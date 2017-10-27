@@ -17,30 +17,6 @@ func resourceL4PortSetNsService() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"Revision": GetRevisionSchema(),
-			"CreateTime": &schema.Schema{
-				Type:        schema.TypeInt,
-				Description: "Timestamp of resource creation",
-				Optional:    true,
-				Computed:    true,
-			},
-			"CreateUser": &schema.Schema{
-				Type:        schema.TypeString,
-				Description: "ID of the user who created this resource",
-				Optional:    true,
-				Computed:    true,
-			},
-			"LastModifiedTime": &schema.Schema{
-				Type:        schema.TypeInt,
-				Description: "Timestamp of last modification",
-				Optional:    true,
-				Computed:    true,
-			},
-			"LastModifiedUser": &schema.Schema{
-				Type:        schema.TypeString,
-				Description: "ID of the user who last modified this resource",
-				Optional:    true,
-				Computed:    true,
-			},
 			"SystemOwned": &schema.Schema{
 				Type:        schema.TypeBool,
 				Description: "Indicates system owned resource",
@@ -63,6 +39,7 @@ func resourceL4PortSetNsService() *schema.Resource {
 				Description: "The default NSServices are created in the system by default. These NSServices can't be modified/deleted",
 				Optional:    true,
 			},
+                        // TODO - convert to TypeSet?
 			"DestinationPorts": &schema.Schema{
 				Type:        schema.TypeList,
 				Description: "Set of destination ports",
@@ -78,7 +55,7 @@ func resourceL4PortSetNsService() *schema.Resource {
 			"L4Protocol": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "L4 Protocol",
-				Optional:    true,
+				Required:    true,
 			},
 		},
 	}
