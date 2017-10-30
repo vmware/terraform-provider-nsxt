@@ -16,32 +16,32 @@ func resourceLogicalPort() *schema.Resource {
 		Delete: resourceLogicalPortDelete,
 
 		Schema: map[string]*schema.Schema{
-			"Revision": GetRevisionSchema(),
-			"SystemOwned": &schema.Schema{
+			"revision": GetRevisionSchema(),
+			"system_owned": &schema.Schema{
 				Type:        schema.TypeBool,
 				Description: "Indicates system owned resource",
 				Optional:    true,
 				Computed:    true,
 			},
-			"DisplayName": &schema.Schema{
+			"display_name": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"Description": &schema.Schema{
+			"description": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"LogicalSwitchId": &schema.Schema{
+			"logical_switch_id": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true, // Cannot change the logical switch of a logical port
 			},
-			"AdminState": &schema.Schema{
+			"admin_state": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"SwitchingProfileIds": GetSwitchingProfileIdsSchema(),
-			"Tags":                GetTagsSchema(),
+			"switching_profile_ids": GetSwitchingProfileIdsSchema(),
+			"tags":                  GetTagsSchema(),
 			//TODO: add attachments
 		},
 	}
@@ -50,10 +50,10 @@ func resourceLogicalPort() *schema.Resource {
 func resourceLogicalPortCreate(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*nsxt.APIClient)
 
-	name := d.Get("DisplayName").(string)
-	description := d.Get("Description").(string)
-	ls_id := d.Get("LogicalSwitchId").(string)
-	admin_state := d.Get("AdminState").(string)
+	name := d.Get("display_name").(string)
+	description := d.Get("description").(string)
+	ls_id := d.Get("logical_switch_id").(string)
+	admin_state := d.Get("admin_state").(string)
 	profilesList := GetSwitchingProfileIdsFromSchema(d)
 	tagList := GetTagsFromSchema(d)
 
@@ -87,23 +87,22 @@ func resourceLogicalPortRead(d *schema.ResourceData, m interface{}) error {
 	logical_port, resp, err := nsxClient.LogicalSwitchingApi.GetLogicalPort(nsxClient.Context, id)
 
 	if err != nil {
+		if resp.StatusCode == http.StatusNotFound {
+			fmt.Printf("Logical port %s was not found\n", id)
+			d.SetId("")
+			return nil
+		}
 		return fmt.Errorf("Error while reading logical port %s: %v\n", id, err)
 	}
-	if resp.StatusCode == http.StatusNotFound {
-		fmt.Printf("Logical port %s was not found\n", id)
-		d.SetId("")
-		return nil
-	}
 
-	d.Set("Revision", logical_port.Revision)
-	d.Set("SystemOwned", logical_port.SystemOwned)
-	d.Set("DisplayName", logical_port.DisplayName)
-	d.Set("Description", logical_port.Description)
-	d.Set("LogicalSwitchId", logical_port.LogicalSwitchId)
-	d.Set("AdminState", logical_port.AdminState)
-	SetSwitchingProfileIdsInSchema(d, logical_port.SwitchingProfileIds)
+	d.Set("revision", logical_port.Revision)
+	d.Set("system_owned", logical_port.SystemOwned)
+	d.Set("display_name", logical_port.DisplayName)
+	d.Set("description", logical_port.Description)
+	d.Set("logical_switch_id", logical_port.LogicalSwitchId)
+	d.Set("admin_state", logical_port.AdminState)
+	SetSwitchingProfileIdsInSchema(d, nsxClient, logical_port.SwitchingProfileIds)
 	SetTagsInSchema(d, logical_port.Tags)
-	d.Set("Revision", logical_port.Revision)
 
 	return nil
 }
@@ -112,13 +111,13 @@ func resourceLogicalPortUpdate(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*nsxt.APIClient)
 
 	lp_id := d.Id()
-	name := d.Get("DisplayName").(string)
-	description := d.Get("Description").(string)
-	ls_id := d.Get("LogicalSwitchId").(string)
-	admin_state := d.Get("AdminState").(string)
+	name := d.Get("display_name").(string)
+	description := d.Get("description").(string)
+	ls_id := d.Get("logical_switch_id").(string)
+	admin_state := d.Get("admin_state").(string)
 	profilesList := GetSwitchingProfileIdsFromSchema(d)
 	tagList := GetTagsFromSchema(d)
-	revision := int64(d.Get("Revision").(int))
+	revision := int64(d.Get("revision").(int))
 
 	lp := manager.LogicalPort{DisplayName: name,
 		Description:         description,

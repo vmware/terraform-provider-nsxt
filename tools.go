@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/common"
 	"github.com/vmware/go-vmware-nsxt/manager"
 )
@@ -35,15 +36,15 @@ func GetRevisionSchema() *schema.Schema {
 // utilities to define & handle tags
 func GetTagsSchema() *schema.Schema {
 	return &schema.Schema{
-		Type:     schema.TypeList,
+		Type:     schema.TypeSet,
 		Optional: true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				"Scope": &schema.Schema{
+				"scope": &schema.Schema{
 					Type:     schema.TypeString,
 					Required: true,
 				},
-				"Tag": &schema.Schema{
+				"tag": &schema.Schema{
 					Type:     schema.TypeString,
 					Required: true,
 				},
@@ -53,13 +54,13 @@ func GetTagsSchema() *schema.Schema {
 }
 
 func GetTagsFromSchema(d *schema.ResourceData) []common.Tag {
-	tags := d.Get("Tags").([]interface{})
+	tags := d.Get("tags").(*schema.Set).List()
 	var tagList []common.Tag
 	for _, tag := range tags {
 		data := tag.(map[string]interface{})
 		elem := common.Tag{
-			Scope: data["Scope"].(string),
-			Tag:   data["Tag"].(string)}
+			Scope: data["scope"].(string),
+			Tag:   data["tag"].(string)}
 
 		tagList = append(tagList, elem)
 	}
@@ -70,26 +71,26 @@ func SetTagsInSchema(d *schema.ResourceData, tags []common.Tag) {
 	var tagList []map[string]string
 	for _, tag := range tags {
 		elem := make(map[string]string)
-		elem["Scope"] = tag.Scope
-		elem["Tag"] = tag.Tag
+		elem["scope"] = tag.Scope
+		elem["tag"] = tag.Tag
 		tagList = append(tagList, elem)
 	}
-	d.Set("Tags", tagList)
+	d.Set("tags", tagList)
 }
 
 // utilities to define & handle switching profiles
 func GetSwitchingProfileIdsSchema() *schema.Schema {
 	return &schema.Schema{
-		Type:     schema.TypeList,
+		Type:     schema.TypeSet,
 		Optional: true,
 		Computed: true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				"Key": &schema.Schema{
+				"key": &schema.Schema{
 					Type:     schema.TypeString,
 					Required: true,
 				},
-				"Value": &schema.Schema{
+				"value": &schema.Schema{
 					Type:     schema.TypeString,
 					Required: true,
 				},
@@ -99,46 +100,52 @@ func GetSwitchingProfileIdsSchema() *schema.Schema {
 }
 
 func GetSwitchingProfileIdsFromSchema(d *schema.ResourceData) []manager.SwitchingProfileTypeIdEntry {
-	profiles := d.Get("SwitchingProfileIds").([]interface{})
+	profiles := d.Get("switching_profile_ids").(*schema.Set).List()
 	var profileList []manager.SwitchingProfileTypeIdEntry
 	for _, profile := range profiles {
 		data := profile.(map[string]interface{})
 		elem := manager.SwitchingProfileTypeIdEntry{
-			Key:   data["Key"].(string),
-			Value: data["Value"].(string)}
+			Key:   data["key"].(string),
+			Value: data["value"].(string)}
 
 		profileList = append(profileList, elem)
 	}
 	return profileList
 }
 
-func SetSwitchingProfileIdsInSchema(d *schema.ResourceData, profiles []manager.SwitchingProfileTypeIdEntry) {
+func SetSwitchingProfileIdsInSchema(d *schema.ResourceData, nsxClient *nsxt.APIClient, profiles []manager.SwitchingProfileTypeIdEntry) {
 	var profileList []map[string]string
 	for _, profile := range profiles {
+		// ignore system owned profiles
+		obj, _, _ := nsxClient.LogicalSwitchingApi.GetSwitchingProfile(nsxClient.Context, profile.Value)
+		if obj.SystemOwned {
+			continue
+		}
+
 		elem := make(map[string]string)
-		elem["Key"] = profile.Key
-		elem["Value"] = profile.Value
+		elem["key"] = profile.Key
+		elem["value"] = profile.Value
 		profileList = append(profileList, elem)
 	}
-	d.Set("SwitchingProfileIds", profileList)
+	d.Set("switching_profile_ids", profileList)
 }
 
 // utilities to define & handle address bindings
 func GetAddressBindingsSchema() *schema.Schema {
 	return &schema.Schema{
-		Type:     schema.TypeList,
+		Type:     schema.TypeSet,
 		Optional: true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				"IpAddress": &schema.Schema{
+				"ip_address": &schema.Schema{
 					Type:     schema.TypeString,
 					Optional: true,
 				},
-				"MacAddress": &schema.Schema{
+				"mac_address": &schema.Schema{
 					Type:     schema.TypeString,
 					Optional: true,
 				},
-				"Vlan": &schema.Schema{
+				"vlan": &schema.Schema{
 					Type:     schema.TypeInt,
 					Optional: true,
 				},
@@ -148,14 +155,14 @@ func GetAddressBindingsSchema() *schema.Schema {
 }
 
 func GetAddressBindingsFromSchema(d *schema.ResourceData) []manager.PacketAddressClassifier {
-	bindings := d.Get("AddressBindings").([]interface{})
+	bindings := d.Get("address_bindings").(*schema.Set).List()
 	var bindingList []manager.PacketAddressClassifier
 	for _, binding := range bindings {
 		data := binding.(map[string]interface{})
 		elem := manager.PacketAddressClassifier{
-			IpAddress:  data["IpAddress"].(string),
-			MacAddress: data["MacAddress"].(string),
-			Vlan:       data["Vlan"].(int64),
+			IpAddress:  data["ip_address"].(string),
+			MacAddress: data["mac_address"].(string),
+			Vlan:       data["vlan"].(int64),
 		}
 
 		bindingList = append(bindingList, elem)
@@ -167,10 +174,10 @@ func SetAddressBindingsInSchema(d *schema.ResourceData, bindings []manager.Packe
 	var bindingList []map[string]interface{}
 	for _, binding := range bindings {
 		elem := make(map[string]interface{})
-		elem["IpAddress"] = binding.IpAddress
-		elem["MacAddress"] = binding.MacAddress
-		elem["Vlan"] = binding.Vlan
+		elem["ip_address"] = binding.IpAddress
+		elem["mac_address"] = binding.MacAddress
+		elem["vlan"] = binding.Vlan
 		bindingList = append(bindingList, elem)
 	}
-	d.Set("AddressBindings", bindingList)
+	d.Set("address_bindings", bindingList)
 }

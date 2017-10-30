@@ -13,12 +13,12 @@ func dataSourceSwitchingProfile() *schema.Resource {
 		Read: dataSourceSwitchingProfileRead,
 
 		Schema: map[string]*schema.Schema{
-			"Id": &schema.Schema{
+			"id": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
-			"DisplayName": &schema.Schema{
+			"display_name": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
@@ -27,6 +27,12 @@ func dataSourceSwitchingProfile() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"system_owned": &schema.Schema{
+				Type:        schema.TypeBool,
+				Description: "Indicates system owned resource",
+				Optional:    true,
+				Computed:    true,
+			},
 		},
 	}
 }
@@ -34,8 +40,8 @@ func dataSourceSwitchingProfile() *schema.Resource {
 func dataSourceSwitchingProfileRead(d *schema.ResourceData, m interface{}) error {
 	// Read a switching profile by name or id
 	nsxClient := m.(*nsxt.APIClient)
-	obj_id := d.Get("Id").(string)
-	obj_name := d.Get("DisplayName").(string)
+	obj_id := d.Get("id").(string)
+	obj_name := d.Get("display_name").(string)
 	var obj manager.BaseSwitchingProfile
 	if obj_id != "" {
 		// Get by id
@@ -50,9 +56,8 @@ func dataSourceSwitchingProfileRead(d *schema.ResourceData, m interface{}) error
 		obj = obj_get
 	} else if obj_name != "" {
 		// Get by name
-		// TODO use 2nd parameter localVarOptionals for paging
+		// TODO use localVarOptionals for paging
 		localVarOptionals := make(map[string]interface{})
-		localVarOptionals["includeSystemOwned"] = true
 		obj_list, _, err := nsxClient.LogicalSwitchingApi.ListSwitchingProfiles(nsxClient.Context, localVarOptionals)
 		if err != nil {
 			return fmt.Errorf("Error while reading switching profiles: %v\n", err)
@@ -76,7 +81,8 @@ func dataSourceSwitchingProfileRead(d *schema.ResourceData, m interface{}) error
 	}
 
 	d.SetId(obj.Id)
-	d.Set("DisplayName", obj.DisplayName)
+	d.Set("display_name", obj.DisplayName)
 	d.Set("resource_type", obj.ResourceType)
+	d.Set("system_owned", obj.SystemOwned)
 	return nil
 }

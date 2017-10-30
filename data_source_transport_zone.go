@@ -13,27 +13,27 @@ func dataSourceTransportZone() *schema.Resource {
 		Read: dataSourceTransportZoneRead,
 
 		Schema: map[string]*schema.Schema{
-			"Id": &schema.Schema{
+			"id": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
-			"DisplayName": &schema.Schema{
+			"display_name": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
-			"Description": &schema.Schema{
+			"description": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
-			"HostSwitchName": &schema.Schema{
+			"host_switch_name": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
-			"TransportType": &schema.Schema{
+			"transport_type": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
@@ -45,8 +45,8 @@ func dataSourceTransportZone() *schema.Resource {
 func dataSourceTransportZoneRead(d *schema.ResourceData, m interface{}) error {
 	// Read a transport zone by name or id
 	nsxClient := m.(*nsxt.APIClient)
-	obj_id := d.Get("Id").(string)
-	obj_name := d.Get("DisplayName").(string)
+	obj_id := d.Get("id").(string)
+	obj_name := d.Get("display_name").(string)
 	var obj manager.TransportZone
 	if obj_id != "" {
 		// Get by id
@@ -85,10 +85,10 @@ func dataSourceTransportZoneRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	d.SetId(obj.Id)
-	d.Set("DisplayName", obj.DisplayName)
-	d.Set("Description", obj.Description)
-	d.Set("HostSwitchName", obj.HostSwitchName)
-	d.Set("TransportType", obj.TransportType)
+	d.Set("display_name", obj.DisplayName)
+	d.Set("description", obj.Description)
+	d.Set("host_switch_name", obj.HostSwitchName)
+	d.Set("transport_type", obj.TransportType)
 
 	return nil
 }

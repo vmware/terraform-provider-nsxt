@@ -4,11 +4,12 @@ import (
 	"crypto/tls"
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/terraform"
 	"github.com/vmware/go-vmware-nsxt"
 	"net/http"
 )
 
-func Provider() *schema.Provider {
+func Provider() terraform.ResourceProvider {
 	return &schema.Provider{
 
 		Schema: map[string]*schema.Schema{
