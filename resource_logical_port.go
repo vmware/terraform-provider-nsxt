@@ -17,12 +17,7 @@ func resourceLogicalPort() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"revision": GetRevisionSchema(),
-			"system_owned": &schema.Schema{
-				Type:        schema.TypeBool,
-				Description: "Indicates system owned resource",
-				Optional:    true,
-				Computed:    true,
-			},
+			"system_owned": GetSystemOwnedSchema(),
 			"display_name": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,

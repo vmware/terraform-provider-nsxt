@@ -27,12 +27,7 @@ func dataSourceSwitchingProfile() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"system_owned": &schema.Schema{
-				Type:        schema.TypeBool,
-				Description: "Indicates system owned resource",
-				Optional:    true,
-				Computed:    true,
-			},
+			"system_owned": GetSystemOwnedSchema(),
 		},
 	}
 }

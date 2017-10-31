@@ -17,12 +17,7 @@ func resourceL4PortSetNsService() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"revision": GetRevisionSchema(),
-			"system_owned": &schema.Schema{
-				Type:        schema.TypeBool,
-				Description: "Indicates system owned resource",
-				Optional:    true,
-				Computed:    true,
-			},
+			"system_owned": GetSystemOwnedSchema(),
 			"description": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
