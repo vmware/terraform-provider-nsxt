@@ -53,6 +53,7 @@ func dataSourceSwitchingProfileRead(d *schema.ResourceData, m interface{}) error
 		// Get by name
 		// TODO use localVarOptionals for paging
 		localVarOptionals := make(map[string]interface{})
+		localVarOptionals["includeSystemOwned"] = true
 		obj_list, _, err := nsxClient.LogicalSwitchingApi.ListSwitchingProfiles(nsxClient.Context, localVarOptionals)
 		if err != nil {
 			return fmt.Errorf("Error while reading switching profiles: %v\n", err)
