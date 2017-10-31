@@ -17,7 +17,6 @@ func TestNSXLogicalSwitchBasic(t *testing.T) {
 	testResourceName := "nsxt_logical_switch.test"
 	novlan := "0"
 	replicationMode := "MTEP"
-	fmt.Printf("Test logical switch display_name is %s\n", switchName)
 	// default overlay TZ name prefix
 	transportZoneName := "1-transportzone-"
 
@@ -71,7 +70,6 @@ func TestNSXLogicalSwitchvlan(t *testing.T) {
 	origvlan := "1"
 	updatedvlan := "2"
 	replicationMode := ""
-	fmt.Printf("Test logical switch display_name is %s\n", switchName)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -109,7 +107,7 @@ func TestNSXLogicalSwitchvlan(t *testing.T) {
 
 }
 
-func testAccNSXLogicalSwitchExists(display_name, resourceName string) resource.TestCheckFunc {
+func testAccNSXLogicalSwitchExists(display_name string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
 		nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
@@ -212,7 +210,7 @@ tags = [
 }`, transportZoneName, switchName, replicationMode, vlan)
 }
 
-func testAccNSXLogicalSwitchUpdateTemplate(switchUpdateName, transportZoneName string, vlan string, replicationMode string) string {
+func testAccNSXLogicalSwitchUpdateTemplate(switchUpdateName string, transportZoneName string, vlan string, replicationMode string) string {
 	return fmt.Sprintf(`
 data "nsxt_transport_zone" "TZ1" {
      display_name = "%s"

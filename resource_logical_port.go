@@ -131,7 +131,6 @@ func resourceLogicalPortUpdate(d *schema.ResourceData, m interface{}) error {
 		d.SetId("")
 		return nil
 	}
-	fmt.Printf("Data %s\nresp %s", lp, resp)
 	return resourceLogicalPortRead(d, m)
 }
 
