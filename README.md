@@ -1,22 +1,34 @@
 
 
 # terraform-provider-nsxt
+This is terraform provider for vmware NSX-T
 
 ## Overview
+
+Supported data sources:
+
+..* TransportZone
+..* SwitchingProfile
+
+Supported resources:
+
+..* L4PortSetNsService
+..* LogicalPort
+..* LogicalSwitch
 
 ## Try it out
 
 ### Prerequisites
 
-* Prereq 1
-* Prereq 2
-* Prereq 3
+* Go 1.9.x onwards
+* Terraform 0.10.x
+* This repo makes use of go-vmware-nsxt library
 
 ### Build & Run
 
-1. Step 1
-2. Step 2
-3. Step 3
+1. go get github.com/vmware/terraform-provider-nsxt.git
+2. go build -o terraform-provider-nsxt
+3. copy terraform-provider-nsxt to terraform running folder
 
 ## Documentation
 
@@ -30,3 +42,5 @@ questions about the CLA process, please refer to our [FAQ](https://cla.vmware.co
 refer to [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
+
+This terraform provider is available under MPL2.0 license.
