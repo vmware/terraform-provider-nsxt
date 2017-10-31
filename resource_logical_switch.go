@@ -180,7 +180,7 @@ func resourceLogicalSwitchUpdate(d *schema.ResourceData, m interface{}) error {
 	transport_zone_id := d.Get("transport_zone_id").(string)
 	vlan := int64(d.Get("vlan").(int))
 	vni := int32(d.Get("vni").(int))
-	revision := int64(d.Get("Revision").(int))
+	revision := int64(d.Get("revision").(int))
 	logical_switch := manager.LogicalSwitch{
 		Description:         description,
 		DisplayName:         display_name,

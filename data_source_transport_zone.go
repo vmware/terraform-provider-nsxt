@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/manager"
@@ -60,16 +61,17 @@ func dataSourceTransportZoneRead(d *schema.ResourceData, m interface{}) error {
 		}
 		obj = obj_get
 	} else if obj_name != "" {
-		// Get by name
+		// Get by name prefix
 		// TODO use 2nd parameter localVarOptionals for paging
 		obj_list, _, err := nsxClient.NetworkTransportApi.ListTransportZones(nsxClient.Context, nil)
 		if err != nil {
 			return fmt.Errorf("Error while reading transport zones: %v\n", err)
 		}
 		// go over the list to find the correct one
+		// TODO: prefer full match
 		found := false
 		for _, obj_in_list := range obj_list.Results {
-			if obj_in_list.DisplayName == obj_name {
+			if strings.HasPrefix(obj_in_list.DisplayName, obj_name) {
 				if found == true {
 					return fmt.Errorf("Found multiple transport zones with name '%s'\n", obj_name)
 				}
