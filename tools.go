@@ -33,6 +33,15 @@ func GetRevisionSchema() *schema.Schema {
 	}
 }
 
+func GetSystemOwnedSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeBool,
+		Description: "Indicates system owned resource",
+		Optional:    true,
+		Computed:    true,
+	}
+}
+
 // utilities to define & handle tags
 func GetTagsSchema() *schema.Schema {
 	return &schema.Schema{

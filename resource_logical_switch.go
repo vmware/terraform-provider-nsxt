@@ -17,12 +17,7 @@ func resourceLogicalSwitch() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"revision": GetRevisionSchema(),
-			"system_owned": &schema.Schema{
-				Type:        schema.TypeBool,
-				Description: "Indicates system owned resource",
-				Optional:    true,
-				Computed:    true,
-			},
+			"system_owned": GetSystemOwnedSchema(),
 			"description": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
@@ -180,7 +175,7 @@ func resourceLogicalSwitchUpdate(d *schema.ResourceData, m interface{}) error {
 	transport_zone_id := d.Get("transport_zone_id").(string)
 	vlan := int64(d.Get("vlan").(int))
 	vni := int32(d.Get("vni").(int))
-	revision := int64(d.Get("Revision").(int))
+	revision := int64(d.Get("revision").(int))
 	logical_switch := manager.LogicalSwitch{
 		Description:         description,
 		DisplayName:         display_name,

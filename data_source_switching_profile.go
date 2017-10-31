@@ -27,12 +27,7 @@ func dataSourceSwitchingProfile() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"system_owned": &schema.Schema{
-				Type:        schema.TypeBool,
-				Description: "Indicates system owned resource",
-				Optional:    true,
-				Computed:    true,
-			},
+			"system_owned": GetSystemOwnedSchema(),
 		},
 	}
 }
@@ -58,6 +53,7 @@ func dataSourceSwitchingProfileRead(d *schema.ResourceData, m interface{}) error
 		// Get by name
 		// TODO use localVarOptionals for paging
 		localVarOptionals := make(map[string]interface{})
+		localVarOptionals["includeSystemOwned"] = true
 		obj_list, _, err := nsxClient.LogicalSwitchingApi.ListSwitchingProfiles(nsxClient.Context, localVarOptionals)
 		if err != nil {
 			return fmt.Errorf("Error while reading switching profiles: %v\n", err)
