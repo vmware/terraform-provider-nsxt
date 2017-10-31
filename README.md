@@ -7,14 +7,14 @@ This is terraform provider for vmware NSX-T
 
 Supported data sources:
 
-..* TransportZone
-..* SwitchingProfile
+* TransportZone
+* SwitchingProfile
 
 Supported resources:
 
-..* L4PortSetNsService
-..* LogicalPort
-..* LogicalSwitch
+* L4PortSetNsService
+* LogicalPort
+* LogicalSwitch
 
 ## Try it out
 
