@@ -60,11 +60,15 @@ func resourceLogicalPortCreate(d *schema.ResourceData, m interface{}) error {
 		SwitchingProfileIds: profilesList,
 		Tags:                tagList}
 
-	lp, _, err := nsxClient.LogicalSwitchingApi.CreateLogicalPort(nsxClient.Context, lp)
+	lp, resp, err := nsxClient.LogicalSwitchingApi.CreateLogicalPort(nsxClient.Context, lp)
 
 	if err != nil {
 		return fmt.Errorf("Error while creating logical port %s: %v\n", lp.DisplayName, err)
 	}
+    if resp.StatusCode != http.StatusCreated {
+        fmt.Printf("Unexpected status returned")
+        return nil
+    }
 
 	resource_id := lp.Id
 	d.SetId(resource_id)
@@ -81,12 +85,12 @@ func resourceLogicalPortRead(d *schema.ResourceData, m interface{}) error {
 	}
 	logical_port, resp, err := nsxClient.LogicalSwitchingApi.GetLogicalPort(nsxClient.Context, id)
 
+	if resp.StatusCode == http.StatusNotFound {
+		fmt.Printf("Logical port %s was not found\n", id)
+		d.SetId("")
+		return nil
+	}
 	if err != nil {
-		if resp.StatusCode == http.StatusNotFound {
-			fmt.Printf("Logical port %s was not found\n", id)
-			d.SetId("")
-			return nil
-		}
 		return fmt.Errorf("Error while reading logical port %s: %v\n", id, err)
 	}
 
@@ -123,13 +127,8 @@ func resourceLogicalPortUpdate(d *schema.ResourceData, m interface{}) error {
 		Revision:            revision}
 
 	lp, resp, err := nsxClient.LogicalSwitchingApi.UpdateLogicalPort(nsxClient.Context, lp_id, lp)
-	if err != nil {
+	if err != nil || resp.StatusCode == http.StatusNotFound{
 		return fmt.Errorf("Error while updating logical port %s: %v\n", lp_id, err)
-	}
-	if resp.StatusCode == http.StatusNotFound {
-		fmt.Printf("Logical port %s was not found\n", lp_id)
-		d.SetId("")
-		return nil
 	}
 	return resourceLogicalPortRead(d, m)
 }

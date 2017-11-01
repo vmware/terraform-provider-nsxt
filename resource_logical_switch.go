@@ -127,12 +127,12 @@ func resourceLogicalSwitchRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	logical_switch, resp, err := nsxClient.LogicalSwitchingApi.GetLogicalSwitch(nsxClient.Context, id)
+	if resp.StatusCode == http.StatusNotFound {
+		fmt.Printf("LogicalSwitch not found")
+		d.SetId("")
+		return nil
+	}
 	if err != nil {
-		if resp.StatusCode == http.StatusNotFound {
-			fmt.Printf("LogicalSwitch not found")
-			d.SetId("")
-			return nil
-		}
 		return fmt.Errorf("Error during LogicalSwitch read: %v", err)
 	}
 
@@ -193,16 +193,10 @@ func resourceLogicalSwitchUpdate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	logical_switch, resp, err := nsxClient.LogicalSwitchingApi.UpdateLogicalSwitch(nsxClient.Context, id, logical_switch)
-
-	if err != nil {
+	if err != nil || resp.StatusCode == http.StatusNotFound{
 		return fmt.Errorf("Error during LogicalSwitch update: %v", err)
 	}
 
-	if resp.StatusCode == http.StatusNotFound {
-		fmt.Printf("LogicalSwitch not found")
-		d.SetId("")
-		return nil
-	}
 	return resourceLogicalSwitchRead(d, m)
 }
 
