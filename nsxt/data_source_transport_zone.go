@@ -1,10 +1,10 @@
-package main
+package nsxt
 
 import (
 	"fmt"
 	"strings"
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/vmware/go-vmware-nsxt"
+	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/manager"
 	"net/http"
 )
@@ -45,7 +45,7 @@ func dataSourceTransportZone() *schema.Resource {
 
 func dataSourceTransportZoneRead(d *schema.ResourceData, m interface{}) error {
 	// Read a transport zone by name or id
-	nsxClient := m.(*nsxt.APIClient)
+	nsxClient := m.(*api.APIClient)
 	obj_id := d.Get("id").(string)
 	obj_name := d.Get("display_name").(string)
 	var obj manager.TransportZone

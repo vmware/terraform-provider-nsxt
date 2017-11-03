@@ -1,9 +1,9 @@
-package main
+package nsxt
 
 import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/vmware/go-vmware-nsxt"
+	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/manager"
 	"net/http"
 )
@@ -43,7 +43,7 @@ func resourceLogicalPort() *schema.Resource {
 }
 
 func resourceLogicalPortCreate(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*nsxt.APIClient)
+	nsxClient := m.(*api.APIClient)
 
 	name := d.Get("display_name").(string)
 	description := d.Get("description").(string)
@@ -77,7 +77,7 @@ func resourceLogicalPortCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceLogicalPortRead(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*nsxt.APIClient)
+	nsxClient := m.(*api.APIClient)
 
 	id := d.Id()
 	if id == "" {
@@ -107,7 +107,7 @@ func resourceLogicalPortRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceLogicalPortUpdate(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*nsxt.APIClient)
+	nsxClient := m.(*api.APIClient)
 
 	lp_id := d.Id()
 	name := d.Get("display_name").(string)
@@ -134,7 +134,7 @@ func resourceLogicalPortUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceLogicalPortDelete(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*nsxt.APIClient)
+	nsxClient := m.(*api.APIClient)
 
 	lp_id := d.Id()
 	if lp_id == "" {

@@ -1,9 +1,9 @@
-package main
+package nsxt
 
 import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/vmware/go-vmware-nsxt"
+	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/manager"
 	"net/http"
 )
@@ -73,7 +73,7 @@ func resourceLogicalSwitch() *schema.Resource {
 
 func resourceLogicalSwitchCreate(d *schema.ResourceData, m interface{}) error {
 
-	nsxClient := m.(*nsxt.APIClient)
+	nsxClient := m.(*api.APIClient)
 
 	description := d.Get("description").(string)
 	display_name := d.Get("display_name").(string)
@@ -119,7 +119,7 @@ func resourceLogicalSwitchCreate(d *schema.ResourceData, m interface{}) error {
 
 func resourceLogicalSwitchRead(d *schema.ResourceData, m interface{}) error {
 
-	nsxClient := m.(*nsxt.APIClient)
+	nsxClient := m.(*api.APIClient)
 
 	id := d.Id()
 	if id == "" {
@@ -156,7 +156,7 @@ func resourceLogicalSwitchRead(d *schema.ResourceData, m interface{}) error {
 
 func resourceLogicalSwitchUpdate(d *schema.ResourceData, m interface{}) error {
 
-	nsxClient := m.(*nsxt.APIClient)
+	nsxClient := m.(*api.APIClient)
 
 	id := d.Id()
 	if id == "" {
@@ -202,7 +202,7 @@ func resourceLogicalSwitchUpdate(d *schema.ResourceData, m interface{}) error {
 
 func resourceLogicalSwitchDelete(d *schema.ResourceData, m interface{}) error {
 
-	nsxClient := m.(*nsxt.APIClient)
+	nsxClient := m.(*api.APIClient)
 
 	id := d.Id()
 	if id == "" {

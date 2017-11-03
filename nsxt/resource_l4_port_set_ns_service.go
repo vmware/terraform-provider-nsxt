@@ -1,9 +1,9 @@
-package main
+package nsxt
 
 import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/vmware/go-vmware-nsxt"
+	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/manager"
 	"net/http"
 )
@@ -57,7 +57,7 @@ func resourceL4PortSetNsService() *schema.Resource {
 
 func resourceL4PortSetNsServiceCreate(d *schema.ResourceData, m interface{}) error {
 
-	nsxClient := m.(*nsxt.APIClient)
+	nsxClient := m.(*api.APIClient)
 
 	description := d.Get("description").(string)
 	display_name := d.Get("display_name").(string)
@@ -98,7 +98,7 @@ func resourceL4PortSetNsServiceCreate(d *schema.ResourceData, m interface{}) err
 
 func resourceL4PortSetNsServiceRead(d *schema.ResourceData, m interface{}) error {
 
-	nsxClient := m.(*nsxt.APIClient)
+	nsxClient := m.(*api.APIClient)
 
 	id := d.Id()
 	if id == "" {
@@ -132,7 +132,7 @@ func resourceL4PortSetNsServiceRead(d *schema.ResourceData, m interface{}) error
 
 func resourceL4PortSetNsServiceUpdate(d *schema.ResourceData, m interface{}) error {
 
-	nsxClient := m.(*nsxt.APIClient)
+	nsxClient := m.(*api.APIClient)
 
 	id := d.Id()
 	if id == "" {
@@ -174,7 +174,7 @@ func resourceL4PortSetNsServiceUpdate(d *schema.ResourceData, m interface{}) err
 
 func resourceL4PortSetNsServiceDelete(d *schema.ResourceData, m interface{}) error {
 
-	nsxClient := m.(*nsxt.APIClient)
+	nsxClient := m.(*api.APIClient)
 
 	id := d.Id()
 	if id == "" {

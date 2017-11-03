@@ -1,4 +1,4 @@
-package main
+package nsxt
 
 import (
 	"github.com/hashicorp/terraform/helper/schema"
