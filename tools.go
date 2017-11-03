@@ -37,7 +37,6 @@ func GetSystemOwnedSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:        schema.TypeBool,
 		Description: "Indicates system owned resource",
-		Optional:    true,
 		Computed:    true,
 	}
 }

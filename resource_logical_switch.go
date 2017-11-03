@@ -33,7 +33,7 @@ func resourceLogicalSwitch() *schema.Resource {
 			"admin_state": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "Represents Desired state of the Logical Switch",
-				Optional:    true,
+				Required:    true,
 			},
 			"ip_pool_id": &schema.Schema{
 				Type:        schema.TypeString,

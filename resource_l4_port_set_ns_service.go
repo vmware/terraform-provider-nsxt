@@ -32,7 +32,7 @@ func resourceL4PortSetNsService() *schema.Resource {
 			"default_service": &schema.Schema{
 				Type:        schema.TypeBool,
 				Description: "The default NSServices are created in the system by default. These NSServices can't be modified/deleted",
-				Optional:    true,
+				Computed:    true,
 			},
 			"destination_ports": &schema.Schema{
 				Type:        schema.TypeSet,
