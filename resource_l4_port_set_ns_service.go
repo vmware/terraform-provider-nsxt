@@ -106,12 +106,12 @@ func resourceL4PortSetNsServiceRead(d *schema.ResourceData, m interface{}) error
 	}
 
 	ns_service, resp, err := nsxClient.GroupingObjectsApi.ReadL4PortSetNSService(nsxClient.Context, id)
+	if resp.StatusCode == http.StatusNotFound {
+		fmt.Printf("NsService not found")
+		d.SetId("")
+		return nil
+	}
 	if err != nil {
-		if resp.StatusCode == http.StatusNotFound {
-			fmt.Printf("NsService not found")
-			d.SetId("")
-			return nil
-		}
 		return fmt.Errorf("Error during NsService read: %v", err)
 	}
 
@@ -124,8 +124,6 @@ func resourceL4PortSetNsServiceRead(d *schema.ResourceData, m interface{}) error
 	SetTagsInSchema(d, ns_service.Tags)
 	d.Set("default_service", ns_service.DefaultService)
 	d.Set("resource_type", nsservice_element.ResourceType)
-	//d.Set("DestinationPorts", flattenStringList(nsservice_element.DestinationPorts))
-	//d.Set("SourcePorts", flattenStringList(nsservice_element.SourcePorts))
 	d.Set("destination_ports", nsservice_element.DestinationPorts)
 	d.Set("source_ports", nsservice_element.SourcePorts)
 
@@ -167,16 +165,10 @@ func resourceL4PortSetNsServiceUpdate(d *schema.ResourceData, m interface{}) err
 	}
 
 	ns_service, resp, err := nsxClient.GroupingObjectsApi.UpdateL4PortSetNSService(nsxClient.Context, id, ns_service)
-
-	if err != nil {
+	if err != nil || resp.StatusCode == http.StatusNotFound{
 		return fmt.Errorf("Error during NsService update: %v %v", err, resp)
 	}
 
-	if resp.StatusCode == http.StatusNotFound {
-		fmt.Printf("NsService not found")
-		d.SetId("")
-		return nil
-	}
 	return resourceL4PortSetNsServiceRead(d, m)
 }
 
