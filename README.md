@@ -26,7 +26,7 @@ Supported resources:
 
 ### Build & Run
 
-1. go get github.com/vmware/terraform-provider-nsxt.git
+1. go get github.com/vmware/terraform-provider-nsxt
 2. go build -o terraform-provider-nsxt
 3. copy terraform-provider-nsxt to terraform running folder
 
