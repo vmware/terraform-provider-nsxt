@@ -1,3 +1,6 @@
+/* Copyright © 2017 VMware, Inc. All Rights Reserved.
+   SPDX-License-Identifier: MPL-2.0 */
+
 package nsxt
 
 import (
@@ -46,7 +49,7 @@ func TestNSXLogicalPortBasic(t *testing.T) {
 	})
 }
 
-func testAccNSXLogicalPortExists(display_name string , resourceName string) resource.TestCheckFunc {
+func testAccNSXLogicalPortExists(display_name string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
 		nsxClient := testAccProvider.Meta().(*nsxt.APIClient)

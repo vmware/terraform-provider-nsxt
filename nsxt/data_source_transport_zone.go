@@ -1,12 +1,15 @@
+/* Copyright © 2017 VMware, Inc. All Rights Reserved.
+   SPDX-License-Identifier: MPL-2.0 */
+
 package nsxt
 
 import (
 	"fmt"
-	"strings"
 	"github.com/hashicorp/terraform/helper/schema"
 	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/manager"
 	"net/http"
+	"strings"
 )
 
 func dataSourceTransportZone() *schema.Resource {

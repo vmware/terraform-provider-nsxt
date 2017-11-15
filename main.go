@@ -1,9 +1,12 @@
+/* Copyright © 2017 VMware, Inc. All Rights Reserved.
+   SPDX-License-Identifier: MPL-2.0 */
+
 package main
 
 import (
 	"github.com/hashicorp/terraform/plugin"
 	"github.com/hashicorp/terraform/terraform"
-        "github.com/vmware/terraform-provider-nsxt/nsxt"
+	"github.com/vmware/terraform-provider-nsxt/nsxt"
 )
 
 func main() {

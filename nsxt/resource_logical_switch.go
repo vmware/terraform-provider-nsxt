@@ -1,3 +1,6 @@
+/* Copyright © 2017 VMware, Inc. All Rights Reserved.
+   SPDX-License-Identifier: MPL-2.0 */
+
 package nsxt
 
 import (
@@ -16,7 +19,7 @@ func resourceLogicalSwitch() *schema.Resource {
 		Delete: resourceLogicalSwitchDelete,
 
 		Schema: map[string]*schema.Schema{
-			"revision": GetRevisionSchema(),
+			"revision":     GetRevisionSchema(),
 			"system_owned": GetSystemOwnedSchema(),
 			"description": &schema.Schema{
 				Type:        schema.TypeString,
@@ -193,7 +196,7 @@ func resourceLogicalSwitchUpdate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	logical_switch, resp, err := nsxClient.LogicalSwitchingApi.UpdateLogicalSwitch(nsxClient.Context, id, logical_switch)
-	if err != nil || resp.StatusCode == http.StatusNotFound{
+	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during LogicalSwitch update: %v", err)
 	}
 

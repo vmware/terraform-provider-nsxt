@@ -1,3 +1,6 @@
+/* Copyright © 2017 VMware, Inc. All Rights Reserved.
+   SPDX-License-Identifier: MPL-2.0 */
+
 package nsxt
 
 import (
@@ -16,7 +19,7 @@ func resourceLogicalPort() *schema.Resource {
 		Delete: resourceLogicalPortDelete,
 
 		Schema: map[string]*schema.Schema{
-			"revision": GetRevisionSchema(),
+			"revision":     GetRevisionSchema(),
 			"system_owned": GetSystemOwnedSchema(),
 			"display_name": &schema.Schema{
 				Type:     schema.TypeString,
@@ -65,10 +68,10 @@ func resourceLogicalPortCreate(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return fmt.Errorf("Error while creating logical port %s: %v\n", lp.DisplayName, err)
 	}
-    if resp.StatusCode != http.StatusCreated {
-        fmt.Printf("Unexpected status returned")
-        return nil
-    }
+	if resp.StatusCode != http.StatusCreated {
+		fmt.Printf("Unexpected status returned")
+		return nil
+	}
 
 	resource_id := lp.Id
 	d.SetId(resource_id)
@@ -127,7 +130,7 @@ func resourceLogicalPortUpdate(d *schema.ResourceData, m interface{}) error {
 		Revision:            revision}
 
 	lp, resp, err := nsxClient.LogicalSwitchingApi.UpdateLogicalPort(nsxClient.Context, lp_id, lp)
-	if err != nil || resp.StatusCode == http.StatusNotFound{
+	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error while updating logical port %s: %v\n", lp_id, err)
 	}
 	return resourceLogicalPortRead(d, m)

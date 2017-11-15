@@ -1,3 +1,6 @@
+/* Copyright © 2017 VMware, Inc. All Rights Reserved.
+   SPDX-License-Identifier: MPL-2.0 */
+
 package nsxt
 
 import (
@@ -16,7 +19,7 @@ func resourceL4PortSetNsService() *schema.Resource {
 		Delete: resourceL4PortSetNsServiceDelete,
 
 		Schema: map[string]*schema.Schema{
-			"revision": GetRevisionSchema(),
+			"revision":     GetRevisionSchema(),
 			"system_owned": GetSystemOwnedSchema(),
 			"description": &schema.Schema{
 				Type:        schema.TypeString,
@@ -165,7 +168,7 @@ func resourceL4PortSetNsServiceUpdate(d *schema.ResourceData, m interface{}) err
 	}
 
 	ns_service, resp, err := nsxClient.GroupingObjectsApi.UpdateL4PortSetNSService(nsxClient.Context, id, ns_service)
-	if err != nil || resp.StatusCode == http.StatusNotFound{
+	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during NsService update: %v %v", err, resp)
 	}
 
