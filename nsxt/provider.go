@@ -28,6 +28,7 @@ func Provider() terraform.ResourceProvider {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("NSX_PASSWORD", nil),
+				Sensitive:   true,
 			},
 			"host": &schema.Schema{
 				Type:        schema.TypeString,
@@ -91,12 +92,12 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	ca_file := d.Get("ca_file").(string)
 
 	cfg := nsxt.Configuration{
-		BasePath:  "/api/v1",
-		Host:      host,
-		Scheme:    "https",
-		UserAgent: "terraform-provider-nsxt/1.0",
-		UserName:  username,
-		Password:  password,
+		BasePath:           "/api/v1",
+		Host:               host,
+		Scheme:             "https",
+		UserAgent:          "terraform-provider-nsxt/1.0",
+		UserName:           username,
+		Password:           password,
 		ClientAuthCertFile: client_auth_cert_file,
 		ClientAuthKeyFile:  client_auth_key_file,
 		CAFile:             ca_file,

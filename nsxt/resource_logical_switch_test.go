@@ -14,6 +14,30 @@ import (
 )
 
 func TestNSXLogicalSwitchBasic(t *testing.T) {
+	// Test without verification for realization state
+
+	testNSXLogicalSwitchBasic(t, false)
+}
+
+func TestNSXLogicalSwitchBasicWithRealization(t *testing.T) {
+	// Test with verification for realization state
+
+	testNSXLogicalSwitchBasic(t, true)
+}
+
+func TestNSXLogicalSwitchVlan(t *testing.T) {
+	// Test without verification for realization state
+
+	testNSXLogicalSwitchVlan(t, false)
+}
+
+func TestNSXLogicalSwitchVlanWithRealization(t *testing.T) {
+	// Test with verification for realization state
+
+	testNSXLogicalSwitchVlan(t, true)
+}
+
+func testNSXLogicalSwitchBasic(t *testing.T, verifyRealization bool) {
 
 	switchName := fmt.Sprintf("test-nsx-logical-switch-overlay")
 	updateSwitchName := fmt.Sprintf("%s-update", switchName)
@@ -35,7 +59,7 @@ func TestNSXLogicalSwitchBasic(t *testing.T) {
 				ExpectError: regexp.MustCompile(`required field is not set`),
 			},
 			{
-				Config: testAccNSXLogicalSwitchCreateTemplate(switchName, transportZoneName, novlan, replicationMode),
+				Config: testAccNSXLogicalSwitchCreateTemplate(switchName, transportZoneName, novlan, replicationMode, verifyRealization),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXLogicalSwitchExists(switchName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", switchName),
@@ -62,7 +86,7 @@ func TestNSXLogicalSwitchBasic(t *testing.T) {
 	})
 }
 
-func TestNSXLogicalSwitchvlan(t *testing.T) {
+func testNSXLogicalSwitchVlan(t *testing.T, verifyRealization bool) {
 
 	switchName := fmt.Sprintf("test-nsx-logical-switch-vlan")
 	updateSwitchName := fmt.Sprintf("%s-update", switchName)
@@ -82,11 +106,11 @@ func TestNSXLogicalSwitchvlan(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config:      testAccNSXLogicalSwitchNovlanTemplate(switchName, transportZoneName),
+				Config:      testAccNSXLogicalSwitchNoVlanTemplate(switchName, transportZoneName),
 				ExpectError: regexp.MustCompile(`required field is not set`),
 			},
 			{
-				Config: testAccNSXLogicalSwitchCreateTemplate(switchName, transportZoneName, origvlan, replicationMode),
+				Config: testAccNSXLogicalSwitchCreateTemplate(switchName, transportZoneName, origvlan, replicationMode, verifyRealization),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXLogicalSwitchExists(switchName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", switchName),
@@ -177,7 +201,7 @@ replication_mode = "MTEP"
 }`, switchName)
 }
 
-func testAccNSXLogicalSwitchNovlanTemplate(switchName string, transportZoneName string) string {
+func testAccNSXLogicalSwitchNoVlanTemplate(switchName string, transportZoneName string) string {
 	return fmt.Sprintf(`
 data "nsxt_transport_zone" "TZ1" {
      display_name = "%s"
@@ -191,7 +215,7 @@ transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
 }`, transportZoneName, switchName)
 }
 
-func testAccNSXLogicalSwitchCreateTemplate(switchName string, transportZoneName string, vlan string, replicationMode string) string {
+func testAccNSXLogicalSwitchCreateTemplate(switchName string, transportZoneName string, vlan string, replicationMode string, verifyRealization bool) string {
 	return fmt.Sprintf(`
 data "nsxt_transport_zone" "TZ1" {
      display_name = "%s"
@@ -204,13 +228,14 @@ description = "Acceptance Test"
 transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
 replication_mode = "%s"
 vlan = "%s"
+verify_realization = "%t"
 tags = [
     {
-	    scope = "scope1"
+	scope = "scope1"
         tag = "tag1"
     }
 ]
-}`, transportZoneName, switchName, replicationMode, vlan)
+}`, transportZoneName, switchName, replicationMode, vlan, verifyRealization)
 }
 
 func testAccNSXLogicalSwitchUpdateTemplate(switchUpdateName string, transportZoneName string, vlan string, replicationMode string) string {

@@ -8,7 +8,9 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/manager"
+	"log"
 	"net/http"
+	"time"
 )
 
 func resourceLogicalSwitch() *schema.Resource {
@@ -70,7 +72,23 @@ func resourceLogicalSwitch() *schema.Resource {
 				Optional:    true,
 				Computed:    true,
 			},
+			"verify_realization": &schema.Schema{
+				Type:        schema.TypeBool,
+				Description: "Wait for realization to complete",
+				Default:     true,
+				Optional:    true,
+			},
 		},
+	}
+}
+
+func resourceLogicalSwitchCreateRollback(nsxClient *api.APIClient, id string) {
+	log.Printf("[ERROR] Rollback switch %d creation due to unrealized state", id)
+
+	localVarOptionals := make(map[string]interface{})
+	_, err := nsxClient.LogicalSwitchingApi.DeleteLogicalSwitch(nsxClient.Context, id, localVarOptionals)
+	if err != nil {
+		log.Printf("[ERROR] Rollback failed!")
 	}
 }
 
@@ -90,6 +108,9 @@ func resourceLogicalSwitchCreate(d *schema.ResourceData, m interface{}) error {
 	transport_zone_id := d.Get("transport_zone_id").(string)
 	vlan := int64(d.Get("vlan").(int))
 	vni := int32(d.Get("vni").(int))
+
+	verify_realization := d.Get("verify_realization").(bool)
+
 	logical_switch := manager.LogicalSwitch{
 		Description:         description,
 		DisplayName:         display_name,
@@ -112,9 +133,39 @@ func resourceLogicalSwitchCreate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	if resp.StatusCode != http.StatusCreated {
-		fmt.Printf("Unexpected status returned")
-		return nil
+		return fmt.Errorf("Unexpected return status %d", resp.StatusCode)
 	}
+
+	if verify_realization {
+
+		for {
+			state, resp, err := nsxClient.LogicalSwitchingApi.GetLogicalSwitchState(nsxClient.Context, logical_switch.Id)
+
+			if err != nil {
+				resourceLogicalSwitchCreateRollback(nsxClient, logical_switch.Id)
+				return fmt.Errorf("Error while querying realization state: %v", err)
+			}
+
+			if resp.StatusCode != http.StatusOK {
+				resourceLogicalSwitchCreateRollback(nsxClient, logical_switch.Id)
+				return fmt.Errorf("Unexpected return status %d", resp.StatusCode)
+			}
+
+			if state.FailureCode != 0 {
+				resourceLogicalSwitchCreateRollback(nsxClient, logical_switch.Id)
+				return fmt.Errorf("Error in switch realization: %s", state.FailureMessage)
+			}
+
+			log.Printf("[DEBUG] Realization state: %s", state.State)
+
+			if state.State == "success" {
+				break
+			}
+
+			time.Sleep(time.Second)
+		}
+	}
+
 	d.SetId(logical_switch.Id)
 
 	return resourceLogicalSwitchRead(d, m)
