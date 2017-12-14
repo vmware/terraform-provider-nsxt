@@ -192,3 +192,60 @@ func SetAddressBindingsInSchema(d *schema.ResourceData, bindings []manager.Packe
 	}
 	d.Set("address_bindings", bindingList)
 }
+
+func GetResourceReferencesSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:     schema.TypeList,
+		Optional: true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"is_valid": &schema.Schema{
+					Type:     schema.TypeBool,
+					Optional: true,
+				},
+				"target_display_name": &schema.Schema{
+					Type:     schema.TypeString,
+					Optional: true,
+				},
+				"target_id": &schema.Schema{
+					Type:     schema.TypeString,
+					Optional: true,
+				},
+				"target_type": &schema.Schema{
+					Type:     schema.TypeString,
+					Optional: true,
+				},
+			},
+		},
+	}
+}
+
+func GetResourceReferencesFromSchema(d *schema.ResourceData, schema_attr_name string) []common.ResourceReference {
+	references := d.Get(schema_attr_name).([]interface{})
+	var referenceList []common.ResourceReference
+	for _, reference := range references {
+		data := reference.(map[string]interface{})
+		elem := common.ResourceReference{
+			IsValid:           data["is_valid"].(bool),
+			TargetDisplayName: data["target_display_name"].(string),
+			TargetId:          data["target_id"].(string),
+			TargetType:        data["target_type"].(string),
+		}
+
+		referenceList = append(referenceList, elem)
+	}
+	return referenceList
+}
+
+func SetResourceReferencesInSchema(d *schema.ResourceData, references []common.ResourceReference, schema_attr_name string) {
+	var referenceList []map[string]interface{}
+	for _, reference := range references {
+		elem := make(map[string]interface{})
+		elem["is_valid"] = reference.IsValid
+		elem["target_display_name"] = reference.TargetDisplayName
+		elem["target_id"] = reference.TargetId
+		elem["target_type"] = reference.TargetType
+		referenceList = append(referenceList, elem)
+	}
+	d.Set(schema_attr_name, referenceList)
+}

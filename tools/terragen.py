@@ -1,4 +1,4 @@
-#  Copyright © 2017 VMware, Inc. All Rights Reserved.
+#  Copyright (c) 2017 VMware, Inc. All Rights Reserved.
 #  SPDX-License-Identifier: MPL-2.0
 
 import sys
@@ -8,7 +8,7 @@ PACKAGE_NAME = "nsxt"
 SDK_PACKAGE_NAME = "api"
 MANAGER_PACKAGE_NAME = "manager"
 
-IGNORE_ATTRS = ["Links", "Schema", "Self", "Id", "ResourceType"]
+IGNORE_ATTRS = ["Links", "Schema", "Self", "Id", "ResourceType", "CreateTime", "CreateUser", "LastModifiedTime", "LastModifiedUser"]
 COMPUTED_ATTRS = ["CreateTime", "CreateUser", "LastModifiedTime", "LastModifiedUser", "SystemOwned"]
 FORCENEW_ATTRS = ["TransportZoneId"]
 VIP_SCHEMA_ATTRS = ["Tags", "SwitchingProfileIds", "Revision", "AddressBindings", "SystemOwned"]
