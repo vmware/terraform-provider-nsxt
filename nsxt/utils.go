@@ -193,10 +193,12 @@ func SetAddressBindingsInSchema(d *schema.ResourceData, bindings []manager.Packe
 	d.Set("address_bindings", bindingList)
 }
 
-func GetResourceReferencesSchema() *schema.Schema {
+func GetResourceReferencesSchema(required bool, computed bool) *schema.Schema {
 	return &schema.Schema{
 		Type:     schema.TypeList,
-		Optional: true,
+		Required: required,
+		Optional: !required,
+		Computed: computed,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"is_valid": &schema.Schema{
@@ -220,8 +222,8 @@ func GetResourceReferencesSchema() *schema.Schema {
 	}
 }
 
-func GetResourceReferencesFromSchema(d *schema.ResourceData, schema_attr_name string) []common.ResourceReference {
-	references := d.Get(schema_attr_name).([]interface{})
+func GetResourceReferencesFromSchema(d *schema.ResourceData, schemaAttrName string) []common.ResourceReference {
+	references := d.Get(schemaAttrName).([]interface{})
 	var referenceList []common.ResourceReference
 	for _, reference := range references {
 		data := reference.(map[string]interface{})
@@ -237,7 +239,7 @@ func GetResourceReferencesFromSchema(d *schema.ResourceData, schema_attr_name st
 	return referenceList
 }
 
-func SetResourceReferencesInSchema(d *schema.ResourceData, references []common.ResourceReference, schema_attr_name string) {
+func SetResourceReferencesInSchema(d *schema.ResourceData, references []common.ResourceReference, schemaAttrName string) {
 	var referenceList []map[string]interface{}
 	for _, reference := range references {
 		elem := make(map[string]interface{})
@@ -247,5 +249,60 @@ func SetResourceReferencesInSchema(d *schema.ResourceData, references []common.R
 		elem["target_type"] = reference.TargetType
 		referenceList = append(referenceList, elem)
 	}
-	d.Set(schema_attr_name, referenceList)
+	d.Set(schemaAttrName, referenceList)
+}
+
+func GetIpSubnetsSchema(required bool, computed bool) *schema.Schema {
+	return &schema.Schema{
+		Type:     schema.TypeList,
+		Optional: !required,
+		Required: required,
+		Computed: computed,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"ip_addresses": &schema.Schema{
+					Type:     schema.TypeList,
+					Optional: true,
+					Elem:     &schema.Schema{Type: schema.TypeString},
+				},
+				"prefix_length": &schema.Schema{
+					Type:     schema.TypeInt,
+					Optional: true,
+				},
+			},
+		},
+	}
+}
+
+func GetIpSubnetsFromSchema(d *schema.ResourceData) []manager.IpSubnet {
+	subnets := d.Get("subnets").([]interface{})
+	var subnetList []manager.IpSubnet
+	for _, subnet := range subnets {
+		data := subnet.(map[string]interface{})
+		elem := manager.IpSubnet{
+			IpAddresses:  Interface2StringList(data["ip_addresses"].([]interface{})),
+			PrefixLength: int64(data["prefix_length"].(int)),
+		}
+
+		subnetList = append(subnetList, elem)
+	}
+	return subnetList
+}
+
+func SetIpSubnetsInSchema(d *schema.ResourceData, subnets []manager.IpSubnet) {
+	var subnetList []map[string]interface{}
+	for _, subnet := range subnets {
+		elem := make(map[string]interface{})
+		elem["ip_addresses"] = StringList2Interface(subnet.IpAddresses)
+		elem["prefix_length"] = subnet.PrefixLength
+		subnetList = append(subnetList, elem)
+	}
+	d.Set("subnets", subnetList)
+}
+
+func MakeResourceReference(resourceType string, resourceId string) *common.ResourceReference {
+	return &common.ResourceReference{
+		TargetType: resourceType,
+		TargetId:   resourceId,
+	}
 }

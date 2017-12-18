@@ -11,6 +11,7 @@ MANAGER_PACKAGE_NAME = "manager"
 IGNORE_ATTRS = ["Links", "Schema", "Self", "Id", "ResourceType", "CreateTime", "CreateUser", "LastModifiedTime", "LastModifiedUser"]
 COMPUTED_ATTRS = ["CreateTime", "CreateUser", "LastModifiedTime", "LastModifiedUser", "SystemOwned"]
 FORCENEW_ATTRS = ["TransportZoneId"]
+# TODO: ServiceBindings
 VIP_SCHEMA_ATTRS = ["Tags", "SwitchingProfileIds", "Revision", "AddressBindings", "SystemOwned"]
 VIP_GETTER_ATTRS = ["Tags", "SwitchingProfileIds", "AddressBindings"]
 VIP_SETTER_ATTRS = VIP_GETTER_ATTRS
