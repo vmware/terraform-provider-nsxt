@@ -17,8 +17,8 @@ func resourceLogicalRouter() *schema.Resource {
 		Delete: resourceLogicalRouterDelete,
 
 		Schema: map[string]*schema.Schema{
-			"revision":     GetRevisionSchema(),
-			"system_owned": GetSystemOwnedSchema(),
+			"revision":     getRevisionSchema(),
+			"system_owned": getSystemOwnedSchema(),
 			"description": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
@@ -29,7 +29,7 @@ func resourceLogicalRouter() *schema.Resource {
 				Description: "Defaults to ID if not set",
 				Optional:    true,
 			},
-			"tags": GetTagsSchema(),
+			"tags": getTagsSchema(),
 			"edge_cluster_id": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "Used for tier0 routers",
@@ -40,7 +40,7 @@ func resourceLogicalRouter() *schema.Resource {
 				Description: "This failover mode determines, whether the preferred service router instance for given logical router will preempt the peer. Note - It can be specified if and only if logical router is ACTIVE_STANDBY and NON_PREEMPTIVE mode is supported only for a Tier1 logical router. For Tier0 ACTIVE_STANDBY logical router, failover mode is always PREEMPTIVE, i.e. once the preferred node comes up after a failure, it will preempt the peer causing failover from current active to preferred node. For ACTIVE_ACTIVE logical routers, this field must not be populated",
 				Optional:    true,
 			},
-			"firewall_sections": GetResourceReferencesSchema(false, true),
+			"firewall_sections": getResourceReferencesSchema(false, true),
 			"high_availability_mode": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "High availability mode",
@@ -68,10 +68,10 @@ func resourceLogicalRouterCreate(d *schema.ResourceData, m interface{}) error {
 
 	description := d.Get("description").(string)
 	display_name := d.Get("display_name").(string)
-	tags := GetTagsFromSchema(d)
+	tags := getTagsFromSchema(d)
 	edge_cluster_id := d.Get("edge_cluster_id").(string)
 	failover_mode := d.Get("failover_mode").(string)
-	firewall_sections := GetResourceReferencesFromSchema(d, "firewall_sections")
+	firewall_sections := getResourceReferencesFromSchema(d, "firewall_sections")
 	high_availability_mode := d.Get("high_availability_mode").(string)
 	preferred_edge_cluster_member_index := int64(d.Get("preferred_edge_cluster_member_index").(int))
 	router_type := d.Get("router_type").(string)
@@ -124,11 +124,11 @@ func resourceLogicalRouterRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("SystemOwned", logical_router.SystemOwned)
 	d.Set("Description", logical_router.Description)
 	d.Set("DisplayName", logical_router.DisplayName)
-	SetTagsInSchema(d, logical_router.Tags)
+	setTagsInSchema(d, logical_router.Tags)
 	d.Set("AdvancedConfig", logical_router.AdvancedConfig)
 	d.Set("EdgeClusterId", logical_router.EdgeClusterId)
 	d.Set("FailoverMode", logical_router.FailoverMode)
-	SetResourceReferencesInSchema(d, logical_router.FirewallSections, "firewall_sections")
+	setResourceReferencesInSchema(d, logical_router.FirewallSections, "firewall_sections")
 	d.Set("FirewallSections", logical_router.FirewallSections)
 	d.Set("HighAvailabilityMode", logical_router.HighAvailabilityMode)
 	d.Set("PreferredEdgeClusterMemberIndex", logical_router.PreferredEdgeClusterMemberIndex)
@@ -149,10 +149,10 @@ func resourceLogicalRouterUpdate(d *schema.ResourceData, m interface{}) error {
 	revision := int64(d.Get("revision").(int))
 	description := d.Get("description").(string)
 	display_name := d.Get("display_name").(string)
-	tags := GetTagsFromSchema(d)
+	tags := getTagsFromSchema(d)
 	edge_cluster_id := d.Get("edge_cluster_id").(string)
 	failover_mode := d.Get("failover_mode").(string)
-	firewall_sections := GetResourceReferencesFromSchema(d, "firewall_sections")
+	firewall_sections := getResourceReferencesFromSchema(d, "firewall_sections")
 	high_availability_mode := d.Get("high_availability_mode").(string)
 	preferred_edge_cluster_member_index := int64(d.Get("preferred_edge_cluster_member_index").(int))
 	router_type := d.Get("router_type").(string)

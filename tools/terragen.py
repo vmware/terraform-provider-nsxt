@@ -64,7 +64,7 @@ def write_header(f):
 def write_attr(f, attr):
 
     if attr['name'] in VIP_SCHEMA_ATTRS:
-        pretty_writeln(f, "\"%s\": Get%sSchema()," % (convert_name(attr['name']), attr['name']))
+        pretty_writeln(f, "\"%s\": get%sSchema()," % (convert_name(attr['name']), attr['name']))
         return
 
     if attr['type'] not in TYPE_MAP:
@@ -125,7 +125,7 @@ def write_object(f, resource, attrs, is_create=True):
 
         used_attrs.append(attr['name'])
         if attr['name'] in VIP_GETTER_ATTRS:
-            pretty_writeln(f, "%s := Get%sFromSchema(d)" % (
+            pretty_writeln(f, "%s := get%sFromSchema(d)" % (
                 convert_name(attr['name']), attr['name']))
             continue
 
@@ -211,7 +211,7 @@ def write_read_func(f, resource, attrs, api_section):
             continue
 
         if attr['name'] in VIP_SETTER_ATTRS:
-            pretty_writeln(f, "Set%sInSchema(d, %s.%s)" % (
+            pretty_writeln(f, "set%sInSchema(d, %s.%s)" % (
                 attr['name'], lower_resource, attr['name']))
             continue
 

@@ -21,8 +21,8 @@ func resourceLogicalSwitch() *schema.Resource {
 		Delete: resourceLogicalSwitchDelete,
 
 		Schema: map[string]*schema.Schema{
-			"revision":     GetRevisionSchema(),
-			"system_owned": GetSystemOwnedSchema(),
+			"revision":     getRevisionSchema(),
+			"system_owned": getSystemOwnedSchema(),
 			"description": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
@@ -33,8 +33,8 @@ func resourceLogicalSwitch() *schema.Resource {
 				Description: "Defaults to ID if not set",
 				Optional:    true,
 			},
-			"tags":             GetTagsSchema(),
-			"address_bindings": GetAddressBindingsSchema(),
+			"tags":             getTagsSchema(),
+			"address_bindings": getAddressBindingsSchema(),
 			"admin_state": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "Represents Desired state of the Logical Switch",
@@ -55,7 +55,7 @@ func resourceLogicalSwitch() *schema.Resource {
 				Description: "Replication mode of the Logical Switch",
 				Required:    true,
 			},
-			"switching_profile_ids": GetSwitchingProfileIdsSchema(),
+			"switching_profile_ids": getSwitchingProfileIdsSchema(),
 			"transport_zone_id": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "Id of the TransportZone to which this LogicalSwitch is associated",
@@ -98,13 +98,13 @@ func resourceLogicalSwitchCreate(d *schema.ResourceData, m interface{}) error {
 
 	description := d.Get("description").(string)
 	display_name := d.Get("display_name").(string)
-	tags := GetTagsFromSchema(d)
-	address_bindings := GetAddressBindingsFromSchema(d)
+	tags := getTagsFromSchema(d)
+	address_bindings := getAddressBindingsFromSchema(d)
 	admin_state := d.Get("admin_state").(string)
 	ip_pool_id := d.Get("ip_pool_id").(string)
 	mac_pool_id := d.Get("mac_pool_id").(string)
 	replication_mode := d.Get("replication_mode").(string)
-	switching_profile_ids := GetSwitchingProfileIdsFromSchema(d)
+	switching_profile_ids := getSwitchingProfileIdsFromSchema(d)
 	transport_zone_id := d.Get("transport_zone_id").(string)
 	vlan := int64(d.Get("vlan").(int))
 	vni := int32(d.Get("vni").(int))
@@ -194,13 +194,13 @@ func resourceLogicalSwitchRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("system_owned", logical_switch.SystemOwned)
 	d.Set("description", logical_switch.Description)
 	d.Set("display_name", logical_switch.DisplayName)
-	SetTagsInSchema(d, logical_switch.Tags)
-	SetAddressBindingsInSchema(d, logical_switch.AddressBindings)
+	setTagsInSchema(d, logical_switch.Tags)
+	setAddressBindingsInSchema(d, logical_switch.AddressBindings)
 	d.Set("admin_state", logical_switch.AdminState)
 	d.Set("ip_pool_id", logical_switch.IpPoolId)
 	d.Set("mac_pool_id", logical_switch.MacPoolId)
 	d.Set("replication_mode", logical_switch.ReplicationMode)
-	SetSwitchingProfileIdsInSchema(d, nsxClient, logical_switch.SwitchingProfileIds)
+	setSwitchingProfileIdsInSchema(d, nsxClient, logical_switch.SwitchingProfileIds)
 	d.Set("transport_zone_id", logical_switch.TransportZoneId)
 	d.Set("vlan", logical_switch.Vlan)
 	d.Set("vni", logical_switch.Vni)
@@ -219,13 +219,13 @@ func resourceLogicalSwitchUpdate(d *schema.ResourceData, m interface{}) error {
 
 	description := d.Get("description").(string)
 	display_name := d.Get("display_name").(string)
-	tags := GetTagsFromSchema(d)
-	address_bindings := GetAddressBindingsFromSchema(d)
+	tags := getTagsFromSchema(d)
+	address_bindings := getAddressBindingsFromSchema(d)
 	admin_state := d.Get("admin_state").(string)
 	ip_pool_id := d.Get("ip_pool_id").(string)
 	mac_pool_id := d.Get("mac_pool_id").(string)
 	replication_mode := d.Get("replication_mode").(string)
-	switching_profile_ids := GetSwitchingProfileIdsFromSchema(d)
+	switching_profile_ids := getSwitchingProfileIdsFromSchema(d)
 	transport_zone_id := d.Get("transport_zone_id").(string)
 	vlan := int64(d.Get("vlan").(int))
 	vni := int32(d.Get("vni").(int))

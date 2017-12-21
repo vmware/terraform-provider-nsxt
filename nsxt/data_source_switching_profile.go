@@ -30,7 +30,7 @@ func dataSourceSwitchingProfile() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"system_owned": GetSystemOwnedSchema(),
+			"system_owned": getSystemOwnedSchema(),
 		},
 	}
 }

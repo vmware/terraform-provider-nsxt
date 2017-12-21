@@ -16,8 +16,8 @@ func resourceLogicalRouterDownLinkPort() *schema.Resource {
 		Delete: resourceLogicalRouterDownLinkPortDelete,
 
 		Schema: map[string]*schema.Schema{
-			"revision":     GetRevisionSchema(),
-			"system_owned": GetSystemOwnedSchema(),
+			"revision":     getRevisionSchema(),
+			"system_owned": getSystemOwnedSchema(),
 			"description": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
@@ -28,7 +28,7 @@ func resourceLogicalRouterDownLinkPort() *schema.Resource {
 				Description: "Defaults to ID if not set",
 				Optional:    true,
 			},
-			"tags": GetTagsSchema(),
+			"tags": getTagsSchema(),
 			"logical_router_id": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "Identifier for logical router on which this port is created",
@@ -41,7 +41,7 @@ func resourceLogicalRouterDownLinkPort() *schema.Resource {
 				Required:    true,
 				ForceNew:    true,
 			},
-			"subnets": GetIpSubnetsSchema(true, false),
+			"subnets": getIpSubnetsSchema(true, false),
 			"mac_address": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "MAC address",
@@ -62,11 +62,11 @@ func resourceLogicalRouterDownLinkPortCreate(d *schema.ResourceData, m interface
 
 	description := d.Get("description").(string)
 	display_name := d.Get("display_name").(string)
-	tags := GetTagsFromSchema(d)
+	tags := getTagsFromSchema(d)
 	logical_router_id := d.Get("logical_router_id").(string)
 	mac_address := d.Get("mac_address").(string)
 	linked_logical_switch_port_id := d.Get("linked_logical_switch_port_id").(string)
-	subnets := GetIpSubnetsFromSchema(d)
+	subnets := getIpSubnetsFromSchema(d)
 	urpf_mode := d.Get("urpf_mode").(string)
 	logical_router_down_link_port := manager.LogicalRouterDownLinkPort{
 		Description:               description,
@@ -74,7 +74,7 @@ func resourceLogicalRouterDownLinkPortCreate(d *schema.ResourceData, m interface
 		Tags:                      tags,
 		LogicalRouterId:           logical_router_id,
 		MacAddress:                mac_address,
-		LinkedLogicalSwitchPortId: MakeResourceReference("LogicalPort", linked_logical_switch_port_id),
+		LinkedLogicalSwitchPortId: makeResourceReference("LogicalPort", linked_logical_switch_port_id),
 		Subnets:                   subnets,
 		UrpfMode:                  urpf_mode,
 	}
@@ -117,11 +117,11 @@ func resourceLogicalRouterDownLinkPortRead(d *schema.ResourceData, m interface{}
 	d.Set("SystemOwned", logical_router_down_link_port.SystemOwned)
 	d.Set("Description", logical_router_down_link_port.Description)
 	d.Set("DisplayName", logical_router_down_link_port.DisplayName)
-	SetTagsInSchema(d, logical_router_down_link_port.Tags)
+	setTagsInSchema(d, logical_router_down_link_port.Tags)
 	d.Set("LogicalRouterId", logical_router_down_link_port.LogicalRouterId)
 	d.Set("MacAddress", logical_router_down_link_port.MacAddress)
 	d.Set("LinkedLogicalSwitchPortId", logical_router_down_link_port.LinkedLogicalSwitchPortId.TargetId)
-	SetIpSubnetsInSchema(d, logical_router_down_link_port.Subnets)
+	setIpSubnetsInSchema(d, logical_router_down_link_port.Subnets)
 	d.Set("UrpfMode", logical_router_down_link_port.UrpfMode)
 
 	return nil
@@ -139,10 +139,10 @@ func resourceLogicalRouterDownLinkPortUpdate(d *schema.ResourceData, m interface
 	revision := int64(d.Get("revision").(int))
 	description := d.Get("description").(string)
 	display_name := d.Get("display_name").(string)
-	tags := GetTagsFromSchema(d)
+	tags := getTagsFromSchema(d)
 	logical_router_id := d.Get("logical_router_id").(string)
 	linked_logical_switch_port_id := d.Get("linked_logical_switch_port_id").(string)
-	subnets := GetIpSubnetsFromSchema(d)
+	subnets := getIpSubnetsFromSchema(d)
 	mac_address := d.Get("mac_address").(string)
 
 	urpf_mode := d.Get("urpf_mode").(string)
@@ -153,7 +153,7 @@ func resourceLogicalRouterDownLinkPortUpdate(d *schema.ResourceData, m interface
 		Tags:                      tags,
 		LogicalRouterId:           logical_router_id,
 		MacAddress:                mac_address,
-		LinkedLogicalSwitchPortId: MakeResourceReference("LogicalSwitch", linked_logical_switch_port_id),
+		LinkedLogicalSwitchPortId: makeResourceReference("LogicalSwitch", linked_logical_switch_port_id),
 		Subnets:                   subnets,
 		UrpfMode:                  urpf_mode,
 	}

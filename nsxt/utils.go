@@ -10,7 +10,7 @@ import (
 	"github.com/vmware/go-vmware-nsxt/manager"
 )
 
-func Interface2StringList(configured []interface{}) []string {
+func interface2StringList(configured []interface{}) []string {
 	vs := make([]string, 0, len(configured))
 	for _, v := range configured {
 		val, ok := v.(string)
@@ -21,7 +21,8 @@ func Interface2StringList(configured []interface{}) []string {
 	return vs
 }
 
-func StringList2Interface(list []string) []interface{} {
+// TODO: ???
+func stringList2Interface(list []string) []interface{} {
 	vs := make([]interface{}, 0, len(list))
 	for _, v := range list {
 		vs = append(vs, v)
@@ -29,14 +30,19 @@ func StringList2Interface(list []string) []interface{} {
 	return vs
 }
 
-func GetRevisionSchema() *schema.Schema {
+func getStringListFromSchemaSet(d *schema.ResourceData, schemaAttrName string) []string {
+    return interface2StringList(d.Get(schemaAttrName).(*schema.Set).List())
+}
+
+
+func getRevisionSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:     schema.TypeInt,
 		Computed: true,
 	}
 }
 
-func GetSystemOwnedSchema() *schema.Schema {
+func getSystemOwnedSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:        schema.TypeBool,
 		Description: "Indicates system owned resource",
@@ -45,7 +51,7 @@ func GetSystemOwnedSchema() *schema.Schema {
 }
 
 // utilities to define & handle tags
-func GetTagsSchema() *schema.Schema {
+func getTagsSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:     schema.TypeSet,
 		Optional: true,
@@ -64,7 +70,7 @@ func GetTagsSchema() *schema.Schema {
 	}
 }
 
-func GetTagsFromSchema(d *schema.ResourceData) []common.Tag {
+func getTagsFromSchema(d *schema.ResourceData) []common.Tag {
 	tags := d.Get("tags").(*schema.Set).List()
 	var tagList []common.Tag
 	for _, tag := range tags {
@@ -78,7 +84,7 @@ func GetTagsFromSchema(d *schema.ResourceData) []common.Tag {
 	return tagList
 }
 
-func SetTagsInSchema(d *schema.ResourceData, tags []common.Tag) {
+func setTagsInSchema(d *schema.ResourceData, tags []common.Tag) {
 	var tagList []map[string]string
 	for _, tag := range tags {
 		elem := make(map[string]string)
@@ -90,7 +96,7 @@ func SetTagsInSchema(d *schema.ResourceData, tags []common.Tag) {
 }
 
 // utilities to define & handle switching profiles
-func GetSwitchingProfileIdsSchema() *schema.Schema {
+func getSwitchingProfileIdsSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:     schema.TypeSet,
 		Optional: true,
@@ -110,7 +116,7 @@ func GetSwitchingProfileIdsSchema() *schema.Schema {
 	}
 }
 
-func GetSwitchingProfileIdsFromSchema(d *schema.ResourceData) []manager.SwitchingProfileTypeIdEntry {
+func getSwitchingProfileIdsFromSchema(d *schema.ResourceData) []manager.SwitchingProfileTypeIdEntry {
 	profiles := d.Get("switching_profile_ids").(*schema.Set).List()
 	var profileList []manager.SwitchingProfileTypeIdEntry
 	for _, profile := range profiles {
@@ -124,7 +130,7 @@ func GetSwitchingProfileIdsFromSchema(d *schema.ResourceData) []manager.Switchin
 	return profileList
 }
 
-func SetSwitchingProfileIdsInSchema(d *schema.ResourceData, nsxClient *nsxt.APIClient, profiles []manager.SwitchingProfileTypeIdEntry) {
+func setSwitchingProfileIdsInSchema(d *schema.ResourceData, nsxClient *nsxt.APIClient, profiles []manager.SwitchingProfileTypeIdEntry) {
 	var profileList []map[string]string
 	for _, profile := range profiles {
 		// ignore system owned profiles
@@ -142,7 +148,7 @@ func SetSwitchingProfileIdsInSchema(d *schema.ResourceData, nsxClient *nsxt.APIC
 }
 
 // utilities to define & handle address bindings
-func GetAddressBindingsSchema() *schema.Schema {
+func getAddressBindingsSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:     schema.TypeSet,
 		Optional: true,
@@ -165,7 +171,7 @@ func GetAddressBindingsSchema() *schema.Schema {
 	}
 }
 
-func GetAddressBindingsFromSchema(d *schema.ResourceData) []manager.PacketAddressClassifier {
+func getAddressBindingsFromSchema(d *schema.ResourceData) []manager.PacketAddressClassifier {
 	bindings := d.Get("address_bindings").(*schema.Set).List()
 	var bindingList []manager.PacketAddressClassifier
 	for _, binding := range bindings {
@@ -181,7 +187,7 @@ func GetAddressBindingsFromSchema(d *schema.ResourceData) []manager.PacketAddres
 	return bindingList
 }
 
-func SetAddressBindingsInSchema(d *schema.ResourceData, bindings []manager.PacketAddressClassifier) {
+func setAddressBindingsInSchema(d *schema.ResourceData, bindings []manager.PacketAddressClassifier) {
 	var bindingList []map[string]interface{}
 	for _, binding := range bindings {
 		elem := make(map[string]interface{})
@@ -193,7 +199,7 @@ func SetAddressBindingsInSchema(d *schema.ResourceData, bindings []manager.Packe
 	d.Set("address_bindings", bindingList)
 }
 
-func GetResourceReferencesSchema(required bool, computed bool) *schema.Schema {
+func getResourceReferencesSchema(required bool, computed bool) *schema.Schema {
 	return &schema.Schema{
 		Type:     schema.TypeList,
 		Required: required,
@@ -222,7 +228,7 @@ func GetResourceReferencesSchema(required bool, computed bool) *schema.Schema {
 	}
 }
 
-func GetResourceReferencesFromSchema(d *schema.ResourceData, schemaAttrName string) []common.ResourceReference {
+func getResourceReferencesFromSchema(d *schema.ResourceData, schemaAttrName string) []common.ResourceReference {
 	references := d.Get(schemaAttrName).([]interface{})
 	var referenceList []common.ResourceReference
 	for _, reference := range references {
@@ -239,7 +245,7 @@ func GetResourceReferencesFromSchema(d *schema.ResourceData, schemaAttrName stri
 	return referenceList
 }
 
-func SetResourceReferencesInSchema(d *schema.ResourceData, references []common.ResourceReference, schemaAttrName string) {
+func setResourceReferencesInSchema(d *schema.ResourceData, references []common.ResourceReference, schemaAttrName string) {
 	var referenceList []map[string]interface{}
 	for _, reference := range references {
 		elem := make(map[string]interface{})
@@ -252,7 +258,7 @@ func SetResourceReferencesInSchema(d *schema.ResourceData, references []common.R
 	d.Set(schemaAttrName, referenceList)
 }
 
-func GetIpSubnetsSchema(required bool, computed bool) *schema.Schema {
+func getIpSubnetsSchema(required bool, computed bool) *schema.Schema {
 	return &schema.Schema{
 		Type:     schema.TypeList,
 		Optional: !required,
@@ -274,13 +280,13 @@ func GetIpSubnetsSchema(required bool, computed bool) *schema.Schema {
 	}
 }
 
-func GetIpSubnetsFromSchema(d *schema.ResourceData) []manager.IpSubnet {
+func getIpSubnetsFromSchema(d *schema.ResourceData) []manager.IpSubnet {
 	subnets := d.Get("subnets").([]interface{})
 	var subnetList []manager.IpSubnet
 	for _, subnet := range subnets {
 		data := subnet.(map[string]interface{})
 		elem := manager.IpSubnet{
-			IpAddresses:  Interface2StringList(data["ip_addresses"].([]interface{})),
+			IpAddresses:  interface2StringList(data["ip_addresses"].([]interface{})),
 			PrefixLength: int64(data["prefix_length"].(int)),
 		}
 
@@ -289,18 +295,18 @@ func GetIpSubnetsFromSchema(d *schema.ResourceData) []manager.IpSubnet {
 	return subnetList
 }
 
-func SetIpSubnetsInSchema(d *schema.ResourceData, subnets []manager.IpSubnet) {
+func setIpSubnetsInSchema(d *schema.ResourceData, subnets []manager.IpSubnet) {
 	var subnetList []map[string]interface{}
 	for _, subnet := range subnets {
 		elem := make(map[string]interface{})
-		elem["ip_addresses"] = StringList2Interface(subnet.IpAddresses)
+		elem["ip_addresses"] = stringList2Interface(subnet.IpAddresses)
 		elem["prefix_length"] = subnet.PrefixLength
 		subnetList = append(subnetList, elem)
 	}
 	d.Set("subnets", subnetList)
 }
 
-func MakeResourceReference(resourceType string, resourceId string) *common.ResourceReference {
+func makeResourceReference(resourceType string, resourceId string) *common.ResourceReference {
 	return &common.ResourceReference{
 		TargetType: resourceType,
 		TargetId:   resourceId,

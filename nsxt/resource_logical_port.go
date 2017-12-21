@@ -19,8 +19,8 @@ func resourceLogicalPort() *schema.Resource {
 		Delete: resourceLogicalPortDelete,
 
 		Schema: map[string]*schema.Schema{
-			"revision":     GetRevisionSchema(),
-			"system_owned": GetSystemOwnedSchema(),
+			"revision":     getRevisionSchema(),
+			"system_owned": getSystemOwnedSchema(),
 			"display_name": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
@@ -38,8 +38,8 @@ func resourceLogicalPort() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"switching_profile_ids": GetSwitchingProfileIdsSchema(),
-			"tags":                  GetTagsSchema(),
+			"switching_profile_ids": getSwitchingProfileIdsSchema(),
+			"tags":                  getTagsSchema(),
 			//TODO: add attachments
 		},
 	}
@@ -52,8 +52,8 @@ func resourceLogicalPortCreate(d *schema.ResourceData, m interface{}) error {
 	description := d.Get("description").(string)
 	ls_id := d.Get("logical_switch_id").(string)
 	admin_state := d.Get("admin_state").(string)
-	profilesList := GetSwitchingProfileIdsFromSchema(d)
-	tagList := GetTagsFromSchema(d)
+	profilesList := getSwitchingProfileIdsFromSchema(d)
+	tagList := getTagsFromSchema(d)
 
 	lp := manager.LogicalPort{
 		DisplayName:         name,
@@ -103,8 +103,8 @@ func resourceLogicalPortRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("description", logical_port.Description)
 	d.Set("logical_switch_id", logical_port.LogicalSwitchId)
 	d.Set("admin_state", logical_port.AdminState)
-	SetSwitchingProfileIdsInSchema(d, nsxClient, logical_port.SwitchingProfileIds)
-	SetTagsInSchema(d, logical_port.Tags)
+	setSwitchingProfileIdsInSchema(d, nsxClient, logical_port.SwitchingProfileIds)
+	setTagsInSchema(d, logical_port.Tags)
 
 	return nil
 }
@@ -117,8 +117,8 @@ func resourceLogicalPortUpdate(d *schema.ResourceData, m interface{}) error {
 	description := d.Get("description").(string)
 	ls_id := d.Get("logical_switch_id").(string)
 	admin_state := d.Get("admin_state").(string)
-	profilesList := GetSwitchingProfileIdsFromSchema(d)
-	tagList := GetTagsFromSchema(d)
+	profilesList := getSwitchingProfileIdsFromSchema(d)
+	tagList := getTagsFromSchema(d)
 	revision := int64(d.Get("revision").(int))
 
 	lp := manager.LogicalPort{DisplayName: name,

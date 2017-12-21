@@ -19,8 +19,8 @@ func resourceL4PortSetNsService() *schema.Resource {
 		Delete: resourceL4PortSetNsServiceDelete,
 
 		Schema: map[string]*schema.Schema{
-			"revision":     GetRevisionSchema(),
-			"system_owned": GetSystemOwnedSchema(),
+			"revision":     getRevisionSchema(),
+			"system_owned": getSystemOwnedSchema(),
 			"description": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
@@ -31,7 +31,7 @@ func resourceL4PortSetNsService() *schema.Resource {
 				Description: "Defaults to ID if not set",
 				Optional:    true,
 			},
-			"tags": GetTagsSchema(),
+			"tags": getTagsSchema(),
 			"default_service": &schema.Schema{
 				Type:        schema.TypeBool,
 				Description: "The default NSServices are created in the system by default. These NSServices can't be modified/deleted",
@@ -64,11 +64,11 @@ func resourceL4PortSetNsServiceCreate(d *schema.ResourceData, m interface{}) err
 
 	description := d.Get("description").(string)
 	display_name := d.Get("display_name").(string)
-	tags := GetTagsFromSchema(d)
+	tags := getTagsFromSchema(d)
 	default_service := d.Get("default_service").(bool)
 	l4_protocol := d.Get("l4_protocol").(string)
-	source_ports := Interface2StringList(d.Get("source_ports").(*schema.Set).List())
-	destination_ports := Interface2StringList(d.Get("destination_ports").(*schema.Set).List())
+	source_ports := getStringListFromSchemaSet(d, "source_ports")
+	destination_ports := getStringListFromSchemaSet(d, "destination_ports")
 
 	ns_service := manager.L4PortSetNsService{
 		NsService: manager.NsService{
@@ -124,7 +124,7 @@ func resourceL4PortSetNsServiceRead(d *schema.ResourceData, m interface{}) error
 	d.Set("system_owned", ns_service.SystemOwned)
 	d.Set("description", ns_service.Description)
 	d.Set("display_name", ns_service.DisplayName)
-	SetTagsInSchema(d, ns_service.Tags)
+	setTagsInSchema(d, ns_service.Tags)
 	d.Set("default_service", ns_service.DefaultService)
 	d.Set("resource_type", nsservice_element.ResourceType)
 	d.Set("destination_ports", nsservice_element.DestinationPorts)
@@ -144,11 +144,11 @@ func resourceL4PortSetNsServiceUpdate(d *schema.ResourceData, m interface{}) err
 
 	description := d.Get("description").(string)
 	display_name := d.Get("display_name").(string)
-	tags := GetTagsFromSchema(d)
+	tags := getTagsFromSchema(d)
 	default_service := d.Get("default_service").(bool)
 	l4_protocol := d.Get("l4_protocol").(string)
-	source_ports := Interface2StringList(d.Get("source_ports").(*schema.Set).List())
-	destination_ports := Interface2StringList(d.Get("destination_ports").(*schema.Set).List())
+	source_ports := interface2StringList(d.Get("source_ports").(*schema.Set).List())
+	destination_ports := interface2StringList(d.Get("destination_ports").(*schema.Set).List())
 	revision := int64(d.Get("revision").(int))
 
 	ns_service := manager.L4PortSetNsService{
