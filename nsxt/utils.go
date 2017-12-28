@@ -31,9 +31,8 @@ func stringList2Interface(list []string) []interface{} {
 }
 
 func getStringListFromSchemaSet(d *schema.ResourceData, schemaAttrName string) []string {
-    return interface2StringList(d.Get(schemaAttrName).(*schema.Set).List())
+	return interface2StringList(d.Get(schemaAttrName).(*schema.Set).List())
 }
-
 
 func getRevisionSchema() *schema.Schema {
 	return &schema.Schema{

@@ -1,0 +1,51 @@
+<% wrap_layout :inner do %>
+    <% content_for :sidebar do %>
+        <div class="docs-sidebar hidden-print affix-top" role="complementary">
+            <ul class="nav docs-sidenav">
+                <li<%= sidebar_current("docs-home") %>>
+                    <a href="/docs/providers/index.html">All Providers</a>
+                </li>
+
+                <li<%= sidebar_current("docs-nsxt-index") %>>
+                    <a href="/docs/providers/nsxt/index.html">AWS Provider</a>
+                </li>
+
+                <li<%= sidebar_current("docs-nsxt-datasource") %>>
+                <a href="#">Data Sources</a>
+                    <ul class="nav nav-visible">
+
+                        <li<%= sidebar_current("docs-nsxt-datasource-transport-zone") %>>
+                            <a href="/docs/providers/nsxt/d/transport_zone.html">nsxt_transport_zone</a>
+                        </li>
+                        <li<%= sidebar_current("docs-nsxt-datasource-switching-profile") %>>
+                            <a href="/docs/providers/nsxt/d/switching_profile.html">nsxt_switching_profile</a>
+                        </li>
+                    </ul>
+                </li>
+
+                <li<%= sidebar_current("docs-nsxt-resource") %>>
+                    <a href="#">Resources</a>
+                    <ul class="nav nav-visible">
+                        <li<%= sidebar_current("docs-nsxt-resource-logical-switch") %>>
+                            <a href="/docs/providers/nsxt/r/logical_switch.html">nsxt_logical_switch</a>
+                        </li>
+                        <li<%= sidebar_current("docs-nsxt-resource-logical-port") %>>
+                            <a href="/docs/providers/nsxt/r/logical_port.html">nsxt_logical_port</a>
+                        </li>
+                        <li<%= sidebar_current("docs-nsxt-resource-logical-tier1-router") %>>
+                            <a href="/docs/providers/nsxt/r/logical_tier1_router.html">nsxt_logical_router</a>
+                        </li>
+                        <li<%= sidebar_current("docs-nsxt-resource-logical-router-downlink-port") %>>
+                            <a href="/docs/providers/nsxt/r/logical_router_downlink_port.html">nsxt_logical_router_downlink_port</a>
+                        </li>
+                        <li<%= sidebar_current("docs-nsxt-resource-nsxt-l4-port-set-ns-service") %>>
+                            <a href="/docs/providers/nsxt/r/l4_port_set_ns_service.html">nsxt_l4_port_set_ns_service</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    <% end %>
+
+    <%= yield %>
+<% end %>

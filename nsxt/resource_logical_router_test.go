@@ -17,8 +17,8 @@ func TestNSXLogicalRouterBasic(t *testing.T) {
 	name := fmt.Sprintf("test-nsx-logical-router")
 	updateName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_logical_router.test"
-        failoverMode := "PREEMPTIVE"
-        haMode := "ACTIVE_STANDBY"
+	failoverMode := "PREEMPTIVE"
+	haMode := "ACTIVE_STANDBY"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },

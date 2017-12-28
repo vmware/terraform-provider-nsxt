@@ -13,6 +13,7 @@ import (
 	"time"
 )
 
+// TODO: consider splitting this resource to overlay_ls and vlan_ls
 func resourceLogicalSwitch() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceLogicalSwitchCreate,
@@ -53,7 +54,8 @@ func resourceLogicalSwitch() *schema.Resource {
 			"replication_mode": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "Replication mode of the Logical Switch",
-				Required:    true,
+				Optional:    true,
+				Default:     "MTEP",
 			},
 			"switching_profile_ids": getSwitchingProfileIdsSchema(),
 			"transport_zone_id": &schema.Schema{
