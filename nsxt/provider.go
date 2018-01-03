@@ -60,7 +60,7 @@ func Provider() terraform.ResourceProvider {
 		ResourcesMap: map[string]*schema.Resource{
 			"nsxt_logical_switch":               resourceLogicalSwitch(),
 			"nsxt_logical_port":                 resourceLogicalPort(),
-			"nsxt_logical_router":               resourceLogicalRouter(),
+			"nsxt_logical_tier1_router":         resourceLogicalTier1Router(),
 			"nsxt_logical_router_downlink_port": resourceLogicalRouterDownLinkPort(),
 			"nsxt_l4_port_set_ns_service":       resourceL4PortSetNsService(),
 		},
