@@ -153,7 +153,7 @@ func resourceLogicalRouterDownLinkPortUpdate(d *schema.ResourceData, m interface
 		Tags:                      tags,
 		LogicalRouterId:           logical_router_id,
 		MacAddress:                mac_address,
-		LinkedLogicalSwitchPortId: makeResourceReference("LogicalSwitch", linked_logical_switch_port_id),
+		LinkedLogicalSwitchPortId: makeResourceReference("LogicalPort", linked_logical_switch_port_id),
 		Subnets:                   subnets,
 		UrpfMode:                  urpf_mode,
 	}

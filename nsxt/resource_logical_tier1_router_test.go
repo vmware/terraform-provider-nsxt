@@ -87,7 +87,6 @@ func testAccNSXLogicalTier1RouterExists(displayName string, resourceName string)
 func testAccNSXLogicalTier1RouterCheckDestroy(state *terraform.State, displayName string) error {
 
 	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
-
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_logical_tier1_router" {
@@ -112,11 +111,16 @@ func testAccNSXLogicalTier1RouterCheckDestroy(state *terraform.State, displayNam
 
 func testAccNSXLogicalTier1RouterCreateTemplate(name string, failoverMode string, haMode string) string {
 	return fmt.Sprintf(`
+data "nsxt_edge_cluster" "EC" {
+     display_name = "edgecluster"
+}
+
 resource "nsxt_logical_tier1_router" "test" {
 display_name = "%s"
 description = "Acceptance Test"
 failover_mode = "%s"
 high_availability_mode = "%s"
+edge_cluster_id = "${data.nsxt_edge_cluster.EC.id}"
 tags = [
     {
 	scope = "scope1"
@@ -131,11 +135,16 @@ tags = [
 
 func testAccNSXLogicalTier1RouterUpdateTemplate(name string, failoverMode string, haMode string) string {
 	return fmt.Sprintf(`
+data "nsxt_edge_cluster" "EC" {
+     display_name = "edgecluster"
+}
+
 resource "nsxt_logical_tier1_router" "test" {
 display_name = "%s"
 description = "Acceptance Test Update"
 failover_mode = "%s"
 high_availability_mode = "%s"
+edge_cluster_id = "${data.nsxt_edge_cluster.EC.id}"
 tags = [
 	{
 	scope = "scope3"

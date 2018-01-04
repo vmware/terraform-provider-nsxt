@@ -55,14 +55,16 @@ func Provider() terraform.ResourceProvider {
 		DataSourcesMap: map[string]*schema.Resource{
 			"nsxt_transport_zone":    dataSourceTransportZone(),
 			"nsxt_switching_profile": dataSourceSwitchingProfile(),
+			"nsxt_logical_tier0_router": dataSourceLogicalTier0Router(),
+			"nsxt_edge_cluster": dataSourceEdgeCluster(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
-			"nsxt_logical_switch":               resourceLogicalSwitch(),
-			"nsxt_logical_port":                 resourceLogicalPort(),
-			"nsxt_logical_tier1_router":         resourceLogicalTier1Router(),
-			"nsxt_logical_router_downlink_port": resourceLogicalRouterDownLinkPort(),
-			"nsxt_l4_port_set_ns_service":       resourceL4PortSetNsService(),
+			"nsxt_logical_switch":               		resourceLogicalSwitch(),
+			"nsxt_logical_port":                 		resourceLogicalPort(),
+			"nsxt_logical_tier1_router":         		resourceLogicalTier1Router(),
+			"nsxt_logical_router_downlink_port": 		resourceLogicalRouterDownLinkPort(),
+			"nsxt_l4_port_set_ns_service":       		resourceL4PortSetNsService(),
 		},
 
 		ConfigureFunc: providerConfigure,

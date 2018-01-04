@@ -41,6 +41,11 @@ func resourceLogicalTier1Router() *schema.Resource {
 				Description: "High availability mode",
 				Optional:    true,
 			},
+			"edge_cluster_id": &schema.Schema{
+				Type:        schema.TypeString,
+				Description: "Edge Cluster Id",
+				Optional:    true,
+			},
 		},
 	}
 }
@@ -56,6 +61,7 @@ func resourceLogicalTier1RouterCreate(d *schema.ResourceData, m interface{}) err
 	firewall_sections := getResourceReferencesFromSchema(d, "firewall_sections")
 	high_availability_mode := d.Get("high_availability_mode").(string)
 	router_type := "TIER1"
+	edge_cluster_id := d.Get("edge_cluster_id").(string)
 	logical_router := manager.LogicalRouter{
 		Description:                     description,
 		DisplayName:                     display_name,
@@ -64,6 +70,7 @@ func resourceLogicalTier1RouterCreate(d *schema.ResourceData, m interface{}) err
 		FirewallSections:                firewall_sections,
 		HighAvailabilityMode:            high_availability_mode,
 		RouterType:                      router_type,
+		EdgeClusterId:				     edge_cluster_id,
 	}
 
 	logical_router, resp, err := nsxClient.LogicalRoutingAndServicesApi.CreateLogicalRouter(nsxClient.Context, logical_router)
@@ -99,19 +106,20 @@ func resourceLogicalTier1RouterRead(d *schema.ResourceData, m interface{}) error
 		return fmt.Errorf("Error during LogicalTier1Router read: %v", err)
 	}
 
-	d.Set("Revision", logical_router.Revision)
-	d.Set("SystemOwned", logical_router.SystemOwned)
-	d.Set("Description", logical_router.Description)
-	d.Set("DisplayName", logical_router.DisplayName)
+	d.Set("revision", logical_router.Revision)
+	d.Set("system_owned", logical_router.SystemOwned)
+	d.Set("description", logical_router.Description)
+	d.Set("display_name", logical_router.DisplayName)
 	setTagsInSchema(d, logical_router.Tags)
-	d.Set("AdvancedConfig", logical_router.AdvancedConfig)
-	d.Set("EdgeClusterId", logical_router.EdgeClusterId)
-	d.Set("FailoverMode", logical_router.FailoverMode)
+	d.Set("advanced_config", logical_router.AdvancedConfig)
+	d.Set("edge_cluster_id", logical_router.EdgeClusterId)
+	d.Set("failover_mode", logical_router.FailoverMode)
 	setResourceReferencesInSchema(d, logical_router.FirewallSections, "firewall_sections")
-	d.Set("FirewallSections", logical_router.FirewallSections)
-	d.Set("HighAvailabilityMode", logical_router.HighAvailabilityMode)
-	d.Set("PreferredEdgeClusterMemberIndex", logical_router.PreferredEdgeClusterMemberIndex)
-	d.Set("RouterType", logical_router.RouterType)
+	d.Set("firewall_sections", logical_router.FirewallSections)
+	d.Set("high_availability_mode", logical_router.HighAvailabilityMode)
+	d.Set("preferred_edge_cluster_member_index", logical_router.PreferredEdgeClusterMemberIndex)
+	d.Set("router_type", logical_router.RouterType)
+	d.Set("resource_type", logical_router.ResourceType)
 
 	return nil
 }
@@ -132,6 +140,8 @@ func resourceLogicalTier1RouterUpdate(d *schema.ResourceData, m interface{}) err
 	failover_mode := d.Get("failover_mode").(string)
 	firewall_sections := getResourceReferencesFromSchema(d, "firewall_sections")
 	high_availability_mode := d.Get("high_availability_mode").(string)
+	router_type := "TIER1"
+	edge_cluster_id := d.Get("edge_cluster_id").(string)
 	logical_router := manager.LogicalRouter{
 		Revision:                        revision,
 		Description:                     description,
@@ -140,12 +150,13 @@ func resourceLogicalTier1RouterUpdate(d *schema.ResourceData, m interface{}) err
 		FailoverMode:                    failover_mode,
 		FirewallSections:                firewall_sections,
 		HighAvailabilityMode:            high_availability_mode,
+		RouterType:                      router_type,
+		EdgeClusterId:				     edge_cluster_id,
 	}
-
 	logical_router, resp, err := nsxClient.LogicalRoutingAndServicesApi.UpdateLogicalRouter(nsxClient.Context, id, logical_router)
 
 	if err != nil || resp.StatusCode == http.StatusNotFound {
-		return fmt.Errorf("Error during LogicalTier1Router update: %v", err)
+		return fmt.Errorf("Error during LogicalTier1Router update error: %v, resp %+v", err, resp)
 	}
 
 	return resourceLogicalTier1RouterRead(d, m)
