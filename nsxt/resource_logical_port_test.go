@@ -17,6 +17,7 @@ func TestNSXLogicalPortBasic(t *testing.T) {
 	portName := fmt.Sprintf("test-nsx-logical-port")
 	updatePortName := fmt.Sprintf("%s-update", portName)
 	testResourceName := "nsxt_logical_port.test"
+	transportZoneName := OverlayTransportZoneNamePrefix
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -26,7 +27,7 @@ func TestNSXLogicalPortBasic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXLogicalPortCreateTemplate(portName),
+				Config: testAccNSXLogicalPortCreateTemplate(portName, transportZoneName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXLogicalPortExists(portName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", portName),
@@ -36,7 +37,7 @@ func TestNSXLogicalPortBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXLogicalPortUpdateTemplate(updatePortName),
+				Config: testAccNSXLogicalPortUpdateTemplate(updatePortName, transportZoneName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXLogicalPortExists(updatePortName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatePortName),
@@ -106,10 +107,10 @@ func testAccNSXLogicalPortCheckDestroy(state *terraform.State, display_name stri
 	return nil
 }
 
-func testAccNSXLogicalPortCreateTemplate(portName string) string {
+func testAccNSXLogicalPortCreateTemplate(portName string, transportZoneName string) string {
 	return fmt.Sprintf(`
 data "nsxt_transport_zone" "TZ1" {
-     display_name = "1-transportzone-"
+     display_name = "%s"
 }
 
 resource "nsxt_logical_switch" "test" {
@@ -130,13 +131,13 @@ tags = [
     	tag = "tag1"
     },
 ]
-}`, portName)
+}`, transportZoneName, portName)
 }
 
-func testAccNSXLogicalPortUpdateTemplate(portUpdatedName string) string {
+func testAccNSXLogicalPortUpdateTemplate(portUpdatedName string, transportZoneName string) string {
 	return fmt.Sprintf(`
 data "nsxt_transport_zone" "TZ1" {
-     display_name = "1-transportzone-"
+     display_name = "%s"
 }
 
 resource "nsxt_logical_switch" "test" {
@@ -161,5 +162,5 @@ tags = [
     	tag = "tag2"
     },
 ]
-}`, portUpdatedName)
+}`, transportZoneName, portUpdatedName)
 }

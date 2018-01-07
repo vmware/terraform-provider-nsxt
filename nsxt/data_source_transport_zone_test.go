@@ -13,7 +13,7 @@ import (
 )
 
 func TestNSXTransportZoneBasic(t *testing.T) {
-	transportZoneName := "transportzone2"
+	transportZoneName := VlanTransportZoneName
 	testResourceName := "data.nsxt_transport_zone.test"
 
 	resource.Test(t, resource.TestCase{
