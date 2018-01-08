@@ -63,14 +63,14 @@ func resourceLogicalTier1RouterCreate(d *schema.ResourceData, m interface{}) err
 	router_type := "TIER1"
 	edge_cluster_id := d.Get("edge_cluster_id").(string)
 	logical_router := manager.LogicalRouter{
-		Description:                     description,
-		DisplayName:                     display_name,
-		Tags:                            tags,
-		FailoverMode:                    failover_mode,
-		FirewallSections:                firewall_sections,
-		HighAvailabilityMode:            high_availability_mode,
-		RouterType:                      router_type,
-		EdgeClusterId:				     edge_cluster_id,
+		Description:          description,
+		DisplayName:          display_name,
+		Tags:                 tags,
+		FailoverMode:         failover_mode,
+		FirewallSections:     firewall_sections,
+		HighAvailabilityMode: high_availability_mode,
+		RouterType:           router_type,
+		EdgeClusterId:        edge_cluster_id,
 	}
 
 	logical_router, resp, err := nsxClient.LogicalRoutingAndServicesApi.CreateLogicalRouter(nsxClient.Context, logical_router)
@@ -143,15 +143,15 @@ func resourceLogicalTier1RouterUpdate(d *schema.ResourceData, m interface{}) err
 	router_type := "TIER1"
 	edge_cluster_id := d.Get("edge_cluster_id").(string)
 	logical_router := manager.LogicalRouter{
-		Revision:                        revision,
-		Description:                     description,
-		DisplayName:                     display_name,
-		Tags:                            tags,
-		FailoverMode:                    failover_mode,
-		FirewallSections:                firewall_sections,
-		HighAvailabilityMode:            high_availability_mode,
-		RouterType:                      router_type,
-		EdgeClusterId:				     edge_cluster_id,
+		Revision:             revision,
+		Description:          description,
+		DisplayName:          display_name,
+		Tags:                 tags,
+		FailoverMode:         failover_mode,
+		FirewallSections:     firewall_sections,
+		HighAvailabilityMode: high_availability_mode,
+		RouterType:           router_type,
+		EdgeClusterId:        edge_cluster_id,
 	}
 	logical_router, resp, err := nsxClient.LogicalRoutingAndServicesApi.UpdateLogicalRouter(nsxClient.Context, id, logical_router)
 

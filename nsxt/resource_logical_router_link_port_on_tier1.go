@@ -40,7 +40,7 @@ func resourceLogicalRouterLinkPortOnTier1() *schema.Resource {
 				Description: "Identifier for port on logical router to connect to",
 				Required:    true,
 				ForceNew:    true,
-        	},
+			},
 		},
 	}
 }

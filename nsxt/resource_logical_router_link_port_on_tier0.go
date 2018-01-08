@@ -38,7 +38,7 @@ func resourceLogicalRouterLinkPortOnTier0() *schema.Resource {
 			"linked_logical_router_port_id": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "Identifier for port on logical router to connect to",
-        		Computed:    true,
+				Computed:    true,
 			},
 		},
 	}
