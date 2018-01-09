@@ -141,6 +141,8 @@ func resourceLogicalSwitchCreate(d *schema.ResourceData, m interface{}) error {
 	if verify_realization {
 
 		for {
+			time.Sleep(time.Second)
+
 			state, resp, err := nsxClient.LogicalSwitchingApi.GetLogicalSwitchState(nsxClient.Context, logical_switch.Id)
 
 			if err != nil {
@@ -164,7 +166,6 @@ func resourceLogicalSwitchCreate(d *schema.ResourceData, m interface{}) error {
 				break
 			}
 
-			time.Sleep(time.Second)
 		}
 	}
 

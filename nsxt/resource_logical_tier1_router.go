@@ -5,6 +5,7 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/manager"
+	"log"
 	"net/http"
 )
 
@@ -50,6 +51,16 @@ func resourceLogicalTier1Router() *schema.Resource {
 	}
 }
 
+func resourceLogicalTier1RouterCreateRollback(nsxClient *api.APIClient, id string) {
+	log.Printf("[ERROR] Rollback router %d creation", id)
+
+	localVarOptionals := make(map[string]interface{})
+	_, err := nsxClient.LogicalRoutingAndServicesApi.DeleteLogicalRouter(nsxClient.Context, id, localVarOptionals)
+	if err != nil {
+		log.Printf("[ERROR] Rollback failed!")
+	}
+}
+
 func resourceLogicalTier1RouterCreate(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
@@ -82,6 +93,23 @@ func resourceLogicalTier1RouterCreate(d *schema.ResourceData, m interface{}) err
 	if resp.StatusCode != http.StatusCreated {
 		return fmt.Errorf("Unexpected status returned: %s", resp.StatusCode)
 	}
+
+	// Add advertisement config
+	// TODO - make advertisement parameters configurable
+	adv_config := manager.AdvertisementConfig{
+		Enabled:                     true,
+		AdvertiseNsxConnectedRoutes: true,
+		AdvertiseStaticRoutes:       true,
+		AdvertiseNatRoutes:          true,
+	}
+
+	_, resp, err1 := nsxClient.LogicalRoutingAndServicesApi.UpdateAdvertisementConfig(nsxClient.Context, logical_router.Id, adv_config)
+
+	if err1 != nil {
+		resourceLogicalTier1RouterCreateRollback(nsxClient, logical_router.Id)
+		return fmt.Errorf("Error while setting config advertisement state: %v", err)
+	}
+
 	d.SetId(logical_router.Id)
 
 	return resourceLogicalTier1RouterRead(d, m)
