@@ -8,7 +8,7 @@ description: |-
 
 # nsxt_transport_zone
 
-Provides infromation about transport zones (TZ) configured on NSX-T manager.
+Provides information about transport zones (TZ) configured on NSX-T manager.
 
 ## Example Usage
 
@@ -22,8 +22,14 @@ data "nsxt_transport_zone" "TZ1" {
 
 * `id` - (Optional) The ID of Transport Zone to retrieve
 
-* `display_name` - (Optional) Display Name of the Transport Zone to retrieve
+* `display_name` - (Optional) Display Name prefix of the Transport Zone to retrieve
 
 ## Attributes Reference
 
-Same as Argument Reference
+In addition to arguments listed above, the following attributes are exported:
+
+* `description` - Description of the transport zone.
+
+* `host_switch_name` - The name of the host switch that was installed on the NSX edge.
+
+* `transport_type` - The transport type of this transport zone.

@@ -8,7 +8,7 @@ description: |-
 
 # nsxt_switching_profile
 
-Provides infromation about switching profiles configured on NSX-T manager.
+Provides information about switching profiles configured on NSX-T manager.
 
 ## Example Usage
 
@@ -26,4 +26,8 @@ data "nsxt_switching_profile" "profile1" {
 
 ## Attributes Reference
 
-Same as Argument Reference
+In addition to arguments listed above, the following attributes are exported:
+
+* `resource_type` - The resource type representing the specific type of this profile.
+
+* `system_owned` - A boolean that indicates whether this resource is system-owned and thus read-only.
