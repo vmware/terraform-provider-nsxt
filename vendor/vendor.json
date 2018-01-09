@@ -3,10 +3,22 @@
 	"ignore": "test",
 	"package": [
 		{
+			"checksumSHA1": "mrz/kicZiUaHxkyfvC/DyQcr8Do=",
+			"path": "github.com/davecgh/go-spew/spew",
+			"revision": "ecdeabc65495df2dec95d7c4a4c3e021903035e5",
+			"revisionTime": "2017-10-02T20:02:53Z"
+		},
+		{
 			"checksumSHA1": "cdOCt0Yb+hdErz8NAQqayxPmRsY=",
 			"path": "github.com/hashicorp/errwrap",
 			"revision": "7554cd9344cec97297fa6649b055a8c98c2a1e55",
 			"revisionTime": "2014-10-28T05:47:10Z"
+		},
+		{
+			"checksumSHA1": "wCKbbnwvVEoKAE5TWunloLhErm4=",
+			"path": "github.com/hashicorp/go-getter",
+			"revision": "994f50a6f071b07cfbea9eca9618c9674091ca51",
+			"revisionTime": "2017-12-04T19:28:26Z"
 		},
 		{
 			"checksumSHA1": "g7uHECbzuaWwdxvwoyxBwgeERPk=",
