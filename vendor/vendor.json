@@ -1,0 +1,57 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "uaoY/P9we+9GauKykok1N4ZFnhE=",
+			"path": "fmt",
+			"revision": ""
+		},
+		{
+			"checksumSHA1": "h8cCJU5Nx31Xg63TpXSNoTqz2a0=",
+			"path": "github.com/hashicorp/terraform/helper/resource",
+			"revision": "f69f7e623ba01feafb7b7f39cf79e56d9ca730e6",
+			"revisionTime": "2017-06-09T11:14:31Z"
+		},
+		{
+			"checksumSHA1": "bgaeB6ivKIK5H+7JCsp7w8aAdAg=",
+			"path": "github.com/hashicorp/terraform/helper/schema",
+			"revision": "f69f7e623ba01feafb7b7f39cf79e56d9ca730e6",
+			"revisionTime": "2017-06-09T11:14:31Z"
+		},
+		{
+			"checksumSHA1": "TROrZEEUVA9U2T2MmqI70zj0dRU=",
+			"path": "github.com/vmware/go-vmware-nsxt",
+			"revision": "c0bfaeb37ecc09360572f60f04f8189a8b4481d8",
+			"revisionTime": "2017-12-18T22:28:35Z"
+		},
+		{
+			"checksumSHA1": "3rgMMUzGNs4rdTiTWqWKOYqYSJw=",
+			"path": "github.com/vmware/go-vmware-nsxt/common",
+			"revision": "c0bfaeb37ecc09360572f60f04f8189a8b4481d8",
+			"revisionTime": "2017-12-18T22:28:35Z"
+		},
+		{
+			"checksumSHA1": "+msIhRDE6o7uVN/Q8KXYytjCia8=",
+			"path": "github.com/vmware/go-vmware-nsxt/manager",
+			"revision": "c0bfaeb37ecc09360572f60f04f8189a8b4481d8",
+			"revisionTime": "2017-12-18T22:28:35Z"
+		},
+		{
+			"checksumSHA1": "dLI61JazvsFBhufpTRFG4PvwB9s=",
+			"path": "net/http",
+			"revision": ""
+		},
+		{
+			"checksumSHA1": "BlMhw951Zq2qGykslifj757d0+8=",
+			"path": "strings",
+			"revision": ""
+		},
+		{
+			"checksumSHA1": "ORFHl6nc331r7zRAorp3oI7s+9o=",
+			"path": "testing",
+			"revision": ""
+		}
+	],
+	"rootPath": "github.com/vmware/terraform-provider-nsxt"
+}
