@@ -34,12 +34,14 @@ func resourceLogicalTier1Router() *schema.Resource {
 			"failover_mode": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "This failover mode determines, whether the preferred service router instance for given logical router will preempt the peer. Note - It can be specified if and only if logical router is ACTIVE_STANDBY and NON_PREEMPTIVE mode is supported only for a Tier1 logical router. For Tier0 ACTIVE_STANDBY logical router, failover mode is always PREEMPTIVE, i.e. once the preferred node comes up after a failure, it will preempt the peer causing failover from current active to preferred node. For ACTIVE_ACTIVE logical routers, this field must not be populated",
+				Default:     "PREEMPTIVE",
 				Optional:    true,
 			},
 			"firewall_sections": getResourceReferencesSchema(false, true),
 			"high_availability_mode": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "High availability mode",
+				Default:     "ACTIVE_STANDBY",
 				Optional:    true,
 			},
 			"edge_cluster_id": &schema.Schema{
