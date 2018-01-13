@@ -41,7 +41,8 @@ func testNSXLogicalSwitchBasic(t *testing.T, verifyRealization bool) {
 
 	switchName := fmt.Sprintf("test-nsx-logical-switch-overlay")
 	updateSwitchName := fmt.Sprintf("%s-update", switchName)
-	testResourceName := "nsxt_logical_switch.test"
+        resourceName := "testoverlay"
+        testResourceName := fmt.Sprintf("nsxt_logical_switch.%s", resourceName)
 	novlan := "0"
 	replicationMode := "MTEP"
 	transportZoneName := OverlayTransportZoneNamePrefix
@@ -54,11 +55,11 @@ func testNSXLogicalSwitchBasic(t *testing.T, verifyRealization bool) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config:      testAccNSXLogicalSwitchNoTZIDTemplate(switchName),
+				Config: testAccNSXLogicalSwitchNoTZIDTemplate(switchName),
 				ExpectError: regexp.MustCompile(`required field is not set`),
 			},
 			{
-				Config: testAccNSXLogicalSwitchCreateTemplate(switchName, transportZoneName, novlan, replicationMode, verifyRealization),
+				Config: testAccNSXLogicalSwitchCreateTemplate(resourceName, switchName, transportZoneName, novlan, replicationMode, verifyRealization),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXLogicalSwitchExists(switchName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", switchName),
@@ -70,7 +71,7 @@ func testNSXLogicalSwitchBasic(t *testing.T, verifyRealization bool) {
 				),
 			},
 			{
-				Config: testAccNSXLogicalSwitchUpdateTemplate(updateSwitchName, transportZoneName, novlan, replicationMode),
+				Config: testAccNSXLogicalSwitchUpdateTemplate(resourceName, updateSwitchName, transportZoneName, novlan, replicationMode),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXLogicalSwitchExists(updateSwitchName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updateSwitchName),
@@ -87,14 +88,16 @@ func testNSXLogicalSwitchBasic(t *testing.T, verifyRealization bool) {
 
 func testNSXLogicalSwitchVlan(t *testing.T, verifyRealization bool) {
 
-	switchName := fmt.Sprintf("test-nsx-logical-switch-vlan")
+	switchName := "test-nsx-logical-switch-vlan"
 	updateSwitchName := fmt.Sprintf("%s-update", switchName)
 	transportZoneName := VlanTransportZoneName
-	testResourceName := "nsxt_logical_switch.test"
+        resourceName := "testvlan"
+	testResourceName := fmt.Sprintf("nsxt_logical_switch.%s", resourceName)
 
 	origvlan := "1"
 	updatedvlan := "2"
 	replicationMode := ""
+        // TODO - add verification that replication mode can not be set for vlan LS
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -104,11 +107,11 @@ func testNSXLogicalSwitchVlan(t *testing.T, verifyRealization bool) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config:      testAccNSXLogicalSwitchNoVlanTemplate(switchName, transportZoneName),
-				ExpectError: regexp.MustCompile(`required field is not set`),
+				Config: testAccNSXLogicalSwitchNoVlanTemplate(switchName, transportZoneName),
+				ExpectError: regexp.MustCompile(`Error during LogicalSwitch create`),
 			},
 			{
-				Config: testAccNSXLogicalSwitchCreateTemplate(switchName, transportZoneName, origvlan, replicationMode, verifyRealization),
+				Config: testAccNSXLogicalSwitchCreateTemplate(resourceName, switchName, transportZoneName, origvlan, replicationMode, verifyRealization),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXLogicalSwitchExists(switchName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", switchName),
@@ -118,7 +121,7 @@ func testNSXLogicalSwitchVlan(t *testing.T, verifyRealization bool) {
 				),
 			},
 			{
-				Config: testAccNSXLogicalSwitchUpdateTemplate(updateSwitchName, transportZoneName, updatedvlan, replicationMode),
+				Config: testAccNSXLogicalSwitchUpdateTemplate(resourceName, updateSwitchName, transportZoneName, updatedvlan, replicationMode),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXLogicalSwitchExists(updateSwitchName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updateSwitchName),
@@ -191,7 +194,7 @@ func testAccNSXLogicalSwitchCheckDestroy(state *terraform.State, display_name st
 
 func testAccNSXLogicalSwitchNoTZIDTemplate(switchName string) string {
 	return fmt.Sprintf(`
-resource "nsxt_logical_switch" "test" {
+resource "nsxt_logical_switch" "error" {
 display_name = "%s"
 admin_state = "UP"
 description = "Acceptance Test"
@@ -205,7 +208,7 @@ data "nsxt_transport_zone" "TZ1" {
      display_name = "%s"
 }
 
-resource "nsxt_logical_switch" "test" {
+resource "nsxt_logical_switch" "error" {
 display_name = "%s"
 admin_state = "UP"
 description = "Acceptance Test"
@@ -213,13 +216,13 @@ transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
 }`, transportZoneName, switchName)
 }
 
-func testAccNSXLogicalSwitchCreateTemplate(switchName string, transportZoneName string, vlan string, replicationMode string, verifyRealization bool) string {
+func testAccNSXLogicalSwitchCreateTemplate(resourceName string, switchName string, transportZoneName string, vlan string, replicationMode string, verifyRealization bool) string {
 	return fmt.Sprintf(`
 data "nsxt_transport_zone" "TZ1" {
      display_name = "%s"
 }
 
-resource "nsxt_logical_switch" "test" {
+resource "nsxt_logical_switch" "%s" {
 display_name = "%s"
 admin_state = "UP"
 description = "Acceptance Test"
@@ -233,16 +236,16 @@ tags = [
         tag = "tag1"
     }
 ]
-}`, transportZoneName, switchName, replicationMode, vlan, verifyRealization)
+}`, transportZoneName, resourceName, switchName, replicationMode, vlan, verifyRealization)
 }
 
-func testAccNSXLogicalSwitchUpdateTemplate(switchUpdateName string, transportZoneName string, vlan string, replicationMode string) string {
+func testAccNSXLogicalSwitchUpdateTemplate(resourceName string, switchUpdateName string, transportZoneName string, vlan string, replicationMode string) string {
 	return fmt.Sprintf(`
 data "nsxt_transport_zone" "TZ1" {
      display_name = "%s"
 }
 
-resource "nsxt_logical_switch" "test" {
+resource "nsxt_logical_switch" "%s" {
 display_name = "%s"
 admin_state = "UP"
 description = "Acceptance Test Update"
@@ -259,5 +262,5 @@ tags = [
     	tag = "tag2"
     },
 ]
-}`, transportZoneName, switchUpdateName, replicationMode, vlan)
+}`, transportZoneName, resourceName, switchUpdateName, replicationMode, vlan)
 }

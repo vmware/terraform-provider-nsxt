@@ -71,7 +71,6 @@ func resourceLogicalTier1RouterCreate(d *schema.ResourceData, m interface{}) err
 	display_name := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
 	failover_mode := d.Get("failover_mode").(string)
-	firewall_sections := getResourceReferencesFromSchema(d, "firewall_sections")
 	high_availability_mode := d.Get("high_availability_mode").(string)
 	router_type := "TIER1"
 	edge_cluster_id := d.Get("edge_cluster_id").(string)
@@ -80,7 +79,6 @@ func resourceLogicalTier1RouterCreate(d *schema.ResourceData, m interface{}) err
 		DisplayName:          display_name,
 		Tags:                 tags,
 		FailoverMode:         failover_mode,
-		FirewallSections:     firewall_sections,
 		HighAvailabilityMode: high_availability_mode,
 		RouterType:           router_type,
 		EdgeClusterId:        edge_cluster_id,
@@ -145,7 +143,6 @@ func resourceLogicalTier1RouterRead(d *schema.ResourceData, m interface{}) error
 	d.Set("edge_cluster_id", logical_router.EdgeClusterId)
 	d.Set("failover_mode", logical_router.FailoverMode)
 	setResourceReferencesInSchema(d, logical_router.FirewallSections, "firewall_sections")
-	d.Set("firewall_sections", logical_router.FirewallSections)
 	d.Set("high_availability_mode", logical_router.HighAvailabilityMode)
 	d.Set("preferred_edge_cluster_member_index", logical_router.PreferredEdgeClusterMemberIndex)
 	d.Set("router_type", logical_router.RouterType)
@@ -168,7 +165,6 @@ func resourceLogicalTier1RouterUpdate(d *schema.ResourceData, m interface{}) err
 	display_name := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
 	failover_mode := d.Get("failover_mode").(string)
-	firewall_sections := getResourceReferencesFromSchema(d, "firewall_sections")
 	high_availability_mode := d.Get("high_availability_mode").(string)
 	router_type := "TIER1"
 	edge_cluster_id := d.Get("edge_cluster_id").(string)
@@ -178,7 +174,6 @@ func resourceLogicalTier1RouterUpdate(d *schema.ResourceData, m interface{}) err
 		DisplayName:          display_name,
 		Tags:                 tags,
 		FailoverMode:         failover_mode,
-		FirewallSections:     firewall_sections,
 		HighAvailabilityMode: high_availability_mode,
 		RouterType:           router_type,
 		EdgeClusterId:        edge_cluster_id,
