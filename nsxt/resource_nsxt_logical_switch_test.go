@@ -41,8 +41,8 @@ func testNSXLogicalSwitchBasic(t *testing.T, verifyRealization bool) {
 
 	switchName := fmt.Sprintf("test-nsx-logical-switch-overlay")
 	updateSwitchName := fmt.Sprintf("%s-update", switchName)
-        resourceName := "testoverlay"
-        testResourceName := fmt.Sprintf("nsxt_logical_switch.%s", resourceName)
+	resourceName := "testoverlay"
+	testResourceName := fmt.Sprintf("nsxt_logical_switch.%s", resourceName)
 	novlan := "0"
 	replicationMode := "MTEP"
 	transportZoneName := OverlayTransportZoneNamePrefix
@@ -55,7 +55,7 @@ func testNSXLogicalSwitchBasic(t *testing.T, verifyRealization bool) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXLogicalSwitchNoTZIDTemplate(switchName),
+				Config:      testAccNSXLogicalSwitchNoTZIDTemplate(switchName),
 				ExpectError: regexp.MustCompile(`required field is not set`),
 			},
 			{
@@ -91,13 +91,13 @@ func testNSXLogicalSwitchVlan(t *testing.T, verifyRealization bool) {
 	switchName := "test-nsx-logical-switch-vlan"
 	updateSwitchName := fmt.Sprintf("%s-update", switchName)
 	transportZoneName := VlanTransportZoneName
-        resourceName := "testvlan"
+	resourceName := "testvlan"
 	testResourceName := fmt.Sprintf("nsxt_logical_switch.%s", resourceName)
 
 	origvlan := "1"
 	updatedvlan := "2"
 	replicationMode := ""
-        // TODO - add verification that replication mode can not be set for vlan LS
+	// TODO - add verification that replication mode can not be set for vlan LS
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -107,7 +107,7 @@ func testNSXLogicalSwitchVlan(t *testing.T, verifyRealization bool) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXLogicalSwitchNoVlanTemplate(switchName, transportZoneName),
+				Config:      testAccNSXLogicalSwitchNoVlanTemplate(switchName, transportZoneName),
 				ExpectError: regexp.MustCompile(`Error during LogicalSwitch create`),
 			},
 			{

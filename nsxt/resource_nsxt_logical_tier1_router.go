@@ -106,7 +106,7 @@ func resourceLogicalTier1RouterReadAdv(d *schema.ResourceData, nsxClient *api.AP
 
 func resourceLogicalTier1RouterCreateAdv(d *schema.ResourceData, nsxClient *api.APIClient, id string) error {
 	enable_router_advertisement := d.Get("enable_router_advertisement").(bool)
-	if enable_router_advertisement{
+	if enable_router_advertisement {
 		adv_connected := d.Get("advertise_connected_routes").(bool)
 		adv_static := d.Get("advertise_static_routes").(bool)
 		adv_nat := d.Get("advertise_nat_routes").(bool)
