@@ -3,28 +3,10 @@
 	"ignore": "test",
 	"package": [
 		{
-			"checksumSHA1": "mrz/kicZiUaHxkyfvC/DyQcr8Do=",
-			"path": "github.com/davecgh/go-spew/spew",
-			"revision": "ecdeabc65495df2dec95d7c4a4c3e021903035e5",
-			"revisionTime": "2017-10-02T20:02:53Z"
-		},
-		{
-			"checksumSHA1": "cdOCt0Yb+hdErz8NAQqayxPmRsY=",
-			"path": "github.com/hashicorp/errwrap",
-			"revision": "7554cd9344cec97297fa6649b055a8c98c2a1e55",
-			"revisionTime": "2014-10-28T05:47:10Z"
-		},
-		{
-			"checksumSHA1": "wCKbbnwvVEoKAE5TWunloLhErm4=",
-			"path": "github.com/hashicorp/go-getter",
-			"revision": "994f50a6f071b07cfbea9eca9618c9674091ca51",
-			"revisionTime": "2017-12-04T19:28:26Z"
-		},
-		{
-			"checksumSHA1": "g7uHECbzuaWwdxvwoyxBwgeERPk=",
-			"path": "github.com/hashicorp/go-multierror",
-			"revision": "b7773ae218740a7be65057fc60b366a49b538a44",
-			"revisionTime": "2017-12-04T18:29:08Z"
+			"checksumSHA1": "LQDpyHjYsIHT+w5v2qqc/26lTGA=",
+			"path": "github.com/hashicorp/terraform",
+			"revision": "a42fdb08a43c7fabb8898fe8c286b793bbaa4835",
+			"revisionTime": "2017-11-30T19:00:59Z"
 		},
 		{
 			"checksumSHA1": "h8cCJU5Nx31Xg63TpXSNoTqz2a0=",
@@ -37,18 +19,6 @@
 			"path": "github.com/hashicorp/terraform/helper/schema",
 			"revision": "f69f7e623ba01feafb7b7f39cf79e56d9ca730e6",
 			"revisionTime": "2017-06-09T11:14:31Z"
-		},
-		{
-			"checksumSHA1": "v9y1OJ6NpBUhK4U8V4mmYUFBU4Q=",
-			"path": "github.com/mitchellh/iochan",
-			"revision": "87b45ffd0e9581375c491fef3d32130bb15c5bd7",
-			"revisionTime": "2015-05-29T22:44:32Z"
-		},
-		{
-			"checksumSHA1": "gILp4IL+xwXLH6tJtRLrnZ56F24=",
-			"path": "github.com/mitchellh/mapstructure",
-			"revision": "06020f85339e21b2478f756a78e295255ffa4d6a",
-			"revisionTime": "2017-10-17T17:18:08Z"
 		},
 		{
 			"checksumSHA1": "TROrZEEUVA9U2T2MmqI70zj0dRU=",
