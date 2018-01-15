@@ -21,10 +21,52 @@
 			"revisionTime": "2017-06-09T11:14:31Z"
 		},
 		{
-			"checksumSHA1": "TROrZEEUVA9U2T2MmqI70zj0dRU=",
+			"checksumSHA1": "DqaoG++NXRCfvH/OloneLWrM+3k=",
+			"path": "github.com/hashicorp/terraform/plugin",
+			"revision": "a42fdb08a43c7fabb8898fe8c286b793bbaa4835",
+			"revisionTime": "2017-11-30T19:00:59Z"
+		},
+		{
+			"checksumSHA1": "scMviGf/4JlTphkoPF/anN4SUTs=",
 			"path": "github.com/vmware/go-vmware-nsxt",
-			"revision": "c0bfaeb37ecc09360572f60f04f8189a8b4481d8",
-			"revisionTime": "2017-12-18T22:28:35Z"
+			"revision": "96b140e11f9b2e77c8a2e8ba557981e35fd5332a",
+			"revisionTime": "2018-01-07T08:12:33Z"
+		},
+		{
+			"checksumSHA1": "o0gNsuAZWWIs1RY7hh5cB5j85q4=",
+			"path": "github.com/vmware/go-vmware-nsxt/aaa",
+			"revision": "96b140e11f9b2e77c8a2e8ba557981e35fd5332a",
+			"revisionTime": "2018-01-07T08:12:33Z"
+		},
+		{
+			"checksumSHA1": "+r4eiuAQUVXvXzt3VLuWPOQiJJQ=",
+			"path": "github.com/vmware/go-vmware-nsxt/administration",
+			"revision": "96b140e11f9b2e77c8a2e8ba557981e35fd5332a",
+			"revisionTime": "2018-01-07T08:12:33Z"
+		},
+		{
+			"checksumSHA1": "m7nBJOMdkH2kJfBsQ9Iudk+3gA8=",
+			"path": "github.com/vmware/go-vmware-nsxt/aggregation",
+			"revision": "96b140e11f9b2e77c8a2e8ba557981e35fd5332a",
+			"revisionTime": "2018-01-07T08:12:33Z"
+		},
+		{
+			"checksumSHA1": "SCg8gXmVKhDm7UYv8rtigsOfKCs=",
+			"path": "github.com/vmware/go-vmware-nsxt/apiservice",
+			"revision": "96b140e11f9b2e77c8a2e8ba557981e35fd5332a",
+			"revisionTime": "2018-01-07T08:12:33Z"
+		},
+		{
+			"checksumSHA1": "13p9mLMyigsoe3LqxGHJZ4wXkus=",
+			"path": "github.com/vmware/go-vmware-nsxt/appdiscovery",
+			"revision": "96b140e11f9b2e77c8a2e8ba557981e35fd5332a",
+			"revisionTime": "2018-01-07T08:12:33Z"
+		},
+		{
+			"checksumSHA1": "5J+0DJ6LnkxxguLV/cMMlZwo868=",
+			"path": "github.com/vmware/go-vmware-nsxt/association",
+			"revision": "96b140e11f9b2e77c8a2e8ba557981e35fd5332a",
+			"revisionTime": "2018-01-07T08:12:33Z"
 		},
 		{
 			"checksumSHA1": "3rgMMUzGNs4rdTiTWqWKOYqYSJw=",
@@ -33,10 +75,58 @@
 			"revisionTime": "2017-12-18T22:28:35Z"
 		},
 		{
+			"checksumSHA1": "2n64AG0KYXCVtZJ+IxBVChm2aXA=",
+			"path": "github.com/vmware/go-vmware-nsxt/errorresolver",
+			"revision": "96b140e11f9b2e77c8a2e8ba557981e35fd5332a",
+			"revisionTime": "2018-01-07T08:12:33Z"
+		},
+		{
+			"checksumSHA1": "Cl+aNhQR/+EJ6grxcfrhFKzcM/A=",
+			"path": "github.com/vmware/go-vmware-nsxt/licensing",
+			"revision": "96b140e11f9b2e77c8a2e8ba557981e35fd5332a",
+			"revisionTime": "2018-01-07T08:12:33Z"
+		},
+		{
 			"checksumSHA1": "+msIhRDE6o7uVN/Q8KXYytjCia8=",
 			"path": "github.com/vmware/go-vmware-nsxt/manager",
 			"revision": "c0bfaeb37ecc09360572f60f04f8189a8b4481d8",
 			"revisionTime": "2017-12-18T22:28:35Z"
+		},
+		{
+			"checksumSHA1": "NVOWbWEQajRsbUIEwdoTyDP80AM=",
+			"path": "github.com/vmware/go-vmware-nsxt/monitoring",
+			"revision": "96b140e11f9b2e77c8a2e8ba557981e35fd5332a",
+			"revisionTime": "2018-01-07T08:12:33Z"
+		},
+		{
+			"checksumSHA1": "nA0ZaT+zNkkLZ1JcW8jP2wRgmJQ=",
+			"path": "github.com/vmware/go-vmware-nsxt/normalization",
+			"revision": "96b140e11f9b2e77c8a2e8ba557981e35fd5332a",
+			"revisionTime": "2018-01-07T08:12:33Z"
+		},
+		{
+			"checksumSHA1": "m3RvB7bMQxmG3BLfKhNPkb5JVgg=",
+			"path": "github.com/vmware/go-vmware-nsxt/policy",
+			"revision": "96b140e11f9b2e77c8a2e8ba557981e35fd5332a",
+			"revisionTime": "2018-01-07T08:12:33Z"
+		},
+		{
+			"checksumSHA1": "ueMTVEpMh1RpBamHpYkWBAlydX4=",
+			"path": "github.com/vmware/go-vmware-nsxt/trust",
+			"revision": "96b140e11f9b2e77c8a2e8ba557981e35fd5332a",
+			"revisionTime": "2018-01-07T08:12:33Z"
+		},
+		{
+			"checksumSHA1": "+cZCzX3FDyXrRRDfi+w+cjKTdKw=",
+			"path": "github.com/vmware/go-vmware-nsxt/upgrade",
+			"revision": "96b140e11f9b2e77c8a2e8ba557981e35fd5332a",
+			"revisionTime": "2018-01-07T08:12:33Z"
+		},
+		{
+			"checksumSHA1": "HmVJmSDDCwsPJQrp7ml2gXb2szg=",
+			"path": "golang.org/x/oauth2",
+			"revision": "13449ad91cb26cb47661c1b080790392170385fd",
+			"revisionTime": "2017-06-22T15:12:08Z"
 		}
 	],
 	"rootPath": "github.com/vmware/terraform-provider-nsxt"

@@ -13,7 +13,6 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-        //"io/ioutil"
 )
 
 // Linger please
@@ -718,21 +717,14 @@ func (a *LogicalRoutingAndServicesApiService) CreateLogicalRouterLinkPortOnTier0
 	if err != nil {
 		return successPayload, nil, err
 	}
-        // DEBUG ADIT
+
 	localVarHttpResponse, err := a.client.callAPI(r)
-        //bodyBytes, err2 := ioutil.ReadAll(localVarHttpResponse.Body)
-        //bodyString := string(bodyBytes)
-        //fmt.Printf("DEBUG ADIT respons body %s", bodyString)
-        //fmt.Errorf("DEBUG ADIT respons body %s (%s)", bodyString, err2)
 	if err != nil || localVarHttpResponse == nil {
-		return successPayload, localVarHttpResponse, nil
-                //fmt.Errorf("DEBUG ADIT respons body %s (%s)", bodyString, err2)
+		return successPayload, localVarHttpResponse, err
 	}
 	defer localVarHttpResponse.Body.Close()
 	if localVarHttpResponse.StatusCode >= 300 {
 		return successPayload, localVarHttpResponse, reportError(localVarHttpResponse.Status)
-                //fmt.Errorf("DEBUG ADIT respons body %s (%s) request %+v", bodyString, err2, localVarPostBody)
-                //reportError(localVarHttpResponse.Status)
 	}
 
 	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
@@ -6601,9 +6593,8 @@ func (a *LogicalRoutingAndServicesApiService) UpdateLogicalRouter(ctx context.Co
 	if err != nil {
 		return successPayload, nil, err
 	}
-        fmt.Errorf("DEBUG ADIT request %+v", r)
+
 	localVarHttpResponse, err := a.client.callAPI(r)
-        fmt.Errorf("DEBUG ADIT response %+v", localVarHttpResponse)
 	if err != nil || localVarHttpResponse == nil {
 		return successPayload, localVarHttpResponse, err
 	}
