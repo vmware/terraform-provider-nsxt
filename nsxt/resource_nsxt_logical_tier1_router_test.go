@@ -37,6 +37,10 @@ func TestNSXLogicalTier1RouterBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "high_availability_mode", haMode),
 					resource.TestCheckResourceAttr(testResourceName, "failover_mode", failoverMode),
 					resource.TestCheckResourceAttr(testResourceName, "tags.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "enable_router_advertisement", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "advertise_connected_routes", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "advertise_static_routes", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "advertise_nat_routes", "true"),
 				),
 			},
 			{
@@ -48,6 +52,10 @@ func TestNSXLogicalTier1RouterBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "high_availability_mode", haMode),
 					resource.TestCheckResourceAttr(testResourceName, "failover_mode", failoverMode),
 					resource.TestCheckResourceAttr(testResourceName, "tags.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "enable_router_advertisement", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "advertise_connected_routes", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "advertise_static_routes", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "advertise_nat_routes", "false"),
 				),
 			},
 		},
@@ -122,6 +130,10 @@ description = "Acceptance Test"
 failover_mode = "%s"
 high_availability_mode = "%s"
 edge_cluster_id = "${data.nsxt_edge_cluster.EC.id}"
+enable_router_advertisement = "true"
+advertise_connected_routes = "true"
+advertise_static_routes = "true"
+advertise_nat_routes = "true"
 tags = [
     {
 	scope = "scope1"
@@ -146,6 +158,10 @@ description = "Acceptance Test Update"
 failover_mode = "%s"
 high_availability_mode = "%s"
 edge_cluster_id = "${data.nsxt_edge_cluster.EC.id}"
+enable_router_advertisement = "false"
+advertise_connected_routes = "false"
+advertise_static_routes = "false"
+advertise_nat_routes = "false"
 tags = [
 	{
 	scope = "scope3"

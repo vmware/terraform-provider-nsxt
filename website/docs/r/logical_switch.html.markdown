@@ -50,4 +50,4 @@ In addition to arguments listed above, the following attributes are exported:
 
 * `id` - ID of the logical switch.
 * `system_owned` - A boolean that indicates whether this resource is system-owned and thus read-only.
-* `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attributed is can be useful for debugging.
+* `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
