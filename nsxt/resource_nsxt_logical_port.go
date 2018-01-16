@@ -40,7 +40,6 @@ func resourceLogicalPort() *schema.Resource {
 			},
 			"switching_profile_ids": getSwitchingProfileIdsSchema(),
 			"tags":                  getTagsSchema(),
-			//TODO: add attachments
 		},
 	}
 }
@@ -69,8 +68,7 @@ func resourceLogicalPortCreate(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("Error while creating logical port %s: %v\n", lp.DisplayName, err)
 	}
 	if resp.StatusCode != http.StatusCreated {
-		fmt.Printf("Unexpected status returned")
-		return nil
+		return fmt.Errorf("Unexpected status returned")
 	}
 
 	resource_id := lp.Id
@@ -89,9 +87,8 @@ func resourceLogicalPortRead(d *schema.ResourceData, m interface{}) error {
 	logical_port, resp, err := nsxClient.LogicalSwitchingApi.GetLogicalPort(nsxClient.Context, id)
 
 	if resp.StatusCode == http.StatusNotFound {
-		fmt.Printf("Logical port %s was not found\n", id)
 		d.SetId("")
-		return nil
+		return fmt.Errorf("Logical port %s was not found\n", id)
 	}
 	if err != nil {
 		return fmt.Errorf("Error while reading logical port %s: %v\n", id, err)
@@ -112,26 +109,38 @@ func resourceLogicalPortRead(d *schema.ResourceData, m interface{}) error {
 func resourceLogicalPortUpdate(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 
-	lp_id := d.Id()
+	id := d.Id()
 	name := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	ls_id := d.Get("logical_switch_id").(string)
 	admin_state := d.Get("admin_state").(string)
 	profilesList := getSwitchingProfileIdsFromSchema(d)
 	tagList := getTagsFromSchema(d)
 	revision := int64(d.Get("revision").(int))
 
-	lp := manager.LogicalPort{DisplayName: name,
-		Description:         description,
-		LogicalSwitchId:     ls_id,
-		AdminState:          admin_state,
-		SwitchingProfileIds: profilesList,
-		Tags:                tagList,
-		Revision:            revision}
+	// Some of the port attributes (attachment) are not exposed to terraform.
+	// If we try to update port based on terraform attributes only, apply will fail
+	// due to missing info.
+	// We don't expose attachment to terraform, since it will become out of sync
+	// once attachment info is updated/remove outside the scope of port management.
 
-	lp, resp, err := nsxClient.LogicalSwitchingApi.UpdateLogicalPort(nsxClient.Context, lp_id, lp)
+	lp, resp, err := nsxClient.LogicalSwitchingApi.GetLogicalPort(nsxClient.Context, id)
+	if resp.StatusCode == http.StatusNotFound {
+		return fmt.Errorf("Logical port %s was not found\n", id)
+	}
+	if err != nil {
+		return fmt.Errorf("Error while reading logical port %s: %v\n", id, err)
+	}
+
+	lp.DisplayName = name
+	lp.Description = description
+	lp.AdminState = admin_state
+	lp.SwitchingProfileIds = profilesList
+	lp.Tags = tagList
+	lp.Revision = revision
+
+	lp, resp, err = nsxClient.LogicalSwitchingApi.UpdateLogicalPort(nsxClient.Context, id, lp)
 	if err != nil || resp.StatusCode == http.StatusNotFound {
-		return fmt.Errorf("Error while updating logical port %s: %v\n", lp_id, err)
+		return fmt.Errorf("Error while updating logical port %s: %v\n", id, err)
 	}
 	return resourceLogicalPortRead(d, m)
 }
