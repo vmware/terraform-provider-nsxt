@@ -18,6 +18,7 @@ resource "nsxt_logical_router_downlink_port" "DP1" {
   display_name = "DP1"
   logical_router_id = "${nsxt_logical_router.RTR1.id}"
   linked_logical_switch_port_id = "${nsxt_logical_port.LP1.id}"
+  subnets = [{ ip_addresses = ["1.1.1.0"], prefix_length = "24"}]
   tags = [{ scope = "color"
             tag = "red" }
   ]
@@ -30,7 +31,7 @@ The following arguments are supported:
 
 * `logical_router_id` - (Required) Identifier for logical Tier-1 router on which this port is created
 * `linked_logical_switch_port_id` - (Required) Identifier for port on logical switch to connect to
-* `subnets` - (Optional) Logical router port subnets
+* `subnets` - (Required) Logical router port subnets
 * `mac_address` - (Optional) Mac Address
 * `urpf_mode` - (Optional) Unicast Reverse Path Forwarding mode
 * `display_name` - (Optional) Display name, defaults to ID if not set.

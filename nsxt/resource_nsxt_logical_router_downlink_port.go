@@ -100,7 +100,7 @@ func resourceLogicalRouterDownLinkPortRead(d *schema.ResourceData, m interface{}
 
 	id := d.Id()
 	if id == "" {
-		return fmt.Errorf("Error obtaining logical object id")
+		return fmt.Errorf("Error obtaining logical router downlink port id while reading")
 	}
 
 	logical_router_down_link_port, resp, err := nsxClient.LogicalRoutingAndServicesApi.ReadLogicalRouterDownLinkPort(nsxClient.Context, id)
@@ -123,6 +123,7 @@ func resourceLogicalRouterDownLinkPortRead(d *schema.ResourceData, m interface{}
 	d.Set("LinkedLogicalSwitchPortId", logical_router_down_link_port.LinkedLogicalSwitchPortId.TargetId)
 	setIpSubnetsInSchema(d, logical_router_down_link_port.Subnets)
 	d.Set("UrpfMode", logical_router_down_link_port.UrpfMode)
+	d.Set("ResourceType", logical_router_down_link_port.ResourceType)
 
 	return nil
 }
@@ -133,7 +134,7 @@ func resourceLogicalRouterDownLinkPortUpdate(d *schema.ResourceData, m interface
 
 	id := d.Id()
 	if id == "" {
-		return fmt.Errorf("Error obtaining logical object id")
+		return fmt.Errorf("Error obtaining logical router downlink port id while updating")
 	}
 
 	revision := int64(d.Get("revision").(int))
@@ -156,6 +157,7 @@ func resourceLogicalRouterDownLinkPortUpdate(d *schema.ResourceData, m interface
 		LinkedLogicalSwitchPortId: makeResourceReference("LogicalPort", linked_logical_switch_port_id),
 		Subnets:                   subnets,
 		UrpfMode:                  urpf_mode,
+		ResourceType:              "LogicalRouterDownLinkPort",
 	}
 
 	logical_router_down_link_port, resp, err := nsxClient.LogicalRoutingAndServicesApi.UpdateLogicalRouterDownLinkPort(nsxClient.Context, id, logical_router_down_link_port)
@@ -173,7 +175,7 @@ func resourceLogicalRouterDownLinkPortDelete(d *schema.ResourceData, m interface
 
 	id := d.Id()
 	if id == "" {
-		return fmt.Errorf("Error obtaining logical object id")
+		return fmt.Errorf("Error obtaining logical router downlink port id while deleting")
 	}
 
 	localVarOptionals := make(map[string]interface{})
