@@ -76,7 +76,10 @@ def write_attr(f, attr):
     pretty_writeln(f, "Type:        %s," % TYPE_MAP[attr['type']])
     if attr['comment']:
         pretty_writeln(f, "Description: \"%s\"," % attr['comment'])
-    pretty_writeln(f, "Optional:    true,")
+    if attr['optional']:
+        pretty_writeln(f, "Optional:    true,")
+    else:
+        pretty_writeln(f, "Required:    true,")
     if attr['name'] in FORCENEW_ATTRS:
         pretty_writeln(f, "ForceNew:    true,")
     if attr['name'] in COMPUTED_ATTRS:
@@ -273,6 +276,72 @@ def write_delete_func(f, resource, attrs, api_section):
     pretty_writeln(f, "}")
 
 
+def write_doc_header(f, resource):
+    description = "Provides a resource to configure %s on NSX-T manager" % re.sub('_', ' ', resource)
+    pretty_writeln(f, "---")
+    pretty_writeln(f, "layout: \"nsxt\"")
+    pretty_writeln(f, "page_title: \"NSXT: nsxt_%s\"" % resource)
+    pretty_writeln(f, "sidebar_current: \"docs-nsxt-resource-%s\"" % re.sub('_', '-', resource))
+    pretty_writeln(f, "description: |-")
+    pretty_writeln(f, "  %s" % description)
+    pretty_writeln(f, "---\n")
+    pretty_writeln(f, "# nsxt_%s\n" % resource)
+    pretty_writeln(f, "%s\n" % description)
+
+
+def write_doc_example(f, resource, attrs):
+    obj_name = ''.join(i[0] for i in resource.split('_')).upper()
+    pretty_writeln(f, "## Example Usage\n")
+    pretty_writeln(f, "```hcl")
+
+    pretty_writeln(f, "resource \"nsxt_%s\" \"%s\" {" % (resource, obj_name))
+    for attr in attrs:
+        if attr['name'] == 'Revision' or attr['name'] in COMPUTED_ATTRS or attr['name'] in IGNORE_ATTRS:
+            continue
+        name = convert_name(attr['name'])
+        val = "..."
+        if name == 'display_name':
+            val = "\"%s\"" % obj_name
+        elif name == 'description':
+            val = "\"%s provisioned by Terraform\"" % obj_name
+        elif name == 'tags':
+            val = "[{ scope = \"color\"\n            tag = \"red\" }\n  ]"
+        pretty_writeln(f, "  %s = %s" % (name, val))
+
+    pretty_writeln(f, "}")
+    pretty_writeln(f, "```\n")
+
+
+def write_arguments_reference(f, resource, attrs):
+    pretty_writeln(f, "## Argument Reference\n")
+    pretty_writeln(f, "The following arguments are supported:\n")
+    for attr in attrs:
+        if attr['name'] == 'Revision' or attr['name'] in COMPUTED_ATTRS or attr['name'] in IGNORE_ATTRS:
+            continue
+        name = convert_name(attr['name'])
+        desc = attr['comment']
+        optional = 'Optional' if attr['optional'] else 'Required'
+        if name == 'tags':
+            desc = "A list of scope + tag pairs to associate with this %s" % resource
+        pretty_writeln(f, "* `%s` - (%s) %s." % (name, optional, desc))
+    pretty_writeln(f, "\n")
+
+def write_attributes_reference(f, resource, attrs):
+    pretty_writeln(f, "## Attributes Reference\n")
+    pretty_writeln(f, "In addition to arguments listed above, the following attributes are exported:\n")
+    pretty_writeln(f, "* `id` - ID of the %s." % resource)
+    for attr in attrs:
+        if attr['name'] == 'Revision' or attr['name'] in COMPUTED_ATTRS or attr['name'] in IGNORE_ATTRS:
+            name = convert_name(attr['name'])
+            desc = attr['comment']
+            if name == 'revision':
+                desc = 'Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging'
+            if name == 'system_owned':
+                desc = 'A boolean that indicates whether this resource is system-owned and thus read-only'
+
+            pretty_writeln(f, "* `%s` - %s." % (name, desc))
+
+
 def main():
 
     if len(sys.argv) != 3:
@@ -312,11 +381,13 @@ def main():
             attr_name = match.group(1).strip()
             attr_type = match.group(2).strip()
             attr_meta = match.group(3).strip()
+            attr_optional = 'omitempty' in attr_meta
             if attr_name not in IGNORE_ATTRS:
                 attrs.append({'name': attr_name,
                               'type': attr_type,
                               'meta': attr_meta,
-                              'comment': attr_comment})
+                              'comment': attr_comment,
+                              'optional': attr_optional})
             attr_comment = None
 
 
@@ -324,7 +395,8 @@ def main():
     resource_lower = convert_name(resource)
     print(resource_lower)
 
-    with open("resource_%s.go" % resource_lower, 'w') as f:
+    # write the resource file
+    with open("resource_nsxt_%s.go" % resource_lower, 'w') as f:
         write_header(f)
 
         pretty_writeln(f, "func resource%s() *schema.Resource {" % resource)
@@ -352,5 +424,13 @@ def main():
         write_read_func(f, resource, attrs, api_section)
         write_update_func(f, resource, attrs, api_section)
         write_delete_func(f, resource, attrs, api_section)
+
+    # write the documentation file
+    with open("%s.html.markdown" % resource_lower, 'w') as f:
+        write_doc_header(f, resource_lower)
+        write_doc_example(f, resource_lower, attrs)
+        write_arguments_reference(f, resource_lower, attrs)
+        write_attributes_reference(f, resource_lower, attrs)
+
 
 main()
