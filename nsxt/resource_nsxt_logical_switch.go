@@ -180,7 +180,7 @@ func resourceLogicalSwitchRead(d *schema.ResourceData, m interface{}) error {
 
 	id := d.Id()
 	if id == "" {
-		return fmt.Errorf("Error obtaining logical object id")
+		return fmt.Errorf("Error obtaining logical switch id")
 	}
 
 	logical_switch, resp, err := nsxClient.LogicalSwitchingApi.GetLogicalSwitch(nsxClient.Context, id)
@@ -217,7 +217,7 @@ func resourceLogicalSwitchUpdate(d *schema.ResourceData, m interface{}) error {
 
 	id := d.Id()
 	if id == "" {
-		return fmt.Errorf("Error obtaining logical object id")
+		return fmt.Errorf("Error obtaining logical switch id")
 	}
 
 	description := d.Get("description").(string)
@@ -263,7 +263,7 @@ func resourceLogicalSwitchDelete(d *schema.ResourceData, m interface{}) error {
 
 	id := d.Id()
 	if id == "" {
-		return fmt.Errorf("Error obtaining logical object id")
+		return fmt.Errorf("Error obtaining logical switch id")
 	}
 
 	localVarOptionals := make(map[string]interface{})

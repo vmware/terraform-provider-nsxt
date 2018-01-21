@@ -81,7 +81,7 @@ func resourceLogicalRouterLinkPortOnTier0Read(d *schema.ResourceData, m interfac
 
 	id := d.Id()
 	if id == "" {
-		return fmt.Errorf("Error obtaining logical object id")
+		return fmt.Errorf("Error obtaining logical router link port on tier0 id")
 	}
 
 	logical_router_link_port, resp, err := nsxClient.LogicalRoutingAndServicesApi.ReadLogicalRouterLinkPortOnTier0(nsxClient.Context, id)
@@ -112,7 +112,7 @@ func resourceLogicalRouterLinkPortOnTier0Update(d *schema.ResourceData, m interf
 
 	id := d.Id()
 	if id == "" {
-		return fmt.Errorf("Error obtaining logical object id")
+		return fmt.Errorf("Error obtaining logical router link port on tier0 id")
 	}
 
 	revision := int64(d.Get("revision").(int))
@@ -147,7 +147,7 @@ func resourceLogicalRouterLinkPortOnTier0Delete(d *schema.ResourceData, m interf
 
 	id := d.Id()
 	if id == "" {
-		return fmt.Errorf("Error obtaining logical object id")
+		return fmt.Errorf("Error obtaining logical router link port on tier0 id")
 	}
 
 	localVarOptionals := make(map[string]interface{})

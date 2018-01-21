@@ -105,7 +105,7 @@ func resourceL4PortSetNsServiceRead(d *schema.ResourceData, m interface{}) error
 
 	id := d.Id()
 	if id == "" {
-		return fmt.Errorf("Error obtaining logical object id")
+		return fmt.Errorf("Error obtaining ns service id")
 	}
 
 	ns_service, resp, err := nsxClient.GroupingObjectsApi.ReadL4PortSetNSService(nsxClient.Context, id)
@@ -139,7 +139,7 @@ func resourceL4PortSetNsServiceUpdate(d *schema.ResourceData, m interface{}) err
 
 	id := d.Id()
 	if id == "" {
-		return fmt.Errorf("Error obtaining logical object id")
+		return fmt.Errorf("Error obtaining ns service id")
 	}
 
 	description := d.Get("description").(string)
@@ -181,7 +181,7 @@ func resourceL4PortSetNsServiceDelete(d *schema.ResourceData, m interface{}) err
 
 	id := d.Id()
 	if id == "" {
-		return fmt.Errorf("Error obtaining logical object id")
+		return fmt.Errorf("Error obtaining ns service id")
 	}
 
 	localVarOptionals := make(map[string]interface{})

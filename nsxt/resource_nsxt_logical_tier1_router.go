@@ -188,7 +188,7 @@ func resourceLogicalTier1RouterRead(d *schema.ResourceData, m interface{}) error
 
 	id := d.Id()
 	if id == "" {
-		return fmt.Errorf("Error obtaining logical object id")
+		return fmt.Errorf("Error obtaining logical tier1 router id")
 	}
 
 	logical_router, resp, err := nsxClient.LogicalRoutingAndServicesApi.ReadLogicalRouter(nsxClient.Context, id)
@@ -229,7 +229,7 @@ func resourceLogicalTier1RouterUpdate(d *schema.ResourceData, m interface{}) err
 
 	id := d.Id()
 	if id == "" {
-		return fmt.Errorf("Error obtaining logical object id")
+		return fmt.Errorf("Error obtaining logical tier1 router id")
 	}
 
 	revision := int64(d.Get("revision").(int))
@@ -271,7 +271,7 @@ func resourceLogicalTier1RouterDelete(d *schema.ResourceData, m interface{}) err
 
 	id := d.Id()
 	if id == "" {
-		return fmt.Errorf("Error obtaining logical object id")
+		return fmt.Errorf("Error obtaining logical tier1 router id")
 	}
 
 	localVarOptionals := make(map[string]interface{})
