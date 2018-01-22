@@ -53,6 +53,53 @@ func TestNSXLogicalRouterDownlinkPortBasic(t *testing.T) {
 	})
 }
 
+func TestNSXLogicalRouterDownlinkPortWithRelay(t *testing.T) {
+
+	portName := fmt.Sprintf("test-nsx-logical-router-downlink-port")
+	updatePortName := fmt.Sprintf("%s-update", portName)
+	testResourceName := "nsxt_logical_router_downlink_port.test"
+	transportZoneName := OverlayTransportZoneNamePrefix
+	edgeClusterName := EdgeClusterDefaultName
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXLogicalRouterDownlinkPortCheckDestroy(state, portName)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXLogicalRouterDownlinkPortCreateWithRelayTemplate(portName, transportZoneName, edgeClusterName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXLogicalRouterDownlinkPortExists(portName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", portName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttrSet(testResourceName, "linked_logical_switch_port_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "logical_router_id"),
+					resource.TestCheckResourceAttr(testResourceName, "tags.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "service_bindings.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "service_bindings.0.target_type", "LogicalService"),
+					resource.TestCheckResourceAttr(testResourceName, "service_bindings.0.target_display_name", "srv"),
+				),
+			},
+			{
+				Config: testAccNSXLogicalRouterDownlinkPortUpdateWithRelayTemplate(updatePortName, transportZoneName, edgeClusterName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXLogicalRouterDownlinkPortExists(updatePortName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updatePortName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test Update"),
+					resource.TestCheckResourceAttrSet(testResourceName, "linked_logical_switch_port_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "logical_router_id"),
+					resource.TestCheckResourceAttr(testResourceName, "tags.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "service_bindings.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "service_bindings.0.target_type", "LogicalService"),
+					resource.TestCheckResourceAttr(testResourceName, "service_bindings.0.target_display_name", "srv"),
+				),
+			},
+		},
+	})
+}
+
 func testAccNSXLogicalRouterDownlinkPortExists(display_name string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
@@ -141,6 +188,20 @@ edge_cluster_id = "${data.nsxt_edge_cluster.EC.id}"
 }`, transportZoneName, edgeClusterName)
 }
 
+func testAccNSXLogicalRouterDownlinkPortRelayTemplate() string {
+	return fmt.Sprintf(`
+resource "nsxt_dhcp_relay_profile" "DRP1" {
+display_name = "prf"
+server_addresses = ["1.1.1.1"]
+}
+
+resource "nsxt_dhcp_relay_service" "DRS1" {
+display_name = "srv"
+description = "Acceptance Test"
+dhcp_relay_profile_id = "${nsxt_dhcp_relay_profile.DRP1.id}"
+}`)
+}
+
 func testAccNSXLogicalRouterDownlinkPortCreateTemplate(portName string, transportZoneName string, edgeClusterName string) string {
 	return testAccNSXLogicalRouterDownlinkPortPreConditionTemplate(transportZoneName, edgeClusterName) + fmt.Sprintf(`
 resource "nsxt_logical_router_downlink_port" "test" {
@@ -168,6 +229,62 @@ linked_logical_switch_port_id = "${nsxt_logical_port.PORT1.id}"
 logical_router_id = "${nsxt_logical_tier1_router.RTR1.id}"
 subnets =  [{ip_addresses = ["8.0.0.1"],
              prefix_length = 24}]
+tags = [
+	{
+		scope = "scope1"
+    	tag = "tag1"
+    },
+	{
+		scope = "scope2"
+    	tag = "tag2"
+    },
+]
+}`, portUpdatedName)
+}
+
+func testAccNSXLogicalRouterDownlinkPortCreateWithRelayTemplate(portName string, transportZoneName string, edgeClusterName string) string {
+	return testAccNSXLogicalRouterDownlinkPortPreConditionTemplate(transportZoneName, edgeClusterName) +
+	       testAccNSXLogicalRouterDownlinkPortRelayTemplate() +
+	       fmt.Sprintf(`
+resource "nsxt_logical_router_downlink_port" "test" {
+display_name = "%s"
+description = "Acceptance Test"
+linked_logical_switch_port_id = "${nsxt_logical_port.PORT1.id}"
+logical_router_id = "${nsxt_logical_tier1_router.RTR1.id}"
+subnets =  [{ip_addresses = ["8.0.0.1"],
+             prefix_length = 24}]
+service_bindings = [
+	{
+		target_id = "${nsxt_dhcp_relay_service.DRS1.id}"
+		target_type = "LogicalService"
+	},
+]
+tags = [
+	{
+		scope = "scope1"
+    	tag = "tag1"
+    },
+]
+}`, portName)
+}
+
+func testAccNSXLogicalRouterDownlinkPortUpdateWithRelayTemplate(portUpdatedName string, transportZoneName string, edgeClusterName string) string {
+	return testAccNSXLogicalRouterDownlinkPortPreConditionTemplate(transportZoneName, edgeClusterName) +
+	       testAccNSXLogicalRouterDownlinkPortRelayTemplate() +
+	       fmt.Sprintf(`
+resource "nsxt_logical_router_downlink_port" "test" {
+display_name = "%s"
+description = "Acceptance Test Update"
+linked_logical_switch_port_id = "${nsxt_logical_port.PORT1.id}"
+logical_router_id = "${nsxt_logical_tier1_router.RTR1.id}"
+subnets =  [{ip_addresses = ["8.0.0.1"],
+             prefix_length = 24}]
+service_bindings = [
+	{
+		target_id = "${nsxt_dhcp_relay_service.DRS1.id}"
+		target_type = "LogicalService"
+	},
+]
 tags = [
 	{
 		scope = "scope1"

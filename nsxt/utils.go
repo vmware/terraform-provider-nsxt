@@ -208,11 +208,11 @@ func getResourceReferencesSchema(required bool, computed bool) *schema.Schema {
 			Schema: map[string]*schema.Schema{
 				"is_valid": &schema.Schema{
 					Type:     schema.TypeBool,
-					Optional: true,
+					Computed: true,
 				},
 				"target_display_name": &schema.Schema{
 					Type:     schema.TypeString,
-					Optional: true,
+					Computed: true,
 				},
 				"target_id": &schema.Schema{
 					Type:     schema.TypeString,
@@ -252,6 +252,36 @@ func setResourceReferencesInSchema(d *schema.ResourceData, references []common.R
 		elem["target_display_name"] = reference.TargetDisplayName
 		elem["target_id"] = reference.TargetId
 		elem["target_type"] = reference.TargetType
+		referenceList = append(referenceList, elem)
+	}
+	d.Set(schemaAttrName, referenceList)
+}
+
+func getServiceBindingsFromSchema(d *schema.ResourceData, schemaAttrName string) []manager.ServiceBinding {
+	references := d.Get(schemaAttrName).([]interface{})
+	var bindingList []manager.ServiceBinding
+	for _, reference := range references {
+		data := reference.(map[string]interface{})
+		ref := common.ResourceReference{
+			IsValid:           data["is_valid"].(bool),
+			TargetDisplayName: data["target_display_name"].(string),
+			TargetId:          data["target_id"].(string),
+			TargetType:        data["target_type"].(string),
+		}
+		elem := manager.ServiceBinding{&ref}
+		bindingList = append(bindingList, elem)
+	}
+	return bindingList
+}
+
+func setServiceBindingsInSchema(d *schema.ResourceData, serviceBindings []manager.ServiceBinding, schemaAttrName string) {
+	var referenceList []map[string]interface{}
+	for _, binding := range serviceBindings {
+		elem := make(map[string]interface{})
+		elem["is_valid"] = binding.ServiceId.IsValid
+		elem["target_display_name"] = binding.ServiceId.TargetDisplayName
+		elem["target_id"] = binding.ServiceId.TargetId
+		elem["target_type"] = binding.ServiceId.TargetType
 		referenceList = append(referenceList, elem)
 	}
 	d.Set(schemaAttrName, referenceList)

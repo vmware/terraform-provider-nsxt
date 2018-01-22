@@ -52,6 +52,7 @@ func resourceLogicalRouterDownLinkPort() *schema.Resource {
 				Description: "Unicast Reverse Path Forwarding mode",
 				Optional:    true,
 			},
+			"service_bindings": getResourceReferencesSchema(false, false),
 		},
 	}
 }
@@ -68,6 +69,7 @@ func resourceLogicalRouterDownLinkPortCreate(d *schema.ResourceData, m interface
 	linked_logical_switch_port_id := d.Get("linked_logical_switch_port_id").(string)
 	subnets := getIpSubnetsFromSchema(d)
 	urpf_mode := d.Get("urpf_mode").(string)
+	service_bindings := getServiceBindingsFromSchema(d, "service_bindings")
 	logical_router_down_link_port := manager.LogicalRouterDownLinkPort{
 		Description:               description,
 		DisplayName:               display_name,
@@ -77,6 +79,7 @@ func resourceLogicalRouterDownLinkPortCreate(d *schema.ResourceData, m interface
 		LinkedLogicalSwitchPortId: makeResourceReference("LogicalPort", linked_logical_switch_port_id),
 		Subnets:                   subnets,
 		UrpfMode:                  urpf_mode,
+		ServiceBindings:           service_bindings,
 	}
 
 	logical_router_down_link_port, resp, err := nsxClient.LogicalRoutingAndServicesApi.CreateLogicalRouterDownLinkPort(nsxClient.Context, logical_router_down_link_port)
@@ -124,6 +127,7 @@ func resourceLogicalRouterDownLinkPortRead(d *schema.ResourceData, m interface{}
 	setIpSubnetsInSchema(d, logical_router_down_link_port.Subnets)
 	d.Set("UrpfMode", logical_router_down_link_port.UrpfMode)
 	d.Set("ResourceType", logical_router_down_link_port.ResourceType)
+	setServiceBindingsInSchema(d, logical_router_down_link_port.ServiceBindings, "service_bindings")
 
 	return nil
 }
@@ -145,8 +149,8 @@ func resourceLogicalRouterDownLinkPortUpdate(d *schema.ResourceData, m interface
 	linked_logical_switch_port_id := d.Get("linked_logical_switch_port_id").(string)
 	subnets := getIpSubnetsFromSchema(d)
 	mac_address := d.Get("mac_address").(string)
-
 	urpf_mode := d.Get("urpf_mode").(string)
+	service_bindings := getServiceBindingsFromSchema(d, "service_bindings")
 	logical_router_down_link_port := manager.LogicalRouterDownLinkPort{
 		Revision:                  revision,
 		Description:               description,
@@ -157,6 +161,7 @@ func resourceLogicalRouterDownLinkPortUpdate(d *schema.ResourceData, m interface
 		LinkedLogicalSwitchPortId: makeResourceReference("LogicalPort", linked_logical_switch_port_id),
 		Subnets:                   subnets,
 		UrpfMode:                  urpf_mode,
+		ServiceBindings:           service_bindings,
 		ResourceType:              "LogicalRouterDownLinkPort",
 	}
 
