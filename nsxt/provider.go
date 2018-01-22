@@ -69,6 +69,7 @@ func Provider() terraform.ResourceProvider {
 			"nsxt_logical_router_link_port_on_tier0": resourceLogicalRouterLinkPortOnTier0(),
 			"nsxt_logical_router_link_port_on_tier1": resourceLogicalRouterLinkPortOnTier1(),
 			"nsxt_l4_port_set_ns_service":            resourceL4PortSetNsService(),
+			"nsxt_ns_group":                          resourceNsGroup(),
 		},
 
 		ConfigureFunc: providerConfigure,
