@@ -219,7 +219,7 @@ def write_read_func(f, resource, attrs, api_section):
             continue
 
         pretty_writeln(f, "d.Set(\"%s\", %s.%s)" %
-                (attr['name'], lower_resource, attr['name']))
+                (convert_name(attr['name']), lower_resource, attr['name']))
 
     f.write("\n")
     pretty_writeln(f, "return nil")
