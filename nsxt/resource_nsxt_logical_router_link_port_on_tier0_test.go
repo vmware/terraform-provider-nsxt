@@ -55,7 +55,7 @@ func testAccNSXLogicalRouterLinkPortOnTier0Exists(displayName string, resourceNa
 
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
-			return fmt.Errorf("NSX logical tier1 router resource %s not found in resources", resourceName)
+			return fmt.Errorf("NSX logical router link port on Tier0 resource %s not found in resources", resourceName)
 		}
 
 		resourceID := rs.Primary.ID
@@ -111,18 +111,14 @@ data "nsxt_logical_tier0_router" "TIER0RTR" {
 }
 
 resource "nsxt_logical_router_link_port_on_tier0" "test" {
-display_name = "%s"
-description = "Acceptance Test"
-logical_router_id =  "${data.nsxt_logical_tier0_router.TIER0RTR.id}"
-tags = [
-    {
-	scope = "scope1"
-        tag = "tag1"
-    }, {
-	scope = "scope2"
-    	tag = "tag2"
-    }
-]
+	display_name = "%s"
+	description = "Acceptance Test"
+	logical_router_id = "${data.nsxt_logical_tier0_router.TIER0RTR.id}"
+	tags = [{scope = "scope1"
+        	 tag = "tag1"},
+        	{scope = "scope2"
+    	     tag = "tag2"}
+	]
 }`, tier0RouterName, name)
 }
 
@@ -133,14 +129,11 @@ data "nsxt_logical_tier0_router" "TIER0RTR" {
 }
 
 resource "nsxt_logical_router_link_port_on_tier0" "test" {
-display_name = "%s"
-description = "Acceptance Test Update"
-logical_router_id =  "${data.nsxt_logical_tier0_router.TIER0RTR.id}"
-tags = [
-	{
-	scope = "scope3"
-    	tag = "tag3"
-    },
-]
+	display_name = "%s"
+	description = "Acceptance Test Update"
+	logical_router_id = "${data.nsxt_logical_tier0_router.TIER0RTR.id}"
+	tags = [{scope = "scope3"
+    	     tag = "tag3"}
+	]
 }`, tier0RouterName, name)
 }

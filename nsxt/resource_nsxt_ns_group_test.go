@@ -146,62 +146,54 @@ func testAccNSXNSGroupCheckDestroy(state *terraform.State, display_name string) 
 func testAccNSXNSGroupCreateTemplate(name string) string {
 	return fmt.Sprintf(`
 resource "nsxt_ns_group" "test" {
-display_name = "%s"
-description = "Acceptance Test"
-tags = [
-	{
-		scope = "scope1"
-    	tag = "tag1"
-    },
-]
+	display_name = "%s"
+	description = "Acceptance Test"
+	tags = [{scope = "scope1"
+	    	 tag = "tag1"}
+	]
 }`, name)
 }
 
 func testAccNSXNSGroupUpdateTemplate(updatedName string) string {
 	return fmt.Sprintf(`
 resource "nsxt_ns_group" "test" {
-display_name = "%s"
-description = "Acceptance Test Update"
-tags = [
-	{
-		scope = "scope1"
-    	tag = "tag1"
-    },
-	{
-		scope = "scope2"
-    	tag = "tag2"
-    },
-]
+	display_name = "%s"
+	description = "Acceptance Test Update"
+	tags = [{scope = "scope1"
+             tag = "tag1"}, 
+            {scope = "scope2"
+    	     tag = "tag2"}
+	]
 }`, updatedName)
 }
 
 func testAccNSXNSGroupNestedCreateTemplate(name string) string {
 	return fmt.Sprintf(`
 resource "nsxt_ns_group" "GRP1" {
-display_name = "grp1"
+	display_name = "grp1"
 }
 resource "nsxt_ns_group" "test" {
-display_name = "%s"
-description = "Acceptance Test"
-members = [{target_type = "NSGroup"
-            value = "${nsxt_ns_group.GRP1.id}"}]
+	display_name = "%s"
+	description = "Acceptance Test"
+	members = [{target_type = "NSGroup"
+	            value = "${nsxt_ns_group.GRP1.id}"}]
 }`, name)
 }
 
 func testAccNSXNSGroupNestedUpdateTemplate(updatedName string) string {
 	return fmt.Sprintf(`
 resource "nsxt_ns_group" "GRP1" {
-display_name = "grp1"
+	display_name = "grp1"
 }
 resource "nsxt_ns_group" "GRP2" {
-display_name = "grp2"
+	display_name = "grp2"
 }
 resource "nsxt_ns_group" "test" {
-display_name = "%s"
-description = "Acceptance Test Update"
-members = [{target_type = "NSGroup"
-            value = "${nsxt_ns_group.GRP1.id}"},
-           {target_type = "NSGroup"
-            value = "${nsxt_ns_group.GRP2.id}"}]
+	display_name = "%s"
+	description = "Acceptance Test Update"
+	members = [{target_type = "NSGroup"
+	            value = "${nsxt_ns_group.GRP1.id}"},
+	           {target_type = "NSGroup"
+	            value = "${nsxt_ns_group.GRP2.id}"}]
 }`, updatedName)
 }

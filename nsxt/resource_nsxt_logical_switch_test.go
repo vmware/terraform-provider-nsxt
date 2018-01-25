@@ -195,10 +195,10 @@ func testAccNSXLogicalSwitchCheckDestroy(state *terraform.State, display_name st
 func testAccNSXLogicalSwitchNoTZIDTemplate(switchName string) string {
 	return fmt.Sprintf(`
 resource "nsxt_logical_switch" "error" {
-display_name = "%s"
-admin_state = "UP"
-description = "Acceptance Test"
-replication_mode = "MTEP"
+	display_name = "%s"
+	admin_state = "UP"
+	description = "Acceptance Test"
+	replication_mode = "MTEP"
 }`, switchName)
 }
 
@@ -209,10 +209,10 @@ data "nsxt_transport_zone" "TZ1" {
 }
 
 resource "nsxt_logical_switch" "error" {
-display_name = "%s"
-admin_state = "UP"
-description = "Acceptance Test"
-transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
+	display_name = "%s"
+	admin_state = "UP"
+	description = "Acceptance Test"
+	transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
 }`, transportZoneName, switchName)
 }
 
@@ -223,19 +223,16 @@ data "nsxt_transport_zone" "TZ1" {
 }
 
 resource "nsxt_logical_switch" "%s" {
-display_name = "%s"
-admin_state = "UP"
-description = "Acceptance Test"
-transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
-replication_mode = "%s"
-vlan = "%s"
-verify_realization = "%t"
-tags = [
-    {
-	scope = "scope1"
-        tag = "tag1"
-    }
-]
+	display_name = "%s"
+	admin_state = "UP"
+	description = "Acceptance Test"
+	transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
+	replication_mode = "%s"
+	vlan = "%s"
+	verify_realization = "%t"
+	tags = [{scope = "scope1"
+	         tag = "tag1"}
+	]
 }`, transportZoneName, resourceName, switchName, replicationMode, vlan, verifyRealization)
 }
 
@@ -246,21 +243,16 @@ data "nsxt_transport_zone" "TZ1" {
 }
 
 resource "nsxt_logical_switch" "%s" {
-display_name = "%s"
-admin_state = "UP"
-description = "Acceptance Test Update"
-transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
-replication_mode = "%s"
-vlan = "%s"
-tags = [
-	{
-		scope = "scope1"
-    	tag = "tag1"
-    },
-	{
-		scope = "scope2"
-    	tag = "tag2"
-    },
-]
+	display_name = "%s"
+	admin_state = "UP"
+	description = "Acceptance Test Update"
+	transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
+	replication_mode = "%s"
+	vlan = "%s"
+	tags = [{scope = "scope1"
+	         tag = "tag1"}, 
+	        {scope = "scope2"
+	    	 tag = "tag2"}
+	]
 }`, transportZoneName, resourceName, switchUpdateName, replicationMode, vlan)
 }

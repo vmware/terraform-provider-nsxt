@@ -114,23 +114,20 @@ data "nsxt_transport_zone" "TZ1" {
 }
 
 resource "nsxt_logical_switch" "test" {
-display_name = "test_switch"
-admin_state = "UP"
-replication_mode = "MTEP"
-transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
+	display_name = "test_switch"
+	admin_state = "UP"
+	replication_mode = "MTEP"
+	transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
 }
 
 resource "nsxt_logical_port" "test" {
-display_name = "%s"
-admin_state = "UP"
-description = "Acceptance Test"
-logical_switch_id = "${nsxt_logical_switch.test.id}"
-tags = [
-	{
-		scope = "scope1"
-    	tag = "tag1"
-    },
-]
+	display_name = "%s"
+	admin_state = "UP"
+	description = "Acceptance Test"
+	logical_switch_id = "${nsxt_logical_switch.test.id}"
+	tags = [{scope = "scope1"
+	    	 tag = "tag1"}
+	]
 }`, transportZoneName, portName)
 }
 
@@ -141,26 +138,21 @@ data "nsxt_transport_zone" "TZ1" {
 }
 
 resource "nsxt_logical_switch" "test" {
-display_name = "test_switch"
-admin_state = "UP"
-replication_mode = "MTEP"
-transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
+	display_name = "test_switch"
+	admin_state = "UP"
+	replication_mode = "MTEP"
+	transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
 }
 
 resource "nsxt_logical_port" "test" {
-display_name = "%s"
-admin_state = "UP"
-description = "Acceptance Test Update"
-logical_switch_id = "${nsxt_logical_switch.test.id}"
-tags = [
-	{
-		scope = "scope1"
-    	tag = "tag1"
-    },
-	{
-		scope = "scope2"
-    	tag = "tag2"
-    },
-]
+	display_name = "%s"
+	admin_state = "UP"
+	description = "Acceptance Test Update"
+	logical_switch_id = "${nsxt_logical_switch.test.id}"
+	tags = [{scope = "scope1"
+	         tag = "tag1"}, 
+	        {scope = "scope2"
+	    	 tag = "tag2"}
+	]
 }`, transportZoneName, portUpdatedName)
 }

@@ -209,8 +209,8 @@ display_name = "%s"
 description = "Acceptance Test"
 linked_logical_switch_port_id = "${nsxt_logical_port.PORT1.id}"
 logical_router_id = "${nsxt_logical_tier1_router.RTR1.id}"
-subnets =  [{ip_addresses = ["8.0.0.1"],
-             prefix_length = 24}]
+subnets = [{ip_addresses = ["8.0.0.1"],
+            prefix_length = 24}]
 tags = [
 	{
 		scope = "scope1"
@@ -227,8 +227,8 @@ display_name = "%s"
 description = "Acceptance Test Update"
 linked_logical_switch_port_id = "${nsxt_logical_port.PORT1.id}"
 logical_router_id = "${nsxt_logical_tier1_router.RTR1.id}"
-subnets =  [{ip_addresses = ["8.0.0.1"],
-             prefix_length = 24}]
+subnets = [{ip_addresses = ["8.0.0.1"],
+            prefix_length = 24}]
 tags = [
 	{
 		scope = "scope1"
@@ -247,24 +247,18 @@ func testAccNSXLogicalRouterDownlinkPortCreateWithRelayTemplate(portName string,
 	       testAccNSXLogicalRouterDownlinkPortRelayTemplate() +
 	       fmt.Sprintf(`
 resource "nsxt_logical_router_downlink_port" "test" {
-display_name = "%s"
-description = "Acceptance Test"
-linked_logical_switch_port_id = "${nsxt_logical_port.PORT1.id}"
-logical_router_id = "${nsxt_logical_tier1_router.RTR1.id}"
-subnets =  [{ip_addresses = ["8.0.0.1"],
-             prefix_length = 24}]
-service_bindings = [
-	{
-		target_id = "${nsxt_dhcp_relay_service.DRS1.id}"
-		target_type = "LogicalService"
-	},
-]
-tags = [
-	{
-		scope = "scope1"
-    	tag = "tag1"
-    },
-]
+	display_name = "%s"
+	description = "Acceptance Test"
+	linked_logical_switch_port_id = "${nsxt_logical_port.PORT1.id}"
+	logical_router_id = "${nsxt_logical_tier1_router.RTR1.id}"
+	subnets = [{ip_addresses = ["8.0.0.1"],
+	            prefix_length = 24}]
+	service_bindings = [{target_id = "${nsxt_dhcp_relay_service.DRS1.id}"
+			             target_type = "LogicalService"}
+	]
+	tags = [{scope = "scope1"
+	    	 tag = "tag1"}
+	]
 }`, portName)
 }
 
@@ -273,27 +267,19 @@ func testAccNSXLogicalRouterDownlinkPortUpdateWithRelayTemplate(portUpdatedName 
 	       testAccNSXLogicalRouterDownlinkPortRelayTemplate() +
 	       fmt.Sprintf(`
 resource "nsxt_logical_router_downlink_port" "test" {
-display_name = "%s"
-description = "Acceptance Test Update"
-linked_logical_switch_port_id = "${nsxt_logical_port.PORT1.id}"
-logical_router_id = "${nsxt_logical_tier1_router.RTR1.id}"
-subnets =  [{ip_addresses = ["8.0.0.1"],
-             prefix_length = 24}]
-service_bindings = [
-	{
-		target_id = "${nsxt_dhcp_relay_service.DRS1.id}"
-		target_type = "LogicalService"
-	},
-]
-tags = [
-	{
-		scope = "scope1"
-    	tag = "tag1"
-    },
-	{
-		scope = "scope2"
-    	tag = "tag2"
-    },
-]
+	display_name = "%s"
+	description = "Acceptance Test Update"
+	linked_logical_switch_port_id = "${nsxt_logical_port.PORT1.id}"
+	logical_router_id = "${nsxt_logical_tier1_router.RTR1.id}"
+	subnets = [{ip_addresses = ["8.0.0.1"],
+	            prefix_length = 24}]
+	service_bindings = [{target_id = "${nsxt_dhcp_relay_service.DRS1.id}"
+			             target_type = "LogicalService"}
+	]
+	tags = [{scope = "scope1"
+	    	 tag = "tag1"},
+		    {scope = "scope2"
+	    	 tag = "tag2"}
+	]
 }`, portUpdatedName)
 }

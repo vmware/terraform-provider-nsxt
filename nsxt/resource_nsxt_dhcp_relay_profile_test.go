@@ -111,33 +111,25 @@ func testAccNSXDhcpRelayProfileCheckDestroy(state *terraform.State, display_name
 func testAccNSXDhcpRelayProfileCreateTemplate(prfName string, server_ip string) string {
 	return fmt.Sprintf(`
 resource "nsxt_dhcp_relay_profile" "test" {
-display_name = "%s"
-description = "Acceptance Test"
-server_addresses = ["%s"]
-tags = [
-	{
-		scope = "scope1"
-    	tag = "tag1"
-    },
-]
+	display_name = "%s"
+	description = "Acceptance Test"
+	server_addresses = ["%s"]
+	tags = [{scope = "scope1"
+	    	 tag = "tag1"}
+	]
 }`, prfName, server_ip)
 }
 
 func testAccNSXDhcpRelayProfileUpdateTemplate(prfUpdatedName string, server_ip string, additional_ip string) string {
 	return fmt.Sprintf(`
 resource "nsxt_dhcp_relay_profile" "test" {
-display_name = "%s"
-description = "Acceptance Test Update"
-server_addresses = ["%s", "%s"]
-tags = [
-	{
-		scope = "scope1"
-    	tag = "tag1"
-    },
-	{
-		scope = "scope2"
-    	tag = "tag2"
-    },
-]
+	display_name = "%s"
+	description = "Acceptance Test Update"
+	server_addresses = ["%s", "%s"]
+	tags = [{scope = "scope1"
+	         tag = "tag1"}, 
+	        {scope = "scope2"
+	    	 tag = "tag2"}
+	]
 }`, prfUpdatedName, server_ip, additional_ip)
 }
