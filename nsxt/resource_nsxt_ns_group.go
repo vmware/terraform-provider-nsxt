@@ -35,7 +35,7 @@ func resourceNsGroup() *schema.Resource {
                 Computed:    true,
             },
             "members": &schema.Schema{
-                Type:     schema.TypeList,
+                Type:     schema.TypeSet,
                 Description: "Reference to the direct/static members of the NSGroup.",
                 Optional: true,
                 Elem: &schema.Resource{
@@ -126,7 +126,7 @@ func setMembershipCriteriaInSchema(d *schema.ResourceData, membershipCriterias [
 }
 
 func getMembersFromSchema(d *schema.ResourceData) []manager.NsGroupSimpleExpression {
-    members := d.Get("members").([]interface{})
+    members := d.Get("members").(*schema.Set).List()
     var expresionList []manager.NsGroupSimpleExpression
     for _, member := range members {
         data := member.(map[string]interface{})
@@ -269,5 +269,5 @@ func resourceNsGroupDelete(d *schema.ResourceData, m interface{}) error {
         fmt.Printf("NsGroup %s not found", id)
         d.SetId("")
     }
-return nil
+    return nil
 }

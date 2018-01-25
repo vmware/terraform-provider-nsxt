@@ -19,7 +19,8 @@ resource "nsxt_ns_group" "NG" {
   tags = [{ scope = "color"
             tag = "red" }
   ]
-  members = ...
+  members = [{target_type = "NSGroup"
+              value = "${nsxt_ns_group.GRP1.id}"},
   membership_criteria = ...
 }
 ```
@@ -31,7 +32,7 @@ The following arguments are supported:
 * `description` - (Optional) Description of this resource.
 * `display_name` - (Optional) Defaults to ID if not set.
 * `tags` - (Optional) A list of scope + tag pairs to associate with this ns_group.
-* `members` - (Optional) Reference to the direct/static members of the NSGroup. Can be ID based expressions only. VirtualMachine cannot be added as a static member.
+* `members` - (Optional) Reference to the direct/static members of the NSGroup. Can be ID based expressions only. VirtualMachine cannot be added as a static member. target_type can be: NSGroup, IPSet, LogicalPort, LogicalSwitch, MACSet
 * `membership_criteria` - (Optional) List of tag or ID expressions which define the membership criteria for this NSGroup. An object must satisfy at least one of these expressions to qualify as a member of this group.
 
 
