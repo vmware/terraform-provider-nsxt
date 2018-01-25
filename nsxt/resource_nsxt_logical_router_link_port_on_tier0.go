@@ -67,8 +67,7 @@ func resourceLogicalRouterLinkPortOnTier0Create(d *schema.ResourceData, m interf
 	}
 
 	if resp.StatusCode != http.StatusCreated {
-		fmt.Printf("Unexpected status returned")
-		return nil
+        return fmt.Errorf("Unexpected status returned during LogicalRouterLinkPortOnTier0 create: %v", resp.StatusCode)
 	}
 	d.SetId(logical_router_link_port.Id)
 
@@ -86,7 +85,7 @@ func resourceLogicalRouterLinkPortOnTier0Read(d *schema.ResourceData, m interfac
 
 	logical_router_link_port, resp, err := nsxClient.LogicalRoutingAndServicesApi.ReadLogicalRouterLinkPortOnTier0(nsxClient.Context, id)
 	if resp.StatusCode == http.StatusNotFound {
-		fmt.Printf("LogicalRouterLinkPortOnTier0 not found")
+		fmt.Printf("LogicalRouterLinkPortOnTier0 %s not found", id)
 		d.SetId("")
 		return nil
 	}
@@ -157,7 +156,7 @@ func resourceLogicalRouterLinkPortOnTier0Delete(d *schema.ResourceData, m interf
 	}
 
 	if resp.StatusCode == http.StatusNotFound {
-		fmt.Printf("LogicalRouterLinkPortOnTier0 not found")
+		fmt.Printf("LogicalRouterLinkPortOnTier0 %s not found", id)
 		d.SetId("")
 	}
 

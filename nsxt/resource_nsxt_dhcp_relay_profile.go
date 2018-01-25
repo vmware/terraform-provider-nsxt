@@ -61,8 +61,7 @@ func resourceDhcpRelayProfileCreate(d *schema.ResourceData, m interface{}) error
     }
 
     if resp.StatusCode != http.StatusCreated {
-        fmt.Printf("Unexpected status returned")
-        return nil
+        return fmt.Errorf("Unexpected status returned during DhcpRelayProfile create: %v", resp.StatusCode)
     }
     d.SetId(dhcp_relay_profile.Id)
 
@@ -80,7 +79,7 @@ func resourceDhcpRelayProfileRead(d *schema.ResourceData, m interface{}) error {
 
     dhcp_relay_profile, resp, err := nsxClient.LogicalRoutingAndServicesApi.ReadDhcpRelayProfile(nsxClient.Context, id)
     if resp.StatusCode == http.StatusNotFound {
-        fmt.Printf("DhcpRelayProfile not found")
+        fmt.Printf("DhcpRelayProfile %s not found", id)
         d.SetId("")
         return nil
     }
@@ -144,7 +143,7 @@ func resourceDhcpRelayProfileDelete(d *schema.ResourceData, m interface{}) error
     }
 
     if resp.StatusCode == http.StatusNotFound {
-        fmt.Printf("DhcpRelayProfile not found")
+        fmt.Printf("DhcpRelayProfile %s not found", id)
         d.SetId("")
     }
     return nil

@@ -135,7 +135,7 @@ func resourceLogicalSwitchCreate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	if resp.StatusCode != http.StatusCreated {
-		return fmt.Errorf("Unexpected return status %d", resp.StatusCode)
+        return fmt.Errorf("Unexpected status returned during LogicalSwitch create: %v", resp.StatusCode)
 	}
 
 	if verify_realization {
@@ -185,7 +185,7 @@ func resourceLogicalSwitchRead(d *schema.ResourceData, m interface{}) error {
 
 	logical_switch, resp, err := nsxClient.LogicalSwitchingApi.GetLogicalSwitch(nsxClient.Context, id)
 	if resp.StatusCode == http.StatusNotFound {
-		fmt.Printf("LogicalSwitch not found")
+		fmt.Printf("LogicalSwitch %s not found", id)
 		d.SetId("")
 		return nil
 	}
@@ -273,7 +273,7 @@ func resourceLogicalSwitchDelete(d *schema.ResourceData, m interface{}) error {
 	}
 
 	if resp.StatusCode == http.StatusNotFound {
-		fmt.Printf("LogicalSwitch not found")
+		fmt.Printf("LogicalSwitch %s not found", id)
 		d.SetId("")
 	}
 	return nil

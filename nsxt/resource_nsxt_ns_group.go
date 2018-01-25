@@ -177,8 +177,7 @@ func resourceNsGroupCreate(d *schema.ResourceData, m interface{}) error {
     }
 
     if resp.StatusCode != http.StatusCreated {
-        fmt.Printf("Unexpected status returned")
-        return nil
+        return fmt.Errorf("Unexpected status returned during NsGroup create: %v", resp.StatusCode)
     }
     d.SetId(ns_group.Id)
     
@@ -198,7 +197,7 @@ func resourceNsGroupRead(d *schema.ResourceData, m interface{}) error {
     localVarOptionals["populateReferences"] = true
     ns_group, resp, err := nsxClient.GroupingObjectsApi.ReadNSGroup(nsxClient.Context, id, localVarOptionals)
     if resp.StatusCode == http.StatusNotFound {
-        fmt.Printf("NsGroup not found")
+        fmt.Printf("NsGroup %s not found", id)
         d.SetId("")
         return nil
     }
@@ -267,7 +266,7 @@ func resourceNsGroupDelete(d *schema.ResourceData, m interface{}) error {
     }
 
     if resp.StatusCode == http.StatusNotFound {
-        fmt.Printf("NsGroup not found")
+        fmt.Printf("NsGroup %s not found", id)
         d.SetId("")
     }
 return nil

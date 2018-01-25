@@ -68,7 +68,7 @@ func resourceLogicalPortCreate(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("Error while creating logical port %s: %v\n", lp.DisplayName, err)
 	}
 	if resp.StatusCode != http.StatusCreated {
-		return fmt.Errorf("Unexpected status returned")
+        return fmt.Errorf("Unexpected status returned during Logical port create: %v", resp.StatusCode)
 	}
 
 	resource_id := lp.Id
@@ -88,7 +88,8 @@ func resourceLogicalPortRead(d *schema.ResourceData, m interface{}) error {
 
 	if resp.StatusCode == http.StatusNotFound {
 		d.SetId("")
-		return fmt.Errorf("Logical port %s was not found\n", id)
+		fmt.Printf("Logical port %s not found", id)
+		return nil
 	}
 	if err != nil {
 		return fmt.Errorf("Error while reading logical port %s: %v\n", id, err)
@@ -163,7 +164,6 @@ func resourceLogicalPortDelete(d *schema.ResourceData, m interface{}) error {
 	if resp.StatusCode == http.StatusNotFound {
 		fmt.Printf("Logical port %s was not found\n", lp_id)
 		d.SetId("")
-		return nil
 	}
 
 	return nil

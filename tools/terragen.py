@@ -171,8 +171,7 @@ def write_create_func(f, resource, attrs, api_section):
 
     pretty_writeln(f, "if resp.StatusCode != http.StatusCreated {")
     shift()
-    pretty_writeln(f, "fmt.Printf(\"Unexpected status returned\")")
-    pretty_writeln(f, "return nil")
+    pretty_writeln(f, "return fmt.Errorf(\"Unexpected status returned during %s create: " % resource + '%v", resp.StatusCode)')
     unshift()
     pretty_writeln(f, "}")
 
@@ -201,7 +200,7 @@ def write_read_func(f, resource, attrs, api_section):
 
     pretty_writeln(f, "if resp.StatusCode == http.StatusNotFound {")
     shift()
-    pretty_writeln(f, "fmt.Printf(\"%s not found\")" % resource)
+    pretty_writeln(f, "fmt.Printf(\"%s " % resource + '%s not found\", id)')
     pretty_writeln(f, 'd.SetId("")')
     pretty_writeln(f, "return nil")
     unshift()
@@ -266,7 +265,7 @@ def write_delete_func(f, resource, attrs, api_section):
 
     pretty_writeln(f, "if resp.StatusCode == http.StatusNotFound {")
     shift()
-    pretty_writeln(f, "fmt.Printf(\"%s not found\")" % resource)
+    pretty_writeln(f, "fmt.Printf(\"%s " % resource + '%s not found\", id)')
     pretty_writeln(f, 'd.SetId("")')
     unshift()
     pretty_writeln(f, "}")

@@ -89,8 +89,7 @@ func resourceLogicalRouterDownLinkPortCreate(d *schema.ResourceData, m interface
 	}
 
 	if resp.StatusCode != http.StatusCreated {
-		fmt.Printf("Unexpected status returned")
-		return nil
+        return fmt.Errorf("Unexpected status returned during LogicalRouterDownLinkPort create: %v", resp.StatusCode)
 	}
 	d.SetId(logical_router_down_link_port.Id)
 
@@ -108,7 +107,7 @@ func resourceLogicalRouterDownLinkPortRead(d *schema.ResourceData, m interface{}
 
 	logical_router_down_link_port, resp, err := nsxClient.LogicalRoutingAndServicesApi.ReadLogicalRouterDownLinkPort(nsxClient.Context, id)
 	if resp.StatusCode == http.StatusNotFound {
-		fmt.Printf("LogicalRouterDownLinkPort not found")
+		fmt.Printf("LogicalRouterDownLinkPort %s not found", id)
 		d.SetId("")
 		return nil
 	}
@@ -190,7 +189,7 @@ func resourceLogicalRouterDownLinkPortDelete(d *schema.ResourceData, m interface
 	}
 
 	if resp.StatusCode == http.StatusNotFound {
-		fmt.Printf("LogicalRouterDownLinkPort not found")
+		fmt.Printf("LogicalRouterDownLinkPort %s not found", id)
 		d.SetId("")
 	}
 

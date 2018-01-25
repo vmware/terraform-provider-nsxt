@@ -92,8 +92,7 @@ func resourceL4PortSetNsServiceCreate(d *schema.ResourceData, m interface{}) err
 	}
 
 	if resp.StatusCode != http.StatusCreated {
-		fmt.Printf("Unexpected status returned")
-		return nil
+        return fmt.Errorf("Unexpected status returned during NsService create: %v", resp.StatusCode)
 	}
 	d.SetId(ns_service.Id)
 	return resourceL4PortSetNsServiceRead(d, m)
@@ -110,7 +109,7 @@ func resourceL4PortSetNsServiceRead(d *schema.ResourceData, m interface{}) error
 
 	ns_service, resp, err := nsxClient.GroupingObjectsApi.ReadL4PortSetNSService(nsxClient.Context, id)
 	if resp.StatusCode == http.StatusNotFound {
-		fmt.Printf("NsService not found")
+		fmt.Printf("NsService %s not found", id)
 		d.SetId("")
 		return nil
 	}
@@ -191,7 +190,7 @@ func resourceL4PortSetNsServiceDelete(d *schema.ResourceData, m interface{}) err
 	}
 
 	if resp.StatusCode == http.StatusNotFound {
-		fmt.Printf("NsService not found")
+		fmt.Printf("NsService %s not found", id)
 		d.SetId("")
 	}
 	return nil

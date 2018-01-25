@@ -60,8 +60,7 @@ func resourceDhcpRelayServiceCreate(d *schema.ResourceData, m interface{}) error
     }
 
     if resp.StatusCode != http.StatusCreated {
-        fmt.Printf("Unexpected status returned")
-        return nil
+        return fmt.Errorf("Unexpected status returned during DhcpRelayService create: %v", resp.StatusCode)
     }
     d.SetId(dhcp_relay_service.Id)
 
@@ -79,7 +78,7 @@ func resourceDhcpRelayServiceRead(d *schema.ResourceData, m interface{}) error {
 
     dhcp_relay_service, resp, err := nsxClient.LogicalRoutingAndServicesApi.ReadDhcpRelay(nsxClient.Context, id)
     if resp.StatusCode == http.StatusNotFound {
-        fmt.Printf("DhcpRelayService not found")
+        fmt.Printf("DhcpRelayService %s not found", id)
         d.SetId("")
         return nil
     }
@@ -143,7 +142,7 @@ func resourceDhcpRelayServiceDelete(d *schema.ResourceData, m interface{}) error
     }
 
     if resp.StatusCode == http.StatusNotFound {
-        fmt.Printf("DhcpRelayService not found")
+        fmt.Printf("DhcpRelayService %s not found", id)
         d.SetId("")
     }
 return nil

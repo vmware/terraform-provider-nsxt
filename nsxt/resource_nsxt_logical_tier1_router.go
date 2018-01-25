@@ -91,7 +91,7 @@ func resourceLogicalTier1RouterCreateRollback(nsxClient *api.APIClient, id strin
 func resourceLogicalTier1RouterReadAdv(d *schema.ResourceData, nsxClient *api.APIClient, id string) error {
 	adv_config, resp, err := nsxClient.LogicalRoutingAndServicesApi.ReadAdvertisementConfig(nsxClient.Context, id)
 	if resp.StatusCode == http.StatusNotFound {
-		return fmt.Errorf("LogicalTier1Router Advertisement config not found")
+		return fmt.Errorf("LogicalTier1Router %s Advertisement config not found", id)
 	}
 	if err != nil {
 		return fmt.Errorf("Error during LogicalTier1Router Advertisement config read: %v", err)
@@ -193,7 +193,7 @@ func resourceLogicalTier1RouterRead(d *schema.ResourceData, m interface{}) error
 
 	logical_router, resp, err := nsxClient.LogicalRoutingAndServicesApi.ReadLogicalRouter(nsxClient.Context, id)
 	if resp.StatusCode == http.StatusNotFound {
-		fmt.Printf("LogicalTier1Router not found")
+		fmt.Printf("LogicalTier1Router %s not found", id)
 		d.SetId("")
 		return nil
 	}
@@ -281,7 +281,7 @@ func resourceLogicalTier1RouterDelete(d *schema.ResourceData, m interface{}) err
 	}
 
 	if resp.StatusCode == http.StatusNotFound {
-		fmt.Printf("LogicalTier1Router not found")
+		fmt.Printf("LogicalTier1Router %s not found", id)
 		d.SetId("")
 	}
 	return nil
