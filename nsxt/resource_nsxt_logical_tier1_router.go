@@ -37,7 +37,7 @@ func resourceLogicalTier1Router() *schema.Resource {
 				Default:     "PREEMPTIVE",
 				Optional:    true,
 			},
-			"firewall_sections": getResourceReferencesSchema(false, true),
+			"firewall_sections": getResourceReferencesSchema(false, true, []string{}),
 			"high_availability_mode": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "High availability mode",

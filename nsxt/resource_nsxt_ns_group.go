@@ -43,6 +43,7 @@ func resourceNsGroup() *schema.Resource {
                         "target_type": &schema.Schema{
                             Type:     schema.TypeString,
                             Required: true,
+                            ValidateFunc: validateTargetType,
                         },
                         "value": &schema.Schema{
                             Type:     schema.TypeString,
@@ -90,6 +91,11 @@ func resourceNsGroup() *schema.Resource {
             // },
         },
     }
+}
+
+func validateTargetType(v interface{}, k string) (ws []string, errors []error) {
+    legal_values := []string{"NSGroup", "IPSet", "LogicalPort", "LogicalSwitch", "MACSet"}
+    return validateValueInList(v, k, legal_values)
 }
 
 func getMembershipCriteriaFromSchema(d *schema.ResourceData) []manager.NsGroupTagExpression {

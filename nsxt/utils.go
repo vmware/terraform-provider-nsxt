@@ -8,6 +8,7 @@ import (
 	"github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/common"
 	"github.com/vmware/go-vmware-nsxt/manager"
+    "fmt"
 )
 
 func interface2StringList(configured []interface{}) []string {
@@ -21,7 +22,6 @@ func interface2StringList(configured []interface{}) []string {
 	return vs
 }
 
-// TODO: ???
 func stringList2Interface(list []string) []interface{} {
 	vs := make([]interface{}, 0, len(list))
 	for _, v := range list {
@@ -198,7 +198,7 @@ func setAddressBindingsInSchema(d *schema.ResourceData, bindings []manager.Packe
 	d.Set("address_bindings", bindingList)
 }
 
-func getResourceReferencesSchema(required bool, computed bool) *schema.Schema {
+func getResourceReferencesSchema(required bool, computed bool, valid_target_types []string) *schema.Schema {
 	return &schema.Schema{
 		Type:     schema.TypeList,
 		Required: required,
@@ -221,14 +221,19 @@ func getResourceReferencesSchema(required bool, computed bool) *schema.Schema {
 				"target_type": &schema.Schema{
 					Type:     schema.TypeString,
 					Optional: true,
+					ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
+						if len(valid_target_types) > 0 {
+						    return validateValueInList(v, k, valid_target_types)
+						}
+						return
+					},
 				},
 			},
 		},
 	}
 }
 
-func getResourceReferencesFromSchema(d *schema.ResourceData, schemaAttrName string) []common.ResourceReference {
-	references := d.Get(schemaAttrName).([]interface{})
+func getResourceReferences(references []interface{}) []common.ResourceReference {
 	var referenceList []common.ResourceReference
 	for _, reference := range references {
 		data := reference.(map[string]interface{})
@@ -244,7 +249,12 @@ func getResourceReferencesFromSchema(d *schema.ResourceData, schemaAttrName stri
 	return referenceList
 }
 
-func setResourceReferencesInSchema(d *schema.ResourceData, references []common.ResourceReference, schemaAttrName string) {
+func getResourceReferencesFromSchema(d *schema.ResourceData, schemaAttrName string) []common.ResourceReference {
+	references := d.Get(schemaAttrName).([]interface{})
+	return getResourceReferences(references)
+}
+
+func returnResourceReferences(references []common.ResourceReference) []map[string]interface{} {
 	var referenceList []map[string]interface{}
 	for _, reference := range references {
 		elem := make(map[string]interface{})
@@ -254,6 +264,11 @@ func setResourceReferencesInSchema(d *schema.ResourceData, references []common.R
 		elem["target_type"] = reference.TargetType
 		referenceList = append(referenceList, elem)
 	}
+	return referenceList
+}
+
+func setResourceReferencesInSchema(d *schema.ResourceData, references []common.ResourceReference, schemaAttrName string) {
+	referenceList := returnResourceReferences(references)
 	d.Set(schemaAttrName, referenceList)
 }
 
@@ -341,3 +356,16 @@ func makeResourceReference(resourceType string, resourceId string) *common.Resou
 		TargetId:   resourceId,
 	}
 }
+
+// Utilities for fields validations
+func validateValueInList(v interface{}, k string, legal_values []string) (ws []string, errors []error) {
+    value := v.(string)
+    for _, option := range legal_values {
+        if value == option {
+            return
+        }
+    }
+    errors = append(errors, fmt.Errorf("%q must be one of %s", k, legal_values))
+    return
+}
+

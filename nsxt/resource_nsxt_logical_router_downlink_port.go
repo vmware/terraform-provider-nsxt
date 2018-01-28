@@ -52,7 +52,7 @@ func resourceLogicalRouterDownLinkPort() *schema.Resource {
 				Description: "Unicast Reverse Path Forwarding mode",
 				Optional:    true,
 			},
-			"service_bindings": getResourceReferencesSchema(false, false),
+			"service_bindings": getResourceReferencesSchema(false, false, []string{"LogicalService"}),
 		},
 	}
 }
