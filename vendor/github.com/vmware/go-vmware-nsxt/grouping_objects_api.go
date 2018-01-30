@@ -154,6 +154,140 @@ func (a *GroupingObjectsApiService) AddOrRemoveNSGroupExpression(ctx context.Con
 	return successPayload, localVarHttpResponse, err
 }
 
+/* GroupingObjectsApiService Add NSGroup expression
+Add/remove the expressions passed in the request body to/from the NSGroup
+* @param ctx context.Context Authentication Context
+@param nsGroupId NSGroup Id
+@param nSGroupExpressionList
+@param action Specifies addition or removal action
+@return NsGroup*/
+func (a *GroupingObjectsApiService) AddOrRemoveNsGroupTagExpression(ctx context.Context, nsGroupId string, nSGroupExpressionList manager.NsGroupTagExpressionList, action string) (manager.NsGroup, *http.Response, error) {
+	var (
+		localVarHttpMethod = strings.ToUpper("Post")
+		localVarPostBody   interface{}
+		localVarFileName   string
+		localVarFileBytes  []byte
+		successPayload     manager.NsGroup
+	)
+
+	// create path and map variables
+	localVarPath := a.client.cfg.BasePath + "/ns-groups/{ns-group-id}"
+	localVarPath = strings.Replace(localVarPath, "{"+"ns-group-id"+"}", fmt.Sprintf("%v", nsGroupId), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	localVarQueryParams.Add("action", parameterToString(action, ""))
+	// to determine the Content-Type header
+	localVarHttpContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHttpContentType := selectHeaderContentType(localVarHttpContentTypes)
+	if localVarHttpContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHttpContentType
+	}
+
+	// to determine the Accept header
+	localVarHttpHeaderAccepts := []string{
+		"application/json",
+	}
+
+	// set Accept header
+	localVarHttpHeaderAccept := selectHeaderAccept(localVarHttpHeaderAccepts)
+	if localVarHttpHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHttpHeaderAccept
+	}
+	// body params
+	localVarPostBody = &nSGroupExpressionList
+	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHttpMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFileName, localVarFileBytes)
+	if err != nil {
+		return successPayload, nil, err
+	}
+
+	localVarHttpResponse, err := a.client.callAPI(r)
+	if err != nil || localVarHttpResponse == nil {
+		return successPayload, localVarHttpResponse, err
+	}
+	defer localVarHttpResponse.Body.Close()
+	if localVarHttpResponse.StatusCode >= 300 {
+		return successPayload, localVarHttpResponse, reportError(localVarHttpResponse.Status)
+	}
+
+	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
+		return successPayload, localVarHttpResponse, err
+	}
+
+	return successPayload, localVarHttpResponse, err
+}
+
+/* GroupingObjectsApiService Add NSGroup expression
+Add/remove the expressions passed in the request body to/from the NSGroup
+* @param ctx context.Context Authentication Context
+@param nsGroupId NSGroup Id
+@param nSGroupExpressionList
+@param action Specifies addition or removal action
+@return NsGroup*/
+func (a *GroupingObjectsApiService) AddOrRemoveNsGroupSimpleExpression(ctx context.Context, nsGroupId string, nSGroupExpressionList manager.NsGroupSimpleExpressionList, action string) (manager.NsGroup, *http.Response, error) {
+	var (
+		localVarHttpMethod = strings.ToUpper("Post")
+		localVarPostBody   interface{}
+		localVarFileName   string
+		localVarFileBytes  []byte
+		successPayload     manager.NsGroup
+	)
+
+	// create path and map variables
+	localVarPath := a.client.cfg.BasePath + "/ns-groups/{ns-group-id}"
+	localVarPath = strings.Replace(localVarPath, "{"+"ns-group-id"+"}", fmt.Sprintf("%v", nsGroupId), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	localVarQueryParams.Add("action", parameterToString(action, ""))
+	// to determine the Content-Type header
+	localVarHttpContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHttpContentType := selectHeaderContentType(localVarHttpContentTypes)
+	if localVarHttpContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHttpContentType
+	}
+
+	// to determine the Accept header
+	localVarHttpHeaderAccepts := []string{
+		"application/json",
+	}
+
+	// set Accept header
+	localVarHttpHeaderAccept := selectHeaderAccept(localVarHttpHeaderAccepts)
+	if localVarHttpHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHttpHeaderAccept
+	}
+	// body params
+	localVarPostBody = &nSGroupExpressionList
+	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHttpMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFileName, localVarFileBytes)
+	if err != nil {
+		return successPayload, nil, err
+	}
+
+	localVarHttpResponse, err := a.client.callAPI(r)
+	if err != nil || localVarHttpResponse == nil {
+		return successPayload, localVarHttpResponse, err
+	}
+	defer localVarHttpResponse.Body.Close()
+	if localVarHttpResponse.StatusCode >= 300 {
+		return successPayload, localVarHttpResponse, reportError(localVarHttpResponse.Status)
+	}
+
+	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
+		return successPayload, localVarHttpResponse, err
+	}
+
+	return successPayload, localVarHttpResponse, err
+}
+
 /* GroupingObjectsApiService Create IPSet
 Creates a new IPSet that can group either IPv4 or IPv6 individual ip addresses, ranges or subnets.
 * @param ctx context.Context Authentication Context
