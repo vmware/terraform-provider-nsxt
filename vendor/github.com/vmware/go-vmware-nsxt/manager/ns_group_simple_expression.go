@@ -27,3 +27,10 @@ type NsGroupSimpleExpression struct {
 	// Value that satisfies this expression
 	Value string `json:"value"`
 }
+
+// List of NSGroupSimpleExpressions
+type NsGroupSimpleExpressionList struct {
+
+	// List of NSGroupSimpleExpressions to be passed to add and remove APIs
+	Members []NsGroupSimpleExpression `json:"members"`
+}

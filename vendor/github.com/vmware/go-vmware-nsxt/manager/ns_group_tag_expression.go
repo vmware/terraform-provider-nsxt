@@ -23,3 +23,10 @@ type NsGroupTagExpression struct {
 	// Type of the resource on which this expression is evaluated
 	TargetType string `json:"target_type"`
 }
+
+// List of NSGroupTagExpressions
+type NsGroupTagExpressionList struct {
+
+	// List of NSGroupTagExpressions to be passed to add and remove APIs
+	Members []NsGroupTagExpression `json:"members"`
+}
