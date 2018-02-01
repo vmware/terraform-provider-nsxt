@@ -55,10 +55,10 @@ type NatRule struct {
 	Action string `json:"action"`
 
 	// enable/disable the rule
-	Enabled bool `json:"enabled,omitempty"`
+	Enabled bool `json:"enabled"`
 
 	// enable/disable the logging of rule
-	Logging bool `json:"logging,omitempty"`
+	Logging bool `json:"logging"`
 
 	// Logical router id
 	LogicalRouterId string `json:"logical_router_id,omitempty"`
@@ -73,7 +73,7 @@ type NatRule struct {
 	MatchSourceNetwork string `json:"match_source_network,omitempty"`
 
 	// Default is true. If the nat_pass is set to true, the following firewall stage will be skipped. Please note, if action is NO_NAT, then nat_pass must be set to true or omitted.
-	NatPass bool `json:"nat_pass,omitempty"`
+	NatPass bool `json:"nat_pass"`
 
 	// Ascending, valid range [0-2147483647]. If multiple rules have the same priority, evaluation sequence is undefined.
 	RulePriority int64 `json:"rule_priority,omitempty"`
