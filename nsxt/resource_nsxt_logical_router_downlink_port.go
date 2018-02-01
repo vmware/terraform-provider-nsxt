@@ -89,7 +89,7 @@ func resourceLogicalRouterDownLinkPortCreate(d *schema.ResourceData, m interface
 	}
 
 	if resp.StatusCode != http.StatusCreated {
-        return fmt.Errorf("Unexpected status returned during LogicalRouterDownLinkPort create: %v", resp.StatusCode)
+		return fmt.Errorf("Unexpected status returned during LogicalRouterDownLinkPort create: %v", resp.StatusCode)
 	}
 	d.SetId(logical_router_down_link_port.Id)
 

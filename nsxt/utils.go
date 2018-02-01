@@ -4,11 +4,11 @@
 package nsxt
 
 import (
+	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/common"
 	"github.com/vmware/go-vmware-nsxt/manager"
-    "fmt"
 )
 
 func interface2StringList(configured []interface{}) []string {
@@ -223,7 +223,7 @@ func getResourceReferencesSchema(required bool, computed bool, valid_target_type
 					Optional: true,
 					ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
 						if len(valid_target_types) > 0 {
-						    return validateValueInList(v, k, valid_target_types)
+							return validateValueInList(v, k, valid_target_types)
 						}
 						return
 					},
@@ -359,13 +359,12 @@ func makeResourceReference(resourceType string, resourceId string) *common.Resou
 
 // Utilities for fields validations
 func validateValueInList(v interface{}, k string, legal_values []string) (ws []string, errors []error) {
-    value := v.(string)
-    for _, option := range legal_values {
-        if value == option {
-            return
-        }
-    }
-    errors = append(errors, fmt.Errorf("%q must be one of %s", k, legal_values))
-    return
+	value := v.(string)
+	for _, option := range legal_values {
+		if value == option {
+			return
+		}
+	}
+	errors = append(errors, fmt.Errorf("%q must be one of %s", k, legal_values))
+	return
 }
-

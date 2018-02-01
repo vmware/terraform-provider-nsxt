@@ -92,7 +92,7 @@ func resourceL4PortSetNsServiceCreate(d *schema.ResourceData, m interface{}) err
 	}
 
 	if resp.StatusCode != http.StatusCreated {
-        return fmt.Errorf("Unexpected status returned during NsService create: %v", resp.StatusCode)
+		return fmt.Errorf("Unexpected status returned during NsService create: %v", resp.StatusCode)
 	}
 	d.SetId(ns_service.Id)
 	return resourceL4PortSetNsServiceRead(d, m)

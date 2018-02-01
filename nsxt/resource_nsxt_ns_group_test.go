@@ -99,7 +99,7 @@ func testAccNSXNSGroupExists(display_name string, resourceName string) resource.
 			return fmt.Errorf("NS Group resource ID not set in resources ")
 		}
 
-        localVarOptionals := make(map[string]interface{})
+		localVarOptionals := make(map[string]interface{})
 		group, responseCode, err := nsxClient.GroupingObjectsApi.ReadNSGroup(nsxClient.Context, resourceID, localVarOptionals)
 		if err != nil {
 			return fmt.Errorf("Error while retrieving NS Group ID %s. Error: %v", resourceID, err)
@@ -127,7 +127,7 @@ func testAccNSXNSGroupCheckDestroy(state *terraform.State, display_name string) 
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-        localVarOptionals := make(map[string]interface{})
+		localVarOptionals := make(map[string]interface{})
 		group, responseCode, err := nsxClient.GroupingObjectsApi.ReadNSGroup(nsxClient.Context, resourceID, localVarOptionals)
 		if err != nil {
 			if responseCode.StatusCode != http.StatusOK {

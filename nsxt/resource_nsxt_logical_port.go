@@ -68,7 +68,7 @@ func resourceLogicalPortCreate(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("Error while creating logical port %s: %v\n", lp.DisplayName, err)
 	}
 	if resp.StatusCode != http.StatusCreated {
-        return fmt.Errorf("Unexpected status returned during Logical port create: %v", resp.StatusCode)
+		return fmt.Errorf("Unexpected status returned during Logical port create: %v", resp.StatusCode)
 	}
 
 	resource_id := lp.Id

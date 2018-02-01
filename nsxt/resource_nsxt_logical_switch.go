@@ -135,7 +135,7 @@ func resourceLogicalSwitchCreate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	if resp.StatusCode != http.StatusCreated {
-        return fmt.Errorf("Unexpected status returned during LogicalSwitch create: %v", resp.StatusCode)
+		return fmt.Errorf("Unexpected status returned during LogicalSwitch create: %v", resp.StatusCode)
 	}
 
 	if verify_realization {

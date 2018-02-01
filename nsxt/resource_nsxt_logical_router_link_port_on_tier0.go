@@ -70,7 +70,7 @@ func resourceLogicalRouterLinkPortOnTier0Create(d *schema.ResourceData, m interf
 	}
 
 	if resp.StatusCode != http.StatusCreated {
-        return fmt.Errorf("Unexpected status returned during LogicalRouterLinkPortOnTier0 create: %v", resp.StatusCode)
+		return fmt.Errorf("Unexpected status returned during LogicalRouterLinkPortOnTier0 create: %v", resp.StatusCode)
 	}
 	d.SetId(logical_router_link_port.Id)
 

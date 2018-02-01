@@ -231,8 +231,8 @@ resource "nsxt_logical_router_downlink_port" "test" {
 
 func testAccNSXLogicalRouterDownlinkPortCreateWithRelayTemplate(portName string, transportZoneName string, edgeClusterName string) string {
 	return testAccNSXLogicalRouterDownlinkPortPreConditionTemplate(transportZoneName, edgeClusterName) +
-	       testAccNSXLogicalRouterDownlinkPortRelayTemplate() +
-	       fmt.Sprintf(`
+		testAccNSXLogicalRouterDownlinkPortRelayTemplate() +
+		fmt.Sprintf(`
 resource "nsxt_logical_router_downlink_port" "test" {
 	display_name = "%s"
 	description = "Acceptance Test"
@@ -251,8 +251,8 @@ resource "nsxt_logical_router_downlink_port" "test" {
 
 func testAccNSXLogicalRouterDownlinkPortUpdateWithRelayTemplate(portUpdatedName string, transportZoneName string, edgeClusterName string) string {
 	return testAccNSXLogicalRouterDownlinkPortPreConditionTemplate(transportZoneName, edgeClusterName) +
-	       testAccNSXLogicalRouterDownlinkPortRelayTemplate() +
-	       fmt.Sprintf(`
+		testAccNSXLogicalRouterDownlinkPortRelayTemplate() +
+		fmt.Sprintf(`
 resource "nsxt_logical_router_downlink_port" "test" {
 	display_name = "%s"
 	description = "Acceptance Test Update"
