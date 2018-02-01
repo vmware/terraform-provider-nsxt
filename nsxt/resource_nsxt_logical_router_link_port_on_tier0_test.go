@@ -48,6 +48,48 @@ func TestNSXLogicalRouterLinkPortOnTier0Basic(t *testing.T) {
 	})
 }
 
+func TestNSXLogicalRouterLinkPortOnTier0WithRelay(t *testing.T) {
+	// Note: this test will pass only with NSX 2.2 & up. Before that dhcp relay is not supported here
+	name := fmt.Sprintf("test-nsx-port-on-tier0")
+	tier0RouterName := Tier0RouterDefaultName
+	updateName := fmt.Sprintf("%s-update", name)
+	testResourceName := "nsxt_logical_router_link_port_on_tier0.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXLogicalRouterLinkPortOnTier0CheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXLogicalRouterLinkPortOnTier0WithRelayCreateTemplate(name, tier0RouterName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXLogicalRouterLinkPortOnTier0Exists(name, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "tags.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "service_bindings.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "service_bindings.0.target_type", "LogicalService"),
+					resource.TestCheckResourceAttr(testResourceName, "service_bindings.0.target_display_name", "srv"),
+				),
+			},
+			{
+				Config: testAccNSXLogicalRouterLinkPortOnTier0WithRelayUpdateTemplate(updateName, tier0RouterName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXLogicalRouterLinkPortOnTier0Exists(updateName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updateName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test Update"),
+					resource.TestCheckResourceAttr(testResourceName, "tags.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "service_bindings.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "service_bindings.0.target_type", "LogicalService"),
+					resource.TestCheckResourceAttr(testResourceName, "service_bindings.0.target_display_name", "srv"),
+				),
+			},
+		},
+	})
+}
+
 func testAccNSXLogicalRouterLinkPortOnTier0Exists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
@@ -132,6 +174,46 @@ resource "nsxt_logical_router_link_port_on_tier0" "test" {
 	display_name = "%s"
 	description = "Acceptance Test Update"
 	logical_router_id = "${data.nsxt_logical_tier0_router.TIER0RTR.id}"
+	tags = [{scope = "scope3"
+    	     tag = "tag3"}
+	]
+}`, tier0RouterName, name)
+}
+
+func testAccNSXLogicalRouterLinkPortOnTier0WithRelayCreateTemplate(name string, tier0RouterName string) string {
+	return testAccNSXLogicalRouterDownlinkPortRelayTemplate() + fmt.Sprintf(`
+data "nsxt_logical_tier0_router" "TIER0RTR" {
+    display_name = "%s"
+}
+
+resource "nsxt_logical_router_link_port_on_tier0" "test" {
+	display_name = "%s"
+	description = "Acceptance Test"
+	logical_router_id = "${data.nsxt_logical_tier0_router.TIER0RTR.id}"
+	service_bindings = [{target_id = "${nsxt_dhcp_relay_service.DRS1.id}"
+			             target_type = "LogicalService"}
+	]
+	tags = [{scope = "scope1"
+        	 tag = "tag1"},
+        	{scope = "scope2"
+    	     tag = "tag2"}
+	]
+}`, tier0RouterName, name)
+}
+
+func testAccNSXLogicalRouterLinkPortOnTier0WithRelayUpdateTemplate(name string, tier0RouterName string) string {
+	return testAccNSXLogicalRouterDownlinkPortRelayTemplate() + fmt.Sprintf(`
+data "nsxt_logical_tier0_router" "TIER0RTR" {
+    display_name = "%s"
+}
+
+resource "nsxt_logical_router_link_port_on_tier0" "test" {
+	display_name = "%s"
+	description = "Acceptance Test Update"
+	logical_router_id = "${data.nsxt_logical_tier0_router.TIER0RTR.id}"
+	service_bindings = [{target_id = "${nsxt_dhcp_relay_service.DRS1.id}"
+			             target_type = "LogicalService"}
+	]
 	tags = [{scope = "scope3"
     	     tag = "tag3"}
 	]

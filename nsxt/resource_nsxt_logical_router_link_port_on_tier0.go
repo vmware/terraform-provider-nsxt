@@ -40,6 +40,7 @@ func resourceLogicalRouterLinkPortOnTier0() *schema.Resource {
 				Description: "Identifier for port on logical router to connect to",
 				Computed:    true,
 			},
+			"service_bindings": getResourceReferencesSchema(false, false, []string{"LogicalService"}),
 		},
 	}
 }
@@ -53,12 +54,14 @@ func resourceLogicalRouterLinkPortOnTier0Create(d *schema.ResourceData, m interf
 	tags := getTagsFromSchema(d)
 	logical_router_id := d.Get("logical_router_id").(string)
 	linked_logical_router_port_id := d.Get("linked_logical_router_port_id").(string)
+	service_bindings := getServiceBindingsFromSchema(d, "service_bindings")
 	logical_router_link_port := manager.LogicalRouterLinkPortOnTier0{
 		Description:               description,
 		DisplayName:               display_name,
 		Tags:                      tags,
 		LogicalRouterId:           logical_router_id,
 		LinkedLogicalRouterPortId: linked_logical_router_port_id,
+		ServiceBindings:           service_bindings,
 	}
 	logical_router_link_port, resp, err := nsxClient.LogicalRoutingAndServicesApi.CreateLogicalRouterLinkPortOnTier0(nsxClient.Context, logical_router_link_port)
 
@@ -100,6 +103,7 @@ func resourceLogicalRouterLinkPortOnTier0Read(d *schema.ResourceData, m interfac
 	setTagsInSchema(d, logical_router_link_port.Tags)
 	d.Set("logical_router_id", logical_router_link_port.LogicalRouterId)
 	d.Set("linked_logical_router_port_id", logical_router_link_port.LinkedLogicalRouterPortId)
+	setServiceBindingsInSchema(d, logical_router_link_port.ServiceBindings, "service_bindings")
 	d.Set("resource_type", logical_router_link_port.ResourceType)
 
 	return nil
@@ -120,7 +124,7 @@ func resourceLogicalRouterLinkPortOnTier0Update(d *schema.ResourceData, m interf
 	tags := getTagsFromSchema(d)
 	logical_router_id := d.Get("logical_router_id").(string)
 	linked_logical_router_port_id := d.Get("linked_logical_router_port_id").(string)
-
+	service_bindings := getServiceBindingsFromSchema(d, "service_bindings")
 	logical_router_link_port := manager.LogicalRouterLinkPortOnTier0{
 		Revision:                  revision,
 		Description:               description,
@@ -128,6 +132,7 @@ func resourceLogicalRouterLinkPortOnTier0Update(d *schema.ResourceData, m interf
 		Tags:                      tags,
 		LogicalRouterId:           logical_router_id,
 		LinkedLogicalRouterPortId: linked_logical_router_port_id,
+		ServiceBindings:           service_bindings,
 		ResourceType:              "LogicalRouterLinkPortOnTIER0",
 	}
 
