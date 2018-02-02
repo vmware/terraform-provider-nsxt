@@ -672,6 +672,72 @@ func (a *GroupingObjectsApiService) CreateIcmpTypeNSService(ctx context.Context,
 	return successPayload, localVarHttpResponse, err
 }
 
+/* GroupingObjectsApiService Create IgmpTypeNSService
+Creates a new NSService which allows users to specify characteristics to use for matching network traffic.
+* @param ctx context.Context Authentication Context
+@param nSService
+@return manager.NsService*/
+func (a *GroupingObjectsApiService) CreateIgmpTypeNSService(ctx context.Context, nSService manager.IgmpTypeNsService) (manager.IgmpTypeNsService, *http.Response, error) {
+	var (
+		localVarHttpMethod = strings.ToUpper("Post")
+		localVarPostBody   interface{}
+		localVarFileName   string
+		localVarFileBytes  []byte
+		successPayload     manager.IgmpTypeNsService
+	)
+
+	// set resource type for this type-specific API
+	nSService.ResourceType = "IGMPTypeNSService"
+
+	// create path and map variables
+	localVarPath := a.client.cfg.BasePath + "/ns-services"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHttpContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHttpContentType := selectHeaderContentType(localVarHttpContentTypes)
+	if localVarHttpContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHttpContentType
+	}
+
+	// to determine the Accept header
+	localVarHttpHeaderAccepts := []string{
+		"application/json",
+	}
+
+	// set Accept header
+	localVarHttpHeaderAccept := selectHeaderAccept(localVarHttpHeaderAccepts)
+	if localVarHttpHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHttpHeaderAccept
+	}
+	// body params
+	localVarPostBody = &nSService
+	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHttpMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFileName, localVarFileBytes)
+	if err != nil {
+		return successPayload, nil, err
+	}
+
+	localVarHttpResponse, err := a.client.callAPI(r)
+	if err != nil || localVarHttpResponse == nil {
+		return successPayload, localVarHttpResponse, err
+	}
+	defer localVarHttpResponse.Body.Close()
+	if localVarHttpResponse.StatusCode >= 300 {
+		return successPayload, localVarHttpResponse, reportError(localVarHttpResponse.Status)
+	}
+
+	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
+		return successPayload, localVarHttpResponse, err
+	}
+
+	return successPayload, localVarHttpResponse, err
+}
+
 /* GroupingObjectsApiService Create AlgTypeNSService
 Creates a new NSService which allows users to specify characteristics to use for matching network traffic.
 * @param ctx context.Context Authentication Context

@@ -11,12 +11,12 @@ import (
 	"net/http"
 )
 
-func resourceIcmpTypeNsService() *schema.Resource {
+func resourceEtherTypeNsService() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceIcmpTypeNsServiceCreate,
-		Read:   resourceIcmpTypeNsServiceRead,
-		Update: resourceIcmpTypeNsServiceUpdate,
-		Delete: resourceIcmpTypeNsServiceDelete,
+		Create: resourceEtherTypeNsServiceCreate,
+		Read:   resourceEtherTypeNsServiceRead,
+		Update: resourceEtherTypeNsServiceUpdate,
+		Delete: resourceEtherTypeNsServiceDelete,
 
 		Schema: map[string]*schema.Schema{
 			"revision":     getRevisionSchema(),
@@ -37,27 +37,16 @@ func resourceIcmpTypeNsService() *schema.Resource {
 				Description: "The default NSServices are created in the system by default. These NSServices can't be modified/deleted",
 				Computed:    true,
 			},
-			"icmp_code": &schema.Schema{
+			"ether_type": &schema.Schema{
 				Type:        schema.TypeInt,
-				Description: "ICMP message code",
-				Optional:    true,
-			},
-			"icmp_type": &schema.Schema{
-				Type:        schema.TypeInt,
-				Description: "ICMP message type",
-				Elem:        &schema.Schema{Type: schema.TypeString},
-				Optional:    true,
-			},
-			"protocol": &schema.Schema{
-				Type:        schema.TypeString,
-				Description: "Version of ICMP protocol (ICMPv4/ICMPv6)",
+				Description: "Type of the encapsulated protocol",
 				Required:    true,
 			},
 		},
 	}
 }
 
-func resourceIcmpTypeNsServiceCreate(d *schema.ResourceData, m interface{}) error {
+func resourceEtherTypeNsServiceCreate(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
@@ -65,26 +54,22 @@ func resourceIcmpTypeNsServiceCreate(d *schema.ResourceData, m interface{}) erro
 	display_name := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
 	default_service := d.Get("default_service").(bool)
-	icmp_code := int64(d.Get("icmp_code").(int))
-	icmp_type := int64(d.Get("icmp_type").(int))
-	protocol := d.Get("protocol").(string)
+	ether_type := int64(d.Get("ether_type").(int))
 
-	ns_service := manager.IcmpTypeNsService{
+	ns_service := manager.EtherTypeNsService{
 		NsService: manager.NsService{
 			Description:    description,
 			DisplayName:    display_name,
 			Tags:           tags,
 			DefaultService: default_service,
 		},
-		NsserviceElement: manager.IcmpTypeNsServiceEntry{
-			ResourceType: "ICMPTypeNSService",
-			IcmpCode:     icmp_code,
-			IcmpType:     icmp_type,
-			Protocol:     protocol,
+		NsserviceElement: manager.EtherTypeNsServiceEntry{
+			ResourceType: "EtherTypeNSService",
+			EtherType:    ether_type,
 		},
 	}
 
-	ns_service, resp, err := nsxClient.GroupingObjectsApi.CreateIcmpTypeNSService(nsxClient.Context, ns_service)
+	ns_service, resp, err := nsxClient.GroupingObjectsApi.CreateEtherTypeNSService(nsxClient.Context, ns_service)
 
 	if err != nil {
 		return fmt.Errorf("Error during NsService create: %v", err)
@@ -94,10 +79,10 @@ func resourceIcmpTypeNsServiceCreate(d *schema.ResourceData, m interface{}) erro
 		return fmt.Errorf("Unexpected status returned during NsService create: %v", resp.StatusCode)
 	}
 	d.SetId(ns_service.Id)
-	return resourceIcmpTypeNsServiceRead(d, m)
+	return resourceEtherTypeNsServiceRead(d, m)
 }
 
-func resourceIcmpTypeNsServiceRead(d *schema.ResourceData, m interface{}) error {
+func resourceEtherTypeNsServiceRead(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
@@ -106,7 +91,7 @@ func resourceIcmpTypeNsServiceRead(d *schema.ResourceData, m interface{}) error 
 		return fmt.Errorf("Error obtaining ns service id")
 	}
 
-	ns_service, resp, err := nsxClient.GroupingObjectsApi.ReadIcmpTypeNSService(nsxClient.Context, id)
+	ns_service, resp, err := nsxClient.GroupingObjectsApi.ReadEtherTypeNSService(nsxClient.Context, id)
 	if resp.StatusCode == http.StatusNotFound {
 		fmt.Printf("NsService %s not found", id)
 		d.SetId("")
@@ -124,15 +109,12 @@ func resourceIcmpTypeNsServiceRead(d *schema.ResourceData, m interface{}) error 
 	d.Set("display_name", ns_service.DisplayName)
 	setTagsInSchema(d, ns_service.Tags)
 	d.Set("default_service", ns_service.DefaultService)
-	d.Set("resource_type", nsservice_element.ResourceType)
-	d.Set("icmp_type", nsservice_element.IcmpType)
-	d.Set("icmp_code", nsservice_element.IcmpCode)
-	d.Set("protocol", nsservice_element.Protocol)
+	d.Set("ether_type", nsservice_element.EtherType)
 
 	return nil
 }
 
-func resourceIcmpTypeNsServiceUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceEtherTypeNsServiceUpdate(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
@@ -145,12 +127,10 @@ func resourceIcmpTypeNsServiceUpdate(d *schema.ResourceData, m interface{}) erro
 	display_name := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
 	default_service := d.Get("default_service").(bool)
-	icmp_code := int64(d.Get("icmp_code").(int))
-	icmp_type := int64(d.Get("icmp_type").(int))
-	protocol := d.Get("protocol").(string)
 	revision := int64(d.Get("revision").(int))
+	ether_type := int64(d.Get("ether_type").(int))
 
-	ns_service := manager.IcmpTypeNsService{
+	ns_service := manager.EtherTypeNsService{
 		NsService: manager.NsService{
 			Description:    description,
 			DisplayName:    display_name,
@@ -158,23 +138,21 @@ func resourceIcmpTypeNsServiceUpdate(d *schema.ResourceData, m interface{}) erro
 			DefaultService: default_service,
 			Revision:       revision,
 		},
-		NsserviceElement: manager.IcmpTypeNsServiceEntry{
-			ResourceType: "ICMPTypeNSService",
-			IcmpCode:     icmp_code,
-			IcmpType:     icmp_type,
-			Protocol:     protocol,
+		NsserviceElement: manager.EtherTypeNsServiceEntry{
+			ResourceType: "EtherTypeNSService",
+			EtherType:    ether_type,
 		},
 	}
 
-	ns_service, resp, err := nsxClient.GroupingObjectsApi.UpdateIcmpTypeNSService(nsxClient.Context, id, ns_service)
+	ns_service, resp, err := nsxClient.GroupingObjectsApi.UpdateEtherTypeNSService(nsxClient.Context, id, ns_service)
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during NsService update: %v %v", err, resp)
 	}
 
-	return resourceIcmpTypeNsServiceRead(d, m)
+	return resourceEtherTypeNsServiceRead(d, m)
 }
 
-func resourceIcmpTypeNsServiceDelete(d *schema.ResourceData, m interface{}) error {
+func resourceEtherTypeNsServiceDelete(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 

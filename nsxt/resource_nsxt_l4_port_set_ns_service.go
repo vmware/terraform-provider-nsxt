@@ -125,7 +125,6 @@ func resourceL4PortSetNsServiceRead(d *schema.ResourceData, m interface{}) error
 	d.Set("display_name", ns_service.DisplayName)
 	setTagsInSchema(d, ns_service.Tags)
 	d.Set("default_service", ns_service.DefaultService)
-	d.Set("resource_type", nsservice_element.ResourceType)
 	d.Set("protocol", nsservice_element.L4Protocol)
 	d.Set("destination_ports", nsservice_element.DestinationPorts)
 	d.Set("source_ports", nsservice_element.SourcePorts)

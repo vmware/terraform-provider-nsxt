@@ -32,6 +32,8 @@ func TestNSXIcmpTypeNsServiceBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "display_name", serviceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "icmp service"),
 					resource.TestCheckResourceAttr(testResourceName, "protocol", "ICMPv4"),
+					resource.TestCheckResourceAttr(testResourceName, "icmp_type", "5"),
+					resource.TestCheckResourceAttr(testResourceName, "icmp_code", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "tags.#", "1"),
 				),
 			},
