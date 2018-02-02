@@ -11,12 +11,12 @@ import (
 	"net/http"
 )
 
-func resourceL4PortSetNsService() *schema.Resource {
+func resourceIcmpTypeNsService() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceL4PortSetNsServiceCreate,
-		Read:   resourceL4PortSetNsServiceRead,
-		Update: resourceL4PortSetNsServiceUpdate,
-		Delete: resourceL4PortSetNsServiceDelete,
+		Create: resourceIcmpTypeNsServiceCreate,
+		Read:   resourceIcmpTypeNsServiceRead,
+		Update: resourceIcmpTypeNsServiceUpdate,
+		Delete: resourceIcmpTypeNsServiceDelete,
 
 		Schema: map[string]*schema.Schema{
 			"revision":     getRevisionSchema(),
@@ -37,28 +37,27 @@ func resourceL4PortSetNsService() *schema.Resource {
 				Description: "The default NSServices are created in the system by default. These NSServices can't be modified/deleted",
 				Computed:    true,
 			},
-			"destination_ports": &schema.Schema{
-				Type:        schema.TypeSet,
-				Description: "Set of destination ports",
+			"icmp_code": &schema.Schema{
+				Type:        schema.TypeInt,
+				Description: "ICMP message code",
+				Optional:    true,
+			},
+			"icmp_type": &schema.Schema{
+				Type:        schema.TypeInt,
+				Description: "ICMP message type",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Optional:    true,
 			},
-			"source_ports": &schema.Schema{
-				Type:        schema.TypeSet,
-				Description: "Set of source ports",
-				Elem:        &schema.Schema{Type: schema.TypeString},
-				Optional:    true,
-			},
-			"l4_protocol": &schema.Schema{
+			"protocol": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "L4 Protocol",
+				Description: "Version of ICMP protocol (ICMPv4/ICMPv6)",
 				Required:    true,
 			},
 		},
 	}
 }
 
-func resourceL4PortSetNsServiceCreate(d *schema.ResourceData, m interface{}) error {
+func resourceIcmpTypeNsServiceCreate(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
@@ -66,26 +65,26 @@ func resourceL4PortSetNsServiceCreate(d *schema.ResourceData, m interface{}) err
 	display_name := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
 	default_service := d.Get("default_service").(bool)
-	l4_protocol := d.Get("l4_protocol").(string)
-	source_ports := getStringListFromSchemaSet(d, "source_ports")
-	destination_ports := getStringListFromSchemaSet(d, "destination_ports")
+	icmp_code := int64(d.Get("icmp_code").(int))
+	icmp_type := int64(d.Get("icmp_type").(int))
+	protocol := d.Get("protocol").(string)
 
-	ns_service := manager.L4PortSetNsService{
+	ns_service := manager.IcmpTypeNsService{
 		NsService: manager.NsService{
 			Description:    description,
 			DisplayName:    display_name,
 			Tags:           tags,
 			DefaultService: default_service,
 		},
-		NsserviceElement: manager.L4PortSetNsServiceEntry{
-			ResourceType:     "L4PortSetNSService",
-			L4Protocol:       l4_protocol,
-			DestinationPorts: destination_ports,
-			SourcePorts:      source_ports,
+		NsserviceElement: manager.IcmpTypeNsServiceEntry{
+			ResourceType: "ICMPTypeNSService",
+			IcmpCode:     icmp_code,
+			IcmpType:     icmp_type,
+			Protocol:     protocol,
 		},
 	}
 
-	ns_service, resp, err := nsxClient.GroupingObjectsApi.CreateL4PortSetNSService(nsxClient.Context, ns_service)
+	ns_service, resp, err := nsxClient.GroupingObjectsApi.CreateIcmpTypeNSService(nsxClient.Context, ns_service)
 
 	if err != nil {
 		return fmt.Errorf("Error during NsService create: %v", err)
@@ -95,10 +94,10 @@ func resourceL4PortSetNsServiceCreate(d *schema.ResourceData, m interface{}) err
 		return fmt.Errorf("Unexpected status returned during NsService create: %v", resp.StatusCode)
 	}
 	d.SetId(ns_service.Id)
-	return resourceL4PortSetNsServiceRead(d, m)
+	return resourceIcmpTypeNsServiceRead(d, m)
 }
 
-func resourceL4PortSetNsServiceRead(d *schema.ResourceData, m interface{}) error {
+func resourceIcmpTypeNsServiceRead(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
@@ -107,7 +106,7 @@ func resourceL4PortSetNsServiceRead(d *schema.ResourceData, m interface{}) error
 		return fmt.Errorf("Error obtaining ns service id")
 	}
 
-	ns_service, resp, err := nsxClient.GroupingObjectsApi.ReadL4PortSetNSService(nsxClient.Context, id)
+	ns_service, resp, err := nsxClient.GroupingObjectsApi.ReadIcmpTypeNSService(nsxClient.Context, id)
 	if resp.StatusCode == http.StatusNotFound {
 		fmt.Printf("NsService %s not found", id)
 		d.SetId("")
@@ -126,14 +125,14 @@ func resourceL4PortSetNsServiceRead(d *schema.ResourceData, m interface{}) error
 	setTagsInSchema(d, ns_service.Tags)
 	d.Set("default_service", ns_service.DefaultService)
 	d.Set("resource_type", nsservice_element.ResourceType)
-	d.Set("protocol", nsservice_element.L4Protocol)
-	d.Set("destination_ports", nsservice_element.DestinationPorts)
-	d.Set("source_ports", nsservice_element.SourcePorts)
+	d.Set("imcp_type", nsservice_element.IcmpType)
+	d.Set("imcp_code", nsservice_element.IcmpCode)
+	d.Set("protocol", nsservice_element.Protocol)
 
 	return nil
 }
 
-func resourceL4PortSetNsServiceUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceIcmpTypeNsServiceUpdate(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
@@ -146,12 +145,12 @@ func resourceL4PortSetNsServiceUpdate(d *schema.ResourceData, m interface{}) err
 	display_name := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
 	default_service := d.Get("default_service").(bool)
-	l4_protocol := d.Get("l4_protocol").(string)
-	source_ports := interface2StringList(d.Get("source_ports").(*schema.Set).List())
-	destination_ports := interface2StringList(d.Get("destination_ports").(*schema.Set).List())
+	icmp_code := int64(d.Get("icmp_code").(int))
+	icmp_type := int64(d.Get("icmp_type").(int))
+	protocol := d.Get("protocol").(string)
 	revision := int64(d.Get("revision").(int))
 
-	ns_service := manager.L4PortSetNsService{
+	ns_service := manager.IcmpTypeNsService{
 		NsService: manager.NsService{
 			Description:    description,
 			DisplayName:    display_name,
@@ -159,23 +158,23 @@ func resourceL4PortSetNsServiceUpdate(d *schema.ResourceData, m interface{}) err
 			DefaultService: default_service,
 			Revision:       revision,
 		},
-		NsserviceElement: manager.L4PortSetNsServiceEntry{
-			ResourceType:     "L4PortSetNSService",
-			L4Protocol:       l4_protocol,
-			DestinationPorts: destination_ports,
-			SourcePorts:      source_ports,
+		NsserviceElement: manager.IcmpTypeNsServiceEntry{
+			ResourceType: "ICMPTypeNSService",
+			IcmpCode:     icmp_code,
+			IcmpType:     icmp_type,
+			Protocol:     protocol,
 		},
 	}
 
-	ns_service, resp, err := nsxClient.GroupingObjectsApi.UpdateL4PortSetNSService(nsxClient.Context, id, ns_service)
+	ns_service, resp, err := nsxClient.GroupingObjectsApi.UpdateIcmpTypeNSService(nsxClient.Context, id, ns_service)
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during NsService update: %v %v", err, resp)
 	}
 
-	return resourceL4PortSetNsServiceRead(d, m)
+	return resourceIcmpTypeNsServiceRead(d, m)
 }
 
-func resourceL4PortSetNsServiceDelete(d *schema.ResourceData, m interface{}) error {
+func resourceIcmpTypeNsServiceDelete(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
