@@ -52,43 +52,40 @@ func resourceNsGroup() *schema.Resource {
 					},
 				},
 			},
-			// TODO(asarfaty): currently only NsGroupTagExpression?
-			// "membership_criteria": &schema.Schema{
-			//     Type:     schema.TypeList,
-			//     Description: "List of tag or ID expressions which define the membership criteria for this NSGroup.",
-			//     Optional: true,
-			//     Elem: &schema.Resource{
-			//         Schema: map[string]*schema.Schema{
-			//             "resource_type": &schema.Schema{
-			//                 Type:     schema.TypeString,
-			//                 Default:  "NSGroupTagExpression",
-			//                 Optional: true,
-			//             },
-			//             "target_type": &schema.Schema{
-			//                 Type:     schema.TypeString,
-			//                 Required: true,
-			//             },
-			//             "scope": &schema.Schema{
-			//                 Type:     schema.TypeString,
-			//                 Required: true,
-			//             },
-			//             "tag": &schema.Schema{
-			//                 Type:     schema.TypeString,
-			//                 Required: true,
-			//             },
-			//             "scope_op": &schema.Schema{
-			//                 Type:     schema.TypeString,
-			//                 Default:  "EQUALS",
-			//                 Optional: true,
-			//             },
-			//             "tag_op": &schema.Schema{
-			//                 Type:     schema.TypeString,
-			//                 Default:  "EQUALS",
-			//                 Optional: true,
-			//             },
-			//         },
-			//     },
-			// },
+			"membership_criteria": &schema.Schema{
+				Type:        schema.TypeList,
+				Description: "List of tag expressions which define the membership criteria for this NSGroup.",
+				Optional:    true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"target_type": &schema.Schema{
+							Type:         schema.TypeString,
+							Required:     true,
+							ValidateFunc: validateMembershipCriteriaTargetType,
+						},
+						"scope": &schema.Schema{
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"tag": &schema.Schema{
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"scope_op": &schema.Schema{
+							Type:         schema.TypeString,
+							Default:      "EQUALS",
+							Optional:     true,
+							ValidateFunc: validateTagOperation,
+						},
+						"tag_op": &schema.Schema{
+							Type:         schema.TypeString,
+							Default:      "EQUALS",
+							Optional:     true,
+							ValidateFunc: validateTagOperation,
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -98,13 +95,23 @@ func validateTargetType(v interface{}, k string) (ws []string, errors []error) {
 	return validateValueInList(v, k, legal_values)
 }
 
+func validateMembershipCriteriaTargetType(v interface{}, k string) (ws []string, errors []error) {
+	legal_values := []string{"LogicalPort", "LogicalSwitch", "VirtualMachine"}
+	return validateValueInList(v, k, legal_values)
+}
+
+func validateTagOperation(v interface{}, k string) (ws []string, errors []error) {
+	legal_values := []string{"EQUALS"}
+	return validateValueInList(v, k, legal_values)
+}
+
 func getMembershipCriteriaFromSchema(d *schema.ResourceData) []manager.NsGroupTagExpression {
 	criterias := d.Get("membership_criteria").([]interface{})
 	var expresionList []manager.NsGroupTagExpression
 	for _, criteria := range criterias {
 		data := criteria.(map[string]interface{})
 		elem := manager.NsGroupTagExpression{
-			ResourceType: data["resource_type"].(string),
+			ResourceType: "NSGroupTagExpression",
 			Scope:        data["scope"].(string),
 			ScopeOp:      data["scope_op"].(string),
 			Tag:          data["tag"].(string),
@@ -120,7 +127,6 @@ func setMembershipCriteriaInSchema(d *schema.ResourceData, membershipCriterias [
 	var expresionList []map[string]interface{}
 	for _, criteria := range membershipCriterias {
 		elem := make(map[string]interface{})
-		elem["resource_type"] = criteria.ResourceType
 		elem["scope"] = criteria.Scope
 		elem["scope_op"] = criteria.ScopeOp
 		elem["tag"] = criteria.Tag
@@ -167,13 +173,13 @@ func resourceNsGroupCreate(d *schema.ResourceData, m interface{}) error {
 	display_name := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
 	members := getMembersFromSchema(d)
-	//membership_criteria := getMembershipCriteriaFromSchema(d)
+	membership_criteria := getMembershipCriteriaFromSchema(d)
 	ns_group := manager.NsGroup{
-		Description: description,
-		DisplayName: display_name,
-		Tags:        tags,
-		Members:     members,
-		//MembershipCriteria: membership_criteria,
+		Description:        description,
+		DisplayName:        display_name,
+		Tags:               tags,
+		Members:            members,
+		MembershipCriteria: membership_criteria,
 	}
 
 	ns_group, resp, err := nsxClient.GroupingObjectsApi.CreateNSGroup(nsxClient.Context, ns_group)
@@ -218,7 +224,7 @@ func resourceNsGroupRead(d *schema.ResourceData, m interface{}) error {
 	setTagsInSchema(d, ns_group.Tags)
 	d.Set("member_count", ns_group.MemberCount)
 	setMembersInSchema(d, ns_group.Members)
-	//setMembershipCriteriaInSchema(d, ns_group.MembershipCriteria)
+	setMembershipCriteriaInSchema(d, ns_group.MembershipCriteria)
 
 	return nil
 }
@@ -237,14 +243,14 @@ func resourceNsGroupUpdate(d *schema.ResourceData, m interface{}) error {
 	display_name := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
 	members := getMembersFromSchema(d)
-	//membership_criteria := getMembershipCriteriaFromSchema(d)
+	membership_criteria := getMembershipCriteriaFromSchema(d)
 	ns_group := manager.NsGroup{
-		Revision:    revision,
-		Description: description,
-		DisplayName: display_name,
-		Tags:        tags,
-		Members:     members,
-		//MembershipCriteria: membership_criteria,
+		Revision:           revision,
+		Description:        description,
+		DisplayName:        display_name,
+		Tags:               tags,
+		Members:            members,
+		MembershipCriteria: membership_criteria,
 	}
 
 	ns_group, resp, err := nsxClient.GroupingObjectsApi.UpdateNSGroup(nsxClient.Context, id, ns_group)

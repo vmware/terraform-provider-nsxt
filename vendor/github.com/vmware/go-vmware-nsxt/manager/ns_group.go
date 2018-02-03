@@ -58,5 +58,5 @@ type NsGroup struct {
 	Members []NsGroupSimpleExpression `json:"members,omitempty"`
 
 	// List of tag or ID expressions which define the membership criteria for this NSGroup. An object must satisfy atleast one of these expressions to qualify as a member of this group.
-	MembershipCriteria []NsGroupExpression `json:"membership_criteria,omitempty"`
+	MembershipCriteria []NsGroupTagExpression `json:"membership_criteria,omitempty"`
 }

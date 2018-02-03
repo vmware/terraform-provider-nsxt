@@ -84,6 +84,44 @@ func TestNSXNSGroupNested(t *testing.T) {
 	})
 }
 
+func TestNSXNSGroupWithCriteria(t *testing.T) {
+
+	grpName := fmt.Sprintf("test-nsx-ns-group")
+	updateGrpName := fmt.Sprintf("%s-update", grpName)
+	testResourceName := "nsxt_ns_group.test"
+	transportZoneName := OverlayTransportZoneNamePrefix
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXNSGroupCheckDestroy(state, grpName)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXNSGroupCriteriaCreateTemplate(grpName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXNSGroupExists(grpName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", grpName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "members.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "membership_criteria.#", "2"),
+				),
+			},
+			{
+				Config: testAccNSXNSGroupCriteriaUpdateTemplate(updateGrpName, transportZoneName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXNSGroupExists(updateGrpName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updateGrpName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test Update"),
+					resource.TestCheckResourceAttr(testResourceName, "members.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "membership_criteria.#", "1"),
+				),
+			},
+		},
+	})
+}
+
 func testAccNSXNSGroupExists(display_name string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
@@ -160,7 +198,7 @@ resource "nsxt_ns_group" "test" {
 	display_name = "%s"
 	description = "Acceptance Test Update"
 	tags = [{scope = "scope1"
-             tag = "tag1"}, 
+             tag = "tag1"},
             {scope = "scope2"
     	     tag = "tag2"}
 	]
@@ -196,4 +234,43 @@ resource "nsxt_ns_group" "test" {
 	           {target_type = "NSGroup"
 	            value = "${nsxt_ns_group.GRP2.id}"}]
 }`, updatedName)
+}
+
+func testAccNSXNSGroupCriteriaCreateTemplate(name string) string {
+	return fmt.Sprintf(`
+resource "nsxt_ns_group" "test" {
+	display_name = "%s"
+	description = "Acceptance Test"
+        membership_criteria = [{target_type = "LogicalSwitch"
+                                scope = "XXX"},
+                               {target_type = "LogicalPort"
+                                scope = "XXX",
+                                tag = "YYY"},
+                               ]
+}`, name)
+}
+
+func testAccNSXNSGroupCriteriaUpdateTemplate(name string, tz_name string) string {
+	return fmt.Sprintf(`
+
+data "nsxt_transport_zone" "TZ1" {
+     display_name = "%s"
+}
+
+resource "nsxt_logical_switch" "test" {
+	display_name = "test_switch"
+	admin_state = "UP"
+	replication_mode = "MTEP"
+	transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
+}
+
+resource "nsxt_ns_group" "test" {
+	display_name = "%s"
+	description = "Acceptance Test Update"
+        membership_criteria = [{target_type = "LogicalSwitch"
+                                scope = "XXX"},
+                               ]
+        members = [{target_type = "LogicalSwitch"
+	            value = "${nsxt_logical_switch.test.id}"}]
+}`, tz_name, name)
 }
