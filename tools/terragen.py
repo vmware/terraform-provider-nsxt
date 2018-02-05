@@ -1,5 +1,9 @@
+#!/usr/bin/python
+# -*- coding: latin-1 -*-
+
 #  Copyright (c) 2017 VMware, Inc. All Rights Reserved.
 #  SPDX-License-Identifier: MPL-2.0
+
 
 import sys
 import re
@@ -43,14 +47,17 @@ def unshift():
 
 def pretty_writeln(f, line):
     for i in range(indent):
-        f.write("    ")
+        f.write("\t")
     f.write(line)
     f.write("\n")
 
 
 def write_header(f):
+    pretty_writeln(f, "/* Copyright © 2018 VMware, Inc. All Rights Reserved.")
+    pretty_writeln(f, "   SPDX-License-Identifier: MPL-2.0 */\n")
+
     pretty_writeln(f, "package %s\n" % PACKAGE_NAME)
-    pretty_writeln(f, "import(")
+    pretty_writeln(f, "import (")
     shift()
     pretty_writeln(f, "\"github.com/hashicorp/terraform/helper/schema\"")
     pretty_writeln(f, "%s \"github.com/vmware/go-vmware-nsxt\"" % SDK_PACKAGE_NAME)
