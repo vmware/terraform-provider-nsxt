@@ -4,22 +4,22 @@
 package nsxt
 
 import (
+	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/manager"
 	"net/http"
-	"fmt"
 )
 
 func resourceIpSet() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceIpSetCreate,
-		Read: resourceIpSetRead,
+		Read:   resourceIpSetRead,
 		Update: resourceIpSetUpdate,
 		Delete: resourceIpSetDelete,
 
 		Schema: map[string]*schema.Schema{
-			"revision": getRevisionSchema(),
+			"revision":     getRevisionSchema(),
 			"system_owned": getSystemOwnedSchema(),
 			"description": &schema.Schema{
 				Type:        schema.TypeString,
@@ -32,13 +32,12 @@ func resourceIpSet() *schema.Resource {
 				Optional:    true,
 			},
 			"tags": getTagsSchema(),
-            "ip_addresses": &schema.Schema{
-                Type:        schema.TypeSet,
-                Description: "Set of IP addresses",
-                Elem:        &schema.Schema{Type: schema.TypeString},
-                Optional:    true,
-            },
-
+			"ip_addresses": &schema.Schema{
+				Type:        schema.TypeSet,
+				Description: "Set of IP addresses",
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Optional:    true,
+			},
 		},
 	}
 }
@@ -51,10 +50,10 @@ func resourceIpSetCreate(d *schema.ResourceData, m interface{}) error {
 	display_name := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
 	ip_addresses := getStringListFromSchemaSet(d, "ip_addresses")
-	ip_set := manager.IpSet {
+	ip_set := manager.IpSet{
 		Description: description,
 		DisplayName: display_name,
-		Tags: tags,
+		Tags:        tags,
 		IpAddresses: ip_addresses,
 	}
 
@@ -114,12 +113,12 @@ func resourceIpSetUpdate(d *schema.ResourceData, m interface{}) error {
 	description := d.Get("description").(string)
 	display_name := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
-    ip_addresses := interface2StringList(d.Get("ip_addresses").(*schema.Set).List())
-	ip_set := manager.IpSet {
-		Revision: revision,
+	ip_addresses := interface2StringList(d.Get("ip_addresses").(*schema.Set).List())
+	ip_set := manager.IpSet{
+		Revision:    revision,
 		Description: description,
 		DisplayName: display_name,
-		Tags: tags,
+		Tags:        tags,
 		IpAddresses: ip_addresses,
 	}
 
@@ -151,5 +150,5 @@ func resourceIpSetDelete(d *schema.ResourceData, m interface{}) error {
 		fmt.Printf("IpSet %s not found", id)
 		d.SetId("")
 	}
-    return nil
+	return nil
 }
