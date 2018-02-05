@@ -277,8 +277,8 @@ def write_delete_func(f, resource, attrs, api_section):
     unshift()
     pretty_writeln(f, "}")
 
-    unshift()
     pretty_writeln(f, "return nil")
+    unshift()
     pretty_writeln(f, "}")
 
 
