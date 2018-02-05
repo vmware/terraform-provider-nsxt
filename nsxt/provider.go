@@ -75,6 +75,7 @@ func Provider() terraform.ResourceProvider {
 			"nsxt_ns_group":                          resourceNsGroup(),
 			"nsxt_firewall_section":                  resourceFirewallSection(),
 			"nsxt_nat_rule":                          resourceNatRule(),
+			"nsxt_ip_set":                            resourceIpSet(),
 		},
 
 		ConfigureFunc: providerConfigure,
