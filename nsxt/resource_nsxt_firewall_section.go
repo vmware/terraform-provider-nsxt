@@ -54,7 +54,7 @@ func resourceFirewallSection() *schema.Resource {
 				Required:    true,
 				ForceNew:    true,
 			},
-			"applied_tos": getResourceReferencesSchema(false, false, []string{"LogicalPort", "LogicalSwitch", "NSGroup"}),
+			"applied_tos": getResourceReferencesSetSchema(false, false, []string{"LogicalPort", "LogicalSwitch", "NSGroup"}),
 			"rules":       getRulesSchema(),
 		},
 	}
@@ -242,7 +242,7 @@ func resourceFirewallSectionCreateEmpty(d *schema.ResourceData, m interface{}) e
 	description := d.Get("description").(string)
 	display_name := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
-	applied_tos := getResourceReferencesFromSchema(d, "applied_tos")
+	applied_tos := getResourceReferencesFromSchemaSet(d, "applied_tos")
 	is_default := d.Get("is_default").(bool)
 	rule_count := int64(d.Get("rule_count").(int))
 	section_type := d.Get("section_type").(string)
@@ -283,7 +283,7 @@ func resourceFirewallSectionCreate(d *schema.ResourceData, m interface{}) error 
 	description := d.Get("description").(string)
 	display_name := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
-	applied_tos := getResourceReferencesFromSchema(d, "applied_tos")
+	applied_tos := getResourceReferencesFromSchemaSet(d, "applied_tos")
 	is_default := d.Get("is_default").(bool)
 	rule_count := int64(d.Get("rule_count").(int))
 	section_type := d.Get("section_type").(string)
@@ -366,7 +366,7 @@ func resourceFirewallSectionUpdateEmpty(d *schema.ResourceData, m interface{}, i
 	description := d.Get("description").(string)
 	display_name := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
-	applied_tos := getResourceReferencesFromSchema(d, "applied_tos")
+	applied_tos := getResourceReferencesFromSchemaSet(d, "applied_tos")
 	is_default := d.Get("is_default").(bool)
 	rule_count := int64(d.Get("rule_count").(int))
 	section_type := d.Get("section_type").(string)
@@ -421,7 +421,7 @@ func resourceFirewallSectionUpdate(d *schema.ResourceData, m interface{}) error 
 	description := d.Get("description").(string)
 	display_name := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
-	applied_tos := getResourceReferencesFromSchema(d, "applied_tos")
+	applied_tos := getResourceReferencesFromSchemaSet(d, "applied_tos")
 	is_default := d.Get("is_default").(bool)
 	rule_count := int64(d.Get("rule_count").(int))
 	section_type := d.Get("section_type").(string)

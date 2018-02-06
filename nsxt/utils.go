@@ -4,8 +4,6 @@
 package nsxt
 
 import (
-	"fmt"
-	"sort"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/common"
@@ -200,8 +198,21 @@ func setAddressBindingsInSchema(d *schema.ResourceData, bindings []manager.Packe
 }
 
 func getResourceReferencesSchema(required bool, computed bool, valid_target_types []string) *schema.Schema {
+	return getResourceReferencesSchemaByType(required, computed, valid_target_types, true)
+}
+
+func getResourceReferencesSetSchema(required bool, computed bool, valid_target_types []string) *schema.Schema {
+	return getResourceReferencesSchemaByType(required, computed, valid_target_types, false)
+}
+
+func getResourceReferencesSchemaByType(required bool, computed bool, valid_target_types []string, is_list bool) *schema.Schema {
+	sch_type := schema.TypeSet
+	if is_list {
+		sch_type = schema.TypeList
+	}
+
 	return &schema.Schema{
-		Type:     schema.TypeList,
+		Type:     sch_type,
 		Required: required,
 		Optional: !required,
 		Computed: computed,
@@ -255,11 +266,10 @@ func getResourceReferencesFromSchema(d *schema.ResourceData, schemaAttrName stri
 	return getResourceReferences(references)
 }
 
-type RefSorter []map[string]interface{}
-
-func (a RefSorter) Len() int           { return len(a) }
-func (a RefSorter) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a RefSorter) Less(i, j int) bool { return a[i]["target_id"].(string) < a[j]["target_id"].(string) }
+func getResourceReferencesFromSchemaSet(d *schema.ResourceData, schemaAttrName string) []common.ResourceReference {
+	references := d.Get(schemaAttrName).(*schema.Set).List()
+	return getResourceReferences(references)
+}
 
 func returnResourceReferences(references []common.ResourceReference) []map[string]interface{} {
 	var referenceList []map[string]interface{}
@@ -271,8 +281,6 @@ func returnResourceReferences(references []common.ResourceReference) []map[strin
 		elem["target_type"] = reference.TargetType
 		referenceList = append(referenceList, elem)
 	}
-	// sort by target_id so it will be the same each time
-	sort.Sort(RefSorter(referenceList))
 	return referenceList
 }
 
@@ -364,16 +372,4 @@ func makeResourceReference(resourceType string, resourceId string) *common.Resou
 		TargetType: resourceType,
 		TargetId:   resourceId,
 	}
-}
-
-// Utilities for fields validations
-func validateValueInList(v interface{}, k string, legal_values []string) (ws []string, errors []error) {
-	value := v.(string)
-	for _, option := range legal_values {
-		if value == option {
-			return
-		}
-	}
-	errors = append(errors, fmt.Errorf("%q must be one of %s", k, legal_values))
-	return
 }
