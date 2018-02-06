@@ -44,7 +44,7 @@ func resourceAlgTypeNsService() *schema.Resource {
 			},
 			"destination_ports": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "Range of destination ports. This is single value, not a set",
+				Description: "A single destination port",
 				Required:    true,
 			},
 			"source_ports": &schema.Schema{

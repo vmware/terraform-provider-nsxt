@@ -34,6 +34,7 @@ The following arguments are supported:
 * `destination_ports` - (Optional) Set of destination ports.
 * `source_ports` - (Optional) Set of source ports.
 * `l4_protocol` - (Optional) VL4 protocol
+* `tags` - (Optional) A list of scope + tag pairs to associate with this ip_set.
 
 ## Attributes Reference
 
