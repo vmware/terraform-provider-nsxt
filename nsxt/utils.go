@@ -4,7 +4,6 @@
 package nsxt
 
 import (
-	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/common"
@@ -355,16 +354,4 @@ func makeResourceReference(resourceType string, resourceId string) *common.Resou
 		TargetType: resourceType,
 		TargetId:   resourceId,
 	}
-}
-
-// Utilities for fields validations
-func validateValueInList(v interface{}, k string, legal_values []string) (ws []string, errors []error) {
-	value := v.(string)
-	for _, option := range legal_values {
-		if value == option {
-			return
-		}
-	}
-	errors = append(errors, fmt.Errorf("%q must be one of %s", k, legal_values))
-	return
 }
