@@ -14,9 +14,12 @@ import (
 
 func TestNSXFirewallSectionBasic(t *testing.T) {
 
-	prfName := fmt.Sprintf("test-nsx-firewall-section")
+	prfName := fmt.Sprintf("test-nsx-firewall-section-basic")
 	updatePrfName := fmt.Sprintf("%s-update", prfName)
 	testResourceName := "nsxt_firewall_section.test"
+	tags := SingleTag
+	updatedTags := DoubleTags
+	tos := string("[]")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -26,7 +29,7 @@ func TestNSXFirewallSectionBasic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXFirewallSectionCreateEmptyTemplate(prfName),
+				Config: testAccNSXFirewallSectionCreateEmptyTemplate(prfName, tags, tos),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXFirewallSectionExists(prfName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", prfName),
@@ -39,7 +42,7 @@ func TestNSXFirewallSectionBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXFirewallSectionUpdateEmptyTemplate(updatePrfName),
+				Config: testAccNSXFirewallSectionUpdateEmptyTemplate(updatePrfName, updatedTags, tos),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXFirewallSectionExists(updatePrfName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatePrfName),
@@ -48,20 +51,20 @@ func TestNSXFirewallSectionBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "section_type", "LAYER3"),
 					resource.TestCheckResourceAttr(testResourceName, "stateful", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "rules.#", "0"),
-					resource.TestCheckResourceAttr(testResourceName, "applied_tos.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "applied_tos.#", "0"),
 				),
 			},
 		},
 	})
 }
 
-func TestNSXFirewallSectionWithRules(t *testing.T) {
-
-	prfName := fmt.Sprintf("test-nsx-firewall-section")
+func TestNSXFirewallSectionWithTos(t *testing.T) {
+	prfName := fmt.Sprintf("test-nsx-firewall-section-tos")
 	updatePrfName := fmt.Sprintf("%s-update", prfName)
 	testResourceName := "nsxt_firewall_section.test"
-	ruleName := "rule1.0"
-	updatedRuleName := "rule1.1"
+	tags := SingleTag
+	tos := string("[{target_type = \"NSGroup\", target_id = \"${nsxt_ns_group.GRP1.id}\"}]")
+	updatedTos := string("[{target_type = \"NSGroup\", target_id = \"${nsxt_ns_group.GRP1.id}\"}, {target_type = \"NSGroup\", target_id = \"${nsxt_ns_group.GRP2.id}\"}]")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -71,7 +74,54 @@ func TestNSXFirewallSectionWithRules(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXFirewallSectionCreateTemplate(prfName, ruleName),
+				Config: testAccNSXFirewallSectionCreateEmptyTemplate(prfName, tags, tos),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXFirewallSectionExists(prfName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", prfName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "tags.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "section_type", "LAYER3"),
+					resource.TestCheckResourceAttr(testResourceName, "stateful", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "rules.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "applied_tos.#", "1"),
+				),
+			},
+			{
+				Config: testAccNSXFirewallSectionUpdateEmptyTemplate(updatePrfName, tags, updatedTos),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXFirewallSectionExists(updatePrfName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updatePrfName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test Update"),
+					resource.TestCheckResourceAttr(testResourceName, "tags.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "section_type", "LAYER3"),
+					resource.TestCheckResourceAttr(testResourceName, "stateful", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "rules.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "applied_tos.#", "2"),
+				),
+			},
+		},
+	})
+}
+
+func TestNSXFirewallSectionWithRules(t *testing.T) {
+
+	prfName := fmt.Sprintf("test-nsx-firewall-section-rules")
+	updatePrfName := fmt.Sprintf("%s-update", prfName)
+	testResourceName := "nsxt_firewall_section.test"
+	ruleName := "rule1.0"
+	updatedRuleName := "rule1.1"
+	tags := SingleTag
+	tos := string("[]")
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXFirewallSectionCheckDestroy(state, prfName)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXFirewallSectionCreateTemplate(prfName, ruleName, tags, tos),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXFirewallSectionExists(prfName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", prfName),
@@ -85,7 +135,7 @@ func TestNSXFirewallSectionWithRules(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXFirewallSectionUpdateTemplate(updatePrfName, updatedRuleName),
+				Config: testAccNSXFirewallSectionUpdateTemplate(updatePrfName, updatedRuleName, tags, tos),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXFirewallSectionExists(updatePrfName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatePrfName),
@@ -94,14 +144,114 @@ func TestNSXFirewallSectionWithRules(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "stateful", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "rules.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "rules.0.display_name", updatedRuleName),
-					resource.TestCheckResourceAttr(testResourceName, "applied_tos.#", "1"),
-					// Tags update is currently failing because of an NSX bug
-					//resource.TestCheckResourceAttr(testResourceName, "tags.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "applied_tos.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "tags.#", "1"),
 				),
 			},
 		},
 	})
 }
+
+func TestNSXFirewallSectionWithRulesAndTags(t *testing.T) {
+	// Note: this test will not pass with NSX 2.1 because of an NSX bug.
+	// This test should be skipped based on the nsx version
+	prfName := fmt.Sprintf("test-nsx-firewall-section-tags")
+	updatePrfName := fmt.Sprintf("%s-update", prfName)
+	testResourceName := "nsxt_firewall_section.test"
+	ruleName := "rule1.0"
+	updatedRuleName := "rule1.1"
+	tags := SingleTag
+	updatedTags := DoubleTags
+	tos := string("[]")
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXFirewallSectionCheckDestroy(state, prfName)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXFirewallSectionCreateTemplate(prfName, ruleName, tags, tos),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXFirewallSectionExists(prfName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", prfName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "section_type", "LAYER3"),
+					resource.TestCheckResourceAttr(testResourceName, "stateful", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "rules.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rules.0.display_name", ruleName),
+					resource.TestCheckResourceAttr(testResourceName, "applied_tos.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "tags.#", "1"),
+				),
+			},
+			{
+				Config: testAccNSXFirewallSectionUpdateTemplate(updatePrfName, updatedRuleName, updatedTags, tos),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXFirewallSectionExists(updatePrfName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updatePrfName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test Update"),
+					resource.TestCheckResourceAttr(testResourceName, "section_type", "LAYER3"),
+					resource.TestCheckResourceAttr(testResourceName, "stateful", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "rules.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "rules.0.display_name", updatedRuleName),
+					resource.TestCheckResourceAttr(testResourceName, "applied_tos.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "tags.#", "2"),
+				),
+			},
+		},
+	})
+}
+
+func TestNSXFirewallSectionWithRulesAndTos(t *testing.T) {
+	prfName := fmt.Sprintf("test-nsx-firewall-section-rules_and_tos")
+	updatePrfName := fmt.Sprintf("%s-update", prfName)
+	testResourceName := "nsxt_firewall_section.test"
+	ruleName := "rule1.0"
+	updatedRuleName := "rule1.1"
+	tags := SingleTag
+	tos := string("[{target_type = \"NSGroup\", target_id = \"${nsxt_ns_group.GRP1.id}\"}]")
+	updatedTos := string("[{target_type = \"NSGroup\", target_id = \"${nsxt_ns_group.GRP1.id}\"}, {target_type = \"NSGroup\", target_id = \"${nsxt_ns_group.GRP2.id}\"}]")
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXFirewallSectionCheckDestroy(state, prfName)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXFirewallSectionCreateTemplate(prfName, ruleName, tags, tos),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXFirewallSectionExists(prfName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", prfName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "section_type", "LAYER3"),
+					resource.TestCheckResourceAttr(testResourceName, "stateful", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "rules.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rules.0.display_name", ruleName),
+					resource.TestCheckResourceAttr(testResourceName, "tags.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "applied_tos.#", "1"),
+				),
+			},
+			{
+				Config: testAccNSXFirewallSectionUpdateTemplate(updatePrfName, updatedRuleName, tags, updatedTos),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXFirewallSectionExists(updatePrfName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updatePrfName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test Update"),
+					resource.TestCheckResourceAttr(testResourceName, "section_type", "LAYER3"),
+					resource.TestCheckResourceAttr(testResourceName, "stateful", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "rules.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "rules.0.display_name", updatedRuleName),
+					resource.TestCheckResourceAttr(testResourceName, "tags.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "applied_tos.#", "2"),
+				),
+			},
+		},
+	})
+}
+
 func testAccNSXFirewallSectionExists(display_name string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
@@ -159,16 +309,24 @@ func testAccNSXFirewallSectionCheckDestroy(state *terraform.State, display_name 
 	return nil
 }
 
-func testAccNSXFirewallSectionCreateTemplate(name string, ruleName string) string {
+func testAccNSXFirewallSectionNSGroups() string {
 	return fmt.Sprintf(`
+resource "nsxt_ns_group" "GRP1" {
+    display_name = "grp1"
+}
+resource "nsxt_ns_group" "GRP2" {
+    display_name = "grp2"
+}`)
+}
+
+func testAccNSXFirewallSectionCreateTemplate(name string, ruleName string, tags string, tos string) string {
+	return testAccNSXFirewallSectionNSGroups() + fmt.Sprintf(`
 resource "nsxt_firewall_section" "test" {
 	display_name = "%s"
 	description = "Acceptance Test"
     section_type = "LAYER3"
     stateful = true
-	tags = [{scope = "scope1"
-	    	 tag = "tag1"}
-	]
+	tags = %s
 	rules = [{display_name = "%s",
 	          description = "rule1",
 	          action = "ALLOW",
@@ -176,23 +334,18 @@ resource "nsxt_firewall_section" "test" {
 	          ip_protocol = "IPV4",
 	          direction = "IN"}
 	]
-}`, name, ruleName)
+	applied_tos = %s 
+}`, name, tags, ruleName, tos)
 }
 
-func testAccNSXFirewallSectionUpdateTemplate(updatedName string, updatedRuleName string) string {
-	return fmt.Sprintf(`
-resource "nsxt_ns_group" "GRP1" {
-    display_name = "grp1"
-}
-
+func testAccNSXFirewallSectionUpdateTemplate(updatedName string, updatedRuleName string, tags string, tos string) string {
+	return testAccNSXFirewallSectionNSGroups() + fmt.Sprintf(`
 resource "nsxt_firewall_section" "test" {
 	display_name = "%s"
 	description = "Acceptance Test Update"
     section_type = "LAYER3"
     stateful = true
-	tags = [{scope = "scope1"
-	         tag = "tag1"}
-	]
+	tags = %s
 	rules = [{display_name = "%s",
 	          description = "rule1",
 	          action = "ALLOW",
@@ -206,40 +359,30 @@ resource "nsxt_firewall_section" "test" {
 	          ip_protocol = "IPV6",
 	          direction = "OUT"}	          
 	]
-	applied_tos = [{target_type = "NSGroup",
-                    target_id = "${nsxt_ns_group.GRP1.id}"}]
-}`, updatedName, updatedRuleName)
+	applied_tos = %s 
+}`, updatedName, tags, updatedRuleName, tos)
 }
 
-func testAccNSXFirewallSectionCreateEmptyTemplate(name string) string {
-	return fmt.Sprintf(`
+func testAccNSXFirewallSectionCreateEmptyTemplate(name string, tags string, tos string) string {
+	return testAccNSXFirewallSectionNSGroups() + fmt.Sprintf(`
 resource "nsxt_firewall_section" "test" {
 	display_name = "%s"
 	description = "Acceptance Test"
     section_type = "LAYER3"
     stateful = true
-	tags = [{scope = "scope1"
-	    	 tag = "tag1"}
-	]
-}`, name)
+	tags = %s
+	applied_tos = %s
+}`, name, tags, tos)
 }
 
-func testAccNSXFirewallSectionUpdateEmptyTemplate(updatedName string) string {
-	return fmt.Sprintf(`
-resource "nsxt_ns_group" "GRP1" {
-    display_name = "grp1"
-}
+func testAccNSXFirewallSectionUpdateEmptyTemplate(updatedName string, tags string, tos string) string {
+	return testAccNSXFirewallSectionNSGroups() +  fmt.Sprintf(`
 resource "nsxt_firewall_section" "test" {
 	display_name = "%s"
 	description = "Acceptance Test Update"
     section_type = "LAYER3"
     stateful = true
-	tags = [{scope = "scope1"
-	         tag = "tag1"}, 
-	        {scope = "scope2"
-	    	 tag = "tag2"}
-	]
-	applied_tos = [{target_type = "NSGroup",
-                    target_id = "${nsxt_ns_group.GRP1.id}"}]
-}`, updatedName)
+	tags = %s
+	applied_tos = %s
+}`, updatedName, tags, tos)
 }

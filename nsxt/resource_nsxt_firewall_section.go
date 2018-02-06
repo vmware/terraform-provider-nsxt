@@ -338,12 +338,23 @@ func resourceFirewallSectionRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("description", firewall_section.Description)
 	d.Set("display_name", firewall_section.DisplayName)
 	setTagsInSchema(d, firewall_section.Tags)
-	setResourceReferencesInSchema(d, firewall_section.AppliedTos, "applied_tos")
 	setRulesInSchema(d, firewall_section.Rules)
 	d.Set("is_default", firewall_section.IsDefault)
 	d.Set("rule_count", firewall_section.RuleCount)
 	d.Set("section_type", firewall_section.SectionType)
 	d.Set("stateful", firewall_section.Stateful)
+
+	// Getting the applied tos will require another api call
+	firewall_section2, resp, err := nsxClient.ServicesApi.GetSection(nsxClient.Context, id)
+	if resp.StatusCode == http.StatusNotFound {
+		fmt.Printf("FirewallSection %s not found", id)
+		d.SetId("")
+		return nil
+	}
+	if err != nil {
+		return fmt.Errorf("Error during FirewallSection %s read: %v", id, err)
+	}
+	setResourceReferencesInSchema(d, firewall_section2.AppliedTos, "applied_tos")
 
 	return nil
 }

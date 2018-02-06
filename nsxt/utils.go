@@ -5,6 +5,7 @@ package nsxt
 
 import (
 	"fmt"
+	"sort"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/common"
@@ -254,6 +255,12 @@ func getResourceReferencesFromSchema(d *schema.ResourceData, schemaAttrName stri
 	return getResourceReferences(references)
 }
 
+type RefSorter []map[string]interface{}
+
+func (a RefSorter) Len() int           { return len(a) }
+func (a RefSorter) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a RefSorter) Less(i, j int) bool { return a[i]["target_id"].(string) < a[j]["target_id"].(string) }
+
 func returnResourceReferences(references []common.ResourceReference) []map[string]interface{} {
 	var referenceList []map[string]interface{}
 	for _, reference := range references {
@@ -264,6 +271,8 @@ func returnResourceReferences(references []common.ResourceReference) []map[strin
 		elem["target_type"] = reference.TargetType
 		referenceList = append(referenceList, elem)
 	}
+	// sort by target_id so it will be the same each time
+	sort.Sort(RefSorter(referenceList))
 	return referenceList
 }
 
