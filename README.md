@@ -7,14 +7,30 @@ This is terraform provider for vmware NSX-T
 
 Supported data sources:
 
-* TransportZone
-* SwitchingProfile
+* transport_zone
+* switching_profile
+* logical_tier0_router
+* edge_cluster
 
 Supported resources:
 
-* L4PortSetNsService
-* LogicalPort
-* LogicalSwitch
+* logical_switch
+* logical_port
+* logical_tier1_router
+* logical_router_downlink_port
+* logical_router_link_port_on_tier0
+* logical_router_link_port_on_tier1
+* l4_port_set_ns_service
+* icmp_type_ns_service
+* igmp_type_ns_service
+* ether_type_ns_service
+* alg_type_ns_service
+* ip_protocol_ns_service
+* ns_group
+* firewall_section
+* nat_rule
+* ip_set
+
 
 ## Try it out
 
@@ -22,13 +38,12 @@ Supported resources:
 
 * Go 1.9.x onwards
 * Terraform 0.10.x
-* This repo makes use of go-vmware-nsxt library
 
 ### Build & Run
 
 1. go get github.com/vmware/terraform-provider-nsxt
-2. go build -o terraform-provider-nsxt
-3. copy terraform-provider-nsxt to terraform running folder
+2. cd $GOROOT/src/github.com/vmware/terraform-provider-nsxt
+3. make
 
 ## Contributing
 
