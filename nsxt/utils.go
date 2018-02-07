@@ -14,6 +14,8 @@ import (
 	"net/http"
 )
 
+var adminStateValues = []string{"UP", "DOWN"}
+
 func interface2StringList(configured []interface{}) []string {
 	vs := make([]string, 0, len(configured))
 	for _, v := range configured {
@@ -337,6 +339,15 @@ func getIpSubnetsSchema(required bool, computed bool) *schema.Schema {
 				},
 			},
 		},
+	}
+}
+
+func getAdminStateSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:     schema.TypeString,
+		Required: true,
+		Description: "Represents Desired state of the object",
+		ValidateFunc: validation.StringInSlice(adminStateValues, false),
 	}
 }
 

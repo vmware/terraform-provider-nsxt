@@ -76,7 +76,7 @@ func testNSXLogicalSwitchBasic(t *testing.T, verifyRealization bool) {
 					testAccNSXLogicalSwitchExists(updateSwitchName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updateSwitchName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test Update"),
-					resource.TestCheckResourceAttr(testResourceName, "admin_state", "UP"),
+					resource.TestCheckResourceAttr(testResourceName, "admin_state", "DOWN"),
 					resource.TestCheckResourceAttr(testResourceName, "replication_mode", replicationMode),
 					resource.TestCheckResourceAttr(testResourceName, "tags.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "vlan", novlan),
@@ -126,7 +126,7 @@ func testNSXLogicalSwitchVlan(t *testing.T, verifyRealization bool) {
 					testAccNSXLogicalSwitchExists(updateSwitchName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updateSwitchName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test Update"),
-					resource.TestCheckResourceAttr(testResourceName, "admin_state", "UP"),
+					resource.TestCheckResourceAttr(testResourceName, "admin_state", "DOWN"),
 					resource.TestCheckResourceAttr(testResourceName, "vlan", updatedvlan),
 				),
 			},
@@ -244,7 +244,7 @@ data "nsxt_transport_zone" "TZ1" {
 
 resource "nsxt_logical_switch" "%s" {
 	display_name = "%s"
-	admin_state = "UP"
+	admin_state = "DOWN"
 	description = "Acceptance Test Update"
 	transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
 	replication_mode = "%s"

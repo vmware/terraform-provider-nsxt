@@ -259,7 +259,7 @@ data "nsxt_transport_zone" "TZ1" {
 
 resource "nsxt_logical_switch" "test" {
 	display_name = "test_switch"
-	admin_state = "UP"
+	admin_state = "DOWN"
 	replication_mode = "MTEP"
 	transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
 }
