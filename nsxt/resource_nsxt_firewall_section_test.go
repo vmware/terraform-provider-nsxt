@@ -152,7 +152,19 @@ func TestNSXFirewallSectionWithRules(t *testing.T) {
 	})
 }
 
+func skipFirewallSectionTests() (bool, error) {
+	// TODO(asarfaty): this currently doesn't work since the provider configure func was not called yet
+	//testAccProvider.ConfigureFunc([]*ResourceData{})
+	//nsx_ver := getNSXVersion(testAccProvider.Meta())
+	//if nsx_ver <= "2.1.0" {
+	//	fmt.Printf("Skipping test because it is not supported on nsx version %s", nsx_ver)
+	//	return true, nil
+	//}
+	return false, nil
+}
+
 func TestNSXFirewallSectionWithRulesAndTags(t *testing.T) {
+
 	// Note: this test will not pass with NSX 2.1 because of an NSX bug.
 	// This test should be skipped based on the nsx version
 	prfName := fmt.Sprintf("test-nsx-firewall-section-tags")
@@ -172,6 +184,7 @@ func TestNSXFirewallSectionWithRulesAndTags(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
+				SkipFunc: skipFirewallSectionTests,
 				Config: testAccNSXFirewallSectionCreateTemplate(prfName, ruleName, tags, tos),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXFirewallSectionExists(prfName, testResourceName),
@@ -186,6 +199,7 @@ func TestNSXFirewallSectionWithRulesAndTags(t *testing.T) {
 				),
 			},
 			{
+				SkipFunc: skipFirewallSectionTests,
 				Config: testAccNSXFirewallSectionUpdateTemplate(updatePrfName, updatedRuleName, updatedTags, tos),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXFirewallSectionExists(updatePrfName, testResourceName),

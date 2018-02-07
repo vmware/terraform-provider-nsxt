@@ -4,10 +4,13 @@
 package nsxt
 
 import (
+	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/common"
 	"github.com/vmware/go-vmware-nsxt/manager"
+	api "github.com/vmware/go-vmware-nsxt"
+	"net/http"
 )
 
 func interface2StringList(configured []interface{}) []string {
@@ -372,4 +375,16 @@ func makeResourceReference(resourceType string, resourceId string) *common.Resou
 		TargetType: resourceType,
 		TargetId:   resourceId,
 	}
+}
+
+func getNSXVersion(m interface{}) string {
+	nsxClient := m.(*api.APIClient)
+	node_properties, resp, err := nsxClient.NsxComponentAdministrationApi.ReadNodeProperties(nsxClient.Context)
+	initial_version := string("1.0.0")
+
+	if resp.StatusCode == http.StatusNotFound || err != nil {
+		fmt.Printf("Node properties not found")
+		return initial_version
+	}
+	return node_properties.NodeVersion
 }
