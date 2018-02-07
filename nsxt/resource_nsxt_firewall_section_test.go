@@ -185,7 +185,7 @@ func TestNSXFirewallSectionWithRulesAndTags(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				SkipFunc: skipFirewallSectionTests,
-				Config: testAccNSXFirewallSectionCreateTemplate(prfName, ruleName, tags, tos),
+				Config:   testAccNSXFirewallSectionCreateTemplate(prfName, ruleName, tags, tos),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXFirewallSectionExists(prfName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", prfName),
@@ -200,7 +200,7 @@ func TestNSXFirewallSectionWithRulesAndTags(t *testing.T) {
 			},
 			{
 				SkipFunc: skipFirewallSectionTests,
-				Config: testAccNSXFirewallSectionUpdateTemplate(updatePrfName, updatedRuleName, updatedTags, tos),
+				Config:   testAccNSXFirewallSectionUpdateTemplate(updatePrfName, updatedRuleName, updatedTags, tos),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXFirewallSectionExists(updatePrfName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatePrfName),
@@ -390,7 +390,7 @@ resource "nsxt_firewall_section" "test" {
 }
 
 func testAccNSXFirewallSectionUpdateEmptyTemplate(updatedName string, tags string, tos string) string {
-	return testAccNSXFirewallSectionNSGroups() +  fmt.Sprintf(`
+	return testAccNSXFirewallSectionNSGroups() + fmt.Sprintf(`
 resource "nsxt_firewall_section" "test" {
 	display_name = "%s"
 	description = "Acceptance Test Update"

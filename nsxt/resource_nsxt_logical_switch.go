@@ -6,12 +6,15 @@ package nsxt
 import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/manager"
 	"log"
 	"net/http"
 	"time"
 )
+
+var logicalSwitchReplicationModeValues = []string{"MTEP", "SOURCE"}
 
 // TODO: consider splitting this resource to overlay_ls and vlan_ls
 func resourceLogicalSwitch() *schema.Resource {
@@ -52,10 +55,11 @@ func resourceLogicalSwitch() *schema.Resource {
 				Optional:    true,
 			},
 			"replication_mode": &schema.Schema{
-				Type:        schema.TypeString,
-				Description: "Replication mode of the Logical Switch",
-				Optional:    true,
-				Default:     "MTEP",
+				Type:         schema.TypeString,
+				Description:  "Replication mode of the Logical Switch",
+				Optional:     true,
+				Default:      "MTEP",
+				ValidateFunc: validation.StringInSlice(logicalSwitchReplicationModeValues, false),
 			},
 			"switching_profile_ids": getSwitchingProfileIdsSchema(),
 			"transport_zone_id": &schema.Schema{
