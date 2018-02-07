@@ -6,10 +6,16 @@ package nsxt
 import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/manager"
 	"net/http"
 )
+
+var firewallRuleIPProtocolValues = []string{"IPV4", "IPV6", "IPV4_IPV6"}
+var firewallRuleActionValues = []string{"ALLOW", "DROP", "REJECT"}
+var firewallRuleDirectionValues = []string{"IN", "OUT", "IN_OUT"}
+var firewallSectionTypeValues = []string{"LAYER2", "LAYER3"}
 
 func resourceFirewallSection() *schema.Resource {
 	return &schema.Resource{
@@ -46,7 +52,7 @@ func resourceFirewallSection() *schema.Resource {
 				Type:         schema.TypeString,
 				Description:  "Type of the rules which a section can contain. Only homogeneous sections are supported",
 				Required:     true,
-				ValidateFunc: validateSectionType,
+				ValidateFunc: validation.StringInSlice(firewallSectionTypeValues, false),
 			},
 			"stateful": &schema.Schema{
 				Type:        schema.TypeBool,
@@ -81,7 +87,7 @@ func getRulesSchema() *schema.Schema {
 					Type:         schema.TypeString,
 					Description:  "Action enforced on the packets which matches the firewall rule",
 					Required:     true,
-					ValidateFunc: validateRuleAction,
+					ValidateFunc: validation.StringInSlice(firewallRuleActionValues, false),
 				},
 				"applied_tos":  getResourceReferencesSchema(false, false, []string{"LogicalPort", "LogicalSwitch", "NSGroup"}),
 				"destinations": getResourceReferencesSchema(false, false, []string{"IPSet", "LogicalPort", "LogicalSwitch", "NSGroup", "MACSet"}),
@@ -94,7 +100,7 @@ func getRulesSchema() *schema.Schema {
 					Type:         schema.TypeString,
 					Description:  "Rule direction in case of stateless firewall rules. This will only considered if section level parameter is set to stateless. Default to IN_OUT if not specified",
 					Optional:     true,
-					ValidateFunc: validateRuleDirection,
+					ValidateFunc: validation.StringInSlice(firewallRuleDirectionValues, false),
 				},
 				"disabled": &schema.Schema{
 					Type:        schema.TypeBool,
@@ -105,7 +111,7 @@ func getRulesSchema() *schema.Schema {
 					Type:         schema.TypeString,
 					Description:  "Type of IP packet that should be matched while enforcing the rule (IPV4, IPV6, IPV4_IPV6)",
 					Optional:     true,
-					ValidateFunc: validateRuleIPProtocol,
+					ValidateFunc: validation.StringInSlice(firewallRuleIPProtocolValues, false),
 				},
 				"logged": &schema.Schema{
 					Type:        schema.TypeBool,
@@ -132,26 +138,6 @@ func getRulesSchema() *schema.Schema {
 			},
 		},
 	}
-}
-
-func validateRuleIPProtocol(v interface{}, k string) (ws []string, errors []error) {
-	legal_values := []string{"IPV4", "IPV6", "IPV4_IPV6"}
-	return validateValueInList(v, k, legal_values)
-}
-
-func validateRuleAction(v interface{}, k string) (ws []string, errors []error) {
-	legal_values := []string{"ALLOW", "DROP", "REJECT"}
-	return validateValueInList(v, k, legal_values)
-}
-
-func validateRuleDirection(v interface{}, k string) (ws []string, errors []error) {
-	legal_values := []string{"IN", "OUT", "IN_OUT"}
-	return validateValueInList(v, k, legal_values)
-}
-
-func validateSectionType(v interface{}, k string) (ws []string, errors []error) {
-	legal_values := []string{"LAYER2", "LAYER3"}
-	return validateValueInList(v, k, legal_values)
 }
 
 func returnServicesResourceReferences(services []manager.FirewallService) []map[string]interface{} {

@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-var logicalSwitchReplicationModeValues = []string{"MTEP", "SOURCE"}
+var logicalSwitchReplicationModeValues = []string{"MTEP", "SOURCE", ""}
 
 // TODO: consider splitting this resource to overlay_ls and vlan_ls
 func resourceLogicalSwitch() *schema.Resource {

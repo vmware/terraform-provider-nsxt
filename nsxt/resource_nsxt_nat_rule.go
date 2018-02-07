@@ -6,10 +6,13 @@ package nsxt
 import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/manager"
 	"net/http"
 )
+
+var natRuleActionValues = []string{"SNAT", "DNAT", "NO_NAT", "REFLEXIVE"}
 
 func resourceNatRule() *schema.Resource {
 	return &schema.Resource{
@@ -36,7 +39,7 @@ func resourceNatRule() *schema.Resource {
 				Type:         schema.TypeString,
 				Description:  "valid actions: SNAT, DNAT, NO_NAT, REFLEXIVE. All rules in a logical router are either stateless or stateful. Mix is not supported. SNAT and DNAT are stateful, can NOT be supported when the logical router is running at active-active HA mode; REFLEXIVE is stateless. NO_NAT has no translated_fields, only match fields",
 				Required:     true,
-				ValidateFunc: validateNatAction,
+				ValidateFunc: validation.StringInSlice(natRuleActionValues, false),
 			},
 			"enabled": &schema.Schema{
 				Type:        schema.TypeBool,
@@ -89,11 +92,6 @@ func resourceNatRule() *schema.Resource {
 			//TODO(asarfaty): Add match_service field
 		},
 	}
-}
-
-func validateNatAction(v interface{}, k string) (ws []string, errors []error) {
-	legal_values := []string{"SNAT", "DNAT", "NO_NAT", "REFLEXIVE"}
-	return validateValueInList(v, k, legal_values)
 }
 
 func resourceNatRuleCreate(d *schema.ResourceData, m interface{}) error {

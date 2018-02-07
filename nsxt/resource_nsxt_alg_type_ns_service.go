@@ -6,15 +6,13 @@ package nsxt
 import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/manager"
 	"net/http"
 )
 
-func validateAlgType(v interface{}, k string) (ws []string, errors []error) {
-	legal_values := []string{"ORACLE_TNS", "FTP", "SUN_RPC_TCP", "SUN_RPC_UDP", "MS_RPC_TCP", "MS_RPC_UDP", "NBNS_BROADCAST", "NBDG_BROADCAST", "TFTP"}
-	return validateValueInList(v, k, legal_values)
-}
+var algTypeValues = []string{"ORACLE_TNS", "FTP", "SUN_RPC_TCP", "SUN_RPC_UDP", "MS_RPC_TCP", "MS_RPC_UDP", "NBNS_BROADCAST", "NBDG_BROADCAST", "TFTP"}
 
 func resourceAlgTypeNsService() *schema.Resource {
 	return &schema.Resource{
@@ -57,7 +55,7 @@ func resourceAlgTypeNsService() *schema.Resource {
 				Type:         schema.TypeString,
 				Description:  "Algorithm",
 				Required:     true,
-				ValidateFunc: validateAlgType,
+				ValidateFunc: validation.StringInSlice(algTypeValues, false),
 			},
 		},
 	}

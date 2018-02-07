@@ -6,6 +6,7 @@ package nsxt
 import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/manager"
 	"net/http"
@@ -41,7 +42,7 @@ func resourceIpProtocolNsService() *schema.Resource {
 				Type:         schema.TypeInt,
 				Description:  "Ip protocol number",
 				Required:     true,
-				ValidateFunc: validateIntegerInRange(0, 255),
+				ValidateFunc: validation.IntBetween(0, 255),
 			},
 		},
 	}

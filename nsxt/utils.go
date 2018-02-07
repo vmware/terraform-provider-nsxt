@@ -6,6 +6,7 @@ package nsxt
 import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 	"github.com/vmware/go-vmware-nsxt"
 	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/common"
@@ -236,12 +237,7 @@ func getResourceReferencesSchemaByType(required bool, computed bool, valid_targe
 				"target_type": &schema.Schema{
 					Type:     schema.TypeString,
 					Optional: true,
-					ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-						if len(valid_target_types) > 0 {
-							return validateValueInList(v, k, valid_target_types)
-						}
-						return
-					},
+					ValidateFunc: validation.StringInSlice(valid_target_types, false),
 				},
 			},
 		},

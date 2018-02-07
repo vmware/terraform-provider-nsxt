@@ -3,10 +3,15 @@ package nsxt
 import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/manager"
 	"net/http"
 )
+
+var nsGroupTargetTypeValues = []string{"NSGroup", "IPSet", "LogicalPort", "LogicalSwitch", "MACSet"}
+var nsGroupMembershipCriteriaTargetTypeValues = []string{"LogicalPort", "LogicalSwitch", "VirtualMachine"}
+var nsGroupTagOperationValues = []string{"EQUALS"}
 
 func resourceNsGroup() *schema.Resource {
 	return &schema.Resource{
@@ -43,7 +48,7 @@ func resourceNsGroup() *schema.Resource {
 						"target_type": &schema.Schema{
 							Type:         schema.TypeString,
 							Required:     true,
-							ValidateFunc: validateTargetType,
+							ValidateFunc: validation.StringInSlice(nsGroupTargetTypeValues, false),
 						},
 						"value": &schema.Schema{
 							Type:     schema.TypeString,
@@ -61,7 +66,7 @@ func resourceNsGroup() *schema.Resource {
 						"target_type": &schema.Schema{
 							Type:         schema.TypeString,
 							Required:     true,
-							ValidateFunc: validateMembershipCriteriaTargetType,
+							ValidateFunc: validation.StringInSlice(nsGroupMembershipCriteriaTargetTypeValues, false),
 						},
 						"scope": &schema.Schema{
 							Type:     schema.TypeString,
@@ -75,34 +80,19 @@ func resourceNsGroup() *schema.Resource {
 							Type:         schema.TypeString,
 							Default:      "EQUALS",
 							Optional:     true,
-							ValidateFunc: validateTagOperation,
+							ValidateFunc: validation.StringInSlice(nsGroupTagOperationValues, false),
 						},
 						"tag_op": &schema.Schema{
 							Type:         schema.TypeString,
 							Default:      "EQUALS",
 							Optional:     true,
-							ValidateFunc: validateTagOperation,
+							ValidateFunc: validation.StringInSlice(nsGroupTagOperationValues, false),
 						},
 					},
 				},
 			},
 		},
 	}
-}
-
-func validateTargetType(v interface{}, k string) (ws []string, errors []error) {
-	legal_values := []string{"NSGroup", "IPSet", "LogicalPort", "LogicalSwitch", "MACSet"}
-	return validateValueInList(v, k, legal_values)
-}
-
-func validateMembershipCriteriaTargetType(v interface{}, k string) (ws []string, errors []error) {
-	legal_values := []string{"LogicalPort", "LogicalSwitch", "VirtualMachine"}
-	return validateValueInList(v, k, legal_values)
-}
-
-func validateTagOperation(v interface{}, k string) (ws []string, errors []error) {
-	legal_values := []string{"EQUALS"}
-	return validateValueInList(v, k, legal_values)
 }
 
 func getMembershipCriteriaFromSchema(d *schema.ResourceData) []manager.NsGroupTagExpression {
