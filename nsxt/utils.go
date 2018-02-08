@@ -237,8 +237,8 @@ func getResourceReferencesSchemaByType(required bool, computed bool, valid_targe
 					Optional: true,
 				},
 				"target_type": &schema.Schema{
-					Type:     schema.TypeString,
-					Optional: true,
+					Type:         schema.TypeString,
+					Optional:     true,
 					ValidateFunc: validation.StringInSlice(valid_target_types, false),
 				},
 			},
@@ -344,9 +344,9 @@ func getIpSubnetsSchema(required bool, computed bool) *schema.Schema {
 
 func getAdminStateSchema() *schema.Schema {
 	return &schema.Schema{
-		Type:     schema.TypeString,
-		Required: true,
-		Description: "Represents Desired state of the object",
+		Type:         schema.TypeString,
+		Required:     true,
+		Description:  "Represents Desired state of the object",
 		ValidateFunc: validation.StringInSlice(adminStateValues, false),
 	}
 }

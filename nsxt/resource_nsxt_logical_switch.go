@@ -39,7 +39,7 @@ func resourceLogicalSwitch() *schema.Resource {
 			},
 			"tags":             getTagsSchema(),
 			"address_bindings": getAddressBindingsSchema(),
-			"admin_state": getAdminStateSchema(),
+			"admin_state":      getAdminStateSchema(),
 			"ip_pool_id": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "IP pool id that associated with a LogicalSwitch",
