@@ -17,8 +17,9 @@ func TestNSXIpSetBasic(t *testing.T) {
 	name := fmt.Sprintf("test-nsx-ip-set")
 	updateName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_ip_set.test"
-	server_ip := "1.1.1.1"
-	additional_ip := "2.1.1.1"
+	single_ip := "1.1.1.1"
+	additional_cidr := "2.1.1.0/24"
+	additional_range := "3.1.1.1-3.1.1.10"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -28,7 +29,7 @@ func TestNSXIpSetBasic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXIpSetCreateTemplate(name, server_ip),
+				Config: testAccNSXIpSetCreateTemplate(name, single_ip),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXIpSetExists(name, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -38,13 +39,13 @@ func TestNSXIpSetBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXIpSetUpdateTemplate(updateName, server_ip, additional_ip),
+				Config: testAccNSXIpSetUpdateTemplate(updateName, single_ip, additional_cidr, additional_range),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXIpSetExists(updateName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updateName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test Update"),
 					resource.TestCheckResourceAttr(testResourceName, "tags.#", "2"),
-					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.#", "3"),
 				),
 			},
 		},
@@ -108,7 +109,7 @@ func testAccNSXIpSetCheckDestroy(state *terraform.State, display_name string) er
 	return nil
 }
 
-func testAccNSXIpSetCreateTemplate(name string, server_ip string) string {
+func testAccNSXIpSetCreateTemplate(name string, single_ip string) string {
 	return fmt.Sprintf(`
 resource "nsxt_ip_set" "test" {
 	display_name = "%s"
@@ -117,19 +118,19 @@ resource "nsxt_ip_set" "test" {
 	tags = [{scope = "scope1"
 	    	 tag = "tag1"}
 	]
-}`, name, server_ip)
+}`, name, single_ip)
 }
 
-func testAccNSXIpSetUpdateTemplate(updatedName string, server_ip string, additional_ip string) string {
+func testAccNSXIpSetUpdateTemplate(updatedName string, single_ip string, additional_range string, additional_cidr string) string {
 	return fmt.Sprintf(`
 resource "nsxt_ip_set" "test" {
 	display_name = "%s"
 	description = "Acceptance Test Update"
-	ip_addresses = ["%s", "%s"]
+	ip_addresses = ["%s", "%s", "%s"]
 	tags = [{scope = "scope1"
 	         tag = "tag1"}, 
 	        {scope = "scope2"
 	    	 tag = "tag2"}
 	]
-}`, updatedName, server_ip, additional_ip)
+}`, updatedName, single_ip, additional_range, additional_cidr)
 }

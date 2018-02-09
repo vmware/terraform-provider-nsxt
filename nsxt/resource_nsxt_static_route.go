@@ -13,8 +13,6 @@ import (
 	"net/http"
 )
 
-var staticRouteNextHopBlackholeAction = []string{"DISCARD", ""}
-
 func resourceStaticRoute() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceStaticRouteCreate,
@@ -29,9 +27,10 @@ func resourceStaticRoute() *schema.Resource {
 				Required:    true,
 			},
 			"network": &schema.Schema{
-				Type:        schema.TypeString,
-				Description: "CIDR",
-				Required:    true,
+				Type:         schema.TypeString,
+				Description:  "CIDR",
+				Required:     true,
+				ValidateFunc: validation.CIDRNetwork(0, 32),
 			},
 			"next_hops":    getNextHopsSchema(),
 			"revision":     getRevisionSchema(),
@@ -64,19 +63,19 @@ func getNextHopsSchema() *schema.Schema {
 				},
 				"bfd_enabled": &schema.Schema{
 					Type:        schema.TypeBool,
-					Description: "Status of bfd for this next hop where bfd_enabled = true indicate bfd is enabled for this next hop and bfd_enabled = false indicate bfd peer is disabled or not configured for this next hop. Default value is False",
-					Optional:    true,
+					Description: "Status of bfd for this next hop where bfd_enabled = true indicate bfd is enabled for this next hop and bfd_enabled = false indicate bfd peer is disabled or not configured for this next hop.",
+					Computed:    true,
 				},
 				"blackhole_action": &schema.Schema{
-					Type:         schema.TypeString,
-					Description:  "Action to be taken on matching packets for NULL routes",
-					Optional:     true,
-					ValidateFunc: validation.StringInSlice(staticRouteNextHopBlackholeAction, false),
+					Type:        schema.TypeString,
+					Description: "Action to be taken on matching packets for NULL routes",
+					Computed:    true,
 				},
 				"ip_address": &schema.Schema{
-					Type:        schema.TypeString,
-					Description: "Next Hop IP",
-					Optional:    true,
+					Type:         schema.TypeString,
+					Description:  "Next Hop IP",
+					Optional:     true,
+					ValidateFunc: ValidateSingleIP(),
 				},
 				"logical_router_port_id": &schema.Schema{
 					Type:        schema.TypeString,

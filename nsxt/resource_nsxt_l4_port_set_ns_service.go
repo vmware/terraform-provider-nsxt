@@ -6,10 +6,13 @@ package nsxt
 import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/manager"
 	"net/http"
 )
+
+var ipProtocolValues = []string{"TCP", "UDP"}
 
 func resourceL4PortSetNsService() *schema.Resource {
 	return &schema.Resource{
@@ -40,19 +43,26 @@ func resourceL4PortSetNsService() *schema.Resource {
 			"destination_ports": &schema.Schema{
 				Type:        schema.TypeSet,
 				Description: "Set of destination ports",
-				Elem:        &schema.Schema{Type: schema.TypeString},
-				Optional:    true,
+				Elem: &schema.Schema{
+					Type:         schema.TypeString,
+					ValidateFunc: validatePortRange(),
+				},
+				Optional: true,
 			},
 			"source_ports": &schema.Schema{
 				Type:        schema.TypeSet,
 				Description: "Set of source ports",
-				Elem:        &schema.Schema{Type: schema.TypeString},
-				Optional:    true,
+				Elem: &schema.Schema{
+					Type:         schema.TypeString,
+					ValidateFunc: validatePortRange(),
+				},
+				Optional: true,
 			},
 			"l4_protocol": &schema.Schema{
-				Type:        schema.TypeString,
-				Description: "L4 Protocol",
-				Required:    true,
+				Type:         schema.TypeString,
+				Description:  "L4 Protocol",
+				Required:     true,
+				ValidateFunc: validation.StringInSlice(ipProtocolValues, false),
 			},
 		},
 	}

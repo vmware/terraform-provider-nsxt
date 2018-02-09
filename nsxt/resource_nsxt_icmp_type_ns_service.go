@@ -6,10 +6,13 @@ package nsxt
 import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/manager"
 	"net/http"
 )
+
+var icmpProtocolValues = []string{"ICMPv4", "ICMPv6"}
 
 func resourceIcmpTypeNsService() *schema.Resource {
 	return &schema.Resource{
@@ -38,20 +41,22 @@ func resourceIcmpTypeNsService() *schema.Resource {
 				Computed:    true,
 			},
 			"icmp_code": &schema.Schema{
-				Type:        schema.TypeInt,
-				Description: "ICMP message code",
-				Optional:    true,
+				Type:         schema.TypeInt,
+				Description:  "ICMP message code",
+				Optional:     true,
+				ValidateFunc: validation.IntBetween(0, 255),
 			},
 			"icmp_type": &schema.Schema{
-				Type:        schema.TypeInt,
-				Description: "ICMP message type",
-				Elem:        &schema.Schema{Type: schema.TypeString},
-				Optional:    true,
+				Type:         schema.TypeInt,
+				Description:  "ICMP message type",
+				Optional:     true,
+				ValidateFunc: validation.IntBetween(0, 255),
 			},
 			"protocol": &schema.Schema{
-				Type:        schema.TypeString,
-				Description: "Version of ICMP protocol (ICMPv4/ICMPv6)",
-				Required:    true,
+				Type:         schema.TypeString,
+				Description:  "Version of ICMP protocol (ICMPv4/ICMPv6)",
+				Required:     true,
+				ValidateFunc: validation.StringInSlice(icmpProtocolValues, false),
 			},
 		},
 	}

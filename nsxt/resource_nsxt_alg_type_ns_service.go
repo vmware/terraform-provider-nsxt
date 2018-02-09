@@ -41,15 +41,19 @@ func resourceAlgTypeNsService() *schema.Resource {
 				Computed:    true,
 			},
 			"destination_ports": &schema.Schema{
-				Type:        schema.TypeString,
-				Description: "A single destination port",
-				Required:    true,
+				Type:         schema.TypeString,
+				Description:  "A single destination port",
+				Required:     true,
+				ValidateFunc: validateSinglePort(),
 			},
 			"source_ports": &schema.Schema{
 				Type:        schema.TypeSet,
 				Description: "Set of source ports or ranges",
-				Elem:        &schema.Schema{Type: schema.TypeString},
-				Optional:    true,
+				Elem: &schema.Schema{
+					Type:         schema.TypeString,
+					ValidateFunc: validatePortRange(),
+				},
+				Optional: true,
 			},
 			"alg": &schema.Schema{
 				Type:         schema.TypeString,

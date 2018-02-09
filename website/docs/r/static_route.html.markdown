@@ -23,8 +23,6 @@ resource "nsxt_static_route" "SR" {
   network = "4.4.4.0/24"
   next_hops = [{ip_address = "8.0.0.10",
                 administrative_distance = "1",
-                bfd_enabled = "false",
-                blackhole_action = "",
                 logical_router_port_id = "${nsxt_logical_router_downlink_port.LRP1.id}"}]
 }
 ```
@@ -40,8 +38,6 @@ The following arguments are supported:
 * `network` - (Required) CIDR.
 * `next_hops` - (Required) List of Next Hops, each with those arguments:
     * `administrative_distance` - (Optional) Administrative Distance for the next hop IP.
-    * `bfd_enabled` - (Optional) Status of bfd for this next hop where bfd_enabled = true indicate bfd is enabled for this next hop and bfd_enabled = false indicate bfd peer is disabled or not configured for this next hop. The default is Disabled
-    * `blackhole_action` - (Optional) Action to be taken on matching packets for NULL routes. Options: "DISCARD" or keep empty
     * `ip_address` - (Optional) Next Hop IP.
     * `logical_router_port_id` - (Optional) Reference of logical router port to be used for next hop.
 
@@ -53,3 +49,6 @@ In addition to arguments listed above, the following attributes are exported:
 * `id` - ID of the static_route.
 * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
 * `system_owned` - A boolean that indicates whether this resource is system-owned and thus read-only.
+* `next_hops` additional arguments:
+    * `bfd_enabled` - Status of bfd for this next hop where bfd_enabled = true indicate bfd is enabled for this next hop and bfd_enabled = false indicate bfd peer is disabled or not configured for this next hop.
+    * `blackhole_action` - Action to be taken on matching packets for NULL routes. 
