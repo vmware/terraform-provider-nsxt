@@ -302,7 +302,7 @@ func getServiceBindingsFromSchema(d *schema.ResourceData, schemaAttrName string)
 			TargetId:          data["target_id"].(string),
 			TargetType:        data["target_type"].(string),
 		}
-		elem := manager.ServiceBinding{&ref}
+		elem := manager.ServiceBinding{ServiceId: &ref}
 		bindingList = append(bindingList, elem)
 	}
 	return bindingList

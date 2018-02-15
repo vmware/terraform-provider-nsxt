@@ -144,7 +144,7 @@ func testAccNSXNSGroupExists(display_name string, resourceName string) resource.
 		}
 
 		if responseCode.StatusCode != http.StatusOK {
-			return fmt.Errorf("Error while checking if NS Group %s exists. HTTP return code was %d", resourceID, responseCode)
+			return fmt.Errorf("Error while checking if NS Group %s exists. HTTP return code was %d", resourceID, responseCode.StatusCode)
 		}
 
 		if display_name == group.DisplayName {

@@ -88,7 +88,7 @@ func resourceLogicalTier1Router() *schema.Resource {
 }
 
 func resourceLogicalTier1RouterCreateRollback(nsxClient *api.APIClient, id string) {
-	log.Printf("[ERROR] Rollback router %d creation", id)
+	log.Printf("[ERROR] Rollback router %s creation", id)
 
 	localVarOptionals := make(map[string]interface{})
 	_, err := nsxClient.LogicalRoutingAndServicesApi.DeleteLogicalRouter(nsxClient.Context, id, localVarOptionals)
@@ -176,7 +176,7 @@ func resourceLogicalTier1RouterCreate(d *schema.ResourceData, m interface{}) err
 	}
 
 	if resp.StatusCode != http.StatusCreated {
-		return fmt.Errorf("Unexpected status returned: %s", resp.StatusCode)
+		return fmt.Errorf("Unexpected status returned: %d", resp.StatusCode)
 	}
 
 	// Add advertisement config

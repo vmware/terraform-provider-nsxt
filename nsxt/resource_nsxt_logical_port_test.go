@@ -71,7 +71,7 @@ func testAccNSXLogicalPortExists(display_name string, resourceName string) resou
 		}
 
 		if responseCode.StatusCode != http.StatusOK {
-			return fmt.Errorf("Error while checking if logical port %s exists. HTTP return code was %d", resourceID, responseCode)
+			return fmt.Errorf("Error while checking if logical port %s exists. HTTP return code was %d", resourceID, responseCode.StatusCode)
 		}
 
 		if display_name == logicalPort.DisplayName {

@@ -85,7 +85,7 @@ func resourceLogicalSwitch() *schema.Resource {
 }
 
 func resourceLogicalSwitchCreateRollback(nsxClient *api.APIClient, id string) {
-	log.Printf("[ERROR] Rollback switch %d creation due to unrealized state", id)
+	log.Printf("[ERROR] Rollback switch %s creation due to unrealized state", id)
 
 	localVarOptionals := make(map[string]interface{})
 	_, err := nsxClient.LogicalSwitchingApi.DeleteLogicalSwitch(nsxClient.Context, id, localVarOptionals)

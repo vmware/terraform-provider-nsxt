@@ -156,7 +156,7 @@ func testAccNSXLogicalSwitchExists(display_name string, resourceName string) res
 		}
 
 		if responseCode.StatusCode != http.StatusOK {
-			return fmt.Errorf("Error while checking if logical switch %s exists. HTTP return code was %d", resourceID, responseCode)
+			return fmt.Errorf("Error while checking if logical switch %s exists. HTTP return code was %d", resourceID, responseCode.StatusCode)
 		}
 
 		if display_name == logicalSwitch.DisplayName {

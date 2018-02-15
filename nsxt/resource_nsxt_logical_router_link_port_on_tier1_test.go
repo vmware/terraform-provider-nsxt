@@ -122,7 +122,7 @@ func testAccNSXLogicalRouterLinkPortOnTier1Exists(displayName string, resourceNa
 		}
 
 		if responseCode.StatusCode != http.StatusOK {
-			return fmt.Errorf("Error while checking verifying logical router link port on Tier1 existence. HTTP returned %d", resourceID, responseCode)
+			return fmt.Errorf("Error while checking verifying logical router link port on Tier1 existence. HTTP returned %d", responseCode.StatusCode)
 		}
 
 		if displayName == resource.DisplayName {

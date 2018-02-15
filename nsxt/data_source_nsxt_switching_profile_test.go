@@ -52,7 +52,7 @@ func testAccNSXSwitchingProfileExists(resourceName string) resource.TestCheckFun
 		}
 
 		if responseCode.StatusCode != http.StatusOK {
-			return fmt.Errorf("Error while checking if switching profile %s exists. HTTP return code was %d", resourceID, responseCode)
+			return fmt.Errorf("Error while checking if switching profile %s exists. HTTP return code was %d", resourceID, responseCode.StatusCode)
 		}
 
 		return nil

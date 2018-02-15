@@ -70,7 +70,7 @@ func testAccNSXAlgServiceExists(display_name string, resourceName string) resour
 		}
 
 		if responseCode.StatusCode != http.StatusOK {
-			return fmt.Errorf("Error while checking if alg ns service %s exists. HTTP return code was %d", resourceID, responseCode)
+			return fmt.Errorf("Error while checking if alg ns service %s exists. HTTP return code was %d", resourceID, responseCode.StatusCode)
 		}
 
 		if display_name == service.DisplayName {

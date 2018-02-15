@@ -52,7 +52,7 @@ func testAccNSXLogicalTier0RouterExists(resourceName string) resource.TestCheckF
 		}
 
 		if responseCode.StatusCode != http.StatusOK {
-			return fmt.Errorf("Error while checking if logical tier0 router %s exists. HTTP return code was %d", resourceID, responseCode)
+			return fmt.Errorf("Error while checking if logical tier0 router %s exists. HTTP return code was %d", resourceID, responseCode.StatusCode)
 		}
 
 		return nil

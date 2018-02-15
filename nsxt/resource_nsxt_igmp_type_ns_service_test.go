@@ -68,7 +68,7 @@ func testAccNSXIgmpServiceExists(display_name string, resourceName string) resou
 		}
 
 		if responseCode.StatusCode != http.StatusOK {
-			return fmt.Errorf("Error while checking if igmp service %s exists. HTTP return code was %d", resourceID, responseCode)
+			return fmt.Errorf("Error while checking if igmp service %s exists. HTTP return code was %d", resourceID, responseCode.StatusCode)
 		}
 
 		if display_name == service.DisplayName {

@@ -70,7 +70,7 @@ func testAccNSXL4ServiceExists(display_name string, resourceName string) resourc
 		}
 
 		if responseCode.StatusCode != http.StatusOK {
-			return fmt.Errorf("Error while checking if L4 ns service %s exists. HTTP return code was %d", resourceID, responseCode)
+			return fmt.Errorf("Error while checking if L4 ns service %s exists. HTTP return code was %d", resourceID, responseCode.StatusCode)
 		}
 
 		if display_name == service.DisplayName {

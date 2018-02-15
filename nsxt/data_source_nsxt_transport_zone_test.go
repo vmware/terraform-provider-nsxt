@@ -52,7 +52,7 @@ func testAccNSXTransportZoneExists(resourceName string) resource.TestCheckFunc {
 		}
 
 		if responseCode.StatusCode != http.StatusOK {
-			return fmt.Errorf("Error while checking if transport zone %s exists. HTTP return code was %d", resourceID, responseCode)
+			return fmt.Errorf("Error while checking if transport zone %s exists. HTTP return code was %d", resourceID, responseCode.StatusCode)
 		}
 
 		return nil

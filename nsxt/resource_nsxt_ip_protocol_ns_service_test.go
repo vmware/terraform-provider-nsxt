@@ -70,7 +70,7 @@ func testAccNSXIpProtocolServiceExists(display_name string, resourceName string)
 		}
 
 		if responseCode.StatusCode != http.StatusOK {
-			return fmt.Errorf("Error while checking if ip protocol service %s exists. HTTP return code was %d", resourceID, responseCode)
+			return fmt.Errorf("Error while checking if ip protocol service %s exists. HTTP return code was %d", resourceID, responseCode.StatusCode)
 		}
 
 		if display_name == service.DisplayName {
