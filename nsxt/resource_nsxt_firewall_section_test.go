@@ -17,8 +17,8 @@ func TestNSXFirewallSectionBasic(t *testing.T) {
 	prfName := fmt.Sprintf("test-nsx-firewall-section-basic")
 	updatePrfName := fmt.Sprintf("%s-update", prfName)
 	testResourceName := "nsxt_firewall_section.test"
-	tags := SingleTag
-	updatedTags := DoubleTags
+	tags := singleTag
+	updatedTags := doubleTags
 	tos := string("[]")
 
 	resource.Test(t, resource.TestCase{
@@ -62,7 +62,7 @@ func TestNSXFirewallSectionWithTos(t *testing.T) {
 	prfName := fmt.Sprintf("test-nsx-firewall-section-tos")
 	updatePrfName := fmt.Sprintf("%s-update", prfName)
 	testResourceName := "nsxt_firewall_section.test"
-	tags := SingleTag
+	tags := singleTag
 	tos := string("[{target_type = \"NSGroup\", target_id = \"${nsxt_ns_group.GRP1.id}\"}]")
 	updatedTos := string("[{target_type = \"NSGroup\", target_id = \"${nsxt_ns_group.GRP1.id}\"}, {target_type = \"NSGroup\", target_id = \"${nsxt_ns_group.GRP2.id}\"}]")
 
@@ -110,7 +110,7 @@ func TestNSXFirewallSectionWithRules(t *testing.T) {
 	testResourceName := "nsxt_firewall_section.test"
 	ruleName := "rule1.0"
 	updatedRuleName := "rule1.1"
-	tags := SingleTag
+	tags := singleTag
 	tos := string("[]")
 
 	resource.Test(t, resource.TestCase{
@@ -172,8 +172,8 @@ func TestNSXFirewallSectionWithRulesAndTags(t *testing.T) {
 	testResourceName := "nsxt_firewall_section.test"
 	ruleName := "rule1.0"
 	updatedRuleName := "rule1.1"
-	tags := SingleTag
-	updatedTags := DoubleTags
+	tags := singleTag
+	updatedTags := doubleTags
 	tos := string("[]")
 
 	resource.Test(t, resource.TestCase{
@@ -223,7 +223,7 @@ func TestNSXFirewallSectionWithRulesAndTos(t *testing.T) {
 	testResourceName := "nsxt_firewall_section.test"
 	ruleName := "rule1.0"
 	updatedRuleName := "rule1.1"
-	tags := SingleTag
+	tags := singleTag
 	tos := string("[{target_type = \"NSGroup\", target_id = \"${nsxt_ns_group.GRP1.id}\"}]")
 	updatedTos := string("[{target_type = \"NSGroup\", target_id = \"${nsxt_ns_group.GRP1.id}\"}, {target_type = \"NSGroup\", target_id = \"${nsxt_ns_group.GRP2.id}\"}]")
 

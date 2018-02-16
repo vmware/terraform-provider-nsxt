@@ -36,7 +36,7 @@ func resourceIpSet() *schema.Resource {
 				Description: "Set of IP addresses",
 				Elem: &schema.Schema{
 					Type:         schema.TypeString,
-					ValidateFunc: ValidateCidrOrIPOrRange(),
+					ValidateFunc: validateCidrOrIPOrRange(),
 				},
 				Optional: true,
 			},

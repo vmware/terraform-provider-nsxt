@@ -89,7 +89,7 @@ func TestNSXNSGroupWithCriteria(t *testing.T) {
 	grpName := fmt.Sprintf("test-nsx-ns-group")
 	updateGrpName := fmt.Sprintf("%s-update", grpName)
 	testResourceName := "nsxt_ns_group.test"
-	transportZoneName := OverlayTransportZoneNamePrefix
+	transportZoneName := overlayTransportZoneNamePrefix
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },

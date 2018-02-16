@@ -74,7 +74,7 @@ func getNextHopsSchema() *schema.Schema {
 					Type:         schema.TypeString,
 					Description:  "Next Hop IP",
 					Optional:     true,
-					ValidateFunc: ValidateSingleIP(),
+					ValidateFunc: validateSingleIP(),
 				},
 				"logical_router_port_id": &schema.Schema{
 					Type:        schema.TypeString,

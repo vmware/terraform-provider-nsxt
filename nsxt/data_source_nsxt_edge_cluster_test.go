@@ -13,7 +13,7 @@ import (
 )
 
 func TestNSXEdgeClusterBasic(t *testing.T) {
-	edgeClusterName := EdgeClusterDefaultName
+	edgeClusterName := edgeClusterDefaultName
 	testResourceName := "data.nsxt_edge_cluster.test"
 
 	resource.Test(t, resource.TestCase{

@@ -13,7 +13,7 @@ import (
 )
 
 func TestNSXSwitchingProfileBasic(t *testing.T) {
-	profileName := SwitchingProfileDefaultName
+	profileName := switchingProfileDefaultName
 	testResourceName := "data.nsxt_switching_profile.test"
 
 	resource.Test(t, resource.TestCase{

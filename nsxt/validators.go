@@ -59,7 +59,7 @@ func validateSinglePort() schema.SchemaValidateFunc {
 }
 
 // Validations for IP objects
-func IsIpRange(v string) bool {
+func isIPRange(v string) bool {
 	s := strings.Split(v, "-")
 	if len(s) != 2 {
 		return false
@@ -72,7 +72,7 @@ func IsIpRange(v string) bool {
 	return true
 }
 
-func IsSingleIp(v string) bool {
+func isSingleIP(v string) bool {
 	ip := net.ParseIP(v)
 	if ip == nil {
 		return false
@@ -80,7 +80,7 @@ func IsSingleIp(v string) bool {
 	return true
 }
 
-func IsCidr(v string) bool {
+func isCidr(v string) bool {
 	_, ipnet, err := net.ParseCIDR(v)
 	if err != nil {
 		return false
@@ -91,7 +91,7 @@ func IsCidr(v string) bool {
 	return true
 }
 
-func ValidateCidrOrIPOrRange() schema.SchemaValidateFunc {
+func validateCidrOrIPOrRange() schema.SchemaValidateFunc {
 	return func(i interface{}, k string) (s []string, es []error) {
 		v, ok := i.(string)
 		if !ok {
@@ -99,7 +99,7 @@ func ValidateCidrOrIPOrRange() schema.SchemaValidateFunc {
 			return
 		}
 
-		if !IsCidr(v) && !IsSingleIp(v) && !IsIpRange(v) {
+		if !isCidr(v) && !isSingleIP(v) && !isIPRange(v) {
 			es = append(es, fmt.Errorf(
 				"expected %s to contain a valid CIDR or IP or Range, got: %s", k, v))
 		}
@@ -107,7 +107,7 @@ func ValidateCidrOrIPOrRange() schema.SchemaValidateFunc {
 	}
 }
 
-func ValidateSingleIP() schema.SchemaValidateFunc {
+func validateSingleIP() schema.SchemaValidateFunc {
 	return func(i interface{}, k string) (s []string, es []error) {
 		v, ok := i.(string)
 		if !ok {
@@ -115,7 +115,7 @@ func ValidateSingleIP() schema.SchemaValidateFunc {
 			return
 		}
 
-		if !IsSingleIp(v) {
+		if !isSingleIP(v) {
 			es = append(es, fmt.Errorf(
 				"expected %s to contain a valid IP, got: %s", k, v))
 		}

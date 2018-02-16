@@ -45,7 +45,7 @@ func testNSXLogicalSwitchBasic(t *testing.T, verifyRealization bool) {
 	testResourceName := fmt.Sprintf("nsxt_logical_switch.%s", resourceName)
 	novlan := "0"
 	replicationMode := "MTEP"
-	transportZoneName := OverlayTransportZoneNamePrefix
+	transportZoneName := overlayTransportZoneNamePrefix
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -90,7 +90,7 @@ func testNSXLogicalSwitchVlan(t *testing.T, verifyRealization bool) {
 
 	switchName := "test-nsx-logical-switch-vlan"
 	updateSwitchName := fmt.Sprintf("%s-update", switchName)
-	transportZoneName := VlanTransportZoneName
+	transportZoneName := vlanTransportZoneName
 	resourceName := "testvlan"
 	testResourceName := fmt.Sprintf("nsxt_logical_switch.%s", resourceName)
 

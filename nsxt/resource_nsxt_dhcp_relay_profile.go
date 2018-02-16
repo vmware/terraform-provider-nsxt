@@ -36,7 +36,7 @@ func resourceDhcpRelayProfile() *schema.Resource {
 				Description: "Set of dhcp relay server addresses",
 				Elem: &schema.Schema{
 					Type:         schema.TypeString,
-					ValidateFunc: ValidateSingleIP(),
+					ValidateFunc: validateSingleIP(),
 				},
 				Required: true,
 			},

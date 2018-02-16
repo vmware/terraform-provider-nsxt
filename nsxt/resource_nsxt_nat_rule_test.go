@@ -17,7 +17,7 @@ func TestNSXSNATRuleBasic(t *testing.T) {
 	ruleName := fmt.Sprintf("test-nsx-snat-rule")
 	updateRuleName := fmt.Sprintf("%s-update", ruleName)
 	testResourceName := "nsxt_nat_rule.test"
-	edgeClusterName := EdgeClusterDefaultName
+	edgeClusterName := edgeClusterDefaultName
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -69,7 +69,7 @@ func TestNSXDNATRuleBasic(t *testing.T) {
 	ruleName := fmt.Sprintf("test-nsx-dnat-rule")
 	updateRuleName := fmt.Sprintf("%s-update", ruleName)
 	testResourceName := "nsxt_nat_rule.test"
-	edgeClusterName := EdgeClusterDefaultName
+	edgeClusterName := edgeClusterDefaultName
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },

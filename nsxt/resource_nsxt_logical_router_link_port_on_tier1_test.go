@@ -15,8 +15,8 @@ import (
 func TestNSXLogicalRouterLinkPortOnTier1Basic(t *testing.T) {
 
 	name := fmt.Sprintf("test-nsx-port-on-tier1")
-	tier0RouterName := Tier0RouterDefaultName
-	edgeClusterName := EdgeClusterDefaultName
+	tier0RouterName := tier0RouterDefaultName
+	edgeClusterName := edgeClusterDefaultName
 	updateName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_logical_router_link_port_on_tier1.test"
 
@@ -57,8 +57,8 @@ func TestNSXLogicalRouterLinkPortOnTier1WithRelay(t *testing.T) {
 	// Note: this test will pass only with NSX 2.2 & up. Before that dhcp relay is not supported here
 	// This test should be skipped based on the nsx version
 	name := fmt.Sprintf("test-nsx-port-on-tier1")
-	tier0RouterName := Tier0RouterDefaultName
-	edgeClusterName := EdgeClusterDefaultName
+	tier0RouterName := tier0RouterDefaultName
+	edgeClusterName := edgeClusterDefaultName
 	updateName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_logical_router_link_port_on_tier1.test"
 

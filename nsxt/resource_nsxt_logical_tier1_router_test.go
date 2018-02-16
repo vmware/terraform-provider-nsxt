@@ -19,7 +19,7 @@ func TestNSXLogicalTier1RouterBasic(t *testing.T) {
 	testResourceName := "nsxt_logical_tier1_router.test"
 	failoverMode := "PREEMPTIVE"
 	haMode := "ACTIVE_STANDBY"
-	edgeClusterName := EdgeClusterDefaultName
+	edgeClusterName := edgeClusterDefaultName
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },

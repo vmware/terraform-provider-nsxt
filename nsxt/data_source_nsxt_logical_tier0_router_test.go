@@ -13,7 +13,7 @@ import (
 )
 
 func TestNSXLogicalTier0RouterBasic(t *testing.T) {
-	routerName := Tier0RouterDefaultName
+	routerName := tier0RouterDefaultName
 	testResourceName := "data.nsxt_logical_tier0_router.test"
 
 	resource.Test(t, resource.TestCase{

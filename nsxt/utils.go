@@ -161,7 +161,7 @@ func getAddressBindingsSchema() *schema.Schema {
 				"ip_address": &schema.Schema{
 					Type:         schema.TypeString,
 					Optional:     true,
-					ValidateFunc: ValidateSingleIP(),
+					ValidateFunc: validateSingleIP(),
 				},
 				"mac_address": &schema.Schema{
 					Type:     schema.TypeString,
@@ -334,7 +334,7 @@ func getIpSubnetsSchema(required bool, computed bool) *schema.Schema {
 					Optional: true,
 					Elem: &schema.Schema{
 						Type:         schema.TypeString,
-						ValidateFunc: ValidateSingleIP(),
+						ValidateFunc: validateSingleIP(),
 					},
 				},
 				"prefix_length": &schema.Schema{

@@ -17,8 +17,8 @@ func TestNSXLogicalRouterDownlinkPortBasic(t *testing.T) {
 	portName := fmt.Sprintf("test-nsx-logical-router-downlink-port")
 	updatePortName := fmt.Sprintf("%s-update", portName)
 	testResourceName := "nsxt_logical_router_downlink_port.test"
-	transportZoneName := OverlayTransportZoneNamePrefix
-	edgeClusterName := EdgeClusterDefaultName
+	transportZoneName := overlayTransportZoneNamePrefix
+	edgeClusterName := edgeClusterDefaultName
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -58,8 +58,8 @@ func TestNSXLogicalRouterDownlinkPortWithRelay(t *testing.T) {
 	portName := fmt.Sprintf("test-nsx-logical-router-downlink-port")
 	updatePortName := fmt.Sprintf("%s-update", portName)
 	testResourceName := "nsxt_logical_router_downlink_port.test"
-	transportZoneName := OverlayTransportZoneNamePrefix
-	edgeClusterName := EdgeClusterDefaultName
+	transportZoneName := overlayTransportZoneNamePrefix
+	edgeClusterName := edgeClusterDefaultName
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },

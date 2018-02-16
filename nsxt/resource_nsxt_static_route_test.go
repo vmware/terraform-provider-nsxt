@@ -17,8 +17,8 @@ func TestNSXStaticRouteBasic(t *testing.T) {
 	name := fmt.Sprintf("test-nsx-static-route")
 	updateName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_static_route.test"
-	edgeClusterName := EdgeClusterDefaultName
-	transportZoneName := OverlayTransportZoneNamePrefix
+	edgeClusterName := edgeClusterDefaultName
+	transportZoneName := overlayTransportZoneNamePrefix
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
