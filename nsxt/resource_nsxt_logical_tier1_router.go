@@ -25,8 +25,7 @@ func resourceLogicalTier1Router() *schema.Resource {
 		Delete: resourceLogicalTier1RouterDelete,
 
 		Schema: map[string]*schema.Schema{
-			"revision":     getRevisionSchema(),
-			"system_owned": getSystemOwnedSchema(),
+			"revision": getRevisionSchema(),
 			"description": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
@@ -211,7 +210,6 @@ func resourceLogicalTier1RouterRead(d *schema.ResourceData, m interface{}) error
 	}
 
 	d.Set("revision", logical_router.Revision)
-	d.Set("system_owned", logical_router.SystemOwned)
 	d.Set("description", logical_router.Description)
 	d.Set("display_name", logical_router.DisplayName)
 	setTagsInSchema(d, logical_router.Tags)
@@ -222,7 +220,6 @@ func resourceLogicalTier1RouterRead(d *schema.ResourceData, m interface{}) error
 	d.Set("high_availability_mode", logical_router.HighAvailabilityMode)
 	d.Set("preferred_edge_cluster_member_index", logical_router.PreferredEdgeClusterMemberIndex)
 	d.Set("router_type", logical_router.RouterType)
-	d.Set("resource_type", logical_router.ResourceType)
 
 	err = resourceLogicalTier1RouterReadAdv(d, nsxClient, id)
 	if err != nil {

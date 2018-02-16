@@ -25,8 +25,7 @@ func resourceFirewallSection() *schema.Resource {
 		Delete: resourceFirewallSectionDelete,
 
 		Schema: map[string]*schema.Schema{
-			"revision":     getRevisionSchema(),
-			"system_owned": getSystemOwnedSchema(),
+			"revision": getRevisionSchema(),
 			"description": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
@@ -320,7 +319,6 @@ func resourceFirewallSectionRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	d.Set("revision", firewall_section.Revision)
-	d.Set("system_owned", firewall_section.SystemOwned)
 	d.Set("description", firewall_section.Description)
 	d.Set("display_name", firewall_section.DisplayName)
 	setTagsInSchema(d, firewall_section.Tags)

@@ -6,10 +6,13 @@ package nsxt
 import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/manager"
 	"net/http"
 )
+
+var logicalRouterPortUrpfModeValues = []string{"NONE", "STRICT", ""}
 
 func resourceLogicalRouterDownLinkPort() *schema.Resource {
 	return &schema.Resource{
@@ -19,8 +22,7 @@ func resourceLogicalRouterDownLinkPort() *schema.Resource {
 		Delete: resourceLogicalRouterDownLinkPortDelete,
 
 		Schema: map[string]*schema.Schema{
-			"revision":     getRevisionSchema(),
-			"system_owned": getSystemOwnedSchema(),
+			"revision": getRevisionSchema(),
 			"description": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
@@ -49,11 +51,14 @@ func resourceLogicalRouterDownLinkPort() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "MAC address",
 				Optional:    true,
+				Computed:    true,
 			},
 			"urpf_mode": &schema.Schema{
-				Type:        schema.TypeString,
-				Description: "Unicast Reverse Path Forwarding mode",
-				Optional:    true,
+				Type:         schema.TypeString,
+				Description:  "Unicast Reverse Path Forwarding mode",
+				Optional:     true,
+				Default:      "STRICT",
+				ValidateFunc: validation.StringInSlice(logicalRouterPortUrpfModeValues, false),
 			},
 			"service_bindings": getResourceReferencesSchema(false, false, []string{"LogicalService"}),
 		},
@@ -118,17 +123,15 @@ func resourceLogicalRouterDownLinkPortRead(d *schema.ResourceData, m interface{}
 		return fmt.Errorf("Error during LogicalRouterDownLinkPort read: %v", err)
 	}
 
-	d.Set("Revision", logical_router_down_link_port.Revision)
-	d.Set("SystemOwned", logical_router_down_link_port.SystemOwned)
-	d.Set("Description", logical_router_down_link_port.Description)
-	d.Set("DisplayName", logical_router_down_link_port.DisplayName)
+	d.Set("revision", logical_router_down_link_port.Revision)
+	d.Set("description", logical_router_down_link_port.Description)
+	d.Set("display_name", logical_router_down_link_port.DisplayName)
 	setTagsInSchema(d, logical_router_down_link_port.Tags)
-	d.Set("LogicalRouterId", logical_router_down_link_port.LogicalRouterId)
-	d.Set("MacAddress", logical_router_down_link_port.MacAddress)
-	d.Set("LinkedLogicalSwitchPortId", logical_router_down_link_port.LinkedLogicalSwitchPortId.TargetId)
+	d.Set("logical_router_id", logical_router_down_link_port.LogicalRouterId)
+	d.Set("mac_address", logical_router_down_link_port.MacAddress)
+	d.Set("linked_logical_switch_port_id", logical_router_down_link_port.LinkedLogicalSwitchPortId.TargetId)
 	setIpSubnetsInSchema(d, logical_router_down_link_port.Subnets)
-	d.Set("UrpfMode", logical_router_down_link_port.UrpfMode)
-	d.Set("ResourceType", logical_router_down_link_port.ResourceType)
+	d.Set("urpf_mode", logical_router_down_link_port.UrpfMode)
 	setServiceBindingsInSchema(d, logical_router_down_link_port.ServiceBindings, "service_bindings")
 
 	return nil

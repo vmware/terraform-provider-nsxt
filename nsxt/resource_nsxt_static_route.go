@@ -32,9 +32,8 @@ func resourceStaticRoute() *schema.Resource {
 				Required:     true,
 				ValidateFunc: validation.CIDRNetwork(0, 32),
 			},
-			"next_hops":    getNextHopsSchema(),
-			"revision":     getRevisionSchema(),
-			"system_owned": getSystemOwnedSchema(),
+			"next_hops": getNextHopsSchema(),
+			"revision":  getRevisionSchema(),
 			"description": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
@@ -188,7 +187,6 @@ func resourceStaticRouteRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	d.Set("revision", static_route.Revision)
-	d.Set("system_owned", static_route.SystemOwned)
 	d.Set("description", static_route.Description)
 	d.Set("display_name", static_route.DisplayName)
 	setTagsInSchema(d, static_route.Tags)

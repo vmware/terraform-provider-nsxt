@@ -19,8 +19,7 @@ func resourceDhcpRelayService() *schema.Resource {
 		Delete: resourceDhcpRelayServiceDelete,
 
 		Schema: map[string]*schema.Schema{
-			"revision":     getRevisionSchema(),
-			"system_owned": getSystemOwnedSchema(),
+			"revision": getRevisionSchema(),
 			"description": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
@@ -89,12 +88,11 @@ func resourceDhcpRelayServiceRead(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("Error during DhcpRelayService read: %v", err)
 	}
 
-	d.Set("Revision", dhcp_relay_service.Revision)
-	d.Set("SystemOwned", dhcp_relay_service.SystemOwned)
-	d.Set("Description", dhcp_relay_service.Description)
-	d.Set("DisplayName", dhcp_relay_service.DisplayName)
+	d.Set("revision", dhcp_relay_service.Revision)
+	d.Set("description", dhcp_relay_service.Description)
+	d.Set("display_name", dhcp_relay_service.DisplayName)
 	setTagsInSchema(d, dhcp_relay_service.Tags)
-	d.Set("DhcpRelayProfileId", dhcp_relay_service.DhcpRelayProfileId)
+	d.Set("dhcp_relay_profile_id", dhcp_relay_service.DhcpRelayProfileId)
 
 	return nil
 }

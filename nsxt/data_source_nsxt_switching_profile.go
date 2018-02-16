@@ -30,7 +30,6 @@ func dataSourceSwitchingProfile() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"system_owned": getSystemOwnedSchema(),
 		},
 	}
 }
@@ -82,6 +81,5 @@ func dataSourceSwitchingProfileRead(d *schema.ResourceData, m interface{}) error
 	d.SetId(obj.Id)
 	d.Set("display_name", obj.DisplayName)
 	d.Set("resource_type", obj.ResourceType)
-	d.Set("system_owned", obj.SystemOwned)
 	return nil
 }

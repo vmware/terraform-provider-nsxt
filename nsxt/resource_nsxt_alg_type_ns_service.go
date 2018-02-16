@@ -22,8 +22,7 @@ func resourceAlgTypeNsService() *schema.Resource {
 		Delete: resourceAlgTypeNsServiceDelete,
 
 		Schema: map[string]*schema.Schema{
-			"revision":     getRevisionSchema(),
-			"system_owned": getSystemOwnedSchema(),
+			"revision": getRevisionSchema(),
 			"description": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
@@ -128,7 +127,6 @@ func resourceAlgTypeNsServiceRead(d *schema.ResourceData, m interface{}) error {
 	nsservice_element := ns_service.NsserviceElement
 
 	d.Set("revision", ns_service.Revision)
-	d.Set("system_owned", ns_service.SystemOwned)
 	d.Set("description", ns_service.Description)
 	d.Set("display_name", ns_service.DisplayName)
 	setTagsInSchema(d, ns_service.Tags)

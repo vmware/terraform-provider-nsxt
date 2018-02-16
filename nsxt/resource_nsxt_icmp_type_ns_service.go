@@ -22,8 +22,7 @@ func resourceIcmpTypeNsService() *schema.Resource {
 		Delete: resourceIcmpTypeNsServiceDelete,
 
 		Schema: map[string]*schema.Schema{
-			"revision":     getRevisionSchema(),
-			"system_owned": getSystemOwnedSchema(),
+			"revision": getRevisionSchema(),
 			"description": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
@@ -124,12 +123,10 @@ func resourceIcmpTypeNsServiceRead(d *schema.ResourceData, m interface{}) error 
 	nsservice_element := ns_service.NsserviceElement
 
 	d.Set("revision", ns_service.Revision)
-	d.Set("system_owned", ns_service.SystemOwned)
 	d.Set("description", ns_service.Description)
 	d.Set("display_name", ns_service.DisplayName)
 	setTagsInSchema(d, ns_service.Tags)
 	d.Set("default_service", ns_service.DefaultService)
-	d.Set("resource_type", nsservice_element.ResourceType)
 	d.Set("icmp_type", nsservice_element.IcmpType)
 	d.Set("icmp_code", nsservice_element.IcmpCode)
 	d.Set("protocol", nsservice_element.Protocol)

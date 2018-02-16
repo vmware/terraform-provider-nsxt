@@ -19,8 +19,7 @@ func resourceLogicalRouterLinkPortOnTier0() *schema.Resource {
 		Delete: resourceLogicalRouterLinkPortOnTier0Delete,
 
 		Schema: map[string]*schema.Schema{
-			"revision":     getRevisionSchema(),
-			"system_owned": getSystemOwnedSchema(),
+			"revision": getRevisionSchema(),
 			"description": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
@@ -100,14 +99,12 @@ func resourceLogicalRouterLinkPortOnTier0Read(d *schema.ResourceData, m interfac
 	}
 
 	d.Set("revision", logical_router_link_port.Revision)
-	d.Set("system_owned", logical_router_link_port.SystemOwned)
 	d.Set("description", logical_router_link_port.Description)
 	d.Set("display_name", logical_router_link_port.DisplayName)
 	setTagsInSchema(d, logical_router_link_port.Tags)
 	d.Set("logical_router_id", logical_router_link_port.LogicalRouterId)
 	d.Set("linked_logical_router_port_id", logical_router_link_port.LinkedLogicalRouterPortId)
 	setServiceBindingsInSchema(d, logical_router_link_port.ServiceBindings, "service_bindings")
-	d.Set("resource_type", logical_router_link_port.ResourceType)
 
 	return nil
 }

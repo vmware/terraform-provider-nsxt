@@ -19,8 +19,7 @@ func resourceIpSet() *schema.Resource {
 		Delete: resourceIpSetDelete,
 
 		Schema: map[string]*schema.Schema{
-			"revision":     getRevisionSchema(),
-			"system_owned": getSystemOwnedSchema(),
+			"revision": getRevisionSchema(),
 			"description": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
@@ -94,7 +93,6 @@ func resourceIpSetRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	d.Set("revision", ip_set.Revision)
-	d.Set("system_owned", ip_set.SystemOwned)
 	d.Set("description", ip_set.Description)
 	d.Set("display_name", ip_set.DisplayName)
 	setTagsInSchema(d, ip_set.Tags)

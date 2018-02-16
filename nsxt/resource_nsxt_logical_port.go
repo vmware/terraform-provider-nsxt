@@ -19,8 +19,7 @@ func resourceLogicalPort() *schema.Resource {
 		Delete: resourceLogicalPortDelete,
 
 		Schema: map[string]*schema.Schema{
-			"revision":     getRevisionSchema(),
-			"system_owned": getSystemOwnedSchema(),
+			"revision": getRevisionSchema(),
 			"display_name": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
@@ -93,7 +92,6 @@ func resourceLogicalPortRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	d.Set("revision", logical_port.Revision)
-	d.Set("system_owned", logical_port.SystemOwned)
 	d.Set("display_name", logical_port.DisplayName)
 	d.Set("description", logical_port.Description)
 	d.Set("logical_switch_id", logical_port.LogicalSwitchId)

@@ -25,8 +25,7 @@ func resourceLogicalSwitch() *schema.Resource {
 		Delete: resourceLogicalSwitchDelete,
 
 		Schema: map[string]*schema.Schema{
-			"revision":     getRevisionSchema(),
-			"system_owned": getSystemOwnedSchema(),
+			"revision": getRevisionSchema(),
 			"description": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
@@ -194,7 +193,6 @@ func resourceLogicalSwitchRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	d.Set("revision", logical_switch.Revision)
-	d.Set("system_owned", logical_switch.SystemOwned)
 	d.Set("description", logical_switch.Description)
 	d.Set("display_name", logical_switch.DisplayName)
 	setTagsInSchema(d, logical_switch.Tags)

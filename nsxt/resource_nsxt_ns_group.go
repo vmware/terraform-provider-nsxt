@@ -21,8 +21,7 @@ func resourceNsGroup() *schema.Resource {
 		Delete: resourceNsGroupDelete,
 
 		Schema: map[string]*schema.Schema{
-			"revision":     getRevisionSchema(),
-			"system_owned": getSystemOwnedSchema(),
+			"revision": getRevisionSchema(),
 			"description": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
@@ -208,7 +207,6 @@ func resourceNsGroupRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	d.Set("revision", ns_group.Revision)
-	d.Set("system_owned", ns_group.SystemOwned)
 	d.Set("description", ns_group.Description)
 	d.Set("display_name", ns_group.DisplayName)
 	setTagsInSchema(d, ns_group.Tags)

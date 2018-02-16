@@ -22,8 +22,7 @@ func resourceNatRule() *schema.Resource {
 		Delete: resourceNatRuleDelete,
 
 		Schema: map[string]*schema.Schema{
-			"revision":     getRevisionSchema(),
-			"system_owned": getSystemOwnedSchema(),
+			"revision": getRevisionSchema(),
 			"description": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
@@ -172,7 +171,6 @@ func resourceNatRuleRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	d.Set("revision", nat_rule.Revision)
-	d.Set("system_owned", nat_rule.SystemOwned)
 	d.Set("description", nat_rule.Description)
 	d.Set("display_name", nat_rule.DisplayName)
 	setTagsInSchema(d, nat_rule.Tags)
