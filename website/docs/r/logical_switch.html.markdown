@@ -23,6 +23,10 @@ resource "nsxt_logical_switch" "LS1" {
   tags = [{ scope = "color"
             tag = "red" }
   ]
+  switching_profile_id {
+    key = "${data.nsxt_switching_profile.PRF1.resource_type}",
+    value = "${data.nsxt_switching_profile.PRF1.id}"
+  }
 }
 ```
 
@@ -33,7 +37,7 @@ The following arguments are supported:
 * `transport_zone_id` - (Required) Transport Zone ID for the logical switch.
 * `admin_state` - (Required) Admin state for the logical switch. Accepted values - 'UP' or 'DOWN'.
 * `replication_mode` - (Optional) Replication mode of the Logical Switch. Accepted values - 'MTEP' (Hierarchical Two-Tier replication) and 'SOURCE' (Head Replication), with 'MTEP' being the default value. Applies to overlay logical switches.
-* `switching_profile_ids` - (Optional) List of IDs of switching profiles (of various types) to be associated with this switch. Default switching profiles will be used if not specified.
+* `switching_profile_id` - (Optional) List of IDs of switching profiles (of various types) to be associated with this switch. Default switching profiles will be used if not specified.
 * `display_name` - (Optional) Display name, defaults to ID if not set.
 * `description` - (Optional) Description.
 * `ip_pool_id` - (Optional) Ip Pool ID to be associated with the logical switch.

@@ -33,9 +33,9 @@ func resourceLogicalPort() *schema.Resource {
 				Required: true,
 				ForceNew: true, // Cannot change the logical switch of a logical port
 			},
-			"admin_state":           getAdminStateSchema(),
-			"switching_profile_ids": getSwitchingProfileIdsSchema(),
-			"tags":                  getTagsSchema(),
+			"admin_state":          getAdminStateSchema(),
+			"switching_profile_id": getSwitchingProfileIdsSchema(),
+			"tags":                 getTagsSchema(),
 		},
 	}
 }

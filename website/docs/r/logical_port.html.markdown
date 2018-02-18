@@ -21,10 +21,10 @@ resource "nsxt_logical_port" "LP1" {
   tags = [{ scope = "color"
             tag = "red" }
   ]
-  switching_profile_ids = [{
-    key = "${data.nsxt_switching_profile.QOS1.resource_type}",
-    value = "${data.nsxt_switching_profile.QOS1.id}"},
-  ]
+  switching_profile_id {
+    key = "${data.nsxt_switching_profile.PRF1.resource_type}",
+    value = "${data.nsxt_switching_profile.PRF1.id}"
+  }
 }
 ```
 
@@ -34,7 +34,7 @@ The following arguments are supported:
 
 * `logical_switch_id` - (Required) Logical switch ID for the logical port.
 * `admin_state` - (Required) Admin state for the logical port. Accepted values - 'UP' or 'DOWN'.
-* `switching_profile_ids` - (Optional) List of IDs of switching profiles (of various types) to be associated with this switch. Default switching profiles will be used if not specified.
+* `switching_profile_id` - (Optional) List of IDs of switching profiles (of various types) to be associated with this switch. Default switching profiles will be used if not specified.
 * `display_name` - (Optional) Display name, defaults to ID if not set.
 * `description` - (Optional) Description.
 * `tags` - (Optional) A list of scope + tag pairs to associate with this logical switch.

@@ -56,7 +56,7 @@ func resourceLogicalSwitch() *schema.Resource {
 				Default:      "MTEP",
 				ValidateFunc: validation.StringInSlice(logicalSwitchReplicationModeValues, false),
 			},
-			"switching_profile_ids": getSwitchingProfileIdsSchema(),
+			"switching_profile_id": getSwitchingProfileIdsSchema(),
 			"transport_zone_id": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "Id of the TransportZone to which this LogicalSwitch is associated",
@@ -105,7 +105,7 @@ func resourceLogicalSwitchCreate(d *schema.ResourceData, m interface{}) error {
 	ip_pool_id := d.Get("ip_pool_id").(string)
 	mac_pool_id := d.Get("mac_pool_id").(string)
 	replication_mode := d.Get("replication_mode").(string)
-	switching_profile_ids := getSwitchingProfileIdsFromSchema(d)
+	switching_profile_id := getSwitchingProfileIdsFromSchema(d)
 	transport_zone_id := d.Get("transport_zone_id").(string)
 	vlan := int64(d.Get("vlan").(int))
 	vni := int32(d.Get("vni").(int))
@@ -121,7 +121,7 @@ func resourceLogicalSwitchCreate(d *schema.ResourceData, m interface{}) error {
 		IpPoolId:            ip_pool_id,
 		MacPoolId:           mac_pool_id,
 		ReplicationMode:     replication_mode,
-		SwitchingProfileIds: switching_profile_ids,
+		SwitchingProfileIds: switching_profile_id,
 		TransportZoneId:     transport_zone_id,
 		Vlan:                vlan,
 		Vni:                 vni,
@@ -226,7 +226,7 @@ func resourceLogicalSwitchUpdate(d *schema.ResourceData, m interface{}) error {
 	ip_pool_id := d.Get("ip_pool_id").(string)
 	mac_pool_id := d.Get("mac_pool_id").(string)
 	replication_mode := d.Get("replication_mode").(string)
-	switching_profile_ids := getSwitchingProfileIdsFromSchema(d)
+	switching_profile_id := getSwitchingProfileIdsFromSchema(d)
 	transport_zone_id := d.Get("transport_zone_id").(string)
 	vlan := int64(d.Get("vlan").(int))
 	vni := int32(d.Get("vni").(int))
@@ -240,7 +240,7 @@ func resourceLogicalSwitchUpdate(d *schema.ResourceData, m interface{}) error {
 		IpPoolId:            ip_pool_id,
 		MacPoolId:           mac_pool_id,
 		ReplicationMode:     replication_mode,
-		SwitchingProfileIds: switching_profile_ids,
+		SwitchingProfileIds: switching_profile_id,
 		TransportZoneId:     transport_zone_id,
 		Vlan:                vlan,
 		Vni:                 vni,

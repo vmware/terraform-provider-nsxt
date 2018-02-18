@@ -121,7 +121,7 @@ func getSwitchingProfileIdsSchema() *schema.Schema {
 }
 
 func getSwitchingProfileIdsFromSchema(d *schema.ResourceData) []manager.SwitchingProfileTypeIdEntry {
-	profiles := d.Get("switching_profile_ids").(*schema.Set).List()
+	profiles := d.Get("switching_profile_id").(*schema.Set).List()
 	var profileList []manager.SwitchingProfileTypeIdEntry
 	for _, profile := range profiles {
 		data := profile.(map[string]interface{})
@@ -148,7 +148,7 @@ func setSwitchingProfileIdsInSchema(d *schema.ResourceData, nsxClient *nsxt.APIC
 		elem["value"] = profile.Value
 		profileList = append(profileList, elem)
 	}
-	d.Set("switching_profile_ids", profileList)
+	d.Set("switching_profile_id", profileList)
 }
 
 // utilities to define & handle address bindings
