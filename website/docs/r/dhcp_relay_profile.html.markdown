@@ -61,4 +61,3 @@ In addition to arguments listed above, the following attributes are exported:
 
 * `id` - ID of the dhcp_relay_profile.
 * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
-* `system_owned` - A boolean that indicates whether this resource is system-owned and thus read-only.

@@ -39,5 +39,4 @@ In addition to arguments listed above, the following attributes are exported:
 
 * `id` - ID of the logical switch.
 * `default_service` - The default NSServices are created in the system by default. These NSServices can't be modified/deleted.
-* `system_owned` - A boolean that indicates whether this resource is system-owned and thus read-only.
 * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.

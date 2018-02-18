@@ -61,5 +61,4 @@ In addition to arguments listed above, the following attributes are exported:
 
 * `id` - ID of the nat_rule.
 * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
-* `system_owned` - A boolean that indicates whether this resource is system-owned and thus read-only.
 * `rule_priority` - Ascending, valid range [0-2147483647]. If multiple rules have the same priority, evaluation sequence is undefined.
