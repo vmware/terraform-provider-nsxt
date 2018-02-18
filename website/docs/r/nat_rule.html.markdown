@@ -3,12 +3,12 @@ layout: "nsxt"
 page_title: "NSXT: nsxt_nat_rule"
 sidebar_current: "docs-nsxt-resource-nat-rule"
 description: |-
-  Provides a resource to configure nat rule on NSX-T manager
+  Provides a resource to configure NAT rule on NSX-T manager
 ---
 
 # nsxt_nat_rule
 
-Provides a resource to configure nat rule on NSX-T manager
+Provides a resource to configure NAT rule on NSX-T manager
 
 ## Example Usage
 
@@ -23,7 +23,7 @@ resource "nsxt_nat_rule" "NR" {
     nat_pass = false
     translated_network = "4.4.0.0/24"
     match_destination_network = "3.3.3.0/24"
-    match_source_network = "5.5.5.0/24"}
+    match_source_network = "5.5.5.0/24"
     tag {
         scope = "color"
         tag = "blue"
@@ -38,13 +38,20 @@ The following arguments are supported:
 * `description` - (Optional) Description of this resource.
 * `display_name` - (Optional) Defaults to ID if not set.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this nat_rule.
-* `action` - (Required) valid actions: SNAT, DNAT, NO_NAT, REFLEXIVE. All rules in a logical router are either stateless or stateful. Mix is not supported. SNAT and DNAT are stateful, can NOT be supported when the logical router is running at active-active HA mode; REFLEXIVE is stateless. NO_NAT has no translated_fields, only match fields.
+* `action` - (Required) NAT rule action type.
+             Valid actions: SNAT, DNAT, NO_NAT, REFLEXIVE.
+             All rules in a logical router are either stateless or stateful. Mix is not supported.
+             SNAT and DNAT are stateful, can NOT be supported when the logical router is running at active-active HA mode; REFLEXIVE is stateless.
+             NO_NAT has no translated_fields, only match fields.
 * `enabled` - (Optional) enable/disable the rule.
 * `logging` - (Optional) enable/disable the logging of rule.
 * `match_destination_network` - (Optional) IP Address | CIDR | (null implies Any).
 * `match_source_network` - (Optional) IP Address | CIDR | (null implies Any).
-* `nat_pass` - (Optional) Default is true. If the nat_pass is set to true, the following firewall stage will be skipped. Please note, if action is NO_NAT, then nat_pass must be set to true or omitted.
-* `translated_network` - (Optional) IP Address | IP Range | CIDR.
+* `nat_pass` - (Optional) Enable/disable to bypass following firewall stage.
+               Default is true.
+               If the nat_pass is set to true, the following firewall stage will be skipped.
+               Please note, if action is NO_NAT, then nat_pass must be set to true or omitted.
+* `translated_network` - (Optional) IP Address | IP Range | CIDR. For DNAT rules only a single ip is supported.
 * `translated_ports` - (Optional) port number or port range. DNAT only.
 
 

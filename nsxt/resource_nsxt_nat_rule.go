@@ -80,7 +80,7 @@ func resourceNatRule() *schema.Resource {
 			},
 			"translated_network": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "IP Address | IP Range | CIDR",
+				Description: "IP Address | IP Range | CIDR. For DNAT rules only a single ip is supported",
 				Optional:    true,
 			},
 			"translated_ports": &schema.Schema{
