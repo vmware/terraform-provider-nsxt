@@ -12,7 +12,7 @@ import (
 	"testing"
 )
 
-func TestNSXStaticRouteBasic(t *testing.T) {
+func TestAccResourceNsxtStaticRoute_basic(t *testing.T) {
 
 	name := fmt.Sprintf("test-nsx-static-route")
 	updateName := fmt.Sprintf("%s-update", name)

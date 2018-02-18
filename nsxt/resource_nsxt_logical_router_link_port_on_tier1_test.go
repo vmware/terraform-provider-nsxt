@@ -12,7 +12,7 @@ import (
 	"testing"
 )
 
-func TestNSXLogicalRouterLinkPortOnTier1Basic(t *testing.T) {
+func TestAccResourceNsxtLogicalRouterLinkPortOnTier1_basic(t *testing.T) {
 
 	name := fmt.Sprintf("test-nsx-port-on-tier1")
 	tier0RouterName := tier0RouterDefaultName
@@ -53,7 +53,7 @@ func TestNSXLogicalRouterLinkPortOnTier1Basic(t *testing.T) {
 	})
 }
 
-func TestNSXLogicalRouterLinkPortOnTier1WithRelay(t *testing.T) {
+func TestAccResourceNsxtLogicalRouterLinkPortOnTier1_withRelay(t *testing.T) {
 	// Note: this test will pass only with NSX 2.2 & up. Before that dhcp relay is not supported here
 	// This test should be skipped based on the nsx version
 	name := fmt.Sprintf("test-nsx-port-on-tier1")

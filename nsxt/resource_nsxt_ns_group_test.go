@@ -12,7 +12,7 @@ import (
 	"testing"
 )
 
-func TestNSXNSGroupBasic(t *testing.T) {
+func TestAccResourceNsxtNSGroup_basic(t *testing.T) {
 
 	grpName := fmt.Sprintf("test-nsx-ns-group")
 	updateGrpName := fmt.Sprintf("%s-update", grpName)
@@ -49,7 +49,7 @@ func TestNSXNSGroupBasic(t *testing.T) {
 	})
 }
 
-func TestNSXNSGroupNested(t *testing.T) {
+func TestAccResourceNsxt_nested(t *testing.T) {
 
 	grpName := fmt.Sprintf("test-nsx-ns-group")
 	updateGrpName := fmt.Sprintf("%s-update", grpName)
@@ -84,7 +84,7 @@ func TestNSXNSGroupNested(t *testing.T) {
 	})
 }
 
-func TestNSXNSGroupWithCriteria(t *testing.T) {
+func TestAccResourceNsxtNSGroup_withCriteria(t *testing.T) {
 
 	grpName := fmt.Sprintf("test-nsx-ns-group")
 	updateGrpName := fmt.Sprintf("%s-update", grpName)

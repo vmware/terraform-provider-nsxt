@@ -12,7 +12,7 @@ import (
 	"testing"
 )
 
-func TestNSXLogicalTier1RouterBasic(t *testing.T) {
+func TestAccResourceNsxtLogicalTier1Router_basic(t *testing.T) {
 
 	name := fmt.Sprintf("test-nsx-logical-tier1-router")
 	updateName := fmt.Sprintf("%s-update", name)

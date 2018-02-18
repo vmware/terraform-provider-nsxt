@@ -12,7 +12,7 @@ import (
 	"testing"
 )
 
-func TestNSXIgmpTypeNsServiceBasic(t *testing.T) {
+func TestAccResourceNsxtIgmpTypeNsService_basic(t *testing.T) {
 
 	serviceName := fmt.Sprintf("test-nsx-igmp-service")
 	updateServiceName := fmt.Sprintf("%s-update", serviceName)

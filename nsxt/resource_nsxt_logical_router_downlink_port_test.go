@@ -12,7 +12,7 @@ import (
 	"testing"
 )
 
-func TestNSXLogicalRouterDownlinkPortBasic(t *testing.T) {
+func TestAccResourceNsxtLogicalRouterDownlinkPort_basic(t *testing.T) {
 
 	portName := fmt.Sprintf("test-nsx-logical-router-downlink-port")
 	updatePortName := fmt.Sprintf("%s-update", portName)
@@ -55,7 +55,7 @@ func TestNSXLogicalRouterDownlinkPortBasic(t *testing.T) {
 	})
 }
 
-func TestNSXLogicalRouterDownlinkPortWithRelay(t *testing.T) {
+func TestAccResourceNsxtLogicalRouterDownlinkPort_withRelay(t *testing.T) {
 
 	portName := fmt.Sprintf("test-nsx-logical-router-downlink-port")
 	updatePortName := fmt.Sprintf("%s-update", portName)

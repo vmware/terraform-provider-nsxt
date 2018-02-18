@@ -12,7 +12,7 @@ import (
 	"testing"
 )
 
-func TestNSXTransportZoneBasic(t *testing.T) {
+func TestAccDataSourceNsxtTransportZone_basic(t *testing.T) {
 	transportZoneName := vlanTransportZoneName
 	testResourceName := "data.nsxt_transport_zone.test"
 

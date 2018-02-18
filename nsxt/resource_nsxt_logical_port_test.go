@@ -12,7 +12,7 @@ import (
 	"testing"
 )
 
-func TestNSXLogicalPortBasic(t *testing.T) {
+func TestAccResourceNsxtLogicalPort_basic(t *testing.T) {
 
 	portName := fmt.Sprintf("test-nsx-logical-port")
 	updatePortName := fmt.Sprintf("%s-update", portName)

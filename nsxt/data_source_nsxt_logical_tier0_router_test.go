@@ -12,7 +12,7 @@ import (
 	"testing"
 )
 
-func TestNSXLogicalTier0RouterBasic(t *testing.T) {
+func TestAccDataSourceNsxtLogicalTier0Router_basic(t *testing.T) {
 	routerName := tier0RouterDefaultName
 	testResourceName := "data.nsxt_logical_tier0_router.test"
 

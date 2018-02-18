@@ -12,7 +12,7 @@ import (
 	"testing"
 )
 
-func TestNSXFirewallSectionBasic(t *testing.T) {
+func TestAccResourceNsxtFirewallSection_basic(t *testing.T) {
 
 	prfName := fmt.Sprintf("test-nsx-firewall-section-basic")
 	updatePrfName := fmt.Sprintf("%s-update", prfName)
@@ -58,7 +58,7 @@ func TestNSXFirewallSectionBasic(t *testing.T) {
 	})
 }
 
-func TestNSXFirewallSectionWithTos(t *testing.T) {
+func TestAccResourceNsxtFirewallSection_withTos(t *testing.T) {
 	prfName := fmt.Sprintf("test-nsx-firewall-section-tos")
 	updatePrfName := fmt.Sprintf("%s-update", prfName)
 	testResourceName := "nsxt_firewall_section.test"
@@ -103,7 +103,7 @@ func TestNSXFirewallSectionWithTos(t *testing.T) {
 	})
 }
 
-func TestNSXFirewallSectionWithRules(t *testing.T) {
+func TestAccResourceNsxtFirewallSection_withRules(t *testing.T) {
 
 	prfName := fmt.Sprintf("test-nsx-firewall-section-rules")
 	updatePrfName := fmt.Sprintf("%s-update", prfName)
@@ -163,7 +163,7 @@ func skipFirewallSectionTests() (bool, error) {
 	return false, nil
 }
 
-func TestNSXFirewallSectionWithRulesAndTags(t *testing.T) {
+func TestAccResourceNsxtFirewallSection_withRulesAndTags(t *testing.T) {
 
 	// Note: this test will not pass with NSX 2.1 because of an NSX bug.
 	// This test should be skipped based on the nsx version
@@ -217,7 +217,7 @@ func TestNSXFirewallSectionWithRulesAndTags(t *testing.T) {
 	})
 }
 
-func TestNSXFirewallSectionWithRulesAndTos(t *testing.T) {
+func TestAccResourceNsxtFirewallSection_withRulesAndTos(t *testing.T) {
 	prfName := fmt.Sprintf("test-nsx-firewall-section-rules_and_tos")
 	updatePrfName := fmt.Sprintf("%s-update", prfName)
 	testResourceName := "nsxt_firewall_section.test"

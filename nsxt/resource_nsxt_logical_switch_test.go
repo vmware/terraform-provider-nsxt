@@ -13,31 +13,31 @@ import (
 	"testing"
 )
 
-func TestNSXLogicalSwitchBasic(t *testing.T) {
+func TestAccResourceNsxtLogicalSwitch_basic(t *testing.T) {
 	// Test without verification for realization state
 
-	testNSXLogicalSwitchBasic(t, false)
+	testAccResourceNsxtLogicalSwitch_basic(t, false)
 }
 
-func TestNSXLogicalSwitchBasicWithRealization(t *testing.T) {
+func TestAccResourceNsxtLogicalSwitch_basicWithRealization(t *testing.T) {
 	// Test with verification for realization state
 
-	testNSXLogicalSwitchBasic(t, true)
+	testAccResourceNsxtLogicalSwitch_basic(t, true)
 }
 
-func TestNSXLogicalSwitchVlan(t *testing.T) {
+func TestAccResourceNsxtLogicalSwitch_switchVlan(t *testing.T) {
 	// Test without verification for realization state
 
-	testNSXLogicalSwitchVlan(t, false)
+	testAccResourceNsxtLogicalSwitch_switchVlan(t, false)
 }
 
-func TestNSXLogicalSwitchVlanWithRealization(t *testing.T) {
+func TestAccResourceNsxtLogicalSwitch_switchVlanWithRealization(t *testing.T) {
 	// Test with verification for realization state
 
-	testNSXLogicalSwitchVlan(t, true)
+	testAccResourceNsxtLogicalSwitch_switchVlan(t, true)
 }
 
-func testNSXLogicalSwitchBasic(t *testing.T, verifyRealization bool) {
+func testAccResourceNsxtLogicalSwitch_basic(t *testing.T, verifyRealization bool) {
 
 	switchName := fmt.Sprintf("test-nsx-logical-switch-overlay")
 	updateSwitchName := fmt.Sprintf("%s-update", switchName)
@@ -86,7 +86,7 @@ func testNSXLogicalSwitchBasic(t *testing.T, verifyRealization bool) {
 	})
 }
 
-func testNSXLogicalSwitchVlan(t *testing.T, verifyRealization bool) {
+func testAccResourceNsxtLogicalSwitch_switchVlan(t *testing.T, verifyRealization bool) {
 
 	switchName := "test-nsx-logical-switch-vlan"
 	updateSwitchName := fmt.Sprintf("%s-update", switchName)

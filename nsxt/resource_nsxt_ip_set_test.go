@@ -12,7 +12,7 @@ import (
 	"testing"
 )
 
-func TestNSXIpSetBasic(t *testing.T) {
+func TestAccResourceNsxtIpSet_basic(t *testing.T) {
 
 	name := fmt.Sprintf("test-nsx-ip-set")
 	updateName := fmt.Sprintf("%s-update", name)

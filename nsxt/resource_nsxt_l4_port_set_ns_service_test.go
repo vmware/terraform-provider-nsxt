@@ -12,7 +12,7 @@ import (
 	"testing"
 )
 
-func TestNSXL4PortNsServiceBasic(t *testing.T) {
+func TestAccResourceNsxtL4PortNsService_basic(t *testing.T) {
 
 	serviceName := fmt.Sprintf("test-nsx-l4-service")
 	updateServiceName := fmt.Sprintf("%s-update", serviceName)

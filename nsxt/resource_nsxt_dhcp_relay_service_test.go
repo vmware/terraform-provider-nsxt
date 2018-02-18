@@ -12,7 +12,7 @@ import (
 	"testing"
 )
 
-func TestNSXDhcpRelayServiceBasic(t *testing.T) {
+func TestAccResourceNsxtDhcpRelayService_basic(t *testing.T) {
 
 	prfName := fmt.Sprintf("test-nsx-dhcp-relay-service")
 	updatePrfName := fmt.Sprintf("%s-update", prfName)

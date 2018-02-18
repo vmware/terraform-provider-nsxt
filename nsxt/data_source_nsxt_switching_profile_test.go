@@ -12,7 +12,7 @@ import (
 	"testing"
 )
 
-func TestNSXSwitchingProfileBasic(t *testing.T) {
+func TestAccDataSourceNsxtSwitchingProfile_basic(t *testing.T) {
 	profileName := switchingProfileDefaultName
 	testResourceName := "data.nsxt_switching_profile.test"
 
