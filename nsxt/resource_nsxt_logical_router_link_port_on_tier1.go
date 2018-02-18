@@ -29,6 +29,7 @@ func resourceLogicalRouterLinkPortOnTier1() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "Defaults to ID if not set",
 				Optional:    true,
+				Computed:    true,
 			},
 			"tag": getTagsSchema(),
 			"logical_router_id": &schema.Schema{

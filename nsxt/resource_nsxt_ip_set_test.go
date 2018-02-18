@@ -52,6 +52,45 @@ func TestAccResourceNsxtIpSet_basic(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtIpSet_noName(t *testing.T) {
+
+	name := ""
+	testResourceName := "nsxt_ip_set.test"
+	single_ip := "1.1.1.1"
+	additional_cidr := "2.1.1.0/24"
+	additional_range := "3.1.1.1-3.1.1.10"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXIpSetCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXIpSetCreateTemplate(name, single_ip),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXIpSetExists(name, testResourceName),
+					resource.TestCheckResourceAttrSet(testResourceName, "display_name"),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.#", "1"),
+				),
+			},
+			{
+				Config: testAccNSXIpSetUpdateTemplate(name, single_ip, additional_cidr, additional_range),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXIpSetExists(name, testResourceName),
+					resource.TestCheckResourceAttrSet(testResourceName, "display_name"),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test Update"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.#", "3"),
+				),
+			},
+		},
+	})
+}
+
 func testAccNSXIpSetExists(display_name string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
@@ -76,7 +115,8 @@ func testAccNSXIpSetExists(display_name string, resourceName string) resource.Te
 			return fmt.Errorf("Error while checking if IP Set %s exists. HTTP return code was %d", resourceID, responseCode.StatusCode)
 		}
 
-		if display_name == profile.DisplayName {
+		// Ignore display name to support the 'no-name' test
+		if display_name == "" || display_name == profile.DisplayName {
 			return nil
 		}
 		return fmt.Errorf("IP Set %s wasn't found", display_name)

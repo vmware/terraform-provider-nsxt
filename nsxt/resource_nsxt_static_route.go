@@ -43,6 +43,7 @@ func resourceStaticRoute() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "Defaults to ID if not set",
 				Optional:    true,
+				Computed:    true,
 			},
 			"tag": getTagsSchema(),
 		},
