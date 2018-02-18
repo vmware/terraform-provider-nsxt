@@ -42,11 +42,6 @@ func resourceFirewallSection() *schema.Resource {
 				Description: "It is a boolean flag which reflects whether a firewall section is default section or not. Each Layer 3 and Layer 2 section will have at least and at most one default section",
 				Computed:    true,
 			},
-			"rule_count": &schema.Schema{
-				Type:        schema.TypeInt,
-				Description: "Number of rules in this section",
-				Computed:    true,
-			},
 			"section_type": &schema.Schema{
 				Type:         schema.TypeString,
 				Description:  "Type of the rules which a section can contain. Only homogeneous sections are supported",
@@ -59,8 +54,8 @@ func resourceFirewallSection() *schema.Resource {
 				Required:    true,
 				ForceNew:    true,
 			},
-			"applied_tos": getResourceReferencesSetSchema(false, false, []string{"LogicalPort", "LogicalSwitch", "NSGroup"}),
-			"rules":       getRulesSchema(),
+			"applied_to": getResourceReferencesSetSchema(false, false, []string{"LogicalPort", "LogicalSwitch", "NSGroup"}),
+			"rule":       getRulesSchema(),
 		},
 	}
 }
@@ -88,8 +83,8 @@ func getRulesSchema() *schema.Schema {
 					Required:     true,
 					ValidateFunc: validation.StringInSlice(firewallRuleActionValues, false),
 				},
-				"applied_tos":  getResourceReferencesSchema(false, false, []string{"LogicalPort", "LogicalSwitch", "NSGroup"}),
-				"destinations": getResourceReferencesSchema(false, false, []string{"IPSet", "LogicalPort", "LogicalSwitch", "NSGroup", "MACSet"}),
+				"applied_to":  getResourceReferencesSchema(false, false, []string{"LogicalPort", "LogicalSwitch", "NSGroup"}),
+				"destination": getResourceReferencesSchema(false, false, []string{"IPSet", "LogicalPort", "LogicalSwitch", "NSGroup", "MACSet"}),
 				"destinations_excluded": &schema.Schema{
 					Type:        schema.TypeBool,
 					Description: "Negation of the destination",
@@ -127,13 +122,13 @@ func getRulesSchema() *schema.Schema {
 					Description: "User level field which will be printed in CLI and packet logs",
 					Optional:    true,
 				},
-				"sources": getResourceReferencesSchema(false, false, []string{"IPSet", "LogicalPort", "LogicalSwitch", "NSGroup", "MACSet"}),
+				"source": getResourceReferencesSchema(false, false, []string{"IPSet", "LogicalPort", "LogicalSwitch", "NSGroup", "MACSet"}),
 				"sources_excluded": &schema.Schema{
 					Type:        schema.TypeBool,
 					Description: "Negation of the source",
 					Optional:    true,
 				},
-				"services": getResourceReferencesSchema(false, false, []string{"NSService", "NSServiceGroup"}),
+				"service": getResourceReferencesSchema(false, false, []string{"NSService", "NSServiceGroup"}),
 			},
 		},
 	}
@@ -169,13 +164,13 @@ func setRulesInSchema(d *schema.ResourceData, rules []manager.FirewallRule) {
 		elem["disabled"] = rule.Disabled
 		elem["revision"] = rule.Revision
 		elem["direction"] = rule.Direction
-		elem["sources"] = returnResourceReferences(rule.Sources)
-		elem["destinations"] = returnResourceReferences(rule.Destinations)
-		elem["services"] = returnServicesResourceReferences(rule.Services)
+		elem["source"] = returnResourceReferences(rule.Sources)
+		elem["destination"] = returnResourceReferences(rule.Destinations)
+		elem["service"] = returnServicesResourceReferences(rule.Services)
 
 		rulesList = append(rulesList, elem)
 	}
-	d.Set("rules", rulesList)
+	d.Set("rule", rulesList)
 }
 
 func getServicesResourceReferences(services []interface{}) []manager.FirewallService {
@@ -194,7 +189,7 @@ func getServicesResourceReferences(services []interface{}) []manager.FirewallSer
 }
 
 func getRulesFromSchema(d *schema.ResourceData) []manager.FirewallRule {
-	rules := d.Get("rules").([]interface{})
+	rules := d.Get("rule").([]interface{})
 	var ruleList []manager.FirewallRule
 	for _, rule := range rules {
 		data := rule.(map[string]interface{})
@@ -211,9 +206,9 @@ func getRulesFromSchema(d *schema.ResourceData) []manager.FirewallRule {
 			DestinationsExcluded: data["destinations_excluded"].(bool),
 			IpProtocol:           data["ip_protocol"].(string),
 			Direction:            data["direction"].(string),
-			Sources:              getResourceReferences(data["sources"].([]interface{})),
-			Destinations:         getResourceReferences(data["destinations"].([]interface{})),
-			Services:             getServicesResourceReferences(data["services"].([]interface{})),
+			Sources:              getResourceReferences(data["source"].([]interface{})),
+			Destinations:         getResourceReferences(data["destination"].([]interface{})),
+			Services:             getServicesResourceReferences(data["service"].([]interface{})),
 		}
 
 		ruleList = append(ruleList, elem)
@@ -227,9 +222,8 @@ func resourceFirewallSectionCreateEmpty(d *schema.ResourceData, m interface{}) e
 	description := d.Get("description").(string)
 	display_name := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
-	applied_tos := getResourceReferencesFromSchemaSet(d, "applied_tos")
+	applied_tos := getResourceReferencesFromSchemaSet(d, "applied_to")
 	is_default := d.Get("is_default").(bool)
-	rule_count := int64(d.Get("rule_count").(int))
 	section_type := d.Get("section_type").(string)
 	stateful := d.Get("stateful").(bool)
 
@@ -240,7 +234,6 @@ func resourceFirewallSectionCreateEmpty(d *schema.ResourceData, m interface{}) e
 		Tags:        tags,
 		AppliedTos:  applied_tos,
 		IsDefault:   is_default,
-		RuleCount:   rule_count,
 		SectionType: section_type,
 		Stateful:    stateful,
 	}
@@ -268,9 +261,8 @@ func resourceFirewallSectionCreate(d *schema.ResourceData, m interface{}) error 
 	description := d.Get("description").(string)
 	display_name := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
-	applied_tos := getResourceReferencesFromSchemaSet(d, "applied_tos")
+	applied_tos := getResourceReferencesFromSchemaSet(d, "applied_to")
 	is_default := d.Get("is_default").(bool)
-	rule_count := int64(d.Get("rule_count").(int))
 	section_type := d.Get("section_type").(string)
 	stateful := d.Get("stateful").(bool)
 
@@ -280,7 +272,6 @@ func resourceFirewallSectionCreate(d *schema.ResourceData, m interface{}) error 
 		Tags:        tags,
 		AppliedTos:  applied_tos,
 		IsDefault:   is_default,
-		RuleCount:   rule_count,
 		SectionType: section_type,
 		Stateful:    stateful,
 		Rules:       rules,
@@ -324,7 +315,6 @@ func resourceFirewallSectionRead(d *schema.ResourceData, m interface{}) error {
 	setTagsInSchema(d, firewall_section.Tags)
 	setRulesInSchema(d, firewall_section.Rules)
 	d.Set("is_default", firewall_section.IsDefault)
-	d.Set("rule_count", firewall_section.RuleCount)
 	d.Set("section_type", firewall_section.SectionType)
 	d.Set("stateful", firewall_section.Stateful)
 
@@ -338,7 +328,7 @@ func resourceFirewallSectionRead(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return fmt.Errorf("Error during FirewallSection %s read: %v", id, err)
 	}
-	setResourceReferencesInSchema(d, firewall_section2.AppliedTos, "applied_tos")
+	setResourceReferencesInSchema(d, firewall_section2.AppliedTos, "applied_to")
 
 	return nil
 }
@@ -350,9 +340,8 @@ func resourceFirewallSectionUpdateEmpty(d *schema.ResourceData, m interface{}, i
 	description := d.Get("description").(string)
 	display_name := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
-	applied_tos := getResourceReferencesFromSchemaSet(d, "applied_tos")
+	applied_tos := getResourceReferencesFromSchemaSet(d, "applied_to")
 	is_default := d.Get("is_default").(bool)
-	rule_count := int64(d.Get("rule_count").(int))
 	section_type := d.Get("section_type").(string)
 	stateful := d.Get("stateful").(bool)
 	firewall_section := manager.FirewallSection{
@@ -362,7 +351,6 @@ func resourceFirewallSectionUpdateEmpty(d *schema.ResourceData, m interface{}, i
 		Tags:        tags,
 		AppliedTos:  applied_tos,
 		IsDefault:   is_default,
-		RuleCount:   rule_count,
 		SectionType: section_type,
 		Stateful:    stateful,
 	}
@@ -405,9 +393,8 @@ func resourceFirewallSectionUpdate(d *schema.ResourceData, m interface{}) error 
 	description := d.Get("description").(string)
 	display_name := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
-	applied_tos := getResourceReferencesFromSchemaSet(d, "applied_tos")
+	applied_tos := getResourceReferencesFromSchemaSet(d, "applied_to")
 	is_default := d.Get("is_default").(bool)
-	rule_count := int64(d.Get("rule_count").(int))
 	section_type := d.Get("section_type").(string)
 	stateful := d.Get("stateful").(bool)
 	firewall_section := manager.FirewallSectionRuleList{
@@ -417,7 +404,6 @@ func resourceFirewallSectionUpdate(d *schema.ResourceData, m interface{}) error 
 		Tags:        tags,
 		AppliedTos:  applied_tos,
 		IsDefault:   is_default,
-		RuleCount:   rule_count,
 		SectionType: section_type,
 		Stateful:    stateful,
 		Rules:       rules,

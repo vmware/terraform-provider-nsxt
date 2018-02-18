@@ -37,8 +37,8 @@ func TestNSXFirewallSectionBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "tags.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "section_type", "LAYER3"),
 					resource.TestCheckResourceAttr(testResourceName, "stateful", "true"),
-					resource.TestCheckResourceAttr(testResourceName, "rules.#", "0"),
-					resource.TestCheckResourceAttr(testResourceName, "applied_tos.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "applied_to.#", "0"),
 				),
 			},
 			{
@@ -50,8 +50,8 @@ func TestNSXFirewallSectionBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "tags.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "section_type", "LAYER3"),
 					resource.TestCheckResourceAttr(testResourceName, "stateful", "true"),
-					resource.TestCheckResourceAttr(testResourceName, "rules.#", "0"),
-					resource.TestCheckResourceAttr(testResourceName, "applied_tos.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "applied_to.#", "0"),
 				),
 			},
 		},
@@ -82,8 +82,8 @@ func TestNSXFirewallSectionWithTos(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "tags.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "section_type", "LAYER3"),
 					resource.TestCheckResourceAttr(testResourceName, "stateful", "true"),
-					resource.TestCheckResourceAttr(testResourceName, "rules.#", "0"),
-					resource.TestCheckResourceAttr(testResourceName, "applied_tos.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "applied_to.#", "1"),
 				),
 			},
 			{
@@ -95,8 +95,8 @@ func TestNSXFirewallSectionWithTos(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "tags.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "section_type", "LAYER3"),
 					resource.TestCheckResourceAttr(testResourceName, "stateful", "true"),
-					resource.TestCheckResourceAttr(testResourceName, "rules.#", "0"),
-					resource.TestCheckResourceAttr(testResourceName, "applied_tos.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "applied_to.#", "2"),
 				),
 			},
 		},
@@ -128,10 +128,10 @@ func TestNSXFirewallSectionWithRules(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttr(testResourceName, "section_type", "LAYER3"),
 					resource.TestCheckResourceAttr(testResourceName, "stateful", "true"),
-					resource.TestCheckResourceAttr(testResourceName, "rules.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "rules.0.display_name", ruleName),
+					resource.TestCheckResourceAttr(testResourceName, "rule.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.display_name", ruleName),
 					resource.TestCheckResourceAttr(testResourceName, "tags.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "applied_tos.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "applied_to.#", "0"),
 				),
 			},
 			{
@@ -142,9 +142,9 @@ func TestNSXFirewallSectionWithRules(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test Update"),
 					resource.TestCheckResourceAttr(testResourceName, "section_type", "LAYER3"),
 					resource.TestCheckResourceAttr(testResourceName, "stateful", "true"),
-					resource.TestCheckResourceAttr(testResourceName, "rules.#", "2"),
-					resource.TestCheckResourceAttr(testResourceName, "rules.0.display_name", updatedRuleName),
-					resource.TestCheckResourceAttr(testResourceName, "applied_tos.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.display_name", updatedRuleName),
+					resource.TestCheckResourceAttr(testResourceName, "applied_to.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "tags.#", "1"),
 				),
 			},
@@ -192,9 +192,9 @@ func TestNSXFirewallSectionWithRulesAndTags(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttr(testResourceName, "section_type", "LAYER3"),
 					resource.TestCheckResourceAttr(testResourceName, "stateful", "true"),
-					resource.TestCheckResourceAttr(testResourceName, "rules.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "rules.0.display_name", ruleName),
-					resource.TestCheckResourceAttr(testResourceName, "applied_tos.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.display_name", ruleName),
+					resource.TestCheckResourceAttr(testResourceName, "applied_to.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "tags.#", "1"),
 				),
 			},
@@ -207,9 +207,9 @@ func TestNSXFirewallSectionWithRulesAndTags(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test Update"),
 					resource.TestCheckResourceAttr(testResourceName, "section_type", "LAYER3"),
 					resource.TestCheckResourceAttr(testResourceName, "stateful", "true"),
-					resource.TestCheckResourceAttr(testResourceName, "rules.#", "2"),
-					resource.TestCheckResourceAttr(testResourceName, "rules.0.display_name", updatedRuleName),
-					resource.TestCheckResourceAttr(testResourceName, "applied_tos.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.display_name", updatedRuleName),
+					resource.TestCheckResourceAttr(testResourceName, "applied_to.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "tags.#", "2"),
 				),
 			},
@@ -242,10 +242,10 @@ func TestNSXFirewallSectionWithRulesAndTos(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttr(testResourceName, "section_type", "LAYER3"),
 					resource.TestCheckResourceAttr(testResourceName, "stateful", "true"),
-					resource.TestCheckResourceAttr(testResourceName, "rules.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "rules.0.display_name", ruleName),
+					resource.TestCheckResourceAttr(testResourceName, "rule.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.display_name", ruleName),
 					resource.TestCheckResourceAttr(testResourceName, "tags.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "applied_tos.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "applied_to.#", "1"),
 				),
 			},
 			{
@@ -256,10 +256,10 @@ func TestNSXFirewallSectionWithRulesAndTos(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test Update"),
 					resource.TestCheckResourceAttr(testResourceName, "section_type", "LAYER3"),
 					resource.TestCheckResourceAttr(testResourceName, "stateful", "true"),
-					resource.TestCheckResourceAttr(testResourceName, "rules.#", "2"),
-					resource.TestCheckResourceAttr(testResourceName, "rules.0.display_name", updatedRuleName),
+					resource.TestCheckResourceAttr(testResourceName, "rule.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.display_name", updatedRuleName),
 					resource.TestCheckResourceAttr(testResourceName, "tags.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "applied_tos.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "applied_to.#", "2"),
 				),
 			},
 		},
@@ -341,14 +341,15 @@ resource "nsxt_firewall_section" "test" {
     section_type = "LAYER3"
     stateful = true
 	tags = %s
-	rules = [{display_name = "%s",
-	          description = "rule1",
-	          action = "ALLOW",
-	          logged = "true",
-	          ip_protocol = "IPV4",
-	          direction = "IN"}
-	]
-	applied_tos = %s 
+	rule {
+		display_name = "%s",
+	    description = "rule1",
+    	action = "ALLOW",
+     	logged = "true",
+    	ip_protocol = "IPV4",
+    	direction = "IN"
+    }
+	applied_to = %s 
 }`, name, tags, ruleName, tos)
 }
 
@@ -360,20 +361,23 @@ resource "nsxt_firewall_section" "test" {
     section_type = "LAYER3"
     stateful = true
 	tags = %s
-	rules = [{display_name = "%s",
-	          description = "rule1",
-	          action = "ALLOW",
-	          logged = "true",
-	          ip_protocol = "IPV4",
-	          direction = "IN"},
-			 {display_name = "rule2",
-	          description = "rule2",
-	          action = "ALLOW",
-	          logged = "true",
-	          ip_protocol = "IPV6",
-	          direction = "OUT"}	          
-	]
-	applied_tos = %s 
+	rule {
+		display_name = "%s",
+	    description = "rule1",
+    	action = "ALLOW",
+      	logged = "true",
+      	ip_protocol = "IPV4",
+      	direction = "IN"
+    }
+	rule {
+		display_name = "rule2",
+      	description = "rule2",
+      	action = "ALLOW",
+      	logged = "true",
+      	ip_protocol = "IPV6",
+      	direction = "OUT"
+    }
+	applied_to = %s 
 }`, updatedName, tags, updatedRuleName, tos)
 }
 
@@ -385,7 +389,7 @@ resource "nsxt_firewall_section" "test" {
     section_type = "LAYER3"
     stateful = true
 	tags = %s
-	applied_tos = %s
+	applied_to = %s
 }`, name, tags, tos)
 }
 
@@ -397,6 +401,6 @@ resource "nsxt_firewall_section" "test" {
     section_type = "LAYER3"
     stateful = true
 	tags = %s
-	applied_tos = %s
+	applied_to = %s
 }`, updatedName, tags, tos)
 }
