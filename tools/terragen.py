@@ -12,11 +12,12 @@ PACKAGE_NAME = "nsxt"
 SDK_PACKAGE_NAME = "api"
 MANAGER_PACKAGE_NAME = "manager"
 
-IGNORE_ATTRS = ["Links", "Schema", "Self", "Id", "ResourceType", "CreateTime", "CreateUser", "LastModifiedTime", "LastModifiedUser"]
+IGNORE_ATTRS = ["Links", "Schema", "Self", "Id", "ResourceType", "CreateTime", "CreateUser", "LastModifiedTime", "LastModifiedUser", "SystemOwned"]
 COMPUTED_ATTRS = ["CreateTime", "CreateUser", "LastModifiedTime", "LastModifiedUser", "SystemOwned"]
+COMPUTED_AND_OPTIONAL_ATTRS = ["DisplayName"]
 FORCENEW_ATTRS = ["TransportZoneId"]
 # TODO: ServiceBindings
-VIP_SCHEMA_ATTRS = ["Tags", "SwitchingProfileIds", "Revision", "AddressBindings", "SystemOwned"]
+VIP_SCHEMA_ATTRS = ["Tags", "SwitchingProfileIds", "Revision", "AddressBindings"]
 VIP_GETTER_ATTRS = ["Tags", "SwitchingProfileIds", "AddressBindings"]
 VIP_SETTER_ATTRS = VIP_GETTER_ATTRS
 
@@ -33,6 +34,24 @@ indent = 0
 def convert_name(name):
     tmp = re.sub(r'([A-Z])', r'_\1', name).lower()
     return tmp[1:]
+
+
+def is_list_complex_attr(attr):
+    if attr['type'].startswith('[]'):
+        # this is a list.
+        if attr['type'][2:] not in TYPE_MAP:
+            # complex type: needs to be in a single form
+            return True
+    return False
+
+
+def get_attr_fixed_name(attr):
+    fixed_name = attr['name']
+    if is_list_complex_attr(attr) and fixed_name.endswith('s'):
+        # remove last s
+        fixed_name = fixed_name[:-1]
+    fixed_name = convert_name(fixed_name)
+    return fixed_name
 
 
 def shift():
@@ -69,16 +88,16 @@ def write_header(f):
 
 
 def write_attr(f, attr):
-
+    fixed_name = get_attr_fixed_name(attr)
     if attr['name'] in VIP_SCHEMA_ATTRS:
-        pretty_writeln(f, "\"%s\": get%sSchema()," % (convert_name(attr['name']), attr['name']))
+        pretty_writeln(f, "\"%s\": get%sSchema()," % (fixed_name, attr['name']))
         return
 
     if attr['type'] not in TYPE_MAP:
         print("Skipping attribute %s due to mysterious type %s" % (attr['name'], attr['type']))
         return
 
-    pretty_writeln(f, "\"%s\": &schema.Schema{" % convert_name(attr['name']))
+    pretty_writeln(f, "\"%s\": &schema.Schema{" % fixed_name)
     shift()
     pretty_writeln(f, "Type:        %s," % TYPE_MAP[attr['type']])
     if attr['comment']:
@@ -89,7 +108,7 @@ def write_attr(f, attr):
         pretty_writeln(f, "Required:    true,")
     if attr['name'] in FORCENEW_ATTRS:
         pretty_writeln(f, "ForceNew:    true,")
-    if attr['name'] in COMPUTED_ATTRS:
+    if attr['name'] in COMPUTED_ATTRS or attr['name'] in COMPUTED_AND_OPTIONAL_ATTRS:
         pretty_writeln(f, "Computed:    true,")
 
     unshift()
@@ -134,6 +153,7 @@ def write_object(f, resource, attrs, is_create=True):
             continue
 
         used_attrs.append(attr['name'])
+        fixed_name = get_attr_fixed_name(attr)
         if attr['name'] in VIP_GETTER_ATTRS:
             pretty_writeln(f, "%s := get%sFromSchema(d)" % (
                 convert_name(attr['name']), attr['name']))
@@ -144,12 +164,12 @@ def write_object(f, resource, attrs, is_create=True):
             pretty_writeln(f, "%s := %s(d.Get(\"%s\").(%s))" %
                     (convert_name(attr['name']),
                      attr['type'],
-                     convert_name(attr['name']),
+                     fixed_name,
                      TYPECAST_MAP[attr['type']]))
         else:
             pretty_writeln(f, "%s := d.Get(\"%s\").(%s)" %
                         (convert_name(attr['name']),
-                         convert_name(attr['name']),
+                         fixed_name,
                          attr['type']))
 
     pretty_writeln(f, "%s := %s.%s {" % (convert_name(resource), MANAGER_PACKAGE_NAME, resource))
@@ -224,8 +244,9 @@ def write_read_func(f, resource, attrs, api_section):
                 attr['name'], lower_resource, attr['name']))
             continue
 
+        fixed_name = get_attr_fixed_name(attr)
         pretty_writeln(f, "d.Set(\"%s\", %s.%s)" %
-                (convert_name(attr['name']), lower_resource, attr['name']))
+                (fixed_name, lower_resource, attr['name']))
 
     f.write("\n")
     pretty_writeln(f, "return nil")
@@ -304,15 +325,17 @@ def write_doc_example(f, resource, attrs):
     for attr in attrs:
         if attr['name'] == 'Revision' or attr['name'] in COMPUTED_ATTRS or attr['name'] in IGNORE_ATTRS:
             continue
-        name = convert_name(attr['name'])
+        name = get_attr_fixed_name(attr)
         val = "..."
+        eq = " = "
         if name == 'display_name':
             val = "\"%s\"" % obj_name
         elif name == 'description':
             val = "\"%s provisioned by Terraform\"" % obj_name
-        elif name == 'tags':
-            val = "[{ scope = \"color\"\n            tag = \"red\" }\n  ]"
-        pretty_writeln(f, "  %s = %s" % (name, val))
+        elif name == 'tag':
+            eq = ' '
+            val = "{\n\tscope = \"color\"\n\ttag = \"red\"\n  }"
+        pretty_writeln(f, "  %s%s%s" % (name, eq, val))
 
     pretty_writeln(f, "}")
     pretty_writeln(f, "```\n")
@@ -324,10 +347,10 @@ def write_arguments_reference(f, resource, attrs):
     for attr in attrs:
         if attr['name'] == 'Revision' or attr['name'] in COMPUTED_ATTRS or attr['name'] in IGNORE_ATTRS:
             continue
-        name = convert_name(attr['name'])
+        name = get_attr_fixed_name(attr)
         desc = attr['comment']
         optional = 'Optional' if attr['optional'] else 'Required'
-        if name == 'tags':
+        if name == 'tag':
             desc = "A list of scope + tag pairs to associate with this %s" % resource
         pretty_writeln(f, "* `%s` - (%s) %s." % (name, optional, desc))
     pretty_writeln(f, "\n")
@@ -342,8 +365,6 @@ def write_attributes_reference(f, resource, attrs):
             desc = attr['comment']
             if name == 'revision':
                 desc = 'Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging'
-            if name == 'system_owned':
-                desc = 'A boolean that indicates whether this resource is system-owned and thus read-only'
 
             pretty_writeln(f, "* `%s` - %s." % (name, desc))
 
