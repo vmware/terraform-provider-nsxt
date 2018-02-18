@@ -30,6 +30,9 @@ Supported resources:
 * firewall_section
 * nat_rule
 * ip_set
+* dhcp_relay_profile
+* dhcp_relay_service
+* static_route
 
 
 ## Try it out

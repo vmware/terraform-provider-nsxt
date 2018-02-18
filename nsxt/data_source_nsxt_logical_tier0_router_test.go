@@ -13,7 +13,7 @@ import (
 )
 
 func TestAccDataSourceNsxtLogicalTier0Router_basic(t *testing.T) {
-	routerName := tier0RouterDefaultName
+	routerName := getTier0RouterName()
 	testResourceName := "data.nsxt_logical_tier0_router.test"
 
 	resource.Test(t, resource.TestCase{

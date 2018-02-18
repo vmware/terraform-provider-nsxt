@@ -13,7 +13,7 @@ import (
 )
 
 func TestAccDataSourceNsxtSwitchingProfile_basic(t *testing.T) {
-	profileName := switchingProfileDefaultName
+	profileName := getSwitchingProfileName()
 	testResourceName := "data.nsxt_switching_profile.test"
 
 	resource.Test(t, resource.TestCase{

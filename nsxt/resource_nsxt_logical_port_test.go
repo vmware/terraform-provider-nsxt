@@ -17,7 +17,7 @@ func TestAccResourceNsxtLogicalPort_basic(t *testing.T) {
 	portName := fmt.Sprintf("test-nsx-logical-port")
 	updatePortName := fmt.Sprintf("%s-update", portName)
 	testResourceName := "nsxt_logical_port.test"
-	transportZoneName := overlayTransportZoneNamePrefix
+	transportZoneName := getOverlayTransportZoneName()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
