@@ -26,10 +26,6 @@ resource "nsxt_logical_router_downlink_port" "DP1" {
       target_id = "${nsxt_dhcp_relay_service.DRS1.id}"
       target_type = "LogicalService"
     }
-    service_binding {
-      target_id = "${nsxt_dhcp_relay_service.DRS2.id}"
-      target_type = "LogicalService"
-    }
     tag {
         scope = "color"
         tag = "blue"
