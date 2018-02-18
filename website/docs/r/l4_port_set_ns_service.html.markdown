@@ -16,7 +16,7 @@ Provides a resource to configure NS service for L4 protocol with ports on NSX-T 
 resource "nsxt_l4_port_set_ns_service" "S1" {
     description = "S1 provisioned by Terraform"
     display_name = "S1"
-    l4_protocol = "TCP"
+    protocol = "TCP"
     destination_ports = [ "73", "8080", "81"]
     tag {
         scope = "color"
@@ -33,7 +33,7 @@ The following arguments are supported:
 * `description` - (Optional) Description.
 * `destination_ports` - (Optional) Set of destination ports.
 * `source_ports` - (Optional) Set of source ports.
-* `l4_protocol` - (Optional) VL4 protocol
+* `protocol` - (Optional) VL4 protocol
 * `tag` - (Optional) A list of scope + tag pairs to associate with this ip_set.
 
 ## Attributes Reference

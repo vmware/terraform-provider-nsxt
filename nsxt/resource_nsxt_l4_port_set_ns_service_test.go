@@ -31,7 +31,7 @@ func TestAccResourceNsxtL4PortNsService_basic(t *testing.T) {
 					testAccNSXL4ServiceExists(serviceName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", serviceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "l4 service"),
-					resource.TestCheckResourceAttr(testResourceName, "l4_protocol", "TCP"),
+					resource.TestCheckResourceAttr(testResourceName, "protocol", "TCP"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 				),
 			},
@@ -41,7 +41,7 @@ func TestAccResourceNsxtL4PortNsService_basic(t *testing.T) {
 					testAccNSXL4ServiceExists(updateServiceName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updateServiceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "l4 service"),
-					resource.TestCheckResourceAttr(testResourceName, "l4_protocol", "UDP"),
+					resource.TestCheckResourceAttr(testResourceName, "protocol", "UDP"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 				),
 			},
@@ -111,7 +111,7 @@ func testAccNSXserviceCreateTemplate(serviceName string, protocol string, port s
 resource "nsxt_l4_port_set_ns_service" "test" {
     description = "l4 service"
     display_name = "%s"
-    l4_protocol = "%s"
+    protocol = "%s"
     destination_ports = [ "%s" ]
     tag {
     	scope = "scope1"

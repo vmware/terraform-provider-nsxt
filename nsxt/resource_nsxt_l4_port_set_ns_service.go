@@ -57,7 +57,7 @@ func resourceL4PortSetNsService() *schema.Resource {
 				},
 				Optional: true,
 			},
-			"l4_protocol": &schema.Schema{
+			"protocol": &schema.Schema{
 				Type:         schema.TypeString,
 				Description:  "L4 Protocol",
 				Required:     true,
@@ -75,7 +75,7 @@ func resourceL4PortSetNsServiceCreate(d *schema.ResourceData, m interface{}) err
 	display_name := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
 	default_service := d.Get("default_service").(bool)
-	l4_protocol := d.Get("l4_protocol").(string)
+	l4_protocol := d.Get("protocol").(string)
 	source_ports := getStringListFromSchemaSet(d, "source_ports")
 	destination_ports := getStringListFromSchemaSet(d, "destination_ports")
 
@@ -153,7 +153,7 @@ func resourceL4PortSetNsServiceUpdate(d *schema.ResourceData, m interface{}) err
 	display_name := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
 	default_service := d.Get("default_service").(bool)
-	l4_protocol := d.Get("l4_protocol").(string)
+	l4_protocol := d.Get("protocol").(string)
 	source_ports := getStringListFromSchemaSet(d, "source_ports")
 	destination_ports := getStringListFromSchemaSet(d, "destination_ports")
 	revision := int64(d.Get("revision").(int))
