@@ -12,11 +12,11 @@ import (
 	"testing"
 )
 
-func TestAccResourceNsxtAlgTypeNsService_basic(t *testing.T) {
+func TestAccResourceNsxtAlgorithmTypeNsService_basic(t *testing.T) {
 
 	serviceName := fmt.Sprintf("test-nsx-alg-service")
 	updateServiceName := fmt.Sprintf("%s-update", serviceName)
-	testResourceName := "nsxt_alg_type_ns_service.test"
+	testResourceName := "nsxt_algorithm_type_ns_service.test"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -31,7 +31,7 @@ func TestAccResourceNsxtAlgTypeNsService_basic(t *testing.T) {
 					testAccNSXAlgServiceExists(serviceName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", serviceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "alg service"),
-					resource.TestCheckResourceAttr(testResourceName, "alg", "FTP"),
+					resource.TestCheckResourceAttr(testResourceName, "algorithm", "FTP"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 				),
 			},
@@ -41,7 +41,7 @@ func TestAccResourceNsxtAlgTypeNsService_basic(t *testing.T) {
 					testAccNSXAlgServiceExists(updateServiceName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updateServiceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "alg service"),
-					resource.TestCheckResourceAttr(testResourceName, "alg", "ORACLE_TNS"),
+					resource.TestCheckResourceAttr(testResourceName, "algorithm", "ORACLE_TNS"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 				),
 			},
@@ -86,7 +86,7 @@ func testAccNSXAlgServiceCheckDestroy(state *terraform.State, display_name strin
 
 	for _, rs := range state.RootModule().Resources {
 
-		if rs.Type != "nsxt_alg_type_ns_service" {
+		if rs.Type != "nsxt_algorithm_type_ns_service" {
 			continue
 		}
 
@@ -108,10 +108,10 @@ func testAccNSXAlgServiceCheckDestroy(state *terraform.State, display_name strin
 
 func testAccNSXAlgServiceCreateTemplate(serviceName string, protocol string, source_ports string, dest_ports string) string {
 	return fmt.Sprintf(`
-resource "nsxt_alg_type_ns_service" "test" {
+resource "nsxt_algorithm_type_ns_service" "test" {
     description = "alg service"
     display_name = "%s"
-    alg = "%s"
+    algorithm = "%s"
     source_ports = [ "%s" ]
     destination_ports = "%s"
     tag {

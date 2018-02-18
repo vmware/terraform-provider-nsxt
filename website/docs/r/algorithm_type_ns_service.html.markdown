@@ -1,22 +1,22 @@
 ---
 layout: "nsxt"
-page_title: "NSXT: nsxt_alg_type_ns_service"
-sidebar_current: "docs-nsxt-resource-alg-type-ns-service"
+page_title: "NSXT: nsxt_algorithm_type_ns_service"
+sidebar_current: "docs-nsxt-resource-algorithm-type-ns-service"
 description: |-
   Provides a resource to configure NS service for algorithm type on NSX-T Manager.
 ---
 
-# nsxt_alg_type_ns_service
+# nsxt_algorithm_type_ns_service
 
 Provides a resource to configure NS service for algorithm type on NSX-T Manager
 
 ## Example Usage
 
 ```hcl
-resource "nsxt_alg_type_ns_service" "S1" {
+resource "nsxt_algorithm_type_ns_service" "S1" {
     description = "S1 provisioned by Terraform"
     display_name = "S1"
-    alg = "FTP"
+    algorithm = "FTP"
     destination_ports = "21"
     source_ports = [ "9001-9003"]
     tag {
@@ -34,7 +34,7 @@ The following arguments are supported:
 * `description` - (Optional) Description.
 * `destination_ports` - (Required) a single destination port.
 * `source_ports` - (Optional) Set of source ports/ranges.
-* `alg` - (Required) Algorithm one of "ORACLE_TNS", "FTP", "SUN_RPC_TCP", "SUN_RPC_UDP", "MS_RPC_TCP", "MS_RPC_UDP", "NBNS_BROADCAST", "NBDG_BROADCAST", "TFTP"
+* `algorithm` - (Required) Algorithm one of "ORACLE_TNS", "FTP", "SUN_RPC_TCP", "SUN_RPC_UDP", "MS_RPC_TCP", "MS_RPC_UDP", "NBNS_BROADCAST", "NBDG_BROADCAST", "TFTP"
 * `tag` - (Optional) A list of scope + tag pairs to associate with this ip_set.
 
 ## Attributes Reference

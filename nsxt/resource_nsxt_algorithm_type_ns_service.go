@@ -14,12 +14,12 @@ import (
 
 var algTypeValues = []string{"ORACLE_TNS", "FTP", "SUN_RPC_TCP", "SUN_RPC_UDP", "MS_RPC_TCP", "MS_RPC_UDP", "NBNS_BROADCAST", "NBDG_BROADCAST", "TFTP"}
 
-func resourceAlgTypeNsService() *schema.Resource {
+func resourceAlgorithmTypeNsService() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceAlgTypeNsServiceCreate,
-		Read:   resourceAlgTypeNsServiceRead,
-		Update: resourceAlgTypeNsServiceUpdate,
-		Delete: resourceAlgTypeNsServiceDelete,
+		Create: resourceAlgorithmTypeNsServiceCreate,
+		Read:   resourceAlgorithmTypeNsServiceRead,
+		Update: resourceAlgorithmTypeNsServiceUpdate,
+		Delete: resourceAlgorithmTypeNsServiceDelete,
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
@@ -54,7 +54,7 @@ func resourceAlgTypeNsService() *schema.Resource {
 				},
 				Optional: true,
 			},
-			"alg": &schema.Schema{
+			"algorithm": &schema.Schema{
 				Type:         schema.TypeString,
 				Description:  "Algorithm",
 				Required:     true,
@@ -64,7 +64,7 @@ func resourceAlgTypeNsService() *schema.Resource {
 	}
 }
 
-func resourceAlgTypeNsServiceCreate(d *schema.ResourceData, m interface{}) error {
+func resourceAlgorithmTypeNsServiceCreate(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
@@ -72,7 +72,7 @@ func resourceAlgTypeNsServiceCreate(d *schema.ResourceData, m interface{}) error
 	display_name := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
 	default_service := d.Get("default_service").(bool)
-	alg := d.Get("alg").(string)
+	alg := d.Get("algorithm").(string)
 	source_ports := getStringListFromSchemaSet(d, "source_ports")
 	destination_ports := make([]string, 0, 1)
 	destination_ports = append(destination_ports, d.Get("destination_ports").(string))
@@ -102,10 +102,10 @@ func resourceAlgTypeNsServiceCreate(d *schema.ResourceData, m interface{}) error
 		return fmt.Errorf("Unexpected status returned during NsService create: %v", resp.StatusCode)
 	}
 	d.SetId(ns_service.Id)
-	return resourceAlgTypeNsServiceRead(d, m)
+	return resourceAlgorithmTypeNsServiceRead(d, m)
 }
 
-func resourceAlgTypeNsServiceRead(d *schema.ResourceData, m interface{}) error {
+func resourceAlgorithmTypeNsServiceRead(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
@@ -131,14 +131,14 @@ func resourceAlgTypeNsServiceRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("display_name", ns_service.DisplayName)
 	setTagsInSchema(d, ns_service.Tags)
 	d.Set("default_service", ns_service.DefaultService)
-	d.Set("alg", nsservice_element.Alg)
+	d.Set("algorithm", nsservice_element.Alg)
 	d.Set("destination_ports", nsservice_element.DestinationPorts)
 	d.Set("source_ports", nsservice_element.SourcePorts)
 
 	return nil
 }
 
-func resourceAlgTypeNsServiceUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceAlgorithmTypeNsServiceUpdate(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
@@ -151,7 +151,7 @@ func resourceAlgTypeNsServiceUpdate(d *schema.ResourceData, m interface{}) error
 	display_name := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
 	default_service := d.Get("default_service").(bool)
-	alg := d.Get("alg").(string)
+	alg := d.Get("algorithm").(string)
 	source_ports := getStringListFromSchemaSet(d, "source_ports")
 	destination_ports := make([]string, 0, 1)
 	destination_ports = append(destination_ports, d.Get("destination_ports").(string))
@@ -178,10 +178,10 @@ func resourceAlgTypeNsServiceUpdate(d *schema.ResourceData, m interface{}) error
 		return fmt.Errorf("Error during NsService update: %v %v", err, resp)
 	}
 
-	return resourceAlgTypeNsServiceRead(d, m)
+	return resourceAlgorithmTypeNsServiceRead(d, m)
 }
 
-func resourceAlgTypeNsServiceDelete(d *schema.ResourceData, m interface{}) error {
+func resourceAlgorithmTypeNsServiceDelete(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
