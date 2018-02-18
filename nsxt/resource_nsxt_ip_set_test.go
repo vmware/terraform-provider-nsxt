@@ -34,7 +34,7 @@ func TestNSXIpSetBasic(t *testing.T) {
 					testAccNSXIpSetExists(name, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
-					resource.TestCheckResourceAttr(testResourceName, "tags.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.#", "1"),
 				),
 			},
@@ -44,7 +44,7 @@ func TestNSXIpSetBasic(t *testing.T) {
 					testAccNSXIpSetExists(updateName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updateName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test Update"),
-					resource.TestCheckResourceAttr(testResourceName, "tags.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.#", "3"),
 				),
 			},
@@ -115,9 +115,10 @@ resource "nsxt_ip_set" "test" {
 	display_name = "%s"
 	description = "Acceptance Test"
 	ip_addresses = ["%s"]
-	tags = [{scope = "scope1"
-	    	 tag = "tag1"}
-	]
+    tag {
+    	scope = "scope1"
+        tag = "tag1"
+    }
 }`, name, single_ip)
 }
 
@@ -127,10 +128,13 @@ resource "nsxt_ip_set" "test" {
 	display_name = "%s"
 	description = "Acceptance Test Update"
 	ip_addresses = ["%s", "%s", "%s"]
-	tags = [{scope = "scope1"
-	         tag = "tag1"}, 
-	        {scope = "scope2"
-	    	 tag = "tag2"}
-	]
+    tag {
+    	scope = "scope1"
+        tag = "tag1"
+    }
+    tag {
+    	scope = "scope2"
+        tag = "tag2"
+    }
 }`, updatedName, single_ip, additional_range, additional_cidr)
 }

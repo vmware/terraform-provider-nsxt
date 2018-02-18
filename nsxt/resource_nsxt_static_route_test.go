@@ -34,12 +34,12 @@ func TestNSXStaticRouteBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttrSet(testResourceName, "logical_router_id"),
-					resource.TestCheckResourceAttr(testResourceName, "tags.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "network", "4.4.4.0/24"),
-					resource.TestCheckResourceAttr(testResourceName, "next_hops.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "next_hops.0.administrative_distance", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "next_hops.0.ip_address", "8.0.0.10"),
-					resource.TestCheckResourceAttrSet(testResourceName, "next_hops.0.logical_router_port_id"),
+					resource.TestCheckResourceAttr(testResourceName, "next_hop.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "next_hop.0.administrative_distance", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "next_hop.0.ip_address", "8.0.0.10"),
+					resource.TestCheckResourceAttrSet(testResourceName, "next_hop.0.logical_router_port_id"),
 				),
 			},
 			{
@@ -49,9 +49,9 @@ func TestNSXStaticRouteBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updateName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test Update"),
 					resource.TestCheckResourceAttrSet(testResourceName, "logical_router_id"),
-					resource.TestCheckResourceAttr(testResourceName, "tags.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "network", "5.5.5.0/24"),
-					resource.TestCheckResourceAttr(testResourceName, "next_hops.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "next_hop.#", "2"),
 				),
 			},
 		},
@@ -155,8 +155,10 @@ resource "nsxt_logical_router_downlink_port" "LRP1" {
 	description = "Acceptance Test"
 	linked_logical_switch_port_id = "${nsxt_logical_port.PORT1.id}"
 	logical_router_id = "${nsxt_logical_tier1_router.RTR1.id}"
-	subnets = [{ip_addresses = ["8.0.0.1"],
-    	        prefix_length = 24}]
+	subnet {
+		ip_addresses = ["8.0.0.1"],
+    	prefix_length = 24
+    }
 }
 `, edgeClusterName, tzName)
 }
@@ -167,11 +169,16 @@ resource "nsxt_static_route" "test" {
 	logical_router_id = "${nsxt_logical_tier1_router.RTR1.id}"
     display_name = "%s"
 	description = "Acceptance Test"
-	tags = [{scope = "scope1", tag = "tag1"}]
+    tag {
+    	scope = "scope1"
+        tag = "tag1"
+    }
     network = "4.4.4.0/24"
-	next_hops = [{ip_address = "8.0.0.10",
-	              administrative_distance = "1",
-	              logical_router_port_id = "${nsxt_logical_router_downlink_port.LRP1.id}"}]
+	next_hop {
+		ip_address = "8.0.0.10"
+		administrative_distance = "1"
+		logical_router_port_id = "${nsxt_logical_router_downlink_port.LRP1.id}"
+	}
 }`, name)
 }
 
@@ -182,12 +189,22 @@ resource "nsxt_static_route" "test" {
     display_name = "%s"
 	description = "Acceptance Test Update"
     network = "5.5.5.0/24"
-	next_hops = [{ip_address = "8.0.0.10",
-	              administrative_distance = "1",
-	              logical_router_port_id = "${nsxt_logical_router_downlink_port.LRP1.id}"},
-	             {ip_address = "2.2.2.2"
-	              administrative_distance = "2"}]
-	tags = [{scope = "scope1", tag = "tag1"},
-	        {scope = "scope2", tag = "tag2"}]
+	next_hop {
+		ip_address = "8.0.0.10"
+		administrative_distance = "1"
+		logical_router_port_id = "${nsxt_logical_router_downlink_port.LRP1.id}"
+	}
+	next_hop {
+		ip_address = "2.2.2.2"
+		administrative_distance = "2"
+	}
+    tag {
+    	scope = "scope1"
+        tag = "tag1"
+    }
+    tag {
+    	scope = "scope2"
+        tag = "tag2"
+    }
 }`, name)
 }

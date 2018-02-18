@@ -14,19 +14,20 @@ Provides a resource to configure nat rule on NSX-T manager
 
 ```hcl
 resource "nsxt_nat_rule" "NR" {
-  logical_router_id = "${nsxt_logical_tier1_router.RTR1.id}"
-  description = "NR provisioned by Terraform"
-  display_name = "NR"
-  tags = [{ scope = "color"
-            tag = "red" }
-  ]
-  action = "SNAT"
-  enabled = true
-  logging = true
-  nat_pass = false
-  translated_network = "4.4.0.0/24"
-  match_destination_network = "3.3.3.0/24"
-  match_source_network = "5.5.5.0/24"}
+    logical_router_id = "${nsxt_logical_tier1_router.RTR1.id}"
+    description = "NR provisioned by Terraform"
+    display_name = "NR"
+    action = "SNAT"
+    enabled = true
+    logging = true
+    nat_pass = false
+    translated_network = "4.4.0.0/24"
+    match_destination_network = "3.3.3.0/24"
+    match_source_network = "5.5.5.0/24"}
+    tag {
+        scope = "color"
+        tag = "blue"
+    }
 ```
 
 ## Argument Reference
@@ -36,7 +37,7 @@ The following arguments are supported:
 * `logical_router_id` - (Required) ID of the logical router.
 * `description` - (Optional) Description of this resource.
 * `display_name` - (Optional) Defaults to ID if not set.
-* `tags` - (Optional) A list of scope + tag pairs to associate with this nat_rule.
+* `tag` - (Optional) A list of scope + tag pairs to associate with this nat_rule.
 * `action` - (Required) valid actions: SNAT, DNAT, NO_NAT, REFLEXIVE. All rules in a logical router are either stateless or stateful. Mix is not supported. SNAT and DNAT are stateful, can NOT be supported when the logical router is running at active-active HA mode; REFLEXIVE is stateless. NO_NAT has no translated_fields, only match fields.
 * `enabled` - (Optional) enable/disable the rule.
 * `logging` - (Optional) enable/disable the logging of rule.

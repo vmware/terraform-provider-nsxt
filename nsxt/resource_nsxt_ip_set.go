@@ -30,7 +30,7 @@ func resourceIpSet() *schema.Resource {
 				Description: "Defaults to ID if not set",
 				Optional:    true,
 			},
-			"tags": getTagsSchema(),
+			"tag": getTagsSchema(),
 			"ip_addresses": &schema.Schema{
 				Type:        schema.TypeSet,
 				Description: "Set of IP addresses",

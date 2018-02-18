@@ -19,10 +19,10 @@ resource "nsxt_alg_type_ns_service" "S1" {
     alg = "FTP"
     destination_ports = "21"
     source_ports = [ "9001-9003"]
-    tags = [{
+    tag {
         scope = "color"
-        tag = "blue"}
-    ]
+        tag = "blue"
+    }
 }
 ```
 
@@ -35,7 +35,7 @@ The following arguments are supported:
 * `destination_ports` - (Required) a single destination port.
 * `source_ports` - (Optional) Set of source ports/ranges.
 * `alg` - (Required) Algorithm one of "ORACLE_TNS", "FTP", "SUN_RPC_TCP", "SUN_RPC_UDP", "MS_RPC_TCP", "MS_RPC_UDP", "NBNS_BROADCAST", "NBDG_BROADCAST", "TFTP"
-* `tags` - (Optional) A list of scope + tag pairs to associate with this ip_set.
+* `tag` - (Optional) A list of scope + tag pairs to associate with this ip_set.
 
 ## Attributes Reference
 

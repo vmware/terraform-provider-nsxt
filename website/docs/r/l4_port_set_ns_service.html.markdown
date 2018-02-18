@@ -18,10 +18,10 @@ resource "nsxt_l4_port_set_ns_service" "S1" {
     display_name = "S1"
     l4_protocol = "TCP"
     destination_ports = [ "73", "8080", "81"]
-    tags = [{
+    tag {
         scope = "color"
-        tag = "blue"}
-    ]
+        tag = "blue"
+    }
 }
 ```
 
@@ -34,7 +34,7 @@ The following arguments are supported:
 * `destination_ports` - (Optional) Set of destination ports.
 * `source_ports` - (Optional) Set of source ports.
 * `l4_protocol` - (Optional) VL4 protocol
-* `tags` - (Optional) A list of scope + tag pairs to associate with this ip_set.
+* `tag` - (Optional) A list of scope + tag pairs to associate with this ip_set.
 
 ## Attributes Reference
 

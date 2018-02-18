@@ -32,13 +32,8 @@ func resourceNsGroup() *schema.Resource {
 				Description: "Defaults to ID if not set",
 				Optional:    true,
 			},
-			"tags": getTagsSchema(),
-			"member_count": &schema.Schema{
-				Type:        schema.TypeInt,
-				Description: "Count of the members added to this NSGroup",
-				Computed:    true,
-			},
-			"members": &schema.Schema{
+			"tag": getTagsSchema(),
+			"member": &schema.Schema{
 				Type:        schema.TypeSet,
 				Description: "Reference to the direct/static members of the NSGroup.",
 				Optional:    true,
@@ -127,7 +122,7 @@ func setMembershipCriteriaInSchema(d *schema.ResourceData, membershipCriterias [
 }
 
 func getMembersFromSchema(d *schema.ResourceData) []manager.NsGroupSimpleExpression {
-	members := d.Get("members").(*schema.Set).List()
+	members := d.Get("member").(*schema.Set).List()
 	var expresionList []manager.NsGroupSimpleExpression
 	for _, member := range members {
 		data := member.(map[string]interface{})
@@ -151,7 +146,7 @@ func setMembersInSchema(d *schema.ResourceData, members []manager.NsGroupSimpleE
 		elem["value"] = member.Value
 		expresionList = append(expresionList, elem)
 	}
-	d.Set("members", expresionList)
+	d.Set("member", expresionList)
 }
 
 func resourceNsGroupCreate(d *schema.ResourceData, m interface{}) error {
@@ -210,7 +205,6 @@ func resourceNsGroupRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("description", ns_group.Description)
 	d.Set("display_name", ns_group.DisplayName)
 	setTagsInSchema(d, ns_group.Tags)
-	d.Set("member_count", ns_group.MemberCount)
 	setMembersInSchema(d, ns_group.Members)
 	setMembershipCriteriaInSchema(d, ns_group.MembershipCriteria)
 

@@ -32,7 +32,7 @@ func TestNSXEtherTypeNsServiceBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "display_name", serviceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "ether service"),
 					resource.TestCheckResourceAttr(testResourceName, "ether_type", "1536"),
-					resource.TestCheckResourceAttr(testResourceName, "tags.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 				),
 			},
 			{
@@ -42,7 +42,7 @@ func TestNSXEtherTypeNsServiceBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updateServiceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "ether service"),
 					resource.TestCheckResourceAttr(testResourceName, "ether_type", "2001"),
-					resource.TestCheckResourceAttr(testResourceName, "tags.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 				),
 			},
 		},
@@ -112,8 +112,9 @@ resource "nsxt_ether_type_ns_service" "test" {
     description = "ether service"
     display_name = "%s"
     ether_type = "%d"
-    tags = [{scope = "scope1"
-             tag = "tag1"}
-    ]
+    tag {
+    	scope = "scope1"
+        tag = "tag1"
+    }
 }`, serviceName, ether_type)
 }

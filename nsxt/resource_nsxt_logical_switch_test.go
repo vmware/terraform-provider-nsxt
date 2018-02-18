@@ -66,7 +66,7 @@ func testNSXLogicalSwitchBasic(t *testing.T, verifyRealization bool) {
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttr(testResourceName, "admin_state", "UP"),
 					resource.TestCheckResourceAttr(testResourceName, "replication_mode", replicationMode),
-					resource.TestCheckResourceAttr(testResourceName, "tags.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "vlan", novlan),
 				),
 			},
@@ -78,7 +78,7 @@ func testNSXLogicalSwitchBasic(t *testing.T, verifyRealization bool) {
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test Update"),
 					resource.TestCheckResourceAttr(testResourceName, "admin_state", "DOWN"),
 					resource.TestCheckResourceAttr(testResourceName, "replication_mode", replicationMode),
-					resource.TestCheckResourceAttr(testResourceName, "tags.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "vlan", novlan),
 				),
 			},
@@ -230,9 +230,10 @@ resource "nsxt_logical_switch" "%s" {
 	replication_mode = "%s"
 	vlan = "%s"
 	verify_realization = "%t"
-	tags = [{scope = "scope1"
-	         tag = "tag1"}
-	]
+    tag {
+    	scope = "scope1"
+        tag = "tag1"
+    }
 }`, transportZoneName, resourceName, switchName, replicationMode, vlan, verifyRealization)
 }
 
@@ -249,10 +250,13 @@ resource "nsxt_logical_switch" "%s" {
 	transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
 	replication_mode = "%s"
 	vlan = "%s"
-	tags = [{scope = "scope1"
-	         tag = "tag1"}, 
-	        {scope = "scope2"
-	    	 tag = "tag2"}
-	]
+    tag {
+    	scope = "scope1"
+        tag = "tag1"
+    }
+    tag {
+    	scope = "scope2"
+        tag = "tag2"
+    }
 }`, transportZoneName, resourceName, switchUpdateName, replicationMode, vlan)
 }

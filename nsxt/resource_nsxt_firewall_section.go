@@ -36,7 +36,7 @@ func resourceFirewallSection() *schema.Resource {
 				Description: "Defaults to ID if not set",
 				Optional:    true,
 			},
-			"tags": getTagsSchema(),
+			"tag": getTagsSchema(),
 			"is_default": &schema.Schema{
 				Type:        schema.TypeBool,
 				Description: "It is a boolean flag which reflects whether a firewall section is default section or not. Each Layer 3 and Layer 2 section will have at least and at most one default section",

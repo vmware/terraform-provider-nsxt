@@ -36,9 +36,9 @@ func resourceLogicalSwitch() *schema.Resource {
 				Description: "Defaults to ID if not set",
 				Optional:    true,
 			},
-			"tags":             getTagsSchema(),
-			"address_bindings": getAddressBindingsSchema(),
-			"admin_state":      getAdminStateSchema(),
+			"tag":             getTagsSchema(),
+			"address_binding": getAddressBindingsSchema(),
+			"admin_state":     getAdminStateSchema(),
 			"ip_pool_id": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "IP pool id that associated with a LogicalSwitch",

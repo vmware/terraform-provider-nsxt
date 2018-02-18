@@ -33,7 +33,7 @@ func resourceIcmpTypeNsService() *schema.Resource {
 				Description: "Defaults to ID if not set",
 				Optional:    true,
 			},
-			"tags": getTagsSchema(),
+			"tag": getTagsSchema(),
 			"default_service": &schema.Schema{
 				Type:        schema.TypeBool,
 				Description: "The default NSServices are created in the system by default. These NSServices can't be modified/deleted",

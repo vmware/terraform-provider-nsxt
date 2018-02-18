@@ -30,7 +30,7 @@ func resourceDhcpRelayService() *schema.Resource {
 				Description: "Defaults to ID if not set",
 				Optional:    true,
 			},
-			"tags": getTagsSchema(),
+			"tag": getTagsSchema(),
 			"dhcp_relay_profile_id": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "dhcp relay profile referenced by the dhcp relay service",

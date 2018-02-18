@@ -32,8 +32,8 @@ func resourceStaticRoute() *schema.Resource {
 				Required:     true,
 				ValidateFunc: validation.CIDRNetwork(0, 32),
 			},
-			"next_hops": getNextHopsSchema(),
-			"revision":  getRevisionSchema(),
+			"next_hop": getNextHopsSchema(),
+			"revision": getRevisionSchema(),
 			"description": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
@@ -44,7 +44,7 @@ func resourceStaticRoute() *schema.Resource {
 				Description: "Defaults to ID if not set",
 				Optional:    true,
 			},
-			"tags": getTagsSchema(),
+			"tag": getTagsSchema(),
 		},
 	}
 }
@@ -87,7 +87,7 @@ func getNextHopsSchema() *schema.Schema {
 }
 
 func getNextHopsFromSchema(d *schema.ResourceData) []manager.StaticRouteNextHop {
-	hops := d.Get("next_hops").([]interface{})
+	hops := d.Get("next_hop").([]interface{})
 	var nextHopsList []manager.StaticRouteNextHop
 	for _, hop := range hops {
 		data := hop.(map[string]interface{})
@@ -122,7 +122,7 @@ func setNextHopsInSchema(d *schema.ResourceData, next_hops []manager.StaticRoute
 		elem["logical_router_port_id"] = static_route_next_hop.LogicalRouterPortId
 		nextHopsList = append(nextHopsList, elem)
 	}
-	d.Set("next_hops", nextHopsList)
+	d.Set("next_hop", nextHopsList)
 }
 
 func resourceStaticRouteCreate(d *schema.ResourceData, m interface{}) error {

@@ -33,7 +33,7 @@ func TestNSXLogicalPortBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "display_name", portName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttr(testResourceName, "admin_state", "UP"),
-					resource.TestCheckResourceAttr(testResourceName, "tags.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 				),
 			},
 			{
@@ -43,7 +43,7 @@ func TestNSXLogicalPortBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatePortName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test Update"),
 					resource.TestCheckResourceAttr(testResourceName, "admin_state", "UP"),
-					resource.TestCheckResourceAttr(testResourceName, "tags.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
 				),
 			},
 		},
@@ -125,9 +125,10 @@ resource "nsxt_logical_port" "test" {
 	admin_state = "UP"
 	description = "Acceptance Test"
 	logical_switch_id = "${nsxt_logical_switch.test.id}"
-	tags = [{scope = "scope1"
-	    	 tag = "tag1"}
-	]
+    tag {
+    	scope = "scope1"
+        tag = "tag1"
+    }
 }`, transportZoneName, portName)
 }
 
@@ -149,10 +150,13 @@ resource "nsxt_logical_port" "test" {
 	admin_state = "UP"
 	description = "Acceptance Test Update"
 	logical_switch_id = "${nsxt_logical_switch.test.id}"
-	tags = [{scope = "scope1"
-	         tag = "tag1"}, 
-	        {scope = "scope2"
-	    	 tag = "tag2"}
-	]
+    tag {
+    	scope = "scope1"
+        tag = "tag1"
+    }
+    tag {
+    	scope = "scope2"
+        tag = "tag2"
+    }
 }`, transportZoneName, portUpdatedName)
 }

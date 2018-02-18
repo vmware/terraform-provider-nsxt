@@ -14,17 +14,18 @@ Provides a resource to configure Logical Port (LP) on NSX-T Manager.
 
 ```hcl
 resource "nsxt_logical_port" "LP1" {
-  admin_state = "UP"
-  description = "LP1 provisioned by Terraform"
-  display_name = "LP1"
-  logical_switch_id = "${nsxt_logical_switch.LS1.id}"
-  tags = [{ scope = "color"
-            tag = "red" }
-  ]
-  switching_profile_id {
-    key = "${data.nsxt_switching_profile.PRF1.resource_type}",
-    value = "${data.nsxt_switching_profile.PRF1.id}"
-  }
+    admin_state = "UP"
+    description = "LP1 provisioned by Terraform"
+    display_name = "LP1"
+    logical_switch_id = "${nsxt_logical_switch.LS1.id}"
+    tag {
+        scope = "color"
+        tag = "blue"
+    }
+    switching_profile_id {
+        key = "${data.nsxt_switching_profile.PRF1.resource_type}",
+        value = "${data.nsxt_switching_profile.PRF1.id}"
+    }
 }
 ```
 
@@ -37,7 +38,7 @@ The following arguments are supported:
 * `switching_profile_id` - (Optional) List of IDs of switching profiles (of various types) to be associated with this switch. Default switching profiles will be used if not specified.
 * `display_name` - (Optional) Display name, defaults to ID if not set.
 * `description` - (Optional) Description.
-* `tags` - (Optional) A list of scope + tag pairs to associate with this logical switch.
+* `tag` - (Optional) A list of scope + tag pairs to associate with this logical switch.
 
 ## Attributes Reference
 

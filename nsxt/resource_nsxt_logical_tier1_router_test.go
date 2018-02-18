@@ -36,7 +36,7 @@ func TestNSXLogicalTier1RouterBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttr(testResourceName, "high_availability_mode", haMode),
 					resource.TestCheckResourceAttr(testResourceName, "failover_mode", failoverMode),
-					resource.TestCheckResourceAttr(testResourceName, "tags.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "enable_router_advertisement", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "advertise_connected_routes", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "advertise_static_routes", "true"),
@@ -51,7 +51,7 @@ func TestNSXLogicalTier1RouterBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test Update"),
 					resource.TestCheckResourceAttr(testResourceName, "high_availability_mode", haMode),
 					resource.TestCheckResourceAttr(testResourceName, "failover_mode", failoverMode),
-					resource.TestCheckResourceAttr(testResourceName, "tags.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "enable_router_advertisement", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "advertise_connected_routes", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "advertise_static_routes", "false"),
@@ -134,12 +134,14 @@ resource "nsxt_logical_tier1_router" "test" {
 	advertise_connected_routes = "true"
 	advertise_static_routes = "true"
 	advertise_nat_routes = "true"
-	tags = [{scope = "scope1"
-         tag = "tag1"}, 
-        {scope = "scope2"
-    	 tag = "tag2"}
-	]
-
+    tag {
+    	scope = "scope1"
+        tag = "tag1"
+    }
+    tag {
+    	scope = "scope2"
+        tag = "tag2"
+    }
 }`, edgeClusterName, name, failoverMode, haMode)
 }
 
@@ -159,8 +161,9 @@ resource "nsxt_logical_tier1_router" "test" {
 	advertise_connected_routes = "false"
 	advertise_static_routes = "false"
 	advertise_nat_routes = "false"
-	tags = [{scope = "scope3"
-	    	 tag = "tag3"}
-	]
+    tag {
+    	scope = "scope3"
+        tag = "tag3"
+    }
 }`, edgeClusterName, name, failoverMode, haMode)
 }

@@ -31,7 +31,7 @@ func TestNSXIgmpTypeNsServiceBasic(t *testing.T) {
 					testAccNSXIgmpServiceExists(serviceName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", serviceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "igmp service"),
-					resource.TestCheckResourceAttr(testResourceName, "tags.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 				),
 			},
 			{
@@ -40,7 +40,7 @@ func TestNSXIgmpTypeNsServiceBasic(t *testing.T) {
 					testAccNSXIgmpServiceExists(updateServiceName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updateServiceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "igmp service"),
-					resource.TestCheckResourceAttr(testResourceName, "tags.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 				),
 			},
 		},
@@ -109,8 +109,9 @@ func testAccNSXIgmpServiceCreateTemplate(serviceName string) string {
 resource "nsxt_igmp_type_ns_service" "test" {
     description = "igmp service"
     display_name = "%s"
-    tags = [{scope = "scope1"
-             tag = "tag1"}
-    ]
+    tag {
+    	scope = "scope1"
+        tag = "tag1"
+    }
 }`, serviceName)
 }

@@ -34,7 +34,7 @@ func TestNSXIcmpTypeNsServiceBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "protocol", "ICMPv4"),
 					resource.TestCheckResourceAttr(testResourceName, "icmp_type", "5"),
 					resource.TestCheckResourceAttr(testResourceName, "icmp_code", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "tags.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 				),
 			},
 			{
@@ -44,7 +44,7 @@ func TestNSXIcmpTypeNsServiceBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updateServiceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "icmp service"),
 					resource.TestCheckResourceAttr(testResourceName, "protocol", "ICMPv6"),
-					resource.TestCheckResourceAttr(testResourceName, "tags.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 				),
 			},
 		},
@@ -116,8 +116,9 @@ resource "nsxt_icmp_type_ns_service" "test" {
     protocol = "%s"
     icmp_type = "%d"
     icmp_code = "%d"
-    tags = [{scope = "scope1"
-             tag = "tag1"}
-    ]
+    tag {
+    	scope = "scope1"
+        tag = "tag1"
+    }
 }`, serviceName, protocol, icmp_type, icmp_code)
 }

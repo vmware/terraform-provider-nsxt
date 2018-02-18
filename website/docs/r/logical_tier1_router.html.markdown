@@ -14,19 +14,19 @@ Provides a resource to configure Logical Tier1 router on NSX-T Manager.
 
 ```hcl
 resource "nsxt_logical_tier1_router" "RTR1" {
-  description = "RTR1 provisioned by Terraform"
-  display_name = "RTR1"
-  failover_mode =  "PREEMPTIVE"
-  high_availability_mode = "ACTIVE_STANDBY"
-  edge_cluster_id = "${data.nsxt_edge_cluster.EC.id}"
-  enable_router_advertisement = "true"
-  advertise_connected_routes = "false"
-  advertise_static_routes = "true"
-  advertise_nat_routes = "true"
-
-  tags = [{ scope = "color"
-            tag = "red" }
-  ]
+    description = "RTR1 provisioned by Terraform"
+    display_name = "RTR1"
+    failover_mode =  "PREEMPTIVE"
+    high_availability_mode = "ACTIVE_STANDBY"
+    edge_cluster_id = "${data.nsxt_edge_cluster.EC.id}"
+    enable_router_advertisement = "true"
+    advertise_connected_routes = "false"
+    advertise_static_routes = "true"
+    advertise_nat_routes = "true"
+    tag {
+        scope = "color"
+        tag = "blue"
+    }
 }
 ```
 
@@ -37,7 +37,7 @@ The following arguments are supported:
 * `edge_cluster_id` - (Required) Edge Cluster ID for the logical tier1 router.
 * `display_name` - (Optional) Display name, defaults to ID if not set.
 * `description` - (Optional) Description.
-* `tags` - (Optional) A list of scope + tag pairs to associate with this logical tier1 router.
+* `tag` - (Optional) A list of scope + tag pairs to associate with this logical tier1 router.
 * `failover_mode` - (Optional) This failover mode determines, whether the preferred service router instance for given logical router will preempt the peer. Note - It can be specified if and only if logical router is ACTIVE_STANDBY and NON_PREEMPTIVE mode is supported only for a Tier1 logical router. For ACTIVE_ACTIVE logical routers, this field must not be populated
 * `high_availability_mode` - (Optional) High availability mode
 * `enable_router_advertisement` - (Optional) Enable the router advertisement

@@ -33,7 +33,7 @@ func resourceLogicalRouterDownLinkPort() *schema.Resource {
 				Description: "Defaults to ID if not set",
 				Optional:    true,
 			},
-			"tags": getTagsSchema(),
+			"tag": getTagsSchema(),
 			"logical_router_id": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "Identifier for logical router on which this port is created",
@@ -46,7 +46,7 @@ func resourceLogicalRouterDownLinkPort() *schema.Resource {
 				Required:    true,
 				ForceNew:    true,
 			},
-			"subnets": getIpSubnetsSchema(true, false),
+			"subnet": getIpSubnetsSchema(true, false),
 			"mac_address": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "MAC address",

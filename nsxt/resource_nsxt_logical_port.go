@@ -35,7 +35,7 @@ func resourceLogicalPort() *schema.Resource {
 			},
 			"admin_state":          getAdminStateSchema(),
 			"switching_profile_id": getSwitchingProfileIdsSchema(),
-			"tags":                 getTagsSchema(),
+			"tag": getTagsSchema(),
 		},
 	}
 }

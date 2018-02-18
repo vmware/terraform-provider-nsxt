@@ -16,9 +16,10 @@ Provides a resource to configure dhcp relay profile on NSX-T manager
 resource "nsxt_dhcp_relay_profile" "DRP" {
   description = "DRP provisioned by Terraform"
   display_name = "DRP"
-  tags = [{ scope = "color"
-            tag = "red" }
-  ]
+    tag {
+        scope = "color"
+        tag = "red"
+    }
   server_addresses = ["1.1.1.1"]
 }
 ```
@@ -29,7 +30,7 @@ The following arguments are supported:
 
 * `description` - (Optional) Description of this resource.
 * `display_name` - (Optional) Defaults to ID if not set.
-* `tags` - (Optional) A list of scope + tag pairs to associate with this dhcp_relay_profile.
+* `tag` - (Optional) A list of scope + tag pairs to associate with this dhcp_relay_profile.
 * `server_addresses` - (Required) IP addresses of the DHCP relay servers.
 
 

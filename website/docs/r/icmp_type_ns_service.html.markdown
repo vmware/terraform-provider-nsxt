@@ -19,10 +19,10 @@ resource "nsxt_icmp_type_ns_service" "S1" {
     protocol = "ICMPv4"
     icmp_type = "5"
     icmp_code = "1"
-    tags = [{
+    tag {
         scope = "color"
-        tag = "blue"}
-    ]
+        tag = "blue"
+    }
 }
 ```
 
@@ -35,7 +35,7 @@ The following arguments are supported:
 * `protocol` - (Required) Version of ICMP protocol ICMPv4 or ICMPv6.
 * `icmp_type` - (Optional) ICMP message type.
 * `icmp_code` - (Optional) ICMP message code
-* `tags` - (Optional) A list of scope + tag pairs to associate with this ip_set.
+* `tag` - (Optional) A list of scope + tag pairs to associate with this ip_set.
 
 ## Attributes Reference
 

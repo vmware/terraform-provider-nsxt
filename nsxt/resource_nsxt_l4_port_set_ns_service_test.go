@@ -32,7 +32,7 @@ func TestNSXL4PortNsServiceBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "display_name", serviceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "l4 service"),
 					resource.TestCheckResourceAttr(testResourceName, "l4_protocol", "TCP"),
-					resource.TestCheckResourceAttr(testResourceName, "tags.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 				),
 			},
 			{
@@ -42,7 +42,7 @@ func TestNSXL4PortNsServiceBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updateServiceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "l4 service"),
 					resource.TestCheckResourceAttr(testResourceName, "l4_protocol", "UDP"),
-					resource.TestCheckResourceAttr(testResourceName, "tags.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 				),
 			},
 		},
@@ -113,8 +113,9 @@ resource "nsxt_l4_port_set_ns_service" "test" {
     display_name = "%s"
     l4_protocol = "%s"
     destination_ports = [ "%s" ]
-    tags = [{scope = "scope1"
-             tag = "tag1"}
-    ]
+    tag {
+    	scope = "scope1"
+        tag = "tag1"
+    }
 }`, serviceName, protocol, port)
 }

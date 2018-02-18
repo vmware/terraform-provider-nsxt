@@ -35,7 +35,8 @@ func TestNSXLogicalRouterDownlinkPortBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttrSet(testResourceName, "linked_logical_switch_port_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "logical_router_id"),
-					resource.TestCheckResourceAttr(testResourceName, "tags.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "subnet.#", "1"),
 				),
 			},
 			{
@@ -46,7 +47,8 @@ func TestNSXLogicalRouterDownlinkPortBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test Update"),
 					resource.TestCheckResourceAttrSet(testResourceName, "linked_logical_switch_port_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "logical_router_id"),
-					resource.TestCheckResourceAttr(testResourceName, "tags.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "subnet.#", "1"),
 				),
 			},
 		},
@@ -76,7 +78,7 @@ func TestNSXLogicalRouterDownlinkPortWithRelay(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttrSet(testResourceName, "linked_logical_switch_port_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "logical_router_id"),
-					resource.TestCheckResourceAttr(testResourceName, "tags.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "service_binding.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "service_binding.0.target_type", "LogicalService"),
 					resource.TestCheckResourceAttr(testResourceName, "service_binding.0.target_display_name", "srv"),
@@ -90,7 +92,7 @@ func TestNSXLogicalRouterDownlinkPortWithRelay(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test Update"),
 					resource.TestCheckResourceAttrSet(testResourceName, "linked_logical_switch_port_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "logical_router_id"),
-					resource.TestCheckResourceAttr(testResourceName, "tags.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "service_binding.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "service_binding.0.target_type", "LogicalService"),
 					resource.TestCheckResourceAttr(testResourceName, "service_binding.0.target_display_name", "srv"),
@@ -209,9 +211,14 @@ resource "nsxt_logical_router_downlink_port" "test" {
 	description = "Acceptance Test"
 	linked_logical_switch_port_id = "${nsxt_logical_port.PORT1.id}"
 	logical_router_id = "${nsxt_logical_tier1_router.RTR1.id}"
-	subnets = [{ip_addresses = ["8.0.0.1"],
-    	        prefix_length = 24}]
-	tags = [{scope = "scope1", tag = "tag1"}]
+	subnet {
+		ip_addresses = ["8.0.0.1"],
+    	prefix_length = 24
+    }
+    tag {
+    	scope = "scope1"
+        tag = "tag1"
+    }
 }`, portName)
 }
 
@@ -222,10 +229,18 @@ resource "nsxt_logical_router_downlink_port" "test" {
 	description = "Acceptance Test Update"
 	linked_logical_switch_port_id = "${nsxt_logical_port.PORT1.id}"
 	logical_router_id = "${nsxt_logical_tier1_router.RTR1.id}"
-	subnets = [{ip_addresses = ["8.0.0.1"],
-            	prefix_length = 24}]
-	tags = [{scope = "scope1", tag = "tag1"},
-			{scope = "scope2", tag = "tag2"}]
+	subnet {
+		ip_addresses = ["8.0.0.1"],
+        prefix_length = 24
+    }
+    tag {
+    	scope = "scope1"
+        tag = "tag1"
+    }
+    tag {
+    	scope = "scope2"
+        tag = "tag2"
+    }
 }`, portUpdatedName)
 }
 
@@ -238,15 +253,18 @@ resource "nsxt_logical_router_downlink_port" "test" {
 	description = "Acceptance Test"
 	linked_logical_switch_port_id = "${nsxt_logical_port.PORT1.id}"
 	logical_router_id = "${nsxt_logical_tier1_router.RTR1.id}"
-	subnets = [{ip_addresses = ["8.0.0.1"],
-	            prefix_length = 24}]
+	subnet {
+		ip_addresses = ["8.0.0.1"],
+	    prefix_length = 24
+	}
 	service_binding {
 		target_id = "${nsxt_dhcp_relay_service.DRS1.id}"
 		target_type = "LogicalService"
 	}
-	tags = [{scope = "scope1"
-	    	 tag = "tag1"}
-	]
+    tag {
+    	scope = "scope1"
+        tag = "tag1"
+    }
 }`, portName)
 }
 
@@ -259,16 +277,21 @@ resource "nsxt_logical_router_downlink_port" "test" {
 	description = "Acceptance Test Update"
 	linked_logical_switch_port_id = "${nsxt_logical_port.PORT1.id}"
 	logical_router_id = "${nsxt_logical_tier1_router.RTR1.id}"
-	subnets = [{ip_addresses = ["8.0.0.1"],
-	            prefix_length = 24}]
+	subnet {
+		ip_addresses = ["8.0.0.1"],
+	    prefix_length = 24
+	}
 	service_binding {
 		target_id = "${nsxt_dhcp_relay_service.DRS1.id}"
 		target_type = "LogicalService"
 	}
-	tags = [{scope = "scope1"
-	    	 tag = "tag1"},
-		    {scope = "scope2"
-	    	 tag = "tag2"}
-	]
+    tag {
+    	scope = "scope1"
+        tag = "tag1"
+    }
+    tag {
+    	scope = "scope2"
+        tag = "tag2"
+    }
 }`, portUpdatedName)
 }

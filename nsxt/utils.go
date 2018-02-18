@@ -75,7 +75,7 @@ func getTagsSchema() *schema.Schema {
 }
 
 func getTagsFromSchema(d *schema.ResourceData) []common.Tag {
-	tags := d.Get("tags").(*schema.Set).List()
+	tags := d.Get("tag").(*schema.Set).List()
 	var tagList []common.Tag
 	for _, tag := range tags {
 		data := tag.(map[string]interface{})
@@ -96,7 +96,7 @@ func setTagsInSchema(d *schema.ResourceData, tags []common.Tag) {
 		elem["tag"] = tag.Tag
 		tagList = append(tagList, elem)
 	}
-	d.Set("tags", tagList)
+	d.Set("tag", tagList)
 }
 
 // utilities to define & handle switching profiles
@@ -177,7 +177,7 @@ func getAddressBindingsSchema() *schema.Schema {
 }
 
 func getAddressBindingsFromSchema(d *schema.ResourceData) []manager.PacketAddressClassifier {
-	bindings := d.Get("address_bindings").(*schema.Set).List()
+	bindings := d.Get("address_binding").(*schema.Set).List()
 	var bindingList []manager.PacketAddressClassifier
 	for _, binding := range bindings {
 		data := binding.(map[string]interface{})
@@ -201,7 +201,7 @@ func setAddressBindingsInSchema(d *schema.ResourceData, bindings []manager.Packe
 		elem["vlan"] = binding.Vlan
 		bindingList = append(bindingList, elem)
 	}
-	d.Set("address_bindings", bindingList)
+	d.Set("address_binding", bindingList)
 }
 
 func getResourceReferencesSchema(required bool, computed bool, valid_target_types []string) *schema.Schema {
@@ -358,7 +358,7 @@ func getAdminStateSchema() *schema.Schema {
 }
 
 func getIpSubnetsFromSchema(d *schema.ResourceData) []manager.IpSubnet {
-	subnets := d.Get("subnets").([]interface{})
+	subnets := d.Get("subnet").([]interface{})
 	var subnetList []manager.IpSubnet
 	for _, subnet := range subnets {
 		data := subnet.(map[string]interface{})
@@ -380,7 +380,7 @@ func setIpSubnetsInSchema(d *schema.ResourceData, subnets []manager.IpSubnet) {
 		elem["prefix_length"] = subnet.PrefixLength
 		subnetList = append(subnetList, elem)
 	}
-	d.Set("subnets", subnetList)
+	d.Set("subnet", subnetList)
 }
 
 func makeResourceReference(resourceType string, resourceId string) *common.ResourceReference {

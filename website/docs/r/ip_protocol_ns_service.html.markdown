@@ -17,10 +17,10 @@ resource "nsxt_ip_protocol_ns_service" "S1" {
     description = "S1 provisioned by Terraform"
     display_name = "S1"
     protocol = "10"
-    tags = [{
+    tag {
         scope = "color"
-        tag = "blue"}
-    ]
+        tag = "blue"
+    }
 }
 ```
 
@@ -31,7 +31,7 @@ The following arguments are supported:
 * `display_name` - (Optional) Display name, defaults to ID if not set.
 * `description` - (Optional) Description.
 * `protocol` - (Required) IP protocol number (0-255)
-* `tags` - (Optional) A list of scope + tag pairs to associate with this ip_set.
+* `tag` - (Optional) A list of scope + tag pairs to associate with this ip_set.
 
 ## Attributes Reference
 

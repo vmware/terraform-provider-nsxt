@@ -14,18 +14,19 @@ Provides a resource to configure firewall section on NSX-T manager
 
 ```hcl
 resource "nsxt_firewall_section" "FS" {
-  description = "FS provisioned by Terraform"
-  display_name = "FS"
-  tags = [{ scope = "color"
-            tag = "red" }
-  ]
-  applied_to {
+    description = "FS provisioned by Terraform"
+    display_name = "FS"
+    tag {
+        scope = "color"
+        tag = "blue"
+    }
+    applied_to {
       target_type = "NSGroup",
       target_id = "${nsxt_ns_group.GRP2.id}"
-  }
-  section_type = "LAYER3"
-  stateful = true
-  rule {
+    }
+    section_type = "LAYER3"
+    stateful = true
+    rule {
       display_name = "out_rule",
       description = "Out going rule",
       action = "ALLOW",
@@ -40,8 +41,8 @@ resource "nsxt_firewall_section" "FS" {
           target_type = "LogicalSwitch"
           target_id = "${nsxt_logical_switch.LS2.id}"
       }
-  }
-  rule {
+    }
+    rule {
       display_name = "in_rule",
       description = "In going rule",
       action = "DROP",
@@ -66,7 +67,7 @@ The following arguments are supported:
 
 * `display_name` - (Optional) Defaults to ID if not set.
 * `description` - (Optional) Description of this resource.
-* `tags` - (Optional) A list of scope + tag pairs to associate with this firewall_section.
+* `tag` - (Optional) A list of scope + tag pairs to associate with this firewall_section.
 * `applied_to` - (Optional) List of objects where the rules in this section will be enforced. This will take precedence over rule level appliedTo. [allowed target types: "LogicalPort", "LogicalSwitch", "NSGroup"]
 * `section_type` - (Required) Type of the rules which a section can contain. Either LAYER2 or LAYER3. Only homogeneous sections are supported.
 * `stateful` - (Required) Stateful or Stateless nature of firewall section is enforced on all rules inside the section. Layer3 sections can be stateful or stateless. Layer2 sections can only be stateless.

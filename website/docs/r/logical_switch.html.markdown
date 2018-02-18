@@ -14,19 +14,19 @@ Provides a resource to configure Logical Switch (LS) on NSX-T Manager.
 
 ```hcl
 resource "nsxt_logical_switch" "LS1" {
-  admin_state = "UP"
-  description = "LS1 provisioned by Terraform"
-  display_name = "LS1"
-  transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
-  replication_mode = "MTEP"
-
-  tags = [{ scope = "color"
-            tag = "red" }
-  ]
-  switching_profile_id {
-    key = "${data.nsxt_switching_profile.PRF1.resource_type}",
-    value = "${data.nsxt_switching_profile.PRF1.id}"
-  }
+    admin_state = "UP"
+    description = "LS1 provisioned by Terraform"
+    display_name = "LS1"
+    transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
+    replication_mode = "MTEP"
+    tag {
+        scope = "color"
+        tag = "blue"
+    }
+    switching_profile_id {
+      key = "${data.nsxt_switching_profile.PRF1.resource_type}",
+      value = "${data.nsxt_switching_profile.PRF1.id}"
+    }
 }
 ```
 
@@ -44,8 +44,8 @@ The following arguments are supported:
 * `mac_pool_id` - (Optional) Mac Pool ID to be associated with the logical switch.
 * `vlan` - (Optional) Vlan for vlan logical switch. If not specified, this switch is overlay logical switch.
 * `vni` - (Optional) Vni for the logical switch.
-* `address_bindings` - (Optional) List of Address Bindings for the logical switch. This setting allows to provide bindings between IP address, mac Address and vlan.
-* `tags` - (Optional) A list of scope + tag pairs to associate with this logical switch.
+* `address_binding` - (Optional) List of Address Bindings for the logical switch. This setting allows to provide bindings between IP address, mac Address and vlan.
+* `tag` - (Optional) A list of scope + tag pairs to associate with this logical switch.
 * `verify_realization` - (Optional). If true (default), on create operation terraform will not return success until this logical switch is realized on platform and can be consumed. If set to false, the switch is not guaranteed to be accessible right away.
 
 ## Attributes Reference

@@ -31,7 +31,7 @@ func TestNSXDhcpRelayServiceBasic(t *testing.T) {
 					testAccNSXDhcpRelayServiceExists(prfName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", prfName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
-					resource.TestCheckResourceAttr(testResourceName, "tags.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 				),
 			},
 			{
@@ -40,7 +40,7 @@ func TestNSXDhcpRelayServiceBasic(t *testing.T) {
 					testAccNSXDhcpRelayServiceExists(updatePrfName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatePrfName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test Update"),
-					resource.TestCheckResourceAttr(testResourceName, "tags.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
 				),
 			},
 		},
@@ -115,9 +115,10 @@ resource "nsxt_dhcp_relay_service" "test" {
 	display_name = "%s"
 	description = "Acceptance Test"
 	dhcp_relay_profile_id = "${nsxt_dhcp_relay_profile.test.id}"
-	tags = [{scope = "scope1"
-	    	 tag = "tag1"}
-	]
+    tag {
+    	scope = "scope1"
+        tag = "tag1"
+    }
 }`, name)
 }
 
@@ -132,10 +133,13 @@ resource "nsxt_dhcp_relay_service" "test" {
 	display_name = "%s"
 	description = "Acceptance Test Update"
 	dhcp_relay_profile_id = "${nsxt_dhcp_relay_profile.test.id}"
-	tags = [{scope = "scope1"
-	         tag = "tag1"}, 
-	        {scope = "scope2"
-	    	 tag = "tag2"}
-	]
+    tag {
+    	scope = "scope1"
+        tag = "tag1"
+    }
+    tag {
+    	scope = "scope2"
+        tag = "tag2"
+    }
 }`, updated_name)
 }

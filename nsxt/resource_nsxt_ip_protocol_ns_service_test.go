@@ -32,7 +32,7 @@ func TestNSXIpProtocolNsServiceBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "display_name", serviceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "ip protocol service"),
 					resource.TestCheckResourceAttr(testResourceName, "protocol", "6"),
-					resource.TestCheckResourceAttr(testResourceName, "tags.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 				),
 			},
 			{
@@ -42,7 +42,7 @@ func TestNSXIpProtocolNsServiceBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updateServiceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "ip protocol service"),
 					resource.TestCheckResourceAttr(testResourceName, "protocol", "17"),
-					resource.TestCheckResourceAttr(testResourceName, "tags.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 				),
 			},
 		},
@@ -112,8 +112,9 @@ resource "nsxt_ip_protocol_ns_service" "test" {
     description = "ip protocol service"
     display_name = "%s"
     protocol = "%d"
-    tags = [{scope = "scope1"
-             tag = "tag1"}
-    ]
+    tag {
+    	scope = "scope1"
+        tag = "tag1"
+    }
 }`, serviceName, protocol)
 }

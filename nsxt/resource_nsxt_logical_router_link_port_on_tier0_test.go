@@ -32,7 +32,7 @@ func TestNSXLogicalRouterLinkPortOnTier0Basic(t *testing.T) {
 					testAccNSXLogicalRouterLinkPortOnTier0Exists(name, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
-					resource.TestCheckResourceAttr(testResourceName, "tags.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
 				),
 			},
 			{
@@ -41,7 +41,7 @@ func TestNSXLogicalRouterLinkPortOnTier0Basic(t *testing.T) {
 					testAccNSXLogicalRouterLinkPortOnTier0Exists(updateName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updateName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test Update"),
-					resource.TestCheckResourceAttr(testResourceName, "tags.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 				),
 			},
 		},
@@ -69,7 +69,7 @@ func TestNSXLogicalRouterLinkPortOnTier0WithRelay(t *testing.T) {
 					testAccNSXLogicalRouterLinkPortOnTier0Exists(name, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
-					resource.TestCheckResourceAttr(testResourceName, "tags.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "service_binding.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "service_binding.0.target_type", "LogicalService"),
 					resource.TestCheckResourceAttr(testResourceName, "service_binding.0.target_display_name", "srv"),
@@ -81,7 +81,7 @@ func TestNSXLogicalRouterLinkPortOnTier0WithRelay(t *testing.T) {
 					testAccNSXLogicalRouterLinkPortOnTier0Exists(updateName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updateName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test Update"),
-					resource.TestCheckResourceAttr(testResourceName, "tags.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "service_binding.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "service_binding.0.target_type", "LogicalService"),
 					resource.TestCheckResourceAttr(testResourceName, "service_binding.0.target_display_name", "srv"),
@@ -157,11 +157,14 @@ resource "nsxt_logical_router_link_port_on_tier0" "test" {
 	display_name = "%s"
 	description = "Acceptance Test"
 	logical_router_id = "${data.nsxt_logical_tier0_router.TIER0RTR.id}"
-	tags = [{scope = "scope1"
-        	 tag = "tag1"},
-        	{scope = "scope2"
-    	     tag = "tag2"}
-	]
+    tag {
+    	scope = "scope1"
+        tag = "tag1"
+    }
+    tag {
+    	scope = "scope2"
+        tag = "tag2"
+    }
 }`, tier0RouterName, name)
 }
 
@@ -175,9 +178,10 @@ resource "nsxt_logical_router_link_port_on_tier0" "test" {
 	display_name = "%s"
 	description = "Acceptance Test Update"
 	logical_router_id = "${data.nsxt_logical_tier0_router.TIER0RTR.id}"
-	tags = [{scope = "scope3"
-    	     tag = "tag3"}
-	]
+    tag {
+    	scope = "scope3"
+        tag = "tag3"
+    }
 }`, tier0RouterName, name)
 }
 
@@ -195,11 +199,14 @@ resource "nsxt_logical_router_link_port_on_tier0" "test" {
 		target_id = "${nsxt_dhcp_relay_service.DRS1.id}"
 		target_type = "LogicalService"
 	}
-	tags = [{scope = "scope1"
-        	 tag = "tag1"},
-        	{scope = "scope2"
-    	     tag = "tag2"}
-	]
+    tag {
+    	scope = "scope1"
+        tag = "tag1"
+    }
+    tag {
+    	scope = "scope2"
+        tag = "tag2"
+    }
 }`, tier0RouterName, name)
 }
 
@@ -217,8 +224,9 @@ resource "nsxt_logical_router_link_port_on_tier0" "test" {
 		target_id = "${nsxt_dhcp_relay_service.DRS1.id}"
 		target_type = "LogicalService"
 	}
-	tags = [{scope = "scope3"
-    	     tag = "tag3"}
-	]
+    tag {
+    	scope = "scope3"
+        tag = "tag3"
+    }
 }`, tier0RouterName, name)
 }

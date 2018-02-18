@@ -31,8 +31,8 @@ func TestNSXNSGroupBasic(t *testing.T) {
 					testAccNSXNSGroupExists(grpName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", grpName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
-					resource.TestCheckResourceAttr(testResourceName, "tags.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "members.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "member.#", "0"),
 				),
 			},
 			{
@@ -41,8 +41,8 @@ func TestNSXNSGroupBasic(t *testing.T) {
 					testAccNSXNSGroupExists(updateGrpName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updateGrpName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test Update"),
-					resource.TestCheckResourceAttr(testResourceName, "tags.#", "2"),
-					resource.TestCheckResourceAttr(testResourceName, "members.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "member.#", "0"),
 				),
 			},
 		},
@@ -68,7 +68,7 @@ func TestNSXNSGroupNested(t *testing.T) {
 					testAccNSXNSGroupExists(grpName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", grpName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
-					resource.TestCheckResourceAttr(testResourceName, "members.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "member.#", "1"),
 				),
 			},
 			{
@@ -77,7 +77,7 @@ func TestNSXNSGroupNested(t *testing.T) {
 					testAccNSXNSGroupExists(updateGrpName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updateGrpName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test Update"),
-					resource.TestCheckResourceAttr(testResourceName, "members.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "member.#", "2"),
 				),
 			},
 		},
@@ -104,7 +104,7 @@ func TestNSXNSGroupWithCriteria(t *testing.T) {
 					testAccNSXNSGroupExists(grpName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", grpName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
-					resource.TestCheckResourceAttr(testResourceName, "members.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "member.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "membership_criteria.#", "2"),
 				),
 			},
@@ -114,7 +114,7 @@ func TestNSXNSGroupWithCriteria(t *testing.T) {
 					testAccNSXNSGroupExists(updateGrpName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updateGrpName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test Update"),
-					resource.TestCheckResourceAttr(testResourceName, "members.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "member.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "membership_criteria.#", "1"),
 				),
 			},
@@ -186,9 +186,10 @@ func testAccNSXNSGroupCreateTemplate(name string) string {
 resource "nsxt_ns_group" "test" {
 	display_name = "%s"
 	description = "Acceptance Test"
-	tags = [{scope = "scope1"
-	    	 tag = "tag1"}
-	]
+    tag {
+    	scope = "scope1"
+        tag = "tag1"
+    }
 }`, name)
 }
 
@@ -197,11 +198,14 @@ func testAccNSXNSGroupUpdateTemplate(updatedName string) string {
 resource "nsxt_ns_group" "test" {
 	display_name = "%s"
 	description = "Acceptance Test Update"
-	tags = [{scope = "scope1"
-             tag = "tag1"},
-            {scope = "scope2"
-    	     tag = "tag2"}
-	]
+    tag {
+    	scope = "scope1"
+        tag = "tag1"
+    }
+    tag {
+    	scope = "scope2"
+        tag = "tag2"
+    }
 }`, updatedName)
 }
 
@@ -213,8 +217,10 @@ resource "nsxt_ns_group" "GRP1" {
 resource "nsxt_ns_group" "test" {
 	display_name = "%s"
 	description = "Acceptance Test"
-	members = [{target_type = "NSGroup"
-	            value = "${nsxt_ns_group.GRP1.id}"}]
+	member {
+		target_type = "NSGroup"
+	    value = "${nsxt_ns_group.GRP1.id}"
+	}
 }`, name)
 }
 
@@ -229,10 +235,14 @@ resource "nsxt_ns_group" "GRP2" {
 resource "nsxt_ns_group" "test" {
 	display_name = "%s"
 	description = "Acceptance Test Update"
-	members = [{target_type = "NSGroup"
-	            value = "${nsxt_ns_group.GRP1.id}"},
-	           {target_type = "NSGroup"
-	            value = "${nsxt_ns_group.GRP2.id}"}]
+	member {
+		target_type = "NSGroup"
+	    value = "${nsxt_ns_group.GRP1.id}"
+	}
+	member {
+	    target_type = "NSGroup"
+	    value = "${nsxt_ns_group.GRP2.id}"
+	}
 }`, updatedName)
 }
 
@@ -241,12 +251,15 @@ func testAccNSXNSGroupCriteriaCreateTemplate(name string) string {
 resource "nsxt_ns_group" "test" {
 	display_name = "%s"
 	description = "Acceptance Test"
-        membership_criteria = [{target_type = "LogicalSwitch"
-                                scope = "XXX"},
-                               {target_type = "LogicalPort"
-                                scope = "XXX",
-                                tag = "YYY"},
-                               ]
+	membership_criteria {
+    	target_type = "LogicalSwitch"
+        scope = "XXX"
+	}
+	membership_criteria {
+        target_type = "LogicalPort"
+        scope = "XXX"
+        tag = "YYY"
+	}
 }`, name)
 }
 
@@ -267,10 +280,13 @@ resource "nsxt_logical_switch" "test" {
 resource "nsxt_ns_group" "test" {
 	display_name = "%s"
 	description = "Acceptance Test Update"
-        membership_criteria = [{target_type = "LogicalSwitch"
-                                scope = "XXX"},
-                               ]
-        members = [{target_type = "LogicalSwitch"
-	            value = "${nsxt_logical_switch.test.id}"}]
+	membership_criteria {
+		target_type = "LogicalSwitch"
+        scope = "XXX"
+	}
+    member {
+    	target_type = "LogicalSwitch"
+	    value = "${nsxt_logical_switch.test.id}"
+	}
 }`, tz_name, name)
 }

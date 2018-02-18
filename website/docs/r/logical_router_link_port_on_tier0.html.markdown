@@ -21,10 +21,10 @@ resource "nsxt_logical_router_link_port_on_tier0" "TIER0_PORT1" {
         target_id = "${nsxt_dhcp_relay_service.DRS1.id}"
         target_type = "LogicalService"
     }
-    tags = [{
+    tag {
         scope = "color"
-        tag = "yellow"}
-    ]
+        tag = "blue"
+    }
 }
 ```
 
@@ -35,7 +35,7 @@ The following arguments are supported:
 * `logical_router_id` - (Required) Identifier for logical tier-0 router on which this port is created.
 * `display_name` - (Optional) Display name, defaults to ID if not set.
 * `description` - (Optional) Description.
-* `tags` - (Optional) A list of scope + tag pairs to associate with this logical switch.
+* `tag` - (Optional) A list of scope + tag pairs to associate with this logical switch.
 * `service_binding` - (Optional) A list of services for this port
 
 ## Attributes Reference

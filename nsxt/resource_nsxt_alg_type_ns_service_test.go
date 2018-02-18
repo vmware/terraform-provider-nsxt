@@ -32,7 +32,7 @@ func TestNSXAlgTypeNsServiceBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "display_name", serviceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "alg service"),
 					resource.TestCheckResourceAttr(testResourceName, "alg", "FTP"),
-					resource.TestCheckResourceAttr(testResourceName, "tags.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 				),
 			},
 			{
@@ -42,7 +42,7 @@ func TestNSXAlgTypeNsServiceBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updateServiceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "alg service"),
 					resource.TestCheckResourceAttr(testResourceName, "alg", "ORACLE_TNS"),
-					resource.TestCheckResourceAttr(testResourceName, "tags.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 				),
 			},
 		},
@@ -114,8 +114,9 @@ resource "nsxt_alg_type_ns_service" "test" {
     alg = "%s"
     source_ports = [ "%s" ]
     destination_ports = "%s"
-    tags = [{scope = "scope1"
-             tag = "tag1"}
-    ]
+    tag {
+    	scope = "scope1"
+        tag = "tag1"
+    }
 }`, serviceName, protocol, source_ports, dest_ports)
 }

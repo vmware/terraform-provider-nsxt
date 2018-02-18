@@ -33,7 +33,7 @@ func TestNSXSNATRuleBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "display_name", ruleName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttrSet(testResourceName, "logical_router_id"),
-					resource.TestCheckResourceAttr(testResourceName, "tags.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "enabled", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "logging", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "nat_pass", "false"),
@@ -50,7 +50,7 @@ func TestNSXSNATRuleBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updateRuleName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test Update"),
 					resource.TestCheckResourceAttrSet(testResourceName, "logical_router_id"),
-					resource.TestCheckResourceAttr(testResourceName, "tags.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "enabled", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "logging", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "nat_pass", "true"),
@@ -85,7 +85,7 @@ func TestNSXDNATRuleBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "display_name", ruleName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttrSet(testResourceName, "logical_router_id"),
-					resource.TestCheckResourceAttr(testResourceName, "tags.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "enabled", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "logging", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "nat_pass", "true"),
@@ -101,7 +101,7 @@ func TestNSXDNATRuleBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updateRuleName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test Update"),
 					resource.TestCheckResourceAttrSet(testResourceName, "logical_router_id"),
-					resource.TestCheckResourceAttr(testResourceName, "tags.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "logging", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "nat_pass", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "action", "DNAT"),
@@ -201,7 +201,10 @@ resource "nsxt_nat_rule" "test" {
     enabled = true
     logging = true
     nat_pass = false
-	tags = [{scope = "scope1", tag = "tag1"}]
+    tag {
+    	scope = "scope1"
+        tag = "tag1"
+    }
 }`, name)
 }
 
@@ -218,8 +221,14 @@ resource "nsxt_nat_rule" "test" {
     enabled = false
     logging = true
     nat_pass = true
-	tags = [{scope = "scope1", tag = "tag1"},
-	        {scope = "scope2", tag = "tag2"}]
+    tag {
+    	scope = "scope1"
+        tag = "tag1"
+    }
+    tag {
+    	scope = "scope2"
+        tag = "tag2"
+    }
 }`, name)
 }
 
@@ -235,7 +244,10 @@ resource "nsxt_nat_rule" "test" {
     enabled = true
     logging = true
     nat_pass = true
-	tags = [{scope = "scope1", tag = "tag1"}]
+    tag {
+    	scope = "scope1"
+        tag = "tag1"
+    }
 }`, name)
 }
 
@@ -251,7 +263,13 @@ resource "nsxt_nat_rule" "test" {
     enabled = true
     logging = true
     nat_pass = true
-	tags = [{scope = "scope1", tag = "tag1"},
-	        {scope = "scope2", tag = "tag2"}]
+    tag {
+    	scope = "scope1"
+        tag = "tag1"
+    }
+    tag {
+    	scope = "scope2"
+        tag = "tag2"
+    }
 }`, name)
 }

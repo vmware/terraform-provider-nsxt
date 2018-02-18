@@ -14,12 +14,13 @@ Provides a resource to configure dhcp relay service on NSX-T manager
 
 ```hcl
 resource "nsxt_dhcp_relay_service" "DRS" {
-  description = "DRS provisioned by Terraform"
-  display_name = "DRS"
-  tags = [{ scope = "color"
-            tag = "red" }
-  ]
-  dhcp_relay_profile_id = ...
+    description = "DRS provisioned by Terraform"
+    display_name = "DRS"
+    tag {
+        scope = "color"
+        tag = "blue"
+    }
+    dhcp_relay_profile_id = ...
 }
 ```
 
@@ -29,7 +30,7 @@ The following arguments are supported:
 
 * `description` - (Optional) Description of this resource.
 * `display_name` - (Optional) Defaults to ID if not set.
-* `tags` - (Optional) A list of scope + tag pairs to associate with this dhcp_relay_service.
+* `tag` - (Optional) A list of scope + tag pairs to associate with this dhcp_relay_service.
 * `dhcp_relay_profile_id` - (Required) dhcp relay profile referenced by the dhcp relay service.
 
 
