@@ -350,8 +350,9 @@ func getIpSubnetsSchema(required bool, computed bool) *schema.Schema {
 func getAdminStateSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:         schema.TypeString,
-		Required:     true,
+		Optional:     true,
 		Description:  "Represents Desired state of the object",
+		Default:      "UP",
 		ValidateFunc: validation.StringInSlice(adminStateValues, false),
 	}
 }

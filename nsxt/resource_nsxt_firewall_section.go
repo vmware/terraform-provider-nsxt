@@ -328,7 +328,7 @@ func resourceFirewallSectionRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("section_type", firewall_section.SectionType)
 	d.Set("stateful", firewall_section.Stateful)
 
-	// Getting the applied tos will require another api call
+	// Getting the applied tos will require another api call (for NSX 2.1 or less)
 	firewall_section2, resp, err := nsxClient.ServicesApi.GetSection(nsxClient.Context, id)
 	if resp.StatusCode == http.StatusNotFound {
 		fmt.Printf("FirewallSection %s not found", id)
