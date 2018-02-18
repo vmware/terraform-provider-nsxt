@@ -17,9 +17,10 @@ resource "nsxt_logical_router_link_port_on_tier0" "TIER0_PORT1" {
     description = "TIER0_PORT1 provisioned by Terraform"
     display_name = "TIER0_PORT1"
     logical_router_id =  "${data.nsxt_logical_tier0_router.TIER0RTR.id}"
-    service_bindings = [{ target_id = "${nsxt_dhcp_relay_service.DRS1.id}"
-                          target_type = "LogicalService"},
-    ]
+    service_binding {
+        target_id = "${nsxt_dhcp_relay_service.DRS1.id}"
+        target_type = "LogicalService"
+    }
     tags = [{
         scope = "color"
         tag = "yellow"}
@@ -35,7 +36,7 @@ The following arguments are supported:
 * `display_name` - (Optional) Display name, defaults to ID if not set.
 * `description` - (Optional) Description.
 * `tags` - (Optional) A list of scope + tag pairs to associate with this logical switch.
-* `service_bindings` - (Optional) A list of services for this port
+* `service_binding` - (Optional) A list of services for this port
 
 ## Attributes Reference
 

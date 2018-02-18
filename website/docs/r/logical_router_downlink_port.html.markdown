@@ -19,9 +19,14 @@ resource "nsxt_logical_router_downlink_port" "DP1" {
   logical_router_id = "${nsxt_logical_router.RTR1.id}"
   linked_logical_switch_port_id = "${nsxt_logical_port.LP1.id}"
   subnets = [{ ip_addresses = ["1.1.1.0"], prefix_length = "24"}]
-  service_bindings = [{ target_id = "${nsxt_dhcp_relay_service.DRS1.id}"
-                        target_type = "LogicalService"},
-  ]
+  service_binding {
+    target_id = "${nsxt_dhcp_relay_service.DRS1.id}"
+    target_type = "LogicalService"
+  }
+  service_binding {
+    target_id = "${nsxt_dhcp_relay_service.DRS2.id}"
+    target_type = "LogicalService"
+  }
   tags = [{ scope = "color"
             tag = "red" }
   ]
@@ -40,7 +45,8 @@ The following arguments are supported:
 * `display_name` - (Optional) Display name, defaults to ID if not set.
 * `description` - (Optional) Description.
 * `tags` - (Optional) A list of scope + tag pairs to associate with this logical switch.
-* `service_bindings` - (Optional) A list of services for this port
+* `service_binding` - (Optional) A list of services for this port
+
 ## Attributes Reference
 
 In addition to arguments listed above, the following attributes are exported:

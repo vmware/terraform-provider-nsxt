@@ -77,9 +77,9 @@ func TestNSXLogicalRouterDownlinkPortWithRelay(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "linked_logical_switch_port_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "logical_router_id"),
 					resource.TestCheckResourceAttr(testResourceName, "tags.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "service_bindings.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "service_bindings.0.target_type", "LogicalService"),
-					resource.TestCheckResourceAttr(testResourceName, "service_bindings.0.target_display_name", "srv"),
+					resource.TestCheckResourceAttr(testResourceName, "service_binding.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "service_binding.0.target_type", "LogicalService"),
+					resource.TestCheckResourceAttr(testResourceName, "service_binding.0.target_display_name", "srv"),
 				),
 			},
 			{
@@ -91,9 +91,9 @@ func TestNSXLogicalRouterDownlinkPortWithRelay(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "linked_logical_switch_port_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "logical_router_id"),
 					resource.TestCheckResourceAttr(testResourceName, "tags.#", "2"),
-					resource.TestCheckResourceAttr(testResourceName, "service_bindings.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "service_bindings.0.target_type", "LogicalService"),
-					resource.TestCheckResourceAttr(testResourceName, "service_bindings.0.target_display_name", "srv"),
+					resource.TestCheckResourceAttr(testResourceName, "service_binding.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "service_binding.0.target_type", "LogicalService"),
+					resource.TestCheckResourceAttr(testResourceName, "service_binding.0.target_display_name", "srv"),
 				),
 			},
 		},
@@ -240,9 +240,10 @@ resource "nsxt_logical_router_downlink_port" "test" {
 	logical_router_id = "${nsxt_logical_tier1_router.RTR1.id}"
 	subnets = [{ip_addresses = ["8.0.0.1"],
 	            prefix_length = 24}]
-	service_bindings = [{target_id = "${nsxt_dhcp_relay_service.DRS1.id}"
-			             target_type = "LogicalService"}
-	]
+	service_binding {
+		target_id = "${nsxt_dhcp_relay_service.DRS1.id}"
+		target_type = "LogicalService"
+	}
 	tags = [{scope = "scope1"
 	    	 tag = "tag1"}
 	]
@@ -260,9 +261,10 @@ resource "nsxt_logical_router_downlink_port" "test" {
 	logical_router_id = "${nsxt_logical_tier1_router.RTR1.id}"
 	subnets = [{ip_addresses = ["8.0.0.1"],
 	            prefix_length = 24}]
-	service_bindings = [{target_id = "${nsxt_dhcp_relay_service.DRS1.id}"
-			             target_type = "LogicalService"}
-	]
+	service_binding {
+		target_id = "${nsxt_dhcp_relay_service.DRS1.id}"
+		target_type = "LogicalService"
+	}
 	tags = [{scope = "scope1"
 	    	 tag = "tag1"},
 		    {scope = "scope2"
