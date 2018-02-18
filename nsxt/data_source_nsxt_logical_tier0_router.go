@@ -12,46 +12,46 @@ import (
 	"strings"
 )
 
-func dataSourceLogicalTier0Router() *schema.Resource {
+func dataSourceNsxtLogicalTier0Router() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceLogicalTier0RouterRead,
+		Read: dataSourceNsxtLogicalTier0RouterRead,
 
 		Schema: map[string]*schema.Schema{
 			"id": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "Unique ID of this resource",
+				Optional:    true,
+				Computed:    true,
 			},
 			"display_name": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "The display name of this resource",
+				Optional:    true,
+				Computed:    true,
 			},
 			"description": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-			},
-			"router_type": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "Description of this resource",
+				Optional:    true,
+				Computed:    true,
 			},
 			"edge_cluster_id": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "The ID of the edge cluster connected to this router",
+				Optional:    true,
+				Computed:    true,
 			},
 			"high_availability_mode": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "The High availability mode of this router",
+				Optional:    true,
+				Computed:    true,
 			},
 		},
 	}
 }
 
-func dataSourceLogicalTier0RouterRead(d *schema.ResourceData, m interface{}) error {
+func dataSourceNsxtLogicalTier0RouterRead(d *schema.ResourceData, m interface{}) error {
 	// Read a logical tier0 router by name or id
 	nsxClient := m.(*api.APIClient)
 	obj_id := d.Get("id").(string)
@@ -94,10 +94,11 @@ func dataSourceLogicalTier0RouterRead(d *schema.ResourceData, m interface{}) err
 		return fmt.Errorf("Error obtaining logical tier0 router ID or name during read")
 	}
 
+	// TODO(asarfaty): Make sure this is a TIER0 router
+
 	d.SetId(obj.Id)
 	d.Set("display_name", obj.DisplayName)
 	d.Set("description", obj.Description)
-	d.Set("router_type", obj.RouterType)
 	d.Set("edge_cluster_id", obj.EdgeClusterId)
 	d.Set("high_availability_mode", obj.HighAvailabilityMode)
 

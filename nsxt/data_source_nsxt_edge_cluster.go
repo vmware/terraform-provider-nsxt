@@ -12,41 +12,46 @@ import (
 	"strings"
 )
 
-func dataSourceEdgeCluster() *schema.Resource {
+func dataSourceNsxtEdgeCluster() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceEdgeClusterRead,
+		Read: dataSourceNsxtEdgeClusterRead,
 
 		Schema: map[string]*schema.Schema{
 			"id": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "Unique ID of this resource",
+				Optional:    true,
+				Computed:    true,
 			},
 			"display_name": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "The display name of this resource",
+				Optional:    true,
+				Computed:    true,
 			},
 			"description": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "Description of this resource",
+				Optional:    true,
+				Computed:    true,
 			},
 			"deployment_type": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "This field could show deployment_type of members. It would return UNKNOWN if there is no members, and return VIRTUAL_MACHINE|PHYSICAL_MACHINE if all edge members are VIRTUAL_MACHINE|PHYSICAL_MACHINE.",
+				Optional:    true,
+				Computed:    true,
 			},
 			"member_node_type": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "Edge cluster is homogenous collection of transport nodes. Hence all transport nodes of the cluster must be of same type. This field shows the type of transport nodes.",
+				Optional:    true,
+				Computed:    true,
 			},
 		},
 	}
 }
 
-func dataSourceEdgeClusterRead(d *schema.ResourceData, m interface{}) error {
+func dataSourceNsxtEdgeClusterRead(d *schema.ResourceData, m interface{}) error {
 	// Read an edge cluster by name or id
 	nsxClient := m.(*api.APIClient)
 	obj_id := d.Get("id").(string)

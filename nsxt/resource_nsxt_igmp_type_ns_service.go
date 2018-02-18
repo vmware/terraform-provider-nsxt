@@ -11,12 +11,12 @@ import (
 	"net/http"
 )
 
-func resourceIgmpTypeNsService() *schema.Resource {
+func resourceNsxtIgmpTypeNsService() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceIgmpTypeNsServiceCreate,
-		Read:   resourceIgmpTypeNsServiceRead,
-		Update: resourceIgmpTypeNsServiceUpdate,
-		Delete: resourceIgmpTypeNsServiceDelete,
+		Create: resourceNsxtIgmpTypeNsServiceCreate,
+		Read:   resourceNsxtIgmpTypeNsServiceRead,
+		Update: resourceNsxtIgmpTypeNsServiceUpdate,
+		Delete: resourceNsxtIgmpTypeNsServiceDelete,
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
@@ -41,7 +41,7 @@ func resourceIgmpTypeNsService() *schema.Resource {
 	}
 }
 
-func resourceIgmpTypeNsServiceCreate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtIgmpTypeNsServiceCreate(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
@@ -72,10 +72,10 @@ func resourceIgmpTypeNsServiceCreate(d *schema.ResourceData, m interface{}) erro
 		return fmt.Errorf("Unexpected status returned during NsService create: %v", resp.StatusCode)
 	}
 	d.SetId(ns_service.Id)
-	return resourceIgmpTypeNsServiceRead(d, m)
+	return resourceNsxtIgmpTypeNsServiceRead(d, m)
 }
 
-func resourceIgmpTypeNsServiceRead(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtIgmpTypeNsServiceRead(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
@@ -103,7 +103,7 @@ func resourceIgmpTypeNsServiceRead(d *schema.ResourceData, m interface{}) error 
 	return nil
 }
 
-func resourceIgmpTypeNsServiceUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtIgmpTypeNsServiceUpdate(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
@@ -136,10 +136,10 @@ func resourceIgmpTypeNsServiceUpdate(d *schema.ResourceData, m interface{}) erro
 		return fmt.Errorf("Error during NsService update: %v %v", err, resp)
 	}
 
-	return resourceIgmpTypeNsServiceRead(d, m)
+	return resourceNsxtIgmpTypeNsServiceRead(d, m)
 }
 
-func resourceIgmpTypeNsServiceDelete(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtIgmpTypeNsServiceDelete(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 

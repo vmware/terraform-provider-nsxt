@@ -12,14 +12,14 @@ import (
 	"net/http"
 )
 
-var ipProtocolValues = []string{"TCP", "UDP"}
+var protocolValues = []string{"TCP", "UDP"}
 
-func resourceL4PortSetNsService() *schema.Resource {
+func resourceNsxtL4PortSetNsService() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceL4PortSetNsServiceCreate,
-		Read:   resourceL4PortSetNsServiceRead,
-		Update: resourceL4PortSetNsServiceUpdate,
-		Delete: resourceL4PortSetNsServiceDelete,
+		Create: resourceNsxtL4PortSetNsServiceCreate,
+		Read:   resourceNsxtL4PortSetNsServiceRead,
+		Update: resourceNsxtL4PortSetNsServiceUpdate,
+		Delete: resourceNsxtL4PortSetNsServiceDelete,
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
@@ -62,13 +62,13 @@ func resourceL4PortSetNsService() *schema.Resource {
 				Type:         schema.TypeString,
 				Description:  "L4 Protocol",
 				Required:     true,
-				ValidateFunc: validation.StringInSlice(ipProtocolValues, false),
+				ValidateFunc: validation.StringInSlice(protocolValues, false),
 			},
 		},
 	}
 }
 
-func resourceL4PortSetNsServiceCreate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtL4PortSetNsServiceCreate(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
@@ -105,10 +105,10 @@ func resourceL4PortSetNsServiceCreate(d *schema.ResourceData, m interface{}) err
 		return fmt.Errorf("Unexpected status returned during NsService create: %v", resp.StatusCode)
 	}
 	d.SetId(ns_service.Id)
-	return resourceL4PortSetNsServiceRead(d, m)
+	return resourceNsxtL4PortSetNsServiceRead(d, m)
 }
 
-func resourceL4PortSetNsServiceRead(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtL4PortSetNsServiceRead(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
@@ -141,7 +141,7 @@ func resourceL4PortSetNsServiceRead(d *schema.ResourceData, m interface{}) error
 	return nil
 }
 
-func resourceL4PortSetNsServiceUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtL4PortSetNsServiceUpdate(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
@@ -180,10 +180,10 @@ func resourceL4PortSetNsServiceUpdate(d *schema.ResourceData, m interface{}) err
 		return fmt.Errorf("Error during NsService update: %v %v", err, resp)
 	}
 
-	return resourceL4PortSetNsServiceRead(d, m)
+	return resourceNsxtL4PortSetNsServiceRead(d, m)
 }
 
-func resourceL4PortSetNsServiceDelete(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtL4PortSetNsServiceDelete(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 

@@ -17,12 +17,12 @@ var firewallRuleActionValues = []string{"ALLOW", "DROP", "REJECT"}
 var firewallRuleDirectionValues = []string{"IN", "OUT", "IN_OUT"}
 var firewallSectionTypeValues = []string{"LAYER2", "LAYER3"}
 
-func resourceFirewallSection() *schema.Resource {
+func resourceNsxtFirewallSection() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceFirewallSectionCreate,
-		Read:   resourceFirewallSectionRead,
-		Update: resourceFirewallSectionUpdate,
-		Delete: resourceFirewallSectionDelete,
+		Create: resourceNsxtFirewallSectionCreate,
+		Read:   resourceNsxtFirewallSectionRead,
+		Update: resourceNsxtFirewallSectionUpdate,
+		Delete: resourceNsxtFirewallSectionDelete,
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
@@ -217,7 +217,7 @@ func getRulesFromSchema(d *schema.ResourceData) []manager.FirewallRule {
 	return ruleList
 }
 
-func resourceFirewallSectionCreateEmpty(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtFirewallSectionCreateEmpty(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 
 	description := d.Get("description").(string)
@@ -248,14 +248,14 @@ func resourceFirewallSectionCreateEmpty(d *schema.ResourceData, m interface{}) e
 	}
 	d.SetId(firewall_section.Id)
 
-	return resourceFirewallSectionRead(d, m)
+	return resourceNsxtFirewallSectionRead(d, m)
 }
 
-func resourceFirewallSectionCreate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtFirewallSectionCreate(d *schema.ResourceData, m interface{}) error {
 
 	rules := getRulesFromSchema(d)
 	if len(rules) == 0 {
-		return resourceFirewallSectionCreateEmpty(d, m)
+		return resourceNsxtFirewallSectionCreateEmpty(d, m)
 	}
 
 	nsxClient := m.(*api.APIClient)
@@ -288,10 +288,10 @@ func resourceFirewallSectionCreate(d *schema.ResourceData, m interface{}) error 
 	}
 	d.SetId(firewall_section.Id)
 
-	return resourceFirewallSectionRead(d, m)
+	return resourceNsxtFirewallSectionRead(d, m)
 }
 
-func resourceFirewallSectionRead(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtFirewallSectionRead(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
@@ -334,7 +334,7 @@ func resourceFirewallSectionRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceFirewallSectionUpdateEmpty(d *schema.ResourceData, m interface{}, id string) error {
+func resourceNsxtFirewallSectionUpdateEmpty(d *schema.ResourceData, m interface{}, id string) error {
 
 	nsxClient := m.(*api.APIClient)
 	revision := int64(d.Get("revision").(int))
@@ -373,10 +373,10 @@ func resourceFirewallSectionUpdateEmpty(d *schema.ResourceData, m interface{}, i
 	for _, rule := range curr_section.Rules {
 		nsxClient.ServicesApi.DeleteRule(nsxClient.Context, id, rule.Id)
 	}
-	return resourceFirewallSectionRead(d, m)
+	return resourceNsxtFirewallSectionRead(d, m)
 }
 
-func resourceFirewallSectionUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtFirewallSectionUpdate(d *schema.ResourceData, m interface{}) error {
 
 	id := d.Id()
 	if id == "" {
@@ -385,7 +385,7 @@ func resourceFirewallSectionUpdate(d *schema.ResourceData, m interface{}) error 
 
 	rules := getRulesFromSchema(d)
 	if len(rules) == 0 {
-		return resourceFirewallSectionUpdateEmpty(d, m, id)
+		return resourceNsxtFirewallSectionUpdateEmpty(d, m, id)
 	}
 
 	nsxClient := m.(*api.APIClient)
@@ -416,10 +416,10 @@ func resourceFirewallSectionUpdate(d *schema.ResourceData, m interface{}) error 
 		return fmt.Errorf("Error during FirewallSection %s update: %v", id, err)
 	}
 
-	return resourceFirewallSectionRead(d, m)
+	return resourceNsxtFirewallSectionRead(d, m)
 }
 
-func resourceFirewallSectionDelete(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtFirewallSectionDelete(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 

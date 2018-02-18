@@ -14,12 +14,12 @@ import (
 
 var natRuleActionValues = []string{"SNAT", "DNAT", "NO_NAT", "REFLEXIVE"}
 
-func resourceNatRule() *schema.Resource {
+func resourceNsxtNatRule() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNatRuleCreate,
-		Read:   resourceNatRuleRead,
-		Update: resourceNatRuleUpdate,
-		Delete: resourceNatRuleDelete,
+		Create: resourceNsxtNatRuleCreate,
+		Read:   resourceNsxtNatRuleRead,
+		Update: resourceNsxtNatRuleUpdate,
+		Delete: resourceNsxtNatRuleDelete,
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
@@ -94,7 +94,7 @@ func resourceNatRule() *schema.Resource {
 	}
 }
 
-func resourceNatRuleCreate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtNatRuleCreate(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
@@ -144,10 +144,10 @@ func resourceNatRuleCreate(d *schema.ResourceData, m interface{}) error {
 	}
 	d.SetId(nat_rule.Id)
 
-	return resourceNatRuleRead(d, m)
+	return resourceNsxtNatRuleRead(d, m)
 }
 
-func resourceNatRuleRead(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtNatRuleRead(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
@@ -190,7 +190,7 @@ func resourceNatRuleRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceNatRuleUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtNatRuleUpdate(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
@@ -242,10 +242,10 @@ func resourceNatRuleUpdate(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("Error during NatRule update: %v", err)
 	}
 
-	return resourceNatRuleRead(d, m)
+	return resourceNsxtNatRuleRead(d, m)
 }
 
-func resourceNatRuleDelete(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtNatRuleDelete(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 

@@ -12,7 +12,7 @@ import (
 	"testing"
 )
 
-func TestAccResourceNsxtNATRule_snat(t *testing.T) {
+func TestAccResourceNsxtNatRule_snat(t *testing.T) {
 
 	ruleName := fmt.Sprintf("test-nsx-snat-rule")
 	updateRuleName := fmt.Sprintf("%s-update", ruleName)
@@ -64,7 +64,7 @@ func TestAccResourceNsxtNATRule_snat(t *testing.T) {
 	})
 }
 
-func TestAccResourceNsxtNATRule_dnat(t *testing.T) {
+func TestAccResourceNsxtNatRule_dnat(t *testing.T) {
 
 	ruleName := fmt.Sprintf("test-nsx-dnat-rule")
 	updateRuleName := fmt.Sprintf("%s-update", ruleName)

@@ -11,12 +11,12 @@ import (
 	"net/http"
 )
 
-func resourceEtherTypeNsService() *schema.Resource {
+func resourceNsxtEtherTypeNsService() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceEtherTypeNsServiceCreate,
-		Read:   resourceEtherTypeNsServiceRead,
-		Update: resourceEtherTypeNsServiceUpdate,
-		Delete: resourceEtherTypeNsServiceDelete,
+		Create: resourceNsxtEtherTypeNsServiceCreate,
+		Read:   resourceNsxtEtherTypeNsServiceRead,
+		Update: resourceNsxtEtherTypeNsServiceUpdate,
+		Delete: resourceNsxtEtherTypeNsServiceDelete,
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
@@ -46,7 +46,7 @@ func resourceEtherTypeNsService() *schema.Resource {
 	}
 }
 
-func resourceEtherTypeNsServiceCreate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtEtherTypeNsServiceCreate(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
@@ -79,10 +79,10 @@ func resourceEtherTypeNsServiceCreate(d *schema.ResourceData, m interface{}) err
 		return fmt.Errorf("Unexpected status returned during NsService create: %v", resp.StatusCode)
 	}
 	d.SetId(ns_service.Id)
-	return resourceEtherTypeNsServiceRead(d, m)
+	return resourceNsxtEtherTypeNsServiceRead(d, m)
 }
 
-func resourceEtherTypeNsServiceRead(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtEtherTypeNsServiceRead(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
@@ -113,7 +113,7 @@ func resourceEtherTypeNsServiceRead(d *schema.ResourceData, m interface{}) error
 	return nil
 }
 
-func resourceEtherTypeNsServiceUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtEtherTypeNsServiceUpdate(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
@@ -148,10 +148,10 @@ func resourceEtherTypeNsServiceUpdate(d *schema.ResourceData, m interface{}) err
 		return fmt.Errorf("Error during NsService update: %v %v", err, resp)
 	}
 
-	return resourceEtherTypeNsServiceRead(d, m)
+	return resourceNsxtEtherTypeNsServiceRead(d, m)
 }
 
-func resourceEtherTypeNsServiceDelete(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtEtherTypeNsServiceDelete(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 

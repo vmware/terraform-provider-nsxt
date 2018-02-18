@@ -29,8 +29,6 @@ In addition to arguments listed above, the following attributes are exported:
 
 * `description` - Description of the Logical Tier 0 Router.
 
-* `router_type` - Type of Logical Router.
-
-* `edge_cluster_id` - This id of the edge cluster connected to the router.
+* `edge_cluster_id` - This id of the edge cluster connected to this router.
 
 * `high_availability_mode` - The High availability mode of this router.

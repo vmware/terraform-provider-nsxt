@@ -49,7 +49,7 @@ func TestAccResourceNsxtNSGroup_basic(t *testing.T) {
 	})
 }
 
-func TestAccResourceNsxt_nested(t *testing.T) {
+func TestAccResourceNsxtNSGroup_nested(t *testing.T) {
 
 	grpName := fmt.Sprintf("test-nsx-ns-group")
 	updateGrpName := fmt.Sprintf("%s-update", grpName)

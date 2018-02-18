@@ -11,12 +11,12 @@ import (
 	"net/http"
 )
 
-func resourceDhcpRelayProfile() *schema.Resource {
+func resourceNsxtDhcpRelayProfile() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceDhcpRelayProfileCreate,
-		Read:   resourceDhcpRelayProfileRead,
-		Update: resourceDhcpRelayProfileUpdate,
-		Delete: resourceDhcpRelayProfileDelete,
+		Create: resourceNsxtDhcpRelayProfileCreate,
+		Read:   resourceNsxtDhcpRelayProfileRead,
+		Update: resourceNsxtDhcpRelayProfileUpdate,
+		Delete: resourceNsxtDhcpRelayProfileDelete,
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
@@ -45,7 +45,7 @@ func resourceDhcpRelayProfile() *schema.Resource {
 	}
 }
 
-func resourceDhcpRelayProfileCreate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtDhcpRelayProfileCreate(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
@@ -71,10 +71,10 @@ func resourceDhcpRelayProfileCreate(d *schema.ResourceData, m interface{}) error
 	}
 	d.SetId(dhcp_relay_profile.Id)
 
-	return resourceDhcpRelayProfileRead(d, m)
+	return resourceNsxtDhcpRelayProfileRead(d, m)
 }
 
-func resourceDhcpRelayProfileRead(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtDhcpRelayProfileRead(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
@@ -102,7 +102,7 @@ func resourceDhcpRelayProfileRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceDhcpRelayProfileUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtDhcpRelayProfileUpdate(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
@@ -130,10 +130,10 @@ func resourceDhcpRelayProfileUpdate(d *schema.ResourceData, m interface{}) error
 		return fmt.Errorf("Error during DhcpRelayProfile update: %v", err)
 	}
 
-	return resourceDhcpRelayProfileRead(d, m)
+	return resourceNsxtDhcpRelayProfileRead(d, m)
 }
 
-func resourceDhcpRelayProfileDelete(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtDhcpRelayProfileDelete(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 

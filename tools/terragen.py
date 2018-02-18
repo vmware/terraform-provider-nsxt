@@ -116,7 +116,7 @@ def write_attr(f, attr):
 
 def write_func_header(f, resource, operation):
     f.write("\n")
-    pretty_writeln(f, "func resource%s%s(d *schema.ResourceData, m interface{}) error {" %
+    pretty_writeln(f, "func resourceNsxt%s%s(d *schema.ResourceData, m interface{}) error {" %
             (resource, operation))
     f.write("\n")
     shift()
@@ -205,7 +205,7 @@ def write_create_func(f, resource, attrs, api_section):
 
     pretty_writeln(f, "d.SetId(%s.Id)\n" % lower_resource)
 
-    pretty_writeln(f, "return resource%sRead(d, m)" % resource)
+    pretty_writeln(f, "return resourceNsxt%sRead(d, m)" % resource)
     unshift()
     pretty_writeln(f, "}")
 
@@ -269,7 +269,7 @@ def write_update_func(f, resource, attrs, api_section):
     f.write("\n")
     write_error_check(f, resource, "update")
 
-    pretty_writeln(f, "return resource%sRead(d, m)" % resource)
+    pretty_writeln(f, "return resourceNsxt%sRead(d, m)" % resource)
     unshift()
     pretty_writeln(f, "}")
 
@@ -426,12 +426,12 @@ def main():
     with open("resource_nsxt_%s.go" % resource_lower, 'w') as f:
         write_header(f)
 
-        pretty_writeln(f, "func resource%s() *schema.Resource {" % resource)
+        pretty_writeln(f, "func resourceNsxt%s() *schema.Resource {" % resource)
         shift()
         pretty_writeln(f, "return &schema.Resource{")
         shift()
         for op in ("Create", "Read", "Update", "Delete"):
-            pretty_writeln(f, "%s: resource%s%s," % (op, resource, op))
+            pretty_writeln(f, "%s: resourceNsxt%s%s," % (op, resource, op))
 
         f.write("\n")
         pretty_writeln(f, "Schema: map[string]*schema.Schema{")

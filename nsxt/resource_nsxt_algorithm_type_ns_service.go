@@ -14,12 +14,12 @@ import (
 
 var algTypeValues = []string{"ORACLE_TNS", "FTP", "SUN_RPC_TCP", "SUN_RPC_UDP", "MS_RPC_TCP", "MS_RPC_UDP", "NBNS_BROADCAST", "NBDG_BROADCAST", "TFTP"}
 
-func resourceAlgorithmTypeNsService() *schema.Resource {
+func resourceNsxtAlgorithmTypeNsService() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceAlgorithmTypeNsServiceCreate,
-		Read:   resourceAlgorithmTypeNsServiceRead,
-		Update: resourceAlgorithmTypeNsServiceUpdate,
-		Delete: resourceAlgorithmTypeNsServiceDelete,
+		Create: resourceNsxtAlgorithmTypeNsServiceCreate,
+		Read:   resourceNsxtAlgorithmTypeNsServiceRead,
+		Update: resourceNsxtAlgorithmTypeNsServiceUpdate,
+		Delete: resourceNsxtAlgorithmTypeNsServiceDelete,
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
@@ -65,7 +65,7 @@ func resourceAlgorithmTypeNsService() *schema.Resource {
 	}
 }
 
-func resourceAlgorithmTypeNsServiceCreate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtAlgorithmTypeNsServiceCreate(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
@@ -103,10 +103,10 @@ func resourceAlgorithmTypeNsServiceCreate(d *schema.ResourceData, m interface{})
 		return fmt.Errorf("Unexpected status returned during NsService create: %v", resp.StatusCode)
 	}
 	d.SetId(ns_service.Id)
-	return resourceAlgorithmTypeNsServiceRead(d, m)
+	return resourceNsxtAlgorithmTypeNsServiceRead(d, m)
 }
 
-func resourceAlgorithmTypeNsServiceRead(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtAlgorithmTypeNsServiceRead(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
@@ -139,7 +139,7 @@ func resourceAlgorithmTypeNsServiceRead(d *schema.ResourceData, m interface{}) e
 	return nil
 }
 
-func resourceAlgorithmTypeNsServiceUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtAlgorithmTypeNsServiceUpdate(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
@@ -179,10 +179,10 @@ func resourceAlgorithmTypeNsServiceUpdate(d *schema.ResourceData, m interface{})
 		return fmt.Errorf("Error during NsService update: %v %v", err, resp)
 	}
 
-	return resourceAlgorithmTypeNsServiceRead(d, m)
+	return resourceNsxtAlgorithmTypeNsServiceRead(d, m)
 }
 
-func resourceAlgorithmTypeNsServiceDelete(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtAlgorithmTypeNsServiceDelete(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 

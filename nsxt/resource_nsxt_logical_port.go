@@ -11,12 +11,12 @@ import (
 	"net/http"
 )
 
-func resourceLogicalPort() *schema.Resource {
+func resourceNsxtLogicalPort() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceLogicalPortCreate,
-		Read:   resourceLogicalPortRead,
-		Update: resourceLogicalPortUpdate,
-		Delete: resourceLogicalPortDelete,
+		Create: resourceNsxtLogicalPortCreate,
+		Read:   resourceNsxtLogicalPortRead,
+		Update: resourceNsxtLogicalPortUpdate,
+		Delete: resourceNsxtLogicalPortDelete,
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
@@ -41,7 +41,7 @@ func resourceLogicalPort() *schema.Resource {
 	}
 }
 
-func resourceLogicalPortCreate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtLogicalPortCreate(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 
 	name := d.Get("display_name").(string)
@@ -71,10 +71,10 @@ func resourceLogicalPortCreate(d *schema.ResourceData, m interface{}) error {
 	resource_id := lp.Id
 	d.SetId(resource_id)
 
-	return resourceLogicalPortRead(d, m)
+	return resourceNsxtLogicalPortRead(d, m)
 }
 
-func resourceLogicalPortRead(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtLogicalPortRead(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 
 	id := d.Id()
@@ -103,7 +103,7 @@ func resourceLogicalPortRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceLogicalPortUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtLogicalPortUpdate(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 
 	id := d.Id()
@@ -139,10 +139,10 @@ func resourceLogicalPortUpdate(d *schema.ResourceData, m interface{}) error {
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error while updating logical port %s: %v\n", id, err)
 	}
-	return resourceLogicalPortRead(d, m)
+	return resourceNsxtLogicalPortRead(d, m)
 }
 
-func resourceLogicalPortDelete(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtLogicalPortDelete(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 
 	lp_id := d.Id()

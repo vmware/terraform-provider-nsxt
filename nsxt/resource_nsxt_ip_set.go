@@ -11,12 +11,12 @@ import (
 	"net/http"
 )
 
-func resourceIpSet() *schema.Resource {
+func resourceNsxtIpSet() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceIpSetCreate,
-		Read:   resourceIpSetRead,
-		Update: resourceIpSetUpdate,
-		Delete: resourceIpSetDelete,
+		Create: resourceNsxtIpSetCreate,
+		Read:   resourceNsxtIpSetRead,
+		Update: resourceNsxtIpSetUpdate,
+		Delete: resourceNsxtIpSetDelete,
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
@@ -45,7 +45,7 @@ func resourceIpSet() *schema.Resource {
 	}
 }
 
-func resourceIpSetCreate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtIpSetCreate(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
@@ -71,10 +71,10 @@ func resourceIpSetCreate(d *schema.ResourceData, m interface{}) error {
 	}
 	d.SetId(ip_set.Id)
 
-	return resourceIpSetRead(d, m)
+	return resourceNsxtIpSetRead(d, m)
 }
 
-func resourceIpSetRead(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtIpSetRead(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
@@ -102,7 +102,7 @@ func resourceIpSetRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceIpSetUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtIpSetUpdate(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
@@ -130,10 +130,10 @@ func resourceIpSetUpdate(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("Error during IpSet update: %v", err)
 	}
 
-	return resourceIpSetRead(d, m)
+	return resourceNsxtIpSetRead(d, m)
 }
 
-func resourceIpSetDelete(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtIpSetDelete(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 

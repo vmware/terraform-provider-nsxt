@@ -29,6 +29,6 @@ In addition to arguments listed above, the following attributes are exported:
 
 * `description` - Description of the edge cluster.
 
-* `deployment_type` - This field is a readonly field which could show deployment_type of members.
+* `deployment_type` - This field could show deployment_type of members (VIRTUAL_MACHINE|PHYSICAL_MACHINE).
 
-* `member_node_type` - This readonly field shows the type of transport nodes.
+* `member_node_type` - Edge cluster is homogenous collection of transport nodes. Hence all transport nodes of the cluster must be of same type. This field shows the type of transport nodes

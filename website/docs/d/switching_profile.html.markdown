@@ -31,3 +31,5 @@ In addition to arguments listed above, the following attributes are exported:
 * `resource_type` - The resource type representing the specific type of this profile.
 
 * `system_owned` - A boolean that indicates whether this resource is system-owned and thus read-only.
+
+* `description` - Description of the edge cluster.

@@ -14,12 +14,12 @@ import (
 
 var logicalRouterPortUrpfModeValues = []string{"NONE", "STRICT", ""}
 
-func resourceLogicalRouterDownLinkPort() *schema.Resource {
+func resourceNsxtLogicalRouterDownLinkPort() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceLogicalRouterDownLinkPortCreate,
-		Read:   resourceLogicalRouterDownLinkPortRead,
-		Update: resourceLogicalRouterDownLinkPortUpdate,
-		Delete: resourceLogicalRouterDownLinkPortDelete,
+		Create: resourceNsxtLogicalRouterDownLinkPortCreate,
+		Read:   resourceNsxtLogicalRouterDownLinkPortRead,
+		Update: resourceNsxtLogicalRouterDownLinkPortUpdate,
+		Delete: resourceNsxtLogicalRouterDownLinkPortDelete,
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
@@ -66,7 +66,7 @@ func resourceLogicalRouterDownLinkPort() *schema.Resource {
 	}
 }
 
-func resourceLogicalRouterDownLinkPortCreate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtLogicalRouterDownLinkPortCreate(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
@@ -102,10 +102,10 @@ func resourceLogicalRouterDownLinkPortCreate(d *schema.ResourceData, m interface
 	}
 	d.SetId(logical_router_down_link_port.Id)
 
-	return resourceLogicalRouterDownLinkPortRead(d, m)
+	return resourceNsxtLogicalRouterDownLinkPortRead(d, m)
 }
 
-func resourceLogicalRouterDownLinkPortRead(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtLogicalRouterDownLinkPortRead(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
@@ -138,7 +138,7 @@ func resourceLogicalRouterDownLinkPortRead(d *schema.ResourceData, m interface{}
 	return nil
 }
 
-func resourceLogicalRouterDownLinkPortUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtLogicalRouterDownLinkPortUpdate(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
@@ -177,10 +177,10 @@ func resourceLogicalRouterDownLinkPortUpdate(d *schema.ResourceData, m interface
 		return fmt.Errorf("Error during LogicalRouterDownLinkPort update: %v", err)
 	}
 
-	return resourceLogicalRouterDownLinkPortRead(d, m)
+	return resourceNsxtLogicalRouterDownLinkPortRead(d, m)
 }
 
-func resourceLogicalRouterDownLinkPortDelete(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtLogicalRouterDownLinkPortDelete(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 

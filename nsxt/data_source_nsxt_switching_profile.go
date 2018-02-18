@@ -11,30 +11,39 @@ import (
 	"net/http"
 )
 
-func dataSourceSwitchingProfile() *schema.Resource {
+func dataSourceNsxtSwitchingProfile() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceSwitchingProfileRead,
+		Read: dataSourceNsxtSwitchingProfileRead,
 
 		Schema: map[string]*schema.Schema{
 			"id": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "Unique ID of this resource",
+				Optional:    true,
+				Computed:    true,
 			},
 			"display_name": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "The display name of this resource",
+				Optional:    true,
+				Computed:    true,
 			},
 			"resource_type": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "The resource type representing the specific type of this profile",
+				Computed:    true,
+			},
+			"description": &schema.Schema{
+				Type:        schema.TypeString,
+				Description: "Description of this resource",
+				Optional:    true,
+				Computed:    true,
 			},
 		},
 	}
 }
 
-func dataSourceSwitchingProfileRead(d *schema.ResourceData, m interface{}) error {
+func dataSourceNsxtSwitchingProfileRead(d *schema.ResourceData, m interface{}) error {
 	// Read a switching profile by name or id
 	nsxClient := m.(*api.APIClient)
 	obj_id := d.Get("id").(string)
@@ -81,5 +90,6 @@ func dataSourceSwitchingProfileRead(d *schema.ResourceData, m interface{}) error
 	d.SetId(obj.Id)
 	d.Set("display_name", obj.DisplayName)
 	d.Set("resource_type", obj.ResourceType)
+	d.Set("description", obj.Description)
 	return nil
 }

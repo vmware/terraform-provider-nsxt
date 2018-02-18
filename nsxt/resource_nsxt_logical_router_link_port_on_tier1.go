@@ -11,12 +11,12 @@ import (
 	"net/http"
 )
 
-func resourceLogicalRouterLinkPortOnTier1() *schema.Resource {
+func resourceNsxtLogicalRouterLinkPortOnTier1() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceLogicalRouterLinkPortOnTier1Create,
-		Read:   resourceLogicalRouterLinkPortOnTier1Read,
-		Update: resourceLogicalRouterLinkPortOnTier1Update,
-		Delete: resourceLogicalRouterLinkPortOnTier1Delete,
+		Create: resourceNsxtLogicalRouterLinkPortOnTier1Create,
+		Read:   resourceNsxtLogicalRouterLinkPortOnTier1Read,
+		Update: resourceNsxtLogicalRouterLinkPortOnTier1Update,
+		Delete: resourceNsxtLogicalRouterLinkPortOnTier1Delete,
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
@@ -49,7 +49,7 @@ func resourceLogicalRouterLinkPortOnTier1() *schema.Resource {
 	}
 }
 
-func resourceLogicalRouterLinkPortOnTier1Create(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtLogicalRouterLinkPortOnTier1Create(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
@@ -79,10 +79,10 @@ func resourceLogicalRouterLinkPortOnTier1Create(d *schema.ResourceData, m interf
 	}
 	d.SetId(logical_router_link_port.Id)
 
-	return resourceLogicalRouterLinkPortOnTier1Read(d, m)
+	return resourceNsxtLogicalRouterLinkPortOnTier1Read(d, m)
 }
 
-func resourceLogicalRouterLinkPortOnTier1Read(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtLogicalRouterLinkPortOnTier1Read(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
@@ -112,7 +112,7 @@ func resourceLogicalRouterLinkPortOnTier1Read(d *schema.ResourceData, m interfac
 	return nil
 }
 
-func resourceLogicalRouterLinkPortOnTier1Update(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtLogicalRouterLinkPortOnTier1Update(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
@@ -145,10 +145,10 @@ func resourceLogicalRouterLinkPortOnTier1Update(d *schema.ResourceData, m interf
 		return fmt.Errorf("Error during LogicalRouterLinkPortOnTier1 %v update: %v (%+v)", id, err, resp)
 	}
 
-	return resourceLogicalRouterLinkPortOnTier1Read(d, m)
+	return resourceNsxtLogicalRouterLinkPortOnTier1Read(d, m)
 }
 
-func resourceLogicalRouterLinkPortOnTier1Delete(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtLogicalRouterLinkPortOnTier1Delete(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 

@@ -17,12 +17,12 @@ var failOverModeValues = []string{"PREEMPTIVE", "NON_PREEMPTIVE"}
 var HighAvailabilityValues = []string{"ACTIVE_ACTIVE", "ACTIVE_STANDBY"}
 
 // TODO: add advanced config
-func resourceLogicalTier1Router() *schema.Resource {
+func resourceNsxtLogicalTier1Router() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceLogicalTier1RouterCreate,
-		Read:   resourceLogicalTier1RouterRead,
-		Update: resourceLogicalTier1RouterUpdate,
-		Delete: resourceLogicalTier1RouterDelete,
+		Create: resourceNsxtLogicalTier1RouterCreate,
+		Read:   resourceNsxtLogicalTier1RouterRead,
+		Update: resourceNsxtLogicalTier1RouterUpdate,
+		Delete: resourceNsxtLogicalTier1RouterDelete,
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
@@ -87,7 +87,7 @@ func resourceLogicalTier1Router() *schema.Resource {
 	}
 }
 
-func resourceLogicalTier1RouterCreateRollback(nsxClient *api.APIClient, id string) {
+func resourceNsxtLogicalTier1RouterCreateRollback(nsxClient *api.APIClient, id string) {
 	log.Printf("[ERROR] Rollback router %s creation", id)
 
 	localVarOptionals := make(map[string]interface{})
@@ -97,7 +97,7 @@ func resourceLogicalTier1RouterCreateRollback(nsxClient *api.APIClient, id strin
 	}
 }
 
-func resourceLogicalTier1RouterReadAdv(d *schema.ResourceData, nsxClient *api.APIClient, id string) error {
+func resourceNsxtLogicalTier1RouterReadAdv(d *schema.ResourceData, nsxClient *api.APIClient, id string) error {
 	adv_config, resp, err := nsxClient.LogicalRoutingAndServicesApi.ReadAdvertisementConfig(nsxClient.Context, id)
 	if resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("LogicalTier1Router %s Advertisement config not found", id)
@@ -113,7 +113,7 @@ func resourceLogicalTier1RouterReadAdv(d *schema.ResourceData, nsxClient *api.AP
 	return nil
 }
 
-func resourceLogicalTier1RouterCreateAdv(d *schema.ResourceData, nsxClient *api.APIClient, id string) error {
+func resourceNsxtLogicalTier1RouterCreateAdv(d *schema.ResourceData, nsxClient *api.APIClient, id string) error {
 	enable_router_advertisement := d.Get("enable_router_advertisement").(bool)
 	if enable_router_advertisement {
 		adv_connected := d.Get("advertise_connected_routes").(bool)
@@ -131,7 +131,7 @@ func resourceLogicalTier1RouterCreateAdv(d *schema.ResourceData, nsxClient *api.
 	return nil
 }
 
-func resourceLogicalTier1RouterUpdateAdv(d *schema.ResourceData, nsxClient *api.APIClient, id string) error {
+func resourceNsxtLogicalTier1RouterUpdateAdv(d *schema.ResourceData, nsxClient *api.APIClient, id string) error {
 	enable_router_advertisement := d.Get("enable_router_advertisement").(bool)
 	adv_connected := d.Get("advertise_connected_routes").(bool)
 	adv_static := d.Get("advertise_static_routes").(bool)
@@ -148,7 +148,7 @@ func resourceLogicalTier1RouterUpdateAdv(d *schema.ResourceData, nsxClient *api.
 	return err
 }
 
-func resourceLogicalTier1RouterCreate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtLogicalTier1RouterCreate(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
@@ -180,18 +180,18 @@ func resourceLogicalTier1RouterCreate(d *schema.ResourceData, m interface{}) err
 	}
 
 	// Add advertisement config
-	err = resourceLogicalTier1RouterCreateAdv(d, nsxClient, logical_router.Id)
+	err = resourceNsxtLogicalTier1RouterCreateAdv(d, nsxClient, logical_router.Id)
 	if err != nil {
-		resourceLogicalTier1RouterCreateRollback(nsxClient, logical_router.Id)
+		resourceNsxtLogicalTier1RouterCreateRollback(nsxClient, logical_router.Id)
 		return fmt.Errorf("Error while setting config advertisement state: %v", err)
 	}
 
 	d.SetId(logical_router.Id)
 
-	return resourceLogicalTier1RouterRead(d, m)
+	return resourceNsxtLogicalTier1RouterRead(d, m)
 }
 
-func resourceLogicalTier1RouterRead(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtLogicalTier1RouterRead(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
@@ -222,7 +222,7 @@ func resourceLogicalTier1RouterRead(d *schema.ResourceData, m interface{}) error
 	d.Set("preferred_edge_cluster_member_index", logical_router.PreferredEdgeClusterMemberIndex)
 	d.Set("router_type", logical_router.RouterType)
 
-	err = resourceLogicalTier1RouterReadAdv(d, nsxClient, id)
+	err = resourceNsxtLogicalTier1RouterReadAdv(d, nsxClient, id)
 	if err != nil {
 		return fmt.Errorf("Error during LogicalTier1Router read: %v", err)
 	}
@@ -230,7 +230,7 @@ func resourceLogicalTier1RouterRead(d *schema.ResourceData, m interface{}) error
 	return nil
 }
 
-func resourceLogicalTier1RouterUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtLogicalTier1RouterUpdate(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
@@ -264,15 +264,15 @@ func resourceLogicalTier1RouterUpdate(d *schema.ResourceData, m interface{}) err
 	}
 
 	// Update advertisement config
-	err = resourceLogicalTier1RouterUpdateAdv(d, nsxClient, id)
+	err = resourceNsxtLogicalTier1RouterUpdateAdv(d, nsxClient, id)
 	if err != nil {
 		return fmt.Errorf("Error while setting config advertisement state: %v", err)
 	}
 
-	return resourceLogicalTier1RouterRead(d, m)
+	return resourceNsxtLogicalTier1RouterRead(d, m)
 }
 
-func resourceLogicalTier1RouterDelete(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtLogicalTier1RouterDelete(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 

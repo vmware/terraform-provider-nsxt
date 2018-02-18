@@ -30,6 +30,6 @@ In addition to arguments listed above, the following attributes are exported:
 
 * `description` - Description of the transport zone.
 
-* `host_switch_name` - The name of the host switch that was installed on the NSX edge.
+* `host_switch_name` - TName of the host switch on all transport nodes in this transport zone that will be used to run NSX network traffic.
 
-* `transport_type` - The transport type of this transport zone.
+* `transport_type` - The transport type of this transport zone (OVERLAY or VLAN).

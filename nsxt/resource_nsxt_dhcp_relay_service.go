@@ -11,12 +11,12 @@ import (
 	"net/http"
 )
 
-func resourceDhcpRelayService() *schema.Resource {
+func resourceNsxtDhcpRelayService() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceDhcpRelayServiceCreate,
-		Read:   resourceDhcpRelayServiceRead,
-		Update: resourceDhcpRelayServiceUpdate,
-		Delete: resourceDhcpRelayServiceDelete,
+		Create: resourceNsxtDhcpRelayServiceCreate,
+		Read:   resourceNsxtDhcpRelayServiceRead,
+		Update: resourceNsxtDhcpRelayServiceUpdate,
+		Delete: resourceNsxtDhcpRelayServiceDelete,
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
@@ -41,7 +41,7 @@ func resourceDhcpRelayService() *schema.Resource {
 	}
 }
 
-func resourceDhcpRelayServiceCreate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtDhcpRelayServiceCreate(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
@@ -67,10 +67,10 @@ func resourceDhcpRelayServiceCreate(d *schema.ResourceData, m interface{}) error
 	}
 	d.SetId(dhcp_relay_service.Id)
 
-	return resourceDhcpRelayServiceRead(d, m)
+	return resourceNsxtDhcpRelayServiceRead(d, m)
 }
 
-func resourceDhcpRelayServiceRead(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtDhcpRelayServiceRead(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
@@ -98,7 +98,7 @@ func resourceDhcpRelayServiceRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceDhcpRelayServiceUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtDhcpRelayServiceUpdate(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
@@ -126,10 +126,10 @@ func resourceDhcpRelayServiceUpdate(d *schema.ResourceData, m interface{}) error
 		return fmt.Errorf("Error during DhcpRelayService update: %v", err)
 	}
 
-	return resourceDhcpRelayServiceRead(d, m)
+	return resourceNsxtDhcpRelayServiceRead(d, m)
 }
 
-func resourceDhcpRelayServiceDelete(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtDhcpRelayServiceDelete(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 

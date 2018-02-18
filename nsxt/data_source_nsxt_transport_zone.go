@@ -12,41 +12,46 @@ import (
 	"strings"
 )
 
-func dataSourceTransportZone() *schema.Resource {
+func dataSourceNsxtTransportZone() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceTransportZoneRead,
+		Read: dataSourceNsxtTransportZoneRead,
 
 		Schema: map[string]*schema.Schema{
 			"id": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "Unique ID of this resource",
+				Optional:    true,
+				Computed:    true,
 			},
 			"display_name": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "The display name of this resource",
+				Optional:    true,
+				Computed:    true,
 			},
 			"description": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "Description of this resource",
+				Optional:    true,
+				Computed:    true,
 			},
 			"host_switch_name": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "Name of the host switch on all transport nodes in this transport zone that will be used to run NSX network traffic",
+				Optional:    true,
+				Computed:    true,
 			},
 			"transport_type": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:        schema.TypeString,
+				Description: "The transport type of this transport zone (OVERLAY or VLAN)",
+				Optional:    true,
+				Computed:    true,
 			},
 		},
 	}
 }
 
-func dataSourceTransportZoneRead(d *schema.ResourceData, m interface{}) error {
+func dataSourceNsxtTransportZoneRead(d *schema.ResourceData, m interface{}) error {
 	// Read a transport zone by name or id
 	nsxClient := m.(*api.APIClient)
 	obj_id := d.Get("id").(string)

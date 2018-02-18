@@ -17,12 +17,12 @@ import (
 var logicalSwitchReplicationModeValues = []string{"MTEP", "SOURCE", ""}
 
 // TODO: consider splitting this resource to overlay_ls and vlan_ls
-func resourceLogicalSwitch() *schema.Resource {
+func resourceNsxtLogicalSwitch() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceLogicalSwitchCreate,
-		Read:   resourceLogicalSwitchRead,
-		Update: resourceLogicalSwitchUpdate,
-		Delete: resourceLogicalSwitchDelete,
+		Create: resourceNsxtLogicalSwitchCreate,
+		Read:   resourceNsxtLogicalSwitchRead,
+		Update: resourceNsxtLogicalSwitchUpdate,
+		Delete: resourceNsxtLogicalSwitchDelete,
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
@@ -84,7 +84,7 @@ func resourceLogicalSwitch() *schema.Resource {
 	}
 }
 
-func resourceLogicalSwitchCreateRollback(nsxClient *api.APIClient, id string) {
+func resourceNsxtLogicalSwitchCreateRollback(nsxClient *api.APIClient, id string) {
 	log.Printf("[ERROR] Rollback switch %s creation due to unrealized state", id)
 
 	localVarOptionals := make(map[string]interface{})
@@ -94,7 +94,7 @@ func resourceLogicalSwitchCreateRollback(nsxClient *api.APIClient, id string) {
 	}
 }
 
-func resourceLogicalSwitchCreate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtLogicalSwitchCreate(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
@@ -146,17 +146,17 @@ func resourceLogicalSwitchCreate(d *schema.ResourceData, m interface{}) error {
 			state, resp, err := nsxClient.LogicalSwitchingApi.GetLogicalSwitchState(nsxClient.Context, logical_switch.Id)
 
 			if err != nil {
-				resourceLogicalSwitchCreateRollback(nsxClient, logical_switch.Id)
+				resourceNsxtLogicalSwitchCreateRollback(nsxClient, logical_switch.Id)
 				return fmt.Errorf("Error while querying realization state: %v", err)
 			}
 
 			if resp.StatusCode != http.StatusOK {
-				resourceLogicalSwitchCreateRollback(nsxClient, logical_switch.Id)
+				resourceNsxtLogicalSwitchCreateRollback(nsxClient, logical_switch.Id)
 				return fmt.Errorf("Unexpected return status %d", resp.StatusCode)
 			}
 
 			if state.FailureCode != 0 {
-				resourceLogicalSwitchCreateRollback(nsxClient, logical_switch.Id)
+				resourceNsxtLogicalSwitchCreateRollback(nsxClient, logical_switch.Id)
 				return fmt.Errorf("Error in switch realization: %s", state.FailureMessage)
 			}
 
@@ -171,10 +171,10 @@ func resourceLogicalSwitchCreate(d *schema.ResourceData, m interface{}) error {
 
 	d.SetId(logical_switch.Id)
 
-	return resourceLogicalSwitchRead(d, m)
+	return resourceNsxtLogicalSwitchRead(d, m)
 }
 
-func resourceLogicalSwitchRead(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtLogicalSwitchRead(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
@@ -210,7 +210,7 @@ func resourceLogicalSwitchRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceLogicalSwitchUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtLogicalSwitchUpdate(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
@@ -253,10 +253,10 @@ func resourceLogicalSwitchUpdate(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("Error during LogicalSwitch update: %v", err)
 	}
 
-	return resourceLogicalSwitchRead(d, m)
+	return resourceNsxtLogicalSwitchRead(d, m)
 }
 
-func resourceLogicalSwitchDelete(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtLogicalSwitchDelete(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 

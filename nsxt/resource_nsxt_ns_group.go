@@ -13,12 +13,12 @@ var nsGroupTargetTypeValues = []string{"NSGroup", "IPSet", "LogicalPort", "Logic
 var nsGroupMembershipCriteriaTargetTypeValues = []string{"LogicalPort", "LogicalSwitch", "VirtualMachine"}
 var nsGroupTagOperationValues = []string{"EQUALS"}
 
-func resourceNsGroup() *schema.Resource {
+func resourceNsxtNsGroup() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNsGroupCreate,
-		Read:   resourceNsGroupRead,
-		Update: resourceNsGroupUpdate,
-		Delete: resourceNsGroupDelete,
+		Create: resourceNsxtNsGroupCreate,
+		Read:   resourceNsxtNsGroupRead,
+		Update: resourceNsxtNsGroupUpdate,
+		Delete: resourceNsxtNsGroupDelete,
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
@@ -150,7 +150,7 @@ func setMembersInSchema(d *schema.ResourceData, members []manager.NsGroupSimpleE
 	d.Set("member", expresionList)
 }
 
-func resourceNsGroupCreate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtNsGroupCreate(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
@@ -178,10 +178,10 @@ func resourceNsGroupCreate(d *schema.ResourceData, m interface{}) error {
 	}
 	d.SetId(ns_group.Id)
 
-	return resourceNsGroupRead(d, m)
+	return resourceNsxtNsGroupRead(d, m)
 }
 
-func resourceNsGroupRead(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtNsGroupRead(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
@@ -212,7 +212,7 @@ func resourceNsGroupRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceNsGroupUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtNsGroupUpdate(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
@@ -242,10 +242,10 @@ func resourceNsGroupUpdate(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("Error during NsGroup update: %v", err)
 	}
 
-	return resourceNsGroupRead(d, m)
+	return resourceNsxtNsGroupRead(d, m)
 }
 
-func resourceNsGroupDelete(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtNsGroupDelete(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 

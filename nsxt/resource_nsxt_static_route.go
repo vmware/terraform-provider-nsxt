@@ -13,12 +13,12 @@ import (
 	"net/http"
 )
 
-func resourceStaticRoute() *schema.Resource {
+func resourceNsxtStaticRoute() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceStaticRouteCreate,
-		Read:   resourceStaticRouteRead,
-		Update: resourceStaticRouteUpdate,
-		Delete: resourceStaticRouteDelete,
+		Create: resourceNsxtStaticRouteCreate,
+		Read:   resourceNsxtStaticRouteRead,
+		Update: resourceNsxtStaticRouteUpdate,
+		Delete: resourceNsxtStaticRouteDelete,
 
 		Schema: map[string]*schema.Schema{
 			"logical_router_id": &schema.Schema{
@@ -126,7 +126,7 @@ func setNextHopsInSchema(d *schema.ResourceData, next_hops []manager.StaticRoute
 	d.Set("next_hop", nextHopsList)
 }
 
-func resourceStaticRouteCreate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtStaticRouteCreate(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
@@ -160,10 +160,10 @@ func resourceStaticRouteCreate(d *schema.ResourceData, m interface{}) error {
 	}
 	d.SetId(static_route.Id)
 
-	return resourceStaticRouteRead(d, m)
+	return resourceNsxtStaticRouteRead(d, m)
 }
 
-func resourceStaticRouteRead(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtStaticRouteRead(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
@@ -198,7 +198,7 @@ func resourceStaticRouteRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceStaticRouteUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtStaticRouteUpdate(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
@@ -234,10 +234,10 @@ func resourceStaticRouteUpdate(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("Error during StaticRoute update: %v", err)
 	}
 
-	return resourceStaticRouteRead(d, m)
+	return resourceNsxtStaticRouteRead(d, m)
 }
 
-func resourceStaticRouteDelete(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtStaticRouteDelete(d *schema.ResourceData, m interface{}) error {
 
 	nsxClient := m.(*api.APIClient)
 
