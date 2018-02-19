@@ -155,12 +155,12 @@ func resourceNsxtLogicalSwitchCreate(d *schema.ResourceData, m interface{}) erro
 					return nil, "", fmt.Errorf("Error in switch realization: %s", state.FailureMessage)
 				}
 
-				log.Printf("[ERROR] Realization state: %s", state.State)
+				log.Printf("[DEBUG] Realization state: %s", state.State)
 				return logical_switch, state.State, nil
 			},
 			Timeout:    d.Timeout(schema.TimeoutCreate),
 			MinTimeout: 1 * time.Second,
-			Delay:      1 * time.Second, // Wait 30 secs before starting
+			Delay:      1 * time.Second,
 		}
 		_, err = stateConf.WaitForState()
 		if err != nil {
