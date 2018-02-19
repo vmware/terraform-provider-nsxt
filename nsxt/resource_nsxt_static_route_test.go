@@ -153,10 +153,7 @@ resource "nsxt_logical_router_downlink_port" "LRP1" {
 	description = "Acceptance Test"
 	linked_logical_switch_port_id = "${nsxt_logical_port.PORT1.id}"
 	logical_router_id = "${nsxt_logical_tier1_router.RTR1.id}"
-	subnet {
-		ip_addresses = ["8.0.0.1"],
-    	prefix_length = 24
-    }
+	ip_address = "8.0.0.1/24"
 }
 `, edgeClusterName, tzName)
 }

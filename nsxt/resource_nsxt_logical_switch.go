@@ -139,7 +139,7 @@ func resourceNsxtLogicalSwitchCreate(d *schema.ResourceData, m interface{}) erro
 
 	if verify_realization {
 		stateConf := &resource.StateChangeConf{
-			Pending: []string{"in_progress", "pending"},
+			Pending: []string{"in_progress", "pending", "partial_success"},
 			Target:  []string{"success"},
 			Refresh: func() (interface{}, string, error) {
 				state, resp, err := nsxClient.LogicalSwitchingApi.GetLogicalSwitchState(nsxClient.Context, logical_switch.Id)

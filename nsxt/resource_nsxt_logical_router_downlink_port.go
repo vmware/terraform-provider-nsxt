@@ -11,6 +11,8 @@ import (
 	"github.com/vmware/go-vmware-nsxt/manager"
 	"log"
 	"net/http"
+	"strconv"
+	"strings"
 )
 
 var logicalRouterPortUrpfModeValues = []string{"NONE", "STRICT", ""}
@@ -48,7 +50,12 @@ func resourceNsxtLogicalRouterDownLinkPort() *schema.Resource {
 				Required:    true,
 				ForceNew:    true,
 			},
-			"subnet": getIpSubnetsSchema(true, false),
+			"ip_address": &schema.Schema{
+				Type:         schema.TypeString,
+				Description:  "Logical router port subnet (ip_address / prefix length)",
+				Required:     true,
+				ValidateFunc: validatePortAddress(),
+			},
 			"mac_address": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "MAC address",
@@ -67,6 +74,27 @@ func resourceNsxtLogicalRouterDownLinkPort() *schema.Resource {
 	}
 }
 
+func getIpSubnetsFromCidr(cidr string) []manager.IpSubnet {
+	s := strings.Split(cidr, "/")
+	ip_address := s[0]
+	prefix, _ := strconv.ParseUint(s[1], 10, 32)
+	var subnetList []manager.IpSubnet
+	elem := manager.IpSubnet{
+		IpAddresses:  []string{ip_address},
+		PrefixLength: int64(prefix),
+	}
+	subnetList = append(subnetList, elem)
+	return subnetList
+}
+
+func setIpSubnetsInSchema(d *schema.ResourceData, subnets []manager.IpSubnet) {
+	for _, subnet := range subnets {
+		// only 1 subnet is expected
+		cidr := fmt.Sprintf("%s/%d", subnet.IpAddresses[0], subnet.PrefixLength)
+		d.Set("ip_address", cidr)
+	}
+}
+
 func resourceNsxtLogicalRouterDownLinkPortCreate(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 	description := d.Get("description").(string)
@@ -75,7 +103,7 @@ func resourceNsxtLogicalRouterDownLinkPortCreate(d *schema.ResourceData, m inter
 	logical_router_id := d.Get("logical_router_id").(string)
 	mac_address := d.Get("mac_address").(string)
 	linked_logical_switch_port_id := d.Get("linked_logical_switch_port_id").(string)
-	subnets := getIpSubnetsFromSchema(d)
+	subnets := getIpSubnetsFromCidr(d.Get("ip_address").(string))
 	urpf_mode := d.Get("urpf_mode").(string)
 	service_binding := getServiceBindingsFromSchema(d, "service_binding")
 	logical_router_down_link_port := manager.LogicalRouterDownLinkPort{
@@ -148,7 +176,7 @@ func resourceNsxtLogicalRouterDownLinkPortUpdate(d *schema.ResourceData, m inter
 	tags := getTagsFromSchema(d)
 	logical_router_id := d.Get("logical_router_id").(string)
 	linked_logical_switch_port_id := d.Get("linked_logical_switch_port_id").(string)
-	subnets := getIpSubnetsFromSchema(d)
+	subnets := getIpSubnetsFromCidr(d.Get("ip_address").(string))
 	mac_address := d.Get("mac_address").(string)
 	urpf_mode := d.Get("urpf_mode").(string)
 	service_binding := getServiceBindingsFromSchema(d, "service_binding")

@@ -47,14 +47,6 @@ func getRevisionSchema() *schema.Schema {
 	}
 }
 
-func getSystemOwnedSchema() *schema.Schema {
-	return &schema.Schema{
-		Type:        schema.TypeBool,
-		Description: "Indicates system owned resource",
-		Computed:    true,
-	}
-}
-
 // utilities to define & handle tags
 func getTagsSchema() *schema.Schema {
 	return &schema.Schema{
@@ -335,35 +327,6 @@ func setServiceBindingsInSchema(d *schema.ResourceData, serviceBindings []manage
 	d.Set(schemaAttrName, referenceList)
 }
 
-func getIpSubnetsSchema(required bool, computed bool) *schema.Schema {
-	return &schema.Schema{
-		Type:        schema.TypeList,
-		Description: "Logical router port subnets",
-		Optional:    !required,
-		Required:    required,
-		Computed:    computed,
-		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{
-				"ip_addresses": &schema.Schema{
-					Type:        schema.TypeList,
-					Description: "IPv4 Addresses",
-					Optional:    true,
-					Elem: &schema.Schema{
-						Type:         schema.TypeString,
-						ValidateFunc: validateSingleIP(),
-					},
-				},
-				"prefix_length": &schema.Schema{
-					Type:         schema.TypeInt,
-					Description:  "Subnet Prefix Length",
-					Optional:     true,
-					ValidateFunc: validation.IntBetween(0, 32),
-				},
-			},
-		},
-	}
-}
-
 func getAdminStateSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:         schema.TypeString,
@@ -372,32 +335,6 @@ func getAdminStateSchema() *schema.Schema {
 		Default:      "UP",
 		ValidateFunc: validation.StringInSlice(adminStateValues, false),
 	}
-}
-
-func getIpSubnetsFromSchema(d *schema.ResourceData) []manager.IpSubnet {
-	subnets := d.Get("subnet").([]interface{})
-	var subnetList []manager.IpSubnet
-	for _, subnet := range subnets {
-		data := subnet.(map[string]interface{})
-		elem := manager.IpSubnet{
-			IpAddresses:  interface2StringList(data["ip_addresses"].([]interface{})),
-			PrefixLength: int64(data["prefix_length"].(int)),
-		}
-
-		subnetList = append(subnetList, elem)
-	}
-	return subnetList
-}
-
-func setIpSubnetsInSchema(d *schema.ResourceData, subnets []manager.IpSubnet) {
-	var subnetList []map[string]interface{}
-	for _, subnet := range subnets {
-		elem := make(map[string]interface{})
-		elem["ip_addresses"] = stringList2Interface(subnet.IpAddresses)
-		elem["prefix_length"] = subnet.PrefixLength
-		subnetList = append(subnetList, elem)
-	}
-	d.Set("subnet", subnetList)
 }
 
 func makeResourceReference(resourceType string, resourceId string) *common.ResourceReference {
