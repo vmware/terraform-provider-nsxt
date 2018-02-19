@@ -5,6 +5,7 @@ package nsxt
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
 	api "github.com/vmware/go-vmware-nsxt"
@@ -137,33 +138,34 @@ func resourceNsxtLogicalSwitchCreate(d *schema.ResourceData, m interface{}) erro
 	}
 
 	if verify_realization {
+		stateConf := &resource.StateChangeConf{
+			Pending: []string{"in_progress", "pending"},
+			Target:  []string{"success"},
+			Refresh: func() (interface{}, string, error) {
+				state, resp, err := nsxClient.LogicalSwitchingApi.GetLogicalSwitchState(nsxClient.Context, logical_switch.Id)
+				if err != nil {
+					return nil, "", fmt.Errorf("Error while querying realization state: %v", err)
+				}
 
-		for {
-			time.Sleep(time.Second)
+				if resp.StatusCode != http.StatusOK {
+					return nil, "", fmt.Errorf("Unexpected return status %d", resp.StatusCode)
+				}
 
-			state, resp, err := nsxClient.LogicalSwitchingApi.GetLogicalSwitchState(nsxClient.Context, logical_switch.Id)
+				if state.FailureCode != 0 {
+					return nil, "", fmt.Errorf("Error in switch realization: %s", state.FailureMessage)
+				}
 
-			if err != nil {
-				resourceNsxtLogicalSwitchCreateRollback(nsxClient, logical_switch.Id)
-				return fmt.Errorf("Error while querying realization state: %v", err)
-			}
-
-			if resp.StatusCode != http.StatusOK {
-				resourceNsxtLogicalSwitchCreateRollback(nsxClient, logical_switch.Id)
-				return fmt.Errorf("Unexpected return status %d", resp.StatusCode)
-			}
-
-			if state.FailureCode != 0 {
-				resourceNsxtLogicalSwitchCreateRollback(nsxClient, logical_switch.Id)
-				return fmt.Errorf("Error in switch realization: %s", state.FailureMessage)
-			}
-
-			log.Printf("[DEBUG] Realization state: %s", state.State)
-
-			if state.State == "success" {
-				break
-			}
-
+				log.Printf("[ERROR] Realization state: %s", state.State)
+				return logical_switch, state.State, nil
+			},
+			Timeout:    d.Timeout(schema.TimeoutCreate),
+			MinTimeout: 1 * time.Second,
+			Delay:      1 * time.Second, // Wait 30 secs before starting
+		}
+		_, err = stateConf.WaitForState()
+		if err != nil {
+			resourceNsxtLogicalSwitchCreateRollback(nsxClient, logical_switch.Id)
+			return err
 		}
 	}
 
