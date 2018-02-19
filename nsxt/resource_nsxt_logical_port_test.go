@@ -13,7 +13,6 @@ import (
 )
 
 func TestAccResourceNsxtLogicalPort_basic(t *testing.T) {
-
 	portName := fmt.Sprintf("test-nsx-logical-port")
 	updatePortName := fmt.Sprintf("%s-update", portName)
 	testResourceName := "nsxt_logical_port.test"
@@ -82,9 +81,7 @@ func testAccNSXLogicalPortExists(display_name string, resourceName string) resou
 }
 
 func testAccNSXLogicalPortCheckDestroy(state *terraform.State, display_name string) error {
-
 	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
-
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_logical_port" {

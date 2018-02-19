@@ -13,7 +13,6 @@ import (
 )
 
 func TestAccResourceNsxtNatRule_snat(t *testing.T) {
-
 	ruleName := fmt.Sprintf("test-nsx-snat-rule")
 	updateRuleName := fmt.Sprintf("%s-update", ruleName)
 	testResourceName := "nsxt_nat_rule.test"
@@ -65,7 +64,6 @@ func TestAccResourceNsxtNatRule_snat(t *testing.T) {
 }
 
 func TestAccResourceNsxtNatRule_dnat(t *testing.T) {
-
 	ruleName := fmt.Sprintf("test-nsx-dnat-rule")
 	updateRuleName := fmt.Sprintf("%s-update", ruleName)
 	testResourceName := "nsxt_nat_rule.test"
@@ -150,9 +148,7 @@ func testAccNSXNATRuleCheckExists(display_name string, resourceName string) reso
 }
 
 func testAccNSXNATRuleCheckDestroy(state *terraform.State, display_name string) error {
-
 	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
-
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_nat_rule" {

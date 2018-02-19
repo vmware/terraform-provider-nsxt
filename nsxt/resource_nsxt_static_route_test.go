@@ -13,7 +13,6 @@ import (
 )
 
 func TestAccResourceNsxtStaticRoute_basic(t *testing.T) {
-
 	name := fmt.Sprintf("test-nsx-static-route")
 	updateName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_static_route.test"
@@ -94,7 +93,6 @@ func testAccNSXStaticRouteCheckExists(display_name string, resourceName string) 
 }
 
 func testAccNSXStaticRouteCheckDestroy(state *terraform.State, display_name string) error {
-
 	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
 
 	for _, rs := range state.RootModule().Resources {

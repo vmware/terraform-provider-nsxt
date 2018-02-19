@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform/helper/validation"
 	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/manager"
+	"log"
 	"net/http"
 )
 
@@ -220,7 +221,6 @@ func getRulesFromSchema(d *schema.ResourceData) []manager.FirewallRule {
 
 func resourceNsxtFirewallSectionCreateEmpty(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
-
 	description := d.Get("description").(string)
 	display_name := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
@@ -253,12 +253,10 @@ func resourceNsxtFirewallSectionCreateEmpty(d *schema.ResourceData, m interface{
 }
 
 func resourceNsxtFirewallSectionCreate(d *schema.ResourceData, m interface{}) error {
-
 	rules := getRulesFromSchema(d)
 	if len(rules) == 0 {
 		return resourceNsxtFirewallSectionCreateEmpty(d, m)
 	}
-
 	nsxClient := m.(*api.APIClient)
 	description := d.Get("description").(string)
 	display_name := d.Get("display_name").(string)
@@ -293,9 +291,7 @@ func resourceNsxtFirewallSectionCreate(d *schema.ResourceData, m interface{}) er
 }
 
 func resourceNsxtFirewallSectionRead(d *schema.ResourceData, m interface{}) error {
-
 	nsxClient := m.(*api.APIClient)
-
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")
@@ -303,7 +299,7 @@ func resourceNsxtFirewallSectionRead(d *schema.ResourceData, m interface{}) erro
 
 	firewall_section, resp, err := nsxClient.ServicesApi.GetSectionWithRulesListWithRules(nsxClient.Context, id)
 	if resp.StatusCode == http.StatusNotFound {
-		fmt.Printf("FirewallSection %s not found", id)
+		log.Printf("[DEBUG] FirewallSection %s not found", id)
 		d.SetId("")
 		return nil
 	}
@@ -323,7 +319,7 @@ func resourceNsxtFirewallSectionRead(d *schema.ResourceData, m interface{}) erro
 	// Getting the applied tos will require another api call (for NSX 2.1 or less)
 	firewall_section2, resp, err := nsxClient.ServicesApi.GetSection(nsxClient.Context, id)
 	if resp.StatusCode == http.StatusNotFound {
-		fmt.Printf("FirewallSection %s not found", id)
+		log.Printf("[DEBUG] FirewallSection %s not found", id)
 		d.SetId("")
 		return nil
 	}
@@ -336,7 +332,6 @@ func resourceNsxtFirewallSectionRead(d *schema.ResourceData, m interface{}) erro
 }
 
 func resourceNsxtFirewallSectionUpdateEmpty(d *schema.ResourceData, m interface{}, id string) error {
-
 	nsxClient := m.(*api.APIClient)
 	revision := int64(d.Get("revision").(int))
 	description := d.Get("description").(string)
@@ -378,7 +373,6 @@ func resourceNsxtFirewallSectionUpdateEmpty(d *schema.ResourceData, m interface{
 }
 
 func resourceNsxtFirewallSectionUpdate(d *schema.ResourceData, m interface{}) error {
-
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")
@@ -390,7 +384,6 @@ func resourceNsxtFirewallSectionUpdate(d *schema.ResourceData, m interface{}) er
 	}
 
 	nsxClient := m.(*api.APIClient)
-
 	revision := int64(d.Get("revision").(int))
 	description := d.Get("description").(string)
 	display_name := d.Get("display_name").(string)
@@ -421,9 +414,7 @@ func resourceNsxtFirewallSectionUpdate(d *schema.ResourceData, m interface{}) er
 }
 
 func resourceNsxtFirewallSectionDelete(d *schema.ResourceData, m interface{}) error {
-
 	nsxClient := m.(*api.APIClient)
-
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")
@@ -437,7 +428,7 @@ func resourceNsxtFirewallSectionDelete(d *schema.ResourceData, m interface{}) er
 	}
 
 	if resp.StatusCode == http.StatusNotFound {
-		fmt.Printf("FirewallSection %s not found", id)
+		log.Printf("[DEBUG] FirewallSection %s not found", id)
 		d.SetId("")
 	}
 	return nil

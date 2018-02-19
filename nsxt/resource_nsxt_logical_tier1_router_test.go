@@ -13,7 +13,6 @@ import (
 )
 
 func TestAccResourceNsxtLogicalTier1Router_basic(t *testing.T) {
-
 	name := fmt.Sprintf("test-nsx-logical-tier1-router")
 	updateName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_logical_tier1_router.test"
@@ -94,7 +93,6 @@ func testAccNSXLogicalTier1RouterExists(displayName string, resourceName string)
 }
 
 func testAccNSXLogicalTier1RouterCheckDestroy(state *terraform.State, displayName string) error {
-
 	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
 	for _, rs := range state.RootModule().Resources {
 

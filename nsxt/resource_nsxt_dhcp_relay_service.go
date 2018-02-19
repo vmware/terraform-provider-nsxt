@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/manager"
+	"log"
 	"net/http"
 )
 
@@ -42,9 +43,7 @@ func resourceNsxtDhcpRelayService() *schema.Resource {
 }
 
 func resourceNsxtDhcpRelayServiceCreate(d *schema.ResourceData, m interface{}) error {
-
 	nsxClient := m.(*api.APIClient)
-
 	description := d.Get("description").(string)
 	display_name := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
@@ -71,9 +70,7 @@ func resourceNsxtDhcpRelayServiceCreate(d *schema.ResourceData, m interface{}) e
 }
 
 func resourceNsxtDhcpRelayServiceRead(d *schema.ResourceData, m interface{}) error {
-
 	nsxClient := m.(*api.APIClient)
-
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining dhcp relay service id")
@@ -81,7 +78,7 @@ func resourceNsxtDhcpRelayServiceRead(d *schema.ResourceData, m interface{}) err
 
 	dhcp_relay_service, resp, err := nsxClient.LogicalRoutingAndServicesApi.ReadDhcpRelay(nsxClient.Context, id)
 	if resp.StatusCode == http.StatusNotFound {
-		fmt.Printf("DhcpRelayService %s not found", id)
+		log.Printf("[DEBUG] DhcpRelayService %s not found", id)
 		d.SetId("")
 		return nil
 	}
@@ -99,9 +96,7 @@ func resourceNsxtDhcpRelayServiceRead(d *schema.ResourceData, m interface{}) err
 }
 
 func resourceNsxtDhcpRelayServiceUpdate(d *schema.ResourceData, m interface{}) error {
-
 	nsxClient := m.(*api.APIClient)
-
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining dhcp relay service id")
@@ -130,9 +125,7 @@ func resourceNsxtDhcpRelayServiceUpdate(d *schema.ResourceData, m interface{}) e
 }
 
 func resourceNsxtDhcpRelayServiceDelete(d *schema.ResourceData, m interface{}) error {
-
 	nsxClient := m.(*api.APIClient)
-
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining dhcp relay service id")
@@ -144,7 +137,7 @@ func resourceNsxtDhcpRelayServiceDelete(d *schema.ResourceData, m interface{}) e
 	}
 
 	if resp.StatusCode == http.StatusNotFound {
-		fmt.Printf("DhcpRelayService %s not found", id)
+		log.Printf("[DEBUG] DhcpRelayService %s not found", id)
 		d.SetId("")
 	}
 	return nil

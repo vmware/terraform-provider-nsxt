@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/manager"
+	"log"
 	"net/http"
 )
 
@@ -46,9 +47,7 @@ func resourceNsxtIpSet() *schema.Resource {
 }
 
 func resourceNsxtIpSetCreate(d *schema.ResourceData, m interface{}) error {
-
 	nsxClient := m.(*api.APIClient)
-
 	description := d.Get("description").(string)
 	display_name := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
@@ -75,9 +74,7 @@ func resourceNsxtIpSetCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceNsxtIpSetRead(d *schema.ResourceData, m interface{}) error {
-
 	nsxClient := m.(*api.APIClient)
-
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")
@@ -85,7 +82,7 @@ func resourceNsxtIpSetRead(d *schema.ResourceData, m interface{}) error {
 
 	ip_set, resp, err := nsxClient.GroupingObjectsApi.ReadIPSet(nsxClient.Context, id)
 	if resp.StatusCode == http.StatusNotFound {
-		fmt.Printf("IpSet %s not found", id)
+		log.Printf("[DEBUG] IpSet %s not found", id)
 		d.SetId("")
 		return nil
 	}
@@ -103,9 +100,7 @@ func resourceNsxtIpSetRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceNsxtIpSetUpdate(d *schema.ResourceData, m interface{}) error {
-
 	nsxClient := m.(*api.APIClient)
-
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")
@@ -134,9 +129,7 @@ func resourceNsxtIpSetUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceNsxtIpSetDelete(d *schema.ResourceData, m interface{}) error {
-
 	nsxClient := m.(*api.APIClient)
-
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")
@@ -149,7 +142,7 @@ func resourceNsxtIpSetDelete(d *schema.ResourceData, m interface{}) error {
 	}
 
 	if resp.StatusCode == http.StatusNotFound {
-		fmt.Printf("IpSet %s not found", id)
+		log.Printf("[DEBUG] IpSet %s not found", id)
 		d.SetId("")
 	}
 	return nil

@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform/helper/validation"
 	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/manager"
+	"log"
 	"net/http"
 )
 
@@ -153,9 +154,7 @@ func setMembersInSchema(d *schema.ResourceData, members []manager.NsGroupSimpleE
 }
 
 func resourceNsxtNsGroupCreate(d *schema.ResourceData, m interface{}) error {
-
 	nsxClient := m.(*api.APIClient)
-
 	description := d.Get("description").(string)
 	display_name := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
@@ -184,9 +183,7 @@ func resourceNsxtNsGroupCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceNsxtNsGroupRead(d *schema.ResourceData, m interface{}) error {
-
 	nsxClient := m.(*api.APIClient)
-
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")
@@ -196,7 +193,7 @@ func resourceNsxtNsGroupRead(d *schema.ResourceData, m interface{}) error {
 	localVarOptionals["populateReferences"] = true
 	ns_group, resp, err := nsxClient.GroupingObjectsApi.ReadNSGroup(nsxClient.Context, id, localVarOptionals)
 	if resp.StatusCode == http.StatusNotFound {
-		fmt.Printf("NsGroup %s not found", id)
+		log.Printf("[DEBUG] NsGroup %s not found", id)
 		d.SetId("")
 		return nil
 	}
@@ -215,9 +212,7 @@ func resourceNsxtNsGroupRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceNsxtNsGroupUpdate(d *schema.ResourceData, m interface{}) error {
-
 	nsxClient := m.(*api.APIClient)
-
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")
@@ -248,9 +243,7 @@ func resourceNsxtNsGroupUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceNsxtNsGroupDelete(d *schema.ResourceData, m interface{}) error {
-
 	nsxClient := m.(*api.APIClient)
-
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")
@@ -263,7 +256,7 @@ func resourceNsxtNsGroupDelete(d *schema.ResourceData, m interface{}) error {
 	}
 
 	if resp.StatusCode == http.StatusNotFound {
-		fmt.Printf("NsGroup %s not found", id)
+		log.Printf("[DEBUG] NsGroup %s not found", id)
 		d.SetId("")
 	}
 	return nil

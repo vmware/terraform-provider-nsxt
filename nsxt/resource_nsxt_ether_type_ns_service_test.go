@@ -13,7 +13,6 @@ import (
 )
 
 func TestAccResourceNsxtEtherTypeNsService_basic(t *testing.T) {
-
 	serviceName := fmt.Sprintf("test-nsx-ether-service")
 	updateServiceName := fmt.Sprintf("%s-update", serviceName)
 	testResourceName := "nsxt_ether_type_ns_service.test"
@@ -81,7 +80,6 @@ func testAccNSXEtherServiceExists(display_name string, resourceName string) reso
 }
 
 func testAccNSXEtherServiceCheckDestroy(state *terraform.State, display_name string) error {
-
 	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
 
 	for _, rs := range state.RootModule().Resources {

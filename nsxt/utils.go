@@ -4,13 +4,13 @@
 package nsxt
 
 import (
-	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
 	"github.com/vmware/go-vmware-nsxt"
 	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/common"
 	"github.com/vmware/go-vmware-nsxt/manager"
+	"log"
 	"net/http"
 )
 
@@ -413,7 +413,7 @@ func getNSXVersion(m interface{}) string {
 	initial_version := string("1.0.0")
 
 	if resp.StatusCode == http.StatusNotFound || err != nil {
-		fmt.Printf("Node properties not found")
+		log.Printf("[DEBUG] Node properties not found")
 		return initial_version
 	}
 	return node_properties.NodeVersion

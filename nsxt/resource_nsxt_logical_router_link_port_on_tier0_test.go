@@ -13,7 +13,6 @@ import (
 )
 
 func TestAccResourceNsxtLogicalRouterLinkPortOnTier0_basic(t *testing.T) {
-
 	name := fmt.Sprintf("test-nsx-port-on-tier0")
 	tier0RouterName := getTier0RouterName()
 	updateName := fmt.Sprintf("%s-update", name)
@@ -123,7 +122,6 @@ func testAccNSXLogicalRouterLinkPortOnTier0Exists(displayName string, resourceNa
 }
 
 func testAccNSXLogicalRouterLinkPortOnTier0CheckDestroy(state *terraform.State, displayName string) error {
-
 	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
 	for _, rs := range state.RootModule().Resources {
 

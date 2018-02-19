@@ -13,7 +13,6 @@ import (
 )
 
 func TestAccResourceNsxtNSGroup_basic(t *testing.T) {
-
 	grpName := fmt.Sprintf("test-nsx-ns-group")
 	updateGrpName := fmt.Sprintf("%s-update", grpName)
 	testResourceName := "nsxt_ns_group.test"
@@ -50,7 +49,6 @@ func TestAccResourceNsxtNSGroup_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtNSGroup_nested(t *testing.T) {
-
 	grpName := fmt.Sprintf("test-nsx-ns-group")
 	updateGrpName := fmt.Sprintf("%s-update", grpName)
 	testResourceName := "nsxt_ns_group.test"
@@ -85,7 +83,6 @@ func TestAccResourceNsxtNSGroup_nested(t *testing.T) {
 }
 
 func TestAccResourceNsxtNSGroup_withCriteria(t *testing.T) {
-
 	grpName := fmt.Sprintf("test-nsx-ns-group")
 	updateGrpName := fmt.Sprintf("%s-update", grpName)
 	testResourceName := "nsxt_ns_group.test"
@@ -155,9 +152,7 @@ func testAccNSXNSGroupExists(display_name string, resourceName string) resource.
 }
 
 func testAccNSXNSGroupCheckDestroy(state *terraform.State, display_name string) error {
-
 	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
-
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_logical_port" {

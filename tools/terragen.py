@@ -78,11 +78,12 @@ def write_header(f):
     pretty_writeln(f, "package %s\n" % PACKAGE_NAME)
     pretty_writeln(f, "import (")
     shift()
+    pretty_writeln(f, "\"fmt\"")
+    pretty_writeln(f, "\"log\"")
     pretty_writeln(f, "\"github.com/hashicorp/terraform/helper/schema\"")
     pretty_writeln(f, "%s \"github.com/vmware/go-vmware-nsxt\"" % SDK_PACKAGE_NAME)
     pretty_writeln(f, "\"github.com/vmware/go-vmware-nsxt/%s\"" % MANAGER_PACKAGE_NAME)
     pretty_writeln(f, "\"net/http\"")
-    pretty_writeln(f, "\"fmt\"")
     unshift()
     pretty_writeln(f, ")\n")
 
@@ -124,11 +125,10 @@ def write_func_header(f, resource, operation):
     f.write("\n")
     pretty_writeln(f, "func resourceNsxt%s%s(d *schema.ResourceData, m interface{}) error {" %
             (resource, operation))
-    f.write("\n")
     shift()
 
 def write_nsxclient(f):
-    pretty_writeln(f, "nsxClient := m.(*%s.APIClient)\n" % SDK_PACKAGE_NAME)
+    pretty_writeln(f, "nsxClient := m.(*%s.APIClient)" % SDK_PACKAGE_NAME)
 
 
 def write_get_id(f):
@@ -233,7 +233,7 @@ def write_read_func(f, resource, attrs, api_section):
 
     pretty_writeln(f, "if resp.StatusCode == http.StatusNotFound {")
     shift()
-    pretty_writeln(f, "fmt.Printf(\"%s " % resource + '%s not found\", id)')
+    pretty_writeln(f, "log.Printf(\"[DEBUG] %s " % resource + '%s not found\", id)')
     pretty_writeln(f, 'd.SetId("")')
     pretty_writeln(f, "return nil")
     unshift()
@@ -299,7 +299,7 @@ def write_delete_func(f, resource, attrs, api_section):
 
     pretty_writeln(f, "if resp.StatusCode == http.StatusNotFound {")
     shift()
-    pretty_writeln(f, "fmt.Printf(\"%s " % resource + '%s not found\", id)')
+    pretty_writeln(f, "log.Printf(\"[DEBUG] %s " % resource + '%s not found\", id)')
     pretty_writeln(f, 'd.SetId("")')
     unshift()
     pretty_writeln(f, "}")

@@ -13,7 +13,6 @@ import (
 )
 
 func TestAccResourceNsxtIcmpTypeNsService_basic(t *testing.T) {
-
 	serviceName := fmt.Sprintf("test-nsx-icmp-service")
 	updateServiceName := fmt.Sprintf("%s-update", serviceName)
 	testResourceName := "nsxt_icmp_type_ns_service.test"
@@ -83,7 +82,6 @@ func testAccNSXIcmpServiceExists(display_name string, resourceName string) resou
 }
 
 func testAccNSXIcmpServiceCheckDestroy(state *terraform.State, display_name string) error {
-
 	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
 
 	for _, rs := range state.RootModule().Resources {

@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/manager"
+	"log"
 	"net/http"
 )
 
@@ -46,9 +47,7 @@ func resourceNsxtDhcpRelayProfile() *schema.Resource {
 }
 
 func resourceNsxtDhcpRelayProfileCreate(d *schema.ResourceData, m interface{}) error {
-
 	nsxClient := m.(*api.APIClient)
-
 	description := d.Get("description").(string)
 	display_name := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
@@ -75,9 +74,7 @@ func resourceNsxtDhcpRelayProfileCreate(d *schema.ResourceData, m interface{}) e
 }
 
 func resourceNsxtDhcpRelayProfileRead(d *schema.ResourceData, m interface{}) error {
-
 	nsxClient := m.(*api.APIClient)
-
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining dhcp relay profile id")
@@ -85,7 +82,7 @@ func resourceNsxtDhcpRelayProfileRead(d *schema.ResourceData, m interface{}) err
 
 	dhcp_relay_profile, resp, err := nsxClient.LogicalRoutingAndServicesApi.ReadDhcpRelayProfile(nsxClient.Context, id)
 	if resp.StatusCode == http.StatusNotFound {
-		fmt.Printf("DhcpRelayProfile %s not found", id)
+		log.Printf("[DEBUG] DhcpRelayProfile %s not found", id)
 		d.SetId("")
 		return nil
 	}
@@ -103,9 +100,7 @@ func resourceNsxtDhcpRelayProfileRead(d *schema.ResourceData, m interface{}) err
 }
 
 func resourceNsxtDhcpRelayProfileUpdate(d *schema.ResourceData, m interface{}) error {
-
 	nsxClient := m.(*api.APIClient)
-
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining dhcp relay profile id")
@@ -134,9 +129,7 @@ func resourceNsxtDhcpRelayProfileUpdate(d *schema.ResourceData, m interface{}) e
 }
 
 func resourceNsxtDhcpRelayProfileDelete(d *schema.ResourceData, m interface{}) error {
-
 	nsxClient := m.(*api.APIClient)
-
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining dhcp relay profile id")
@@ -148,7 +141,7 @@ func resourceNsxtDhcpRelayProfileDelete(d *schema.ResourceData, m interface{}) e
 	}
 
 	if resp.StatusCode == http.StatusNotFound {
-		fmt.Printf("DhcpRelayProfile %s not found", id)
+		log.Printf("[DEBUG] DhcpRelayProfile %s not found", id)
 		d.SetId("")
 	}
 	return nil

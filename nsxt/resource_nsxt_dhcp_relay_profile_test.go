@@ -13,7 +13,6 @@ import (
 )
 
 func TestAccResourceNsxtDhcpRelayProfile_basic(t *testing.T) {
-
 	prfName := fmt.Sprintf("test-nsx-dhcp-relay-profile")
 	updatePrfName := fmt.Sprintf("%s-update", prfName)
 	testResourceName := "nsxt_dhcp_relay_profile.test"
@@ -53,9 +52,7 @@ func TestAccResourceNsxtDhcpRelayProfile_basic(t *testing.T) {
 
 func testAccNSXDhcpRelayProfileExists(display_name string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
-
 		nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
-
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
 			return fmt.Errorf("Dhcp Relay Profile resource %s not found in resources", resourceName)
@@ -83,9 +80,7 @@ func testAccNSXDhcpRelayProfileExists(display_name string, resourceName string) 
 }
 
 func testAccNSXDhcpRelayProfileCheckDestroy(state *terraform.State, display_name string) error {
-
 	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
-
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_logical_port" {

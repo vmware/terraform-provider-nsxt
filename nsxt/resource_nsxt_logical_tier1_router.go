@@ -149,9 +149,7 @@ func resourceNsxtLogicalTier1RouterUpdateAdv(d *schema.ResourceData, nsxClient *
 }
 
 func resourceNsxtLogicalTier1RouterCreate(d *schema.ResourceData, m interface{}) error {
-
 	nsxClient := m.(*api.APIClient)
-
 	description := d.Get("description").(string)
 	display_name := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
@@ -192,9 +190,7 @@ func resourceNsxtLogicalTier1RouterCreate(d *schema.ResourceData, m interface{})
 }
 
 func resourceNsxtLogicalTier1RouterRead(d *schema.ResourceData, m interface{}) error {
-
 	nsxClient := m.(*api.APIClient)
-
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical tier1 router id")
@@ -202,7 +198,7 @@ func resourceNsxtLogicalTier1RouterRead(d *schema.ResourceData, m interface{}) e
 
 	logical_router, resp, err := nsxClient.LogicalRoutingAndServicesApi.ReadLogicalRouter(nsxClient.Context, id)
 	if resp.StatusCode == http.StatusNotFound {
-		fmt.Printf("LogicalTier1Router %s not found", id)
+		log.Printf("[DEBUG] LogicalTier1Router %s not found", id)
 		d.SetId("")
 		return nil
 	}
@@ -231,9 +227,7 @@ func resourceNsxtLogicalTier1RouterRead(d *schema.ResourceData, m interface{}) e
 }
 
 func resourceNsxtLogicalTier1RouterUpdate(d *schema.ResourceData, m interface{}) error {
-
 	nsxClient := m.(*api.APIClient)
-
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical tier1 router id")
@@ -273,9 +267,7 @@ func resourceNsxtLogicalTier1RouterUpdate(d *schema.ResourceData, m interface{})
 }
 
 func resourceNsxtLogicalTier1RouterDelete(d *schema.ResourceData, m interface{}) error {
-
 	nsxClient := m.(*api.APIClient)
-
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical tier1 router id")
@@ -288,7 +280,7 @@ func resourceNsxtLogicalTier1RouterDelete(d *schema.ResourceData, m interface{})
 	}
 
 	if resp.StatusCode == http.StatusNotFound {
-		fmt.Printf("LogicalTier1Router %s not found", id)
+		log.Printf("[DEBUG] LogicalTier1Router %s not found", id)
 		d.SetId("")
 	}
 	return nil

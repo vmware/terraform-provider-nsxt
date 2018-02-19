@@ -13,7 +13,6 @@ import (
 )
 
 func TestAccResourceNsxtL4PortNsService_basic(t *testing.T) {
-
 	serviceName := fmt.Sprintf("test-nsx-l4-service")
 	updateServiceName := fmt.Sprintf("%s-update", serviceName)
 	testResourceName := "nsxt_l4_port_set_ns_service.test"
@@ -81,9 +80,7 @@ func testAccNSXL4ServiceExists(display_name string, resourceName string) resourc
 }
 
 func testAccNSXL4ServiceCheckDestroy(state *terraform.State, display_name string) error {
-
 	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
-
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_l4_port_set_ns_service" {

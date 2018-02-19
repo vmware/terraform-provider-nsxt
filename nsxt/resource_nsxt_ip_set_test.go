@@ -13,7 +13,6 @@ import (
 )
 
 func TestAccResourceNsxtIpSet_basic(t *testing.T) {
-
 	name := fmt.Sprintf("test-nsx-ip-set")
 	updateName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_ip_set.test"
@@ -53,7 +52,6 @@ func TestAccResourceNsxtIpSet_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtIpSet_noName(t *testing.T) {
-
 	name := ""
 	testResourceName := "nsxt_ip_set.test"
 	single_ip := "1.1.1.1"
@@ -124,9 +122,7 @@ func testAccNSXIpSetExists(display_name string, resourceName string) resource.Te
 }
 
 func testAccNSXIpSetCheckDestroy(state *terraform.State, display_name string) error {
-
 	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
-
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_logical_port" {

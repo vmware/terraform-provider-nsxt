@@ -13,7 +13,6 @@ import (
 )
 
 func TestAccResourceNsxtIpProtocolNsService_basic(t *testing.T) {
-
 	serviceName := fmt.Sprintf("test-nsx-ip-protocol-service")
 	updateServiceName := fmt.Sprintf("%s-update", serviceName)
 	testResourceName := "nsxt_ip_protocol_ns_service.test"
@@ -81,7 +80,6 @@ func testAccNSXIpProtocolServiceExists(display_name string, resourceName string)
 }
 
 func testAccNSXIpProtocolServiceCheckDestroy(state *terraform.State, display_name string) error {
-
 	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
 
 	for _, rs := range state.RootModule().Resources {

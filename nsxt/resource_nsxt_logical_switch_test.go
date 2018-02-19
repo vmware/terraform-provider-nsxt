@@ -15,30 +15,25 @@ import (
 
 func TestAccResourceNsxtLogicalSwitch_basic(t *testing.T) {
 	// Test without verification for realization state
-
 	testAccResourceNsxtLogicalSwitch_basic(t, false)
 }
 
 func TestAccResourceNsxtLogicalSwitch_basicWithRealization(t *testing.T) {
 	// Test with verification for realization state
-
 	testAccResourceNsxtLogicalSwitch_basic(t, true)
 }
 
 func TestAccResourceNsxtLogicalSwitch_switchVlan(t *testing.T) {
 	// Test without verification for realization state
-
 	testAccResourceNsxtLogicalSwitch_switchVlan(t, false)
 }
 
 func TestAccResourceNsxtLogicalSwitch_switchVlanWithRealization(t *testing.T) {
 	// Test with verification for realization state
-
 	testAccResourceNsxtLogicalSwitch_switchVlan(t, true)
 }
 
 func testAccResourceNsxtLogicalSwitch_basic(t *testing.T, verifyRealization bool) {
-
 	switchName := fmt.Sprintf("test-nsx-logical-switch-overlay")
 	updateSwitchName := fmt.Sprintf("%s-update", switchName)
 	resourceName := "testoverlay"
@@ -87,7 +82,6 @@ func testAccResourceNsxtLogicalSwitch_basic(t *testing.T, verifyRealization bool
 }
 
 func testAccResourceNsxtLogicalSwitch_switchVlan(t *testing.T, verifyRealization bool) {
-
 	switchName := "test-nsx-logical-switch-vlan"
 	updateSwitchName := fmt.Sprintf("%s-update", switchName)
 	transportZoneName := getVlanTransportZoneName()
@@ -167,9 +161,7 @@ func testAccNSXLogicalSwitchExists(display_name string, resourceName string) res
 }
 
 func testAccNSXLogicalSwitchCheckDestroy(state *terraform.State, display_name string) error {
-
 	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
-
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_logical_switch" {

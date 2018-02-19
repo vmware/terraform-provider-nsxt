@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform/helper/validation"
 	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/manager"
+	"log"
 	"net/http"
 )
 
@@ -66,9 +67,7 @@ func resourceNsxtAlgorithmTypeNsService() *schema.Resource {
 }
 
 func resourceNsxtAlgorithmTypeNsServiceCreate(d *schema.ResourceData, m interface{}) error {
-
 	nsxClient := m.(*api.APIClient)
-
 	description := d.Get("description").(string)
 	display_name := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
@@ -107,9 +106,7 @@ func resourceNsxtAlgorithmTypeNsServiceCreate(d *schema.ResourceData, m interfac
 }
 
 func resourceNsxtAlgorithmTypeNsServiceRead(d *schema.ResourceData, m interface{}) error {
-
 	nsxClient := m.(*api.APIClient)
-
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining ns service id")
@@ -117,7 +114,7 @@ func resourceNsxtAlgorithmTypeNsServiceRead(d *schema.ResourceData, m interface{
 
 	ns_service, resp, err := nsxClient.GroupingObjectsApi.ReadAlgTypeNSService(nsxClient.Context, id)
 	if resp.StatusCode == http.StatusNotFound {
-		fmt.Printf("NsService %s not found", id)
+		log.Printf("[DEBUG] NsService %s not found", id)
 		d.SetId("")
 		return nil
 	}
@@ -140,9 +137,7 @@ func resourceNsxtAlgorithmTypeNsServiceRead(d *schema.ResourceData, m interface{
 }
 
 func resourceNsxtAlgorithmTypeNsServiceUpdate(d *schema.ResourceData, m interface{}) error {
-
 	nsxClient := m.(*api.APIClient)
-
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining ns service id")
@@ -183,9 +178,7 @@ func resourceNsxtAlgorithmTypeNsServiceUpdate(d *schema.ResourceData, m interfac
 }
 
 func resourceNsxtAlgorithmTypeNsServiceDelete(d *schema.ResourceData, m interface{}) error {
-
 	nsxClient := m.(*api.APIClient)
-
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining ns service id")
@@ -198,7 +191,7 @@ func resourceNsxtAlgorithmTypeNsServiceDelete(d *schema.ResourceData, m interfac
 	}
 
 	if resp.StatusCode == http.StatusNotFound {
-		fmt.Printf("NsService %s not found", id)
+		log.Printf("[DEBUG] NsService %s not found", id)
 		d.SetId("")
 	}
 	return nil

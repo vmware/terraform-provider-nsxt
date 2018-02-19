@@ -13,7 +13,6 @@ import (
 )
 
 func TestAccResourceNsxtLogicalRouterDownlinkPort_basic(t *testing.T) {
-
 	portName := fmt.Sprintf("test-nsx-logical-router-downlink-port")
 	updatePortName := fmt.Sprintf("%s-update", portName)
 	testResourceName := "nsxt_logical_router_downlink_port.test"
@@ -56,7 +55,6 @@ func TestAccResourceNsxtLogicalRouterDownlinkPort_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtLogicalRouterDownlinkPort_withRelay(t *testing.T) {
-
 	portName := fmt.Sprintf("test-nsx-logical-router-downlink-port")
 	updatePortName := fmt.Sprintf("%s-update", portName)
 	testResourceName := "nsxt_logical_router_downlink_port.test"
@@ -134,9 +132,7 @@ func testAccNSXLogicalRouterDownlinkPortExists(display_name string, resourceName
 }
 
 func testAccNSXLogicalRouterDownlinkPortCheckDestroy(state *terraform.State, display_name string) error {
-
 	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
-
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_logical_router_downlink_port" {

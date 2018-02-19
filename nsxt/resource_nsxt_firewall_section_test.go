@@ -13,7 +13,6 @@ import (
 )
 
 func TestAccResourceNsxtFirewallSection_basic(t *testing.T) {
-
 	prfName := fmt.Sprintf("test-nsx-firewall-section-basic")
 	updatePrfName := fmt.Sprintf("%s-update", prfName)
 	testResourceName := "nsxt_firewall_section.test"
@@ -104,7 +103,6 @@ func TestAccResourceNsxtFirewallSection_withTos(t *testing.T) {
 }
 
 func TestAccResourceNsxtFirewallSection_withRules(t *testing.T) {
-
 	prfName := fmt.Sprintf("test-nsx-firewall-section-rules")
 	updatePrfName := fmt.Sprintf("%s-update", prfName)
 	testResourceName := "nsxt_firewall_section.test"
@@ -157,14 +155,13 @@ func skipFirewallSectionTests() (bool, error) {
 	//testAccProvider.ConfigureFunc([]*ResourceData{})
 	//nsx_ver := getNSXVersion(testAccProvider.Meta())
 	//if nsx_ver <= "2.1.0" {
-	//	fmt.Printf("Skipping test because it is not supported on nsx version %s", nsx_ver)
+	//	log.Printf("[DEBUG] Skipping test because it is not supported on nsx version %s", nsx_ver)
 	//	return true, nil
 	//}
 	return false, nil
 }
 
 func TestAccResourceNsxtFirewallSection_withRulesAndTags(t *testing.T) {
-
 	// Note: this test will not pass with NSX 2.1 because of an NSX bug.
 	// This test should be skipped based on the nsx version
 	prfName := fmt.Sprintf("test-nsx-firewall-section-tags")
@@ -298,7 +295,6 @@ func testAccNSXFirewallSectionExists(display_name string, resourceName string) r
 }
 
 func testAccNSXFirewallSectionCheckDestroy(state *terraform.State, display_name string) error {
-
 	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
 
 	for _, rs := range state.RootModule().Resources {

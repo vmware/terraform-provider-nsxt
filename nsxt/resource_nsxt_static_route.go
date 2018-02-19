@@ -10,6 +10,7 @@ import (
 	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/common"
 	"github.com/vmware/go-vmware-nsxt/manager"
+	"log"
 	"net/http"
 )
 
@@ -127,9 +128,7 @@ func setNextHopsInSchema(d *schema.ResourceData, next_hops []manager.StaticRoute
 }
 
 func resourceNsxtStaticRouteCreate(d *schema.ResourceData, m interface{}) error {
-
 	nsxClient := m.(*api.APIClient)
-
 	logical_router_id := d.Get("logical_router_id").(string)
 	if logical_router_id == "" {
 		return fmt.Errorf("Error obtaining logical router id during static route creation")
@@ -164,9 +163,7 @@ func resourceNsxtStaticRouteCreate(d *schema.ResourceData, m interface{}) error 
 }
 
 func resourceNsxtStaticRouteRead(d *schema.ResourceData, m interface{}) error {
-
 	nsxClient := m.(*api.APIClient)
-
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")
@@ -179,7 +176,7 @@ func resourceNsxtStaticRouteRead(d *schema.ResourceData, m interface{}) error {
 
 	static_route, resp, err := nsxClient.LogicalRoutingAndServicesApi.ReadStaticRoute(nsxClient.Context, logical_router_id, id)
 	if resp.StatusCode == http.StatusNotFound {
-		fmt.Printf("StaticRoute %s not found", id)
+		log.Printf("[DEBUG] StaticRoute %s not found", id)
 		d.SetId("")
 		return nil
 	}
@@ -199,9 +196,7 @@ func resourceNsxtStaticRouteRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceNsxtStaticRouteUpdate(d *schema.ResourceData, m interface{}) error {
-
 	nsxClient := m.(*api.APIClient)
-
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")
@@ -238,9 +233,7 @@ func resourceNsxtStaticRouteUpdate(d *schema.ResourceData, m interface{}) error 
 }
 
 func resourceNsxtStaticRouteDelete(d *schema.ResourceData, m interface{}) error {
-
 	nsxClient := m.(*api.APIClient)
-
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")
@@ -257,7 +250,7 @@ func resourceNsxtStaticRouteDelete(d *schema.ResourceData, m interface{}) error 
 	}
 
 	if resp.StatusCode == http.StatusNotFound {
-		fmt.Printf("StaticRoute %s for router %s not found", id, logical_router_id)
+		log.Printf("[DEBUG] StaticRoute %s for router %s not found", id, logical_router_id)
 		d.SetId("")
 	}
 	return nil

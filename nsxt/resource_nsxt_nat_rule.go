@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform/helper/validation"
 	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/manager"
+	"log"
 	"net/http"
 )
 
@@ -95,9 +96,7 @@ func resourceNsxtNatRule() *schema.Resource {
 }
 
 func resourceNsxtNatRuleCreate(d *schema.ResourceData, m interface{}) error {
-
 	nsxClient := m.(*api.APIClient)
-
 	logical_router_id := d.Get("logical_router_id").(string)
 	if logical_router_id == "" {
 		return fmt.Errorf("Error obtaining logical object id")
@@ -148,9 +147,7 @@ func resourceNsxtNatRuleCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceNsxtNatRuleRead(d *schema.ResourceData, m interface{}) error {
-
 	nsxClient := m.(*api.APIClient)
-
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")
@@ -163,7 +160,7 @@ func resourceNsxtNatRuleRead(d *schema.ResourceData, m interface{}) error {
 
 	nat_rule, resp, err := nsxClient.LogicalRoutingAndServicesApi.GetNatRule(nsxClient.Context, logical_router_id, id)
 	if resp.StatusCode == http.StatusNotFound {
-		fmt.Printf("NatRule %s not found", id)
+		log.Printf("[DEBUG] NatRule %s not found", id)
 		d.SetId("")
 		return nil
 	}
@@ -191,9 +188,7 @@ func resourceNsxtNatRuleRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceNsxtNatRuleUpdate(d *schema.ResourceData, m interface{}) error {
-
 	nsxClient := m.(*api.APIClient)
-
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")
@@ -246,9 +241,7 @@ func resourceNsxtNatRuleUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceNsxtNatRuleDelete(d *schema.ResourceData, m interface{}) error {
-
 	nsxClient := m.(*api.APIClient)
-
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")
@@ -264,7 +257,7 @@ func resourceNsxtNatRuleDelete(d *schema.ResourceData, m interface{}) error {
 	}
 
 	if resp.StatusCode == http.StatusNotFound {
-		fmt.Printf("NatRule %s not found", id)
+		log.Printf("[DEBUG] NatRule %s not found", id)
 		d.SetId("")
 	}
 	return nil

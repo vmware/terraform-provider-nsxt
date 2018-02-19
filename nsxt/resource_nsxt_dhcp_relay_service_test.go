@@ -13,7 +13,6 @@ import (
 )
 
 func TestAccResourceNsxtDhcpRelayService_basic(t *testing.T) {
-
 	prfName := fmt.Sprintf("test-nsx-dhcp-relay-service")
 	updatePrfName := fmt.Sprintf("%s-update", prfName)
 	testResourceName := "nsxt_dhcp_relay_service.test"
@@ -79,9 +78,7 @@ func testAccNSXDhcpRelayServiceExists(display_name string, resourceName string) 
 }
 
 func testAccNSXDhcpRelayServiceCheckDestroy(state *terraform.State, display_name string) error {
-
 	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
-
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_logical_port" {

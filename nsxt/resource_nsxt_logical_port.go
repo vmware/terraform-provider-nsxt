@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/manager"
+	"log"
 	"net/http"
 )
 
@@ -46,7 +47,6 @@ func resourceNsxtLogicalPort() *schema.Resource {
 
 func resourceNsxtLogicalPortCreate(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
-
 	name := d.Get("display_name").(string)
 	description := d.Get("description").(string)
 	ls_id := d.Get("logical_switch_id").(string)
@@ -79,7 +79,6 @@ func resourceNsxtLogicalPortCreate(d *schema.ResourceData, m interface{}) error 
 
 func resourceNsxtLogicalPortRead(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
-
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical port ID from state during read")
@@ -88,7 +87,7 @@ func resourceNsxtLogicalPortRead(d *schema.ResourceData, m interface{}) error {
 
 	if resp.StatusCode == http.StatusNotFound {
 		d.SetId("")
-		fmt.Printf("Logical port %s not found", id)
+		log.Printf("[DEBUG] Logical port %s not found", id)
 		return nil
 	}
 	if err != nil {
@@ -108,7 +107,6 @@ func resourceNsxtLogicalPortRead(d *schema.ResourceData, m interface{}) error {
 
 func resourceNsxtLogicalPortUpdate(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
-
 	id := d.Id()
 	name := d.Get("display_name").(string)
 	description := d.Get("description").(string)
@@ -147,7 +145,6 @@ func resourceNsxtLogicalPortUpdate(d *schema.ResourceData, m interface{}) error 
 
 func resourceNsxtLogicalPortDelete(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
-
 	lp_id := d.Id()
 	if lp_id == "" {
 		return fmt.Errorf("Error obtaining logical port ID from state during delete")
@@ -161,7 +158,7 @@ func resourceNsxtLogicalPortDelete(d *schema.ResourceData, m interface{}) error 
 		return fmt.Errorf("Error while deleting logical port %s: %v\n", lp_id, err)
 	}
 	if resp.StatusCode == http.StatusNotFound {
-		fmt.Printf("Logical port %s was not found\n", lp_id)
+		log.Printf("[DEBUG] Logical port %s was not found\n", lp_id)
 		d.SetId("")
 	}
 

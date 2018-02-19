@@ -13,7 +13,6 @@ import (
 )
 
 func TestAccResourceNsxtLogicalRouterLinkPortOnTier1_basic(t *testing.T) {
-
 	name := fmt.Sprintf("test-nsx-port-on-tier1")
 	tier0RouterName := getTier0RouterName()
 	edgeClusterName := getEdgeClusterName()
@@ -133,7 +132,6 @@ func testAccNSXLogicalRouterLinkPortOnTier1Exists(displayName string, resourceNa
 }
 
 func testAccNSXLogicalRouterLinkPortOnTier1CheckDestroy(state *terraform.State, displayName string) error {
-
 	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
 	for _, rs := range state.RootModule().Resources {
 

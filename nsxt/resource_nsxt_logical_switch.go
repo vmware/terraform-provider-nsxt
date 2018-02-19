@@ -95,9 +95,7 @@ func resourceNsxtLogicalSwitchCreateRollback(nsxClient *api.APIClient, id string
 }
 
 func resourceNsxtLogicalSwitchCreate(d *schema.ResourceData, m interface{}) error {
-
 	nsxClient := m.(*api.APIClient)
-
 	description := d.Get("description").(string)
 	display_name := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
@@ -175,9 +173,7 @@ func resourceNsxtLogicalSwitchCreate(d *schema.ResourceData, m interface{}) erro
 }
 
 func resourceNsxtLogicalSwitchRead(d *schema.ResourceData, m interface{}) error {
-
 	nsxClient := m.(*api.APIClient)
-
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical switch id")
@@ -185,7 +181,7 @@ func resourceNsxtLogicalSwitchRead(d *schema.ResourceData, m interface{}) error 
 
 	logical_switch, resp, err := nsxClient.LogicalSwitchingApi.GetLogicalSwitch(nsxClient.Context, id)
 	if resp.StatusCode == http.StatusNotFound {
-		fmt.Printf("LogicalSwitch %s not found", id)
+		log.Printf("[DEBUG] LogicalSwitch %s not found", id)
 		d.SetId("")
 		return nil
 	}
@@ -211,9 +207,7 @@ func resourceNsxtLogicalSwitchRead(d *schema.ResourceData, m interface{}) error 
 }
 
 func resourceNsxtLogicalSwitchUpdate(d *schema.ResourceData, m interface{}) error {
-
 	nsxClient := m.(*api.APIClient)
-
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical switch id")
@@ -257,9 +251,7 @@ func resourceNsxtLogicalSwitchUpdate(d *schema.ResourceData, m interface{}) erro
 }
 
 func resourceNsxtLogicalSwitchDelete(d *schema.ResourceData, m interface{}) error {
-
 	nsxClient := m.(*api.APIClient)
-
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical switch id")
@@ -272,7 +264,7 @@ func resourceNsxtLogicalSwitchDelete(d *schema.ResourceData, m interface{}) erro
 	}
 
 	if resp.StatusCode == http.StatusNotFound {
-		fmt.Printf("LogicalSwitch %s not found", id)
+		log.Printf("[DEBUG] LogicalSwitch %s not found", id)
 		d.SetId("")
 	}
 	return nil

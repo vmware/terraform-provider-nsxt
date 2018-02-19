@@ -13,7 +13,6 @@ import (
 )
 
 func TestAccResourceNsxtAlgorithmTypeNsService_basic(t *testing.T) {
-
 	serviceName := fmt.Sprintf("test-nsx-alg-service")
 	updateServiceName := fmt.Sprintf("%s-update", serviceName)
 	testResourceName := "nsxt_algorithm_type_ns_service.test"
@@ -51,9 +50,7 @@ func TestAccResourceNsxtAlgorithmTypeNsService_basic(t *testing.T) {
 
 func testAccNSXAlgServiceExists(display_name string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
-
 		nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
-
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
 			return fmt.Errorf("NSX alg ns service resource %s not found in resources", resourceName)
@@ -81,9 +78,7 @@ func testAccNSXAlgServiceExists(display_name string, resourceName string) resour
 }
 
 func testAccNSXAlgServiceCheckDestroy(state *terraform.State, display_name string) error {
-
 	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
-
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_algorithm_type_ns_service" {

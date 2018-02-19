@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform/helper/validation"
 	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/manager"
+	"log"
 	"net/http"
 )
 
@@ -67,9 +68,7 @@ func resourceNsxtLogicalRouterDownLinkPort() *schema.Resource {
 }
 
 func resourceNsxtLogicalRouterDownLinkPortCreate(d *schema.ResourceData, m interface{}) error {
-
 	nsxClient := m.(*api.APIClient)
-
 	description := d.Get("description").(string)
 	display_name := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
@@ -106,9 +105,7 @@ func resourceNsxtLogicalRouterDownLinkPortCreate(d *schema.ResourceData, m inter
 }
 
 func resourceNsxtLogicalRouterDownLinkPortRead(d *schema.ResourceData, m interface{}) error {
-
 	nsxClient := m.(*api.APIClient)
-
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical router downlink port id while reading")
@@ -116,7 +113,7 @@ func resourceNsxtLogicalRouterDownLinkPortRead(d *schema.ResourceData, m interfa
 
 	logical_router_down_link_port, resp, err := nsxClient.LogicalRoutingAndServicesApi.ReadLogicalRouterDownLinkPort(nsxClient.Context, id)
 	if resp.StatusCode == http.StatusNotFound {
-		fmt.Printf("LogicalRouterDownLinkPort %s not found", id)
+		log.Printf("[DEBUG] LogicalRouterDownLinkPort %s not found", id)
 		d.SetId("")
 		return nil
 	}
@@ -139,9 +136,7 @@ func resourceNsxtLogicalRouterDownLinkPortRead(d *schema.ResourceData, m interfa
 }
 
 func resourceNsxtLogicalRouterDownLinkPortUpdate(d *schema.ResourceData, m interface{}) error {
-
 	nsxClient := m.(*api.APIClient)
-
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical router downlink port id while updating")
@@ -181,9 +176,7 @@ func resourceNsxtLogicalRouterDownLinkPortUpdate(d *schema.ResourceData, m inter
 }
 
 func resourceNsxtLogicalRouterDownLinkPortDelete(d *schema.ResourceData, m interface{}) error {
-
 	nsxClient := m.(*api.APIClient)
-
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical router downlink port id while deleting")
@@ -196,7 +189,7 @@ func resourceNsxtLogicalRouterDownLinkPortDelete(d *schema.ResourceData, m inter
 	}
 
 	if resp.StatusCode == http.StatusNotFound {
-		fmt.Printf("LogicalRouterDownLinkPort %s not found", id)
+		log.Printf("[DEBUG] LogicalRouterDownLinkPort %s not found", id)
 		d.SetId("")
 	}
 

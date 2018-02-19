@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/manager"
+	"log"
 	"net/http"
 )
 
@@ -50,9 +51,7 @@ func resourceNsxtLogicalRouterLinkPortOnTier1() *schema.Resource {
 }
 
 func resourceNsxtLogicalRouterLinkPortOnTier1Create(d *schema.ResourceData, m interface{}) error {
-
 	nsxClient := m.(*api.APIClient)
-
 	description := d.Get("description").(string)
 	display_name := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
@@ -83,9 +82,7 @@ func resourceNsxtLogicalRouterLinkPortOnTier1Create(d *schema.ResourceData, m in
 }
 
 func resourceNsxtLogicalRouterLinkPortOnTier1Read(d *schema.ResourceData, m interface{}) error {
-
 	nsxClient := m.(*api.APIClient)
-
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical router link port on tier1 id")
@@ -93,7 +90,7 @@ func resourceNsxtLogicalRouterLinkPortOnTier1Read(d *schema.ResourceData, m inte
 
 	logical_router_link_port, resp, err := nsxClient.LogicalRoutingAndServicesApi.ReadLogicalRouterLinkPortOnTier1(nsxClient.Context, id)
 	if resp.StatusCode == http.StatusNotFound {
-		fmt.Printf("LogicalRouterLinkPortOnTier1 %s not found", id)
+		log.Printf("[DEBUG] LogicalRouterLinkPortOnTier1 %s not found", id)
 		d.SetId("")
 		return nil
 	}
@@ -113,9 +110,7 @@ func resourceNsxtLogicalRouterLinkPortOnTier1Read(d *schema.ResourceData, m inte
 }
 
 func resourceNsxtLogicalRouterLinkPortOnTier1Update(d *schema.ResourceData, m interface{}) error {
-
 	nsxClient := m.(*api.APIClient)
-
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical router link port on tier1 id")
@@ -149,9 +144,7 @@ func resourceNsxtLogicalRouterLinkPortOnTier1Update(d *schema.ResourceData, m in
 }
 
 func resourceNsxtLogicalRouterLinkPortOnTier1Delete(d *schema.ResourceData, m interface{}) error {
-
 	nsxClient := m.(*api.APIClient)
-
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical router link port on tier1 id")
@@ -164,7 +157,7 @@ func resourceNsxtLogicalRouterLinkPortOnTier1Delete(d *schema.ResourceData, m in
 	}
 
 	if resp.StatusCode == http.StatusNotFound {
-		fmt.Printf("LogicalRouterLinkPortOnTier1 %s not found", id)
+		log.Printf("[DEBUG] LogicalRouterLinkPortOnTier1 %s not found", id)
 		d.SetId("")
 	}
 
