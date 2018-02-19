@@ -50,7 +50,7 @@ resource "nsxt_logical_router_downlink_port" "LRDP" {
 The following arguments are supported:
 
 * `description` - (Optional) Description of this resource.
-* `display_name` - (Optional) Defaults to ID if not set.
+* `display_name` - (Optional) The display name of this resource. Defaults to ID if not set.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this dhcp_relay_profile.
 * `server_addresses` - (Required) IP addresses of the DHCP relay servers.
 

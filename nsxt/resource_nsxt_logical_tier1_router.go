@@ -33,7 +33,7 @@ func resourceNsxtLogicalTier1Router() *schema.Resource {
 			},
 			"display_name": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "Defaults to ID if not set",
+				Description: "The display name of this resource. Defaults to ID if not set",
 				Optional:    true,
 				Computed:    true,
 			},
@@ -45,7 +45,7 @@ func resourceNsxtLogicalTier1Router() *schema.Resource {
 				Optional:     true,
 				ValidateFunc: validation.StringInSlice(failOverModeValues, false),
 			},
-			"firewall_sections": getResourceReferencesSchema(false, true, []string{}),
+			"firewall_sections": getResourceReferencesSchema(false, true, []string{}, "List of Firewall sections related to Logical Router"),
 			"high_availability_mode": &schema.Schema{
 				Type:         schema.TypeString,
 				Description:  "High availability mode",

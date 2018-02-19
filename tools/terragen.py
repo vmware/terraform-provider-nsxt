@@ -100,8 +100,14 @@ def write_attr(f, attr):
     pretty_writeln(f, "\"%s\": &schema.Schema{" % fixed_name)
     shift()
     pretty_writeln(f, "Type:        %s," % TYPE_MAP[attr['type']])
+
+    comment = ' '
     if attr['comment']:
-        pretty_writeln(f, "Description: \"%s\"," % attr['comment'])
+        comment = attr['comment']
+    if attr['name'] == 'DisplayName' and comment == 'Defaults to ID if not set':
+        comment = "The display name of this resource. " + comment
+    pretty_writeln(f, "Description: \"%s\"," % comment)
+
     if attr['optional']:
         pretty_writeln(f, "Optional:    true,")
     else:
@@ -350,6 +356,8 @@ def write_arguments_reference(f, resource, attrs):
         name = get_attr_fixed_name(attr)
         desc = attr['comment']
         optional = 'Optional' if attr['optional'] else 'Required'
+        if name == 'display_name':
+            desc = "The display name of this resource. " + desc
         if name == 'tag':
             desc = "A list of scope + tag pairs to associate with this %s" % resource
         pretty_writeln(f, "* `%s` - (%s) %s." % (name, optional, desc))

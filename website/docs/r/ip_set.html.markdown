@@ -29,7 +29,7 @@ resource "nsxt_ip_set" "IS" {
 The following arguments are supported:
 
 * `description` - (Optional) Description of this resource.
-* `display_name` - (Optional) Defaults to ID if not set.
+* `display_name` - (Optional) The display name of this resource. Defaults to ID if not set.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this ip_set.
 * `ip_addresses` - (Optional) IP addresses.
 

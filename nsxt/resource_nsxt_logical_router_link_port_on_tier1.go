@@ -27,7 +27,7 @@ func resourceNsxtLogicalRouterLinkPortOnTier1() *schema.Resource {
 			},
 			"display_name": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "Defaults to ID if not set",
+				Description: "The display name of this resource. Defaults to ID if not set",
 				Optional:    true,
 				Computed:    true,
 			},
@@ -44,7 +44,7 @@ func resourceNsxtLogicalRouterLinkPortOnTier1() *schema.Resource {
 				Required:    true,
 				ForceNew:    true,
 			},
-			"service_binding": getResourceReferencesSchema(false, false, []string{"LogicalService"}),
+			"service_binding": getResourceReferencesSchema(false, false, []string{"LogicalService"}, "Service Bindings"),
 		},
 	}
 }

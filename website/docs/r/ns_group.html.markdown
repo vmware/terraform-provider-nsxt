@@ -37,7 +37,7 @@ resource "nsxt_ns_group" "NG" {
 The following arguments are supported:
 
 * `description` - (Optional) Description of this resource.
-* `display_name` - (Optional) Defaults to ID if not set.
+* `display_name` - (Optional) The display name of this resource. Defaults to ID if not set.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this ns_group.
 * `member` - (Optional) Reference to the direct/static members of the NSGroup. Can be ID based expressions only. VirtualMachine cannot be added as a static member. target_type can be: NSGroup, IPSet, LogicalPort, LogicalSwitch, MACSet
 * `membership_criteria` - (Optional) List of tag or ID expressions which define the membership criteria for this NSGroup. An object must satisfy at least one of these expressions to qualify as a member of this group.

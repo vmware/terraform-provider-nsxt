@@ -29,7 +29,7 @@ func resourceNsxtNsGroup() *schema.Resource {
 			},
 			"display_name": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "Defaults to ID if not set",
+				Description: "The display name of this resource. Defaults to ID if not set",
 				Optional:    true,
 				Computed:    true,
 			},
@@ -42,12 +42,14 @@ func resourceNsxtNsGroup() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"target_type": &schema.Schema{
 							Type:         schema.TypeString,
+							Description:  "Type of the resource on which this expression is evaluated",
 							Required:     true,
 							ValidateFunc: validation.StringInSlice(nsGroupTargetTypeValues, false),
 						},
 						"value": &schema.Schema{
-							Type:     schema.TypeString,
-							Required: true,
+							Type:        schema.TypeString,
+							Description: "Value that satisfies this expression",
+							Required:    true,
 						},
 					},
 				},

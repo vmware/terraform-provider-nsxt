@@ -30,7 +30,7 @@ resource "nsxt_l4_port_set_ns_service" "S1" {
 The following arguments are supported:
 
 * `display_name` - (Optional) Display name, defaults to ID if not set.
-* `description` - (Optional) Description.
+* `description` - (Optional) Description of this resource.
 * `destination_ports` - (Optional) Set of destination ports.
 * `source_ports` - (Optional) Set of source ports.
 * `protocol` - (Optional) VL4 protocol

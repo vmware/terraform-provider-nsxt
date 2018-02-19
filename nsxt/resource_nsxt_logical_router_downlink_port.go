@@ -30,7 +30,7 @@ func resourceNsxtLogicalRouterDownLinkPort() *schema.Resource {
 			},
 			"display_name": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "Defaults to ID if not set",
+				Description: "The display name of this resource. Defaults to ID if not set",
 				Optional:    true,
 				Computed:    true,
 			},
@@ -61,7 +61,7 @@ func resourceNsxtLogicalRouterDownLinkPort() *schema.Resource {
 				Default:      "STRICT",
 				ValidateFunc: validation.StringInSlice(logicalRouterPortUrpfModeValues, false),
 			},
-			"service_binding": getResourceReferencesSchema(false, false, []string{"LogicalService"}),
+			"service_binding": getResourceReferencesSchema(false, false, []string{"LogicalService"}, "Service Bindings"),
 		},
 	}
 }

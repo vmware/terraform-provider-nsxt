@@ -33,14 +33,14 @@ func resourceNsxtFirewallSection() *schema.Resource {
 			},
 			"display_name": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "Defaults to ID if not set",
+				Description: "The display name of this resource. Defaults to ID if not set",
 				Optional:    true,
 				Computed:    true,
 			},
 			"tag": getTagsSchema(),
 			"is_default": &schema.Schema{
 				Type:        schema.TypeBool,
-				Description: "It is a boolean flag which reflects whether a firewall section is default section or not. Each Layer 3 and Layer 2 section will have at least and at most one default section",
+				Description: "A boolean flag which reflects whether a firewall section is default section or not. Each Layer 3 and Layer 2 section will have at least and at most one default section",
 				Computed:    true,
 			},
 			"section_type": &schema.Schema{
@@ -55,7 +55,7 @@ func resourceNsxtFirewallSection() *schema.Resource {
 				Required:    true,
 				ForceNew:    true,
 			},
-			"applied_to": getResourceReferencesSetSchema(false, false, []string{"LogicalPort", "LogicalSwitch", "NSGroup"}),
+			"applied_to": getResourceReferencesSetSchema(false, false, []string{"LogicalPort", "LogicalSwitch", "NSGroup"}, "List of objects where the rules in this section will be enforced. This will take precedence over rule level appliedTo"),
 			"rule":       getRulesSchema(),
 		},
 	}
@@ -63,8 +63,9 @@ func resourceNsxtFirewallSection() *schema.Resource {
 
 func getRulesSchema() *schema.Schema {
 	return &schema.Schema{
-		Type:     schema.TypeList,
-		Optional: true,
+		Type:        schema.TypeList,
+		Description: "List of firewall rules in the section. Only homogeneous rules are supported",
+		Optional:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"revision": getRevisionSchema(),
@@ -84,8 +85,8 @@ func getRulesSchema() *schema.Schema {
 					Required:     true,
 					ValidateFunc: validation.StringInSlice(firewallRuleActionValues, false),
 				},
-				"applied_to":  getResourceReferencesSchema(false, false, []string{"LogicalPort", "LogicalSwitch", "NSGroup"}),
-				"destination": getResourceReferencesSchema(false, false, []string{"IPSet", "LogicalPort", "LogicalSwitch", "NSGroup", "MACSet"}),
+				"applied_to":  getResourceReferencesSchema(false, false, []string{"LogicalPort", "LogicalSwitch", "NSGroup"}, "List of object where rule will be enforced. The section level field overrides this one. Null will be treated as any"),
+				"destination": getResourceReferencesSchema(false, false, []string{"IPSet", "LogicalPort", "LogicalSwitch", "NSGroup", "MACSet"}, "List of the destinations. Null will be treated as any"),
 				"destinations_excluded": &schema.Schema{
 					Type:        schema.TypeBool,
 					Description: "Negation of the destination",
@@ -123,13 +124,13 @@ func getRulesSchema() *schema.Schema {
 					Description: "User level field which will be printed in CLI and packet logs",
 					Optional:    true,
 				},
-				"source": getResourceReferencesSchema(false, false, []string{"IPSet", "LogicalPort", "LogicalSwitch", "NSGroup", "MACSet"}),
+				"source": getResourceReferencesSchema(false, false, []string{"IPSet", "LogicalPort", "LogicalSwitch", "NSGroup", "MACSet"}, "List of sources. Null will be treated as any"),
 				"sources_excluded": &schema.Schema{
 					Type:        schema.TypeBool,
 					Description: "Negation of the source",
 					Optional:    true,
 				},
-				"service": getResourceReferencesSchema(false, false, []string{"NSService", "NSServiceGroup"}),
+				"service": getResourceReferencesSchema(false, false, []string{"NSService", "NSServiceGroup"}, "List of the services. Null will be treated as any"),
 			},
 		},
 	}

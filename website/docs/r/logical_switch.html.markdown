@@ -39,7 +39,7 @@ The following arguments are supported:
 * `replication_mode` - (Optional) Replication mode of the Logical Switch. Accepted values - 'MTEP' (Hierarchical Two-Tier replication) and 'SOURCE' (Head Replication), with 'MTEP' being the default value. Applies to overlay logical switches.
 * `switching_profile_id` - (Optional) List of IDs of switching profiles (of various types) to be associated with this switch. Default switching profiles will be used if not specified.
 * `display_name` - (Optional) Display name, defaults to ID if not set.
-* `description` - (Optional) Description.
+* `description` - (Optional) Description of the resource.
 * `ip_pool_id` - (Optional) Ip Pool ID to be associated with the logical switch.
 * `mac_pool_id` - (Optional) Mac Pool ID to be associated with the logical switch.
 * `vlan` - (Optional) Vlan for vlan logical switch. If not specified, this switch is overlay logical switch.

@@ -65,7 +65,7 @@ resource "nsxt_firewall_section" "FS" {
 
 The following arguments are supported:
 
-* `display_name` - (Optional) Defaults to ID if not set.
+* `display_name` - (Optional) The display name of this resource. Defaults to ID if not set.
 * `description` - (Optional) Description of this resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this firewall_section.
 * `applied_to` - (Optional) List of objects where the rules in this section will be enforced. This will take precedence over rule level appliedTo. [allowed target types: "LogicalPort", "LogicalSwitch", "NSGroup"]

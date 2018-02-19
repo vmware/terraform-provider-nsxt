@@ -41,8 +41,9 @@ func getStringListFromSchemaSet(d *schema.ResourceData, schemaAttrName string) [
 
 func getRevisionSchema() *schema.Schema {
 	return &schema.Schema{
-		Type:     schema.TypeInt,
-		Computed: true,
+		Type:        schema.TypeInt,
+		Description: "The _revision property describes the current revision of the resource. To prevent clients from overwriting each other's changes, PUT operations must include the current _revision of the resource, which clients should obtain by issuing a GET operation. If the _revision provided in a PUT request is missing or stale, the operation will be rejected",
+		Computed:    true,
 	}
 }
 
@@ -57,8 +58,9 @@ func getSystemOwnedSchema() *schema.Schema {
 // utilities to define & handle tags
 func getTagsSchema() *schema.Schema {
 	return &schema.Schema{
-		Type:     schema.TypeSet,
-		Optional: true,
+		Type:        schema.TypeSet,
+		Description: "Set of opaque identifiers meaningful to the API user",
+		Optional:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"scope": &schema.Schema{
@@ -102,18 +104,21 @@ func setTagsInSchema(d *schema.ResourceData, tags []common.Tag) {
 // utilities to define & handle switching profiles
 func getSwitchingProfileIdsSchema() *schema.Schema {
 	return &schema.Schema{
-		Type:     schema.TypeSet,
-		Optional: true,
-		Computed: true,
+		Type:        schema.TypeSet,
+		Description: "List of IDs of switching profiles (of various types) to be associated with this switch. Default switching profiles will be used if not specified",
+		Optional:    true,
+		Computed:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"key": &schema.Schema{
-					Type:     schema.TypeString,
-					Required: true,
+					Type:        schema.TypeString,
+					Description: "The resource type of this profile",
+					Required:    true,
 				},
 				"value": &schema.Schema{
-					Type:     schema.TypeString,
-					Required: true,
+					Type:        schema.TypeString,
+					Description: "The ID of this profile",
+					Required:    true,
 				},
 			},
 		},
@@ -154,22 +159,26 @@ func setSwitchingProfileIdsInSchema(d *schema.ResourceData, nsxClient *nsxt.APIC
 // utilities to define & handle address bindings
 func getAddressBindingsSchema() *schema.Schema {
 	return &schema.Schema{
-		Type:     schema.TypeSet,
-		Optional: true,
+		Type:        schema.TypeSet,
+		Description: "Address bindings for the Logical switch",
+		Optional:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"ip_address": &schema.Schema{
 					Type:         schema.TypeString,
+					Description:  "A single IP address or a subnet cidr",
 					Optional:     true,
 					ValidateFunc: validateSingleIP(),
 				},
 				"mac_address": &schema.Schema{
-					Type:     schema.TypeString,
-					Optional: true,
+					Type:        schema.TypeString,
+					Description: "A single MAC address",
+					Optional:    true,
 				},
 				"vlan": &schema.Schema{
-					Type:     schema.TypeInt,
-					Optional: true,
+					Type:        schema.TypeInt,
+					Description: "A single vlan tag value",
+					Optional:    true,
 				},
 			},
 		},
@@ -204,41 +213,46 @@ func setAddressBindingsInSchema(d *schema.ResourceData, bindings []manager.Packe
 	d.Set("address_binding", bindingList)
 }
 
-func getResourceReferencesSchema(required bool, computed bool, valid_target_types []string) *schema.Schema {
-	return getResourceReferencesSchemaByType(required, computed, valid_target_types, true)
+func getResourceReferencesSchema(required bool, computed bool, valid_target_types []string, description string) *schema.Schema {
+	return getResourceReferencesSchemaByType(required, computed, valid_target_types, true, description)
 }
 
-func getResourceReferencesSetSchema(required bool, computed bool, valid_target_types []string) *schema.Schema {
-	return getResourceReferencesSchemaByType(required, computed, valid_target_types, false)
+func getResourceReferencesSetSchema(required bool, computed bool, valid_target_types []string, description string) *schema.Schema {
+	return getResourceReferencesSchemaByType(required, computed, valid_target_types, false, description)
 }
 
-func getResourceReferencesSchemaByType(required bool, computed bool, valid_target_types []string, is_list bool) *schema.Schema {
+func getResourceReferencesSchemaByType(required bool, computed bool, valid_target_types []string, is_list bool, description string) *schema.Schema {
 	sch_type := schema.TypeSet
 	if is_list {
 		sch_type = schema.TypeList
 	}
 
 	return &schema.Schema{
-		Type:     sch_type,
-		Required: required,
-		Optional: !required,
-		Computed: computed,
+		Type:        sch_type,
+		Required:    required,
+		Optional:    !required,
+		Computed:    computed,
+		Description: description,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"is_valid": &schema.Schema{
-					Type:     schema.TypeBool,
-					Computed: true,
+					Type:        schema.TypeBool,
+					Description: "A boolean flag which will be set to false if the referenced NSX resource has been deleted",
+					Computed:    true,
 				},
 				"target_display_name": &schema.Schema{
-					Type:     schema.TypeString,
-					Computed: true,
+					Type:        schema.TypeString,
+					Description: "Display name of the NSX resource",
+					Computed:    true,
 				},
 				"target_id": &schema.Schema{
-					Type:     schema.TypeString,
-					Optional: true,
+					Type:        schema.TypeString,
+					Description: "Identifier of the NSX resource",
+					Optional:    true,
 				},
 				"target_type": &schema.Schema{
 					Type:         schema.TypeString,
+					Description:  "Type of the NSX resource",
 					Optional:     true,
 					ValidateFunc: validation.StringInSlice(valid_target_types, false),
 				},
@@ -323,15 +337,17 @@ func setServiceBindingsInSchema(d *schema.ResourceData, serviceBindings []manage
 
 func getIpSubnetsSchema(required bool, computed bool) *schema.Schema {
 	return &schema.Schema{
-		Type:     schema.TypeList,
-		Optional: !required,
-		Required: required,
-		Computed: computed,
+		Type:        schema.TypeList,
+		Description: "Logical router port subnets",
+		Optional:    !required,
+		Required:    required,
+		Computed:    computed,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"ip_addresses": &schema.Schema{
-					Type:     schema.TypeList,
-					Optional: true,
+					Type:        schema.TypeList,
+					Description: "IPv4 Addresses",
+					Optional:    true,
 					Elem: &schema.Schema{
 						Type:         schema.TypeString,
 						ValidateFunc: validateSingleIP(),
@@ -339,6 +355,7 @@ func getIpSubnetsSchema(required bool, computed bool) *schema.Schema {
 				},
 				"prefix_length": &schema.Schema{
 					Type:         schema.TypeInt,
+					Description:  "Subnet Prefix Length",
 					Optional:     true,
 					ValidateFunc: validation.IntBetween(0, 32),
 				},

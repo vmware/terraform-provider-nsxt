@@ -35,7 +35,7 @@ resource "nsxt_static_route" "SR" {
 The following arguments are supported:
 
 * `description` - (Optional) Description of this resource.
-* `display_name` - (Optional) Defaults to ID if not set.
+* `display_name` - (Optional) The display name of this resource. Defaults to ID if not set.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this static_route.
 * `logical_router_id` - (Optional) Logical router id.
 * `network` - (Required) CIDR.
