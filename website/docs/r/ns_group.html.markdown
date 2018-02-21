@@ -13,12 +13,12 @@ Provides a resource to configure ns group on NSX-T manager
 ## Example Usage
 
 ```hcl
-resource "nsxt_ns_group" "NG" {
+resource "nsxt_ns_group" "group2" {
     description = "NG provisioned by Terraform"
     display_name = "NG"
     member {
         target_type = "NSGroup"
-        value = "${nsxt_ns_group.GRP1.id}"
+        value = "${nsxt_ns_group.group1.id}"
     }
     membership_criteria {
         target_type = "LogicalPort"

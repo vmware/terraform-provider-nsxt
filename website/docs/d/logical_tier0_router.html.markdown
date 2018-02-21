@@ -12,7 +12,7 @@ Provides information about logical tier 0 routers configured on NSX-T manager.
 ## Example Usage
 
 ```
-data "nsxt_logical_tier0_router" "RT0" {
+data "nsxt_logical_tier0_router" "tier0_router" {
   display_name = "PLR1"
 }
 ```

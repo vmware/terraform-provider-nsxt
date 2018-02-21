@@ -13,18 +13,18 @@ Provides a resource to configure Logical Port (LP) on NSX-T Manager.
 ## Example Usage
 
 ```hcl
-resource "nsxt_logical_port" "LP1" {
+resource "nsxt_logical_port" "logical_port" {
     admin_state = "UP"
     description = "LP1 provisioned by Terraform"
     display_name = "LP1"
-    logical_switch_id = "${nsxt_logical_switch.LS1.id}"
+    logical_switch_id = "${nsxt_logical_switch.switch1.id}"
     tag {
         scope = "color"
         tag = "blue"
     }
     switching_profile_id {
-        key = "${data.nsxt_switching_profile.PRF1.resource_type}",
-        value = "${data.nsxt_switching_profile.PRF1.id}"
+        key = "${data.nsxt_switching_profile.qos_profile.resource_type}",
+        value = "${data.nsxt_switching_profile.qos_profile.id}"
     }
 }
 ```

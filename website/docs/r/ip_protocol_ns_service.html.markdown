@@ -13,7 +13,7 @@ Provides a resource to configure NS service for IP protocol on NSX-T Manager
 ## Example Usage
 
 ```hcl
-resource "nsxt_ip_protocol_ns_service" "S1" {
+resource "nsxt_ip_protocol_ns_service" "ipns" {
     description = "S1 provisioned by Terraform"
     display_name = "S1"
     protocol = "10"

@@ -13,15 +13,15 @@ Provides a resource to configure static route on NSX-T manager
 ## Example Usage
 
 ```hcl
-resource "nsxt_static_route" "SR" {
+resource "nsxt_static_route" "static_route" {
     description = "SR provisioned by Terraform"
     display_name = "SR"
-    logical_router_id = ${nsxt_logical_tier1_router.RTR1.id}
+    logical_router_id = ${nsxt_logical_tier1_router.router1.id}
     network = "4.4.4.0/24"
     next_hop {
         ip_address = "8.0.0.10"
         administrative_distance = "1"
-        logical_router_port_id = "${nsxt_logical_router_downlink_port.LRP1.id}"
+        logical_router_port_id = "${nsxt_logical_router_downlink_port.downlink_port.id}"
     }
     tag {
         scope = "color"

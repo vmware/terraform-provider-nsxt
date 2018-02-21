@@ -15,7 +15,7 @@ link port.
 ## Example Usage
 
 ```hcl
-resource "nsxt_dhcp_relay_profile" "DRP" {
+resource "nsxt_dhcp_relay_profile" "dr_profile" {
     description = "DRP provisioned by Terraform"
     display_name = "DRP"
     tag {
@@ -25,21 +25,21 @@ resource "nsxt_dhcp_relay_profile" "DRP" {
     server_addresses = ["1.1.1.1"]
 }
 
-resource "nsxt_dhcp_relay_service" "DRS" {
+resource "nsxt_dhcp_relay_service" "dr_service" {
     display_name = "DRS"
-    dhcp_relay_profile_id = "${nsxt_dhcp_relay_profile.DRP.id}"
+    dhcp_relay_profile_id = "${nsxt_dhcp_relay_profile.dr_profile.id}"
 }
 
-resource "nsxt_logical_router_downlink_port" "LRDP" {
+resource "nsxt_logical_router_downlink_port" "router_downlink" {
     display_name = "logical_router_downlink_port"
-    linked_logical_switch_port_id = "${nsxt_logical_port.PORT1.id}"
-    logical_router_id = "${nsxt_logical_tier1_router.RTR1.id}"
+    linked_logical_switch_port_id = "${nsxt_logical_port.port1.id}"
+    logical_router_id = "${nsxt_logical_tier1_router.rtr1.id}"
     subnet {
         ip_addresses = ["8.0.0.1"],
         prefix_length = 24
     }
     service_binding {
-        target_id = "${nsxt_dhcp_relay_service.DRS.id}"
+        target_id = "${nsxt_dhcp_relay_service.dr_service.id}"
         target_type = "LogicalService"
     }
 }

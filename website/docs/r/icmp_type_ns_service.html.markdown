@@ -13,7 +13,7 @@ Provides a resource to configure NS service for ICMP on NSX-T Manager
 ## Example Usage
 
 ```hcl
-resource "nsxt_icmp_type_ns_service" "S1" {
+resource "nsxt_icmp_type_ns_service" "ns_service_icmp" {
     description = "S1 provisioned by Terraform"
     display_name = "S1"
     protocol = "ICMPv4"

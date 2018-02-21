@@ -13,7 +13,7 @@ Provides information about transport zones (TZ) configured on NSX-T manager.
 ## Example Usage
 
 ```
-data "nsxt_transport_zone" "TZ1" {
+data "nsxt_transport_zone" "overlay_transport_zone" {
   display_name = "1-transportzone-87"
 }
 ```

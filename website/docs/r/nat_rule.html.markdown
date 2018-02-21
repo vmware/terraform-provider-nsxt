@@ -13,8 +13,8 @@ Provides a resource to configure NAT rule on NSX-T manager
 ## Example Usage
 
 ```hcl
-resource "nsxt_nat_rule" "NR" {
-    logical_router_id = "${nsxt_logical_tier1_router.RTR1.id}"
+resource "nsxt_nat_rule" "rule1" {
+    logical_router_id = "${nsxt_logical_tier1_router.rtr1.id}"
     description = "NR provisioned by Terraform"
     display_name = "NR"
     action = "SNAT"

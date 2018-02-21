@@ -13,7 +13,7 @@ Provides a resource to configure NS service for IGMP on NSX-T Manager
 ## Example Usage
 
 ```hcl
-resource "nsxt_igmp_type_ns_service" "S1" {
+resource "nsxt_igmp_type_ns_service" "itns" {
     description = "S1 provisioned by Terraform"
     display_name = "S1"
     tag {

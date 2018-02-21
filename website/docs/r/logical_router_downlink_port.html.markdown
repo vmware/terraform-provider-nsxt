@@ -13,14 +13,14 @@ Provides a resource to configure Logical Router Downlink Port on NSX-T Manager.
 ## Example Usage
 
 ```hcl
-resource "nsxt_logical_router_downlink_port" "DP1" {
+resource "nsxt_logical_router_downlink_port" "downlink_port" {
     description = "DP1 provisioned by Terraform"
     display_name = "DP1"
-    logical_router_id = "${nsxt_logical_router.RTR1.id}"
-    linked_logical_switch_port_id = "${nsxt_logical_port.LP1.id}"
+    logical_router_id = "${nsxt_logical_router.rtr1.id}"
+    linked_logical_switch_port_id = "${nsxt_logical_port.logical_port1.id}"
     ip_address = "1.1.0.0/24"
     service_binding {
-      target_id = "${nsxt_dhcp_relay_service.DRS1.id}"
+      target_id = "${nsxt_dhcp_relay_service.dr_service.id}"
       target_type = "LogicalService"
     }
     tag {

@@ -13,7 +13,7 @@ Provides a resource to configure IP set on NSX-T manager
 ## Example Usage
 
 ```hcl
-resource "nsxt_ip_set" "IS" {
+resource "nsxt_ip_set" "ipset" {
     description = "IS provisioned by Terraform"
     display_name = "IS"
     tag {

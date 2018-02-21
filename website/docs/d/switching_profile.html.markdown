@@ -13,7 +13,7 @@ Provides information about switching profiles configured on NSX-T manager.
 ## Example Usage
 
 ```
-data "nsxt_switching_profile" "profile1" {
+data "nsxt_switching_profile" "qos_profile" {
   display_name = "qos-profile"
 }
 ```

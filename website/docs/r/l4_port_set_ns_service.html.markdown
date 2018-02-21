@@ -13,7 +13,7 @@ Provides a resource to configure NS service for L4 protocol with ports on NSX-T 
 ## Example Usage
 
 ```hcl
-resource "nsxt_l4_port_set_ns_service" "S1" {
+resource "nsxt_l4_port_set_ns_service" "ns_service_l4" {
     description = "S1 provisioned by Terraform"
     display_name = "S1"
     protocol = "TCP"

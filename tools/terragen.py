@@ -323,7 +323,7 @@ def write_doc_header(f, resource):
 
 
 def write_doc_example(f, resource, attrs):
-    obj_name = ''.join(i[0] for i in resource.split('_')).upper()
+    obj_name = resource
     pretty_writeln(f, "## Example Usage\n")
     pretty_writeln(f, "```hcl")
 

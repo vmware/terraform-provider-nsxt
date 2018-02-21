@@ -12,7 +12,7 @@ Provides information about edge clusters configured on NSX-T manager.
 ## Example Usage
 
 ```
-data "nsxt_edge_cluster" "EC1" {
+data "nsxt_edge_cluster" "edge_cluster1" {
   display_name = "edgecluster"
 }
 ```
