@@ -52,7 +52,7 @@ func TestAccResourceNsxtLogicalTier1Router_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "failover_mode", failoverMode),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "enable_router_advertisement", "false"),
-					resource.TestCheckResourceAttr(testResourceName, "advertise_connected_routes", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "advertise_connected_routes", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "advertise_static_routes", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "advertise_nat_routes", "false"),
 				),
@@ -156,7 +156,7 @@ resource "nsxt_logical_tier1_router" "test" {
 	high_availability_mode = "%s"
 	edge_cluster_id = "${data.nsxt_edge_cluster.EC.id}"
 	enable_router_advertisement = "false"
-	advertise_connected_routes = "false"
+	advertise_connected_routes = "true"
 	advertise_static_routes = "false"
 	advertise_nat_routes = "false"
     tag {

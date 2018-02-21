@@ -30,7 +30,7 @@ resource "nsxt_firewall_section" "firewall_section" {
       display_name = "out_rule",
       description = "Out going rule",
       action = "ALLOW",
-      logged = "true",
+      logged = true,
       ip_protocol = "IPV4",
       direction = "OUT",
       source {
@@ -46,7 +46,7 @@ resource "nsxt_firewall_section" "firewall_section" {
       display_name = "in_rule",
       description = "In going rule",
       action = "DROP",
-      logged = "true",
+      logged = true,
       ip_protocol = "IPV4",
       direction = "IN",
       service {

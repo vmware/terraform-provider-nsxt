@@ -19,10 +19,10 @@ resource "nsxt_logical_tier1_router" "tier1_router" {
     failover_mode =  "PREEMPTIVE"
     high_availability_mode = "ACTIVE_STANDBY"
     edge_cluster_id = "${data.nsxt_edge_cluster.edge_cluster.id}"
-    enable_router_advertisement = "true"
-    advertise_connected_routes = "false"
-    advertise_static_routes = "true"
-    advertise_nat_routes = "true"
+    enable_router_advertisement = true
+    advertise_connected_routes = false
+    advertise_static_routes = true
+    advertise_nat_routes = true
     tag {
         scope = "color"
         tag = "blue"
