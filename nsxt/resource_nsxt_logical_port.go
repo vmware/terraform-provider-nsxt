@@ -65,7 +65,7 @@ func resourceNsxtLogicalPortCreate(d *schema.ResourceData, m interface{}) error 
 	lp, resp, err := nsxClient.LogicalSwitchingApi.CreateLogicalPort(nsxClient.Context, lp)
 
 	if err != nil {
-		return fmt.Errorf("Error while creating logical port %s: %v\n", lp.DisplayName, err)
+		return fmt.Errorf("Error while creating logical port %s: %v", lp.DisplayName, err)
 	}
 	if resp.StatusCode != http.StatusCreated {
 		return fmt.Errorf("Unexpected status returned during Logical port create: %v", resp.StatusCode)
@@ -91,7 +91,7 @@ func resourceNsxtLogicalPortRead(d *schema.ResourceData, m interface{}) error {
 		return nil
 	}
 	if err != nil {
-		return fmt.Errorf("Error while reading logical port %s: %v\n", id, err)
+		return fmt.Errorf("Error while reading logical port %s: %v", id, err)
 	}
 
 	d.Set("revision", logicalPort.Revision)
@@ -123,10 +123,10 @@ func resourceNsxtLogicalPortUpdate(d *schema.ResourceData, m interface{}) error 
 
 	lp, resp, err := nsxClient.LogicalSwitchingApi.GetLogicalPort(nsxClient.Context, id)
 	if resp.StatusCode == http.StatusNotFound {
-		return fmt.Errorf("Logical port %s was not found\n", id)
+		return fmt.Errorf("Logical port %s was not found", id)
 	}
 	if err != nil {
-		return fmt.Errorf("Error while reading logical port %s: %v\n", id, err)
+		return fmt.Errorf("Error while reading logical port %s: %v", id, err)
 	}
 
 	lp.DisplayName = name
@@ -138,7 +138,7 @@ func resourceNsxtLogicalPortUpdate(d *schema.ResourceData, m interface{}) error 
 
 	lp, resp, err = nsxClient.LogicalSwitchingApi.UpdateLogicalPort(nsxClient.Context, id, lp)
 	if err != nil || resp.StatusCode == http.StatusNotFound {
-		return fmt.Errorf("Error while updating logical port %s: %v\n", id, err)
+		return fmt.Errorf("Error while updating logical port %s: %v", id, err)
 	}
 	return resourceNsxtLogicalPortRead(d, m)
 }
@@ -155,10 +155,10 @@ func resourceNsxtLogicalPortDelete(d *schema.ResourceData, m interface{}) error 
 	resp, err := nsxClient.LogicalSwitchingApi.DeleteLogicalPort(nsxClient.Context, lpID, localVarOptionals)
 
 	if err != nil {
-		return fmt.Errorf("Error while deleting logical port %s: %v\n", lpID, err)
+		return fmt.Errorf("Error while deleting logical port %s: %v", lpID, err)
 	}
 	if resp.StatusCode == http.StatusNotFound {
-		log.Printf("[DEBUG] Logical port %s was not found\n", lpID)
+		log.Printf("[DEBUG] Logical port %s was not found", lpID)
 		d.SetId("")
 	}
 

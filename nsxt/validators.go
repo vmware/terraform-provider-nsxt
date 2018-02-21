@@ -74,10 +74,7 @@ func isIPRange(v string) bool {
 
 func isSingleIP(v string) bool {
 	ip := net.ParseIP(v)
-	if ip == nil {
-		return false
-	}
-	return true
+	return (ip != nil)
 }
 
 func isCidr(v string, maxPrefix int, isIP bool) bool {
@@ -96,11 +93,7 @@ func isCidr(v string, maxPrefix int, isIP bool) bool {
 	}
 	s := strings.Split(v, "/")
 	prefix, _ := strconv.ParseUint(s[1], 10, 32)
-	if int(prefix) > maxPrefix {
-		return false
-	}
-
-	return true
+	return (int(prefix) <= maxPrefix)
 }
 
 func validatePortAddress() schema.SchemaValidateFunc {

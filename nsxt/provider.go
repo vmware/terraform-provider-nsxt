@@ -10,6 +10,7 @@ import (
 	"github.com/vmware/go-vmware-nsxt"
 )
 
+// Provider for VMWare NSX-T. Returns terraform.ResourceProvider
 func Provider() terraform.ResourceProvider {
 	return &schema.Provider{
 
@@ -73,11 +74,11 @@ func Provider() terraform.ResourceProvider {
 			"nsxt_icmp_type_ns_service":              resourceNsxtIcmpTypeNsService(),
 			"nsxt_igmp_type_ns_service":              resourceNsxtIgmpTypeNsService(),
 			"nsxt_ether_type_ns_service":             resourceNsxtEtherTypeNsService(),
-			"nsxt_ip_protocol_ns_service":            resourceNsxtIpProtocolNsService(),
+			"nsxt_ip_protocol_ns_service":            resourceNsxtIPProtocolNsService(),
 			"nsxt_ns_group":                          resourceNsxtNsGroup(),
 			"nsxt_firewall_section":                  resourceNsxtFirewallSection(),
 			"nsxt_nat_rule":                          resourceNsxtNatRule(),
-			"nsxt_ip_set":                            resourceNsxtIpSet(),
+			"nsxt_ip_set":                            resourceNsxtIPSet(),
 			"nsxt_static_route":                      resourceNsxtStaticRoute(),
 		},
 

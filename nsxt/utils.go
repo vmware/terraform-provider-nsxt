@@ -337,10 +337,10 @@ func getAdminStateSchema() *schema.Schema {
 	}
 }
 
-func makeResourceReference(resourceType string, resourceId string) *common.ResourceReference {
+func makeResourceReference(resourceType string, resourceID string) *common.ResourceReference {
 	return &common.ResourceReference{
 		TargetType: resourceType,
-		TargetId:   resourceId,
+		TargetId:   resourceID,
 	}
 }
 

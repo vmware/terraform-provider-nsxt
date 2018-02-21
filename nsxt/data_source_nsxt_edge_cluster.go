@@ -62,10 +62,10 @@ func dataSourceNsxtEdgeClusterRead(d *schema.ResourceData, m interface{}) error 
 		objGet, resp, err := nsxClient.NetworkTransportApi.ReadEdgeCluster(nsxClient.Context, objID)
 
 		if err != nil {
-			return fmt.Errorf("Error while reading edge cluster %s: %v\n", objID, err)
+			return fmt.Errorf("Error while reading edge cluster %s: %v", objID, err)
 		}
 		if resp.StatusCode == http.StatusNotFound {
-			return fmt.Errorf("Edge cluster %s was not found\n", objID)
+			return fmt.Errorf("Edge cluster %s was not found", objID)
 		}
 		obj = objGet
 	} else if objName != "" {
@@ -73,22 +73,22 @@ func dataSourceNsxtEdgeClusterRead(d *schema.ResourceData, m interface{}) error 
 		// TODO use 2nd parameter localVarOptionals for paging
 		objList, _, err := nsxClient.NetworkTransportApi.ListEdgeClusters(nsxClient.Context, nil)
 		if err != nil {
-			return fmt.Errorf("Error while reading edge clusters: %v\n", err)
+			return fmt.Errorf("Error while reading edge clusters: %v", err)
 		}
 		// go over the list to find the correct one
 		// TODO: prefer full match
 		found := false
 		for _, objInList := range objList.Results {
 			if strings.HasPrefix(objInList.DisplayName, objName) {
-				if found == true {
-					return fmt.Errorf("Found multiple edge clusters with name '%s'\n", objName)
+				if found {
+					return fmt.Errorf("Found multiple edge clusters with name '%s'", objName)
 				}
 				obj = objInList
 				found = true
 			}
 		}
-		if found == false {
-			return fmt.Errorf("Edge cluster '%s' was not found\n", objName)
+		if !found {
+			return fmt.Errorf("Edge cluster '%s' was not found", objName)
 		}
 	} else {
 		return fmt.Errorf("Error obtaining edge cluster ID or name during read")

@@ -62,10 +62,10 @@ func dataSourceNsxtLogicalTier0RouterRead(d *schema.ResourceData, m interface{})
 		objGet, resp, err := nsxClient.LogicalRoutingAndServicesApi.ReadLogicalRouter(nsxClient.Context, objID)
 
 		if err != nil {
-			return fmt.Errorf("Error while reading logical tier0 router %s: %v\n", objID, err)
+			return fmt.Errorf("Error while reading logical tier0 router %s: %v", objID, err)
 		}
 		if resp.StatusCode == http.StatusNotFound {
-			return fmt.Errorf("logical tier0 router %s was not found\n", objID)
+			return fmt.Errorf("logical tier0 router %s was not found", objID)
 		}
 		obj = objGet
 	} else if objName != "" {
@@ -73,22 +73,22 @@ func dataSourceNsxtLogicalTier0RouterRead(d *schema.ResourceData, m interface{})
 		// TODO use 2nd parameter localVarOptionals for paging
 		objList, _, err := nsxClient.LogicalRoutingAndServicesApi.ListLogicalRouters(nsxClient.Context, nil)
 		if err != nil {
-			return fmt.Errorf("Error while reading logical tier0 routers: %v\n", err)
+			return fmt.Errorf("Error while reading logical tier0 routers: %v", err)
 		}
 		// go over the list to find the correct one
 		// TODO: prefer full match
 		found := false
 		for _, objInList := range objList.Results {
 			if strings.HasPrefix(objInList.DisplayName, objName) {
-				if found == true {
-					return fmt.Errorf("Found multiple logical tier0 routers with name '%s'\n", objName)
+				if found {
+					return fmt.Errorf("Found multiple logical tier0 routers with name '%s'", objName)
 				}
 				obj = objInList
 				found = true
 			}
 		}
-		if found == false {
-			return fmt.Errorf("logical tier0 router '%s' was not found\n", objName)
+		if !found {
+			return fmt.Errorf("logical tier0 router '%s' was not found", objName)
 		}
 	} else {
 		return fmt.Errorf("Error obtaining logical tier0 router ID or name during read")

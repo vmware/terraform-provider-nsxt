@@ -12,12 +12,12 @@ import (
 	"net/http"
 )
 
-func resourceNsxtIpSet() *schema.Resource {
+func resourceNsxtIPSet() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNsxtIpSetCreate,
-		Read:   resourceNsxtIpSetRead,
-		Update: resourceNsxtIpSetUpdate,
-		Delete: resourceNsxtIpSetDelete,
+		Create: resourceNsxtIPSetCreate,
+		Read:   resourceNsxtIPSetRead,
+		Update: resourceNsxtIPSetUpdate,
+		Delete: resourceNsxtIPSetDelete,
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
@@ -46,7 +46,7 @@ func resourceNsxtIpSet() *schema.Resource {
 	}
 }
 
-func resourceNsxtIpSetCreate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtIPSetCreate(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
@@ -70,10 +70,10 @@ func resourceNsxtIpSetCreate(d *schema.ResourceData, m interface{}) error {
 	}
 	d.SetId(ipSet.Id)
 
-	return resourceNsxtIpSetRead(d, m)
+	return resourceNsxtIPSetRead(d, m)
 }
 
-func resourceNsxtIpSetRead(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtIPSetRead(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 	id := d.Id()
 	if id == "" {
@@ -99,7 +99,7 @@ func resourceNsxtIpSetRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceNsxtIpSetUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtIPSetUpdate(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 	id := d.Id()
 	if id == "" {
@@ -125,10 +125,10 @@ func resourceNsxtIpSetUpdate(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("Error during IpSet update: %v", err)
 	}
 
-	return resourceNsxtIpSetRead(d, m)
+	return resourceNsxtIPSetRead(d, m)
 }
 
-func resourceNsxtIpSetDelete(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtIPSetDelete(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 	id := d.Id()
 	if id == "" {

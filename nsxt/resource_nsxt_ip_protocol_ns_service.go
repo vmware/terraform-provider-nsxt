@@ -13,12 +13,12 @@ import (
 	"net/http"
 )
 
-func resourceNsxtIpProtocolNsService() *schema.Resource {
+func resourceNsxtIPProtocolNsService() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNsxtIpProtocolNsServiceCreate,
-		Read:   resourceNsxtIpProtocolNsServiceRead,
-		Update: resourceNsxtIpProtocolNsServiceUpdate,
-		Delete: resourceNsxtIpProtocolNsServiceDelete,
+		Create: resourceNsxtIPProtocolNsServiceCreate,
+		Read:   resourceNsxtIPProtocolNsServiceRead,
+		Update: resourceNsxtIPProtocolNsServiceUpdate,
+		Delete: resourceNsxtIPProtocolNsServiceDelete,
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
@@ -49,7 +49,7 @@ func resourceNsxtIpProtocolNsService() *schema.Resource {
 	}
 }
 
-func resourceNsxtIpProtocolNsServiceCreate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtIPProtocolNsServiceCreate(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
@@ -80,10 +80,10 @@ func resourceNsxtIpProtocolNsServiceCreate(d *schema.ResourceData, m interface{}
 		return fmt.Errorf("Unexpected status returned during NsService create: %v", resp.StatusCode)
 	}
 	d.SetId(nsService.Id)
-	return resourceNsxtIpProtocolNsServiceRead(d, m)
+	return resourceNsxtIPProtocolNsServiceRead(d, m)
 }
 
-func resourceNsxtIpProtocolNsServiceRead(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtIPProtocolNsServiceRead(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 	id := d.Id()
 	if id == "" {
@@ -112,7 +112,7 @@ func resourceNsxtIpProtocolNsServiceRead(d *schema.ResourceData, m interface{}) 
 	return nil
 }
 
-func resourceNsxtIpProtocolNsServiceUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtIPProtocolNsServiceUpdate(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 	id := d.Id()
 	if id == "" {
@@ -145,10 +145,10 @@ func resourceNsxtIpProtocolNsServiceUpdate(d *schema.ResourceData, m interface{}
 		return fmt.Errorf("Error during NsService update: %v %v", err, resp)
 	}
 
-	return resourceNsxtIpProtocolNsServiceRead(d, m)
+	return resourceNsxtIPProtocolNsServiceRead(d, m)
 }
 
-func resourceNsxtIpProtocolNsServiceDelete(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtIPProtocolNsServiceDelete(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 	id := d.Id()
 	if id == "" {

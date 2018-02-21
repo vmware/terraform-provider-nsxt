@@ -14,7 +14,7 @@ import (
 )
 
 var failOverModeValues = []string{"PREEMPTIVE", "NON_PREEMPTIVE"}
-var HighAvailabilityValues = []string{"ACTIVE_ACTIVE", "ACTIVE_STANDBY"}
+var highAvailabilityValues = []string{"ACTIVE_ACTIVE", "ACTIVE_STANDBY"}
 
 // TODO: add advanced config
 func resourceNsxtLogicalTier1Router() *schema.Resource {
@@ -51,7 +51,7 @@ func resourceNsxtLogicalTier1Router() *schema.Resource {
 				Description:  "High availability mode",
 				Default:      "ACTIVE_STANDBY",
 				Optional:     true,
-				ValidateFunc: validation.StringInSlice(HighAvailabilityValues, false),
+				ValidateFunc: validation.StringInSlice(highAvailabilityValues, false),
 			},
 			"edge_cluster_id": &schema.Schema{
 				Type:        schema.TypeString,

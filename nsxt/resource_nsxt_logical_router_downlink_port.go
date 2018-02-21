@@ -74,7 +74,7 @@ func resourceNsxtLogicalRouterDownLinkPort() *schema.Resource {
 	}
 }
 
-func getIpSubnetsFromCidr(cidr string) []manager.IpSubnet {
+func getIPSubnetsFromCidr(cidr string) []manager.IpSubnet {
 	s := strings.Split(cidr, "/")
 	ipAddress := s[0]
 	prefix, _ := strconv.ParseUint(s[1], 10, 32)
@@ -87,7 +87,7 @@ func getIpSubnetsFromCidr(cidr string) []manager.IpSubnet {
 	return subnetList
 }
 
-func setIpSubnetsInSchema(d *schema.ResourceData, subnets []manager.IpSubnet) {
+func setIPSubnetsInSchema(d *schema.ResourceData, subnets []manager.IpSubnet) {
 	for _, subnet := range subnets {
 		// only 1 subnet is expected
 		cidr := fmt.Sprintf("%s/%d", subnet.IpAddresses[0], subnet.PrefixLength)
@@ -103,7 +103,7 @@ func resourceNsxtLogicalRouterDownLinkPortCreate(d *schema.ResourceData, m inter
 	logicalRouterID := d.Get("logical_router_id").(string)
 	macAddress := d.Get("mac_address").(string)
 	linkedLogicalSwitchPortID := d.Get("linked_logical_switch_port_id").(string)
-	subnets := getIpSubnetsFromCidr(d.Get("ip_address").(string))
+	subnets := getIPSubnetsFromCidr(d.Get("ip_address").(string))
 	urpfMode := d.Get("urpf_mode").(string)
 	serviceBinding := getServiceBindingsFromSchema(d, "service_binding")
 	logicalRouterDownLinkPort := manager.LogicalRouterDownLinkPort{
@@ -156,7 +156,7 @@ func resourceNsxtLogicalRouterDownLinkPortRead(d *schema.ResourceData, m interfa
 	d.Set("logical_router_id", logicalRouterDownLinkPort.LogicalRouterId)
 	d.Set("mac_address", logicalRouterDownLinkPort.MacAddress)
 	d.Set("linked_logical_switch_port_id", logicalRouterDownLinkPort.LinkedLogicalSwitchPortId.TargetId)
-	setIpSubnetsInSchema(d, logicalRouterDownLinkPort.Subnets)
+	setIPSubnetsInSchema(d, logicalRouterDownLinkPort.Subnets)
 	d.Set("urpf_mode", logicalRouterDownLinkPort.UrpfMode)
 	setServiceBindingsInSchema(d, logicalRouterDownLinkPort.ServiceBindings, "service_binding")
 
@@ -176,7 +176,7 @@ func resourceNsxtLogicalRouterDownLinkPortUpdate(d *schema.ResourceData, m inter
 	tags := getTagsFromSchema(d)
 	logicalRouterID := d.Get("logical_router_id").(string)
 	linkedLogicalSwitchPortID := d.Get("linked_logical_switch_port_id").(string)
-	subnets := getIpSubnetsFromCidr(d.Get("ip_address").(string))
+	subnets := getIPSubnetsFromCidr(d.Get("ip_address").(string))
 	macAddress := d.Get("mac_address").(string)
 	urpfMode := d.Get("urpf_mode").(string)
 	serviceBinding := getServiceBindingsFromSchema(d, "service_binding")

@@ -54,10 +54,10 @@ func dataSourceNsxtSwitchingProfileRead(d *schema.ResourceData, m interface{}) e
 		objGet, resp, err := nsxClient.LogicalSwitchingApi.GetSwitchingProfile(nsxClient.Context, objID)
 
 		if err != nil {
-			return fmt.Errorf("Error while reading switching profile %s: %v\n", objID, err)
+			return fmt.Errorf("Error while reading switching profile %s: %v", objID, err)
 		}
 		if resp.StatusCode == http.StatusNotFound {
-			return fmt.Errorf("switching profile %s was not found\n", objID)
+			return fmt.Errorf("switching profile %s was not found", objID)
 		}
 		obj = objGet
 	} else if objName != "" {
@@ -67,21 +67,21 @@ func dataSourceNsxtSwitchingProfileRead(d *schema.ResourceData, m interface{}) e
 		localVarOptionals["includeSystemOwned"] = true
 		objList, _, err := nsxClient.LogicalSwitchingApi.ListSwitchingProfiles(nsxClient.Context, localVarOptionals)
 		if err != nil {
-			return fmt.Errorf("Error while reading switching profiles: %v\n", err)
+			return fmt.Errorf("Error while reading switching profiles: %v", err)
 		}
 		// go over the list to find the correct one
 		found := false
 		for _, objInList := range objList.Results {
 			if objInList.DisplayName == objName {
-				if found == true {
-					return fmt.Errorf("Found multiple switching profiles with name '%s'\n", objName)
+				if found {
+					return fmt.Errorf("Found multiple switching profiles with name '%s'", objName)
 				}
 				obj = objInList
 				found = true
 			}
 		}
-		if found == false {
-			return fmt.Errorf("Switching profile '%s' was not found\n", objName)
+		if !found {
+			return fmt.Errorf("Switching profile '%s' was not found", objName)
 		}
 	} else {
 		return fmt.Errorf("Error obtaining switching profile ID or name during read")
