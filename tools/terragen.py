@@ -35,6 +35,9 @@ def convert_name(name):
     tmp = re.sub(r'([A-Z])', r'_\1', name).lower()
     return tmp[1:]
 
+def lowercase_first(name):
+    return name[:1].lower() + name[1:]
+
 
 def is_list_complex_attr(attr):
     if attr['type'].startswith('[]'):
@@ -162,26 +165,26 @@ def write_object(f, resource, attrs, is_create=True):
         fixed_name = get_attr_fixed_name(attr)
         if attr['name'] in VIP_GETTER_ATTRS:
             pretty_writeln(f, "%s := get%sFromSchema(d)" % (
-                convert_name(attr['name']), attr['name']))
+                lowercase_first(attr['name']), attr['name']))
             continue
 
         if attr['type'] in TYPECAST_MAP:
             # type casting is needed
             pretty_writeln(f, "%s := %s(d.Get(\"%s\").(%s))" %
-                    (convert_name(attr['name']),
+                    (lowercase_first(attr['name']),
                      attr['type'],
                      fixed_name,
                      TYPECAST_MAP[attr['type']]))
         else:
             pretty_writeln(f, "%s := d.Get(\"%s\").(%s)" %
-                        (convert_name(attr['name']),
+                        (lowercase_first(attr['name']),
                          fixed_name,
                          attr['type']))
 
-    pretty_writeln(f, "%s := %s.%s {" % (convert_name(resource), MANAGER_PACKAGE_NAME, resource))
+    pretty_writeln(f, "%s := %s.%s {" % (lowercase_first(resource), MANAGER_PACKAGE_NAME, resource))
     shift()
     for attr in used_attrs:
-        pretty_writeln(f, "%s: %s," % (attr, convert_name(attr)))
+        pretty_writeln(f, "%s: %s," % (attr, lowercase_first(attr)))
 
     unshift()
 
@@ -189,7 +192,8 @@ def write_object(f, resource, attrs, is_create=True):
 
 def write_create_func(f, resource, attrs, api_section):
 
-    lower_resource = convert_name(resource)
+    lower_resource = lowercase_first(resource)
+
     write_func_header(f, resource, "Create")
 
     write_nsxclient(f)
@@ -218,7 +222,7 @@ def write_create_func(f, resource, attrs, api_section):
 
 def write_read_func(f, resource, attrs, api_section):
 
-    lower_resource = convert_name(resource)
+    lower_resource = lowercase_first(resource)
     write_func_header(f, resource, "Read")
 
     write_nsxclient(f)
@@ -262,7 +266,7 @@ def write_read_func(f, resource, attrs, api_section):
 
 def write_update_func(f, resource, attrs, api_section):
 
-    lower_resource = convert_name(resource)
+    lower_resource = lowercase_first(resource)
     write_func_header(f, resource, "Update")
 
     write_nsxclient(f)
