@@ -21,6 +21,9 @@ func resourceNsxtL4PortSetNsService() *schema.Resource {
 		Read:   resourceNsxtL4PortSetNsServiceRead,
 		Update: resourceNsxtL4PortSetNsServiceUpdate,
 		Delete: resourceNsxtL4PortSetNsServiceDelete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),

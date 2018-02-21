@@ -18,6 +18,9 @@ func resourceNsxtEtherTypeNsService() *schema.Resource {
 		Read:   resourceNsxtEtherTypeNsServiceRead,
 		Update: resourceNsxtEtherTypeNsServiceUpdate,
 		Delete: resourceNsxtEtherTypeNsServiceDelete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),

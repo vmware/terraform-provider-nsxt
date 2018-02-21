@@ -379,6 +379,18 @@ def write_attributes_reference(f, resource, attrs):
                 desc = 'Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging'
 
             pretty_writeln(f, "* `%s` - %s." % (name, desc))
+    pretty_writeln(f, "\n")
+
+
+def write_import_doc(f, resource):
+    name = re.sub('_', ' ', resource)
+    pretty_writeln(f, "## Importing\n")
+    pretty_writeln(f, "An existing %s can be [imported][docs-import] into this resource, via the following command:\n" % name)
+    pretty_writeln(f, "[docs-import]: https://www.terraform.io/docs/import/index.html\n");
+    pretty_writeln(f, "```")
+    pretty_writeln(f, "terraform import %s.x id" % resource)
+    pretty_writeln(f, "```\n")
+    pretty_writeln(f, "The above would import the %s named `x` with the nsx id `id`" % name)
 
 
 def main():
@@ -470,6 +482,7 @@ def main():
         write_doc_example(f, resource_lower, attrs)
         write_arguments_reference(f, resource_lower, attrs)
         write_attributes_reference(f, resource_lower, attrs)
+        write_import_doc(f, resource_lower)
 
 
 main()

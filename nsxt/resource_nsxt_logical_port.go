@@ -18,6 +18,9 @@ func resourceNsxtLogicalPort() *schema.Resource {
 		Read:   resourceNsxtLogicalPortRead,
 		Update: resourceNsxtLogicalPortUpdate,
 		Delete: resourceNsxtLogicalPortDelete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),

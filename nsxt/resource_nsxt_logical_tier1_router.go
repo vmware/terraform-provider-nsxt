@@ -23,6 +23,9 @@ func resourceNsxtLogicalTier1Router() *schema.Resource {
 		Read:   resourceNsxtLogicalTier1RouterRead,
 		Update: resourceNsxtLogicalTier1RouterUpdate,
 		Delete: resourceNsxtLogicalTier1RouterDelete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),

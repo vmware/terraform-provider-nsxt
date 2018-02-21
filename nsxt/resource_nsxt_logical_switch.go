@@ -24,6 +24,9 @@ func resourceNsxtLogicalSwitch() *schema.Resource {
 		Read:   resourceNsxtLogicalSwitchRead,
 		Update: resourceNsxtLogicalSwitchUpdate,
 		Delete: resourceNsxtLogicalSwitchDelete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),

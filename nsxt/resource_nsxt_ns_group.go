@@ -20,6 +20,9 @@ func resourceNsxtNsGroup() *schema.Resource {
 		Read:   resourceNsxtNsGroupRead,
 		Update: resourceNsxtNsGroupUpdate,
 		Delete: resourceNsxtNsGroupDelete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),

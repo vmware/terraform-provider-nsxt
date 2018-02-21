@@ -49,3 +49,15 @@ In addition to arguments listed above, the following attributes are exported:
 
 * `id` - ID of the ns_group.
 * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
+
+## Importing
+
+An existing NS group can be [imported][docs-import] into this resource, via the following command:
+
+[docs-import]: https://www.terraform.io/docs/import/index.html
+
+```
+terraform import nsxt_ns_group.x id
+```
+
+The above would import the NS group named `x` with the nsx id `id`

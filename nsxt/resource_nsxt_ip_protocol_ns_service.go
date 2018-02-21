@@ -19,6 +19,9 @@ func resourceNsxtIPProtocolNsService() *schema.Resource {
 		Read:   resourceNsxtIPProtocolNsServiceRead,
 		Update: resourceNsxtIPProtocolNsServiceUpdate,
 		Delete: resourceNsxtIPProtocolNsServiceDelete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),

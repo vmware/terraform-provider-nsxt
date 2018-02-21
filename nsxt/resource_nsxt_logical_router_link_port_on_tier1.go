@@ -18,6 +18,9 @@ func resourceNsxtLogicalRouterLinkPortOnTier1() *schema.Resource {
 		Read:   resourceNsxtLogicalRouterLinkPortOnTier1Read,
 		Update: resourceNsxtLogicalRouterLinkPortOnTier1Update,
 		Delete: resourceNsxtLogicalRouterLinkPortOnTier1Delete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),

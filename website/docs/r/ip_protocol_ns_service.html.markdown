@@ -13,7 +13,7 @@ Provides a resource to configure NS service for IP protocol on NSX-T Manager
 ## Example Usage
 
 ```hcl
-resource "nsxt_ip_protocol_ns_service" "ipns" {
+resource "nsxt_ip_protocol_ns_service" "ns_service_ip" {
     description = "S1 provisioned by Terraform"
     display_name = "S1"
     protocol = "10"
@@ -40,3 +40,15 @@ In addition to arguments listed above, the following attributes are exported:
 * `id` - ID of the logical switch.
 * `default_service` - The default NSServices are created in the system by default. These NSServices can't be modified/deleted.
 * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
+
+## Importing
+
+An existing IP protocol NS service can be [imported][docs-import] into this resource, via the following command:
+
+[docs-import]: https://www.terraform.io/docs/import/index.html
+
+```
+terraform import nsxt_ip_protocol_ns_service.x id
+```
+
+The above would import the IP protocol NS service named `x` with the nsx id `id`

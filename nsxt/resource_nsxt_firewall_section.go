@@ -24,6 +24,9 @@ func resourceNsxtFirewallSection() *schema.Resource {
 		Read:   resourceNsxtFirewallSectionRead,
 		Update: resourceNsxtFirewallSectionUpdate,
 		Delete: resourceNsxtFirewallSectionDelete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),

@@ -43,3 +43,15 @@ In addition to arguments listed above, the following attributes are exported:
 * `id` - ID of the logical switch.
 * `default_service` - The default NSServices are created in the system by default. These NSServices can't be modified/deleted.
 * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
+
+## Importing
+
+An existing L4 port set NS service can be [imported][docs-import] into this resource, via the following command:
+
+[docs-import]: https://www.terraform.io/docs/import/index.html
+
+```
+terraform import nsxt_l4_port_set_ns_service.x id
+```
+
+The above would import the L4 port set NS service named `x` with the nsx id `id`

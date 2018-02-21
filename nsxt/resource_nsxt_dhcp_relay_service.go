@@ -18,6 +18,9 @@ func resourceNsxtDhcpRelayService() *schema.Resource {
 		Read:   resourceNsxtDhcpRelayServiceRead,
 		Update: resourceNsxtDhcpRelayServiceUpdate,
 		Delete: resourceNsxtDhcpRelayServiceDelete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),

@@ -18,6 +18,9 @@ func resourceNsxtIgmpTypeNsService() *schema.Resource {
 		Read:   resourceNsxtIgmpTypeNsServiceRead,
 		Update: resourceNsxtIgmpTypeNsServiceUpdate,
 		Delete: resourceNsxtIgmpTypeNsServiceDelete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),

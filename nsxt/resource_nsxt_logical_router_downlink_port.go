@@ -23,6 +23,9 @@ func resourceNsxtLogicalRouterDownLinkPort() *schema.Resource {
 		Read:   resourceNsxtLogicalRouterDownLinkPortRead,
 		Update: resourceNsxtLogicalRouterDownLinkPortUpdate,
 		Delete: resourceNsxtLogicalRouterDownLinkPortDelete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),

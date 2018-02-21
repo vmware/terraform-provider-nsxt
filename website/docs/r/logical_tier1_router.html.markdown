@@ -53,3 +53,15 @@ In addition to arguments listed above, the following attributes are exported:
 * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
 * `advertise_config_revision` - Indicates current revision number of the advertisement configuration object as seen by NSX-T API server. This attribute can be useful for debugging.
 * `firewall_sections` - (Optional) The list of firewall sections for this router
+
+## Importing
+
+An existing logical tier1 router can be [imported][docs-import] into this resource, via the following command:
+
+[docs-import]: https://www.terraform.io/docs/import/index.html
+
+```
+terraform import nsxt_logical_tier1_router.x id
+```
+
+The above would import the logical tier1 router named `x` with the nsx id `id`

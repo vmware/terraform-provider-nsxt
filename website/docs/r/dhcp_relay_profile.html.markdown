@@ -61,3 +61,15 @@ In addition to arguments listed above, the following attributes are exported:
 
 * `id` - ID of the dhcp_relay_profile.
 * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
+
+## Importing
+
+An existing DHCP Relay profile can be [imported][docs-import] into this resource, via the following command:
+
+[docs-import]: https://www.terraform.io/docs/import/index.html
+
+```
+terraform import nsxt_dhcp_relay_profile.x id
+```
+
+The above would import the DHCP Relay profile named `x` with the nsx id `id`

@@ -18,6 +18,9 @@ func resourceNsxtIPSet() *schema.Resource {
 		Read:   resourceNsxtIPSetRead,
 		Update: resourceNsxtIPSetUpdate,
 		Delete: resourceNsxtIPSetDelete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),

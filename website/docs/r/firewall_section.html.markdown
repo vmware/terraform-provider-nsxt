@@ -95,4 +95,15 @@ In addition to arguments listed above, the following attributes are exported:
 * `id` - ID of the firewall_section.
 * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
 * `is_default` - It is a boolean flag which reflects whether a firewall section is default section or not. Each Layer 3 and Layer 2 section will have at least and at most one default section.
-  
+
+## Importing
+
+An existing Firewall section can be [imported][docs-import] into this resource, via the following command:
+
+[docs-import]: https://www.terraform.io/docs/import/index.html
+
+```
+terraform import nsxt_firewall_section.x id
+```
+
+The above would import the Firewall section named `x` with the nsx id `id`

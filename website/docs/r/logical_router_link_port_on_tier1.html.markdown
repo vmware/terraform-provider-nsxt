@@ -46,3 +46,15 @@ In addition to arguments listed above, the following attributes are exported:
 
 * `id` - ID of the logical switch.
 * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
+
+## Importing
+
+An existing logical router link port on Tier-1 can be [imported][docs-import] into this resource, via the following command:
+
+[docs-import]: https://www.terraform.io/docs/import/index.html
+
+```
+terraform import nsxt_logical_router_link_port_on_tier1.x id
+```
+
+The above would import the logical router link port on Tier-1 named `x` with the nsx id `id`
