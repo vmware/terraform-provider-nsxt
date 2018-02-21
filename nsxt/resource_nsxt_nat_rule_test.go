@@ -112,7 +112,7 @@ func TestAccResourceNsxtNatRule_dnat(t *testing.T) {
 	})
 }
 
-func testAccNSXNATRuleCheckExists(display_name string, resourceName string) resource.TestCheckFunc {
+func testAccNSXNATRuleCheckExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
 		nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
@@ -126,12 +126,12 @@ func testAccNSXNATRuleCheckExists(display_name string, resourceName string) reso
 		if resourceID == "" {
 			return fmt.Errorf("NSX nat rule resource ID not set in resources ")
 		}
-		router_id := rs.Primary.Attributes["logical_router_id"]
-		if router_id == "" {
-			return fmt.Errorf("NSX nat rule router_id not set in resources ")
+		routerID := rs.Primary.Attributes["logical_router_id"]
+		if routerID == "" {
+			return fmt.Errorf("NSX nat rule routerID not set in resources ")
 		}
 
-		natRule, responseCode, err := nsxClient.LogicalRoutingAndServicesApi.GetNatRule(nsxClient.Context, router_id, resourceID)
+		natRule, responseCode, err := nsxClient.LogicalRoutingAndServicesApi.GetNatRule(nsxClient.Context, routerID, resourceID)
 		if err != nil {
 			return fmt.Errorf("Error while retrieving nat rule ID %s. Error: %v", resourceID, err)
 		}
@@ -140,14 +140,14 @@ func testAccNSXNATRuleCheckExists(display_name string, resourceName string) reso
 			return fmt.Errorf("Error while checking if nat rule %s exists. HTTP return code was %d", resourceID, responseCode.StatusCode)
 		}
 
-		if display_name == natRule.DisplayName {
+		if displayName == natRule.DisplayName {
 			return nil
 		}
-		return fmt.Errorf("NSX nat rule %s wasn't found", display_name)
+		return fmt.Errorf("NSX nat rule %s wasn't found", displayName)
 	}
 }
 
-func testAccNSXNATRuleCheckDestroy(state *terraform.State, display_name string) error {
+func testAccNSXNATRuleCheckDestroy(state *terraform.State, displayName string) error {
 	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
 	for _, rs := range state.RootModule().Resources {
 
@@ -156,8 +156,8 @@ func testAccNSXNATRuleCheckDestroy(state *terraform.State, display_name string) 
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		router_id := rs.Primary.Attributes["logical_router_id"]
-		natRule, responseCode, err := nsxClient.LogicalRoutingAndServicesApi.GetNatRule(nsxClient.Context, router_id, resourceID)
+		routerID := rs.Primary.Attributes["logical_router_id"]
+		natRule, responseCode, err := nsxClient.LogicalRoutingAndServicesApi.GetNatRule(nsxClient.Context, routerID, resourceID)
 		if err != nil {
 			if responseCode.StatusCode != http.StatusOK {
 				return nil
@@ -165,8 +165,8 @@ func testAccNSXNATRuleCheckDestroy(state *terraform.State, display_name string) 
 			return fmt.Errorf("Error while retrieving nat rule ID %s. Error: %v", resourceID, err)
 		}
 
-		if display_name == natRule.DisplayName {
-			return fmt.Errorf("NSX nat rule %s still exists", display_name)
+		if displayName == natRule.DisplayName {
+			return fmt.Errorf("NSX nat rule %s still exists", displayName)
 		}
 	}
 	return nil
@@ -187,9 +187,9 @@ resource "nsxt_logical_tier1_router" "RTR1" {
 func testAccNSXSNATRuleCreateTemplate(name string, edgeClusterName string) string {
 	return testAccNSXNATRulePreConditionTemplate(edgeClusterName) + fmt.Sprintf(`
 resource "nsxt_nat_rule" "test" {
-	logical_router_id = "${nsxt_logical_tier1_router.RTR1.id}"
+    logical_router_id = "${nsxt_logical_tier1_router.RTR1.id}"
     display_name = "%s"
-	description = "Acceptance Test"
+    description = "Acceptance Test"
     action = "SNAT"
     translated_network = "4.4.4.0/24"
     match_destination_network = "3.3.3.0/24"
@@ -207,9 +207,9 @@ resource "nsxt_nat_rule" "test" {
 func testAccNSXSNATRuleUpdateTemplate(name string, edgeClusterName string) string {
 	return testAccNSXNATRulePreConditionTemplate(edgeClusterName) + fmt.Sprintf(`
 resource "nsxt_nat_rule" "test" {
-	logical_router_id = "${nsxt_logical_tier1_router.RTR1.id}"
+    logical_router_id = "${nsxt_logical_tier1_router.RTR1.id}"
     display_name = "%s"
-	description = "Acceptance Test Update"
+    description = "Acceptance Test Update"
     action = "SNAT"
     translated_network = "4.4.4.0/24"
     match_destination_network = "3.3.3.0/24"
@@ -231,9 +231,9 @@ resource "nsxt_nat_rule" "test" {
 func testAccNSXDNATRuleCreateTemplate(name string, edgeClusterName string) string {
 	return testAccNSXNATRulePreConditionTemplate(edgeClusterName) + fmt.Sprintf(`
 resource "nsxt_nat_rule" "test" {
-	logical_router_id = "${nsxt_logical_tier1_router.RTR1.id}"
+    logical_router_id = "${nsxt_logical_tier1_router.RTR1.id}"
     display_name = "%s"
-	description = "Acceptance Test"
+    description = "Acceptance Test"
     action = "DNAT"
     translated_network = "4.4.4.4"
     match_destination_network = "3.3.3.0/24"
@@ -250,9 +250,9 @@ resource "nsxt_nat_rule" "test" {
 func testAccNSXDNATRuleUpdateTemplate(name string, edgeClusterName string) string {
 	return testAccNSXNATRulePreConditionTemplate(edgeClusterName) + fmt.Sprintf(`
 resource "nsxt_nat_rule" "test" {
-	logical_router_id = "${nsxt_logical_tier1_router.RTR1.id}"
+    logical_router_id = "${nsxt_logical_tier1_router.RTR1.id}"
     display_name = "%s"
-	description = "Acceptance Test Update"
+    description = "Acceptance Test Update"
     action = "DNAT"
     translated_network = "4.4.4.4"
     match_destination_network = "7.7.7.0/24"

@@ -57,7 +57,7 @@ func TestAccResourceNsxtStaticRoute_basic(t *testing.T) {
 	})
 }
 
-func testAccNSXStaticRouteCheckExists(display_name string, resourceName string) resource.TestCheckFunc {
+func testAccNSXStaticRouteCheckExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
 		nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
@@ -71,12 +71,12 @@ func testAccNSXStaticRouteCheckExists(display_name string, resourceName string) 
 		if resourceID == "" {
 			return fmt.Errorf("NSX static route resource ID not set in resources ")
 		}
-		router_id := rs.Primary.Attributes["logical_router_id"]
-		if router_id == "" {
-			return fmt.Errorf("NSX static route router_id not set in resources ")
+		routerID := rs.Primary.Attributes["logical_router_id"]
+		if routerID == "" {
+			return fmt.Errorf("NSX static route routerID not set in resources ")
 		}
 
-		staticRoute, responseCode, err := nsxClient.LogicalRoutingAndServicesApi.ReadStaticRoute(nsxClient.Context, router_id, resourceID)
+		staticRoute, responseCode, err := nsxClient.LogicalRoutingAndServicesApi.ReadStaticRoute(nsxClient.Context, routerID, resourceID)
 		if err != nil {
 			return fmt.Errorf("Error while retrieving static route ID %s. Error: %v", resourceID, err)
 		}
@@ -85,14 +85,14 @@ func testAccNSXStaticRouteCheckExists(display_name string, resourceName string) 
 			return fmt.Errorf("Error while checking if static route %s exists. HTTP return code was %d", resourceID, responseCode.StatusCode)
 		}
 
-		if display_name == staticRoute.DisplayName {
+		if displayName == staticRoute.DisplayName {
 			return nil
 		}
-		return fmt.Errorf("NSX static route %s wasn't found", display_name)
+		return fmt.Errorf("NSX static route %s wasn't found", displayName)
 	}
 }
 
-func testAccNSXStaticRouteCheckDestroy(state *terraform.State, display_name string) error {
+func testAccNSXStaticRouteCheckDestroy(state *terraform.State, displayName string) error {
 	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
 
 	for _, rs := range state.RootModule().Resources {
@@ -102,8 +102,8 @@ func testAccNSXStaticRouteCheckDestroy(state *terraform.State, display_name stri
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		router_id := rs.Primary.Attributes["logical_router_id"]
-		staticRoute, responseCode, err := nsxClient.LogicalRoutingAndServicesApi.ReadStaticRoute(nsxClient.Context, router_id, resourceID)
+		routerID := rs.Primary.Attributes["logical_router_id"]
+		staticRoute, responseCode, err := nsxClient.LogicalRoutingAndServicesApi.ReadStaticRoute(nsxClient.Context, routerID, resourceID)
 		if err != nil {
 			if responseCode.StatusCode != http.StatusOK {
 				return nil
@@ -111,8 +111,8 @@ func testAccNSXStaticRouteCheckDestroy(state *terraform.State, display_name stri
 			return fmt.Errorf("Error while retrieving static route ID %s. Error: %v", resourceID, err)
 		}
 
-		if display_name == staticRoute.DisplayName {
-			return fmt.Errorf("NSX static route %s still exists", display_name)
+		if displayName == staticRoute.DisplayName {
+			return fmt.Errorf("NSX static route %s still exists", displayName)
 		}
 	}
 	return nil
@@ -130,7 +130,7 @@ resource "nsxt_logical_tier1_router" "RTR1" {
 }
 
 data "nsxt_transport_zone" "TZ1" {
-     display_name = "%s"
+        display_name = "%s"
 }
 
 resource "nsxt_logical_switch" "LS1" {
@@ -161,38 +161,38 @@ resource "nsxt_logical_router_downlink_port" "LRP1" {
 func testAccNSXStaticRouteCreateTemplate(name string, edgeClusterName string, tzName string) string {
 	return testAccNSXStaticRoutePreConditionTemplate(edgeClusterName, tzName) + fmt.Sprintf(`
 resource "nsxt_static_route" "test" {
-	logical_router_id = "${nsxt_logical_tier1_router.RTR1.id}"
+    logical_router_id = "${nsxt_logical_tier1_router.RTR1.id}"
     display_name = "%s"
-	description = "Acceptance Test"
+    description = "Acceptance Test"
     tag {
     	scope = "scope1"
         tag = "tag1"
     }
     network = "4.4.4.0/24"
-	next_hop {
-		ip_address = "8.0.0.10"
-		administrative_distance = "1"
-		logical_router_port_id = "${nsxt_logical_router_downlink_port.LRP1.id}"
-	}
+    next_hop {
+	ip_address = "8.0.0.10"
+	administrative_distance = "1"
+	logical_router_port_id = "${nsxt_logical_router_downlink_port.LRP1.id}"
+    }
 }`, name)
 }
 
 func testAccNSXStaticRouteUpdateTemplate(name string, edgeClusterName string, tzName string) string {
 	return testAccNSXStaticRoutePreConditionTemplate(edgeClusterName, tzName) + fmt.Sprintf(`
 resource "nsxt_static_route" "test" {
-	logical_router_id = "${nsxt_logical_tier1_router.RTR1.id}"
+    logical_router_id = "${nsxt_logical_tier1_router.RTR1.id}"
     display_name = "%s"
-	description = "Acceptance Test Update"
+    description = "Acceptance Test Update"
     network = "5.5.5.0/24"
-	next_hop {
-		ip_address = "8.0.0.10"
-		administrative_distance = "1"
-		logical_router_port_id = "${nsxt_logical_router_downlink_port.LRP1.id}"
-	}
-	next_hop {
-		ip_address = "2.2.2.2"
-		administrative_distance = "2"
-	}
+    next_hop {
+	ip_address = "8.0.0.10"
+	administrative_distance = "1"
+	logical_router_port_id = "${nsxt_logical_router_downlink_port.LRP1.id}"
+    }
+    next_hop {
+	ip_address = "2.2.2.2"
+	administrative_distance = "2"
+    }
     tag {
     	scope = "scope1"
         tag = "tag1"

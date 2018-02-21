@@ -80,7 +80,7 @@ func isSingleIP(v string) bool {
 	return true
 }
 
-func isCidr(v string, max_prefix int, is_ip bool) bool {
+func isCidr(v string, maxPrefix int, isIP bool) bool {
 	_, ipnet, err := net.ParseCIDR(v)
 	if err != nil {
 		return false
@@ -88,15 +88,15 @@ func isCidr(v string, max_prefix int, is_ip bool) bool {
 	if ipnet == nil {
 		return false
 	}
-	if is_ip && v == ipnet.String() {
+	if isIP && v == ipnet.String() {
 		return false
 	}
-	if !is_ip && v != ipnet.String() {
+	if !isIP && v != ipnet.String() {
 		return false
 	}
 	s := strings.Split(v, "/")
 	prefix, _ := strconv.ParseUint(s[1], 10, 32)
-	if int(prefix) > max_prefix {
+	if int(prefix) > maxPrefix {
 		return false
 	}
 

@@ -46,7 +46,7 @@ func TestAccResourceNsxtDhcpRelayService_basic(t *testing.T) {
 	})
 }
 
-func testAccNSXDhcpRelayServiceExists(display_name string, resourceName string) resource.TestCheckFunc {
+func testAccNSXDhcpRelayServiceExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
 		nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
@@ -70,14 +70,14 @@ func testAccNSXDhcpRelayServiceExists(display_name string, resourceName string) 
 			return fmt.Errorf("Error while checking if Dhcp Relay Service %s exists. HTTP return code was %d", resourceID, responseCode.StatusCode)
 		}
 
-		if display_name == service.DisplayName {
+		if displayName == service.DisplayName {
 			return nil
 		}
-		return fmt.Errorf("Dhcp Relay Service %s wasn't found", display_name)
+		return fmt.Errorf("Dhcp Relay Service %s wasn't found", displayName)
 	}
 }
 
-func testAccNSXDhcpRelayServiceCheckDestroy(state *terraform.State, display_name string) error {
+func testAccNSXDhcpRelayServiceCheckDestroy(state *terraform.State, displayName string) error {
 	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
 	for _, rs := range state.RootModule().Resources {
 
@@ -94,8 +94,8 @@ func testAccNSXDhcpRelayServiceCheckDestroy(state *terraform.State, display_name
 			return fmt.Errorf("Error while retrieving Dhcp Relay Service ID %s. Error: %v", resourceID, err)
 		}
 
-		if display_name == service.DisplayName {
-			return fmt.Errorf("Dhcp Relay Service %s still exists", display_name)
+		if displayName == service.DisplayName {
+			return fmt.Errorf("Dhcp Relay Service %s still exists", displayName)
 		}
 	}
 	return nil
@@ -104,14 +104,14 @@ func testAccNSXDhcpRelayServiceCheckDestroy(state *terraform.State, display_name
 func testAccNSXDhcpRelayServiceCreateTemplate(name string) string {
 	return fmt.Sprintf(`
 resource "nsxt_dhcp_relay_profile" "test" {
-	display_name = "prf"
-	server_addresses = ["1.1.1.1"]
+    display_name = "prf"
+    server_addresses = ["1.1.1.1"]
 }
 
 resource "nsxt_dhcp_relay_service" "test" {
-	display_name = "%s"
-	description = "Acceptance Test"
-	dhcp_relay_profile_id = "${nsxt_dhcp_relay_profile.test.id}"
+    display_name = "%s"
+    description = "Acceptance Test"
+    dhcp_relay_profile_id = "${nsxt_dhcp_relay_profile.test.id}"
     tag {
     	scope = "scope1"
         tag = "tag1"
@@ -119,17 +119,17 @@ resource "nsxt_dhcp_relay_service" "test" {
 }`, name)
 }
 
-func testAccNSXDhcpRelayServiceUpdateTemplate(updated_name string) string {
+func testAccNSXDhcpRelayServiceUpdateTemplate(updatedName string) string {
 	return fmt.Sprintf(`
 resource "nsxt_dhcp_relay_profile" "test" {
-	display_name = "prf"
-	server_addresses = ["1.1.1.1"]
+    display_name = "prf"
+    server_addresses = ["1.1.1.1"]
 }
 
 resource "nsxt_dhcp_relay_service" "test" {
-	display_name = "%s"
-	description = "Acceptance Test Update"
-	dhcp_relay_profile_id = "${nsxt_dhcp_relay_profile.test.id}"
+    display_name = "%s"
+    description = "Acceptance Test Update"
+    dhcp_relay_profile_id = "${nsxt_dhcp_relay_profile.test.id}"
     tag {
     	scope = "scope1"
         tag = "tag1"
@@ -138,5 +138,5 @@ resource "nsxt_dhcp_relay_service" "test" {
     	scope = "scope2"
         tag = "tag2"
     }
-}`, updated_name)
+}`, updatedName)
 }

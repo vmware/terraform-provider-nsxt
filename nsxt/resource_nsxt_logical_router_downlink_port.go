@@ -52,7 +52,7 @@ func resourceNsxtLogicalRouterDownLinkPort() *schema.Resource {
 			},
 			"ip_address": &schema.Schema{
 				Type:         schema.TypeString,
-				Description:  "Logical router port subnet (ip_address / prefix length)",
+				Description:  "Logical router port subnet (ipAddress / prefix length)",
 				Required:     true,
 				ValidateFunc: validatePortAddress(),
 			},
@@ -76,11 +76,11 @@ func resourceNsxtLogicalRouterDownLinkPort() *schema.Resource {
 
 func getIpSubnetsFromCidr(cidr string) []manager.IpSubnet {
 	s := strings.Split(cidr, "/")
-	ip_address := s[0]
+	ipAddress := s[0]
 	prefix, _ := strconv.ParseUint(s[1], 10, 32)
 	var subnetList []manager.IpSubnet
 	elem := manager.IpSubnet{
-		IpAddresses:  []string{ip_address},
+		IpAddresses:  []string{ipAddress},
 		PrefixLength: int64(prefix),
 	}
 	subnetList = append(subnetList, elem)
@@ -98,27 +98,27 @@ func setIpSubnetsInSchema(d *schema.ResourceData, subnets []manager.IpSubnet) {
 func resourceNsxtLogicalRouterDownLinkPortCreate(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 	description := d.Get("description").(string)
-	display_name := d.Get("display_name").(string)
+	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
-	logical_router_id := d.Get("logical_router_id").(string)
-	mac_address := d.Get("mac_address").(string)
-	linked_logical_switch_port_id := d.Get("linked_logical_switch_port_id").(string)
+	logicalRouterID := d.Get("logical_router_id").(string)
+	macAddress := d.Get("mac_address").(string)
+	linkedLogicalSwitchPortID := d.Get("linked_logical_switch_port_id").(string)
 	subnets := getIpSubnetsFromCidr(d.Get("ip_address").(string))
-	urpf_mode := d.Get("urpf_mode").(string)
-	service_binding := getServiceBindingsFromSchema(d, "service_binding")
-	logical_router_down_link_port := manager.LogicalRouterDownLinkPort{
+	urpfMode := d.Get("urpf_mode").(string)
+	serviceBinding := getServiceBindingsFromSchema(d, "service_binding")
+	logicalRouterDownLinkPort := manager.LogicalRouterDownLinkPort{
 		Description:               description,
-		DisplayName:               display_name,
+		DisplayName:               displayName,
 		Tags:                      tags,
-		LogicalRouterId:           logical_router_id,
-		MacAddress:                mac_address,
-		LinkedLogicalSwitchPortId: makeResourceReference("LogicalPort", linked_logical_switch_port_id),
+		LogicalRouterId:           logicalRouterID,
+		MacAddress:                macAddress,
+		LinkedLogicalSwitchPortId: makeResourceReference("LogicalPort", linkedLogicalSwitchPortID),
 		Subnets:                   subnets,
-		UrpfMode:                  urpf_mode,
-		ServiceBindings:           service_binding,
+		UrpfMode:                  urpfMode,
+		ServiceBindings:           serviceBinding,
 	}
 
-	logical_router_down_link_port, resp, err := nsxClient.LogicalRoutingAndServicesApi.CreateLogicalRouterDownLinkPort(nsxClient.Context, logical_router_down_link_port)
+	logicalRouterDownLinkPort, resp, err := nsxClient.LogicalRoutingAndServicesApi.CreateLogicalRouterDownLinkPort(nsxClient.Context, logicalRouterDownLinkPort)
 
 	if err != nil {
 		return fmt.Errorf("Error during LogicalRouterDownLinkPort create: %v", err)
@@ -127,7 +127,7 @@ func resourceNsxtLogicalRouterDownLinkPortCreate(d *schema.ResourceData, m inter
 	if resp.StatusCode != http.StatusCreated {
 		return fmt.Errorf("Unexpected status returned during LogicalRouterDownLinkPort create: %v", resp.StatusCode)
 	}
-	d.SetId(logical_router_down_link_port.Id)
+	d.SetId(logicalRouterDownLinkPort.Id)
 
 	return resourceNsxtLogicalRouterDownLinkPortRead(d, m)
 }
@@ -139,7 +139,7 @@ func resourceNsxtLogicalRouterDownLinkPortRead(d *schema.ResourceData, m interfa
 		return fmt.Errorf("Error obtaining logical router downlink port id while reading")
 	}
 
-	logical_router_down_link_port, resp, err := nsxClient.LogicalRoutingAndServicesApi.ReadLogicalRouterDownLinkPort(nsxClient.Context, id)
+	logicalRouterDownLinkPort, resp, err := nsxClient.LogicalRoutingAndServicesApi.ReadLogicalRouterDownLinkPort(nsxClient.Context, id)
 	if resp.StatusCode == http.StatusNotFound {
 		log.Printf("[DEBUG] LogicalRouterDownLinkPort %s not found", id)
 		d.SetId("")
@@ -149,16 +149,16 @@ func resourceNsxtLogicalRouterDownLinkPortRead(d *schema.ResourceData, m interfa
 		return fmt.Errorf("Error during LogicalRouterDownLinkPort read: %v", err)
 	}
 
-	d.Set("revision", logical_router_down_link_port.Revision)
-	d.Set("description", logical_router_down_link_port.Description)
-	d.Set("display_name", logical_router_down_link_port.DisplayName)
-	setTagsInSchema(d, logical_router_down_link_port.Tags)
-	d.Set("logical_router_id", logical_router_down_link_port.LogicalRouterId)
-	d.Set("mac_address", logical_router_down_link_port.MacAddress)
-	d.Set("linked_logical_switch_port_id", logical_router_down_link_port.LinkedLogicalSwitchPortId.TargetId)
-	setIpSubnetsInSchema(d, logical_router_down_link_port.Subnets)
-	d.Set("urpf_mode", logical_router_down_link_port.UrpfMode)
-	setServiceBindingsInSchema(d, logical_router_down_link_port.ServiceBindings, "service_binding")
+	d.Set("revision", logicalRouterDownLinkPort.Revision)
+	d.Set("description", logicalRouterDownLinkPort.Description)
+	d.Set("display_name", logicalRouterDownLinkPort.DisplayName)
+	setTagsInSchema(d, logicalRouterDownLinkPort.Tags)
+	d.Set("logical_router_id", logicalRouterDownLinkPort.LogicalRouterId)
+	d.Set("mac_address", logicalRouterDownLinkPort.MacAddress)
+	d.Set("linked_logical_switch_port_id", logicalRouterDownLinkPort.LinkedLogicalSwitchPortId.TargetId)
+	setIpSubnetsInSchema(d, logicalRouterDownLinkPort.Subnets)
+	d.Set("urpf_mode", logicalRouterDownLinkPort.UrpfMode)
+	setServiceBindingsInSchema(d, logicalRouterDownLinkPort.ServiceBindings, "service_binding")
 
 	return nil
 }
@@ -172,29 +172,29 @@ func resourceNsxtLogicalRouterDownLinkPortUpdate(d *schema.ResourceData, m inter
 
 	revision := int64(d.Get("revision").(int))
 	description := d.Get("description").(string)
-	display_name := d.Get("display_name").(string)
+	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
-	logical_router_id := d.Get("logical_router_id").(string)
-	linked_logical_switch_port_id := d.Get("linked_logical_switch_port_id").(string)
+	logicalRouterID := d.Get("logical_router_id").(string)
+	linkedLogicalSwitchPortID := d.Get("linked_logical_switch_port_id").(string)
 	subnets := getIpSubnetsFromCidr(d.Get("ip_address").(string))
-	mac_address := d.Get("mac_address").(string)
-	urpf_mode := d.Get("urpf_mode").(string)
-	service_binding := getServiceBindingsFromSchema(d, "service_binding")
-	logical_router_down_link_port := manager.LogicalRouterDownLinkPort{
+	macAddress := d.Get("mac_address").(string)
+	urpfMode := d.Get("urpf_mode").(string)
+	serviceBinding := getServiceBindingsFromSchema(d, "service_binding")
+	logicalRouterDownLinkPort := manager.LogicalRouterDownLinkPort{
 		Revision:                  revision,
 		Description:               description,
-		DisplayName:               display_name,
+		DisplayName:               displayName,
 		Tags:                      tags,
-		LogicalRouterId:           logical_router_id,
-		MacAddress:                mac_address,
-		LinkedLogicalSwitchPortId: makeResourceReference("LogicalPort", linked_logical_switch_port_id),
+		LogicalRouterId:           logicalRouterID,
+		MacAddress:                macAddress,
+		LinkedLogicalSwitchPortId: makeResourceReference("LogicalPort", linkedLogicalSwitchPortID),
 		Subnets:                   subnets,
-		UrpfMode:                  urpf_mode,
-		ServiceBindings:           service_binding,
+		UrpfMode:                  urpfMode,
+		ServiceBindings:           serviceBinding,
 		ResourceType:              "LogicalRouterDownLinkPort",
 	}
 
-	logical_router_down_link_port, resp, err := nsxClient.LogicalRoutingAndServicesApi.UpdateLogicalRouterDownLinkPort(nsxClient.Context, id, logical_router_down_link_port)
+	logicalRouterDownLinkPort, resp, err := nsxClient.LogicalRoutingAndServicesApi.UpdateLogicalRouterDownLinkPort(nsxClient.Context, id, logicalRouterDownLinkPort)
 
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during LogicalRouterDownLinkPort update: %v", err)

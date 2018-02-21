@@ -15,25 +15,25 @@ import (
 
 func TestAccResourceNsxtLogicalSwitch_basic(t *testing.T) {
 	// Test without verification for realization state
-	testAccResourceNsxtLogicalSwitch_basic(t, false)
+	testAccResourceNsxtLogicalSwitchBasic(t, false)
 }
 
 func TestAccResourceNsxtLogicalSwitch_basicWithRealization(t *testing.T) {
 	// Test with verification for realization state
-	testAccResourceNsxtLogicalSwitch_basic(t, true)
+	testAccResourceNsxtLogicalSwitchBasic(t, true)
 }
 
 func TestAccResourceNsxtLogicalSwitch_switchVlan(t *testing.T) {
 	// Test without verification for realization state
-	testAccResourceNsxtLogicalSwitch_switchVlan(t, false)
+	testAccResourceNsxtLogicalSwitchSwitchVlan(t, false)
 }
 
 func TestAccResourceNsxtLogicalSwitch_switchVlanWithRealization(t *testing.T) {
 	// Test with verification for realization state
-	testAccResourceNsxtLogicalSwitch_switchVlan(t, true)
+	testAccResourceNsxtLogicalSwitchSwitchVlan(t, true)
 }
 
-func testAccResourceNsxtLogicalSwitch_basic(t *testing.T, verifyRealization bool) {
+func testAccResourceNsxtLogicalSwitchBasic(t *testing.T, verifyRealization bool) {
 	switchName := fmt.Sprintf("test-nsx-logical-switch-overlay")
 	updateSwitchName := fmt.Sprintf("%s-update", switchName)
 	resourceName := "testoverlay"
@@ -81,7 +81,7 @@ func testAccResourceNsxtLogicalSwitch_basic(t *testing.T, verifyRealization bool
 	})
 }
 
-func testAccResourceNsxtLogicalSwitch_switchVlan(t *testing.T, verifyRealization bool) {
+func testAccResourceNsxtLogicalSwitchSwitchVlan(t *testing.T, verifyRealization bool) {
 	switchName := "test-nsx-logical-switch-vlan"
 	updateSwitchName := fmt.Sprintf("%s-update", switchName)
 	transportZoneName := getVlanTransportZoneName()
@@ -129,7 +129,7 @@ func testAccResourceNsxtLogicalSwitch_switchVlan(t *testing.T, verifyRealization
 
 }
 
-func testAccNSXLogicalSwitchExists(display_name string, resourceName string) resource.TestCheckFunc {
+func testAccNSXLogicalSwitchExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
 		nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
@@ -153,14 +153,14 @@ func testAccNSXLogicalSwitchExists(display_name string, resourceName string) res
 			return fmt.Errorf("Error while checking if logical switch %s exists. HTTP return code was %d", resourceID, responseCode.StatusCode)
 		}
 
-		if display_name == logicalSwitch.DisplayName {
+		if displayName == logicalSwitch.DisplayName {
 			return nil
 		}
-		return fmt.Errorf("NSX logical switch %s wasn't found", display_name)
+		return fmt.Errorf("NSX logical switch %s wasn't found", displayName)
 	}
 }
 
-func testAccNSXLogicalSwitchCheckDestroy(state *terraform.State, display_name string) error {
+func testAccNSXLogicalSwitchCheckDestroy(state *terraform.State, displayName string) error {
 	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
 	for _, rs := range state.RootModule().Resources {
 
@@ -177,8 +177,8 @@ func testAccNSXLogicalSwitchCheckDestroy(state *terraform.State, display_name st
 			return fmt.Errorf("Error while retrieving logical switch ID %s. Error: %v", resourceID, err)
 		}
 
-		if display_name == logicalSwitch.DisplayName {
-			return fmt.Errorf("NSX logical switch %s still exists", display_name)
+		if displayName == logicalSwitch.DisplayName {
+			return fmt.Errorf("NSX logical switch %s still exists", displayName)
 		}
 	}
 	return nil
@@ -215,13 +215,13 @@ data "nsxt_transport_zone" "TZ1" {
 }
 
 resource "nsxt_logical_switch" "%s" {
-	display_name = "%s"
-	admin_state = "UP"
-	description = "Acceptance Test"
-	transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
-	replication_mode = "%s"
-	vlan = "%s"
-	verify_realization = "%t"
+    display_name = "%s"
+    admin_state = "UP"
+    description = "Acceptance Test"
+    transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
+    replication_mode = "%s"
+    vlan = "%s"
+    verify_realization = "%t"
     tag {
     	scope = "scope1"
         tag = "tag1"
@@ -236,12 +236,12 @@ data "nsxt_transport_zone" "TZ1" {
 }
 
 resource "nsxt_logical_switch" "%s" {
-	display_name = "%s"
-	admin_state = "DOWN"
-	description = "Acceptance Test Update"
-	transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
-	replication_mode = "%s"
-	vlan = "%s"
+    display_name = "%s"
+    admin_state = "DOWN"
+    description = "Acceptance Test Update"
+    transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
+    replication_mode = "%s"
+    vlan = "%s"
     tag {
     	scope = "scope1"
         tag = "tag1"

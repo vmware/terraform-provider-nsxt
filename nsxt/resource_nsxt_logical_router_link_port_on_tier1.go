@@ -53,21 +53,21 @@ func resourceNsxtLogicalRouterLinkPortOnTier1() *schema.Resource {
 func resourceNsxtLogicalRouterLinkPortOnTier1Create(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 	description := d.Get("description").(string)
-	display_name := d.Get("display_name").(string)
+	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
-	logical_router_id := d.Get("logical_router_id").(string)
-	linked_logical_router_port_id := d.Get("linked_logical_router_port_id").(string)
-	service_binding := getServiceBindingsFromSchema(d, "service_binding")
-	logical_router_link_port := manager.LogicalRouterLinkPortOnTier1{
+	logicalRouterID := d.Get("logical_router_id").(string)
+	linkedLogicalRouterPortID := d.Get("linked_logical_router_port_id").(string)
+	serviceBinding := getServiceBindingsFromSchema(d, "service_binding")
+	logicalRouterLinkPort := manager.LogicalRouterLinkPortOnTier1{
 		Description:               description,
-		DisplayName:               display_name,
+		DisplayName:               displayName,
 		Tags:                      tags,
-		LogicalRouterId:           logical_router_id,
-		LinkedLogicalRouterPortId: makeResourceReference("LogicalPort", linked_logical_router_port_id),
-		ServiceBindings:           service_binding,
+		LogicalRouterId:           logicalRouterID,
+		LinkedLogicalRouterPortId: makeResourceReference("LogicalPort", linkedLogicalRouterPortID),
+		ServiceBindings:           serviceBinding,
 	}
 
-	logical_router_link_port, resp, err := nsxClient.LogicalRoutingAndServicesApi.CreateLogicalRouterLinkPortOnTier1(nsxClient.Context, logical_router_link_port)
+	logicalRouterLinkPort, resp, err := nsxClient.LogicalRoutingAndServicesApi.CreateLogicalRouterLinkPortOnTier1(nsxClient.Context, logicalRouterLinkPort)
 
 	if err != nil {
 		return fmt.Errorf("Error during LogicalRouterLinkPortOnTier1 create: %v", err)
@@ -76,7 +76,7 @@ func resourceNsxtLogicalRouterLinkPortOnTier1Create(d *schema.ResourceData, m in
 	if resp.StatusCode != http.StatusCreated {
 		return fmt.Errorf("Unexpected status returned during LogicalRouterLinkPortOnTier1 create: %v", resp.StatusCode)
 	}
-	d.SetId(logical_router_link_port.Id)
+	d.SetId(logicalRouterLinkPort.Id)
 
 	return resourceNsxtLogicalRouterLinkPortOnTier1Read(d, m)
 }
@@ -88,7 +88,7 @@ func resourceNsxtLogicalRouterLinkPortOnTier1Read(d *schema.ResourceData, m inte
 		return fmt.Errorf("Error obtaining logical router link port on tier1 id")
 	}
 
-	logical_router_link_port, resp, err := nsxClient.LogicalRoutingAndServicesApi.ReadLogicalRouterLinkPortOnTier1(nsxClient.Context, id)
+	logicalRouterLinkPort, resp, err := nsxClient.LogicalRoutingAndServicesApi.ReadLogicalRouterLinkPortOnTier1(nsxClient.Context, id)
 	if resp.StatusCode == http.StatusNotFound {
 		log.Printf("[DEBUG] LogicalRouterLinkPortOnTier1 %s not found", id)
 		d.SetId("")
@@ -98,13 +98,13 @@ func resourceNsxtLogicalRouterLinkPortOnTier1Read(d *schema.ResourceData, m inte
 		return fmt.Errorf("Error during LogicalRouterLinkPortOnTier1 read: %v", err)
 	}
 
-	d.Set("revision", logical_router_link_port.Revision)
-	d.Set("description", logical_router_link_port.Description)
-	d.Set("display_name", logical_router_link_port.DisplayName)
-	setTagsInSchema(d, logical_router_link_port.Tags)
-	d.Set("logical_router_id", logical_router_link_port.LogicalRouterId)
-	d.Set("linked_logical_router_port_id", logical_router_link_port.LinkedLogicalRouterPortId)
-	setServiceBindingsInSchema(d, logical_router_link_port.ServiceBindings, "service_binding")
+	d.Set("revision", logicalRouterLinkPort.Revision)
+	d.Set("description", logicalRouterLinkPort.Description)
+	d.Set("display_name", logicalRouterLinkPort.DisplayName)
+	setTagsInSchema(d, logicalRouterLinkPort.Tags)
+	d.Set("logical_router_id", logicalRouterLinkPort.LogicalRouterId)
+	d.Set("linked_logical_router_port_id", logicalRouterLinkPort.LinkedLogicalRouterPortId)
+	setServiceBindingsInSchema(d, logicalRouterLinkPort.ServiceBindings, "service_binding")
 
 	return nil
 }
@@ -118,23 +118,23 @@ func resourceNsxtLogicalRouterLinkPortOnTier1Update(d *schema.ResourceData, m in
 
 	revision := int64(d.Get("revision").(int))
 	description := d.Get("description").(string)
-	display_name := d.Get("display_name").(string)
+	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
-	logical_router_id := d.Get("logical_router_id").(string)
-	linked_logical_router_port_id := d.Get("linked_logical_router_port_id").(string)
-	service_binding := getServiceBindingsFromSchema(d, "service_binding")
-	logical_router_link_port := manager.LogicalRouterLinkPortOnTier1{
+	logicalRouterID := d.Get("logical_router_id").(string)
+	linkedLogicalRouterPortID := d.Get("linked_logical_router_port_id").(string)
+	serviceBinding := getServiceBindingsFromSchema(d, "service_binding")
+	logicalRouterLinkPort := manager.LogicalRouterLinkPortOnTier1{
 		Revision:                  revision,
 		Description:               description,
-		DisplayName:               display_name,
+		DisplayName:               displayName,
 		Tags:                      tags,
-		LogicalRouterId:           logical_router_id,
-		LinkedLogicalRouterPortId: makeResourceReference("LogicalPort", linked_logical_router_port_id),
-		ServiceBindings:           service_binding,
+		LogicalRouterId:           logicalRouterID,
+		LinkedLogicalRouterPortId: makeResourceReference("LogicalPort", linkedLogicalRouterPortID),
+		ServiceBindings:           serviceBinding,
 		ResourceType:              "LogicalRouterLinkPortOnTIER1",
 	}
 
-	logical_router_link_port, resp, err := nsxClient.LogicalRoutingAndServicesApi.UpdateLogicalRouterLinkPortOnTier1(nsxClient.Context, id, logical_router_link_port)
+	logicalRouterLinkPort, resp, err := nsxClient.LogicalRoutingAndServicesApi.UpdateLogicalRouterLinkPortOnTier1(nsxClient.Context, id, logicalRouterLinkPort)
 
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during LogicalRouterLinkPortOnTier1 %v update: %v (%+v)", id, err, resp)

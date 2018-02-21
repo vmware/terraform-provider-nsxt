@@ -222,24 +222,24 @@ func getRulesFromSchema(d *schema.ResourceData) []manager.FirewallRule {
 func resourceNsxtFirewallSectionCreateEmpty(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 	description := d.Get("description").(string)
-	display_name := d.Get("display_name").(string)
+	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
-	applied_tos := getResourceReferencesFromSchemaSet(d, "applied_to")
-	is_default := d.Get("is_default").(bool)
-	section_type := d.Get("section_type").(string)
+	appliedTos := getResourceReferencesFromSchemaSet(d, "applied_to")
+	isDefault := d.Get("is_default").(bool)
+	sectionType := d.Get("section_type").(string)
 	stateful := d.Get("stateful").(bool)
 
 	localVarOptionals := make(map[string]interface{})
-	firewall_section := manager.FirewallSection{
+	firewallSection := manager.FirewallSection{
 		Description: description,
-		DisplayName: display_name,
+		DisplayName: displayName,
 		Tags:        tags,
-		AppliedTos:  applied_tos,
-		IsDefault:   is_default,
-		SectionType: section_type,
+		AppliedTos:  appliedTos,
+		IsDefault:   isDefault,
+		SectionType: sectionType,
 		Stateful:    stateful,
 	}
-	firewall_section, resp, err := nsxClient.ServicesApi.AddSection(nsxClient.Context, firewall_section, localVarOptionals)
+	firewallSection, resp, err := nsxClient.ServicesApi.AddSection(nsxClient.Context, firewallSection, localVarOptionals)
 	if err != nil {
 		return fmt.Errorf("Error during FirewallSection create empty: %v", err)
 	}
@@ -247,7 +247,7 @@ func resourceNsxtFirewallSectionCreateEmpty(d *schema.ResourceData, m interface{
 	if resp.StatusCode != http.StatusCreated {
 		return fmt.Errorf("Unexpected status returned during FirewallSection create empty: %v", resp.StatusCode)
 	}
-	d.SetId(firewall_section.Id)
+	d.SetId(firewallSection.Id)
 
 	return resourceNsxtFirewallSectionRead(d, m)
 }
@@ -259,25 +259,25 @@ func resourceNsxtFirewallSectionCreate(d *schema.ResourceData, m interface{}) er
 	}
 	nsxClient := m.(*api.APIClient)
 	description := d.Get("description").(string)
-	display_name := d.Get("display_name").(string)
+	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
-	applied_tos := getResourceReferencesFromSchemaSet(d, "applied_to")
-	is_default := d.Get("is_default").(bool)
-	section_type := d.Get("section_type").(string)
+	appliedTos := getResourceReferencesFromSchemaSet(d, "applied_to")
+	isDefault := d.Get("is_default").(bool)
+	sectionType := d.Get("section_type").(string)
 	stateful := d.Get("stateful").(bool)
 
-	firewall_section := manager.FirewallSectionRuleList{
+	firewallSection := manager.FirewallSectionRuleList{
 		Description: description,
-		DisplayName: display_name,
+		DisplayName: displayName,
 		Tags:        tags,
-		AppliedTos:  applied_tos,
-		IsDefault:   is_default,
-		SectionType: section_type,
+		AppliedTos:  appliedTos,
+		IsDefault:   isDefault,
+		SectionType: sectionType,
 		Stateful:    stateful,
 		Rules:       rules,
 	}
 	localVarOptionals := make(map[string]interface{})
-	firewall_section, resp, err := nsxClient.ServicesApi.AddSectionWithRulesCreateWithRules(nsxClient.Context, firewall_section, localVarOptionals)
+	firewallSection, resp, err := nsxClient.ServicesApi.AddSectionWithRulesCreateWithRules(nsxClient.Context, firewallSection, localVarOptionals)
 	if err != nil {
 		return fmt.Errorf("Error during FirewallSection create with rules: %v", err)
 	}
@@ -285,7 +285,7 @@ func resourceNsxtFirewallSectionCreate(d *schema.ResourceData, m interface{}) er
 	if resp.StatusCode != http.StatusCreated {
 		return fmt.Errorf("Unexpected status returned during FirewallSection create with rules: %v", resp.StatusCode)
 	}
-	d.SetId(firewall_section.Id)
+	d.SetId(firewallSection.Id)
 
 	return resourceNsxtFirewallSectionRead(d, m)
 }
@@ -297,7 +297,7 @@ func resourceNsxtFirewallSectionRead(d *schema.ResourceData, m interface{}) erro
 		return fmt.Errorf("Error obtaining logical object id")
 	}
 
-	firewall_section, resp, err := nsxClient.ServicesApi.GetSectionWithRulesListWithRules(nsxClient.Context, id)
+	firewallSection, resp, err := nsxClient.ServicesApi.GetSectionWithRulesListWithRules(nsxClient.Context, id)
 	if resp.StatusCode == http.StatusNotFound {
 		log.Printf("[DEBUG] FirewallSection %s not found", id)
 		d.SetId("")
@@ -307,17 +307,17 @@ func resourceNsxtFirewallSectionRead(d *schema.ResourceData, m interface{}) erro
 		return fmt.Errorf("Error during FirewallSection %s read: %v", id, err)
 	}
 
-	d.Set("revision", firewall_section.Revision)
-	d.Set("description", firewall_section.Description)
-	d.Set("display_name", firewall_section.DisplayName)
-	setTagsInSchema(d, firewall_section.Tags)
-	setRulesInSchema(d, firewall_section.Rules)
-	d.Set("is_default", firewall_section.IsDefault)
-	d.Set("section_type", firewall_section.SectionType)
-	d.Set("stateful", firewall_section.Stateful)
+	d.Set("revision", firewallSection.Revision)
+	d.Set("description", firewallSection.Description)
+	d.Set("display_name", firewallSection.DisplayName)
+	setTagsInSchema(d, firewallSection.Tags)
+	setRulesInSchema(d, firewallSection.Rules)
+	d.Set("is_default", firewallSection.IsDefault)
+	d.Set("section_type", firewallSection.SectionType)
+	d.Set("stateful", firewallSection.Stateful)
 
 	// Getting the applied tos will require another api call (for NSX 2.1 or less)
-	firewall_section2, resp, err := nsxClient.ServicesApi.GetSection(nsxClient.Context, id)
+	firewallSection2, resp, err := nsxClient.ServicesApi.GetSection(nsxClient.Context, id)
 	if resp.StatusCode == http.StatusNotFound {
 		log.Printf("[DEBUG] FirewallSection %s not found", id)
 		d.SetId("")
@@ -326,7 +326,7 @@ func resourceNsxtFirewallSectionRead(d *schema.ResourceData, m interface{}) erro
 	if err != nil {
 		return fmt.Errorf("Error during FirewallSection %s read: %v", id, err)
 	}
-	setResourceReferencesInSchema(d, firewall_section2.AppliedTos, "applied_to")
+	setResourceReferencesInSchema(d, firewallSection2.AppliedTos, "applied_to")
 
 	return nil
 }
@@ -335,38 +335,38 @@ func resourceNsxtFirewallSectionUpdateEmpty(d *schema.ResourceData, m interface{
 	nsxClient := m.(*api.APIClient)
 	revision := int64(d.Get("revision").(int))
 	description := d.Get("description").(string)
-	display_name := d.Get("display_name").(string)
+	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
-	applied_tos := getResourceReferencesFromSchemaSet(d, "applied_to")
-	is_default := d.Get("is_default").(bool)
-	section_type := d.Get("section_type").(string)
+	appliedTos := getResourceReferencesFromSchemaSet(d, "applied_to")
+	isDefault := d.Get("is_default").(bool)
+	sectionType := d.Get("section_type").(string)
 	stateful := d.Get("stateful").(bool)
-	firewall_section := manager.FirewallSection{
+	firewallSection := manager.FirewallSection{
 		Revision:    revision,
 		Description: description,
-		DisplayName: display_name,
+		DisplayName: displayName,
 		Tags:        tags,
-		AppliedTos:  applied_tos,
-		IsDefault:   is_default,
-		SectionType: section_type,
+		AppliedTos:  appliedTos,
+		IsDefault:   isDefault,
+		SectionType: sectionType,
 		Stateful:    stateful,
 	}
 	// Update the section ignoring the rules
-	firewall_section, resp, err := nsxClient.ServicesApi.UpdateSection(nsxClient.Context, id, firewall_section)
+	firewallSection, resp, err := nsxClient.ServicesApi.UpdateSection(nsxClient.Context, id, firewallSection)
 
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during FirewallSection %s update empty: %v", id, err)
 	}
 
 	// Read the section, and delete all current rules from it
-	curr_section, resp2, err2 := nsxClient.ServicesApi.GetSectionWithRulesListWithRules(nsxClient.Context, id)
+	currSection, resp2, err2 := nsxClient.ServicesApi.GetSectionWithRulesListWithRules(nsxClient.Context, id)
 	if resp2.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("FirewallSection %s not found during update empty action", id)
 	}
 	if err2 != nil {
 		return fmt.Errorf("Error during FirewallSection %s update empty: cannot read the section: %v", id, err2)
 	}
-	for _, rule := range curr_section.Rules {
+	for _, rule := range currSection.Rules {
 		nsxClient.ServicesApi.DeleteRule(nsxClient.Context, id, rule.Id)
 	}
 	return resourceNsxtFirewallSectionRead(d, m)
@@ -386,25 +386,25 @@ func resourceNsxtFirewallSectionUpdate(d *schema.ResourceData, m interface{}) er
 	nsxClient := m.(*api.APIClient)
 	revision := int64(d.Get("revision").(int))
 	description := d.Get("description").(string)
-	display_name := d.Get("display_name").(string)
+	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
-	applied_tos := getResourceReferencesFromSchemaSet(d, "applied_to")
-	is_default := d.Get("is_default").(bool)
-	section_type := d.Get("section_type").(string)
+	appliedTos := getResourceReferencesFromSchemaSet(d, "applied_to")
+	isDefault := d.Get("is_default").(bool)
+	sectionType := d.Get("section_type").(string)
 	stateful := d.Get("stateful").(bool)
-	firewall_section := manager.FirewallSectionRuleList{
+	firewallSection := manager.FirewallSectionRuleList{
 		Revision:    revision,
 		Description: description,
-		DisplayName: display_name,
+		DisplayName: displayName,
 		Tags:        tags,
-		AppliedTos:  applied_tos,
-		IsDefault:   is_default,
-		SectionType: section_type,
+		AppliedTos:  appliedTos,
+		IsDefault:   isDefault,
+		SectionType: sectionType,
 		Stateful:    stateful,
 		Rules:       rules,
 	}
 
-	firewall_section, resp, err := nsxClient.ServicesApi.UpdateSectionWithRulesUpdateWithRules(nsxClient.Context, id, firewall_section)
+	firewallSection, resp, err := nsxClient.ServicesApi.UpdateSectionWithRulesUpdateWithRules(nsxClient.Context, id, firewallSection)
 
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during FirewallSection %s update: %v", id, err)

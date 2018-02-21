@@ -105,9 +105,9 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		return nil, fmt.Errorf("host must be provided")
 	}
 
-	client_auth_cert_file := d.Get("client_auth_cert_file").(string)
-	client_auth_key_file := d.Get("client_auth_key_file").(string)
-	ca_file := d.Get("ca_file").(string)
+	clientAuthCertFile := d.Get("client_auth_cert_file").(string)
+	clientAuthKeyFile := d.Get("client_auth_key_file").(string)
+	caFile := d.Get("ca_file").(string)
 
 	cfg := nsxt.Configuration{
 		BasePath:           "/api/v1",
@@ -116,9 +116,9 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		UserAgent:          "terraform-provider-nsxt/1.0",
 		UserName:           username,
 		Password:           password,
-		ClientAuthCertFile: client_auth_cert_file,
-		ClientAuthKeyFile:  client_auth_key_file,
-		CAFile:             ca_file,
+		ClientAuthCertFile: clientAuthCertFile,
+		ClientAuthKeyFile:  clientAuthKeyFile,
+		CAFile:             caFile,
 		Insecure:           insecure,
 	}
 

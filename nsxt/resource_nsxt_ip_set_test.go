@@ -16,9 +16,9 @@ func TestAccResourceNsxtIpSet_basic(t *testing.T) {
 	name := fmt.Sprintf("test-nsx-ip-set")
 	updateName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_ip_set.test"
-	single_ip := "1.1.1.1"
-	additional_cidr := "2.1.1.0/24"
-	additional_range := "3.1.1.1-3.1.1.10"
+	singleIP := "1.1.1.1"
+	additionalCidr := "2.1.1.0/24"
+	additionalRange := "3.1.1.1-3.1.1.10"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -28,7 +28,7 @@ func TestAccResourceNsxtIpSet_basic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXIpSetCreateTemplate(name, single_ip),
+				Config: testAccNSXIpSetCreateTemplate(name, singleIP),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXIpSetExists(name, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -38,7 +38,7 @@ func TestAccResourceNsxtIpSet_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXIpSetUpdateTemplate(updateName, single_ip, additional_cidr, additional_range),
+				Config: testAccNSXIpSetUpdateTemplate(updateName, singleIP, additionalCidr, additionalRange),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXIpSetExists(updateName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updateName),
@@ -54,9 +54,9 @@ func TestAccResourceNsxtIpSet_basic(t *testing.T) {
 func TestAccResourceNsxtIpSet_noName(t *testing.T) {
 	name := ""
 	testResourceName := "nsxt_ip_set.test"
-	single_ip := "1.1.1.1"
-	additional_cidr := "2.1.1.0/24"
-	additional_range := "3.1.1.1-3.1.1.10"
+	singleIP := "1.1.1.1"
+	additionalCidr := "2.1.1.0/24"
+	additionalRange := "3.1.1.1-3.1.1.10"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -66,7 +66,7 @@ func TestAccResourceNsxtIpSet_noName(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXIpSetCreateTemplate(name, single_ip),
+				Config: testAccNSXIpSetCreateTemplate(name, singleIP),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXIpSetExists(name, testResourceName),
 					resource.TestCheckResourceAttrSet(testResourceName, "display_name"),
@@ -76,7 +76,7 @@ func TestAccResourceNsxtIpSet_noName(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXIpSetUpdateTemplate(name, single_ip, additional_cidr, additional_range),
+				Config: testAccNSXIpSetUpdateTemplate(name, singleIP, additionalCidr, additionalRange),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXIpSetExists(name, testResourceName),
 					resource.TestCheckResourceAttrSet(testResourceName, "display_name"),
@@ -89,7 +89,7 @@ func TestAccResourceNsxtIpSet_noName(t *testing.T) {
 	})
 }
 
-func testAccNSXIpSetExists(display_name string, resourceName string) resource.TestCheckFunc {
+func testAccNSXIpSetExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
 		nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
@@ -114,14 +114,14 @@ func testAccNSXIpSetExists(display_name string, resourceName string) resource.Te
 		}
 
 		// Ignore display name to support the 'no-name' test
-		if display_name == "" || display_name == profile.DisplayName {
+		if displayName == "" || displayName == profile.DisplayName {
 			return nil
 		}
-		return fmt.Errorf("IP Set %s wasn't found", display_name)
+		return fmt.Errorf("IP Set %s wasn't found", displayName)
 	}
 }
 
-func testAccNSXIpSetCheckDestroy(state *terraform.State, display_name string) error {
+func testAccNSXIpSetCheckDestroy(state *terraform.State, displayName string) error {
 	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
 	for _, rs := range state.RootModule().Resources {
 
@@ -138,32 +138,32 @@ func testAccNSXIpSetCheckDestroy(state *terraform.State, display_name string) er
 			return fmt.Errorf("Error while retrieving IP Set ID %s. Error: %v", resourceID, err)
 		}
 
-		if display_name == profile.DisplayName {
-			return fmt.Errorf("IP Set %s still exists", display_name)
+		if displayName == profile.DisplayName {
+			return fmt.Errorf("IP Set %s still exists", displayName)
 		}
 	}
 	return nil
 }
 
-func testAccNSXIpSetCreateTemplate(name string, single_ip string) string {
+func testAccNSXIpSetCreateTemplate(name string, singleIP string) string {
 	return fmt.Sprintf(`
 resource "nsxt_ip_set" "test" {
-	display_name = "%s"
-	description = "Acceptance Test"
-	ip_addresses = ["%s"]
+    display_name = "%s"
+    description = "Acceptance Test"
+    ip_addresses = ["%s"]
     tag {
     	scope = "scope1"
         tag = "tag1"
     }
-}`, name, single_ip)
+}`, name, singleIP)
 }
 
-func testAccNSXIpSetUpdateTemplate(updatedName string, single_ip string, additional_range string, additional_cidr string) string {
+func testAccNSXIpSetUpdateTemplate(updatedName string, singleIP string, additionalRange string, additionalCidr string) string {
 	return fmt.Sprintf(`
 resource "nsxt_ip_set" "test" {
-	display_name = "%s"
-	description = "Acceptance Test Update"
-	ip_addresses = ["%s", "%s", "%s"]
+    display_name = "%s"
+    description = "Acceptance Test Update"
+    ip_addresses = ["%s", "%s", "%s"]
     tag {
     	scope = "scope1"
         tag = "tag1"
@@ -172,5 +172,5 @@ resource "nsxt_ip_set" "test" {
     	scope = "scope2"
         tag = "tag2"
     }
-}`, updatedName, single_ip, additional_range, additional_cidr)
+}`, updatedName, singleIP, additionalRange, additionalCidr)
 }

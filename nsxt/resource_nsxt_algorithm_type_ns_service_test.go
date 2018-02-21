@@ -48,7 +48,7 @@ func TestAccResourceNsxtAlgorithmTypeNsService_basic(t *testing.T) {
 	})
 }
 
-func testAccNSXAlgServiceExists(display_name string, resourceName string) resource.TestCheckFunc {
+func testAccNSXAlgServiceExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 		nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
 		rs, ok := state.RootModule().Resources[resourceName]
@@ -70,14 +70,14 @@ func testAccNSXAlgServiceExists(display_name string, resourceName string) resour
 			return fmt.Errorf("Error while checking if alg ns service %s exists. HTTP return code was %d", resourceID, responseCode.StatusCode)
 		}
 
-		if display_name == service.DisplayName {
+		if displayName == service.DisplayName {
 			return nil
 		}
-		return fmt.Errorf("NSX alg ns service %s wasn't found", display_name)
+		return fmt.Errorf("NSX alg ns service %s wasn't found", displayName)
 	}
 }
 
-func testAccNSXAlgServiceCheckDestroy(state *terraform.State, display_name string) error {
+func testAccNSXAlgServiceCheckDestroy(state *terraform.State, displayName string) error {
 	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
 	for _, rs := range state.RootModule().Resources {
 
@@ -94,14 +94,14 @@ func testAccNSXAlgServiceCheckDestroy(state *terraform.State, display_name strin
 			return fmt.Errorf("Error while retrieving alg ns service ID %s. Error: %v", resourceID, err)
 		}
 
-		if display_name == service.DisplayName {
-			return fmt.Errorf("NSX alg ns service %s still exists", display_name)
+		if displayName == service.DisplayName {
+			return fmt.Errorf("NSX alg ns service %s still exists", displayName)
 		}
 	}
 	return nil
 }
 
-func testAccNSXAlgServiceCreateTemplate(serviceName string, protocol string, source_ports string, dest_ports string) string {
+func testAccNSXAlgServiceCreateTemplate(serviceName string, protocol string, sourcePorts string, destPorts string) string {
 	return fmt.Sprintf(`
 resource "nsxt_algorithm_type_ns_service" "test" {
     description = "alg service"
@@ -113,5 +113,5 @@ resource "nsxt_algorithm_type_ns_service" "test" {
     	scope = "scope1"
         tag = "tag1"
     }
-}`, serviceName, protocol, source_ports, dest_ports)
+}`, serviceName, protocol, sourcePorts, destPorts)
 }

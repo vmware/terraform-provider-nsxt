@@ -72,29 +72,29 @@ func resourceNsxtL4PortSetNsService() *schema.Resource {
 func resourceNsxtL4PortSetNsServiceCreate(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 	description := d.Get("description").(string)
-	display_name := d.Get("display_name").(string)
+	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
-	default_service := d.Get("default_service").(bool)
-	l4_protocol := d.Get("protocol").(string)
-	source_ports := getStringListFromSchemaSet(d, "source_ports")
-	destination_ports := getStringListFromSchemaSet(d, "destination_ports")
+	defaultService := d.Get("default_service").(bool)
+	l4Protocol := d.Get("protocol").(string)
+	sourcePorts := getStringListFromSchemaSet(d, "source_ports")
+	destinationPorts := getStringListFromSchemaSet(d, "destination_ports")
 
-	ns_service := manager.L4PortSetNsService{
+	nsService := manager.L4PortSetNsService{
 		NsService: manager.NsService{
 			Description:    description,
-			DisplayName:    display_name,
+			DisplayName:    displayName,
 			Tags:           tags,
-			DefaultService: default_service,
+			DefaultService: defaultService,
 		},
 		NsserviceElement: manager.L4PortSetNsServiceEntry{
 			ResourceType:     "L4PortSetNSService",
-			L4Protocol:       l4_protocol,
-			DestinationPorts: destination_ports,
-			SourcePorts:      source_ports,
+			L4Protocol:       l4Protocol,
+			DestinationPorts: destinationPorts,
+			SourcePorts:      sourcePorts,
 		},
 	}
 
-	ns_service, resp, err := nsxClient.GroupingObjectsApi.CreateL4PortSetNSService(nsxClient.Context, ns_service)
+	nsService, resp, err := nsxClient.GroupingObjectsApi.CreateL4PortSetNSService(nsxClient.Context, nsService)
 
 	if err != nil {
 		return fmt.Errorf("Error during NsService create: %v", err)
@@ -103,7 +103,7 @@ func resourceNsxtL4PortSetNsServiceCreate(d *schema.ResourceData, m interface{})
 	if resp.StatusCode != http.StatusCreated {
 		return fmt.Errorf("Unexpected status returned during NsService create: %v", resp.StatusCode)
 	}
-	d.SetId(ns_service.Id)
+	d.SetId(nsService.Id)
 	return resourceNsxtL4PortSetNsServiceRead(d, m)
 }
 
@@ -114,7 +114,7 @@ func resourceNsxtL4PortSetNsServiceRead(d *schema.ResourceData, m interface{}) e
 		return fmt.Errorf("Error obtaining ns service id")
 	}
 
-	ns_service, resp, err := nsxClient.GroupingObjectsApi.ReadL4PortSetNSService(nsxClient.Context, id)
+	nsService, resp, err := nsxClient.GroupingObjectsApi.ReadL4PortSetNSService(nsxClient.Context, id)
 	if resp.StatusCode == http.StatusNotFound {
 		log.Printf("[DEBUG] NsService %s not found", id)
 		d.SetId("")
@@ -124,16 +124,16 @@ func resourceNsxtL4PortSetNsServiceRead(d *schema.ResourceData, m interface{}) e
 		return fmt.Errorf("Error during NsService read: %v", err)
 	}
 
-	nsservice_element := ns_service.NsserviceElement
+	nsserviceElement := nsService.NsserviceElement
 
-	d.Set("revision", ns_service.Revision)
-	d.Set("description", ns_service.Description)
-	d.Set("display_name", ns_service.DisplayName)
-	setTagsInSchema(d, ns_service.Tags)
-	d.Set("default_service", ns_service.DefaultService)
-	d.Set("protocol", nsservice_element.L4Protocol)
-	d.Set("destination_ports", nsservice_element.DestinationPorts)
-	d.Set("source_ports", nsservice_element.SourcePorts)
+	d.Set("revision", nsService.Revision)
+	d.Set("description", nsService.Description)
+	d.Set("display_name", nsService.DisplayName)
+	setTagsInSchema(d, nsService.Tags)
+	d.Set("default_service", nsService.DefaultService)
+	d.Set("protocol", nsserviceElement.L4Protocol)
+	d.Set("destination_ports", nsserviceElement.DestinationPorts)
+	d.Set("source_ports", nsserviceElement.SourcePorts)
 
 	return nil
 }
@@ -146,31 +146,31 @@ func resourceNsxtL4PortSetNsServiceUpdate(d *schema.ResourceData, m interface{})
 	}
 
 	description := d.Get("description").(string)
-	display_name := d.Get("display_name").(string)
+	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
-	default_service := d.Get("default_service").(bool)
-	l4_protocol := d.Get("protocol").(string)
-	source_ports := getStringListFromSchemaSet(d, "source_ports")
-	destination_ports := getStringListFromSchemaSet(d, "destination_ports")
+	defaultService := d.Get("default_service").(bool)
+	l4Protocol := d.Get("protocol").(string)
+	sourcePorts := getStringListFromSchemaSet(d, "source_ports")
+	destinationPorts := getStringListFromSchemaSet(d, "destination_ports")
 	revision := int64(d.Get("revision").(int))
 
-	ns_service := manager.L4PortSetNsService{
+	nsService := manager.L4PortSetNsService{
 		NsService: manager.NsService{
 			Description:    description,
-			DisplayName:    display_name,
+			DisplayName:    displayName,
 			Tags:           tags,
-			DefaultService: default_service,
+			DefaultService: defaultService,
 			Revision:       revision,
 		},
 		NsserviceElement: manager.L4PortSetNsServiceEntry{
 			ResourceType:     "L4PortSetNSService",
-			L4Protocol:       l4_protocol,
-			DestinationPorts: destination_ports,
-			SourcePorts:      source_ports,
+			L4Protocol:       l4Protocol,
+			DestinationPorts: destinationPorts,
+			SourcePorts:      sourcePorts,
 		},
 	}
 
-	ns_service, resp, err := nsxClient.GroupingObjectsApi.UpdateL4PortSetNSService(nsxClient.Context, id, ns_service)
+	nsService, resp, err := nsxClient.GroupingObjectsApi.UpdateL4PortSetNSService(nsxClient.Context, id, nsService)
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during NsService update: %v %v", err, resp)
 	}

@@ -54,41 +54,41 @@ func dataSourceNsxtTransportZone() *schema.Resource {
 func dataSourceNsxtTransportZoneRead(d *schema.ResourceData, m interface{}) error {
 	// Read a transport zone by name or id
 	nsxClient := m.(*api.APIClient)
-	obj_id := d.Get("id").(string)
-	obj_name := d.Get("display_name").(string)
+	objID := d.Get("id").(string)
+	objName := d.Get("display_name").(string)
 	var obj manager.TransportZone
-	if obj_id != "" {
+	if objID != "" {
 		// Get by id
-		obj_get, resp, err := nsxClient.NetworkTransportApi.GetTransportZone(nsxClient.Context, obj_id)
+		objGet, resp, err := nsxClient.NetworkTransportApi.GetTransportZone(nsxClient.Context, objID)
 
 		if err != nil {
-			return fmt.Errorf("Error while reading transport zone %s: %v\n", obj_id, err)
+			return fmt.Errorf("Error while reading transport zone %s: %v\n", objID, err)
 		}
 		if resp.StatusCode == http.StatusNotFound {
-			return fmt.Errorf("Transport zone %s was not found\n", obj_id)
+			return fmt.Errorf("Transport zone %s was not found\n", objID)
 		}
-		obj = obj_get
-	} else if obj_name != "" {
+		obj = objGet
+	} else if objName != "" {
 		// Get by name prefix
 		// TODO use 2nd parameter localVarOptionals for paging
-		obj_list, _, err := nsxClient.NetworkTransportApi.ListTransportZones(nsxClient.Context, nil)
+		objList, _, err := nsxClient.NetworkTransportApi.ListTransportZones(nsxClient.Context, nil)
 		if err != nil {
 			return fmt.Errorf("Error while reading transport zones: %v\n", err)
 		}
 		// go over the list to find the correct one
 		// TODO: prefer full match
 		found := false
-		for _, obj_in_list := range obj_list.Results {
-			if strings.HasPrefix(obj_in_list.DisplayName, obj_name) {
+		for _, objInList := range objList.Results {
+			if strings.HasPrefix(objInList.DisplayName, objName) {
 				if found == true {
-					return fmt.Errorf("Found multiple transport zones with name '%s'\n", obj_name)
+					return fmt.Errorf("Found multiple transport zones with name '%s'\n", objName)
 				}
-				obj = obj_in_list
+				obj = objInList
 				found = true
 			}
 		}
 		if found == false {
-			return fmt.Errorf("Transport zone '%s' was not found\n", obj_name)
+			return fmt.Errorf("Transport zone '%s' was not found\n", objName)
 		}
 	} else {
 		return fmt.Errorf("Error obtaining transport zone ID or name during read")

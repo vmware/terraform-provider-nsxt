@@ -98,76 +98,76 @@ func resourceNsxtLogicalTier1RouterCreateRollback(nsxClient *api.APIClient, id s
 }
 
 func resourceNsxtLogicalTier1RouterReadAdv(d *schema.ResourceData, nsxClient *api.APIClient, id string) error {
-	adv_config, resp, err := nsxClient.LogicalRoutingAndServicesApi.ReadAdvertisementConfig(nsxClient.Context, id)
+	advConfig, resp, err := nsxClient.LogicalRoutingAndServicesApi.ReadAdvertisementConfig(nsxClient.Context, id)
 	if resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("LogicalTier1Router %s Advertisement config not found", id)
 	}
 	if err != nil {
 		return fmt.Errorf("Error during LogicalTier1Router Advertisement config read: %v", err)
 	}
-	d.Set("enable_router_advertisement", adv_config.Enabled)
-	d.Set("advertise_connected_routes", adv_config.AdvertiseNsxConnectedRoutes)
-	d.Set("advertise_static_routes", adv_config.AdvertiseStaticRoutes)
-	d.Set("advertise_nat_routes", adv_config.AdvertiseNatRoutes)
-	d.Set("advertise_config_revision", adv_config.Revision)
+	d.Set("enable_router_advertisement", advConfig.Enabled)
+	d.Set("advertise_connected_routes", advConfig.AdvertiseNsxConnectedRoutes)
+	d.Set("advertise_static_routes", advConfig.AdvertiseStaticRoutes)
+	d.Set("advertise_nat_routes", advConfig.AdvertiseNatRoutes)
+	d.Set("advertise_config_revision", advConfig.Revision)
 	return nil
 }
 
 func resourceNsxtLogicalTier1RouterCreateAdv(d *schema.ResourceData, nsxClient *api.APIClient, id string) error {
-	enable_router_advertisement := d.Get("enable_router_advertisement").(bool)
-	if enable_router_advertisement {
-		adv_connected := d.Get("advertise_connected_routes").(bool)
-		adv_static := d.Get("advertise_static_routes").(bool)
-		adv_nat := d.Get("advertise_nat_routes").(bool)
-		adv_config := manager.AdvertisementConfig{
+	enableRouterAdvertisement := d.Get("enable_router_advertisement").(bool)
+	if enableRouterAdvertisement {
+		advConnected := d.Get("advertise_connected_routes").(bool)
+		advStatic := d.Get("advertise_static_routes").(bool)
+		advNat := d.Get("advertise_nat_routes").(bool)
+		advConfig := manager.AdvertisementConfig{
 			Enabled:                     true,
-			AdvertiseNsxConnectedRoutes: adv_connected,
-			AdvertiseStaticRoutes:       adv_static,
-			AdvertiseNatRoutes:          adv_nat,
+			AdvertiseNsxConnectedRoutes: advConnected,
+			AdvertiseStaticRoutes:       advStatic,
+			AdvertiseNatRoutes:          advNat,
 		}
-		_, _, err := nsxClient.LogicalRoutingAndServicesApi.UpdateAdvertisementConfig(nsxClient.Context, id, adv_config)
+		_, _, err := nsxClient.LogicalRoutingAndServicesApi.UpdateAdvertisementConfig(nsxClient.Context, id, advConfig)
 		return err
 	}
 	return nil
 }
 
 func resourceNsxtLogicalTier1RouterUpdateAdv(d *schema.ResourceData, nsxClient *api.APIClient, id string) error {
-	enable_router_advertisement := d.Get("enable_router_advertisement").(bool)
-	adv_connected := d.Get("advertise_connected_routes").(bool)
-	adv_static := d.Get("advertise_static_routes").(bool)
-	adv_nat := d.Get("advertise_nat_routes").(bool)
-	adv_revision := int64(d.Get("advertise_config_revision").(int))
-	adv_config := manager.AdvertisementConfig{
-		Enabled:                     enable_router_advertisement,
-		AdvertiseNsxConnectedRoutes: adv_connected,
-		AdvertiseStaticRoutes:       adv_static,
-		AdvertiseNatRoutes:          adv_nat,
-		Revision:                    adv_revision,
+	enableRouterAdvertisement := d.Get("enable_router_advertisement").(bool)
+	advConnected := d.Get("advertise_connected_routes").(bool)
+	advStatic := d.Get("advertise_static_routes").(bool)
+	advNat := d.Get("advertise_nat_routes").(bool)
+	advRevision := int64(d.Get("advertise_config_revision").(int))
+	advConfig := manager.AdvertisementConfig{
+		Enabled:                     enableRouterAdvertisement,
+		AdvertiseNsxConnectedRoutes: advConnected,
+		AdvertiseStaticRoutes:       advStatic,
+		AdvertiseNatRoutes:          advNat,
+		Revision:                    advRevision,
 	}
-	_, _, err := nsxClient.LogicalRoutingAndServicesApi.UpdateAdvertisementConfig(nsxClient.Context, id, adv_config)
+	_, _, err := nsxClient.LogicalRoutingAndServicesApi.UpdateAdvertisementConfig(nsxClient.Context, id, advConfig)
 	return err
 }
 
 func resourceNsxtLogicalTier1RouterCreate(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 	description := d.Get("description").(string)
-	display_name := d.Get("display_name").(string)
+	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
-	failover_mode := d.Get("failover_mode").(string)
-	high_availability_mode := d.Get("high_availability_mode").(string)
-	router_type := "TIER1"
-	edge_cluster_id := d.Get("edge_cluster_id").(string)
-	logical_router := manager.LogicalRouter{
+	failoverMode := d.Get("failover_mode").(string)
+	highAvailabilityMode := d.Get("high_availability_mode").(string)
+	routerType := "TIER1"
+	edgeClusterID := d.Get("edge_cluster_id").(string)
+	logicalRouter := manager.LogicalRouter{
 		Description:          description,
-		DisplayName:          display_name,
+		DisplayName:          displayName,
 		Tags:                 tags,
-		FailoverMode:         failover_mode,
-		HighAvailabilityMode: high_availability_mode,
-		RouterType:           router_type,
-		EdgeClusterId:        edge_cluster_id,
+		FailoverMode:         failoverMode,
+		HighAvailabilityMode: highAvailabilityMode,
+		RouterType:           routerType,
+		EdgeClusterId:        edgeClusterID,
 	}
 
-	logical_router, resp, err := nsxClient.LogicalRoutingAndServicesApi.CreateLogicalRouter(nsxClient.Context, logical_router)
+	logicalRouter, resp, err := nsxClient.LogicalRoutingAndServicesApi.CreateLogicalRouter(nsxClient.Context, logicalRouter)
 
 	if err != nil {
 		return fmt.Errorf("Error during LogicalTier1Router create: %v", err)
@@ -178,13 +178,13 @@ func resourceNsxtLogicalTier1RouterCreate(d *schema.ResourceData, m interface{})
 	}
 
 	// Add advertisement config
-	err = resourceNsxtLogicalTier1RouterCreateAdv(d, nsxClient, logical_router.Id)
+	err = resourceNsxtLogicalTier1RouterCreateAdv(d, nsxClient, logicalRouter.Id)
 	if err != nil {
-		resourceNsxtLogicalTier1RouterCreateRollback(nsxClient, logical_router.Id)
+		resourceNsxtLogicalTier1RouterCreateRollback(nsxClient, logicalRouter.Id)
 		return fmt.Errorf("Error while setting config advertisement state: %v", err)
 	}
 
-	d.SetId(logical_router.Id)
+	d.SetId(logicalRouter.Id)
 
 	return resourceNsxtLogicalTier1RouterRead(d, m)
 }
@@ -196,7 +196,7 @@ func resourceNsxtLogicalTier1RouterRead(d *schema.ResourceData, m interface{}) e
 		return fmt.Errorf("Error obtaining logical tier1 router id")
 	}
 
-	logical_router, resp, err := nsxClient.LogicalRoutingAndServicesApi.ReadLogicalRouter(nsxClient.Context, id)
+	logicalRouter, resp, err := nsxClient.LogicalRoutingAndServicesApi.ReadLogicalRouter(nsxClient.Context, id)
 	if resp.StatusCode == http.StatusNotFound {
 		log.Printf("[DEBUG] LogicalTier1Router %s not found", id)
 		d.SetId("")
@@ -206,17 +206,17 @@ func resourceNsxtLogicalTier1RouterRead(d *schema.ResourceData, m interface{}) e
 		return fmt.Errorf("Error during LogicalTier1Router read: %v", err)
 	}
 
-	d.Set("revision", logical_router.Revision)
-	d.Set("description", logical_router.Description)
-	d.Set("display_name", logical_router.DisplayName)
-	setTagsInSchema(d, logical_router.Tags)
-	d.Set("advanced_config", logical_router.AdvancedConfig)
-	d.Set("edge_cluster_id", logical_router.EdgeClusterId)
-	d.Set("failover_mode", logical_router.FailoverMode)
-	setResourceReferencesInSchema(d, logical_router.FirewallSections, "firewall_sections")
-	d.Set("high_availability_mode", logical_router.HighAvailabilityMode)
-	d.Set("preferred_edge_cluster_member_index", logical_router.PreferredEdgeClusterMemberIndex)
-	d.Set("router_type", logical_router.RouterType)
+	d.Set("revision", logicalRouter.Revision)
+	d.Set("description", logicalRouter.Description)
+	d.Set("display_name", logicalRouter.DisplayName)
+	setTagsInSchema(d, logicalRouter.Tags)
+	d.Set("advanced_config", logicalRouter.AdvancedConfig)
+	d.Set("edge_cluster_id", logicalRouter.EdgeClusterId)
+	d.Set("failover_mode", logicalRouter.FailoverMode)
+	setResourceReferencesInSchema(d, logicalRouter.FirewallSections, "firewall_sections")
+	d.Set("high_availability_mode", logicalRouter.HighAvailabilityMode)
+	d.Set("preferred_edge_cluster_member_index", logicalRouter.PreferredEdgeClusterMemberIndex)
+	d.Set("router_type", logicalRouter.RouterType)
 
 	err = resourceNsxtLogicalTier1RouterReadAdv(d, nsxClient, id)
 	if err != nil {
@@ -235,23 +235,23 @@ func resourceNsxtLogicalTier1RouterUpdate(d *schema.ResourceData, m interface{})
 
 	revision := int64(d.Get("revision").(int))
 	description := d.Get("description").(string)
-	display_name := d.Get("display_name").(string)
+	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
-	failover_mode := d.Get("failover_mode").(string)
-	high_availability_mode := d.Get("high_availability_mode").(string)
-	router_type := "TIER1"
-	edge_cluster_id := d.Get("edge_cluster_id").(string)
-	logical_router := manager.LogicalRouter{
+	failoverMode := d.Get("failover_mode").(string)
+	highAvailabilityMode := d.Get("high_availability_mode").(string)
+	routerType := "TIER1"
+	edgeClusterID := d.Get("edge_cluster_id").(string)
+	logicalRouter := manager.LogicalRouter{
 		Revision:             revision,
 		Description:          description,
-		DisplayName:          display_name,
+		DisplayName:          displayName,
 		Tags:                 tags,
-		FailoverMode:         failover_mode,
-		HighAvailabilityMode: high_availability_mode,
-		RouterType:           router_type,
-		EdgeClusterId:        edge_cluster_id,
+		FailoverMode:         failoverMode,
+		HighAvailabilityMode: highAvailabilityMode,
+		RouterType:           routerType,
+		EdgeClusterId:        edgeClusterID,
 	}
-	logical_router, resp, err := nsxClient.LogicalRoutingAndServicesApi.UpdateLogicalRouter(nsxClient.Context, id, logical_router)
+	logicalRouter, resp, err := nsxClient.LogicalRoutingAndServicesApi.UpdateLogicalRouter(nsxClient.Context, id, logicalRouter)
 
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during LogicalTier1Router update error: %v, resp %+v", err, resp)

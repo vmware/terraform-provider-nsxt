@@ -119,7 +119,7 @@ func TestAccResourceNsxtNSGroup_withCriteria(t *testing.T) {
 	})
 }
 
-func testAccNSXNSGroupExists(display_name string, resourceName string) resource.TestCheckFunc {
+func testAccNSXNSGroupExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
 		nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
@@ -144,14 +144,14 @@ func testAccNSXNSGroupExists(display_name string, resourceName string) resource.
 			return fmt.Errorf("Error while checking if NS Group %s exists. HTTP return code was %d", resourceID, responseCode.StatusCode)
 		}
 
-		if display_name == group.DisplayName {
+		if displayName == group.DisplayName {
 			return nil
 		}
-		return fmt.Errorf("NS Group %s wasn't found", display_name)
+		return fmt.Errorf("NS Group %s wasn't found", displayName)
 	}
 }
 
-func testAccNSXNSGroupCheckDestroy(state *terraform.State, display_name string) error {
+func testAccNSXNSGroupCheckDestroy(state *terraform.State, displayName string) error {
 	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
 	for _, rs := range state.RootModule().Resources {
 
@@ -169,8 +169,8 @@ func testAccNSXNSGroupCheckDestroy(state *terraform.State, display_name string) 
 			return fmt.Errorf("Error while retrieving NS Group ID %s. Error: %v", resourceID, err)
 		}
 
-		if display_name == group.DisplayName {
-			return fmt.Errorf("NS Group %s still exists", display_name)
+		if displayName == group.DisplayName {
+			return fmt.Errorf("NS Group %s still exists", displayName)
 		}
 	}
 	return nil
@@ -179,8 +179,8 @@ func testAccNSXNSGroupCheckDestroy(state *terraform.State, display_name string) 
 func testAccNSXNSGroupCreateTemplate(name string) string {
 	return fmt.Sprintf(`
 resource "nsxt_ns_group" "test" {
-	display_name = "%s"
-	description = "Acceptance Test"
+    display_name = "%s"
+    description = "Acceptance Test"
     tag {
     	scope = "scope1"
         tag = "tag1"
@@ -191,8 +191,8 @@ resource "nsxt_ns_group" "test" {
 func testAccNSXNSGroupUpdateTemplate(updatedName string) string {
 	return fmt.Sprintf(`
 resource "nsxt_ns_group" "test" {
-	display_name = "%s"
-	description = "Acceptance Test Update"
+    display_name = "%s"
+    description = "Acceptance Test Update"
     tag {
     	scope = "scope1"
         tag = "tag1"
@@ -207,81 +207,81 @@ resource "nsxt_ns_group" "test" {
 func testAccNSXNSGroupNestedCreateTemplate(name string) string {
 	return fmt.Sprintf(`
 resource "nsxt_ns_group" "GRP1" {
-	display_name = "grp1"
+    display_name = "grp1"
 }
 resource "nsxt_ns_group" "test" {
-	display_name = "%s"
-	description = "Acceptance Test"
-	member {
-		target_type = "NSGroup"
-	    value = "${nsxt_ns_group.GRP1.id}"
-	}
+    display_name = "%s"
+    description = "Acceptance Test"
+    member {
+	target_type = "NSGroup"
+	value = "${nsxt_ns_group.GRP1.id}"
+    }
 }`, name)
 }
 
 func testAccNSXNSGroupNestedUpdateTemplate(updatedName string) string {
 	return fmt.Sprintf(`
 resource "nsxt_ns_group" "GRP1" {
-	display_name = "grp1"
+    display_name = "grp1"
 }
 resource "nsxt_ns_group" "GRP2" {
-	display_name = "grp2"
+    display_name = "grp2"
 }
 resource "nsxt_ns_group" "test" {
-	display_name = "%s"
-	description = "Acceptance Test Update"
-	member {
-		target_type = "NSGroup"
-	    value = "${nsxt_ns_group.GRP1.id}"
-	}
-	member {
-	    target_type = "NSGroup"
-	    value = "${nsxt_ns_group.GRP2.id}"
-	}
+    display_name = "%s"
+    description = "Acceptance Test Update"
+    member {
+	target_type = "NSGroup"
+	value = "${nsxt_ns_group.GRP1.id}"
+    }
+    member {
+	target_type = "NSGroup"
+	value = "${nsxt_ns_group.GRP2.id}"
+    }
 }`, updatedName)
 }
 
 func testAccNSXNSGroupCriteriaCreateTemplate(name string) string {
 	return fmt.Sprintf(`
 resource "nsxt_ns_group" "test" {
-	display_name = "%s"
-	description = "Acceptance Test"
-	membership_criteria {
+    display_name = "%s"
+    description = "Acceptance Test"
+    membership_criteria {
     	target_type = "LogicalSwitch"
         scope = "XXX"
-	}
-	membership_criteria {
+    }
+    membership_criteria {
         target_type = "LogicalPort"
         scope = "XXX"
         tag = "YYY"
-	}
+    }
 }`, name)
 }
 
-func testAccNSXNSGroupCriteriaUpdateTemplate(name string, tz_name string) string {
+func testAccNSXNSGroupCriteriaUpdateTemplate(name string, tzName string) string {
 	return fmt.Sprintf(`
 
 data "nsxt_transport_zone" "TZ1" {
-     display_name = "%s"
+    display_name = "%s"
 }
 
 resource "nsxt_logical_switch" "test" {
-	display_name = "test_switch"
-	admin_state = "DOWN"
-	replication_mode = "MTEP"
-	transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
+    display_name = "test_switch"
+    admin_state = "DOWN"
+    replication_mode = "MTEP"
+    transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
 }
 
 resource "nsxt_ns_group" "test" {
-	display_name = "%s"
-	description = "Acceptance Test Update"
-	membership_criteria {
-		target_type = "LogicalSwitch"
+    display_name = "%s"
+    description = "Acceptance Test Update"
+    membership_criteria {
+	target_type = "LogicalSwitch"
         scope = "XXX"
-	}
+    }
     member {
     	target_type = "LogicalSwitch"
 	    value = "${nsxt_logical_switch.test.id}"
 	}
-}`, tz_name, name)
+    }`, tzName, name)
 }

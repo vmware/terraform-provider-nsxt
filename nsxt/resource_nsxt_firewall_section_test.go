@@ -263,7 +263,7 @@ func TestAccResourceNsxtFirewallSection_withRulesAndTos(t *testing.T) {
 	})
 }
 
-func testAccNSXFirewallSectionExists(display_name string, resourceName string) resource.TestCheckFunc {
+func testAccNSXFirewallSectionExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
 		nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
@@ -287,14 +287,14 @@ func testAccNSXFirewallSectionExists(display_name string, resourceName string) r
 			return fmt.Errorf("Error while checking if firewall section %s exists. HTTP return code was %d", resourceID, responseCode.StatusCode)
 		}
 
-		if display_name == profile.DisplayName {
+		if displayName == profile.DisplayName {
 			return nil
 		}
-		return fmt.Errorf("Firewall Section %s wasn't found", display_name)
+		return fmt.Errorf("Firewall Section %s wasn't found", displayName)
 	}
 }
 
-func testAccNSXFirewallSectionCheckDestroy(state *terraform.State, display_name string) error {
+func testAccNSXFirewallSectionCheckDestroy(state *terraform.State, displayName string) error {
 	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
 
 	for _, rs := range state.RootModule().Resources {
@@ -312,8 +312,8 @@ func testAccNSXFirewallSectionCheckDestroy(state *terraform.State, display_name 
 			return fmt.Errorf("Error while retrieving firewall section ID %s. Error: %v", resourceID, err)
 		}
 
-		if display_name == profile.DisplayName {
-			return fmt.Errorf("Firewall Section %s still exists", display_name)
+		if displayName == profile.DisplayName {
+			return fmt.Errorf("Firewall Section %s still exists", displayName)
 		}
 	}
 	return nil
@@ -332,71 +332,71 @@ resource "nsxt_ns_group" "GRP2" {
 func testAccNSXFirewallSectionCreateTemplate(name string, ruleName string, tags string, tos string) string {
 	return testAccNSXFirewallSectionNSGroups() + fmt.Sprintf(`
 resource "nsxt_firewall_section" "test" {
-	display_name = "%s"
-	description = "Acceptance Test"
+    display_name = "%s"
+    description = "Acceptance Test"
     section_type = "LAYER3"
     stateful = true
-	tag = %s
-	rule {
-		display_name = "%s",
-	    description = "rule1",
+    tag = %s
+    rule {
+	display_name = "%s",
+	description = "rule1",
     	action = "ALLOW",
      	logged = "true",
     	ip_protocol = "IPV4",
     	direction = "IN"
     }
-	applied_to = %s 
+    applied_to = %s
 }`, name, tags, ruleName, tos)
 }
 
 func testAccNSXFirewallSectionUpdateTemplate(updatedName string, updatedRuleName string, tags string, tos string) string {
 	return testAccNSXFirewallSectionNSGroups() + fmt.Sprintf(`
 resource "nsxt_firewall_section" "test" {
-	display_name = "%s"
-	description = "Acceptance Test Update"
+    display_name = "%s"
+    description = "Acceptance Test Update"
     section_type = "LAYER3"
     stateful = true
-	tag = %s
-	rule {
-		display_name = "%s",
-	    description = "rule1",
+    tag = %s
+    rule {
+	display_name = "%s",
+	description = "rule1",
     	action = "ALLOW",
       	logged = "true",
       	ip_protocol = "IPV4",
       	direction = "IN"
     }
-	rule {
-		display_name = "rule2",
+    rule {
+	display_name = "rule2",
       	description = "rule2",
       	action = "ALLOW",
       	logged = "true",
       	ip_protocol = "IPV6",
       	direction = "OUT"
     }
-	applied_to = %s 
+    applied_to = %s
 }`, updatedName, tags, updatedRuleName, tos)
 }
 
 func testAccNSXFirewallSectionCreateEmptyTemplate(name string, tags string, tos string) string {
 	return testAccNSXFirewallSectionNSGroups() + fmt.Sprintf(`
 resource "nsxt_firewall_section" "test" {
-	display_name = "%s"
-	description = "Acceptance Test"
+    display_name = "%s"
+    description = "Acceptance Test"
     section_type = "LAYER3"
     stateful = true
-	tag = %s
-	applied_to = %s
+    tag = %s
+    applied_to = %s
 }`, name, tags, tos)
 }
 
 func testAccNSXFirewallSectionUpdateEmptyTemplate(updatedName string, tags string, tos string) string {
 	return testAccNSXFirewallSectionNSGroups() + fmt.Sprintf(`
 resource "nsxt_firewall_section" "test" {
-	display_name = "%s"
-	description = "Acceptance Test Update"
+    display_name = "%s"
+    description = "Acceptance Test Update"
     section_type = "LAYER3"
     stateful = true
-	tag = %s
-	applied_to = %s
+    tag = %s
+    applied_to = %s
 }`, updatedName, tags, tos)
 }

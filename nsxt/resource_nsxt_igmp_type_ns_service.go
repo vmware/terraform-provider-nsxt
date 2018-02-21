@@ -45,23 +45,23 @@ func resourceNsxtIgmpTypeNsService() *schema.Resource {
 func resourceNsxtIgmpTypeNsServiceCreate(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 	description := d.Get("description").(string)
-	display_name := d.Get("display_name").(string)
+	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
-	default_service := d.Get("default_service").(bool)
+	defaultService := d.Get("default_service").(bool)
 
-	ns_service := manager.IgmpTypeNsService{
+	nsService := manager.IgmpTypeNsService{
 		NsService: manager.NsService{
 			Description:    description,
-			DisplayName:    display_name,
+			DisplayName:    displayName,
 			Tags:           tags,
-			DefaultService: default_service,
+			DefaultService: defaultService,
 		},
 		NsserviceElement: manager.IgmpTypeNsServiceEntry{
 			ResourceType: "IGMPTypeNSService",
 		},
 	}
 
-	ns_service, resp, err := nsxClient.GroupingObjectsApi.CreateIgmpTypeNSService(nsxClient.Context, ns_service)
+	nsService, resp, err := nsxClient.GroupingObjectsApi.CreateIgmpTypeNSService(nsxClient.Context, nsService)
 
 	if err != nil {
 		return fmt.Errorf("Error during NsService create: %v", err)
@@ -70,7 +70,7 @@ func resourceNsxtIgmpTypeNsServiceCreate(d *schema.ResourceData, m interface{}) 
 	if resp.StatusCode != http.StatusCreated {
 		return fmt.Errorf("Unexpected status returned during NsService create: %v", resp.StatusCode)
 	}
-	d.SetId(ns_service.Id)
+	d.SetId(nsService.Id)
 	return resourceNsxtIgmpTypeNsServiceRead(d, m)
 }
 
@@ -81,7 +81,7 @@ func resourceNsxtIgmpTypeNsServiceRead(d *schema.ResourceData, m interface{}) er
 		return fmt.Errorf("Error obtaining ns service id")
 	}
 
-	ns_service, resp, err := nsxClient.GroupingObjectsApi.ReadIgmpTypeNSService(nsxClient.Context, id)
+	nsService, resp, err := nsxClient.GroupingObjectsApi.ReadIgmpTypeNSService(nsxClient.Context, id)
 	if resp.StatusCode == http.StatusNotFound {
 		log.Printf("[DEBUG] NsService %s not found", id)
 		d.SetId("")
@@ -91,11 +91,11 @@ func resourceNsxtIgmpTypeNsServiceRead(d *schema.ResourceData, m interface{}) er
 		return fmt.Errorf("Error during NsService read: %v", err)
 	}
 
-	d.Set("revision", ns_service.Revision)
-	d.Set("description", ns_service.Description)
-	d.Set("display_name", ns_service.DisplayName)
-	setTagsInSchema(d, ns_service.Tags)
-	d.Set("default_service", ns_service.DefaultService)
+	d.Set("revision", nsService.Revision)
+	d.Set("description", nsService.Description)
+	d.Set("display_name", nsService.DisplayName)
+	setTagsInSchema(d, nsService.Tags)
+	d.Set("default_service", nsService.DefaultService)
 
 	return nil
 }
@@ -108,17 +108,17 @@ func resourceNsxtIgmpTypeNsServiceUpdate(d *schema.ResourceData, m interface{}) 
 	}
 
 	description := d.Get("description").(string)
-	display_name := d.Get("display_name").(string)
+	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
-	default_service := d.Get("default_service").(bool)
+	defaultService := d.Get("default_service").(bool)
 	revision := int64(d.Get("revision").(int))
 
-	ns_service := manager.IgmpTypeNsService{
+	nsService := manager.IgmpTypeNsService{
 		NsService: manager.NsService{
 			Description:    description,
-			DisplayName:    display_name,
+			DisplayName:    displayName,
 			Tags:           tags,
-			DefaultService: default_service,
+			DefaultService: defaultService,
 			Revision:       revision,
 		},
 		NsserviceElement: manager.IgmpTypeNsServiceEntry{
@@ -126,7 +126,7 @@ func resourceNsxtIgmpTypeNsServiceUpdate(d *schema.ResourceData, m interface{}) 
 		},
 	}
 
-	ns_service, resp, err := nsxClient.GroupingObjectsApi.UpdateIgmpTypeNSService(nsxClient.Context, id, ns_service)
+	nsService, resp, err := nsxClient.GroupingObjectsApi.UpdateIgmpTypeNSService(nsxClient.Context, id, nsService)
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during NsService update: %v %v", err, resp)
 	}

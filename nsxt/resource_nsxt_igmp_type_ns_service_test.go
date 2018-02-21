@@ -46,7 +46,7 @@ func TestAccResourceNsxtIgmpTypeNsService_basic(t *testing.T) {
 	})
 }
 
-func testAccNSXIgmpServiceExists(display_name string, resourceName string) resource.TestCheckFunc {
+func testAccNSXIgmpServiceExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
 		nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
@@ -70,14 +70,14 @@ func testAccNSXIgmpServiceExists(display_name string, resourceName string) resou
 			return fmt.Errorf("Error while checking if igmp service %s exists. HTTP return code was %d", resourceID, responseCode.StatusCode)
 		}
 
-		if display_name == service.DisplayName {
+		if displayName == service.DisplayName {
 			return nil
 		}
-		return fmt.Errorf("NSX igmp ns service %s wasn't found", display_name)
+		return fmt.Errorf("NSX igmp ns service %s wasn't found", displayName)
 	}
 }
 
-func testAccNSXIgmpServiceCheckDestroy(state *terraform.State, display_name string) error {
+func testAccNSXIgmpServiceCheckDestroy(state *terraform.State, displayName string) error {
 	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
 
 	for _, rs := range state.RootModule().Resources {
@@ -95,8 +95,8 @@ func testAccNSXIgmpServiceCheckDestroy(state *terraform.State, display_name stri
 			return fmt.Errorf("Error while retrieving L4 ns service ID %s. Error: %v", resourceID, err)
 		}
 
-		if display_name == service.DisplayName {
-			return fmt.Errorf("NSX L4 ns service %s still exists", display_name)
+		if displayName == service.DisplayName {
+			return fmt.Errorf("NSX L4 ns service %s still exists", displayName)
 		}
 	}
 	return nil

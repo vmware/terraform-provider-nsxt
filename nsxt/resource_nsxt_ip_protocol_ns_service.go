@@ -52,17 +52,17 @@ func resourceNsxtIpProtocolNsService() *schema.Resource {
 func resourceNsxtIpProtocolNsServiceCreate(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 	description := d.Get("description").(string)
-	display_name := d.Get("display_name").(string)
+	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
-	default_service := d.Get("default_service").(bool)
+	defaultService := d.Get("default_service").(bool)
 	protocol := int64(d.Get("protocol").(int))
 
-	ns_service := manager.IpProtocolNsService{
+	nsService := manager.IpProtocolNsService{
 		NsService: manager.NsService{
 			Description:    description,
-			DisplayName:    display_name,
+			DisplayName:    displayName,
 			Tags:           tags,
-			DefaultService: default_service,
+			DefaultService: defaultService,
 		},
 		NsserviceElement: manager.IpProtocolNsServiceEntry{
 			ResourceType:   "IPProtocolNSService",
@@ -70,7 +70,7 @@ func resourceNsxtIpProtocolNsServiceCreate(d *schema.ResourceData, m interface{}
 		},
 	}
 
-	ns_service, resp, err := nsxClient.GroupingObjectsApi.CreateIpProtocolNSService(nsxClient.Context, ns_service)
+	nsService, resp, err := nsxClient.GroupingObjectsApi.CreateIpProtocolNSService(nsxClient.Context, nsService)
 
 	if err != nil {
 		return fmt.Errorf("Error during NsService create: %v", err)
@@ -79,7 +79,7 @@ func resourceNsxtIpProtocolNsServiceCreate(d *schema.ResourceData, m interface{}
 	if resp.StatusCode != http.StatusCreated {
 		return fmt.Errorf("Unexpected status returned during NsService create: %v", resp.StatusCode)
 	}
-	d.SetId(ns_service.Id)
+	d.SetId(nsService.Id)
 	return resourceNsxtIpProtocolNsServiceRead(d, m)
 }
 
@@ -90,7 +90,7 @@ func resourceNsxtIpProtocolNsServiceRead(d *schema.ResourceData, m interface{}) 
 		return fmt.Errorf("Error obtaining ns service id")
 	}
 
-	ns_service, resp, err := nsxClient.GroupingObjectsApi.ReadIpProtocolNSService(nsxClient.Context, id)
+	nsService, resp, err := nsxClient.GroupingObjectsApi.ReadIpProtocolNSService(nsxClient.Context, id)
 	if resp.StatusCode == http.StatusNotFound {
 		log.Printf("[DEBUG] NsService %s not found", id)
 		d.SetId("")
@@ -100,14 +100,14 @@ func resourceNsxtIpProtocolNsServiceRead(d *schema.ResourceData, m interface{}) 
 		return fmt.Errorf("Error during NsService read: %v", err)
 	}
 
-	nsservice_element := ns_service.NsserviceElement
+	nsserviceElement := nsService.NsserviceElement
 
-	d.Set("revision", ns_service.Revision)
-	d.Set("description", ns_service.Description)
-	d.Set("display_name", ns_service.DisplayName)
-	setTagsInSchema(d, ns_service.Tags)
-	d.Set("default_service", ns_service.DefaultService)
-	d.Set("protocol", nsservice_element.ProtocolNumber)
+	d.Set("revision", nsService.Revision)
+	d.Set("description", nsService.Description)
+	d.Set("display_name", nsService.DisplayName)
+	setTagsInSchema(d, nsService.Tags)
+	d.Set("default_service", nsService.DefaultService)
+	d.Set("protocol", nsserviceElement.ProtocolNumber)
 
 	return nil
 }
@@ -120,18 +120,18 @@ func resourceNsxtIpProtocolNsServiceUpdate(d *schema.ResourceData, m interface{}
 	}
 
 	description := d.Get("description").(string)
-	display_name := d.Get("display_name").(string)
+	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
-	default_service := d.Get("default_service").(bool)
+	defaultService := d.Get("default_service").(bool)
 	revision := int64(d.Get("revision").(int))
 	protocol := int64(d.Get("protocol").(int))
 
-	ns_service := manager.IpProtocolNsService{
+	nsService := manager.IpProtocolNsService{
 		NsService: manager.NsService{
 			Description:    description,
-			DisplayName:    display_name,
+			DisplayName:    displayName,
 			Tags:           tags,
-			DefaultService: default_service,
+			DefaultService: defaultService,
 			Revision:       revision,
 		},
 		NsserviceElement: manager.IpProtocolNsServiceEntry{
@@ -140,7 +140,7 @@ func resourceNsxtIpProtocolNsServiceUpdate(d *schema.ResourceData, m interface{}
 		},
 	}
 
-	ns_service, resp, err := nsxClient.GroupingObjectsApi.UpdateIpProtocolNSService(nsxClient.Context, id, ns_service)
+	nsService, resp, err := nsxClient.GroupingObjectsApi.UpdateIpProtocolNSService(nsxClient.Context, id, nsService)
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during NsService update: %v %v", err, resp)
 	}

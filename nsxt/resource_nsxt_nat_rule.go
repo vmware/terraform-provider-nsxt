@@ -72,7 +72,7 @@ func resourceNsxtNatRule() *schema.Resource {
 			"nat_pass": &schema.Schema{
 				Type:        schema.TypeBool,
 				Default:     true,
-				Description: "Default is true. If the nat_pass is set to true, the following firewall stage will be skipped. Please note, if action is NO_NAT, then nat_pass must be set to true or omitted",
+				Description: "Default is true. If the natPass is set to true, the following firewall stage will be skipped. Please note, if action is NO_NAT, then natPass must be set to true or omitted",
 				Optional:    true,
 			},
 			"rule_priority": &schema.Schema{
@@ -97,42 +97,42 @@ func resourceNsxtNatRule() *schema.Resource {
 
 func resourceNsxtNatRuleCreate(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
-	logical_router_id := d.Get("logical_router_id").(string)
-	if logical_router_id == "" {
+	logicalRouterID := d.Get("logical_router_id").(string)
+	if logicalRouterID == "" {
 		return fmt.Errorf("Error obtaining logical object id")
 	}
 
 	description := d.Get("description").(string)
-	display_name := d.Get("display_name").(string)
+	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
 	action := d.Get("action").(string)
 	enabled := d.Get("enabled").(bool)
 	logging := d.Get("logging").(bool)
-	match_destination_network := d.Get("match_destination_network").(string)
+	matchDestinationNetwork := d.Get("match_destination_network").(string)
 	//match_service := d.Get("match_service").(*NsServiceElement)
-	match_source_network := d.Get("match_source_network").(string)
-	nat_pass := d.Get("nat_pass").(bool)
-	rule_priority := int64(d.Get("rule_priority").(int))
-	translated_network := d.Get("translated_network").(string)
-	translated_ports := d.Get("translated_ports").(string)
-	nat_rule := manager.NatRule{
+	matchSourceNetwork := d.Get("match_source_network").(string)
+	natPass := d.Get("nat_pass").(bool)
+	rulePriority := int64(d.Get("rule_priority").(int))
+	translatedNetwork := d.Get("translated_network").(string)
+	translatedPorts := d.Get("translated_ports").(string)
+	natRule := manager.NatRule{
 		Description:             description,
-		DisplayName:             display_name,
+		DisplayName:             displayName,
 		Tags:                    tags,
 		Action:                  action,
 		Enabled:                 enabled,
 		Logging:                 logging,
-		LogicalRouterId:         logical_router_id,
-		MatchDestinationNetwork: match_destination_network,
+		LogicalRouterId:         logicalRouterID,
+		MatchDestinationNetwork: matchDestinationNetwork,
 		//MatchService: match_service,
-		MatchSourceNetwork: match_source_network,
-		NatPass:            nat_pass,
-		RulePriority:       rule_priority,
-		TranslatedNetwork:  translated_network,
-		TranslatedPorts:    translated_ports,
+		MatchSourceNetwork: matchSourceNetwork,
+		NatPass:            natPass,
+		RulePriority:       rulePriority,
+		TranslatedNetwork:  translatedNetwork,
+		TranslatedPorts:    translatedPorts,
 	}
 
-	nat_rule, resp, err := nsxClient.LogicalRoutingAndServicesApi.AddNatRule(nsxClient.Context, logical_router_id, nat_rule)
+	natRule, resp, err := nsxClient.LogicalRoutingAndServicesApi.AddNatRule(nsxClient.Context, logicalRouterID, natRule)
 
 	if err != nil {
 		return fmt.Errorf("Error during NatRule create: %v", err)
@@ -141,7 +141,7 @@ func resourceNsxtNatRuleCreate(d *schema.ResourceData, m interface{}) error {
 	if resp.StatusCode != http.StatusCreated {
 		return fmt.Errorf("Unexpected status returned during NatRule create: %v", resp.StatusCode)
 	}
-	d.SetId(nat_rule.Id)
+	d.SetId(natRule.Id)
 
 	return resourceNsxtNatRuleRead(d, m)
 }
@@ -153,12 +153,12 @@ func resourceNsxtNatRuleRead(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("Error obtaining logical object id")
 	}
 
-	logical_router_id := d.Get("logical_router_id").(string)
-	if logical_router_id == "" {
+	logicalRouterID := d.Get("logical_router_id").(string)
+	if logicalRouterID == "" {
 		return fmt.Errorf("Error obtaining logical object id")
 	}
 
-	nat_rule, resp, err := nsxClient.LogicalRoutingAndServicesApi.GetNatRule(nsxClient.Context, logical_router_id, id)
+	natRule, resp, err := nsxClient.LogicalRoutingAndServicesApi.GetNatRule(nsxClient.Context, logicalRouterID, id)
 	if resp.StatusCode == http.StatusNotFound {
 		log.Printf("[DEBUG] NatRule %s not found", id)
 		d.SetId("")
@@ -168,21 +168,21 @@ func resourceNsxtNatRuleRead(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("Error during NatRule read: %v", err)
 	}
 
-	d.Set("revision", nat_rule.Revision)
-	d.Set("description", nat_rule.Description)
-	d.Set("display_name", nat_rule.DisplayName)
-	setTagsInSchema(d, nat_rule.Tags)
-	d.Set("action", nat_rule.Action)
-	d.Set("enabled", nat_rule.Enabled)
-	d.Set("logging", nat_rule.Logging)
-	d.Set("logical_router_id", nat_rule.LogicalRouterId)
-	d.Set("match_destination_network", nat_rule.MatchDestinationNetwork)
-	//d.Set("match_service", nat_rule.MatchService)
-	d.Set("match_source_network", nat_rule.MatchSourceNetwork)
-	d.Set("nat_pass", nat_rule.NatPass)
-	d.Set("rule_priority", nat_rule.RulePriority)
-	d.Set("translated_network", nat_rule.TranslatedNetwork)
-	d.Set("translated_ports", nat_rule.TranslatedPorts)
+	d.Set("revision", natRule.Revision)
+	d.Set("description", natRule.Description)
+	d.Set("display_name", natRule.DisplayName)
+	setTagsInSchema(d, natRule.Tags)
+	d.Set("action", natRule.Action)
+	d.Set("enabled", natRule.Enabled)
+	d.Set("logging", natRule.Logging)
+	d.Set("logical_router_id", natRule.LogicalRouterId)
+	d.Set("match_destination_network", natRule.MatchDestinationNetwork)
+	//d.Set("match_service", natRule.MatchService)
+	d.Set("match_source_network", natRule.MatchSourceNetwork)
+	d.Set("nat_pass", natRule.NatPass)
+	d.Set("rule_priority", natRule.RulePriority)
+	d.Set("translated_network", natRule.TranslatedNetwork)
+	d.Set("translated_ports", natRule.TranslatedPorts)
 
 	return nil
 }
@@ -194,44 +194,44 @@ func resourceNsxtNatRuleUpdate(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("Error obtaining logical object id")
 	}
 
-	logical_router_id := d.Get("logical_router_id").(string)
-	if logical_router_id == "" {
+	logicalRouterID := d.Get("logical_router_id").(string)
+	if logicalRouterID == "" {
 		return fmt.Errorf("Error obtaining logical object id")
 	}
 
 	revision := int64(d.Get("revision").(int))
 	description := d.Get("description").(string)
-	display_name := d.Get("display_name").(string)
+	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
 	action := d.Get("action").(string)
 	enabled := d.Get("enabled").(bool)
 	logging := d.Get("logging").(bool)
-	match_destination_network := d.Get("match_destination_network").(string)
+	matchDestinationNetwork := d.Get("match_destination_network").(string)
 	//match_service := d.Get("match_service").(*NsServiceElement)
-	match_source_network := d.Get("match_source_network").(string)
-	nat_pass := d.Get("nat_pass").(bool)
-	rule_priority := int64(d.Get("rule_priority").(int))
-	translated_network := d.Get("translated_network").(string)
-	translated_ports := d.Get("translated_ports").(string)
-	nat_rule := manager.NatRule{
+	matchSourceNetwork := d.Get("match_source_network").(string)
+	natPass := d.Get("nat_pass").(bool)
+	rulePriority := int64(d.Get("rule_priority").(int))
+	translatedNetwork := d.Get("translated_network").(string)
+	translatedPorts := d.Get("translated_ports").(string)
+	natRule := manager.NatRule{
 		Revision:                revision,
 		Description:             description,
-		DisplayName:             display_name,
+		DisplayName:             displayName,
 		Tags:                    tags,
 		Action:                  action,
 		Enabled:                 enabled,
 		Logging:                 logging,
-		LogicalRouterId:         logical_router_id,
-		MatchDestinationNetwork: match_destination_network,
+		LogicalRouterId:         logicalRouterID,
+		MatchDestinationNetwork: matchDestinationNetwork,
 		//MatchService: match_service,
-		MatchSourceNetwork: match_source_network,
-		NatPass:            nat_pass,
-		RulePriority:       rule_priority,
-		TranslatedNetwork:  translated_network,
-		TranslatedPorts:    translated_ports,
+		MatchSourceNetwork: matchSourceNetwork,
+		NatPass:            natPass,
+		RulePriority:       rulePriority,
+		TranslatedNetwork:  translatedNetwork,
+		TranslatedPorts:    translatedPorts,
 	}
 
-	nat_rule, resp, err := nsxClient.LogicalRoutingAndServicesApi.UpdateNatRule(nsxClient.Context, logical_router_id, id, nat_rule)
+	natRule, resp, err := nsxClient.LogicalRoutingAndServicesApi.UpdateNatRule(nsxClient.Context, logicalRouterID, id, natRule)
 
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during NatRule update: %v", err)
@@ -246,12 +246,12 @@ func resourceNsxtNatRuleDelete(d *schema.ResourceData, m interface{}) error {
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")
 	}
-	logical_router_id := d.Get("logical_router_id").(string)
-	if logical_router_id == "" {
+	logicalRouterID := d.Get("logical_router_id").(string)
+	if logicalRouterID == "" {
 		return fmt.Errorf("Error obtaining logical object id")
 	}
 
-	resp, err := nsxClient.LogicalRoutingAndServicesApi.DeleteNatRule(nsxClient.Context, logical_router_id, id)
+	resp, err := nsxClient.LogicalRoutingAndServicesApi.DeleteNatRule(nsxClient.Context, logicalRouterID, id)
 	if err != nil {
 		return fmt.Errorf("Error during NatRule delete: %v", err)
 	}

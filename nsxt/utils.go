@@ -205,22 +205,22 @@ func setAddressBindingsInSchema(d *schema.ResourceData, bindings []manager.Packe
 	d.Set("address_binding", bindingList)
 }
 
-func getResourceReferencesSchema(required bool, computed bool, valid_target_types []string, description string) *schema.Schema {
-	return getResourceReferencesSchemaByType(required, computed, valid_target_types, true, description)
+func getResourceReferencesSchema(required bool, computed bool, validTargetTypes []string, description string) *schema.Schema {
+	return getResourceReferencesSchemaByType(required, computed, validTargetTypes, true, description)
 }
 
-func getResourceReferencesSetSchema(required bool, computed bool, valid_target_types []string, description string) *schema.Schema {
-	return getResourceReferencesSchemaByType(required, computed, valid_target_types, false, description)
+func getResourceReferencesSetSchema(required bool, computed bool, validTargetTypes []string, description string) *schema.Schema {
+	return getResourceReferencesSchemaByType(required, computed, validTargetTypes, false, description)
 }
 
-func getResourceReferencesSchemaByType(required bool, computed bool, valid_target_types []string, is_list bool, description string) *schema.Schema {
-	sch_type := schema.TypeSet
-	if is_list {
-		sch_type = schema.TypeList
+func getResourceReferencesSchemaByType(required bool, computed bool, validTargetTypes []string, isList bool, description string) *schema.Schema {
+	schType := schema.TypeSet
+	if isList {
+		schType = schema.TypeList
 	}
 
 	return &schema.Schema{
-		Type:        sch_type,
+		Type:        schType,
 		Required:    required,
 		Optional:    !required,
 		Computed:    computed,
@@ -246,7 +246,7 @@ func getResourceReferencesSchemaByType(required bool, computed bool, valid_targe
 					Type:         schema.TypeString,
 					Description:  "Type of the NSX resource",
 					Optional:     true,
-					ValidateFunc: validation.StringInSlice(valid_target_types, false),
+					ValidateFunc: validation.StringInSlice(validTargetTypes, false),
 				},
 			},
 		},
@@ -346,12 +346,12 @@ func makeResourceReference(resourceType string, resourceId string) *common.Resou
 
 func getNSXVersion(m interface{}) string {
 	nsxClient := m.(*api.APIClient)
-	node_properties, resp, err := nsxClient.NsxComponentAdministrationApi.ReadNodeProperties(nsxClient.Context)
-	initial_version := string("1.0.0")
+	nodeProperties, resp, err := nsxClient.NsxComponentAdministrationApi.ReadNodeProperties(nsxClient.Context)
+	initialVersion := string("1.0.0")
 
 	if resp.StatusCode == http.StatusNotFound || err != nil {
 		log.Printf("[DEBUG] Node properties not found")
-		return initial_version
+		return initialVersion
 	}
-	return node_properties.NodeVersion
+	return nodeProperties.NodeVersion
 }

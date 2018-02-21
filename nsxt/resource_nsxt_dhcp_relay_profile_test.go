@@ -16,8 +16,8 @@ func TestAccResourceNsxtDhcpRelayProfile_basic(t *testing.T) {
 	prfName := fmt.Sprintf("test-nsx-dhcp-relay-profile")
 	updatePrfName := fmt.Sprintf("%s-update", prfName)
 	testResourceName := "nsxt_dhcp_relay_profile.test"
-	server_ip := "1.1.1.1"
-	additional_ip := "2.1.1.1"
+	serverIP := "1.1.1.1"
+	additionalIP := "2.1.1.1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -27,7 +27,7 @@ func TestAccResourceNsxtDhcpRelayProfile_basic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXDhcpRelayProfileCreateTemplate(prfName, server_ip),
+				Config: testAccNSXDhcpRelayProfileCreateTemplate(prfName, serverIP),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXDhcpRelayProfileExists(prfName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", prfName),
@@ -37,7 +37,7 @@ func TestAccResourceNsxtDhcpRelayProfile_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXDhcpRelayProfileUpdateTemplate(updatePrfName, server_ip, additional_ip),
+				Config: testAccNSXDhcpRelayProfileUpdateTemplate(updatePrfName, serverIP, additionalIP),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXDhcpRelayProfileExists(updatePrfName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatePrfName),
@@ -50,7 +50,7 @@ func TestAccResourceNsxtDhcpRelayProfile_basic(t *testing.T) {
 	})
 }
 
-func testAccNSXDhcpRelayProfileExists(display_name string, resourceName string) resource.TestCheckFunc {
+func testAccNSXDhcpRelayProfileExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 		nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
 		rs, ok := state.RootModule().Resources[resourceName]
@@ -72,14 +72,14 @@ func testAccNSXDhcpRelayProfileExists(display_name string, resourceName string) 
 			return fmt.Errorf("Error while checking if dhcp relay profile %s exists. HTTP return code was %d", resourceID, responseCode.StatusCode)
 		}
 
-		if display_name == profile.DisplayName {
+		if displayName == profile.DisplayName {
 			return nil
 		}
-		return fmt.Errorf("Dhcp Relay Profile %s wasn't found", display_name)
+		return fmt.Errorf("Dhcp Relay Profile %s wasn't found", displayName)
 	}
 }
 
-func testAccNSXDhcpRelayProfileCheckDestroy(state *terraform.State, display_name string) error {
+func testAccNSXDhcpRelayProfileCheckDestroy(state *terraform.State, displayName string) error {
 	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
 	for _, rs := range state.RootModule().Resources {
 
@@ -96,32 +96,32 @@ func testAccNSXDhcpRelayProfileCheckDestroy(state *terraform.State, display_name
 			return fmt.Errorf("Error while retrieving dhcp relay profile ID %s. Error: %v", resourceID, err)
 		}
 
-		if display_name == profile.DisplayName {
-			return fmt.Errorf("Dhcp Relay Profile %s still exists", display_name)
+		if displayName == profile.DisplayName {
+			return fmt.Errorf("Dhcp Relay Profile %s still exists", displayName)
 		}
 	}
 	return nil
 }
 
-func testAccNSXDhcpRelayProfileCreateTemplate(prfName string, server_ip string) string {
+func testAccNSXDhcpRelayProfileCreateTemplate(prfName string, serverIP string) string {
 	return fmt.Sprintf(`
 resource "nsxt_dhcp_relay_profile" "test" {
-	display_name = "%s"
-	description = "Acceptance Test"
-	server_addresses = ["%s"]
+    display_name = "%s"
+    description = "Acceptance Test"
+    server_addresses = ["%s"]
     tag {
     	scope = "scope1"
         tag = "tag1"
     }
-}`, prfName, server_ip)
+}`, prfName, serverIP)
 }
 
-func testAccNSXDhcpRelayProfileUpdateTemplate(prfUpdatedName string, server_ip string, additional_ip string) string {
+func testAccNSXDhcpRelayProfileUpdateTemplate(prfUpdatedName string, serverIP string, additionalIP string) string {
 	return fmt.Sprintf(`
 resource "nsxt_dhcp_relay_profile" "test" {
-	display_name = "%s"
-	description = "Acceptance Test Update"
-	server_addresses = ["%s", "%s"]
+    display_name = "%s"
+    description = "Acceptance Test Update"
+    server_addresses = ["%s", "%s"]
     tag {
     	scope = "scope1"
         tag = "tag1"
@@ -130,5 +130,5 @@ resource "nsxt_dhcp_relay_profile" "test" {
     	scope = "scope2"
         tag = "tag2"
     }
-}`, prfUpdatedName, server_ip, additional_ip)
+}`, prfUpdatedName, serverIP, additionalIP)
 }

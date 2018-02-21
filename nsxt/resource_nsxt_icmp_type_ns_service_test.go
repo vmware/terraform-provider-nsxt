@@ -50,7 +50,7 @@ func TestAccResourceNsxtIcmpTypeNsService_basic(t *testing.T) {
 	})
 }
 
-func testAccNSXIcmpServiceExists(display_name string, resourceName string) resource.TestCheckFunc {
+func testAccNSXIcmpServiceExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
 		nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
@@ -74,14 +74,14 @@ func testAccNSXIcmpServiceExists(display_name string, resourceName string) resou
 			return fmt.Errorf("Error while checking if icmp service %s exists. HTTP return code was %d", resourceID, responseCode.StatusCode)
 		}
 
-		if display_name == service.DisplayName {
+		if displayName == service.DisplayName {
 			return nil
 		}
-		return fmt.Errorf("NSX icmp ns service %s wasn't found", display_name)
+		return fmt.Errorf("NSX icmp ns service %s wasn't found", displayName)
 	}
 }
 
-func testAccNSXIcmpServiceCheckDestroy(state *terraform.State, display_name string) error {
+func testAccNSXIcmpServiceCheckDestroy(state *terraform.State, displayName string) error {
 	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
 
 	for _, rs := range state.RootModule().Resources {
@@ -99,14 +99,14 @@ func testAccNSXIcmpServiceCheckDestroy(state *terraform.State, display_name stri
 			return fmt.Errorf("Error while retrieving L4 ns service ID %s. Error: %v", resourceID, err)
 		}
 
-		if display_name == service.DisplayName {
-			return fmt.Errorf("NSX L4 ns service %s still exists", display_name)
+		if displayName == service.DisplayName {
+			return fmt.Errorf("NSX L4 ns service %s still exists", displayName)
 		}
 	}
 	return nil
 }
 
-func testAccNSXIcmpServiceCreateTemplate(serviceName string, protocol string, icmp_type int, icmp_code int) string {
+func testAccNSXIcmpServiceCreateTemplate(serviceName string, protocol string, icmpType int, icmpCode int) string {
 	return fmt.Sprintf(`
 resource "nsxt_icmp_type_ns_service" "test" {
     description = "icmp service"
@@ -118,5 +118,5 @@ resource "nsxt_icmp_type_ns_service" "test" {
     	scope = "scope1"
         tag = "tag1"
     }
-}`, serviceName, protocol, icmp_type, icmp_code)
+}`, serviceName, protocol, icmpType, icmpCode)
 }

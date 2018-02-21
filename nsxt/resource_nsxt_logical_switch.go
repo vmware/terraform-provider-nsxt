@@ -98,36 +98,36 @@ func resourceNsxtLogicalSwitchCreateRollback(nsxClient *api.APIClient, id string
 func resourceNsxtLogicalSwitchCreate(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 	description := d.Get("description").(string)
-	display_name := d.Get("display_name").(string)
+	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
-	address_bindings := getAddressBindingsFromSchema(d)
-	admin_state := d.Get("admin_state").(string)
-	ip_pool_id := d.Get("ip_pool_id").(string)
-	mac_pool_id := d.Get("mac_pool_id").(string)
-	replication_mode := d.Get("replication_mode").(string)
-	switching_profile_id := getSwitchingProfileIdsFromSchema(d)
-	transport_zone_id := d.Get("transport_zone_id").(string)
+	addressBindings := getAddressBindingsFromSchema(d)
+	adminState := d.Get("admin_state").(string)
+	ipPoolID := d.Get("ip_pool_id").(string)
+	macPoolID := d.Get("mac_pool_id").(string)
+	replicationMode := d.Get("replication_mode").(string)
+	switchingProfileID := getSwitchingProfileIdsFromSchema(d)
+	transportZoneID := d.Get("transport_zone_id").(string)
 	vlan := int64(d.Get("vlan").(int))
 	vni := int32(d.Get("vni").(int))
 
-	verify_realization := d.Get("verify_realization").(bool)
+	verifyRealization := d.Get("verify_realization").(bool)
 
-	logical_switch := manager.LogicalSwitch{
+	logicalSwitch := manager.LogicalSwitch{
 		Description:         description,
-		DisplayName:         display_name,
+		DisplayName:         displayName,
 		Tags:                tags,
-		AddressBindings:     address_bindings,
-		AdminState:          admin_state,
-		IpPoolId:            ip_pool_id,
-		MacPoolId:           mac_pool_id,
-		ReplicationMode:     replication_mode,
-		SwitchingProfileIds: switching_profile_id,
-		TransportZoneId:     transport_zone_id,
+		AddressBindings:     addressBindings,
+		AdminState:          adminState,
+		IpPoolId:            ipPoolID,
+		MacPoolId:           macPoolID,
+		ReplicationMode:     replicationMode,
+		SwitchingProfileIds: switchingProfileID,
+		TransportZoneId:     transportZoneID,
 		Vlan:                vlan,
 		Vni:                 vni,
 	}
 
-	logical_switch, resp, err := nsxClient.LogicalSwitchingApi.CreateLogicalSwitch(nsxClient.Context, logical_switch)
+	logicalSwitch, resp, err := nsxClient.LogicalSwitchingApi.CreateLogicalSwitch(nsxClient.Context, logicalSwitch)
 
 	if err != nil {
 		return fmt.Errorf("Error during LogicalSwitch create: %v", err)
@@ -137,12 +137,12 @@ func resourceNsxtLogicalSwitchCreate(d *schema.ResourceData, m interface{}) erro
 		return fmt.Errorf("Unexpected status returned during LogicalSwitch create: %v", resp.StatusCode)
 	}
 
-	if verify_realization {
+	if verifyRealization {
 		stateConf := &resource.StateChangeConf{
 			Pending: []string{"in_progress", "pending", "partial_success"},
 			Target:  []string{"success"},
 			Refresh: func() (interface{}, string, error) {
-				state, resp, err := nsxClient.LogicalSwitchingApi.GetLogicalSwitchState(nsxClient.Context, logical_switch.Id)
+				state, resp, err := nsxClient.LogicalSwitchingApi.GetLogicalSwitchState(nsxClient.Context, logicalSwitch.Id)
 				if err != nil {
 					return nil, "", fmt.Errorf("Error while querying realization state: %v", err)
 				}
@@ -156,7 +156,7 @@ func resourceNsxtLogicalSwitchCreate(d *schema.ResourceData, m interface{}) erro
 				}
 
 				log.Printf("[DEBUG] Realization state: %s", state.State)
-				return logical_switch, state.State, nil
+				return logicalSwitch, state.State, nil
 			},
 			Timeout:    d.Timeout(schema.TimeoutCreate),
 			MinTimeout: 1 * time.Second,
@@ -164,12 +164,12 @@ func resourceNsxtLogicalSwitchCreate(d *schema.ResourceData, m interface{}) erro
 		}
 		_, err = stateConf.WaitForState()
 		if err != nil {
-			resourceNsxtLogicalSwitchCreateRollback(nsxClient, logical_switch.Id)
+			resourceNsxtLogicalSwitchCreateRollback(nsxClient, logicalSwitch.Id)
 			return err
 		}
 	}
 
-	d.SetId(logical_switch.Id)
+	d.SetId(logicalSwitch.Id)
 
 	return resourceNsxtLogicalSwitchRead(d, m)
 }
@@ -181,7 +181,7 @@ func resourceNsxtLogicalSwitchRead(d *schema.ResourceData, m interface{}) error 
 		return fmt.Errorf("Error obtaining logical switch id")
 	}
 
-	logical_switch, resp, err := nsxClient.LogicalSwitchingApi.GetLogicalSwitch(nsxClient.Context, id)
+	logicalSwitch, resp, err := nsxClient.LogicalSwitchingApi.GetLogicalSwitch(nsxClient.Context, id)
 	if resp.StatusCode == http.StatusNotFound {
 		log.Printf("[DEBUG] LogicalSwitch %s not found", id)
 		d.SetId("")
@@ -191,19 +191,19 @@ func resourceNsxtLogicalSwitchRead(d *schema.ResourceData, m interface{}) error 
 		return fmt.Errorf("Error during LogicalSwitch read: %v", err)
 	}
 
-	d.Set("revision", logical_switch.Revision)
-	d.Set("description", logical_switch.Description)
-	d.Set("display_name", logical_switch.DisplayName)
-	setTagsInSchema(d, logical_switch.Tags)
-	setAddressBindingsInSchema(d, logical_switch.AddressBindings)
-	d.Set("admin_state", logical_switch.AdminState)
-	d.Set("ip_pool_id", logical_switch.IpPoolId)
-	d.Set("mac_pool_id", logical_switch.MacPoolId)
-	d.Set("replication_mode", logical_switch.ReplicationMode)
-	setSwitchingProfileIdsInSchema(d, nsxClient, logical_switch.SwitchingProfileIds)
-	d.Set("transport_zone_id", logical_switch.TransportZoneId)
-	d.Set("vlan", logical_switch.Vlan)
-	d.Set("vni", logical_switch.Vni)
+	d.Set("revision", logicalSwitch.Revision)
+	d.Set("description", logicalSwitch.Description)
+	d.Set("display_name", logicalSwitch.DisplayName)
+	setTagsInSchema(d, logicalSwitch.Tags)
+	setAddressBindingsInSchema(d, logicalSwitch.AddressBindings)
+	d.Set("admin_state", logicalSwitch.AdminState)
+	d.Set("ip_pool_id", logicalSwitch.IpPoolId)
+	d.Set("mac_pool_id", logicalSwitch.MacPoolId)
+	d.Set("replication_mode", logicalSwitch.ReplicationMode)
+	setSwitchingProfileIdsInSchema(d, nsxClient, logicalSwitch.SwitchingProfileIds)
+	d.Set("transport_zone_id", logicalSwitch.TransportZoneId)
+	d.Set("vlan", logicalSwitch.Vlan)
+	d.Set("vni", logicalSwitch.Vni)
 
 	return nil
 }
@@ -216,35 +216,35 @@ func resourceNsxtLogicalSwitchUpdate(d *schema.ResourceData, m interface{}) erro
 	}
 
 	description := d.Get("description").(string)
-	display_name := d.Get("display_name").(string)
+	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
-	address_bindings := getAddressBindingsFromSchema(d)
-	admin_state := d.Get("admin_state").(string)
-	ip_pool_id := d.Get("ip_pool_id").(string)
-	mac_pool_id := d.Get("mac_pool_id").(string)
-	replication_mode := d.Get("replication_mode").(string)
-	switching_profile_id := getSwitchingProfileIdsFromSchema(d)
-	transport_zone_id := d.Get("transport_zone_id").(string)
+	addressBindings := getAddressBindingsFromSchema(d)
+	adminState := d.Get("admin_state").(string)
+	ipPoolID := d.Get("ip_pool_id").(string)
+	macPoolID := d.Get("mac_pool_id").(string)
+	replicationMode := d.Get("replication_mode").(string)
+	switchingProfileID := getSwitchingProfileIdsFromSchema(d)
+	transportZoneID := d.Get("transport_zone_id").(string)
 	vlan := int64(d.Get("vlan").(int))
 	vni := int32(d.Get("vni").(int))
 	revision := int64(d.Get("revision").(int))
-	logical_switch := manager.LogicalSwitch{
+	logicalSwitch := manager.LogicalSwitch{
 		Description:         description,
-		DisplayName:         display_name,
+		DisplayName:         displayName,
 		Tags:                tags,
-		AddressBindings:     address_bindings,
-		AdminState:          admin_state,
-		IpPoolId:            ip_pool_id,
-		MacPoolId:           mac_pool_id,
-		ReplicationMode:     replication_mode,
-		SwitchingProfileIds: switching_profile_id,
-		TransportZoneId:     transport_zone_id,
+		AddressBindings:     addressBindings,
+		AdminState:          adminState,
+		IpPoolId:            ipPoolID,
+		MacPoolId:           macPoolID,
+		ReplicationMode:     replicationMode,
+		SwitchingProfileIds: switchingProfileID,
+		TransportZoneId:     transportZoneID,
 		Vlan:                vlan,
 		Vni:                 vni,
 		Revision:            revision,
 	}
 
-	logical_switch, resp, err := nsxClient.LogicalSwitchingApi.UpdateLogicalSwitch(nsxClient.Context, id, logical_switch)
+	logicalSwitch, resp, err := nsxClient.LogicalSwitchingApi.UpdateLogicalSwitch(nsxClient.Context, id, logicalSwitch)
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during LogicalSwitch update: %v", err)
 	}

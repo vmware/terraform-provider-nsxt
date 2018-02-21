@@ -100,7 +100,7 @@ func TestAccResourceNsxtLogicalRouterDownlinkPort_withRelay(t *testing.T) {
 	})
 }
 
-func testAccNSXLogicalRouterDownlinkPortExists(display_name string, resourceName string) resource.TestCheckFunc {
+func testAccNSXLogicalRouterDownlinkPortExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
 		nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
@@ -124,14 +124,14 @@ func testAccNSXLogicalRouterDownlinkPortExists(display_name string, resourceName
 			return fmt.Errorf("Error while checking if logical port %s exists. HTTP return code was %d", resourceID, responseCode.StatusCode)
 		}
 
-		if display_name == logicalPort.DisplayName {
+		if displayName == logicalPort.DisplayName {
 			return nil
 		}
-		return fmt.Errorf("NSX logical port %s wasn't found", display_name)
+		return fmt.Errorf("NSX logical port %s wasn't found", displayName)
 	}
 }
 
-func testAccNSXLogicalRouterDownlinkPortCheckDestroy(state *terraform.State, display_name string) error {
+func testAccNSXLogicalRouterDownlinkPortCheckDestroy(state *terraform.State, displayName string) error {
 	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
 	for _, rs := range state.RootModule().Resources {
 
@@ -148,8 +148,8 @@ func testAccNSXLogicalRouterDownlinkPortCheckDestroy(state *terraform.State, dis
 			return fmt.Errorf("Error while retrieving logical port ID %s. Error: %v", resourceID, err)
 		}
 
-		if display_name == logicalPort.DisplayName {
-			return fmt.Errorf("NSX logical port %s still exists", display_name)
+		if displayName == logicalPort.DisplayName {
+			return fmt.Errorf("NSX logical port %s still exists", displayName)
 		}
 	}
 	return nil

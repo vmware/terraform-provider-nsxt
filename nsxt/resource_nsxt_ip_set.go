@@ -49,17 +49,17 @@ func resourceNsxtIpSet() *schema.Resource {
 func resourceNsxtIpSetCreate(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 	description := d.Get("description").(string)
-	display_name := d.Get("display_name").(string)
+	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
-	ip_addresses := getStringListFromSchemaSet(d, "ip_addresses")
-	ip_set := manager.IpSet{
+	ipAddresses := getStringListFromSchemaSet(d, "ip_addresses")
+	ipSet := manager.IpSet{
 		Description: description,
-		DisplayName: display_name,
+		DisplayName: displayName,
 		Tags:        tags,
-		IpAddresses: ip_addresses,
+		IpAddresses: ipAddresses,
 	}
 
-	ip_set, resp, err := nsxClient.GroupingObjectsApi.CreateIPSet(nsxClient.Context, ip_set)
+	ipSet, resp, err := nsxClient.GroupingObjectsApi.CreateIPSet(nsxClient.Context, ipSet)
 
 	if err != nil {
 		return fmt.Errorf("Error during IpSet create: %v", err)
@@ -68,7 +68,7 @@ func resourceNsxtIpSetCreate(d *schema.ResourceData, m interface{}) error {
 	if resp.StatusCode != http.StatusCreated {
 		return fmt.Errorf("Unexpected status returned during IpSet create: %v", resp.StatusCode)
 	}
-	d.SetId(ip_set.Id)
+	d.SetId(ipSet.Id)
 
 	return resourceNsxtIpSetRead(d, m)
 }
@@ -80,7 +80,7 @@ func resourceNsxtIpSetRead(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("Error obtaining logical object id")
 	}
 
-	ip_set, resp, err := nsxClient.GroupingObjectsApi.ReadIPSet(nsxClient.Context, id)
+	ipSet, resp, err := nsxClient.GroupingObjectsApi.ReadIPSet(nsxClient.Context, id)
 	if resp.StatusCode == http.StatusNotFound {
 		log.Printf("[DEBUG] IpSet %s not found", id)
 		d.SetId("")
@@ -90,11 +90,11 @@ func resourceNsxtIpSetRead(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("Error during IpSet read: %v", err)
 	}
 
-	d.Set("revision", ip_set.Revision)
-	d.Set("description", ip_set.Description)
-	d.Set("display_name", ip_set.DisplayName)
-	setTagsInSchema(d, ip_set.Tags)
-	d.Set("ip_addresses", ip_set.IpAddresses)
+	d.Set("revision", ipSet.Revision)
+	d.Set("description", ipSet.Description)
+	d.Set("display_name", ipSet.DisplayName)
+	setTagsInSchema(d, ipSet.Tags)
+	d.Set("ip_addresses", ipSet.IpAddresses)
 
 	return nil
 }
@@ -108,18 +108,18 @@ func resourceNsxtIpSetUpdate(d *schema.ResourceData, m interface{}) error {
 
 	revision := int64(d.Get("revision").(int))
 	description := d.Get("description").(string)
-	display_name := d.Get("display_name").(string)
+	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
-	ip_addresses := interface2StringList(d.Get("ip_addresses").(*schema.Set).List())
-	ip_set := manager.IpSet{
+	ipAddresses := interface2StringList(d.Get("ip_addresses").(*schema.Set).List())
+	ipSet := manager.IpSet{
 		Revision:    revision,
 		Description: description,
-		DisplayName: display_name,
+		DisplayName: displayName,
 		Tags:        tags,
-		IpAddresses: ip_addresses,
+		IpAddresses: ipAddresses,
 	}
 
-	ip_set, resp, err := nsxClient.GroupingObjectsApi.UpdateIPSet(nsxClient.Context, id, ip_set)
+	ipSet, resp, err := nsxClient.GroupingObjectsApi.UpdateIPSet(nsxClient.Context, id, ipSet)
 
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during IpSet update: %v", err)

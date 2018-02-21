@@ -49,16 +49,16 @@ func resourceNsxtLogicalPortCreate(d *schema.ResourceData, m interface{}) error 
 	nsxClient := m.(*api.APIClient)
 	name := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	ls_id := d.Get("logical_switch_id").(string)
-	admin_state := d.Get("admin_state").(string)
+	lsID := d.Get("logical_switch_id").(string)
+	adminState := d.Get("admin_state").(string)
 	profilesList := getSwitchingProfileIdsFromSchema(d)
 	tagList := getTagsFromSchema(d)
 
 	lp := manager.LogicalPort{
 		DisplayName:         name,
 		Description:         description,
-		LogicalSwitchId:     ls_id,
-		AdminState:          admin_state,
+		LogicalSwitchId:     lsID,
+		AdminState:          adminState,
 		SwitchingProfileIds: profilesList,
 		Tags:                tagList}
 
@@ -71,8 +71,8 @@ func resourceNsxtLogicalPortCreate(d *schema.ResourceData, m interface{}) error 
 		return fmt.Errorf("Unexpected status returned during Logical port create: %v", resp.StatusCode)
 	}
 
-	resource_id := lp.Id
-	d.SetId(resource_id)
+	resourceID := lp.Id
+	d.SetId(resourceID)
 
 	return resourceNsxtLogicalPortRead(d, m)
 }
@@ -83,7 +83,7 @@ func resourceNsxtLogicalPortRead(d *schema.ResourceData, m interface{}) error {
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical port ID from state during read")
 	}
-	logical_port, resp, err := nsxClient.LogicalSwitchingApi.GetLogicalPort(nsxClient.Context, id)
+	logicalPort, resp, err := nsxClient.LogicalSwitchingApi.GetLogicalPort(nsxClient.Context, id)
 
 	if resp.StatusCode == http.StatusNotFound {
 		d.SetId("")
@@ -94,13 +94,13 @@ func resourceNsxtLogicalPortRead(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("Error while reading logical port %s: %v\n", id, err)
 	}
 
-	d.Set("revision", logical_port.Revision)
-	d.Set("display_name", logical_port.DisplayName)
-	d.Set("description", logical_port.Description)
-	d.Set("logical_switch_id", logical_port.LogicalSwitchId)
-	d.Set("admin_state", logical_port.AdminState)
-	setSwitchingProfileIdsInSchema(d, nsxClient, logical_port.SwitchingProfileIds)
-	setTagsInSchema(d, logical_port.Tags)
+	d.Set("revision", logicalPort.Revision)
+	d.Set("display_name", logicalPort.DisplayName)
+	d.Set("description", logicalPort.Description)
+	d.Set("logical_switch_id", logicalPort.LogicalSwitchId)
+	d.Set("admin_state", logicalPort.AdminState)
+	setSwitchingProfileIdsInSchema(d, nsxClient, logicalPort.SwitchingProfileIds)
+	setTagsInSchema(d, logicalPort.Tags)
 
 	return nil
 }
@@ -110,7 +110,7 @@ func resourceNsxtLogicalPortUpdate(d *schema.ResourceData, m interface{}) error 
 	id := d.Id()
 	name := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	admin_state := d.Get("admin_state").(string)
+	adminState := d.Get("admin_state").(string)
 	profilesList := getSwitchingProfileIdsFromSchema(d)
 	tagList := getTagsFromSchema(d)
 	revision := int64(d.Get("revision").(int))
@@ -131,7 +131,7 @@ func resourceNsxtLogicalPortUpdate(d *schema.ResourceData, m interface{}) error 
 
 	lp.DisplayName = name
 	lp.Description = description
-	lp.AdminState = admin_state
+	lp.AdminState = adminState
 	lp.SwitchingProfileIds = profilesList
 	lp.Tags = tagList
 	lp.Revision = revision
@@ -145,20 +145,20 @@ func resourceNsxtLogicalPortUpdate(d *schema.ResourceData, m interface{}) error 
 
 func resourceNsxtLogicalPortDelete(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
-	lp_id := d.Id()
-	if lp_id == "" {
+	lpID := d.Id()
+	if lpID == "" {
 		return fmt.Errorf("Error obtaining logical port ID from state during delete")
 	}
 	//TODO: add optional detach param
 	localVarOptionals := make(map[string]interface{})
 
-	resp, err := nsxClient.LogicalSwitchingApi.DeleteLogicalPort(nsxClient.Context, lp_id, localVarOptionals)
+	resp, err := nsxClient.LogicalSwitchingApi.DeleteLogicalPort(nsxClient.Context, lpID, localVarOptionals)
 
 	if err != nil {
-		return fmt.Errorf("Error while deleting logical port %s: %v\n", lp_id, err)
+		return fmt.Errorf("Error while deleting logical port %s: %v\n", lpID, err)
 	}
 	if resp.StatusCode == http.StatusNotFound {
-		log.Printf("[DEBUG] Logical port %s was not found\n", lp_id)
+		log.Printf("[DEBUG] Logical port %s was not found\n", lpID)
 		d.SetId("")
 	}
 

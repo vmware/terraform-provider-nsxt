@@ -156,19 +156,19 @@ func setMembersInSchema(d *schema.ResourceData, members []manager.NsGroupSimpleE
 func resourceNsxtNsGroupCreate(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 	description := d.Get("description").(string)
-	display_name := d.Get("display_name").(string)
+	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
 	members := getMembersFromSchema(d)
-	membership_criteria := getMembershipCriteriaFromSchema(d)
-	ns_group := manager.NsGroup{
+	membershipCriteria := getMembershipCriteriaFromSchema(d)
+	nsGroup := manager.NsGroup{
 		Description:        description,
-		DisplayName:        display_name,
+		DisplayName:        displayName,
 		Tags:               tags,
 		Members:            members,
-		MembershipCriteria: membership_criteria,
+		MembershipCriteria: membershipCriteria,
 	}
 
-	ns_group, resp, err := nsxClient.GroupingObjectsApi.CreateNSGroup(nsxClient.Context, ns_group)
+	nsGroup, resp, err := nsxClient.GroupingObjectsApi.CreateNSGroup(nsxClient.Context, nsGroup)
 
 	if err != nil {
 		return fmt.Errorf("Error during NsGroup create: %v", err)
@@ -177,7 +177,7 @@ func resourceNsxtNsGroupCreate(d *schema.ResourceData, m interface{}) error {
 	if resp.StatusCode != http.StatusCreated {
 		return fmt.Errorf("Unexpected status returned during NsGroup create: %v", resp.StatusCode)
 	}
-	d.SetId(ns_group.Id)
+	d.SetId(nsGroup.Id)
 
 	return resourceNsxtNsGroupRead(d, m)
 }
@@ -191,7 +191,7 @@ func resourceNsxtNsGroupRead(d *schema.ResourceData, m interface{}) error {
 
 	localVarOptionals := make(map[string]interface{})
 	localVarOptionals["populateReferences"] = true
-	ns_group, resp, err := nsxClient.GroupingObjectsApi.ReadNSGroup(nsxClient.Context, id, localVarOptionals)
+	nsGroup, resp, err := nsxClient.GroupingObjectsApi.ReadNSGroup(nsxClient.Context, id, localVarOptionals)
 	if resp.StatusCode == http.StatusNotFound {
 		log.Printf("[DEBUG] NsGroup %s not found", id)
 		d.SetId("")
@@ -201,12 +201,12 @@ func resourceNsxtNsGroupRead(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("Error during NsGroup read: %v", err)
 	}
 
-	d.Set("revision", ns_group.Revision)
-	d.Set("description", ns_group.Description)
-	d.Set("display_name", ns_group.DisplayName)
-	setTagsInSchema(d, ns_group.Tags)
-	setMembersInSchema(d, ns_group.Members)
-	setMembershipCriteriaInSchema(d, ns_group.MembershipCriteria)
+	d.Set("revision", nsGroup.Revision)
+	d.Set("description", nsGroup.Description)
+	d.Set("display_name", nsGroup.DisplayName)
+	setTagsInSchema(d, nsGroup.Tags)
+	setMembersInSchema(d, nsGroup.Members)
+	setMembershipCriteriaInSchema(d, nsGroup.MembershipCriteria)
 
 	return nil
 }
@@ -220,20 +220,20 @@ func resourceNsxtNsGroupUpdate(d *schema.ResourceData, m interface{}) error {
 
 	revision := int64(d.Get("revision").(int))
 	description := d.Get("description").(string)
-	display_name := d.Get("display_name").(string)
+	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
 	members := getMembersFromSchema(d)
-	membership_criteria := getMembershipCriteriaFromSchema(d)
-	ns_group := manager.NsGroup{
+	membershipCriteria := getMembershipCriteriaFromSchema(d)
+	nsGroup := manager.NsGroup{
 		Revision:           revision,
 		Description:        description,
-		DisplayName:        display_name,
+		DisplayName:        displayName,
 		Tags:               tags,
 		Members:            members,
-		MembershipCriteria: membership_criteria,
+		MembershipCriteria: membershipCriteria,
 	}
 
-	ns_group, resp, err := nsxClient.GroupingObjectsApi.UpdateNSGroup(nsxClient.Context, id, ns_group)
+	nsGroup, resp, err := nsxClient.GroupingObjectsApi.UpdateNSGroup(nsxClient.Context, id, nsGroup)
 
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during NsGroup update: %v", err)

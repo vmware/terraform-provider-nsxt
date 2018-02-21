@@ -45,17 +45,17 @@ func resourceNsxtDhcpRelayService() *schema.Resource {
 func resourceNsxtDhcpRelayServiceCreate(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 	description := d.Get("description").(string)
-	display_name := d.Get("display_name").(string)
+	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
-	dhcp_relay_profile_id := d.Get("dhcp_relay_profile_id").(string)
-	dhcp_relay_service := manager.DhcpRelayService{
+	dhcpRelayProfileID := d.Get("dhcp_relay_profile_id").(string)
+	dhcpRelayService := manager.DhcpRelayService{
 		Description:        description,
-		DisplayName:        display_name,
+		DisplayName:        displayName,
 		Tags:               tags,
-		DhcpRelayProfileId: dhcp_relay_profile_id,
+		DhcpRelayProfileId: dhcpRelayProfileID,
 	}
 
-	dhcp_relay_service, resp, err := nsxClient.LogicalRoutingAndServicesApi.CreateDhcpRelay(nsxClient.Context, dhcp_relay_service)
+	dhcpRelayService, resp, err := nsxClient.LogicalRoutingAndServicesApi.CreateDhcpRelay(nsxClient.Context, dhcpRelayService)
 
 	if err != nil {
 		return fmt.Errorf("Error during DhcpRelayService create: %v", err)
@@ -64,7 +64,7 @@ func resourceNsxtDhcpRelayServiceCreate(d *schema.ResourceData, m interface{}) e
 	if resp.StatusCode != http.StatusCreated {
 		return fmt.Errorf("Unexpected status returned during DhcpRelayService create: %v", resp.StatusCode)
 	}
-	d.SetId(dhcp_relay_service.Id)
+	d.SetId(dhcpRelayService.Id)
 
 	return resourceNsxtDhcpRelayServiceRead(d, m)
 }
@@ -76,7 +76,7 @@ func resourceNsxtDhcpRelayServiceRead(d *schema.ResourceData, m interface{}) err
 		return fmt.Errorf("Error obtaining dhcp relay service id")
 	}
 
-	dhcp_relay_service, resp, err := nsxClient.LogicalRoutingAndServicesApi.ReadDhcpRelay(nsxClient.Context, id)
+	dhcpRelayService, resp, err := nsxClient.LogicalRoutingAndServicesApi.ReadDhcpRelay(nsxClient.Context, id)
 	if resp.StatusCode == http.StatusNotFound {
 		log.Printf("[DEBUG] DhcpRelayService %s not found", id)
 		d.SetId("")
@@ -86,11 +86,11 @@ func resourceNsxtDhcpRelayServiceRead(d *schema.ResourceData, m interface{}) err
 		return fmt.Errorf("Error during DhcpRelayService read: %v", err)
 	}
 
-	d.Set("revision", dhcp_relay_service.Revision)
-	d.Set("description", dhcp_relay_service.Description)
-	d.Set("display_name", dhcp_relay_service.DisplayName)
-	setTagsInSchema(d, dhcp_relay_service.Tags)
-	d.Set("dhcp_relay_profile_id", dhcp_relay_service.DhcpRelayProfileId)
+	d.Set("revision", dhcpRelayService.Revision)
+	d.Set("description", dhcpRelayService.Description)
+	d.Set("display_name", dhcpRelayService.DisplayName)
+	setTagsInSchema(d, dhcpRelayService.Tags)
+	d.Set("dhcp_relay_profile_id", dhcpRelayService.DhcpRelayProfileId)
 
 	return nil
 }
@@ -104,18 +104,18 @@ func resourceNsxtDhcpRelayServiceUpdate(d *schema.ResourceData, m interface{}) e
 
 	revision := int64(d.Get("revision").(int))
 	description := d.Get("description").(string)
-	display_name := d.Get("display_name").(string)
+	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
-	dhcp_relay_profile_id := d.Get("dhcp_relay_profile_id").(string)
-	dhcp_relay_service := manager.DhcpRelayService{
+	dhcpRelayProfileID := d.Get("dhcp_relay_profile_id").(string)
+	dhcpRelayService := manager.DhcpRelayService{
 		Revision:           revision,
 		Description:        description,
-		DisplayName:        display_name,
+		DisplayName:        displayName,
 		Tags:               tags,
-		DhcpRelayProfileId: dhcp_relay_profile_id,
+		DhcpRelayProfileId: dhcpRelayProfileID,
 	}
 
-	dhcp_relay_service, resp, err := nsxClient.LogicalRoutingAndServicesApi.UpdateDhcpRelay(nsxClient.Context, id, dhcp_relay_service)
+	dhcpRelayService, resp, err := nsxClient.LogicalRoutingAndServicesApi.UpdateDhcpRelay(nsxClient.Context, id, dhcpRelayService)
 
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during DhcpRelayService update: %v", err)

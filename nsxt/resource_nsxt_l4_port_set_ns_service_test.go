@@ -48,7 +48,7 @@ func TestAccResourceNsxtL4PortNsService_basic(t *testing.T) {
 	})
 }
 
-func testAccNSXL4ServiceExists(display_name string, resourceName string) resource.TestCheckFunc {
+func testAccNSXL4ServiceExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
 		nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
@@ -72,14 +72,14 @@ func testAccNSXL4ServiceExists(display_name string, resourceName string) resourc
 			return fmt.Errorf("Error while checking if L4 ns service %s exists. HTTP return code was %d", resourceID, responseCode.StatusCode)
 		}
 
-		if display_name == service.DisplayName {
+		if displayName == service.DisplayName {
 			return nil
 		}
-		return fmt.Errorf("NSX L4 ns service %s wasn't found", display_name)
+		return fmt.Errorf("NSX L4 ns service %s wasn't found", displayName)
 	}
 }
 
-func testAccNSXL4ServiceCheckDestroy(state *terraform.State, display_name string) error {
+func testAccNSXL4ServiceCheckDestroy(state *terraform.State, displayName string) error {
 	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
 	for _, rs := range state.RootModule().Resources {
 
@@ -96,8 +96,8 @@ func testAccNSXL4ServiceCheckDestroy(state *terraform.State, display_name string
 			return fmt.Errorf("Error while retrieving L4 ns service ID %s. Error: %v", resourceID, err)
 		}
 
-		if display_name == service.DisplayName {
-			return fmt.Errorf("NSX L4 ns service %s still exists", display_name)
+		if displayName == service.DisplayName {
+			return fmt.Errorf("NSX L4 ns service %s still exists", displayName)
 		}
 	}
 	return nil

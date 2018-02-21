@@ -46,42 +46,42 @@ func dataSourceNsxtSwitchingProfile() *schema.Resource {
 func dataSourceNsxtSwitchingProfileRead(d *schema.ResourceData, m interface{}) error {
 	// Read a switching profile by name or id
 	nsxClient := m.(*api.APIClient)
-	obj_id := d.Get("id").(string)
-	obj_name := d.Get("display_name").(string)
+	objID := d.Get("id").(string)
+	objName := d.Get("display_name").(string)
 	var obj manager.BaseSwitchingProfile
-	if obj_id != "" {
+	if objID != "" {
 		// Get by id
-		obj_get, resp, err := nsxClient.LogicalSwitchingApi.GetSwitchingProfile(nsxClient.Context, obj_id)
+		objGet, resp, err := nsxClient.LogicalSwitchingApi.GetSwitchingProfile(nsxClient.Context, objID)
 
 		if err != nil {
-			return fmt.Errorf("Error while reading switching profile %s: %v\n", obj_id, err)
+			return fmt.Errorf("Error while reading switching profile %s: %v\n", objID, err)
 		}
 		if resp.StatusCode == http.StatusNotFound {
-			return fmt.Errorf("switching profile %s was not found\n", obj_id)
+			return fmt.Errorf("switching profile %s was not found\n", objID)
 		}
-		obj = obj_get
-	} else if obj_name != "" {
+		obj = objGet
+	} else if objName != "" {
 		// Get by name
 		// TODO use localVarOptionals for paging
 		localVarOptionals := make(map[string]interface{})
 		localVarOptionals["includeSystemOwned"] = true
-		obj_list, _, err := nsxClient.LogicalSwitchingApi.ListSwitchingProfiles(nsxClient.Context, localVarOptionals)
+		objList, _, err := nsxClient.LogicalSwitchingApi.ListSwitchingProfiles(nsxClient.Context, localVarOptionals)
 		if err != nil {
 			return fmt.Errorf("Error while reading switching profiles: %v\n", err)
 		}
 		// go over the list to find the correct one
 		found := false
-		for _, obj_in_list := range obj_list.Results {
-			if obj_in_list.DisplayName == obj_name {
+		for _, objInList := range objList.Results {
+			if objInList.DisplayName == objName {
 				if found == true {
-					return fmt.Errorf("Found multiple switching profiles with name '%s'\n", obj_name)
+					return fmt.Errorf("Found multiple switching profiles with name '%s'\n", objName)
 				}
-				obj = obj_in_list
+				obj = objInList
 				found = true
 			}
 		}
 		if found == false {
-			return fmt.Errorf("Switching profile '%s' was not found\n", obj_name)
+			return fmt.Errorf("Switching profile '%s' was not found\n", objName)
 		}
 	} else {
 		return fmt.Errorf("Error obtaining switching profile ID or name during read")

@@ -48,7 +48,7 @@ func TestAccResourceNsxtEtherTypeNsService_basic(t *testing.T) {
 	})
 }
 
-func testAccNSXEtherServiceExists(display_name string, resourceName string) resource.TestCheckFunc {
+func testAccNSXEtherServiceExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
 		nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
@@ -72,14 +72,14 @@ func testAccNSXEtherServiceExists(display_name string, resourceName string) reso
 			return fmt.Errorf("Error while checking if ether service %s exists. HTTP return code was %d", resourceID, responseCode.StatusCode)
 		}
 
-		if display_name == service.DisplayName {
+		if displayName == service.DisplayName {
 			return nil
 		}
-		return fmt.Errorf("NSX ether ns service %s wasn't found", display_name)
+		return fmt.Errorf("NSX ether ns service %s wasn't found", displayName)
 	}
 }
 
-func testAccNSXEtherServiceCheckDestroy(state *terraform.State, display_name string) error {
+func testAccNSXEtherServiceCheckDestroy(state *terraform.State, displayName string) error {
 	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
 
 	for _, rs := range state.RootModule().Resources {
@@ -97,14 +97,14 @@ func testAccNSXEtherServiceCheckDestroy(state *terraform.State, display_name str
 			return fmt.Errorf("Error while retrieving L4 ns service ID %s. Error: %v", resourceID, err)
 		}
 
-		if display_name == service.DisplayName {
-			return fmt.Errorf("NSX L4 ns service %s still exists", display_name)
+		if displayName == service.DisplayName {
+			return fmt.Errorf("NSX L4 ns service %s still exists", displayName)
 		}
 	}
 	return nil
 }
 
-func testAccNSXEtherServiceCreateTemplate(serviceName string, ether_type int) string {
+func testAccNSXEtherServiceCreateTemplate(serviceName string, etherType int) string {
 	return fmt.Sprintf(`
 resource "nsxt_ether_type_ns_service" "test" {
     description = "ether service"
@@ -114,5 +114,5 @@ resource "nsxt_ether_type_ns_service" "test" {
     	scope = "scope1"
         tag = "tag1"
     }
-}`, serviceName, ether_type)
+}`, serviceName, etherType)
 }
