@@ -29,7 +29,7 @@ The following arguments are supported:
 
 * `display_name` - (Optional) Display name, defaults to ID if not set.
 * `description` - (Optional) Description.
-* `tag` - (Optional) A list of scope + tag pairs to associate with this ip_set.
+* `tag` - (Optional) A list of scope + tag pairs to associate with this service.
 
 ## Attributes Reference
 

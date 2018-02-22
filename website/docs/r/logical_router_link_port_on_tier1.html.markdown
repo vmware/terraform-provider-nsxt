@@ -37,7 +37,7 @@ The following arguments are supported:
 * `linked_logical_switch_port_id` - (Required) Identifier for port on logical Tier-0 router to connect to.
 * `display_name` - (Optional) Display name, defaults to ID if not set.
 * `description` - (Optional) Description of the resource.
-* `tag` - (Optional) A list of scope + tag pairs to associate with this logical switch.
+* `tag` - (Optional) A list of scope + tag pairs to associate with this port.
 * `service_binding` - (Optional) A list of services for this port
 
 ## Attributes Reference

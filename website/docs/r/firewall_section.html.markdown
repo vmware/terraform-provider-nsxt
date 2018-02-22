@@ -65,17 +65,17 @@ resource "nsxt_firewall_section" "firewall_section" {
 
 The following arguments are supported:
 
-* `display_name` - (Optional) The display name of this resource. Defaults to ID if not set.
-* `description` - (Optional) Description of this resource.
-* `tag` - (Optional) A list of scope + tag pairs to associate with this firewall_section.
-* `applied_to` - (Optional) List of objects where the rules in this section will be enforced. This will take precedence over rule level appliedTo. [allowed target types: "LogicalPort", "LogicalSwitch", "NSGroup"]
+* `display_name` - (Optional) The display name of this firewall section. Defaults to ID if not set.
+* `description` - (Optional) Description of this firewall section.
+* `tag` - (Optional) A list of scope + tag pairs to associate with this firewall section.
+* `applied_to` - (Optional) List of objects where the rules in this section will be enforced. This will take precedence over rule level applied_to. [Supported target types: "LogicalPort", "LogicalSwitch", "NSGroup"]
 * `section_type` - (Required) Type of the rules which a section can contain. Either LAYER2 or LAYER3. Only homogeneous sections are supported.
 * `stateful` - (Required) Stateful or Stateless nature of firewall section is enforced on all rules inside the section. Layer3 sections can be stateful or stateless. Layer2 sections can only be stateless.
-* `rule` - (Optional) A list of rules to be applied in this section. each rule has the following arguments"
-  * `display_name` - (Optional) Defaults to ID if not set.
-  * `description` - (Optional) Description of this resource.
+* `rule` - (Optional) A list of rules to be applied in this section. each rule has the following arguments:
+  * `display_name` - (Optional) The display name of this rule. Defaults to ID if not set.
+  * `description` - (Optional) Description of this rule.
   * `action` - (Required) Action enforced on the packets which matches the firewall rule. [Allowed values: "ALLOW", "DROP", "REJECT"]
-  * `applied_to` - (Optional) List of object where rule will be enforced. The section level field overrides this one. Null will be treated as any. [Allowed target types: "LogicalPort", "LogicalSwitch", "NSGroup"]
+  * `applied_to` - (Optional) List of object where rule will be enforced. The section level field overrides this one. Null will be treated as any. [Supported target types: "LogicalPort", "LogicalSwitch", "NSGroup"]
   * `destination` - (Optional) List of the destinations. Null will be treated as any. [Allowed target types: "IPSet", "LogicalPort", "LogicalSwitch", "NSGroup", "MACSet" (depending on the section type)]
   * `destinations_excluded` - (Optional) Negation of the destination.
   * `direction` - (Optional) Rule direction in case of stateless firewall rules. This will only considered if section level parameter is set to stateless. Default to IN_OUT if not specified. [Allowed values: "IN", "OUT", "IN_OUT"]

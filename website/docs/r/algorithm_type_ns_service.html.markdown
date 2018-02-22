@@ -35,7 +35,7 @@ The following arguments are supported:
 * `destination_ports` - (Required) a single destination port.
 * `source_ports` - (Optional) Set of source ports/ranges.
 * `algorithm` - (Required) Algorithm one of "ORACLE_TNS", "FTP", "SUN_RPC_TCP", "SUN_RPC_UDP", "MS_RPC_TCP", "MS_RPC_UDP", "NBNS_BROADCAST", "NBDG_BROADCAST", "TFTP"
-* `tag` - (Optional) A list of scope + tag pairs to associate with this ip_set.
+* `tag` - (Optional) A list of scope + tag pairs to associate with this service.
 
 ## Attributes Reference
 

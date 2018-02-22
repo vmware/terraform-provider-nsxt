@@ -363,7 +363,7 @@ def write_arguments_reference(f, resource, attrs):
         if name == 'display_name':
             desc = "The display name of this resource. " + desc
         if name == 'tag':
-            desc = "A list of scope + tag pairs to associate with this %s" % resource
+            desc = "A list of scope + tag pairs to associate with this %s" % re.sub('_', ' ', resource)
         pretty_writeln(f, "* `%s` - (%s) %s." % (name, optional, desc))
     pretty_writeln(f, "\n")
 

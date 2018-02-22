@@ -37,7 +37,7 @@ The following arguments are supported:
 * `logical_router_id` - (Required) ID of the logical router.
 * `description` - (Optional) Description of this resource.
 * `display_name` - (Optional) The display name of this resource. Defaults to ID if not set.
-* `tag` - (Optional) A list of scope + tag pairs to associate with this nat_rule.
+* `tag` - (Optional) A list of scope + tag pairs to associate with this NAT rule.
 * `action` - (Required) NAT rule action type.
              Valid actions: SNAT, DNAT, NO_NAT, REFLEXIVE.
              All rules in a logical router are either stateless or stateful. Mix is not supported.

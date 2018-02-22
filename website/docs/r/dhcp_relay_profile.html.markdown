@@ -51,7 +51,7 @@ The following arguments are supported:
 
 * `description` - (Optional) Description of this resource.
 * `display_name` - (Optional) The display name of this resource. Defaults to ID if not set.
-* `tag` - (Optional) A list of scope + tag pairs to associate with this dhcp_relay_profile.
+* `tag` - (Optional) A list of scope + tag pairs to associate with this dhcp relay profile.
 * `server_addresses` - (Required) IP addresses of the DHCP relay servers.
 
 

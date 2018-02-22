@@ -35,7 +35,7 @@ The following arguments are supported:
 * `protocol` - (Required) Version of ICMP protocol ICMPv4 or ICMPv6.
 * `icmp_type` - (Optional) ICMP message type.
 * `icmp_code` - (Optional) ICMP message code
-* `tag` - (Optional) A list of scope + tag pairs to associate with this ip_set.
+* `tag` - (Optional) A list of scope + tag pairs to associate with this service.
 
 ## Attributes Reference
 
