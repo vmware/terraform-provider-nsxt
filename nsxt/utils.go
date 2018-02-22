@@ -344,8 +344,7 @@ func makeResourceReference(resourceType string, resourceID string) *common.Resou
 	}
 }
 
-func getNSXVersion(m interface{}) string {
-	nsxClient := m.(*api.APIClient)
+func getNSXVersion(nsxClient *api.APIClient) string {
 	nodeProperties, resp, err := nsxClient.NsxComponentAdministrationApi.ReadNodeProperties(nsxClient.Context)
 	initialVersion := string("1.0.0")
 
@@ -353,5 +352,6 @@ func getNSXVersion(m interface{}) string {
 		log.Printf("[DEBUG] Node properties not found")
 		return initialVersion
 	}
+	log.Printf("[DEBUG] NSX version %s", nodeProperties.NodeVersion)
 	return nodeProperties.NodeVersion
 }

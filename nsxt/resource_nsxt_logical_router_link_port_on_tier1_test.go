@@ -62,7 +62,7 @@ func TestAccResourceNsxtLogicalRouterLinkPortOnTier1_withRelay(t *testing.T) {
 	testResourceName := "nsxt_logical_router_link_port_on_tier1.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "2.2.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLogicalRouterLinkPortOnTier1CheckDestroy(state, name)

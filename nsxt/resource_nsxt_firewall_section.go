@@ -387,6 +387,11 @@ func resourceNsxtFirewallSectionUpdate(d *schema.ResourceData, m interface{}) er
 	}
 
 	nsxClient := m.(*api.APIClient)
+	if getNSXVersion(nsxClient) < "2.2.0" {
+		// Due to an NSX bug, the empty update should also be called
+		resourceNsxtFirewallSectionUpdateEmpty(d, m, id)
+	}
+
 	revision := int64(d.Get("revision").(int))
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
