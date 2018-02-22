@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/vmware/go-vmware-nsxt"
 	"net/http"
+	"strings"
 	"testing"
 )
 
@@ -23,7 +24,7 @@ func TestAccDataSourceNsxtSwitchingProfile_basic(t *testing.T) {
 			{
 				Config: testAccNSXSwitchingProfileReadTemplate(profileName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNSXSwitchingProfileExists(testResourceName),
+					testAccNSXSwitchingProfileExists(testResourceName, profileName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", profileName),
 				),
 			},
@@ -31,22 +32,22 @@ func TestAccDataSourceNsxtSwitchingProfile_basic(t *testing.T) {
 	})
 }
 
-func testAccNSXSwitchingProfileExists(resourceName string) resource.TestCheckFunc {
+func testAccNSXSwitchingProfileExists(resourceName string, displayNamePrefix string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
 		nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
 
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
-			return fmt.Errorf("NSX switching profile resource %s not found in resources", resourceName)
+			return fmt.Errorf("NSX switching profile data source %s not found", resourceName)
 		}
 
 		resourceID := rs.Primary.ID
 		if resourceID == "" {
-			return fmt.Errorf("NSX switching profile resource ID not set in resources ")
+			return fmt.Errorf("NSX switching profile data source ID not set")
 		}
 
-		_, responseCode, err := nsxClient.LogicalSwitchingApi.GetSwitchingProfile(nsxClient.Context, resourceID)
+		object, responseCode, err := nsxClient.LogicalSwitchingApi.GetSwitchingProfile(nsxClient.Context, resourceID)
 		if err != nil {
 			return fmt.Errorf("Error while retrieving switching profile ID %s. Error: %v", resourceID, err)
 		}
@@ -55,7 +56,10 @@ func testAccNSXSwitchingProfileExists(resourceName string) resource.TestCheckFun
 			return fmt.Errorf("Error while checking if switching profile %s exists. HTTP return code was %d", resourceID, responseCode.StatusCode)
 		}
 
-		return nil
+		if strings.HasPrefix(object.DisplayName, displayNamePrefix) {
+			return nil
+		}
+		return fmt.Errorf("NSX switching profile data source '%s' wasn't found", displayNamePrefix)
 	}
 }
 

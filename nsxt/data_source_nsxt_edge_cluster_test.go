@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/vmware/go-vmware-nsxt"
 	"net/http"
+	"strings"
 	"testing"
 )
 
@@ -23,7 +24,7 @@ func TestAccDataSourceNsxtEdgeCluster_basic(t *testing.T) {
 			{
 				Config: testAccNSXEdgeClusterReadTemplate(edgeClusterName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNSXEdgeClusterExists(testResourceName),
+					testAccNSXEdgeClusterExists(testResourceName, edgeClusterName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", edgeClusterName),
 				),
 			},
@@ -31,22 +32,22 @@ func TestAccDataSourceNsxtEdgeCluster_basic(t *testing.T) {
 	})
 }
 
-func testAccNSXEdgeClusterExists(resourceName string) resource.TestCheckFunc {
+func testAccNSXEdgeClusterExists(resourceName string, displayNamePrefix string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
 		nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
 
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
-			return fmt.Errorf("NSX edge cluster resource %s not found in resources", resourceName)
+			return fmt.Errorf("NSX edge cluster data source '%s' not found", resourceName)
 		}
 
 		resourceID := rs.Primary.ID
 		if resourceID == "" {
-			return fmt.Errorf("NSX edge cluster resource ID not set in resources ")
+			return fmt.Errorf("NSX edge cluster data source ID not set")
 		}
 
-		_, responseCode, err := nsxClient.NetworkTransportApi.ReadEdgeCluster(nsxClient.Context, resourceID)
+		object, responseCode, err := nsxClient.NetworkTransportApi.ReadEdgeCluster(nsxClient.Context, resourceID)
 		if err != nil {
 			return fmt.Errorf("Error while retrieving edge cluster ID %s. Error: %v", resourceID, err)
 		}
@@ -55,7 +56,10 @@ func testAccNSXEdgeClusterExists(resourceName string) resource.TestCheckFunc {
 			return fmt.Errorf("Error while checking if edge cluster %s exists. HTTP return code was %d", resourceID, responseCode.StatusCode)
 		}
 
-		return nil
+		if strings.HasPrefix(object.DisplayName, displayNamePrefix) {
+			return nil
+		}
+		return fmt.Errorf("NSX edge cluster data source '%s' wasn't found", displayNamePrefix)
 	}
 }
 

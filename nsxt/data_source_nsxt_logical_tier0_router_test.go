@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/vmware/go-vmware-nsxt"
 	"net/http"
+	"strings"
 	"testing"
 )
 
@@ -23,7 +24,7 @@ func TestAccDataSourceNsxtLogicalTier0Router_basic(t *testing.T) {
 			{
 				Config: testAccNSXLogicalTier0RouterReadTemplate(routerName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNSXLogicalTier0RouterExists(testResourceName),
+					testAccNSXLogicalTier0RouterExists(testResourceName, routerName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", routerName),
 				),
 			},
@@ -31,22 +32,22 @@ func TestAccDataSourceNsxtLogicalTier0Router_basic(t *testing.T) {
 	})
 }
 
-func testAccNSXLogicalTier0RouterExists(resourceName string) resource.TestCheckFunc {
+func testAccNSXLogicalTier0RouterExists(resourceName string, displayNamePrefix string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
 		nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
 
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
-			return fmt.Errorf("NSX logical tier0 router resource %s not found in resources", resourceName)
+			return fmt.Errorf("NSX logical tier0 router data source %s not found", resourceName)
 		}
 
 		resourceID := rs.Primary.ID
 		if resourceID == "" {
-			return fmt.Errorf("NSX logical tier0 router resource ID not set in resources ")
+			return fmt.Errorf("NSX logical tier0 router data source ID not set")
 		}
 
-		_, responseCode, err := nsxClient.LogicalRoutingAndServicesApi.ReadLogicalRouter(nsxClient.Context, resourceID)
+		object, responseCode, err := nsxClient.LogicalRoutingAndServicesApi.ReadLogicalRouter(nsxClient.Context, resourceID)
 		if err != nil {
 			return fmt.Errorf("Error while retrieving logical tier0 router ID %s. Error: %v", resourceID, err)
 		}
@@ -55,7 +56,10 @@ func testAccNSXLogicalTier0RouterExists(resourceName string) resource.TestCheckF
 			return fmt.Errorf("Error while checking if logical tier0 router %s exists. HTTP return code was %d", resourceID, responseCode.StatusCode)
 		}
 
-		return nil
+		if strings.HasPrefix(object.DisplayName, displayNamePrefix) {
+			return nil
+		}
+		return fmt.Errorf("NSX logical tier0 router data source '%s' wasn't found", displayNamePrefix)
 	}
 }
 
