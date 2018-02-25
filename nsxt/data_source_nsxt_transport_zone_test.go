@@ -6,10 +6,6 @@ package nsxt
 import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
-	"github.com/vmware/go-vmware-nsxt"
-	"net/http"
-	"strings"
 	"testing"
 )
 
@@ -24,43 +20,14 @@ func TestAccDataSourceNsxtTransportZone_basic(t *testing.T) {
 			{
 				Config: testAccNSXTransportZoneReadTemplate(transportZoneName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNSXTransportZoneExists(testResourceName, transportZoneName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", transportZoneName),
+					resource.TestCheckResourceAttrSet(testResourceName, "id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "host_switch_name"),
+					resource.TestCheckResourceAttrSet(testResourceName, "transport_type"),
 				),
 			},
 		},
 	})
-}
-
-func testAccNSXTransportZoneExists(resourceName string, displayNamePrefix string) resource.TestCheckFunc {
-	return func(state *terraform.State) error {
-
-		nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
-
-		rs, ok := state.RootModule().Resources[resourceName]
-		if !ok {
-			return fmt.Errorf("NSX transport zone data source %s not found", resourceName)
-		}
-
-		resourceID := rs.Primary.ID
-		if resourceID == "" {
-			return fmt.Errorf("NSX transport zone data source ID not set")
-		}
-
-		object, responseCode, err := nsxClient.NetworkTransportApi.GetTransportZone(nsxClient.Context, resourceID)
-		if err != nil {
-			return fmt.Errorf("Error while retrieving transport zone ID %s. Error: %v", resourceID, err)
-		}
-
-		if responseCode.StatusCode != http.StatusOK {
-			return fmt.Errorf("Error while checking if transport zone %s exists. HTTP return code was %d", resourceID, responseCode.StatusCode)
-		}
-
-		if strings.HasPrefix(object.DisplayName, displayNamePrefix) {
-			return nil
-		}
-		return fmt.Errorf("NSX transport zone data source '%s' wasn't found", displayNamePrefix)
-	}
 }
 
 func testAccNSXTransportZoneReadTemplate(transportZoneName string) string {

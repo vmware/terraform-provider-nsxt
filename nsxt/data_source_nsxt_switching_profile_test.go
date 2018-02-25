@@ -7,60 +7,86 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/vmware/go-vmware-nsxt"
+	"github.com/vmware/go-vmware-nsxt/manager"
 	"net/http"
-	"strings"
 	"testing"
 )
 
 func TestAccDataSourceNsxtSwitchingProfile_basic(t *testing.T) {
-	profileName := getSwitchingProfileName()
+	profileName := "terraform_test_profile"
+	profileType := "QosSwitchingProfile"
 	testResourceName := "data.nsxt_switching_profile.test"
+	var s *terraform.State
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
+				PreConfig: func() {
+					if err := testAccDataSourceNsxtSwitchingProfileCreate(profileName, profileType); err != nil {
+						panic(err)
+					}
+				},
 				Config: testAccNSXSwitchingProfileReadTemplate(profileName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNSXSwitchingProfileExists(testResourceName, profileName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", profileName),
+					resource.TestCheckResourceAttr(testResourceName, "description", profileName),
+					resource.TestCheckResourceAttr(testResourceName, "resource_type", profileType),
+					copyStatePtr(&s),
 				),
+			},
+			{
+				PreConfig: func() {
+					if err := testAccDataSourceNsxtSwitchingProfileDelete(s, testResourceName); err != nil {
+						panic(err)
+					}
+				},
+				Config: testAccNSXSwitchingNoProfileTemplate(),
 			},
 		},
 	})
 }
 
-func testAccNSXSwitchingProfileExists(resourceName string, displayNamePrefix string) resource.TestCheckFunc {
-	return func(state *terraform.State) error {
-
-		nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
-
-		rs, ok := state.RootModule().Resources[resourceName]
-		if !ok {
-			return fmt.Errorf("NSX switching profile data source %s not found", resourceName)
-		}
-
-		resourceID := rs.Primary.ID
-		if resourceID == "" {
-			return fmt.Errorf("NSX switching profile data source ID not set")
-		}
-
-		object, responseCode, err := nsxClient.LogicalSwitchingApi.GetSwitchingProfile(nsxClient.Context, resourceID)
-		if err != nil {
-			return fmt.Errorf("Error while retrieving switching profile ID %s. Error: %v", resourceID, err)
-		}
-
-		if responseCode.StatusCode != http.StatusOK {
-			return fmt.Errorf("Error while checking if switching profile %s exists. HTTP return code was %d", resourceID, responseCode.StatusCode)
-		}
-
-		if strings.HasPrefix(object.DisplayName, displayNamePrefix) {
-			return nil
-		}
-		return fmt.Errorf("NSX switching profile data source '%s' wasn't found", displayNamePrefix)
+func testAccDataSourceNsxtSwitchingProfileCreate(profileName string, profileType string) error {
+	nsxClient := testAccGetClient()
+	profile := manager.BaseSwitchingProfile{
+		DisplayName:  profileName,
+		ResourceType: profileType,
+		Description:  profileName,
 	}
+	profile, responseCode, err := nsxClient.LogicalSwitchingApi.CreateSwitchingProfile(nsxClient.Context, profile)
+	if err != nil {
+		return fmt.Errorf("Error during SwitchingProfile creation: %v", err)
+	}
+
+	if responseCode.StatusCode != http.StatusCreated {
+		return fmt.Errorf("Unexpected status returned during SwitchingProfile creation: %v", responseCode.StatusCode)
+	}
+	return nil
+}
+
+func testAccDataSourceNsxtSwitchingProfileDelete(state *terraform.State, resourceName string) error {
+	rs, ok := state.RootModule().Resources[resourceName]
+	if !ok {
+		return fmt.Errorf("NSX SwitchingProfile data source %s not found", resourceName)
+	}
+
+	resourceID := rs.Primary.ID
+	if resourceID == "" {
+		return fmt.Errorf("NSX SwitchingProfile data source ID not set")
+	}
+	nsxClient := testAccGetClient()
+	localVarOptionals := make(map[string]interface{})
+	responseCode, err := nsxClient.LogicalSwitchingApi.DeleteSwitchingProfile(nsxClient.Context, resourceID, localVarOptionals)
+	if err != nil {
+		return fmt.Errorf("Error during SwitchingProfile deletion: %v", err)
+	}
+
+	if responseCode.StatusCode != http.StatusOK {
+		return fmt.Errorf("Unexpected status returned during SwitchingProfile deletion: %v", responseCode.StatusCode)
+	}
+	return nil
 }
 
 func testAccNSXSwitchingProfileReadTemplate(profileName string) string {
@@ -68,4 +94,8 @@ func testAccNSXSwitchingProfileReadTemplate(profileName string) string {
 data "nsxt_switching_profile" "test" {
      display_name = "%s"
 }`, profileName)
+}
+
+func testAccNSXSwitchingNoProfileTemplate() string {
+	return fmt.Sprintf(` `)
 }

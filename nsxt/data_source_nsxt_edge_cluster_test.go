@@ -6,10 +6,6 @@ package nsxt
 import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
-	"github.com/vmware/go-vmware-nsxt"
-	"net/http"
-	"strings"
 	"testing"
 )
 
@@ -24,43 +20,14 @@ func TestAccDataSourceNsxtEdgeCluster_basic(t *testing.T) {
 			{
 				Config: testAccNSXEdgeClusterReadTemplate(edgeClusterName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNSXEdgeClusterExists(testResourceName, edgeClusterName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", edgeClusterName),
+					resource.TestCheckResourceAttrSet(testResourceName, "id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "member_node_type"),
+					resource.TestCheckResourceAttrSet(testResourceName, "deployment_type"),
 				),
 			},
 		},
 	})
-}
-
-func testAccNSXEdgeClusterExists(resourceName string, displayNamePrefix string) resource.TestCheckFunc {
-	return func(state *terraform.State) error {
-
-		nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
-
-		rs, ok := state.RootModule().Resources[resourceName]
-		if !ok {
-			return fmt.Errorf("NSX edge cluster data source '%s' not found", resourceName)
-		}
-
-		resourceID := rs.Primary.ID
-		if resourceID == "" {
-			return fmt.Errorf("NSX edge cluster data source ID not set")
-		}
-
-		object, responseCode, err := nsxClient.NetworkTransportApi.ReadEdgeCluster(nsxClient.Context, resourceID)
-		if err != nil {
-			return fmt.Errorf("Error while retrieving edge cluster ID %s. Error: %v", resourceID, err)
-		}
-
-		if responseCode.StatusCode != http.StatusOK {
-			return fmt.Errorf("Error while checking if edge cluster %s exists. HTTP return code was %d", resourceID, responseCode.StatusCode)
-		}
-
-		if strings.HasPrefix(object.DisplayName, displayNamePrefix) {
-			return nil
-		}
-		return fmt.Errorf("NSX edge cluster data source '%s' wasn't found", displayNamePrefix)
-	}
 }
 
 func testAccNSXEdgeClusterReadTemplate(name string) string {
