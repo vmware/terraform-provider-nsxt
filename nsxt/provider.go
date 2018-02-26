@@ -15,10 +15,10 @@ func Provider() terraform.ResourceProvider {
 	return &schema.Provider{
 
 		Schema: map[string]*schema.Schema{
-			"insecure": &schema.Schema{
+			"allow_unverified_ssl": &schema.Schema{
 				Type:        schema.TypeBool,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("NSX_INSECURE", false),
+				DefaultFunc: schema.EnvDefaultFunc("NSX_ALLOW_UNVERIFIED_SSL", false),
 			},
 			"username": &schema.Schema{
 				Type:        schema.TypeString,
@@ -87,7 +87,7 @@ func Provider() terraform.ResourceProvider {
 }
 
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
-	insecure := d.Get("insecure").(bool)
+	insecure := d.Get("allow_unverified_ssl").(bool)
 	username := d.Get("username").(string)
 
 	if username == "" {

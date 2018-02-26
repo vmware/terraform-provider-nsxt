@@ -46,8 +46,8 @@ func testAccPreCheck(t *testing.T) {
 		t.Fatal("NSX_MANAGER_HOST must be set for acceptance tests")
 	}
 
-	if v := os.Getenv("NSX_INSECURE"); v == "" {
-		t.Fatal("NSX_INSECURE must be set for acceptance tests")
+	if v := os.Getenv("NSX_ALLOW_UNVERIFIED_SSL"); v == "" {
+		t.Fatal("NSX_ALLOW_UNVERIFIED_SSL must be set for acceptance tests")
 	}
 }
 
@@ -59,7 +59,7 @@ func testAccGetClient() *api.APIClient {
 	// Try to create a temporary client using the tests configuration
 	// This is necessary since the test PreCheck is called before the client is initialized.
 	insecure := false
-	if strings.ToLower(os.Getenv("NSX_INSECURE")) == "true" {
+	if strings.ToLower(os.Getenv("NSX_ALLOW_UNVERIFIED_SSL")) == "true" {
 		insecure = true
 	}
 	cfg := api.Configuration{
