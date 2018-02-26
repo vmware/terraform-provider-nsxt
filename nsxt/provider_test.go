@@ -46,8 +46,8 @@ func testAccPreCheck(t *testing.T) {
 		t.Fatal("NSX_MANAGER_HOST must be set for acceptance tests")
 	}
 
-	if v := os.Getenv("NSX_INSECURE"); v == "" {
-		t.Fatal("NSX_INSECURE must be set for acceptance tests")
+	if v := os.Getenv("NSX_ALLOW_UNVERIFIED_SSL"); v == "" {
+		t.Fatal("NSX_ALLOW_UNVERIFIED_SSL must be set for acceptance tests")
 	}
 }
 

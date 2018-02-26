@@ -19,7 +19,7 @@ provider "nsxt" {
     host = "10.160.94.11"
     username = "admin"
     password = "qwerty"
-    insecure = true
+    allow_unverified_ssl = true
 }
 
 ```
@@ -42,7 +42,7 @@ provider "nsxt" {
     host = "10.160.94.11"
     client_auth_cert_file = "mycert.pem"
     client_auth_key_file = "mykey.pem"
-    insecure = true
+    allow_unverified_ssl = true
 }
 
 ```
