@@ -60,6 +60,11 @@ func getOverlayTransportZoneName() string {
 	return name
 }
 
+func getTestVMID() string {
+	return os.Getenv("NSX_TEST_VM_ID")
+
+}
+
 // copyStatePtr returns a TestCheckFunc that copies the reference to the test
 // run's state to t. This allows access to the state data in later steps where
 // it's not normally accessible (ie: in pre-config parts in another test step).

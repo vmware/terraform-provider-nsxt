@@ -34,20 +34,12 @@ func TestProvider_impl(t *testing.T) {
 }
 
 func testAccPreCheck(t *testing.T) {
-	if v := os.Getenv("NSX_USERNAME"); v == "" {
-		t.Fatal("NSX_USERNAME must be set for acceptance tests")
-	}
-
-	if v := os.Getenv("NSX_PASSWORD"); v == "" {
-		t.Fatal("NSX_PASSWORD must be set for acceptance tests")
-	}
-
-	if v := os.Getenv("NSX_MANAGER_HOST"); v == "" {
-		t.Fatal("NSX_MANAGER_HOST must be set for acceptance tests")
-	}
-
-	if v := os.Getenv("NSX_ALLOW_UNVERIFIED_SSL"); v == "" {
-		t.Fatal("NSX_ALLOW_UNVERIFIED_SSL must be set for acceptance tests")
+	var requiredVariables = []string{"NSX_USERNAME", "NSX_PASSWORD", "NSX_MANAGER_HOST", "NSX_ALLOW_UNVERIFIED_SSL"}
+	for _, element := range requiredVariables {
+		if v := os.Getenv(element); v == "" {
+			str = fmt.Sprintf("%s must be set for acceptance tests", element)
+			t.Fatal(str)
+		}
 	}
 }
 
