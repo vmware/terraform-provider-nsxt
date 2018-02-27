@@ -4,6 +4,7 @@
 package nsxt
 
 import (
+	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
 	api "github.com/vmware/go-vmware-nsxt"
@@ -37,7 +38,7 @@ func testAccPreCheck(t *testing.T) {
 	var requiredVariables = []string{"NSX_USERNAME", "NSX_PASSWORD", "NSX_MANAGER_HOST", "NSX_ALLOW_UNVERIFIED_SSL"}
 	for _, element := range requiredVariables {
 		if v := os.Getenv(element); v == "" {
-			str = fmt.Sprintf("%s must be set for acceptance tests", element)
+			str := fmt.Sprintf("%s must be set for acceptance tests", element)
 			t.Fatal(str)
 		}
 	}

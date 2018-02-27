@@ -16,13 +16,9 @@ var vmTagsFullResourceName = "nsxt_vm_tags." + vmTagsResourceName
 
 func TestAccResourceNsxtVMTags(t *testing.T) {
 	vmID := getTestVMID()
-	if len(vmID) == 0 {
-		// No external VM to test against
-		return
-	}
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t); testAccEnvDefined(t, "NSX_TEST_VM_ID") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXVMTagsCheckDestroy(state)
@@ -53,12 +49,12 @@ func testAccNSXVMTagsCheckExists() resource.TestCheckFunc {
 
 		rs, ok := state.RootModule().Resources[vmTagsFullResourceName]
 		if !ok {
-			return fmt.Errorf("NSX nat rule resource %s not found in resources", vmTagsFullResourceName)
+			return fmt.Errorf("NSX vm tags resource %s not found in resources", vmTagsFullResourceName)
 		}
 
 		resourceID := rs.Primary.ID
 		if resourceID == "" {
-			return fmt.Errorf("NSX nat rule resource ID not set in resources ")
+			return fmt.Errorf("NSX vm tags resource ID not set in resources ")
 		}
 
 		_, err := findVMByExternalID(nsxClient, resourceID)
