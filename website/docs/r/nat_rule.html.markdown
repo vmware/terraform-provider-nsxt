@@ -64,3 +64,15 @@ In addition to arguments listed above, the following attributes are exported:
 * `id` - ID of the nat_rule.
 * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
 * `rule_priority` - Ascending, valid range [0-2147483647]. If multiple rules have the same priority, evaluation sequence is undefined.
+
+## Importing
+
+An existing NAT rule can be [imported][docs-import] into this resource, via the following command:
+
+[docs-import]: /docs/import/index.html
+
+```
+terraform import nsxt_nat_rule.rule1 logical-router-uuid/nat-rule-num
+```
+
+The above would import the NAT rule named `rule1` with the number id `nat-rule-num` that belongs to the Tier-1 logical router with the nsx id `logical-router-uuid`

@@ -16,6 +16,8 @@ func TestAccResourceNsxtAlgorithmTypeNsService_basic(t *testing.T) {
 	serviceName := fmt.Sprintf("test-nsx-alg-service")
 	updateServiceName := fmt.Sprintf("%s-update", serviceName)
 	testResourceName := "nsxt_algorithm_type_ns_service.test"
+	destPort := "21"
+	updatedDestPort := "21"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -25,24 +27,50 @@ func TestAccResourceNsxtAlgorithmTypeNsService_basic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXAlgServiceCreateTemplate(serviceName, "FTP", "9000-9001", "21"),
+				Config: testAccNSXAlgServiceCreateTemplate(serviceName, "FTP", "9000-9001", destPort),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXAlgServiceExists(serviceName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", serviceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "alg service"),
 					resource.TestCheckResourceAttr(testResourceName, "algorithm", "FTP"),
+					resource.TestCheckResourceAttr(testResourceName, "destination_port", destPort),
+					resource.TestCheckResourceAttr(testResourceName, "source_ports.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 				),
 			},
 			{
-				Config: testAccNSXAlgServiceCreateTemplate(updateServiceName, "ORACLE_TNS", "600", "8081"),
+				Config: testAccNSXAlgServiceCreateTemplate(updateServiceName, "ORACLE_TNS", "600", updatedDestPort),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXAlgServiceExists(updateServiceName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updateServiceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "alg service"),
 					resource.TestCheckResourceAttr(testResourceName, "algorithm", "ORACLE_TNS"),
+					resource.TestCheckResourceAttr(testResourceName, "destination_port", updatedDestPort),
+					resource.TestCheckResourceAttr(testResourceName, "source_ports.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 				),
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtAlgorithmTypeNsService_importBasic(t *testing.T) {
+	serviceName := fmt.Sprintf("test-nsx-alg-service")
+	testResourceName := "nsxt_algorithm_type_ns_service.test"
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXAlgServiceCheckDestroy(state, serviceName)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXAlgServiceCreateTemplate(serviceName, "FTP", "9000-9001", "21"),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -101,17 +129,19 @@ func testAccNSXAlgServiceCheckDestroy(state *terraform.State, displayName string
 	return nil
 }
 
-func testAccNSXAlgServiceCreateTemplate(serviceName string, protocol string, sourcePorts string, destPorts string) string {
+func testAccNSXAlgServiceCreateTemplate(serviceName string, protocol string, sourcePorts string, destPort string) string {
 	return fmt.Sprintf(`
 resource "nsxt_algorithm_type_ns_service" "test" {
-    description = "alg service"
-    display_name = "%s"
-    algorithm = "%s"
-    source_ports = [ "%s" ]
-    destination_ports = "%s"
-    tag {
-    	scope = "scope1"
-        tag = "tag1"
-    }
-}`, serviceName, protocol, sourcePorts, destPorts)
+  description       = "alg service"
+  display_name      = "%s"
+  algorithm         = "%s"
+  source_ports      = ["%s"]
+  destination_port  = "%s"
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+}
+`, serviceName, protocol, sourcePorts, destPort)
 }

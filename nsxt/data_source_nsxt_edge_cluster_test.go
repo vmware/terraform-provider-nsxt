@@ -33,6 +33,6 @@ func TestAccDataSourceNsxtEdgeCluster_basic(t *testing.T) {
 func testAccNSXEdgeClusterReadTemplate(name string) string {
 	return fmt.Sprintf(`
 data "nsxt_edge_cluster" "test" {
-     display_name = "%s"
+  display_name = "%s"
 }`, name)
 }

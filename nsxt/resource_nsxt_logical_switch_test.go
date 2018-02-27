@@ -109,6 +109,37 @@ func TestAccResourceNsxtLogicalSwitch_vlan(t *testing.T) {
 
 }
 
+func TestAccResourceNsxtLogicalSwitch_importBasic(t *testing.T) {
+	switchName := fmt.Sprintf("test-nsx-logical-switch-overlay")
+	resourceName := "testoverlay"
+	testResourceName := fmt.Sprintf("nsxt_logical_switch.%s", resourceName)
+	novlan := "0"
+	replicationMode := "MTEP"
+	transportZoneName := getOverlayTransportZoneName()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXLogicalSwitchCheckDestroy(state, switchName)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccNSXLogicalSwitchNoTZIDTemplate(switchName),
+				ExpectError: regexp.MustCompile(`required field is not set`),
+			},
+			{
+				Config: testAccNSXLogicalSwitchCreateTemplate(resourceName, switchName, transportZoneName, novlan, replicationMode),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func testAccNSXLogicalSwitchExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
@@ -167,67 +198,70 @@ func testAccNSXLogicalSwitchCheckDestroy(state *terraform.State, displayName str
 func testAccNSXLogicalSwitchNoTZIDTemplate(switchName string) string {
 	return fmt.Sprintf(`
 resource "nsxt_logical_switch" "error" {
-	display_name = "%s"
-	admin_state = "UP"
-	description = "Acceptance Test"
-	replication_mode = "MTEP"
+  display_name     = "%s"
+  admin_state      = "UP"
+  description      = "Acceptance Test"
+  replication_mode = "MTEP"
 }`, switchName)
 }
 
 func testAccNSXLogicalSwitchNoVlanTemplate(switchName string, transportZoneName string) string {
 	return fmt.Sprintf(`
 data "nsxt_transport_zone" "TZ1" {
-     display_name = "%s"
+  display_name = "%s"
 }
 
 resource "nsxt_logical_switch" "error" {
-	display_name = "%s"
-	admin_state = "UP"
-	description = "Acceptance Test"
-	transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
+  display_name      = "%s"
+  admin_state       = "UP"
+  description       = "Acceptance Test"
+  transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
 }`, transportZoneName, switchName)
 }
 
 func testAccNSXLogicalSwitchCreateTemplate(resourceName string, switchName string, transportZoneName string, vlan string, replicationMode string) string {
 	return fmt.Sprintf(`
 data "nsxt_transport_zone" "TZ1" {
-     display_name = "%s"
+  display_name = "%s"
 }
 
 resource "nsxt_logical_switch" "%s" {
-    display_name = "%s"
-    admin_state = "UP"
-    description = "Acceptance Test"
-    transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
-    replication_mode = "%s"
-    vlan = "%s"
-    tag {
-    	scope = "scope1"
-        tag = "tag1"
-    }
+  display_name      = "%s"
+  admin_state       = "UP"
+  description       = "Acceptance Test"
+  transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
+  replication_mode  = "%s"
+  vlan              = "%s"
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
 }`, transportZoneName, resourceName, switchName, replicationMode, vlan)
 }
 
 func testAccNSXLogicalSwitchUpdateTemplate(resourceName string, switchUpdateName string, transportZoneName string, vlan string, replicationMode string) string {
 	return fmt.Sprintf(`
 data "nsxt_transport_zone" "TZ1" {
-     display_name = "%s"
+  display_name = "%s"
 }
 
 resource "nsxt_logical_switch" "%s" {
-    display_name = "%s"
-    admin_state = "DOWN"
-    description = "Acceptance Test Update"
-    transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
-    replication_mode = "%s"
-    vlan = "%s"
-    tag {
-    	scope = "scope1"
-        tag = "tag1"
-    }
-    tag {
-    	scope = "scope2"
-        tag = "tag2"
-    }
+  display_name      = "%s"
+  admin_state       = "DOWN"
+  description       = "Acceptance Test Update"
+  transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
+  replication_mode  = "%s"
+  vlan              = "%s"
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+
+  tag {
+    scope = "scope2"
+    tag   = "tag2"
+  }
 }`, transportZoneName, resourceName, switchUpdateName, replicationMode, vlan)
 }

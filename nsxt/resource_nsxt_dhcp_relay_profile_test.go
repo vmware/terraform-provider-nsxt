@@ -16,8 +16,6 @@ func TestAccResourceNsxtDhcpRelayProfile_basic(t *testing.T) {
 	prfName := fmt.Sprintf("test-nsx-dhcp-relay-profile")
 	updatePrfName := fmt.Sprintf("%s-update", prfName)
 	testResourceName := "nsxt_dhcp_relay_profile.test"
-	serverIP := "1.1.1.1"
-	additionalIP := "2.1.1.1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -27,7 +25,7 @@ func TestAccResourceNsxtDhcpRelayProfile_basic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXDhcpRelayProfileCreateTemplate(prfName, serverIP),
+				Config: testAccNSXDhcpRelayProfileCreateTemplate(prfName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXDhcpRelayProfileExists(prfName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", prfName),
@@ -37,7 +35,7 @@ func TestAccResourceNsxtDhcpRelayProfile_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXDhcpRelayProfileUpdateTemplate(updatePrfName, serverIP, additionalIP),
+				Config: testAccNSXDhcpRelayProfileUpdateTemplate(updatePrfName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXDhcpRelayProfileExists(updatePrfName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatePrfName),
@@ -45,6 +43,29 @@ func TestAccResourceNsxtDhcpRelayProfile_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "server_addresses.#", "2"),
 				),
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtDhcpRelayProfile_importBasic(t *testing.T) {
+	prfName := fmt.Sprintf("test-nsx-dhcp-relay-profile")
+	testResourceName := "nsxt_dhcp_relay_profile.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXDhcpRelayProfileCheckDestroy(state, prfName)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXDhcpRelayProfileCreateTemplate(prfName),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -103,32 +124,35 @@ func testAccNSXDhcpRelayProfileCheckDestroy(state *terraform.State, displayName 
 	return nil
 }
 
-func testAccNSXDhcpRelayProfileCreateTemplate(prfName string, serverIP string) string {
+func testAccNSXDhcpRelayProfileCreateTemplate(prfName string) string {
 	return fmt.Sprintf(`
 resource "nsxt_dhcp_relay_profile" "test" {
-    display_name = "%s"
-    description = "Acceptance Test"
-    server_addresses = ["%s"]
-    tag {
-    	scope = "scope1"
-        tag = "tag1"
-    }
-}`, prfName, serverIP)
+  display_name     = "%s"
+  description      = "Acceptance Test"
+  server_addresses = ["1.1.1.1"]
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+}`, prfName)
 }
 
-func testAccNSXDhcpRelayProfileUpdateTemplate(prfUpdatedName string, serverIP string, additionalIP string) string {
+func testAccNSXDhcpRelayProfileUpdateTemplate(prfUpdatedName string) string {
 	return fmt.Sprintf(`
 resource "nsxt_dhcp_relay_profile" "test" {
-    display_name = "%s"
-    description = "Acceptance Test Update"
-    server_addresses = ["%s", "%s"]
-    tag {
-    	scope = "scope1"
-        tag = "tag1"
-    }
-    tag {
-    	scope = "scope2"
-        tag = "tag2"
-    }
-}`, prfUpdatedName, serverIP, additionalIP)
+  display_name     = "%s"
+  description      = "Acceptance Test Update"
+  server_addresses = ["1.1.1.1", "2.2.2.2"]
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+
+  tag {
+    scope = "scope2"
+    tag   = "tag2"
+  }
+}`, prfUpdatedName)
 }

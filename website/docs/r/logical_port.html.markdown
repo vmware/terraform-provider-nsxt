@@ -53,10 +53,10 @@ In addition to arguments listed above, the following attributes are exported:
 
 An existing Logical Port can be [imported][docs-import] into this resource, via the following command:
 
-[docs-import]: https://www.terraform.io/docs/import/index.html
+[docs-import]: /docs/import/index.html
 
 ```
-terraform import nsxt_logical_port.x id
+terraform import nsxt_logical_port.logical_port UUID
 ```
 
-The above would import the Logical Port named `x` with the nsx id `id`
+The above would import the Logical Port named `logical_port` with the nsx id `UUID`

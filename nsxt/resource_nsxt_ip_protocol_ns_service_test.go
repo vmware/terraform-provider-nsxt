@@ -48,6 +48,29 @@ func TestAccResourceNsxtIpProtocolNsService_basic(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtIpProtocolNsService_importBasic(t *testing.T) {
+	serviceName := fmt.Sprintf("test-nsx-ip-protocol-service")
+	testResourceName := "nsxt_ip_protocol_ns_service.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXIpProtocolServiceCheckDestroy(state, serviceName)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXIpProtocolServiceCreateTemplate(serviceName, 6),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func testAccNSXIpProtocolServiceExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
@@ -107,12 +130,13 @@ func testAccNSXIpProtocolServiceCheckDestroy(state *terraform.State, displayName
 func testAccNSXIpProtocolServiceCreateTemplate(serviceName string, protocol int) string {
 	return fmt.Sprintf(`
 resource "nsxt_ip_protocol_ns_service" "test" {
-    description = "ip protocol service"
-    display_name = "%s"
-    protocol = "%d"
-    tag {
-    	scope = "scope1"
-        tag = "tag1"
-    }
+  description  = "ip protocol service"
+  display_name = "%s"
+  protocol     = "%d"
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
 }`, serviceName, protocol)
 }

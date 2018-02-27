@@ -46,6 +46,29 @@ func TestAccResourceNsxtDhcpRelayService_basic(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtDhcpRelayService_importBasic(t *testing.T) {
+	prfName := fmt.Sprintf("test-nsx-dhcp-relay-service")
+	testResourceName := "nsxt_dhcp_relay_service.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXDhcpRelayServiceCheckDestroy(state, prfName)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXDhcpRelayServiceCreateTemplate(prfName),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func testAccNSXDhcpRelayServiceExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
@@ -104,39 +127,42 @@ func testAccNSXDhcpRelayServiceCheckDestroy(state *terraform.State, displayName 
 func testAccNSXDhcpRelayServiceCreateTemplate(name string) string {
 	return fmt.Sprintf(`
 resource "nsxt_dhcp_relay_profile" "test" {
-    display_name = "prf"
-    server_addresses = ["1.1.1.1"]
+  display_name     = "prf"
+  server_addresses = ["1.1.1.1"]
 }
 
 resource "nsxt_dhcp_relay_service" "test" {
-    display_name = "%s"
-    description = "Acceptance Test"
-    dhcp_relay_profile_id = "${nsxt_dhcp_relay_profile.test.id}"
-    tag {
-    	scope = "scope1"
-        tag = "tag1"
-    }
+  display_name          = "%s"
+  description           = "Acceptance Test"
+  dhcp_relay_profile_id = "${nsxt_dhcp_relay_profile.test.id}"
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
 }`, name)
 }
 
 func testAccNSXDhcpRelayServiceUpdateTemplate(updatedName string) string {
 	return fmt.Sprintf(`
 resource "nsxt_dhcp_relay_profile" "test" {
-    display_name = "prf"
-    server_addresses = ["1.1.1.1"]
+  display_name     = "prf"
+  server_addresses = ["1.1.1.1"]
 }
 
 resource "nsxt_dhcp_relay_service" "test" {
-    display_name = "%s"
-    description = "Acceptance Test Update"
-    dhcp_relay_profile_id = "${nsxt_dhcp_relay_profile.test.id}"
-    tag {
-    	scope = "scope1"
-        tag = "tag1"
-    }
-    tag {
-    	scope = "scope2"
-        tag = "tag2"
-    }
+  display_name          = "%s"
+  description           = "Acceptance Test Update"
+  dhcp_relay_profile_id = "${nsxt_dhcp_relay_profile.test.id}"
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+
+  tag {
+    scope = "scope2"
+    tag   = "tag2"
+  }
 }`, updatedName)
 }

@@ -12,6 +12,7 @@ import (
 	"github.com/vmware/go-vmware-nsxt/manager"
 	"log"
 	"net/http"
+	"strings"
 )
 
 func resourceNsxtStaticRoute() *schema.Resource {
@@ -20,6 +21,9 @@ func resourceNsxtStaticRoute() *schema.Resource {
 		Read:   resourceNsxtStaticRouteRead,
 		Update: resourceNsxtStaticRouteUpdate,
 		Delete: resourceNsxtStaticRouteDelete,
+		Importer: &schema.ResourceImporter{
+			State: resourceNsxtStaticRouteImport,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"logical_router_id": &schema.Schema{
@@ -121,7 +125,9 @@ func setNextHopsInSchema(d *schema.ResourceData, nextHops []manager.StaticRouteN
 		elem["bfd_enabled"] = staticRouteNextHop.BfdEnabled
 		elem["blackhole_action"] = staticRouteNextHop.BlackholeAction
 		elem["ip_address"] = staticRouteNextHop.IpAddress
-		elem["logical_router_port_id"] = staticRouteNextHop.LogicalRouterPortId
+		if staticRouteNextHop.LogicalRouterPortId != nil {
+			elem["logical_router_port_id"] = staticRouteNextHop.LogicalRouterPortId.TargetId
+		}
 		nextHopsList = append(nextHopsList, elem)
 	}
 	d.Set("next_hop", nextHopsList)
@@ -254,4 +260,15 @@ func resourceNsxtStaticRouteDelete(d *schema.ResourceData, m interface{}) error 
 		d.SetId("")
 	}
 	return nil
+}
+
+func resourceNsxtStaticRouteImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	importId := d.Id()
+	s := strings.Split(importId, "/")
+	if len(s) != 2 {
+		return nil, fmt.Errorf("Please provide <router-id>/<static-route-id> as an input")
+	}
+	d.SetId(s[1])
+	d.Set("logical_router_id", s[0])
+	return []*schema.ResourceData{d}, nil
 }

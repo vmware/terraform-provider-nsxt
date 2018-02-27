@@ -34,10 +34,10 @@ The following arguments are supported:
 
 An existing Tags collection can be [imported][docs-import] into this resource, via the following command:
 
-[docs-import]: https://www.terraform.io/docs/import/index.html
+[docs-import]: /docs/import/index.html
 
 ```
-terraform import nsxt_vm_tags.x id
+terraform import nsxt_vm_tags.vm1_tags id
 ```
 
-The above would import nsxt vm tags resource named `x` with the nsx id `id`, where id is external ID (not the BIOS id) of the VM.
+The above would import nsxt vm tags resource named `vm1_tags` with the nsx id `id`, where id is external ID (not the BIOS id) of the VM.

@@ -49,10 +49,10 @@ In addition to arguments listed above, the following attributes are exported:
 
 An existing L4 port set NS service can be [imported][docs-import] into this resource, via the following command:
 
-[docs-import]: https://www.terraform.io/docs/import/index.html
+[docs-import]: /docs/import/index.html
 
 ```
-terraform import nsxt_l4_port_set_ns_service.x id
+terraform import nsxt_l4_port_set_ns_service.ns_service_l4 UUID
 ```
 
-The above would import the L4 port set NS service named `x` with the nsx id `id`
+The above would import the L4 port set NS service named `ns_service_l4` with the nsx id `UUID`

@@ -48,6 +48,29 @@ func TestAccResourceNsxtL4PortNsService_basic(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtL4PortNsService_importBasic(t *testing.T) {
+	serviceName := fmt.Sprintf("test-nsx-l4-service")
+	testResourceName := "nsxt_l4_port_set_ns_service.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXL4ServiceCheckDestroy(state, serviceName)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXserviceCreateTemplate(serviceName, "TCP", "99"),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func testAccNSXL4ServiceExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
@@ -106,13 +129,14 @@ func testAccNSXL4ServiceCheckDestroy(state *terraform.State, displayName string)
 func testAccNSXserviceCreateTemplate(serviceName string, protocol string, port string) string {
 	return fmt.Sprintf(`
 resource "nsxt_l4_port_set_ns_service" "test" {
-    description = "l4 service"
-    display_name = "%s"
-    protocol = "%s"
-    destination_ports = [ "%s" ]
-    tag {
-    	scope = "scope1"
-        tag = "tag1"
-    }
+  description       = "l4 service"
+  display_name      = "%s"
+  protocol          = "%s"
+  destination_ports = [ "%s" ]
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
 }`, serviceName, protocol, port)
 }
