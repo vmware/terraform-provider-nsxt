@@ -104,39 +104,42 @@ func testAccNSXDhcpRelayServiceCheckDestroy(state *terraform.State, displayName 
 func testAccNSXDhcpRelayServiceCreateTemplate(name string) string {
 	return fmt.Sprintf(`
 resource "nsxt_dhcp_relay_profile" "test" {
-    display_name = "prf"
-    server_addresses = ["1.1.1.1"]
+  display_name     = "prf"
+  server_addresses = ["1.1.1.1"]
 }
 
 resource "nsxt_dhcp_relay_service" "test" {
-    display_name = "%s"
-    description = "Acceptance Test"
-    dhcp_relay_profile_id = "${nsxt_dhcp_relay_profile.test.id}"
-    tag {
-    	scope = "scope1"
-        tag = "tag1"
-    }
+  display_name          = "%s"
+  description           = "Acceptance Test"
+  dhcp_relay_profile_id = "${nsxt_dhcp_relay_profile.test.id}"
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
 }`, name)
 }
 
 func testAccNSXDhcpRelayServiceUpdateTemplate(updatedName string) string {
 	return fmt.Sprintf(`
 resource "nsxt_dhcp_relay_profile" "test" {
-    display_name = "prf"
-    server_addresses = ["1.1.1.1"]
+  display_name     = "prf"
+  server_addresses = ["1.1.1.1"]
 }
 
 resource "nsxt_dhcp_relay_service" "test" {
-    display_name = "%s"
-    description = "Acceptance Test Update"
-    dhcp_relay_profile_id = "${nsxt_dhcp_relay_profile.test.id}"
-    tag {
-    	scope = "scope1"
-        tag = "tag1"
-    }
-    tag {
-    	scope = "scope2"
-        tag = "tag2"
-    }
+  display_name          = "%s"
+  description           = "Acceptance Test Update"
+  dhcp_relay_profile_id = "${nsxt_dhcp_relay_profile.test.id}"
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+
+  tag {
+    scope = "scope2"
+    tag   = "tag2"
+  }
 }`, updatedName)
 }

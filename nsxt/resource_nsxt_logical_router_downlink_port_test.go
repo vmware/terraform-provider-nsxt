@@ -158,39 +158,39 @@ func testAccNSXLogicalRouterDownlinkPortCheckDestroy(state *terraform.State, dis
 func testAccNSXLogicalRouterDownlinkPortPreConditionTemplate(transportZoneName string, edgeClusterName string) string {
 	return fmt.Sprintf(`
 data "nsxt_transport_zone" "TZ1" {
-     display_name = "%s"
+  display_name = "%s"
 }
 
 resource "nsxt_logical_switch" "LS1" {
-	display_name = "downlink_test_switch"
-	admin_state = "UP"
-	replication_mode = "MTEP"
-	vlan = "0"
-	transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
+  display_name     = "downlink_test_switch"
+  admin_state      = "UP"
+  replication_mode = "MTEP"
+  vlan             = "0"
+  transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
 }
 
 resource "nsxt_logical_port" "PORT1" {
-	display_name = "LP"
-	admin_state = "UP"
-	description = "Acceptance Test"
-	logical_switch_id = "${nsxt_logical_switch.LS1.id}"
+  display_name      = "LP"
+  admin_state       = "UP"
+  description       = "Acceptance Test"
+  logical_switch_id = "${nsxt_logical_switch.LS1.id}"
 }
 
 data "nsxt_edge_cluster" "EC" {
-	display_name = "%s"
+  display_name = "%s"
 }
 
-resource "nsxt_logical_tier1_router" "RTR1" {
-	display_name = "downlink_test_router"
-	edge_cluster_id = "${data.nsxt_edge_cluster.EC.id}"
+resource "nsxt_logical_tier1_router" "rtr1" {
+  display_name    = "downlink_test_router"
+  edge_cluster_id = "${data.nsxt_edge_cluster.EC.id}"
 }`, transportZoneName, edgeClusterName)
 }
 
 func testAccNSXLogicalRouterDownlinkPortRelayTemplate() string {
 	return fmt.Sprintf(`
 resource "nsxt_dhcp_relay_profile" "DRP1" {
-	display_name = "prf"
-	server_addresses = ["1.1.1.1"]
+  display_name     = "prf"
+  server_addresses = ["1.1.1.1"]
 }
 
 resource "nsxt_dhcp_relay_service" "DRS1" {
@@ -203,34 +203,37 @@ resource "nsxt_dhcp_relay_service" "DRS1" {
 func testAccNSXLogicalRouterDownlinkPortCreateTemplate(portName string, transportZoneName string, edgeClusterName string) string {
 	return testAccNSXLogicalRouterDownlinkPortPreConditionTemplate(transportZoneName, edgeClusterName) + fmt.Sprintf(`
 resource "nsxt_logical_router_downlink_port" "test" {
-	display_name = "%s"
-	description = "Acceptance Test"
-	linked_logical_switch_port_id = "${nsxt_logical_port.PORT1.id}"
-	logical_router_id = "${nsxt_logical_tier1_router.RTR1.id}"
-	ip_address = "8.0.0.1/24"
-    tag {
-    	scope = "scope1"
-        tag = "tag1"
-    }
+  display_name                  = "%s"
+  description                   = "Acceptance Test"
+  linked_logical_switch_port_id = "${nsxt_logical_port.PORT1.id}"
+  logical_router_id             = "${nsxt_logical_tier1_router.rtr1.id}"
+  ip_address                    = "8.0.0.1/24"
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
 }`, portName)
 }
 
 func testAccNSXLogicalRouterDownlinkPortUpdateTemplate(portUpdatedName string, transportZoneName string, edgeClusterName string) string {
 	return testAccNSXLogicalRouterDownlinkPortPreConditionTemplate(transportZoneName, edgeClusterName) + fmt.Sprintf(`
 resource "nsxt_logical_router_downlink_port" "test" {
-	display_name = "%s"
-	description = "Acceptance Test Update"
-	linked_logical_switch_port_id = "${nsxt_logical_port.PORT1.id}"
-	logical_router_id = "${nsxt_logical_tier1_router.RTR1.id}"
-	ip_address = "8.0.0.1/24"
-    tag {
-    	scope = "scope1"
-        tag = "tag1"
-    }
-    tag {
-    	scope = "scope2"
-        tag = "tag2"
-    }
+  display_name                  = "%s"
+  description                   = "Acceptance Test Update"
+  linked_logical_switch_port_id = "${nsxt_logical_port.PORT1.id}"
+  logical_router_id             = "${nsxt_logical_tier1_router.rtr1.id}"
+  ip_address                    = "8.0.0.1/24"
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+
+  tag {
+    scope = "scope2"
+    tag   = "tag2"
+  }
 }`, portUpdatedName)
 }
 
@@ -239,19 +242,21 @@ func testAccNSXLogicalRouterDownlinkPortCreateWithRelayTemplate(portName string,
 		testAccNSXLogicalRouterDownlinkPortRelayTemplate() +
 		fmt.Sprintf(`
 resource "nsxt_logical_router_downlink_port" "test" {
-	display_name = "%s"
-	description = "Acceptance Test"
-	linked_logical_switch_port_id = "${nsxt_logical_port.PORT1.id}"
-	logical_router_id = "${nsxt_logical_tier1_router.RTR1.id}"
-	ip_address = "8.0.0.1/24"
-	service_binding {
-		target_id = "${nsxt_dhcp_relay_service.DRS1.id}"
-		target_type = "LogicalService"
-	}
-    tag {
-    	scope = "scope1"
-        tag = "tag1"
-    }
+  display_name                  = "%s"
+  description                   = "Acceptance Test"
+  linked_logical_switch_port_id = "${nsxt_logical_port.PORT1.id}"
+  logical_router_id             = "${nsxt_logical_tier1_router.rtr1.id}"
+  ip_address                    = "8.0.0.1/24"
+
+  service_binding {
+    target_id   = "${nsxt_dhcp_relay_service.DRS1.id}"
+	target_type = "LogicalService"
+  }
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
 }`, portName)
 }
 
@@ -260,22 +265,25 @@ func testAccNSXLogicalRouterDownlinkPortUpdateWithRelayTemplate(portUpdatedName 
 		testAccNSXLogicalRouterDownlinkPortRelayTemplate() +
 		fmt.Sprintf(`
 resource "nsxt_logical_router_downlink_port" "test" {
-	display_name = "%s"
-	description = "Acceptance Test Update"
-	linked_logical_switch_port_id = "${nsxt_logical_port.PORT1.id}"
-	logical_router_id = "${nsxt_logical_tier1_router.RTR1.id}"
-	ip_address = "8.0.0.1/24"
-	service_binding {
-		target_id = "${nsxt_dhcp_relay_service.DRS1.id}"
-		target_type = "LogicalService"
-	}
-    tag {
-    	scope = "scope1"
-        tag = "tag1"
-    }
-    tag {
-    	scope = "scope2"
-        tag = "tag2"
-    }
+  display_name                  = "%s"
+  description                   = "Acceptance Test Update"
+  linked_logical_switch_port_id = "${nsxt_logical_port.PORT1.id}"
+  logical_router_id             = "${nsxt_logical_tier1_router.rtr1.id}"
+  ip_address                    = "8.0.0.1/24"
+
+  service_binding {
+    target_id   = "${nsxt_dhcp_relay_service.DRS1.id}"
+    target_type = "LogicalService"
+  }
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+
+  tag {
+    scope = "scope2"
+    tag   = "tag2"
+  }
 }`, portUpdatedName)
 }

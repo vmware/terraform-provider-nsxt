@@ -106,13 +106,14 @@ func testAccNSXL4ServiceCheckDestroy(state *terraform.State, displayName string)
 func testAccNSXserviceCreateTemplate(serviceName string, protocol string, port string) string {
 	return fmt.Sprintf(`
 resource "nsxt_l4_port_set_ns_service" "test" {
-    description = "l4 service"
-    display_name = "%s"
-    protocol = "%s"
-    destination_ports = [ "%s" ]
-    tag {
-    	scope = "scope1"
-        tag = "tag1"
-    }
+  description       = "l4 service"
+  display_name      = "%s"
+  protocol          = "%s"
+  destination_ports = [ "%s" ]
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
 }`, serviceName, protocol, port)
 }

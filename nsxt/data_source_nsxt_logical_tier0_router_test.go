@@ -33,6 +33,6 @@ func TestAccDataSourceNsxtLogicalTier0Router_basic(t *testing.T) {
 func testAccNSXLogicalTier0RouterReadTemplate(name string) string {
 	return fmt.Sprintf(`
 data "nsxt_logical_tier0_router" "test" {
-     display_name = "%s"
+  display_name = "%s"
 }`, name)
 }

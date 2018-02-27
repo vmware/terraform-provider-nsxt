@@ -104,14 +104,16 @@ func testAccNSXAlgServiceCheckDestroy(state *terraform.State, displayName string
 func testAccNSXAlgServiceCreateTemplate(serviceName string, protocol string, sourcePorts string, destPorts string) string {
 	return fmt.Sprintf(`
 resource "nsxt_algorithm_type_ns_service" "test" {
-    description = "alg service"
-    display_name = "%s"
-    algorithm = "%s"
-    source_ports = [ "%s" ]
-    destination_ports = "%s"
-    tag {
-    	scope = "scope1"
-        tag = "tag1"
-    }
-}`, serviceName, protocol, sourcePorts, destPorts)
+  description       = "alg service"
+  display_name      = "%s"
+  algorithm         = "%s"
+  source_ports      = ["%s"]
+  destination_ports = "%s"
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+}
+`, serviceName, protocol, sourcePorts, destPorts)
 }

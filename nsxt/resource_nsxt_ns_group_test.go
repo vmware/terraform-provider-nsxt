@@ -179,109 +179,121 @@ func testAccNSXNSGroupCheckDestroy(state *terraform.State, displayName string) e
 func testAccNSXNSGroupCreateTemplate(name string) string {
 	return fmt.Sprintf(`
 resource "nsxt_ns_group" "test" {
-    display_name = "%s"
-    description = "Acceptance Test"
-    tag {
-    	scope = "scope1"
-        tag = "tag1"
-    }
+  display_name = "%s"
+  description  = "Acceptance Test"
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
 }`, name)
 }
 
 func testAccNSXNSGroupUpdateTemplate(updatedName string) string {
 	return fmt.Sprintf(`
 resource "nsxt_ns_group" "test" {
-    display_name = "%s"
-    description = "Acceptance Test Update"
-    tag {
-    	scope = "scope1"
-        tag = "tag1"
-    }
-    tag {
-    	scope = "scope2"
-        tag = "tag2"
-    }
+  display_name = "%s"
+  description  = "Acceptance Test Update"
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+
+  tag {
+    scope = "scope2"
+    tag   = "tag2"
+  }
 }`, updatedName)
 }
 
 func testAccNSXNSGroupNestedCreateTemplate(name string) string {
 	return fmt.Sprintf(`
 resource "nsxt_ns_group" "GRP1" {
-    display_name = "grp1"
+  display_name = "grp1"
 }
+
 resource "nsxt_ns_group" "test" {
-    display_name = "%s"
-    description = "Acceptance Test"
-    member {
-	target_type = "NSGroup"
-	value = "${nsxt_ns_group.GRP1.id}"
-    }
+  display_name = "%s"
+  description  = "Acceptance Test"
+
+  member {
+    target_type = "NSGroup"
+    value       = "${nsxt_ns_group.GRP1.id}"
+  }
 }`, name)
 }
 
 func testAccNSXNSGroupNestedUpdateTemplate(updatedName string) string {
 	return fmt.Sprintf(`
 resource "nsxt_ns_group" "GRP1" {
-    display_name = "grp1"
+  display_name = "grp1"
 }
+
 resource "nsxt_ns_group" "GRP2" {
-    display_name = "grp2"
+  display_name = "grp2"
 }
+
 resource "nsxt_ns_group" "test" {
-    display_name = "%s"
-    description = "Acceptance Test Update"
-    member {
-	target_type = "NSGroup"
-	value = "${nsxt_ns_group.GRP1.id}"
-    }
-    member {
-	target_type = "NSGroup"
-	value = "${nsxt_ns_group.GRP2.id}"
-    }
+  display_name = "%s"
+  description  = "Acceptance Test Update"
+
+  member {
+    target_type = "NSGroup"
+    value       = "${nsxt_ns_group.GRP1.id}"
+  }
+
+  member {
+    target_type = "NSGroup"
+    value       = "${nsxt_ns_group.GRP2.id}"
+  }
 }`, updatedName)
 }
 
 func testAccNSXNSGroupCriteriaCreateTemplate(name string) string {
 	return fmt.Sprintf(`
 resource "nsxt_ns_group" "test" {
-    display_name = "%s"
-    description = "Acceptance Test"
-    membership_criteria {
-    	target_type = "LogicalSwitch"
-        scope = "XXX"
-    }
-    membership_criteria {
-        target_type = "LogicalPort"
-        scope = "XXX"
-        tag = "YYY"
-    }
+  display_name = "%s"
+  description  = "Acceptance Test"
+
+  membership_criteria {
+    target_type = "LogicalSwitch"
+    scope       = "XXX"
+  }
+
+  membership_criteria {
+    target_type = "LogicalPort"
+    scope       = "XXX"
+    tag         = "YYY"
+  }
 }`, name)
 }
 
 func testAccNSXNSGroupCriteriaUpdateTemplate(name string, tzName string) string {
 	return fmt.Sprintf(`
-
 data "nsxt_transport_zone" "TZ1" {
-    display_name = "%s"
+  display_name = "%s"
 }
 
 resource "nsxt_logical_switch" "test" {
-    display_name = "test_switch"
-    admin_state = "DOWN"
-    replication_mode = "MTEP"
-    transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
+  display_name      = "test_switch"
+  admin_state       = "DOWN"
+  replication_mode  = "MTEP"
+  transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
 }
 
 resource "nsxt_ns_group" "test" {
-    display_name = "%s"
-    description = "Acceptance Test Update"
-    membership_criteria {
+  display_name = "%s"
+  description = "Acceptance Test Update"
+
+  membership_criteria {
 	target_type = "LogicalSwitch"
-        scope = "XXX"
-    }
-    member {
-    	target_type = "LogicalSwitch"
-	    value = "${nsxt_logical_switch.test.id}"
-	}
-    }`, tzName, name)
+    scope       = "XXX"
+  }
+
+  member {
+    target_type = "LogicalSwitch"
+    value = "${nsxt_logical_switch.test.id}"
+  }
+}`, tzName, name)
 }

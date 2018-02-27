@@ -104,56 +104,51 @@ func testAccNSXLogicalPortCheckDestroy(state *terraform.State, displayName strin
 	return nil
 }
 
-func testAccNSXLogicalPortCreateTemplate(portName string, transportZoneName string) string {
+func testAccNSXLogicalSwitchCreateForPort(transportZoneName string) string {
 	return fmt.Sprintf(`
 data "nsxt_transport_zone" "TZ1" {
-     display_name = "%s"
+  display_name = "%s"
 }
 
 resource "nsxt_logical_switch" "test" {
-	display_name = "test_switch"
-	admin_state = "UP"
-	replication_mode = "MTEP"
-	transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
+  display_name      = "test_switch"
+  admin_state       = "UP"
+  replication_mode  = "MTEP"
+  transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
+}`, transportZoneName)
 }
 
+func testAccNSXLogicalPortCreateTemplate(portName string, transportZoneName string) string {
+	return testAccNSXLogicalSwitchCreateForPort(transportZoneName) + fmt.Sprintf(`
 resource "nsxt_logical_port" "test" {
-	display_name = "%s"
-	admin_state = "UP"
-	description = "Acceptance Test"
-	logical_switch_id = "${nsxt_logical_switch.test.id}"
-    tag {
-    	scope = "scope1"
-        tag = "tag1"
-    }
-}`, transportZoneName, portName)
+  display_name      = "%s"
+  admin_state       = "UP"
+  description       = "Acceptance Test"
+  logical_switch_id = "${nsxt_logical_switch.test.id}"
+
+  tag {
+  	scope = "scope1"
+    tag   = "tag1"
+  }
+}`, portName)
 }
 
 func testAccNSXLogicalPortUpdateTemplate(portUpdatedName string, transportZoneName string) string {
-	return fmt.Sprintf(`
-data "nsxt_transport_zone" "TZ1" {
-     display_name = "%s"
-}
-
-resource "nsxt_logical_switch" "test" {
-	display_name = "test_switch"
-	admin_state = "UP"
-	replication_mode = "MTEP"
-	transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
-}
-
+	return testAccNSXLogicalSwitchCreateForPort(transportZoneName) + fmt.Sprintf(`
 resource "nsxt_logical_port" "test" {
-	display_name = "%s"
-	admin_state = "UP"
-	description = "Acceptance Test Update"
-	logical_switch_id = "${nsxt_logical_switch.test.id}"
-    tag {
-    	scope = "scope1"
-        tag = "tag1"
-    }
-    tag {
-    	scope = "scope2"
-        tag = "tag2"
-    }
-}`, transportZoneName, portUpdatedName)
+  display_name      = "%s"
+  admin_state       = "UP"
+  description       = "Acceptance Test Update"
+  logical_switch_id = "${nsxt_logical_switch.test.id}"
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+
+  tag {
+    scope = "scope2"
+    tag   = "tag2"
+  }
+}`, portUpdatedName)
 }

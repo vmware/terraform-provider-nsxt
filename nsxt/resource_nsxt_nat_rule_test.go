@@ -175,97 +175,103 @@ func testAccNSXNATRuleCheckDestroy(state *terraform.State, displayName string) e
 func testAccNSXNATRulePreConditionTemplate(edgeClusterName string) string {
 	return fmt.Sprintf(`
 data "nsxt_edge_cluster" "EC" {
-	display_name = "%s"
+  display_name = "%s"
 }
 
-resource "nsxt_logical_tier1_router" "RTR1" {
-	display_name = "tier1_router"
-	edge_cluster_id = "${data.nsxt_edge_cluster.EC.id}"
+resource "nsxt_logical_tier1_router" "rtr1" {
+  display_name    = "tier1_router"
+  edge_cluster_id = "${data.nsxt_edge_cluster.EC.id}"
 }`, edgeClusterName)
 }
 
 func testAccNSXSNATRuleCreateTemplate(name string, edgeClusterName string) string {
 	return testAccNSXNATRulePreConditionTemplate(edgeClusterName) + fmt.Sprintf(`
 resource "nsxt_nat_rule" "test" {
-    logical_router_id = "${nsxt_logical_tier1_router.RTR1.id}"
-    display_name = "%s"
-    description = "Acceptance Test"
-    action = "SNAT"
-    translated_network = "4.4.4.0/24"
-    match_destination_network = "3.3.3.0/24"
-    match_source_network = "5.5.5.0/24"
-    enabled = true
-    logging = true
-    nat_pass = false
-    tag {
-    	scope = "scope1"
-        tag = "tag1"
-    }
+  logical_router_id         = "${nsxt_logical_tier1_router.rtr1.id}"
+  display_name              = "%s"
+  description               = "Acceptance Test"
+  action                    = "SNAT"
+  translated_network        = "4.4.4.0/24"
+  match_destination_network = "3.3.3.0/24"
+  match_source_network      = "5.5.5.0/24"
+  enabled                   = "true"
+  logging                   = "true"
+  nat_pass                  = "false"
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
 }`, name)
 }
 
 func testAccNSXSNATRuleUpdateTemplate(name string, edgeClusterName string) string {
 	return testAccNSXNATRulePreConditionTemplate(edgeClusterName) + fmt.Sprintf(`
 resource "nsxt_nat_rule" "test" {
-    logical_router_id = "${nsxt_logical_tier1_router.RTR1.id}"
-    display_name = "%s"
-    description = "Acceptance Test Update"
-    action = "SNAT"
-    translated_network = "4.4.4.0/24"
-    match_destination_network = "3.3.3.0/24"
-    match_source_network = "6.6.6.0/24"
-    enabled = false
-    logging = true
-    nat_pass = true
-    tag {
-    	scope = "scope1"
-        tag = "tag1"
-    }
-    tag {
-    	scope = "scope2"
-        tag = "tag2"
-    }
+  logical_router_id         = "${nsxt_logical_tier1_router.rtr1.id}"
+  display_name              = "%s"
+  description               = "Acceptance Test Update"
+  action                    = "SNAT"
+  translated_network        = "4.4.4.0/24"
+  match_destination_network = "3.3.3.0/24"
+  match_source_network      = "6.6.6.0/24"
+  enabled                   = "false"
+  logging                   = "true"
+  nat_pass                  = "true"
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+
+  tag {
+    scope = "scope2"
+    tag   = "tag2"
+  }
 }`, name)
 }
 
 func testAccNSXDNATRuleCreateTemplate(name string, edgeClusterName string) string {
 	return testAccNSXNATRulePreConditionTemplate(edgeClusterName) + fmt.Sprintf(`
 resource "nsxt_nat_rule" "test" {
-    logical_router_id = "${nsxt_logical_tier1_router.RTR1.id}"
-    display_name = "%s"
-    description = "Acceptance Test"
-    action = "DNAT"
-    translated_network = "4.4.4.4"
-    match_destination_network = "3.3.3.0/24"
-    enabled = true
-    logging = true
-    nat_pass = true
-    tag {
-    	scope = "scope1"
-        tag = "tag1"
-    }
+  logical_router_id         = "${nsxt_logical_tier1_router.rtr1.id}"
+  display_name              = "%s"
+  description               = "Acceptance Test"
+  action                    = "DNAT"
+  translated_network        = "4.4.4.4"
+  match_destination_network = "3.3.3.0/24"
+  enabled                   = "true"
+  logging                   = "true"
+  nat_pass                  = "true"
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
 }`, name)
 }
 
 func testAccNSXDNATRuleUpdateTemplate(name string, edgeClusterName string) string {
 	return testAccNSXNATRulePreConditionTemplate(edgeClusterName) + fmt.Sprintf(`
 resource "nsxt_nat_rule" "test" {
-    logical_router_id = "${nsxt_logical_tier1_router.RTR1.id}"
-    display_name = "%s"
-    description = "Acceptance Test Update"
-    action = "DNAT"
-    translated_network = "4.4.4.4"
-    match_destination_network = "7.7.7.0/24"
-    enabled = true
-    logging = true
-    nat_pass = true
-    tag {
-    	scope = "scope1"
-        tag = "tag1"
-    }
-    tag {
-    	scope = "scope2"
-        tag = "tag2"
-    }
+  logical_router_id         = "${nsxt_logical_tier1_router.rtr1.id}"
+  display_name              = "%s"
+  description               = "Acceptance Test Update"
+  action                    = "DNAT"
+  translated_network        = "4.4.4.4"
+  match_destination_network = "7.7.7.0/24"
+  enabled                   = "true"
+  logging                   = "true"
+  nat_pass                  = "true"
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+
+  tag {
+    scope = "scope2"
+    tag   = "tag2"
+  }
 }`, name)
 }

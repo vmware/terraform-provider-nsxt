@@ -145,86 +145,85 @@ func testAccNSXLogicalRouterLinkPortOnTier0CheckDestroy(state *terraform.State, 
 	return nil
 }
 
-func testAccNSXLogicalRouterLinkPortOnTier0CreateTemplate(name string, tier0RouterName string) string {
+func testAccNSXTier0RouterDataSource(name string) string {
 	return fmt.Sprintf(`
-data "nsxt_logical_tier0_router" "TIER0RTR" {
-    display_name = "%s"
+data "nsxt_logical_tier0_router" "tier0rtr" {
+  display_name = "%s"
+}`, name)
 }
 
+func testAccNSXLogicalRouterLinkPortOnTier0CreateTemplate(name string, tier0RouterName string) string {
+	return testAccNSXTier0RouterDataSource(tier0RouterName) + fmt.Sprintf(`
 resource "nsxt_logical_router_link_port_on_tier0" "test" {
-	display_name = "%s"
-	description = "Acceptance Test"
-	logical_router_id = "${data.nsxt_logical_tier0_router.TIER0RTR.id}"
-    tag {
-    	scope = "scope1"
-        tag = "tag1"
-    }
-    tag {
-    	scope = "scope2"
-        tag = "tag2"
-    }
-}`, tier0RouterName, name)
+  display_name      = "%s"
+  description       = "Acceptance Test"
+  logical_router_id = "${data.nsxt_logical_tier0_router.tier0rtr.id}"
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+
+  tag {
+    scope = "scope2"
+    tag   = "tag2"
+  }
+}`, name)
 }
 
 func testAccNSXLogicalRouterLinkPortOnTier0UpdateTemplate(name string, tier0RouterName string) string {
-	return fmt.Sprintf(`
-data "nsxt_logical_tier0_router" "TIER0RTR" {
-    display_name = "%s"
-}
-
+	return testAccNSXTier0RouterDataSource(tier0RouterName) + fmt.Sprintf(`
 resource "nsxt_logical_router_link_port_on_tier0" "test" {
-	display_name = "%s"
-	description = "Acceptance Test Update"
-	logical_router_id = "${data.nsxt_logical_tier0_router.TIER0RTR.id}"
-    tag {
-    	scope = "scope3"
-        tag = "tag3"
-    }
-}`, tier0RouterName, name)
+  display_name      = "%s"
+  description       = "Acceptance Test Update"
+  logical_router_id = "${data.nsxt_logical_tier0_router.tier0rtr.id}"
+
+  tag {
+    scope = "scope3"
+    tag   = "tag3"
+  }
+}`, name)
 }
 
 func testAccNSXLogicalRouterLinkPortOnTier0WithRelayCreateTemplate(name string, tier0RouterName string) string {
-	return testAccNSXLogicalRouterDownlinkPortRelayTemplate() + fmt.Sprintf(`
-data "nsxt_logical_tier0_router" "TIER0RTR" {
-    display_name = "%s"
-}
-
+	return testAccNSXTier0RouterDataSource(tier0RouterName) + testAccNSXLogicalRouterDownlinkPortRelayTemplate() + fmt.Sprintf(`
 resource "nsxt_logical_router_link_port_on_tier0" "test" {
-	display_name = "%s"
-	description = "Acceptance Test"
-	logical_router_id = "${data.nsxt_logical_tier0_router.TIER0RTR.id}"
-	service_binding {
-		target_id = "${nsxt_dhcp_relay_service.DRS1.id}"
-		target_type = "LogicalService"
-	}
-    tag {
-    	scope = "scope1"
-        tag = "tag1"
-    }
-    tag {
-    	scope = "scope2"
-        tag = "tag2"
-    }
-}`, tier0RouterName, name)
+  display_name      = "%s"
+  description       = "Acceptance Test"
+  logical_router_id = "${data.nsxt_logical_tier0_router.tier0rtr.id}"
+
+  service_binding {
+    target_id   = "${nsxt_dhcp_relay_service.DRS1.id}"
+    target_type = "LogicalService"
+  }
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+
+  tag {
+    scope = "scope2"
+    tag   = "tag2"
+  }
+}`, name)
 }
 
 func testAccNSXLogicalRouterLinkPortOnTier0WithRelayUpdateTemplate(name string, tier0RouterName string) string {
-	return testAccNSXLogicalRouterDownlinkPortRelayTemplate() + fmt.Sprintf(`
-data "nsxt_logical_tier0_router" "TIER0RTR" {
-    display_name = "%s"
-}
-
+	return testAccNSXTier0RouterDataSource(tier0RouterName) + testAccNSXLogicalRouterDownlinkPortRelayTemplate() + fmt.Sprintf(`
 resource "nsxt_logical_router_link_port_on_tier0" "test" {
-	display_name = "%s"
-	description = "Acceptance Test Update"
-	logical_router_id = "${data.nsxt_logical_tier0_router.TIER0RTR.id}"
-	service_binding {
-		target_id = "${nsxt_dhcp_relay_service.DRS1.id}"
-		target_type = "LogicalService"
-	}
-    tag {
-    	scope = "scope3"
-        tag = "tag3"
-    }
-}`, tier0RouterName, name)
+  display_name      = "%s"
+  description       = "Acceptance Test Update"
+  logical_router_id = "${data.nsxt_logical_tier0_router.tier0rtr.id}"
+
+  service_binding {
+    target_id   = "${nsxt_dhcp_relay_service.DRS1.id}"
+    target_type = "LogicalService"
+  }
+
+  tag {
+    scope = "scope3"
+    tag   = "tag3"
+  }
+}`, name)
 }

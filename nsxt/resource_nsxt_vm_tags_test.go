@@ -90,25 +90,28 @@ func testAccNSXVMTagsCheckDestroy(state *terraform.State) error {
 func testAccNSXVMTagsCreateTemplate(instanceID string) string {
 	return fmt.Sprintf(`
 resource "nsxt_vm_tags" "%s" {
-    instance_id = "%s"
-    tag {
-    	scope = "scope1"
-        tag = "tag1"
-    }
+  instance_id = "%s"
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
 }`, vmTagsResourceName, instanceID)
 }
 
 func testAccNSXVMTagsUpdateTemplate(instanceID string) string {
 	return fmt.Sprintf(`
 resource "nsxt_vm_tags" "%s" {
-    instance_id = "%s"
-    tag {
-    	scope = "scope1"
-        tag = "tag1"
-    }
-    tag {
-    	scope = "scope2"
-        tag = "tag2"
-    }
+  instance_id = "%s"
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+
+  tag {
+    scope = "scope2"
+    tag   = "tag2"
+  }
 }`, vmTagsResourceName, instanceID)
 }

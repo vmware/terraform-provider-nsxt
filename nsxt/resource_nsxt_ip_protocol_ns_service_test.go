@@ -107,12 +107,13 @@ func testAccNSXIpProtocolServiceCheckDestroy(state *terraform.State, displayName
 func testAccNSXIpProtocolServiceCreateTemplate(serviceName string, protocol int) string {
 	return fmt.Sprintf(`
 resource "nsxt_ip_protocol_ns_service" "test" {
-    description = "ip protocol service"
-    display_name = "%s"
-    protocol = "%d"
-    tag {
-    	scope = "scope1"
-        tag = "tag1"
-    }
+  description  = "ip protocol service"
+  display_name = "%s"
+  protocol     = "%d"
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
 }`, serviceName, protocol)
 }

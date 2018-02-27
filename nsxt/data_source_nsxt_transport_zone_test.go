@@ -33,6 +33,6 @@ func TestAccDataSourceNsxtTransportZone_basic(t *testing.T) {
 func testAccNSXTransportZoneReadTemplate(transportZoneName string) string {
 	return fmt.Sprintf(`
 data "nsxt_transport_zone" "test" {
-     display_name = "%s"
+  display_name = "%s"
 }`, transportZoneName)
 }

@@ -121,85 +121,91 @@ func testAccNSXStaticRouteCheckDestroy(state *terraform.State, displayName strin
 func testAccNSXStaticRoutePreConditionTemplate(edgeClusterName string, tzName string) string {
 	return fmt.Sprintf(`
 data "nsxt_edge_cluster" "EC" {
-	display_name = "%s"
+  display_name = "%s"
 }
 
-resource "nsxt_logical_tier1_router" "RTR1" {
-	display_name = "tier1_router"
-	edge_cluster_id = "${data.nsxt_edge_cluster.EC.id}"
+resource "nsxt_logical_tier1_router" "rtr1" {
+  display_name    = "tier1_router"
+  edge_cluster_id = "${data.nsxt_edge_cluster.EC.id}"
 }
 
 data "nsxt_transport_zone" "TZ1" {
-        display_name = "%s"
+  display_name = "%s"
 }
 
 resource "nsxt_logical_switch" "LS1" {
-	display_name = "downlink_test_switch"
-	admin_state = "UP"
-	replication_mode = "MTEP"
-	vlan = "0"
-	transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
+  display_name      = "downlink_test_switch"
+  admin_state       = "UP"
+  replication_mode  = "MTEP"
+  vlan              = "0"
+  transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
 }
 
 resource "nsxt_logical_port" "PORT1" {
-	display_name = "LP"
-	admin_state = "UP"
-	description = "Acceptance Test"
-	logical_switch_id = "${nsxt_logical_switch.LS1.id}"
+  display_name      = "LP"
+  admin_state       = "UP"
+  description       = "Acceptance Test"
+  logical_switch_id = "${nsxt_logical_switch.LS1.id}"
 }
 
 resource "nsxt_logical_router_downlink_port" "LRP1" {
-	display_name = "LRP"
-	description = "Acceptance Test"
-	linked_logical_switch_port_id = "${nsxt_logical_port.PORT1.id}"
-	logical_router_id = "${nsxt_logical_tier1_router.RTR1.id}"
-	ip_address = "8.0.0.1/24"
-}
-`, edgeClusterName, tzName)
+  display_name                  = "LRP"
+  description                   = "Acceptance Test"
+  linked_logical_switch_port_id = "${nsxt_logical_port.PORT1.id}"
+  logical_router_id             = "${nsxt_logical_tier1_router.rtr1.id}"
+  ip_address                    = "8.0.0.1/24"
+}`, edgeClusterName, tzName)
 }
 
 func testAccNSXStaticRouteCreateTemplate(name string, edgeClusterName string, tzName string) string {
 	return testAccNSXStaticRoutePreConditionTemplate(edgeClusterName, tzName) + fmt.Sprintf(`
 resource "nsxt_static_route" "test" {
-    logical_router_id = "${nsxt_logical_tier1_router.RTR1.id}"
-    display_name = "%s"
-    description = "Acceptance Test"
-    tag {
-    	scope = "scope1"
-        tag = "tag1"
-    }
-    network = "4.4.4.0/24"
-    next_hop {
-	ip_address = "8.0.0.10"
-	administrative_distance = "1"
-	logical_router_port_id = "${nsxt_logical_router_downlink_port.LRP1.id}"
-    }
+  logical_router_id = "${nsxt_logical_tier1_router.rtr1.id}"
+  display_name      = "%s"
+  description       = "Acceptance Test"
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+
+  network = "4.4.4.0/24"
+
+  next_hop {
+    ip_address              = "8.0.0.10"
+    administrative_distance = "1" 
+    logical_router_port_id  = "${nsxt_logical_router_downlink_port.LRP1.id}"
+  }
 }`, name)
 }
 
 func testAccNSXStaticRouteUpdateTemplate(name string, edgeClusterName string, tzName string) string {
 	return testAccNSXStaticRoutePreConditionTemplate(edgeClusterName, tzName) + fmt.Sprintf(`
 resource "nsxt_static_route" "test" {
-    logical_router_id = "${nsxt_logical_tier1_router.RTR1.id}"
-    display_name = "%s"
-    description = "Acceptance Test Update"
-    network = "5.5.5.0/24"
-    next_hop {
-	ip_address = "8.0.0.10"
-	administrative_distance = "1"
-	logical_router_port_id = "${nsxt_logical_router_downlink_port.LRP1.id}"
-    }
-    next_hop {
-	ip_address = "2.2.2.2"
-	administrative_distance = "2"
-    }
-    tag {
-    	scope = "scope1"
-        tag = "tag1"
-    }
-    tag {
-    	scope = "scope2"
-        tag = "tag2"
-    }
+  logical_router_id = "${nsxt_logical_tier1_router.rtr1.id}"
+  display_name      = "%s"
+  description       = "Acceptance Test Update"
+  network           = "5.5.5.0/24"
+
+  next_hop {
+    ip_address              = "8.0.0.10"
+    administrative_distance = "1" 
+    logical_router_port_id  = "${nsxt_logical_router_downlink_port.LRP1.id}"
+  }
+
+  next_hop {
+    ip_address              = "2.2.2.2"
+    administrative_distance = "2" 
+  }
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+
+  tag {
+    scope = "scope2"
+    tag   = "tag2"
+  }
 }`, name)
 }

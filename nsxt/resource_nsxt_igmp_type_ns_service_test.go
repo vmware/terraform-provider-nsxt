@@ -105,11 +105,12 @@ func testAccNSXIgmpServiceCheckDestroy(state *terraform.State, displayName strin
 func testAccNSXIgmpServiceCreateTemplate(serviceName string) string {
 	return fmt.Sprintf(`
 resource "nsxt_igmp_type_ns_service" "test" {
-    description = "igmp service"
-    display_name = "%s"
-    tag {
-    	scope = "scope1"
-        tag = "tag1"
-    }
+  description  = "igmp service"
+  display_name = "%s"
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
 }`, serviceName)
 }
