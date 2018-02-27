@@ -14,13 +14,14 @@ Provides a resource to configure NS service for IP protocol on NSX-T Manager
 
 ```hcl
 resource "nsxt_ip_protocol_ns_service" "ns_service_ip" {
-    description = "S1 provisioned by Terraform"
-    display_name = "S1"
-    protocol = "10"
-    tag {
-        scope = "color"
-        tag = "blue"
-    }
+  description  = "S1 provisioned by Terraform"
+  display_name = "S1"
+  protocol     = "10"
+
+  tag {
+    scope = "color"
+    tag   = "blue"
+  }
 }
 ```
 

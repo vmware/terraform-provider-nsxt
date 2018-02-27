@@ -14,11 +14,12 @@ description: |-
 
 ```hcl
 resource "nsxt_vm_tags" "vm1_tags" {
-    instance_id = "${vsphere_virtual_machine.vm1.id}"
-    tag {
-        scope = "color"
-        tag = "blue"
-    }
+  instance_id = "${vsphere_virtual_machine.vm1.id}"
+
+  tag {
+    scope = "color"
+    tag   = "blue"
+  }
 }
 ```
 

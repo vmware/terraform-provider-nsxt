@@ -14,13 +14,15 @@ Provides a resource to configure IP set on NSX-T manager
 
 ```hcl
 resource "nsxt_ip_set" "ip_set" {
-    description = "IS provisioned by Terraform"
-    display_name = "IS"
-    tag {
-        scope = "color"
-        tag = "blue"
-    }
-    ip_addresses = ["1.1.1.1", "2.2.2.2"]
+  description  = "IS provisioned by Terraform"
+  display_name = "IS"
+
+  tag {
+    scope = "color"
+    tag   = "blue"
+  }
+
+  ip_addresses = ["1.1.1.1", "2.2.2.2"]
 }
 ```
 

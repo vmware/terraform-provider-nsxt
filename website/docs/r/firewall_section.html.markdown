@@ -14,49 +14,58 @@ Provides a resource to configure firewall section on NSX-T manager
 
 ```hcl
 resource "nsxt_firewall_section" "firewall_section" {
-    description = "FS provisioned by Terraform"
-    display_name = "FS"
-    tag {
-        scope = "color"
-        tag = "blue"
+  description  = "FS provisioned by Terraform"
+  display_name = "FS"
+
+  tag {
+    scope = "color"
+    tag   = "blue"
+  }
+
+  applied_to {
+    target_type = "NSGroup"
+    target_id   = "${nsxt_ns_group.group1.id}"
+  }
+
+  section_type = "LAYER3"
+  stateful     = true
+
+  rule {
+    display_name = "out_rule"
+    description  = "Out going rule"
+    action       = "ALLOW"
+    logged       = true
+    ip_protocol  = "IPV4"
+    direction    = "OUT"
+
+    source {
+      target_type = "LogicalSwitch"
+      target_id   = "${nsxt_logical_switch.switch1.id}"
     }
-    applied_to {
-      target_type = "NSGroup",
-      target_id = "${nsxt_ns_group.group1.id}"
+
+    destination {
+      target_type = "LogicalSwitch"
+      target_id   = "${nsxt_logical_switch.switch2.id}"
     }
-    section_type = "LAYER3"
-    stateful = true
-    rule {
-      display_name = "out_rule",
-      description = "Out going rule",
-      action = "ALLOW",
-      logged = true,
-      ip_protocol = "IPV4",
-      direction = "OUT",
-      source {
-          target_type = "LogicalSwitch",
-          target_id = "${nsxt_logical_switch.switch1.id}"
-      }
-      destination {
-          target_type = "LogicalSwitch"
-          target_id = "${nsxt_logical_switch.switch2.id}"
-      }
+  }
+
+  rule {
+    display_name = "in_rule"
+    description  = "In going rule"
+    action       = "DROP"
+    logged       = true
+    ip_protocol  = "IPV4"
+    direction    = "IN"
+
+    service {
+      target_type = "NSService"
+      target_id   = "e8d59e13-484b-4825-ae3b-4c11f83249d9"
     }
-    rule {
-      display_name = "in_rule",
-      description = "In going rule",
-      action = "DROP",
-      logged = true,
-      ip_protocol = "IPV4",
-      direction = "IN",
-      service {
-          target_type = "NSService"
-          target_id = "e8d59e13-484b-4825-ae3b-4c11f83249d9"
-      }
-      service {
-          target_type = "NSService"
-          target_id = "${nsxt_l4_port_set_ns_service.http.id}"
-      }
+
+    service {
+      target_type = "NSService"
+      target_id   = "${nsxt_l4_port_set_ns_service.http.id}"
+    }
   }
 }
 ```

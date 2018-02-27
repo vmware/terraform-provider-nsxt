@@ -14,12 +14,13 @@ Provides a resource to configure NS service for IGMP on NSX-T Manager
 
 ```hcl
 resource "nsxt_igmp_type_ns_service" "ns_service_igmp" {
-    description = "S1 provisioned by Terraform"
-    display_name = "S1"
-    tag {
-        scope = "color"
-        tag = "blue"
-    }
+  description  = "S1 provisioned by Terraform"
+  display_name = "S1"
+
+  tag {
+    scope = "color"
+    tag   = "blue"
+  }
 }
 ```
 

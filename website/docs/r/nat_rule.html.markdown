@@ -14,20 +14,22 @@ Provides a resource to configure NAT rule on NSX-T manager
 
 ```hcl
 resource "nsxt_nat_rule" "rule1" {
-    logical_router_id = "${nsxt_logical_tier1_router.rtr1.id}"
-    description = "NR provisioned by Terraform"
-    display_name = "NR"
-    action = "SNAT"
-    enabled = true
-    logging = true
-    nat_pass = false
-    translated_network = "4.4.0.0/24"
-    match_destination_network = "3.3.3.0/24"
-    match_source_network = "5.5.5.0/24"
-    tag {
-        scope = "color"
-        tag = "blue"
-    }
+  logical_router_id         = "${nsxt_logical_tier1_router.rtr1.id}"
+  description               = "NR provisioned by Terraform"
+  display_name              = "NR"
+  action                    = "SNAT"
+  enabled                   = true
+  logging                   = true
+  nat_pass                  = false
+  translated_network        = "4.4.0.0/24"
+  match_destination_network = "3.3.3.0/24"
+  match_source_network      = "5.5.5.0/24"
+
+  tag {
+    scope = "color"
+    tag   = "blue"
+  }
+}
 ```
 
 ## Argument Reference
