@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 	"os"
+	"testing"
 )
 
 // Default names or prefixed of NSX backend existing objects used in the acceptance tests.
@@ -58,6 +59,16 @@ func getOverlayTransportZoneName() string {
 		name = overlayTransportZoneNamePrefix
 	}
 	return name
+}
+
+func getTestVMID() string {
+	return os.Getenv("NSX_TEST_VM_ID")
+}
+
+func testAccEnvDefined(t *testing.T, envVar string) {
+	if len(os.Getenv(envVar)) == 0 {
+		t.Skipf("This test requires %s environment variable to be set", envVar)
+	}
 }
 
 // copyStatePtr returns a TestCheckFunc that copies the reference to the test

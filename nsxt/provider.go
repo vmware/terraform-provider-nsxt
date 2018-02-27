@@ -80,6 +80,7 @@ func Provider() terraform.ResourceProvider {
 			"nsxt_nat_rule":                          resourceNsxtNatRule(),
 			"nsxt_ip_set":                            resourceNsxtIPSet(),
 			"nsxt_static_route":                      resourceNsxtStaticRoute(),
+			"nsxt_vm_tags":                           resourceNsxtVMTags(),
 		},
 
 		ConfigureFunc: providerConfigure,
