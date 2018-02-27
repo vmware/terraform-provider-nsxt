@@ -78,12 +78,6 @@ func resourceNsxtLogicalSwitch() *schema.Resource {
 				Optional:    true,
 				Computed:    true,
 			},
-			"verify_realization": &schema.Schema{
-				Type:        schema.TypeBool,
-				Description: "Wait for realization to complete",
-				Default:     true,
-				Optional:    true,
-			},
 		},
 	}
 }
@@ -113,8 +107,6 @@ func resourceNsxtLogicalSwitchCreate(d *schema.ResourceData, m interface{}) erro
 	vlan := int64(d.Get("vlan").(int))
 	vni := int32(d.Get("vni").(int))
 
-	verifyRealization := d.Get("verify_realization").(bool)
-
 	logicalSwitch := manager.LogicalSwitch{
 		Description:         description,
 		DisplayName:         displayName,
@@ -140,36 +132,35 @@ func resourceNsxtLogicalSwitchCreate(d *schema.ResourceData, m interface{}) erro
 		return fmt.Errorf("Unexpected status returned during LogicalSwitch create: %v", resp.StatusCode)
 	}
 
-	if verifyRealization {
-		stateConf := &resource.StateChangeConf{
-			Pending: []string{"in_progress", "pending", "partial_success"},
-			Target:  []string{"success"},
-			Refresh: func() (interface{}, string, error) {
-				state, resp, err := nsxClient.LogicalSwitchingApi.GetLogicalSwitchState(nsxClient.Context, logicalSwitch.Id)
-				if err != nil {
-					return nil, "", fmt.Errorf("Error while querying realization state: %v", err)
-				}
+	// verifying switch realization on hypervisor
+	stateConf := &resource.StateChangeConf{
+		Pending: []string{"in_progress", "pending", "partial_success"},
+		Target:  []string{"success"},
+		Refresh: func() (interface{}, string, error) {
+			state, resp, err := nsxClient.LogicalSwitchingApi.GetLogicalSwitchState(nsxClient.Context, logicalSwitch.Id)
+			if err != nil {
+				return nil, "", fmt.Errorf("Error while querying realization state: %v", err)
+			}
 
-				if resp.StatusCode != http.StatusOK {
-					return nil, "", fmt.Errorf("Unexpected return status %d", resp.StatusCode)
-				}
+			if resp.StatusCode != http.StatusOK {
+				return nil, "", fmt.Errorf("Unexpected return status %d", resp.StatusCode)
+			}
 
-				if state.FailureCode != 0 {
-					return nil, "", fmt.Errorf("Error in switch realization: %s", state.FailureMessage)
-				}
+			if state.FailureCode != 0 {
+				return nil, "", fmt.Errorf("Error in switch realization: %s", state.FailureMessage)
+			}
 
-				log.Printf("[DEBUG] Realization state: %s", state.State)
-				return logicalSwitch, state.State, nil
-			},
-			Timeout:    d.Timeout(schema.TimeoutCreate),
-			MinTimeout: 1 * time.Second,
-			Delay:      1 * time.Second,
-		}
-		_, err = stateConf.WaitForState()
-		if err != nil {
-			resourceNsxtLogicalSwitchCreateRollback(nsxClient, logicalSwitch.Id)
-			return err
-		}
+			log.Printf("[DEBUG] Realization state: %s", state.State)
+			return logicalSwitch, state.State, nil
+		},
+		Timeout:    d.Timeout(schema.TimeoutCreate),
+		MinTimeout: 1 * time.Second,
+		Delay:      1 * time.Second,
+	}
+	_, err = stateConf.WaitForState()
+	if err != nil {
+		resourceNsxtLogicalSwitchCreateRollback(nsxClient, logicalSwitch.Id)
+		return err
 	}
 
 	d.SetId(logicalSwitch.Id)

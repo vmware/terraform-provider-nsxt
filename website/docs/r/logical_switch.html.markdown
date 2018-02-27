@@ -46,7 +46,6 @@ The following arguments are supported:
 * `vni` - (Optional) Vni for the logical switch.
 * `address_binding` - (Optional) List of Address Bindings for the logical switch. This setting allows to provide bindings between IP address, mac Address and vlan.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this logical switch.
-* `verify_realization` - (Optional). If true (default), on create operation terraform will not return success until this logical switch is realized on platform and can be consumed. If set to false, the switch is not guaranteed to be accessible right away.
 
 ## Attributes Reference
 
