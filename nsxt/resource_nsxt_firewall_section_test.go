@@ -62,8 +62,8 @@ func TestAccResourceNsxtFirewallSection_withTos(t *testing.T) {
 	updatesectionName := fmt.Sprintf("%s-update", sectionName)
 	testResourceName := "nsxt_firewall_section.test"
 	tags := singleTag
-	tos := string("[{target_type = \"NSGroup\", target_id = \"${nsxt_ns_group.GRP1.id}\"}]")
-	updatedTos := string("[{target_type = \"NSGroup\", target_id = \"${nsxt_ns_group.GRP1.id}\"}, {target_type = \"NSGroup\", target_id = \"${nsxt_ns_group.GRP2.id}\"}]")
+	tos := string("[{target_type = \"NSGroup\", target_id = \"${nsxt_ns_group.grp1.id}\"}]")
+	updatedTos := string("[{target_type = \"NSGroup\", target_id = \"${nsxt_ns_group.grp1.id}\"}, {target_type = \"NSGroup\", target_id = \"${nsxt_ns_group.grp2.id}\"}]")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -206,8 +206,8 @@ func TestAccResourceNsxtFirewallSection_withRulesAndTos(t *testing.T) {
 	ruleName := "rule1.0"
 	updatedRuleName := "rule1.1"
 	tags := singleTag
-	tos := string("[{target_type = \"NSGroup\", target_id = \"${nsxt_ns_group.GRP1.id}\"}]")
-	updatedTos := string("[{target_type = \"NSGroup\", target_id = \"${nsxt_ns_group.GRP1.id}\"}, {target_type = \"NSGroup\", target_id = \"${nsxt_ns_group.GRP2.id}\"}]")
+	tos := string("[{target_type = \"NSGroup\", target_id = \"${nsxt_ns_group.grp1.id}\"}]")
+	updatedTos := string("[{target_type = \"NSGroup\", target_id = \"${nsxt_ns_group.grp1.id}\"}, {target_type = \"NSGroup\", target_id = \"${nsxt_ns_group.grp2.id}\"}]")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -303,7 +303,7 @@ func TestAccResourceNsxtFirewallSection_importWithTos(t *testing.T) {
 	sectionName := fmt.Sprintf("test-nsx-firewall-section-tos")
 	testResourceName := "nsxt_firewall_section.test"
 	tags := singleTag
-	tos := string("[{target_type = \"NSGroup\", target_id = \"${nsxt_ns_group.GRP1.id}\"}]")
+	tos := string("[{target_type = \"NSGroup\", target_id = \"${nsxt_ns_group.grp1.id}\"}]")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -382,12 +382,16 @@ func testAccNSXFirewallSectionCheckDestroy(state *terraform.State, displayName s
 
 func testAccNSXFirewallSectionNSGroups() string {
 	return fmt.Sprintf(`
-resource "nsxt_ns_group" "GRP1" {
+resource "nsxt_ns_group" "grp1" {
   display_name = "grp1"
 }
 
-resource "nsxt_ns_group" "GRP2" {
+resource "nsxt_ns_group" "grp2" {
   display_name = "grp2"
+}
+
+resource "nsxt_ip_protocol_ns_service" "test" {
+  protocol     = "6"
 }`)
 }
 
@@ -402,12 +406,32 @@ resource "nsxt_firewall_section" "test" {
   applied_to   = %s
 
   rule {
-    display_name = "%s",
-	description  = "rule1",
-    action       = "ALLOW",
-    logged       = "true",
-    ip_protocol  = "IPV4",
-    direction    = "IN"
+    display_name          = "%s",
+	description           = "rule1",
+    action                = "ALLOW",
+    logged                = "true",
+    ip_protocol           = "IPV4",
+    direction             = "IN"
+    destinations_excluded = "false"
+    sources_excluded      = "false"
+    notes                 = "test rule"
+    rule_tag              = "test rule tag"
+	disabled              = "false"
+
+    source {
+      target_id   = "${nsxt_ns_group.grp1.id}"
+      target_type = "NSGroup"
+    }
+
+    destination {
+      target_id   = "${nsxt_ns_group.grp2.id}"
+      target_type = "NSGroup"
+    }
+
+    service {
+      target_id   = "${nsxt_ip_protocol_ns_service.test.id}"
+      target_type = "NSService"    	
+    }
   }
 }`, name, tags, tos, ruleName)
 }
@@ -429,6 +453,7 @@ resource "nsxt_firewall_section" "test" {
     logged       = "true",
     ip_protocol  = "IPV4",
     direction    = "IN"
+	disabled     = "false"
   }
 
   rule {
