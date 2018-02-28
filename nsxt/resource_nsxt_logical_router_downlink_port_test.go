@@ -187,7 +187,7 @@ data "nsxt_transport_zone" "tz1" {
 }
 
 resource "nsxt_logical_switch" "ls1" {
-  display_name     = "test-nsx-downlink-switch"
+  display_name     = "downlink_test_switch"
   admin_state      = "UP"
   replication_mode = "MTEP"
   vlan             = "0"

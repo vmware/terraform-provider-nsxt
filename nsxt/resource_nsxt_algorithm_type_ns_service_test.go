@@ -137,7 +137,6 @@ resource "nsxt_algorithm_type_ns_service" "test" {
   algorithm         = "%s"
   source_ports      = ["%s"]
   destination_port  = "%s"
-
   tag {
     scope = "scope1"
     tag   = "tag1"
