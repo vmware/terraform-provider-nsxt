@@ -14,18 +14,20 @@ Provides a resource to configure Logical Router link Port on Tier-1 Router on NS
 
 ```hcl
 resource "nsxt_logical_router_link_port_on_tier1" "link_port_tier1" {
-    description = "TIER1_PORT1 provisioned by Terraform"
-    display_name = "TIER1_PORT1"
-    logical_router_id =  "${nsxt_logical_tier1_router.rtr1.id}"
-    linked_logical_router_port_id = "${nsxt_logical_router_link_port_on_tier0.link_port_tier0.id}"
-    service_binding {
-        target_id = "${nsxt_dhcp_relay_service.dr_service.id}"
-        target_type = "LogicalService"
-    }
-    tag {
-        scope = "color"
-        tag = "blue"
-    }
+  description                   = "TIER1_PORT1 provisioned by Terraform"
+  display_name                  = "TIER1_PORT1"
+  logical_router_id             = "${nsxt_logical_tier1_router.rtr1.id}"
+  linked_logical_router_port_id = "${nsxt_logical_router_link_port_on_tier0.link_port_tier0.id}"
+
+  service_binding {
+    target_id   = "${nsxt_dhcp_relay_service.dr_service.id}"
+    target_type = "LogicalService"
+  }
+
+  tag {
+    scope = "color"
+    tag   = "blue"
+  }
 }
 ```
 

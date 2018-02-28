@@ -14,19 +14,20 @@ Provides a resource to configure Logical Tier1 router on NSX-T Manager.
 
 ```hcl
 resource "nsxt_logical_tier1_router" "tier1_router" {
-    description = "RTR1 provisioned by Terraform"
-    display_name = "RTR1"
-    failover_mode =  "PREEMPTIVE"
-    high_availability_mode = "ACTIVE_STANDBY"
-    edge_cluster_id = "${data.nsxt_edge_cluster.edge_cluster.id}"
-    enable_router_advertisement = true
-    advertise_connected_routes = false
-    advertise_static_routes = true
-    advertise_nat_routes = true
-    tag {
-        scope = "color"
-        tag = "blue"
-    }
+  description                 = "RTR1 provisioned by Terraform"
+  display_name                = "RTR1"
+  failover_mode               = "PREEMPTIVE"
+  high_availability_mode      = "ACTIVE_STANDBY"
+  edge_cluster_id             = "${data.nsxt_edge_cluster.edge_cluster.id}"
+  enable_router_advertisement = true
+  advertise_connected_routes  = false
+  advertise_static_routes     = true
+  advertise_nat_routes        = true
+
+  tag {
+    scope = "color"
+    tag   = "blue"
+  }
 }
 ```
 

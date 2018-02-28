@@ -343,8 +343,8 @@ def write_doc_example(f, resource, attrs):
         elif name == 'description':
             val = "\"%s provisioned by Terraform\"" % obj_name
         elif name == 'tag':
-            eq = ' '
-            val = "{\n\tscope = \"color\"\n\ttag = \"red\"\n  }"
+            pretty_writeln(f, "")
+            val = "{\n    scope = \"color\"\n    tag   = \"red\"\n  }\n"
         pretty_writeln(f, "  %s%s%s" % (name, eq, val))
 
     pretty_writeln(f, "}")

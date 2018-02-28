@@ -14,15 +14,16 @@ Provides a resource to configure NS service for algorithm type on NSX-T Manager
 
 ```hcl
 resource "nsxt_algorithm_type_ns_service" "ns_service_alg" {
-    description = "S1 provisioned by Terraform"
-    display_name = "S1"
-    algorithm = "FTP"
-    destination_ports = "21"
-    source_ports = [ "9001-9003"]
-    tag {
-        scope = "color"
-        tag = "blue"
-    }
+  description       = "S1 provisioned by Terraform"
+  display_name      = "S1"
+  algorithm         = "FTP"
+  destination_ports = "21"
+  source_ports      = ["9001-9003"]
+
+  tag {
+    scope = "color"
+    tag   = "blue"
+  }
 }
 ```
 

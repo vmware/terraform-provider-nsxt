@@ -14,19 +14,21 @@ Provides a resource to configure Logical Switch (LS) on NSX-T Manager.
 
 ```hcl
 resource "nsxt_logical_switch" "switch1" {
-    admin_state = "UP"
-    description = "LS1 provisioned by Terraform"
-    display_name = "LS1"
-    transport_zone_id = "${data.nsxt_transport_zone.transport_zone.id}"
-    replication_mode = "MTEP"
-    tag {
-        scope = "color"
-        tag = "blue"
-    }
-    switching_profile_id {
-      key = "${data.nsxt_switching_profile.qos_profiles.resource_type}",
-      value = "${data.nsxt_switching_profile.qos_profiles.id}"
-    }
+  admin_state       = "UP"
+  description       = "LS1 provisioned by Terraform"
+  display_name      = "LS1"
+  transport_zone_id = "${data.nsxt_transport_zone.transport_zone.id}"
+  replication_mode  = "MTEP"
+
+  tag {
+    scope = "color"
+    tag   = "blue"
+  }
+
+  switching_profile_id {
+    key   = "${data.nsxt_switching_profile.qos_profiles.resource_type}"
+    value = "${data.nsxt_switching_profile.qos_profiles.id}"
+  }
 }
 ```
 

@@ -14,21 +14,24 @@ Provides a resource to configure ns group on NSX-T manager
 
 ```hcl
 resource "nsxt_ns_group" "group2" {
-    description = "NG provisioned by Terraform"
-    display_name = "NG"
-    member {
-        target_type = "NSGroup"
-        value = "${nsxt_ns_group.group1.id}"
-    }
-    membership_criteria {
-        target_type = "LogicalPort"
-        scope = "XXX"
-        tag = "YYY"
-    }
-    tag {
-        scope = "color"
-        tag = "blue"
-    }
+  description  = "NG provisioned by Terraform"
+  display_name = "NG"
+
+  member {
+    target_type = "NSGroup"
+    value       = "${nsxt_ns_group.group1.id}"
+  }
+
+  membership_criteria {
+    target_type = "LogicalPort"
+    scope       = "XXX"
+    tag         = "YYY"
+  }
+
+  tag {
+    scope = "color"
+    tag   = "blue"
+  }
 }
 ```
 

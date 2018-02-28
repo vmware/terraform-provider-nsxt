@@ -14,13 +14,14 @@ Provides a resource to configure NS service for Ethernet type on NSX-T Manager
 
 ```hcl
 resource "nsxt_ether_type_ns_service" "etns" {
-    description = "S1 provisioned by Terraform"
-    display_name = "S1"
-    ether_type = "1536"
-    tag {
-        scope = "color"
-        tag = "blue"
-    }
+  description  = "S1 provisioned by Terraform"
+  display_name = "S1"
+  ether_type   = "1536"
+
+  tag {
+    scope = "color"
+    tag   = "blue"
+  }
 }
 ```
 
