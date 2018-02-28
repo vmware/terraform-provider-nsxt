@@ -255,7 +255,11 @@ resource "nsxt_ns_group" "test" {
 
 func testAccNSXNSGroupNestedCreateTemplate(name string) string {
 	return fmt.Sprintf(`
+<<<<<<< HEAD
 resource "nsxt_ns_group" "grp1" {
+=======
+resource "nsxt_ns_group" "GRP1" {
+>>>>>>> d334171cd4507ad23fa0784a9c39598e919b5974
   display_name = "grp1"
 }
 
@@ -265,18 +269,30 @@ resource "nsxt_ns_group" "test" {
 
   member {
     target_type = "NSGroup"
+<<<<<<< HEAD
     value       = "${nsxt_ns_group.grp1.id}"
+=======
+    value       = "${nsxt_ns_group.GRP1.id}"
+>>>>>>> d334171cd4507ad23fa0784a9c39598e919b5974
   }
 }`, name)
 }
 
 func testAccNSXNSGroupNestedUpdateTemplate(updatedName string) string {
 	return fmt.Sprintf(`
+<<<<<<< HEAD
 resource "nsxt_ns_group" "grp1" {
   display_name = "grp1"
 }
 
 resource "nsxt_ns_group" "grp2" {
+=======
+resource "nsxt_ns_group" "GRP1" {
+  display_name = "grp1"
+}
+
+resource "nsxt_ns_group" "GRP2" {
+>>>>>>> d334171cd4507ad23fa0784a9c39598e919b5974
   display_name = "grp2"
 }
 
@@ -286,12 +302,20 @@ resource "nsxt_ns_group" "test" {
 
   member {
     target_type = "NSGroup"
+<<<<<<< HEAD
     value       = "${nsxt_ns_group.grp1.id}"
+=======
+    value       = "${nsxt_ns_group.GRP1.id}"
+>>>>>>> d334171cd4507ad23fa0784a9c39598e919b5974
   }
 
   member {
     target_type = "NSGroup"
+<<<<<<< HEAD
     value       = "${nsxt_ns_group.grp2.id}"
+=======
+    value       = "${nsxt_ns_group.GRP2.id}"
+>>>>>>> d334171cd4507ad23fa0784a9c39598e919b5974
   }
 }`, updatedName)
 }
@@ -317,15 +341,26 @@ resource "nsxt_ns_group" "test" {
 
 func testAccNSXNSGroupCriteriaUpdateTemplate(name string, tzName string) string {
 	return fmt.Sprintf(`
+<<<<<<< HEAD
 data "nsxt_transport_zone" "tz1" {
+=======
+data "nsxt_transport_zone" "TZ1" {
+>>>>>>> d334171cd4507ad23fa0784a9c39598e919b5974
   display_name = "%s"
 }
 
 resource "nsxt_logical_switch" "test" {
+<<<<<<< HEAD
   display_name      = "test-nsx-switch-for-group"
   admin_state       = "DOWN"
   replication_mode  = "MTEP"
   transport_zone_id = "${data.nsxt_transport_zone.tz1.id}"
+=======
+  display_name      = "test_switch"
+  admin_state       = "DOWN"
+  replication_mode  = "MTEP"
+  transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
+>>>>>>> d334171cd4507ad23fa0784a9c39598e919b5974
 }
 
 resource "nsxt_ns_group" "test" {

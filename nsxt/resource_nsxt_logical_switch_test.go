@@ -232,12 +232,20 @@ resource "nsxt_logical_switch" "%s" {
   transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
   replication_mode  = "%s"
   vlan              = "%s"
+<<<<<<< HEAD
+=======
+  verify_realization = "%t"
+>>>>>>> d334171cd4507ad23fa0784a9c39598e919b5974
 
   tag {
     scope = "scope1"
     tag   = "tag1"
   }
+<<<<<<< HEAD
 }`, transportZoneName, resourceName, switchName, replicationMode, vlan)
+=======
+}`, transportZoneName, resourceName, switchName, replicationMode, vlan, verifyRealization)
+>>>>>>> d334171cd4507ad23fa0784a9c39598e919b5974
 }
 
 func testAccNSXLogicalSwitchUpdateTemplate(resourceName string, switchUpdateName string, transportZoneName string, vlan string, replicationMode string) string {

@@ -171,6 +171,7 @@ resource "nsxt_logical_tier1_router" "rtr1" {
   edge_cluster_id = "${data.nsxt_edge_cluster.EC.id}"
 }
 
+<<<<<<< HEAD
 data "nsxt_transport_zone" "tz1" {
   display_name = "%s"
 }
@@ -194,6 +195,31 @@ resource "nsxt_logical_router_downlink_port" "lrp1" {
   display_name                  = "LRP"
   description                   = "Acceptance Test"
   linked_logical_switch_port_id = "${nsxt_logical_port.port1.id}"
+=======
+data "nsxt_transport_zone" "TZ1" {
+  display_name = "%s"
+}
+
+resource "nsxt_logical_switch" "LS1" {
+  display_name      = "downlink_test_switch"
+  admin_state       = "UP"
+  replication_mode  = "MTEP"
+  vlan              = "0"
+  transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
+}
+
+resource "nsxt_logical_port" "PORT1" {
+  display_name      = "LP"
+  admin_state       = "UP"
+  description       = "Acceptance Test"
+  logical_switch_id = "${nsxt_logical_switch.LS1.id}"
+}
+
+resource "nsxt_logical_router_downlink_port" "LRP1" {
+  display_name                  = "LRP"
+  description                   = "Acceptance Test"
+  linked_logical_switch_port_id = "${nsxt_logical_port.PORT1.id}"
+>>>>>>> d334171cd4507ad23fa0784a9c39598e919b5974
   logical_router_id             = "${nsxt_logical_tier1_router.rtr1.id}"
   ip_address                    = "8.0.0.1/24"
 }`, edgeClusterName, tzName)
@@ -216,7 +242,11 @@ resource "nsxt_static_route" "test" {
   next_hop {
     ip_address              = "8.0.0.10"
     administrative_distance = "1" 
+<<<<<<< HEAD
     logical_router_port_id  = "${nsxt_logical_router_downlink_port.lrp1.id}"
+=======
+    logical_router_port_id  = "${nsxt_logical_router_downlink_port.LRP1.id}"
+>>>>>>> d334171cd4507ad23fa0784a9c39598e919b5974
   }
 }`, name)
 }
@@ -232,7 +262,11 @@ resource "nsxt_static_route" "test" {
   next_hop {
     ip_address              = "8.0.0.10"
     administrative_distance = "1" 
+<<<<<<< HEAD
     logical_router_port_id  = "${nsxt_logical_router_downlink_port.lrp1.id}"
+=======
+    logical_router_port_id  = "${nsxt_logical_router_downlink_port.LRP1.id}"
+>>>>>>> d334171cd4507ad23fa0784a9c39598e919b5974
   }
 
   next_hop {

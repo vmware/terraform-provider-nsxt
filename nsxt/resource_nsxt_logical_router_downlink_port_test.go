@@ -182,6 +182,7 @@ func testAccNSXLogicalRouterDownlinkPortCheckDestroy(state *terraform.State, dis
 
 func testAccNSXLogicalRouterDownlinkPortPreConditionTemplate(transportZoneName string, edgeClusterName string) string {
 	return fmt.Sprintf(`
+<<<<<<< HEAD
 data "nsxt_transport_zone" "tz1" {
   display_name = "%s"
 }
@@ -202,18 +203,48 @@ resource "nsxt_logical_port" "port1" {
 }
 
 data "nsxt_edge_cluster" "ec" {
+=======
+data "nsxt_transport_zone" "TZ1" {
+  display_name = "%s"
+}
+
+resource "nsxt_logical_switch" "LS1" {
+  display_name     = "downlink_test_switch"
+  admin_state      = "UP"
+  replication_mode = "MTEP"
+  vlan             = "0"
+  transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
+}
+
+resource "nsxt_logical_port" "PORT1" {
+  display_name      = "LP"
+  admin_state       = "UP"
+  description       = "Acceptance Test"
+  logical_switch_id = "${nsxt_logical_switch.LS1.id}"
+}
+
+data "nsxt_edge_cluster" "EC" {
+>>>>>>> d334171cd4507ad23fa0784a9c39598e919b5974
   display_name = "%s"
 }
 
 resource "nsxt_logical_tier1_router" "rtr1" {
   display_name    = "downlink_test_router"
+<<<<<<< HEAD
   edge_cluster_id = "${data.nsxt_edge_cluster.ec.id}"
+=======
+  edge_cluster_id = "${data.nsxt_edge_cluster.EC.id}"
+>>>>>>> d334171cd4507ad23fa0784a9c39598e919b5974
 }`, transportZoneName, edgeClusterName)
 }
 
 func testAccNSXLogicalRouterDownlinkPortRelayTemplate() string {
 	return fmt.Sprintf(`
+<<<<<<< HEAD
 resource "nsxt_dhcp_relay_profile" "drp1" {
+=======
+resource "nsxt_dhcp_relay_profile" "DRP1" {
+>>>>>>> d334171cd4507ad23fa0784a9c39598e919b5974
   display_name     = "prf"
   server_addresses = ["1.1.1.1"]
 }
@@ -230,7 +261,11 @@ func testAccNSXLogicalRouterDownlinkPortCreateTemplate(portName string, transpor
 resource "nsxt_logical_router_downlink_port" "test" {
   display_name                  = "%s"
   description                   = "Acceptance Test"
+<<<<<<< HEAD
   linked_logical_switch_port_id = "${nsxt_logical_port.port1.id}"
+=======
+  linked_logical_switch_port_id = "${nsxt_logical_port.PORT1.id}"
+>>>>>>> d334171cd4507ad23fa0784a9c39598e919b5974
   logical_router_id             = "${nsxt_logical_tier1_router.rtr1.id}"
   ip_address                    = "8.0.0.1/24"
 
@@ -246,7 +281,11 @@ func testAccNSXLogicalRouterDownlinkPortUpdateTemplate(portUpdatedName string, t
 resource "nsxt_logical_router_downlink_port" "test" {
   display_name                  = "%s"
   description                   = "Acceptance Test Update"
+<<<<<<< HEAD
   linked_logical_switch_port_id = "${nsxt_logical_port.port1.id}"
+=======
+  linked_logical_switch_port_id = "${nsxt_logical_port.PORT1.id}"
+>>>>>>> d334171cd4507ad23fa0784a9c39598e919b5974
   logical_router_id             = "${nsxt_logical_tier1_router.rtr1.id}"
   ip_address                    = "8.0.0.1/24"
 
@@ -269,12 +308,20 @@ func testAccNSXLogicalRouterDownlinkPortCreateWithRelayTemplate(portName string,
 resource "nsxt_logical_router_downlink_port" "test" {
   display_name                  = "%s"
   description                   = "Acceptance Test"
+<<<<<<< HEAD
   linked_logical_switch_port_id = "${nsxt_logical_port.port1.id}"
+=======
+  linked_logical_switch_port_id = "${nsxt_logical_port.PORT1.id}"
+>>>>>>> d334171cd4507ad23fa0784a9c39598e919b5974
   logical_router_id             = "${nsxt_logical_tier1_router.rtr1.id}"
   ip_address                    = "8.0.0.1/24"
 
   service_binding {
+<<<<<<< HEAD
     target_id   = "${nsxt_dhcp_relay_service.drs1.id}"
+=======
+    target_id   = "${nsxt_dhcp_relay_service.DRS1.id}"
+>>>>>>> d334171cd4507ad23fa0784a9c39598e919b5974
 	target_type = "LogicalService"
   }
 
@@ -292,12 +339,20 @@ func testAccNSXLogicalRouterDownlinkPortUpdateWithRelayTemplate(portUpdatedName 
 resource "nsxt_logical_router_downlink_port" "test" {
   display_name                  = "%s"
   description                   = "Acceptance Test Update"
+<<<<<<< HEAD
   linked_logical_switch_port_id = "${nsxt_logical_port.port1.id}"
+=======
+  linked_logical_switch_port_id = "${nsxt_logical_port.PORT1.id}"
+>>>>>>> d334171cd4507ad23fa0784a9c39598e919b5974
   logical_router_id             = "${nsxt_logical_tier1_router.rtr1.id}"
   ip_address                    = "8.0.0.1/24"
 
   service_binding {
+<<<<<<< HEAD
     target_id   = "${nsxt_dhcp_relay_service.drs1.id}"
+=======
+    target_id   = "${nsxt_dhcp_relay_service.DRS1.id}"
+>>>>>>> d334171cd4507ad23fa0784a9c39598e919b5974
     target_type = "LogicalService"
   }
 

@@ -136,12 +136,20 @@ resource "nsxt_algorithm_type_ns_service" "test" {
   display_name      = "%s"
   algorithm         = "%s"
   source_ports      = ["%s"]
+<<<<<<< HEAD
   destination_port  = "%s"
+=======
+  destination_ports = "%s"
+>>>>>>> d334171cd4507ad23fa0784a9c39598e919b5974
 
   tag {
     scope = "scope1"
     tag   = "tag1"
   }
 }
+<<<<<<< HEAD
 `, serviceName, protocol, sourcePorts, destPort)
+=======
+`, serviceName, protocol, sourcePorts, destPorts)
+>>>>>>> d334171cd4507ad23fa0784a9c39598e919b5974
 }

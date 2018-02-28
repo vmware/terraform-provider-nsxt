@@ -217,7 +217,11 @@ resource "nsxt_logical_router_link_port_on_tier0" "test" {
   logical_router_id = "${data.nsxt_logical_tier0_router.tier0rtr.id}"
 
   service_binding {
+<<<<<<< HEAD
     target_id   = "${nsxt_dhcp_relay_service.drs1.id}"
+=======
+    target_id   = "${nsxt_dhcp_relay_service.DRS1.id}"
+>>>>>>> d334171cd4507ad23fa0784a9c39598e919b5974
     target_type = "LogicalService"
   }
 
@@ -241,7 +245,11 @@ resource "nsxt_logical_router_link_port_on_tier0" "test" {
   logical_router_id = "${data.nsxt_logical_tier0_router.tier0rtr.id}"
 
   service_binding {
+<<<<<<< HEAD
     target_id   = "${nsxt_dhcp_relay_service.drs1.id}"
+=======
+    target_id   = "${nsxt_dhcp_relay_service.DRS1.id}"
+>>>>>>> d334171cd4507ad23fa0784a9c39598e919b5974
     target_type = "LogicalService"
   }
 

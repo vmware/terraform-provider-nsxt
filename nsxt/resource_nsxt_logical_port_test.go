@@ -135,7 +135,11 @@ data "nsxt_transport_zone" "TZ1" {
 }
 
 resource "nsxt_logical_switch" "test" {
+<<<<<<< HEAD
   display_name      = "test-nsx-switch"
+=======
+  display_name      = "test_switch"
+>>>>>>> d334171cd4507ad23fa0784a9c39598e919b5974
   admin_state       = "UP"
   replication_mode  = "MTEP"
   transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
