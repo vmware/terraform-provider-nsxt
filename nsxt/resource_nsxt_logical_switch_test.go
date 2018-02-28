@@ -14,26 +14,6 @@ import (
 )
 
 func TestAccResourceNsxtLogicalSwitch_basic(t *testing.T) {
-	// Test without verification for realization state
-	testAccResourceNsxtLogicalSwitchBasic(t, false)
-}
-
-func TestAccResourceNsxtLogicalSwitch_basicWithRealization(t *testing.T) {
-	// Test with verification for realization state
-	testAccResourceNsxtLogicalSwitchBasic(t, true)
-}
-
-func TestAccResourceNsxtLogicalSwitch_switchVlan(t *testing.T) {
-	// Test without verification for realization state
-	testAccResourceNsxtLogicalSwitchSwitchVlan(t, false)
-}
-
-func TestAccResourceNsxtLogicalSwitch_switchVlanWithRealization(t *testing.T) {
-	// Test with verification for realization state
-	testAccResourceNsxtLogicalSwitchSwitchVlan(t, true)
-}
-
-func testAccResourceNsxtLogicalSwitchBasic(t *testing.T, verifyRealization bool) {
 	switchName := fmt.Sprintf("test-nsx-logical-switch-overlay")
 	updateSwitchName := fmt.Sprintf("%s-update", switchName)
 	resourceName := "testoverlay"
@@ -54,7 +34,7 @@ func testAccResourceNsxtLogicalSwitchBasic(t *testing.T, verifyRealization bool)
 				ExpectError: regexp.MustCompile(`required field is not set`),
 			},
 			{
-				Config: testAccNSXLogicalSwitchCreateTemplate(resourceName, switchName, transportZoneName, novlan, replicationMode, verifyRealization),
+				Config: testAccNSXLogicalSwitchCreateTemplate(resourceName, switchName, transportZoneName, novlan, replicationMode),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXLogicalSwitchExists(switchName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", switchName),
@@ -81,7 +61,7 @@ func testAccResourceNsxtLogicalSwitchBasic(t *testing.T, verifyRealization bool)
 	})
 }
 
-func testAccResourceNsxtLogicalSwitchSwitchVlan(t *testing.T, verifyRealization bool) {
+func TestAccResourceNsxtLogicalSwitch_vlan(t *testing.T) {
 	switchName := "test-nsx-logical-switch-vlan"
 	updateSwitchName := fmt.Sprintf("%s-update", switchName)
 	transportZoneName := getVlanTransportZoneName()
@@ -105,7 +85,7 @@ func testAccResourceNsxtLogicalSwitchSwitchVlan(t *testing.T, verifyRealization 
 				ExpectError: regexp.MustCompile(`Error during LogicalSwitch create`),
 			},
 			{
-				Config: testAccNSXLogicalSwitchCreateTemplate(resourceName, switchName, transportZoneName, origvlan, replicationMode, verifyRealization),
+				Config: testAccNSXLogicalSwitchCreateTemplate(resourceName, switchName, transportZoneName, origvlan, replicationMode),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXLogicalSwitchExists(switchName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", switchName),
@@ -208,7 +188,7 @@ resource "nsxt_logical_switch" "error" {
 }`, transportZoneName, switchName)
 }
 
-func testAccNSXLogicalSwitchCreateTemplate(resourceName string, switchName string, transportZoneName string, vlan string, replicationMode string, verifyRealization bool) string {
+func testAccNSXLogicalSwitchCreateTemplate(resourceName string, switchName string, transportZoneName string, vlan string, replicationMode string) string {
 	return fmt.Sprintf(`
 data "nsxt_transport_zone" "TZ1" {
      display_name = "%s"
@@ -221,12 +201,11 @@ resource "nsxt_logical_switch" "%s" {
     transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
     replication_mode = "%s"
     vlan = "%s"
-    verify_realization = "%t"
     tag {
     	scope = "scope1"
         tag = "tag1"
     }
-}`, transportZoneName, resourceName, switchName, replicationMode, vlan, verifyRealization)
+}`, transportZoneName, resourceName, switchName, replicationMode, vlan)
 }
 
 func testAccNSXLogicalSwitchUpdateTemplate(resourceName string, switchUpdateName string, transportZoneName string, vlan string, replicationMode string) string {
