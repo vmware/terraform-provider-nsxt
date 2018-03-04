@@ -51,6 +51,34 @@ func Provider() terraform.ResourceProvider {
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("NSX_CA_FILE", nil),
 			},
+			"max_retries": &schema.Schema{
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "Maximum number of HTTP client retries",
+				DefaultFunc: schema.EnvDefaultFunc("NSX_MAX_RETRIES", 10),
+			},
+			"retry_min_delay": &schema.Schema{
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "Minimum delay in milliseconds between retries of a request",
+				DefaultFunc: schema.EnvDefaultFunc("NSX_RETRY_MIN_DELAY", 500),
+			},
+			"retry_max_delay": &schema.Schema{
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "Maximum delay in milliseconds between retries of a request",
+				DefaultFunc: schema.EnvDefaultFunc("NSX_RETRY_MAZ_DELAY", 5000),
+			},
+			"retry_on_statuses": &schema.Schema{
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "HTTP replies status codes to retry on",
+				Elem: &schema.Schema{
+					Type:	schema.TypeInt,
+				},
+				// 429: TooManyRequests
+				DefaultFunc: schema.EnvDefaultFunc("NSX_RETRY_ON_STATUSES", []int{429}),
+			},
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
@@ -111,17 +139,34 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	clientAuthKeyFile := d.Get("client_auth_key_file").(string)
 	caFile := d.Get("ca_file").(string)
 
+	maxRetries := d.Get("max_retries").(int)
+	retryMinDelay := d.Get("retry_min_delay").(int)
+	retryMaxDelay := d.Get("retry_max_delay").(int)
+	statuses := d.Get("retry_on_statuses").([]interface{})
+	retryStatuses := make([]int, 0, len(statuses))
+	for _, s := range statuses {
+		retryStatuses = append(retryStatuses, s.(int))
+	}
+
+	retriesConfig := nsxt.ClientRetriesConfiguration{
+		MaxRetries:			maxRetries,
+		RetryMinDelay: 	 	retryMinDelay,
+		RetryMaxDelay: 	 	retryMaxDelay,
+		RetryOnStatuses: 	retryStatuses,
+    }
+
 	cfg := nsxt.Configuration{
-		BasePath:           "/api/v1",
-		Host:               host,
-		Scheme:             "https",
-		UserAgent:          "terraform-provider-nsxt/1.0",
-		UserName:           username,
-		Password:           password,
-		ClientAuthCertFile: clientAuthCertFile,
-		ClientAuthKeyFile:  clientAuthKeyFile,
-		CAFile:             caFile,
-		Insecure:           insecure,
+		BasePath:           	"/api/v1",
+		Host:               	host,
+		Scheme:             	"https",
+		UserAgent:          	"terraform-provider-nsxt/1.0",
+		UserName:           	username,
+		Password:           	password,
+		ClientAuthCertFile: 	clientAuthCertFile,
+		ClientAuthKeyFile:  	clientAuthKeyFile,
+		CAFile:             	caFile,
+		Insecure:           	insecure,
+		RetriesConfiguration: 	retriesConfig,
 	}
 
 	nsxClient, err := nsxt.NewAPIClient(&cfg)
