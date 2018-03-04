@@ -17,6 +17,8 @@ import (
 	"golang.org/x/oauth2"
 	"io"
 	"io/ioutil"
+	"math"
+	"math/rand"
 	"mime/multipart"
 	"net/http"
 	"net/url"
@@ -302,8 +304,57 @@ func parameterToString(obj interface{}, collectionFormat string) string {
 	return fmt.Sprintf("%v", obj)
 }
 
+func (c *APIClient) shouldRetryOnStatus(code int) bool {
+	for _, s := range c.cfg.RetriesConfiguration.RetryOnStatuses {
+		if code == s {
+			return true
+		}
+	}
+	return false
+}
+
 // callAPI do the request.
 func (c *APIClient) callAPI(request *http.Request) (*http.Response, error) {
+
+	// keep the initial request body string
+	var requestBodyString string
+	if request.Body != nil {
+		buf := new(bytes.Buffer)
+		buf.ReadFrom(request.Body)
+		requestBodyString = buf.String() 
+		request.Body = ioutil.NopCloser(strings.NewReader(requestBodyString))
+	}
+
+	// first run
+	localVarHttpResponse, err := c.callAPIInternal(request)
+	config := c.cfg.RetriesConfiguration
+	maxRetries := int(math.Max(2, float64(config.MaxRetries)))
+	// loop until not getting the retry-able error, or until max retries
+    for n_try := 1; n_try < maxRetries; n_try++ {
+    	if localVarHttpResponse == nil {
+        	// Non retry-able response
+        	return localVarHttpResponse, err
+        } else if c.shouldRetryOnStatus(localVarHttpResponse.StatusCode) {
+	    	// sleep a random increasing time
+    		float_delay := float64(rand.Intn(config.RetryMinDelay * n_try))
+	  	  	fixed_delay := time.Duration(math.Min(float64(config.RetryMaxDelay), float_delay))
+    		time.Sleep(fixed_delay * time.Millisecond)
+	        // reset Request.Body
+			if request.Body != nil {
+	        	request.Body = ioutil.NopCloser(strings.NewReader(requestBodyString))
+	        }
+    	    // perform the request again
+			localVarHttpResponse, err = c.callAPIInternal(request)
+        } else {
+        	// Non retry-able response
+        	return localVarHttpResponse, err
+        }
+    }
+    // max retries exceeded
+	return localVarHttpResponse, err
+}
+
+func (c *APIClient) callAPIInternal(request *http.Request) (*http.Response, error) {
 	localVarHttpResponse, err := c.cfg.HTTPClient.Do(request)
 
 	if err == nil && localVarHttpResponse.StatusCode == 400 {

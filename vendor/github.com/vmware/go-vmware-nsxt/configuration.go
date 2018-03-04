@@ -24,19 +24,27 @@ type APIKey struct {
 	Prefix string
 }
 
+type ClientRetriesConfiguration struct {
+	MaxRetries		int
+	RetryMinDelay	int // milliseconds
+	RetryMaxDelay	int // milliseconds
+	RetryOnStatuses []int
+}
+
 type Configuration struct {
-	BasePath           string `json:"basePath,omitempty"`
-	Host               string `json:"host,omitempty"`
-	Scheme             string `json:"scheme,omitempty"`
-	UserName           string
-	Password           string
-	DefaultHeader      map[string]string `json:"defaultHeader,omitempty"`
-	UserAgent          string            `json:"userAgent,omitempty"`
-	ClientAuthCertFile string
-	ClientAuthKeyFile  string
-	CAFile             string
-	Insecure           bool
-	HTTPClient         *http.Client
+	BasePath           	    string `json:"basePath,omitempty"`
+	Host               	    string `json:"host,omitempty"`
+	Scheme             	    string `json:"scheme,omitempty"`
+	UserName           	    string
+	Password           	    string
+	DefaultHeader      	    map[string]string `json:"defaultHeader,omitempty"`
+	UserAgent          	    string            `json:"userAgent,omitempty"`
+	ClientAuthCertFile 	    string
+	ClientAuthKeyFile  	    string
+	CAFile             	    string
+	Insecure           	    bool
+	RetriesConfiguration    ClientRetriesConfiguration
+	HTTPClient         	    *http.Client
 }
 
 func NewConfiguration() *Configuration {
