@@ -17,6 +17,21 @@ import (
 
 var logicalSwitchReplicationModeValues = []string{"MTEP", "SOURCE", ""}
 
+// formatVirtualMachinePostCloneRollbackError defines the verbose error when
+// rollback fails on a post-clone virtual machine operation.
+const formatLogicalSwitchRollbackError = `
+WARNING:
+There was an error during the creation of logical switch %s:
+%s
+Additionally, there was an error deleting the logical switch during rollback:
+%s
+The logical switch may still exist in Terraform state. If it does, the
+resource will need to be tainted before trying again. For more information on
+how to do this, see the following page:
+https://www.terraform.io/docs/commands/taint.html
+If the logical switch does not exist in state, manually delete it to try again.
+`
+
 // TODO: consider splitting this resource to overlay_ls and vlan_ls
 func resourceNsxtLogicalSwitch() *schema.Resource {
 	return &schema.Resource{
@@ -79,16 +94,6 @@ func resourceNsxtLogicalSwitch() *schema.Resource {
 				Computed:    true,
 			},
 		},
-	}
-}
-
-func resourceNsxtLogicalSwitchCreateRollback(nsxClient *api.APIClient, id string) {
-	log.Printf("[ERROR] Rollback switch %s creation due to unrealized state", id)
-
-	localVarOptionals := make(map[string]interface{})
-	_, err := nsxClient.LogicalSwitchingApi.DeleteLogicalSwitch(nsxClient.Context, id, localVarOptionals)
-	if err != nil {
-		log.Printf("[ERROR] Rollback failed!")
 	}
 }
 
@@ -159,7 +164,14 @@ func resourceNsxtLogicalSwitchCreate(d *schema.ResourceData, m interface{}) erro
 	}
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		resourceNsxtLogicalSwitchCreateRollback(nsxClient, logicalSwitch.Id)
+		// Realization failed - rollback & delete the switch
+		log.Printf("[ERROR] Rollback switch %s creation due to unrealized state", logicalSwitch.Id)
+		localVarOptionals := make(map[string]interface{})
+		_, derr := nsxClient.LogicalSwitchingApi.DeleteLogicalSwitch(nsxClient.Context, logicalSwitch.Id, localVarOptionals)
+		if derr != nil {
+			// rollback failed
+			return fm.Errorf(formatLogicalSwitchRollbackError, logicalSwitch.Id, err, derr)
+		}
 		return err
 	}
 
