@@ -57,10 +57,10 @@ In addition to arguments listed above, the following attributes are exported:
 
 An existing Logical Router Downlink Port can be [imported][docs-import] into this resource, via the following command:
 
-[docs-import]: https://www.terraform.io/docs/import/index.html
+[docs-import]: /docs/import/index.html
 
 ```
-terraform import nsxt_logical_router_downlink_port.x id
+terraform import nsxt_logical_router_downlink_port.downlink_port UUID
 ```
 
-The above would import the Logical Router Downlink Port named `x` with the nsx id `id`
+The above would import the Logical Router Downlink Port named `downlink_port` with the nsx id `UUID`

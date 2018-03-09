@@ -92,7 +92,7 @@ func testAccDataSourceNsxtSwitchingProfileDelete(state *terraform.State, resourc
 func testAccNSXSwitchingProfileReadTemplate(profileName string) string {
 	return fmt.Sprintf(`
 data "nsxt_switching_profile" "test" {
-     display_name = "%s"
+  display_name = "%s"
 }`, profileName)
 }
 

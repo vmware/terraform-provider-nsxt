@@ -56,3 +56,15 @@ In addition to arguments listed above, the following attributes are exported:
 * `next_hop` additional arguments:
     * `bfd_enabled` - Status of bfd for this next hop where bfd_enabled = true indicate bfd is enabled for this next hop and bfd_enabled = false indicate bfd peer is disabled or not configured for this next hop.
     * `blackhole_action` - Action to be taken on matching packets for NULL routes. 
+
+## Importing
+
+An existing static route can be [imported][docs-import] into this resource, via the following command:
+
+[docs-import]: /docs/import/index.html
+
+```
+terraform import nsxt_static_route.static_route logical-router-uuid/static-route-num
+```
+
+The above would import the static route named `static_route` with the number `static-route-num` that belongs to the Tier-1 logical router with the nsx id `logical-router-uuid`

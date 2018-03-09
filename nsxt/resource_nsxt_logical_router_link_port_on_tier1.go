@@ -106,7 +106,7 @@ func resourceNsxtLogicalRouterLinkPortOnTier1Read(d *schema.ResourceData, m inte
 	d.Set("display_name", logicalRouterLinkPort.DisplayName)
 	setTagsInSchema(d, logicalRouterLinkPort.Tags)
 	d.Set("logical_router_id", logicalRouterLinkPort.LogicalRouterId)
-	d.Set("linked_logical_router_port_id", logicalRouterLinkPort.LinkedLogicalRouterPortId)
+	d.Set("linked_logical_router_port_id", logicalRouterLinkPort.LinkedLogicalRouterPortId.TargetId)
 	setServiceBindingsInSchema(d, logicalRouterLinkPort.ServiceBindings, "service_binding")
 
 	return nil

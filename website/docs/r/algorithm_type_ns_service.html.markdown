@@ -17,7 +17,7 @@ resource "nsxt_algorithm_type_ns_service" "ns_service_alg" {
   description       = "S1 provisioned by Terraform"
   display_name      = "S1"
   algorithm         = "FTP"
-  destination_ports = "21"
+  destination_port  = "21"
   source_ports      = ["9001-9003"]
 
   tag {
@@ -33,7 +33,7 @@ The following arguments are supported:
 
 * `display_name` - (Optional) Display name, defaults to ID if not set.
 * `description` - (Optional) Description.
-* `destination_ports` - (Required) a single destination port.
+* `destination_port` - (Required) a single destination port.
 * `source_ports` - (Optional) Set of source ports/ranges.
 * `algorithm` - (Required) Algorithm one of "ORACLE_TNS", "FTP", "SUN_RPC_TCP", "SUN_RPC_UDP", "MS_RPC_TCP", "MS_RPC_UDP", "NBNS_BROADCAST", "NBDG_BROADCAST", "TFTP"
 * `tag` - (Optional) A list of scope + tag pairs to associate with this service.
@@ -50,10 +50,10 @@ In addition to arguments listed above, the following attributes are exported:
 
 An existing Algorithm type NS service can be [imported][docs-import] into this resource, via the following command:
 
-[docs-import]: https://www.terraform.io/docs/import/index.html
+[docs-import]: /docs/import/index.html
 
 ```
-terraform import nsxt_algorithm_type_ns_service.x id
+terraform import nsxt_algorithm_type_ns_service.ns_service_alg UUID
 ```
 
-The above would import the Algorithm type NS service named `x` with the nsx id `id`
+The above would import the Algorithm type NS service named `ns_service_alg` with the nsx id `UUID`

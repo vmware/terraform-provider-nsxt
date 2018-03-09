@@ -57,10 +57,10 @@ In addition to arguments listed above, the following attributes are exported:
 
 An existing NS group can be [imported][docs-import] into this resource, via the following command:
 
-[docs-import]: https://www.terraform.io/docs/import/index.html
+[docs-import]: /docs/import/index.html
 
 ```
-terraform import nsxt_ns_group.x id
+terraform import nsxt_ns_group.group2 UUID
 ```
 
-The above would import the NS group named `x` with the nsx id `id`
+The above would import the NS group named `group2` with the nsx id `UUID`

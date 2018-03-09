@@ -46,6 +46,29 @@ func TestAccResourceNsxtIgmpTypeNsService_basic(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtIgmpTypeNsService_importBasic(t *testing.T) {
+	serviceName := fmt.Sprintf("test-nsx-igmp-service")
+	testResourceName := "nsxt_igmp_type_ns_service.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXIgmpServiceCheckDestroy(state, serviceName)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXIgmpServiceCreateTemplate(serviceName),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func testAccNSXIgmpServiceExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
@@ -105,11 +128,12 @@ func testAccNSXIgmpServiceCheckDestroy(state *terraform.State, displayName strin
 func testAccNSXIgmpServiceCreateTemplate(serviceName string) string {
 	return fmt.Sprintf(`
 resource "nsxt_igmp_type_ns_service" "test" {
-    description = "igmp service"
-    display_name = "%s"
-    tag {
-    	scope = "scope1"
-        tag = "tag1"
-    }
+  description  = "igmp service"
+  display_name = "%s"
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
 }`, serviceName)
 }

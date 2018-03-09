@@ -60,10 +60,10 @@ In addition to arguments listed above, the following attributes are exported:
 
 An existing X can be [imported][docs-import] into this resource, via the following command:
 
-[docs-import]: https://www.terraform.io/docs/import/index.html
+[docs-import]: /docs/import/index.html
 
 ```
-terraform import nsxt_X.x id
+terraform import nsxt_logical_switch.switch1 UUID
 ```
 
-The above would import the X named `x` with the nsx id `id`
+The above would import the logical switch named `switch1` with the nsx id `UUID`

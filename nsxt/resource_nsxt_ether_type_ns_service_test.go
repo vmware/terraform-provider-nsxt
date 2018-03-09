@@ -48,6 +48,29 @@ func TestAccResourceNsxtEtherTypeNsService_basic(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtEtherTypeNsService_importBasic(t *testing.T) {
+	serviceName := fmt.Sprintf("test-nsx-ether-service")
+	testResourceName := "nsxt_ether_type_ns_service.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXEtherServiceCheckDestroy(state, serviceName)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXEtherServiceCreateTemplate(serviceName, 1536),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func testAccNSXEtherServiceExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 

@@ -386,11 +386,11 @@ def write_import_doc(f, resource):
     name = re.sub('_', ' ', resource)
     pretty_writeln(f, "## Importing\n")
     pretty_writeln(f, "An existing %s can be [imported][docs-import] into this resource, via the following command:\n" % name)
-    pretty_writeln(f, "[docs-import]: https://www.terraform.io/docs/import/index.html\n");
+    pretty_writeln(f, "[docs-import]: /docs/import/index.html\n");
     pretty_writeln(f, "```")
-    pretty_writeln(f, "terraform import %s.x id" % resource)
+    pretty_writeln(f, "terraform import nsxt_%s.%s UUID" % (resource, resource))
     pretty_writeln(f, "```\n")
-    pretty_writeln(f, "The above would import the %s named `x` with the nsx id `id`" % name)
+    pretty_writeln(f, "The above would import the %s named `%s` with the nsx id `UUID`" % (name, resource))
 
 
 def main():

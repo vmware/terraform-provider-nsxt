@@ -14,7 +14,7 @@ import (
 var vmTagsResourceName = "test"
 var vmTagsFullResourceName = "nsxt_vm_tags." + vmTagsResourceName
 
-func TestAccResourceNsxtVMTags(t *testing.T) {
+func TestAccResourceNsxtVMTags_basic(t *testing.T) {
 	vmID := getTestVMID()
 
 	resource.Test(t, resource.TestCase{
@@ -37,6 +37,28 @@ func TestAccResourceNsxtVMTags(t *testing.T) {
 					testAccNSXVMTagsCheckExists(),
 					resource.TestCheckResourceAttr(vmTagsFullResourceName, "tag.#", "2"),
 				),
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtVMTags_import_basic(t *testing.T) {
+	vmID := getTestVMID()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccEnvDefined(t, "NSX_TEST_VM_ID") },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXVMTagsCheckDestroy(state)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXVMTagsCreateTemplate(vmID),
+			},
+			{
+				ResourceName:      vmTagsFullResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -90,25 +112,28 @@ func testAccNSXVMTagsCheckDestroy(state *terraform.State) error {
 func testAccNSXVMTagsCreateTemplate(instanceID string) string {
 	return fmt.Sprintf(`
 resource "nsxt_vm_tags" "%s" {
-    instance_id = "%s"
-    tag {
-    	scope = "scope1"
-        tag = "tag1"
-    }
+  instance_id = "%s"
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
 }`, vmTagsResourceName, instanceID)
 }
 
 func testAccNSXVMTagsUpdateTemplate(instanceID string) string {
 	return fmt.Sprintf(`
 resource "nsxt_vm_tags" "%s" {
-    instance_id = "%s"
-    tag {
-    	scope = "scope1"
-        tag = "tag1"
-    }
-    tag {
-    	scope = "scope2"
-        tag = "tag2"
-    }
+  instance_id = "%s"
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+
+  tag {
+    scope = "scope2"
+    tag   = "tag2"
+  }
 }`, vmTagsResourceName, instanceID)
 }
