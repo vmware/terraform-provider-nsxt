@@ -17,8 +17,8 @@ import (
 
 var logicalSwitchReplicationModeValues = []string{"MTEP", "SOURCE", ""}
 
-// formatVirtualMachinePostCloneRollbackError defines the verbose error when
-// rollback fails on a post-clone virtual machine operation.
+// formatLogicalSwitchRollbackError defines the verbose error when
+// rollback fails on a logical switch creation.
 const formatLogicalSwitchRollbackError = `
 WARNING:
 There was an error during the creation of logical switch %s:
@@ -167,7 +167,7 @@ func resourceNsxtLogicalSwitchCreate(d *schema.ResourceData, m interface{}) erro
 		_, derr := nsxClient.LogicalSwitchingApi.DeleteLogicalSwitch(nsxClient.Context, logicalSwitch.Id, localVarOptionals)
 		if derr != nil {
 			// rollback failed
-			return fm.Errorf(formatLogicalSwitchRollbackError, logicalSwitch.Id, err, derr)
+			return fmt.Errorf(formatLogicalSwitchRollbackError, logicalSwitch.Id, err, derr)
 		}
 		return err
 	}
