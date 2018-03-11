@@ -37,13 +37,13 @@ func dataSourceNsxtEdgeCluster() *schema.Resource {
 			},
 			"deployment_type": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "This field could show deployment_type of members. It would return UNKNOWN if there is no members, and return VIRTUAL_MACHINE|PHYSICAL_MACHINE if all edge members are VIRTUAL_MACHINE|PHYSICAL_MACHINE.",
+				Description: "The deployment type of edge cluster members (UNKNOWN/VIRTUAL_MACHINE|PHYSICAL_MACHINE)",
 				Optional:    true,
 				Computed:    true,
 			},
 			"member_node_type": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "Edge cluster is homogenous collection of transport nodes. Hence all transport nodes of the cluster must be of same type. This field shows the type of transport nodes.",
+				Description: "Type of transport nodes",
 				Optional:    true,
 				Computed:    true,
 			},

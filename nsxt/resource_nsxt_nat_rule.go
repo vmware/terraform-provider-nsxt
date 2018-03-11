@@ -42,7 +42,7 @@ func resourceNsxtNatRule() *schema.Resource {
 			"tag": getTagsSchema(),
 			"action": &schema.Schema{
 				Type:         schema.TypeString,
-				Description:  "valid actions: SNAT, DNAT, NO_NAT, REFLEXIVE. All rules in a logical router are either stateless or stateful. Mix is not supported. SNAT and DNAT are stateful, can NOT be supported when the logical router is running at active-active HA mode; REFLEXIVE is stateless. NO_NAT has no translated_fields, only match fields",
+				Description:  "NAT rule action. Valid actions: SNAT, DNAT, NO_NAT and REFLEXIVE",
 				Required:     true,
 				ValidateFunc: validation.StringInSlice(natRuleActionValues, false),
 			},
@@ -76,12 +76,12 @@ func resourceNsxtNatRule() *schema.Resource {
 			"nat_pass": &schema.Schema{
 				Type:        schema.TypeBool,
 				Default:     true,
-				Description: "Default is true. If the natPass is set to true, the following firewall stage will be skipped. Please note, if action is NO_NAT, then natPass must be set to true or omitted",
+				Description: "A boolean flag which reflects whether the following firewall stage will be skipped",
 				Optional:    true,
 			},
 			"rule_priority": &schema.Schema{
 				Type:        schema.TypeInt,
-				Description: "Ascending, valid range [0-2147483647]. If multiple rules have the same priority, evaluation sequence is undefined",
+				Description: "The priority of the rule (ascending). Valid range [0-2147483647]",
 				Computed:    true,
 			},
 			"translated_network": &schema.Schema{

@@ -44,7 +44,7 @@ func resourceNsxtFirewallSection() *schema.Resource {
 			"tag": getTagsSchema(),
 			"is_default": &schema.Schema{
 				Type:        schema.TypeBool,
-				Description: "A boolean flag which reflects whether a firewall section is default section or not. Each Layer 3 and Layer 2 section will have at least and at most one default section",
+				Description: "A boolean flag which reflects whether a firewall section is default section or not",
 				Computed:    true,
 			},
 			"section_type": &schema.Schema{
@@ -55,7 +55,7 @@ func resourceNsxtFirewallSection() *schema.Resource {
 			},
 			"stateful": &schema.Schema{
 				Type:        schema.TypeBool,
-				Description: "Stateful or Stateless nature of firewall section is enforced on all rules inside the section. Layer3 sections can be stateful or stateless. Layer2 sections can only be stateless",
+				Description: "Stateful or Stateless nature of firewall section is enforced on all rules inside the section",
 				Required:    true,
 				ForceNew:    true,
 			},

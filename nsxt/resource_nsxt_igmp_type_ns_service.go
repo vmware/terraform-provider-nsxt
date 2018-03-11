@@ -38,7 +38,7 @@ func resourceNsxtIgmpTypeNsService() *schema.Resource {
 			"tag": getTagsSchema(),
 			"default_service": &schema.Schema{
 				Type:        schema.TypeBool,
-				Description: "The default NSServices are created in the system by default. These NSServices can't be modified/deleted",
+				Description: "A boolean flag which reflects whether this is a default NSServices which can't be modified/deleted",
 				Computed:    true,
 			},
 		},
