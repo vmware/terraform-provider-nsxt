@@ -50,6 +50,29 @@ func TestAccResourceNsxtIcmpTypeNsService_basic(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtIcmpTypeNsService_importBasic(t *testing.T) {
+	serviceName := fmt.Sprintf("test-nsx-icmp-service")
+	testResourceName := "nsxt_icmp_type_ns_service.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXIcmpServiceCheckDestroy(state, serviceName)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXIcmpServiceCreateTemplate(serviceName, "ICMPv4", 5, 1),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func testAccNSXIcmpServiceExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
@@ -109,14 +132,15 @@ func testAccNSXIcmpServiceCheckDestroy(state *terraform.State, displayName strin
 func testAccNSXIcmpServiceCreateTemplate(serviceName string, protocol string, icmpType int, icmpCode int) string {
 	return fmt.Sprintf(`
 resource "nsxt_icmp_type_ns_service" "test" {
-    description = "icmp service"
-    display_name = "%s"
-    protocol = "%s"
-    icmp_type = "%d"
-    icmp_code = "%d"
-    tag {
-    	scope = "scope1"
-        tag = "tag1"
-    }
+  description = "icmp service"
+  display_name = "%s"
+  protocol     = "%s"
+  icmp_type    = "%d"
+  icmp_code    = "%d"
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
 }`, serviceName, protocol, icmpType, icmpCode)
 }

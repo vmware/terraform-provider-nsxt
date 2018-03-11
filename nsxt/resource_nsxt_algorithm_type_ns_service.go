@@ -44,7 +44,7 @@ func resourceNsxtAlgorithmTypeNsService() *schema.Resource {
 				Description: "The default NSServices are created in the system by default. These NSServices can't be modified/deleted",
 				Computed:    true,
 			},
-			"destination_ports": &schema.Schema{
+			"destination_port": &schema.Schema{
 				Type:         schema.TypeString,
 				Description:  "A single destination port",
 				Required:     true,
@@ -78,7 +78,7 @@ func resourceNsxtAlgorithmTypeNsServiceCreate(d *schema.ResourceData, m interfac
 	alg := d.Get("algorithm").(string)
 	sourcePorts := getStringListFromSchemaSet(d, "source_ports")
 	destinationPorts := make([]string, 0, 1)
-	destinationPorts = append(destinationPorts, d.Get("destination_ports").(string))
+	destinationPorts = append(destinationPorts, d.Get("destination_port").(string))
 
 	nsService := manager.AlgTypeNsService{
 		NsService: manager.NsService{
@@ -133,7 +133,7 @@ func resourceNsxtAlgorithmTypeNsServiceRead(d *schema.ResourceData, m interface{
 	setTagsInSchema(d, nsService.Tags)
 	d.Set("default_service", nsService.DefaultService)
 	d.Set("algorithm", nsserviceElement.Alg)
-	d.Set("destination_ports", nsserviceElement.DestinationPorts)
+	d.Set("destination_port", nsserviceElement.DestinationPorts[0])
 	d.Set("source_ports", nsserviceElement.SourcePorts)
 
 	return nil
@@ -153,7 +153,7 @@ func resourceNsxtAlgorithmTypeNsServiceUpdate(d *schema.ResourceData, m interfac
 	alg := d.Get("algorithm").(string)
 	sourcePorts := getStringListFromSchemaSet(d, "source_ports")
 	destinationPorts := make([]string, 0, 1)
-	destinationPorts = append(destinationPorts, d.Get("destination_ports").(string))
+	destinationPorts = append(destinationPorts, d.Get("destination_port").(string))
 	revision := int64(d.Get("revision").(int))
 
 	nsService := manager.AlgTypeNsService{

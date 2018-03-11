@@ -72,6 +72,11 @@ func getRulesSchema() *schema.Schema {
 		Optional:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
+				"id": &schema.Schema{
+					Type:        schema.TypeString,
+					Description: "ID of this resource",
+					Computed:    true,
+				},
 				"revision": getRevisionSchema(),
 				"description": &schema.Schema{
 					Type:        schema.TypeString,

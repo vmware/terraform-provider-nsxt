@@ -16,10 +16,14 @@ Use the navigation to the left to read about available data sources and resource
 
 ```hcl
 provider "nsxt" {
-    host = "10.160.94.11"
-    username = "admin"
-    password = "qwerty"
-    allow_unverified_ssl = true
+  host                 = "10.160.94.11"
+  username             = "admin"
+  password             = "qwerty"
+  allow_unverified_ssl = true
+  max_retries          = 10
+  retry_min_delay      = 500
+  retry_max_delay      = 5000
+  retry_on_statuses    = [429]
 }
 
 ```
@@ -39,10 +43,10 @@ In addition, self-signed client certificate can be used for authentication. Terr
 
 ```hcl
 provider "nsxt" {
-    host = "10.160.94.11"
-    client_auth_cert_file = "mycert.pem"
-    client_auth_key_file = "mykey.pem"
-    allow_unverified_ssl = true
+  host                  = "10.160.94.11"
+  client_auth_cert_file = "mycert.pem"
+  client_auth_key_file  = "mykey.pem"
+  allow_unverified_ssl  = true
 }
 
 ```
@@ -53,10 +57,10 @@ The "insecure" provider parameter set to true (shown in examples above) will dir
 
 ```hcl
 provider "nsxt" {
-    host = "10.160.94.11"
-    username = "admin"
-    password = "qwerty"
-    ca_file = "myca.pem"
+  host     = "10.160.94.11"
+  username = "admin"
+  password = "qwerty"
+  ca_file  = "myca.pem"
 }
 
 ```

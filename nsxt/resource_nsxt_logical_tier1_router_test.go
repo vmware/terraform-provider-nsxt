@@ -61,6 +61,32 @@ func TestAccResourceNsxtLogicalTier1Router_basic(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtLogicalTier1Router_importBasic(t *testing.T) {
+	name := fmt.Sprintf("test-nsx-logical-tier1-router")
+	testResourceName := "nsxt_logical_tier1_router.test"
+	failoverMode := "PREEMPTIVE"
+	haMode := "ACTIVE_STANDBY"
+	edgeClusterName := getEdgeClusterName()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXLogicalTier1RouterCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXLogicalTier1RouterCreateTemplate(name, failoverMode, haMode, edgeClusterName),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func testAccNSXLogicalTier1RouterExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
@@ -119,27 +145,29 @@ func testAccNSXLogicalTier1RouterCheckDestroy(state *terraform.State, displayNam
 func testAccNSXLogicalTier1RouterCreateTemplate(name string, failoverMode string, haMode string, edgeClusterName string) string {
 	return fmt.Sprintf(`
 data "nsxt_edge_cluster" "EC" {
-     display_name = "%s"
+  display_name = "%s"
 }
 
 resource "nsxt_logical_tier1_router" "test" {
-	display_name = "%s"
-	description = "Acceptance Test"
-	failover_mode = "%s"
-	high_availability_mode = "%s"
-	edge_cluster_id = "${data.nsxt_edge_cluster.EC.id}"
-	enable_router_advertisement = "true"
-	advertise_connected_routes = "true"
-	advertise_static_routes = "true"
-	advertise_nat_routes = "true"
-    tag {
-    	scope = "scope1"
-        tag = "tag1"
-    }
-    tag {
-    	scope = "scope2"
-        tag = "tag2"
-    }
+  display_name                = "%s"
+  description                 = "Acceptance Test"
+  failover_mode               = "%s"
+  high_availability_mode      = "%s"
+  edge_cluster_id             = "${data.nsxt_edge_cluster.EC.id}"
+  enable_router_advertisement = "true"
+  advertise_connected_routes  = "true"
+  advertise_static_routes     = "true"
+  advertise_nat_routes        = "true"
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+
+  tag {
+    scope = "scope2"
+    tag   = "tag2"
+  }
 }`, edgeClusterName, name, failoverMode, haMode)
 }
 
@@ -150,18 +178,19 @@ data "nsxt_edge_cluster" "EC" {
 }
 
 resource "nsxt_logical_tier1_router" "test" {
-	display_name = "%s"
-	description = "Acceptance Test Update"
-	failover_mode = "%s"
-	high_availability_mode = "%s"
-	edge_cluster_id = "${data.nsxt_edge_cluster.EC.id}"
-	enable_router_advertisement = "false"
-	advertise_connected_routes = "true"
-	advertise_static_routes = "false"
-	advertise_nat_routes = "false"
-    tag {
-    	scope = "scope3"
-        tag = "tag3"
-    }
+  display_name                = "%s"
+  description                 = "Acceptance Test Update"
+  failover_mode               = "%s"
+  high_availability_mode      = "%s"
+  edge_cluster_id             = "${data.nsxt_edge_cluster.EC.id}"
+  enable_router_advertisement = "false"
+  advertise_connected_routes  = "true"
+  advertise_static_routes     = "false"
+  advertise_nat_routes        = "false"
+
+  tag {
+    scope = "scope3"
+    tag   = "tag3"
+  }
 }`, edgeClusterName, name, failoverMode, haMode)
 }

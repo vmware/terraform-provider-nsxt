@@ -16,9 +16,6 @@ func TestAccResourceNsxtIpSet_basic(t *testing.T) {
 	name := fmt.Sprintf("test-nsx-ip-set")
 	updateName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_ip_set.test"
-	singleIP := "1.1.1.1"
-	additionalCidr := "2.1.1.0/24"
-	additionalRange := "3.1.1.1-3.1.1.10"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -28,7 +25,7 @@ func TestAccResourceNsxtIpSet_basic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXIpSetCreateTemplate(name, singleIP),
+				Config: testAccNSXIpSetCreateTemplate(name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXIpSetExists(name, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -38,7 +35,7 @@ func TestAccResourceNsxtIpSet_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXIpSetUpdateTemplate(updateName, singleIP, additionalCidr, additionalRange),
+				Config: testAccNSXIpSetUpdateTemplate(updateName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXIpSetExists(updateName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updateName),
@@ -54,9 +51,6 @@ func TestAccResourceNsxtIpSet_basic(t *testing.T) {
 func TestAccResourceNsxtIpSet_noName(t *testing.T) {
 	name := ""
 	testResourceName := "nsxt_ip_set.test"
-	singleIP := "1.1.1.1"
-	additionalCidr := "2.1.1.0/24"
-	additionalRange := "3.1.1.1-3.1.1.10"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -66,7 +60,7 @@ func TestAccResourceNsxtIpSet_noName(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXIpSetCreateTemplate(name, singleIP),
+				Config: testAccNSXIpSetCreateTemplate(name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXIpSetExists(name, testResourceName),
 					resource.TestCheckResourceAttrSet(testResourceName, "display_name"),
@@ -76,7 +70,7 @@ func TestAccResourceNsxtIpSet_noName(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXIpSetUpdateTemplate(name, singleIP, additionalCidr, additionalRange),
+				Config: testAccNSXIpSetUpdateTemplate(name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXIpSetExists(name, testResourceName),
 					resource.TestCheckResourceAttrSet(testResourceName, "display_name"),
@@ -84,6 +78,29 @@ func TestAccResourceNsxtIpSet_noName(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.#", "3"),
 				),
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtIpSet_importBasic(t *testing.T) {
+	name := fmt.Sprintf("test-nsx-ip-set")
+	testResourceName := "nsxt_ip_set.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXIpSetCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXIpSetCreateTemplate(name),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -145,32 +162,35 @@ func testAccNSXIpSetCheckDestroy(state *terraform.State, displayName string) err
 	return nil
 }
 
-func testAccNSXIpSetCreateTemplate(name string, singleIP string) string {
+func testAccNSXIpSetCreateTemplate(name string) string {
 	return fmt.Sprintf(`
 resource "nsxt_ip_set" "test" {
-    display_name = "%s"
-    description = "Acceptance Test"
-    ip_addresses = ["%s"]
-    tag {
-    	scope = "scope1"
-        tag = "tag1"
-    }
-}`, name, singleIP)
+  display_name = "%s"
+  description  = "Acceptance Test"
+  ip_addresses = ["1.1.1.1"]
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+}`, name)
 }
 
-func testAccNSXIpSetUpdateTemplate(updatedName string, singleIP string, additionalRange string, additionalCidr string) string {
+func testAccNSXIpSetUpdateTemplate(updatedName string) string {
 	return fmt.Sprintf(`
 resource "nsxt_ip_set" "test" {
-    display_name = "%s"
-    description = "Acceptance Test Update"
-    ip_addresses = ["%s", "%s", "%s"]
-    tag {
-    	scope = "scope1"
-        tag = "tag1"
-    }
-    tag {
-    	scope = "scope2"
-        tag = "tag2"
-    }
-}`, updatedName, singleIP, additionalRange, additionalCidr)
+  display_name = "%s"
+  description  = "Acceptance Test Update"
+  ip_addresses = ["1.1.1.1", "2.1.1.0/24", "3.1.1.1-3.1.1.10"]
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+
+  tag {
+    scope = "scope2"
+    tag   = "tag2"
+  }
+}`, updatedName)
 }

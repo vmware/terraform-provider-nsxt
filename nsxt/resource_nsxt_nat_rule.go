@@ -11,6 +11,7 @@ import (
 	"github.com/vmware/go-vmware-nsxt/manager"
 	"log"
 	"net/http"
+	"strings"
 )
 
 var natRuleActionValues = []string{"SNAT", "DNAT", "NO_NAT", "REFLEXIVE"}
@@ -21,6 +22,9 @@ func resourceNsxtNatRule() *schema.Resource {
 		Read:   resourceNsxtNatRuleRead,
 		Update: resourceNsxtNatRuleUpdate,
 		Delete: resourceNsxtNatRuleDelete,
+		Importer: &schema.ResourceImporter{
+			State: resourceNsxtNatRuleImport,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
@@ -261,4 +265,15 @@ func resourceNsxtNatRuleDelete(d *schema.ResourceData, m interface{}) error {
 		d.SetId("")
 	}
 	return nil
+}
+
+func resourceNsxtNatRuleImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	importId := d.Id()
+	s := strings.Split(importId, "/")
+	if len(s) != 2 {
+		return nil, fmt.Errorf("Please provide <router-id>/<nat-rule-id> as an input")
+	}
+	d.SetId(s[1])
+	d.Set("logical_router_id", s[0])
+	return []*schema.ResourceData{d}, nil
 }

@@ -70,10 +70,10 @@ In addition to arguments listed above, the following attributes are exported:
 
 An existing DHCP Relay service can be [imported][docs-import] into this resource, via the following command:
 
-[docs-import]: https://www.terraform.io/docs/import/index.html
+[docs-import]: /docs/import/index.html
 
 ```
-terraform import nsxt_dhcp_relay_service.x id
+terraform import nsxt_dhcp_relay_service.dr_service UUID
 ```
 
-The above would import the DHCP Relay service named `x` with the nsx id `id`
+The above would import the DHCP Relay service named `dr_service` with the nsx id `UUID`
