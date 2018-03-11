@@ -35,7 +35,7 @@ func TestProvider_impl(t *testing.T) {
 }
 
 func testAccPreCheck(t *testing.T) {
-	var requiredVariables = []string{"NSX_USERNAME", "NSX_PASSWORD", "NSX_MANAGER_HOST", "NSX_ALLOW_UNVERIFIED_SSL"}
+	var requiredVariables = []string{"NSXT_USERNAME", "NSXT_PASSWORD", "NSXT_MANAGER_HOST", "NSXT_ALLOW_UNVERIFIED_SSL"}
 	for _, element := range requiredVariables {
 		if v := os.Getenv(element); v == "" {
 			str := fmt.Sprintf("%s must be set for acceptance tests", element)
@@ -52,16 +52,16 @@ func testAccGetClient() *api.APIClient {
 	// Try to create a temporary client using the tests configuration
 	// This is necessary since the test PreCheck is called before the client is initialized.
 	insecure := false
-	if strings.ToLower(os.Getenv("NSX_ALLOW_UNVERIFIED_SSL")) == "true" {
+	if strings.ToLower(os.Getenv("NSXT_ALLOW_UNVERIFIED_SSL")) == "true" {
 		insecure = true
 	}
 	cfg := api.Configuration{
 		BasePath:  "/api/v1",
-		Host:      os.Getenv("NSX_MANAGER_HOST"),
+		Host:      os.Getenv("NSXT_MANAGER_HOST"),
 		Scheme:    "https",
 		UserAgent: "terraform-provider-nsxt/1.0",
-		UserName:  os.Getenv("NSX_USERNAME"),
-		Password:  os.Getenv("NSX_PASSWORD"),
+		UserName:  os.Getenv("NSXT_USERNAME"),
+		Password:  os.Getenv("NSXT_PASSWORD"),
 		Insecure:  insecure,
 	}
 

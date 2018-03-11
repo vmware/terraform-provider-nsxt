@@ -22,7 +22,7 @@ const singleTag string = "[{scope = \"scope1\", tag = \"tag1\"}]"
 const doubleTags string = "[{scope = \"scope1\", tag = \"tag1\"}, {scope = \"scope2\", tag = \"tag2\"}]"
 
 func getTier0RouterName() string {
-	name := os.Getenv("NSX_TIER0_ROUTER")
+	name := os.Getenv("NSXT_TEST_TIER0_ROUTER")
 	if name == "" {
 		name = tier0RouterDefaultName
 	}
@@ -30,7 +30,7 @@ func getTier0RouterName() string {
 }
 
 func getEdgeClusterName() string {
-	name := os.Getenv("NSX_EDGE_CLUSTER")
+	name := os.Getenv("NSXT_TEST_EDGE_CLUSTER")
 	if name == "" {
 		name = edgeClusterDefaultName
 	}
@@ -38,7 +38,7 @@ func getEdgeClusterName() string {
 }
 
 func getSwitchingProfileName() string {
-	name := os.Getenv("NSX_SWITCHING_PROFILE")
+	name := os.Getenv("NSXT_TEST_SWITCHING_PROFILE")
 	if name == "" {
 		name = switchingProfileDefaultName
 	}
@@ -46,7 +46,7 @@ func getSwitchingProfileName() string {
 }
 
 func getVlanTransportZoneName() string {
-	name := os.Getenv("NSX_VLAN_TRANSPORT_ZONE")
+	name := os.Getenv("NSXT_TEST_VLAN_TRANSPORT_ZONE")
 	if name == "" {
 		name = vlanTransportZoneName
 	}
@@ -54,7 +54,7 @@ func getVlanTransportZoneName() string {
 }
 
 func getOverlayTransportZoneName() string {
-	name := os.Getenv("NSX_OVERLAY_TRANSPORT_ZONE")
+	name := os.Getenv("NSXT_TEST_OVERLAY_TRANSPORT_ZONE")
 	if name == "" {
 		name = overlayTransportZoneNamePrefix
 	}
@@ -62,7 +62,7 @@ func getOverlayTransportZoneName() string {
 }
 
 func getTestVMID() string {
-	return os.Getenv("NSX_TEST_VM_ID")
+	return os.Getenv("NSXT_TEST_VM_ID")
 }
 
 func testAccEnvDefined(t *testing.T, envVar string) {
