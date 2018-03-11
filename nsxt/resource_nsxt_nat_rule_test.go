@@ -160,6 +160,36 @@ func TestAccResourceNsxtNatRule_dnatImport(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtNatRule_noNnat(t *testing.T) {
+	ruleName := fmt.Sprintf("test-nsx-nonat-rule")
+	edgeClusterName := getEdgeClusterName()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXNATRuleCheckDestroy(state, ruleName)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXNoNATRuleCreateTemplate(ruleName, edgeClusterName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXNATRuleCheckExists(ruleName, testAccResourceNatRuleName),
+					resource.TestCheckResourceAttr(testAccResourceNatRuleName, "display_name", ruleName),
+					resource.TestCheckResourceAttr(testAccResourceNatRuleName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttrSet(testAccResourceNatRuleName, "logical_router_id"),
+					resource.TestCheckResourceAttr(testAccResourceNatRuleName, "tag.#", "1"),
+					resource.TestCheckResourceAttr(testAccResourceNatRuleName, "enabled", "true"),
+					resource.TestCheckResourceAttr(testAccResourceNatRuleName, "logging", "true"),
+					resource.TestCheckResourceAttr(testAccResourceNatRuleName, "nat_pass", "true"),
+					resource.TestCheckResourceAttr(testAccResourceNatRuleName, "action", "NO_NAT"),
+					resource.TestCheckResourceAttr(testAccResourceNatRuleName, "match_destination_network", "3.3.3.0/24"),
+				),
+			},
+		},
+	})
+}
+
 func testAccNSXNATRuleCheckExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
@@ -336,6 +366,26 @@ resource "nsxt_nat_rule" "test" {
   tag {
     scope = "scope2"
     tag   = "tag2"
+  }
+}`, name)
+}
+
+func testAccNSXNoNATRuleCreateTemplate(name string, edgeClusterName string) string {
+	return testAccNSXNATRulePreConditionTemplate(edgeClusterName) + fmt.Sprintf(`
+resource "nsxt_nat_rule" "test" {
+  logical_router_id         = "${nsxt_logical_tier1_router.rtr1.id}"
+  display_name              = "%s"
+  description               = "Acceptance Test"
+  action                    = "NO_NAT"
+  match_destination_network = "3.3.3.0/24"
+  match_source_network      = "0.0.0.0/0"
+  enabled                   = "true"
+  logging                   = "true"
+  nat_pass                  = "true"
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
   }
 }`, name)
 }
