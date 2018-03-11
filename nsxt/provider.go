@@ -85,6 +85,7 @@ func Provider() terraform.ResourceProvider {
 			"nsxt_transport_zone":       dataSourceNsxtTransportZone(),
 			"nsxt_switching_profile":    dataSourceNsxtSwitchingProfile(),
 			"nsxt_logical_tier0_router": dataSourceNsxtLogicalTier0Router(),
+			"nsxt_ns_service":           dataSourceNsxtNsService(),
 			"nsxt_edge_cluster":         dataSourceNsxtEdgeCluster(),
 		},
 
