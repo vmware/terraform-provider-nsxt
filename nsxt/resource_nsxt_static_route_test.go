@@ -77,7 +77,7 @@ func TestAccResourceNsxtStaticRoute_importBasic(t *testing.T) {
 				ResourceName:      testAccResourceStaticRouteName,
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateIdFunc: testAccNSXStaticRouteImporterGetId,
+				ImportStateIdFunc: testAccNSXStaticRouteImporterGetID,
 			},
 		},
 	})
@@ -144,7 +144,7 @@ func testAccNSXStaticRouteCheckDestroy(state *terraform.State, displayName strin
 	return nil
 }
 
-func testAccNSXStaticRouteImporterGetId(s *terraform.State) (string, error) {
+func testAccNSXStaticRouteImporterGetID(s *terraform.State) (string, error) {
 	rs, ok := s.RootModule().Resources[testAccResourceStaticRouteName]
 	if !ok {
 		return "", fmt.Errorf("NSX static route resource %s not found in resources", testAccResourceStaticRouteName)

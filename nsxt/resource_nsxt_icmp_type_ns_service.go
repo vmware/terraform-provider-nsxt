@@ -71,17 +71,15 @@ func resourceNsxtIcmpTypeNsServiceCreate(d *schema.ResourceData, m interface{}) 
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
-	defaultService := d.Get("default_service").(bool)
 	icmpCode := int64(d.Get("icmp_code").(int))
 	icmpType := int64(d.Get("icmp_type").(int))
 	protocol := d.Get("protocol").(string)
 
 	nsService := manager.IcmpTypeNsService{
 		NsService: manager.NsService{
-			Description:    description,
-			DisplayName:    displayName,
-			Tags:           tags,
-			DefaultService: defaultService,
+			Description: description,
+			DisplayName: displayName,
+			Tags:        tags,
 		},
 		NsserviceElement: manager.IcmpTypeNsServiceEntry{
 			ResourceType: "ICMPTypeNSService",
@@ -145,7 +143,6 @@ func resourceNsxtIcmpTypeNsServiceUpdate(d *schema.ResourceData, m interface{}) 
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
-	defaultService := d.Get("default_service").(bool)
 	icmpCode := int64(d.Get("icmp_code").(int))
 	icmpType := int64(d.Get("icmp_type").(int))
 	protocol := d.Get("protocol").(string)
@@ -153,11 +150,10 @@ func resourceNsxtIcmpTypeNsServiceUpdate(d *schema.ResourceData, m interface{}) 
 
 	nsService := manager.IcmpTypeNsService{
 		NsService: manager.NsService{
-			Description:    description,
-			DisplayName:    displayName,
-			Tags:           tags,
-			DefaultService: defaultService,
-			Revision:       revision,
+			Description: description,
+			DisplayName: displayName,
+			Tags:        tags,
+			Revision:    revision,
 		},
 		NsserviceElement: manager.IcmpTypeNsServiceEntry{
 			ResourceType: "ICMPTypeNSService",

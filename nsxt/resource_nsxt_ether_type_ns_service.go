@@ -55,15 +55,13 @@ func resourceNsxtEtherTypeNsServiceCreate(d *schema.ResourceData, m interface{})
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
-	defaultService := d.Get("default_service").(bool)
 	etherType := int64(d.Get("ether_type").(int))
 
 	nsService := manager.EtherTypeNsService{
 		NsService: manager.NsService{
-			Description:    description,
-			DisplayName:    displayName,
-			Tags:           tags,
-			DefaultService: defaultService,
+			Description: description,
+			DisplayName: displayName,
+			Tags:        tags,
 		},
 		NsserviceElement: manager.EtherTypeNsServiceEntry{
 			ResourceType: "EtherTypeNSService",
@@ -123,17 +121,15 @@ func resourceNsxtEtherTypeNsServiceUpdate(d *schema.ResourceData, m interface{})
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
-	defaultService := d.Get("default_service").(bool)
 	revision := int64(d.Get("revision").(int))
 	etherType := int64(d.Get("ether_type").(int))
 
 	nsService := manager.EtherTypeNsService{
 		NsService: manager.NsService{
-			Description:    description,
-			DisplayName:    displayName,
-			Tags:           tags,
-			DefaultService: defaultService,
-			Revision:       revision,
+			Description: description,
+			DisplayName: displayName,
+			Tags:        tags,
+			Revision:    revision,
 		},
 		NsserviceElement: manager.EtherTypeNsServiceEntry{
 			ResourceType: "EtherTypeNSService",
