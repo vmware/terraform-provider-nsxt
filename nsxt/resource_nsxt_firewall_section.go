@@ -234,7 +234,6 @@ func resourceNsxtFirewallSectionCreate(d *schema.ResourceData, m interface{}) er
 	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
 	appliedTos := getResourceReferencesFromSchemaSet(d, "applied_to")
-	isDefault := d.Get("is_default").(bool)
 	sectionType := d.Get("section_type").(string)
 	stateful := d.Get("stateful").(bool)
 	firewallSection := manager.FirewallSectionRuleList{
@@ -243,7 +242,6 @@ func resourceNsxtFirewallSectionCreate(d *schema.ResourceData, m interface{}) er
 			DisplayName: displayName,
 			Tags:        tags,
 			AppliedTos:  appliedTos,
-			IsDefault:   isDefault,
 			SectionType: sectionType,
 			Stateful:    stateful,
 		},
@@ -327,7 +325,6 @@ func resourceNsxtFirewallSectionUpdate(d *schema.ResourceData, m interface{}) er
 	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
 	appliedTos := getResourceReferencesFromSchemaSet(d, "applied_to")
-	isDefault := d.Get("is_default").(bool)
 	sectionType := d.Get("section_type").(string)
 	stateful := d.Get("stateful").(bool)
 	firewallSection := manager.FirewallSectionRuleList{
@@ -337,7 +334,6 @@ func resourceNsxtFirewallSectionUpdate(d *schema.ResourceData, m interface{}) er
 			DisplayName: displayName,
 			Tags:        tags,
 			AppliedTos:  appliedTos,
-			IsDefault:   isDefault,
 			SectionType: sectionType,
 			Stateful:    stateful,
 		},
