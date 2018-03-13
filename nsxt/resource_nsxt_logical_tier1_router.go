@@ -16,6 +16,18 @@ import (
 var failOverModeValues = []string{"PREEMPTIVE", "NON_PREEMPTIVE"}
 var highAvailabilityValues = []string{"ACTIVE_ACTIVE", "ACTIVE_STANDBY"}
 
+// formatLogicalRouterRollbackError defines the verbose error when
+// rollback fails on a logical router create operation.
+const formatLogicalRouterRollbackError = `
+WARNING:
+There was an error during the creation of logical router %s:
+%s
+Additionally, there was an error deleting the logical router during rollback:
+%s
+The logical router may still exist in the NSX. If it does, please manually delete it
+and try again.
+`
+
 // TODO: add advanced config
 func resourceNsxtLogicalTier1Router() *schema.Resource {
 	return &schema.Resource{
@@ -87,16 +99,6 @@ func resourceNsxtLogicalTier1Router() *schema.Resource {
 			},
 			"advertise_config_revision": getRevisionSchema(),
 		},
-	}
-}
-
-func resourceNsxtLogicalTier1RouterCreateRollback(nsxClient *api.APIClient, id string) {
-	log.Printf("[ERROR] Rollback router %s creation", id)
-
-	localVarOptionals := make(map[string]interface{})
-	_, err := nsxClient.LogicalRoutingAndServicesApi.DeleteLogicalRouter(nsxClient.Context, id, localVarOptionals)
-	if err != nil {
-		log.Printf("[ERROR] Rollback failed!")
 	}
 }
 
@@ -183,8 +185,15 @@ func resourceNsxtLogicalTier1RouterCreate(d *schema.ResourceData, m interface{})
 	// Add advertisement config
 	err = resourceNsxtLogicalTier1RouterCreateAdv(d, nsxClient, logicalRouter.Id)
 	if err != nil {
-		resourceNsxtLogicalTier1RouterCreateRollback(nsxClient, logicalRouter.Id)
-		return fmt.Errorf("Error while setting config advertisement state: %v", err)
+		// Advertisement configuration creation failed: rollback & delete the router
+		log.Printf("[ERROR] Rollback router %s creation", logicalRouter.Id)
+		localVarOptionals := make(map[string]interface{})
+		_, derr := nsxClient.LogicalRoutingAndServicesApi.DeleteLogicalRouter(nsxClient.Context, logicalRouter.Id, localVarOptionals)
+		if derr != nil {
+			// rollback failed
+			return fmt.Errorf(formatLogicalRouterRollbackError, logicalRouter.Id, err, derr)
+		}
+		return fmt.Errorf("Error while setting advertisement configuration: %v", err)
 	}
 
 	d.SetId(logicalRouter.Id)
@@ -196,7 +205,7 @@ func resourceNsxtLogicalTier1RouterRead(d *schema.ResourceData, m interface{}) e
 	nsxClient := m.(*api.APIClient)
 	id := d.Id()
 	if id == "" {
-		return fmt.Errorf("Error obtaining logical tier1 router id")
+		return fmt.Errorf("Error obtaining logical Tier-1 router id")
 	}
 
 	logicalRouter, resp, err := nsxClient.LogicalRoutingAndServicesApi.ReadLogicalRouter(nsxClient.Context, id)
