@@ -74,7 +74,6 @@ func resourceNsxtAlgorithmTypeNsServiceCreate(d *schema.ResourceData, m interfac
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
-	defaultService := d.Get("default_service").(bool)
 	alg := d.Get("algorithm").(string)
 	sourcePorts := getStringListFromSchemaSet(d, "source_ports")
 	destinationPorts := make([]string, 0, 1)
@@ -82,10 +81,9 @@ func resourceNsxtAlgorithmTypeNsServiceCreate(d *schema.ResourceData, m interfac
 
 	nsService := manager.AlgTypeNsService{
 		NsService: manager.NsService{
-			Description:    description,
-			DisplayName:    displayName,
-			Tags:           tags,
-			DefaultService: defaultService,
+			Description: description,
+			DisplayName: displayName,
+			Tags:        tags,
 		},
 		NsserviceElement: manager.AlgTypeNsServiceEntry{
 			ResourceType:     "ALGTypeNSService",
@@ -149,7 +147,6 @@ func resourceNsxtAlgorithmTypeNsServiceUpdate(d *schema.ResourceData, m interfac
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
-	defaultService := d.Get("default_service").(bool)
 	alg := d.Get("algorithm").(string)
 	sourcePorts := getStringListFromSchemaSet(d, "source_ports")
 	destinationPorts := make([]string, 0, 1)
@@ -158,11 +155,10 @@ func resourceNsxtAlgorithmTypeNsServiceUpdate(d *schema.ResourceData, m interfac
 
 	nsService := manager.AlgTypeNsService{
 		NsService: manager.NsService{
-			Description:    description,
-			DisplayName:    displayName,
-			Tags:           tags,
-			DefaultService: defaultService,
-			Revision:       revision,
+			Description: description,
+			DisplayName: displayName,
+			Tags:        tags,
+			Revision:    revision,
 		},
 		NsserviceElement: manager.AlgTypeNsServiceEntry{
 			ResourceType:     "ALGTypeNSService",

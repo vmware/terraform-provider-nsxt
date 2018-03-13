@@ -50,14 +50,12 @@ func resourceNsxtIgmpTypeNsServiceCreate(d *schema.ResourceData, m interface{}) 
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
-	defaultService := d.Get("default_service").(bool)
 
 	nsService := manager.IgmpTypeNsService{
 		NsService: manager.NsService{
-			Description:    description,
-			DisplayName:    displayName,
-			Tags:           tags,
-			DefaultService: defaultService,
+			Description: description,
+			DisplayName: displayName,
+			Tags:        tags,
 		},
 		NsserviceElement: manager.IgmpTypeNsServiceEntry{
 			ResourceType: "IGMPTypeNSService",
@@ -113,16 +111,14 @@ func resourceNsxtIgmpTypeNsServiceUpdate(d *schema.ResourceData, m interface{}) 
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
-	defaultService := d.Get("default_service").(bool)
 	revision := int64(d.Get("revision").(int))
 
 	nsService := manager.IgmpTypeNsService{
 		NsService: manager.NsService{
-			Description:    description,
-			DisplayName:    displayName,
-			Tags:           tags,
-			DefaultService: defaultService,
-			Revision:       revision,
+			Description: description,
+			DisplayName: displayName,
+			Tags:        tags,
+			Revision:    revision,
 		},
 		NsserviceElement: manager.IgmpTypeNsServiceEntry{
 			ResourceType: "IGMPTypeNSService",

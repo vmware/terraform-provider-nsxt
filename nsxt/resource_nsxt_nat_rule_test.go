@@ -82,7 +82,7 @@ func TestAccResourceNsxtNatRule_snatImport(t *testing.T) {
 				ResourceName:      testAccResourceNatRuleName,
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateIdFunc: testAccNSXNATRuleImporterGetId,
+				ImportStateIdFunc: testAccNSXNATRuleImporterGetID,
 			},
 		},
 	})
@@ -154,7 +154,7 @@ func TestAccResourceNsxtNatRule_dnatImport(t *testing.T) {
 				ResourceName:      testAccResourceNatRuleName,
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateIdFunc: testAccNSXNATRuleImporterGetId,
+				ImportStateIdFunc: testAccNSXNATRuleImporterGetID,
 			},
 		},
 	})
@@ -250,7 +250,7 @@ func testAccNSXNATRuleCheckDestroy(state *terraform.State, displayName string) e
 	return nil
 }
 
-func testAccNSXNATRuleImporterGetId(s *terraform.State) (string, error) {
+func testAccNSXNATRuleImporterGetID(s *terraform.State) (string, error) {
 	rs, ok := s.RootModule().Resources[testAccResourceNatRuleName]
 	if !ok {
 		return "", fmt.Errorf("NSX nat rule resource %s not found in resources", testAccResourceNatRuleName)

@@ -268,8 +268,8 @@ func resourceNsxtNatRuleDelete(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceNsxtNatRuleImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	importId := d.Id()
-	s := strings.Split(importId, "/")
+	importID := d.Id()
+	s := strings.Split(importID, "/")
 	if len(s) != 2 {
 		return nil, fmt.Errorf("Please provide <router-id>/<nat-rule-id> as an input")
 	}

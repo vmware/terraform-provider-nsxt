@@ -77,17 +77,15 @@ func resourceNsxtL4PortSetNsServiceCreate(d *schema.ResourceData, m interface{})
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
-	defaultService := d.Get("default_service").(bool)
 	l4Protocol := d.Get("protocol").(string)
 	sourcePorts := getStringListFromSchemaSet(d, "source_ports")
 	destinationPorts := getStringListFromSchemaSet(d, "destination_ports")
 
 	nsService := manager.L4PortSetNsService{
 		NsService: manager.NsService{
-			Description:    description,
-			DisplayName:    displayName,
-			Tags:           tags,
-			DefaultService: defaultService,
+			Description: description,
+			DisplayName: displayName,
+			Tags:        tags,
 		},
 		NsserviceElement: manager.L4PortSetNsServiceEntry{
 			ResourceType:     "L4PortSetNSService",
@@ -151,7 +149,6 @@ func resourceNsxtL4PortSetNsServiceUpdate(d *schema.ResourceData, m interface{})
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
-	defaultService := d.Get("default_service").(bool)
 	l4Protocol := d.Get("protocol").(string)
 	sourcePorts := getStringListFromSchemaSet(d, "source_ports")
 	destinationPorts := getStringListFromSchemaSet(d, "destination_ports")
@@ -159,11 +156,10 @@ func resourceNsxtL4PortSetNsServiceUpdate(d *schema.ResourceData, m interface{})
 
 	nsService := manager.L4PortSetNsService{
 		NsService: manager.NsService{
-			Description:    description,
-			DisplayName:    displayName,
-			Tags:           tags,
-			DefaultService: defaultService,
-			Revision:       revision,
+			Description: description,
+			DisplayName: displayName,
+			Tags:        tags,
+			Revision:    revision,
 		},
 		NsserviceElement: manager.L4PortSetNsServiceEntry{
 			ResourceType:     "L4PortSetNSService",
