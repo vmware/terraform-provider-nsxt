@@ -46,6 +46,27 @@ func TestAccDataSourceNsxtNsService_basic(t *testing.T) {
 	})
 }
 
+func TestAccDataSourceNsxtNsService_systemOwned(t *testing.T) {
+	serviceName := "WINS"
+	testResourceName := "data.nsxt_ns_service.test"
+	var s *terraform.State
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXNsServiceReadTemplate(serviceName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(testResourceName, "display_name", serviceName),
+					resource.TestCheckResourceAttr(testResourceName, "description", serviceName),
+					copyStatePtr(&s),
+				),
+			},
+		},
+	})
+}
+
 func testAccDataSourceNsxtNsServiceCreate(serviceName string) error {
 	nsxClient := testAccGetClient()
 	nsService := manager.IgmpTypeNsService{

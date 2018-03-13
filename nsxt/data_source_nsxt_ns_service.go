@@ -74,7 +74,7 @@ func dataSourceNsxtNsServiceRead(d *schema.ResourceData, m interface{}) error {
 			}
 		}
 		if !found {
-			return fmt.Errorf("ns service '%s' was not found", objName)
+			return fmt.Errorf("ns service '%s' was not found out of %d services", objName, len(objList.Results))
 		}
 	} else {
 		return fmt.Errorf("Error obtaining ns service ID or name during read")
