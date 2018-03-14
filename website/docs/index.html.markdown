@@ -3,16 +3,27 @@ layout: "nsxt"
 page_title: "Provider: NSXT"
 sidebar_current: "docs-nsxt-index"
 description: |-
-  The VMWare NSXT provider is used to configure VMWare NSX-T Manager.
+  The VMware NSX-T Terraform Provider 
 ---
 
-# NSXT Provider
+# The NSX-T Terraform Provider
 
-This provider is used to configure VMWare NSX-T Manager. The provider needs to be configured with NSX-T Manager host and credentials.
+The NSX-T Terraform Provider provides a way to automate NSX to provide virtualized networking and security services using both vSphere and KVM.
+
+More information on NSX can be found on the [NSX Product Page](https://www.vmware.com/products/nsx.html)
+
+Documenation on the NSX plaform can be found on the [NSX Documenatation page](https://docs.vmware.com/en/VMware-NSX-T/index.html)
+
+## NSXTProvider
+In order to use the NSX-T Terraform Provider you must first configure the proveder to communicate with the VMmare NSX-T manager. This required the IP address, hostname or FQDN of the NSX manager along with the username and password of the user to which the provider will authenticate. 
+
+The provider also supports using both signed and self-signed certificates. It is recommended that in production environments you only use certificates signed by a certificate authority.
+
+Ther are also a number of other parameters that can be set to tune how the provider connects to the NSX REST API.
 
 Use the navigation to the left to read about available data sources and resources.
 
-## Example Usage
+### Example Usage
 
 ```hcl
 provider "nsxt" {
@@ -28,7 +39,7 @@ provider "nsxt" {
 
 ```
 
-## Client Authentication
+### Client Authentication
 
 NSXT Provider offers few ways of authentication. Credentials can be provided statically as shown in example above or provided as environment variables:
 
@@ -38,7 +49,7 @@ export NSX_USERNAME="admin"
 export NSX_PASSWORD="qwerty"
 ```
 
-In addition, self-signed client certificate can be used for authentication. Terraform will require certificate file and private key file in PEM format. In this case, the client certificate needs to be registered with NSX-T Manager prior to invoking terraform.
+In addition, client certificates can be used for authentication. Terraform will require certificate file and private key file in PEM format. In this case, the client certificate needs to be registered with NSX-T manager prior to invoking Terraform.
 
 
 ```hcl
@@ -51,9 +62,9 @@ provider "nsxt" {
 
 ```
 
-## Server Authentication
+### Server Authentication
 
-The "insecure" provider parameter set to true (shown in examples above) will direct terraform client to skip server certificate verification. However, it is recommended to use trusted connection. The example below shows provides CA file (in PEM format) to verify server certificate.
+The "insecure" provider parameter set to true (shown in examples above) will direct Terraform client to skip server certificate verification. This is not recommended in production deployments and it is recommended to use trusted connection using certificates signed by a certificate authority.. The example below shows provides CA file (in PEM format) to verify server certificate.
 
 ```hcl
 provider "nsxt" {
