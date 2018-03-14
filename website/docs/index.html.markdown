@@ -14,14 +14,14 @@ More information on NSX can be found on the [NSX Product Page](https://www.vmwar
 
 Documenation on the NSX plaform can be found on the [NSX Documenatation page](https://docs.vmware.com/en/VMware-NSX-T/index.html)
 
-## NSXTProvider
-In order to use the NSX-T Terraform Provider you must first configure the proveder to communicate with the VMmare NSX-T manager. This required the IP address, hostname or FQDN of the NSX manager along with the username and password of the user to which the provider will authenticate. 
+## NSXT Provider
+In order to use the NSX-T Terraform Provider you must first configure the provider to communicate with the VMmare NSX-T Manager. This required the IP address, hostname or FQDN of the NSX Manager along with the username and password of the user to which the provider will authenticate. 
 
 The provider also supports using both signed and self-signed certificates. It is recommended that in production environments you only use certificates signed by a certificate authority.
 
-Ther are also a number of other parameters that can be set to tune how the provider connects to the NSX REST API.
+There are also a number of other parameters that can be set to tune how the provider connects to the NSX REST API.
 
-Use the navigation to the left to read about available data sources and resources.
+Please use the navigation to the left to read about available data sources and resources.
 
 ### Example Usage
 
@@ -49,7 +49,7 @@ export NSX_USERNAME="admin"
 export NSX_PASSWORD="qwerty"
 ```
 
-In addition, client certificates can be used for authentication. Terraform will require certificate file and private key file in PEM format. In this case, the client certificate needs to be registered with NSX-T manager prior to invoking Terraform.
+In addition, client certificates can be used for authentication. Terraform will require certificate file and private key file in PEM format. In this case, the client certificate needs to be registered with NSX-T Manager prior to invoking Terraform.
 
 
 ```hcl
