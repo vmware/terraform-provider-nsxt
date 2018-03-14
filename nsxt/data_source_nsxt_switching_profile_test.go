@@ -49,7 +49,10 @@ func TestAccDataSourceNsxtSwitchingProfile_basic(t *testing.T) {
 }
 
 func testAccDataSourceNsxtSwitchingProfileCreate(profileName string, profileType string) error {
-	nsxClient := testAccGetClient()
+	nsxClient, err := testAccGetClient()
+	if err != nil {
+		return fmt.Errorf("Error during test client initialization: %v", err)
+	}
 	profile := manager.BaseSwitchingProfile{
 		DisplayName:  profileName,
 		ResourceType: profileType,
@@ -76,7 +79,10 @@ func testAccDataSourceNsxtSwitchingProfileDelete(state *terraform.State, resourc
 	if resourceID == "" {
 		return fmt.Errorf("NSX SwitchingProfile data source ID not set")
 	}
-	nsxClient := testAccGetClient()
+	nsxClient, err := testAccGetClient()
+	if err != nil {
+		return fmt.Errorf("Error during test client initialization: %v", err)
+	}
 	localVarOptionals := make(map[string]interface{})
 	responseCode, err := nsxClient.LogicalSwitchingApi.DeleteSwitchingProfile(nsxClient.Context, resourceID, localVarOptionals)
 	if err != nil {

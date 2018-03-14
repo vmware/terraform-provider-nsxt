@@ -68,7 +68,11 @@ func TestAccDataSourceNsxtNsService_systemOwned(t *testing.T) {
 }
 
 func testAccDataSourceNsxtNsServiceCreate(serviceName string) error {
-	nsxClient := testAccGetClient()
+	nsxClient, err := testAccGetClient()
+	if err != nil {
+		return fmt.Errorf("Error during test client initialization: %v", err)
+	}
+
 	nsService := manager.IgmpTypeNsService{
 		NsService: manager.NsService{
 			DisplayName:    serviceName,
@@ -100,7 +104,10 @@ func testAccDataSourceNsxtNsServiceDelete(state *terraform.State, resourceName s
 	if resourceID == "" {
 		return fmt.Errorf("NSX nsService data source ID not set")
 	}
-	nsxClient := testAccGetClient()
+	nsxClient, err := testAccGetClient()
+	if err != nil {
+		return fmt.Errorf("Error during test client initialization: %v", err)
+	}
 	localVarOptionals := make(map[string]interface{})
 	responseCode, err := nsxClient.GroupingObjectsApi.DeleteNSService(nsxClient.Context, resourceID, localVarOptionals)
 	if err != nil {

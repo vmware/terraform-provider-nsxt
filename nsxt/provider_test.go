@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
 	api "github.com/vmware/go-vmware-nsxt"
-	"log"
 	"os"
 	"strings"
 	"testing"
@@ -44,17 +43,19 @@ func testAccPreCheck(t *testing.T) {
 	}
 }
 
-func testAccGetClient() *api.APIClient {
+func testAccGetClient() (*api.APIClient, error) {
 	client, ok := testAccProvider.Meta().(*api.APIClient)
 	if ok {
-		return client
+		return client, nil
 	}
+
 	// Try to create a temporary client using the tests configuration
 	// This is necessary since the test PreCheck is called before the client is initialized.
 	insecure := false
-	if strings.ToLower(os.Getenv("NSXT_ALLOW_UNVERIFIED_SSL")) == "true" {
+	if v := strings.ToLower(os.Getenv("NSXT_ALLOW_UNVERIFIED_SSL")); v != "false" && v != "0" {
 		insecure = true
 	}
+
 	cfg := api.Configuration{
 		BasePath:  "/api/v1",
 		Host:      os.Getenv("NSXT_MANAGER_HOST"),
@@ -65,17 +66,12 @@ func testAccGetClient() *api.APIClient {
 		Insecure:  insecure,
 	}
 
-	newClient, err := api.NewAPIClient(&cfg)
-	if err != nil {
-		log.Printf("Failed to create a test client: %s", err)
-		return nil
-	}
-	return newClient
+	return api.NewAPIClient(&cfg)
 }
 
 func testAccNSXVersion(t *testing.T, requiredVersion string) {
-	client := testAccGetClient()
-	if client == nil {
+	client, err := testAccGetClient()
+	if err != nil {
 		t.Skipf("Skipping non-NSX provider. No NSX client")
 		return
 	}
