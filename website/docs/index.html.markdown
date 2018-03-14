@@ -75,3 +75,7 @@ provider "nsxt" {
 }
 
 ```
+
+## Feature Requests, Bug Reports, and Contributing
+
+For more information how how to submit feature requests, bug reports, or details on how to make your own contributions to the provider, see the NSX-T provider project page.
