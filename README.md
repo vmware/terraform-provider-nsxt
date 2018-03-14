@@ -38,7 +38,7 @@ Supported resources:
 * nat_rule
 * static_route
 
-# Interopability
+# Interoperability
 
 The following versions of NSX-T are supported:
 
@@ -56,14 +56,21 @@ The following are prerequisistes that need to be installed in order to run the N
 These commands will allow you to install the NSX Terraform provider:
 
     go get github.com/vmware/terraform-provider-nsxt
+
     cd $GOROOT/src/github.com/vmware/terraform-provider-nsxt
+
     make
 
 # Contributing
 
 The terraform-provider-nsxt project team welcomes contributions from the community. If you wish to contribute code and you have not signed our contributor license agreement (CLA), our bot will update the issue when you open a Pull Request. For any questions about the CLA process, please refer to our [FAQ](https://cla.vmware.com/faq). For more detailed information, refer to [CONTRIBUTING](https://github.com/vmware/terraform-provider-nsxt/blob/master/CONTRIBUTING.md).
 
+# Support
+
+The NSX Terraform provider is community supported. For bugs and feature requests please open a Github Issue and label it approprately. As this is a community supported solution there is no SLA for resolutions.
+ 
 # License
+
 Copyright © 2015-2018 VMware, Inc. All Rights Reserved.
 
 The NSX Terraform provider is available under [MPL2.0 license](https://github.com/vmware/terraform-provider-nsxt/blob/master/LICENSE.txt).
