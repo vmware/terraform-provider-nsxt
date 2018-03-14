@@ -15,7 +15,7 @@ More information on NSX can be found on the [NSX Product Page](https://www.vmwar
 Documenation on the NSX plaform can be found on the [NSX Documenatation page](https://docs.vmware.com/en/VMware-NSX-T/index.html)
 
 ## NSXT Provider
-In order to use the NSX-T Terraform Provider you must first configure the provider to communicate with the VMmare NSX-T Manager. This required the IP address, hostname or FQDN of the NSX Manager along with the username and password of the user to which the provider will authenticate. 
+In order to use the NSX-T Terraform Provider you must first configure the provider to communicate with the VMmare NSX-T Manager. This required the IP address, hostname or FQDN of the NSX Manager along with the username and password of the user to which the provider will authenticate. You can also use client certificates for authentication if you prefer that method.
 
 The provider also supports using both signed and self-signed certificates. It is recommended that in production environments you only use certificates signed by a certificate authority.
 
