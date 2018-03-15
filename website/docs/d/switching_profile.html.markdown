@@ -30,4 +30,4 @@ In addition to arguments listed above, the following attributes are exported:
 
 * `resource_type` - The resource type representing the specific type of this profile.
 
-* `description` - Description of the edge cluster.
+* `description` - Description of the profile.
