@@ -48,8 +48,9 @@ The following versions of NSX-T are supported:
 
 The following are prerequisistes that need to be installed in order to run the NSX Terraform provider:
 
-- Go 1.9.x onwards
-- Terraform 0.10.x
+- Go 1.9.x onwards - [Go installation instructions](https://golang.org/doc/install)
+
+- Terraform 0.10.x - [Terraform installation instructions](https://www.terraform.io/intro/getting-started/install.html)
 
 # Installation
 
