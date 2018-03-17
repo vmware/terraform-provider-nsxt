@@ -24,13 +24,13 @@ The NSX provider offers several ways to authenticate to the NSX manager. Credent
 
 The provider also can accept both signed and self-signed server certificates. It is recommended that in production environments you only use certificates signed by a certificate authority. NSX ships by default with a self-signed server certificates as the hostname of the NSX manager is not known until the NSX administrator determines what name or IP to use.
 
-Setting the 'allow_unverified_ssl' parameter to 'true' will direct the Terraform client to skip server certificate verification. This is not recommended in production deployments as it is recommended that you use trusted connection using certificates signed by a certificate authority.
+Setting the `allow_unverified_ssl` parameter to `true` will direct the Terraform client to skip server certificate verification. This is not recommended in production deployments as it is recommended that you use trusted connection using certificates signed by a certificate authority.
 
-With the 'ca_file' parameter you can also specify a file that contains your certificate authority certificate in PEM format to verify certificates with a certificate authority.
+With the `ca_file` parameter you can also specify a file that contains your certificate authority certificate in PEM format to verify certificates with a certificate authority.
 
 There are also a number of other parameters that can be set to tune how the provider connects to the NSX REST API. It is recommended you leave these to the defaults unless you experience issues in which case they can be tuned to optimize the system in your environment.
 
-Note that in all of the examples you will need to update the 'host', 'username', and 'password' settings to match those configured in your NSX deployment.
+Note that in all of the examples you will need to update the `host`, `username`, and `password` settings to match those configured in your NSX deployment.
 
 ### Example of Configuration with Credentials
 
