@@ -2,8 +2,7 @@
 layout: "nsxt"
 page_title: "NSXT: nsxt_logical_router_downlink_port"
 sidebar_current: "docs-nsxt-resource-logical-router_downlink-port"
-description: |-
-  Provides a resource to configure Logical Router Downlink Port on NSX-T Manager.
+description: A resource that can be used to configure logical router downlink port in NSX.
 ---
 
 # nsxt_logical_router_downlink_port

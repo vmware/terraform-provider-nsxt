@@ -2,8 +2,7 @@
 layout: "nsxt"
 page_title: "NSXT: nsxt_ns_group"
 sidebar_current: "docs-nsxt-resource-ns-group"
-description: |-
-  Provides a resource to configure ns group on NSX-T manager
+description: A resource to configure a networking and security group in NSX.
 ---
 
 # nsxt_ns_group

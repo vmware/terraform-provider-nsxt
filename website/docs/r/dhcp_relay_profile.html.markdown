@@ -2,8 +2,7 @@
 layout: "nsxt"
 page_title: "NSXT: nsxt_dhcp_relay_profile"
 sidebar_current: "docs-nsxt-resource-dhcp-relay-profile"
-description: |-
-  Provides a resource to configure DHCP relay profile on NSX-T manager
+description: A resource that can be used to configure a DHCP relay profile in NSX.
 ---
 
 # nsxt_dhcp_relay_profile

@@ -2,8 +2,7 @@
 layout: "nsxt"
 page_title: "NSXT: nsxt_dhcp_relay_service"
 sidebar_current: "docs-nsxt-resource-dhcp-relay-service"
-description: |-
-  Provides a resource to configure DHCP relay service on NSX-T manager
+description: A resource that can be used to configure a DHCP relay service in NSX.
 ---
 
 # nsxt_dhcp_relay_service

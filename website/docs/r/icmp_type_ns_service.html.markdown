@@ -2,8 +2,7 @@
 layout: "nsxt"
 page_title: "NSXT: nsxt_icmp_type_ns_service"
 sidebar_current: "docs-nsxt-resource-icmp-type-ns-service"
-description: |-
-  Provides a resource to configure NS service for ICMP on NSX-T Manager.
+description: A resource that can be used to configure an ICMP based networking and security service in NSX.
 ---
 
 # nsxt_icmp_type_ns_service
@@ -17,8 +16,8 @@ resource "nsxt_icmp_type_ns_service" "ns_service_icmp" {
   description  = "S1 provisioned by Terraform"
   display_name = "S1"
   protocol     = "ICMPv4"
-  icmp_type    = "5" 
-  icmp_code    = "1" 
+  icmp_type    = "5"
+  icmp_code    = "1"
 
   tag {
     scope = "color"

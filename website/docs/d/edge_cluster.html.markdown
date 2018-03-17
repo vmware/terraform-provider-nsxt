@@ -2,7 +2,7 @@
 layout: "nsxt"
 page_title: "NSXT: edge_cluster"
 sidebar_current: "docs-nsxt-datasource-edge-cluster"
-description: Edge Cluster data source.
+description: An Edge Cluster data source.
 ---
 
 # nsxt_edge_cluster

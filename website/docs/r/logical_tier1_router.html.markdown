@@ -2,8 +2,7 @@
 layout: "nsxt"
 page_title: "NSXT: nsxt_logical_tier1 router"
 sidebar_current: "docs-nsxt-resource-logical-tier1 router"
-description: |-
-  Provides a resource to configure Logical Tier1 router on NSX-T Manager.
+description: A resource to configure a logical Tier1 router in NSX.
 ---
 
 # nsxt_logical_tier1_router

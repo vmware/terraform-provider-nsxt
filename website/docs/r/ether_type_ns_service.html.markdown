@@ -2,8 +2,7 @@
 layout: "nsxt"
 page_title: "NSXT: nsxt_ether_type_ns_service"
 sidebar_current: "docs-nsxt-resource-ether-type-ns-service"
-description: |-
-  Provides a resource to configure NS service for Ethernet type on NSX-T Manager.
+description: A resource that can be used to configure a layer 2 ethernet networking and security service in NSX.
 ---
 
 # nsxt_ether_type_ns_service

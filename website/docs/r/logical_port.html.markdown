@@ -2,8 +2,7 @@
 layout: "nsxt"
 page_title: "NSXT: nsxt_logical_port"
 sidebar_current: "docs-nsxt-resource-logical-port"
-description: |-
-  Provides a resource to configure Logical Port (LP) on NSX-T Manager.
+description: A resource that can be used to configure a Logical Port in NSX.
 ---
 
 # nsxt_logical_port

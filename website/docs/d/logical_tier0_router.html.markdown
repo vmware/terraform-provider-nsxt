@@ -2,7 +2,7 @@
 layout: "nsxt"
 page_title: "NSXT: logical_tier0_router"
 sidebar_current: "docs-nsxt-datasource-logical-tier0-router"
-description: Logical Tier 0 Router data source.
+description: A logical Tier 0 router data source.
 ---
 
 # nsxt_logical_tier0_router

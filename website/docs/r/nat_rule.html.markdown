@@ -2,8 +2,7 @@
 layout: "nsxt"
 page_title: "NSXT: nsxt_nat_rule"
 sidebar_current: "docs-nsxt-resource-nat-rule"
-description: |-
-  Provides a resource to configure NAT rule on NSX-T manager
+description: A resource to configure a NAT rule in NSX.
 ---
 
 # nsxt_nat_rule

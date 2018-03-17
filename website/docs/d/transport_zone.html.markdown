@@ -2,8 +2,7 @@
 layout: "nsxt"
 page_title: "NSXT: transport_zone"
 sidebar_current: "docs-nsxt-datasource-transport-zone"
-description: |-
-  Provides Transport Zone data source.
+description: A transport zone data source.
 ---
 
 # nsxt_transport_zone

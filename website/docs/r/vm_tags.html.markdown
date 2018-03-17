@@ -2,8 +2,7 @@
 layout: "nsxt"
 page_title: "NSXT: nsxt_vm_tags"
 sidebar_current: "docs-nsxt-resource-vm-tags"
-description: |-
-  Provides a resource to configure Tags for VM for on NSX-T Manager.
+description: A resource to configure tags for a virtual machine in NSX.
 ---
 
 # nsxt_vm_tags

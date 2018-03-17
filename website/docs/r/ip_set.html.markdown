@@ -2,8 +2,7 @@
 layout: "nsxt"
 page_title: "NSXT: nsxt_ip_set"
 sidebar_current: "docs-nsxt-resource-ip-set"
-description: |-
-  Provides a resource to configure IP set on NSX-T manager
+description: A resource that can be used to configure an IP set in NSX.
 ---
 
 # nsxt_ip_set

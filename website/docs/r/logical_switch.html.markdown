@@ -2,8 +2,7 @@
 layout: "nsxt"
 page_title: "NSXT: nsxt_logical_switch"
 sidebar_current: "docs-nsxt-resource-logical-switch"
-description: |-
-  Provides a resource to configure Logical Switch (LS) on NSX-T Manager.
+description: A resource to configure a logical switch in NSX.
 ---
 
 # nsxt_logical_switch

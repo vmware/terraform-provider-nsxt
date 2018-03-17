@@ -2,8 +2,7 @@
 layout: "nsxt"
 page_title: "NSXT: nsxt_l4_port_set_ns_service"
 sidebar_current: "docs-nsxt-resource-l4-port-set-ns-service"
-description: |-
-  Provides a resource to configure NS service for L4 protocol with ports on NSX-T Manager.
+description: A resource that can be used to configure a layer 4 networking and security service with ports in NSX.
 ---
 
 # nsxt_l4_port_set_ns_service

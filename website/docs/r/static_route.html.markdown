@@ -2,8 +2,7 @@
 layout: "nsxt"
 page_title: "NSXT: nsxt_static_route"
 sidebar_current: "docs-nsxt-resource-static-route"
-description: |-
-  Provides a resource to configure static route on NSX-T manager
+description: A resource to configure a static route in NSX.
 ---
 
 # nsxt_static_route
@@ -21,7 +20,7 @@ resource "nsxt_static_route" "static_route" {
 
   next_hop {
     ip_address              = "8.0.0.10"
-    administrative_distance = "1" 
+    administrative_distance = "1"
     logical_router_port_id  = "${nsxt_logical_router_downlink_port.downlink_port.id}"
   }
 
@@ -55,7 +54,7 @@ In addition to arguments listed above, the following attributes are exported:
 * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
 * `next_hop` additional arguments:
     * `bfd_enabled` - Status of bfd for this next hop where bfd_enabled = true indicate bfd is enabled for this next hop and bfd_enabled = false indicate bfd peer is disabled or not configured for this next hop.
-    * `blackhole_action` - Action to be taken on matching packets for NULL routes. 
+    * `blackhole_action` - Action to be taken on matching packets for NULL routes.
 
 ## Importing
 

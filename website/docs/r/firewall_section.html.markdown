@@ -2,8 +2,7 @@
 layout: "nsxt"
 page_title: "NSXT: nsxt_firewall_section"
 sidebar_current: "docs-nsxt-resource-firewall-section"
-description: |-
-  Provides a resource to configure firewall section on NSX-T manager
+description: A resource that can be used to configure a firewall section in NSX.
 ---
 
 # nsxt_firewall_section

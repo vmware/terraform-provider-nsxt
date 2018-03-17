@@ -2,8 +2,7 @@
 layout: "nsxt"
 page_title: "NSXT: nsxt_ip_protocol_ns_service"
 sidebar_current: "docs-nsxt-resource-ip-protocol-ns-service"
-description: |-
-  Provides a resource to configure NS service for IP protocol on NSX-T Manager.
+description: A resource that can be used to configure an IP protocol based networking and security service in NSX.
 ---
 
 # nsxt_ip_protocol_ns_service
