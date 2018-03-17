@@ -52,6 +52,12 @@ The following are prerequisistes that need to be installed in order to run the N
 
 - Terraform 0.10.x - [Terraform installation instructions](https://www.terraform.io/intro/getting-started/install.html)
 
+Make sure that both terraform and go are in your path so they can be executed. To check versions of each you can run the following:
+
+    go version
+
+    terraform version  
+
 # Installation
 
 These commands will allow you to install the NSX Terraform provider:
