@@ -58,6 +58,10 @@ Make sure that both terraform and go are in your path so they can be executed. T
 
     terraform version  
 
+Make sure you have the following directory:
+
+    ~/.terraform.d/plugins/
+
 # Installation
 
 These commands will allow you to install the NSX Terraform provider:
@@ -66,7 +70,7 @@ These commands will allow you to install the NSX Terraform provider:
 
     cd $GOROOT/src/github.com/vmware/terraform-provider-nsxt
 
-    make
+    go build -o ~/.terraform.d/plugins/terraform-provider-nsxt
 
 # Contributing
 
@@ -75,7 +79,7 @@ The terraform-provider-nsxt project team welcomes contributions from the communi
 # Support
 
 The NSX Terraform provider is community supported. For bugs and feature requests please open a Github Issue and label it approprately. As this is a community supported solution there is no SLA for resolutions.
- 
+
 # License
 
 Copyright © 2015-2018 VMware, Inc. All Rights Reserved.
