@@ -17,6 +17,18 @@ import (
 
 var logicalSwitchReplicationModeValues = []string{"MTEP", "SOURCE", ""}
 
+// formatLogicalSwitchRollbackError defines the verbose error when
+// rollback fails on a logical switch creation.
+const formatLogicalSwitchRollbackError = `
+WARNING:
+There was an error during the creation of logical switch %s:
+%s
+Additionally, there was an error deleting the logical switch during rollback:
+%s
+The logical switch may still exist in the NSX. If it does, please manually delete it
+and try again.
+`
+
 // TODO: consider splitting this resource to overlay_ls and vlan_ls
 func resourceNsxtLogicalSwitch() *schema.Resource {
 	return &schema.Resource{
@@ -79,16 +91,6 @@ func resourceNsxtLogicalSwitch() *schema.Resource {
 				Computed:    true,
 			},
 		},
-	}
-}
-
-func resourceNsxtLogicalSwitchCreateRollback(nsxClient *api.APIClient, id string) {
-	log.Printf("[ERROR] Rollback switch %s creation due to unrealized state", id)
-
-	localVarOptionals := make(map[string]interface{})
-	_, err := nsxClient.LogicalSwitchingApi.DeleteLogicalSwitch(nsxClient.Context, id, localVarOptionals)
-	if err != nil {
-		log.Printf("[ERROR] Rollback failed!")
 	}
 }
 
@@ -159,7 +161,14 @@ func resourceNsxtLogicalSwitchCreate(d *schema.ResourceData, m interface{}) erro
 	}
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		resourceNsxtLogicalSwitchCreateRollback(nsxClient, logicalSwitch.Id)
+		// Realization failed - rollback & delete the switch
+		log.Printf("[ERROR] Rollback switch %s creation due to unrealized state", logicalSwitch.Id)
+		localVarOptionals := make(map[string]interface{})
+		_, derr := nsxClient.LogicalSwitchingApi.DeleteLogicalSwitch(nsxClient.Context, logicalSwitch.Id, localVarOptionals)
+		if derr != nil {
+			// rollback failed
+			return fmt.Errorf(formatLogicalSwitchRollbackError, logicalSwitch.Id, err, derr)
+		}
 		return err
 	}
 
