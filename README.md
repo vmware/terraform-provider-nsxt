@@ -13,6 +13,7 @@ Supported data sources:
 
 * edge_cluster
 * logical_tier0_router
+* ns_service
 * switching_profile
 * transport_zone
 
