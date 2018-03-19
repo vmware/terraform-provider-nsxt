@@ -17,7 +17,6 @@ func TestAccResourceNsxtLogicalTier1Router_basic(t *testing.T) {
 	updateName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_logical_tier1_router.test"
 	failoverMode := "PREEMPTIVE"
-	haMode := "ACTIVE_STANDBY"
 	edgeClusterName := getEdgeClusterName()
 
 	resource.Test(t, resource.TestCase{
@@ -28,12 +27,11 @@ func TestAccResourceNsxtLogicalTier1Router_basic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXLogicalTier1RouterCreateTemplate(name, failoverMode, haMode, edgeClusterName),
+				Config: testAccNSXLogicalTier1RouterCreateTemplate(name, failoverMode, edgeClusterName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXLogicalTier1RouterExists(name, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
-					resource.TestCheckResourceAttr(testResourceName, "high_availability_mode", haMode),
 					resource.TestCheckResourceAttr(testResourceName, "failover_mode", failoverMode),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "enable_router_advertisement", "true"),
@@ -43,12 +41,11 @@ func TestAccResourceNsxtLogicalTier1Router_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXLogicalTier1RouterUpdateTemplate(updateName, failoverMode, haMode, edgeClusterName),
+				Config: testAccNSXLogicalTier1RouterUpdateTemplate(updateName, failoverMode, edgeClusterName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXLogicalTier1RouterExists(updateName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updateName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test Update"),
-					resource.TestCheckResourceAttr(testResourceName, "high_availability_mode", haMode),
 					resource.TestCheckResourceAttr(testResourceName, "failover_mode", failoverMode),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "enable_router_advertisement", "false"),
@@ -65,7 +62,6 @@ func TestAccResourceNsxtLogicalTier1Router_importBasic(t *testing.T) {
 	name := fmt.Sprintf("test-nsx-logical-tier1-router")
 	testResourceName := "nsxt_logical_tier1_router.test"
 	failoverMode := "PREEMPTIVE"
-	haMode := "ACTIVE_STANDBY"
 	edgeClusterName := getEdgeClusterName()
 
 	resource.Test(t, resource.TestCase{
@@ -76,7 +72,7 @@ func TestAccResourceNsxtLogicalTier1Router_importBasic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXLogicalTier1RouterCreateTemplate(name, failoverMode, haMode, edgeClusterName),
+				Config: testAccNSXLogicalTier1RouterCreateTemplate(name, failoverMode, edgeClusterName),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -142,7 +138,7 @@ func testAccNSXLogicalTier1RouterCheckDestroy(state *terraform.State, displayNam
 	return nil
 }
 
-func testAccNSXLogicalTier1RouterCreateTemplate(name string, failoverMode string, haMode string, edgeClusterName string) string {
+func testAccNSXLogicalTier1RouterCreateTemplate(name string, failoverMode string, edgeClusterName string) string {
 	return fmt.Sprintf(`
 data "nsxt_edge_cluster" "EC" {
   display_name = "%s"
@@ -152,7 +148,6 @@ resource "nsxt_logical_tier1_router" "test" {
   display_name                = "%s"
   description                 = "Acceptance Test"
   failover_mode               = "%s"
-  high_availability_mode      = "%s"
   edge_cluster_id             = "${data.nsxt_edge_cluster.EC.id}"
   enable_router_advertisement = "true"
   advertise_connected_routes  = "true"
@@ -168,10 +163,10 @@ resource "nsxt_logical_tier1_router" "test" {
     scope = "scope2"
     tag   = "tag2"
   }
-}`, edgeClusterName, name, failoverMode, haMode)
+}`, edgeClusterName, name, failoverMode)
 }
 
-func testAccNSXLogicalTier1RouterUpdateTemplate(name string, failoverMode string, haMode string, edgeClusterName string) string {
+func testAccNSXLogicalTier1RouterUpdateTemplate(name string, failoverMode string, edgeClusterName string) string {
 	return fmt.Sprintf(`
 data "nsxt_edge_cluster" "EC" {
      display_name = "%s"
@@ -181,7 +176,6 @@ resource "nsxt_logical_tier1_router" "test" {
   display_name                = "%s"
   description                 = "Acceptance Test Update"
   failover_mode               = "%s"
-  high_availability_mode      = "%s"
   edge_cluster_id             = "${data.nsxt_edge_cluster.EC.id}"
   enable_router_advertisement = "false"
   advertise_connected_routes  = "true"
@@ -192,5 +186,5 @@ resource "nsxt_logical_tier1_router" "test" {
     scope = "scope3"
     tag   = "tag3"
   }
-}`, edgeClusterName, name, failoverMode, haMode)
+}`, edgeClusterName, name, failoverMode)
 }
