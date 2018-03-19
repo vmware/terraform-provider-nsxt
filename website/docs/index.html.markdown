@@ -36,14 +36,14 @@ Note that in all of the examples you will need to update the `host`, `username`,
 
 ```hcl
 provider "nsxt" {
-  host                 = "192.168.110.41"
-  username             = "admin"
-  password             = "default"
-  allow_unverified_ssl = true
-  max_retries          = 10
-  retry_min_delay      = 500
-  retry_max_delay      = 5000
-  retry_on_statuses    = [429]
+  host                     = "192.168.110.41"
+  username                 = "admin"
+  password                 = "default"
+  allow_unverified_ssl     = true
+  max_retries              = 10
+  retry_min_delay          = 500
+  retry_max_delay          = 5000
+  retry_on_status_codes    = [429]
 }
 
 ```
