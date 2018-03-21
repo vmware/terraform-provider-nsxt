@@ -7,8 +7,7 @@ description: A resource that can be used to configure a DHCP relay profile in NS
 
 # nsxt_dhcp_relay_profile
 
-Provides a resource to configure a DHCP relay profile on NSX-T manager
-The profile can be used in a DHCP relay service, and later consumed by a router
+This resource can be used to configure a NSX DHCP relay profile on the NSX manager. A DHCP relay profile is a type of template that can be used to define a remote DHCP server where DHCP packets can be relayed for DHCP requests of machines attached to NSX logical topologies. The DHCP relay profile can be used in a DHCP relay service and later consumed by a router
 link port.
 
 ## Example Usage
