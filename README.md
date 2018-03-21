@@ -3,7 +3,7 @@
 # terraform-provider-nsxt
 This repository contains the NSX Terraform provider for VMware NSX-T.
 
-NSX is the VMware network and security virtualization platform. More more information on the NSX product please visit the [NSX Product Page](https://www.vmware.com/products/nsx.html)
+NSX is the VMware network and security virtualization platform. More more information on the NSX product, please visit the [NSX Product Page](https://www.vmware.com/products/nsx.html)
 
 Documentation on the NSX platform can be found on the [NSX Documentation page](https://docs.vmware.com/en/VMware-NSX-T/index.html)
 
@@ -28,15 +28,15 @@ Supported resources:
 * igmp_type_ns_service
 * ip_protocol_ns_service
 * ip_set
-* logical_switch
+* l4_port_set_ns_service
 * logical_port
-* logical_tier1_router
 * logical_router_downlink_port
 * logical_router_link_port_on_tier0
 * logical_router_link_port_on_tier1
-* l4_port_set_ns_service
-* ns_group
+* logical_switch
+* logical_tier1_router
 * nat_rule
+* ns_group
 * static_route
 
 # Interoperability
@@ -53,7 +53,7 @@ The following are prerequisites that need to be installed in order to run the NS
 
 - Terraform 0.10.x - [Terraform installation instructions](https://www.terraform.io/intro/getting-started/install.html)
 
-Make sure that both terraform and go are in your path so they can be executed. To check versions of each you can run the following:
+Make sure that both Terraform and Go are in your path so they can be executed. To check versions of each you can run the following:
 
     go version
 
