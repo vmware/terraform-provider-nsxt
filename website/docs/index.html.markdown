@@ -86,19 +86,49 @@ The NSX Terraform provider can be used to manage logical networking and security
 
 ### Logical Networking and Security Example Usage
 
-The following abridged example demonstrates using the NSX Terraform provider to create a  logical switch and tier1 logical router. It also connects the logical switch to the tier1 logical router and uplinks the  T1 router to a pre-created T0 router.
+The following example demonstrates using the NSX Terraform provider to create a logical switch and tier1 logical router. It then connects the logical switch to the tier1 logical router and uplinks the T1 router to a pre-created T0 router.
 
+#### Example variables.tf File
+
+This file allows you to define some variables that can be reused in multiple .tf files.
 
 ```hcl
-# Configure the VMware NSX-T Provider
+variable "nsx_manager" {}
+variable "nsx_username" {}
+variable "nsx_password" {}
+```
+#### Example terraform.tfvars File
+
+This file allows you to set some variables that can be reused in multiple .tf files.
+
+```hcl
+nsx_manager = "192.168.110.41"
+nsx_username = "admin"
+nsx_password = "default"
+```
+
+#### Example nsx.tf file
+
+This file will define the logical networking topology that Terraform will create in NSX.
+
+```hcl
+#
+# The first step is to configure the VMware NSX provider to connect to the NSX REST API running on the NSX manager.
+#
 provider "nsxt" {
-  host                 = "192.168.110.41"
-  username             = "admin"
-  password             = "default"
-  allow_unverified_ssl = true
+   host                  = "${var.nsx_manager}"
+   username              = "${var.nsx_username}"
+   password              = "${var.nsx_password}"
+   insecure              = true
+   max_retries           = 10
+   retry_min_delay       = 500
+   retry_max_delay       = 5000
+   retry_on_status_codes = [429]
 }
 
-# Define NSX-T Tag in order to be able easily to search for the created objects in NSX
+#
+# Here we show that you define a NSX tag which can be used later to easily to search for the created objects in NSX.
+#
 variable "nsx_tag_scope" {
     default = "project"
 }
@@ -106,11 +136,15 @@ variable "nsx_tag" {
     default = "terraform-demo"
 }
 
-
-# Create the data sources we will need to refer to later
+#
+# This part of the example shows some data sources we will need to refer to later in the .tf file. They include the transport zone, tier 0 router and edge cluster.
+#
 data "nsxt_transport_zone" "overlay_tz" {
     display_name = "tz1"
 }
+#
+# The tier 0 router (T0) is considered a "provider" router that is pre-created by the NSX admin. A T0 router is used for north/south connectivity between the logical networking space and the physical networking space. Many tier 1 routers will be connected to a tier 0 router.
+#
 data "nsxt_logical_tier0_router" "tier0_router" {
   display_name = "DefaultT0Router"
 }
@@ -118,7 +152,9 @@ data "nsxt_edge_cluster" "edge_cluster1" {
     display_name = "EdgeCluster1"
 }
 
-# Create NSX-T Logical Switch
+#
+# This shows the settings required to create a NSX logical switch to which you can attach virtual machines.
+#
 resource "nsxt_logical_switch" "switch1" {
     admin_state = "UP"
     description = "LS created by Terraform"
@@ -135,7 +171,9 @@ resource "nsxt_logical_switch" "switch1" {
     }
 }
 
-# Create T1 router
+#
+# In this part of the example the settings are defined that are required to create a T1 router. In NSX a T1 router is often used on a per user, tenant, or application basis. Each application may have it's own T1 router. The T1 router provides the default gateway for machines on logical switches connected to the T1 router.
+#
 resource "nsxt_logical_tier1_router" "tier1_router" {
     description                 = "Tier1 router provisioned by Terraform"
     display_name                = "TfTier1"
@@ -151,8 +189,9 @@ resource "nsxt_logical_tier1_router" "tier1_router" {
 	tag = "${var.nsx_tag}"
     }
 }
-
-# Create a port on the T0 router. We will connect the T1 router to this port
+#
+# This resource creates a logical port on the T0 router. We will connect the T1 router to this port to enable connectivity from the tenant / application networks to the networks to the cloud.
+#
 resource "nsxt_logical_router_link_port_on_tier0" "link_port_tier0" {
     description       = "TIER0_PORT1 provisioned by Terraform"
     display_name      = "TIER0_PORT1"
@@ -163,7 +202,9 @@ resource "nsxt_logical_router_link_port_on_tier0" "link_port_tier0" {
     }
 }
 
-# Create a T1 uplink port and connect it to T0 router
+#
+# Here we create a tier 1 router uplink port and connect it to T0 router port created in the previous example.
+#
 resource "nsxt_logical_router_link_port_on_tier1" "link_port_tier1" {
     description                   = "TIER1_PORT1 provisioned by Terraform"
     display_name                  = "TIER1_PORT1"
@@ -175,7 +216,9 @@ resource "nsxt_logical_router_link_port_on_tier1" "link_port_tier1" {
     }
 }
 
-# Create a switchport on our logical switch
+#
+# Like their physical counterpart a logical switch can have switch ports. In this example Terraform will create a logical switch port on a logical switch.
+#
 resource "nsxt_logical_port" "logical_port1" {
     admin_state       = "UP"
     description       = "LP1 provisioned by Terraform"
@@ -187,8 +230,11 @@ resource "nsxt_logical_port" "logical_port1" {
     }
 }
 
-# Create downlink port on the T1 router and connect it to the switchport we created above
-# The ip_address will be default gateway for VMs connected to this logical switch
+#
+# In order to connect a logical switch to a tier 1 logical router we will need a downlink port on the tier 1 router and will need to  connect it to the switch port we created above.
+#
+# The IP address provided in the `ip_address` property will be default gateway for virtual machines connected to this logical switch.
+#
 resource "nsxt_logical_router_downlink_port" "downlink_port" {
     description                   = "DP1 provisioned by Terraform"
     display_name                  = "DP1"
@@ -204,6 +250,7 @@ resource "nsxt_logical_router_downlink_port" "downlink_port" {
 ```
 
 In order to be able to connect VMs to the newly created logical switch a new vpshere_network datasource need to be defined.
+
 ```hcl
 data "vsphere_network" "terraform_switch1" {
     name = "${nsxt_logical_switch.switch1.display_name}"
@@ -212,7 +259,7 @@ data "vsphere_network" "terraform_switch1" {
 }
 
 ```
-The datasource above should be refered in network_id inside network_interface section for vsphere_virtual_machine resource.
+The datasource in the above example should be referred in network_id inside network_interface section for vsphere_virtual_machine resource.
 
 ## Feature Requests, Bug Reports, and Contributing
 
