@@ -103,7 +103,9 @@ This file allows you to set some variables that can be reused in multiple .tf fi
 
 ```hcl
 nsx_manager = "192.168.110.41"
+
 nsx_username = "admin"
+
 nsx_password = "default"
 ```
 
