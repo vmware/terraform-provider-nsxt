@@ -80,9 +80,14 @@ provider "nsxt" {
 
 ```
 
-### Example Usage
+## NSX Logical Networking
 
-The following abridged example demonstrates a current basic usage of the provider to create Logical Switch, Tier1 router, connect the Logical Switch to the T1 router as well as connect the T1 router to the provider T0 router.
+The NSX Terraform provider can be used to manage logical networking and security constructs in NSX. This includes logical switching, routing and firewall.
+
+### Logical Networking and Security Example Usage
+
+The following abridged example demonstrates using the NSX Terraform provider to create a  logical switch and tier1 logical router. It also connects the logical switch to the tier1 logical router and uplinks the  T1 router to a pre-created T0 router.
+
 
 ```hcl
 # Configure the VMware NSX-T Provider
