@@ -7,7 +7,7 @@ description: A resource to configure a static route in NSX.
 
 # nsxt_static_route
 
-Provides a resource to configure static route on NSX-T manager
+This resource provides a means to configure static routes in NSX to determine where IP traffic is routed.
 
 ## Example Usage
 

@@ -7,7 +7,7 @@ description: A resource that can be used to configure a Logical Port in NSX.
 
 # nsxt_logical_port
 
-Provides a resource to configure Logical Port (LP) on NSX-T Manager.
+This resource provides a resource to configure a logical port on a logical switch in the NSX system. Like physical switches a logical switch can have one or more ports which can be connected to virtual machines or logical routers.
 
 ## Example Usage
 

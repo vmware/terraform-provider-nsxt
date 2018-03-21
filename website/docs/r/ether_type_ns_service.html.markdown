@@ -7,7 +7,7 @@ description: A resource that can be used to configure a layer 2 ethernet network
 
 # nsxt_ether_type_ns_service
 
-Provides a resource to configure NS service for Ethernet type on NSX-T Manager
+This resource provides a way to configure a networking and security service which can be used within NSX. This specific service is for the layer 2 Ethernet protocol.
 
 ## Example Usage
 

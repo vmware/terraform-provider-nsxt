@@ -7,7 +7,7 @@ description: A resource that can be used to configure logical router downlink po
 
 # nsxt_logical_router_downlink_port
 
-Provides a resource to configure Logical Router Downlink Port on NSX-T Manager.
+This resource provides a means to define a downlink port on a logical router to connect a logical router to a logical switch. The result of this is to provide a default gateway to virtual machines running on the logical switch.
 
 ## Example Usage
 

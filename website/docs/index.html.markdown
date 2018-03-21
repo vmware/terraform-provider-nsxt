@@ -18,7 +18,7 @@ Please use the navigation to the left to read about available data sources and r
 
 ## Basic Configuration of the NSX Terraform Provider
 
-In order to use the NSX Terraform provider you must first configure the provider to communicate with the VMmare NSX manager. The NSX manager is the system which serves the NSX REST API and provides a way to configure the desired state of the NSX system. The configuration of the NSX provider requires the IP address, hostname, or FQDN of the NSX manager.
+In order to use the NSX Terraform provider you must first configure the provider to communicate with the VMware NSX manager. The NSX manager is the system which serves the NSX REST API and provides a way to configure the desired state of the NSX system. The configuration of the NSX provider requires the IP address, hostname, or FQDN of the NSX manager.
 
 The NSX provider offers several ways to authenticate to the NSX manager. Credentials can be provided statically or provided as environment variables. In addition, client certificates can be used for authentication. For authentication with certificates Terraform will require a certificate file and private key file in PEM format. To use client certificates the client certificate needs to be registered with NSX-T manager prior to invoking Terraform.
 
@@ -119,7 +119,7 @@ provider "nsxt" {
   host                  = "${var.nsx_manager}"
   username              = "${var.nsx_username}"
   password              = "${var.nsx_password}"
-  insecure              = true
+  allow_unverified_ssl  = true
   max_retries           = 10
   retry_min_delay       = 500
   retry_max_delay       = 5000

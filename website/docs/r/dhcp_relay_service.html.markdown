@@ -7,9 +7,9 @@ description: A resource that can be used to configure a DHCP relay service in NS
 
 # nsxt_dhcp_relay_service
 
-Provides a resource to configure DHCP relay service on NSX-T manager
-The DHCP relay service uses a DHCP relay profile, and later consumed by a router
-link port.
+This resource provides a way to configure the DHCP relay service on the NSX manager.
+The DHCP relay service uses a DHCP relay profile and later consumed by a router
+link port to provide DHCP addresses to virtual machines connected to a logical switch.
 
 ## Example Usage
 

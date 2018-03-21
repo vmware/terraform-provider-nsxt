@@ -7,7 +7,7 @@ description: A resource to configure a networking and security group in NSX.
 
 # nsxt_ns_group
 
-Provides a resource to configure ns group on NSX-T manager
+This resource provides a method to create and manage a network and security (NS) group in NSX. A NS group is used to group other objects into collections for application of other settings.
 
 ## Example Usage
 

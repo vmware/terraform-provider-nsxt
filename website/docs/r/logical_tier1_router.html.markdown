@@ -7,7 +7,7 @@ description: A resource to configure a logical Tier1 router in NSX.
 
 # nsxt_logical_tier1_router
 
-Provides a resource to configure Logical Tier1 router on NSX-T Manager.
+This resource provides a method for the management of a tier 1 logical router. A tier 1 logical router is often used for tenants, users and applications. There can be many tier 1 logical routers connected to a common tier 0 provider router.
 
 ## Example Usage
 

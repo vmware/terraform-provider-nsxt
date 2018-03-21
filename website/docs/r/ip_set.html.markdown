@@ -7,7 +7,7 @@ description: A resource that can be used to configure an IP set in NSX.
 
 # nsxt_ip_set
 
-Provides a resource to configure IP set on NSX-T manager
+This resources provides a way to configure an IP set in NSX. An IP set is a collection of IP addresses. It is often used in the configuration of the NSX firewall.
 
 ## Example Usage
 

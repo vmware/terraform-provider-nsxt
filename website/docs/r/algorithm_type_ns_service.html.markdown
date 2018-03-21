@@ -7,7 +7,7 @@ description: A resource that can be used to configure a networking and security 
 
 # nsxt_algorithm_type_ns_service
 
-Provides a resource to configure NS service for algorithm type on NSX-T Manager
+This resource provides a way to configure a networking and security service which can be used with the NSX firewall. A networking and security service is an object that contains the TCP/UDP algorithm, source ports and destination ports in a single entity.
 
 ## Example Usage
 

@@ -7,7 +7,7 @@ description: A resource to configure a logical switch in NSX.
 
 # nsxt_logical_switch
 
-Provides a resource to configure Logical Switch (LS) on NSX-T Manager.
+This resource provides a method to create a logical switch in NSX. Virtual machines can then be connected to the appropriate logical switch for the desired topology and network connectivity.
 
 ## Example Usage
 

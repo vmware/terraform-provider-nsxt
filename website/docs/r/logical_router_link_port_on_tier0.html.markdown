@@ -7,7 +7,7 @@ description: A resource that can be used to configure a logical router link port
 
 # nsxt_logical_router_link_port_on_tier0
 
-Provides a resource to configure Logical Router link Port on Tier-0 Router on NSX-T Manager.
+This resource provides the ability to configure a logical router link port on a tier 0 logical router. This port can then be used to connect the tier 0 logical router to another logical router.
 
 ## Example Usage
 

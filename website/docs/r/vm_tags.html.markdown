@@ -6,8 +6,8 @@ description: A resource to configure tags for a virtual machine in NSX.
 ---
 
 # nsxt_vm_tags
-  Provides a resource to configure Tags for Virtual Machine for on NSX-T Manager. The Virtual Machine is not managed by NSX-T, but NSX-T allows attachment of tags to the VM. This enables tag-based grouping. Deletion of nsxt_vm_tags resource will remove all tags from the VM, and is equivalent to update operation with empty tag set.
 
+  This resource provides a means to configure tags that are applied to objects such as virtual machines. A virtual machine is not directly managed by NSX however, NSX allows attachment of tags to a virtual machine. This tagging enables tag based grouping of objects. Deletion of `nsxt_vm_tags` resource will remove all tags from the virtual machine and is equivalent to update operation with empty tag set.
 
 ## Example Usage
 

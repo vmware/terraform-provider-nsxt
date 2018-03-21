@@ -7,7 +7,7 @@ description: A resource that can be used to configure an IGMP based networking a
 
 # nsxt_igmp_type_ns_service
 
-Provides a resource to configure NS service for IGMP on NSX-T Manager
+This resource provides a way to configure a networking and security service which can be used within NSX. This specific service is for the IGMP protocol.
 
 ## Example Usage
 

@@ -7,7 +7,7 @@ description: A resource that can be used to configure an ICMP based networking a
 
 # nsxt_icmp_type_ns_service
 
-Provides a resource to configure NS service for ICMP on NSX-T Manager
+This resource provides a way to configure a networking and security service which can be used within NSX. This specific service is for the ICMP protocol.
 
 ## Example Usage
 

@@ -3,9 +3,9 @@
 # terraform-provider-nsxt
 This repository contains the NSX Terraform provider for VMware NSX-T.
 
-NSX is the VMware network and security virtualization platform. More more infomration on the NSX product please visit the [NSX Product Page](https://www.vmware.com/products/nsx.html)
+NSX is the VMware network and security virtualization platform. More more information on the NSX product please visit the [NSX Product Page](https://www.vmware.com/products/nsx.html)
 
-Documenation on the NSX plaform can be found on the [NSX Documenatation page](https://docs.vmware.com/en/VMware-NSX-T/index.html)
+Documentation on the NSX platform can be found on the [NSX Documentation page](https://docs.vmware.com/en/VMware-NSX-T/index.html)
 
 # Overview
 
@@ -47,7 +47,7 @@ The following versions of NSX-T are supported:
 
 # Prerequisites
 
-The following are prerequisistes that need to be installed in order to run the NSX Terraform provider:
+The following are prerequisites that need to be installed in order to run the NSX Terraform provider:
 
 - Go 1.9.x onwards - [Go installation instructions](https://golang.org/doc/install)
 
@@ -79,7 +79,7 @@ The terraform-provider-nsxt project team welcomes contributions from the communi
 
 # Support
 
-The NSX Terraform provider is community supported. For bugs and feature requests please open a Github Issue and label it approprately. As this is a community supported solution there is no SLA for resolutions.
+The NSX Terraform provider is community supported. For bugs and feature requests please open a Github Issue and label it appropriately. As this is a community supported solution there is no SLA for resolutions.
 
 # License
 

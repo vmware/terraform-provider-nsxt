@@ -7,7 +7,7 @@ description: A resource that can be used to configure a firewall section in NSX.
 
 # nsxt_firewall_section
 
-Provides a resource to configure firewall section on NSX-T manager
+This resource provides a way to configure a firewall section on the NSX manager. A firewall section is a collection of firewall rules that are grouped together.
 
 ## Example Usage
 
