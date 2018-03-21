@@ -260,7 +260,7 @@ resource "nsxt_logical_router_downlink_port" "downlink_port" {
 
 ```
 
-In order to be able to connect VMs to the newly created logical switch a new vpshere_network datasource need to be defined.
+In order to be able to connect VMs to the newly created logical switch a new `vpshere_network` datasource need to be defined.
 
 ```hcl
 data "vsphere_network" "terraform_switch1" {
@@ -270,7 +270,7 @@ data "vsphere_network" "terraform_switch1" {
 }
 
 ```
-The datasource in the above example should be referred in network_id inside network_interface section for vsphere_virtual_machine resource.
+The datasource in the above example should be referred in `network_id` inside `network_interface` section for `vsphere_virtual_machine` resource.
 
 ## Feature Requests, Bug Reports, and Contributing
 
