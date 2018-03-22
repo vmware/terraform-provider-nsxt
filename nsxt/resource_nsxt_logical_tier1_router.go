@@ -154,12 +154,12 @@ func resourceNsxtLogicalTier1RouterCreate(d *schema.ResourceData, m interface{})
 	routerType := "TIER1"
 	edgeClusterID := d.Get("edge_cluster_id").(string)
 	logicalRouter := manager.LogicalRouter{
-		Description:          description,
-		DisplayName:          displayName,
-		Tags:                 tags,
-		FailoverMode:         failoverMode,
-		RouterType:           routerType,
-		EdgeClusterId:        edgeClusterID,
+		Description:   description,
+		DisplayName:   displayName,
+		Tags:          tags,
+		FailoverMode:  failoverMode,
+		RouterType:    routerType,
+		EdgeClusterId: edgeClusterID,
 	}
 
 	logicalRouter, resp, err := nsxClient.LogicalRoutingAndServicesApi.CreateLogicalRouter(nsxClient.Context, logicalRouter)
@@ -242,13 +242,13 @@ func resourceNsxtLogicalTier1RouterUpdate(d *schema.ResourceData, m interface{})
 	routerType := "TIER1"
 	edgeClusterID := d.Get("edge_cluster_id").(string)
 	logicalRouter := manager.LogicalRouter{
-		Revision:             revision,
-		Description:          description,
-		DisplayName:          displayName,
-		Tags:                 tags,
-		FailoverMode:         failoverMode,
-		RouterType:           routerType,
-		EdgeClusterId:        edgeClusterID,
+		Revision:      revision,
+		Description:   description,
+		DisplayName:   displayName,
+		Tags:          tags,
+		FailoverMode:  failoverMode,
+		RouterType:    routerType,
+		EdgeClusterId: edgeClusterID,
 	}
 	logicalRouter, resp, err := nsxClient.LogicalRoutingAndServicesApi.UpdateLogicalRouter(nsxClient.Context, id, logicalRouter)
 
