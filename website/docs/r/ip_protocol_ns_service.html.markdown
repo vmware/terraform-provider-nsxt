@@ -51,4 +51,4 @@ An existing IP protocol NS service can be [imported][docs-import] into this reso
 terraform import nsxt_ip_protocol_ns_service.ns_service_ip UUID
 ```
 
-The above would import the IP protocol NS service named `ns_service_ip` with the nsx id `UUID`
+The above command imports the IP protocol based networking and security service named `ns_service_ip` with the NSX id `UUID`.

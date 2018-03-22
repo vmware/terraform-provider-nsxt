@@ -58,4 +58,4 @@ An existing Logical Port can be [imported][docs-import] into this resource, via 
 terraform import nsxt_logical_port.logical_port UUID
 ```
 
-The above would import the Logical Port named `logical_port` with the nsx id `UUID`
+The above command imports the logical port named `logical_port` with the NSX id `UUID`.

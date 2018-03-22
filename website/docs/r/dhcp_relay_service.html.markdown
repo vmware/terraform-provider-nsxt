@@ -75,4 +75,4 @@ An existing DHCP Relay service can be [imported][docs-import] into this resource
 terraform import nsxt_dhcp_relay_service.dr_service UUID
 ```
 
-The above would import the DHCP Relay service named `dr_service` with the nsx id `UUID`
+The above command imports the DHCP relay service named `dr_service` with the NSX id `UUID`.

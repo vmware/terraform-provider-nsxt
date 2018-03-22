@@ -74,4 +74,4 @@ An existing DHCP Relay profile can be [imported][docs-import] into this resource
 terraform import nsxt_dhcp_relay_profile.dr_profile UUID
 ```
 
-The above would import the DHCP Relay profile named `dr_profile` with the nsx id `UUID`
+The above command imports the DHCP relay profile named `dr_profile` with the NSX id `UUID`.

@@ -62,4 +62,4 @@ An existing Logical Router Downlink Port can be [imported][docs-import] into thi
 terraform import nsxt_logical_router_downlink_port.downlink_port UUID
 ```
 
-The above would import the Logical Router Downlink Port named `downlink_port` with the nsx id `UUID`
+The above command imports the logical router downlink port named `downlink_port` with the NSX id `UUID`.

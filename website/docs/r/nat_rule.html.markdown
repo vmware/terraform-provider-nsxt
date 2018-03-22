@@ -7,7 +7,7 @@ description: A resource to configure a NAT rule in NSX.
 
 # nsxt_nat_rule
 
-This resource provides a means to configure a NAT rule in NSX. NAT provides network address translation between one IP address space and another IP address space. NAT rules can be destination NAT or source NAT rules. 
+This resource provides a means to configure a NAT rule in NSX. NAT provides network address translation between one IP address space and another IP address space. NAT rules can be destination NAT or source NAT rules.
 
 ## Example Usage
 
@@ -67,4 +67,4 @@ An existing NAT rule can be [imported][docs-import] into this resource, via the 
 terraform import nsxt_nat_rule.rule1 logical-router-uuid/nat-rule-num
 ```
 
-The above would import the NAT rule named `rule1` with the number id `nat-rule-num` that belongs to the Tier-1 logical router with the nsx id `logical-router-uuid`
+The above command imports the NAT rule named `rule1` with the number id `nat-rule-num` that belongs to the tier 1 logical router with the NSX id `logical-router-uuid`.

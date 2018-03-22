@@ -58,4 +58,4 @@ An existing logical router link port on Tier-1 can be [imported][docs-import] in
 terraform import nsxt_logical_router_link_port_on_tier1.link_port_tier1 UUID
 ```
 
-The above would import the logical router link port on Tier-1 named `link_port_tier1` with the nsx id `UUID`
+The above command imports the logical router link port on the tier 1 router named `link_port_tier1` with the NSX id `UUID`.

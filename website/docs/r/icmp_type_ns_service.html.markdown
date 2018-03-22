@@ -55,4 +55,4 @@ An existing ICMP type NS Service can be [imported][docs-import] into this resour
 terraform import nsxt_icmp_type_ns_service.x id
 ```
 
-The above would import the ICMP type NS Service named `x` with the nsx id `id`
+The above service imports the ICMP type network and security service named `x` with the NSX id `id`.

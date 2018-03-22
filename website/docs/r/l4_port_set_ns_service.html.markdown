@@ -54,4 +54,4 @@ An existing L4 port set NS service can be [imported][docs-import] into this reso
 terraform import nsxt_l4_port_set_ns_service.ns_service_l4 UUID
 ```
 
-The above would import the L4 port set NS service named `ns_service_l4` with the nsx id `UUID`
+The above command imports the layer 4 port based networking and security service named `ns_service_l4` with the NSX id `UUID`.

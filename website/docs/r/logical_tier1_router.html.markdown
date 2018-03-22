@@ -64,4 +64,4 @@ An existing logical tier1 router can be [imported][docs-import] into this resour
 terraform import nsxt_logical_tier1_router.tier1_router UUID
 ```
 
-The above would import the logical tier1 router named `tier1_router` with the nsx id `UUID`
+The above command imports the logical tier 1 router named `tier1_router` with the NSX id `UUID`.

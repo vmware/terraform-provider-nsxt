@@ -55,4 +55,4 @@ An existing Algorithm type NS service can be [imported][docs-import] into this r
 terraform import nsxt_algorithm_type_ns_service.ns_service_alg UUID
 ```
 
-The above would import the Algorithm type NS service named `ns_service_alg` with the nsx id `UUID`
+The above command imports the algorithm based networking and security service named `ns_service_alg` with the NSX id `UUID`.

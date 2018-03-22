@@ -51,4 +51,4 @@ An existing Ethernet type NS service can be [imported][docs-import] into this re
 terraform import nsxt_ether_type_ns_service.etns UUID
 ```
 
-The above would import the Ethernet type NS service named `etns` with the nsx id `UUID`
+The above command imports the ethernet type networking and security service named `etns` with the NSX id `UUID`.

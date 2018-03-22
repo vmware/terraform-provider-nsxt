@@ -54,7 +54,7 @@ In addition to arguments listed above, the following attributes are exported:
 
 ## Importing
 
-An existing NS group can be [imported][docs-import] into this resource, via the following command:
+An existing networking and security group can be [imported][docs-import] into this resource, via the following command:
 
 [docs-import]: /docs/import/index.html
 
@@ -62,4 +62,4 @@ An existing NS group can be [imported][docs-import] into this resource, via the 
 terraform import nsxt_ns_group.group2 UUID
 ```
 
-The above would import the NS group named `group2` with the nsx id `UUID`
+The above command imports the networking and security group named `group2` with the NSX id `UUID`.

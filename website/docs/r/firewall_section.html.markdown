@@ -114,4 +114,4 @@ An existing Firewall section can be [imported][docs-import] into this resource, 
 terraform import nsxt_firewall_section.firewall_sect UUID
 ```
 
-The above would import the Firewall section named `firewall_sect` with the nsx id `UUID`
+The above command imports the firewall section named `firewall_sect` with the NSX id `UUID`.

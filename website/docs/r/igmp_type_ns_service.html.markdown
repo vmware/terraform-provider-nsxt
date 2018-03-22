@@ -49,4 +49,4 @@ An existing IGMP type NS Service can be [imported][docs-import] into this resour
 terraform import nsxt_igmp_type_ns_service.ns_service_igmp UUID
 ```
 
-The above would import the IGMP type NS Service named `ns_service_igmp` with the nsx id `UUID`
+The above command imports the IGMP based networking and security service named `ns_service_igmp` with the NSX id `UUID`.

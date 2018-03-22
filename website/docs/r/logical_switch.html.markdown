@@ -65,4 +65,4 @@ An existing X can be [imported][docs-import] into this resource, via the followi
 terraform import nsxt_logical_switch.switch1 UUID
 ```
 
-The above would import the logical switch named `switch1` with the nsx id `UUID`
+The above command imports the logical switch named `switch1` with the NSX id `UUID`.

@@ -52,4 +52,4 @@ An existing IP set can be [imported][docs-import] into this resource, via the fo
 terraform import nsxt_ip_set.ip_set1 UUID
 ```
 
-The above would import the IP set named `ip_set1` with the nsx id `UUID`
+The above command imports the IP set named `ip_set1` with the NSX id `UUID`.

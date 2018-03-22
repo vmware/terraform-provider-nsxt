@@ -39,4 +39,4 @@ An existing Tags collection can be [imported][docs-import] into this resource, v
 terraform import nsxt_vm_tags.vm1_tags id
 ```
 
-The above would import nsxt vm tags resource named `vm1_tags` with the nsx id `id`, where id is external ID (not the BIOS id) of the VM.
+The above would import NSX virtual machine tags as a resource named `vm1_tags` with the NSX id `id`, where id is external ID (not the BIOS id) of the virtual machine.

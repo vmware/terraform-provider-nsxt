@@ -66,4 +66,4 @@ An existing static route can be [imported][docs-import] into this resource, via 
 terraform import nsxt_static_route.static_route logical-router-uuid/static-route-num
 ```
 
-The above would import the static route named `static_route` with the number `static-route-num` that belongs to the Tier-1 logical router with the nsx id `logical-router-uuid`
+The above command imports the static route named `static_route` with the number `static-route-num` that belongs to the tier 1 logical router with the NSX id `logical-router-uuid`.
