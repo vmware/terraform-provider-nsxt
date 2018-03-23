@@ -41,7 +41,7 @@ Supported resources:
 
 # Interoperability
 
-The following versions of NSX-T are supported:
+The following versions of NSX are supported:
 
 - NSX-T 2.1.*
 
