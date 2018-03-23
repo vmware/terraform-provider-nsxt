@@ -1,7 +1,7 @@
 
 
 # terraform-provider-nsxt
-This repository contains the NSX Terraform provider for VMware NSX-T.
+This repository contains the NSX Terraform provider for VMware NSX.
 
 NSX is the VMware network and security virtualization platform. More more information on the NSX product, please visit the [NSX Product Page](https://www.vmware.com/products/nsx.html)
 
