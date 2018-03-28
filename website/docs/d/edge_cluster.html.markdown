@@ -11,7 +11,7 @@ This data source provides information about Edge clusters configured in NSX. An 
 
 ## Example Usage
 
-```
+```hcl
 data "nsxt_edge_cluster" "edge_cluster1" {
   display_name = "edgecluster"
 }

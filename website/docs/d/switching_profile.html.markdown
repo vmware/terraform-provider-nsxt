@@ -11,7 +11,7 @@ The switching profile data source provides information about switching profiles 
 
 ## Example Usage
 
-```
+```hcl
 data "nsxt_switching_profile" "qos_profile" {
   display_name = "qos-profile"
 }

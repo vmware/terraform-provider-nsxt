@@ -11,7 +11,7 @@ This data source provides information about a network and security (NS) service 
 
 ## Example Usage
 
-```
+```hcl
 data "nsxt_ns_service" "ns_service_dns" {
   display_name = "DNS"
 }

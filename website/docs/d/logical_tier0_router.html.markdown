@@ -11,7 +11,7 @@ This data source provides information about logical Tier 0 routers configured in
 
 ## Example Usage
 
-```
+```hcl
 data "nsxt_logical_tier0_router" "tier0_router" {
   display_name = "PLR1"
 }

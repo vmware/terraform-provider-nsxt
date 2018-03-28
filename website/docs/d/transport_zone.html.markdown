@@ -11,7 +11,7 @@ This data source provides information about Transport Zones (TZ) configured in N
 
 ## Example Usage
 
-```
+```hcl
 data "nsxt_transport_zone" "overlay_transport_zone" {
   display_name = "1-transportzone-87"
 }
