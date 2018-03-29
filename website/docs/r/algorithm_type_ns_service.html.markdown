@@ -1,7 +1,7 @@
 ---
 layout: "nsxt"
 page_title: "NSXT: nsxt_algorithm_type_ns_service"
-sidebar_current: "docs-nsxt-resource-algorithm-type-ns-service"
+sidebar_current: "docs-nsxt-ns-service-resource-algorithm-type"
 description: A resource that can be used to configure a networking and security service in NSX.
 ---
 

@@ -1,7 +1,7 @@
 ---
 layout: "nsxt"
 page_title: "NSXT: nsxt_l4_port_set_ns_service"
-sidebar_current: "docs-nsxt-resource-l4-port-set-ns-service"
+sidebar_current: "docs-nsxt-ns-service-resource-l4-port-set"
 description: A resource that can be used to configure a layer 4 networking and security service with ports in NSX.
 ---
 
