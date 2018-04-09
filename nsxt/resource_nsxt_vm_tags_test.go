@@ -56,9 +56,10 @@ func TestAccResourceNsxtVMTags_import_basic(t *testing.T) {
 				Config: testAccNSXVMTagsCreateTemplate(vmID),
 			},
 			{
-				ResourceName:      vmTagsFullResourceName,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            vmTagsFullResourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"instance_id"},
 			},
 		},
 	})
