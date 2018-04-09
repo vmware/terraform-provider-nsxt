@@ -8,29 +8,58 @@ description: |-
 
 # The NSX Terraform Provider
 
-The NSX Terraform provider gives the NSX administrator a way to automate NSX to provide virtualized networking and security services using both ESXi and KVM based hypervisor hosts as well as container networking and security.
+The NSX Terraform provider gives the NSX administrator a way to automate NSX to
+provide virtualized networking and security services using both ESXi and KVM
+based hypervisor hosts as well as container networking and security.
 
-More information on NSX can be found on the [NSX Product Page](https://www.vmware.com/products/nsx.html)
+More information on NSX can be found on the [NSX Product
+Page](https://www.vmware.com/products/nsx.html)
 
-Documentation on the NSX platform can be found on the [NSX Documentation Page](https://docs.vmware.com/en/VMware-NSX-T/index.html)
+Documentation on the NSX platform can be found on the [NSX Documentation
+Page](https://docs.vmware.com/en/VMware-NSX-T/index.html)
 
-Please use the navigation to the left to read about available data sources and resources.
+Please use the navigation to the left to read about available data sources and
+resources.
 
 ## Basic Configuration of the NSX Terraform Provider
 
-In order to use the NSX Terraform provider you must first configure the provider to communicate with the VMware NSX manager. The NSX manager is the system which serves the NSX REST API and provides a way to configure the desired state of the NSX system. The configuration of the NSX provider requires the IP address, hostname, or FQDN of the NSX manager.
+In order to use the NSX Terraform provider you must first configure the
+provider to communicate with the VMware NSX manager. The NSX manager is the
+system which serves the NSX REST API and provides a way to configure the
+desired state of the NSX system. The configuration of the NSX provider requires
+the IP address, hostname, or FQDN of the NSX manager.
 
-The NSX provider offers several ways to authenticate to the NSX manager. Credentials can be provided statically or provided as environment variables. In addition, client certificates can be used for authentication. For authentication with certificates Terraform will require a certificate file and private key file in PEM format. To use client certificates the client certificate needs to be registered with NSX-T manager prior to invoking Terraform.
+The NSX provider offers several ways to authenticate to the NSX manager.
+Credentials can be provided statically or provided as environment variables. In
+addition, client certificates can be used for authentication. For
+authentication with certificates Terraform will require a certificate file and
+private key file in PEM format. To use client certificates the client
+certificate needs to be registered with NSX-T manager prior to invoking
+Terraform.
 
-The provider also can accept both signed and self-signed server certificates. It is recommended that in production environments you only use certificates signed by a certificate authority. NSX ships by default with a self-signed server certificates as the hostname of the NSX manager is not known until the NSX administrator determines what name or IP to use.
+The provider also can accept both signed and self-signed server certificates.
+It is recommended that in production environments you only use certificates
+signed by a certificate authority. NSX ships by default with a self-signed
+server certificates as the hostname of the NSX manager is not known until the
+NSX administrator determines what name or IP to use.
 
-Setting the `allow_unverified_ssl` parameter to `true` will direct the Terraform client to skip server certificate verification. This is not recommended in production deployments as it is recommended that you use trusted connection using certificates signed by a certificate authority.
+Setting the `allow_unverified_ssl` parameter to `true` will direct the
+Terraform client to skip server certificate verification. This is not
+recommended in production deployments as it is recommended that you use trusted
+connection using certificates signed by a certificate authority.
 
-With the `ca_file` parameter you can also specify a file that contains your certificate authority certificate in PEM format to verify certificates with a certificate authority.
+With the `ca_file` parameter you can also specify a file that contains your
+certificate authority certificate in PEM format to verify certificates with a
+certificate authority.
 
-There are also a number of other parameters that can be set to tune how the provider connects to the NSX REST API. It is recommended you leave these to the defaults unless you experience issues in which case they can be tuned to optimize the system in your environment.
+There are also a number of other parameters that can be set to tune how the
+provider connects to the NSX REST API. It is recommended you leave these to the
+defaults unless you experience issues in which case they can be tuned to
+optimize the system in your environment.
 
-Note that in all of the examples you will need to update the `host`, `username`, and `password` settings to match those configured in your NSX deployment.
+Note that in all of the examples you will need to update the `host`,
+`username`, and `password` settings to match those configured in your NSX
+deployment.
 
 ### Example of Configuration with Credentials
 
@@ -82,15 +111,20 @@ provider "nsxt" {
 
 ## NSX Logical Networking
 
-The NSX Terraform provider can be used to manage logical networking and security constructs in NSX. This includes logical switching, routing and firewall.
+The NSX Terraform provider can be used to manage logical networking and
+security constructs in NSX. This includes logical switching, routing and
+firewall.
 
 ### Logical Networking and Security Example Usage
 
-The following example demonstrates using the NSX Terraform provider to create a logical switch and tier1 logical router. It then connects the logical switch to the tier1 logical router and uplinks the T1 router to a pre-created T0 router.
+The following example demonstrates using the NSX Terraform provider to create a
+logical switch and tier1 logical router. It then connects the logical switch to
+the tier1 logical router and uplinks the T1 router to a pre-created T0 router.
 
 #### Example variables.tf File
 
-This file allows you to define some variables that can be reused in multiple .tf files.
+This file allows you to define some variables that can be reused in multiple
+.tf files.
 
 ```hcl
 variable "nsx_manager" {}
@@ -99,7 +133,8 @@ variable "nsx_password" {}
 ```
 #### Example terraform.tfvars File
 
-This file allows you to set some variables that can be reused in multiple .tf files.
+This file allows you to set some variables that can be reused in multiple .tf
+files.
 
 ```hcl
 nsx_manager = "192.168.110.41"
@@ -111,7 +146,8 @@ nsx_password = "default"
 
 #### Example nsx.tf file
 
-This file will define the logical networking topology that Terraform will create in NSX.
+This file will define the logical networking topology that Terraform will
+create in NSX.
 
 ```hcl
 #
@@ -280,7 +316,8 @@ resource "nsxt_logical_router_downlink_port" "downlink_port" {
 }
 ```
 
-In order to be able to connect VMs to the newly created logical switch a new `vpshere_network` datasource need to be defined.
+In order to be able to connect VMs to the newly created logical switch a new
+`vpshere_network` datasource need to be defined.
 
 ```hcl
 data "vsphere_network" "terraform_switch1" {
@@ -290,8 +327,14 @@ data "vsphere_network" "terraform_switch1" {
 }
 
 ```
-The datasource in the above example should be referred in `network_id` inside `network_interface` section for `vsphere_virtual_machine` resource.
+
+The datasource in the above example should be referred in `network_id` inside
+`network_interface` section for `vsphere_virtual_machine` resource.
 
 ## Feature Requests, Bug Reports, and Contributing
 
-For more information how how to submit feature requests, bug reports, or details on how to make your own contributions to the provider, see the NSX-T provider project page.
+For more information how how to submit feature requests, bug reports, or
+details on how to make your own contributions to the provider, see the [NSX-T
+provider project page][nsxt-provider-project-page].
+
+[nsxt-provider-project-page]: https://github.com/terraform-providers/terraform-provider-nsxt
