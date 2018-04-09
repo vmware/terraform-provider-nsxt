@@ -80,9 +80,9 @@ provider "nsxt" {
 ### Example of Setting Environment Variables
 
 ```hcl
-export NSX_MANAGER_HOST="192.168.110.41"
-export NSX_USERNAME="admin"
-export NSX_PASSWORD="default"
+export NSXT_MANAGER_HOST="192.168.110.41"
+export NSXT_USERNAME="admin"
+export NSXT_PASSWORD="default"
 ```
 
 ### Example using a Client Certificate
@@ -108,6 +108,44 @@ provider "nsxt" {
 }
 
 ```
+
+## Argument Reference
+
+The following arguments are used to configure the VMware NSX-T Provider:
+
+* `host` - (Required) The host name or IP address of the NSX-T manager. Can also
+  be specified with the `NSXT_MANAGER_HOST` environment variable.
+* `username` - (Required) The user name to connect to the NSX-T manager as. Can
+  also be specified with the `NSXT_USERNAME` environment variable.
+* `password` - (Required) The password for the NSX-T manager user. Can also be
+  specified with the `NSXT_PASSWORD` environment variable.
+* `client_auth_cert_file` - (Optional) The path to a certificate file for
+  certificate authorization. Can also be specified with the
+  `NSXT_CLIENT_AUTH_CERT_FILE` environment variable.
+* `client_auth_key_file` - (Optional) The path to a private key file for the
+  certificate supplied to `client_auth_cert_file`. Can also be specified with
+  the `NSXT_CLIENT_AUTH_KEY_FILE` environment variable.
+* `allow_unverified_ssl` - (Optional) Boolean that can be set to true to disable
+  SSL certificate verification. This should be used with care as it could allow
+  an attacker to intercept your auth token. If omitted, default value is
+  `false`. Can also be specified with the `NSXT_ALLOW_UNVERIFIED_SSL`
+  environment variable.
+* `ca_file` - (Optional) The path to an optional CA certificate file for SSL
+  validation. Can also be specified with the `NSXT_CA_FILE` environment
+  variable.
+* `max_retries` - (Optional) The maximum number of retires before failing an API
+  request. Default: `10` Can also be specified with the `NSXT_MAX_RETRIES`
+  environment variable.
+* `retry_min_delay` - (Optional) The minimum delay, in milliseconds, between
+  retires made to the API. Default:`500`. Can also be specified with the
+  `NSXT_RETRY_MIN_DELAY` environment variable.
+* `retry_max_delay` - (Optional) The maximum delay, in milliseconds, between
+  retires made to the API. Default:`5000`. Can also be specified with the
+  `NSXT_RETRY_MAX_DELAY` environment variable.
+* `retry_on_status_codes` - (Optional) A list of HTTP status codes to retry on.
+  By default, the provider will retry on HTTP error 429 (too many requests),
+  essentially retrying on throttled connections. Can also be specified with the
+  `NSXT_RETRY_ON_STATUS_CODES` environment variable.
 
 ## NSX Logical Networking
 
