@@ -85,4 +85,4 @@ The NSX Terraform provider is community supported. For bugs and feature requests
 
 Copyright © 2015-2018 VMware, Inc. All Rights Reserved.
 
-The NSX Terraform provider is available under [MPL2.0 license](https://github.com/vmware/terraform-provider-nsxt/blob/master/LICENSE.txt).
+The NSX Terraform provider is available under [MPL2.0 license](https://github.com/terraform-providers/terraform-provider-nsxt/blob/master/LICENSE.txt).
