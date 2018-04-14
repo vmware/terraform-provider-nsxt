@@ -147,3 +147,13 @@ make testacc TESTARGS="-run=TestAccResourceNsxtLogicalSwitch"
 This following example would run all of the acceptance tests matching
 `TestAccResourceNsxtLogicalSwitch`. Change this for the specific tests you want
 to run.
+
+# Support
+
+The NSX Terraform provider is community supported. For bugs and feature requests please open a Github Issue and label it appropriately. As this is a community supported solution there is no SLA for resolutions.
+
+# License
+
+Copyright © 2015-2018 VMware, Inc. All Rights Reserved.
+
+The NSX Terraform provider is available under [MPL2.0 license](https://github.com/terraform-providers/terraform-provider-nsxt/blob/master/LICENSE.txt).
