@@ -15,9 +15,7 @@ This provider plugin is maintained by a collaboration between
 [VMware](https://www.vmware.com/) and the Terraform team at
 [HashiCorp](https://www.hashicorp.com/).
 
-Documentation on the NSX platform can be found on the [NSX Documentation page][ns-doc-website]
-
-[nsx-doc-website]: https://docs.vmware.com/en/VMware-NSX-T/index.html
+Documentation on the NSX platform can be found at the [NSX-T Documentation page](https://docs.vmware.com/en/VMware-NSX-T/index.html)
 
 # Using the Provider
 
@@ -156,7 +154,7 @@ to run.
 
 The following versions of NSX are supported:
 
--NSX-T 2.1.*
+ * NSX-T 2.1.*
 
 # Support
 
