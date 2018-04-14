@@ -1,6 +1,6 @@
 # Terraform NSX-T Provider
 
-This is the repository for the Terraform NSX-T Provider, which one can use with
+This is the repository for the Terraform NSX Provider, which one can use with
 Terraform to work with [VMware NSX-T][vmware-nsxt].
 
 [vmware-nsxt]: https://www.vmware.com/products/nsx.html
@@ -14,6 +14,10 @@ website][tf-website] and the [GitHub project page][tf-github].
 This provider plugin is maintained by a collaboration between
 [VMware](https://www.vmware.com/) and the Terraform team at
 [HashiCorp](https://www.hashicorp.com/).
+
+Documentation on the NSX platform can be found on the [NSX Documentation page][ns-doc-website]
+
+[nsx-doc-website]: https://docs.vmware.com/en/VMware-NSX-T/index.html
 
 # Using the Provider
 
@@ -147,6 +151,12 @@ make testacc TESTARGS="-run=TestAccResourceNsxtLogicalSwitch"
 This following example would run all of the acceptance tests matching
 `TestAccResourceNsxtLogicalSwitch`. Change this for the specific tests you want
 to run.
+
+# Interoperability
+
+The following versions of NSX are supported:
+
+-NSX-T 2.1.*
 
 # Support
 
