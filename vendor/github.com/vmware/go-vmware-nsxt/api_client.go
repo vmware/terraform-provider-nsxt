@@ -321,7 +321,7 @@ func (c *APIClient) callAPI(request *http.Request) (*http.Response, error) {
 	if request.Body != nil {
 		buf := new(bytes.Buffer)
 		buf.ReadFrom(request.Body)
-		requestBodyString = buf.String() 
+		requestBodyString = buf.String()
 		request.Body = ioutil.NopCloser(strings.NewReader(requestBodyString))
 	}
 
@@ -330,34 +330,34 @@ func (c *APIClient) callAPI(request *http.Request) (*http.Response, error) {
 	config := c.cfg.RetriesConfiguration
 	maxRetries := int(math.Max(2, float64(config.MaxRetries)))
 	// loop until not getting the retry-able error, or until max retries
-    for n_try := 1; n_try < maxRetries; n_try++ {
-    	if localVarHttpResponse == nil {
-        	// Non retry-able response
-        	return localVarHttpResponse, err
-        } else if c.shouldRetryOnStatus(localVarHttpResponse.StatusCode) {
-	    	// sleep a random increasing time
-    		float_delay := float64(rand.Intn(config.RetryMinDelay * n_try))
-	  	  	fixed_delay := time.Duration(math.Min(float64(config.RetryMaxDelay), float_delay))
-    		time.Sleep(fixed_delay * time.Millisecond)
-	        // reset Request.Body
+	for n_try := 1; n_try < maxRetries; n_try++ {
+		if localVarHttpResponse == nil {
+			// Non retry-able response
+			return localVarHttpResponse, err
+		} else if c.shouldRetryOnStatus(localVarHttpResponse.StatusCode) {
+			// sleep a random increasing time
+			float_delay := float64(rand.Intn(config.RetryMinDelay * n_try))
+			fixed_delay := time.Duration(math.Min(float64(config.RetryMaxDelay), float_delay))
+			time.Sleep(fixed_delay * time.Millisecond)
+			// reset Request.Body
 			if request.Body != nil {
-	        	request.Body = ioutil.NopCloser(strings.NewReader(requestBodyString))
-	        }
-    	    // perform the request again
+				request.Body = ioutil.NopCloser(strings.NewReader(requestBodyString))
+			}
+			// perform the request again
 			localVarHttpResponse, err = c.callAPIInternal(request)
-        } else {
-        	// Non retry-able response
-        	return localVarHttpResponse, err
-        }
-    }
-    // max retries exceeded
+		} else {
+			// Non retry-able response
+			return localVarHttpResponse, err
+		}
+	}
+	// max retries exceeded
 	return localVarHttpResponse, err
 }
 
 func (c *APIClient) callAPIInternal(request *http.Request) (*http.Response, error) {
 	localVarHttpResponse, err := c.cfg.HTTPClient.Do(request)
 
-	if err == nil && localVarHttpResponse.StatusCode == 400 {
+	if err == nil && (localVarHttpResponse.StatusCode == 400 || localVarHttpResponse.StatusCode == 500) {
 		bodyBytes, _ := ioutil.ReadAll(localVarHttpResponse.Body)
 		err = fmt.Errorf("Code %d, response %s", localVarHttpResponse.StatusCode, bodyBytes)
 	}
