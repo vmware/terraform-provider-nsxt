@@ -107,6 +107,8 @@ func Provider() terraform.ResourceProvider {
 			"nsxt_ns_group":                          resourceNsxtNsGroup(),
 			"nsxt_firewall_section":                  resourceNsxtFirewallSection(),
 			"nsxt_nat_rule":                          resourceNsxtNatRule(),
+			"nsxt_ip_block":                          resourceNsxtIpBlock(),
+			"nsxt_ip_pool":                           resourceNsxtIpPool(),
 			"nsxt_ip_set":                            resourceNsxtIPSet(),
 			"nsxt_static_route":                      resourceNsxtStaticRoute(),
 			"nsxt_vm_tags":                           resourceNsxtVMTags(),
