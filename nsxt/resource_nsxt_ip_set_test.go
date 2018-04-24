@@ -142,7 +142,7 @@ func testAccNSXIpSetCheckDestroy(state *terraform.State, displayName string) err
 	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
 	for _, rs := range state.RootModule().Resources {
 
-		if rs.Type != "nsxt_logical_port" {
+		if rs.Type != "nsxt_ip_set" {
 			continue
 		}
 

@@ -104,7 +104,7 @@ func testAccNSXDhcpRelayServiceCheckDestroy(state *terraform.State, displayName 
 	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
 	for _, rs := range state.RootModule().Resources {
 
-		if rs.Type != "nsxt_logical_port" {
+		if rs.Type != "nsxt_dhcp_relay_service" {
 			continue
 		}
 

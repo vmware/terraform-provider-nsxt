@@ -360,7 +360,7 @@ func testAccNSXFirewallSectionCheckDestroy(state *terraform.State, displayName s
 
 	for _, rs := range state.RootModule().Resources {
 
-		if rs.Type != "nsxt_logical_port" {
+		if rs.Type != "nsxt_firewall_section" {
 			continue
 		}
 
