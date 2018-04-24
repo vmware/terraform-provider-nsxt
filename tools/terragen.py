@@ -82,10 +82,10 @@ def write_header(f):
     pretty_writeln(f, "import (")
     shift()
     pretty_writeln(f, "\"fmt\"")
-    pretty_writeln(f, "\"log\"")
     pretty_writeln(f, "\"github.com/hashicorp/terraform/helper/schema\"")
     pretty_writeln(f, "%s \"github.com/vmware/go-vmware-nsxt\"" % SDK_PACKAGE_NAME)
     pretty_writeln(f, "\"github.com/vmware/go-vmware-nsxt/%s\"" % MANAGER_PACKAGE_NAME)
+    pretty_writeln(f, "\"log\"")
     pretty_writeln(f, "\"net/http\"")
     unshift()
     pretty_writeln(f, ")\n")
@@ -181,7 +181,7 @@ def write_object(f, resource, attrs, is_create=True):
                          fixed_name,
                          attr['type']))
 
-    pretty_writeln(f, "%s := %s.%s {" % (lowercase_first(resource), MANAGER_PACKAGE_NAME, resource))
+    pretty_writeln(f, "%s := %s.%s{" % (lowercase_first(resource), MANAGER_PACKAGE_NAME, resource))
     shift()
     for attr in used_attrs:
         pretty_writeln(f, "%s: %s," % (attr, lowercase_first(attr)))
@@ -455,7 +455,14 @@ def main():
         pretty_writeln(f, "return &schema.Resource{")
         shift()
         for op in ("Create", "Read", "Update", "Delete"):
-            pretty_writeln(f, "%s: resourceNsxt%s%s," % (op, resource, op))
+            spaces = "  " if op == "Read" else ""
+            pretty_writeln(f, "%s: %sresourceNsxt%s%s," % (op, spaces, resource, op))
+        # Add the importer line
+        pretty_writeln(f, "Importer: &schema.ResourceImporter{")
+        shift()
+        pretty_writeln(f, "State: schema.ImportStatePassthrough,")
+        unshift()
+        pretty_writeln(f, "},")
 
         f.write("\n")
         pretty_writeln(f, "Schema: map[string]*schema.Schema{")
