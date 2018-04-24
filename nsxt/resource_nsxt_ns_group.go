@@ -114,7 +114,7 @@ func getMembershipCriteriaFromSchema(d *schema.ResourceData) []manager.NsGroupTa
 	return expresionList
 }
 
-func setMembershipCriteriaInSchema(d *schema.ResourceData, membershipCriterias []manager.NsGroupTagExpression) {
+func setMembershipCriteriaInSchema(d *schema.ResourceData, membershipCriterias []manager.NsGroupTagExpression) error {
 	var expresionList []map[string]interface{}
 	for _, criteria := range membershipCriterias {
 		elem := make(map[string]interface{})
@@ -125,7 +125,8 @@ func setMembershipCriteriaInSchema(d *schema.ResourceData, membershipCriterias [
 		elem["target_type"] = criteria.TargetType
 		expresionList = append(expresionList, elem)
 	}
-	d.Set("membership_criteria", expresionList)
+	err := d.Set("membership_criteria", expresionList)
+	return err
 }
 
 func getMembersFromSchema(d *schema.ResourceData) []manager.NsGroupSimpleExpression {
@@ -145,7 +146,7 @@ func getMembersFromSchema(d *schema.ResourceData) []manager.NsGroupSimpleExpress
 	return expresionList
 }
 
-func setMembersInSchema(d *schema.ResourceData, members []manager.NsGroupSimpleExpression) {
+func setMembersInSchema(d *schema.ResourceData, members []manager.NsGroupSimpleExpression) error {
 	var expresionList []map[string]interface{}
 	for _, member := range members {
 		elem := make(map[string]interface{})
@@ -153,7 +154,8 @@ func setMembersInSchema(d *schema.ResourceData, members []manager.NsGroupSimpleE
 		elem["value"] = member.Value
 		expresionList = append(expresionList, elem)
 	}
-	d.Set("member", expresionList)
+	err := d.Set("member", expresionList)
+	return err
 }
 
 func resourceNsxtNsGroupCreate(d *schema.ResourceData, m interface{}) error {
@@ -208,8 +210,12 @@ func resourceNsxtNsGroupRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("description", nsGroup.Description)
 	d.Set("display_name", nsGroup.DisplayName)
 	setTagsInSchema(d, nsGroup.Tags)
-	setMembersInSchema(d, nsGroup.Members)
-	setMembershipCriteriaInSchema(d, nsGroup.MembershipCriteria)
+	err1 := setMembersInSchema(d, nsGroup.Members)
+
+	err2 := setMembershipCriteriaInSchema(d, nsGroup.MembershipCriteria)
+	if err1 != nil || err2 != nil {
+		return fmt.Errorf("Error during NsGroup set in schema: %v / %v", err1, err2)
+	}
 
 	return nil
 }

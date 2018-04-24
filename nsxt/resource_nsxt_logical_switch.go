@@ -198,12 +198,18 @@ func resourceNsxtLogicalSwitchRead(d *schema.ResourceData, m interface{}) error 
 	d.Set("description", logicalSwitch.Description)
 	d.Set("display_name", logicalSwitch.DisplayName)
 	setTagsInSchema(d, logicalSwitch.Tags)
-	setAddressBindingsInSchema(d, logicalSwitch.AddressBindings)
+	err = setAddressBindingsInSchema(d, logicalSwitch.AddressBindings)
+	if err != nil {
+		return fmt.Errorf("Error during logical switch address bindings set in schema: %v", err)
+	}
 	d.Set("admin_state", logicalSwitch.AdminState)
 	d.Set("ip_pool_id", logicalSwitch.IpPoolId)
 	d.Set("mac_pool_id", logicalSwitch.MacPoolId)
 	d.Set("replication_mode", logicalSwitch.ReplicationMode)
-	setSwitchingProfileIdsInSchema(d, nsxClient, logicalSwitch.SwitchingProfileIds)
+	err = setSwitchingProfileIdsInSchema(d, nsxClient, logicalSwitch.SwitchingProfileIds)
+	if err != nil {
+		return fmt.Errorf("Error during logical switch profiles set in schema: %v", err)
+	}
 	d.Set("transport_zone_id", logicalSwitch.TransportZoneId)
 	d.Set("vlan", logicalSwitch.Vlan)
 	d.Set("vni", logicalSwitch.Vni)

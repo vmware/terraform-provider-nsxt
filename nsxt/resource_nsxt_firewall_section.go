@@ -158,7 +158,7 @@ func returnServicesResourceReferences(services []manager.FirewallService) []map[
 	return servicesList
 }
 
-func setRulesInSchema(d *schema.ResourceData, rules []manager.FirewallRule) {
+func setRulesInSchema(d *schema.ResourceData, rules []manager.FirewallRule) error {
 	var rulesList []map[string]interface{}
 	for _, rule := range rules {
 		elem := make(map[string]interface{})
@@ -181,7 +181,8 @@ func setRulesInSchema(d *schema.ResourceData, rules []manager.FirewallRule) {
 
 		rulesList = append(rulesList, elem)
 	}
-	d.Set("rule", rulesList)
+	err := d.Set("rule", rulesList)
+	return err
 }
 
 func getServicesResourceReferences(services []interface{}) []manager.FirewallService {
@@ -291,11 +292,14 @@ func resourceNsxtFirewallSectionRead(d *schema.ResourceData, m interface{}) erro
 	d.Set("revision", firewallSection.Revision)
 	d.Set("description", firewallSection.Description)
 	d.Set("display_name", firewallSection.DisplayName)
-	setTagsInSchema(d, firewallSection.Tags)
-	setRulesInSchema(d, firewallSection.Rules)
 	d.Set("is_default", firewallSection.IsDefault)
 	d.Set("section_type", firewallSection.SectionType)
 	d.Set("stateful", firewallSection.Stateful)
+	setTagsInSchema(d, firewallSection.Tags)
+	err = setRulesInSchema(d, firewallSection.Rules)
+	if err != nil {
+		return fmt.Errorf("Error during FirewallSection rules set in schema: %v", err)
+	}
 
 	// Getting the applied tos will require another api call (for NSX 2.1 or less)
 	firewallSection2, resp, err := nsxClient.ServicesApi.GetSection(nsxClient.Context, id)
@@ -307,7 +311,10 @@ func resourceNsxtFirewallSectionRead(d *schema.ResourceData, m interface{}) erro
 	if err != nil {
 		return fmt.Errorf("Error during FirewallSection %s read: %v", id, err)
 	}
-	setResourceReferencesInSchema(d, firewallSection2.AppliedTos, "applied_to")
+	err = setResourceReferencesInSchema(d, firewallSection2.AppliedTos, "applied_to")
+	if err != nil {
+		return fmt.Errorf("Error during FirewallSection AppliedTos set in schema: %v", err)
+	}
 
 	return nil
 }

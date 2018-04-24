@@ -102,7 +102,10 @@ func resourceNsxtLogicalPortRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("description", logicalPort.Description)
 	d.Set("logical_switch_id", logicalPort.LogicalSwitchId)
 	d.Set("admin_state", logicalPort.AdminState)
-	setSwitchingProfileIdsInSchema(d, nsxClient, logicalPort.SwitchingProfileIds)
+	err = setSwitchingProfileIdsInSchema(d, nsxClient, logicalPort.SwitchingProfileIds)
+	if err != nil {
+		return fmt.Errorf("Error during logical port switching profiles set in schema: %v", err)
+	}
 	setTagsInSchema(d, logicalPort.Tags)
 
 	return nil

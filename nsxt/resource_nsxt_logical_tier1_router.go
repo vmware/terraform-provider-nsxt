@@ -215,7 +215,10 @@ func resourceNsxtLogicalTier1RouterRead(d *schema.ResourceData, m interface{}) e
 	d.Set("advanced_config", logicalRouter.AdvancedConfig)
 	d.Set("edge_cluster_id", logicalRouter.EdgeClusterId)
 	d.Set("failover_mode", logicalRouter.FailoverMode)
-	setResourceReferencesInSchema(d, logicalRouter.FirewallSections, "firewall_sections")
+	err = setResourceReferencesInSchema(d, logicalRouter.FirewallSections, "firewall_sections")
+	if err != nil {
+		return fmt.Errorf("Error during LogicalTier1Router firewall sections set in schema: %v", err)
+	}
 	d.Set("preferred_edge_cluster_member_index", logicalRouter.PreferredEdgeClusterMemberIndex)
 	d.Set("router_type", logicalRouter.RouterType)
 
