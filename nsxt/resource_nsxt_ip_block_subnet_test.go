@@ -34,6 +34,9 @@ func TestAccResourceNsxtIpBlockSubnet_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttr(testResourceName, "size", fmt.Sprint(size)),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "allocation_ranges.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, "allocation_ranges.0.start"),
+					resource.TestCheckResourceAttrSet(testResourceName, "allocation_ranges.0.end"),
 					// TODO(asarfaty): remove the comment on the next line once NSX supports getting the block_id
 					//resource.TestCheckResourceAttrSet(testResourceName, "block_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "cidr"),
@@ -50,6 +53,9 @@ func TestAccResourceNsxtIpBlockSubnet_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test Update"),
 					resource.TestCheckResourceAttr(testResourceName, "size", fmt.Sprint(size)),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "allocation_ranges.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, "allocation_ranges.0.start"),
+					resource.TestCheckResourceAttrSet(testResourceName, "allocation_ranges.0.end"),
 					// TODO(asarfaty): remove the comment on the next line once NSX supports getting the block_id
 					//resource.TestCheckResourceAttrSet(testResourceName, "block_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "cidr"),

@@ -176,3 +176,29 @@ func validateCidr() schema.SchemaValidateFunc {
 		return
 	}
 }
+
+func isPowerOfTwo(num int) bool {
+	for num >= 2 {
+		if num%2 != 0 {
+			return false
+		}
+		num = num / 2
+	}
+	return num == 1
+}
+
+func validatePowerOf2() schema.SchemaValidateFunc {
+	return func(i interface{}, k string) (s []string, es []error) {
+		v, ok := i.(int)
+		if !ok {
+			es = append(es, fmt.Errorf("expected type of %s to be int", k))
+			return
+		}
+
+		if !isPowerOfTwo(v) {
+			es = append(es, fmt.Errorf(
+				"expected %s to be a power of 2, got: %d", k, v))
+		}
+		return
+	}
+}

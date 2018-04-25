@@ -45,18 +45,36 @@ func resourceNsxtIpBlockSubnet() *schema.Resource {
 				ForceNew:    true,
 			},
 			"size": &schema.Schema{
-				// TODO(asarfaty): add validation for power of 2
-				Type:        schema.TypeInt,
-				Description: "Represents the size or number of ip addresses in the subnet",
-				Required:    true,
-				ForceNew:    true,
+				Type:         schema.TypeInt,
+				Description:  "Represents the size or number of ip addresses in the subnet",
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validatePowerOf2(),
 			},
 			"cidr": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "Represents network address and the prefix length which will be associated with a layer-2 broadcast domain",
 				Computed:    true,
 			},
-			// TODO(asarfaty) add allocation ranges
+			"allocation_ranges": &schema.Schema{
+				Type:        schema.TypeList,
+				Description: "A collection of IPv4 Pool Ranges",
+				Computed:    true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"start": &schema.Schema{
+							Type:        schema.TypeString,
+							Description: "The start IP Address of the IP Range",
+							Computed:    true,
+						},
+						"end": &schema.Schema{
+							Type:        schema.TypeString,
+							Description: "The end IP Address of the IP Range",
+							Computed:    true,
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -90,6 +108,18 @@ func resourceNsxtIpBlockSubnetCreate(d *schema.ResourceData, m interface{}) erro
 	return resourceNsxtIpBlockSubnetRead(d, m)
 }
 
+func setAllocationRangesInSchema(d *schema.ResourceData, ranges []manager.IpPoolRange) error {
+	allocationRanges := make([]map[string]interface{}, 0, len(ranges))
+	for _, rng := range ranges {
+		elem := make(map[string]interface{})
+		elem["start"] = rng.Start
+		elem["end"] = rng.End
+		allocationRanges = append(allocationRanges, elem)
+	}
+	err := d.Set("allocation_ranges", allocationRanges)
+	return err
+}
+
 func resourceNsxtIpBlockSubnetRead(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 	id := d.Id()
@@ -112,7 +142,10 @@ func resourceNsxtIpBlockSubnetRead(d *schema.ResourceData, m interface{}) error 
 	d.Set("block_id", ipBlockSubnet.BlockId)
 	d.Set("size", ipBlockSubnet.Size)
 	setTagsInSchema(d, ipBlockSubnet.Tags)
-	//d.Set("allocation_range", ipBlockSubnet.AllocationRanges)
+	err = setAllocationRangesInSchema(d, ipBlockSubnet.AllocationRanges)
+	if err != nil {
+		return fmt.Errorf("Error during IpBlockSubnet allocation ranges set in schema: %v", err)
+	}
 	d.Set("cidr", ipBlockSubnet.Cidr)
 	d.Set("revision", ipBlockSubnet.Revision)
 
