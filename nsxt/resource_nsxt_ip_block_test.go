@@ -9,7 +9,6 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/vmware/go-vmware-nsxt"
 	"net/http"
-	"regexp"
 	"testing"
 )
 
@@ -61,89 +60,6 @@ func TestAccResourceNsxtIpBlock_basic(t *testing.T) {
 	})
 }
 
-func TestAccResourceNsxtIpBlock_withSubnets(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-ip-block")
-	updateName := fmt.Sprintf("%s-update", name)
-	testResourceName := "nsxt_ip_block.test"
-	cidr1 := "1.1.1.0/24"
-	cidr2 := "2.2.2.0/24"
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
-		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXIpBlockCheckDestroy(state, name)
-		},
-		Steps: []resource.TestStep{
-			{
-				// Create an IP block with 2 subnets
-				Config: testAccNSXIpBlockWithSubnetTemplate(name, cidr1, 2),
-				Check: resource.ComposeTestCheckFunc(
-					testAccNSXIpBlockExists(name, testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
-					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
-					resource.TestCheckResourceAttr(testResourceName, "cidr", cidr1),
-					resource.TestCheckResourceAttr(testResourceName, "subnet.#", "2"),
-					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
-				),
-			},
-			{
-				// Update the IP block name
-				Config: testAccNSXIpBlockWithSubnetTemplate(updateName, cidr1, 2),
-				Check: resource.ComposeTestCheckFunc(
-					testAccNSXIpBlockExists(updateName, testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", updateName),
-					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
-					resource.TestCheckResourceAttr(testResourceName, "cidr", cidr1),
-					resource.TestCheckResourceAttr(testResourceName, "subnet.#", "2"),
-					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
-				),
-			},
-			{
-				// Add a subnet
-				Config: testAccNSXIpBlockWithSubnetTemplate(updateName, cidr1, 3),
-				Check: resource.ComposeTestCheckFunc(
-					testAccNSXIpBlockExists(updateName, testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", updateName),
-					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
-					resource.TestCheckResourceAttr(testResourceName, "cidr", cidr1),
-					resource.TestCheckResourceAttr(testResourceName, "subnet.#", "3"),
-					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
-				),
-			},
-			{
-				// Delete a subnet
-				Config: testAccNSXIpBlockWithSubnetTemplate(updateName, cidr1, 2),
-				Check: resource.ComposeTestCheckFunc(
-					testAccNSXIpBlockExists(updateName, testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", updateName),
-					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
-					resource.TestCheckResourceAttr(testResourceName, "cidr", cidr1),
-					resource.TestCheckResourceAttr(testResourceName, "subnet.#", "2"),
-					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
-				),
-			},
-			{
-				// Test updating the Cidr (ForceNew)
-				Config: testAccNSXIpBlockWithSubnetTemplate(updateName, cidr2, 2),
-				Check: resource.ComposeTestCheckFunc(
-					testAccNSXIpBlockExists(updateName, testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", updateName),
-					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
-					resource.TestCheckResourceAttr(testResourceName, "cidr", cidr2),
-					resource.TestCheckResourceAttr(testResourceName, "subnet.#", "2"),
-					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
-				),
-			},
-			{
-				// Updating the subnet itself is not allowed
-				Config:      testAccNSXIpBlockWithNamedSubnetsTemplate(updateName, cidr2, 2, "upd"),
-				ExpectError: regexp.MustCompile(".*"),
-			},
-		},
-	})
-}
-
 func TestAccResourceNsxtIpBlock_importBasic(t *testing.T) {
 	name := "test-nsx-ip-block"
 	testResourceName := "nsxt_ip_block.test"
@@ -157,29 +73,6 @@ func TestAccResourceNsxtIpBlock_importBasic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNSXIpBlockCreateTemplate(name, "1.1.1.0/24"),
-			},
-			{
-				ResourceName:      testResourceName,
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
-}
-
-func TestAccResourceNsxtIpBlock_importWithSubnets(t *testing.T) {
-	name := "test-nsx-ip-block"
-	testResourceName := "nsxt_ip_block.test"
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
-		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXIpBlockCheckDestroy(state, name)
-		},
-		Steps: []resource.TestStep{
-			{
-				Config: testAccNSXIpBlockWithSubnetTemplate(name, "3.0.0.0/16", 3),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -277,37 +170,4 @@ resource "nsxt_ip_block" "test" {
     tag   = "tag2"
   }
 }`, updatedName, cidr)
-}
-
-func testAccNSXIpBlockSubnetTemplate(name string) string {
-	return fmt.Sprintf(`
-  subnet {
-    display_name = "%s"
-    description  = "subnet"
-    size         = "16"
-  }
-`, name)
-}
-
-func testAccNSXIpBlockWithNamedSubnetsTemplate(name string, cidr string, nSubnets int, subnetNamePrf string) string {
-	subnets := ""
-	for i := 0; i < nSubnets; i++ {
-		subnets += testAccNSXIpBlockSubnetTemplate(fmt.Sprintf("%s-%d", subnetNamePrf, i))
-	}
-
-	return fmt.Sprintf(`
-resource "nsxt_ip_block" "test" {
-  display_name = "%s"
-  description  = "Acceptance Test"
-  cidr         = "%s"
-
-  tag {
-    scope = "scope1"
-    tag   = "tag1"
-  }
-`, name, cidr) + subnets + "}"
-}
-
-func testAccNSXIpBlockWithSubnetTemplate(name string, cidr string, nSubnets int) string {
-	return testAccNSXIpBlockWithNamedSubnetsTemplate(name, cidr, nSubnets, "sub")
 }

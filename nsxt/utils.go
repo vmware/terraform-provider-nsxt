@@ -48,24 +48,36 @@ func getRevisionSchema() *schema.Schema {
 }
 
 // utilities to define & handle tags
-func getTagsSchema() *schema.Schema {
+func getTagsSchemaInternal(forceNew bool) *schema.Schema {
 	return &schema.Schema{
 		Type:        schema.TypeSet,
 		Description: "Set of opaque identifiers meaningful to the API user",
 		Optional:    true,
+		ForceNew:    forceNew,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"scope": &schema.Schema{
 					Type:     schema.TypeString,
 					Required: true,
+					ForceNew: forceNew,
 				},
 				"tag": &schema.Schema{
 					Type:     schema.TypeString,
 					Required: true,
+					ForceNew: forceNew,
 				},
 			},
 		},
 	}
+}
+
+// utilities to define & handle tags
+func getTagsSchema() *schema.Schema {
+	return getTagsSchemaInternal(false)
+}
+
+func getTagsSchemaForceNew() *schema.Schema {
+	return getTagsSchemaInternal(true)
 }
 
 func getTagsFromSchema(d *schema.ResourceData) []common.Tag {

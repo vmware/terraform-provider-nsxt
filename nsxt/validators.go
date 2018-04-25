@@ -9,7 +9,6 @@ import (
 	"net"
 	"strconv"
 	"strings"
-	"math"
 )
 
 // Validations for Port objects
