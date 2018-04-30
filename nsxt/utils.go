@@ -35,8 +35,31 @@ func stringList2Interface(list []string) []interface{} {
 	return vs
 }
 
+func interface2Int32List(configured []interface{}) []int32 {
+	vs := make([]int32, 0, len(configured))
+	for _, v := range configured {
+		val, ok := v.(int32)
+		if ok {
+			vs = append(vs, val)
+		}
+	}
+	return vs
+}
+
+func intList2Interface(list []int32) []interface{} {
+	vs := make([]interface{}, 0, len(list))
+	for _, v := range list {
+		vs = append(vs, v)
+	}
+	return vs
+}
+
 func getStringListFromSchemaSet(d *schema.ResourceData, schemaAttrName string) []string {
 	return interface2StringList(d.Get(schemaAttrName).(*schema.Set).List())
+}
+
+func getInt32ListFromSchemaSet(d *schema.ResourceData, schemaAttrName string) []int32 {
+	return interface2Int32List(d.Get(schemaAttrName).(*schema.Set).List())
 }
 
 func getRevisionSchema() *schema.Schema {

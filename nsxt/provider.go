@@ -110,6 +110,9 @@ func Provider() terraform.ResourceProvider {
 			"nsxt_ip_set":                            resourceNsxtIPSet(),
 			"nsxt_static_route":                      resourceNsxtStaticRoute(),
 			"nsxt_vm_tags":                           resourceNsxtVMTags(),
+			"nsxt_lb_icmp_monitor":                   resourceNsxtLbIcmpMonitor(),
+			"nsxt_lb_tcp_monitor":                    resourceNsxtLbTCPMonitor(),
+			"nsxt_lb_udp_monitor":                    resourceNsxtLbUDPMonitor(),
 		},
 
 		ConfigureFunc: providerConfigure,
