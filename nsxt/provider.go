@@ -94,6 +94,7 @@ func Provider() terraform.ResourceProvider {
 			"nsxt_dhcp_relay_service":                resourceNsxtDhcpRelayService(),
 			"nsxt_logical_switch":                    resourceNsxtLogicalSwitch(),
 			"nsxt_logical_port":                      resourceNsxtLogicalPort(),
+			"nsxt_logical_tier0_router":              resourceNsxtLogicalTier0Router(),
 			"nsxt_logical_tier1_router":              resourceNsxtLogicalTier1Router(),
 			"nsxt_logical_router_downlink_port":      resourceNsxtLogicalRouterDownLinkPort(),
 			"nsxt_logical_router_link_port_on_tier0": resourceNsxtLogicalRouterLinkPortOnTier0(),
