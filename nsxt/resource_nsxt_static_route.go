@@ -117,7 +117,7 @@ func getNextHopsFromSchema(d *schema.ResourceData) []manager.StaticRouteNextHop 
 	return nextHopsList
 }
 
-func setNextHopsInSchema(d *schema.ResourceData, nextHops []manager.StaticRouteNextHop) {
+func setNextHopsInSchema(d *schema.ResourceData, nextHops []manager.StaticRouteNextHop) error {
 	var nextHopsList []map[string]interface{}
 	for _, staticRouteNextHop := range nextHops {
 		elem := make(map[string]interface{})
@@ -130,7 +130,8 @@ func setNextHopsInSchema(d *schema.ResourceData, nextHops []manager.StaticRouteN
 		}
 		nextHopsList = append(nextHopsList, elem)
 	}
-	d.Set("next_hop", nextHopsList)
+	err := d.Set("next_hop", nextHopsList)
+	return err
 }
 
 func resourceNsxtStaticRouteCreate(d *schema.ResourceData, m interface{}) error {
@@ -196,7 +197,10 @@ func resourceNsxtStaticRouteRead(d *schema.ResourceData, m interface{}) error {
 	setTagsInSchema(d, staticRoute.Tags)
 	d.Set("logical_router_id", staticRoute.LogicalRouterId)
 	d.Set("network", staticRoute.Network)
-	setNextHopsInSchema(d, staticRoute.NextHops)
+	err = setNextHopsInSchema(d, staticRoute.NextHops)
+	if err != nil {
+		return fmt.Errorf("Error during StaticRoute set in schema: %v", err)
+	}
 
 	return nil
 }

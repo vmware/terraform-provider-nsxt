@@ -161,7 +161,10 @@ func resourceNsxtLogicalRouterDownLinkPortRead(d *schema.ResourceData, m interfa
 	d.Set("linked_logical_switch_port_id", logicalRouterDownLinkPort.LinkedLogicalSwitchPortId.TargetId)
 	setIPSubnetsInSchema(d, logicalRouterDownLinkPort.Subnets)
 	d.Set("urpf_mode", logicalRouterDownLinkPort.UrpfMode)
-	setServiceBindingsInSchema(d, logicalRouterDownLinkPort.ServiceBindings, "service_binding")
+	err = setServiceBindingsInSchema(d, logicalRouterDownLinkPort.ServiceBindings, "service_binding")
+	if err != nil {
+		return fmt.Errorf("Error during LogicalRouterDownLinkPort service_binding set in schema: %v", err)
+	}
 
 	return nil
 }

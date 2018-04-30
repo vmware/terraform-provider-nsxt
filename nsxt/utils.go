@@ -82,7 +82,7 @@ func getTagsFromSchema(d *schema.ResourceData) []common.Tag {
 	return tagList
 }
 
-func setTagsInSchema(d *schema.ResourceData, tags []common.Tag) {
+func setTagsInSchema(d *schema.ResourceData, tags []common.Tag) error {
 	var tagList []map[string]string
 	for _, tag := range tags {
 		elem := make(map[string]string)
@@ -90,7 +90,8 @@ func setTagsInSchema(d *schema.ResourceData, tags []common.Tag) {
 		elem["tag"] = tag.Tag
 		tagList = append(tagList, elem)
 	}
-	d.Set("tag", tagList)
+	err := d.Set("tag", tagList)
+	return err
 }
 
 // utilities to define & handle switching profiles
@@ -131,7 +132,7 @@ func getSwitchingProfileIdsFromSchema(d *schema.ResourceData) []manager.Switchin
 	return profileList
 }
 
-func setSwitchingProfileIdsInSchema(d *schema.ResourceData, nsxClient *nsxt.APIClient, profiles []manager.SwitchingProfileTypeIdEntry) {
+func setSwitchingProfileIdsInSchema(d *schema.ResourceData, nsxClient *nsxt.APIClient, profiles []manager.SwitchingProfileTypeIdEntry) error {
 	var profileList []map[string]string
 	for _, profile := range profiles {
 		// ignore system owned profiles
@@ -145,7 +146,8 @@ func setSwitchingProfileIdsInSchema(d *schema.ResourceData, nsxClient *nsxt.APIC
 		elem["value"] = profile.Value
 		profileList = append(profileList, elem)
 	}
-	d.Set("switching_profile_id", profileList)
+	err := d.Set("switching_profile_id", profileList)
+	return err
 }
 
 // utilities to define & handle address bindings
@@ -193,7 +195,7 @@ func getAddressBindingsFromSchema(d *schema.ResourceData) []manager.PacketAddres
 	return bindingList
 }
 
-func setAddressBindingsInSchema(d *schema.ResourceData, bindings []manager.PacketAddressClassifier) {
+func setAddressBindingsInSchema(d *schema.ResourceData, bindings []manager.PacketAddressClassifier) error {
 	var bindingList []map[string]interface{}
 	for _, binding := range bindings {
 		elem := make(map[string]interface{})
@@ -202,7 +204,8 @@ func setAddressBindingsInSchema(d *schema.ResourceData, bindings []manager.Packe
 		elem["vlan"] = binding.Vlan
 		bindingList = append(bindingList, elem)
 	}
-	d.Set("address_binding", bindingList)
+	err := d.Set("address_binding", bindingList)
+	return err
 }
 
 func getResourceReferencesSchema(required bool, computed bool, validTargetTypes []string, description string) *schema.Schema {
@@ -292,9 +295,10 @@ func returnResourceReferences(references []common.ResourceReference) []map[strin
 	return referenceList
 }
 
-func setResourceReferencesInSchema(d *schema.ResourceData, references []common.ResourceReference, schemaAttrName string) {
+func setResourceReferencesInSchema(d *schema.ResourceData, references []common.ResourceReference, schemaAttrName string) error {
 	referenceList := returnResourceReferences(references)
-	d.Set(schemaAttrName, referenceList)
+	err := d.Set(schemaAttrName, referenceList)
+	return err
 }
 
 func getServiceBindingsFromSchema(d *schema.ResourceData, schemaAttrName string) []manager.ServiceBinding {
@@ -314,7 +318,7 @@ func getServiceBindingsFromSchema(d *schema.ResourceData, schemaAttrName string)
 	return bindingList
 }
 
-func setServiceBindingsInSchema(d *schema.ResourceData, serviceBindings []manager.ServiceBinding, schemaAttrName string) {
+func setServiceBindingsInSchema(d *schema.ResourceData, serviceBindings []manager.ServiceBinding, schemaAttrName string) error {
 	var referenceList []map[string]interface{}
 	for _, binding := range serviceBindings {
 		elem := make(map[string]interface{})
@@ -324,7 +328,8 @@ func setServiceBindingsInSchema(d *schema.ResourceData, serviceBindings []manage
 		elem["target_type"] = binding.ServiceId.TargetType
 		referenceList = append(referenceList, elem)
 	}
-	d.Set(schemaAttrName, referenceList)
+	err := d.Set(schemaAttrName, referenceList)
+	return err
 }
 
 func getAdminStateSchema() *schema.Schema {
