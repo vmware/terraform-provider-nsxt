@@ -56,7 +56,7 @@ func dataSourceNsxtNsServiceRead(d *schema.ResourceData, m interface{}) error {
 		}
 		obj = objGet
 	} else if objName != "" {
-		// Get by name
+		// Get by full name
 		// TODO use 2nd parameter localVarOptionals for paging
 		objList, _, err := nsxClient.GroupingObjectsApi.ListNSServices(nsxClient.Context, nil)
 		if err != nil {
