@@ -61,7 +61,7 @@ func dataSourceNsxtSwitchingProfileRead(d *schema.ResourceData, m interface{}) e
 		}
 		obj = objGet
 	} else if objName != "" {
-		// Get by name
+		// Get by full name
 		// TODO use localVarOptionals for paging
 		localVarOptionals := make(map[string]interface{})
 		localVarOptionals["includeSystemOwned"] = true
