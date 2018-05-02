@@ -52,7 +52,7 @@ func dataSourceNsxtNsServiceRead(d *schema.ResourceData, m interface{}) error {
 			return fmt.Errorf("Error while reading ns service %s: %v", objID, err)
 		}
 		if resp.StatusCode == http.StatusNotFound {
-			return fmt.Errorf("ns service %s was not found", objID)
+			return fmt.Errorf("NS service %s was not found", objID)
 		}
 		obj = objGet
 	} else if objName != "" {
@@ -60,24 +60,24 @@ func dataSourceNsxtNsServiceRead(d *schema.ResourceData, m interface{}) error {
 		// TODO use 2nd parameter localVarOptionals for paging
 		objList, _, err := nsxClient.GroupingObjectsApi.ListNSServices(nsxClient.Context, nil)
 		if err != nil {
-			return fmt.Errorf("Error while reading ns services: %v", err)
+			return fmt.Errorf("Error while reading NS services: %v", err)
 		}
 		// go over the list to find the correct one
 		found := false
 		for _, objInList := range objList.Results {
 			if objInList.DisplayName == objName {
 				if found {
-					return fmt.Errorf("Found multiple ns services with name '%s'", objName)
+					return fmt.Errorf("Found multiple NS services with name '%s'", objName)
 				}
 				obj = objInList
 				found = true
 			}
 		}
 		if !found {
-			return fmt.Errorf("ns service '%s' was not found out of %d services", objName, len(objList.Results))
+			return fmt.Errorf("NS service '%s' was not found out of %d services", objName, len(objList.Results))
 		}
 	} else {
-		return fmt.Errorf("Error obtaining ns service ID or name during read")
+		return fmt.Errorf("Error obtaining NS service ID or name during read")
 	}
 
 	d.SetId(obj.Id)
