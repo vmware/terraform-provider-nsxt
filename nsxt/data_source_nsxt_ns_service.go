@@ -9,6 +9,7 @@ import (
 	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/manager"
 	"net/http"
+	"strings"
 )
 
 func dataSourceNsxtNsService() *schema.Resource {
@@ -49,35 +50,45 @@ func dataSourceNsxtNsServiceRead(d *schema.ResourceData, m interface{}) error {
 		objGet, resp, err := nsxClient.GroupingObjectsApi.ReadNSService(nsxClient.Context, objID)
 
 		if err != nil {
-			return fmt.Errorf("Error while reading ns service %s: %v", objID, err)
+			return fmt.Errorf("Error while reading NS service %s: %v", objID, err)
 		}
 		if resp.StatusCode == http.StatusNotFound {
-			return fmt.Errorf("ns service %s was not found", objID)
+			return fmt.Errorf("NS service %s was not found", objID)
 		}
 		obj = objGet
-	} else if objName != "" {
-		// Get by name
+	} else if objName == "" {
+		return fmt.Errorf("Error obtaining NS service ID or name during read")
+	} else {
+		// Get by full name/prefix
 		// TODO use 2nd parameter localVarOptionals for paging
 		objList, _, err := nsxClient.GroupingObjectsApi.ListNSServices(nsxClient.Context, nil)
 		if err != nil {
-			return fmt.Errorf("Error while reading ns services: %v", err)
+			return fmt.Errorf("Error while reading NS services: %v", err)
 		}
-		// go over the list to find the correct one
-		found := false
+		// go over the list to find the correct one (prefer a perfect match. If not - prefix match)
+		var perfectMatch []manager.NsService
+		var prefixMatch []manager.NsService
 		for _, objInList := range objList.Results {
+			if strings.HasPrefix(objInList.DisplayName, objName) {
+				prefixMatch = append(prefixMatch, objInList)
+			}
 			if objInList.DisplayName == objName {
-				if found {
-					return fmt.Errorf("Found multiple ns services with name '%s'", objName)
-				}
-				obj = objInList
-				found = true
+				perfectMatch = append(perfectMatch, objInList)
 			}
 		}
-		if !found {
-			return fmt.Errorf("ns service '%s' was not found out of %d services", objName, len(objList.Results))
+		if len(perfectMatch) > 0 {
+			if len(perfectMatch) > 1 {
+				return fmt.Errorf("Found multiple NS services with name '%s'", objName)
+			}
+			obj = perfectMatch[0]
+		} else if len(prefixMatch) > 0 {
+			if len(prefixMatch) > 1 {
+				return fmt.Errorf("Found multiple NS services with name starting with '%s'", objName)
+			}
+			obj = prefixMatch[0]
+		} else {
+			return fmt.Errorf("NS service '%s' was not found", objName)
 		}
-	} else {
-		return fmt.Errorf("Error obtaining ns service ID or name during read")
 	}
 
 	d.SetId(obj.Id)
