@@ -68,30 +68,39 @@ func dataSourceNsxtEdgeClusterRead(d *schema.ResourceData, m interface{}) error 
 			return fmt.Errorf("Edge cluster %s was not found", objID)
 		}
 		obj = objGet
-	} else if objName != "" {
-		// Get by name prefix
+	} else if objName == "" {
+		return fmt.Errorf("Error obtaining edge cluster ID or name during read")
+	} else {
+		// Get by full name/prefix
 		// TODO use 2nd parameter localVarOptionals for paging
 		objList, _, err := nsxClient.NetworkTransportApi.ListEdgeClusters(nsxClient.Context, nil)
 		if err != nil {
 			return fmt.Errorf("Error while reading edge clusters: %v", err)
 		}
-		// go over the list to find the correct one
-		// TODO: prefer full match
-		found := false
+		// go over the list to find the correct one (prefer a perfect match. If not - prefix match)
+		var perfectMatch []manager.EdgeCluster
+		var prefixMatch []manager.EdgeCluster
 		for _, objInList := range objList.Results {
 			if strings.HasPrefix(objInList.DisplayName, objName) {
-				if found {
-					return fmt.Errorf("Found multiple edge clusters with name '%s'", objName)
-				}
-				obj = objInList
-				found = true
+				prefixMatch = append(prefixMatch, objInList)
+			}
+			if objInList.DisplayName == objName {
+				perfectMatch = append(perfectMatch, objInList)
 			}
 		}
-		if !found {
+		if len(perfectMatch) > 0 {
+			if len(perfectMatch) > 1 {
+				return fmt.Errorf("Found multiple edge clusters with name '%s'", objName)
+			}
+			obj = perfectMatch[0]
+		} else if len(prefixMatch) > 0 {
+			if len(prefixMatch) > 1 {
+				return fmt.Errorf("Found multiple edge clusters with name starting with '%s'", objName)
+			}
+			obj = prefixMatch[0]
+		} else {
 			return fmt.Errorf("Edge cluster '%s' was not found", objName)
 		}
-	} else {
-		return fmt.Errorf("Error obtaining edge cluster ID or name during read")
 	}
 
 	d.SetId(obj.Id)
