@@ -39,6 +39,17 @@ func getStringListFromSchemaSet(d *schema.ResourceData, schemaAttrName string) [
 	return interface2StringList(d.Get(schemaAttrName).(*schema.Set).List())
 }
 
+func intList2int64List(configured []interface{}) []int64 {
+	vs := make([]int64, 0, len(configured))
+	for _, v := range configured {
+		val, ok := v.(int)
+		if ok {
+			vs = append(vs, int64(val))
+		}
+	}
+	return vs
+}
+
 func getRevisionSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:        schema.TypeInt,
