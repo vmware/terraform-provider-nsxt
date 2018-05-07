@@ -78,9 +78,9 @@ func resourceNsxtLogicalDhcpServer() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"network": &schema.Schema{
-							Type:        schema.TypeString,
-							Description: "Destination in cidr",
-							Required:    true,
+							Type:         schema.TypeString,
+							Description:  "Destination in cidr",
+							Required:     true,
 							ValidateFunc: validateCidr(),
 						},
 						"next_hop": &schema.Schema{
@@ -179,16 +179,20 @@ func resourceNsxtLogicalDhcpServerCreate(d *schema.ResourceData, m interface{}) 
 	description := d.Get("description").(string)
 	dhcpProfileId := d.Get("dhcp_profile_id").(string)
 	opt121Routes := getDhcpOptions121(d)
+	var opt121 *manager.DhcpOption121
+	if opt121Routes != nil {
+		opt121 = &manager.DhcpOption121{
+			StaticRoutes: opt121Routes,
+		}
+	}
 	ipv4DhcpServer := manager.IPv4DhcpServer{
 		DhcpServerIp:   d.Get("dhcp_server_ip").(string),
 		DnsNameservers: interface2StringList(d.Get("dns_name_servers").([]interface{})),
 		DomainName:     d.Get("domain_name").(string),
 		GatewayIp:      d.Get("gateway_ip").(string),
 		Options: &manager.DhcpOptions{
-			Option121: &manager.DhcpOption121{
-				StaticRoutes: opt121Routes,
-			},
-			Others: getDhcpGenericOptions(d),
+			Option121: opt121,
+			Others:    getDhcpGenericOptions(d),
 		},
 	}
 	tags := getTagsFromSchema(d)
@@ -246,12 +250,18 @@ func resourceNsxtLogicalDhcpServerRead(d *schema.ResourceData, m interface{}) er
 		if err != nil {
 			return fmt.Errorf("Error during LogicalDhcpServer read option 121: %v", err)
 		}
+	} else {
+		var emptyDhcpOpt121 []map[string]interface{}
+		d.Set("dhcp_option_121", emptyDhcpOpt121)
 	}
 	if logicalDhcpServer.Ipv4DhcpServer.Options != nil {
 		err = SetDhcpGenericOptionsInScheme(d, logicalDhcpServer.Ipv4DhcpServer.Options.Others)
 		if err != nil {
 			return fmt.Errorf("Error during LogicalDhcpServer read generic options: %v", err)
 		}
+	} else {
+		var emptyDhcpGenOpt []map[string]interface{}
+		d.Set("dhcp_generic_option", emptyDhcpGenOpt)
 	}
 
 	return nil
@@ -270,16 +280,20 @@ func resourceNsxtLogicalDhcpServerUpdate(d *schema.ResourceData, m interface{}) 
 	dhcpProfileId := d.Get("dhcp_profile_id").(string)
 	revision := int64(d.Get("revision").(int))
 	opt121Routes := getDhcpOptions121(d)
+	var opt121 *manager.DhcpOption121
+	if opt121Routes != nil {
+		opt121 = &manager.DhcpOption121{
+			StaticRoutes: opt121Routes,
+		}
+	}
 	ipv4DhcpServer := manager.IPv4DhcpServer{
 		DhcpServerIp:   d.Get("dhcp_server_ip").(string),
 		DnsNameservers: interface2StringList(d.Get("dns_name_servers").([]interface{})),
 		DomainName:     d.Get("domain_name").(string),
 		GatewayIp:      d.Get("gateway_ip").(string),
 		Options: &manager.DhcpOptions{
-			Option121: &manager.DhcpOption121{
-				StaticRoutes: opt121Routes,
-			},
-			Others: getDhcpGenericOptions(d),
+			Option121: opt121,
+			Others:    getDhcpGenericOptions(d),
 		},
 	}
 	logicalDhcpServer := manager.LogicalDhcpServer{
