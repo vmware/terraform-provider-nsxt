@@ -5,6 +5,7 @@ package nsxt
 
 import (
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 	"github.com/vmware/go-vmware-nsxt/loadbalancer"
 )
 
@@ -54,7 +55,65 @@ func getLbMonitorTimeoutSchema() *schema.Schema {
 	}
 }
 
-func isDataRequired(protocol string) bool {
+func getLbMonitorRequestBodySchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeString,
+		Description: "String to send as HTTP health check request body. Valid only for certain HTTP methods like POST",
+		Optional:    true,
+	}
+}
+
+func getLbMonitorRequestMethodSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:         schema.TypeString,
+		Description:  "Health check method for HTTP monitor type",
+		Optional:     true,
+		ValidateFunc: validation.StringInSlice([]string{"GET", "HEAD", "OPTIONS", "POST", "PUT"}, false),
+		Default:      "GET",
+	}
+}
+
+func getLbMonitorRequestURLSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeString,
+		Description: "URL used for HTTP monitor",
+		Optional:    true,
+		Default:     "/",
+	}
+}
+
+func getLbMonitorRequestVersionSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:         schema.TypeString,
+		Description:  "HTTP request version",
+		Optional:     true,
+		ValidateFunc: validation.StringInSlice([]string{"HTTP_VERSION_1_0", "HTT    P_VERSION_1_1", "HTTP_VERSION_1_2"}, false),
+		Default:      "HTTP_VERSION_1_1",
+	}
+}
+
+func getLbMonitorResponseBodySchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeString,
+		Description: "If HTTP response body string is specified then the healthcheck HTTP response body is matched against the specified string (regular expressions not supported), and server is considered healthy only if there is a match. If response body string is not specified, HTTP healthcheck is considered successful if the HTTP response status code matches configured value.",
+		Optional:    true,
+	}
+}
+
+func getLbMonitorResponseStatusCodesSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeList,
+		Description: "The HTTP response status code should be a valid HTTP status code",
+		Elem: &schema.Schema{
+			Type:         schema.TypeInt,
+			ValidateFunc: validation.IntBetween(100, 505),
+		},
+		Optional: true,
+		Computed: true,
+	}
+}
+
+func isLbMonitorDataRequired(protocol string) bool {
 	if protocol == "udp" {
 		return true
 	}
@@ -62,7 +121,7 @@ func isDataRequired(protocol string) bool {
 	return false
 }
 
-func getSendDescription(protocol string) string {
+func getLbMonitorSendDescription(protocol string) string {
 	if protocol == "tcp" {
 		return "If both send and receive are not specified, then just a TCP connection is established (3-way handshake) to validate server is healthy, no data is sent."
 	}
@@ -73,6 +132,8 @@ func getSendDescription(protocol string) string {
 // The only differences between tcp and udp monitors are required vs. optional data fields,
 // and their descriptions
 func getLbL4MonitorSchema(protocol string) map[string]*schema.Schema {
+	dataRequired := isLbMonitorDataRequired(protocol)
+
 	return map[string]*schema.Schema{
 		"revision": getRevisionSchema(),
 		"description": &schema.Schema{
@@ -95,14 +156,14 @@ func getLbL4MonitorSchema(protocol string) map[string]*schema.Schema {
 		"receive": &schema.Schema{
 			Type:        schema.TypeString,
 			Description: "Expected data, if specified, can be anywhere in the response and it has to be a string, regular expressions are not supported",
-			Optional:    !isDataRequired(protocol),
-			Required:    isDataRequired(protocol),
+			Optional:    !dataRequired,
+			Required:    dataRequired,
 		},
 		"send": &schema.Schema{
 			Type:        schema.TypeString,
-			Description: getSendDescription(protocol),
-			Optional:    !isDataRequired(protocol),
-			Required:    isDataRequired(protocol),
+			Description: getLbMonitorSendDescription(protocol),
+			Optional:    !dataRequired,
+			Required:    dataRequired,
 		},
 	}
 }

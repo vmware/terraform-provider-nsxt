@@ -87,6 +87,7 @@ func Provider() terraform.ResourceProvider {
 			"nsxt_logical_tier0_router": dataSourceNsxtLogicalTier0Router(),
 			"nsxt_ns_service":           dataSourceNsxtNsService(),
 			"nsxt_edge_cluster":         dataSourceNsxtEdgeCluster(),
+			"nsxt_certificate":          dataSourceNsxtCertificate(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -117,6 +118,8 @@ func Provider() terraform.ResourceProvider {
 			"nsxt_lb_icmp_monitor":                   resourceNsxtLbIcmpMonitor(),
 			"nsxt_lb_tcp_monitor":                    resourceNsxtLbTCPMonitor(),
 			"nsxt_lb_udp_monitor":                    resourceNsxtLbUDPMonitor(),
+			"nsxt_lb_http_monitor":                   resourceNsxtLbHTTPMonitor(),
+			"nsxt_lb_https_monitor":                  resourceNsxtLbHTTPSMonitor(),
 		},
 
 		ConfigureFunc: providerConfigure,

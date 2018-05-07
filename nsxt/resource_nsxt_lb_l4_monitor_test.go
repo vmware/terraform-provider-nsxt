@@ -106,26 +106,10 @@ func testAccResourceNsxtLbL4MonitorImport(t *testing.T, protocol string) {
 	})
 }
 
-func testAccNSXLbL4MonitorRead(protocol string, resourceID string) (string, int, error) {
-	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
-	var err error
-	if protocol == "tcp" {
-		monitor, responseCode, err := nsxClient.ServicesApi.ReadLoadBalancerTcpMonitor(nsxClient.Context, resourceID)
-		if err == nil {
-			return monitor.DisplayName, responseCode.StatusCode, err
-		}
-	} else {
-		monitor, responseCode, err := nsxClient.ServicesApi.ReadLoadBalancerUdpMonitor(nsxClient.Context, resourceID)
-		if err == nil {
-			return monitor.DisplayName, responseCode.StatusCode, err
-		}
-	}
-
-	return "", 0, err
-}
-
 func testAccNSXLbL4MonitorExists(protocol string, displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
+
+		nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
 			return fmt.Errorf("NSX LB %s monitor resource %s not found in resources", protocol, resourceName)
@@ -136,16 +120,16 @@ func testAccNSXLbL4MonitorExists(protocol string, displayName string, resourceNa
 			return fmt.Errorf("NSX LB %s monitor resource ID not set in resources", protocol)
 		}
 
-		monitorName, statusCode, err := testAccNSXLbL4MonitorRead(protocol, resourceID)
+		monitor, responseCode, err := nsxClient.ServicesApi.ReadLoadBalancerMonitor(nsxClient.Context, resourceID)
 		if err != nil {
-			return fmt.Errorf("Error while retrieving LB %s monitor with ID %s. Error: %v", protocol, resourceID, err)
+			return fmt.Errorf("Error while checking if LB %s monitor %s exists", monitor.DisplayName)
 		}
 
-		if statusCode != http.StatusOK {
-			return fmt.Errorf("Error while checking if LB %s monitor %s exists. HTTP return code was %d", protocol, resourceID, statusCode)
+		if responseCode.StatusCode != http.StatusOK {
+			return fmt.Errorf("Error while checking if LB %s monitor %s exists. HTTP return code was %d", protocol, resourceID, responseCode.StatusCode)
 		}
 
-		if displayName == monitorName {
+		if displayName == monitor.DisplayName {
 			return nil
 		}
 		return fmt.Errorf("NSX LB %s monitor %s wasn't found", protocol, displayName)
@@ -153,6 +137,7 @@ func testAccNSXLbL4MonitorExists(protocol string, displayName string, resourceNa
 }
 
 func testAccNSXLbL4MonitorCheckDestroy(protocol string, state *terraform.State, displayName string) error {
+	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
 	monitorType := fmt.Sprintf("nsxt_lb_%s_monitor", protocol)
 	for _, rs := range state.RootModule().Resources {
 
@@ -161,15 +146,15 @@ func testAccNSXLbL4MonitorCheckDestroy(protocol string, state *terraform.State, 
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		monitorName, statusCode, err := testAccNSXLbL4MonitorRead(protocol, resourceID)
+		monitor, responseCode, err := nsxClient.ServicesApi.ReadLoadBalancerMonitor(nsxClient.Context, resourceID)
 		if err != nil {
-			if statusCode != http.StatusOK {
+			if responseCode.StatusCode != http.StatusOK {
 				return nil
 			}
 			return fmt.Errorf("Error while retrieving LB %s monitor with ID %s. Error: %v", protocol, resourceID, err)
 		}
 
-		if displayName == monitorName {
+		if displayName == monitor.DisplayName {
 			return fmt.Errorf("NSX LB %s monitor %s still exists", protocol, displayName)
 		}
 	}
