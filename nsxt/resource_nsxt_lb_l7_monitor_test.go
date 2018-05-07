@@ -16,7 +16,7 @@ import (
 var caCertID string
 var clientCertID string
 
-func TestAccResourceNsxtLbHttpMonitor_basic(t *testing.T) {
+func TestAccResourceNsxtLbHTTPMonitor_basic(t *testing.T) {
 	testAccResourceNsxtLbL7MonitorBasic(t, "http")
 }
 
@@ -24,7 +24,7 @@ func TestAccResourceNsxtLbHTTPSMonitor_basic(t *testing.T) {
 	testAccResourceNsxtLbL7MonitorBasic(t, "https")
 }
 
-func TestAccResourceNsxtLbHttpMonitor_importBasic(t *testing.T) {
+func TestAccResourceNsxtLbHTTPMonitor_importBasic(t *testing.T) {
 	testAccResourceNsxtLbL7MonitorImport(t, "http")
 }
 
@@ -183,7 +183,7 @@ func testAccNSXLbHTTPSMonitorCheckDestroy(state *terraform.State, displayName st
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		monitor, response, err := nsxClient.ServicesApi.ReadLoadBalancerHttpsMonitor(nsxClient.Context, resourceID)
+		monitor, response, err := nsxClient.ServicesApi.ReadLoadBalancerMonitor(nsxClient.Context, resourceID)
 		if err != nil {
 			if response.StatusCode != http.StatusOK {
 				return nil
