@@ -109,6 +109,64 @@ func TestAccResourceNsxtLogicalSwitch_vlan(t *testing.T) {
 
 }
 
+func TestAccResourceNsxtLogicalSwitch_withProfiles(t *testing.T) {
+	switchName := fmt.Sprintf("test-nsx-logical-switch-with-profiles")
+	updateSwitchName := fmt.Sprintf("%s-update", switchName)
+	resourceName := "test_profiles"
+	testResourceName := fmt.Sprintf("nsxt_logical_switch.%s", resourceName)
+	transportZoneName := getOverlayTransportZoneName()
+	customProfileName := "terraform_test_LS_profile"
+	oobProfileName := "nsx-default-switch-security-vif-profile"
+	profileType := "SwitchSecuritySwitchingProfile"
+	var s *terraform.State
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXLogicalSwitchCheckDestroy(state, switchName)
+		},
+		Steps: []resource.TestStep{
+			{
+				PreConfig: func() {
+					// Create a custom switching profile
+					if err := testAccDataSourceNsxtSwitchingProfileCreate(customProfileName, profileType); err != nil {
+						panic(err)
+					}
+				},
+				// Create a logical switch to use the custom switching profile
+				Config: testAccNSXLogicalSwitchCreateWithProfilesTemplate(resourceName, switchName, transportZoneName, customProfileName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXLogicalSwitchExists(switchName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", switchName),
+					resource.TestCheckResourceAttr(testResourceName, "switching_profile_id.#", "1"),
+				),
+			},
+			{
+				// Replace the custom switching profile with OOB one
+				Config:             testAccNSXLogicalSwitchUpdateWithProfilesTemplate(resourceName, updateSwitchName, transportZoneName, customProfileName, oobProfileName),
+				ExpectNonEmptyPlan: true,
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXLogicalSwitchExists(updateSwitchName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updateSwitchName),
+					// Counting only custom profiles so count should be 0
+					resource.TestCheckResourceAttr(testResourceName, "switching_profile_id.#", "0"),
+					copyStatePtr(&s),
+				),
+			},
+			{
+				PreConfig: func() {
+					// Delete the configured switching profile
+					if err := testAccDataSourceNsxtSwitchingProfileDelete(s, "data.nsxt_switching_profile.test1"); err != nil {
+						panic(err)
+					}
+				},
+				Config: testAccNSXSwitchingNoProfileTemplate(),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtLogicalSwitch_importBasic(t *testing.T) {
 	switchName := fmt.Sprintf("test-nsx-logical-switch-overlay")
 	resourceName := "testoverlay"
@@ -264,4 +322,53 @@ resource "nsxt_logical_switch" "%s" {
     tag   = "tag2"
   }
 }`, transportZoneName, resourceName, switchUpdateName, replicationMode, vlan)
+}
+
+func testAccNSXLogicalSwitchCreateWithProfilesTemplate(resourceName string, switchName string, transportZoneName string, profileName string) string {
+	return fmt.Sprintf(`
+data "nsxt_transport_zone" "TZ1" {
+  display_name = "%s"
+}
+
+data "nsxt_switching_profile" "test1" {
+  display_name = "%s"
+}
+
+resource "nsxt_logical_switch" "%s" {
+  display_name      = "%s"
+  admin_state       = "UP"
+  transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
+
+  switching_profile_id {
+    key   = "${data.nsxt_switching_profile.test1.resource_type}"
+    value = "${data.nsxt_switching_profile.test1.id}"
+  }
+}`, transportZoneName, profileName, resourceName, switchName)
+}
+
+func testAccNSXLogicalSwitchUpdateWithProfilesTemplate(resourceName string, switchUpdateName string, transportZoneName string, profileName1 string, profileName2 string) string {
+	return fmt.Sprintf(`
+data "nsxt_transport_zone" "TZ1" {
+  display_name = "%s"
+}
+
+data "nsxt_switching_profile" "test1" {
+  display_name = "%s"
+}
+
+data "nsxt_switching_profile" "test2" {
+  display_name = "%s"
+}
+
+resource "nsxt_logical_switch" "%s" {
+  display_name      = "%s"
+  admin_state       = "UP"
+  transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
+
+  switching_profile_id {
+    key   = "${data.nsxt_switching_profile.test2.resource_type}"
+    value = "${data.nsxt_switching_profile.test2.id}"
+  }
+
+}`, transportZoneName, profileName1, profileName2, resourceName, switchUpdateName)
 }
