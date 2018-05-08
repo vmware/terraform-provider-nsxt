@@ -143,14 +143,14 @@ func testAccNSXLbIcmpMonitorCheckDestroy(state *terraform.State, displayName str
 func testAccNSXLbIcmpMonitorCreateTemplate(name string, count string, interval string, port string, timeout string, dataLength string) string {
 	return fmt.Sprintf(`
 resource "nsxt_lb_icmp_monitor" "test" {
-  description       = "test description"
-  display_name      = "%s"
-  fall_count        = "%s"
-  interval          = "%s"
-  monitor_port      = "%s"
-  rise_count        = "%s"
-  timeout           = "%s"
-  data_length       = "%s"
+  description  = "test description"
+  display_name = "%s"
+  fall_count   = "%s"
+  interval     = "%s"
+  monitor_port = "%s"
+  rise_count   = "%s"
+  timeout      = "%s"
+  data_length  = "%s"
   tag {
     scope = "scope1"
     tag   = "tag1"
@@ -162,7 +162,7 @@ resource "nsxt_lb_icmp_monitor" "test" {
 func testAccNSXLbIcmpMonitorCreateTemplateTrivial(name string) string {
 	return `
 resource "nsxt_lb_icmp_monitor" "test" {
-  description       = "test description"
+  description = "test description"
 }
 `
 }

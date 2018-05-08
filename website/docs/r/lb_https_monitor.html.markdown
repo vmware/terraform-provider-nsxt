@@ -23,38 +23,38 @@ data "nsxt_certificate" "CA" {
 }
 
 resource "nsxt_lb_https_monitor" "lb_https_monitor" {
-  description = "lb_https_monitor provisioned by Terraform"
-  display_name = "lb_https_monitor"
+  description             = "lb_https_monitor provisioned by Terraform"
+  display_name            = "lb_https_monitor"
 
   tag = {
     scope = "color"
     tag   = "red"
   }
 
-  fall_count = 2
-  interval = 5
-  monitor_port = 8080
-  rise_count = 5
-  timeout = 10
+  fall_count              = 2
+  interval                = 5
+  monitor_port            = 8080
+  rise_count              = 5
+  timeout                 = 10
   certificate_chain_depth = 2
-  ciphers = ["TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256", "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384"]
-  client_certificate_id = "${data.nsxt_certificate.client.id}"
-  protocols = ["TLS_V1_2"]
-  request_body = "ping"
+  ciphers                 = ["TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256", "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384"]
+  client_certificate_id   = "${data.nsxt_certificate.client.id}"
+  protocols               = ["TLS_V1_2"]
+  request_body            = "ping"
 
   request_header {
-    name = "X-healthcheck"
+    name  = "X-healthcheck"
     value = "NSX"
   }
 
-  request_method = "HEAD"
-  request_url = "/index.html"
-  request_version = "HTTP_VERSION_1_1"
-  response_body = "pong"
-  response_status_codes = [200, 304]
-  server_auth = "REQUIRED"
-  server_auth_ca_ids = ["${data.nsxt_certificate.CA.id}"]
-  server_auth_crl_ids = ["78ba3814-bfe1-45e5-89d3-46862bed7896"]
+  request_method          = "HEAD"
+  request_url             = "/index.html"
+  request_version         = "HTTP_VERSION_1_1"
+  response_body           = "pong"
+  response_status_codes   = [200, 304]
+  server_auth             = "REQUIRED"
+  server_auth_ca_ids      = ["${data.nsxt_certificate.CA.id}"]
+  server_auth_crl_ids     = ["78ba3814-bfe1-45e5-89d3-46862bed7896"]
 }
 ```
 

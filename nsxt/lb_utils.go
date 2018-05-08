@@ -4,9 +4,13 @@
 package nsxt
 
 import (
+	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
+	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/loadbalancer"
+	"log"
+	"net/http"
 )
 
 // Helpers for common LB monitor schema settings
@@ -213,4 +217,23 @@ func setLbHTTPHeaderInSchema(d *schema.ResourceData, attrName string, headers []
 		headerList = append(headerList, elem)
 	}
 	d.Set(attrName, headerList)
+}
+
+func resourceNsxtLbMonitorDelete(d *schema.ResourceData, m interface{}) error {
+	nsxClient := m.(*api.APIClient)
+	id := d.Id()
+	if id == "" {
+		return fmt.Errorf("Error obtaining logical object id")
+	}
+
+	resp, err := nsxClient.ServicesApi.DeleteLoadBalancerMonitor(nsxClient.Context, id)
+	if err != nil {
+		return fmt.Errorf("Error during LbMonitor delete: %v", err)
+	}
+
+	if resp.StatusCode == http.StatusNotFound {
+		log.Printf("[DEBUG] LbMonitor %s not found", id)
+		d.SetId("")
+	}
+	return nil
 }

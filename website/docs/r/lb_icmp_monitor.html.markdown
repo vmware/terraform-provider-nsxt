@@ -14,7 +14,7 @@ Provides a resource to configure lb icmp monitor on NSX-T manager
 
 ```hcl
 resource "nsxt_lb_icmp_monitor" "lb_icmp_monitor" {
-  description = "lb_icmp_monitor provisioned by Terraform"
+  description  = "lb_icmp_monitor provisioned by Terraform"
   display_name = "lb_icmp_monitor"
 
   tag = {
@@ -22,12 +22,12 @@ resource "nsxt_lb_icmp_monitor" "lb_icmp_monitor" {
     tag   = "red"
   }
 
-  fall_count = 3
-  interval = 5
+  fall_count   = 3
+  interval     = 5
   monitor_port = 7887
-  rise_count = 3
-  timeout = 10
-  data_length = 56
+  rise_count   = 3
+  timeout      = 10
+  data_length  = 56
 }
 ```
 
@@ -43,7 +43,7 @@ The following arguments are supported:
 * `monitor_port` - (Optional) If the monitor port is specified, it would override pool member port setting for healthcheck. Port range is not supported.
 * `rise_count` - (Optional) Number of consecutive checks must pass before marking it up.
 * `timeout` - (Optional) Number of seconds the target has in which to respond to the monitor request.
-* `data_length` - (Optional) The data size(in bytes) of the ICMP healthcheck packet.
+* `data_length` - (Optional) The data size (in bytes) of the ICMP healthcheck packet.
 
 
 ## Attributes Reference

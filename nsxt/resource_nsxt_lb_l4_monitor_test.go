@@ -164,15 +164,15 @@ func testAccNSXLbL4MonitorCheckDestroy(protocol string, state *terraform.State, 
 func testAccNSXLbL4MonitorCreateTemplate(protocol string, name string, count string, interval string, port string, timeout string, send string, receive string) string {
 	return fmt.Sprintf(`
 resource "nsxt_lb_%s_monitor" "test" {
-  description       = "test description"
-  display_name      = "%s"
-  fall_count        = "%s"
-  interval          = "%s"
-  monitor_port      = "%s"
-  rise_count        = "%s"
-  timeout           = "%s"
-  send              = "%s"
-  receive           = "%s"
+  description  = "test description"
+  display_name = "%s"
+  fall_count   = "%s"
+  interval     = "%s"
+  monitor_port = "%s"
+  rise_count   = "%s"
+  timeout      = "%s"
+  send         = "%s"
+  receive      = "%s"
   tag {
     scope = "scope1"
     tag   = "tag1"
@@ -184,9 +184,9 @@ resource "nsxt_lb_%s_monitor" "test" {
 func testAccNSXLbL4MonitorCreateTemplateTrivial(protocol string, name string) string {
 	return fmt.Sprintf(`
 resource "nsxt_lb_%s_monitor" "test" {
-  description       = "test description"
-  send              = "Client hello"
-  receive           = "Server hello"
+  description = "test description"
+  send        = "Client hello"
+  receive     = "Server hello"
 }
 `, protocol)
 }

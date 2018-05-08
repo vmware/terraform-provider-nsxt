@@ -44,7 +44,7 @@ func testAccResourceNsxtLbL7MonitorBasic(t *testing.T, protocol string) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXLbHTTPSMonitorCheckDestroy(state, name)
+			return testAccNSXLbL7MonitorCheckDestroy(state, name)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -88,6 +88,10 @@ func TestAccResourceNsxtLbHTTPSMonitor_withAuth(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			testAccNSXLbHTTPSMonitorDeleteCerts(t)
+			return testAccNSXLbL7MonitorCheckDestroy(state, name)
+		},
 		Steps: []resource.TestStep{
 			{
 				PreConfig: func() {
@@ -107,18 +111,7 @@ func TestAccResourceNsxtLbHTTPSMonitor_withAuth(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "client_certificate_id"),
 				),
 			},
-			{
-				Config: " ",
-				Check: func(state *terraform.State) error {
-					return testAccNSXLbHTTPSMonitorCheckDestroy(state, name)
-				},
-			},
-			{
-				PreConfig: func() {
-					testAccNSXLbHTTPSMonitorDeleteCerts(t)
-				},
-				Config: " ",
-			},
+			{Config: " "},
 		},
 	})
 }
@@ -130,7 +123,7 @@ func testAccResourceNsxtLbL7MonitorImport(t *testing.T, protocol string) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXLbHTTPSMonitorCheckDestroy(state, name)
+			return testAccNSXLbL7MonitorCheckDestroy(state, name)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -174,7 +167,7 @@ func testAccNSXLbHTTPSMonitorExists(displayName string, resourceName string) res
 	}
 }
 
-func testAccNSXLbHTTPSMonitorCheckDestroy(state *terraform.State, displayName string) error {
+func testAccNSXLbL7MonitorCheckDestroy(state *terraform.State, displayName string) error {
 	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
 	for _, rs := range state.RootModule().Resources {
 
@@ -340,7 +333,7 @@ resource "nsxt_lb_%s_monitor" "test" {
 func testAccNSXLbL7MonitorCreateTemplateTrivial(name string, protocol string) string {
 	return fmt.Sprintf(`
 resource "nsxt_lb_%s_monitor" "test" {
-  description       = "test description"
+  description = "test description"
 }
 `, protocol)
 }
@@ -348,22 +341,22 @@ resource "nsxt_lb_%s_monitor" "test" {
 func testAccNSXLbHTTPSMonitorCreateTemplateWithAuth(name string) string {
 	return fmt.Sprintf(`
 data "nsxt_certificate" "ca" {
-  display_name      = "ca"
+  display_name = "ca"
 }
 
 data "nsxt_certificate" "client" {
-  display_name      = "client"
+  display_name = "client"
 }
 
 resource "nsxt_lb_https_monitor" "test" {
-  description       = "test description"
-  display_name      = "%s"
-  server_auth       = "REQUIRED"
-  server_auth_ca_ids = ["${data.nsxt_certificate.ca.id}"]
+  description             = "test description"
+  display_name            = "%s"
+  server_auth             = "REQUIRED"
+  server_auth_ca_ids      = ["${data.nsxt_certificate.ca.id}"]
   certificate_chain_depth = 2
-  client_certificate_id = "${data.nsxt_certificate.client.id}"
-  protocols = ["TLS_V1_2"]
-  ciphers = ["TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256", "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384"]
+  client_certificate_id   = "${data.nsxt_certificate.client.id}"
+  protocols               = ["TLS_V1_2"]
+  ciphers                 = ["TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256", "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384"]
 }
 `, name)
 }

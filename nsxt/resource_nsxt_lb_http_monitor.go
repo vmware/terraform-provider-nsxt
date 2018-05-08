@@ -17,7 +17,7 @@ func resourceNsxtLbHTTPMonitor() *schema.Resource {
 		Create: resourceNsxtLbHTTPMonitorCreate,
 		Read:   resourceNsxtLbHTTPMonitorRead,
 		Update: resourceNsxtLbHTTPMonitorUpdate,
-		Delete: resourceNsxtLbHTTPMonitorDelete,
+		Delete: resourceNsxtLbMonitorDelete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -187,23 +187,4 @@ func resourceNsxtLbHTTPMonitorUpdate(d *schema.ResourceData, m interface{}) erro
 	}
 
 	return resourceNsxtLbHTTPMonitorRead(d, m)
-}
-
-func resourceNsxtLbHTTPMonitorDelete(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
-	id := d.Id()
-	if id == "" {
-		return fmt.Errorf("Error obtaining logical object id")
-	}
-
-	resp, err := nsxClient.ServicesApi.DeleteLoadBalancerMonitor(nsxClient.Context, id)
-	if err != nil {
-		return fmt.Errorf("Error during LbHttpMonitor delete: %v", err)
-	}
-
-	if resp.StatusCode == http.StatusNotFound {
-		log.Printf("[DEBUG] LbHttpMonitor %s not found", id)
-		d.SetId("")
-	}
-	return nil
 }

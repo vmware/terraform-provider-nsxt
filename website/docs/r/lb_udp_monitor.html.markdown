@@ -14,7 +14,7 @@ Provides a resource to configure lb udp monitor on NSX-T manager
 
 ```hcl
 resource "nsxt_lb_udp_monitor" "lb_udp_monitor" {
-  description = "lb_udp_monitor provisioned by Terraform"
+  description  = "lb_udp_monitor provisioned by Terraform"
   display_name = "lb_udp_monitor"
 
   tag = {
@@ -22,13 +22,13 @@ resource "nsxt_lb_udp_monitor" "lb_udp_monitor" {
     tag   = "red"
   }
 
-  fall_count = 3
-  interval = 5
+  fall_count   = 3
+  interval     = 5
   monitor_port = 7887
-  rise_count = 3
-  timeout = 10
-  send = "hi"
-  receive = "hello"
+  rise_count   = 3
+  timeout      = 10
+  send         = "hi"
+  receive      = "hello"
 }
 ```
 
