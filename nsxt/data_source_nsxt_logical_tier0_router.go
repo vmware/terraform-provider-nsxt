@@ -65,36 +65,48 @@ func dataSourceNsxtLogicalTier0RouterRead(d *schema.ResourceData, m interface{})
 			return fmt.Errorf("Error while reading logical tier0 router %s: %v", objID, err)
 		}
 		if resp.StatusCode == http.StatusNotFound {
-			return fmt.Errorf("logical tier0 router %s was not found", objID)
+			return fmt.Errorf("Logical tier0 router %s was not found", objID)
+		}
+		if objGet.RouterType != "TIER0" {
+			return fmt.Errorf("Logical router %s is not a tier0 router", objID)
 		}
 		obj = objGet
-	} else if objName != "" {
-		// Get by name prefix
+	} else if objName == "" {
+		return fmt.Errorf("Error obtaining logical tier0 router ID or name during read")
+	} else {
+		// Get by full name/prefix
 		// TODO use 2nd parameter localVarOptionals for paging
 		objList, _, err := nsxClient.LogicalRoutingAndServicesApi.ListLogicalRouters(nsxClient.Context, nil)
 		if err != nil {
 			return fmt.Errorf("Error while reading logical tier0 routers: %v", err)
 		}
-		// go over the list to find the correct one
-		// TODO: prefer full match
-		found := false
+		// go over the list to find the correct one (prefer a perfect match. If not - prefix match)
+		var perfectMatch []manager.LogicalRouter
+		var prefixMatch []manager.LogicalRouter
 		for _, objInList := range objList.Results {
-			if strings.HasPrefix(objInList.DisplayName, objName) {
-				if found {
-					return fmt.Errorf("Found multiple logical tier0 routers with name '%s'", objName)
+			if objInList.RouterType == "TIER0" {
+				if strings.HasPrefix(objInList.DisplayName, objName) {
+					prefixMatch = append(prefixMatch, objInList)
 				}
-				obj = objInList
-				found = true
+				if objInList.DisplayName == objName {
+					perfectMatch = append(perfectMatch, objInList)
+				}
 			}
 		}
-		if !found {
-			return fmt.Errorf("logical tier0 router '%s' was not found", objName)
+		if len(perfectMatch) > 0 {
+			if len(perfectMatch) > 1 {
+				return fmt.Errorf("Found multiple logical tier0 routers with name '%s'", objName)
+			}
+			obj = perfectMatch[0]
+		} else if len(prefixMatch) > 0 {
+			if len(prefixMatch) > 1 {
+				return fmt.Errorf("Found multiple logical tier0 routers with name starting with '%s'", objName)
+			}
+			obj = prefixMatch[0]
+		} else {
+			return fmt.Errorf("Logical tier0 router '%s' was not found", objName)
 		}
-	} else {
-		return fmt.Errorf("Error obtaining logical tier0 router ID or name during read")
 	}
-
-	// TODO(asarfaty): Make sure this is a TIER0 router
 
 	d.SetId(obj.Id)
 	d.Set("display_name", obj.DisplayName)
