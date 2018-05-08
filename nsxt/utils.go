@@ -62,7 +62,7 @@ func getRevisionSchema() *schema.Schema {
 func getTagsSchemaInternal(forceNew bool) *schema.Schema {
 	return &schema.Schema{
 		Type:        schema.TypeSet,
-		Description: "Set of opaque identifiers meaningful to the API user",
+		Description: "Set of opaque identifiers meaningful to the user",
 		Optional:    true,
 		ForceNew:    forceNew,
 		Elem: &schema.Resource{
@@ -121,7 +121,7 @@ func setTagsInSchema(d *schema.ResourceData, tags []common.Tag) error {
 func getSwitchingProfileIdsSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:        schema.TypeSet,
-		Description: "List of IDs of switching profiles (of various types) to be associated with this switch. Default switching profiles will be used if not specified",
+		Description: "List of IDs of switching profiles (of various types) to be associated with this object. Default switching profiles will be used if not specified",
 		Optional:    true,
 		Computed:    true,
 		Elem: &schema.Resource{
