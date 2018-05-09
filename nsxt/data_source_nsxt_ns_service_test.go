@@ -15,11 +15,13 @@ import (
 func TestAccDataSourceNsxtNsService_basic(t *testing.T) {
 	serviceName := "terraform_test_ns_service"
 	testResourceName := "data.nsxt_ns_service.test"
-	var s *terraform.State
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccDataSourceNsxtNsServiceDeleteByName(serviceName)
+		},
 		Steps: []resource.TestStep{
 			{
 				PreConfig: func() {
@@ -31,15 +33,9 @@ func TestAccDataSourceNsxtNsService_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(testResourceName, "display_name", serviceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", serviceName),
-					copyStatePtr(&s),
 				),
 			},
 			{
-				PreConfig: func() {
-					if err := testAccDataSourceNsxtNsServiceDelete(s, testResourceName); err != nil {
-						panic(err)
-					}
-				},
 				Config: testAccNSXNoNsServiceTemplate(),
 			},
 		},
@@ -49,7 +45,6 @@ func TestAccDataSourceNsxtNsService_basic(t *testing.T) {
 func TestAccDataSourceNsxtNsService_systemOwned(t *testing.T) {
 	serviceName := "WINS"
 	testResourceName := "data.nsxt_ns_service.test"
-	var s *terraform.State
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -60,7 +55,6 @@ func TestAccDataSourceNsxtNsService_systemOwned(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(testResourceName, "display_name", serviceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", serviceName),
-					copyStatePtr(&s),
 				),
 			},
 		},
@@ -94,30 +88,33 @@ func testAccDataSourceNsxtNsServiceCreate(serviceName string) error {
 	return nil
 }
 
-func testAccDataSourceNsxtNsServiceDelete(state *terraform.State, resourceName string) error {
-	rs, ok := state.RootModule().Resources[resourceName]
-	if !ok {
-		return fmt.Errorf("NSX nsService data source %s not found", resourceName)
-	}
-
-	resourceID := rs.Primary.ID
-	if resourceID == "" {
-		return fmt.Errorf("NSX nsService data source ID not set")
-	}
+func testAccDataSourceNsxtNsServiceDeleteByName(serviceName string) error {
 	nsxClient, err := testAccGetClient()
 	if err != nil {
 		return fmt.Errorf("Error during test client initialization: %v", err)
 	}
-	localVarOptionals := make(map[string]interface{})
-	responseCode, err := nsxClient.GroupingObjectsApi.DeleteNSService(nsxClient.Context, resourceID, localVarOptionals)
-	if err != nil {
-		return fmt.Errorf("Error during nsService deletion: %v", err)
-	}
 
-	if responseCode.StatusCode != http.StatusOK {
-		return fmt.Errorf("Unexpected status returned during nsService deletion: %v", responseCode.StatusCode)
+	// Find the object by name
+	objList, _, err := nsxClient.GroupingObjectsApi.ListNSServices(nsxClient.Context, nil)
+	if err != nil {
+		return fmt.Errorf("Error while reading NS services: %v", err)
 	}
-	return nil
+	// go over the list to find the correct one
+	for _, objInList := range objList.Results {
+		if objInList.DisplayName == serviceName {
+			localVarOptionals := make(map[string]interface{})
+			responseCode, err := nsxClient.GroupingObjectsApi.DeleteNSService(nsxClient.Context, objInList.Id, localVarOptionals)
+			if err != nil {
+				return fmt.Errorf("Error during nsService deletion: %v", err)
+			}
+
+			if responseCode.StatusCode != http.StatusOK {
+				return fmt.Errorf("Unexpected status returned during nsService deletion: %v", responseCode.StatusCode)
+			}
+			return nil
+		}
+	}
+	return fmt.Errorf("Error while deleting NS service '%s': service not found", serviceName)
 }
 
 func testAccNSXNsServiceReadTemplate(serviceName string) string {
