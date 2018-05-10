@@ -12,12 +12,12 @@ import (
 	"net/http"
 )
 
-func resourceNsxtIpBlock() *schema.Resource {
+func resourceNsxtIPBlock() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNsxtIpBlockCreate,
-		Read:   resourceNsxtIpBlockRead,
-		Update: resourceNsxtIpBlockUpdate,
-		Delete: resourceNsxtIpBlockDelete,
+		Create: resourceNsxtIPBlockCreate,
+		Read:   resourceNsxtIPBlockRead,
+		Update: resourceNsxtIPBlockUpdate,
+		Delete: resourceNsxtIPBlockDelete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -46,7 +46,7 @@ func resourceNsxtIpBlock() *schema.Resource {
 	}
 }
 
-func resourceNsxtIpBlockCreate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtIPBlockCreate(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
@@ -70,10 +70,10 @@ func resourceNsxtIpBlockCreate(d *schema.ResourceData, m interface{}) error {
 	}
 	d.SetId(ipBlock.Id)
 
-	return resourceNsxtIpBlockRead(d, m)
+	return resourceNsxtIPBlockRead(d, m)
 }
 
-func resourceNsxtIpBlockRead(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtIPBlockRead(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 	id := d.Id()
 	if id == "" {
@@ -99,7 +99,7 @@ func resourceNsxtIpBlockRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceNsxtIpBlockUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtIPBlockUpdate(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 	id := d.Id()
 	if id == "" {
@@ -125,10 +125,10 @@ func resourceNsxtIpBlockUpdate(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("Error during IpBlock update: %v", err)
 	}
 
-	return resourceNsxtIpBlockRead(d, m)
+	return resourceNsxtIPBlockRead(d, m)
 }
 
-func resourceNsxtIpBlockDelete(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtIPBlockDelete(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 	id := d.Id()
 	if id == "" {

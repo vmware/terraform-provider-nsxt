@@ -135,7 +135,7 @@ func getDhcpOptions121(d *schema.ResourceData) []manager.ClasslessStaticRoute {
 	return routes
 }
 
-func SetDhcpOptions121InScheme(d *schema.ResourceData, routes []manager.ClasslessStaticRoute) error {
+func setDhcpOptions121InScheme(d *schema.ResourceData, routes []manager.ClasslessStaticRoute) error {
 	var dhcpOpt121 []map[string]interface{}
 	for _, route := range routes {
 		elem := make(map[string]interface{})
@@ -161,7 +161,7 @@ func getDhcpGenericOptions(d *schema.ResourceData) []manager.GenericDhcpOption {
 	return options
 }
 
-func SetDhcpGenericOptionsInScheme(d *schema.ResourceData, opts []manager.GenericDhcpOption) error {
+func setDhcpGenericOptionsInScheme(d *schema.ResourceData, opts []manager.GenericDhcpOption) error {
 	var dhcpOptions []map[string]interface{}
 	for _, opt := range opts {
 		elem := make(map[string]interface{})
@@ -177,7 +177,7 @@ func resourceNsxtLogicalDhcpServerCreate(d *schema.ResourceData, m interface{}) 
 	nsxClient := m.(*api.APIClient)
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	dhcpProfileId := d.Get("dhcp_profile_id").(string)
+	dhcpProfileID := d.Get("dhcp_profile_id").(string)
 	opt121Routes := getDhcpOptions121(d)
 	var opt121 *manager.DhcpOption121
 	if opt121Routes != nil {
@@ -199,7 +199,7 @@ func resourceNsxtLogicalDhcpServerCreate(d *schema.ResourceData, m interface{}) 
 	logicalDhcpServer := manager.LogicalDhcpServer{
 		DisplayName:    displayName,
 		Description:    description,
-		DhcpProfileId:  dhcpProfileId,
+		DhcpProfileId:  dhcpProfileID,
 		Ipv4DhcpServer: &ipv4DhcpServer,
 		Tags:           tags,
 	}
@@ -246,7 +246,7 @@ func resourceNsxtLogicalDhcpServerRead(d *schema.ResourceData, m interface{}) er
 	d.Set("gateway_ip", logicalDhcpServer.Ipv4DhcpServer.GatewayIp)
 	d.Set("dns_name_servers", logicalDhcpServer.Ipv4DhcpServer.DnsNameservers)
 	if logicalDhcpServer.Ipv4DhcpServer.Options != nil && logicalDhcpServer.Ipv4DhcpServer.Options.Option121 != nil {
-		err = SetDhcpOptions121InScheme(d, logicalDhcpServer.Ipv4DhcpServer.Options.Option121.StaticRoutes)
+		err = setDhcpOptions121InScheme(d, logicalDhcpServer.Ipv4DhcpServer.Options.Option121.StaticRoutes)
 		if err != nil {
 			return fmt.Errorf("Error during LogicalDhcpServer read option 121: %v", err)
 		}
@@ -255,7 +255,7 @@ func resourceNsxtLogicalDhcpServerRead(d *schema.ResourceData, m interface{}) er
 		d.Set("dhcp_option_121", emptyDhcpOpt121)
 	}
 	if logicalDhcpServer.Ipv4DhcpServer.Options != nil {
-		err = SetDhcpGenericOptionsInScheme(d, logicalDhcpServer.Ipv4DhcpServer.Options.Others)
+		err = setDhcpGenericOptionsInScheme(d, logicalDhcpServer.Ipv4DhcpServer.Options.Others)
 		if err != nil {
 			return fmt.Errorf("Error during LogicalDhcpServer read generic options: %v", err)
 		}
@@ -277,7 +277,7 @@ func resourceNsxtLogicalDhcpServerUpdate(d *schema.ResourceData, m interface{}) 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
 	tags := getTagsFromSchema(d)
-	dhcpProfileId := d.Get("dhcp_profile_id").(string)
+	dhcpProfileID := d.Get("dhcp_profile_id").(string)
 	revision := int64(d.Get("revision").(int))
 	opt121Routes := getDhcpOptions121(d)
 	var opt121 *manager.DhcpOption121
@@ -299,7 +299,7 @@ func resourceNsxtLogicalDhcpServerUpdate(d *schema.ResourceData, m interface{}) 
 	logicalDhcpServer := manager.LogicalDhcpServer{
 		DisplayName:    displayName,
 		Description:    description,
-		DhcpProfileId:  dhcpProfileId,
+		DhcpProfileId:  dhcpProfileID,
 		Ipv4DhcpServer: &ipv4DhcpServer,
 		Tags:           tags,
 		Revision:       revision,
