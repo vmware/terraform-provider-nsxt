@@ -53,7 +53,7 @@ The following arguments are supported:
 
 * `description` - (Optional) Description of this resource.
 * `display_name` - (Optional) The display name of this resource. Defaults to ID if not set.
-* `tag` - (Optional) A list of scope + tag pairs to associate with this dhcp relay profile.
+* `tag` - (Optional) A list of scope + tag pairs to associate with this DHCP relay profile.
 * `server_addresses` - (Required) IP addresses of the DHCP relay servers.
 
 
@@ -61,7 +61,7 @@ The following arguments are supported:
 
 In addition to arguments listed above, the following attributes are exported:
 
-* `id` - ID of the dhcp_relay_profile.
+* `id` - ID of the DHCP relay profile.
 * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
 
 ## Importing

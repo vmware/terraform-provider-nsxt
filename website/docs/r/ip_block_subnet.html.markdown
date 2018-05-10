@@ -3,12 +3,12 @@ layout: "nsxt"
 page_title: "NSXT: nsxt_ip_block_subnet"
 sidebar_current: "docs-nsxt-resource-ip-block-subnet"
 description: |-
-  Provides a resource to configure ip block subnet on NSX-T manager
+  Provides a resource to configure IP block subnet on NSX-T manager
 ---
 
 # nsxt_ip_block_subnet
 
-Provides a resource to configure ip block subnet on NSX-T manager
+Provides a resource to configure IP block subnet on NSX-T manager
 
 ## Example Usage
 
@@ -38,23 +38,23 @@ The following arguments are supported:
 * `display_name` - (Optional) The display name of this resource. Defaults to ID if not set.
 * `description` - (Optional) Description of this resource.
 * `block_id` - (Required) Block id for which the subnet is created.
-* `size` - (Required) Represents the size or number of ip addresses in the subnet.
-* `tag` - (Optional) A list of scope + tag pairs to associate with this ip block subnet.
+* `size` - (Required) Represents the size or number of IP addresses in the subnet.
+* `tag` - (Optional) A list of scope + tag pairs to associate with this IP block subnet.
 
 
 ## Attributes Reference
 
 In addition to arguments listed above, the following attributes are exported:
 
-* `id` - ID of the ip_block_subnet.
+* `id` - ID of the IP block subnet.
 * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
 * `allocation_range` - A collection of IPv4 IP ranges used for IP allocation.
-* `cidr` - Represents the size or number of ip addresses in the subnet. All subnets of the same block must have the same size, which must be a power of 2.
+* `cidr` - Represents the size or number of IP addresses in the subnet. All subnets of the same block must have the same size, which must be a power of 2.
 
 
 ## Importing
 
-An existing ip block subnet can be [imported][docs-import] into this resource, via the following command:
+An existing IP block subnet can be [imported][docs-import] into this resource, via the following command:
 
 [docs-import]: /docs/import/index.html
 
@@ -62,4 +62,4 @@ An existing ip block subnet can be [imported][docs-import] into this resource, v
 terraform import nsxt_ip_block_subnet.ip_block_subnet UUID
 ```
 
-The above would import the ip block subnet named `ip_block_subnet` with the nsx id `UUID`
+The above would import the IP block subnet named `ip_block_subnet` with the nsx id `UUID`

@@ -54,12 +54,12 @@ The following arguments are supported:
 
 In addition to arguments listed above, the following attributes are exported:
 
-* `id` - ID of the logical switch.
+* `id` - ID of the logical DHCP port.
 * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
 
 ## Importing
 
-An existing Logical Port can be [imported][docs-import] into this resource, via the following command:
+An existing DHCP Logical Port can be [imported][docs-import] into this resource, via the following command:
 
 [docs-import]: /docs/import/index.html
 

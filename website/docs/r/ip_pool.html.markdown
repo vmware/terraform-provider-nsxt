@@ -3,12 +3,12 @@ layout: "nsxt"
 page_title: "NSXT: nsxt_ip_pool"
 sidebar_current: "docs-nsxt-resource-ip-pool"
 description: |-
-  Provides a resource to configure ip pool on NSX-T manager
+  Provides a resource to configure IP pool on NSX-T manager
 ---
 
 # nsxt_ip_pool
 
-Provides a resource to configure ip pool on NSX-T manager
+Provides a resource to configure IP pool on NSX-T manager
 
 ## Example Usage
 
@@ -38,7 +38,7 @@ The following arguments are supported:
 
 * `description` - (Optional) Description of this resource.
 * `display_name` - (Optional) The display name of this resource. Defaults to ID if not set.
-* `tag` - (Optional) A list of scope + tag pairs to associate with this ip pool.
+* `tag` - (Optional) A list of scope + tag pairs to associate with this IP pool.
 * `subnet` - (Optional) Subnets can be IPv4 or IPv6 and they should not overlap. The maximum number will not exceed 5 subnets. Each subnet has the following arguments:
   * `allocation_ranges` - (Required) A collection of IPv4 Pool Ranges
   * `cidr` - (Required) Network address and the prefix length which will be associated with a layer-2 broadcast domainIPv4 Pool Ranges
@@ -50,13 +50,13 @@ The following arguments are supported:
 
 In addition to arguments listed above, the following attributes are exported:
 
-* `id` - ID of the ip_pool.
+* `id` - ID of the IP pool.
 * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
 
 
 ## Importing
 
-An existing ip pool can be [imported][docs-import] into this resource, via the following command:
+An existing IP pool can be [imported][docs-import] into this resource, via the following command:
 
 [docs-import]: /docs/import/index.html
 
@@ -64,4 +64,4 @@ An existing ip pool can be [imported][docs-import] into this resource, via the f
 terraform import nsxt_ip_pool.ip_pool UUID
 ```
 
-The above would import the ip pool named `ip_pool` with the nsx id `UUID`
+The above would import the IP pool named `ip_pool` with the nsx id `UUID`

@@ -55,14 +55,14 @@ The following arguments are supported:
 * `description` - (Optional) Description of this resource.
 * `display_name` - (Optional) The display name of this resource. Defaults to ID if not set.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this dhcp_relay_service.
-* `dhcp_relay_profile_id` - (Required) dhcp relay profile referenced by the dhcp relay service.
+* `dhcp_relay_profile_id` - (Required) DHCP relay profile referenced by the DHCP relay service.
 
 
 ## Attributes Reference
 
 In addition to arguments listed above, the following attributes are exported:
 
-* `id` - ID of the dhcp_relay_service.
+* `id` - ID of the DHCP relay service.
 * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
 
 ## Importing
