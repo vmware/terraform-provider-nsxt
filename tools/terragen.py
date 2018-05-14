@@ -12,7 +12,7 @@ PACKAGE_NAME = "nsxt"
 SDK_PACKAGE_NAME = "api"
 MANAGER_PACKAGE_NAME = "manager"
 
-IGNORE_ATTRS = ["Links", "Schema", "Self", "Id", "ResourceType", "CreateTime", "CreateUser", "LastModifiedTime", "LastModifiedUser", "SystemOwned"]
+IGNORE_ATTRS = ["Links", "Schema", "Self", "Id", "ResourceType", "CreateTime", "CreateUser", "LastModifiedTime", "LastModifiedUser", "SystemOwned", "Protection"]
 COMPUTED_ATTRS = ["CreateTime", "CreateUser", "LastModifiedTime", "LastModifiedUser", "SystemOwned"]
 COMPUTED_AND_OPTIONAL_ATTRS = ["DisplayName"]
 FORCENEW_ATTRS = ["TransportZoneId"]
@@ -31,13 +31,15 @@ TYPECAST_MAP = {"int64": "int", "int32": "int"}
 indent = 0
 
 
-def convert_name(name):
+def name_to_lower(name):
     tmp = re.sub(r'([A-Z])', r'_\1', name).lower()
     return tmp[1:]
 
 def lowercase_first(name):
     return name[:1].lower() + name[1:]
 
+def name_to_upper(name):
+    return name.title().replace('_', '')
 
 def is_list_complex_attr(attr):
     if attr['type'].startswith('[]'):
@@ -53,7 +55,7 @@ def get_attr_fixed_name(attr):
     if is_list_complex_attr(attr) and fixed_name.endswith('s'):
         # remove last s
         fixed_name = fixed_name[:-1]
-    fixed_name = convert_name(fixed_name)
+    fixed_name = name_to_lower(fixed_name)
     return fixed_name
 
 
@@ -97,13 +99,27 @@ def write_attr(f, attr):
         pretty_writeln(f, "\"%s\": get%sSchema()," % (fixed_name, attr['name']))
         return
 
-    if attr['type'] not in TYPE_MAP:
-        print("Skipping attribute %s due to mysterious type %s" % (attr['name'], attr['type']))
+    is_array = False
+    attr_type = attr['type']
+    if attr_type.startswith("[]") and attr_type[2:] in TYPE_MAP:
+        # Handle arrays. By default, arrays are translated to sets
+        # assuming in most cases order is not significant. When order is
+        # significant, these should be changed to lists
+        # TODO: add both with choice comment
+        is_array = True
+        attr_type = attr_type[2:]
+        attr['helper'] = "%sListFromSchemaSet" % name_to_upper(attr_type)
+
+    if attr_type not in TYPE_MAP:
+        print("Skipping attribute %s due to mysterious type %s" % (attr['name'], attr_type))
         return
 
     pretty_writeln(f, "\"%s\": &schema.Schema{" % fixed_name)
     shift()
-    pretty_writeln(f, "Type:        %s," % TYPE_MAP[attr['type']])
+    if is_array:
+        pretty_writeln(f, "Type:        schema.TypeSet,")
+    else:
+        pretty_writeln(f, "Type:        %s," % TYPE_MAP[attr_type])
 
     comment = ' '
     if attr['comment']:
@@ -111,6 +127,14 @@ def write_attr(f, attr):
     if attr['name'] == 'DisplayName' and comment == 'Defaults to ID if not set':
         comment = "The display name of this resource. " + comment
     pretty_writeln(f, "Description: \"%s\"," % comment)
+
+    if is_array:
+        pretty_writeln(f, "Elem: &schema.Schema{")
+        shift()
+        pretty_writeln(f, "Type:        %s," % TYPE_MAP[attr_type])
+        pretty_writeln(f, "ValidateFunc: validate%s," % name_to_upper(fixed_name))
+        unshift()
+        pretty_writeln(f, "},")
 
     if attr['optional']:
         pretty_writeln(f, "Optional:    true,")
@@ -163,6 +187,14 @@ def write_object(f, resource, attrs, is_create=True):
 
         used_attrs.append(attr['name'])
         fixed_name = get_attr_fixed_name(attr)
+        if 'helper' in attr:
+            # helper function name already computed - this is the case for arrays
+            pretty_writeln(f, '%s := get%s(d, "%s")' % (
+                lowercase_first(attr['name']),
+                attr['helper'],
+                fixed_name))
+            continue
+
         if attr['name'] in VIP_GETTER_ATTRS:
             pretty_writeln(f, "%s := get%sFromSchema(d)" % (
                 lowercase_first(attr['name']), attr['name']))
@@ -374,7 +406,7 @@ def write_attributes_reference(f, resource, attrs):
     pretty_writeln(f, "* `id` - ID of the %s." % res)
     for attr in attrs:
         if attr['name'] == 'Revision' or attr['name'] in COMPUTED_ATTRS or attr['name'] in IGNORE_ATTRS:
-            name = convert_name(attr['name'])
+            name = name_to_lower(attr['name'])
             desc = attr['comment']
             if name == 'revision':
                 desc = 'Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging'
@@ -444,7 +476,7 @@ def main():
 
 
     print("Resource: %s" % resource)
-    resource_lower = convert_name(resource)
+    resource_lower = name_to_lower(resource)
     print(resource_lower)
 
     # write the resource file
