@@ -12,12 +12,12 @@ import (
 	"net/http"
 )
 
-func resourceNsxtIpBlockSubnet() *schema.Resource {
+func resourceNsxtIPBlockSubnet() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNsxtIpBlockSubnetCreate,
-		Read:   resourceNsxtIpBlockSubnetRead,
-		// Update ip block subnet is not supported by the NSX
-		Delete: resourceNsxtIpBlockSubnetDelete,
+		Create: resourceNsxtIPBlockSubnetCreate,
+		Read:   resourceNsxtIPBlockSubnetRead,
+		// Update IP block subnet is not supported by the NSX
+		Delete: resourceNsxtIPBlockSubnetDelete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -79,17 +79,17 @@ func resourceNsxtIpBlockSubnet() *schema.Resource {
 	}
 }
 
-func resourceNsxtIpBlockSubnetCreate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtIPBlockSubnetCreate(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
-	blockId := d.Get("block_id").(string)
+	blockID := d.Get("block_id").(string)
 	size := int64(d.Get("size").(int))
 	tags := getTagsFromSchema(d)
 	ipBlockSubnet := manager.IpBlockSubnet{
 		DisplayName: displayName,
 		Description: description,
-		BlockId:     blockId,
+		BlockId:     blockID,
 		Size:        size,
 		Tags:        tags,
 	}
@@ -105,7 +105,7 @@ func resourceNsxtIpBlockSubnetCreate(d *schema.ResourceData, m interface{}) erro
 	}
 	d.SetId(ipBlockSubnet.Id)
 
-	return resourceNsxtIpBlockSubnetRead(d, m)
+	return resourceNsxtIPBlockSubnetRead(d, m)
 }
 
 func setAllocationRangesInSchema(d *schema.ResourceData, ranges []manager.IpPoolRange) error {
@@ -120,7 +120,7 @@ func setAllocationRangesInSchema(d *schema.ResourceData, ranges []manager.IpPool
 	return err
 }
 
-func resourceNsxtIpBlockSubnetRead(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtIPBlockSubnetRead(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 	id := d.Id()
 	if id == "" {
@@ -152,7 +152,7 @@ func resourceNsxtIpBlockSubnetRead(d *schema.ResourceData, m interface{}) error 
 	return nil
 }
 
-func resourceNsxtIpBlockSubnetDelete(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtIPBlockSubnetDelete(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 	id := d.Id()
 	if id == "" {

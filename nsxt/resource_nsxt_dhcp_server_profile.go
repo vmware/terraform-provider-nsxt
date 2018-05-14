@@ -59,12 +59,12 @@ func resourceNsxtDhcpServerProfileCreate(d *schema.ResourceData, m interface{}) 
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
-	edgeClusterId := d.Get("edge_cluster_id").(string)
+	edgeClusterID := d.Get("edge_cluster_id").(string)
 	edgeClusterMemberIndexes := intList2int64List(d.Get("edge_cluster_member_indexes").([]interface{}))
 	dhcpProfile := manager.DhcpProfile{
 		DisplayName:              displayName,
 		Description:              description,
-		EdgeClusterId:            edgeClusterId,
+		EdgeClusterId:            edgeClusterID,
 		EdgeClusterMemberIndexes: edgeClusterMemberIndexes,
 		Tags: tags,
 	}
@@ -119,14 +119,14 @@ func resourceNsxtDhcpServerProfileUpdate(d *schema.ResourceData, m interface{}) 
 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	edgeClusterId := d.Get("edge_cluster_id").(string)
+	edgeClusterID := d.Get("edge_cluster_id").(string)
 	edgeClusterMemberIndexes := intList2int64List(d.Get("edge_cluster_member_indexes").([]interface{}))
 	tags := getTagsFromSchema(d)
 	revision := int64(d.Get("revision").(int))
 	dhcpProfile := manager.DhcpProfile{
 		DisplayName:              displayName,
 		Description:              description,
-		EdgeClusterId:            edgeClusterId,
+		EdgeClusterId:            edgeClusterID,
 		EdgeClusterMemberIndexes: edgeClusterMemberIndexes,
 		Tags:     tags,
 		Revision: revision,

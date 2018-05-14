@@ -64,10 +64,10 @@ func resourceNsxtLogicalDhcpPortCreate(d *schema.ResourceData, m interface{}) er
 	adminState := d.Get("admin_state").(string)
 	//profilesList := getSwitchingProfileIdsFromSchema(d)
 	tagList := getTagsFromSchema(d)
-	dhcpServerId := d.Get("dhcp_server_id").(string)
+	dhcpServerID := d.Get("dhcp_server_id").(string)
 	attachment := manager.LogicalPortAttachment{
 		AttachmentType: dhcpType,
-		Id:             dhcpServerId,
+		Id:             dhcpServerID,
 	}
 	lp := manager.LogicalPort{
 		DisplayName:     name,
@@ -139,10 +139,10 @@ func resourceNsxtLogicalDhcpPortUpdate(d *schema.ResourceData, m interface{}) er
 	//profilesList := getSwitchingProfileIdsFromSchema(d)
 	tagList := getTagsFromSchema(d)
 	revision := int64(d.Get("revision").(int))
-	dhcpServerId := d.Get("dhcp_server_id").(string)
+	dhcpServerID := d.Get("dhcp_server_id").(string)
 	attachment := manager.LogicalPortAttachment{
 		AttachmentType: "DHCP_SERVICE",
-		Id:             dhcpServerId,
+		Id:             dhcpServerID,
 	}
 	lp := manager.LogicalPort{
 		Revision:        revision,

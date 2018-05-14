@@ -13,12 +13,12 @@ import (
 	"strings"
 )
 
-func resourceNsxtIpPool() *schema.Resource {
+func resourceNsxtIPPool() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNsxtIpPoolCreate,
-		Read:   resourceNsxtIpPoolRead,
-		Update: resourceNsxtIpPoolUpdate,
-		Delete: resourceNsxtIpPoolDelete,
+		Create: resourceNsxtIPPoolCreate,
+		Read:   resourceNsxtIPPoolRead,
+		Update: resourceNsxtIPPoolUpdate,
+		Delete: resourceNsxtIPPoolDelete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -92,7 +92,7 @@ func getSubnetSchema() *schema.Schema {
 }
 
 func getAllocationRangesFromRanges(ranges []interface{}) []manager.IpPoolRange {
-	var allocation_ranges []manager.IpPoolRange
+	var allocationRanges []manager.IpPoolRange
 	for _, rng := range ranges {
 		r := rng.(string)
 		s := strings.Split(r, "-")
@@ -102,9 +102,9 @@ func getAllocationRangesFromRanges(ranges []interface{}) []manager.IpPoolRange {
 			Start: start,
 			End:   end,
 		}
-		allocation_ranges = append(allocation_ranges, elem)
+		allocationRanges = append(allocationRanges, elem)
 	}
-	return allocation_ranges
+	return allocationRanges
 }
 
 func getSubnetsFromSchema(d *schema.ResourceData) []manager.IpPoolSubnet {
@@ -149,7 +149,7 @@ func setSubnetsInSchema(d *schema.ResourceData, subnets []manager.IpPoolSubnet) 
 	return err
 }
 
-func resourceNsxtIpPoolCreate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtIPPoolCreate(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 	displayName := d.Get("display_name").(string)
 	subnets := getSubnetsFromSchema(d)
@@ -173,10 +173,10 @@ func resourceNsxtIpPoolCreate(d *schema.ResourceData, m interface{}) error {
 	}
 	d.SetId(ipPool.Id)
 
-	return resourceNsxtIpPoolRead(d, m)
+	return resourceNsxtIPPoolRead(d, m)
 }
 
-func resourceNsxtIpPoolRead(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtIPPoolRead(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 	id := d.Id()
 	if id == "" {
@@ -205,7 +205,7 @@ func resourceNsxtIpPoolRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceNsxtIpPoolUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtIPPoolUpdate(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 	id := d.Id()
 	if id == "" {
@@ -231,10 +231,10 @@ func resourceNsxtIpPoolUpdate(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("Error during IpPool update: %v", err)
 	}
 
-	return resourceNsxtIpPoolRead(d, m)
+	return resourceNsxtIPPoolRead(d, m)
 }
 
-func resourceNsxtIpPoolDelete(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtIPPoolDelete(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 	id := d.Id()
 	if id == "" {
