@@ -43,7 +43,7 @@ The following arguments are supported:
 
 In addition to arguments listed above, the following attributes are exported:
 
-* `id` - ID of the logical switch.
+* `id` - ID of the logical router link port.
 * `linked_logical_switch_port_id` - Identifier for port on logical router to connect to.
 * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
 

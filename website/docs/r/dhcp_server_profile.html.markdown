@@ -3,12 +3,12 @@ layout: "nsxt"
 page_title: "NSXT: nsxt_dhcp_server_profile"
 sidebar_current: "docs-nsxt-resource-dhcp-server_profile"
 description: |-
-  Provides a resource to configure dhcp server profile on NSX-T manager
+  Provides a resource to configure DHCP server profile on NSX-T manager
 ---
 
 # nsxt_dhcp_server_profile
 
-Provides a resource to configure dhcp server profile on NSX-T manager
+Provides a resource to configure DHCP server profile on NSX-T manager
 
 ## Example Usage
 
@@ -38,20 +38,20 @@ The following arguments are supported:
 * `description` - (Optional) Description of this resource.
 * `edge_cluster_id` - (Required) Edge cluster uuid.
 * `edge_cluster_member_indexes` - (Optional) Up to 2 edge nodes from the given cluster. If none is provided, the NSX will auto-select two edge-nodes from the given edge cluster. If user provides only one edge node, there will be no HA support.
-* `tag` - (Optional) A list of scope + tag pairs to associate with this dhcp profile.
+* `tag` - (Optional) A list of scope + tag pairs to associate with this DHCP profile.
 
 
 ## Attributes Reference
 
 In addition to arguments listed above, the following attributes are exported:
 
-* `id` - ID of the dhcp_profile.
+* `id` - ID of the DHCP server profile.
 * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
 
 
 ## Importing
 
-An existing dhcp profile can be [imported][docs-import] into this resource, via the following command:
+An existing DHCP profile can be [imported][docs-import] into this resource, via the following command:
 
 [docs-import]: /docs/import/index.html
 
@@ -59,4 +59,4 @@ An existing dhcp profile can be [imported][docs-import] into this resource, via 
 terraform import nsxt_dhcp_server_profile.dhcp_profile UUID
 ```
 
-The above would import the dhcp server profile named `dhcp_profile` with the nsx id `UUID`
+The above would import the DHCP server profile named `dhcp_profile` with the nsx id `UUID`

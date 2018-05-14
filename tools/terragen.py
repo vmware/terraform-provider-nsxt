@@ -368,9 +368,10 @@ def write_arguments_reference(f, resource, attrs):
     pretty_writeln(f, "\n")
 
 def write_attributes_reference(f, resource, attrs):
+    res = re.sub('_', ' ', resource)
     pretty_writeln(f, "## Attributes Reference\n")
     pretty_writeln(f, "In addition to arguments listed above, the following attributes are exported:\n")
-    pretty_writeln(f, "* `id` - ID of the %s." % resource)
+    pretty_writeln(f, "* `id` - ID of the %s." % res)
     for attr in attrs:
         if attr['name'] == 'Revision' or attr['name'] in COMPUTED_ATTRS or attr['name'] in IGNORE_ATTRS:
             name = convert_name(attr['name'])

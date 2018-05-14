@@ -31,7 +31,7 @@ The following arguments are supported:
 
 * `description` - (Optional) Description of this resource.
 * `display_name` - (Optional) The display name of this resource. Defaults to ID if not set.
-* `tag` - (Optional) A list of scope + tag pairs to associate with this ip_set.
+* `tag` - (Optional) A list of scope + tag pairs to associate with this IP set.
 * `ip_addresses` - (Optional) IP addresses.
 
 
@@ -39,7 +39,7 @@ The following arguments are supported:
 
 In addition to arguments listed above, the following attributes are exported:
 
-* `id` - ID of the ip_set.
+* `id` - ID of the IP set.
 * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
 
 ## Importing

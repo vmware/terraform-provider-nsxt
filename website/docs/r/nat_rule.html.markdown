@@ -45,7 +45,7 @@ The following arguments are supported:
 * `match_destination_network` - (Optional) IP Address | CIDR | (null implies Any).
 * `match_source_network` - (Optional) IP Address | CIDR | (null implies Any).
 * `nat_pass` - (Optional) Enable/disable to bypass following firewall stage. The default is true, meaning that the following firewall stage will be skipped. Please note, if action is NO_NAT, then nat_pass must be set to true or omitted.
-* `translated_network` - (Optional) IP Address | IP Range | CIDR. For DNAT rules only a single ip is supported.
+* `translated_network` - (Optional) IP Address | IP Range | CIDR. For DNAT rules only a single IP is supported.
 * `translated_ports` - (Optional) port number or port range. DNAT only.
 
 
@@ -53,7 +53,7 @@ The following arguments are supported:
 
 In addition to arguments listed above, the following attributes are exported:
 
-* `id` - ID of the nat_rule.
+* `id` - ID of the NAT rule.
 * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
 * `rule_priority` - The priority of the rule which is ascending, valid range [0-2147483647]. If multiple rules have the same priority, evaluation sequence is undefined.
 
