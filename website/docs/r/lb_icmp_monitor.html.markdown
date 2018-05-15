@@ -16,18 +16,17 @@ Provides a resource to configure lb icmp monitor on NSX-T manager
 resource "nsxt_lb_icmp_monitor" "lb_icmp_monitor" {
   description  = "lb_icmp_monitor provisioned by Terraform"
   display_name = "lb_icmp_monitor"
-
-  tag = {
-    scope = "color"
-    tag   = "red"
-  }
-
   fall_count   = 3
   interval     = 5
   monitor_port = 7887
   rise_count   = 3
   timeout      = 10
   data_length  = 56
+
+  tag = {
+    scope = "color"
+    tag   = "red"
+  }
 }
 ```
 

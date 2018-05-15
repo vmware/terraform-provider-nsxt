@@ -44,7 +44,7 @@ func resourceNsxtLbIcmpMonitor() *schema.Resource {
 			"timeout":      getLbMonitorTimeoutSchema(),
 			"data_length": &schema.Schema{
 				Type:         schema.TypeInt,
-				Description:  "The data size(in bytes) of the ICMP healthcheck packet",
+				Description:  "The data size (in bytes) of the ICMP healthcheck packet",
 				Optional:     true,
 				Default:      56,
 				ValidateFunc: validation.IntBetween(0, 65507),

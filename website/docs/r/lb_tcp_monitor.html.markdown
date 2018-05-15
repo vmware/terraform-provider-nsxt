@@ -16,17 +16,16 @@ Provides a resource to configure lb tcp monitor on NSX-T manager
 resource "nsxt_lb_tcp_monitor" "lb_tcp_monitor" {
   description  = "lb_tcp_monitor provisioned by Terraform"
   display_name = "lb_tcp_monitor"
-
-  tag = {
-    scope = "color"
-    tag   = "red"
-  }
-
   fall_count   = 3
   interval     = 5
   monitor_port = 7887
   rise_count   = 3
   timeout      = 10
+
+  tag = {
+    scope = "color"
+    tag   = "red"
+  }
 }
 ```
 
