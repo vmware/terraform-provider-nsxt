@@ -52,54 +52,6 @@ func TestAccResourceNsxtLogicalRouterLinkPortOnTier1_basic(t *testing.T) {
 	})
 }
 
-func TestAccResourceNsxtLogicalRouterLinkPortOnTier1_withRelay(t *testing.T) {
-	// Note: this test will pass only with NSX 2.2 & up. Before that dhcp relay is not supported here
-	// This test should be skipped based on the nsx version
-	name := fmt.Sprintf("test-nsx-port-on-tier1")
-	tier0RouterName := getTier0RouterName()
-	edgeClusterName := getEdgeClusterName()
-	updateName := fmt.Sprintf("%s-update", name)
-	testResourceName := "nsxt_logical_router_link_port_on_tier1.test"
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "2.2.0") },
-		Providers: testAccProviders,
-		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXLogicalRouterLinkPortOnTier1CheckDestroy(state, name)
-		},
-		Steps: []resource.TestStep{
-			{
-				Config: testAccNSXLogicalRouterLinkPortOnTier1WithRelayCreateTemplate(name, tier0RouterName, edgeClusterName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccNSXLogicalRouterLinkPortOnTier1Exists(name, testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
-					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
-					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
-					resource.TestCheckResourceAttrSet(testResourceName, "logical_router_id"),
-					resource.TestCheckResourceAttrSet(testResourceName, "linked_logical_router_port_id"),
-					resource.TestCheckResourceAttr(testResourceName, "service_binding.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "service_binding.0.target_type", "LogicalService"),
-					resource.TestCheckResourceAttr(testResourceName, "service_binding.0.target_display_name", "srv"),
-				),
-			},
-			{
-				Config: testAccNSXLogicalRouterLinkPortOnTier1WithRelayUpdateTemplate(updateName, tier0RouterName, edgeClusterName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccNSXLogicalRouterLinkPortOnTier1Exists(updateName, testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", updateName),
-					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test Update"),
-					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
-					resource.TestCheckResourceAttrSet(testResourceName, "logical_router_id"),
-					resource.TestCheckResourceAttrSet(testResourceName, "linked_logical_router_port_id"),
-					resource.TestCheckResourceAttr(testResourceName, "service_binding.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "service_binding.0.target_type", "LogicalService"),
-					resource.TestCheckResourceAttr(testResourceName, "service_binding.0.target_display_name", "srv"),
-				),
-			},
-		},
-	})
-}
-
 func TestAccResourceNsxtLogicalRouterLinkPortOnTier1_importBasic(t *testing.T) {
 	name := fmt.Sprintf("test-nsx-port-on-tier1")
 	tier0RouterName := getTier0RouterName()
@@ -223,51 +175,6 @@ resource "nsxt_logical_router_link_port_on_tier1" "test" {
   description                  = "Acceptance Test Update"
   logical_router_id            = "${nsxt_logical_tier1_router.test.id}"
   linked_logical_router_port_id = "${nsxt_logical_router_link_port_on_tier0.test.id}"
-
-  tag {
-    scope = "scope1"
-    tag   = "tag1"
-  }
-
-  tag {
-    scope = "scope2"
-    tag   = "tag2"
-  }
-}`, name)
-}
-
-func testAccNSXLogicalRouterLinkPortOnTier1WithRelayCreateTemplate(name string, tier0RouterName string, edgeClusterName string) string {
-	return testAccNSXLogicalRouterDownlinkPortRelayTemplate() + testAccNSXLogicalRouterLinkPortOnTier1PreconditionsTemplate(tier0RouterName, edgeClusterName) + fmt.Sprintf(`
-resource "nsxt_logical_router_link_port_on_tier1" "test" {
-  display_name                  = "%s"
-  description                   = "Acceptance Test"
-  logical_router_id             = "${nsxt_logical_tier1_router.test.id}"
-  linked_logical_router_port_id = "${nsxt_logical_router_link_port_on_tier0.test.id}"
-
-  service_binding {
-    target_id = "${nsxt_dhcp_relay_service.DRS1.id}"
-    target_type = "LogicalService"
-  }
-
-  tag {
-    scope = "scope1"
-    tag   = "tag1"
-  }
-}`, name)
-}
-
-func testAccNSXLogicalRouterLinkPortOnTier1WithRelayUpdateTemplate(name string, tier0RouterName string, edgeClusterName string) string {
-	return testAccNSXLogicalRouterDownlinkPortRelayTemplate() + testAccNSXLogicalRouterLinkPortOnTier1PreconditionsTemplate(tier0RouterName, edgeClusterName) + fmt.Sprintf(`
-resource "nsxt_logical_router_link_port_on_tier1" "test" {
-  display_name                  = "%s"
-  description                   = "Acceptance Test Update"
-  logical_router_id             = "${nsxt_logical_tier1_router.test.id}"
-  linked_logical_router_port_id = "${nsxt_logical_router_link_port_on_tier0.test.id}"
-
-  service_binding {
-    target_id   = "${nsxt_dhcp_relay_service.DRS1.id}"
-    target_type = "LogicalService"
-  }
 
   tag {
     scope = "scope1"
