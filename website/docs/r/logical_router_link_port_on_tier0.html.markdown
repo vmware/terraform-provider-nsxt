@@ -17,11 +17,6 @@ resource "nsxt_logical_router_link_port_on_tier0" "link_port_tier0" {
   display_name      = "TIER0_PORT1"
   logical_router_id = "${data.nsxt_logical_tier0_router.rtr1.id}"
 
-  service_binding {
-    target_id   = "${nsxt_dhcp_relay_service.dr_service.id}"
-    target_type = "LogicalService"
-  }
-
   tag {
     scope = "color"
     tag   = "blue"
