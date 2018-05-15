@@ -123,6 +123,7 @@ func Provider() terraform.ResourceProvider {
 			"nsxt_lb_udp_monitor":                    resourceNsxtLbUDPMonitor(),
 			"nsxt_lb_http_monitor":                   resourceNsxtLbHTTPMonitor(),
 			"nsxt_lb_https_monitor":                  resourceNsxtLbHTTPSMonitor(),
+			"nsxt_lb_pool":                           resourceNsxtLbPool(),
 		},
 
 		ConfigureFunc: providerConfigure,
