@@ -2266,10 +2266,10 @@
 			"revisionTime": "2017-06-05T21:53:11Z"
 		},
 		{
-			"checksumSHA1": "AW5WYMRJXT8hxjuHbUK74KDymIc=",
+			"checksumSHA1": "CcmI0qyF+IpbYeoKd/ClyH7/x5E=",
 			"path": "github.com/vmware/go-vmware-nsxt",
-			"revision": "3ad8bbf22d4ff51964ee19cbdd4a2d2faef0ac22",
-			"revisionTime": "2018-04-30T21:12:36Z"
+			"revision": "6b7e59e538d4486112adc456b2f087ec154ea8da",
+			"revisionTime": "2018-05-10T19:34:16Z"
 		},
 		{
 			"checksumSHA1": "o0gNsuAZWWIs1RY7hh5cB5j85q4=",

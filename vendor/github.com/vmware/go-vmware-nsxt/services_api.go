@@ -1683,6 +1683,73 @@ func (a *ServicesApiService) CreateLoadBalancerIcmpMonitor(ctx context.Context, 
 	return successPayload, localVarHttpResponse, err
 }
 
+/* ServicesApiService Create a load balancer monitor
+Create a load balancer monitor.
+* @param ctx context.Context for authentication, logging, tracing, etc.
+@param lbMonitor
+@return loadbalancer.LbPassiveMonitor*/
+func (a *ServicesApiService) CreateLoadBalancerPassiveMonitor(ctx context.Context, lbMonitor loadbalancer.LbPassiveMonitor) (loadbalancer.LbPassiveMonitor, *http.Response, error) {
+	var (
+		localVarHttpMethod = strings.ToUpper("Post")
+		localVarPostBody   interface{}
+		localVarFileName   string
+		localVarFileBytes  []byte
+		successPayload     loadbalancer.LbPassiveMonitor
+	)
+
+	// set resource type for this type-specific API
+	lbMonitor.ResourceType = "LbPassiveMonitor"
+
+	// create path and map variables
+	localVarPath := a.client.cfg.BasePath + "/loadbalancer/monitors"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHttpContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHttpContentType := selectHeaderContentType(localVarHttpContentTypes)
+	if localVarHttpContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHttpContentType
+	}
+
+	// to determine the Accept header
+	localVarHttpHeaderAccepts := []string{
+		"application/json",
+	}
+
+	// set Accept header
+	localVarHttpHeaderAccept := selectHeaderAccept(localVarHttpHeaderAccepts)
+	if localVarHttpHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHttpHeaderAccept
+	}
+	// body params
+	localVarPostBody = &lbMonitor
+	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHttpMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFileName, localVarFileBytes)
+	if err != nil {
+		return successPayload, nil, err
+	}
+
+	localVarHttpResponse, err := a.client.callAPI(r)
+	if err != nil || localVarHttpResponse == nil {
+		return successPayload, localVarHttpResponse, err
+	}
+	defer localVarHttpResponse.Body.Close()
+	if localVarHttpResponse.StatusCode >= 300 {
+		bodyBytes, _ := ioutil.ReadAll(localVarHttpResponse.Body)
+		return successPayload, localVarHttpResponse, reportError("Status: %v, Body: %s", localVarHttpResponse.Status, bodyBytes)
+	}
+
+	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
+		return successPayload, localVarHttpResponse, err
+	}
+
+	return successPayload, localVarHttpResponse, err
+}
+
 /* ServicesApiService Create a load balancer persistence profile
 Create a load balancer persistence profile.
 * @param ctx context.Context for authentication, logging, tracing, etc.
@@ -7239,6 +7306,69 @@ func (a *ServicesApiService) ReadLoadBalancerIcmpMonitor(ctx context.Context, mo
 	return successPayload, localVarHttpResponse, err
 }
 
+/* ServicesApiService Retrieve a load balancer monitor
+Retrieve a load balancer monitor.
+* @param ctx context.Context for authentication, logging, tracing, etc.
+@param monitorId
+@return loadbalancer.LbPassiveMonitor*/
+func (a *ServicesApiService) ReadLoadBalancerPassiveMonitor(ctx context.Context, monitorId string) (loadbalancer.LbPassiveMonitor, *http.Response, error) {
+	var (
+		localVarHttpMethod = strings.ToUpper("Get")
+		localVarPostBody   interface{}
+		localVarFileName   string
+		localVarFileBytes  []byte
+		successPayload     loadbalancer.LbPassiveMonitor
+	)
+
+	// create path and map variables
+	localVarPath := a.client.cfg.BasePath + "/loadbalancer/monitors/{monitor-id}"
+	localVarPath = strings.Replace(localVarPath, "{"+"monitor-id"+"}", fmt.Sprintf("%v", monitorId), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHttpContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHttpContentType := selectHeaderContentType(localVarHttpContentTypes)
+	if localVarHttpContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHttpContentType
+	}
+
+	// to determine the Accept header
+	localVarHttpHeaderAccepts := []string{
+		"application/json",
+	}
+
+	// set Accept header
+	localVarHttpHeaderAccept := selectHeaderAccept(localVarHttpHeaderAccepts)
+	if localVarHttpHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHttpHeaderAccept
+	}
+	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHttpMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFileName, localVarFileBytes)
+	if err != nil {
+		return successPayload, nil, err
+	}
+
+	localVarHttpResponse, err := a.client.callAPI(r)
+	if err != nil || localVarHttpResponse == nil {
+		return successPayload, localVarHttpResponse, err
+	}
+	defer localVarHttpResponse.Body.Close()
+	if localVarHttpResponse.StatusCode >= 300 {
+		bodyBytes, _ := ioutil.ReadAll(localVarHttpResponse.Body)
+		return successPayload, localVarHttpResponse, reportError("Status: %v, Body: %s", localVarHttpResponse.Status, bodyBytes)
+	}
+
+	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
+		return successPayload, localVarHttpResponse, err
+	}
+
+	return successPayload, localVarHttpResponse, err
+}
+
 /* ServicesApiService Retrieve a load balancer persistence profile
 Retrieve a load balancer persistence profile.
 * @param ctx context.Context for authentication, logging, tracing, etc.
@@ -9512,7 +9642,7 @@ func (a *ServicesApiService) UpdateLoadBalancerIcmpMonitor(ctx context.Context, 
 		successPayload     loadbalancer.LbIcmpMonitor
 	)
 
-        // set resource type for this type-specific API
+	// set resource type for this type-specific API
 	lbMonitor.ResourceType = "LbIcmpMonitor"
 
 	// create path and map variables
@@ -9581,7 +9711,7 @@ func (a *ServicesApiService) UpdateLoadBalancerTcpMonitor(ctx context.Context, m
 		successPayload     loadbalancer.LbTcpMonitor
 	)
 
-        // set resource type for this type-specific API
+	// set resource type for this type-specific API
 	lbMonitor.ResourceType = "LbTcpMonitor"
 
 	// create path and map variables
@@ -9650,7 +9780,7 @@ func (a *ServicesApiService) UpdateLoadBalancerUdpMonitor(ctx context.Context, m
 		successPayload     loadbalancer.LbUdpMonitor
 	)
 
-        // set resource type for this type-specific API
+	// set resource type for this type-specific API
 	lbMonitor.ResourceType = "LbUdpMonitor"
 
 	// create path and map variables
@@ -9719,7 +9849,7 @@ func (a *ServicesApiService) UpdateLoadBalancerHttpMonitor(ctx context.Context, 
 		successPayload     loadbalancer.LbHttpMonitor
 	)
 
-        // set resource type for this type-specific API
+	// set resource type for this type-specific API
 	lbMonitor.ResourceType = "LbHttpMonitor"
 
 	// create path and map variables
@@ -9788,8 +9918,77 @@ func (a *ServicesApiService) UpdateLoadBalancerHttpsMonitor(ctx context.Context,
 		successPayload     loadbalancer.LbHttpsMonitor
 	)
 
-        // set resource type for this type-specific API
+	// set resource type for this type-specific API
 	lbMonitor.ResourceType = "LbHttpsMonitor"
+
+	// create path and map variables
+	localVarPath := a.client.cfg.BasePath + "/loadbalancer/monitors/{monitor-id}"
+	localVarPath = strings.Replace(localVarPath, "{"+"monitor-id"+"}", fmt.Sprintf("%v", monitorId), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHttpContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHttpContentType := selectHeaderContentType(localVarHttpContentTypes)
+	if localVarHttpContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHttpContentType
+	}
+
+	// to determine the Accept header
+	localVarHttpHeaderAccepts := []string{
+		"application/json",
+	}
+
+	// set Accept header
+	localVarHttpHeaderAccept := selectHeaderAccept(localVarHttpHeaderAccepts)
+	if localVarHttpHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHttpHeaderAccept
+	}
+	// body params
+	localVarPostBody = &lbMonitor
+	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHttpMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFileName, localVarFileBytes)
+	if err != nil {
+		return successPayload, nil, err
+	}
+
+	localVarHttpResponse, err := a.client.callAPI(r)
+	if err != nil || localVarHttpResponse == nil {
+		return successPayload, localVarHttpResponse, err
+	}
+	defer localVarHttpResponse.Body.Close()
+	if localVarHttpResponse.StatusCode >= 300 {
+		bodyBytes, _ := ioutil.ReadAll(localVarHttpResponse.Body)
+		return successPayload, localVarHttpResponse, reportError("Status: %v, Body: %s", localVarHttpResponse.Status, bodyBytes)
+	}
+
+	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
+		return successPayload, localVarHttpResponse, err
+	}
+
+	return successPayload, localVarHttpResponse, err
+}
+
+/* ServicesApiService Update a load balancer monitor
+Update a load balancer monitor.
+* @param ctx context.Context for authentication, logging, tracing, etc.
+@param monitorId
+@param lbMonitor
+@return loadbalancer.LbPassiveMonitor*/
+func (a *ServicesApiService) UpdateLoadBalancerPassiveMonitor(ctx context.Context, monitorId string, lbMonitor loadbalancer.LbPassiveMonitor) (loadbalancer.LbPassiveMonitor, *http.Response, error) {
+	var (
+		localVarHttpMethod = strings.ToUpper("Put")
+		localVarPostBody   interface{}
+		localVarFileName   string
+		localVarFileBytes  []byte
+		successPayload     loadbalancer.LbPassiveMonitor
+	)
+
+	// set resource type for this type-specific API
+	lbMonitor.ResourceType = "LbPassiveMonitor"
 
 	// create path and map variables
 	localVarPath := a.client.cfg.BasePath + "/loadbalancer/monitors/{monitor-id}"
