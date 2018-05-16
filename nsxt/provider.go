@@ -10,6 +10,8 @@ import (
 	"github.com/vmware/go-vmware-nsxt"
 )
 
+var defaultRetryOnStatusCodes = []int{429}
+
 // Provider for VMWare NSX-T. Returns terraform.ResourceProvider
 func Provider() terraform.ResourceProvider {
 	return &schema.Provider{
@@ -55,7 +57,7 @@ func Provider() terraform.ResourceProvider {
 				Type:        schema.TypeInt,
 				Optional:    true,
 				Description: "Maximum number of HTTP client retries",
-				DefaultFunc: schema.EnvDefaultFunc("NSXT_MAX_RETRIES", 10),
+				DefaultFunc: schema.EnvDefaultFunc("NSXT_MAX_RETRIES", 50),
 			},
 			"retry_min_delay": &schema.Schema{
 				Type:        schema.TypeInt,
@@ -76,8 +78,7 @@ func Provider() terraform.ResourceProvider {
 				Elem: &schema.Schema{
 					Type: schema.TypeInt,
 				},
-				// 429: TooManyRequests
-				DefaultFunc: schema.EnvDefaultFunc("NSXT_RETRY_ON_STATUS_CODES", []int{429}),
+				// There is no support for default values/func for list, so it will be handled later
 			},
 		},
 
@@ -156,7 +157,14 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	maxRetries := d.Get("max_retries").(int)
 	retryMinDelay := d.Get("retry_min_delay").(int)
 	retryMaxDelay := d.Get("retry_max_delay").(int)
+
 	statuses := d.Get("retry_on_status_codes").([]interface{})
+	if len(statuses) == 0 {
+		// Set to the defaults if empty
+		for _, val := range defaultRetryOnStatusCodes {
+			statuses = append(statuses, val)
+		}
+	}
 	retryStatuses := make([]int, 0, len(statuses))
 	for _, s := range statuses {
 		retryStatuses = append(retryStatuses, s.(int))
