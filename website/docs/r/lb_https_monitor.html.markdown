@@ -25,12 +25,6 @@ data "nsxt_certificate" "CA" {
 resource "nsxt_lb_https_monitor" "lb_https_monitor" {
   description             = "lb_https_monitor provisioned by Terraform"
   display_name            = "lb_https_monitor"
-
-  tag = {
-    scope = "color"
-    tag   = "red"
-  }
-
   fall_count              = 2
   interval                = 5
   monitor_port            = 8080
@@ -41,12 +35,6 @@ resource "nsxt_lb_https_monitor" "lb_https_monitor" {
   client_certificate_id   = "${data.nsxt_certificate.client.id}"
   protocols               = ["TLS_V1_2"]
   request_body            = "ping"
-
-  request_header {
-    name  = "X-healthcheck"
-    value = "NSX"
-  }
-
   request_method          = "HEAD"
   request_url             = "/index.html"
   request_version         = "HTTP_VERSION_1_1"
@@ -55,6 +43,16 @@ resource "nsxt_lb_https_monitor" "lb_https_monitor" {
   server_auth             = "REQUIRED"
   server_auth_ca_ids      = ["${data.nsxt_certificate.CA.id}"]
   server_auth_crl_ids     = ["78ba3814-bfe1-45e5-89d3-46862bed7896"]
+
+  request_header {
+    name  = "X-healthcheck"
+    value = "NSX"
+  }
+
+  tag = {
+    scope = "color"
+    tag   = "red"
+  }
 }
 ```
 

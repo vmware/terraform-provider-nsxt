@@ -15,31 +15,29 @@ Provides a resource to configure lb http monitor on NSX-T manager
 ```hcl
 
 resource "nsxt_lb_http_monitor" "lb_http_monitor" {
-  description  = "lb_http_monitor provisioned by Terraform"
-  display_name = "lb_http_monitor"
-
-  tag = {
-    scope = "color"
-    tag   = "red"
-  }
-
+  description           = "lb_http_monitor provisioned by Terraform"
+  display_name          = "lb_http_monitor"
   fall_count            = 2
   interval              = 5
   monitor_port          = 8080
   rise_count            = 5
   timeout               = 10
   request_body          = "ping"
-
-  request_header {
-    name  = "X-healthcheck"
-    value = "NSX"
-  }
-
   request_method        = "HEAD"
   request_url           = "/index.html"
   request_version       = "HTTP_VERSION_1_1"
   response_body         = "pong"
   response_status_codes = [200, 304]
+
+  tag = {
+    scope = "color"
+    tag   = "red"
+  }
+
+  request_header {
+    name  = "X-healthcheck"
+    value = "NSX"
+  }
 }
 ```
 
