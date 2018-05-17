@@ -357,7 +357,7 @@ func (c *APIClient) callAPI(request *http.Request) (*http.Response, error) {
 func (c *APIClient) callAPIInternal(request *http.Request) (*http.Response, error) {
 	localVarHttpResponse, err := c.cfg.HTTPClient.Do(request)
 
-	if err == nil && localVarHttpResponse.StatusCode >= 300 {
+	if err == nil && (localVarHttpResponse.StatusCode == 400 || localVarHttpResponse.StatusCode == 500) {
 		bodyBytes, _ := ioutil.ReadAll(localVarHttpResponse.Body)
 		err = reportError("Status: %v, Body: %s", localVarHttpResponse.Status, bodyBytes)
 	}
