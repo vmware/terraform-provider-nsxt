@@ -132,6 +132,16 @@ func Provider() terraform.ResourceProvider {
 	}
 }
 
+func providerConnectivityCheck(nsxClient *nsxt.APIClient) error {
+	// Connectivity check - get a random object just to see we get a valid response or 403
+	// TODO(asarfaty): Use a list command which returns the full body, when the go vendor has one.
+	_, httpResponse, err := nsxClient.ServicesApi.ReadLoadBalancerPool(nsxClient.Context, "Dummy")
+	if err != nil && httpResponse.StatusCode == 403 {
+		return fmt.Errorf("NSXT provider connectivity check failed: %s", err)
+	}
+	return nil
+}
+
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	insecure := d.Get("allow_unverified_ssl").(bool)
 	username := d.Get("username").(string)
@@ -194,5 +204,14 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	}
 
 	nsxClient, err := nsxt.NewAPIClient(&cfg)
-	return nsxClient, err
+	if err != nil {
+		return nil, err
+	}
+	// Check provider connectivity
+	err = providerConnectivityCheck(nsxClient)
+	if err != nil {
+		return nil, err
+	}
+
+	return nsxClient, nil
 }
