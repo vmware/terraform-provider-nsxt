@@ -49,6 +49,61 @@ func TestAccResourceNsxtLogicalPort_basic(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtLogicalPort_withProfiles(t *testing.T) {
+	portName := fmt.Sprintf("test-nsx-logical-port-with-profiles")
+	updatePortName := fmt.Sprintf("%s-update", portName)
+	testResourceName := "nsxt_logical_port.test"
+	transportZoneName := getOverlayTransportZoneName()
+	customProfileName := "terraform_test_LP_profile"
+	oobProfileName := "nsx-default-qos-switching-profile"
+	profileType := "QosSwitchingProfile"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			// Verify that the LP was deleted
+			err := testAccNSXLogicalPortCheckDestroy(state, portName)
+			if err != nil {
+				return err
+			}
+			// Delete the created switching profile
+			return testAccDataSourceNsxtSwitchingProfileDeleteByName(customProfileName)
+		},
+		Steps: []resource.TestStep{
+			{
+				PreConfig: func() {
+					// Create a custom switching profile
+					if err := testAccDataSourceNsxtSwitchingProfileCreate(customProfileName, profileType); err != nil {
+						panic(err)
+					}
+				},
+				// Create a logical port to use the custom switching profile
+				Config: testAccNSXLogicalPortCreateWithProfilesTemplate(portName, transportZoneName, customProfileName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXLogicalPortExists(portName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", portName),
+					resource.TestCheckResourceAttr(testResourceName, "switching_profile_id.#", "1"),
+				),
+			},
+			{
+				// Replace the custom switching profile with OOB one
+				Config:             testAccNSXLogicalPortUpdateWithProfilesTemplate(updatePortName, transportZoneName, customProfileName, oobProfileName),
+				ExpectNonEmptyPlan: true,
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXLogicalPortExists(updatePortName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updatePortName),
+					// Counting only custom profiles so count should be 0
+					resource.TestCheckResourceAttr(testResourceName, "switching_profile_id.#", "0"),
+				),
+			},
+			{
+				Config: testAccNSXSwitchingNoProfileTemplate(),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtLogicalPort_importBasic(t *testing.T) {
 	portName := fmt.Sprintf("test-nsx-logical-port")
 	testResourceName := "nsxt_logical_port.test"
@@ -175,4 +230,45 @@ resource "nsxt_logical_port" "test" {
     tag   = "tag2"
   }
 }`, portUpdatedName)
+}
+
+func testAccNSXLogicalPortCreateWithProfilesTemplate(portName string, transportZoneName string, profileName string) string {
+	return testAccNSXLogicalSwitchCreateForPort(transportZoneName) + fmt.Sprintf(`
+data "nsxt_switching_profile" "test1" {
+  display_name = "%s"
+}
+
+resource "nsxt_logical_port" "test" {
+  display_name      = "%s"
+  admin_state       = "UP"
+  logical_switch_id = "${nsxt_logical_switch.test.id}"
+
+  switching_profile_id {
+    key   = "${data.nsxt_switching_profile.test1.resource_type}"
+    value = "${data.nsxt_switching_profile.test1.id}"
+  }
+}`, profileName, portName)
+}
+
+func testAccNSXLogicalPortUpdateWithProfilesTemplate(portUpdatedName string, transportZoneName string, profileName1 string, profileName2 string) string {
+	return testAccNSXLogicalSwitchCreateForPort(transportZoneName) + fmt.Sprintf(`
+data "nsxt_switching_profile" "test1" {
+  display_name = "%s"
+}
+
+data "nsxt_switching_profile" "test2" {
+  display_name = "%s"
+}
+
+resource "nsxt_logical_port" "test" {
+  display_name      = "%s"
+  admin_state       = "UP"
+  logical_switch_id = "${nsxt_logical_switch.test.id}"
+
+  switching_profile_id {
+    key   = "${data.nsxt_switching_profile.test2.resource_type}"
+    value = "${data.nsxt_switching_profile.test2.id}"
+  }
+
+}`, profileName1, profileName2, portUpdatedName)
 }

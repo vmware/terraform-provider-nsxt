@@ -16,11 +16,13 @@ func TestAccDataSourceNsxtSwitchingProfile_basic(t *testing.T) {
 	profileName := "terraform_test_profile"
 	profileType := "QosSwitchingProfile"
 	testResourceName := "data.nsxt_switching_profile.test"
-	var s *terraform.State
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccDataSourceNsxtSwitchingProfileDeleteByName(profileName)
+		},
 		Steps: []resource.TestStep{
 			{
 				PreConfig: func() {
@@ -33,15 +35,9 @@ func TestAccDataSourceNsxtSwitchingProfile_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "display_name", profileName),
 					resource.TestCheckResourceAttr(testResourceName, "description", profileName),
 					resource.TestCheckResourceAttr(testResourceName, "resource_type", profileType),
-					copyStatePtr(&s),
 				),
 			},
 			{
-				PreConfig: func() {
-					if err := testAccDataSourceNsxtSwitchingProfileDelete(s, testResourceName); err != nil {
-						panic(err)
-					}
-				},
 				Config: testAccNSXSwitchingNoProfileTemplate(),
 			},
 		},
@@ -69,30 +65,30 @@ func testAccDataSourceNsxtSwitchingProfileCreate(profileName string, profileType
 	return nil
 }
 
-func testAccDataSourceNsxtSwitchingProfileDelete(state *terraform.State, resourceName string) error {
-	rs, ok := state.RootModule().Resources[resourceName]
-	if !ok {
-		return fmt.Errorf("NSX SwitchingProfile data source %s not found", resourceName)
-	}
-
-	resourceID := rs.Primary.ID
-	if resourceID == "" {
-		return fmt.Errorf("NSX SwitchingProfile data source ID not set")
-	}
+func testAccDataSourceNsxtSwitchingProfileDeleteByName(profileName string) error {
 	nsxClient, err := testAccGetClient()
 	if err != nil {
 		return fmt.Errorf("Error during test client initialization: %v", err)
 	}
+	// Look up this profile
 	localVarOptionals := make(map[string]interface{})
-	responseCode, err := nsxClient.LogicalSwitchingApi.DeleteSwitchingProfile(nsxClient.Context, resourceID, localVarOptionals)
+	localVarOptionals["includeSystemOwned"] = true
+	objList, _, err := nsxClient.LogicalSwitchingApi.ListSwitchingProfiles(nsxClient.Context, localVarOptionals)
 	if err != nil {
-		return fmt.Errorf("Error during SwitchingProfile deletion: %v", err)
+		return fmt.Errorf("Error while reading switching profiles: %v", err)
 	}
-
-	if responseCode.StatusCode != http.StatusOK {
-		return fmt.Errorf("Unexpected status returned during SwitchingProfile deletion: %v", responseCode.StatusCode)
+	// go over the list to find the correct one
+	for _, objInList := range objList.Results {
+		if objInList.DisplayName == profileName {
+			localVarOptionals := make(map[string]interface{})
+			_, err := nsxClient.LogicalSwitchingApi.DeleteSwitchingProfile(nsxClient.Context, objInList.Id, localVarOptionals)
+			if err != nil {
+				return fmt.Errorf("Error during SwitchingProfile deletion: %v", err)
+			}
+			return nil
+		}
 	}
-	return nil
+	return fmt.Errorf("Switching profile '%s' was not found", profileName)
 }
 
 func testAccNSXSwitchingProfileReadTemplate(profileName string) string {
