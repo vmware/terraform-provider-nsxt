@@ -60,6 +60,57 @@ func TestAccResourceNsxtLbPool_basic(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtLbPool_withIpSnat(t *testing.T) {
+	name := "test-nsx-lb-pool"
+	updatedName := fmt.Sprintf("%s-update", name)
+	testResourceName := "nsxt_lb_pool.test"
+	algorithm := "LEAST_CONNECTION"
+	updatedAlgorithm := "WEIGHTED_ROUND_ROBIN"
+	minActiveMembers := "3"
+	updatedMinActiveMembers := "4"
+	snatTranslationType := "LbSnatIpPool"
+	ipAddress := "1.1.1.1"
+	updatedIpAddress := "1.1.1.2-1.1.1.20"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXLbPoolCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXLbPoolCreateWithSnatTemplate(name, algorithm, minActiveMembers, snatTranslationType, ipAddress),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXLbPoolExists(name, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "algorithm", algorithm),
+					resource.TestCheckResourceAttr(testResourceName, "min_active_members", minActiveMembers),
+					resource.TestCheckResourceAttr(testResourceName, "snat_translation_type", snatTranslationType),
+					resource.TestCheckResourceAttr(testResourceName, "snat_translation_ip", ipAddress),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "member.#", "0"),
+				),
+			},
+			{
+				Config: testAccNSXLbPoolUpdateWithSnatTemplate(updatedName, updatedAlgorithm, updatedMinActiveMembers, snatTranslationType, updatedIpAddress),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXLbPoolExists(updatedName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Updated Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "algorithm", updatedAlgorithm),
+					resource.TestCheckResourceAttr(testResourceName, "min_active_members", updatedMinActiveMembers),
+					resource.TestCheckResourceAttr(testResourceName, "snat_translation_type", snatTranslationType),
+					resource.TestCheckResourceAttr(testResourceName, "snat_translation_ip", updatedIpAddress),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "member.#", "0"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtLbPool_withMember(t *testing.T) {
 	name := "test-nsx-lb-pool"
 	updatedName := fmt.Sprintf("%s-update", name)
@@ -224,6 +275,46 @@ resource "nsxt_lb_pool" "test" {
   }
 }
 `, name, algorithm, minActiveMembers, snatTranslationType)
+}
+
+func testAccNSXLbPoolCreateWithSnatTemplate(name string, algorithm string, minActiveMembers string, snatTranslationType string, snatTranslationIp string) string {
+	return fmt.Sprintf(`
+resource "nsxt_lb_pool" "test" {
+  display_name          = "%s"
+  algorithm             = "%s"
+  description           = "Acceptance Test"
+  min_active_members    = "%s"
+  snat_translation_type = "%s"
+  snat_translation_ip   = "%s"
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+}
+`, name, algorithm, minActiveMembers, snatTranslationType, snatTranslationIp)
+}
+
+func testAccNSXLbPoolUpdateWithSnatTemplate(name string, algorithm string, minActiveMembers string, snatTranslationType string, snatTranslationIp string) string {
+	return fmt.Sprintf(`
+resource "nsxt_lb_pool" "test" {
+  display_name          = "%s"
+  algorithm             = "%s"
+  description           = "Updated Acceptance Test"
+  min_active_members    = "%s"
+  snat_translation_type = "%s"
+  snat_translation_ip   = "%s"
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+  tag {
+    scope = "scope2"
+    tag   = "tag2"
+  }
+}
+`, name, algorithm, minActiveMembers, snatTranslationType, snatTranslationIp)
 }
 
 func testAccNSXLbPoolCreateTemplateTrivial(name string) string {

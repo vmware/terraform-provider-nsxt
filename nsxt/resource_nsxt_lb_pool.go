@@ -14,7 +14,7 @@ import (
 )
 
 var poolAlgTypeValues = []string{"ROUND_ROBIN", "WEIGHTED_ROUND_ROBIN", "LEAST_CONNECTION", "WEIGHTED_LEAST_CONNECTION", "IP_HASH"}
-var poolSnatTranslationTypeValues = []string{"LbSnatAutoMap", "Transparent"}
+var poolSnatTranslationTypeValues = []string{"LbSnatAutoMap", "LbSnatIpPool", "Transparent"}
 var memberAdminStateTypeValues = []string{"ENABLED", "DISABLED", "GRACEFUL_DISABLED"}
 
 func resourceNsxtLbPool() *schema.Resource {
@@ -82,6 +82,12 @@ func resourceNsxtLbPool() *schema.Resource {
 				ValidateFunc: validation.StringInSlice(poolSnatTranslationTypeValues, false),
 				Optional:     true,
 				Default:      "Transparent",
+			},
+			"snat_translation_ip": &schema.Schema{
+				Type:         schema.TypeString,
+				Description:  "Ip address or Ip range for SNAT of type LbSnatIpPool",
+				ValidateFunc: validateIPOrRange(),
+				Optional:     true,
 			},
 			"member": getPoolMembersSchema(),
 		},
@@ -155,6 +161,18 @@ func getSnatTranslationFromSchema(d *schema.ResourceData) *loadbalancer.LbSnatTr
 	if trType == "Transparent" {
 		return nil
 	}
+	if trType == "LbSnatIpPool" {
+		ipAddresses := make([]loadbalancer.LbSnatIpElement, 0, 1)
+		ipAddress := d.Get("snat_translation_ip").(string)
+		elem := loadbalancer.LbSnatIpElement{IpAddress: ipAddress}
+		ipAddresses = append(ipAddresses, elem)
+
+		return &loadbalancer.LbSnatTranslation{
+			Type_:       trType,
+			IpAddresses: ipAddresses,
+		}
+	}
+	// For LbSnatAutoMap type
 	return &loadbalancer.LbSnatTranslation{Type_: trType}
 }
 
@@ -238,7 +256,6 @@ func resourceNsxtLbPoolCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceNsxtLbPoolRead(d *schema.ResourceData, m interface{}) error {
-	log.Printf("[DEBUG] DEBUG ADIT resourceNsxtLbPoolRead")
 	nsxClient := m.(*api.APIClient)
 	id := d.Id()
 	if id == "" {
@@ -272,10 +289,11 @@ func resourceNsxtLbPoolRead(d *schema.ResourceData, m interface{}) error {
 	}
 	d.Set("min_active_members", lbPool.MinActiveMembers)
 	if lbPool.SnatTranslation != nil {
-		log.Printf("[DEBUG] DEBUG ADIT resourceNsxtLbPoolRead 1 %s", lbPool.SnatTranslation.Type_)
 		d.Set("snat_translation_type", lbPool.SnatTranslation.Type_)
+		if lbPool.SnatTranslation.IpAddresses != nil && len(lbPool.SnatTranslation.IpAddresses) > 0 {
+			d.Set("snat_translation_ip", lbPool.SnatTranslation.IpAddresses[0].IpAddress)
+		}
 	} else {
-		log.Printf("[DEBUG] DEBUG ADIT resourceNsxtLbPoolRead 2 Transparent")
 		d.Set("snat_translation_type", "Transparent")
 	}
 	d.Set("tcp_multiplexing_enabled", lbPool.TcpMultiplexingEnabled)
