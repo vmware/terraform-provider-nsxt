@@ -112,6 +112,7 @@ The following arguments are supported:
 * `min_active_members` - (Optional) The minimum number of members for the pool to be considered active. This value is 1 by default.
 * `passive_monitor_id` - (Optional) Passive health monitor Id. If one is not set, the passive healthchecks will be disabled.
 * `snat_translation_type` - (Optional) Type of SNAT performed to ensure reverse traffic from the server can be received and processed by the loadbalancer. Supported types are: LbSnatAutoMap, Transparent
+* `snat_translation_ip` - (Optional) Ip address or Ip range for SNAT of type LbSnatIpPool.
 * `tcp_multiplexing_enabled` - (Optional) TCP multiplexing allows the same TCP connection between load balancer and the backend server to be used for sending multiple client requests from different client TCP connections. Disabled by default.
 * `tcp_multiplexing_number` - (Optional) The maximum number of TCP connections per pool that are idly kept alive for sending future client requests. The default value for this is 6.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this lb pool.

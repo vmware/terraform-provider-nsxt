@@ -130,6 +130,22 @@ func validateCidrOrIPOrRange() schema.SchemaValidateFunc {
 	}
 }
 
+func validateIPOrRange() schema.SchemaValidateFunc {
+	return func(i interface{}, k string) (s []string, es []error) {
+		v, ok := i.(string)
+		if !ok {
+			es = append(es, fmt.Errorf("expected type of %s to be string", k))
+			return
+		}
+
+		if !isSingleIP(v) && !isIPRange(v) {
+			es = append(es, fmt.Errorf(
+				"expected %s to contain a valid IP or Range, got: %s", k, v))
+		}
+		return
+	}
+}
+
 func validateSingleIP() schema.SchemaValidateFunc {
 	return func(i interface{}, k string) (s []string, es []error) {
 		v, ok := i.(string)

@@ -15,7 +15,7 @@ import (
 )
 
 var poolAlgTypeValues = []string{"ROUND_ROBIN", "WEIGHTED_ROUND_ROBIN", "LEAST_CONNECTION", "WEIGHTED_LEAST_CONNECTION", "IP_HASH"}
-var poolSnatTranslationTypeValues = []string{"LbSnatAutoMap", "Transparent"}
+var poolSnatTranslationTypeValues = []string{"LbSnatAutoMap", "LbSnatIpPool", "Transparent"}
 var memberAdminStateTypeValues = []string{"ENABLED", "DISABLED", "GRACEFUL_DISABLED"}
 var ipRevisionFilterTypeValues = []string{"IPV4", "IPV6"}
 
@@ -87,6 +87,12 @@ func resourceNsxtLbPool() *schema.Resource {
 			},
 			"member":       getPoolMembersSchema(),
 			"member_group": getPoolMemberGroupSchema(),
+			"snat_translation_ip": &schema.Schema{
+				Type:         schema.TypeString,
+				Description:  "Ip address or Ip range for SNAT of type LbSnatIpPool",
+				ValidateFunc: validateIPOrRange(),
+				Optional:     true,
+			},
 		},
 	}
 }
@@ -191,6 +197,18 @@ func getSnatTranslationFromSchema(d *schema.ResourceData) *loadbalancer.LbSnatTr
 	if trType == "Transparent" {
 		return nil
 	}
+	if trType == "LbSnatIpPool" {
+		ipAddresses := make([]loadbalancer.LbSnatIpElement, 0, 1)
+		ipAddress := d.Get("snat_translation_ip").(string)
+		elem := loadbalancer.LbSnatIpElement{IpAddress: ipAddress}
+		ipAddresses = append(ipAddresses, elem)
+
+		return &loadbalancer.LbSnatTranslation{
+			Type_:       trType,
+			IpAddresses: ipAddresses,
+		}
+	}
+	// For LbSnatAutoMap type
 	return &loadbalancer.LbSnatTranslation{Type_: trType}
 }
 
@@ -312,7 +330,6 @@ func resourceNsxtLbPoolCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceNsxtLbPoolRead(d *schema.ResourceData, m interface{}) error {
-	log.Printf("[DEBUG] DEBUG ADIT resourceNsxtLbPoolRead")
 	nsxClient := m.(*api.APIClient)
 	id := d.Id()
 	if id == "" {
@@ -351,6 +368,9 @@ func resourceNsxtLbPoolRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("min_active_members", lbPool.MinActiveMembers)
 	if lbPool.SnatTranslation != nil {
 		d.Set("snat_translation_type", lbPool.SnatTranslation.Type_)
+		if lbPool.SnatTranslation.IpAddresses != nil && len(lbPool.SnatTranslation.IpAddresses) > 0 {
+			d.Set("snat_translation_ip", lbPool.SnatTranslation.IpAddresses[0].IpAddress)
+		}
 	} else {
 		d.Set("snat_translation_type", "Transparent")
 	}
