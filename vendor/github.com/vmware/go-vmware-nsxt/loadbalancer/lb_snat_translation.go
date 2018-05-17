@@ -16,4 +16,7 @@ type LbSnatTranslation struct {
 
 	// Load balancers may need to perform SNAT to ensure reverse traffic from the server can be received and processed by them. There are two modes: LbSnatAutoMap uses the load balancer interface IP and an ephemeral port as the source IP and port of the server side connection. LbSnatIpPool allows user to specify one or more IP addresses along with their subnet masks that should be used for SNAT while connecting to any of the servers in the pool.
 	Type_ string `json:"type"`
+
+        // Currently, only one single IP address or IP range is supported. If an IP range is specified, the range may contain no more than 64 IP addresses.
+	IpAddresses []LbSnatIpElement `json:"ip_addresses"`
 }
