@@ -153,6 +153,61 @@ func TestAccResourceNsxtLbPool_withMember(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtLbPool_withMemberGroup(t *testing.T) {
+	name := "test-nsx-lb-pool"
+	updatedName := fmt.Sprintf("%s-update", name)
+	testResourceName := "nsxt_lb_pool.test"
+	algorithm := "LEAST_CONNECTION"
+	size := "3"
+	updatedSize := "4"
+	port := "50"
+	updatedPort := "60"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXLbPoolCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXLbPoolCreateWithMemberGroupTemplate(name, algorithm, size, port),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXLbPoolExists(name, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "algorithm", algorithm),
+					resource.TestCheckResourceAttr(testResourceName, "member.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "member_group.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "member_group.0.max_ip_list_size", size),
+					resource.TestCheckResourceAttr(testResourceName, "member_group.0.ip_version_filter", "IPV4"),
+					resource.TestCheckResourceAttr(testResourceName, "member_group.0.port", port),
+					resource.TestCheckResourceAttr(testResourceName, "member_group.0.grouping_object.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "member_group.0.grouping_object.0.target_type", "NSGroup"),
+					resource.TestCheckResourceAttrSet(testResourceName, "member_group.0.grouping_object.0.target_id"),
+				),
+			},
+			{
+				Config: testAccNSXLbPoolUpdateWithMemberGroupTemplate(updatedName, algorithm, updatedSize, updatedPort),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXLbPoolExists(updatedName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Updated Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "algorithm", algorithm),
+					resource.TestCheckResourceAttr(testResourceName, "member.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "member_group.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "member_group.0.max_ip_list_size", updatedSize),
+					resource.TestCheckResourceAttr(testResourceName, "member_group.0.ip_version_filter", "IPV6"),
+					resource.TestCheckResourceAttr(testResourceName, "member_group.0.port", updatedPort),
+					resource.TestCheckResourceAttr(testResourceName, "member_group.0.grouping_object.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "member_group.0.grouping_object.0.target_type", "NSGroup"),
+					resource.TestCheckResourceAttrSet(testResourceName, "member_group.0.grouping_object.0.target_id"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtLbPool_importBasic(t *testing.T) {
 	name := "test-nsx-lb-pool"
 	testResourceName := "nsxt_lb_pool.test"
@@ -375,4 +430,54 @@ resource "nsxt_lb_pool" "test" {
   }
 }
 `, name, algorithm, minActiveMembers, snatTranslationType, name, memberIp)
+}
+
+func testAccNSXLbPoolCreateWithMemberGroupTemplate(name string, algorithm string, size string, port string) string {
+	return fmt.Sprintf(`
+resource "nsxt_ns_group" "grp1" {
+  display_name = "grp1"
+}
+
+resource "nsxt_lb_pool" "test" {
+  display_name          = "%s"
+  algorithm             = "%s"
+  description           = "Acceptance Test"
+
+  member_group {
+    ip_version_filter = "IPV4"
+    max_ip_list_size  = "%s"
+    port              = "%s"
+
+    grouping_object {
+      target_type = "NSGroup"
+      target_id   = "${nsxt_ns_group.grp1.id}"
+    }
+  }
+}
+`, name, algorithm, size, port)
+}
+
+func testAccNSXLbPoolUpdateWithMemberGroupTemplate(name string, algorithm string, size string, port string) string {
+	return fmt.Sprintf(`
+resource "nsxt_ns_group" "grp1" {
+  display_name = "grp1"
+}
+
+resource "nsxt_lb_pool" "test" {
+  display_name          = "%s"
+  algorithm             = "%s"
+  description           = "Updated Acceptance Test"
+
+  member_group {
+    ip_version_filter = "IPV6"
+    max_ip_list_size  = "%s"
+    port              = "%s"
+
+    grouping_object {
+      target_type = "NSGroup"
+      target_id   = "${nsxt_ns_group.grp1.id}"
+    }
+  }
+}
+`, name, algorithm, size, port)
 }

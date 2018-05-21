@@ -49,7 +49,7 @@ func resourceNsxtLogicalDhcpPort() *schema.Resource {
 				Required:    true,
 			},
 			"admin_state": getAdminStateSchema(),
-			"tag": getTagsSchema(),
+			"tag":         getTagsSchema(),
 		},
 	}
 }
@@ -71,8 +71,8 @@ func resourceNsxtLogicalDhcpPortCreate(d *schema.ResourceData, m interface{}) er
 		Description:     description,
 		LogicalSwitchId: lsID,
 		AdminState:      adminState,
-		Tags:       tagList,
-		Attachment: &attachment,
+		Tags:            tagList,
+		Attachment:      &attachment,
 	}
 
 	lp, resp, err := nsxClient.LogicalSwitchingApi.CreateLogicalPort(nsxClient.Context, lp)
@@ -141,8 +141,8 @@ func resourceNsxtLogicalDhcpPortUpdate(d *schema.ResourceData, m interface{}) er
 		Description:     description,
 		LogicalSwitchId: lsID,
 		AdminState:      adminState,
-		Tags:       tagList,
-		Attachment: &attachment,
+		Tags:            tagList,
+		Attachment:      &attachment,
 	}
 
 	lp, resp, err := nsxClient.LogicalSwitchingApi.UpdateLogicalPort(nsxClient.Context, id, lp)
