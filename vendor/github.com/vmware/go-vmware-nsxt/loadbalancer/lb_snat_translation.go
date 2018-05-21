@@ -18,5 +18,5 @@ type LbSnatTranslation struct {
 	Type_ string `json:"type"`
 
         // Currently, only one single IP address or IP range is supported. If an IP range is specified, the range may contain no more than 64 IP addresses.
-	IpAddresses []LbSnatIpElement `json:"ip_addresses"`
+	IpAddresses []LbSnatIpElement `json:"ip_addresses,omitempty"`
 }
