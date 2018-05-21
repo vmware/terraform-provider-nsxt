@@ -19,6 +19,12 @@ resource "nsxt_lb_icmp_monitor" "lb_icmp_monitor" {
   interval     = 5
 }
 
+resource "nsxt_lb_passive_monitor" "lb_passive_monitor" {
+  display_name = "lb_passive_monitor"
+  max_fails    = 3
+  timeout      = 10
+}
+
 resource "nsxt_lb_pool" "lb_pool" {
   description              = "lb_pool provisioned by Terraform"
   display_name             = "lb_pool"
@@ -27,6 +33,7 @@ resource "nsxt_lb_pool" "lb_pool" {
   tcp_multiplexing_enabled = false
   tcp_multiplexing_number  = 3
   active_monitor_id        = "${nsxt_lb_icmp_monitor.lb_icmp_monitor.id}"
+  passive_monitor_id       = "${nsxt_lb_passive_monitor.lb_passive_monitor.id}"
   snat_translation_type    = "LbSnatAutoMap"
  
   member {

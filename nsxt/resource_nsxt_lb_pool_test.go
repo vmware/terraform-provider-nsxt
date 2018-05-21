@@ -60,6 +60,46 @@ func TestAccResourceNsxtLbPool_basic(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtLbPool_withMonitors(t *testing.T) {
+	name := "test-nsx-lb-pool"
+	updatedName := fmt.Sprintf("%s-update", name)
+	testResourceName := "nsxt_lb_pool.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXLbPoolCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXLbPoolCreateWithMonitorsTemplate(name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXLbPoolExists(name, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "member.#", "0"),
+					resource.TestCheckResourceAttrSet(testResourceName, "active_monitor_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "passive_monitor_id"),
+				),
+			},
+			{
+				Config: testAccNSXLbPoolUpdateWithMonitorsTemplate(updatedName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXLbPoolExists(updatedName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Updated Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "member.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "active_monitor_id", ""),
+					resource.TestCheckResourceAttr(testResourceName, "passive_monitor_id", ""),
+				),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtLbPool_withMember(t *testing.T) {
 	name := "test-nsx-lb-pool"
 	updatedName := fmt.Sprintf("%s-update", name)
@@ -224,6 +264,42 @@ resource "nsxt_lb_pool" "test" {
   }
 }
 `, name, algorithm, minActiveMembers, snatTranslationType)
+}
+
+func testAccNSXLbPoolMonitorsTemplate() string {
+	return fmt.Sprintf(`
+resource "nsxt_lb_icmp_monitor" "lb_icmp_monitor" {
+  display_name = "lb_icmp_monitor"
+  fall_count   = 3
+  interval     = 5
+}
+
+resource "nsxt_lb_passive_monitor" "lb_passive_monitor" {
+  display_name = "lb_passive_monitor"
+  max_fails    = 3
+  timeout      = 10
+}
+`)
+}
+
+func testAccNSXLbPoolCreateWithMonitorsTemplate(name string) string {
+	return testAccNSXLbPoolMonitorsTemplate() + fmt.Sprintf(`
+resource "nsxt_lb_pool" "test" {
+  display_name       = "%s"
+  description        = "Acceptance Test"
+  active_monitor_id  = "${nsxt_lb_icmp_monitor.lb_icmp_monitor.id}"
+  passive_monitor_id = "${nsxt_lb_passive_monitor.lb_passive_monitor.id}"
+}
+`, name)
+}
+
+func testAccNSXLbPoolUpdateWithMonitorsTemplate(name string) string {
+	return testAccNSXLbPoolMonitorsTemplate() + fmt.Sprintf(`
+resource "nsxt_lb_pool" "test" {
+  display_name       = "%s"
+  description        = "Updated Acceptance Test"
+}
+`, name)
 }
 
 func testAccNSXLbPoolCreateTemplateTrivial(name string) string {
