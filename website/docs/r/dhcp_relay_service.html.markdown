@@ -9,7 +9,8 @@ description: A resource that can be used to configure a DHCP relay service in NS
 
 This resource provides a way to configure the DHCP relay service on the NSX manager.
 The DHCP relay service uses a DHCP relay profile and later consumed by a router
-link port to provide DHCP addresses to virtual machines connected to a logical switch.
+downlink port to provide DHCP addresses to virtual machines connected to a logical switch.
+Currently the DHCP relay is not supported for logical routers link ports on Tier0 or Tier1.
 
 ## Example Usage
 
