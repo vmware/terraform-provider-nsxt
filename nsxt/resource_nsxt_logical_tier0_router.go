@@ -48,13 +48,22 @@ func resourceNsxtLogicalTier0Router() *schema.Resource {
 				ForceNew:     true, // Cannot change the HA mode of a router
 				ValidateFunc: validation.StringInSlice(highAvailabilityValues, false),
 			},
+			"failover_mode": &schema.Schema{
+				Type:         schema.TypeString,
+				Description:  "Failover mode which determines whether the preferred service router instance for given logical router will preempt the peer",
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.StringInSlice([]string{"PREEMPTIVE", "NON_PREEMPTIVE"}, false),
+			},
 			"firewall_sections": getResourceReferencesSchema(false, true, []string{}, "List of Firewall sections related to the logical router"),
 			"edge_cluster_id": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "Edge Cluster Id",
-				Optional:    true,
-				ForceNew:    true, // Cannot change the HA mode of a router
+				Required:    true,
+				ForceNew:    true, // Cannot change the edge cluster of existing router
 			},
+			// TODO - add PreferredEdgeClusterMemberIndex when appropriate data source
+			// becomes available
 		},
 	}
 }
@@ -65,6 +74,7 @@ func resourceNsxtLogicalTier0RouterCreate(d *schema.ResourceData, m interface{})
 	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
 	highAvailabilityMode := d.Get("high_availability_mode").(string)
+	failoverMode := d.Get("failover_mode").(string)
 	routerType := "TIER0"
 	edgeClusterID := d.Get("edge_cluster_id").(string)
 	logicalRouter := manager.LogicalRouter{
@@ -74,6 +84,7 @@ func resourceNsxtLogicalTier0RouterCreate(d *schema.ResourceData, m interface{})
 		RouterType:           routerType,
 		EdgeClusterId:        edgeClusterID,
 		HighAvailabilityMode: highAvailabilityMode,
+		FailoverMode:         failoverMode,
 	}
 	logicalRouter, resp, err := nsxClient.LogicalRoutingAndServicesApi.CreateLogicalRouter(nsxClient.Context, logicalRouter)
 
@@ -113,6 +124,7 @@ func resourceNsxtLogicalTier0RouterRead(d *schema.ResourceData, m interface{}) e
 	setTagsInSchema(d, logicalRouter.Tags)
 	d.Set("edge_cluster_id", logicalRouter.EdgeClusterId)
 	d.Set("high_availability_mode", logicalRouter.HighAvailabilityMode)
+	d.Set("failover_mode", logicalRouter.FailoverMode)
 	err = setResourceReferencesInSchema(d, logicalRouter.FirewallSections, "firewall_sections")
 	if err != nil {
 		return fmt.Errorf("Error during LogicalTier0Router firewall sections set in schema: %v", err)
@@ -133,6 +145,7 @@ func resourceNsxtLogicalTier0RouterUpdate(d *schema.ResourceData, m interface{})
 	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
 	highAvailabilityMode := d.Get("high_availability_mode").(string)
+	failoverMode := d.Get("failover_mode").(string)
 	routerType := "TIER0"
 	edgeClusterID := d.Get("edge_cluster_id").(string)
 	logicalRouter := manager.LogicalRouter{
@@ -143,6 +156,7 @@ func resourceNsxtLogicalTier0RouterUpdate(d *schema.ResourceData, m interface{})
 		RouterType:           routerType,
 		EdgeClusterId:        edgeClusterID,
 		HighAvailabilityMode: highAvailabilityMode,
+		FailoverMode:         failoverMode,
 	}
 	logicalRouter, resp, err := nsxClient.LogicalRoutingAndServicesApi.UpdateLogicalRouter(nsxClient.Context, id, logicalRouter)
 
