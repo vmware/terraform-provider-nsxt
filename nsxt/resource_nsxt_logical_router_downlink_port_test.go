@@ -35,6 +35,7 @@ func TestAccResourceNsxtLogicalRouterDownlinkPort_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "linked_logical_switch_port_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "logical_router_id"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "urpf_mode", "NONE"),
 					resource.TestCheckResourceAttr(testResourceName, "ip_address", "8.0.0.1/24"),
 				),
 			},
@@ -47,6 +48,7 @@ func TestAccResourceNsxtLogicalRouterDownlinkPort_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "linked_logical_switch_port_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "logical_router_id"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "urpf_mode", "STRICT"),
 					resource.TestCheckResourceAttr(testResourceName, "ip_address", "8.0.0.1/24"),
 				),
 			},
@@ -233,6 +235,7 @@ resource "nsxt_logical_router_downlink_port" "test" {
   linked_logical_switch_port_id = "${nsxt_logical_port.port1.id}"
   logical_router_id             = "${nsxt_logical_tier1_router.rtr1.id}"
   ip_address                    = "8.0.0.1/24"
+  urpf_mode                     = "NONE"
 
   tag {
     scope = "scope1"
@@ -249,6 +252,7 @@ resource "nsxt_logical_router_downlink_port" "test" {
   linked_logical_switch_port_id = "${nsxt_logical_port.port1.id}"
   logical_router_id             = "${nsxt_logical_tier1_router.rtr1.id}"
   ip_address                    = "8.0.0.1/24"
+  urpf_mode                     = "STRICT"
 
   tag {
     scope = "scope1"

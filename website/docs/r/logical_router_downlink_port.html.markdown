@@ -39,11 +39,11 @@ The following arguments are supported:
 * `linked_logical_switch_port_id` - (Required) Identifier for port on logical switch to connect to
 * `ip_address` - (Required) Logical router port subnet (ip_address / prefix length)
 * `mac_address` - (Optional) Mac Address
-* `urpf_mode` - (Optional) Unicast Reverse Path Forwarding mode
+* `urpf_mode` - (Optional) Unicast Reverse Path Forwarding mode. Accepted values are "NONE" and "STRICT" which is the default value.
 * `display_name` - (Optional) Display name, defaults to ID if not set.
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this port.
-* `service_binding` - (Optional) A list of services for this port
+* `service_binding` - (Optional) A list of services for this port. Currently only "LogicalService" is supported as a target_type.
 
 ## Attributes Reference
 
