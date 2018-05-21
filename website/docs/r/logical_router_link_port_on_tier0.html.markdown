@@ -32,7 +32,7 @@ The following arguments are supported:
 * `display_name` - (Optional) Display name, defaults to ID if not set.
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this port.
-* `service_binding` - (Optional) A list of services for this port
+* `service_binding` - (Optional) A list of services for this port. Currently only "LogicalService" is supported as a target_type.
 
 ## Attributes Reference
 

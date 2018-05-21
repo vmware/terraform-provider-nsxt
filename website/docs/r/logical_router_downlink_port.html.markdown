@@ -7,7 +7,7 @@ description: A resource that can be used to configure logical router downlink po
 
 # nsxt_logical_router_downlink_port
 
-This resource provides a means to define a downlink port on a logical router to connect a logical router to a logical switch. The result of this is to provide a default gateway to virtual machines running on the logical switch.
+This resource provides a means to define a downlink port on a logical router to connect a logical tier1 router to a logical switch. The result of this is to provide a default gateway to virtual machines running on the logical switch.
 
 ## Example Usage
 
@@ -15,7 +15,7 @@ This resource provides a means to define a downlink port on a logical router to 
 resource "nsxt_logical_router_downlink_port" "downlink_port" {
   description                   = "DP1 provisioned by Terraform"
   display_name                  = "DP1"
-  logical_router_id             = "${nsxt_logical_router.rtr1.id}"
+  logical_router_id             = "${nsxt_logical_tier1_router.rtr1.id}"
   linked_logical_switch_port_id = "${nsxt_logical_port.logical_port1.id}"
   ip_address                    = "1.1.0.1/24"
 
@@ -39,11 +39,11 @@ The following arguments are supported:
 * `linked_logical_switch_port_id` - (Required) Identifier for port on logical switch to connect to
 * `ip_address` - (Required) Logical router port subnet (ip_address / prefix length)
 * `mac_address` - (Optional) Mac Address
-* `urpf_mode` - (Optional) Unicast Reverse Path Forwarding mode
+* `urpf_mode` - (Optional) Unicast Reverse Path Forwarding mode. Accepted values are "NONE" and "STRICT" which is the default value.
 * `display_name` - (Optional) Display name, defaults to ID if not set.
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this port.
-* `service_binding` - (Optional) A list of services for this port
+* `service_binding` - (Optional) A list of services for this port. Currently only "LogicalService" is supported as a target_type.
 
 ## Attributes Reference
 
@@ -51,6 +51,7 @@ In addition to arguments listed above, the following attributes are exported:
 
 * `id` - ID of the logical router downlink port.
 * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
+* `mac_address` - The MAC address assigned to this port
 
 ## Importing
 

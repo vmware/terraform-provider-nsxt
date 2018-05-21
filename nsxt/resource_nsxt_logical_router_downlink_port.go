@@ -15,7 +15,7 @@ import (
 	"strings"
 )
 
-var logicalRouterPortUrpfModeValues = []string{"NONE", "STRICT", ""}
+var logicalRouterPortUrpfModeValues = []string{"NONE", "STRICT"}
 
 func resourceNsxtLogicalRouterDownLinkPort() *schema.Resource {
 	return &schema.Resource{
@@ -62,7 +62,6 @@ func resourceNsxtLogicalRouterDownLinkPort() *schema.Resource {
 			"mac_address": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "MAC address",
-				Optional:    true,
 				Computed:    true,
 			},
 			"urpf_mode": &schema.Schema{
