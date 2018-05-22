@@ -122,7 +122,7 @@ func testAccNSXLbL4MonitorExists(protocol string, displayName string, resourceNa
 
 		monitor, responseCode, err := nsxClient.ServicesApi.ReadLoadBalancerMonitor(nsxClient.Context, resourceID)
 		if err != nil {
-			return fmt.Errorf("Error while checking if LB %s monitor %s exists", monitor.DisplayName)
+			return fmt.Errorf("Error while checking if LB %s monitor %s exists", protocol, monitor.DisplayName)
 		}
 
 		if responseCode.StatusCode != http.StatusOK {
