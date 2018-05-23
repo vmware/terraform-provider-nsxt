@@ -64,9 +64,15 @@ resource "nsxt_lb_pool" "lb_pool_with_dynamic_membership" {
   snat_translation_type    = "LbSnatAutoMap"
  
   member_group {
+<<<<<<< HEAD
     ip_version_filter = "IPV4"
     max_ip_list_size  = "4"
     port              = "80"
+=======
+    ip_revision_filter = "IPV4"
+    max_ip_list_size   = "4"
+    port               = "80"
+>>>>>>> 433045aeeff6bc2887e5a452aea81986880a91bf
 
     grouping_object {
       target_type = "NSGroup"
