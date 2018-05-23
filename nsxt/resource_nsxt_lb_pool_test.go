@@ -20,8 +20,8 @@ func TestAccResourceNsxtLbPool_basic(t *testing.T) {
 	updatedAlgorithm := "WEIGHTED_ROUND_ROBIN"
 	minActiveMembers := "3"
 	updatedMinActiveMembers := "4"
-	snatTranslationType := "Transparent"
-	updatedSnatTranslationType := "LbSnatAutoMap"
+	snatTranslationType := "TRANSPARENT"
+	updatedSnatTranslationType := "SNAT_AUTO_MAP"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -108,7 +108,7 @@ func TestAccResourceNsxtLbPool_withIpSnat(t *testing.T) {
 	updatedAlgorithm := "WEIGHTED_ROUND_ROBIN"
 	minActiveMembers := "3"
 	updatedMinActiveMembers := "4"
-	snatTranslationType := "LbSnatIpPool"
+	snatTranslationType := "SNAT_IP_POOL"
 	ipAddress := "1.1.1.1"
 	updatedIpAddress := "1.1.1.2-1.1.1.20"
 
@@ -159,8 +159,8 @@ func TestAccResourceNsxtLbPool_withMember(t *testing.T) {
 	updatedAlgorithm := "WEIGHTED_ROUND_ROBIN"
 	minActiveMembers := "3"
 	updatedMinActiveMembers := "4"
-	snatTranslationType := "Transparent"
-	updatedSnatTranslationType := "LbSnatAutoMap"
+	snatTranslationType := "TRANSPARENT"
+	updatedSnatTranslationType := "SNAT_AUTO_MAP"
 	memberIp := "1.1.1.1"
 
 	resource.Test(t, resource.TestCase{
