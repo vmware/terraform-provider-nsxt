@@ -98,8 +98,9 @@ func getRulesSchema() *schema.Schema {
 				"destination": getResourceReferencesSchema(false, false, []string{"IPSet", "LogicalPort", "LogicalSwitch", "NSGroup", "MACSet"}, "List of the destinations. Null will be treated as any"),
 				"destinations_excluded": &schema.Schema{
 					Type:        schema.TypeBool,
-					Description: "Negation of the destination",
+					Description: "When this boolean flag is set to true, the rule destinations will be negated",
 					Optional:    true,
+					Default:     false,
 				},
 				"direction": &schema.Schema{
 					Type:         schema.TypeString,
@@ -136,8 +137,9 @@ func getRulesSchema() *schema.Schema {
 				"source": getResourceReferencesSchema(false, false, []string{"IPSet", "LogicalPort", "LogicalSwitch", "NSGroup", "MACSet"}, "List of sources. Null will be treated as any"),
 				"sources_excluded": &schema.Schema{
 					Type:        schema.TypeBool,
-					Description: "Negation of the source",
+					Description: "When this boolean flag is set to true, the rule sources will be negated",
 					Optional:    true,
+					Default:     false,
 				},
 				"service": getResourceReferencesSchema(false, false, []string{"NSService", "NSServiceGroup"}, "List of the services. Null will be treated as any"),
 			},
