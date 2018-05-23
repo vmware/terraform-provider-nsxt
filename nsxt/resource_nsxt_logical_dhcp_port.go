@@ -49,8 +49,6 @@ func resourceNsxtLogicalDhcpPort() *schema.Resource {
 				Required:    true,
 			},
 			"admin_state": getAdminStateSchema(),
-			//TODO(asarfaty): switching profiles for DHCP ports are currently ignored by NSX
-			//"switching_profile_id": getSwitchingProfileIdsSchema(),
 			"tag": getTagsSchema(),
 		},
 	}
@@ -62,7 +60,6 @@ func resourceNsxtLogicalDhcpPortCreate(d *schema.ResourceData, m interface{}) er
 	description := d.Get("description").(string)
 	lsID := d.Get("logical_switch_id").(string)
 	adminState := d.Get("admin_state").(string)
-	//profilesList := getSwitchingProfileIdsFromSchema(d)
 	tagList := getTagsFromSchema(d)
 	dhcpServerID := d.Get("dhcp_server_id").(string)
 	attachment := manager.LogicalPortAttachment{
@@ -74,7 +71,6 @@ func resourceNsxtLogicalDhcpPortCreate(d *schema.ResourceData, m interface{}) er
 		Description:     description,
 		LogicalSwitchId: lsID,
 		AdminState:      adminState,
-		//SwitchingProfileIds: profilesList,
 		Tags:       tagList,
 		Attachment: &attachment,
 	}
@@ -120,10 +116,6 @@ func resourceNsxtLogicalDhcpPortRead(d *schema.ResourceData, m interface{}) erro
 	d.Set("logical_switch_id", LogicalDhcpPort.LogicalSwitchId)
 	d.Set("admin_state", LogicalDhcpPort.AdminState)
 	d.Set("dhcp_server_id", LogicalDhcpPort.Attachment.Id)
-	//err = setSwitchingProfileIdsInSchema(d, nsxClient, LogicalDhcpPort.SwitchingProfileIds)
-	//if err != nil {
-	//	return fmt.Errorf("Error during logical DHCP port switching profiles set in schema: %v", err)
-	//}
 	setTagsInSchema(d, LogicalDhcpPort.Tags)
 
 	return nil
@@ -136,7 +128,6 @@ func resourceNsxtLogicalDhcpPortUpdate(d *schema.ResourceData, m interface{}) er
 	description := d.Get("description").(string)
 	adminState := d.Get("admin_state").(string)
 	lsID := d.Get("logical_switch_id").(string)
-	//profilesList := getSwitchingProfileIdsFromSchema(d)
 	tagList := getTagsFromSchema(d)
 	revision := int64(d.Get("revision").(int))
 	dhcpServerID := d.Get("dhcp_server_id").(string)
@@ -150,7 +141,6 @@ func resourceNsxtLogicalDhcpPortUpdate(d *schema.ResourceData, m interface{}) er
 		Description:     description,
 		LogicalSwitchId: lsID,
 		AdminState:      adminState,
-		//SwitchingProfileIds: profilesList,
 		Tags:       tagList,
 		Attachment: &attachment,
 	}
