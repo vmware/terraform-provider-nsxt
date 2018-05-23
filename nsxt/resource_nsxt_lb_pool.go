@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
 	api "github.com/vmware/go-vmware-nsxt"
+	"github.com/vmware/go-vmware-nsxt/common"
 	"github.com/vmware/go-vmware-nsxt/loadbalancer"
 	"log"
 	"net/http"
@@ -16,6 +17,7 @@ import (
 var poolAlgTypeValues = []string{"ROUND_ROBIN", "WEIGHTED_ROUND_ROBIN", "LEAST_CONNECTION", "WEIGHTED_LEAST_CONNECTION", "IP_HASH"}
 var poolSnatTranslationTypeValues = []string{"LbSnatAutoMap", "Transparent"}
 var memberAdminStateTypeValues = []string{"ENABLED", "DISABLED", "GRACEFUL_DISABLED"}
+var ipRevisionFilterTypeValues = []string{"IPV4", "IPV6"}
 
 func resourceNsxtLbPool() *schema.Resource {
 	return &schema.Resource{
@@ -83,7 +85,8 @@ func resourceNsxtLbPool() *schema.Resource {
 				Optional:     true,
 				Default:      "Transparent",
 			},
-			"member": getPoolMembersSchema(),
+			"member":       getPoolMembersSchema(),
+			"member_group": getPoolMemberGroupSchema(),
 		},
 	}
 }
@@ -106,6 +109,7 @@ func getPoolMembersSchema() *schema.Schema {
 					Description:  "Member admin state",
 					Optional:     true,
 					ValidateFunc: validation.StringInSlice(memberAdminStateTypeValues, false),
+					Default:      "ENABLED",
 				},
 				"backup_member": &schema.Schema{
 					Type:        schema.TypeBool,
@@ -133,6 +137,38 @@ func getPoolMembersSchema() *schema.Schema {
 				"weight": &schema.Schema{
 					Type:        schema.TypeInt,
 					Description: "Pool member weight is used for WEIGHTED_ROUND_ROBIN balancing algorithm. The weight value would be ignored in other algorithms",
+					Optional:    true,
+					Default:     1,
+				},
+			},
+		},
+	}
+}
+
+func getPoolMemberGroupSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeList,
+		Description: "Dynamic pool members for the loadbalancing pool. When member group is defined, members setting should not be specified",
+		Optional:    true,
+		MaxItems:    1,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"grouping_object": getSingleResourceReferencesSchema(true, false, []string{"NSGroup"}, "Load balancer pool support grouping object as dynamic pool members. The IP list of the grouping object such as NSGroup would be used as pool member IP setting"),
+				"ip_version_filter": &schema.Schema{
+					Type:         schema.TypeString,
+					Description:  "Ip revision filter is used to filter IPv4 or IPv6 addresses from the grouping object. If the filter is not specified, both IPv4 and IPv6 addresses would be used as server IPs",
+					Optional:     true,
+					ValidateFunc: validation.StringInSlice(ipRevisionFilterTypeValues, false),
+					Default:      "IPV4",
+				},
+				"max_ip_list_size": &schema.Schema{
+					Type:        schema.TypeInt,
+					Description: "Define the maximum number of grouping object IP address list. These IP addresses would be used as pool members",
+					Optional:    true,
+				},
+				"port": &schema.Schema{
+					Type:        schema.TypeInt,
+					Description: "If port is specified, all connections will be sent to this port. If unset, the same port the client connected to will be used",
 					Optional:    true,
 				},
 			},
@@ -182,18 +218,54 @@ func getPoolMembersFromSchema(d *schema.ResourceData) []loadbalancer.PoolMember 
 	for _, member := range members {
 		data := member.(map[string]interface{})
 		elem := loadbalancer.PoolMember{
-			AdminState:               data["admin_state"].(string),
-			BackupMember:             data["backup_member"].(bool),
-			DisplayName:              data["display_name"].(string),
-			IpAddress:                data["ip_address"].(string),
+			AdminState:   data["admin_state"].(string),
+			BackupMember: data["backup_member"].(bool),
+			DisplayName:  data["display_name"].(string),
+			IpAddress:    data["ip_address"].(string),
+			Port:         data["port"].(string),
+			Weight:       int64(data["weight"].(int)),
 			MaxConcurrentConnections: int64(data["max_concurrent_connections"].(int)),
-			Port:   data["port"].(string),
-			Weight: int64(data["weight"].(int)),
 		}
 
 		memberList = append(memberList, elem)
 	}
 	return memberList
+}
+
+func setPoolGroupMemberInSchema(d *schema.ResourceData, groupMember *loadbalancer.PoolMemberGroup) error {
+	var groupMembersList []map[string]interface{}
+	if groupMember != nil {
+		elem := make(map[string]interface{})
+		var refList []common.ResourceReference
+		if groupMember.GroupingObject != nil {
+			refList = append(refList, *groupMember.GroupingObject)
+		}
+		elem["grouping_object"] = returnResourceReferences(refList)
+		elem["ip_version_filter"] = groupMember.IpRevisionFilter
+		elem["max_ip_list_size"] = groupMember.MaxIpListSize
+		elem["port"] = groupMember.Port
+
+		groupMembersList = append(groupMembersList, elem)
+	}
+	err := d.Set("member_group", groupMembersList)
+	return err
+}
+
+func getPoolMemberGroupFromSchema(d *schema.ResourceData) *loadbalancer.PoolMemberGroup {
+	memberGroups := d.Get("member_group").([]interface{})
+	for _, member := range memberGroups {
+		// only 1 member group is allowed so return the first 1
+		data := member.(map[string]interface{})
+		groupingObject := getSingleResourceReference(data["grouping_object"].([]interface{}))
+		memberGroup := loadbalancer.PoolMemberGroup{
+			IpRevisionFilter: data["ip_version_filter"].(string),
+			Port:             int32(data["port"].(int)),
+			MaxIpListSize:    int64(data["max_ip_list_size"].(int)),
+			GroupingObject:   groupingObject,
+		}
+		return &memberGroup
+	}
+	return nil
 }
 
 func resourceNsxtLbPoolCreate(d *schema.ResourceData, m interface{}) error {
@@ -205,6 +277,7 @@ func resourceNsxtLbPoolCreate(d *schema.ResourceData, m interface{}) error {
 	passiveMonitorId := d.Get("passive_monitor_id").(string)
 	algorithm := d.Get("algorithm").(string)
 	members := getPoolMembersFromSchema(d)
+	memberGroup := getPoolMemberGroupFromSchema(d)
 	minActiveMembers := int64(d.Get("min_active_members").(int))
 	tcpMultiplexingEnabled := d.Get("tcp_multiplexing_enabled").(bool)
 	tcpMultiplexingNumber := int64(d.Get("tcp_multiplexing_number").(int))
@@ -221,6 +294,7 @@ func resourceNsxtLbPoolCreate(d *schema.ResourceData, m interface{}) error {
 		TcpMultiplexingEnabled: tcpMultiplexingEnabled,
 		TcpMultiplexingNumber:  tcpMultiplexingNumber,
 		Members:                members,
+		MemberGroup:            memberGroup,
 	}
 
 	lbPool, resp, err := nsxClient.ServicesApi.CreateLoadBalancerPool(nsxClient.Context, lbPool)
@@ -270,12 +344,14 @@ func resourceNsxtLbPoolRead(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return fmt.Errorf("Error during LB Pool members set in schema: %v", err)
 	}
+	err = setPoolGroupMemberInSchema(d, lbPool.MemberGroup)
+	if err != nil {
+		return fmt.Errorf("Error during LB Pool group member set in schema: %v", err)
+	}
 	d.Set("min_active_members", lbPool.MinActiveMembers)
 	if lbPool.SnatTranslation != nil {
-		log.Printf("[DEBUG] DEBUG ADIT resourceNsxtLbPoolRead 1 %s", lbPool.SnatTranslation.Type_)
 		d.Set("snat_translation_type", lbPool.SnatTranslation.Type_)
 	} else {
-		log.Printf("[DEBUG] DEBUG ADIT resourceNsxtLbPoolRead 2 Transparent")
 		d.Set("snat_translation_type", "Transparent")
 	}
 	d.Set("tcp_multiplexing_enabled", lbPool.TcpMultiplexingEnabled)
@@ -299,6 +375,7 @@ func resourceNsxtLbPoolUpdate(d *schema.ResourceData, m interface{}) error {
 	passiveMonitorId := d.Get("passive_monitor_id").(string)
 	algorithm := d.Get("algorithm").(string)
 	members := getPoolMembersFromSchema(d)
+	memberGroup := getPoolMemberGroupFromSchema(d)
 	minActiveMembers := int64(d.Get("min_active_members").(int))
 	snatTranslation := getSnatTranslationFromSchema(d)
 	tcpMultiplexingEnabled := d.Get("tcp_multiplexing_enabled").(bool)
@@ -316,6 +393,7 @@ func resourceNsxtLbPoolUpdate(d *schema.ResourceData, m interface{}) error {
 		TcpMultiplexingEnabled: tcpMultiplexingEnabled,
 		TcpMultiplexingNumber:  tcpMultiplexingNumber,
 		Members:                members,
+		MemberGroup:            memberGroup,
 	}
 
 	lbPool, resp, err := nsxClient.ServicesApi.UpdateLoadBalancerPool(nsxClient.Context, id, lbPool)

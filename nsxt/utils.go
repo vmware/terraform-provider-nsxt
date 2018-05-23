@@ -251,14 +251,18 @@ func setAddressBindingsInSchema(d *schema.ResourceData, bindings []manager.Packe
 }
 
 func getResourceReferencesSchema(required bool, computed bool, validTargetTypes []string, description string) *schema.Schema {
-	return getResourceReferencesSchemaByType(required, computed, validTargetTypes, true, description)
+	return getResourceReferencesSchemaByType(required, computed, validTargetTypes, true, description, 0)
+}
+
+func getSingleResourceReferencesSchema(required bool, computed bool, validTargetTypes []string, description string) *schema.Schema {
+	return getResourceReferencesSchemaByType(required, computed, validTargetTypes, true, description, 1)
 }
 
 func getResourceReferencesSetSchema(required bool, computed bool, validTargetTypes []string, description string) *schema.Schema {
-	return getResourceReferencesSchemaByType(required, computed, validTargetTypes, false, description)
+	return getResourceReferencesSchemaByType(required, computed, validTargetTypes, false, description, 0)
 }
 
-func getResourceReferencesSchemaByType(required bool, computed bool, validTargetTypes []string, isList bool, description string) *schema.Schema {
+func getResourceReferencesSchemaByType(required bool, computed bool, validTargetTypes []string, isList bool, description string, maxItems int) *schema.Schema {
 	schType := schema.TypeSet
 	if isList {
 		schType = schema.TypeList
@@ -269,6 +273,7 @@ func getResourceReferencesSchemaByType(required bool, computed bool, validTarget
 		Required:    required,
 		Optional:    !required,
 		Computed:    computed,
+		MaxItems:    maxItems,
 		Description: description,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
@@ -296,6 +301,21 @@ func getResourceReferencesSchemaByType(required bool, computed bool, validTarget
 			},
 		},
 	}
+}
+
+func getSingleResourceReference(references []interface{}) *common.ResourceReference {
+	for _, reference := range references {
+		data := reference.(map[string]interface{})
+		// only 1 ref is allowed so return the first 1
+		elem := common.ResourceReference{
+			IsValid:           data["is_valid"].(bool),
+			TargetDisplayName: data["target_display_name"].(string),
+			TargetId:          data["target_id"].(string),
+			TargetType:        data["target_type"].(string),
+		}
+		return &elem
+	}
+	return nil
 }
 
 func getResourceReferences(references []interface{}) []common.ResourceReference {

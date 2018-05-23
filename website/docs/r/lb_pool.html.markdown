@@ -19,6 +19,12 @@ resource "nsxt_lb_icmp_monitor" "lb_icmp_monitor" {
   interval     = 5
 }
 
+resource "nsxt_lb_passive_monitor" "lb_passive_monitor" {
+  display_name = "lb_passive_monitor"
+  max_fails    = 3
+  timeout      = 10
+}
+
 resource "nsxt_lb_pool" "lb_pool" {
   description              = "lb_pool provisioned by Terraform"
   display_name             = "lb_pool"
@@ -27,6 +33,7 @@ resource "nsxt_lb_pool" "lb_pool" {
   tcp_multiplexing_enabled = false
   tcp_multiplexing_number  = 3
   active_monitor_id        = "${nsxt_lb_icmp_monitor.lb_icmp_monitor.id}"
+  passive_monitor_id       = "${nsxt_lb_passive_monitor.lb_passive_monitor.id}"
   snat_translation_type    = "LbSnatAutoMap"
  
   member {
@@ -37,6 +44,41 @@ resource "nsxt_lb_pool" "lb_pool" {
     max_concurrent_connections = "1"
     port                       = "87"
     weight                     = "1"
+  }
+
+  tag = {
+    scope = "color"
+    tag   = "red"
+  }
+}
+
+resource "nsxt_lb_pool" "lb_pool_with_dynamic_membership" {
+  description              = "lb_pool provisioned by Terraform"
+  display_name             = "dynamic_lb_pool"
+  algorithm                = "LEAST_CONNECTION"
+  min_active_members       = 1
+  tcp_multiplexing_enabled = false
+  tcp_multiplexing_number  = 3
+  active_monitor_id        = "${nsxt_lb_icmp_monitor.lb_icmp_monitor.id}"
+  passive_monitor_id       = "${nsxt_lb_passive_monitor.lb_passive_monitor.id}"
+  snat_translation_type    = "LbSnatAutoMap"
+ 
+  member_group {
+<<<<<<< HEAD
+    ip_version_filter = "IPV4"
+    max_ip_list_size  = "4"
+    port              = "80"
+=======
+    ip_revision_filter = "IPV4"
+    max_ip_list_size   = "4"
+    port               = "80"
+>>>>>>> 433045aeeff6bc2887e5a452aea81986880a91bf
+
+    grouping_object {
+      target_type = "NSGroup"
+      target_id   = "${nsxt_ns_group.group1.id}"
+      }
+    }
   }
 
   tag = {
@@ -62,6 +104,11 @@ The following arguments are supported:
   * `max_concurrent_connections` - (Optional) To ensure members are not overloaded, connections to a member can be capped by the load balancer. When a member reaches this limit, it is skipped during server selection. If it is not specified, it means that connections are unlimited.
   * `port` - (Optional) If port is specified, all connections will be sent to this port. Only single port is supported. If unset, the same port the client connected to will be used, it could be overrode by default_pool_member_port setting in virtual server. The port should not specified for port range case.
   * `weight` - (Optional) Pool member weight is used for WEIGHTED_ROUND_ROBIN balancing algorithm. The weight value would be ignored in other algorithms.
+* `member_group` - (Optional) Dynamic pool members for the loadbalancing pool. When member group is defined, members setting should not be specified. The member_group has the following arguments:
+  * `grouping_object` - (Required) Grouping object of type NSGroup which will be used as dynamic pool members. The IP list of the grouping object would be used as pool member IP setting.
+  * `ip_version_filter` - (Optional) Ip version filter is used to filter IPv4 or IPv6 addresses from the grouping object. If the filter is not specified, both IPv4 and IPv6 addresses would be used as server IPs. Supported filtering is "IPV4" and "IPV6" ("IPV4" is the default one)
+  * `max_ip_list_size` - (Optional) The size is used to define the maximum number of grouping object IP address list. These IP addresses would be used as pool members. If the grouping object includes more than certain number of IP addresses, the redundant parts would be ignored and those IP addresses would not be treated as pool members.
+  * `port` - (Optional) If port is specified, all connections will be sent to this port. If unset, the same port the client connected to will be used, it could be overridden by default_pool_member_ports setting in virtual server. The port should not specified for multiple ports case.
 * `min_active_members` - (Optional) The minimum number of members for the pool to be considered active. This value is 1 by default.
 * `passive_monitor_id` - (Optional) Passive health monitor Id. If one is not set, the passive healthchecks will be disabled.
 * `snat_translation_type` - (Optional) Type of SNAT performed to ensure reverse traffic from the server can be received and processed by the loadbalancer. Supported types are: LbSnatAutoMap, Transparent
