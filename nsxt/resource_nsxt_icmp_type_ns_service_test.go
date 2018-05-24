@@ -37,7 +37,7 @@ func TestAccResourceNsxtIcmpTypeNsService_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXIcmpServiceCreateTemplate(updateServiceName, "ICMPv6", 3, 1),
+				Config: testAccNSXIcmpServiceCreateTemplate(updateServiceName, "ICMPv6", 139, 1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXIcmpServiceExists(updateServiceName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updateServiceName),
