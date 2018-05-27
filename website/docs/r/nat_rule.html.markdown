@@ -42,11 +42,11 @@ The following arguments are supported:
 * `action` - (Required) NAT rule action type. Valid actions are: SNAT, DNAT, NO_NAT and REFLEXIVE. All rules in a logical router are either stateless or stateful. Mix is not supported. SNAT and DNAT are stateful, and can NOT be supported when the logical router is running at active-active HA mode. The REFLEXIVE action is stateless. The NO_NAT action has no translated_fields, only match fields.
 * `enabled` - (Optional) enable/disable the rule.
 * `logging` - (Optional) enable/disable the logging of rule.
-* `match_destination_network` - (Optional) IP Address | CIDR | (null implies Any).
-* `match_source_network` - (Optional) IP Address | CIDR | (null implies Any).
+* `match_destination_network` - (Required for action=DNAT, not allowed for action=REFLEXIVE) IP Address | CIDR. Omitting this field implies Any.
+* `match_source_network` - (Required for action=NO_NAT or REFLEXIVE, Optional for the other actions) IP Address | CIDR. Omitting this field implies Any.
 * `nat_pass` - (Optional) Enable/disable to bypass following firewall stage. The default is true, meaning that the following firewall stage will be skipped. Please note, if action is NO_NAT, then nat_pass must be set to true or omitted.
-* `translated_network` - (Optional) IP Address | IP Range | CIDR. For DNAT rules only a single IP is supported.
-* `translated_ports` - (Optional) port number or port range. DNAT only.
+* `translated_network` - (Required for action=DNAT or SNAT) IP Address | IP Range | CIDR.
+* `translated_ports` - (Optional) port number or port range. Allowed only when action=DNAT.
 
 
 ## Attributes Reference

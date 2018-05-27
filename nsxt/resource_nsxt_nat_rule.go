@@ -65,12 +65,12 @@ func resourceNsxtNatRule() *schema.Resource {
 			},
 			"match_destination_network": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "IP Address | CIDR | (null implies Any)",
+				Description: "IP Address | CIDR",
 				Optional:    true,
 			},
 			"match_source_network": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "IP Address | CIDR | (null implies Any)",
+				Description: "IP Address | CIDR",
 				Optional:    true,
 			},
 			"nat_pass": &schema.Schema{
@@ -86,7 +86,7 @@ func resourceNsxtNatRule() *schema.Resource {
 			},
 			"translated_network": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "IP Address | IP Range | CIDR. For DNAT rules only a single ip is supported",
+				Description: "IP Address | IP Range | CIDR",
 				Optional:    true,
 			},
 			"translated_ports": &schema.Schema{

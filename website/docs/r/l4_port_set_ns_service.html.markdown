@@ -33,7 +33,7 @@ The following arguments are supported:
 * `description` - (Optional) Description of this resource.
 * `destination_ports` - (Optional) Set of destination ports.
 * `source_ports` - (Optional) Set of source ports.
-* `protocol` - (Optional) VL4 protocol
+* `protocol` - (Required) L4 protocol. Accepted values - 'TCP' or 'UDP'.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this service.
 
 ## Attributes Reference
