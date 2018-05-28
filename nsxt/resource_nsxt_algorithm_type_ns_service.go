@@ -114,13 +114,13 @@ func resourceNsxtAlgorithmTypeNsServiceRead(d *schema.ResourceData, m interface{
 	}
 
 	nsService, resp, err := nsxClient.GroupingObjectsApi.ReadAlgTypeNSService(nsxClient.Context, id)
+	if err != nil {
+		return fmt.Errorf("Error during NsService read: %v", err)
+	}
 	if resp.StatusCode == http.StatusNotFound {
 		log.Printf("[DEBUG] NsService %s not found", id)
 		d.SetId("")
 		return nil
-	}
-	if err != nil {
-		return fmt.Errorf("Error during NsService read: %v", err)
 	}
 
 	nsserviceElement := nsService.NsserviceElement

@@ -116,13 +116,13 @@ func resourceNsxtL4PortSetNsServiceRead(d *schema.ResourceData, m interface{}) e
 	}
 
 	nsService, resp, err := nsxClient.GroupingObjectsApi.ReadL4PortSetNSService(nsxClient.Context, id)
+	if err != nil {
+		return fmt.Errorf("Error during NsService read: %v", err)
+	}
 	if resp.StatusCode == http.StatusNotFound {
 		log.Printf("[DEBUG] NsService %s not found", id)
 		d.SetId("")
 		return nil
-	}
-	if err != nil {
-		return fmt.Errorf("Error during NsService read: %v", err)
 	}
 
 	nsserviceElement := nsService.NsserviceElement

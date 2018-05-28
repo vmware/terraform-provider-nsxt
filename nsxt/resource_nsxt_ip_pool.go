@@ -184,13 +184,13 @@ func resourceNsxtIPPoolRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	ipPool, resp, err := nsxClient.PoolManagementApi.ReadIpPool(nsxClient.Context, id)
+	if err != nil {
+		return fmt.Errorf("Error during IpPool read: %v", err)
+	}
 	if resp.StatusCode == http.StatusNotFound {
 		log.Printf("[DEBUG] IpPool %s not found", id)
 		d.SetId("")
 		return nil
-	}
-	if err != nil {
-		return fmt.Errorf("Error during IpPool read: %v", err)
 	}
 
 	d.Set("display_name", ipPool.DisplayName)

@@ -90,13 +90,13 @@ func resourceNsxtLogicalRouterLinkPortOnTier0Read(d *schema.ResourceData, m inte
 	}
 
 	logicalRouterLinkPort, resp, err := nsxClient.LogicalRoutingAndServicesApi.ReadLogicalRouterLinkPortOnTier0(nsxClient.Context, id)
+	if err != nil {
+		return fmt.Errorf("Error during LogicalRouterLinkPortOnTier0 read: %v", err)
+	}
 	if resp.StatusCode == http.StatusNotFound {
 		log.Printf("[DEBUG] LogicalRouterLinkPortOnTier0 %s not found", id)
 		d.SetId("")
 		return nil
-	}
-	if err != nil {
-		return fmt.Errorf("Error during LogicalRouterLinkPortOnTier0 read: %v", err)
 	}
 
 	d.Set("revision", logicalRouterLinkPort.Revision)

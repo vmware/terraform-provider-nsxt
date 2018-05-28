@@ -128,13 +128,13 @@ func resourceNsxtIPBlockSubnetRead(d *schema.ResourceData, m interface{}) error 
 	}
 
 	ipBlockSubnet, resp, err := nsxClient.PoolManagementApi.ReadIpBlockSubnet(nsxClient.Context, id)
+	if err != nil {
+		return fmt.Errorf("Error during IpBlockSubnet read: %v", err)
+	}
 	if resp.StatusCode == http.StatusNotFound {
 		log.Printf("[DEBUG] IpBlockSubnet %s not found", id)
 		d.SetId("")
 		return nil
-	}
-	if err != nil {
-		return fmt.Errorf("Error during IpBlockSubnet read: %v", err)
 	}
 
 	d.Set("display_name", ipBlockSubnet.DisplayName)

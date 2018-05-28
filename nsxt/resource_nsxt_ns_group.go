@@ -197,13 +197,15 @@ func resourceNsxtNsGroupRead(d *schema.ResourceData, m interface{}) error {
 	localVarOptionals := make(map[string]interface{})
 	localVarOptionals["populateReferences"] = true
 	nsGroup, resp, err := nsxClient.GroupingObjectsApi.ReadNSGroup(nsxClient.Context, id, localVarOptionals)
+
+	if err != nil {
+		return fmt.Errorf("Error during NsGroup read: %v", err)
+	}
+
 	if resp.StatusCode == http.StatusNotFound {
 		log.Printf("[DEBUG] NsGroup %s not found", id)
 		d.SetId("")
 		return nil
-	}
-	if err != nil {
-		return fmt.Errorf("Error during NsGroup read: %v", err)
 	}
 
 	d.Set("revision", nsGroup.Revision)

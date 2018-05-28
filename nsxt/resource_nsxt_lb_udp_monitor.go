@@ -73,13 +73,13 @@ func resourceNsxtLbUDPMonitorRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	lbUDPMonitor, resp, err := nsxClient.ServicesApi.ReadLoadBalancerUdpMonitor(nsxClient.Context, id)
+	if err != nil {
+		return fmt.Errorf("Error during LbMonitor read: %v", err)
+	}
 	if resp.StatusCode == http.StatusNotFound {
 		log.Printf("[DEBUG] LbMonitor %s not found", id)
 		d.SetId("")
 		return nil
-	}
-	if err != nil {
-		return fmt.Errorf("Error during LbMonitor read: %v", err)
 	}
 
 	d.Set("revision", lbUDPMonitor.Revision)

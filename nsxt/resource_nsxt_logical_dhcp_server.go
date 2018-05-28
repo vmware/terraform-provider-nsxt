@@ -226,13 +226,13 @@ func resourceNsxtLogicalDhcpServerRead(d *schema.ResourceData, m interface{}) er
 	}
 
 	logicalDhcpServer, resp, err := nsxClient.ServicesApi.ReadDhcpServer(nsxClient.Context, id)
+	if err != nil {
+		return fmt.Errorf("Error during LogicalDhcpServer read: %v", err)
+	}
 	if resp.StatusCode == http.StatusNotFound {
 		log.Printf("[DEBUG] LogicalDhcpServer %s not found", id)
 		d.SetId("")
 		return nil
-	}
-	if err != nil {
-		return fmt.Errorf("Error during LogicalDhcpServer read: %v", err)
 	}
 
 	d.Set("revision", logicalDhcpServer.Revision)
