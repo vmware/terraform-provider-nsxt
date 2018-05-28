@@ -38,7 +38,7 @@ func TestAccResourceNsxtLbPool_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttr(testResourceName, "algorithm", algorithm),
 					resource.TestCheckResourceAttr(testResourceName, "min_active_members", minActiveMembers),
-					resource.TestCheckResourceAttr(testResourceName, "snat_translation_type", snatTranslationType),
+					resource.TestCheckResourceAttr(testResourceName, "snat_translation.0.type", snatTranslationType),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "member.#", "0"),
 				),
@@ -51,7 +51,7 @@ func TestAccResourceNsxtLbPool_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "description", "Updated Acceptance Test"),
 					resource.TestCheckResourceAttr(testResourceName, "algorithm", updatedAlgorithm),
 					resource.TestCheckResourceAttr(testResourceName, "min_active_members", updatedMinActiveMembers),
-					resource.TestCheckResourceAttr(testResourceName, "snat_translation_type", updatedSnatTranslationType),
+					resource.TestCheckResourceAttr(testResourceName, "snat_translation.0.type", updatedSnatTranslationType),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "member.#", "0"),
 				),
@@ -111,6 +111,8 @@ func TestAccResourceNsxtLbPool_withIpSnat(t *testing.T) {
 	snatTranslationType := "SNAT_IP_POOL"
 	ipAddress := "1.1.1.1"
 	updatedIpAddress := "1.1.1.2-1.1.1.20"
+	portOverload := "2"
+	updatedPortOverload := "16"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -120,29 +122,31 @@ func TestAccResourceNsxtLbPool_withIpSnat(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXLbPoolCreateWithSnatTemplate(name, algorithm, minActiveMembers, snatTranslationType, ipAddress),
+				Config: testAccNSXLbPoolCreateWithSnatTemplate(name, algorithm, minActiveMembers, snatTranslationType, ipAddress, portOverload),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXLbPoolExists(name, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttr(testResourceName, "algorithm", algorithm),
 					resource.TestCheckResourceAttr(testResourceName, "min_active_members", minActiveMembers),
-					resource.TestCheckResourceAttr(testResourceName, "snat_translation_type", snatTranslationType),
-					resource.TestCheckResourceAttr(testResourceName, "snat_translation_ip", ipAddress),
+					resource.TestCheckResourceAttr(testResourceName, "snat_translation.0.type", snatTranslationType),
+					resource.TestCheckResourceAttr(testResourceName, "snat_translation.0.ip", ipAddress),
+					resource.TestCheckResourceAttr(testResourceName, "snat_translation.0.port_overload", portOverload),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "member.#", "0"),
 				),
 			},
 			{
-				Config: testAccNSXLbPoolUpdateWithSnatTemplate(updatedName, updatedAlgorithm, updatedMinActiveMembers, snatTranslationType, updatedIpAddress),
+				Config: testAccNSXLbPoolUpdateWithSnatTemplate(updatedName, updatedAlgorithm, updatedMinActiveMembers, snatTranslationType, updatedIpAddress, updatedPortOverload),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXLbPoolExists(updatedName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Updated Acceptance Test"),
 					resource.TestCheckResourceAttr(testResourceName, "algorithm", updatedAlgorithm),
 					resource.TestCheckResourceAttr(testResourceName, "min_active_members", updatedMinActiveMembers),
-					resource.TestCheckResourceAttr(testResourceName, "snat_translation_type", snatTranslationType),
-					resource.TestCheckResourceAttr(testResourceName, "snat_translation_ip", updatedIpAddress),
+					resource.TestCheckResourceAttr(testResourceName, "snat_translation.0.type", snatTranslationType),
+					resource.TestCheckResourceAttr(testResourceName, "snat_translation.0.ip", updatedIpAddress),
+					resource.TestCheckResourceAttr(testResourceName, "snat_translation.0.port_overload", updatedPortOverload),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "member.#", "0"),
 				),
@@ -178,7 +182,7 @@ func TestAccResourceNsxtLbPool_withMember(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttr(testResourceName, "algorithm", algorithm),
 					resource.TestCheckResourceAttr(testResourceName, "min_active_members", minActiveMembers),
-					resource.TestCheckResourceAttr(testResourceName, "snat_translation_type", snatTranslationType),
+					resource.TestCheckResourceAttr(testResourceName, "snat_translation.0.type", snatTranslationType),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "member.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "member.0.display_name", name+"-member"),
@@ -193,7 +197,7 @@ func TestAccResourceNsxtLbPool_withMember(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "description", "Updated Acceptance Test"),
 					resource.TestCheckResourceAttr(testResourceName, "algorithm", updatedAlgorithm),
 					resource.TestCheckResourceAttr(testResourceName, "min_active_members", updatedMinActiveMembers),
-					resource.TestCheckResourceAttr(testResourceName, "snat_translation_type", updatedSnatTranslationType),
+					resource.TestCheckResourceAttr(testResourceName, "snat_translation.0.type", updatedSnatTranslationType),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "member.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "member.0.display_name", updatedName+"-member"),
@@ -337,11 +341,14 @@ func testAccNSXLbPoolCheckDestroy(state *terraform.State, displayName string) er
 func testAccNSXLbPoolCreateTemplate(name string, algorithm string, minActiveMembers string, snatTranslationType string) string {
 	return fmt.Sprintf(`
 resource "nsxt_lb_pool" "test" {
-  display_name          = "%s"
-  algorithm             = "%s"
-  description           = "Acceptance Test"
-  min_active_members    = "%s"
-  snat_translation_type = "%s"
+  display_name       = "%s"
+  algorithm          = "%s"
+  description        = "Acceptance Test"
+  min_active_members = "%s"
+
+  snat_translation {
+  	type = "%s"
+  }
 
   tag {
     scope = "scope1"
@@ -358,7 +365,10 @@ resource "nsxt_lb_pool" "test" {
   algorithm             = "%s"
   description           = "Updated Acceptance Test"
   min_active_members    = "%s"
-  snat_translation_type = "%s"
+
+  snat_translation {
+  	type = "%s"
+  }
 
   tag {
     scope = "scope1"
@@ -408,33 +418,41 @@ resource "nsxt_lb_pool" "test" {
 `, name)
 }
 
-func testAccNSXLbPoolCreateWithSnatTemplate(name string, algorithm string, minActiveMembers string, snatTranslationType string, snatTranslationIp string) string {
+func testAccNSXLbPoolCreateWithSnatTemplate(name string, algorithm string, minActiveMembers string, snatTranslationType string, snatTranslationIp string, portOverload string) string {
 	return fmt.Sprintf(`
 resource "nsxt_lb_pool" "test" {
-  display_name          = "%s"
-  algorithm             = "%s"
-  description           = "Acceptance Test"
-  min_active_members    = "%s"
-  snat_translation_type = "%s"
-  snat_translation_ip   = "%s"
+  display_name       = "%s"
+  algorithm          = "%s"
+  description        = "Acceptance Test"
+  min_active_members = "%s"
+
+  snat_translation {
+  	type          = "%s"
+  	ip            = "%s"
+  	port_overload = "%s"
+  }
 
   tag {
     scope = "scope1"
     tag   = "tag1"
   }
 }
-`, name, algorithm, minActiveMembers, snatTranslationType, snatTranslationIp)
+`, name, algorithm, minActiveMembers, snatTranslationType, snatTranslationIp, portOverload)
 }
 
-func testAccNSXLbPoolUpdateWithSnatTemplate(name string, algorithm string, minActiveMembers string, snatTranslationType string, snatTranslationIp string) string {
+func testAccNSXLbPoolUpdateWithSnatTemplate(name string, algorithm string, minActiveMembers string, snatTranslationType string, snatTranslationIp string, portOverload string) string {
 	return fmt.Sprintf(`
 resource "nsxt_lb_pool" "test" {
-  display_name          = "%s"
-  algorithm             = "%s"
-  description           = "Updated Acceptance Test"
-  min_active_members    = "%s"
-  snat_translation_type = "%s"
-  snat_translation_ip   = "%s"
+  display_name       = "%s"
+  algorithm          = "%s"
+  description        = "Updated Acceptance Test"
+  min_active_members = "%s"
+
+  snat_translation {
+  	type          = "%s"
+  	ip            = "%s"
+  	port_overload = "%s"
+  }
 
   tag {
     scope = "scope1"
@@ -445,7 +463,7 @@ resource "nsxt_lb_pool" "test" {
     tag   = "tag2"
   }
 }
-`, name, algorithm, minActiveMembers, snatTranslationType, snatTranslationIp)
+`, name, algorithm, minActiveMembers, snatTranslationType, snatTranslationIp, portOverload)
 }
 
 func testAccNSXLbPoolCreateTemplateTrivial(name string) string {
@@ -459,11 +477,14 @@ resource "nsxt_lb_pool" "test" {
 func testAccNSXLbPoolCreateWithMemberTemplate(name string, algorithm string, minActiveMembers string, snatTranslationType string, memberIp string) string {
 	return fmt.Sprintf(`
 resource "nsxt_lb_pool" "test" {
-  display_name          = "%s"
-  algorithm             = "%s"
-  description           = "Acceptance Test"
-  min_active_members    = "%s"
-  snat_translation_type = "%s"
+  display_name       = "%s"
+  algorithm          = "%s"
+  description        = "Acceptance Test"
+  min_active_members = "%s"
+
+  snat_translation {
+  	type = "%s"
+  }
 
   tag {
     scope = "scope1"
@@ -490,7 +511,10 @@ resource "nsxt_lb_pool" "test" {
   algorithm             = "%s"
   description           = "Updated Acceptance Test"
   min_active_members    = "%s"
-  snat_translation_type = "%s"
+
+  snat_translation {
+  	type = "%s"
+  }
 
   tag {
     scope = "scope1"

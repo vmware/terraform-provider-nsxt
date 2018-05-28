@@ -78,20 +78,42 @@ func resourceNsxtLbPool() *schema.Resource {
 				Description: "Passive health monitor Id. If one is not set, the passive healthchecks will be disabled",
 				Optional:    true,
 			},
-			"snat_translation_type": &schema.Schema{
-				Type:         schema.TypeString,
-				Description:  "Type of SNAT performed to ensure reverse traffic from the server can be received and processed by the loadbalancer",
-				ValidateFunc: validation.StringInSlice(poolSnatTranslationTypeValues, false),
-				Optional:     true,
-				Default:      "TRANSPARENT",
-			},
-			"member":       getPoolMembersSchema(),
-			"member_group": getPoolMemberGroupSchema(),
-			"snat_translation_ip": &schema.Schema{
-				Type:         schema.TypeString,
-				Description:  "Ip address or Ip range for SNAT of type LbSnatIpPool",
-				ValidateFunc: validateIPOrRange(),
-				Optional:     true,
+			"snat_translation": getSnatTranslationSchema(),
+			"member":           getPoolMembersSchema(),
+			"member_group":     getPoolMemberGroupSchema(),
+		},
+	}
+}
+
+func getSnatTranslationSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeList,
+		Description: "SNAT translation configuration",
+		Optional:    true,
+		Computed:    true,
+		MaxItems:    1,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"type": &schema.Schema{
+					Type:         schema.TypeString,
+					Description:  "Type of SNAT performed to ensure reverse traffic from the server can be received and processed by the loadbalancer",
+					ValidateFunc: validation.StringInSlice(poolSnatTranslationTypeValues, false),
+					Optional:     true,
+					Default:      "TRANSPARENT",
+				},
+				"ip": &schema.Schema{
+					Type:         schema.TypeString,
+					Description:  "Ip address or Ip range for SNAT of type LbSnatIpPool",
+					ValidateFunc: validateIPOrRange(),
+					Optional:     true,
+				},
+				"port_overload": &schema.Schema{
+					Type:         schema.TypeInt,
+					Description:  "Maximum times for reusing the same SNAT IP and port for multiple backend connections",
+					ValidateFunc: validatePowerOf2(true, 32),
+					Optional:     true,
+					Computed:     true,
+				},
 			},
 		},
 	}
@@ -192,23 +214,56 @@ func getActiveMonitorIdsFromSchema(d *schema.ResourceData) []string {
 }
 
 func getSnatTranslationFromSchema(d *schema.ResourceData) *loadbalancer.LbSnatTranslation {
-	// TRANSPARENT type should not create an object
-	trType := d.Get("snat_translation_type").(string)
-	if trType == "TRANSPARENT" {
-		return nil
-	}
-	if trType == "SNAT_IP_POOL" {
-		ipAddresses := make([]loadbalancer.LbSnatIpElement, 0, 1)
-		ipAddress := d.Get("snat_translation_ip").(string)
-		elem := loadbalancer.LbSnatIpElement{IpAddress: ipAddress}
-		ipAddresses = append(ipAddresses, elem)
+	snatConfs := d.Get("snat_translation").([]interface{})
+	for _, snatConf := range snatConfs {
+		// only 1 snat_translation is allowed so return the first 1
+		data := snatConf.(map[string]interface{})
+
+		// TRANSPARENT type should not create an object
+		trType := data["type"].(string)
+		if trType == "TRANSPARENT" {
+			return nil
+		}
+		portOverload := int64(data["port_overload"].(int))
+		if trType == "SNAT_IP_POOL" {
+			ipAddresses := make([]loadbalancer.LbSnatIpElement, 0, 1)
+			ipAddress := data["ip"].(string)
+			elem := loadbalancer.LbSnatIpElement{IpAddress: ipAddress}
+			ipAddresses = append(ipAddresses, elem)
+			return &loadbalancer.LbSnatTranslation{
+				Type_:        "LbSnatIpPool",
+				IpAddresses:  ipAddresses,
+				PortOverload: portOverload,
+			}
+		}
+		// For SNAT_AUTO_MAP type
 		return &loadbalancer.LbSnatTranslation{
-			Type_:       "LbSnatIpPool",
-			IpAddresses: ipAddresses,
+			Type_:        "LbSnatAutoMap",
+			PortOverload: portOverload,
 		}
 	}
-	// For SNAT_AUTO_MAP type
-	return &loadbalancer.LbSnatTranslation{Type_: "LbSnatAutoMap"}
+	return nil
+}
+
+func setSnatTranslationInSchema(d *schema.ResourceData, snatTranslation *loadbalancer.LbSnatTranslation) error {
+	var snatTranslationList []map[string]interface{}
+	elem := make(map[string]interface{})
+	if snatTranslation != nil {
+		if snatTranslation.Type_ == "LbSnatIpPool" {
+			elem["type"] = "SNAT_IP_POOL"
+			if snatTranslation.IpAddresses != nil && len(snatTranslation.IpAddresses) > 0 {
+				elem["ip"] = snatTranslation.IpAddresses[0].IpAddress
+			}
+		} else {
+			elem["type"] = "SNAT_AUTO_MAP"
+		}
+		elem["port_overload"] = snatTranslation.PortOverload
+	} else {
+		elem["type"] = "TRANSPARENT"
+	}
+	snatTranslationList = append(snatTranslationList, elem)
+	err := d.Set("snat_translation", snatTranslationList)
+	return err
 }
 
 func setPoolMembersInSchema(d *schema.ResourceData, members []loadbalancer.PoolMember) error {
@@ -365,17 +420,9 @@ func resourceNsxtLbPoolRead(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("Error during LB Pool group member set in schema: %v", err)
 	}
 	d.Set("min_active_members", lbPool.MinActiveMembers)
-	if lbPool.SnatTranslation != nil {
-		if lbPool.SnatTranslation.Type_ == "LbSnatIpPool" {
-			d.Set("snat_translation_type", "SNAT_IP_POOL")
-		} else {
-			d.Set("snat_translation_type", "SNAT_AUTO_MAP")
-		}
-		if lbPool.SnatTranslation.IpAddresses != nil && len(lbPool.SnatTranslation.IpAddresses) > 0 {
-			d.Set("snat_translation_ip", lbPool.SnatTranslation.IpAddresses[0].IpAddress)
-		}
-	} else {
-		d.Set("snat_translation_type", "TRANSPARENT")
+	err = setSnatTranslationInSchema(d, lbPool.SnatTranslation)
+	if err != nil {
+		return fmt.Errorf("Error during LB Pool SNAT translation set in schema: %v", err)
 	}
 	d.Set("tcp_multiplexing_enabled", lbPool.TcpMultiplexingEnabled)
 	d.Set("tcp_multiplexing_number", lbPool.TcpMultiplexingNumber)
