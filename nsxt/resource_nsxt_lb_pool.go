@@ -15,7 +15,7 @@ import (
 )
 
 var poolAlgTypeValues = []string{"ROUND_ROBIN", "WEIGHTED_ROUND_ROBIN", "LEAST_CONNECTION", "WEIGHTED_LEAST_CONNECTION", "IP_HASH"}
-var poolSnatTranslationTypeValues = []string{"LbSnatAutoMap", "Transparent"}
+var poolSnatTranslationTypeValues = []string{"SNAT_AUTO_MAP", "SNAT_IP_POOL", "TRANSPARENT"}
 var memberAdminStateTypeValues = []string{"ENABLED", "DISABLED", "GRACEFUL_DISABLED"}
 var ipRevisionFilterTypeValues = []string{"IPV4", "IPV6"}
 
@@ -83,10 +83,16 @@ func resourceNsxtLbPool() *schema.Resource {
 				Description:  "Type of SNAT performed to ensure reverse traffic from the server can be received and processed by the loadbalancer",
 				ValidateFunc: validation.StringInSlice(poolSnatTranslationTypeValues, false),
 				Optional:     true,
-				Default:      "Transparent",
+				Default:      "TRANSPARENT",
 			},
 			"member":       getPoolMembersSchema(),
 			"member_group": getPoolMemberGroupSchema(),
+			"snat_translation_ip": &schema.Schema{
+				Type:         schema.TypeString,
+				Description:  "Ip address or Ip range for SNAT of type LbSnatIpPool",
+				ValidateFunc: validateIPOrRange(),
+				Optional:     true,
+			},
 		},
 	}
 }
@@ -186,12 +192,23 @@ func getActiveMonitorIdsFromSchema(d *schema.ResourceData) []string {
 }
 
 func getSnatTranslationFromSchema(d *schema.ResourceData) *loadbalancer.LbSnatTranslation {
-	// Transparent type should not create an object
+	// TRANSPARENT type should not create an object
 	trType := d.Get("snat_translation_type").(string)
-	if trType == "Transparent" {
+	if trType == "TRANSPARENT" {
 		return nil
 	}
-	return &loadbalancer.LbSnatTranslation{Type_: trType}
+	if trType == "SNAT_IP_POOL" {
+		ipAddresses := make([]loadbalancer.LbSnatIpElement, 0, 1)
+		ipAddress := d.Get("snat_translation_ip").(string)
+		elem := loadbalancer.LbSnatIpElement{IpAddress: ipAddress}
+		ipAddresses = append(ipAddresses, elem)
+		return &loadbalancer.LbSnatTranslation{
+			Type_:       "LbSnatIpPool",
+			IpAddresses: ipAddresses,
+		}
+	}
+	// For SNAT_AUTO_MAP type
+	return &loadbalancer.LbSnatTranslation{Type_: "LbSnatAutoMap"}
 }
 
 func setPoolMembersInSchema(d *schema.ResourceData, members []loadbalancer.PoolMember) error {
@@ -312,7 +329,6 @@ func resourceNsxtLbPoolCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceNsxtLbPoolRead(d *schema.ResourceData, m interface{}) error {
-	log.Printf("[DEBUG] DEBUG ADIT resourceNsxtLbPoolRead")
 	nsxClient := m.(*api.APIClient)
 	id := d.Id()
 	if id == "" {
@@ -350,9 +366,16 @@ func resourceNsxtLbPoolRead(d *schema.ResourceData, m interface{}) error {
 	}
 	d.Set("min_active_members", lbPool.MinActiveMembers)
 	if lbPool.SnatTranslation != nil {
-		d.Set("snat_translation_type", lbPool.SnatTranslation.Type_)
+		if lbPool.SnatTranslation.Type_ == "LbSnatIpPool" {
+			d.Set("snat_translation_type", "SNAT_IP_POOL")
+		} else {
+			d.Set("snat_translation_type", "SNAT_AUTO_MAP")
+		}
+		if lbPool.SnatTranslation.IpAddresses != nil && len(lbPool.SnatTranslation.IpAddresses) > 0 {
+			d.Set("snat_translation_ip", lbPool.SnatTranslation.IpAddresses[0].IpAddress)
+		}
 	} else {
-		d.Set("snat_translation_type", "Transparent")
+		d.Set("snat_translation_type", "TRANSPARENT")
 	}
 	d.Set("tcp_multiplexing_enabled", lbPool.TcpMultiplexingEnabled)
 	d.Set("tcp_multiplexing_number", lbPool.TcpMultiplexingNumber)
