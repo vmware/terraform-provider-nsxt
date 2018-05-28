@@ -143,17 +143,26 @@ func providerConnectivityCheck(nsxClient *nsxt.APIClient) error {
 }
 
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
-	insecure := d.Get("allow_unverified_ssl").(bool)
-	username := d.Get("username").(string)
+	clientAuthCertFile := d.Get("client_auth_cert_file").(string)
+	clientAuthKeyFile := d.Get("client_auth_key_file").(string)
 
-	if username == "" {
-		return nil, fmt.Errorf("username must be provided")
+	needCreds := true
+	if len(clientAuthCertFile) > 0 && len(clientAuthKeyFile) > 0 {
+		needCreds = false
 	}
 
+	insecure := d.Get("allow_unverified_ssl").(bool)
+	username := d.Get("username").(string)
 	password := d.Get("password").(string)
 
-	if password == "" {
-		return nil, fmt.Errorf("password must be provided")
+	if needCreds {
+		if username == "" {
+			return nil, fmt.Errorf("username must be provided")
+		}
+
+		if password == "" {
+			return nil, fmt.Errorf("password must be provided")
+		}
 	}
 
 	host := d.Get("host").(string)
@@ -162,8 +171,6 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		return nil, fmt.Errorf("host must be provided")
 	}
 
-	clientAuthCertFile := d.Get("client_auth_cert_file").(string)
-	clientAuthKeyFile := d.Get("client_auth_key_file").(string)
 	caFile := d.Get("ca_file").(string)
 
 	maxRetries := d.Get("max_retries").(int)
