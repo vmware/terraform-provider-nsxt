@@ -82,6 +82,7 @@ func TestAccResourceNsxtLbPool_withMonitors(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "member.#", "0"),
 					resource.TestCheckResourceAttrSet(testResourceName, "active_monitor_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "passive_monitor_id"),
+					resource.TestCheckResourceAttr(testResourceName, "snat_translation.0.type", "TRANSPARENT"),
 				),
 			},
 			{

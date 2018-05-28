@@ -103,7 +103,7 @@ func getSnatTranslationSchema() *schema.Schema {
 				},
 				"ip": &schema.Schema{
 					Type:         schema.TypeString,
-					Description:  "Ip address or Ip range for SNAT of type LbSnatIpPool",
+					Description:  "Ip address or Ip range for SNAT of type SNAT_IP_POOL",
 					ValidateFunc: validateIPOrRange(),
 					Optional:     true,
 				},
