@@ -104,6 +104,37 @@ func TestAccResourceNsxtLogicalPort_withProfiles(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtLogicalPort_withNSGroup(t *testing.T) {
+	// Verify port can be deleted if its an effective member
+	// of existing NS Group
+	portName := fmt.Sprintf("test-nsx-logical-port")
+	testResourceName := "nsxt_logical_port.test"
+	transportZoneName := getOverlayTransportZoneName()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXLogicalPortCheckDestroy(state, portName)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXLogicalPortCreateWithGroup(portName, transportZoneName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXLogicalPortExists(portName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", portName),
+				),
+			},
+			{
+				Config: testAccNSXLogicalPortCreateNSGroup(),
+				Check: func(state *terraform.State) error {
+					return testAccNSXLogicalPortCheckDestroy(state, portName)
+				},
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtLogicalPort_importBasic(t *testing.T) {
 	portName := fmt.Sprintf("test-nsx-logical-port")
 	testResourceName := "nsxt_logical_port.test"
@@ -271,4 +302,30 @@ resource "nsxt_logical_port" "test" {
   }
 
 }`, profileName1, profileName2, portUpdatedName)
+}
+
+func testAccNSXLogicalPortCreateNSGroup() string {
+	return `
+resource "nsxt_ns_group" "test" {
+  membership_criteria {
+      target_type = "LogicalPort"
+      scope       = "scope1"
+      tag         = "tag1"
+  }
+}`
+}
+
+func testAccNSXLogicalPortCreateWithGroup(portName string, transportZoneName string) string {
+	return testAccNSXLogicalPortCreateNSGroup() + testAccNSXLogicalSwitchCreateForPort(transportZoneName) + fmt.Sprintf(`
+resource "nsxt_logical_port" "test" {
+  display_name      = "%s"
+  admin_state       = "UP"
+  description       = "Acceptance Test"
+  logical_switch_id = "${nsxt_logical_switch.test.id}"
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+}`, portName)
 }

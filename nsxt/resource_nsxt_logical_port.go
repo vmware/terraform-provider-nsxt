@@ -155,8 +155,8 @@ func resourceNsxtLogicalPortDelete(d *schema.ResourceData, m interface{}) error 
 	if lpID == "" {
 		return fmt.Errorf("Error obtaining logical port ID from state during delete")
 	}
-	//TODO: add optional detach param
 	localVarOptionals := make(map[string]interface{})
+	localVarOptionals["detach"] = true
 
 	resp, err := nsxClient.LogicalSwitchingApi.DeleteLogicalPort(nsxClient.Context, lpID, localVarOptionals)
 
