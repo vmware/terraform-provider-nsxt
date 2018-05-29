@@ -58,7 +58,7 @@ func resourceNsxtStaticRoute() *schema.Resource {
 func getNextHopsSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:     schema.TypeList,
-		Optional: true,
+		Required: true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"administrative_distance": &schema.Schema{
