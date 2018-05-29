@@ -10,7 +10,7 @@ import (
 	"github.com/vmware/go-vmware-nsxt"
 )
 
-var defaultRetryOnStatusCodes = []int{429}
+var defaultRetryOnStatusCodes = []int{429, 503}
 
 // Provider for VMWare NSX-T. Returns terraform.ResourceProvider
 func Provider() terraform.ResourceProvider {
