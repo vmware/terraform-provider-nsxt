@@ -17,6 +17,7 @@ import (
 	"golang.org/x/oauth2"
 	"io"
 	"io/ioutil"
+	"log"
 	"math"
 	"math/rand"
 	"mime/multipart"
@@ -331,10 +332,13 @@ func (c *APIClient) callAPI(request *http.Request) (*http.Response, error) {
 	maxRetries := int(math.Max(2, float64(config.MaxRetries)))
 	// loop until not getting the retry-able error, or until max retries
 	for n_try := 1; n_try < maxRetries; n_try++ {
-		if localVarHttpResponse == nil {
-			// Non retry-able response
-			return localVarHttpResponse, err
-		} else if c.shouldRetryOnStatus(localVarHttpResponse.StatusCode) {
+		if localVarHttpResponse == nil || c.shouldRetryOnStatus(localVarHttpResponse.StatusCode) {
+			status := 0
+			if localVarHttpResponse != nil {
+				status = localVarHttpResponse.StatusCode
+				localVarHttpResponse.Body.Close()
+			}
+			log.Printf("[DEBUG] Retrying request %s %s for the %d time because of status %d", request.Method, request.URL, n_try, status)
 			// sleep a random increasing time
 			float_delay := float64(rand.Intn(config.RetryMinDelay * n_try))
 			fixed_delay := time.Duration(math.Min(float64(config.RetryMaxDelay), float_delay))
@@ -357,7 +361,7 @@ func (c *APIClient) callAPI(request *http.Request) (*http.Response, error) {
 func (c *APIClient) callAPIInternal(request *http.Request) (*http.Response, error) {
 	localVarHttpResponse, err := c.cfg.HTTPClient.Do(request)
 
-	if err == nil && (localVarHttpResponse.StatusCode == 400 || localVarHttpResponse.StatusCode == 500) {
+	if err == nil && localVarHttpResponse != nil && (localVarHttpResponse.StatusCode == 400 || localVarHttpResponse.StatusCode == 500) {
 		bodyBytes, _ := ioutil.ReadAll(localVarHttpResponse.Body)
 		err = reportError("Status: %v, Body: %s", localVarHttpResponse.Status, bodyBytes)
 	}
