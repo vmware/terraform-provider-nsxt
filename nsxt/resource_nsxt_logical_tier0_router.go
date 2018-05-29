@@ -109,13 +109,13 @@ func resourceNsxtLogicalTier0RouterRead(d *schema.ResourceData, m interface{}) e
 	}
 
 	logicalRouter, resp, err := nsxClient.LogicalRoutingAndServicesApi.ReadLogicalRouter(nsxClient.Context, id)
+	if err != nil {
+		return fmt.Errorf("Error during LogicalTier0Router read: %v", err)
+	}
 	if resp.StatusCode == http.StatusNotFound {
 		log.Printf("[DEBUG] LogicalTier0Router %s not found", id)
 		d.SetId("")
 		return nil
-	}
-	if err != nil {
-		return fmt.Errorf("Error during LogicalTier0Router read: %v", err)
 	}
 
 	d.Set("revision", logicalRouter.Revision)

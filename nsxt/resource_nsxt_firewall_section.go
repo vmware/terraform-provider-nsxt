@@ -103,7 +103,7 @@ func getRulesSchema() *schema.Schema {
 				},
 				"direction": &schema.Schema{
 					Type:         schema.TypeString,
-					Description:  "Rule direction in case of stateless firewall rules. This will only considered if section level parameter is set to stateless. Default to IN_OUT if not specified",
+					Description:  "Rule direction in case of stateless firewall rules. This will only be considered if section level parameter is set to stateless. Default to IN_OUT if not specified",
 					Optional:     true,
 					ValidateFunc: validation.StringInSlice(firewallRuleDirectionValues, false),
 				},
@@ -280,13 +280,13 @@ func resourceNsxtFirewallSectionRead(d *schema.ResourceData, m interface{}) erro
 	}
 
 	firewallSection, resp, err := nsxClient.ServicesApi.GetSectionWithRulesListWithRules(nsxClient.Context, id)
+	if err != nil {
+		return fmt.Errorf("Error during FirewallSection %s read: %v", id, err)
+	}
 	if resp.StatusCode == http.StatusNotFound {
 		log.Printf("[DEBUG] FirewallSection %s not found", id)
 		d.SetId("")
 		return nil
-	}
-	if err != nil {
-		return fmt.Errorf("Error during FirewallSection %s read: %v", id, err)
 	}
 
 	d.Set("revision", firewallSection.Revision)

@@ -109,13 +109,13 @@ func resourceNsxtLbHTTPMonitorRead(d *schema.ResourceData, m interface{}) error 
 	}
 
 	lbHTTPMonitor, resp, err := nsxClient.ServicesApi.ReadLoadBalancerHttpMonitor(nsxClient.Context, id)
+	if err != nil {
+		return fmt.Errorf("Error during LbHttpMonitor read: %v", err)
+	}
 	if resp.StatusCode == http.StatusNotFound {
 		log.Printf("[DEBUG] LbHttpMonitor %s not found", id)
 		d.SetId("")
 		return nil
-	}
-	if err != nil {
-		return fmt.Errorf("Error during LbHttpMonitor read: %v", err)
 	}
 
 	d.Set("revision", lbHTTPMonitor.Revision)

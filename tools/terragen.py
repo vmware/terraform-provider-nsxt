@@ -267,6 +267,8 @@ def write_read_func(f, resource, attrs, api_section):
     pretty_writeln(f, "%s, resp, err := nsxClient.%s.Read%s(nsxClient.Context, id)" %
             (lower_resource, api_section, resource))
 
+    write_error_check(f, resource, "read")
+
     pretty_writeln(f, "if resp.StatusCode == http.StatusNotFound {")
     shift()
     pretty_writeln(f, "log.Printf(\"[DEBUG] %s " % resource + '%s not found\", id)')
@@ -275,7 +277,6 @@ def write_read_func(f, resource, attrs, api_section):
     unshift()
     pretty_writeln(f, "}")
 
-    write_error_check(f, resource, "read")
 
     for attr in attrs:
         if attr['name'] in IGNORE_ATTRS:

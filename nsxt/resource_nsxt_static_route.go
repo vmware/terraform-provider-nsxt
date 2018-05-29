@@ -182,13 +182,13 @@ func resourceNsxtStaticRouteRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	staticRoute, resp, err := nsxClient.LogicalRoutingAndServicesApi.ReadStaticRoute(nsxClient.Context, logicalRouterID, id)
+	if err != nil {
+		return fmt.Errorf("Error during StaticRoute read: %v", err)
+	}
 	if resp.StatusCode == http.StatusNotFound {
 		log.Printf("[DEBUG] StaticRoute %s not found", id)
 		d.SetId("")
 		return nil
-	}
-	if err != nil {
-		return fmt.Errorf("Error during StaticRoute read: %v", err)
 	}
 
 	d.Set("revision", staticRoute.Revision)

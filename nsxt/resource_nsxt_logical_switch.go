@@ -185,13 +185,13 @@ func resourceNsxtLogicalSwitchRead(d *schema.ResourceData, m interface{}) error 
 	}
 
 	logicalSwitch, resp, err := nsxClient.LogicalSwitchingApi.GetLogicalSwitch(nsxClient.Context, id)
+	if err != nil {
+		return fmt.Errorf("Error during LogicalSwitch read: %v", err)
+	}
 	if resp.StatusCode == http.StatusNotFound {
 		log.Printf("[DEBUG] LogicalSwitch %s not found", id)
 		d.SetId("")
 		return nil
-	}
-	if err != nil {
-		return fmt.Errorf("Error during LogicalSwitch read: %v", err)
 	}
 
 	d.Set("revision", logicalSwitch.Revision)

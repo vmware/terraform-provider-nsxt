@@ -89,13 +89,13 @@ func resourceNsxtLbPassiveMonitorRead(d *schema.ResourceData, m interface{}) err
 	}
 
 	lbPassiveMonitor, resp, err := nsxClient.ServicesApi.ReadLoadBalancerPassiveMonitor(nsxClient.Context, id)
+	if err != nil {
+		return fmt.Errorf("Error during LbMonitor read: %v", err)
+	}
 	if resp.StatusCode == http.StatusNotFound {
 		log.Printf("[DEBUG] LbMonitor %s not found", id)
 		d.SetId("")
 		return nil
-	}
-	if err != nil {
-		return fmt.Errorf("Error during LbMonitor read: %v", err)
 	}
 
 	d.Set("revision", lbPassiveMonitor.Revision)
