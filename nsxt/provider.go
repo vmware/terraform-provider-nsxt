@@ -133,11 +133,13 @@ func Provider() terraform.ResourceProvider {
 }
 
 func providerConnectivityCheck(nsxClient *nsxt.APIClient) error {
-	// Connectivity check - get a random object just to see we get a valid response or 403
+	// Connectivity check - get a random object to check connectivity and credentials
 	// TODO(asarfaty): Use a list command which returns the full body, when the go vendor has one.
 	_, httpResponse, err := nsxClient.ServicesApi.ReadLoadBalancerPool(nsxClient.Context, "Dummy")
-	if err != nil && httpResponse.StatusCode == 403 {
-		return fmt.Errorf("NSXT provider connectivity check failed: %s", err)
+	if err != nil {
+		if httpResponse == nil || (httpResponse.StatusCode == 401 || httpResponse.StatusCode == 403) {
+			return fmt.Errorf("NSXT provider connectivity check failed: %s", err)
+		}
 	}
 	return nil
 }

@@ -191,7 +191,7 @@ func getServicesResourceReferences(services []interface{}) []manager.FirewallSer
 		data := srv.(map[string]interface{})
 		elem := manager.FirewallService{
 			IsValid:           data["is_valid"].(bool),
-                        TargetDisplayName: data["target_display_name"].(string),
+			TargetDisplayName: data["target_display_name"].(string),
 			TargetId:          data["target_id"].(string),
 			TargetType:        data["target_type"].(string),
 		}
