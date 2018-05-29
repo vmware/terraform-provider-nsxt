@@ -67,7 +67,6 @@ func resourceNsxtLbClientSslProfileCreate(d *schema.ResourceData, m interface{})
 	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
 	ciphers := getStringListFromSchemaSet(d, "ciphers")
-	isSecure := d.Get("is_secure").(bool)
 	preferServerCiphers := d.Get("prefer_server_ciphers").(bool)
 	protocols := getStringListFromSchemaSet(d, "protocols")
 	sessionCacheEnabled := d.Get("session_cache_enabled").(bool)
@@ -77,7 +76,6 @@ func resourceNsxtLbClientSslProfileCreate(d *schema.ResourceData, m interface{})
 		DisplayName:         displayName,
 		Tags:                tags,
 		Ciphers:             ciphers,
-		IsSecure:            isSecure,
 		PreferServerCiphers: preferServerCiphers,
 		Protocols:           protocols,
 		SessionCacheEnabled: sessionCacheEnabled,
@@ -141,7 +139,6 @@ func resourceNsxtLbClientSslProfileUpdate(d *schema.ResourceData, m interface{})
 	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
 	ciphers := getStringListFromSchemaSet(d, "ciphers")
-	isSecure := d.Get("is_secure").(bool)
 	preferServerCiphers := d.Get("prefer_server_ciphers").(bool)
 	protocols := getStringListFromSchemaSet(d, "protocols")
 	sessionCacheEnabled := d.Get("session_cache_enabled").(bool)
@@ -152,7 +149,6 @@ func resourceNsxtLbClientSslProfileUpdate(d *schema.ResourceData, m interface{})
 		DisplayName:         displayName,
 		Tags:                tags,
 		Ciphers:             ciphers,
-		IsSecure:            isSecure,
 		PreferServerCiphers: preferServerCiphers,
 		Protocols:           protocols,
 		SessionCacheEnabled: sessionCacheEnabled,
