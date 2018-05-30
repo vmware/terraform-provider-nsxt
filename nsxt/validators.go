@@ -204,11 +204,21 @@ func isPowerOfTwo(num int) bool {
 	return num == 1
 }
 
-func validatePowerOf2() schema.SchemaValidateFunc {
+func validatePowerOf2(allowZero bool, maxVal int) schema.SchemaValidateFunc {
 	return func(i interface{}, k string) (s []string, es []error) {
 		v, ok := i.(int)
 		if !ok {
 			es = append(es, fmt.Errorf("expected type of %s to be int", k))
+			return
+		}
+
+		if allowZero && v == 0 {
+			return
+		}
+
+		if maxVal != 0 && v > maxVal {
+			es = append(es, fmt.Errorf(
+				"expected %s to be <= %d, got: %d", k, maxVal, v))
 			return
 		}
 

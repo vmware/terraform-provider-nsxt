@@ -49,7 +49,7 @@ func resourceNsxtIPBlockSubnet() *schema.Resource {
 				Description:  "Represents the size or number of ip addresses in the subnet",
 				Required:     true,
 				ForceNew:     true,
-				ValidateFunc: validatePowerOf2(),
+				ValidateFunc: validatePowerOf2(false, 0),
 			},
 			"cidr": &schema.Schema{
 				Type:        schema.TypeString,
