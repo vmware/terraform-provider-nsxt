@@ -52,17 +52,8 @@ The following arguments are supported:
   * `cookie_domain` - (Optional) HTTP cookie domain (for INSERT mode only).
   * `cookie_path` - (Optional) HTTP cookie path (for INSERT mode only).
   * `cookie_expiry_type` - (Optional) Type of cookie expiration timing (for INSERT mode only). Accepted values: SESSION_COOKIE_TIME for session cookie time setting and PERSISTENCE_COOKIE_TIME for persistence cookie time setting.
-
-        "max_idle_time": &schema.Schema{
-          Type:        schema.TypeInt,
-          Description: "Maximum interval the cookie is valid for from the last time it was seen in a request (for INSERT mode only, required if cookie_expiry_type is set)",
-          Optional:    true,
-          Computed:    true,
-        },
-        "max_life_time": &schema.Schema{
-          Type:        schema.TypeInt,
-          Description: "Maximum interval the cookie is valid for from the first time the cookie was seen in a request (required for INSERT mode with SESSION_COOKIE_TIME expiration)",
-
+  * `max_idle_time` - (Required if cookie_expiry_type is set) Maximum interval the cookie is valid for from the last time it was seen in a request.
+  * `max_life_time` - (Required for INSERT mode with SESSION_COOKIE_TIME expiration) Maximum interval the cookie is valid for from the first time the cookie was seen in a request.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this lb cookie persistence profile.
 
 
