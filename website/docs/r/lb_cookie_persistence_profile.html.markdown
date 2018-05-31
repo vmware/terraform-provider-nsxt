@@ -20,9 +20,15 @@ resource "nsxt_lb_cookie_persistence_profile" "lb_cookie_persistence_profile" {
   cookie_fallback    = "false"
   cookie_garble      = "false"
   cookie_mode        = "INSERT"
-  cookie_name        = "my_cookie"
-  cookie_domain      = ".example2.com"
-  cookie_path        = "/subfolder"
+
+  insert_mode_params {
+    cookie_name        = "my_cookie"
+    cookie_domain      = ".example2.com"
+    cookie_path        = "/subfolder"
+    cookie_expiry_type = "SESSION_COOKIE_TIME"
+    max_idle_time      = "1000"
+    max_life_time      = "2000"
+  }
 
   tag = {
     scope = "color"
@@ -42,19 +48,20 @@ The following arguments are supported:
 * `persistence_shared` - (Optional) A boolean flag which reflects whether the cookie persistence is private or shared. When false (which is the default value), the cookie persistence is private to each virtual server and is qualified by the pool. If set to true, in cookie insert mode, cookie persistence could be shared across multiple virtual servers that are bound to the same pools.
 * `cookie_fallback` - (Optional) A boolean flag which reflects whether once the server points by this cookie is down, a new server is selected, or the requests will be rejected.
 * `cookie_garble` - (Optional) A boolean flag which reflects whether the cookie value (server IP and port) would be encrypted or in plain text.
-* `cookie_domain` - (Optional) HTTP cookie domain (for INSERT mode only).
-* `cookie_path` - (Optional) HTTP cookie path (for INSERT mode only).
-* `cookie_expiry_type` - (Optional) Type of cookie expiration timing (for INSERT mode only). Accepted values: SESSION_COOKIE_TIME for session cookie time setting and PERSISTENCE_COOKIE_TIME for persistence cookie time setting.
+* `insert_mode_params` - (Optional) Additional parameters for the INSERT cookie mode:
+  * `cookie_domain` - (Optional) HTTP cookie domain (for INSERT mode only).
+  * `cookie_path` - (Optional) HTTP cookie path (for INSERT mode only).
+  * `cookie_expiry_type` - (Optional) Type of cookie expiration timing (for INSERT mode only). Accepted values: SESSION_COOKIE_TIME for session cookie time setting and PERSISTENCE_COOKIE_TIME for persistence cookie time setting.
 
-      "max_idle_time": &schema.Schema{
-        Type:        schema.TypeInt,
-        Description: "Maximum interval the cookie is valid for from the last time it was seen in a request (for INSERT mode only, required if cookie_expiry_type is set)",
-        Optional:    true,
-        Computed:    true,
-      },
-      "max_life_time": &schema.Schema{
-        Type:        schema.TypeInt,
-        Description: "Maximum interval the cookie is valid for from the first time the cookie was seen in a request (required for INSERT mode with SESSION_COOKIE_TIME expiration)",
+        "max_idle_time": &schema.Schema{
+          Type:        schema.TypeInt,
+          Description: "Maximum interval the cookie is valid for from the last time it was seen in a request (for INSERT mode only, required if cookie_expiry_type is set)",
+          Optional:    true,
+          Computed:    true,
+        },
+        "max_life_time": &schema.Schema{
+          Type:        schema.TypeInt,
+          Description: "Maximum interval the cookie is valid for from the first time the cookie was seen in a request (required for INSERT mode with SESSION_COOKIE_TIME expiration)",
 
 * `tag` - (Optional) A list of scope + tag pairs to associate with this lb cookie persistence profile.
 

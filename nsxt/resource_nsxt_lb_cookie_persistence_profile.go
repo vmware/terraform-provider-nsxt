@@ -70,72 +70,101 @@ func resourceNsxtLbCookiePersistenceProfile() *schema.Resource {
 				Optional:    true,
 				Default:     true,
 			},
-			"cookie_domain": &schema.Schema{
-				Type:        schema.TypeString,
-				Description: "HTTP cookie domain (for INSERT mode only)",
-				Optional:    true,
-				// TODO(asarfaty) add validation on cookie domain values
-			},
-			"cookie_path": &schema.Schema{
-				Type:        schema.TypeString,
-				Description: "HTTP cookie path (for INSERT mode only)",
-				Optional:    true,
-			},
-			"cookie_expiry_type": &schema.Schema{
-				Type:         schema.TypeString,
-				Description:  "Type of cookie expiration timing (for INSERT mode only)",
-				Optional:     true,
-				ValidateFunc: validation.StringInSlice(cookieExpiryTypes, false),
-			},
-			"max_idle_time": &schema.Schema{
-				Type:        schema.TypeInt,
-				Description: "Maximum interval (in seconds) the cookie is valid for from the last time it was seen in a request (for INSERT mode only, required if cookie_expiry_type is set)",
+			"insert_mode_params": &schema.Schema{
+				Type:        schema.TypeList,
+				Description: "Additional parameters for the INSERT cookie mode",
 				Optional:    true,
 				Computed:    true,
-			},
-			"max_life_time": &schema.Schema{
-				Type:        schema.TypeInt,
-				Description: "Maximum interval (in seconds) the cookie is valid for from the first time the cookie was seen in a request (required for INSERT mode with SESSION_COOKIE_TIME expiration)",
-				Optional:    true,
-				Computed:    true,
+				MaxItems:    1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"cookie_domain": &schema.Schema{
+							Type:        schema.TypeString,
+							Description: "HTTP cookie domain",
+							Optional:    true,
+							// TODO(asarfaty) add validation on cookie domain values
+						},
+						"cookie_path": &schema.Schema{
+							Type:        schema.TypeString,
+							Description: "HTTP cookie path",
+							Optional:    true,
+						},
+						"cookie_expiry_type": &schema.Schema{
+							Type:         schema.TypeString,
+							Description:  "Type of cookie expiration timing",
+							Optional:     true,
+							ValidateFunc: validation.StringInSlice(cookieExpiryTypes, false),
+						},
+						"max_idle_time": &schema.Schema{
+							Type:        schema.TypeInt,
+							Description: "Maximum interval (in seconds) the cookie is valid for from the last time it was seen in a request (required if cookie_expiry_type is set)",
+							Optional:    true,
+							Computed:    true,
+						},
+						"max_life_time": &schema.Schema{
+							Type:        schema.TypeInt,
+							Description: "Maximum interval (in seconds) the cookie is valid for from the first time the cookie was seen in a request (required if cookie_expiry_type is SESSION_COOKIE_TIME expiration)",
+							Optional:    true,
+							Computed:    true,
+						},
+					},
+				},
 			},
 		},
 	}
 }
 
-func getCookieTimeFromSchema(d *schema.ResourceData) *loadbalancer.LbCookieTime {
+func getInsertParamsFromSchema(d *schema.ResourceData) (string, string, *loadbalancer.LbCookieTime) {
+	confs := d.Get("insert_mode_params").([]interface{})
 	cookieMode := d.Get("cookie_mode").(string)
-	expiryType := d.Get("cookie_expiry_type").(string)
-	if cookieMode != "INSERT" || expiryType == "" {
-		// Cookie time is supported only in insert mode
-		return nil
+	if cookieMode != "INSERT" {
+		return "", "", nil
 	}
+	for _, conf := range confs {
+		// only 1 insert mode config is allowed so return the first 1
+		data := conf.(map[string]interface{})
+		cookieDomain := data["cookie_domain"].(string)
+		cookiePath := data["cookie_path"].(string)
+		expiryType := data["cookie_expiry_type"].(string)
 
-	if expiryType == "SESSION_COOKIE_TIME" {
-		return &loadbalancer.LbCookieTime{
-			Type_:         "LbSessionCookieTime",
-			CookieMaxIdle: int64(d.Get("max_idle_time").(int)),
-			CookieMaxLife: int64(d.Get("max_life_time").(int)),
+		if expiryType == "" {
+			// Cookie time is supported only in insert mode
+			return cookieDomain, cookiePath, nil
 		}
-	} else {
-		return &loadbalancer.LbCookieTime{
-			Type_:         "LbPersistenceCookieTime",
-			CookieMaxIdle: int64(d.Get("max_idle_time").(int)),
+
+		if expiryType == "SESSION_COOKIE_TIME" {
+			return cookieDomain, cookiePath, &loadbalancer.LbCookieTime{
+				Type_:         "LbSessionCookieTime",
+				CookieMaxIdle: int64(data["max_idle_time"].(int)),
+				CookieMaxLife: int64(data["max_life_time"].(int)),
+			}
+		} else {
+			return cookieDomain, cookiePath, &loadbalancer.LbCookieTime{
+				Type_:         "LbPersistenceCookieTime",
+				CookieMaxIdle: int64(data["max_idle_time"].(int)),
+			}
 		}
 	}
+	return "", "", nil
 }
 
-func setCookieTimeInSchema(d *schema.ResourceData, cookieTime *loadbalancer.LbCookieTime) {
-	if cookieTime == nil {
-		return
+func setInsertParamsInSchema(d *schema.ResourceData, cookieDomain string, cookiePath string, cookieTime *loadbalancer.LbCookieTime) error {
+	var insertConfigList []map[string]interface{}
+	elem := make(map[string]interface{})
+	elem["cookie_domain"] = cookieDomain
+	elem["cookie_path"] = cookiePath
+	if cookieTime != nil {
+		elem["max_idle_time"] = cookieTime.CookieMaxIdle
+		if cookieTime.Type_ == "LbSessionCookieTime" {
+			elem["cookie_expiry_type"] = "SESSION_COOKIE_TIME"
+			elem["max_life_time"] = cookieTime.CookieMaxLife
+		} else {
+			elem["cookie_expiry_type"] = "PERSISTENCE_COOKIE_TIME"
+		}
 	}
-	if cookieTime.Type_ == "LbSessionCookieTime" {
-		d.Set("cookie_expiry_type", "SESSION_COOKIE_TIME")
-		d.Set("max_life_time", cookieTime.CookieMaxLife)
-	} else {
-		d.Set("cookie_expiry_type", "PERSISTENCE_COOKIE_TIME")
-	}
-	d.Set("max_idle_time", cookieTime.CookieMaxIdle)
+	insertConfigList = append(insertConfigList, elem)
+	err := d.Set("insert_mode_params", insertConfigList)
+	return err
 }
 
 func resourceNsxtLbCookiePersistenceProfileCreate(d *schema.ResourceData, m interface{}) error {
@@ -144,13 +173,11 @@ func resourceNsxtLbCookiePersistenceProfileCreate(d *schema.ResourceData, m inte
 	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
 	persistenceShared := d.Get("persistence_shared").(bool)
-	cookieDomain := d.Get("cookie_domain").(string)
 	cookieFallback := d.Get("cookie_fallback").(bool)
 	cookieGarble := d.Get("cookie_garble").(bool)
 	cookieMode := d.Get("cookie_mode").(string)
 	cookieName := d.Get("cookie_name").(string)
-	cookiePath := d.Get("cookie_path").(string)
-	cookieTime := getCookieTimeFromSchema(d)
+	cookieDomain, cookiePath, cookieTime := getInsertParamsFromSchema(d)
 	lbCookiePersistenceProfile := loadbalancer.LbCookiePersistenceProfile{
 		Description:       description,
 		DisplayName:       displayName,
@@ -201,13 +228,11 @@ func resourceNsxtLbCookiePersistenceProfileRead(d *schema.ResourceData, m interf
 	d.Set("display_name", lbCookiePersistenceProfile.DisplayName)
 	setTagsInSchema(d, lbCookiePersistenceProfile.Tags)
 	d.Set("persistence_shared", lbCookiePersistenceProfile.PersistenceShared)
-	d.Set("cookie_domain", lbCookiePersistenceProfile.CookieDomain)
 	d.Set("cookie_fallback", lbCookiePersistenceProfile.CookieFallback)
 	d.Set("cookie_garble", lbCookiePersistenceProfile.CookieGarble)
 	d.Set("cookie_mode", lbCookiePersistenceProfile.CookieMode)
 	d.Set("cookie_name", lbCookiePersistenceProfile.CookieName)
-	d.Set("cookie_path", lbCookiePersistenceProfile.CookiePath)
-	setCookieTimeInSchema(d, lbCookiePersistenceProfile.CookieTime)
+	setInsertParamsInSchema(d, lbCookiePersistenceProfile.CookieDomain, lbCookiePersistenceProfile.CookiePath, lbCookiePersistenceProfile.CookieTime)
 
 	return nil
 }
@@ -224,13 +249,11 @@ func resourceNsxtLbCookiePersistenceProfileUpdate(d *schema.ResourceData, m inte
 	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
 	persistenceShared := d.Get("persistence_shared").(bool)
-	cookieDomain := d.Get("cookie_domain").(string)
 	cookieFallback := d.Get("cookie_fallback").(bool)
 	cookieGarble := d.Get("cookie_garble").(bool)
 	cookieMode := d.Get("cookie_mode").(string)
 	cookieName := d.Get("cookie_name").(string)
-	cookiePath := d.Get("cookie_path").(string)
-	cookieTime := getCookieTimeFromSchema(d)
+	cookieDomain, cookiePath, cookieTime := getInsertParamsFromSchema(d)
 	lbCookiePersistenceProfile := loadbalancer.LbCookiePersistenceProfile{
 		Revision:          revision,
 		Description:       description,

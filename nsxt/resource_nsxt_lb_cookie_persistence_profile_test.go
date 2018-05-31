@@ -89,11 +89,12 @@ func TestAccResourceNsxtLbCookiePersistenceProfile_insertMode(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "persistence_shared", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "cookie_fallback", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "cookie_garble", "true"),
-					resource.TestCheckResourceAttr(testResourceName, "cookie_domain", cookieDomain),
-					resource.TestCheckResourceAttr(testResourceName, "cookie_path", cookiePath),
-					resource.TestCheckResourceAttr(testResourceName, "cookie_expiry_type", "SESSION_COOKIE_TIME"),
-					resource.TestCheckResourceAttr(testResourceName, "max_idle_time", "1000"),
-					resource.TestCheckResourceAttr(testResourceName, "max_life_time", "2000"),
+					resource.TestCheckResourceAttr(testResourceName, "insert_mode_params.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "insert_mode_params.0.cookie_domain", cookieDomain),
+					resource.TestCheckResourceAttr(testResourceName, "insert_mode_params.0.cookie_path", cookiePath),
+					resource.TestCheckResourceAttr(testResourceName, "insert_mode_params.0.cookie_expiry_type", "SESSION_COOKIE_TIME"),
+					resource.TestCheckResourceAttr(testResourceName, "insert_mode_params.0.max_idle_time", "1000"),
+					resource.TestCheckResourceAttr(testResourceName, "insert_mode_params.0.max_life_time", "2000"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 				),
 			},
@@ -108,11 +109,12 @@ func TestAccResourceNsxtLbCookiePersistenceProfile_insertMode(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "persistence_shared", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "cookie_fallback", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "cookie_garble", "true"),
-					resource.TestCheckResourceAttr(testResourceName, "cookie_domain", updatedCookieDomain),
-					resource.TestCheckResourceAttr(testResourceName, "cookie_path", updatedCookiePath),
-					resource.TestCheckResourceAttr(testResourceName, "cookie_expiry_type", "SESSION_COOKIE_TIME"),
-					resource.TestCheckResourceAttr(testResourceName, "max_idle_time", "1000"),
-					resource.TestCheckResourceAttr(testResourceName, "max_life_time", "2000"),
+					resource.TestCheckResourceAttr(testResourceName, "insert_mode_params.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "insert_mode_params.0.cookie_domain", updatedCookieDomain),
+					resource.TestCheckResourceAttr(testResourceName, "insert_mode_params.0.cookie_path", updatedCookiePath),
+					resource.TestCheckResourceAttr(testResourceName, "insert_mode_params.0.cookie_expiry_type", "SESSION_COOKIE_TIME"),
+					resource.TestCheckResourceAttr(testResourceName, "insert_mode_params.0.max_idle_time", "1000"),
+					resource.TestCheckResourceAttr(testResourceName, "insert_mode_params.0.max_life_time", "2000"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 				),
 			},
@@ -222,13 +224,16 @@ resource "nsxt_lb_cookie_persistence_profile" "test" {
   persistence_shared = "false"
   cookie_fallback    = "false"
   cookie_garble      = "true"
-  cookie_mode        = "INSERT"
   cookie_name        = "%s"
-  cookie_domain      = "%s"
-  cookie_path        = "%s"
-  cookie_expiry_type = "SESSION_COOKIE_TIME"
-  max_idle_time      = "1000"
-  max_life_time      = "2000"
+  cookie_mode        = "INSERT"
+
+  insert_mode_params {
+  	cookie_domain      = "%s"
+  	cookie_path        = "%s"
+  	cookie_expiry_type = "SESSION_COOKIE_TIME"
+  	max_idle_time      = "1000"
+  	max_life_time      = "2000"
+  }
 
   tag {
     scope = "scope1"
