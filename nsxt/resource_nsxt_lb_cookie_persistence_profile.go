@@ -14,6 +14,7 @@ import (
 )
 
 var cookieModeTypes = []string{"INSERT", "PREFIX", "REWRITE"}
+var cookieExpiryTypes = []string{"SESSION_COOKIE_TIME", "PERSISTENCE_COOKIE_TIME"}
 
 func resourceNsxtLbCookiePersistenceProfile() *schema.Resource {
 	return &schema.Resource{
@@ -53,7 +54,7 @@ func resourceNsxtLbCookiePersistenceProfile() *schema.Resource {
 			},
 			"persistence_shared": &schema.Schema{
 				Type:        schema.TypeBool,
-				Description: "????If persistence shared flag is not set in the cookie persistence profile bound to a virtual server, it defaults to cookie persistence that is private to each virtual server and is qualified by the pool. This is accomplished by load balancer inserting a cookie with name in the format &lt;name&gt;.&lt;virtual_server_id&gt;.&lt;pool_id&gt;. If persistence shared flag is set in the cookie persistence profile, in cookie insert mode, cookie persistence could be shared across multiple virtual servers that are bound to the same pools. The cookie name would be changed to &lt;name&gt;.&lt;profile-id&gt;.&lt;pool-id&gt;. If persistence shared flag is not set in the sourceIp persistence profile bound to a virtual server, each virtual server that the profile is bound to maintains its own private persistence table. If persistence shared flag is set in the sourceIp persistence profile, all virtual servers the profile is bound to share the same persistence table",
+				Description: "A boolean flag which reflects whether the cookie persistence is private or shared",
 				Optional:    true,
 				Default:     false,
 			},
@@ -80,9 +81,61 @@ func resourceNsxtLbCookiePersistenceProfile() *schema.Resource {
 				Description: "HTTP cookie path (for INSERT mode only)",
 				Optional:    true,
 			},
-			// TODO(asarfaty) add cookie_time too, after SDK support
+			"cookie_expiry_type": &schema.Schema{
+				Type:         schema.TypeString,
+				Description:  "Type of cookie expiration timing (for INSERT mode only)",
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice(cookieExpiryTypes, false),
+			},
+			"max_idle_time": &schema.Schema{
+				Type:        schema.TypeInt,
+				Description: "Maximum interval (in seconds) the cookie is valid for from the last time it was seen in a request (for INSERT mode only, required if cookie_expiry_type is set)",
+				Optional:    true,
+				Computed:    true,
+			},
+			"max_life_time": &schema.Schema{
+				Type:        schema.TypeInt,
+				Description: "Maximum interval (in seconds) the cookie is valid for from the first time the cookie was seen in a request (required for INSERT mode with SESSION_COOKIE_TIME expiration)",
+				Optional:    true,
+				Computed:    true,
+			},
 		},
 	}
+}
+
+func getCookieTimeFromSchema(d *schema.ResourceData) *loadbalancer.LbCookieTime {
+	cookieMode := d.Get("cookie_mode").(string)
+	expiryType := d.Get("cookie_expiry_type").(string)
+	if cookieMode != "INSERT" || expiryType == "" {
+		// Cookie time is supported only in insert mode
+		return nil
+	}
+
+	if expiryType == "SESSION_COOKIE_TIME" {
+		return &loadbalancer.LbCookieTime{
+			Type_:         "LbSessionCookieTime",
+			CookieMaxIdle: int64(d.Get("max_idle_time").(int)),
+			CookieMaxLife: int64(d.Get("max_life_time").(int)),
+		}
+	} else {
+		return &loadbalancer.LbCookieTime{
+			Type_:         "LbPersistenceCookieTime",
+			CookieMaxIdle: int64(d.Get("max_idle_time").(int)),
+		}
+	}
+}
+
+func setCookieTimeInSchema(d *schema.ResourceData, cookieTime *loadbalancer.LbCookieTime) {
+	if cookieTime == nil {
+		return
+	}
+	if cookieTime.Type_ == "LbSessionCookieTime" {
+		d.Set("cookie_expiry_type", "SESSION_COOKIE_TIME")
+		d.Set("max_life_time", cookieTime.CookieMaxLife)
+	} else {
+		d.Set("cookie_expiry_type", "PERSISTENCE_COOKIE_TIME")
+	}
+	d.Set("max_idle_time", cookieTime.CookieMaxIdle)
 }
 
 func resourceNsxtLbCookiePersistenceProfileCreate(d *schema.ResourceData, m interface{}) error {
@@ -97,7 +150,7 @@ func resourceNsxtLbCookiePersistenceProfileCreate(d *schema.ResourceData, m inte
 	cookieMode := d.Get("cookie_mode").(string)
 	cookieName := d.Get("cookie_name").(string)
 	cookiePath := d.Get("cookie_path").(string)
-	//cookieTime := d.Get("cookie_time").(*LbCookieTime)
+	cookieTime := getCookieTimeFromSchema(d)
 	lbCookiePersistenceProfile := loadbalancer.LbCookiePersistenceProfile{
 		Description:       description,
 		DisplayName:       displayName,
@@ -109,7 +162,7 @@ func resourceNsxtLbCookiePersistenceProfileCreate(d *schema.ResourceData, m inte
 		CookieMode:        cookieMode,
 		CookieName:        cookieName,
 		CookiePath:        cookiePath,
-		//CookieTime: cookieTime,
+		CookieTime:        cookieTime,
 	}
 
 	lbCookiePersistenceProfile, resp, err := nsxClient.ServicesApi.CreateLoadBalancerCookiePersistenceProfile(nsxClient.Context, lbCookiePersistenceProfile)
@@ -154,7 +207,7 @@ func resourceNsxtLbCookiePersistenceProfileRead(d *schema.ResourceData, m interf
 	d.Set("cookie_mode", lbCookiePersistenceProfile.CookieMode)
 	d.Set("cookie_name", lbCookiePersistenceProfile.CookieName)
 	d.Set("cookie_path", lbCookiePersistenceProfile.CookiePath)
-	//d.Set("cookie_time", lbCookiePersistenceProfile.CookieTime)
+	setCookieTimeInSchema(d, lbCookiePersistenceProfile.CookieTime)
 
 	return nil
 }
@@ -177,7 +230,7 @@ func resourceNsxtLbCookiePersistenceProfileUpdate(d *schema.ResourceData, m inte
 	cookieMode := d.Get("cookie_mode").(string)
 	cookieName := d.Get("cookie_name").(string)
 	cookiePath := d.Get("cookie_path").(string)
-	//cookieTime := d.Get("cookie_time").(*LbCookieTime)
+	cookieTime := getCookieTimeFromSchema(d)
 	lbCookiePersistenceProfile := loadbalancer.LbCookiePersistenceProfile{
 		Revision:          revision,
 		Description:       description,
@@ -190,7 +243,7 @@ func resourceNsxtLbCookiePersistenceProfileUpdate(d *schema.ResourceData, m inte
 		CookieMode:        cookieMode,
 		CookieName:        cookieName,
 		CookiePath:        cookiePath,
-		//CookieTime: cookieTime,
+		CookieTime:        cookieTime,
 	}
 
 	lbCookiePersistenceProfile, resp, err := nsxClient.ServicesApi.UpdateLoadBalancerCookiePersistenceProfile(nsxClient.Context, id, lbCookiePersistenceProfile)
