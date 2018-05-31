@@ -64,13 +64,13 @@ type LbHttpProfile struct {
 	HttpRedirectTo string `json:"http_redirect_to,omitempty"`
 
 	// Certain secure applications may want to force communication over SSL, but instead of rejecting non-SSL connections, they may choose to redirect the client automatically to use SSL.
-	HttpRedirectToHttps bool `json:"http_redirect_to_https,omitempty"`
+	HttpRedirectToHttps bool `json:"http_redirect_to_https"`
 
 	// It is used to specify the HTTP application idle time out, instead of TCP socket setting which should be configured in TCP profile.
 	IdleTimeout int64 `json:"idle_timeout,omitempty"`
 
 	// NTLM is an authentication protocol that can be used over HTTP. If the flag is set to true, LB will use NTLM challenge/response methodology.
-	Ntlm bool `json:"ntlm,omitempty"`
+	Ntlm bool `json:"ntlm"`
 
 	// If it is not specified, it means that request body size is unlimited.
 	RequestBodySize int64 `json:"request_body_size,omitempty"`

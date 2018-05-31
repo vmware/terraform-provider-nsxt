@@ -13,7 +13,7 @@ package loadbalancer
 type LbHttpRequestBodyCondition struct {
 
 	// A flag to indicate whether reverse the match result of this condition
-	Inverse bool `json:"inverse,omitempty"`
+	Inverse bool `json:"inverse"`
 
 	// Type of load balancer rule condition
 	Type_ string `json:"type"`
@@ -22,7 +22,7 @@ type LbHttpRequestBodyCondition struct {
 	BodyValue string `json:"body_value"`
 
 	// If true, case is significant when comparing HTTP body value.
-	CaseSensitive bool `json:"case_sensitive,omitempty"`
+	CaseSensitive bool `json:"case_sensitive"`
 
 	// Match type of HTTP body
 	MatchType string `json:"match_type,omitempty"`

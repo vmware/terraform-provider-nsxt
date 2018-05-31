@@ -64,7 +64,7 @@ type LbFastTcpProfile struct {
 	CloseTimeout int64 `json:"close_timeout,omitempty"`
 
 	// If flow mirroring is enabled, all the flows to the bounded virtual server are mirrored to the standby node.
-	HaFlowMirroringEnabled bool `json:"ha_flow_mirroring_enabled,omitempty"`
+	HaFlowMirroringEnabled bool `json:"ha_flow_mirroring_enabled"`
 
 	// It is used to configure how long an idle TCP connection in ESTABLISHED state should be kept for this application before cleaning up.
 	IdleTimeout int64 `json:"idle_timeout,omitempty"`

@@ -67,13 +67,13 @@ type LbClientSslProfile struct {
 	IsSecure bool `json:"is_secure,omitempty"`
 
 	// During SSL handshake as part of the SSL client Hello client sends an ordered list of ciphers that it can support (or prefers) and typically server selects the first one from the top of that list it can also support. For Perfect Forward Secrecy(PFS), server could override the client's preference.
-	PreferServerCiphers bool `json:"prefer_server_ciphers,omitempty"`
+	PreferServerCiphers bool `json:"prefer_server_ciphers"`
 
 	// SSL versions TLS1.1 and TLS1.2 are supported and enabled by default. SSLv2, SSLv3, and TLS1.0 are supported, but disabled by default.
 	Protocols []string `json:"protocols,omitempty"`
 
 	// SSL session caching allows SSL client and server to reuse previously negotiated security parameters avoiding the expensive public key operation during handshake.
-	SessionCacheEnabled bool `json:"session_cache_enabled,omitempty"`
+	SessionCacheEnabled bool `json:"session_cache_enabled"`
 
 	// Session cache timeout specifies how long the SSL session parameters are held on to and can be reused.
 	SessionCacheTimeout int64 `json:"session_cache_timeout,omitempty"`

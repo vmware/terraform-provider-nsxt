@@ -2266,10 +2266,10 @@
 			"revisionTime": "2017-06-05T21:53:11Z"
 		},
 		{
-			"checksumSHA1": "/pXf8ltJUFo2qR+TzjAHwjAVRSY=",
+			"checksumSHA1": "1Rzjdlhy4OTTGFKQK5efYAHpmsM=",
 			"path": "github.com/vmware/go-vmware-nsxt",
-			"revision": "b75f359a3679ed9c60082555449f07285bc11566",
-			"revisionTime": "2018-05-29T07:02:26Z"
+			"revision": "92937448aeabb08293f89c00949a5d074c7b8cdb",
+			"revisionTime": "2018-05-31T05:38:20Z"
 		},
 		{
 			"checksumSHA1": "o0gNsuAZWWIs1RY7hh5cB5j85q4=",
@@ -2326,10 +2326,10 @@
 			"revisionTime": "2018-01-07T08:12:33Z"
 		},
 		{
-			"checksumSHA1": "wA2x4etdYICVtY8Ulg+HaliDPJk=",
+			"checksumSHA1": "uhvmnumGMjG9oARgKqezwZJEzl8=",
 			"path": "github.com/vmware/go-vmware-nsxt/loadbalancer",
-			"revision": "f6975e358c2ae221eda21d6cb2c015ffef3a728f",
-			"revisionTime": "2018-05-21T06:31:20Z"
+			"revision": "92937448aeabb08293f89c00949a5d074c7b8cdb",
+			"revisionTime": "2018-05-31T05:38:20Z"
 		},
 		{
 			"checksumSHA1": "pesIbJiO3XpJ/dXX7+ST22N3KXQ=",

@@ -15,7 +15,7 @@ type PoolMember struct {
 	AdminState string `json:"admin_state,omitempty"`
 
 	// Backup servers are typically configured with a sorry page indicating to the user that the application is currently unavailable. While the pool is active (a specified minimum number of pool members are active) BACKUP members are skipped during server selection. When the pool is inactive, incoming connections are sent to only the BACKUP member(s).
-	BackupMember bool `json:"backup_member,omitempty"`
+	BackupMember bool `json:"backup_member"`
 
 	// pool member name
 	DisplayName string `json:"display_name,omitempty"`
