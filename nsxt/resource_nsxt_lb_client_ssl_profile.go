@@ -40,20 +40,20 @@ func resourceNsxtLbClientSslProfile() *schema.Resource {
 			"is_secure": getIsSecureSchema(),
 			"prefer_server_ciphers": &schema.Schema{
 				Type:        schema.TypeBool,
-				Description: "During SSL handshake as part of the SSL client Hello client sends an ordered list of ciphers that it can support (or prefers) and typically server selects the first one from the top of that list it can also support. For Perfect Forward Secrecy(PFS), server could override the client's preference",
+				Description: "Allow server to override the client's preference",
 				Optional:    true,
 				Default:     false,
 			},
 			"protocols": getSSLProtocolsSchema(),
 			"session_cache_enabled": &schema.Schema{
 				Type:        schema.TypeBool,
-				Description: "SSL session caching allows SSL client and server to reuse previously negotiated security parameters avoiding the expensive public key operation during handshake",
+				Description: "Reuse previously negotiated security parameters during handshake",
 				Optional:    true,
 				Default:     true,
 			},
 			"session_cache_timeout": &schema.Schema{
 				Type:        schema.TypeInt,
-				Description: "Session cache timeout specifies how long the SSL session parameters are held on to and can be reused",
+				Description: "For how long the SSL session parameters can be reused",
 				Optional:    true,
 				Default:     300,
 			},

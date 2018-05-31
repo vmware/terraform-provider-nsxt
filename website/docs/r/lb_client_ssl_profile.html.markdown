@@ -14,19 +14,18 @@ Provides a resource to configure lb client ssl profile on NSX-T manager
 
 ```hcl
 resource "nsxt_lb_client_ssl_profile" "lb_client_ssl_profile" {
-  description = "lb_client_ssl_profile provisioned by Terraform"
-  display_name = "lb_client_ssl_profile"
-
-  tag = {
-    scope = "color"
-    tag   = "red"
-  }
-
-  protocols = ["TLS_V1_2"]
-  ciphers = ["TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256", "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384"]
+  description           = "lb_client_ssl_profile provisioned by Terraform"
+  display_name          = "lb_client_ssl_profile"
+  protocols             = ["TLS_V1_2"]
+  ciphers               = ["TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256", "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384"]
   prefer_server_ciphers = true
   session_cache_enabled = true
   session_cache_timeout = 200
+
+  tag {
+    scope = "color"
+    tag   = "red"
+  }
 }
 ```
 

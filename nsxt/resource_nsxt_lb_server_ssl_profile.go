@@ -41,7 +41,7 @@ func resourceNsxtLbServerSslProfile() *schema.Resource {
 			"protocols": getSSLProtocolsSchema(),
 			"session_cache_enabled": &schema.Schema{
 				Type:        schema.TypeBool,
-				Description: "SSL session caching allows SSL client and server to reuse previously negotiated security parameters avoiding the expensive public key operation during handshake",
+				Description: "Reuse previously negotiated security parameters during handshake",
 				Optional:    true,
 				Default:     true,
 			},
