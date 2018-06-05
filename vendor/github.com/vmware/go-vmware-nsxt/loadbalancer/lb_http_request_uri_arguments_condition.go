@@ -13,13 +13,13 @@ package loadbalancer
 type LbHttpRequestUriArgumentsCondition struct {
 
 	// A flag to indicate whether reverse the match result of this condition
-	Inverse bool `json:"inverse,omitempty"`
+	Inverse bool `json:"inverse"`
 
 	// Type of load balancer rule condition
 	Type_ string `json:"type"`
 
 	// If true, case is significant when comparing URI arguments.
-	CaseSensitive bool `json:"case_sensitive,omitempty"`
+	CaseSensitive bool `json:"case_sensitive"`
 
 	// Match type of URI arguments
 	MatchType string `json:"match_type,omitempty"`

@@ -68,7 +68,7 @@ type LbTcpProfile struct {
 	MaxSynRetransmissions int64 `json:"max_syn_retransmissions,omitempty"`
 
 	// Setting this option to enable or disable Nagle's algorithm.
-	NagleAlgorithmEnabled bool `json:"nagle_algorithm_enabled,omitempty"`
+	NagleAlgorithmEnabled bool `json:"nagle_algorithm_enabled"`
 
 	// If the field is not specified, the load balancer will use the default setting per load balancer service flavor.
 	ReceiveWindowSize int64 `json:"receive_window_size,omitempty"`

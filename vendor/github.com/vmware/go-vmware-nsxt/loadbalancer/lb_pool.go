@@ -43,7 +43,7 @@ type LbPool struct {
 	Protection string `json:"_protection,omitempty"`
 
 	// Indicates system owned resource
-	SystemOwned bool `json:"_system_owned,omitempty"`
+	SystemOwned bool `json:"_system_owned"`
 
 	// Description of this resource
 	Description string `json:"description,omitempty"`

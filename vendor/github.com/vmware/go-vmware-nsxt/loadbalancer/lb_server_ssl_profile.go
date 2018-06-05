@@ -70,5 +70,5 @@ type LbServerSslProfile struct {
 	Protocols []string `json:"protocols,omitempty"`
 
 	// SSL session caching allows SSL client and server to reuse previously negotiated security parameters avoiding the expensive public key operation during handshake.
-	SessionCacheEnabled bool `json:"session_cache_enabled,omitempty"`
+	SessionCacheEnabled bool `json:"session_cache_enabled"`
 }
