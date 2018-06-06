@@ -13,7 +13,7 @@ package loadbalancer
 type LbHttpRequestMethodCondition struct {
 
 	// A flag to indicate whether reverse the match result of this condition
-	Inverse bool `json:"inverse,omitempty"`
+	Inverse bool `json:"inverse"`
 
 	// Type of load balancer rule condition
 	Type_ string `json:"type"`

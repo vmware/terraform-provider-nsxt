@@ -13,13 +13,13 @@ package loadbalancer
 type LbHttpRequestCookieCondition struct {
 
 	// A flag to indicate whether reverse the match result of this condition
-	Inverse bool `json:"inverse,omitempty"`
+	Inverse bool `json:"inverse"`
 
 	// Type of load balancer rule condition
 	Type_ string `json:"type"`
 
 	// If true, case is significant when comparing cookie value.
-	CaseSensitive bool `json:"case_sensitive,omitempty"`
+	CaseSensitive bool `json:"case_sensitive"`
 
 	// Name of cookie
 	CookieName string `json:"cookie_name"`

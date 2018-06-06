@@ -61,13 +61,13 @@ type LbService struct {
 	Tags []common.Tag `json:"tags,omitempty"`
 
 	// whether access log is enabled
-	AccessLogEnabled bool `json:"access_log_enabled,omitempty"`
+	AccessLogEnabled bool `json:"access_log_enabled"`
 
 	// LBS could be instantiated (or created) on the Logical router, etc. Typically, it could be applied to Tier1 LogicalRouter. It can be attached to Tier0 LogicalRouter either in non-multi-tenant environments or to provide load balancing for infrastructure services offered by the provider.
 	Attachment *common.ResourceReference `json:"attachment,omitempty"`
 
 	// whether the load balancer service is enabled
-	Enabled bool `json:"enabled,omitempty"`
+	Enabled bool `json:"enabled"`
 
 	// Load balancer engine writes information about encountered issues of different severity levels to the error log. This setting is used to define the severity level of the error log.
 	ErrorLogLevel string `json:"error_log_level,omitempty"`

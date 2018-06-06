@@ -61,7 +61,7 @@ type LbVirtualServer struct {
 	Tags []common.Tag `json:"tags,omitempty"`
 
 	// Whether access log is enabled
-	AccessLogEnabled bool `json:"access_log_enabled,omitempty"`
+	AccessLogEnabled bool `json:"access_log_enabled"`
 
 	// The application profile defines the application protocol characteristics. It is used to influence how load balancing is performed. Currently, LbFastTCPProfile, LbFastUDPProfile and LbHttpProfile, etc are supported.
 	ApplicationProfileId string `json:"application_profile_id"`
@@ -79,7 +79,7 @@ type LbVirtualServer struct {
 	DefaultPoolMemberPorts []string `json:"default_pool_member_ports,omitempty"`
 
 	// whether the virtual server is enabled
-	Enabled bool `json:"enabled,omitempty"`
+	Enabled bool `json:"enabled"`
 
 	// virtual server IP address
 	IpAddress string `json:"ip_address"`
