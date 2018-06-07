@@ -129,6 +129,7 @@ func Provider() terraform.ResourceProvider {
 			"nsxt_lb_cookie_persistence_profile":     resourceNsxtLbCookiePersistenceProfile(),
 			"nsxt_lb_client_ssl_profile":             resourceNsxtLbClientSslProfile(),
 			"nsxt_lb_server_ssl_profile":             resourceNsxtLbServerSslProfile(),
+			"nsxt_lb_fast_tcp_application_profile":   resourceNsxtLbFastTcpApplicationProfile(),
 		},
 
 		ConfigureFunc: providerConfigure,
