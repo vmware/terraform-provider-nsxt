@@ -74,7 +74,7 @@ func getLbRuleCaseSensitiveSchema() *schema.Schema {
 		Type:        schema.TypeBool,
 		Description: "If true, case is significant in condition matching",
 		Optional:    true,
-		Default:     false,
+		Default:     true,
 	}
 }
 
@@ -152,6 +152,7 @@ func getLbRuleHTTPVersionConditionSchema() *schema.Schema {
 		Type:        schema.TypeSet,
 		Description: "Rule condition based on http request version",
 		Optional:    true,
+		MaxItems:    1,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"inverse": getLbRuleInverseSchema(),
