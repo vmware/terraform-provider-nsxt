@@ -177,6 +177,8 @@ func getLbRuleHTTPRequestURIConditionSchema() *schema.Schema {
 					Type:     schema.TypeString,
 					Required: true,
 				},
+				"case_sensitive": getLbRuleCaseSensitiveSchema(),
+				"match_type":     getLbRuleMatchTypeSchema(),
 			},
 		},
 	}
@@ -194,6 +196,8 @@ func getLbRuleHTTPRequestURIArgumentsConditionSchema() *schema.Schema {
 					Type:     schema.TypeString,
 					Required: true,
 				},
+				"case_sensitive": getLbRuleCaseSensitiveSchema(),
+				"match_type":     getLbRuleMatchTypeSchema(),
 			},
 		},
 	}
@@ -294,7 +298,7 @@ func getLbRuleHTTPRequestConditionsFromSchema(d *schema.ResourceData) []loadbala
 	conditions := d.Get("header_condition").(*schema.Set).List()
 	for _, condition := range conditions {
 		data := condition.(map[string]interface{})
-		elem := initLbHTTPRuleMatchCondition(data, "LbHTTPRequestHeaderCondition")
+		elem := initLbHTTPRuleMatchCondition(data, "LbHttpRequestHeaderCondition")
 		elem.HeaderName = data["name"].(string)
 		elem.HeaderValue = data["value"].(string)
 
@@ -304,7 +308,7 @@ func getLbRuleHTTPRequestConditionsFromSchema(d *schema.ResourceData) []loadbala
 	conditions = d.Get("cookie_condition").(*schema.Set).List()
 	for _, condition := range conditions {
 		data := condition.(map[string]interface{})
-		elem := initLbHTTPRuleMatchCondition(data, "LbHTTPRequestCookieCondition")
+		elem := initLbHTTPRuleMatchCondition(data, "LbHttpRequestCookieCondition")
 		elem.CookieName = data["name"].(string)
 		elem.CookieValue = data["value"].(string)
 
@@ -314,7 +318,7 @@ func getLbRuleHTTPRequestConditionsFromSchema(d *schema.ResourceData) []loadbala
 	conditions = d.Get("body_condition").(*schema.Set).List()
 	for _, condition := range conditions {
 		data := condition.(map[string]interface{})
-		elem := initLbHTTPRuleMatchCondition(data, "LbHTTPRequestBodyCondition")
+		elem := initLbHTTPRuleMatchCondition(data, "LbHttpRequestBodyCondition")
 		elem.BodyValue = data["value"].(string)
 
 		conditionList = append(conditionList, elem)
@@ -325,7 +329,7 @@ func getLbRuleHTTPRequestConditionsFromSchema(d *schema.ResourceData) []loadbala
 		data := condition.(map[string]interface{})
 		elem := loadbalancer.LbRuleCondition{
 			Inverse: data["inverse"].(bool),
-			Type_:   "LbHTTPRequestMethodCondition",
+			Type_:   "LbHttpRequestMethodCondition",
 			Method:  data["method"].(string),
 		}
 
@@ -337,7 +341,7 @@ func getLbRuleHTTPRequestConditionsFromSchema(d *schema.ResourceData) []loadbala
 		data := condition.(map[string]interface{})
 		elem := loadbalancer.LbRuleCondition{
 			Inverse: data["inverse"].(bool),
-			Type_:   "LbHTTPRequestVersionCondition",
+			Type_:   "LbHttpRequestVersionCondition",
 			Version: data["version"].(string),
 		}
 
@@ -347,16 +351,16 @@ func getLbRuleHTTPRequestConditionsFromSchema(d *schema.ResourceData) []loadbala
 	conditions = d.Get("uri_condition").(*schema.Set).List()
 	for _, condition := range conditions {
 		data := condition.(map[string]interface{})
-		elem := initLbHTTPRuleMatchCondition(data, "LbHTTPRequestUriCondition")
+		elem := initLbHTTPRuleMatchCondition(data, "LbHttpRequestUriCondition")
 		elem.Uri = data["uri"].(string)
 
 		conditionList = append(conditionList, elem)
 	}
 
-	conditions = d.Get("uri_arguments").(*schema.Set).List()
+	conditions = d.Get("uri_arguments_condition").(*schema.Set).List()
 	for _, condition := range conditions {
 		data := condition.(map[string]interface{})
-		elem := initLbHTTPRuleMatchCondition(data, "LbHTTPRequestUriArgumentsCondition")
+		elem := initLbHTTPRuleMatchCondition(data, "LbHttpRequestUriArgumentsCondition")
 		elem.UriArguments = data["uri_arguments"].(string)
 
 		conditionList = append(conditionList, elem)
@@ -403,7 +407,7 @@ func setLbRuleHTTPRequestConditionsInSchema(d *schema.ResourceData, conditions [
 	for _, condition := range conditions {
 		elem := make(map[string]interface{})
 
-		if condition.Type_ == "LbHTTPRequestHeaderCondition" {
+		if condition.Type_ == "LbHttpRequestHeaderCondition" {
 			elem["name"] = condition.HeaderName
 			elem["value"] = condition.HeaderValue
 			elem["inverse"] = condition.Inverse
@@ -412,16 +416,16 @@ func setLbRuleHTTPRequestConditionsInSchema(d *schema.ResourceData, conditions [
 			headerConditionList = append(headerConditionList, elem)
 		}
 
-		if condition.Type_ == "LbHTTPRequestCookieCondition" {
+		if condition.Type_ == "LbHttpRequestCookieCondition" {
 			elem["name"] = condition.CookieName
 			elem["value"] = condition.CookieValue
 			elem["inverse"] = condition.Inverse
 			elem["match_type"] = condition.MatchType
 			elem["case_sensitive"] = *condition.CaseSensitive
-			cookieConditionList = append(headerConditionList, elem)
+			cookieConditionList = append(cookieConditionList, elem)
 		}
 
-		if condition.Type_ == "LbHTTPRequestBodyCondition" {
+		if condition.Type_ == "LbHttpRequestBodyCondition" {
 			elem["value"] = condition.BodyValue
 			elem["inverse"] = condition.Inverse
 			elem["match_type"] = condition.MatchType
@@ -429,19 +433,19 @@ func setLbRuleHTTPRequestConditionsInSchema(d *schema.ResourceData, conditions [
 			bodyConditionList = append(bodyConditionList, elem)
 		}
 
-		if condition.Type_ == "LbHTTPRequestMethodCondition" {
+		if condition.Type_ == "LbHttpRequestMethodCondition" {
 			elem["method"] = condition.Method
 			elem["inverse"] = condition.Inverse
 			methodConditionList = append(methodConditionList, elem)
 		}
 
-		if condition.Type_ == "LbHTTPRequestVersionCondition" {
+		if condition.Type_ == "LbHttpRequestVersionCondition" {
 			elem["version"] = condition.Version
 			elem["inverse"] = condition.Inverse
 			versionConditionList = append(versionConditionList, elem)
 		}
 
-		if condition.Type_ == "LbHTTPRequestUriCondition" {
+		if condition.Type_ == "LbHttpRequestUriCondition" {
 			elem["uri"] = condition.Uri
 			elem["inverse"] = condition.Inverse
 			elem["match_type"] = condition.MatchType
@@ -449,7 +453,7 @@ func setLbRuleHTTPRequestConditionsInSchema(d *schema.ResourceData, conditions [
 			uriConditionList = append(uriConditionList, elem)
 		}
 
-		if condition.Type_ == "LbHTTPRequestUriArgumentsCondition" {
+		if condition.Type_ == "LbHttpRequestUriArgumentsCondition" {
 			elem["uri_arguments"] = condition.UriArguments
 			elem["inverse"] = condition.Inverse
 			elem["match_type"] = condition.MatchType
@@ -524,7 +528,7 @@ func getLbRuleRewriteActionsFromSchema(d *schema.ResourceData) []loadbalancer.Lb
 	for _, action := range actions {
 		data := action.(map[string]interface{})
 		elem := loadbalancer.LbRuleAction{
-			Type_:       "LbHTTPRequestHeaderRewriteAction",
+			Type_:       "LbHttpRequestHeaderRewriteAction",
 			HeaderName:  data["name"].(string),
 			HeaderValue: data["value"].(string),
 		}
@@ -536,7 +540,7 @@ func getLbRuleRewriteActionsFromSchema(d *schema.ResourceData) []loadbalancer.Lb
 	for _, action := range actions {
 		data := action.(map[string]interface{})
 		elem := loadbalancer.LbRuleAction{
-			Type_:        "LbHTTPRequestUriRewriteAction",
+			Type_:        "LbHttpRequestUriRewriteAction",
 			Uri:          data["uri"].(string),
 			UriArguments: data["uri_arguments"].(string),
 		}
@@ -553,13 +557,13 @@ func setLbRuleRewriteActionsInSchema(d *schema.ResourceData, actions []loadbalan
 
 	for _, action := range actions {
 		elem := make(map[string]string)
-		if action.Type_ == "LbHTTPRequestHeaderRewriteAction" {
+		if action.Type_ == "LbHttpRequestHeaderRewriteAction" {
 			elem["name"] = action.HeaderName
 			elem["value"] = action.HeaderValue
 			headerActionList = append(headerActionList, elem)
 		}
 
-		if action.Type_ == "LbHTTPRequestUriRewriteAction" {
+		if action.Type_ == "LbHttpRequestUriRewriteAction" {
 			elem["uri"] = action.Uri
 			elem["uri_arguments"] = action.UriArguments
 			uriActionList = append(uriActionList, elem)

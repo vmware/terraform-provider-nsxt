@@ -37,7 +37,7 @@ type LbRuleCondition struct {
 	MatchType string `json:"match_type,omitempty"`
 
 	// A string used to identify resource
-	Uri string `json:"urii,omitempty"`
+	Uri string `json:"uri,omitempty"`
 
 	// URI arguments, aka query string of URI.
 	UriArguments string `json:"uri_arguments,omitempty"`
