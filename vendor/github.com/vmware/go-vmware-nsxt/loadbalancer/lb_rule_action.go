@@ -14,4 +14,16 @@ type LbRuleAction struct {
 
 	// Type of load balancer rule action
 	Type_ string `json:"type"`
+
+	// Name of HTTP request header
+	HeaderName string `json:"header_name,omitempty"`
+
+	// Value of HTTP request header
+	HeaderValue string `json:"header_value,omitempty"`
+
+	// URI of HTTP request
+	Uri string `json:"uri,omitempty"`
+
+	// Query string of URI, typically contains key value pairs, for example: foo1=bar1&foo2=bar2
+	UriArguments string `json:"uri_arguments,omitempty"`
 }
