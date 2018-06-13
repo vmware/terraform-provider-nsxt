@@ -17,4 +17,43 @@ type LbRuleCondition struct {
 
 	// Type of load balancer rule condition
 	Type_ string `json:"type"`
+
+	// Source IP address of HTTP message
+	SourceAddress string `json:"source_address,omitempty"`
+
+	// TCP source port of HTTP message
+	SourcePort string `json:"source_port,omitempty"`
+
+	// HTTP version
+	Version string `json:"version,omitempty"`
+
+	// Type of HTTP request method
+	Method string `json:"method,omitempty"`
+
+	// If true, case is significant
+	CaseSensitive *bool `json:"case_sensitive,omitempty"`
+
+	// Match type
+	MatchType string `json:"match_type,omitempty"`
+
+	// A string used to identify resource
+	Uri string `json:"uri,omitempty"`
+
+	// URI arguments, aka query string of URI.
+	UriArguments string `json:"uri_arguments,omitempty"`
+
+	// Name of HTTP header
+	HeaderName string `json:"header_name,omitempty"`
+
+	// Value of HTTP header
+	HeaderValue string `json:"header_value,omitempty"`
+
+	// Name of cookie
+	CookieName string `json:"cookie_name,omitempty"`
+
+	// Value of cookie
+	CookieValue string `json:"cookie_value,omitempty"`
+
+	// HTTP request body
+	BodyValue string `json:"body_value,omitempty"`
 }
