@@ -154,7 +154,7 @@ to run.
 
 The following versions of NSX are supported:
 
- * NSX-T 2.1.*
+ * NSX-T 2.2.*
 
 # Support
 
