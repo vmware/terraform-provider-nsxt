@@ -99,7 +99,7 @@ cd $GOPATH/src/github.com/terraform-providers
 git clone git@github.com:terraform-providers/terraform-provider-nsxt
 ```
 
-## Building and installing the provider
+## Building and Installing the Provider
 
 After the clone has been completed, you can enter the provider directory and build the provider. 
 
