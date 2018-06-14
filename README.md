@@ -22,7 +22,7 @@ Documentation on the NSX platform can be found at the [NSX-T Documentation page]
 The current version of this provider requires Terraform v0.10.2 or higher to
 run.
 
-The VMware supported version of the provider requires NSX version 2.2.x and Terraform 0.11.7. The recommended vSphere provider to be used in conjunction with the NSX-T Terraform Provider is 1.3.3.
+The VMware supported version of the provider requires NSX version 2.2.x and Terraform 0.11.7. The recommended vSphere provider to be used in conjunction with the NSX-T Terraform Provider is 1.3.3 or above.
 
 Note that you need to run `terraform init` to fetch the provider before
 deploying. Read about the provider split and other changes to TF v0.10.0 in the
@@ -72,7 +72,7 @@ Terraform v0.11.7
 + provider.vsphere v1.5.0
 ```
 
-# Manual Installation by Building the Provider
+# Manual Installation
 
 **NOTE:** Unless you are [developing](#developing-the-provider) or require a
 pre-release bugfix or feature, you will want to use the officially released
@@ -99,20 +99,16 @@ cd $GOPATH/src/github.com/terraform-providers
 git clone git@github.com:terraform-providers/terraform-provider-nsxt
 ```
 
-## Running the Build
+## Building and installing the provider
 
-After the clone has been completed, you can enter the provider directory and
-build the provider.
+After the clone has been completed, you can enter the provider directory and build the provider. 
 
 ```sh
 cd $GOPATH/src/github.com/terraform-providers/terraform-provider-nsxt
-make build
+make 
 ```
 
-## Installing the Local Plugin
-
-After the build is complete, copy the `terraform-provider-nsxt` binary into
-the same path as your `terraform` binary, and re-run `terraform init`.
+After the build is complete, if your terraform running folder does not match your GOPATH environment, you need to copy the `terraform-provider-nsxt` executable to your running folder and re-run `terraform init` to make terraform aware of your local provider executable.
 
 After this, your project-local `.terraform/plugins/ARCH/lock.json` (where `ARCH`
 matches the architecture of your machine) file should contain a SHA256 sum that
@@ -137,7 +133,7 @@ correctly setup a [GOPATH][gopath], as well as adding `$GOPATH/bin` to your
 [go-website]: https://golang.org/
 [gopath]: http://golang.org/doc/code.html#GOPATH
 
-See [Building the Provider](#manual-installation-by-building-the-provider) for details on building the
+See [Manual Installation](#manual-installation) for details on building the
 provider.
 
 # Testing the Provider
