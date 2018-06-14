@@ -22,6 +22,8 @@ Documentation on the NSX platform can be found at the [NSX-T Documentation page]
 The current version of this provider requires Terraform v0.10.2 or higher to
 run.
 
+The VMware supported version of the provider requires NSX version 2.2.x and Terraform 0.11.7. The recommended vSphere provider to be used in conjunction with the NSX-T Terraform Provider is 1.3.3.
+
 Note that you need to run `terraform init` to fetch the provider before
 deploying. Read about the provider split and other changes to TF v0.10.0 in the
 official release announcement found [here][tf-0.10-announce].
@@ -58,11 +60,33 @@ more][provider-vc] on provider version control.
 
 [provider-vc]: https://www.terraform.io/docs/configuration/providers.html#provider-versions
 
-# Building The Provider
+# Automated Installation (Recommended)
+
+Download and initialization of Terraform providers is with the “terraform init” command. This applies to the NSX-T provider as well. Once the provider block for the NSX-T provider is specified in your .tf file, “terraform init” will detect a need for the provider and download it to your environment.
+You can list versions of providers installed in your environment by running “terraform version” command:
+
+```hcl
+$ ./terraform version
+Terraform v0.11.7
++ provider.nsxt v1.0.0
++ provider.vsphere v1.5.0
+```
+
+# Manual Installation by Building the Provider
 
 **NOTE:** Unless you are [developing](#developing-the-provider) or require a
 pre-release bugfix or feature, you will want to use the officially released
 version of the provider (see [the section above](#using-the-provider)).
+
+**NOTE:** Note that if the provider is manually copied to your running folder (rather than fetched with the “terraform init” based on provider block), Terraform is not aware of the version of the provider you’re running. It will appear as “unversioned”:
+```hcl
+$ ./terraform version
+Terraform v0.11.1
++ provider.nsxt (unversioned)
++ provider.vsphere v1.5.0
+```
+Since Terraform has no indication of version, it cannot upgrade in a native way, based on the “version” attribute in provider block.
+In addition, this may cause difficulties in housekeeping and issue reporting.
 
 ## Cloning the Project
 
@@ -113,7 +137,7 @@ correctly setup a [GOPATH][gopath], as well as adding `$GOPATH/bin` to your
 [go-website]: https://golang.org/
 [gopath]: http://golang.org/doc/code.html#GOPATH
 
-See [Building the Provider](#building-the-provider) for details on building the
+See [Building the Provider](#manual-installation-by-building-the-provider) for details on building the
 provider.
 
 # Testing the Provider
@@ -158,7 +182,7 @@ The following versions of NSX are supported:
 
 # Support
 
-The NSX Terraform provider is community supported. For bugs and feature requests please open a Github Issue and label it appropriately. As this is a community supported solution there is no SLA for resolutions.
+The NSX Terraform provider is now VMware supported as well as community supported. For bugs and feature requests please open a Github Issue and label it appropriately or contact VMware support.
 
 # License
 
