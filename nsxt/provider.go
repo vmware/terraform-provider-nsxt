@@ -134,6 +134,7 @@ func Provider() terraform.ResourceProvider {
 			"nsxt_lb_fast_tcp_application_profile":   resourceNsxtLbFastTcpApplicationProfile(),
 			"nsxt_lb_fast_udp_application_profile":   resourceNsxtLbFastUdpApplicationProfile(),
 			"nsxt_lb_http_application_profile":       resourceNsxtLbHttpApplicationProfile(),
+			"nsxt_lb_service":                        resourceNsxtLbService(),
 		},
 
 		ConfigureFunc: providerConfigure,
