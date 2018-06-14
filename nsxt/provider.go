@@ -127,6 +127,7 @@ func Provider() terraform.ResourceProvider {
 			"nsxt_lb_passive_monitor":                resourceNsxtLbPassiveMonitor(),
 			"nsxt_lb_pool":                           resourceNsxtLbPool(),
 			"nsxt_lb_http_request_rewrite_rule":      resourceNsxtLbHTTPRequestRewriteRule(),
+			"nsxt_lb_http_response_rewrite_rule":     resourceNsxtLbHTTPResponseRewriteRule(),
 			"nsxt_lb_cookie_persistence_profile":     resourceNsxtLbCookiePersistenceProfile(),
 			"nsxt_lb_source_ip_persistence_profile":  resourceNsxtLbSourceIpPersistenceProfile(),
 			"nsxt_lb_client_ssl_profile":             resourceNsxtLbClientSslProfile(),
