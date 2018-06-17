@@ -23,13 +23,13 @@ func TestAccResourceNsxtLbSourceIpPersistenceProfile_basic(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXLbSourceIpPersistenceProfileCheckDestroy(state, name)
+			return testAccNSXLbSourceIPPersistenceProfileCheckDestroy(state, name)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXLbSourceIpPersistenceProfileBasicTemplate(name, timeout),
+				Config: testAccNSXLbSourceIPPersistenceProfileBasicTemplate(name, timeout),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNSXLbSourceIpPersistenceProfileExists(name, testResourceName),
+					testAccNSXLbSourceIPPersistenceProfileExists(name, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "test description"),
 					resource.TestCheckResourceAttr(testResourceName, "persistence_shared", "true"),
@@ -40,9 +40,9 @@ func TestAccResourceNsxtLbSourceIpPersistenceProfile_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXLbSourceIpPersistenceProfileBasicTemplate(updatedName, updatedTimeout),
+				Config: testAccNSXLbSourceIPPersistenceProfileBasicTemplate(updatedName, updatedTimeout),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNSXLbSourceIpPersistenceProfileExists(updatedName, testResourceName),
+					testAccNSXLbSourceIPPersistenceProfileExists(updatedName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "test description"),
 					resource.TestCheckResourceAttr(testResourceName, "persistence_shared", "true"),
@@ -63,11 +63,11 @@ func TestAccResourceNsxtLbSourceIpPersistenceProfile_importBasic(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXLbSourceIpPersistenceProfileCheckDestroy(state, name)
+			return testAccNSXLbSourceIPPersistenceProfileCheckDestroy(state, name)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXLbSourceIpPersistenceProfileCreateTemplateTrivial(name),
+				Config: testAccNSXLbSourceIPPersistenceProfileCreateTemplateTrivial(name),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -78,7 +78,7 @@ func TestAccResourceNsxtLbSourceIpPersistenceProfile_importBasic(t *testing.T) {
 	})
 }
 
-func testAccNSXLbSourceIpPersistenceProfileExists(displayName string, resourceName string) resource.TestCheckFunc {
+func testAccNSXLbSourceIPPersistenceProfileExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 		nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
 		rs, ok := state.RootModule().Resources[resourceName]
@@ -107,7 +107,7 @@ func testAccNSXLbSourceIpPersistenceProfileExists(displayName string, resourceNa
 	}
 }
 
-func testAccNSXLbSourceIpPersistenceProfileCheckDestroy(state *terraform.State, displayName string) error {
+func testAccNSXLbSourceIPPersistenceProfileCheckDestroy(state *terraform.State, displayName string) error {
 	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
 	for _, rs := range state.RootModule().Resources {
 
@@ -131,7 +131,7 @@ func testAccNSXLbSourceIpPersistenceProfileCheckDestroy(state *terraform.State, 
 	return nil
 }
 
-func testAccNSXLbSourceIpPersistenceProfileBasicTemplate(name string, timeout string) string {
+func testAccNSXLbSourceIPPersistenceProfileBasicTemplate(name string, timeout string) string {
 	return fmt.Sprintf(`
 resource "nsxt_lb_source_ip_persistence_profile" "test" {
   display_name             = "%s"
@@ -149,7 +149,7 @@ resource "nsxt_lb_source_ip_persistence_profile" "test" {
 `, name, timeout)
 }
 
-func testAccNSXLbSourceIpPersistenceProfileCreateTemplateTrivial(name string) string {
+func testAccNSXLbSourceIPPersistenceProfileCreateTemplateTrivial(name string) string {
 	return fmt.Sprintf(`
 resource "nsxt_lb_source_ip_persistence_profile" "test" {
   display_name = "%s"
