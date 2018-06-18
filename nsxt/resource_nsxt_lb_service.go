@@ -59,17 +59,17 @@ func resourceNsxtLbService() *schema.Resource {
 				Required:     true,
 				ValidateFunc: validation.StringInSlice(lbServiceSizes, false),
 			},
-			"logical_router_id": &schema.Schema{
-				Type:        schema.TypeString,
-				Description: "Logical Tier1 Router to which the Load Balancer is to be atta    ched",
-				Required:    true,
-			},
 			// TODO: LB service creation will error out on NSX if logical Tier1 router is not
 			// attached to Tier0 or Centralized Service Port. Consider dummy port attribute here
 			// to enforce this dependency.
+			"logical_router_id": &schema.Schema{
+				Type:        schema.TypeString,
+				Description: "Logical Tier1 Router to which the Load Balancer is to be attached",
+				Required:    true,
+			},
 			"virtual_server_ids": &schema.Schema{
 				Type:        schema.TypeSet,
-				Description: "Virtual server identifier list here would be used to maintain the relationship of LbService and other Lb entities",
+				Description: "Virtual servers associated with this Load Balancer",
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},

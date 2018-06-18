@@ -72,8 +72,8 @@ The following arguments are supported:
 * `logical_router_id` - (Required) Tier1 logical router this service is attached to. Note that this router needs to have edge cluster configured, and have an uplink port or CSP (centralized service port).
 * `enabled` - (Optional) whether the load balancer service is enabled.
 * `error_log_level` - (Optional) Load balancer engine writes information about encountered issues of different severity levels to the error log. This setting is used to define the severity level of the error log.
-* `size` - (Required) the size of load balancer service. Accepted values are SMALL/MEDIUM/LARGE.
-* `virtual_server_ids` - (Optional) virtual servers can be associated to LbService(which is similar to physical/virtual load balancer), Lb virtual servers, pools and other entities could be defined independently, the virtual server identifier list here would be used to maintain the relationship of LbService and other Lb entities.
+* `size` - (Required) Size of load balancer service. Accepted values are SMALL/MEDIUM/LARGE.
+* `virtual_server_ids` - (Optional) Virtual servers associated with this Load Balancer.
 
 
 ## Attributes Reference
