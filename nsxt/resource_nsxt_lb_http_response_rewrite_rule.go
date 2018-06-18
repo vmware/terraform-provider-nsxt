@@ -368,7 +368,7 @@ func resourceNsxtLbHTTPResponseRewriteRuleRead(d *schema.ResourceData, m interfa
 	d.Set("match_strategy", lbRule.MatchStrategy)
 	err = setLbRuleResponseRewriteActionsInSchema(d, lbRule.Actions)
 	if err != nil {
-		log.Printf("[DEBUG] Failed to set action in LoadBalancerRule %d: %v", id, err)
+		log.Printf("[DEBUG] Failed to set action in LoadBalancerRule %v: %v", id, err)
 		d.SetId("")
 		return nil
 	}
