@@ -1,7 +1,7 @@
 ---
 layout: "nsxt"
 page_title: "NSXT: nsxt_lb_http_request_rewrite_rule"
-sidebar_current: "docs-nsxt-resource-lb-rule"
+sidebar_current: "docs-nsxt-resource-lb-http-request-rewrite-rule"
 description: |-
   Provides a resource to configure lb rule on NSX-T manager
 ---
