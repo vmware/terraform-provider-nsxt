@@ -22,6 +22,7 @@ func resourceNsxtLbHTTPVirtualServer() *schema.Resource {
 			State: schema.ImportStatePassthrough,
 		},
 
+		// TODO: add client/server_tcp_profile_id when available
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
 			"description": &schema.Schema{
@@ -46,11 +47,6 @@ func resourceNsxtLbHTTPVirtualServer() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "The http application profile defines the application protocol characteristics",
 				Required:    true,
-			},
-			"client_tcp_profile_id": &schema.Schema{
-				Type:        schema.TypeString,
-				Description: "Customized client side TCP profile",
-				Optional:    true,
 			},
 			"client_ssl": getLbClientSSLBindingSchema(),
 			"default_pool_member_port": &schema.Schema{
@@ -103,11 +99,6 @@ func resourceNsxtLbHTTPVirtualServer() *schema.Resource {
 					Type: schema.TypeString,
 				},
 				Optional: true,
-			},
-			"server_tcp_profile_id": &schema.Schema{
-				Type:        schema.TypeString,
-				Description: "Customized server side TCP profile",
-				Optional:    true,
 			},
 			"sorry_pool_id": &schema.Schema{
 				Type:        schema.TypeString,
@@ -286,7 +277,6 @@ func resourceNsxtLbHTTPVirtualServerCreate(d *schema.ResourceData, m interface{}
 	accessLogEnabled := d.Get("access_log_enabled").(bool)
 	applicationProfileID := d.Get("application_profile_id").(string)
 	clientSslProfileBinding := getClientSSLBindingFromSchema(d)
-	clientTCPProfileID := d.Get("client_tcp_profile_id").(string)
 	defaultPoolMemberPort := d.Get("default_pool_member_port").(string)
 	if defaultPoolMemberPort != "" {
 		defaultPoolMemberPorts = append(defaultPoolMemberPorts, defaultPoolMemberPort)
@@ -300,7 +290,6 @@ func resourceNsxtLbHTTPVirtualServerCreate(d *schema.ResourceData, m interface{}
 	ports := []string{d.Get("port").(string)}
 	ruleIds := interface2StringList(d.Get("rule_ids").([]interface{}))
 	serverSslProfileBinding := getServerSSLBindingFromSchema(d)
-	serverTCPProfileID := d.Get("server_tcp_profile_id").(string)
 	sorryPoolID := d.Get("sorry_pool_id").(string)
 	lbVirtualServer := loadbalancer.LbVirtualServer{
 		Description:              description,
@@ -309,7 +298,6 @@ func resourceNsxtLbHTTPVirtualServerCreate(d *schema.ResourceData, m interface{}
 		AccessLogEnabled:         accessLogEnabled,
 		ApplicationProfileId:     applicationProfileID,
 		ClientSslProfileBinding:  clientSslProfileBinding,
-		ClientTcpProfileId:       clientTCPProfileID,
 		DefaultPoolMemberPorts:   defaultPoolMemberPorts,
 		Enabled:                  enabled,
 		IpAddress:                ipAddress,
@@ -321,7 +309,6 @@ func resourceNsxtLbHTTPVirtualServerCreate(d *schema.ResourceData, m interface{}
 		Ports:                    ports,
 		RuleIds:                  ruleIds,
 		ServerSslProfileBinding:  serverSslProfileBinding,
-		ServerTcpProfileId:       serverTCPProfileID,
 		SorryPoolId:              sorryPoolID,
 	}
 
@@ -363,7 +350,6 @@ func resourceNsxtLbHTTPVirtualServerRead(d *schema.ResourceData, m interface{}) 
 	d.Set("access_log_enabled", lbVirtualServer.AccessLogEnabled)
 	d.Set("application_profile_id", lbVirtualServer.ApplicationProfileId)
 	setClientSSLBindingInSchema(d, lbVirtualServer.ClientSslProfileBinding)
-	d.Set("client_tcp_profile_id", lbVirtualServer.ClientTcpProfileId)
 	if len(lbVirtualServer.DefaultPoolMemberPorts) > 0 {
 		d.Set("default_pool_member_port", lbVirtualServer.DefaultPoolMemberPorts[0])
 	}
@@ -377,7 +363,6 @@ func resourceNsxtLbHTTPVirtualServerRead(d *schema.ResourceData, m interface{}) 
 	d.Set("port", lbVirtualServer.Ports[0])
 	d.Set("rule_ids", lbVirtualServer.RuleIds)
 	setServerSSLBindingInSchema(d, lbVirtualServer.ServerSslProfileBinding)
-	d.Set("server_tcp_profile_id", lbVirtualServer.ServerTcpProfileId)
 	d.Set("sorry_pool_id", lbVirtualServer.SorryPoolId)
 
 	return nil
@@ -398,7 +383,6 @@ func resourceNsxtLbHTTPVirtualServerUpdate(d *schema.ResourceData, m interface{}
 	accessLogEnabled := d.Get("access_log_enabled").(bool)
 	applicationProfileID := d.Get("application_profile_id").(string)
 	clientSslProfileBinding := getClientSSLBindingFromSchema(d)
-	clientTCPProfileID := d.Get("client_tcp_profile_id").(string)
 	defaultPoolMemberPort := d.Get("default_pool_member_port").(string)
 	if defaultPoolMemberPort != "" {
 		defaultPoolMemberPorts = append(defaultPoolMemberPorts, defaultPoolMemberPort)
@@ -411,7 +395,6 @@ func resourceNsxtLbHTTPVirtualServerUpdate(d *schema.ResourceData, m interface{}
 	poolID := d.Get("pool_id").(string)
 	ports := []string{d.Get("port").(string)}
 	ruleIds := interface2StringList(d.Get("rule_ids").([]interface{}))
-	serverTCPProfileID := d.Get("server_tcp_profile_id").(string)
 	serverSslProfileBinding := getServerSSLBindingFromSchema(d)
 	sorryPoolID := d.Get("sorry_pool_id").(string)
 	lbVirtualServer := loadbalancer.LbVirtualServer{
@@ -422,7 +405,6 @@ func resourceNsxtLbHTTPVirtualServerUpdate(d *schema.ResourceData, m interface{}
 		AccessLogEnabled:         accessLogEnabled,
 		ApplicationProfileId:     applicationProfileID,
 		ClientSslProfileBinding:  clientSslProfileBinding,
-		ClientTcpProfileId:       clientTCPProfileID,
 		DefaultPoolMemberPorts:   defaultPoolMemberPorts,
 		Enabled:                  enabled,
 		IpAddress:                ipAddress,
@@ -434,7 +416,6 @@ func resourceNsxtLbHTTPVirtualServerUpdate(d *schema.ResourceData, m interface{}
 		Ports:                    ports,
 		RuleIds:                  ruleIds,
 		ServerSslProfileBinding:  serverSslProfileBinding,
-		ServerTcpProfileId:       serverTCPProfileID,
 		SorryPoolId:              sorryPoolID,
 	}
 
