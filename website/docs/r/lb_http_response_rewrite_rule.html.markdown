@@ -1,52 +1,53 @@
 ---
 layout: "nsxt"
-page_title: "NSXT: nsxt_lb_http_request_rewrite_rule"
+page_title: "NSXT: nsxt_lb_http_response_rewrite_rule"
 sidebar_current: "docs-nsxt-resource-lb-rule"
 description: |-
   Provides a resource to configure lb rule on NSX-T manager
 ---
 
-# nsxt_lb_http_request_rewrite_rule
+# nsxt_lb_http_response_rewrite_rule
 
-Provides a resource to configure lb http request rewrite rule on NSX-T manager. This rule will be executed when HTTP request message is received by load balancer.
+Provides a resource to configure lb http response rewrite rule on NSX-T manager. This rule will be executed when HTTP response message is received by load balancer.
 
 ## Example Usages
 This example represents a superset of all possible action and conditions (and thus doesn't make much sense).
 More specific examples are provided below.
 
 ```hcl
-resource "nsxt_lb_http_request_rewrite_rule" "lb_rule" {
+resource "nsxt_lb_http_response_rewrite_rule" "lb_rule" {
   description = "lb_rule provisioned by Terraform"
   display_name = "lb_rule"
-  match_strategy = "ANY"
+  match_strategy = "ALL"
 
   tag = {
     scope = "color"
-    tag   = "red"
+    tag   = "blue"
   }
 
-  body_condition {
-    value      = "XXX"
-    match_type = "CONTAINS"
-    case_sensitive = false
-  }
-
-  header_condition {
+  request_header_condition {
     name       = "header1"
     value      = "bad"
     match_type = "EQUALS"
     inverse    = true
   }
 
+  response_header_condition {
+    name       = "header1"
+    value      = "good"
+    match_type = "EQUALS"
+    inverse    = false
+  }
+
   cookie_condition {
-    name           = "name"
+    name           = "name1"
     value          = "cookie1"
     match_type     = "STARTS_WITH"
     case_sensitive = true
   }
 
   cookie_condition {
-    name           = "name"
+    name           = "name2"
     value          = "cookie2"
     match_type     = "STARTS_WITH"
     case_sensitive = true
@@ -57,7 +58,7 @@ resource "nsxt_lb_http_request_rewrite_rule" "lb_rule" {
   }
 
   version_condition {
-    version = "HTTP_VERSION_1_0"
+    version = "HTTP_VERSION_1_1"
     inverse = true
   }
 
@@ -82,36 +83,33 @@ resource "nsxt_lb_http_request_rewrite_rule" "lb_rule" {
 
   header_rewrite_action {
     name  = "header1"
-    value = "value2"
-  }
-
-  uri_rewrite_action {
-    uri           = "new.html"
-    uri_arguments = "redirect=true"
+    value = "even better"
   }
 }
 ```
 
-The following rule will match if header X-FORWARDED-FOR does not start with "192.168", request method is GET and URI contains "books":
+The following rule will match if request header X-FORWARDED-FOR does not start with "192.168", request method is GET and response content is json:
 
 ```hcl
-resource "nsxt_lb_http_request_rewrite_rule" "lb_rule1" {
+resource "nsxt_lb_http_response_rewrite_rule" "lb_rule1" {
   match_strategy = "ALL"
 
-  header_condition {
+  request_header_condition {
     name       = "X-FORWARDED-FOR"
     value      = "192.168"
     match_type = "STARTS_WITH"
     inverse    = true
   }
 
-  method_condition {
-    method = "GET"
+  response_header_condition {
+    name       = "Content-Type"
+    value      = "/json"
+    match_type = "CONTAINS"
+    inverse    = false
   }
 
-  uri_condition {
-    uri        = "books"
-    match_type = "CONTAINS"
+  method_condition {
+    method = "GET"
   }
 
   header_rewrite_action {
@@ -122,20 +120,20 @@ resource "nsxt_lb_http_request_rewrite_rule" "lb_rule1" {
 ```
 
 
-The following rule will match if header X-TEST contains "apples" or "pears", regardless of the case:
+The following rule will match if response header X-TEST contains "apples" or "pears", regardless of the case:
 
 ```hcl
-resource "nsxt_lb_http_request_rewrite_rule" "lb_rule1" {
+resource "nsxt_lb_http_response_rewrite_rule" "lb_rule1" {
   match_strategy = "ANY"
 
-  header_condition {
+  response_header_condition {
     name           = "X-TEST"
     value          = "apples"
     match_type     = "CONTAINS"
     case_sensitive = false
   }
 
-  header_condition {
+  response_header_condition {
     name           = "X-TEST"
     value          = "pears"
     match_type     = "CONTAINS"
@@ -158,16 +156,17 @@ The following arguments are supported:
 * `tag` - (Optional) A list of scope + tag pairs to associate with this lb rule.
 * `match_strategy` - (Required) Strategy to define how load balancer rule is considered a match when multiple match conditions are specified in one rule. If set to ALL, then load balancer rule is considered a match only if all the conditions match. If set to ANY, then load balancer rule is considered a match if any one of the conditions match.
 
-* `body_condition` - (Optional) Set of match conditions used to match http request body:
-  * `value` - (Required) The value to look for in the body.
-  * `match_type` - (Required) Defines how value field is used to match the body of HTTP requests. Accepted values are STARTS_WITH, ENDS_WITH, CONTAINS, EQUALS, REGEX.
+* `request_header_condition` - (Optional) Set of match conditions used to match http request header:
+  * `name` - (Required) The name of HTTP header to match.
+  * `value` - (Required) The value of HTTP header to match.
+  * `match_type` - (Required) Defines how value field is used to match the header value of HTTP request. Accepted values are STARTS_WITH, ENDS_WITH, CONTAINS, EQUALS, REGEX. Header name field does not support match types.
   * `case_sensitive` - (Optional) If true, case is significant in the match. Default is true.
   * `inverse` - (Optional) A flag to indicate whether reverse the match result of this condition. Default is false.
 
-* `header_condition` - (Optional) Set of match conditions used to match http request header:
+* `response_header_condition` - (Optional) Set of match conditions used to match http response header:
   * `name` - (Required) The name of HTTP header to match.
   * `value` - (Required) The value of HTTP header to match.
-  * `match_type` - (Required) Defines how value field is used to match the header value of HTTP requests. Accepted values are STARTS_WITH, ENDS_WITH, CONTAINS, EQUALS, REGEX. Header name field does not support match types.
+  * `match_type` - (Required) Defines how value field is used to match the header value of HTTP response. Accepted values are STARTS_WITH, ENDS_WITH, CONTAINS, EQUALS, REGEX. Header name field does not support match types.
   * `case_sensitive` - (Optional) If true, case is significant in the match. Default is true.
   * `inverse` - (Optional) A flag to indicate whether reverse the match result of this condition. Default is false.
 
@@ -192,17 +191,13 @@ The following arguments are supported:
   * `case_sensitive` - (Optional) If true, case is significant in the match. Default is true.
   * `inverse` - (Optional) A flag to indicate whether reverse the match result of this condition. Default is false.
 
-* `ip_condition` - (Optional) Set of match conditions used to match IP header values of HTTP request:
+* `ip_condition` - (Optional) Set of match conditions used to match IP header values of HTTP message:
   * `source_address` - (Required) The value source IP address to match.
   * `inverse` - (Optional) A flag to indicate whether reverse the match result of this condition. Default is false.
 
-* `header_rewrite_action` - (Optional) Set of header rewrite actions to be executed when load balancer rule matches:
+* `header_rewrite_action` - (Optional) Set of header rewrite actions to be executed on the outgoing response when load balancer rule matches:
   * `name` - (Required) The name of HTTP header to be rewritten.
   * `value` - (Required) The new value of HTTP header.
-
-* `uri_rewrite_action` - (Optional) Set of header rewrite actions to be executed when load balancer rule matches:
-  * `uri` - (Required) The new URI for the HTTP request.
-  * `uri_arguments` - (Required) The new URI arguments(query string) for the HTTP request.
 
 
 ## Attributes Reference
@@ -222,7 +217,7 @@ An existing lb rule can be [imported][docs-import] into this resource, via the f
 [docs-import]: /docs/import/index.html
 
 ```
-terraform import nsxt_lb_http_request_rewrite_rule.lb_rule UUID
+terraform import nsxt_lb_http_response_rewrite_rule.lb_rule UUID
 ```
 
 The above would import the lb rule named `lb_rule` with the nsx id `UUID`

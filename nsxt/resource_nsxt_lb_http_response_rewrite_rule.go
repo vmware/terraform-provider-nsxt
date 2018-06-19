@@ -13,11 +13,11 @@ import (
 	"net/http"
 )
 
-func resourceNsxtLbHTTPRequestRewriteRule() *schema.Resource {
+func resourceNsxtLbHTTPResponseRewriteRule() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNsxtLbHTTPRequestRewriteRuleCreate,
-		Read:   resourceNsxtLbHTTPRequestRewriteRuleRead,
-		Update: resourceNsxtLbHTTPRequestRewriteRuleUpdate,
+		Create: resourceNsxtLbHTTPResponseRewriteRuleCreate,
+		Read:   resourceNsxtLbHTTPResponseRewriteRuleRead,
+		Update: resourceNsxtLbHTTPResponseRewriteRuleUpdate,
 		Delete: resourceNsxtLbHTTPRuleDelete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
@@ -44,28 +44,35 @@ func resourceNsxtLbHTTPRequestRewriteRule() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"ALL", "ANY"}, false),
 				Default:      "ALL",
 			},
-			"header_condition":        getLbRuleHTTPHeaderConditionSchema(),
-			"body_condition":          getLbRuleHTTPRequestBodyConditionSchema(),
-			"method_condition":        getLbRuleHTTPRequestMethodConditionSchema(),
-			"cookie_condition":        getLbRuleHTTPHeaderConditionSchema(),
-			"version_condition":       getLbRuleHTTPVersionConditionSchema(),
-			"uri_condition":           getLbRuleHTTPRequestURIConditionSchema(),
-			"uri_arguments_condition": getLbRuleHTTPRequestURIArgumentsConditionSchema(),
-			"ip_condition":            getLbRuleIPConditionSchema(),
-			"tcp_condition":           getLbRuleTCPConditionSchema(),
+			"request_header_condition":  getLbRuleHTTPHeaderConditionSchema(),
+			"response_header_condition": getLbRuleHTTPHeaderConditionSchema(),
+			"method_condition":          getLbRuleHTTPRequestMethodConditionSchema(),
+			"cookie_condition":          getLbRuleHTTPHeaderConditionSchema(),
+			"version_condition":         getLbRuleHTTPVersionConditionSchema(),
+			"uri_condition":             getLbRuleHTTPRequestURIConditionSchema(),
+			"uri_arguments_condition":   getLbRuleHTTPRequestURIArgumentsConditionSchema(),
+			"ip_condition":              getLbRuleIPConditionSchema(),
+			"tcp_condition":             getLbRuleTCPConditionSchema(),
 
-			"uri_rewrite_action":    getLbRuleURIRewriteActionSchema(),
 			"header_rewrite_action": getLbRuleHeaderRewriteActionSchema(),
 		},
 	}
 }
 
-func getLbRuleHTTPRequestConditionsFromSchema(d *schema.ResourceData) []loadbalancer.LbRuleCondition {
+func getLbRuleHTTPResponseConditionsFromSchema(d *schema.ResourceData) []loadbalancer.LbRuleCondition {
 	var conditionList []loadbalancer.LbRuleCondition
-	conditions := d.Get("header_condition").(*schema.Set).List()
+	conditions := d.Get("request_header_condition").(*schema.Set).List()
 	for _, condition := range conditions {
 		data := condition.(map[string]interface{})
 		elem := initLbHTTPRuleMatchConditionFromSchema(data, "LbHttpRequestHeaderCondition", true, false)
+
+		conditionList = append(conditionList, elem)
+	}
+
+	conditions = d.Get("response_header_condition").(*schema.Set).List()
+	for _, condition := range conditions {
+		data := condition.(map[string]interface{})
+		elem := initLbHTTPRuleMatchConditionFromSchema(data, "LbHttpResponseHeaderCondition", true, false)
 
 		conditionList = append(conditionList, elem)
 	}
@@ -74,15 +81,6 @@ func getLbRuleHTTPRequestConditionsFromSchema(d *schema.ResourceData) []loadbala
 	for _, condition := range conditions {
 		data := condition.(map[string]interface{})
 		elem := initLbHTTPRuleMatchConditionFromSchema(data, "LbHttpRequestCookieCondition", false, true)
-
-		conditionList = append(conditionList, elem)
-	}
-
-	conditions = d.Get("body_condition").(*schema.Set).List()
-	for _, condition := range conditions {
-		data := condition.(map[string]interface{})
-		elem := initLbHTTPRuleMatchConditionFromSchema(data, "LbHttpRequestBodyCondition", false, false)
-		elem.BodyValue = data["value"].(string)
 
 		conditionList = append(conditionList, elem)
 	}
@@ -156,10 +154,10 @@ func getLbRuleHTTPRequestConditionsFromSchema(d *schema.ResourceData) []loadbala
 	return conditionList
 }
 
-func setLbRuleHTTPRequestConditionsInSchema(d *schema.ResourceData, conditions []loadbalancer.LbRuleCondition) error {
-	var headerConditionList []map[string]interface{}
+func setLbRuleHTTPResponseConditionsInSchema(d *schema.ResourceData, conditions []loadbalancer.LbRuleCondition) error {
+	var requestHeaderConditionList []map[string]interface{}
+	var responseHeaderConditionList []map[string]interface{}
 	var cookieConditionList []map[string]interface{}
-	var bodyConditionList []map[string]interface{}
 	var methodConditionList []map[string]interface{}
 	var versionConditionList []map[string]interface{}
 	var uriConditionList []map[string]interface{}
@@ -171,29 +169,18 @@ func setLbRuleHTTPRequestConditionsInSchema(d *schema.ResourceData, conditions [
 		elem := make(map[string]interface{})
 
 		if condition.Type_ == "LbHttpRequestHeaderCondition" {
-			elem["name"] = condition.HeaderName
-			elem["value"] = condition.HeaderValue
-			elem["inverse"] = condition.Inverse
-			elem["match_type"] = condition.MatchType
-			elem["case_sensitive"] = *condition.CaseSensitive
-			headerConditionList = append(headerConditionList, elem)
+			fillLbHttpRuleHeaderConditionInSchema(elem, condition, false)
+			requestHeaderConditionList = append(requestHeaderConditionList, elem)
+		}
+
+		if condition.Type_ == "LbHttpResponseHeaderCondition" {
+			fillLbHttpRuleHeaderConditionInSchema(elem, condition, false)
+			responseHeaderConditionList = append(responseHeaderConditionList, elem)
 		}
 
 		if condition.Type_ == "LbHttpRequestCookieCondition" {
-			elem["name"] = condition.CookieName
-			elem["value"] = condition.CookieValue
-			elem["inverse"] = condition.Inverse
-			elem["match_type"] = condition.MatchType
-			elem["case_sensitive"] = *condition.CaseSensitive
+			fillLbHttpRuleHeaderConditionInSchema(elem, condition, true)
 			cookieConditionList = append(cookieConditionList, elem)
-		}
-
-		if condition.Type_ == "LbHttpRequestBodyCondition" {
-			elem["value"] = condition.BodyValue
-			elem["inverse"] = condition.Inverse
-			elem["match_type"] = condition.MatchType
-			elem["case_sensitive"] = *condition.CaseSensitive
-			bodyConditionList = append(bodyConditionList, elem)
 		}
 
 		if condition.Type_ == "LbHttpRequestMethodCondition" {
@@ -236,17 +223,17 @@ func setLbRuleHTTPRequestConditionsInSchema(d *schema.ResourceData, conditions [
 			tcpConditionList = append(tcpConditionList, elem)
 		}
 
-		err := d.Set("header_condition", headerConditionList)
+		err := d.Set("request_header_condition", requestHeaderConditionList)
+		if err != nil {
+			return err
+		}
+
+		err = d.Set("response_header_condition", responseHeaderConditionList)
 		if err != nil {
 			return err
 		}
 
 		err = d.Set("cookie_condition", cookieConditionList)
-		if err != nil {
-			return err
-		}
-
-		err = d.Set("body_condition", bodyConditionList)
 		if err != nil {
 			return err
 		}
@@ -285,27 +272,15 @@ func setLbRuleHTTPRequestConditionsInSchema(d *schema.ResourceData, conditions [
 	return nil
 }
 
-func getLbRuleRequestRewriteActionsFromSchema(d *schema.ResourceData) []loadbalancer.LbRuleAction {
+func getLbRuleResponseRewriteActionsFromSchema(d *schema.ResourceData) []loadbalancer.LbRuleAction {
 	var actionList []loadbalancer.LbRuleAction
 	actions := d.Get("header_rewrite_action").(*schema.Set).List()
 	for _, action := range actions {
 		data := action.(map[string]interface{})
 		elem := loadbalancer.LbRuleAction{
-			Type_:       "LbHttpRequestHeaderRewriteAction",
+			Type_:       "LbHttpResponseHeaderRewriteAction",
 			HeaderName:  data["name"].(string),
 			HeaderValue: data["value"].(string),
-		}
-
-		actionList = append(actionList, elem)
-	}
-
-	actions = d.Get("uri_rewrite_action").(*schema.Set).List()
-	for _, action := range actions {
-		data := action.(map[string]interface{})
-		elem := loadbalancer.LbRuleAction{
-			Type_:        "LbHttpRequestUriRewriteAction",
-			Uri:          data["uri"].(string),
-			UriArguments: data["uri_arguments"].(string),
 		}
 
 		actionList = append(actionList, elem)
@@ -314,46 +289,35 @@ func getLbRuleRequestRewriteActionsFromSchema(d *schema.ResourceData) []loadbala
 	return actionList
 }
 
-func setLbRuleRequestRewriteActionsInSchema(d *schema.ResourceData, actions []loadbalancer.LbRuleAction) error {
-	var uriActionList []map[string]string
+func setLbRuleResponseRewriteActionsInSchema(d *schema.ResourceData, actions []loadbalancer.LbRuleAction) error {
 	var headerActionList []map[string]string
 
 	for _, action := range actions {
 		elem := make(map[string]string)
-		if action.Type_ == "LbHttpRequestHeaderRewriteAction" {
+		if action.Type_ == "LbHttpResponseHeaderRewriteAction" {
 			elem["name"] = action.HeaderName
 			elem["value"] = action.HeaderValue
 			headerActionList = append(headerActionList, elem)
-		}
-
-		if action.Type_ == "LbHttpRequestUriRewriteAction" {
-			elem["uri"] = action.Uri
-			elem["uri_arguments"] = action.UriArguments
-			uriActionList = append(uriActionList, elem)
 		}
 
 		err := d.Set("header_rewrite_action", headerActionList)
 		if err != nil {
 			return err
 		}
-
-		err = d.Set("uri_rewrite_action", uriActionList)
-		if err != nil {
-			return err
-		}
 	}
+
 	return nil
 }
 
-func resourceNsxtLbHTTPRequestRewriteRuleCreate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtLbHTTPResponseRewriteRuleCreate(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
-	matchConditions := getLbRuleHTTPRequestConditionsFromSchema(d)
-	actions := getLbRuleRequestRewriteActionsFromSchema(d)
+	matchConditions := getLbRuleHTTPResponseConditionsFromSchema(d)
+	actions := getLbRuleResponseRewriteActionsFromSchema(d)
 	matchStrategy := d.Get("match_strategy").(string)
-	phase := "HTTP_REQUEST_REWRITE"
+	phase := "HTTP_RESPONSE_REWRITE"
 
 	lbRule := loadbalancer.LbRule{
 		Description:     description,
@@ -376,10 +340,10 @@ func resourceNsxtLbHTTPRequestRewriteRuleCreate(d *schema.ResourceData, m interf
 	}
 	d.SetId(lbRule.Id)
 
-	return resourceNsxtLbHTTPRequestRewriteRuleRead(d, m)
+	return resourceNsxtLbHTTPResponseRewriteRuleRead(d, m)
 }
 
-func resourceNsxtLbHTTPRequestRewriteRuleRead(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtLbHTTPResponseRewriteRuleRead(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 	id := d.Id()
 	if id == "" {
@@ -400,10 +364,9 @@ func resourceNsxtLbHTTPRequestRewriteRuleRead(d *schema.ResourceData, m interfac
 	d.Set("description", lbRule.Description)
 	d.Set("display_name", lbRule.DisplayName)
 	setTagsInSchema(d, lbRule.Tags)
-	setLbRuleHTTPRequestConditionsInSchema(d, lbRule.MatchConditions)
+	setLbRuleHTTPResponseConditionsInSchema(d, lbRule.MatchConditions)
 	d.Set("match_strategy", lbRule.MatchStrategy)
-	err = setLbRuleRequestRewriteActionsInSchema(d, lbRule.Actions)
-
+	err = setLbRuleResponseRewriteActionsInSchema(d, lbRule.Actions)
 	if err != nil {
 		log.Printf("[DEBUG] Failed to set action in LoadBalancerRule %v: %v", id, err)
 		d.SetId("")
@@ -413,7 +376,7 @@ func resourceNsxtLbHTTPRequestRewriteRuleRead(d *schema.ResourceData, m interfac
 	return nil
 }
 
-func resourceNsxtLbHTTPRequestRewriteRuleUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtLbHTTPResponseRewriteRuleUpdate(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 	id := d.Id()
 	if id == "" {
@@ -424,10 +387,10 @@ func resourceNsxtLbHTTPRequestRewriteRuleUpdate(d *schema.ResourceData, m interf
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
-	matchConditions := getLbRuleHTTPRequestConditionsFromSchema(d)
-	actions := getLbRuleRequestRewriteActionsFromSchema(d)
+	matchConditions := getLbRuleHTTPResponseConditionsFromSchema(d)
+	actions := getLbRuleResponseRewriteActionsFromSchema(d)
 	matchStrategy := d.Get("match_strategy").(string)
-	phase := "HTTP_REQUEST_REWRITE"
+	phase := "HTTP_RESPONSE_REWRITE"
 
 	lbRule := loadbalancer.LbRule{
 		Revision:        revision,
@@ -446,5 +409,5 @@ func resourceNsxtLbHTTPRequestRewriteRuleUpdate(d *schema.ResourceData, m interf
 		return fmt.Errorf("Error during LoadBalancerRule update: %v", err)
 	}
 
-	return resourceNsxtLbHTTPRequestRewriteRuleRead(d, m)
+	return resourceNsxtLbHTTPResponseRewriteRuleRead(d, m)
 }
