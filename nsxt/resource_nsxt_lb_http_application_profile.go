@@ -15,12 +15,12 @@ import (
 
 var xForwardedValues = []string{"INSERT", "REPLACE"}
 
-func resourceNsxtLbHttpApplicationProfile() *schema.Resource {
+func resourceNsxtLbHTTPApplicationProfile() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNsxtLbHttpApplicationProfileCreate,
-		Read:   resourceNsxtLbHttpApplicationProfileRead,
-		Update: resourceNsxtLbHttpApplicationProfileUpdate,
-		Delete: resourceNsxtLbHttpApplicationProfileDelete,
+		Create: resourceNsxtLbHTTPApplicationProfileCreate,
+		Read:   resourceNsxtLbHTTPApplicationProfileRead,
+		Update: resourceNsxtLbHTTPApplicationProfileUpdate,
+		Delete: resourceNsxtLbHTTPApplicationProfileDelete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -92,25 +92,25 @@ func resourceNsxtLbHttpApplicationProfile() *schema.Resource {
 	}
 }
 
-func resourceNsxtLbHttpApplicationProfileCreate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtLbHTTPApplicationProfileCreate(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
 	httpRedirectTo := d.Get("http_redirect_to").(string)
-	httpRedirectToHttps := d.Get("http_redirect_to_https").(bool)
+	httpRedirectToHTTPS := d.Get("http_redirect_to_https").(bool)
 	idleTimeout := int64(d.Get("idle_timeout").(int))
 	ntlm := d.Get("ntlm").(bool)
 	requestBodySize := int64(d.Get("request_body_size").(int))
 	requestHeaderSize := int64(d.Get("request_header_size").(int))
 	responseTimeout := int64(d.Get("response_timeout").(int))
 	xForwardedFor := d.Get("x_forwarded_for").(string)
-	lbHttpApplicationProfile := loadbalancer.LbHttpProfile{
+	lbHTTPApplicationProfile := loadbalancer.LbHttpProfile{
 		Description:         description,
 		DisplayName:         displayName,
 		Tags:                tags,
 		HttpRedirectTo:      httpRedirectTo,
-		HttpRedirectToHttps: httpRedirectToHttps,
+		HttpRedirectToHttps: httpRedirectToHTTPS,
 		IdleTimeout:         idleTimeout,
 		Ntlm:                ntlm,
 		RequestBodySize:     requestBodySize,
@@ -119,54 +119,54 @@ func resourceNsxtLbHttpApplicationProfileCreate(d *schema.ResourceData, m interf
 		XForwardedFor:       xForwardedFor,
 	}
 
-	lbHttpApplicationProfile, resp, err := nsxClient.ServicesApi.CreateLoadBalancerHttpProfile(nsxClient.Context, lbHttpApplicationProfile)
+	lbHTTPApplicationProfile, resp, err := nsxClient.ServicesApi.CreateLoadBalancerHttpProfile(nsxClient.Context, lbHTTPApplicationProfile)
 
 	if err != nil {
-		return fmt.Errorf("Error during LbHttpApplicationProfile create: %v", err)
+		return fmt.Errorf("Error during LbHTTPApplicationProfile create: %v", err)
 	}
 
 	if resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("Unexpected status returned during LbHttpApplicationProfile create: %v", resp.StatusCode)
+		return fmt.Errorf("Unexpected status returned during LbHTTPApplicationProfile create: %v", resp.StatusCode)
 	}
-	d.SetId(lbHttpApplicationProfile.Id)
+	d.SetId(lbHTTPApplicationProfile.Id)
 
-	return resourceNsxtLbHttpApplicationProfileRead(d, m)
+	return resourceNsxtLbHTTPApplicationProfileRead(d, m)
 }
 
-func resourceNsxtLbHttpApplicationProfileRead(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtLbHTTPApplicationProfileRead(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")
 	}
 
-	lbHttpApplicationProfile, resp, err := nsxClient.ServicesApi.ReadLoadBalancerHttpProfile(nsxClient.Context, id)
+	lbHTTPApplicationProfile, resp, err := nsxClient.ServicesApi.ReadLoadBalancerHttpProfile(nsxClient.Context, id)
 	if err != nil {
-		return fmt.Errorf("Error during LbHttpApplicationProfile read: %v", err)
+		return fmt.Errorf("Error during LbHTTPApplicationProfile read: %v", err)
 	}
 
 	if resp.StatusCode == http.StatusNotFound {
-		log.Printf("[DEBUG] LbHttpApplicationProfile %s not found", id)
+		log.Printf("[DEBUG] LbHTTPApplicationProfile %s not found", id)
 		d.SetId("")
 		return nil
 	}
-	d.Set("revision", lbHttpApplicationProfile.Revision)
-	d.Set("description", lbHttpApplicationProfile.Description)
-	d.Set("display_name", lbHttpApplicationProfile.DisplayName)
-	setTagsInSchema(d, lbHttpApplicationProfile.Tags)
-	d.Set("http_redirect_to", lbHttpApplicationProfile.HttpRedirectTo)
-	d.Set("http_redirect_to_https", lbHttpApplicationProfile.HttpRedirectToHttps)
-	d.Set("idle_timeout", lbHttpApplicationProfile.IdleTimeout)
-	d.Set("ntlm", lbHttpApplicationProfile.Ntlm)
-	d.Set("request_body_size", lbHttpApplicationProfile.RequestBodySize)
-	d.Set("request_header_size", lbHttpApplicationProfile.RequestHeaderSize)
-	d.Set("response_timeout", lbHttpApplicationProfile.ResponseTimeout)
-	d.Set("x_forwarded_for", lbHttpApplicationProfile.XForwardedFor)
+	d.Set("revision", lbHTTPApplicationProfile.Revision)
+	d.Set("description", lbHTTPApplicationProfile.Description)
+	d.Set("display_name", lbHTTPApplicationProfile.DisplayName)
+	setTagsInSchema(d, lbHTTPApplicationProfile.Tags)
+	d.Set("http_redirect_to", lbHTTPApplicationProfile.HttpRedirectTo)
+	d.Set("http_redirect_to_https", lbHTTPApplicationProfile.HttpRedirectToHttps)
+	d.Set("idle_timeout", lbHTTPApplicationProfile.IdleTimeout)
+	d.Set("ntlm", lbHTTPApplicationProfile.Ntlm)
+	d.Set("request_body_size", lbHTTPApplicationProfile.RequestBodySize)
+	d.Set("request_header_size", lbHTTPApplicationProfile.RequestHeaderSize)
+	d.Set("response_timeout", lbHTTPApplicationProfile.ResponseTimeout)
+	d.Set("x_forwarded_for", lbHTTPApplicationProfile.XForwardedFor)
 
 	return nil
 }
 
-func resourceNsxtLbHttpApplicationProfileUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtLbHTTPApplicationProfileUpdate(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 	id := d.Id()
 	if id == "" {
@@ -178,20 +178,20 @@ func resourceNsxtLbHttpApplicationProfileUpdate(d *schema.ResourceData, m interf
 	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
 	httpRedirectTo := d.Get("http_redirect_to").(string)
-	httpRedirectToHttps := d.Get("http_redirect_to_https").(bool)
+	httpRedirectToHTTPS := d.Get("http_redirect_to_https").(bool)
 	idleTimeout := int64(d.Get("idle_timeout").(int))
 	ntlm := d.Get("ntlm").(bool)
 	requestBodySize := int64(d.Get("request_body_size").(int))
 	requestHeaderSize := int64(d.Get("request_header_size").(int))
 	responseTimeout := int64(d.Get("response_timeout").(int))
 	xForwardedFor := d.Get("x_forwarded_for").(string)
-	lbHttpApplicationProfile := loadbalancer.LbHttpProfile{
+	lbHTTPApplicationProfile := loadbalancer.LbHttpProfile{
 		Revision:            revision,
 		Description:         description,
 		DisplayName:         displayName,
 		Tags:                tags,
 		HttpRedirectTo:      httpRedirectTo,
-		HttpRedirectToHttps: httpRedirectToHttps,
+		HttpRedirectToHttps: httpRedirectToHTTPS,
 		IdleTimeout:         idleTimeout,
 		Ntlm:                ntlm,
 		RequestBodySize:     requestBodySize,
@@ -200,16 +200,16 @@ func resourceNsxtLbHttpApplicationProfileUpdate(d *schema.ResourceData, m interf
 		XForwardedFor:       xForwardedFor,
 	}
 
-	lbHttpApplicationProfile, resp, err := nsxClient.ServicesApi.UpdateLoadBalancerHttpProfile(nsxClient.Context, id, lbHttpApplicationProfile)
+	lbHTTPApplicationProfile, resp, err := nsxClient.ServicesApi.UpdateLoadBalancerHttpProfile(nsxClient.Context, id, lbHTTPApplicationProfile)
 
 	if err != nil || resp.StatusCode == http.StatusNotFound {
-		return fmt.Errorf("Error during LbHttpApplicationProfile update: %v", err)
+		return fmt.Errorf("Error during LbHTTPApplicationProfile update: %v", err)
 	}
 
-	return resourceNsxtLbHttpApplicationProfileRead(d, m)
+	return resourceNsxtLbHTTPApplicationProfileRead(d, m)
 }
 
-func resourceNsxtLbHttpApplicationProfileDelete(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtLbHTTPApplicationProfileDelete(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 	id := d.Id()
 	if id == "" {
@@ -218,11 +218,11 @@ func resourceNsxtLbHttpApplicationProfileDelete(d *schema.ResourceData, m interf
 
 	resp, err := nsxClient.ServicesApi.DeleteLoadBalancerApplicationProfile(nsxClient.Context, id)
 	if err != nil {
-		return fmt.Errorf("Error during LbHttpApplicationProfile delete: %v", err)
+		return fmt.Errorf("Error during LbHTTPApplicationProfile delete: %v", err)
 	}
 
 	if resp.StatusCode == http.StatusNotFound {
-		log.Printf("[DEBUG] LbHttpApplicationProfile %s not found", id)
+		log.Printf("[DEBUG] LbHTTPApplicationProfile %s not found", id)
 		d.SetId("")
 	}
 	return nil

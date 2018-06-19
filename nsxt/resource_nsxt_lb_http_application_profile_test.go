@@ -12,7 +12,7 @@ import (
 	"testing"
 )
 
-func TestAccResourceNsxtLbHttpApplicationProfile_basic(t *testing.T) {
+func TestAccResourceNsxtLbHTTPApplicationProfile_basic(t *testing.T) {
 	name := "test"
 	updatedName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_lb_http_application_profile.test"
@@ -25,8 +25,8 @@ func TestAccResourceNsxtLbHttpApplicationProfile_basic(t *testing.T) {
 	forward := "INSERT"
 	ntlm := "true"
 
-	upHttpRedirect := ""
-	upHttpsRedirect := "true"
+	upHTTPRedirect := ""
+	upHTTPSRedirect := "true"
 	upIdleTime := "110"
 	upBodySize := "120"
 	upHeaderSize := "130"
@@ -38,13 +38,13 @@ func TestAccResourceNsxtLbHttpApplicationProfile_basic(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXLbHttpApplicationProfileCheckDestroy(state, name)
+			return testAccNSXLbHTTPApplicationProfileCheckDestroy(state, name)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXLbHttpApplicationCreateTemplate(name, httpRedirect, httpsRedirect, idleTime, bodySize, headerSize, respTimeout, forward, ntlm),
+				Config: testAccNSXLbHTTPApplicationCreateTemplate(name, httpRedirect, httpsRedirect, idleTime, bodySize, headerSize, respTimeout, forward, ntlm),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNSXLbHttpApplicationProfileExists(name, testResourceName),
+					testAccNSXLbHTTPApplicationProfileExists(name, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "app profile"),
 					resource.TestCheckResourceAttr(testResourceName, "http_redirect_to", httpRedirect),
@@ -59,9 +59,9 @@ func TestAccResourceNsxtLbHttpApplicationProfile_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXLbHttpApplicationCreateTemplate(updatedName, upHttpRedirect, upHttpsRedirect, upIdleTime, upBodySize, upHeaderSize, upRespTimeout, upForward, upNtlm),
+				Config: testAccNSXLbHTTPApplicationCreateTemplate(updatedName, upHTTPRedirect, upHTTPSRedirect, upIdleTime, upBodySize, upHeaderSize, upRespTimeout, upForward, upNtlm),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNSXLbHttpApplicationProfileExists(updatedName, testResourceName),
+					testAccNSXLbHTTPApplicationProfileExists(updatedName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "app profile"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
@@ -71,18 +71,18 @@ func TestAccResourceNsxtLbHttpApplicationProfile_basic(t *testing.T) {
 	})
 }
 
-func TestAccResourceNsxtLbHttpApplicationProfile_importBasic(t *testing.T) {
+func TestAccResourceNsxtLbHTTPApplicationProfile_importBasic(t *testing.T) {
 	name := "test"
 	testResourceName := "nsxt_lb_http_application_profile.test"
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXLbHttpApplicationProfileCheckDestroy(state, name)
+			return testAccNSXLbHTTPApplicationProfileCheckDestroy(state, name)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXLbHttpApplicationCreateTemplateTrivial(name),
+				Config: testAccNSXLbHTTPApplicationCreateTemplateTrivial(name),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -93,7 +93,7 @@ func TestAccResourceNsxtLbHttpApplicationProfile_importBasic(t *testing.T) {
 	})
 }
 
-func testAccNSXLbHttpApplicationProfileExists(displayName string, resourceName string) resource.TestCheckFunc {
+func testAccNSXLbHTTPApplicationProfileExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 		nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
 		rs, ok := state.RootModule().Resources[resourceName]
@@ -122,7 +122,7 @@ func testAccNSXLbHttpApplicationProfileExists(displayName string, resourceName s
 	}
 }
 
-func testAccNSXLbHttpApplicationProfileCheckDestroy(state *terraform.State, displayName string) error {
+func testAccNSXLbHTTPApplicationProfileCheckDestroy(state *terraform.State, displayName string) error {
 	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
 	for _, rs := range state.RootModule().Resources {
 
@@ -146,7 +146,7 @@ func testAccNSXLbHttpApplicationProfileCheckDestroy(state *terraform.State, disp
 	return nil
 }
 
-func testAccNSXLbHttpApplicationCreateTemplate(name string, httpRedirect string, httpsRedirect string, idleTime string, bodySize string, headerSize string, respTimeout string, forward string, ntlm string) string {
+func testAccNSXLbHTTPApplicationCreateTemplate(name string, httpRedirect string, httpsRedirect string, idleTime string, bodySize string, headerSize string, respTimeout string, forward string, ntlm string) string {
 	return fmt.Sprintf(`
 resource "nsxt_lb_http_application_profile" "test" {
   display_name           = "%s"
@@ -168,7 +168,7 @@ resource "nsxt_lb_http_application_profile" "test" {
 `, name, httpRedirect, httpsRedirect, idleTime, bodySize, headerSize, respTimeout, forward, ntlm)
 }
 
-func testAccNSXLbHttpApplicationCreateTemplateTrivial(name string) string {
+func testAccNSXLbHTTPApplicationCreateTemplateTrivial(name string) string {
 	return `
 resource "nsxt_lb_http_application_profile" "test" {
   description = "test description"

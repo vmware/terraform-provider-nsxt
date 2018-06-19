@@ -12,7 +12,7 @@ import (
 	"testing"
 )
 
-func TestAccResourceNsxtLbFastTcpApplicationProfile_basic(t *testing.T) {
+func TestAccResourceNsxtLbFastTCPApplicationProfile_basic(t *testing.T) {
 	name := "test-nsx-application-profile"
 	updatedName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_lb_fast_tcp_application_profile.test"
@@ -27,13 +27,13 @@ func TestAccResourceNsxtLbFastTcpApplicationProfile_basic(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXLbFastTcpApplicationProfileCheckDestroy(state, name)
+			return testAccNSXLbFastTCPApplicationProfileCheckDestroy(state, name)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXLbFastTcpApplicationProfileBasicTemplate(name, closeTimeout, idleTimeout, mirroring),
+				Config: testAccNSXLbFastTCPApplicationProfileBasicTemplate(name, closeTimeout, idleTimeout, mirroring),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNSXLbFastTcpApplicationProfileExists(name, testResourceName),
+					testAccNSXLbFastTCPApplicationProfileExists(name, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "test description"),
 					resource.TestCheckResourceAttr(testResourceName, "close_timeout", closeTimeout),
@@ -42,9 +42,9 @@ func TestAccResourceNsxtLbFastTcpApplicationProfile_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXLbFastTcpApplicationProfileBasicTemplate(updatedName, updatedCloseTimeout, updatedIdleTimeout, updatedMirroring),
+				Config: testAccNSXLbFastTCPApplicationProfileBasicTemplate(updatedName, updatedCloseTimeout, updatedIdleTimeout, updatedMirroring),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNSXLbFastTcpApplicationProfileExists(updatedName, testResourceName),
+					testAccNSXLbFastTCPApplicationProfileExists(updatedName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "test description"),
 					resource.TestCheckResourceAttr(testResourceName, "close_timeout", updatedCloseTimeout),
@@ -57,18 +57,18 @@ func TestAccResourceNsxtLbFastTcpApplicationProfile_basic(t *testing.T) {
 	})
 }
 
-func TestAccResourceNsxtLbFastTcpApplicationProfile_importBasic(t *testing.T) {
+func TestAccResourceNsxtLbFastTCPApplicationProfile_importBasic(t *testing.T) {
 	name := "test-nsx-application-profile"
 	testResourceName := "nsxt_lb_fast_tcp_application_profile.test"
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXLbFastTcpApplicationProfileCheckDestroy(state, name)
+			return testAccNSXLbFastTCPApplicationProfileCheckDestroy(state, name)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXLbFastTcpApplicationProfileCreateTemplateTrivial(name),
+				Config: testAccNSXLbFastTCPApplicationProfileCreateTemplateTrivial(name),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -79,7 +79,7 @@ func TestAccResourceNsxtLbFastTcpApplicationProfile_importBasic(t *testing.T) {
 	})
 }
 
-func testAccNSXLbFastTcpApplicationProfileExists(displayName string, resourceName string) resource.TestCheckFunc {
+func testAccNSXLbFastTCPApplicationProfileExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 		nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
 		rs, ok := state.RootModule().Resources[resourceName]
@@ -108,7 +108,7 @@ func testAccNSXLbFastTcpApplicationProfileExists(displayName string, resourceNam
 	}
 }
 
-func testAccNSXLbFastTcpApplicationProfileCheckDestroy(state *terraform.State, displayName string) error {
+func testAccNSXLbFastTCPApplicationProfileCheckDestroy(state *terraform.State, displayName string) error {
 	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
 	for _, rs := range state.RootModule().Resources {
 
@@ -132,7 +132,7 @@ func testAccNSXLbFastTcpApplicationProfileCheckDestroy(state *terraform.State, d
 	return nil
 }
 
-func testAccNSXLbFastTcpApplicationProfileBasicTemplate(name string, closeTimeout string, idleTimeout string, mirroring string) string {
+func testAccNSXLbFastTCPApplicationProfileBasicTemplate(name string, closeTimeout string, idleTimeout string, mirroring string) string {
 	return fmt.Sprintf(`
 resource "nsxt_lb_fast_tcp_application_profile" "test" {
   display_name      = "%s"
@@ -149,7 +149,7 @@ resource "nsxt_lb_fast_tcp_application_profile" "test" {
 `, name, closeTimeout, idleTimeout, mirroring)
 }
 
-func testAccNSXLbFastTcpApplicationProfileCreateTemplateTrivial(name string) string {
+func testAccNSXLbFastTCPApplicationProfileCreateTemplateTrivial(name string) string {
 	return fmt.Sprintf(`
 resource "nsxt_lb_fast_tcp_application_profile" "test" {
   display_name = "%s"
