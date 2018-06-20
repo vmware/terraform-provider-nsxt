@@ -12,7 +12,7 @@ import (
 	"testing"
 )
 
-func TestAccResourceNsxtLbFastUdpApplicationProfile_basic(t *testing.T) {
+func TestAccResourceNsxtLbFastUDPApplicationProfile_basic(t *testing.T) {
 	name := "test-nsx-application-profile"
 	updatedName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_lb_fast_udp_application_profile.test"
@@ -25,13 +25,13 @@ func TestAccResourceNsxtLbFastUdpApplicationProfile_basic(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXLbFastUdpApplicationProfileCheckDestroy(state, name)
+			return testAccNSXLbFastUDPApplicationProfileCheckDestroy(state, name)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXLbFastUdpApplicationProfileBasicTemplate(name, idleTimeout, mirroring),
+				Config: testAccNSXLbFastUDPApplicationProfileBasicTemplate(name, idleTimeout, mirroring),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNSXLbFastUdpApplicationProfileExists(name, testResourceName),
+					testAccNSXLbFastUDPApplicationProfileExists(name, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "test description"),
 					resource.TestCheckResourceAttr(testResourceName, "idle_timeout", idleTimeout),
@@ -39,9 +39,9 @@ func TestAccResourceNsxtLbFastUdpApplicationProfile_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXLbFastUdpApplicationProfileBasicTemplate(updatedName, updatedIdleTimeout, updatedMirroring),
+				Config: testAccNSXLbFastUDPApplicationProfileBasicTemplate(updatedName, updatedIdleTimeout, updatedMirroring),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNSXLbFastUdpApplicationProfileExists(updatedName, testResourceName),
+					testAccNSXLbFastUDPApplicationProfileExists(updatedName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "test description"),
 					resource.TestCheckResourceAttr(testResourceName, "idle_timeout", updatedIdleTimeout),
@@ -53,18 +53,18 @@ func TestAccResourceNsxtLbFastUdpApplicationProfile_basic(t *testing.T) {
 	})
 }
 
-func TestAccResourceNsxtLbFastUdpApplicationProfile_importBasic(t *testing.T) {
+func TestAccResourceNsxtLbFastUDPApplicationProfile_importBasic(t *testing.T) {
 	name := "test-nsx-application-profile"
 	testResourceName := "nsxt_lb_fast_udp_application_profile.test"
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXLbFastUdpApplicationProfileCheckDestroy(state, name)
+			return testAccNSXLbFastUDPApplicationProfileCheckDestroy(state, name)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXLbFastUdpApplicationProfileCreateTemplateTrivial(name),
+				Config: testAccNSXLbFastUDPApplicationProfileCreateTemplateTrivial(name),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -75,7 +75,7 @@ func TestAccResourceNsxtLbFastUdpApplicationProfile_importBasic(t *testing.T) {
 	})
 }
 
-func testAccNSXLbFastUdpApplicationProfileExists(displayName string, resourceName string) resource.TestCheckFunc {
+func testAccNSXLbFastUDPApplicationProfileExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 		nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
 		rs, ok := state.RootModule().Resources[resourceName]
@@ -104,7 +104,7 @@ func testAccNSXLbFastUdpApplicationProfileExists(displayName string, resourceNam
 	}
 }
 
-func testAccNSXLbFastUdpApplicationProfileCheckDestroy(state *terraform.State, displayName string) error {
+func testAccNSXLbFastUDPApplicationProfileCheckDestroy(state *terraform.State, displayName string) error {
 	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
 	for _, rs := range state.RootModule().Resources {
 
@@ -128,7 +128,7 @@ func testAccNSXLbFastUdpApplicationProfileCheckDestroy(state *terraform.State, d
 	return nil
 }
 
-func testAccNSXLbFastUdpApplicationProfileBasicTemplate(name string, idleTimeout string, mirroring string) string {
+func testAccNSXLbFastUDPApplicationProfileBasicTemplate(name string, idleTimeout string, mirroring string) string {
 	return fmt.Sprintf(`
 resource "nsxt_lb_fast_udp_application_profile" "test" {
   display_name      = "%s"
@@ -144,7 +144,7 @@ resource "nsxt_lb_fast_udp_application_profile" "test" {
 `, name, idleTimeout, mirroring)
 }
 
-func testAccNSXLbFastUdpApplicationProfileCreateTemplateTrivial(name string) string {
+func testAccNSXLbFastUDPApplicationProfileCreateTemplateTrivial(name string) string {
 	return fmt.Sprintf(`
 resource "nsxt_lb_fast_udp_application_profile" "test" {
   display_name = "%s"

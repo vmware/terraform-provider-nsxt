@@ -13,12 +13,12 @@ import (
 	"net/http"
 )
 
-func resourceNsxtLbFastTcpApplicationProfile() *schema.Resource {
+func resourceNsxtLbFastTCPApplicationProfile() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNsxtLbFastTcpApplicationProfileCreate,
-		Read:   resourceNsxtLbFastTcpApplicationProfileRead,
-		Update: resourceNsxtLbFastTcpApplicationProfileUpdate,
-		Delete: resourceNsxtLbFastTcpApplicationProfileDelete,
+		Create: resourceNsxtLbFastTCPApplicationProfileCreate,
+		Read:   resourceNsxtLbFastTCPApplicationProfileRead,
+		Update: resourceNsxtLbFastTCPApplicationProfileUpdate,
+		Delete: resourceNsxtLbFastTCPApplicationProfileDelete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -61,7 +61,7 @@ func resourceNsxtLbFastTcpApplicationProfile() *schema.Resource {
 	}
 }
 
-func resourceNsxtLbFastTcpApplicationProfileCreate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtLbFastTCPApplicationProfileCreate(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
@@ -69,7 +69,7 @@ func resourceNsxtLbFastTcpApplicationProfileCreate(d *schema.ResourceData, m int
 	closeTimeout := int64(d.Get("close_timeout").(int))
 	haFlowMirroringEnabled := d.Get("ha_flow_mirroring").(bool)
 	idleTimeout := int64(d.Get("idle_timeout").(int))
-	lbFastTcpProfile := loadbalancer.LbFastTcpProfile{
+	lbFastTCPProfile := loadbalancer.LbFastTcpProfile{
 		Description:            description,
 		DisplayName:            displayName,
 		Tags:                   tags,
@@ -78,7 +78,7 @@ func resourceNsxtLbFastTcpApplicationProfileCreate(d *schema.ResourceData, m int
 		IdleTimeout:            idleTimeout,
 	}
 
-	lbFastTcpProfile, resp, err := nsxClient.ServicesApi.CreateLoadBalancerFastTcpProfile(nsxClient.Context, lbFastTcpProfile)
+	lbFastTCPProfile, resp, err := nsxClient.ServicesApi.CreateLoadBalancerFastTcpProfile(nsxClient.Context, lbFastTCPProfile)
 
 	if err != nil {
 		return fmt.Errorf("Error during LbFastTcpProfile create: %v", err)
@@ -87,19 +87,19 @@ func resourceNsxtLbFastTcpApplicationProfileCreate(d *schema.ResourceData, m int
 	if resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("Unexpected status returned during LbFastTcpProfile create: %v", resp.StatusCode)
 	}
-	d.SetId(lbFastTcpProfile.Id)
+	d.SetId(lbFastTCPProfile.Id)
 
-	return resourceNsxtLbFastTcpApplicationProfileRead(d, m)
+	return resourceNsxtLbFastTCPApplicationProfileRead(d, m)
 }
 
-func resourceNsxtLbFastTcpApplicationProfileRead(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtLbFastTCPApplicationProfileRead(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")
 	}
 
-	lbFastTcpProfile, resp, err := nsxClient.ServicesApi.ReadLoadBalancerFastTcpProfile(nsxClient.Context, id)
+	lbFastTCPProfile, resp, err := nsxClient.ServicesApi.ReadLoadBalancerFastTcpProfile(nsxClient.Context, id)
 	if err != nil {
 		return fmt.Errorf("Error during LbFastTcpProfile read: %v", err)
 	}
@@ -109,18 +109,18 @@ func resourceNsxtLbFastTcpApplicationProfileRead(d *schema.ResourceData, m inter
 		d.SetId("")
 		return nil
 	}
-	d.Set("revision", lbFastTcpProfile.Revision)
-	d.Set("description", lbFastTcpProfile.Description)
-	d.Set("display_name", lbFastTcpProfile.DisplayName)
-	setTagsInSchema(d, lbFastTcpProfile.Tags)
-	d.Set("close_timeout", lbFastTcpProfile.CloseTimeout)
-	d.Set("ha_flow_mirroring", lbFastTcpProfile.HaFlowMirroringEnabled)
-	d.Set("idle_timeout", lbFastTcpProfile.IdleTimeout)
+	d.Set("revision", lbFastTCPProfile.Revision)
+	d.Set("description", lbFastTCPProfile.Description)
+	d.Set("display_name", lbFastTCPProfile.DisplayName)
+	setTagsInSchema(d, lbFastTCPProfile.Tags)
+	d.Set("close_timeout", lbFastTCPProfile.CloseTimeout)
+	d.Set("ha_flow_mirroring", lbFastTCPProfile.HaFlowMirroringEnabled)
+	d.Set("idle_timeout", lbFastTCPProfile.IdleTimeout)
 
 	return nil
 }
 
-func resourceNsxtLbFastTcpApplicationProfileUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtLbFastTCPApplicationProfileUpdate(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 	id := d.Id()
 	if id == "" {
@@ -134,7 +134,7 @@ func resourceNsxtLbFastTcpApplicationProfileUpdate(d *schema.ResourceData, m int
 	closeTimeout := int64(d.Get("close_timeout").(int))
 	haFlowMirroringEnabled := d.Get("ha_flow_mirroring").(bool)
 	idleTimeout := int64(d.Get("idle_timeout").(int))
-	lbFastTcpProfile := loadbalancer.LbFastTcpProfile{
+	lbFastTCPProfile := loadbalancer.LbFastTcpProfile{
 		Revision:               revision,
 		Description:            description,
 		DisplayName:            displayName,
@@ -144,16 +144,16 @@ func resourceNsxtLbFastTcpApplicationProfileUpdate(d *schema.ResourceData, m int
 		IdleTimeout:            idleTimeout,
 	}
 
-	lbFastTcpProfile, resp, err := nsxClient.ServicesApi.UpdateLoadBalancerFastTcpProfile(nsxClient.Context, id, lbFastTcpProfile)
+	lbFastTCPProfile, resp, err := nsxClient.ServicesApi.UpdateLoadBalancerFastTcpProfile(nsxClient.Context, id, lbFastTCPProfile)
 
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during LbFastTcpProfile update: %v", err)
 	}
 
-	return resourceNsxtLbFastTcpApplicationProfileRead(d, m)
+	return resourceNsxtLbFastTCPApplicationProfileRead(d, m)
 }
 
-func resourceNsxtLbFastTcpApplicationProfileDelete(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtLbFastTCPApplicationProfileDelete(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 	id := d.Id()
 	if id == "" {

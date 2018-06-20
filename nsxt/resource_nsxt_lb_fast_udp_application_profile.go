@@ -13,12 +13,12 @@ import (
 	"net/http"
 )
 
-func resourceNsxtLbFastUdpApplicationProfile() *schema.Resource {
+func resourceNsxtLbFastUDPApplicationProfile() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNsxtLbFastUdpApplicationProfileCreate,
-		Read:   resourceNsxtLbFastUdpApplicationProfileRead,
-		Update: resourceNsxtLbFastUdpApplicationProfileUpdate,
-		Delete: resourceNsxtLbFastUdpApplicationProfileDelete,
+		Create: resourceNsxtLbFastUDPApplicationProfileCreate,
+		Read:   resourceNsxtLbFastUDPApplicationProfileRead,
+		Update: resourceNsxtLbFastUDPApplicationProfileUpdate,
+		Delete: resourceNsxtLbFastUDPApplicationProfileDelete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -54,14 +54,14 @@ func resourceNsxtLbFastUdpApplicationProfile() *schema.Resource {
 	}
 }
 
-func resourceNsxtLbFastUdpApplicationProfileCreate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtLbFastUDPApplicationProfileCreate(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
 	haFlowMirroringEnabled := d.Get("ha_flow_mirroring").(bool)
 	idleTimeout := int64(d.Get("idle_timeout").(int))
-	lbFastUdpProfile := loadbalancer.LbFastUdpProfile{
+	lbFastUDPProfile := loadbalancer.LbFastUdpProfile{
 		Description:          description,
 		DisplayName:          displayName,
 		Tags:                 tags,
@@ -69,7 +69,7 @@ func resourceNsxtLbFastUdpApplicationProfileCreate(d *schema.ResourceData, m int
 		FlowMirroringEnabled: haFlowMirroringEnabled,
 	}
 
-	lbFastUdpProfile, resp, err := nsxClient.ServicesApi.CreateLoadBalancerFastUdpProfile(nsxClient.Context, lbFastUdpProfile)
+	lbFastUDPProfile, resp, err := nsxClient.ServicesApi.CreateLoadBalancerFastUdpProfile(nsxClient.Context, lbFastUDPProfile)
 
 	if err != nil {
 		return fmt.Errorf("Error during LbFastUdpProfile create: %v", err)
@@ -78,19 +78,19 @@ func resourceNsxtLbFastUdpApplicationProfileCreate(d *schema.ResourceData, m int
 	if resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("Unexpected status returned during LbFastUdpProfile create: %v", resp.StatusCode)
 	}
-	d.SetId(lbFastUdpProfile.Id)
+	d.SetId(lbFastUDPProfile.Id)
 
-	return resourceNsxtLbFastUdpApplicationProfileRead(d, m)
+	return resourceNsxtLbFastUDPApplicationProfileRead(d, m)
 }
 
-func resourceNsxtLbFastUdpApplicationProfileRead(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtLbFastUDPApplicationProfileRead(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")
 	}
 
-	lbFastUdpProfile, resp, err := nsxClient.ServicesApi.ReadLoadBalancerFastUdpProfile(nsxClient.Context, id)
+	lbFastUDPProfile, resp, err := nsxClient.ServicesApi.ReadLoadBalancerFastUdpProfile(nsxClient.Context, id)
 	if err != nil {
 		return fmt.Errorf("Error during LbFastUdpProfile read: %v", err)
 	}
@@ -100,17 +100,17 @@ func resourceNsxtLbFastUdpApplicationProfileRead(d *schema.ResourceData, m inter
 		d.SetId("")
 		return nil
 	}
-	d.Set("revision", lbFastUdpProfile.Revision)
-	d.Set("description", lbFastUdpProfile.Description)
-	d.Set("display_name", lbFastUdpProfile.DisplayName)
-	setTagsInSchema(d, lbFastUdpProfile.Tags)
-	d.Set("ha_flow_mirroring", lbFastUdpProfile.FlowMirroringEnabled)
-	d.Set("idle_timeout", lbFastUdpProfile.IdleTimeout)
+	d.Set("revision", lbFastUDPProfile.Revision)
+	d.Set("description", lbFastUDPProfile.Description)
+	d.Set("display_name", lbFastUDPProfile.DisplayName)
+	setTagsInSchema(d, lbFastUDPProfile.Tags)
+	d.Set("ha_flow_mirroring", lbFastUDPProfile.FlowMirroringEnabled)
+	d.Set("idle_timeout", lbFastUDPProfile.IdleTimeout)
 
 	return nil
 }
 
-func resourceNsxtLbFastUdpApplicationProfileUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtLbFastUDPApplicationProfileUpdate(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 	id := d.Id()
 	if id == "" {
@@ -123,7 +123,7 @@ func resourceNsxtLbFastUdpApplicationProfileUpdate(d *schema.ResourceData, m int
 	tags := getTagsFromSchema(d)
 	haFlowMirroringEnabled := d.Get("ha_flow_mirroring").(bool)
 	idleTimeout := int64(d.Get("idle_timeout").(int))
-	lbFastUdpProfile := loadbalancer.LbFastUdpProfile{
+	lbFastUDPProfile := loadbalancer.LbFastUdpProfile{
 		Revision:             revision,
 		Description:          description,
 		DisplayName:          displayName,
@@ -132,16 +132,16 @@ func resourceNsxtLbFastUdpApplicationProfileUpdate(d *schema.ResourceData, m int
 		FlowMirroringEnabled: haFlowMirroringEnabled,
 	}
 
-	lbFastUdpProfile, resp, err := nsxClient.ServicesApi.UpdateLoadBalancerFastUdpProfile(nsxClient.Context, id, lbFastUdpProfile)
+	lbFastUDPProfile, resp, err := nsxClient.ServicesApi.UpdateLoadBalancerFastUdpProfile(nsxClient.Context, id, lbFastUDPProfile)
 
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during LbFastUdpProfile update: %v", err)
 	}
 
-	return resourceNsxtLbFastUdpApplicationProfileRead(d, m)
+	return resourceNsxtLbFastUDPApplicationProfileRead(d, m)
 }
 
-func resourceNsxtLbFastUdpApplicationProfileDelete(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtLbFastUDPApplicationProfileDelete(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 	id := d.Id()
 	if id == "" {
