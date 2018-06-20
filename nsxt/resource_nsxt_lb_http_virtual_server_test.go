@@ -46,6 +46,8 @@ func TestAccResourceNsxtLbHttpVirtualServer_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(fullName, "max_concurrent_connections", "20"),
 					resource.TestCheckResourceAttr(fullName, "max_new_connection_rate", "10"),
 					resource.TestCheckResourceAttr(fullName, "tag.#", "1"),
+					resource.TestCheckResourceAttrSet(fullName, "pool_id"),
+					resource.TestCheckResourceAttrSet(fullName, "sorry_pool_id"),
 				),
 			},
 			{
@@ -63,6 +65,45 @@ func TestAccResourceNsxtLbHttpVirtualServer_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(fullName, "max_concurrent_connections", "20"),
 					resource.TestCheckResourceAttr(fullName, "max_new_connection_rate", "10"),
 					resource.TestCheckResourceAttr(fullName, "tag.#", "1"),
+					resource.TestCheckResourceAttrSet(fullName, "pool_id"),
+					resource.TestCheckResourceAttrSet(fullName, "sorry_pool_id"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtLbHttpVirtualServer_withRules(t *testing.T) {
+	name := "test"
+	fullName := "nsxt_lb_http_virtual_server.test"
+	rule1 := "rule1"
+	rule2 := "rule3"
+	updatedRule1 := "rule2"
+	updatedRule2 := "rule1"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXLbHTTPVirtualServerCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXLbHTTPVirtualServerCreateTemplateWithRules(rule1, rule2),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXLbHTTPVirtualServerExists(name, fullName),
+					resource.TestCheckResourceAttr(fullName, "ip_address", "1.1.1.1"),
+					resource.TestCheckResourceAttr(fullName, "port", "443"),
+					resource.TestCheckResourceAttr(fullName, "rule_ids.#", "2"),
+				),
+			},
+			{
+				Config: testAccNSXLbHTTPVirtualServerCreateTemplateWithRules(updatedRule1, updatedRule2),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXLbHTTPVirtualServerExists(name, fullName),
+					resource.TestCheckResourceAttr(fullName, "ip_address", "1.1.1.1"),
+					resource.TestCheckResourceAttr(fullName, "port", "443"),
+					resource.TestCheckResourceAttr(fullName, "rule_ids.#", "2"),
 				),
 			},
 		},
@@ -229,6 +270,16 @@ resource "nsxt_lb_cookie_persistence_profile" "test" {
   cookie_name  = "test"
 }
 
+resource "nsxt_lb_pool" "test" {
+  display_name = "lb virtual server test"
+  algorithm    = "ROUND_ROBIN"
+}
+
+resource "nsxt_lb_pool" "sorry" {
+  display_name = "lb virtual server test sorry pool"
+  algorithm    = "ROUND_ROBIN"
+}
+
 resource "nsxt_lb_http_virtual_server" "test" {
   display_name               = "test"
   description                = "test description"
@@ -241,6 +292,8 @@ resource "nsxt_lb_http_virtual_server" "test" {
   max_concurrent_connections = 20
   max_new_connection_rate    = 10
   persistence_profile_id     = "${nsxt_lb_cookie_persistence_profile.test.id}"
+  pool_id                    = "${nsxt_lb_pool.test.id}"
+  sorry_pool_id              = "${nsxt_lb_pool.sorry.id}"
 
   tag {
     scope = "scope1"
@@ -248,6 +301,61 @@ resource "nsxt_lb_http_virtual_server" "test" {
   }
 }
 `, enabled, port)
+}
+
+// TODO: add other types of rules
+func testAccNSXLbHTTPVirtualServerCreateTemplateWithRules(rule1 string, rule2 string) string {
+	return fmt.Sprintf(`
+resource "nsxt_lb_http_application_profile" "test" {
+  display_name = "lb virtual server test"
+}
+
+resource "nsxt_lb_http_request_rewrite_rule" "rule1" {
+  display_name = "lb virtual server test rule1"
+  method_condition {
+    method = "HEAD"
+  }
+
+  header_rewrite_action {
+    name  = "NAME1"
+    value = "VALUE1"
+  }
+}
+
+resource "nsxt_lb_http_request_rewrite_rule" "rule2" {
+  display_name = "lb virtual server test rule2"
+  uri_condition {
+    uri        = "/hello"
+    match_type = "STARTS_WITH"
+  }
+
+  header_rewrite_action {
+    name  = "NAME1"
+    value = "VALUE1"
+  }
+}
+
+resource "nsxt_lb_http_request_rewrite_rule" "rule3" {
+  display_name = "lb virtual server test rule3"
+  uri_condition {
+    uri = "html"
+    match_type = "ENDS_WITH"
+  }
+
+  header_rewrite_action {
+    name  = "NAME1"
+    value = "VALUE1"
+  }
+}
+
+resource "nsxt_lb_http_virtual_server" "test" {
+  display_name           = "test"
+  application_profile_id = "${nsxt_lb_http_application_profile.test.id}"
+  ip_address             = "1.1.1.1"
+  port                   = "443"
+  rule_ids               = ["${nsxt_lb_http_request_rewrite_rule.%s.id}", "${nsxt_lb_http_request_rewrite_rule.%s.id}"]
+}
+`, rule1, rule2)
 }
 
 func testAccNSXLbHTTPVirtualServerCreateTemplateWithSSL(depth string) string {

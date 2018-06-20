@@ -23,7 +23,7 @@ resource "nsxt_lb_icmp_monitor" "lb_icmp_monitor" {
   timeout      = 10
   data_length  = 56
 
-  tag = {
+  tag {
     scope = "color"
     tag   = "red"
   }
