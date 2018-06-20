@@ -132,6 +132,7 @@ func Provider() terraform.ResourceProvider {
 			"nsxt_lb_source_ip_persistence_profile":  resourceNsxtLbSourceIPPersistenceProfile(),
 			"nsxt_lb_client_ssl_profile":             resourceNsxtLbClientSslProfile(),
 			"nsxt_lb_server_ssl_profile":             resourceNsxtLbServerSslProfile(),
+			"nsxt_lb_service":                        resourceNsxtLbService(),
 			"nsxt_lb_fast_tcp_application_profile":   resourceNsxtLbFastTCPApplicationProfile(),
 			"nsxt_lb_fast_udp_application_profile":   resourceNsxtLbFastUDPApplicationProfile(),
 			"nsxt_lb_http_application_profile":       resourceNsxtLbHTTPApplicationProfile(),
