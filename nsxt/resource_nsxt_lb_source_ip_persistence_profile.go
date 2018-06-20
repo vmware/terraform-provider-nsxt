@@ -12,12 +12,12 @@ import (
 	"net/http"
 )
 
-func resourceNsxtLbSourceIpPersistenceProfile() *schema.Resource {
+func resourceNsxtLbSourceIPPersistenceProfile() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNsxtLbSourceIpPersistenceProfileCreate,
-		Read:   resourceNsxtLbSourceIpPersistenceProfileRead,
-		Update: resourceNsxtLbSourceIpPersistenceProfileUpdate,
-		Delete: resourceNsxtLbSourceIpPersistenceProfileDelete,
+		Create: resourceNsxtLbSourceIPPersistenceProfileCreate,
+		Read:   resourceNsxtLbSourceIPPersistenceProfileRead,
+		Update: resourceNsxtLbSourceIPPersistenceProfileUpdate,
+		Delete: resourceNsxtLbSourceIPPersistenceProfileDelete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -63,20 +63,20 @@ func resourceNsxtLbSourceIpPersistenceProfile() *schema.Resource {
 	}
 }
 
-func resourceNsxtLbSourceIpPersistenceProfileCreate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtLbSourceIPPersistenceProfileCreate(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
 	persistenceShared := d.Get("persistence_shared").(bool)
 	haPersistenceMirroring := d.Get("ha_persistence_mirroring").(bool)
-	purge_flag := d.Get("purge_when_full").(bool)
+	purgeFlag := d.Get("purge_when_full").(bool)
 	purge := "FULL"
-	if purge_flag == false {
+	if purgeFlag == false {
 		purge = "NO_PURGE"
 	}
 	timeout := int64(d.Get("timeout").(int))
-	lbSourceIpPersistenceProfile := loadbalancer.LbSourceIpPersistenceProfile{
+	lbSourceIPPersistenceProfile := loadbalancer.LbSourceIpPersistenceProfile{
 		Description:                   description,
 		DisplayName:                   displayName,
 		Tags:                          tags,
@@ -86,54 +86,54 @@ func resourceNsxtLbSourceIpPersistenceProfileCreate(d *schema.ResourceData, m in
 		Timeout: timeout,
 	}
 
-	lbSourceIpPersistenceProfile, resp, err := nsxClient.ServicesApi.CreateLoadBalancerSourceIpPersistenceProfile(nsxClient.Context, lbSourceIpPersistenceProfile)
+	lbSourceIPPersistenceProfile, resp, err := nsxClient.ServicesApi.CreateLoadBalancerSourceIpPersistenceProfile(nsxClient.Context, lbSourceIPPersistenceProfile)
 
 	if err != nil {
-		return fmt.Errorf("Error during LbSourceIpPersistenceProfile create: %v", err)
+		return fmt.Errorf("Error during LbSourceIPPersistenceProfile create: %v", err)
 	}
 
 	if resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("Unexpected status returned during LbSourceIpPersistenceProfile create: %v", resp.StatusCode)
+		return fmt.Errorf("Unexpected status returned during LbSourceIPPersistenceProfile create: %v", resp.StatusCode)
 	}
-	d.SetId(lbSourceIpPersistenceProfile.Id)
+	d.SetId(lbSourceIPPersistenceProfile.Id)
 
-	return resourceNsxtLbSourceIpPersistenceProfileRead(d, m)
+	return resourceNsxtLbSourceIPPersistenceProfileRead(d, m)
 }
 
-func resourceNsxtLbSourceIpPersistenceProfileRead(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtLbSourceIPPersistenceProfileRead(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")
 	}
 
-	lbSourceIpPersistenceProfile, resp, err := nsxClient.ServicesApi.ReadLoadBalancerSourceIpPersistenceProfile(nsxClient.Context, id)
+	lbSourceIPPersistenceProfile, resp, err := nsxClient.ServicesApi.ReadLoadBalancerSourceIpPersistenceProfile(nsxClient.Context, id)
 	if err != nil {
-		return fmt.Errorf("Error during LbSourceIpPersistenceProfile read: %v", err)
+		return fmt.Errorf("Error during LbSourceIPPersistenceProfile read: %v", err)
 	}
 
 	if resp.StatusCode == http.StatusNotFound {
-		log.Printf("[DEBUG] LbSourceIpPersistenceProfile %s not found", id)
+		log.Printf("[DEBUG] LbSourceIPPersistenceProfile %s not found", id)
 		d.SetId("")
 		return nil
 	}
-	d.Set("revision", lbSourceIpPersistenceProfile.Revision)
-	d.Set("description", lbSourceIpPersistenceProfile.Description)
-	d.Set("display_name", lbSourceIpPersistenceProfile.DisplayName)
-	setTagsInSchema(d, lbSourceIpPersistenceProfile.Tags)
-	d.Set("persistence_shared", lbSourceIpPersistenceProfile.PersistenceShared)
-	d.Set("ha_persistence_mirroring", lbSourceIpPersistenceProfile.HaPersistenceMirroringEnabled)
-	if lbSourceIpPersistenceProfile.Purge == "FULL" {
+	d.Set("revision", lbSourceIPPersistenceProfile.Revision)
+	d.Set("description", lbSourceIPPersistenceProfile.Description)
+	d.Set("display_name", lbSourceIPPersistenceProfile.DisplayName)
+	setTagsInSchema(d, lbSourceIPPersistenceProfile.Tags)
+	d.Set("persistence_shared", lbSourceIPPersistenceProfile.PersistenceShared)
+	d.Set("ha_persistence_mirroring", lbSourceIPPersistenceProfile.HaPersistenceMirroringEnabled)
+	if lbSourceIPPersistenceProfile.Purge == "FULL" {
 		d.Set("purge_when_full", true)
 	} else {
 		d.Set("purge_when_full", false)
 	}
-	d.Set("timeout", lbSourceIpPersistenceProfile.Timeout)
+	d.Set("timeout", lbSourceIPPersistenceProfile.Timeout)
 
 	return nil
 }
 
-func resourceNsxtLbSourceIpPersistenceProfileUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtLbSourceIPPersistenceProfileUpdate(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 	id := d.Id()
 	if id == "" {
@@ -146,13 +146,13 @@ func resourceNsxtLbSourceIpPersistenceProfileUpdate(d *schema.ResourceData, m in
 	tags := getTagsFromSchema(d)
 	persistenceShared := d.Get("persistence_shared").(bool)
 	haPersistenceMirroring := d.Get("ha_persistence_mirroring").(bool)
-	purge_flag := d.Get("purge_when_full").(bool)
+	purgeFlag := d.Get("purge_when_full").(bool)
 	purge := "FULL"
-	if purge_flag == false {
+	if purgeFlag == false {
 		purge = "NO_PURGE"
 	}
 	timeout := int64(d.Get("timeout").(int))
-	lbSourceIpPersistenceProfile := loadbalancer.LbSourceIpPersistenceProfile{
+	lbSourceIPPersistenceProfile := loadbalancer.LbSourceIpPersistenceProfile{
 		Revision:                      revision,
 		Description:                   description,
 		DisplayName:                   displayName,
@@ -163,16 +163,16 @@ func resourceNsxtLbSourceIpPersistenceProfileUpdate(d *schema.ResourceData, m in
 		Timeout: timeout,
 	}
 
-	lbSourceIpPersistenceProfile, resp, err := nsxClient.ServicesApi.UpdateLoadBalancerSourceIpPersistenceProfile(nsxClient.Context, id, lbSourceIpPersistenceProfile)
+	lbSourceIPPersistenceProfile, resp, err := nsxClient.ServicesApi.UpdateLoadBalancerSourceIpPersistenceProfile(nsxClient.Context, id, lbSourceIPPersistenceProfile)
 
 	if err != nil || resp.StatusCode == http.StatusNotFound {
-		return fmt.Errorf("Error during LbSourceIpPersistenceProfile update: %v", err)
+		return fmt.Errorf("Error during LbSourceIPPersistenceProfile update: %v", err)
 	}
 
-	return resourceNsxtLbSourceIpPersistenceProfileRead(d, m)
+	return resourceNsxtLbSourceIPPersistenceProfileRead(d, m)
 }
 
-func resourceNsxtLbSourceIpPersistenceProfileDelete(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtLbSourceIPPersistenceProfileDelete(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 	id := d.Id()
 	if id == "" {
@@ -181,11 +181,11 @@ func resourceNsxtLbSourceIpPersistenceProfileDelete(d *schema.ResourceData, m in
 
 	resp, err := nsxClient.ServicesApi.DeleteLoadBalancerPersistenceProfile(nsxClient.Context, id)
 	if err != nil {
-		return fmt.Errorf("Error during LbSourceIpPersistenceProfile delete: %v", err)
+		return fmt.Errorf("Error during LbSourceIPPersistenceProfile delete: %v", err)
 	}
 
 	if resp.StatusCode == http.StatusNotFound {
-		log.Printf("[DEBUG] LbSourceIpPersistenceProfile %s not found", id)
+		log.Printf("[DEBUG] LbSourceIPPersistenceProfile %s not found", id)
 		d.SetId("")
 	}
 	return nil

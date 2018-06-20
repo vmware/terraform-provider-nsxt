@@ -111,7 +111,7 @@ func TestAccResourceNsxtLbPool_withIpSnat(t *testing.T) {
 	updatedMinActiveMembers := "4"
 	snatTranslationType := "SNAT_IP_POOL"
 	ipAddress := "1.1.1.1"
-	updatedIpAddress := "1.1.1.2-1.1.1.20"
+	updatedIPAddress := "1.1.1.2-1.1.1.20"
 	portOverload := "2"
 	updatedPortOverload := "16"
 
@@ -138,7 +138,7 @@ func TestAccResourceNsxtLbPool_withIpSnat(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXLbPoolUpdateWithSnatTemplate(updatedName, updatedAlgorithm, updatedMinActiveMembers, snatTranslationType, updatedIpAddress, updatedPortOverload),
+				Config: testAccNSXLbPoolUpdateWithSnatTemplate(updatedName, updatedAlgorithm, updatedMinActiveMembers, snatTranslationType, updatedIPAddress, updatedPortOverload),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXLbPoolExists(updatedName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -146,7 +146,7 @@ func TestAccResourceNsxtLbPool_withIpSnat(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "algorithm", updatedAlgorithm),
 					resource.TestCheckResourceAttr(testResourceName, "min_active_members", updatedMinActiveMembers),
 					resource.TestCheckResourceAttr(testResourceName, "snat_translation.0.type", snatTranslationType),
-					resource.TestCheckResourceAttr(testResourceName, "snat_translation.0.ip", updatedIpAddress),
+					resource.TestCheckResourceAttr(testResourceName, "snat_translation.0.ip", updatedIPAddress),
 					resource.TestCheckResourceAttr(testResourceName, "snat_translation.0.port_overload", updatedPortOverload),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "member.#", "0"),
@@ -166,7 +166,7 @@ func TestAccResourceNsxtLbPool_withMember(t *testing.T) {
 	updatedMinActiveMembers := "4"
 	snatTranslationType := "TRANSPARENT"
 	updatedSnatTranslationType := "SNAT_AUTO_MAP"
-	memberIp := "1.1.1.1"
+	memberIP := "1.1.1.1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -176,7 +176,7 @@ func TestAccResourceNsxtLbPool_withMember(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXLbPoolCreateWithMemberTemplate(name, algorithm, minActiveMembers, snatTranslationType, memberIp),
+				Config: testAccNSXLbPoolCreateWithMemberTemplate(name, algorithm, minActiveMembers, snatTranslationType, memberIP),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXLbPoolExists(name, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -187,11 +187,11 @@ func TestAccResourceNsxtLbPool_withMember(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "member.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "member.0.display_name", name+"-member"),
-					resource.TestCheckResourceAttr(testResourceName, "member.0.ip_address", memberIp),
+					resource.TestCheckResourceAttr(testResourceName, "member.0.ip_address", memberIP),
 				),
 			},
 			{
-				Config: testAccNSXLbPoolUpdateWithMemberTemplate(updatedName, updatedAlgorithm, updatedMinActiveMembers, updatedSnatTranslationType, memberIp),
+				Config: testAccNSXLbPoolUpdateWithMemberTemplate(updatedName, updatedAlgorithm, updatedMinActiveMembers, updatedSnatTranslationType, memberIP),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXLbPoolExists(updatedName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -202,7 +202,7 @@ func TestAccResourceNsxtLbPool_withMember(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "member.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "member.0.display_name", updatedName+"-member"),
-					resource.TestCheckResourceAttr(testResourceName, "member.0.ip_address", memberIp),
+					resource.TestCheckResourceAttr(testResourceName, "member.0.ip_address", memberIP),
 				),
 			},
 		},
@@ -419,7 +419,7 @@ resource "nsxt_lb_pool" "test" {
 `, name)
 }
 
-func testAccNSXLbPoolCreateWithSnatTemplate(name string, algorithm string, minActiveMembers string, snatTranslationType string, snatTranslationIp string, portOverload string) string {
+func testAccNSXLbPoolCreateWithSnatTemplate(name string, algorithm string, minActiveMembers string, snatTranslationType string, snatTranslationIP string, portOverload string) string {
 	return fmt.Sprintf(`
 resource "nsxt_lb_pool" "test" {
   display_name       = "%s"
@@ -438,10 +438,10 @@ resource "nsxt_lb_pool" "test" {
     tag   = "tag1"
   }
 }
-`, name, algorithm, minActiveMembers, snatTranslationType, snatTranslationIp, portOverload)
+`, name, algorithm, minActiveMembers, snatTranslationType, snatTranslationIP, portOverload)
 }
 
-func testAccNSXLbPoolUpdateWithSnatTemplate(name string, algorithm string, minActiveMembers string, snatTranslationType string, snatTranslationIp string, portOverload string) string {
+func testAccNSXLbPoolUpdateWithSnatTemplate(name string, algorithm string, minActiveMembers string, snatTranslationType string, snatTranslationIP string, portOverload string) string {
 	return fmt.Sprintf(`
 resource "nsxt_lb_pool" "test" {
   display_name       = "%s"
@@ -464,7 +464,7 @@ resource "nsxt_lb_pool" "test" {
     tag   = "tag2"
   }
 }
-`, name, algorithm, minActiveMembers, snatTranslationType, snatTranslationIp, portOverload)
+`, name, algorithm, minActiveMembers, snatTranslationType, snatTranslationIP, portOverload)
 }
 
 func testAccNSXLbPoolCreateTemplateTrivial(name string) string {
@@ -475,7 +475,7 @@ resource "nsxt_lb_pool" "test" {
 `
 }
 
-func testAccNSXLbPoolCreateWithMemberTemplate(name string, algorithm string, minActiveMembers string, snatTranslationType string, memberIp string) string {
+func testAccNSXLbPoolCreateWithMemberTemplate(name string, algorithm string, minActiveMembers string, snatTranslationType string, memberIP string) string {
 	return fmt.Sprintf(`
 resource "nsxt_lb_pool" "test" {
   display_name       = "%s"
@@ -502,10 +502,10 @@ resource "nsxt_lb_pool" "test" {
     weight                     = "1"
   }
 }
-`, name, algorithm, minActiveMembers, snatTranslationType, name, memberIp)
+`, name, algorithm, minActiveMembers, snatTranslationType, name, memberIP)
 }
 
-func testAccNSXLbPoolUpdateWithMemberTemplate(name string, algorithm string, minActiveMembers string, snatTranslationType string, memberIp string) string {
+func testAccNSXLbPoolUpdateWithMemberTemplate(name string, algorithm string, minActiveMembers string, snatTranslationType string, memberIP string) string {
 	return fmt.Sprintf(`
 resource "nsxt_lb_pool" "test" {
   display_name          = "%s"
@@ -545,7 +545,7 @@ resource "nsxt_lb_pool" "test" {
     weight                     = "8"
   }
 }
-`, name, algorithm, minActiveMembers, snatTranslationType, name, memberIp)
+`, name, algorithm, minActiveMembers, snatTranslationType, name, memberIP)
 }
 
 func testAccNSXLbPoolCreateWithMemberGroupTemplate(name string, algorithm string, size string, port string) string {

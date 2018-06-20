@@ -205,10 +205,10 @@ func getPoolMemberGroupSchema() *schema.Schema {
 }
 
 func getActiveMonitorIdsFromSchema(d *schema.ResourceData) []string {
-	activeMonitorId := d.Get("active_monitor_id").(string)
+	activeMonitorID := d.Get("active_monitor_id").(string)
 	var activeMonitorIds []string
-	if activeMonitorId != "" {
-		activeMonitorIds = append(activeMonitorIds, activeMonitorId)
+	if activeMonitorID != "" {
+		activeMonitorIds = append(activeMonitorIds, activeMonitorID)
 	}
 	return activeMonitorIds
 }
@@ -346,7 +346,7 @@ func resourceNsxtLbPoolCreate(d *schema.ResourceData, m interface{}) error {
 	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
 	activeMonitorIds := getActiveMonitorIdsFromSchema(d)
-	passiveMonitorId := d.Get("passive_monitor_id").(string)
+	passiveMonitorID := d.Get("passive_monitor_id").(string)
 	algorithm := d.Get("algorithm").(string)
 	members := getPoolMembersFromSchema(d)
 	memberGroup := getPoolMemberGroupFromSchema(d)
@@ -361,7 +361,7 @@ func resourceNsxtLbPoolCreate(d *schema.ResourceData, m interface{}) error {
 		ActiveMonitorIds:       activeMonitorIds,
 		Algorithm:              algorithm,
 		MinActiveMembers:       minActiveMembers,
-		PassiveMonitorId:       passiveMonitorId,
+		PassiveMonitorId:       passiveMonitorID,
 		SnatTranslation:        snatTranslation,
 		TcpMultiplexingEnabled: tcpMultiplexingEnabled,
 		TcpMultiplexingNumber:  tcpMultiplexingNumber,
@@ -442,7 +442,7 @@ func resourceNsxtLbPoolUpdate(d *schema.ResourceData, m interface{}) error {
 	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
 	activeMonitorIds := getActiveMonitorIdsFromSchema(d)
-	passiveMonitorId := d.Get("passive_monitor_id").(string)
+	passiveMonitorID := d.Get("passive_monitor_id").(string)
 	algorithm := d.Get("algorithm").(string)
 	members := getPoolMembersFromSchema(d)
 	memberGroup := getPoolMemberGroupFromSchema(d)
@@ -458,7 +458,7 @@ func resourceNsxtLbPoolUpdate(d *schema.ResourceData, m interface{}) error {
 		ActiveMonitorIds:       activeMonitorIds,
 		Algorithm:              algorithm,
 		MinActiveMembers:       minActiveMembers,
-		PassiveMonitorId:       passiveMonitorId,
+		PassiveMonitorId:       passiveMonitorID,
 		SnatTranslation:        snatTranslation,
 		TcpMultiplexingEnabled: tcpMultiplexingEnabled,
 		TcpMultiplexingNumber:  tcpMultiplexingNumber,

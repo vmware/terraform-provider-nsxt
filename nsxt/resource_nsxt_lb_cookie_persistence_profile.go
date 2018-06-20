@@ -138,11 +138,10 @@ func getInsertParamsFromSchema(d *schema.ResourceData) (string, string, *loadbal
 				CookieMaxIdle: int64(data["max_idle_time"].(int)),
 				CookieMaxLife: int64(data["max_life_time"].(int)),
 			}
-		} else {
-			return cookieDomain, cookiePath, &loadbalancer.LbCookieTime{
-				Type_:         "LbPersistenceCookieTime",
-				CookieMaxIdle: int64(data["max_idle_time"].(int)),
-			}
+		}
+		return cookieDomain, cookiePath, &loadbalancer.LbCookieTime{
+			Type_:         "LbPersistenceCookieTime",
+			CookieMaxIdle: int64(data["max_idle_time"].(int)),
 		}
 	}
 	return "", "", nil
