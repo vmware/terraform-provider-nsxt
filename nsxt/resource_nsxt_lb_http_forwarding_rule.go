@@ -66,7 +66,7 @@ func resourceNsxtLbHTTPForwardingRule() *schema.Resource {
 						},
 						"reply_message": &schema.Schema{
 							Type:     schema.TypeString,
-							Optional: true,
+							Required: true,
 						},
 					},
 				},
@@ -84,7 +84,7 @@ func resourceNsxtLbHTTPForwardingRule() *schema.Resource {
 						},
 						"redirect_url": &schema.Schema{
 							Type:     schema.TypeString,
-							Optional: true,
+							Required: true,
 						},
 					},
 				},
