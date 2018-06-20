@@ -169,17 +169,17 @@ func setLbRuleHTTPResponseConditionsInSchema(d *schema.ResourceData, conditions 
 		elem := make(map[string]interface{})
 
 		if condition.Type_ == "LbHttpRequestHeaderCondition" {
-			fillLbHttpRuleHeaderConditionInSchema(elem, condition, false)
+			fillLbHTTPRuleHeaderConditionInSchema(elem, condition, false)
 			requestHeaderConditionList = append(requestHeaderConditionList, elem)
 		}
 
 		if condition.Type_ == "LbHttpResponseHeaderCondition" {
-			fillLbHttpRuleHeaderConditionInSchema(elem, condition, false)
+			fillLbHTTPRuleHeaderConditionInSchema(elem, condition, false)
 			responseHeaderConditionList = append(responseHeaderConditionList, elem)
 		}
 
 		if condition.Type_ == "LbHttpRequestCookieCondition" {
-			fillLbHttpRuleHeaderConditionInSchema(elem, condition, true)
+			fillLbHTTPRuleHeaderConditionInSchema(elem, condition, true)
 			cookieConditionList = append(cookieConditionList, elem)
 		}
 
