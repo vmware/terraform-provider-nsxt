@@ -56,7 +56,8 @@ func resourceNsxtLbService() *schema.Resource {
 			"size": &schema.Schema{
 				Type:         schema.TypeString,
 				Description:  "Size of load balancer service",
-				Required:     true,
+				Optional:     true,
+				Default:      "SMALL",
 				ValidateFunc: validation.StringInSlice(lbServiceSizes, false),
 			},
 			// TODO: LB service creation will error out on NSX if logical Tier1 router is not

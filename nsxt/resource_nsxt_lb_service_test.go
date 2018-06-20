@@ -175,7 +175,7 @@ resource "nsxt_lb_service" "test" {
     tag   = "tag1"
   }
 
-  depends_on        = ["nsxt_logical_router_link_port_on_tier1.test"]
+  depends_on = ["nsxt_logical_router_link_port_on_tier1.test"]
 }`
 }
 
@@ -199,6 +199,6 @@ resource "nsxt_lb_service" "test" {
     tag   = "tag2"
   }
 
-  depends_on        = ["nsxt_logical_router_link_port_on_tier1.test"]
+  depends_on = ["nsxt_logical_router_link_port_on_tier1.test"]
 }`
 }
