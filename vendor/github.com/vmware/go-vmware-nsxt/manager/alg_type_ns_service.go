@@ -6,7 +6,6 @@
 package manager
 
 type AlgTypeNsServiceEntry struct {
-
 	ResourceType string `json:"resource_type"`
 
 	Alg string `json:"alg"`
@@ -18,8 +17,7 @@ type AlgTypeNsServiceEntry struct {
 }
 
 type AlgTypeNsService struct {
+	NsService
 
-        NsService
-
-        NsserviceElement AlgTypeNsServiceEntry `json:"nsservice_element"`
+	NsserviceElement AlgTypeNsServiceEntry `json:"nsservice_element"`
 }

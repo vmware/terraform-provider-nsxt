@@ -269,6 +269,7 @@ func resourceNsxtLogicalSwitchDelete(d *schema.ResourceData, m interface{}) erro
 	}
 
 	localVarOptionals := make(map[string]interface{})
+	localVarOptionals["cascade"] = true
 	resp, err := nsxClient.LogicalSwitchingApi.DeleteLogicalSwitch(nsxClient.Context, id, localVarOptionals)
 	if err != nil {
 		return fmt.Errorf("Error during LogicalSwitch delete: %v", err)

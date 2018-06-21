@@ -6,15 +6,13 @@
 package manager
 
 type IpProtocolNsServiceEntry struct {
-
 	ResourceType string `json:"resource_type"`
 
 	ProtocolNumber int64 `json:"protocol_number"`
 }
 
 type IpProtocolNsService struct {
+	NsService
 
-        NsService
-
-        NsserviceElement IpProtocolNsServiceEntry `json:"nsservice_element"`
+	NsserviceElement IpProtocolNsServiceEntry `json:"nsservice_element"`
 }
