@@ -126,6 +126,8 @@ func Provider() terraform.ResourceProvider {
 			"nsxt_lb_https_monitor":                  resourceNsxtLbHTTPSMonitor(),
 			"nsxt_lb_passive_monitor":                resourceNsxtLbPassiveMonitor(),
 			"nsxt_lb_pool":                           resourceNsxtLbPool(),
+			"nsxt_lb_tcp_virtual_server":             resourceNsxtLbTCPVirtualServer(),
+			"nsxt_lb_udp_virtual_server":             resourceNsxtLbUDPVirtualServer(),
 			"nsxt_lb_http_forwarding_rule":           resourceNsxtLbHTTPForwardingRule(),
 			"nsxt_lb_http_request_rewrite_rule":      resourceNsxtLbHTTPRequestRewriteRule(),
 			"nsxt_lb_http_response_rewrite_rule":     resourceNsxtLbHTTPResponseRewriteRule(),
