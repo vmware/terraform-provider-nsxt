@@ -56,8 +56,8 @@ func TestAccResourceNsxtLbService_basic(t *testing.T) {
 func TestAccResourceNsxtLbService_withServers(t *testing.T) {
 	name := "test"
 	testResourceName := "nsxt_lb_service.test"
-        logLevel := "EMERGENCY"
-        updatedLogLevel := "INFO"
+	logLevel := "EMERGENCY"
+	updatedLogLevel := "INFO"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -74,8 +74,8 @@ func TestAccResourceNsxtLbService_withServers(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "enabled", "true"),
 					resource.TestCheckResourceAttrSet(testResourceName, "logical_router_id"),
 					resource.TestCheckResourceAttr(testResourceName, "size", "SMALL"),
-                                        resource.TestCheckResourceAttr(testResourceName, "error_log_level", logLevel),
-                                        resource.TestCheckResourceAttr(testResourceName, "virtual_server_ids.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "error_log_level", logLevel),
+					resource.TestCheckResourceAttr(testResourceName, "virtual_server_ids.#", "2"),
 				),
 			},
 			{
@@ -87,7 +87,7 @@ func TestAccResourceNsxtLbService_withServers(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "logical_router_id"),
 					resource.TestCheckResourceAttr(testResourceName, "size", "SMALL"),
 					resource.TestCheckResourceAttr(testResourceName, "error_log_level", updatedLogLevel),
-                                        resource.TestCheckResourceAttr(testResourceName, "virtual_server_ids.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "virtual_server_ids.#", "2"),
 				),
 			},
 		},
