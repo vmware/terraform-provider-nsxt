@@ -38,7 +38,6 @@ The following arguments are supported:
 * `logical_router_id` - (Required) Identifier for logical Tier-1 router on which this port is created
 * `linked_logical_switch_port_id` - (Required) Identifier for port on logical switch to connect to
 * `ip_address` - (Required) Logical router port subnet (ip_address / prefix length)
-* `mac_address` - (Optional) Mac Address
 * `urpf_mode` - (Optional) Unicast Reverse Path Forwarding mode. Accepted values are "NONE" and "STRICT" which is the default value.
 * `display_name` - (Optional) Display name, defaults to ID if not set.
 * `description` - (Optional) Description of the resource.
