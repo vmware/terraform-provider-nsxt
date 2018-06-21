@@ -62,9 +62,10 @@ func resourceNsxtLbHTTPVirtualServer() *schema.Resource {
 				Default:     true,
 			},
 			"ip_address": &schema.Schema{
-				Type:        schema.TypeString,
-				Description: "Virtual server IP address",
-				Required:    true,
+				Type:         schema.TypeString,
+				Description:  "Virtual server IP address",
+				ValidateFunc: validateSingleIP(),
+				Required:     true,
 			},
 			"port": &schema.Schema{
 				Type:         schema.TypeString,
