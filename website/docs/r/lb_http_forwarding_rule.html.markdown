@@ -26,8 +26,8 @@ resource "nsxt_lb_http_forwarding_rule" "lb_rule" {
   }
 
   body_condition {
-    value      = "XXX"
-    match_type = "CONTAINS"
+    value          = "XXX"
+    match_type     = "CONTAINS"
     case_sensitive = false
   }
 
