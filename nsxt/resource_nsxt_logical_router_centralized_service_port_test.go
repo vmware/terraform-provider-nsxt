@@ -18,7 +18,7 @@ func TestAccResourceNsxtLogicalRouterCentralizedServicePort_basic(t *testing.T) 
 	testResourceName := "nsxt_logical_router_centralized_service_port.test"
 	transportZoneName := getOverlayTransportZoneName()
 	edgeClusterName := getEdgeClusterName()
-    routerObj := "nsxt_logical_tier1_router.rtr1.id"
+	routerObj := "nsxt_logical_tier1_router.rtr1.id"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -58,48 +58,48 @@ func TestAccResourceNsxtLogicalRouterCentralizedServicePort_basic(t *testing.T) 
 }
 
 func TestAccResourceNsxtLogicalRouterCentralizedServicePort_onTier0(t *testing.T) {
-    portName := fmt.Sprintf("test-nsx-logical-router-centralized-service-port")
-    updatePortName := fmt.Sprintf("%s-update", portName)
-    testResourceName := "nsxt_logical_router_centralized_service_port.test"
-    transportZoneName := getOverlayTransportZoneName()
-    edgeClusterName := getEdgeClusterName()
-    routerObj := "data.nsxt_logical_tier0_router.tier0rtr.id"
+	portName := fmt.Sprintf("test-nsx-logical-router-centralized-service-port")
+	updatePortName := fmt.Sprintf("%s-update", portName)
+	testResourceName := "nsxt_logical_router_centralized_service_port.test"
+	transportZoneName := getOverlayTransportZoneName()
+	edgeClusterName := getEdgeClusterName()
+	routerObj := "data.nsxt_logical_tier0_router.tier0rtr.id"
 
-    resource.Test(t, resource.TestCase{
-        PreCheck:  func() { testAccPreCheck(t) },
-        Providers: testAccProviders,
-        CheckDestroy: func(state *terraform.State) error {
-            return testAccNSXLogicalRouterCentralizedServicePortCheckDestroy(state, portName)
-        },
-        Steps: []resource.TestStep{
-            {
-                Config: testAccNSXLogicalRouterCentralizedServicePortCreateTemplate(portName, transportZoneName, edgeClusterName, routerObj),
-                Check: resource.ComposeTestCheckFunc(
-                    testAccNSXLogicalRouterCentralizedServicePortExists(portName, testResourceName),
-                    resource.TestCheckResourceAttr(testResourceName, "display_name", portName),
-                    resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
-                    resource.TestCheckResourceAttrSet(testResourceName, "linked_logical_switch_port_id"),
-                    resource.TestCheckResourceAttrSet(testResourceName, "logical_router_id"),
-                    resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
-                    resource.TestCheckResourceAttr(testResourceName, "urpf_mode", "NONE"),
-                    resource.TestCheckResourceAttr(testResourceName, "ip_address", "8.0.0.1/24"),
-                ),
-            },
-            {
-                Config: testAccNSXLogicalRouterCentralizedServicePortUpdateTemplate(updatePortName, transportZoneName, edgeClusterName, routerObj),
-                Check: resource.ComposeTestCheckFunc(
-                    testAccNSXLogicalRouterCentralizedServicePortExists(updatePortName, testResourceName),
-                    resource.TestCheckResourceAttr(testResourceName, "display_name", updatePortName),
-                    resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test Update"),
-                    resource.TestCheckResourceAttrSet(testResourceName, "linked_logical_switch_port_id"),
-                    resource.TestCheckResourceAttrSet(testResourceName, "logical_router_id"),
-                    resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
-                    resource.TestCheckResourceAttr(testResourceName, "urpf_mode", "STRICT"),
-                    resource.TestCheckResourceAttr(testResourceName, "ip_address", "8.0.0.1/24"),
-                ),
-            },
-        },
-    })
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXLogicalRouterCentralizedServicePortCheckDestroy(state, portName)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXLogicalRouterCentralizedServicePortCreateTemplate(portName, transportZoneName, edgeClusterName, routerObj),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXLogicalRouterCentralizedServicePortExists(portName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", portName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttrSet(testResourceName, "linked_logical_switch_port_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "logical_router_id"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "urpf_mode", "NONE"),
+					resource.TestCheckResourceAttr(testResourceName, "ip_address", "8.0.0.1/24"),
+				),
+			},
+			{
+				Config: testAccNSXLogicalRouterCentralizedServicePortUpdateTemplate(updatePortName, transportZoneName, edgeClusterName, routerObj),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXLogicalRouterCentralizedServicePortExists(updatePortName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updatePortName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test Update"),
+					resource.TestCheckResourceAttrSet(testResourceName, "linked_logical_switch_port_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "logical_router_id"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "urpf_mode", "STRICT"),
+					resource.TestCheckResourceAttr(testResourceName, "ip_address", "8.0.0.1/24"),
+				),
+			},
+		},
+	})
 }
 
 func TestAccResourceNsxtLogicalRouterCentralizedServicePort_importBasic(t *testing.T) {
@@ -107,7 +107,7 @@ func TestAccResourceNsxtLogicalRouterCentralizedServicePort_importBasic(t *testi
 	testResourceName := "nsxt_logical_router_centralized_service_port.test"
 	transportZoneName := getOverlayTransportZoneName()
 	edgeClusterName := getEdgeClusterName()
-    routerObj := "nsxt_logical_tier1_router.rtr1.id"
+	routerObj := "nsxt_logical_tier1_router.rtr1.id"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -194,10 +194,10 @@ data "nsxt_logical_tier0_router" "tier0rtr" {
 }
 
 resource "nsxt_logical_switch" "ls1" {
-  display_name     = "test_switch"
-  admin_state      = "UP"
-  replication_mode = "MTEP"
-  vlan             = "0"
+  display_name      = "test_switch"
+  admin_state       = "UP"
+  replication_mode  = "MTEP"
+  vlan              = "0"
   transport_zone_id = "${data.nsxt_transport_zone.tz1.id}"
 }
 
