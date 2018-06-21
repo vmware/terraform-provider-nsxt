@@ -6,7 +6,6 @@
 package manager
 
 type EtherTypeNsServiceEntry struct {
-
 	ResourceType string `json:"resource_type"`
 
 	// Type of the encapsulated protocol
@@ -14,8 +13,7 @@ type EtherTypeNsServiceEntry struct {
 }
 
 type EtherTypeNsService struct {
+	NsService
 
-        NsService
-
-        NsserviceElement EtherTypeNsServiceEntry `json:"nsservice_element"`
+	NsserviceElement EtherTypeNsServiceEntry `json:"nsservice_element"`
 }

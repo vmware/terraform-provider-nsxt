@@ -257,7 +257,7 @@ func initLbHTTPRuleMatchConditionFromSchema(data map[string]interface{}, conditi
 	return condition
 }
 
-func fillLbHttpRuleHeaderConditionInSchema(data map[string]interface{}, condition loadbalancer.LbRuleCondition, isCookie bool) {
+func fillLbHTTPRuleHeaderConditionInSchema(data map[string]interface{}, condition loadbalancer.LbRuleCondition, isCookie bool) {
 	if isCookie {
 		data["name"] = condition.CookieName
 		data["value"] = condition.CookieValue
