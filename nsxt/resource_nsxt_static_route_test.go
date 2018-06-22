@@ -15,6 +15,14 @@ import (
 var testAccResourceStaticRouteName = "nsxt_static_route.test"
 
 func TestAccResourceNsxtStaticRoute_basic(t *testing.T) {
+	testAccResourceNsxtStaticRoute(t, "tier1")
+}
+
+func TestAccResourceNsxtStaticRoute_onT0(t *testing.T) {
+	testAccResourceNsxtStaticRoute(t, "tier0")
+}
+
+func testAccResourceNsxtStaticRoute(t *testing.T, tier string) {
 	name := fmt.Sprintf("test-nsx-static-route")
 	updateName := fmt.Sprintf("%s-update", name)
 	edgeClusterName := getEdgeClusterName()
@@ -28,7 +36,7 @@ func TestAccResourceNsxtStaticRoute_basic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXStaticRouteCreateTemplate(name, edgeClusterName, transportZoneName),
+				Config: testAccNSXStaticRouteCreateTemplate(tier, name, edgeClusterName, transportZoneName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXStaticRouteCheckExists(name, testAccResourceStaticRouteName),
 					resource.TestCheckResourceAttr(testAccResourceStaticRouteName, "display_name", name),
@@ -43,7 +51,7 @@ func TestAccResourceNsxtStaticRoute_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXStaticRouteUpdateTemplate(updateName, edgeClusterName, transportZoneName),
+				Config: testAccNSXStaticRouteUpdateTemplate(tier, updateName, edgeClusterName, transportZoneName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXStaticRouteCheckExists(updateName, testAccResourceStaticRouteName),
 					resource.TestCheckResourceAttr(testAccResourceStaticRouteName, "display_name", updateName),
@@ -59,6 +67,14 @@ func TestAccResourceNsxtStaticRoute_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtStaticRoute_importBasic(t *testing.T) {
+	testAccResourceNsxtStaticRouteImport(t, "tier1")
+}
+
+func TestAccResourceNsxtStaticRoute_importOnTier0(t *testing.T) {
+	testAccResourceNsxtStaticRouteImport(t, "tier0")
+}
+
+func testAccResourceNsxtStaticRouteImport(t *testing.T, tier string) {
 	name := fmt.Sprintf("test-nsx-static-route")
 	edgeClusterName := getEdgeClusterName()
 	transportZoneName := getOverlayTransportZoneName()
@@ -71,7 +87,7 @@ func TestAccResourceNsxtStaticRoute_importBasic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXStaticRouteCreateTemplate(name, edgeClusterName, transportZoneName),
+				Config: testAccNSXStaticRouteCreateTemplate(tier, name, edgeClusterName, transportZoneName),
 			},
 			{
 				ResourceName:      testAccResourceStaticRouteName,
@@ -160,14 +176,14 @@ func testAccNSXStaticRouteImporterGetID(s *terraform.State) (string, error) {
 	return fmt.Sprintf("%s/%s", routerID, resourceID), nil
 }
 
-func testAccNSXStaticRoutePreConditionTemplate(edgeClusterName string, tzName string) string {
+func testAccNSXStaticRoutePreConditionTemplate(tier string, edgeClusterName string, tzName string) string {
 	return fmt.Sprintf(`
 data "nsxt_edge_cluster" "EC" {
   display_name = "%s"
 }
 
-resource "nsxt_logical_tier1_router" "rtr1" {
-  display_name    = "tier1_router"
+resource "nsxt_logical_%s_router" "rtr1" {
+  display_name    = "static route test"
   edge_cluster_id = "${data.nsxt_edge_cluster.EC.id}"
 }
 
@@ -194,15 +210,15 @@ resource "nsxt_logical_router_downlink_port" "lrp1" {
   display_name                  = "LRP"
   description                   = "Acceptance Test"
   linked_logical_switch_port_id = "${nsxt_logical_port.port1.id}"
-  logical_router_id             = "${nsxt_logical_tier1_router.rtr1.id}"
+  logical_router_id             = "${nsxt_logical_%s_router.rtr1.id}"
   ip_address                    = "8.0.0.1/24"
-}`, edgeClusterName, tzName)
+}`, edgeClusterName, tier, tzName, tier)
 }
 
-func testAccNSXStaticRouteCreateTemplate(name string, edgeClusterName string, tzName string) string {
-	return testAccNSXStaticRoutePreConditionTemplate(edgeClusterName, tzName) + fmt.Sprintf(`
+func testAccNSXStaticRouteCreateTemplate(tier string, name string, edgeClusterName string, tzName string) string {
+	return testAccNSXStaticRoutePreConditionTemplate(tier, edgeClusterName, tzName) + fmt.Sprintf(`
 resource "nsxt_static_route" "test" {
-  logical_router_id = "${nsxt_logical_tier1_router.rtr1.id}"
+  logical_router_id = "${nsxt_logical_%s_router.rtr1.id}"
   display_name      = "%s"
   description       = "Acceptance Test"
 
@@ -215,14 +231,14 @@ resource "nsxt_static_route" "test" {
 
   next_hop {
     ip_address              = "8.0.0.10"
-    administrative_distance = "1" 
+    administrative_distance = "1"
     logical_router_port_id  = "${nsxt_logical_router_downlink_port.lrp1.id}"
   }
-}`, name)
+}`, tier, name)
 }
 
-func testAccNSXStaticRouteUpdateTemplate(name string, edgeClusterName string, tzName string) string {
-	return testAccNSXStaticRoutePreConditionTemplate(edgeClusterName, tzName) + fmt.Sprintf(`
+func testAccNSXStaticRouteUpdateTemplate(tier string, name string, edgeClusterName string, tzName string) string {
+	return testAccNSXStaticRoutePreConditionTemplate(tier, edgeClusterName, tzName) + fmt.Sprintf(`
 resource "nsxt_static_route" "test" {
   logical_router_id = "${nsxt_logical_tier1_router.rtr1.id}"
   display_name      = "%s"
@@ -231,13 +247,13 @@ resource "nsxt_static_route" "test" {
 
   next_hop {
     ip_address              = "8.0.0.10"
-    administrative_distance = "1" 
+    administrative_distance = "1"
     logical_router_port_id  = "${nsxt_logical_router_downlink_port.lrp1.id}"
   }
 
   next_hop {
     ip_address              = "2.2.2.2"
-    administrative_distance = "2" 
+    administrative_distance = "2"
   }
 
   tag {
