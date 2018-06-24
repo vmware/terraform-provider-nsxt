@@ -1,0 +1,272 @@
+/* Copyright © 2017 VMware, Inc. All Rights Reserved.
+   SPDX-License-Identifier: MPL-2.0 */
+
+package nsxt
+
+import (
+	"fmt"
+	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform/terraform"
+	"github.com/vmware/go-vmware-nsxt"
+	"net/http"
+	"testing"
+)
+
+func TestAccResourceNsxtLogicalRouterCentralizedServicePort_basic(t *testing.T) {
+	portName := fmt.Sprintf("test-nsx-logical-router-centralized-service-port")
+	updatePortName := fmt.Sprintf("%s-update", portName)
+	testResourceName := "nsxt_logical_router_centralized_service_port.test"
+	transportZoneName := getOverlayTransportZoneName()
+	edgeClusterName := getEdgeClusterName()
+	routerObj := "nsxt_logical_tier1_router.rtr1.id"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXLogicalRouterCentralizedServicePortCheckDestroy(state, portName)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXLogicalRouterCentralizedServicePortCreateTemplate(portName, transportZoneName, edgeClusterName, routerObj),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXLogicalRouterCentralizedServicePortExists(portName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", portName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttrSet(testResourceName, "linked_logical_switch_port_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "logical_router_id"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "urpf_mode", "NONE"),
+					resource.TestCheckResourceAttr(testResourceName, "ip_address", "8.0.0.1/24"),
+				),
+			},
+			{
+				Config: testAccNSXLogicalRouterCentralizedServicePortUpdateTemplate(updatePortName, transportZoneName, edgeClusterName, routerObj),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXLogicalRouterCentralizedServicePortExists(updatePortName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updatePortName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test Update"),
+					resource.TestCheckResourceAttrSet(testResourceName, "linked_logical_switch_port_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "logical_router_id"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "urpf_mode", "STRICT"),
+					resource.TestCheckResourceAttr(testResourceName, "ip_address", "8.0.0.1/24"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtLogicalRouterCentralizedServicePort_onTier0(t *testing.T) {
+	portName := fmt.Sprintf("test-nsx-logical-router-centralized-service-port")
+	updatePortName := fmt.Sprintf("%s-update", portName)
+	testResourceName := "nsxt_logical_router_centralized_service_port.test"
+	transportZoneName := getOverlayTransportZoneName()
+	edgeClusterName := getEdgeClusterName()
+	routerObj := "data.nsxt_logical_tier0_router.tier0rtr.id"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXLogicalRouterCentralizedServicePortCheckDestroy(state, portName)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXLogicalRouterCentralizedServicePortCreateTemplate(portName, transportZoneName, edgeClusterName, routerObj),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXLogicalRouterCentralizedServicePortExists(portName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", portName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttrSet(testResourceName, "linked_logical_switch_port_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "logical_router_id"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "urpf_mode", "NONE"),
+					resource.TestCheckResourceAttr(testResourceName, "ip_address", "8.0.0.1/24"),
+				),
+			},
+			{
+				Config: testAccNSXLogicalRouterCentralizedServicePortUpdateTemplate(updatePortName, transportZoneName, edgeClusterName, routerObj),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXLogicalRouterCentralizedServicePortExists(updatePortName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updatePortName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test Update"),
+					resource.TestCheckResourceAttrSet(testResourceName, "linked_logical_switch_port_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "logical_router_id"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "urpf_mode", "STRICT"),
+					resource.TestCheckResourceAttr(testResourceName, "ip_address", "8.0.0.1/24"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtLogicalRouterCentralizedServicePort_importBasic(t *testing.T) {
+	portName := fmt.Sprintf("test-nsx-logical-router-centralized-service-port")
+	testResourceName := "nsxt_logical_router_centralized_service_port.test"
+	transportZoneName := getOverlayTransportZoneName()
+	edgeClusterName := getEdgeClusterName()
+	routerObj := "nsxt_logical_tier1_router.rtr1.id"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXLogicalRouterCentralizedServicePortCheckDestroy(state, portName)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXLogicalRouterCentralizedServicePortCreateTemplate(portName, transportZoneName, edgeClusterName, routerObj),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccNSXLogicalRouterCentralizedServicePortExists(displayName string, resourceName string) resource.TestCheckFunc {
+	return func(state *terraform.State) error {
+
+		nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
+
+		rs, ok := state.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("NSX logical port resource %s not found in resources", resourceName)
+		}
+
+		resourceID := rs.Primary.ID
+		if resourceID == "" {
+			return fmt.Errorf("NSX logical port resource ID not set in resources ")
+		}
+
+		logicalPort, responseCode, err := nsxClient.LogicalRoutingAndServicesApi.ReadLogicalRouterCentralizedServicePort(nsxClient.Context, resourceID)
+		if err != nil {
+			return fmt.Errorf("Error while retrieving logical port ID %s. Error: %v", resourceID, err)
+		}
+
+		if responseCode.StatusCode != http.StatusOK {
+			return fmt.Errorf("Error while checking if logical port %s exists. HTTP return code was %d", resourceID, responseCode.StatusCode)
+		}
+
+		if displayName == logicalPort.DisplayName {
+			return nil
+		}
+		return fmt.Errorf("NSX logical port %s wasn't found", displayName)
+	}
+}
+
+func testAccNSXLogicalRouterCentralizedServicePortCheckDestroy(state *terraform.State, displayName string) error {
+	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
+	for _, rs := range state.RootModule().Resources {
+
+		if rs.Type != "nsxt_logical_router_centralized_service_port" {
+			continue
+		}
+
+		resourceID := rs.Primary.Attributes["id"]
+		logicalPort, responseCode, err := nsxClient.LogicalRoutingAndServicesApi.ReadLogicalRouterCentralizedServicePort(nsxClient.Context, resourceID)
+		if err != nil {
+			if responseCode.StatusCode != http.StatusOK {
+				return nil
+			}
+			return fmt.Errorf("Error while retrieving logical port ID %s. Error: %v", resourceID, err)
+		}
+
+		if displayName == logicalPort.DisplayName {
+			return fmt.Errorf("NSX logical port %s still exists", displayName)
+		}
+	}
+	return nil
+}
+
+func testAccNSXLogicalRouterCentralizedServicePortPreConditionTemplate(transportZoneName string, edgeClusterName string) string {
+	return fmt.Sprintf(`
+data "nsxt_transport_zone" "tz1" {
+  display_name = "%s"
+}
+
+data "nsxt_logical_tier0_router" "tier0rtr" {
+  display_name = "%s"
+}
+
+resource "nsxt_logical_switch" "ls1" {
+  display_name      = "test_switch"
+  admin_state       = "UP"
+  replication_mode  = "MTEP"
+  vlan              = "0"
+  transport_zone_id = "${data.nsxt_transport_zone.tz1.id}"
+}
+
+resource "nsxt_logical_port" "port1" {
+  display_name      = "LP"
+  admin_state       = "UP"
+  description       = "Acceptance Test"
+  logical_switch_id = "${nsxt_logical_switch.ls1.id}"
+}
+
+data "nsxt_edge_cluster" "ec" {
+  display_name = "%s"
+}
+
+resource "nsxt_logical_tier1_router" "rtr1" {
+  display_name    = "test_router"
+  edge_cluster_id = "${data.nsxt_edge_cluster.ec.id}"
+}`, transportZoneName, getTier0RouterName(), edgeClusterName)
+}
+
+func testAccNSXLogicalRouterCentralizedServicePortRelayTemplate() string {
+	return fmt.Sprintf(`
+resource "nsxt_dhcp_relay_profile" "drp1" {
+  display_name     = "prf"
+  server_addresses = ["1.1.1.1"]
+}
+
+resource "nsxt_dhcp_relay_service" "drs1" {
+	display_name = "srv"
+	description = "Acceptance Test"
+	dhcp_relay_profile_id = "${nsxt_dhcp_relay_profile.drp1.id}"
+}`)
+}
+
+func testAccNSXLogicalRouterCentralizedServicePortCreateTemplate(portName string, transportZoneName string, edgeClusterName string, routerObj string) string {
+	return testAccNSXLogicalRouterCentralizedServicePortPreConditionTemplate(transportZoneName, edgeClusterName) + fmt.Sprintf(`
+resource "nsxt_logical_router_centralized_service_port" "test" {
+  display_name                  = "%s"
+  description                   = "Acceptance Test"
+  linked_logical_switch_port_id = "${nsxt_logical_port.port1.id}"
+  logical_router_id             = "${%s}"
+  ip_address                    = "8.0.0.1/24"
+  urpf_mode                     = "NONE"
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+}`, portName, routerObj)
+}
+
+func testAccNSXLogicalRouterCentralizedServicePortUpdateTemplate(portUpdatedName string, transportZoneName string, edgeClusterName string, routerObj string) string {
+	return testAccNSXLogicalRouterCentralizedServicePortPreConditionTemplate(transportZoneName, edgeClusterName) + fmt.Sprintf(`
+resource "nsxt_logical_router_centralized_service_port" "test" {
+  display_name                  = "%s"
+  description                   = "Acceptance Test Update"
+  linked_logical_switch_port_id = "${nsxt_logical_port.port1.id}"
+  logical_router_id             = "${%s}"
+  ip_address                    = "8.0.0.1/24"
+  urpf_mode                     = "STRICT"
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+
+  tag {
+    scope = "scope2"
+    tag   = "tag2"
+  }
+}`, portUpdatedName, routerObj)
+}
