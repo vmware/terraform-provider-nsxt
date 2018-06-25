@@ -12,7 +12,6 @@ import (
 	"testing"
 )
 
-// TODO: add test for virtual_server_ids when these are supported
 func TestAccResourceNsxtLbService_basic(t *testing.T) {
 	name := "test"
 	testResourceName := "nsxt_lb_service.test"
@@ -48,6 +47,47 @@ func TestAccResourceNsxtLbService_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "size", "SMALL"),
 					resource.TestCheckResourceAttr(testResourceName, "error_log_level", "ERROR"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtLbService_withServers(t *testing.T) {
+	name := "test"
+	testResourceName := "nsxt_lb_service.test"
+	logLevel := "EMERGENCY"
+	updatedLogLevel := "INFO"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXLbServiceCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXLbServiceCreateTemplateWithServers(logLevel),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXLbServiceExists(name, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "enabled", "true"),
+					resource.TestCheckResourceAttrSet(testResourceName, "logical_router_id"),
+					resource.TestCheckResourceAttr(testResourceName, "size", "SMALL"),
+					resource.TestCheckResourceAttr(testResourceName, "error_log_level", logLevel),
+					resource.TestCheckResourceAttr(testResourceName, "virtual_server_ids.#", "2"),
+				),
+			},
+			{
+				Config: testAccNSXLbServiceCreateTemplateWithServers(updatedLogLevel),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXLbServiceExists(name, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "enabled", "true"),
+					resource.TestCheckResourceAttrSet(testResourceName, "logical_router_id"),
+					resource.TestCheckResourceAttr(testResourceName, "size", "SMALL"),
+					resource.TestCheckResourceAttr(testResourceName, "error_log_level", updatedLogLevel),
+					resource.TestCheckResourceAttr(testResourceName, "virtual_server_ids.#", "2"),
 				),
 			},
 		},
@@ -201,4 +241,37 @@ resource "nsxt_lb_service" "test" {
 
   depends_on = ["nsxt_logical_router_link_port_on_tier1.test"]
 }`
+}
+
+func testAccNSXLbServiceCreateTemplateWithServers(logLevel string) string {
+	return testAccNSXLbCreateTopology() + fmt.Sprintf(`
+
+resource "nsxt_lb_fast_tcp_application_profile" "test" {
+  display_name = "lb service test"
+}
+
+resource "nsxt_lb_fast_udp_application_profile" "test" {
+  display_name = "lb service test"
+}
+
+resource "nsxt_lb_tcp_virtual_server" "test"{
+  application_profile_id = "${nsxt_lb_fast_tcp_application_profile.test.id}"
+  ip_address             = "1.1.1.2"
+  ports                  = ["7887"]
+}
+
+resource "nsxt_lb_udp_virtual_server" "test"{
+  application_profile_id = "${nsxt_lb_fast_udp_application_profile.test.id}"
+  ip_address             = "1.1.1.2"
+  ports                  = ["7888"]
+}
+
+resource "nsxt_lb_service" "test" {
+  display_name       = "test"
+  logical_router_id  = "${nsxt_logical_tier1_router.test.id}"
+  error_log_level    = "%s"
+  virtual_server_ids = ["${nsxt_lb_tcp_virtual_server.test.id}", "${nsxt_lb_udp_virtual_server.test.id}"]
+
+  depends_on = ["nsxt_logical_router_link_port_on_tier1.test"]
+}`, logLevel)
 }

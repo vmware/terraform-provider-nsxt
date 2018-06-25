@@ -6,7 +6,6 @@
 package manager
 
 type IcmpTypeNsServiceEntry struct {
-
 	ResourceType string `json:"resource_type"`
 
 	// ICMP message code
@@ -19,8 +18,7 @@ type IcmpTypeNsServiceEntry struct {
 }
 
 type IcmpTypeNsService struct {
+	NsService
 
-        NsService
-
-        NsserviceElement IcmpTypeNsServiceEntry `json:"nsservice_element"`
+	NsserviceElement IcmpTypeNsServiceEntry `json:"nsservice_element"`
 }

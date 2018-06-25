@@ -26,4 +26,19 @@ type LbRuleAction struct {
 
 	// Query string of URI, typically contains key value pairs, for example: foo1=bar1&foo2=bar2
 	UriArguments string `json:"uri_arguments,omitempty"`
+
+	// HTTP response status code for type LbHttpRejectAction
+	ReplyStatus string  `json:"reply_status,omitempty"`
+
+	// Response message for type LbHttpRejectAction
+	ReplyMessage string  `json:"reply_message,omitempty"`
+
+	// HTTP response status code for type LbHttpRedirectAction
+	RedirectStatus string `json:"redirect_status,omitempty"`
+
+	// The URL that the HTTP request is redirected to for type LbHttpRedirectAction
+	RedirectUrl string `json:"redirect_url,omitempty"`
+
+	// UUID of load balancer pool for type LbSelectPoolAction
+	PoolId string `json:"pool_id,omitempty"`
 }

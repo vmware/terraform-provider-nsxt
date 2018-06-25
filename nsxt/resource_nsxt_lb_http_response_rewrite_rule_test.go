@@ -258,7 +258,8 @@ resource "nsxt_lb_http_response_rewrite_rule" "test" {
 
   response_header_condition {
     name = "NAME1"
-    name = "VALUE1"
+    value = "VALUE1"
+    match_type = "EQUALS"
   }
 
   header_rewrite_action {
