@@ -49,7 +49,7 @@ resource "nsxt_lb_https_monitor" "lb_https_monitor" {
     value = "NSX"
   }
 
-  tag = {
+  tag {
     scope = "color"
     tag   = "red"
   }

@@ -40,3 +40,12 @@ func getIsSecureSchema() *schema.Schema {
 		Computed:    true,
 	}
 }
+
+func getCertificateChainDepthSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeInt,
+		Description: "Verification depth in the server certificate chain",
+		Optional:    true,
+		Default:     3,
+	}
+}

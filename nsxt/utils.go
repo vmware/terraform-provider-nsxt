@@ -404,6 +404,15 @@ func getAdminStateSchema() *schema.Schema {
 	}
 }
 
+func getIdSetSchema(description string) *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeSet,
+		Description: description,
+		Elem:        &schema.Schema{Type: schema.TypeString},
+		Optional:    true,
+	}
+}
+
 func makeResourceReference(resourceType string, resourceID string) *common.ResourceReference {
 	return &common.ResourceReference{
 		TargetType: resourceType,
