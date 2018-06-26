@@ -240,7 +240,7 @@ resource "nsxt_static_route" "test" {
 func testAccNSXStaticRouteUpdateTemplate(tier string, name string, edgeClusterName string, tzName string) string {
 	return testAccNSXStaticRoutePreConditionTemplate(tier, edgeClusterName, tzName) + fmt.Sprintf(`
 resource "nsxt_static_route" "test" {
-  logical_router_id = "${nsxt_logical_tier1_router.rtr1.id}"
+  logical_router_id = "${nsxt_logical_%s_router.rtr1.id}"
   display_name      = "%s"
   description       = "Acceptance Test Update"
   network           = "5.5.5.0/24"
@@ -265,5 +265,5 @@ resource "nsxt_static_route" "test" {
     scope = "scope2"
     tag   = "tag2"
   }
-}`, name)
+}`, tier, name)
 }
