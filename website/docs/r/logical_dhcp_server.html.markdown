@@ -31,7 +31,7 @@ resource "nsxt_logical_dhcp_server" "logical_dhcp_server" {
   dns_name_servers = ["5.5.5.5"]
 
   dhcp_option_121 {
-    network  = "6.6.6.6/24"
+    network  = "6.6.6.0/24"
     next_hop = "1.1.1.21"
   }
 
