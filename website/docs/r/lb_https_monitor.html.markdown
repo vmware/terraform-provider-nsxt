@@ -74,9 +74,9 @@ The following arguments are supported:
 * `protocols` - (Optional) SSL versions TLS1.1 and TLS1.2 are supported and enabled by default. SSLv2, SSLv3, and TLS1.0 are supported, but disabled by default.
 * `request_body` - (Optional) String to send as HTTP health check request body. Valid only for certain HTTP methods like POST.
 * `request_header` - (Optional) HTTP request headers.
-* `request_method` - (Optional) Health check method for HTTP monitor type.
+* `request_method` - (Optional) Health check method for HTTP monitor type. Valid values are GET, HEAD, PUT, POST and OPTIONS.
 * `request_url` - (Optional) URL used for HTTP monitor.
-* `request_version` - (Optional) HTTP request version.
+* `request_version` - (Optional) HTTP request version. Valid values are HTTP_VERSION_1_0 and HTTP_VERSION_1_1.
 * `response_body` - (Optional) If response body is specified, healthcheck HTTP response body is matched against the specified string and server is considered healthy only if there is a match (regular expressions not supported). If response body string is not specified, HTTP healthcheck is considered successful if the HTTP response status code is among configured values.
 * `response_status_codes` - (Optional) HTTP response status code should be a valid HTTP status code.
 * `server_auth` - (Optional) Server authentication mode - REQUIRED or IGNORE.
