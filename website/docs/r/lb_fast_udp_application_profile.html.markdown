@@ -1,21 +1,21 @@
 ---
 layout: "nsxt"
-page_title: "NSXT: nsxt_lb_fast_udp_profile"
-sidebar_current: "docs-nsxt-resource-lb-fast-udp-profile"
+page_title: "NSXT: nsxt_lb_fast_udp_application_profile"
+sidebar_current: "docs-nsxt-resource-lb-fast-udp-application-profile"
 description: |-
-  Provides a resource to configure lb fast udp profile on NSX-T manager
+  Provides a resource to configure LB fast UDP application profile on NSX-T manager
 ---
 
-# nsxt_lb_fast_udp_profile
+# nsxt_lb_fast_udp_application_profile
 
-Provides a resource to configure lb fast udp profile on NSX-T manager
+Provides a resource to configure LB fast UDP application profile on NSX-T manager
 
 ## Example Usage
 
 ```hcl
-resource "nsxt_lb_fast_udp_profile" "lb_fast_udp_profile" {
-  description       = "lb_fast_udp_profile provisioned by Terraform"
-  display_name      = "lb_fast_udp_profile"
+resource "nsxt_lb_fast_udp_application_profile" "lb_fast_udp_profile" {
+  description       = "lb_fast_udp_application_profile provisioned by Terraform"
+  display_name      = "lb_fast_udp_application_profile"
   idle_timeout      = "1800"
   ha_flow_mirroring = "false"
 
@@ -52,7 +52,7 @@ An existing lb fast udp profile can be [imported][docs-import] into this resourc
 [docs-import]: /docs/import/index.html
 
 ```
-terraform import nsxt_lb_fast_udp_profile.lb_fast_udp_profile UUID
+terraform import nsxt_lb_fast_udp_application_profile.lb_fast_udp_profile UUID
 ```
 
-The above would import the lb fast udp profile named `lb_fast_udp_profile` with the nsx id `UUID`
+The above would import the LB fast UDP application profile named `lb_fast_udp_profile` with the nsx id `UUID`
