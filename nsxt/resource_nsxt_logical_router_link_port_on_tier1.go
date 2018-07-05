@@ -48,7 +48,6 @@ func resourceNsxtLogicalRouterLinkPortOnTier1() *schema.Resource {
 				Required:    true,
 				ForceNew:    true,
 			},
-			"service_binding": getResourceReferencesSchema(false, false, []string{"LogicalService"}, "Service Bindings"),
 		},
 	}
 }
@@ -60,14 +59,12 @@ func resourceNsxtLogicalRouterLinkPortOnTier1Create(d *schema.ResourceData, m in
 	tags := getTagsFromSchema(d)
 	logicalRouterID := d.Get("logical_router_id").(string)
 	linkedLogicalRouterPortID := d.Get("linked_logical_router_port_id").(string)
-	serviceBinding := getServiceBindingsFromSchema(d, "service_binding")
 	logicalRouterLinkPort := manager.LogicalRouterLinkPortOnTier1{
 		Description:               description,
 		DisplayName:               displayName,
 		Tags:                      tags,
 		LogicalRouterId:           logicalRouterID,
 		LinkedLogicalRouterPortId: makeResourceReference("LogicalPort", linkedLogicalRouterPortID),
-		ServiceBindings:           serviceBinding,
 	}
 
 	logicalRouterLinkPort, resp, err := nsxClient.LogicalRoutingAndServicesApi.CreateLogicalRouterLinkPortOnTier1(nsxClient.Context, logicalRouterLinkPort)
@@ -107,10 +104,6 @@ func resourceNsxtLogicalRouterLinkPortOnTier1Read(d *schema.ResourceData, m inte
 	setTagsInSchema(d, logicalRouterLinkPort.Tags)
 	d.Set("logical_router_id", logicalRouterLinkPort.LogicalRouterId)
 	d.Set("linked_logical_router_port_id", logicalRouterLinkPort.LinkedLogicalRouterPortId.TargetId)
-	err = setServiceBindingsInSchema(d, logicalRouterLinkPort.ServiceBindings, "service_binding")
-	if err != nil {
-		return fmt.Errorf("Error during LogicalRouterLinkPortOnTier1 service_binding set in schema: %v", err)
-	}
 
 	return nil
 }
@@ -128,7 +121,6 @@ func resourceNsxtLogicalRouterLinkPortOnTier1Update(d *schema.ResourceData, m in
 	tags := getTagsFromSchema(d)
 	logicalRouterID := d.Get("logical_router_id").(string)
 	linkedLogicalRouterPortID := d.Get("linked_logical_router_port_id").(string)
-	serviceBinding := getServiceBindingsFromSchema(d, "service_binding")
 	logicalRouterLinkPort := manager.LogicalRouterLinkPortOnTier1{
 		Revision:                  revision,
 		Description:               description,
@@ -136,7 +128,6 @@ func resourceNsxtLogicalRouterLinkPortOnTier1Update(d *schema.ResourceData, m in
 		Tags:                      tags,
 		LogicalRouterId:           logicalRouterID,
 		LinkedLogicalRouterPortId: makeResourceReference("LogicalPort", linkedLogicalRouterPortID),
-		ServiceBindings:           serviceBinding,
 		ResourceType:              "LogicalRouterLinkPortOnTIER1",
 	}
 
