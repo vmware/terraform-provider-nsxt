@@ -1,21 +1,21 @@
 ---
 layout: "nsxt"
-page_title: "NSXT: nsxt_lb_fast_tcp_profile"
-sidebar_current: "docs-nsxt-resource-lb-fast-tcp-profile"
+page_title: "NSXT: nsxt_lb_fast_tcp_application_profile"
+sidebar_current: "docs-nsxt-resource-lb-fast-tcp-application-profile"
 description: |-
-  Provides a resource to configure lb fast tcp profile on NSX-T manager
+  Provides a resource to configure LB fast TCP application profile on NSX-T manager
 ---
 
-# nsxt_lb_fast_tcp_profile
+# nsxt_lb_fast_tcp_application_profile
 
-Provides a resource to configure lb fast tcp profile on NSX-T manager
+Provides a resource to configure LB fast TCP application profile on NSX-T manager
 
 ## Example Usage
 
 ```hcl
-resource "nsxt_lb_fast_tcp_profile" "lb_fast_tcp_profile" {
-  description       = "lb_fast_tcp_profile provisioned by Terraform"
-  display_name      = "lb_fast_tcp_profile"
+resource "nsxt_lb_fast_tcp_application_profile" "lb_fast_tcp_profile" {
+  description       = "lb_fast_tcp_application_profile provisioned by Terraform"
+  display_name      = "lb_fast_tcp_application_profile"
   close_timeout     = "8"
   idle_timeout      = "1800"
   ha_flow_mirroring = "false"
@@ -54,7 +54,7 @@ An existing lb fast tcp profile can be [imported][docs-import] into this resourc
 [docs-import]: /docs/import/index.html
 
 ```
-terraform import nsxt_lb_fast_tcp_profile.lb_fast_tcp_profile UUID
+terraform import nsxt_lb_fast_tcp_application_profile.lb_fast_tcp_profile UUID
 ```
 
-The above would import the lb fast tcp profile named `lb_fast_tcp_profile` with the nsx id `UUID`
+The above would import the LB fast TCP application profile named `lb_fast_tcp_profile` with the nsx id `UUID`

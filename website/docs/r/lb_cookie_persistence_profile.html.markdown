@@ -16,13 +16,13 @@ Provides a resource to configure lb cookie persistence profile on NSX-T manager
 resource "nsxt_lb_cookie_persistence_profile" "lb_cookie_persistence_profile" {
   description        = "lb_cookie_persistence_profile provisioned by Terraform"
   display_name       = "lb_cookie_persistence_profile"
+  cookie_name        = "my_cookie"
   persistence_shared = "false"
   cookie_fallback    = "false"
   cookie_garble      = "false"
   cookie_mode        = "INSERT"
 
   insert_mode_params {
-    cookie_name        = "my_cookie"
     cookie_domain      = ".example2.com"
     cookie_path        = "/subfolder"
     cookie_expiry_type = "SESSION_COOKIE_TIME"

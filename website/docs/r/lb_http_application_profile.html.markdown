@@ -3,12 +3,12 @@ layout: "nsxt"
 page_title: "NSXT: nsxt_lb_http_application_profile"
 sidebar_current: "docs-nsxt-resource-lb-http-application-profile"
 description: |-
-  Provides a resource to configure lb http application profile on NSX-T manager
+  Provides a resource to configure LB HTTP application profile on NSX-T manager
 ---
 
-# nsxt_lb_http_profile
+# nsxt_lb_http_application_profile
 
-Provides a resource to configure lb http application profile on NSX-T manager
+Provides a resource to configure LB HTTP application profile on NSX-T manager
 
 ## Example Usage
 
@@ -39,7 +39,7 @@ The following arguments are supported:
 * `description` - (Optional) Description of this resource.
 * `display_name` - (Optional) The display name of this resource. Defaults to ID if not set.
 * `http_redirect_to` - (Optional) A URL that incoming requests for that virtual server can be temporarily redirected to, If a website is temporarily down or has moved. When set, http_redirect_to_https should be false.
-* `http_redirect_to_https` - (Optional) A boolean flag which reflects whether the client will automatically be redirected to use SSL. When true, the http_redirect_to should not be empty.
+* `http_redirect_to_https` - (Optional) A boolean flag which reflects whether the client will automatically be redirected to use SSL. When true, the http_redirect_to should not be specified.
 * `idle_timeout` - (Optional) Timeout in seconds to specify how long an HTTP application can remain idle. Defaults to 15 seconds.
 * `ntlm` - (Optional) A boolean flag which reflects whether NTLM challenge/response methodology will be used over HTTP. Can be set to true only if http_redirect_to_https is false.
 * `request_body_size` - (Optional) Maximum request body size in bytes. If it is not specified, it means that request body size is unlimited.
@@ -67,4 +67,4 @@ An existing lb http profile can be [imported][docs-import] into this resource, v
 terraform import nsxt_lb_http_application_profile.lb_http_application_profile UUID
 ```
 
-The above would import the lb http application profile named `lb_http_application_profile` with the nsx id `UUID`
+The above would import the LB HTTP application profile named `lb_http_application_profile` with the nsx id `UUID`
