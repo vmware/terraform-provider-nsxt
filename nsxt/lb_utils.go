@@ -91,7 +91,7 @@ func getLbMonitorRequestVersionSchema() *schema.Schema {
 		Type:         schema.TypeString,
 		Description:  "HTTP request version",
 		Optional:     true,
-		ValidateFunc: validation.StringInSlice([]string{"HTTP_VERSION_1_0", "HTT    P_VERSION_1_1", "HTTP_VERSION_1_2"}, false),
+		ValidateFunc: validation.StringInSlice([]string{"HTTP_VERSION_1_0", "HTTP_VERSION_1_1"}, false),
 		Default:      "HTTP_VERSION_1_1",
 	}
 }
@@ -99,7 +99,7 @@ func getLbMonitorRequestVersionSchema() *schema.Schema {
 func getLbMonitorResponseBodySchema() *schema.Schema {
 	return &schema.Schema{
 		Type:        schema.TypeString,
-		Description: "If HTTP response body string is specified then the healthcheck HTTP response body is matched against the specified string (regular expressions not supported), and server is considered healthy only if there is a match. If response body string is not specified, HTTP healthcheck is considered successful if the HTTP response status code matches configured value.",
+		Description: "If HTTP specified, healthcheck HTTP response body is matched against the specified string (regular expressions not supported), and succeeds only if there is a match",
 		Optional:    true,
 	}
 }

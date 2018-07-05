@@ -112,7 +112,7 @@ func getLbRuleHTTPVersionConditionSchema() *schema.Schema {
 				"version": &schema.Schema{
 					Type:         schema.TypeString,
 					Required:     true,
-					ValidateFunc: validation.StringInSlice([]string{"HTTP_VERSION_1_0", "HTTP_VERSION_1_1", "HTTP_VERSION_2_0"}, false),
+					ValidateFunc: validation.StringInSlice([]string{"HTTP_VERSION_1_0", "HTTP_VERSION_1_1"}, false),
 				},
 			},
 		},

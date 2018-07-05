@@ -183,7 +183,7 @@ The following arguments are supported:
   * `inverse` - (Optional) A flag to indicate whether reverse the match result of this condition. Default is false.
 
 * `version_condition` - (Optional) Match condition used to match http version of the request:
-  * `method` - (Required) One of GET, HEAD, POST, PUT, OPTIONS.
+  * `version` - (Required) One of HTTP_VERSION_1_0, HTTP_VERSION_1_1.
   * `inverse` - (Optional) A flag to indicate whether reverse the match result of this condition. Default is false.
 
 * `uri_arguments_condition` - (Optional) Set of match conditions used to match http request URI arguments(query string):
