@@ -166,6 +166,42 @@ func TestAccResourceNsxtLogicalSwitch_withProfiles(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtLogicalSwitch_withMacPool(t *testing.T) {
+	switchName := fmt.Sprintf("test-nsx-logical-switch-with-mac")
+	resourceName := "test_mac_pool"
+	testResourceName := fmt.Sprintf("nsxt_logical_switch.%s", resourceName)
+	transportZoneName := getOverlayTransportZoneName()
+	macPoolName := getMacPoolName()
+	novlan := "0"
+	replicationMode := "MTEP"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXLogicalSwitchCheckDestroy(state, switchName)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccNSXLogicalSwitchNoTZIDTemplate(switchName),
+				ExpectError: regexp.MustCompile(`required field is not set`),
+			},
+			{
+				Config: testAccNSXLogicalSwitchCreateWithMacTemplate(resourceName, switchName, transportZoneName, macPoolName, novlan, replicationMode),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXLogicalSwitchExists(switchName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", switchName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "admin_state", "UP"),
+					resource.TestCheckResourceAttr(testResourceName, "replication_mode", replicationMode),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "vlan", novlan),
+				),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtLogicalSwitch_importBasic(t *testing.T) {
 	switchName := fmt.Sprintf("test-nsx-logical-switch-overlay")
 	resourceName := "testoverlay"
@@ -370,4 +406,30 @@ resource "nsxt_logical_switch" "%s" {
   }
 
 }`, transportZoneName, profileName1, profileName2, resourceName, switchUpdateName)
+}
+
+func testAccNSXLogicalSwitchCreateWithMacTemplate(resourceName string, switchName string, transportZoneName string, macPoolName string, vlan string, replicationMode string) string {
+	return fmt.Sprintf(`
+data "nsxt_transport_zone" "TZ1" {
+  display_name = "%s"
+}
+
+data "nsxt_mac_pool" "MAC1" {
+  display_name = "%s"
+}
+
+resource "nsxt_logical_switch" "%s" {
+  display_name      = "%s"
+  admin_state       = "UP"
+  description       = "Acceptance Test"
+  transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
+  replication_mode  = "%s"
+  vlan              = "%s"
+  mac_pool_id       = "${data.nsxt_mac_pool.MAC1.id}"
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+}`, transportZoneName, macPoolName, resourceName, switchName, replicationMode, vlan)
 }
