@@ -65,8 +65,8 @@ func resourceNsxtLbHTTPSMonitor() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"REQUIRED", "IGNORE"}, false),
 				Default:      "IGNORE",
 			},
-			"server_auth_ca_ids":  getIdSetSchema("If server auth type is REQUIRED, server certificate must be signed by one of the CAs"),
-			"server_auth_crl_ids": getIdSetSchema("Certificate Revocation List (CRL) to disallow compromised server certificates"),
+			"server_auth_ca_ids":  getIDSetSchema("If server auth type is REQUIRED, server certificate must be signed by one of the CAs"),
+			"server_auth_crl_ids": getIDSetSchema("Certificate Revocation List (CRL) to disallow compromised server certificates"),
 		},
 	}
 }

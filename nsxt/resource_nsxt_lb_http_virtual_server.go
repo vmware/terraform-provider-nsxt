@@ -136,9 +136,9 @@ func getLbClientSSLBindingSchema() *schema.Schema {
 					Optional:    true,
 					Default:     false,
 				},
-				"ca_ids":              getIdSetSchema("List of CA ids for client authentication"),
-				"crl_ids":             getIdSetSchema("List of CRL ids for client authentication"),
-				"sni_certificate_ids": getIdSetSchema("List of certificates to serve different hostnames"),
+				"ca_ids":              getIDSetSchema("List of CA ids for client authentication"),
+				"crl_ids":             getIDSetSchema("List of CRL ids for client authentication"),
+				"sni_certificate_ids": getIDSetSchema("List of certificates to serve different hostnames"),
 			},
 		},
 	}
@@ -169,8 +169,8 @@ func getLbServerSSLBindingSchema() *schema.Schema {
 					Optional:    true,
 					Default:     false,
 				},
-				"ca_ids":  getIdSetSchema("List of CA ids for server authentication"),
-				"crl_ids": getIdSetSchema("List of CRL ids for server authentication"),
+				"ca_ids":  getIDSetSchema("List of CA ids for server authentication"),
+				"crl_ids": getIDSetSchema("List of CRL ids for server authentication"),
 			},
 		},
 	}
