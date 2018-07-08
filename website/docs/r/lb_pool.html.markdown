@@ -95,7 +95,7 @@ The following arguments are supported:
 * `active_monitor_id` - (Optional) Active health monitor Id. If one is not set, the active healthchecks will be disabled.
 * `algorithm` - (Optional) Load balancing algorithm controls how the incoming connections are distributed among the members. Supported algorithms are: ROUND_ROBIN, WEIGHTED_ROUND_ROBIN, LEAST_CONNECTION, WEIGHTED_LEAST_CONNECTION, IP_HASH.
 * `member` - (Optional) Server pool consists of one or more pool members. Each pool member is identified, typically, by an IP address and a port. Each member has the following arguments:
-  * `admin_state` - (Optional) Pool member admin state.
+  * `admin_state` - (Optional) Pool member admin state. Possible values: ENABLED, DISABLED and GRACEFUL_DISABLED
   * `backup_member` - (Optional) A boolean flag which reflects whether this is a backup pool member. Backup servers are typically configured with a sorry page indicating to the user that the application is currently unavailable. While the pool is active (a specified minimum number of pool members are active) BACKUP members are skipped during server selection. When the pool is inactive, incoming connections are sent to only the BACKUP member(s).
   * `display_name` - (Optional) The display name of this resource. pool member name.
   * `ip_address` - (Required) Pool member IP address.
