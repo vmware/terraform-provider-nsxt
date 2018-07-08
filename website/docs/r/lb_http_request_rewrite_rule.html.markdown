@@ -202,11 +202,11 @@ The following arguments are supported:
   * `source_address` - (Required) The value source IP address to match.
   * `inverse` - (Optional) A flag to indicate whether reverse the match result of this condition. Default is false.
 
-* `header_rewrite_action` - (Required header_rewrite_action or uri_rewrite_action) Set of header rewrite actions to be executed when load balancer rule matches:
+* `header_rewrite_action` - (At least one action is required) Set of header rewrite actions to be executed when load balancer rule matches:
   * `name` - (Required) The name of HTTP header to be rewritten.
   * `value` - (Required) The new value of HTTP header.
 
-* `uri_rewrite_action` - (Required header_rewrite_action or uri_rewrite_action) Set of URI rewrite actions to be executed when load balancer rule matches:
+* `uri_rewrite_action` - (At least one action is required) Set of URI rewrite actions to be executed when load balancer rule matches:
   * `uri` - (Required) The new URI for the HTTP request.
   * `uri_arguments` - (Required) The new URI arguments(query string) for the HTTP request.
 

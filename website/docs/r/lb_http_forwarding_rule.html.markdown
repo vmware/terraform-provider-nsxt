@@ -193,11 +193,11 @@ The following arguments are supported:
   * `case_sensitive` - (Optional) If true, case is significant in the match. Default is true.
   * `inverse` - (Optional) A flag to indicate whether reverse the match result of this condition. Default is false.
 
-* `http_reject_action` - (Required 1 type of action) Set of http reject actions to be executed when load balancer rule matches:
+* `http_reject_action` - (At least one action is required) Set of http reject actions to be executed when load balancer rule matches:
   * `reply_status` - (Required) The HTTP reply status.
   * `reply_message` - (Required) The HTTP reply message.
 
-* `http_redirect_action` - (Required 1 type of action) Set of http redirect actions to be executed when load balancer rule matches:
+* `http_redirect_action` - (At least one action is required) Set of http redirect actions to be executed when load balancer rule matches:
   * `redirect_status` - (Required) The HTTP reply status.
   * `redirect_url` - (Required) The URL to redirect to.
 
