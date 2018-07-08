@@ -404,7 +404,7 @@ func getAdminStateSchema() *schema.Schema {
 	}
 }
 
-func getIdSetSchema(description string) *schema.Schema {
+func getIDSetSchema(description string) *schema.Schema {
 	return &schema.Schema{
 		Type:        schema.TypeSet,
 		Description: description,
