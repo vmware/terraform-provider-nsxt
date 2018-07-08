@@ -201,7 +201,7 @@ The following arguments are supported:
   * `redirect_status` - (Required) The HTTP reply status.
   * `redirect_url` - (Required) The URL to redirect to.
 
-* `select_pool_action` - (Required 1 type of action) Set of pool selection actions to be executed when load balancer rule matches:
+* `select_pool_action` - (At least one action is required) Set of pool selection actions to be executed when load balancer rule matches:
   * `pool_id` - (Required) The loadbalancer pool the request will be forwarded to.
 
 ## Attributes Reference
