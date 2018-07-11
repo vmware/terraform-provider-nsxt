@@ -187,15 +187,21 @@ The following arguments are supported:
   * `source_address` - (Required) The value source IP address to match.
   * `inverse` - (Optional) A flag to indicate whether reverse the match result of this condition. Default is false.
 
-* `http_reject_action` - (Optional) Set of http reject actions to be executed when load balancer rule matches:
+* `uri_condition` - (Optional) Set of match conditions used to match http request URI:
+  * `uri` - (Required) The value of URI to match.
+  * `match_type` - (Required) Defines how value field is used to match the URI. Accepted values are STARTS_WITH, ENDS_WITH, CONTAINS, EQUALS, REGEX.
+  * `case_sensitive` - (Optional) If true, case is significant in the match. Default is true.
+  * `inverse` - (Optional) A flag to indicate whether reverse the match result of this condition. Default is false.
+
+* `http_reject_action` - (At least one action is required) Set of http reject actions to be executed when load balancer rule matches:
   * `reply_status` - (Required) The HTTP reply status.
   * `reply_message` - (Required) The HTTP reply message.
 
-* `http_redirect_action` - (Optional) Set of http redirect actions to be executed when load balancer rule matches:
+* `http_redirect_action` - (At least one action is required) Set of http redirect actions to be executed when load balancer rule matches:
   * `redirect_status` - (Required) The HTTP reply status.
   * `redirect_url` - (Required) The URL to redirect to.
 
-* `select_pool_action` - (Optional) Set of pool selection actions to be executed when load balancer rule matches:
+* `select_pool_action` - (At least one action is required) Set of pool selection actions to be executed when load balancer rule matches:
   * `pool_id` - (Required) The loadbalancer pool the request will be forwarded to.
 
 ## Attributes Reference

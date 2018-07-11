@@ -214,11 +214,12 @@ func getLbRuleURIRewriteActionSchema() *schema.Schema {
 	}
 }
 
-func getLbRuleHeaderRewriteActionSchema() *schema.Schema {
+func getLbRuleHeaderRewriteActionSchema(optional bool) *schema.Schema {
 	return &schema.Schema{
 		Type:        schema.TypeSet,
 		Description: "Header to replace original header in outgoing message",
-		Optional:    true,
+		Optional:    optional,
+		Required:    !optional,
 		MaxItems:    1,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{

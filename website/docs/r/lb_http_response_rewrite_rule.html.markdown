@@ -11,7 +11,7 @@ description: |-
 Provides a resource to configure lb http response rewrite rule on NSX-T manager. This rule will be executed when HTTP response message is received by load balancer.
 
 ## Example Usages
-This example represents a superset of all possible action and conditions (and thus doesn't make much sense).
+This example represents a superset of all possible conditions (and thus doesn't make much sense).
 More specific examples are provided below.
 
 ```hcl
@@ -185,8 +185,14 @@ The following arguments are supported:
   * `version` - (Required) One of HTTP_VERSION_1_0, HTTP_VERSION_1_1.
   * `inverse` - (Optional) A flag to indicate whether reverse the match result of this condition. Default is false.
 
-* `uri_arguments_condition` - (Optional) Set of match conditions used to match http request URI arguments(query string):
+* `uri_condition` - (Optional) Set of match conditions used to match http request URI:
   * `uri` - (Required) The value of URI to match.
+  * `match_type` - (Required) Defines how value field is used to match the URI. Accepted values are STARTS_WITH, ENDS_WITH, CONTAINS, EQUALS, REGEX.
+  * `case_sensitive` - (Optional) If true, case is significant in the match. Default is true.
+  * `inverse` - (Optional) A flag to indicate whether reverse the match result of this condition. Default is false.
+
+* `uri_arguments_condition` - (Optional) Set of match conditions used to match http request URI arguments (query string):
+  * `uri_arguments` - (Required) Query string of URI, typically contains key value pairs.
   * `match_type` - (Required) Defines how value field is used to match the URI. Accepted values are STARTS_WITH, ENDS_WITH, CONTAINS, EQUALS, REGEX.
   * `case_sensitive` - (Optional) If true, case is significant in the match. Default is true.
   * `inverse` - (Optional) A flag to indicate whether reverse the match result of this condition. Default is false.
@@ -195,7 +201,7 @@ The following arguments are supported:
   * `source_address` - (Required) The value source IP address to match.
   * `inverse` - (Optional) A flag to indicate whether reverse the match result of this condition. Default is false.
 
-* `header_rewrite_action` - (Optional) Set of header rewrite actions to be executed on the outgoing response when load balancer rule matches:
+* `header_rewrite_action` - (Required) Set of header rewrite actions to be executed on the outgoing response when load balancer rule matches:
   * `name` - (Required) The name of HTTP header to be rewritten.
   * `value` - (Required) The new value of HTTP header.
 

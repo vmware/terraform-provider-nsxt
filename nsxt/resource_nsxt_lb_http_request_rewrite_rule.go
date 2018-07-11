@@ -55,7 +55,7 @@ func resourceNsxtLbHTTPRequestRewriteRule() *schema.Resource {
 			"tcp_condition":           getLbRuleTCPConditionSchema(),
 
 			"uri_rewrite_action":    getLbRuleURIRewriteActionSchema(),
-			"header_rewrite_action": getLbRuleHeaderRewriteActionSchema(),
+			"header_rewrite_action": getLbRuleHeaderRewriteActionSchema(true),
 		},
 	}
 }
