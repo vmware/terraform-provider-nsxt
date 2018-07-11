@@ -20,6 +20,7 @@ const edgeClusterDefaultName string = "edgecluster1"
 const switchingProfileDefaultName string = "nsx-default-mac-profile"
 const vlanTransportZoneName string = "transportzone2"
 const overlayTransportZoneNamePrefix string = "1-transportzone"
+const macPoolDefaultName string = "DefaultMacPool"
 
 const singleTag string = "[{scope = \"scope1\", tag = \"tag1\"}]"
 const doubleTags string = "[{scope = \"scope1\", tag = \"tag1\"}, {scope = \"scope2\", tag = \"tag2\"}]"
@@ -60,6 +61,14 @@ func getOverlayTransportZoneName() string {
 	name := os.Getenv("NSXT_TEST_OVERLAY_TRANSPORT_ZONE")
 	if name == "" {
 		name = overlayTransportZoneNamePrefix
+	}
+	return name
+}
+
+func getMacPoolName() string {
+	name := os.Getenv("NSXT_TEST_MAC_POOL")
+	if name == "" {
+		name = macPoolDefaultName
 	}
 	return name
 }
