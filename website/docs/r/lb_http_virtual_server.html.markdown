@@ -22,7 +22,7 @@ resource "nsxt_lb_cookie_persistence_profile" "session_persistence" {
 }
 
 resource "nsxt_lb_pool" "pool1" {
-  algorithm = LEAST_CONNECTION
+  algorithm = "LEAST_CONNECTION"
   member {
     ip_address = "3.0.0.1"
     port       = "443"
