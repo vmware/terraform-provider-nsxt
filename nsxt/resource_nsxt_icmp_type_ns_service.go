@@ -179,6 +179,7 @@ func resourceNsxtIcmpTypeNsServiceDelete(d *schema.ResourceData, m interface{}) 
 	}
 
 	localVarOptionals := make(map[string]interface{})
+	localVarOptionals["force"] = true
 	resp, err := nsxClient.GroupingObjectsApi.DeleteNSService(nsxClient.Context, id, localVarOptionals)
 	if err != nil {
 		return fmt.Errorf("Error during NsService delete: %v", err)

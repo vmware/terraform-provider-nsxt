@@ -112,6 +112,7 @@ func Provider() terraform.ResourceProvider {
 			"nsxt_igmp_type_ns_service":                    resourceNsxtIgmpTypeNsService(),
 			"nsxt_ether_type_ns_service":                   resourceNsxtEtherTypeNsService(),
 			"nsxt_ip_protocol_ns_service":                  resourceNsxtIPProtocolNsService(),
+			"nsxt_ns_service_group":                        resourceNsxtNsServiceGroup(),
 			"nsxt_ns_group":                                resourceNsxtNsGroup(),
 			"nsxt_firewall_section":                        resourceNsxtFirewallSection(),
 			"nsxt_nat_rule":                                resourceNsxtNatRule(),
