@@ -42,7 +42,7 @@ The following arguments are supported:
 * `description` - (Optional) Description of this resource.
 * `display_name` - (Optional) The display name of this resource. Defaults to ID if not set.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this NS service group.
-* `members` - (Optional) List of NSServices IDs that can be added as members to an NSServiceGroup. All members should be of the same type : Ethernet, or Non Ethernet.
+* `members` - (Required) List of NSServices IDs that can be added as members to an NSServiceGroup. All members should be of the same L2 type: Ethernet, or Non Ethernet.
 
 
 ## Attributes Reference
