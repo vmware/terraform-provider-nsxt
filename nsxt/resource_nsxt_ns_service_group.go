@@ -52,10 +52,10 @@ func resourceNsxtNsServiceGroup() *schema.Resource {
 func getResourceReferencesFromStringsSet(d *schema.ResourceData, schemaAttrName string) []common.ResourceReference {
 	targetIds := interface2StringList(d.Get(schemaAttrName).(*schema.Set).List())
 	var referenceList []common.ResourceReference
-	for _, targetId := range targetIds {
+	for _, targetID := range targetIds {
 		elem := common.ResourceReference{
 			IsValid:    true,
-			TargetId:   targetId,
+			TargetId:   targetID,
 			TargetType: "NSService",
 		}
 
