@@ -9,7 +9,7 @@ type IcmpTypeNsServiceEntry struct {
 	ResourceType string `json:"resource_type"`
 
 	// ICMP message code
-	IcmpCode int64 `json:"icmp_code,omitempty"`
+	IcmpCode int64 `json:"icmp_code"`
 
 	// ICMP message type
 	IcmpType int64 `json:"icmp_type,omitempty"`
