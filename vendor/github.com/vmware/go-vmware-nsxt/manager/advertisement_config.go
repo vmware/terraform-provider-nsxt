@@ -60,6 +60,12 @@ type AdvertisementConfig struct {
 	// Flag to advertise all static routes
 	AdvertiseStaticRoutes bool `json:"advertise_static_routes,omitempty"`
 
+        // Flag to advertise all lb SNAT ips
+        AdvertiseLbSnatIp bool `json:"advertise_lb_snat_ip,omitempty"`
+
+        // Flag to advertise lb vip
+        AdvertiseLbVip bool `json:"advertise_lb_vip,omitempty"`
+
 	// Flag to enable this configuration
 	Enabled bool `json:"enabled,omitempty"`
 

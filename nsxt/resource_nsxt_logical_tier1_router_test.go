@@ -38,6 +38,8 @@ func TestAccResourceNsxtLogicalTier1Router_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "advertise_connected_routes", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "advertise_static_routes", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "advertise_nat_routes", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "advertise_lb_vip_routes", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "advertise_lb_snat_ip_routes", "false"),
 				),
 			},
 			{
@@ -52,6 +54,8 @@ func TestAccResourceNsxtLogicalTier1Router_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "advertise_connected_routes", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "advertise_static_routes", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "advertise_nat_routes", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "advertise_lb_vip_routes", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "advertise_lb_snat_ip_routes", "true"),
 				),
 			},
 		},
@@ -153,6 +157,8 @@ resource "nsxt_logical_tier1_router" "test" {
   advertise_connected_routes  = "true"
   advertise_static_routes     = "true"
   advertise_nat_routes        = "true"
+  advertise_lb_vip_routes     = "false"
+  advertise_lb_snat_ip_routes = "false"
 
   tag {
     scope = "scope1"
@@ -181,6 +187,8 @@ resource "nsxt_logical_tier1_router" "test" {
   advertise_connected_routes  = "true"
   advertise_static_routes     = "false"
   advertise_nat_routes        = "false"
+  advertise_lb_vip_routes     = "true"
+  advertise_lb_snat_ip_routes = "true"
 
   tag {
     scope = "scope3"
