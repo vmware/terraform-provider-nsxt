@@ -89,6 +89,19 @@ func resourceNsxtLogicalTier1Router() *schema.Resource {
 				Default:     false,
 				Optional:    true,
 			},
+			"advertise_lb_vip_routes": &schema.Schema{
+				Type:        schema.TypeBool,
+				Description: "Enable LB VIP routes advertisement",
+				Default:     false,
+				Optional:    true,
+			},
+			"advertise_lb_snat_ip_routes": &schema.Schema{
+				Type:        schema.TypeBool,
+				Description: "Enable LB SNAT IP routes advertisement",
+				Default:     false,
+				Optional:    true,
+			},
+
 			"advertise_config_revision": getRevisionSchema(),
 		},
 	}
@@ -106,6 +119,8 @@ func resourceNsxtLogicalTier1RouterReadAdv(d *schema.ResourceData, nsxClient *ap
 	d.Set("advertise_connected_routes", advConfig.AdvertiseNsxConnectedRoutes)
 	d.Set("advertise_static_routes", advConfig.AdvertiseStaticRoutes)
 	d.Set("advertise_nat_routes", advConfig.AdvertiseNatRoutes)
+	d.Set("advertise_lb_vip_routes", advConfig.AdvertiseLbVip)
+	d.Set("advertise_lb_snat_ip_routes", advConfig.AdvertiseLbSnatIp)
 	d.Set("advertise_config_revision", advConfig.Revision)
 	return nil
 }
@@ -116,11 +131,15 @@ func resourceNsxtLogicalTier1RouterCreateAdv(d *schema.ResourceData, nsxClient *
 		advConnected := d.Get("advertise_connected_routes").(bool)
 		advStatic := d.Get("advertise_static_routes").(bool)
 		advNat := d.Get("advertise_nat_routes").(bool)
+		advLbVip := d.Get("advertise_lb_vip_routes").(bool)
+		advLbSnatIp := d.Get("advertise_lb_snat_ip_routes").(bool)
 		advConfig := manager.AdvertisementConfig{
 			Enabled:                     true,
 			AdvertiseNsxConnectedRoutes: advConnected,
 			AdvertiseStaticRoutes:       advStatic,
 			AdvertiseNatRoutes:          advNat,
+			AdvertiseLbVip:              advLbVip,
+			AdvertiseLbSnatIp:           advLbSnatIp,
 		}
 		_, _, err := nsxClient.LogicalRoutingAndServicesApi.UpdateAdvertisementConfig(nsxClient.Context, id, advConfig)
 		return err
@@ -133,12 +152,16 @@ func resourceNsxtLogicalTier1RouterUpdateAdv(d *schema.ResourceData, nsxClient *
 	advConnected := d.Get("advertise_connected_routes").(bool)
 	advStatic := d.Get("advertise_static_routes").(bool)
 	advNat := d.Get("advertise_nat_routes").(bool)
+	advLbVip := d.Get("advertise_lb_vip_routes").(bool)
+	advLbSnatIp := d.Get("advertise_lb_snat_ip_routes").(bool)
 	advRevision := int64(d.Get("advertise_config_revision").(int))
 	advConfig := manager.AdvertisementConfig{
 		Enabled:                     enableRouterAdvertisement,
 		AdvertiseNsxConnectedRoutes: advConnected,
 		AdvertiseStaticRoutes:       advStatic,
 		AdvertiseNatRoutes:          advNat,
+		AdvertiseLbVip:              advLbVip,
+		AdvertiseLbSnatIp:           advLbSnatIp,
 		Revision:                    advRevision,
 	}
 	_, _, err := nsxClient.LogicalRoutingAndServicesApi.UpdateAdvertisementConfig(nsxClient.Context, id, advConfig)

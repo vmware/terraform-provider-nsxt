@@ -21,6 +21,8 @@ resource "nsxt_logical_tier1_router" "tier1_router" {
   advertise_connected_routes  = false
   advertise_static_routes     = true
   advertise_nat_routes        = true
+  advertise_lb_vip_routes     = true
+  advertise_lb_snat_ip_routes = false
 
   tag {
     scope = "color"
@@ -42,6 +44,8 @@ The following arguments are supported:
 * `advertise_connected_routes` - (Optional) Enable the router advertisement for all NSX connected routes
 * `advertise_static_routes` - (Optional) Enable the router advertisement for static routes
 * `advertise_nat_routes` - (Optional) Enable the router advertisement for NAT routes
+* `advertise_lb_vip_routes` - (Optional) Enable the router advertisement for LB VIP routes
+* `advertise_lb_snat_ip_routes` - (Optional) Enable the router advertisement for LB SNAT IP routes
 
 ## Attributes Reference
 
