@@ -25,14 +25,14 @@ func TestAccResourceNsxtIcmpTypeNsService_basic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXIcmpServiceCreateTemplate(serviceName, "ICMPv4", 5, 1),
+				Config: testAccNSXIcmpServiceCreateTemplate(serviceName, "ICMPv4", 8, 0),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXIcmpServiceExists(serviceName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", serviceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "icmp service"),
 					resource.TestCheckResourceAttr(testResourceName, "protocol", "ICMPv4"),
-					resource.TestCheckResourceAttr(testResourceName, "icmp_type", "5"),
-					resource.TestCheckResourceAttr(testResourceName, "icmp_code", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "icmp_type", "8"),
+					resource.TestCheckResourceAttr(testResourceName, "icmp_code", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 				),
 			},
@@ -62,7 +62,7 @@ func TestAccResourceNsxtIcmpTypeNsService_importBasic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXIcmpServiceCreateTemplate(serviceName, "ICMPv4", 5, 1),
+				Config: testAccNSXIcmpServiceCreateTemplate(serviceName, "ICMPv4", 8, 0),
 			},
 			{
 				ResourceName:      testResourceName,
