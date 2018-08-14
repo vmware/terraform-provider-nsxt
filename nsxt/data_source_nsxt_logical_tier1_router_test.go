@@ -51,12 +51,10 @@ func testAccDataSourceNsxtTier1RouterCreate(routerName string) error {
 	displayName := routerName
 	description := routerName
 	routerType := "TIER1"
-	//edgeClusterID := d.Get("edge_cluster_id").(string)
 	logicalRouter := manager.LogicalRouter{
 		Description: description,
 		DisplayName: displayName,
 		RouterType:  routerType,
-		//EdgeClusterId: edgeClusterID,
 	}
 
 	logicalRouter, resp, err := nsxClient.LogicalRoutingAndServicesApi.CreateLogicalRouter(nsxClient.Context, logicalRouter)
