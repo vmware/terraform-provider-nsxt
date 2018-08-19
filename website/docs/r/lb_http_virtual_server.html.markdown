@@ -73,7 +73,7 @@ resource "nsxt_lb_http_virtual_server" "lb_virtual_server" {
   persistence_profile_id     = "${nsxt_lb_cookie_persistence_profile.session_persistence.id}"
   pool_id                    = "${nsxt_lb_pool.pool1.id}"
   sorry_pool_id              = "${nsxt_lb_pool.sorry_pool.id}"
-  rule_ids                   = "[${nsxt_lb_http_request_rewrite_rule.redirect_post.id}"]
+  rule_ids                   = ["${nsxt_lb_http_request_rewrite_rule.redirect_post.id}"]
 
   client_ssl {
     client_ssl_profile_id   = "${nsxt_lb_client_ssl_profile.ssl1.id}"
@@ -123,7 +123,7 @@ The following arguments are supported:
 * `client_ssl` - (Optional) Client side SSL customization.
   * `client_ssl_profile_id` - (Required) Id of client SSL profile that defines reusable properties.
   * `default_certificate_id` - (Required) Id of certificate that will be used if the server does not host     multiple hostnames on the same IP address or if the client does not support SNI extension.
-  * `certificate_chain_depth` - (Optional) Allowed depth of certificate chain.
+  * `certificate_chain_depth` - (Optional) Allowed depth of certificate chain. Default is 3.
   * `client_auth` - (Optional) Whether client authentication is mandatory. Default is false.
   * `ca_ids` - (Optional) List of CA certificate ids for client authentication.
   * `crl_ids` - (Optional) List of CRL certificate ids for client authentication.
@@ -131,6 +131,8 @@ The following arguments are supported:
 
 * `server_ssl` - (Optional) Server side SSL customization.
   * `server_ssl_profile_id` - (Required) Id of server SSL profile that defines reusable properties.
+  * `server_auth` - (Optional) Whether server authentication is needed. Default is False. If true, ca_ids should be provided.
+  * `certificate_chain_depth` - (Optional) Allowed depth of certificate chain. Default is 3.
   * `client_certificate_id` - (Optional) Whether server authentication is required. Default is false.
   * `ca_ids` - (Optional) List of CA certificate ids for server authentication.
   * `crl_ids` - (Optional) List of CRL certificate ids for server authentication.

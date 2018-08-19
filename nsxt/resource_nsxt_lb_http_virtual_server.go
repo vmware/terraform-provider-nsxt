@@ -165,7 +165,7 @@ func getLbServerSSLBindingSchema() *schema.Schema {
 				"certificate_chain_depth": getCertificateChainDepthSchema(),
 				"server_auth": &schema.Schema{
 					Type:        schema.TypeBool,
-					Description: "Server authentication mode (IGNORE/REQUIRED)",
+					Description: "Server authentication mode",
 					Optional:    true,
 					Default:     false,
 				},
