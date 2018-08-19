@@ -53,11 +53,14 @@ type IpDiscoverySwitchingProfile struct {
 	RequiredCapabilities []string `json:"required_capabilities,omitempty"`
 
 	// Indicates whether ARP snooping is enabled
-	ArpSnoopingEnabled bool `json:"arp_snooping_enabled,omitempty"`
+	ArpSnoopingEnabled bool `json:"arp_snooping_enabled"`
 
 	// Indicates whether DHCP snooping is enabled
-	DhcpSnoopingEnabled bool `json:"dhcp_snooping_enabled,omitempty"`
+	DhcpSnoopingEnabled bool `json:"dhcp_snooping_enabled"`
 
 	// This option is only supported on ESX where vm-tools is installed.
-	VmToolsEnabled bool `json:"vm_tools_enabled,omitempty"`
+	VmToolsEnabled bool `json:"vm_tools_enabled"`
+
+	// Limit the number of ARPs bindings.
+	ArpBindingsLimit int `json:"arp_bindings_limit,omitempty"`
 }
