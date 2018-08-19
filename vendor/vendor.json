@@ -2266,10 +2266,10 @@
 			"revisionTime": "2017-06-05T21:53:11Z"
 		},
 		{
-			"checksumSHA1": "tyUX/OW/FKfdAV6ukHMG0wOEKAM=",
+			"checksumSHA1": "aSmNXCC+4cf0vQSbTR1obFkBgLE=",
 			"path": "github.com/vmware/go-vmware-nsxt",
-			"revision": "36b9ba8db5450aff8cda926fa135a660491425a0",
-			"revisionTime": "2018-06-24T05:57:26Z"
+			"revision": "a9a64db2040ad754eff6d900056c5fd409383e06",
+			"revisionTime": "2018-08-16T01:46:03Z"
 		},
 		{
 			"checksumSHA1": "o0gNsuAZWWIs1RY7hh5cB5j85q4=",
@@ -2332,10 +2332,10 @@
 			"revisionTime": "2018-06-24T05:57:26Z"
 		},
 		{
-			"checksumSHA1": "xOGJDEReVofJ+9xErUdcmL4DAa0=",
+			"checksumSHA1": "ZeINkYe8IKON81RCrl9WP6bi8U0=",
 			"path": "github.com/vmware/go-vmware-nsxt/manager",
-			"revision": "81d1ac65bf3db3850710032af60fb98f778d75e7",
-			"revisionTime": "2018-07-31T20:28:20Z"
+			"revision": "a9a64db2040ad754eff6d900056c5fd409383e06",
+			"revisionTime": "2018-08-16T01:46:03Z"
 		},
 		{
 			"checksumSHA1": "NVOWbWEQajRsbUIEwdoTyDP80AM=",

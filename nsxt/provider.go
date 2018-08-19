@@ -107,6 +107,7 @@ func Provider() terraform.ResourceProvider {
 			"nsxt_logical_router_downlink_port":            resourceNsxtLogicalRouterDownLinkPort(),
 			"nsxt_logical_router_link_port_on_tier0":       resourceNsxtLogicalRouterLinkPortOnTier0(),
 			"nsxt_logical_router_link_port_on_tier1":       resourceNsxtLogicalRouterLinkPortOnTier1(),
+			"nsxt_qos_switching_profile":                   resourceNsxtQosSwitchingProfile(),
 			"nsxt_l4_port_set_ns_service":                  resourceNsxtL4PortSetNsService(),
 			"nsxt_algorithm_type_ns_service":               resourceNsxtAlgorithmTypeNsService(),
 			"nsxt_icmp_type_ns_service":                    resourceNsxtIcmpTypeNsService(),
