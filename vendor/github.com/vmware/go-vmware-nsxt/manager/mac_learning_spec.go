@@ -21,5 +21,5 @@ type MacLearningSpec struct {
 	LimitPolicy string `json:"limit_policy,omitempty"`
 
 	// Allowing flooding for unlearned MAC for ingress traffic
-	UnicastFloodingAllowed bool `json:"unicast_flooding_allowed,omitempty"`
+	UnicastFloodingAllowed bool `json:"unicast_flooding_allowed"`
 }
