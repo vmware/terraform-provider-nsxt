@@ -111,6 +111,7 @@ func Provider() terraform.ResourceProvider {
 			"nsxt_mac_management_switching_profile":        resourceNsxtMacManagementSwitchingProfile(),
 			"nsxt_qos_switching_profile":                   resourceNsxtQosSwitchingProfile(),
 			"nsxt_spoofguard_switching_profile":            resourceNsxtSpoofGuardSwitchingProfile(),
+			"nsxt_switch_security_switching_profile":       resourceNsxtSwitchSecuritySwitchingProfile(),
 			"nsxt_l4_port_set_ns_service":                  resourceNsxtL4PortSetNsService(),
 			"nsxt_algorithm_type_ns_service":               resourceNsxtAlgorithmTypeNsService(),
 			"nsxt_icmp_type_ns_service":                    resourceNsxtIcmpTypeNsService(),
