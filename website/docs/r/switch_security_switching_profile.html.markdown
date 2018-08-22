@@ -14,31 +14,20 @@ Provides a resource to configure switch security switching profile on NSX-T mana
 
 ```hcl
 resource "nsxt_switch_security_switching_profile" "switch_security_switching_profile" {
-  description      = "switch_security_switching_profile provisioned by Terraform"
-  display_name     = "switch_security_switching_profile"
-  class_of_service = "5"
-  dscp_trusted     = "true"
-  dscp_priority    = "53"
+  description           = "switch_security_switching_profile provisioned by Terraform"
+  display_name          = "switch_security_switching_profile"
+  block_non_ip          = true
+  block_client_dhcp     = false
+  block_server_dhcp     = false
+  bpdu_filter_enabled   = true
+  bpdu_filter_whitelist = ["01:80:c2:00:00:01"]
 
-  ingress_rate_shaper {
-    enabled         = "true"
-    peak_bw_mbps    = "800"
-    burst_size      = "200"
-    average_bw_mbps = "100"
-  }
-
-  egress_rate_shaper {
-    enabled         = "true"
-    peak_bw_mbps    = "800"
-    burst_size      = "200"
-    average_bw_mbps = "100"
-  }
-
-  ingress_broadcast_rate_shaper {
-    enabled         = "true"
-    average_bw_kbps = "111"
-    burst_size      = "222"
-    peak_bw_kbps    = "500"
+  rate_limits {
+    enabled      = true
+    rx_broadcast = 32
+    rx_multicast = 32
+    tx_broadcast = 32
+    tx_multicast = 32
   }
 
   tag = {
@@ -72,7 +61,7 @@ The following arguments are supported:
 
 In addition to arguments listed above, the following attributes are exported:
 
-* `id` - ID of the QoS switching profile.
+* `id` - ID of the switch security switching profile.
 * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
 
 
