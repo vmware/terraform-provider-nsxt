@@ -88,6 +88,7 @@ func Provider() terraform.ResourceProvider {
 			"nsxt_logical_tier0_router": dataSourceNsxtLogicalTier0Router(),
 			"nsxt_logical_tier1_router": dataSourceNsxtLogicalTier1Router(),
 			"nsxt_mac_pool":             dataSourceNsxtMacPool(),
+			"nsxt_ns_group":             dataSourceNsxtNsGroup(),
 			"nsxt_ns_service":           dataSourceNsxtNsService(),
 			"nsxt_edge_cluster":         dataSourceNsxtEdgeCluster(),
 			"nsxt_certificate":          dataSourceNsxtCertificate(),
