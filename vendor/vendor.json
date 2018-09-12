@@ -2332,10 +2332,10 @@
 			"revisionTime": "2018-06-24T05:57:26Z"
 		},
 		{
-			"checksumSHA1": "mV4+GonGtJNy/Rs0jnsCvmCl4Yo=",
+			"checksumSHA1": "YARizRacx7TxQ5lolipNph6A9Lo=",
 			"path": "github.com/vmware/go-vmware-nsxt/manager",
-			"revision": "cf4050a0556a7f1a74dce6ce1e8c96cbb2d5daf3",
-			"revisionTime": "2018-08-19T12:59:21Z"
+			"revision": "c2ea816b544015056536e1875a196d9fdf837986",
+			"revisionTime": "2018-09-12T20:14:52Z"
 		},
 		{
 			"checksumSHA1": "NVOWbWEQajRsbUIEwdoTyDP80AM=",
