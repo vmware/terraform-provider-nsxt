@@ -95,7 +95,7 @@ func getRulesSchema() *schema.Schema {
 					ValidateFunc: validation.StringInSlice(firewallRuleActionValues, false),
 				},
 				"applied_to":  getResourceReferencesSchema(false, false, []string{"LogicalPort", "LogicalSwitch", "NSGroup"}, "List of object where rule will be enforced. The section level field overrides this one. Null will be treated as any"),
-				"destination": getResourceReferencesSchema(false, false, []string{"IPSet", "LogicalPort", "LogicalSwitch", "NSGroup", "MACSet"}, "List of the destinations. Null will be treated as any"),
+				"destination": getResourceReferencesSetSchema(false, false, []string{"IPSet", "LogicalPort", "LogicalSwitch", "NSGroup", "MACSet"}, "List of the destinations. Null will be treated as any"),
 				"destinations_excluded": &schema.Schema{
 					Type:        schema.TypeBool,
 					Description: "When this boolean flag is set to true, the rule destinations will be negated",
@@ -133,7 +133,7 @@ func getRulesSchema() *schema.Schema {
 					Description: "User level field which will be printed in CLI and packet logs",
 					Optional:    true,
 				},
-				"source": getResourceReferencesSchema(false, false, []string{"IPSet", "LogicalPort", "LogicalSwitch", "NSGroup", "MACSet"}, "List of sources. Null will be treated as any"),
+				"source": getResourceReferencesSetSchema(false, false, []string{"IPSet", "LogicalPort", "LogicalSwitch", "NSGroup", "MACSet"}, "List of sources. Null will be treated as any"),
 				"sources_excluded": &schema.Schema{
 					Type:        schema.TypeBool,
 					Description: "When this boolean flag is set to true, the rule sources will be negated",
@@ -218,8 +218,8 @@ func getRulesFromSchema(d *schema.ResourceData) []manager.FirewallRule {
 			DestinationsExcluded: data["destinations_excluded"].(bool),
 			IpProtocol:           data["ip_protocol"].(string),
 			Direction:            data["direction"].(string),
-			Sources:              getResourceReferences(data["source"].([]interface{})),
-			Destinations:         getResourceReferences(data["destination"].([]interface{})),
+			Sources:              getResourceReferences(data["source"].(*schema.Set).List()),
+			Destinations:         getResourceReferences(data["destination"].(*schema.Set).List()),
 			Services:             getServicesResourceReferences(data["service"].([]interface{})),
 		}
 
