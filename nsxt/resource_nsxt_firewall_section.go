@@ -175,8 +175,8 @@ func setRulesInSchema(d *schema.ResourceData, rules []manager.FirewallRule) erro
 		elem["disabled"] = rule.Disabled
 		elem["revision"] = rule.Revision
 		elem["direction"] = rule.Direction
-		elem["source"] = returnResourceReferences(rule.Sources)
-		elem["destination"] = returnResourceReferences(rule.Destinations)
+		elem["source"] = returnResourceReferencesSet(rule.Sources)
+		elem["destination"] = returnResourceReferencesSet(rule.Destinations)
 		elem["service"] = returnServicesResourceReferences(rule.Services)
 
 		rulesList = append(rulesList, elem)

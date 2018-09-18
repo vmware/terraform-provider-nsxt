@@ -4,6 +4,9 @@
 package nsxt
 
 import (
+	"bytes"
+	"fmt"
+	"github.com/hashicorp/terraform/helper/hashcode"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
 	"github.com/vmware/go-vmware-nsxt"
@@ -355,6 +358,31 @@ func returnResourceReferences(references []common.ResourceReference) []map[strin
 		referenceList = append(referenceList, elem)
 	}
 	return referenceList
+}
+
+func resourceReferenceHash(v interface{}) int {
+	var buf bytes.Buffer
+
+	if v != nil {
+		m := v.(map[string]interface{})
+		buf.WriteString(fmt.Sprintf("%s-%s", m["target_type"], m["target_id"]))
+	}
+	return hashcode.String(buf.String())
+}
+
+func returnResourceReferencesSet(references []common.ResourceReference) *schema.Set {
+	var referenceList []interface{}
+	for _, reference := range references {
+		elem := make(map[string]interface{})
+		elem["is_valid"] = reference.IsValid
+		elem["target_display_name"] = reference.TargetDisplayName
+		elem["target_id"] = reference.TargetId
+		elem["target_type"] = reference.TargetType
+		referenceList = append(referenceList, elem)
+	}
+
+	s := schema.NewSet(resourceReferenceHash, referenceList)
+	return s
 }
 
 func setResourceReferencesInSchema(d *schema.ResourceData, references []common.ResourceReference, schemaAttrName string) error {

@@ -415,7 +415,7 @@ resource "nsxt_firewall_section" "test" {
 
   rule {
     display_name          = "%s",
-	description           = "rule1",
+    description           = "rule1",
     action                = "ALLOW",
     logged                = "true",
     ip_protocol           = "IPV4",
