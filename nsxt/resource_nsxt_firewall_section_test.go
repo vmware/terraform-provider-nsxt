@@ -390,8 +390,16 @@ resource "nsxt_ns_group" "grp2" {
   display_name = "grp2"
 }
 
+resource "nsxt_ns_group" "grp3" {
+  display_name = "grp3"
+}
+
+resource "nsxt_ns_group" "grp4" {
+  display_name = "grp4"
+}
+
 resource "nsxt_ip_protocol_ns_service" "test" {
-  protocol     = "6"
+  protocol = "6"
 }`)
 }
 
@@ -407,7 +415,7 @@ resource "nsxt_firewall_section" "test" {
 
   rule {
     display_name          = "%s",
-	description           = "rule1",
+    description           = "rule1",
     action                = "ALLOW",
     logged                = "true",
     ip_protocol           = "IPV4",
@@ -423,14 +431,24 @@ resource "nsxt_firewall_section" "test" {
       target_type = "NSGroup"
     }
 
-    destination {
+    source {
       target_id   = "${nsxt_ns_group.grp2.id}"
+      target_type = "NSGroup"
+    }
+
+    destination {
+      target_id   = "${nsxt_ns_group.grp3.id}"
+      target_type = "NSGroup"
+    }
+
+    destination {
+      target_id   = "${nsxt_ns_group.grp4.id}"
       target_type = "NSGroup"
     }
 
     service {
       target_id   = "${nsxt_ip_protocol_ns_service.test.id}"
-      target_type = "NSService"    	
+      target_type = "NSService"
     }
   }
 }`, name, tags, tos, ruleName)
