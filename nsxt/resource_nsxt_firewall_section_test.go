@@ -110,6 +110,7 @@ func TestAccResourceNsxtFirewallSection_withRules(t *testing.T) {
 	updatedRuleName := "rule1.1"
 	tags := singleTag
 	tos := string("[]")
+	ruleTos := string("[]")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -119,7 +120,7 @@ func TestAccResourceNsxtFirewallSection_withRules(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXFirewallSectionCreateTemplate(sectionName, ruleName, tags, tos),
+				Config: testAccNSXFirewallSectionCreateTemplate(sectionName, ruleName, tags, tos, ruleTos),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXFirewallSectionExists(sectionName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", sectionName),
@@ -128,6 +129,7 @@ func TestAccResourceNsxtFirewallSection_withRules(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "stateful", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.display_name", ruleName),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.applied_to.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "applied_to.#", "0"),
 				),
@@ -168,7 +170,7 @@ func TestAccResourceNsxtFirewallSection_withRulesAndTags(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXFirewallSectionCreateTemplate(sectionName, ruleName, tags, tos),
+				Config: testAccNSXFirewallSectionCreateTemplate(sectionName, ruleName, tags, tos, tos),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXFirewallSectionExists(sectionName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", sectionName),
@@ -177,6 +179,7 @@ func TestAccResourceNsxtFirewallSection_withRulesAndTags(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "stateful", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.display_name", ruleName),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.applied_to.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "applied_to.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 				),
@@ -207,6 +210,7 @@ func TestAccResourceNsxtFirewallSection_withRulesAndTos(t *testing.T) {
 	updatedRuleName := "rule1.1"
 	tags := singleTag
 	tos := string("[{target_type = \"NSGroup\", target_id = \"${nsxt_ns_group.grp1.id}\"}]")
+	ruleTos := string("[{target_type = \"NSGroup\", target_id = \"${nsxt_ns_group.grp5.id}\"}]")
 	updatedTos := string("[{target_type = \"NSGroup\", target_id = \"${nsxt_ns_group.grp1.id}\"}, {target_type = \"NSGroup\", target_id = \"${nsxt_ns_group.grp2.id}\"}]")
 
 	resource.Test(t, resource.TestCase{
@@ -217,7 +221,7 @@ func TestAccResourceNsxtFirewallSection_withRulesAndTos(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXFirewallSectionCreateTemplate(sectionName, ruleName, tags, tos),
+				Config: testAccNSXFirewallSectionCreateTemplate(sectionName, ruleName, tags, tos, ruleTos),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXFirewallSectionExists(sectionName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", sectionName),
@@ -226,6 +230,7 @@ func TestAccResourceNsxtFirewallSection_withRulesAndTos(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "stateful", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.display_name", ruleName),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.applied_to.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "applied_to.#", "1"),
 				),
@@ -288,7 +293,7 @@ func TestAccResourceNsxtFirewallSection_importWithRules(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXFirewallSectionCreateTemplate(sectionName, ruleName, tags, tos),
+				Config: testAccNSXFirewallSectionCreateTemplate(sectionName, ruleName, tags, tos, tos),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -398,12 +403,16 @@ resource "nsxt_ns_group" "grp4" {
   display_name = "grp4"
 }
 
+resource "nsxt_ns_group" "grp5" {
+  display_name = "grp5"
+}
+
 resource "nsxt_ip_protocol_ns_service" "test" {
   protocol = "6"
 }`)
 }
 
-func testAccNSXFirewallSectionCreateTemplate(name string, ruleName string, tags string, tos string) string {
+func testAccNSXFirewallSectionCreateTemplate(name string, ruleName string, tags string, tos string, ruleTos string) string {
 	return testAccNSXFirewallSectionNSGroups() + fmt.Sprintf(`
 resource "nsxt_firewall_section" "test" {
   display_name = "%s"
@@ -425,6 +434,7 @@ resource "nsxt_firewall_section" "test" {
     notes                 = "test rule"
     rule_tag              = "test rule tag"
 	disabled              = "false"
+    applied_to            = %s
 
     source {
       target_id   = "${nsxt_ns_group.grp1.id}"
@@ -451,7 +461,7 @@ resource "nsxt_firewall_section" "test" {
       target_type = "NSService"
     }
   }
-}`, name, tags, tos, ruleName)
+}`, name, tags, tos, ruleName, ruleTos)
 }
 
 func testAccNSXFirewallSectionUpdateTemplate(updatedName string, updatedRuleName string, tags string, tos string) string {
