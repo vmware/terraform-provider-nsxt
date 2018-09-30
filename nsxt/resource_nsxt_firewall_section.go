@@ -94,7 +94,7 @@ func getRulesSchema() *schema.Schema {
 					Required:     true,
 					ValidateFunc: validation.StringInSlice(firewallRuleActionValues, false),
 				},
-				"applied_to":  getResourceReferencesSchema(false, false, []string{"LogicalPort", "LogicalSwitch", "NSGroup"}, "List of object where rule will be enforced. The section level field overrides this one. Null will be treated as any"),
+				"applied_to":  getResourceReferencesSetSchema(false, false, []string{"LogicalPort", "LogicalSwitch", "NSGroup"}, "List of objects where rule will be enforced. The section level field overrides this one. Null will be treated as any"),
 				"destination": getResourceReferencesSetSchema(false, false, []string{"IPSet", "LogicalPort", "LogicalSwitch", "NSGroup", "MACSet"}, "List of the destinations. Null will be treated as any"),
 				"destinations_excluded": &schema.Schema{
 					Type:        schema.TypeBool,
@@ -178,6 +178,7 @@ func setRulesInSchema(d *schema.ResourceData, rules []manager.FirewallRule) erro
 		elem["source"] = returnResourceReferencesSet(rule.Sources)
 		elem["destination"] = returnResourceReferencesSet(rule.Destinations)
 		elem["service"] = returnServicesResourceReferences(rule.Services)
+		elem["applied_to"] = returnResourceReferencesSet(rule.AppliedTos)
 
 		rulesList = append(rulesList, elem)
 	}
@@ -221,6 +222,7 @@ func getRulesFromSchema(d *schema.ResourceData) []manager.FirewallRule {
 			Sources:              getResourceReferences(data["source"].(*schema.Set).List()),
 			Destinations:         getResourceReferences(data["destination"].(*schema.Set).List()),
 			Services:             getServicesResourceReferences(data["service"].([]interface{})),
+			AppliedTos:           getResourceReferences(data["applied_to"].(*schema.Set).List()),
 		}
 
 		ruleList = append(ruleList, elem)

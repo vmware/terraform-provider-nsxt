@@ -85,7 +85,7 @@ The following arguments are supported:
   * `display_name` - (Optional) The display name of this rule. Defaults to ID if not set.
   * `description` - (Optional) Description of this rule.
   * `action` - (Required) Action enforced on the packets which matches the firewall rule. [Allowed values: "ALLOW", "DROP", "REJECT"]
-  * `applied_to` - (Optional) List of object where rule will be enforced. The section level field overrides this one. Null will be treated as any. [Supported target types: "LogicalPort", "LogicalSwitch", "NSGroup"]
+  * `applied_to` - (Optional) List of objects where rule will be enforced. The section level field overrides this one. Null will be treated as any. [Supported target types: "LogicalPort", "LogicalSwitch", "NSGroup"]
   * `destination` - (Optional) List of the destinations. Null will be treated as any. [Allowed target types: "IPSet", "LogicalPort", "LogicalSwitch", "NSGroup", "MACSet" (depending on the section type)]
   * `destinations_excluded` - (Optional) When this boolean flag is set to true, the rule destinations will be negated.
   * `direction` - (Optional) Rule direction in case of stateless firewall rules. This will only considered if section level parameter is set to stateless. Default to IN_OUT if not specified. [Allowed values: "IN", "OUT", "IN_OUT"]
