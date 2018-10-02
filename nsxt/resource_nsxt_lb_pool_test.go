@@ -235,6 +235,7 @@ func TestAccResourceNsxtLbPool_withMemberGroup(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "algorithm", algorithm),
 					resource.TestCheckResourceAttr(testResourceName, "member.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "member_group.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "member_group.0.limit_ip_list_size", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "member_group.0.max_ip_list_size", size),
 					resource.TestCheckResourceAttr(testResourceName, "member_group.0.ip_version_filter", "IPV4"),
 					resource.TestCheckResourceAttr(testResourceName, "member_group.0.port", port),
@@ -252,6 +253,7 @@ func TestAccResourceNsxtLbPool_withMemberGroup(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "algorithm", algorithm),
 					resource.TestCheckResourceAttr(testResourceName, "member.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "member_group.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "member_group.0.limit_ip_list_size", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "member_group.0.max_ip_list_size", updatedSize),
 					resource.TestCheckResourceAttr(testResourceName, "member_group.0.ip_version_filter", "IPV6"),
 					resource.TestCheckResourceAttr(testResourceName, "member_group.0.port", updatedPort),
@@ -560,9 +562,10 @@ resource "nsxt_lb_pool" "test" {
   description           = "Acceptance Test"
 
   member_group {
-    ip_version_filter = "IPV4"
-    max_ip_list_size  = "%s"
-    port              = "%s"
+    ip_version_filter  = "IPV4"
+    limit_ip_list_size = true
+    max_ip_list_size   = %s
+    port               = "%s"
 
     grouping_object {
       target_type = "NSGroup"
@@ -585,9 +588,10 @@ resource "nsxt_lb_pool" "test" {
   description           = "Updated Acceptance Test"
 
   member_group {
-    ip_version_filter = "IPV6"
-    max_ip_list_size  = "%s"
-    port              = "%s"
+    ip_version_filter  = "IPV6"
+    limit_ip_list_size = true
+    max_ip_list_size   = %s
+    port               = "%s"
 
     grouping_object {
       target_type = "NSGroup"

@@ -189,9 +189,15 @@ func getPoolMemberGroupSchema() *schema.Schema {
 					ValidateFunc: validation.StringInSlice(ipRevisionFilterTypeValues, false),
 					Default:      "IPV4",
 				},
+				"limit_ip_list_size": &schema.Schema{
+					Type:        schema.TypeBool,
+					Description: "Specifies whether to limit pool members. If false, dynamic pool can grow up to the load balancer max pool member capacity.",
+					Optional:    true,
+					Default:     false,
+				},
 				"max_ip_list_size": &schema.Schema{
 					Type:        schema.TypeInt,
-					Description: "Define the maximum number of grouping object IP address list. These IP addresses would be used as pool members",
+					Description: "Limits the max number of pool members to the specified value if limit_ip_list_size is set to true, ignored otherwise.",
 					Optional:    true,
 				},
 				"port": &schema.Schema{
@@ -314,7 +320,13 @@ func setPoolGroupMemberInSchema(d *schema.ResourceData, groupMember *loadbalance
 		}
 		elem["grouping_object"] = returnResourceReferences(refList)
 		elem["ip_version_filter"] = groupMember.IpRevisionFilter
-		elem["max_ip_list_size"] = groupMember.MaxIpListSize
+		if groupMember.MaxIpListSize != nil {
+			elem["max_ip_list_size"] = *groupMember.MaxIpListSize
+			elem["limit_ip_list_size"] = true
+		} else {
+			elem["limit_ip_list_size"] = false
+		}
+
 		elem["port"] = groupMember.Port
 
 		groupMembersList = append(groupMembersList, elem)
@@ -332,8 +344,12 @@ func getPoolMemberGroupFromSchema(d *schema.ResourceData) *loadbalancer.PoolMemb
 		memberGroup := loadbalancer.PoolMemberGroup{
 			IpRevisionFilter: data["ip_version_filter"].(string),
 			Port:             int32(data["port"].(int)),
-			MaxIpListSize:    int64(data["max_ip_list_size"].(int)),
 			GroupingObject:   groupingObject,
+		}
+		memberGroup.MaxIpListSize = nil
+		if data["limit_ip_list_size"].(bool) {
+			maxSize := int64(data["max_ip_list_size"].(int))
+			memberGroup.MaxIpListSize = &maxSize
 		}
 		return &memberGroup
 	}

@@ -2326,10 +2326,10 @@
 			"revisionTime": "2018-01-07T08:12:33Z"
 		},
 		{
-			"checksumSHA1": "+bNl9dfUjN96pPzi5BuKgqLm0dY=",
+			"checksumSHA1": "CsBWxmyQlaTwD5Np7xhNGh1gbs8=",
 			"path": "github.com/vmware/go-vmware-nsxt/loadbalancer",
-			"revision": "36b9ba8db5450aff8cda926fa135a660491425a0",
-			"revisionTime": "2018-06-24T05:57:26Z"
+			"revision": "02ced2297288a42d85fdf3f744a797422a73fa62",
+			"revisionTime": "2018-10-02T18:05:17Z"
 		},
 		{
 			"checksumSHA1": "1Aq+4XzgRMdTxNGn5LE+8xIw8ic=",
