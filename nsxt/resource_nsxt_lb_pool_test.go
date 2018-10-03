@@ -215,7 +215,6 @@ func TestAccResourceNsxtLbPool_withMemberGroup(t *testing.T) {
 	testResourceName := "nsxt_lb_pool.test"
 	algorithm := "LEAST_CONNECTION"
 	size := "3"
-	updatedSize := "4"
 	port := "50"
 	updatedPort := "60"
 
@@ -245,7 +244,7 @@ func TestAccResourceNsxtLbPool_withMemberGroup(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXLbPoolUpdateWithMemberGroupTemplate(updatedName, algorithm, updatedSize, updatedPort),
+				Config: testAccNSXLbPoolUpdateWithMemberGroupTemplate(updatedName, algorithm, updatedPort),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXLbPoolExists(updatedName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -253,8 +252,8 @@ func TestAccResourceNsxtLbPool_withMemberGroup(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "algorithm", algorithm),
 					resource.TestCheckResourceAttr(testResourceName, "member.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "member_group.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "member_group.0.limit_ip_list_size", "true"),
-					resource.TestCheckResourceAttr(testResourceName, "member_group.0.max_ip_list_size", updatedSize),
+					resource.TestCheckResourceAttr(testResourceName, "member_group.0.limit_ip_list_size", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "member_group.0.max_ip_list_size", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "member_group.0.ip_version_filter", "IPV6"),
 					resource.TestCheckResourceAttr(testResourceName, "member_group.0.port", updatedPort),
 					resource.TestCheckResourceAttr(testResourceName, "member_group.0.grouping_object.#", "1"),
@@ -576,7 +575,7 @@ resource "nsxt_lb_pool" "test" {
 `, name, algorithm, size, port)
 }
 
-func testAccNSXLbPoolUpdateWithMemberGroupTemplate(name string, algorithm string, size string, port string) string {
+func testAccNSXLbPoolUpdateWithMemberGroupTemplate(name string, algorithm string, port string) string {
 	return fmt.Sprintf(`
 resource "nsxt_ns_group" "grp1" {
   display_name = "grp1"
@@ -589,8 +588,7 @@ resource "nsxt_lb_pool" "test" {
 
   member_group {
     ip_version_filter  = "IPV6"
-    limit_ip_list_size = true
-    max_ip_list_size   = %s
+    limit_ip_list_size = false
     port               = "%s"
 
     grouping_object {
@@ -599,5 +597,5 @@ resource "nsxt_lb_pool" "test" {
     }
   }
 }
-`, name, algorithm, size, port)
+`, name, algorithm, port)
 }
