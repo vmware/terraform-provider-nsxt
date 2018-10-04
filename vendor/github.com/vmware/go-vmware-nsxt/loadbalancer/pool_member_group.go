@@ -25,7 +25,8 @@ type PoolMemberGroup struct {
 	IpRevisionFilter string `json:"ip_revision_filter,omitempty"`
 
 	// The size is used to define the maximum number of grouping object IP address list. These IP addresses would be used as pool members. If the grouping object includes more than certain number of IP addresses, the redundant parts would be ignored and those IP addresses would not be treated as pool members.
-	MaxIpListSize int64 `json:"max_ip_list_size"`
+        // In order to destinguish between zero and unspecified value, use pointer
+	MaxIpListSize *int64 `json:"max_ip_list_size,omitempty"`
 
 	// If port is specified, all connections will be sent to this port. If unset, the same port the client connected to will be used, it could be overridden by default_pool_member_ports setting in virtual server. The port should not specified for multiple ports case.
 	Port int32 `json:"port,omitempty"`
