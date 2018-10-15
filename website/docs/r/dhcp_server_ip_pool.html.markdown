@@ -85,7 +85,7 @@ The following arguments are supported:
 
 In addition to arguments listed above, the following attributes are exported:
 
-* `id` - ID of the logical DHCP server.
+* `id` - ID of the DHCP server IP pool.
 * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
 
 
