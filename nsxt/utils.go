@@ -441,6 +441,53 @@ func getIDSetSchema(description string) *schema.Schema {
 	}
 }
 
+func getIPRangesSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeList,
+		Description: "List of IP Ranges",
+		Optional:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"start": &schema.Schema{
+					Type:         schema.TypeString,
+					ValidateFunc: validateSingleIP(),
+					Required:     true,
+				},
+				"end": &schema.Schema{
+					Type:         schema.TypeString,
+					ValidateFunc: validateSingleIP(),
+					Required:     true,
+				},
+			},
+		},
+	}
+}
+
+func getIPRangesFromSchema(d *schema.ResourceData) []manager.IpPoolRange {
+	ranges := d.Get("ip_range").([]interface{})
+	var rangeList []manager.IpPoolRange
+	for _, r := range ranges {
+		data := r.(map[string]interface{})
+		elem := manager.IpPoolRange{
+			Start: data["start"].(string),
+			End:   data["end"].(string)}
+
+		rangeList = append(rangeList, elem)
+	}
+	return rangeList
+}
+
+func setIPRangesInSchema(d *schema.ResourceData, ranges []manager.IpPoolRange) error {
+	var rangeList []map[string]string
+	for _, r := range ranges {
+		elem := make(map[string]string)
+		elem["start"] = r.Start
+		elem["end"] = r.End
+		rangeList = append(rangeList, elem)
+	}
+	return d.Set("ip_range", rangeList)
+}
+
 func makeResourceReference(resourceType string, resourceID string) *common.ResourceReference {
 	return &common.ResourceReference{
 		TargetType: resourceType,
