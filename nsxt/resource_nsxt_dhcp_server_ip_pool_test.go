@@ -13,10 +13,13 @@ import (
 	"testing"
 )
 
+var testNsxtDhcpServerIPPoolName = "test"
+var testNsxtDhcpServerIPPoolResourceName = "nsxt_dhcp_server_ip_pool.test"
+
 func TestAccResourceNsxtDhcpServerIPPool_basic(t *testing.T) {
-	name := "test"
+	name := testNsxtDhcpServerIPPoolName
 	updatedName := "test-update"
-	testResourceName := "nsxt_dhcp_server_ip_pool.test"
+	testResourceName := testNsxtDhcpServerIPPoolResourceName
 	edgeClusterName := getEdgeClusterName()
 	gateway := "1.1.1.1"
 	updatedGateway := "1.1.1.8"
@@ -79,9 +82,9 @@ func TestAccResourceNsxtDhcpServerIPPool_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtDhcpServerIPPool_noOpts(t *testing.T) {
-	name := "test"
+	name := testNsxtDhcpServerIPPoolName
 	updatedName := "test-update"
-	testResourceName := "nsxt_dhcp_server_ip_pool.test"
+	testResourceName := testNsxtDhcpServerIPPoolResourceName
 	edgeClusterName := getEdgeClusterName()
 	start1 := "1.1.1.100"
 	end1 := "1.1.1.120"
@@ -127,6 +130,47 @@ func TestAccResourceNsxtDhcpServerIPPool_noOpts(t *testing.T) {
 			},
 		},
 	})
+}
+
+func TestAccResourceNsxtDhcpServerIPPool_Import(t *testing.T) {
+	name := testNsxtDhcpServerIPPoolName
+	testResourceName := testNsxtDhcpServerIPPoolResourceName
+	edgeClusterName := getEdgeClusterName()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXNATRuleCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXDhcpServerIPPoolNoOptsTemplate(edgeClusterName, name, "2.0.0.3", "2.0.0.16", "2.0.0.140", "2.0.0.156"),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccNSXNDhcpIPPoolImporterGetID,
+			},
+		},
+	})
+}
+
+func testAccNSXNDhcpIPPoolImporterGetID(s *terraform.State) (string, error) {
+	rs, ok := s.RootModule().Resources[testNsxtDhcpServerIPPoolResourceName]
+	if !ok {
+		return "", fmt.Errorf("DHCP IP Pool %s not found in resources", testNsxtDhcpServerIPPoolName)
+	}
+	resourceID := rs.Primary.ID
+	if resourceID == "" {
+		return "", fmt.Errorf("DHCP IP Pool resource ID not set in resources")
+	}
+	serverID := rs.Primary.Attributes["logical_dhcp_server_id"]
+	if serverID == "" {
+		return "", fmt.Errorf("DHCP IP Pool logical_dhcp_server_id not set in resources")
+	}
+	return fmt.Sprintf("%s/%s", serverID, resourceID), nil
 }
 
 func findAccNSXDhcpIPPool(resourceID string) (*manager.DhcpIpPool, error) {
