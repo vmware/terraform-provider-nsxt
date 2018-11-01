@@ -11,6 +11,7 @@ import (
 	"github.com/vmware/go-vmware-nsxt/manager"
 	"log"
 	"net/http"
+	"strings"
 )
 
 func resourceNsxtDhcpServerIPPool() *schema.Resource {
@@ -19,6 +20,9 @@ func resourceNsxtDhcpServerIPPool() *schema.Resource {
 		Read:   resourceNsxtDhcpServerIPPoolRead,
 		Update: resourceNsxtDhcpServerIPPoolUpdate,
 		Delete: resourceNsxtDhcpServerIPPoolDelete,
+		Importer: &schema.ResourceImporter{
+			State: resourceNsxtDhcpServerIPPoolImport,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"display_name": &schema.Schema{
@@ -226,4 +230,18 @@ func resourceNsxtDhcpServerIPPoolDelete(d *schema.ResourceData, m interface{}) e
 		d.SetId("")
 	}
 	return nil
+}
+
+func resourceNsxtDhcpServerIPPoolImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	importID := d.Id()
+	s := strings.Split(importID, "/")
+	if len(s) != 2 {
+		return nil, fmt.Errorf("Please provide <dhcp-server-id>/<ip-pool-id> as an input")
+	}
+
+	d.SetId(s[1])
+	d.Set("logical_dhcp_server_id", s[0])
+
+	return []*schema.ResourceData{d}, nil
+
 }
