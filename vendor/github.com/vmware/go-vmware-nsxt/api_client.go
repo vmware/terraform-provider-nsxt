@@ -119,7 +119,7 @@ func GetDefaultHeaders(client *APIClient) error {
 		return fmt.Errorf("Failed to create session: %s.", err)
 	}
 	response, err := client.callAPI(r)
-	if err != nil {
+	if err != nil || response == nil {
 		return fmt.Errorf("Failed to create session: %s.", err)
 	}
 
@@ -141,7 +141,7 @@ func GetDefaultHeaders(client *APIClient) error {
 		}
 	}
 
-	//TODO: close the session before exiting
+	response.Body.Close()
 	return nil
 }
 
@@ -177,7 +177,11 @@ func InitHttpClient(cfg *Configuration) error {
 
 	tlsConfig.BuildNameToCertificate()
 
-	transport := &http.Transport{TLSClientConfig: tlsConfig}
+	transport := &http.Transport{Proxy: http.ProxyFromEnvironment,
+		TLSClientConfig:     tlsConfig,
+		MaxIdleConns:        100,
+		MaxIdleConnsPerHost: 100,
+	}
 	cfg.HTTPClient = &http.Client{Transport: transport}
 	return nil
 }
