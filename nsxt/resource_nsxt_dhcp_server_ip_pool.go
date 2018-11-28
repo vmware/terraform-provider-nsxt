@@ -31,6 +31,11 @@ func resourceNsxtDhcpServerIPPool() *schema.Resource {
 				Optional:    true,
 				Computed:    true,
 			},
+			"description": &schema.Schema{
+				Type:        schema.TypeString,
+				Description: "Description of this resource",
+				Optional:    true,
+			},
 			"logical_dhcp_server_id": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "Id of dhcp server this pool is serving",
@@ -77,6 +82,7 @@ func resourceNsxtDhcpServerIPPool() *schema.Resource {
 func resourceNsxtDhcpServerIPPoolCreate(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
 	displayName := d.Get("display_name").(string)
+	description := d.Get("description").(string)
 	gatewayIP := d.Get("gateway_ip").(string)
 	serverID := d.Get("logical_dhcp_server_id").(string)
 	leaseTime := int64(d.Get("lease_time").(int))
@@ -93,6 +99,7 @@ func resourceNsxtDhcpServerIPPoolCreate(d *schema.ResourceData, m interface{}) e
 	tags := getTagsFromSchema(d)
 	pool := manager.DhcpIpPool{
 		DisplayName: displayName,
+		Description: description,
 		GatewayIp:   gatewayIP,
 		Options: &manager.DhcpOptions{
 			Option121: opt121,
@@ -140,6 +147,7 @@ func resourceNsxtDhcpServerIPPoolRead(d *schema.ResourceData, m interface{}) err
 
 	d.Set("revision", pool.Revision)
 	d.Set("display_name", pool.DisplayName)
+	d.Set("description", pool.Description)
 	setTagsInSchema(d, pool.Tags)
 	d.Set("logical_dhcp_server_id", serverID)
 	d.Set("gateway_ip", pool.GatewayIp)
@@ -176,6 +184,7 @@ func resourceNsxtDhcpServerIPPoolUpdate(d *schema.ResourceData, m interface{}) e
 	}
 
 	displayName := d.Get("display_name").(string)
+	description := d.Get("description").(string)
 	gatewayIP := d.Get("gateway_ip").(string)
 	leaseTime := int64(d.Get("lease_time").(int))
 	errorThreshold := int64(d.Get("error_threshold").(int))
@@ -191,6 +200,7 @@ func resourceNsxtDhcpServerIPPoolUpdate(d *schema.ResourceData, m interface{}) e
 	tags := getTagsFromSchema(d)
 	pool := manager.DhcpIpPool{
 		DisplayName: displayName,
+		Description: description,
 		GatewayIp:   gatewayIP,
 		Options: &manager.DhcpOptions{
 			Option121: opt121,

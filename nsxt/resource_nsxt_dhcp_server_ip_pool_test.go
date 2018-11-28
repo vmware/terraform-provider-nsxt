@@ -38,6 +38,7 @@ func TestAccResourceNsxtDhcpServerIPPool_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXDhcpIPPoolExists(name, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "description", "test"),
 					resource.TestCheckResourceAttrSet(testResourceName, "logical_dhcp_server_id"),
 					resource.TestCheckResourceAttr(testResourceName, "gateway_ip", gateway),
 					resource.TestCheckResourceAttr(testResourceName, "lease_time", leaseTime),
@@ -60,6 +61,7 @@ func TestAccResourceNsxtDhcpServerIPPool_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXDhcpIPPoolExists(updatedName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "test"),
 					resource.TestCheckResourceAttrSet(testResourceName, "logical_dhcp_server_id"),
 					resource.TestCheckResourceAttr(testResourceName, "gateway_ip", updatedGateway),
 					resource.TestCheckResourceAttr(testResourceName, "lease_time", updatedLeaseTime),
@@ -282,6 +284,7 @@ func testAccNSXDhcpServerIPPoolTemplate(edgeClusterName string, name string, ip 
 	return testAccNSXCreateDhcpIPPoolPrerequisites(edgeClusterName) + fmt.Sprintf(`
 resource "nsxt_dhcp_server_ip_pool" "test" {
   display_name           = "%s"
+  description            = "test"
   logical_dhcp_server_id = "${nsxt_logical_dhcp_server.DS.id}"
   gateway_ip             = "%s"
   lease_time             = %s
