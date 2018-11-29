@@ -30,6 +30,7 @@ resource "nsxt_logical_dhcp_server" "logical_dhcp_server" {
 
 resource "nsxt_dhcp_server_ip_pool" "dhcp_ip_pool" {
   display_name           = "ip pool"
+  description            = "ip pool"
   logical_dhcp_server_id = "${nsxt_logical_dhcp_server.logical_dhcp_server.id}"
   gateway_ip             = "1.1.1.21"
   lease_time             = 1296000
@@ -64,6 +65,7 @@ resource "nsxt_dhcp_server_ip_pool" "dhcp_ip_pool" {
 The following arguments are supported:
 
 * `display_name` - (Optional) The display name of this resource. Defaults to ID if not set.
+* `description` - (Optional) Description of this resource.
 * `logical_dhcp_server_id` - (Required) DHCP server uuid. Changing this would force new pool to be created.
 * `gateway_ip` - (Optional) Gateway IP.
 * `ip_range` - (Required) IP Ranges to be used within this pool.
