@@ -128,6 +128,36 @@ func TestAccResourceNsxtLogicalRouterCentralizedServicePort_importBasic(t *testi
 	})
 }
 
+func TestAccResourceNsxtLogicalRouterCentralizedServicePort_onTier1(t *testing.T) {
+	portName := "test"
+	testResourceName := "nsxt_logical_router_centralized_service_port.test"
+	transportZoneName := getVlanTransportZoneName()
+	edgeClusterName := getEdgeClusterName()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXLogicalRouterCentralizedServicePortCheckDestroy(state, portName)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXLogicalRouterCSPVlanCreateTemplate(transportZoneName, edgeClusterName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXLogicalRouterCentralizedServicePortExists(portName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", portName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttrSet(testResourceName, "linked_logical_switch_port_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "logical_router_id"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "urpf_mode", "NONE"),
+					resource.TestCheckResourceAttr(testResourceName, "ip_address", "8.0.0.1/24"),
+				),
+			},
+		},
+	})
+}
+
 func testAccNSXLogicalRouterCentralizedServicePortExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
@@ -269,4 +299,50 @@ resource "nsxt_logical_router_centralized_service_port" "test" {
     tag   = "tag2"
   }
 }`, portUpdatedName, routerObj)
+}
+
+func testAccNSXLogicalRouterCSPVlanCreateTemplate(transportZoneName string, edgeClusterName string) string {
+	return fmt.Sprintf(`
+
+data "nsxt_transport_zone" "tz1" {
+  display_name = "%s"
+}
+
+resource "nsxt_logical_switch" "ls1" {
+  display_name      = "test_switch"
+  replication_mode  = ""
+  admin_state       = "UP"
+  vlan              = "1"
+  transport_zone_id = "${data.nsxt_transport_zone.tz1.id}"
+}
+
+resource "nsxt_logical_port" "port1" {
+  display_name      = "LP"
+  admin_state       = "UP"
+  description       = "Acceptance Test"
+  logical_switch_id = "${nsxt_logical_switch.ls1.id}"
+}
+
+data "nsxt_edge_cluster" "ec" {
+  display_name = "%s"
+}
+
+resource "nsxt_logical_tier1_router" "test" {
+  display_name    = "test_router"
+  edge_cluster_id = "${data.nsxt_edge_cluster.ec.id}"
+}
+
+resource "nsxt_logical_router_centralized_service_port" "test" {
+  display_name                  = "test"
+  description                   = "Acceptance Test"
+  linked_logical_switch_port_id = "${nsxt_logical_port.port1.id}"
+  logical_router_id             = "${nsxt_logical_tier1_router.test.id}"
+  ip_address                    = "8.0.0.1/24"
+  urpf_mode                     = "NONE"
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+}`, transportZoneName, edgeClusterName)
 }
