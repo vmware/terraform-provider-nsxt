@@ -24,36 +24,36 @@ func resourceNsxtLbSourceIPPersistenceProfile() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
-			"description": &schema.Schema{
+			"description": {
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
 				Optional:    true,
 			},
-			"display_name": &schema.Schema{
+			"display_name": {
 				Type:        schema.TypeString,
 				Description: "The display name of this resource. Defaults to ID if not set",
 				Optional:    true,
 				Computed:    true,
 			},
 			"tag": getTagsSchema(),
-			"persistence_shared": &schema.Schema{
+			"persistence_shared": {
 				Type:        schema.TypeBool,
 				Description: "A boolean flag which reflects whether the cookie persistence is private or shared",
 				Optional:    true,
 			},
-			"ha_persistence_mirroring": &schema.Schema{
+			"ha_persistence_mirroring": {
 				Type:        schema.TypeBool,
 				Description: "A boolean flag which reflects whether persistence entries will be synchronized to the HA peer",
 				Optional:    true,
 				Default:     false,
 			},
-			"purge_when_full": &schema.Schema{
+			"purge_when_full": {
 				Type:        schema.TypeBool,
 				Description: "A boolean flag which reflects whether entries will be purged when the persistence table is full",
 				Optional:    true,
 				Default:     true,
 			},
-			"timeout": &schema.Schema{
+			"timeout": {
 				Type:        schema.TypeInt,
 				Description: "Persistence expiration time in seconds, counted from the time all the connections are completed",
 				Optional:    true,
@@ -82,8 +82,8 @@ func resourceNsxtLbSourceIPPersistenceProfileCreate(d *schema.ResourceData, m in
 		Tags:                          tags,
 		PersistenceShared:             persistenceShared,
 		HaPersistenceMirroringEnabled: haPersistenceMirroring,
-		Purge:   purge,
-		Timeout: timeout,
+		Purge:                         purge,
+		Timeout:                       timeout,
 	}
 
 	lbSourceIPPersistenceProfile, resp, err := nsxClient.ServicesApi.CreateLoadBalancerSourceIpPersistenceProfile(nsxClient.Context, lbSourceIPPersistenceProfile)
@@ -159,8 +159,8 @@ func resourceNsxtLbSourceIPPersistenceProfileUpdate(d *schema.ResourceData, m in
 		Tags:                          tags,
 		PersistenceShared:             persistenceShared,
 		HaPersistenceMirroringEnabled: haPersistenceMirroring,
-		Purge:   purge,
-		Timeout: timeout,
+		Purge:                         purge,
+		Timeout:                       timeout,
 	}
 
 	lbSourceIPPersistenceProfile, resp, err := nsxClient.ServicesApi.UpdateLoadBalancerSourceIpPersistenceProfile(nsxClient.Context, id, lbSourceIPPersistenceProfile)

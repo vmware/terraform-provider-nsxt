@@ -25,50 +25,50 @@ func resourceNsxtMacManagementSwitchingProfile() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
-			"description": &schema.Schema{
+			"description": {
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
 				Optional:    true,
 			},
-			"display_name": &schema.Schema{
+			"display_name": {
 				Type:        schema.TypeString,
 				Description: "The display name of this resource. Defaults to ID if not set",
 				Optional:    true,
 				Computed:    true,
 			},
 			"tag": getTagsSchema(),
-			"mac_change_allowed": &schema.Schema{
+			"mac_change_allowed": {
 				Type:        schema.TypeBool,
 				Description: "Allowing source MAC address change",
 				Optional:    true,
 				Default:     false,
 			},
-			"mac_learning": &schema.Schema{
+			"mac_learning": {
 				Type:     schema.TypeList,
 				MaxItems: 1,
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"enabled": &schema.Schema{
+						"enabled": {
 							Type:        schema.TypeBool,
 							Description: "Allowing source MAC address learning",
 							Optional:    true,
 							Default:     false,
 						},
-						"unicast_flooding_allowed": &schema.Schema{
+						"unicast_flooding_allowed": {
 							Type:        schema.TypeBool,
 							Description: "Allowing flooding for unlearned MAC for ingress traffic",
 							Optional:    true,
 							Default:     false,
 						},
-						"limit": &schema.Schema{
+						"limit": {
 							Type:         schema.TypeInt,
 							Description:  "The maximum number of MAC addresses that can be learned on this port",
 							Optional:     true,
 							Default:      4096,
 							ValidateFunc: validation.IntAtLeast(1),
 						},
-						"limit_policy": &schema.Schema{
+						"limit_policy": {
 							Type:         schema.TypeString,
 							Description:  "The policy after MAC Limit is exceeded",
 							Optional:     true,
@@ -90,8 +90,8 @@ func getMacLearningFromSchema(d *schema.ResourceData) *manager.MacLearningSpec {
 		return &manager.MacLearningSpec{
 			Enabled:                data["enabled"].(bool),
 			UnicastFloodingAllowed: data["unicast_flooding_allowed"].(bool),
-			Limit:       int32(data["limit"].(int)),
-			LimitPolicy: data["limit_policy"].(string),
+			Limit:                  int32(data["limit"].(int)),
+			LimitPolicy:            data["limit_policy"].(string),
 		}
 	}
 

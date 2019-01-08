@@ -26,12 +26,12 @@ func resourceNsxtStaticRoute() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"logical_router_id": &schema.Schema{
+			"logical_router_id": {
 				Type:        schema.TypeString,
 				Description: "Logical router id",
 				Required:    true,
 			},
-			"network": &schema.Schema{
+			"network": {
 				Type:         schema.TypeString,
 				Description:  "CIDR",
 				Required:     true,
@@ -39,12 +39,12 @@ func resourceNsxtStaticRoute() *schema.Resource {
 			},
 			"next_hop": getNextHopsSchema(),
 			"revision": getRevisionSchema(),
-			"description": &schema.Schema{
+			"description": {
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
 				Optional:    true,
 			},
-			"display_name": &schema.Schema{
+			"display_name": {
 				Type:        schema.TypeString,
 				Description: "Defaults to ID if not set",
 				Optional:    true,
@@ -61,28 +61,28 @@ func getNextHopsSchema() *schema.Schema {
 		Required: true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				"administrative_distance": &schema.Schema{
+				"administrative_distance": {
 					Type:        schema.TypeInt,
 					Description: "Administrative Distance for the next hop IP",
 					Optional:    true,
 				},
-				"bfd_enabled": &schema.Schema{
+				"bfd_enabled": {
 					Type:        schema.TypeBool,
 					Description: "Status of bfd for this next hop where bfdEnabled = true indicate bfd is enabled for this next hop and bfdEnabled = false indicate bfd peer is disabled or not configured for this next hop.",
 					Computed:    true,
 				},
-				"blackhole_action": &schema.Schema{
+				"blackhole_action": {
 					Type:        schema.TypeString,
 					Description: "Action to be taken on matching packets for NULL routes",
 					Computed:    true,
 				},
-				"ip_address": &schema.Schema{
+				"ip_address": {
 					Type:         schema.TypeString,
 					Description:  "Next Hop IP",
 					Optional:     true,
 					ValidateFunc: validateSingleIP(),
 				},
-				"logical_router_port_id": &schema.Schema{
+				"logical_router_port_id": {
 					Type:        schema.TypeString,
 					Description: "Logical router port id",
 					Optional:    true,

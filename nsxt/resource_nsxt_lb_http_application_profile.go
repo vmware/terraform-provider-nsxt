@@ -27,62 +27,62 @@ func resourceNsxtLbHTTPApplicationProfile() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
-			"description": &schema.Schema{
+			"description": {
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
 				Optional:    true,
 			},
-			"display_name": &schema.Schema{
+			"display_name": {
 				Type:        schema.TypeString,
 				Description: "The display name of this resource. Defaults to ID if not set",
 				Optional:    true,
 				Computed:    true,
 			},
 			"tag": getTagsSchema(),
-			"http_redirect_to": &schema.Schema{
+			"http_redirect_to": {
 				Type:        schema.TypeString,
 				Description: "A URL that incoming requests for that virtual server can be temporarily redirected to, If a website is temporarily down or has moved",
 				Optional:    true,
 			},
-			"http_redirect_to_https": &schema.Schema{
+			"http_redirect_to_https": {
 				Type:        schema.TypeBool,
 				Description: "A boolean flag which reflects whether the client will automatically be redirected to use SSL",
 				Optional:    true,
 				Default:     false,
 			},
-			"idle_timeout": &schema.Schema{
+			"idle_timeout": {
 				Type:         schema.TypeInt,
 				Description:  "Timeout in seconds to specify how long an HTTP application can remain idle",
 				Optional:     true,
 				Default:      15,
 				ValidateFunc: validation.IntAtLeast(1),
 			},
-			"ntlm": &schema.Schema{
+			"ntlm": {
 				Type:        schema.TypeBool,
 				Description: "A boolean flag which reflects whether NTLM challenge/response methodology will be used over HTTP",
 				Optional:    true,
 				Default:     false,
 			},
-			"request_body_size": &schema.Schema{
+			"request_body_size": {
 				Type:        schema.TypeInt,
 				Description: "Maximum request body size in bytes (Unlimited if not specified)",
 				Optional:    true,
 			},
-			"request_header_size": &schema.Schema{
+			"request_header_size": {
 				Type:         schema.TypeInt,
 				Description:  "Maximum request header size in bytes. Requests with larger header size will be processed as best effort whereas a request with header below this specified size is guaranteed to be processed",
 				Optional:     true,
 				Default:      1024,
 				ValidateFunc: validation.IntBetween(1, 65536),
 			},
-			"response_timeout": &schema.Schema{
+			"response_timeout": {
 				Type:         schema.TypeInt,
 				Description:  "Number of seconds waiting for the server response before the connection is closed",
 				Optional:     true,
 				Default:      60,
 				ValidateFunc: validation.IntAtLeast(1),
 			},
-			"x_forwarded_for": &schema.Schema{
+			"x_forwarded_for": {
 				Type:         schema.TypeString,
 				Description:  "When this value is set, the x_forwarded_for header in the incoming request will be inserted or replaced",
 				Optional:     true,

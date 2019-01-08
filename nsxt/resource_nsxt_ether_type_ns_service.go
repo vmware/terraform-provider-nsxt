@@ -24,24 +24,24 @@ func resourceNsxtEtherTypeNsService() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
-			"description": &schema.Schema{
+			"description": {
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
 				Optional:    true,
 			},
-			"display_name": &schema.Schema{
+			"display_name": {
 				Type:        schema.TypeString,
 				Description: "The display name of this resource. Defaults to ID if not set",
 				Optional:    true,
 				Computed:    true,
 			},
 			"tag": getTagsSchema(),
-			"default_service": &schema.Schema{
+			"default_service": {
 				Type:        schema.TypeBool,
 				Description: "A boolean flag which reflects whether this is a default NSServices which can't be modified/deleted",
 				Computed:    true,
 			},
-			"ether_type": &schema.Schema{
+			"ether_type": {
 				Type:        schema.TypeInt,
 				Description: "Type of the encapsulated protocol",
 				Required:    true,

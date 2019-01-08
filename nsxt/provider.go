@@ -17,61 +17,61 @@ func Provider() terraform.ResourceProvider {
 	return &schema.Provider{
 
 		Schema: map[string]*schema.Schema{
-			"allow_unverified_ssl": &schema.Schema{
+			"allow_unverified_ssl": {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("NSXT_ALLOW_UNVERIFIED_SSL", false),
 			},
-			"username": &schema.Schema{
+			"username": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("NSXT_USERNAME", nil),
 			},
-			"password": &schema.Schema{
+			"password": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("NSXT_PASSWORD", nil),
 				Sensitive:   true,
 			},
-			"host": &schema.Schema{
+			"host": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("NSXT_MANAGER_HOST", nil),
 			},
-			"client_auth_cert_file": &schema.Schema{
+			"client_auth_cert_file": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("NSXT_CLIENT_AUTH_CERT_FILE", nil),
 			},
-			"client_auth_key_file": &schema.Schema{
+			"client_auth_key_file": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("NSXT_CLIENT_AUTH_KEY_FILE", nil),
 			},
-			"ca_file": &schema.Schema{
+			"ca_file": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("NSXT_CA_FILE", nil),
 			},
-			"max_retries": &schema.Schema{
+			"max_retries": {
 				Type:        schema.TypeInt,
 				Optional:    true,
 				Description: "Maximum number of HTTP client retries",
 				DefaultFunc: schema.EnvDefaultFunc("NSXT_MAX_RETRIES", 50),
 			},
-			"retry_min_delay": &schema.Schema{
+			"retry_min_delay": {
 				Type:        schema.TypeInt,
 				Optional:    true,
 				Description: "Minimum delay in milliseconds between retries of a request",
 				DefaultFunc: schema.EnvDefaultFunc("NSXT_RETRY_MIN_DELAY", 500),
 			},
-			"retry_max_delay": &schema.Schema{
+			"retry_max_delay": {
 				Type:        schema.TypeInt,
 				Optional:    true,
 				Description: "Maximum delay in milliseconds between retries of a request",
 				DefaultFunc: schema.EnvDefaultFunc("NSXT_RETRY_MAX_DELAY", 5000),
 			},
-			"retry_on_status_codes": &schema.Schema{
+			"retry_on_status_codes": {
 				Type:        schema.TypeList,
 				Optional:    true,
 				Description: "HTTP replies status codes to retry on",

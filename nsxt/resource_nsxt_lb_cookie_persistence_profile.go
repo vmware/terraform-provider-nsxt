@@ -28,49 +28,49 @@ func resourceNsxtLbCookiePersistenceProfile() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
-			"description": &schema.Schema{
+			"description": {
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
 				Optional:    true,
 			},
-			"display_name": &schema.Schema{
+			"display_name": {
 				Type:        schema.TypeString,
 				Description: "The display name of this resource. Defaults to ID if not set",
 				Optional:    true,
 				Computed:    true,
 			},
 			"tag": getTagsSchema(),
-			"cookie_mode": &schema.Schema{
+			"cookie_mode": {
 				Type:         schema.TypeString,
 				Description:  "The cookie persistence mode",
 				Optional:     true,
 				Default:      "INSERT",
 				ValidateFunc: validation.StringInSlice(cookieModeTypes, false),
 			},
-			"cookie_name": &schema.Schema{
+			"cookie_name": {
 				Type:        schema.TypeString,
 				Description: "The name of the cookie",
 				Required:    true,
 			},
-			"persistence_shared": &schema.Schema{
+			"persistence_shared": {
 				Type:        schema.TypeBool,
 				Description: "A boolean flag which reflects whether the cookie persistence is private or shared",
 				Optional:    true,
 				Default:     false,
 			},
-			"cookie_fallback": &schema.Schema{
+			"cookie_fallback": {
 				Type:        schema.TypeBool,
 				Description: "A boolean flag which reflects whether once the server points by this cookie is down, a new server is selected, or the requests will be rejected",
 				Optional:    true,
 				Default:     true,
 			},
-			"cookie_garble": &schema.Schema{
+			"cookie_garble": {
 				Type:        schema.TypeBool,
 				Description: "A boolean flag which reflects whether the cookie value (server IP and port) would be encrypted or in plain text",
 				Optional:    true,
 				Default:     true,
 			},
-			"insert_mode_params": &schema.Schema{
+			"insert_mode_params": {
 				Type:        schema.TypeList,
 				Description: "Additional parameters for the INSERT cookie mode",
 				Optional:    true,
@@ -78,30 +78,30 @@ func resourceNsxtLbCookiePersistenceProfile() *schema.Resource {
 				MaxItems:    1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"cookie_domain": &schema.Schema{
+						"cookie_domain": {
 							Type:        schema.TypeString,
 							Description: "HTTP cookie domain",
 							Optional:    true,
 							// TODO(asarfaty) add validation on cookie domain values
 						},
-						"cookie_path": &schema.Schema{
+						"cookie_path": {
 							Type:        schema.TypeString,
 							Description: "HTTP cookie path",
 							Optional:    true,
 						},
-						"cookie_expiry_type": &schema.Schema{
+						"cookie_expiry_type": {
 							Type:         schema.TypeString,
 							Description:  "Type of cookie expiration timing",
 							Optional:     true,
 							ValidateFunc: validation.StringInSlice(cookieExpiryTypes, false),
 						},
-						"max_idle_time": &schema.Schema{
+						"max_idle_time": {
 							Type:        schema.TypeInt,
 							Description: "Maximum interval (in seconds) the cookie is valid for from the last time it was seen in a request (required if cookie_expiry_type is set)",
 							Optional:    true,
 							Computed:    true,
 						},
-						"max_life_time": &schema.Schema{
+						"max_life_time": {
 							Type:        schema.TypeInt,
 							Description: "Maximum interval (in seconds) the cookie is valid for from the first time the cookie was seen in a request (required if cookie_expiry_type is SESSION_COOKIE_TIME expiration)",
 							Optional:    true,

@@ -42,12 +42,12 @@ func resourceNsxtLogicalSwitch() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
-			"description": &schema.Schema{
+			"description": {
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
 				Optional:    true,
 			},
-			"display_name": &schema.Schema{
+			"display_name": {
 				Type:        schema.TypeString,
 				Description: "The display name of this resource. Defaults to ID if not set",
 				Optional:    true,
@@ -56,17 +56,17 @@ func resourceNsxtLogicalSwitch() *schema.Resource {
 			"tag":             getTagsSchema(),
 			"address_binding": getAddressBindingsSchema(),
 			"admin_state":     getAdminStateSchema(),
-			"ip_pool_id": &schema.Schema{
+			"ip_pool_id": {
 				Type:        schema.TypeString,
 				Description: "IP pool id that associated with a LogicalSwitch",
 				Optional:    true,
 			},
-			"mac_pool_id": &schema.Schema{
+			"mac_pool_id": {
 				Type:        schema.TypeString,
 				Description: "Mac pool id that associated with a LogicalSwitch",
 				Optional:    true,
 			},
-			"replication_mode": &schema.Schema{
+			"replication_mode": {
 				Type:         schema.TypeString,
 				Description:  "Replication mode of the Logical Switch",
 				Optional:     true,
@@ -74,17 +74,17 @@ func resourceNsxtLogicalSwitch() *schema.Resource {
 				ValidateFunc: validation.StringInSlice(logicalSwitchReplicationModeValues, false),
 			},
 			"switching_profile_id": getSwitchingProfileIdsSchema(),
-			"transport_zone_id": &schema.Schema{
+			"transport_zone_id": {
 				Type:        schema.TypeString,
 				Description: "Id of the TransportZone to which this LogicalSwitch is associated",
 				Required:    true,
 				ForceNew:    true,
 			},
-			"vlan": &schema.Schema{
+			"vlan": {
 				Type:     schema.TypeInt,
 				Optional: true,
 			},
-			"vni": &schema.Schema{
+			"vni": {
 				Type:        schema.TypeInt,
 				Description: "VNI for this LogicalSwitch",
 				Optional:    true,

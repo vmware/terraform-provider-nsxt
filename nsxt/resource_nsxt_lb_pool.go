@@ -31,49 +31,49 @@ func resourceNsxtLbPool() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
-			"description": &schema.Schema{
+			"description": {
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
 				Optional:    true,
 			},
-			"display_name": &schema.Schema{
+			"display_name": {
 				Type:        schema.TypeString,
 				Description: "The display name of this resource. Defaults to ID if not set",
 				Optional:    true,
 				Computed:    true,
 			},
 			"tag": getTagsSchema(),
-			"algorithm": &schema.Schema{
+			"algorithm": {
 				Type:         schema.TypeString,
 				Description:  "Load balancing algorithm controls how the incoming connections are distributed among the members",
 				ValidateFunc: validation.StringInSlice(poolAlgTypeValues, false),
 				Optional:     true,
 				Default:      "ROUND_ROBIN",
 			},
-			"min_active_members": &schema.Schema{
+			"min_active_members": {
 				Type:        schema.TypeInt,
 				Description: "The minimum number of members for the pool to be considered active",
 				Optional:    true,
 				Default:     1,
 			},
-			"tcp_multiplexing_enabled": &schema.Schema{
+			"tcp_multiplexing_enabled": {
 				Type:        schema.TypeBool,
 				Description: "TCP multiplexing allows the same TCP connection between load balancer and the backend server to be used for sending multiple client requests from different client TCP connections",
 				Optional:    true,
 				Default:     false,
 			},
-			"tcp_multiplexing_number": &schema.Schema{
+			"tcp_multiplexing_number": {
 				Type:        schema.TypeInt,
 				Description: "The maximum number of TCP connections per pool that are idly kept alive for sending future client requests",
 				Optional:    true,
 				Default:     6,
 			},
-			"active_monitor_id": &schema.Schema{
+			"active_monitor_id": {
 				Type:        schema.TypeString,
 				Description: "Active health monitor Id. If one is not set, the active healthchecks will be disabled",
 				Optional:    true,
 			},
-			"passive_monitor_id": &schema.Schema{
+			"passive_monitor_id": {
 				Type:        schema.TypeString,
 				Description: "Passive health monitor Id. If one is not set, the passive healthchecks will be disabled",
 				Optional:    true,
@@ -94,20 +94,20 @@ func getSnatTranslationSchema() *schema.Schema {
 		MaxItems:    1,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				"type": &schema.Schema{
+				"type": {
 					Type:         schema.TypeString,
 					Description:  "Type of SNAT performed to ensure reverse traffic from the server can be received and processed by the loadbalancer",
 					ValidateFunc: validation.StringInSlice(poolSnatTranslationTypeValues, false),
 					Optional:     true,
 					Default:      "TRANSPARENT",
 				},
-				"ip": &schema.Schema{
+				"ip": {
 					Type:         schema.TypeString,
 					Description:  "Ip address or Ip range for SNAT of type SNAT_IP_POOL",
 					ValidateFunc: validateIPOrRange(),
 					Optional:     true,
 				},
-				"port_overload": &schema.Schema{
+				"port_overload": {
 					Type:         schema.TypeInt,
 					Description:  "Maximum times for reusing the same SNAT IP and port for multiple backend connections",
 					ValidateFunc: validatePowerOf2(true, 32),
@@ -126,43 +126,43 @@ func getPoolMembersSchema() *schema.Schema {
 		Optional:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				"display_name": &schema.Schema{
+				"display_name": {
 					Type:        schema.TypeString,
 					Description: "Pool member name",
 					Optional:    true,
 					Computed:    true,
 				},
-				"admin_state": &schema.Schema{
+				"admin_state": {
 					Type:         schema.TypeString,
 					Description:  "Member admin state",
 					Optional:     true,
 					ValidateFunc: validation.StringInSlice(memberAdminStateTypeValues, false),
 					Default:      "ENABLED",
 				},
-				"backup_member": &schema.Schema{
+				"backup_member": {
 					Type:        schema.TypeBool,
 					Description: "A boolean flag which reflects whether this is a backup pool member",
 					Optional:    true,
 					Default:     false,
 				},
-				"ip_address": &schema.Schema{
+				"ip_address": {
 					Type:         schema.TypeString,
 					Description:  "Pool member IP address",
 					Required:     true,
 					ValidateFunc: validateSingleIP(),
 				},
-				"max_concurrent_connections": &schema.Schema{
+				"max_concurrent_connections": {
 					Type:        schema.TypeInt,
 					Description: "To ensure members are not overloaded, connections to a member can be capped by the load balancer. When a member reaches this limit, it is skipped during server selection. If it is not specified, it means that connections are unlimited",
 					Optional:    true,
 				},
-				"port": &schema.Schema{
+				"port": {
 					Type:         schema.TypeString,
 					Description:  "If port is specified, all connections will be sent to this port. Only single port is supported. If unset, the same port the client connected to will be used, it could be overrode by default_pool_member_port setting in virtual server. The port should not specified for port range case",
 					Optional:     true,
 					ValidateFunc: validateSinglePort(),
 				},
-				"weight": &schema.Schema{
+				"weight": {
 					Type:        schema.TypeInt,
 					Description: "Pool member weight is used for WEIGHTED_ROUND_ROBIN balancing algorithm. The weight value would be ignored in other algorithms",
 					Optional:    true,
@@ -182,25 +182,25 @@ func getPoolMemberGroupSchema() *schema.Schema {
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"grouping_object": getSingleResourceReferencesSchema(true, false, []string{"NSGroup"}, "Load balancer pool support grouping object as dynamic pool members. The IP list of the grouping object such as NSGroup would be used as pool member IP setting"),
-				"ip_version_filter": &schema.Schema{
+				"ip_version_filter": {
 					Type:         schema.TypeString,
 					Description:  "Ip revision filter is used to filter IPv4 or IPv6 addresses from the grouping object. If the filter is not specified, both IPv4 and IPv6 addresses would be used as server IPs",
 					Optional:     true,
 					ValidateFunc: validation.StringInSlice(ipRevisionFilterTypeValues, false),
 					Default:      "IPV4",
 				},
-				"limit_ip_list_size": &schema.Schema{
+				"limit_ip_list_size": {
 					Type:        schema.TypeBool,
 					Description: "Specifies whether to limit pool members. If false, dynamic pool can grow up to the load balancer max pool member capacity.",
 					Optional:    true,
 					Default:     false,
 				},
-				"max_ip_list_size": &schema.Schema{
+				"max_ip_list_size": {
 					Type:        schema.TypeInt,
 					Description: "Limits the max number of pool members to the specified value if limit_ip_list_size is set to true, ignored otherwise.",
 					Optional:    true,
 				},
-				"port": &schema.Schema{
+				"port": {
 					Type:        schema.TypeInt,
 					Description: "If port is specified, all connections will be sent to this port. If unset, the same port the client connected to will be used",
 					Optional:    true,
@@ -296,12 +296,12 @@ func getPoolMembersFromSchema(d *schema.ResourceData) []loadbalancer.PoolMember 
 	for _, member := range members {
 		data := member.(map[string]interface{})
 		elem := loadbalancer.PoolMember{
-			AdminState:   data["admin_state"].(string),
-			BackupMember: data["backup_member"].(bool),
-			DisplayName:  data["display_name"].(string),
-			IpAddress:    data["ip_address"].(string),
-			Port:         data["port"].(string),
-			Weight:       int64(data["weight"].(int)),
+			AdminState:               data["admin_state"].(string),
+			BackupMember:             data["backup_member"].(bool),
+			DisplayName:              data["display_name"].(string),
+			IpAddress:                data["ip_address"].(string),
+			Port:                     data["port"].(string),
+			Weight:                   int64(data["weight"].(int)),
 			MaxConcurrentConnections: int64(data["max_concurrent_connections"].(int)),
 		}
 

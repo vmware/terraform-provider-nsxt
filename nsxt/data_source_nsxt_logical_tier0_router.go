@@ -17,31 +17,31 @@ func dataSourceNsxtLogicalTier0Router() *schema.Resource {
 		Read: dataSourceNsxtLogicalTier0RouterRead,
 
 		Schema: map[string]*schema.Schema{
-			"id": &schema.Schema{
+			"id": {
 				Type:        schema.TypeString,
 				Description: "Unique ID of this resource",
 				Optional:    true,
 				Computed:    true,
 			},
-			"display_name": &schema.Schema{
+			"display_name": {
 				Type:        schema.TypeString,
 				Description: "The display name of this resource",
 				Optional:    true,
 				Computed:    true,
 			},
-			"description": &schema.Schema{
+			"description": {
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
 				Optional:    true,
 				Computed:    true,
 			},
-			"edge_cluster_id": &schema.Schema{
+			"edge_cluster_id": {
 				Type:        schema.TypeString,
 				Description: "The ID of the edge cluster connected to this router",
 				Optional:    true,
 				Computed:    true,
 			},
-			"high_availability_mode": &schema.Schema{
+			"high_availability_mode": {
 				Type:        schema.TypeString,
 				Description: "The High availability mode of this router",
 				Optional:    true,

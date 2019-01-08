@@ -24,12 +24,12 @@ func resourceNsxtLbClientSslProfile() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
-			"description": &schema.Schema{
+			"description": {
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
 				Optional:    true,
 			},
-			"display_name": &schema.Schema{
+			"display_name": {
 				Type:        schema.TypeString,
 				Description: "The display name of this resource. Defaults to ID if not set",
 				Optional:    true,
@@ -38,20 +38,20 @@ func resourceNsxtLbClientSslProfile() *schema.Resource {
 			"tag":       getTagsSchema(),
 			"ciphers":   getSSLCiphersSchema(),
 			"is_secure": getIsSecureSchema(),
-			"prefer_server_ciphers": &schema.Schema{
+			"prefer_server_ciphers": {
 				Type:        schema.TypeBool,
 				Description: "Allow server to override the client's preference",
 				Optional:    true,
 				Default:     false,
 			},
 			"protocols": getSSLProtocolsSchema(),
-			"session_cache_enabled": &schema.Schema{
+			"session_cache_enabled": {
 				Type:        schema.TypeBool,
 				Description: "Reuse previously negotiated security parameters during handshake",
 				Optional:    true,
 				Default:     true,
 			},
-			"session_cache_timeout": &schema.Schema{
+			"session_cache_timeout": {
 				Type:        schema.TypeInt,
 				Description: "For how long the SSL session parameters can be reused",
 				Optional:    true,

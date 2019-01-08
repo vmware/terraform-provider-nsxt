@@ -25,75 +25,75 @@ func resourceNsxtLbHTTPVirtualServer() *schema.Resource {
 		// TODO: add client/server_tcp_profile_id when available
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
-			"description": &schema.Schema{
+			"description": {
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
 				Optional:    true,
 			},
-			"display_name": &schema.Schema{
+			"display_name": {
 				Type:        schema.TypeString,
 				Description: "The display name of this resource. Defaults to ID if not set",
 				Optional:    true,
 				Computed:    true,
 			},
 			"tag": getTagsSchema(),
-			"access_log_enabled": &schema.Schema{
+			"access_log_enabled": {
 				Type:        schema.TypeBool,
 				Description: "Whether access log is enabled",
 				Optional:    true,
 				Default:     false,
 			},
-			"application_profile_id": &schema.Schema{
+			"application_profile_id": {
 				Type:        schema.TypeString,
 				Description: "The http application profile defines the application protocol characteristics",
 				Required:    true,
 			},
 			"client_ssl": getLbClientSSLBindingSchema(),
-			"default_pool_member_port": &schema.Schema{
+			"default_pool_member_port": {
 				Type:         schema.TypeString,
 				Description:  "Default pool member port",
 				ValidateFunc: validateSinglePort(),
 				Optional:     true,
 			},
-			"enabled": &schema.Schema{
+			"enabled": {
 				Type:        schema.TypeBool,
 				Description: "Whether the virtual server is enabled",
 				Optional:    true,
 				Default:     true,
 			},
-			"ip_address": &schema.Schema{
+			"ip_address": {
 				Type:         schema.TypeString,
 				Description:  "Virtual server IP address",
 				ValidateFunc: validateSingleIP(),
 				Required:     true,
 			},
-			"port": &schema.Schema{
+			"port": {
 				Type:         schema.TypeString,
 				Description:  "Virtual server port",
 				ValidateFunc: validateSinglePort(),
 				Required:     true,
 			},
-			"max_concurrent_connections": &schema.Schema{
+			"max_concurrent_connections": {
 				Type:        schema.TypeInt,
 				Description: "If not specified, connections are unlimited",
 				Optional:    true,
 			},
-			"max_new_connection_rate": &schema.Schema{
+			"max_new_connection_rate": {
 				Type:        schema.TypeInt,
 				Description: "If not specified, connection rate is unlimited",
 				Optional:    true,
 			},
-			"persistence_profile_id": &schema.Schema{
+			"persistence_profile_id": {
 				Type:        schema.TypeString,
 				Description: "Persistence profile is used to allow related client connections to be sent to the same backend server",
 				Optional:    true,
 			},
-			"pool_id": &schema.Schema{
+			"pool_id": {
 				Type:        schema.TypeString,
 				Description: "Server pool for backend connections",
 				Optional:    true,
 			},
-			"rule_ids": &schema.Schema{
+			"rule_ids": {
 				Type:        schema.TypeList,
 				Description: "Customization of load balancing behavior using match/action rules",
 				Elem: &schema.Schema{
@@ -101,7 +101,7 @@ func resourceNsxtLbHTTPVirtualServer() *schema.Resource {
 				},
 				Optional: true,
 			},
-			"sorry_pool_id": &schema.Schema{
+			"sorry_pool_id": {
 				Type:        schema.TypeString,
 				Description: "When load balancer can not select a backend server to serve the request in default pool or pool in rules, the request would be served by sorry server pool",
 				Optional:    true,
@@ -119,18 +119,18 @@ func getLbClientSSLBindingSchema() *schema.Schema {
 		MaxItems:    1,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				"client_ssl_profile_id": &schema.Schema{
+				"client_ssl_profile_id": {
 					Type:        schema.TypeString,
 					Description: "Id of client SSL profile that defines reusable properties",
 					Required:    true,
 				},
-				"default_certificate_id": &schema.Schema{
+				"default_certificate_id": {
 					Type:        schema.TypeString,
 					Description: "Id of certificate that will be used if the server does not host multiple hostnames on the same IP address or if the client does not support SNI extension",
 					Required:    true,
 				},
 				"certificate_chain_depth": getCertificateChainDepthSchema(),
-				"client_auth": &schema.Schema{
+				"client_auth": {
 					Type:        schema.TypeBool,
 					Description: "Whether client certificate authentication is mandatory",
 					Optional:    true,
@@ -152,18 +152,18 @@ func getLbServerSSLBindingSchema() *schema.Schema {
 		MaxItems:    1,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				"server_ssl_profile_id": &schema.Schema{
+				"server_ssl_profile_id": {
 					Type:        schema.TypeString,
 					Description: "Id of server SSL profile that defines reusable properties",
 					Required:    true,
 				},
-				"client_certificate_id": &schema.Schema{
+				"client_certificate_id": {
 					Type:        schema.TypeString,
 					Description: "Id of certificate that will be used if the server does not host multiple hostnames on the same IP address or if the client does not support SNI extension",
 					Optional:    true,
 				},
 				"certificate_chain_depth": getCertificateChainDepthSchema(),
-				"server_auth": &schema.Schema{
+				"server_auth": {
 					Type:        schema.TypeBool,
 					Description: "Server authentication mode",
 					Optional:    true,

@@ -25,19 +25,19 @@ func resourceNsxtLbHTTPForwardingRule() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
-			"description": &schema.Schema{
+			"description": {
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
 				Optional:    true,
 			},
-			"display_name": &schema.Schema{
+			"display_name": {
 				Type:        schema.TypeString,
 				Description: "The display name of this resource. Defaults to ID if not set",
 				Optional:    true,
 				Computed:    true,
 			},
 			"tag": getTagsSchema(),
-			"match_strategy": &schema.Schema{
+			"match_strategy": {
 				Type:         schema.TypeString,
 				Description:  "Strategy when multiple match conditions are specified in one rule (ANY vs ALL)",
 				Optional:     true,
@@ -53,50 +53,50 @@ func resourceNsxtLbHTTPForwardingRule() *schema.Resource {
 			"ip_condition":      getLbRuleIPConditionSchema(),
 			"tcp_condition":     getLbRuleTCPConditionSchema(),
 
-			"http_reject_action": &schema.Schema{
+			"http_reject_action": {
 				Type:        schema.TypeSet,
 				Description: "Reject the request with a defined status and message",
 				Optional:    true,
 				MaxItems:    1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"reply_status": &schema.Schema{
+						"reply_status": {
 							Type:     schema.TypeString,
 							Required: true,
 						},
-						"reply_message": &schema.Schema{
+						"reply_message": {
 							Type:     schema.TypeString,
 							Required: true,
 						},
 					},
 				},
 			},
-			"http_redirect_action": &schema.Schema{
+			"http_redirect_action": {
 				Type:        schema.TypeSet,
 				Description: "Redirect the request with a defined status and url",
 				Optional:    true,
 				MaxItems:    1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"redirect_status": &schema.Schema{
+						"redirect_status": {
 							Type:     schema.TypeString,
 							Required: true,
 						},
-						"redirect_url": &schema.Schema{
+						"redirect_url": {
 							Type:     schema.TypeString,
 							Required: true,
 						},
 					},
 				},
 			},
-			"select_pool_action": &schema.Schema{
+			"select_pool_action": {
 				Type:        schema.TypeSet,
 				Description: "Forward the request to the a defined pool",
 				Optional:    true,
 				MaxItems:    1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"pool_id": &schema.Schema{
+						"pool_id": {
 							Type:     schema.TypeString,
 							Required: true,
 						},

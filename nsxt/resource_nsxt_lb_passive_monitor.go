@@ -24,25 +24,25 @@ func resourceNsxtLbPassiveMonitor() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
-			"description": &schema.Schema{
+			"description": {
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
 				Optional:    true,
 			},
-			"display_name": &schema.Schema{
+			"display_name": {
 				Type:        schema.TypeString,
 				Description: "The display name of this resource. Defaults to ID if not set",
 				Optional:    true,
 				Computed:    true,
 			},
 			"tag": getTagsSchema(),
-			"max_fails": &schema.Schema{
+			"max_fails": {
 				Type:        schema.TypeInt,
 				Description: "When the consecutive failures reach this value, then the member is considered temporarily unavailable for a configurable period",
 				Optional:    true,
 				Default:     5,
 			},
-			"timeout": &schema.Schema{
+			"timeout": {
 				Type:        schema.TypeInt,
 				Description: "After this timeout period, the member is tried again for a new connection to see if it is available",
 				Optional:    true,

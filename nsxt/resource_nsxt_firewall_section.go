@@ -30,30 +30,30 @@ func resourceNsxtFirewallSection() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
-			"description": &schema.Schema{
+			"description": {
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
 				Optional:    true,
 			},
-			"display_name": &schema.Schema{
+			"display_name": {
 				Type:        schema.TypeString,
 				Description: "The display name of this resource. Defaults to ID if not set",
 				Optional:    true,
 				Computed:    true,
 			},
 			"tag": getTagsSchema(),
-			"is_default": &schema.Schema{
+			"is_default": {
 				Type:        schema.TypeBool,
 				Description: "A boolean flag which reflects whether a firewall section is default section or not",
 				Computed:    true,
 			},
-			"section_type": &schema.Schema{
+			"section_type": {
 				Type:         schema.TypeString,
 				Description:  "Type of the rules which a section can contain. Only homogeneous sections are supported",
 				Required:     true,
 				ValidateFunc: validation.StringInSlice(firewallSectionTypeValues, false),
 			},
-			"stateful": &schema.Schema{
+			"stateful": {
 				Type:        schema.TypeBool,
 				Description: "Stateful or Stateless nature of firewall section is enforced on all rules inside the section",
 				Required:    true,
@@ -72,23 +72,23 @@ func getRulesSchema() *schema.Schema {
 		Optional:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				"id": &schema.Schema{
+				"id": {
 					Type:        schema.TypeString,
 					Description: "ID of this resource",
 					Computed:    true,
 				},
 				"revision": getRevisionSchema(),
-				"description": &schema.Schema{
+				"description": {
 					Type:        schema.TypeString,
 					Description: "Description of this resource",
 					Optional:    true,
 				},
-				"display_name": &schema.Schema{
+				"display_name": {
 					Type:        schema.TypeString,
 					Description: "Defaults to ID if not set",
 					Optional:    true,
 				},
-				"action": &schema.Schema{
+				"action": {
 					Type:         schema.TypeString,
 					Description:  "Action enforced on the packets which matches the firewall rule",
 					Required:     true,
@@ -96,45 +96,45 @@ func getRulesSchema() *schema.Schema {
 				},
 				"applied_to":  getResourceReferencesSetSchema(false, false, []string{"LogicalPort", "LogicalSwitch", "NSGroup"}, "List of objects where rule will be enforced. The section level field overrides this one. Null will be treated as any"),
 				"destination": getResourceReferencesSetSchema(false, false, []string{"IPSet", "LogicalPort", "LogicalSwitch", "NSGroup", "MACSet"}, "List of the destinations. Null will be treated as any"),
-				"destinations_excluded": &schema.Schema{
+				"destinations_excluded": {
 					Type:        schema.TypeBool,
 					Description: "When this boolean flag is set to true, the rule destinations will be negated",
 					Optional:    true,
 				},
-				"direction": &schema.Schema{
+				"direction": {
 					Type:         schema.TypeString,
 					Description:  "Rule direction in case of stateless firewall rules. This will only be considered if section level parameter is set to stateless. Default to IN_OUT if not specified",
 					Optional:     true,
 					ValidateFunc: validation.StringInSlice(firewallRuleDirectionValues, false),
 				},
-				"disabled": &schema.Schema{
+				"disabled": {
 					Type:        schema.TypeBool,
 					Description: "Flag to disable rule. Disabled will only be persisted but never provisioned/realized",
 					Optional:    true,
 				},
-				"ip_protocol": &schema.Schema{
+				"ip_protocol": {
 					Type:         schema.TypeString,
 					Description:  "Type of IP packet that should be matched while enforcing the rule (IPV4, IPV6, IPV4_IPV6)",
 					Optional:     true,
 					ValidateFunc: validation.StringInSlice(firewallRuleIPProtocolValues, false),
 				},
-				"logged": &schema.Schema{
+				"logged": {
 					Type:        schema.TypeBool,
 					Description: "Flag to enable packet logging. Default is disabled",
 					Optional:    true,
 				},
-				"notes": &schema.Schema{
+				"notes": {
 					Type:        schema.TypeString,
 					Description: "User notes specific to the rule",
 					Optional:    true,
 				},
-				"rule_tag": &schema.Schema{
+				"rule_tag": {
 					Type:        schema.TypeString,
 					Description: "User level field which will be printed in CLI and packet logs",
 					Optional:    true,
 				},
 				"source": getResourceReferencesSetSchema(false, false, []string{"IPSet", "LogicalPort", "LogicalSwitch", "NSGroup", "MACSet"}, "List of sources. Null will be treated as any"),
-				"sources_excluded": &schema.Schema{
+				"sources_excluded": {
 					Type:        schema.TypeBool,
 					Description: "When this boolean flag is set to true, the rule sources will be negated",
 					Optional:    true,

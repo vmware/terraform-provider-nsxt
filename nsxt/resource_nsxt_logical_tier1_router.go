@@ -40,19 +40,19 @@ func resourceNsxtLogicalTier1Router() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
-			"description": &schema.Schema{
+			"description": {
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
 				Optional:    true,
 			},
-			"display_name": &schema.Schema{
+			"display_name": {
 				Type:        schema.TypeString,
 				Description: "The display name of this resource. Defaults to ID if not set",
 				Optional:    true,
 				Computed:    true,
 			},
 			"tag": getTagsSchema(),
-			"failover_mode": &schema.Schema{
+			"failover_mode": {
 				Type:         schema.TypeString,
 				Description:  "Failover mode which determines whether the preferred service router instance for given logical router will preempt the peer",
 				Default:      "PREEMPTIVE",
@@ -60,42 +60,42 @@ func resourceNsxtLogicalTier1Router() *schema.Resource {
 				ValidateFunc: validation.StringInSlice(failOverModeValues, false),
 			},
 			"firewall_sections": getResourceReferencesSchema(false, true, []string{}, "List of Firewall sections related to the logical router"),
-			"edge_cluster_id": &schema.Schema{
+			"edge_cluster_id": {
 				Type:        schema.TypeString,
 				Description: "Edge Cluster Id",
 				Optional:    true,
 			},
-			"enable_router_advertisement": &schema.Schema{
+			"enable_router_advertisement": {
 				Type:        schema.TypeBool,
 				Description: "Enable router advertisement",
 				Default:     false,
 				Optional:    true,
 			},
-			"advertise_connected_routes": &schema.Schema{
+			"advertise_connected_routes": {
 				Type:        schema.TypeBool,
 				Description: "Enable connected NSX routes advertisement",
 				Default:     false,
 				Optional:    true,
 			},
-			"advertise_static_routes": &schema.Schema{
+			"advertise_static_routes": {
 				Type:        schema.TypeBool,
 				Description: "Enable static routes advertisement",
 				Default:     false,
 				Optional:    true,
 			},
-			"advertise_nat_routes": &schema.Schema{
+			"advertise_nat_routes": {
 				Type:        schema.TypeBool,
 				Description: "Enable NAT routes advertisement",
 				Default:     false,
 				Optional:    true,
 			},
-			"advertise_lb_vip_routes": &schema.Schema{
+			"advertise_lb_vip_routes": {
 				Type:        schema.TypeBool,
 				Description: "Enable LB VIP routes advertisement",
 				Default:     false,
 				Optional:    true,
 			},
-			"advertise_lb_snat_ip_routes": &schema.Schema{
+			"advertise_lb_snat_ip_routes": {
 				Type:        schema.TypeBool,
 				Description: "Enable LB SNAT IP routes advertisement",
 				Default:     false,

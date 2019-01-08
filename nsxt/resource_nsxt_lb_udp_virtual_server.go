@@ -24,42 +24,42 @@ func resourceNsxtLbUDPVirtualServer() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
-			"description": &schema.Schema{
+			"description": {
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
 				Optional:    true,
 			},
-			"display_name": &schema.Schema{
+			"display_name": {
 				Type:        schema.TypeString,
 				Description: "The display name of this resource. Defaults to ID if not set",
 				Optional:    true,
 				Computed:    true,
 			},
 			"tag": getTagsSchema(),
-			"access_log_enabled": &schema.Schema{
+			"access_log_enabled": {
 				Type:        schema.TypeBool,
 				Description: "Whether access log is enabled",
 				Optional:    true,
 				Default:     false,
 			},
-			"application_profile_id": &schema.Schema{
+			"application_profile_id": {
 				Type:        schema.TypeString,
 				Description: "The tcp application profile defines the application protocol characteristics",
 				Required:    true,
 				// TODO: add validation for fast UDP profile only
 			},
-			"enabled": &schema.Schema{
+			"enabled": {
 				Type:        schema.TypeBool,
 				Description: "whether the virtual server is enabled",
 				Optional:    true,
 				Default:     true,
 			},
-			"ip_address": &schema.Schema{
+			"ip_address": {
 				Type:        schema.TypeString,
 				Description: "virtual server IP address",
 				Required:    true,
 			},
-			"ports": &schema.Schema{
+			"ports": {
 				Type:        schema.TypeList,
 				Description: "Single port, multiple ports or port ranges",
 				Elem: &schema.Schema{
@@ -68,7 +68,7 @@ func resourceNsxtLbUDPVirtualServer() *schema.Resource {
 				},
 				Required: true,
 			},
-			"default_pool_member_ports": &schema.Schema{
+			"default_pool_member_ports": {
 				Type:        schema.TypeList,
 				Description: "Default pool member ports or port range",
 				Elem: &schema.Schema{
@@ -77,28 +77,28 @@ func resourceNsxtLbUDPVirtualServer() *schema.Resource {
 				},
 				Optional: true,
 			},
-			"max_concurrent_connections": &schema.Schema{
+			"max_concurrent_connections": {
 				Type:        schema.TypeInt,
 				Description: "If not specified, connections are unlimited",
 				Optional:    true,
 			},
-			"max_new_connection_rate": &schema.Schema{
+			"max_new_connection_rate": {
 				Type:        schema.TypeInt,
 				Description: "If not specified, connection rate is unlimited",
 				Optional:    true,
 			},
-			"persistence_profile_id": &schema.Schema{
+			"persistence_profile_id": {
 				Type:        schema.TypeString,
 				Description: "Persistence profile is used to allow related client connections to be sent to the same backend server. Source ip persistence is supported.",
 				Optional:    true,
 				// TODO: add validation for source IP persistence only
 			},
-			"pool_id": &schema.Schema{
+			"pool_id": {
 				Type:        schema.TypeString,
 				Description: "Server pool for backend connections",
 				Optional:    true,
 			},
-			"sorry_pool_id": &schema.Schema{
+			"sorry_pool_id": {
 				Type:        schema.TypeString,
 				Description: "When load balancer can not select a backend server to serve the request in default pool, the request would be served by sorry server pool",
 				Optional:    true,
