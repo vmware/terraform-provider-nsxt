@@ -2,12 +2,12 @@
 layout: "nsxt"
 page_title: "NSXT: nsxt_logical_switch"
 sidebar_current: "docs-nsxt-resource-logical-switch"
-description: A resource to configure a logical switch in NSX.
+description: A resource to configure overlay logical switch in NSX.
 ---
 
 # nsxt_logical_switch
 
-This resource provides a method to create a logical switch in NSX. Virtual machines can then be connected to the appropriate logical switch for the desired topology and network connectivity.
+This resource provides a method to create overlay logical switch in NSX. Virtual machines can then be connected to the appropriate logical switch for the desired topology and network connectivity.
 
 ## Example Usage
 
@@ -43,8 +43,8 @@ The following arguments are supported:
 * `description` - (Optional) Description of the resource.
 * `ip_pool_id` - (Optional) Ip Pool ID to be associated with the logical switch.
 * `mac_pool_id` - (Optional) Mac Pool ID to be associated with the logical switch.
-* `vlan` - (Optional) Vlan for vlan logical switch. If not specified, this switch is overlay logical switch.
-* `vni` - (Optional) Vni for the logical switch.
+* `vlan` - (Deprecated, Optional) Vlan for vlan logical switch. This attribute is deprecated, please use nsxt_vlan_logical_switch resource to manage vlan logical switches.
+* `vni` - (Optional, Readonly) Vni for the logical switch.
 * `address_binding` - (Optional) List of Address Bindings for the logical switch. This setting allows to provide bindings between IP address, mac Address and vlan.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this logical switch.
 

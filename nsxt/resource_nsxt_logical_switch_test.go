@@ -26,7 +26,7 @@ func TestAccResourceNsxtLogicalSwitch_basic(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXLogicalSwitchCheckDestroy(state, switchName)
+			return testAccNSXLogicalSwitchCheckDestroy(state, switchName, "nsxt_logical_switch")
 		},
 		Steps: []resource.TestStep{
 			{
@@ -61,6 +61,7 @@ func TestAccResourceNsxtLogicalSwitch_basic(t *testing.T) {
 	})
 }
 
+// This use case is deprecated and should be removed with next major release
 func TestAccResourceNsxtLogicalSwitch_vlan(t *testing.T) {
 	switchName := "test-nsx-logical-switch-vlan"
 	updateSwitchName := fmt.Sprintf("%s-update", switchName)
@@ -71,19 +72,14 @@ func TestAccResourceNsxtLogicalSwitch_vlan(t *testing.T) {
 	origvlan := "1"
 	updatedvlan := "2"
 	replicationMode := ""
-	// TODO - add verification that replication mode can not be set for vlan LS
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXLogicalSwitchCheckDestroy(state, switchName)
+			return testAccNSXLogicalSwitchCheckDestroy(state, switchName, "nsxt_logical_switch")
 		},
 		Steps: []resource.TestStep{
-			{
-				Config:      testAccNSXLogicalSwitchNoVlanTemplate(switchName, transportZoneName),
-				ExpectError: regexp.MustCompile(`Error during LogicalSwitch create`),
-			},
 			{
 				Config: testAccNSXLogicalSwitchCreateTemplate(resourceName, switchName, transportZoneName, origvlan, replicationMode),
 				Check: resource.ComposeTestCheckFunc(
@@ -124,7 +120,7 @@ func TestAccResourceNsxtLogicalSwitch_withProfiles(t *testing.T) {
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			// Verify that the LS was deleted
-			err := testAccNSXLogicalSwitchCheckDestroy(state, switchName)
+			err := testAccNSXLogicalSwitchCheckDestroy(state, switchName, "nsxt_logical_switch")
 			if err != nil {
 				return err
 			}
@@ -179,7 +175,7 @@ func TestAccResourceNsxtLogicalSwitch_withMacPool(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXLogicalSwitchCheckDestroy(state, switchName)
+			return testAccNSXLogicalSwitchCheckDestroy(state, switchName, "nsxt_logical_switch")
 		},
 		Steps: []resource.TestStep{
 			{
@@ -214,7 +210,7 @@ func TestAccResourceNsxtLogicalSwitch_importBasic(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXLogicalSwitchCheckDestroy(state, switchName)
+			return testAccNSXLogicalSwitchCheckDestroy(state, switchName, "nsxt_logical_switch")
 		},
 		Steps: []resource.TestStep{
 			{
@@ -264,11 +260,11 @@ func testAccNSXLogicalSwitchExists(displayName string, resourceName string) reso
 	}
 }
 
-func testAccNSXLogicalSwitchCheckDestroy(state *terraform.State, displayName string) error {
+func testAccNSXLogicalSwitchCheckDestroy(state *terraform.State, resourceType string, displayName string) error {
 	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
 	for _, rs := range state.RootModule().Resources {
 
-		if rs.Type != "nsxt_logical_switch" {
+		if rs.Type != resourceType {
 			continue
 		}
 
