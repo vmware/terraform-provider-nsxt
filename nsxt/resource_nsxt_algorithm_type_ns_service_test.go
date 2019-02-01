@@ -107,6 +107,9 @@ func testAccNSXAlgServiceExists(displayName string, resourceName string) resourc
 
 func testAccNSXAlgServiceCheckDestroy(state *terraform.State, displayName string) error {
 	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
+	if nsxClient == nil {
+		return fmt.Errorf("Failed to initialize the client")
+	}
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_algorithm_type_ns_service" {
