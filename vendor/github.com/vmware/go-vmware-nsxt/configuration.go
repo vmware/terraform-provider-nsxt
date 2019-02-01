@@ -37,6 +37,7 @@ type Configuration struct {
 	Scheme               string `json:"scheme,omitempty"`
 	UserName             string
 	Password             string
+	RemoteAuth           bool
 	DefaultHeader        map[string]string `json:"defaultHeader,omitempty"`
 	UserAgent            string            `json:"userAgent,omitempty"`
 	ClientAuthCertFile   string

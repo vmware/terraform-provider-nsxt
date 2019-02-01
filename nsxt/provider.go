@@ -33,6 +33,11 @@ func Provider() terraform.ResourceProvider {
 				DefaultFunc: schema.EnvDefaultFunc("NSXT_PASSWORD", nil),
 				Sensitive:   true,
 			},
+			"remote_auth": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("NSXT_REMOTE_AUTH", false),
+			},
 			"host": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -181,6 +186,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	insecure := d.Get("allow_unverified_ssl").(bool)
 	username := d.Get("username").(string)
 	password := d.Get("password").(string)
+	remoteAuth := d.Get("remote_auth").(bool)
 
 	if needCreds {
 		if username == "" {
@@ -230,6 +236,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		UserAgent:            "terraform-provider-nsxt/1.0",
 		UserName:             username,
 		Password:             password,
+		RemoteAuth:           remoteAuth,
 		ClientAuthCertFile:   clientAuthCertFile,
 		ClientAuthKeyFile:    clientAuthKeyFile,
 		CAFile:               caFile,
