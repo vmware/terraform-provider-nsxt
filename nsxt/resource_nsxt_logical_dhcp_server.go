@@ -24,45 +24,45 @@ func resourceNsxtLogicalDhcpServer() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"display_name": &schema.Schema{
+			"display_name": {
 				Type:        schema.TypeString,
 				Description: "The display name of this resource. Defaults to ID if not set",
 				Optional:    true,
 				Computed:    true,
 			},
-			"description": &schema.Schema{
+			"description": {
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
 				Optional:    true,
 			},
-			"attached_logical_port_id": &schema.Schema{
+			"attached_logical_port_id": {
 				Type:        schema.TypeString,
 				Description: "Id of attached logical port",
 				Computed:    true,
 			},
-			"dhcp_profile_id": &schema.Schema{
+			"dhcp_profile_id": {
 				Type:        schema.TypeString,
 				Description: "DHCP profile uuid",
 				Required:    true,
 			},
-			"dhcp_server_ip": &schema.Schema{
+			"dhcp_server_ip": {
 				Type:         schema.TypeString,
 				Description:  "DHCP server ip in cidr format",
 				Required:     true,
 				ValidateFunc: validatePortAddress(),
 			},
-			"gateway_ip": &schema.Schema{
+			"gateway_ip": {
 				Type:         schema.TypeString,
 				Description:  "Gateway IP",
 				Required:     true,
 				ValidateFunc: validateSingleIP(),
 			},
-			"domain_name": &schema.Schema{
+			"domain_name": {
 				Type:        schema.TypeString,
 				Description: "Domain name",
 				Optional:    true,
 			},
-			"dns_name_servers": &schema.Schema{
+			"dns_name_servers": {
 				Type:        schema.TypeList,
 				Description: "DNS IPs",
 				Optional:    true,
@@ -73,8 +73,8 @@ func resourceNsxtLogicalDhcpServer() *schema.Resource {
 			},
 			"dhcp_option_121":     getDhcpOptions121Schema(),
 			"dhcp_generic_option": getDhcpGenericOptionsSchema(),
-			"tag":      getTagsSchema(),
-			"revision": getRevisionSchema(),
+			"tag":                 getTagsSchema(),
+			"revision":            getRevisionSchema(),
 		},
 	}
 }
@@ -87,13 +87,13 @@ func getDhcpOptions121Schema() *schema.Schema {
 		Optional:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				"network": &schema.Schema{
+				"network": {
 					Type:         schema.TypeString,
 					Description:  "Destination in cidr",
 					Required:     true,
 					ValidateFunc: validateCidr(),
 				},
-				"next_hop": &schema.Schema{
+				"next_hop": {
 					Type:         schema.TypeString,
 					Description:  "Next hop IP",
 					Required:     true,
@@ -111,13 +111,13 @@ func getDhcpGenericOptionsSchema() *schema.Schema {
 		Optional:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				"code": &schema.Schema{
+				"code": {
 					Type:         schema.TypeInt,
 					Description:  "DHCP option code, [0-255]",
 					Required:     true,
 					ValidateFunc: validation.IntBetween(0, 255),
 				},
-				"values": &schema.Schema{
+				"values": {
 					Type:        schema.TypeList,
 					Description: "DHCP option values",
 					Required:    true,

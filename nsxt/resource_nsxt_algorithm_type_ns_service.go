@@ -27,30 +27,30 @@ func resourceNsxtAlgorithmTypeNsService() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
-			"description": &schema.Schema{
+			"description": {
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
 				Optional:    true,
 			},
-			"display_name": &schema.Schema{
+			"display_name": {
 				Type:        schema.TypeString,
 				Description: "The display name of this resource. Defaults to ID if not set",
 				Optional:    true,
 				Computed:    true,
 			},
 			"tag": getTagsSchema(),
-			"default_service": &schema.Schema{
+			"default_service": {
 				Type:        schema.TypeBool,
 				Description: "A boolean flag which reflects whether this is a default NSServices which can't be modified/deleted",
 				Computed:    true,
 			},
-			"destination_port": &schema.Schema{
+			"destination_port": {
 				Type:         schema.TypeString,
 				Description:  "A single destination port",
 				Required:     true,
 				ValidateFunc: validateSinglePort(),
 			},
-			"source_ports": &schema.Schema{
+			"source_ports": {
 				Type:        schema.TypeSet,
 				Description: "Set of source ports or ranges",
 				Elem: &schema.Schema{
@@ -59,7 +59,7 @@ func resourceNsxtAlgorithmTypeNsService() *schema.Resource {
 				},
 				Optional: true,
 			},
-			"algorithm": &schema.Schema{
+			"algorithm": {
 				Type:         schema.TypeString,
 				Description:  "Algorithm",
 				Required:     true,

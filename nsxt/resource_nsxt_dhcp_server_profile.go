@@ -24,24 +24,24 @@ func resourceNsxtDhcpServerProfile() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
-			"description": &schema.Schema{
+			"description": {
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
 				Optional:    true,
 			},
-			"display_name": &schema.Schema{
+			"display_name": {
 				Type:        schema.TypeString,
 				Description: "The display name of this resource. Defaults to ID if not set",
 				Optional:    true,
 				Computed:    true,
 			},
 			"tag": getTagsSchema(),
-			"edge_cluster_id": &schema.Schema{
+			"edge_cluster_id": {
 				Type:        schema.TypeString,
 				Description: "Edge cluster uuid",
 				Required:    true,
 			},
-			"edge_cluster_member_indexes": &schema.Schema{
+			"edge_cluster_member_indexes": {
 				Type:        schema.TypeList,
 				Description: "Edge nodes from the given cluster",
 				Optional:    true,
@@ -66,7 +66,7 @@ func resourceNsxtDhcpServerProfileCreate(d *schema.ResourceData, m interface{}) 
 		Description:              description,
 		EdgeClusterId:            edgeClusterID,
 		EdgeClusterMemberIndexes: edgeClusterMemberIndexes,
-		Tags: tags,
+		Tags:                     tags,
 	}
 
 	dhcpProfile, resp, err := nsxClient.ServicesApi.CreateDhcpProfile(nsxClient.Context, dhcpProfile)
@@ -128,8 +128,8 @@ func resourceNsxtDhcpServerProfileUpdate(d *schema.ResourceData, m interface{}) 
 		Description:              description,
 		EdgeClusterId:            edgeClusterID,
 		EdgeClusterMemberIndexes: edgeClusterMemberIndexes,
-		Tags:     tags,
-		Revision: revision,
+		Tags:                     tags,
+		Revision:                 revision,
 	}
 
 	dhcpProfile, resp, err := nsxClient.ServicesApi.UpdateDhcpProfile(nsxClient.Context, id, dhcpProfile)

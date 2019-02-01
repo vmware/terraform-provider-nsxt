@@ -24,18 +24,18 @@ func resourceNsxtLogicalPort() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
-			"display_name": &schema.Schema{
+			"display_name": {
 				Type:        schema.TypeString,
 				Description: "The display name of this resource. Defaults to ID if not set",
 				Optional:    true,
 				Computed:    true,
 			},
-			"description": &schema.Schema{
+			"description": {
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
 				Optional:    true,
 			},
-			"logical_switch_id": &schema.Schema{
+			"logical_switch_id": {
 				Type:        schema.TypeString,
 				Description: "Id of the Logical switch that this port belongs to",
 				Required:    true,
@@ -43,7 +43,7 @@ func resourceNsxtLogicalPort() *schema.Resource {
 			},
 			"admin_state":          getAdminStateSchema(),
 			"switching_profile_id": getSwitchingProfileIdsSchema(),
-			"tag": getTagsSchema(),
+			"tag":                  getTagsSchema(),
 		},
 	}
 }

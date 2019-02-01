@@ -48,7 +48,7 @@ func getLbRuleHTTPRequestBodyConditionSchema() *schema.Schema {
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"inverse": getLbRuleInverseSchema(),
-				"value": &schema.Schema{
+				"value": {
 					Type:     schema.TypeString,
 					Required: true,
 				},
@@ -67,11 +67,11 @@ func getLbRuleHTTPHeaderConditionSchema() *schema.Schema {
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"inverse": getLbRuleInverseSchema(),
-				"name": &schema.Schema{
+				"name": {
 					Type:     schema.TypeString,
 					Required: true,
 				},
-				"value": &schema.Schema{
+				"value": {
 					Type:     schema.TypeString,
 					Required: true,
 				},
@@ -90,7 +90,7 @@ func getLbRuleHTTPRequestMethodConditionSchema() *schema.Schema {
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"inverse": getLbRuleInverseSchema(),
-				"method": &schema.Schema{
+				"method": {
 					Type:         schema.TypeString,
 					Required:     true,
 					ValidateFunc: validation.StringInSlice([]string{"GET", "OPTIONS", "POST", "HEAD", "PUT"}, false),
@@ -109,7 +109,7 @@ func getLbRuleHTTPVersionConditionSchema() *schema.Schema {
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"inverse": getLbRuleInverseSchema(),
-				"version": &schema.Schema{
+				"version": {
 					Type:         schema.TypeString,
 					Required:     true,
 					ValidateFunc: validation.StringInSlice([]string{"HTTP_VERSION_1_0", "HTTP_VERSION_1_1"}, false),
@@ -127,7 +127,7 @@ func getLbRuleHTTPRequestURIConditionSchema() *schema.Schema {
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"inverse": getLbRuleInverseSchema(),
-				"uri": &schema.Schema{
+				"uri": {
 					Type:     schema.TypeString,
 					Required: true,
 				},
@@ -146,7 +146,7 @@ func getLbRuleHTTPRequestURIArgumentsConditionSchema() *schema.Schema {
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"inverse": getLbRuleInverseSchema(),
-				"uri_arguments": &schema.Schema{
+				"uri_arguments": {
 					Type:     schema.TypeString,
 					Required: true,
 				},
@@ -165,7 +165,7 @@ func getLbRuleIPConditionSchema() *schema.Schema {
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"inverse": getLbRuleInverseSchema(),
-				"source_address": &schema.Schema{
+				"source_address": {
 					Type:         schema.TypeString,
 					Required:     true,
 					ValidateFunc: validateSingleIP(),
@@ -183,7 +183,7 @@ func getLbRuleTCPConditionSchema() *schema.Schema {
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"inverse": getLbRuleInverseSchema(),
-				"source_port": &schema.Schema{
+				"source_port": {
 					Type:         schema.TypeString,
 					Required:     true,
 					ValidateFunc: validateSinglePort(),
@@ -201,11 +201,11 @@ func getLbRuleURIRewriteActionSchema() *schema.Schema {
 		MaxItems:    1,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				"uri": &schema.Schema{
+				"uri": {
 					Type:     schema.TypeString,
 					Required: true,
 				},
-				"uri_arguments": &schema.Schema{
+				"uri_arguments": {
 					Type:     schema.TypeString,
 					Optional: true,
 				},
@@ -223,11 +223,11 @@ func getLbRuleHeaderRewriteActionSchema(optional bool) *schema.Schema {
 		MaxItems:    1,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				"name": &schema.Schema{
+				"name": {
 					Type:     schema.TypeString,
 					Required: true,
 				},
-				"value": &schema.Schema{
+				"value": {
 					Type:     schema.TypeString,
 					Optional: true,
 				},

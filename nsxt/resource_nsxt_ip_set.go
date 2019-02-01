@@ -24,19 +24,19 @@ func resourceNsxtIPSet() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
-			"description": &schema.Schema{
+			"description": {
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
 				Optional:    true,
 			},
-			"display_name": &schema.Schema{
+			"display_name": {
 				Type:        schema.TypeString,
 				Description: "The display name of this resource. Defaults to ID if not set",
 				Optional:    true,
 				Computed:    true,
 			},
 			"tag": getTagsSchema(),
-			"ip_addresses": &schema.Schema{
+			"ip_addresses": {
 				Type:        schema.TypeSet,
 				Description: "Set of IP addresses",
 				Elem: &schema.Schema{

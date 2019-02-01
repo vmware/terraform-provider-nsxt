@@ -26,31 +26,31 @@ func resourceNsxtNsGroup() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
-			"description": &schema.Schema{
+			"description": {
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
 				Optional:    true,
 			},
-			"display_name": &schema.Schema{
+			"display_name": {
 				Type:        schema.TypeString,
 				Description: "The display name of this resource. Defaults to ID if not set",
 				Optional:    true,
 				Computed:    true,
 			},
 			"tag": getTagsSchema(),
-			"member": &schema.Schema{
+			"member": {
 				Type:        schema.TypeSet,
 				Description: "Reference to the direct/static members of the NSGroup.",
 				Optional:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"target_type": &schema.Schema{
+						"target_type": {
 							Type:         schema.TypeString,
 							Description:  "Type of the resource on which this expression is evaluated",
 							Required:     true,
 							ValidateFunc: validation.StringInSlice(nsGroupTargetTypeValues, false),
 						},
-						"value": &schema.Schema{
+						"value": {
 							Type:        schema.TypeString,
 							Description: "Value that satisfies this expression",
 							Required:    true,
@@ -58,32 +58,32 @@ func resourceNsxtNsGroup() *schema.Resource {
 					},
 				},
 			},
-			"membership_criteria": &schema.Schema{
+			"membership_criteria": {
 				Type:        schema.TypeList,
 				Description: "List of tag expressions which define the membership criteria for this NSGroup.",
 				Optional:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"target_type": &schema.Schema{
+						"target_type": {
 							Type:         schema.TypeString,
 							Required:     true,
 							ValidateFunc: validation.StringInSlice(nsGroupMembershipCriteriaTargetTypeValues, false),
 						},
-						"scope": &schema.Schema{
+						"scope": {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
-						"tag": &schema.Schema{
+						"tag": {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
-						"scope_op": &schema.Schema{
+						"scope_op": {
 							Type:         schema.TypeString,
 							Default:      "EQUALS",
 							Optional:     true,
 							ValidateFunc: validation.StringInSlice(nsGroupTagOperationValues, false),
 						},
-						"tag_op": &schema.Schema{
+						"tag_op": {
 							Type:         schema.TypeString,
 							Default:      "EQUALS",
 							Optional:     true,

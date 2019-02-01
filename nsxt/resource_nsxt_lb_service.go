@@ -28,32 +28,32 @@ func resourceNsxtLbService() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
-			"description": &schema.Schema{
+			"description": {
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
 				Optional:    true,
 			},
-			"display_name": &schema.Schema{
+			"display_name": {
 				Type:        schema.TypeString,
 				Description: "The display name of this resource. Defaults to ID if not set",
 				Optional:    true,
 				Computed:    true,
 			},
 			"tag": getTagsSchema(),
-			"enabled": &schema.Schema{
+			"enabled": {
 				Type:        schema.TypeBool,
 				Description: "Whether the load balancer service is enabled",
 				Optional:    true,
 				Default:     true,
 			},
-			"error_log_level": &schema.Schema{
+			"error_log_level": {
 				Type:         schema.TypeString,
 				Description:  "Load balancer engine writes information about encountered issues of different severity levels to the error log. This setting is used to define the severity level of the error log",
 				Optional:     true,
 				Default:      "INFO",
 				ValidateFunc: validation.StringInSlice(lbServiceLogLevels, false),
 			},
-			"size": &schema.Schema{
+			"size": {
 				Type:         schema.TypeString,
 				Description:  "Size of load balancer service",
 				Optional:     true,
@@ -63,12 +63,12 @@ func resourceNsxtLbService() *schema.Resource {
 			// TODO: LB service creation will error out on NSX if logical Tier1 router is not
 			// attached to Tier0 or Centralized Service Port. Consider dummy port attribute here
 			// to enforce this dependency.
-			"logical_router_id": &schema.Schema{
+			"logical_router_id": {
 				Type:        schema.TypeString,
 				Description: "Logical Tier1 Router to which the Load Balancer is to be attached",
 				Required:    true,
 			},
-			"virtual_server_ids": &schema.Schema{
+			"virtual_server_ids": {
 				Type:        schema.TypeSet,
 				Description: "Virtual servers associated with this Load Balancer",
 				Elem: &schema.Schema{

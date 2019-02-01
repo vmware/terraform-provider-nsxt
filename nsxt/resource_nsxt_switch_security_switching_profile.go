@@ -38,43 +38,43 @@ func resourceNsxtSwitchSecuritySwitchingProfile() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
-			"description": &schema.Schema{
+			"description": {
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
 				Optional:    true,
 			},
-			"display_name": &schema.Schema{
+			"display_name": {
 				Type:        schema.TypeString,
 				Description: "The display name of this resource. Defaults to ID if not set",
 				Optional:    true,
 				Computed:    true,
 			},
 			"tag": getTagsSchema(),
-			"block_non_ip": &schema.Schema{
+			"block_non_ip": {
 				Type:        schema.TypeBool,
 				Description: "Block all traffic except IP/(G)ARP/BPDU",
 				Optional:    true,
 				Default:     false,
 			},
-			"block_client_dhcp": &schema.Schema{
+			"block_client_dhcp": {
 				Type:        schema.TypeBool,
 				Description: "Indicates whether DHCP client blocking is enabled",
 				Optional:    true,
 				Default:     false,
 			},
-			"block_server_dhcp": &schema.Schema{
+			"block_server_dhcp": {
 				Type:        schema.TypeBool,
 				Description: "Indicates whether DHCP server blocking is enabled",
 				Optional:    true,
 				Default:     false,
 			},
-			"bpdu_filter_enabled": &schema.Schema{
+			"bpdu_filter_enabled": {
 				Type:        schema.TypeBool,
 				Description: "Indicates whether BPDU filter is enabled",
 				Optional:    true,
 				Default:     false,
 			},
-			"bpdu_filter_whitelist": &schema.Schema{
+			"bpdu_filter_whitelist": {
 				Type:        schema.TypeSet,
 				Description: "Set of allowed MAC addresses to be excluded from BPDU filtering",
 				Optional:    true,
@@ -95,28 +95,28 @@ func getSwitchSecurityRateLimitsSchema() *schema.Schema {
 		Optional: true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				"enabled": &schema.Schema{
+				"enabled": {
 					Type:        schema.TypeBool,
 					Description: "Whether rate limiting is enabled",
 					Optional:    true,
 					Default:     true,
 				},
-				"rx_broadcast": &schema.Schema{
+				"rx_broadcast": {
 					Type:        schema.TypeInt,
 					Description: "Incoming broadcast traffic limit in packets per second",
 					Optional:    true,
 				},
-				"rx_multicast": &schema.Schema{
+				"rx_multicast": {
 					Type:        schema.TypeInt,
 					Description: "Incoming multicast traffic limit in packets per second",
 					Optional:    true,
 				},
-				"tx_broadcast": &schema.Schema{
+				"tx_broadcast": {
 					Type:        schema.TypeInt,
 					Description: "Outgoing broadcast traffic limit in packets per second",
 					Optional:    true,
 				},
-				"tx_multicast": &schema.Schema{
+				"tx_multicast": {
 					Type:        schema.TypeInt,
 					Description: "Outgoing multicast traffic limit in packets per second",
 					Optional:    true,

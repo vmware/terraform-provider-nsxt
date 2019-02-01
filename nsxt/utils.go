@@ -89,12 +89,12 @@ func getTagsSchemaInternal(forceNew bool) *schema.Schema {
 		ForceNew:    forceNew,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				"scope": &schema.Schema{
+				"scope": {
 					Type:     schema.TypeString,
 					Required: true,
 					ForceNew: forceNew,
 				},
-				"tag": &schema.Schema{
+				"tag": {
 					Type:     schema.TypeString,
 					Required: true,
 					ForceNew: forceNew,
@@ -148,12 +148,12 @@ func getSwitchingProfileIdsSchema() *schema.Schema {
 		Computed:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				"key": &schema.Schema{
+				"key": {
 					Type:        schema.TypeString,
 					Description: "The resource type of this profile",
 					Required:    true,
 				},
-				"value": &schema.Schema{
+				"value": {
 					Type:        schema.TypeString,
 					Description: "The ID of this profile",
 					Required:    true,
@@ -203,18 +203,18 @@ func getAddressBindingsSchema() *schema.Schema {
 		Optional:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				"ip_address": &schema.Schema{
+				"ip_address": {
 					Type:         schema.TypeString,
 					Description:  "A single IP address or a subnet cidr",
 					Optional:     true,
 					ValidateFunc: validateSingleIP(),
 				},
-				"mac_address": &schema.Schema{
+				"mac_address": {
 					Type:        schema.TypeString,
 					Description: "A single MAC address",
 					Optional:    true,
 				},
-				"vlan": &schema.Schema{
+				"vlan": {
 					Type:        schema.TypeInt,
 					Description: "A single vlan tag value",
 					Optional:    true,
@@ -280,22 +280,22 @@ func getResourceReferencesSchemaByType(required bool, computed bool, validTarget
 		Description: description,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				"is_valid": &schema.Schema{
+				"is_valid": {
 					Type:        schema.TypeBool,
 					Description: "A boolean flag which will be set to false if the referenced NSX resource has been deleted",
 					Computed:    true,
 				},
-				"target_display_name": &schema.Schema{
+				"target_display_name": {
 					Type:        schema.TypeString,
 					Description: "Display name of the NSX resource",
 					Computed:    true,
 				},
-				"target_id": &schema.Schema{
+				"target_id": {
 					Type:        schema.TypeString,
 					Description: "Identifier of the NSX resource",
 					Optional:    true,
 				},
-				"target_type": &schema.Schema{
+				"target_type": {
 					Type:         schema.TypeString,
 					Description:  "Type of the NSX resource",
 					Optional:     true,
@@ -448,12 +448,12 @@ func getIPRangesSchema() *schema.Schema {
 		Optional:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				"start": &schema.Schema{
+				"start": {
 					Type:         schema.TypeString,
 					ValidateFunc: validateSingleIP(),
 					Required:     true,
 				},
-				"end": &schema.Schema{
+				"end": {
 					Type:         schema.TypeString,
 					ValidateFunc: validateSingleIP(),
 					Required:     true,

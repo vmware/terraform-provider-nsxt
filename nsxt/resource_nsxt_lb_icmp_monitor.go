@@ -25,12 +25,12 @@ func resourceNsxtLbIcmpMonitor() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
-			"description": &schema.Schema{
+			"description": {
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
 				Optional:    true,
 			},
-			"display_name": &schema.Schema{
+			"display_name": {
 				Type:        schema.TypeString,
 				Description: "The display name of this resource. Defaults to ID if not set",
 				Optional:    true,
@@ -42,7 +42,7 @@ func resourceNsxtLbIcmpMonitor() *schema.Resource {
 			"monitor_port": getLbMonitorPortSchema(),
 			"rise_count":   getLbMonitorRiseCountSchema(),
 			"timeout":      getLbMonitorTimeoutSchema(),
-			"data_length": &schema.Schema{
+			"data_length": {
 				Type:         schema.TypeInt,
 				Description:  "The data size (in bytes) of the ICMP healthcheck packet",
 				Optional:     true,

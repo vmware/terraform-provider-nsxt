@@ -25,33 +25,33 @@ func resourceNsxtLbFastTCPApplicationProfile() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
-			"description": &schema.Schema{
+			"description": {
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
 				Optional:    true,
 			},
-			"display_name": &schema.Schema{
+			"display_name": {
 				Type:        schema.TypeString,
 				Description: "The display name of this resource. Defaults to ID if not set",
 				Optional:    true,
 				Computed:    true,
 			},
 			"tag": getTagsSchema(),
-			"close_timeout": &schema.Schema{
+			"close_timeout": {
 				Type:         schema.TypeInt,
 				Description:  "Timeout in seconds to specify how long a closed TCP connection should be kept for this application before cleaning up the connection",
 				Optional:     true,
 				Default:      8,
 				ValidateFunc: validation.IntBetween(1, 60),
 			},
-			"idle_timeout": &schema.Schema{
+			"idle_timeout": {
 				Type:         schema.TypeInt,
 				Description:  "Timeout in seconds to specify how long an idle TCP connection in ESTABLISHED state should be kept for this application before cleaning up",
 				Optional:     true,
 				Default:      1800,
 				ValidateFunc: validation.IntAtLeast(1),
 			},
-			"ha_flow_mirroring": &schema.Schema{
+			"ha_flow_mirroring": {
 				Type:        schema.TypeBool,
 				Description: "A boolean flag which reflects whether flow mirroring is enabled, and all the flows to the bounded virtual server are mirrored to the standby node",
 				Optional:    true,

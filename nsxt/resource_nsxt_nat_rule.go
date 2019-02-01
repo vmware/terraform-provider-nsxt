@@ -28,68 +28,68 @@ func resourceNsxtNatRule() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
-			"description": &schema.Schema{
+			"description": {
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
 				Optional:    true,
 			},
-			"display_name": &schema.Schema{
+			"display_name": {
 				Type:        schema.TypeString,
 				Description: "The display name of this resource. Defaults to ID if not set",
 				Optional:    true,
 				Computed:    true,
 			},
 			"tag": getTagsSchema(),
-			"action": &schema.Schema{
+			"action": {
 				Type:         schema.TypeString,
 				Description:  "NAT rule action. Valid actions: SNAT, DNAT, NO_NAT and REFLEXIVE",
 				Required:     true,
 				ValidateFunc: validation.StringInSlice(natRuleActionValues, false),
 			},
-			"enabled": &schema.Schema{
+			"enabled": {
 				Type:        schema.TypeBool,
 				Default:     true,
 				Description: "enable/disable the rule",
 				Optional:    true,
 			},
-			"logging": &schema.Schema{
+			"logging": {
 				Type:        schema.TypeBool,
 				Default:     false,
 				Description: "enable/disable the logging of rule",
 				Optional:    true,
 			},
-			"logical_router_id": &schema.Schema{
+			"logical_router_id": {
 				Type:        schema.TypeString,
 				Description: "Logical router id",
 				Required:    true,
 			},
-			"match_destination_network": &schema.Schema{
+			"match_destination_network": {
 				Type:        schema.TypeString,
 				Description: "IP Address | CIDR",
 				Optional:    true,
 			},
-			"match_source_network": &schema.Schema{
+			"match_source_network": {
 				Type:        schema.TypeString,
 				Description: "IP Address | CIDR",
 				Optional:    true,
 			},
-			"nat_pass": &schema.Schema{
+			"nat_pass": {
 				Type:        schema.TypeBool,
 				Default:     true,
 				Description: "A boolean flag which reflects whether the following firewall stage will be skipped",
 				Optional:    true,
 			},
-			"rule_priority": &schema.Schema{
+			"rule_priority": {
 				Type:        schema.TypeInt,
 				Description: "The priority of the rule (ascending). Valid range [0-2147483647]",
 				Computed:    true,
 			},
-			"translated_network": &schema.Schema{
+			"translated_network": {
 				Type:        schema.TypeString,
 				Description: "IP Address | IP Range | CIDR",
 				Optional:    true,
 			},
-			"translated_ports": &schema.Schema{
+			"translated_ports": {
 				Type:        schema.TypeString,
 				Description: "port number or port range. DNAT only",
 				Optional:    true,

@@ -24,19 +24,19 @@ func resourceNsxtSpoofGuardSwitchingProfile() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
-			"description": &schema.Schema{
+			"description": {
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
 				Optional:    true,
 			},
-			"display_name": &schema.Schema{
+			"display_name": {
 				Type:        schema.TypeString,
 				Description: "The display name of this resource. Defaults to ID if not set",
 				Optional:    true,
 				Computed:    true,
 			},
 			"tag": getTagsSchema(),
-			"address_binding_whitelist_enabled": &schema.Schema{
+			"address_binding_whitelist_enabled": {
 				Type:        schema.TypeBool,
 				Description: "When true, this profile overrides the default system wide settings for Spoof Guard when assigned to ports",
 				Optional:    true,

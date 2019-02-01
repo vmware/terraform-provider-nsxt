@@ -24,13 +24,13 @@ func resourceNsxtIPBlockSubnet() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
-			"description": &schema.Schema{
+			"description": {
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
 				Optional:    true,
 				ForceNew:    true,
 			},
-			"display_name": &schema.Schema{
+			"display_name": {
 				Type:        schema.TypeString,
 				Description: "The display name of this resource. Defaults to ID if not set",
 				Optional:    true,
@@ -38,36 +38,36 @@ func resourceNsxtIPBlockSubnet() *schema.Resource {
 				ForceNew:    true,
 			},
 			"tag": getTagsSchemaForceNew(),
-			"block_id": &schema.Schema{
+			"block_id": {
 				Type:        schema.TypeString,
 				Description: "Block id for which the subnet is created",
 				Required:    true,
 				ForceNew:    true,
 			},
-			"size": &schema.Schema{
+			"size": {
 				Type:         schema.TypeInt,
 				Description:  "Represents the size or number of ip addresses in the subnet",
 				Required:     true,
 				ForceNew:     true,
 				ValidateFunc: validatePowerOf2(false, 0),
 			},
-			"cidr": &schema.Schema{
+			"cidr": {
 				Type:        schema.TypeString,
 				Description: "Represents network address and the prefix length which will be associated with a layer-2 broadcast domain",
 				Computed:    true,
 			},
-			"allocation_ranges": &schema.Schema{
+			"allocation_ranges": {
 				Type:        schema.TypeList,
 				Description: "A collection of IPv4 Pool Ranges",
 				Computed:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"start": &schema.Schema{
+						"start": {
 							Type:        schema.TypeString,
 							Description: "The start IP Address of the IP Range",
 							Computed:    true,
 						},
-						"end": &schema.Schema{
+						"end": {
 							Type:        schema.TypeString,
 							Description: "The end IP Address of the IP Range",
 							Computed:    true,
