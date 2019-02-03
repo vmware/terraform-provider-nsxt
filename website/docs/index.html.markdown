@@ -146,6 +146,10 @@ The following arguments are used to configure the VMware NSX-T Provider:
   By default, the provider will retry on HTTP error 429 (too many requests),
   essentially retrying on throttled connections. Can also be specified with the
   `NSXT_RETRY_ON_STATUS_CODES` environment variable.
+* `remote_auth` - (Optional) Would trigger remote authorization instead of basic
+  authorization. This is required for users based on vIDM authentication.
+  The default for this flag is false. Can also be specified with the
+  `NSXT_REMOTE_AUTH` environment variable.
 
 ## NSX Logical Networking
 

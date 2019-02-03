@@ -57,13 +57,14 @@ func testAccGetClient() (*api.APIClient, error) {
 	}
 
 	cfg := api.Configuration{
-		BasePath:  "/api/v1",
-		Host:      os.Getenv("NSXT_MANAGER_HOST"),
-		Scheme:    "https",
-		UserAgent: "terraform-provider-nsxt/1.0",
-		UserName:  os.Getenv("NSXT_USERNAME"),
-		Password:  os.Getenv("NSXT_PASSWORD"),
-		Insecure:  insecure,
+		BasePath:   "/api/v1",
+		Host:       os.Getenv("NSXT_MANAGER_HOST"),
+		Scheme:     "https",
+		UserAgent:  "terraform-provider-nsxt/1.0",
+		UserName:   os.Getenv("NSXT_USERNAME"),
+		Password:   os.Getenv("NSXT_PASSWORD"),
+		RemoteAuth: false,
+		Insecure:   insecure,
 	}
 
 	return api.NewAPIClient(&cfg)
