@@ -57,7 +57,7 @@ func resourceNsxtVlanLogicalSwitch() *schema.Resource {
 			},
 			"vlan": &schema.Schema{
 				Type:        schema.TypeInt,
-				Description: "VLAN Id or VLAN Trunk Spec",
+				Description: "VLAN Id",
 				Required:    true,
 			},
 			// TODO - add option for vlan trunk spec
