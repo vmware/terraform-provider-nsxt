@@ -17,31 +17,31 @@ func dataSourceNsxtEdgeCluster() *schema.Resource {
 		Read: dataSourceNsxtEdgeClusterRead,
 
 		Schema: map[string]*schema.Schema{
-			"id": &schema.Schema{
+			"id": {
 				Type:        schema.TypeString,
 				Description: "Unique ID of this resource",
 				Optional:    true,
 				Computed:    true,
 			},
-			"display_name": &schema.Schema{
+			"display_name": {
 				Type:        schema.TypeString,
 				Description: "The display name of this resource",
 				Optional:    true,
 				Computed:    true,
 			},
-			"description": &schema.Schema{
+			"description": {
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
 				Optional:    true,
 				Computed:    true,
 			},
-			"deployment_type": &schema.Schema{
+			"deployment_type": {
 				Type:        schema.TypeString,
 				Description: "The deployment type of edge cluster members (UNKNOWN/VIRTUAL_MACHINE|PHYSICAL_MACHINE)",
 				Optional:    true,
 				Computed:    true,
 			},
-			"member_node_type": &schema.Schema{
+			"member_node_type": {
 				Type:        schema.TypeString,
 				Description: "Type of transport nodes",
 				Optional:    true,

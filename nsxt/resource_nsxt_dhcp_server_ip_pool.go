@@ -25,18 +25,18 @@ func resourceNsxtDhcpServerIPPool() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"display_name": &schema.Schema{
+			"display_name": {
 				Type:        schema.TypeString,
 				Description: "The display name of this resource. Defaults to ID if not set",
 				Optional:    true,
 				Computed:    true,
 			},
-			"description": &schema.Schema{
+			"description": {
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
 				Optional:    true,
 			},
-			"logical_dhcp_server_id": &schema.Schema{
+			"logical_dhcp_server_id": {
 				Type:        schema.TypeString,
 				Description: "Id of dhcp server this pool is serving",
 				Required:    true,
@@ -45,27 +45,27 @@ func resourceNsxtDhcpServerIPPool() *schema.Resource {
 			"dhcp_option_121":     getDhcpOptions121Schema(),
 			"dhcp_generic_option": getDhcpGenericOptionsSchema(),
 			"ip_range":            getIPRangesSchema(),
-			"gateway_ip": &schema.Schema{
+			"gateway_ip": {
 				Type:         schema.TypeString,
 				Description:  "Gateway ip",
 				Optional:     true,
 				ValidateFunc: validateSingleIP(),
 			},
-			"lease_time": &schema.Schema{
+			"lease_time": {
 				Type:         schema.TypeInt,
 				Description:  "Lease time, in seconds",
 				Optional:     true,
 				ValidateFunc: validation.IntBetween(0, 4294967295),
 				Default:      86400,
 			},
-			"error_threshold": &schema.Schema{
+			"error_threshold": {
 				Type:         schema.TypeInt,
 				Description:  "Error threshold",
 				Optional:     true,
 				ValidateFunc: validation.IntBetween(80, 100),
 				Default:      100,
 			},
-			"warning_threshold": &schema.Schema{
+			"warning_threshold": {
 				Type:         schema.TypeInt,
 				Description:  "Warning threshold",
 				Optional:     true,

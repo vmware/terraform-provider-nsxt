@@ -25,37 +25,37 @@ func resourceNsxtIPDiscoverySwitchingProfile() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
-			"description": &schema.Schema{
+			"description": {
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
 				Optional:    true,
 			},
-			"display_name": &schema.Schema{
+			"display_name": {
 				Type:        schema.TypeString,
 				Description: "The display name of this resource. Defaults to ID if not set",
 				Optional:    true,
 				Computed:    true,
 			},
 			"tag": getTagsSchema(),
-			"vm_tools_enabled": &schema.Schema{
+			"vm_tools_enabled": {
 				Type:        schema.TypeBool,
 				Description: "Indicating whether VM tools will be enabled. This option is only supported on ESX where vm-tools is installed",
 				Optional:    true,
 				Default:     false,
 			},
-			"arp_snooping_enabled": &schema.Schema{
+			"arp_snooping_enabled": {
 				Type:        schema.TypeBool,
 				Description: "Indicates whether ARP snooping is enabled",
 				Optional:    true,
 				Default:     false,
 			},
-			"dhcp_snooping_enabled": &schema.Schema{
+			"dhcp_snooping_enabled": {
 				Type:        schema.TypeBool,
 				Description: "Indicates whether DHCP snooping is enabled",
 				Optional:    true,
 				Default:     false,
 			},
-			"arp_bindings_limit": &schema.Schema{
+			"arp_bindings_limit": {
 				Type:         schema.TypeInt,
 				Description:  "Limit for the amount of ARP bindings",
 				Optional:     true,

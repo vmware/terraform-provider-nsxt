@@ -25,26 +25,26 @@ func resourceNsxtLbFastUDPApplicationProfile() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
-			"description": &schema.Schema{
+			"description": {
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
 				Optional:    true,
 			},
-			"display_name": &schema.Schema{
+			"display_name": {
 				Type:        schema.TypeString,
 				Description: "The display name of this resource. Defaults to ID if not set",
 				Optional:    true,
 				Computed:    true,
 			},
 			"tag": getTagsSchema(),
-			"idle_timeout": &schema.Schema{
+			"idle_timeout": {
 				Type:         schema.TypeInt,
 				Description:  "Timeout in seconds to specify how long an idle UDP connection in ESTABLISHED state should be kept for this application before cleaning up",
 				Optional:     true,
 				Default:      300,
 				ValidateFunc: validation.IntAtLeast(1),
 			},
-			"ha_flow_mirroring": &schema.Schema{
+			"ha_flow_mirroring": {
 				Type:        schema.TypeBool,
 				Description: "A boolean flag which reflects whether flow mirroring is enabled, and all the flows to the bounded virtual server are mirrored to the standby node",
 				Optional:    true,

@@ -24,19 +24,19 @@ func resourceNsxtIPBlock() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
-			"description": &schema.Schema{
+			"description": {
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
 				Optional:    true,
 			},
-			"display_name": &schema.Schema{
+			"display_name": {
 				Type:        schema.TypeString,
 				Description: "The display name of this resource. Defaults to ID if not set",
 				Optional:    true,
 				Computed:    true,
 			},
 			"tag": getTagsSchema(),
-			"cidr": &schema.Schema{
+			"cidr": {
 				Type:        schema.TypeString,
 				Description: "Represents network address and the prefix length which will be associated with a layer-2 broadcast domain",
 				Required:    true,

@@ -27,24 +27,24 @@ func resourceNsxtL4PortSetNsService() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
-			"description": &schema.Schema{
+			"description": {
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
 				Optional:    true,
 			},
-			"display_name": &schema.Schema{
+			"display_name": {
 				Type:        schema.TypeString,
 				Description: "The display name of this resource. Defaults to ID if not set",
 				Optional:    true,
 				Computed:    true,
 			},
 			"tag": getTagsSchema(),
-			"default_service": &schema.Schema{
+			"default_service": {
 				Type:        schema.TypeBool,
 				Description: "A boolean flag which reflects whether this is a default NSServices which can't be modified/deleted",
 				Computed:    true,
 			},
-			"destination_ports": &schema.Schema{
+			"destination_ports": {
 				Type:        schema.TypeSet,
 				Description: "Set of destination ports",
 				Elem: &schema.Schema{
@@ -53,7 +53,7 @@ func resourceNsxtL4PortSetNsService() *schema.Resource {
 				},
 				Optional: true,
 			},
-			"source_ports": &schema.Schema{
+			"source_ports": {
 				Type:        schema.TypeSet,
 				Description: "Set of source ports",
 				Elem: &schema.Schema{
@@ -62,7 +62,7 @@ func resourceNsxtL4PortSetNsService() *schema.Resource {
 				},
 				Optional: true,
 			},
-			"protocol": &schema.Schema{
+			"protocol": {
 				Type:         schema.TypeString,
 				Description:  "L4 Protocol",
 				Required:     true,

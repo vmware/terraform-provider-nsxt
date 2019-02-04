@@ -17,31 +17,31 @@ func dataSourceNsxtTransportZone() *schema.Resource {
 		Read: dataSourceNsxtTransportZoneRead,
 
 		Schema: map[string]*schema.Schema{
-			"id": &schema.Schema{
+			"id": {
 				Type:        schema.TypeString,
 				Description: "Unique ID of this resource",
 				Optional:    true,
 				Computed:    true,
 			},
-			"display_name": &schema.Schema{
+			"display_name": {
 				Type:        schema.TypeString,
 				Description: "The display name of this resource",
 				Optional:    true,
 				Computed:    true,
 			},
-			"description": &schema.Schema{
+			"description": {
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
 				Optional:    true,
 				Computed:    true,
 			},
-			"host_switch_name": &schema.Schema{
+			"host_switch_name": {
 				Type:        schema.TypeString,
 				Description: "Name of the host switch on all transport nodes in this transport zone that will be used to run NSX network traffic",
 				Optional:    true,
 				Computed:    true,
 			},
-			"transport_type": &schema.Schema{
+			"transport_type": {
 				Type:        schema.TypeString,
 				Description: "The transport type of this transport zone (OVERLAY or VLAN)",
 				Optional:    true,

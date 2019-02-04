@@ -28,19 +28,19 @@ func resourceNsxtLogicalTier0Router() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
-			"description": &schema.Schema{
+			"description": {
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
 				Optional:    true,
 			},
-			"display_name": &schema.Schema{
+			"display_name": {
 				Type:        schema.TypeString,
 				Description: "The display name of this resource. Defaults to ID if not set",
 				Optional:    true,
 				Computed:    true,
 			},
 			"tag": getTagsSchema(),
-			"high_availability_mode": &schema.Schema{
+			"high_availability_mode": {
 				Type:         schema.TypeString,
 				Description:  "High availability mode",
 				Default:      "ACTIVE_STANDBY",
@@ -48,7 +48,7 @@ func resourceNsxtLogicalTier0Router() *schema.Resource {
 				ForceNew:     true, // Cannot change the HA mode of a router
 				ValidateFunc: validation.StringInSlice(highAvailabilityValues, false),
 			},
-			"failover_mode": &schema.Schema{
+			"failover_mode": {
 				Type:         schema.TypeString,
 				Description:  "Failover mode which determines whether the preferred service router instance for given logical router will preempt the peer",
 				Optional:     true,
@@ -56,7 +56,7 @@ func resourceNsxtLogicalTier0Router() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"PREEMPTIVE", "NON_PREEMPTIVE"}, false),
 			},
 			"firewall_sections": getResourceReferencesSchema(false, true, []string{}, "List of Firewall sections related to the logical router"),
-			"edge_cluster_id": &schema.Schema{
+			"edge_cluster_id": {
 				Type:        schema.TypeString,
 				Description: "Edge Cluster Id",
 				Required:    true,

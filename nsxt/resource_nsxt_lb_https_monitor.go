@@ -25,12 +25,12 @@ func resourceNsxtLbHTTPSMonitor() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
-			"description": &schema.Schema{
+			"description": {
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
 				Optional:    true,
 			},
-			"display_name": &schema.Schema{
+			"display_name": {
 				Type:        schema.TypeString,
 				Description: "The display name of this resource. Defaults to ID if not set",
 				Optional:    true,
@@ -44,7 +44,7 @@ func resourceNsxtLbHTTPSMonitor() *schema.Resource {
 			"timeout":                 getLbMonitorTimeoutSchema(),
 			"certificate_chain_depth": getCertificateChainDepthSchema(),
 			"ciphers":                 getSSLCiphersSchema(),
-			"client_certificate_id": &schema.Schema{
+			"client_certificate_id": {
 				Type:        schema.TypeString,
 				Description: "client certificate can be specified to support client authentication",
 				Optional:    true,
@@ -58,7 +58,7 @@ func resourceNsxtLbHTTPSMonitor() *schema.Resource {
 			"request_version":       getLbMonitorRequestVersionSchema(),
 			"response_body":         getLbMonitorResponseBodySchema(),
 			"response_status_codes": getLbMonitorResponseStatusCodesSchema(),
-			"server_auth": &schema.Schema{
+			"server_auth": {
 				Type:         schema.TypeString,
 				Description:  "Server authentication mode",
 				Optional:     true,

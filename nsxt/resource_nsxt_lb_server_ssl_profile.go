@@ -24,12 +24,12 @@ func resourceNsxtLbServerSslProfile() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
-			"description": &schema.Schema{
+			"description": {
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
 				Optional:    true,
 			},
-			"display_name": &schema.Schema{
+			"display_name": {
 				Type:        schema.TypeString,
 				Description: "The display name of this resource. Defaults to ID if not set",
 				Optional:    true,
@@ -39,7 +39,7 @@ func resourceNsxtLbServerSslProfile() *schema.Resource {
 			"ciphers":   getSSLCiphersSchema(),
 			"is_secure": getIsSecureSchema(),
 			"protocols": getSSLProtocolsSchema(),
-			"session_cache_enabled": &schema.Schema{
+			"session_cache_enabled": {
 				Type:        schema.TypeBool,
 				Description: "Reuse previously negotiated security parameters during handshake",
 				Optional:    true,

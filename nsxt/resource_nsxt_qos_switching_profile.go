@@ -33,32 +33,32 @@ func resourceNsxtQosSwitchingProfile() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
-			"description": &schema.Schema{
+			"description": {
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
 				Optional:    true,
 			},
-			"display_name": &schema.Schema{
+			"display_name": {
 				Type:        schema.TypeString,
 				Description: "The display name of this resource. Defaults to ID if not set",
 				Optional:    true,
 				Computed:    true,
 			},
 			"tag": getTagsSchema(),
-			"class_of_service": &schema.Schema{
+			"class_of_service": {
 				Type:         schema.TypeInt,
 				Description:  "Class of service",
 				Optional:     true,
 				ValidateFunc: validation.IntBetween(0, 7),
 			},
-			"dscp_trusted": &schema.Schema{
+			"dscp_trusted": {
 				Type:        schema.TypeBool,
 				Description: "Trust mode for DSCP",
 				Optional:    true,
 				Default:     false,
 			},
 
-			"dscp_priority": &schema.Schema{
+			"dscp_priority": {
 				Type:         schema.TypeInt,
 				Description:  "DSCP Priority",
 				Optional:     true,
@@ -79,23 +79,23 @@ func getQosRateShaperSchema(index int) *schema.Schema {
 		Optional: true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				"enabled": &schema.Schema{
+				"enabled": {
 					Type:        schema.TypeBool,
 					Description: "Whether this rate shaper is enabled",
 					Optional:    true,
 					Default:     true,
 				},
-				fmt.Sprintf("average_bw_%s", scale): &schema.Schema{
+				fmt.Sprintf("average_bw_%s", scale): {
 					Type:        schema.TypeInt,
 					Description: fmt.Sprintf("Average Bandwidth in %s", scale),
 					Optional:    true,
 				},
-				"burst_size": &schema.Schema{
+				"burst_size": {
 					Type:        schema.TypeInt,
 					Description: "Burst size in bytes",
 					Optional:    true,
 				},
-				fmt.Sprintf("peak_bw_%s", scale): &schema.Schema{
+				fmt.Sprintf("peak_bw_%s", scale): {
 					Type:        schema.TypeInt,
 					Description: fmt.Sprintf("Peak Bandwidth in %s", scale),
 					Optional:    true,

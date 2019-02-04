@@ -24,25 +24,25 @@ func resourceNsxtLogicalRouterLinkPortOnTier0() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
-			"description": &schema.Schema{
+			"description": {
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
 				Optional:    true,
 			},
-			"display_name": &schema.Schema{
+			"display_name": {
 				Type:        schema.TypeString,
 				Description: "The display name of this resource. Defaults to ID if not set",
 				Optional:    true,
 				Computed:    true,
 			},
 			"tag": getTagsSchema(),
-			"logical_router_id": &schema.Schema{
+			"logical_router_id": {
 				Type:        schema.TypeString,
 				Description: "Identifier for logical router on which this port is created",
 				Required:    true,
 				ForceNew:    true,
 			},
-			"linked_logical_router_port_id": &schema.Schema{
+			"linked_logical_router_port_id": {
 				Type:        schema.TypeString,
 				Description: "Identifier for port on logical router to connect to",
 				Computed:    true,

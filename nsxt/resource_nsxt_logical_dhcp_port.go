@@ -26,24 +26,24 @@ func resourceNsxtLogicalDhcpPort() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
-			"display_name": &schema.Schema{
+			"display_name": {
 				Type:        schema.TypeString,
 				Description: "The display name of this resource. Defaults to ID if not set",
 				Optional:    true,
 				Computed:    true,
 			},
-			"description": &schema.Schema{
+			"description": {
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
 				Optional:    true,
 			},
-			"logical_switch_id": &schema.Schema{
+			"logical_switch_id": {
 				Type:        schema.TypeString,
 				Description: "Id of the Logical switch that this port belongs to",
 				Required:    true,
 				ForceNew:    true, // Cannot change the logical switch of a logical port
 			},
-			"dhcp_server_id": &schema.Schema{
+			"dhcp_server_id": {
 				Type:        schema.TypeString,
 				Description: "Id of the Logical DHCP server this port belongs to",
 				Required:    true,

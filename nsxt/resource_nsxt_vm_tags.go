@@ -25,7 +25,7 @@ func resourceNsxtVMTags() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"instance_id": &schema.Schema{
+			"instance_id": {
 				Type:        schema.TypeString,
 				Description: "Instance id",
 				Required:    true,

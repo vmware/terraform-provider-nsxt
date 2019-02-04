@@ -25,12 +25,12 @@ func resourceNsxtIPPool() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
-			"description": &schema.Schema{
+			"description": {
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
 				Optional:    true,
 			},
-			"display_name": &schema.Schema{
+			"display_name": {
 				Type:        schema.TypeString,
 				Description: "The display name of this resource. Defaults to ID if not set",
 				Optional:    true,
@@ -50,7 +50,7 @@ func getSubnetSchema() *schema.Schema {
 		MaxItems:    5,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				"allocation_ranges": &schema.Schema{
+				"allocation_ranges": {
 					Type:        schema.TypeList,
 					Description: "A collection of IPv4 Pool Ranges",
 					Elem: &schema.Schema{
@@ -59,13 +59,13 @@ func getSubnetSchema() *schema.Schema {
 					},
 					Required: true,
 				},
-				"cidr": &schema.Schema{
+				"cidr": {
 					Type:         schema.TypeString,
 					Description:  "Network address and the prefix length which will be associated with a layer-2 broadcast domain",
 					Required:     true,
 					ValidateFunc: validateCidr(),
 				},
-				"dns_nameservers": &schema.Schema{
+				"dns_nameservers": {
 					Type:        schema.TypeList,
 					Description: "A collection of DNS servers for the subnet",
 					Optional:    true,
@@ -75,12 +75,12 @@ func getSubnetSchema() *schema.Schema {
 					},
 					MaxItems: 3,
 				},
-				"dns_suffix": &schema.Schema{
+				"dns_suffix": {
 					Type:        schema.TypeString,
 					Description: "The DNS suffix for the DNS server",
 					Optional:    true,
 				},
-				"gateway_ip": &schema.Schema{
+				"gateway_ip": {
 					Type:         schema.TypeString,
 					Description:  "The default gateway address on a layer-3 router",
 					Optional:     true,

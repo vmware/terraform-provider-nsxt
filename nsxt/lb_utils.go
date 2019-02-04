@@ -140,12 +140,12 @@ func getLbL4MonitorSchema(protocol string) map[string]*schema.Schema {
 
 	return map[string]*schema.Schema{
 		"revision": getRevisionSchema(),
-		"description": &schema.Schema{
+		"description": {
 			Type:        schema.TypeString,
 			Description: "Description of this resource",
 			Optional:    true,
 		},
-		"display_name": &schema.Schema{
+		"display_name": {
 			Type:        schema.TypeString,
 			Description: "The display name of this resource. Defaults to ID if not set",
 			Optional:    true,
@@ -157,13 +157,13 @@ func getLbL4MonitorSchema(protocol string) map[string]*schema.Schema {
 		"monitor_port": getLbMonitorPortSchema(),
 		"rise_count":   getLbMonitorRiseCountSchema(),
 		"timeout":      getLbMonitorTimeoutSchema(),
-		"receive": &schema.Schema{
+		"receive": {
 			Type:        schema.TypeString,
 			Description: "Expected data, if specified, can be anywhere in the response and it has to be a string, regular expressions are not supported",
 			Optional:    !dataRequired,
 			Required:    dataRequired,
 		},
-		"send": &schema.Schema{
+		"send": {
 			Type:        schema.TypeString,
 			Description: getLbMonitorSendDescription(protocol),
 			Optional:    !dataRequired,
@@ -179,12 +179,12 @@ func getLbHTTPHeaderSchema(description string) *schema.Schema {
 		Optional:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				"name": &schema.Schema{
+				"name": {
 					Type:        schema.TypeString,
 					Description: "Header name",
 					Required:    true,
 				},
-				"value": &schema.Schema{
+				"value": {
 					Type:        schema.TypeString,
 					Description: "Header value",
 					Required:    true,

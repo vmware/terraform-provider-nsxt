@@ -10,6 +10,7 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
+	"encoding/base64"
 	"encoding/json"
 	"encoding/xml"
 	"errors"
@@ -76,7 +77,7 @@ type service struct {
 }
 
 func GetContext(cfg *Configuration) context.Context {
-	if len(cfg.ClientAuthCertFile) == 0 {
+	if len(cfg.ClientAuthCertFile) == 0 && cfg.RemoteAuth == false {
 		auth := BasicAuth{UserName: cfg.UserName,
 			Password: cfg.Password}
 		return context.WithValue(context.Background(), ContextBasicAuth, auth)
@@ -101,6 +102,15 @@ func GetDefaultHeaders(client *APIClient) error {
 	requestHeaders := map[string]string{
 		"Accept":       "application/json",
 		"Content-Type": "application/x-www-form-urlencoded",
+	}
+
+	// For remote Auth (vIDM use case), construct the REMOTE auth header
+	remoteAuthHeader := ""
+	if client.cfg.RemoteAuth {
+		auth := client.cfg.UserName + ":" + client.cfg.Password
+		encoded := base64.StdEncoding.EncodeToString([]byte(auth))
+		remoteAuthHeader = "Remote " + encoded
+		requestHeaders["Authorization"] = remoteAuthHeader
 	}
 
 	path := strings.TrimSuffix(client.cfg.BasePath, "v1") + "session/create"
@@ -142,6 +152,11 @@ func GetDefaultHeaders(client *APIClient) error {
 	}
 
 	response.Body.Close()
+
+	// For remote Auth (vIDM use case), construct the REMOTE auth header
+	if client.cfg.RemoteAuth {
+		client.cfg.DefaultHeader["Authorization"] = remoteAuthHeader
+	}
 	return nil
 }
 

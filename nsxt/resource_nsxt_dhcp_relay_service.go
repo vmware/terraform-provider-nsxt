@@ -24,19 +24,19 @@ func resourceNsxtDhcpRelayService() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
-			"description": &schema.Schema{
+			"description": {
 				Type:        schema.TypeString,
 				Description: "Description of this resource",
 				Optional:    true,
 			},
-			"display_name": &schema.Schema{
+			"display_name": {
 				Type:        schema.TypeString,
 				Description: "The display name of this resource. Defaults to ID if not set",
 				Optional:    true,
 				Computed:    true,
 			},
 			"tag": getTagsSchema(),
-			"dhcp_relay_profile_id": &schema.Schema{
+			"dhcp_relay_profile_id": {
 				Type:        schema.TypeString,
 				Description: "DHCP relay profile referenced by the dhcp relay service",
 				Required:    true,
