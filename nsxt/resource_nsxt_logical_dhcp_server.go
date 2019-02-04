@@ -73,8 +73,8 @@ func resourceNsxtLogicalDhcpServer() *schema.Resource {
 			},
 			"dhcp_option_121":     getDhcpOptions121Schema(),
 			"dhcp_generic_option": getDhcpGenericOptionsSchema(),
-			"tag":                 getTagsSchema(),
-			"revision":            getRevisionSchema(),
+			"tag":      getTagsSchema(),
+			"revision": getRevisionSchema(),
 		},
 	}
 }

@@ -296,12 +296,12 @@ func getPoolMembersFromSchema(d *schema.ResourceData) []loadbalancer.PoolMember 
 	for _, member := range members {
 		data := member.(map[string]interface{})
 		elem := loadbalancer.PoolMember{
-			AdminState:               data["admin_state"].(string),
-			BackupMember:             data["backup_member"].(bool),
-			DisplayName:              data["display_name"].(string),
-			IpAddress:                data["ip_address"].(string),
-			Port:                     data["port"].(string),
-			Weight:                   int64(data["weight"].(int)),
+			AdminState:   data["admin_state"].(string),
+			BackupMember: data["backup_member"].(bool),
+			DisplayName:  data["display_name"].(string),
+			IpAddress:    data["ip_address"].(string),
+			Port:         data["port"].(string),
+			Weight:       int64(data["weight"].(int)),
 			MaxConcurrentConnections: int64(data["max_concurrent_connections"].(int)),
 		}
 

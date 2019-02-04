@@ -90,8 +90,8 @@ func getMacLearningFromSchema(d *schema.ResourceData) *manager.MacLearningSpec {
 		return &manager.MacLearningSpec{
 			Enabled:                data["enabled"].(bool),
 			UnicastFloodingAllowed: data["unicast_flooding_allowed"].(bool),
-			Limit:                  int32(data["limit"].(int)),
-			LimitPolicy:            data["limit_policy"].(string),
+			Limit:       int32(data["limit"].(int)),
+			LimitPolicy: data["limit_policy"].(string),
 		}
 	}
 

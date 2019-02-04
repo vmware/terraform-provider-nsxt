@@ -43,7 +43,7 @@ func resourceNsxtLogicalPort() *schema.Resource {
 			},
 			"admin_state":          getAdminStateSchema(),
 			"switching_profile_id": getSwitchingProfileIdsSchema(),
-			"tag":                  getTagsSchema(),
+			"tag": getTagsSchema(),
 		},
 	}
 }

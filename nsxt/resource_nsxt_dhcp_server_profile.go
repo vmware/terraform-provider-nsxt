@@ -66,7 +66,7 @@ func resourceNsxtDhcpServerProfileCreate(d *schema.ResourceData, m interface{}) 
 		Description:              description,
 		EdgeClusterId:            edgeClusterID,
 		EdgeClusterMemberIndexes: edgeClusterMemberIndexes,
-		Tags:                     tags,
+		Tags: tags,
 	}
 
 	dhcpProfile, resp, err := nsxClient.ServicesApi.CreateDhcpProfile(nsxClient.Context, dhcpProfile)
@@ -128,8 +128,8 @@ func resourceNsxtDhcpServerProfileUpdate(d *schema.ResourceData, m interface{}) 
 		Description:              description,
 		EdgeClusterId:            edgeClusterID,
 		EdgeClusterMemberIndexes: edgeClusterMemberIndexes,
-		Tags:                     tags,
-		Revision:                 revision,
+		Tags:     tags,
+		Revision: revision,
 	}
 
 	dhcpProfile, resp, err := nsxClient.ServicesApi.UpdateDhcpProfile(nsxClient.Context, id, dhcpProfile)

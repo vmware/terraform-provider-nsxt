@@ -82,8 +82,8 @@ func resourceNsxtLbSourceIPPersistenceProfileCreate(d *schema.ResourceData, m in
 		Tags:                          tags,
 		PersistenceShared:             persistenceShared,
 		HaPersistenceMirroringEnabled: haPersistenceMirroring,
-		Purge:                         purge,
-		Timeout:                       timeout,
+		Purge:   purge,
+		Timeout: timeout,
 	}
 
 	lbSourceIPPersistenceProfile, resp, err := nsxClient.ServicesApi.CreateLoadBalancerSourceIpPersistenceProfile(nsxClient.Context, lbSourceIPPersistenceProfile)
@@ -159,8 +159,8 @@ func resourceNsxtLbSourceIPPersistenceProfileUpdate(d *schema.ResourceData, m in
 		Tags:                          tags,
 		PersistenceShared:             persistenceShared,
 		HaPersistenceMirroringEnabled: haPersistenceMirroring,
-		Purge:                         purge,
-		Timeout:                       timeout,
+		Purge:   purge,
+		Timeout: timeout,
 	}
 
 	lbSourceIPPersistenceProfile, resp, err := nsxClient.ServicesApi.UpdateLoadBalancerSourceIpPersistenceProfile(nsxClient.Context, id, lbSourceIPPersistenceProfile)
