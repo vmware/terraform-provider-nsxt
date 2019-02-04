@@ -71,7 +71,7 @@ type LogicalSwitch struct {
 	// Id of the TransportZone to which this LogicalSwitch is associated
 	TransportZoneId string `json:"transport_zone_id"`
 
-	Vlan int64 `json:"vlan,omitempty"`
+	Vlan int64 `json:"vlan"`
 
 	// VNI for this LogicalSwitch.
 	Vni int32 `json:"vni,omitempty"`

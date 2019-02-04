@@ -106,6 +106,7 @@ func Provider() terraform.ResourceProvider {
 			"nsxt_logical_dhcp_server":                     resourceNsxtLogicalDhcpServer(),
 			"nsxt_dhcp_server_ip_pool":                     resourceNsxtDhcpServerIPPool(),
 			"nsxt_logical_switch":                          resourceNsxtLogicalSwitch(),
+			"nsxt_vlan_logical_switch":                     resourceNsxtVlanLogicalSwitch(),
 			"nsxt_logical_dhcp_port":                       resourceNsxtLogicalDhcpPort(),
 			"nsxt_logical_port":                            resourceNsxtLogicalPort(),
 			"nsxt_logical_tier0_router":                    resourceNsxtLogicalTier0Router(),
