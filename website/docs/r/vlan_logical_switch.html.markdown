@@ -1,7 +1,7 @@
 ---
 layout: "nsxt"
-page_title: "NSXT: nsxt_logical_switch"
-sidebar_current: "docs-nsxt-resource-logical-switch"
+page_title: "NSXT: nsxt_vlan_logical_switch"
+sidebar_current: "docs-nsxt-resource-vlan-logical-switch"
 description: A resource to configure vlan logical switch in NSX.
 ---
 
@@ -12,7 +12,7 @@ This resource provides a method to create vlan logical switch in NSX. Virtual ma
 ## Example Usage
 
 ```hcl
-resource "nsxt_logical_switch" "switch1" {
+resource "nsxt_vlan_logical_switch" "switch1" {
   admin_state       = "UP"
   description       = "LS1 provisioned by Terraform"
   display_name      = "LS1"
@@ -60,7 +60,7 @@ An existing X can be [imported][docs-import] into this resource, via the followi
 [docs-import]: /docs/import/index.html
 
 ```
-terraform import nsxt_logical_switch.switch1 UUID
+terraform import nsxt_vlan_logical_switch.switch1 UUID
 ```
 
 The above command imports the logical switch named `switch1` with the NSX id `UUID`.

@@ -64,7 +64,6 @@ resource "nsxt_lb_pool" "lb_pool_with_dynamic_membership" {
   snat_translation {
     type          = "SNAT_IP_POOL"
     ip            = "1.1.1.1"
-    port_overload = "8"
   }
 
   member_group {
@@ -113,7 +112,6 @@ The following arguments are supported:
 * `passive_monitor_id` - (Optional) Passive health monitor Id. If one is not set, the passive healthchecks will be disabled.
 * `snat_translation - (Optional) SNAT translation configuration for the pool.
   * `type` - (Optional) Type of SNAT performed to ensure reverse traffic from the server can be received and processed by the loadbalancer. Supported types are: SNAT_AUTO_MAP, SNAT_IP_POOL and TRANSPARENT
-  * `port_overload` - (Optional) Maximum times for reusing the same SNAT IP and port for multiple backend connections. Both SNAT_AUTO_MAP and SNAT_IP_POOL modes support port overloading which allows the same SNAT IP and port to be used for multiple backend connections as long as the tuple (source IP, source port, destination IP, destination port, IP protocol) after SNAT is performed is unique. The valid number is 1, 2, 4, 8, 16, 32.
   * `ip` - (Required for snat_translation of type SNAT_IP_POOL) Ip address or Ip range for SNAT of type SNAT_IP_POOL.
 * `tcp_multiplexing_enabled` - (Optional) TCP multiplexing allows the same TCP connection between load balancer and the backend server to be used for sending multiple client requests from different client TCP connections. Disabled by default.
 * `tcp_multiplexing_number` - (Optional) The maximum number of TCP connections per pool that are idly kept alive for sending future client requests. The default value for this is 6.

@@ -107,13 +107,6 @@ func getSnatTranslationSchema() *schema.Schema {
 					ValidateFunc: validateIPOrRange(),
 					Optional:     true,
 				},
-				"port_overload": {
-					Type:         schema.TypeInt,
-					Description:  "Maximum times for reusing the same SNAT IP and port for multiple backend connections",
-					ValidateFunc: validatePowerOf2(true, 32),
-					Optional:     true,
-					Computed:     true,
-				},
 			},
 		},
 	}
@@ -230,22 +223,19 @@ func getSnatTranslationFromSchema(d *schema.ResourceData) *loadbalancer.LbSnatTr
 		if trType == "TRANSPARENT" {
 			return nil
 		}
-		portOverload := int64(data["port_overload"].(int))
 		if trType == "SNAT_IP_POOL" {
 			ipAddresses := make([]loadbalancer.LbSnatIpElement, 0, 1)
 			ipAddress := data["ip"].(string)
 			elem := loadbalancer.LbSnatIpElement{IpAddress: ipAddress}
 			ipAddresses = append(ipAddresses, elem)
 			return &loadbalancer.LbSnatTranslation{
-				Type_:        "LbSnatIpPool",
-				IpAddresses:  ipAddresses,
-				PortOverload: portOverload,
+				Type_:       "LbSnatIpPool",
+				IpAddresses: ipAddresses,
 			}
 		}
 		// For SNAT_AUTO_MAP type
 		return &loadbalancer.LbSnatTranslation{
-			Type_:        "LbSnatAutoMap",
-			PortOverload: portOverload,
+			Type_: "LbSnatAutoMap",
 		}
 	}
 	return nil
@@ -263,7 +253,6 @@ func setSnatTranslationInSchema(d *schema.ResourceData, snatTranslation *loadbal
 		} else {
 			elem["type"] = "SNAT_AUTO_MAP"
 		}
-		elem["port_overload"] = snatTranslation.PortOverload
 	} else {
 		elem["type"] = "TRANSPARENT"
 	}

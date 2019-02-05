@@ -112,8 +112,6 @@ func TestAccResourceNsxtLbPool_withIpSnat(t *testing.T) {
 	snatTranslationType := "SNAT_IP_POOL"
 	ipAddress := "1.1.1.1"
 	updatedIPAddress := "1.1.1.2-1.1.1.20"
-	portOverload := "2"
-	updatedPortOverload := "16"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -123,7 +121,7 @@ func TestAccResourceNsxtLbPool_withIpSnat(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXLbPoolCreateWithSnatTemplate(name, algorithm, minActiveMembers, snatTranslationType, ipAddress, portOverload),
+				Config: testAccNSXLbPoolCreateWithSnatTemplate(name, algorithm, minActiveMembers, snatTranslationType, ipAddress),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXLbPoolExists(name, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -132,13 +130,12 @@ func TestAccResourceNsxtLbPool_withIpSnat(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "min_active_members", minActiveMembers),
 					resource.TestCheckResourceAttr(testResourceName, "snat_translation.0.type", snatTranslationType),
 					resource.TestCheckResourceAttr(testResourceName, "snat_translation.0.ip", ipAddress),
-					resource.TestCheckResourceAttr(testResourceName, "snat_translation.0.port_overload", portOverload),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "member.#", "0"),
 				),
 			},
 			{
-				Config: testAccNSXLbPoolUpdateWithSnatTemplate(updatedName, updatedAlgorithm, updatedMinActiveMembers, snatTranslationType, updatedIPAddress, updatedPortOverload),
+				Config: testAccNSXLbPoolUpdateWithSnatTemplate(updatedName, updatedAlgorithm, updatedMinActiveMembers, snatTranslationType, updatedIPAddress),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXLbPoolExists(updatedName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -147,7 +144,6 @@ func TestAccResourceNsxtLbPool_withIpSnat(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "min_active_members", updatedMinActiveMembers),
 					resource.TestCheckResourceAttr(testResourceName, "snat_translation.0.type", snatTranslationType),
 					resource.TestCheckResourceAttr(testResourceName, "snat_translation.0.ip", updatedIPAddress),
-					resource.TestCheckResourceAttr(testResourceName, "snat_translation.0.port_overload", updatedPortOverload),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "member.#", "0"),
 				),
@@ -420,7 +416,7 @@ resource "nsxt_lb_pool" "test" {
 `, name)
 }
 
-func testAccNSXLbPoolCreateWithSnatTemplate(name string, algorithm string, minActiveMembers string, snatTranslationType string, snatTranslationIP string, portOverload string) string {
+func testAccNSXLbPoolCreateWithSnatTemplate(name string, algorithm string, minActiveMembers string, snatTranslationType string, snatTranslationIP string) string {
 	return fmt.Sprintf(`
 resource "nsxt_lb_pool" "test" {
   display_name       = "%s"
@@ -431,7 +427,6 @@ resource "nsxt_lb_pool" "test" {
   snat_translation {
   	type          = "%s"
   	ip            = "%s"
-  	port_overload = "%s"
   }
 
   tag {
@@ -439,10 +434,10 @@ resource "nsxt_lb_pool" "test" {
     tag   = "tag1"
   }
 }
-`, name, algorithm, minActiveMembers, snatTranslationType, snatTranslationIP, portOverload)
+`, name, algorithm, minActiveMembers, snatTranslationType, snatTranslationIP)
 }
 
-func testAccNSXLbPoolUpdateWithSnatTemplate(name string, algorithm string, minActiveMembers string, snatTranslationType string, snatTranslationIP string, portOverload string) string {
+func testAccNSXLbPoolUpdateWithSnatTemplate(name string, algorithm string, minActiveMembers string, snatTranslationType string, snatTranslationIP string) string {
 	return fmt.Sprintf(`
 resource "nsxt_lb_pool" "test" {
   display_name       = "%s"
@@ -453,7 +448,6 @@ resource "nsxt_lb_pool" "test" {
   snat_translation {
   	type          = "%s"
   	ip            = "%s"
-  	port_overload = "%s"
   }
 
   tag {
@@ -465,7 +459,7 @@ resource "nsxt_lb_pool" "test" {
     tag   = "tag2"
   }
 }
-`, name, algorithm, minActiveMembers, snatTranslationType, snatTranslationIP, portOverload)
+`, name, algorithm, minActiveMembers, snatTranslationType, snatTranslationIP)
 }
 
 func testAccNSXLbPoolCreateTemplateTrivial(name string) string {
