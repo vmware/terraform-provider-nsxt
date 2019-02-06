@@ -254,7 +254,7 @@ resource "nsxt_lb_http_forwarding_rule" "test" {
   }
 
   http_redirect_action {
-    redirect_status = "200"
+    redirect_status = "301"
     redirect_url    = "/abc.com"
   }
 
