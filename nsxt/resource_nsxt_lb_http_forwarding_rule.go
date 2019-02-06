@@ -79,8 +79,9 @@ func resourceNsxtLbHTTPForwardingRule() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"redirect_status": {
-							Type:     schema.TypeString,
-							Required: true,
+							Type:         schema.TypeString,
+							ValidateFunc: validation.StringInSlice([]string{"301", "302", "303", "307"}, false),
+							Required:     true,
 						},
 						"redirect_url": {
 							Type:     schema.TypeString,
