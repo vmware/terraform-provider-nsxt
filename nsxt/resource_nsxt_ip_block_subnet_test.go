@@ -18,7 +18,7 @@ func TestAccResourceNsxtIpBlockSubnet_basic(t *testing.T) {
 	testResourceName := "nsxt_ip_block_subnet.test"
 	size := 16
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
+		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "2.4.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXIpBlockSubnetCheckDestroy(state, name)
@@ -26,8 +26,6 @@ func TestAccResourceNsxtIpBlockSubnet_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNSXIpBlockSubnetCreateTemplate(name, size),
-				// TODO(asarfaty): remove the next line once NSX supports getting the block_id
-				ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXIpBlockSubnetExists(name, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -37,16 +35,13 @@ func TestAccResourceNsxtIpBlockSubnet_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "allocation_ranges.#", "1"),
 					resource.TestCheckResourceAttrSet(testResourceName, "allocation_ranges.0.start"),
 					resource.TestCheckResourceAttrSet(testResourceName, "allocation_ranges.0.end"),
-					// TODO(asarfaty): remove the comment on the next line once NSX supports getting the block_id
-					//resource.TestCheckResourceAttrSet(testResourceName, "block_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "block_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "cidr"),
 				),
 			},
 			{
 				// Test updating the subnet (ForceNew)
 				Config: testAccNSXIpBlockSubnetUpdateTemplate(updateName, size),
-				// TODO(asarfaty): remove the next line once NSX supports getting the block_id
-				ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXIpBlockSubnetExists(updateName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updateName),
@@ -56,8 +51,7 @@ func TestAccResourceNsxtIpBlockSubnet_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "allocation_ranges.#", "1"),
 					resource.TestCheckResourceAttrSet(testResourceName, "allocation_ranges.0.start"),
 					resource.TestCheckResourceAttrSet(testResourceName, "allocation_ranges.0.end"),
-					// TODO(asarfaty): remove the comment on the next line once NSX supports getting the block_id
-					//resource.TestCheckResourceAttrSet(testResourceName, "block_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "block_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "cidr"),
 				),
 			},
@@ -70,16 +64,14 @@ func TestAccResourceNsxtIpBlockSubnet_importBasic(t *testing.T) {
 	testResourceName := "nsxt_ip_block_subnet.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
+		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "2.4.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXIpBlockSubnetCheckDestroy(state, name)
 		},
 		Steps: []resource.TestStep{
 			{
-				// TODO(asarfaty): remove the next line once NSX supports getting the block_id
-				ExpectNonEmptyPlan: true,
-				Config:             testAccNSXIpBlockSubnetCreateTemplate(name, 32),
+				Config: testAccNSXIpBlockSubnetCreateTemplate(name, 32),
 			},
 			{
 				ResourceName:      testResourceName,
