@@ -14,6 +14,7 @@ import (
 )
 
 var failOverModeValues = []string{"PREEMPTIVE", "NON_PREEMPTIVE"}
+var failOverModeDefaultValue = "PREEMPTIVE"
 
 // formatLogicalRouterRollbackError defines the verbose error when
 // rollback fails on a logical router create operation.
@@ -55,7 +56,7 @@ func resourceNsxtLogicalTier1Router() *schema.Resource {
 			"failover_mode": {
 				Type:         schema.TypeString,
 				Description:  "Failover mode which determines whether the preferred service router instance for given logical router will preempt the peer",
-				Default:      "PREEMPTIVE",
+				Default:      failOverModeDefaultValue,
 				Optional:     true,
 				ValidateFunc: validation.StringInSlice(failOverModeValues, false),
 			},
@@ -236,7 +237,13 @@ func resourceNsxtLogicalTier1RouterRead(d *schema.ResourceData, m interface{}) e
 	d.Set("display_name", logicalRouter.DisplayName)
 	setTagsInSchema(d, logicalRouter.Tags)
 	d.Set("edge_cluster_id", logicalRouter.EdgeClusterId)
-	d.Set("failover_mode", logicalRouter.FailoverMode)
+	if logicalRouter.FailoverMode != "" {
+		d.Set("failover_mode", logicalRouter.FailoverMode)
+	} else {
+		// If router is not connected to edge cluster, failover mode will not be set
+		// Reset to default value to avoid non-empty plan
+		d.Set("failover_mode", failOverModeDefaultValue)
+	}
 	err = setResourceReferencesInSchema(d, logicalRouter.FirewallSections, "firewall_sections")
 	if err != nil {
 		return fmt.Errorf("Error during LogicalTier1Router firewall sections set in schema: %v", err)
