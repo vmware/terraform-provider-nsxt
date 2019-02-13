@@ -64,7 +64,10 @@ func resourceNsxtLogicalTier1Router() *schema.Resource {
 			"edge_cluster_id": {
 				Type:        schema.TypeString,
 				Description: "Edge Cluster Id",
-				Optional:    true,
+				// This is needed since updating edge cluster requires special handling
+				// which is not yet available in sdk
+				ForceNew: true,
+				Optional: true,
 			},
 			"enable_router_advertisement": {
 				Type:        schema.TypeBool,
