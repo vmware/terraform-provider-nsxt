@@ -8,7 +8,7 @@ description: |-
 
 # nsxt_lb_http_virtual_server
 
-Provides a resource to configure lb http virtual server on NSX-T manager
+Provides a resource to configure lb http or https virtual server on NSX-T manager
 
 ## Example Usage
 
