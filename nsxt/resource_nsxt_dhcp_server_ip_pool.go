@@ -55,7 +55,7 @@ func resourceNsxtDhcpServerIPPool() *schema.Resource {
 				Type:         schema.TypeInt,
 				Description:  "Lease time, in seconds",
 				Optional:     true,
-				ValidateFunc: validation.IntBetween(0, 4294967295),
+				ValidateFunc: validation.IntAtLeast(0),
 				Default:      86400,
 			},
 			"error_threshold": {
