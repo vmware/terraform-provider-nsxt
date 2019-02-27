@@ -22,7 +22,7 @@ func TestAccResourceNsxtLbFastUDPApplicationProfile_basic(t *testing.T) {
 	updatedMirroring := "false"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLbFastUDPApplicationProfileCheckDestroy(state, name)
@@ -57,7 +57,7 @@ func TestAccResourceNsxtLbFastUDPApplicationProfile_importBasic(t *testing.T) {
 	name := "test-nsx-application-profile"
 	testResourceName := "nsxt_lb_fast_udp_application_profile.test"
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLbFastUDPApplicationProfileCheckDestroy(state, name)
