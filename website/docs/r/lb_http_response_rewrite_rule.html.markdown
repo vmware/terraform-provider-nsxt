@@ -10,6 +10,8 @@ description: |-
 
 Provides a resource to configure lb http response rewrite rule on NSX-T manager. This rule will be executed when HTTP response message is received by load balancer.
 
+~> **NOTE:** This resource requires NSX version 2.3 or higher.
+
 ## Example Usages
 This example represents a superset of all possible conditions (and thus doesn't make much sense).
 More specific examples are provided below.

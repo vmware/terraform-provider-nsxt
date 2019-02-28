@@ -17,6 +17,8 @@ following preconditions:
 In order to enforce correct order of create/delete, it is recommended to add
 depends_on clause to lb service.
 
+~> **NOTE:** This resource requires NSX version 2.3 or higher.
+
 ## Example Usage
 
 ```hcl
