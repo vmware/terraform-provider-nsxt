@@ -10,6 +10,8 @@ description: |-
 
 Provides a resource to configure lb http forwarding rule on NSX-T manager. This rule will be executed when HTTP request message is forwarded by load balancer.
 
+~> **NOTE:** This resource requires NSX version 2.3 or higher.
+
 ## Example Usages
 This example represents a superset of all possible action and conditions (and thus doesn't make much sense).
 More specific examples are provided below.

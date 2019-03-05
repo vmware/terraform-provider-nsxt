@@ -10,6 +10,8 @@ description: |-
 
 Provides a resource to configure lb udp monitor on NSX-T manager
 
+~> **NOTE:** This resource requires NSX version 2.3 or higher.
+
 ## Example Usage
 
 ```hcl
