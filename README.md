@@ -22,7 +22,7 @@ Documentation on the NSX platform can be found at the [NSX-T Documentation page]
 The current version of this provider requires Terraform v0.10.2 or higher to
 run.
 
-The VMware supported version of the provider requires NSX version 2.2.x and Terraform 0.11.7. The recommended vSphere provider to be used in conjunction with the NSX-T Terraform Provider is 1.3.3 or above.
+The VMware supported version of the provider requires NSX version 2.2 onwards and Terraform 0.11.7. The recommended vSphere provider to be used in conjunction with the NSX-T Terraform Provider is 1.3.3 or above.
 
 Note that you need to run `terraform init` to fetch the provider before
 deploying. Read about the provider split and other changes to TF v0.10.0 in the
