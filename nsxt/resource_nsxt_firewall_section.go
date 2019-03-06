@@ -60,7 +60,13 @@ func resourceNsxtFirewallSection() *schema.Resource {
 				ForceNew:    true,
 			},
 			"applied_to": getResourceReferencesSetSchema(false, false, []string{"LogicalPort", "LogicalSwitch", "NSGroup"}, "List of objects where the rules in this section will be enforced. This will take precedence over rule level appliedTo"),
-			"rule":       getRulesSchema(),
+			"insert_before": {
+				Type:        schema.TypeString,
+				Description: "Id of section that should come after this one",
+				Optional:    true,
+				ForceNew:    true,
+			},
+			"rule": getRulesSchema(),
 		},
 	}
 }
@@ -239,6 +245,7 @@ func resourceNsxtFirewallSectionCreate(d *schema.ResourceData, m interface{}) er
 	appliedTos := getResourceReferencesFromSchemaSet(d, "applied_to")
 	sectionType := d.Get("section_type").(string)
 	stateful := d.Get("stateful").(bool)
+	insertBefore := d.Get("insert_before")
 	firewallSection := manager.FirewallSectionRuleList{
 		FirewallSection: manager.FirewallSection{
 			Description: description,
@@ -252,6 +259,11 @@ func resourceNsxtFirewallSectionCreate(d *schema.ResourceData, m interface{}) er
 	}
 
 	localVarOptionals := make(map[string]interface{})
+	if insertBefore != "" {
+		localVarOptionals["operation"] = "insert_before"
+		localVarOptionals["id"] = insertBefore
+	}
+
 	var resp *http.Response
 	var err error
 	if len(rules) == 0 {
