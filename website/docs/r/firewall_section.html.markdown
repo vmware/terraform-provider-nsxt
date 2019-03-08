@@ -8,6 +8,7 @@ description: A resource that can be used to configure a firewall section in NSX.
 # nsxt_firewall_section
 
 This resource provides a way to configure a firewall section on the NSX manager. A firewall section is a collection of firewall rules that are grouped together.
+Order of firewall sections can be controlled with 'insert_before' attribute.
 
 ## Example Usage
 
@@ -26,8 +27,9 @@ resource "nsxt_firewall_section" "firewall_sect" {
     target_id   = "${nsxt_ns_group.group1.id}"
   }
 
-  section_type = "LAYER3"
-  stateful     = true
+  section_type  = "LAYER3"
+  stateful      = true
+  insert_before = "${nsxt_firewall_section.bottom_line.id}"
 
   rule {
     display_name          = "out_rule"
@@ -81,6 +83,7 @@ The following arguments are supported:
 * `applied_to` - (Optional) List of objects where the rules in this section will be enforced. This will take precedence over rule level applied_to. [Supported target types: "LogicalPort", "LogicalSwitch", "NSGroup"]
 * `section_type` - (Required) Type of the rules which a section can contain. Either LAYER2 or LAYER3. Only homogeneous sections are supported.
 * `stateful` - (Required) Stateful or Stateless nature of firewall section is enforced on all rules inside the section. Layer3 sections can be stateful or stateless. Layer2 sections can only be stateless.
+* `insert_before` - (Optional) Firewall section id that should come immediately after this one. It is user responsibility to use this attribute in consistent manner (for example, if same value would be set in two separate sections, the outcome would depend on order of creation). Changing this attribute would force recreation of the firewall section.
 * `rule` - (Optional) A list of rules to be applied in this section. each rule has the following arguments:
   * `display_name` - (Optional) The display name of this rule. Defaults to ID if not set.
   * `description` - (Optional) Description of this rule.

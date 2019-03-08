@@ -253,6 +253,59 @@ func TestAccResourceNsxtFirewallSection_withRulesAndTos(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtFirewallSection_ordered(t *testing.T) {
+	sectionNames := [4]string{"s1", "s2", "s3", "s4"}
+	testResourceNames := [4]string{"nsxt_firewall_section.test1", "nsxt_firewall_section.test2", "nsxt_firewall_section.test3", "nsxt_firewall_section.test4"}
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			for i := 0; i <= 3; i++ {
+				err := testAccNSXFirewallSectionCheckDestroy(state, sectionNames[i])
+				if err != nil {
+					return err
+				}
+			}
+
+			return nil
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXFirewallSectionCreateOrderedTemplate(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXFirewallSectionExists(sectionNames[0], testResourceNames[0]),
+					resource.TestCheckResourceAttr(testResourceNames[0], "display_name", sectionNames[0]),
+					resource.TestCheckResourceAttr(testResourceNames[0], "section_type", "LAYER3"),
+					testAccNSXFirewallSectionExists(sectionNames[1], testResourceNames[1]),
+					resource.TestCheckResourceAttr(testResourceNames[1], "display_name", sectionNames[1]),
+					resource.TestCheckResourceAttr(testResourceNames[1], "section_type", "LAYER3"),
+					testAccNSXFirewallSectionExists(sectionNames[2], testResourceNames[2]),
+					resource.TestCheckResourceAttr(testResourceNames[2], "display_name", sectionNames[2]),
+					resource.TestCheckResourceAttr(testResourceNames[2], "section_type", "LAYER3"),
+				),
+			},
+			{
+				Config: testAccNSXFirewallSectionUpdateOrderedTemplate(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXFirewallSectionExists(sectionNames[0], testResourceNames[0]),
+					resource.TestCheckResourceAttr(testResourceNames[0], "display_name", sectionNames[0]),
+					resource.TestCheckResourceAttr(testResourceNames[0], "section_type", "LAYER3"),
+					testAccNSXFirewallSectionExists(sectionNames[1], testResourceNames[1]),
+					resource.TestCheckResourceAttr(testResourceNames[1], "display_name", sectionNames[1]),
+					resource.TestCheckResourceAttr(testResourceNames[1], "section_type", "LAYER3"),
+					testAccNSXFirewallSectionExists(sectionNames[2], testResourceNames[2]),
+					resource.TestCheckResourceAttr(testResourceNames[2], "display_name", sectionNames[2]),
+					resource.TestCheckResourceAttr(testResourceNames[2], "section_type", "LAYER3"),
+					testAccNSXFirewallSectionExists(sectionNames[3], testResourceNames[3]),
+					resource.TestCheckResourceAttr(testResourceNames[3], "display_name", sectionNames[3]),
+					resource.TestCheckResourceAttr(testResourceNames[3], "section_type", "LAYER3"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtFirewallSection_importBasic(t *testing.T) {
 	sectionName := fmt.Sprintf("test-nsx-firewall-section-basic")
 	testResourceName := "nsxt_firewall_section.test"
@@ -475,17 +528,17 @@ resource "nsxt_firewall_section" "test" {
   applied_to   = %s
 
   rule {
-	display_name = "%s",
-	description  = "rule1",
+    display_name = "%s",
+    description  = "rule1",
     action       = "ALLOW",
     logged       = "true",
     ip_protocol  = "IPV4",
     direction    = "IN"
-	disabled     = "false"
+    disabled     = "false"
   }
 
   rule {
-	display_name = "rule2",
+    display_name = "rule2",
     description  = "rule2",
     action       = "ALLOW",
     logged       = "true",
@@ -517,4 +570,68 @@ resource "nsxt_firewall_section" "test" {
   tag          = %s
   applied_to   = %s
 }`, updatedName, tags, tos)
+}
+
+func testAccNSXFirewallSectionCreateOrderedTemplate() string {
+	return `
+resource "nsxt_firewall_section" "test1" {
+  display_name = "s1"
+  section_type = "LAYER3"
+  stateful     = true
+}
+
+resource "nsxt_firewall_section" "test2" {
+  display_name  = "s2"
+  section_type  = "LAYER3"
+  insert_before = "${nsxt_firewall_section.test1.id}"
+  stateful      = true
+
+  rule {
+    display_name = "test"
+    action       = "ALLOW",
+    logged       = "true",
+    ip_protocol  = "IPV4",
+    direction    = "IN"
+  }
+}
+
+resource "nsxt_firewall_section" "test3" {
+  display_name  = "s3"
+  section_type  = "LAYER3"
+  insert_before = "${nsxt_firewall_section.test2.id}"
+  stateful      = true
+}
+
+`
+}
+
+func testAccNSXFirewallSectionUpdateOrderedTemplate() string {
+	return `
+resource "nsxt_firewall_section" "test1" {
+  display_name  = "s1"
+  section_type  = "LAYER3"
+  insert_before = "${nsxt_firewall_section.test4.id}"
+  stateful      = true
+}
+
+resource "nsxt_firewall_section" "test2" {
+  display_name  = "s2"
+  section_type  = "LAYER3"
+  insert_before = "${nsxt_firewall_section.test1.id}"
+  stateful      = true
+}
+
+resource "nsxt_firewall_section" "test3" {
+  display_name = "s3"
+  section_type = "LAYER3"
+  stateful     = true
+}
+
+resource "nsxt_firewall_section" "test4" {
+  display_name = "s4"
+  section_type = "LAYER3"
+  stateful     = true
+}
+
+`
 }
