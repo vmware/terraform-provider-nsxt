@@ -81,7 +81,7 @@ func resourceNsxtLogicalSwitch() *schema.Resource {
 				Required:    true,
 				ForceNew:    true,
 			},
-			"vlan": &schema.Schema{
+			"vlan": {
 				Type:       schema.TypeInt,
 				Deprecated: "Use nsxt_vlan_logical_switch resource instead",
 				Optional:   true,

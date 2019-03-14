@@ -12,6 +12,7 @@
 package schema
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"reflect"
@@ -50,6 +51,26 @@ type Schema struct {
 	//   TypeSet - *schema.Set
 	//
 	Type ValueType
+
+	// ConfigMode allows for overriding the default behaviors for mapping
+	// schema entries onto configuration constructs.
+	//
+	// By default, the Elem field is used to choose whether a particular
+	// schema is represented in configuration as an attribute or as a nested
+	// block; if Elem is a *schema.Resource then it's a block and it's an
+	// attribute otherwise.
+	//
+	// If Elem is *schema.Resource then setting ConfigMode to
+	// SchemaConfigModeAttr will force it to be represented in configuration
+	// as an attribute, which means that the Computed flag can be used to
+	// provide default elements when the argument isn't set at all, while still
+	// allowing the user to force zero elements by explicitly assigning an
+	// empty list.
+	//
+	// When Computed is set without Optional, the attribute is not settable
+	// in configuration at all and so SchemaConfigModeAttr is the automatic
+	// behavior, and SchemaConfigModeBlock is not permitted.
+	ConfigMode SchemaConfigMode
 
 	// If one of these is set, then this item can come from the configuration.
 	// Both cannot be set. If Optional is set, the value is optional. If
@@ -199,7 +220,18 @@ type Schema struct {
 	Sensitive bool
 }
 
-// SchemaDiffSuppresFunc is a function which can be used to determine
+// SchemaConfigMode is used to influence how a schema item is mapped into a
+// corresponding configuration construct, using the ConfigMode field of
+// Schema.
+type SchemaConfigMode int
+
+const (
+	SchemaConfigModeAuto SchemaConfigMode = iota
+	SchemaConfigModeAttr
+	SchemaConfigModeBlock
+)
+
+// SchemaDiffSuppressFunc is a function which can be used to determine
 // whether a detected diff on a schema element is "valid" or not, and
 // suppress it from the plan if necessary.
 //
@@ -395,7 +427,7 @@ func (m *schemaMap) DeepCopy() schemaMap {
 	if err != nil {
 		panic(err)
 	}
-	return copy.(schemaMap)
+	return *copy.(*schemaMap)
 }
 
 // Diff returns the diff for a resource given the schema map,
@@ -424,6 +456,13 @@ func (m schemaMap) Diff(
 		err := m.diff(k, schema, result, d, false)
 		if err != nil {
 			return nil, err
+		}
+	}
+
+	// Remove any nil diffs just to keep things clean
+	for k, v := range result.Attributes {
+		if v == nil {
+			delete(result.Attributes, k)
 		}
 	}
 
@@ -521,13 +560,6 @@ func (m schemaMap) Diff(
 		result = result2
 	}
 
-	// Remove any nil diffs just to keep things clean
-	for k, v := range result.Attributes {
-		if v == nil {
-			delete(result.Attributes, k)
-		}
-	}
-
 	// Go through and detect all of the ComputedWhens now that we've
 	// finished the diff.
 	// TODO
@@ -611,6 +643,10 @@ func (m schemaMap) Validate(c *terraform.ResourceConfig) ([]string, []error) {
 // from a unit test (and not in user-path code) to verify that a schema
 // is properly built.
 func (m schemaMap) InternalValidate(topSchemaMap schemaMap) error {
+	return m.internalValidate(topSchemaMap, false)
+}
+
+func (m schemaMap) internalValidate(topSchemaMap schemaMap, attrsOnly bool) error {
 	if topSchemaMap == nil {
 		topSchemaMap = m
 	}
@@ -629,6 +665,32 @@ func (m schemaMap) InternalValidate(topSchemaMap schemaMap) error {
 
 		if !v.Required && !v.Optional && !v.Computed {
 			return fmt.Errorf("%s: One of optional, required, or computed must be set", k)
+		}
+
+		computedOnly := v.Computed && !v.Optional
+
+		switch v.ConfigMode {
+		case SchemaConfigModeBlock:
+			if _, ok := v.Elem.(*Resource); !ok {
+				return fmt.Errorf("%s: ConfigMode of block is allowed only when Elem is *schema.Resource", k)
+			}
+			if attrsOnly {
+				return fmt.Errorf("%s: ConfigMode of block cannot be used in child of schema with ConfigMode of attribute", k)
+			}
+			if computedOnly {
+				return fmt.Errorf("%s: ConfigMode of block cannot be used for computed schema", k)
+			}
+		case SchemaConfigModeAttr:
+			// anything goes
+		case SchemaConfigModeAuto:
+			// Since "Auto" for Elem: *Resource would create a nested block,
+			// and that's impossible inside an attribute, we require it to be
+			// explicitly overridden as mode "Attr" for clarity.
+			if _, ok := v.Elem.(*Resource); ok && attrsOnly {
+				return fmt.Errorf("%s: in *schema.Resource with ConfigMode of attribute, so must also have ConfigMode of attribute", k)
+			}
+		default:
+			return fmt.Errorf("%s: invalid ConfigMode value", k)
 		}
 
 		if v.Computed && v.Default != nil {
@@ -695,7 +757,9 @@ func (m schemaMap) InternalValidate(topSchemaMap schemaMap) error {
 
 			switch t := v.Elem.(type) {
 			case *Resource:
-				if err := t.InternalValidate(topSchemaMap, true); err != nil {
+				attrsOnly := attrsOnly || v.ConfigMode == SchemaConfigModeAttr
+
+				if err := schemaMap(t.Schema).internalValidate(topSchemaMap, attrsOnly); err != nil {
 					return err
 				}
 			case *Schema:
@@ -1210,7 +1274,7 @@ func (m schemaMap) inputString(
 	input terraform.UIInput,
 	k string,
 	schema *Schema) (interface{}, error) {
-	result, err := input.Input(&terraform.InputOpts{
+	result, err := input.Input(context.Background(), &terraform.InputOpts{
 		Id:          k,
 		Query:       k,
 		Description: schema.Description,
@@ -1270,9 +1334,9 @@ func (m schemaMap) validateConflictingAttributes(
 	}
 
 	for _, conflicting_key := range schema.ConflictsWith {
-		if value, ok := c.Get(conflicting_key); ok {
+		if _, ok := c.Get(conflicting_key); ok {
 			return fmt.Errorf(
-				"%q: conflicts with %s (%#v)", k, conflicting_key, value)
+				"%q: conflicts with %s", k, conflicting_key)
 		}
 	}
 
@@ -1461,13 +1525,10 @@ func getValueType(k string, schema *Schema) (ValueType, error) {
 		return vt, nil
 	}
 
+	// If a Schema is provided to a Map, we use the Type of that schema
+	// as the type for each element in the Map.
 	if s, ok := schema.Elem.(*Schema); ok {
-		if s.Elem == nil {
-			return TypeString, nil
-		}
-		if vt, ok := s.Elem.(ValueType); ok {
-			return vt, nil
-		}
+		return s.Type, nil
 	}
 
 	if _, ok := schema.Elem.(*Resource); ok {
