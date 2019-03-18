@@ -59,7 +59,7 @@ func resourceNsxtFirewallSection() *schema.Resource {
 				Required:    true,
 				ForceNew:    true,
 			},
-			"applied_to": getResourceReferencesSetSchema(false, false, []string{"LogicalPort", "LogicalSwitch", "NSGroup"}, "List of objects where the rules in this section will be enforced. This will take precedence over rule level appliedTo"),
+			"applied_to": getResourceReferencesSetSchema(false, false, []string{"LogicalPort", "LogicalSwitch", "NSGroup", "LogicalRouter"}, "List of objects where the rules in this section will be enforced. This will take precedence over rule level appliedTo"),
 			"insert_before": {
 				Type:        schema.TypeString,
 				Description: "Id of section that should come after this one",
@@ -100,7 +100,7 @@ func getRulesSchema() *schema.Schema {
 					Required:     true,
 					ValidateFunc: validation.StringInSlice(firewallRuleActionValues, false),
 				},
-				"applied_to":  getResourceReferencesSetSchema(false, false, []string{"LogicalPort", "LogicalSwitch", "NSGroup"}, "List of objects where rule will be enforced. The section level field overrides this one. Null will be treated as any"),
+				"applied_to":  getResourceReferencesSetSchema(false, false, []string{"LogicalPort", "LogicalSwitch", "NSGroup", "LogicalRouterPort"}, "List of objects where rule will be enforced. The section level field overrides this one. Null will be treated as any"),
 				"destination": getResourceReferencesSetSchema(false, false, []string{"IPSet", "LogicalPort", "LogicalSwitch", "NSGroup", "MACSet"}, "List of the destinations. Null will be treated as any"),
 				"destinations_excluded": {
 					Type:        schema.TypeBool,
