@@ -145,14 +145,14 @@ func getRulesSchema() *schema.Schema {
 					Description: "When this boolean flag is set to true, the rule sources will be negated",
 					Optional:    true,
 				},
-				"service": getResourceReferencesSchema(false, false, []string{"NSService", "NSServiceGroup"}, "List of the services. Null will be treated as any"),
+				"service": getResourceReferencesSetSchema(false, false, []string{"NSService", "NSServiceGroup"}, "List of the services. Null will be treated as any"),
 			},
 		},
 	}
 }
 
-func returnServicesResourceReferences(services []manager.FirewallService) []map[string]interface{} {
-	var servicesList []map[string]interface{}
+func returnServicesResourceReferences(services []manager.FirewallService) *schema.Set {
+	var servicesList []interface{}
 	for _, srv := range services {
 		elem := make(map[string]interface{})
 		elem["is_valid"] = srv.IsValid
@@ -161,7 +161,8 @@ func returnServicesResourceReferences(services []manager.FirewallService) []map[
 		elem["target_type"] = srv.TargetType
 		servicesList = append(servicesList, elem)
 	}
-	return servicesList
+	s := schema.NewSet(resourceReferenceHash, servicesList)
+	return s
 }
 
 func setRulesInSchema(d *schema.ResourceData, rules []manager.FirewallRule) error {
@@ -228,7 +229,7 @@ func getRulesFromSchema(d *schema.ResourceData) []manager.FirewallRule {
 			Direction:            data["direction"].(string),
 			Sources:              getResourceReferences(data["source"].(*schema.Set).List()),
 			Destinations:         getResourceReferences(data["destination"].(*schema.Set).List()),
-			Services:             getServicesResourceReferences(data["service"].([]interface{})),
+			Services:             getServicesResourceReferences(data["service"].(*schema.Set).List()),
 			AppliedTos:           getResourceReferences(data["applied_to"].(*schema.Set).List()),
 		}
 
