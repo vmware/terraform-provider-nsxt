@@ -214,6 +214,7 @@ func getRulesFromSchema(d *schema.ResourceData) []manager.FirewallRule {
 		data := rule.(map[string]interface{})
 		elem := manager.FirewallRule{
 			DisplayName:          data["display_name"].(string),
+			Id:                   data["id"].(string),
 			RuleTag:              data["rule_tag"].(string),
 			Notes:                data["notes"].(string),
 			Description:          data["description"].(string),
@@ -357,6 +358,7 @@ func resourceNsxtFirewallSectionUpdate(d *schema.ResourceData, m interface{}) er
 			AppliedTos:  appliedTos,
 			SectionType: sectionType,
 			Stateful:    stateful,
+			Id:          id,
 		},
 		Rules: rules,
 	}
