@@ -175,6 +175,10 @@ to run.
 The following versions of NSX are supported:
 
  * NSX-T 2.2.*
+ * NSX-T 2.3.*
+ * NSX-T 2.4.*
+
+Some specific resources may require later versions of NSX-T.
 
 # Support
 
@@ -182,6 +186,6 @@ The NSX Terraform provider is now VMware supported as well as community supporte
 
 # License
 
-Copyright © 2015-2018 VMware, Inc. All Rights Reserved.
+Copyright © 2015-2019 VMware, Inc. All Rights Reserved.
 
 The NSX Terraform provider is available under [MPL2.0 license](https://github.com/terraform-providers/terraform-provider-nsxt/blob/master/LICENSE.txt).
