@@ -122,7 +122,7 @@ func getRulesSchema() *schema.Schema {
 					Type:         schema.TypeString,
 					Description:  "Type of IP packet that should be matched while enforcing the rule (IPV4, IPV6, IPV4_IPV6)",
 					Optional:     true,
-                                        Default:      "IPV4_IPV6",
+					Default:      "IPV4_IPV6",
 					ValidateFunc: validation.StringInSlice(firewallRuleIPProtocolValues, false),
 				},
 				"logged": {
