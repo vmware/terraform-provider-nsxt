@@ -306,6 +306,53 @@ func TestAccResourceNsxtFirewallSection_ordered(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtFirewallSection_edge(t *testing.T) {
+	sectionName := fmt.Sprintf("test-nsx-firewall-section-basic")
+	edgeClusterName := getEdgeClusterName()
+	transportZoneName := getOverlayTransportZoneName()
+	updatesectionName := fmt.Sprintf("%s-update", sectionName)
+	ruleName := "test"
+	testResourceName := "nsxt_firewall_section.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "2.4.0") },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXFirewallSectionCheckDestroy(state, sectionName)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXEdgeFirewallSectionCreateTemplate(edgeClusterName, transportZoneName, sectionName, ruleName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXFirewallSectionExists(sectionName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", sectionName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "section_type", "LAYER3"),
+					resource.TestCheckResourceAttr(testResourceName, "stateful", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "applied_to.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.display_name", ruleName),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.applied_to.#", "1"),
+				),
+			},
+			{
+				Config: testAccNSXEdgeFirewallSectionCreateTemplate(edgeClusterName, transportZoneName, updatesectionName, ruleName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXFirewallSectionExists(updatesectionName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updatesectionName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "section_type", "LAYER3"),
+					resource.TestCheckResourceAttr(testResourceName, "stateful", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "applied_to.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.display_name", ruleName),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.applied_to.#", "1"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtFirewallSection_importBasic(t *testing.T) {
 	sectionName := fmt.Sprintf("test-nsx-firewall-section-basic")
 	testResourceName := "nsxt_firewall_section.test"
@@ -486,7 +533,7 @@ resource "nsxt_firewall_section" "test" {
     sources_excluded      = "false"
     notes                 = "test rule"
     rule_tag              = "test rule tag"
-	disabled              = "false"
+    disabled              = "false"
     applied_to            = %s
 
     source {
@@ -555,8 +602,8 @@ resource "nsxt_firewall_section" "test" {
   description  = "Acceptance Test"
   section_type = "LAYER3"
   stateful     = true
-  tag         = %s
-  applied_to  = %s
+  tag          = %s
+  applied_to   = %s
 }`, name, tags, tos)
 }
 
@@ -634,4 +681,60 @@ resource "nsxt_firewall_section" "test4" {
 }
 
 `
+}
+
+func testAccNSXEdgeFirewallSectionCreateTemplate(edgeCluster string, transportZone string, name string, ruleName string) string {
+	return fmt.Sprintf(`
+
+data "nsxt_edge_cluster" "ec" {
+  display_name = "%s"
+}
+
+data "nsxt_transport_zone" "tz" {
+  display_name = "%s"
+}
+
+resource "nsxt_logical_tier1_router" "test" {
+  display_name                = "test"
+  edge_cluster_id             = "${data.nsxt_edge_cluster.ec.id}"
+  enable_router_advertisement = true
+}
+
+resource "nsxt_logical_switch" "test" {
+  display_name      = "test"
+  transport_zone_id = "${data.nsxt_transport_zone.tz.id}"
+}
+
+resource "nsxt_logical_port" "test" {
+  display_name      = "test"
+  logical_switch_id = "${nsxt_logical_switch.test.id}"
+}
+
+resource "nsxt_logical_router_centralized_service_port" "test" {
+  display_name                  = "test"
+  logical_router_id             = "${nsxt_logical_tier1_router.test.id}"
+  linked_logical_switch_port_id = "${nsxt_logical_port.test.id}"
+  ip_address                    = "2.2.2.2/24"
+}
+
+resource "nsxt_firewall_section" "test" {
+  display_name = "%s"
+  description  = "Acceptance Test"
+  section_type = "LAYER3"
+  stateful     = false
+  applied_to {
+    target_type = "LogicalRouter"
+    target_id   = "${nsxt_logical_tier1_router.test.id}"
+  }
+
+  rule {
+    display_name = "%s",
+    action       = "ALLOW",
+    direction    = "IN"
+    applied_to {
+      target_id   = "${nsxt_logical_router_centralized_service_port.test.id}"
+      target_type = "LogicalRouterPort"
+    }
+  }
+}`, edgeCluster, transportZone, name, ruleName)
 }
