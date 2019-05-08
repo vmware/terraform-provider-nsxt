@@ -635,9 +635,9 @@ resource "nsxt_firewall_section" "test2" {
 
   rule {
     display_name = "test"
-    action       = "ALLOW",
-    logged       = "true",
-    ip_protocol  = "IPV4_IPV6",
+    action       = "ALLOW"
+    logged       = "true"
+    ip_protocol  = "IPV4"
     direction    = "IN"
   }
 }
