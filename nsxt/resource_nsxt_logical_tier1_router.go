@@ -72,11 +72,8 @@ func resourceNsxtLogicalTier1Router() *schema.Resource {
 			"enable_router_advertisement": {
 				Type:        schema.TypeBool,
 				Description: "Enable router advertisement",
-				// The default was changed on backend in 2.5.0
-				DefaultFunc: func() (interface{}, error) {
-					return nsxVersionHigherOrEqual("2.5.0"), nil
-				},
-				Optional: true,
+				Default:     false,
+				Optional:    true,
 			},
 			"advertise_connected_routes": {
 				Type:        schema.TypeBool,
