@@ -163,13 +163,15 @@ func resourceNsxtNatRuleRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	natRule, resp, err := nsxClient.LogicalRoutingAndServicesApi.GetNatRule(nsxClient.Context, logicalRouterID, id)
-	if err != nil {
-		return fmt.Errorf("Error during NatRule read: %v", err)
-	}
-	if resp.StatusCode == http.StatusNotFound {
+	if resp != nil && (resp.StatusCode == http.StatusBadRequest || resp.StatusCode == http.StatusNotFound) {
+		// Due to platform bug, 400 response is returned when NAT rule is not found
+		// In this case terraform should not error out
 		log.Printf("[DEBUG] NatRule %s not found", id)
 		d.SetId("")
 		return nil
+	}
+	if err != nil {
+		return fmt.Errorf("Error during NatRule read: %v", err)
 	}
 
 	d.Set("revision", natRule.Revision)
