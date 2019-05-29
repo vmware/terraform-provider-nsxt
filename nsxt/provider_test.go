@@ -71,14 +71,17 @@ func testAccGetClient() (*api.APIClient, error) {
 }
 
 func testAccNSXVersion(t *testing.T, requiredVersion string) {
-	client, err := testAccGetClient()
-	if err != nil {
-		t.Skipf("Skipping non-NSX provider. No NSX client")
-		return
+	if nsxVersion == "" {
+		client, err := testAccGetClient()
+		if err != nil {
+			t.Skipf("Skipping non-NSX provider. No NSX client")
+			return
+		}
+
+		initNSXVersion(client)
 	}
 
-	nsxVersion := getNSXVersion(client)
-	if nsxVersion < requiredVersion {
+	if nsxVersionLower(requiredVersion) {
 		t.Skipf("This test can only run in NSX %s or above (Current version %s)", requiredVersion, nsxVersion)
 	}
 }

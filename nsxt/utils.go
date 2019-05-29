@@ -6,6 +6,7 @@ package nsxt
 import (
 	"bytes"
 	"fmt"
+	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/terraform/helper/hashcode"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
@@ -18,6 +19,7 @@ import (
 )
 
 var adminStateValues = []string{"UP", "DOWN"}
+var nsxVersion = ""
 
 func interface2StringList(configured []interface{}) []string {
 	vs := make([]string, 0, len(configured))
@@ -497,12 +499,37 @@ func makeResourceReference(resourceType string, resourceID string) *common.Resou
 
 func getNSXVersion(nsxClient *api.APIClient) string {
 	nodeProperties, resp, err := nsxClient.NsxComponentAdministrationApi.ReadNodeProperties(nsxClient.Context)
-	initialVersion := string("1.0.0")
 
 	if resp.StatusCode == http.StatusNotFound || err != nil {
-		log.Printf("[DEBUG] Node properties not found")
-		return initialVersion
+		log.Printf("[DEBUG] Failed to retrieve NSX version")
+		return string("1.0.0")
 	}
-	log.Printf("[DEBUG] NSX version %s", nodeProperties.NodeVersion)
+	log.Printf("[DEBUG] NSX version is %s", nodeProperties.NodeVersion)
 	return nodeProperties.NodeVersion
+}
+
+func initNSXVersion(nsxClient *api.APIClient) {
+	nsxVersion = getNSXVersion(nsxClient)
+}
+
+func nsxVersionLower(ver string) bool {
+
+	requestedVersion, err1 := version.NewVersion(ver)
+	currentVersion, err2 := version.NewVersion(nsxVersion)
+	if err1 != nil || err2 != nil {
+		log.Printf("[ERROR] Failed perform version check for version %s", ver)
+		return true
+	}
+	return currentVersion.LessThan(requestedVersion)
+}
+
+func nsxVersionHigherOrEqual(ver string) bool {
+
+	requestedVersion, err1 := version.NewVersion(ver)
+	currentVersion, err2 := version.NewVersion(nsxVersion)
+	if err1 != nil || err2 != nil {
+		log.Printf("[ERROR] Failed perform version check for version %s", ver)
+		return false
+	}
+	return currentVersion.Compare(requestedVersion) >= 0
 }
