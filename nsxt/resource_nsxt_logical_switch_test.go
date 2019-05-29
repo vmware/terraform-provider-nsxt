@@ -31,7 +31,7 @@ func TestAccResourceNsxtLogicalSwitch_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccNSXLogicalSwitchNoTZIDTemplate(switchName),
-				ExpectError: regexp.MustCompile(`required field is not set`),
+				ExpectError: regexp.MustCompile(`Missing required argument`),
 			},
 			{
 				Config: testAccNSXLogicalSwitchCreateTemplate(resourceName, switchName, transportZoneName, novlan, replicationMode),
@@ -180,7 +180,7 @@ func TestAccResourceNsxtLogicalSwitch_withMacPool(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccNSXLogicalSwitchNoTZIDTemplate(switchName),
-				ExpectError: regexp.MustCompile(`required field is not set`),
+				ExpectError: regexp.MustCompile(`Missing required argument`),
 			},
 			{
 				Config: testAccNSXLogicalSwitchCreateWithMacTemplate(resourceName, switchName, transportZoneName, macPoolName, novlan, replicationMode),
@@ -215,7 +215,7 @@ func TestAccResourceNsxtLogicalSwitch_importBasic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccNSXLogicalSwitchNoTZIDTemplate(switchName),
-				ExpectError: regexp.MustCompile(`required field is not set`),
+				ExpectError: regexp.MustCompile(`Missing required argument`),
 			},
 			{
 				Config: testAccNSXLogicalSwitchCreateTemplate(resourceName, switchName, transportZoneName, novlan, replicationMode),

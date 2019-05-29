@@ -127,7 +127,7 @@ func TestAccResourceNsxtVlanLogicalSwitch_withMacPool(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccNSXLogicalSwitchNoTZIDTemplate(switchName),
-				ExpectError: regexp.MustCompile(`required field is not set`),
+				ExpectError: regexp.MustCompile(`Missing required argument`),
 			},
 			{
 				Config: testAccNSXVlanLogicalSwitchCreateWithMacTemplate(resourceName, switchName, transportZoneName, macPoolName, novlan),
@@ -160,7 +160,7 @@ func TestAccResourceNsxtVlanLogicalSwitch_importBasic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccNSXLogicalSwitchNoTZIDTemplate(switchName),
-				ExpectError: regexp.MustCompile(`required field is not set`),
+				ExpectError: regexp.MustCompile(`Missing required argument`),
 			},
 			{
 				Config: testAccNSXVlanLogicalSwitchCreateTemplate(resourceName, switchName, transportZoneName, vlan),
