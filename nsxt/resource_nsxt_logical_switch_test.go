@@ -112,7 +112,6 @@ func TestAccResourceNsxtLogicalSwitch_withProfiles(t *testing.T) {
 	testResourceName := fmt.Sprintf("nsxt_logical_switch.%s", resourceName)
 	transportZoneName := getOverlayTransportZoneName()
 	customProfileName := "terraform_test_LS_profile"
-	oobProfileName := "nsx-default-switch-security-vif-profile"
 	profileType := "SwitchSecuritySwitchingProfile"
 
 	resource.Test(t, resource.TestCase{
@@ -145,8 +144,7 @@ func TestAccResourceNsxtLogicalSwitch_withProfiles(t *testing.T) {
 			},
 			{
 				// Replace the custom switching profile with OOB one
-				Config:             testAccNSXLogicalSwitchUpdateWithProfilesTemplate(resourceName, updateSwitchName, transportZoneName, customProfileName, oobProfileName),
-				ExpectNonEmptyPlan: true,
+				Config: testAccNSXLogicalSwitchUpdateWithProfilesTemplate(resourceName, updateSwitchName, transportZoneName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXLogicalSwitchExists(updateSwitchName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updateSwitchName),
@@ -377,17 +375,9 @@ resource "nsxt_logical_switch" "%s" {
 }`, transportZoneName, profileName, resourceName, switchName)
 }
 
-func testAccNSXLogicalSwitchUpdateWithProfilesTemplate(resourceName string, switchUpdateName string, transportZoneName string, profileName1 string, profileName2 string) string {
+func testAccNSXLogicalSwitchUpdateWithProfilesTemplate(resourceName string, switchUpdateName string, transportZoneName string) string {
 	return fmt.Sprintf(`
 data "nsxt_transport_zone" "TZ1" {
-  display_name = "%s"
-}
-
-data "nsxt_switching_profile" "test1" {
-  display_name = "%s"
-}
-
-data "nsxt_switching_profile" "test2" {
   display_name = "%s"
 }
 
@@ -395,13 +385,7 @@ resource "nsxt_logical_switch" "%s" {
   display_name      = "%s"
   admin_state       = "UP"
   transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
-
-  switching_profile_id {
-    key   = "${data.nsxt_switching_profile.test2.resource_type}"
-    value = "${data.nsxt_switching_profile.test2.id}"
-  }
-
-}`, transportZoneName, profileName1, profileName2, resourceName, switchUpdateName)
+}`, transportZoneName, resourceName, switchUpdateName)
 }
 
 func testAccNSXLogicalSwitchCreateWithMacTemplate(resourceName string, switchName string, transportZoneName string, macPoolName string, vlan string, replicationMode string) string {

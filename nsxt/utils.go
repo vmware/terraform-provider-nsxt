@@ -145,7 +145,6 @@ func getSwitchingProfileIdsSchema() *schema.Schema {
 		Type:        schema.TypeSet,
 		Description: "List of IDs of switching profiles (of various types) to be associated with this object. Default switching profiles will be used if not specified",
 		Optional:    true,
-		Computed:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"key": {

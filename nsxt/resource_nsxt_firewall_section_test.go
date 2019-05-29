@@ -433,7 +433,8 @@ func TestAccResourceNsxtFirewallSection_importWithTos(t *testing.T) {
 	tags := singleTag
 	tos := `applied_to {
 target_type = "NSGroup"
-target_id = "${nsxt_ns_group.grp1.id}"}`
+target_id = "${nsxt_ns_group.grp1.id}"
+}`
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -753,7 +754,7 @@ resource "nsxt_firewall_section" "test" {
   }
 
   rule {
-    display_name = "%s",
+    display_name = "%s"
     action       = "ALLOW"
     direction    = "IN"
     applied_to {
