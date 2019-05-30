@@ -255,5 +255,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		return nil, err
 	}
 
+	initNSXVersion(nsxClient)
+
 	return nsxClient, nil
 }

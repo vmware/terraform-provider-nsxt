@@ -367,7 +367,7 @@ func resourceNsxtFirewallSectionUpdate(d *schema.ResourceData, m interface{}) er
 
 	var resp *http.Response
 	var err error
-	if len(rules) == 0 || getNSXVersion(nsxClient) < "2.2.0" {
+	if len(rules) == 0 || nsxVersionLower("2.2.0") {
 		// Due to an NSX bug, the empty update should also be called to update ToS & tags fields
 		section := *firewallSection.GetFirewallSection()
 		// Update the section ignoring the rules
