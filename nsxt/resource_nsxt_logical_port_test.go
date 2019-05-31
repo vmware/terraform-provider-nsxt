@@ -55,7 +55,6 @@ func TestAccResourceNsxtLogicalPort_withProfiles(t *testing.T) {
 	testResourceName := "nsxt_logical_port.test"
 	transportZoneName := getOverlayTransportZoneName()
 	customProfileName := "terraform_test_LP_profile"
-	oobProfileName := "nsx-default-qos-switching-profile"
 	profileType := "QosSwitchingProfile"
 
 	resource.Test(t, resource.TestCase{
@@ -87,13 +86,11 @@ func TestAccResourceNsxtLogicalPort_withProfiles(t *testing.T) {
 				),
 			},
 			{
-				// Replace the custom switching profile with OOB one
-				Config:             testAccNSXLogicalPortUpdateWithProfilesTemplate(updatePortName, transportZoneName, customProfileName, oobProfileName),
-				ExpectNonEmptyPlan: true,
+				// Remove custom switching profile
+				Config: testAccNSXLogicalPortUpdateWithProfilesTemplate(updatePortName, transportZoneName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXLogicalPortExists(updatePortName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatePortName),
-					// Counting only custom profiles so count should be 0
 					resource.TestCheckResourceAttr(testResourceName, "switching_profile_id.#", "0"),
 				),
 			},
@@ -281,27 +278,14 @@ resource "nsxt_logical_port" "test" {
 }`, profileName, portName)
 }
 
-func testAccNSXLogicalPortUpdateWithProfilesTemplate(portUpdatedName string, transportZoneName string, profileName1 string, profileName2 string) string {
+func testAccNSXLogicalPortUpdateWithProfilesTemplate(portUpdatedName string, transportZoneName string) string {
 	return testAccNSXLogicalSwitchCreateForPort(transportZoneName) + fmt.Sprintf(`
-data "nsxt_switching_profile" "test1" {
-  display_name = "%s"
-}
-
-data "nsxt_switching_profile" "test2" {
-  display_name = "%s"
-}
-
 resource "nsxt_logical_port" "test" {
   display_name      = "%s"
   admin_state       = "UP"
   logical_switch_id = "${nsxt_logical_switch.test.id}"
 
-  switching_profile_id {
-    key   = "${data.nsxt_switching_profile.test2.resource_type}"
-    value = "${data.nsxt_switching_profile.test2.id}"
-  }
-
-}`, profileName1, profileName2, portUpdatedName)
+}`, portUpdatedName)
 }
 
 func testAccNSXLogicalPortCreateNSGroup() string {

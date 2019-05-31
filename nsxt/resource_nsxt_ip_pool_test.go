@@ -138,7 +138,7 @@ resource "nsxt_ip_pool" "test" {
   display_name = "%s"
   description  = "Acceptance Test"
 
-  subnet = {
+  subnet {
     allocation_ranges = ["1.1.1.1-1.1.1.11", "1.1.1.21-1.1.1.100"]
     cidr              = "1.1.1.0/24"
     gateway_ip        = "1.1.1.12"
@@ -159,7 +159,7 @@ resource "nsxt_ip_pool" "test" {
   display_name = "%s"
   description  = "Acceptance Test Update"
 
-  subnet = {
+  subnet {
     allocation_ranges = ["1.1.1.1-1.1.1.11", "1.1.1.21-1.1.1.99"]
     cidr              = "1.1.1.0/24"
     gateway_ip        = "1.1.1.12"
@@ -167,7 +167,7 @@ resource "nsxt_ip_pool" "test" {
     dns_nameservers   = ["3.3.3.3"]
   }
 
-  subnet = {
+  subnet {
     allocation_ranges = ["2.1.1.1-2.1.1.11", "2.1.1.21-2.1.1.100"]
     cidr              = "2.1.1.0/24"
     gateway_ip        = "2.1.1.12"

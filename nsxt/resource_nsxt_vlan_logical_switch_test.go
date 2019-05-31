@@ -60,7 +60,6 @@ func TestAccResourceNsxtVlanLogicalSwitch_withProfiles(t *testing.T) {
 	testResourceName := fmt.Sprintf("nsxt_vlan_logical_switch.%s", resourceName)
 	transportZoneName := getVlanTransportZoneName()
 	customProfileName := "terraform_test_LS_profile"
-	oobProfileName := "nsx-default-switch-security-vif-profile"
 	profileType := "SwitchSecuritySwitchingProfile"
 
 	resource.Test(t, resource.TestCase{
@@ -93,7 +92,7 @@ func TestAccResourceNsxtVlanLogicalSwitch_withProfiles(t *testing.T) {
 			},
 			{
 				// Replace the custom switching profile with OOB one
-				Config:             testAccNSXVlanLogicalSwitchUpdateWithProfilesTemplate(resourceName, updateSwitchName, transportZoneName, customProfileName, oobProfileName),
+				Config:             testAccNSXVlanLogicalSwitchUpdateWithProfilesTemplate(resourceName, updateSwitchName, transportZoneName),
 				ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXLogicalSwitchExists(updateSwitchName, testResourceName),
@@ -127,7 +126,7 @@ func TestAccResourceNsxtVlanLogicalSwitch_withMacPool(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccNSXLogicalSwitchNoTZIDTemplate(switchName),
-				ExpectError: regexp.MustCompile(`required field is not set`),
+				ExpectError: regexp.MustCompile(`Missing required argument`),
 			},
 			{
 				Config: testAccNSXVlanLogicalSwitchCreateWithMacTemplate(resourceName, switchName, transportZoneName, macPoolName, novlan),
@@ -160,7 +159,7 @@ func TestAccResourceNsxtVlanLogicalSwitch_importBasic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccNSXLogicalSwitchNoTZIDTemplate(switchName),
-				ExpectError: regexp.MustCompile(`required field is not set`),
+				ExpectError: regexp.MustCompile(`Missing required argument`),
 			},
 			{
 				Config: testAccNSXVlanLogicalSwitchCreateTemplate(resourceName, switchName, transportZoneName, vlan),
@@ -265,17 +264,10 @@ resource "nsxt_vlan_logical_switch" "%s" {
 }`, transportZoneName, profileName, resourceName, switchName)
 }
 
-func testAccNSXVlanLogicalSwitchUpdateWithProfilesTemplate(resourceName string, switchUpdateName string, transportZoneName string, profileName1 string, profileName2 string) string {
+func testAccNSXVlanLogicalSwitchUpdateWithProfilesTemplate(resourceName string, switchUpdateName string, transportZoneName string) string {
 	return fmt.Sprintf(`
+
 data "nsxt_transport_zone" "TZ1" {
-  display_name = "%s"
-}
-
-data "nsxt_switching_profile" "test1" {
-  display_name = "%s"
-}
-
-data "nsxt_switching_profile" "test2" {
   display_name = "%s"
 }
 
@@ -284,13 +276,7 @@ resource "nsxt_vlan_logical_switch" "%s" {
   admin_state       = "UP"
   transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
   vlan              = 1
-
-  switching_profile_id {
-    key   = "${data.nsxt_switching_profile.test2.resource_type}"
-    value = "${data.nsxt_switching_profile.test2.id}"
-  }
-
-}`, transportZoneName, profileName1, profileName2, resourceName, switchUpdateName)
+}`, transportZoneName, resourceName, switchUpdateName)
 }
 
 func testAccNSXVlanLogicalSwitchCreateWithMacTemplate(resourceName string, switchName string, transportZoneName string, macPoolName string, vlan string) string {

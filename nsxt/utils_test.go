@@ -22,8 +22,21 @@ const vlanTransportZoneName string = "transportzone2"
 const overlayTransportZoneNamePrefix string = "1-transportzone"
 const macPoolDefaultName string = "DefaultMacPool"
 
-const singleTag string = "[{scope = \"scope1\", tag = \"tag1\"}]"
-const doubleTags string = "[{scope = \"scope1\", tag = \"tag1\"}, {scope = \"scope2\", tag = \"tag2\"}]"
+const singleTag string = `
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }`
+
+const doubleTags string = `
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+  tag {
+    scope = "scope2"
+    tag   = "tag2"
+  }`
 
 func getTier0RouterName() string {
 	name := os.Getenv("NSXT_TEST_TIER0_ROUTER")

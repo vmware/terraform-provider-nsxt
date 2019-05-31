@@ -18,7 +18,7 @@ func TestAccResourceNsxtFirewallSection_basic(t *testing.T) {
 	testResourceName := "nsxt_firewall_section.test"
 	tags := singleTag
 	updatedTags := doubleTags
-	tos := string("[]")
+	tos := ""
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -62,8 +62,18 @@ func TestAccResourceNsxtFirewallSection_withTos(t *testing.T) {
 	updatesectionName := fmt.Sprintf("%s-update", sectionName)
 	testResourceName := "nsxt_firewall_section.test"
 	tags := singleTag
-	tos := string("[{target_type = \"NSGroup\", target_id = \"${nsxt_ns_group.grp1.id}\"}]")
-	updatedTos := string("[{target_type = \"NSGroup\", target_id = \"${nsxt_ns_group.grp1.id}\"}, {target_type = \"NSGroup\", target_id = \"${nsxt_ns_group.grp2.id}\"}]")
+	tos := `applied_to {
+target_type = "NSGroup"
+target_id   = "${nsxt_ns_group.grp1.id}"
+}`
+	updatedTos := `applied_to {
+target_type = "NSGroup"
+target_id   = "${nsxt_ns_group.grp1.id}"
+}
+applied_to {
+target_type = "NSGroup"
+target_id   = "${nsxt_ns_group.grp2.id}"
+}`
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -109,8 +119,8 @@ func TestAccResourceNsxtFirewallSection_withRules(t *testing.T) {
 	ruleName := "rule1.0"
 	updatedRuleName := "rule1.1"
 	tags := singleTag
-	tos := string("[]")
-	ruleTos := string("[]")
+	tos := ""
+	ruleTos := ""
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -160,7 +170,7 @@ func TestAccResourceNsxtFirewallSection_withRulesAndTags(t *testing.T) {
 	updatedRuleName := "rule1.1"
 	tags := singleTag
 	updatedTags := doubleTags
-	tos := string("[]")
+	tos := ""
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -209,9 +219,22 @@ func TestAccResourceNsxtFirewallSection_withRulesAndTos(t *testing.T) {
 	ruleName := "rule1.0"
 	updatedRuleName := "rule1.1"
 	tags := singleTag
-	tos := string("[{target_type = \"NSGroup\", target_id = \"${nsxt_ns_group.grp1.id}\"}]")
-	ruleTos := string("[{target_type = \"NSGroup\", target_id = \"${nsxt_ns_group.grp5.id}\"}]")
-	updatedTos := string("[{target_type = \"NSGroup\", target_id = \"${nsxt_ns_group.grp1.id}\"}, {target_type = \"NSGroup\", target_id = \"${nsxt_ns_group.grp2.id}\"}]")
+	tos := `applied_to {
+  target_type = "NSGroup"
+  target_id   = "${nsxt_ns_group.grp1.id}"
+}`
+	ruleTos := `applied_to {
+  target_type = "NSGroup"
+  target_id   = "${nsxt_ns_group.grp5.id}"
+}`
+	updatedTos := `applied_to {
+  target_type = "NSGroup"
+  target_id   = "${nsxt_ns_group.grp1.id}"
+}
+applied_to {
+  target_type = "NSGroup"
+  target_id   = "${nsxt_ns_group.grp2.id}"
+}`
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -357,7 +380,7 @@ func TestAccResourceNsxtFirewallSection_importBasic(t *testing.T) {
 	sectionName := fmt.Sprintf("test-nsx-firewall-section-basic")
 	testResourceName := "nsxt_firewall_section.test"
 	tags := singleTag
-	tos := string("[]")
+	tos := string("")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -383,7 +406,7 @@ func TestAccResourceNsxtFirewallSection_importWithRules(t *testing.T) {
 	testResourceName := "nsxt_firewall_section.test"
 	ruleName := "rule1.0"
 	tags := singleTag
-	tos := string("[]")
+	tos := string("")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -408,7 +431,10 @@ func TestAccResourceNsxtFirewallSection_importWithTos(t *testing.T) {
 	sectionName := fmt.Sprintf("test-nsx-firewall-section-tos")
 	testResourceName := "nsxt_firewall_section.test"
 	tags := singleTag
-	tos := string("[{target_type = \"NSGroup\", target_id = \"${nsxt_ns_group.grp1.id}\"}]")
+	tos := `applied_to {
+target_type = "NSGroup"
+target_id = "${nsxt_ns_group.grp1.id}"
+}`
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -519,22 +545,22 @@ resource "nsxt_firewall_section" "test" {
   description  = "Acceptance Test"
   section_type = "LAYER3"
   stateful     = true
-  tag          = %s
-  applied_to   = %s
+%s
+%s
 
   rule {
-    display_name          = "%s",
-    description           = "rule1",
-    action                = "ALLOW",
-    logged                = "true",
-    ip_protocol           = "IPV4",
+    display_name          = "%s"
+    description           = "rule1"
+    action                = "ALLOW"
+    logged                = "true"
+    ip_protocol           = "IPV4"
     direction             = "IN"
     destinations_excluded = "false"
     sources_excluded      = "false"
     notes                 = "test rule"
     rule_tag              = "test rule tag"
     disabled              = "false"
-    applied_to            = %s
+    %s
 
     source {
       target_id   = "${nsxt_ns_group.grp1.id}"
@@ -571,25 +597,25 @@ resource "nsxt_firewall_section" "test" {
   description  = "Acceptance Test Update"
   section_type = "LAYER3"
   stateful     = true
-  tag          = %s
-  applied_to   = %s
+  %s
+  %s
 
   rule {
-    display_name = "%s",
-    description  = "rule1",
-    action       = "ALLOW",
-    logged       = "true",
-    ip_protocol  = "IPV4",
+    display_name = "%s"
+    description  = "rule1"
+    action       = "ALLOW"
+    logged       = "true"
+    ip_protocol  = "IPV4"
     direction    = "IN"
     disabled     = "false"
   }
 
   rule {
-    display_name = "rule2",
-    description  = "rule2",
-    action       = "ALLOW",
-    logged       = "true",
-    ip_protocol  = "IPV6",
+    display_name = "rule2"
+    description  = "rule2"
+    action       = "ALLOW"
+    logged       = "true"
+    ip_protocol  = "IPV6"
     direction    = "OUT"
   }
 }`, updatedName, tags, tos, updatedRuleName)
@@ -602,8 +628,8 @@ resource "nsxt_firewall_section" "test" {
   description  = "Acceptance Test"
   section_type = "LAYER3"
   stateful     = true
-  tag          = %s
-  applied_to   = %s
+%s
+%s
 }`, name, tags, tos)
 }
 
@@ -614,8 +640,8 @@ resource "nsxt_firewall_section" "test" {
   description  = "Acceptance Test Update"
   section_type = "LAYER3"
   stateful     = true
-  tag          = %s
-  applied_to   = %s
+%s
+%s
 }`, updatedName, tags, tos)
 }
 
@@ -728,8 +754,8 @@ resource "nsxt_firewall_section" "test" {
   }
 
   rule {
-    display_name = "%s",
-    action       = "ALLOW",
+    display_name = "%s"
+    action       = "ALLOW"
     direction    = "IN"
     applied_to {
       target_id   = "${nsxt_logical_router_centralized_service_port.test.id}"
