@@ -19,6 +19,11 @@ resource "nsxt_vm_tags" "vm1_tags" {
     scope = "color"
     tag   = "blue"
   }
+
+  logical_port_tag {
+    scope = "color"
+    tag   = "blue"
+  }
 }
 ```
 
@@ -27,7 +32,8 @@ resource "nsxt_vm_tags" "vm1_tags" {
 The following arguments are supported:
 
 * `instance_id` - (Required) BIOS Id of the Virtual Machine.
-* `tag` - (Required) A list of scope + tag pairs to associate with this VM.
+* `tag` - (Optional) A list of scope + tag pairs to associate with this VM.
+* `logical_port_tag` - (Optional) A list of scope + tag pairs to associate with logical port that is automatically created for this VM.
 
 ## Importing
 

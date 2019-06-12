@@ -29,6 +29,9 @@ func TestAccResourceNsxtVMTags_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXVMTagsCheckExists(),
 					resource.TestCheckResourceAttr(vmTagsFullResourceName, "tag.#", "1"),
+					resource.TestCheckResourceAttr(vmTagsFullResourceName, "logical_port_tag.#", "1"),
+					resource.TestCheckResourceAttr(vmTagsFullResourceName, "logical_port_tag.934310497.scope", "a"),
+					resource.TestCheckResourceAttr(vmTagsFullResourceName, "logical_port_tag.934310497.tag", "b"),
 				),
 			},
 			{
@@ -36,6 +39,9 @@ func TestAccResourceNsxtVMTags_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXVMTagsCheckExists(),
 					resource.TestCheckResourceAttr(vmTagsFullResourceName, "tag.#", "2"),
+					resource.TestCheckResourceAttr(vmTagsFullResourceName, "logical_port_tag.#", "1"),
+					resource.TestCheckResourceAttr(vmTagsFullResourceName, "logical_port_tag.600822426.scope", "c"),
+					resource.TestCheckResourceAttr(vmTagsFullResourceName, "logical_port_tag.600822426.tag", "d"),
 				),
 			},
 		},
@@ -119,6 +125,11 @@ resource "nsxt_vm_tags" "%s" {
     scope = "scope1"
     tag   = "tag1"
   }
+
+  logical_port_tag {
+    scope = "a"
+    tag   = "b"
+  }
 }`, vmTagsResourceName, instanceID)
 }
 
@@ -135,6 +146,11 @@ resource "nsxt_vm_tags" "%s" {
   tag {
     scope = "scope2"
     tag   = "tag2"
+  }
+
+  logical_port_tag {
+    scope = "c"
+    tag   = "d"
   }
 }`, vmTagsResourceName, instanceID)
 }
