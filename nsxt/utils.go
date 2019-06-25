@@ -115,8 +115,8 @@ func getTagsSchemaForceNew() *schema.Schema {
 	return getTagsSchemaInternal(true)
 }
 
-func getTagsFromSchema(d *schema.ResourceData) []common.Tag {
-	tags := d.Get("tag").(*schema.Set).List()
+func getCustomizedTagsFromSchema(d *schema.ResourceData, schemaName string) []common.Tag {
+	tags := d.Get(schemaName).(*schema.Set).List()
 	var tagList []common.Tag
 	for _, tag := range tags {
 		data := tag.(map[string]interface{})
@@ -129,7 +129,7 @@ func getTagsFromSchema(d *schema.ResourceData) []common.Tag {
 	return tagList
 }
 
-func setTagsInSchema(d *schema.ResourceData, tags []common.Tag) error {
+func setCustomizedTagsInSchema(d *schema.ResourceData, tags []common.Tag, schemaName string) error {
 	var tagList []map[string]string
 	for _, tag := range tags {
 		elem := make(map[string]string)
@@ -137,8 +137,15 @@ func setTagsInSchema(d *schema.ResourceData, tags []common.Tag) error {
 		elem["tag"] = tag.Tag
 		tagList = append(tagList, elem)
 	}
-	err := d.Set("tag", tagList)
+	err := d.Set(schemaName, tagList)
 	return err
+}
+func getTagsFromSchema(d *schema.ResourceData) []common.Tag {
+	return getCustomizedTagsFromSchema(d, "tag")
+}
+
+func setTagsInSchema(d *schema.ResourceData, tags []common.Tag) error {
+	return setCustomizedTagsInSchema(d, tags, "tag")
 }
 
 // utilities to define & handle switching profiles

@@ -30,7 +30,8 @@ func resourceNsxtVMTags() *schema.Resource {
 				Description: "Instance id",
 				Required:    true,
 			},
-			"tag": getTagsSchema(),
+			"tag":              getTagsSchema(),
+			"logical_port_tag": getTagsSchema(),
 		},
 	}
 }
@@ -49,6 +50,36 @@ func getVMList(nsxClient *api.APIClient) (*manager.VirtualMachineListResult, err
 
 	return &vmList, nil
 
+}
+
+func getVIFList(nsxClient *api.APIClient) (*manager.VirtualNetworkInterfaceListResult, error) {
+
+	localVarOptionals := make(map[string]interface{})
+	vifList, resp, err := nsxClient.FabricApi.ListVifs(nsxClient.Context, localVarOptionals)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("Unexpected status returned during operation on Logical Port Tags: %v", resp.StatusCode)
+	}
+
+	return &vifList, nil
+
+}
+
+func getPortList(nsxClient *api.APIClient) (*manager.LogicalPortListResult, error) {
+	localVarOptionals := make(map[string]interface{})
+	portList, resp, err := nsxClient.LogicalSwitchingApi.ListLogicalPorts(nsxClient.Context, localVarOptionals)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("Unexpected status returned during operation on Logical Port Tags: %v", resp.StatusCode)
+	}
+
+	return &portList, nil
 }
 
 func findVMIDByLocalID(nsxClient *api.APIClient, localID string) (*manager.VirtualMachine, error) {
@@ -87,6 +118,42 @@ func findVMByExternalID(nsxClient *api.APIClient, instanceID string) (*manager.V
 	return nil, fmt.Errorf("Failed to find Virtual Machine with id %s in inventory", instanceID)
 }
 
+func findVIFByExternalID(nsxClient *api.APIClient, instanceID string) (*manager.VirtualNetworkInterface, error) {
+
+	vifList, err := getVIFList(nsxClient)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, vif := range vifList.Results {
+		if vif.OwnerVmId == instanceID {
+			return &vif, nil
+		}
+	}
+
+	return nil, fmt.Errorf("Failed to find VIF for VM id %s in inventory", instanceID)
+}
+
+func findPortByExternalID(nsxClient *api.APIClient, instanceID string) (*manager.LogicalPort, error) {
+
+	vif, err := findVIFByExternalID(nsxClient, instanceID)
+	if err != nil {
+		return nil, err
+	}
+
+	portList, err := getPortList(nsxClient)
+	if err != nil {
+		return nil, err
+	}
+	for _, elem := range portList.Results {
+		if elem.Attachment != nil && elem.Attachment.Id == vif.LportAttachmentId {
+			return &elem, nil
+		}
+	}
+
+	return nil, fmt.Errorf("Failed to find logical port with attachment id %s", vif.LportAttachmentId)
+}
+
 func updateTags(nsxClient *api.APIClient, id string, tags []common.Tag) error {
 	log.Printf("[DEBUG] Updating tags for %s", id)
 
@@ -108,6 +175,24 @@ func updateTags(nsxClient *api.APIClient, id string, tags []common.Tag) error {
 	return nil
 }
 
+func updatePortTags(nsxClient *api.APIClient, id string, tags []common.Tag) error {
+	log.Printf("[DEBUG] Updating logical port tags for %s", id)
+
+	port, err := findPortByExternalID(nsxClient, id)
+	if err != nil {
+		return err
+	}
+
+	port.Tags = tags
+	_, resp, err := nsxClient.LogicalSwitchingApi.UpdateLogicalPort(nsxClient.Context, port.Id, *port)
+
+	if err != nil || resp.StatusCode == http.StatusNotFound {
+		return fmt.Errorf("Error while updating logical port %s: %v", id, err)
+	}
+
+	return nil
+}
+
 func resourceNsxtVMTagsCreate(d *schema.ResourceData, m interface{}) error {
 	instanceID := d.Get("instance_id").(string)
 
@@ -118,9 +203,13 @@ func resourceNsxtVMTagsCreate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	tags := getTagsFromSchema(d)
-
 	err = updateTags(nsxClient, vm.ExternalId, tags)
+	if err != nil {
+		return err
+	}
 
+	portTags := getCustomizedTagsFromSchema(d, "logical_port_tag")
+	err = updatePortTags(nsxClient, vm.ExternalId, portTags)
 	if err != nil {
 		return err
 	}
@@ -142,7 +231,13 @@ func resourceNsxtVMTagsRead(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("Error during VM retrieval: %v", err)
 	}
 
+	port, err := findPortByExternalID(nsxClient, id)
+	if err != nil {
+		return fmt.Errorf("Error during logical port retrieval: %v", err)
+	}
+
 	setTagsInSchema(d, vm.Tags)
+	setCustomizedTagsInSchema(d, port.Tags, "logical_port_tag")
 
 	return nil
 }
@@ -162,9 +257,14 @@ func resourceNsxtVMTagsDelete(d *schema.ResourceData, m interface{}) error {
 
 	tags := make([]common.Tag, 0)
 	err = updateTags(nsxClient, vm.ExternalId, tags)
+	err2 := updatePortTags(nsxClient, vm.ExternalId, tags)
 
 	if err != nil {
 		return err
+	}
+
+	if err2 != nil {
+		return err2
 	}
 
 	return nil
