@@ -71,7 +71,7 @@ func resourceNsxtLogicalRouterDownLinkPort() *schema.Resource {
 				Default:      "STRICT",
 				ValidateFunc: validation.StringInSlice(logicalRouterPortUrpfModeValues, false),
 			},
-			"service_binding": getResourceReferencesSchema(false, false, []string{"LogicalService"}, "Service Bindings"),
+			"service_binding": getResourceReferencesSchema(false, false, []string{"LogicalService", "DhcpRelayService"}, "Service Bindings"),
 		},
 	}
 }
