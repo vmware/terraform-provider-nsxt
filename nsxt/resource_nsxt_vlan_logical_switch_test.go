@@ -93,7 +93,6 @@ func TestAccResourceNsxtVlanLogicalSwitch_withProfiles(t *testing.T) {
 			{
 				// Replace the custom switching profile with OOB one
 				Config:             testAccNSXVlanLogicalSwitchUpdateWithProfilesTemplate(resourceName, updateSwitchName, transportZoneName),
-				ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXLogicalSwitchExists(updateSwitchName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updateSwitchName),
