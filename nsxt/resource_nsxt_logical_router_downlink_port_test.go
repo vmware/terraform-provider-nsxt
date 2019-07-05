@@ -58,20 +58,24 @@ func TestAccResourceNsxtLogicalRouterDownlinkPort_basic(t *testing.T) {
 	})
 }
 
+var testAccDhcpRelayServiceResourceType string
+
+func testAccSetDhcpRelayServiceType() {
+	// resource type changed to DhcpRelayService in NSX 2.5
+	testAccDhcpRelayServiceResourceType = "DhcpRelayService"
+	// this is needed to init the version
+	testAccNSXVersion(nil, "2.2.0")
+	if nsxVersionLower("2.5.0") {
+		testAccDhcpRelayServiceResourceType = "LogicalService"
+	}
+}
+
 func TestAccResourceNsxtLogicalRouterDownlinkPort_withRelay(t *testing.T) {
 	portName := fmt.Sprintf("test-nsx-logical-router-downlink-port")
 	updatePortName := fmt.Sprintf("%s-update", portName)
 	testResourceName := "nsxt_logical_router_downlink_port.test"
 	transportZoneName := getOverlayTransportZoneName()
 	edgeClusterName := getEdgeClusterName()
-
-	// resource type changed to DhcpRelayService in NSX 2.5
-	resourceType := "DhcpRelayService"
-	// this is needed to init the version
-	testAccNSXVersion(t, "2.2.0")
-	if nsxVersionLower("2.5.0") {
-		resourceType = "LogicalService"
-	}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -81,7 +85,7 @@ func TestAccResourceNsxtLogicalRouterDownlinkPort_withRelay(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXLogicalRouterDownlinkPortCreateWithRelayTemplate(portName, transportZoneName, edgeClusterName, resourceType),
+				Config: testAccNSXLogicalRouterDownlinkPortCreateWithRelayTemplate(portName, transportZoneName, edgeClusterName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXLogicalRouterDownlinkPortExists(portName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", portName),
@@ -90,12 +94,12 @@ func TestAccResourceNsxtLogicalRouterDownlinkPort_withRelay(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "logical_router_id"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "service_binding.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "service_binding.0.target_type", resourceType),
+					resource.TestCheckResourceAttr(testResourceName, "service_binding.0.target_type", testAccDhcpRelayServiceResourceType),
 					resource.TestCheckResourceAttr(testResourceName, "service_binding.0.target_display_name", "srv"),
 				),
 			},
 			{
-				Config: testAccNSXLogicalRouterDownlinkPortUpdateWithRelayTemplate(updatePortName, transportZoneName, edgeClusterName, resourceType),
+				Config: testAccNSXLogicalRouterDownlinkPortUpdateWithRelayTemplate(updatePortName, transportZoneName, edgeClusterName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXLogicalRouterDownlinkPortExists(updatePortName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatePortName),
@@ -104,7 +108,7 @@ func TestAccResourceNsxtLogicalRouterDownlinkPort_withRelay(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "logical_router_id"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "service_binding.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "service_binding.0.target_type", resourceType),
+					resource.TestCheckResourceAttr(testResourceName, "service_binding.0.target_type", testAccDhcpRelayServiceResourceType),
 					resource.TestCheckResourceAttr(testResourceName, "service_binding.0.target_display_name", "srv"),
 				),
 			},
@@ -276,7 +280,8 @@ resource "nsxt_logical_router_downlink_port" "test" {
 }`, portUpdatedName)
 }
 
-func testAccNSXLogicalRouterDownlinkPortCreateWithRelayTemplate(portName string, transportZoneName string, edgeClusterName string, resourceType string) string {
+func testAccNSXLogicalRouterDownlinkPortCreateWithRelayTemplate(portName string, transportZoneName string, edgeClusterName string) string {
+	testAccSetDhcpRelayServiceType()
 	return testAccNSXLogicalRouterDownlinkPortPreConditionTemplate(transportZoneName, edgeClusterName) +
 		testAccNSXLogicalRouterDownlinkPortRelayTemplate() +
 		fmt.Sprintf(`
@@ -296,10 +301,10 @@ resource "nsxt_logical_router_downlink_port" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, portName, resourceType)
+}`, portName, testAccDhcpRelayServiceResourceType)
 }
 
-func testAccNSXLogicalRouterDownlinkPortUpdateWithRelayTemplate(portUpdatedName string, transportZoneName string, edgeClusterName string, resourceType string) string {
+func testAccNSXLogicalRouterDownlinkPortUpdateWithRelayTemplate(portUpdatedName string, transportZoneName string, edgeClusterName string) string {
 	return testAccNSXLogicalRouterDownlinkPortPreConditionTemplate(transportZoneName, edgeClusterName) +
 		testAccNSXLogicalRouterDownlinkPortRelayTemplate() +
 		fmt.Sprintf(`
@@ -324,5 +329,5 @@ resource "nsxt_logical_router_downlink_port" "test" {
     scope = "scope2"
     tag   = "tag2"
   }
-}`, portUpdatedName, resourceType)
+}`, portUpdatedName, testAccDhcpRelayServiceResourceType)
 }
