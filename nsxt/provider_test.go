@@ -44,6 +44,10 @@ func testAccPreCheck(t *testing.T) {
 }
 
 func testAccGetClient() (*api.APIClient, error) {
+	if os.Getenv("NSXT_MANAGER_HOST") == "" {
+		return nil, fmt.Errorf("NSXT_MANAGER_HOST is not set in environment")
+	}
+
 	client, ok := testAccProvider.Meta().(*api.APIClient)
 	if ok {
 		return client, nil
