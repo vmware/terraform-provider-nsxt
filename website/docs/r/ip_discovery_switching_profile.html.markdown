@@ -21,7 +21,7 @@ resource "nsxt_ip_discovery_switching_profile" "ip_discovery_switching_profile" 
   dhcp_snooping_enabled = "false"
   arp_bindings_limit    = "1"
 
-  tag = {
+  tag {
     scope = "color"
     tag   = "red"
   }

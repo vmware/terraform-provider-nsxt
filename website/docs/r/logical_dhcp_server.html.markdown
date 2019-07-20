@@ -40,7 +40,7 @@ resource "nsxt_logical_dhcp_server" "logical_dhcp_server" {
     values = ["abc"]
   }
 
-  tag = {
+  tag {
     scope = "color"
     tag   = "red"
   }

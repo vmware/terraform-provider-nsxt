@@ -18,7 +18,7 @@ resource "nsxt_ip_block" "ip_block" {
   display_name = "ip_block"
   cidr         = "2.1.1.0/24"
 
-  tag = {
+  tag {
     scope = "color"
     tag   = "red"
   }

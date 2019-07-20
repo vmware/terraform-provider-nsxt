@@ -26,7 +26,7 @@ resource "nsxt_lb_udp_monitor" "lb_udp_monitor" {
   send         = "hi"
   receive      = "hello"
 
-  tag = {
+  tag {
     scope = "color"
     tag   = "red"
   }

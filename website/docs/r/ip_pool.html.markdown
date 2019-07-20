@@ -17,12 +17,12 @@ resource "nsxt_ip_pool" "ip_pool" {
   description = "ip_pool provisioned by Terraform"
   display_name = "ip_pool"
 
-  tag = {
+  tag {
     scope = "color"
     tag   = "red"
   }
 
-  subnet = {
+  subnet {
     allocation_ranges = ["2.1.1.1-2.1.1.11", "2.1.1.21-2.1.1.100"]
     cidr              = "2.1.1.0/24"
     gateway_ip        = "2.1.1.12"

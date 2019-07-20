@@ -25,7 +25,7 @@ resource "nsxt_mac_management_switching_profile" "mac_management_switching_profi
     unicast_flooding_allowed = "false"
   }
 
-  tag = {
+  tag {
     scope = "color"
     tag   = "red"
   }

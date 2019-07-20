@@ -22,7 +22,7 @@ resource "nsxt_lb_fast_tcp_application_profile" "lb_fast_tcp_profile" {
   idle_timeout      = "1800"
   ha_flow_mirroring = "false"
 
-  tag = {
+  tag {
     scope = "color"
     tag   = "red"
   }

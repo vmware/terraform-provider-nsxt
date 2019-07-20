@@ -24,7 +24,7 @@ resource "nsxt_ip_block_subnet" "ip_block_subnet" {
   block_id     = "${nsxt_ip_block.ip_block.id}"
   size         = 16
 
-  tag = {
+  tag {
     scope = "color"
     tag   = "red"
   }

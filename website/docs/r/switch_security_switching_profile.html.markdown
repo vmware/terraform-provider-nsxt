@@ -30,7 +30,7 @@ resource "nsxt_switch_security_switching_profile" "switch_security_switching_pro
     tx_multicast = 32
   }
 
-  tag = {
+  tag {
     scope = "color"
     tag   = "red"
   }
