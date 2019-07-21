@@ -41,7 +41,7 @@ resource "nsxt_qos_switching_profile" "qos_switching_profile" {
     peak_bw_kbps    = "500"
   }
 
-  tag = {
+  tag {
     scope = "color"
     tag   = "red"
   }

@@ -18,7 +18,7 @@ resource "nsxt_spoofguard_switching_profile" "spoofguard_switching_profile" {
   display_name                      = "spoofguard_switching_profile"
   address_binding_whitelist_enabled = "true"
 
-  tag = {
+  tag {
     scope = "color"
     tag   = "red"
   }

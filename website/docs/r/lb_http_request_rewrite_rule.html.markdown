@@ -22,7 +22,7 @@ resource "nsxt_lb_http_request_rewrite_rule" "lb_rule" {
   display_name = "lb_rule"
   match_strategy = "ANY"
 
-  tag = {
+  tag {
     scope = "color"
     tag   = "red"
   }

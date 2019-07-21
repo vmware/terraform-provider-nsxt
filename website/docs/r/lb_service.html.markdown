@@ -50,7 +50,7 @@ resource "nsxt_lb_service" "lb_service" {
   description  = "lb_service provisioned by Terraform"
   display_name = "lb_service"
 
-  tag = {
+  tag {
     scope = "color"
     tag   = "red"
   }

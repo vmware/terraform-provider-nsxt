@@ -47,7 +47,7 @@ resource "nsxt_lb_pool" "lb_pool" {
     weight                     = "1"
   }
 
-  tag = {
+  tag {
     scope = "color"
     tag   = "red"
   }
@@ -81,7 +81,7 @@ resource "nsxt_lb_pool" "lb_pool_with_dynamic_membership" {
     }
   }
 
-  tag = {
+  tag {
     scope = "color"
     tag   = "red"
   }

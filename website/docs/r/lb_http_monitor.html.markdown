@@ -31,7 +31,7 @@ resource "nsxt_lb_http_monitor" "lb_http_monitor" {
   response_body         = "pong"
   response_status_codes = [200, 304]
 
-  tag = {
+  tag {
     scope = "color"
     tag   = "red"
   }

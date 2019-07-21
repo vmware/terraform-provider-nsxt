@@ -48,11 +48,11 @@ resource "nsxt_dhcp_server_ip_pool" "dhcp_ip_pool" {
   }
 
   dhcp_generic_option {
-    code = "119"
+    code   = "119"
     values = ["abc"]
   }
 
-  tag = {
+  tag {
     scope = "color"
     tag   = "red"
   }

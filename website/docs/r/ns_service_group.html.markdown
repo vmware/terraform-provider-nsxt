@@ -28,7 +28,7 @@ resource "nsxt_ns_service_group" "ns_service_group" {
   display_name = "ns_service_group"
   members      = ["${nsxt_ip_protocol_ns_service.prot17.id}", "${data.nsxt_ns_service.dns.id}"]
 
-  tag = {
+  tag {
     scope = "color"
     tag   = "red"
   }

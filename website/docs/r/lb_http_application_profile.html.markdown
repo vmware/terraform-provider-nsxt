@@ -27,7 +27,7 @@ resource "nsxt_lb_http_application_profile" "lb_http_application_profile" {
   x_forwarded_for        = "INSERT"
   ntlm                   = "true"
 
-  tag = {
+  tag {
     scope = "color"
     tag   = "red"
   }

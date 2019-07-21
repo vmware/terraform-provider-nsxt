@@ -32,7 +32,7 @@ resource "nsxt_lb_cookie_persistence_profile" "lb_cookie_persistence_profile" {
     max_life_time      = "2000"
   }
 
-  tag = {
+  tag {
     scope = "color"
     tag   = "red"
   }

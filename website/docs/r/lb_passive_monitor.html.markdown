@@ -21,7 +21,7 @@ resource "nsxt_lb_passive_monitor" "lb_passive_monitor" {
   max_fails    = 3
   timeout      = 10
 
-  tag = {
+  tag {
     scope = "color"
     tag   = "red"
   }

@@ -24,7 +24,7 @@ resource "nsxt_lb_tcp_monitor" "lb_tcp_monitor" {
   rise_count   = 3
   timeout      = 10
 
-  tag = {
+  tag {
     scope = "color"
     tag   = "red"
   }

@@ -23,7 +23,7 @@ resource "nsxt_lb_source_ip_persistence_profile" "lb_source_ip_persistence_profi
   purge_when_full          = "true"
   timeout                  = "100"
 
-  tag = {
+  tag {
     scope = "color"
     tag   = "red"
   }

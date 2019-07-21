@@ -23,7 +23,7 @@ resource "nsxt_dhcp_server_profile" "dhcp_profile" {
   edge_cluster_id             = "${data.nsxt_edge_cluster.edge_cluster1.id}"
   edge_cluster_member_indexes = [0, 1]
 
-  tag = {
+  tag {
     scope = "color"
     tag   = "red"
   }
