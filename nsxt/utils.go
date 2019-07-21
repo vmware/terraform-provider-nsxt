@@ -240,7 +240,7 @@ func getAddressBindingsFromSchema(d *schema.ResourceData) []manager.PacketAddres
 		elem := manager.PacketAddressClassifier{
 			IpAddress:  data["ip_address"].(string),
 			MacAddress: data["mac_address"].(string),
-			Vlan:       data["vlan"].(int64),
+			Vlan:       int64(data["vlan"].(int)),
 		}
 
 		bindingList = append(bindingList, elem)
