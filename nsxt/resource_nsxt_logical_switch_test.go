@@ -43,7 +43,7 @@ func TestAccResourceNsxtLogicalSwitch_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "replication_mode", replicationMode),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "vlan", novlan),
-                                        resource.TestCheckResourceAttr(testResourceName, "address_binding.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "address_binding.#", "1"),
 				),
 			},
 			{
@@ -56,7 +56,7 @@ func TestAccResourceNsxtLogicalSwitch_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "replication_mode", replicationMode),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "vlan", novlan),
-                                        resource.TestCheckResourceAttr(testResourceName, "address_binding.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "address_binding.#", "0"),
 				),
 			},
 		},
