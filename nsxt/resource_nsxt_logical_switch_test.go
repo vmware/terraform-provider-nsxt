@@ -43,6 +43,7 @@ func TestAccResourceNsxtLogicalSwitch_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "replication_mode", replicationMode),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "vlan", novlan),
+					resource.TestCheckResourceAttr(testResourceName, "address_binding.#", "1"),
 				),
 			},
 			{
@@ -55,6 +56,7 @@ func TestAccResourceNsxtLogicalSwitch_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "replication_mode", replicationMode),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "vlan", novlan),
+					resource.TestCheckResourceAttr(testResourceName, "address_binding.#", "0"),
 				),
 			},
 		},
@@ -319,6 +321,11 @@ resource "nsxt_logical_switch" "%s" {
   transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
   replication_mode  = "%s"
   vlan              = "%s"
+
+  address_binding {
+    ip_address = "1.1.1.1"
+    mac_address = "00:11:22:33:44:55"
+  }
 
   tag {
     scope = "scope1"

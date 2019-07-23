@@ -24,6 +24,11 @@ resource "nsxt_logical_switch" "switch1" {
     tag   = "blue"
   }
 
+  address_binding {
+    ip_address = "2.2.2.2"
+    mac_address = "00:11:22:33:44:55"
+  }
+
   switching_profile_id {
     key   = "${data.nsxt_switching_profile.qos_profiles.resource_type}"
     value = "${data.nsxt_switching_profile.qos_profiles.id}"
@@ -43,6 +48,10 @@ The following arguments are supported:
 * `description` - (Optional) Description of the resource.
 * `ip_pool_id` - (Optional) Ip Pool ID to be associated with the logical switch.
 * `mac_pool_id` - (Optional) Mac Pool ID to be associated with the logical switch.
+* `address_binding` - (Optional) A list address bindings for this logical switch
+  * `ip_address` - (Required) IP Address
+  * `mac_address` - (Required) MAC Address
+  * `vlan` - (Optional) Vlan 
 * `vlan` - (Deprecated, Optional) Vlan for vlan logical switch. This attribute is deprecated, please use nsxt_vlan_logical_switch resource to manage vlan logical switches.
 * `vni` - (Optional, Readonly) Vni for the logical switch.
 * `address_binding` - (Optional) List of Address Bindings for the logical switch. This setting allows to provide bindings between IP address, mac Address and vlan.
