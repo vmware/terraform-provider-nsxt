@@ -2,7 +2,7 @@
 
 NOTES:
 
-* The provider is now aligned with Terraform 0.12 SDK which is required for Terraform 0.12 support. This version of terraform is more strict with syntax enforcement. If you old configuration doesn't work post upgrade, please verify syntax against the updated documentation.
+* The provider is now aligned with Terraform 0.12 SDK which is required for Terraform 0.12 support. This version of terraform is more strict with syntax enforcement. If you old configuration errors out post upgrade, please verify syntax against the updated provider documentation.
 
 IMPROVEMENTS:
 
