@@ -143,9 +143,16 @@ func resourceNsxtLogicalSwitchCreate(d *schema.ResourceData, m interface{}) erro
 
 func resourceNsxtLogicalSwitchVerifyRealization(d *schema.ResourceData, nsxClient *api.APIClient, logicalSwitch *manager.LogicalSwitch) error {
 	// verifying switch realization on hypervisor
+	pendingStates := []string{"in_progress", "pending"}
+	targetStates := []string{"success"}
+	if toleratePartialSuccess {
+		targetStates = append(targetStates, "partial_success")
+	} else {
+		pendingStates = append(pendingStates, "partial_success")
+	}
 	stateConf := &resource.StateChangeConf{
-		Pending: []string{"in_progress", "pending", "partial_success"},
-		Target:  []string{"success"},
+		Pending: pendingStates,
+		Target:  targetStates,
 		Refresh: func() (interface{}, string, error) {
 			state, resp, err := nsxClient.LogicalSwitchingApi.GetLogicalSwitchState(nsxClient.Context, logicalSwitch.Id)
 			if err != nil {
