@@ -1,4 +1,26 @@
 ## 1.1.1 (Unreleased)
+
+NOTES:
+
+* The provider is now aligned with Terraform 0.12 SDK which is required for Terraform 0.12 support. This version of terraform is more strict with syntax enforcement. If you old configuration errors out post upgrade, please verify syntax against the updated provider documentation.
+
+IMPROVEMENTS:
+
+* `resource/nsxt_vm_tag`: Support tagging of logical port for the VM ([#171](https://github.com/terraform-providers/terraform-provider-nsxt/pull/171))
+* `resource/nsxt_firewall_section`: Add ability to control order of FW sections ([#150](https://github.com/terraform-providers/terraform-provider-nsxt/pull/150))
+* `resource/nsxt_firewall_section`: Add support for LogicalRouter and LogicalRouterPort in as applied_to type ([#157](https://github.com/terraform-providers/terraform-provider-nsxt/pull/157))
+* Add Go Modules support ([#155](https://github.com/terraform-providers/terraform-provider-nsxt/pull/155))
+* Fix syntax in documentation and tests according to terraform 0.12 requirements ([#178](https://github.com/terraform-providers/terraform-provider-nsxt/pull/178))
+* Verify interoperability with NSX 2.5
+* Improve documentation and test coverage
+
+
+BUG FIXES:
+
+* `resource/nsxt_nat_rule`: Fix deletion of NAT rule that was due to a platform bug in versions 2.4 and below ([#166](https://github.com/terraform-providers/terraform-provider-nsxt/pull/166)).
+* `resource/nsxt_firewall_section`: Do not enforce order of services in rules. This fixes the bug of non-empty plan when services were registered on backend in order different that defined in terraform ([#156)(https://github.com/terraform-providers/terraform-provider-nsxt/pull/156))
+* `resource/nsxt_firewall_section`: Prevent re-creation of rules by retaining rule ids ([#154](https://github.com/terraform-providers/terraform-provider-nsxt/pull/154))
+
 ## 1.1.0 (February 22, 2019)
 
 NOTES:
