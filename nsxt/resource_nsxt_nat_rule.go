@@ -82,6 +82,7 @@ func resourceNsxtNatRule() *schema.Resource {
 			"rule_priority": {
 				Type:        schema.TypeInt,
 				Description: "The priority of the rule (ascending). Valid range [0-2147483647]",
+				Optional:    true,
 				Computed:    true,
 			},
 			"translated_network": {
