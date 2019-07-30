@@ -11,6 +11,7 @@ import (
 )
 
 var defaultRetryOnStatusCodes = []int{429, 503}
+var toleratePartialSuccess = false
 
 // Provider for VMWare NSX-T. Returns terraform.ResourceProvider
 func Provider() terraform.ResourceProvider {
@@ -84,6 +85,12 @@ func Provider() terraform.ResourceProvider {
 					Type: schema.TypeInt,
 				},
 				// There is no support for default values/func for list, so it will be handled later
+			},
+			"tolerate_partial_success": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Treat partial success status as success",
+				DefaultFunc: schema.EnvDefaultFunc("NSXT_TOLERATE_PARTIAL_SUCCESS", false),
 			},
 		},
 
@@ -188,6 +195,9 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	username := d.Get("username").(string)
 	password := d.Get("password").(string)
 	remoteAuth := d.Get("remote_auth").(bool)
+
+	// Global variable used in resources with realization checks
+	toleratePartialSuccess = d.Get("tolerate_partial_success").(bool)
 
 	if needCreds {
 		if username == "" {

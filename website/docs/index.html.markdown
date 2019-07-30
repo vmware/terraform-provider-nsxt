@@ -150,6 +150,8 @@ The following arguments are used to configure the VMware NSX-T Provider:
   authorization. This is required for users based on vIDM authentication.
   The default for this flag is false. Can also be specified with the
   `NSXT_REMOTE_AUTH` environment variable.
+* `tolerate_partial_success` - (Optional) Setting this flag to true would treat
+  partially succesful realization as valid state and not fail apply.
 
 ## NSX Logical Networking
 
