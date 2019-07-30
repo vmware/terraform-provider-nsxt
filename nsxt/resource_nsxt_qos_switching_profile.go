@@ -21,7 +21,6 @@ var rateShaperSchemaNames = []string{"ingress_rate_shaper", "ingress_broadcast_r
 var rateShaperScales = []string{"mbps", "kbps", "mbps"}
 var rateShaperResourceTypes = []string{"IngressRateShaper", "IngressBroadcastRateShaper", "EgressRateShaper"}
 
-
 func resourceNsxtQosSwitchingProfile() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtQosSwitchingProfileCreate,
