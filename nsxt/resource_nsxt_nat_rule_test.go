@@ -41,6 +41,7 @@ func TestAccResourceNsxtNatRule_snat(t *testing.T) {
 					resource.TestCheckResourceAttr(testAccResourceNatRuleName, "translated_network", "4.4.4.0/24"),
 					resource.TestCheckResourceAttr(testAccResourceNatRuleName, "match_destination_network", "3.3.3.0/24"),
 					resource.TestCheckResourceAttr(testAccResourceNatRuleName, "match_source_network", "5.5.5.0/24"),
+					resource.TestCheckResourceAttr(testAccResourceNatRuleName, "rule_priority", "5"),
 				),
 			},
 			{
@@ -58,6 +59,7 @@ func TestAccResourceNsxtNatRule_snat(t *testing.T) {
 					resource.TestCheckResourceAttr(testAccResourceNatRuleName, "translated_network", "4.4.4.0/24"),
 					resource.TestCheckResourceAttr(testAccResourceNatRuleName, "match_destination_network", "3.3.3.0/24"),
 					resource.TestCheckResourceAttr(testAccResourceNatRuleName, "match_source_network", "6.6.6.0/24"),
+					resource.TestCheckResourceAttr(testAccResourceNatRuleName, "rule_priority", "5"),
 				),
 			},
 		},
@@ -291,6 +293,7 @@ resource "nsxt_nat_rule" "test" {
   enabled                   = "true"
   logging                   = "true"
   nat_pass                  = "false"
+  rule_priority             = 5
 
   tag {
     scope = "scope1"
@@ -312,6 +315,7 @@ resource "nsxt_nat_rule" "test" {
   enabled                   = "false"
   logging                   = "true"
   nat_pass                  = "true"
+  rule_priority             = 5
 
   tag {
     scope = "scope1"

@@ -47,6 +47,7 @@ The following arguments are supported:
 * `nat_pass` - (Optional) Enable/disable to bypass following firewall stage. The default is true, meaning that the following firewall stage will be skipped. Please note, if action is NO_NAT, then nat_pass must be set to true or omitted.
 * `translated_network` - (Required for action=DNAT or SNAT) IP Address | IP Range | CIDR.
 * `translated_ports` - (Optional) port number or port range. Allowed only when action=DNAT.
+* `rule_priority` - The priority of the rule which is ascending, valid range [0-2147483647]. If multiple rules have the same priority, evaluation sequence is undefined.
 
 
 ## Attributes Reference
@@ -55,7 +56,6 @@ In addition to arguments listed above, the following attributes are exported:
 
 * `id` - ID of the NAT rule.
 * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
-* `rule_priority` - The priority of the rule which is ascending, valid range [0-2147483647]. If multiple rules have the same priority, evaluation sequence is undefined.
 
 ## Importing
 
