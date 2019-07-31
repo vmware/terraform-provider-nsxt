@@ -9,6 +9,7 @@ IMPROVEMENTS:
 * `resource/nsxt_vm_tag`: Support tagging of logical port for the VM ([#171](https://github.com/terraform-providers/terraform-provider-nsxt/pull/171))
 * `resource/nsxt_firewall_section`: Add ability to control order of FW sections ([#150](https://github.com/terraform-providers/terraform-provider-nsxt/pull/150))
 * `resource/nsxt_firewall_section`: Add support for LogicalRouter and LogicalRouterPort in as applied_to type ([#157](https://github.com/terraform-providers/terraform-provider-nsxt/pull/157))
+* Introduce flag to tolerate partial_success realization state. This can be controlled by tolerate_partial_success provider attribute or NSXT_TOLERATE_PARTIAL_SUCCESS environment variable. The default is False ([#181](https://github.com/terraform-providers/terraform-provider-nsxt/pull/181))
 * Add Go Modules support ([#155](https://github.com/terraform-providers/terraform-provider-nsxt/pull/155))
 * Fix syntax in documentation and tests according to terraform 0.12 requirements ([#178](https://github.com/terraform-providers/terraform-provider-nsxt/pull/178))
 * Verify interoperability with NSX 2.5
@@ -18,8 +19,9 @@ IMPROVEMENTS:
 BUG FIXES:
 
 * `resource/nsxt_nat_rule`: Fix deletion of NAT rule that was due to a platform bug in versions 2.4 and below ([#166](https://github.com/terraform-providers/terraform-provider-nsxt/pull/166)).
-* `resource/nsxt_firewall_section`: Do not enforce order of services in rules. This fixes the bug of non-empty plan when services were registered on backend in order different that defined in terraform ([#156)(https://github.com/terraform-providers/terraform-provider-nsxt/pull/156))
+* `resource/nsxt_firewall_section`: Do not enforce order of services in rules. This fixes the bug of non-empty plan when services were registered on backend in order different that defined in terraform ([#156](https://github.com/terraform-providers/terraform-provider-nsxt/pull/156))
 * `resource/nsxt_firewall_section`: Prevent re-creation of rules by retaining rule ids ([#154](https://github.com/terraform-providers/terraform-provider-nsxt/pull/154))
+* `resource/nsxt_nat_rule`: Allow setting rule_priority ([#182](https://github.com/te    rraform-providers/terraform-provider-nsxt/pull/182))
 
 ## 1.1.0 (February 22, 2019)
 
