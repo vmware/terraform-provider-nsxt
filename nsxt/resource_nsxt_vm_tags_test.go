@@ -25,7 +25,35 @@ func TestAccResourceNsxtVMTags_basic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXVMTagsCreateTemplate(vmID),
+				Config: testAccNSXVMTagsCreateTemplate(vmID, false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXVMTagsCheckExists(),
+					resource.TestCheckResourceAttr(vmTagsFullResourceName, "tag.#", "1"),
+				),
+			},
+			{
+				Config: testAccNSXVMTagsUpdateTemplate(vmID, false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXVMTagsCheckExists(),
+					resource.TestCheckResourceAttr(vmTagsFullResourceName, "tag.#", "2"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtVMPortTags_basic(t *testing.T) {
+	vmID := getTestVMOnOpaqueSwitchID()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccEnvDefined(t, "NSXT_TEST_VM_ON_OPAQUE_SWITCH_ID") },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXVMTagsCheckDestroy(state)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXVMTagsCreateTemplate(vmID, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXVMTagsCheckExists(),
 					resource.TestCheckResourceAttr(vmTagsFullResourceName, "tag.#", "1"),
@@ -35,7 +63,7 @@ func TestAccResourceNsxtVMTags_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXVMTagsUpdateTemplate(vmID),
+				Config: testAccNSXVMTagsUpdateTemplate(vmID, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXVMTagsCheckExists(),
 					resource.TestCheckResourceAttr(vmTagsFullResourceName, "tag.#", "2"),
@@ -59,7 +87,7 @@ func TestAccResourceNsxtVMTags_import_basic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXVMTagsCreateTemplate(vmID),
+				Config: testAccNSXVMTagsCreateTemplate(vmID, false),
 			},
 			{
 				ResourceName:            vmTagsFullResourceName,
@@ -116,7 +144,14 @@ func testAccNSXVMTagsCheckDestroy(state *terraform.State) error {
 	return nil
 }
 
-func testAccNSXVMTagsCreateTemplate(instanceID string) string {
+func testAccNSXVMTagsCreateTemplate(instanceID string, withPorts bool) string {
+	var ports string
+	if withPorts {
+		ports = `logical_port_tag {
+    scope = "a"
+    tag   = "b"
+  }`
+	}
 	return fmt.Sprintf(`
 resource "nsxt_vm_tags" "%s" {
   instance_id = "%s"
@@ -125,15 +160,18 @@ resource "nsxt_vm_tags" "%s" {
     scope = "scope1"
     tag   = "tag1"
   }
-
-  logical_port_tag {
-    scope = "a"
-    tag   = "b"
-  }
-}`, vmTagsResourceName, instanceID)
+  %s
+}`, vmTagsResourceName, instanceID, ports)
 }
 
-func testAccNSXVMTagsUpdateTemplate(instanceID string) string {
+func testAccNSXVMTagsUpdateTemplate(instanceID string, withPorts bool) string {
+	var ports string
+	if withPorts {
+		ports = `logical_port_tag {
+    scope = "c"
+    tag   = "d"
+  }`
+	}
 	return fmt.Sprintf(`
 resource "nsxt_vm_tags" "%s" {
   instance_id = "%s"
@@ -147,10 +185,6 @@ resource "nsxt_vm_tags" "%s" {
     scope = "scope2"
     tag   = "tag2"
   }
-
-  logical_port_tag {
-    scope = "c"
-    tag   = "d"
-  }
-}`, vmTagsResourceName, instanceID)
+  %s
+}`, vmTagsResourceName, instanceID, ports)
 }
