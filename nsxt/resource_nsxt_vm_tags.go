@@ -180,7 +180,12 @@ func updatePortTags(nsxClient *api.APIClient, id string, tags []common.Tag) erro
 
 	port, err := findPortByExternalID(nsxClient, id)
 	if err != nil {
-		return err
+		if len(tags) > 0 {
+			return err
+		}
+
+		// Its OK to end up here when VM is not residing on opaque switch
+		return nil
 	}
 
 	port.Tags = tags
@@ -209,9 +214,11 @@ func resourceNsxtVMTagsCreate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	portTags := getCustomizedTagsFromSchema(d, "logical_port_tag")
-	err = updatePortTags(nsxClient, vm.ExternalId, portTags)
-	if err != nil {
-		return err
+	if len(portTags) > 0 {
+		err = updatePortTags(nsxClient, vm.ExternalId, portTags)
+		if err != nil {
+			return err
+		}
 	}
 
 	d.SetId(vm.ExternalId)
@@ -232,12 +239,11 @@ func resourceNsxtVMTagsRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	port, err := findPortByExternalID(nsxClient, id)
-	if err != nil {
-		return fmt.Errorf("Error during logical port retrieval: %v", err)
-	}
 
 	setTagsInSchema(d, vm.Tags)
-	setCustomizedTagsInSchema(d, port.Tags, "logical_port_tag")
+	if port != nil {
+		setCustomizedTagsInSchema(d, port.Tags, "logical_port_tag")
+	}
 
 	return nil
 }
