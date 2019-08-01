@@ -90,6 +90,10 @@ func getTestVMID() string {
 	return os.Getenv("NSXT_TEST_VM_ID")
 }
 
+func getTestVMOnOpaqueSwitchID() string {
+	return os.Getenv("NSXT_TEST_VM_ON_OPAQUE_SWITCH_ID")
+}
+
 func testAccEnvDefined(t *testing.T, envVar string) {
 	if len(os.Getenv(envVar)) == 0 {
 		t.Skipf("This test requires %s environment variable to be set", envVar)
