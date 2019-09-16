@@ -21,6 +21,7 @@ const switchingProfileDefaultName string = "nsx-default-mac-profile"
 const vlanTransportZoneName string = "transportzone2"
 const overlayTransportZoneNamePrefix string = "1-transportzone"
 const macPoolDefaultName string = "DefaultMacPool"
+const ipPoolDefaultName string = "DefaultIpPool"
 
 const singleTag string = `
   tag {
@@ -82,6 +83,14 @@ func getMacPoolName() string {
 	name := os.Getenv("NSXT_TEST_MAC_POOL")
 	if name == "" {
 		name = macPoolDefaultName
+	}
+	return name
+}
+
+func getIpPoolName() string {
+	name := os.Getenv("NSXT_TEST_IP_POOL")
+	if name == "" {
+		name = ipPoolDefaultName
 	}
 	return name
 }
