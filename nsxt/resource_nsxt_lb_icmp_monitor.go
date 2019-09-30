@@ -77,14 +77,13 @@ func resourceNsxtLbIcmpMonitorCreate(d *schema.ResourceData, m interface{}) erro
 	}
 
 	lbIcmpMonitor, resp, err := nsxClient.ServicesApi.CreateLoadBalancerIcmpMonitor(nsxClient.Context, lbIcmpMonitor)
-
+	if resp != nil && resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("Unexpected status returned during LbMonitor create: %v", resp.StatusCode)
+	}
 	if err != nil {
 		return fmt.Errorf("Error during LbMonitor create: %v", err)
 	}
 
-	if resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("Unexpected status returned during LbMonitor create: %v", resp.StatusCode)
-	}
 	d.SetId(lbIcmpMonitor.Id)
 
 	return resourceNsxtLbIcmpMonitorRead(d, m)

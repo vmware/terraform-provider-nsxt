@@ -85,15 +85,15 @@ func resourceNsxtSpoofGuardSwitchingProfileRead(d *schema.ResourceData, m interf
 	}
 
 	sgSwitchingProfile, resp, err := nsxClient.LogicalSwitchingApi.GetSpoofGuardSwitchingProfile(nsxClient.Context, id)
-	if err != nil {
-		return fmt.Errorf("Error during SpoofGuardSwitchingProfile read: %v", err)
-	}
-
-	if resp.StatusCode == http.StatusNotFound {
+	if resp != nil && resp.StatusCode == http.StatusNotFound {
 		log.Printf("[DEBUG] SpoofGuardSwitchingProfile %s not found", id)
 		d.SetId("")
 		return nil
 	}
+	if err != nil {
+		return fmt.Errorf("Error during SpoofGuardSwitchingProfile read: %v", err)
+	}
+
 	d.Set("revision", sgSwitchingProfile.Revision)
 	d.Set("description", sgSwitchingProfile.Description)
 	d.Set("display_name", sgSwitchingProfile.DisplayName)

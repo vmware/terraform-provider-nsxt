@@ -81,13 +81,13 @@ func resourceNsxtIPBlockRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	ipBlock, resp, err := nsxClient.PoolManagementApi.ReadIpBlock(nsxClient.Context, id)
-	if err != nil {
-		return fmt.Errorf("Error during IpBlock read: %v", err)
-	}
-	if resp.StatusCode == http.StatusNotFound {
+	if resp != nil && resp.StatusCode == http.StatusNotFound {
 		log.Printf("[DEBUG] IpBlock %s not found", id)
 		d.SetId("")
 		return nil
+	}
+	if err != nil {
+		return fmt.Errorf("Error during IpBlock read: %v", err)
 	}
 
 	d.Set("revision", ipBlock.Revision)

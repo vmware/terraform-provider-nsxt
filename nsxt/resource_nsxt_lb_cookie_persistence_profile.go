@@ -213,15 +213,15 @@ func resourceNsxtLbCookiePersistenceProfileRead(d *schema.ResourceData, m interf
 	}
 
 	lbCookiePersistenceProfile, resp, err := nsxClient.ServicesApi.ReadLoadBalancerCookiePersistenceProfile(nsxClient.Context, id)
-	if err != nil {
-		return fmt.Errorf("Error during LbCookiePersistenceProfile read: %v", err)
-	}
-
-	if resp.StatusCode == http.StatusNotFound {
+	if resp != nil && resp.StatusCode == http.StatusNotFound {
 		log.Printf("[DEBUG] LbCookiePersistenceProfile %s not found", id)
 		d.SetId("")
 		return nil
 	}
+	if err != nil {
+		return fmt.Errorf("Error during LbCookiePersistenceProfile read: %v", err)
+	}
+
 	d.Set("revision", lbCookiePersistenceProfile.Revision)
 	d.Set("description", lbCookiePersistenceProfile.Description)
 	d.Set("display_name", lbCookiePersistenceProfile.DisplayName)

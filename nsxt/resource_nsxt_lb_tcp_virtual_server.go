@@ -163,15 +163,15 @@ func resourceNsxtLbTCPVirtualServerRead(d *schema.ResourceData, m interface{}) e
 	}
 
 	lbVirtualServer, resp, err := nsxClient.ServicesApi.ReadLoadBalancerVirtualServer(nsxClient.Context, id)
-	if err != nil {
-		return fmt.Errorf("Error during LbVirtualServer read: %v", err)
-	}
-
-	if resp.StatusCode == http.StatusNotFound {
+	if resp != nil && resp.StatusCode == http.StatusNotFound {
 		log.Printf("[DEBUG] LbVirtualServer %s not found", id)
 		d.SetId("")
 		return nil
 	}
+	if err != nil {
+		return fmt.Errorf("Error during LbVirtualServer read: %v", err)
+	}
+
 	d.Set("revision", lbVirtualServer.Revision)
 	d.Set("description", lbVirtualServer.Description)
 	d.Set("display_name", lbVirtualServer.DisplayName)

@@ -100,15 +100,15 @@ func resourceNsxtLbFastTCPApplicationProfileRead(d *schema.ResourceData, m inter
 	}
 
 	lbFastTCPProfile, resp, err := nsxClient.ServicesApi.ReadLoadBalancerFastTcpProfile(nsxClient.Context, id)
-	if err != nil {
-		return fmt.Errorf("Error during LbFastTcpProfile read: %v", err)
-	}
-
-	if resp.StatusCode == http.StatusNotFound {
+	if resp != nil && resp.StatusCode == http.StatusNotFound {
 		log.Printf("[DEBUG] LbFastTcpProfile %s not found", id)
 		d.SetId("")
 		return nil
 	}
+	if err != nil {
+		return fmt.Errorf("Error during LbFastTcpProfile read: %v", err)
+	}
+
 	d.Set("revision", lbFastTCPProfile.Revision)
 	d.Set("description", lbFastTCPProfile.Description)
 	d.Set("display_name", lbFastTCPProfile.DisplayName)

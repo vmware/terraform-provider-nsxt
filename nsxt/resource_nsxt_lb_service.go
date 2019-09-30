@@ -124,13 +124,13 @@ func resourceNsxtLbServiceRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	lbService, resp, err := nsxClient.ServicesApi.ReadLoadBalancerService(nsxClient.Context, id)
-	if err != nil {
-		return fmt.Errorf("Error during LbService read: %v", err)
-	}
-	if resp.StatusCode == http.StatusNotFound {
+	if resp != nil && resp.StatusCode == http.StatusNotFound {
 		log.Printf("[DEBUG] LbService %s not found", id)
 		d.SetId("")
 		return nil
+	}
+	if err != nil {
+		return fmt.Errorf("Error during LbService read: %v", err)
 	}
 
 	d.Set("revision", lbService.Revision)

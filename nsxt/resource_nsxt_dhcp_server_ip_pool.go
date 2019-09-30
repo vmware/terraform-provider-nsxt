@@ -113,13 +113,11 @@ func resourceNsxtDhcpServerIPPoolCreate(d *schema.ResourceData, m interface{}) e
 	}
 
 	createdPool, resp, err := nsxClient.ServicesApi.CreateDhcpIpPool(nsxClient.Context, serverID, pool)
-
+	if resp != nil && resp.StatusCode != http.StatusCreated {
+		return fmt.Errorf("Unexpected status returned during DhcpIPPool create: %v", resp.StatusCode)
+	}
 	if err != nil {
 		return fmt.Errorf("Error during DhcpIPPool create: %v", err)
-	}
-
-	if resp.StatusCode != http.StatusCreated {
-		return fmt.Errorf("Unexpected status returned during DhcpIPPool create: %v", resp.StatusCode)
 	}
 
 	d.SetId(createdPool.Id)

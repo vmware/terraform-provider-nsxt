@@ -215,14 +215,13 @@ func resourceNsxtSwitchSecuritySwitchingProfileRead(d *schema.ResourceData, m in
 	}
 
 	switchSecurityProfile, resp, err := nsxClient.LogicalSwitchingApi.GetSwitchSecuritySwitchingProfile(nsxClient.Context, id)
-	if err != nil {
-		return fmt.Errorf("Error during SwitchSecurityProfile read: %v", err)
-	}
-
-	if resp.StatusCode == http.StatusNotFound {
+	if resp != nil && resp.StatusCode == http.StatusNotFound {
 		log.Printf("[DEBUG] SwitchSecurityProfile %s not found", id)
 		d.SetId("")
 		return nil
+	}
+	if err != nil {
+		return fmt.Errorf("Error during SwitchSecurityProfile read: %v", err)
 	}
 
 	d.Set("revision", switchSecurityProfile.Revision)

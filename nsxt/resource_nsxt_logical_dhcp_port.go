@@ -97,15 +97,15 @@ func resourceNsxtLogicalDhcpPortRead(d *schema.ResourceData, m interface{}) erro
 		return fmt.Errorf("Error obtaining logical DHCP port ID from state during read")
 	}
 	LogicalDhcpPort, resp, err := nsxClient.LogicalSwitchingApi.GetLogicalPort(nsxClient.Context, id)
-
-	if err != nil {
-		return fmt.Errorf("Error while reading logical DHCP port %s: %v", id, err)
-	}
-	if resp.StatusCode == http.StatusNotFound {
+	if resp != nil && resp.StatusCode == http.StatusNotFound {
 		d.SetId("")
 		log.Printf("[DEBUG] Logical DHCP port %s not found", id)
 		return nil
 	}
+	if err != nil {
+		return fmt.Errorf("Error while reading logical DHCP port %s: %v", id, err)
+	}
+
 	if LogicalDhcpPort.Attachment == nil || LogicalDhcpPort.Attachment.AttachmentType != dhcpType {
 		return fmt.Errorf("Error reading DHCP port %s: This not a DHCP port", id)
 	}
