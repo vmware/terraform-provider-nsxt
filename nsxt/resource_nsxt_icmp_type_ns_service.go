@@ -90,14 +90,13 @@ func resourceNsxtIcmpTypeNsServiceCreate(d *schema.ResourceData, m interface{}) 
 	}
 
 	nsService, resp, err := nsxClient.GroupingObjectsApi.CreateIcmpTypeNSService(nsxClient.Context, nsService)
-
+	if resp != nil && resp.StatusCode != http.StatusCreated {
+		return fmt.Errorf("Unexpected status returned during NsService create: %v", resp.StatusCode)
+	}
 	if err != nil {
 		return fmt.Errorf("Error during NsService create: %v", err)
 	}
 
-	if resp.StatusCode != http.StatusCreated {
-		return fmt.Errorf("Unexpected status returned during NsService create: %v", resp.StatusCode)
-	}
 	d.SetId(nsService.Id)
 	return resourceNsxtIcmpTypeNsServiceRead(d, m)
 }

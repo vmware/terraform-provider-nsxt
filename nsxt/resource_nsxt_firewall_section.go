@@ -320,7 +320,7 @@ func resourceNsxtFirewallSectionRead(d *schema.ResourceData, m interface{}) erro
 
 	// Getting the applied tos will require another api call (for NSX 2.1 or less)
 	firewallSection2, resp, err := nsxClient.ServicesApi.GetSection(nsxClient.Context, id)
-	if resp.StatusCode == http.StatusNotFound {
+	if resp != nil && resp.StatusCode == http.StatusNotFound {
 		log.Printf("[DEBUG] FirewallSection %s not found", id)
 		d.SetId("")
 		return nil

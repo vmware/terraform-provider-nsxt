@@ -91,7 +91,7 @@ func resourceNsxtDhcpServerProfileRead(d *schema.ResourceData, m interface{}) er
 	}
 
 	dhcpProfile, resp, err := nsxClient.ServicesApi.ReadDhcpProfile(nsxClient.Context, id)
-	if resp.StatusCode == http.StatusNotFound {
+	if resp != nil && resp.StatusCode == http.StatusNotFound {
 		log.Printf("[DEBUG] DhcpProfile %s not found", id)
 		d.SetId("")
 		return nil

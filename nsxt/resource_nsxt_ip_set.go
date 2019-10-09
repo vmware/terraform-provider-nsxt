@@ -84,13 +84,13 @@ func resourceNsxtIPSetRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	ipSet, resp, err := nsxClient.GroupingObjectsApi.ReadIPSet(nsxClient.Context, id)
-	if err != nil {
-		return fmt.Errorf("Error during IpSet read: %v", err)
-	}
-	if resp.StatusCode == http.StatusNotFound {
+	if resp != nil && resp.StatusCode == http.StatusNotFound {
 		log.Printf("[DEBUG] IpSet %s not found", id)
 		d.SetId("")
 		return nil
+	}
+	if err != nil {
+		return fmt.Errorf("Error during IpSet read: %v", err)
 	}
 
 	d.Set("revision", ipSet.Revision)

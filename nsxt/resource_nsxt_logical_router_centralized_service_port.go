@@ -107,13 +107,13 @@ func resourceNsxtLogicalRouterCentralizedServicePortRead(d *schema.ResourceData,
 	}
 
 	LogicalRouterCentralizedServicePort, resp, err := nsxClient.LogicalRoutingAndServicesApi.ReadLogicalRouterCentralizedServicePort(nsxClient.Context, id)
-	if err != nil {
-		return fmt.Errorf("Error during LogicalRouterCentralizedServicePort read: %v", err)
-	}
-	if resp.StatusCode == http.StatusNotFound {
+	if resp != nil && resp.StatusCode == http.StatusNotFound {
 		log.Printf("[DEBUG] LogicalRouterCentralizedServicePort %s not found", id)
 		d.SetId("")
 		return nil
+	}
+	if err != nil {
+		return fmt.Errorf("Error during LogicalRouterCentralizedServicePort read: %v", err)
 	}
 
 	d.Set("revision", LogicalRouterCentralizedServicePort.Revision)

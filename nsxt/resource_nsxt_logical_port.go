@@ -87,14 +87,13 @@ func resourceNsxtLogicalPortRead(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("Error obtaining logical port ID from state during read")
 	}
 	logicalPort, resp, err := nsxClient.LogicalSwitchingApi.GetLogicalPort(nsxClient.Context, id)
-
-	if err != nil {
-		return fmt.Errorf("Error while reading logical port %s: %v", id, err)
-	}
-	if resp.StatusCode == http.StatusNotFound {
+	if resp != nil && resp.StatusCode == http.StatusNotFound {
 		d.SetId("")
 		log.Printf("[DEBUG] Logical port %s not found", id)
 		return nil
+	}
+	if err != nil {
+		return fmt.Errorf("Error while reading logical port %s: %v", id, err)
 	}
 
 	d.Set("revision", logicalPort.Revision)

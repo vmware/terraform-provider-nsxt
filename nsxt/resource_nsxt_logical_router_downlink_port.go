@@ -142,13 +142,13 @@ func resourceNsxtLogicalRouterDownLinkPortRead(d *schema.ResourceData, m interfa
 	}
 
 	logicalRouterDownLinkPort, resp, err := nsxClient.LogicalRoutingAndServicesApi.ReadLogicalRouterDownLinkPort(nsxClient.Context, id)
-	if err != nil {
-		return fmt.Errorf("Error during LogicalRouterDownLinkPort read: %v", err)
-	}
-	if resp.StatusCode == http.StatusNotFound {
+	if resp != nil && resp.StatusCode == http.StatusNotFound {
 		log.Printf("[DEBUG] LogicalRouterDownLinkPort %s not found", id)
 		d.SetId("")
 		return nil
+	}
+	if err != nil {
+		return fmt.Errorf("Error during LogicalRouterDownLinkPort read: %v", err)
 	}
 
 	d.Set("revision", logicalRouterDownLinkPort.Revision)

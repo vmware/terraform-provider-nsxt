@@ -108,15 +108,15 @@ func resourceNsxtIPDiscoverySwitchingProfileRead(d *schema.ResourceData, m inter
 	}
 
 	switchingProfile, resp, err := nsxClient.LogicalSwitchingApi.GetIpDiscoverySwitchingProfile(nsxClient.Context, id)
-	if err != nil {
-		return fmt.Errorf("Error during IPDiscoverySwitchingProfile read: %v", err)
-	}
-
-	if resp.StatusCode == http.StatusNotFound {
+	if resp != nil && resp.StatusCode == http.StatusNotFound {
 		log.Printf("[DEBUG] IPDiscoverySwitchingProfile %s not found", id)
 		d.SetId("")
 		return nil
 	}
+	if err != nil {
+		return fmt.Errorf("Error during IPDiscoverySwitchingProfile read: %v", err)
+	}
+
 	d.Set("revision", switchingProfile.Revision)
 	d.Set("description", switchingProfile.Description)
 	d.Set("display_name", switchingProfile.DisplayName)

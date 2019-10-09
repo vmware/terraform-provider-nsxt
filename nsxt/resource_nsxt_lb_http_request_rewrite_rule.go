@@ -387,15 +387,15 @@ func resourceNsxtLbHTTPRequestRewriteRuleRead(d *schema.ResourceData, m interfac
 	}
 
 	lbRule, resp, err := nsxClient.ServicesApi.ReadLoadBalancerRule(nsxClient.Context, id)
-	if err != nil {
-		return fmt.Errorf("Error during LoadBalancerRule read: %v", err)
-	}
-
-	if resp.StatusCode == http.StatusNotFound {
+	if resp != nil && resp.StatusCode == http.StatusNotFound {
 		log.Printf("[DEBUG] LoadBalancerRule %s not found", id)
 		d.SetId("")
 		return nil
 	}
+	if err != nil {
+		return fmt.Errorf("Error during LoadBalancerRule read: %v", err)
+	}
+
 	d.Set("revision", lbRule.Revision)
 	d.Set("description", lbRule.Description)
 	d.Set("display_name", lbRule.DisplayName)

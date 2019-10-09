@@ -396,13 +396,13 @@ func resourceNsxtLbPoolRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	lbPool, resp, err := nsxClient.ServicesApi.ReadLoadBalancerPool(nsxClient.Context, id)
-	if err != nil {
-		return fmt.Errorf("Error during LbPool read: %v", err)
-	}
-	if resp.StatusCode == http.StatusNotFound {
+	if resp != nil && resp.StatusCode == http.StatusNotFound {
 		log.Printf("[DEBUG] LbPool %s not found", id)
 		d.SetId("")
 		return nil
+	}
+	if err != nil {
+		return fmt.Errorf("Error during LbPool read: %v", err)
 	}
 
 	d.Set("revision", lbPool.Revision)

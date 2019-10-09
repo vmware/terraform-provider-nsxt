@@ -68,14 +68,13 @@ func resourceNsxtLogicalRouterLinkPortOnTier1Create(d *schema.ResourceData, m in
 	}
 
 	logicalRouterLinkPort, resp, err := nsxClient.LogicalRoutingAndServicesApi.CreateLogicalRouterLinkPortOnTier1(nsxClient.Context, logicalRouterLinkPort)
-
+	if resp != nil && resp.StatusCode != http.StatusCreated {
+		return fmt.Errorf("Unexpected status returned during LogicalRouterLinkPortOnTier1 create: %v", resp.StatusCode)
+	}
 	if err != nil {
 		return fmt.Errorf("Error during LogicalRouterLinkPortOnTier1 create: %v", err)
 	}
 
-	if resp.StatusCode != http.StatusCreated {
-		return fmt.Errorf("Unexpected status returned during LogicalRouterLinkPortOnTier1 create: %v", resp.StatusCode)
-	}
 	d.SetId(logicalRouterLinkPort.Id)
 
 	return resourceNsxtLogicalRouterLinkPortOnTier1Read(d, m)
@@ -89,13 +88,13 @@ func resourceNsxtLogicalRouterLinkPortOnTier1Read(d *schema.ResourceData, m inte
 	}
 
 	logicalRouterLinkPort, resp, err := nsxClient.LogicalRoutingAndServicesApi.ReadLogicalRouterLinkPortOnTier1(nsxClient.Context, id)
-	if err != nil {
-		return fmt.Errorf("Error during LogicalRouterLinkPortOnTier1 read: %v", err)
-	}
-	if resp.StatusCode == http.StatusNotFound {
+	if resp != nil && resp.StatusCode == http.StatusNotFound {
 		log.Printf("[DEBUG] LogicalRouterLinkPortOnTier1 %s not found", id)
 		d.SetId("")
 		return nil
+	}
+	if err != nil {
+		return fmt.Errorf("Error during LogicalRouterLinkPortOnTier1 read: %v", err)
 	}
 
 	d.Set("revision", logicalRouterLinkPort.Revision)

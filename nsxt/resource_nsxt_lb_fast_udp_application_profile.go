@@ -70,14 +70,13 @@ func resourceNsxtLbFastUDPApplicationProfileCreate(d *schema.ResourceData, m int
 	}
 
 	lbFastUDPProfile, resp, err := nsxClient.ServicesApi.CreateLoadBalancerFastUdpProfile(nsxClient.Context, lbFastUDPProfile)
-
+	if resp != nil && resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("Unexpected status returned during LbFastUdpProfile create: %v", resp.StatusCode)
+	}
 	if err != nil {
 		return fmt.Errorf("Error during LbFastUdpProfile create: %v", err)
 	}
 
-	if resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("Unexpected status returned during LbFastUdpProfile create: %v", resp.StatusCode)
-	}
 	d.SetId(lbFastUDPProfile.Id)
 
 	return resourceNsxtLbFastUDPApplicationProfileRead(d, m)

@@ -108,15 +108,15 @@ func resourceNsxtLbSourceIPPersistenceProfileRead(d *schema.ResourceData, m inte
 	}
 
 	lbSourceIPPersistenceProfile, resp, err := nsxClient.ServicesApi.ReadLoadBalancerSourceIpPersistenceProfile(nsxClient.Context, id)
-	if err != nil {
-		return fmt.Errorf("Error during LbSourceIPPersistenceProfile read: %v", err)
-	}
-
-	if resp.StatusCode == http.StatusNotFound {
+	if resp != nil && resp.StatusCode == http.StatusNotFound {
 		log.Printf("[DEBUG] LbSourceIPPersistenceProfile %s not found", id)
 		d.SetId("")
 		return nil
 	}
+	if err != nil {
+		return fmt.Errorf("Error during LbSourceIPPersistenceProfile read: %v", err)
+	}
+
 	d.Set("revision", lbSourceIPPersistenceProfile.Revision)
 	d.Set("description", lbSourceIPPersistenceProfile.Description)
 	d.Set("display_name", lbSourceIPPersistenceProfile.DisplayName)

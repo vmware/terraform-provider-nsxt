@@ -84,13 +84,13 @@ func resourceNsxtDhcpRelayProfileRead(d *schema.ResourceData, m interface{}) err
 	}
 
 	dhcpRelayProfile, resp, err := nsxClient.LogicalRoutingAndServicesApi.ReadDhcpRelayProfile(nsxClient.Context, id)
-	if err != nil {
-		return fmt.Errorf("Error during DhcpRelayProfile read: %v", err)
-	}
-	if resp.StatusCode == http.StatusNotFound {
+	if resp != nil && resp.StatusCode == http.StatusNotFound {
 		log.Printf("[DEBUG] DhcpRelayProfile %s not found", id)
 		d.SetId("")
 		return nil
+	}
+	if err != nil {
+		return fmt.Errorf("Error during DhcpRelayProfile read: %v", err)
 	}
 
 	d.Set("revision", dhcpRelayProfile.Revision)

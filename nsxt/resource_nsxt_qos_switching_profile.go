@@ -227,15 +227,15 @@ func resourceNsxtQosSwitchingProfileRead(d *schema.ResourceData, m interface{}) 
 	}
 
 	qosSwitchingProfile, resp, err := nsxClient.LogicalSwitchingApi.GetQosSwitchingProfile(nsxClient.Context, id)
-	if err != nil {
-		return fmt.Errorf("Error during QosSwitchingProfile read: %v", err)
-	}
-
-	if resp.StatusCode == http.StatusNotFound {
+	if resp != nil && resp.StatusCode == http.StatusNotFound {
 		log.Printf("[DEBUG] QosSwitchingProfile %s not found", id)
 		d.SetId("")
 		return nil
 	}
+	if err != nil {
+		return fmt.Errorf("Error during QosSwitchingProfile read: %v", err)
+	}
+
 	d.Set("revision", qosSwitchingProfile.Revision)
 	d.Set("description", qosSwitchingProfile.Description)
 	d.Set("display_name", qosSwitchingProfile.DisplayName)

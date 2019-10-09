@@ -104,15 +104,15 @@ func resourceNsxtLbClientSslProfileRead(d *schema.ResourceData, m interface{}) e
 	}
 
 	lbClientSslProfile, resp, err := nsxClient.ServicesApi.ReadLoadBalancerClientSslProfile(nsxClient.Context, id)
-	if err != nil {
-		return fmt.Errorf("Error during LbClientSslProfile read: %v", err)
-	}
-
-	if resp.StatusCode == http.StatusNotFound {
+	if resp != nil && resp.StatusCode == http.StatusNotFound {
 		log.Printf("[DEBUG] LbClientSslProfile %s not found", id)
 		d.SetId("")
 		return nil
 	}
+	if err != nil {
+		return fmt.Errorf("Error during LbClientSslProfile read: %v", err)
+	}
+
 	d.Set("revision", lbClientSslProfile.Revision)
 	d.Set("description", lbClientSslProfile.Description)
 	d.Set("display_name", lbClientSslProfile.DisplayName)

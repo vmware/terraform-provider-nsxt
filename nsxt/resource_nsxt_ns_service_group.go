@@ -107,15 +107,15 @@ func resourceNsxtNsServiceGroupRead(d *schema.ResourceData, m interface{}) error
 	}
 
 	nsServiceGroup, resp, err := nsxClient.GroupingObjectsApi.ReadNSServiceGroup(nsxClient.Context, id)
-	if err != nil {
-		return fmt.Errorf("Error during NsServiceGroup read: %v", err)
-	}
-
-	if resp.StatusCode == http.StatusNotFound {
+	if resp != nil && resp.StatusCode == http.StatusNotFound {
 		log.Printf("[DEBUG] NsServiceGroup %s not found", id)
 		d.SetId("")
 		return nil
 	}
+	if err != nil {
+		return fmt.Errorf("Error during NsServiceGroup read: %v", err)
+	}
+
 	d.Set("revision", nsServiceGroup.Revision)
 	d.Set("description", nsServiceGroup.Description)
 	d.Set("display_name", nsServiceGroup.DisplayName)
