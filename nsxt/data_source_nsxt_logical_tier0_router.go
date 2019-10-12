@@ -61,11 +61,11 @@ func dataSourceNsxtLogicalTier0RouterRead(d *schema.ResourceData, m interface{})
 		// Get by id
 		objGet, resp, err := nsxClient.LogicalRoutingAndServicesApi.ReadLogicalRouter(nsxClient.Context, objID)
 
+		if resp != nil && resp.StatusCode == http.StatusNotFound {
+			return fmt.Errorf("Logical tier0 router %s was not found", objID)
+		}
 		if err != nil {
 			return fmt.Errorf("Error while reading logical tier0 router %s: %v", objID, err)
-		}
-		if resp.StatusCode == http.StatusNotFound {
-			return fmt.Errorf("Logical tier0 router %s was not found", objID)
 		}
 		if objGet.RouterType != "TIER0" {
 			return fmt.Errorf("Logical router %s is not a tier0 router", objID)
@@ -104,7 +104,7 @@ func dataSourceNsxtLogicalTier0RouterRead(d *schema.ResourceData, m interface{})
 			}
 			obj = prefixMatch[0]
 		} else {
-			return fmt.Errorf("Logical tier0 router '%s' was not found", objName)
+			return fmt.Errorf("Logical tier0 router with name '%s' was not found", objName)
 		}
 	}
 

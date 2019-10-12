@@ -61,11 +61,11 @@ func dataSourceNsxtTransportZoneRead(d *schema.ResourceData, m interface{}) erro
 		// Get by id
 		objGet, resp, err := nsxClient.NetworkTransportApi.GetTransportZone(nsxClient.Context, objID)
 
+		if resp != nil && resp.StatusCode == http.StatusNotFound {
+			return fmt.Errorf("Transport zone %s was not found", objID)
+		}
 		if err != nil {
 			return fmt.Errorf("Error while reading transport zone %s: %v", objID, err)
-		}
-		if resp.StatusCode == http.StatusNotFound {
-			return fmt.Errorf("Transport zone %s was not found", objID)
 		}
 		obj = objGet
 	} else if objName == "" {
@@ -99,7 +99,7 @@ func dataSourceNsxtTransportZoneRead(d *schema.ResourceData, m interface{}) erro
 			}
 			obj = prefixMatch[0]
 		} else {
-			return fmt.Errorf("Transport zone '%s' was not found", objName)
+			return fmt.Errorf("Transport zone with name '%s' was not found", objName)
 		}
 	}
 

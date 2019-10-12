@@ -53,11 +53,11 @@ func dataSourceNsxtSwitchingProfileRead(d *schema.ResourceData, m interface{}) e
 		// Get by id
 		objGet, resp, err := nsxClient.LogicalSwitchingApi.GetSwitchingProfile(nsxClient.Context, objID)
 
+		if resp != nil && resp.StatusCode == http.StatusNotFound {
+			return fmt.Errorf("switching profile %s was not found", objID)
+		}
 		if err != nil {
 			return fmt.Errorf("Error while reading switching profile %s: %v", objID, err)
-		}
-		if resp.StatusCode == http.StatusNotFound {
-			return fmt.Errorf("switching profile %s was not found", objID)
 		}
 		obj = objGet
 	} else if objName != "" {
@@ -81,7 +81,7 @@ func dataSourceNsxtSwitchingProfileRead(d *schema.ResourceData, m interface{}) e
 			}
 		}
 		if !found {
-			return fmt.Errorf("Switching profile '%s' was not found", objName)
+			return fmt.Errorf("Switching profile with name '%s' was not found", objName)
 		}
 	} else {
 		return fmt.Errorf("Error obtaining switching profile ID or name during read")

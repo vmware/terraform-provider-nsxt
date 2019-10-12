@@ -48,11 +48,11 @@ func dataSourceNsxtCertificateRead(d *schema.ResourceData, m interface{}) error 
 		// Get by id
 		objGet, resp, err := nsxClient.NsxComponentAdministrationApi.GetCertificate(nsxClient.Context, objID, nil)
 
+		if resp != nil && resp.StatusCode == http.StatusNotFound {
+			return fmt.Errorf("certificate %s was not found", objID)
+		}
 		if err != nil {
 			return fmt.Errorf("Error while reading certificate %s: %v", objID, err)
-		}
-		if resp.StatusCode == http.StatusNotFound {
-			return fmt.Errorf("certificate %s was not found", objID)
 		}
 		obj = objGet
 
@@ -75,7 +75,7 @@ func dataSourceNsxtCertificateRead(d *schema.ResourceData, m interface{}) error 
 			}
 		}
 		if !found {
-			return fmt.Errorf("certificate '%s' was not found", objName)
+			return fmt.Errorf("Certificate with name '%s' was not found", objName)
 		}
 	} else {
 		return fmt.Errorf("Error obtaining certificate ID or name during read")

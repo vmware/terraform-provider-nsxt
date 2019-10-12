@@ -48,11 +48,11 @@ func dataSourceNsxtNsServiceRead(d *schema.ResourceData, m interface{}) error {
 		// Get by id
 		objGet, resp, err := nsxClient.GroupingObjectsApi.ReadNSService(nsxClient.Context, objID)
 
-		if err != nil {
-			return fmt.Errorf("Error while reading ns service %s: %v", objID, err)
-		}
-		if resp.StatusCode == http.StatusNotFound {
+		if resp != nil && resp.StatusCode == http.StatusNotFound {
 			return fmt.Errorf("NS service %s was not found", objID)
+		}
+		if err != nil {
+			return fmt.Errorf("Error while reading NS service %s: %v", objID, err)
 		}
 		obj = objGet
 	} else if objName != "" {
@@ -74,7 +74,7 @@ func dataSourceNsxtNsServiceRead(d *schema.ResourceData, m interface{}) error {
 			}
 		}
 		if !found {
-			return fmt.Errorf("NS service '%s' was not found out of %d services", objName, len(objList.Results))
+			return fmt.Errorf("NS service with name '%s' was not found among %d services", objName, len(objList.Results))
 		}
 	} else {
 		return fmt.Errorf("Error obtaining NS service ID or name during read")

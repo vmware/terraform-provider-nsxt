@@ -61,13 +61,14 @@ func dataSourceNsxtEdgeClusterRead(d *schema.ResourceData, m interface{}) error 
 		// Get by id
 		objGet, resp, err := nsxClient.NetworkTransportApi.ReadEdgeCluster(nsxClient.Context, objID)
 
+		if resp != nil && resp.StatusCode == http.StatusNotFound {
+			return fmt.Errorf("Edge cluster %s was not found", objID)
+		}
 		if err != nil {
 			return fmt.Errorf("Error while reading edge cluster %s: %v", objID, err)
 		}
-		if resp.StatusCode == http.StatusNotFound {
-			return fmt.Errorf("Edge cluster %s was not found", objID)
-		}
 		obj = objGet
+
 	} else if objName == "" {
 		return fmt.Errorf("Error obtaining edge cluster ID or name during read")
 	} else {
@@ -99,7 +100,7 @@ func dataSourceNsxtEdgeClusterRead(d *schema.ResourceData, m interface{}) error 
 			}
 			obj = prefixMatch[0]
 		} else {
-			return fmt.Errorf("Edge cluster '%s' was not found", objName)
+			return fmt.Errorf("Edge cluster with name '%s' was not found", objName)
 		}
 	}
 
