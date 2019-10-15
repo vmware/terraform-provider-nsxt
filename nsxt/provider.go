@@ -104,6 +104,7 @@ func Provider() terraform.ResourceProvider {
 			"nsxt_ns_service":           dataSourceNsxtNsService(),
 			"nsxt_edge_cluster":         dataSourceNsxtEdgeCluster(),
 			"nsxt_certificate":          dataSourceNsxtCertificate(),
+			"nsxt_ip_pool":              dataSourceNsxtIPPool(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -140,6 +141,7 @@ func Provider() terraform.ResourceProvider {
 			"nsxt_ip_block":                                resourceNsxtIPBlock(),
 			"nsxt_ip_block_subnet":                         resourceNsxtIPBlockSubnet(),
 			"nsxt_ip_pool":                                 resourceNsxtIPPool(),
+			"nsxt_ip_pool_allocation_ip_address":           resourceNsxtIPPoolAllocationIPAddress(),
 			"nsxt_ip_set":                                  resourceNsxtIPSet(),
 			"nsxt_static_route":                            resourceNsxtStaticRoute(),
 			"nsxt_vm_tags":                                 resourceNsxtVMTags(),
