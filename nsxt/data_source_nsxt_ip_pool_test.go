@@ -1,4 +1,4 @@
-/* Copyright © 2017 VMware, Inc. All Rights Reserved.
+/* Copyright © 2019 VMware, Inc. All Rights Reserved.
    SPDX-License-Identifier: MPL-2.0 */
 
 package nsxt
@@ -10,7 +10,10 @@ import (
 )
 
 func TestAccDataSourceNsxtIPPool_basic(t *testing.T) {
-	ipPoolName := getIpPoolName()
+	ipPoolName := getIPPoolName()
+	if ipPoolName == "" {
+		t.Skipf("No NSXT_TEST_IP_POOL set - skipping test")
+	}
 	testResourceName := "data.nsxt_ip_pool.test"
 
 	resource.Test(t, resource.TestCase{

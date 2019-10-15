@@ -87,12 +87,8 @@ func getMacPoolName() string {
 	return name
 }
 
-func getIpPoolName() string {
-	name := os.Getenv("NSXT_TEST_IP_POOL")
-	if name == "" {
-		name = ipPoolDefaultName
-	}
-	return name
+func getIPPoolName() string {
+	return os.Getenv("NSXT_TEST_IP_POOL")
 }
 
 func getTestVMID() string {

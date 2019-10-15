@@ -1,4 +1,4 @@
-/* Copyright © 2017 VMware, Inc. All Rights Reserved.
+/* Copyright © 2019 VMware, Inc. All Rights Reserved.
    SPDX-License-Identifier: MPL-2.0 */
 
 package nsxt
@@ -48,11 +48,11 @@ func dataSourceNsxtIPPoolRead(d *schema.ResourceData, m interface{}) error {
 		// Get by id
 		objGet, resp, err := nsxClient.PoolManagementApi.ReadIpPool(nsxClient.Context, objID)
 
+		if resp != nil && resp.StatusCode == http.StatusNotFound {
+			return fmt.Errorf("IP pool %s was not found", objID)
+		}
 		if err != nil {
 			return fmt.Errorf("Error while reading ns service %s: %v", objID, err)
-		}
-		if resp.StatusCode == http.StatusNotFound {
-			return fmt.Errorf("IP pool %s was not found", objID)
 		}
 		obj = objGet
 	} else if objName != "" {

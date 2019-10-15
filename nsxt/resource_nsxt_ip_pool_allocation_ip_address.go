@@ -1,4 +1,4 @@
-/* Copyright © 2018 VMware, Inc. All Rights Reserved.
+/* Copyright © 2019 VMware, Inc. All Rights Reserved.
    SPDX-License-Identifier: MPL-2.0 */
 
 package nsxt
@@ -40,22 +40,22 @@ func resourceNsxtIPPoolAllocationIPAddress() *schema.Resource {
 
 func resourceNsxtIPPoolAllocationIPAddressCreate(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(*api.APIClient)
-	poolId := d.Get("ip_pool_id").(string)
-	allocationId := d.Get("allocation_id").(string)
-	allocationIpAddress := manager.AllocationIpAddress{
-		AllocationId: allocationId,
+	poolID := d.Get("ip_pool_id").(string)
+	allocationID := d.Get("allocation_id").(string)
+	allocationIPAddress := manager.AllocationIpAddress{
+		AllocationId: allocationID,
 	}
 
-	allocationIpAddress, resp, err := nsxClient.PoolManagementApi.AllocateOrReleaseFromIpPool(nsxClient.Context, poolId, allocationIpAddress, "ALLOCATE")
+	allocationIPAddress, resp, err := nsxClient.PoolManagementApi.AllocateOrReleaseFromIpPool(nsxClient.Context, poolID, allocationIPAddress, "ALLOCATE")
 
 	if err != nil {
-		return fmt.Errorf("Error during IpPoolAllocationIpAddress create: %v", err)
+		return fmt.Errorf("Error during IPPoolAllocationIPAddress create: %v", err)
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("Unexpected status returned during IpPoolAllocationIpAddress create: %v", resp.StatusCode)
+		return fmt.Errorf("Unexpected status returned during IPPoolAllocationIPAddress create: %v", resp.StatusCode)
 	}
-	d.SetId(allocationIpAddress.AllocationId)
+	d.SetId(allocationIPAddress.AllocationId)
 
 	return resourceNsxtIPPoolAllocationIPAddressRead(d, m)
 }
@@ -66,22 +66,28 @@ func resourceNsxtIPPoolAllocationIPAddressRead(d *schema.ResourceData, m interfa
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")
 	}
-	poolId := d.Get("ip_pool_id").(string)
-	if id == "" {
+	poolID := d.Get("ip_pool_id").(string)
+	if poolID == "" {
 		return fmt.Errorf("Error obtaining pool id")
 	}
 
-	resultList, resp, err := nsxClient.PoolManagementApi.ListIpPoolAllocations(nsxClient.Context, poolId)
+	resultList, resp, err := nsxClient.PoolManagementApi.ListIpPoolAllocations(nsxClient.Context, poolID)
+	if resp != nil && resp.StatusCode == http.StatusNotFound {
+		log.Printf("[DEBUG] IP pool %s not found", poolID)
+		d.SetId("")
+		return nil
+	}
+
 	if err != nil {
 		return fmt.Errorf("Error during IPPoolAllocationIPAddress read: %v", err)
 	}
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("Unexpected status returned during IpPoolAllocationIpAddress read: %v", resp.StatusCode)
+		return fmt.Errorf("Unexpected status returned during IPPoolAllocationIPAddress read: %v", resp.StatusCode)
 	}
 
 	for _, address := range resultList.Results {
 		if address.AllocationId == id {
-			d.Set("ip_pool_id", poolId)
+			d.Set("ip_pool_id", poolID)
 			d.Set("allocation_id", address.AllocationId)
 			return nil
 		}
@@ -102,21 +108,21 @@ func resourceNsxtIPPoolAllocationIPAddressDelete(d *schema.ResourceData, m inter
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")
 	}
-	poolId := d.Get("ip_pool_id").(string)
+	poolID := d.Get("ip_pool_id").(string)
 	if id == "" {
 		return fmt.Errorf("Error obtaining pool id")
 	}
 
-	allocationIpAddress := manager.AllocationIpAddress{
+	allocationIPAddress := manager.AllocationIpAddress{
 		AllocationId: d.Id(),
 	}
-	_, resp, err := nsxClient.PoolManagementApi.AllocateOrReleaseFromIpPool(nsxClient.Context, poolId, allocationIpAddress, "RELEASE")
-	if resp == nil && err != nil {
+	_, resp, err := nsxClient.PoolManagementApi.AllocateOrReleaseFromIpPool(nsxClient.Context, poolID, allocationIPAddress, "RELEASE")
+	if resp != nil && resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("Error during IPPoolAllocationIPAddress delete: status=%s", resp.Status)
+	}
+	if err != nil {
 		return fmt.Errorf("Error during IPPoolAllocationIPAddress delete: %v", err)
 	}
 
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("Error during IPPoolAllocationIPAddress delete: status=%s", resp.Status)
-	}
 	return nil
 }
