@@ -120,7 +120,8 @@ func resourceNsxtIPPoolAllocationIPAddressDelete(d *schema.ResourceData, m inter
 	if resp != nil && resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("Error during IPPoolAllocationIPAddress delete: status=%s", resp.Status)
 	}
-	if err != nil {
+	if resp == nil && err != nil {
+		// AllocateOrReleaseFromIpPool always returns an error EOF for action RELEASE, this is ignored if resp is set
 		return fmt.Errorf("Error during IPPoolAllocationIPAddress delete: %v", err)
 	}
 
