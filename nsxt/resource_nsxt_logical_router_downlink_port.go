@@ -157,7 +157,9 @@ func resourceNsxtLogicalRouterDownLinkPortRead(d *schema.ResourceData, m interfa
 	setTagsInSchema(d, logicalRouterDownLinkPort.Tags)
 	d.Set("logical_router_id", logicalRouterDownLinkPort.LogicalRouterId)
 	d.Set("mac_address", logicalRouterDownLinkPort.MacAddress)
-	d.Set("linked_logical_switch_port_id", logicalRouterDownLinkPort.LinkedLogicalSwitchPortId.TargetId)
+	if logicalRouterDownLinkPort.LinkedLogicalSwitchPortId != nil {
+		d.Set("linked_logical_switch_port_id", logicalRouterDownLinkPort.LinkedLogicalSwitchPortId.TargetId)
+	}
 	setIPSubnetsInSchema(d, logicalRouterDownLinkPort.Subnets)
 	d.Set("urpf_mode", logicalRouterDownLinkPort.UrpfMode)
 	err = setServiceBindingsInSchema(d, logicalRouterDownLinkPort.ServiceBindings, "service_binding")
