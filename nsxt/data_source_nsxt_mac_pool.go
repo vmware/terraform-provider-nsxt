@@ -48,11 +48,11 @@ func dataSourceNsxtMacPoolRead(d *schema.ResourceData, m interface{}) error {
 		// Get by id
 		objGet, resp, err := nsxClient.PoolManagementApi.ReadMacPool(nsxClient.Context, objID)
 
-		if err != nil {
-			return fmt.Errorf("Error while reading ns service %s: %v", objID, err)
-		}
-		if resp.StatusCode == http.StatusNotFound {
+		if resp != nil && resp.StatusCode == http.StatusNotFound {
 			return fmt.Errorf("Mac pool %s was not found", objID)
+		}
+		if err != nil {
+			return fmt.Errorf("Error while reading Mac pool %s: %v", objID, err)
 		}
 		obj = objGet
 	} else if objName != "" {
@@ -74,7 +74,7 @@ func dataSourceNsxtMacPoolRead(d *schema.ResourceData, m interface{}) error {
 			}
 		}
 		if !found {
-			return fmt.Errorf("Mac pool '%s' was not found out of %d services", objName, len(objList.Results))
+			return fmt.Errorf("Mac pool with name '%s' was not found among %d pools", objName, len(objList.Results))
 		}
 	} else {
 		return fmt.Errorf("Error obtaining Mac pool ID or name during read")

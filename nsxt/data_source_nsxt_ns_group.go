@@ -50,11 +50,11 @@ func dataSourceNsxtNsGroupRead(d *schema.ResourceData, m interface{}) error {
 		localVarOptionals["populateReferences"] = true
 		objGet, resp, err := nsxClient.GroupingObjectsApi.ReadNSGroup(nsxClient.Context, objID, localVarOptionals)
 
-		if err != nil {
-			return fmt.Errorf("Error while reading ns group %s: %v", objID, err)
-		}
-		if resp.StatusCode == http.StatusNotFound {
+		if resp != nil && resp.StatusCode == http.StatusNotFound {
 			return fmt.Errorf("NS group %s was not found", objID)
+		}
+		if err != nil {
+			return fmt.Errorf("Error while reading NS group %s: %v", objID, err)
 		}
 		obj = objGet
 	} else if objName != "" {
@@ -76,7 +76,7 @@ func dataSourceNsxtNsGroupRead(d *schema.ResourceData, m interface{}) error {
 			}
 		}
 		if !found {
-			return fmt.Errorf("NS group '%s' was not found out of %d groups", objName, len(objList.Results))
+			return fmt.Errorf("NS group with  name '%s' was not found among %d groups", objName, len(objList.Results))
 		}
 	} else {
 		return fmt.Errorf("Error obtaining NS group ID or name during read")
