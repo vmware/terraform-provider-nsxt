@@ -11,7 +11,7 @@ import (
 )
 
 var nsGroupTargetTypeValues = []string{"NSGroup", "IPSet", "LogicalPort", "LogicalSwitch", "MACSet"}
-var nsGroupMembershipCriteriaTargetTypeValues = []string{"LogicalPort", "LogicalSwitch", "VirtualMachine"}
+var nsGroupMembershipCriteriaTargetTypeValues = []string{"LogicalPort", "LogicalSwitch", "VirtualMachine", "IPSet"}
 var nsGroupTagOperationValues = []string{"EQUALS"}
 
 func resourceNsxtNsGroup() *schema.Resource {

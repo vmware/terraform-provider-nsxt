@@ -139,6 +139,7 @@ func resourceNsxtIPSetDelete(d *schema.ResourceData, m interface{}) error {
 	}
 
 	localVarOptionals := make(map[string]interface{})
+	localVarOptionals["force"] = true
 	resp, err := nsxClient.GroupingObjectsApi.DeleteIPSet(nsxClient.Context, id, localVarOptionals)
 	if err != nil {
 		return fmt.Errorf("Error during IpSet delete: %v", err)
