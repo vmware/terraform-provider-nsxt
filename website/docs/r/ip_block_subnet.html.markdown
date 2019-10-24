@@ -38,7 +38,7 @@ The following arguments are supported:
 * `display_name` - (Optional) The display name of this resource. Defaults to ID if not set.
 * `description` - (Optional) Description of this resource.
 * `block_id` - (Required) Block id for which the subnet is created.
-* `size` - (Required) Represents the size or number of IP addresses in the subnet.
+* `size` - (Required) Represents the size or number of IP addresses in the subnet. Changing this setting on existing subnet will re-create the subnet.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this IP block subnet.
 
 
