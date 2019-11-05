@@ -1,4 +1,18 @@
-## 1.2.0 (Unreleased)
+## 1.1.2 (Unreleased)
+
+FEATURES:
+* **New Data Source**: `nsxt_ip_pool` ([#109](https://github.com/terraform-providers/terraform-provider-nsxt/pull/190))
+* **New Resource**: `nsxt_ip_pool_allocation_ip_address` ([#109](https://github.com/terraform-providers/terraform-provider-nsxt/pull/190))
+
+IMPROVEMENTS:
+* `resource/nsxt_ns_group`: Support IPSet type in membership criteria ([#195](https://github.com/terraform-providers/terraform-provider-nsxt/pull/195))
+
+BUG FIXES:
+* Fix refresh failures for most of resources. When resource was deleted on backend, the provider is expected to refresh state, discover resource absence and re-create it on next apply. Instead, the provider errored out ([#195]https://github.com/terraform-providers/terraform-provider-nsxt/pull/191))
+* `resource/nsxt_ip_set`: Allow force-deletion of IPSet even if its referenced in ns groups.
+* `resource/nsxt_logical_router_downlink_port`: Fix crash that happened during import with specific configuration ([#193](https://github.com/terraform-providers/terraform-provider-nsxt/pull/193))
+* `resource/nsxt_logical_router_link_port_on_tier1`: Fix crash that happened during import with specific configuration ([#193](https://github.com/terraform-providers/terraform-provider-nsxt/pull/193))
+
 ## 1.1.1 (August 05, 2019)
 
 NOTES:
