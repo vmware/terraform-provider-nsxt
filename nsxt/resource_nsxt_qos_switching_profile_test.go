@@ -68,6 +68,15 @@ func TestAccResourceNsxtQosSwitchingProfile_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 				),
 			},
+			{
+				Config: testAccNSXQosSwitchingProfileEmptyTemplate(updatedName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXQosSwitchingProfileExists(updatedName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "egress_rate_shaper.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "ingress_broadcast_rate_shaper.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+				),
+			},
 		},
 	})
 }
@@ -174,6 +183,12 @@ resource "nsxt_qos_switching_profile" "test" {
   }
 }
 `, name, cos, direction, peak, peak)
+}
+
+func testAccNSXQosSwitchingProfileEmptyTemplate(name string) string {
+	return `
+resource "nsxt_qos_switching_profile" "test" {
+}`
 }
 
 func testAccNSXQosSwitchingProfileCreateTemplateTrivial(name string) string {

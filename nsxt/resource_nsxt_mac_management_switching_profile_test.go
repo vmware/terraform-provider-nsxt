@@ -54,6 +54,14 @@ func TestAccResourceNsxtMacManagementSwitchingProfile_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 				),
 			},
+			{
+				Config: testAccNSXMacManagementSwitchingProfileBasicTemplate(updatedName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXMacManagementSwitchingProfileExists(updatedName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "mac_learning.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+				),
+			},
 		},
 	})
 }
@@ -153,6 +161,14 @@ resource "nsxt_mac_management_switching_profile" "test" {
   }
 }
 `, name, macChange, macLearnEnabled, limit, limitPolicy, unicast)
+}
+
+func testAccNSXMacManagementSwitchingProfileBasicTemplate(name string) string {
+	return fmt.Sprintf(`
+resource "nsxt_mac_management_switching_profile" "test" {
+  display_name       = "%s"
+}
+`, name)
 }
 
 func testAccNSXMacManagementSwitchingProfileCreateTemplateTrivial(name string) string {

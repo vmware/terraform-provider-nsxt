@@ -50,6 +50,13 @@ func TestAccResourceNsxtIpDiscoverySwitchingProfile_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 				),
 			},
+			{
+				Config: testAccNSXIpDiscoverySwitchingProfileEmptyTemplate(updatedName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXIpDiscoverySwitchingProfileExists(updatedName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+				),
+			},
 		},
 	})
 }
@@ -145,6 +152,14 @@ resource "nsxt_ip_discovery_switching_profile" "test" {
   }
 }
 `, name, vmToolsEnabled, arpSnoopingEnabled, dhcpSnoopingEnabled, arpBindingsLimit)
+}
+
+func testAccNSXIpDiscoverySwitchingProfileEmptyTemplate(name string) string {
+	return fmt.Sprintf(`
+resource "nsxt_ip_discovery_switching_profile" "test" {
+  display_name          = "%s"
+}
+`, name)
 }
 
 func testAccNSXIpDiscoverySwitchingProfileCreateTemplateTrivial(name string) string {

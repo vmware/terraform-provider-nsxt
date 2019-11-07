@@ -252,6 +252,7 @@ func resourceNsxtSwitchSecuritySwitchingProfileUpdate(d *schema.ResourceData, m 
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
+	revision := int64(d.Get("revision").(int))
 	blockNonIP := d.Get("block_non_ip").(bool)
 	blockClientDHCP := d.Get("block_client_dhcp").(bool)
 	blockServerDHCP := d.Get("block_server_dhcp").(bool)
@@ -273,6 +274,7 @@ func resourceNsxtSwitchSecuritySwitchingProfileUpdate(d *schema.ResourceData, m 
 			WhiteList: bpduFilterWhitelist,
 		},
 		RateLimits: rateLimits,
+		Revision:   revision,
 	}
 
 	switchSecurityProfile, resp, err := nsxClient.LogicalSwitchingApi.UpdateSwitchSecuritySwitchingProfile(nsxClient.Context, id, switchSecurityProfile)
