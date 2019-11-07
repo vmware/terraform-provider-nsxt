@@ -64,6 +64,15 @@ func TestAccResourceNsxtSwitchSecuritySwitchingProfile_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 				),
 			},
+			{
+				Config: testAccNSXSwitchSecuritySwitchingProfileEmptyTemplate(updatedName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXSwitchSecuritySwitchingProfileExists(updatedName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "bpdu_filter_whitelist.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "rate_limits.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+				),
+			},
 		},
 	})
 }
@@ -168,6 +177,13 @@ resource "nsxt_switch_security_switching_profile" "test" {
   }
 }
 `, name, limit, limit, limit, limit)
+}
+func testAccNSXSwitchSecuritySwitchingProfileEmptyTemplate(name string) string {
+	return fmt.Sprintf(`
+resource "nsxt_switch_security_switching_profile" "test" {
+  display_name          = "%s"
+}
+`, name)
 }
 
 func testAccNSXSwitchSecuritySwitchingProfileCreateTemplateTrivial(name string) string {

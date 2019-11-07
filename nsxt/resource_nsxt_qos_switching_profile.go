@@ -264,6 +264,7 @@ func resourceNsxtQosSwitchingProfileUpdate(d *schema.ResourceData, m interface{}
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
+	revision := int64(d.Get("revision").(int))
 	classOfService := int32(d.Get("class_of_service").(int))
 	dscpTrusted := "UNTRUSTED"
 	if d.Get("dscp_trusted").(bool) {
@@ -288,6 +289,7 @@ func resourceNsxtQosSwitchingProfileUpdate(d *schema.ResourceData, m interface{}
 			Priority: dscpPriority,
 		},
 		ShaperConfiguration: shapers,
+		Revision:            revision,
 	}
 
 	qosSwitchingProfile, resp, err := nsxClient.LogicalSwitchingApi.UpdateQosSwitchingProfile(nsxClient.Context, id, qosSwitchingProfile)

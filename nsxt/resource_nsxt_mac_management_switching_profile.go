@@ -182,6 +182,7 @@ func resourceNsxtMacManagementSwitchingProfileUpdate(d *schema.ResourceData, m i
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
+	revision := int64(d.Get("revision").(int))
 	macChangeAllowed := d.Get("mac_change_allowed").(bool)
 	macLearning := getMacLearningFromSchema(d)
 
@@ -191,6 +192,7 @@ func resourceNsxtMacManagementSwitchingProfileUpdate(d *schema.ResourceData, m i
 		Tags:             tags,
 		MacChangeAllowed: macChangeAllowed,
 		MacLearning:      macLearning,
+		Revision:         revision,
 	}
 
 	switchingProfile, resp, err := nsxClient.LogicalSwitchingApi.UpdateMacManagementSwitchingProfile(nsxClient.Context, id, switchingProfile)

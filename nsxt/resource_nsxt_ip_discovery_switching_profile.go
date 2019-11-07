@@ -139,6 +139,7 @@ func resourceNsxtIPDiscoverySwitchingProfileUpdate(d *schema.ResourceData, m int
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
+	revision := int64(d.Get("revision").(int))
 	dhcpSnoopingEnabled := d.Get("dhcp_snooping_enabled").(bool)
 	arpSnoopingEnabled := d.Get("arp_snooping_enabled").(bool)
 	arpBindingsLimit := d.Get("arp_bindings_limit").(int)
@@ -152,6 +153,7 @@ func resourceNsxtIPDiscoverySwitchingProfileUpdate(d *schema.ResourceData, m int
 		ArpSnoopingEnabled:  arpSnoopingEnabled,
 		ArpBindingsLimit:    arpBindingsLimit,
 		VmToolsEnabled:      vmToolsEnabled,
+		Revision:            revision,
 	}
 
 	switchingProfile, resp, err := nsxClient.LogicalSwitchingApi.UpdateIpDiscoverySwitchingProfile(nsxClient.Context, id, switchingProfile)

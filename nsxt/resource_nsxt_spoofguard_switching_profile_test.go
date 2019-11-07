@@ -44,6 +44,13 @@ func TestAccResourceNsxtSpoofGuardSwitchingProfile_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 				),
 			},
+			{
+				Config: testAccNSXSpoofGuardSwitchingProfileEmptyTemplate(updatedName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXSpoofGuardSwitchingProfileExists(updatedName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+				),
+			},
 		},
 	})
 }
@@ -136,4 +143,12 @@ resource "nsxt_spoofguard_switching_profile" "test" {
   }
 }
 `, name, enableWhitelist)
+}
+
+func testAccNSXSpoofGuardSwitchingProfileEmptyTemplate(name string) string {
+	return fmt.Sprintf(`
+resource "nsxt_spoofguard_switching_profile" "test" {
+  display_name                      = "%s"
+}
+`, name)
 }
