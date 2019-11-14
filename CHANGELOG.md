@@ -13,6 +13,7 @@ BUG FIXES:
 * `resource/nsxt_logical_router_downlink_port`: Fix crash that happened during import with specific configuration ([#193](https://github.com/terraform-providers/terraform-provider-nsxt/pull/193))
 * `resource/nsxt_logical_router_link_port_on_tier1`: Fix crash that happened during import with specific configuration ([#193](https://github.com/terraform-providers/terraform-provider-nsxt/pull/193))
 * `resource/nsxt_*_switching_profile`: Fix update error that occured in some cases due to omitted revision ([#201](https://github.com/terraform-providers/terraform-provider-nsxt/pull/201))
+* `resource/nsxt_logical_switch`: On delete operation, detach logical switch in order to avoid possible dependency errors ([#202](https://github.com/terraform-providers/terraform-provider-nsxt/pull/202))
 
 ## 1.1.1 (August 05, 2019)
 
