@@ -1,4 +1,4 @@
-## 1.1.2 (Unreleased)
+## 1.1.2 (November 18, 2019)
 
 FEATURES:
 * **New Data Source**: `nsxt_ip_pool` ([#109](https://github.com/terraform-providers/terraform-provider-nsxt/pull/190))
