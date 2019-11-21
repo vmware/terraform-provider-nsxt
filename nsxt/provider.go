@@ -6,6 +6,7 @@ package nsxt
 import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/vmware/go-vmware-nsxt"
 )
@@ -66,10 +67,11 @@ func Provider() terraform.ResourceProvider {
 				DefaultFunc: schema.EnvDefaultFunc("NSXT_MAX_RETRIES", 50),
 			},
 			"retry_min_delay": {
-				Type:        schema.TypeInt,
-				Optional:    true,
-				Description: "Minimum delay in milliseconds between retries of a request",
-				DefaultFunc: schema.EnvDefaultFunc("NSXT_RETRY_MIN_DELAY", 500),
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Description:  "Minimum delay in milliseconds between retries of a request",
+				DefaultFunc:  schema.EnvDefaultFunc("NSXT_RETRY_MIN_DELAY", 500),
+				ValidateFunc: validation.IntAtLeast(10),
 			},
 			"retry_max_delay": {
 				Type:        schema.TypeInt,
