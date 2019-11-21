@@ -78,7 +78,7 @@ func isSingleIP(v string) bool {
 	return (ip != nil)
 }
 
-func isCidr(v string, maxPrefix int, isIP bool) bool {
+func isCidr(v string, allowMaxPrefix bool, isIP bool) bool {
 	_, ipnet, err := net.ParseCIDR(v)
 	if err != nil {
 		return false
@@ -92,9 +92,13 @@ func isCidr(v string, maxPrefix int, isIP bool) bool {
 	if !isIP && v != ipnet.String() {
 		return false
 	}
-	s := strings.Split(v, "/")
-	prefix, _ := strconv.ParseUint(s[1], 10, 32)
-	return (int(prefix) <= maxPrefix)
+	_, bits := ipnet.Mask.Size()
+	if !allowMaxPrefix && bits == 1 {
+		return false
+	}
+
+	return true
+
 }
 
 func validatePortAddress() schema.SchemaValidateFunc {
@@ -106,7 +110,7 @@ func validatePortAddress() schema.SchemaValidateFunc {
 			return
 		}
 
-		if !isCidr(v, 31, true) {
+		if !isCidr(v, false, true) {
 			es = append(es, fmt.Errorf(
 				"expected %s to contain a valid port address/prefix, got: %s", k, v))
 		}
@@ -122,7 +126,7 @@ func validateCidrOrIPOrRange() schema.SchemaValidateFunc {
 			return
 		}
 
-		if !isCidr(v, 32, false) && !isSingleIP(v) && !isIPRange(v) {
+		if !isCidr(v, true, false) && !isSingleIP(v) && !isIPRange(v) {
 			es = append(es, fmt.Errorf(
 				"expected %s to contain a valid CIDR or IP or Range, got: %s", k, v))
 		}
@@ -186,7 +190,7 @@ func validateCidr() schema.SchemaValidateFunc {
 			return
 		}
 
-		if !isCidr(v, 32, false) {
+		if !isCidr(v, true, false) {
 			es = append(es, fmt.Errorf(
 				"expected %s to contain a valid CIDR, got: %s", k, v))
 		}
