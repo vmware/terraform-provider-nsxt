@@ -31,7 +31,7 @@ func TestAccResourceNsxtIpSet_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.#", "2"),
 				),
 			},
 			{
@@ -66,7 +66,7 @@ func TestAccResourceNsxtIpSet_noName(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "display_name"),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.#", "2"),
 				),
 			},
 			{
@@ -167,7 +167,7 @@ func testAccNSXIpSetCreateTemplate(name string) string {
 resource "nsxt_ip_set" "test" {
   display_name = "%s"
   description  = "Acceptance Test"
-  ip_addresses = ["1.1.1.1"]
+  ip_addresses = ["1.1.1.1", "3003::2"]
 
   tag {
     scope = "scope1"
