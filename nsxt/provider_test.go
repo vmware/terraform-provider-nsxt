@@ -5,8 +5,8 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	api "github.com/vmware/go-vmware-nsxt"
 	"os"
 	"strings"
