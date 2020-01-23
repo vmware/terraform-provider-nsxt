@@ -38,7 +38,7 @@ The following arguments are supported:
 
 * `display_name` - (Optional) The display name of this resource. Defaults to ID if not set.
 * `description` - (Optional) Description of this resource.
-* `cidr` - (Required) Represents network address and the prefix length which will be associated with a layer-2 broadcast domain. Changing this setting on existing block will re-create the block.
+* `cidr` - (Required) Represents network address and the prefix length which will be associated with a layer-2 broadcast domain.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this IP block.
 
 ## Attributes Reference

@@ -172,29 +172,6 @@ func TestAccResourceNsxtVlanLogicalSwitch_importBasic(t *testing.T) {
 	})
 }
 
-func testAccNSXVlanLogicalSwitchNoTZIDTemplate(switchName string) string {
-	return fmt.Sprintf(`
-resource "nsxt_vlan_logical_switch" "error" {
-  display_name     = "%s"
-  admin_state      = "UP"
-  description      = "Acceptance Test"
-}`, switchName)
-}
-
-func testAccNSXVlanLogicalSwitchNoVlanTemplate(switchName string, transportZoneName string) string {
-	return fmt.Sprintf(`
-data "nsxt_transport_zone" "TZ1" {
-  display_name = "%s"
-}
-
-resource "nsxt_vlan_logical_switch" "error" {
-  display_name      = "%s"
-  admin_state       = "UP"
-  description       = "Acceptance Test"
-  transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
-}`, transportZoneName, switchName)
-}
-
 func testAccNSXVlanLogicalSwitchCreateTemplate(resourceName string, switchName string, transportZoneName string, vlan string) string {
 	return fmt.Sprintf(`
 data "nsxt_transport_zone" "TZ1" {

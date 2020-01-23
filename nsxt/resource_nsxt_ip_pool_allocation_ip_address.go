@@ -6,7 +6,6 @@ package nsxt
 import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
-	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/manager"
 	"log"
 	"net/http"
@@ -16,7 +15,6 @@ func resourceNsxtIPPoolAllocationIPAddress() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtIPPoolAllocationIPAddressCreate,
 		Read:   resourceNsxtIPPoolAllocationIPAddressRead,
-		Update: resourceNsxtIPPoolAllocationIPAddressUpdate,
 		Delete: resourceNsxtIPPoolAllocationIPAddressDelete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
@@ -27,19 +25,24 @@ func resourceNsxtIPPoolAllocationIPAddress() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "ID of IP pool that allocation belongs to",
 				Required:    true,
+				ForceNew:    true,
 			},
 			"allocation_id": {
 				Type:        schema.TypeString,
 				Description: "IP Address that is allocated from the pool",
 				Optional:    true,
 				Computed:    true,
+				ForceNew:    true,
 			},
 		},
 	}
 }
 
 func resourceNsxtIPPoolAllocationIPAddressCreate(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
 	poolID := d.Get("ip_pool_id").(string)
 	allocationID := d.Get("allocation_id").(string)
 	allocationIPAddress := manager.AllocationIpAddress{
@@ -61,7 +64,10 @@ func resourceNsxtIPPoolAllocationIPAddressCreate(d *schema.ResourceData, m inter
 }
 
 func resourceNsxtIPPoolAllocationIPAddressRead(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")
@@ -98,12 +104,11 @@ func resourceNsxtIPPoolAllocationIPAddressRead(d *schema.ResourceData, m interfa
 	return nil
 }
 
-func resourceNsxtIPPoolAllocationIPAddressUpdate(d *schema.ResourceData, m interface{}) error {
-	return fmt.Errorf("Updating IPPoolAllocationIPAddress is not supported")
-}
-
 func resourceNsxtIPPoolAllocationIPAddressDelete(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")

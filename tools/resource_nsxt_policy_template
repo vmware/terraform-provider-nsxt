@@ -1,0 +1,179 @@
+/* Copyright © 2019 VMware, Inc. All Rights Reserved.
+   SPDX-License-Identifier: MPL-2.0 */
+
+package nsxt
+
+import (
+	"fmt"
+	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
+	"github.com/vmware/go-nsx-t-policy/bindings/nsx_policy/infra"
+	"github.com/vmware/go-nsx-t-policy/bindings/nsx_policy/model"
+	"github.com/vmware/go-nsx-t-policy/runtime/protocol/client"
+	"log"
+)
+
+<!ENUMS!>
+
+func resourceNsxtPolicy<!RESOURCE!>() *schema.Resource {
+	return &schema.Resource{
+		Create: resourceNsxtPolicy<!RESOURCE!>Create,
+		Read:   resourceNsxtPolicy<!RESOURCE!>Read,
+		Update: resourceNsxtPolicy<!RESOURCE!>Update,
+		Delete: resourceNsxtPolicy<!RESOURCE!>Delete,
+		Importer: &schema.ResourceImporter{
+                        State: schema.ImportStatePassthrough,
+		},
+
+		Schema: map[string]*schema.Schema{
+			"nsx_id":         getNsxIDSchema(),
+			"path":           getPathSchema(),
+			"display_name":   getDisplayNameSchema(),
+			"description":    getDescriptionSchema(),
+			"revision":       getRevisionSchema(),
+			"tag":            getTagsSchema(),
+                        <!SCHEMA_ATTRS!>
+		},
+	}
+}
+
+func resourceNsxtPolicy<!RESOURCE!>Exists(id string, connector *client.RestConnector) bool {
+	client := infra.NewDefault<!RESOURCE!>sClient(connector)
+
+        _, err := client.Get(id)
+	if err == nil {
+		return true
+	}
+
+	if isNotFoundError(err) {
+		return false
+	}
+
+	logAPIError("Error retrieving resource", err)
+
+	return false
+}
+
+func resourceNsxtPolicy<!RESOURCE!>Create(d *schema.ResourceData, m interface{}) error {
+	connector := getPolicyConnector(m)
+	client := infra.NewDefault<!RESOURCE!>sClient(connector)
+
+        if client == nil {
+            return policyResourceNotSupportedError()
+        }
+
+	// Initialize resource Id and verify this ID is not yet used
+	id, err := getOrGenerateID(d, connector, resourceNsxtPolicy<!RESOURCE!>Exists)
+	if err != nil {
+		return err
+	}
+
+	displayName := d.Get("display_name").(string)
+	description := d.Get("description").(string)
+	tags := getPolicyTagsFromSchema(d)
+        <!GET_ATTRS_FROM_SCHEMA!>
+
+        obj := model.<!RESOURCE!>{
+		DisplayName:    &displayName,
+		Description:    &description,
+		Tags:           tags,
+                <!SET_ATTRS_IN_OBJ!>
+        }
+
+	// Create the resource using PATCH
+	log.Printf("[INFO] Creating <!RESOURCE!> with ID %s", id)
+	err = client.Patch(id, obj)
+	if err != nil {
+		return handleCreateError("<!RESOURCE!>", id, err)
+	}
+
+	d.SetId(id)
+	d.Set("nsx_id", id)
+
+	return resourceNsxtPolicy<!RESOURCE!>Read(d, m)
+}
+
+func resourceNsxtPolicy<!RESOURCE!>Read(d *schema.ResourceData, m interface{}) error {
+	connector := getPolicyConnector(m)
+	client := infra.NewDefault<!RESOURCE!>sClient(connector)
+
+        if client == nil {
+            return policyResourceNotSupportedError()
+        }
+
+	id := d.Id()
+	if id == "" {
+		return fmt.Errorf("Error obtaining <!RESOURCE!> ID")
+	}
+
+	obj, err := client.Get(id)
+	if err != nil {
+		return handleReadError(d, "<!RESOURCE!>", id, err)
+	}
+
+	d.Set("display_name", obj.DisplayName)
+	d.Set("description", obj.Description)
+	setPolicyTagsInSchema(d, obj.Tags)
+	d.Set("nsx_id", id)
+	d.Set("path", obj.Path)
+	d.Set("revision", obj.Revision)
+
+        <!SET_OBJ_ATTRS_IN_SCHEMA!>
+
+	return nil
+}
+
+func resourceNsxtPolicy<!RESOURCE!>Update(d *schema.ResourceData, m interface{}) error {
+	connector := getPolicyConnector(m)
+	client := infra.NewDefault<!RESOURCE!>sClient(connector)
+        if client == nil {
+            return policyResourceNotSupportedError()
+        }
+
+	id := d.Id()
+	if id == "" {
+		return fmt.Errorf("Error obtaining <!RESOURCE!> ID")
+	}
+
+	// Read the rest of the configured parameters
+	description := d.Get("description").(string)
+	displayName := d.Get("display_name").(string)
+	tags := getPolicyTagsFromSchema(d)
+
+        <!GET_ATTRS_FROM_SCHEMA!>
+
+        obj := model.<!RESOURCE!>{
+		DisplayName:    &displayName,
+		Description:    &description,
+		Tags:           tags,
+                <!SET_ATTRS_IN_OBJ!>
+        }
+
+	// Update the resource using PATCH
+	err := client.Patch(id, obj)
+	if err != nil {
+		return handleUpdateError("<!RESOURCE!>", id, err)
+	}
+
+	return resourceNsxtPolicy<!RESOURCE!>Read(d, m)
+}
+
+func resourceNsxtPolicy<!RESOURCE!>Delete(d *schema.ResourceData, m interface{}) error {
+	id := d.Id()
+	if id == "" {
+		return fmt.Errorf("Error obtaining <!RESOURCE!> ID")
+	}
+
+	connector := getPolicyConnector(m)
+	client := infra.NewDefault<!RESOURCE!>sClient(connector)
+        if client == nil {
+            return policyResourceNotSupportedError()
+        }
+
+	err := client.Delete(id)
+	if err != nil {
+		return handleDeleteError("<!RESOURCE!>", id, err)
+	}
+
+	return nil
+}

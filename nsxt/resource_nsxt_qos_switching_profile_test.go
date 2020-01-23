@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/vmware/go-vmware-nsxt"
 	"net/http"
 	"testing"
 )
@@ -69,7 +68,7 @@ func TestAccResourceNsxtQosSwitchingProfile_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXQosSwitchingProfileEmptyTemplate(updatedName),
+				Config: testAccNSXQosSwitchingProfileEmptyTemplate(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXQosSwitchingProfileExists(updatedName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "egress_rate_shaper.#", "0"),
@@ -105,7 +104,7 @@ func TestAccResourceNsxtQosSwitchingProfile_importBasic(t *testing.T) {
 
 func testAccNSXQosSwitchingProfileExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
-		nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
+		nsxClient := testAccProvider.Meta().(nsxtClients).NsxtClient
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
 			return fmt.Errorf("NSX switching profile resource %s not found in resources", resourceName)
@@ -133,7 +132,7 @@ func testAccNSXQosSwitchingProfileExists(displayName string, resourceName string
 }
 
 func testAccNSXQosSwitchingProfileCheckDestroy(state *terraform.State, displayName string) error {
-	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
+	nsxClient := testAccProvider.Meta().(nsxtClients).NsxtClient
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_qos_switching_profile" {
@@ -185,7 +184,7 @@ resource "nsxt_qos_switching_profile" "test" {
 `, name, cos, direction, peak, peak)
 }
 
-func testAccNSXQosSwitchingProfileEmptyTemplate(name string) string {
+func testAccNSXQosSwitchingProfileEmptyTemplate() string {
 	return `
 resource "nsxt_qos_switching_profile" "test" {
 }`

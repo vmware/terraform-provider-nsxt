@@ -4,15 +4,38 @@
 package nsxt
 
 import (
+	"crypto/tls"
+	"crypto/x509"
+	"encoding/json"
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/hashicorp/terraform/helper/validation"
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/vmware/go-vmware-nsxt"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/core"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/security"
+	"io/ioutil"
+	"net/http"
+	"strings"
 )
 
 var defaultRetryOnStatusCodes = []int{429, 503}
 var toleratePartialSuccess = false
+
+type nsxtClients struct {
+	// NSX Manager client - based on go-vmware-nsxt SDK
+	NsxtClient *nsxt.APIClient
+	// Data for NSX Policy client - based on vsphere-automation-sdk-go SDK
+	// First offering of Policy SDK does not support concurrent
+	// operations in single connector. In order to avoid heavy locks,
+	// we are allocating connector per provider operation.
+	// TODO: when concurrency support is introduced policy client,
+	// change this code to allocate single connector for all provider
+	// operations.
+	PolicySecurityContext *core.SecurityContextImpl
+	PolicyHTTPClient      *http.Client
+	Host                  string
+}
 
 // Provider for VMWare NSX-T. Returns terraform.ResourceProvider
 func Provider() terraform.ResourceProvider {
@@ -41,9 +64,11 @@ func Provider() terraform.ResourceProvider {
 				DefaultFunc: schema.EnvDefaultFunc("NSXT_REMOTE_AUTH", false),
 			},
 			"host": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("NSXT_MANAGER_HOST", nil),
+				Type:         schema.TypeString,
+				Optional:     true,
+				DefaultFunc:  schema.EnvDefaultFunc("NSXT_MANAGER_HOST", nil),
+				ValidateFunc: validateNsxtProviderHostFormat(),
+				Description:  "The hostname or IP address of the NSX manager.",
 			},
 			"client_auth_cert_file": {
 				Type:        schema.TypeString,
@@ -67,11 +92,10 @@ func Provider() terraform.ResourceProvider {
 				DefaultFunc: schema.EnvDefaultFunc("NSXT_MAX_RETRIES", 50),
 			},
 			"retry_min_delay": {
-				Type:         schema.TypeInt,
-				Optional:     true,
-				Description:  "Minimum delay in milliseconds between retries of a request",
-				DefaultFunc:  schema.EnvDefaultFunc("NSXT_RETRY_MIN_DELAY", 500),
-				ValidateFunc: validation.IntAtLeast(10),
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "Minimum delay in milliseconds between retries of a request",
+				DefaultFunc: schema.EnvDefaultFunc("NSXT_RETRY_MIN_DELAY", 500),
 			},
 			"retry_max_delay": {
 				Type:        schema.TypeInt,
@@ -94,19 +118,53 @@ func Provider() terraform.ResourceProvider {
 				Description: "Treat partial success status as success",
 				DefaultFunc: schema.EnvDefaultFunc("NSXT_TOLERATE_PARTIAL_SUCCESS", false),
 			},
+			"vmc_auth_host": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "URL for VMC authorization service (CSP)",
+				DefaultFunc: schema.EnvDefaultFunc("NSXT_VMC_AUTH_HOST", "console.cloud.vmware.com/csp/gateway/am/api/auth/api-tokens/authorize"),
+			},
+			"vmc_token": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Long-living API token for VMC authorization",
+				DefaultFunc: schema.EnvDefaultFunc("NSXT_VMC_TOKEN", nil),
+			},
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
-			"nsxt_transport_zone":       dataSourceNsxtTransportZone(),
-			"nsxt_switching_profile":    dataSourceNsxtSwitchingProfile(),
-			"nsxt_logical_tier0_router": dataSourceNsxtLogicalTier0Router(),
-			"nsxt_logical_tier1_router": dataSourceNsxtLogicalTier1Router(),
-			"nsxt_mac_pool":             dataSourceNsxtMacPool(),
-			"nsxt_ns_group":             dataSourceNsxtNsGroup(),
-			"nsxt_ns_service":           dataSourceNsxtNsService(),
-			"nsxt_edge_cluster":         dataSourceNsxtEdgeCluster(),
-			"nsxt_certificate":          dataSourceNsxtCertificate(),
-			"nsxt_ip_pool":              dataSourceNsxtIPPool(),
+			"nsxt_transport_zone":                  dataSourceNsxtTransportZone(),
+			"nsxt_switching_profile":               dataSourceNsxtSwitchingProfile(),
+			"nsxt_logical_tier0_router":            dataSourceNsxtLogicalTier0Router(),
+			"nsxt_logical_tier1_router":            dataSourceNsxtLogicalTier1Router(),
+			"nsxt_mac_pool":                        dataSourceNsxtMacPool(),
+			"nsxt_ns_group":                        dataSourceNsxtNsGroup(),
+			"nsxt_ns_service":                      dataSourceNsxtNsService(),
+			"nsxt_edge_cluster":                    dataSourceNsxtEdgeCluster(),
+			"nsxt_certificate":                     dataSourceNsxtCertificate(),
+			"nsxt_ip_pool":                         dataSourceNsxtIPPool(),
+			"nsxt_policy_edge_cluster":             dataSourceNsxtPolicyEdgeCluster(),
+			"nsxt_policy_edge_node":                dataSourceNsxtPolicyEdgeNode(),
+			"nsxt_policy_tier0_gateway":            dataSourceNsxtPolicyTier0Gateway(),
+			"nsxt_policy_tier1_gateway":            dataSourceNsxtPolicyTier1Gateway(),
+			"nsxt_policy_service":                  dataSourceNsxtPolicyService(),
+			"nsxt_policy_realization_info":         dataSourceNsxtPolicyRealizationInfo(),
+			"nsxt_policy_transport_zone":           dataSourceNsxtPolicyTransportZone(),
+			"nsxt_policy_ip_discovery_profile":     dataSourceNsxtPolicyIPDiscoveryProfile(),
+			"nsxt_policy_spoofguard_profile":       dataSourceNsxtPolicySpoofGuardProfile(),
+			"nsxt_policy_qos_profile":              dataSourceNsxtPolicyQosProfile(),
+			"nsxt_policy_ipv6_ndra_profile":        dataSourceNsxtPolicyIpv6NdraProfile(),
+			"nsxt_policy_ipv6_dad_profile":         dataSourceNsxtPolicyIpv6DadProfile(),
+			"nsxt_policy_segment_security_profile": dataSourceNsxtPolicySegmentSecurityProfile(),
+			"nsxt_policy_mac_discovery_profile":    dataSourceNsxtPolicyMacDiscoveryProfile(),
+			"nsxt_policy_vm":                       dataSourceNsxtPolicyVM(),
+			"nsxt_policy_lb_app_profile":           dataSourceNsxtPolicyLBAppProfile(),
+			"nsxt_policy_lb_client_ssl_profile":    dataSourceNsxtPolicyLBClientSslProfile(),
+			"nsxt_policy_lb_server_ssl_profile":    dataSourceNsxtPolicyLBServerSslProfile(),
+			"nsxt_policy_lb_monitor":               dataSourceNsxtPolicyLBMonitor(),
+			"nsxt_policy_certificate":              dataSourceNsxtPolicyCertificate(),
+			"nsxt_policy_lb_persistence_profile":   dataSourceNsxtPolicyLbPersistenceProfile(),
+			"nsxt_policy_vni_pool":                 dataSourceNsxtPolicyVniPool(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -168,6 +226,30 @@ func Provider() terraform.ResourceProvider {
 			"nsxt_lb_fast_tcp_application_profile":         resourceNsxtLbFastTCPApplicationProfile(),
 			"nsxt_lb_fast_udp_application_profile":         resourceNsxtLbFastUDPApplicationProfile(),
 			"nsxt_lb_http_application_profile":             resourceNsxtLbHTTPApplicationProfile(),
+			"nsxt_policy_tier1_gateway":                    resourceNsxtPolicyTier1Gateway(),
+			"nsxt_policy_tier1_gateway_interface":          resourceNsxtPolicyTier1GatewayInterface(),
+			"nsxt_policy_tier0_gateway":                    resourceNsxtPolicyTier0Gateway(),
+			"nsxt_policy_tier0_gateway_interface":          resourceNsxtPolicyTier0GatewayInterface(),
+			"nsxt_policy_group":                            resourceNsxtPolicyGroup(),
+			"nsxt_policy_security_policy":                  resourceNsxtPolicySecurityPolicy(),
+			"nsxt_policy_service":                          resourceNsxtPolicyService(),
+			"nsxt_policy_gateway_policy":                   resourceNsxtPolicyGatewayPolicy(),
+			"nsxt_policy_segment":                          resourceNsxtPolicySegment(),
+			"nsxt_policy_vlan_segment":                     resourceNsxtPolicyVlanSegment(),
+			"nsxt_policy_static_route":                     resourceNsxtPolicyStaticRoute(),
+			"nsxt_policy_vm_tags":                          resourceNsxtPolicyVMTags(),
+			"nsxt_policy_nat_rule":                         resourceNsxtPolicyNATRule(),
+			"nsxt_policy_ip_block":                         resourceNsxtPolicyIPBlock(),
+			"nsxt_policy_lb_pool":                          resourceNsxtPolicyLBPool(),
+			"nsxt_policy_ip_pool":                          resourceNsxtPolicyIPPool(),
+			"nsxt_policy_ip_pool_block_subnet":             resourceNsxtPolicyIPPoolBlockSubnet(),
+			"nsxt_policy_ip_pool_static_subnet":            resourceNsxtPolicyIPPoolStaticSubnet(),
+			"nsxt_policy_lb_service":                       resourceNsxtPolicyLBService(),
+			"nsxt_policy_lb_virtual_server":                resourceNsxtPolicyLBVirtualServer(),
+			"nsxt_policy_ip_address_allocation":            resourceNsxtPolicyIPAddressAllocation(),
+			"nsxt_policy_bgp_neighbor":                     resourceNsxtPolicyBgpNeighbor(),
+			"nsxt_policy_dhcp_relay":                       resourceNsxtPolicyDhcpRelayConfig(),
+			"nsxt_policy_dhcp_server":                      resourceNsxtPolicyDhcpServer(),
 		},
 
 		ConfigureFunc: providerConfigure,
@@ -186,12 +268,20 @@ func providerConnectivityCheck(nsxClient *nsxt.APIClient) error {
 	return nil
 }
 
-func providerConfigure(d *schema.ResourceData) (interface{}, error) {
+func configureNsxtClient(d *schema.ResourceData) (*nsxt.APIClient, error) {
 	clientAuthCertFile := d.Get("client_auth_cert_file").(string)
 	clientAuthKeyFile := d.Get("client_auth_key_file").(string)
+	vmcToken := d.Get("vmc_token").(string)
+
+	if len(vmcToken) > 0 {
+		return nil, nil
+	}
 
 	needCreds := true
-	if len(clientAuthCertFile) > 0 && len(clientAuthKeyFile) > 0 {
+	if len(clientAuthCertFile) > 0 {
+		if len(clientAuthKeyFile) == 0 {
+			return nil, fmt.Errorf("Please provide key file for client certificate")
+		}
 		needCreds = false
 	}
 
@@ -272,4 +362,164 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	initNSXVersion(nsxClient)
 
 	return nsxClient, nil
+}
+
+type jwtToken struct {
+	IDToken      string `json:"id_token"`
+	TokenType    string `json:"token_type"`
+	ExpiresIn    string `json:"expires_in"`
+	Scope        string `json:"scope"`
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+}
+
+func getAPIToken(vmcAuthHost string, vmcAccessToken string) (string, error) {
+
+	payload := strings.NewReader("refresh_token=" + vmcAccessToken)
+	req, _ := http.NewRequest("POST", "https://"+vmcAuthHost, payload)
+
+	req.Header.Add("content-type", "application/x-www-form-urlencoded")
+	res, err := http.DefaultClient.Do(req)
+
+	if err != nil {
+		return "", err
+	}
+
+	if res.StatusCode != 200 {
+		b, _ := ioutil.ReadAll(res.Body)
+		return "", fmt.Errorf("Unexpected status code %d trying to get auth token. %s", res.StatusCode, string(b))
+	}
+
+	defer res.Body.Close()
+	token := jwtToken{}
+	json.NewDecoder(res.Body).Decode(&token)
+
+	return token.AccessToken, nil
+}
+
+func getConnectorTLSConfig(insecure bool, clientCertFile string, clientKeyFile string, caFile string) (*tls.Config, error) {
+
+	tlsConfig := tls.Config{InsecureSkipVerify: insecure}
+
+	if len(clientCertFile) > 0 {
+
+		if len(clientKeyFile) == 0 {
+			return nil, fmt.Errorf("Please provide key file for client certificate")
+		}
+
+		cert, err := tls.LoadX509KeyPair(clientCertFile, clientKeyFile)
+		if err != nil {
+			return nil, fmt.Errorf("Failed to load client cert/key pair: %v", err)
+		}
+
+		tlsConfig.Certificates = []tls.Certificate{cert}
+	}
+
+	if len(caFile) > 0 {
+		caCert, err := ioutil.ReadFile(caFile)
+		if err != nil {
+			return nil, err
+		}
+
+		caCertPool := x509.NewCertPool()
+		caCertPool.AppendCertsFromPEM(caCert)
+
+		tlsConfig.RootCAs = caCertPool
+	}
+
+	tlsConfig.BuildNameToCertificate()
+
+	return &tlsConfig, nil
+}
+
+func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) error {
+	hostIP := d.Get("host").(string)
+	username := d.Get("username").(string)
+	password := d.Get("password").(string)
+	vmcAccessToken := d.Get("vmc_token").(string)
+	vmcAuthHost := d.Get("vmc_auth_host").(string)
+	insecure := d.Get("allow_unverified_ssl").(bool)
+	clientAuthCertFile := d.Get("client_auth_cert_file").(string)
+	clientAuthKeyFile := d.Get("client_auth_key_file").(string)
+	caFile := d.Get("ca_file").(string)
+
+	if hostIP == "" {
+		return fmt.Errorf("host must be provided")
+	}
+
+	host := fmt.Sprintf("https://%s", hostIP)
+	securityCtx := core.NewSecurityContextImpl()
+	securityContextNeeded := true
+	if len(clientAuthCertFile) > 0 {
+		securityContextNeeded = false
+	}
+
+	if securityContextNeeded {
+		if len(vmcAccessToken) > 0 {
+			if vmcAuthHost == "" {
+				return fmt.Errorf("vmc auth host must be provided if auth token is provided")
+			}
+
+			apiToken, err := getAPIToken(vmcAuthHost, vmcAccessToken)
+			if err != nil {
+				return err
+			}
+
+			securityCtx.SetProperty(security.AUTHENTICATION_SCHEME_ID, security.OAUTH_SCHEME_ID)
+			securityCtx.SetProperty(security.ACCESS_TOKEN, apiToken)
+		} else {
+			if username == "" {
+				return fmt.Errorf("username must be provided")
+			}
+
+			if password == "" {
+				return fmt.Errorf("password must be provided")
+			}
+
+			securityCtx.SetProperty(security.AUTHENTICATION_SCHEME_ID, security.USER_PASSWORD_SCHEME_ID)
+			securityCtx.SetProperty(security.USER_KEY, username)
+			securityCtx.SetProperty(security.PASSWORD_KEY, password)
+		}
+	}
+
+	tlsConfig, err := getConnectorTLSConfig(insecure, clientAuthCertFile, clientAuthKeyFile, caFile)
+	if err != nil {
+		return err
+	}
+
+	tr := &http.Transport{
+		TLSClientConfig: tlsConfig,
+	}
+
+	httpClient := http.Client{Transport: tr}
+	clients.PolicyHTTPClient = &httpClient
+	clients.PolicySecurityContext = securityCtx
+	clients.Host = host
+
+	return nil
+}
+
+func providerConfigure(d *schema.ResourceData) (interface{}, error) {
+	nsxtClient, err := configureNsxtClient(d)
+	if err != nil {
+		return nil, err
+	}
+
+	clients := nsxtClients{
+		NsxtClient: nsxtClient,
+	}
+
+	err = configurePolicyConnectorData(d, &clients)
+	if err != nil {
+		return nil, err
+	}
+
+	return clients, nil
+}
+
+func getPolicyConnector(clients interface{}) *client.RestConnector {
+	c := clients.(nsxtClients)
+	connector := client.NewRestConnector(c.Host, *c.PolicyHTTPClient)
+	connector.SetSecurityContext(c.PolicySecurityContext)
+	return connector
 }

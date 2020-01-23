@@ -75,7 +75,7 @@ func isIPRange(v string) bool {
 
 func isSingleIP(v string) bool {
 	ip := net.ParseIP(v)
-	return (ip != nil)
+	return ip != nil
 }
 
 func isCidr(v string, allowMaxPrefix bool, isIP bool) bool {
@@ -92,13 +92,13 @@ func isCidr(v string, allowMaxPrefix bool, isIP bool) bool {
 	if !isIP && v != ipnet.String() {
 		return false
 	}
+
 	_, bits := ipnet.Mask.Size()
 	if !allowMaxPrefix && bits == 1 {
 		return false
 	}
 
 	return true
-
 }
 
 func validatePortAddress() schema.SchemaValidateFunc {
@@ -166,6 +166,49 @@ func validateSingleIP() schema.SchemaValidateFunc {
 	}
 }
 
+func validateASNOrIP(i interface{}, k string) (s []string, es []error) {
+	v, ok := i.(string)
+	if !ok {
+		es = append(es, fmt.Errorf("expected type of %s to be string", k))
+		return
+	}
+
+	err := fmt.Errorf("expected %s to contain ASN:<number> or valid IP:<number>, got: %s", k, v)
+
+	tokens := strings.Split(v, ":")
+	if len(tokens) != 2 {
+		es = append(es, err)
+		return
+	}
+	if !isSingleIP(tokens[0]) && tokens[0] != "ASN" {
+		es = append(es, err)
+		return
+	}
+	_, err = strconv.ParseUint(tokens[1], 10, 4)
+	if err != nil {
+		es = append(es, err)
+	}
+	return
+}
+
+func validate4ByteASNPlain(i interface{}, k string) (s []string, es []error) {
+	v, ok := i.(string)
+	if !ok {
+		es = append(es, fmt.Errorf("expected type of %s to be string", k))
+		return
+	}
+	asni, err := strconv.Atoi(v)
+	if err != nil {
+		es = append(es, fmt.Errorf("cannot convert %s to int", v))
+		return
+	}
+	if asni < 0 || asni > 4294967295 {
+		es = append(es, fmt.Errorf("invalid ASN number %s", v))
+		return
+	}
+	return
+}
+
 func validateIPRange() schema.SchemaValidateFunc {
 	return func(i interface{}, k string) (s []string, es []error) {
 		v, ok := i.(string)
@@ -191,6 +234,22 @@ func validateCidr() schema.SchemaValidateFunc {
 		}
 
 		if !isCidr(v, true, false) {
+			es = append(es, fmt.Errorf(
+				"expected %s to contain a valid CIDR, got: %s", k, v))
+		}
+		return
+	}
+}
+
+func validateIPCidr() schema.SchemaValidateFunc {
+	return func(i interface{}, k string) (s []string, es []error) {
+		v, ok := i.(string)
+		if !ok {
+			es = append(es, fmt.Errorf("expected type of %s to be string", k))
+			return
+		}
+
+		if !isCidr(v, true, true) {
 			es = append(es, fmt.Errorf(
 				"expected %s to contain a valid CIDR, got: %s", k, v))
 		}
@@ -276,4 +335,79 @@ var supportedSSLCiphers = []string{
 
 func validateSSLCiphers() schema.SchemaValidateFunc {
 	return validation.StringInSlice(supportedSSLCiphers, false)
+}
+
+func validatePolicyPath() schema.SchemaValidateFunc {
+	return func(i interface{}, k string) (s []string, es []error) {
+		v, ok := i.(string)
+		if !ok {
+			es = append(es, fmt.Errorf("expected type of %s to be string", k))
+			return
+		}
+
+		if !isPolicyPath(v) {
+			es = append(es, fmt.Errorf("Invalid policy path: %s", v))
+		}
+
+		return
+	}
+}
+
+func validateVLANId(i interface{}, k string) (s []string, es []error) {
+	var vlan int
+	vlan, ok := i.(int)
+	if !ok {
+		v, ok := i.(string)
+		if ok {
+			vlanVal, err := strconv.Atoi(v)
+			if err != nil {
+				es = append(es, fmt.Errorf("cannot convert %s to int", v))
+				return
+			}
+			vlan = vlanVal
+		} else {
+			es = append(es, fmt.Errorf("Expected VLAN type to be int or string"))
+			return
+		}
+	}
+	if vlan < 1 || vlan > 4095 {
+		es = append(es, fmt.Errorf("invalid VLAN ID %d", vlan))
+		return
+	}
+	return
+}
+
+func validateStringIntBetween(start int, end int) schema.SchemaValidateFunc {
+	return func(i interface{}, k string) (s []string, es []error) {
+		v, ok := i.(string)
+		if !ok {
+			es = append(es, fmt.Errorf("expected type of %s to be string", k))
+			return
+		}
+		intVal, err := strconv.Atoi(v)
+		if err != nil {
+			es = append(es, fmt.Errorf("cannot convert %s to int", v))
+			return
+		}
+		if intVal < start || intVal > end {
+			es = append(es, fmt.Errorf("the value %s must be between %v and %v", v, start, end))
+		}
+		return
+	}
+}
+
+func validateNsxtProviderHostFormat() schema.SchemaValidateFunc {
+	return func(i interface{}, k string) (s []string, es []error) {
+		v, ok := i.(string)
+		if !ok {
+			es = append(es, fmt.Errorf("expected type of %s to be string", k))
+			return
+		}
+
+		if strings.HasPrefix(v, "https://") || strings.HasPrefix(v, "http://") {
+			es = append(es, fmt.Errorf("not expecting http:// or https:// in the host, but got %s", v))
+		}
+
+		return
+	}
 }

@@ -81,7 +81,7 @@ resource "nsxt_lb_http_virtual_server" "lb_virtual_server" {
     certificate_chain_depth = 2
     client_auth             = true
     ca_ids                  = ["${data.nsxt_certificate.ca.id}"]
-    crl_ids                 = ["fa27d79e-13cd-4dd1-a088-4f2fb2cc91f9"]
+    crl_ids                 = ["${data.nsxt_certificate.crl.id}"]
     sni_certificate_ids     = ["${data.nsxt_certificate.sni.id}"]
   }
 
@@ -91,7 +91,7 @@ resource "nsxt_lb_http_virtual_server" "lb_virtual_server" {
     certificate_chain_depth = 2
     server_auth             = true
     ca_ids                  = ["${data.nsxt_certificate.server_ca.id}"]
-    crl_ids                 = ["fa27d79e-13cd-4dd1-a088-4f2fb2cc91f9"]
+    crl_ids                 = ["${data.nsxt_certificate.crl.id}"]
   }
 
   tag {
@@ -126,7 +126,7 @@ The following arguments are supported:
   * `certificate_chain_depth` - (Optional) Allowed depth of certificate chain. Default is 3.
   * `client_auth` - (Optional) Whether client authentication is mandatory. Default is false.
   * `ca_ids` - (Optional) List of CA certificate ids for client authentication.
-  * `crl_ids` - (Optional) List of CRL ids for client authentication.
+  * `crl_ids` - (Optional) List of CRL certificate ids for client authentication.
   * `sni_certificate_ids` - (Optional) List of certificates to serve different hostnames.
 
 * `server_ssl` - (Optional) Server side SSL customization.

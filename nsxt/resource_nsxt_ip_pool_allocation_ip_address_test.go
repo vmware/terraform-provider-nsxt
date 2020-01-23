@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/vmware/go-vmware-nsxt"
 	"net/http"
 	"testing"
 	"time"
@@ -83,7 +82,10 @@ func checkAllocationIPAddressExists(state *terraform.State, poolResourceName str
 		return nil, fmt.Errorf("IP Pool allocation_ip_address resource %s not found in resources", resourceName)
 	}
 
-	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
+	nsxClient := testAccProvider.Meta().(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return nil, resourceNotSupportedError()
+	}
 	listResult, responseCode, err := nsxClient.PoolManagementApi.ListIpPoolAllocations(nsxClient.Context, poolID)
 	if err != nil {
 		return nil, fmt.Errorf("Error while retrieving allocations for IP Pool ID %s. Error: %v", poolID, err)

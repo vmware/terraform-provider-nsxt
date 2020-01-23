@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/vmware/go-vmware-nsxt"
 	"net/http"
 	"testing"
 )
@@ -65,7 +64,7 @@ func TestAccResourceNsxtLbServerSSLProfile_importBasic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXLbServerSSLCreateTemplateTrivial(name),
+				Config: testAccNSXLbServerSSLCreateTemplateTrivial(),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -78,7 +77,7 @@ func TestAccResourceNsxtLbServerSSLProfile_importBasic(t *testing.T) {
 
 func testAccNSXLbServerSSLProfileExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
-		nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
+		nsxClient := testAccProvider.Meta().(nsxtClients).NsxtClient
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
 			return fmt.Errorf("NSX server ssl profile resource %s not found in resources", resourceName)
@@ -106,7 +105,7 @@ func testAccNSXLbServerSSLProfileExists(displayName string, resourceName string)
 }
 
 func testAccNSXLbServerSSLProfileCheckDestroy(state *terraform.State, displayName string) error {
-	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
+	nsxClient := testAccProvider.Meta().(nsxtClients).NsxtClient
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_lb_server_ssl_profile" {
@@ -144,7 +143,7 @@ resource "nsxt_lb_server_ssl_profile" "test" {
 `, name, protocol)
 }
 
-func testAccNSXLbServerSSLCreateTemplateTrivial(name string) string {
+func testAccNSXLbServerSSLCreateTemplateTrivial() string {
 	return `
 resource "nsxt_lb_server_ssl_profile" "test" {
   description = "test description"

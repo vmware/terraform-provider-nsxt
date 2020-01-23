@@ -1,0 +1,102 @@
+/* Copyright © 2019 VMware, Inc. All Rights Reserved.
+   SPDX-License-Identifier: MPL-2.0 */
+
+package nsxt
+
+import (
+	"fmt"
+	"github.com/google/uuid"
+	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform/terraform"
+	"github.com/vmware/go-nsx-t-policy/bindings/nsx_policy/infra"
+	"github.com/vmware/go-nsx-t-policy/bindings/nsx_policy/model"
+	"testing"
+)
+
+func TestAccDataSourceNsxtPolicy<!RESOURCE!>_basic(t *testing.T) {
+	name := "terraform_test"
+	testResourceName := "data.nsxt_policy_<!resource_lower!>.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccDataSourceNsxtPolicy<!RESOURCE!>DeleteByName(name)
+		},
+		Steps: []resource.TestStep{
+			{
+				PreConfig: func() {
+					if err := testAccDataSourceNsxtPolicy<!RESOURCE!>Create(name); err != nil {
+						panic(err)
+					}
+				},
+				Config: testAccNsxtPolicy<!RESOURCE!>ReadTemplate(name),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "description", name),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyEmptyTemplate(),
+			},
+		},
+	})
+}
+
+func testAccDataSourceNsxtPolicy<!RESOURCE!>Create(name string) error {
+	connector, err := testAccGetPolicyConnector()
+	if err != nil {
+		return fmt.Errorf("Error during test client initialization: %v", err)
+	}
+	client := infra.NewDefault<!RESOURCE!>sClient(connector)
+
+	displayName := name
+	description := name
+	obj := model.<!RESOURCE!>{
+		Description: &description,
+		DisplayName: &displayName,
+	}
+
+	// Generate a random ID for the resource
+	uuid, _ := uuid.NewRandom()
+	id := uuid.String()
+
+	err = client.Patch(id, obj)
+	if err != nil {
+		return fmt.Errorf("Error during <!RESOURCE!> creation: %v", err)
+	}
+	return nil
+}
+
+func testAccDataSourceNsxtPolicy<!RESOURCE!>DeleteByName(name string) error {
+	connector, err := testAccGetPolicyConnector()
+	if err != nil {
+		return fmt.Errorf("Error during test client initialization: %v", err)
+	}
+	client := infra.NewDefault<!RESOURCE!>sClient(connector)
+
+	// Find the object by name
+	objList, err := client.List(nil, nil, nil, nil, nil, nil)
+	if err != nil {
+		return fmt.Errorf("Error while reading <!RESOURCE!>s: %v", err)
+	}
+	for _, objInList := range objList.Results {
+		if *objInList.DisplayName == name {
+			err := client.Delete(*objInList.Id)
+			if err != nil {
+				return fmt.Errorf("Error during <!RESOURCE!> deletion: %v", err)
+			}
+			return nil
+		}
+	}
+	return fmt.Errorf("Error while deleting <!RESOURCE!> '%s': resource not found", name)
+}
+
+func testAccNsxtPolicy<!RESOURCE!>ReadTemplate(name string) string {
+	return fmt.Sprintf(`
+data "nsxt_policy_<!resource_lower!>" "test" {
+  display_name = "%s"
+}`, name)
+}
+

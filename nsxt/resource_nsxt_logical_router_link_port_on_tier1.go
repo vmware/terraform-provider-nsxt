@@ -6,7 +6,6 @@ package nsxt
 import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
-	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/manager"
 	"log"
 	"net/http"
@@ -53,7 +52,11 @@ func resourceNsxtLogicalRouterLinkPortOnTier1() *schema.Resource {
 }
 
 func resourceNsxtLogicalRouterLinkPortOnTier1Create(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
@@ -81,7 +84,11 @@ func resourceNsxtLogicalRouterLinkPortOnTier1Create(d *schema.ResourceData, m in
 }
 
 func resourceNsxtLogicalRouterLinkPortOnTier1Read(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical router link port on tier1 id")
@@ -102,15 +109,17 @@ func resourceNsxtLogicalRouterLinkPortOnTier1Read(d *schema.ResourceData, m inte
 	d.Set("display_name", logicalRouterLinkPort.DisplayName)
 	setTagsInSchema(d, logicalRouterLinkPort.Tags)
 	d.Set("logical_router_id", logicalRouterLinkPort.LogicalRouterId)
-	if logicalRouterLinkPort.LinkedLogicalRouterPortId != nil {
-		d.Set("linked_logical_router_port_id", logicalRouterLinkPort.LinkedLogicalRouterPortId.TargetId)
-	}
+	d.Set("linked_logical_router_port_id", logicalRouterLinkPort.LinkedLogicalRouterPortId.TargetId)
 
 	return nil
 }
 
 func resourceNsxtLogicalRouterLinkPortOnTier1Update(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical router link port on tier1 id")
@@ -142,7 +151,11 @@ func resourceNsxtLogicalRouterLinkPortOnTier1Update(d *schema.ResourceData, m in
 }
 
 func resourceNsxtLogicalRouterLinkPortOnTier1Delete(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical router link port on tier1 id")

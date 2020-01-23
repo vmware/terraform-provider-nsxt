@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
-	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/manager"
 	"log"
 	"net/http"
@@ -98,7 +97,11 @@ func setIPSubnetsInSchema(d *schema.ResourceData, subnets []manager.IpSubnet) {
 }
 
 func resourceNsxtLogicalRouterDownLinkPortCreate(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
@@ -135,7 +138,11 @@ func resourceNsxtLogicalRouterDownLinkPortCreate(d *schema.ResourceData, m inter
 }
 
 func resourceNsxtLogicalRouterDownLinkPortRead(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical router downlink port id while reading")
@@ -157,9 +164,7 @@ func resourceNsxtLogicalRouterDownLinkPortRead(d *schema.ResourceData, m interfa
 	setTagsInSchema(d, logicalRouterDownLinkPort.Tags)
 	d.Set("logical_router_id", logicalRouterDownLinkPort.LogicalRouterId)
 	d.Set("mac_address", logicalRouterDownLinkPort.MacAddress)
-	if logicalRouterDownLinkPort.LinkedLogicalSwitchPortId != nil {
-		d.Set("linked_logical_switch_port_id", logicalRouterDownLinkPort.LinkedLogicalSwitchPortId.TargetId)
-	}
+	d.Set("linked_logical_switch_port_id", logicalRouterDownLinkPort.LinkedLogicalSwitchPortId.TargetId)
 	setIPSubnetsInSchema(d, logicalRouterDownLinkPort.Subnets)
 	d.Set("urpf_mode", logicalRouterDownLinkPort.UrpfMode)
 	err = setServiceBindingsInSchema(d, logicalRouterDownLinkPort.ServiceBindings, "service_binding")
@@ -171,7 +176,11 @@ func resourceNsxtLogicalRouterDownLinkPortRead(d *schema.ResourceData, m interfa
 }
 
 func resourceNsxtLogicalRouterDownLinkPortUpdate(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical router downlink port id while updating")
@@ -211,7 +220,11 @@ func resourceNsxtLogicalRouterDownLinkPortUpdate(d *schema.ResourceData, m inter
 }
 
 func resourceNsxtLogicalRouterDownLinkPortDelete(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical router downlink port id while deleting")

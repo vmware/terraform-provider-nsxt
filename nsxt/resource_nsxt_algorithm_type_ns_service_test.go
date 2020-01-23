@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/vmware/go-vmware-nsxt"
 	"net/http"
 	"testing"
 )
@@ -78,7 +77,7 @@ func TestAccResourceNsxtAlgorithmTypeNsService_importBasic(t *testing.T) {
 
 func testAccNSXAlgServiceExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
-		nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
+		nsxClient := testAccProvider.Meta().(nsxtClients).NsxtClient
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
 			return fmt.Errorf("NSX alg ns service resource %s not found in resources", resourceName)
@@ -106,7 +105,7 @@ func testAccNSXAlgServiceExists(displayName string, resourceName string) resourc
 }
 
 func testAccNSXAlgServiceCheckDestroy(state *terraform.State, displayName string) error {
-	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
+	nsxClient := testAccProvider.Meta().(nsxtClients).NsxtClient
 	if nsxClient == nil {
 		return fmt.Errorf("Failed to initialize the client")
 	}

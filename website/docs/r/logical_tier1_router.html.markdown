@@ -35,7 +35,7 @@ resource "nsxt_logical_tier1_router" "tier1_router" {
 
 The following arguments are supported:
 
-* `edge_cluster_id` - (Optional) Edge Cluster ID for the logical Tier1 router. Changing this setting on existing router will re-create the router.
+* `edge_cluster_id` - (Optional) Edge Cluster ID for the logical Tier1 router.
 * `display_name` - (Optional) Display name, defaults to ID if not set.
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this logical Tier1 router.

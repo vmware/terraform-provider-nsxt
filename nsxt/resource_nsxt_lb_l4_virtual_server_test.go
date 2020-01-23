@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/vmware/go-vmware-nsxt"
 	"net/http"
 	"testing"
 )
@@ -104,7 +103,7 @@ func testAccResourceNsxtLbL4VirtualServerImport(t *testing.T, protocol string) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXLbL4VirtualServerCreateTemplateTrivial(protocol, name),
+				Config: testAccNSXLbL4VirtualServerCreateTemplateTrivial(protocol),
 			},
 			{
 				ResourceName:      resourceName,
@@ -117,7 +116,7 @@ func testAccResourceNsxtLbL4VirtualServerImport(t *testing.T, protocol string) {
 
 func testAccNSXLbL4VirtualServerExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
-		nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
+		nsxClient := testAccProvider.Meta().(nsxtClients).NsxtClient
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
 			return fmt.Errorf("NSX LB virtual server resource %s not found in resources", resourceName)
@@ -145,7 +144,7 @@ func testAccNSXLbL4VirtualServerExists(displayName string, resourceName string) 
 }
 
 func testAccNSXLbL4VirtualServerCheckDestroy(state *terraform.State, protocol string, displayName string) error {
-	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
+	nsxClient := testAccProvider.Meta().(nsxtClients).NsxtClient
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != fmt.Sprintf("nsxt_lb_%s_virtual_server", protocol) {
@@ -211,7 +210,7 @@ resource "nsxt_lb_%s_virtual_server" "test" {
 `, protocol, protocol, protocol, port, memberPort)
 }
 
-func testAccNSXLbL4VirtualServerCreateTemplateTrivial(protocol string, name string) string {
+func testAccNSXLbL4VirtualServerCreateTemplateTrivial(protocol string) string {
 	return fmt.Sprintf(`
 
 resource "nsxt_lb_fast_%s_application_profile" "test" {

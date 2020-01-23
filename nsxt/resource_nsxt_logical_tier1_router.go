@@ -173,7 +173,11 @@ func resourceNsxtLogicalTier1RouterUpdateAdv(d *schema.ResourceData, nsxClient *
 }
 
 func resourceNsxtLogicalTier1RouterCreate(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
@@ -219,7 +223,11 @@ func resourceNsxtLogicalTier1RouterCreate(d *schema.ResourceData, m interface{})
 }
 
 func resourceNsxtLogicalTier1RouterRead(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical Tier-1 router id")
@@ -261,7 +269,11 @@ func resourceNsxtLogicalTier1RouterRead(d *schema.ResourceData, m interface{}) e
 }
 
 func resourceNsxtLogicalTier1RouterUpdate(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical tier1 router id")
@@ -299,7 +311,11 @@ func resourceNsxtLogicalTier1RouterUpdate(d *schema.ResourceData, m interface{})
 }
 
 func resourceNsxtLogicalTier1RouterDelete(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical tier1 router id")

@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/vmware/go-vmware-nsxt"
 	"testing"
 )
 
@@ -25,35 +24,7 @@ func TestAccResourceNsxtVMTags_basic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXVMTagsCreateTemplate(vmID, false),
-				Check: resource.ComposeTestCheckFunc(
-					testAccNSXVMTagsCheckExists(),
-					resource.TestCheckResourceAttr(vmTagsFullResourceName, "tag.#", "1"),
-				),
-			},
-			{
-				Config: testAccNSXVMTagsUpdateTemplate(vmID, false),
-				Check: resource.ComposeTestCheckFunc(
-					testAccNSXVMTagsCheckExists(),
-					resource.TestCheckResourceAttr(vmTagsFullResourceName, "tag.#", "2"),
-				),
-			},
-		},
-	})
-}
-
-func TestAccResourceNsxtVMPortTags_basic(t *testing.T) {
-	vmID := getTestVMOnOpaqueSwitchID()
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccEnvDefined(t, "NSXT_TEST_VM_ON_OPAQUE_SWITCH_ID") },
-		Providers: testAccProviders,
-		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXVMTagsCheckDestroy(state)
-		},
-		Steps: []resource.TestStep{
-			{
-				Config: testAccNSXVMTagsCreateTemplate(vmID, true),
+				Config: testAccNSXVMTagsCreateTemplate(vmID),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXVMTagsCheckExists(),
 					resource.TestCheckResourceAttr(vmTagsFullResourceName, "tag.#", "1"),
@@ -63,7 +34,7 @@ func TestAccResourceNsxtVMPortTags_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXVMTagsUpdateTemplate(vmID, true),
+				Config: testAccNSXVMTagsUpdateTemplate(vmID),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXVMTagsCheckExists(),
 					resource.TestCheckResourceAttr(vmTagsFullResourceName, "tag.#", "2"),
@@ -87,7 +58,7 @@ func TestAccResourceNsxtVMTags_import_basic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXVMTagsCreateTemplate(vmID, false),
+				Config: testAccNSXVMTagsCreateTemplate(vmID),
 			},
 			{
 				ResourceName:            vmTagsFullResourceName,
@@ -102,7 +73,7 @@ func TestAccResourceNsxtVMTags_import_basic(t *testing.T) {
 func testAccNSXVMTagsCheckExists() resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
-		nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
+		nsxClient := testAccProvider.Meta().(nsxtClients).NsxtClient
 
 		rs, ok := state.RootModule().Resources[vmTagsFullResourceName]
 		if !ok {
@@ -124,7 +95,7 @@ func testAccNSXVMTagsCheckExists() resource.TestCheckFunc {
 }
 
 func testAccNSXVMTagsCheckDestroy(state *terraform.State) error {
-	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
+	nsxClient := testAccProvider.Meta().(nsxtClients).NsxtClient
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_vm_tags" {
@@ -144,14 +115,7 @@ func testAccNSXVMTagsCheckDestroy(state *terraform.State) error {
 	return nil
 }
 
-func testAccNSXVMTagsCreateTemplate(instanceID string, withPorts bool) string {
-	var ports string
-	if withPorts {
-		ports = `logical_port_tag {
-    scope = "a"
-    tag   = "b"
-  }`
-	}
+func testAccNSXVMTagsCreateTemplate(instanceID string) string {
 	return fmt.Sprintf(`
 resource "nsxt_vm_tags" "%s" {
   instance_id = "%s"
@@ -160,18 +124,15 @@ resource "nsxt_vm_tags" "%s" {
     scope = "scope1"
     tag   = "tag1"
   }
-  %s
-}`, vmTagsResourceName, instanceID, ports)
+
+  logical_port_tag {
+    scope = "a"
+    tag   = "b"
+  }
+}`, vmTagsResourceName, instanceID)
 }
 
-func testAccNSXVMTagsUpdateTemplate(instanceID string, withPorts bool) string {
-	var ports string
-	if withPorts {
-		ports = `logical_port_tag {
-    scope = "c"
-    tag   = "d"
-  }`
-	}
+func testAccNSXVMTagsUpdateTemplate(instanceID string) string {
 	return fmt.Sprintf(`
 resource "nsxt_vm_tags" "%s" {
   instance_id = "%s"
@@ -185,6 +146,10 @@ resource "nsxt_vm_tags" "%s" {
     scope = "scope2"
     tag   = "tag2"
   }
-  %s
-}`, vmTagsResourceName, instanceID, ports)
+
+  logical_port_tag {
+    scope = "c"
+    tag   = "d"
+  }
+}`, vmTagsResourceName, instanceID)
 }

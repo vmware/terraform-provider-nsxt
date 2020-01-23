@@ -6,7 +6,6 @@ package nsxt
 import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
-	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/manager"
 	"log"
 	"net/http"
@@ -55,7 +54,11 @@ func resourceNsxtDhcpServerProfile() *schema.Resource {
 }
 
 func resourceNsxtDhcpServerProfileCreate(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
@@ -84,7 +87,11 @@ func resourceNsxtDhcpServerProfileCreate(d *schema.ResourceData, m interface{}) 
 }
 
 func resourceNsxtDhcpServerProfileRead(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")
@@ -111,7 +118,11 @@ func resourceNsxtDhcpServerProfileRead(d *schema.ResourceData, m interface{}) er
 }
 
 func resourceNsxtDhcpServerProfileUpdate(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")
@@ -142,7 +153,11 @@ func resourceNsxtDhcpServerProfileUpdate(d *schema.ResourceData, m interface{}) 
 }
 
 func resourceNsxtDhcpServerProfileDelete(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")

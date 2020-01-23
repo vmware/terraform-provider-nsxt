@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
-	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/manager"
 	"log"
 	"net/http"
@@ -166,7 +165,11 @@ func setSwitchSecurityRateLimitsInSchema(d *schema.ResourceData, rateLimitConf *
 }
 
 func resourceNsxtSwitchSecuritySwitchingProfileCreate(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
@@ -208,7 +211,11 @@ func resourceNsxtSwitchSecuritySwitchingProfileCreate(d *schema.ResourceData, m 
 }
 
 func resourceNsxtSwitchSecuritySwitchingProfileRead(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")
@@ -243,7 +250,11 @@ func resourceNsxtSwitchSecuritySwitchingProfileRead(d *schema.ResourceData, m in
 }
 
 func resourceNsxtSwitchSecuritySwitchingProfileUpdate(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")
@@ -287,7 +298,11 @@ func resourceNsxtSwitchSecuritySwitchingProfileUpdate(d *schema.ResourceData, m 
 }
 
 func resourceNsxtSwitchSecuritySwitchingProfileDelete(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")

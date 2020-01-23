@@ -6,7 +6,6 @@ package nsxt
 import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
-	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/manager"
 	"log"
 	"net/http"
@@ -55,7 +54,11 @@ func resourceNsxtLogicalDhcpPort() *schema.Resource {
 }
 
 func resourceNsxtLogicalDhcpPortCreate(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	name := d.Get("display_name").(string)
 	description := d.Get("description").(string)
 	lsID := d.Get("logical_switch_id").(string)
@@ -91,7 +94,11 @@ func resourceNsxtLogicalDhcpPortCreate(d *schema.ResourceData, m interface{}) er
 }
 
 func resourceNsxtLogicalDhcpPortRead(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical DHCP port ID from state during read")
@@ -122,7 +129,11 @@ func resourceNsxtLogicalDhcpPortRead(d *schema.ResourceData, m interface{}) erro
 }
 
 func resourceNsxtLogicalDhcpPortUpdate(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	name := d.Get("display_name").(string)
 	description := d.Get("description").(string)
@@ -153,7 +164,11 @@ func resourceNsxtLogicalDhcpPortUpdate(d *schema.ResourceData, m interface{}) er
 }
 
 func resourceNsxtLogicalDhcpPortDelete(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	lpID := d.Id()
 	if lpID == "" {
 		return fmt.Errorf("Error obtaining logical DHCP port ID from state during delete")

@@ -6,7 +6,6 @@ package nsxt
 import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
-	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/manager"
 	"log"
 	"net/http"
@@ -46,7 +45,11 @@ func resourceNsxtDhcpRelayService() *schema.Resource {
 }
 
 func resourceNsxtDhcpRelayServiceCreate(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
@@ -73,7 +76,11 @@ func resourceNsxtDhcpRelayServiceCreate(d *schema.ResourceData, m interface{}) e
 }
 
 func resourceNsxtDhcpRelayServiceRead(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining dhcp relay service id")
@@ -99,7 +106,11 @@ func resourceNsxtDhcpRelayServiceRead(d *schema.ResourceData, m interface{}) err
 }
 
 func resourceNsxtDhcpRelayServiceUpdate(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining dhcp relay service id")
@@ -128,7 +139,11 @@ func resourceNsxtDhcpRelayServiceUpdate(d *schema.ResourceData, m interface{}) e
 }
 
 func resourceNsxtDhcpRelayServiceDelete(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining dhcp relay service id")

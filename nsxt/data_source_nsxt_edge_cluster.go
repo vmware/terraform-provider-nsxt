@@ -6,7 +6,6 @@ package nsxt
 import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
-	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/manager"
 	"net/http"
 	"strings"
@@ -53,7 +52,11 @@ func dataSourceNsxtEdgeCluster() *schema.Resource {
 
 func dataSourceNsxtEdgeClusterRead(d *schema.ResourceData, m interface{}) error {
 	// Read an edge cluster by name or id
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return dataSourceNotSupportedError()
+	}
+
 	objID := d.Get("id").(string)
 	objName := d.Get("display_name").(string)
 	var obj manager.EdgeCluster

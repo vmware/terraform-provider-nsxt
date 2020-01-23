@@ -63,6 +63,10 @@ func getStringListFromSchemaSet(d *schema.ResourceData, schemaAttrName string) [
 	return interface2StringList(d.Get(schemaAttrName).(*schema.Set).List())
 }
 
+func getStringListFromSchemaList(d *schema.ResourceData, schemaAttrName string) []string {
+	return interface2StringList(d.Get(schemaAttrName).([]interface{}))
+}
+
 func intList2int64List(configured []interface{}) []int64 {
 	vs := make([]int64, 0, len(configured))
 	for _, v := range configured {
@@ -93,12 +97,12 @@ func getTagsSchemaInternal(forceNew bool) *schema.Schema {
 			Schema: map[string]*schema.Schema{
 				"scope": {
 					Type:     schema.TypeString,
-					Required: true,
+					Optional: true,
 					ForceNew: forceNew,
 				},
 				"tag": {
 					Type:     schema.TypeString,
-					Required: true,
+					Optional: true,
 					ForceNew: forceNew,
 				},
 			},
@@ -345,11 +349,6 @@ func getResourceReferences(references []interface{}) []common.ResourceReference 
 	return referenceList
 }
 
-func getResourceReferencesFromSchema(d *schema.ResourceData, schemaAttrName string) []common.ResourceReference {
-	references := d.Get(schemaAttrName).([]interface{})
-	return getResourceReferences(references)
-}
-
 func getResourceReferencesFromSchemaSet(d *schema.ResourceData, schemaAttrName string) []common.ResourceReference {
 	references := d.Get(schemaAttrName).(*schema.Set).List()
 	return getResourceReferences(references)
@@ -508,7 +507,7 @@ func getNSXVersion(nsxClient *api.APIClient) string {
 
 	if resp.StatusCode == http.StatusNotFound || err != nil {
 		log.Printf("[DEBUG] Failed to retrieve NSX version")
-		return string("1.0.0")
+		return "1.0.0"
 	}
 	log.Printf("[DEBUG] NSX version is %s", nodeProperties.NodeVersion)
 	return nodeProperties.NodeVersion
@@ -538,4 +537,12 @@ func nsxVersionHigherOrEqual(ver string) bool {
 		return false
 	}
 	return currentVersion.Compare(requestedVersion) >= 0
+}
+
+func resourceNotSupportedError() error {
+	return fmt.Errorf("This resource is not supported with given provider settings")
+}
+
+func dataSourceNotSupportedError() error {
+	return fmt.Errorf("This data source is not supported with given provider settings")
 }

@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/vmware/go-vmware-nsxt"
 	"net/http"
 	"testing"
 )
@@ -159,7 +158,7 @@ func TestAccResourceNsxtLogicalPort_importBasic(t *testing.T) {
 func testAccNSXLogicalPortExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
-		nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
+		nsxClient := testAccProvider.Meta().(nsxtClients).NsxtClient
 
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
@@ -188,7 +187,7 @@ func testAccNSXLogicalPortExists(displayName string, resourceName string) resour
 }
 
 func testAccNSXLogicalPortCheckDestroy(state *terraform.State, displayName string) error {
-	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
+	nsxClient := testAccProvider.Meta().(nsxtClients).NsxtClient
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_logical_port" {

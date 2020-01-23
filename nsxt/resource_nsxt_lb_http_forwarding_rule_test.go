@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/vmware/go-vmware-nsxt"
 	"net/http"
 	"testing"
 )
@@ -154,7 +153,7 @@ func TestAccResourceNsxtLbHttpForwardingRule_importBasic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXLbHTTPForwardingRuleCreateTemplateTrivial(name),
+				Config: testAccNSXLbHTTPForwardingRuleCreateTemplateTrivial(),
 			},
 			{
 				ResourceName:      resourceName,
@@ -167,7 +166,7 @@ func TestAccResourceNsxtLbHttpForwardingRule_importBasic(t *testing.T) {
 
 func testAccNSXLbHTTPForwardingRuleExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
-		nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
+		nsxClient := testAccProvider.Meta().(nsxtClients).NsxtClient
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
 			return fmt.Errorf("NSX LB rule resource %s not found in resources", resourceName)
@@ -195,7 +194,7 @@ func testAccNSXLbHTTPForwardingRuleExists(displayName string, resourceName strin
 }
 
 func testAccNSXLbHTTPForwardingRuleCheckDestroy(state *terraform.State, displayName string) error {
-	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
+	nsxClient := testAccProvider.Meta().(nsxtClients).NsxtClient
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_lb_http_forwarding_rule" {
@@ -270,7 +269,7 @@ resource "nsxt_lb_http_forwarding_rule" "test" {
 `, inverse, inverse)
 }
 
-func testAccNSXLbHTTPForwardingRuleCreateTemplateTrivial(name string) string {
+func testAccNSXLbHTTPForwardingRuleCreateTemplateTrivial() string {
 	return `
 resource "nsxt_lb_http_forwarding_rule" "test" {
   description    = "test description"

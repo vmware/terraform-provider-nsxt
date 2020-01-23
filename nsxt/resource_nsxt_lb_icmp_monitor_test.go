@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/vmware/go-vmware-nsxt"
 	"net/http"
 	"testing"
 )
@@ -76,7 +75,7 @@ func TestAccResourceNsxtLbIcmpMonitor_importBasic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXLbIcmpMonitorCreateTemplateTrivial(name),
+				Config: testAccNSXLbIcmpMonitorCreateTemplateTrivial(),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -89,7 +88,7 @@ func TestAccResourceNsxtLbIcmpMonitor_importBasic(t *testing.T) {
 
 func testAccNSXLbIcmpMonitorExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
-		nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
+		nsxClient := testAccProvider.Meta().(nsxtClients).NsxtClient
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
 			return fmt.Errorf("NSX LB icmp monitor resource %s not found in resources", resourceName)
@@ -117,7 +116,7 @@ func testAccNSXLbIcmpMonitorExists(displayName string, resourceName string) reso
 }
 
 func testAccNSXLbIcmpMonitorCheckDestroy(state *terraform.State, displayName string) error {
-	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
+	nsxClient := testAccProvider.Meta().(nsxtClients).NsxtClient
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_lb_icmp_monitor" {
@@ -159,7 +158,7 @@ resource "nsxt_lb_icmp_monitor" "test" {
 `, name, count, interval, port, count, timeout, dataLength)
 }
 
-func testAccNSXLbIcmpMonitorCreateTemplateTrivial(name string) string {
+func testAccNSXLbIcmpMonitorCreateTemplateTrivial() string {
 	return `
 resource "nsxt_lb_icmp_monitor" "test" {
   description = "test description"

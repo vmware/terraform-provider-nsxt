@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/vmware/go-vmware-nsxt"
 	"net/http"
 	"testing"
 )
@@ -161,7 +160,7 @@ func TestAccResourceNsxtLogicalRouterCentralizedServicePort_onTier1(t *testing.T
 func testAccNSXLogicalRouterCentralizedServicePortExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
-		nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
+		nsxClient := testAccProvider.Meta().(nsxtClients).NsxtClient
 
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
@@ -190,7 +189,7 @@ func testAccNSXLogicalRouterCentralizedServicePortExists(displayName string, res
 }
 
 func testAccNSXLogicalRouterCentralizedServicePortCheckDestroy(state *terraform.State, displayName string) error {
-	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
+	nsxClient := testAccProvider.Meta().(nsxtClients).NsxtClient
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_logical_router_centralized_service_port" {
@@ -246,20 +245,6 @@ resource "nsxt_logical_tier1_router" "rtr1" {
   display_name    = "test_router"
   edge_cluster_id = "${data.nsxt_edge_cluster.ec.id}"
 }`, transportZoneName, getTier0RouterName(), edgeClusterName)
-}
-
-func testAccNSXLogicalRouterCentralizedServicePortRelayTemplate() string {
-	return fmt.Sprintf(`
-resource "nsxt_dhcp_relay_profile" "drp1" {
-  display_name     = "prf"
-  server_addresses = ["1.1.1.1"]
-}
-
-resource "nsxt_dhcp_relay_service" "drs1" {
-	display_name = "srv"
-	description = "Acceptance Test"
-	dhcp_relay_profile_id = "${nsxt_dhcp_relay_profile.drp1.id}"
-}`)
 }
 
 func testAccNSXLogicalRouterCentralizedServicePortCreateTemplate(portName string, transportZoneName string, edgeClusterName string, routerObj string) string {

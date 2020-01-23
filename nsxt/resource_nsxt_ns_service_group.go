@@ -6,7 +6,6 @@ package nsxt
 import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
-	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/common"
 	"github.com/vmware/go-vmware-nsxt/manager"
 	"log"
@@ -73,7 +72,11 @@ func returnResourceReferencesTargetIDs(references []common.ResourceReference) []
 }
 
 func resourceNsxtNsServiceGroupCreate(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
@@ -100,7 +103,11 @@ func resourceNsxtNsServiceGroupCreate(d *schema.ResourceData, m interface{}) err
 }
 
 func resourceNsxtNsServiceGroupRead(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")
@@ -126,7 +133,11 @@ func resourceNsxtNsServiceGroupRead(d *schema.ResourceData, m interface{}) error
 }
 
 func resourceNsxtNsServiceGroupUpdate(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")
@@ -156,7 +167,11 @@ func resourceNsxtNsServiceGroupUpdate(d *schema.ResourceData, m interface{}) err
 
 func resourceNsxtNsServiceGroupDelete(d *schema.ResourceData, m interface{}) error {
 
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")

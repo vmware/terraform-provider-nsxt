@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
-	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/manager"
 	"log"
 	"net/http"
@@ -53,7 +52,11 @@ func resourceNsxtIPProtocolNsService() *schema.Resource {
 }
 
 func resourceNsxtIPProtocolNsServiceCreate(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
@@ -85,7 +88,11 @@ func resourceNsxtIPProtocolNsServiceCreate(d *schema.ResourceData, m interface{}
 }
 
 func resourceNsxtIPProtocolNsServiceRead(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining ns service id")
@@ -114,7 +121,11 @@ func resourceNsxtIPProtocolNsServiceRead(d *schema.ResourceData, m interface{}) 
 }
 
 func resourceNsxtIPProtocolNsServiceUpdate(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining ns service id")
@@ -148,7 +159,11 @@ func resourceNsxtIPProtocolNsServiceUpdate(d *schema.ResourceData, m interface{}
 }
 
 func resourceNsxtIPProtocolNsServiceDelete(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining ns service id")

@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/manager"
 	"net/http"
 	"testing"
@@ -176,7 +175,7 @@ func testAccNSXNDhcpIPPoolImporterGetID(s *terraform.State) (string, error) {
 }
 
 func findAccNSXDhcpIPPool(resourceID string) (*manager.DhcpIpPool, error) {
-	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
+	nsxClient := testAccProvider.Meta().(nsxtClients).NsxtClient
 
 	servers, responseCode, err := nsxClient.ServicesApi.ListDhcpServers(nsxClient.Context, nil)
 	if err != nil {

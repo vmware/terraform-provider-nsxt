@@ -91,13 +91,18 @@ func resourceNsxtLogicalSwitch() *schema.Resource {
 				Description: "VNI for this LogicalSwitch",
 				Optional:    true,
 				Computed:    true,
+				ForceNew:    true,
 			},
 		},
 	}
 }
 
 func resourceNsxtLogicalSwitchCreate(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
@@ -191,7 +196,11 @@ func resourceNsxtLogicalSwitchVerifyRealization(d *schema.ResourceData, nsxClien
 }
 
 func resourceNsxtLogicalSwitchRead(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical switch id")
@@ -237,7 +246,11 @@ func resourceNsxtLogicalSwitchRead(d *schema.ResourceData, m interface{}) error 
 }
 
 func resourceNsxtLogicalSwitchUpdate(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical switch id")
@@ -281,7 +294,11 @@ func resourceNsxtLogicalSwitchUpdate(d *schema.ResourceData, m interface{}) erro
 }
 
 func resourceNsxtLogicalSwitchDelete(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical switch id")
@@ -289,7 +306,6 @@ func resourceNsxtLogicalSwitchDelete(d *schema.ResourceData, m interface{}) erro
 
 	localVarOptionals := make(map[string]interface{})
 	localVarOptionals["cascade"] = true
-	localVarOptionals["detach"] = true
 	resp, err := nsxClient.LogicalSwitchingApi.DeleteLogicalSwitch(nsxClient.Context, id, localVarOptionals)
 	if err != nil {
 		return fmt.Errorf("Error during LogicalSwitch delete: %v", err)

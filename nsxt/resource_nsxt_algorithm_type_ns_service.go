@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
-	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/manager"
 	"log"
 	"net/http"
@@ -70,7 +69,11 @@ func resourceNsxtAlgorithmTypeNsService() *schema.Resource {
 }
 
 func resourceNsxtAlgorithmTypeNsServiceCreate(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
@@ -107,7 +110,11 @@ func resourceNsxtAlgorithmTypeNsServiceCreate(d *schema.ResourceData, m interfac
 }
 
 func resourceNsxtAlgorithmTypeNsServiceRead(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining ns service id")
@@ -138,7 +145,11 @@ func resourceNsxtAlgorithmTypeNsServiceRead(d *schema.ResourceData, m interface{
 }
 
 func resourceNsxtAlgorithmTypeNsServiceUpdate(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining ns service id")
@@ -177,7 +188,11 @@ func resourceNsxtAlgorithmTypeNsServiceUpdate(d *schema.ResourceData, m interfac
 }
 
 func resourceNsxtAlgorithmTypeNsServiceDelete(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining ns service id")

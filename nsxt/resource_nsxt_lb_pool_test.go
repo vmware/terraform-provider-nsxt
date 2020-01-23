@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/vmware/go-vmware-nsxt"
 	"net/http"
 	"testing"
 )
@@ -272,7 +271,7 @@ func TestAccResourceNsxtLbPool_importBasic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXLbPoolCreateTemplateTrivial(name),
+				Config: testAccNSXLbPoolCreateTemplateTrivial(),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -285,7 +284,7 @@ func TestAccResourceNsxtLbPool_importBasic(t *testing.T) {
 
 func testAccNSXLbPoolExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
-		nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
+		nsxClient := testAccProvider.Meta().(nsxtClients).NsxtClient
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
 			return fmt.Errorf("NSX LB pool resource %s not found in resources", resourceName)
@@ -313,7 +312,7 @@ func testAccNSXLbPoolExists(displayName string, resourceName string) resource.Te
 }
 
 func testAccNSXLbPoolCheckDestroy(state *terraform.State, displayName string) error {
-	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
+	nsxClient := testAccProvider.Meta().(nsxtClients).NsxtClient
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_lb_icmp_monitor" {
@@ -462,7 +461,7 @@ resource "nsxt_lb_pool" "test" {
 `, name, algorithm, minActiveMembers, snatTranslationType, snatTranslationIP)
 }
 
-func testAccNSXLbPoolCreateTemplateTrivial(name string) string {
+func testAccNSXLbPoolCreateTemplateTrivial() string {
 	return `
 resource "nsxt_lb_pool" "test" {
   description = "test description"

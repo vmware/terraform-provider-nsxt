@@ -6,7 +6,6 @@ package nsxt
 import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
-	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/loadbalancer"
 	"log"
 	"net/http"
@@ -64,7 +63,11 @@ func resourceNsxtLbSourceIPPersistenceProfile() *schema.Resource {
 }
 
 func resourceNsxtLbSourceIPPersistenceProfileCreate(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
@@ -101,7 +104,11 @@ func resourceNsxtLbSourceIPPersistenceProfileCreate(d *schema.ResourceData, m in
 }
 
 func resourceNsxtLbSourceIPPersistenceProfileRead(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")
@@ -134,7 +141,11 @@ func resourceNsxtLbSourceIPPersistenceProfileRead(d *schema.ResourceData, m inte
 }
 
 func resourceNsxtLbSourceIPPersistenceProfileUpdate(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")
@@ -173,7 +184,11 @@ func resourceNsxtLbSourceIPPersistenceProfileUpdate(d *schema.ResourceData, m in
 }
 
 func resourceNsxtLbSourceIPPersistenceProfileDelete(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")

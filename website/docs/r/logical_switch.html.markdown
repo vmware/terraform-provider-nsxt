@@ -33,11 +33,6 @@ resource "nsxt_logical_switch" "switch1" {
     key   = "${data.nsxt_switching_profile.qos_profiles.resource_type}"
     value = "${data.nsxt_switching_profile.qos_profiles.id}"
   }
-
-  switching_profile_id {
-    key   = "MacManagementSwitchingProfile"
-    value = "${nsxt_mac_management_switching_profile.allow.id}"
-  }
 }
 ```
 
@@ -49,8 +44,6 @@ The following arguments are supported:
 * `admin_state` - (Optional) Admin state for the logical switch. Accepted values - 'UP' or 'DOWN'. The default value is 'UP'.
 * `replication_mode` - (Optional) Replication mode of the Logical Switch. Accepted values - 'MTEP' (Hierarchical Two-Tier replication) and 'SOURCE' (Head Replication), with 'MTEP' being the default value. Applies to overlay logical switches.
 * `switching_profile_id` - (Optional) List of IDs of switching profiles (of various types) to be associated with this switch. Default switching profiles will be used if not specified.
-  * `key` - (Required) Type of profile, one of `SwitchSecuritySwitchingProfile`, `SpoofGuardSwitchingProfile`, `IpDiscoverySwitchingProfile`, `MacManagementSwitchingProfile`, `PortMirroringSwitchingProfile`, `QosSwitchingProfile`.
-  * `value` - (Required) NSX ID of the profile.
 * `display_name` - (Optional) Display name, defaults to ID if not set.
 * `description` - (Optional) Description of the resource.
 * `ip_pool_id` - (Optional) Ip Pool ID to be associated with the logical switch.
@@ -58,7 +51,7 @@ The following arguments are supported:
 * `address_binding` - (Optional) A list address bindings for this logical switch
   * `ip_address` - (Required) IP Address
   * `mac_address` - (Required) MAC Address
-  * `vlan` - (Optional) Vlan
+  * `vlan` - (Optional) Vlan 
 * `vlan` - (Deprecated, Optional) Vlan for vlan logical switch. This attribute is deprecated, please use nsxt_vlan_logical_switch resource to manage vlan logical switches.
 * `vni` - (Optional, Readonly) Vni for the logical switch.
 * `address_binding` - (Optional) List of Address Bindings for the logical switch. This setting allows to provide bindings between IP address, mac Address and vlan.
