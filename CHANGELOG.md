@@ -1,9 +1,68 @@
-## 1.1.3 (Unreleased)
+## 2.0.0 (Unreleased)
+
+NOTES:
+
+* The provider is extended to support NSX-T policy API. Policy API is intended to be primary consumtion for NSX-T logical constructs, thus users are encouraged to use new data sources/resources, with _policy_ in the name.
+
+FEATURES:
+* **New Data Source**: `nsxt_policy_certificate`
+* **New Data Source**: `nsxt_policy_edge_cluster`
+* **New Data Source**: `nsxt_policy_edge_node`
+* **New Data Source**: `nsxt_policy_tier0_gateway`
+* **New Data Source**: `nsxt_policy_tier1_gateway`
+* **New Data Source**: `nsxt_policy_segment`
+* **New Data Source**: `nsxt_policy_vlan_segment`
+* **New Data Source**: `nsxt_policy_service`
+* **New Data Source**: `nsxt_policy_ip_discovery_profile`
+* **New Data Source**: `nsxt_policy_spoofguard_profile`
+* **New Data Source**: `nsxt_policy_qos_profile`
+* **New Data Source**: `nsxt_policy_segment_security_profile`
+* **New Data Source**: `nsxt_policy_mac_discovery_profile`
+* **New Data Source**: `nsxt_policy_ipv6_ndra_profile`
+* **New Data Source**: `nsxt_policy_ipv6_dad_profile`
+* **New Data Source**: `nsxt_policy_vm`
+* **New Data Source**: `nsxt_policy_lb_app_profile`
+* **New Data Source**: `nsxt_policy_lb_client_ssl_profile`
+* **New Data Source**: `nsxt_policy_lb_server_ssl_profile`
+* **New Data Source**: `nsxt_policy_lb_monitor`
+* **New Data Source**: `nsxt_policy_lb_persistence_profile`
+* **New Data Source**: `nsxt_policy_vni_pool`
+* **New Data Source**: `nsxt_policy_realization_info`
+
+* **New Resource**: `nsxt_policy_tier0_gateway`
+* **New Resource**: `nsxt_policy_tier1_gateway`
+* **New Resource**: `nsxt_policy_tier0_gateway_interface`
+* **New Resource**: `nsxt_policy_tier1_gateway_interface`
+* **New Resource**: `nsxt_policy_group`
+* **New Resource**: `nsxt_policy_service`
+* **New Resource**: `nsxt_policy_security_policy`
+* **New Resource**: `nsxt_policy_gateway_policy`
+* **New Resource**: `nsxt_policy_segment`
+* **New Resource**: `nsxt_policy_vlan_segment`
+* **New Resource**: `nsxt_policy_static_route`
+* **New Resource**: `nsxt_policy_nat_rule`
+* **New Resource**: `nsxt_policy_vm_tags`
+* **New Resource**: `nsxt_policy_ip_block`
+* **New Resource**: `nsxt_policy_ip_pool`
+* **New Resource**: `nsxt_policy_ip_pool_block_subnet`
+* **New Resource**: `nsxt_policy_ip_pool_static_subnet`
+* **New Resource**: `nsxt_policy_ip_address_allocation`
+* **New Resource**: `nsxt_policy_lb_pool`
+* **New Resource**: `nsxt_policy_lb_service`
+* **New Resource**: `nsxt_policy_lb_virtual_server`
+* **New Resource**: `nsxt_policy_bgp_neighbor`
+* **New Resource**: `nsxt_policy_dhcp_relay`
+* **New Resource**: `nsxt_policy_dhcp_server`
+
+BUG FIXES:
+* Fix client authentication error that used to occur when client certificate is not self signed ([#207](https://github.com/terraform-providers/terraform-provider-nsxt/pull/207))
+* Allow IPv6 in IP addresses and CIDR validations ([#204](https://github.com/terraform-providers/terraform-provider-nsxt/pull/204))
+
 ## 1.1.2 (November 18, 2019)
 
 FEATURES:
-* **New Data Source**: `nsxt_ip_pool` ([#109](https://github.com/terraform-providers/terraform-provider-nsxt/pull/190))
-* **New Resource**: `nsxt_ip_pool_allocation_ip_address` ([#109](https://github.com/terraform-providers/terraform-provider-nsxt/pull/190))
+* **New Data Source**: `nsxt_ip_pool` ([#190](https://github.com/terraform-providers/terraform-provider-nsxt/pull/190))
+* **New Resource**: `nsxt_ip_pool_allocation_ip_address` ([#190](https://github.com/terraform-providers/terraform-provider-nsxt/pull/190))
 
 IMPROVEMENTS:
 * `resource/nsxt_ns_group`: Support IPSet type in membership criteria ([#195](https://github.com/terraform-providers/terraform-provider-nsxt/pull/195))
