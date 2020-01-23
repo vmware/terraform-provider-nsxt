@@ -180,12 +180,7 @@ func updatePortTags(nsxClient *api.APIClient, id string, tags []common.Tag) erro
 
 	port, err := findPortByExternalID(nsxClient, id)
 	if err != nil {
-		if len(tags) > 0 {
-			return err
-		}
-
-		// Its OK to end up here when VM is not residing on opaque switch
-		return nil
+		return err
 	}
 
 	port.Tags = tags
@@ -201,7 +196,11 @@ func updatePortTags(nsxClient *api.APIClient, id string, tags []common.Tag) erro
 func resourceNsxtVMTagsCreate(d *schema.ResourceData, m interface{}) error {
 	instanceID := d.Get("instance_id").(string)
 
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	vm, err := findVMIDByLocalID(nsxClient, instanceID)
 	if err != nil {
 		return fmt.Errorf("Error during VM retrieval: %v", err)
@@ -214,11 +213,9 @@ func resourceNsxtVMTagsCreate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	portTags := getCustomizedTagsFromSchema(d, "logical_port_tag")
-	if len(portTags) > 0 {
-		err = updatePortTags(nsxClient, vm.ExternalId, portTags)
-		if err != nil {
-			return err
-		}
+	err = updatePortTags(nsxClient, vm.ExternalId, portTags)
+	if err != nil {
+		return err
 	}
 
 	d.SetId(vm.ExternalId)
@@ -227,7 +224,11 @@ func resourceNsxtVMTagsCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceNsxtVMTagsRead(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")
@@ -239,11 +240,12 @@ func resourceNsxtVMTagsRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	port, err := findPortByExternalID(nsxClient, id)
+	if err != nil {
+		return fmt.Errorf("Error during logical port retrieval: %v", err)
+	}
 
 	setTagsInSchema(d, vm.Tags)
-	if port != nil {
-		setCustomizedTagsInSchema(d, port.Tags, "logical_port_tag")
-	}
+	setCustomizedTagsInSchema(d, port.Tags, "logical_port_tag")
 
 	return nil
 }
@@ -255,7 +257,11 @@ func resourceNsxtVMTagsUpdate(d *schema.ResourceData, m interface{}) error {
 func resourceNsxtVMTagsDelete(d *schema.ResourceData, m interface{}) error {
 	instanceID := d.Get("instance_id").(string)
 
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	vm, err := findVMIDByLocalID(nsxClient, instanceID)
 	if err != nil {
 		return fmt.Errorf("Error during VM retrieval: %v", err)

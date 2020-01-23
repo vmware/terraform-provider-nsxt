@@ -6,7 +6,6 @@ package nsxt
 import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
-	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/loadbalancer"
 	"log"
 	"net/http"
@@ -271,7 +270,11 @@ func setServerSSLBindingInSchema(d *schema.ResourceData, binding *loadbalancer.S
 
 func resourceNsxtLbHTTPVirtualServerCreate(d *schema.ResourceData, m interface{}) error {
 	var defaultPoolMemberPorts []string
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
@@ -328,7 +331,11 @@ func resourceNsxtLbHTTPVirtualServerCreate(d *schema.ResourceData, m interface{}
 }
 
 func resourceNsxtLbHTTPVirtualServerRead(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")
@@ -370,7 +377,11 @@ func resourceNsxtLbHTTPVirtualServerRead(d *schema.ResourceData, m interface{}) 
 }
 
 func resourceNsxtLbHTTPVirtualServerUpdate(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")
@@ -430,7 +441,11 @@ func resourceNsxtLbHTTPVirtualServerUpdate(d *schema.ResourceData, m interface{}
 }
 
 func resourceNsxtLbHTTPVirtualServerDelete(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")

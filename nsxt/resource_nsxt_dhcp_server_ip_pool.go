@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
-	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/manager"
 	"log"
 	"net/http"
@@ -80,7 +79,11 @@ func resourceNsxtDhcpServerIPPool() *schema.Resource {
 }
 
 func resourceNsxtDhcpServerIPPoolCreate(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
 	gatewayIP := d.Get("gateway_ip").(string)
@@ -126,7 +129,11 @@ func resourceNsxtDhcpServerIPPoolCreate(d *schema.ResourceData, m interface{}) e
 }
 
 func resourceNsxtDhcpServerIPPoolRead(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	serverID := d.Get("logical_dhcp_server_id").(string)
 	if id == "" || serverID == "" {
@@ -174,7 +181,11 @@ func resourceNsxtDhcpServerIPPoolRead(d *schema.ResourceData, m interface{}) err
 }
 
 func resourceNsxtDhcpServerIPPoolUpdate(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	serverID := d.Get("logical_dhcp_server_id").(string)
 	if id == "" {
@@ -221,7 +232,11 @@ func resourceNsxtDhcpServerIPPoolUpdate(d *schema.ResourceData, m interface{}) e
 }
 
 func resourceNsxtDhcpServerIPPoolDelete(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	serverID := d.Get("logical_dhcp_server_id").(string)
 	if id == "" || serverID == "" {

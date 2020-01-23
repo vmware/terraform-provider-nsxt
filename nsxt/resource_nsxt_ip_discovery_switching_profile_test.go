@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/vmware/go-vmware-nsxt"
 	"net/http"
 	"testing"
 )
@@ -85,7 +84,7 @@ func TestAccResourceNsxtIpDiscoverySwitchingProfile_importBasic(t *testing.T) {
 
 func testAccNSXIpDiscoverySwitchingProfileExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
-		nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
+		nsxClient := testAccProvider.Meta().(nsxtClients).NsxtClient
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
 			return fmt.Errorf("NSX switching profile resource %s not found in resources", resourceName)
@@ -113,7 +112,7 @@ func testAccNSXIpDiscoverySwitchingProfileExists(displayName string, resourceNam
 }
 
 func testAccNSXIpDiscoverySwitchingProfileCheckDestroy(state *terraform.State, displayName string) error {
-	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
+	nsxClient := testAccProvider.Meta().(nsxtClients).NsxtClient
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_ip_discovery_switching_profile" {

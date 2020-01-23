@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
-	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/manager"
 	"log"
 	"net/http"
@@ -67,7 +66,11 @@ func resourceNsxtLogicalRouterCentralizedServicePort() *schema.Resource {
 }
 
 func resourceNsxtLogicalRouterCentralizedServicePortCreate(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
@@ -100,7 +103,11 @@ func resourceNsxtLogicalRouterCentralizedServicePortCreate(d *schema.ResourceDat
 }
 
 func resourceNsxtLogicalRouterCentralizedServicePortRead(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical router centralized port id while reading")
@@ -129,7 +136,11 @@ func resourceNsxtLogicalRouterCentralizedServicePortRead(d *schema.ResourceData,
 }
 
 func resourceNsxtLogicalRouterCentralizedServicePortUpdate(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical router centralized port id while updating")
@@ -165,7 +176,11 @@ func resourceNsxtLogicalRouterCentralizedServicePortUpdate(d *schema.ResourceDat
 }
 
 func resourceNsxtLogicalRouterCentralizedServicePortDelete(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical router centralized port id while deleting")

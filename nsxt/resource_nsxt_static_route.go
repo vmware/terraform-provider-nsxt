@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
-	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/common"
 	"github.com/vmware/go-vmware-nsxt/manager"
 	"log"
@@ -135,7 +134,11 @@ func setNextHopsInSchema(d *schema.ResourceData, nextHops []manager.StaticRouteN
 }
 
 func resourceNsxtStaticRouteCreate(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	logicalRouterID := d.Get("logical_router_id").(string)
 	if logicalRouterID == "" {
 		return fmt.Errorf("Error obtaining logical router id during static route creation")
@@ -170,7 +173,11 @@ func resourceNsxtStaticRouteCreate(d *schema.ResourceData, m interface{}) error 
 }
 
 func resourceNsxtStaticRouteRead(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")
@@ -206,7 +213,11 @@ func resourceNsxtStaticRouteRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceNsxtStaticRouteUpdate(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")
@@ -243,7 +254,11 @@ func resourceNsxtStaticRouteUpdate(d *schema.ResourceData, m interface{}) error 
 }
 
 func resourceNsxtStaticRouteDelete(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")

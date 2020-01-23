@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/vmware/go-vmware-nsxt"
 	"net/http"
 	"testing"
 )
@@ -31,7 +30,7 @@ func TestAccResourceNsxtIpSet_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.#", "1"),
 				),
 			},
 			{
@@ -66,7 +65,7 @@ func TestAccResourceNsxtIpSet_noName(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "display_name"),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.#", "1"),
 				),
 			},
 			{
@@ -109,7 +108,7 @@ func TestAccResourceNsxtIpSet_importBasic(t *testing.T) {
 func testAccNSXIpSetExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
-		nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
+		nsxClient := testAccProvider.Meta().(nsxtClients).NsxtClient
 
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
@@ -139,7 +138,7 @@ func testAccNSXIpSetExists(displayName string, resourceName string) resource.Tes
 }
 
 func testAccNSXIpSetCheckDestroy(state *terraform.State, displayName string) error {
-	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
+	nsxClient := testAccProvider.Meta().(nsxtClients).NsxtClient
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_ip_set" {
@@ -167,7 +166,7 @@ func testAccNSXIpSetCreateTemplate(name string) string {
 resource "nsxt_ip_set" "test" {
   display_name = "%s"
   description  = "Acceptance Test"
-  ip_addresses = ["1.1.1.1", "3003::2"]
+  ip_addresses = ["1.1.1.1"]
 
   tag {
     scope = "scope1"

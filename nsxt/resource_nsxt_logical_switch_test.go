@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/vmware/go-vmware-nsxt"
 	"net/http"
 	"regexp"
 	"testing"
@@ -232,7 +231,7 @@ func TestAccResourceNsxtLogicalSwitch_importBasic(t *testing.T) {
 func testAccNSXLogicalSwitchExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
-		nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
+		nsxClient := testAccProvider.Meta().(nsxtClients).NsxtClient
 
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
@@ -261,7 +260,7 @@ func testAccNSXLogicalSwitchExists(displayName string, resourceName string) reso
 }
 
 func testAccNSXLogicalSwitchCheckDestroy(state *terraform.State, resourceType string, displayName string) error {
-	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
+	nsxClient := testAccProvider.Meta().(nsxtClients).NsxtClient
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != resourceType {
@@ -292,20 +291,6 @@ resource "nsxt_logical_switch" "error" {
   description      = "Acceptance Test"
   replication_mode = "MTEP"
 }`, switchName)
-}
-
-func testAccNSXLogicalSwitchNoVlanTemplate(switchName string, transportZoneName string) string {
-	return fmt.Sprintf(`
-data "nsxt_transport_zone" "TZ1" {
-  display_name = "%s"
-}
-
-resource "nsxt_logical_switch" "error" {
-  display_name      = "%s"
-  admin_state       = "UP"
-  description       = "Acceptance Test"
-  transport_zone_id = "${data.nsxt_transport_zone.TZ1.id}"
-}`, transportZoneName, switchName)
 }
 
 func testAccNSXLogicalSwitchCreateTemplate(resourceName string, switchName string, transportZoneName string, vlan string, replicationMode string) string {

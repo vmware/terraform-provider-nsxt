@@ -1,0 +1,177 @@
+/* Copyright © 2019 VMware, Inc. All Rights Reserved.
+   SPDX-License-Identifier: MPL-2.0 */
+
+package nsxt
+
+import (
+	"fmt"
+	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform/terraform"
+	"github.com/vmware/go-nsx-t-policy/bindings/nsx_policy/infra"
+	"testing"
+)
+
+var accTestPolicy<!RESOURCE!>CreateAttributes = map[string]string{
+	"display_name": "terra-test",
+	"description":  "terraform created",
+        <!TEST_ATTRS_CREATE!>
+}
+
+var accTestPolicy<!RESOURCE!>UpdateAttributes = map[string]string{
+	"display_name": "terra-test-updated",
+	"description":  "terraform updated",
+        <!TEST_ATTRS_UPDATE!>
+}
+
+func TestAccResourceNsxtPolicy<!RESOURCE!>_basic(t *testing.T) {
+	testResourceName := "nsxt_policy_<!resource_lower!>.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicy<!RESOURCE!>CheckDestroy(state, accTestPolicy<!RESOURCE!>CreateAttributes["display_name"])
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicy<!RESOURCE!>Template(true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicy<!RESOURCE!>Exists(accTestPolicy<!RESOURCE!>CreateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicy<!RESOURCE!>CreateAttributes["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicy<!RESOURCE!>CreateAttributes["description"]),
+                                        <!CHECK_ATTRS_CREATE!>
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicy<!RESOURCE!>Template(false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicy<!RESOURCE!>Exists(accTestPolicy<!RESOURCE!>UpdateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicy<!RESOURCE!>UpdateAttributes["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicy<!RESOURCE!>UpdateAttributes["description"]),
+                                        <!CHECK_ATTRS_UPDATE!>
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicy<!RESOURCE!>Minimalistic(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicy<!RESOURCE!>Exists(accTestPolicy<!RESOURCE!>CreateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "description", ""),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicy<!RESOURCE!>_importBasic(t *testing.T) {
+	name := "terra-test-import"
+	testResourceName := "nsxt_policy_<!resource_lower!>.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicy<!RESOURCE!>CheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicy<!RESOURCE!>Minimalistic(),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccNsxtPolicy<!RESOURCE!>Exists(displayName string, resourceName string) resource.TestCheckFunc {
+	return func(state *terraform.State) error {
+
+		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
+		nsxClient := infra.NewDefault<!RESOURCE!>sClient(connector)
+
+		rs, ok := state.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("Policy <!RESOURCE!> resource %s not found in resources", resourceName)
+		}
+
+		resourceID := rs.Primary.ID
+		if resourceID == "" {
+			return fmt.Errorf("Policy <!RESOURCE!> resource ID not set in resources")
+		}
+
+		_, err := nsxClient.Get(resourceID)
+		if err != nil {
+			return fmt.Errorf("Error while retrieving policy <!RESOURCE!> ID %s. Error: %v", resourceID, err)
+		}
+
+		return nil
+	}
+}
+
+func testAccNsxtPolicy<!RESOURCE!>CheckDestroy(state *terraform.State, displayName string) error {
+	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
+	nsxClient := infra.NewDefault<!RESOURCE!>sClient(connector)
+	for _, rs := range state.RootModule().Resources {
+
+		if rs.Type != "nsxt_policy_<!resource_lower!>" {
+			continue
+		}
+
+		resourceID := rs.Primary.Attributes["id"]
+		_, err := nsxClient.Get(resourceID)
+		if err == nil {
+			return fmt.Errorf("Policy <!RESOURCE!> %s still exists", displayName)
+		}
+	}
+	return nil
+}
+
+func testAccNsxtPolicy<!RESOURCE!>Template(createFlow bool) string {
+	var attrMap map[string]string
+	if createFlow {
+		attrMap = accTestPolicy<!RESOURCE!>CreateAttributes
+	} else {
+		attrMap = accTestPolicy<!RESOURCE!>UpdateAttributes
+	}
+	return fmt.Sprintf(`
+resource "nsxt_policy_<!resource_lower!>" "test" {
+  display_name = "%s"
+  description  = "%s"
+  <!TEST_ATTRS!>
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+}
+
+data "nsxt_policy_realization_info" "realization_info" {
+  path = nsxt_policy_<!resource_lower!>.test.path
+}`, attrMap["display_name"], attrMap["description"]<!TEST_ATTRS_SPRINTF!>)
+}
+
+func testAccNsxtPolicy<!RESOURCE!>Minimalistic() string {
+	return fmt.Sprintf(`
+resource "nsxt_policy_<!resource_lower!>" "test" {
+  display_name = "%s"
+<!TEST_REQUIRED_ATTRS!>
+}
+
+data "nsxt_policy_realization_info" "realization_info" {
+  path = nsxt_policy_<!resource_lower!>.test.path
+}`, accTestPolicy<!RESOURCE!>UpdateAttributes["display_name"]<!TEST_REQUIRED_ATTRS_SPRINTF!>)
+}

@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/vmware/go-vmware-nsxt"
 	"net/http"
 	"testing"
 )
@@ -95,7 +94,7 @@ func testAccResourceNsxtLbL4MonitorImport(t *testing.T, protocol string) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXLbL4MonitorCreateTemplateTrivial(protocol, name),
+				Config: testAccNSXLbL4MonitorCreateTemplateTrivial(protocol),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -109,7 +108,7 @@ func testAccResourceNsxtLbL4MonitorImport(t *testing.T, protocol string) {
 func testAccNSXLbL4MonitorExists(protocol string, displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
-		nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
+		nsxClient := testAccProvider.Meta().(nsxtClients).NsxtClient
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
 			return fmt.Errorf("NSX LB %s monitor resource %s not found in resources", protocol, resourceName)
@@ -137,7 +136,7 @@ func testAccNSXLbL4MonitorExists(protocol string, displayName string, resourceNa
 }
 
 func testAccNSXLbL4MonitorCheckDestroy(protocol string, state *terraform.State, displayName string) error {
-	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
+	nsxClient := testAccProvider.Meta().(nsxtClients).NsxtClient
 	monitorType := fmt.Sprintf("nsxt_lb_%s_monitor", protocol)
 	for _, rs := range state.RootModule().Resources {
 
@@ -181,7 +180,7 @@ resource "nsxt_lb_%s_monitor" "test" {
 `, protocol, name, count, interval, port, count, timeout, send, receive)
 }
 
-func testAccNSXLbL4MonitorCreateTemplateTrivial(protocol string, name string) string {
+func testAccNSXLbL4MonitorCreateTemplateTrivial(protocol string) string {
 	return fmt.Sprintf(`
 resource "nsxt_lb_%s_monitor" "test" {
   description = "test description"

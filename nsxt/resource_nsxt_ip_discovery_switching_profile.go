@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
-	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/manager"
 	"log"
 	"net/http"
@@ -67,7 +66,11 @@ func resourceNsxtIPDiscoverySwitchingProfile() *schema.Resource {
 }
 
 func resourceNsxtIPDiscoverySwitchingProfileCreate(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
@@ -101,7 +104,11 @@ func resourceNsxtIPDiscoverySwitchingProfileCreate(d *schema.ResourceData, m int
 }
 
 func resourceNsxtIPDiscoverySwitchingProfileRead(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")
@@ -130,7 +137,11 @@ func resourceNsxtIPDiscoverySwitchingProfileRead(d *schema.ResourceData, m inter
 }
 
 func resourceNsxtIPDiscoverySwitchingProfileUpdate(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")
@@ -166,7 +177,11 @@ func resourceNsxtIPDiscoverySwitchingProfileUpdate(d *schema.ResourceData, m int
 }
 
 func resourceNsxtIPDiscoverySwitchingProfileDelete(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")

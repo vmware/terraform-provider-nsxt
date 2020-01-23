@@ -5,8 +5,6 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
 	"github.com/vmware/go-vmware-nsxt/trust"
 	"net/http"
 	"os"
@@ -17,11 +15,11 @@ import (
 // Those defaults can be overridden using environment parameters
 const tier0RouterDefaultName string = "PLR-1 LogicalRouterTier0"
 const edgeClusterDefaultName string = "edgecluster1"
-const switchingProfileDefaultName string = "nsx-default-mac-profile"
 const vlanTransportZoneName string = "transportzone2"
 const overlayTransportZoneNamePrefix string = "1-transportzone"
 const macPoolDefaultName string = "DefaultMacPool"
-const ipPoolDefaultName string = "DefaultIpPool"
+
+const realizationResourceName string = "data.nsxt_policy_realization_info.realization_info"
 
 const singleTag string = `
   tag {
@@ -51,14 +49,6 @@ func getEdgeClusterName() string {
 	name := os.Getenv("NSXT_TEST_EDGE_CLUSTER")
 	if name == "" {
 		name = edgeClusterDefaultName
-	}
-	return name
-}
-
-func getSwitchingProfileName() string {
-	name := os.Getenv("NSXT_TEST_SWITCHING_PROFILE")
-	if name == "" {
-		name = switchingProfileDefaultName
 	}
 	return name
 }
@@ -95,23 +85,20 @@ func getTestVMID() string {
 	return os.Getenv("NSXT_TEST_VM_ID")
 }
 
-func getTestVMOnOpaqueSwitchID() string {
-	return os.Getenv("NSXT_TEST_VM_ON_OPAQUE_SWITCH_ID")
+func getTestVMName() string {
+	return os.Getenv("NSXT_TEST_VM_NAME")
+}
+
+func getTestCertificateName(isClient bool) string {
+	if isClient {
+		return os.Getenv("NSXT_TEST_CLIENT_CERTIFICATE_NAME")
+	}
+	return os.Getenv("NSXT_TEST_CERTIFICATE_NAME")
 }
 
 func testAccEnvDefined(t *testing.T, envVar string) {
 	if len(os.Getenv(envVar)) == 0 {
 		t.Skipf("This test requires %s environment variable to be set", envVar)
-	}
-}
-
-// copyStatePtr returns a TestCheckFunc that copies the reference to the test
-// run's state to t. This allows access to the state data in later steps where
-// it's not normally accessible (ie: in pre-config parts in another test step).
-func copyStatePtr(t **terraform.State) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		*t = s
-		return nil
 	}
 }
 
@@ -295,4 +282,8 @@ func testAccNSXDeleteCerts(t *testing.T, certID string, clientCertID string, caC
 	testAccNSXDeleteCert(t, certID)
 	testAccNSXDeleteCert(t, clientCertID)
 	testAccNSXDeleteCert(t, caCertID)
+}
+
+func testAccNsxtPolicyEmptyTemplate() string {
+	return " "
 }

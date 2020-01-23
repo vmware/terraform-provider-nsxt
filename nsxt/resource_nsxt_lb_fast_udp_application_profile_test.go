@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/vmware/go-vmware-nsxt"
 	"net/http"
 	"testing"
 )
@@ -77,7 +76,7 @@ func TestAccResourceNsxtLbFastUDPApplicationProfile_importBasic(t *testing.T) {
 
 func testAccNSXLbFastUDPApplicationProfileExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
-		nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
+		nsxClient := testAccProvider.Meta().(nsxtClients).NsxtClient
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
 			return fmt.Errorf("NSX LB fast udp application profile resource %s not found in resources", resourceName)
@@ -105,7 +104,7 @@ func testAccNSXLbFastUDPApplicationProfileExists(displayName string, resourceNam
 }
 
 func testAccNSXLbFastUDPApplicationProfileCheckDestroy(state *terraform.State, displayName string) error {
-	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
+	nsxClient := testAccProvider.Meta().(nsxtClients).NsxtClient
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_lb_fast_udp_application_profile" {

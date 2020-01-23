@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/vmware/go-vmware-nsxt"
 	"net/http"
 	"testing"
 )
@@ -82,7 +81,7 @@ func TestAccResourceNsxtLbHTTPApplicationProfile_importBasic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXLbHTTPApplicationCreateTemplateTrivial(name),
+				Config: testAccNSXLbHTTPApplicationCreateTemplateTrivial(),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -95,7 +94,7 @@ func TestAccResourceNsxtLbHTTPApplicationProfile_importBasic(t *testing.T) {
 
 func testAccNSXLbHTTPApplicationProfileExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
-		nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
+		nsxClient := testAccProvider.Meta().(nsxtClients).NsxtClient
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
 			return fmt.Errorf("NSX http application profile resource %s not found in resources", resourceName)
@@ -123,7 +122,7 @@ func testAccNSXLbHTTPApplicationProfileExists(displayName string, resourceName s
 }
 
 func testAccNSXLbHTTPApplicationProfileCheckDestroy(state *terraform.State, displayName string) error {
-	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
+	nsxClient := testAccProvider.Meta().(nsxtClients).NsxtClient
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_lb_http_application_profile" {
@@ -168,7 +167,7 @@ resource "nsxt_lb_http_application_profile" "test" {
 `, name, httpRedirect, httpsRedirect, idleTime, bodySize, headerSize, respTimeout, forward, ntlm)
 }
 
-func testAccNSXLbHTTPApplicationCreateTemplateTrivial(name string) string {
+func testAccNSXLbHTTPApplicationCreateTemplateTrivial() string {
 	return `
 resource "nsxt_lb_http_application_profile" "test" {
   description = "test description"

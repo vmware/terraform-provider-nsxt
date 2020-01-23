@@ -175,7 +175,10 @@ func InitHttpClient(cfg *Configuration) error {
 			return err
 		}
 
-		tlsConfig.Certificates = []tls.Certificate{cert}
+		tlsConfig.GetClientCertificate = func(*tls.CertificateRequestInfo) (*tls.Certificate, error) {
+			return &cert, nil
+		}
+
 	}
 
 	if len(cfg.CAFile) > 0 {

@@ -1,0 +1,232 @@
+/* Copyright © 2019 VMware, Inc. All Rights Reserved.
+   SPDX-License-Identifier: MPL-2.0 */
+
+package nsxt
+
+import (
+	"fmt"
+	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/ip_pools"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+	"log"
+	"strings"
+)
+
+func resourceNsxtPolicyIPPoolBlockSubnet() *schema.Resource {
+	return &schema.Resource{
+		Create: resourceNsxtPolicyIPPoolBlockSubnetCreate,
+		Read:   resourceNsxtPolicyIPPoolBlockSubnetRead,
+		Update: resourceNsxtPolicyIPPoolBlockSubnetUpdate,
+		Delete: resourceNsxtPolicyIPPoolBlockSubnetDelete,
+		Importer: &schema.ResourceImporter{
+			State: resourceNsxtPolicyIPPoolSubnetImport,
+		},
+
+		Schema: map[string]*schema.Schema{
+			"nsx_id":       getNsxIDSchema(),
+			"path":         getPathSchema(),
+			"display_name": getDisplayNameSchema(),
+			"description":  getDescriptionSchema(),
+			"revision":     getRevisionSchema(),
+			"tag":          getTagsSchema(),
+			"auto_assign_gateway": {
+				Type:        schema.TypeBool,
+				Description: "If true, the first IP in the range will be reserved for gateway",
+				Optional:    true,
+				Default:     true,
+			},
+			"size": {
+				Type:         schema.TypeInt,
+				Description:  "Number of addresses",
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validatePowerOf2(false, 0),
+			},
+			"pool_path":  getPolicyPathSchema(true, true, "Policy path to the IP Pool for this Subnet"),
+			"block_path": getPolicyPathSchema(true, true, "Policy path to the IP Block"),
+		},
+	}
+}
+
+func resourceNsxtPolicyIPPoolBlockSubnetSchemaToStructValue(d *schema.ResourceData, id string) (*data.StructValue, error) {
+	converter := bindings.NewTypeConverter()
+	converter.SetMode(bindings.REST)
+
+	displayName := d.Get("display_name").(string)
+	description := d.Get("description").(string)
+	blockPath := d.Get("block_path").(string)
+	autoAssignGateway := d.Get("auto_assign_gateway").(bool)
+	size := d.Get("size").(int)
+	tags := getPolicyTagsFromSchema(d)
+
+	obj := model.IpAddressPoolBlockSubnet{
+		DisplayName:       &displayName,
+		Description:       &description,
+		Tags:              tags,
+		Size:              int64(size),
+		AutoAssignGateway: &autoAssignGateway,
+		ResourceType:      "IpAddressPoolBlockSubnet",
+		IpBlockPath:       blockPath,
+		Id:                &id,
+	}
+
+	dataValue, errors := converter.ConvertToVapi(obj, model.IpAddressPoolBlockSubnetBindingType())
+	if errors != nil {
+		return nil, fmt.Errorf("Error converting Block Subnet: %v", errors[0])
+	}
+
+	return dataValue.(*data.StructValue), nil
+}
+
+func resourceNsxtPolicyIPPoolBlockSubnetRead(d *schema.ResourceData, m interface{}) error {
+	connector := getPolicyConnector(m)
+	client := ip_pools.NewDefaultIpSubnetsClient(connector)
+	converter := bindings.NewTypeConverter()
+	converter.SetMode(bindings.REST)
+
+	poolPath := d.Get("pool_path").(string)
+	poolID := getPolicyIDFromPath(poolPath)
+
+	id := d.Id()
+	if id == "" || poolID == "" {
+		return fmt.Errorf("Error obtaining Block Subnet ID")
+	}
+
+	subnetData, err := client.Get(poolID, id)
+	if err != nil {
+		if isNotFoundError(err) {
+			d.SetId("")
+			log.Printf("[DEBUG] Block Subnet %s not found", id)
+			return nil
+		}
+		return handleReadError(d, "Block Subnet", id, err)
+	}
+
+	snet, errs := converter.ConvertToGolang(subnetData, model.IpAddressPoolBlockSubnetBindingType())
+	if len(errs) > 0 {
+		return fmt.Errorf("Error converting Block Subnet %s", errs[0])
+	}
+	blockSubnet := snet.(model.IpAddressPoolBlockSubnet)
+
+	d.Set("display_name", blockSubnet.DisplayName)
+	d.Set("description", blockSubnet.Description)
+	setPolicyTagsInSchema(d, blockSubnet.Tags)
+	d.Set("nsx_id", blockSubnet.Id)
+	d.Set("path", blockSubnet.Path)
+	d.Set("revision", blockSubnet.Revision)
+	d.Set("auto_assign_gateway", blockSubnet.AutoAssignGateway)
+	d.Set("size", int(blockSubnet.Size))
+	d.Set("pool_path", poolPath)
+	d.Set("block_path", blockSubnet.IpBlockPath)
+
+	return nil
+}
+
+func resourceNsxtPolicyIPPoolBlockSubnetCreate(d *schema.ResourceData, m interface{}) error {
+	connector := getPolicyConnector(m)
+	client := ip_pools.NewDefaultIpSubnetsClient(connector)
+
+	poolPath := d.Get("pool_path").(string)
+	poolID := getPolicyIDFromPath(poolPath)
+
+	id := d.Get("nsx_id").(string)
+	if id == "" {
+		id = newUUID()
+	} else {
+		_, err := client.Get(poolID, id)
+		if err == nil {
+			return fmt.Errorf("Block Subnet with ID '%s' already exists on Pool %s", id, poolID)
+		} else if !isNotFoundError(err) {
+			return err
+		}
+	}
+
+	dataValue, err := resourceNsxtPolicyIPPoolBlockSubnetSchemaToStructValue(d, id)
+	if err != nil {
+		return err
+	}
+
+	log.Printf("[INFO] Creating IP Pool Block Subnet with ID %s", id)
+	err = client.Patch(poolID, id, dataValue)
+	if err != nil {
+		return handleCreateError("Block Subnet", id, err)
+	}
+
+	d.SetId(id)
+	d.Set("nsx_id", id)
+	return resourceNsxtPolicyIPPoolBlockSubnetRead(d, m)
+}
+
+func resourceNsxtPolicyIPPoolBlockSubnetUpdate(d *schema.ResourceData, m interface{}) error {
+	connector := getPolicyConnector(m)
+	client := ip_pools.NewDefaultIpSubnetsClient(connector)
+
+	poolPath := d.Get("pool_path").(string)
+	poolID := getPolicyIDFromPath(poolPath)
+
+	id := d.Id()
+	if id == "" || poolID == "" {
+		return fmt.Errorf("Error obtaining Block Subnet ID")
+	}
+
+	dataValue, err := resourceNsxtPolicyIPPoolBlockSubnetSchemaToStructValue(d, id)
+	if err != nil {
+		return err
+	}
+
+	log.Printf("[INFO] Creating IP Pool Block Subnet with ID %s", id)
+	err = client.Patch(poolID, id, dataValue)
+	if err != nil {
+		return handleUpdateError("Block Subnet", id, err)
+	}
+
+	d.SetId(id)
+	d.Set("nsx_id", id)
+	return resourceNsxtPolicyIPPoolBlockSubnetRead(d, m)
+}
+
+func resourceNsxtPolicyIPPoolBlockSubnetDelete(d *schema.ResourceData, m interface{}) error {
+	connector := getPolicyConnector(m)
+	client := ip_pools.NewDefaultIpSubnetsClient(connector)
+
+	poolPath := d.Get("pool_path").(string)
+	poolID := getPolicyIDFromPath(poolPath)
+
+	id := d.Id()
+	if id == "" || poolID == "" {
+		return fmt.Errorf("Error obtaining Block Subnet ID")
+	}
+
+	log.Printf("[INFO] Deleting Block Subnet with ID %s", id)
+	err := client.Delete(poolID, id)
+	if err != nil {
+		return handleDeleteError("Block Subnet", id, err)
+	}
+
+	return nil
+}
+
+func resourceNsxtPolicyIPPoolSubnetImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	importID := d.Id()
+	s := strings.Split(importID, "/")
+	if len(s) != 2 {
+		return nil, fmt.Errorf("Please provide <ip-pool-id>/<subnet-id> as an input")
+	}
+
+	poolID := s[0]
+	connector := getPolicyConnector(m)
+	client := infra.NewDefaultIpPoolsClient(connector)
+
+	pool, err := client.Get(poolID)
+	if err != nil {
+		return nil, err
+	}
+	d.Set("pool_path", pool.Path)
+
+	d.SetId(s[1])
+
+	return []*schema.ResourceData{d}, nil
+}

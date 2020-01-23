@@ -6,7 +6,6 @@ package nsxt
 import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
-	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/manager"
 	"log"
 	"net/http"
@@ -66,7 +65,11 @@ func resourceNsxtVlanLogicalSwitch() *schema.Resource {
 }
 
 func resourceNsxtVlanLogicalSwitchCreate(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
@@ -113,7 +116,11 @@ func resourceNsxtVlanLogicalSwitchCreate(d *schema.ResourceData, m interface{}) 
 }
 
 func resourceNsxtVlanLogicalSwitchRead(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical switch id")
@@ -151,7 +158,11 @@ func resourceNsxtVlanLogicalSwitchRead(d *schema.ResourceData, m interface{}) er
 }
 
 func resourceNsxtVlanLogicalSwitchUpdate(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical switch id")
@@ -191,7 +202,11 @@ func resourceNsxtVlanLogicalSwitchUpdate(d *schema.ResourceData, m interface{}) 
 }
 
 func resourceNsxtVlanLogicalSwitchDelete(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical switch id")

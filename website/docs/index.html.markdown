@@ -109,12 +109,26 @@ provider "nsxt" {
 
 ```
 
+### VMC Environment Example
+
+Note that only a limited subset of policy resources are supported with VMC.
+
+```hcl
+provider "nsxt" {
+  host                 = "x-54-200-54-5.rp.vmwarevmc.com/vmc/reverse-proxy/api/orgs/b003c3a5-3f68-4a8c-a74f-f79a0625da17/sddcs/d2f43050-f4e2-4989-ab52-2eb0b89d8487/sks-nsxt-manager"
+  vmc_token            = "5aVZEj6dJN1bQ6ZheakMyV0Qbj7P65sa2pYuhgx7Mp5glvgCkFKHcGxy3KmslllT"
+  allow_unverified_ssl = true
+}
+
+```
+
 ## Argument Reference
 
 The following arguments are used to configure the VMware NSX-T Provider:
 
 * `host` - (Required) The host name or IP address of the NSX-T manager. Can also
-  be specified with the `NSXT_MANAGER_HOST` environment variable.
+  be specified with the `NSXT_MANAGER_HOST` environment variable. Do not include
+  `http://` or `https://` in the host.
 * `username` - (Required) The user name to connect to the NSX-T manager as. Can
   also be specified with the `NSXT_USERNAME` environment variable.
 * `password` - (Required) The password for the NSX-T manager user. Can also be
@@ -152,6 +166,13 @@ The following arguments are used to configure the VMware NSX-T Provider:
   `NSXT_REMOTE_AUTH` environment variable.
 * `tolerate_partial_success` - (Optional) Setting this flag to true would treat
   partially succesful realization as valid state and not fail apply.
+* `vmc_token` - (Optional) Long-lived API token for authenticating with VMware
+  Cloud Services APIs. This token will be used to short-lived token that is
+  needed to communicate with NSX Manager in VMC environment.
+  Note that only subset of policy resources are supported with VMC environment.
+* `vmc_auth_host` - (Optional) URL for VMC authorization service that is used
+  to obtain short-lived token for NSX manager access. Defaults to VMC
+  console authorization URL.
 
 ## NSX Logical Networking
 

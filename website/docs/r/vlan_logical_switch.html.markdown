@@ -28,11 +28,6 @@ resource "nsxt_vlan_logical_switch" "switch1" {
     key   = "${data.nsxt_switching_profile.qos_profiles.resource_type}"
     value = "${data.nsxt_switching_profile.qos_profiles.id}"
   }
-
-  switching_profile_id {
-    key   = "MacManagementSwitchingProfile"
-    value = "${nsxt_mac_management_switching_profile.allow.id}"
-  }
 }
 ```
 
@@ -44,8 +39,6 @@ The following arguments are supported:
 * `admin_state` - (Optional) Admin state for the logical switch. Accepted values - 'UP' or 'DOWN'. The default value is 'UP'.
 * `vlan` - (Required) Vlan for the logical switch.
 * `switching_profile_id` - (Optional) List of IDs of switching profiles (of various types) to be associated with this switch. Default switching profiles will be used if not specified.
-  * `key` - (Required) Type of profile, one of `SwitchSecuritySwitchingProfile`, `SpoofGuardSwitchingProfile`, `IpDiscoverySwitchingProfile`, `MacManagementSwitchingProfile`, `PortMirroringSwitchingProfile`, `QosSwitchingProfile`.
-  * `value` - (Required) NSX ID of the profile.
 * `display_name` - (Optional) Display name, defaults to ID if not set.
 * `description` - (Optional) Description of the resource.
 * `ip_pool_id` - (Optional) Ip Pool ID to be associated with the logical switch.

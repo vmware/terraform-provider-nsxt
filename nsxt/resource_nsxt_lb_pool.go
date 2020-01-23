@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
-	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/common"
 	"github.com/vmware/go-vmware-nsxt/loadbalancer"
 	"log"
@@ -63,10 +62,11 @@ func resourceNsxtLbPool() *schema.Resource {
 				Default:     false,
 			},
 			"tcp_multiplexing_number": {
-				Type:        schema.TypeInt,
-				Description: "The maximum number of TCP connections per pool that are idly kept alive for sending future client requests",
-				Optional:    true,
-				Default:     6,
+				Type:         schema.TypeInt,
+				Description:  "The maximum number of TCP connections per pool that are idly kept alive for sending future client requests",
+				Optional:     true,
+				Default:      6,
+				ValidateFunc: validation.IntBetween(0, 6),
 			},
 			"active_monitor_id": {
 				Type:        schema.TypeString,
@@ -112,6 +112,8 @@ func getSnatTranslationSchema() *schema.Schema {
 	}
 }
 
+// NOTE: This method is used in policy resource as well.
+// If making changes, be sure the changes apply to both use cases
 func getPoolMembersSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:        schema.TypeList,
@@ -156,10 +158,11 @@ func getPoolMembersSchema() *schema.Schema {
 					ValidateFunc: validateSinglePort(),
 				},
 				"weight": {
-					Type:        schema.TypeInt,
-					Description: "Pool member weight is used for WEIGHTED_ROUND_ROBIN balancing algorithm. The weight value would be ignored in other algorithms",
-					Optional:    true,
-					Default:     1,
+					Type:         schema.TypeInt,
+					Description:  "Pool member weight is used for WEIGHTED_ROUND_ROBIN balancing algorithm. The weight value would be ignored in other algorithms",
+					Optional:     true,
+					Default:      1,
+					ValidateFunc: validation.IntBetween(1, 256),
 				},
 			},
 		},
@@ -346,7 +349,11 @@ func getPoolMemberGroupFromSchema(d *schema.ResourceData) *loadbalancer.PoolMemb
 }
 
 func resourceNsxtLbPoolCreate(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
@@ -389,7 +396,11 @@ func resourceNsxtLbPoolCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceNsxtLbPoolRead(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")
@@ -436,7 +447,11 @@ func resourceNsxtLbPoolRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceNsxtLbPoolUpdate(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")
@@ -481,7 +496,11 @@ func resourceNsxtLbPoolUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceNsxtLbPoolDelete(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")

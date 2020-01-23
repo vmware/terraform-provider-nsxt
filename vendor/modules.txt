@@ -49,6 +49,8 @@ github.com/aws/aws-sdk-go/aws/credentials/endpointcreds
 github.com/aws/aws-sdk-go/private/protocol/query
 github.com/aws/aws-sdk-go/private/protocol/xml/xmlutil
 github.com/aws/aws-sdk-go/private/protocol/query/queryutil
+# github.com/beevik/etree v1.1.0
+github.com/beevik/etree
 # github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d
 github.com/bgentry/go-netrc/netrc
 # github.com/bgentry/speakeasy v0.1.0
@@ -59,6 +61,8 @@ github.com/blang/semver
 github.com/davecgh/go-spew/spew
 # github.com/fatih/color v1.7.0
 github.com/fatih/color
+# github.com/gibson042/canonicaljson-go v1.0.3
+github.com/gibson042/canonicaljson-go
 # github.com/golang/protobuf v1.3.0
 github.com/golang/protobuf/proto
 github.com/golang/protobuf/ptypes
@@ -71,8 +75,12 @@ github.com/google/go-cmp/cmp
 github.com/google/go-cmp/cmp/internal/diff
 github.com/google/go-cmp/cmp/internal/function
 github.com/google/go-cmp/cmp/internal/value
+# github.com/google/uuid v1.1.1
+github.com/google/uuid
 # github.com/googleapis/gax-go/v2 v2.0.3
 github.com/googleapis/gax-go/v2
+# github.com/gorilla/mux v1.7.3
+github.com/gorilla/mux
 # github.com/hashicorp/errwrap v1.0.0
 github.com/hashicorp/errwrap
 # github.com/hashicorp/go-cleanhttp v0.5.0
@@ -215,7 +223,7 @@ github.com/ulikunitz/xz/internal/hash
 # github.com/vmihailenco/msgpack v4.0.1+incompatible
 github.com/vmihailenco/msgpack
 github.com/vmihailenco/msgpack/codes
-# github.com/vmware/go-vmware-nsxt v0.0.0-20190201205556-16aa0443042d
+# github.com/vmware/go-vmware-nsxt v0.0.0-20191219213550-f4221331f638
 github.com/vmware/go-vmware-nsxt
 github.com/vmware/go-vmware-nsxt/common
 github.com/vmware/go-vmware-nsxt/loadbalancer
@@ -233,6 +241,46 @@ github.com/vmware/go-vmware-nsxt/monitoring
 github.com/vmware/go-vmware-nsxt/normalization
 github.com/vmware/go-vmware-nsxt/policy
 github.com/vmware/go-vmware-nsxt/upgrade
+# github.com/vmware/vsphere-automation-sdk-go/lib v0.1.1
+github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors
+github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std
+# github.com/vmware/vsphere-automation-sdk-go/runtime v0.1.1
+github.com/vmware/vsphere-automation-sdk-go/runtime/bindings
+github.com/vmware/vsphere-automation-sdk-go/runtime/core
+github.com/vmware/vsphere-automation-sdk-go/runtime/data
+github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client
+github.com/vmware/vsphere-automation-sdk-go/runtime/security
+github.com/vmware/vsphere-automation-sdk-go/runtime/l10n
+github.com/vmware/vsphere-automation-sdk-go/runtime/lib
+github.com/vmware/vsphere-automation-sdk-go/runtime/log
+github.com/vmware/vsphere-automation-sdk-go/runtime
+github.com/vmware/vsphere-automation-sdk-go/runtime/common
+github.com/vmware/vsphere-automation-sdk-go/runtime/data/serializers/rest
+github.com/vmware/vsphere-automation-sdk-go/runtime/protocol
+github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/server/rpc/msg
+github.com/vmware/vsphere-automation-sdk-go/runtime/metadata
+github.com/vmware/vsphere-automation-sdk-go/runtime/metadata/info
+github.com/vmware/vsphere-automation-sdk-go/runtime/l10n/runtime
+github.com/vmware/vsphere-automation-sdk-go/runtime/data/serializers/cleanjson
+github.com/vmware/vsphere-automation-sdk-go/runtime/lib/rest
+github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/server
+# github.com/vmware/vsphere-automation-sdk-go/services/nsxt v0.1.1
+github.com/vmware/vsphere-automation-sdk-go/services/nsxt
+github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra
+github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/domains
+github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/ip_pools
+github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/realized_state
+github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/realized_state/enforcement_points
+github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/sites/enforcement_points
+github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/sites/enforcement_points/edge_clusters
+github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s
+github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services
+github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services/bgp
+github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/nat
+github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s
+github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/locale_services
+github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/nat
+github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
 # github.com/zclconf/go-cty v0.0.0-20190516203816-4fecf87372ec
 github.com/zclconf/go-cty/cty
 github.com/zclconf/go-cty/cty/msgpack
@@ -267,7 +315,7 @@ golang.org/x/crypto/openpgp/s2k
 golang.org/x/crypto/blowfish
 golang.org/x/crypto/cast5
 golang.org/x/crypto/openpgp/elgamal
-# golang.org/x/net v0.0.0-20190502183928-7f726cade0ab
+# golang.org/x/net v0.0.0-20200114155413-6afb5195e5aa
 golang.org/x/net/context
 golang.org/x/net/trace
 golang.org/x/net/internal/timeseries
@@ -286,7 +334,19 @@ golang.org/x/oauth2/jwt
 golang.org/x/sys/unix
 # golang.org/x/text v0.3.2
 golang.org/x/text/unicode/norm
+golang.org/x/text/language
+golang.org/x/text/message
+golang.org/x/text/message/catalog
 golang.org/x/text/transform
+golang.org/x/text/internal/language
+golang.org/x/text/internal/language/compact
+golang.org/x/text/feature/plural
+golang.org/x/text/internal/format
+golang.org/x/text/internal/number
+golang.org/x/text/internal
+golang.org/x/text/internal/catmsg
+golang.org/x/text/internal/tag
+golang.org/x/text/internal/stringset
 golang.org/x/text/secure/bidirule
 golang.org/x/text/unicode/bidi
 # google.golang.org/api v0.1.0

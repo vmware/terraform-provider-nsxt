@@ -7,14 +7,22 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
-	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/manager"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"log"
 	"net/http"
 	"strings"
 )
 
-var natRuleActionValues = []string{"SNAT", "DNAT", "NO_NAT", "REFLEXIVE"}
+var natRuleActionValues = []string{
+	model.PolicyNatRule_ACTION_SNAT,
+	model.PolicyNatRule_ACTION_DNAT,
+	model.PolicyNatRule_ACTION_REFLEXIVE,
+	model.PolicyNatRule_ACTION_NO_SNAT,
+	model.PolicyNatRule_ACTION_NO_DNAT,
+	model.PolicyNatRule_ACTION_NAT64,
+	"NO_NAT", // NSX < 3.0.0 only
+}
 
 func resourceNsxtNatRule() *schema.Resource {
 	return &schema.Resource{
@@ -42,7 +50,7 @@ func resourceNsxtNatRule() *schema.Resource {
 			"tag": getTagsSchema(),
 			"action": {
 				Type:         schema.TypeString,
-				Description:  "NAT rule action. Valid actions: SNAT, DNAT, NO_NAT and REFLEXIVE",
+				Description:  "The action for the NAT Rule",
 				Required:     true,
 				ValidateFunc: validation.StringInSlice(natRuleActionValues, false),
 			},
@@ -80,10 +88,11 @@ func resourceNsxtNatRule() *schema.Resource {
 				Optional:    true,
 			},
 			"rule_priority": {
-				Type:        schema.TypeInt,
-				Description: "The priority of the rule (ascending). Valid range [0-2147483647]",
-				Optional:    true,
-				Computed:    true,
+				Type:         schema.TypeInt,
+				Description:  "The priority of the rule (ascending). Valid range [0-2147483647]",
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.IntAtLeast(0),
 			},
 			"translated_network": {
 				Type:        schema.TypeString,
@@ -101,7 +110,11 @@ func resourceNsxtNatRule() *schema.Resource {
 }
 
 func resourceNsxtNatRuleCreate(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	logicalRouterID := d.Get("logical_router_id").(string)
 	if logicalRouterID == "" {
 		return fmt.Errorf("Error obtaining logical object id")
@@ -111,6 +124,9 @@ func resourceNsxtNatRuleCreate(d *schema.ResourceData, m interface{}) error {
 	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
 	action := d.Get("action").(string)
+	if action == "NO_NAT" && nsxVersionHigherOrEqual("3.0.0") {
+		return fmt.Errorf("NO_NAT action is not supported in NSX versions 3.0.0 and greater. Use NO_SNAT and NO_DNAT instead")
+	}
 	enabled := d.Get("enabled").(bool)
 	logging := d.Get("logging").(bool)
 	matchDestinationNetwork := d.Get("match_destination_network").(string)
@@ -152,7 +168,11 @@ func resourceNsxtNatRuleCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceNsxtNatRuleRead(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")
@@ -195,7 +215,11 @@ func resourceNsxtNatRuleRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceNsxtNatRuleUpdate(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")
@@ -211,6 +235,9 @@ func resourceNsxtNatRuleUpdate(d *schema.ResourceData, m interface{}) error {
 	displayName := d.Get("display_name").(string)
 	tags := getTagsFromSchema(d)
 	action := d.Get("action").(string)
+	if action == "NO_NAT" && nsxVersionHigherOrEqual("3.0.0") {
+		return fmt.Errorf("NO_NAT action is not supported in NSX versions 3.0.0 and greater. Use NO_SNAT and NO_DNAT instead")
+	}
 	enabled := d.Get("enabled").(bool)
 	logging := d.Get("logging").(bool)
 	matchDestinationNetwork := d.Get("match_destination_network").(string)
@@ -248,7 +275,11 @@ func resourceNsxtNatRuleUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceNsxtNatRuleDelete(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(*api.APIClient)
+	nsxClient := m.(nsxtClients).NsxtClient
+	if nsxClient == nil {
+		return resourceNotSupportedError()
+	}
+
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")

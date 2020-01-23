@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/vmware/go-vmware-nsxt"
 	"net/http"
 	"testing"
 )
@@ -74,36 +73,36 @@ func TestAccResourceNsxtIpProtocolNsService_importBasic(t *testing.T) {
 func testAccNSXIpProtocolServiceExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
-		nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
+		nsxClient := testAccProvider.Meta().(nsxtClients).NsxtClient
 
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
-			return fmt.Errorf("NSX ip protocol service resource %s not found in resources", resourceName)
+			return fmt.Errorf("NSX IP protocol NS service resource %s not found in resources", resourceName)
 		}
 
 		resourceID := rs.Primary.ID
 		if resourceID == "" {
-			return fmt.Errorf("NSX ip protocol service resource ID not set in resources ")
+			return fmt.Errorf("NSX IP protocol NS service resource ID not set in resources ")
 		}
 
 		service, responseCode, err := nsxClient.GroupingObjectsApi.ReadIpProtocolNSService(nsxClient.Context, resourceID)
 		if err != nil {
-			return fmt.Errorf("Error while retrieving ip protocol service ID %s. Error: %v", resourceID, err)
+			return fmt.Errorf("Error while retrieving IP protocol NS service ID %s. Error: %v", resourceID, err)
 		}
 
 		if responseCode.StatusCode != http.StatusOK {
-			return fmt.Errorf("Error while checking if ip protocol service %s exists. HTTP return code was %d", resourceID, responseCode.StatusCode)
+			return fmt.Errorf("Error while checking if IP protocol NS service %s exists. HTTP return code was %d", resourceID, responseCode.StatusCode)
 		}
 
 		if displayName == service.DisplayName {
 			return nil
 		}
-		return fmt.Errorf("NSX ip protocol ns service %s wasn't found", displayName)
+		return fmt.Errorf("NSX IP protocol NS service %s wasn't found", displayName)
 	}
 }
 
 func testAccNSXIpProtocolServiceCheckDestroy(state *terraform.State, displayName string) error {
-	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
+	nsxClient := testAccProvider.Meta().(nsxtClients).NsxtClient
 
 	for _, rs := range state.RootModule().Resources {
 
@@ -117,11 +116,11 @@ func testAccNSXIpProtocolServiceCheckDestroy(state *terraform.State, displayName
 			if responseCode.StatusCode != http.StatusOK {
 				return nil
 			}
-			return fmt.Errorf("Error while retrieving L4 ns service ID %s. Error: %v", resourceID, err)
+			return fmt.Errorf("Error while retrieving IP protocol NS service ID %s. Error: %v", resourceID, err)
 		}
 
 		if displayName == service.DisplayName {
-			return fmt.Errorf("NSX L4 ns service %s still exists", displayName)
+			return fmt.Errorf("NSX IP protocol NS service %s still exists", displayName)
 		}
 	}
 	return nil

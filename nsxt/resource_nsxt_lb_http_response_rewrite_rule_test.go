@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/vmware/go-vmware-nsxt"
 	"net/http"
 	"testing"
 )
@@ -148,7 +147,7 @@ func TestAccResourceNsxtLbHttpResponseRewriteRule_importBasic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXLbHTTPResponseRewriteRuleCreateTemplateTrivial(name),
+				Config: testAccNSXLbHTTPResponseRewriteRuleCreateTemplateTrivial(),
 			},
 			{
 				ResourceName:      resourceName,
@@ -161,7 +160,7 @@ func TestAccResourceNsxtLbHttpResponseRewriteRule_importBasic(t *testing.T) {
 
 func testAccNSXLbHTTPResponseRewriteRuleExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
-		nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
+		nsxClient := testAccProvider.Meta().(nsxtClients).NsxtClient
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
 			return fmt.Errorf("NSX LB rule resource %s not found in resources", resourceName)
@@ -189,7 +188,7 @@ func testAccNSXLbHTTPResponseRewriteRuleExists(displayName string, resourceName 
 }
 
 func testAccNSXLbHTTPResponseRewriteRuleCheckDestroy(state *terraform.State, displayName string) error {
-	nsxClient := testAccProvider.Meta().(*nsxt.APIClient)
+	nsxClient := testAccProvider.Meta().(nsxtClients).NsxtClient
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_lb_http_response_rewrite_rule" {
@@ -250,7 +249,7 @@ resource "nsxt_lb_http_response_rewrite_rule" "test" {
 `, inverse, inverse)
 }
 
-func testAccNSXLbHTTPResponseRewriteRuleCreateTemplateTrivial(name string) string {
+func testAccNSXLbHTTPResponseRewriteRuleCreateTemplateTrivial() string {
 	return `
 resource "nsxt_lb_http_response_rewrite_rule" "test" {
   description    = "test description"
