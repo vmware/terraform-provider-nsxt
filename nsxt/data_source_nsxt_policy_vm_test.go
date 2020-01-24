@@ -13,7 +13,11 @@ func TestAccDataSourceNsxtPolicyVM_basic(t *testing.T) {
 	testResourceName := "data.nsxt_policy_vm.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccEnvDefined(t, "NSXT_TEST_VM_ID")
+			testAccEnvDefined(t, "NSXT_TEST_VM_NAME")
+		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
