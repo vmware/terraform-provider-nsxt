@@ -321,7 +321,7 @@ func resourceNsxtPolicyTier0GatewayGetLocaleServiceEntry(gwID string, connector 
 	}
 	for _, objInList := range objList {
 		// Find the one with the edge cluster path
-		if *objInList.EdgeClusterPath != "" {
+		if objInList.EdgeClusterPath != nil {
 			return &objInList, nil
 		}
 	}
