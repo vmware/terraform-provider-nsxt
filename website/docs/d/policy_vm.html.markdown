@@ -19,7 +19,6 @@ data "nsxt_policy_vm" "nsxt_vm1" {
 
 ## Argument Reference
 
-* `id` - (Optional) The ID of Virtual Machine.
 * `display_name` - (Optional) The Display Name prefix of the Virtual Machine to retrieve.
 * `external_id` - (Optional) The external ID of the Virtual Machine.
 * `bios_id` - (Optional) The BIOS UUID of the Virtual Machine.

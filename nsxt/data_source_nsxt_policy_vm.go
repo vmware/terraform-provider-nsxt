@@ -21,7 +21,6 @@ func dataSourceNsxtPolicyVM() *schema.Resource {
 		Read: dataSourceNsxtPolicyVMIDRead,
 
 		Schema: map[string]*schema.Schema{
-			"id":           getDataSourceIDSchema(),
 			"display_name": getDataSourceDisplayNameSchema(),
 			"description":  getDataSourceDescriptionSchema(),
 			"external_id":  getDataSourceStringSchema("External ID of the Virtual Machine"),
