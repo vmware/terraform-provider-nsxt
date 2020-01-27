@@ -201,7 +201,7 @@ func resourceNsxtPolicyTier1GatewayGetLocaleServiceEntry(gwID string, connector 
 	}
 	for _, objInList := range objList {
 		// Find the one with the edge cluster path
-		if *objInList.EdgeClusterPath != "" {
+		if objInList.EdgeClusterPath != nil {
 			return &objInList, nil
 		}
 	}
@@ -242,8 +242,8 @@ func resourceNsxtPolicyTier1GatewayReadEdgeCluster(d *schema.ResourceData, conne
 		// No locale-service found
 		return nil
 	}
-	if *(*obj).EdgeClusterPath != "" {
-		d.Set("edge_cluster_path", *obj.EdgeClusterPath)
+	if obj.EdgeClusterPath != nil {
+		d.Set("edge_cluster_path", obj.EdgeClusterPath)
 		return nil
 	}
 	// No edge cluster found
