@@ -68,8 +68,8 @@ The following arguments are supported:
 * `default_rule_logging` - (Optional) Boolean flag indicating if the default rule logging will be enabled or not. The default value is false.
 * `enable_firewall` - (Optional) Boolean flag indicating if the edge firewall will be enabled or not. The default value is true.
 * `force_whitelisting` - (Optional) Boolean flag indicating if white-listing will be forced or not. The default value is false.
-* `ipv6_ndra_profile_id` - (Optional) Id of IPv6 NDRA profile.
-* `ipv6_dad_profile_id` - (Optional) Id of IPv6 DAD profile.
+* `ipv6_ndra_profile_path` - (Optional) Policy path to IPv6 NDRA profile.
+* `ipv6_dad_profile_path` - (Optional) Policy path to IPv6 DAD profile.
 * `ha_mode` - (Optional) High-availability Mode for Tier-0. Valid values are `ACTIVE_ACTIVE` and `ACTIVE_STANDBY`.
 * `internal_transit_subnets` - (Optional) Internal transit subnets in CIDR format. At most 1 CIDR.
 * `transit_subnets` - (Optional) Transit subnets in CIDR format.

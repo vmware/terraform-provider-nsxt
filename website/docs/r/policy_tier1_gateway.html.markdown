@@ -64,8 +64,8 @@ The following arguments are supported:
 * `force_whitelisting` - (Optional) Boolean flag indicating if white-listing will be forced or not. The default value is false.
 * `tier0_path` - (Optional) The path of the connected Tier0.
 * `route_advertisement_types` - (Optional) Enable different types of route advertisements: TIER1_STATIC_ROUTES, TIER1_CONNECTED, TIER1_NAT, TIER1_LB_VIP, TIER1_LB_SNAT, TIER1_DNS_FORWARDER_IP, TIER1_IPSEC_LOCAL_ENDPOINT.
-* `ipv6_ndra_profile_id` - (Optional) Id of IPv6 NDRA profile.
-* `ipv6_dad_profile_id` - (Optional) Id of IPv6 DAD profile.
+* `ipv6_ndra_profile_path` - (Optional) Policy path to IPv6 NDRA profile.
+* `ipv6_dad_profile_path` - (Optional) Policy path to IPv6 DAD profile.
 * `dhcp_config_path` - (Optional) Policy path to DHCP server or relay configuration to use for this gateway.
 * `route_advertisement_rule` - (Optional) List of rules for routes advertisement:
   * `name` - (Required) The name of the rule.

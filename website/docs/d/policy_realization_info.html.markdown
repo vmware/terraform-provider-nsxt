@@ -17,7 +17,7 @@ data "nsxt_policy_tier1_gateway" "tier1_gw" {
 }
 
 data "nsxt_policy_realization_info" "info" {
-  path = "${data.nsxt_policy_tier1_gateway.tier1_gw.path}"
+  path = data.nsxt_policy_tier1_gateway.tier1_gw.path
   entity_type = "RealizedLogicalRouter"
 }
 ```
