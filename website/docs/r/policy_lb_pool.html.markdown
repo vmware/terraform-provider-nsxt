@@ -17,7 +17,7 @@ resource "nsxt_policy_lb_pool" "test" {
     description          = "Terraform provisioned LB Pool"
     algorithm            = "IP_HASH"
     min_active_members   = 2
-    active_monitor_paths = ["/infra/lb-monitor-profiles/default-icmp-lb-monitor"]
+    active_monitor_path  = "/infra/lb-monitor-profiles/default-icmp-lb-monitor"
     passive_monitor_path = "/infra/lb-monitor-profiles/default-passive-lb-monitor"
     member {
       admin_state                = "ENABLED"
@@ -60,7 +60,7 @@ The following arguments are supported:
   * `port` - (Optional) If port is specified, all connections will be redirected to this port.
   * `weight` - (Optional) Pool member weight is used for WEIGHTED algorithms.
 * `min_active_members` - (Optional) A pool is considered active if there are at least certain minimum number of members.
-* `active_monitor_paths` - (Optional) List of active monitor paths to be associated with this pool. Pool member status is UP only when the health check status is UP for all the monitors.
+* `active_monitor_path` - (Optional) Active monitor to be associated with this pool.
 * `passive_monitor_path` - (Optional) Passive monitor to be associated with this pool.
 * `snat` - (Optional) Source NAT may be required to ensure traffic from the server destined to the client is received by the load balancer.
   * `type` - (Optional) SNAT type, one of 'AUTOMAP`, `DISABLED`, `IPPOOL`. Default is `AUTOMAP`.
