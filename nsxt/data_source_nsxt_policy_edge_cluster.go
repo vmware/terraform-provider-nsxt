@@ -34,7 +34,7 @@ func dataSourceNsxtPolicyEdgeClusterRead(d *schema.ResourceData, m interface{}) 
 	var obj model.PolicyEdgeCluster
 	if objID != "" {
 		// Get by id
-		objGet, err := client.Get(defaultSite, defaultEnforcementPoint, objID)
+		objGet, err := client.Get(defaultSite, policyEnforcementPoint, objID)
 
 		if err != nil {
 			return fmt.Errorf("Error while reading edge cluster %s: %v", objID, err)
@@ -45,7 +45,7 @@ func dataSourceNsxtPolicyEdgeClusterRead(d *schema.ResourceData, m interface{}) 
 	} else {
 		// Get by full name/prefix
 		includeMarkForDeleteObjectsParam := false
-		objList, err := client.List(defaultSite, defaultEnforcementPoint, nil, &includeMarkForDeleteObjectsParam, nil, nil, nil, nil)
+		objList, err := client.List(defaultSite, policyEnforcementPoint, nil, &includeMarkForDeleteObjectsParam, nil, nil, nil, nil)
 		if err != nil {
 			return fmt.Errorf("Error while reading edge clusters: %v", err)
 		}

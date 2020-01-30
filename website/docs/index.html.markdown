@@ -118,6 +118,7 @@ provider "nsxt" {
   host                 = "x-54-200-54-5.rp.vmwarevmc.com/vmc/reverse-proxy/api/orgs/b003c3a5-3f68-4a8c-a74f-f79a0625da17/sddcs/d2f43050-f4e2-4989-ab52-2eb0b89d8487/sks-nsxt-manager"
   vmc_token            = "5aVZEj6dJN1bQ6ZheakMyV0Qbj7P65sa2pYuhgx7Mp5glvgCkFKHcGxy3KmslllT"
   allow_unverified_ssl = true
+  enforcement_point    = "vmc-enforcementpoint"
 }
 
 ```
@@ -173,6 +174,9 @@ The following arguments are used to configure the VMware NSX-T Provider:
 * `vmc_auth_host` - (Optional) URL for VMC authorization service that is used
   to obtain short-lived token for NSX manager access. Defaults to VMC
   console authorization URL.
+* `enforcement_point` - (Optional) Enforcement point, mostly relevant for policy
+  data sources. For VMC environment, this should be set to `vmc-enforcementpoint`.
+  For on-prem deployments, this setting should not be specified.
 
 ## NSX Logical Networking
 

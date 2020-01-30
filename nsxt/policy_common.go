@@ -9,7 +9,6 @@ import (
 
 var defaultDomain = "default"
 var defaultSite = "default"
-var defaultEnforcementPoint = "default"
 var securityPolicyCategoryValues = []string{"Ethernet", "Emergency", "Infrastructure", "Environment", "Application"}
 var securityPolicyDirectionValues = []string{model.Rule_DIRECTION_IN, model.Rule_DIRECTION_OUT, model.Rule_DIRECTION_IN_OUT}
 var securityPolicyIPProtocolValues = []string{model.Rule_IP_PROTOCOL_IPV4, model.Rule_IP_PROTOCOL_IPV6, model.Rule_IP_PROTOCOL_IPV4_IPV6}
