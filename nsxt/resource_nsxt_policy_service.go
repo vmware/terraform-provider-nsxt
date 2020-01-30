@@ -114,9 +114,10 @@ func resourceNsxtPolicyService() *schema.Resource {
 			},
 
 			"ether_type_entry": {
-				Type:        schema.TypeSet,
-				Description: "Ether type service entry",
-				Optional:    true,
+				Type:          schema.TypeSet,
+				Description:   "Ether type service entry",
+				Optional:      true,
+				ConflictsWith: []string{"algorithm_entry", "igmp_entry", "icmp_entry", "l4_port_set_entry", "ip_protocol_entry"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"display_name": getOptionalDisplayNameSchema(),
