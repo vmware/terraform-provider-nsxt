@@ -143,6 +143,7 @@ func Provider() terraform.ResourceProvider {
 			"nsxt_edge_cluster":                    dataSourceNsxtEdgeCluster(),
 			"nsxt_certificate":                     dataSourceNsxtCertificate(),
 			"nsxt_ip_pool":                         dataSourceNsxtIPPool(),
+			"nsxt_firewall_section":                dataSourceNsxtFirewallSection(),
 			"nsxt_policy_edge_cluster":             dataSourceNsxtPolicyEdgeCluster(),
 			"nsxt_policy_edge_node":                dataSourceNsxtPolicyEdgeNode(),
 			"nsxt_policy_tier0_gateway":            dataSourceNsxtPolicyTier0Gateway(),

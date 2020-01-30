@@ -13,6 +13,10 @@ Order of firewall sections can be controlled with 'insert_before' attribute.
 ## Example Usage
 
 ```hcl
+data "nsxt_firewall_section" "block_all" {
+  display_name = "BLOCK"
+}
+
 resource "nsxt_firewall_section" "firewall_sect" {
   description  = "FS provisioned by Terraform"
   display_name = "FS"
@@ -29,7 +33,7 @@ resource "nsxt_firewall_section" "firewall_sect" {
 
   section_type  = "LAYER3"
   stateful      = true
-  insert_before = "${nsxt_firewall_section.bottom_line.id}"
+  insert_before = "${data.nsxt_firewall_section.block_all.id}"
 
   rule {
     display_name          = "out_rule"
