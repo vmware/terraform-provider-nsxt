@@ -34,12 +34,8 @@ func dataSourceNsxtPolicyIpv6NdraProfileRead(d *schema.ResourceData, m interface
 	if objID != "" {
 		// Get by id
 		objGet, err := client.Get(objID)
-		if isNotFoundError(err) {
-			return fmt.Errorf("Ipv6NdraProfile with ID %s was not found", objID)
-		}
-
 		if err != nil {
-			return fmt.Errorf("Error while reading Ipv6NdraProfile %s: %v", objID, err)
+			return handleDataSourceReadError(d, "IPv6NdraProfile", objID, err)
 		}
 		obj = objGet
 	} else if objName == "" {
@@ -49,7 +45,7 @@ func dataSourceNsxtPolicyIpv6NdraProfileRead(d *schema.ResourceData, m interface
 		includeMarkForDeleteObjectsParam := false
 		objList, err := client.List(nil, &includeMarkForDeleteObjectsParam, nil, nil, nil, nil)
 		if err != nil {
-			return fmt.Errorf("Error while reading Ipv6NdraProfiles: %v", err)
+			return handleListError("IPv6NdraProfile", err)
 		}
 		// go over the list to find the correct one (prefer a perfect match. If not - prefix match)
 		var perfectMatch []model.Ipv6NdraProfile

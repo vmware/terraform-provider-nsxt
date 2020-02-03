@@ -35,12 +35,8 @@ func dataSourceNsxtPolicyCertificateRead(d *schema.ResourceData, m interface{}) 
 	if objID != "" {
 		// Get by id
 		objGet, err := client.Get(objID, &details)
-		if isNotFoundError(err) {
-			return fmt.Errorf("Certificate with ID %s was not found", objID)
-		}
-
 		if err != nil {
-			return fmt.Errorf("Error while reading Certificate %s: %v", objID, err)
+			return handleDataSourceReadError(d, "Certificate", objID, err)
 		}
 		obj = objGet
 	} else if objName == "" {
@@ -49,7 +45,7 @@ func dataSourceNsxtPolicyCertificateRead(d *schema.ResourceData, m interface{}) 
 		// Get by full name/prefix
 		objList, err := client.List(nil, &details, nil, nil, nil, nil, nil)
 		if err != nil {
-			return fmt.Errorf("Error while reading Certificates: %v", err)
+			return handleListError("Certificate", err)
 		}
 		// go over the list to find the correct one (prefer a perfect match. If not - prefix match)
 		var perfectMatch []model.TlsCertificate

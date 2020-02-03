@@ -73,12 +73,9 @@ func dataSourceNsxtPolicyLBAppProfileRead(d *schema.ResourceData, m interface{})
 	if objID != "" {
 		// Get by id
 		objGet, err := client.Get(objID)
-		if isNotFoundError(err) {
-			return fmt.Errorf("LBAppProfile with ID %s was not found", objID)
-		}
 
 		if err != nil {
-			return fmt.Errorf("Error while reading LBAppProfile %s: %v", objID, err)
+			return handleDataSourceReadError(d, "LBAppProfile", objID, err)
 		}
 		result, err = policyLbAppProfileConvert(objGet, objType)
 		if err != nil {
@@ -94,7 +91,7 @@ func dataSourceNsxtPolicyLBAppProfileRead(d *schema.ResourceData, m interface{})
 		includeMarkForDeleteObjectsParam := false
 		objList, err := client.List(nil, &includeMarkForDeleteObjectsParam, nil, nil, nil, nil)
 		if err != nil {
-			return fmt.Errorf("Error while reading LBAppProfiles: %v", err)
+			return handleListError("LBAppProfile", err)
 		}
 		// go over the list to find the correct one (prefer a perfect match. If not - prefix match)
 		var perfectMatch []model.LBAppProfile

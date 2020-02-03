@@ -77,7 +77,7 @@ func testAccDataSourceNsxtPolicyTier0DeleteByName(routerName string) error {
 	// Find the object by name
 	objList, err := client.List(nil, nil, nil, nil, nil, nil)
 	if err != nil {
-		return fmt.Errorf("Error while reading Tier0s: %v", err)
+		return handleListError("Tier0", err)
 	}
 	for _, objInList := range objList.Results {
 		if *objInList.DisplayName == routerName {

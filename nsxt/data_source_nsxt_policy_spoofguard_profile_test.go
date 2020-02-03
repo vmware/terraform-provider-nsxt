@@ -77,7 +77,7 @@ func testAccDataSourceNsxtPolicySpoofGuardProfileDeleteByName(name string) error
 	// Find the object by name
 	objList, err := client.List(nil, nil, nil, nil, nil, nil)
 	if err != nil {
-		return fmt.Errorf("Error while reading SpoofGuardProfiles: %v", err)
+		return handleListError("SpoofGuardProfiles", err)
 	}
 	for _, objInList := range objList.Results {
 		if *objInList.DisplayName == name {

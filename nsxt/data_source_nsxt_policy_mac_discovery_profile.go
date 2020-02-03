@@ -34,12 +34,9 @@ func dataSourceNsxtPolicyMacDiscoveryProfileRead(d *schema.ResourceData, m inter
 	if objID != "" {
 		// Get by id
 		objGet, err := client.Get(objID)
-		if isNotFoundError(err) {
-			return fmt.Errorf("MacDiscoveryProfile with ID %s was not found", objID)
-		}
 
 		if err != nil {
-			return fmt.Errorf("Error while reading MacDiscoveryProfile %s: %v", objID, err)
+			return handleDataSourceReadError(d, "MacDiscoveryProfile", objID, err)
 		}
 		obj = objGet
 	} else if objName == "" {
@@ -49,7 +46,7 @@ func dataSourceNsxtPolicyMacDiscoveryProfileRead(d *schema.ResourceData, m inter
 		includeMarkForDeleteObjectsParam := false
 		objList, err := client.List(nil, &includeMarkForDeleteObjectsParam, nil, nil, nil, nil)
 		if err != nil {
-			return fmt.Errorf("Error while reading MacDiscoveryProfiles: %v", err)
+			return handleListError("MacDiscoveryProfile", err)
 		}
 		// go over the list to find the correct one (prefer a perfect match. If not - prefix match)
 		var perfectMatch []model.MacDiscoveryProfile

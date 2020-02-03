@@ -66,12 +66,9 @@ func dataSourceNsxtPolicyLbPersistenceProfileRead(d *schema.ResourceData, m inte
 	if objID != "" {
 		// Get by id
 		objGet, err := client.Get(objID)
-		if isNotFoundError(err) {
-			return fmt.Errorf("PolicyLbPersistenceProfile with ID %s was not found", objID)
-		}
 
 		if err != nil {
-			return fmt.Errorf("Error while reading PolicyLbPersistenceProfile %s: %v", objID, err)
+			return handleDataSourceReadError(d, "LbPersistenceProfile", objID, err)
 		}
 		profile, errs := converter.ConvertToGolang(objGet, model.PolicyLbPersistenceProfileBindingType())
 		if errs != nil {
@@ -79,13 +76,13 @@ func dataSourceNsxtPolicyLbPersistenceProfileRead(d *schema.ResourceData, m inte
 		}
 		obj = profile.(model.PolicyLbPersistenceProfile)
 	} else if objName == "" && !typeSet {
-		return fmt.Errorf("Error obtaining PolicyLbPersistenceProfile name or type during read")
+		return fmt.Errorf("Error obtaining LbPersistenceProfile name or type during read")
 	} else {
 		// Get by full name/prefix
 		includeMarkForDeleteObjectsParam := false
 		objList, err := client.List(nil, &includeMarkForDeleteObjectsParam, nil, nil, nil, nil)
 		if err != nil {
-			return fmt.Errorf("Error while reading PolicyLbPersistenceProfiles: %v", err)
+			return handleListError("LbPersistenceProfile", err)
 		}
 		// go over the list to find the correct one (prefer a perfect match. If not - prefix match)
 		var perfectMatch []model.PolicyLbPersistenceProfile

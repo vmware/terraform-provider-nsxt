@@ -108,7 +108,7 @@ func testAccDataSourceNsxtPolicyLBAppProfileDeleteByName(name string) error {
 	// Find the object by name
 	objList, err := client.List(nil, nil, nil, nil, nil, nil)
 	if err != nil {
-		return fmt.Errorf("Error while reading LBAppProfiles: %v", err)
+		return handleListError("LBAppProfile", err)
 	}
 	force := true
 	for _, objInList := range objList.Results {

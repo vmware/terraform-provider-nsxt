@@ -62,7 +62,7 @@ func dataSourceNsxtPolicyServiceRead(d *schema.ResourceData, m interface{}) erro
 		objGet, err := client.Get(objID)
 
 		if err != nil {
-			return fmt.Errorf("Error while reading service %s: %v", objID, err)
+			return handleDataSourceReadError(d, "Service", objID, err)
 		}
 		obj = objGet
 	} else if objName == "" {
@@ -71,7 +71,7 @@ func dataSourceNsxtPolicyServiceRead(d *schema.ResourceData, m interface{}) erro
 		// Get by full name/prefix
 		objList, err := dataSourceNsxtPolicyServiceReadAllServices(connector)
 		if err != nil {
-			return fmt.Errorf("Error while reading services: %v", err)
+			return handleListError("Service", err)
 		}
 		// go over the list to find the correct one (prefer a perfect match. If not - prefix match)
 		var perfectMatch []model.Service

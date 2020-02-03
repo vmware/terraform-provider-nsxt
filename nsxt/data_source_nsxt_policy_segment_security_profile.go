@@ -34,12 +34,9 @@ func dataSourceNsxtPolicySegmentSecurityProfileRead(d *schema.ResourceData, m in
 	if objID != "" {
 		// Get by id
 		objGet, err := client.Get(objID)
-		if isNotFoundError(err) {
-			return fmt.Errorf("SegmentSecurityProfile with ID %s was not found", objID)
-		}
 
 		if err != nil {
-			return fmt.Errorf("Error while reading SegmentSecurityProfile %s: %v", objID, err)
+			return handleDataSourceReadError(d, "SegmentSecurityProfile", objID, err)
 		}
 		obj = objGet
 	} else if objName == "" {
@@ -49,7 +46,7 @@ func dataSourceNsxtPolicySegmentSecurityProfileRead(d *schema.ResourceData, m in
 		includeMarkForDeleteObjectsParam := false
 		objList, err := client.List(nil, &includeMarkForDeleteObjectsParam, nil, nil, nil, nil)
 		if err != nil {
-			return fmt.Errorf("Error while reading SegmentSecurityProfiles: %v", err)
+			return handleListError("SegmentSecurityProfile", err)
 		}
 		// go over the list to find the correct one (prefer a perfect match. If not - prefix match)
 		var perfectMatch []model.SegmentSecurityProfile

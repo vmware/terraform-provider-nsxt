@@ -76,6 +76,11 @@ func handleUpdateError(resourceType string, resourceID string, err error) error 
 	return logAPIError(msg, err)
 }
 
+func handleListError(resourceType string, err error) error {
+	msg := fmt.Sprintf("Failed to read %ss", resourceType)
+	return logAPIError(msg, err)
+}
+
 func handleReadError(d *schema.ResourceData, resourceType string, resourceID string, err error) error {
 	msg := fmt.Sprintf("Failed to read %s %s", resourceType, resourceID)
 	if isNotFoundError(err) {
@@ -83,6 +88,11 @@ func handleReadError(d *schema.ResourceData, resourceType string, resourceID str
 		log.Printf(msg)
 		return nil
 	}
+	return logAPIError(msg, err)
+}
+
+func handleDataSourceReadError(d *schema.ResourceData, resourceType string, resourceID string, err error) error {
+	msg := fmt.Sprintf("Failed to read %s %s", resourceType, resourceID)
 	return logAPIError(msg, err)
 }
 

@@ -96,7 +96,7 @@ func getPolicyPoolMemberGroupSchema() *schema.Schema {
 					Type:        schema.TypeBool,
 					Description: "Use IPv4 addresses as server IPs",
 					Optional:    true,
-					Default:     true,
+					Default:     false,
 				},
 				"max_ip_list_size": {
 					Type:        schema.TypeInt,

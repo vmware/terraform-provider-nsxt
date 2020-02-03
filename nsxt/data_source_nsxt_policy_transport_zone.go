@@ -61,7 +61,7 @@ func dataSourceNsxtPolicyTransportZoneRead(d *schema.ResourceData, m interface{}
 		objGet, err := client.Get(defaultSite, policyEnforcementPoint, objID)
 
 		if err != nil {
-			return fmt.Errorf("Error while reading TransportZone %s: %v", objID, err)
+			return handleDataSourceReadError(d, "TransportZone", objID, err)
 		}
 		obj = objGet
 	} else if objName == "" && !(isDefault && transportType != "") {
@@ -71,7 +71,7 @@ func dataSourceNsxtPolicyTransportZoneRead(d *schema.ResourceData, m interface{}
 		includeMarkForDeleteObjectsParam := false
 		objList, err := client.List(defaultSite, policyEnforcementPoint, nil, &includeMarkForDeleteObjectsParam, nil, nil, &includeMarkForDeleteObjectsParam, nil)
 		if err != nil {
-			return fmt.Errorf("Error while reading TransportZone: %v", err)
+			return handleListError("TransportZone", err)
 		}
 		// go over the list to find the correct one (prefer a perfect match. If not - prefix match)
 		var perfectMatch []model.PolicyTransportZone
