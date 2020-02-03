@@ -114,8 +114,7 @@ func updateNsxtPolicyVMTags(connector *client.RestConnector, externalID string, 
 		Tags:             tags,
 		VirtualMachineId: externalID,
 	}
-	// TODO: make enforcement point configurable
-	return client.Updatetags(defaultEnforcementPoint, tagUpdate)
+	return client.Updatetags(policyEnforcementPoint, tagUpdate)
 }
 
 func resourceNsxtPolicyVMTagsRead(d *schema.ResourceData, m interface{}) error {

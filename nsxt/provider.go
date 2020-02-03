@@ -21,6 +21,7 @@ import (
 
 var defaultRetryOnStatusCodes = []int{429, 503}
 var toleratePartialSuccess = false
+var policyEnforcementPoint = "default"
 
 type nsxtClients struct {
 	// NSX Manager client - based on go-vmware-nsxt SDK
@@ -129,6 +130,12 @@ func Provider() terraform.ResourceProvider {
 				Optional:    true,
 				Description: "Long-living API token for VMC authorization",
 				DefaultFunc: schema.EnvDefaultFunc("NSXT_VMC_TOKEN", nil),
+			},
+			"enforcement_point": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Enforcement Point for NSXT Policy",
+				DefaultFunc: schema.EnvDefaultFunc("NSXT_POLICY_ENFORCEMENT_POINT", "default"),
 			},
 		},
 
@@ -443,6 +450,7 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 	clientAuthCertFile := d.Get("client_auth_cert_file").(string)
 	clientAuthKeyFile := d.Get("client_auth_key_file").(string)
 	caFile := d.Get("ca_file").(string)
+	policyEnforcementPoint = d.Get("enforcement_point").(string)
 
 	if hostIP == "" {
 		return fmt.Errorf("host must be provided")

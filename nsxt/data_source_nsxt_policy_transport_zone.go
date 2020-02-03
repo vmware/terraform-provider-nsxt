@@ -6,10 +6,18 @@ package nsxt
 import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/sites/enforcement_points"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"strings"
 )
+
+var policyTransportZoneTransportTypes = [](string){
+	model.PolicyTransportZone_TZ_TYPE_OVERLAY_STANDARD,
+	model.PolicyTransportZone_TZ_TYPE_OVERLAY_ENS,
+	model.PolicyTransportZone_TZ_TYPE_VLAN_BACKED,
+	model.PolicyTransportZone_TZ_TYPE_UNKNOWN,
+}
 
 func dataSourceNsxtPolicyTransportZone() *schema.Resource {
 	return &schema.Resource{
@@ -27,10 +35,11 @@ func dataSourceNsxtPolicyTransportZone() *schema.Resource {
 				Computed:    true,
 			},
 			"transport_type": {
-				Type:        schema.TypeString,
-				Description: "Type of Transport Zone",
-				Optional:    true,
-				Computed:    true,
+				Type:         schema.TypeString,
+				Description:  "Type of Transport Zone",
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.StringInSlice(policyTransportZoneTransportTypes, false),
 			},
 		},
 	}
@@ -43,21 +52,24 @@ func dataSourceNsxtPolicyTransportZoneRead(d *schema.ResourceData, m interface{}
 	// TODO: support non-default site and enforcement point possibly as a triple; site/point/tz_id
 	objID := d.Get("id").(string)
 	objName := d.Get("display_name").(string)
+	defaultVal, isDefaultSet := d.GetOkExists("is_default")
+	isDefault := isDefaultSet && defaultVal.(bool)
+	transportType := d.Get("transport_type").(string)
 	var obj model.PolicyTransportZone
 	if objID != "" {
 		// Get by id
-		objGet, err := client.Get(defaultSite, defaultEnforcementPoint, objID)
+		objGet, err := client.Get(defaultSite, policyEnforcementPoint, objID)
 
 		if err != nil {
 			return fmt.Errorf("Error while reading TransportZone %s: %v", objID, err)
 		}
 		obj = objGet
-	} else if objName == "" {
-		return fmt.Errorf("Error obtaining TransportZone ID or name during read")
+	} else if objName == "" && !(isDefault && transportType != "") {
+		return fmt.Errorf("Please specify id, display_name or is_default and transport_type in order to identify Transport Zone")
 	} else {
 		// Get by full name/prefix
 		includeMarkForDeleteObjectsParam := false
-		objList, err := client.List(defaultSite, defaultEnforcementPoint, nil, &includeMarkForDeleteObjectsParam, nil, nil, &includeMarkForDeleteObjectsParam, nil)
+		objList, err := client.List(defaultSite, policyEnforcementPoint, nil, &includeMarkForDeleteObjectsParam, nil, nil, &includeMarkForDeleteObjectsParam, nil)
 		if err != nil {
 			return fmt.Errorf("Error while reading TransportZone: %v", err)
 		}
@@ -65,6 +77,17 @@ func dataSourceNsxtPolicyTransportZoneRead(d *schema.ResourceData, m interface{}
 		var perfectMatch []model.PolicyTransportZone
 		var prefixMatch []model.PolicyTransportZone
 		for _, objInList := range objList.Results {
+			if transportType != "" && transportType != *objInList.TzType {
+				// no match for transport type
+				continue
+			}
+
+			if isDefault && *objInList.IsDefault {
+				// user is looking for default TZ
+				perfectMatch = append(perfectMatch, objInList)
+				break
+			}
+
 			if strings.HasPrefix(*objInList.DisplayName, objName) {
 				prefixMatch = append(prefixMatch, objInList)
 			}

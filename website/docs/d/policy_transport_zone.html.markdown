@@ -17,10 +17,19 @@ data "nsxt_policy_transport_zone" "overlay_transport_zone" {
 }
 ```
 
+```hcl
+data "nsxt_policy_transport_zone" "vlan_transport_zone" {
+  transport_type = "VLAN_BACKED"
+  is_default     = true
+}
+```
+
 ## Argument Reference
 
 * `id` - (Optional) The ID of Transport Zone to retrieve.
 * `display_name` - (Optional) The Display Name prefix of the Transport Zone to retrieve.
+* `transport_type` - (Optional) Transport type of requested Transport Zone, one of `OVERLAY_STANDARD`, `OVERLAY_ENS`, `VLAN_BACKED` and `UNKNOWN`.
+* `is_default` - (Optional) May be set together with `transport_type` in order to retrieve default Transport Zone for for this transport type.
 
 ## Attributes Reference
 
@@ -28,5 +37,5 @@ In addition to arguments listed above, the following attributes are exported:
 
 * `description` - The description of the Transport Zone.
 * `is_default` - A boolean flag indicating if this Transport Zone is the default.
-* `transport_type` - The transport type of this transport zone (`OVERLAY` or `VLAN`).
+* `transport_type` - The transport type of this transport zone.
 * `path` - The NSX path of the policy resource.
