@@ -94,7 +94,7 @@ func getPolicyPoolMemberGroupSchema() *schema.Schema {
 				},
 				"allow_ipv6": {
 					Type:        schema.TypeBool,
-					Description: "Use IPv4 addresses as server IPs",
+					Description: "Use IPv6 addresses as server IPs",
 					Optional:    true,
 					Default:     false,
 				},
