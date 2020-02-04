@@ -79,7 +79,7 @@ func testAccDataSourceNsxtPolicyMacDiscoveryProfileDeleteByName(name string) err
 	// Find the object by name
 	objList, err := client.List(nil, nil, nil, nil, nil, nil)
 	if err != nil {
-		return fmt.Errorf("Error while reading MacDiscoveryProfiles: %v", err)
+		return handleListError("MacDiscoveryProfile", err)
 	}
 	for _, objInList := range objList.Results {
 		if *objInList.DisplayName == name {

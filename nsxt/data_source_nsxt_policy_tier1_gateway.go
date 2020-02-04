@@ -68,7 +68,7 @@ func dataSourceNsxtPolicyTier1GatewayRead(d *schema.ResourceData, m interface{})
 		objGet, err := client.Get(objID)
 
 		if err != nil {
-			return fmt.Errorf("Error while reading Tier1 %s: %v", objID, err)
+			return handleDataSourceReadError(d, "Tier1", objID, err)
 		}
 		obj = objGet
 	} else if objName == "" {
@@ -77,7 +77,7 @@ func dataSourceNsxtPolicyTier1GatewayRead(d *schema.ResourceData, m interface{})
 		// Get by full name/prefix
 		objList, err := dataSourceNsxtPolicyTier1GatewayReadAllTier1(connector)
 		if err != nil {
-			return fmt.Errorf("Error while reading Tier1s: %v", err)
+			return handleListError("Tier1", err)
 		}
 		// go over the list to find the correct one (prefer a perfect match. If not - prefix match)
 		var perfectMatch []model.Tier1

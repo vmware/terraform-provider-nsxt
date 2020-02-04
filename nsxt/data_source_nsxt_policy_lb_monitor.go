@@ -76,12 +76,9 @@ func dataSourceNsxtPolicyLBMonitorRead(d *schema.ResourceData, m interface{}) er
 	if objID != "" {
 		// Get by id
 		objGet, err := client.Get(objID)
-		if isNotFoundError(err) {
-			return fmt.Errorf("LBMonitor with ID %s was not found", objID)
-		}
 
 		if err != nil {
-			return fmt.Errorf("Error while reading LBMonitor %s: %v", objID, err)
+			return handleDataSourceReadError(d, "LBMonitor", objID, err)
 		}
 		result, err = policyLbMonitorConvert(objGet, objType)
 		if err != nil {
@@ -97,7 +94,7 @@ func dataSourceNsxtPolicyLBMonitorRead(d *schema.ResourceData, m interface{}) er
 		includeMarkForDeleteObjectsParam := false
 		objList, err := client.List(nil, &includeMarkForDeleteObjectsParam, nil, nil, nil, nil)
 		if err != nil {
-			return fmt.Errorf("Error while reading LBMonitors: %v", err)
+			return handleListError("LBMonitor", err)
 		}
 		// go over the list to find the correct one (prefer a perfect match. If not - prefix match)
 		var perfectMatch []model.LBMonitorProfile

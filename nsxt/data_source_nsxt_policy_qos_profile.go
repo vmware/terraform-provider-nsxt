@@ -34,12 +34,9 @@ func dataSourceNsxtPolicyQosProfileRead(d *schema.ResourceData, m interface{}) e
 	if objID != "" {
 		// Get by id
 		objGet, err := client.Get(objID)
-		if isNotFoundError(err) {
-			return fmt.Errorf("QosProfile with ID %s was not found", objID)
-		}
 
 		if err != nil {
-			return fmt.Errorf("Error while reading QosProfile %s: %v", objID, err)
+			return handleDataSourceReadError(d, "QosProfile", objID, err)
 		}
 		obj = objGet
 	} else if objName == "" {
@@ -48,7 +45,7 @@ func dataSourceNsxtPolicyQosProfileRead(d *schema.ResourceData, m interface{}) e
 		// Get by full name/prefix
 		objList, err := client.List(nil, nil, nil, nil, nil)
 		if err != nil {
-			return fmt.Errorf("Error while reading QosProfiles: %v", err)
+			return handleListError("QosProfile", err)
 		}
 		// go over the list to find the correct one (prefer a perfect match. If not - prefix match)
 		var perfectMatch []model.QosProfile
