@@ -203,8 +203,8 @@ resource "nsxt_policy_ip_pool" "pool1" {
 resource "nsxt_policy_ip_pool_block_subnet" "test" {
   display_name = "%s"
   size         = 4
-  pool_path    = "${nsxt_policy_ip_pool.pool1.path}"
-  block_path   = "${nsxt_policy_ip_block.block1.path}"
+  pool_path    = nsxt_policy_ip_pool.pool1.path
+  block_path   = nsxt_policy_ip_block.block1.path
 }`, nsxtPolicyBlockSubnetPoolID, nsxtPolicyBlockSubnetPoolID, name)
 }
 
@@ -220,8 +220,8 @@ resource "nsxt_policy_ip_pool_block_subnet" "test" {
   description         = "Acceptance Test"
   size                = 4
   auto_assign_gateway = false
-  pool_path           = "${nsxt_policy_ip_pool.pool1.path}"
-  block_path          = "${nsxt_policy_ip_block.block1.path}"
+  pool_path           = nsxt_policy_ip_pool.pool1.path
+  block_path          = nsxt_policy_ip_block.block1.path
   tag {
     scope = "scope2"
     tag   = "tag2"
@@ -241,8 +241,8 @@ resource "nsxt_policy_ip_pool_block_subnet" "test" {
   description         = "Acceptance Test"
   size                = 4
   auto_assign_gateway = true
-  pool_path           = "${nsxt_policy_ip_pool.pool1.path}"
-  block_path          = "${nsxt_policy_ip_block.block1.path}"
+  pool_path           = nsxt_policy_ip_pool.pool1.path
+  block_path          = nsxt_policy_ip_block.block1.path
   tag {
     scope = "scope1"
     tag   = "tag1"
