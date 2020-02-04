@@ -19,7 +19,7 @@ resource "nsxt_policy_segment" "segment1" {
 
     subnet {
       cidr        = "12.12.2.1/24"
-      dhcp_ranges = "12.12.2.100-12.12.2.160"
+      dhcp_ranges = ["12.12.2.100-12.12.2.160"]
 
       dhcp_v4_config {
         lease_time = 36000
@@ -58,7 +58,7 @@ The following arguments are supported:
 * `dhcp_config_path` - (Optional) Policy path to DHCP server or relay configuration to use for subnets configured on this segment. This attribute is supported with NSX 3.0.0 onwards.
 * `subnet` - (Required) Subnet configuration block.
   * `cidr` - (Required) Gateway IP address CIDR.
-  * `dhcp_ranges` - (Optional) DHCP address ranges for dynamic IP allocation.
+  * `dhcp_ranges` - (Optional) List of DHCP address ranges for dynamic IP allocation.
   * `dhcp_v4_config` - (Optional) DHCPv4 config for IPv4 subnet. This clause is supported with NSX 3.0.0 onwards.
     * `dns_servers` - (Optional) List of IP addresses of DNS servers for the subnet.
     * `lease_time`  - (Optional) DHCP lease time in seconds.
