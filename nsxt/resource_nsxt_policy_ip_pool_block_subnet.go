@@ -5,14 +5,18 @@ package nsxt
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/ip_pools"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/realized_state"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"log"
 	"strings"
+	"time"
 )
 
 func resourceNsxtPolicyIPPoolBlockSubnet() *schema.Resource {
@@ -204,6 +208,45 @@ func resourceNsxtPolicyIPPoolBlockSubnetDelete(d *schema.ResourceData, m interfa
 	err := client.Delete(poolID, id)
 	if err != nil {
 		return handleDeleteError("Block Subnet", id, err)
+	}
+
+	return resourceNsxtPolicyIPPoolBlockSubnetVerifyDelete(d, connector)
+}
+
+// NOTE: This will not be needed when IPAM is handled by NSXT Policy
+func resourceNsxtPolicyIPPoolBlockSubnetVerifyDelete(d *schema.ResourceData, connector *client.RestConnector) error {
+
+	client := realized_state.NewDefaultRealizedEntitiesClient(connector)
+
+	path := d.Get("path").(string)
+	// Wait for realization state to disappear (not_found) - this means
+	// block subnet deletion is realized
+	pendingStates := []string{"PENDING"}
+	targetStates := []string{"DELETED", "ERROR"}
+	stateConf := &resource.StateChangeConf{
+		Pending: pendingStates,
+		Target:  targetStates,
+		Refresh: func() (interface{}, string, error) {
+
+			_, realizationError := client.List(path)
+			if realizationError != nil {
+				if isNotFoundError(realizationError) {
+					return 0, "DELETED", nil
+				} else {
+					return 0, "ERROR", realizationError
+				}
+			}
+			// realization info found
+			log.Printf("[INFO] IP Block realization still present")
+			return 0, "PENDING", nil
+		},
+		Timeout:    d.Timeout(schema.TimeoutDelete),
+		MinTimeout: 1 * time.Second,
+		Delay:      1 * time.Second,
+	}
+	_, err := stateConf.WaitForState()
+	if err != nil {
+		return fmt.Errorf("Failed to confirm delete realization for %s: %v", path, err)
 	}
 
 	return nil
