@@ -232,9 +232,8 @@ func resourceNsxtPolicyIPPoolBlockSubnetVerifyDelete(d *schema.ResourceData, con
 			if realizationError != nil {
 				if isNotFoundError(realizationError) {
 					return 0, "DELETED", nil
-				} else {
-					return 0, "ERROR", realizationError
 				}
+				return 0, "ERROR", realizationError
 			}
 			// realization info found
 			log.Printf("[INFO] IP Block realization still present")
