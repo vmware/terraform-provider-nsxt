@@ -497,7 +497,7 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 	}
 
 	tr := &http.Transport{
-		Proxy: http.ProxyFromEnvironment,
+		Proxy: 		 http.ProxyFromEnvironment,
 		TLSClientConfig: tlsConfig,
 	}
 
