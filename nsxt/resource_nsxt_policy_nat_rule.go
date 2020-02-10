@@ -73,6 +73,7 @@ func resourceNsxtPolicyNATRule() *schema.Resource {
 				Type:         schema.TypeString,
 				Description:  "Firewall match flag",
 				Optional:     true,
+				Default:      model.PolicyNatRule_FIREWALL_MATCH_BYPASS,
 				ValidateFunc: validation.StringInSlice(policyNATRuleFirewallMatchTypeValues, false),
 			},
 			"logging": {
