@@ -14,6 +14,10 @@ import (
 )
 
 func logVapiErrorData(message string, apiErrorDataValue *data.StructValue) error {
+	if apiErrorDataValue == nil {
+		return fmt.Errorf("[ERROR]: %s (no additional details provided)", message)
+	}
+
 	var typeConverter = bindings.NewTypeConverter()
 	typeConverter.SetMode(bindings.REST)
 	data, err := typeConverter.ConvertToGolang(apiErrorDataValue, model.ApiErrorBindingType())
@@ -37,6 +41,13 @@ func logVapiErrorData(message string, apiErrorDataValue *data.StructValue) error
 
 func logAPIError(message string, err error) error {
 	if vapiError, ok := err.(errors.InvalidRequest); ok {
+		// Connection errors end up here
+		if vapiError.Data == nil {
+			if len(vapiError.Messages) > 0 {
+				return fmt.Errorf("[ERROR]: %s (%s)", message, vapiError.Messages[0].DefaultMessage)
+			}
+			return fmt.Errorf("[ERROR]: %s (no additional details provided)", message)
+		}
 		return logVapiErrorData(message, vapiError.Data)
 	}
 	if vapiError, ok := err.(errors.NotFound); ok {
