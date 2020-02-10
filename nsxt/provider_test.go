@@ -136,7 +136,7 @@ func testAccGetPolicyConnector() (*client.RestConnector, error) {
 
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: insecure},
-    		Proxy: http.ProxyFromEnvironment,
+		Proxy: http.ProxyFromEnvironment,
 	}
 	httpClient := http.Client{Transport: tr}
 	connector := client.NewRestConnector(host, httpClient)
