@@ -173,6 +173,8 @@ func Provider() terraform.ResourceProvider {
 			"nsxt_policy_certificate":              dataSourceNsxtPolicyCertificate(),
 			"nsxt_policy_lb_persistence_profile":   dataSourceNsxtPolicyLbPersistenceProfile(),
 			"nsxt_policy_vni_pool":                 dataSourceNsxtPolicyVniPool(),
+			"nsxt_policy_ip_block":                 dataSourceNsxtPolicyIPBlock(),
+			"nsxt_policy_ip_pool":                  dataSourceNsxtPolicyIPPool(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
