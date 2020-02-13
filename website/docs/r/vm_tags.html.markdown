@@ -33,7 +33,7 @@ The following arguments are supported:
 
 * `instance_id` - (Required) BIOS Id of the Virtual Machine.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this VM.
-* `logical_port_tag` - (Optional) A list of scope + tag pairs to associate with logical port that is automatically created for this VM.
+* `logical_port_tag` - (Optional) A list of scope + tag pairs to associate with all logical ports that are automatically created for this VM.
 
 ## Importing
 

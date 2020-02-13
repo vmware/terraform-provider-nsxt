@@ -118,40 +118,45 @@ func findVMByExternalID(nsxClient *api.APIClient, instanceID string) (*manager.V
 	return nil, fmt.Errorf("Failed to find Virtual Machine with id %s in inventory", instanceID)
 }
 
-func findVIFByExternalID(nsxClient *api.APIClient, instanceID string) (*manager.VirtualNetworkInterface, error) {
+func findVIFsByExternalID(nsxClient *api.APIClient, instanceID string) ([]manager.VirtualNetworkInterface, error) {
 
 	vifList, err := getVIFList(nsxClient)
+	var resultList []manager.VirtualNetworkInterface
 	if err != nil {
 		return nil, err
 	}
 
 	for _, vif := range vifList.Results {
 		if vif.OwnerVmId == instanceID {
-			return &vif, nil
+			resultList = append(resultList, vif)
 		}
 	}
 
-	return nil, fmt.Errorf("Failed to find VIF for VM id %s in inventory", instanceID)
+	return resultList, nil
 }
 
-func findPortByExternalID(nsxClient *api.APIClient, instanceID string) (*manager.LogicalPort, error) {
+func findPortsByExternalID(nsxClient *api.APIClient, instanceID string) ([]manager.LogicalPort, error) {
 
-	vif, err := findVIFByExternalID(nsxClient, instanceID)
+	var resultList []manager.LogicalPort
+	vifs, err := findVIFsByExternalID(nsxClient, instanceID)
 	if err != nil {
-		return nil, err
+		return resultList, err
 	}
 
 	portList, err := getPortList(nsxClient)
 	if err != nil {
-		return nil, err
+		return resultList, err
 	}
 	for _, elem := range portList.Results {
-		if elem.Attachment != nil && elem.Attachment.Id == vif.LportAttachmentId {
-			return &elem, nil
+		for _, vif := range vifs {
+			if elem.Attachment != nil && elem.Attachment.Id == vif.LportAttachmentId {
+				resultList = append(resultList, elem)
+				continue
+			}
 		}
 	}
 
-	return nil, fmt.Errorf("Failed to find logical port with attachment id %s", vif.LportAttachmentId)
+	return resultList, nil
 }
 
 func updateTags(nsxClient *api.APIClient, id string, tags []common.Tag) error {
@@ -178,17 +183,25 @@ func updateTags(nsxClient *api.APIClient, id string, tags []common.Tag) error {
 func updatePortTags(nsxClient *api.APIClient, id string, tags []common.Tag) error {
 	log.Printf("[DEBUG] Updating logical port tags for %s", id)
 
-	port, err := findPortByExternalID(nsxClient, id)
+	ports, err := findPortsByExternalID(nsxClient, id)
 	if err != nil {
 		return err
 	}
 
-	port.Tags = tags
-	_, resp, err := nsxClient.LogicalSwitchingApi.UpdateLogicalPort(nsxClient.Context, port.Id, *port)
+	portsUpdated := 0
 
-	if err != nil || resp.StatusCode == http.StatusNotFound {
-		return fmt.Errorf("Error while updating logical port %s: %v", id, err)
+	for _, port := range ports {
+		port.Tags = tags
+		log.Printf("[DEBUG] Applying %d tags on logical port %s", len(tags), port.Id)
+		_, resp, err := nsxClient.LogicalSwitchingApi.UpdateLogicalPort(nsxClient.Context, port.Id, port)
+
+		if err != nil || (resp != nil && resp.StatusCode == http.StatusNotFound) {
+			return fmt.Errorf("Error while updating tags on logical port %s: %v", port.Id, err)
+		}
+		portsUpdated++
 	}
+
+	log.Printf("[INFO] Applied %d tags on %d logical ports for VM %s", len(tags), portsUpdated, id)
 
 	return nil
 }
@@ -239,13 +252,21 @@ func resourceNsxtVMTagsRead(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("Error during VM retrieval: %v", err)
 	}
 
-	port, err := findPortByExternalID(nsxClient, id)
+	ports, err := findPortsByExternalID(nsxClient, id)
 	if err != nil {
 		return fmt.Errorf("Error during logical port retrieval: %v", err)
 	}
 
 	setTagsInSchema(d, vm.Tags)
-	setCustomizedTagsInSchema(d, port.Tags, "logical_port_tag")
+	// assuming all ports have same tags
+	// note - more flexible implementation will be provided with policy resource
+	if len(ports) > 0 {
+		setCustomizedTagsInSchema(d, ports[0].Tags, "logical_port_tag")
+	} else {
+		// assign empty list
+		var tagList []map[string]string
+		d.Set("logical_port_tag", tagList)
+	}
 
 	return nil
 }
