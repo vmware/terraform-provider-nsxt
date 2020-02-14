@@ -121,7 +121,7 @@ func getTagsSchemaForceNew() *schema.Schema {
 
 func getCustomizedTagsFromSchema(d *schema.ResourceData, schemaName string) []common.Tag {
 	tags := d.Get(schemaName).(*schema.Set).List()
-	var tagList []common.Tag
+	tagList := make([]common.Tag, 0)
 	for _, tag := range tags {
 		data := tag.(map[string]interface{})
 		elem := common.Tag{
