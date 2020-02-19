@@ -59,7 +59,7 @@ The following arguments are supported:
     * `key` (Required for a `condition`) Specifies the attribute to query. Must be one of: `Tag`, `ComputerName`, `OSName` or `Name`. For a `member_type` other than `VirtualMachine`, only the `Tag` key is supported.
     * `member_type` (Required for a `condition`) Specifies the type of resource to query. Must be one of: `IPSet`, `LogicalPort`, `LogicalSwitch`, `Segment`, `SegmentPort` or `VirtualMachine`.
     * `operator` (Required for a `condition`) Specifies the query operator to use. Must be one of: `CONTAINS`, `ENDSWITH`, `EQUALS`, `NOTEQUALS` or `STARTSWITH`.
-    * `value` (Required for a `condition`) User specified string value to use in the query.
+    * `value` (Required for a `condition`) User specified string value to use in the query. For `Tag` criteria, use 'scope|value' notation if you wish to specify scope in criteria.
 * `conjunction` (Required for multiple `criteria`) When specifying multiple `criteria`, a conjunction is used to specify if the criteria should selected using `AND` or `OR`.
   * `operator` (Required for `conjunction`) The operator to use. Must be one of `AND` or `OR`. If `AND` is used, then the `criteria` block before/after must be of the same type and if using `condition` then also must use the same `member_type`.
 

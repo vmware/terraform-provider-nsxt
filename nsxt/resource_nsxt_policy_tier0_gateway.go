@@ -156,7 +156,7 @@ func getPolicyBGPConfigSchema() *schema.Schema {
 					Type:        schema.TypeBool,
 					Description: "Flag to enable BGP multipath relax option",
 					Optional:    true,
-					Default:     true,
+					Default:     false,
 				},
 				"route_aggregation": {
 					Type:        schema.TypeList,
@@ -721,10 +721,9 @@ func resourceNsxtPolicyTier0GatewayCreate(d *schema.ResourceData, m interface{})
 		return handleCreateError("Tier0", id, err)
 	}
 
-	boolTrue := true
+	boolFalse := false
 	log.Printf("[INFO] H-API Creating Tier0 with ID %s", id)
-	// use enforce_revision_check to ensure multipath_relax is created with default of true as per bug 2479086
-	err = infraClient.Patch(infraModel, &boolTrue)
+	err = infraClient.Patch(infraModel, &boolFalse)
 	if err != nil {
 		return handleCreateError("Tier0", id, err)
 	}

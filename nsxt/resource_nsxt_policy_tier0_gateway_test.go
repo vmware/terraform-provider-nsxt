@@ -198,7 +198,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_withEdgeCluster(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "bgp_config.0.enabled", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "bgp_config.0.inter_sr_ibgp", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "bgp_config.0.local_as_num", "65000"),
-					resource.TestCheckResourceAttr(testResourceName, "bgp_config.0.multipath_relax", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "bgp_config.0.multipath_relax", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "bgp_config.0.route_aggregation.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "bgp_config.0.graceful_restart_mode", "HELPER_ONLY"),
 					resource.TestCheckResourceAttr(testResourceName, "bgp_config.0.graceful_restart_timer", "180"),
@@ -253,6 +253,46 @@ func TestAccResourceNsxtPolicyTier0Gateway_withEdgeCluster(t *testing.T) {
 				),
 			},
 			*/
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicyTier0Gateway_createWithBGP(t *testing.T) {
+	name := fmt.Sprintf("test-nsx-policy-tier0-bgp")
+	updateName := fmt.Sprintf("%s-update", name)
+	testResourceName := "nsxt_policy_tier0_gateway.test"
+	edgeClusterName := getEdgeClusterName()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyTier0CheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyTier0UpdateWithEcTemplate(updateName, edgeClusterName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyTier0Exists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updateName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttrSet(testResourceName, "edge_cluster_path"),
+					resource.TestCheckResourceAttr(realizationResourceName, "state", "REALIZED"),
+					resource.TestCheckResourceAttr(testResourceName, "bgp_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "bgp_config.0.tag.#", "0"),
+					resource.TestCheckResourceAttrSet(testResourceName, "bgp_config.0.revision"),
+					resource.TestCheckResourceAttrSet(testResourceName, "bgp_config.0.path"),
+					resource.TestCheckResourceAttr(testResourceName, "bgp_config.0.ecmp", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "bgp_config.0.enabled", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "bgp_config.0.inter_sr_ibgp", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "bgp_config.0.local_as_num", "60000"),
+					resource.TestCheckResourceAttr(testResourceName, "bgp_config.0.multipath_relax", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "bgp_config.0.route_aggregation.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "bgp_config.0.graceful_restart_mode", "HELPER_ONLY"),
+					resource.TestCheckResourceAttr(testResourceName, "bgp_config.0.graceful_restart_timer", "180"),
+					resource.TestCheckResourceAttr(testResourceName, "bgp_config.0.graceful_restart_stale_route_timer", "600"),
+				),
+			},
 		},
 	})
 }
