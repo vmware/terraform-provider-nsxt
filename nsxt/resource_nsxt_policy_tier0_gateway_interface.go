@@ -38,7 +38,7 @@ func resourceNsxtPolicyTier0GatewayInterface() *schema.Resource {
 			"revision":               getRevisionSchema(),
 			"tag":                    getTagsSchema(),
 			"gateway_path":           getPolicyPathSchema(true, true, "Policy path for Tier0 gateway"),
-			"segment_path":           getPolicyPathSchema(true, true, "Policy path for connected segment"),
+			"segment_path":           getPolicyPathSchema(false, true, "Policy path for connected segment"),
 			"subnets":                getGatewayInterfaceSubnetsSchema(),
 			"mtu":                    getMtuSchema(),
 			"ipv6_ndra_profile_path": getIPv6NDRAPathSchema(),
@@ -100,6 +100,13 @@ func resourceNsxtPolicyTier0GatewayInterfaceCreate(d *schema.ResourceData, m int
 	tier0Path := d.Get("gateway_path").(string)
 	tier0ID := getPolicyIDFromPath(tier0Path)
 
+	segmentPath := d.Get("segment_path").(string)
+	ifType := d.Get("type").(string)
+	if len(segmentPath) == 0 && ifType != model.Tier0Interface_TYPE_LOOPBACK {
+		// segment_path in required for all interfaces other than loopback
+		return fmt.Errorf("segment_path is mandatory for interface of type %s", ifType)
+	}
+
 	localeService, err := resourceNsxtPolicyTier0GatewayGetLocaleServiceEntry(tier0ID, connector)
 	if err != nil {
 		return err
@@ -123,7 +130,6 @@ func resourceNsxtPolicyTier0GatewayInterfaceCreate(d *schema.ResourceData, m int
 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	segmentPath := d.Get("segment_path").(string)
 	tags := getPolicyTagsFromSchema(d)
 	interfaceSubnetList := getGatewayInterfaceSubnetList(d)
 	var ipv6ProfilePaths []string
@@ -131,7 +137,6 @@ func resourceNsxtPolicyTier0GatewayInterfaceCreate(d *schema.ResourceData, m int
 		ipv6ProfilePaths = append(ipv6ProfilePaths, d.Get("ipv6_ndra_profile_path").(string))
 	}
 	mtu := int64(d.Get("mtu").(int))
-	ifType := d.Get("type").(string)
 	edgePath := d.Get("edge_node_path").(string)
 	obj := model.Tier0Interface{
 		Id:               &id,
@@ -140,8 +145,11 @@ func resourceNsxtPolicyTier0GatewayInterfaceCreate(d *schema.ResourceData, m int
 		Tags:             tags,
 		Type_:            &ifType,
 		Subnets:          interfaceSubnetList,
-		SegmentPath:      &segmentPath,
 		Ipv6ProfilePaths: ipv6ProfilePaths,
+	}
+
+	if len(segmentPath) > 0 {
+		obj.SegmentPath = &segmentPath
 	}
 
 	if mtu > 0 {
@@ -253,7 +261,6 @@ func resourceNsxtPolicyTier0GatewayInterfaceUpdate(d *schema.ResourceData, m int
 		Tags:             tags,
 		Type_:            &ifType,
 		Subnets:          interfaceSubnetList,
-		SegmentPath:      &segmentPath,
 		Ipv6ProfilePaths: ipv6ProfilePaths,
 		Revision:         &revision,
 	}
@@ -264,6 +271,10 @@ func resourceNsxtPolicyTier0GatewayInterfaceUpdate(d *schema.ResourceData, m int
 
 	if edgePath != "" {
 		obj.EdgePath = &edgePath
+	}
+
+	if len(segmentPath) > 0 {
+		obj.SegmentPath = &segmentPath
 	}
 
 	gatewayInterfaceVersionDepenantSet(d, &obj)

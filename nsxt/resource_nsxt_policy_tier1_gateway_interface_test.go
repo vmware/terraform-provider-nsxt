@@ -227,7 +227,7 @@ func testAccNsxtPolicyTier1InterfaceCheckDestroy(state *terraform.State, display
 }
 
 func testAccNsxtPolicyTier1InterfaceTemplate(name string, subnet string, mtu string) string {
-	return testAccNsxtPolicyGatewayInterfaceDeps() + fmt.Sprintf(`
+	return testAccNsxtPolicyGatewayInterfaceDeps("11") + fmt.Sprintf(`
 resource "nsxt_policy_tier1_gateway" "test" {
   nsx_id            = "%s"
   display_name      = "%s"
@@ -254,7 +254,7 @@ data "nsxt_policy_realization_info" "realization_info" {
 }
 
 func testAccNsxtPolicyTier1InterfaceThinTemplate(name string, subnet string) string {
-	return testAccNsxtPolicyGatewayInterfaceDeps() + fmt.Sprintf(`
+	return testAccNsxtPolicyGatewayInterfaceDeps("11") + fmt.Sprintf(`
 resource "nsxt_policy_tier1_gateway" "test" {
   nsx_id            = "%s"
   display_name      = "%s"
@@ -274,7 +274,7 @@ data "nsxt_policy_realization_info" "realization_info" {
 }
 
 func testAccNsxtPolicyTier1InterfaceTemplateWithID(name string, subnet string) string {
-	return testAccNsxtPolicyGatewayInterfaceDeps() + fmt.Sprintf(`
+	return testAccNsxtPolicyGatewayInterfaceDeps("11") + fmt.Sprintf(`
 data "nsxt_policy_ipv6_ndra_profile" "default" {
   display_name = "default"
 }
