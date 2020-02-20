@@ -79,9 +79,9 @@ func TestAccResourceNsxtLogicalDhcpServer_noOpts(t *testing.T) {
 	edgeClusterName := getEdgeClusterName()
 	ip1 := "1.1.1.10/24"
 	ip2 := "1.1.1.20"
+	ip3 := "1.1.1.21"
 	ip1upd := "2.1.1.10/24"
 	ip2upd := "2.1.1.20"
-	ip3 := "1.1.1.21"
 	ip4 := "1.1.1.22"
 
 	resource.Test(t, resource.TestCase{
@@ -92,16 +92,15 @@ func TestAccResourceNsxtLogicalDhcpServer_noOpts(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXLogicalDhcpServerCreateNoOptsTemplate(edgeClusterName, prfName, ip1, ip2, ip3),
+				Config: testAccNSXLogicalDhcpServerCreateNoOptsTemplate(edgeClusterName, prfName, ip1, ip2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXLogicalDhcpServerExists(prfName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", prfName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttrSet(testResourceName, "dhcp_profile_id"),
 					resource.TestCheckResourceAttr(testResourceName, "dhcp_server_ip", ip1),
-					resource.TestCheckResourceAttr(testResourceName, "gateway_ip", ip2),
 					resource.TestCheckResourceAttr(testResourceName, "dns_name_servers.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "dns_name_servers.0", ip3),
+					resource.TestCheckResourceAttr(testResourceName, "dns_name_servers.0", ip2),
 					resource.TestCheckResourceAttr(testResourceName, "dhcp_option_121.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "dhcp_generic_option.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
@@ -282,14 +281,13 @@ resource "nsxt_logical_dhcp_server" "test" {
 }`, updatedName, ip1, ip2, ip3, ip4, ip5, ip5)
 }
 
-func testAccNSXLogicalDhcpServerCreateNoOptsTemplate(edgeClusterName string, name string, ip1 string, ip2 string, ip3 string) string {
+func testAccNSXLogicalDhcpServerCreateNoOptsTemplate(edgeClusterName string, name string, ip1 string, ip2 string) string {
 	return testAccNSXDhcpServerProfileCreateForServerTemplate(edgeClusterName) + fmt.Sprintf(`
 resource "nsxt_logical_dhcp_server" "test" {
   display_name     = "%s"
   description      = "Acceptance Test"
   dhcp_profile_id  = "${nsxt_dhcp_server_profile.PRF.id}"
   dhcp_server_ip   = "%s"
-  gateway_ip       = "%s"
   domain_name      = "abc.com"
   dns_name_servers = ["%s"]
 
@@ -297,7 +295,7 @@ resource "nsxt_logical_dhcp_server" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, name, ip1, ip2, ip3)
+}`, name, ip1, ip2)
 }
 
 func testAccNSXLogicalDhcpServerUpdateNoOptsTemplate(edgeClusterName string, updatedName string, ip1 string, ip2 string, ip3 string, ip4 string) string {

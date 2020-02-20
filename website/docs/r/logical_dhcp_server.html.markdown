@@ -56,7 +56,7 @@ The following arguments are supported:
 * `description` - (Optional) Description of this resource.
 * `dhcp_profile_id` - (Required) DHCP profile uuid.
 * `dhcp_server_ip` - (Required) DHCP server IP in cidr format.
-* `gateway_ip` - (Required) Gateway IP.
+* `gateway_ip` - (Optional) Gateway IP.
 * `domain_name` - (Optional) Domain name.
 * `dns_name_servers` - (Optional) DNS IPs.
 * `dhcp_option_121` - (Optional) DHCP classless static routes.
