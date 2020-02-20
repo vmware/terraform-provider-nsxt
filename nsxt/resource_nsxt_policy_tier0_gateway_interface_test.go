@@ -288,7 +288,7 @@ func testAccNsxtPolicyTier0InterfaceCheckDestroy(state *terraform.State, display
 	return nil
 }
 
-func testAccNsxtPolicyGatewayInterfaceDeps() string {
+func testAccNsxtPolicyGatewayInterfaceDeps(vlans string) string {
 	return fmt.Sprintf(`
 data "nsxt_policy_edge_cluster" "EC" {
   display_name = "%s"
@@ -301,16 +301,17 @@ data "nsxt_policy_transport_zone" "test" {
 resource "nsxt_policy_vlan_segment" "test" {
   transport_zone_path = data.nsxt_policy_transport_zone.test.path
   display_name        = "interface_test"
-  vlan_ids            = ["11", "12"]
+  vlan_ids            = [%s]
   subnet {
       cidr = "10.2.2.2/24"
   }
-}`, getEdgeClusterName(), getVlanTransportZoneName())
+}`, getEdgeClusterName(), getVlanTransportZoneName(), vlans)
 
 }
 
 func testAccNsxtPolicyTier0InterfaceServiceTemplate(name string, subnet string, mtu string) string {
-	return testAccNsxtPolicyGatewayInterfaceDeps() + fmt.Sprintf(`
+	return testAccNsxtPolicyGatewayInterfaceDeps("11") + fmt.Sprintf(`
+
 resource "nsxt_policy_tier0_gateway" "test" {
   nsx_id            = "%s"
   display_name      = "%s"
@@ -339,7 +340,7 @@ data "nsxt_policy_realization_info" "realization_info" {
 }
 
 func testAccNsxtPolicyTier0InterfaceThinTemplate(name string, subnet string) string {
-	return testAccNsxtPolicyGatewayInterfaceDeps() + fmt.Sprintf(`
+	return testAccNsxtPolicyGatewayInterfaceDeps("11") + fmt.Sprintf(`
 resource "nsxt_policy_tier0_gateway" "test" {
   nsx_id            = "%s"
   display_name      = "%s"
@@ -361,7 +362,7 @@ data "nsxt_policy_realization_info" "realization_info" {
 }
 
 func testAccNsxtPolicyTier0InterfaceTemplateWithID(name string, subnet string) string {
-	return testAccNsxtPolicyGatewayInterfaceDeps() + fmt.Sprintf(`
+	return testAccNsxtPolicyGatewayInterfaceDeps("11") + fmt.Sprintf(`
 data "nsxt_policy_ipv6_ndra_profile" "default" {
   display_name = "default"
 }
@@ -390,7 +391,7 @@ data "nsxt_policy_realization_info" "realization_info" {
 }
 
 func testAccNsxtPolicyTier0InterfaceExternalTemplate(name string, subnet string, mtu string) string {
-	return testAccNsxtPolicyGatewayInterfaceDeps() + fmt.Sprintf(`
+	return testAccNsxtPolicyGatewayInterfaceDeps("11") + fmt.Sprintf(`
 data "nsxt_policy_edge_node" "EN" {
   edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
   member_index      = 0

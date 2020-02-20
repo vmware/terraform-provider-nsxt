@@ -325,7 +325,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_withVRF(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testInterfaceName, "display_name", name),
-					resource.TestCheckResourceAttr(testInterfaceName, "access_vlan_id", "11"),
+					resource.TestCheckResourceAttr(testInterfaceName, "access_vlan_id", "12"),
 				),
 			},
 			{
@@ -338,7 +338,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_withVRF(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testInterfaceName, "display_name", updateName),
-					resource.TestCheckResourceAttr(testInterfaceName, "access_vlan_id", "11"),
+					resource.TestCheckResourceAttr(testInterfaceName, "access_vlan_id", "12"),
 				),
 			},
 			{
@@ -640,7 +640,7 @@ func testAccNsxtPolicyTier0WithVRFTemplate(name string, targets bool) string {
         }
             `
 	}
-	return testAccNsxtPolicyGatewayInterfaceDeps() + fmt.Sprintf(`
+	return testAccNsxtPolicyGatewayInterfaceDeps("11, 12") + fmt.Sprintf(`
 resource "nsxt_policy_tier0_gateway" "parent" {
   nsx_id            = "vrf_parent"
   display_name      = "parent"
@@ -656,15 +656,13 @@ resource "nsxt_policy_tier0_gateway" "test" {
   }
 }
 
-resource "nsxt_policy_tier0_gateway_interface" "test-parent" {
+resource "nsxt_policy_tier0_gateway_interface" "parent-loopback" {
   display_name   = "parent interface"
-  type           = "EXTERNAL"
+  type           = "LOOPBACK"
   gateway_path   = nsxt_policy_tier0_gateway.parent.path
-  segment_path   = nsxt_policy_vlan_segment.test.path
   edge_node_path = data.nsxt_policy_edge_node.EN.path
-  subnets        = ["4.4.4.1/24"]
+  subnets        = ["4.4.4.12/24"]
 }
-
 
 data "nsxt_policy_edge_node" "EN" {
   edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
@@ -678,7 +676,7 @@ resource "nsxt_policy_tier0_gateway_interface" "test" {
   segment_path   = nsxt_policy_vlan_segment.test.path
   edge_node_path = data.nsxt_policy_edge_node.EN.path
   subnets        = ["4.4.4.1/24"]
-  access_vlan_id = 11
+  access_vlan_id = 12
 }
 
 data "nsxt_policy_realization_info" "realization_info" {
@@ -687,7 +685,7 @@ data "nsxt_policy_realization_info" "realization_info" {
 }
 
 func testAccNsxtPolicyTier0WithVRFTearDown() string {
-	return testAccNsxtPolicyGatewayInterfaceDeps() + `
+	return testAccNsxtPolicyGatewayInterfaceDeps("11, 12") + `
 data "nsxt_policy_edge_node" "EN" {
   edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
   member_index      = 0
@@ -699,12 +697,11 @@ resource "nsxt_policy_tier0_gateway" "parent" {
   edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
 }
 
-resource "nsxt_policy_tier0_gateway_interface" "test-parent" {
+resource "nsxt_policy_tier0_gateway_interface" "parent-loopback" {
   display_name   = "parent interface"
-  type           = "EXTERNAL"
+  type           = "LOOPBACK"
   gateway_path   = nsxt_policy_tier0_gateway.parent.path
-  segment_path   = nsxt_policy_vlan_segment.test.path
   edge_node_path = data.nsxt_policy_edge_node.EN.path
-  subnets        = ["4.4.4.1/24"]
+  subnets        = ["4.4.4.12/24"]
 }`
 }

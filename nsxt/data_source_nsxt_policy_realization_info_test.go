@@ -144,6 +144,7 @@ resource "nsxt_policy_ip_address_allocation" "test" {
   display_name  = "tfipallocationerror"
   pool_path     = nsxt_policy_ip_pool.test.path
   allocation_ip = "12.12.12.21"
+  depends_on    = [nsxt_policy_ip_pool_static_subnet.test]
 }
 
 data "nsxt_policy_realization_info" "realization_info" {
