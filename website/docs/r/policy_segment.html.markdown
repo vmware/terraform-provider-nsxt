@@ -57,7 +57,7 @@ The following arguments are supported:
 * `transport_zone_path` - (Optional) Policy path to the Overlay transport zone. This property is required if more than one overlay transport zone is defined, and none is marked as default.
 * `dhcp_config_path` - (Optional) Policy path to DHCP server or relay configuration to use for subnets configured on this segment. This attribute is supported with NSX 3.0.0 onwards.
 * `subnet` - (Required) Subnet configuration block.
-  * `cidr` - (Required) Gateway IP address CIDR.
+  * `cidr` - (Required) Gateway IP address CIDR. This argument can not be changed if DHCP is enabled for the subnet.
   * `dhcp_ranges` - (Optional) List of DHCP address ranges for dynamic IP allocation.
   * `dhcp_v4_config` - (Optional) DHCPv4 config for IPv4 subnet. This clause is supported with NSX 3.0.0 onwards.
     * `dns_servers` - (Optional) List of IP addresses of DNS servers for the subnet.
