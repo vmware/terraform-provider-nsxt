@@ -120,6 +120,7 @@ func getPolicyPoolSnatSchema() *schema.Schema {
 		Description: "SNAT configuration",
 		Optional:    true,
 		MaxItems:    1,
+		Computed:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"type": {
@@ -311,7 +312,10 @@ func getPolicyPoolSnatFromSchema(d *schema.ResourceData) (*data.StructValue, err
 			tokens := strings.Split(addressStr, "/")
 			if len(tokens) == 2 {
 				// cidr format
-				prefix, _ := strconv.Atoi(tokens[1])
+				prefix, err := strconv.Atoi(tokens[1])
+				if err != nil {
+					return nil, fmt.Errorf("Failed to convert snat address prefix: %s", err)
+				}
 				prefix64 := int64(prefix)
 				element := model.LBSnatIpElement{
 					IpAddress:    tokens[0],
@@ -355,37 +359,44 @@ func setPolicyPoolSnatInSchema(d *schema.ResourceData, snat *data.StructValue) e
 	var snatList []map[string]interface{}
 	elem := make(map[string]interface{})
 
-	_, errs := converter.ConvertToGolang(snat, model.LBSnatDisabledBindingType())
-	if errs == nil {
+	basicType, errs := converter.ConvertToGolang(snat, model.LBSnatTranslationBindingType())
+	if errs != nil {
+		return errs[0]
+	}
+
+	snatType := basicType.(model.LBSnatTranslation).Type_
+
+	if snatType == model.LBSnatDisabled__TYPE_IDENTIFIER {
 		elem["type"] = "DISABLED"
 		elem["ip_pool_addresses"] = nil
+	} else if snatType == model.LBSnatAutoMap__TYPE_IDENTIFIER {
+		elem["type"] = "AUTOMAP"
+		elem["ip_pool_addresses"] = nil
 	} else {
-		_, errs = converter.ConvertToGolang(snat, model.LBSnatAutoMapBindingType())
-		if errs == nil {
-			elem["type"] = "AUTOMAP"
-			elem["ip_pool_addresses"] = nil
-		} else {
-			// IP Pool
-			data, errs := converter.ConvertToGolang(snat, model.LBSnatIpPoolBindingType())
-			if errs != nil {
-				return errs[0]
-			}
-			ipPoolSnat := data.(model.LBSnatIpPool)
-			elem["type"] = "IPPOOL"
-			var addressList []string
-			for _, address := range ipPoolSnat.IpAddresses {
-				if address.PrefixLength != nil {
-					cidr := fmt.Sprintf("%s/%d", address.IpAddress, address.PrefixLength)
-					addressList = append(addressList, cidr)
-				} else {
-					addressList = append(addressList, address.IpAddress)
-				}
-			}
-			elem["ip_pool_addresses"] = addressList
+		if snatType != model.LBSnatIpPool__TYPE_IDENTIFIER {
+			return fmt.Errorf("Unrecognized Snat Translation type %s", snatType)
 		}
-		snatList = append(snatList, elem)
-		d.Set("snat", snatList)
+		// IP Pool
+		data, errs := converter.ConvertToGolang(snat, model.LBSnatIpPoolBindingType())
+		if errs != nil {
+			return errs[0]
+		}
+		ipPoolSnat := data.(model.LBSnatIpPool)
+		elem["type"] = "IPPOOL"
+		var addressList []string
+		for _, address := range ipPoolSnat.IpAddresses {
+			if address.PrefixLength != nil {
+				cidr := fmt.Sprintf("%s/%d", address.IpAddress, *address.PrefixLength)
+				addressList = append(addressList, cidr)
+			} else {
+				addressList = append(addressList, address.IpAddress)
+			}
+		}
+		elem["ip_pool_addresses"] = addressList
 	}
+
+	snatList = append(snatList, elem)
+	d.Set("snat", snatList)
 	return nil
 }
 
