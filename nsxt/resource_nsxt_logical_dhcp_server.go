@@ -53,7 +53,7 @@ func resourceNsxtLogicalDhcpServer() *schema.Resource {
 			"gateway_ip": {
 				Type:         schema.TypeString,
 				Description:  "Gateway IP",
-				Required:     true,
+				Optional:     true,
 				ValidateFunc: validateSingleIP(),
 			},
 			"domain_name": {
