@@ -16,12 +16,12 @@ resource "nsxt_policy_lb_virtual_server" "test" {
   display_name               = "test"
   description                = "Terraform provisioned Virtual Server"
   access_log_enabled         = true
-  application_profile_path   = data.nsxt_policy_app_profile.tcp.path
+  application_profile_path   = data.nsxt_policy_lb_app_profile.tcp.path
   enabled                    = true
   ip_address                 = "10.10.10.21"
   ports                      = ["443"]
   default_pool_member_ports  = ["80"]
-  lb_service_path            = nsxt_policy_lb_service.app1.path
+  service_path               = nsxt_policy_lb_service.app1.path
   max_concurrent_connections = 6
   max_new_connection_rate    = 20
   pool_path                  = nsxt_policy_lb_pool.pool1.path
@@ -32,14 +32,14 @@ resource "nsxt_policy_lb_virtual_server" "test" {
     default_certificate_path = data.nsxt_policy_certificate.cert1.path
     ca_paths                 = [data.nsxt_policy_certificate.lb_ca.path]
     certificate_chain_depth  = 3
-    ssl_profile_path         = data.nsxt_policy_client_ssl_profile.lb_profile.path
+    ssl_profile_path         = data.nsxt_policy_lb_client_ssl_profile.lb_profile.path
   }
 
   server_ssl {
     server_auth             = "REQUIRED"
     client_certificate_path = data.nsxt_policy_certificate.client_ca.path
     certificate_chain_depth = 3
-    ssl_profile_path        = data.nsxt_policy_server_ssl_profile.lb_profile.path
+    ssl_profile_path        = data.nsxt_policy_lb_server_ssl_profile.lb_profile.path
   }
 }
 ```

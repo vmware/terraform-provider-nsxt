@@ -26,13 +26,14 @@ resource "nsxt_policy_tier0_gateway" "tier0_gw" {
   edge_cluster_path         = data.nsxt_policy_edge_cluster.EC.path
 
   bgp_config {
-      local_as_num      = "60000"
-      multipath_relax   = false
+      local_as_num    = "60000"
+      multipath_relax = false
 
-      route_aggregation = {
+      route_aggregation {
         prefix = "12.10.10.0/24"
       }
-      route_aggregation = {
+
+      route_aggregation {
         prefix = "12.11.10.0/24"
       }
   }
@@ -42,7 +43,7 @@ resource "nsxt_policy_tier0_gateway" "tier0_gw" {
     route_distinuisher = "ASN:5"
     evpn_transit_vni   = 76001
     route_target {
-      auto_mode       = false
+      auto_mode      = false
       import_targets = ["ASN:1"]
       export_targets = ["ASN:5", "10.2.2.0:3"]
     }
