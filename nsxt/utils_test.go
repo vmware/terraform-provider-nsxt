@@ -5,6 +5,7 @@ package nsxt
 
 import (
 	"fmt"
+	"github.com/vmware/go-vmware-nsxt/common"
 	"github.com/vmware/go-vmware-nsxt/trust"
 	"net/http"
 	"os"
@@ -286,4 +287,47 @@ func testAccNSXDeleteCerts(t *testing.T, certID string, clientCertID string, caC
 
 func testAccNsxtPolicyEmptyTemplate() string {
 	return " "
+}
+
+func TestEqualTags(t *testing.T) {
+
+	type test struct {
+		a    []common.Tag
+		b    []common.Tag
+		want bool
+	}
+	testTagsA := []common.Tag{
+		{Scope: "scope", Tag: "a"},
+		{Scope: "scope", Tag: "b"},
+		{Scope: "scope", Tag: "c"},
+	}
+	testTagsB := []common.Tag{
+		{Scope: "scope", Tag: "c"},
+		{Scope: "scope", Tag: "a"},
+		{Scope: "scope", Tag: "b"},
+	}
+	testTagsC := []common.Tag{
+		{Scope: "scope", Tag: "d"},
+		{Scope: "scope", Tag: "a"},
+		{Scope: "scope", Tag: "b"},
+	}
+	testTagsEmpty := []common.Tag{}
+
+	tests := []test{
+		{a: testTagsA, b: testTagsA, want: true},
+		{a: testTagsA, b: testTagsB, want: true},
+		{a: testTagsEmpty, b: testTagsEmpty, want: true},
+		{a: nil, b: nil, want: true},
+		{a: nil, b: testTagsEmpty, want: true},
+		{a: testTagsA, b: testTagsC, want: false},
+		{a: testTagsA, b: testTagsEmpty, want: false},
+	}
+
+	for _, tc := range tests {
+		got := equalTags(tc.a, tc.b)
+		if got != tc.want {
+			t.Fatalf("Expected '%+v' comparison to '%+v' to return '%v', got '%v'", tc.a, tc.b, tc.want, got)
+		}
+	}
+
 }

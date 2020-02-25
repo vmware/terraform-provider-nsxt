@@ -16,6 +16,7 @@ import (
 	"github.com/vmware/go-vmware-nsxt/manager"
 	"log"
 	"net/http"
+	"sort"
 )
 
 var adminStateValues = []string{"UP", "DOWN"}
@@ -150,6 +151,24 @@ func getTagsFromSchema(d *schema.ResourceData) []common.Tag {
 
 func setTagsInSchema(d *schema.ResourceData, tags []common.Tag) error {
 	return setCustomizedTagsInSchema(d, tags, "tag")
+}
+
+func equalTags(a, b []common.Tag) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	sort.Slice(a, func(p, q int) bool {
+		return a[p].Tag < a[q].Tag
+	})
+	sort.Slice(b, func(p, q int) bool {
+		return b[p].Tag < b[q].Tag
+	})
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
 }
 
 // utilities to define & handle switching profiles

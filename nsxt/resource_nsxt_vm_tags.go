@@ -191,6 +191,10 @@ func updatePortTags(nsxClient *api.APIClient, id string, tags []common.Tag) erro
 	portsUpdated := 0
 
 	for _, port := range ports {
+		if equalTags(tags, port.Tags) {
+			log.Printf("[DEBUG] skipping update since tags are identical for port %s", port.Id)
+			continue
+		}
 		port.Tags = tags
 		log.Printf("[DEBUG] Applying %d tags on logical port %s", len(tags), port.Id)
 		_, resp, err := nsxClient.LogicalSwitchingApi.UpdateLogicalPort(nsxClient.Context, port.Id, port)
