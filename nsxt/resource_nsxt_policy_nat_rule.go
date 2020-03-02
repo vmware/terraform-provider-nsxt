@@ -123,6 +123,7 @@ func resourceNsxtPolicyNATRule() *schema.Resource {
 				Type:        schema.TypeList,
 				Description: "Policy paths to interfaces or labels where the NAT Rule is enforced",
 				Optional:    true,
+				Computed:    true,
 				Elem:        getElemPolicyPathSchema(),
 			},
 		},
