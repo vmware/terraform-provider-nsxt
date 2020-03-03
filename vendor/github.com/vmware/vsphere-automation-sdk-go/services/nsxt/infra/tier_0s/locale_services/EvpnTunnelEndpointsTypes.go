@@ -30,9 +30,11 @@ func evpnTunnelEndpointsDeleteInputType() bindings.StructType {
 	fields["tier0_id"] = bindings.NewStringType()
 	fields["locale_services_id"] = bindings.NewStringType()
 	fields["tunnel_endpoint_id"] = bindings.NewStringType()
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["tier0_id"] = "Tier0Id"
 	fieldNameMap["locale_services_id"] = "LocaleServicesId"
 	fieldNameMap["tunnel_endpoint_id"] = "TunnelEndpointId"
+	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -51,10 +53,13 @@ func evpnTunnelEndpointsDeleteRestMetadata() protocol.OperationRestMetadata {
 	fields["tier0_id"] = bindings.NewStringType()
 	fields["locale_services_id"] = bindings.NewStringType()
 	fields["tunnel_endpoint_id"] = bindings.NewStringType()
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["tier0_id"] = "Tier0Id"
 	fieldNameMap["locale_services_id"] = "LocaleServicesId"
 	fieldNameMap["tunnel_endpoint_id"] = "TunnelEndpointId"
+	fieldNameMap["override"] = "Override"
 	paramsTypeMap["tier0_id"] = bindings.NewStringType()
+	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["tunnel_endpoint_id"] = bindings.NewStringType()
 	paramsTypeMap["locale_services_id"] = bindings.NewStringType()
 	paramsTypeMap["tier0Id"] = bindings.NewStringType()
@@ -63,6 +68,7 @@ func evpnTunnelEndpointsDeleteRestMetadata() protocol.OperationRestMetadata {
 	pathParams["locale_services_id"] = "localeServicesId"
 	pathParams["tier0_id"] = "tier0Id"
 	pathParams["tunnel_endpoint_id"] = "tunnelEndpointId"
+	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -234,10 +240,12 @@ func evpnTunnelEndpointsPatchInputType() bindings.StructType {
 	fields["locale_services_id"] = bindings.NewStringType()
 	fields["tunnel_endpoint_id"] = bindings.NewStringType()
 	fields["evpn_tunnel_endpoint_config"] = bindings.NewReferenceType(model.EvpnTunnelEndpointConfigBindingType)
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["tier0_id"] = "Tier0Id"
 	fieldNameMap["locale_services_id"] = "LocaleServicesId"
 	fieldNameMap["tunnel_endpoint_id"] = "TunnelEndpointId"
 	fieldNameMap["evpn_tunnel_endpoint_config"] = "EvpnTunnelEndpointConfig"
+	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -257,11 +265,14 @@ func evpnTunnelEndpointsPatchRestMetadata() protocol.OperationRestMetadata {
 	fields["locale_services_id"] = bindings.NewStringType()
 	fields["tunnel_endpoint_id"] = bindings.NewStringType()
 	fields["evpn_tunnel_endpoint_config"] = bindings.NewReferenceType(model.EvpnTunnelEndpointConfigBindingType)
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["tier0_id"] = "Tier0Id"
 	fieldNameMap["locale_services_id"] = "LocaleServicesId"
 	fieldNameMap["tunnel_endpoint_id"] = "TunnelEndpointId"
 	fieldNameMap["evpn_tunnel_endpoint_config"] = "EvpnTunnelEndpointConfig"
+	fieldNameMap["override"] = "Override"
 	paramsTypeMap["tier0_id"] = bindings.NewStringType()
+	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["evpn_tunnel_endpoint_config"] = bindings.NewReferenceType(model.EvpnTunnelEndpointConfigBindingType)
 	paramsTypeMap["tunnel_endpoint_id"] = bindings.NewStringType()
 	paramsTypeMap["locale_services_id"] = bindings.NewStringType()
@@ -271,6 +282,7 @@ func evpnTunnelEndpointsPatchRestMetadata() protocol.OperationRestMetadata {
 	pathParams["locale_services_id"] = "localeServicesId"
 	pathParams["tier0_id"] = "tier0Id"
 	pathParams["tunnel_endpoint_id"] = "tunnelEndpointId"
+	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -297,10 +309,12 @@ func evpnTunnelEndpointsUpdateInputType() bindings.StructType {
 	fields["locale_services_id"] = bindings.NewStringType()
 	fields["tunnel_endpoint_id"] = bindings.NewStringType()
 	fields["evpn_tunnel_endpoint_config"] = bindings.NewReferenceType(model.EvpnTunnelEndpointConfigBindingType)
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["tier0_id"] = "Tier0Id"
 	fieldNameMap["locale_services_id"] = "LocaleServicesId"
 	fieldNameMap["tunnel_endpoint_id"] = "TunnelEndpointId"
 	fieldNameMap["evpn_tunnel_endpoint_config"] = "EvpnTunnelEndpointConfig"
+	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -320,11 +334,14 @@ func evpnTunnelEndpointsUpdateRestMetadata() protocol.OperationRestMetadata {
 	fields["locale_services_id"] = bindings.NewStringType()
 	fields["tunnel_endpoint_id"] = bindings.NewStringType()
 	fields["evpn_tunnel_endpoint_config"] = bindings.NewReferenceType(model.EvpnTunnelEndpointConfigBindingType)
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["tier0_id"] = "Tier0Id"
 	fieldNameMap["locale_services_id"] = "LocaleServicesId"
 	fieldNameMap["tunnel_endpoint_id"] = "TunnelEndpointId"
 	fieldNameMap["evpn_tunnel_endpoint_config"] = "EvpnTunnelEndpointConfig"
+	fieldNameMap["override"] = "Override"
 	paramsTypeMap["tier0_id"] = bindings.NewStringType()
+	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["evpn_tunnel_endpoint_config"] = bindings.NewReferenceType(model.EvpnTunnelEndpointConfigBindingType)
 	paramsTypeMap["tunnel_endpoint_id"] = bindings.NewStringType()
 	paramsTypeMap["locale_services_id"] = bindings.NewStringType()
@@ -334,6 +351,7 @@ func evpnTunnelEndpointsUpdateRestMetadata() protocol.OperationRestMetadata {
 	pathParams["locale_services_id"] = "localeServicesId"
 	pathParams["tier0_id"] = "tier0Id"
 	pathParams["tunnel_endpoint_id"] = "tunnelEndpointId"
+	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]string{}
 	return protocol.NewOperationRestMetadata(

@@ -28,7 +28,9 @@ func ipfixCollectorProfilesDeleteInputType() bindings.StructType {
 	fields := make(map[string]bindings.BindingType)
 	fieldNameMap := make(map[string]string)
 	fields["ipfix_collector_profile_id"] = bindings.NewStringType()
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["ipfix_collector_profile_id"] = "IpfixCollectorProfileId"
+	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -45,10 +47,14 @@ func ipfixCollectorProfilesDeleteRestMetadata() protocol.OperationRestMetadata {
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	fields["ipfix_collector_profile_id"] = bindings.NewStringType()
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["ipfix_collector_profile_id"] = "IpfixCollectorProfileId"
+	fieldNameMap["override"] = "Override"
 	paramsTypeMap["ipfix_collector_profile_id"] = bindings.NewStringType()
+	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["ipfixCollectorProfileId"] = bindings.NewStringType()
 	pathParams["ipfix_collector_profile_id"] = "ipfixCollectorProfileId"
+	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -190,8 +196,10 @@ func ipfixCollectorProfilesPatchInputType() bindings.StructType {
 	fieldNameMap := make(map[string]string)
 	fields["ipfix_collector_profile_id"] = bindings.NewStringType()
 	fields["i_PFIX_collector_profile"] = bindings.NewReferenceType(model.IPFIXCollectorProfileBindingType)
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["ipfix_collector_profile_id"] = "IpfixCollectorProfileId"
 	fieldNameMap["i_PFIX_collector_profile"] = "IPFIXCollectorProfile"
+	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -209,12 +217,16 @@ func ipfixCollectorProfilesPatchRestMetadata() protocol.OperationRestMetadata {
 	headerParams := map[string]string{}
 	fields["ipfix_collector_profile_id"] = bindings.NewStringType()
 	fields["i_PFIX_collector_profile"] = bindings.NewReferenceType(model.IPFIXCollectorProfileBindingType)
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["ipfix_collector_profile_id"] = "IpfixCollectorProfileId"
 	fieldNameMap["i_PFIX_collector_profile"] = "IPFIXCollectorProfile"
+	fieldNameMap["override"] = "Override"
 	paramsTypeMap["i_PFIX_collector_profile"] = bindings.NewReferenceType(model.IPFIXCollectorProfileBindingType)
 	paramsTypeMap["ipfix_collector_profile_id"] = bindings.NewStringType()
+	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["ipfixCollectorProfileId"] = bindings.NewStringType()
 	pathParams["ipfix_collector_profile_id"] = "ipfixCollectorProfileId"
+	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -239,8 +251,10 @@ func ipfixCollectorProfilesUpdateInputType() bindings.StructType {
 	fieldNameMap := make(map[string]string)
 	fields["ipfix_collector_profile_id"] = bindings.NewStringType()
 	fields["i_PFIX_collector_profile"] = bindings.NewReferenceType(model.IPFIXCollectorProfileBindingType)
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["ipfix_collector_profile_id"] = "IpfixCollectorProfileId"
 	fieldNameMap["i_PFIX_collector_profile"] = "IPFIXCollectorProfile"
+	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -258,12 +272,16 @@ func ipfixCollectorProfilesUpdateRestMetadata() protocol.OperationRestMetadata {
 	headerParams := map[string]string{}
 	fields["ipfix_collector_profile_id"] = bindings.NewStringType()
 	fields["i_PFIX_collector_profile"] = bindings.NewReferenceType(model.IPFIXCollectorProfileBindingType)
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["ipfix_collector_profile_id"] = "IpfixCollectorProfileId"
 	fieldNameMap["i_PFIX_collector_profile"] = "IPFIXCollectorProfile"
+	fieldNameMap["override"] = "Override"
 	paramsTypeMap["i_PFIX_collector_profile"] = bindings.NewReferenceType(model.IPFIXCollectorProfileBindingType)
 	paramsTypeMap["ipfix_collector_profile_id"] = bindings.NewStringType()
+	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["ipfixCollectorProfileId"] = bindings.NewStringType()
 	pathParams["ipfix_collector_profile_id"] = "ipfixCollectorProfileId"
+	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]string{}
 	return protocol.NewOperationRestMetadata(

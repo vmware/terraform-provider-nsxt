@@ -61,19 +61,22 @@ func NewDefaultIpfixCollectorProfilesClient(connector client.Connector) *Default
 	return &iIface
 }
 
-func (iIface *DefaultIpfixCollectorProfilesClient) Delete(ipfixCollectorProfileIdParam string) error {
+func (iIface *DefaultIpfixCollectorProfilesClient) Delete(ipfixCollectorProfileIdParam string, overrideParam *bool) error {
 	typeConverter := iIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(iIface.interfaceIdentifier, "delete")
 	sv := bindings.NewStructValueBuilder(ipfixCollectorProfilesDeleteInputType(), typeConverter)
 	sv.AddStructField("IpfixCollectorProfileId", ipfixCollectorProfileIdParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
 	}
 	operationRestMetaData := ipfixCollectorProfilesDeleteRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	iIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := iIface.Invoke(iIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := iIface.connector.NewExecutionContext()
+	methodResult := iIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	if methodResult.IsSuccess() {
 		return nil
 	} else {
@@ -97,8 +100,10 @@ func (iIface *DefaultIpfixCollectorProfilesClient) Get(ipfixCollectorProfileIdPa
 	}
 	operationRestMetaData := ipfixCollectorProfilesGetRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	iIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := iIface.Invoke(iIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := iIface.connector.NewExecutionContext()
+	methodResult := iIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	var emptyOutput model.IPFIXCollectorProfile
 	if methodResult.IsSuccess() {
 		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), ipfixCollectorProfilesGetOutputType())
@@ -132,8 +137,10 @@ func (iIface *DefaultIpfixCollectorProfilesClient) List(cursorParam *string, inc
 	}
 	operationRestMetaData := ipfixCollectorProfilesListRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	iIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := iIface.Invoke(iIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := iIface.connector.NewExecutionContext()
+	methodResult := iIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	var emptyOutput model.IPFIXCollectorProfileListResult
 	if methodResult.IsSuccess() {
 		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), ipfixCollectorProfilesListOutputType())
@@ -150,20 +157,23 @@ func (iIface *DefaultIpfixCollectorProfilesClient) List(cursorParam *string, inc
 	}
 }
 
-func (iIface *DefaultIpfixCollectorProfilesClient) Patch(ipfixCollectorProfileIdParam string, iPFIXCollectorProfileParam model.IPFIXCollectorProfile) error {
+func (iIface *DefaultIpfixCollectorProfilesClient) Patch(ipfixCollectorProfileIdParam string, iPFIXCollectorProfileParam model.IPFIXCollectorProfile, overrideParam *bool) error {
 	typeConverter := iIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(iIface.interfaceIdentifier, "patch")
 	sv := bindings.NewStructValueBuilder(ipfixCollectorProfilesPatchInputType(), typeConverter)
 	sv.AddStructField("IpfixCollectorProfileId", ipfixCollectorProfileIdParam)
 	sv.AddStructField("IPFIXCollectorProfile", iPFIXCollectorProfileParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
 	}
 	operationRestMetaData := ipfixCollectorProfilesPatchRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	iIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := iIface.Invoke(iIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := iIface.connector.NewExecutionContext()
+	methodResult := iIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	if methodResult.IsSuccess() {
 		return nil
 	} else {
@@ -175,12 +185,13 @@ func (iIface *DefaultIpfixCollectorProfilesClient) Patch(ipfixCollectorProfileId
 	}
 }
 
-func (iIface *DefaultIpfixCollectorProfilesClient) Update(ipfixCollectorProfileIdParam string, iPFIXCollectorProfileParam model.IPFIXCollectorProfile) (model.IPFIXCollectorProfile, error) {
+func (iIface *DefaultIpfixCollectorProfilesClient) Update(ipfixCollectorProfileIdParam string, iPFIXCollectorProfileParam model.IPFIXCollectorProfile, overrideParam *bool) (model.IPFIXCollectorProfile, error) {
 	typeConverter := iIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(iIface.interfaceIdentifier, "update")
 	sv := bindings.NewStructValueBuilder(ipfixCollectorProfilesUpdateInputType(), typeConverter)
 	sv.AddStructField("IpfixCollectorProfileId", ipfixCollectorProfileIdParam)
 	sv.AddStructField("IPFIXCollectorProfile", iPFIXCollectorProfileParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		var emptyOutput model.IPFIXCollectorProfile
@@ -188,8 +199,10 @@ func (iIface *DefaultIpfixCollectorProfilesClient) Update(ipfixCollectorProfileI
 	}
 	operationRestMetaData := ipfixCollectorProfilesUpdateRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	iIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := iIface.Invoke(iIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := iIface.connector.NewExecutionContext()
+	methodResult := iIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	var emptyOutput model.IPFIXCollectorProfile
 	if methodResult.IsSuccess() {
 		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), ipfixCollectorProfilesUpdateOutputType())

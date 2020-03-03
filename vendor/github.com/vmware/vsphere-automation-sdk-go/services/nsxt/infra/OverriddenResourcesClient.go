@@ -4,26 +4,27 @@
 // Code generated. DO NOT EDIT.
 
 /*
- * Interface file for service: Span
+ * Interface file for service: OverriddenResources
  * Used by client-side stubs.
  */
 
-package tier_1s
+package infra
 
 import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
-type SpanClient interface {
+type OverriddenResourcesClient interface {
 
-    // Get site span for Tier-1 Gateway.
+    // List overridden resources
     //
-    // @param tier1IdParam (required)
-    // @return com.vmware.nsx_policy.model.Sites
+    // @param intentPathParam Global resource path (optional)
+    // @param sitePathParam Site path (optional)
+    // @return com.vmware.nsx_policy.model.OverriddenResourceListResult
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Get(tier1IdParam string) (model.Sites, error)
+	List(intentPathParam *string, sitePathParam *string) (model.OverriddenResourceListResult, error)
 }

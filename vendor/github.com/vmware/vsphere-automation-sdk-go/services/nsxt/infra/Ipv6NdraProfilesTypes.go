@@ -28,7 +28,9 @@ func ipv6NdraProfilesDeleteInputType() bindings.StructType {
 	fields := make(map[string]bindings.BindingType)
 	fieldNameMap := make(map[string]string)
 	fields["ndra_profile_id"] = bindings.NewStringType()
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["ndra_profile_id"] = "NdraProfileId"
+	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -45,10 +47,14 @@ func ipv6NdraProfilesDeleteRestMetadata() protocol.OperationRestMetadata {
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	fields["ndra_profile_id"] = bindings.NewStringType()
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["ndra_profile_id"] = "NdraProfileId"
+	fieldNameMap["override"] = "Override"
 	paramsTypeMap["ndra_profile_id"] = bindings.NewStringType()
+	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["ndraProfileId"] = bindings.NewStringType()
 	pathParams["ndra_profile_id"] = "ndraProfileId"
+	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -190,8 +196,10 @@ func ipv6NdraProfilesPatchInputType() bindings.StructType {
 	fieldNameMap := make(map[string]string)
 	fields["ndra_profile_id"] = bindings.NewStringType()
 	fields["ipv6_ndra_profile"] = bindings.NewReferenceType(model.Ipv6NdraProfileBindingType)
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["ndra_profile_id"] = "NdraProfileId"
 	fieldNameMap["ipv6_ndra_profile"] = "Ipv6NdraProfile"
+	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -209,12 +217,16 @@ func ipv6NdraProfilesPatchRestMetadata() protocol.OperationRestMetadata {
 	headerParams := map[string]string{}
 	fields["ndra_profile_id"] = bindings.NewStringType()
 	fields["ipv6_ndra_profile"] = bindings.NewReferenceType(model.Ipv6NdraProfileBindingType)
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["ndra_profile_id"] = "NdraProfileId"
 	fieldNameMap["ipv6_ndra_profile"] = "Ipv6NdraProfile"
+	fieldNameMap["override"] = "Override"
 	paramsTypeMap["ndra_profile_id"] = bindings.NewStringType()
+	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["ipv6_ndra_profile"] = bindings.NewReferenceType(model.Ipv6NdraProfileBindingType)
 	paramsTypeMap["ndraProfileId"] = bindings.NewStringType()
 	pathParams["ndra_profile_id"] = "ndraProfileId"
+	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -239,8 +251,10 @@ func ipv6NdraProfilesUpdateInputType() bindings.StructType {
 	fieldNameMap := make(map[string]string)
 	fields["ndra_profile_id"] = bindings.NewStringType()
 	fields["ipv6_ndra_profile"] = bindings.NewReferenceType(model.Ipv6NdraProfileBindingType)
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["ndra_profile_id"] = "NdraProfileId"
 	fieldNameMap["ipv6_ndra_profile"] = "Ipv6NdraProfile"
+	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -258,12 +272,16 @@ func ipv6NdraProfilesUpdateRestMetadata() protocol.OperationRestMetadata {
 	headerParams := map[string]string{}
 	fields["ndra_profile_id"] = bindings.NewStringType()
 	fields["ipv6_ndra_profile"] = bindings.NewReferenceType(model.Ipv6NdraProfileBindingType)
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["ndra_profile_id"] = "NdraProfileId"
 	fieldNameMap["ipv6_ndra_profile"] = "Ipv6NdraProfile"
+	fieldNameMap["override"] = "Override"
 	paramsTypeMap["ndra_profile_id"] = bindings.NewStringType()
+	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["ipv6_ndra_profile"] = bindings.NewReferenceType(model.Ipv6NdraProfileBindingType)
 	paramsTypeMap["ndraProfileId"] = bindings.NewStringType()
 	pathParams["ndra_profile_id"] = "ndraProfileId"
+	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]string{}
 	return protocol.NewOperationRestMetadata(

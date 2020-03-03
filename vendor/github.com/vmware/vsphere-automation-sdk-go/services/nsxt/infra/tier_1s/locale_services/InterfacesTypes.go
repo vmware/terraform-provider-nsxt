@@ -30,9 +30,11 @@ func interfacesDeleteInputType() bindings.StructType {
 	fields["tier1_id"] = bindings.NewStringType()
 	fields["locale_services_id"] = bindings.NewStringType()
 	fields["interface_id"] = bindings.NewStringType()
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["tier1_id"] = "Tier1Id"
 	fieldNameMap["locale_services_id"] = "LocaleServicesId"
 	fieldNameMap["interface_id"] = "InterfaceId"
+	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -51,11 +53,14 @@ func interfacesDeleteRestMetadata() protocol.OperationRestMetadata {
 	fields["tier1_id"] = bindings.NewStringType()
 	fields["locale_services_id"] = bindings.NewStringType()
 	fields["interface_id"] = bindings.NewStringType()
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["tier1_id"] = "Tier1Id"
 	fieldNameMap["locale_services_id"] = "LocaleServicesId"
 	fieldNameMap["interface_id"] = "InterfaceId"
+	fieldNameMap["override"] = "Override"
 	paramsTypeMap["interface_id"] = bindings.NewStringType()
 	paramsTypeMap["tier1_id"] = bindings.NewStringType()
+	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["locale_services_id"] = bindings.NewStringType()
 	paramsTypeMap["tier1Id"] = bindings.NewStringType()
 	paramsTypeMap["localeServicesId"] = bindings.NewStringType()
@@ -63,6 +68,7 @@ func interfacesDeleteRestMetadata() protocol.OperationRestMetadata {
 	pathParams["locale_services_id"] = "localeServicesId"
 	pathParams["tier1_id"] = "tier1Id"
 	pathParams["interface_id"] = "interfaceId"
+	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -234,10 +240,12 @@ func interfacesPatchInputType() bindings.StructType {
 	fields["locale_services_id"] = bindings.NewStringType()
 	fields["interface_id"] = bindings.NewStringType()
 	fields["tier1_interface"] = bindings.NewReferenceType(model.Tier1InterfaceBindingType)
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["tier1_id"] = "Tier1Id"
 	fieldNameMap["locale_services_id"] = "LocaleServicesId"
 	fieldNameMap["interface_id"] = "InterfaceId"
 	fieldNameMap["tier1_interface"] = "Tier1Interface"
+	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -257,13 +265,16 @@ func interfacesPatchRestMetadata() protocol.OperationRestMetadata {
 	fields["locale_services_id"] = bindings.NewStringType()
 	fields["interface_id"] = bindings.NewStringType()
 	fields["tier1_interface"] = bindings.NewReferenceType(model.Tier1InterfaceBindingType)
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["tier1_id"] = "Tier1Id"
 	fieldNameMap["locale_services_id"] = "LocaleServicesId"
 	fieldNameMap["interface_id"] = "InterfaceId"
 	fieldNameMap["tier1_interface"] = "Tier1Interface"
+	fieldNameMap["override"] = "Override"
 	paramsTypeMap["interface_id"] = bindings.NewStringType()
 	paramsTypeMap["tier1_interface"] = bindings.NewReferenceType(model.Tier1InterfaceBindingType)
 	paramsTypeMap["tier1_id"] = bindings.NewStringType()
+	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["locale_services_id"] = bindings.NewStringType()
 	paramsTypeMap["tier1Id"] = bindings.NewStringType()
 	paramsTypeMap["localeServicesId"] = bindings.NewStringType()
@@ -271,6 +282,7 @@ func interfacesPatchRestMetadata() protocol.OperationRestMetadata {
 	pathParams["locale_services_id"] = "localeServicesId"
 	pathParams["tier1_id"] = "tier1Id"
 	pathParams["interface_id"] = "interfaceId"
+	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -297,10 +309,12 @@ func interfacesUpdateInputType() bindings.StructType {
 	fields["locale_services_id"] = bindings.NewStringType()
 	fields["interface_id"] = bindings.NewStringType()
 	fields["tier1_interface"] = bindings.NewReferenceType(model.Tier1InterfaceBindingType)
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["tier1_id"] = "Tier1Id"
 	fieldNameMap["locale_services_id"] = "LocaleServicesId"
 	fieldNameMap["interface_id"] = "InterfaceId"
 	fieldNameMap["tier1_interface"] = "Tier1Interface"
+	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -320,13 +334,16 @@ func interfacesUpdateRestMetadata() protocol.OperationRestMetadata {
 	fields["locale_services_id"] = bindings.NewStringType()
 	fields["interface_id"] = bindings.NewStringType()
 	fields["tier1_interface"] = bindings.NewReferenceType(model.Tier1InterfaceBindingType)
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["tier1_id"] = "Tier1Id"
 	fieldNameMap["locale_services_id"] = "LocaleServicesId"
 	fieldNameMap["interface_id"] = "InterfaceId"
 	fieldNameMap["tier1_interface"] = "Tier1Interface"
+	fieldNameMap["override"] = "Override"
 	paramsTypeMap["interface_id"] = bindings.NewStringType()
 	paramsTypeMap["tier1_interface"] = bindings.NewReferenceType(model.Tier1InterfaceBindingType)
 	paramsTypeMap["tier1_id"] = bindings.NewStringType()
+	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["locale_services_id"] = bindings.NewStringType()
 	paramsTypeMap["tier1Id"] = bindings.NewStringType()
 	paramsTypeMap["localeServicesId"] = bindings.NewStringType()
@@ -334,6 +351,7 @@ func interfacesUpdateRestMetadata() protocol.OperationRestMetadata {
 	pathParams["locale_services_id"] = "localeServicesId"
 	pathParams["tier1_id"] = "tier1Id"
 	pathParams["interface_id"] = "interfaceId"
+	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]string{}
 	return protocol.NewOperationRestMetadata(

@@ -111,7 +111,7 @@ func resourceNsxtPolicyTier1GatewayInterfaceCreate(d *schema.ResourceData, m int
 
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating tier1 interface with ID %s", id)
-	err = client.Patch(tier1ID, localeServiceID, id, obj)
+	err = client.Patch(tier1ID, localeServiceID, id, obj, nil)
 	if err != nil {
 		return handleCreateError("Tier1 Interface", id, err)
 	}
@@ -200,7 +200,7 @@ func resourceNsxtPolicyTier1GatewayInterfaceUpdate(d *schema.ResourceData, m int
 		obj.Mtu = &mtu
 	}
 
-	_, err := client.Update(tier1ID, defaultPolicyLocaleServiceID, id, obj)
+	_, err := client.Update(tier1ID, defaultPolicyLocaleServiceID, id, obj, nil)
 	if err != nil {
 		return handleUpdateError("Tier1 Interface", id, err)
 	}
@@ -219,7 +219,7 @@ func resourceNsxtPolicyTier1GatewayInterfaceDelete(d *schema.ResourceData, m int
 		return fmt.Errorf("Error obtaining Tier1 Interface id")
 	}
 
-	err := client.Delete(tier1ID, defaultPolicyLocaleServiceID, id)
+	err := client.Delete(tier1ID, defaultPolicyLocaleServiceID, id, nil)
 	if err != nil {
 		return handleDeleteError("Tier1 Interface", id, err)
 	}

@@ -16,7 +16,7 @@ import (
 
 type TagsClient interface {
 
-    // Paginated list of all unique tags. Supports filtering on scope, tag and source from which tags are synched. Supports starts with, equals and contains search on scope and tag values specified using wild card (\"\*\").
+    // Returns paginated list of all unique tags. Supports filtering by scope, tag and source from which tags are synched. Supports starts with, equals and contains operators on scope and tag values. To filter tags by starts with on scope or tag, use '\*' as prefix before the value. To filter tags by ends with on scope or tag, use '\*' as suffix after the value. To filter tags by contain on scope or tag, use '\*' as prefix and suffix on the value. Below special characters in the filter value needs to be escaped with hex values. - Character '&' needs to be escaped as '%26' - Character '[' needs to be escaped as '%5B' - Character ']' needs to be escaped as '%5D' - Character '+' needs to be escaped as '%2B' - Character '#' needs to be escaped as '%23'
     //
     // @param cursorParam Opaque cursor to be used for getting next page of records (supplied by current result page) (optional)
     // @param includeMarkForDeleteObjectsParam Include objects that are marked for deletion in results (optional, default to false)

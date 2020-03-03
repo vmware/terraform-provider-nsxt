@@ -21,12 +21,13 @@ type ServiceInterfacesClient interface {
     // @param tier0IdParam (required)
     // @param localeServiceIdParam (required)
     // @param interfaceIdParam (required)
+    // @param overrideParam Locally override the global object (optional, default to false)
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Delete(tier0IdParam string, localeServiceIdParam string, interfaceIdParam string) error
+	Delete(tier0IdParam string, localeServiceIdParam string, interfaceIdParam string, overrideParam *bool) error
 
     // Read service interface
     //
@@ -65,12 +66,13 @@ type ServiceInterfacesClient interface {
     // @param localeServiceIdParam (required)
     // @param interfaceIdParam (required)
     // @param serviceInterfaceParam (required)
+    // @param overrideParam Locally override the global object (optional, default to false)
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Patch(tier0IdParam string, localeServiceIdParam string, interfaceIdParam string, serviceInterfaceParam model.ServiceInterface) error
+	Patch(tier0IdParam string, localeServiceIdParam string, interfaceIdParam string, serviceInterfaceParam model.ServiceInterface, overrideParam *bool) error
 
     // If an interface with the interface-id is not already present, create a new interface. Modification of service interface is not allowed.
     //
@@ -78,11 +80,12 @@ type ServiceInterfacesClient interface {
     // @param localeServiceIdParam (required)
     // @param interfaceIdParam (required)
     // @param serviceInterfaceParam (required)
+    // @param overrideParam Locally override the global object (optional, default to false)
     // @return com.vmware.nsx_policy.model.ServiceInterface
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Update(tier0IdParam string, localeServiceIdParam string, interfaceIdParam string, serviceInterfaceParam model.ServiceInterface) (model.ServiceInterface, error)
+	Update(tier0IdParam string, localeServiceIdParam string, interfaceIdParam string, serviceInterfaceParam model.ServiceInterface, overrideParam *bool) (model.ServiceInterface, error)
 }

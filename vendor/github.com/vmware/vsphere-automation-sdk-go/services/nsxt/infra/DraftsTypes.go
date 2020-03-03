@@ -24,50 +24,6 @@ import (
 
 
 
-func draftsAbortInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
-	fieldNameMap := make(map[string]string)
-	fields["draft_id"] = bindings.NewStringType()
-	fieldNameMap["draft_id"] = "DraftId"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
-}
-
-func draftsAbortOutputType() bindings.BindingType {
-	return bindings.NewVoidType()
-}
-
-func draftsAbortRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
-	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
-	pathParams := map[string]string{}
-	queryParams := map[string]string{}
-	headerParams := map[string]string{}
-	fields["draft_id"] = bindings.NewStringType()
-	fieldNameMap["draft_id"] = "DraftId"
-	paramsTypeMap["draft_id"] = bindings.NewStringType()
-	paramsTypeMap["draftId"] = bindings.NewStringType()
-	pathParams["draft_id"] = "draftId"
-	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
-	return protocol.NewOperationRestMetadata(
-		fields,
-		fieldNameMap,
-		paramsTypeMap,
-		pathParams,
-		queryParams,
-		headerParams,
-		"action=abort",
-		"",
-		"POST",
-		"/policy/api/v1/infra/drafts/{draftId}",
-		resultHeaders,
-		204,
-		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
-}
-
 func draftsDeleteInputType() bindings.StructType {
 	fields := make(map[string]bindings.BindingType)
 	fieldNameMap := make(map[string]string)

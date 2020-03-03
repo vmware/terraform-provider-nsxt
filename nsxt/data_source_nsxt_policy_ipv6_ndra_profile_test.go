@@ -61,7 +61,7 @@ func testAccDataSourceNsxtPolicyIpv6NdraProfileCreate(name string) error {
 	// Generate a random ID for the resource
 	id := newUUID()
 
-	err = client.Patch(id, obj)
+	err = client.Patch(id, obj, nil)
 	if err != nil {
 		return handleCreateError("Ipv6NdraProfile", id, err)
 	}
@@ -82,7 +82,7 @@ func testAccDataSourceNsxtPolicyIpv6NdraProfileDeleteByName(name string) error {
 	}
 	for _, objInList := range objList.Results {
 		if *objInList.DisplayName == name {
-			err := client.Delete(*objInList.Id)
+			err := client.Delete(*objInList.Id, nil)
 			if err != nil {
 				return fmt.Errorf("Error during Ipv6NdraProfile deletion: %v", err)
 			}

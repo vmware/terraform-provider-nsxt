@@ -16,16 +16,6 @@ import (
 
 type DraftsClient interface {
 
-    // If there is a failure during publish, the admin can choose to abort the publishing attempts. This will bring back the system to the current configuration, i.e just before the publish was invoked. If draft publishing is not in progress or already completed, then this is a NO-OP
-    //
-    // @param draftIdParam (required)
-    // @throws InvalidRequest  Bad Request, Precondition Failed
-    // @throws Unauthorized  Forbidden
-    // @throws ServiceUnavailable  Service Unavailable
-    // @throws InternalServerError  Internal Server Error
-    // @throws NotFound  Not Found
-	Abort(draftIdParam string) error
-
     // Delete a manual draft.
     //
     // @param draftIdParam (required)

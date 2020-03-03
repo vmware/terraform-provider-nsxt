@@ -61,19 +61,22 @@ func NewDefaultIpfixDfwProfilesClient(connector client.Connector) *DefaultIpfixD
 	return &iIface
 }
 
-func (iIface *DefaultIpfixDfwProfilesClient) Delete(ipfixDfwProfileIdParam string) error {
+func (iIface *DefaultIpfixDfwProfilesClient) Delete(ipfixDfwProfileIdParam string, overrideParam *bool) error {
 	typeConverter := iIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(iIface.interfaceIdentifier, "delete")
 	sv := bindings.NewStructValueBuilder(ipfixDfwProfilesDeleteInputType(), typeConverter)
 	sv.AddStructField("IpfixDfwProfileId", ipfixDfwProfileIdParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
 	}
 	operationRestMetaData := ipfixDfwProfilesDeleteRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	iIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := iIface.Invoke(iIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := iIface.connector.NewExecutionContext()
+	methodResult := iIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	if methodResult.IsSuccess() {
 		return nil
 	} else {
@@ -97,8 +100,10 @@ func (iIface *DefaultIpfixDfwProfilesClient) Get(ipfixDfwProfileIdParam string) 
 	}
 	operationRestMetaData := ipfixDfwProfilesGetRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	iIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := iIface.Invoke(iIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := iIface.connector.NewExecutionContext()
+	methodResult := iIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	var emptyOutput model.IPFIXDFWProfile
 	if methodResult.IsSuccess() {
 		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), ipfixDfwProfilesGetOutputType())
@@ -132,8 +137,10 @@ func (iIface *DefaultIpfixDfwProfilesClient) List(cursorParam *string, includeMa
 	}
 	operationRestMetaData := ipfixDfwProfilesListRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	iIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := iIface.Invoke(iIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := iIface.connector.NewExecutionContext()
+	methodResult := iIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	var emptyOutput model.IPFIXDFWProfileListResult
 	if methodResult.IsSuccess() {
 		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), ipfixDfwProfilesListOutputType())
@@ -150,20 +157,23 @@ func (iIface *DefaultIpfixDfwProfilesClient) List(cursorParam *string, includeMa
 	}
 }
 
-func (iIface *DefaultIpfixDfwProfilesClient) Patch(ipfixDfwProfileIdParam string, iPFIXDFWProfileParam model.IPFIXDFWProfile) error {
+func (iIface *DefaultIpfixDfwProfilesClient) Patch(ipfixDfwProfileIdParam string, iPFIXDFWProfileParam model.IPFIXDFWProfile, overrideParam *bool) error {
 	typeConverter := iIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(iIface.interfaceIdentifier, "patch")
 	sv := bindings.NewStructValueBuilder(ipfixDfwProfilesPatchInputType(), typeConverter)
 	sv.AddStructField("IpfixDfwProfileId", ipfixDfwProfileIdParam)
 	sv.AddStructField("IPFIXDFWProfile", iPFIXDFWProfileParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
 	}
 	operationRestMetaData := ipfixDfwProfilesPatchRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	iIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := iIface.Invoke(iIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := iIface.connector.NewExecutionContext()
+	methodResult := iIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	if methodResult.IsSuccess() {
 		return nil
 	} else {
@@ -175,12 +185,13 @@ func (iIface *DefaultIpfixDfwProfilesClient) Patch(ipfixDfwProfileIdParam string
 	}
 }
 
-func (iIface *DefaultIpfixDfwProfilesClient) Update(ipfixDfwProfileIdParam string, iPFIXDFWProfileParam model.IPFIXDFWProfile) (model.IPFIXDFWProfile, error) {
+func (iIface *DefaultIpfixDfwProfilesClient) Update(ipfixDfwProfileIdParam string, iPFIXDFWProfileParam model.IPFIXDFWProfile, overrideParam *bool) (model.IPFIXDFWProfile, error) {
 	typeConverter := iIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(iIface.interfaceIdentifier, "update")
 	sv := bindings.NewStructValueBuilder(ipfixDfwProfilesUpdateInputType(), typeConverter)
 	sv.AddStructField("IpfixDfwProfileId", ipfixDfwProfileIdParam)
 	sv.AddStructField("IPFIXDFWProfile", iPFIXDFWProfileParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		var emptyOutput model.IPFIXDFWProfile
@@ -188,8 +199,10 @@ func (iIface *DefaultIpfixDfwProfilesClient) Update(ipfixDfwProfileIdParam strin
 	}
 	operationRestMetaData := ipfixDfwProfilesUpdateRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	iIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := iIface.Invoke(iIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := iIface.connector.NewExecutionContext()
+	methodResult := iIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	var emptyOutput model.IPFIXDFWProfile
 	if methodResult.IsSuccess() {
 		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), ipfixDfwProfilesUpdateOutputType())

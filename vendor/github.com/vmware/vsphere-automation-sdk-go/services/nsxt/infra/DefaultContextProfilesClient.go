@@ -61,20 +61,23 @@ func NewDefaultContextProfilesClient(connector client.Connector) *DefaultContext
 	return &cIface
 }
 
-func (cIface *DefaultContextProfilesClient) Delete(contextProfileIdParam string, forceParam *bool) error {
+func (cIface *DefaultContextProfilesClient) Delete(contextProfileIdParam string, forceParam *bool, overrideParam *bool) error {
 	typeConverter := cIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(cIface.interfaceIdentifier, "delete")
 	sv := bindings.NewStructValueBuilder(contextProfilesDeleteInputType(), typeConverter)
 	sv.AddStructField("ContextProfileId", contextProfileIdParam)
 	sv.AddStructField("Force", forceParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
 	}
 	operationRestMetaData := contextProfilesDeleteRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	cIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := cIface.Invoke(cIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := cIface.connector.NewExecutionContext()
+	methodResult := cIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	if methodResult.IsSuccess() {
 		return nil
 	} else {
@@ -98,8 +101,10 @@ func (cIface *DefaultContextProfilesClient) Get(contextProfileIdParam string) (m
 	}
 	operationRestMetaData := contextProfilesGetRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	cIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := cIface.Invoke(cIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := cIface.connector.NewExecutionContext()
+	methodResult := cIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	var emptyOutput model.PolicyContextProfile
 	if methodResult.IsSuccess() {
 		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), contextProfilesGetOutputType())
@@ -133,8 +138,10 @@ func (cIface *DefaultContextProfilesClient) List(cursorParam *string, includeMar
 	}
 	operationRestMetaData := contextProfilesListRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	cIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := cIface.Invoke(cIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := cIface.connector.NewExecutionContext()
+	methodResult := cIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	var emptyOutput model.PolicyContextProfileListResult
 	if methodResult.IsSuccess() {
 		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), contextProfilesListOutputType())
@@ -151,20 +158,23 @@ func (cIface *DefaultContextProfilesClient) List(cursorParam *string, includeMar
 	}
 }
 
-func (cIface *DefaultContextProfilesClient) Patch(contextProfileIdParam string, policyContextProfileParam model.PolicyContextProfile) error {
+func (cIface *DefaultContextProfilesClient) Patch(contextProfileIdParam string, policyContextProfileParam model.PolicyContextProfile, overrideParam *bool) error {
 	typeConverter := cIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(cIface.interfaceIdentifier, "patch")
 	sv := bindings.NewStructValueBuilder(contextProfilesPatchInputType(), typeConverter)
 	sv.AddStructField("ContextProfileId", contextProfileIdParam)
 	sv.AddStructField("PolicyContextProfile", policyContextProfileParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
 	}
 	operationRestMetaData := contextProfilesPatchRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	cIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := cIface.Invoke(cIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := cIface.connector.NewExecutionContext()
+	methodResult := cIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	if methodResult.IsSuccess() {
 		return nil
 	} else {
@@ -176,12 +186,13 @@ func (cIface *DefaultContextProfilesClient) Patch(contextProfileIdParam string, 
 	}
 }
 
-func (cIface *DefaultContextProfilesClient) Update(contextProfileIdParam string, policyContextProfileParam model.PolicyContextProfile) (model.PolicyContextProfile, error) {
+func (cIface *DefaultContextProfilesClient) Update(contextProfileIdParam string, policyContextProfileParam model.PolicyContextProfile, overrideParam *bool) (model.PolicyContextProfile, error) {
 	typeConverter := cIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(cIface.interfaceIdentifier, "update")
 	sv := bindings.NewStructValueBuilder(contextProfilesUpdateInputType(), typeConverter)
 	sv.AddStructField("ContextProfileId", contextProfileIdParam)
 	sv.AddStructField("PolicyContextProfile", policyContextProfileParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		var emptyOutput model.PolicyContextProfile
@@ -189,8 +200,10 @@ func (cIface *DefaultContextProfilesClient) Update(contextProfileIdParam string,
 	}
 	operationRestMetaData := contextProfilesUpdateRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	cIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := cIface.Invoke(cIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := cIface.connector.NewExecutionContext()
+	methodResult := cIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	var emptyOutput model.PolicyContextProfile
 	if methodResult.IsSuccess() {
 		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), contextProfilesUpdateOutputType())

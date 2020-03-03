@@ -34,7 +34,7 @@ func spanGetInputType() bindings.StructType {
 }
 
 func spanGetOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.SitesBindingType)
+	return bindings.NewReferenceType(model.SpanBindingType)
 }
 
 func spanGetRestMetadata() protocol.OperationRestMetadata {

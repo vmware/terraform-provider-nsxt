@@ -5,8 +5,8 @@
 // Code generated. DO NOT EDIT.
 
 /*
- * Client stubs for service: BfdConfigs
- * Functions that implement the generated BfdConfigsClient interface
+ * Client stubs for service: BfdProfiles
+ * Functions that implement the generated BfdProfilesClient interface
  */
 
 
@@ -23,7 +23,7 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 )
 
-type DefaultBfdConfigsClient struct {
+type DefaultBfdProfilesClient struct {
 	interfaceName       string
 	interfaceDefinition core.InterfaceDefinition
 	methodIdentifiers   []core.MethodIdentifier
@@ -33,8 +33,8 @@ type DefaultBfdConfigsClient struct {
 	connector           client.Connector
 }
 
-func NewDefaultBfdConfigsClient(connector client.Connector) *DefaultBfdConfigsClient {
-	interfaceName := "com.vmware.nsx_policy.infra.bfd_configs"
+func NewDefaultBfdProfilesClient(connector client.Connector) *DefaultBfdProfilesClient {
+	interfaceName := "com.vmware.nsx_policy.infra.bfd_profiles"
 	interfaceIdentifier := core.NewInterfaceIdentifier(interfaceName)
 	methodIdentifiers := []core.MethodIdentifier{
 		core.NewMethodIdentifier(interfaceIdentifier, "delete"),
@@ -51,7 +51,7 @@ func NewDefaultBfdConfigsClient(connector client.Connector) *DefaultBfdConfigsCl
 	errorBindingMap[errors.UnexpectedInput{}.Error()] = errors.UnexpectedInputBindingType()
 	errorBindingMap[errors.ServiceUnavailable{}.Error()] = errors.ServiceUnavailableBindingType()
 	errorBindingMap[errors.TimedOut{}.Error()] = errors.TimedOutBindingType()
-	bIface := DefaultBfdConfigsClient{interfaceName: interfaceName, methodIdentifiers: methodIdentifiers, interfaceDefinition: interfaceDefinition, errorBindingMap: errorBindingMap, interfaceIdentifier: interfaceIdentifier, connector: connector}
+	bIface := DefaultBfdProfilesClient{interfaceName: interfaceName, methodIdentifiers: methodIdentifiers, interfaceDefinition: interfaceDefinition, errorBindingMap: errorBindingMap, interfaceIdentifier: interfaceIdentifier, connector: connector}
 	bIface.methodNameToDefMap = make(map[string]*core.MethodDefinition)
 	bIface.methodNameToDefMap["delete"] = bIface.deleteMethodDefinition()
 	bIface.methodNameToDefMap["get"] = bIface.getMethodDefinition()
@@ -61,19 +61,21 @@ func NewDefaultBfdConfigsClient(connector client.Connector) *DefaultBfdConfigsCl
 	return &bIface
 }
 
-func (bIface *DefaultBfdConfigsClient) Delete(bfdConfigIdParam string) error {
+func (bIface *DefaultBfdProfilesClient) Delete(bfdProfileIdParam string) error {
 	typeConverter := bIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(bIface.interfaceIdentifier, "delete")
-	sv := bindings.NewStructValueBuilder(bfdConfigsDeleteInputType(), typeConverter)
-	sv.AddStructField("BfdConfigId", bfdConfigIdParam)
+	sv := bindings.NewStructValueBuilder(bfdProfilesDeleteInputType(), typeConverter)
+	sv.AddStructField("BfdProfileId", bfdProfileIdParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
 	}
-	operationRestMetaData := bfdConfigsDeleteRestMetadata()
+	operationRestMetaData := bfdProfilesDeleteRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	bIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := bIface.Invoke(bIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := bIface.connector.NewExecutionContext()
+	methodResult := bIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	if methodResult.IsSuccess() {
 		return nil
 	} else {
@@ -85,27 +87,29 @@ func (bIface *DefaultBfdConfigsClient) Delete(bfdConfigIdParam string) error {
 	}
 }
 
-func (bIface *DefaultBfdConfigsClient) Get(bfdConfigIdParam string) (model.BfdConfiguration, error) {
+func (bIface *DefaultBfdProfilesClient) Get(bfdProfileIdParam string) (model.BfdProfile, error) {
 	typeConverter := bIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(bIface.interfaceIdentifier, "get")
-	sv := bindings.NewStructValueBuilder(bfdConfigsGetInputType(), typeConverter)
-	sv.AddStructField("BfdConfigId", bfdConfigIdParam)
+	sv := bindings.NewStructValueBuilder(bfdProfilesGetInputType(), typeConverter)
+	sv.AddStructField("BfdProfileId", bfdProfileIdParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
-		var emptyOutput model.BfdConfiguration
+		var emptyOutput model.BfdProfile
 		return emptyOutput, bindings.VAPIerrorsToError(inputError)
 	}
-	operationRestMetaData := bfdConfigsGetRestMetadata()
+	operationRestMetaData := bfdProfilesGetRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	bIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := bIface.Invoke(bIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
-	var emptyOutput model.BfdConfiguration
+	executionContext := bIface.connector.NewExecutionContext()
+	methodResult := bIface.Invoke(executionContext, methodIdentifier, inputDataValue)
+	var emptyOutput model.BfdProfile
 	if methodResult.IsSuccess() {
-		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), bfdConfigsGetOutputType())
+		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), bfdProfilesGetOutputType())
 		if errorInOutput != nil {
 			return emptyOutput, bindings.VAPIerrorsToError(errorInOutput)
 		}
-		return output.(model.BfdConfiguration), nil
+		return output.(model.BfdProfile), nil
 	} else {
 		methodError, errorInError := typeConverter.ConvertToGolang(methodResult.Error(), bIface.errorBindingMap[methodResult.Error().Name()])
 		if errorInError != nil {
@@ -115,10 +119,10 @@ func (bIface *DefaultBfdConfigsClient) Get(bfdConfigIdParam string) (model.BfdCo
 	}
 }
 
-func (bIface *DefaultBfdConfigsClient) List(cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.BfdConfigurationListResult, error) {
+func (bIface *DefaultBfdProfilesClient) List(cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.BfdProfileListResult, error) {
 	typeConverter := bIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(bIface.interfaceIdentifier, "list")
-	sv := bindings.NewStructValueBuilder(bfdConfigsListInputType(), typeConverter)
+	sv := bindings.NewStructValueBuilder(bfdProfilesListInputType(), typeConverter)
 	sv.AddStructField("Cursor", cursorParam)
 	sv.AddStructField("IncludeMarkForDeleteObjects", includeMarkForDeleteObjectsParam)
 	sv.AddStructField("IncludedFields", includedFieldsParam)
@@ -127,20 +131,22 @@ func (bIface *DefaultBfdConfigsClient) List(cursorParam *string, includeMarkForD
 	sv.AddStructField("SortBy", sortByParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
-		var emptyOutput model.BfdConfigurationListResult
+		var emptyOutput model.BfdProfileListResult
 		return emptyOutput, bindings.VAPIerrorsToError(inputError)
 	}
-	operationRestMetaData := bfdConfigsListRestMetadata()
+	operationRestMetaData := bfdProfilesListRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	bIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := bIface.Invoke(bIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
-	var emptyOutput model.BfdConfigurationListResult
+	executionContext := bIface.connector.NewExecutionContext()
+	methodResult := bIface.Invoke(executionContext, methodIdentifier, inputDataValue)
+	var emptyOutput model.BfdProfileListResult
 	if methodResult.IsSuccess() {
-		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), bfdConfigsListOutputType())
+		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), bfdProfilesListOutputType())
 		if errorInOutput != nil {
 			return emptyOutput, bindings.VAPIerrorsToError(errorInOutput)
 		}
-		return output.(model.BfdConfigurationListResult), nil
+		return output.(model.BfdProfileListResult), nil
 	} else {
 		methodError, errorInError := typeConverter.ConvertToGolang(methodResult.Error(), bIface.errorBindingMap[methodResult.Error().Name()])
 		if errorInError != nil {
@@ -150,20 +156,22 @@ func (bIface *DefaultBfdConfigsClient) List(cursorParam *string, includeMarkForD
 	}
 }
 
-func (bIface *DefaultBfdConfigsClient) Patch(bfdConfigIdParam string, bfdConfigurationParam model.BfdConfiguration) error {
+func (bIface *DefaultBfdProfilesClient) Patch(bfdProfileIdParam string, bfdProfileParam model.BfdProfile) error {
 	typeConverter := bIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(bIface.interfaceIdentifier, "patch")
-	sv := bindings.NewStructValueBuilder(bfdConfigsPatchInputType(), typeConverter)
-	sv.AddStructField("BfdConfigId", bfdConfigIdParam)
-	sv.AddStructField("BfdConfiguration", bfdConfigurationParam)
+	sv := bindings.NewStructValueBuilder(bfdProfilesPatchInputType(), typeConverter)
+	sv.AddStructField("BfdProfileId", bfdProfileIdParam)
+	sv.AddStructField("BfdProfile", bfdProfileParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
 	}
-	operationRestMetaData := bfdConfigsPatchRestMetadata()
+	operationRestMetaData := bfdProfilesPatchRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	bIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := bIface.Invoke(bIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := bIface.connector.NewExecutionContext()
+	methodResult := bIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	if methodResult.IsSuccess() {
 		return nil
 	} else {
@@ -175,28 +183,30 @@ func (bIface *DefaultBfdConfigsClient) Patch(bfdConfigIdParam string, bfdConfigu
 	}
 }
 
-func (bIface *DefaultBfdConfigsClient) Update(bfdConfigIdParam string, bfdConfigurationParam model.BfdConfiguration) (model.BfdConfiguration, error) {
+func (bIface *DefaultBfdProfilesClient) Update(bfdProfileIdParam string, bfdProfileParam model.BfdProfile) (model.BfdProfile, error) {
 	typeConverter := bIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(bIface.interfaceIdentifier, "update")
-	sv := bindings.NewStructValueBuilder(bfdConfigsUpdateInputType(), typeConverter)
-	sv.AddStructField("BfdConfigId", bfdConfigIdParam)
-	sv.AddStructField("BfdConfiguration", bfdConfigurationParam)
+	sv := bindings.NewStructValueBuilder(bfdProfilesUpdateInputType(), typeConverter)
+	sv.AddStructField("BfdProfileId", bfdProfileIdParam)
+	sv.AddStructField("BfdProfile", bfdProfileParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
-		var emptyOutput model.BfdConfiguration
+		var emptyOutput model.BfdProfile
 		return emptyOutput, bindings.VAPIerrorsToError(inputError)
 	}
-	operationRestMetaData := bfdConfigsUpdateRestMetadata()
+	operationRestMetaData := bfdProfilesUpdateRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	bIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := bIface.Invoke(bIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
-	var emptyOutput model.BfdConfiguration
+	executionContext := bIface.connector.NewExecutionContext()
+	methodResult := bIface.Invoke(executionContext, methodIdentifier, inputDataValue)
+	var emptyOutput model.BfdProfile
 	if methodResult.IsSuccess() {
-		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), bfdConfigsUpdateOutputType())
+		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), bfdProfilesUpdateOutputType())
 		if errorInOutput != nil {
 			return emptyOutput, bindings.VAPIerrorsToError(errorInOutput)
 		}
-		return output.(model.BfdConfiguration), nil
+		return output.(model.BfdProfile), nil
 	} else {
 		methodError, errorInError := typeConverter.ConvertToGolang(methodResult.Error(), bIface.errorBindingMap[methodResult.Error().Name()])
 		if errorInError != nil {
@@ -207,25 +217,25 @@ func (bIface *DefaultBfdConfigsClient) Update(bfdConfigIdParam string, bfdConfig
 }
 
 
-func (bIface *DefaultBfdConfigsClient) Invoke(ctx *core.ExecutionContext, methodId core.MethodIdentifier, inputDataValue data.DataValue) core.MethodResult {
+func (bIface *DefaultBfdProfilesClient) Invoke(ctx *core.ExecutionContext, methodId core.MethodIdentifier, inputDataValue data.DataValue) core.MethodResult {
 	methodResult := bIface.connector.GetApiProvider().Invoke(bIface.interfaceName, methodId.Name(), inputDataValue, ctx)
 	return methodResult
 }
 
 
-func (bIface *DefaultBfdConfigsClient) deleteMethodDefinition() *core.MethodDefinition {
+func (bIface *DefaultBfdProfilesClient) deleteMethodDefinition() *core.MethodDefinition {
 	interfaceIdentifier := core.NewInterfaceIdentifier(bIface.interfaceName)
 	typeConverter := bIface.connector.TypeConverter()
 
-	input, inputError := typeConverter.ConvertToDataDefinition(bfdConfigsDeleteInputType())
-	output, outputError := typeConverter.ConvertToDataDefinition(bfdConfigsDeleteOutputType())
+	input, inputError := typeConverter.ConvertToDataDefinition(bfdProfilesDeleteInputType())
+	output, outputError := typeConverter.ConvertToDataDefinition(bfdProfilesDeleteOutputType())
 	if inputError != nil {
-		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdConfigsClient.delete method's input - %s",
+		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdProfilesClient.delete method's input - %s",
 			bindings.VAPIerrorsToError(inputError).Error())
 		return nil
 	}
 	if outputError != nil {
-		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdConfigsClient.delete method's output - %s",
+		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdProfilesClient.delete method's output - %s",
 			bindings.VAPIerrorsToError(outputError).Error())
 		return nil
 	}
@@ -234,7 +244,7 @@ func (bIface *DefaultBfdConfigsClient) deleteMethodDefinition() *core.MethodDefi
 	bIface.errorBindingMap[errors.InvalidRequest{}.Error()] = errors.InvalidRequestBindingType()
 	errDef1, errError1 := typeConverter.ConvertToDataDefinition(errors.InvalidRequestBindingType())
 	if errError1 != nil {
-		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdConfigsClient.delete method's errors.InvalidRequest error - %s",
+		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdProfilesClient.delete method's errors.InvalidRequest error - %s",
 			bindings.VAPIerrorsToError(errError1).Error())
 		return nil
 	}
@@ -242,7 +252,7 @@ func (bIface *DefaultBfdConfigsClient) deleteMethodDefinition() *core.MethodDefi
 	bIface.errorBindingMap[errors.Unauthorized{}.Error()] = errors.UnauthorizedBindingType()
 	errDef2, errError2 := typeConverter.ConvertToDataDefinition(errors.UnauthorizedBindingType())
 	if errError2 != nil {
-		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdConfigsClient.delete method's errors.Unauthorized error - %s",
+		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdProfilesClient.delete method's errors.Unauthorized error - %s",
 			bindings.VAPIerrorsToError(errError2).Error())
 		return nil
 	}
@@ -250,7 +260,7 @@ func (bIface *DefaultBfdConfigsClient) deleteMethodDefinition() *core.MethodDefi
 	bIface.errorBindingMap[errors.ServiceUnavailable{}.Error()] = errors.ServiceUnavailableBindingType()
 	errDef3, errError3 := typeConverter.ConvertToDataDefinition(errors.ServiceUnavailableBindingType())
 	if errError3 != nil {
-		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdConfigsClient.delete method's errors.ServiceUnavailable error - %s",
+		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdProfilesClient.delete method's errors.ServiceUnavailable error - %s",
 			bindings.VAPIerrorsToError(errError3).Error())
 		return nil
 	}
@@ -258,7 +268,7 @@ func (bIface *DefaultBfdConfigsClient) deleteMethodDefinition() *core.MethodDefi
 	bIface.errorBindingMap[errors.InternalServerError{}.Error()] = errors.InternalServerErrorBindingType()
 	errDef4, errError4 := typeConverter.ConvertToDataDefinition(errors.InternalServerErrorBindingType())
 	if errError4 != nil {
-		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdConfigsClient.delete method's errors.InternalServerError error - %s",
+		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdProfilesClient.delete method's errors.InternalServerError error - %s",
 			bindings.VAPIerrorsToError(errError4).Error())
 		return nil
 	}
@@ -266,7 +276,7 @@ func (bIface *DefaultBfdConfigsClient) deleteMethodDefinition() *core.MethodDefi
 	bIface.errorBindingMap[errors.NotFound{}.Error()] = errors.NotFoundBindingType()
 	errDef5, errError5 := typeConverter.ConvertToDataDefinition(errors.NotFoundBindingType())
 	if errError5 != nil {
-		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdConfigsClient.delete method's errors.NotFound error - %s",
+		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdProfilesClient.delete method's errors.NotFound error - %s",
 			bindings.VAPIerrorsToError(errError5).Error())
 		return nil
 	}
@@ -276,19 +286,19 @@ func (bIface *DefaultBfdConfigsClient) deleteMethodDefinition() *core.MethodDefi
 	return &methodDefinition
 }
 
-func (bIface *DefaultBfdConfigsClient) getMethodDefinition() *core.MethodDefinition {
+func (bIface *DefaultBfdProfilesClient) getMethodDefinition() *core.MethodDefinition {
 	interfaceIdentifier := core.NewInterfaceIdentifier(bIface.interfaceName)
 	typeConverter := bIface.connector.TypeConverter()
 
-	input, inputError := typeConverter.ConvertToDataDefinition(bfdConfigsGetInputType())
-	output, outputError := typeConverter.ConvertToDataDefinition(bfdConfigsGetOutputType())
+	input, inputError := typeConverter.ConvertToDataDefinition(bfdProfilesGetInputType())
+	output, outputError := typeConverter.ConvertToDataDefinition(bfdProfilesGetOutputType())
 	if inputError != nil {
-		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdConfigsClient.get method's input - %s",
+		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdProfilesClient.get method's input - %s",
 			bindings.VAPIerrorsToError(inputError).Error())
 		return nil
 	}
 	if outputError != nil {
-		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdConfigsClient.get method's output - %s",
+		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdProfilesClient.get method's output - %s",
 			bindings.VAPIerrorsToError(outputError).Error())
 		return nil
 	}
@@ -297,7 +307,7 @@ func (bIface *DefaultBfdConfigsClient) getMethodDefinition() *core.MethodDefinit
 	bIface.errorBindingMap[errors.InvalidRequest{}.Error()] = errors.InvalidRequestBindingType()
 	errDef1, errError1 := typeConverter.ConvertToDataDefinition(errors.InvalidRequestBindingType())
 	if errError1 != nil {
-		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdConfigsClient.get method's errors.InvalidRequest error - %s",
+		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdProfilesClient.get method's errors.InvalidRequest error - %s",
 			bindings.VAPIerrorsToError(errError1).Error())
 		return nil
 	}
@@ -305,7 +315,7 @@ func (bIface *DefaultBfdConfigsClient) getMethodDefinition() *core.MethodDefinit
 	bIface.errorBindingMap[errors.Unauthorized{}.Error()] = errors.UnauthorizedBindingType()
 	errDef2, errError2 := typeConverter.ConvertToDataDefinition(errors.UnauthorizedBindingType())
 	if errError2 != nil {
-		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdConfigsClient.get method's errors.Unauthorized error - %s",
+		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdProfilesClient.get method's errors.Unauthorized error - %s",
 			bindings.VAPIerrorsToError(errError2).Error())
 		return nil
 	}
@@ -313,7 +323,7 @@ func (bIface *DefaultBfdConfigsClient) getMethodDefinition() *core.MethodDefinit
 	bIface.errorBindingMap[errors.ServiceUnavailable{}.Error()] = errors.ServiceUnavailableBindingType()
 	errDef3, errError3 := typeConverter.ConvertToDataDefinition(errors.ServiceUnavailableBindingType())
 	if errError3 != nil {
-		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdConfigsClient.get method's errors.ServiceUnavailable error - %s",
+		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdProfilesClient.get method's errors.ServiceUnavailable error - %s",
 			bindings.VAPIerrorsToError(errError3).Error())
 		return nil
 	}
@@ -321,7 +331,7 @@ func (bIface *DefaultBfdConfigsClient) getMethodDefinition() *core.MethodDefinit
 	bIface.errorBindingMap[errors.InternalServerError{}.Error()] = errors.InternalServerErrorBindingType()
 	errDef4, errError4 := typeConverter.ConvertToDataDefinition(errors.InternalServerErrorBindingType())
 	if errError4 != nil {
-		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdConfigsClient.get method's errors.InternalServerError error - %s",
+		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdProfilesClient.get method's errors.InternalServerError error - %s",
 			bindings.VAPIerrorsToError(errError4).Error())
 		return nil
 	}
@@ -329,7 +339,7 @@ func (bIface *DefaultBfdConfigsClient) getMethodDefinition() *core.MethodDefinit
 	bIface.errorBindingMap[errors.NotFound{}.Error()] = errors.NotFoundBindingType()
 	errDef5, errError5 := typeConverter.ConvertToDataDefinition(errors.NotFoundBindingType())
 	if errError5 != nil {
-		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdConfigsClient.get method's errors.NotFound error - %s",
+		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdProfilesClient.get method's errors.NotFound error - %s",
 			bindings.VAPIerrorsToError(errError5).Error())
 		return nil
 	}
@@ -339,19 +349,19 @@ func (bIface *DefaultBfdConfigsClient) getMethodDefinition() *core.MethodDefinit
 	return &methodDefinition
 }
 
-func (bIface *DefaultBfdConfigsClient) listMethodDefinition() *core.MethodDefinition {
+func (bIface *DefaultBfdProfilesClient) listMethodDefinition() *core.MethodDefinition {
 	interfaceIdentifier := core.NewInterfaceIdentifier(bIface.interfaceName)
 	typeConverter := bIface.connector.TypeConverter()
 
-	input, inputError := typeConverter.ConvertToDataDefinition(bfdConfigsListInputType())
-	output, outputError := typeConverter.ConvertToDataDefinition(bfdConfigsListOutputType())
+	input, inputError := typeConverter.ConvertToDataDefinition(bfdProfilesListInputType())
+	output, outputError := typeConverter.ConvertToDataDefinition(bfdProfilesListOutputType())
 	if inputError != nil {
-		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdConfigsClient.list method's input - %s",
+		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdProfilesClient.list method's input - %s",
 			bindings.VAPIerrorsToError(inputError).Error())
 		return nil
 	}
 	if outputError != nil {
-		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdConfigsClient.list method's output - %s",
+		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdProfilesClient.list method's output - %s",
 			bindings.VAPIerrorsToError(outputError).Error())
 		return nil
 	}
@@ -360,7 +370,7 @@ func (bIface *DefaultBfdConfigsClient) listMethodDefinition() *core.MethodDefini
 	bIface.errorBindingMap[errors.InvalidRequest{}.Error()] = errors.InvalidRequestBindingType()
 	errDef1, errError1 := typeConverter.ConvertToDataDefinition(errors.InvalidRequestBindingType())
 	if errError1 != nil {
-		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdConfigsClient.list method's errors.InvalidRequest error - %s",
+		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdProfilesClient.list method's errors.InvalidRequest error - %s",
 			bindings.VAPIerrorsToError(errError1).Error())
 		return nil
 	}
@@ -368,7 +378,7 @@ func (bIface *DefaultBfdConfigsClient) listMethodDefinition() *core.MethodDefini
 	bIface.errorBindingMap[errors.Unauthorized{}.Error()] = errors.UnauthorizedBindingType()
 	errDef2, errError2 := typeConverter.ConvertToDataDefinition(errors.UnauthorizedBindingType())
 	if errError2 != nil {
-		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdConfigsClient.list method's errors.Unauthorized error - %s",
+		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdProfilesClient.list method's errors.Unauthorized error - %s",
 			bindings.VAPIerrorsToError(errError2).Error())
 		return nil
 	}
@@ -376,7 +386,7 @@ func (bIface *DefaultBfdConfigsClient) listMethodDefinition() *core.MethodDefini
 	bIface.errorBindingMap[errors.ServiceUnavailable{}.Error()] = errors.ServiceUnavailableBindingType()
 	errDef3, errError3 := typeConverter.ConvertToDataDefinition(errors.ServiceUnavailableBindingType())
 	if errError3 != nil {
-		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdConfigsClient.list method's errors.ServiceUnavailable error - %s",
+		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdProfilesClient.list method's errors.ServiceUnavailable error - %s",
 			bindings.VAPIerrorsToError(errError3).Error())
 		return nil
 	}
@@ -384,7 +394,7 @@ func (bIface *DefaultBfdConfigsClient) listMethodDefinition() *core.MethodDefini
 	bIface.errorBindingMap[errors.InternalServerError{}.Error()] = errors.InternalServerErrorBindingType()
 	errDef4, errError4 := typeConverter.ConvertToDataDefinition(errors.InternalServerErrorBindingType())
 	if errError4 != nil {
-		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdConfigsClient.list method's errors.InternalServerError error - %s",
+		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdProfilesClient.list method's errors.InternalServerError error - %s",
 			bindings.VAPIerrorsToError(errError4).Error())
 		return nil
 	}
@@ -392,7 +402,7 @@ func (bIface *DefaultBfdConfigsClient) listMethodDefinition() *core.MethodDefini
 	bIface.errorBindingMap[errors.NotFound{}.Error()] = errors.NotFoundBindingType()
 	errDef5, errError5 := typeConverter.ConvertToDataDefinition(errors.NotFoundBindingType())
 	if errError5 != nil {
-		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdConfigsClient.list method's errors.NotFound error - %s",
+		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdProfilesClient.list method's errors.NotFound error - %s",
 			bindings.VAPIerrorsToError(errError5).Error())
 		return nil
 	}
@@ -402,19 +412,19 @@ func (bIface *DefaultBfdConfigsClient) listMethodDefinition() *core.MethodDefini
 	return &methodDefinition
 }
 
-func (bIface *DefaultBfdConfigsClient) patchMethodDefinition() *core.MethodDefinition {
+func (bIface *DefaultBfdProfilesClient) patchMethodDefinition() *core.MethodDefinition {
 	interfaceIdentifier := core.NewInterfaceIdentifier(bIface.interfaceName)
 	typeConverter := bIface.connector.TypeConverter()
 
-	input, inputError := typeConverter.ConvertToDataDefinition(bfdConfigsPatchInputType())
-	output, outputError := typeConverter.ConvertToDataDefinition(bfdConfigsPatchOutputType())
+	input, inputError := typeConverter.ConvertToDataDefinition(bfdProfilesPatchInputType())
+	output, outputError := typeConverter.ConvertToDataDefinition(bfdProfilesPatchOutputType())
 	if inputError != nil {
-		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdConfigsClient.patch method's input - %s",
+		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdProfilesClient.patch method's input - %s",
 			bindings.VAPIerrorsToError(inputError).Error())
 		return nil
 	}
 	if outputError != nil {
-		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdConfigsClient.patch method's output - %s",
+		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdProfilesClient.patch method's output - %s",
 			bindings.VAPIerrorsToError(outputError).Error())
 		return nil
 	}
@@ -423,7 +433,7 @@ func (bIface *DefaultBfdConfigsClient) patchMethodDefinition() *core.MethodDefin
 	bIface.errorBindingMap[errors.InvalidRequest{}.Error()] = errors.InvalidRequestBindingType()
 	errDef1, errError1 := typeConverter.ConvertToDataDefinition(errors.InvalidRequestBindingType())
 	if errError1 != nil {
-		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdConfigsClient.patch method's errors.InvalidRequest error - %s",
+		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdProfilesClient.patch method's errors.InvalidRequest error - %s",
 			bindings.VAPIerrorsToError(errError1).Error())
 		return nil
 	}
@@ -431,7 +441,7 @@ func (bIface *DefaultBfdConfigsClient) patchMethodDefinition() *core.MethodDefin
 	bIface.errorBindingMap[errors.Unauthorized{}.Error()] = errors.UnauthorizedBindingType()
 	errDef2, errError2 := typeConverter.ConvertToDataDefinition(errors.UnauthorizedBindingType())
 	if errError2 != nil {
-		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdConfigsClient.patch method's errors.Unauthorized error - %s",
+		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdProfilesClient.patch method's errors.Unauthorized error - %s",
 			bindings.VAPIerrorsToError(errError2).Error())
 		return nil
 	}
@@ -439,7 +449,7 @@ func (bIface *DefaultBfdConfigsClient) patchMethodDefinition() *core.MethodDefin
 	bIface.errorBindingMap[errors.ServiceUnavailable{}.Error()] = errors.ServiceUnavailableBindingType()
 	errDef3, errError3 := typeConverter.ConvertToDataDefinition(errors.ServiceUnavailableBindingType())
 	if errError3 != nil {
-		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdConfigsClient.patch method's errors.ServiceUnavailable error - %s",
+		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdProfilesClient.patch method's errors.ServiceUnavailable error - %s",
 			bindings.VAPIerrorsToError(errError3).Error())
 		return nil
 	}
@@ -447,7 +457,7 @@ func (bIface *DefaultBfdConfigsClient) patchMethodDefinition() *core.MethodDefin
 	bIface.errorBindingMap[errors.InternalServerError{}.Error()] = errors.InternalServerErrorBindingType()
 	errDef4, errError4 := typeConverter.ConvertToDataDefinition(errors.InternalServerErrorBindingType())
 	if errError4 != nil {
-		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdConfigsClient.patch method's errors.InternalServerError error - %s",
+		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdProfilesClient.patch method's errors.InternalServerError error - %s",
 			bindings.VAPIerrorsToError(errError4).Error())
 		return nil
 	}
@@ -455,7 +465,7 @@ func (bIface *DefaultBfdConfigsClient) patchMethodDefinition() *core.MethodDefin
 	bIface.errorBindingMap[errors.NotFound{}.Error()] = errors.NotFoundBindingType()
 	errDef5, errError5 := typeConverter.ConvertToDataDefinition(errors.NotFoundBindingType())
 	if errError5 != nil {
-		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdConfigsClient.patch method's errors.NotFound error - %s",
+		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdProfilesClient.patch method's errors.NotFound error - %s",
 			bindings.VAPIerrorsToError(errError5).Error())
 		return nil
 	}
@@ -465,19 +475,19 @@ func (bIface *DefaultBfdConfigsClient) patchMethodDefinition() *core.MethodDefin
 	return &methodDefinition
 }
 
-func (bIface *DefaultBfdConfigsClient) updateMethodDefinition() *core.MethodDefinition {
+func (bIface *DefaultBfdProfilesClient) updateMethodDefinition() *core.MethodDefinition {
 	interfaceIdentifier := core.NewInterfaceIdentifier(bIface.interfaceName)
 	typeConverter := bIface.connector.TypeConverter()
 
-	input, inputError := typeConverter.ConvertToDataDefinition(bfdConfigsUpdateInputType())
-	output, outputError := typeConverter.ConvertToDataDefinition(bfdConfigsUpdateOutputType())
+	input, inputError := typeConverter.ConvertToDataDefinition(bfdProfilesUpdateInputType())
+	output, outputError := typeConverter.ConvertToDataDefinition(bfdProfilesUpdateOutputType())
 	if inputError != nil {
-		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdConfigsClient.update method's input - %s",
+		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdProfilesClient.update method's input - %s",
 			bindings.VAPIerrorsToError(inputError).Error())
 		return nil
 	}
 	if outputError != nil {
-		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdConfigsClient.update method's output - %s",
+		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdProfilesClient.update method's output - %s",
 			bindings.VAPIerrorsToError(outputError).Error())
 		return nil
 	}
@@ -486,7 +496,7 @@ func (bIface *DefaultBfdConfigsClient) updateMethodDefinition() *core.MethodDefi
 	bIface.errorBindingMap[errors.InvalidRequest{}.Error()] = errors.InvalidRequestBindingType()
 	errDef1, errError1 := typeConverter.ConvertToDataDefinition(errors.InvalidRequestBindingType())
 	if errError1 != nil {
-		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdConfigsClient.update method's errors.InvalidRequest error - %s",
+		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdProfilesClient.update method's errors.InvalidRequest error - %s",
 			bindings.VAPIerrorsToError(errError1).Error())
 		return nil
 	}
@@ -494,7 +504,7 @@ func (bIface *DefaultBfdConfigsClient) updateMethodDefinition() *core.MethodDefi
 	bIface.errorBindingMap[errors.Unauthorized{}.Error()] = errors.UnauthorizedBindingType()
 	errDef2, errError2 := typeConverter.ConvertToDataDefinition(errors.UnauthorizedBindingType())
 	if errError2 != nil {
-		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdConfigsClient.update method's errors.Unauthorized error - %s",
+		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdProfilesClient.update method's errors.Unauthorized error - %s",
 			bindings.VAPIerrorsToError(errError2).Error())
 		return nil
 	}
@@ -502,7 +512,7 @@ func (bIface *DefaultBfdConfigsClient) updateMethodDefinition() *core.MethodDefi
 	bIface.errorBindingMap[errors.ServiceUnavailable{}.Error()] = errors.ServiceUnavailableBindingType()
 	errDef3, errError3 := typeConverter.ConvertToDataDefinition(errors.ServiceUnavailableBindingType())
 	if errError3 != nil {
-		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdConfigsClient.update method's errors.ServiceUnavailable error - %s",
+		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdProfilesClient.update method's errors.ServiceUnavailable error - %s",
 			bindings.VAPIerrorsToError(errError3).Error())
 		return nil
 	}
@@ -510,7 +520,7 @@ func (bIface *DefaultBfdConfigsClient) updateMethodDefinition() *core.MethodDefi
 	bIface.errorBindingMap[errors.InternalServerError{}.Error()] = errors.InternalServerErrorBindingType()
 	errDef4, errError4 := typeConverter.ConvertToDataDefinition(errors.InternalServerErrorBindingType())
 	if errError4 != nil {
-		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdConfigsClient.update method's errors.InternalServerError error - %s",
+		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdProfilesClient.update method's errors.InternalServerError error - %s",
 			bindings.VAPIerrorsToError(errError4).Error())
 		return nil
 	}
@@ -518,7 +528,7 @@ func (bIface *DefaultBfdConfigsClient) updateMethodDefinition() *core.MethodDefi
 	bIface.errorBindingMap[errors.NotFound{}.Error()] = errors.NotFoundBindingType()
 	errDef5, errError5 := typeConverter.ConvertToDataDefinition(errors.NotFoundBindingType())
 	if errError5 != nil {
-		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdConfigsClient.update method's errors.NotFound error - %s",
+		log.Errorf("Error in ConvertToDataDefinition for DefaultBfdProfilesClient.update method's errors.NotFound error - %s",
 			bindings.VAPIerrorsToError(errError5).Error())
 		return nil
 	}

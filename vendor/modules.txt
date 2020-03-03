@@ -236,8 +236,8 @@ github.com/vmware/go-vmware-nsxt/normalization
 github.com/vmware/go-vmware-nsxt/policy
 github.com/vmware/go-vmware-nsxt/upgrade
 # github.com/vmware/vsphere-automation-sdk-go/lib v0.1.1
-github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors
 github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std
+github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors
 # github.com/vmware/vsphere-automation-sdk-go/runtime v0.1.1
 github.com/vmware/vsphere-automation-sdk-go/runtime/bindings
 github.com/vmware/vsphere-automation-sdk-go/runtime/core
@@ -258,7 +258,7 @@ github.com/vmware/vsphere-automation-sdk-go/runtime/l10n/runtime
 github.com/vmware/vsphere-automation-sdk-go/runtime/data/serializers/cleanjson
 github.com/vmware/vsphere-automation-sdk-go/runtime/lib/rest
 github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/server
-# github.com/vmware/vsphere-automation-sdk-go/services/nsxt v0.1.1
+# github.com/vmware/vsphere-automation-sdk-go/services/nsxt v0.2.0
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/domains

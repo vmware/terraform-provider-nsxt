@@ -61,21 +61,24 @@ func NewDefaultInterfacesClient(connector client.Connector) *DefaultInterfacesCl
 	return &iIface
 }
 
-func (iIface *DefaultInterfacesClient) Delete(tier1IdParam string, localeServicesIdParam string, interfaceIdParam string) error {
+func (iIface *DefaultInterfacesClient) Delete(tier1IdParam string, localeServicesIdParam string, interfaceIdParam string, overrideParam *bool) error {
 	typeConverter := iIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(iIface.interfaceIdentifier, "delete")
 	sv := bindings.NewStructValueBuilder(interfacesDeleteInputType(), typeConverter)
 	sv.AddStructField("Tier1Id", tier1IdParam)
 	sv.AddStructField("LocaleServicesId", localeServicesIdParam)
 	sv.AddStructField("InterfaceId", interfaceIdParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
 	}
 	operationRestMetaData := interfacesDeleteRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	iIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := iIface.Invoke(iIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := iIface.connector.NewExecutionContext()
+	methodResult := iIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	if methodResult.IsSuccess() {
 		return nil
 	} else {
@@ -101,8 +104,10 @@ func (iIface *DefaultInterfacesClient) Get(tier1IdParam string, localeServicesId
 	}
 	operationRestMetaData := interfacesGetRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	iIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := iIface.Invoke(iIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := iIface.connector.NewExecutionContext()
+	methodResult := iIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	var emptyOutput model.Tier1Interface
 	if methodResult.IsSuccess() {
 		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), interfacesGetOutputType())
@@ -138,8 +143,10 @@ func (iIface *DefaultInterfacesClient) List(tier1IdParam string, localeServicesI
 	}
 	operationRestMetaData := interfacesListRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	iIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := iIface.Invoke(iIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := iIface.connector.NewExecutionContext()
+	methodResult := iIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	var emptyOutput model.Tier1InterfaceListResult
 	if methodResult.IsSuccess() {
 		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), interfacesListOutputType())
@@ -156,7 +163,7 @@ func (iIface *DefaultInterfacesClient) List(tier1IdParam string, localeServicesI
 	}
 }
 
-func (iIface *DefaultInterfacesClient) Patch(tier1IdParam string, localeServicesIdParam string, interfaceIdParam string, tier1InterfaceParam model.Tier1Interface) error {
+func (iIface *DefaultInterfacesClient) Patch(tier1IdParam string, localeServicesIdParam string, interfaceIdParam string, tier1InterfaceParam model.Tier1Interface, overrideParam *bool) error {
 	typeConverter := iIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(iIface.interfaceIdentifier, "patch")
 	sv := bindings.NewStructValueBuilder(interfacesPatchInputType(), typeConverter)
@@ -164,14 +171,17 @@ func (iIface *DefaultInterfacesClient) Patch(tier1IdParam string, localeServices
 	sv.AddStructField("LocaleServicesId", localeServicesIdParam)
 	sv.AddStructField("InterfaceId", interfaceIdParam)
 	sv.AddStructField("Tier1Interface", tier1InterfaceParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
 	}
 	operationRestMetaData := interfacesPatchRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	iIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := iIface.Invoke(iIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := iIface.connector.NewExecutionContext()
+	methodResult := iIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	if methodResult.IsSuccess() {
 		return nil
 	} else {
@@ -183,7 +193,7 @@ func (iIface *DefaultInterfacesClient) Patch(tier1IdParam string, localeServices
 	}
 }
 
-func (iIface *DefaultInterfacesClient) Update(tier1IdParam string, localeServicesIdParam string, interfaceIdParam string, tier1InterfaceParam model.Tier1Interface) (model.Tier1Interface, error) {
+func (iIface *DefaultInterfacesClient) Update(tier1IdParam string, localeServicesIdParam string, interfaceIdParam string, tier1InterfaceParam model.Tier1Interface, overrideParam *bool) (model.Tier1Interface, error) {
 	typeConverter := iIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(iIface.interfaceIdentifier, "update")
 	sv := bindings.NewStructValueBuilder(interfacesUpdateInputType(), typeConverter)
@@ -191,6 +201,7 @@ func (iIface *DefaultInterfacesClient) Update(tier1IdParam string, localeService
 	sv.AddStructField("LocaleServicesId", localeServicesIdParam)
 	sv.AddStructField("InterfaceId", interfaceIdParam)
 	sv.AddStructField("Tier1Interface", tier1InterfaceParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		var emptyOutput model.Tier1Interface
@@ -198,8 +209,10 @@ func (iIface *DefaultInterfacesClient) Update(tier1IdParam string, localeService
 	}
 	operationRestMetaData := interfacesUpdateRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	iIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := iIface.Invoke(iIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := iIface.connector.NewExecutionContext()
+	methodResult := iIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	var emptyOutput model.Tier1Interface
 	if methodResult.IsSuccess() {
 		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), interfacesUpdateOutputType())

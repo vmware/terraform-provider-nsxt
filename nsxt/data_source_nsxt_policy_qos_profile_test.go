@@ -60,7 +60,7 @@ func testAccDataSourceNsxtPolicyQosProfileCreate(name string) error {
 	// Generate a random ID for the resource
 	id := newUUID()
 
-	err = client.Patch(id, obj)
+	err = client.Patch(id, obj, nil)
 	if err != nil {
 		return fmt.Errorf("Error during QosProfile creation: %v", err)
 	}
@@ -81,7 +81,7 @@ func testAccDataSourceNsxtPolicyQosProfileDeleteByName(name string) error {
 	}
 	for _, objInList := range objList.Results {
 		if *objInList.DisplayName == name {
-			err := client.Delete(*objInList.Id)
+			err := client.Delete(*objInList.Id, nil)
 			if err != nil {
 				return fmt.Errorf("Error during QosProfile deletion: %v", err)
 			}

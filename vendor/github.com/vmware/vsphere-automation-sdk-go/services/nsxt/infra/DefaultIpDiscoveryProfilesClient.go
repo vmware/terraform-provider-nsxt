@@ -61,19 +61,22 @@ func NewDefaultIpDiscoveryProfilesClient(connector client.Connector) *DefaultIpD
 	return &iIface
 }
 
-func (iIface *DefaultIpDiscoveryProfilesClient) Delete(ipDiscoveryProfileIdParam string) error {
+func (iIface *DefaultIpDiscoveryProfilesClient) Delete(ipDiscoveryProfileIdParam string, overrideParam *bool) error {
 	typeConverter := iIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(iIface.interfaceIdentifier, "delete")
 	sv := bindings.NewStructValueBuilder(ipDiscoveryProfilesDeleteInputType(), typeConverter)
 	sv.AddStructField("IpDiscoveryProfileId", ipDiscoveryProfileIdParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
 	}
 	operationRestMetaData := ipDiscoveryProfilesDeleteRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	iIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := iIface.Invoke(iIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := iIface.connector.NewExecutionContext()
+	methodResult := iIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	if methodResult.IsSuccess() {
 		return nil
 	} else {
@@ -97,8 +100,10 @@ func (iIface *DefaultIpDiscoveryProfilesClient) Get(ipDiscoveryProfileIdParam st
 	}
 	operationRestMetaData := ipDiscoveryProfilesGetRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	iIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := iIface.Invoke(iIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := iIface.connector.NewExecutionContext()
+	methodResult := iIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	var emptyOutput model.IPDiscoveryProfile
 	if methodResult.IsSuccess() {
 		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), ipDiscoveryProfilesGetOutputType())
@@ -132,8 +137,10 @@ func (iIface *DefaultIpDiscoveryProfilesClient) List(cursorParam *string, includ
 	}
 	operationRestMetaData := ipDiscoveryProfilesListRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	iIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := iIface.Invoke(iIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := iIface.connector.NewExecutionContext()
+	methodResult := iIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	var emptyOutput model.IPDiscoveryProfileListResult
 	if methodResult.IsSuccess() {
 		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), ipDiscoveryProfilesListOutputType())
@@ -150,20 +157,23 @@ func (iIface *DefaultIpDiscoveryProfilesClient) List(cursorParam *string, includ
 	}
 }
 
-func (iIface *DefaultIpDiscoveryProfilesClient) Patch(ipDiscoveryProfileIdParam string, ipDiscoveryProfileParam model.IPDiscoveryProfile) error {
+func (iIface *DefaultIpDiscoveryProfilesClient) Patch(ipDiscoveryProfileIdParam string, ipDiscoveryProfileParam model.IPDiscoveryProfile, overrideParam *bool) error {
 	typeConverter := iIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(iIface.interfaceIdentifier, "patch")
 	sv := bindings.NewStructValueBuilder(ipDiscoveryProfilesPatchInputType(), typeConverter)
 	sv.AddStructField("IpDiscoveryProfileId", ipDiscoveryProfileIdParam)
 	sv.AddStructField("IpDiscoveryProfile", ipDiscoveryProfileParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
 	}
 	operationRestMetaData := ipDiscoveryProfilesPatchRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	iIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := iIface.Invoke(iIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := iIface.connector.NewExecutionContext()
+	methodResult := iIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	if methodResult.IsSuccess() {
 		return nil
 	} else {
@@ -175,12 +185,13 @@ func (iIface *DefaultIpDiscoveryProfilesClient) Patch(ipDiscoveryProfileIdParam 
 	}
 }
 
-func (iIface *DefaultIpDiscoveryProfilesClient) Update(ipDiscoveryProfileIdParam string, ipDiscoveryProfileParam model.IPDiscoveryProfile) (model.IPDiscoveryProfile, error) {
+func (iIface *DefaultIpDiscoveryProfilesClient) Update(ipDiscoveryProfileIdParam string, ipDiscoveryProfileParam model.IPDiscoveryProfile, overrideParam *bool) (model.IPDiscoveryProfile, error) {
 	typeConverter := iIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(iIface.interfaceIdentifier, "update")
 	sv := bindings.NewStructValueBuilder(ipDiscoveryProfilesUpdateInputType(), typeConverter)
 	sv.AddStructField("IpDiscoveryProfileId", ipDiscoveryProfileIdParam)
 	sv.AddStructField("IpDiscoveryProfile", ipDiscoveryProfileParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		var emptyOutput model.IPDiscoveryProfile
@@ -188,8 +199,10 @@ func (iIface *DefaultIpDiscoveryProfilesClient) Update(ipDiscoveryProfileIdParam
 	}
 	operationRestMetaData := ipDiscoveryProfilesUpdateRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	iIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := iIface.Invoke(iIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := iIface.connector.NewExecutionContext()
+	methodResult := iIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	var emptyOutput model.IPDiscoveryProfile
 	if methodResult.IsSuccess() {
 		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), ipDiscoveryProfilesUpdateOutputType())

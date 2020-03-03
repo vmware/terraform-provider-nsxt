@@ -21,6 +21,7 @@ type RoutingTableClient interface {
     // @param tier0IdParam (required)
     // @param cursorParam Opaque cursor to be used for getting next page of records (supplied by current result page) (optional)
     // @param edgeIdParam UUID of edge node (optional)
+    // @param edgePathParam Policy path of edge node (optional)
     // @param enforcementPointPathParam Enforcement point path (optional)
     // @param includedFieldsParam Comma separated list of fields that should be included in query result (optional)
     // @param networkPrefixParam IPv4 or IPv6 CIDR Block (optional)
@@ -34,5 +35,5 @@ type RoutingTableClient interface {
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	List(tier0IdParam string, cursorParam *string, edgeIdParam *string, enforcementPointPathParam *string, includedFieldsParam *string, networkPrefixParam *string, pageSizeParam *int64, routeSourceParam *string, sortAscendingParam *bool, sortByParam *string) (model.RoutingTableListResult, error)
+	List(tier0IdParam string, cursorParam *string, edgeIdParam *string, edgePathParam *string, enforcementPointPathParam *string, includedFieldsParam *string, networkPrefixParam *string, pageSizeParam *int64, routeSourceParam *string, sortAscendingParam *bool, sortByParam *string) (model.RoutingTableListResult, error)
 }

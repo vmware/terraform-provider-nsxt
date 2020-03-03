@@ -28,7 +28,9 @@ func segmentSecurityProfilesDeleteInputType() bindings.StructType {
 	fields := make(map[string]bindings.BindingType)
 	fieldNameMap := make(map[string]string)
 	fields["segment_security_profile_id"] = bindings.NewStringType()
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["segment_security_profile_id"] = "SegmentSecurityProfileId"
+	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -45,10 +47,14 @@ func segmentSecurityProfilesDeleteRestMetadata() protocol.OperationRestMetadata 
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	fields["segment_security_profile_id"] = bindings.NewStringType()
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["segment_security_profile_id"] = "SegmentSecurityProfileId"
+	fieldNameMap["override"] = "Override"
 	paramsTypeMap["segment_security_profile_id"] = bindings.NewStringType()
+	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["segmentSecurityProfileId"] = bindings.NewStringType()
 	pathParams["segment_security_profile_id"] = "segmentSecurityProfileId"
+	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -190,8 +196,10 @@ func segmentSecurityProfilesPatchInputType() bindings.StructType {
 	fieldNameMap := make(map[string]string)
 	fields["segment_security_profile_id"] = bindings.NewStringType()
 	fields["segment_security_profile"] = bindings.NewReferenceType(model.SegmentSecurityProfileBindingType)
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["segment_security_profile_id"] = "SegmentSecurityProfileId"
 	fieldNameMap["segment_security_profile"] = "SegmentSecurityProfile"
+	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -209,12 +217,16 @@ func segmentSecurityProfilesPatchRestMetadata() protocol.OperationRestMetadata {
 	headerParams := map[string]string{}
 	fields["segment_security_profile_id"] = bindings.NewStringType()
 	fields["segment_security_profile"] = bindings.NewReferenceType(model.SegmentSecurityProfileBindingType)
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["segment_security_profile_id"] = "SegmentSecurityProfileId"
 	fieldNameMap["segment_security_profile"] = "SegmentSecurityProfile"
+	fieldNameMap["override"] = "Override"
 	paramsTypeMap["segment_security_profile_id"] = bindings.NewStringType()
+	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["segment_security_profile"] = bindings.NewReferenceType(model.SegmentSecurityProfileBindingType)
 	paramsTypeMap["segmentSecurityProfileId"] = bindings.NewStringType()
 	pathParams["segment_security_profile_id"] = "segmentSecurityProfileId"
+	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -239,8 +251,10 @@ func segmentSecurityProfilesUpdateInputType() bindings.StructType {
 	fieldNameMap := make(map[string]string)
 	fields["segment_security_profile_id"] = bindings.NewStringType()
 	fields["segment_security_profile"] = bindings.NewReferenceType(model.SegmentSecurityProfileBindingType)
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["segment_security_profile_id"] = "SegmentSecurityProfileId"
 	fieldNameMap["segment_security_profile"] = "SegmentSecurityProfile"
+	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -258,12 +272,16 @@ func segmentSecurityProfilesUpdateRestMetadata() protocol.OperationRestMetadata 
 	headerParams := map[string]string{}
 	fields["segment_security_profile_id"] = bindings.NewStringType()
 	fields["segment_security_profile"] = bindings.NewReferenceType(model.SegmentSecurityProfileBindingType)
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["segment_security_profile_id"] = "SegmentSecurityProfileId"
 	fieldNameMap["segment_security_profile"] = "SegmentSecurityProfile"
+	fieldNameMap["override"] = "Override"
 	paramsTypeMap["segment_security_profile_id"] = bindings.NewStringType()
+	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["segment_security_profile"] = bindings.NewReferenceType(model.SegmentSecurityProfileBindingType)
 	paramsTypeMap["segmentSecurityProfileId"] = bindings.NewStringType()
 	pathParams["segment_security_profile_id"] = "segmentSecurityProfileId"
+	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]string{}
 	return protocol.NewOperationRestMetadata(

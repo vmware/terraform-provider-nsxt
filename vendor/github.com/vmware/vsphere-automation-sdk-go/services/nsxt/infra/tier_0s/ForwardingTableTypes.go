@@ -36,6 +36,7 @@ func forwardingTableListInputType() bindings.StructType {
 	fields["tier0_id"] = bindings.NewStringType()
 	fields["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
 	fields["edge_id"] = bindings.NewOptionalType(bindings.NewStringType())
+	fields["edge_path"] = bindings.NewOptionalType(bindings.NewStringType())
 	fields["enforcement_point_path"] = bindings.NewOptionalType(bindings.NewStringType())
 	fields["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
 	fields["network_prefix"] = bindings.NewOptionalType(bindings.NewStringType())
@@ -46,6 +47,7 @@ func forwardingTableListInputType() bindings.StructType {
 	fieldNameMap["tier0_id"] = "Tier0Id"
 	fieldNameMap["cursor"] = "Cursor"
 	fieldNameMap["edge_id"] = "EdgeId"
+	fieldNameMap["edge_path"] = "EdgePath"
 	fieldNameMap["enforcement_point_path"] = "EnforcementPointPath"
 	fieldNameMap["included_fields"] = "IncludedFields"
 	fieldNameMap["network_prefix"] = "NetworkPrefix"
@@ -71,6 +73,7 @@ func forwardingTableListRestMetadata() protocol.OperationRestMetadata {
 	fields["tier0_id"] = bindings.NewStringType()
 	fields["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
 	fields["edge_id"] = bindings.NewOptionalType(bindings.NewStringType())
+	fields["edge_path"] = bindings.NewOptionalType(bindings.NewStringType())
 	fields["enforcement_point_path"] = bindings.NewOptionalType(bindings.NewStringType())
 	fields["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
 	fields["network_prefix"] = bindings.NewOptionalType(bindings.NewStringType())
@@ -81,6 +84,7 @@ func forwardingTableListRestMetadata() protocol.OperationRestMetadata {
 	fieldNameMap["tier0_id"] = "Tier0Id"
 	fieldNameMap["cursor"] = "Cursor"
 	fieldNameMap["edge_id"] = "EdgeId"
+	fieldNameMap["edge_path"] = "EdgePath"
 	fieldNameMap["enforcement_point_path"] = "EnforcementPointPath"
 	fieldNameMap["included_fields"] = "IncludedFields"
 	fieldNameMap["network_prefix"] = "NetworkPrefix"
@@ -90,6 +94,7 @@ func forwardingTableListRestMetadata() protocol.OperationRestMetadata {
 	fieldNameMap["sort_by"] = "SortBy"
 	paramsTypeMap["tier0_id"] = bindings.NewStringType()
 	paramsTypeMap["enforcement_point_path"] = bindings.NewOptionalType(bindings.NewStringType())
+	paramsTypeMap["edge_path"] = bindings.NewOptionalType(bindings.NewStringType())
 	paramsTypeMap["edge_id"] = bindings.NewOptionalType(bindings.NewStringType())
 	paramsTypeMap["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
 	paramsTypeMap["network_prefix"] = bindings.NewOptionalType(bindings.NewStringType())
@@ -104,6 +109,7 @@ func forwardingTableListRestMetadata() protocol.OperationRestMetadata {
 	queryParams["network_prefix"] = "network_prefix"
 	queryParams["sort_ascending"] = "sort_ascending"
 	queryParams["included_fields"] = "included_fields"
+	queryParams["edge_path"] = "edge_path"
 	queryParams["edge_id"] = "edge_id"
 	queryParams["enforcement_point_path"] = "enforcement_point_path"
 	queryParams["sort_by"] = "sort_by"

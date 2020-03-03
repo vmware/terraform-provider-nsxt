@@ -61,19 +61,22 @@ func NewDefaultQosProfilesClient(connector client.Connector) *DefaultQosProfiles
 	return &qIface
 }
 
-func (qIface *DefaultQosProfilesClient) Delete(qosProfileIdParam string) error {
+func (qIface *DefaultQosProfilesClient) Delete(qosProfileIdParam string, overrideParam *bool) error {
 	typeConverter := qIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(qIface.interfaceIdentifier, "delete")
 	sv := bindings.NewStructValueBuilder(qosProfilesDeleteInputType(), typeConverter)
 	sv.AddStructField("QosProfileId", qosProfileIdParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
 	}
 	operationRestMetaData := qosProfilesDeleteRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	qIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := qIface.Invoke(qIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := qIface.connector.NewExecutionContext()
+	methodResult := qIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	if methodResult.IsSuccess() {
 		return nil
 	} else {
@@ -97,8 +100,10 @@ func (qIface *DefaultQosProfilesClient) Get(qosProfileIdParam string) (model.Qos
 	}
 	operationRestMetaData := qosProfilesGetRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	qIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := qIface.Invoke(qIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := qIface.connector.NewExecutionContext()
+	methodResult := qIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	var emptyOutput model.QosProfile
 	if methodResult.IsSuccess() {
 		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), qosProfilesGetOutputType())
@@ -131,8 +136,10 @@ func (qIface *DefaultQosProfilesClient) List(cursorParam *string, includedFields
 	}
 	operationRestMetaData := qosProfilesListRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	qIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := qIface.Invoke(qIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := qIface.connector.NewExecutionContext()
+	methodResult := qIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	var emptyOutput model.QosProfileListResult
 	if methodResult.IsSuccess() {
 		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), qosProfilesListOutputType())
@@ -149,20 +156,23 @@ func (qIface *DefaultQosProfilesClient) List(cursorParam *string, includedFields
 	}
 }
 
-func (qIface *DefaultQosProfilesClient) Patch(qosProfileIdParam string, qosProfileParam model.QosProfile) error {
+func (qIface *DefaultQosProfilesClient) Patch(qosProfileIdParam string, qosProfileParam model.QosProfile, overrideParam *bool) error {
 	typeConverter := qIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(qIface.interfaceIdentifier, "patch")
 	sv := bindings.NewStructValueBuilder(qosProfilesPatchInputType(), typeConverter)
 	sv.AddStructField("QosProfileId", qosProfileIdParam)
 	sv.AddStructField("QosProfile", qosProfileParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
 	}
 	operationRestMetaData := qosProfilesPatchRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	qIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := qIface.Invoke(qIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := qIface.connector.NewExecutionContext()
+	methodResult := qIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	if methodResult.IsSuccess() {
 		return nil
 	} else {
@@ -174,12 +184,13 @@ func (qIface *DefaultQosProfilesClient) Patch(qosProfileIdParam string, qosProfi
 	}
 }
 
-func (qIface *DefaultQosProfilesClient) Update(qosProfileIdParam string, qosProfileParam model.QosProfile) (model.QosProfile, error) {
+func (qIface *DefaultQosProfilesClient) Update(qosProfileIdParam string, qosProfileParam model.QosProfile, overrideParam *bool) (model.QosProfile, error) {
 	typeConverter := qIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(qIface.interfaceIdentifier, "update")
 	sv := bindings.NewStructValueBuilder(qosProfilesUpdateInputType(), typeConverter)
 	sv.AddStructField("QosProfileId", qosProfileIdParam)
 	sv.AddStructField("QosProfile", qosProfileParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		var emptyOutput model.QosProfile
@@ -187,8 +198,10 @@ func (qIface *DefaultQosProfilesClient) Update(qosProfileIdParam string, qosProf
 	}
 	operationRestMetaData := qosProfilesUpdateRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	qIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := qIface.Invoke(qIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := qIface.connector.NewExecutionContext()
+	methodResult := qIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	var emptyOutput model.QosProfile
 	if methodResult.IsSuccess() {
 		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), qosProfilesUpdateOutputType())

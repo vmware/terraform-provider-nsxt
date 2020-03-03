@@ -4,7 +4,7 @@
 // Code generated. DO NOT EDIT.
 
 /*
- * Data type definitions file for service: BfdConfigs.
+ * Data type definitions file for service: BfdProfiles.
  * Includes binding types of a structures and enumerations defined in the service.
  * Shared by client-side stubs and server-side skeletons to ensure type
  * compatibility.
@@ -24,31 +24,31 @@ import (
 
 
 
-func bfdConfigsDeleteInputType() bindings.StructType {
+func bfdProfilesDeleteInputType() bindings.StructType {
 	fields := make(map[string]bindings.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["bfd_config_id"] = bindings.NewStringType()
-	fieldNameMap["bfd_config_id"] = "BfdConfigId"
+	fields["bfd_profile_id"] = bindings.NewStringType()
+	fieldNameMap["bfd_profile_id"] = "BfdProfileId"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
 
-func bfdConfigsDeleteOutputType() bindings.BindingType {
+func bfdProfilesDeleteOutputType() bindings.BindingType {
 	return bindings.NewVoidType()
 }
 
-func bfdConfigsDeleteRestMetadata() protocol.OperationRestMetadata {
+func bfdProfilesDeleteRestMetadata() protocol.OperationRestMetadata {
 	fields := map[string]bindings.BindingType{}
 	fieldNameMap := map[string]string{}
 	paramsTypeMap := map[string]bindings.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
-	fields["bfd_config_id"] = bindings.NewStringType()
-	fieldNameMap["bfd_config_id"] = "BfdConfigId"
-	paramsTypeMap["bfd_config_id"] = bindings.NewStringType()
-	paramsTypeMap["bfdConfigId"] = bindings.NewStringType()
-	pathParams["bfd_config_id"] = "bfdConfigId"
+	fields["bfd_profile_id"] = bindings.NewStringType()
+	fieldNameMap["bfd_profile_id"] = "BfdProfileId"
+	paramsTypeMap["bfd_profile_id"] = bindings.NewStringType()
+	paramsTypeMap["bfdProfileId"] = bindings.NewStringType()
+	pathParams["bfd_profile_id"] = "bfdProfileId"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -61,38 +61,38 @@ func bfdConfigsDeleteRestMetadata() protocol.OperationRestMetadata {
 		"",
 		"",
 		"DELETE",
-		"/policy/api/v1/infra/bfd-configs/{bfdConfigId}",
+		"/policy/api/v1/infra/bfd-profiles/{bfdProfileId}",
 		resultHeaders,
 		204,
 		errorHeaders,
 		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
 }
 
-func bfdConfigsGetInputType() bindings.StructType {
+func bfdProfilesGetInputType() bindings.StructType {
 	fields := make(map[string]bindings.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["bfd_config_id"] = bindings.NewStringType()
-	fieldNameMap["bfd_config_id"] = "BfdConfigId"
+	fields["bfd_profile_id"] = bindings.NewStringType()
+	fieldNameMap["bfd_profile_id"] = "BfdProfileId"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
 
-func bfdConfigsGetOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.BfdConfigurationBindingType)
+func bfdProfilesGetOutputType() bindings.BindingType {
+	return bindings.NewReferenceType(model.BfdProfileBindingType)
 }
 
-func bfdConfigsGetRestMetadata() protocol.OperationRestMetadata {
+func bfdProfilesGetRestMetadata() protocol.OperationRestMetadata {
 	fields := map[string]bindings.BindingType{}
 	fieldNameMap := map[string]string{}
 	paramsTypeMap := map[string]bindings.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
-	fields["bfd_config_id"] = bindings.NewStringType()
-	fieldNameMap["bfd_config_id"] = "BfdConfigId"
-	paramsTypeMap["bfd_config_id"] = bindings.NewStringType()
-	paramsTypeMap["bfdConfigId"] = bindings.NewStringType()
-	pathParams["bfd_config_id"] = "bfdConfigId"
+	fields["bfd_profile_id"] = bindings.NewStringType()
+	fieldNameMap["bfd_profile_id"] = "BfdProfileId"
+	paramsTypeMap["bfd_profile_id"] = bindings.NewStringType()
+	paramsTypeMap["bfdProfileId"] = bindings.NewStringType()
+	pathParams["bfd_profile_id"] = "bfdProfileId"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -105,14 +105,14 @@ func bfdConfigsGetRestMetadata() protocol.OperationRestMetadata {
 		"",
 		"",
 		"GET",
-		"/policy/api/v1/infra/bfd-configs/{bfdConfigId}",
+		"/policy/api/v1/infra/bfd-profiles/{bfdProfileId}",
 		resultHeaders,
 		200,
 		errorHeaders,
 		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
 }
 
-func bfdConfigsListInputType() bindings.StructType {
+func bfdProfilesListInputType() bindings.StructType {
 	fields := make(map[string]bindings.BindingType)
 	fieldNameMap := make(map[string]string)
 	fields["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
@@ -131,11 +131,11 @@ func bfdConfigsListInputType() bindings.StructType {
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
 
-func bfdConfigsListOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.BfdConfigurationListResultBindingType)
+func bfdProfilesListOutputType() bindings.BindingType {
+	return bindings.NewReferenceType(model.BfdProfileListResultBindingType)
 }
 
-func bfdConfigsListRestMetadata() protocol.OperationRestMetadata {
+func bfdProfilesListRestMetadata() protocol.OperationRestMetadata {
 	fields := map[string]bindings.BindingType{}
 	fieldNameMap := map[string]string{}
 	paramsTypeMap := map[string]bindings.BindingType{}
@@ -178,43 +178,43 @@ func bfdConfigsListRestMetadata() protocol.OperationRestMetadata {
 		"",
 		"",
 		"GET",
-		"/policy/api/v1/infra/bfd-configs",
+		"/policy/api/v1/infra/bfd-profiles",
 		resultHeaders,
 		200,
 		errorHeaders,
 		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
 }
 
-func bfdConfigsPatchInputType() bindings.StructType {
+func bfdProfilesPatchInputType() bindings.StructType {
 	fields := make(map[string]bindings.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["bfd_config_id"] = bindings.NewStringType()
-	fields["bfd_configuration"] = bindings.NewReferenceType(model.BfdConfigurationBindingType)
-	fieldNameMap["bfd_config_id"] = "BfdConfigId"
-	fieldNameMap["bfd_configuration"] = "BfdConfiguration"
+	fields["bfd_profile_id"] = bindings.NewStringType()
+	fields["bfd_profile"] = bindings.NewReferenceType(model.BfdProfileBindingType)
+	fieldNameMap["bfd_profile_id"] = "BfdProfileId"
+	fieldNameMap["bfd_profile"] = "BfdProfile"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
 
-func bfdConfigsPatchOutputType() bindings.BindingType {
+func bfdProfilesPatchOutputType() bindings.BindingType {
 	return bindings.NewVoidType()
 }
 
-func bfdConfigsPatchRestMetadata() protocol.OperationRestMetadata {
+func bfdProfilesPatchRestMetadata() protocol.OperationRestMetadata {
 	fields := map[string]bindings.BindingType{}
 	fieldNameMap := map[string]string{}
 	paramsTypeMap := map[string]bindings.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
-	fields["bfd_config_id"] = bindings.NewStringType()
-	fields["bfd_configuration"] = bindings.NewReferenceType(model.BfdConfigurationBindingType)
-	fieldNameMap["bfd_config_id"] = "BfdConfigId"
-	fieldNameMap["bfd_configuration"] = "BfdConfiguration"
-	paramsTypeMap["bfd_configuration"] = bindings.NewReferenceType(model.BfdConfigurationBindingType)
-	paramsTypeMap["bfd_config_id"] = bindings.NewStringType()
-	paramsTypeMap["bfdConfigId"] = bindings.NewStringType()
-	pathParams["bfd_config_id"] = "bfdConfigId"
+	fields["bfd_profile_id"] = bindings.NewStringType()
+	fields["bfd_profile"] = bindings.NewReferenceType(model.BfdProfileBindingType)
+	fieldNameMap["bfd_profile_id"] = "BfdProfileId"
+	fieldNameMap["bfd_profile"] = "BfdProfile"
+	paramsTypeMap["bfd_profile_id"] = bindings.NewStringType()
+	paramsTypeMap["bfd_profile"] = bindings.NewReferenceType(model.BfdProfileBindingType)
+	paramsTypeMap["bfdProfileId"] = bindings.NewStringType()
+	pathParams["bfd_profile_id"] = "bfdProfileId"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -225,45 +225,45 @@ func bfdConfigsPatchRestMetadata() protocol.OperationRestMetadata {
 		queryParams,
 		headerParams,
 		"",
-		"bfd_configuration",
+		"bfd_profile",
 		"PATCH",
-		"/policy/api/v1/infra/bfd-configs/{bfdConfigId}",
+		"/policy/api/v1/infra/bfd-profiles/{bfdProfileId}",
 		resultHeaders,
 		204,
 		errorHeaders,
 		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
 }
 
-func bfdConfigsUpdateInputType() bindings.StructType {
+func bfdProfilesUpdateInputType() bindings.StructType {
 	fields := make(map[string]bindings.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["bfd_config_id"] = bindings.NewStringType()
-	fields["bfd_configuration"] = bindings.NewReferenceType(model.BfdConfigurationBindingType)
-	fieldNameMap["bfd_config_id"] = "BfdConfigId"
-	fieldNameMap["bfd_configuration"] = "BfdConfiguration"
+	fields["bfd_profile_id"] = bindings.NewStringType()
+	fields["bfd_profile"] = bindings.NewReferenceType(model.BfdProfileBindingType)
+	fieldNameMap["bfd_profile_id"] = "BfdProfileId"
+	fieldNameMap["bfd_profile"] = "BfdProfile"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
 
-func bfdConfigsUpdateOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.BfdConfigurationBindingType)
+func bfdProfilesUpdateOutputType() bindings.BindingType {
+	return bindings.NewReferenceType(model.BfdProfileBindingType)
 }
 
-func bfdConfigsUpdateRestMetadata() protocol.OperationRestMetadata {
+func bfdProfilesUpdateRestMetadata() protocol.OperationRestMetadata {
 	fields := map[string]bindings.BindingType{}
 	fieldNameMap := map[string]string{}
 	paramsTypeMap := map[string]bindings.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
-	fields["bfd_config_id"] = bindings.NewStringType()
-	fields["bfd_configuration"] = bindings.NewReferenceType(model.BfdConfigurationBindingType)
-	fieldNameMap["bfd_config_id"] = "BfdConfigId"
-	fieldNameMap["bfd_configuration"] = "BfdConfiguration"
-	paramsTypeMap["bfd_configuration"] = bindings.NewReferenceType(model.BfdConfigurationBindingType)
-	paramsTypeMap["bfd_config_id"] = bindings.NewStringType()
-	paramsTypeMap["bfdConfigId"] = bindings.NewStringType()
-	pathParams["bfd_config_id"] = "bfdConfigId"
+	fields["bfd_profile_id"] = bindings.NewStringType()
+	fields["bfd_profile"] = bindings.NewReferenceType(model.BfdProfileBindingType)
+	fieldNameMap["bfd_profile_id"] = "BfdProfileId"
+	fieldNameMap["bfd_profile"] = "BfdProfile"
+	paramsTypeMap["bfd_profile_id"] = bindings.NewStringType()
+	paramsTypeMap["bfd_profile"] = bindings.NewReferenceType(model.BfdProfileBindingType)
+	paramsTypeMap["bfdProfileId"] = bindings.NewStringType()
+	pathParams["bfd_profile_id"] = "bfdProfileId"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -274,9 +274,9 @@ func bfdConfigsUpdateRestMetadata() protocol.OperationRestMetadata {
 		queryParams,
 		headerParams,
 		"",
-		"bfd_configuration",
+		"bfd_profile",
 		"PUT",
-		"/policy/api/v1/infra/bfd-configs/{bfdConfigId}",
+		"/policy/api/v1/infra/bfd-profiles/{bfdProfileId}",
 		resultHeaders,
 		200,
 		errorHeaders,

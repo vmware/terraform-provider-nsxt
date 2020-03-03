@@ -163,7 +163,7 @@ func resourceNsxtPolicyTier0GatewayInterfaceCreate(d *schema.ResourceData, m int
 
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating Tier0 interface with ID %s", id)
-	err = client.Patch(tier0ID, localeServiceID, id, obj)
+	err = client.Patch(tier0ID, localeServiceID, id, obj, nil)
 	if err != nil {
 		return handleCreateError("Tier0 Interface", id, err)
 	}
@@ -279,7 +279,7 @@ func resourceNsxtPolicyTier0GatewayInterfaceUpdate(d *schema.ResourceData, m int
 
 	gatewayInterfaceVersionDepenantSet(d, &obj)
 
-	_, err := client.Update(tier0ID, localeServiceID, id, obj)
+	_, err := client.Update(tier0ID, localeServiceID, id, obj, nil)
 	if err != nil {
 		return handleUpdateError("Tier0 Interface", id, err)
 	}
@@ -298,7 +298,7 @@ func resourceNsxtPolicyTier0GatewayInterfaceDelete(d *schema.ResourceData, m int
 		return fmt.Errorf("Error obtaining Tier0 Interface id")
 	}
 
-	err := client.Delete(tier0ID, defaultPolicyLocaleServiceID, id)
+	err := client.Delete(tier0ID, defaultPolicyLocaleServiceID, id, nil)
 	if err != nil {
 		return handleDeleteError("Tier0 Interface", id, err)
 	}

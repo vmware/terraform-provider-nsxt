@@ -61,19 +61,22 @@ func NewDefaultGatewayQosProfilesClient(connector client.Connector) *DefaultGate
 	return &gIface
 }
 
-func (gIface *DefaultGatewayQosProfilesClient) Delete(qosProfileIdParam string) error {
+func (gIface *DefaultGatewayQosProfilesClient) Delete(qosProfileIdParam string, overrideParam *bool) error {
 	typeConverter := gIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(gIface.interfaceIdentifier, "delete")
 	sv := bindings.NewStructValueBuilder(gatewayQosProfilesDeleteInputType(), typeConverter)
 	sv.AddStructField("QosProfileId", qosProfileIdParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
 	}
 	operationRestMetaData := gatewayQosProfilesDeleteRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	gIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := gIface.Invoke(gIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := gIface.connector.NewExecutionContext()
+	methodResult := gIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	if methodResult.IsSuccess() {
 		return nil
 	} else {
@@ -97,8 +100,10 @@ func (gIface *DefaultGatewayQosProfilesClient) Get(qosProfileIdParam string) (mo
 	}
 	operationRestMetaData := gatewayQosProfilesGetRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	gIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := gIface.Invoke(gIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := gIface.connector.NewExecutionContext()
+	methodResult := gIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	var emptyOutput model.GatewayQosProfile
 	if methodResult.IsSuccess() {
 		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), gatewayQosProfilesGetOutputType())
@@ -132,8 +137,10 @@ func (gIface *DefaultGatewayQosProfilesClient) List(cursorParam *string, include
 	}
 	operationRestMetaData := gatewayQosProfilesListRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	gIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := gIface.Invoke(gIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := gIface.connector.NewExecutionContext()
+	methodResult := gIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	var emptyOutput model.GatewayQosProfileListResult
 	if methodResult.IsSuccess() {
 		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), gatewayQosProfilesListOutputType())
@@ -150,20 +157,23 @@ func (gIface *DefaultGatewayQosProfilesClient) List(cursorParam *string, include
 	}
 }
 
-func (gIface *DefaultGatewayQosProfilesClient) Patch(qosProfileIdParam string, gatewayQosProfileParam model.GatewayQosProfile) error {
+func (gIface *DefaultGatewayQosProfilesClient) Patch(qosProfileIdParam string, gatewayQosProfileParam model.GatewayQosProfile, overrideParam *bool) error {
 	typeConverter := gIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(gIface.interfaceIdentifier, "patch")
 	sv := bindings.NewStructValueBuilder(gatewayQosProfilesPatchInputType(), typeConverter)
 	sv.AddStructField("QosProfileId", qosProfileIdParam)
 	sv.AddStructField("GatewayQosProfile", gatewayQosProfileParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
 	}
 	operationRestMetaData := gatewayQosProfilesPatchRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	gIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := gIface.Invoke(gIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := gIface.connector.NewExecutionContext()
+	methodResult := gIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	if methodResult.IsSuccess() {
 		return nil
 	} else {
@@ -175,12 +185,13 @@ func (gIface *DefaultGatewayQosProfilesClient) Patch(qosProfileIdParam string, g
 	}
 }
 
-func (gIface *DefaultGatewayQosProfilesClient) Update(qosProfileIdParam string, gatewayQosProfileParam model.GatewayQosProfile) (model.GatewayQosProfile, error) {
+func (gIface *DefaultGatewayQosProfilesClient) Update(qosProfileIdParam string, gatewayQosProfileParam model.GatewayQosProfile, overrideParam *bool) (model.GatewayQosProfile, error) {
 	typeConverter := gIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(gIface.interfaceIdentifier, "update")
 	sv := bindings.NewStructValueBuilder(gatewayQosProfilesUpdateInputType(), typeConverter)
 	sv.AddStructField("QosProfileId", qosProfileIdParam)
 	sv.AddStructField("GatewayQosProfile", gatewayQosProfileParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		var emptyOutput model.GatewayQosProfile
@@ -188,8 +199,10 @@ func (gIface *DefaultGatewayQosProfilesClient) Update(qosProfileIdParam string, 
 	}
 	operationRestMetaData := gatewayQosProfilesUpdateRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	gIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := gIface.Invoke(gIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := gIface.connector.NewExecutionContext()
+	methodResult := gIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	var emptyOutput model.GatewayQosProfile
 	if methodResult.IsSuccess() {
 		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), gatewayQosProfilesUpdateOutputType())
