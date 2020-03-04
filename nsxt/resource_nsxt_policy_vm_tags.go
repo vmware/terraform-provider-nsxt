@@ -49,7 +49,8 @@ func listAllPolicyVirtualMachines(connector *client.RestConnector) ([]model.Virt
 
 	for {
 		// NOTE: the search API does not return resource_type of VirtualMachine
-		vms, err := client.List(cursor, nil, &boolFalse, nil, nil, &boolFalse, nil)
+		enforcementPointPath := getPolicyEnforcementPointPath()
+		vms, err := client.List(cursor, &enforcementPointPath, &boolFalse, nil, nil, &boolFalse, nil)
 		if err != nil {
 			return results, err
 		}
