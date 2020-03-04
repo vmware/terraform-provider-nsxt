@@ -209,3 +209,7 @@ func nsxtPolicyWaitForRealizationStateConf(connector *client.RestConnector, d *s
 
 	return stateConf
 }
+
+func getPolicyEnforcementPointPath() string {
+	return "/infra/sites/default/enforcement-points/" + policyEnforcementPoint
+}
