@@ -44,6 +44,7 @@ type ForwardingPoliciesClient interface {
     // @param domainIdParam Domain id (required)
     // @param cursorParam Opaque cursor to be used for getting next page of records (supplied by current result page) (optional)
     // @param includeMarkForDeleteObjectsParam Include objects that are marked for deletion in results (optional, default to false)
+    // @param includeRuleCountParam Include the count of rules in policy (optional, default to false)
     // @param includedFieldsParam Comma separated list of fields that should be included in query result (optional)
     // @param pageSizeParam Maximum number of results to return in this page (server may return fewer) (optional, default to 1000)
     // @param sortAscendingParam (optional)
@@ -54,7 +55,7 @@ type ForwardingPoliciesClient interface {
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	List(domainIdParam string, cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.ForwardingPolicyListResult, error)
+	List(domainIdParam string, cursorParam *string, includeMarkForDeleteObjectsParam *bool, includeRuleCountParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.ForwardingPolicyListResult, error)
 
     // Create or update the forwarding policy.
     //

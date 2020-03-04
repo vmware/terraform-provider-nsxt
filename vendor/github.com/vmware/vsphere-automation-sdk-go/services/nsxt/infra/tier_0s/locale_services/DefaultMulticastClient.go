@@ -70,8 +70,10 @@ func (mIface *DefaultMulticastClient) Get(tier0IdParam string, localeServicesIdP
 	}
 	operationRestMetaData := multicastGetRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	mIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := mIface.Invoke(mIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := mIface.connector.NewExecutionContext()
+	methodResult := mIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	var emptyOutput model.PolicyMulticastConfig
 	if methodResult.IsSuccess() {
 		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), multicastGetOutputType())
@@ -88,21 +90,24 @@ func (mIface *DefaultMulticastClient) Get(tier0IdParam string, localeServicesIdP
 	}
 }
 
-func (mIface *DefaultMulticastClient) Patch(tier0IdParam string, localeServicesIdParam string, policyMulticastConfigParam model.PolicyMulticastConfig) error {
+func (mIface *DefaultMulticastClient) Patch(tier0IdParam string, localeServicesIdParam string, policyMulticastConfigParam model.PolicyMulticastConfig, overrideParam *bool) error {
 	typeConverter := mIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(mIface.interfaceIdentifier, "patch")
 	sv := bindings.NewStructValueBuilder(multicastPatchInputType(), typeConverter)
 	sv.AddStructField("Tier0Id", tier0IdParam)
 	sv.AddStructField("LocaleServicesId", localeServicesIdParam)
 	sv.AddStructField("PolicyMulticastConfig", policyMulticastConfigParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
 	}
 	operationRestMetaData := multicastPatchRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	mIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := mIface.Invoke(mIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := mIface.connector.NewExecutionContext()
+	methodResult := mIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	if methodResult.IsSuccess() {
 		return nil
 	} else {
@@ -114,13 +119,14 @@ func (mIface *DefaultMulticastClient) Patch(tier0IdParam string, localeServicesI
 	}
 }
 
-func (mIface *DefaultMulticastClient) Update(tier0IdParam string, localeServicesIdParam string, policyMulticastConfigParam model.PolicyMulticastConfig) (model.PolicyMulticastConfig, error) {
+func (mIface *DefaultMulticastClient) Update(tier0IdParam string, localeServicesIdParam string, policyMulticastConfigParam model.PolicyMulticastConfig, overrideParam *bool) (model.PolicyMulticastConfig, error) {
 	typeConverter := mIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(mIface.interfaceIdentifier, "update")
 	sv := bindings.NewStructValueBuilder(multicastUpdateInputType(), typeConverter)
 	sv.AddStructField("Tier0Id", tier0IdParam)
 	sv.AddStructField("LocaleServicesId", localeServicesIdParam)
 	sv.AddStructField("PolicyMulticastConfig", policyMulticastConfigParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		var emptyOutput model.PolicyMulticastConfig
@@ -128,8 +134,10 @@ func (mIface *DefaultMulticastClient) Update(tier0IdParam string, localeServices
 	}
 	operationRestMetaData := multicastUpdateRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	mIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := mIface.Invoke(mIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := mIface.connector.NewExecutionContext()
+	methodResult := mIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	var emptyOutput model.PolicyMulticastConfig
 	if methodResult.IsSuccess() {
 		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), multicastUpdateOutputType())

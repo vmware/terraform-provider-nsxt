@@ -68,8 +68,10 @@ func (gIface *DefaultGlobalConfigClient) Get() (model.GlobalConfig, error) {
 	}
 	operationRestMetaData := globalConfigGetRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	gIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := gIface.Invoke(gIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := gIface.connector.NewExecutionContext()
+	methodResult := gIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	var emptyOutput model.GlobalConfig
 	if methodResult.IsSuccess() {
 		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), globalConfigGetOutputType())
@@ -97,8 +99,10 @@ func (gIface *DefaultGlobalConfigClient) Patch(globalConfigParam model.GlobalCon
 	}
 	operationRestMetaData := globalConfigPatchRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	gIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := gIface.Invoke(gIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := gIface.connector.NewExecutionContext()
+	methodResult := gIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	if methodResult.IsSuccess() {
 		return nil
 	} else {
@@ -122,8 +126,10 @@ func (gIface *DefaultGlobalConfigClient) Update(globalConfigParam model.GlobalCo
 	}
 	operationRestMetaData := globalConfigUpdateRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	gIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := gIface.Invoke(gIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := gIface.connector.NewExecutionContext()
+	methodResult := gIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	var emptyOutput model.GlobalConfig
 	if methodResult.IsSuccess() {
 		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), globalConfigUpdateOutputType())

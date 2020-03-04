@@ -53,13 +53,14 @@ func NewDefaultRoutingTableClient(connector client.Connector) *DefaultRoutingTab
 	return &rIface
 }
 
-func (rIface *DefaultRoutingTableClient) List(tier0IdParam string, cursorParam *string, edgeIdParam *string, enforcementPointPathParam *string, includedFieldsParam *string, networkPrefixParam *string, pageSizeParam *int64, routeSourceParam *string, sortAscendingParam *bool, sortByParam *string) (model.RoutingTableListResult, error) {
+func (rIface *DefaultRoutingTableClient) List(tier0IdParam string, cursorParam *string, edgeIdParam *string, edgePathParam *string, enforcementPointPathParam *string, includedFieldsParam *string, networkPrefixParam *string, pageSizeParam *int64, routeSourceParam *string, sortAscendingParam *bool, sortByParam *string) (model.RoutingTableListResult, error) {
 	typeConverter := rIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(rIface.interfaceIdentifier, "list")
 	sv := bindings.NewStructValueBuilder(routingTableListInputType(), typeConverter)
 	sv.AddStructField("Tier0Id", tier0IdParam)
 	sv.AddStructField("Cursor", cursorParam)
 	sv.AddStructField("EdgeId", edgeIdParam)
+	sv.AddStructField("EdgePath", edgePathParam)
 	sv.AddStructField("EnforcementPointPath", enforcementPointPathParam)
 	sv.AddStructField("IncludedFields", includedFieldsParam)
 	sv.AddStructField("NetworkPrefix", networkPrefixParam)
@@ -74,8 +75,10 @@ func (rIface *DefaultRoutingTableClient) List(tier0IdParam string, cursorParam *
 	}
 	operationRestMetaData := routingTableListRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	rIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := rIface.Invoke(rIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := rIface.connector.NewExecutionContext()
+	methodResult := rIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	var emptyOutput model.RoutingTableListResult
 	if methodResult.IsSuccess() {
 		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), routingTableListOutputType())

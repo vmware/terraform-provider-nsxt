@@ -28,7 +28,9 @@ func ipv6DadProfilesDeleteInputType() bindings.StructType {
 	fields := make(map[string]bindings.BindingType)
 	fieldNameMap := make(map[string]string)
 	fields["dad_profile_id"] = bindings.NewStringType()
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["dad_profile_id"] = "DadProfileId"
+	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -45,10 +47,14 @@ func ipv6DadProfilesDeleteRestMetadata() protocol.OperationRestMetadata {
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	fields["dad_profile_id"] = bindings.NewStringType()
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["dad_profile_id"] = "DadProfileId"
+	fieldNameMap["override"] = "Override"
+	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["dad_profile_id"] = bindings.NewStringType()
 	paramsTypeMap["dadProfileId"] = bindings.NewStringType()
 	pathParams["dad_profile_id"] = "dadProfileId"
+	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -190,8 +196,10 @@ func ipv6DadProfilesPatchInputType() bindings.StructType {
 	fieldNameMap := make(map[string]string)
 	fields["dad_profile_id"] = bindings.NewStringType()
 	fields["ipv6_dad_profile"] = bindings.NewReferenceType(model.Ipv6DadProfileBindingType)
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["dad_profile_id"] = "DadProfileId"
 	fieldNameMap["ipv6_dad_profile"] = "Ipv6DadProfile"
+	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -209,12 +217,16 @@ func ipv6DadProfilesPatchRestMetadata() protocol.OperationRestMetadata {
 	headerParams := map[string]string{}
 	fields["dad_profile_id"] = bindings.NewStringType()
 	fields["ipv6_dad_profile"] = bindings.NewReferenceType(model.Ipv6DadProfileBindingType)
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["dad_profile_id"] = "DadProfileId"
 	fieldNameMap["ipv6_dad_profile"] = "Ipv6DadProfile"
+	fieldNameMap["override"] = "Override"
+	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["dad_profile_id"] = bindings.NewStringType()
 	paramsTypeMap["ipv6_dad_profile"] = bindings.NewReferenceType(model.Ipv6DadProfileBindingType)
 	paramsTypeMap["dadProfileId"] = bindings.NewStringType()
 	pathParams["dad_profile_id"] = "dadProfileId"
+	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -239,8 +251,10 @@ func ipv6DadProfilesUpdateInputType() bindings.StructType {
 	fieldNameMap := make(map[string]string)
 	fields["dad_profile_id"] = bindings.NewStringType()
 	fields["ipv6_dad_profile"] = bindings.NewReferenceType(model.Ipv6DadProfileBindingType)
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["dad_profile_id"] = "DadProfileId"
 	fieldNameMap["ipv6_dad_profile"] = "Ipv6DadProfile"
+	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -258,12 +272,16 @@ func ipv6DadProfilesUpdateRestMetadata() protocol.OperationRestMetadata {
 	headerParams := map[string]string{}
 	fields["dad_profile_id"] = bindings.NewStringType()
 	fields["ipv6_dad_profile"] = bindings.NewReferenceType(model.Ipv6DadProfileBindingType)
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["dad_profile_id"] = "DadProfileId"
 	fieldNameMap["ipv6_dad_profile"] = "Ipv6DadProfile"
+	fieldNameMap["override"] = "Override"
+	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["dad_profile_id"] = bindings.NewStringType()
 	paramsTypeMap["ipv6_dad_profile"] = bindings.NewReferenceType(model.Ipv6DadProfileBindingType)
 	paramsTypeMap["dadProfileId"] = bindings.NewStringType()
 	pathParams["dad_profile_id"] = "dadProfileId"
+	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]string{}
 	return protocol.NewOperationRestMetadata(

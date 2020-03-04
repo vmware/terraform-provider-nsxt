@@ -4,13 +4,13 @@
 // Code generated. DO NOT EDIT.
 
 /*
- * Data type definitions file for service: Span.
+ * Data type definitions file for service: OnboardingCheckCompatibility.
  * Includes binding types of a structures and enumerations defined in the service.
  * Shared by client-side stubs and server-side skeletons to ensure type
  * compatibility.
  */
 
-package tier_0s
+package infra
 
 import (
 	"reflect"
@@ -24,31 +24,29 @@ import (
 
 
 
-func spanGetInputType() bindings.StructType {
+func onboardingCheckCompatibilityCreateInputType() bindings.StructType {
 	fields := make(map[string]bindings.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["tier0_id"] = bindings.NewStringType()
-	fieldNameMap["tier0_id"] = "Tier0Id"
+	fields["site_node_connection_info"] = bindings.NewReferenceType(model.SiteNodeConnectionInfoBindingType)
+	fieldNameMap["site_node_connection_info"] = "SiteNodeConnectionInfo"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
 
-func spanGetOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.SitesBindingType)
+func onboardingCheckCompatibilityCreateOutputType() bindings.BindingType {
+	return bindings.NewReferenceType(model.CompatibilityCheckResultBindingType)
 }
 
-func spanGetRestMetadata() protocol.OperationRestMetadata {
+func onboardingCheckCompatibilityCreateRestMetadata() protocol.OperationRestMetadata {
 	fields := map[string]bindings.BindingType{}
 	fieldNameMap := map[string]string{}
 	paramsTypeMap := map[string]bindings.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
-	fields["tier0_id"] = bindings.NewStringType()
-	fieldNameMap["tier0_id"] = "Tier0Id"
-	paramsTypeMap["tier0_id"] = bindings.NewStringType()
-	paramsTypeMap["tier0Id"] = bindings.NewStringType()
-	pathParams["tier0_id"] = "tier0Id"
+	fields["site_node_connection_info"] = bindings.NewReferenceType(model.SiteNodeConnectionInfoBindingType)
+	fieldNameMap["site_node_connection_info"] = "SiteNodeConnectionInfo"
+	paramsTypeMap["site_node_connection_info"] = bindings.NewReferenceType(model.SiteNodeConnectionInfoBindingType)
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -59,11 +57,11 @@ func spanGetRestMetadata() protocol.OperationRestMetadata {
 		queryParams,
 		headerParams,
 		"",
-		"",
-		"GET",
-		"/policy/api/v1/infra/tier-0s/{tier0Id}/span",
+		"site_node_connection_info",
+		"POST",
+		"/policy/api/v1/infra/onboarding-check-compatibility",
 		resultHeaders,
-		200,
+		201,
 		errorHeaders,
 		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
 }

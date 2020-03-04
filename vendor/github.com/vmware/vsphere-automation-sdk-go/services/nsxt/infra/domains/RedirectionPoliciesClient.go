@@ -43,6 +43,7 @@ type RedirectionPoliciesClient interface {
     //
     // @param cursorParam Opaque cursor to be used for getting next page of records (supplied by current result page) (optional)
     // @param includeMarkForDeleteObjectsParam Include objects that are marked for deletion in results (optional, default to false)
+    // @param includeRuleCountParam Include the count of rules in policy (optional, default to false)
     // @param includedFieldsParam Comma separated list of fields that should be included in query result (optional)
     // @param pageSizeParam Maximum number of results to return in this page (server may return fewer) (optional, default to 1000)
     // @param sortAscendingParam (optional)
@@ -53,13 +54,14 @@ type RedirectionPoliciesClient interface {
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	List(cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.RedirectionPolicyListResult, error)
+	List(cursorParam *string, includeMarkForDeleteObjectsParam *bool, includeRuleCountParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.RedirectionPolicyListResult, error)
 
     // List redirection policys for a domain
     //
     // @param domainIdParam Domain id (required)
     // @param cursorParam Opaque cursor to be used for getting next page of records (supplied by current result page) (optional)
     // @param includeMarkForDeleteObjectsParam Include objects that are marked for deletion in results (optional, default to false)
+    // @param includeRuleCountParam Include the count of rules in policy (optional, default to false)
     // @param includedFieldsParam Comma separated list of fields that should be included in query result (optional)
     // @param pageSizeParam Maximum number of results to return in this page (server may return fewer) (optional, default to 1000)
     // @param sortAscendingParam (optional)
@@ -70,7 +72,7 @@ type RedirectionPoliciesClient interface {
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	List0(domainIdParam string, cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.RedirectionPolicyListResult, error)
+	List0(domainIdParam string, cursorParam *string, includeMarkForDeleteObjectsParam *bool, includeRuleCountParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.RedirectionPolicyListResult, error)
 
     // Create or update the redirection policy.
     //

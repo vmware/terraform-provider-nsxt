@@ -19,12 +19,13 @@ type PortMirroringProfilesClient interface {
     // API will delete port mirroring profile. Mirroring from source to destination ports will be stopped.
     //
     // @param portMirroringProfileIdParam Port Mirroring Profile Id (required)
+    // @param overrideParam Locally override the global object (optional, default to false)
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Delete(portMirroringProfileIdParam string) error
+	Delete(portMirroringProfileIdParam string, overrideParam *bool) error
 
     // API will return details of port mirroring profile.
     //
@@ -52,26 +53,28 @@ type PortMirroringProfilesClient interface {
     // @throws NotFound  Not Found
 	List(cursorParam *string, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.PortMirroringProfileListResult, error)
 
-    // Create a new Port Mirroring Profile if the Port Mirroring Profile with given id does not already exist. If the Port Mirroring Profile with the given id already exists, patch with the existing Port Mirroring Profile.
+    // Create a new Port Mirroring Profile if the Port Mirroring Profile with given id does not already exist. If the Port Mirroring Profile with the given id already exists, patch with the existing Port Mirroring Profile. Realized entities of this API can be found using the path of monitoring profile binding map that is used to apply this profile.
     //
     // @param portMirroringProfileIdParam Port Mirroring Profile Id (required)
     // @param portMirroringProfileParam (required)
+    // @param overrideParam Locally override the global object (optional, default to false)
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Patch(portMirroringProfileIdParam string, portMirroringProfileParam model.PortMirroringProfile) error
+	Patch(portMirroringProfileIdParam string, portMirroringProfileParam model.PortMirroringProfile, overrideParam *bool) error
 
-    // Create or Replace port mirroring profile. Packets will be mirrored from source group, segment, port to destination group.
+    // Create or Replace port mirroring profile. Packets will be mirrored from source group, segment, port to destination group. Realized entities of this API can be found using the path of monitoring profile binding map that is used to apply this profile.
     //
     // @param portMirroringProfileIdParam Port Mirroring Profiles Id (required)
     // @param portMirroringProfileParam (required)
+    // @param overrideParam Locally override the global object (optional, default to false)
     // @return com.vmware.nsx_policy.model.PortMirroringProfile
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Update(portMirroringProfileIdParam string, portMirroringProfileParam model.PortMirroringProfile) (model.PortMirroringProfile, error)
+	Update(portMirroringProfileIdParam string, portMirroringProfileParam model.PortMirroringProfile, overrideParam *bool) (model.PortMirroringProfile, error)
 }

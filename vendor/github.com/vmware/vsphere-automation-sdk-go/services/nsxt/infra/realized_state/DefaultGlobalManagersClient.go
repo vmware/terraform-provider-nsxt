@@ -67,8 +67,10 @@ func (gIface *DefaultGlobalManagersClient) Get(globalManagerIdParam string) (mod
 	}
 	operationRestMetaData := globalManagersGetRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	gIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := gIface.Invoke(gIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := gIface.connector.NewExecutionContext()
+	methodResult := gIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	var emptyOutput model.RealizedGlobalManager
 	if methodResult.IsSuccess() {
 		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), globalManagersGetOutputType())
@@ -102,8 +104,10 @@ func (gIface *DefaultGlobalManagersClient) List(cursorParam *string, includeMark
 	}
 	operationRestMetaData := globalManagersListRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	gIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := gIface.Invoke(gIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := gIface.connector.NewExecutionContext()
+	methodResult := gIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	var emptyOutput model.RealizedGlobalManagerListResult
 	if methodResult.IsSuccess() {
 		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), globalManagersListOutputType())

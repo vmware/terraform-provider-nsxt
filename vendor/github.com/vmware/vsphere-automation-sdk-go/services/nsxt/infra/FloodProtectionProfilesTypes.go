@@ -28,7 +28,9 @@ func floodProtectionProfilesDeleteInputType() bindings.StructType {
 	fields := make(map[string]bindings.BindingType)
 	fieldNameMap := make(map[string]string)
 	fields["flood_protection_profile_id"] = bindings.NewStringType()
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["flood_protection_profile_id"] = "FloodProtectionProfileId"
+	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -45,10 +47,14 @@ func floodProtectionProfilesDeleteRestMetadata() protocol.OperationRestMetadata 
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	fields["flood_protection_profile_id"] = bindings.NewStringType()
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["flood_protection_profile_id"] = "FloodProtectionProfileId"
+	fieldNameMap["override"] = "Override"
+	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["flood_protection_profile_id"] = bindings.NewStringType()
 	paramsTypeMap["floodProtectionProfileId"] = bindings.NewStringType()
 	pathParams["flood_protection_profile_id"] = "floodProtectionProfileId"
+	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -190,8 +196,10 @@ func floodProtectionProfilesPatchInputType() bindings.StructType {
 	fieldNameMap := make(map[string]string)
 	fields["flood_protection_profile_id"] = bindings.NewStringType()
 	fields["flood_protection_profile"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.FloodProtectionProfileBindingType),}, bindings.REST)
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["flood_protection_profile_id"] = "FloodProtectionProfileId"
 	fieldNameMap["flood_protection_profile"] = "FloodProtectionProfile"
+	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -209,12 +217,16 @@ func floodProtectionProfilesPatchRestMetadata() protocol.OperationRestMetadata {
 	headerParams := map[string]string{}
 	fields["flood_protection_profile_id"] = bindings.NewStringType()
 	fields["flood_protection_profile"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.FloodProtectionProfileBindingType),}, bindings.REST)
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["flood_protection_profile_id"] = "FloodProtectionProfileId"
 	fieldNameMap["flood_protection_profile"] = "FloodProtectionProfile"
+	fieldNameMap["override"] = "Override"
+	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["flood_protection_profile_id"] = bindings.NewStringType()
 	paramsTypeMap["flood_protection_profile"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.FloodProtectionProfileBindingType),}, bindings.REST)
 	paramsTypeMap["floodProtectionProfileId"] = bindings.NewStringType()
 	pathParams["flood_protection_profile_id"] = "floodProtectionProfileId"
+	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -239,8 +251,10 @@ func floodProtectionProfilesUpdateInputType() bindings.StructType {
 	fieldNameMap := make(map[string]string)
 	fields["flood_protection_profile_id"] = bindings.NewStringType()
 	fields["flood_protection_profile"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.FloodProtectionProfileBindingType),}, bindings.REST)
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["flood_protection_profile_id"] = "FloodProtectionProfileId"
 	fieldNameMap["flood_protection_profile"] = "FloodProtectionProfile"
+	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -258,12 +272,16 @@ func floodProtectionProfilesUpdateRestMetadata() protocol.OperationRestMetadata 
 	headerParams := map[string]string{}
 	fields["flood_protection_profile_id"] = bindings.NewStringType()
 	fields["flood_protection_profile"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.FloodProtectionProfileBindingType),}, bindings.REST)
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["flood_protection_profile_id"] = "FloodProtectionProfileId"
 	fieldNameMap["flood_protection_profile"] = "FloodProtectionProfile"
+	fieldNameMap["override"] = "Override"
+	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["flood_protection_profile_id"] = bindings.NewStringType()
 	paramsTypeMap["flood_protection_profile"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.FloodProtectionProfileBindingType),}, bindings.REST)
 	paramsTypeMap["floodProtectionProfileId"] = bindings.NewStringType()
 	pathParams["flood_protection_profile_id"] = "floodProtectionProfileId"
+	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]string{}
 	return protocol.NewOperationRestMetadata(

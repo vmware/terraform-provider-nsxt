@@ -27,7 +27,7 @@ type RealizedEntityClient interface {
     // @throws NotFound  Not Found
 	Get(realizedPathParam string) (model.GenericPolicyRealizedResource, error)
 
-    // Refresh the status and statistics of all realized entities associated with given intent path synchronously.
+    // Refresh the status and statistics of all realized entities associated with given intent path synchronously. The vmw-async: True HTTP header cannot be used with this API.
     //
     // @param intentPathParam String Path of the intent object (required)
     // @param enforcementPointPathParam String Path of the enforcement point (optional)

@@ -4,26 +4,26 @@
 // Code generated. DO NOT EDIT.
 
 /*
- * Interface file for service: Span
+ * Interface file for service: OnboardingCheckCompatibility
  * Used by client-side stubs.
  */
 
-package domains
+package infra
 
 import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
-type SpanClient interface {
+type OnboardingCheckCompatibilityClient interface {
 
-    // Get site span for Domain.
+    // Create or fully replace a Site under Infra. Revision is optional for creation and required for update.
     //
-    // @param domainIdParam (required)
-    // @return com.vmware.nsx_policy.model.Sites
+    // @param siteNodeConnectionInfoParam (required)
+    // @return com.vmware.nsx_policy.model.CompatibilityCheckResult
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Get(domainIdParam string) (model.Sites, error)
+	Create(siteNodeConnectionInfoParam model.SiteNodeConnectionInfo) (model.CompatibilityCheckResult, error)
 }

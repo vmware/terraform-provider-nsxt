@@ -33,23 +33,25 @@ type MulticastClient interface {
     // @param tier0IdParam tier0 id (required)
     // @param localeServicesIdParam locale services id (required)
     // @param policyMulticastConfigParam (required)
+    // @param overrideParam Locally override the global object (optional, default to false)
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Patch(tier0IdParam string, localeServicesIdParam string, policyMulticastConfigParam model.PolicyMulticastConfig) error
+	Patch(tier0IdParam string, localeServicesIdParam string, policyMulticastConfigParam model.PolicyMulticastConfig, overrideParam *bool) error
 
     // Create or update multicast config.
     //
     // @param tier0IdParam tier0 id (required)
     // @param localeServicesIdParam locale services id (required)
     // @param policyMulticastConfigParam (required)
+    // @param overrideParam Locally override the global object (optional, default to false)
     // @return com.vmware.nsx_policy.model.PolicyMulticastConfig
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Update(tier0IdParam string, localeServicesIdParam string, policyMulticastConfigParam model.PolicyMulticastConfig) (model.PolicyMulticastConfig, error)
+	Update(tier0IdParam string, localeServicesIdParam string, policyMulticastConfigParam model.PolicyMulticastConfig, overrideParam *bool) (model.PolicyMulticastConfig, error)
 }

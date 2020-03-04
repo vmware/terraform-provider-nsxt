@@ -21,12 +21,13 @@ type EvpnTunnelEndpointsClient interface {
     // @param tier0IdParam tier0 id (required)
     // @param localeServicesIdParam locale services id (required)
     // @param tunnelEndpointIdParam tunnel endpoint id (required)
+    // @param overrideParam Locally override the global object (optional, default to false)
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Delete(tier0IdParam string, localeServicesIdParam string, tunnelEndpointIdParam string) error
+	Delete(tier0IdParam string, localeServicesIdParam string, tunnelEndpointIdParam string, overrideParam *bool) error
 
     // Read evpn tunnel endpoint Config.
     //
@@ -65,12 +66,13 @@ type EvpnTunnelEndpointsClient interface {
     // @param localeServicesIdParam locale services id (required)
     // @param tunnelEndpointIdParam tunnel endpoint id (required)
     // @param evpnTunnelEndpointConfigParam (required)
+    // @param overrideParam Locally override the global object (optional, default to false)
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Patch(tier0IdParam string, localeServicesIdParam string, tunnelEndpointIdParam string, evpnTunnelEndpointConfigParam model.EvpnTunnelEndpointConfig) error
+	Patch(tier0IdParam string, localeServicesIdParam string, tunnelEndpointIdParam string, evpnTunnelEndpointConfigParam model.EvpnTunnelEndpointConfig, overrideParam *bool) error
 
     // Create or update evpn tunnel endpoint config.
     //
@@ -78,11 +80,12 @@ type EvpnTunnelEndpointsClient interface {
     // @param localeServicesIdParam locale services id (required)
     // @param tunnelEndpointIdParam tunnel endpoint id (required)
     // @param evpnTunnelEndpointConfigParam (required)
+    // @param overrideParam Locally override the global object (optional, default to false)
     // @return com.vmware.nsx_policy.model.EvpnTunnelEndpointConfig
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Update(tier0IdParam string, localeServicesIdParam string, tunnelEndpointIdParam string, evpnTunnelEndpointConfigParam model.EvpnTunnelEndpointConfig) (model.EvpnTunnelEndpointConfig, error)
+	Update(tier0IdParam string, localeServicesIdParam string, tunnelEndpointIdParam string, evpnTunnelEndpointConfigParam model.EvpnTunnelEndpointConfig, overrideParam *bool) (model.EvpnTunnelEndpointConfig, error)
 }

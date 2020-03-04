@@ -16,30 +16,12 @@ import (
 
 type FederationConfigClient interface {
 
-    // Delete federation config
+    // Read a federation config from Global Manager.
+    // @return com.vmware.nsx_policy.model.FederationConfig
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Delete() error
-
-    // Read federation config
-    // @return com.vmware.nsx_policy.model.GmFederationConfig
-    // @throws InvalidRequest  Bad Request, Precondition Failed
-    // @throws Unauthorized  Forbidden
-    // @throws ServiceUnavailable  Service Unavailable
-    // @throws InternalServerError  Internal Server Error
-    // @throws NotFound  Not Found
-	Get() (model.GmFederationConfig, error)
-
-    // Create or update federation configuration.
-    //
-    // @param gmFederationConfigParam (required)
-    // @throws InvalidRequest  Bad Request, Precondition Failed
-    // @throws Unauthorized  Forbidden
-    // @throws ServiceUnavailable  Service Unavailable
-    // @throws InternalServerError  Internal Server Error
-    // @throws NotFound  Not Found
-	Patch(gmFederationConfigParam model.GmFederationConfig) error
+	Get() (model.FederationConfig, error)
 }

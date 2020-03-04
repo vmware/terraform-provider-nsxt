@@ -61,19 +61,22 @@ func NewDefaultDnsSecurityProfilesClient(connector client.Connector) *DefaultDns
 	return &dIface
 }
 
-func (dIface *DefaultDnsSecurityProfilesClient) Delete(profileIdParam string) error {
+func (dIface *DefaultDnsSecurityProfilesClient) Delete(profileIdParam string, overrideParam *bool) error {
 	typeConverter := dIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(dIface.interfaceIdentifier, "delete")
 	sv := bindings.NewStructValueBuilder(dnsSecurityProfilesDeleteInputType(), typeConverter)
 	sv.AddStructField("ProfileId", profileIdParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
 	}
 	operationRestMetaData := dnsSecurityProfilesDeleteRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	dIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := dIface.Invoke(dIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := dIface.connector.NewExecutionContext()
+	methodResult := dIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	if methodResult.IsSuccess() {
 		return nil
 	} else {
@@ -97,8 +100,10 @@ func (dIface *DefaultDnsSecurityProfilesClient) Get(profileIdParam string) (mode
 	}
 	operationRestMetaData := dnsSecurityProfilesGetRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	dIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := dIface.Invoke(dIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := dIface.connector.NewExecutionContext()
+	methodResult := dIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	var emptyOutput model.DnsSecurityProfile
 	if methodResult.IsSuccess() {
 		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), dnsSecurityProfilesGetOutputType())
@@ -132,8 +137,10 @@ func (dIface *DefaultDnsSecurityProfilesClient) List(cursorParam *string, includ
 	}
 	operationRestMetaData := dnsSecurityProfilesListRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	dIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := dIface.Invoke(dIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := dIface.connector.NewExecutionContext()
+	methodResult := dIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	var emptyOutput model.DnsSecurityProfileListResult
 	if methodResult.IsSuccess() {
 		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), dnsSecurityProfilesListOutputType())
@@ -150,20 +157,23 @@ func (dIface *DefaultDnsSecurityProfilesClient) List(cursorParam *string, includ
 	}
 }
 
-func (dIface *DefaultDnsSecurityProfilesClient) Patch(profileIdParam string, dnsSecurityProfileParam model.DnsSecurityProfile) error {
+func (dIface *DefaultDnsSecurityProfilesClient) Patch(profileIdParam string, dnsSecurityProfileParam model.DnsSecurityProfile, overrideParam *bool) error {
 	typeConverter := dIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(dIface.interfaceIdentifier, "patch")
 	sv := bindings.NewStructValueBuilder(dnsSecurityProfilesPatchInputType(), typeConverter)
 	sv.AddStructField("ProfileId", profileIdParam)
 	sv.AddStructField("DnsSecurityProfile", dnsSecurityProfileParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
 	}
 	operationRestMetaData := dnsSecurityProfilesPatchRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	dIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := dIface.Invoke(dIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := dIface.connector.NewExecutionContext()
+	methodResult := dIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	if methodResult.IsSuccess() {
 		return nil
 	} else {
@@ -175,12 +185,13 @@ func (dIface *DefaultDnsSecurityProfilesClient) Patch(profileIdParam string, dns
 	}
 }
 
-func (dIface *DefaultDnsSecurityProfilesClient) Update(profileIdParam string, dnsSecurityProfileParam model.DnsSecurityProfile) (model.DnsSecurityProfile, error) {
+func (dIface *DefaultDnsSecurityProfilesClient) Update(profileIdParam string, dnsSecurityProfileParam model.DnsSecurityProfile, overrideParam *bool) (model.DnsSecurityProfile, error) {
 	typeConverter := dIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(dIface.interfaceIdentifier, "update")
 	sv := bindings.NewStructValueBuilder(dnsSecurityProfilesUpdateInputType(), typeConverter)
 	sv.AddStructField("ProfileId", profileIdParam)
 	sv.AddStructField("DnsSecurityProfile", dnsSecurityProfileParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		var emptyOutput model.DnsSecurityProfile
@@ -188,8 +199,10 @@ func (dIface *DefaultDnsSecurityProfilesClient) Update(profileIdParam string, dn
 	}
 	operationRestMetaData := dnsSecurityProfilesUpdateRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	dIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := dIface.Invoke(dIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := dIface.connector.NewExecutionContext()
+	methodResult := dIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	var emptyOutput model.DnsSecurityProfile
 	if methodResult.IsSuccess() {
 		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), dnsSecurityProfilesUpdateOutputType())

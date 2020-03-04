@@ -61,19 +61,22 @@ func NewDefaultSpoofguardProfilesClient(connector client.Connector) *DefaultSpoo
 	return &sIface
 }
 
-func (sIface *DefaultSpoofguardProfilesClient) Delete(spoofguardProfileIdParam string) error {
+func (sIface *DefaultSpoofguardProfilesClient) Delete(spoofguardProfileIdParam string, overrideParam *bool) error {
 	typeConverter := sIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(sIface.interfaceIdentifier, "delete")
 	sv := bindings.NewStructValueBuilder(spoofguardProfilesDeleteInputType(), typeConverter)
 	sv.AddStructField("SpoofguardProfileId", spoofguardProfileIdParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
 	}
 	operationRestMetaData := spoofguardProfilesDeleteRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	sIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := sIface.Invoke(sIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := sIface.connector.NewExecutionContext()
+	methodResult := sIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	if methodResult.IsSuccess() {
 		return nil
 	} else {
@@ -97,8 +100,10 @@ func (sIface *DefaultSpoofguardProfilesClient) Get(spoofguardProfileIdParam stri
 	}
 	operationRestMetaData := spoofguardProfilesGetRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	sIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := sIface.Invoke(sIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := sIface.connector.NewExecutionContext()
+	methodResult := sIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	var emptyOutput model.SpoofGuardProfile
 	if methodResult.IsSuccess() {
 		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), spoofguardProfilesGetOutputType())
@@ -132,8 +137,10 @@ func (sIface *DefaultSpoofguardProfilesClient) List(cursorParam *string, include
 	}
 	operationRestMetaData := spoofguardProfilesListRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	sIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := sIface.Invoke(sIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := sIface.connector.NewExecutionContext()
+	methodResult := sIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	var emptyOutput model.SpoofGuardProfileListResult
 	if methodResult.IsSuccess() {
 		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), spoofguardProfilesListOutputType())
@@ -150,20 +157,23 @@ func (sIface *DefaultSpoofguardProfilesClient) List(cursorParam *string, include
 	}
 }
 
-func (sIface *DefaultSpoofguardProfilesClient) Patch(spoofguardProfileIdParam string, spoofGuardProfileParam model.SpoofGuardProfile) error {
+func (sIface *DefaultSpoofguardProfilesClient) Patch(spoofguardProfileIdParam string, spoofGuardProfileParam model.SpoofGuardProfile, overrideParam *bool) error {
 	typeConverter := sIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(sIface.interfaceIdentifier, "patch")
 	sv := bindings.NewStructValueBuilder(spoofguardProfilesPatchInputType(), typeConverter)
 	sv.AddStructField("SpoofguardProfileId", spoofguardProfileIdParam)
 	sv.AddStructField("SpoofGuardProfile", spoofGuardProfileParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
 	}
 	operationRestMetaData := spoofguardProfilesPatchRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	sIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := sIface.Invoke(sIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := sIface.connector.NewExecutionContext()
+	methodResult := sIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	if methodResult.IsSuccess() {
 		return nil
 	} else {
@@ -175,12 +185,13 @@ func (sIface *DefaultSpoofguardProfilesClient) Patch(spoofguardProfileIdParam st
 	}
 }
 
-func (sIface *DefaultSpoofguardProfilesClient) Update(spoofguardProfileIdParam string, spoofGuardProfileParam model.SpoofGuardProfile) (model.SpoofGuardProfile, error) {
+func (sIface *DefaultSpoofguardProfilesClient) Update(spoofguardProfileIdParam string, spoofGuardProfileParam model.SpoofGuardProfile, overrideParam *bool) (model.SpoofGuardProfile, error) {
 	typeConverter := sIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(sIface.interfaceIdentifier, "update")
 	sv := bindings.NewStructValueBuilder(spoofguardProfilesUpdateInputType(), typeConverter)
 	sv.AddStructField("SpoofguardProfileId", spoofguardProfileIdParam)
 	sv.AddStructField("SpoofGuardProfile", spoofGuardProfileParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		var emptyOutput model.SpoofGuardProfile
@@ -188,8 +199,10 @@ func (sIface *DefaultSpoofguardProfilesClient) Update(spoofguardProfileIdParam s
 	}
 	operationRestMetaData := spoofguardProfilesUpdateRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	sIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := sIface.Invoke(sIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := sIface.connector.NewExecutionContext()
+	methodResult := sIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	var emptyOutput model.SpoofGuardProfile
 	if methodResult.IsSuccess() {
 		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), spoofguardProfilesUpdateOutputType())

@@ -28,7 +28,9 @@ func firewallSessionTimerProfilesDeleteInputType() bindings.StructType {
 	fields := make(map[string]bindings.BindingType)
 	fieldNameMap := make(map[string]string)
 	fields["firewall_session_timer_profile_id"] = bindings.NewStringType()
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["firewall_session_timer_profile_id"] = "FirewallSessionTimerProfileId"
+	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -45,10 +47,14 @@ func firewallSessionTimerProfilesDeleteRestMetadata() protocol.OperationRestMeta
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	fields["firewall_session_timer_profile_id"] = bindings.NewStringType()
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["firewall_session_timer_profile_id"] = "FirewallSessionTimerProfileId"
+	fieldNameMap["override"] = "Override"
+	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["firewall_session_timer_profile_id"] = bindings.NewStringType()
 	paramsTypeMap["firewallSessionTimerProfileId"] = bindings.NewStringType()
 	pathParams["firewall_session_timer_profile_id"] = "firewallSessionTimerProfileId"
+	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -190,8 +196,10 @@ func firewallSessionTimerProfilesPatchInputType() bindings.StructType {
 	fieldNameMap := make(map[string]string)
 	fields["firewall_session_timer_profile_id"] = bindings.NewStringType()
 	fields["policy_firewall_session_timer_profile"] = bindings.NewReferenceType(model.PolicyFirewallSessionTimerProfileBindingType)
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["firewall_session_timer_profile_id"] = "FirewallSessionTimerProfileId"
 	fieldNameMap["policy_firewall_session_timer_profile"] = "PolicyFirewallSessionTimerProfile"
+	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -209,12 +217,16 @@ func firewallSessionTimerProfilesPatchRestMetadata() protocol.OperationRestMetad
 	headerParams := map[string]string{}
 	fields["firewall_session_timer_profile_id"] = bindings.NewStringType()
 	fields["policy_firewall_session_timer_profile"] = bindings.NewReferenceType(model.PolicyFirewallSessionTimerProfileBindingType)
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["firewall_session_timer_profile_id"] = "FirewallSessionTimerProfileId"
 	fieldNameMap["policy_firewall_session_timer_profile"] = "PolicyFirewallSessionTimerProfile"
+	fieldNameMap["override"] = "Override"
+	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["firewall_session_timer_profile_id"] = bindings.NewStringType()
 	paramsTypeMap["policy_firewall_session_timer_profile"] = bindings.NewReferenceType(model.PolicyFirewallSessionTimerProfileBindingType)
 	paramsTypeMap["firewallSessionTimerProfileId"] = bindings.NewStringType()
 	pathParams["firewall_session_timer_profile_id"] = "firewallSessionTimerProfileId"
+	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -239,8 +251,10 @@ func firewallSessionTimerProfilesUpdateInputType() bindings.StructType {
 	fieldNameMap := make(map[string]string)
 	fields["firewall_session_timer_profile_id"] = bindings.NewStringType()
 	fields["policy_firewall_session_timer_profile"] = bindings.NewReferenceType(model.PolicyFirewallSessionTimerProfileBindingType)
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["firewall_session_timer_profile_id"] = "FirewallSessionTimerProfileId"
 	fieldNameMap["policy_firewall_session_timer_profile"] = "PolicyFirewallSessionTimerProfile"
+	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -258,12 +272,16 @@ func firewallSessionTimerProfilesUpdateRestMetadata() protocol.OperationRestMeta
 	headerParams := map[string]string{}
 	fields["firewall_session_timer_profile_id"] = bindings.NewStringType()
 	fields["policy_firewall_session_timer_profile"] = bindings.NewReferenceType(model.PolicyFirewallSessionTimerProfileBindingType)
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["firewall_session_timer_profile_id"] = "FirewallSessionTimerProfileId"
 	fieldNameMap["policy_firewall_session_timer_profile"] = "PolicyFirewallSessionTimerProfile"
+	fieldNameMap["override"] = "Override"
+	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["firewall_session_timer_profile_id"] = bindings.NewStringType()
 	paramsTypeMap["policy_firewall_session_timer_profile"] = bindings.NewReferenceType(model.PolicyFirewallSessionTimerProfileBindingType)
 	paramsTypeMap["firewallSessionTimerProfileId"] = bindings.NewStringType()
 	pathParams["firewall_session_timer_profile_id"] = "firewallSessionTimerProfileId"
+	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]string{}
 	return protocol.NewOperationRestMetadata(

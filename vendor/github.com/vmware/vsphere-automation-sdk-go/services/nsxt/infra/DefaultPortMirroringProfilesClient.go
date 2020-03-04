@@ -61,19 +61,22 @@ func NewDefaultPortMirroringProfilesClient(connector client.Connector) *DefaultP
 	return &pIface
 }
 
-func (pIface *DefaultPortMirroringProfilesClient) Delete(portMirroringProfileIdParam string) error {
+func (pIface *DefaultPortMirroringProfilesClient) Delete(portMirroringProfileIdParam string, overrideParam *bool) error {
 	typeConverter := pIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(pIface.interfaceIdentifier, "delete")
 	sv := bindings.NewStructValueBuilder(portMirroringProfilesDeleteInputType(), typeConverter)
 	sv.AddStructField("PortMirroringProfileId", portMirroringProfileIdParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
 	}
 	operationRestMetaData := portMirroringProfilesDeleteRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	pIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := pIface.Invoke(pIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := pIface.connector.NewExecutionContext()
+	methodResult := pIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	if methodResult.IsSuccess() {
 		return nil
 	} else {
@@ -97,8 +100,10 @@ func (pIface *DefaultPortMirroringProfilesClient) Get(portMirroringProfileIdPara
 	}
 	operationRestMetaData := portMirroringProfilesGetRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	pIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := pIface.Invoke(pIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := pIface.connector.NewExecutionContext()
+	methodResult := pIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	var emptyOutput model.PortMirroringProfile
 	if methodResult.IsSuccess() {
 		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), portMirroringProfilesGetOutputType())
@@ -131,8 +136,10 @@ func (pIface *DefaultPortMirroringProfilesClient) List(cursorParam *string, incl
 	}
 	operationRestMetaData := portMirroringProfilesListRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	pIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := pIface.Invoke(pIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := pIface.connector.NewExecutionContext()
+	methodResult := pIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	var emptyOutput model.PortMirroringProfileListResult
 	if methodResult.IsSuccess() {
 		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), portMirroringProfilesListOutputType())
@@ -149,20 +156,23 @@ func (pIface *DefaultPortMirroringProfilesClient) List(cursorParam *string, incl
 	}
 }
 
-func (pIface *DefaultPortMirroringProfilesClient) Patch(portMirroringProfileIdParam string, portMirroringProfileParam model.PortMirroringProfile) error {
+func (pIface *DefaultPortMirroringProfilesClient) Patch(portMirroringProfileIdParam string, portMirroringProfileParam model.PortMirroringProfile, overrideParam *bool) error {
 	typeConverter := pIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(pIface.interfaceIdentifier, "patch")
 	sv := bindings.NewStructValueBuilder(portMirroringProfilesPatchInputType(), typeConverter)
 	sv.AddStructField("PortMirroringProfileId", portMirroringProfileIdParam)
 	sv.AddStructField("PortMirroringProfile", portMirroringProfileParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
 	}
 	operationRestMetaData := portMirroringProfilesPatchRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	pIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := pIface.Invoke(pIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := pIface.connector.NewExecutionContext()
+	methodResult := pIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	if methodResult.IsSuccess() {
 		return nil
 	} else {
@@ -174,12 +184,13 @@ func (pIface *DefaultPortMirroringProfilesClient) Patch(portMirroringProfileIdPa
 	}
 }
 
-func (pIface *DefaultPortMirroringProfilesClient) Update(portMirroringProfileIdParam string, portMirroringProfileParam model.PortMirroringProfile) (model.PortMirroringProfile, error) {
+func (pIface *DefaultPortMirroringProfilesClient) Update(portMirroringProfileIdParam string, portMirroringProfileParam model.PortMirroringProfile, overrideParam *bool) (model.PortMirroringProfile, error) {
 	typeConverter := pIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(pIface.interfaceIdentifier, "update")
 	sv := bindings.NewStructValueBuilder(portMirroringProfilesUpdateInputType(), typeConverter)
 	sv.AddStructField("PortMirroringProfileId", portMirroringProfileIdParam)
 	sv.AddStructField("PortMirroringProfile", portMirroringProfileParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		var emptyOutput model.PortMirroringProfile
@@ -187,8 +198,10 @@ func (pIface *DefaultPortMirroringProfilesClient) Update(portMirroringProfileIdP
 	}
 	operationRestMetaData := portMirroringProfilesUpdateRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	pIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := pIface.Invoke(pIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := pIface.connector.NewExecutionContext()
+	methodResult := pIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	var emptyOutput model.PortMirroringProfile
 	if methodResult.IsSuccess() {
 		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), portMirroringProfilesUpdateOutputType())

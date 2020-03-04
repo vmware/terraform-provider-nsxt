@@ -75,8 +75,10 @@ func (gIface *DefaultGroupsClient) Delete(domainIdParam string, groupIdParam str
 	}
 	operationRestMetaData := groupsDeleteRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	gIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := gIface.Invoke(gIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := gIface.connector.NewExecutionContext()
+	methodResult := gIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	if methodResult.IsSuccess() {
 		return nil
 	} else {
@@ -101,8 +103,10 @@ func (gIface *DefaultGroupsClient) Get(domainIdParam string, groupIdParam string
 	}
 	operationRestMetaData := groupsGetRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	gIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := gIface.Invoke(gIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := gIface.connector.NewExecutionContext()
+	methodResult := gIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	var emptyOutput model.Group
 	if methodResult.IsSuccess() {
 		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), groupsGetOutputType())
@@ -119,7 +123,7 @@ func (gIface *DefaultGroupsClient) Get(domainIdParam string, groupIdParam string
 	}
 }
 
-func (gIface *DefaultGroupsClient) List(domainIdParam string, cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.GroupListResult, error) {
+func (gIface *DefaultGroupsClient) List(domainIdParam string, cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, memberTypesParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.GroupListResult, error) {
 	typeConverter := gIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(gIface.interfaceIdentifier, "list")
 	sv := bindings.NewStructValueBuilder(groupsListInputType(), typeConverter)
@@ -127,6 +131,7 @@ func (gIface *DefaultGroupsClient) List(domainIdParam string, cursorParam *strin
 	sv.AddStructField("Cursor", cursorParam)
 	sv.AddStructField("IncludeMarkForDeleteObjects", includeMarkForDeleteObjectsParam)
 	sv.AddStructField("IncludedFields", includedFieldsParam)
+	sv.AddStructField("MemberTypes", memberTypesParam)
 	sv.AddStructField("PageSize", pageSizeParam)
 	sv.AddStructField("SortAscending", sortAscendingParam)
 	sv.AddStructField("SortBy", sortByParam)
@@ -137,8 +142,10 @@ func (gIface *DefaultGroupsClient) List(domainIdParam string, cursorParam *strin
 	}
 	operationRestMetaData := groupsListRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	gIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := gIface.Invoke(gIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := gIface.connector.NewExecutionContext()
+	methodResult := gIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	var emptyOutput model.GroupListResult
 	if methodResult.IsSuccess() {
 		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), groupsListOutputType())
@@ -168,8 +175,10 @@ func (gIface *DefaultGroupsClient) Patch(domainIdParam string, groupIdParam stri
 	}
 	operationRestMetaData := groupsPatchRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	gIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := gIface.Invoke(gIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := gIface.connector.NewExecutionContext()
+	methodResult := gIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	if methodResult.IsSuccess() {
 		return nil
 	} else {
@@ -195,8 +204,10 @@ func (gIface *DefaultGroupsClient) Update(domainIdParam string, groupIdParam str
 	}
 	operationRestMetaData := groupsUpdateRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	gIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := gIface.Invoke(gIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := gIface.connector.NewExecutionContext()
+	methodResult := gIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	var emptyOutput model.Group
 	if methodResult.IsSuccess() {
 		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), groupsUpdateOutputType())

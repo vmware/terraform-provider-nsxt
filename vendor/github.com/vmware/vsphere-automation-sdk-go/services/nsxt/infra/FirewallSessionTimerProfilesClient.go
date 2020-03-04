@@ -19,12 +19,13 @@ type FirewallSessionTimerProfilesClient interface {
     // API will delete Firewall Session Timer Profile
     //
     // @param firewallSessionTimerProfileIdParam Firewall Session Timer Profile ID (required)
+    // @param overrideParam Locally override the global object (optional, default to false)
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Delete(firewallSessionTimerProfileIdParam string) error
+	Delete(firewallSessionTimerProfileIdParam string, overrideParam *bool) error
 
     // API will get Firewall Session Timer Profile
     //
@@ -57,22 +58,24 @@ type FirewallSessionTimerProfilesClient interface {
     //
     // @param firewallSessionTimerProfileIdParam Firewall Session Timer Profile ID (required)
     // @param policyFirewallSessionTimerProfileParam (required)
+    // @param overrideParam Locally override the global object (optional, default to false)
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Patch(firewallSessionTimerProfileIdParam string, policyFirewallSessionTimerProfileParam model.PolicyFirewallSessionTimerProfile) error
+	Patch(firewallSessionTimerProfileIdParam string, policyFirewallSessionTimerProfileParam model.PolicyFirewallSessionTimerProfile, overrideParam *bool) error
 
     // API will update Firewall Session Timer Profile
     //
     // @param firewallSessionTimerProfileIdParam Firewall Session Timer Profile ID (required)
     // @param policyFirewallSessionTimerProfileParam (required)
+    // @param overrideParam Locally override the global object (optional, default to false)
     // @return com.vmware.nsx_policy.model.PolicyFirewallSessionTimerProfile
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Update(firewallSessionTimerProfileIdParam string, policyFirewallSessionTimerProfileParam model.PolicyFirewallSessionTimerProfile) (model.PolicyFirewallSessionTimerProfile, error)
+	Update(firewallSessionTimerProfileIdParam string, policyFirewallSessionTimerProfileParam model.PolicyFirewallSessionTimerProfile, overrideParam *bool) (model.PolicyFirewallSessionTimerProfile, error)
 }

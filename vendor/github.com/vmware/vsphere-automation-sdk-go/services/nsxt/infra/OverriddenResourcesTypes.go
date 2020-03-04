@@ -4,13 +4,13 @@
 // Code generated. DO NOT EDIT.
 
 /*
- * Data type definitions file for service: Span.
+ * Data type definitions file for service: OverriddenResources.
  * Includes binding types of a structures and enumerations defined in the service.
  * Shared by client-side stubs and server-side skeletons to ensure type
  * compatibility.
  */
 
-package tier_1s
+package infra
 
 import (
 	"reflect"
@@ -24,31 +24,36 @@ import (
 
 
 
-func spanGetInputType() bindings.StructType {
+func overriddenResourcesListInputType() bindings.StructType {
 	fields := make(map[string]bindings.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["tier1_id"] = bindings.NewStringType()
-	fieldNameMap["tier1_id"] = "Tier1Id"
+	fields["intent_path"] = bindings.NewOptionalType(bindings.NewStringType())
+	fields["site_path"] = bindings.NewOptionalType(bindings.NewStringType())
+	fieldNameMap["intent_path"] = "IntentPath"
+	fieldNameMap["site_path"] = "SitePath"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
 
-func spanGetOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.SitesBindingType)
+func overriddenResourcesListOutputType() bindings.BindingType {
+	return bindings.NewReferenceType(model.OverriddenResourceListResultBindingType)
 }
 
-func spanGetRestMetadata() protocol.OperationRestMetadata {
+func overriddenResourcesListRestMetadata() protocol.OperationRestMetadata {
 	fields := map[string]bindings.BindingType{}
 	fieldNameMap := map[string]string{}
 	paramsTypeMap := map[string]bindings.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
-	fields["tier1_id"] = bindings.NewStringType()
-	fieldNameMap["tier1_id"] = "Tier1Id"
-	paramsTypeMap["tier1_id"] = bindings.NewStringType()
-	paramsTypeMap["tier1Id"] = bindings.NewStringType()
-	pathParams["tier1_id"] = "tier1Id"
+	fields["intent_path"] = bindings.NewOptionalType(bindings.NewStringType())
+	fields["site_path"] = bindings.NewOptionalType(bindings.NewStringType())
+	fieldNameMap["intent_path"] = "IntentPath"
+	fieldNameMap["site_path"] = "SitePath"
+	paramsTypeMap["site_path"] = bindings.NewOptionalType(bindings.NewStringType())
+	paramsTypeMap["intent_path"] = bindings.NewOptionalType(bindings.NewStringType())
+	queryParams["site_path"] = "site_path"
+	queryParams["intent_path"] = "intent_path"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -61,7 +66,7 @@ func spanGetRestMetadata() protocol.OperationRestMetadata {
 		"",
 		"",
 		"GET",
-		"/policy/api/v1/infra/tier-1s/{tier1Id}/span",
+		"/policy/api/v1/infra/overridden-resources",
 		resultHeaders,
 		200,
 		errorHeaders,

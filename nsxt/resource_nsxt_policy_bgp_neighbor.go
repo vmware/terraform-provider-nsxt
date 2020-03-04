@@ -22,8 +22,7 @@ var bgpNeighborConfigGracefulRestartModeValues = []string{
 var bgpNeighborConfigRouteFilteringAddressFamilyValues = []string{
 	model.BgpRouteFiltering_ADDRESS_FAMILY_IPV4,
 	model.BgpRouteFiltering_ADDRESS_FAMILY_IPV6,
-	// TODO: file bug for no BgpRouteFiltering_ADDRESS_FAMILY_L2VPN_EVPN
-	model.VrfRouteTargets_ADDRESS_FAMILY_EVPN,
+	model.BgpRouteFiltering_ADDRESS_FAMILY_L2VPN_EVPN,
 }
 
 func resourceNsxtPolicyBgpNeighbor() *schema.Resource {
@@ -242,8 +241,8 @@ func resourceNsxtPolicyBgpNeighborResourceDataToStruct(d *schema.ResourceData, i
 	for _, filter := range routeFiltering {
 		data := filter.(map[string]interface{})
 		addrFamily := data["address_family"].(string)
-		if addrFamily == model.BgpRouteFiltering_ADDRESS_FAMILY_EVPN && nsxVersionLower("3.0.0") {
-			return neighborStruct, fmt.Errorf("'%s' is not supported for 'address_family' with NSX-T versions less than 3.0.0", model.BgpRouteFiltering_ADDRESS_FAMILY_EVPN)
+		if addrFamily == model.BgpRouteFiltering_ADDRESS_FAMILY_L2VPN_EVPN && nsxVersionLower("3.0.0") {
+			return neighborStruct, fmt.Errorf("'%s' is not supported for 'address_family' with NSX-T versions less than 3.0.0", model.BgpRouteFiltering_ADDRESS_FAMILY_L2VPN_EVPN)
 		}
 		enabled := data["enabled"].(bool)
 
@@ -320,7 +319,7 @@ func resourceNsxtPolicyBgpNeighborCreate(d *schema.ResourceData, m interface{}) 
 
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating BgpNeighbor with ID %s", id)
-	err = client.Patch(t0ID, serviceID, id, obj)
+	err = client.Patch(t0ID, serviceID, id, obj, nil)
 	if err != nil {
 		return handleCreateError("BgpNeighbor", id, err)
 	}
@@ -432,7 +431,7 @@ func resourceNsxtPolicyBgpNeighborUpdate(d *schema.ResourceData, m interface{}) 
 	}
 
 	// Update the resource using PATCH
-	err = client.Patch(t0ID, serviceID, id, obj)
+	err = client.Patch(t0ID, serviceID, id, obj, nil)
 	if err != nil {
 		return handleUpdateError("BgpNeighbor", id, err)
 	}
@@ -458,7 +457,7 @@ func resourceNsxtPolicyBgpNeighborDelete(d *schema.ResourceData, m interface{}) 
 		return fmt.Errorf("Invalid bgp_path %s", bgpPath)
 	}
 
-	err := client.Delete(t0ID, serviceID, id)
+	err := client.Delete(t0ID, serviceID, id, nil)
 	if err != nil {
 		return handleDeleteError("BgpNeighbor", id, err)
 	}

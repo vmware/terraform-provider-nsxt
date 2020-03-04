@@ -61,19 +61,22 @@ func NewDefaultFirewallSessionTimerProfilesClient(connector client.Connector) *D
 	return &fIface
 }
 
-func (fIface *DefaultFirewallSessionTimerProfilesClient) Delete(firewallSessionTimerProfileIdParam string) error {
+func (fIface *DefaultFirewallSessionTimerProfilesClient) Delete(firewallSessionTimerProfileIdParam string, overrideParam *bool) error {
 	typeConverter := fIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(fIface.interfaceIdentifier, "delete")
 	sv := bindings.NewStructValueBuilder(firewallSessionTimerProfilesDeleteInputType(), typeConverter)
 	sv.AddStructField("FirewallSessionTimerProfileId", firewallSessionTimerProfileIdParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
 	}
 	operationRestMetaData := firewallSessionTimerProfilesDeleteRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	fIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := fIface.Invoke(fIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := fIface.connector.NewExecutionContext()
+	methodResult := fIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	if methodResult.IsSuccess() {
 		return nil
 	} else {
@@ -97,8 +100,10 @@ func (fIface *DefaultFirewallSessionTimerProfilesClient) Get(firewallSessionTime
 	}
 	operationRestMetaData := firewallSessionTimerProfilesGetRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	fIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := fIface.Invoke(fIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := fIface.connector.NewExecutionContext()
+	methodResult := fIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	var emptyOutput model.PolicyFirewallSessionTimerProfile
 	if methodResult.IsSuccess() {
 		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), firewallSessionTimerProfilesGetOutputType())
@@ -132,8 +137,10 @@ func (fIface *DefaultFirewallSessionTimerProfilesClient) List(cursorParam *strin
 	}
 	operationRestMetaData := firewallSessionTimerProfilesListRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	fIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := fIface.Invoke(fIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := fIface.connector.NewExecutionContext()
+	methodResult := fIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	var emptyOutput model.PolicyFirewallSessionTimerProfileListResult
 	if methodResult.IsSuccess() {
 		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), firewallSessionTimerProfilesListOutputType())
@@ -150,20 +157,23 @@ func (fIface *DefaultFirewallSessionTimerProfilesClient) List(cursorParam *strin
 	}
 }
 
-func (fIface *DefaultFirewallSessionTimerProfilesClient) Patch(firewallSessionTimerProfileIdParam string, policyFirewallSessionTimerProfileParam model.PolicyFirewallSessionTimerProfile) error {
+func (fIface *DefaultFirewallSessionTimerProfilesClient) Patch(firewallSessionTimerProfileIdParam string, policyFirewallSessionTimerProfileParam model.PolicyFirewallSessionTimerProfile, overrideParam *bool) error {
 	typeConverter := fIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(fIface.interfaceIdentifier, "patch")
 	sv := bindings.NewStructValueBuilder(firewallSessionTimerProfilesPatchInputType(), typeConverter)
 	sv.AddStructField("FirewallSessionTimerProfileId", firewallSessionTimerProfileIdParam)
 	sv.AddStructField("PolicyFirewallSessionTimerProfile", policyFirewallSessionTimerProfileParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
 	}
 	operationRestMetaData := firewallSessionTimerProfilesPatchRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	fIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := fIface.Invoke(fIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := fIface.connector.NewExecutionContext()
+	methodResult := fIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	if methodResult.IsSuccess() {
 		return nil
 	} else {
@@ -175,12 +185,13 @@ func (fIface *DefaultFirewallSessionTimerProfilesClient) Patch(firewallSessionTi
 	}
 }
 
-func (fIface *DefaultFirewallSessionTimerProfilesClient) Update(firewallSessionTimerProfileIdParam string, policyFirewallSessionTimerProfileParam model.PolicyFirewallSessionTimerProfile) (model.PolicyFirewallSessionTimerProfile, error) {
+func (fIface *DefaultFirewallSessionTimerProfilesClient) Update(firewallSessionTimerProfileIdParam string, policyFirewallSessionTimerProfileParam model.PolicyFirewallSessionTimerProfile, overrideParam *bool) (model.PolicyFirewallSessionTimerProfile, error) {
 	typeConverter := fIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(fIface.interfaceIdentifier, "update")
 	sv := bindings.NewStructValueBuilder(firewallSessionTimerProfilesUpdateInputType(), typeConverter)
 	sv.AddStructField("FirewallSessionTimerProfileId", firewallSessionTimerProfileIdParam)
 	sv.AddStructField("PolicyFirewallSessionTimerProfile", policyFirewallSessionTimerProfileParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		var emptyOutput model.PolicyFirewallSessionTimerProfile
@@ -188,8 +199,10 @@ func (fIface *DefaultFirewallSessionTimerProfilesClient) Update(firewallSessionT
 	}
 	operationRestMetaData := firewallSessionTimerProfilesUpdateRestMetadata()
 	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
 	fIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := fIface.Invoke(fIface.connector.NewExecutionContext(), methodIdentifier, inputDataValue)
+	executionContext := fIface.connector.NewExecutionContext()
+	methodResult := fIface.Invoke(executionContext, methodIdentifier, inputDataValue)
 	var emptyOutput model.PolicyFirewallSessionTimerProfile
 	if methodResult.IsSuccess() {
 		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), firewallSessionTimerProfilesUpdateOutputType())
