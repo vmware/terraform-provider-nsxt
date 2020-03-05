@@ -29,6 +29,14 @@ var advertismentRuleOperatorValues = []string{
 	model.RouteAdvertisementRule_PREFIX_OPERATOR_GE,
 	model.RouteAdvertisementRule_PREFIX_OPERATOR_EQ}
 
+var poolAllocationValues = []string{
+	model.Tier1_POOL_ALLOCATION_ROUTING,
+	model.Tier1_POOL_ALLOCATION_LB_SMALL,
+	model.Tier1_POOL_ALLOCATION_LB_MEDIUM,
+	model.Tier1_POOL_ALLOCATION_LB_LARGE,
+	model.Tier1_POOL_ALLOCATION_LB_XLARGE,
+}
+
 func resourceNsxtPolicyTier1Gateway() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyTier1GatewayCreate,
@@ -91,6 +99,16 @@ func resourceNsxtPolicyTier1Gateway() *schema.Resource {
 			"ipv6_ndra_profile_path":   getIPv6NDRAPathSchema(),
 			"ipv6_dad_profile_path":    getIPv6DadPathSchema(),
 			"dhcp_config_path":         getPolicyPathSchema(false, false, "Policy path to DHCP server or relay configuration to use for this Tier1"),
+			"pool_allocation": {
+				Type:         schema.TypeString,
+				ForceNew:     true,
+				Description:  "Edge node allocation at different sizes for routing and load balancer service to meet performance and scalability requirements",
+				Optional:     true,
+				Default:      model.Tier1_POOL_ALLOCATION_ROUTING,
+				ValidateFunc: validation.StringInSlice(poolAllocationValues, false),
+			},
+			"ingress_qos_profile_path": getPolicyPathSchema(false, false, "Policy path to gateway QoS profile in ingress direction"),
+			"egress_qos_profile_path":  getPolicyPathSchema(false, false, "Policy path to gateway QoS profile in egress direction"),
 		},
 	}
 }
@@ -315,6 +333,20 @@ func getAdvRulesFromSchema(d *schema.ResourceData) []model.RouteAdvertisementRul
 	return ruleList
 }
 
+func resourceNsxtPolicyTier1GatewaySetQos(d *schema.ResourceData, obj *model.Tier1) {
+	ingressQosProfile := d.Get("ingress_qos_profile_path").(string)
+	egressQosProfile := d.Get("egress_qos_profile_path").(string)
+
+	if ingressQosProfile != "" || egressQosProfile != "" {
+		qosConfig := model.GatewayQosProfileConfig{
+			IngressQosProfilePath: &ingressQosProfile,
+			EgressQosProfilePath:  &egressQosProfile,
+		}
+		obj.QosProfile = &qosConfig
+	}
+
+}
+
 func resourceNsxtPolicyTier1GatewayCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	client := infra.NewDefaultTier1sClient(connector)
@@ -338,6 +370,7 @@ func resourceNsxtPolicyTier1GatewayCreate(d *schema.ResourceData, m interface{})
 	routeAdvertisementRules := getAdvRulesFromSchema(d)
 	ipv6ProfilePaths := getIpv6ProfilePathsFromSchema(d)
 	dhcpPath := d.Get("dhcp_config_path").(string)
+	poolAllocation := d.Get("pool_allocation").(string)
 
 	obj := model.Tier1{
 		DisplayName:             &displayName,
@@ -360,6 +393,12 @@ func resourceNsxtPolicyTier1GatewayCreate(d *schema.ResourceData, m interface{})
 	} else {
 		obj.DhcpConfigPaths = []string{}
 	}
+
+	if poolAllocation != "" {
+		obj.PoolAllocation = &poolAllocation
+	}
+
+	resourceNsxtPolicyTier1GatewaySetQos(d, &obj)
 
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating tier1 with ID %s", id)
@@ -412,10 +451,16 @@ func resourceNsxtPolicyTier1GatewayRead(d *schema.ResourceData, m interface{}) e
 	}
 	d.Set("route_advertisement_types", obj.RouteAdvertisementTypes)
 	d.Set("revision", obj.Revision)
+	d.Set("pool_allocation", obj.PoolAllocation)
 	dhcpPaths := obj.DhcpConfigPaths
 
 	if len(dhcpPaths) > 0 {
 		d.Set("dhcp_config_path", dhcpPaths[0])
+	}
+
+	if obj.QosProfile != nil {
+		d.Set("ingressQosProfile", obj.QosProfile.IngressQosProfilePath)
+		d.Set("egressQosProfile", obj.QosProfile.EgressQosProfilePath)
 	}
 
 	// Get the edge cluster Id
@@ -460,6 +505,7 @@ func resourceNsxtPolicyTier1GatewayUpdate(d *schema.ResourceData, m interface{})
 	routeAdvertisementRules := getAdvRulesFromSchema(d)
 	ipv6ProfilePaths := getIpv6ProfilePathsFromSchema(d)
 	dhcpPath := d.Get("dhcp_config_path").(string)
+	poolAllocation := d.Get("pool_allocation").(string)
 	revision := int64(d.Get("revision").(int))
 
 	obj := model.Tier1{
@@ -485,7 +531,13 @@ func resourceNsxtPolicyTier1GatewayUpdate(d *schema.ResourceData, m interface{})
 		obj.DhcpConfigPaths = []string{}
 	}
 
-	// Update the resource using PATCH
+	if poolAllocation != "" {
+		obj.PoolAllocation = &poolAllocation
+	}
+
+	resourceNsxtPolicyTier1GatewaySetQos(d, &obj)
+
+	// Update the resource using PUT
 	_, err := client.Update(id, obj)
 	if err != nil {
 		return handleUpdateError("Tier1", id, err)

@@ -36,6 +36,7 @@ func TestAccResourceNsxtPolicyTier1Gateway_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "enable_standby_relocation", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "force_whitelisting", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "tier0_path", ""),
+					resource.TestCheckResourceAttr(testResourceName, "pool_allocation", "ROUTING"),
 					resource.TestCheckResourceAttr(testResourceName, "route_advertisement_types.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "route_advertisement_rule.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "ipv6_ndra_profile_path", "/infra/ipv6-ndra-profiles/default"),
@@ -57,6 +58,7 @@ func TestAccResourceNsxtPolicyTier1Gateway_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "enable_standby_relocation", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "force_whitelisting", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "tier0_path", ""),
+					resource.TestCheckResourceAttr(testResourceName, "pool_allocation", "ROUTING"),
 					resource.TestCheckResourceAttr(testResourceName, "route_advertisement_types.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "route_advertisement_rule.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "ipv6_ndra_profile_path", "/infra/ipv6-ndra-profiles/default"),
@@ -66,6 +68,7 @@ func TestAccResourceNsxtPolicyTier1Gateway_basic(t *testing.T) {
 				),
 			},
 			{
+				// ForceNew due to pool allocation change
 				Config: testAccNsxtPolicyTier1Update2Template(updateName, failoverMode),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTier1Exists(testResourceName),
@@ -82,6 +85,7 @@ func TestAccResourceNsxtPolicyTier1Gateway_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "route_advertisement_rule.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "ipv6_ndra_profile_path", "/infra/ipv6-ndra-profiles/default"),
 					resource.TestCheckResourceAttr(testResourceName, "ipv6_dad_profile_path", "/infra/ipv6-dad-profiles/default"),
+					resource.TestCheckResourceAttr(testResourceName, "pool_allocation", "LB_SMALL"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 				),
@@ -215,6 +219,53 @@ func TestAccResourceNsxtPolicyTier1Gateway_withId(t *testing.T) {
 					resource.TestCheckResourceAttr(realizationResourceName, "state", "REALIZED"),
 				),
 			},
+		},
+	})
+}
+func TestAccResourceNsxtPolicyTier1Gateway_withQos(t *testing.T) {
+	name := "test-nsx-policy-tier1"
+        profileName := "test-nsx-qos-profile"
+	updateName := fmt.Sprintf("%s-update", name)
+	testResourceName := "nsxt_policy_tier1_gateway.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+                        if err := testAccDataSourceNsxtPolicyGatewayQosProfileDeleteByName(profileName); err != nil {
+                            return err
+                        }
+			return testAccNsxtPolicyTier1CheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+                                PreConfig: func() {
+                                        if err := testAccDataSourceNsxtPolicyGatewayQosProfileCreate(profileName); err != nil {
+                                            panic(err)
+                                        }
+                                },
+				Config: testAccNsxtPolicyTier1TemplateWithQos(name, profileName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyTier1Exists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+                                        resource.TestCheckResourceAttrSet(testResourceName, "ingress_qos_profile_path"),
+                                        resource.TestCheckResourceAttrSet(testResourceName, "egress_qos_profile_path"),
+					resource.TestCheckResourceAttr(realizationResourceName, "state", "REALIZED"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyTier1TemplateRemoveQos(updateName, profileName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyTier1Exists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updateName),
+                                        resource.TestCheckResourceAttr(testResourceName, "ingress_qos_profile_path", ""),
+                                        resource.TestCheckResourceAttr(testResourceName, "egress_qos_profile_path", ""),
+					resource.TestCheckResourceAttr(realizationResourceName, "state", "REALIZED"),
+				),
+			},
+                        {
+                                Config: testAccNsxtPolicyEmptyTemplate(),
+                        },
 		},
 	})
 }
@@ -424,6 +475,7 @@ resource "nsxt_policy_tier1_gateway" "test" {
   force_whitelisting        = "false"
   route_advertisement_types = ["TIER1_STATIC_ROUTES", "TIER1_CONNECTED"]
   ipv6_ndra_profile_path    = "/infra/ipv6-ndra-profiles/default"
+  pool_allocation           = "ROUTING"
 
   tag {
     scope = "scope1"
@@ -453,6 +505,7 @@ resource "nsxt_policy_tier1_gateway" "test" {
   force_whitelisting        = "true"
   route_advertisement_types = ["TIER1_CONNECTED"]
   ipv6_dad_profile_path     = "/infra/ipv6-dad-profiles/default"
+  pool_allocation           = "ROUTING"
 
   tag {
     scope = "scope3"
@@ -477,6 +530,7 @@ resource "nsxt_policy_tier1_gateway" "test" {
   force_whitelisting        = "true"
   route_advertisement_types = ["TIER1_CONNECTED"]
   ipv6_dad_profile_path     = "/infra/ipv6-dad-profiles/default"
+  pool_allocation           = "LB_SMALL"
 
   tag {
     scope = "scope3"
@@ -667,4 +721,36 @@ resource "nsxt_policy_tier1_gateway" "test" {
 data "nsxt_policy_realization_info" "realization_info" {
   path = nsxt_policy_tier1_gateway.test.path
 }`, name)
+}
+
+func testAccNsxtPolicyTier1TemplateWithQos(name string, profileName string) string {
+	return fmt.Sprintf(`
+data "nsxt_policy_gateway_qos_profile" "test" {
+  display_name = "%s"
+}
+
+resource "nsxt_policy_tier1_gateway" "test" {
+  display_name             = "%s"
+  ingress_qos_profile_path = data.nsxt_policy_gateway_qos_profile.test.path
+  egress_qos_profile_path  = data.nsxt_policy_gateway_qos_profile.test.path
+}
+
+data "nsxt_policy_realization_info" "realization_info" {
+  path = nsxt_policy_tier1_gateway.test.path
+}`, profileName, name)
+}
+
+func testAccNsxtPolicyTier1TemplateRemoveQos(name string, profileName string) string {
+	return fmt.Sprintf(`
+data "nsxt_policy_gateway_qos_profile" "test" {
+  display_name = "%s"
+}
+
+resource "nsxt_policy_tier1_gateway" "test" {
+  display_name             = "%s"
+}
+
+data "nsxt_policy_realization_info" "realization_info" {
+  path = nsxt_policy_tier1_gateway.test.path
+}`, profileName, name)
 }

@@ -163,6 +163,7 @@ func Provider() terraform.ResourceProvider {
 			"nsxt_policy_qos_profile":              dataSourceNsxtPolicyQosProfile(),
 			"nsxt_policy_ipv6_ndra_profile":        dataSourceNsxtPolicyIpv6NdraProfile(),
 			"nsxt_policy_ipv6_dad_profile":         dataSourceNsxtPolicyIpv6DadProfile(),
+			"nsxt_policy_gateway_qos_profile":      dataSourceNsxtPolicyGatewayQosProfile(),
 			"nsxt_policy_segment_security_profile": dataSourceNsxtPolicySegmentSecurityProfile(),
 			"nsxt_policy_mac_discovery_profile":    dataSourceNsxtPolicyMacDiscoveryProfile(),
 			"nsxt_policy_vm":                       dataSourceNsxtPolicyVM(),
