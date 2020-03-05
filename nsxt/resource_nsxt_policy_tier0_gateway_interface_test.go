@@ -113,6 +113,7 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_external(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "subnets.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "subnets.0", subnet),
 					resource.TestCheckResourceAttr(testResourceName, "enable_pim", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "urpf_mode", "STRICT"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 					resource.TestCheckResourceAttrSet(testResourceName, "segment_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "gateway_path"),
@@ -133,6 +134,7 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_external(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "subnets.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "subnets.0", updatedSubnet),
 					resource.TestCheckResourceAttr(testResourceName, "enable_pim", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "urpf_mode", "STRICT"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 					resource.TestCheckResourceAttrSet(testResourceName, "segment_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "gateway_path"),
@@ -414,6 +416,7 @@ resource "nsxt_policy_tier0_gateway_interface" "test" {
   edge_node_path = data.nsxt_policy_edge_node.EN.path
   subnets        = ["%s"]
   enable_pim     = true
+  urpf_mode      = "STRICT"
 
   tag {
     scope = "scope1"

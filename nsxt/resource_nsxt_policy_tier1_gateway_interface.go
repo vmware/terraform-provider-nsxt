@@ -36,6 +36,7 @@ func resourceNsxtPolicyTier1GatewayInterface() *schema.Resource {
 			"subnets":                getGatewayInterfaceSubnetsSchema(),
 			"mtu":                    getMtuSchema(),
 			"ipv6_ndra_profile_path": getIPv6NDRAPathSchema(),
+			"urpf_mode":              getGatewayInterfaceUrpfModeSchema(),
 		},
 	}
 }
@@ -109,6 +110,11 @@ func resourceNsxtPolicyTier1GatewayInterfaceCreate(d *schema.ResourceData, m int
 		obj.Mtu = &mtu
 	}
 
+	if nsxVersionHigherOrEqual("3.0.0") {
+		urpfMode := d.Get("urpf_mode").(string)
+		obj.UrpfMode = &urpfMode
+	}
+
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating tier1 interface with ID %s", id)
 	err = client.Patch(tier1ID, localeServiceID, id, obj, nil)
@@ -148,9 +154,7 @@ func resourceNsxtPolicyTier1GatewayInterfaceRead(d *schema.ResourceData, m inter
 	if obj.Ipv6ProfilePaths != nil {
 		d.Set("ipv6_ndra_profile_path", obj.Ipv6ProfilePaths[0]) // only one supported for now
 	}
-	if obj.Mtu != nil {
-		d.Set("mtu", *obj.Mtu)
-	}
+	d.Set("mtu", obj.Mtu)
 
 	if obj.Subnets != nil {
 		var subnetList []string
@@ -160,6 +164,8 @@ func resourceNsxtPolicyTier1GatewayInterfaceRead(d *schema.ResourceData, m inter
 		}
 		d.Set("subnets", subnetList)
 	}
+
+	d.Set("urpf_mode", obj.UrpfMode)
 
 	return nil
 }
@@ -198,6 +204,11 @@ func resourceNsxtPolicyTier1GatewayInterfaceUpdate(d *schema.ResourceData, m int
 
 	if mtu > 0 {
 		obj.Mtu = &mtu
+	}
+
+	if nsxVersionHigherOrEqual("3.0.0") {
+		urpfMode := d.Get("urpf_mode").(string)
+		obj.UrpfMode = &urpfMode
 	}
 
 	_, err := client.Update(tier1ID, defaultPolicyLocaleServiceID, id, obj, nil)

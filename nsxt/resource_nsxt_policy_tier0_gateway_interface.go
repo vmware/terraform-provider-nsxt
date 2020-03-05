@@ -68,28 +68,32 @@ func resourceNsxtPolicyTier0GatewayInterface() *schema.Resource {
 				Description: "Id of associated Gateway Locale Service on NSX",
 				Computed:    true,
 			},
+			"urpf_mode": getGatewayInterfaceUrpfModeSchema(),
 		},
 	}
 }
 
 func gatewayInterfaceVersionDepenantSet(d *schema.ResourceData, obj *model.Tier0Interface) {
-	multicastSupported := nsxVersionHigherOrEqual("3.0.0")
-	if multicastSupported {
-		interfaceType := d.Get("type").(string)
-		// PIM config can only be configured on external interface
-		if interfaceType == model.Tier0Interface_TYPE_EXTERNAL {
-			enablePIM := d.Get("enable_pim").(bool)
-			pimConfig := model.Tier0InterfacePimConfig{
-				Enabled: &enablePIM,
-			}
-			obj.Multicast = &pimConfig
+	if nsxVersionLower("3.0.0") {
+		return
+	}
+	interfaceType := d.Get("type").(string)
+	// PIM config can only be configured on external interface
+	if interfaceType == model.Tier0Interface_TYPE_EXTERNAL {
+		enablePIM := d.Get("enable_pim").(bool)
+		pimConfig := model.Tier0InterfacePimConfig{
+			Enabled: &enablePIM,
 		}
+		obj.Multicast = &pimConfig
 	}
 
 	vlanID := int64(d.Get("access_vlan_id").(int))
 	if vlanID > 0 {
 		obj.AccessVlanId = &vlanID
 	}
+
+	urpfMode := d.Get("urpf_mode").(string)
+	obj.UrpfMode = &urpfMode
 }
 
 func resourceNsxtPolicyTier0GatewayInterfaceCreate(d *schema.ResourceData, m interface{}) error {
@@ -225,6 +229,10 @@ func resourceNsxtPolicyTier0GatewayInterfaceRead(d *schema.ResourceData, m inter
 			subnetList = append(subnetList, cidr)
 		}
 		d.Set("subnets", subnetList)
+	}
+
+	if obj.UrpfMode != nil {
+		d.Set("urpf_mode", obj.UrpfMode)
 	}
 
 	return nil

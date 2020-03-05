@@ -49,6 +49,7 @@ The following arguments are supported:
 * `subnets` - (Required) list of Ip Addresses/Prefixes in CIDR format, to be associated with this interface.
 * `mtu` - (Optional) Maximum Transmission Unit for this interface.
 * `ipv6_ndra_profile_path` - (Optional) IPv6 NDRA profile to be associated with this interface.
+* `urpf_mode` - (Optional) Unicast Reverse Path Forwarding mode, one of `NONE`, `STRICT`. Default is `STRICT`. This attribute is supported with NSX 3.0.0 onwards.
 
 ## Attributes Reference
 
