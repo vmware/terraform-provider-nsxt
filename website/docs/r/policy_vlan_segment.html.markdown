@@ -24,7 +24,8 @@ resource "nsxt_policy_vlan_segment" "vlansegment1" {
     dhcp_ranges = ["12.12.2.100-12.12.2.160"]
 
     dhcp_v4_config {
-      lease_time = 36000
+      server_address = "12.12.2.2/24"
+      lease_time     = 36000
 
       dhcp_option_121 {
         network  = "6.6.6.0/24"
@@ -61,6 +62,7 @@ The following arguments are supported:
   * `cidr` - (Required) Gateway IP address CIDR.
   * `dhcp_ranges` - (Optional) List of DHCP address ranges for dynamic IP allocation.
   * `dhcp_v4_config` - (Optional) DHCPv4 config for IPv4 subnet. This attribute is supported with NSX 3.0.0 onwards.
+    * `server_address` - (Optional) IP address of the DHCP server in CIDR format. This attribute is required if segment has provided dhcp_config_path and it represents a DHCP server config.
     * `dns_servers` - (Optional) List of IP addresses of DNS servers for the subnet.
     * `lease_time`  - (Optional) DHCP lease time in seconds.
     * `dhcp_option_121` - (Optional) DHCP classless static routes.
@@ -70,6 +72,7 @@ The following arguments are supported:
       * `code` - (Required) DHCP option code. Valid values are from 0 to 255.
       * `values` - (Required) List of DHCP option values.
   * `dhcp_v6_config` - (Optional) DHCPv6 config for IPv6 subnet. This attribute is supported with NSX 3.0.0 onwards.
+    * `server_address` - (Optional) IP address of the DHCP server in CIDR format. This attribute is required if segment has provided dhcp_config_path and it represents a DHCP server config.
     * `dns_servers` - (Optional) List of IP addresses of DNS servers for the subnet.
     * `lease_time`  - (Optional) DHCP lease time in seconds.
     * `preferred_time` - (Optional) The time interval in seconds, in which the prefix is advertised as preferred.

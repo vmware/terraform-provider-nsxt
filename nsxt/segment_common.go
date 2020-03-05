@@ -20,6 +20,13 @@ var connectivityValues = []string{
 func getPolicySegmentDhcpV4ConfigSchema() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
+			"server_address": {
+				Type:        schema.TypeString,
+				Description: "IP address of the DHCP server in CIDR format",
+				Optional:    true,
+				// TODO: validate IPv4 only
+				ValidateFunc: validateIPCidr(),
+			},
 			"dns_servers": {
 				Type:        schema.TypeList,
 				Description: "IP addresses of DNS servers for subnet",
@@ -44,6 +51,13 @@ func getPolicySegmentDhcpV4ConfigSchema() *schema.Resource {
 func getPolicySegmentDhcpV6ConfigSchema() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
+			"server_address": {
+				Type:        schema.TypeString,
+				Description: "IP address of the DHCP server in CIDR format",
+				Optional:    true,
+				// TODO: validate IPv6 only
+				ValidateFunc: validateIPCidr(),
+			},
 			"dns_servers": {
 				Type:        schema.TypeList,
 				Description: "IP addresses of DNS servers for subnet",
@@ -314,12 +328,17 @@ func getSegmentSubnetDhcpConfigFromSchema(schemaConfig map[string]interface{}) (
 
 	if len(dhcpV4Config) > 0 {
 		dhcpConfig := dhcpV4Config[0].(map[string]interface{})
+		serverAddress := dhcpConfig["server_address"].(string)
 		dnsServers := dhcpConfig["dns_servers"].([]interface{})
 		leaseTime := int64(dhcpConfig["lease_time"].(int))
 
 		config := model.SegmentDhcpV4Config{
 			ResourceType: model.SegmentDhcpConfig_RESOURCE_TYPE_SEGMENTDHCPV4CONFIG,
 			DnsServers:   interface2StringList(dnsServers),
+		}
+
+		if len(serverAddress) > 0 {
+			config.ServerAddress = &serverAddress
 		}
 
 		dhcpOpts := model.DhcpV4Options{}
@@ -354,6 +373,7 @@ func getSegmentSubnetDhcpConfigFromSchema(schemaConfig map[string]interface{}) (
 
 	if len(dhcpV6Config) > 0 {
 		dhcpConfig := dhcpV6Config[0].(map[string]interface{})
+		serverAddress := dhcpConfig["server_address"].(string)
 		dnsServers := dhcpConfig["dns_servers"].([]interface{})
 		sntpServers := dhcpConfig["sntp_servers"].([]interface{})
 		domainNames := dhcpConfig["domain_names"].([]interface{})
@@ -364,6 +384,10 @@ func getSegmentSubnetDhcpConfigFromSchema(schemaConfig map[string]interface{}) (
 		config := model.SegmentDhcpV6Config{
 			ResourceType: model.SegmentDhcpConfig_RESOURCE_TYPE_SEGMENTDHCPV6CONFIG,
 			DnsServers:   interface2StringList(dnsServers),
+		}
+
+		if len(serverAddress) > 0 {
+			config.ServerAddress = &serverAddress
 		}
 
 		if len(domainNames) > 0 {
@@ -420,6 +444,7 @@ func setSegmentSubnetDhcpConfigInSchema(schemaConfig map[string]interface{}, sub
 			return errs[0]
 		}
 		dhcpV4Config := obj.(model.SegmentDhcpV4Config)
+		resultConfig["server_address"] = dhcpV4Config.ServerAddress
 		resultConfig["lease_time"] = dhcpV4Config.LeaseTime
 		resultConfig["dns_servers"] = dhcpV4Config.DnsServers
 
@@ -443,13 +468,14 @@ func setSegmentSubnetDhcpConfigInSchema(schemaConfig map[string]interface{}, sub
 			return errs[0]
 		}
 
-		dhcpV4Config := obj.(model.SegmentDhcpV6Config)
-		resultConfig["lease_time"] = dhcpV4Config.LeaseTime
-		resultConfig["preferred_time"] = dhcpV4Config.PreferredTime
-		resultConfig["dns_servers"] = dhcpV4Config.DnsServers
-		resultConfig["sntp_servers"] = dhcpV4Config.SntpServers
-		resultConfig["domain_names"] = dhcpV4Config.DomainNames
-		resultConfig["excluded_range"] = dhcpV4Config.ExcludedRanges
+		dhcpV6Config := obj.(model.SegmentDhcpV6Config)
+		resultConfig["server_address"] = dhcpV6Config.ServerAddress
+		resultConfig["lease_time"] = dhcpV6Config.LeaseTime
+		resultConfig["preferred_time"] = dhcpV6Config.PreferredTime
+		resultConfig["dns_servers"] = dhcpV6Config.DnsServers
+		resultConfig["sntp_servers"] = dhcpV6Config.SntpServers
+		resultConfig["domain_names"] = dhcpV6Config.DomainNames
+		resultConfig["excluded_range"] = dhcpV6Config.ExcludedRanges
 
 		schemaConfig["dhcp_v6_config"] = resultConfig
 		return nil
