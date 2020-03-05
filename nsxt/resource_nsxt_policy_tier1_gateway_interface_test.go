@@ -94,7 +94,7 @@ func TestAccResourceNsxtPolicyTier1GatewayInterface_withID(t *testing.T) {
 	testResourceName := "nsxt_policy_tier1_gateway_interface.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTier1InterfaceCheckDestroy(state, name)
@@ -110,6 +110,7 @@ func TestAccResourceNsxtPolicyTier1GatewayInterface_withID(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "subnets.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "subnets.0", subnet),
 					resource.TestCheckResourceAttr(testResourceName, "ipv6_ndra_profile_path", "/infra/ipv6-ndra-profiles/default"),
+					resource.TestCheckResourceAttr(testResourceName, "urpf_mode", "NONE"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
 					resource.TestCheckResourceAttrSet(testResourceName, "segment_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "gateway_path"),
@@ -129,6 +130,7 @@ func TestAccResourceNsxtPolicyTier1GatewayInterface_withID(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "subnets.0", subnet),
 					resource.TestCheckResourceAttr(testResourceName, "subnets.1", ipv6Subnet),
 					resource.TestCheckResourceAttr(testResourceName, "ipv6_ndra_profile_path", "/infra/ipv6-ndra-profiles/default"),
+					resource.TestCheckResourceAttr(testResourceName, "urpf_mode", "NONE"),
 					resource.TestCheckResourceAttrSet(testResourceName, "segment_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "gateway_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -293,6 +295,7 @@ resource "nsxt_policy_tier1_gateway_interface" "test" {
   segment_path           = nsxt_policy_vlan_segment.test.path
   subnets                = ["%s"]
   ipv6_ndra_profile_path = data.nsxt_policy_ipv6_ndra_profile.default.path
+  urpf_mode              = "NONE"
 }
 
 data "nsxt_policy_realization_info" "realization_info" {

@@ -501,3 +501,18 @@ func getAllocationRangeListSchema(required bool, description string) *schema.Sch
 		},
 	}
 }
+
+var gatewayInterfaceUrpfModeValues = []string{
+	model.Tier0Interface_URPF_MODE_NONE,
+	model.Tier0Interface_URPF_MODE_STRICT,
+}
+
+func getGatewayInterfaceUrpfModeSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:         schema.TypeString,
+		Optional:     true,
+		Description:  "Unicast Reverse Path Forwarding mode",
+		ValidateFunc: validation.StringInSlice(gatewayInterfaceUrpfModeValues, false),
+		Default:      model.Tier0Interface_URPF_MODE_STRICT,
+	}
+}

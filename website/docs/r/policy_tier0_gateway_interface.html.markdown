@@ -53,7 +53,8 @@ The following arguments are supported:
 * `mtu` - (Optional) Maximum Transmission Unit for this interface.
 * `ipv6_ndra_profile_path` - (Optional) IPv6 NDRA profile to be associated with this interface.
 * `enable_pim` - (Optional) Flag to enable Protocol Independent Multicast, relevant only for interfaces of type `EXTERNAL`. This attribute is supported with NSX 3.0.0 onwards.
-* `access_vlan_id`- (Optional) Access VLAN ID, relevant only for VRF interfaces.
+* `access_vlan_id`- (Optional) Access VLAN ID, relevant only for VRF interfaces. This attribute is supported with NSX 3.0.0 onwards.
+* `urpf_mode` - (Optional) Unicast Reverse Path Forwarding mode, one of `NONE`, `STRICT`. Default is `STRICT`. This attribute is supported with NSX 3.0.0 onwards.
 
 ## Attributes Reference
 
