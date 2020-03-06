@@ -224,7 +224,7 @@ func TestAccResourceNsxtPolicyTier1Gateway_withId(t *testing.T) {
 }
 func TestAccResourceNsxtPolicyTier1Gateway_withQos(t *testing.T) {
 	name := "test-nsx-policy-tier1"
-        profileName := "test-nsx-qos-profile"
+	profileName := "test-nsx-qos-profile"
 	updateName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_policy_tier1_gateway.test"
 
@@ -232,24 +232,24 @@ func TestAccResourceNsxtPolicyTier1Gateway_withQos(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-                        if err := testAccDataSourceNsxtPolicyGatewayQosProfileDeleteByName(profileName); err != nil {
-                            return err
-                        }
+			if err := testAccDataSourceNsxtPolicyGatewayQosProfileDeleteByName(profileName); err != nil {
+				return err
+			}
 			return testAccNsxtPolicyTier1CheckDestroy(state, name)
 		},
 		Steps: []resource.TestStep{
 			{
-                                PreConfig: func() {
-                                        if err := testAccDataSourceNsxtPolicyGatewayQosProfileCreate(profileName); err != nil {
-                                            panic(err)
-                                        }
-                                },
+				PreConfig: func() {
+					if err := testAccDataSourceNsxtPolicyGatewayQosProfileCreate(profileName); err != nil {
+						panic(err)
+					}
+				},
 				Config: testAccNsxtPolicyTier1TemplateWithQos(name, profileName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTier1Exists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
-                                        resource.TestCheckResourceAttrSet(testResourceName, "ingress_qos_profile_path"),
-                                        resource.TestCheckResourceAttrSet(testResourceName, "egress_qos_profile_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "ingress_qos_profile_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "egress_qos_profile_path"),
 					resource.TestCheckResourceAttr(realizationResourceName, "state", "REALIZED"),
 				),
 			},
@@ -258,14 +258,14 @@ func TestAccResourceNsxtPolicyTier1Gateway_withQos(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTier1Exists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updateName),
-                                        resource.TestCheckResourceAttr(testResourceName, "ingress_qos_profile_path", ""),
-                                        resource.TestCheckResourceAttr(testResourceName, "egress_qos_profile_path", ""),
+					resource.TestCheckResourceAttr(testResourceName, "ingress_qos_profile_path", ""),
+					resource.TestCheckResourceAttr(testResourceName, "egress_qos_profile_path", ""),
 					resource.TestCheckResourceAttr(realizationResourceName, "state", "REALIZED"),
 				),
 			},
-                        {
-                                Config: testAccNsxtPolicyEmptyTemplate(),
-                        },
+			{
+				Config: testAccNsxtPolicyEmptyTemplate(),
+			},
 		},
 	})
 }
