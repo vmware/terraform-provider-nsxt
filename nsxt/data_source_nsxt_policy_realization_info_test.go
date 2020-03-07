@@ -160,7 +160,7 @@ data "%s" "policy_resource" {
 }
 
 data "nsxt_policy_realization_info" "realization_info" {
-  path = "${data.%s.policy_resource.path}"
+  path = data.%s.policy_resource.path
   entity_type = "%s"
 }`, resourceDataType, resourceName, resourceDataType, entityType)
 }
@@ -172,7 +172,7 @@ resource "%s" "policy_resource" {
 }
 
 data "nsxt_policy_realization_info" "realization_info" {
-  path = "${%s.policy_resource.path}"
+  path = %s.policy_resource.path
   entity_type = "%s"
 }`, resourceType, resourceName, resourceType, entityType)
 }
