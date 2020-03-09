@@ -115,6 +115,7 @@ func TestAccResourceNsxtPolicyVlanSegment_withDhcp(t *testing.T) {
 	updatedName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_policy_vlan_segment.test"
 	leaseTimes := []string{"3600", "36000"}
+	preferredTimes := []string{"3200", "32000"}
 	dnsServersV4 := []string{"2.2.2.2", "3.3.3.3"}
 	dnsServersV6 := []string{"2000::2", "3000::3"}
 
@@ -126,7 +127,7 @@ func TestAccResourceNsxtPolicyVlanSegment_withDhcp(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyVlanSegmentWithDhcpTemplate(name, dnsServersV4[0], dnsServersV6[0], leaseTimes[0]),
+				Config: testAccNsxtPolicyVlanSegmentWithDhcpTemplate(name, dnsServersV4[0], dnsServersV6[0], leaseTimes[0], preferredTimes[0]),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySegmentExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -134,6 +135,7 @@ func TestAccResourceNsxtPolicyVlanSegment_withDhcp(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "subnet.0.cidr", "12.12.2.1/24"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.0.dhcp_v6_config.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.0.dhcp_v4_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "subnet.0.dhcp_v4_config.0.server_address", "12.12.2.2/24"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.0.dhcp_v4_config.0.lease_time", leaseTimes[0]),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.0.dhcp_v4_config.0.dns_servers.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.0.dhcp_v4_config.0.dns_servers.0", dnsServersV4[0]),
@@ -142,8 +144,9 @@ func TestAccResourceNsxtPolicyVlanSegment_withDhcp(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "subnet.1.cidr", "4012::1/64"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.1.dhcp_v4_config.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.1.dhcp_v6_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "subnet.1.dhcp_v6_config.0.server_address", "4012::2/64"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.1.dhcp_v6_config.0.lease_time", leaseTimes[0]),
-					resource.TestCheckResourceAttr(testResourceName, "subnet.1.dhcp_v6_config.0.preferred_time", leaseTimes[0]),
+					resource.TestCheckResourceAttr(testResourceName, "subnet.1.dhcp_v6_config.0.preferred_time", preferredTimes[0]),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.1.dhcp_v6_config.0.dns_servers.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.1.dhcp_v6_config.0.dns_servers.0", dnsServersV6[0]),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.1.dhcp_v6_config.0.sntp_servers.#", "2"),
@@ -151,7 +154,7 @@ func TestAccResourceNsxtPolicyVlanSegment_withDhcp(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyVlanSegmentWithDhcpTemplate(updatedName, dnsServersV4[1], dnsServersV6[1], leaseTimes[1]),
+				Config: testAccNsxtPolicyVlanSegmentWithDhcpTemplate(updatedName, dnsServersV4[1], dnsServersV6[1], leaseTimes[1], preferredTimes[1]),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySegmentExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -159,6 +162,7 @@ func TestAccResourceNsxtPolicyVlanSegment_withDhcp(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "subnet.0.cidr", "12.12.2.1/24"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.0.dhcp_v6_config.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.0.dhcp_v4_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "subnet.0.dhcp_v4_config.0.server_address", "12.12.2.2/24"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.0.dhcp_v4_config.0.lease_time", leaseTimes[1]),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.0.dhcp_v4_config.0.dns_servers.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.0.dhcp_v4_config.0.dns_servers.0", dnsServersV4[1]),
@@ -167,8 +171,9 @@ func TestAccResourceNsxtPolicyVlanSegment_withDhcp(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "subnet.1.cidr", "4012::1/64"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.1.dhcp_v4_config.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.1.dhcp_v6_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "subnet.1.dhcp_v6_config.0.server_address", "4012::2/64"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.1.dhcp_v6_config.0.lease_time", leaseTimes[1]),
-					resource.TestCheckResourceAttr(testResourceName, "subnet.1.dhcp_v6_config.0.preferred_time", leaseTimes[1]),
+					resource.TestCheckResourceAttr(testResourceName, "subnet.1.dhcp_v6_config.0.preferred_time", preferredTimes[1]),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.1.dhcp_v6_config.0.dns_servers.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.1.dhcp_v6_config.0.dns_servers.0", dnsServersV6[1]),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.1.dhcp_v6_config.0.sntp_servers.#", "2"),
@@ -330,12 +335,16 @@ resource "nsxt_policy_vlan_segment" "test" {
 `, name)
 }
 
-func testAccNsxtPolicyVlanSegmentWithDhcpTemplate(name string, dnsServerV4 string, dnsServerV6 string, lease string) string {
+func testAccNsxtPolicyVlanSegmentWithDhcpTemplate(name string, dnsServerV4 string, dnsServerV6 string, lease string, preferred string) string {
 	return testAccNsxtPolicyVlanSegmentDeps() + fmt.Sprintf(`
 
-resource "nsxt_policy_dhcp_relay" "test" {
-  display_name     = "segment-test"
-  server_addresses = ["4.4.4.2"]
+data "nsxt_policy_edge_cluster" "EC" {
+  display_name = "%s"
+}
+
+resource "nsxt_policy_dhcp_server" "test" {
+  edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
+  display_name      = "segment-test"
 }
 
 resource "nsxt_policy_vlan_segment" "test" {
@@ -346,8 +355,9 @@ resource "nsxt_policy_vlan_segment" "test" {
   subnet {
     cidr = "12.12.2.1/24"
     dhcp_v4_config {
-        lease_time  = %s
-        dns_servers = ["%s"]
+        server_address = "12.12.2.2/24"
+        lease_time     = %s
+        dns_servers    = ["%s"]
         dhcp_option_121 {
           network  = "2.1.1.0/24"
           next_hop = "2.3.1.3"
@@ -366,10 +376,11 @@ resource "nsxt_policy_vlan_segment" "test" {
   subnet {
     cidr = "4012::1/64"
     dhcp_v6_config {
-        lease_time      = %s
-        preferred_time  = %s
-        dns_servers     = ["%s"]
-        sntp_servers    = ["3001::1", "3001::2"]
+        server_address = "4012::2/64"
+        lease_time     = %s
+        preferred_time = %s
+        dns_servers    = ["%s"]
+        sntp_servers   = ["3001::1", "3001::2"]
         excluded_range {
             start = "4012::400"
             end   = "4012::500"
@@ -381,8 +392,8 @@ resource "nsxt_policy_vlan_segment" "test" {
     }
   }
 
-  dhcp_config_path = nsxt_policy_dhcp_relay.test.path
+  dhcp_config_path = nsxt_policy_dhcp_server.test.path
 
 }
-`, name, lease, dnsServerV4, lease, lease, dnsServerV6)
+`, getEdgeClusterName(), name, lease, dnsServerV4, lease, preferred, dnsServerV6)
 }
