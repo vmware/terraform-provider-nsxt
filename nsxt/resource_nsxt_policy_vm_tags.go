@@ -35,7 +35,7 @@ func resourceNsxtPolicyVMTags() *schema.Resource {
 				Description: "Instance id",
 				Required:    true,
 			},
-			"tag": getTagsSchema(),
+			"tag": getRequiredTagsSchema(),
 		},
 	}
 }
