@@ -63,8 +63,7 @@ func TestAccResourceNsxtPolicySegment_basicUpdate(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySegmentExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
-					// TODO: file bug for description not being updated
-					// resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test2"),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test2"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.0.cidr", "22.22.22.1/24"),
 					resource.TestCheckResourceAttr(testResourceName, "domain_name", "tftest2.org"),
@@ -301,7 +300,7 @@ func testAccNsxtPolicySegmentBasicUpdateTemplate(tzName string, name string) str
 
 resource "nsxt_policy_segment" "test" {
   display_name        = "%s"
-  description         = "Acceptance Test"
+  description         = "Acceptance Test2"
   domain_name         = "tftest2.org"
   overlay_id          = 1011
   transport_zone_path = data.nsxt_policy_transport_zone.test.path

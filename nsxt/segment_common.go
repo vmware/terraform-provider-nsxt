@@ -493,10 +493,12 @@ func policySegmentResourceToStruct(d *schema.ResourceData, isVlan bool) (model.S
 	domainName := d.Get("domain_name").(string)
 	tzPath := d.Get("transport_zone_path").(string)
 	dhcpConfigPath := d.Get("dhcp_config_path").(string)
+	revision := int64(d.Get("revision").(int))
 
 	obj := model.Segment{
 		DisplayName: &displayName,
 		Tags:        tags,
+		Revision:    &revision,
 	}
 
 	if description != "" {
@@ -524,11 +526,8 @@ func policySegmentResourceToStruct(d *schema.ResourceData, isVlan bool) (model.S
 	} else {
 		// overlay specific fields
 		connectivityPath := d.Get("connectivity_path").(string)
-		if d.HasChange("overlay_id") {
-			overlayID := d.Get("overlay_id").(int)
-			overlay64 := int64(overlayID)
-			obj.OverlayId = &overlay64
-		}
+		overlayID := int64(d.Get("overlay_id").(int))
+		obj.OverlayId = &overlayID
 		if connectivityPath != "" {
 			obj.ConnectivityPath = &connectivityPath
 		}
@@ -718,12 +717,11 @@ func nsxtPolicySegmentUpdate(d *schema.ResourceData, m interface{}, isVlan bool)
 		return fmt.Errorf("Error obtaining Segment ID")
 	}
 
-	// Update the resource using PATCH
 	obj, err := policySegmentResourceToStruct(d, isVlan)
 	if err != nil {
 		return err
 	}
-	err = client.Patch(id, obj)
+	_, err = client.Update(id, obj)
 	if err != nil {
 		return handleUpdateError("Segment", id, err)
 	}
