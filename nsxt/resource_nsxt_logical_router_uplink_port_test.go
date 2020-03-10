@@ -22,6 +22,9 @@ func TestAccResourceNsxtLogicalRouterUpLinkPort_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXLogicalRouterUpLinkPortCheckDestroy(state, portName)
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNsxtLogicalRouterUpLinkPortCreateTemplate(portName, tier0RouterName, transportZoneName, edgeClusterMemberIndex),
@@ -84,6 +87,30 @@ func testAccNsxtLogicalRouterUpLinkPortExists(displayName string, resourceName s
 		}
 		return fmt.Errorf("NSX logical port %s wasn't found", displayName)
 	}
+}
+
+func testAccNSXLogicalRouterUpLinkPortCheckDestroy(state *terraform.State, displayName string) error {
+	nsxClient := testAccProvider.Meta().(nsxtClients).NsxtClient
+	for _, rs := range state.RootModule().Resources {
+
+		if rs.Type != "nsxt_logical_router_uplink_port" {
+			continue
+		}
+
+		resourceID := rs.Primary.Attributes["id"]
+		logicalPort, responseCode, err := nsxClient.LogicalRoutingAndServicesApi.ReadLogicalRouterUpLinkPort(nsxClient.Context, resourceID)
+		if err != nil {
+			if responseCode.StatusCode != http.StatusOK {
+				return nil
+			}
+			return fmt.Errorf("Error while retrieving logical router uplink port ID %s. Error: %v", resourceID, err)
+		}
+
+		if displayName == logicalPort.DisplayName {
+			return fmt.Errorf("NSX logical router uplink port %s still exists", displayName)
+		}
+	}
+	return nil
 }
 
 func testAccNsxtLogicalRouterUpLinkPortPreconditionsTemplate(tier0RouterName string, transportZoneName string) string {
