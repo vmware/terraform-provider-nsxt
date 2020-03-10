@@ -8,6 +8,7 @@ import (
 	"github.com/vmware/go-vmware-nsxt/trust"
 	"net/http"
 	"os"
+	"strconv"
 	"testing"
 )
 
@@ -15,6 +16,7 @@ import (
 // Those defaults can be overridden using environment parameters
 const tier0RouterDefaultName string = "PLR-1 LogicalRouterTier0"
 const edgeClusterDefaultName string = "edgecluster1"
+const edgeClusterMemberIndex int64 = 1
 const vlanTransportZoneName string = "transportzone2"
 const overlayTransportZoneNamePrefix string = "1-transportzone"
 const macPoolDefaultName string = "DefaultMacPool"
@@ -51,6 +53,18 @@ func getEdgeClusterName() string {
 		name = edgeClusterDefaultName
 	}
 	return name
+}
+
+func getEdgeClusterMemberIndex() (int64, error) {
+	index := os.Getenv("NSXT_EDGE_CLUSTER_MEMBER_INDEX")
+	if index == "" {
+		return edgeClusterMemberIndex, nil
+	}
+	value, err := strconv.Atoi(index)
+	if err != nil {
+		return 0, fmt.Errorf("Error on parsing NSXT_EDGE_CLUSTER_MEMBER_INDEX %v", err)
+	}
+	return int64(value), nil
 }
 
 func getVlanTransportZoneName() string {

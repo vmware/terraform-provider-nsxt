@@ -78,6 +78,10 @@ func intList2int64List(configured []interface{}) []int64 {
 	return vs
 }
 
+func getInt64ListFromSchemaList(d *schema.ResourceData, schemaAttrName string) []int64 {
+	return intList2int64List(d.Get(schemaAttrName).([]interface{}))
+}
+
 func getRevisionSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:        schema.TypeInt,
@@ -396,6 +400,19 @@ func setResourceReferencesInSchema(d *schema.ResourceData, references []common.R
 	referenceList := returnResourceReferences(references)
 	err := d.Set(schemaAttrName, referenceList)
 	return err
+}
+
+func getIPSubnetsFromSchema(d *schema.ResourceData) []manager.IpSubnet {
+	references := d.Get("subnets").([]interface{})
+	var subnets []manager.IpSubnet
+	for _, reference := range references {
+		subnetMap := reference.(map[string]interface{})
+		subnets = append(subnets, manager.IpSubnet{
+			IpAddresses:  interfaceListToStringList(subnetMap["ip_addresses"].([]interface{})),
+			PrefixLength: int64(subnetMap["prefix_length"].(int)),
+		})
+	}
+	return subnets
 }
 
 func getServiceBindingsFromSchema(d *schema.ResourceData, schemaAttrName string) []manager.ServiceBinding {
