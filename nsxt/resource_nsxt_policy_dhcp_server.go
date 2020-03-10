@@ -50,7 +50,8 @@ func resourceNsxtPolicyDhcpServer() *schema.Resource {
 			},
 			"server_addresses": {
 				Type:        schema.TypeList,
-				Required:    true,
+				Optional:    true,
+				Computed:    true,
 				Description: "DHCP server address in CIDR format",
 				MaxItems:    2,
 				Elem: &schema.Schema{

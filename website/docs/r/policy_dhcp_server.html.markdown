@@ -9,7 +9,7 @@ description: A resource to configure a DHCP Servers in NSX-T.
 
 This resource provides a method for the management of a DHCP Server configurations.
 This resource is supported with NSX 3.0.0 onwards.
- 
+
 ## Example Usage
 
 ```hcl
@@ -32,8 +32,8 @@ The following arguments are supported:
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `edge_cluster_path` - (Optional) The Policy path to the edge cluster for this DHCP Server.
 * `lease_time` - (Optional) IP address lease time in seconds. Valid values from `60` to `4294967295`. Default is `86400`.
-* `preferred_edge_paths` - (Optional) Policy paths to edge nodes. The first edge node is assigned as active edge, and second one as standby edge. 
-* `server_addresses` - (Required) DHCP server address in CIDR format. At most 2 supported; one IPv4 and one IPv6 address.
+* `preferred_edge_paths` - (Optional) Policy paths to edge nodes. The first edge node is assigned as active edge, and second one as standby edge.
+* `server_addresses` - (Optional) DHCP server address in CIDR format. At most 2 supported; one IPv4 and one IPv6 address. Server address can also be specified on segment subnet level.
 
 
 ## Attributes Reference
