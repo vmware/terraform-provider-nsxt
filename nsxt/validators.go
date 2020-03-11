@@ -166,28 +166,69 @@ func validateSingleIP() schema.SchemaValidateFunc {
 	}
 }
 
-func validateASNOrIP(i interface{}, k string) (s []string, es []error) {
+func isValidStringUint(value string, bits int) bool {
+	_, err := strconv.ParseUint(value, 10, bits)
+	return (err == nil)
+}
+
+func isValidASN(value string) bool {
+	tokens := strings.Split(value, ":")
+	if len(tokens) != 2 {
+		return false
+	}
+	// ASN is limited to 2 bytes
+	if !isValidStringUint(tokens[0], 16) {
+		return false
+	}
+
+	// Number is limited to 4 bytes
+	if !isValidStringUint(tokens[1], 32) {
+		return false
+	}
+
+	return true
+}
+
+func validateASNPair(i interface{}, k string) (s []string, es []error) {
 	v, ok := i.(string)
 	if !ok {
 		es = append(es, fmt.Errorf("expected type of %s to be string", k))
 		return
 	}
 
-	err := fmt.Errorf("expected %s to contain ASN:<number> or valid IP:<number>, got: %s", k, v)
+	if !isValidASN(v) {
+		err := fmt.Errorf("expected %s to contain ASN:<number> with ASN limited to 2 bytes, got: %s", k, v)
+		es = append(es, err)
+	}
+	return
+}
+
+func validateIPorASNPair(i interface{}, k string) (s []string, es []error) {
+	v, ok := i.(string)
+	if !ok {
+		es = append(es, fmt.Errorf("expected type of %s to be string", k))
+		return
+	}
+
+	err := fmt.Errorf("expected %s to contain <ASN>:<number> or <IP>:<number> with ASN limited to 2 bytes, got: %s", k, v)
 
 	tokens := strings.Split(v, ":")
 	if len(tokens) != 2 {
 		es = append(es, err)
 		return
 	}
-	if !isSingleIP(tokens[0]) && tokens[0] != "ASN" {
-		es = append(es, err)
+
+	if isSingleIP(tokens[0]) {
+		if !isValidStringUint(tokens[1], 32) {
+			es = append(es, err)
+		}
 		return
 	}
-	_, err = strconv.ParseUint(tokens[1], 10, 4)
-	if err != nil {
+
+	if !isValidASN(v) {
 		es = append(es, err)
 	}
+
 	return
 }
 
@@ -197,12 +238,7 @@ func validate4ByteASNPlain(i interface{}, k string) (s []string, es []error) {
 		es = append(es, fmt.Errorf("expected type of %s to be string", k))
 		return
 	}
-	asni, err := strconv.Atoi(v)
-	if err != nil {
-		es = append(es, fmt.Errorf("cannot convert %s to int", v))
-		return
-	}
-	if asni < 0 || asni > 4294967295 {
+	if !isValidStringUint(v, 32) {
 		es = append(es, fmt.Errorf("invalid ASN number %s", v))
 		return
 	}
