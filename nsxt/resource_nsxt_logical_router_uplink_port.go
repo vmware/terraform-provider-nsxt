@@ -120,11 +120,12 @@ func resourceNsxtLogicalRouterUpLinkPortCreate(d *schema.ResourceData, m interfa
 	}
 	logicalRouterUpLinkPort, resp, err := nsxClient.LogicalRoutingAndServicesApi.CreateLogicalRouterUpLinkPort(nsxClient.Context, logicalRouterUpLinkPort)
 
-	if resp != nil && resp.StatusCode != http.StatusCreated {
-		return fmt.Errorf("Unexpected status returned during LogicalRouterUpLinkPort create: %v", resp.StatusCode)
-	}
 	if err != nil {
 		return fmt.Errorf("Error during LogicalRouterUpLinkPort create: %v", err)
+	}
+
+	if resp != nil && resp.StatusCode != http.StatusCreated {
+		return fmt.Errorf("Unexpected status returned during LogicalRouterUpLinkPort create: %v", resp.StatusCode)
 	}
 
 	d.SetId(logicalRouterUpLinkPort.Id)
