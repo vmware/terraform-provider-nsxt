@@ -67,7 +67,7 @@ func dataSourceNsxtPolicySegmentRealizationRead(d *schema.ResourceData, m interf
 		Refresh: func() (interface{}, string, error) {
 			state, err := client.Get(segmentID, nil, nil, &enforcementPointPath, nil, nil, nil, nil, nil)
 			if err != nil {
-				return state, model.SegmentConfigurationState_STATE_ERROR, fmt.Errorf("Error while waiting for realization of segment %s: %v", segmentID, err)
+				return state, model.SegmentConfigurationState_STATE_ERROR, logAPIError("Error while waiting for realization of segment", err)
 			}
 
 			d.Set("state", state.State)
