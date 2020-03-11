@@ -38,12 +38,7 @@ func TestAccResourceNsxtPolicyVMTags_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXPolicyVMTagsRemoveTemplate(vmID),
-				Check: resource.ComposeTestCheckFunc(
-					testAccNSXPolicyVMTagsCheckExists(testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
-					resource.TestCheckResourceAttr(testResourceName, "instance_id", vmID),
-				),
+				Config: testAccNsxtPolicyEmptyTemplate(),
 			},
 		},
 	})
@@ -68,6 +63,9 @@ func TestAccResourceNsxtPolicyVMTags_import_basic(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"instance_id"},
+			},
+			{
+				Config: testAccNsxtPolicyEmptyTemplate(),
 			},
 		},
 	})
@@ -143,12 +141,5 @@ resource "nsxt_policy_vm_tags" "test" {
     scope = "scope2"
     tag   = "tag2"
   }
-}`, instanceID)
-}
-
-func testAccNSXPolicyVMTagsRemoveTemplate(instanceID string) string {
-	return fmt.Sprintf(`
-resource "nsxt_policy_vm_tags" "test" {
-  instance_id = "%s"
 }`, instanceID)
 }

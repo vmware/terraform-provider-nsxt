@@ -220,15 +220,19 @@ func resourceNsxtVMTagsCreate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	tags := getTagsFromSchema(d)
-	err = updateTags(nsxClient, vm.ExternalId, tags)
-	if err != nil {
-		return err
+	if len(tags) > 0 || d.HasChange("tag") {
+		err = updateTags(nsxClient, vm.ExternalId, tags)
+		if err != nil {
+			return err
+		}
 	}
 
 	portTags := getCustomizedTagsFromSchema(d, "logical_port_tag")
-	err = updatePortTags(nsxClient, vm.ExternalId, portTags)
-	if err != nil {
-		return err
+	if len(portTags) > 0 || d.HasChange("logical_port_tag") {
+		err = updatePortTags(nsxClient, vm.ExternalId, portTags)
+		if err != nil {
+			return err
+		}
 	}
 
 	d.SetId(vm.ExternalId)
@@ -288,16 +292,23 @@ func resourceNsxtVMTagsDelete(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("Error during VM retrieval: %v", err)
 	}
 
-	tags := make([]common.Tag, 0)
-	err = updateTags(nsxClient, vm.ExternalId, tags)
-	err2 := updatePortTags(nsxClient, vm.ExternalId, tags)
-
-	if err != nil {
-		return err
+	noTags := make([]common.Tag, 0)
+	vmTags := getTagsFromSchema(d)
+	if len(vmTags) > 0 {
+		// Update tags only if they were configured by the provider
+		err = updateTags(nsxClient, vm.ExternalId, noTags)
+		if err != nil {
+			return err
+		}
 	}
 
-	if err2 != nil {
-		return err2
+	portTags := getCustomizedTagsFromSchema(d, "logical_port_tag")
+	if len(portTags) > 0 {
+		// Update port tags only if they were configured by the provider
+		err := updatePortTags(nsxClient, vm.ExternalId, noTags)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
