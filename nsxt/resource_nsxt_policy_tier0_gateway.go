@@ -213,14 +213,14 @@ func getVRFRouteSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:         schema.TypeString,
 		Optional:     true,
-		ValidateFunc: validateASNOrIP,
+		ValidateFunc: validateIPorASNPair,
 	}
 }
 
 func getVRFRouteElemSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:         schema.TypeString,
-		ValidateFunc: validateASNOrIP,
+		ValidateFunc: validateASNPair,
 	}
 }
 

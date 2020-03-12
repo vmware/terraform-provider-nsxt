@@ -635,8 +635,8 @@ func testAccNsxtPolicyTier0WithVRFTemplate(name string, targets bool) string {
 		routeTargets = `
         route_target {
             auto_mode      = "false"
-            import_targets = ["ASN:1"]
-            export_targets = ["8.8.8.8:4", "ASN:3"]
+            import_targets = ["2:12"]
+            export_targets = ["8999:123", "2:14"]
         }
             `
 	}
