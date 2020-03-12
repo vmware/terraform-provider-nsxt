@@ -44,7 +44,7 @@ func resourceNsxtLogicalRouterUpLinkPort() *schema.Resource {
 			},
 			"edge_cluster_member_index": {
 				Type:        schema.TypeList,
-				Description: "Member index of the edge node on the cluster (start at 1)",
+				Description: "Member index of the edge node on the cluster",
 				Required:    true,
 				Elem: &schema.Schema{
 					Type: schema.TypeInt,
