@@ -5,7 +5,7 @@ sidebar_current: "docs-nsxt-datasource-certificate"
 description: A certificate data source.
 ---
 
-# nsxt_transport_zone
+# nsxt_certificate
 
 This data source provides information about various types of certificates imported into NSX trust management.
 
