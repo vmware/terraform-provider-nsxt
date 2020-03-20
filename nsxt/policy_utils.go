@@ -124,7 +124,7 @@ func isPolicyPath(policyPath string) bool {
 	} else if pathSegs[0] != "" || pathSegs[len(pathSegs)-1] == "" {
 		return false
 	} else if !strings.Contains(pathSegs[1], "infra") {
-                // must be infra or global-infra as of now
+		// must be infra or global-infra as of now
 		return false
 	}
 	return true
