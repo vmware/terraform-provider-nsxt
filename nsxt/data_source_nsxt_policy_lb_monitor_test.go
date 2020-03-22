@@ -93,7 +93,7 @@ func testAccDataSourceNsxtPolicyLBMonitorCreate(name string) error {
 
 	err = client.Patch(id, dataValue.(*data.StructValue))
 	if err != nil {
-		return fmt.Errorf("Error during LBMonitor creation: %v", err)
+		return handleCreateError("LBMonitor", id, err)
 	}
 	return nil
 }
@@ -119,7 +119,7 @@ func testAccDataSourceNsxtPolicyLBMonitorDeleteByName(name string) error {
 		if result != nil && *result.DisplayName == name {
 			err := client.Delete(*result.Id, &force)
 			if err != nil {
-				return fmt.Errorf("Error during LBMonitor deletion: %v", err)
+				return handleDeleteError("LBMonitor", *result.Id, err)
 			}
 			return nil
 		}

@@ -62,7 +62,7 @@ func testAccDataSourceNsxtPolicyLBServerSslProfileCreate(name string) error {
 
 	err = client.Patch(id, obj)
 	if err != nil {
-		return fmt.Errorf("Error during LBServerSslProfile creation: %v", err)
+		return handleCreateError("LBServerSslProfile", id, err)
 	}
 	return nil
 }
@@ -77,14 +77,14 @@ func testAccDataSourceNsxtPolicyLBServerSslProfileDeleteByName(name string) erro
 	// Find the object by name
 	objList, err := client.List(nil, nil, nil, nil, nil, nil)
 	if err != nil {
-		return fmt.Errorf("Error while reading LBServerSslProfiles: %v", err)
+		return handleListError("LBServerSslProfile", err)
 	}
 	force := true
 	for _, objInList := range objList.Results {
 		if *objInList.DisplayName == name {
 			err := client.Delete(*objInList.Id, &force)
 			if err != nil {
-				return fmt.Errorf("Error during LBServerSslProfile deletion: %v", err)
+				return handleDeleteError("LBServerSslProfile", *objInList.Id, err)
 			}
 			return nil
 		}

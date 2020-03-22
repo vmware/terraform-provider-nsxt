@@ -62,7 +62,7 @@ func testAccDataSourceNsxtPolicyQosProfileCreate(name string) error {
 
 	err = client.Patch(id, obj, nil)
 	if err != nil {
-		return fmt.Errorf("Error during QosProfile creation: %v", err)
+		return handleCreateError("QosProfile", id, err)
 	}
 	return nil
 }
@@ -77,13 +77,13 @@ func testAccDataSourceNsxtPolicyQosProfileDeleteByName(name string) error {
 	// Find the object by name
 	objList, err := client.List(nil, nil, nil, nil, nil)
 	if err != nil {
-		return fmt.Errorf("Error while reading QosProfiles: %v", err)
+		return handleListError("QosProfile", err)
 	}
 	for _, objInList := range objList.Results {
 		if *objInList.DisplayName == name {
 			err := client.Delete(*objInList.Id, nil)
 			if err != nil {
-				return fmt.Errorf("Error during QosProfile deletion: %v", err)
+				return handleDeleteError("QosProfile", *objInList.Id, err)
 			}
 			return nil
 		}

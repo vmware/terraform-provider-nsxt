@@ -62,7 +62,7 @@ func testAccDataSourceNsxtPolicyTier0Create(routerName string) error {
 
 	err = client.Patch(id, obj)
 	if err != nil {
-		return fmt.Errorf("Error during Tier0 creation: %v", err)
+		return handleCreateError("Tier0", id, err)
 	}
 	return nil
 }
@@ -83,7 +83,7 @@ func testAccDataSourceNsxtPolicyTier0DeleteByName(routerName string) error {
 		if *objInList.DisplayName == routerName {
 			err := client.Delete(*objInList.Id)
 			if err != nil {
-				return fmt.Errorf("Error during Tier0 deletion: %v", err)
+				return handleDeleteError("Tier0", *objInList.Id, err)
 			}
 			return nil
 		}

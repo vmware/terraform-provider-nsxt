@@ -66,7 +66,7 @@ func testAccDataSourceNsxtPolicyVniPoolConfigCreate(name string) error {
 
 	err = client.Patch(id, obj)
 	if err != nil {
-		return fmt.Errorf("Error during VniPoolConfig creation: %v", err)
+		return handleCreateError("VniPoolConfig", id, err)
 	}
 	return nil
 }
@@ -81,13 +81,13 @@ func testAccDataSourceNsxtPolicyVniPoolConfigDeleteByName(name string) error {
 	// Find the object by name
 	objList, err := client.List(nil, nil, nil, nil, nil, nil)
 	if err != nil {
-		return fmt.Errorf("Error while reading VniPoolConfigs: %v", err)
+		return handleListError("VniPoolConfig", err)
 	}
 	for _, objInList := range objList.Results {
 		if *objInList.DisplayName == name {
 			err := client.Delete(*objInList.Id)
 			if err != nil {
-				return fmt.Errorf("Error during VniPoolConfig deletion: %v", err)
+				return handleDeleteError("VniPoolConfig", *objInList.Id, err)
 			}
 			return nil
 		}

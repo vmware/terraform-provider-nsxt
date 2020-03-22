@@ -62,7 +62,7 @@ func testAccDataSourceNsxtPolicyIPDiscoveryProfileCreate(name string) error {
 
 	err = client.Patch(id, obj, nil)
 	if err != nil {
-		return fmt.Errorf("Error during IPDiscoveryProfile creation: %v", err)
+		return handleCreateError("IPDiscoveryProfile", id, err)
 	}
 	return nil
 }
@@ -83,7 +83,7 @@ func testAccDataSourceNsxtPolicyIPDiscoveryProfileDeleteByName(name string) erro
 		if *objInList.DisplayName == name {
 			err := client.Delete(*objInList.Id, nil)
 			if err != nil {
-				return fmt.Errorf("Error during IPDiscoveryProfile deletion: %v", err)
+				return handleDeleteError("IPDiscoveryProfile", *objInList.Id, err)
 			}
 			return nil
 		}

@@ -62,7 +62,7 @@ func testAccDataSourceNsxtPolicySpoofGuardProfileCreate(name string) error {
 
 	err = client.Patch(id, obj, nil)
 	if err != nil {
-		return fmt.Errorf("Error during SpoofGuardProfile creation: %v", err)
+		return handleCreateError("SpoofGuardProfile", id, err)
 	}
 	return nil
 }
@@ -83,7 +83,7 @@ func testAccDataSourceNsxtPolicySpoofGuardProfileDeleteByName(name string) error
 		if *objInList.DisplayName == name {
 			err := client.Delete(*objInList.Id, nil)
 			if err != nil {
-				return fmt.Errorf("Error during SpoofGuardProfile deletion: %v", err)
+				return handleDeleteError("poofGuardProfile", *objInList.Id, err)
 			}
 			return nil
 		}
