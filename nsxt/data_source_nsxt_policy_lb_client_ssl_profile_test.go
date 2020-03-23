@@ -62,7 +62,7 @@ func testAccDataSourceNsxtPolicyLBClientSslProfileCreate(name string) error {
 
 	err = client.Patch(id, obj)
 	if err != nil {
-		return fmt.Errorf("Error during LBClientSslProfile creation: %v", err)
+		return handleCreateError("LBClientSslProfile", id, err)
 	}
 	return nil
 }
@@ -84,7 +84,7 @@ func testAccDataSourceNsxtPolicyLBClientSslProfileDeleteByName(name string) erro
 		if *objInList.DisplayName == name {
 			err := client.Delete(*objInList.Id, &force)
 			if err != nil {
-				return fmt.Errorf("Error during LBClientSslProfile deletion: %v", err)
+				return handleDeleteError("LBClientSslProfile", *objInList.Id, err)
 			}
 			return nil
 		}

@@ -93,7 +93,7 @@ func testAccDataSourceNsxtPolicyLBAppProfileCreate(name string) error {
 
 	err = client.Patch(id, dataValue.(*data.StructValue))
 	if err != nil {
-		return fmt.Errorf("Error during LBAppProfile creation: %v", err)
+		return handleCreateError("LBAppProfile", id, err)
 	}
 	return nil
 }
@@ -119,7 +119,7 @@ func testAccDataSourceNsxtPolicyLBAppProfileDeleteByName(name string) error {
 		if result != nil && *result.DisplayName == name {
 			err := client.Delete(*result.Id, &force)
 			if err != nil {
-				return fmt.Errorf("Error during LBAppProfile deletion: %v", err)
+				return handleDeleteError("LBAppProfile", *result.Id, err)
 			}
 			return nil
 		}

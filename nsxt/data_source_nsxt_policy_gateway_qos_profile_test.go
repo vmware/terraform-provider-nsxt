@@ -62,7 +62,7 @@ func testAccDataSourceNsxtPolicyGatewayQosProfileCreate(name string) error {
 
 	err = client.Patch(id, obj, nil)
 	if err != nil {
-		return fmt.Errorf("Error during GatewayQosProfile creation: %v", err)
+		return handleCreateError("GatewayQosProfile", id, err)
 	}
 	return nil
 }
@@ -83,7 +83,7 @@ func testAccDataSourceNsxtPolicyGatewayQosProfileDeleteByName(name string) error
 		if *objInList.DisplayName == name {
 			err := client.Delete(*objInList.Id, nil)
 			if err != nil {
-				return fmt.Errorf("Error during GatewayQosProfile deletion: %v", err)
+				return handleDeleteError("GatewayQosProfile", *objInList.Id, err)
 			}
 			return nil
 		}

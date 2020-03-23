@@ -62,7 +62,7 @@ func testAccDataSourceNsxtPolicyIpv6DadProfileCreate(name string) error {
 
 	err = client.Patch(id, obj, nil)
 	if err != nil {
-		return fmt.Errorf("Error during Ipv6DadProfile creation: %v", err)
+		return handleCreateError("Ipv6DadProfile", id, err)
 	}
 	return nil
 }
@@ -83,7 +83,7 @@ func testAccDataSourceNsxtPolicyIpv6DadProfileDeleteByName(name string) error {
 		if *objInList.DisplayName == name {
 			err := client.Delete(*objInList.Id, nil)
 			if err != nil {
-				return fmt.Errorf("Error during Ipv6DadProfile deletion: %v", err)
+				return handleDeleteError("Ipv6DadProfile", *objInList.Id, err)
 			}
 			return nil
 		}

@@ -62,7 +62,7 @@ func testAccDataSourceNsxtPolicyIPPoolCreate(name string) error {
 
 	err = client.Patch(id, obj)
 	if err != nil {
-		return fmt.Errorf("Error during IpPool creation: %v", err)
+		return handleCreateError("IpAddressPool", id, err)
 	}
 	return nil
 }
@@ -83,7 +83,7 @@ func testAccDataSourceNsxtPolicyIPPoolDeleteByName(name string) error {
 		if *objInList.DisplayName == name {
 			err := client.Delete(*objInList.Id)
 			if err != nil {
-				return fmt.Errorf("Error during IpPool deletion: %v", err)
+				return handleDeleteError("IpAddressPool", *objInList.Id, err)
 			}
 			return nil
 		}

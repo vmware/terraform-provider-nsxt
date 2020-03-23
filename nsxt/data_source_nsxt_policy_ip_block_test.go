@@ -64,7 +64,7 @@ func testAccDataSourceNsxtPolicyIPBlockCreate(name string) error {
 
 	err = client.Patch(id, obj)
 	if err != nil {
-		return fmt.Errorf("Error during IpBlock creation: %v", err)
+		return handleCreateError("IpAddressBlock", id, err)
 	}
 	return nil
 }
@@ -79,13 +79,13 @@ func testAccDataSourceNsxtPolicyIPBlockDeleteByName(name string) error {
 	// Find the object by name
 	objList, err := client.List(nil, nil, nil, nil, nil, nil)
 	if err != nil {
-		return handleListError("IpBlock", err)
+		return handleListError("IpiAddressBlock", err)
 	}
 	for _, objInList := range objList.Results {
 		if *objInList.DisplayName == name {
 			err := client.Delete(*objInList.Id)
 			if err != nil {
-				return fmt.Errorf("Error during IpBlock deletion: %v", err)
+				return handleDeleteError("IpAddressBlock", *objInList.Id, err)
 			}
 			return nil
 		}

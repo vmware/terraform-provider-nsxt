@@ -62,7 +62,7 @@ func testAccDataSourceNsxtPolicySegmentSecurityProfileCreate(name string) error 
 
 	err = client.Patch(id, obj, nil)
 	if err != nil {
-		return fmt.Errorf("Error during SegmentSecurityProfile creation: %v", err)
+		return handleCreateError("SegmentSecurityProfile", id, err)
 	}
 	return nil
 }
@@ -83,7 +83,7 @@ func testAccDataSourceNsxtPolicySegmentSecurityProfileDeleteByName(name string) 
 		if *objInList.DisplayName == name {
 			err := client.Delete(*objInList.Id, nil)
 			if err != nil {
-				return fmt.Errorf("Error during SegmentSecurityProfile deletion: %v", err)
+				return handleDeleteError("SegmentSecurityProfile", *objInList.Id, err)
 			}
 			return nil
 		}
