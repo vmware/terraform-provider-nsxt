@@ -233,6 +233,9 @@ func resourceNsxtPolicyTier0GatewayInterfaceRead(d *schema.ResourceData, m inter
 
 	if obj.UrpfMode != nil {
 		d.Set("urpf_mode", obj.UrpfMode)
+	} else {
+		// assign default for version that is lower than 3.0.0
+		d.Set("urpf_mode", model.Tier0Interface_URPF_MODE_STRICT)
 	}
 
 	return nil
