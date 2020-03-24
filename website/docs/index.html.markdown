@@ -191,7 +191,7 @@ the imperative API and existing config files will continue to work, the recommen
 is to build logical topologies from the declarative API(Policy Objects).The resources
 and data sources using the policy API have _policy_ in their name. All these resources
 and data sources are fully documented on the NSX-T Terraform Provider
-page:•https://www.terraform.io/docs/providers/nsxt/index.htmlFor more details on the
+page:•https://www.terraform.io/docs/providers/nsxt/index.html For more details on the
 NSX-T Policy API usage, please look at NSX-T documentation.
 
 The existing data sources and resources are still available to consume but using
