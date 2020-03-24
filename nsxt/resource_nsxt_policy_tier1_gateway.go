@@ -347,6 +347,19 @@ func resourceNsxtPolicyTier1GatewaySetQos(d *schema.ResourceData, obj *model.Tie
 
 }
 
+func resourceNsxtPolicyTier1GatewaySetVersionDependentAttrs(d *schema.ResourceData, obj *model.Tier1) {
+	if nsxVersionLower("3.0.0") {
+		return
+	}
+
+	resourceNsxtPolicyTier1GatewaySetQos(d, obj)
+	poolAllocation := d.Get("pool_allocation").(string)
+	if poolAllocation != "" {
+		obj.PoolAllocation = &poolAllocation
+	}
+
+}
+
 func resourceNsxtPolicyTier1GatewayCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	client := infra.NewDefaultTier1sClient(connector)
@@ -370,7 +383,6 @@ func resourceNsxtPolicyTier1GatewayCreate(d *schema.ResourceData, m interface{})
 	routeAdvertisementRules := getAdvRulesFromSchema(d)
 	ipv6ProfilePaths := getIpv6ProfilePathsFromSchema(d)
 	dhcpPath := d.Get("dhcp_config_path").(string)
-	poolAllocation := d.Get("pool_allocation").(string)
 
 	obj := model.Tier1{
 		DisplayName:             &displayName,
@@ -394,11 +406,7 @@ func resourceNsxtPolicyTier1GatewayCreate(d *schema.ResourceData, m interface{})
 		obj.DhcpConfigPaths = []string{}
 	}
 
-	if poolAllocation != "" {
-		obj.PoolAllocation = &poolAllocation
-	}
-
-	resourceNsxtPolicyTier1GatewaySetQos(d, &obj)
+	resourceNsxtPolicyTier1GatewaySetVersionDependentAttrs(d, &obj)
 
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating tier1 with ID %s", id)
@@ -451,7 +459,12 @@ func resourceNsxtPolicyTier1GatewayRead(d *schema.ResourceData, m interface{}) e
 	}
 	d.Set("route_advertisement_types", obj.RouteAdvertisementTypes)
 	d.Set("revision", obj.Revision)
-	d.Set("pool_allocation", obj.PoolAllocation)
+	if obj.PoolAllocation == nil {
+		// This will happen with NSX version < 3.0.0
+		d.Set("pool_allocation", model.Tier1_POOL_ALLOCATION_ROUTING)
+	} else {
+		d.Set("pool_allocation", obj.PoolAllocation)
+	}
 	dhcpPaths := obj.DhcpConfigPaths
 
 	if len(dhcpPaths) > 0 {
@@ -505,7 +518,6 @@ func resourceNsxtPolicyTier1GatewayUpdate(d *schema.ResourceData, m interface{})
 	routeAdvertisementRules := getAdvRulesFromSchema(d)
 	ipv6ProfilePaths := getIpv6ProfilePathsFromSchema(d)
 	dhcpPath := d.Get("dhcp_config_path").(string)
-	poolAllocation := d.Get("pool_allocation").(string)
 	revision := int64(d.Get("revision").(int))
 
 	obj := model.Tier1{
@@ -531,11 +543,7 @@ func resourceNsxtPolicyTier1GatewayUpdate(d *schema.ResourceData, m interface{})
 		obj.DhcpConfigPaths = []string{}
 	}
 
-	if poolAllocation != "" {
-		obj.PoolAllocation = &poolAllocation
-	}
-
-	resourceNsxtPolicyTier1GatewaySetQos(d, &obj)
+	resourceNsxtPolicyTier1GatewaySetVersionDependentAttrs(d, &obj)
 
 	// Update the resource using PUT
 	_, err := client.Update(id, obj)

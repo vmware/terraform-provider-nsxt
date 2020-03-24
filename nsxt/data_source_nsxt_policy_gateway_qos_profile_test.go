@@ -17,7 +17,7 @@ func TestAccDataSourceNsxtPolicyGatewayQosProfile_basic(t *testing.T) {
 	testResourceName := "data.nsxt_policy_gateway_qos_profile.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccDataSourceNsxtPolicyGatewayQosProfileDeleteByName(name)

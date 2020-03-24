@@ -25,7 +25,86 @@ func TestAccResourceNsxtPolicyTier1Gateway_basic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyTier1CreateTemplate(name, failoverMode),
+				Config: testAccNsxtPolicyTier1CreateTemplate(name, failoverMode, false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyTier1Exists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "failover_mode", failoverMode),
+					resource.TestCheckResourceAttr(testResourceName, "default_rule_logging", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "enable_firewall", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "enable_standby_relocation", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "force_whitelisting", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "tier0_path", ""),
+					resource.TestCheckResourceAttr(testResourceName, "route_advertisement_types.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "route_advertisement_rule.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "ipv6_ndra_profile_path", "/infra/ipv6-ndra-profiles/default"),
+					resource.TestCheckResourceAttr(testResourceName, "ipv6_dad_profile_path", "/infra/ipv6-dad-profiles/default"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyTier1UpdateTemplate(updateName, failoverMode, false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyTier1Exists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updateName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test Update"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "failover_mode", failoverMode),
+					resource.TestCheckResourceAttr(testResourceName, "default_rule_logging", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "enable_firewall", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "enable_standby_relocation", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "force_whitelisting", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "tier0_path", ""),
+					resource.TestCheckResourceAttr(testResourceName, "route_advertisement_types.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "route_advertisement_rule.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "ipv6_ndra_profile_path", "/infra/ipv6-ndra-profiles/default"),
+					resource.TestCheckResourceAttr(testResourceName, "ipv6_dad_profile_path", "/infra/ipv6-dad-profiles/default"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyTier1Update2Template(updateName, failoverMode, false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyTier1Exists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updateName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test Update"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "failover_mode", failoverMode),
+					resource.TestCheckResourceAttr(testResourceName, "default_rule_logging", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "enable_firewall", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "enable_standby_relocation", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "force_whitelisting", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "tier0_path", ""),
+					resource.TestCheckResourceAttr(testResourceName, "route_advertisement_types.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "route_advertisement_rule.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "ipv6_ndra_profile_path", "/infra/ipv6-ndra-profiles/default"),
+					resource.TestCheckResourceAttr(testResourceName, "ipv6_dad_profile_path", "/infra/ipv6-dad-profiles/default"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicyTier1Gateway_withPoolAllocation(t *testing.T) {
+	name := fmt.Sprintf("test-nsx-policy-tier1-basic")
+	updateName := fmt.Sprintf("%s-update", name)
+	testResourceName := "nsxt_policy_tier1_gateway.test"
+	failoverMode := "NON_PREEMPTIVE"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyTier1CheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyTier1CreateTemplate(name, failoverMode, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTier1Exists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -46,7 +125,7 @@ func TestAccResourceNsxtPolicyTier1Gateway_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyTier1UpdateTemplate(updateName, failoverMode),
+				Config: testAccNsxtPolicyTier1UpdateTemplate(updateName, failoverMode, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTier1Exists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updateName),
@@ -69,7 +148,7 @@ func TestAccResourceNsxtPolicyTier1Gateway_basic(t *testing.T) {
 			},
 			{
 				// ForceNew due to pool allocation change
-				Config: testAccNsxtPolicyTier1Update2Template(updateName, failoverMode),
+				Config: testAccNsxtPolicyTier1Update2Template(updateName, failoverMode, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTier1Exists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updateName),
@@ -229,7 +308,7 @@ func TestAccResourceNsxtPolicyTier1Gateway_withQos(t *testing.T) {
 	testResourceName := "nsxt_policy_tier1_gateway.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			if err := testAccDataSourceNsxtPolicyGatewayQosProfileDeleteByName(profileName); err != nil {
@@ -342,7 +421,7 @@ func TestAccResourceNsxtPolicyTier1Gateway_withTier0(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyTier1UpdateTemplate(updateName, failoverMode),
+				Config: testAccNsxtPolicyTier1UpdateTemplate(updateName, failoverMode, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTier1Exists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updateName),
@@ -463,7 +542,12 @@ data "nsxt_policy_realization_info" "realization_info" {
 }`, getEdgeClusterName(), name)
 }
 
-func testAccNsxtPolicyTier1CreateTemplate(name string, failoverMode string) string {
+func testAccNsxtPolicyTier1CreateTemplate(name string, failoverMode string, withPoolAllocation bool) string {
+	poolAllocation := ""
+	if withPoolAllocation {
+		poolAllocation = `pool_allocation = "ROUTING"`
+	}
+
 	return fmt.Sprintf(`
 resource "nsxt_policy_tier1_gateway" "test" {
   display_name              = "%s"
@@ -475,7 +559,7 @@ resource "nsxt_policy_tier1_gateway" "test" {
   force_whitelisting        = "false"
   route_advertisement_types = ["TIER1_STATIC_ROUTES", "TIER1_CONNECTED"]
   ipv6_ndra_profile_path    = "/infra/ipv6-ndra-profiles/default"
-  pool_allocation           = "ROUTING"
+  %s
 
   tag {
     scope = "scope1"
@@ -490,10 +574,14 @@ resource "nsxt_policy_tier1_gateway" "test" {
 
 data "nsxt_policy_realization_info" "realization_info" {
   path = nsxt_policy_tier1_gateway.test.path
-}`, name, failoverMode)
+}`, name, failoverMode, poolAllocation)
 }
 
-func testAccNsxtPolicyTier1UpdateTemplate(name string, failoverMode string) string {
+func testAccNsxtPolicyTier1UpdateTemplate(name string, failoverMode string, withPoolAllocation bool) string {
+	poolAllocation := ""
+	if withPoolAllocation {
+		poolAllocation = `pool_allocation = "ROUTING"`
+	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_tier1_gateway" "test" {
   display_name              = "%s"
@@ -505,7 +593,7 @@ resource "nsxt_policy_tier1_gateway" "test" {
   force_whitelisting        = "true"
   route_advertisement_types = ["TIER1_CONNECTED"]
   ipv6_dad_profile_path     = "/infra/ipv6-dad-profiles/default"
-  pool_allocation           = "ROUTING"
+  %s
 
   tag {
     scope = "scope3"
@@ -515,10 +603,14 @@ resource "nsxt_policy_tier1_gateway" "test" {
 
 data "nsxt_policy_realization_info" "realization_info" {
   path = nsxt_policy_tier1_gateway.test.path
-}`, name, failoverMode)
+}`, name, failoverMode, poolAllocation)
 }
 
-func testAccNsxtPolicyTier1Update2Template(name string, failoverMode string) string {
+func testAccNsxtPolicyTier1Update2Template(name string, failoverMode string, withPoolAllocation bool) string {
+	poolAllocation := ""
+	if withPoolAllocation {
+		poolAllocation = `pool_allocation = "LB_SMALL"`
+	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_tier1_gateway" "test" {
   display_name              = "%s"
@@ -530,7 +622,7 @@ resource "nsxt_policy_tier1_gateway" "test" {
   force_whitelisting        = "true"
   route_advertisement_types = ["TIER1_CONNECTED"]
   ipv6_dad_profile_path     = "/infra/ipv6-dad-profiles/default"
-  pool_allocation           = "LB_SMALL"
+  %s
 
   tag {
     scope = "scope3"
@@ -540,7 +632,7 @@ resource "nsxt_policy_tier1_gateway" "test" {
 
 data "nsxt_policy_realization_info" "realization_info" {
   path = nsxt_policy_tier1_gateway.test.path
-}`, name, failoverMode)
+}`, name, failoverMode, poolAllocation)
 }
 
 func testAccNsxtPolicyTier1ImportTemplate(name string, failoverMode string) string {

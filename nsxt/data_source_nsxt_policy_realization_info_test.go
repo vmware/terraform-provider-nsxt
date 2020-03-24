@@ -85,7 +85,7 @@ func TestAccDataSourceNsxtPolicyRealizationInfo_tier1Resource(t *testing.T) {
 	testResourceName := "data.nsxt_policy_realization_info.realization_info"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
