@@ -837,7 +837,7 @@ resource "vsphere_virtual_machine" "appvm" {
     ... other attributes ...
     # Attach the VM to the network data source that refers to the newly created Segments
     network_interface {
-      network_id = "${data.vsphere_network.terraform_app.id}"
+      network_id = data.vsphere_network.tf_app.id
     }
     ... other attributes ...
 ```
