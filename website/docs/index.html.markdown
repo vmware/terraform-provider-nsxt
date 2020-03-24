@@ -226,6 +226,7 @@ nsx_username = "admin"
 nsx_password = "default"
 ```
 
+
 #### Example nsx.tf file
 
 ```hcl
@@ -275,14 +276,14 @@ nsx_password = "default"
 # REST API running on the NSX manager.
 #
 provider "nsxt" {
-  host                         = var.nsx_manager
-  username                     = var.nsx_username
-  password                     = var.nsx_password
-  allow_unverified_ssl         = true
-  max_retries                  = 10
-  retry_min_delay              = 500
-  retry_max_delay              = 5000
-  retry_on_status_codes        = [429]
+  host                  = var.nsx_manager
+  username              = var.nsx_username
+  password              = var.nsx_password
+  allow_unverified_ssl  = true
+  max_retries           = 10
+  retry_min_delay       = 500
+  retry_max_delay       = 5000
+  retry_on_status_codes = [429]
 }
 
 #
@@ -315,7 +316,7 @@ data "nsxt_policy_transport_zone" "overlay_tz" {
   display_name = "Overlay-TZ"
 }
 
-data  "nsxt_policy_tier0_gateway" "t0_gateway" {
+data "nsxt_policy_tier0_gateway" "t0_gateway" {
   display_name = "TF-T0-Gateway"
 }
 
@@ -323,9 +324,9 @@ data  "nsxt_policy_tier0_gateway" "t0_gateway" {
 # Create a DHCP Profile that is used later
 #
 resource "nsxt_policy_dhcp_server" "tier_dhcp" {
-  display_name      = "tier_dhcp"
-  description       = "DHCP server servicing all 3 Segments"
-  server_addresses  = ["12.12.99.2/24"]
+  display_name     = "tier_dhcp"
+  description      = "DHCP server servicing all 3 Segments"
+  server_addresses = ["12.12.99.2/24"]
 }
 
 #
@@ -382,8 +383,8 @@ resource "nsxt_policy_segment" "web" {
       lease_time     = 36000
 
       dhcp_option_121 {
-        network    = "6.6.6.0/24"
-        next_hop   = "1.1.1.21"
+        network  = "6.6.6.0/24"
+        next_hop = "1.1.1.21"
       }
     }
   }
@@ -399,7 +400,7 @@ resource "nsxt_policy_segment" "web" {
   }
   tag {
     scope = "tier"
-    tag = "web"
+    tag   = "web"
   }
 }
 
@@ -418,8 +419,8 @@ resource "nsxt_policy_segment" "app" {
       lease_time     = 36000
 
       dhcp_option_121 {
-        network    = "6.6.6.0/24"
-        next_hop   = "1.1.1.21"
+        network  = "6.6.6.0/24"
+        next_hop = "1.1.1.21"
       }
     }
   }
@@ -435,7 +436,7 @@ resource "nsxt_policy_segment" "app" {
   }
   tag {
     scope = "tier"
-    tag = "app"
+    tag   = "app"
   }
 }
 
@@ -454,8 +455,8 @@ resource "nsxt_policy_segment" "db" {
       lease_time     = 36000
 
       dhcp_option_121 {
-        network    = "6.6.6.0/24"
-        next_hop   = "1.1.1.21"
+        network  = "6.6.6.0/24"
+        next_hop = "1.1.1.21"
       }
     }
   }
@@ -471,7 +472,7 @@ resource "nsxt_policy_segment" "db" {
   }
   tag {
     scope = "tier"
-    tag = "db"
+    tag   = "db"
   }
 }
 
@@ -489,6 +490,7 @@ resource "nsxt_policy_group" "all_vms" {
       operator    = "CONTAINS"
       key         = "Tag"
       value       = var.nsx_tag
+
     }
   }
 }
@@ -566,8 +568,8 @@ resource "nsxt_policy_group" "ip_set" {
 # An example for Service for App that listens on port 8443
 #
 resource "nsxt_policy_service" "app_service" {
-  display_name      = "app_service_8443"
-  description       = "Service for App that listens on port 8443"
+  display_name = "app_service_8443"
+  description  = "Service for App that listens on port 8443"
   l4_port_set_entry {
     description       = "TCP Port 8443"
     protocol          = "TCP"
@@ -671,12 +673,12 @@ resource "nsxt_policy_security_policy" "firewall_section" {
 
   # Allow VMs to communicate with outside
   rule {
-    display_name       = "Allow out"
-    description        = "Outgoing rule"
-    action             = "ALLOW"
-    logged             = "true"
-    ip_version         = "IPV4"
-    source_groups      = [nsxt_policy_group.all_vms.path]
+    display_name  = "Allow out"
+    description   = "Outgoing rule"
+    action        = "ALLOW"
+    logged        = "true"
+    ip_version    = "IPV4"
+    source_groups = [nsxt_policy_group.all_vms.path]
   }
 
   # Reject everything else
@@ -794,6 +796,7 @@ resource "nsxt_policy_vm_tags" "db_vm_tag" {
     tag   = var.nsx_tag
   }
 }
+
 
 
 ```
