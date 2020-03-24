@@ -55,6 +55,8 @@ The following arguments are supported:
 * `criteria` - (Optional) A repeatable block to specify criteria for members of this Group. If more than 1 criteria block is specified, it must be separated by a `conjunction`. In a `criteria` block the following membership selection expressions can be used:
   * `ipaddress_expression` - (Optional) An expression block to specify individual IP Addresses, ranges of IP Addresses or subnets for this Group.
     * `ip_addresses` - (Required for a `ipaddress_expression`) This list can consist of a single IP address, IP address range or a subnet. Its type can be of either IPv4 or IPv6. Both IPv4 and IPv6 addresses within one expression is not allowed.
+  * `path_expression` - (Optional) An expression block to specify direct group members by policy path.
+    * `member_paths` - (Required for a `path_expression`) List of policy paths for direct members for this Group (such as Segments, Segment ports, Groups etc).
   * `condition` (Optional) A repeatable condition block to select this Group's members. When multiple `condition` blocks are used in a single `criteria` they form a nested expression that's implicitly ANDed together and each nested condition must used the same `member_type`.
     * `key` (Required for a `condition`) Specifies the attribute to query. Must be one of: `Tag`, `ComputerName`, `OSName` or `Name`. For a `member_type` other than `VirtualMachine`, only the `Tag` key is supported.
     * `member_type` (Required for a `condition`) Specifies the type of resource to query. Must be one of: `IPSet`, `LogicalPort`, `LogicalSwitch`, `Segment`, `SegmentPort` or `VirtualMachine`.

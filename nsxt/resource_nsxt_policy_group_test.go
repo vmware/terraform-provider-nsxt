@@ -104,6 +104,54 @@ func TestAccResourceNsxtPolicyGroup_multipleIPAddressCriteria(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyGroup_pathCriteria(t *testing.T) {
+	name := fmt.Sprintf("test-nsx-policy-group-paths")
+	testResourceName := "nsxt_policy_group.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyGroupCheckDestroy(state, name, defaultDomain)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyGroupPathsCreateTemplate(name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "domain", defaultDomain),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckNoResourceAttr(testResourceName, "conjunction"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.0.path_expression.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.0.path_expression.0.member_paths.#", "2"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyGroupPathsUpdateTemplate(name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "domain", defaultDomain),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckNoResourceAttr(testResourceName, "conjunction"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.0.path_expression.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.0.path_expression.0.member_paths.#", "1"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyGroupPathsPrerequisites(),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtPolicyGroup_nestedCriteria(t *testing.T) {
 	name := fmt.Sprintf("test-nsx-policy-group-nested")
 	updatedName := fmt.Sprintf("%s-update", name)
@@ -384,6 +432,56 @@ resource "nsxt_policy_group" "test" {
   tag {
     scope = "scope2"
     tag   = "tag2"
+  }
+}
+`, name)
+}
+
+func testAccNsxtPolicyGroupPathsPrerequisites() string {
+	return fmt.Sprintf(`
+data "nsxt_policy_transport_zone" "test"{
+  display_name = "%s"
+}
+
+resource "nsxt_policy_segment" "test-1" {
+  display_name        = "group-test-1"
+  transport_zone_path = data.nsxt_policy_transport_zone.test.path
+}
+
+resource "nsxt_policy_segment" "test-2" {
+  display_name        = "group-test-1"
+  transport_zone_path = data.nsxt_policy_transport_zone.test.path
+}`, getOverlayTransportZoneName())
+
+}
+
+func testAccNsxtPolicyGroupPathsCreateTemplate(name string) string {
+	return testAccNsxtPolicyGroupPathsPrerequisites() + fmt.Sprintf(`
+
+resource "nsxt_policy_group" "test" {
+  display_name = "%s"
+  description  = "Acceptance Test"
+
+  criteria {
+    path_expression {
+      member_paths = [nsxt_policy_segment.test-1.path, nsxt_policy_segment.test-2.path]
+    }
+  }
+}
+`, name)
+}
+
+func testAccNsxtPolicyGroupPathsUpdateTemplate(name string) string {
+	return testAccNsxtPolicyGroupPathsPrerequisites() + fmt.Sprintf(`
+
+resource "nsxt_policy_group" "test" {
+  display_name = "%s"
+  description  = "Acceptance Test"
+
+  criteria {
+    path_expression {
+      member_paths = [nsxt_policy_segment.test-1.path]
+    }
   }
 }
 `, name)
