@@ -90,6 +90,19 @@ func getIPAddressExpressionSchema() *schema.Resource {
 	}
 }
 
+func getPathExpressionSchema() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"member_paths": {
+				Type:        schema.TypeList,
+				Required:    true,
+				Description: "List of policy paths of direct group members",
+				Elem:        getElemPolicyPathSchema(),
+			},
+		},
+	}
+}
+
 func getConditionSchema() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
@@ -149,6 +162,12 @@ func getCriteriaSetSchema() *schema.Resource {
 				Elem:        getConditionSchema(),
 				Optional:    true,
 				MaxItems:    5,
+			},
+			"path_expression": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "A list of object paths for members in the group",
+				Elem:        getPathExpressionSchema(),
 			},
 		},
 	}
@@ -218,7 +237,7 @@ func validateGroupCriteriaSets(criteriaSets []interface{}) ([]criteriaMeta, erro
 						return nil, err
 					}
 					memberType = mType
-				} else if expName == "ipaddress_expression" {
+				} else if expName == "ipaddress_expression" || expName == "path_expression" {
 					memberType = ""
 				} else {
 					return nil, fmt.Errorf("Unknown criteria: %v", expName)
@@ -307,6 +326,25 @@ func buildGroupIPAddressData(ipaddr interface{}) (*data.StructValue, error) {
 	return dataValue.(*data.StructValue), nil
 }
 
+func buildGroupMemberPathData(paths interface{}) (*data.StructValue, error) {
+	pathMap := paths.(map[string]interface{})
+	var pathList []string
+	for _, path := range pathMap["member_paths"].([]interface{}) {
+		pathList = append(pathList, path.(string))
+	}
+	ipaddrStruct := model.PathExpression{
+		Paths:        pathList,
+		ResourceType: model.PathExpression__TYPE_IDENTIFIER,
+	}
+	converter := bindings.NewTypeConverter()
+	converter.SetMode(bindings.REST)
+	dataValue, errors := converter.ConvertToVapi(ipaddrStruct, model.PathExpressionBindingType())
+	if errors != nil {
+		return nil, errors[0]
+	}
+	return dataValue.(*data.StructValue), nil
+}
+
 func buildNestedGroupExpressionData(expressions []*data.StructValue) (*data.StructValue, error) {
 	var completeExpressions []*data.StructValue
 	for i := 0; i < len(expressions)-1; i++ {
@@ -342,6 +380,12 @@ func buildGroupExpressionDataFromType(expressionType string, datum interface{}) 
 		return data, nil
 	} else if expressionType == "ipaddress_expression" {
 		data, err := buildGroupIPAddressData(datum)
+		if err != nil {
+			return nil, err
+		}
+		return data, nil
+	} else if expressionType == "path_expression" {
+		data, err := buildGroupMemberPathData(datum)
 		if err != nil {
 			return nil, err
 		}
@@ -435,6 +479,17 @@ func fromGroupExpressionData(expressions []*data.StructValue) ([]interface{}, []
 			var ipMap = make(map[string]interface{})
 			ipMap["ipaddress_expression"] = addrMap
 			parsedCriteria = append(parsedCriteria, ipMap)
+		} else if expStruct.ResourceType == model.PathExpression__TYPE_IDENTIFIER {
+			pathData, errors := converter.ConvertToGolang(expression, model.PathExpressionBindingType())
+			if len(errors) > 0 {
+				return nil, nil, errors[0]
+			}
+			paths := pathData.(model.PathExpression)
+			var pathMap = make(map[string][]string)
+			pathMap["member_paths"] = paths.Paths
+			var exprMap = make(map[string]interface{})
+			exprMap["path_expression"] = pathMap
+			parsedCriteria = append(parsedCriteria, pathMap)
 		} else if expStruct.ResourceType == model.Condition__TYPE_IDENTIFIER {
 			condMap, err := groupConditionDataToMap(expression)
 			if err != nil {
