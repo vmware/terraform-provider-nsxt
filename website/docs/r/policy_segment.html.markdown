@@ -87,7 +87,8 @@ The following arguments are supported:
   * `address_pool_paths` - (Optional) List of Policy path to IP address pools.
   * `connectivity` - (Optional) Connectivity configuration to manually connect (ON) or disconnect (OFF).
   * `hybrid` - (Optional) Boolean flag to identify a hybrid logical switch.
-  * `local_egress` (Optional) Boolean flag to enable local egress.
+  * `local_egress` - (Optional) Boolean flag to enable local egress.
+  * `uplink_teaming_policy` - (Optional) The name of the switching uplink teaming policy for the bridge endpoint. This name corresponds to one of the switching uplink teaming policy names listed in the transport zone.
 
 ## Attributes Reference
 

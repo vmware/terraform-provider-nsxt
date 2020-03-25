@@ -192,6 +192,11 @@ func getPolicySegmentAdvancedConfigurationSchema() *schema.Resource {
 				Optional:    true,
 				Default:     false,
 			},
+			"uplink_teaming_policy": {
+				Type:        schema.TypeString,
+				Description: "The name of the switching uplink teaming policy for the bridge endpoint",
+				Optional:    true,
+			},
 		},
 	}
 }
@@ -577,9 +582,19 @@ func policySegmentResourceToStruct(d *schema.ResourceData, isVlan bool) (model.S
 		}
 		advConfigStruct := model.SegmentAdvancedConfig{
 			AddressPoolPaths: poolPaths,
-			Connectivity:     &connectivity,
 			Hybrid:           &hybrid,
 			LocalEgress:      &egress,
+		}
+
+		if connectivity != "" {
+			advConfigStruct.Connectivity = &connectivity
+		}
+
+		if nsxVersionHigherOrEqual("3.0.0") {
+			teamingPolicy := advConfigMap["uplink_teaming_policy"].(string)
+			if teamingPolicy != "" {
+				advConfigStruct.UplinkTeamingPolicyName = &teamingPolicy
+			}
 		}
 		obj.AdvancedConfig = &advConfigStruct
 	}
@@ -659,6 +674,9 @@ func nsxtPolicySegmentRead(d *schema.ResourceData, m interface{}, isVlan bool) e
 		advConfig["connectivity"] = obj.AdvancedConfig.Connectivity
 		advConfig["hybrid"] = obj.AdvancedConfig.Hybrid
 		advConfig["local_egress"] = obj.AdvancedConfig.LocalEgress
+		if obj.AdvancedConfig.UplinkTeamingPolicyName != nil {
+			advConfig["uplink_teaming_policy"] = *obj.AdvancedConfig.UplinkTeamingPolicyName
+		}
 		d.Set("advanced_config", advConfig)
 	}
 
