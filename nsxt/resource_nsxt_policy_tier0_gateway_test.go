@@ -176,7 +176,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_withEdgeCluster(t *testing.T) {
 	edgeClusterName := getEdgeClusterName()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTier0CheckDestroy(state, name)
