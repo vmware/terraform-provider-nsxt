@@ -28,6 +28,8 @@ FEATURES:
 * **New Data Source**: `nsxt_policy_lb_persistence_profile`
 * **New Data Source**: `nsxt_policy_vni_pool`
 * **New Data Source**: `nsxt_policy_realization_info`
+* **New Data Source**: `nsxt_policy_segment_realization`
+* **New Data Source**: `nsxt_firewall_section`
 
 * **New Resource**: `nsxt_policy_tier0_gateway`
 * **New Resource**: `nsxt_policy_tier1_gateway`
@@ -54,9 +56,17 @@ FEATURES:
 * **New Resource**: `nsxt_policy_dhcp_relay`
 * **New Resource**: `nsxt_policy_dhcp_server`
 
+IMPROVEMENTS:
+* Migrate to Terraform Plugin SDK ([#210](https://github.com/terraform-providers/terraform-provider-nsxt/pull/210))
+* `resource/nsxt_vm_tags`: Avoid backend calls if no change required in corresponding tags ([#261](https://github.com/terraform-providers/terraform-provider-nsxt/pull/261))
+
 BUG FIXES:
 * Fix client authentication error that used to occur when client certificate is not self signed ([#207](https://github.com/terraform-providers/terraform-provider-nsxt/pull/207))
 * Allow IPv6 in IP addresses and CIDR validations ([#204](https://github.com/terraform-providers/terraform-provider-nsxt/pull/204))
+* `resource/nsxt_vm_tags`: Fix tag removal ([#240](https://github.com/terraform-providers/terraform-provider-nsxt/pull/240))
+* `resource/nsxt_vm_tags`: Apply tags to all logical ports on given vm ([#235](https://github.com/terraform-providers/terraform-provider-nsxt/pull/235))
+* `resource/nsxt_logical_dhcp_server`: Mark gateway_ip as optional rather than required ([#245](https://github.com/terraform-providers/terraform-provider-nsxt/pull/245))
+
 
 ## 1.1.2 (November 18, 2019)
 
