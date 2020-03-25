@@ -5,10 +5,12 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/vmware/go-vmware-nsxt/manager"
 	"log"
 	"net/http"
+	"time"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/vmware/go-vmware-nsxt/manager"
 )
 
 func resourceNsxtIPPoolAllocationIPAddress() *schema.Resource {
@@ -118,16 +120,47 @@ func resourceNsxtIPPoolAllocationIPAddressDelete(d *schema.ResourceData, m inter
 		return fmt.Errorf("Error obtaining pool id")
 	}
 
+	allocations, resp, err := nsxClient.PoolManagementApi.ListIpPoolAllocations(nsxClient.Context, poolID)
+	if err != nil {
+		return fmt.Errorf("Error during IpPoolAllocations list: %v", err)
+	}
+
 	allocationIPAddress := manager.AllocationIpAddress{
 		AllocationId: d.Id(),
 	}
-	_, resp, err := nsxClient.PoolManagementApi.AllocateOrReleaseFromIpPool(nsxClient.Context, poolID, allocationIPAddress, "RELEASE")
+	_, resp, err = nsxClient.PoolManagementApi.AllocateOrReleaseFromIpPool(nsxClient.Context, poolID, allocationIPAddress, "RELEASE")
 	if resp != nil && resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("Error during IPPoolAllocationIPAddress delete: status=%s", resp.Status)
 	}
 	if resp == nil && err != nil {
 		// AllocateOrReleaseFromIpPool always returns an error EOF for action RELEASE, this is ignored if resp is set
 		return fmt.Errorf("Error during IPPoolAllocationIPAddress delete: %v", err)
+	}
+
+	ipInAllocation := true
+	for ipInAllocation {
+		for i, ip := range allocations.Results {
+			if ip.AllocationId == allocationIPAddress.AllocationId {
+				time.Sleep(5000 * time.Millisecond)
+
+				allocations, resp, err = nsxClient.PoolManagementApi.ListIpPoolAllocations(nsxClient.Context, poolID)
+				if err != nil {
+					return fmt.Errorf("Error during IpPoolAllocations list: %v", err)
+				}
+				break
+			}
+
+			if i == len(allocations.Results) {
+				ipInAllocation = false
+				break
+			}
+		}
+		if len(allocations.Results) == 0 {
+			ipInAllocation = false
+		}
+		if !ipInAllocation {
+			break
+		}
 	}
 
 	return nil
