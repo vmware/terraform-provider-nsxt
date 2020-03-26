@@ -119,18 +119,20 @@ func Provider() terraform.ResourceProvider {
 				Description: "Treat partial success status as success",
 				DefaultFunc: schema.EnvDefaultFunc("NSXT_TOLERATE_PARTIAL_SUCCESS", false),
 			},
-			"vmc_auth_host": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "URL for VMC authorization service (CSP)",
-				DefaultFunc: schema.EnvDefaultFunc("NSXT_VMC_AUTH_HOST", "console.cloud.vmware.com/csp/gateway/am/api/auth/api-tokens/authorize"),
-			},
-			"vmc_token": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Long-living API token for VMC authorization",
-				DefaultFunc: schema.EnvDefaultFunc("NSXT_VMC_TOKEN", nil),
-			},
+			/*
+				"vmc_auth_host": {
+					Type:        schema.TypeString,
+					Optional:    true,
+					Description: "URL for VMC authorization service (CSP)",
+					DefaultFunc: schema.EnvDefaultFunc("NSXT_VMC_AUTH_HOST", "console.cloud.vmware.com/csp/gateway/am/api/auth/api-tokens/authorize"),
+				},
+				"vmc_token": {
+					Type:        schema.TypeString,
+					Optional:    true,
+					Description: "Long-living API token for VMC authorization",
+					DefaultFunc: schema.EnvDefaultFunc("NSXT_VMC_TOKEN", nil),
+				},
+			*/
 			"enforcement_point": {
 				Type:        schema.TypeString,
 				Optional:    true,

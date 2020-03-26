@@ -45,7 +45,7 @@ The following arguments are supported:
 * `display_name` - (Required) Display name of the resource.
 * `category` - (Required) The category to use for priority of this Gateway Policy. Must be one of: `Emergency`, `SystemRules`, `SharedPreRules`, `LocalGatewayRules`, `AutoServiceRules` and `Default`.
 * `description` - (Optional) Description of the resource.
-* `domain` - (Optional) The domain to use for the Gateway Policy. This domain must already exist. For VMware Cloud on AWS use `cgw`.
+* `domain` - (Optional) The domain to use for the Gateway Policy. This domain must already exist.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this Gateway Policy.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the Gateway Policy resource.
 * `comments` - (Optional) Comments for this Gateway Policy including lock/unlock comments.
