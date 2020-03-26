@@ -156,7 +156,7 @@ func getPolicyBGPConfigSchema() *schema.Schema {
 					Type:        schema.TypeBool,
 					Description: "Flag to enable BGP multipath relax option",
 					Optional:    true,
-					Default:     false,
+					Default:     true,
 				},
 				"route_aggregation": {
 					Type:        schema.TypeList,

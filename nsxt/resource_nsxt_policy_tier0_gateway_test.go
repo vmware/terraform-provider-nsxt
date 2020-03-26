@@ -198,7 +198,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_withEdgeCluster(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "bgp_config.0.enabled", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "bgp_config.0.inter_sr_ibgp", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "bgp_config.0.local_as_num", "65000"),
-					resource.TestCheckResourceAttr(testResourceName, "bgp_config.0.multipath_relax", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "bgp_config.0.multipath_relax", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "bgp_config.0.route_aggregation.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "bgp_config.0.graceful_restart_mode", "HELPER_ONLY"),
 					resource.TestCheckResourceAttr(testResourceName, "bgp_config.0.graceful_restart_timer", "180"),

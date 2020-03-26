@@ -75,8 +75,7 @@ func TestAccResourceNsxtPolicyBgpNeighbor_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyBgpNeighborExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyBgpNeighborConfigUpdateAttributes["display_name"]),
-					// TODO: file bug for description not sticking on update
-					//resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyBgpNeighborConfigUpdateAttributes["description"]),
+					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyBgpNeighborConfigUpdateAttributes["description"]),
 					resource.TestCheckResourceAttr(testResourceName, "allow_as_in", accTestPolicyBgpNeighborConfigUpdateAttributes["allow_as_in"]),
 					resource.TestCheckResourceAttr(testResourceName, "graceful_restart_mode", accTestPolicyBgpNeighborConfigUpdateAttributes["graceful_restart_mode"]),
 					resource.TestCheckResourceAttr(testResourceName, "hold_down_time", accTestPolicyBgpNeighborConfigUpdateAttributes["hold_down_time"]),

@@ -140,6 +140,7 @@ func resourceNsxtPolicyBgpNeighbor() *schema.Resource {
 				Type:        schema.TypeList,
 				Description: "Enable address families and route filtering in each direction",
 				Optional:    true,
+				Computed:    true,
 				MaxItems:    2,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
