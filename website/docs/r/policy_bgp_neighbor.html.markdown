@@ -62,8 +62,8 @@ The following arguments are supported:
 * `route_filtering` - (Optional) Up to 2 route filters for the neighbor. Note that prior to NSX version 3.0.0, only 1 element is supported.
   * `address_family` - (Required) Address family type. Must be one of `EVPN`, `IPV4` or `IPV6`. Note the `EVPN` property is only available starting with NSX version 3.0.0.
   * `enabled`- (Optional) A boolean flag to enable/disable address family. Defaults to `false`.
-  * `in_route_filter`- (Optional) A prefix or route map path for IN direction.
-  * `out_route_filter`- (Optional) A prefix or route map path for OUT direction.
+  * `in_route_filter`- (Optional) Path of prefix-list or route map to filter routes for IN direction.
+  * `out_route_filter`- (Optional) Path of prefix-list or route map to filter routes for OUT direction.
   * `maximum_routes` - (Optional) Maximum number of routes for the address family. Note this property is only available starting with NSX version 3.0.0.
 
 ## Attributes Reference
