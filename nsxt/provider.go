@@ -285,10 +285,12 @@ func providerConnectivityCheck(nsxClient *nsxt.APIClient) error {
 func configureNsxtClient(d *schema.ResourceData) (*nsxt.APIClient, error) {
 	clientAuthCertFile := d.Get("client_auth_cert_file").(string)
 	clientAuthKeyFile := d.Get("client_auth_key_file").(string)
-	vmcToken := d.Get("vmc_token").(string)
+	vmcToken := d.Get("vmc_token")
+	if vmcToken != nil {
 
-	if len(vmcToken) > 0 {
-		return nil, nil
+		if len(vmcToken.(string)) > 0 {
+			return nil, nil
+		}
 	}
 
 	needCreds := true
@@ -450,8 +452,16 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 	hostIP := d.Get("host").(string)
 	username := d.Get("username").(string)
 	password := d.Get("password").(string)
-	vmcAccessToken := d.Get("vmc_token").(string)
-	vmcAuthHost := d.Get("vmc_auth_host").(string)
+	vmcAccessTokenAttr := d.Get("vmc_token")
+	vmcAuthHostAttr := d.Get("vmc_auth_host")
+	vmcAccessToken := ""
+	vmcAuthHost := ""
+	if vmcAccessTokenAttr != nil {
+		vmcAccessToken = vmcAccessTokenAttr.(string)
+	}
+	if vmcAuthHostAttr != nil {
+		vmcAuthHost = vmcAuthHostAttr.(string)
+	}
 	insecure := d.Get("allow_unverified_ssl").(bool)
 	clientAuthCertFile := d.Get("client_auth_cert_file").(string)
 	clientAuthKeyFile := d.Get("client_auth_key_file").(string)
