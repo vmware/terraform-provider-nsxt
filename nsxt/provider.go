@@ -8,15 +8,16 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"net/http"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/core"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/security"
-	"io/ioutil"
-	"net/http"
-	"strings"
 )
 
 var defaultRetryOnStatusCodes = []int{429, 503}
@@ -146,6 +147,7 @@ func Provider() terraform.ResourceProvider {
 			"nsxt_switching_profile":               dataSourceNsxtSwitchingProfile(),
 			"nsxt_logical_tier0_router":            dataSourceNsxtLogicalTier0Router(),
 			"nsxt_logical_tier1_router":            dataSourceNsxtLogicalTier1Router(),
+			"nsxt_logical_switch":                  dataSourceNsxtLogicalSwitch(),
 			"nsxt_mac_pool":                        dataSourceNsxtMacPool(),
 			"nsxt_ns_group":                        dataSourceNsxtNsGroup(),
 			"nsxt_ns_service":                      dataSourceNsxtNsService(),
