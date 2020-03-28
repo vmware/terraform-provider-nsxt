@@ -2,13 +2,14 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/common"
 	"github.com/vmware/go-vmware-nsxt/manager"
-	"log"
-	"net/http"
-	"strings"
 )
 
 // Note - this resource is time consuming to configure since
@@ -29,6 +30,12 @@ func resourceNsxtVMTags() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "Instance id",
 				Required:    true,
+			},
+			"logical_switch_id": {
+				Type:        schema.TypeString,
+				Description: "(Optional) Logical switch id",
+				Optional:    true,
+				Computed:    true,
 			},
 			"tag":              getTagsSchema(),
 			"logical_port_tag": getTagsSchema(),
@@ -180,7 +187,7 @@ func updateTags(nsxClient *api.APIClient, id string, tags []common.Tag) error {
 	return nil
 }
 
-func updatePortTags(nsxClient *api.APIClient, id string, tags []common.Tag) error {
+func updatePortTags(nsxClient *api.APIClient, id string, tags []common.Tag, logicalSwitchID string) error {
 	log.Printf("[DEBUG] Updating logical port tags for %s", id)
 
 	ports, err := findPortsByExternalID(nsxClient, id)
@@ -193,10 +200,19 @@ func updatePortTags(nsxClient *api.APIClient, id string, tags []common.Tag) erro
 	for _, port := range ports {
 		port.Tags = tags
 		log.Printf("[DEBUG] Applying %d tags on logical port %s", len(tags), port.Id)
-		_, resp, err := nsxClient.LogicalSwitchingApi.UpdateLogicalPort(nsxClient.Context, port.Id, port)
 
-		if err != nil || (resp != nil && resp.StatusCode == http.StatusNotFound) {
-			return fmt.Errorf("Error while updating tags on logical port %s: %v", port.Id, err)
+		if logicalSwitchID == "" {
+			_, resp, err := nsxClient.LogicalSwitchingApi.UpdateLogicalPort(nsxClient.Context, port.Id, port)
+			if err != nil || (resp != nil && resp.StatusCode == http.StatusNotFound) {
+				return fmt.Errorf("Error while updating tags on logical port %s: %v", port.Id, err)
+			}
+		} else {
+			if port.LogicalSwitchId == logicalSwitchID {
+				_, resp, err := nsxClient.LogicalSwitchingApi.UpdateLogicalPort(nsxClient.Context, port.Id, port)
+				if err != nil || (resp != nil && resp.StatusCode == http.StatusNotFound) {
+					return fmt.Errorf("Error while updating tags on logical port %s: %v", port.Id, err)
+				}
+			}
 		}
 		portsUpdated++
 	}
@@ -208,6 +224,7 @@ func updatePortTags(nsxClient *api.APIClient, id string, tags []common.Tag) erro
 
 func resourceNsxtVMTagsCreate(d *schema.ResourceData, m interface{}) error {
 	instanceID := d.Get("instance_id").(string)
+	logicalSwitchID := d.Get("logical_switch_id").(string)
 
 	nsxClient := m.(nsxtClients).NsxtClient
 	if nsxClient == nil {
@@ -229,7 +246,7 @@ func resourceNsxtVMTagsCreate(d *schema.ResourceData, m interface{}) error {
 
 	portTags := getCustomizedTagsFromSchema(d, "logical_port_tag")
 	if len(portTags) > 0 || d.HasChange("logical_port_tag") {
-		err = updatePortTags(nsxClient, vm.ExternalId, portTags)
+		err = updatePortTags(nsxClient, vm.ExternalId, portTags, logicalSwitchID)
 		if err != nil {
 			return err
 		}
@@ -250,6 +267,7 @@ func resourceNsxtVMTagsRead(d *schema.ResourceData, m interface{}) error {
 	if id == "" {
 		return fmt.Errorf("Error obtaining logical object id")
 	}
+	logicalSwitchID := d.Get("logical_switch_id").(string)
 
 	vm, err := findVMByExternalID(nsxClient, id)
 	if err != nil {
@@ -262,10 +280,20 @@ func resourceNsxtVMTagsRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	setTagsInSchema(d, vm.Tags)
-	// assuming all ports have same tags
-	// note - more flexible implementation will be provided with policy resource
 	if len(ports) > 0 {
-		setCustomizedTagsInSchema(d, ports[0].Tags, "logical_port_tag")
+		// assuming all ports have same tags
+		// note - more flexible implementation will be provided with policy resource
+		if logicalSwitchID == "" {
+			setCustomizedTagsInSchema(d, ports[0].Tags, "logical_port_tag")
+		} else {
+			//if logicalSwitchID is set, find for the specific port tag
+			for _, port := range ports {
+				if port.LogicalSwitchId == logicalSwitchID {
+					setCustomizedTagsInSchema(d, port.Tags, "logical_port_tag")
+					break
+				}
+			}
+		}
 	} else {
 		// assign empty list
 		var tagList []map[string]string
@@ -281,6 +309,7 @@ func resourceNsxtVMTagsUpdate(d *schema.ResourceData, m interface{}) error {
 
 func resourceNsxtVMTagsDelete(d *schema.ResourceData, m interface{}) error {
 	instanceID := d.Get("instance_id").(string)
+	logicalSwitchID := d.Get("logical_switch_id").(string)
 
 	nsxClient := m.(nsxtClients).NsxtClient
 	if nsxClient == nil {
@@ -305,7 +334,7 @@ func resourceNsxtVMTagsDelete(d *schema.ResourceData, m interface{}) error {
 	portTags := getCustomizedTagsFromSchema(d, "logical_port_tag")
 	if len(portTags) > 0 {
 		// Update port tags only if they were configured by the provider
-		err := updatePortTags(nsxClient, vm.ExternalId, noTags)
+		err := updatePortTags(nsxClient, vm.ExternalId, noTags, logicalSwitchID)
 		if err != nil {
 			return err
 		}
