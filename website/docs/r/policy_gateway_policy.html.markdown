@@ -64,13 +64,13 @@ The following arguments are supported:
   * `logged` - (Optional) A boolean flag to enable packet logging.
   * `notes` - (Optional) Text for additional notes on changes for the rule.
   * `profiles` - (Optional) A list of profiles for the rule.
-  * `scope` - (Optional) List of policy paths where the rule is applied.
+  * `scope` - (Required) List of policy paths where the rule is applied.
   * `services` - (Optional) List of services to match.
   * `source_groups` - (Optional) A list of source group paths to use for the policy.
   * `source_excluded` - (Optional) A boolean value indicating negation of source groups.
   * `tag` - (Optional) A list of scope + tag pairs to associate with this Rule.
   * `action` - (Optional) The action for the Rule. Must be one of: `ALLOW`, `DROP` or `REJECT`. Defaults to `ALLOW`.
-  
+
 
 ## Attributes Reference
 

@@ -18,7 +18,7 @@ resource "nsxt_policy_nat_rule" "dnat1" {
   source_networks      = ["9.1.1.1", "9.2.1.1"]
   destination_networks = ["11.1.1.1"]
   translated_networks  = ["10.1.1.1"]
-  gateway_path         = "${nsxt_policy_tier1_gateway.t1gateway.path}"
+  gateway_path         = nsxt_policy_tier1_gateway.t1gateway.path
   logging              = false
   firewall_match       = "MATCH_INTERNAL_ADDRESS"
 
