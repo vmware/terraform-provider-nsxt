@@ -23,6 +23,8 @@ resource "nsxt_policy_bgp_neighbor" "test" {
   neighbor_address      = "12.12.11.23"
   password              = "passw0rd"
   remote_as_num         = "60000"
+  source_addresses      = ["12.3.40.251"]
+  depends_on            = [nsxt_policy_tier0_gateway_interface.my_gateway_interface]
 
   bfd_config {
     enabled  = true
@@ -36,6 +38,9 @@ resource "nsxt_policy_bgp_neighbor" "test" {
   }
 }
 ```
+
+~> **NOTE:** If bgp neighbor configuration depends on gateway interface, please add `depends_on` clause in `nsxt_policy_bgp_neighbor` resource in order to ensure correct order of creation/deletion.
+
 
 ## Argument Reference
 
