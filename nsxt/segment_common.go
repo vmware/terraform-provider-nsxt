@@ -235,11 +235,10 @@ func getPolicyCommonSegmentSchema() map[string]*schema.Schema {
 			MaxItems:    1,
 		},
 		"overlay_id": {
-			Type:         schema.TypeInt,
-			Description:  "Overlay connectivity ID for this Segment",
-			Optional:     true,
-			Computed:     true,
-			ValidateFunc: validation.IntBetween(0, 2147483647),
+			Type:        schema.TypeInt,
+			Description: "Overlay connectivity ID for this Segment",
+			Optional:    true,
+			Computed:    true,
 		},
 		"subnet": {
 			Type:        schema.TypeList,

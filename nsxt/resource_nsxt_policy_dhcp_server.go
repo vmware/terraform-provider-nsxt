@@ -36,7 +36,7 @@ func resourceNsxtPolicyDhcpServer() *schema.Resource {
 				Description:  "IP Address lease time in seconds",
 				Optional:     true,
 				Default:      86400,
-				ValidateFunc: validation.IntBetween(60, 4294967295),
+				ValidateFunc: validation.IntAtLeast(60),
 			},
 			"preferred_edge_paths": {
 				Type:        schema.TypeList,
