@@ -35,6 +35,12 @@ func dataSourceNsxtLogicalSwitch() *schema.Resource {
 				Optional:    true,
 				Computed:    true,
 			},
+			"transport_zone_id": {
+				Type:        schema.TypeString,
+				Description: "ID of the transport zone configured for the logical switch",
+				Optional:    true,
+				Computed:    true,
+			},
 		},
 	}
 }

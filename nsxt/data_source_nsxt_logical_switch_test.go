@@ -16,9 +16,10 @@ import (
 func TestAccDataSourceNsxtLogicalSwitch_basic(t *testing.T) {
 	switchName := "terraform_test_switch"
 	testResourceName := "data.nsxt_logical_switch.test"
+	transportZoneID := getTestTransportZoneID()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t); testAccEnvDefined(t, "NSXT_TEST_TRANSPORT_ZONE_ID") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccDataSourceNsxtLogicalSwitchDeleteByName(switchName)
@@ -34,6 +35,7 @@ func TestAccDataSourceNsxtLogicalSwitch_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(testResourceName, "display_name", switchName),
 					resource.TestCheckResourceAttr(testResourceName, "description", switchName),
+					resource.TestCheckResourceAttr(testResourceName, "transport_zone_id", transportZoneID),
 				),
 			},
 			{
@@ -53,11 +55,13 @@ func testAccDataSourceNsxtLogicalSwitchCreate(switchName string) error {
 	description := switchName
 	adminState := "UP"
 	replicationMode := "MTEP"
+	transportZoneID := getTestTransportZoneID()
+
 	logicalSwitch := manager.LogicalSwitch{
 		AdminState:      adminState,
 		Description:     description,
 		DisplayName:     displayName,
-		TransportZoneId: getTransportZoneID(),
+		TransportZoneId: transportZoneID,
 		ReplicationMode: replicationMode,
 	}
 
