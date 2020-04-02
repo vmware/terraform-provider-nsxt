@@ -119,20 +119,18 @@ func Provider() terraform.ResourceProvider {
 				Description: "Treat partial success status as success",
 				DefaultFunc: schema.EnvDefaultFunc("NSXT_TOLERATE_PARTIAL_SUCCESS", false),
 			},
-			/*
-				"vmc_auth_host": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Description: "URL for VMC authorization service (CSP)",
-					DefaultFunc: schema.EnvDefaultFunc("NSXT_VMC_AUTH_HOST", "console.cloud.vmware.com/csp/gateway/am/api/auth/api-tokens/authorize"),
-				},
-				"vmc_token": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Description: "Long-living API token for VMC authorization",
-					DefaultFunc: schema.EnvDefaultFunc("NSXT_VMC_TOKEN", nil),
-				},
-			*/
+			"vmc_auth_host": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "URL for VMC authorization service (CSP)",
+				DefaultFunc: schema.EnvDefaultFunc("NSXT_VMC_AUTH_HOST", "console.cloud.vmware.com/csp/gateway/am/api/auth/api-tokens/authorize"),
+			},
+			"vmc_token": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Long-living API token for VMC authorization",
+				DefaultFunc: schema.EnvDefaultFunc("NSXT_VMC_TOKEN", nil),
+			},
 			"enforcement_point": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -285,12 +283,10 @@ func providerConnectivityCheck(nsxClient *nsxt.APIClient) error {
 func configureNsxtClient(d *schema.ResourceData) (*nsxt.APIClient, error) {
 	clientAuthCertFile := d.Get("client_auth_cert_file").(string)
 	clientAuthKeyFile := d.Get("client_auth_key_file").(string)
-	vmcToken := d.Get("vmc_token")
-	if vmcToken != nil {
+	vmcToken := d.Get("vmc_token").(string)
 
-		if len(vmcToken.(string)) > 0 {
-			return nil, nil
-		}
+	if len(vmcToken) > 0 {
+		return nil, nil
 	}
 
 	needCreds := true
@@ -452,16 +448,8 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 	hostIP := d.Get("host").(string)
 	username := d.Get("username").(string)
 	password := d.Get("password").(string)
-	vmcAccessTokenAttr := d.Get("vmc_token")
-	vmcAuthHostAttr := d.Get("vmc_auth_host")
-	vmcAccessToken := ""
-	vmcAuthHost := ""
-	if vmcAccessTokenAttr != nil {
-		vmcAccessToken = vmcAccessTokenAttr.(string)
-	}
-	if vmcAuthHostAttr != nil {
-		vmcAuthHost = vmcAuthHostAttr.(string)
-	}
+	vmcAccessToken := d.Get("vmc_token").(string)
+	vmcAuthHost := d.Get("vmc_auth_host").(string)
 	insecure := d.Get("allow_unverified_ssl").(bool)
 	clientAuthCertFile := d.Get("client_auth_cert_file").(string)
 	clientAuthKeyFile := d.Get("client_auth_key_file").(string)
