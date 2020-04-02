@@ -49,7 +49,7 @@ The following arguments are supported:
 
 * `display_name` - (Required) Display name of the resource.
 * `description` - (Optional) Description of the resource.
-* `domain` - (Optional) The domain to use for the Group. This domain must already exist.
+* `domain` - (Optional) The domain to use for the Group. This domain must already exist. For VMware Cloud on AWS use `cgw`.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this Group.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the group resource.
 * `criteria` - (Optional) A repeatable block to specify criteria for members of this Group. If more than 1 criteria block is specified, it must be separated by a `conjunction`. In a `criteria` block the following membership selection expressions can be used:

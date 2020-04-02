@@ -49,7 +49,7 @@ The following arguments are supported:
 
 * `display_name` - (Required) Display name of the resource.
 * `description` - (Optional) Description of the resource.
-* `domain` - (Optional) The domain to use for the resource. This domain must already exist.
+* `domain` - (Optional) The domain to use for the resource. This domain must already exist. For VMware Cloud on AWS use `cgw`.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this policy.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `category` - (Required) Category of this policy, one of `Ethernet`, `Emergency`, `Infrastructure`, `Environment`, `Application`.
