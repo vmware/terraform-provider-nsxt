@@ -85,7 +85,7 @@ The following arguments are supported:
   * `l2vpn_paths` - (Optional) Policy paths of associated L2 VPN sessions.
   * `tunnel_id` - (Optional) The Tunnel ID that's a int value between 1 and 4093.
 * `advanced_config` - (Optional) Advanced Segment configuration.
-  * `address_pool_paths` - (Optional) List of Policy path to IP address pools.
+  * `address_pool_path` - (Optional) Policy path to IP address pool.
   * `connectivity` - (Optional) Connectivity configuration to manually connect (ON) or disconnect (OFF).
   * `hybrid` - (Optional) Boolean flag to identify a hybrid logical switch.
   * `local_egress` - (Optional) Boolean flag to enable local egress.
