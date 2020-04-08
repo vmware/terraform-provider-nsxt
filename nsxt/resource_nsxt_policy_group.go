@@ -78,7 +78,7 @@ func getIPAddressExpressionSchema() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"ip_addresses": {
-				Type:        schema.TypeList,
+				Type:        schema.TypeSet,
 				Required:    true,
 				Description: "List of; single IP addresses, IP address ranges or Subnets. Cannot mix IPv4 and IPv6 in a single list",
 				Elem: &schema.Schema{
@@ -94,7 +94,7 @@ func getPathExpressionSchema() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"member_paths": {
-				Type:        schema.TypeList,
+				Type:        schema.TypeSet,
 				Required:    true,
 				Description: "List of policy paths of direct group members",
 				Elem:        getElemPolicyPathSchema(),
@@ -168,6 +168,7 @@ func getCriteriaSetSchema() *schema.Resource {
 				Optional:    true,
 				Description: "A list of object paths for members in the group",
 				Elem:        getPathExpressionSchema(),
+				MaxItems:    1,
 			},
 		},
 	}
@@ -310,7 +311,7 @@ func buildGroupConjunctionData(conjunction string) (*data.StructValue, error) {
 func buildGroupIPAddressData(ipaddr interface{}) (*data.StructValue, error) {
 	ipaddrMap := ipaddr.(map[string]interface{})
 	var ipList []string
-	for _, ip := range ipaddrMap["ip_addresses"].([]interface{}) {
+	for _, ip := range ipaddrMap["ip_addresses"].(*schema.Set).List() {
 		ipList = append(ipList, ip.(string))
 	}
 	ipaddrStruct := model.IPAddressExpression{
@@ -329,7 +330,7 @@ func buildGroupIPAddressData(ipaddr interface{}) (*data.StructValue, error) {
 func buildGroupMemberPathData(paths interface{}) (*data.StructValue, error) {
 	pathMap := paths.(map[string]interface{})
 	var pathList []string
-	for _, path := range pathMap["member_paths"].([]interface{}) {
+	for _, path := range pathMap["member_paths"].(*schema.Set).List() {
 		pathList = append(pathList, path.(string))
 	}
 	ipaddrStruct := model.PathExpression{
@@ -446,9 +447,9 @@ func groupConditionDataToMap(expData *data.StructValue) (map[string]interface{},
 	return condMap, nil
 }
 
-func fromGroupExpressionData(expressions []*data.StructValue) ([]interface{}, []interface{}, error) {
-	var parsedConjunctions []interface{}
-	var parsedCriteria []interface{}
+func fromGroupExpressionData(expressions []*data.StructValue) ([]map[string]interface{}, []map[string]interface{}, error) {
+	var parsedConjunctions []map[string]interface{}
+	var parsedCriteria []map[string]interface{}
 	converter := bindings.NewTypeConverter()
 	converter.SetMode(bindings.REST)
 
@@ -460,45 +461,56 @@ func fromGroupExpressionData(expressions []*data.StructValue) ([]interface{}, []
 		expStruct := expData.(model.Expression)
 
 		if expStruct.ResourceType == model.Expression_RESOURCE_TYPE_CONJUNCTIONOPERATOR {
+			log.Printf("[DEBUG] Parsing conjunction operator")
 			conjData, errors := converter.ConvertToGolang(expression, model.ConjunctionOperatorBindingType())
 			if len(errors) > 0 {
 				return nil, nil, errors[0]
 			}
 			conjStruct := conjData.(model.ConjunctionOperator)
-			var conjMap = make(map[string]string)
+			var conjMap = make(map[string]interface{})
 			conjMap["operator"] = conjStruct.ConjunctionOperator
 			parsedConjunctions = append(parsedConjunctions, conjMap)
 		} else if expStruct.ResourceType == model.IPAddressExpression__TYPE_IDENTIFIER {
+			log.Printf("[DEBUG] Parsing ipaddress expression")
 			ipData, errors := converter.ConvertToGolang(expression, model.IPAddressExpressionBindingType())
 			if len(errors) > 0 {
 				return nil, nil, errors[0]
 			}
 			ipStruct := ipData.(model.IPAddressExpression)
-			var addrMap = make(map[string][]string)
+			var addrList []map[string]interface{}
+			var addrMap = make(map[string]interface{})
 			addrMap["ip_addresses"] = ipStruct.IpAddresses
 			var ipMap = make(map[string]interface{})
-			ipMap["ipaddress_expression"] = addrMap
+			addrList = append(addrList, addrMap)
+			ipMap["ipaddress_expression"] = addrList
 			parsedCriteria = append(parsedCriteria, ipMap)
 		} else if expStruct.ResourceType == model.PathExpression__TYPE_IDENTIFIER {
+			log.Printf("[DEBUG] Parsing path expression")
 			pathData, errors := converter.ConvertToGolang(expression, model.PathExpressionBindingType())
 			if len(errors) > 0 {
 				return nil, nil, errors[0]
 			}
 			paths := pathData.(model.PathExpression)
-			var pathMap = make(map[string][]string)
+			var pathList []map[string]interface{}
+			var pathMap = make(map[string]interface{})
 			pathMap["member_paths"] = paths.Paths
 			var exprMap = make(map[string]interface{})
-			exprMap["path_expression"] = pathMap
-			parsedCriteria = append(parsedCriteria, pathMap)
+			pathList = append(pathList, pathMap)
+			exprMap["path_expression"] = pathList
+			parsedCriteria = append(parsedCriteria, exprMap)
 		} else if expStruct.ResourceType == model.Condition__TYPE_IDENTIFIER {
+			log.Printf("[DEBUG] Parsing condition")
 			condMap, err := groupConditionDataToMap(expression)
 			if err != nil {
 				return nil, nil, err
 			}
-			var criteriaMap = make(map[string]interface{})
-			criteriaMap["condition"] = condMap
+			var condList []map[string]interface{}
+			condList = append(condList, condMap)
+			criteriaMap := make(map[string]interface{})
+			criteriaMap["condition"] = condList
 			parsedCriteria = append(parsedCriteria, criteriaMap)
 		} else if expStruct.ResourceType == model.NestedExpression__TYPE_IDENTIFIER {
+			log.Printf("[DEBUG] Parsing nested expression")
 			nestedData, errors := converter.ConvertToGolang(expression, model.NestedExpressionBindingType())
 			if len(errors) > 0 {
 				return nil, nil, errors[0]
@@ -614,6 +626,7 @@ func resourceNsxtPolicyGroupRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	criteria, conditions, err := fromGroupExpressionData(obj.Expression)
+	log.Printf("[INFO] Found %d criteria, %d conjunctions for group %s", len(criteria), len(conditions), id)
 	if err != nil {
 		return err
 	}
