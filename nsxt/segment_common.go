@@ -676,14 +676,20 @@ func nsxtPolicySegmentRead(d *schema.ResourceData, m interface{}, isVlan bool) e
 		if obj.AdvancedConfig.UplinkTeamingPolicyName != nil {
 			advConfig["uplink_teaming_policy"] = *obj.AdvancedConfig.UplinkTeamingPolicyName
 		}
-		d.Set("advanced_config", advConfig)
+		// This is a list with 1 element
+		var advConfigList []map[string]interface{}
+		advConfigList = append(advConfigList, advConfig)
+		d.Set("advanced_config", advConfigList)
 	}
 
 	if obj.L2Extension != nil {
 		l2Ext := make(map[string]interface{})
 		l2Ext["l2vpn_paths"] = obj.L2Extension.L2vpnPaths
 		l2Ext["tunnel_id"] = obj.L2Extension.TunnelId
-		d.Set("l2_extension", l2Ext)
+		// This is a list with 1 element
+		var l2ExtList []map[string]interface{}
+		l2ExtList = append(l2ExtList, l2Ext)
+		d.Set("l2_extension", l2ExtList)
 	}
 
 	var subnetSegments []interface{}
