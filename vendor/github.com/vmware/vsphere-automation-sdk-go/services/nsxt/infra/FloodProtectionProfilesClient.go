@@ -20,13 +20,12 @@ type FloodProtectionProfilesClient interface {
     // API will delete Flood Protection Profile
     //
     // @param floodProtectionProfileIdParam Flood Protection Profile ID (required)
-    // @param overrideParam Locally override the global object (optional, default to false)
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Delete(floodProtectionProfileIdParam string, overrideParam *bool) error
+	Delete(floodProtectionProfileIdParam string) error
 
     // API will get Flood Protection Profile
     //
@@ -61,20 +60,18 @@ type FloodProtectionProfilesClient interface {
     // @param floodProtectionProfileIdParam Firewall Flood Protection Profile ID (required)
     // @param floodProtectionProfileParam (required)
     // The parameter must contain all the properties defined in model.FloodProtectionProfile.
-    // @param overrideParam Locally override the global object (optional, default to false)
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Patch(floodProtectionProfileIdParam string, floodProtectionProfileParam *data.StructValue, overrideParam *bool) error
+	Patch(floodProtectionProfileIdParam string, floodProtectionProfileParam *data.StructValue) error
 
     // API will update Firewall Flood Protection Profile
     //
     // @param floodProtectionProfileIdParam Flood Protection Profile ID (required)
     // @param floodProtectionProfileParam (required)
     // The parameter must contain all the properties defined in model.FloodProtectionProfile.
-    // @param overrideParam Locally override the global object (optional, default to false)
     // @return com.vmware.nsx_policy.model.FloodProtectionProfile
     // The return value will contain all the properties defined in model.FloodProtectionProfile.
     // @throws InvalidRequest  Bad Request, Precondition Failed
@@ -82,5 +79,5 @@ type FloodProtectionProfilesClient interface {
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Update(floodProtectionProfileIdParam string, floodProtectionProfileParam *data.StructValue, overrideParam *bool) (*data.StructValue, error)
+	Update(floodProtectionProfileIdParam string, floodProtectionProfileParam *data.StructValue) (*data.StructValue, error)
 }

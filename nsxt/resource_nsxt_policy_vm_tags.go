@@ -95,7 +95,7 @@ func findNsxtPolicyVMByID(connector *client.RestConnector, vmID string) (model.V
 	}
 
 	for _, vmResult := range allVMs {
-		if vmResult.ExternalId == vmID {
+		if (vmResult.ExternalId != nil) && *vmResult.ExternalId == vmID {
 			return vmResult, nil
 		}
 		computeIDMap := collectSeparatedStringListToMap(vmResult.ComputeIds, ":")
@@ -113,7 +113,7 @@ func updateNsxtPolicyVMTags(connector *client.RestConnector, externalID string, 
 
 	tagUpdate := model.VirtualMachineTagsUpdate{
 		Tags:             tags,
-		VirtualMachineId: externalID,
+		VirtualMachineId: &externalID,
 	}
 	return client.Updatetags(policyEnforcementPoint, tagUpdate)
 }
@@ -154,12 +154,12 @@ func resourceNsxtPolicyVMTagsCreate(d *schema.ResourceData, m interface{}) error
 	if tags == nil {
 		tags = make([]model.Tag, 0)
 	}
-	err = updateNsxtPolicyVMTags(connector, vm.ExternalId, tags)
+	err = updateNsxtPolicyVMTags(connector, *vm.ExternalId, tags)
 	if err != nil {
-		return handleCreateError("Virtual Machine Tag", vm.ExternalId, err)
+		return handleCreateError("Virtual Machine Tag", *vm.ExternalId, err)
 	}
 
-	d.SetId(vm.ExternalId)
+	d.SetId(*vm.ExternalId)
 
 	return resourceNsxtPolicyVMTagsRead(d, m)
 }
@@ -178,10 +178,10 @@ func resourceNsxtPolicyVMTagsDelete(d *schema.ResourceData, m interface{}) error
 	}
 
 	tags := make([]model.Tag, 0)
-	err = updateNsxtPolicyVMTags(connector, vm.ExternalId, tags)
+	err = updateNsxtPolicyVMTags(connector, *vm.ExternalId, tags)
 
 	if err != nil {
-		return handleDeleteError("Virtual Machine Tag", vm.ExternalId, err)
+		return handleDeleteError("Virtual Machine Tag", *vm.ExternalId, err)
 	}
 
 	return err

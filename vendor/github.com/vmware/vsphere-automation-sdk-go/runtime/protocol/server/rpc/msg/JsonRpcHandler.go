@@ -4,44 +4,34 @@
 package msg
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/core"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/lib"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/log"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/server"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/security"
 	"io/ioutil"
 	"net/http"
 	"os"
-	"strings"
 )
 
 const ENABLE_VAPI_PROVIDER_WIRE_LOGGING = "ENABLE_VAPI_PROVIDER_WIRE_LOGGING"
 
 type JsonRpcHandler struct {
-	apiProvider         core.APIProvider
-	vapiAppCtxConstants map[string]string
-	jsonRpcEncoder      *JsonRpcEncoder
-	jsonRpcDecoder      *JsonRpcDecoder
-	requestProcessors   []server.RequestPreProcessor
+	apiProvider       core.APIProvider
+	jsonRpcEncoder    *JsonRpcEncoder
+	jsonRpcDecoder    *JsonRpcDecoder
+	requestProcessors []server.RequestPreProcessor
 }
 
 func NewJsonRpcHandler(apiProvider core.APIProvider) *JsonRpcHandler {
 	var jsonRpcEncoder = NewJsonRpcEncoder()
 	var jsonRpcDecoder = NewJsonRpcDecoder()
-	vapiAppCtxConstants := map[string]string{
-		"opid":                "opId",
-		"actid":               "actId",
-		"$showunreleasedapis": "$showUnreleasedAPIs",
-		"$useragent":          "$userAgent",
-		"$donotroute":         "$doNotRoute",
-		"vmwaresessionid":     "vmwareSessionId",
-		"activationid":        "ActivationId"}
 	return &JsonRpcHandler{apiProvider: apiProvider,
-		jsonRpcEncoder:      jsonRpcEncoder,
-		jsonRpcDecoder:      jsonRpcDecoder,
-		vapiAppCtxConstants: vapiAppCtxConstants}
+		jsonRpcEncoder: jsonRpcEncoder,
+		jsonRpcDecoder: jsonRpcDecoder}
 }
 
 func (j *JsonRpcHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
@@ -147,8 +137,8 @@ func (j *JsonRpcHandler) processJsonRpcRequest(rw http.ResponseWriter, r *http.R
 		j.sendResponse(jsonRpcRequestError, rw, nil)
 		return
 	}
-
-	j.copyHeadersToContexts(executionContext, r)
+	executionContext.WithContext(r.Context())
+	server.CopyHeadersToContexts(executionContext, r)
 	if !executionContext.ApplicationContext().HasProperty(lib.OPID) {
 		log.Debug("opId was not present for the request")
 	} else {
@@ -177,40 +167,79 @@ func (j *JsonRpcHandler) processJsonRpcRequest(rw http.ResponseWriter, r *http.R
 	}
 
 	var methodResult = j.apiProvider.Invoke(serviceId, operationId, inputValue, executionContext)
-	var jsonRpc20Response = j.prepareResponseBody(request, methodResult, serviceId, operationId)
-	j.sendResponse(jsonRpc20Response, rw, methodResult.Error())
+	if methodResult.IsResponseStream() {
+		rw.Header().Set(lib.HTTP_CONTENT_TYPE_HEADER, lib.VAPI_STREAMING_CONTENT_TYPE)
+		flusher, _ := rw.(http.Flusher)
+		hasError := false
+		for i := range methodResult.ResponseStream() {
+			var jsonRpc20Response = j.prepareResponseBody(request, i)
+			if i.Error() != nil {
+				hasError = true
+			}
+			j.sendStreamingResponse(jsonRpc20Response, rw, i.Error(), flusher)
+		}
+		if !hasError {
+			//send terminating message
+			log.Debug("Sending terminal frame")
+			terminalFrame := make(map[string]interface{})
+			terminalFrame[lib.JSONRPC] = request.version
+			terminalFrame[lib.JSONRPC_ID] = request.id
+			terminalFrame[lib.METHOD_RESULT] = map[string]interface{}{}
+			frameBytes, _ := json.Marshal(terminalFrame)
+			frameLengthInHex := fmt.Sprintf("%x", len(frameBytes))
+			_, err := rw.Write([]byte(frameLengthInHex))
+			if err != nil {
+				log.Error(err)
+			}
+			_, err = rw.Write(lib.CRLFBytes)
+			if err != nil {
+				log.Error(err)
+			}
+			_, err = rw.Write(frameBytes)
+			if err != nil {
+				log.Error(err)
+			}
+			_, err = rw.Write(lib.CRLFBytes)
+			if err != nil {
+				log.Error(err)
+			}
+			flusher.Flush()
+		}
+	} else {
+		var jsonRpc20Response = j.prepareResponseBody(request, methodResult)
+		j.sendResponse(jsonRpc20Response, rw, methodResult.Error())
+	}
 }
 
-func (j *JsonRpcHandler) copyHeadersToContexts(ctx *core.ExecutionContext, r *http.Request) {
-	appCtx := ctx.ApplicationContext()
-	secCtx := ctx.SecurityContext()
-	for key, value := range r.Header {
-		keyLowerCase := strings.ToLower(key)
-		s := strings.Split(keyLowerCase, lib.VAPI_HEADER_PREFIX)
-		if len(s) > 1 {
-			// Override values in appCtx with headers with "vapi-ctx-" prefix
-			// The values from HTTP headers override the body values.
-			// if there are multiple values for the same header, the first entry will be chosen.
-			if j.vapiAppCtxConstants[s[1]] != "" {
-				appCtx.SetProperty(j.vapiAppCtxConstants[s[1]], &value[0])
-			} else {
-				appCtx.SetProperty(s[1], &value[0])
-			}
-		} else {
-			switch keyLowerCase {
-			case lib.HTTP_ACCEPT_LANGUAGE:
-				appCtx.SetProperty(lib.HTTP_ACCEPT_LANGUAGE, &value[0])
-			case lib.VAPI_SESSION_HEADER:
-				// Override session value in security context with authorization header
-				secCtx.SetProperty(security.SESSION_ID, value[0])
-				secCtx.SetProperty(security.AUTHENTICATION_SCHEME_ID, security.SESSION_SCHEME_ID)
-			}
-		}
+func (j *JsonRpcHandler) sendStreamingResponse(response interface{}, rw http.ResponseWriter, error *data.ErrorValue, flusher http.Flusher) {
+	var frame, encodeError = j.jsonRpcEncoder.Encode(response)
+	if encodeError != nil {
+		log.Error(encodeError)
+		//TODO:
+		//report this error to client
 	}
-	// When the request has $useragent header, it will override the custom one if present.
-	if userAgentVal, ok := r.Header["User-Agent"]; ok {
-		appCtx.SetProperty("$userAgent", &userAgentVal[0])
+	if error != nil {
+		//Accessing directly to avoid canonicalizing header key.
+		rw.Header()[lib.VAPI_ERROR] = []string{error.Name()}
 	}
+	frameLengthInHex := fmt.Sprintf("%x", len(frame))
+	_, err := rw.Write([]byte(frameLengthInHex))
+	if err != nil {
+		log.Error(err)
+	}
+	_, err = rw.Write(lib.CRLFBytes)
+	if err != nil {
+		log.Error(err)
+	}
+	_, err = rw.Write(frame)
+	if err != nil {
+		log.Error(err)
+	}
+	_, err = rw.Write(lib.CRLFBytes)
+	if err != nil {
+		log.Error(err)
+	}
+	flusher.Flush()
 }
 
 func (j *JsonRpcHandler) operationId(request JsonRpc20Request) (string, error) {
@@ -257,7 +286,7 @@ func (j *JsonRpcHandler) executionContext(request JsonRpc20Request) (*core.Execu
 	}
 }
 
-func (j *JsonRpcHandler) prepareResponseBody(request JsonRpc20Request, methodResult core.MethodResult, serviceId string, operationId string) JsonRpc20Response {
+func (j *JsonRpcHandler) prepareResponseBody(request JsonRpc20Request, methodResult core.MethodResult) JsonRpc20Response {
 	_, logWireValue := os.LookupEnv(ENABLE_VAPI_PROVIDER_WIRE_LOGGING)
 	if logWireValue {
 		jsonRpcEncoder := NewJsonRpcEncoder()

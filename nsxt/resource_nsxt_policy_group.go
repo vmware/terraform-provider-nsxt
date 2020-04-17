@@ -278,11 +278,15 @@ func validateGroupConjunctions(conjunctions []interface{}, criteriaMeta []criter
 
 func buildGroupConditionData(condition interface{}) (*data.StructValue, error) {
 	conditionMap := condition.(map[string]interface{})
+	key := conditionMap["key"].(string)
+	memberType := conditionMap["member_type"].(string)
+	operator := conditionMap["operator"].(string)
+	value := conditionMap["value"].(string)
 	conditionModel := model.Condition{
-		Key:          conditionMap["key"].(string),
-		MemberType:   conditionMap["member_type"].(string),
-		Operator:     conditionMap["operator"].(string),
-		Value:        conditionMap["value"].(string),
+		Key:          &key,
+		MemberType:   &memberType,
+		Operator:     &operator,
+		Value:        &value,
 		ResourceType: model.Condition__TYPE_IDENTIFIER,
 	}
 	converter := bindings.NewTypeConverter()
@@ -296,7 +300,7 @@ func buildGroupConditionData(condition interface{}) (*data.StructValue, error) {
 
 func buildGroupConjunctionData(conjunction string) (*data.StructValue, error) {
 	conjunctionStruct := model.ConjunctionOperator{
-		ConjunctionOperator: conjunction,
+		ConjunctionOperator: &conjunction,
 		ResourceType:        model.ConjunctionOperator__TYPE_IDENTIFIER,
 	}
 	converter := bindings.NewTypeConverter()

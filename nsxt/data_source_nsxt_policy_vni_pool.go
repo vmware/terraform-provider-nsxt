@@ -91,7 +91,7 @@ func dataSourceNsxtPolicyVniPoolRead(d *schema.ResourceData, m interface{}) erro
 	d.Set("display_name", obj.DisplayName)
 	d.Set("description", obj.Description)
 	d.Set("path", obj.Path)
-	d.Set("end", int(obj.End))
-	d.Set("start", int(obj.Start))
+	d.Set("end", obj.End)
+	d.Set("start", obj.Start)
 	return nil
 }

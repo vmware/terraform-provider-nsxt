@@ -152,7 +152,7 @@ func (g *GolangToRestVisitor) visitBlobType() []error {
 
 func (g *GolangToRestVisitor) visitDateTimeType() []error {
 	if t1, ok := g.inValue.(time.Time); ok {
-		stringValue := data.NewStringValue(t1.Format(time.RFC3339))
+		stringValue := data.NewStringValue(t1.Format(VAPI_DATETIME_LAYOUT))
 		g.outValue = stringValue
 		return nil
 	}

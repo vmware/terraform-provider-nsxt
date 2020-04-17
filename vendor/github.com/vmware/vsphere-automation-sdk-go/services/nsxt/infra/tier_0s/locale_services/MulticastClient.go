@@ -16,7 +16,7 @@ import (
 
 type MulticastClient interface {
 
-    // Read Multicast Config.
+    // Read Multicast Configuration.
     //
     // @param tier0IdParam tier0 id (required)
     // @param localeServicesIdParam locale services id (required)
@@ -28,30 +28,28 @@ type MulticastClient interface {
     // @throws NotFound  Not Found
 	Get(tier0IdParam string, localeServicesIdParam string) (model.PolicyMulticastConfig, error)
 
-    // Create a multicast config with the multicast-config-id is not already present, otherwise update the multicast config.
+    // Create or update a Tier-0 multicast configuration defining the multicast replication range, the IGMP or a PIM profile. It will update the configuration if there is already one in place.
     //
     // @param tier0IdParam tier0 id (required)
     // @param localeServicesIdParam locale services id (required)
     // @param policyMulticastConfigParam (required)
-    // @param overrideParam Locally override the global object (optional, default to false)
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Patch(tier0IdParam string, localeServicesIdParam string, policyMulticastConfigParam model.PolicyMulticastConfig, overrideParam *bool) error
+	Patch(tier0IdParam string, localeServicesIdParam string, policyMulticastConfigParam model.PolicyMulticastConfig) error
 
-    // Create or update multicast config.
+    // Create or update a Tier-0 multicast configuration defining the multicast replication range, the IGMP or a PIM profile. It will update the configuration if there is already one in place.
     //
     // @param tier0IdParam tier0 id (required)
     // @param localeServicesIdParam locale services id (required)
     // @param policyMulticastConfigParam (required)
-    // @param overrideParam Locally override the global object (optional, default to false)
     // @return com.vmware.nsx_policy.model.PolicyMulticastConfig
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Update(tier0IdParam string, localeServicesIdParam string, policyMulticastConfigParam model.PolicyMulticastConfig, overrideParam *bool) (model.PolicyMulticastConfig, error)
+	Update(tier0IdParam string, localeServicesIdParam string, policyMulticastConfigParam model.PolicyMulticastConfig) (model.PolicyMulticastConfig, error)
 }

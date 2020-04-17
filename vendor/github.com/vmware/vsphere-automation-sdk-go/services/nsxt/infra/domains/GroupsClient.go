@@ -41,7 +41,7 @@ type GroupsClient interface {
     // @throws NotFound  Not Found
 	Get(domainIdParam string, groupIdParam string) (model.Group, error)
 
-    // List Groups for a domain
+    // List Groups for a domain. Groups can be filtered using member_types query parameter, which returns the groups that contains the specified member types. Multiple member types can be provided as comma separated values. The API also return groups having member type that are subset of provided member_types.
     //
     // @param domainIdParam Domain ID (required)
     // @param cursorParam Opaque cursor to be used for getting next page of records (supplied by current result page) (optional)
@@ -71,7 +71,7 @@ type GroupsClient interface {
     // @throws NotFound  Not Found
 	Patch(domainIdParam string, groupIdParam string, groupParam model.Group) error
 
-    // If a group with the group-id is not already present, create a new group. If it already exists, update the group.
+    // If a group with the group-id is not already present, create a new group. If it already exists, update the group. Avoid creating groups with multiple MACAddressExpression and IPAddressExpression. In future releases, group will be restricted to contain a single MACAddressExpression and IPAddressExpression along with other expressions. To group IPAddresses or MACAddresses, use nested groups instead of multiple IPAddressExpressions/MACAddressExpression.
     //
     // @param domainIdParam Domain ID (required)
     // @param groupIdParam Group ID (required)

@@ -19,13 +19,12 @@ type IpfixCollectorProfilesClient interface {
     // API deletes IPFIX collector profile. Flow forwarding to collector will be stopped. This API is deprecated. Please use the following API: https://<policy-mgr>/policy/api/v1/infra/ipfix-l2-collector-profiles
     //
     // @param ipfixCollectorProfileIdParam IPFIX collector Profile id (required)
-    // @param overrideParam Locally override the global object (optional, default to false)
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Delete(ipfixCollectorProfileIdParam string, overrideParam *bool) error
+	Delete(ipfixCollectorProfileIdParam string) error
 
     // API will return details of IPFIX collector profile. If profile does not exist, it will return 404. This API is deprecated. Please use the following API: https://<policy-mgr>/policy/api/v1/infra/ipfix-l2-collector-profiles
     //
@@ -58,24 +57,22 @@ type IpfixCollectorProfilesClient interface {
     //
     // @param ipfixCollectorProfileIdParam IPFIX collector profile id (required)
     // @param iPFIXCollectorProfileParam (required)
-    // @param overrideParam Locally override the global object (optional, default to false)
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Patch(ipfixCollectorProfileIdParam string, iPFIXCollectorProfileParam model.IPFIXCollectorProfile, overrideParam *bool) error
+	Patch(ipfixCollectorProfileIdParam string, iPFIXCollectorProfileParam model.IPFIXCollectorProfile) error
 
     // Create or Replace IPFIX collector profile. IPFIX data will be sent to IPFIX collector port. This API is deprecated. Please use the following API: https://<policy-mgr>/policy/api/v1/infra/ipfix-l2-collector-profiles
     //
     // @param ipfixCollectorProfileIdParam IPFIX collector profile id (required)
     // @param iPFIXCollectorProfileParam (required)
-    // @param overrideParam Locally override the global object (optional, default to false)
     // @return com.vmware.nsx_policy.model.IPFIXCollectorProfile
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Update(ipfixCollectorProfileIdParam string, iPFIXCollectorProfileParam model.IPFIXCollectorProfile, overrideParam *bool) (model.IPFIXCollectorProfile, error)
+	Update(ipfixCollectorProfileIdParam string, iPFIXCollectorProfileParam model.IPFIXCollectorProfile) (model.IPFIXCollectorProfile, error)
 }

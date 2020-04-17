@@ -19,13 +19,12 @@ type QosProfilesClient interface {
     // API will delete QoS profile.
     //
     // @param qosProfileIdParam QoS profile Id (required)
-    // @param overrideParam Locally override the global object (optional, default to false)
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Delete(qosProfileIdParam string, overrideParam *bool) error
+	Delete(qosProfileIdParam string) error
 
     // API will return details of QoS profile.
     //
@@ -57,24 +56,22 @@ type QosProfilesClient interface {
     //
     // @param qosProfileIdParam QoS profile Id (required)
     // @param qosProfileParam (required)
-    // @param overrideParam Locally override the global object (optional, default to false)
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Patch(qosProfileIdParam string, qosProfileParam model.QosProfile, overrideParam *bool) error
+	Patch(qosProfileIdParam string, qosProfileParam model.QosProfile) error
 
     // Create or Replace QoS profile.
     //
     // @param qosProfileIdParam QoS profile Id (required)
     // @param qosProfileParam (required)
-    // @param overrideParam Locally override the global object (optional, default to false)
     // @return com.vmware.nsx_policy.model.QoSProfile
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Update(qosProfileIdParam string, qosProfileParam model.QosProfile, overrideParam *bool) (model.QosProfile, error)
+	Update(qosProfileIdParam string, qosProfileParam model.QosProfile) (model.QosProfile, error)
 }

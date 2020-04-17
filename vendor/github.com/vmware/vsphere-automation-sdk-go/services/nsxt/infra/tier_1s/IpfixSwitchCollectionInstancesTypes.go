@@ -46,6 +46,8 @@ func ipfixSwitchCollectionInstancesDeleteRestMetadata() protocol.OperationRestMe
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["tier1_id"] = bindings.NewStringType()
 	fields["ipfix_switch_collection_instance_id"] = bindings.NewStringType()
 	fieldNameMap["tier1_id"] = "Tier1Id"
@@ -65,14 +67,18 @@ func ipfixSwitchCollectionInstancesDeleteRestMetadata() protocol.OperationRestMe
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"",
 		"DELETE",
 		"/policy/api/v1/infra/tier-1s/{tier1Id}/ipfix-switch-collection-instances/{ipfixSwitchCollectionInstanceId}",
+		"",
 		resultHeaders,
 		204,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func ipfixSwitchCollectionInstancesGetInputType() bindings.StructType {
@@ -97,6 +103,8 @@ func ipfixSwitchCollectionInstancesGetRestMetadata() protocol.OperationRestMetad
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["tier1_id"] = bindings.NewStringType()
 	fields["ipfix_switch_collection_instance_id"] = bindings.NewStringType()
 	fieldNameMap["tier1_id"] = "Tier1Id"
@@ -116,14 +124,18 @@ func ipfixSwitchCollectionInstancesGetRestMetadata() protocol.OperationRestMetad
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"",
 		"GET",
 		"/policy/api/v1/infra/tier-1s/{tier1Id}/ipfix-switch-collection-instances/{ipfixSwitchCollectionInstanceId}",
+		"",
 		resultHeaders,
 		200,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func ipfixSwitchCollectionInstancesListInputType() bindings.StructType {
@@ -158,6 +170,8 @@ func ipfixSwitchCollectionInstancesListRestMetadata() protocol.OperationRestMeta
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["tier1_id"] = bindings.NewStringType()
 	fields["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
 	fields["include_mark_for_delete_objects"] = bindings.NewOptionalType(bindings.NewBooleanType())
@@ -196,14 +210,18 @@ func ipfixSwitchCollectionInstancesListRestMetadata() protocol.OperationRestMeta
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"",
 		"GET",
 		"/policy/api/v1/infra/tier-1s/{tier1Id}/ipfix-switch-collection-instances",
+		"",
 		resultHeaders,
 		200,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func ipfixSwitchCollectionInstancesPatchInputType() bindings.StructType {
@@ -230,6 +248,8 @@ func ipfixSwitchCollectionInstancesPatchRestMetadata() protocol.OperationRestMet
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["tier1_id"] = bindings.NewStringType()
 	fields["ipfix_switch_collection_instance_id"] = bindings.NewStringType()
 	fields["i_PFIX_switch_collection_instance"] = bindings.NewReferenceType(model.IPFIXSwitchCollectionInstanceBindingType)
@@ -252,14 +272,18 @@ func ipfixSwitchCollectionInstancesPatchRestMetadata() protocol.OperationRestMet
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"i_PFIX_switch_collection_instance",
 		"PATCH",
 		"/policy/api/v1/infra/tier-1s/{tier1Id}/ipfix-switch-collection-instances/{ipfixSwitchCollectionInstanceId}",
+		"",
 		resultHeaders,
 		204,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func ipfixSwitchCollectionInstancesUpdateInputType() bindings.StructType {
@@ -286,6 +310,8 @@ func ipfixSwitchCollectionInstancesUpdateRestMetadata() protocol.OperationRestMe
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["tier1_id"] = bindings.NewStringType()
 	fields["ipfix_switch_collection_instance_id"] = bindings.NewStringType()
 	fields["i_PFIX_switch_collection_instance"] = bindings.NewReferenceType(model.IPFIXSwitchCollectionInstanceBindingType)
@@ -308,14 +334,18 @@ func ipfixSwitchCollectionInstancesUpdateRestMetadata() protocol.OperationRestMe
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"i_PFIX_switch_collection_instance",
 		"PUT",
 		"/policy/api/v1/infra/tier-1s/{tier1Id}/ipfix-switch-collection-instances/{ipfixSwitchCollectionInstanceId}",
+		"",
 		resultHeaders,
 		200,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 

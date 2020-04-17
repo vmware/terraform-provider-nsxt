@@ -22,6 +22,7 @@ import (
 var defaultRetryOnStatusCodes = []int{429, 503}
 var toleratePartialSuccess = false
 var policyEnforcementPoint = "default"
+var policySite = "default"
 
 type nsxtClients struct {
 	// NSX Manager client - based on go-vmware-nsxt SDK

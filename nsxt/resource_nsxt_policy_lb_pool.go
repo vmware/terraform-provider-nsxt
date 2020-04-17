@@ -156,11 +156,12 @@ func getPolicyPoolMembersFromSchema(d *schema.ResourceData) []model.LBPoolMember
 		port := data["port"].(string)
 		weight := int64(data["weight"].(int))
 		maxConnections := int64(data["max_concurrent_connections"].(int))
+		address := data["ip_address"].(string)
 		elem := model.LBPoolMember{
 			AdminState:   &adminState,
 			BackupMember: &backupMember,
 			DisplayName:  &displayName,
-			IpAddress:    data["ip_address"].(string),
+			IpAddress:    &address,
 			Weight:       &weight,
 		}
 
@@ -224,7 +225,7 @@ func getPolicyPoolMemberGroupFromSchema(d *schema.ResourceData) *model.LBPoolMem
 		}
 
 		elem := model.LBPoolMemberGroup{
-			GroupPath:        groupPath,
+			GroupPath:        &groupPath,
 			IpRevisionFilter: &ipRevisionFilter,
 		}
 
@@ -318,7 +319,7 @@ func getPolicyPoolSnatFromSchema(d *schema.ResourceData) (*data.StructValue, err
 				}
 				prefix64 := int64(prefix)
 				element := model.LBSnatIpElement{
-					IpAddress:    tokens[0],
+					IpAddress:    &tokens[0],
 					PrefixLength: &prefix64,
 				}
 
@@ -326,7 +327,7 @@ func getPolicyPoolSnatFromSchema(d *schema.ResourceData) (*data.StructValue, err
 			} else {
 				// single IP or range
 				element := model.LBSnatIpElement{
-					IpAddress: addressStr,
+					IpAddress: &addressStr,
 				}
 				addressList = append(addressList, element)
 			}
@@ -386,10 +387,10 @@ func setPolicyPoolSnatInSchema(d *schema.ResourceData, snat *data.StructValue) e
 		var addressList []string
 		for _, address := range ipPoolSnat.IpAddresses {
 			if address.PrefixLength != nil {
-				cidr := fmt.Sprintf("%s/%d", address.IpAddress, *address.PrefixLength)
+				cidr := fmt.Sprintf("%s/%d", *address.IpAddress, *address.PrefixLength)
 				addressList = append(addressList, cidr)
 			} else {
-				addressList = append(addressList, address.IpAddress)
+				addressList = append(addressList, *address.IpAddress)
 			}
 		}
 		elem["ip_pool_addresses"] = addressList

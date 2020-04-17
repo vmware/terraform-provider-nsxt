@@ -321,9 +321,11 @@ func getAdvRulesFromSchema(d *schema.ResourceData) []model.RouteAdvertisementRul
 	for _, rule := range rules {
 		data := rule.(map[string]interface{})
 		prefix := data["prefix_operator"].(string)
+		name := data["name"].(string)
+		action := data["action"].(string)
 		elem := model.RouteAdvertisementRule{
-			Name:                    data["name"].(string),
-			Action:                  data["action"].(string),
+			Name:                    &name,
+			Action:                  &action,
 			Subnets:                 interface2StringList(data["subnets"].(*schema.Set).List()),
 			RouteAdvertisementTypes: interface2StringList(data["route_advertisement_types"].(*schema.Set).List()),
 			PrefixOperator:          &prefix,
