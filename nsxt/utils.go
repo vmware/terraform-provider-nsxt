@@ -507,19 +507,21 @@ func makeResourceReference(resourceType string, resourceID string) *common.Resou
 	}
 }
 
-func getNSXVersion(nsxClient *api.APIClient) string {
+func getNSXVersion(nsxClient *api.APIClient) (string, error) {
 	nodeProperties, resp, err := nsxClient.NsxComponentAdministrationApi.ReadNodeProperties(nsxClient.Context)
 
-	if resp.StatusCode == http.StatusNotFound || err != nil {
-		log.Printf("[DEBUG] Failed to retrieve NSX version")
-		return "1.0.0"
+	if err != nil || resp.StatusCode == http.StatusNotFound {
+		return "", fmt.Errorf("Failed to retrieve NSX version (%s). Please check connectivity and authentication settings of the provider", err)
+
 	}
 	log.Printf("[DEBUG] NSX version is %s", nodeProperties.NodeVersion)
-	return nodeProperties.NodeVersion
+	return nodeProperties.NodeVersion, nil
 }
 
-func initNSXVersion(nsxClient *api.APIClient) {
-	nsxVersion = getNSXVersion(nsxClient)
+func initNSXVersion(nsxClient *api.APIClient) error {
+	var err error
+	nsxVersion, err = getNSXVersion(nsxClient)
+	return err
 }
 
 func nsxVersionLower(ver string) bool {
