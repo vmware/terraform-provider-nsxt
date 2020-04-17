@@ -19,13 +19,12 @@ type IpfixL2CollectorProfilesClient interface {
     // API deletes IPFIX collector profile. Flow forwarding to collector will be stopped.
     //
     // @param ipfixL2CollectorProfileIdParam IPFIX collector Profile id (required)
-    // @param overrideParam Locally override the global object (optional, default to false)
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Delete(ipfixL2CollectorProfileIdParam string, overrideParam *bool) error
+	Delete(ipfixL2CollectorProfileIdParam string) error
 
     // API will return details of IPFIX collector profile.
     //
@@ -58,24 +57,22 @@ type IpfixL2CollectorProfilesClient interface {
     //
     // @param ipfixL2CollectorProfileIdParam IPFIX collector profile id (required)
     // @param iPFIXL2CollectorProfileParam (required)
-    // @param overrideParam Locally override the global object (optional, default to false)
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Patch(ipfixL2CollectorProfileIdParam string, iPFIXL2CollectorProfileParam model.IPFIXL2CollectorProfile, overrideParam *bool) error
+	Patch(ipfixL2CollectorProfileIdParam string, iPFIXL2CollectorProfileParam model.IPFIXL2CollectorProfile) error
 
     // Create or Replace IPFIX collector profile. IPFIX data will be sent to IPFIX collector.
     //
     // @param ipfixL2CollectorProfileIdParam IPFIX collector profile id (required)
     // @param iPFIXL2CollectorProfileParam (required)
-    // @param overrideParam Locally override the global object (optional, default to false)
     // @return com.vmware.nsx_policy.model.IPFIXL2CollectorProfile
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Update(ipfixL2CollectorProfileIdParam string, iPFIXL2CollectorProfileParam model.IPFIXL2CollectorProfile, overrideParam *bool) (model.IPFIXL2CollectorProfile, error)
+	Update(ipfixL2CollectorProfileIdParam string, iPFIXL2CollectorProfileParam model.IPFIXL2CollectorProfile) (model.IPFIXL2CollectorProfile, error)
 }

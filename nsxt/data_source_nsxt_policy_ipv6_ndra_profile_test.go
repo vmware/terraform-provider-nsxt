@@ -52,16 +52,19 @@ func testAccDataSourceNsxtPolicyIpv6NdraProfileCreate(name string) error {
 
 	displayName := name
 	description := name
+	mode := model.Ipv6NdraProfile_RA_MODE_DISABLED
+	config := model.RAConfig{}
 	obj := model.Ipv6NdraProfile{
 		Description: &description,
 		DisplayName: &displayName,
-		RaMode:      model.Ipv6NdraProfile_RA_MODE_DISABLED,
+		RaMode:      &mode,
+		RaConfig:    &config,
 	}
 
 	// Generate a random ID for the resource
 	id := newUUID()
 
-	err = client.Patch(id, obj, nil)
+	err = client.Patch(id, obj)
 	if err != nil {
 		return handleCreateError("Ipv6NdraProfile", id, err)
 	}
@@ -82,7 +85,7 @@ func testAccDataSourceNsxtPolicyIpv6NdraProfileDeleteByName(name string) error {
 	}
 	for _, objInList := range objList.Results {
 		if *objInList.DisplayName == name {
-			err := client.Delete(*objInList.Id, nil)
+			err := client.Delete(*objInList.Id)
 			if err != nil {
 				return fmt.Errorf("Error during Ipv6NdraProfile deletion: %v", err)
 			}

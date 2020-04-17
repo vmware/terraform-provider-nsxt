@@ -54,11 +54,13 @@ func testAccDataSourceNsxtPolicyVniPoolConfigCreate(name string) error {
 
 	displayName := name
 	description := name
+	start := int64(75002)
+	end := int64(95001)
 	obj := model.VniPoolConfig{
 		Description: &description,
 		DisplayName: &displayName,
-		Start:       75002,
-		End:         95001,
+		Start:       &start,
+		End:         &end,
 	}
 
 	// Generate a random ID for the resource

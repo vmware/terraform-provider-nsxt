@@ -19,13 +19,12 @@ type Ipv6DadProfilesClient interface {
     // Delete IPv6 DAD profile
     //
     // @param dadProfileIdParam (required)
-    // @param overrideParam Locally override the global object (optional, default to false)
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Delete(dadProfileIdParam string, overrideParam *bool) error
+	Delete(dadProfileIdParam string) error
 
     // Read IPv6 DAD profile
     //
@@ -58,24 +57,22 @@ type Ipv6DadProfilesClient interface {
     //
     // @param dadProfileIdParam (required)
     // @param ipv6DadProfileParam (required)
-    // @param overrideParam Locally override the global object (optional, default to false)
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Patch(dadProfileIdParam string, ipv6DadProfileParam model.Ipv6DadProfile, overrideParam *bool) error
+	Patch(dadProfileIdParam string, ipv6DadProfileParam model.Ipv6DadProfile) error
 
     // If profile with the dad-profile-id is not already present, create a new IPv6 DAD profile instance. If it already exists, replace the IPv6 DAD profile instance with this object.
     //
     // @param dadProfileIdParam (required)
     // @param ipv6DadProfileParam (required)
-    // @param overrideParam Locally override the global object (optional, default to false)
     // @return com.vmware.nsx_policy.model.Ipv6DadProfile
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Update(dadProfileIdParam string, ipv6DadProfileParam model.Ipv6DadProfile, overrideParam *bool) (model.Ipv6DadProfile, error)
+	Update(dadProfileIdParam string, ipv6DadProfileParam model.Ipv6DadProfile) (model.Ipv6DadProfile, error)
 }

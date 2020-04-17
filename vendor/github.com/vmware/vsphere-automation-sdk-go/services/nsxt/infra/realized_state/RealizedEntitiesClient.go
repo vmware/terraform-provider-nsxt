@@ -19,11 +19,12 @@ type RealizedEntitiesClient interface {
     // Get list of realized entities associated with intent object, specified by path in query parameter
     //
     // @param intentPathParam String Path of the intent object (required)
+    // @param sitePathParam Policy Path of the site (optional)
     // @return com.vmware.nsx_policy.model.GenericPolicyRealizedResourceListResult
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	List(intentPathParam string) (model.GenericPolicyRealizedResourceListResult, error)
+	List(intentPathParam string, sitePathParam *string) (model.GenericPolicyRealizedResourceListResult, error)
 }

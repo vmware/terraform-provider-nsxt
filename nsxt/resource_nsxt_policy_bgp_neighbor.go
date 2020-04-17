@@ -280,9 +280,9 @@ func resourceNsxtPolicyBgpNeighborResourceDataToStruct(d *schema.ResourceData, i
 		HoldDownTime:        &holdDownTime,
 		KeepAliveTime:       &keepAliveTime,
 		MaximumHopLimit:     &maximumHopLimit,
-		NeighborAddress:     neighborAddress,
+		NeighborAddress:     &neighborAddress,
 		Password:            &password,
-		RemoteAsNum:         remoteAsNum,
+		RemoteAsNum:         &remoteAsNum,
 		RouteFiltering:      rFilters,
 		SourceAddresses:     sourceAddresses,
 		Id:                  &id,
@@ -320,7 +320,7 @@ func resourceNsxtPolicyBgpNeighborCreate(d *schema.ResourceData, m interface{}) 
 
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating BgpNeighbor with ID %s", id)
-	err = client.Patch(t0ID, serviceID, id, obj, nil)
+	err = client.Patch(t0ID, serviceID, id, obj)
 	if err != nil {
 		return handleCreateError("BgpNeighbor", id, err)
 	}
@@ -432,7 +432,7 @@ func resourceNsxtPolicyBgpNeighborUpdate(d *schema.ResourceData, m interface{}) 
 	}
 
 	// Update the resource using PATCH
-	err = client.Patch(t0ID, serviceID, id, obj, nil)
+	err = client.Patch(t0ID, serviceID, id, obj)
 	if err != nil {
 		return handleUpdateError("BgpNeighbor", id, err)
 	}
@@ -458,7 +458,7 @@ func resourceNsxtPolicyBgpNeighborDelete(d *schema.ResourceData, m interface{}) 
 		return fmt.Errorf("Invalid bgp_path %s", bgpPath)
 	}
 
-	err := client.Delete(t0ID, serviceID, id, nil)
+	err := client.Delete(t0ID, serviceID, id)
 	if err != nil {
 		return handleDeleteError("BgpNeighbor", id, err)
 	}

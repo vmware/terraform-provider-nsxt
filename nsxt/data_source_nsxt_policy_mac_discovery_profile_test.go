@@ -56,13 +56,14 @@ func testAccDataSourceNsxtPolicyMacDiscoveryProfileCreate(name string) error {
 	obj := model.MacDiscoveryProfile{
 		Description:                   &description,
 		DisplayName:                   &displayName,
+		MacLearningEnabled:            &boolFalse,
 		UnknownUnicastFloodingEnabled: &boolFalse,
 	}
 
 	// Generate a random ID for the resource
 	id := newUUID()
 
-	err = client.Patch(id, obj, nil)
+	err = client.Patch(id, obj)
 	if err != nil {
 		return handleCreateError("MacDiscoveryProfile", id, err)
 	}
@@ -83,7 +84,7 @@ func testAccDataSourceNsxtPolicyMacDiscoveryProfileDeleteByName(name string) err
 	}
 	for _, objInList := range objList.Results {
 		if *objInList.DisplayName == name {
-			err := client.Delete(*objInList.Id, nil)
+			err := client.Delete(*objInList.Id)
 			if err != nil {
 				return fmt.Errorf("Error during MacDiscoveryProfile deletion: %v", err)
 			}

@@ -28,9 +28,7 @@ func dnsSecurityProfilesDeleteInputType() bindings.StructType {
 	fields := make(map[string]bindings.BindingType)
 	fieldNameMap := make(map[string]string)
 	fields["profile_id"] = bindings.NewStringType()
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["profile_id"] = "ProfileId"
-	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -46,15 +44,13 @@ func dnsSecurityProfilesDeleteRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["profile_id"] = bindings.NewStringType()
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["profile_id"] = "ProfileId"
-	fieldNameMap["override"] = "Override"
 	paramsTypeMap["profile_id"] = bindings.NewStringType()
-	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["profileId"] = bindings.NewStringType()
 	pathParams["profile_id"] = "profileId"
-	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -64,14 +60,18 @@ func dnsSecurityProfilesDeleteRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"",
 		"DELETE",
 		"/policy/api/v1/infra/dns-security-profiles/{profileId}",
+		"",
 		resultHeaders,
 		204,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func dnsSecurityProfilesGetInputType() bindings.StructType {
@@ -94,6 +94,8 @@ func dnsSecurityProfilesGetRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["profile_id"] = bindings.NewStringType()
 	fieldNameMap["profile_id"] = "ProfileId"
 	paramsTypeMap["profile_id"] = bindings.NewStringType()
@@ -108,14 +110,18 @@ func dnsSecurityProfilesGetRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"",
 		"GET",
 		"/policy/api/v1/infra/dns-security-profiles/{profileId}",
+		"",
 		resultHeaders,
 		200,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func dnsSecurityProfilesListInputType() bindings.StructType {
@@ -148,6 +154,8 @@ func dnsSecurityProfilesListRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
 	fields["include_mark_for_delete_objects"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fields["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
@@ -181,14 +189,18 @@ func dnsSecurityProfilesListRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"",
 		"GET",
 		"/policy/api/v1/infra/dns-security-profiles",
+		"",
 		resultHeaders,
 		200,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func dnsSecurityProfilesPatchInputType() bindings.StructType {
@@ -196,10 +208,8 @@ func dnsSecurityProfilesPatchInputType() bindings.StructType {
 	fieldNameMap := make(map[string]string)
 	fields["profile_id"] = bindings.NewStringType()
 	fields["dns_security_profile"] = bindings.NewReferenceType(model.DnsSecurityProfileBindingType)
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["profile_id"] = "ProfileId"
 	fieldNameMap["dns_security_profile"] = "DnsSecurityProfile"
-	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -215,18 +225,16 @@ func dnsSecurityProfilesPatchRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["profile_id"] = bindings.NewStringType()
 	fields["dns_security_profile"] = bindings.NewReferenceType(model.DnsSecurityProfileBindingType)
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["profile_id"] = "ProfileId"
 	fieldNameMap["dns_security_profile"] = "DnsSecurityProfile"
-	fieldNameMap["override"] = "Override"
 	paramsTypeMap["dns_security_profile"] = bindings.NewReferenceType(model.DnsSecurityProfileBindingType)
 	paramsTypeMap["profile_id"] = bindings.NewStringType()
-	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["profileId"] = bindings.NewStringType()
 	pathParams["profile_id"] = "profileId"
-	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -236,14 +244,18 @@ func dnsSecurityProfilesPatchRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"dns_security_profile",
 		"PATCH",
 		"/policy/api/v1/infra/dns-security-profiles/{profileId}",
+		"",
 		resultHeaders,
 		204,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func dnsSecurityProfilesUpdateInputType() bindings.StructType {
@@ -251,10 +263,8 @@ func dnsSecurityProfilesUpdateInputType() bindings.StructType {
 	fieldNameMap := make(map[string]string)
 	fields["profile_id"] = bindings.NewStringType()
 	fields["dns_security_profile"] = bindings.NewReferenceType(model.DnsSecurityProfileBindingType)
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["profile_id"] = "ProfileId"
 	fieldNameMap["dns_security_profile"] = "DnsSecurityProfile"
-	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -270,18 +280,16 @@ func dnsSecurityProfilesUpdateRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["profile_id"] = bindings.NewStringType()
 	fields["dns_security_profile"] = bindings.NewReferenceType(model.DnsSecurityProfileBindingType)
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["profile_id"] = "ProfileId"
 	fieldNameMap["dns_security_profile"] = "DnsSecurityProfile"
-	fieldNameMap["override"] = "Override"
 	paramsTypeMap["dns_security_profile"] = bindings.NewReferenceType(model.DnsSecurityProfileBindingType)
 	paramsTypeMap["profile_id"] = bindings.NewStringType()
-	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["profileId"] = bindings.NewStringType()
 	pathParams["profile_id"] = "profileId"
-	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -291,14 +299,18 @@ func dnsSecurityProfilesUpdateRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"dns_security_profile",
 		"PUT",
 		"/policy/api/v1/infra/dns-security-profiles/{profileId}",
+		"",
 		resultHeaders,
 		200,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 

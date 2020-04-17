@@ -5,16 +5,12 @@ package protocol
 
 import (
 	"fmt"
+	"net/url"
 	"strings"
 
-	"github.com/gorilla/mux"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/core"
 )
-
-type RestApiInterface interface {
-	RegisterRoutesHandlers(router *mux.Router, provider core.APIProvider)
-}
 
 type OperationMetadata struct {
 	methodDefinition *core.MethodDefinition
@@ -74,9 +70,11 @@ type OperationRestMetadata struct {
 	// Flattened types of all parameters. Key is fully qualified field name
 	paramsTypeMap map[string]bindings.BindingType
 	//Names of rest parameter to fully qualified canonical name of the field
-	pathParamsNameMap   map[string]string
-	queryParamsNameMap  map[string]string
-	headerParamsNameMap map[string]string
+	pathParamsNameMap    map[string]string
+	queryParamsNameMap   map[string]string
+	headerParamsNameMap  map[string]string
+	dispatchHeaderParams map[string]string
+	bodyFieldsMap        map[string]string
 	//Encoded dispatch parameters
 	dispatchParam string
 	//Fully qualified field name canonical name of body param
@@ -85,8 +83,12 @@ type OperationRestMetadata struct {
 	httpMethod string
 	//HTTP URL for the operation
 	urlTemplate string
+	// Content-Type that operation consumes
+	operationConsumes string
 	// HTTP response success code
 	successCode int
+	// Field name of response body
+	responseBodyName string
 	// vAPI error name to HTTP response error code mapping
 	errorCodeMap map[string]int
 	// Map from result field name to http header name
@@ -102,12 +104,16 @@ func NewOperationRestMetadata(
 	pathParamsNameMap map[string]string,
 	queryParamsNameMap map[string]string,
 	headerParamsNameMap map[string]string,
+	dispatchHeaderParams map[string]string,
+	bodyFieldsMap map[string]string,
 	dispatchParam string,
 	bodyParamActualName string,
 	httpMethod string,
 	urlTemplate string,
+	operationConsumes string,
 	resultHeadersNameMap map[string]string,
 	successCode int,
+	responseBodyName string,
 	errorHeadersNameMap map[string]string,
 	errorCodeMap map[string]int) OperationRestMetadata {
 
@@ -118,11 +124,15 @@ func NewOperationRestMetadata(
 		pathParamsNameMap:    pathParamsNameMap,
 		queryParamsNameMap:   queryParamsNameMap,
 		headerParamsNameMap:  headerParamsNameMap,
+		dispatchHeaderParams: dispatchHeaderParams,
+		bodyFieldsMap:        bodyFieldsMap,
 		dispatchParam:        dispatchParam,
 		bodyParamActualName:  bodyParamActualName,
 		httpMethod:           httpMethod,
 		urlTemplate:          urlTemplate,
+		operationConsumes:    operationConsumes,
 		successCode:          successCode,
+		responseBodyName:     responseBodyName,
 		errorCodeMap:         errorCodeMap,
 		resultHeadersNameMap: resultHeadersNameMap,
 		errorHeadersNameMap:  errorHeadersNameMap}
@@ -152,6 +162,14 @@ func (meta OperationRestMetadata) HeaderParamsNameMap() map[string]string {
 	return meta.headerParamsNameMap
 }
 
+func (meta OperationRestMetadata) DispatchHeaderParams() map[string]string {
+	return meta.dispatchHeaderParams
+}
+
+func (meta OperationRestMetadata) BodyFieldsMap() map[string]string {
+	return meta.bodyFieldsMap
+}
+
 func (meta OperationRestMetadata) DispatchParam() string {
 	return meta.dispatchParam
 }
@@ -168,8 +186,16 @@ func (meta OperationRestMetadata) UrlTemplate() string {
 	return meta.urlTemplate
 }
 
+func (meta OperationRestMetadata) OperationConsumes() string {
+	return meta.operationConsumes
+}
+
 func (meta OperationRestMetadata) SuccessCode() int {
 	return meta.successCode
+}
+
+func (meta OperationRestMetadata) ResponseBodyName() string {
+	return meta.responseBodyName
 }
 
 func (meta OperationRestMetadata) ErrorCodeMap() map[string]int {
@@ -184,12 +210,13 @@ func (meta OperationRestMetadata) ErrorHeadersNameMap() map[string]string {
 }
 
 func (meta OperationRestMetadata) GetUrlPath(
-	pathVariableFields map[string]string, queryParamFields map[string]string,
+	pathVariableFields map[string][]string, queryParamFields map[string][]string,
 	dispatchParam string) string {
 	urlPath := meta.urlTemplate
 	// Substitute path variables with values in the template
-	for fieldName, fieldStr := range pathVariableFields {
-		urlPath = strings.Replace(urlPath, fmt.Sprintf("{%s}", fieldName), fieldStr, 1)
+	for fieldName, fields := range pathVariableFields {
+		val := url.QueryEscape(strings.Join(fields, ""))
+		urlPath = strings.Replace(urlPath, fmt.Sprintf("{%s}", fieldName), val, 1)
 	}
 
 	// Construct the query params portion of the url
@@ -202,7 +229,12 @@ func (meta OperationRestMetadata) GetUrlPath(
 
 	// Add other operation query parameters
 	for fieldName, fieldStr := range queryParamFields {
-		queryPrams = append(queryPrams, fmt.Sprintf("%s=%s", fieldName, fieldStr))
+		for _, e := range fieldStr {
+			qpKey := url.QueryEscape(fieldName)
+			qpVal := url.QueryEscape(e)
+			qparam := fmt.Sprintf("%s=%s", qpKey, qpVal)
+			queryPrams = append(queryPrams, qparam)
+		}
 	}
 	queryParamStr := strings.Join(queryPrams, "&")
 
@@ -229,6 +261,14 @@ func (meta OperationRestMetadata) QueryParamFieldNames() []string {
 
 func (meta OperationRestMetadata) HeaderFieldNames() []string {
 	return getListOfMapValues(meta.headerParamsNameMap)
+}
+
+func (meta OperationRestMetadata) DispatchHeaderNames() []string {
+	return getListOfMapValues(meta.dispatchHeaderParams)
+}
+
+func (meta OperationRestMetadata) BodyFieldsNames() []string {
+	return getListOfMapValues(meta.bodyFieldsMap)
 }
 
 func getListOfMapValues(mapValue map[string]string) []string {

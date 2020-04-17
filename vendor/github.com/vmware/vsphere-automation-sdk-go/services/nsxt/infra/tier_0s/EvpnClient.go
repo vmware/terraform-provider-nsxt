@@ -16,7 +16,7 @@ import (
 
 type EvpnClient interface {
 
-    // Read Evpn Config.
+    // Read Evpn Configuration.
     //
     // @param tier0IdParam tier0 id (required)
     // @return com.vmware.nsx_policy.model.EvpnConfig
@@ -27,7 +27,7 @@ type EvpnClient interface {
     // @throws NotFound  Not Found
 	Get(tier0IdParam string) (model.EvpnConfig, error)
 
-    // Create a evpn config if it is not already present, otherwise update the evpn config.
+    // Create a evpn configuration if it is not already present, otherwise update the evpn configuration.
     //
     // @param tier0IdParam tier0 id (required)
     // @param evpnConfigParam (required)
@@ -38,7 +38,7 @@ type EvpnClient interface {
     // @throws NotFound  Not Found
 	Patch(tier0IdParam string, evpnConfigParam model.EvpnConfig) error
 
-    // Create or update evpn config.
+    // Create or update evpn configuration.
     //
     // @param tier0IdParam tier0 id (required)
     // @param evpnConfigParam (required)

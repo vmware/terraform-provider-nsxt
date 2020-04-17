@@ -46,6 +46,8 @@ func segmentQosProfileBindingMapsDeleteRestMetadata() protocol.OperationRestMeta
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["segment_id"] = bindings.NewStringType()
 	fields["segment_qos_profile_binding_map_id"] = bindings.NewStringType()
 	fieldNameMap["segment_id"] = "SegmentId"
@@ -65,14 +67,18 @@ func segmentQosProfileBindingMapsDeleteRestMetadata() protocol.OperationRestMeta
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"",
 		"DELETE",
 		"/policy/api/v1/infra/segments/{segmentId}/segment-qos-profile-binding-maps/{segmentQosProfileBindingMapId}",
+		"",
 		resultHeaders,
 		204,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func segmentQosProfileBindingMapsGetInputType() bindings.StructType {
@@ -97,6 +103,8 @@ func segmentQosProfileBindingMapsGetRestMetadata() protocol.OperationRestMetadat
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["segment_id"] = bindings.NewStringType()
 	fields["segment_qos_profile_binding_map_id"] = bindings.NewStringType()
 	fieldNameMap["segment_id"] = "SegmentId"
@@ -116,14 +124,18 @@ func segmentQosProfileBindingMapsGetRestMetadata() protocol.OperationRestMetadat
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"",
 		"GET",
 		"/policy/api/v1/infra/segments/{segmentId}/segment-qos-profile-binding-maps/{segmentQosProfileBindingMapId}",
+		"",
 		resultHeaders,
 		200,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func segmentQosProfileBindingMapsListInputType() bindings.StructType {
@@ -156,6 +168,8 @@ func segmentQosProfileBindingMapsListRestMetadata() protocol.OperationRestMetada
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["segment_id"] = bindings.NewStringType()
 	fields["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
 	fields["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
@@ -190,14 +204,18 @@ func segmentQosProfileBindingMapsListRestMetadata() protocol.OperationRestMetada
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"",
 		"GET",
 		"/policy/api/v1/infra/segments/{segmentId}/segment-qos-profile-binding-maps",
+		"",
 		resultHeaders,
 		200,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func segmentQosProfileBindingMapsPatchInputType() bindings.StructType {
@@ -224,6 +242,8 @@ func segmentQosProfileBindingMapsPatchRestMetadata() protocol.OperationRestMetad
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["segment_id"] = bindings.NewStringType()
 	fields["segment_qos_profile_binding_map_id"] = bindings.NewStringType()
 	fields["segment_qos_profile_binding_map"] = bindings.NewReferenceType(model.SegmentQosProfileBindingMapBindingType)
@@ -246,14 +266,18 @@ func segmentQosProfileBindingMapsPatchRestMetadata() protocol.OperationRestMetad
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"segment_qos_profile_binding_map",
 		"PATCH",
 		"/policy/api/v1/infra/segments/{segmentId}/segment-qos-profile-binding-maps/{segmentQosProfileBindingMapId}",
+		"",
 		resultHeaders,
 		204,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func segmentQosProfileBindingMapsUpdateInputType() bindings.StructType {
@@ -280,6 +304,8 @@ func segmentQosProfileBindingMapsUpdateRestMetadata() protocol.OperationRestMeta
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["segment_id"] = bindings.NewStringType()
 	fields["segment_qos_profile_binding_map_id"] = bindings.NewStringType()
 	fields["segment_qos_profile_binding_map"] = bindings.NewReferenceType(model.SegmentQosProfileBindingMapBindingType)
@@ -302,14 +328,18 @@ func segmentQosProfileBindingMapsUpdateRestMetadata() protocol.OperationRestMeta
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"segment_qos_profile_binding_map",
 		"PUT",
 		"/policy/api/v1/infra/segments/{segmentId}/segment-qos-profile-binding-maps/{segmentQosProfileBindingMapId}",
+		"",
 		resultHeaders,
 		200,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 

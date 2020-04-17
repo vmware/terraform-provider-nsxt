@@ -43,12 +43,33 @@ func NewDefaultBgpClient(connector client.Connector) *DefaultBgpClient {
 	}
 	interfaceDefinition := core.NewInterfaceDefinition(interfaceIdentifier, methodIdentifiers)
 	errorBindingMap := make(map[string]bindings.BindingType)
+	errorBindingMap[errors.AlreadyExists{}.Error()] = errors.AlreadyExistsBindingType()
+	errorBindingMap[errors.AlreadyInDesiredState{}.Error()] = errors.AlreadyInDesiredStateBindingType()
+	errorBindingMap[errors.Canceled{}.Error()] = errors.CanceledBindingType()
+	errorBindingMap[errors.ConcurrentChange{}.Error()] = errors.ConcurrentChangeBindingType()
+	errorBindingMap[errors.Error{}.Error()] = errors.ErrorBindingType()
+	errorBindingMap[errors.FeatureInUse{}.Error()] = errors.FeatureInUseBindingType()
 	errorBindingMap[errors.InternalServerError{}.Error()] = errors.InternalServerErrorBindingType()
 	errorBindingMap[errors.InvalidArgument{}.Error()] = errors.InvalidArgumentBindingType()
+	errorBindingMap[errors.InvalidElementConfiguration{}.Error()] = errors.InvalidElementConfigurationBindingType()
+	errorBindingMap[errors.InvalidElementType{}.Error()] = errors.InvalidElementTypeBindingType()
+	errorBindingMap[errors.InvalidRequest{}.Error()] = errors.InvalidRequestBindingType()
+	errorBindingMap[errors.NotFound{}.Error()] = errors.NotFoundBindingType()
+	errorBindingMap[errors.NotAllowedInCurrentState{}.Error()] = errors.NotAllowedInCurrentStateBindingType()
 	errorBindingMap[errors.OperationNotFound{}.Error()] = errors.OperationNotFoundBindingType()
-	errorBindingMap[errors.UnexpectedInput{}.Error()] = errors.UnexpectedInputBindingType()
+	errorBindingMap[errors.ResourceBusy{}.Error()] = errors.ResourceBusyBindingType()
+	errorBindingMap[errors.ResourceInUse{}.Error()] = errors.ResourceInUseBindingType()
+	errorBindingMap[errors.ResourceInaccessible{}.Error()] = errors.ResourceInaccessibleBindingType()
 	errorBindingMap[errors.ServiceUnavailable{}.Error()] = errors.ServiceUnavailableBindingType()
 	errorBindingMap[errors.TimedOut{}.Error()] = errors.TimedOutBindingType()
+	errorBindingMap[errors.UnableToAllocateResource{}.Error()] = errors.UnableToAllocateResourceBindingType()
+	errorBindingMap[errors.Unauthenticated{}.Error()] = errors.UnauthenticatedBindingType()
+	errorBindingMap[errors.Unauthorized{}.Error()] = errors.UnauthorizedBindingType()
+	errorBindingMap[errors.UnexpectedInput{}.Error()] = errors.UnexpectedInputBindingType()
+	errorBindingMap[errors.Unsupported{}.Error()] = errors.UnsupportedBindingType()
+	errorBindingMap[errors.UnverifiedPeer{}.Error()] = errors.UnverifiedPeerBindingType()
+
+
 	bIface := DefaultBgpClient{interfaceName: interfaceName, methodIdentifiers: methodIdentifiers, interfaceDefinition: interfaceDefinition, errorBindingMap: errorBindingMap, interfaceIdentifier: interfaceIdentifier, connector: connector}
 	bIface.methodNameToDefMap = make(map[string]*core.MethodDefinition)
 	bIface.methodNameToDefMap["get"] = bIface.getMethodDefinition()
@@ -90,14 +111,13 @@ func (bIface *DefaultBgpClient) Get(tier0IdParam string, localeServiceIdParam st
 	}
 }
 
-func (bIface *DefaultBgpClient) Patch(tier0IdParam string, localeServiceIdParam string, bgpRoutingConfigParam model.BgpRoutingConfig, overrideParam *bool) error {
+func (bIface *DefaultBgpClient) Patch(tier0IdParam string, localeServiceIdParam string, bgpRoutingConfigParam model.BgpRoutingConfig) error {
 	typeConverter := bIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(bIface.interfaceIdentifier, "patch")
 	sv := bindings.NewStructValueBuilder(bgpPatchInputType(), typeConverter)
 	sv.AddStructField("Tier0Id", tier0IdParam)
 	sv.AddStructField("LocaleServiceId", localeServiceIdParam)
 	sv.AddStructField("BgpRoutingConfig", bgpRoutingConfigParam)
-	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
@@ -119,14 +139,13 @@ func (bIface *DefaultBgpClient) Patch(tier0IdParam string, localeServiceIdParam 
 	}
 }
 
-func (bIface *DefaultBgpClient) Update(tier0IdParam string, localeServiceIdParam string, bgpRoutingConfigParam model.BgpRoutingConfig, overrideParam *bool) (model.BgpRoutingConfig, error) {
+func (bIface *DefaultBgpClient) Update(tier0IdParam string, localeServiceIdParam string, bgpRoutingConfigParam model.BgpRoutingConfig) (model.BgpRoutingConfig, error) {
 	typeConverter := bIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(bIface.interfaceIdentifier, "update")
 	sv := bindings.NewStructValueBuilder(bgpUpdateInputType(), typeConverter)
 	sv.AddStructField("Tier0Id", tier0IdParam)
 	sv.AddStructField("LocaleServiceId", localeServiceIdParam)
 	sv.AddStructField("BgpRoutingConfig", bgpRoutingConfigParam)
-	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		var emptyOutput model.BgpRoutingConfig

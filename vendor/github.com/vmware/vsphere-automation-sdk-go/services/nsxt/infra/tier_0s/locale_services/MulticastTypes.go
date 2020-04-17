@@ -46,6 +46,8 @@ func multicastGetRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["tier0_id"] = bindings.NewStringType()
 	fields["locale_services_id"] = bindings.NewStringType()
 	fieldNameMap["tier0_id"] = "Tier0Id"
@@ -65,14 +67,18 @@ func multicastGetRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"",
 		"GET",
 		"/policy/api/v1/infra/tier-0s/{tier0Id}/locale-services/{localeServicesId}/multicast",
+		"",
 		resultHeaders,
 		200,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func multicastPatchInputType() bindings.StructType {
@@ -81,11 +87,9 @@ func multicastPatchInputType() bindings.StructType {
 	fields["tier0_id"] = bindings.NewStringType()
 	fields["locale_services_id"] = bindings.NewStringType()
 	fields["policy_multicast_config"] = bindings.NewReferenceType(model.PolicyMulticastConfigBindingType)
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["tier0_id"] = "Tier0Id"
 	fieldNameMap["locale_services_id"] = "LocaleServicesId"
 	fieldNameMap["policy_multicast_config"] = "PolicyMulticastConfig"
-	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -101,23 +105,21 @@ func multicastPatchRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["tier0_id"] = bindings.NewStringType()
 	fields["locale_services_id"] = bindings.NewStringType()
 	fields["policy_multicast_config"] = bindings.NewReferenceType(model.PolicyMulticastConfigBindingType)
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["tier0_id"] = "Tier0Id"
 	fieldNameMap["locale_services_id"] = "LocaleServicesId"
 	fieldNameMap["policy_multicast_config"] = "PolicyMulticastConfig"
-	fieldNameMap["override"] = "Override"
 	paramsTypeMap["tier0_id"] = bindings.NewStringType()
-	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["policy_multicast_config"] = bindings.NewReferenceType(model.PolicyMulticastConfigBindingType)
 	paramsTypeMap["locale_services_id"] = bindings.NewStringType()
 	paramsTypeMap["tier0Id"] = bindings.NewStringType()
 	paramsTypeMap["localeServicesId"] = bindings.NewStringType()
 	pathParams["locale_services_id"] = "localeServicesId"
 	pathParams["tier0_id"] = "tier0Id"
-	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -127,14 +129,18 @@ func multicastPatchRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"policy_multicast_config",
 		"PATCH",
 		"/policy/api/v1/infra/tier-0s/{tier0Id}/locale-services/{localeServicesId}/multicast",
+		"",
 		resultHeaders,
 		204,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func multicastUpdateInputType() bindings.StructType {
@@ -143,11 +149,9 @@ func multicastUpdateInputType() bindings.StructType {
 	fields["tier0_id"] = bindings.NewStringType()
 	fields["locale_services_id"] = bindings.NewStringType()
 	fields["policy_multicast_config"] = bindings.NewReferenceType(model.PolicyMulticastConfigBindingType)
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["tier0_id"] = "Tier0Id"
 	fieldNameMap["locale_services_id"] = "LocaleServicesId"
 	fieldNameMap["policy_multicast_config"] = "PolicyMulticastConfig"
-	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -163,23 +167,21 @@ func multicastUpdateRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["tier0_id"] = bindings.NewStringType()
 	fields["locale_services_id"] = bindings.NewStringType()
 	fields["policy_multicast_config"] = bindings.NewReferenceType(model.PolicyMulticastConfigBindingType)
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["tier0_id"] = "Tier0Id"
 	fieldNameMap["locale_services_id"] = "LocaleServicesId"
 	fieldNameMap["policy_multicast_config"] = "PolicyMulticastConfig"
-	fieldNameMap["override"] = "Override"
 	paramsTypeMap["tier0_id"] = bindings.NewStringType()
-	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["policy_multicast_config"] = bindings.NewReferenceType(model.PolicyMulticastConfigBindingType)
 	paramsTypeMap["locale_services_id"] = bindings.NewStringType()
 	paramsTypeMap["tier0Id"] = bindings.NewStringType()
 	paramsTypeMap["localeServicesId"] = bindings.NewStringType()
 	pathParams["locale_services_id"] = "localeServicesId"
 	pathParams["tier0_id"] = "tier0Id"
-	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -189,14 +191,18 @@ func multicastUpdateRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"policy_multicast_config",
 		"PUT",
 		"/policy/api/v1/infra/tier-0s/{tier0Id}/locale-services/{localeServicesId}/multicast",
+		"",
 		resultHeaders,
 		200,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 

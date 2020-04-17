@@ -28,9 +28,7 @@ func ipfixDfwProfilesDeleteInputType() bindings.StructType {
 	fields := make(map[string]bindings.BindingType)
 	fieldNameMap := make(map[string]string)
 	fields["ipfix_dfw_profile_id"] = bindings.NewStringType()
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["ipfix_dfw_profile_id"] = "IpfixDfwProfileId"
-	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -46,15 +44,13 @@ func ipfixDfwProfilesDeleteRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["ipfix_dfw_profile_id"] = bindings.NewStringType()
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["ipfix_dfw_profile_id"] = "IpfixDfwProfileId"
-	fieldNameMap["override"] = "Override"
-	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["ipfix_dfw_profile_id"] = bindings.NewStringType()
 	paramsTypeMap["ipfixDfwProfileId"] = bindings.NewStringType()
 	pathParams["ipfix_dfw_profile_id"] = "ipfixDfwProfileId"
-	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -64,14 +60,18 @@ func ipfixDfwProfilesDeleteRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"",
 		"DELETE",
 		"/policy/api/v1/infra/ipfix-dfw-profiles/{ipfixDfwProfileId}",
+		"",
 		resultHeaders,
 		204,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func ipfixDfwProfilesGetInputType() bindings.StructType {
@@ -94,6 +94,8 @@ func ipfixDfwProfilesGetRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["ipfix_dfw_profile_id"] = bindings.NewStringType()
 	fieldNameMap["ipfix_dfw_profile_id"] = "IpfixDfwProfileId"
 	paramsTypeMap["ipfix_dfw_profile_id"] = bindings.NewStringType()
@@ -108,14 +110,18 @@ func ipfixDfwProfilesGetRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"",
 		"GET",
 		"/policy/api/v1/infra/ipfix-dfw-profiles/{ipfixDfwProfileId}",
+		"",
 		resultHeaders,
 		200,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func ipfixDfwProfilesListInputType() bindings.StructType {
@@ -148,6 +154,8 @@ func ipfixDfwProfilesListRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
 	fields["include_mark_for_delete_objects"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fields["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
@@ -181,14 +189,18 @@ func ipfixDfwProfilesListRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"",
 		"GET",
 		"/policy/api/v1/infra/ipfix-dfw-profiles",
+		"",
 		resultHeaders,
 		200,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func ipfixDfwProfilesPatchInputType() bindings.StructType {
@@ -196,10 +208,8 @@ func ipfixDfwProfilesPatchInputType() bindings.StructType {
 	fieldNameMap := make(map[string]string)
 	fields["ipfix_dfw_profile_id"] = bindings.NewStringType()
 	fields["i_PFIXDFW_profile"] = bindings.NewReferenceType(model.IPFIXDFWProfileBindingType)
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["ipfix_dfw_profile_id"] = "IpfixDfwProfileId"
 	fieldNameMap["i_PFIXDFW_profile"] = "IPFIXDFWProfile"
-	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -215,18 +225,16 @@ func ipfixDfwProfilesPatchRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["ipfix_dfw_profile_id"] = bindings.NewStringType()
 	fields["i_PFIXDFW_profile"] = bindings.NewReferenceType(model.IPFIXDFWProfileBindingType)
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["ipfix_dfw_profile_id"] = "IpfixDfwProfileId"
 	fieldNameMap["i_PFIXDFW_profile"] = "IPFIXDFWProfile"
-	fieldNameMap["override"] = "Override"
-	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["ipfix_dfw_profile_id"] = bindings.NewStringType()
 	paramsTypeMap["i_PFIXDFW_profile"] = bindings.NewReferenceType(model.IPFIXDFWProfileBindingType)
 	paramsTypeMap["ipfixDfwProfileId"] = bindings.NewStringType()
 	pathParams["ipfix_dfw_profile_id"] = "ipfixDfwProfileId"
-	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -236,14 +244,18 @@ func ipfixDfwProfilesPatchRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"i_PFIXDFW_profile",
 		"PATCH",
 		"/policy/api/v1/infra/ipfix-dfw-profiles/{ipfixDfwProfileId}",
+		"",
 		resultHeaders,
 		204,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func ipfixDfwProfilesUpdateInputType() bindings.StructType {
@@ -251,10 +263,8 @@ func ipfixDfwProfilesUpdateInputType() bindings.StructType {
 	fieldNameMap := make(map[string]string)
 	fields["ipfix_dfw_profile_id"] = bindings.NewStringType()
 	fields["i_PFIXDFW_profile"] = bindings.NewReferenceType(model.IPFIXDFWProfileBindingType)
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["ipfix_dfw_profile_id"] = "IpfixDfwProfileId"
 	fieldNameMap["i_PFIXDFW_profile"] = "IPFIXDFWProfile"
-	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -270,18 +280,16 @@ func ipfixDfwProfilesUpdateRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["ipfix_dfw_profile_id"] = bindings.NewStringType()
 	fields["i_PFIXDFW_profile"] = bindings.NewReferenceType(model.IPFIXDFWProfileBindingType)
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["ipfix_dfw_profile_id"] = "IpfixDfwProfileId"
 	fieldNameMap["i_PFIXDFW_profile"] = "IPFIXDFWProfile"
-	fieldNameMap["override"] = "Override"
-	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["ipfix_dfw_profile_id"] = bindings.NewStringType()
 	paramsTypeMap["i_PFIXDFW_profile"] = bindings.NewReferenceType(model.IPFIXDFWProfileBindingType)
 	paramsTypeMap["ipfixDfwProfileId"] = bindings.NewStringType()
 	pathParams["ipfix_dfw_profile_id"] = "ipfixDfwProfileId"
-	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -291,14 +299,18 @@ func ipfixDfwProfilesUpdateRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"i_PFIXDFW_profile",
 		"PUT",
 		"/policy/api/v1/infra/ipfix-dfw-profiles/{ipfixDfwProfileId}",
+		"",
 		resultHeaders,
 		200,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 

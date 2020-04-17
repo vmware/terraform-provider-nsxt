@@ -270,9 +270,11 @@ func getPolicyDhcpOptions121(opts []interface{}) model.DhcpOption121 {
 	var routes []model.ClasslessStaticRoute
 	for _, opt121 := range opts {
 		data := opt121.(map[string]interface{})
+		network := data["network"].(string)
+		nextHop := data["next_hop"].(string)
 		elem := model.ClasslessStaticRoute{
-			Network: data["network"].(string),
-			NextHop: data["next_hop"].(string),
+			Network: &network,
+			NextHop: &nextHop,
 		}
 		routes = append(routes, elem)
 	}
@@ -299,8 +301,9 @@ func getPolicyDhcpGenericOptions(opts []interface{}) []model.GenericDhcpOption {
 	var options []model.GenericDhcpOption
 	for _, opt := range opts {
 		data := opt.(map[string]interface{})
+		code := int64(data["code"].(int))
 		elem := model.GenericDhcpOption{
-			Code:   int64(data["code"].(int)),
+			Code:   &code,
 			Values: interface2StringList(data["values"].([]interface{})),
 		}
 		options = append(options, elem)

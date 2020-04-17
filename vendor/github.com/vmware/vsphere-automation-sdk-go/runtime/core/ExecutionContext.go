@@ -1,4 +1,4 @@
-/* Copyright © 2019 VMware, Inc. All Rights Reserved.
+/* Copyright © 2019-2020 VMware, Inc. All Rights Reserved.
    SPDX-License-Identifier: BSD-2-Clause */
 
 package core
@@ -6,11 +6,13 @@ package core
 import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/l10n"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/lib"
+	"golang.org/x/net/context"
 )
 
 type ExecutionContext struct {
 	securityContext    SecurityContext
 	applicationContext *ApplicationContext
+	ctx                context.Context
 }
 
 func NewExecutionContext(applicationContext *ApplicationContext, securityContext SecurityContext) *ExecutionContext {
@@ -19,6 +21,16 @@ func NewExecutionContext(applicationContext *ApplicationContext, securityContext
 	}
 
 	return &ExecutionContext{applicationContext: applicationContext, securityContext: securityContext}
+}
+
+// Set request context
+func (e *ExecutionContext) WithContext(ctx context.Context) {
+	e.ctx = ctx
+}
+
+// Get request context
+func (e *ExecutionContext) Context() context.Context {
+	return e.ctx
 }
 
 func (e *ExecutionContext) SecurityContext() SecurityContext {
@@ -41,10 +53,10 @@ func (ctx *ExecutionContext) GetMessageFormatter(m l10n.LocalizableMessageFactor
 	}
 	applicationCtx := ctx.ApplicationContext()
 
-	formatter,_ := m.GetFormatterForLocalizationParams(
+	formatter, _ := m.GetFormatterForLocalizationParams(
 		applicationCtx.GetProperty(lib.HTTP_ACCEPT_LANGUAGE),
 		applicationCtx.GetProperty(lib.VAPI_L10N_FORMAT_LOCALE),
 		applicationCtx.GetProperty(lib.VAPI_L10N_TIMEZONE))
 
-	return formatter,nil
+	return formatter, nil
 }

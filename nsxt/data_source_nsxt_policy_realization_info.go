@@ -65,28 +65,32 @@ func dataSourceNsxtPolicyRealizationInfoRead(d *schema.ResourceData, m interface
 		Target:  targetStates,
 		Refresh: func() (interface{}, string, error) {
 
-			realizationResult, realizationError := client.List(path)
+			realizationResult, realizationError := client.List(path, &policySite)
+			state := "UNKNOWN"
 			if realizationError == nil {
 				// Find the right entry
 				for _, objInList := range realizationResult.Results {
+					if objInList.State != nil {
+						state = *objInList.State
+					}
 					if entityType == "" {
 						// Take the first one
-						d.Set("state", objInList.State)
+						d.Set("state", state)
 						d.Set("entity_type", *objInList.EntityType)
 						if objInList.RealizationSpecificIdentifier == nil {
 							d.Set("realized_id", "")
 						} else {
 							d.Set("realized_id", *objInList.RealizationSpecificIdentifier)
 						}
-						return realizationResult, objInList.State, nil
-					} else if *objInList.EntityType == entityType {
-						d.Set("state", objInList.State)
+						return realizationResult, state, nil
+					} else if (objInList.EntityType != nil) && (*objInList.EntityType == entityType) {
+						d.Set("state", state)
 						if objInList.RealizationSpecificIdentifier == nil {
 							d.Set("realized_id", "")
 						} else {
 							d.Set("realized_id", *objInList.RealizationSpecificIdentifier)
 						}
-						return realizationResult, objInList.State, nil
+						return realizationResult, state, nil
 					}
 				}
 				// Realization info not found yet

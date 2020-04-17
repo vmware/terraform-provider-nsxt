@@ -167,7 +167,7 @@ func resourceNsxtPolicyTier0GatewayInterfaceCreate(d *schema.ResourceData, m int
 
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating Tier0 interface with ID %s", id)
-	err = client.Patch(tier0ID, localeServiceID, id, obj, nil)
+	err = client.Patch(tier0ID, localeServiceID, id, obj)
 	if err != nil {
 		return handleCreateError("Tier0 Interface", id, err)
 	}
@@ -225,7 +225,7 @@ func resourceNsxtPolicyTier0GatewayInterfaceRead(d *schema.ResourceData, m inter
 	if obj.Subnets != nil {
 		var subnetList []string
 		for _, subnet := range obj.Subnets {
-			cidr := fmt.Sprintf("%s/%d", subnet.IpAddresses[0], subnet.PrefixLen)
+			cidr := fmt.Sprintf("%s/%d", subnet.IpAddresses[0], *subnet.PrefixLen)
 			subnetList = append(subnetList, cidr)
 		}
 		d.Set("subnets", subnetList)
@@ -290,7 +290,7 @@ func resourceNsxtPolicyTier0GatewayInterfaceUpdate(d *schema.ResourceData, m int
 
 	gatewayInterfaceVersionDepenantSet(d, &obj)
 
-	_, err := client.Update(tier0ID, localeServiceID, id, obj, nil)
+	_, err := client.Update(tier0ID, localeServiceID, id, obj)
 	if err != nil {
 		return handleUpdateError("Tier0 Interface", id, err)
 	}
@@ -309,7 +309,7 @@ func resourceNsxtPolicyTier0GatewayInterfaceDelete(d *schema.ResourceData, m int
 		return fmt.Errorf("Error obtaining Tier0 Interface id")
 	}
 
-	err := client.Delete(tier0ID, defaultPolicyLocaleServiceID, id, nil)
+	err := client.Delete(tier0ID, defaultPolicyLocaleServiceID, id)
 	if err != nil {
 		return handleDeleteError("Tier0 Interface", id, err)
 	}
