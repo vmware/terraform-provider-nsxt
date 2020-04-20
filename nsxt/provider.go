@@ -90,7 +90,7 @@ func Provider() terraform.ResourceProvider {
 				Type:        schema.TypeInt,
 				Optional:    true,
 				Description: "Maximum number of HTTP client retries",
-				DefaultFunc: schema.EnvDefaultFunc("NSXT_MAX_RETRIES", 50),
+				DefaultFunc: schema.EnvDefaultFunc("NSXT_MAX_RETRIES", 8),
 			},
 			"retry_min_delay": {
 				Type:        schema.TypeInt,
@@ -268,18 +268,6 @@ func Provider() terraform.ResourceProvider {
 	}
 }
 
-func providerConnectivityCheck(nsxClient *nsxt.APIClient) error {
-	// Connectivity check - get a random object to check connectivity and credentials
-	// TODO(asarfaty): Use a list command which returns the full body, when the go vendor has one.
-	_, httpResponse, err := nsxClient.ServicesApi.ReadLoadBalancerPool(nsxClient.Context, "Dummy")
-	if err != nil {
-		if httpResponse == nil || (httpResponse.StatusCode == 401 || httpResponse.StatusCode == 403) {
-			return fmt.Errorf("NSXT provider connectivity check failed: %s", err)
-		}
-	}
-	return nil
-}
-
 func configureNsxtClient(d *schema.ResourceData) (*nsxt.APIClient, error) {
 	clientAuthCertFile := d.Get("client_auth_cert_file").(string)
 	clientAuthKeyFile := d.Get("client_auth_key_file").(string)
@@ -365,15 +353,10 @@ func configureNsxtClient(d *schema.ResourceData) (*nsxt.APIClient, error) {
 	if err != nil {
 		return nil, err
 	}
-	// Check provider connectivity
-	err = providerConnectivityCheck(nsxClient)
-	if err != nil {
-		return nil, err
-	}
 
-	initNSXVersion(nsxClient)
+	err = initNSXVersion(nsxClient)
 
-	return nsxClient, nil
+	return nsxClient, err
 }
 
 type jwtToken struct {
