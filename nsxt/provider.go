@@ -507,7 +507,9 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 
 	httpClient := http.Client{Transport: tr}
 	clients.PolicyHTTPClient = &httpClient
-	clients.PolicySecurityContext = securityCtx
+	if securityContextNeeded {
+		clients.PolicySecurityContext = securityCtx
+	}
 	clients.Host = host
 
 	return nil
@@ -534,6 +536,8 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 func getPolicyConnector(clients interface{}) *client.RestConnector {
 	c := clients.(nsxtClients)
 	connector := client.NewRestConnector(c.Host, *c.PolicyHTTPClient)
-	connector.SetSecurityContext(c.PolicySecurityContext)
+	if c.PolicySecurityContext != nil {
+		connector.SetSecurityContext(c.PolicySecurityContext)
+	}
 	return connector
 }
