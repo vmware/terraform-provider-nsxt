@@ -98,7 +98,7 @@ func resourceNsxtPolicyNATRule() *schema.Resource {
 			"source_networks": {
 				Type:        schema.TypeList,
 				Description: "The source network(s) for the NAT Rule",
-				Required:    true,
+				Optional:    true,
 				Elem: &schema.Schema{
 					Type:         schema.TypeString,
 					ValidateFunc: validateCidrOrIPOrRange(),
