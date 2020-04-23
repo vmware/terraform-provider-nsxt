@@ -178,9 +178,11 @@ to run.
 
 The following versions of NSX are supported:
 
- * NSX-T 2.2.*
- * NSX-T 2.3.*
+ * NSX-T 3.0
  * NSX-T 2.4.*
+ * NSX-T 2.3.*
+ * NSX-T 2.2.*
+ 
 
 Some specific resources may require later versions of NSX-T.
 
