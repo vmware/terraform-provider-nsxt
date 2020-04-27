@@ -68,7 +68,7 @@ The following arguments are supported:
   * `services` - (Optional) List of services to match.
   * `source_groups` - (Optional) A list of source group paths to use for the policy.
   * `source_excluded` - (Optional) A boolean value indicating negation of source groups.
-  * `tag` - (Optional) A list of scope + tag pairs to associate with this Rule.
+  * `tag` - (Optional) Additional information (string) which will be propagated to the rule syslog.
   * `action` - (Optional) The action for the Rule. Must be one of: `ALLOW`, `DROP` or `REJECT`. Defaults to `ALLOW`.
 
 

@@ -235,7 +235,11 @@ func getSecurityPolicyAndGatewayRulesSchema(scopeRequired bool) *schema.Schema {
 					Optional:    true,
 					Default:     false,
 				},
-				"tag": getTagsSchema(),
+				"tag": {
+					Type:        schema.TypeString,
+					Description: "Tag",
+					Optional:    true,
+				},
 				"action": {
 					Type:         schema.TypeString,
 					Description:  "Action",
@@ -325,6 +329,7 @@ func setPolicyRulesInSchema(d *schema.ResourceData, rules []model.Rule) error {
 		elem["description"] = rule.Description
 		elem["notes"] = rule.Notes
 		elem["logged"] = rule.Logged
+		elem["tag"] = rule.Tag
 		elem["action"] = rule.Action
 		elem["destinations_excluded"] = rule.DestinationsExcluded
 		elem["sources_excluded"] = rule.SourcesExcluded
@@ -355,6 +360,7 @@ func getPolicyRulesFromSchema(d *schema.ResourceData) []model.Rule {
 		description := data["description"].(string)
 		action := data["action"].(string)
 		logged := data["logged"].(bool)
+		tag := data["tag"].(string)
 		disabled := data["disabled"].(bool)
 		sourcesExcluded := data["sources_excluded"].(bool)
 		destinationsExcluded := data["destinations_excluded"].(bool)
@@ -374,6 +380,7 @@ func getPolicyRulesFromSchema(d *schema.ResourceData) []model.Rule {
 			Description:          &description,
 			Action:               &action,
 			Logged:               &logged,
+			Tag:                  &tag,
 			Disabled:             &disabled,
 			SourcesExcluded:      &sourcesExcluded,
 			DestinationsExcluded: &destinationsExcluded,
