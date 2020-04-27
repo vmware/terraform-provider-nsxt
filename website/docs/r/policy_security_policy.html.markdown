@@ -75,7 +75,8 @@ The following arguments are supported:
   * `profiles` - (Optional) Set of profile paths relevant for this rule.
   * `scope` - (Optional) Set of policy object paths where the rule is applied.
   * `services` - (Optional) Set of service paths to match.
-  * `tag` - (Optional) A list of scope + tag pairs to associate with this rule.
+  * `log_label` - (Optional) Additional information (string) which will be propagated to the rule syslog.
+  * `tag` - (Optional) A list of scope + tag pairs to associate with this Rule.
 
 
 ## Attributes Reference
