@@ -284,7 +284,7 @@ func (decoder *JsonRpcDecoder) getJsonRpc20Request(request map[string]interface{
 	}
 }
 
-func (decoder *JsonRpcDecoder) getJsonRpc20Response(response map[string]interface{}) (JsonRpc20Response, *JsonRpc20Error) {
+func (decoder *JsonRpcDecoder) GetJsonRpc20Response(response map[string]interface{}) (JsonRpc20Response, *JsonRpc20Error) {
 	var version string
 	if versionValue, ok := response[lib.JSONRPC]; ok {
 		version = versionValue.(string)
@@ -353,7 +353,7 @@ func (decoder *JsonRpcDecoder) DeSerializeResponse(response interface{}) (JsonRp
 	if err != nil {
 		return JsonRpc20Response{}, NewJsonRpcErrorParseError(err)
 	}
-	return decoder.getJsonRpc20Response(responseObj)
+	return decoder.GetJsonRpc20Response(responseObj)
 }
 func (decoder *JsonRpcDecoder) DeSerializeBinaryValue(val interface{}) (data.DataValue, error) {
 	//binary value is base64 encoded on the wire. decode it first.

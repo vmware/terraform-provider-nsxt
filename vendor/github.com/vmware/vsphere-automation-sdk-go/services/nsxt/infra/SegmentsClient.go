@@ -74,6 +74,17 @@ type SegmentsClient interface {
     // @throws NotFound  Not Found
 	Patch(segmentIdParam string, segmentParam model.Segment) error
 
+    // If segment with the segment-id is not already present, create a new segment. If it already exists, update the segment with specified attributes. Force parameter is required when workload connectivity is indirectly impacted with the current update.
+    //
+    // @param segmentIdParam Segment ID (required)
+    // @param segmentParam (required)
+    // @throws InvalidRequest  Bad Request, Precondition Failed
+    // @throws Unauthorized  Forbidden
+    // @throws ServiceUnavailable  Service Unavailable
+    // @throws InternalServerError  Internal Server Error
+    // @throws NotFound  Not Found
+	Patch0(segmentIdParam string, segmentParam model.Segment) error
+
     // If segment with the segment-id is not already present, create a new segment. If it already exists, replace the segment with this object.
     //
     // @param segmentIdParam Segment ID (required)
@@ -85,4 +96,16 @@ type SegmentsClient interface {
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
 	Update(segmentIdParam string, segmentParam model.Segment) (model.Segment, error)
+
+    // If segment with the segment-id is not already present, create a new segment. If it already exists, replace the segment with this object. Force parameter is required when workload connectivity is indirectly impacted with the current replacement.
+    //
+    // @param segmentIdParam Segment ID (required)
+    // @param segmentParam (required)
+    // @return com.vmware.nsx_policy.model.Segment
+    // @throws InvalidRequest  Bad Request, Precondition Failed
+    // @throws Unauthorized  Forbidden
+    // @throws ServiceUnavailable  Service Unavailable
+    // @throws InternalServerError  Internal Server Error
+    // @throws NotFound  Not Found
+	Update0(segmentIdParam string, segmentParam model.Segment) (model.Segment, error)
 }

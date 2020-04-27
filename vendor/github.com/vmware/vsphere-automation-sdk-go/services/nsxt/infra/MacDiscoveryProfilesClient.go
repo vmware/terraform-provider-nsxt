@@ -19,13 +19,12 @@ type MacDiscoveryProfilesClient interface {
     // API will delete Mac Discovery profile.
     //
     // @param macDiscoveryProfileIdParam Mac Discovery Profile ID (required)
-    // @param overrideParam Locally override the global object (optional, default to false)
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Delete(macDiscoveryProfileIdParam string, overrideParam *bool) error
+	Delete(macDiscoveryProfileIdParam string) error
 
     // API will get Mac Discovery profile.
     //
@@ -58,24 +57,22 @@ type MacDiscoveryProfilesClient interface {
     //
     // @param macDiscoveryProfileIdParam Mac Discovery Profile ID (required)
     // @param macDiscoveryProfileParam (required)
-    // @param overrideParam Locally override the global object (optional, default to false)
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Patch(macDiscoveryProfileIdParam string, macDiscoveryProfileParam model.MacDiscoveryProfile, overrideParam *bool) error
+	Patch(macDiscoveryProfileIdParam string, macDiscoveryProfileParam model.MacDiscoveryProfile) error
 
     // API will update Mac Discovery profile.
     //
     // @param macDiscoveryProfileIdParam Mac Discovery Profile ID (required)
     // @param macDiscoveryProfileParam (required)
-    // @param overrideParam Locally override the global object (optional, default to false)
     // @return com.vmware.nsx_policy.model.MacDiscoveryProfile
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Update(macDiscoveryProfileIdParam string, macDiscoveryProfileParam model.MacDiscoveryProfile, overrideParam *bool) (model.MacDiscoveryProfile, error)
+	Update(macDiscoveryProfileIdParam string, macDiscoveryProfileParam model.MacDiscoveryProfile) (model.MacDiscoveryProfile, error)
 }

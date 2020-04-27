@@ -19,13 +19,12 @@ type IpDiscoveryProfilesClient interface {
     // API will delete IP Discovery profile.
     //
     // @param ipDiscoveryProfileIdParam IP Discovery Profile ID (required)
-    // @param overrideParam Locally override the global object (optional, default to false)
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Delete(ipDiscoveryProfileIdParam string, overrideParam *bool) error
+	Delete(ipDiscoveryProfileIdParam string) error
 
     // API will get IP Discovery profile.
     //
@@ -58,24 +57,22 @@ type IpDiscoveryProfilesClient interface {
     //
     // @param ipDiscoveryProfileIdParam IP Discovery Profile ID (required)
     // @param ipDiscoveryProfileParam (required)
-    // @param overrideParam Locally override the global object (optional, default to false)
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Patch(ipDiscoveryProfileIdParam string, ipDiscoveryProfileParam model.IPDiscoveryProfile, overrideParam *bool) error
+	Patch(ipDiscoveryProfileIdParam string, ipDiscoveryProfileParam model.IPDiscoveryProfile) error
 
     // API will update IP Discovery profile.
     //
     // @param ipDiscoveryProfileIdParam IP Discovery Profile ID (required)
     // @param ipDiscoveryProfileParam (required)
-    // @param overrideParam Locally override the global object (optional, default to false)
     // @return com.vmware.nsx_policy.model.IPDiscoveryProfile
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Update(ipDiscoveryProfileIdParam string, ipDiscoveryProfileParam model.IPDiscoveryProfile, overrideParam *bool) (model.IPDiscoveryProfile, error)
+	Update(ipDiscoveryProfileIdParam string, ipDiscoveryProfileParam model.IPDiscoveryProfile) (model.IPDiscoveryProfile, error)
 }

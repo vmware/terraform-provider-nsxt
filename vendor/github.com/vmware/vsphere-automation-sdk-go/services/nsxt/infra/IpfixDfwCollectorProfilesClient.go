@@ -19,13 +19,12 @@ type IpfixDfwCollectorProfilesClient interface {
     // API deletes IPFIX dfw collector profile. Flow forwarding to collector will be stopped.
     //
     // @param ipfixDfwCollectorProfileIdParam IPFIX dfw collector Profile id (required)
-    // @param overrideParam Locally override the global object (optional, default to false)
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Delete(ipfixDfwCollectorProfileIdParam string, overrideParam *bool) error
+	Delete(ipfixDfwCollectorProfileIdParam string) error
 
     // API will return details of IPFIX dfw collector profile. If profile does not exist, it will return 404.
     //
@@ -58,24 +57,22 @@ type IpfixDfwCollectorProfilesClient interface {
     //
     // @param ipfixDfwCollectorProfileIdParam (required)
     // @param iPFIXDFWCollectorProfileParam (required)
-    // @param overrideParam Locally override the global object (optional, default to false)
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Patch(ipfixDfwCollectorProfileIdParam string, iPFIXDFWCollectorProfileParam model.IPFIXDFWCollectorProfile, overrideParam *bool) error
+	Patch(ipfixDfwCollectorProfileIdParam string, iPFIXDFWCollectorProfileParam model.IPFIXDFWCollectorProfile) error
 
     // Create or Replace IPFIX dfw collector profile. IPFIX data will be sent to IPFIX collector port.
     //
     // @param ipfixDfwCollectorProfileIdParam IPFIX dfw collector profile id (required)
     // @param iPFIXDFWCollectorProfileParam (required)
-    // @param overrideParam Locally override the global object (optional, default to false)
     // @return com.vmware.nsx_policy.model.IPFIXDFWCollectorProfile
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Update(ipfixDfwCollectorProfileIdParam string, iPFIXDFWCollectorProfileParam model.IPFIXDFWCollectorProfile, overrideParam *bool) (model.IPFIXDFWCollectorProfile, error)
+	Update(ipfixDfwCollectorProfileIdParam string, iPFIXDFWCollectorProfileParam model.IPFIXDFWCollectorProfile) (model.IPFIXDFWCollectorProfile, error)
 }

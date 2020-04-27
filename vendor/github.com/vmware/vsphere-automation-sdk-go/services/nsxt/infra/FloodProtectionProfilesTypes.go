@@ -28,9 +28,7 @@ func floodProtectionProfilesDeleteInputType() bindings.StructType {
 	fields := make(map[string]bindings.BindingType)
 	fieldNameMap := make(map[string]string)
 	fields["flood_protection_profile_id"] = bindings.NewStringType()
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["flood_protection_profile_id"] = "FloodProtectionProfileId"
-	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -46,15 +44,13 @@ func floodProtectionProfilesDeleteRestMetadata() protocol.OperationRestMetadata 
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["flood_protection_profile_id"] = bindings.NewStringType()
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["flood_protection_profile_id"] = "FloodProtectionProfileId"
-	fieldNameMap["override"] = "Override"
-	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["flood_protection_profile_id"] = bindings.NewStringType()
 	paramsTypeMap["floodProtectionProfileId"] = bindings.NewStringType()
 	pathParams["flood_protection_profile_id"] = "floodProtectionProfileId"
-	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -64,14 +60,18 @@ func floodProtectionProfilesDeleteRestMetadata() protocol.OperationRestMetadata 
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"",
 		"DELETE",
 		"/policy/api/v1/infra/flood-protection-profiles/{floodProtectionProfileId}",
+		"",
 		resultHeaders,
 		204,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func floodProtectionProfilesGetInputType() bindings.StructType {
@@ -94,6 +94,8 @@ func floodProtectionProfilesGetRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["flood_protection_profile_id"] = bindings.NewStringType()
 	fieldNameMap["flood_protection_profile_id"] = "FloodProtectionProfileId"
 	paramsTypeMap["flood_protection_profile_id"] = bindings.NewStringType()
@@ -108,14 +110,18 @@ func floodProtectionProfilesGetRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"",
 		"GET",
 		"/policy/api/v1/infra/flood-protection-profiles/{floodProtectionProfileId}",
+		"",
 		resultHeaders,
 		200,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func floodProtectionProfilesListInputType() bindings.StructType {
@@ -148,6 +154,8 @@ func floodProtectionProfilesListRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
 	fields["include_mark_for_delete_objects"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fields["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
@@ -181,14 +189,18 @@ func floodProtectionProfilesListRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"",
 		"GET",
 		"/policy/api/v1/infra/flood-protection-profiles",
+		"",
 		resultHeaders,
 		200,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func floodProtectionProfilesPatchInputType() bindings.StructType {
@@ -196,10 +208,8 @@ func floodProtectionProfilesPatchInputType() bindings.StructType {
 	fieldNameMap := make(map[string]string)
 	fields["flood_protection_profile_id"] = bindings.NewStringType()
 	fields["flood_protection_profile"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.FloodProtectionProfileBindingType),}, bindings.REST)
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["flood_protection_profile_id"] = "FloodProtectionProfileId"
 	fieldNameMap["flood_protection_profile"] = "FloodProtectionProfile"
-	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -215,18 +225,16 @@ func floodProtectionProfilesPatchRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["flood_protection_profile_id"] = bindings.NewStringType()
 	fields["flood_protection_profile"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.FloodProtectionProfileBindingType),}, bindings.REST)
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["flood_protection_profile_id"] = "FloodProtectionProfileId"
 	fieldNameMap["flood_protection_profile"] = "FloodProtectionProfile"
-	fieldNameMap["override"] = "Override"
-	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["flood_protection_profile_id"] = bindings.NewStringType()
 	paramsTypeMap["flood_protection_profile"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.FloodProtectionProfileBindingType),}, bindings.REST)
 	paramsTypeMap["floodProtectionProfileId"] = bindings.NewStringType()
 	pathParams["flood_protection_profile_id"] = "floodProtectionProfileId"
-	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -236,14 +244,18 @@ func floodProtectionProfilesPatchRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"flood_protection_profile",
 		"PATCH",
 		"/policy/api/v1/infra/flood-protection-profiles/{floodProtectionProfileId}",
+		"",
 		resultHeaders,
 		204,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func floodProtectionProfilesUpdateInputType() bindings.StructType {
@@ -251,10 +263,8 @@ func floodProtectionProfilesUpdateInputType() bindings.StructType {
 	fieldNameMap := make(map[string]string)
 	fields["flood_protection_profile_id"] = bindings.NewStringType()
 	fields["flood_protection_profile"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.FloodProtectionProfileBindingType),}, bindings.REST)
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["flood_protection_profile_id"] = "FloodProtectionProfileId"
 	fieldNameMap["flood_protection_profile"] = "FloodProtectionProfile"
-	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -270,18 +280,16 @@ func floodProtectionProfilesUpdateRestMetadata() protocol.OperationRestMetadata 
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["flood_protection_profile_id"] = bindings.NewStringType()
 	fields["flood_protection_profile"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.FloodProtectionProfileBindingType),}, bindings.REST)
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["flood_protection_profile_id"] = "FloodProtectionProfileId"
 	fieldNameMap["flood_protection_profile"] = "FloodProtectionProfile"
-	fieldNameMap["override"] = "Override"
-	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["flood_protection_profile_id"] = bindings.NewStringType()
 	paramsTypeMap["flood_protection_profile"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.FloodProtectionProfileBindingType),}, bindings.REST)
 	paramsTypeMap["floodProtectionProfileId"] = bindings.NewStringType()
 	pathParams["flood_protection_profile_id"] = "floodProtectionProfileId"
-	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -291,14 +299,18 @@ func floodProtectionProfilesUpdateRestMetadata() protocol.OperationRestMetadata 
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"flood_protection_profile",
 		"PUT",
 		"/policy/api/v1/infra/flood-protection-profiles/{floodProtectionProfileId}",
+		"",
 		resultHeaders,
 		200,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 

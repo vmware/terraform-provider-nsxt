@@ -6,10 +6,6 @@ package client
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
-	"net/http"
-	"strings"
-
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/common"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/core"
@@ -18,6 +14,11 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/lib"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/log"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/server/rpc/msg"
+	"io"
+	"io/ioutil"
+	"net/http"
+	"net/http/httputil"
+	"strings"
 )
 
 type JsonRpcConnector struct {
@@ -125,11 +126,91 @@ func (j *JsonRpcConnector) Invoke(serviceId string, operationId string, inputVal
 		errVal := bindings.CreateErrorValueFromMessages(bindings.INVALID_REQUEST_ERROR_DEF, []error{err})
 		return core.NewMethodResult(nil, errVal)
 	}
+
 	req.Header.Set(lib.HTTP_CONTENT_TYPE_HEADER, lib.JSON_CONTENT_TYPE)
 	req.Header.Set(lib.VAPI_SERVICE_HEADER, serviceId)
 	req.Header.Set(lib.VAPI_OPERATION_HEADER, operationId)
 	req.Header.Set(lib.HTTP_USER_AGENT_HEADER, GetRuntimeUserAgentHeader())
+	if j.connectionMetadata["isStreamingResponse"] == true {
+		req.Header.Set(lib.HTTP_ACCEPT, lib.VAPI_STREAMING_HEADER_VALUE)
+	}
+	if ctx.Context() != nil {
+		req = req.WithContext(ctx.Context())
+	}
 	CopyContextsToHeaders(ctx, req)
+
+	if j.connectionMetadata["isStreamingResponse"] == true {
+		methodResult := core.NewMethodResult(nil, nil)
+		methodResultChan := make(chan core.MethodResult)
+		methodResult.SetResponseStream(methodResultChan)
+		go func() {
+			response, requestErr := j.httpClient.Do(req)
+			if requestErr != nil {
+				if strings.HasSuffix(requestErr.Error(), "connection refused") {
+					err := l10n.NewRuntimeErrorNoParam("vapi.server.unavailable")
+					errVal := bindings.CreateErrorValueFromMessages(bindings.SERVICE_UNAVAILABLE_ERROR_DEF, []error{err})
+					methodResultChan <- core.NewMethodResult(nil, errVal)
+					return
+				} else if strings.HasSuffix(requestErr.Error(), "i/o timeout") {
+					err := l10n.NewRuntimeErrorNoParam("vapi.server.timedout")
+					errVal := bindings.CreateErrorValueFromMessages(bindings.TIMEDOUT_ERROR_DEF, []error{err})
+					methodResultChan <- core.NewMethodResult(nil, errVal)
+					return
+				}
+			}
+			defer response.Body.Close()
+			dec := json.NewDecoder(httputil.NewChunkedReader(response.Body))
+			dec.UseNumber()
+			jsonRpcDecoder := msg.NewJsonRpcDecoder()
+			for {
+				var m map[string]interface{}
+				if err := dec.Decode(&m); err == io.EOF {
+					break
+				} else if err != nil {
+					// err is not nil when ctx is cancelled.
+					log.Debug(err)
+					break
+				}
+				jsonRpcResponse, responseDeserializationErr := jsonRpcDecoder.GetJsonRpc20Response(m)
+				if responseDeserializationErr != nil {
+					log.Error(responseDeserializationErr)
+					err := l10n.NewRuntimeError("vapi.server.response.error", map[string]string{"errMsg": responseDeserializationErr.Message()})
+					errVal := bindings.CreateErrorValueFromMessages(bindings.INTERNAL_SERVER_ERROR_DEF, []error{err})
+					methodResultChan <- core.NewMethodResult(nil, errVal)
+					break
+				}
+				if jsonRpcResponseMap, ok := jsonRpcResponse.Result().(map[string]interface{}); ok {
+					// check for terminal frame
+					if len(jsonRpcResponseMap) == 0 {
+						log.Debug("Recieved terminal frame")
+						break
+					}
+					methodResult, err := jsonRpcDecoder.DeSerializeMethodResult(jsonRpcResponseMap)
+					if err != nil {
+						log.Error(err)
+						runtimeError := l10n.NewRuntimeError("vapi.server.response.error", map[string]string{"errMsg": err.Error()})
+						errVal := bindings.CreateErrorValueFromMessages(bindings.INTERNAL_SERVER_ERROR_DEF, []error{runtimeError})
+						methodResultChan <- core.NewMethodResult(nil, errVal)
+						break
+					}
+					methodResultChan <- methodResult
+					if methodResult.Error() != nil {
+						log.Debug("Recieved error frame")
+						break
+					}
+				} else {
+					runtimeError := l10n.NewRuntimeError("vapi.server.response.error", map[string]string{"errMsg": ""})
+					errVal := bindings.CreateErrorValueFromMessages(bindings.INTERNAL_SERVER_ERROR_DEF, []error{runtimeError})
+					methodResultChan <- core.NewMethodResult(nil, errVal)
+				}
+
+			}
+			close(methodResultChan)
+
+		}()
+		return methodResult
+	}
+	// non streaming responses.
 	response, requestErr := j.httpClient.Do(req)
 	if requestErr != nil {
 		if strings.HasSuffix(requestErr.Error(), "connection refused") {

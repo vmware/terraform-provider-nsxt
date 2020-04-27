@@ -30,11 +30,9 @@ func interfacesDeleteInputType() bindings.StructType {
 	fields["tier1_id"] = bindings.NewStringType()
 	fields["locale_services_id"] = bindings.NewStringType()
 	fields["interface_id"] = bindings.NewStringType()
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["tier1_id"] = "Tier1Id"
 	fieldNameMap["locale_services_id"] = "LocaleServicesId"
 	fieldNameMap["interface_id"] = "InterfaceId"
-	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -50,17 +48,16 @@ func interfacesDeleteRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["tier1_id"] = bindings.NewStringType()
 	fields["locale_services_id"] = bindings.NewStringType()
 	fields["interface_id"] = bindings.NewStringType()
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["tier1_id"] = "Tier1Id"
 	fieldNameMap["locale_services_id"] = "LocaleServicesId"
 	fieldNameMap["interface_id"] = "InterfaceId"
-	fieldNameMap["override"] = "Override"
 	paramsTypeMap["interface_id"] = bindings.NewStringType()
 	paramsTypeMap["tier1_id"] = bindings.NewStringType()
-	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["locale_services_id"] = bindings.NewStringType()
 	paramsTypeMap["tier1Id"] = bindings.NewStringType()
 	paramsTypeMap["localeServicesId"] = bindings.NewStringType()
@@ -68,7 +65,6 @@ func interfacesDeleteRestMetadata() protocol.OperationRestMetadata {
 	pathParams["locale_services_id"] = "localeServicesId"
 	pathParams["tier1_id"] = "tier1Id"
 	pathParams["interface_id"] = "interfaceId"
-	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -78,14 +74,18 @@ func interfacesDeleteRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"",
 		"DELETE",
 		"/policy/api/v1/infra/tier-1s/{tier1Id}/locale-services/{localeServicesId}/interfaces/{interfaceId}",
+		"",
 		resultHeaders,
 		204,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func interfacesGetInputType() bindings.StructType {
@@ -112,6 +112,8 @@ func interfacesGetRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["tier1_id"] = bindings.NewStringType()
 	fields["locale_services_id"] = bindings.NewStringType()
 	fields["interface_id"] = bindings.NewStringType()
@@ -136,14 +138,18 @@ func interfacesGetRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"",
 		"GET",
 		"/policy/api/v1/infra/tier-1s/{tier1Id}/locale-services/{localeServicesId}/interfaces/{interfaceId}",
+		"",
 		resultHeaders,
 		200,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func interfacesListInputType() bindings.StructType {
@@ -180,6 +186,8 @@ func interfacesListRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["tier1_id"] = bindings.NewStringType()
 	fields["locale_services_id"] = bindings.NewStringType()
 	fields["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
@@ -223,14 +231,18 @@ func interfacesListRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"",
 		"GET",
 		"/policy/api/v1/infra/tier-1s/{tier1Id}/locale-services/{localeServicesId}/interfaces",
+		"",
 		resultHeaders,
 		200,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func interfacesPatchInputType() bindings.StructType {
@@ -240,12 +252,10 @@ func interfacesPatchInputType() bindings.StructType {
 	fields["locale_services_id"] = bindings.NewStringType()
 	fields["interface_id"] = bindings.NewStringType()
 	fields["tier1_interface"] = bindings.NewReferenceType(model.Tier1InterfaceBindingType)
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["tier1_id"] = "Tier1Id"
 	fieldNameMap["locale_services_id"] = "LocaleServicesId"
 	fieldNameMap["interface_id"] = "InterfaceId"
 	fieldNameMap["tier1_interface"] = "Tier1Interface"
-	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -261,20 +271,19 @@ func interfacesPatchRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["tier1_id"] = bindings.NewStringType()
 	fields["locale_services_id"] = bindings.NewStringType()
 	fields["interface_id"] = bindings.NewStringType()
 	fields["tier1_interface"] = bindings.NewReferenceType(model.Tier1InterfaceBindingType)
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["tier1_id"] = "Tier1Id"
 	fieldNameMap["locale_services_id"] = "LocaleServicesId"
 	fieldNameMap["interface_id"] = "InterfaceId"
 	fieldNameMap["tier1_interface"] = "Tier1Interface"
-	fieldNameMap["override"] = "Override"
 	paramsTypeMap["interface_id"] = bindings.NewStringType()
 	paramsTypeMap["tier1_interface"] = bindings.NewReferenceType(model.Tier1InterfaceBindingType)
 	paramsTypeMap["tier1_id"] = bindings.NewStringType()
-	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["locale_services_id"] = bindings.NewStringType()
 	paramsTypeMap["tier1Id"] = bindings.NewStringType()
 	paramsTypeMap["localeServicesId"] = bindings.NewStringType()
@@ -282,7 +291,6 @@ func interfacesPatchRestMetadata() protocol.OperationRestMetadata {
 	pathParams["locale_services_id"] = "localeServicesId"
 	pathParams["tier1_id"] = "tier1Id"
 	pathParams["interface_id"] = "interfaceId"
-	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -292,14 +300,18 @@ func interfacesPatchRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"tier1_interface",
 		"PATCH",
 		"/policy/api/v1/infra/tier-1s/{tier1Id}/locale-services/{localeServicesId}/interfaces/{interfaceId}",
+		"",
 		resultHeaders,
 		204,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func interfacesUpdateInputType() bindings.StructType {
@@ -309,12 +321,10 @@ func interfacesUpdateInputType() bindings.StructType {
 	fields["locale_services_id"] = bindings.NewStringType()
 	fields["interface_id"] = bindings.NewStringType()
 	fields["tier1_interface"] = bindings.NewReferenceType(model.Tier1InterfaceBindingType)
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["tier1_id"] = "Tier1Id"
 	fieldNameMap["locale_services_id"] = "LocaleServicesId"
 	fieldNameMap["interface_id"] = "InterfaceId"
 	fieldNameMap["tier1_interface"] = "Tier1Interface"
-	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -330,20 +340,19 @@ func interfacesUpdateRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["tier1_id"] = bindings.NewStringType()
 	fields["locale_services_id"] = bindings.NewStringType()
 	fields["interface_id"] = bindings.NewStringType()
 	fields["tier1_interface"] = bindings.NewReferenceType(model.Tier1InterfaceBindingType)
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["tier1_id"] = "Tier1Id"
 	fieldNameMap["locale_services_id"] = "LocaleServicesId"
 	fieldNameMap["interface_id"] = "InterfaceId"
 	fieldNameMap["tier1_interface"] = "Tier1Interface"
-	fieldNameMap["override"] = "Override"
 	paramsTypeMap["interface_id"] = bindings.NewStringType()
 	paramsTypeMap["tier1_interface"] = bindings.NewReferenceType(model.Tier1InterfaceBindingType)
 	paramsTypeMap["tier1_id"] = bindings.NewStringType()
-	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["locale_services_id"] = bindings.NewStringType()
 	paramsTypeMap["tier1Id"] = bindings.NewStringType()
 	paramsTypeMap["localeServicesId"] = bindings.NewStringType()
@@ -351,7 +360,6 @@ func interfacesUpdateRestMetadata() protocol.OperationRestMetadata {
 	pathParams["locale_services_id"] = "localeServicesId"
 	pathParams["tier1_id"] = "tier1Id"
 	pathParams["interface_id"] = "interfaceId"
-	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -361,14 +369,18 @@ func interfacesUpdateRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"tier1_interface",
 		"PUT",
 		"/policy/api/v1/infra/tier-1s/{tier1Id}/locale-services/{localeServicesId}/interfaces/{interfaceId}",
+		"",
 		resultHeaders,
 		200,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 

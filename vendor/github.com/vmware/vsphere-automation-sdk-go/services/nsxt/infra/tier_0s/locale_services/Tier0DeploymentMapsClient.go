@@ -16,7 +16,7 @@ import (
 
 type Tier0DeploymentMapsClient interface {
 
-    // Delete Tier-0 Deployment Map This API has been deprecated. Use new API GET /infra/tier-0s/tier-0-id/locale-services/locale-services-id/tier-0-deployment-maps
+    // Delete Tier-0 Deployment Map
     //
     // @param tier0IdParam (required)
     // @param localeServiceIdParam (required)
@@ -28,7 +28,7 @@ type Tier0DeploymentMapsClient interface {
     // @throws NotFound  Not Found
 	Delete(tier0IdParam string, localeServiceIdParam string, tier0DeploymentMapIdParam string) error
 
-    // Read a Tier-0 Deployment Map This API has been deprecated. Use new API GET /infra/tier-0s/tier-0-1/locale-services/locale-services-1/tier-0-deployment-maps/tier-0-deployment-map-1
+    // Read a Tier-0 Deployment Map
     //
     // @param tier0IdParam (required)
     // @param localeServiceIdParam (required)
@@ -41,7 +41,7 @@ type Tier0DeploymentMapsClient interface {
     // @throws NotFound  Not Found
 	Get(tier0IdParam string, localeServiceIdParam string, tier0DeploymentMapIdParam string) (model.Tier0DeploymentMap, error)
 
-    // Paginated list of all Tier-0 Deployment Entries. This API has been deprecated. Use new API GET /infra/tier-0s/tier-0-id/locale-services/locale-services-id/tier-0-deployment-maps
+    // Paginated list of all Tier-0 Deployment Entries.
     //
     // @param tier0IdParam (required)
     // @param localeServiceIdParam (required)
@@ -59,7 +59,7 @@ type Tier0DeploymentMapsClient interface {
     // @throws NotFound  Not Found
 	List(tier0IdParam string, localeServiceIdParam string, cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.Tier0DeploymentMapListResult, error)
 
-    //
+    // If the passed Tier-0 Deployment Map does not already exist, create a new Tier-0 Deployment Map. If it already exists, patch it.
     //
     // @param tier0IdParam (required)
     // @param localeServiceIdParam (required)
@@ -73,7 +73,7 @@ type Tier0DeploymentMapsClient interface {
     // @throws NotFound  Not Found
 	Patch(tier0IdParam string, localeServiceIdParam string, tier0DeploymentMapIdParam string, tier0DeploymentMapParam model.Tier0DeploymentMap) (model.Tier0DeploymentMap, error)
 
-    // If the passed Tier-0 Deployment Map does not already exist, create a new Tier-0 Deployment Map. If it already exists, replace it. This API has been deprecated. Use new API PUT /infra/tier-0s/tier-0-id/locale-services/locale-services-id/tier-0-deployment-maps/tier-0-deployment-map-id
+    // If the passed Tier-0 Deployment Map does not already exist, create a new Tier-0 Deployment Map. If it already exists, replace it.
     //
     // @param tier0IdParam (required)
     // @param localeServiceIdParam (required)

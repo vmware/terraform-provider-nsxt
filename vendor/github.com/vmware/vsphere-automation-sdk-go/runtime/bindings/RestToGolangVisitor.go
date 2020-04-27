@@ -3,18 +3,18 @@
 
 package bindings
 
-
 import (
 	"encoding/base64"
 	"fmt"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/l10n"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/lib"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/log"
 	"net/url"
 	"reflect"
 	"strconv"
 	"time"
+
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/l10n"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/lib"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/log"
 )
 
 // Visitor to convert from RestNative DataValue to Golang native value
@@ -385,6 +385,13 @@ func (v *RestToGolangVisitor) setIntegerType(value reflect.Value) []error {
 		x := integerValue.Value()
 		value.Elem().Set(reflect.ValueOf(x))
 		return nil
+	} else if strValue, ok := v.inValue.(*data.StringValue); ok {
+		// If string value passed check if it can be converted to integer
+		i, err := strconv.ParseInt(strValue.Value(), 10, 64)
+		if err == nil {
+			value.Elem().Set(reflect.ValueOf(i))
+			return nil
+		}
 	}
 	return v.unexpectedValueError("IntegerValue")
 }
@@ -482,11 +489,18 @@ func (v *RestToGolangVisitor) setDateTimeType(value reflect.Value) []error {
 	val := value.Elem()
 	if stringValue, ok := v.inValue.(*data.StringValue); ok {
 		x := stringValue.Value()
-		t, err := time.Parse(time.RFC3339, x)
+		datetime_layout := RFC3339Nano_DATETIME_LAYOUT
+		datetime, err := time.Parse(datetime_layout, x)
 		if err != nil {
 			return []error{l10n.NewRuntimeError("vapi.bindings.typeconverter.datetime.invalid",
-				map[string]string{"dateTime": x, "vapiFormat": "RFC3339", "errorMessage": err.Error()})}
+				map[string]string{"dateTime": x, "vapiFormat": datetime_layout, "errorMessage": err.Error()})}
 		}
+		restDatetimeStr := datetime.UTC().Format(VAPI_DATETIME_LAYOUT)
+
+		// In above line, we are converting Format of time which is in RFC3339Nano to VAPI layout but it gives back a string.
+		// so we need to parse it from resulted string restDatetimeStr, Now we are already aware that restDatetimeStr is in
+		// format compliant with VAPI_DATEIME_LAYOUT hence error handling is not required.
+		t, _ := time.Parse(VAPI_DATETIME_LAYOUT, restDatetimeStr)
 		val.Set(reflect.ValueOf(t))
 		return nil
 	}
@@ -577,10 +591,13 @@ func (v *RestToGolangVisitor) setErrorType(typ ErrorType, optional bool, outputP
 	}
 	output := outputPtr.Elem()
 	var errorValue *data.ErrorValue = nil
-	if errorDataValue, ok := v.inValue.(*data.ErrorValue); !ok {
-		return v.unexpectedValueError("ErrorValue")
-	} else {
+
+	if errorDataValue, ok := v.inValue.(*data.ErrorValue); ok {
 		errorValue = errorDataValue
+	} else if structValue, ok := v.inValue.(*data.StructValue); ok {
+		errorValue = data.NewErrorValue(structValue.Name(), structValue.Fields())
+	} else {
+		return v.unexpectedValueError("ErrorValue")
 	}
 	for _, fieldName := range typ.FieldNames() {
 		var field = output.FieldByName(typ.canonicalFieldMap[fieldName])

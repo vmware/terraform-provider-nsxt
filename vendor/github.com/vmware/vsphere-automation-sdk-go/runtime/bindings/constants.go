@@ -6,11 +6,14 @@ package bindings
 import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"reflect"
+	"time"
 )
 
 // the layout numbers used in parse function have specific meanings.
 // they are not random. refer here for more.
-// https://golang.org/src/time/format.go
+// https://golang.org/src/time/format.go   ## 2006-01-02T15:04:05.999999999Z07:00
+const RFC3339Nano_DATETIME_LAYOUT = time.RFC3339Nano
+
 const VAPI_DATETIME_LAYOUT = "2006-01-02T15:04:05.000Z"
 
 var IntegerBindingType = reflect.TypeOf(IntegerType{})

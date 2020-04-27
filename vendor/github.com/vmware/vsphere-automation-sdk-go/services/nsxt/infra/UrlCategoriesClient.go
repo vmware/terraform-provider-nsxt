@@ -16,17 +16,6 @@ import (
 
 type UrlCategoriesClient interface {
 
-    // Gets a URL category with the requested category id. Few examples of these categories are Shopping, Social Networks, Streaming sites, etc.
-    //
-    // @param categoryIdParam (required)
-    // @return com.vmware.nsx_policy.model.PolicyUrlCategory
-    // @throws InvalidRequest  Bad Request, Precondition Failed
-    // @throws Unauthorized  Forbidden
-    // @throws ServiceUnavailable  Service Unavailable
-    // @throws InternalServerError  Internal Server Error
-    // @throws NotFound  Not Found
-	Get(categoryIdParam string) (model.PolicyUrlCategory, error)
-
     // Gets the list of categories. This will provide all the supported categories along with their ids. Few examples of these categories are Shopping, Social Networks, Streaming sites, etc.
     //
     // @param cursorParam Opaque cursor to be used for getting next page of records (supplied by current result page) (optional)

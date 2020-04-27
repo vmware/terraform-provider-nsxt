@@ -409,7 +409,7 @@ func getPolicyVRFConfigFromSchema(d *schema.ResourceData) *model.Tier0VrfConfig 
 	gwPath := vrfConfig["gateway_path"].(string)
 	routeDist := vrfConfig["route_distinguisher"].(string)
 	config := model.Tier0VrfConfig{
-		Tier0Path: gwPath,
+		Tier0Path: &gwPath,
 	}
 	if len(routeDist) > 0 {
 		config.RouteDistinguisher = &routeDist
@@ -520,7 +520,7 @@ func resourceNsxtPolicyTier0GatewayBGPConfigSchemaToStruct(cfg interface{}, isVr
 			prefix := data["prefix"].(string)
 			summary := data["summary_only"].(bool)
 			elem := model.RouteAggregationEntry{
-				Prefix:      prefix,
+				Prefix:      &prefix,
 				SummaryOnly: &summary,
 			}
 
@@ -627,7 +627,7 @@ func resourceNsxtPolicyTier0GatewayResourceToInfraStruct(d *schema.ResourceData,
 		routingConfigStruct := resourceNsxtPolicyTier0GatewayBGPConfigSchemaToStruct(bgpConfig[0], vrfConfig != nil, id)
 		childConfig := model.ChildBgpRoutingConfig{
 			ResourceType:     "ChildBgpRoutingConfig",
-			BgpRoutingConfig: routingConfigStruct,
+			BgpRoutingConfig: &routingConfigStruct,
 		}
 		dataValue, errors := converter.ConvertToVapi(childConfig, model.ChildBgpRoutingConfigBindingType())
 		if errors != nil {
@@ -677,7 +677,7 @@ func resourceNsxtPolicyTier0GatewayResourceToInfraStruct(d *schema.ResourceData,
 
 		childService := model.ChildLocaleServices{
 			ResourceType:   "ChildLocaleServices",
-			LocaleServices: *serviceStruct,
+			LocaleServices: serviceStruct,
 		}
 		dataValue, errors := converter.ConvertToVapi(childService, model.ChildLocaleServicesBindingType())
 		if errors != nil {
@@ -688,7 +688,7 @@ func resourceNsxtPolicyTier0GatewayResourceToInfraStruct(d *schema.ResourceData,
 
 	t0Struct.Children = gwChildren
 	childTier0 := model.ChildTier0{
-		Tier0:        t0Struct,
+		Tier0:        &t0Struct,
 		ResourceType: "ChildTier0",
 	}
 	dataValue, errors := converter.ConvertToVapi(childTier0, model.ChildTier0BindingType())
@@ -837,7 +837,7 @@ func resourceNsxtPolicyTier0GatewayDelete(d *schema.ResourceData, m interface{})
 
 	childT0 := model.ChildTier0{
 		MarkedForDelete: &boolTrue,
-		Tier0:           t0obj,
+		Tier0:           &t0obj,
 		ResourceType:    "ChildTier0",
 	}
 	dataValue, errors := converter.ConvertToVapi(childT0, model.ChildTier0BindingType())

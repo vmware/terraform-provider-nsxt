@@ -28,9 +28,7 @@ func ipfixL2ProfilesDeleteInputType() bindings.StructType {
 	fields := make(map[string]bindings.BindingType)
 	fieldNameMap := make(map[string]string)
 	fields["ipfix_l2_profile_id"] = bindings.NewStringType()
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["ipfix_l2_profile_id"] = "IpfixL2ProfileId"
-	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -46,15 +44,13 @@ func ipfixL2ProfilesDeleteRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["ipfix_l2_profile_id"] = bindings.NewStringType()
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["ipfix_l2_profile_id"] = "IpfixL2ProfileId"
-	fieldNameMap["override"] = "Override"
 	paramsTypeMap["ipfix_l2_profile_id"] = bindings.NewStringType()
-	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["ipfixL2ProfileId"] = bindings.NewStringType()
 	pathParams["ipfix_l2_profile_id"] = "ipfixL2ProfileId"
-	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -64,14 +60,18 @@ func ipfixL2ProfilesDeleteRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"",
 		"DELETE",
 		"/policy/api/v1/infra/ipfix-l2-profiles/{ipfixL2ProfileId}",
+		"",
 		resultHeaders,
 		204,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func ipfixL2ProfilesGetInputType() bindings.StructType {
@@ -94,6 +94,8 @@ func ipfixL2ProfilesGetRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["ipfix_l2_profile_id"] = bindings.NewStringType()
 	fieldNameMap["ipfix_l2_profile_id"] = "IpfixL2ProfileId"
 	paramsTypeMap["ipfix_l2_profile_id"] = bindings.NewStringType()
@@ -108,14 +110,18 @@ func ipfixL2ProfilesGetRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"",
 		"GET",
 		"/policy/api/v1/infra/ipfix-l2-profiles/{ipfixL2ProfileId}",
+		"",
 		resultHeaders,
 		200,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func ipfixL2ProfilesListInputType() bindings.StructType {
@@ -148,6 +154,8 @@ func ipfixL2ProfilesListRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
 	fields["include_mark_for_delete_objects"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fields["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
@@ -181,14 +189,18 @@ func ipfixL2ProfilesListRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"",
 		"GET",
 		"/policy/api/v1/infra/ipfix-l2-profiles",
+		"",
 		resultHeaders,
 		200,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func ipfixL2ProfilesPatchInputType() bindings.StructType {
@@ -196,10 +208,8 @@ func ipfixL2ProfilesPatchInputType() bindings.StructType {
 	fieldNameMap := make(map[string]string)
 	fields["ipfix_l2_profile_id"] = bindings.NewStringType()
 	fields["i_PFIX_l2_profile"] = bindings.NewReferenceType(model.IPFIXL2ProfileBindingType)
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["ipfix_l2_profile_id"] = "IpfixL2ProfileId"
 	fieldNameMap["i_PFIX_l2_profile"] = "IPFIXL2Profile"
-	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -215,18 +225,16 @@ func ipfixL2ProfilesPatchRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["ipfix_l2_profile_id"] = bindings.NewStringType()
 	fields["i_PFIX_l2_profile"] = bindings.NewReferenceType(model.IPFIXL2ProfileBindingType)
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["ipfix_l2_profile_id"] = "IpfixL2ProfileId"
 	fieldNameMap["i_PFIX_l2_profile"] = "IPFIXL2Profile"
-	fieldNameMap["override"] = "Override"
 	paramsTypeMap["ipfix_l2_profile_id"] = bindings.NewStringType()
-	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["i_PFIX_l2_profile"] = bindings.NewReferenceType(model.IPFIXL2ProfileBindingType)
 	paramsTypeMap["ipfixL2ProfileId"] = bindings.NewStringType()
 	pathParams["ipfix_l2_profile_id"] = "ipfixL2ProfileId"
-	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -236,14 +244,18 @@ func ipfixL2ProfilesPatchRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"i_PFIX_l2_profile",
 		"PATCH",
 		"/policy/api/v1/infra/ipfix-l2-profiles/{ipfixL2ProfileId}",
+		"",
 		resultHeaders,
 		204,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func ipfixL2ProfilesUpdateInputType() bindings.StructType {
@@ -251,10 +263,8 @@ func ipfixL2ProfilesUpdateInputType() bindings.StructType {
 	fieldNameMap := make(map[string]string)
 	fields["ipfix_l2_profile_id"] = bindings.NewStringType()
 	fields["i_PFIX_l2_profile"] = bindings.NewReferenceType(model.IPFIXL2ProfileBindingType)
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["ipfix_l2_profile_id"] = "IpfixL2ProfileId"
 	fieldNameMap["i_PFIX_l2_profile"] = "IPFIXL2Profile"
-	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -270,18 +280,16 @@ func ipfixL2ProfilesUpdateRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["ipfix_l2_profile_id"] = bindings.NewStringType()
 	fields["i_PFIX_l2_profile"] = bindings.NewReferenceType(model.IPFIXL2ProfileBindingType)
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["ipfix_l2_profile_id"] = "IpfixL2ProfileId"
 	fieldNameMap["i_PFIX_l2_profile"] = "IPFIXL2Profile"
-	fieldNameMap["override"] = "Override"
 	paramsTypeMap["ipfix_l2_profile_id"] = bindings.NewStringType()
-	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["i_PFIX_l2_profile"] = bindings.NewReferenceType(model.IPFIXL2ProfileBindingType)
 	paramsTypeMap["ipfixL2ProfileId"] = bindings.NewStringType()
 	pathParams["ipfix_l2_profile_id"] = "ipfixL2ProfileId"
-	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -291,14 +299,18 @@ func ipfixL2ProfilesUpdateRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"i_PFIX_l2_profile",
 		"PUT",
 		"/policy/api/v1/infra/ipfix-l2-profiles/{ipfixL2ProfileId}",
+		"",
 		resultHeaders,
 		200,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 

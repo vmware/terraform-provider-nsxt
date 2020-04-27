@@ -60,7 +60,7 @@ func testAccDataSourceNsxtPolicyGatewayQosProfileCreate(name string) error {
 	// Generate a random ID for the resource
 	id := newUUID()
 
-	err = client.Patch(id, obj, nil)
+	err = client.Patch(id, obj)
 	if err != nil {
 		return handleCreateError("GatewayQosProfile", id, err)
 	}
@@ -81,7 +81,7 @@ func testAccDataSourceNsxtPolicyGatewayQosProfileDeleteByName(name string) error
 	}
 	for _, objInList := range objList.Results {
 		if *objInList.DisplayName == name {
-			err := client.Delete(*objInList.Id, nil)
+			err := client.Delete(*objInList.Id)
 			if err != nil {
 				return handleDeleteError("GatewayQosProfile", *objInList.Id, err)
 			}

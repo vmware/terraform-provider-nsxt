@@ -19,13 +19,12 @@ type IpfixL2ProfilesClient interface {
     // API deletes IPFIX L2 Profile. Flow forwarding to selected collector will be stopped.
     //
     // @param ipfixL2ProfileIdParam IPFIX L2 Profile ID (required)
-    // @param overrideParam Locally override the global object (optional, default to false)
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Delete(ipfixL2ProfileIdParam string, overrideParam *bool) error
+	Delete(ipfixL2ProfileIdParam string) error
 
     // API will return details of IPFIX L2 profile.
     //
@@ -58,24 +57,22 @@ type IpfixL2ProfilesClient interface {
     //
     // @param ipfixL2ProfileIdParam IPFIX L2 Profile ID (required)
     // @param iPFIXL2ProfileParam (required)
-    // @param overrideParam Locally override the global object (optional, default to false)
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Patch(ipfixL2ProfileIdParam string, iPFIXL2ProfileParam model.IPFIXL2Profile, overrideParam *bool) error
+	Patch(ipfixL2ProfileIdParam string, iPFIXL2ProfileParam model.IPFIXL2Profile) error
 
     // Create or replace IPFIX L2 Profile. Profile is reusable entity. Single profile can attached multiple bindings e.g group, segment and port.
     //
     // @param ipfixL2ProfileIdParam IPFIX L2 Profile ID (required)
     // @param iPFIXL2ProfileParam (required)
-    // @param overrideParam Locally override the global object (optional, default to false)
     // @return com.vmware.nsx_policy.model.IPFIXL2Profile
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Update(ipfixL2ProfileIdParam string, iPFIXL2ProfileParam model.IPFIXL2Profile, overrideParam *bool) (model.IPFIXL2Profile, error)
+	Update(ipfixL2ProfileIdParam string, iPFIXL2ProfileParam model.IPFIXL2Profile) (model.IPFIXL2Profile, error)
 }

@@ -19,13 +19,12 @@ type SegmentSecurityProfilesClient interface {
     // API will delete segment security profile with the given id.
     //
     // @param segmentSecurityProfileIdParam Segment security profile id (required)
-    // @param overrideParam Locally override the global object (optional, default to false)
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Delete(segmentSecurityProfileIdParam string, overrideParam *bool) error
+	Delete(segmentSecurityProfileIdParam string) error
 
     // API will return details of the segment security profile with given id. If the profile does not exist, it will return 404.
     //
@@ -58,24 +57,22 @@ type SegmentSecurityProfilesClient interface {
     //
     // @param segmentSecurityProfileIdParam Segment security profile id (required)
     // @param segmentSecurityProfileParam (required)
-    // @param overrideParam Locally override the global object (optional, default to false)
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Patch(segmentSecurityProfileIdParam string, segmentSecurityProfileParam model.SegmentSecurityProfile, overrideParam *bool) error
+	Patch(segmentSecurityProfileIdParam string, segmentSecurityProfileParam model.SegmentSecurityProfile) error
 
     // Create or replace a segment security profile
     //
     // @param segmentSecurityProfileIdParam Segment security profile id (required)
     // @param segmentSecurityProfileParam (required)
-    // @param overrideParam Locally override the global object (optional, default to false)
     // @return com.vmware.nsx_policy.model.SegmentSecurityProfile
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Update(segmentSecurityProfileIdParam string, segmentSecurityProfileParam model.SegmentSecurityProfile, overrideParam *bool) (model.SegmentSecurityProfile, error)
+	Update(segmentSecurityProfileIdParam string, segmentSecurityProfileParam model.SegmentSecurityProfile) (model.SegmentSecurityProfile, error)
 }

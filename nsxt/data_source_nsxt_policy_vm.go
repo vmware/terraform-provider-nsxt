@@ -77,10 +77,13 @@ func dataSourceNsxtPolicyVMIDRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	computeIDMap := collectSeparatedStringListToMap(vmModel.ComputeIds, ":")
-	d.SetId(vmModel.ExternalId)
+	if vmModel.ExternalId == nil {
+		return fmt.Errorf("Unable to read external ID for Virtual Machine with name %s", *vmModel.DisplayName)
+	}
+	d.SetId(*vmModel.ExternalId)
 	d.Set("display_name", vmModel.DisplayName)
 	d.Set("description", vmModel.Description)
-	d.Set("external_id", vmModel.ExternalId)
+	d.Set("external_id", *vmModel.ExternalId)
 	d.Set("bios_id", computeIDMap[nsxtPolicyBiosUUIDKey])
 	d.Set("instance_id", computeIDMap[nsxtPolicyInstanceUUIDKey])
 	return nil

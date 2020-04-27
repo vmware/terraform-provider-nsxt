@@ -24,50 +24,6 @@ import (
 
 
 
-func urlReputationSeveritiesGetInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
-	fieldNameMap := make(map[string]string)
-	fields["reputation_severity_id"] = bindings.NewStringType()
-	fieldNameMap["reputation_severity_id"] = "ReputationSeverityId"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
-}
-
-func urlReputationSeveritiesGetOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.PolicyUrlReputationSeverityBindingType)
-}
-
-func urlReputationSeveritiesGetRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
-	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
-	pathParams := map[string]string{}
-	queryParams := map[string]string{}
-	headerParams := map[string]string{}
-	fields["reputation_severity_id"] = bindings.NewStringType()
-	fieldNameMap["reputation_severity_id"] = "ReputationSeverityId"
-	paramsTypeMap["reputation_severity_id"] = bindings.NewStringType()
-	paramsTypeMap["reputationSeverityId"] = bindings.NewStringType()
-	pathParams["reputation_severity_id"] = "reputationSeverityId"
-	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
-	return protocol.NewOperationRestMetadata(
-		fields,
-		fieldNameMap,
-		paramsTypeMap,
-		pathParams,
-		queryParams,
-		headerParams,
-		"",
-		"",
-		"GET",
-		"/policy/api/v1/infra/url-reputation-severities/{reputationSeverityId}",
-		resultHeaders,
-		200,
-		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
-}
-
 func urlReputationSeveritiesListInputType() bindings.StructType {
 	fields := make(map[string]bindings.BindingType)
 	fieldNameMap := make(map[string]string)
@@ -98,6 +54,8 @@ func urlReputationSeveritiesListRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
 	fields["include_mark_for_delete_objects"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fields["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
@@ -131,14 +89,18 @@ func urlReputationSeveritiesListRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"",
 		"GET",
 		"/policy/api/v1/infra/url-reputation-severities",
+		"",
 		resultHeaders,
 		200,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 

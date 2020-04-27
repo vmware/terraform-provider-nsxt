@@ -46,6 +46,8 @@ func dhcpStaticBindingConfigsDeleteRestMetadata() protocol.OperationRestMetadata
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["segment_id"] = bindings.NewStringType()
 	fields["binding_id"] = bindings.NewStringType()
 	fieldNameMap["segment_id"] = "SegmentId"
@@ -65,14 +67,18 @@ func dhcpStaticBindingConfigsDeleteRestMetadata() protocol.OperationRestMetadata
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"",
 		"DELETE",
 		"/policy/api/v1/infra/segments/{segmentId}/dhcp-static-binding-configs/{bindingId}",
+		"",
 		resultHeaders,
 		204,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func dhcpStaticBindingConfigsGetInputType() bindings.StructType {
@@ -97,6 +103,8 @@ func dhcpStaticBindingConfigsGetRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["segment_id"] = bindings.NewStringType()
 	fields["binding_id"] = bindings.NewStringType()
 	fieldNameMap["segment_id"] = "SegmentId"
@@ -116,14 +124,18 @@ func dhcpStaticBindingConfigsGetRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"",
 		"GET",
 		"/policy/api/v1/infra/segments/{segmentId}/dhcp-static-binding-configs/{bindingId}",
+		"",
 		resultHeaders,
 		200,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func dhcpStaticBindingConfigsListInputType() bindings.StructType {
@@ -158,6 +170,8 @@ func dhcpStaticBindingConfigsListRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["segment_id"] = bindings.NewStringType()
 	fields["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
 	fields["include_mark_for_delete_objects"] = bindings.NewOptionalType(bindings.NewBooleanType())
@@ -196,14 +210,18 @@ func dhcpStaticBindingConfigsListRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"",
 		"GET",
 		"/policy/api/v1/infra/segments/{segmentId}/dhcp-static-binding-configs",
+		"",
 		resultHeaders,
 		200,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func dhcpStaticBindingConfigsPatchInputType() bindings.StructType {
@@ -230,6 +248,8 @@ func dhcpStaticBindingConfigsPatchRestMetadata() protocol.OperationRestMetadata 
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["segment_id"] = bindings.NewStringType()
 	fields["binding_id"] = bindings.NewStringType()
 	fields["dhcp_static_binding_config"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.DhcpStaticBindingConfigBindingType),}, bindings.REST)
@@ -252,14 +272,18 @@ func dhcpStaticBindingConfigsPatchRestMetadata() protocol.OperationRestMetadata 
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"dhcp_static_binding_config",
 		"PATCH",
 		"/policy/api/v1/infra/segments/{segmentId}/dhcp-static-binding-configs/{bindingId}",
+		"",
 		resultHeaders,
 		204,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func dhcpStaticBindingConfigsUpdateInputType() bindings.StructType {
@@ -286,6 +310,8 @@ func dhcpStaticBindingConfigsUpdateRestMetadata() protocol.OperationRestMetadata
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["segment_id"] = bindings.NewStringType()
 	fields["binding_id"] = bindings.NewStringType()
 	fields["dhcp_static_binding_config"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.DhcpStaticBindingConfigBindingType),}, bindings.REST)
@@ -308,14 +334,18 @@ func dhcpStaticBindingConfigsUpdateRestMetadata() protocol.OperationRestMetadata
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"dhcp_static_binding_config",
 		"PUT",
 		"/policy/api/v1/infra/segments/{segmentId}/dhcp-static-binding-configs/{bindingId}",
+		"",
 		resultHeaders,
 		200,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 

@@ -148,7 +148,7 @@ func resourceNsxtPolicyStaticRouteCreate(d *schema.ResourceData, m interface{}) 
 		DisplayName: &displayName,
 		Description: &description,
 		Tags:        tags,
-		Network:     network,
+		Network:     &network,
 	}
 
 	if len(nextHopsStructs) > 0 {
@@ -254,7 +254,7 @@ func resourceNsxtPolicyStaticRouteUpdate(d *schema.ResourceData, m interface{}) 
 		DisplayName: &displayName,
 		Description: &description,
 		Tags:        tags,
-		Network:     network,
+		Network:     &network,
 	}
 
 	if len(nextHopsStructs) > 0 {
