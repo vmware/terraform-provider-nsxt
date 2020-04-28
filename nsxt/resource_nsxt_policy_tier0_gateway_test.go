@@ -214,7 +214,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_withEdgeCluster(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "edge_cluster_path"),
 					resource.TestCheckResourceAttr(realizationResourceName, "state", "REALIZED"),
 					resource.TestCheckResourceAttr(testResourceName, "bgp_config.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "bgp_config.0.tag.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "bgp_config.0.tag.#", "1"),
 					resource.TestCheckResourceAttrSet(testResourceName, "bgp_config.0.revision"),
 					resource.TestCheckResourceAttrSet(testResourceName, "bgp_config.0.path"),
 					resource.TestCheckResourceAttr(testResourceName, "bgp_config.0.ecmp", "true"),
@@ -279,7 +279,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_createWithBGP(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "edge_cluster_path"),
 					resource.TestCheckResourceAttr(realizationResourceName, "state", "REALIZED"),
 					resource.TestCheckResourceAttr(testResourceName, "bgp_config.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "bgp_config.0.tag.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "bgp_config.0.tag.#", "1"),
 					resource.TestCheckResourceAttrSet(testResourceName, "bgp_config.0.revision"),
 					resource.TestCheckResourceAttrSet(testResourceName, "bgp_config.0.path"),
 					resource.TestCheckResourceAttr(testResourceName, "bgp_config.0.ecmp", "true"),
@@ -462,6 +462,11 @@ resource "nsxt_policy_tier0_gateway" "test" {
     route_aggregation {
       prefix = "13.12.12.0/24"
     }
+
+    tag {
+      scope = "bgp-scope"
+      tag   = "bgp-tag"
+    }
   }
 
   tag {
@@ -628,6 +633,7 @@ data "nsxt_policy_realization_info" "realization_info" {
 }`, name)
 }
 
+// TODO: add vrf_config tags when bug 2557096 is resolved
 func testAccNsxtPolicyTier0WithVRFTemplate(name string, targets bool) string {
 
 	var routeTargets string
@@ -642,7 +648,7 @@ func testAccNsxtPolicyTier0WithVRFTemplate(name string, targets bool) string {
 	}
 	return testAccNsxtPolicyGatewayInterfaceDeps("11, 12") + fmt.Sprintf(`
 resource "nsxt_policy_tier0_gateway" "parent" {
-  nsx_id            = "vrf_parent"
+  nsx_id            = "vrf-parent"
   display_name      = "parent"
   edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
 }
@@ -692,7 +698,7 @@ data "nsxt_policy_edge_node" "EN" {
 }
 
 resource "nsxt_policy_tier0_gateway" "parent" {
-  nsx_id            = "vrf_parent"
+  nsx_id            = "vrf-parent"
   display_name      = "parent"
   edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
 }
