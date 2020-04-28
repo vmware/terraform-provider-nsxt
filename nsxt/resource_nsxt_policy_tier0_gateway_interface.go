@@ -249,8 +249,8 @@ func resourceNsxtPolicyTier0GatewayInterfaceUpdate(d *schema.ResourceData, m int
 	tier0Path := d.Get("gateway_path").(string)
 	localeServiceID := d.Get("locale_service_id").(string)
 	tier0ID := getPolicyIDFromPath(tier0Path)
-	if id == "" || tier0ID == "" {
-		return fmt.Errorf("Error obtaining Tier0 id")
+	if id == "" || tier0ID == "" || localeServiceID == "" {
+		return fmt.Errorf("Error obtaining Tier0 id or Locale Service id")
 	}
 
 	displayName := d.Get("display_name").(string)
@@ -305,11 +305,12 @@ func resourceNsxtPolicyTier0GatewayInterfaceDelete(d *schema.ResourceData, m int
 	id := d.Id()
 	tier0Path := d.Get("gateway_path").(string)
 	tier0ID := getPolicyIDFromPath(tier0Path)
-	if id == "" || tier0ID == "" {
-		return fmt.Errorf("Error obtaining Tier0 Interface id")
+	localeServiceID := d.Get("locale_service_id").(string)
+	if id == "" || tier0ID == "" || localeServiceID == "" {
+		return fmt.Errorf("Error obtaining Tier0 id or Locale Service id")
 	}
 
-	err := client.Delete(tier0ID, defaultPolicyLocaleServiceID, id)
+	err := client.Delete(tier0ID, localeServiceID, id)
 	if err != nil {
 		return handleDeleteError("Tier0 Interface", id, err)
 	}

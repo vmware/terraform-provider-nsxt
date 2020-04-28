@@ -37,6 +37,11 @@ func resourceNsxtPolicyTier1GatewayInterface() *schema.Resource {
 			"mtu":                    getMtuSchema(),
 			"ipv6_ndra_profile_path": getIPv6NDRAPathSchema(),
 			"urpf_mode":              getGatewayInterfaceUrpfModeSchema(),
+			"locale_service_id": {
+				Type:        schema.TypeString,
+				Description: "Locale Service ID for this interface",
+				Computed:    true,
+			},
 		},
 	}
 }
@@ -125,6 +130,7 @@ func resourceNsxtPolicyTier1GatewayInterfaceCreate(d *schema.ResourceData, m int
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
+	d.Set("locale_service_id", localeServiceID)
 
 	return resourceNsxtPolicyTier1GatewayInterfaceRead(d, m)
 }
@@ -182,10 +188,12 @@ func resourceNsxtPolicyTier1GatewayInterfaceUpdate(d *schema.ResourceData, m int
 
 	id := d.Id()
 	tier1Path := d.Get("gateway_path").(string)
+	localeServiceID := d.Get("locale_service_id").(string)
 	tier1ID := getPolicyIDFromPath(tier1Path)
-	if id == "" || tier1ID == "" {
-		return fmt.Errorf("Error obtaining Tier1 id")
+	if id == "" || tier1ID == "" || localeServiceID == "" {
+		return fmt.Errorf("Error obtaining Tier1 id or Locale Service id")
 	}
+
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
 	tags := getPolicyTagsFromSchema(d)
@@ -216,7 +224,7 @@ func resourceNsxtPolicyTier1GatewayInterfaceUpdate(d *schema.ResourceData, m int
 		obj.UrpfMode = &urpfMode
 	}
 
-	_, err := client.Update(tier1ID, defaultPolicyLocaleServiceID, id, obj)
+	_, err := client.Update(tier1ID, localeServiceID, id, obj)
 	if err != nil {
 		return handleUpdateError("Tier1 Interface", id, err)
 	}
@@ -231,11 +239,12 @@ func resourceNsxtPolicyTier1GatewayInterfaceDelete(d *schema.ResourceData, m int
 	id := d.Id()
 	tier1Path := d.Get("gateway_path").(string)
 	tier1ID := getPolicyIDFromPath(tier1Path)
-	if id == "" || tier1ID == "" {
-		return fmt.Errorf("Error obtaining Tier1 Interface id")
+	localeServiceID := d.Get("locale_service_id").(string)
+	if id == "" || tier1ID == "" || localeServiceID == "" {
+		return fmt.Errorf("Error obtaining Tier1 id or Locale Service id")
 	}
 
-	err := client.Delete(tier1ID, defaultPolicyLocaleServiceID, id)
+	err := client.Delete(tier1ID, localeServiceID, id)
 	if err != nil {
 		return handleDeleteError("Tier1 Interface", id, err)
 	}
