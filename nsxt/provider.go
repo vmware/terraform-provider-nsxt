@@ -449,7 +449,7 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 	host := fmt.Sprintf("https://%s", hostIP)
 	securityCtx := core.NewSecurityContextImpl()
 	securityContextNeeded := true
-	if len(clientAuthCertFile) > 0 {
+	if len(clientAuthCertFile) > 0 && !policyRemoteAuth {
 		securityContextNeeded = false
 	}
 
