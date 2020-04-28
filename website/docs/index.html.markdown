@@ -759,7 +759,7 @@ data "nsxt_policy_vm" "db_vm" {
 }
 
 
-# Assigne the right tags to the VMs so that they get included in the
+# Assign the right tags to the VMs so that they get included in the
 # dynamic groups created above
 resource "nsxt_policy_vm_tags" "web_vm_tag" {
   instance_id = data.nsxt_policy_vm.web_vm.instance_id
