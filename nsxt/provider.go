@@ -23,6 +23,7 @@ var defaultRetryOnStatusCodes = []int{429, 503}
 var toleratePartialSuccess = false
 var policyEnforcementPoint = "default"
 var policySite = "default"
+var policyRemoteAuth = false
 
 type nsxtClients struct {
 	// NSX Manager client - based on go-vmware-nsxt SDK
@@ -439,6 +440,7 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 	clientAuthKeyFile := d.Get("client_auth_key_file").(string)
 	caFile := d.Get("ca_file").(string)
 	policyEnforcementPoint = d.Get("enforcement_point").(string)
+	policyRemoteAuth = d.Get("remote_auth").(bool)
 
 	if hostIP == "" {
 		return fmt.Errorf("host must be provided")
@@ -447,7 +449,7 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 	host := fmt.Sprintf("https://%s", hostIP)
 	securityCtx := core.NewSecurityContextImpl()
 	securityContextNeeded := true
-	if len(clientAuthCertFile) > 0 {
+	if len(clientAuthCertFile) > 0 && !policyRemoteAuth {
 		securityContextNeeded = false
 	}
 
@@ -499,6 +501,20 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 	return nil
 }
 
+type remoteBasicAuthHeaderProcessor struct {
+}
+
+func newRemoteBasicAuthHeaderProcessor() *remoteBasicAuthHeaderProcessor {
+	return &remoteBasicAuthHeaderProcessor{}
+}
+
+func (processor remoteBasicAuthHeaderProcessor) Process(req *http.Request) error {
+	oldAuthHeader := req.Header.Get("Authorization")
+	newAuthHeader := strings.Replace(oldAuthHeader, "Basic", "Remote", 1)
+	req.Header.Set("Authorization", newAuthHeader)
+	return nil
+}
+
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	nsxtClient, err := configureNsxtClient(d)
 	if err != nil {
@@ -523,5 +539,9 @@ func getPolicyConnector(clients interface{}) *client.RestConnector {
 	if c.PolicySecurityContext != nil {
 		connector.SetSecurityContext(c.PolicySecurityContext)
 	}
+	if policyRemoteAuth {
+		connector.AddRequestProcessor(newRemoteBasicAuthHeaderProcessor())
+	}
+
 	return connector
 }
