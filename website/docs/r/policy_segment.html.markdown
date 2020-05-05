@@ -13,9 +13,10 @@ This resource provides a method for the management of Segments.
 
 ```hcl
 resource "nsxt_policy_segment" "segment1" {
-    display_name      = "segment1"
-    description       = "Terraform provisioned Segment"
-    connectivity_path = nsxt_policy_tier1_gateway.mygateway.path
+    display_name        = "segment1"
+    description         = "Terraform provisioned Segment"
+    connectivity_path   = nsxt_policy_tier1_gateway.mygateway.path
+    transport_zone_path = data.nsxt_policy_transport_zone.overlay_tz.path
 
     subnet {
       cidr        = "12.12.2.1/24"
@@ -36,10 +37,9 @@ resource "nsxt_policy_segment" "segment1" {
         }
       }
     }
-
-    advanced_config {
-      connectivity = "OFF"
-      local_egress = true
+  
+    advanced_config {	
+      connectivity = "ON"	
     }
 }
 ```
@@ -87,7 +87,7 @@ The following arguments are supported:
   * `address_pool_paths` - (Optional) List of Policy path to IP address pools.
   * `connectivity` - (Optional) Connectivity configuration to manually connect (ON) or disconnect (OFF).
   * `hybrid` - (Optional) Boolean flag to identify a hybrid logical switch.
-  * `local_egress` - (Optional) Boolean flag to enable local egress.
+  * `local_egress` - (Optional) Boolean flag to enable local egress when used in conjunction with L2VPN.
   * `uplink_teaming_policy` - (Optional) The name of the switching uplink teaming policy for the bridge endpoint. This name corresponds to one of the switching uplink teaming policy names listed in the transport zone.
 
 ## Attributes Reference

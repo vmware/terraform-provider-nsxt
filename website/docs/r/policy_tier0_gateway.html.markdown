@@ -19,7 +19,7 @@ resource "nsxt_policy_tier0_gateway" "tier0_gw" {
   failover_mode             = "PREEMPTIVE"
   default_rule_logging      = false
   enable_firewall           = true
-  force_whitelisting        = true
+  force_whitelisting        = false
   ha_mode                   = "ACTIVE_STANDBY"
   internal_transit_subnets  = ["102.64.0.0/16"]
   transit_subnets           = ["101.64.0.0/16"]

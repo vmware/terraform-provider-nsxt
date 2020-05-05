@@ -345,7 +345,7 @@ resource "nsxt_policy_tier1_gateway" "t1_gateway" {
   default_rule_logging      = "false"
   enable_firewall           = "true"
   enable_standby_relocation = "false"
-  force_whitelisting        = "true"
+  force_whitelisting        = "false"
   tier0_path                = data.nsxt_policy_tier0_gateway.t0_gateway.path
   route_advertisement_types = ["TIER1_STATIC_ROUTES", "TIER1_CONNECTED"]
   pool_allocation           = "ROUTING"
@@ -389,11 +389,6 @@ resource "nsxt_policy_segment" "web" {
     }
   }
 
-  advanced_config {
-    connectivity = "OFF"
-    local_egress = "true"
-  }
-
   tag {
     scope = var.nsx_tag_scope
     tag   = var.nsx_tag
@@ -425,11 +420,6 @@ resource "nsxt_policy_segment" "app" {
     }
   }
 
-  advanced_config {
-    connectivity = "OFF"
-    local_egress = "true"
-  }
-
   tag {
     scope = var.nsx_tag_scope
     tag   = var.nsx_tag
@@ -459,11 +449,6 @@ resource "nsxt_policy_segment" "db" {
         next_hop = "1.1.1.21"
       }
     }
-  }
-
-  advanced_config {
-    connectivity = "OFF"
-    local_egress = "true"
   }
 
   tag {
