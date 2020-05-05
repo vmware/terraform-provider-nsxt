@@ -38,9 +38,9 @@ resource "nsxt_policy_segment" "segment1" {
       }
     }
   
-  advanced_config {	
-    connectivity = "ON"	
-  }
+    advanced_config {	
+      connectivity = "ON"	
+    }
 }
 ```
 
