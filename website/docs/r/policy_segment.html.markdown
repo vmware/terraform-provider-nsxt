@@ -16,6 +16,7 @@ resource "nsxt_policy_segment" "segment1" {
     display_name      = "segment1"
     description       = "Terraform provisioned Segment"
     connectivity_path = nsxt_policy_tier1_gateway.mygateway.path
+    transport_zone_path = data.nsxt_policy_transport_zone.overlay_tz.path
 
     subnet {
       cidr        = "12.12.2.1/24"
