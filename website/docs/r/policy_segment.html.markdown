@@ -13,9 +13,9 @@ This resource provides a method for the management of Segments.
 
 ```hcl
 resource "nsxt_policy_segment" "segment1" {
-    display_name      = "segment1"
-    description       = "Terraform provisioned Segment"
-    connectivity_path = nsxt_policy_tier1_gateway.mygateway.path
+    display_name        = "segment1"
+    description         = "Terraform provisioned Segment"
+    connectivity_path   = nsxt_policy_tier1_gateway.mygateway.path
     transport_zone_path = data.nsxt_policy_transport_zone.overlay_tz.path
 
     subnet {
