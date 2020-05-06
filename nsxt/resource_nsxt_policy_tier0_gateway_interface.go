@@ -69,6 +69,11 @@ func resourceNsxtPolicyTier0GatewayInterface() *schema.Resource {
 				Computed:    true,
 			},
 			"urpf_mode": getGatewayInterfaceUrpfModeSchema(),
+			"ip_addresses": {
+				Type:           schema.TypeString,
+				Description:    "Ip addresses",
+				Computed:       true,
+			},
 		},
 	}
 }
@@ -224,11 +229,14 @@ func resourceNsxtPolicyTier0GatewayInterfaceRead(d *schema.ResourceData, m inter
 
 	if obj.Subnets != nil {
 		var subnetList []string
+		var ipList []string
 		for _, subnet := range obj.Subnets {
 			cidr := fmt.Sprintf("%s/%d", subnet.IpAddresses[0], *subnet.PrefixLen)
 			subnetList = append(subnetList, cidr)
+			ipList = append(ipList, subnet.IpAddresses[0])
 		}
 		d.Set("subnets", subnetList)
+		d.Set("ip_addresses", ipList)
 	}
 
 	if obj.UrpfMode != nil {
