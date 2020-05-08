@@ -20,8 +20,14 @@ resource "nsxt_policy_segment" "s1" {
   transport_zone_path = data.nsxt_transport_zone.tz1.path
 }
 
-data "nsxt_policy_segment_realization" "info" {
+data "nsxt_policy_segment_realization" "s1" {
   path = data.nsxt_policy_segment.s1.path
+}
+
+# usage in vsphere provider
+data "vsphere_network" "net" {
+  name          = nsxt_policy_segment_realization.s1.network_name
+  datacenter_id = data.vsphere_datacenter.datacenter.id
 }
 ```
 
