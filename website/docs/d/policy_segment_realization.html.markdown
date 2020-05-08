@@ -34,3 +34,4 @@ data "nsxt_policy_segment_realization" "info" {
 In addition to arguments listed above, the following attributes are exported:
 
 * `state` - The realization state of the resource: `success`, `partial_success`, `orphaned`, `failed` or `error`.
+* `network_name` - Network name on the hypervisor. This attribute can be used in vsphere provider in order to ensure implicit dependency on segment realization.

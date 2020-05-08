@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/segments"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"time"
@@ -27,6 +28,11 @@ func dataSourceNsxtPolicySegmentRealization() *schema.Resource {
 			"state": {
 				Type:        schema.TypeString,
 				Description: "The state of the realized resource on hypervisors",
+				Computed:    true,
+			},
+			"network_name": {
+				Type:        schema.TypeString,
+				Description: "Network name on the hypervisors",
 				Computed:    true,
 			},
 		},
@@ -55,6 +61,7 @@ func dataSourceNsxtPolicySegmentRealizationRead(d *schema.ResourceData, m interf
 		model.SegmentConfigurationState_STATE_IN_SYNC,
 		model.SegmentConfigurationState_STATE_UNKNOWN}
 	targetStates := []string{model.SegmentConfigurationState_STATE_SUCCESS,
+		model.SegmentConfigurationState_STATE_PARTIAL_SUCCESS,
 		model.SegmentConfigurationState_STATE_FAILED,
 		model.SegmentConfigurationState_STATE_ERROR,
 		model.SegmentConfigurationState_STATE_ORPHANED}
@@ -81,6 +88,17 @@ func dataSourceNsxtPolicySegmentRealizationRead(d *schema.ResourceData, m interf
 	if err != nil {
 		return fmt.Errorf("Failed to get realization information for %s: %v", path, err)
 	}
+
+	// We need to fetch network name to use in vpshere provider. However, state API does not
+	// return it in details yet. For now, we'll use segment display name, since its always
+	// translates to network name
+	segClient := infra.NewDefaultSegmentsClient(connector)
+	obj, err := segClient.Get(segmentID)
+	if err != nil {
+		return handleReadError(d, "Segment", segmentID, err)
+	}
+
+	d.Set("network_name", obj.DisplayName)
 
 	return nil
 }

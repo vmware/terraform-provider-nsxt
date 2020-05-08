@@ -20,6 +20,7 @@ func testAccDataSourceNsxtPolicySegmentRealization(t *testing.T, vlan bool) {
 				Config: testAccNsxtPolicySegmentRealizationTemplate(vlan),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(testResourceName, "state", "success"),
+					resource.TestCheckResourceAttr(testResourceName, "network_name", "terra-test"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 				),
 			},
