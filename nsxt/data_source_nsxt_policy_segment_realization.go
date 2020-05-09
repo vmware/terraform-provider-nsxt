@@ -61,7 +61,6 @@ func dataSourceNsxtPolicySegmentRealizationRead(d *schema.ResourceData, m interf
 		model.SegmentConfigurationState_STATE_IN_SYNC,
 		model.SegmentConfigurationState_STATE_UNKNOWN}
 	targetStates := []string{model.SegmentConfigurationState_STATE_SUCCESS,
-		model.SegmentConfigurationState_STATE_PARTIAL_SUCCESS,
 		model.SegmentConfigurationState_STATE_FAILED,
 		model.SegmentConfigurationState_STATE_ERROR,
 		model.SegmentConfigurationState_STATE_ORPHANED}
