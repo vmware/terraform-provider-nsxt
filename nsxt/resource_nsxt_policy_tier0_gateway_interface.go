@@ -70,9 +70,12 @@ func resourceNsxtPolicyTier0GatewayInterface() *schema.Resource {
 			},
 			"urpf_mode": getGatewayInterfaceUrpfModeSchema(),
 			"ip_addresses": {
-				Type:           schema.TypeString,
-				Description:    "Ip addresses",
-				Computed:       true,
+				Type:        schema.TypeList,
+				Description: "Ip addresses",
+				Computed:    true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
 			},
 		},
 	}
