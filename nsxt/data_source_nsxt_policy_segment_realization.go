@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/segments"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+	"log"
 	"time"
 )
 
@@ -70,6 +71,8 @@ func dataSourceNsxtPolicySegmentRealizationRead(d *schema.ResourceData, m interf
 				return state, model.SegmentConfigurationState_STATE_ERROR, logAPIError("Error while waiting for realization of segment", err)
 			}
 
+			log.Printf("[DEBUG] Current realization state for segment %s is %s", segmentID, *state.State)
+
 			d.Set("state", state.State)
 			return state, *state.State, nil
 		},
@@ -81,6 +84,10 @@ func dataSourceNsxtPolicySegmentRealizationRead(d *schema.ResourceData, m interf
 	if err != nil {
 		return fmt.Errorf("Failed to get realization information for %s: %v", path, err)
 	}
+
+	// In some cases success state is returned a moment before VC actually sees the network
+	// Adding a short sleep here prevents vsphere provider from erroring out
+	time.Sleep(1 * time.Second)
 
 	return nil
 }
