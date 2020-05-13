@@ -2,14 +2,17 @@ package nsxt
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/segments"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"log"
+	"time"
 )
 
 var connectivityValues = []string{
@@ -766,8 +769,40 @@ func nsxtPolicySegmentDelete(d *schema.ResourceData, m interface{}) error {
 
 	connector := getPolicyConnector(m)
 	client := infra.NewDefaultSegmentsClient(connector)
+	portsClient := segments.NewDefaultPortsClient(connector)
 
-	err := client.Delete(id)
+	// During buld destroy, VMs might be destroyed before segments, but
+	// VIF release is not yet propagated to NSX. NSX will reply with
+	// InvalidRequest on attempted delete if ports are present on the
+	// segment. The code below waits till possible ports are deleted.
+	pendingStates := []string{"pending"}
+	targetStates := []string{"ok", "error"}
+	stateConf := &resource.StateChangeConf{
+		Pending: pendingStates,
+		Target:  targetStates,
+		Refresh: func() (interface{}, string, error) {
+			ports, err := portsClient.List(id, nil, nil, nil, nil, nil, nil)
+			if err != nil {
+				return ports, "error", logAPIError("Error listing segment ports", err)
+			}
+
+			log.Printf("[DEBUG] Current number of ports on segment %s is %d", id, len(ports.Results))
+
+			if len(ports.Results) > 0 {
+				return ports, "pending", nil
+			}
+			return ports, "ok", nil
+
+		},
+		Timeout:    d.Timeout(schema.TimeoutDelete),
+		MinTimeout: 1 * time.Second,
+		Delay:      1 * time.Second,
+	}
+	_, err := stateConf.WaitForState()
+	if err != nil {
+		return fmt.Errorf("Failed to get port information for segment %s: %v", id, err)
+	}
+	err = client.Delete(id)
 	if err != nil {
 		return handleDeleteError("Segment", id, err)
 	}

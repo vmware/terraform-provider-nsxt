@@ -10,6 +10,7 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/segments"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+	"log"
 	"time"
 )
 
@@ -76,6 +77,8 @@ func dataSourceNsxtPolicySegmentRealizationRead(d *schema.ResourceData, m interf
 				return state, model.SegmentConfigurationState_STATE_ERROR, logAPIError("Error while waiting for realization of segment", err)
 			}
 
+			log.Printf("[DEBUG] Current realization state for segment %s is %s", segmentID, *state.State)
+
 			d.Set("state", state.State)
 			return state, *state.State, nil
 		},
@@ -87,6 +90,10 @@ func dataSourceNsxtPolicySegmentRealizationRead(d *schema.ResourceData, m interf
 	if err != nil {
 		return fmt.Errorf("Failed to get realization information for %s: %v", path, err)
 	}
+
+	// In some cases success state is returned a moment before VC actually sees the network
+	// Adding a short sleep here prevents vsphere provider from erroring out
+	time.Sleep(1 * time.Second)
 
 	// We need to fetch network name to use in vpshere provider. However, state API does not
 	// return it in details yet. For now, we'll use segment display name, since its always
