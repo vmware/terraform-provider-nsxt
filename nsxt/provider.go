@@ -24,6 +24,7 @@ var toleratePartialSuccess = false
 var policyEnforcementPoint = "default"
 var policySite = "default"
 var policyRemoteAuth = false
+var policyGlobalManager = false
 
 type nsxtClients struct {
 	// NSX Manager client - based on go-vmware-nsxt SDK
@@ -138,6 +139,12 @@ func Provider() terraform.ResourceProvider {
 				Optional:    true,
 				Description: "Enforcement Point for NSXT Policy",
 				DefaultFunc: schema.EnvDefaultFunc("NSXT_POLICY_ENFORCEMENT_POINT", "default"),
+			},
+			"policy_global_manager": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Is this a policy global manager endpoint",
+				DefaultFunc: schema.EnvDefaultFunc("NSXT_GLOBAL_MANAGER", false),
 			},
 		},
 
@@ -441,6 +448,7 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 	caFile := d.Get("ca_file").(string)
 	policyEnforcementPoint = d.Get("enforcement_point").(string)
 	policyRemoteAuth = d.Get("remote_auth").(bool)
+	policyGlobalManager = d.Get("policy_global_manager").(bool)
 
 	if hostIP == "" {
 		return fmt.Errorf("host must be provided")
