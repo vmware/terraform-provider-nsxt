@@ -20,12 +20,16 @@ import (
 )
 
 var defaultRetryOnStatusCodes = []int{429, 503}
-var toleratePartialSuccess = false
-var policyEnforcementPoint = "default"
 var policySite = "default"
-var policyRemoteAuth = false
+
+// Provider configuration that is shared for policy and MP
+type commonProviderConfig struct {
+	RemoteAuth             bool
+	ToleratePartialSuccess bool
+}
 
 type nsxtClients struct {
+	CommonConfig commonProviderConfig
 	// NSX Manager client - based on go-vmware-nsxt SDK
 	NsxtClient *nsxt.APIClient
 	// Data for NSX Policy client - based on vsphere-automation-sdk-go SDK
@@ -35,9 +39,11 @@ type nsxtClients struct {
 	// TODO: when concurrency support is introduced policy client,
 	// change this code to allocate single connector for all provider
 	// operations.
-	PolicySecurityContext *core.SecurityContextImpl
-	PolicyHTTPClient      *http.Client
-	Host                  string
+	PolicySecurityContext  *core.SecurityContextImpl
+	PolicyHTTPClient       *http.Client
+	Host                   string
+	PolicyEnforcementPoint string
+	PolicySite             string
 }
 
 // Provider for VMWare NSX-T. Returns terraform.ResourceProvider
@@ -270,19 +276,19 @@ func Provider() terraform.ResourceProvider {
 	}
 }
 
-func configureNsxtClient(d *schema.ResourceData) (*nsxt.APIClient, error) {
+func configureNsxtClient(d *schema.ResourceData, clients *nsxtClients) error {
 	clientAuthCertFile := d.Get("client_auth_cert_file").(string)
 	clientAuthKeyFile := d.Get("client_auth_key_file").(string)
 	vmcToken := d.Get("vmc_token").(string)
 
 	if len(vmcToken) > 0 {
-		return nil, nil
+		return nil
 	}
 
 	needCreds := true
 	if len(clientAuthCertFile) > 0 {
 		if len(clientAuthKeyFile) == 0 {
-			return nil, fmt.Errorf("Please provide key file for client certificate")
+			return fmt.Errorf("Please provide key file for client certificate")
 		}
 		needCreds = false
 	}
@@ -290,25 +296,21 @@ func configureNsxtClient(d *schema.ResourceData) (*nsxt.APIClient, error) {
 	insecure := d.Get("allow_unverified_ssl").(bool)
 	username := d.Get("username").(string)
 	password := d.Get("password").(string)
-	remoteAuth := d.Get("remote_auth").(bool)
-
-	// Global variable used in resources with realization checks
-	toleratePartialSuccess = d.Get("tolerate_partial_success").(bool)
 
 	if needCreds {
 		if username == "" {
-			return nil, fmt.Errorf("username must be provided")
+			return fmt.Errorf("username must be provided")
 		}
 
 		if password == "" {
-			return nil, fmt.Errorf("password must be provided")
+			return fmt.Errorf("password must be provided")
 		}
 	}
 
 	host := d.Get("host").(string)
 
 	if host == "" {
-		return nil, fmt.Errorf("host must be provided")
+		return fmt.Errorf("host must be provided")
 	}
 
 	caFile := d.Get("ca_file").(string)
@@ -343,7 +345,7 @@ func configureNsxtClient(d *schema.ResourceData) (*nsxt.APIClient, error) {
 		UserAgent:            "terraform-provider-nsxt/1.0",
 		UserName:             username,
 		Password:             password,
-		RemoteAuth:           remoteAuth,
+		RemoteAuth:           clients.CommonConfig.RemoteAuth,
 		ClientAuthCertFile:   clientAuthCertFile,
 		ClientAuthKeyFile:    clientAuthKeyFile,
 		CAFile:               caFile,
@@ -353,12 +355,12 @@ func configureNsxtClient(d *schema.ResourceData) (*nsxt.APIClient, error) {
 
 	nsxClient, err := nsxt.NewAPIClient(&cfg)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	err = initNSXVersion(nsxClient)
+	clients.NsxtClient = nsxClient
 
-	return nsxClient, err
+	return initNSXVersion(nsxClient)
 }
 
 type jwtToken struct {
@@ -439,8 +441,7 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 	clientAuthCertFile := d.Get("client_auth_cert_file").(string)
 	clientAuthKeyFile := d.Get("client_auth_key_file").(string)
 	caFile := d.Get("ca_file").(string)
-	policyEnforcementPoint = d.Get("enforcement_point").(string)
-	policyRemoteAuth = d.Get("remote_auth").(bool)
+	policyEnforcementPoint := d.Get("enforcement_point").(string)
 
 	if hostIP == "" {
 		return fmt.Errorf("host must be provided")
@@ -449,7 +450,7 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 	host := fmt.Sprintf("https://%s", hostIP)
 	securityCtx := core.NewSecurityContextImpl()
 	securityContextNeeded := true
-	if len(clientAuthCertFile) > 0 && !policyRemoteAuth {
+	if len(clientAuthCertFile) > 0 && !clients.CommonConfig.RemoteAuth {
 		securityContextNeeded = false
 	}
 
@@ -497,6 +498,8 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 		clients.PolicySecurityContext = securityCtx
 	}
 	clients.Host = host
+	clients.PolicyEnforcementPoint = policyEnforcementPoint
+	clients.PolicySite = policySite
 
 	return nil
 }
@@ -515,14 +518,25 @@ func (processor remoteBasicAuthHeaderProcessor) Process(req *http.Request) error
 	return nil
 }
 
+func initCommonConfig(d *schema.ResourceData) commonProviderConfig {
+	remoteAuth := d.Get("remote_auth").(bool)
+	toleratePartialSuccess := d.Get("tolerate_partial_success").(bool)
+
+	return commonProviderConfig{
+		RemoteAuth:             remoteAuth,
+		ToleratePartialSuccess: toleratePartialSuccess,
+	}
+}
+
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
-	nsxtClient, err := configureNsxtClient(d)
-	if err != nil {
-		return nil, err
+	commonConfig := initCommonConfig(d)
+	clients := nsxtClients{
+		CommonConfig: commonConfig,
 	}
 
-	clients := nsxtClients{
-		NsxtClient: nsxtClient,
+	err := configureNsxtClient(d, &clients)
+	if err != nil {
+		return nil, err
 	}
 
 	err = configurePolicyConnectorData(d, &clients)
@@ -539,9 +553,21 @@ func getPolicyConnector(clients interface{}) *client.RestConnector {
 	if c.PolicySecurityContext != nil {
 		connector.SetSecurityContext(c.PolicySecurityContext)
 	}
-	if policyRemoteAuth {
+	if c.CommonConfig.RemoteAuth {
 		connector.AddRequestProcessor(newRemoteBasicAuthHeaderProcessor())
 	}
 
 	return connector
+}
+
+func getPolicyEnforcementPoint(clients interface{}) string {
+	return clients.(nsxtClients).PolicyEnforcementPoint
+}
+
+func getPolicySite(clients interface{}) string {
+	return clients.(nsxtClients).PolicySite
+}
+
+func getCommonProviderConfig(clients interface{}) commonProviderConfig {
+	return clients.(nsxtClients).CommonConfig
 }

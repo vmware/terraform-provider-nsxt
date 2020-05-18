@@ -47,7 +47,7 @@ func dataSourceNsxtPolicyEdgeNodeRead(d *schema.ResourceData, m interface{}) err
 	var obj model.PolicyEdgeNode
 	if objID != "" {
 		// Get by id
-		objGet, err := client.Get(defaultSite, policyEnforcementPoint, edgeClusterID, objID)
+		objGet, err := client.Get(defaultSite, getPolicyEnforcementPoint(m), edgeClusterID, objID)
 
 		if err != nil {
 			return handleDataSourceReadError(d, "Edge Node", objID, err)
@@ -56,7 +56,7 @@ func dataSourceNsxtPolicyEdgeNodeRead(d *schema.ResourceData, m interface{}) err
 	} else {
 		// Get by full name/prefix
 		includeMarkForDeleteObjectsParam := false
-		objList, err := client.List(defaultSite, policyEnforcementPoint, edgeClusterID, nil, &includeMarkForDeleteObjectsParam, nil, nil, nil, nil)
+		objList, err := client.List(defaultSite, getPolicyEnforcementPoint(m), edgeClusterID, nil, &includeMarkForDeleteObjectsParam, nil, nil, nil, nil)
 		if err != nil {
 			return handleListError("Edge Node", err)
 		}

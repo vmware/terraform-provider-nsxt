@@ -104,7 +104,8 @@ func resourceNsxtVlanLogicalSwitchCreate(d *schema.ResourceData, m interface{}) 
 		return fmt.Errorf("Unexpected status returned during LogicalSwitch create: %v", resp.StatusCode)
 	}
 
-	err = resourceNsxtLogicalSwitchVerifyRealization(d, nsxClient, &logicalSwitch)
+	toleratePartialSuccess := getCommonProviderConfig(m.(nsxtClients)).ToleratePartialSuccess
+	err = resourceNsxtLogicalSwitchVerifyRealization(d, nsxClient, &logicalSwitch, toleratePartialSuccess)
 
 	if err != nil {
 		return err

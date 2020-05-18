@@ -43,6 +43,7 @@ func dataSourceNsxtPolicySegmentRealization() *schema.Resource {
 func dataSourceNsxtPolicySegmentRealizationRead(d *schema.ResourceData, m interface{}) error {
 	// Read the realization info by the path, and wait till it is valid
 	connector := getPolicyConnector(m)
+	commonProviderConfig := getCommonProviderConfig(m)
 
 	// Get the realization info of this resource
 	path := d.Get("path").(string)
@@ -55,7 +56,7 @@ func dataSourceNsxtPolicySegmentRealizationRead(d *schema.ResourceData, m interf
 
 	// verifying segment realization on hypervisor
 	segmentID := getPolicyIDFromPath(path)
-	enforcementPointPath := getPolicyEnforcementPointPath()
+	enforcementPointPath := getPolicyEnforcementPointPath(m)
 	client := segments.NewDefaultStateClient(connector)
 	pendingStates := []string{model.SegmentConfigurationState_STATE_PENDING,
 		model.SegmentConfigurationState_STATE_IN_PROGRESS,
@@ -65,7 +66,7 @@ func dataSourceNsxtPolicySegmentRealizationRead(d *schema.ResourceData, m interf
 		model.SegmentConfigurationState_STATE_FAILED,
 		model.SegmentConfigurationState_STATE_ERROR,
 		model.SegmentConfigurationState_STATE_ORPHANED}
-	if toleratePartialSuccess {
+	if commonProviderConfig.ToleratePartialSuccess {
 		targetStates = append(targetStates, model.SegmentConfigurationState_STATE_PARTIAL_SUCCESS)
 	}
 	stateConf := &resource.StateChangeConf{
