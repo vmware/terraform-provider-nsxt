@@ -106,7 +106,6 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_external(t *testing.T) {
 	updatedSubnet := "1.2.12.2/24"
 	ipAddress := "1.1.12.2"
 	updatedIpAddress := "1.2.12.2"
-
 	testResourceName := "nsxt_policy_tier0_gateway_interface.test"
 
 	resource.Test(t, resource.TestCase{
