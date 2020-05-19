@@ -58,7 +58,7 @@ The following arguments are supported:
 * `neighbor_address` - (Required) Neighbor IP Address.
 * `password` - (Optional) Password for BGP neighbor authentication. Set to the empty string to clear out the password.
 * `remote_as_num` - (Required) 4 Byte ASN of the neighbor in ASPLAIN Format.
-* `source_addresses` - (Optional) A list of up to 8 source IP Addresses for BGP peering. `ip_addresses` field of an existing `nsxt_policy_tier0_gateway` can be used here.
+* `source_addresses` - (Optional) A list of up to 8 source IP Addresses for BGP peering. `ip_addresses` field of an existing `nsxt_policy_tier0_gateway_interface` can be used here.
 * `bfd_config` - (Optional) The BFD configuration.
   * `enabled` - (Optional) A boolean flag to enable/disable BFD. Defaults to `false`.
   * `interval` - (Optional) Time interval between heartbeat packets in milliseconds. Defaults to `500`.

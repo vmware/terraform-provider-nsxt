@@ -358,7 +358,7 @@ resource "nsxt_policy_bgp_neighbor" "test" {
   neighbor_address      = "%s"
   remote_as_num         = "%s"
   password              = "%s"
-  source_addresses = nsxt_policy_tier0_gateway_interface.test.ip_addresses
+  source_addresses      = nsxt_policy_tier0_gateway_interface.test.ip_addresses
 
   tag {
     scope = "scope1"
