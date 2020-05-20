@@ -89,6 +89,10 @@ func getTestVMName() string {
 	return os.Getenv("NSXT_TEST_VM_NAME")
 }
 
+func getTestSiteName() string {
+	return os.Getenv("NSXT_TEST_SITE_NAME")
+}
+
 func getTestCertificateName(isClient bool) string {
 	if isClient {
 		return os.Getenv("NSXT_TEST_CLIENT_CERTIFICATE_NAME")

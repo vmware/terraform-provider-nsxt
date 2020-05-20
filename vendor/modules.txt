@@ -282,6 +282,9 @@ github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/locale_services
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/nat
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+# github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm v0.1.0
+github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
+github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/search
 # github.com/zclconf/go-cty v1.2.1
 github.com/zclconf/go-cty/cty
 github.com/zclconf/go-cty/cty/msgpack
