@@ -128,7 +128,7 @@ provider "nsxt" {
 ```hcl
 provider "nsxt" {
   host           = "192.168.110.41"
-  usernam        = "admin"
+  username       = "admin"
   password       = "default"
   global_manager = true
 }
