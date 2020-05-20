@@ -44,6 +44,7 @@ type nsxtClients struct {
 	Host                   string
 	PolicyEnforcementPoint string
 	PolicySite             string
+	PolicyGlobalManager    bool
 }
 
 // Provider for VMWare NSX-T. Returns terraform.ResourceProvider
@@ -144,6 +145,12 @@ func Provider() terraform.ResourceProvider {
 				Optional:    true,
 				Description: "Enforcement Point for NSXT Policy",
 				DefaultFunc: schema.EnvDefaultFunc("NSXT_POLICY_ENFORCEMENT_POINT", "default"),
+			},
+			"global_manager": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Is this a policy global manager endpoint",
+				DefaultFunc: schema.EnvDefaultFunc("NSXT_GLOBAL_MANAGER", false),
 			},
 		},
 
@@ -442,6 +449,7 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 	clientAuthKeyFile := d.Get("client_auth_key_file").(string)
 	caFile := d.Get("ca_file").(string)
 	policyEnforcementPoint := d.Get("enforcement_point").(string)
+	policyGlobalManager := d.Get("global_manager").(bool)
 
 	if hostIP == "" {
 		return fmt.Errorf("host must be provided")
@@ -500,6 +508,7 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 	clients.Host = host
 	clients.PolicyEnforcementPoint = policyEnforcementPoint
 	clients.PolicySite = policySite
+	clients.PolicyGlobalManager = policyGlobalManager
 
 	return nil
 }
@@ -566,6 +575,10 @@ func getPolicyEnforcementPoint(clients interface{}) string {
 
 func getPolicySite(clients interface{}) string {
 	return clients.(nsxtClients).PolicySite
+}
+
+func isPolicyGlobalManager(clients interface{}) bool {
+	return clients.(nsxtClients).PolicyGlobalManager
 }
 
 func getCommonProviderConfig(clients interface{}) commonProviderConfig {
