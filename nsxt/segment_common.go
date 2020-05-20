@@ -113,14 +113,12 @@ func getPolicySegmentSubnetSchema() *schema.Resource {
 				Optional:      true,
 				Elem:          getPolicySegmentDhcpV4ConfigSchema(),
 				MaxItems:      1,
-				ConflictsWith: []string{"subnet.dhcp_v6_config"},
 			},
 			"dhcp_v6_config": {
 				Type:          schema.TypeList,
 				Optional:      true,
 				Elem:          getPolicySegmentDhcpV6ConfigSchema(),
 				MaxItems:      1,
-				ConflictsWith: []string{"subnet.dhcp_v4_config"},
 			},
 			"dhcp_ranges": {
 				Type:        schema.TypeList,
