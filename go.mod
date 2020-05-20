@@ -8,5 +8,5 @@ require (
 	github.com/vmware/vsphere-automation-sdk-go/lib v0.2.0
 	github.com/vmware/vsphere-automation-sdk-go/runtime v0.2.0
 	github.com/vmware/vsphere-automation-sdk-go/services/nsxt v0.3.0
-	github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm v0.1.0 // indirect
+	github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm v0.1.0
 )
