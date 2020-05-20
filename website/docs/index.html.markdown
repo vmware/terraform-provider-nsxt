@@ -127,10 +127,10 @@ provider "nsxt" {
 
 ```hcl
 provider "nsxt" {
-  host                  = "192.168.110.41"
-  username              = "admin"
-  password              = "default"
-  policy_global_manager = true
+  host           = "192.168.110.41"
+  usernam        = "admin"
+  password       = "default"
+  global_manager = true
 }
 
 ```
@@ -189,7 +189,7 @@ The following arguments are used to configure the VMware NSX-T Provider:
 * `enforcement_point` - (Optional) Enforcement point, mostly relevant for policy
   data sources. For VMC environment, this should be set to `vmc-enforcementpoint`.
   For on-prem deployments, this setting should not be specified.
-* `policy_global_manager` - (Optional) True if this is a policy global manager
+* `global_manager` - (Optional) True if this is a policy global manager
   endpoint. False by default.
 
 ## NSX Logical Networking

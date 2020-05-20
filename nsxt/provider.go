@@ -146,7 +146,7 @@ func Provider() terraform.ResourceProvider {
 				Description: "Enforcement Point for NSXT Policy",
 				DefaultFunc: schema.EnvDefaultFunc("NSXT_POLICY_ENFORCEMENT_POINT", "default"),
 			},
-			"policy_global_manager": {
+			"global_manager": {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Description: "Is this a policy global manager endpoint",
@@ -449,7 +449,7 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 	clientAuthKeyFile := d.Get("client_auth_key_file").(string)
 	caFile := d.Get("ca_file").(string)
 	policyEnforcementPoint := d.Get("enforcement_point").(string)
-	policyGlobalManager := d.Get("policy_global_manager").(bool)
+	policyGlobalManager := d.Get("global_manager").(bool)
 
 	if hostIP == "" {
 		return fmt.Errorf("host must be provided")
