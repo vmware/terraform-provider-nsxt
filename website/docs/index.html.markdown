@@ -189,8 +189,8 @@ The following arguments are used to configure the VMware NSX-T Provider:
 * `enforcement_point` - (Optional) Enforcement point, mostly relevant for policy
   data sources. For VMC environment, this should be set to `vmc-enforcementpoint`.
   For on-prem deployments, this setting should not be specified.
-* `global_manager` - (Optional) True if this is a policy global manager
-  endpoint. False by default.
+* `global_manager` - (Optional) True if this is a global manager endpoint.
+  False by default.
 
 ## NSX Logical Networking
 
