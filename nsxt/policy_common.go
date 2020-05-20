@@ -1,6 +1,7 @@
 package nsxt
 
 import (
+	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
@@ -548,4 +549,8 @@ func getGatewayInterfaceUrpfModeSchema() *schema.Schema {
 		ValidateFunc: validation.StringInSlice(gatewayInterfaceUrpfModeValues, false),
 		Default:      model.Tier0Interface_URPF_MODE_STRICT,
 	}
+}
+
+func globalManagerOnlyError() error {
+	return fmt.Errorf("This configuration is only supported with NSX Global Manager. To mark your endpoint as Global Manager, please set 'global_manager' flag to 'true' in the provider.")
 }
