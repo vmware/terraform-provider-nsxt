@@ -643,7 +643,7 @@ func resourceNsxtPolicyServiceDelete(d *schema.ResourceData, m interface{}) erro
 	client := infra.NewDefaultServicesClient(connector)
 	err := client.Delete(id)
 	if err != nil {
-		err = handleDeleteError("Service", id, err)
+		return handleDeleteError("Service", id, err)
 	}
 
 	return nil
