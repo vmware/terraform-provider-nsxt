@@ -25,6 +25,15 @@ func dataSourceNsxtPolicyMacDiscoveryProfile() *schema.Resource {
 }
 
 func dataSourceNsxtPolicyMacDiscoveryProfileRead(d *schema.ResourceData, m interface{}) error {
+	if isPolicyGlobalManager(m) {
+		_, err := policyDataSourceResourceRead(d, getPolicyConnector(m), "MacDiscoveryProfile")
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+
+	// Local manager support:
 	connector := getPolicyConnector(m)
 	client := infra.NewDefaultMacDiscoveryProfilesClient(connector)
 
