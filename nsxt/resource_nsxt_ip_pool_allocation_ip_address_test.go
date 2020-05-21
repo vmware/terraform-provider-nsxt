@@ -17,51 +17,68 @@ const (
 	waitSeconds = 150
 )
 
+var testAccIPAllocationName = "nsxt_ip_pool_allocation_ip_address.test"
+var testAccIPPoolName = "data.nsxt_ip_pool.acceptance_test"
+
 func TestAccResourceNsxtIPPoolAllocationIPAddress_basic(t *testing.T) {
-	poolName := getIPPoolName()
-	if poolName == "" {
-		t.Skipf("No NSXT_TEST_IP_POOL set - skipping test")
-	}
-
-	poolResourceName := "data.nsxt_ip_pool.acceptance_test"
-	resourceName := "nsxt_ip_pool_allocation_ip_address.test"
-
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t); testAccEnvDefined(t, "NSXT_TEST_IP_POOL") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXIPPoolAllocationIPAddressCheckDestroy(state, poolResourceName, resourceName)
+			return testAccNSXIPPoolAllocationIPAddressCheckDestroy(state)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXIPPoolAllocationIPAddressCreateTemplate(poolName),
+				Config: testAccNSXIPPoolAllocationIPAddressCreateTemplate(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNSXIPPoolAllocationIPAddressExists(poolResourceName, resourceName),
-					resource.TestCheckResourceAttrSet(resourceName, "ip_pool_id"),
-					resource.TestCheckResourceAttrSet(resourceName, "allocation_id"),
+					testAccNSXIPPoolAllocationIPAddressExists(),
+					resource.TestCheckResourceAttrSet(testAccIPAllocationName, "ip_pool_id"),
+					resource.TestCheckResourceAttrSet(testAccIPAllocationName, "allocation_id"),
 				),
 			},
 		},
 	})
 }
 
-func testAccNSXIPPoolAllocationIPAddressExists(poolResourceName string, resourceName string) resource.TestCheckFunc {
+func TestAccResourceNsxtIPPoolAllocationIPAddress_import(t *testing.T) {
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccEnvDefined(t, "NSXT_TEST_IP_POOL") },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXIPPoolAllocationIPAddressCheckDestroy(state)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXIPPoolAllocationIPAddressCreateTemplate(),
+			},
+			{
+				ResourceName:      testAccIPAllocationName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccNSXIPPoolAllocationIPAddressImporterGetID,
+			},
+		},
+	})
+}
+
+func testAccNSXIPPoolAllocationIPAddressExists() resource.TestCheckFunc {
 	return func(state *terraform.State) error {
-		exists, err := checkAllocationIPAddressExists(state, poolResourceName, resourceName)
+		exists, err := checkAllocationIPAddressExists(state)
 		if err != nil {
 			return err
 		}
 		if !*exists {
-			return fmt.Errorf("Allocation %s in IP Pool %s is not existing", resourceName, poolResourceName)
+			return fmt.Errorf("Allocation %s in IP Pool %s does not exist", testAccIPAllocationName, testAccIPPoolName)
 		}
 		return nil
 	}
 }
 
-func getIPPoolIDByResourceName(state *terraform.State, poolResourceName string) (string, error) {
-	rsPool, ok := state.RootModule().Resources[poolResourceName]
+func getIPPoolIDByResourceName(state *terraform.State) (string, error) {
+	rsPool, ok := state.RootModule().Resources[testAccIPPoolName]
 	if !ok {
-		return "", fmt.Errorf("IP Pool resource %s not found in resources", getIPPoolName())
+		return "", fmt.Errorf("IP Pool resource %s not found in resources", testAccIPPoolName)
 	}
 
 	poolID := rsPool.Primary.ID
@@ -71,15 +88,16 @@ func getIPPoolIDByResourceName(state *terraform.State, poolResourceName string) 
 	return poolID, nil
 }
 
-func checkAllocationIPAddressExists(state *terraform.State, poolResourceName string, resourceName string) (*bool, error) {
-	poolID, err := getIPPoolIDByResourceName(state, poolResourceName)
+func checkAllocationIPAddressExists(state *terraform.State) (*bool, error) {
+	exists := false
+	poolID, err := getIPPoolIDByResourceName(state)
 	if err != nil {
-		return nil, err
+		return &exists, nil
 	}
 
-	rs, ok := state.RootModule().Resources[resourceName]
+	rs, ok := state.RootModule().Resources[testAccIPAllocationName]
 	if !ok {
-		return nil, fmt.Errorf("IP Pool allocation_ip_address resource %s not found in resources", resourceName)
+		return nil, fmt.Errorf("IP Pool allocation_ip_address resource %s not found in resources", testAccIPAllocationName)
 	}
 
 	nsxClient := testAccProvider.Meta().(nsxtClients).NsxtClient
@@ -95,7 +113,6 @@ func checkAllocationIPAddressExists(state *terraform.State, poolResourceName str
 		return nil, fmt.Errorf("Error while checking if allocations in IP Pool %s exists. HTTP return code was %d", poolID, responseCode.StatusCode)
 	}
 
-	exists := false
 	for _, allocationIPAddress := range listResult.Results {
 		if allocationIPAddress.AllocationId == rs.Primary.ID {
 			exists = true
@@ -106,13 +123,13 @@ func checkAllocationIPAddressExists(state *terraform.State, poolResourceName str
 	return &exists, nil
 }
 
-func testAccNSXIPPoolAllocationIPAddressCheckDestroy(state *terraform.State, poolResourceName, resourceName string) error {
+func testAccNSXIPPoolAllocationIPAddressCheckDestroy(state *terraform.State) error {
 	// PoolManagementApi.ListIpPoolAllocations() call does not return updated list within two minutes. Need to wait...
 	fmt.Printf("testAccNSXIPPoolAllocationIPAddressCheckDestroy: waiting up to %d seconds\n", waitSeconds)
 
 	timeout := time.Now().Add(waitSeconds * time.Second)
 	for time.Now().Before(timeout) {
-		exists, err := checkAllocationIPAddressExists(state, poolResourceName, resourceName)
+		exists, err := checkAllocationIPAddressExists(state)
 		if err != nil {
 			return err
 		}
@@ -124,7 +141,7 @@ func testAccNSXIPPoolAllocationIPAddressCheckDestroy(state *terraform.State, poo
 	return fmt.Errorf("Timeout on check destroy IP address allocation")
 }
 
-func testAccNSXIPPoolAllocationIPAddressCreateTemplate(poolName string) string {
+func testAccNSXIPPoolAllocationIPAddressCreateTemplate() string {
 	return fmt.Sprintf(`
 data "nsxt_ip_pool" "acceptance_test" {
   display_name = "%s"
@@ -132,5 +149,21 @@ data "nsxt_ip_pool" "acceptance_test" {
 
 resource "nsxt_ip_pool_allocation_ip_address" "test" {
   ip_pool_id = "${data.nsxt_ip_pool.acceptance_test.id}"
-}`, poolName)
+}`, getIPPoolName())
+}
+
+func testAccNSXIPPoolAllocationIPAddressImporterGetID(s *terraform.State) (string, error) {
+	rs, ok := s.RootModule().Resources[testAccIPAllocationName]
+	if !ok {
+		return "", fmt.Errorf("NSX IP allocation resource %s not found in resources", testAccIPAllocationName)
+	}
+	resourceID := rs.Primary.ID
+	if resourceID == "" {
+		return "", fmt.Errorf("NSX IP allocation resource ID not set in resources ")
+	}
+	poolID := rs.Primary.Attributes["ip_pool_id"]
+	if poolID == "" {
+		return "", fmt.Errorf("NSX IP Pool ID not set in resources ")
+	}
+	return fmt.Sprintf("%s/%s", poolID, resourceID), nil
 }
