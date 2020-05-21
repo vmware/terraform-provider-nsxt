@@ -106,6 +106,10 @@ func testAccEnvDefined(t *testing.T, envVar string) {
 	}
 }
 
+func testAccIsGlobalManager() bool {
+	return os.Getenv("NSXT_GLOBAL_MANAGER") == "true"
+}
+
 // Create and delete CA and client cert for various tests
 func testAccNSXCreateCert(t *testing.T, name string, certPem string, certPK string, certType string) string {
 	nsxClient, err := testAccGetClient()
