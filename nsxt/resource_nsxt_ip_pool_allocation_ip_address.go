@@ -9,6 +9,7 @@ import (
 	"github.com/vmware/go-vmware-nsxt/manager"
 	"log"
 	"net/http"
+	"strings"
 )
 
 func resourceNsxtIPPoolAllocationIPAddress() *schema.Resource {
@@ -17,7 +18,7 @@ func resourceNsxtIPPoolAllocationIPAddress() *schema.Resource {
 		Read:   resourceNsxtIPPoolAllocationIPAddressRead,
 		Delete: resourceNsxtIPPoolAllocationIPAddressDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			State: resourceNsxtIPPoolAllocationIPAddressImport,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -131,4 +132,15 @@ func resourceNsxtIPPoolAllocationIPAddressDelete(d *schema.ResourceData, m inter
 	}
 
 	return nil
+}
+
+func resourceNsxtIPPoolAllocationIPAddressImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	importID := d.Id()
+	s := strings.Split(importID, "/")
+	if len(s) != 2 {
+		return nil, fmt.Errorf("Please provide <pool-id>/<ip-address-id> as an input")
+	}
+	d.SetId(s[1])
+	d.Set("ip_pool_id", s[0])
+	return []*schema.ResourceData{d}, nil
 }
