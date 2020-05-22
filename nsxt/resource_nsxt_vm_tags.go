@@ -35,7 +35,6 @@ func resourceNsxtVMTags() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "(Optional) Logical switch id",
 				Optional:    true,
-				Computed:    true,
 			},
 			"tag":              getTagsSchema(),
 			"logical_port_tag": getTagsSchema(),

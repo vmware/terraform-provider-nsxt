@@ -90,11 +90,11 @@ func getTestVMName() string {
 }
 
 func getTestLogicalSwitchID() string {
-	return os.Getenv("NSXT_TEST_LOGICAL_SWITCH_ID")
+	return os.Getenv("NSXT_TEST_VM_LOGICAL_SWITCH_ID")
 }
 
 func getTestNonTaggedLogicalSwitchID() string {
-	return os.Getenv("NSXT_TEST_NON_TAGGED_LOGICAL_SWITCH_ID")
+	return os.Getenv("NSXT_TEST_VM_NON_TAGGED_LOGICAL_SWITCH_ID")
 }
 
 func getTestCertificateName(isClient bool) string {

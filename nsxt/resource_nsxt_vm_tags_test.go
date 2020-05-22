@@ -81,8 +81,8 @@ func TestAccResourceNsxtVMTags_withSpecificLogicalPort(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccEnvDefined(t, "NSXT_TEST_VM_ID")
-			testAccEnvDefined(t, "NSXT_TEST_LOGICAL_SWITCH_ID")
-			testAccEnvDefined(t, "NSXT_TEST_NON_TAGGED_LOGICAL_SWITCH_ID")
+			testAccEnvDefined(t, "NSXT_TEST_VM_LOGICAL_SWITCH_ID")
+			testAccEnvDefined(t, "NSXT_TEST_VM_NON_TAGGED_LOGICAL_SWITCH_ID")
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
