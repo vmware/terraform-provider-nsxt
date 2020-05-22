@@ -22,6 +22,8 @@ func TestAccResourceNsxtPolicyGatewayPolicy_basic(t *testing.T) {
 	proto1 := "IPV4"
 	proto2 := "IPV4_IPV6"
 	defaultAction := "ALLOW"
+	tag1 := "abc"
+	tag2 := "def"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -64,7 +66,7 @@ func TestAccResourceNsxtPolicyGatewayPolicy_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyGatewayPolicyWithRule(updatedName, direction1, proto1),
+				Config: testAccNsxtPolicyGatewayPolicyWithRule(updatedName, direction1, proto1, tag1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyGatewayPolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -81,10 +83,12 @@ func TestAccResourceNsxtPolicyGatewayPolicy_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.direction", direction1),
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.ip_version", proto1),
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.action", defaultAction),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.log_label", tag1),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.tag.#", "1"),
 				),
 			},
 			{
-				Config: testAccNsxtPolicyGatewayPolicyWithRule(updatedName, direction2, proto2),
+				Config: testAccNsxtPolicyGatewayPolicyWithRule(updatedName, direction2, proto2, tag2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyGatewayPolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -101,6 +105,8 @@ func TestAccResourceNsxtPolicyGatewayPolicy_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.direction", direction2),
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.ip_version", proto2),
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.action", defaultAction),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.log_label", tag2),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.tag.#", "1"),
 				),
 			},
 		},
@@ -309,7 +315,7 @@ resource "nsxt_policy_gateway_policy" "test" {
 }`, name, comments)
 }
 
-func testAccNsxtPolicyGatewayPolicyWithRule(name string, direction string, protocol string) string {
+func testAccNsxtPolicyGatewayPolicyWithRule(name string, direction string, protocol string, ruleTag string) string {
 	return fmt.Sprintf(`
 resource "nsxt_policy_tier1_gateway" "gwt1test" {
   display_name      = "tf-t1-gw"
@@ -333,10 +339,16 @@ resource "nsxt_policy_gateway_policy" "test" {
   rule {
     display_name = "%s"
     direction    = "%s"
-    ip_version  = "%s"
+    ip_version   = "%s"
     scope        = [nsxt_policy_tier1_gateway.gwt1test.path]
+    log_label    = "%s"
+
+    tag {
+      scope = "color"
+      tag   = "blue"
+    }
   }
-}`, name, name, direction, protocol)
+}`, name, name, direction, protocol, ruleTag)
 }
 
 //TODO: add  profiles when available

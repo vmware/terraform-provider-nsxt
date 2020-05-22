@@ -29,8 +29,10 @@ func statusGetInputType() bindings.StructType {
 	fieldNameMap := make(map[string]string)
 	fields["intent_path"] = bindings.NewStringType()
 	fields["include_enforced_status"] = bindings.NewOptionalType(bindings.NewBooleanType())
+	fields["site_path"] = bindings.NewOptionalType(bindings.NewStringType())
 	fieldNameMap["intent_path"] = "IntentPath"
 	fieldNameMap["include_enforced_status"] = "IncludeEnforcedStatus"
+	fieldNameMap["site_path"] = "SitePath"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -46,12 +48,18 @@ func statusGetRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["intent_path"] = bindings.NewStringType()
 	fields["include_enforced_status"] = bindings.NewOptionalType(bindings.NewBooleanType())
+	fields["site_path"] = bindings.NewOptionalType(bindings.NewStringType())
 	fieldNameMap["intent_path"] = "IntentPath"
 	fieldNameMap["include_enforced_status"] = "IncludeEnforcedStatus"
+	fieldNameMap["site_path"] = "SitePath"
+	paramsTypeMap["site_path"] = bindings.NewOptionalType(bindings.NewStringType())
 	paramsTypeMap["include_enforced_status"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["intent_path"] = bindings.NewStringType()
+	queryParams["site_path"] = "site_path"
 	queryParams["intent_path"] = "intent_path"
 	queryParams["include_enforced_status"] = "include_enforced_status"
 	resultHeaders := map[string]string{}
@@ -63,14 +71,18 @@ func statusGetRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"",
 		"GET",
 		"/policy/api/v1/infra/realized-state/status",
+		"",
 		resultHeaders,
 		200,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 

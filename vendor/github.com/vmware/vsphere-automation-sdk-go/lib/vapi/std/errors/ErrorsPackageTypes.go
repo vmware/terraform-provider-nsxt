@@ -14,9 +14,9 @@ package errors
 
 import (
 	"reflect"
-	"github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
+	"github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std"
 )
 
 
@@ -976,7 +976,7 @@ func (Unsupported Unsupported) Error() string {
 
 // The ``UnverifiedPeer`` exception indicates that an attempt to connect to an unknown or not-yet-trusted endpoint failed because the system was unable to verify the identity of the endpoint. 
 //
-//  Typically the {Error#data property of this error will contain information that can be presented to a human to allow them to decide whether to trust the endpoint. If they decide to trust the endpoint, the request can be resubmitted with an indication that the endpoint should be trusted. 
+//  Typically the Error#data property of this error will contain information that can be presented to a human to allow them to decide whether to trust the endpoint. If they decide to trust the endpoint, the request can be resubmitted with an indication that the endpoint should be trusted. 
 //
 //  Examples: 
 //

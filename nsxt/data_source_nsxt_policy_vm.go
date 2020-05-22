@@ -49,7 +49,7 @@ func dataSourceNsxtPolicyVMIDRead(d *schema.ResourceData, m interface{}) error {
 	// TODO: test with KVM based VM
 	objID := getNsxtPolicyVMIDFromSchema(d)
 	if objID != "" {
-		vmObj, err := findNsxtPolicyVMByID(connector, objID)
+		vmObj, err := findNsxtPolicyVMByID(connector, objID, m)
 		if err != nil {
 			return fmt.Errorf("Error while reading Virtual Machine %s: %v", objID, err)
 		}
@@ -57,7 +57,7 @@ func dataSourceNsxtPolicyVMIDRead(d *schema.ResourceData, m interface{}) error {
 	} else {
 		displayName := d.Get("display_name").(string)
 
-		perfectMatch, prefixMatch, err := findNsxtPolicyVMByNamePrefix(connector, displayName)
+		perfectMatch, prefixMatch, err := findNsxtPolicyVMByNamePrefix(connector, displayName, m)
 		if err != nil {
 			return err
 		}
@@ -77,10 +77,13 @@ func dataSourceNsxtPolicyVMIDRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	computeIDMap := collectSeparatedStringListToMap(vmModel.ComputeIds, ":")
-	d.SetId(vmModel.ExternalId)
+	if vmModel.ExternalId == nil {
+		return fmt.Errorf("Unable to read external ID for Virtual Machine with name %s", *vmModel.DisplayName)
+	}
+	d.SetId(*vmModel.ExternalId)
 	d.Set("display_name", vmModel.DisplayName)
 	d.Set("description", vmModel.Description)
-	d.Set("external_id", vmModel.ExternalId)
+	d.Set("external_id", *vmModel.ExternalId)
 	d.Set("bios_id", computeIDMap[nsxtPolicyBiosUUIDKey])
 	d.Set("instance_id", computeIDMap[nsxtPolicyInstanceUUIDKey])
 	return nil

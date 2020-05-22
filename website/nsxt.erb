@@ -10,50 +10,14 @@
                     <a href="/docs/providers/nsxt/index.html">NSX-T Provider</a>
                 </li>
 
-                <li<%= sidebar_current("docs-nsxt-datasource") %>>
-                <a href="#">Data Sources</a>
-                    <ul class="nav nav-visible">
-                        <li<%= sidebar_current("docs-nsxt-datasource-edge-cluster") %>>
-                            <a href="/docs/providers/nsxt/d/edge_cluster.html">nsxt_edge_cluster</a>
-                        </li>
-                        <li<%= sidebar_current("docs-nsxt-datasource-logical-tier0-router") %>>
-                            <a href="/docs/providers/nsxt/d/logical_tier0_router.html">nsxt_logical_tier0_router</a>
-                        </li>
-                        <li<%= sidebar_current("docs-nsxt-datasource-logical-tier1-router") %>>
-                            <a href="/docs/providers/nsxt/d/logical_tier1_router.html">nsxt_logical_tier1_router</a>
-                        </li>
-                        <li<%= sidebar_current("docs-nsxt-datasource-ns-group") %>>
-                            <a href="/docs/providers/nsxt/d/ns_group.html">nsxt_ns_group</a>
-                        </li>
-                        <li<%= sidebar_current("docs-nsxt-datasource-ns-service") %>>
-                            <a href="/docs/providers/nsxt/d/ns_service.html">nsxt_ns_service</a>
-                        </li>
-                        <li<%= sidebar_current("docs-nsxt-datasource-mac-pool") %>>
-                            <a href="/docs/providers/nsxt/d/mac_pool.html">nsxt_mac_pool</a>
-                        </li>
-                        <li<%= sidebar_current("docs-nsxt-datasource-switching-profile") %>>
-                            <a href="/docs/providers/nsxt/d/switching_profile.html">nsxt_switching_profile</a>
-                        </li>
-                        <li<%= sidebar_current("docs-nsxt-datasource-transport-zone") %>>
-                            <a href="/docs/providers/nsxt/d/transport_zone.html">nsxt_transport_zone</a>
-                        </li>
-                        <li<%= sidebar_current("docs-nsxt-datasource-certificate") %>>
-                            <a href="/docs/providers/nsxt/d/certificate.html">nsxt_certificate</a>
-                        </li>
-                        <li<%= sidebar_current("docs-nsxt-datasource-ip-pool") %>>
-                            <a href="/docs/providers/nsxt/d/ip_pool.html">nsxt_ip_pool</a>
-                        </li>
-                        <li<%= sidebar_current("docs-nsxt-datasource-firewall-section") %>>
-                            <a href="/docs/providers/nsxt/d/firewall_section.html">nsxt_firewall_section</a>
-                        </li>
-                     </ul>
-                </li>
-
                 <li<%= sidebar_current("docs-nsxt-policy-datasource") %>>
                 <a href="#">Policy Data Sources</a>
                     <ul class="nav nav-visible">
                         <li<%= sidebar_current("docs-nsxt-datasource-policy-realization-info") %>>
                             <a href="/docs/providers/nsxt/d/policy_realization_info.html">nsxt_policy_realization_info</a>
+                        </li>
+                        <li<%= sidebar_current("docs-nsxt-datasource-policy-segment-realization") %>>
+                            <a href="/docs/providers/nsxt/d/policy_segment_realization.html">nsxt_policy_segment_realization</a>
                         </li>
                         <li<%= sidebar_current("docs-nsxt-datasource-policy-edge-cluster") %>>
                             <a href="/docs/providers/nsxt/d/policy_edge_cluster.html">nsxt_policy_edge_cluster</a>
@@ -114,6 +78,7 @@
                         </li>
                      </ul>
                 </li>
+
                 <li<%= sidebar_current("docs-nsxt-policy-lb-datasource") %>>
                 <a href="#">Policy Load Balancer Data Sources</a>
                     <ul class="nav nav-visible">
@@ -135,8 +100,131 @@
                      </ul>
                 </li>
 
+                <li<%= sidebar_current("docs-nsxt-policy-resource") %>>
+                    <a href="#">Policy Resources</a>
+                    <ul class="nav nav-visible">
+                        <li<%= sidebar_current("docs-nsxt-resource-policy-tier0-gateway") %>>
+                            <a href="/docs/providers/nsxt/r/policy_tier0_gateway.html">nsxt_policy_tier0_gateway</a>
+                        </li>
+                        <li<%= sidebar_current("docs-nsxt-resource-policy-tier0-gateway-interface") %>>
+                            <a href="/docs/providers/nsxt/r/policy_tier0_gateway_interface.html">nsxt_policy_tier0_gateway_interface</a>
+                        </li>
+                        <li<%= sidebar_current("docs-nsxt-resource-policy-tier1-gateway") %>>
+                            <a href="/docs/providers/nsxt/r/policy_tier1_gateway.html">nsxt_policy_tier1_gateway</a>
+                        </li>
+                        <li<%= sidebar_current("docs-nsxt-resource-policy-tier1-gateway-interface") %>>
+                            <a href="/docs/providers/nsxt/r/policy_tier1_gateway_interface.html">nsxt_policy_tier1_gateway_interface</a>
+                        </li>
+                        <li<%= sidebar_current("docs-nsxt-resource-policy-service") %>>
+                            <a href="/docs/providers/nsxt/r/policy_service.html">nsxt_policy_service</a>
+                        </li>
+                        <li<%= sidebar_current("docs-nsxt-resource-policy-group") %>>
+                            <a href="/docs/providers/nsxt/r/policy_group.html">nsxt_policy_group</a>
+                        </li>
+                        <li<%= sidebar_current("docs-nsxt-resource-policy-security-policy") %>>
+                            <a href="/docs/providers/nsxt/r/policy_security_policy.html">nsxt_policy_security_policy</a>
+                        </li>
+                        <li<%= sidebar_current("docs-nsxt-resource-policy-gateway-policy") %>>
+                            <a href="/docs/providers/nsxt/r/policy_gateway_policy.html">nsxt_policy_gateway_policy</a>
+                        </li>
+                        <li<%= sidebar_current("docs-nsxt-resource-policy-static-route") %>>
+                            <a href="/docs/providers/nsxt/r/policy_static_route.html">nsxt_policy_static_route</a>
+                        </li>
+                        <li<%= sidebar_current("docs-nsxt-resource-policy-nat-rule") %>>
+                            <a href="/docs/providers/nsxt/r/policy_nat_rule.html">nsxt_policy_nat_rule</a>
+                        </li>
+                        <li<%= sidebar_current("docs-nsxt-resource-policy-ip-block") %>>
+                            <a href="/docs/providers/nsxt/r/policy_ip_block.html">nsxt_policy_ip_block</a>
+                        </li>
+                        <li<%= sidebar_current("docs-nsxt-resource-policy-ip-pool") %>>
+                            <a href="/docs/providers/nsxt/r/policy_ip_pool.html">nsxt_policy_ip_pool</a>
+                        </li>
+                        <li<%= sidebar_current("docs-nsxt-resource-policy-ip-pool-block-subnet") %>>
+                            <a href="/docs/providers/nsxt/r/policy_ip_pool_block_subnet.html">nsxt_policy_ip_pool_block_subnet</a>
+                        </li>
+                        <li<%= sidebar_current("docs-nsxt-resource-policy-ip-pool-static-subnet") %>>
+                            <a href="/docs/providers/nsxt/r/policy_ip_pool_static_subnet.html">nsxt_policy_ip_pool_static_subnet</a>
+                        </li>
+                        <li<%= sidebar_current("docs-nsxt-resource-policy-ip-address-allocation") %>>
+                            <a href="/docs/providers/nsxt/r/policy_ip_address_allocation.html">nsxt_policy_ip_address_allocation</a>
+                        </li>
+                        <li<%= sidebar_current("docs-nsxt-resource-policy-bgp-neighbor") %>>
+                            <a href="/docs/providers/nsxt/r/policy_bgp_neighbor.html">nsxt_policy_bgp_neighbor</a>
+                        </li>
+                        <li<%= sidebar_current("docs-nsxt-resource-policy-dhcp-relay") %>>
+                            <a href="/docs/providers/nsxt/r/policy_dhcp_relay.html">nsxt_policy_dhcp_relay</a>
+                        </li>
+                        <li<%= sidebar_current("docs-nsxt-resource-policy-segment") %>>
+                            <a href="/docs/providers/nsxt/r/policy_segment.html">nsxt_policy_segment</a>
+                        </li>
+                        <li<%= sidebar_current("docs-nsxt-resource-policy-vlan-segment") %>>
+                            <a href="/docs/providers/nsxt/r/policy_vlan_segment.html">nsxt_policy_vlan_segment</a>
+                        </li>
+                        <li<%= sidebar_current("docs-nsxt-resource-policy-vm-tags") %>>
+                            <a href="/docs/providers/nsxt/r/policy_vm_tags.html">nsxt_policy_vm_tags</a>
+                        </li>
+                        <li<%= sidebar_current("docs-nsxt-resource-policy-dhcp-server") %>>
+                            <a href="/docs/providers/nsxt/r/policy_dhcp_server.html">nsxt_policy_dhcp_server</a>
+                        </li>
+                    </ul>
+                </li>
+
+                <li<%= sidebar_current("docs-nsxt-policy-load-balancing-resource") %>>
+                    <a href="#">Policy Load Balancing Resources</a>
+                    <ul class="nav nav-visible">
+                        <li<%= sidebar_current("docs-nsxt-resource-policy-lb-pool") %>>
+                            <a href="/docs/providers/nsxt/r/policy_lb_pool.html">nsxt_policy_lb_pool</a>
+                        </li>
+                        <li<%= sidebar_current("docs-nsxt-resource-policy-lb-service") %>>
+                            <a href="/docs/providers/nsxt/r/policy_lb_service.html">nsxt_policy_lb_service</a>
+                        </li>
+                        <li<%= sidebar_current("docs-nsxt-resource-policy-lb-virtual-server") %>>
+                            <a href="/docs/providers/nsxt/r/policy_lb_virtual_server.html">nsxt_policy_lb_virtual_server</a>
+                        </li>
+                    </ul>
+                </li>
+
+                <li<%= sidebar_current("docs-nsxt-datasource") %>>
+                <a href="#">Manager Data Sources</a>
+                    <ul class="nav nav-visible">
+                        <li<%= sidebar_current("docs-nsxt-datasource-edge-cluster") %>>
+                            <a href="/docs/providers/nsxt/d/edge_cluster.html">nsxt_edge_cluster</a>
+                        </li>
+                        <li<%= sidebar_current("docs-nsxt-datasource-logical-tier0-router") %>>
+                            <a href="/docs/providers/nsxt/d/logical_tier0_router.html">nsxt_logical_tier0_router</a>
+                        </li>
+                        <li<%= sidebar_current("docs-nsxt-datasource-logical-tier1-router") %>>
+                            <a href="/docs/providers/nsxt/d/logical_tier1_router.html">nsxt_logical_tier1_router</a>
+                        </li>
+                        <li<%= sidebar_current("docs-nsxt-datasource-ns-group") %>>
+                            <a href="/docs/providers/nsxt/d/ns_group.html">nsxt_ns_group</a>
+                        </li>
+                        <li<%= sidebar_current("docs-nsxt-datasource-ns-service") %>>
+                            <a href="/docs/providers/nsxt/d/ns_service.html">nsxt_ns_service</a>
+                        </li>
+                        <li<%= sidebar_current("docs-nsxt-datasource-mac-pool") %>>
+                            <a href="/docs/providers/nsxt/d/mac_pool.html">nsxt_mac_pool</a>
+                        </li>
+                        <li<%= sidebar_current("docs-nsxt-datasource-switching-profile") %>>
+                            <a href="/docs/providers/nsxt/d/switching_profile.html">nsxt_switching_profile</a>
+                        </li>
+                        <li<%= sidebar_current("docs-nsxt-datasource-transport-zone") %>>
+                            <a href="/docs/providers/nsxt/d/transport_zone.html">nsxt_transport_zone</a>
+                        </li>
+                        <li<%= sidebar_current("docs-nsxt-datasource-certificate") %>>
+                            <a href="/docs/providers/nsxt/d/certificate.html">nsxt_certificate</a>
+                        </li>
+                        <li<%= sidebar_current("docs-nsxt-datasource-ip-pool") %>>
+                            <a href="/docs/providers/nsxt/d/ip_pool.html">nsxt_ip_pool</a>
+                        </li>
+                        <li<%= sidebar_current("docs-nsxt-datasource-firewall-section") %>>
+                            <a href="/docs/providers/nsxt/d/firewall_section.html">nsxt_firewall_section</a>
+                        </li>
+                     </ul>
+                </li>
+
                 <li<%= sidebar_current("docs-nsxt-resource") %>>
-                    <a href="#">Resources</a>
+                    <a href="#">Manager Resources</a>
                     <ul class="nav nav-visible">
                         <li<%= sidebar_current("docs-nsxt-resource-dhcp-relay-profile") %>>
                             <a href="/docs/providers/nsxt/r/dhcp_relay_profile.html">nsxt_dhcp_relay_profile</a>
@@ -262,7 +350,7 @@
                 </li>
 
                 <li<%= sidebar_current("docs-nsxt-ns-service-resource") %>>
-                    <a href="#">NS Services Resources</a>
+                    <a href="#">Manager NS Services Resources</a>
                     <ul class="nav nav-visible">
                         <li<%= sidebar_current("docs-nsxt-ns-service-resource-algorithm-type") %>>
                             <a href="/docs/providers/nsxt/r/algorithm_type_ns_service.html">nsxt_algorithm_type_ns_service</a>
@@ -289,7 +377,7 @@
                 </li>
 
                 <li<%= sidebar_current("docs-nsxt-lb-monitor-resource") %>>
-                    <a href="#">Load Balancer Monitor Resources</a>
+                    <a href="#">Manager Load Balancer Monitor Resources</a>
                     <ul class="nav nav-visible">
                         <li<%= sidebar_current("docs-nsxt-lb-monitor-resource-icmp") %>>
                             <a href="/docs/providers/nsxt/r/lb_icmp_monitor.html">nsxt_lb_icmp_monitor</a>
@@ -313,7 +401,7 @@
                 </li>
 
                 <li<%= sidebar_current("docs-nsxt-switching-profile-resource") %>>
-                    <a href="#">Switching Profiles Resources</a>
+                    <a href="#">Manager Switching Profiles Resources</a>
                     <ul class="nav nav-visible">
                         <li<%= sidebar_current("docs-nsxt-ip-discovery-switching-profile") %>>
                             <a href="/docs/providers/nsxt/r/ip_discovery_switching_profile.html">nsxt_ip_discovery_switching_profile</a>
@@ -333,88 +421,6 @@
                     </ul>
                 </li>
 
-                <li<%= sidebar_current("docs-nsxt-policy-resource") %>>
-                    <a href="#">Policy Resources</a>
-                    <ul class="nav nav-visible">
-                        <li<%= sidebar_current("docs-nsxt-resource-policy-tier0-gateway") %>>
-                            <a href="/docs/providers/nsxt/r/policy_tier0_gateway.html">nsxt_policy_tier0_gateway</a>
-                        </li>
-                        <li<%= sidebar_current("docs-nsxt-resource-policy-tier0-gateway-interface") %>>
-                            <a href="/docs/providers/nsxt/r/policy_tier0_gateway_interface.html">nsxt_policy_tier0_gateway_interface</a>
-                        </li>
-                        <li<%= sidebar_current("docs-nsxt-resource-policy-tier1-gateway") %>>
-                            <a href="/docs/providers/nsxt/r/policy_tier1_gateway.html">nsxt_policy_tier1_gateway</a>
-                        </li>
-                        <li<%= sidebar_current("docs-nsxt-resource-policy-tier1-gateway-interface") %>>
-                            <a href="/docs/providers/nsxt/r/policy_tier1_gateway_interface.html">nsxt_policy_tier1_gateway_interface</a>
-                        </li>
-                        <li<%= sidebar_current("docs-nsxt-resource-policy-service") %>>
-                            <a href="/docs/providers/nsxt/r/policy_service.html">nsxt_policy_service</a>
-                        </li>
-                        <li<%= sidebar_current("docs-nsxt-resource-policy-group") %>>
-                            <a href="/docs/providers/nsxt/r/policy_group.html">nsxt_policy_group</a>
-                        </li>
-                        <li<%= sidebar_current("docs-nsxt-resource-policy-security-policy") %>>
-                            <a href="/docs/providers/nsxt/r/policy_security_policy.html">nsxt_policy_security_policy</a>
-                        </li>
-                        <li<%= sidebar_current("docs-nsxt-resource-policy-gateway-policy") %>>
-                            <a href="/docs/providers/nsxt/r/policy_gateway_policy.html">nsxt_policy_gateway_policy</a>
-                        </li>
-                        <li<%= sidebar_current("docs-nsxt-resource-policy-static-route") %>>
-                            <a href="/docs/providers/nsxt/r/policy_static_route.html">nsxt_policy_static_route</a>
-                        </li>
-                        <li<%= sidebar_current("docs-nsxt-resource-policy-nat-rule") %>>
-                            <a href="/docs/providers/nsxt/r/policy_nat_rule.html">nsxt_policy_nat_rule</a>
-                        </li>
-                        <li<%= sidebar_current("docs-nsxt-resource-policy-ip-block") %>>
-                            <a href="/docs/providers/nsxt/r/policy_ip_block.html">nsxt_policy_ip_block</a>
-                        </li>
-                        <li<%= sidebar_current("docs-nsxt-resource-policy-ip-pool") %>>
-                            <a href="/docs/providers/nsxt/r/policy_ip_pool.html">nsxt_policy_ip_pool</a>
-                        </li>
-                        <li<%= sidebar_current("docs-nsxt-resource-policy-ip-pool-block-subnet") %>>
-                            <a href="/docs/providers/nsxt/r/policy_ip_pool_block_subnet.html">nsxt_policy_ip_pool_block_subnet</a>
-                        </li>
-                        <li<%= sidebar_current("docs-nsxt-resource-policy-ip-pool-static-subnet") %>>
-                            <a href="/docs/providers/nsxt/r/policy_ip_pool_static_subnet.html">nsxt_policy_ip_pool_static_subnet</a>
-                        </li>
-                        <li<%= sidebar_current("docs-nsxt-resource-policy-ip-address-allocation") %>>
-                            <a href="/docs/providers/nsxt/r/policy_ip_address_allocation.html">nsxt_policy_ip_address_allocation</a>
-                        </li>
-                        <li<%= sidebar_current("docs-nsxt-resource-policy-bgp-neighbor") %>>
-                            <a href="/docs/providers/nsxt/r/policy_bgp_neighbor.html">nsxt_policy_bgp_neighbor</a>
-                        </li>
-                        <li<%= sidebar_current("docs-nsxt-resource-policy-dhcp-relay") %>>
-                            <a href="/docs/providers/nsxt/r/policy_dhcp_relay.html">nsxt_policy_dhcp_relay</a>
-                        </li>
-                        <li<%= sidebar_current("docs-nsxt-resource-policy-segment") %>>
-                            <a href="/docs/providers/nsxt/r/policy_segment.html">nsxt_policy_segment</a>
-                        </li>
-                        <li<%= sidebar_current("docs-nsxt-resource-policy-vlan-segment") %>>
-                            <a href="/docs/providers/nsxt/r/policy_vlan_segment.html">nsxt_policy_vlan_segment</a>
-                        </li>
-                        <li<%= sidebar_current("docs-nsxt-resource-policy-vm-tags") %>>
-                            <a href="/docs/providers/nsxt/r/policy_vm_tags.html">nsxt_policy_vm_tags</a>
-                        </li>
-                        <li<%= sidebar_current("docs-nsxt-resource-policy-dhcp-server") %>>
-                            <a href="/docs/providers/nsxt/r/policy_dhcp_server.html">nsxt_policy_dhcp_server</a>
-                        </li>
-                    </ul>
-                </li>
-                <li<%= sidebar_current("docs-nsxt-policy-load-balancing-resource") %>>
-                    <a href="#">Policy Load Balancing Resources</a>
-                    <ul class="nav nav-visible">
-                        <li<%= sidebar_current("docs-nsxt-resource-policy-lb-pool") %>>
-                            <a href="/docs/providers/nsxt/r/policy_lb_pool.html">nsxt_policy_lb_pool</a>
-                        </li>
-                        <li<%= sidebar_current("docs-nsxt-resource-policy-lb-service") %>>
-                            <a href="/docs/providers/nsxt/r/policy_lb_service.html">nsxt_policy_lb_service</a>
-                        </li>
-                        <li<%= sidebar_current("docs-nsxt-resource-policy-lb-virtual-server") %>>
-                            <a href="/docs/providers/nsxt/r/policy_lb_virtual_server.html">nsxt_policy_lb_virtual_server</a>
-                        </li>
-                    </ul>
-                </li>
             </ul>
         </div>
     <% end %>

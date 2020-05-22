@@ -112,17 +112,17 @@ func resourceNsxtPolicyGatewayPolicyRead(d *schema.ResourceData, m interface{}) 
 		return handleReadError(d, "Gateway Policy", id, err)
 	}
 
-	d.Set("display_name", *obj.DisplayName)
+	d.Set("display_name", obj.DisplayName)
 	d.Set("description", obj.Description)
 	setPolicyTagsInSchema(d, obj.Tags)
 	d.Set("nsx_id", id)
-	d.Set("path", *obj.Path)
+	d.Set("path", obj.Path)
 	d.Set("domain", getDomainFromResourcePath(*obj.Path))
-	d.Set("category", *obj.Category)
+	d.Set("category", obj.Category)
 	d.Set("comments", obj.Comments)
-	d.Set("locked", *obj.Locked)
-	d.Set("sequence_number", *obj.SequenceNumber)
-	d.Set("stateful", *obj.Stateful)
+	d.Set("locked", obj.Locked)
+	d.Set("sequence_number", obj.SequenceNumber)
+	d.Set("stateful", obj.Stateful)
 	if obj.TcpStrict != nil {
 		// tcp_strict is dependant on stateful and maybe nil
 		d.Set("tcp_strict", *obj.TcpStrict)

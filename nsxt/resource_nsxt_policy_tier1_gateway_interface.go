@@ -37,6 +37,11 @@ func resourceNsxtPolicyTier1GatewayInterface() *schema.Resource {
 			"mtu":                    getMtuSchema(),
 			"ipv6_ndra_profile_path": getIPv6NDRAPathSchema(),
 			"urpf_mode":              getGatewayInterfaceUrpfModeSchema(),
+			"locale_service_id": {
+				Type:        schema.TypeString,
+				Description: "Locale Service ID for this interface",
+				Computed:    true,
+			},
 		},
 	}
 }
@@ -49,9 +54,10 @@ func getGatewayInterfaceSubnetList(d *schema.ResourceData) []model.InterfaceSubn
 		var ipAddresses []string
 		ipAddresses = append(ipAddresses, result[0])
 		prefix, _ := strconv.Atoi(result[1])
+		prefix64 := int64(prefix)
 		interfaceSubnet := model.InterfaceSubnet{
 			IpAddresses: ipAddresses,
-			PrefixLen:   int64(prefix),
+			PrefixLen:   &prefix64,
 		}
 		interfaceSubnetList = append(interfaceSubnetList, interfaceSubnet)
 	}
@@ -102,7 +108,7 @@ func resourceNsxtPolicyTier1GatewayInterfaceCreate(d *schema.ResourceData, m int
 		Description:      &description,
 		Tags:             tags,
 		Subnets:          interfaceSubnetList,
-		SegmentPath:      segmentPath,
+		SegmentPath:      &segmentPath,
 		Ipv6ProfilePaths: ipv6ProfilePaths,
 	}
 
@@ -117,13 +123,14 @@ func resourceNsxtPolicyTier1GatewayInterfaceCreate(d *schema.ResourceData, m int
 
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating tier1 interface with ID %s", id)
-	err = client.Patch(tier1ID, localeServiceID, id, obj, nil)
+	err = client.Patch(tier1ID, localeServiceID, id, obj)
 	if err != nil {
 		return handleCreateError("Tier1 Interface", id, err)
 	}
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
+	d.Set("locale_service_id", localeServiceID)
 
 	return resourceNsxtPolicyTier1GatewayInterfaceRead(d, m)
 }
@@ -159,7 +166,7 @@ func resourceNsxtPolicyTier1GatewayInterfaceRead(d *schema.ResourceData, m inter
 	if obj.Subnets != nil {
 		var subnetList []string
 		for _, subnet := range obj.Subnets {
-			cidr := fmt.Sprintf("%s/%d", subnet.IpAddresses[0], subnet.PrefixLen)
+			cidr := fmt.Sprintf("%s/%d", subnet.IpAddresses[0], *subnet.PrefixLen)
 			subnetList = append(subnetList, cidr)
 		}
 		d.Set("subnets", subnetList)
@@ -181,9 +188,10 @@ func resourceNsxtPolicyTier1GatewayInterfaceUpdate(d *schema.ResourceData, m int
 
 	id := d.Id()
 	tier1Path := d.Get("gateway_path").(string)
+	localeServiceID := d.Get("locale_service_id").(string)
 	tier1ID := getPolicyIDFromPath(tier1Path)
-	if id == "" || tier1ID == "" {
-		return fmt.Errorf("Error obtaining Tier1 id")
+	if id == "" || tier1ID == "" || localeServiceID == "" {
+		return fmt.Errorf("Error obtaining Tier1 id or Locale Service id")
 	}
 
 	displayName := d.Get("display_name").(string)
@@ -202,7 +210,7 @@ func resourceNsxtPolicyTier1GatewayInterfaceUpdate(d *schema.ResourceData, m int
 		Description:      &description,
 		Tags:             tags,
 		Subnets:          interfaceSubnetList,
-		SegmentPath:      segmentPath,
+		SegmentPath:      &segmentPath,
 		Ipv6ProfilePaths: ipv6ProfilePaths,
 		Revision:         &revision,
 	}
@@ -216,7 +224,7 @@ func resourceNsxtPolicyTier1GatewayInterfaceUpdate(d *schema.ResourceData, m int
 		obj.UrpfMode = &urpfMode
 	}
 
-	_, err := client.Update(tier1ID, defaultPolicyLocaleServiceID, id, obj, nil)
+	_, err := client.Update(tier1ID, localeServiceID, id, obj)
 	if err != nil {
 		return handleUpdateError("Tier1 Interface", id, err)
 	}
@@ -231,11 +239,12 @@ func resourceNsxtPolicyTier1GatewayInterfaceDelete(d *schema.ResourceData, m int
 	id := d.Id()
 	tier1Path := d.Get("gateway_path").(string)
 	tier1ID := getPolicyIDFromPath(tier1Path)
-	if id == "" || tier1ID == "" {
-		return fmt.Errorf("Error obtaining Tier1 Interface id")
+	localeServiceID := d.Get("locale_service_id").(string)
+	if id == "" || tier1ID == "" || localeServiceID == "" {
+		return fmt.Errorf("Error obtaining Tier1 id or Locale Service id")
 	}
 
-	err := client.Delete(tier1ID, defaultPolicyLocaleServiceID, id, nil)
+	err := client.Delete(tier1ID, localeServiceID, id)
 	if err != nil {
 		return handleDeleteError("Tier1 Interface", id, err)
 	}

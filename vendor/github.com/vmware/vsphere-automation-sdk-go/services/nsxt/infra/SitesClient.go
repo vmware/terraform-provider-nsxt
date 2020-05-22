@@ -19,12 +19,13 @@ type SitesClient interface {
     // Delete a site under Infra.
     //
     // @param siteIdParam (required)
+    // @param forceParam (optional)
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Delete(siteIdParam string) error
+	Delete(siteIdParam string, forceParam *bool) error
 
     // Read a site under Infra.
     //

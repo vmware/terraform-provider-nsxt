@@ -60,7 +60,7 @@ func testAccDataSourceNsxtPolicyIPDiscoveryProfileCreate(name string) error {
 	// Generate a random ID for the resource
 	id := newUUID()
 
-	err = client.Patch(id, obj, nil)
+	err = client.Patch(id, obj)
 	if err != nil {
 		return handleCreateError("IPDiscoveryProfile", id, err)
 	}
@@ -81,7 +81,7 @@ func testAccDataSourceNsxtPolicyIPDiscoveryProfileDeleteByName(name string) erro
 	}
 	for _, objInList := range objList.Results {
 		if *objInList.DisplayName == name {
-			err := client.Delete(*objInList.Id, nil)
+			err := client.Delete(*objInList.Id)
 			if err != nil {
 				return handleDeleteError("IPDiscoveryProfile", *objInList.Id, err)
 			}

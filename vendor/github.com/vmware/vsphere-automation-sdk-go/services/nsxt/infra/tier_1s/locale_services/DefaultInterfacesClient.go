@@ -45,12 +45,33 @@ func NewDefaultInterfacesClient(connector client.Connector) *DefaultInterfacesCl
 	}
 	interfaceDefinition := core.NewInterfaceDefinition(interfaceIdentifier, methodIdentifiers)
 	errorBindingMap := make(map[string]bindings.BindingType)
+	errorBindingMap[errors.AlreadyExists{}.Error()] = errors.AlreadyExistsBindingType()
+	errorBindingMap[errors.AlreadyInDesiredState{}.Error()] = errors.AlreadyInDesiredStateBindingType()
+	errorBindingMap[errors.Canceled{}.Error()] = errors.CanceledBindingType()
+	errorBindingMap[errors.ConcurrentChange{}.Error()] = errors.ConcurrentChangeBindingType()
+	errorBindingMap[errors.Error{}.Error()] = errors.ErrorBindingType()
+	errorBindingMap[errors.FeatureInUse{}.Error()] = errors.FeatureInUseBindingType()
 	errorBindingMap[errors.InternalServerError{}.Error()] = errors.InternalServerErrorBindingType()
 	errorBindingMap[errors.InvalidArgument{}.Error()] = errors.InvalidArgumentBindingType()
+	errorBindingMap[errors.InvalidElementConfiguration{}.Error()] = errors.InvalidElementConfigurationBindingType()
+	errorBindingMap[errors.InvalidElementType{}.Error()] = errors.InvalidElementTypeBindingType()
+	errorBindingMap[errors.InvalidRequest{}.Error()] = errors.InvalidRequestBindingType()
+	errorBindingMap[errors.NotFound{}.Error()] = errors.NotFoundBindingType()
+	errorBindingMap[errors.NotAllowedInCurrentState{}.Error()] = errors.NotAllowedInCurrentStateBindingType()
 	errorBindingMap[errors.OperationNotFound{}.Error()] = errors.OperationNotFoundBindingType()
-	errorBindingMap[errors.UnexpectedInput{}.Error()] = errors.UnexpectedInputBindingType()
+	errorBindingMap[errors.ResourceBusy{}.Error()] = errors.ResourceBusyBindingType()
+	errorBindingMap[errors.ResourceInUse{}.Error()] = errors.ResourceInUseBindingType()
+	errorBindingMap[errors.ResourceInaccessible{}.Error()] = errors.ResourceInaccessibleBindingType()
 	errorBindingMap[errors.ServiceUnavailable{}.Error()] = errors.ServiceUnavailableBindingType()
 	errorBindingMap[errors.TimedOut{}.Error()] = errors.TimedOutBindingType()
+	errorBindingMap[errors.UnableToAllocateResource{}.Error()] = errors.UnableToAllocateResourceBindingType()
+	errorBindingMap[errors.Unauthenticated{}.Error()] = errors.UnauthenticatedBindingType()
+	errorBindingMap[errors.Unauthorized{}.Error()] = errors.UnauthorizedBindingType()
+	errorBindingMap[errors.UnexpectedInput{}.Error()] = errors.UnexpectedInputBindingType()
+	errorBindingMap[errors.Unsupported{}.Error()] = errors.UnsupportedBindingType()
+	errorBindingMap[errors.UnverifiedPeer{}.Error()] = errors.UnverifiedPeerBindingType()
+
+
 	iIface := DefaultInterfacesClient{interfaceName: interfaceName, methodIdentifiers: methodIdentifiers, interfaceDefinition: interfaceDefinition, errorBindingMap: errorBindingMap, interfaceIdentifier: interfaceIdentifier, connector: connector}
 	iIface.methodNameToDefMap = make(map[string]*core.MethodDefinition)
 	iIface.methodNameToDefMap["delete"] = iIface.deleteMethodDefinition()
@@ -61,14 +82,13 @@ func NewDefaultInterfacesClient(connector client.Connector) *DefaultInterfacesCl
 	return &iIface
 }
 
-func (iIface *DefaultInterfacesClient) Delete(tier1IdParam string, localeServicesIdParam string, interfaceIdParam string, overrideParam *bool) error {
+func (iIface *DefaultInterfacesClient) Delete(tier1IdParam string, localeServicesIdParam string, interfaceIdParam string) error {
 	typeConverter := iIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(iIface.interfaceIdentifier, "delete")
 	sv := bindings.NewStructValueBuilder(interfacesDeleteInputType(), typeConverter)
 	sv.AddStructField("Tier1Id", tier1IdParam)
 	sv.AddStructField("LocaleServicesId", localeServicesIdParam)
 	sv.AddStructField("InterfaceId", interfaceIdParam)
-	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
@@ -163,7 +183,7 @@ func (iIface *DefaultInterfacesClient) List(tier1IdParam string, localeServicesI
 	}
 }
 
-func (iIface *DefaultInterfacesClient) Patch(tier1IdParam string, localeServicesIdParam string, interfaceIdParam string, tier1InterfaceParam model.Tier1Interface, overrideParam *bool) error {
+func (iIface *DefaultInterfacesClient) Patch(tier1IdParam string, localeServicesIdParam string, interfaceIdParam string, tier1InterfaceParam model.Tier1Interface) error {
 	typeConverter := iIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(iIface.interfaceIdentifier, "patch")
 	sv := bindings.NewStructValueBuilder(interfacesPatchInputType(), typeConverter)
@@ -171,7 +191,6 @@ func (iIface *DefaultInterfacesClient) Patch(tier1IdParam string, localeServices
 	sv.AddStructField("LocaleServicesId", localeServicesIdParam)
 	sv.AddStructField("InterfaceId", interfaceIdParam)
 	sv.AddStructField("Tier1Interface", tier1InterfaceParam)
-	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
@@ -193,7 +212,7 @@ func (iIface *DefaultInterfacesClient) Patch(tier1IdParam string, localeServices
 	}
 }
 
-func (iIface *DefaultInterfacesClient) Update(tier1IdParam string, localeServicesIdParam string, interfaceIdParam string, tier1InterfaceParam model.Tier1Interface, overrideParam *bool) (model.Tier1Interface, error) {
+func (iIface *DefaultInterfacesClient) Update(tier1IdParam string, localeServicesIdParam string, interfaceIdParam string, tier1InterfaceParam model.Tier1Interface) (model.Tier1Interface, error) {
 	typeConverter := iIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(iIface.interfaceIdentifier, "update")
 	sv := bindings.NewStructValueBuilder(interfacesUpdateInputType(), typeConverter)
@@ -201,7 +220,6 @@ func (iIface *DefaultInterfacesClient) Update(tier1IdParam string, localeService
 	sv.AddStructField("LocaleServicesId", localeServicesIdParam)
 	sv.AddStructField("InterfaceId", interfaceIdParam)
 	sv.AddStructField("Tier1Interface", tier1InterfaceParam)
-	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		var emptyOutput model.Tier1Interface

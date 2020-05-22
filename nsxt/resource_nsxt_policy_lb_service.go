@@ -111,6 +111,9 @@ func resourceNsxtPolicyLBServiceCreate(d *schema.ResourceData, m interface{}) er
 	enabled := d.Get("enabled").(bool)
 	errorLogLevel := d.Get("error_log_level").(string)
 	size := d.Get("size").(string)
+	if size == "XLARGE" && nsxVersionLower("3.0.0") {
+		return fmt.Errorf("XLARGE size is not supported before NSX version 3.0.0")
+	}
 
 	obj := model.LBService{
 		DisplayName:      &displayName,
@@ -189,6 +192,9 @@ func resourceNsxtPolicyLBServiceUpdate(d *schema.ResourceData, m interface{}) er
 	enabled := d.Get("enabled").(bool)
 	errorLogLevel := d.Get("error_log_level").(string)
 	size := d.Get("size").(string)
+	if size == "XLARGE" && nsxVersionLower("3.0.0") {
+		return fmt.Errorf("XLARGE size is not supported before NSX version 3.0.0")
+	}
 
 	obj := model.LBService{
 		DisplayName:      &displayName,

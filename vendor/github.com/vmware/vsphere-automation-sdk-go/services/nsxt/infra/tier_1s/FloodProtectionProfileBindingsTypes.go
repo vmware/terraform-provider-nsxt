@@ -46,6 +46,8 @@ func floodProtectionProfileBindingsDeleteRestMetadata() protocol.OperationRestMe
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["tier1_id"] = bindings.NewStringType()
 	fields["flood_protection_profile_binding_id"] = bindings.NewStringType()
 	fieldNameMap["tier1_id"] = "Tier1Id"
@@ -65,14 +67,18 @@ func floodProtectionProfileBindingsDeleteRestMetadata() protocol.OperationRestMe
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"",
 		"DELETE",
 		"/policy/api/v1/infra/tier-1s/{tier1Id}/flood-protection-profile-bindings/{floodProtectionProfileBindingId}",
+		"",
 		resultHeaders,
 		204,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func floodProtectionProfileBindingsGetInputType() bindings.StructType {
@@ -97,6 +103,8 @@ func floodProtectionProfileBindingsGetRestMetadata() protocol.OperationRestMetad
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["tier1_id"] = bindings.NewStringType()
 	fields["flood_protection_profile_binding_id"] = bindings.NewStringType()
 	fieldNameMap["tier1_id"] = "Tier1Id"
@@ -116,14 +124,18 @@ func floodProtectionProfileBindingsGetRestMetadata() protocol.OperationRestMetad
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"",
 		"GET",
 		"/policy/api/v1/infra/tier-1s/{tier1Id}/flood-protection-profile-bindings/{floodProtectionProfileBindingId}",
+		"",
 		resultHeaders,
 		200,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func floodProtectionProfileBindingsPatchInputType() bindings.StructType {
@@ -150,6 +162,8 @@ func floodProtectionProfileBindingsPatchRestMetadata() protocol.OperationRestMet
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["tier1_id"] = bindings.NewStringType()
 	fields["flood_protection_profile_binding_id"] = bindings.NewStringType()
 	fields["flood_protection_profile_binding_map"] = bindings.NewReferenceType(model.FloodProtectionProfileBindingMapBindingType)
@@ -172,14 +186,18 @@ func floodProtectionProfileBindingsPatchRestMetadata() protocol.OperationRestMet
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"flood_protection_profile_binding_map",
 		"PATCH",
 		"/policy/api/v1/infra/tier-1s/{tier1Id}/flood-protection-profile-bindings/{floodProtectionProfileBindingId}",
+		"",
 		resultHeaders,
 		204,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func floodProtectionProfileBindingsUpdateInputType() bindings.StructType {
@@ -206,6 +224,8 @@ func floodProtectionProfileBindingsUpdateRestMetadata() protocol.OperationRestMe
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["tier1_id"] = bindings.NewStringType()
 	fields["flood_protection_profile_binding_id"] = bindings.NewStringType()
 	fields["flood_protection_profile_binding_map"] = bindings.NewReferenceType(model.FloodProtectionProfileBindingMapBindingType)
@@ -228,14 +248,18 @@ func floodProtectionProfileBindingsUpdateRestMetadata() protocol.OperationRestMe
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"flood_protection_profile_binding_map",
 		"PUT",
 		"/policy/api/v1/infra/tier-1s/{tier1Id}/flood-protection-profile-bindings/{floodProtectionProfileBindingId}",
+		"",
 		resultHeaders,
 		200,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 

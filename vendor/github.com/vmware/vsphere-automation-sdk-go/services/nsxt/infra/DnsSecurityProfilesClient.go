@@ -19,13 +19,12 @@ type DnsSecurityProfilesClient interface {
     // Delete DNS security profile
     //
     // @param profileIdParam (required)
-    // @param overrideParam Locally override the global object (optional, default to false)
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Delete(profileIdParam string, overrideParam *bool) error
+	Delete(profileIdParam string) error
 
     // Read the DNS Forwarder for the given tier-0 instance
     //
@@ -58,24 +57,22 @@ type DnsSecurityProfilesClient interface {
     //
     // @param profileIdParam (required)
     // @param dnsSecurityProfileParam (required)
-    // @param overrideParam Locally override the global object (optional, default to false)
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Patch(profileIdParam string, dnsSecurityProfileParam model.DnsSecurityProfile, overrideParam *bool) error
+	Patch(profileIdParam string, dnsSecurityProfileParam model.DnsSecurityProfile) error
 
     // Create or update DNS security profile
     //
     // @param profileIdParam (required)
     // @param dnsSecurityProfileParam (required)
-    // @param overrideParam Locally override the global object (optional, default to false)
     // @return com.vmware.nsx_policy.model.DnsSecurityProfile
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Update(profileIdParam string, dnsSecurityProfileParam model.DnsSecurityProfile, overrideParam *bool) (model.DnsSecurityProfile, error)
+	Update(profileIdParam string, dnsSecurityProfileParam model.DnsSecurityProfile) (model.DnsSecurityProfile, error)
 }

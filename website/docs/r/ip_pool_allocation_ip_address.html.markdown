@@ -34,3 +34,15 @@ In addition to arguments listed above, the following attributes are exported:
 
 * `id` - ID of the IP pool allocation IP address (currently identical to `allocation_ip`).
 * `allocation_ip` - Allocation IP address.
+
+## Importing
+
+An existing IP pool allocation address can be [imported][docs-import] into this resource, via the following command:
+
+[docs-import]: /docs/import/index.html
+
+```
+terraform import nsxt_ip_pool_allocation_ip_address.ip1 POOL-UUID/UUID
+```
+
+The above would import the IP pool allocation address named `ip_pool` with the nsx ID `UUID`, from IP Pool with nsx ID `POOL-UUID`.

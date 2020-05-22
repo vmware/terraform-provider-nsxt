@@ -156,7 +156,7 @@ func getPolicyBGPConfigSchema() *schema.Schema {
 					Type:        schema.TypeBool,
 					Description: "Flag to enable BGP multipath relax option",
 					Optional:    true,
-					Default:     false,
+					Default:     true,
 				},
 				"route_aggregation": {
 					Type:        schema.TypeList,
@@ -408,9 +408,26 @@ func getPolicyVRFConfigFromSchema(d *schema.ResourceData) *model.Tier0VrfConfig 
 	vni := int64(vrfConfig["evpn_transit_vni"].(int))
 	gwPath := vrfConfig["gateway_path"].(string)
 	routeDist := vrfConfig["route_distinguisher"].(string)
-	config := model.Tier0VrfConfig{
-		Tier0Path: gwPath,
+
+	var tagStructs []model.Tag
+	if vrfConfig["tag"] != nil {
+		vrfTags := vrfConfig["tag"].(*schema.Set).List()
+		for _, tag := range vrfTags {
+			data := tag.(map[string]interface{})
+			tagScope := data["scope"].(string)
+			tagTag := data["tag"].(string)
+			elem := model.Tag{
+				Scope: &tagScope,
+				Tag:   &tagTag}
+			tagStructs = append(tagStructs, elem)
+		}
 	}
+
+	config := model.Tier0VrfConfig{
+		Tier0Path: &gwPath,
+		Tags:      tagStructs,
+	}
+
 	if len(routeDist) > 0 {
 		config.RouteDistinguisher = &routeDist
 	}
@@ -464,6 +481,15 @@ func setPolicyVRFConfigInSchema(d *schema.ResourceData, config *model.Tier0VrfCo
 		elem["route_target"] = routeTargets
 	}
 
+	var tagList []map[string]string
+	for _, tag := range config.Tags {
+		tagElem := make(map[string]string)
+		tagElem["scope"] = *tag.Scope
+		tagElem["tag"] = *tag.Tag
+		tagList = append(tagList, tagElem)
+	}
+	elem["tag"] = tagList
+
 	vrfConfigs = append(vrfConfigs, elem)
 
 	return d.Set("vrf_config", vrfConfigs)
@@ -498,8 +524,8 @@ func resourceNsxtPolicyTier0GatewayBGPConfigSchemaToStruct(cfg interface{}, isVr
 	staleTimer := int64(cfgMap["graceful_restart_stale_route_timer"].(int))
 
 	var tagStructs []model.Tag
-	if cfgMap["tags"] != nil {
-		cfgTags := cfgMap["tags"].([]interface{})
+	if cfgMap["tag"] != nil {
+		cfgTags := cfgMap["tag"].(*schema.Set).List()
 		for _, tag := range cfgTags {
 			data := tag.(map[string]interface{})
 			tagScope := data["scope"].(string)
@@ -520,7 +546,7 @@ func resourceNsxtPolicyTier0GatewayBGPConfigSchemaToStruct(cfg interface{}, isVr
 			prefix := data["prefix"].(string)
 			summary := data["summary_only"].(bool)
 			elem := model.RouteAggregationEntry{
-				Prefix:      prefix,
+				Prefix:      &prefix,
 				SummaryOnly: &summary,
 			}
 
@@ -545,6 +571,7 @@ func resourceNsxtPolicyTier0GatewayBGPConfigSchemaToStruct(cfg interface{}, isVr
 		Enabled:           &enabled,
 		RouteAggregations: aggregationStructs,
 		ResourceType:      &bgpcType,
+		Tags:              tagStructs,
 		Id:                &id,
 		Revision:          &revision,
 	}
@@ -627,7 +654,7 @@ func resourceNsxtPolicyTier0GatewayResourceToInfraStruct(d *schema.ResourceData,
 		routingConfigStruct := resourceNsxtPolicyTier0GatewayBGPConfigSchemaToStruct(bgpConfig[0], vrfConfig != nil, id)
 		childConfig := model.ChildBgpRoutingConfig{
 			ResourceType:     "ChildBgpRoutingConfig",
-			BgpRoutingConfig: routingConfigStruct,
+			BgpRoutingConfig: &routingConfigStruct,
 		}
 		dataValue, errors := converter.ConvertToVapi(childConfig, model.ChildBgpRoutingConfigBindingType())
 		if errors != nil {
@@ -677,7 +704,7 @@ func resourceNsxtPolicyTier0GatewayResourceToInfraStruct(d *schema.ResourceData,
 
 		childService := model.ChildLocaleServices{
 			ResourceType:   "ChildLocaleServices",
-			LocaleServices: *serviceStruct,
+			LocaleServices: serviceStruct,
 		}
 		dataValue, errors := converter.ConvertToVapi(childService, model.ChildLocaleServicesBindingType())
 		if errors != nil {
@@ -688,7 +715,7 @@ func resourceNsxtPolicyTier0GatewayResourceToInfraStruct(d *schema.ResourceData,
 
 	t0Struct.Children = gwChildren
 	childTier0 := model.ChildTier0{
-		Tier0:        t0Struct,
+		Tier0:        &t0Struct,
 		ResourceType: "ChildTier0",
 	}
 	dataValue, errors := converter.ConvertToVapi(childTier0, model.ChildTier0BindingType())
@@ -837,7 +864,7 @@ func resourceNsxtPolicyTier0GatewayDelete(d *schema.ResourceData, m interface{})
 
 	childT0 := model.ChildTier0{
 		MarkedForDelete: &boolTrue,
-		Tier0:           t0obj,
+		Tier0:           &t0obj,
 		ResourceType:    "ChildTier0",
 	}
 	dataValue, errors := converter.ConvertToVapi(childT0, model.ChildTier0BindingType())

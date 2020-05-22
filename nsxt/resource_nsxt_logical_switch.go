@@ -146,7 +146,7 @@ func resourceNsxtLogicalSwitchCreate(d *schema.ResourceData, m interface{}) erro
 	return resourceNsxtLogicalSwitchRead(d, m)
 }
 
-func resourceNsxtLogicalSwitchVerifyRealization(d *schema.ResourceData, nsxClient *api.APIClient, logicalSwitch *manager.LogicalSwitch) error {
+func resourceNsxtLogicalSwitchVerifyRealization(d *schema.ResourceData, nsxClient *api.APIClient, logicalSwitch *manager.LogicalSwitch, toleratePartialSuccess bool) error {
 	// verifying switch realization on hypervisor
 	pendingStates := []string{"in_progress", "pending"}
 	targetStates := []string{"success"}
@@ -216,7 +216,8 @@ func resourceNsxtLogicalSwitchRead(d *schema.ResourceData, m interface{}) error 
 		return fmt.Errorf("Error during LogicalSwitch read: %v", err)
 	}
 
-	err = resourceNsxtLogicalSwitchVerifyRealization(d, nsxClient, &logicalSwitch)
+	toleratePartialSuccess := getCommonProviderConfig(m.(nsxtClients)).ToleratePartialSuccess
+	err = resourceNsxtLogicalSwitchVerifyRealization(d, nsxClient, &logicalSwitch, toleratePartialSuccess)
 
 	if err != nil {
 		return err

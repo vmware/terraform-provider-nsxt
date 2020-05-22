@@ -81,7 +81,7 @@ func resourceNsxtPolicyIPPoolStaticSubnetSchemaToStructValue(d *schema.ResourceD
 		Description:  &description,
 		Tags:         tags,
 		ResourceType: "IpAddressPoolStaticSubnet",
-		Cidr:         cidr,
+		Cidr:         &cidr,
 		Id:           &id,
 	}
 
@@ -99,9 +99,11 @@ func resourceNsxtPolicyIPPoolStaticSubnetSchemaToStructValue(d *schema.ResourceD
 	var poolRanges []model.IpPoolRange
 	for _, allocRange := range d.Get("allocation_range").([]interface{}) {
 		allocMap := allocRange.(map[string]interface{})
+		start := allocMap["start"].(string)
+		end := allocMap["end"].(string)
 		ipRange := model.IpPoolRange{
-			Start: allocMap["start"].(string),
-			End:   allocMap["end"].(string),
+			Start: &start,
+			End:   &end,
 		}
 		poolRanges = append(poolRanges, ipRange)
 	}

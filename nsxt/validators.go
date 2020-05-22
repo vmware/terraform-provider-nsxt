@@ -406,7 +406,7 @@ func validateVLANId(i interface{}, k string) (s []string, es []error) {
 			return
 		}
 	}
-	if vlan < 1 || vlan > 4095 {
+	if vlan < 0 || vlan > 4095 {
 		es = append(es, fmt.Errorf("invalid VLAN ID %d", vlan))
 		return
 	}

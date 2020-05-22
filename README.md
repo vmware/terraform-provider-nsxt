@@ -19,10 +19,12 @@ Documentation on the NSX platform can be found at the [NSX-T Documentation page]
 
 # Using the Provider
 
-The current version of this provider requires Terraform v0.10.2 or higher to
-run.
+The latest version of this provider requires Terraform v0.12 or higher to run.
 
-The VMware supported version of the provider requires NSX version 2.2 onwards and Terraform 0.11.7. The recommended vSphere provider to be used in conjunction with the NSX-T Terraform Provider is 1.3.3 or above.
+The VMware supported version of the provider requires NSX version 2.2 onwards and Terraform 0.12 onwards.
+Version 2.0.0 of the provider offers NSX consumption via policy APIs, which is the recommended way.
+Most policy resources are supported with NSX version 2.5 onwards, however some resources or attributes require NSX 3.0 onwards. Please refer to documentation for more details.
+The recommended vSphere provider to be used in conjunction with the NSX-T Terraform Provider is 1.3.3 or above.
 
 Note that you need to run `terraform init` to fetch the provider before
 deploying. Read about the provider split and other changes to TF v0.10.0 in the
@@ -67,8 +69,8 @@ You can list versions of providers installed in your environment by running “t
 
 ```hcl
 $ ./terraform version
-Terraform v0.11.7
-+ provider.nsxt v1.0.0
+Terraform v0.12.7
++ provider.nsxt v2.0.0
 + provider.vsphere v1.5.0
 ```
 
@@ -78,10 +80,12 @@ Terraform v0.11.7
 pre-release bugfix or feature, you will want to use the officially released
 version of the provider (see [the section above](#using-the-provider)).
 
+**NOTE:** Recommended way to compile the provider is using [Go Modules](https://blog.golang.org/using-go-modules), however vendored dependencies are still supported.
+
 **NOTE:** Note that if the provider is manually copied to your running folder (rather than fetched with the “terraform init” based on provider block), Terraform is not aware of the version of the provider you’re running. It will appear as “unversioned”:
 ```hcl
 $ ./terraform version
-Terraform v0.11.1
+Terraform v0.12.7
 + provider.nsxt (unversioned)
 + provider.vsphere v1.5.0
 ```
@@ -174,9 +178,12 @@ to run.
 
 The following versions of NSX are supported:
 
- * NSX-T 2.2.*
- * NSX-T 2.3.*
+ * NSX-T 3.0
+ * NSX-T 2.5.*
  * NSX-T 2.4.*
+ * NSX-T 2.3.*
+ * NSX-T 2.2.*
+ 
 
 Some specific resources may require later versions of NSX-T.
 

@@ -40,7 +40,7 @@ func resourceNsxtPolicyVMTags() *schema.Resource {
 	}
 }
 
-func listAllPolicyVirtualMachines(connector *client.RestConnector) ([]model.VirtualMachine, error) {
+func listAllPolicyVirtualMachines(connector *client.RestConnector, m interface{}) ([]model.VirtualMachine, error) {
 	client := realized_state.NewDefaultVirtualMachinesClient(connector)
 	var results []model.VirtualMachine
 	boolFalse := false
@@ -49,7 +49,7 @@ func listAllPolicyVirtualMachines(connector *client.RestConnector) ([]model.Virt
 
 	for {
 		// NOTE: the search API does not return resource_type of VirtualMachine
-		enforcementPointPath := getPolicyEnforcementPointPath()
+		enforcementPointPath := getPolicyEnforcementPointPath(m)
 		vms, err := client.List(cursor, &enforcementPointPath, &boolFalse, nil, nil, &boolFalse, nil)
 		if err != nil {
 			return results, err
@@ -66,10 +66,10 @@ func listAllPolicyVirtualMachines(connector *client.RestConnector) ([]model.Virt
 	}
 }
 
-func findNsxtPolicyVMByNamePrefix(connector *client.RestConnector, namePrefix string) ([]model.VirtualMachine, []model.VirtualMachine, error) {
+func findNsxtPolicyVMByNamePrefix(connector *client.RestConnector, namePrefix string, m interface{}) ([]model.VirtualMachine, []model.VirtualMachine, error) {
 	var perfectMatch, prefixMatch []model.VirtualMachine
 
-	allVMs, err := listAllPolicyVirtualMachines(connector)
+	allVMs, err := listAllPolicyVirtualMachines(connector, m)
 	if err != nil {
 		log.Printf("[INFO] Error reading Virtual Machines when looking for name: %s", namePrefix)
 		return perfectMatch, prefixMatch, err
@@ -85,17 +85,17 @@ func findNsxtPolicyVMByNamePrefix(connector *client.RestConnector, namePrefix st
 	return perfectMatch, prefixMatch, nil
 }
 
-func findNsxtPolicyVMByID(connector *client.RestConnector, vmID string) (model.VirtualMachine, error) {
+func findNsxtPolicyVMByID(connector *client.RestConnector, vmID string, m interface{}) (model.VirtualMachine, error) {
 	var virtualMachineStruct model.VirtualMachine
 
-	allVMs, err := listAllPolicyVirtualMachines(connector)
+	allVMs, err := listAllPolicyVirtualMachines(connector, m)
 	if err != nil {
 		log.Printf("[INFO] Error reading Virtual Machines when looking for ID: %s", vmID)
 		return virtualMachineStruct, err
 	}
 
 	for _, vmResult := range allVMs {
-		if vmResult.ExternalId == vmID {
+		if (vmResult.ExternalId != nil) && *vmResult.ExternalId == vmID {
 			return vmResult, nil
 		}
 		computeIDMap := collectSeparatedStringListToMap(vmResult.ComputeIds, ":")
@@ -108,14 +108,14 @@ func findNsxtPolicyVMByID(connector *client.RestConnector, vmID string) (model.V
 	return virtualMachineStruct, fmt.Errorf("Could not find Virtual Machine with ID: %s", vmID)
 }
 
-func updateNsxtPolicyVMTags(connector *client.RestConnector, externalID string, tags []model.Tag) error {
+func updateNsxtPolicyVMTags(connector *client.RestConnector, externalID string, tags []model.Tag, m interface{}) error {
 	client := updateClient.NewDefaultVirtualMachinesClient(connector)
 
 	tagUpdate := model.VirtualMachineTagsUpdate{
 		Tags:             tags,
-		VirtualMachineId: externalID,
+		VirtualMachineId: &externalID,
 	}
-	return client.Updatetags(policyEnforcementPoint, tagUpdate)
+	return client.Updatetags(getPolicyEnforcementPoint(m), tagUpdate)
 }
 
 func resourceNsxtPolicyVMTagsRead(d *schema.ResourceData, m interface{}) error {
@@ -126,7 +126,7 @@ func resourceNsxtPolicyVMTagsRead(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("Error obtaining Virtual Machine ID")
 	}
 
-	vm, err := findNsxtPolicyVMByID(connector, vmID)
+	vm, err := findNsxtPolicyVMByID(connector, vmID, m)
 	if err != nil {
 		return fmt.Errorf("Error during Virtual Machine retrieval: %v", err)
 	}
@@ -145,7 +145,7 @@ func resourceNsxtPolicyVMTagsCreate(d *schema.ResourceData, m interface{}) error
 	connector := getPolicyConnector(m)
 	instanceID := d.Get("instance_id").(string)
 
-	vm, err := findNsxtPolicyVMByID(connector, instanceID)
+	vm, err := findNsxtPolicyVMByID(connector, instanceID, m)
 	if err != nil {
 		return fmt.Errorf("Error finding Virtual Machine: %v", err)
 	}
@@ -154,12 +154,12 @@ func resourceNsxtPolicyVMTagsCreate(d *schema.ResourceData, m interface{}) error
 	if tags == nil {
 		tags = make([]model.Tag, 0)
 	}
-	err = updateNsxtPolicyVMTags(connector, vm.ExternalId, tags)
+	err = updateNsxtPolicyVMTags(connector, *vm.ExternalId, tags, m)
 	if err != nil {
-		return handleCreateError("Virtual Machine Tag", vm.ExternalId, err)
+		return handleCreateError("Virtual Machine Tag", *vm.ExternalId, err)
 	}
 
-	d.SetId(vm.ExternalId)
+	d.SetId(*vm.ExternalId)
 
 	return resourceNsxtPolicyVMTagsRead(d, m)
 }
@@ -172,16 +172,16 @@ func resourceNsxtPolicyVMTagsDelete(d *schema.ResourceData, m interface{}) error
 	connector := getPolicyConnector(m)
 	instanceID := d.Get("instance_id").(string)
 
-	vm, err := findNsxtPolicyVMByID(connector, instanceID)
+	vm, err := findNsxtPolicyVMByID(connector, instanceID, m)
 	if err != nil {
 		return fmt.Errorf("Error finding Virtual Machine: %v", err)
 	}
 
 	tags := make([]model.Tag, 0)
-	err = updateNsxtPolicyVMTags(connector, vm.ExternalId, tags)
+	err = updateNsxtPolicyVMTags(connector, *vm.ExternalId, tags, m)
 
 	if err != nil {
-		return handleDeleteError("Virtual Machine Tag", vm.ExternalId, err)
+		return handleDeleteError("Virtual Machine Tag", *vm.ExternalId, err)
 	}
 
 	return err

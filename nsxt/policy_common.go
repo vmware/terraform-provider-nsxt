@@ -236,6 +236,11 @@ func getSecurityPolicyAndGatewayRulesSchema(scopeRequired bool) *schema.Schema {
 					Default:     false,
 				},
 				"tag": getTagsSchema(),
+				"log_label": {
+					Type:        schema.TypeString,
+					Description: "Additional information (string) which will be propagated to the rule syslog",
+					Optional:    true,
+				},
 				"action": {
 					Type:         schema.TypeString,
 					Description:  "Action",
@@ -325,6 +330,7 @@ func setPolicyRulesInSchema(d *schema.ResourceData, rules []model.Rule) error {
 		elem["description"] = rule.Description
 		elem["notes"] = rule.Notes
 		elem["logged"] = rule.Logged
+		elem["log_label"] = rule.Tag
 		elem["action"] = rule.Action
 		elem["destinations_excluded"] = rule.DestinationsExcluded
 		elem["sources_excluded"] = rule.SourcesExcluded
@@ -338,6 +344,15 @@ func setPolicyRulesInSchema(d *schema.ResourceData, rules []model.Rule) error {
 		setPathListInMap(elem, "services", rule.Services)
 		setPathListInMap(elem, "scope", rule.Scope)
 		elem["sequence_number"] = rule.SequenceNumber
+
+		var tagList []map[string]string
+		for _, tag := range rule.Tags {
+			tags := make(map[string]string)
+			tags["scope"] = *tag.Scope
+			tags["tag"] = *tag.Tag
+			tagList = append(tagList, tags)
+		}
+		elem["tag"] = tagList
 
 		rulesList = append(rulesList, elem)
 	}
@@ -355,6 +370,7 @@ func getPolicyRulesFromSchema(d *schema.ResourceData) []model.Rule {
 		description := data["description"].(string)
 		action := data["action"].(string)
 		logged := data["logged"].(bool)
+		tag := data["log_label"].(string)
 		disabled := data["disabled"].(bool)
 		sourcesExcluded := data["sources_excluded"].(bool)
 		destinationsExcluded := data["destinations_excluded"].(bool)
@@ -362,6 +378,21 @@ func getPolicyRulesFromSchema(d *schema.ResourceData) []model.Rule {
 		direction := data["direction"].(string)
 		notes := data["notes"].(string)
 		sequenceNumber := int64(seq)
+
+		var tagStructs []model.Tag
+		if data["tag"] != nil {
+			tags := data["tag"].(*schema.Set).List()
+			for _, tag := range tags {
+				data := tag.(map[string]interface{})
+				tagScope := data["scope"].(string)
+				tagTag := data["tag"].(string)
+				elem := model.Tag{
+					Scope: &tagScope,
+					Tag:   &tagTag}
+
+				tagStructs = append(tagStructs, elem)
+			}
+		}
 
 		// Use a different random Id each time, otherwise Update requires revision
 		// to be set for existing rules, and NOT be set for new rules
@@ -374,6 +405,8 @@ func getPolicyRulesFromSchema(d *schema.ResourceData) []model.Rule {
 			Description:          &description,
 			Action:               &action,
 			Logged:               &logged,
+			Tag:                  &tag,
+			Tags:                 tagStructs,
 			Disabled:             &disabled,
 			SourcesExcluded:      &sourcesExcluded,
 			DestinationsExcluded: &destinationsExcluded,

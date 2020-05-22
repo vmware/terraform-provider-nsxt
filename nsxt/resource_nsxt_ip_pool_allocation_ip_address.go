@@ -9,6 +9,7 @@ import (
 	api "github.com/vmware/go-vmware-nsxt"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -21,7 +22,7 @@ func resourceNsxtIPPoolAllocationIPAddress() *schema.Resource {
 		Read:   resourceNsxtIPPoolAllocationIPAddressRead,
 		Delete: resourceNsxtIPPoolAllocationIPAddressDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			State: resourceNsxtIPPoolAllocationIPAddressImport,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -177,4 +178,15 @@ func resourceNsxtIpPoolAllocationVerifyRelease(d *schema.ResourceData, nsxClient
 		return fmt.Errorf("Error waiting for allocation release: %s", err)
 	}
 	return nil
+}
+
+func resourceNsxtIPPoolAllocationIPAddressImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	importID := d.Id()
+	s := strings.Split(importID, "/")
+	if len(s) != 2 {
+		return nil, fmt.Errorf("Please provide <pool-id>/<ip-address-id> as an input")
+	}
+	d.SetId(s[1])
+	d.Set("ip_pool_id", s[0])
+	return []*schema.ResourceData{d}, nil
 }

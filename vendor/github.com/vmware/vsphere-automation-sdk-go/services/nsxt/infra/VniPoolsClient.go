@@ -16,7 +16,7 @@ import (
 
 type VniPoolsClient interface {
 
-    // Delete Vni Pool Config.
+    // Delete Vni Pool Configuration.
     //
     // @param vniPoolIdParam vni pool id (required)
     // @throws InvalidRequest  Bad Request, Precondition Failed
@@ -26,7 +26,7 @@ type VniPoolsClient interface {
     // @throws NotFound  Not Found
 	Delete(vniPoolIdParam string) error
 
-    // Read Vni Pool Config.
+    // Read Vni Pool Configuration.
     //
     // @param vniPoolIdParam vni pool id (required)
     // @return com.vmware.nsx_policy.model.VniPoolConfig
@@ -37,7 +37,7 @@ type VniPoolsClient interface {
     // @throws NotFound  Not Found
 	Get(vniPoolIdParam string) (model.VniPoolConfig, error)
 
-    // List all Vni Pool config.
+    // List all Vni Pool configuration.
     //
     // @param cursorParam Opaque cursor to be used for getting next page of records (supplied by current result page) (optional)
     // @param includeMarkForDeleteObjectsParam Include objects that are marked for deletion in results (optional, default to false)
@@ -53,7 +53,7 @@ type VniPoolsClient interface {
     // @throws NotFound  Not Found
 	List(cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.VniPoolConfigListResult, error)
 
-    // Create a Vni Pool config if it is not already present, otherwise update the Vni Pool config.
+    // Create a Vni Pool config if it is not already present, otherwise update the Vni Pool configuration.
     //
     // @param vniPoolIdParam vni pool id (required)
     // @param vniPoolConfigParam (required)
@@ -64,7 +64,7 @@ type VniPoolsClient interface {
     // @throws NotFound  Not Found
 	Patch(vniPoolIdParam string, vniPoolConfigParam model.VniPoolConfig) error
 
-    // Create or update VniPool config.
+    // Create or update VniPool configuration.
     //
     // @param vniPoolIdParam vni pool id (required)
     // @param vniPoolConfigParam (required)
