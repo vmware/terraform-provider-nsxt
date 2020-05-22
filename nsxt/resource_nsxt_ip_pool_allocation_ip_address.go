@@ -5,6 +5,8 @@ package nsxt
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	api "github.com/vmware/go-vmware-nsxt"
 	"log"
 	"net/http"
 	"time"
@@ -120,15 +122,10 @@ func resourceNsxtIPPoolAllocationIPAddressDelete(d *schema.ResourceData, m inter
 		return fmt.Errorf("Error obtaining pool id")
 	}
 
-	allocations, resp, err := nsxClient.PoolManagementApi.ListIpPoolAllocations(nsxClient.Context, poolID)
-	if err != nil {
-		return fmt.Errorf("Error during IpPoolAllocations list: %v", err)
-	}
-
 	allocationIPAddress := manager.AllocationIpAddress{
 		AllocationId: d.Id(),
 	}
-	_, resp, err = nsxClient.PoolManagementApi.AllocateOrReleaseFromIpPool(nsxClient.Context, poolID, allocationIPAddress, "RELEASE")
+	_, resp, err := nsxClient.PoolManagementApi.AllocateOrReleaseFromIpPool(nsxClient.Context, poolID, allocationIPAddress, "RELEASE")
 	if resp != nil && resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("Error during IPPoolAllocationIPAddress delete: status=%s", resp.Status)
 	}
@@ -136,32 +133,48 @@ func resourceNsxtIPPoolAllocationIPAddressDelete(d *schema.ResourceData, m inter
 		// AllocateOrReleaseFromIpPool always returns an error EOF for action RELEASE, this is ignored if resp is set
 		return fmt.Errorf("Error during IPPoolAllocationIPAddress delete: %v", err)
 	}
-
-	ipInAllocation := true
-	for ipInAllocation {
-		for i, ip := range allocations.Results {
-			if ip.AllocationId == allocationIPAddress.AllocationId {
-				time.Sleep(5000 * time.Millisecond)
-
-				allocations, resp, err = nsxClient.PoolManagementApi.ListIpPoolAllocations(nsxClient.Context, poolID)
-				if err != nil {
-					return fmt.Errorf("Error during IpPoolAllocations list: %v", err)
-				}
-				break
-			}
-
-			if i == len(allocations.Results) {
-				ipInAllocation = false
-				break
-			}
-		}
-		if len(allocations.Results) == 0 {
-			ipInAllocation = false
-		}
-		if !ipInAllocation {
-			break
-		}
+	//wait for allocation release
+	err = resourceNsxtIpPoolAllocationVerifyRelease(d, nsxClient, poolID, &allocationIPAddress)
+	if err != nil {
+		return err
 	}
+	return nil
+}
 
+func resourceNsxtIpPoolAllocationVerifyRelease(d *schema.ResourceData, nsxClient *api.APIClient, poolID string, allocationIPAddress *manager.AllocationIpAddress) error {
+	// verifying release of ip address allocation from pool
+	pendingStates := []string{"present"}
+	targetStates := []string{"absent"}
+	changeStateConf := &resource.StateChangeConf{
+		Pending: pendingStates,
+		Target:  targetStates,
+		Refresh: func() (interface{}, string, error) {
+			allocations, resp, err := nsxClient.PoolManagementApi.ListIpPoolAllocations(nsxClient.Context, poolID)
+			if err != nil {
+				return nil, "", fmt.Errorf("Error while waiting for allocation release: %v", err)
+			}
+			if resp.StatusCode != http.StatusOK {
+				return nil, "", fmt.Errorf("Unexpected return status %d", resp.StatusCode)
+			}
+
+			//check if ip address is still in pool
+			for _, ip := range allocations.Results {
+				if ip.AllocationId == allocationIPAddress.AllocationId {
+					log.Printf("[DEBUG] ip pool is still present")
+					return allocations, "present", nil
+				}
+			}
+			log.Printf("[DEBUG] ip pool is now absent")
+			return allocations, "absent", nil
+		},
+		Timeout:                   d.Timeout(schema.TimeoutCreate),
+		Delay:                     5 * time.Second,
+		MinTimeout:                10 * time.Second,
+		ContinuousTargetOccurence: 3,
+	}
+	_, err := changeStateConf.WaitForState()
+	if err != nil {
+		return fmt.Errorf("Error waiting for allocation release: %s", err)
+	}
 	return nil
 }
