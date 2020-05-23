@@ -26,7 +26,7 @@ func resourceNsxtPolicyGatewayPolicy() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyGatewayPolicyExistsInDomain(id string, domainName string, connector *client.RestConnector) bool {
+func resourceNsxtPolicyGatewayPolicyExistsInDomain(id string, domainName string, connector *client.RestConnector, isGlobalManager bool) bool {
 	client := domains.NewDefaultGatewayPoliciesClient(connector)
 
 	_, err := client.Get(domainName, id)
@@ -42,9 +42,9 @@ func resourceNsxtPolicyGatewayPolicyExistsInDomain(id string, domainName string,
 	return false
 }
 
-func resourceNsxtPolicyGatewayPolicyExistsPartial(domainName string) func(id string, connector *client.RestConnector) bool {
-	return func(id string, connector *client.RestConnector) bool {
-		return resourceNsxtPolicyGatewayPolicyExistsInDomain(id, domainName, connector)
+func resourceNsxtPolicyGatewayPolicyExistsPartial(domainName string) func(id string, connector *client.RestConnector, isGlobalManager bool) bool {
+	return func(id string, connector *client.RestConnector, isGlobalManager bool) bool {
+		return resourceNsxtPolicyGatewayPolicyExistsInDomain(id, domainName, connector, isGlobalManager)
 	}
 }
 
@@ -53,7 +53,7 @@ func resourceNsxtPolicyGatewayPolicyCreate(d *schema.ResourceData, m interface{}
 	client := domains.NewDefaultGatewayPoliciesClient(connector)
 
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID(d, connector, resourceNsxtPolicyGatewayPolicyExistsPartial(d.Get("domain").(string)))
+	id, err := getOrGenerateID(d, m, resourceNsxtPolicyGatewayPolicyExistsPartial(d.Get("domain").(string)))
 	if err != nil {
 		return err
 	}

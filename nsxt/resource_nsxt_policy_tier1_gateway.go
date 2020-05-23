@@ -284,7 +284,7 @@ func resourceNsxtPolicyTier1GatewayDeleteEdgeCluster(d *schema.ResourceData, con
 	return nil
 }
 
-func resourceNsxtPolicyTier1GatewayExists(id string, connector *client.RestConnector) bool {
+func resourceNsxtPolicyTier1GatewayExists(id string, connector *client.RestConnector, isGlobalManager bool) bool {
 	client := infra.NewDefaultTier1sClient(connector)
 
 	_, err := client.Get(id)
@@ -367,7 +367,7 @@ func resourceNsxtPolicyTier1GatewayCreate(d *schema.ResourceData, m interface{})
 	client := infra.NewDefaultTier1sClient(connector)
 
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID(d, connector, resourceNsxtPolicyTier1GatewayExists)
+	id, err := getOrGenerateID(d, m, resourceNsxtPolicyTier1GatewayExists)
 	if err != nil {
 		return err
 	}

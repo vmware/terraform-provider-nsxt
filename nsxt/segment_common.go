@@ -617,7 +617,7 @@ func policySegmentResourceToStruct(d *schema.ResourceData, isVlan bool) (model.S
 	return obj, nil
 }
 
-func resourceNsxtPolicySegmentExists(id string, connector *client.RestConnector) bool {
+func resourceNsxtPolicySegmentExists(id string, connector *client.RestConnector, isGlobalManager bool) bool {
 	client := infra.NewDefaultSegmentsClient(connector)
 
 	_, err := client.Get(id)
@@ -716,7 +716,7 @@ func nsxtPolicySegmentCreate(d *schema.ResourceData, m interface{}, isVlan bool)
 	client := infra.NewDefaultSegmentsClient(connector)
 
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID(d, connector, resourceNsxtPolicySegmentExists)
+	id, err := getOrGenerateID(d, m, resourceNsxtPolicySegmentExists)
 	if err != nil {
 		return err
 	}

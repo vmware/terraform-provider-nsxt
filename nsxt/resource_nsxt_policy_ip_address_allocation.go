@@ -51,14 +51,6 @@ func resourceNsxtPolicyIPAddressAllocation() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyIPAddressParsePoolIDFromPath(poolPath string, connector *client.RestConnector) (string, error) {
-	poolID := getPolicyIDFromPath(poolPath)
-	if !resourceNsxtPolicyIPPoolExists(poolID, connector) {
-		return "", fmt.Errorf("IP Pool specified in path '%s' does not exist", poolPath)
-	}
-	return poolID, nil
-}
-
 func resourceNsxtPolicyIPAddressAllocationExists(poolID string, allocationID string, connector *client.RestConnector) bool {
 	client := ip_pools.NewDefaultIpAllocationsClient(connector)
 
@@ -84,11 +76,7 @@ func resourceNsxtPolicyIPAddressAllocationCreate(d *schema.ResourceData, m inter
 		return policyResourceNotSupportedError()
 	}
 
-	poolID, err := resourceNsxtPolicyIPAddressParsePoolIDFromPath(d.Get("pool_path").(string), connector)
-
-	if err != nil {
-		return err
-	}
+	poolID := getPolicyIDFromPath(d.Get("pool_path").(string))
 
 	id := d.Get("nsx_id").(string)
 	if id == "" {
@@ -117,7 +105,7 @@ func resourceNsxtPolicyIPAddressAllocationCreate(d *schema.ResourceData, m inter
 
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating IPAddressAllocation with ID %s", id)
-	err = client.Patch(poolID, id, obj)
+	err := client.Patch(poolID, id, obj)
 	if err != nil {
 		return handleCreateError("IPAddressAllocation", id, err)
 	}
@@ -141,11 +129,7 @@ func resourceNsxtPolicyIPAddressAllocationRead(d *schema.ResourceData, m interfa
 		return fmt.Errorf("Error obtaining IPAddressAllocation ID")
 	}
 
-	poolID, err := resourceNsxtPolicyIPAddressParsePoolIDFromPath(d.Get("pool_path").(string), connector)
-
-	if err != nil {
-		return err
-	}
+	poolID := getPolicyIDFromPath(d.Get("pool_path").(string))
 
 	obj, err := client.Get(poolID, id)
 	if err != nil {
@@ -195,13 +179,9 @@ func resourceNsxtPolicyIPAddressAllocationDelete(d *schema.ResourceData, m inter
 		return fmt.Errorf("Error obtaining IPAddressAllocation ID")
 	}
 
-	poolID, err := resourceNsxtPolicyIPAddressParsePoolIDFromPath(d.Get("pool_path").(string), connector)
+	poolID := getPolicyIDFromPath(d.Get("pool_path").(string))
 
-	if err != nil {
-		return err
-	}
-
-	err = client.Delete(poolID, id)
+	err := client.Delete(poolID, id)
 	if err != nil {
 		return handleDeleteError("IPAddressAllocation", id, err)
 	}

@@ -373,7 +373,7 @@ func policyLBVirtualServerVersionDepenantSet(d *schema.ResourceData, obj *model.
 	}
 }
 
-func resourceNsxtPolicyLBVirtualServerExists(id string, connector *client.RestConnector) bool {
+func resourceNsxtPolicyLBVirtualServerExists(id string, connector *client.RestConnector, isGlobalManager bool) bool {
 	client := infra.NewDefaultLbVirtualServersClient(connector)
 
 	_, err := client.Get(id)
@@ -399,7 +399,7 @@ func resourceNsxtPolicyLBVirtualServerCreate(d *schema.ResourceData, m interface
 	}
 
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID(d, connector, resourceNsxtPolicyLBVirtualServerExists)
+	id, err := getOrGenerateID(d, m, resourceNsxtPolicyLBVirtualServerExists)
 	if err != nil {
 		return err
 	}
