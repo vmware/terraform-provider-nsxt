@@ -383,7 +383,7 @@ func resourceNsxtPolicyServiceGetEntriesFromSchema(d *schema.ResourceData) ([]*d
 	return serviceEntries, nil
 }
 
-func resourceNsxtPolicyServiceExists(id string, connector *client.RestConnector) bool {
+func resourceNsxtPolicyServiceExists(id string, connector *client.RestConnector, isGlobalManager bool) bool {
 	client := infra.NewDefaultServicesClient(connector)
 
 	_, err := client.Get(id)
@@ -411,7 +411,7 @@ func resourceNsxtPolicyServiceCreate(d *schema.ResourceData, m interface{}) erro
 	client := infra.NewDefaultServicesClient(connector)
 
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID(d, connector, resourceNsxtPolicyServiceExists)
+	id, err := getOrGenerateID(d, m, resourceNsxtPolicyServiceExists)
 	if err != nil {
 		return err
 	}

@@ -495,7 +495,7 @@ func setPolicyVRFConfigInSchema(d *schema.ResourceData, config *model.Tier0VrfCo
 	return d.Set("vrf_config", vrfConfigs)
 }
 
-func resourceNsxtPolicyTier0GatewayExists(id string, connector *client.RestConnector) bool {
+func resourceNsxtPolicyTier0GatewayExists(id string, connector *client.RestConnector, isGlobalManager bool) bool {
 	client := infra.NewDefaultTier0sClient(connector)
 
 	_, err := client.Get(id)
@@ -738,7 +738,7 @@ func resourceNsxtPolicyTier0GatewayCreate(d *schema.ResourceData, m interface{})
 	infraClient := nsx_policy.NewDefaultInfraClient(connector)
 
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID(d, connector, resourceNsxtPolicyTier0GatewayExists)
+	id, err := getOrGenerateID(d, m, resourceNsxtPolicyTier0GatewayExists)
 	if err != nil {
 		return err
 	}

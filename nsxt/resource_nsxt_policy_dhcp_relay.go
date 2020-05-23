@@ -41,7 +41,7 @@ func resourceNsxtPolicyDhcpRelayConfig() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyDhcpRelayConfigExists(id string, connector *client.RestConnector) bool {
+func resourceNsxtPolicyDhcpRelayConfigExists(id string, connector *client.RestConnector, isGlobalManager bool) bool {
 	client := infra.NewDefaultDhcpRelayConfigsClient(connector)
 
 	_, err := client.Get(id)
@@ -67,7 +67,7 @@ func resourceNsxtPolicyDhcpRelayConfigCreate(d *schema.ResourceData, m interface
 	}
 
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID(d, connector, resourceNsxtPolicyDhcpRelayConfigExists)
+	id, err := getOrGenerateID(d, m, resourceNsxtPolicyDhcpRelayConfigExists)
 	if err != nil {
 		return err
 	}
