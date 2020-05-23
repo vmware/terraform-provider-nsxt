@@ -33,7 +33,7 @@ func resourceNsxtPolicyIPPool() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyIPPoolExists(id string, connector *client.RestConnector) bool {
+func resourceNsxtPolicyIPPoolExists(id string, connector *client.RestConnector, isGlobalManager bool) bool {
 	client := infra.NewDefaultIpPoolsClient(connector)
 
 	_, err := client.Get(id)
@@ -82,7 +82,7 @@ func resourceNsxtPolicyIPPoolCreate(d *schema.ResourceData, m interface{}) error
 	connector := getPolicyConnector(m)
 	client := infra.NewDefaultIpPoolsClient(connector)
 
-	id, err := getOrGenerateID(d, connector, resourceNsxtPolicyIPPoolExists)
+	id, err := getOrGenerateID(d, m, resourceNsxtPolicyIPPoolExists)
 	if err != nil {
 		return err
 	}
