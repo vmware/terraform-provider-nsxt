@@ -7,6 +7,9 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
+	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"testing"
@@ -48,7 +51,6 @@ func testAccDataSourceNsxtPolicyGatewayQosProfileCreate(name string) error {
 	if err != nil {
 		return fmt.Errorf("Error during test client initialization: %v", err)
 	}
-	client := infra.NewDefaultGatewayQosProfilesClient(connector)
 
 	displayName := name
 	description := name
@@ -60,7 +62,25 @@ func testAccDataSourceNsxtPolicyGatewayQosProfileCreate(name string) error {
 	// Generate a random ID for the resource
 	id := newUUID()
 
-	err = client.Patch(id, obj)
+	converter := bindings.NewTypeConverter()
+	converter.SetMode(bindings.REST)
+	if testAccIsGlobalManager() {
+		dataValue, err1 := converter.ConvertToVapi(obj, model.GatewayQosProfileBindingType())
+		if err1 != nil {
+			return err1[0]
+		}
+		gmObj, err2 := converter.ConvertToGolang(dataValue, gm_model.GatewayQosProfileBindingType())
+		if err2 != nil {
+			return err2[0]
+		}
+		gmProfile := gmObj.(gm_model.GatewayQosProfile)
+		client := gm_infra.NewDefaultGatewayQosProfilesClient(connector)
+		err = client.Patch(id, gmProfile)
+	} else {
+		client := infra.NewDefaultGatewayQosProfilesClient(connector)
+		err = client.Patch(id, obj)
+	}
+
 	if err != nil {
 		return handleCreateError("GatewayQosProfile", id, err)
 	}
@@ -72,20 +92,33 @@ func testAccDataSourceNsxtPolicyGatewayQosProfileDeleteByName(name string) error
 	if err != nil {
 		return fmt.Errorf("Error during test client initialization: %v", err)
 	}
-	client := infra.NewDefaultGatewayQosProfilesClient(connector)
 
-	// Find the object by name
-	objList, err := client.List(nil, nil, nil, nil, nil, nil)
-	if err != nil {
-		return handleListError("GatewayQosProfile", err)
-	}
-	for _, objInList := range objList.Results {
-		if *objInList.DisplayName == name {
-			err := client.Delete(*objInList.Id)
+	// Find the object by name and delete it
+	if testAccIsGlobalManager() {
+		objID, err := testGetObjIDByName(name, "GatewayQosProfile")
+		if err == nil {
+			client := gm_infra.NewDefaultQosProfilesClient(connector)
+			err := client.Delete(objID)
 			if err != nil {
-				return handleDeleteError("GatewayQosProfile", *objInList.Id, err)
+				return handleDeleteError("GatewayQosProfile", objID, err)
 			}
 			return nil
+		}
+	} else {
+		client := infra.NewDefaultGatewayQosProfilesClient(connector)
+		// Find the object by name
+		objList, err := client.List(nil, nil, nil, nil, nil, nil)
+		if err != nil {
+			return handleListError("GatewayQosProfile", err)
+		}
+		for _, objInList := range objList.Results {
+			if *objInList.DisplayName == name {
+				err := client.Delete(*objInList.Id)
+				if err != nil {
+					return handleDeleteError("GatewayQosProfile", *objInList.Id, err)
+				}
+				return nil
+			}
 		}
 	}
 	return fmt.Errorf("Error while deleting GatewayQosProfile '%s': resource not found", name)

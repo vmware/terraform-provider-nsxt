@@ -93,21 +93,16 @@ func testAccDataSourceNsxtPolicyQosProfileDeleteByName(name string) error {
 		return fmt.Errorf("Error during test client initialization: %v", err)
 	}
 
-	// Find the object by name
+	// Find the object by name and delete it
 	if testAccIsGlobalManager() {
-		client := gm_infra.NewDefaultQosProfilesClient(connector)
-		objList, err := client.List(nil, nil, nil, nil, nil)
-		if err != nil {
-			return handleListError("QosProfile", err)
-		}
-		for _, objInList := range objList.Results {
-			if *objInList.DisplayName == name {
-				err := client.Delete(*objInList.Id)
-				if err != nil {
-					return handleDeleteError("QosProfile", *objInList.Id, err)
-				}
-				return nil
+		objID, err := testGetObjIDByName(name, "QosProfile")
+		if err == nil {
+			client := gm_infra.NewDefaultQosProfilesClient(connector)
+			err := client.Delete(objID)
+			if err != nil {
+				return handleDeleteError("QosProfile", objID, err)
 			}
+			return nil
 		}
 	} else {
 		client := infra.NewDefaultQosProfilesClient(connector)
