@@ -106,8 +106,7 @@ func testAccDataSourceNsxtPolicyQosProfileDeleteByName(name string) error {
 				if err != nil {
 					return handleDeleteError("QosProfile", *objInList.Id, err)
 				}
-				return fmt.Errorf("DEBUG ADIT this is global manager")
-				//return nil
+				return nil
 			}
 		}
 	} else {
