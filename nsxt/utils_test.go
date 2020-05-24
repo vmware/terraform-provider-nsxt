@@ -6,6 +6,8 @@ package nsxt
 import (
 	"fmt"
 	"github.com/vmware/go-vmware-nsxt/trust"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"net/http"
 	"os"
 	"testing"
@@ -294,4 +296,33 @@ func testAccNSXDeleteCerts(t *testing.T, certID string, clientCertID string, caC
 
 func testAccNsxtPolicyEmptyTemplate() string {
 	return " "
+}
+
+func testGetObjIDByName(objName string, resourceType string) (string, error) {
+	connector, err1 := testAccGetPolicyConnector()
+	if err1 != nil {
+		return "", fmt.Errorf("Error during test client initialization: %v", err1)
+	}
+
+	resultValues, err2 := listPolicyResourcesByType(connector, &resourceType)
+	if err2 != nil {
+		return "", err2
+	}
+
+	converter := bindings.NewTypeConverter()
+	converter.SetMode(bindings.REST)
+
+	for _, result := range resultValues {
+		dataValue, errors := converter.ConvertToGolang(result, model.PolicyResourceBindingType())
+		if len(errors) > 0 {
+			return "", errors[0]
+		}
+		policyResource := dataValue.(model.PolicyResource)
+
+		if *policyResource.DisplayName == objName {
+			return *policyResource.Id, nil
+		}
+	}
+
+	return "", fmt.Errorf("%s with name '%s' was not found", resourceType, objName)
 }
