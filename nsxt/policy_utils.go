@@ -15,13 +15,16 @@ import (
 	"time"
 )
 
-func getOrGenerateID(d *schema.ResourceData, connector *client.RestConnector, presenceChecker func(string, *client.RestConnector) bool) (string, error) {
+func getOrGenerateID(d *schema.ResourceData, m interface{}, presenceChecker func(string, *client.RestConnector, bool) bool) (string, error) {
+	connector := getPolicyConnector(m)
+	isGlobalManager := isPolicyGlobalManager(m)
+
 	id := d.Get("nsx_id").(string)
 	if id == "" {
 		return newUUID(), nil
 	}
 
-	if presenceChecker(id, connector) {
+	if presenceChecker(id, connector, isGlobalManager) {
 		return "", fmt.Errorf("Resource with id %s already exists", id)
 	}
 

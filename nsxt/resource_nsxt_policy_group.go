@@ -174,7 +174,7 @@ func getCriteriaSetSchema() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyGroupExistsInDomain(id string, domain string, connector *client.RestConnector) bool {
+func resourceNsxtPolicyGroupExistsInDomain(id string, domain string, connector *client.RestConnector, isGlobalManager bool) bool {
 	client := domains.NewDefaultGroupsClient(connector)
 
 	_, err := client.Get(domain, id)
@@ -191,9 +191,9 @@ func resourceNsxtPolicyGroupExistsInDomain(id string, domain string, connector *
 
 }
 
-func resourceNsxtPolicyGroupExistsInDomainPartial(domain string) func(id string, connector *client.RestConnector) bool {
-	return func(id string, connector *client.RestConnector) bool {
-		return resourceNsxtPolicyGroupExistsInDomain(id, domain, connector)
+func resourceNsxtPolicyGroupExistsInDomainPartial(domain string) func(id string, connector *client.RestConnector, isGlobalManager bool) bool {
+	return func(id string, connector *client.RestConnector, isGlobalManager bool) bool {
+		return resourceNsxtPolicyGroupExistsInDomain(id, domain, connector, isGlobalManager)
 	}
 }
 
@@ -572,7 +572,7 @@ func resourceNsxtPolicyGroupCreate(d *schema.ResourceData, m interface{}) error 
 	client := domains.NewDefaultGroupsClient(connector)
 
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID(d, connector, resourceNsxtPolicyGroupExistsInDomainPartial(d.Get("domain").(string)))
+	id, err := getOrGenerateID(d, m, resourceNsxtPolicyGroupExistsInDomainPartial(d.Get("domain").(string)))
 	if err != nil {
 		return err
 	}
