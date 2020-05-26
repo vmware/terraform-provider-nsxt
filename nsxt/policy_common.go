@@ -5,6 +5,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+	"log"
 	"strings"
 )
 
@@ -553,4 +554,21 @@ func getGatewayInterfaceUrpfModeSchema() *schema.Schema {
 
 func globalManagerOnlyError() error {
 	return fmt.Errorf("This configuration is only supported with NSX Global Manager. To mark your endpoint as Global Manager, please set 'global_manager' flag to 'true' in the provider.")
+}
+
+func attributeRequiredGlobalManagerError() error {
+	return fmt.Errorf("This configuration is required for NSX Global Manager.")
+}
+
+func buildQueryStringFromMap(query map[string]string) string {
+	if query == nil {
+		return ""
+	}
+	keyValues := make([]string, 0, len(query))
+	for key, value := range query {
+		keyValue := strings.Join([]string{key, value}, ":")
+		keyValues = append(keyValues, keyValue)
+	}
+	log.Print(strings.Join(keyValues, " AND "))
+	return strings.Join(keyValues, " AND ")
 }

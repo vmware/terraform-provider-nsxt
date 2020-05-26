@@ -11,6 +11,7 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/search"
+	"log"
 	"strings"
 )
 
@@ -74,16 +75,16 @@ func policyDataSourceResourceFilterAndSet(d *schema.ResourceData, resultValues [
 	return obj.StructValue, nil
 }
 
-func policyDataSourceResourceRead(d *schema.ResourceData, connector *client.RestConnector, resourceType string) (*data.StructValue, error) {
+func policyDataSourceResourceRead(d *schema.ResourceData, connector *client.RestConnector, resourceType string, additionalQuery map[string]string) (*data.StructValue, error) {
 	objName := d.Get("display_name").(string)
 	objID := d.Get("id").(string)
 	var err error
 	var resultValues []*data.StructValue
-
+	additionalQueryString := buildQueryStringFromMap(additionalQuery)
 	if objID != "" {
-		resultValues, err = listPolicyResourcesByID(connector, &objID)
+		resultValues, err = listPolicyResourcesByID(connector, &objID, &additionalQueryString)
 	} else if objName != "" {
-		resultValues, err = listPolicyResourcesByType(connector, &resourceType)
+		resultValues, err = listPolicyResourcesByType(connector, &resourceType, &additionalQueryString)
 	} else {
 		return nil, fmt.Errorf("No 'id' or 'display_name' specified for %s", resourceType)
 	}
@@ -94,12 +95,14 @@ func policyDataSourceResourceRead(d *schema.ResourceData, connector *client.Rest
 	return policyDataSourceResourceFilterAndSet(d, resultValues, resourceType)
 }
 
-func listPolicyResourcesByType(connector *client.RestConnector, resourceType *string) ([]*data.StructValue, error) {
-	return searchPolicyResources(connector, fmt.Sprintf("resource_type:%s", *resourceType))
+func listPolicyResourcesByType(connector *client.RestConnector, resourceType *string, additionalQuery *string) ([]*data.StructValue, error) {
+	query := fmt.Sprintf("resource_type:%s", *resourceType)
+	return searchPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
 }
 
-func listPolicyResourcesByID(connector *client.RestConnector, resourceID *string) ([]*data.StructValue, error) {
-	return searchPolicyResources(connector, fmt.Sprintf("id:%s", *resourceID))
+func listPolicyResourcesByID(connector *client.RestConnector, resourceID *string, additionalQuery *string) ([]*data.StructValue, error) {
+	query := fmt.Sprintf("id:%s", *resourceID)
+	return searchPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
 }
 
 func searchPolicyResources(connector *client.RestConnector, query string) ([]*data.StructValue, error) {
@@ -155,4 +158,12 @@ func searchPolicyResourcesTyped(connector *client.RestConnector, query string) (
 			return results, nil
 		}
 	}
+}
+
+func buildPolicyResourcesQuery(query *string, additionalQuery *string) *string {
+	if *additionalQuery != "" {
+		*query = *query + " AND " + *additionalQuery
+	}
+	log.Print(*query)
+	return query
 }
