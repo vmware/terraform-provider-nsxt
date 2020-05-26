@@ -11,6 +11,9 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt"
+	global_policy "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm"
+	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
+	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services"
@@ -496,9 +499,15 @@ func setPolicyVRFConfigInSchema(d *schema.ResourceData, config *model.Tier0VrfCo
 }
 
 func resourceNsxtPolicyTier0GatewayExists(id string, connector *client.RestConnector, isGlobalManager bool) bool {
-	client := infra.NewDefaultTier0sClient(connector)
+	var err error
+	if isGlobalManager {
+		client := gm_infra.NewDefaultTier0sClient(connector)
+		_, err = client.Get(id)
+	} else {
+		client := infra.NewDefaultTier0sClient(connector)
+		_, err = client.Get(id)
+	}
 
-	_, err := client.Get(id)
 	if err == nil {
 		return true
 	}
@@ -600,7 +609,7 @@ func resourceNsxtPolicyTier0GatewayBGPConfigSchemaToStruct(cfg interface{}, isVr
 	return routeStruct
 }
 
-func resourceNsxtPolicyTier0GatewayResourceToInfraStruct(d *schema.ResourceData, connector *client.RestConnector, isCreate bool, id string) (model.Infra, error) {
+func resourceNsxtPolicyTier0GatewayResourceToInfraStruct(d *schema.ResourceData, connector *client.RestConnector, isCreate bool, isGlobalManager bool, id string) (model.Infra, error) {
 	var infraChildren, gwChildren, lsChildren []*data.StructValue
 	var infraStruct model.Infra
 	converter := bindings.NewTypeConverter()
@@ -675,7 +684,7 @@ func resourceNsxtPolicyTier0GatewayResourceToInfraStruct(d *schema.ResourceData,
 
 		var serviceStruct *model.LocaleServices
 		var err error
-		if !isCreate {
+		if !isCreate && !isGlobalManager {
 			// BGP config and edge cluster share the same locale service
 			serviceStruct, err = resourceNsxtPolicyTier0GatewayGetLocaleServiceEntry(d.Id(), connector)
 			if err != nil {
@@ -733,24 +742,40 @@ func resourceNsxtPolicyTier0GatewayResourceToInfraStruct(d *schema.ResourceData,
 	return infraStruct, nil
 }
 
-func resourceNsxtPolicyTier0GatewayCreate(d *schema.ResourceData, m interface{}) error {
-	connector := getPolicyConnector(m)
-	infraClient := nsx_policy.NewDefaultInfraClient(connector)
+func policyTier0GatewayInfraPatch(obj model.Infra, isGlobalManager bool, connector *client.RestConnector) error {
+	boolFalse := false
+	if isGlobalManager {
+		infraClient := global_policy.NewDefaultGlobalInfraClient(connector)
+		gmObj, err := convertModelBindingType(obj, model.InfraBindingType(), gm_model.InfraBindingType())
+		if err != nil {
+			return err
+		}
 
+		return infraClient.Patch(gmObj.(gm_model.Infra), &boolFalse)
+	}
+
+	infraClient := nsx_policy.NewDefaultInfraClient(connector)
+	return infraClient.Patch(obj, &boolFalse)
+}
+
+func resourceNsxtPolicyTier0GatewayCreate(d *schema.ResourceData, m interface{}) error {
+
+	connector := getPolicyConnector(m)
+	isGlobalManager := isPolicyGlobalManager(m)
 	// Initialize resource Id and verify this ID is not yet used
 	id, err := getOrGenerateID(d, m, resourceNsxtPolicyTier0GatewayExists)
 	if err != nil {
 		return err
 	}
 
-	infraModel, err := resourceNsxtPolicyTier0GatewayResourceToInfraStruct(d, connector, true, id)
+	obj, err := resourceNsxtPolicyTier0GatewayResourceToInfraStruct(d, connector, true, isGlobalManager, id)
 	if err != nil {
-		return handleCreateError("Tier0", id, err)
+		return err
 	}
 
-	boolFalse := false
-	log.Printf("[INFO] H-API Creating Tier0 with ID %s", id)
-	err = infraClient.Patch(infraModel, &boolFalse)
+	log.Printf("[INFO] Using H-API to create Tier0 with ID %s", id)
+
+	err = policyTier0GatewayInfraPatch(obj, isGlobalManager, getPolicyConnector(m))
 	if err != nil {
 		return handleCreateError("Tier0", id, err)
 	}
@@ -763,14 +788,34 @@ func resourceNsxtPolicyTier0GatewayCreate(d *schema.ResourceData, m interface{})
 
 func resourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewDefaultTier0sClient(connector)
 
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining Tier0 ID")
 	}
 
-	obj, err := client.Get(id)
+	var obj model.Tier0
+	var err error
+	isGlobalManager := isPolicyGlobalManager(m)
+	if isGlobalManager {
+		client := gm_infra.NewDefaultTier0sClient(connector)
+		gmObj, err := client.Get(id)
+		if err != nil {
+			return handleReadError(d, "Tier0", id, err)
+		}
+
+		convertedObj, err := convertModelBindingType(gmObj, model.Tier0BindingType(), model.Tier0BindingType())
+		if err != nil {
+			return err
+		}
+
+		obj = convertedObj.(model.Tier0)
+
+	} else {
+		client := infra.NewDefaultTier0sClient(connector)
+		obj, err = client.Get(id)
+	}
+
 	if err != nil {
 		return handleReadError(d, "Tier0", id, err)
 	}
@@ -795,19 +840,21 @@ func resourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{}) e
 		d.Set("dhcp_config_path", dhcpPaths[0])
 	}
 	// Get the edge cluster Id
-	localeService, err := resourceNsxtPolicyTier0GatewayGetLocaleServiceEntry(d.Id(), connector)
-	if err != nil {
-		return handleReadError(d, "Locale Service for T0", id, err)
-	}
-	if localeService != nil {
-		d.Set("edge_cluster_path", localeService.EdgeClusterPath)
-		err = resourceNsxtPolicyTier0GatewayReadBGPConfig(d, connector, *localeService)
+	if !isGlobalManager {
+		localeService, err := resourceNsxtPolicyTier0GatewayGetLocaleServiceEntry(d.Id(), connector)
 		if err != nil {
-			return handleReadError(d, "BGP Configuration for T0", id, err)
+			return handleReadError(d, "Locale Service for T0", id, err)
 		}
-	} else {
-		// set empty bgp_config to keep empty plan
-		d.Set("bgp_config", make([]map[string]interface{}, 0))
+		if localeService != nil {
+			d.Set("edge_cluster_path", localeService.EdgeClusterPath)
+			err = resourceNsxtPolicyTier0GatewayReadBGPConfig(d, connector, *localeService)
+			if err != nil {
+				return handleReadError(d, "BGP Configuration for T0", id, err)
+			}
+		} else {
+			// set empty bgp_config to keep empty plan
+			d.Set("bgp_config", make([]map[string]interface{}, 0))
+		}
 	}
 
 	err = setIpv6ProfilePathsInSchema(d, obj.Ipv6ProfilePaths)
@@ -820,21 +867,21 @@ func resourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{}) e
 
 func resourceNsxtPolicyTier0GatewayUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	infraClient := nsx_policy.NewDefaultInfraClient(connector)
+	isGlobalManager := isPolicyGlobalManager(m)
 
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining Tier0 ID")
 	}
 
-	infraModel, err := resourceNsxtPolicyTier0GatewayResourceToInfraStruct(d, connector, false, id)
+	obj, err := resourceNsxtPolicyTier0GatewayResourceToInfraStruct(d, connector, false, isGlobalManager, id)
 	if err != nil {
 		return err
 	}
 
-	boolFalse := false
-	log.Printf("[INFO] H-API Updating Tier0 with ID %s", id)
-	err = infraClient.Patch(infraModel, &boolFalse)
+	log.Printf("[INFO] Using H-API to update Tier0 with ID %s", id)
+
+	err = policyTier0GatewayInfraPatch(obj, isGlobalManager, connector)
 	if err != nil {
 		return handleUpdateError("Tier0", id, err)
 	}
@@ -843,14 +890,10 @@ func resourceNsxtPolicyTier0GatewayUpdate(d *schema.ResourceData, m interface{})
 }
 
 func resourceNsxtPolicyTier0GatewayDelete(d *schema.ResourceData, m interface{}) error {
-	connector := getPolicyConnector(m)
 	var infraChildren []*data.StructValue
-	infraClient := nsx_policy.NewDefaultInfraClient(connector)
 	converter := bindings.NewTypeConverter()
 	converter.SetMode(bindings.REST)
 	boolTrue := true
-	boolFalse := false
-
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining Tier0 ID")
@@ -874,13 +917,13 @@ func resourceNsxtPolicyTier0GatewayDelete(d *schema.ResourceData, m interface{})
 	infraChildren = append(infraChildren, dataValue.(*data.StructValue))
 
 	infraType := "Infra"
-	infraModel := model.Infra{
+	obj := model.Infra{
 		Children:     infraChildren,
 		ResourceType: &infraType,
 	}
 
-	log.Printf("[DEBUG] HAPI deleting Tier0 with ID %s", id)
-	err := infraClient.Patch(infraModel, &boolFalse)
+	log.Printf("[DEBUG] Using H-API to delete Tier0 with ID %s", id)
+	err := policyTier0GatewayInfraPatch(obj, isPolicyGlobalManager(m), getPolicyConnector(m))
 	if err != nil {
 		return handleDeleteError("Tier0", id, err)
 	}
