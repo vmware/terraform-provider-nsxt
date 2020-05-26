@@ -25,6 +25,13 @@ func dataSourceNsxtPolicyIPDiscoveryProfile() *schema.Resource {
 }
 
 func dataSourceNsxtPolicyIPDiscoveryProfileRead(d *schema.ResourceData, m interface{}) error {
+	if isPolicyGlobalManager(m) {
+		_, err := policyDataSourceResourceRead(d, getPolicyConnector(m), "IPDiscoveryProfile")
+		if err != nil {
+			return err
+		}
+		return nil
+	}
 	connector := getPolicyConnector(m)
 	client := infra.NewDefaultIpDiscoveryProfilesClient(connector)
 

@@ -6,6 +6,8 @@ package nsxt
 import (
 	"fmt"
 	"github.com/vmware/go-vmware-nsxt/trust"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"net/http"
 	"os"
 	"testing"
@@ -104,6 +106,10 @@ func testAccEnvDefined(t *testing.T, envVar string) {
 	if len(os.Getenv(envVar)) == 0 {
 		t.Skipf("This test requires %s environment variable to be set", envVar)
 	}
+}
+
+func testAccIsGlobalManager() bool {
+	return os.Getenv("NSXT_GLOBAL_MANAGER") == "true"
 }
 
 // Create and delete CA and client cert for various tests
@@ -290,4 +296,33 @@ func testAccNSXDeleteCerts(t *testing.T, certID string, clientCertID string, caC
 
 func testAccNsxtPolicyEmptyTemplate() string {
 	return " "
+}
+
+func testGetObjIDByName(objName string, resourceType string) (string, error) {
+	connector, err1 := testAccGetPolicyConnector()
+	if err1 != nil {
+		return "", fmt.Errorf("Error during test client initialization: %v", err1)
+	}
+
+	resultValues, err2 := listPolicyResourcesByType(connector, &resourceType)
+	if err2 != nil {
+		return "", err2
+	}
+
+	converter := bindings.NewTypeConverter()
+	converter.SetMode(bindings.REST)
+
+	for _, result := range resultValues {
+		dataValue, errors := converter.ConvertToGolang(result, model.PolicyResourceBindingType())
+		if len(errors) > 0 {
+			return "", errors[0]
+		}
+		policyResource := dataValue.(model.PolicyResource)
+
+		if *policyResource.DisplayName == objName {
+			return *policyResource.Id, nil
+		}
+	}
+
+	return "", fmt.Errorf("%s with name '%s' was not found", resourceType, objName)
 }
