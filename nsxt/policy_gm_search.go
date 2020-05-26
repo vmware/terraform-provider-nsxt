@@ -11,7 +11,6 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/search"
-	"log"
 	"strings"
 )
 
@@ -164,6 +163,5 @@ func buildPolicyResourcesQuery(query *string, additionalQuery *string) *string {
 	if *additionalQuery != "" {
 		*query = *query + " AND " + *additionalQuery
 	}
-	log.Print(*query)
 	return query
 }
