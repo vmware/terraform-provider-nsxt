@@ -586,12 +586,6 @@ func getCommonProviderConfig(clients interface{}) commonProviderConfig {
 	return clients.(nsxtClients).CommonConfig
 }
 
-func getGlobalPolicyEnforcementPointPath(m interface{}, site *string) string {
-	var resourceSite string
-	if site != nil {
-		resourceSite = *site
-	} else {
-		resourceSite = getPolicySite(m)
-	}
-	return fmt.Sprintf("/global-infra/sites/%s/enforcement-points/%s", resourceSite, getPolicyEnforcementPoint(m))
+func getGlobalPolicyEnforcementPointPath(m interface{}, sitePath *string) string {
+	return fmt.Sprintf("%s/enforcement-points/%s", *sitePath, getPolicyEnforcementPoint(m))
 }
