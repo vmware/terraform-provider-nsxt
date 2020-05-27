@@ -459,9 +459,9 @@ func resourceNsxtPolicyServiceCreate(d *schema.ResourceData, m interface{}) erro
 	} else {
 		client := infra.NewDefaultServicesClient(connector)
 		err = client.Patch(id, obj)
-		if err != nil {
-			return handleCreateError("Service", id, err)
-		}
+	}
+	if err != nil {
+		return handleCreateError("Service", id, err)
 	}
 
 	d.SetId(id)
