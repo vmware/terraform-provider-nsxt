@@ -51,7 +51,7 @@ func dataSourceNsxtPolicyServiceReadAllServices(connector *client.RestConnector)
 
 func dataSourceNsxtPolicyServiceRead(d *schema.ResourceData, m interface{}) error {
 	if isPolicyGlobalManager(m) {
-		_, err := policyDataSourceResourceRead(d, getPolicyConnector(m), "Service")
+		_, err := policyDataSourceResourceRead(d, getPolicyConnector(m), "Service", nil)
 		if err != nil {
 			return err
 		}

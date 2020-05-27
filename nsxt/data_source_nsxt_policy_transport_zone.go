@@ -43,27 +43,32 @@ func dataSourceNsxtPolicyTransportZone() *schema.Resource {
 				Computed:     true,
 				ValidateFunc: validation.StringInSlice(policyTransportZoneTransportTypes, false),
 			},
-			"site": {
-				Type:        schema.TypeString,
-				Description: "Site this Transport Zone belongs to",
-				Optional:    true,
+			"site_path": {
+				Type:         schema.TypeString,
+				Description:  "Path of the site this Transport Zone belongs to",
+				Optional:     true,
+				ValidateFunc: validatePolicyPath(),
 			},
 		},
 	}
 }
 
 func dataSourceNsxtPolicyTransportZoneRead(d *schema.ResourceData, m interface{}) error {
-	objSite := d.Get("site").(string)
-	if !isPolicyGlobalManager(m) && objSite != "" {
+	objSitePath := d.Get("site_path").(string)
+	transportType := d.Get("transport_type").(string)
+	if !isPolicyGlobalManager(m) && objSitePath != "" {
 		return globalManagerOnlyError()
 	}
 	if isPolicyGlobalManager(m) {
-		if objSite == "" {
+		if objSitePath == "" {
 			return attributeRequiredGlobalManagerError()
 		}
 		query := make(map[string]string)
-		globalPolicyEnforcementPointPath := getGlobalPolicyEnforcementPointPath(m, &objSite)
-		query["parent_path"] = strings.ReplaceAll(globalPolicyEnforcementPointPath, "/", "\\/")
+		globalPolicyEnforcementPointPath := getGlobalPolicyEnforcementPointPath(m, &objSitePath)
+		query["parent_path"] = globalPolicyEnforcementPointPath
+		if transportType != "" {
+			query["tz_type"] = transportType
+		}
 		obj, err := policyDataSourceResourceRead(d, getPolicyConnector(m), "PolicyTransportZone", query)
 		if err != nil {
 			return err
@@ -89,7 +94,6 @@ func dataSourceNsxtPolicyTransportZoneRead(d *schema.ResourceData, m interface{}
 	objName := d.Get("display_name").(string)
 	defaultVal, isDefaultSet := d.GetOkExists("is_default")
 	isDefault := isDefaultSet && defaultVal.(bool)
-	transportType := d.Get("transport_type").(string)
 	var obj lm_model.PolicyTransportZone
 	if objID != "" {
 		// Get by id

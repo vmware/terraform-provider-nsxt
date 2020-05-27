@@ -102,6 +102,10 @@ func getTestCertificateName(isClient bool) string {
 	return os.Getenv("NSXT_TEST_CERTIFICATE_NAME")
 }
 
+func getTestSitePath() string {
+	return os.Getenv("NSXT_TEST_SITE_PATH")
+}
+
 func testAccEnvDefined(t *testing.T, envVar string) {
 	if len(os.Getenv(envVar)) == 0 {
 		t.Skipf("This test requires %s environment variable to be set", envVar)
@@ -110,6 +114,12 @@ func testAccEnvDefined(t *testing.T, envVar string) {
 
 func testAccIsGlobalManager() bool {
 	return os.Getenv("NSXT_GLOBAL_MANAGER") == "true"
+}
+
+func testAccSkipIfIsGlobalManager(t *testing.T) {
+	if testAccIsGlobalManager() {
+		t.Skipf("This test is for local manager only")
+	}
 }
 
 // Create and delete CA and client cert for various tests
@@ -304,7 +314,7 @@ func testGetObjIDByName(objName string, resourceType string) (string, error) {
 		return "", fmt.Errorf("Error during test client initialization: %v", err1)
 	}
 
-	resultValues, err2 := listPolicyResourcesByType(connector, &resourceType)
+	resultValues, err2 := listPolicyResourcesByType(connector, &resourceType, nil)
 	if err2 != nil {
 		return "", err2
 	}
