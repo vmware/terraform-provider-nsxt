@@ -555,8 +555,8 @@ func globalManagerOnlyError() error {
 	return fmt.Errorf("This configuration is only supported with NSX Global Manager. To mark your endpoint as Global Manager, please set 'global_manager' flag to 'true' in the provider.")
 }
 
-func attributeRequiredGlobalManagerError() error {
-	return fmt.Errorf("This configuration is required for NSX Global Manager.")
+func attributeRequiredGlobalManagerError(attribute string) error {
+	return fmt.Errorf("This configuration %s is required for NSX Global Manager.", attribute)
 }
 
 func buildQueryStringFromMap(query map[string]string) string {
