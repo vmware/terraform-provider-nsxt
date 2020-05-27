@@ -112,6 +112,18 @@ func testAccIsGlobalManager() bool {
 	return os.Getenv("NSXT_GLOBAL_MANAGER") == "true"
 }
 
+func testAccOnlyGlobalManager(t *testing.T) {
+	if !testAccIsGlobalManager() {
+		t.Skipf("This test requires a global manager environment")
+	}
+}
+
+func testAccOnlyLocalManager(t *testing.T) {
+	if testAccIsGlobalManager() {
+		t.Skipf("This test requires a local manager environment")
+	}
+}
+
 // Create and delete CA and client cert for various tests
 func testAccNSXCreateCert(t *testing.T, name string, certPem string, certPK string, certType string) string {
 	nsxClient, err := testAccGetClient()
