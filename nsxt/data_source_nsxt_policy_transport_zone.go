@@ -61,7 +61,7 @@ func dataSourceNsxtPolicyTransportZoneRead(d *schema.ResourceData, m interface{}
 	}
 	if isPolicyGlobalManager(m) {
 		if objSitePath == "" {
-			return attributeRequiredGlobalManagerError()
+			return attributeRequiredGlobalManagerError("site_path")
 		}
 		query := make(map[string]string)
 		globalPolicyEnforcementPointPath := getGlobalPolicyEnforcementPointPath(m, &objSitePath)

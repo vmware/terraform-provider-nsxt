@@ -30,4 +30,4 @@ In addition to arguments listed above, the following attributes are exported:
 
 * `description` - The description of the resource.
 
-* `path` - The NSX path of the policy resource.
+* `path` - The NSX path of the policy resource. This attribute can serve as `site_path` field of `nsxt_policy_transport_zone` data source.
