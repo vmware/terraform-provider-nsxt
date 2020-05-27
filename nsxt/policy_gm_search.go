@@ -160,7 +160,7 @@ func searchPolicyResourcesTyped(connector *client.RestConnector, query string) (
 }
 
 func buildPolicyResourcesQuery(query *string, additionalQuery *string) *string {
-	if *additionalQuery != "" {
+	if additionalQuery != nil && *additionalQuery != "" {
 		*query = *query + " AND " + *additionalQuery
 	}
 	return query

@@ -26,7 +26,7 @@ func dataSourceNsxtPolicyIPDiscoveryProfile() *schema.Resource {
 
 func dataSourceNsxtPolicyIPDiscoveryProfileRead(d *schema.ResourceData, m interface{}) error {
 	if isPolicyGlobalManager(m) {
-		_, err := policyDataSourceResourceRead(d, getPolicyConnector(m), "IPDiscoveryProfile")
+		_, err := policyDataSourceResourceRead(d, getPolicyConnector(m), "IPDiscoveryProfile", nil)
 		if err != nil {
 			return err
 		}
