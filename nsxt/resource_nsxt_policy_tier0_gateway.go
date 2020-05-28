@@ -13,6 +13,7 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt"
 	global_policy "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm"
 	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
+	gm_tier_0s "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s"
 	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s"
@@ -110,6 +111,7 @@ func resourceNsxtPolicyTier0Gateway() *schema.Resource {
 			"ipv6_ndra_profile_path": getIPv6NDRAPathSchema(),
 			"ipv6_dad_profile_path":  getIPv6DadPathSchema(),
 			"edge_cluster_path":      getPolicyEdgeClusterPathSchema(),
+			"locale_service":         getPolicyLocaleServiceSchema(),
 			"bgp_config":             getPolicyBGPConfigSchema(),
 			"vrf_config":             getPolicyVRFConfigSchema(),
 			"dhcp_config_path":       getPolicyPathSchema(false, false, "Policy path to DHCP server or relay configuration to use for this Tier0"),
@@ -281,31 +283,52 @@ func getPolicyVRFConfigSchema() *schema.Schema {
 	}
 }
 
-func resourceNsxtPolicyTier0GatewayListEdgeClusterLocaleServiceEntries(connector *client.RestConnector, t0ID string) ([]model.LocaleServices, error) {
-	client := tier_0s.NewDefaultLocaleServicesClient(connector)
+func listPolicyTier0GatewayLocaleServices(connector *client.RestConnector, t0ID string, isGlobalManager bool) ([]model.LocaleServices, error) {
 	var results []model.LocaleServices
 	var cursor *string
-	total := 0
+	var count int64
+	total := int64(0)
 
 	for {
 		includeMarkForDeleteObjectsParam := false
-		searchResponse, err := client.List(t0ID, cursor, &includeMarkForDeleteObjectsParam, nil, nil, nil, nil)
-		if err != nil {
-			return results, err
+		if isGlobalManager {
+			client := gm_tier_0s.NewDefaultLocaleServicesClient(connector)
+			listResponse, err := client.List(t0ID, cursor, &includeMarkForDeleteObjectsParam, nil, nil, nil, nil)
+			if err != nil {
+				return results, err
+			}
+			for _, result := range listResponse.Results {
+				convertedResult, conversionErr := convertModelBindingType(result, gm_model.LocaleServicesBindingType(), model.LocaleServicesBindingType())
+				if conversionErr != nil {
+					return results, conversionErr
+				}
+				results = append(results, convertedResult.(model.LocaleServices))
+			}
+			cursor = listResponse.Cursor
+			count = *listResponse.ResultCount
+		} else {
+			client := tier_0s.NewDefaultLocaleServicesClient(connector)
+			listResponse, err := client.List(t0ID, cursor, &includeMarkForDeleteObjectsParam, nil, nil, nil, nil)
+			if err != nil {
+				return results, err
+			}
+			results = append(results, listResponse.Results...)
+			cursor = listResponse.Cursor
+			count = *listResponse.ResultCount
 		}
-		results = append(results, searchResponse.Results...)
 		if total == 0 {
 			// first response
-			total = int(*searchResponse.ResultCount)
+			total = count
+		} else {
+			total += count
 		}
-		cursor = searchResponse.Cursor
-		if len(results) >= total {
+		if int64(len(results)) >= total {
 			return results, nil
 		}
 	}
 }
 
-func resourceNsxtPolicyTier0GatewayGetLocaleServiceEntry(gwID string, connector *client.RestConnector) (*model.LocaleServices, error) {
+func getPolicyTier0GatewayLocaleServiceWithEdgeCluster(gwID string, connector *client.RestConnector) (*model.LocaleServices, error) {
 	// Get the locale services of this Tier0 for the edge-cluster id
 	client := tier_0s.NewDefaultLocaleServicesClient(connector)
 	obj, err := client.Get(gwID, defaultPolicyLocaleServiceID)
@@ -315,7 +338,7 @@ func resourceNsxtPolicyTier0GatewayGetLocaleServiceEntry(gwID string, connector 
 
 	// No locale-service with the default ID
 	// List all the locale services
-	objList, errList := resourceNsxtPolicyTier0GatewayListEdgeClusterLocaleServiceEntries(connector, gwID)
+	objList, errList := listPolicyTier0GatewayLocaleServices(connector, gwID, false)
 	if errList != nil {
 		if isNotFoundError(errList) {
 			return nil, nil
@@ -609,6 +632,140 @@ func resourceNsxtPolicyTier0GatewayBGPConfigSchemaToStruct(cfg interface{}, isVr
 	return routeStruct
 }
 
+func initChildLocaleService(serviceStruct *model.LocaleServices, markForDelete bool) (*data.StructValue, error) {
+	childService := model.ChildLocaleServices{
+		ResourceType:    "ChildLocaleServices",
+		LocaleServices:  serviceStruct,
+		MarkedForDelete: &markForDelete,
+	}
+
+	converter := bindings.NewTypeConverter()
+	converter.SetMode(bindings.REST)
+	dataValue, err := converter.ConvertToVapi(childService, model.ChildLocaleServicesBindingType())
+
+	if err != nil {
+		return nil, err[0]
+	}
+
+	return dataValue.(*data.StructValue), nil
+}
+
+func initSingleTier0GatewayLocaleService(d *schema.ResourceData, children []*data.StructValue, connector *client.RestConnector) (*data.StructValue, error) {
+
+	edgeClusterPath := d.Get("edge_cluster_path").(string)
+	var serviceStruct *model.LocaleServices
+	var err error
+	if len(d.Id()) > 0 {
+		// This is an update flow - fetch existing locale service to reuse if needed
+		serviceStruct, err = getPolicyTier0GatewayLocaleServiceWithEdgeCluster(d.Id(), connector)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	lsType := "LocaleServices"
+	if serviceStruct == nil {
+		// Locale Service required for edge cluster path and/or BGP config
+		serviceStruct = &model.LocaleServices{
+			Id: &defaultPolicyLocaleServiceID,
+		}
+	}
+
+	serviceStruct.ResourceType = &lsType
+	serviceStruct.EdgeClusterPath = &edgeClusterPath
+	if len(children) > 0 {
+		serviceStruct.Children = children
+	}
+
+	log.Printf("[DEBUG] Using Locale Service with ID %s and Edge Cluster %v", *serviceStruct.Id, serviceStruct.EdgeClusterPath)
+
+	return initChildLocaleService(serviceStruct, false)
+}
+
+func initTier0GatewayLocaleServices(d *schema.ResourceData, connector *client.RestConnector) ([]*data.StructValue, error) {
+	var localeServices []*data.StructValue
+
+	services := d.Get("locale_service").([]interface{})
+	if len(services) == 0 {
+		return localeServices, nil
+	}
+
+	existingServices := make(map[string]bool)
+	if len(d.Id()) > 0 {
+		// This is an update - we might need to delete locale services
+		existingServiceObjects, errList := listPolicyTier0GatewayLocaleServices(connector, d.Id(), true)
+		if errList != nil {
+			return nil, errList
+		}
+
+		for _, obj := range existingServiceObjects {
+			existingServices[*obj.Id] = true
+		}
+	}
+	lsType := "LocaleServices"
+	for _, service := range services {
+		cfg := service.(map[string]interface{})
+		edgeClusterPath := cfg["edge_cluster_path"].(string)
+		edgeNodes := interface2StringList(cfg["preferred_edge_paths"].(*schema.Set).List())
+		path := cfg["path"].(string)
+
+		var serviceID string
+		if path != "" {
+			serviceID = getPolicyIDFromPath(path)
+		} else {
+			serviceID = newUUID()
+		}
+		serviceStruct := model.LocaleServices{
+			Id:                 &serviceID,
+			ResourceType:       &lsType,
+			EdgeClusterPath:    &edgeClusterPath,
+			PreferredEdgePaths: edgeNodes,
+		}
+
+		dataValue, err := initChildLocaleService(&serviceStruct, false)
+		if err != nil {
+			return localeServices, err
+		}
+
+		localeServices = append(localeServices, dataValue)
+		existingServices[serviceID] = false
+	}
+	// Add instruction to delete services that are no longer present in intent
+	for id, shouldDelete := range existingServices {
+		if shouldDelete {
+			serviceStruct := model.LocaleServices{
+				Id:           &id,
+				ResourceType: &lsType,
+			}
+			dataValue, err := initChildLocaleService(&serviceStruct, true)
+			if err != nil {
+				return localeServices, err
+			}
+			localeServices = append(localeServices, dataValue)
+		}
+	}
+
+	return localeServices, nil
+}
+
+func verifyPolicyTier0GatewayConfig(d *schema.ResourceData, isGlobalManager bool) error {
+	if isGlobalManager {
+		_, isSet := d.GetOkExists("edge_cluster_path")
+		if isSet {
+			return fmt.Errorf("edge_cluster_path setting is not supported with NSX Global Manager, please use locale_service instead")
+		}
+
+		return nil
+	}
+
+	_, isSet := d.GetOkExists("locale_service")
+	if isSet {
+		return fmt.Errorf("locale_service setting is only supported with NSX Global Manager")
+	}
+
+	return nil
+}
+
 func resourceNsxtPolicyTier0GatewayResourceToInfraStruct(d *schema.ResourceData, connector *client.RestConnector, isCreate bool, isGlobalManager bool, id string) (model.Infra, error) {
 	var infraChildren, gwChildren, lsChildren []*data.StructValue
 	var infraStruct model.Infra
@@ -659,7 +816,8 @@ func resourceNsxtPolicyTier0GatewayResourceToInfraStruct(d *schema.ResourceData,
 	}
 
 	bgpConfig := d.Get("bgp_config").([]interface{})
-	if len(bgpConfig) > 0 {
+	if len(bgpConfig) > 0 && !isGlobalManager {
+		// BGP not supported for global manager yet
 		routingConfigStruct := resourceNsxtPolicyTier0GatewayBGPConfigSchemaToStruct(bgpConfig[0], vrfConfig != nil, id)
 		childConfig := model.ChildBgpRoutingConfig{
 			ResourceType:     "ChildBgpRoutingConfig",
@@ -672,7 +830,9 @@ func resourceNsxtPolicyTier0GatewayResourceToInfraStruct(d *schema.ResourceData,
 		lsChildren = append(lsChildren, dataValue.(*data.StructValue))
 	}
 
-	if len(lsChildren) > 0 || d.Get("edge_cluster_path") != "" {
+	edgeClusterPath := d.Get("edge_cluster_path").(string)
+	// Local Manager case
+	if len(lsChildren) > 0 || edgeClusterPath != "" {
 		if d.Get("edge_cluster_path") == "" {
 			bgpMap := bgpConfig[0].(map[string]interface{})
 			if bgpMap["enabled"].(bool) {
@@ -682,44 +842,21 @@ func resourceNsxtPolicyTier0GatewayResourceToInfraStruct(d *schema.ResourceData,
 			}
 		}
 
-		var serviceStruct *model.LocaleServices
 		var err error
-		if !isCreate && !isGlobalManager {
-			// BGP config and edge cluster share the same locale service
-			serviceStruct, err = resourceNsxtPolicyTier0GatewayGetLocaleServiceEntry(d.Id(), connector)
-			if err != nil {
-				return infraStruct, err
-			}
+		dataValue, err := initSingleTier0GatewayLocaleService(d, lsChildren, connector)
+		if err != nil {
+			return infraStruct, err
 		}
+		gwChildren = append(gwChildren, dataValue)
+	}
 
-		lsType := "LocaleServices"
-		if serviceStruct == nil {
-			// Locale Service required for edge cluster path and/or BGP config
-			serviceStruct = &model.LocaleServices{
-				Id: &defaultPolicyLocaleServiceID,
-			}
-		}
-
-		serviceStruct.ResourceType = &lsType
-
-		edgeClusterPath := d.Get("edge_cluster_path").(string)
-		serviceStruct.EdgeClusterPath = &edgeClusterPath
-
-		log.Printf("[DEBUG] Using Locale Service with ID %s and Edge Cluster %v", *serviceStruct.Id, serviceStruct.EdgeClusterPath)
-
-		if len(lsChildren) > 0 {
-			serviceStruct.Children = lsChildren
-		}
-
-		childService := model.ChildLocaleServices{
-			ResourceType:   "ChildLocaleServices",
-			LocaleServices: serviceStruct,
-		}
-		dataValue, errors := converter.ConvertToVapi(childService, model.ChildLocaleServicesBindingType())
-		if errors != nil {
-			return infraStruct, fmt.Errorf("Error converting child Locale Service: %v", errors[0])
-		}
-		gwChildren = append(gwChildren, dataValue.(*data.StructValue))
+	// Global Manager case - multiple locale services. BGP not supported yet.
+	localeServices, err := initTier0GatewayLocaleServices(d, connector)
+	if err != nil {
+		return infraStruct, err
+	}
+	if len(localeServices) > 0 {
+		gwChildren = append(gwChildren, localeServices...)
 	}
 
 	t0Struct.Children = gwChildren
@@ -762,6 +899,12 @@ func resourceNsxtPolicyTier0GatewayCreate(d *schema.ResourceData, m interface{})
 
 	connector := getPolicyConnector(m)
 	isGlobalManager := isPolicyGlobalManager(m)
+
+	err := verifyPolicyTier0GatewayConfig(d, isGlobalManager)
+	if err != nil {
+		return err
+	}
+
 	// Initialize resource Id and verify this ID is not yet used
 	id, err := getOrGenerateID(d, m, resourceNsxtPolicyTier0GatewayExists)
 	if err != nil {
@@ -839,22 +982,40 @@ func resourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{}) e
 	if len(dhcpPaths) > 0 {
 		d.Set("dhcp_config_path", dhcpPaths[0])
 	}
-	// Get the edge cluster Id
-	if !isGlobalManager {
-		localeService, err := resourceNsxtPolicyTier0GatewayGetLocaleServiceEntry(d.Id(), connector)
-		if err != nil {
-			return handleReadError(d, "Locale Service for T0", id, err)
-		}
-		if localeService != nil {
-			d.Set("edge_cluster_path", localeService.EdgeClusterPath)
-			err = resourceNsxtPolicyTier0GatewayReadBGPConfig(d, connector, *localeService)
-			if err != nil {
-				return handleReadError(d, "BGP Configuration for T0", id, err)
+	// Get the edge cluster Id or locale services
+	localeServices, err := listPolicyTier0GatewayLocaleServices(connector, id, isGlobalManager)
+	if err != nil {
+		return handleReadError(d, "Locale Service for T0", id, err)
+	}
+	if len(localeServices) > 0 {
+
+		var services []map[string]interface{}
+		for _, service := range localeServices {
+			if isGlobalManager {
+				cfgMap := make(map[string]interface{})
+				cfgMap["path"] = service.Path
+				cfgMap["edge_cluster_path"] = service.EdgeClusterPath
+				cfgMap["preferred_edge_paths"] = service.PreferredEdgePaths
+				services = append(services, cfgMap)
+
+			} else {
+				if service.EdgeClusterPath != nil {
+					d.Set("edge_cluster_path", service.EdgeClusterPath)
+					err = resourceNsxtPolicyTier0GatewayReadBGPConfig(d, connector, service)
+					if err != nil {
+						return handleReadError(d, "BGP Configuration for T0", id, err)
+					}
+					break
+				}
 			}
-		} else {
-			// set empty bgp_config to keep empty plan
-			d.Set("bgp_config", make([]map[string]interface{}, 0))
 		}
+
+		if len(services) > 0 {
+			d.Set("locale_service", services)
+		}
+	} else {
+		// set empty bgp_config to keep empty plan
+		d.Set("bgp_config", make([]map[string]interface{}, 0))
 	}
 
 	err = setIpv6ProfilePathsInSchema(d, obj.Ipv6ProfilePaths)
@@ -868,6 +1029,10 @@ func resourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{}) e
 func resourceNsxtPolicyTier0GatewayUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	isGlobalManager := isPolicyGlobalManager(m)
+	err := verifyPolicyTier0GatewayConfig(d, isGlobalManager)
+	if err != nil {
+		return err
+	}
 
 	id := d.Id()
 	if id == "" {

@@ -111,7 +111,7 @@ func resourceNsxtPolicyTier0GatewayInterfaceCreate(d *schema.ResourceData, m int
 		return fmt.Errorf("segment_path is mandatory for interface of type %s", ifType)
 	}
 
-	localeService, err := resourceNsxtPolicyTier0GatewayGetLocaleServiceEntry(tier0ID, connector)
+	localeService, err := getPolicyTier0GatewayLocaleServiceWithEdgeCluster(tier0ID, connector)
 	if err != nil {
 		return err
 	}
