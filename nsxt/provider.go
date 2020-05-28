@@ -585,3 +585,7 @@ func isPolicyGlobalManager(clients interface{}) bool {
 func getCommonProviderConfig(clients interface{}) commonProviderConfig {
 	return clients.(nsxtClients).CommonConfig
 }
+
+func getGlobalPolicyEnforcementPointPath(m interface{}, sitePath *string) string {
+	return fmt.Sprintf("%s/enforcement-points/%s", *sitePath, getPolicyEnforcementPoint(m))
+}

@@ -554,3 +554,22 @@ func getGatewayInterfaceUrpfModeSchema() *schema.Schema {
 func globalManagerOnlyError() error {
 	return fmt.Errorf("This configuration is only supported with NSX Global Manager. To mark your endpoint as Global Manager, please set 'global_manager' flag to 'true' in the provider.")
 }
+
+func attributeRequiredGlobalManagerError(attribute string) error {
+	return fmt.Errorf("This configuration %s is required for NSX Global Manager.", attribute)
+}
+
+func buildQueryStringFromMap(query map[string]string) string {
+	if query == nil {
+		return ""
+	}
+	keyValues := make([]string, 0, len(query))
+	for key, value := range query {
+		if strings.Contains(value, "/") {
+			value = strings.ReplaceAll(value, "/", "\\/")
+		}
+		keyValue := strings.Join([]string{key, value}, ":")
+		keyValues = append(keyValues, keyValue)
+	}
+	return strings.Join(keyValues, " AND ")
+}
