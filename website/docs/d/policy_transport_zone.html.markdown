@@ -24,7 +24,8 @@ data "nsxt_policy_transport_zone" "vlan_transport_zone" {
 }
 ```
 
-```
+Note: This usage is for Global Manager only.
+```hcl
 data "nsxt_policy_transport_zone" "overlay_transport_zone" {
   display_name = "1-transportzone-87"
   site_path = data.nsxt_policy_site.paris.path
