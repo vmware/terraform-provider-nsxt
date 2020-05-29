@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
 	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
@@ -62,20 +61,14 @@ func testAccDataSourceNsxtPolicyQosProfileCreate(name string) error {
 	// Generate a random ID for the resource
 	id := newUUID()
 
-	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 	if testAccIsGlobalManager() {
-		dataValue, err1 := converter.ConvertToVapi(obj, model.QosProfileBindingType())
-		if err1 != nil {
-			return err1[0]
+		gmObj, err := convertModelBindingType(obj, model.QosProfileBindingType(), gm_model.QosProfileBindingType())
+		if err != nil {
+			return err
 		}
-		gmObj, err2 := converter.ConvertToGolang(dataValue, gm_model.QosProfileBindingType())
-		if err2 != nil {
-			return err2[0]
-		}
-		gmProfile := gmObj.(gm_model.QosProfile)
+
 		client := gm_infra.NewDefaultQosProfilesClient(connector)
-		err = client.Patch(id, gmProfile)
+		err = client.Patch(id, gmObj.(gm_model.QosProfile))
 	} else {
 		client := infra.NewDefaultQosProfilesClient(connector)
 		err = client.Patch(id, obj)

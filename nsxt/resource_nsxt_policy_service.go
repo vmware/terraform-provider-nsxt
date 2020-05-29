@@ -442,20 +442,12 @@ func resourceNsxtPolicyServiceCreate(d *schema.ResourceData, m interface{}) erro
 	log.Printf("[INFO] Creating service with ID %s", id)
 
 	if isPolicyGlobalManager(m) {
-		converter := bindings.NewTypeConverter()
-		converter.SetMode(bindings.REST)
-
-		dataValue, err1 := converter.ConvertToVapi(obj, model.ServiceBindingType())
-		if err1 != nil {
-			return err1[0]
+		gmObj, err := convertModelBindingType(obj, model.ServiceBindingType(), gm_model.ServiceBindingType())
+		if err != nil {
+			return err
 		}
-		gmObj, err2 := converter.ConvertToGolang(dataValue, gm_model.ServiceBindingType())
-		if err2 != nil {
-			return err2[0]
-		}
-		gmService := gmObj.(gm_model.Service)
 		client := gm_infra.NewDefaultServicesClient(connector)
-		err = client.Patch(id, gmService)
+		err = client.Patch(id, gmObj.(gm_model.Service))
 	} else {
 		client := infra.NewDefaultServicesClient(connector)
 		err = client.Patch(id, obj)
@@ -484,17 +476,11 @@ func resourceNsxtPolicyServiceRead(d *schema.ResourceData, m interface{}) error 
 		if err != nil {
 			return handleReadError(d, "Service", id, err)
 		}
-		converter := bindings.NewTypeConverter()
-		converter.SetMode(bindings.REST)
-		dataValue, err1 := converter.ConvertToVapi(gmObj, gm_model.ServiceBindingType())
-		if err1 != nil {
-			return err1[0]
+		lmObj, err := convertModelBindingType(gmObj, gm_model.ServiceBindingType(), model.ServiceBindingType())
+		if err != nil {
+			return err
 		}
-		base, err2 := converter.ConvertToGolang(dataValue, model.ServiceBindingType())
-		if err2 != nil {
-			return err2[0]
-		}
-		obj = base.(model.Service)
+		obj = lmObj.(model.Service)
 	} else {
 		client := infra.NewDefaultServicesClient(connector)
 		var err error
@@ -674,20 +660,13 @@ func resourceNsxtPolicyServiceUpdate(d *schema.ResourceData, m interface{}) erro
 	// Update the resource using Update to totally replace the list of entries
 	var err error
 	if isPolicyGlobalManager(m) {
-		converter := bindings.NewTypeConverter()
-		converter.SetMode(bindings.REST)
 
-		dataValue, err1 := converter.ConvertToVapi(obj, model.ServiceBindingType())
-		if err1 != nil {
-			return err1[0]
+		gmObj, err := convertModelBindingType(obj, model.ServiceBindingType(), gm_model.ServiceBindingType())
+		if err != nil {
+			return err
 		}
-		gmObj, err2 := converter.ConvertToGolang(dataValue, gm_model.ServiceBindingType())
-		if err2 != nil {
-			return err2[0]
-		}
-		gmService := gmObj.(gm_model.Service)
 		client := gm_infra.NewDefaultServicesClient(connector)
-		_, err = client.Update(id, gmService)
+		_, err = client.Update(id, gmObj.(gm_model.Service))
 	} else {
 		client := infra.NewDefaultServicesClient(connector)
 		_, err = client.Update(id, obj)
