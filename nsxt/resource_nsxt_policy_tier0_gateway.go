@@ -750,7 +750,7 @@ func initTier0GatewayLocaleServices(d *schema.ResourceData, connector *client.Re
 
 func verifyPolicyTier0GatewayConfig(d *schema.ResourceData, isGlobalManager bool) error {
 	if isGlobalManager {
-		_, isSet := d.GetOkExists("edge_cluster_path")
+		_, isSet := d.GetOk("edge_cluster_path")
 		if isSet {
 			return fmt.Errorf("edge_cluster_path setting is not supported with NSX Global Manager, please use locale_service instead")
 		}
@@ -758,7 +758,7 @@ func verifyPolicyTier0GatewayConfig(d *schema.ResourceData, isGlobalManager bool
 		return nil
 	}
 
-	_, isSet := d.GetOkExists("locale_service")
+	_, isSet := d.GetOk("locale_serviceee")
 	if isSet {
 		return fmt.Errorf("locale_service setting is only supported with NSX Global Manager")
 	}
@@ -766,7 +766,7 @@ func verifyPolicyTier0GatewayConfig(d *schema.ResourceData, isGlobalManager bool
 	return nil
 }
 
-func resourceNsxtPolicyTier0GatewayResourceToInfraStruct(d *schema.ResourceData, connector *client.RestConnector, isCreate bool, isGlobalManager bool, id string) (model.Infra, error) {
+func policyTier0GatewayResourceToInfraStruct(d *schema.ResourceData, connector *client.RestConnector, isGlobalManager bool, id string) (model.Infra, error) {
 	var infraChildren, gwChildren, lsChildren []*data.StructValue
 	var infraStruct model.Infra
 	converter := bindings.NewTypeConverter()
@@ -805,7 +805,8 @@ func resourceNsxtPolicyTier0GatewayResourceToInfraStruct(d *schema.ResourceData,
 		VrfConfig:              vrfConfig,
 	}
 
-	if !isCreate {
+	if len(d.Id()) > 0 {
+		// This is update flow
 		t0Struct.Revision = &revision
 	}
 	if dhcpPath != "" {
@@ -911,7 +912,7 @@ func resourceNsxtPolicyTier0GatewayCreate(d *schema.ResourceData, m interface{})
 		return err
 	}
 
-	obj, err := resourceNsxtPolicyTier0GatewayResourceToInfraStruct(d, connector, true, isGlobalManager, id)
+	obj, err := policyTier0GatewayResourceToInfraStruct(d, connector, isGlobalManager, id)
 	if err != nil {
 		return err
 	}
@@ -1039,7 +1040,7 @@ func resourceNsxtPolicyTier0GatewayUpdate(d *schema.ResourceData, m interface{})
 		return fmt.Errorf("Error obtaining Tier0 ID")
 	}
 
-	obj, err := resourceNsxtPolicyTier0GatewayResourceToInfraStruct(d, connector, false, isGlobalManager, id)
+	obj, err := policyTier0GatewayResourceToInfraStruct(d, connector, isGlobalManager, id)
 	if err != nil {
 		return err
 	}
