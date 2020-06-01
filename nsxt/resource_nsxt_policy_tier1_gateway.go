@@ -7,7 +7,10 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
@@ -162,7 +165,7 @@ func getAdvRulesSchema() *schema.Schema {
 	}
 }
 
-func resourceNsxtPolicyTier1GatewayListLocaleServiceEntries(connector *client.RestConnector, t1ID string) ([]model.LocaleServices, error) {
+func listPolicyTier1GatewayLocaleServiceEntries(connector *client.RestConnector, t1ID string) ([]model.LocaleServices, error) {
 	client := tier_1s.NewDefaultLocaleServicesClient(connector)
 	var results []model.LocaleServices
 	var cursor *string
@@ -186,24 +189,7 @@ func resourceNsxtPolicyTier1GatewayListLocaleServiceEntries(connector *client.Re
 	}
 }
 
-func resourceNsxtPolicyTier1GatewayCreateEdgeCluster(d *schema.ResourceData, connector *client.RestConnector) error {
-	// Create a Tier1 locale service with the edge-cluster ID
-	client := tier_1s.NewDefaultLocaleServicesClient(connector)
-	edgeClusterPath := d.Get("edge_cluster_path").(string)
-	objID := d.Id()
-	// The default ID of the locale service will be the Tier1 ID
-	obj := model.LocaleServices{
-		EdgeClusterPath: &edgeClusterPath,
-	}
-
-	err := client.Patch(objID, defaultPolicyLocaleServiceID, obj)
-	if err != nil {
-		return handleCreateError("Tier1 locale service", objID, err)
-	}
-	return nil
-}
-
-func resourceNsxtPolicyTier1GatewayGetLocaleServiceEntry(gwID string, connector *client.RestConnector) (*model.LocaleServices, error) {
+func getPolicyTier1GatewayLocaleServiceEntry(gwID string, connector *client.RestConnector) (*model.LocaleServices, error) {
 	// Get the locale services of this Tier1 for the edge-cluster id
 	client := tier_1s.NewDefaultLocaleServicesClient(connector)
 	obj, err := client.Get(gwID, defaultPolicyLocaleServiceID)
@@ -213,7 +199,7 @@ func resourceNsxtPolicyTier1GatewayGetLocaleServiceEntry(gwID string, connector 
 
 	// No locale-service with the default ID
 	// List all the locale services
-	objList, errList := resourceNsxtPolicyTier1GatewayListLocaleServiceEntries(connector, gwID)
+	objList, errList := listPolicyTier1GatewayLocaleServiceEntries(connector, gwID)
 	if errList != nil {
 		return nil, fmt.Errorf("Error while reading Tier1 %v locale-services: %v", gwID, err)
 	}
@@ -233,29 +219,9 @@ func resourceNsxtPolicyTier1GatewayGetLocaleServiceEntry(gwID string, connector 
 	return nil, nil
 }
 
-func resourceNsxtPolicyTier1GatewayUpdateEdgeCluster(d *schema.ResourceData, connector *client.RestConnector) error {
-	// Create or update a Tier1 locale service with the edge-cluster ID
-	// The ID if the locale service should be searches as in case of imported Tier1 it is unknown
-	client := tier_1s.NewDefaultLocaleServicesClient(connector)
-	edgeClusterPath := d.Get("edge_cluster_path").(string)
-	if edgeClusterPath == "" {
-		return resourceNsxtPolicyTier1GatewayDeleteEdgeCluster(d, connector)
-	}
-	obj := model.LocaleServices{
-		EdgeClusterPath: &edgeClusterPath,
-	}
-	objID := d.Id()
-
-	err := client.Patch(objID, defaultPolicyLocaleServiceID, obj)
-	if err != nil {
-		return handleUpdateError("Tier1 locale service", defaultPolicyLocaleServiceID, err)
-	}
-	return nil
-}
-
 func resourceNsxtPolicyTier1GatewayReadEdgeCluster(d *schema.ResourceData, connector *client.RestConnector) error {
 	// Get the locale services of this Tier1 for the edge-cluster id
-	obj, err := resourceNsxtPolicyTier1GatewayGetLocaleServiceEntry(d.Id(), connector)
+	obj, err := getPolicyTier1GatewayLocaleServiceEntry(d.Id(), connector)
 	if err != nil || obj == nil {
 		// No locale-service found
 		return nil
@@ -265,22 +231,6 @@ func resourceNsxtPolicyTier1GatewayReadEdgeCluster(d *schema.ResourceData, conne
 		return nil
 	}
 	// No edge cluster found
-	return nil
-}
-
-func resourceNsxtPolicyTier1GatewayDeleteEdgeCluster(d *schema.ResourceData, connector *client.RestConnector) error {
-	// Find and delete the locale service of this Tier1 for the edge-cluster id
-	client := tier_1s.NewDefaultLocaleServicesClient(connector)
-	objID := d.Id()
-
-	_, err := client.Get(objID, defaultPolicyLocaleServiceID)
-	if err == nil {
-		err = client.Delete(objID, defaultPolicyLocaleServiceID)
-		if err != nil {
-			logAPIError("Error During Tier1 locale-services deletion", err)
-			return fmt.Errorf("Failed to delete Tier1 %s locale-services", objID)
-		}
-	}
 	return nil
 }
 
@@ -362,15 +312,41 @@ func resourceNsxtPolicyTier1GatewaySetVersionDependentAttrs(d *schema.ResourceDa
 
 }
 
-func resourceNsxtPolicyTier1GatewayCreate(d *schema.ResourceData, m interface{}) error {
-	connector := getPolicyConnector(m)
-	client := infra.NewDefaultTier1sClient(connector)
+func initSingleTier1GatewayLocaleService(d *schema.ResourceData, connector *client.RestConnector) (*data.StructValue, error) {
 
-	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID(d, m, resourceNsxtPolicyTier1GatewayExists)
-	if err != nil {
-		return err
+	edgeClusterPath := d.Get("edge_cluster_path").(string)
+	var serviceStruct *model.LocaleServices
+	var err error
+	if len(d.Id()) > 0 {
+		// This is an update flow - fetch existing locale service to reuse if needed
+		serviceStruct, err = getPolicyTier1GatewayLocaleServiceEntry(d.Id(), connector)
+		if err != nil {
+			return nil, err
+		}
 	}
+
+	if serviceStruct == nil {
+		lsType := "LocaleServices"
+		serviceStruct = &model.LocaleServices{
+			Id:           &defaultPolicyLocaleServiceID,
+			ResourceType: &lsType,
+		}
+	}
+	if len(edgeClusterPath) > 0 {
+		serviceStruct.EdgeClusterPath = &edgeClusterPath
+	} else {
+		serviceStruct.EdgeClusterPath = nil
+	}
+
+	log.Printf("[DEBUG] Using Locale Service with ID %s and Edge Cluster %v", *serviceStruct.Id, serviceStruct.EdgeClusterPath)
+	return initChildLocaleService(serviceStruct, false)
+}
+
+func policyTier1GatewayResourceToInfraStruct(d *schema.ResourceData, connector *client.RestConnector, id string) (model.Infra, error) {
+	var infraChildren, gwChildren []*data.StructValue
+	var infraStruct model.Infra
+	converter := bindings.NewTypeConverter()
+	converter.SetMode(bindings.REST)
 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
@@ -385,8 +361,11 @@ func resourceNsxtPolicyTier1GatewayCreate(d *schema.ResourceData, m interface{})
 	routeAdvertisementRules := getAdvRulesFromSchema(d)
 	ipv6ProfilePaths := getIpv6ProfilePathsFromSchema(d)
 	dhcpPath := d.Get("dhcp_config_path").(string)
+	revision := int64(d.Get("revision").(int))
 
+	t1Type := "Tier1"
 	obj := model.Tier1{
+		Id:                      &id,
 		DisplayName:             &displayName,
 		Description:             &description,
 		Tags:                    tags,
@@ -399,6 +378,7 @@ func resourceNsxtPolicyTier1GatewayCreate(d *schema.ResourceData, m interface{})
 		RouteAdvertisementTypes: routeAdvertisementTypes,
 		RouteAdvertisementRules: routeAdvertisementRules,
 		Ipv6ProfilePaths:        ipv6ProfilePaths,
+		ResourceType:            &t1Type,
 	}
 
 	if dhcpPath != "" {
@@ -407,27 +387,72 @@ func resourceNsxtPolicyTier1GatewayCreate(d *schema.ResourceData, m interface{})
 	} else {
 		obj.DhcpConfigPaths = []string{}
 	}
+	if len(d.Id()) > 0 {
+		// This is update flow
+		obj.Revision = &revision
+	}
 
 	resourceNsxtPolicyTier1GatewaySetVersionDependentAttrs(d, &obj)
 
+	// set edge cluster if needed
+	if d.HasChange("edge_cluster_path") {
+		dataValue, err := initSingleTier1GatewayLocaleService(d, connector)
+		if err != nil {
+			return infraStruct, err
+		}
+
+		gwChildren = append(gwChildren, dataValue)
+	}
+
+	obj.Children = gwChildren
+	childTier1 := model.ChildTier1{
+		Tier1:        &obj,
+		ResourceType: "ChildTier1",
+	}
+
+	dataValue, errors := converter.ConvertToVapi(childTier1, model.ChildTier1BindingType())
+	if errors != nil {
+		return infraStruct, fmt.Errorf("Error converting Tier1 Child: %v", errors[0])
+	}
+	infraChildren = append(infraChildren, dataValue.(*data.StructValue))
+
+	infraType := "Infra"
+	infraStruct = model.Infra{
+		Children:     infraChildren,
+		ResourceType: &infraType,
+	}
+
+	return infraStruct, nil
+}
+
+func resourceNsxtPolicyTier1GatewayCreate(d *schema.ResourceData, m interface{}) error {
+	connector := getPolicyConnector(m)
+
+	// Initialize resource Id and verify this ID is not yet used
+	id, err := getOrGenerateID(d, m, resourceNsxtPolicyTier1GatewayExists)
+	if err != nil {
+		return err
+	}
+
+	obj, err := policyTier1GatewayResourceToInfraStruct(d, connector, id)
+	if err != nil {
+		return err
+	}
+
 	// Create the resource using PATCH
-	log.Printf("[INFO] Creating tier1 with ID %s", id)
-	err = client.Patch(id, obj)
+	log.Printf("[INFO] Using H-API to create Tier1 with ID %s", id)
+	boolFalse := false
+	infraClient := nsx_policy.NewDefaultInfraClient(connector)
+	err = infraClient.Patch(obj, &boolFalse)
+	if err != nil {
+		return err
+	}
 	if err != nil {
 		return handleCreateError("Tier1", id, err)
 	}
 
 	d.SetId(id)
 	d.Set("nsx_id", id)
-	// Add the edge cluster
-	if d.Get("edge_cluster_path") != "" {
-		err = resourceNsxtPolicyTier1GatewayCreateEdgeCluster(d, connector)
-		if err != nil {
-			log.Printf("[INFO] Rolling back Tier1 creation")
-			client.Delete(id)
-			return err
-		}
-	}
 
 	return resourceNsxtPolicyTier1GatewayRead(d, m)
 }
@@ -499,66 +524,23 @@ func resourceNsxtPolicyTier1GatewayRead(d *schema.ResourceData, m interface{}) e
 
 func resourceNsxtPolicyTier1GatewayUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewDefaultTier1sClient(connector)
 
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining Tier1 id")
 	}
 
-	// Read the rest of the configured parameters
-	description := d.Get("description").(string)
-	displayName := d.Get("display_name").(string)
-	tags := getPolicyTagsFromSchema(d)
-	failoverMode := d.Get("failover_mode").(string)
-	defaultRuleLogging := d.Get("default_rule_logging").(bool)
-	disableFirewall := !d.Get("enable_firewall").(bool)
-	enableStandbyRelocation := d.Get("enable_standby_relocation").(bool)
-	forceWhitelisting := d.Get("force_whitelisting").(bool)
-	tier0Path := d.Get("tier0_path").(string)
-	routeAdvertisementTypes := getStringListFromSchemaSet(d, "route_advertisement_types")
-	routeAdvertisementRules := getAdvRulesFromSchema(d)
-	ipv6ProfilePaths := getIpv6ProfilePathsFromSchema(d)
-	dhcpPath := d.Get("dhcp_config_path").(string)
-	revision := int64(d.Get("revision").(int))
-
-	obj := model.Tier1{
-		DisplayName:             &displayName,
-		Description:             &description,
-		Tags:                    tags,
-		FailoverMode:            &failoverMode,
-		DefaultRuleLogging:      &defaultRuleLogging,
-		DisableFirewall:         &disableFirewall,
-		EnableStandbyRelocation: &enableStandbyRelocation,
-		ForceWhitelisting:       &forceWhitelisting,
-		Tier0Path:               &tier0Path,
-		RouteAdvertisementTypes: routeAdvertisementTypes,
-		RouteAdvertisementRules: routeAdvertisementRules,
-		Ipv6ProfilePaths:        ipv6ProfilePaths,
-		Revision:                &revision,
+	obj, err := policyTier1GatewayResourceToInfraStruct(d, connector, id)
+	if err != nil {
+		return err
 	}
 
-	if dhcpPath != "" {
-		dhcpPaths := []string{dhcpPath}
-		obj.DhcpConfigPaths = dhcpPaths
-	} else {
-		obj.DhcpConfigPaths = []string{}
-	}
-
-	resourceNsxtPolicyTier1GatewaySetVersionDependentAttrs(d, &obj)
-
-	// Update the resource using PUT
-	_, err := client.Update(id, obj)
+	log.Printf("[INFO] Using H-API to update Tier1 with ID %s", id)
+	boolTrue := true
+	infraClient := nsx_policy.NewDefaultInfraClient(connector)
+	err = infraClient.Patch(obj, &boolTrue)
 	if err != nil {
 		return handleUpdateError("Tier1", id, err)
-	}
-
-	if d.HasChange("edge_cluster_path") {
-		// Update edge cluster
-		err = resourceNsxtPolicyTier1GatewayUpdateEdgeCluster(d, connector)
-		if err != nil {
-			return err
-		}
 	}
 
 	return resourceNsxtPolicyTier1GatewayRead(d, m)
@@ -571,18 +553,37 @@ func resourceNsxtPolicyTier1GatewayDelete(d *schema.ResourceData, m interface{})
 	}
 
 	connector := getPolicyConnector(m)
-	err := resourceNsxtPolicyTier1GatewayDeleteEdgeCluster(d, connector)
-	if err != nil {
-		err = handleDeleteError("Tier1 locale service", id, err)
-		if err != nil {
-			return err
-		}
+	var infraChildren []*data.StructValue
+	converter := bindings.NewTypeConverter()
+	converter.SetMode(bindings.REST)
+	boolTrue := true
+
+	t1Type := "Tier1"
+	t1obj := model.Tier1{
+		Id:           &id,
+		ResourceType: &t1Type,
+	}
+	childT1 := model.ChildTier1{
+		MarkedForDelete: &boolTrue,
+		Tier1:           &t1obj, ResourceType: "ChildTier1",
+	}
+	dataValue, errors := converter.ConvertToVapi(childT1, model.ChildTier1BindingType())
+	if errors != nil {
+		return fmt.Errorf("Error converting Child Tier1: %v", errors[0])
+	}
+	infraChildren = append(infraChildren, dataValue.(*data.StructValue))
+	infraType := "Infra"
+	obj := model.Infra{
+		Children:     infraChildren,
+		ResourceType: &infraType,
 	}
 
-	client := infra.NewDefaultTier1sClient(connector)
-	err = client.Delete(id)
+	log.Printf("[DEBUG] Using H-API to delete Tier1 with ID %s", id)
+	infraClient := nsx_policy.NewDefaultInfraClient(connector)
+	boolFalse := false
+	err := infraClient.Patch(obj, &boolFalse)
 	if err != nil {
-		return handleDeleteError("Tier1", id, err)
+		return err
 	}
 
 	return nil
