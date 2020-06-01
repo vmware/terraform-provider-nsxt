@@ -102,10 +102,6 @@ func getTestCertificateName(isClient bool) string {
 	return os.Getenv("NSXT_TEST_CERTIFICATE_NAME")
 }
 
-func getTestSitePath() string {
-	return os.Getenv("NSXT_TEST_SITE_PATH")
-}
-
 func testAccEnvDefined(t *testing.T, envVar string) {
 	if len(os.Getenv(envVar)) == 0 {
 		t.Skipf("This test requires %s environment variable to be set", envVar)
@@ -119,6 +115,12 @@ func testAccIsGlobalManager() bool {
 func testAccSkipIfIsGlobalManager(t *testing.T) {
 	if testAccIsGlobalManager() {
 		t.Skipf("This test is for local manager only")
+	}
+}
+
+func testAccSkipIfIsLocalManager(t *testing.T) {
+	if !testAccIsGlobalManager() {
+		t.Skipf("This test is for global manager only")
 	}
 }
 

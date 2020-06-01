@@ -76,6 +76,7 @@ func getDomainNameSchema() *schema.Schema {
 		Description: "The domain name to use for resources. If not specified 'default' is used",
 		Optional:    true,
 		Default:     defaultDomain,
+		ForceNew:    true,
 	}
 }
 
