@@ -116,6 +116,32 @@ func getPolicyEdgeClusterPathSchema() *schema.Schema {
 	}
 }
 
+func getPolicyLocaleServiceSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:          schema.TypeList,
+		Optional:      true,
+		Description:   "Locale Service for the gateway",
+		ConflictsWith: []string{"edge_cluster_path"},
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"edge_cluster_path": {
+					Type:         schema.TypeString,
+					Description:  "The path of the edge cluster connected to this gateway",
+					Required:     true,
+					ValidateFunc: validatePolicyPath(),
+				},
+				"preferred_edge_paths": {
+					Type:        schema.TypeSet,
+					Description: "Paths of specific edge nodes",
+					Optional:    true,
+					Elem:        getElemPolicyPathSchema(),
+				},
+				"path": getPathSchema(),
+			},
+		},
+	}
+}
+
 func getPolicyGatewayPathSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:         schema.TypeString,
