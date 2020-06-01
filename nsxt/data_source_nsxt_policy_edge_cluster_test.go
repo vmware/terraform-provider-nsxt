@@ -14,7 +14,10 @@ func TestAccDataSourceNsxtPolicyEdgeCluster_basic(t *testing.T) {
 	testResourceName := "data.nsxt_policy_edge_cluster.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccNSXGlobalManagerSitePrecheck(t)
+		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -32,10 +35,25 @@ func TestAccDataSourceNsxtPolicyEdgeCluster_basic(t *testing.T) {
 }
 
 func testAccNsxtPolicyEdgeClusterReadTemplate(name string) string {
+	if testAccIsGlobalManager() {
+		return testAccNsxtGlobalPolicyEdgeClusterReadTemplate(name)
+	}
 	return fmt.Sprintf(`
 data "nsxt_policy_edge_cluster" "test" {
   display_name = "%s"
 }`, name)
+}
+
+func testAccNsxtGlobalPolicyEdgeClusterReadTemplate(name string) string {
+	return fmt.Sprintf(`
+data "nsxt_policy_site" "test" {
+  display_name = "%s"
+}
+
+data "nsxt_policy_edge_cluster" "test" {
+  display_name = "%s"
+  site_path = data.nsxt_policy_site.test.path
+}`, getTestSiteName(), name)
 }
 
 func testAccNsxtPolicyNoEdgeClusterTemplate() string {

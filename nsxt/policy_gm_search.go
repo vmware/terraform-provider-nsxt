@@ -75,17 +75,22 @@ func policyDataSourceResourceFilterAndSet(d *schema.ResourceData, resultValues [
 }
 
 func policyDataSourceResourceRead(d *schema.ResourceData, connector *client.RestConnector, resourceType string, additionalQuery map[string]string) (*data.StructValue, error) {
+	return policyDataSourceResourceReadWithValidation(d, connector, resourceType, additionalQuery, true)
+}
+
+func policyDataSourceResourceReadWithValidation(d *schema.ResourceData, connector *client.RestConnector, resourceType string, additionalQuery map[string]string, paramsValidation bool) (*data.StructValue, error) {
 	objName := d.Get("display_name").(string)
 	objID := d.Get("id").(string)
 	var err error
 	var resultValues []*data.StructValue
 	additionalQueryString := buildQueryStringFromMap(additionalQuery)
+	if paramsValidation && objID == "" && objName == "" {
+		return nil, fmt.Errorf("No 'id' or 'display_name' specified for %s", resourceType)
+	}
 	if objID != "" {
 		resultValues, err = listPolicyResourcesByID(connector, &objID, &additionalQueryString)
-	} else if objName != "" {
-		resultValues, err = listPolicyResourcesByType(connector, &resourceType, &additionalQueryString)
 	} else {
-		return nil, fmt.Errorf("No 'id' or 'display_name' specified for %s", resourceType)
+		resultValues, err = listPolicyResourcesByType(connector, &resourceType, &additionalQueryString)
 	}
 	if err != nil {
 		return nil, err
