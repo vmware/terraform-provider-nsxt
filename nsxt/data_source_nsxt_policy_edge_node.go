@@ -7,8 +7,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
-	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/sites/enforcement_points/edge_clusters"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"strconv"
@@ -46,21 +44,10 @@ func dataSourceNsxtPolicyEdgeNodeRead(d *schema.ResourceData, m interface{}) err
 		if memberIndexSet {
 			query["member_index"] = strconv.Itoa(memberIndex.(int))
 		}
-		obj, err := policyDataSourceResourceReadWithValidation(d, getPolicyConnector(m), "PolicyEdgeNode", query, false)
+		_, err := policyDataSourceResourceReadWithValidation(d, getPolicyConnector(m), "PolicyEdgeNode", query, false)
 		if err != nil {
 			return err
 		}
-		converter := bindings.NewTypeConverter()
-		converter.SetMode(bindings.REST)
-		dataValue, errors := converter.ConvertToGolang(obj, gm_model.PolicyEdgeNodeBindingType())
-		if len(errors) > 0 {
-			return errors[0]
-		}
-		edgeNodeResource := dataValue.(gm_model.PolicyEdgeNode)
-		d.SetId(*edgeNodeResource.Id)
-		d.Set("display_name", edgeNodeResource.DisplayName)
-		d.Set("description", edgeNodeResource.Description)
-		d.Set("path", edgeNodeResource.Path)
 		return nil
 	}
 

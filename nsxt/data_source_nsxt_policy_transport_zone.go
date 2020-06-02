@@ -81,12 +81,9 @@ func dataSourceNsxtPolicyTransportZoneRead(d *schema.ResourceData, m interface{}
 		}
 		transportZoneResource := dataValue.(gm_model.PolicyTransportZone)
 
-		d.SetId(*transportZoneResource.Id)
 		d.Set("is_default", transportZoneResource.IsDefault)
 		d.Set("transport_type", transportZoneResource.TzType)
 		d.Set("parent_path", transportZoneResource.ParentPath)
-		d.Set("display_name", transportZoneResource.DisplayName)
-		d.Set("description", transportZoneResource.Description)
 		return nil
 	}
 	connector := getPolicyConnector(m)

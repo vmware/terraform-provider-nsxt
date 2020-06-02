@@ -6,8 +6,6 @@ package nsxt
 import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
-	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/sites/enforcement_points"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"strings"
@@ -24,7 +22,7 @@ func dataSourceNsxtPolicyEdgeCluster() *schema.Resource {
 			"path":         getPathSchema(),
 			"site_path": {
 				Type:         schema.TypeString,
-				Description:  "Path of the site this Transport Zone belongs to",
+				Description:  "Path of the site this Edge cluster belongs to",
 				Optional:     true,
 				ValidateFunc: validatePolicyPath(),
 			},
@@ -50,21 +48,10 @@ func dataSourceNsxtPolicyEdgeClusterRead(d *schema.ResourceData, m interface{}) 
 		query := make(map[string]string)
 		globalPolicyEnforcementPointPath := getGlobalPolicyEnforcementPointPath(m, &objSitePath)
 		query["parent_path"] = globalPolicyEnforcementPointPath
-		obj, err := policyDataSourceResourceRead(d, getPolicyConnector(m), "PolicyEdgeCluster", query)
+		_, err := policyDataSourceResourceRead(d, getPolicyConnector(m), "PolicyEdgeCluster", query)
 		if err != nil {
 			return err
 		}
-		converter := bindings.NewTypeConverter()
-		converter.SetMode(bindings.REST)
-		dataValue, errors := converter.ConvertToGolang(obj, gm_model.PolicyEdgeClusterBindingType())
-		if len(errors) > 0 {
-			return errors[0]
-		}
-		edgeClusterResource := dataValue.(gm_model.PolicyEdgeCluster)
-		d.SetId(*edgeClusterResource.Id)
-		d.Set("display_name", edgeClusterResource.DisplayName)
-		d.Set("description", edgeClusterResource.Description)
-		d.Set("path", edgeClusterResource.Path)
 		return nil
 	}
 
