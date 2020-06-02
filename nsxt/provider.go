@@ -172,7 +172,6 @@ func Provider() terraform.ResourceProvider {
 			"nsxt_policy_tier1_gateway":            dataSourceNsxtPolicyTier1Gateway(),
 			"nsxt_policy_service":                  dataSourceNsxtPolicyService(),
 			"nsxt_policy_realization_info":         dataSourceNsxtPolicyRealizationInfo(),
-			"nsxt_policy_gm_realization_info":      dataSourceNsxtPolicyGMRealizationInfo(),
 			"nsxt_policy_segment_realization":      dataSourceNsxtPolicySegmentRealization(),
 			"nsxt_policy_transport_zone":           dataSourceNsxtPolicyTransportZone(),
 			"nsxt_policy_ip_discovery_profile":     dataSourceNsxtPolicyIPDiscoveryProfile(),
