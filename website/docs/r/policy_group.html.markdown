@@ -45,6 +45,9 @@ resource "nsxt_policy_group" "group1" {
 
 Note: This usage is for Global Manager only
 ```hcl
+data "nsxt_policy_site" "paris" {
+  display_name = "Paris"
+}
 resource "nsxt_policy_group" "group1" {
     display_name = "tf-group1"
     description  = "Terraform provisioned Group"

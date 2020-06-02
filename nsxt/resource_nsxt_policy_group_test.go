@@ -67,7 +67,11 @@ func TestAccResourceNsxtGlobalPolicyGroup_singleIPAddressCriteria(t *testing.T) 
 	testResourceName := "nsxt_policy_group.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccNsxtGlobalPolicyGroupPrecheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccSkipIfIsLocalManager(t)
+			testAccEnvDefined(t, "NSXT_TEST_SITE_NAME")
+		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyGroupCheckDestroy(state, name, getTestSiteName())
@@ -154,7 +158,14 @@ func TestAccResourceNsxtPolicyGroup_pathCriteria(t *testing.T) {
 	testResourceName := "nsxt_policy_group.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccNsxtPolicyGroupPathCriteriaPrecheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			//TODO Remove this line after segment support for GM is merged
+			testAccSkipIfIsGlobalManager(t)
+			if testAccIsGlobalManager() {
+				testAccEnvDefined(t, "NSXT_TEST_SITE_NAME")
+			}
+		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyGroupCheckDestroy(state, name, defaultDomain)
@@ -957,26 +968,4 @@ resource "nsxt_policy_group" "test" {
   }
 }
 `, name)
-}
-
-func testAccNsxtGlobalPolicyGroupPrecheck(t *testing.T) {
-	testAccPreCheck(t)
-	testAccSkipIfIsLocalManager(t)
-	if getTestSiteName() == "" {
-		str := fmt.Sprintf("%s must be set for this acceptance test", "NSXT_TEST_SITE_NAME")
-		t.Skipf(str)
-	}
-}
-
-func testAccNsxtPolicyGroupPathCriteriaPrecheck(t *testing.T) {
-	testAccPreCheck(t)
-	//TODO Remove this line after segment support for GM is merged
-	testAccSkipIfIsGlobalManager(t)
-	if !testAccIsGlobalManager() {
-		return
-	}
-	if getTestSiteName() == "" {
-		str := fmt.Sprintf("%s must be set for this acceptance test", "NSXT_TEST_SITE_NAME")
-		t.Skipf(str)
-	}
 }
