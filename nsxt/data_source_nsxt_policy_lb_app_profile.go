@@ -66,7 +66,7 @@ func dataSourceNsxtPolicyLBAppProfileRead(d *schema.ResourceData, m interface{})
 	client := infra.NewDefaultLbAppProfilesClient(connector)
 
 	objID := d.Get("id").(string)
-	objTypeValue, typeSet := d.GetOkExists("type")
+	objTypeValue, typeSet := d.GetOk("type")
 	objType := objTypeValue.(string)
 	objName := d.Get("display_name").(string)
 	var result *model.LBAppProfile
