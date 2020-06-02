@@ -536,7 +536,7 @@ func policySegmentResourceToStruct(d *schema.ResourceData, isVlan bool) (model.S
 	} else {
 		// overlay specific fields
 		connectivityPath := d.Get("connectivity_path").(string)
-		overlayID, exists := d.GetOkExists("overlay_id")
+		overlayID, exists := d.GetOk("overlay_id")
 		if exists {
 			overlayID64 := int64(overlayID.(int))
 			obj.OverlayId = &overlayID64
