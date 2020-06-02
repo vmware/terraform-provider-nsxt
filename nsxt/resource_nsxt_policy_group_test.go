@@ -421,17 +421,10 @@ func testAccNsxtPolicyGroupCheckDestroy(state *terraform.State, displayName stri
 			continue
 		}
 
-		var err error
 		resourceID := rs.Primary.Attributes["id"]
-		if isPolicyGlobalManager(testAccProvider.Meta()) {
-			nsxClient := gm_domains.NewDefaultGroupsClient(connector)
-			_, err = nsxClient.Get(domainName, resourceID)
-		} else {
-			nsxClient := domains.NewDefaultGroupsClient(connector)
-			_, err = nsxClient.Get(domainName, resourceID)
-		}
-		if err == nil {
-			return fmt.Errorf("Policy Group %s still exists", displayName)
+		isPolicyGlobalManager := isPolicyGlobalManager(testAccProvider.Meta())
+		if resourceNsxtPolicyGroupExistsInDomain(resourceID, domainName, connector, isPolicyGlobalManager) {
+			return fmt.Errorf("Policy Group %s still exists in domain %s", displayName, domainName)
 		}
 	}
 	return nil
