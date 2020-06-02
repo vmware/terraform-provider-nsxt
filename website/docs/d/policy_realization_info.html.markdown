@@ -22,11 +22,31 @@ data "nsxt_policy_realization_info" "info" {
 }
 ```
 
+## Global Manager Example
+
+```hcl
+data "nsxt_policy_tier1_gateway" "tier1_gw" {
+  display_name = "tier1_gw"
+}
+
+data "nsxt_policy_site" "site" {
+  display_name = "Paris"
+}
+
+data "nsxt_policy_gm_realization_info" "info" {
+  path = data.nsxt_policy_tier1_gateway.tier1_gw.path
+  entity_type = "RealizedLogicalRouter"
+  site_path = data.nsxt_policy_site.site.path
+}
+```
+
 ## Argument Reference
 
 * `path` - (Required) The policy path of the resource.
 
 * `entity_type` - (Optional) The entity type of realized resource. If not set, on of the realized resources of the policy resource will be retrieved.
+
+* `site_path` - (Optional) The path of the site which the resource belongs to, this configuration is required for global manager only. `path` field of the existing `nsxt_policy_site` can be used here.
 
 ## Attributes Reference
 
