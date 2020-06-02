@@ -61,7 +61,6 @@ func dataSourceNsxtPolicyRealizationInfoRead(d *schema.ResourceData, m interface
 	path := d.Get("path").(string)
 	entityType := d.Get("entity_type").(string)
 	objSitePath := d.Get("site_path").(string)
-	log.Printf("[ERROR] DEBUG ADIT site path %s", objSitePath)
 
 	// Site is mandatory got GM and irrelevant else
 	if !isPolicyGlobalManager(m) && objSitePath != "" {
@@ -91,7 +90,6 @@ func dataSourceNsxtPolicyRealizationInfoRead(d *schema.ResourceData, m interface
 			if isPolicyGlobalManager(m) {
 				client := gm_realized_state.NewDefaultRealizedEntitiesClient(connector)
 				var gmResults gm_model.GenericPolicyRealizedResourceListResult
-				log.Printf("[ERROR] DEBUG ADIT calling realization results list with site path %s", objSitePath)
 				gmResults, realizationError = client.List(path, &objSitePath)
 				if realizationError == nil {
 					var lmResults interface{}
