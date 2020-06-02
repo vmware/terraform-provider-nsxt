@@ -43,13 +43,50 @@ resource "nsxt_policy_group" "group1" {
 }
 ```
 
+Note: This usage is for Global Manager only
+```hcl
+data "nsxt_policy_site" "paris" {
+  display_name = "Paris"
+}
+resource "nsxt_policy_group" "group1" {
+    display_name = "tf-group1"
+    description  = "Terraform provisioned Group"
+    domain = data.nsxt_policy_site.paris.id
+
+    criteria {
+        condition {
+            key         = "Name"
+            member_type = "VirtualMachine"
+            operator    = "STARTSWITH"
+            value       = "public"
+        }
+        condition {
+            key         = "OSName"
+            member_type = "VirtualMachine"
+            operator    = "CONTAINS"
+            value       = "Ubuntu"
+        }
+    }
+
+    conjunction {
+        operator = "OR"
+    }
+
+    criteria {
+        ipaddress_expression {
+            ip_addresses = ["211.1.1.1", "212.1.1.1", "192.168.1.1-192.168.1.100"]
+        }
+    }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
 
 * `display_name` - (Required) Display name of the resource.
 * `description` - (Optional) Description of the resource.
-* `domain` - (Optional) The domain to use for the Group. This domain must already exist. For VMware Cloud on AWS use `cgw`.
+* `domain` - (Optional) The domain to use for the Group. This domain must already exist. For VMware Cloud on AWS use `cgw`. For Global Manager, please use site id for this field. If not specified, this field is default to `default`. 
 * `tag` - (Optional) A list of scope + tag pairs to associate with this Group.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the group resource.
 * `criteria` - (Optional) A repeatable block to specify criteria for members of this Group. If more than 1 criteria block is specified, it must be separated by a `conjunction`. In a `criteria` block the following membership selection expressions can be used:
