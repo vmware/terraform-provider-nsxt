@@ -80,69 +80,6 @@ func getDomainNameSchema() *schema.Schema {
 	}
 }
 
-func getFailoverModeSchema(defaultValue string) *schema.Schema {
-	return &schema.Schema{
-		Type:         schema.TypeString,
-		Description:  "Failover mode",
-		Default:      defaultValue,
-		Optional:     true,
-		ValidateFunc: validation.StringInSlice(policyFailOverModeValues, false),
-	}
-}
-
-func getIPv6NDRAPathSchema() *schema.Schema {
-	return &schema.Schema{
-		Type:        schema.TypeString,
-		Description: "The path of an IPv6 NDRA profile",
-		Optional:    true,
-		Computed:    true,
-	}
-}
-
-func getIPv6DadPathSchema() *schema.Schema {
-	return &schema.Schema{
-		Type:        schema.TypeString,
-		Description: "The path of an IPv6 DAD profile",
-		Optional:    true,
-		Computed:    true,
-	}
-}
-
-func getPolicyEdgeClusterPathSchema() *schema.Schema {
-	return &schema.Schema{
-		Type:         schema.TypeString,
-		Description:  "The path of the edge cluster connected to this gateway",
-		Optional:     true,
-		ValidateFunc: validatePolicyPath(),
-	}
-}
-
-func getPolicyLocaleServiceSchema() *schema.Schema {
-	return &schema.Schema{
-		Type:          schema.TypeList,
-		Optional:      true,
-		Description:   "Locale Service for the gateway",
-		ConflictsWith: []string{"edge_cluster_path"},
-		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{
-				"edge_cluster_path": {
-					Type:         schema.TypeString,
-					Description:  "The path of the edge cluster connected to this gateway",
-					Required:     true,
-					ValidateFunc: validatePolicyPath(),
-				},
-				"preferred_edge_paths": {
-					Type:        schema.TypeSet,
-					Description: "Paths of specific edge nodes",
-					Optional:    true,
-					Elem:        getElemPolicyPathSchema(),
-				},
-				"path": getPathSchema(),
-			},
-		},
-	}
-}
-
 func getPolicyGatewayPathSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:         schema.TypeString,
@@ -466,29 +403,6 @@ func getDataSourceIDSchema() *schema.Schema {
 	return getDataSourceStringSchema("Unique ID of this resource")
 }
 
-func getIpv6ProfilePathsFromSchema(d *schema.ResourceData) []string {
-	var profiles []string
-	if d.Get("ipv6_ndra_profile_path") != "" {
-		profiles = append(profiles, d.Get("ipv6_ndra_profile_path").(string))
-	}
-	if d.Get("ipv6_dad_profile_path") != "" {
-		profiles = append(profiles, d.Get("ipv6_dad_profile_path").(string))
-	}
-	return profiles
-}
-
-func setIpv6ProfilePathsInSchema(d *schema.ResourceData, paths []string) error {
-	for _, path := range paths {
-		if strings.HasPrefix(path, "/infra/ipv6-ndra-profiles") {
-			d.Set("ipv6_ndra_profile_path", path)
-		}
-		if strings.HasPrefix(path, "/infra/ipv6-dad-profiles") {
-			d.Set("ipv6_dad_profile_path", path)
-		}
-	}
-	return nil
-}
-
 func parseGatewayPolicyPath(gwPath string) (bool, string) {
 	// sample path looks like "/infra/tier-0s/mytier0gw"
 	isT0 := true
@@ -517,27 +431,6 @@ func getElemPolicyPathSchema() *schema.Schema {
 	}
 }
 
-func getGatewayInterfaceSubnetsSchema() *schema.Schema {
-	return &schema.Schema{
-		Type:        schema.TypeList,
-		Description: "List of IP addresses and network prefixes for this interface",
-		Elem: &schema.Schema{
-			Type:         schema.TypeString,
-			ValidateFunc: validateIPCidr(),
-		},
-		Required: true,
-	}
-}
-
-func getMtuSchema() *schema.Schema {
-	return &schema.Schema{
-		Type:         schema.TypeInt,
-		Optional:     true,
-		Description:  "Maximum transmission unit specifies the size of the largest packet that a network protocol can transmit",
-		ValidateFunc: validation.IntAtLeast(64),
-	}
-}
-
 func getAllocationRangeListSchema(required bool, description string) *schema.Schema {
 	return &schema.Schema{
 		Type:        schema.TypeList,
@@ -560,21 +453,6 @@ func getAllocationRangeListSchema(required bool, description string) *schema.Sch
 				},
 			},
 		},
-	}
-}
-
-var gatewayInterfaceUrpfModeValues = []string{
-	model.Tier0Interface_URPF_MODE_NONE,
-	model.Tier0Interface_URPF_MODE_STRICT,
-}
-
-func getGatewayInterfaceUrpfModeSchema() *schema.Schema {
-	return &schema.Schema{
-		Type:         schema.TypeString,
-		Optional:     true,
-		Description:  "Unicast Reverse Path Forwarding mode",
-		ValidateFunc: validation.StringInSlice(gatewayInterfaceUrpfModeValues, false),
-		Default:      model.Tier0Interface_URPF_MODE_STRICT,
 	}
 }
 

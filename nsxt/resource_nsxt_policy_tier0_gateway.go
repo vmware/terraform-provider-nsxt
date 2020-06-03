@@ -10,8 +10,6 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt"
-	global_policy "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm"
 	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
 	gm_tier_0s "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s"
 	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
@@ -283,49 +281,35 @@ func getPolicyVRFConfigSchema() *schema.Schema {
 	}
 }
 
-func listPolicyTier0GatewayLocaleServices(connector *client.RestConnector, t0ID string, isGlobalManager bool) ([]model.LocaleServices, error) {
-	var results []model.LocaleServices
-	var cursor *string
-	var count int64
-	total := int64(0)
-
-	for {
-		includeMarkForDeleteObjectsParam := false
-		if isGlobalManager {
-			client := gm_tier_0s.NewDefaultLocaleServicesClient(connector)
-			listResponse, err := client.List(t0ID, cursor, &includeMarkForDeleteObjectsParam, nil, nil, nil, nil)
-			if err != nil {
-				return results, err
-			}
-			for _, result := range listResponse.Results {
-				convertedResult, conversionErr := convertModelBindingType(result, gm_model.LocaleServicesBindingType(), model.LocaleServicesBindingType())
-				if conversionErr != nil {
-					return results, conversionErr
-				}
-				results = append(results, convertedResult.(model.LocaleServices))
-			}
-			cursor = listResponse.Cursor
-			count = *listResponse.ResultCount
-		} else {
-			client := tier_0s.NewDefaultLocaleServicesClient(connector)
-			listResponse, err := client.List(t0ID, cursor, &includeMarkForDeleteObjectsParam, nil, nil, nil, nil)
-			if err != nil {
-				return results, err
-			}
-			results = append(results, listResponse.Results...)
-			cursor = listResponse.Cursor
-			count = *listResponse.ResultCount
-		}
-		if total == 0 {
-			// first response
-			total = count
-		} else {
-			total += count
-		}
-		if int64(len(results)) >= total {
-			return results, nil
-		}
+func listGlobalManagerTier0GatewayLocaleServices(connector *client.RestConnector, gwID string, cursor *string) (model.LocaleServicesListResult, error) {
+	client := gm_tier_0s.NewDefaultLocaleServicesClient(connector)
+	markForDelete := false
+	listResponse, err := client.List(gwID, cursor, &markForDelete, nil, nil, nil, nil)
+	if err != nil {
+		return model.LocaleServicesListResult{}, err
 	}
+
+	convertedResult, conversionErr := convertModelBindingType(listResponse, gm_model.LocaleServicesListResultBindingType(), model.LocaleServicesListResultBindingType())
+	if conversionErr != nil {
+		return model.LocaleServicesListResult{}, conversionErr
+	}
+
+	return convertedResult.(model.LocaleServicesListResult), nil
+}
+
+func listLocalManagerTier0GatewayLocaleServices(connector *client.RestConnector, gwID string, cursor *string) (model.LocaleServicesListResult, error) {
+	client := tier_0s.NewDefaultLocaleServicesClient(connector)
+	markForDelete := false
+	return client.List(gwID, cursor, &markForDelete, nil, nil, nil, nil)
+}
+
+func listPolicyTier0GatewayLocaleServices(connector *client.RestConnector, gwID string, isGlobalManager bool) ([]model.LocaleServices, error) {
+
+	if isGlobalManager {
+		return listPolicyGatewayLocaleServices(connector, gwID, listGlobalManagerTier0GatewayLocaleServices)
+	}
+
+	return listPolicyGatewayLocaleServices(connector, gwID, listLocalManagerTier0GatewayLocaleServices)
 }
 
 func getPolicyTier0GatewayLocaleServiceWithEdgeCluster(gwID string, connector *client.RestConnector) (*model.LocaleServices, error) {
@@ -632,24 +616,6 @@ func resourceNsxtPolicyTier0GatewayBGPConfigSchemaToStruct(cfg interface{}, isVr
 	return routeStruct
 }
 
-func initChildLocaleService(serviceStruct *model.LocaleServices, markForDelete bool) (*data.StructValue, error) {
-	childService := model.ChildLocaleServices{
-		ResourceType:    "ChildLocaleServices",
-		LocaleServices:  serviceStruct,
-		MarkedForDelete: &markForDelete,
-	}
-
-	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
-	dataValue, err := converter.ConvertToVapi(childService, model.ChildLocaleServicesBindingType())
-
-	if err != nil {
-		return nil, err[0]
-	}
-
-	return dataValue.(*data.StructValue), nil
-}
-
 func initSingleTier0GatewayLocaleService(d *schema.ResourceData, children []*data.StructValue, connector *client.RestConnector) (*data.StructValue, error) {
 
 	edgeClusterPath := d.Get("edge_cluster_path").(string)
@@ -680,72 +646,6 @@ func initSingleTier0GatewayLocaleService(d *schema.ResourceData, children []*dat
 	log.Printf("[DEBUG] Using Locale Service with ID %s and Edge Cluster %v", *serviceStruct.Id, serviceStruct.EdgeClusterPath)
 
 	return initChildLocaleService(serviceStruct, false)
-}
-
-func initTier0GatewayLocaleServices(d *schema.ResourceData, connector *client.RestConnector) ([]*data.StructValue, error) {
-	var localeServices []*data.StructValue
-
-	services := d.Get("locale_service").([]interface{})
-	if len(services) == 0 {
-		return localeServices, nil
-	}
-
-	existingServices := make(map[string]bool)
-	if len(d.Id()) > 0 {
-		// This is an update - we might need to delete locale services
-		existingServiceObjects, errList := listPolicyTier0GatewayLocaleServices(connector, d.Id(), true)
-		if errList != nil {
-			return nil, errList
-		}
-
-		for _, obj := range existingServiceObjects {
-			existingServices[*obj.Id] = true
-		}
-	}
-	lsType := "LocaleServices"
-	for _, service := range services {
-		cfg := service.(map[string]interface{})
-		edgeClusterPath := cfg["edge_cluster_path"].(string)
-		edgeNodes := interface2StringList(cfg["preferred_edge_paths"].(*schema.Set).List())
-		path := cfg["path"].(string)
-
-		var serviceID string
-		if path != "" {
-			serviceID = getPolicyIDFromPath(path)
-		} else {
-			serviceID = newUUID()
-		}
-		serviceStruct := model.LocaleServices{
-			Id:                 &serviceID,
-			ResourceType:       &lsType,
-			EdgeClusterPath:    &edgeClusterPath,
-			PreferredEdgePaths: edgeNodes,
-		}
-
-		dataValue, err := initChildLocaleService(&serviceStruct, false)
-		if err != nil {
-			return localeServices, err
-		}
-
-		localeServices = append(localeServices, dataValue)
-		existingServices[serviceID] = false
-	}
-	// Add instruction to delete services that are no longer present in intent
-	for id, shouldDelete := range existingServices {
-		if shouldDelete {
-			serviceStruct := model.LocaleServices{
-				Id:           &id,
-				ResourceType: &lsType,
-			}
-			dataValue, err := initChildLocaleService(&serviceStruct, true)
-			if err != nil {
-				return localeServices, err
-			}
-			localeServices = append(localeServices, dataValue)
-		}
-	}
-
-	return localeServices, nil
 }
 
 func verifyPolicyTier0GatewayConfig(d *schema.ResourceData, isGlobalManager bool) error {
@@ -852,7 +752,7 @@ func policyTier0GatewayResourceToInfraStruct(d *schema.ResourceData, connector *
 	}
 
 	// Global Manager case - multiple locale services. BGP not supported yet.
-	localeServices, err := initTier0GatewayLocaleServices(d, connector)
+	localeServices, err := initGatewayLocaleServices(d, connector, listPolicyTier0GatewayLocaleServices)
 	if err != nil {
 		return infraStruct, err
 	}
@@ -880,21 +780,6 @@ func policyTier0GatewayResourceToInfraStruct(d *schema.ResourceData, connector *
 	return infraStruct, nil
 }
 
-func policyTier0GatewayInfraPatch(obj model.Infra, isGlobalManager bool, connector *client.RestConnector, enforceRevision bool) error {
-	if isGlobalManager {
-		infraClient := global_policy.NewDefaultGlobalInfraClient(connector)
-		gmObj, err := convertModelBindingType(obj, model.InfraBindingType(), gm_model.InfraBindingType())
-		if err != nil {
-			return err
-		}
-
-		return infraClient.Patch(gmObj.(gm_model.Infra), &enforceRevision)
-	}
-
-	infraClient := nsx_policy.NewDefaultInfraClient(connector)
-	return infraClient.Patch(obj, &enforceRevision)
-}
-
 func resourceNsxtPolicyTier0GatewayCreate(d *schema.ResourceData, m interface{}) error {
 
 	connector := getPolicyConnector(m)
@@ -918,7 +803,7 @@ func resourceNsxtPolicyTier0GatewayCreate(d *schema.ResourceData, m interface{})
 
 	log.Printf("[INFO] Using H-API to create Tier0 with ID %s", id)
 
-	err = policyTier0GatewayInfraPatch(obj, isGlobalManager, getPolicyConnector(m), false)
+	err = policyInfraPatch(obj, isGlobalManager, getPolicyConnector(m), false)
 	if err != nil {
 		return handleCreateError("Tier0", id, err)
 	}
@@ -1046,7 +931,7 @@ func resourceNsxtPolicyTier0GatewayUpdate(d *schema.ResourceData, m interface{})
 
 	log.Printf("[INFO] Using H-API to update Tier0 with ID %s", id)
 
-	err = policyTier0GatewayInfraPatch(obj, isGlobalManager, connector, true)
+	err = policyInfraPatch(obj, isGlobalManager, connector, true)
 	if err != nil {
 		return handleUpdateError("Tier0", id, err)
 	}
@@ -1088,7 +973,7 @@ func resourceNsxtPolicyTier0GatewayDelete(d *schema.ResourceData, m interface{})
 	}
 
 	log.Printf("[DEBUG] Using H-API to delete Tier0 with ID %s", id)
-	err := policyTier0GatewayInfraPatch(obj, isPolicyGlobalManager(m), getPolicyConnector(m), false)
+	err := policyInfraPatch(obj, isPolicyGlobalManager(m), getPolicyConnector(m), false)
 	if err != nil {
 		return handleDeleteError("Tier0", id, err)
 	}
