@@ -36,7 +36,7 @@ func dataSourceNsxtPolicyEdgeNode() *schema.Resource {
 func dataSourceNsxtPolicyEdgeNodeRead(d *schema.ResourceData, m interface{}) error {
 	// Read an edge node by name or id
 	edgeClusterPath := d.Get("edge_cluster_path").(string)
-	memberIndex, memberIndexSet := d.GetOkExists("member_index")
+	memberIndex, memberIndexSet := d.GetOk("member_index")
 
 	if isPolicyGlobalManager(m) {
 		query := make(map[string]string)
@@ -68,7 +68,7 @@ func dataSourceNsxtPolicyEdgeNodeRead(d *schema.ResourceData, m interface{}) err
 		obj = objGet
 	} else {
 		// Get by full name/prefix
-		name, nameSet := d.GetOkExists("display_name")
+		name, nameSet := d.GetOk("display_name")
 		objName := name.(string)
 		objMemberIndex := int64(memberIndex.(int))
 		includeMarkForDeleteObjectsParam := false
