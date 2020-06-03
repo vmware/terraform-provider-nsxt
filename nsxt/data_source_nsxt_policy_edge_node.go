@@ -40,9 +40,9 @@ func dataSourceNsxtPolicyEdgeNodeRead(d *schema.ResourceData, m interface{}) err
 	edgeClusterPath := d.Get("edge_cluster_path").(string)
 	edgeClusterID := getPolicyIDFromPath(edgeClusterPath)
 	objID := d.Get("id").(string)
-	name, nameSet := d.GetOkExists("display_name")
+	name, nameSet := d.GetOk("display_name")
 	objName := name.(string)
-	memberIndex, memberIndexSet := d.GetOkExists("member_index")
+	memberIndex, memberIndexSet := d.GetOk("member_index")
 	objMemberIndex := int64(memberIndex.(int))
 	var obj model.PolicyEdgeNode
 	if objID != "" {
