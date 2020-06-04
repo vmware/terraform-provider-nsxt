@@ -261,7 +261,7 @@ func getPolicyCommonSegmentSchema() map[string]*schema.Schema {
 			Description: "VLAN IDs for VLAN backed Segment",
 			Elem: &schema.Schema{
 				Type:         schema.TypeString,
-				ValidateFunc: validateVLANId,
+				ValidateFunc: validateVLANIdOrRange,
 			},
 			Required: true,
 		},
