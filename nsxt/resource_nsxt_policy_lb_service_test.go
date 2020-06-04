@@ -34,7 +34,7 @@ func TestAccResourceNsxtPolicyLBService_basic(t *testing.T) {
 	edgeClusterName := getEdgeClusterName()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyLBServiceCheckDestroy(state, accTestPolicyLBServiceCreateAttributes["display_name"])
@@ -94,7 +94,7 @@ func TestAccResourceNsxtPolicyLBService_importBasic(t *testing.T) {
 	testResourceName := "nsxt_policy_lb_service.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyLBServiceCheckDestroy(state, name)

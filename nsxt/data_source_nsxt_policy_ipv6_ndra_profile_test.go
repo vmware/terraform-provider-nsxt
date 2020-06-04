@@ -17,7 +17,7 @@ func TestAccDataSourceNsxtPolicyIpv6NdraProfile_basic(t *testing.T) {
 	testResourceName := "data.nsxt_policy_ipv6_ndra_profile.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccDataSourceNsxtPolicyIpv6NdraProfileDeleteByName(name)
