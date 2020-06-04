@@ -18,7 +18,7 @@ Documentation on the NSX platform can be found on the [NSX Documentation Page](h
 ```hcl
 provider "nsxt" {
   host                 = "nsx-54-203-97-32.rp.vmwarevmc.com/vmc/reverse-proxy/api/orgs/54f6629e-460b-4521-ac2b-ae3b5461916c/sddcs/1b3c6c7e-59ba-4df7-ab0e-af9b06369a83/sks-nsxt-manager"
-  vmc_token            = "${var.vmc_token}"
+  vmc_token            = var.vmc_token
   allow_unverified_ssl = true
   enforcement_point    = "vmc-enforcementpoint"
 }
