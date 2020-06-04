@@ -14,7 +14,10 @@ func TestAccDataSourceNsxtPolicyTransportZone_basic(t *testing.T) {
 	testResourceName := "data.nsxt_policy_transport_zone.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccNSXPolicyTransportZonePrecheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccNSXGlobalManagerSitePrecheck(t)
+		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -72,14 +75,6 @@ data "nsxt_policy_transport_zone" "test" {
   display_name = "%s"
   site_path = data.nsxt_policy_site.test.path
 }`, getTestSiteName(), transportZoneName)
-}
-
-func testAccNSXPolicyTransportZonePrecheck(t *testing.T) {
-	testAccPreCheck(t)
-	if testAccIsGlobalManager() && getTestSiteName() == "" {
-		str := fmt.Sprintf("%s must be set for this acceptance test", "NSXT_TEST_SITE_NAME")
-		t.Fatal(str)
-	}
 }
 
 func testAccNSXGlobalPolicyTransportZoneWithTransportTypeTemplate(transportZoneName string) string {
