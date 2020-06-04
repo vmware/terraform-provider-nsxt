@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	gm_domains "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/domains"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/domains"
 	"testing"
 )
@@ -228,7 +229,6 @@ func testAccNsxtPolicySecurityPolicyExists(resourceName string, domainName strin
 	return func(state *terraform.State) error {
 
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-		nsxClient := domains.NewDefaultSecurityPoliciesClient(connector)
 
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
@@ -240,7 +240,16 @@ func testAccNsxtPolicySecurityPolicyExists(resourceName string, domainName strin
 			return fmt.Errorf("Policy SecurityPolicy resource ID not set in resources")
 		}
 
-		_, err := nsxClient.Get(domainName, resourceID)
+		var err error
+		if isPolicyGlobalManager(testAccProvider.Meta()) {
+			nsxClient := gm_domains.NewDefaultSecurityPoliciesClient(connector)
+			_, err = nsxClient.Get(domainName, resourceID)
+
+		} else {
+			nsxClient := domains.NewDefaultSecurityPoliciesClient(connector)
+			_, err = nsxClient.Get(domainName, resourceID)
+		}
+
 		if err != nil {
 			return fmt.Errorf("Error while retrieving policy SecurityPolicy ID %s. Error: %v", resourceID, err)
 		}
@@ -251,7 +260,14 @@ func testAccNsxtPolicySecurityPolicyExists(resourceName string, domainName strin
 
 func testAccNsxtPolicySecurityPolicyCheckDestroy(state *terraform.State, displayName string, domainName string) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-	nsxClient := domains.NewDefaultSecurityPoliciesClient(connector)
+	var nsxClient interface{}
+	isPolicyGlobalManager := isPolicyGlobalManager(testAccProvider.Meta())
+	if isPolicyGlobalManager {
+		nsxClient = gm_domains.NewDefaultSecurityPoliciesClient(connector)
+	} else {
+		nsxClient = domains.NewDefaultSecurityPoliciesClient(connector)
+	}
+	var err error
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_policy_security_policy" {
@@ -259,7 +275,11 @@ func testAccNsxtPolicySecurityPolicyCheckDestroy(state *terraform.State, display
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		_, err := nsxClient.Get(domainName, resourceID)
+		if isPolicyGlobalManager {
+			_, err = nsxClient.(*gm_domains.DefaultSecurityPoliciesClient).Get(domainName, resourceID)
+		} else {
+			_, err = nsxClient.(*domains.DefaultSecurityPoliciesClient).Get(domainName, resourceID)
+		}
 		if err == nil {
 			return fmt.Errorf("Policy SecurityPolicy %s still exists", displayName)
 		}
