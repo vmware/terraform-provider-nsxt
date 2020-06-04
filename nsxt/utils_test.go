@@ -351,3 +351,10 @@ func testGetObjIDByName(objName string, resourceType string) (string, error) {
 
 	return "", fmt.Errorf("%s with name '%s' was not found", resourceType, objName)
 }
+
+func testAccNsxtGlobalPolicySite() string {
+	return fmt.Sprintf(`
+data "nsxt_policy_site" "test" {
+  display_name = "%s"
+}`, getTestSiteName())
+}
