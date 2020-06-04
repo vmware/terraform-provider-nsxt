@@ -224,6 +224,116 @@ func TestAccResourceNsxtPolicySecurityPolicy_importBasic(t *testing.T) {
 		},
 	})
 }
+func TestAccResourceNsxtGlobalPolicySecurityPolicy_withSite(t *testing.T) {
+	name := fmt.Sprintf("terraform-test-site")
+	testResourceName := "nsxt_policy_security_policy.test"
+	updatedName := fmt.Sprintf("%s-update", name)
+	comments1 := "Acceptance test create"
+	comments2 := "Acceptance test update"
+	direction1 := "IN"
+	direction2 := "OUT"
+	proto1 := "IPV4"
+	proto2 := "IPV4_IPV6"
+	defaultAction := "ALLOW"
+	tag1 := "abc"
+	tag2 := "def"
+	domain := getTestSiteName()
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccSkipIfIsLocalManager(t)
+			testAccEnvDefined(t, "NSXT_TEST_SITE_NAME")
+			testAccPreCheck(t)
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicySecurityPolicyCheckDestroy(state, name, domain)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicySecurityPolicyBasic(name, comments1),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicySecurityPolicyExists(testResourceName, domain),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "category", "Application"),
+					resource.TestCheckResourceAttr(testResourceName, "domain", domain),
+					resource.TestCheckResourceAttr(testResourceName, "comments", comments1),
+					resource.TestCheckResourceAttr(testResourceName, "locked", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "scope.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "sequence_number", "3"),
+					resource.TestCheckResourceAttr(testResourceName, "stateful", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "tcp_strict", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.#", "0"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicySecurityPolicyBasic(updatedName, comments2),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicySecurityPolicyExists(testResourceName, domain),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "category", "Application"),
+					resource.TestCheckResourceAttr(testResourceName, "domain", domain),
+					resource.TestCheckResourceAttr(testResourceName, "comments", comments2),
+					resource.TestCheckResourceAttr(testResourceName, "locked", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "scope.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "sequence_number", "3"),
+					resource.TestCheckResourceAttr(testResourceName, "stateful", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "tcp_strict", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.#", "0"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicySecurityPolicyWithRule(updatedName, direction1, proto1, tag1),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicySecurityPolicyExists(testResourceName, domain),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "category", "Application"),
+					resource.TestCheckResourceAttr(testResourceName, "domain", domain),
+					resource.TestCheckResourceAttr(testResourceName, "comments", ""),
+					resource.TestCheckResourceAttr(testResourceName, "locked", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "scope.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "sequence_number", "3"),
+					resource.TestCheckResourceAttr(testResourceName, "stateful", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "tcp_strict", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.direction", direction1),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.ip_version", proto1),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.action", defaultAction),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.log_label", tag1),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.tag.#", "1"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicySecurityPolicyWithRule(updatedName, direction2, proto2, tag2),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicySecurityPolicyExists(testResourceName, domain),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "category", "Application"),
+					resource.TestCheckResourceAttr(testResourceName, "domain", domain),
+					resource.TestCheckResourceAttr(testResourceName, "comments", ""),
+					resource.TestCheckResourceAttr(testResourceName, "locked", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "scope.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "sequence_number", "3"),
+					resource.TestCheckResourceAttr(testResourceName, "stateful", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "tcp_strict", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.direction", direction2),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.ip_version", proto2),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.action", defaultAction),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.log_label", tag2),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.tag.#", "1"),
+				),
+			},
+		},
+	})
+
+}
 
 func testAccNsxtPolicySecurityPolicyExists(resourceName string, domainName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
@@ -288,7 +398,27 @@ func testAccNsxtPolicySecurityPolicyCheckDestroy(state *terraform.State, display
 }
 
 func testAccNsxtPolicySecurityPolicyBasic(name string, comments string) string {
-	return fmt.Sprintf(`
+	if testAccIsGlobalManager() {
+		return testAccNsxtGlobalPolicySite() + fmt.Sprintf(`
+resource "nsxt_policy_security_policy" "test" {
+  display_name    = "%s"
+  description     = "Acceptance Test"
+  category        = "Application"
+  comments        = "%s"
+  locked          = true
+  sequence_number = 3
+  stateful        = true
+  tcp_strict      = false
+  domain          = data.nsxt_policy_site.test.id
+
+  tag {
+    scope = "color"
+    tag   = "orange"
+  }
+
+}`, name, comments)
+	} else {
+		return fmt.Sprintf(`
 resource "nsxt_policy_security_policy" "test" {
   display_name    = "%s"
   description     = "Acceptance Test"
@@ -305,10 +435,42 @@ resource "nsxt_policy_security_policy" "test" {
   }
 
 }`, name, comments)
+	}
 }
 
 func testAccNsxtPolicySecurityPolicyWithRule(name string, direction string, protocol string, ruleTag string) string {
-	return fmt.Sprintf(`
+	if testAccIsGlobalManager() {
+		return testAccNsxtGlobalPolicySite() + fmt.Sprintf(`
+resource "nsxt_policy_security_policy" "test" {
+  display_name    = "%s"
+  description     = "Acceptance Test"
+  category        = "Application"
+  locked          = false
+  sequence_number = 3
+  stateful        = true
+  tcp_strict      = false
+  domain          = data.nsxt_policy_site.test.id
+
+  tag {
+    scope = "color"
+    tag   = "orange"
+  }
+
+  rule {
+    display_name = "%s"
+    direction    = "%s"
+    ip_version   = "%s"
+    log_label    = "%s"
+
+    tag {
+      scope = "color"
+      tag   = "blue"
+    }
+  }
+}`, name, name, direction, protocol, ruleTag)
+
+	} else {
+		return fmt.Sprintf(`
 resource "nsxt_policy_security_policy" "test" {
   display_name    = "%s"
   description     = "Acceptance Test"
@@ -335,6 +497,7 @@ resource "nsxt_policy_security_policy" "test" {
     }
   }
 }`, name, name, direction, protocol, ruleTag)
+	}
 }
 
 func testAccNsxtPolicySecurityPolicyDeps() string {
