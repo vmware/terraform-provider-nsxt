@@ -17,7 +17,7 @@ func TestAccDataSourceNsxtPolicyVniPoolConfig_basic(t *testing.T) {
 	testResourceName := "data.nsxt_policy_vni_pool.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccDataSourceNsxtPolicyVniPoolConfigDeleteByName(name)

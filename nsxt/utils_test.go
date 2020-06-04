@@ -109,7 +109,7 @@ func testAccEnvDefined(t *testing.T, envVar string) {
 }
 
 func testAccIsGlobalManager() bool {
-	return os.Getenv("NSXT_GLOBAL_MANAGER") == "true"
+	return os.Getenv("NSXT_GLOBAL_MANAGER") == "true" || os.Getenv("NSXT_GLOBAL_MANAGER") == "1"
 }
 
 func testAccOnlyGlobalManager(t *testing.T) {

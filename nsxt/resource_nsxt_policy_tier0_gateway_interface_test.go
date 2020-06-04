@@ -26,7 +26,7 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_service(t *testing.T) {
 	testResourceName := "nsxt_policy_tier0_gateway_interface.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTier0InterfaceCheckDestroy(state, name)
@@ -109,7 +109,7 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_external(t *testing.T) {
 	testResourceName := "nsxt_policy_tier0_gateway_interface.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTier0InterfaceCheckDestroy(state, name)
@@ -179,7 +179,7 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_withID(t *testing.T) {
 	testResourceName := "nsxt_policy_tier0_gateway_interface.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTier0InterfaceCheckDestroy(state, name)
@@ -256,7 +256,7 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_importBasic(t *testing.T) {
 	subnet := "1.1.12.2/24"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTier0InterfaceCheckDestroy(state, name)

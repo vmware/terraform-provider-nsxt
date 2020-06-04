@@ -27,7 +27,7 @@ func TestAccResourceNsxtPolicyDhcpServer_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_dhcp_server.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyDhcpServerCheckDestroy(state, accTestPolicyDhcpServerCreateAttributes["display_name"])
@@ -89,7 +89,7 @@ func TestAccResourceNsxtPolicyDhcpServer_importBasic(t *testing.T) {
 	testResourceName := "nsxt_policy_dhcp_server.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyDhcpServerCheckDestroy(state, name)

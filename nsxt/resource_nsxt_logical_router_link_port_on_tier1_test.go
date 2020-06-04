@@ -19,7 +19,7 @@ func TestAccResourceNsxtLogicalRouterLinkPortOnTier1_basic(t *testing.T) {
 	testResourceName := "nsxt_logical_router_link_port_on_tier1.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLogicalRouterLinkPortOnTier1CheckDestroy(state, name)
@@ -58,7 +58,7 @@ func TestAccResourceNsxtLogicalRouterLinkPortOnTier1_importBasic(t *testing.T) {
 	testResourceName := "nsxt_logical_router_link_port_on_tier1.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLogicalRouterLinkPortOnTier1CheckDestroy(state, name)

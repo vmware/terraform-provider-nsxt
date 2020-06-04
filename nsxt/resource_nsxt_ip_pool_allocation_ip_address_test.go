@@ -22,7 +22,7 @@ var testAccIPPoolName = "data.nsxt_ip_pool.acceptance_test"
 
 func TestAccResourceNsxtIPPoolAllocationIPAddress_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccEnvDefined(t, "NSXT_TEST_IP_POOL") },
+		PreCheck:  func() { testAccPreCheck(t); testAccEnvDefined(t, "NSXT_TEST_IP_POOL"); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXIPPoolAllocationIPAddressCheckDestroy(state)
@@ -43,7 +43,7 @@ func TestAccResourceNsxtIPPoolAllocationIPAddress_basic(t *testing.T) {
 func TestAccResourceNsxtIPPoolAllocationIPAddress_import(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccEnvDefined(t, "NSXT_TEST_IP_POOL") },
+		PreCheck:  func() { testAccPreCheck(t); testAccEnvDefined(t, "NSXT_TEST_IP_POOL"); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXIPPoolAllocationIPAddressCheckDestroy(state)
