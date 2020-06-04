@@ -17,7 +17,7 @@ Documentation on the NSX platform can be found on the [NSX Documentation Page](h
 
 ```hcl
 provider "nsxt" {
-  host                 ="nsx-54-203-97-32.rp.vmwarevmc.com/vmc/reverse-proxy/api/orgs/54f6629e-460b-4521-ac2b-ae3b5461916c/sddcs/1b3c6c7e-59ba-4df7-ab0e-af9b06369a83/sks-nsxt-manager"
+  host                 = "nsx-54-203-97-32.rp.vmwarevmc.com/vmc/reverse-proxy/api/orgs/54f6629e-460b-4521-ac2b-ae3b5461916c/sddcs/1b3c6c7e-59ba-4df7-ab0e-af9b06369a83/sks-nsxt-manager"
   vmc_token            = "<token>"
   allow_unverified_ssl = true
   enforcement_point    = "vmc-enforcementpoint"
@@ -39,5 +39,12 @@ The following Resources are available to use with VMConAWS:
 * DHCP Relay: [nsxt_policy_dhcp_relay](https://www.terraform.io/docs/providers/nsxt/r/policy_dhcp_relay.html)
 * Virtual Machine Tags: [nsxt_policy_vm_tag](https://www.terraform.io/docs/providers/nsxt/r/policy_vm_tags.html)
 
+## Available Data Sources for use with VMConAWS
 
-Resources and Data Sources applying to NSX-T on VMConAWS have been qualified, tested and documented in order to allow Terraform consumption of VMConAWS environments. Authentication for these environments has also be added to the Provider.
+The following Data Sources are available to use with VMConAWS:
+
+* Services: [nsxt_policy_service](https://www.terraform.io/docs/providers/nsxt/d/policy_service.html)
+* Edge Cluster: [nsxt_policy_edge_cluster](https://www.terraform.io/docs/providers/nsxt/d/policy_edge_cluster.html)
+* Transport Zone: [nsxt_policy_transport_zone](https://www.terraform.io/docs/providers/nsxt/d/policy_transport_zone.html)
+* Tier-0 Gateway: [nsxt_policy_tier0_gateway](https://www.terraform.io/docs/providers/nsxt/d/policy_tier0_gateway.html)
+* Tier-1 Gateway: [nsxt_policy_tier1_gateway](https://www.terraform.io/docs/providers/nsxt/d/policy_tier1_gateway.html)
