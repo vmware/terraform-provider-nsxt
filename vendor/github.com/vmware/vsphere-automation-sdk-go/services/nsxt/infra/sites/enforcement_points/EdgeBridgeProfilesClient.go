@@ -58,7 +58,7 @@ type EdgeBridgeProfilesClient interface {
     // @throws NotFound  Not Found
 	List(siteIdParam string, enforcementPointIdParam string, cursorParam *string, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.L2BridgeEndpointProfileListResult, error)
 
-    // API will create or update L2 bridge profile with ID profile-id
+    // API will create or update L2 bridge profile with ID profile-id. L2 Bridge profile is only allowed under an enforcement-point with path /infra/sites/default/enforcement-points/default.
     //
     // @param siteIdParam site ID (required)
     // @param enforcementPointIdParam enforcement point ID (required)
@@ -71,7 +71,7 @@ type EdgeBridgeProfilesClient interface {
     // @throws NotFound  Not Found
 	Patch(siteIdParam string, enforcementPointIdParam string, profileIdParam string, l2BridgeEndpointProfileParam model.L2BridgeEndpointProfile) error
 
-    // API will create or update L2 bridge profile with ID profile-id
+    // API will create or update L2 bridge profile with ID profile-id. L2 Bridge profile is only allowed under an enforcement-point with path /infra/sites/default/enforcement-points/default.
     //
     // @param siteIdParam site ID (required)
     // @param enforcementPointIdParam enforcement point ID (required)

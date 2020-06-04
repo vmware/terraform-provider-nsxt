@@ -46,6 +46,8 @@ func lbPersistenceProfilesDeleteRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["lb_persistence_profile_id"] = bindings.NewStringType()
 	fields["force"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["lb_persistence_profile_id"] = "LbPersistenceProfileId"
@@ -64,14 +66,18 @@ func lbPersistenceProfilesDeleteRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"",
 		"DELETE",
 		"/policy/api/v1/infra/lb-persistence-profiles/{lbPersistenceProfileId}",
+		"",
 		resultHeaders,
 		204,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func lbPersistenceProfilesGetInputType() bindings.StructType {
@@ -94,6 +100,8 @@ func lbPersistenceProfilesGetRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["lb_persistence_profile_id"] = bindings.NewStringType()
 	fieldNameMap["lb_persistence_profile_id"] = "LbPersistenceProfileId"
 	paramsTypeMap["lb_persistence_profile_id"] = bindings.NewStringType()
@@ -108,14 +116,18 @@ func lbPersistenceProfilesGetRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"",
 		"GET",
 		"/policy/api/v1/infra/lb-persistence-profiles/{lbPersistenceProfileId}",
+		"",
 		resultHeaders,
 		200,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func lbPersistenceProfilesListInputType() bindings.StructType {
@@ -148,6 +160,8 @@ func lbPersistenceProfilesListRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
 	fields["include_mark_for_delete_objects"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fields["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
@@ -181,14 +195,18 @@ func lbPersistenceProfilesListRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"",
 		"GET",
 		"/policy/api/v1/infra/lb-persistence-profiles",
+		"",
 		resultHeaders,
 		200,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func lbPersistenceProfilesPatchInputType() bindings.StructType {
@@ -213,6 +231,8 @@ func lbPersistenceProfilesPatchRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["lb_persistence_profile_id"] = bindings.NewStringType()
 	fields["lb_persistence_profile"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.LBPersistenceProfileBindingType),}, bindings.REST)
 	fieldNameMap["lb_persistence_profile_id"] = "LbPersistenceProfileId"
@@ -230,14 +250,18 @@ func lbPersistenceProfilesPatchRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"lb_persistence_profile",
 		"PATCH",
 		"/policy/api/v1/infra/lb-persistence-profiles/{lbPersistenceProfileId}",
+		"",
 		resultHeaders,
 		204,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func lbPersistenceProfilesUpdateInputType() bindings.StructType {
@@ -262,6 +286,8 @@ func lbPersistenceProfilesUpdateRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["lb_persistence_profile_id"] = bindings.NewStringType()
 	fields["lb_persistence_profile"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.LBPersistenceProfileBindingType),}, bindings.REST)
 	fieldNameMap["lb_persistence_profile_id"] = "LbPersistenceProfileId"
@@ -279,14 +305,18 @@ func lbPersistenceProfilesUpdateRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"lb_persistence_profile",
 		"PUT",
 		"/policy/api/v1/infra/lb-persistence-profiles/{lbPersistenceProfileId}",
+		"",
 		resultHeaders,
 		200,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 

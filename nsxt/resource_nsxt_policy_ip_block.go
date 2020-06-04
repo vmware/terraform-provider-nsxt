@@ -97,7 +97,7 @@ func resourceNsxtPolicyIPBlockCreate(d *schema.ResourceData, m interface{}) erro
 	obj := model.IpAddressBlock{
 		DisplayName: &displayName,
 		Description: &description,
-		Cidr:        cidr,
+		Cidr:        &cidr,
 		Tags:        tags,
 	}
 
@@ -133,7 +133,7 @@ func resourceNsxtPolicyIPBlockUpdate(d *schema.ResourceData, m interface{}) erro
 		Id:          &id,
 		DisplayName: &displayName,
 		Description: &description,
-		Cidr:        cidr,
+		Cidr:        &cidr,
 		Tags:        tags,
 		Revision:    &revision,
 	}

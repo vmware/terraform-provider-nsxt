@@ -16,6 +16,18 @@ import (
 
 type TraceflowsClient interface {
 
+    // This will retrace even if current traceflow has observations. Current observations will be lost. Traceflow configuration will be cleaned up by the system after two hours of inactivity.
+    //
+    // @param traceflowIdParam (required)
+    // @param actionParam Action to be performed (optional)
+    // @return com.vmware.nsx_policy.model.TraceflowConfig
+    // @throws InvalidRequest  Bad Request, Precondition Failed
+    // @throws Unauthorized  Forbidden
+    // @throws ServiceUnavailable  Service Unavailable
+    // @throws InternalServerError  Internal Server Error
+    // @throws NotFound  Not Found
+	Create(traceflowIdParam string, actionParam *string) (model.TraceflowConfig, error)
+
     // Delete traceflow config with id traceflow-id
     //
     // @param traceflowIdParam (required)
@@ -26,7 +38,7 @@ type TraceflowsClient interface {
     // @throws NotFound  Not Found
 	Delete(traceflowIdParam string) error
 
-    // Read traceflow config with id traceflow-id
+    // Read traceflow config with id traceflow-id. This configuration will be cleaned up by the system after two hours of inactivity.
     //
     // @param traceflowIdParam (required)
     // @return com.vmware.nsx_policy.model.TraceflowConfig
@@ -53,7 +65,7 @@ type TraceflowsClient interface {
     // @throws NotFound  Not Found
 	List(cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.TraceflowConfigListResult, error)
 
-    // If a traceflow config with the traceflow-id is not already present, create a new traceflow config. If it already exists, update the traceflow config. This is a full replace.
+    // If a traceflow config with the traceflow-id is not already present, create a new traceflow config. If it already exists, update the traceflow config. This is a full replace. This configuration will be cleaned up by the system after two hours of inactivity.
     //
     // @param traceflowIdParam (required)
     // @param traceflowConfigParam (required)
@@ -64,7 +76,7 @@ type TraceflowsClient interface {
     // @throws NotFound  Not Found
 	Patch(traceflowIdParam string, traceflowConfigParam model.TraceflowConfig) error
 
-    // If a traceflow config with the traceflow-id is not already present, create a new traceflow config. If it already exists, update the traceflow config. This is a full replace.
+    // If a traceflow config with the traceflow-id is not already present, create a new traceflow config. If it already exists, update the traceflow config. This is a full replace. This configuration will be cleaned up by the system after two hours of inactivity.
     //
     // @param traceflowIdParam (required)
     // @param traceflowConfigParam (required)

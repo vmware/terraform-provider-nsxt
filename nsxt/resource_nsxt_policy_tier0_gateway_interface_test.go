@@ -21,6 +21,8 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_service(t *testing.T) {
 	updatedMtu := "1800"
 	subnet := "1.1.12.2/24"
 	updatedSubnet := "1.2.12.2/24"
+	ipAddress := "1.1.12.2"
+	updatedIPAddress := "1.2.12.2"
 	testResourceName := "nsxt_policy_tier0_gateway_interface.test"
 
 	resource.Test(t, resource.TestCase{
@@ -40,11 +42,14 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_service(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "type", "SERVICE"),
 					resource.TestCheckResourceAttr(testResourceName, "subnets.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "subnets.0", subnet),
+					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.0", ipAddress),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 					resource.TestCheckResourceAttrSet(testResourceName, "segment_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "gateway_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "locale_service_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 				),
 			},
@@ -58,11 +63,14 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_service(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "type", "SERVICE"),
 					resource.TestCheckResourceAttr(testResourceName, "subnets.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "subnets.0", updatedSubnet),
+					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.0", updatedIPAddress),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 					resource.TestCheckResourceAttrSet(testResourceName, "segment_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "gateway_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "locale_service_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 				),
 			},
@@ -74,11 +82,14 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_service(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "mtu", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "subnets.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "subnets.0", subnet),
+					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.0", ipAddress),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
 					resource.TestCheckResourceAttrSet(testResourceName, "segment_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "gateway_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "locale_service_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 				),
 			},
@@ -93,6 +104,8 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_external(t *testing.T) {
 	updatedMtu := "1800"
 	subnet := "1.1.12.2/24"
 	updatedSubnet := "1.2.12.2/24"
+	ipAddress := "1.1.12.2"
+	updatedIPAddress := "1.2.12.2"
 	testResourceName := "nsxt_policy_tier0_gateway_interface.test"
 
 	resource.Test(t, resource.TestCase{
@@ -112,6 +125,8 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_external(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "type", "EXTERNAL"),
 					resource.TestCheckResourceAttr(testResourceName, "subnets.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "subnets.0", subnet),
+					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.0", ipAddress),
 					resource.TestCheckResourceAttr(testResourceName, "enable_pim", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "urpf_mode", "STRICT"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
@@ -120,6 +135,7 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_external(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "edge_node_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "locale_service_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 				),
 			},
@@ -133,6 +149,8 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_external(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "type", "EXTERNAL"),
 					resource.TestCheckResourceAttr(testResourceName, "subnets.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "subnets.0", updatedSubnet),
+					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.0", updatedIPAddress),
 					resource.TestCheckResourceAttr(testResourceName, "enable_pim", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "urpf_mode", "STRICT"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
@@ -141,6 +159,7 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_external(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "edge_node_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "locale_service_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 				),
 			},
@@ -155,6 +174,8 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_withID(t *testing.T) {
 	// Update to 2 addresses
 	ipv6Subnet := "4003::12/64"
 	updatedSubnet := fmt.Sprintf("%s\",\"%s", subnet, ipv6Subnet)
+	ipAddress := "1.1.12.2"
+	ipv6Address := "4003::12"
 	testResourceName := "nsxt_policy_tier0_gateway_interface.test"
 
 	resource.Test(t, resource.TestCase{
@@ -173,12 +194,15 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_withID(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttr(testResourceName, "subnets.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "subnets.0", subnet),
+					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.0", ipAddress),
 					resource.TestCheckResourceAttr(testResourceName, "ipv6_ndra_profile_path", "/infra/ipv6-ndra-profiles/default"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
 					resource.TestCheckResourceAttrSet(testResourceName, "segment_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "gateway_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "locale_service_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 				),
 			},
@@ -192,11 +216,15 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_withID(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "subnets.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "subnets.0", subnet),
 					resource.TestCheckResourceAttr(testResourceName, "subnets.1", ipv6Subnet),
+					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.0", ipAddress),
+					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.1", ipv6Address),
 					resource.TestCheckResourceAttr(testResourceName, "ipv6_ndra_profile_path", "/infra/ipv6-ndra-profiles/default"),
 					resource.TestCheckResourceAttrSet(testResourceName, "segment_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "gateway_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "locale_service_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 				),
 			},

@@ -98,7 +98,7 @@ func resourceNsxtPolicyNATRule() *schema.Resource {
 			"source_networks": {
 				Type:        schema.TypeList,
 				Description: "The source network(s) for the NAT Rule",
-				Required:    true,
+				Optional:    true,
 				Elem: &schema.Schema{
 					Type:         schema.TypeString,
 					ValidateFunc: validateCidrOrIPOrRange(),
@@ -197,14 +197,20 @@ func resourceNsxtPolicyNATRuleRead(d *schema.ResourceData, m interface{}) error 
 	d.Set("path", obj.Path)
 	d.Set("revision", obj.Revision)
 	d.Set("action", obj.Action)
-	d.Set("destination_networks", commaSeparatedStringToStringList(*obj.DestinationNetwork))
+	if obj.DestinationNetwork != nil {
+		d.Set("destination_networks", commaSeparatedStringToStringList(*obj.DestinationNetwork))
+	}
 	d.Set("enabled", obj.Enabled)
 	d.Set("firewall_match", obj.FirewallMatch)
 	d.Set("logging", obj.Logging)
 	d.Set("rule_priority", obj.SequenceNumber)
 	d.Set("service", obj.Service)
-	d.Set("source_networks", commaSeparatedStringToStringList(*obj.SourceNetwork))
-	d.Set("translated_networks", commaSeparatedStringToStringList(*obj.TranslatedNetwork))
+	if obj.SourceNetwork != nil {
+		d.Set("source_networks", commaSeparatedStringToStringList(*obj.SourceNetwork))
+	}
+	if obj.TranslatedNetwork != nil {
+		d.Set("translated_networks", commaSeparatedStringToStringList(*obj.TranslatedNetwork))
+	}
 	d.Set("translated_ports", obj.TranslatedPorts)
 	d.Set("scope", obj.Scope)
 
@@ -251,7 +257,7 @@ func resourceNsxtPolicyNATRuleCreate(d *schema.ResourceData, m interface{}) erro
 		DisplayName:        &displayName,
 		Description:        &description,
 		Tags:               tags,
-		Action:             action,
+		Action:             &action,
 		DestinationNetwork: &dNets,
 		Enabled:            &enabled,
 		Logging:            &logging,
@@ -312,7 +318,7 @@ func resourceNsxtPolicyNATRuleUpdate(d *schema.ResourceData, m interface{}) erro
 		DisplayName:        &displayName,
 		Description:        &description,
 		Tags:               tags,
-		Action:             action,
+		Action:             &action,
 		DestinationNetwork: &dNets,
 		Enabled:            &enabled,
 		Logging:            &logging,

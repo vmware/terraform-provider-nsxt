@@ -118,15 +118,15 @@ func resourceNsxtPolicySecurityPolicyRead(d *schema.ResourceData, m interface{})
 	d.Set("domain", getDomainFromResourcePath(*obj.Path))
 	d.Set("category", obj.Category)
 	d.Set("comments", obj.Comments)
-	d.Set("locked", *obj.Locked)
+	d.Set("locked", obj.Locked)
 	if len(obj.Scope) == 1 && obj.Scope[0] == "ANY" {
 		d.Set("scope", nil)
 	} else {
 		d.Set("scope", obj.Scope)
 	}
 	d.Set("sequence_number", obj.SequenceNumber)
-	d.Set("stateful", *obj.Stateful)
-	d.Set("tcp_strict", *obj.TcpStrict)
+	d.Set("stateful", obj.Stateful)
+	d.Set("tcp_strict", obj.TcpStrict)
 	d.Set("revision", obj.Revision)
 	setPolicyRulesInSchema(d, obj.Rules)
 

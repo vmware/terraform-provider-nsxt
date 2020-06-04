@@ -192,11 +192,13 @@ func nsxtPolicyWaitForRealizationStateConf(connector *client.RestConnector, d *s
 		Target:  targetStates,
 		Refresh: func() (interface{}, string, error) {
 
-			realizationResult, realizationError := client.List(realizedEntityPath)
+			realizationResult, realizationError := client.List(realizedEntityPath, &policySite)
 			if realizationError == nil {
 				// Find the right entry
 				for _, objInList := range realizationResult.Results {
-					return objInList, objInList.State, nil
+					if objInList.State != nil {
+						return objInList, *objInList.State, nil
+					}
 				}
 				// Realization info not found yet
 				return nil, "UNKNOWN", nil
@@ -211,6 +213,6 @@ func nsxtPolicyWaitForRealizationStateConf(connector *client.RestConnector, d *s
 	return stateConf
 }
 
-func getPolicyEnforcementPointPath() string {
-	return "/infra/sites/default/enforcement-points/" + policyEnforcementPoint
+func getPolicyEnforcementPointPath(m interface{}) string {
+	return "/infra/sites/default/enforcement-points/" + getPolicyEnforcementPoint(m)
 }

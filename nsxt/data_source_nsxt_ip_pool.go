@@ -75,7 +75,7 @@ func dataSourceNsxtIPPoolRead(d *schema.ResourceData, m interface{}) error {
 			}
 		}
 		if !found {
-			return fmt.Errorf("IP pool '%s' was not found out of %d services", objName, len(objList.Results))
+			return fmt.Errorf("IP pool '%s' was not found out of %d objects", objName, len(objList.Results))
 		}
 	} else {
 		return fmt.Errorf("Error obtaining IP pool ID or name during read")

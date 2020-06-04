@@ -244,7 +244,7 @@ func getPolicyClientSSLBindingFromSchema(d *schema.ResourceData) *model.LBClient
 			ClientAuth:             &clientAuth,
 			ClientAuthCaPaths:      caList,
 			ClientAuthCrlPaths:     crlList,
-			DefaultCertificatePath: certPath,
+			DefaultCertificatePath: &certPath,
 			SslProfilePath:         &profilePath,
 		}
 
@@ -339,9 +339,9 @@ func getPolicyAccessListControlFromSchema(d *schema.ResourceData) *model.LBAcces
 		enabled := data["enabled"].(bool)
 		groupPath := data["group_path"].(string)
 		result := model.LBAccessListControl{
-			Action:    action,
+			Action:    &action,
 			Enabled:   &enabled,
-			GroupPath: groupPath,
+			GroupPath: &groupPath,
 		}
 
 		return &result
@@ -427,11 +427,11 @@ func resourceNsxtPolicyLBVirtualServerCreate(d *schema.ResourceData, m interface
 		Description:              &description,
 		Tags:                     tags,
 		AccessLogEnabled:         &accessLogEnabled,
-		ApplicationProfilePath:   applicationProfilePath,
+		ApplicationProfilePath:   &applicationProfilePath,
 		ClientSslProfileBinding:  clientSSLProfileBinding,
 		DefaultPoolMemberPorts:   defaultPoolMemberPorts,
 		Enabled:                  &enabled,
-		IpAddress:                ipAddress,
+		IpAddress:                &ipAddress,
 		LbPersistenceProfilePath: &lbPersistenceProfilePath,
 		LbServicePath:            &lbServicePath,
 		PoolPath:                 &poolPath,
@@ -545,11 +545,11 @@ func resourceNsxtPolicyLBVirtualServerUpdate(d *schema.ResourceData, m interface
 		Description:              &description,
 		Tags:                     tags,
 		AccessLogEnabled:         &accessLogEnabled,
-		ApplicationProfilePath:   applicationProfilePath,
+		ApplicationProfilePath:   &applicationProfilePath,
 		ClientSslProfileBinding:  clientSSLProfileBinding,
 		DefaultPoolMemberPorts:   defaultPoolMemberPorts,
 		Enabled:                  &enabled,
-		IpAddress:                ipAddress,
+		IpAddress:                &ipAddress,
 		LbPersistenceProfilePath: &lbPersistenceProfilePath,
 		LbServicePath:            &lbServicePath,
 		PoolPath:                 &poolPath,

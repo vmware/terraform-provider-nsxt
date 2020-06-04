@@ -2,14 +2,17 @@ package nsxt
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/segments"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"log"
+	"time"
 )
 
 var connectivityValues = []string{
@@ -192,6 +195,11 @@ func getPolicySegmentAdvancedConfigurationSchema() *schema.Resource {
 				Optional:    true,
 				Default:     false,
 			},
+			"uplink_teaming_policy": {
+				Type:        schema.TypeString,
+				Description: "The name of the switching uplink teaming policy for the bridge endpoint",
+				Optional:    true,
+			},
 		},
 	}
 }
@@ -230,11 +238,10 @@ func getPolicyCommonSegmentSchema() map[string]*schema.Schema {
 			MaxItems:    1,
 		},
 		"overlay_id": {
-			Type:         schema.TypeInt,
-			Description:  "Overlay connectivity ID for this Segment",
-			Optional:     true,
-			Computed:     true,
-			ValidateFunc: validation.IntBetween(0, 2147483647),
+			Type:        schema.TypeInt,
+			Description: "Overlay connectivity ID for this Segment",
+			Optional:    true,
+			Computed:    true,
 		},
 		"subnet": {
 			Type:        schema.TypeList,
@@ -266,9 +273,11 @@ func getPolicyDhcpOptions121(opts []interface{}) model.DhcpOption121 {
 	var routes []model.ClasslessStaticRoute
 	for _, opt121 := range opts {
 		data := opt121.(map[string]interface{})
+		network := data["network"].(string)
+		nextHop := data["next_hop"].(string)
 		elem := model.ClasslessStaticRoute{
-			Network: data["network"].(string),
-			NextHop: data["next_hop"].(string),
+			Network: &network,
+			NextHop: &nextHop,
 		}
 		routes = append(routes, elem)
 	}
@@ -295,8 +304,9 @@ func getPolicyDhcpGenericOptions(opts []interface{}) []model.GenericDhcpOption {
 	var options []model.GenericDhcpOption
 	for _, opt := range opts {
 		data := opt.(map[string]interface{})
+		code := int64(data["code"].(int))
 		elem := model.GenericDhcpOption{
-			Code:   int64(data["code"].(int)),
+			Code:   &code,
 			Values: interface2StringList(data["values"].([]interface{})),
 		}
 		options = append(options, elem)
@@ -526,7 +536,7 @@ func policySegmentResourceToStruct(d *schema.ResourceData, isVlan bool) (model.S
 	} else {
 		// overlay specific fields
 		connectivityPath := d.Get("connectivity_path").(string)
-		overlayID, exists := d.GetOkExists("overlay_id")
+		overlayID, exists := d.GetOk("overlay_id")
 		if exists {
 			overlayID64 := int64(overlayID.(int))
 			obj.OverlayId = &overlayID64
@@ -577,9 +587,19 @@ func policySegmentResourceToStruct(d *schema.ResourceData, isVlan bool) (model.S
 		}
 		advConfigStruct := model.SegmentAdvancedConfig{
 			AddressPoolPaths: poolPaths,
-			Connectivity:     &connectivity,
 			Hybrid:           &hybrid,
 			LocalEgress:      &egress,
+		}
+
+		if connectivity != "" {
+			advConfigStruct.Connectivity = &connectivity
+		}
+
+		if nsxVersionHigherOrEqual("3.0.0") {
+			teamingPolicy := advConfigMap["uplink_teaming_policy"].(string)
+			if teamingPolicy != "" {
+				advConfigStruct.UplinkTeamingPolicyName = &teamingPolicy
+			}
 		}
 		obj.AdvancedConfig = &advConfigStruct
 	}
@@ -659,14 +679,23 @@ func nsxtPolicySegmentRead(d *schema.ResourceData, m interface{}, isVlan bool) e
 		advConfig["connectivity"] = obj.AdvancedConfig.Connectivity
 		advConfig["hybrid"] = obj.AdvancedConfig.Hybrid
 		advConfig["local_egress"] = obj.AdvancedConfig.LocalEgress
-		d.Set("advanced_config", advConfig)
+		if obj.AdvancedConfig.UplinkTeamingPolicyName != nil {
+			advConfig["uplink_teaming_policy"] = *obj.AdvancedConfig.UplinkTeamingPolicyName
+		}
+		// This is a list with 1 element
+		var advConfigList []map[string]interface{}
+		advConfigList = append(advConfigList, advConfig)
+		d.Set("advanced_config", advConfigList)
 	}
 
 	if obj.L2Extension != nil {
 		l2Ext := make(map[string]interface{})
 		l2Ext["l2vpn_paths"] = obj.L2Extension.L2vpnPaths
 		l2Ext["tunnel_id"] = obj.L2Extension.TunnelId
-		d.Set("l2_extension", l2Ext)
+		// This is a list with 1 element
+		var l2ExtList []map[string]interface{}
+		l2ExtList = append(l2ExtList, l2Ext)
+		d.Set("l2_extension", l2ExtList)
 	}
 
 	var subnetSegments []interface{}
@@ -740,8 +769,40 @@ func nsxtPolicySegmentDelete(d *schema.ResourceData, m interface{}) error {
 
 	connector := getPolicyConnector(m)
 	client := infra.NewDefaultSegmentsClient(connector)
+	portsClient := segments.NewDefaultPortsClient(connector)
 
-	err := client.Delete(id)
+	// During buld destroy, VMs might be destroyed before segments, but
+	// VIF release is not yet propagated to NSX. NSX will reply with
+	// InvalidRequest on attempted delete if ports are present on the
+	// segment. The code below waits till possible ports are deleted.
+	pendingStates := []string{"pending"}
+	targetStates := []string{"ok", "error"}
+	stateConf := &resource.StateChangeConf{
+		Pending: pendingStates,
+		Target:  targetStates,
+		Refresh: func() (interface{}, string, error) {
+			ports, err := portsClient.List(id, nil, nil, nil, nil, nil, nil)
+			if err != nil {
+				return ports, "error", logAPIError("Error listing segment ports", err)
+			}
+
+			log.Printf("[DEBUG] Current number of ports on segment %s is %d", id, len(ports.Results))
+
+			if len(ports.Results) > 0 {
+				return ports, "pending", nil
+			}
+			return ports, "ok", nil
+
+		},
+		Timeout:    d.Timeout(schema.TimeoutDelete),
+		MinTimeout: 1 * time.Second,
+		Delay:      1 * time.Second,
+	}
+	_, err := stateConf.WaitForState()
+	if err != nil {
+		return fmt.Errorf("Failed to get port information for segment %s: %v", id, err)
+	}
+	err = client.Delete(id)
 	if err != nil {
 		return handleDeleteError("Segment", id, err)
 	}

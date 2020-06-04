@@ -19,13 +19,12 @@ type GatewayQosProfilesClient interface {
     // Delete QoS profile
     //
     // @param qosProfileIdParam (required)
-    // @param overrideParam Locally override the global object (optional, default to false)
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Delete(qosProfileIdParam string, overrideParam *bool) error
+	Delete(qosProfileIdParam string) error
 
     // Read gateway QoS profile
     //
@@ -58,24 +57,22 @@ type GatewayQosProfilesClient interface {
     //
     // @param qosProfileIdParam (required)
     // @param gatewayQosProfileParam (required)
-    // @param overrideParam Locally override the global object (optional, default to false)
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Patch(qosProfileIdParam string, gatewayQosProfileParam model.GatewayQosProfile, overrideParam *bool) error
+	Patch(qosProfileIdParam string, gatewayQosProfileParam model.GatewayQosProfile) error
 
     // If profile with the qos-profile-id is not already present, create a new gateway QoS profile instance. If it already exists, replace the gateway QoS profile instance with this object.
     //
     // @param qosProfileIdParam (required)
     // @param gatewayQosProfileParam (required)
-    // @param overrideParam Locally override the global object (optional, default to false)
     // @return com.vmware.nsx_policy.model.GatewayQosProfile
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Update(qosProfileIdParam string, gatewayQosProfileParam model.GatewayQosProfile, overrideParam *bool) (model.GatewayQosProfile, error)
+	Update(qosProfileIdParam string, gatewayQosProfileParam model.GatewayQosProfile) (model.GatewayQosProfile, error)
 }

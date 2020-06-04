@@ -16,17 +16,6 @@ import (
 
 type UrlReputationSeveritiesClient interface {
 
-    // Gets a URL reputation severity. The min_reputation and max_reputation specify the range of the reputations which belong to a particular severity. For instance, any reputation between 1 to 20 belongs to the severity 'High Risk'. Similary a reputation between 81 to 100 belong to the severity 'Trustworthy'.
-    //
-    // @param reputationSeverityIdParam (required)
-    // @return com.vmware.nsx_policy.model.PolicyUrlReputationSeverity
-    // @throws InvalidRequest  Bad Request, Precondition Failed
-    // @throws Unauthorized  Forbidden
-    // @throws ServiceUnavailable  Service Unavailable
-    // @throws InternalServerError  Internal Server Error
-    // @throws NotFound  Not Found
-	Get(reputationSeverityIdParam string) (model.PolicyUrlReputationSeverity, error)
-
     // Gets the list of reputation severities. This will provide all the supported severities along with their ids, min and max reputaitons. The min_reputation and max_reputation specify the range of the reputations which belong to a particular severity. For instance, any reputation between 1 to 20 belongs to the severity 'High Risk'. Similary a reputation between 81 to 100 belong to the severity 'Trustworthy'.
     //
     // @param cursorParam Opaque cursor to be used for getting next page of records (supplied by current result page) (optional)

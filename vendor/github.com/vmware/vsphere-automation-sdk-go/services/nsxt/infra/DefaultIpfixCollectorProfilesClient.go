@@ -45,12 +45,33 @@ func NewDefaultIpfixCollectorProfilesClient(connector client.Connector) *Default
 	}
 	interfaceDefinition := core.NewInterfaceDefinition(interfaceIdentifier, methodIdentifiers)
 	errorBindingMap := make(map[string]bindings.BindingType)
+	errorBindingMap[errors.AlreadyExists{}.Error()] = errors.AlreadyExistsBindingType()
+	errorBindingMap[errors.AlreadyInDesiredState{}.Error()] = errors.AlreadyInDesiredStateBindingType()
+	errorBindingMap[errors.Canceled{}.Error()] = errors.CanceledBindingType()
+	errorBindingMap[errors.ConcurrentChange{}.Error()] = errors.ConcurrentChangeBindingType()
+	errorBindingMap[errors.Error{}.Error()] = errors.ErrorBindingType()
+	errorBindingMap[errors.FeatureInUse{}.Error()] = errors.FeatureInUseBindingType()
 	errorBindingMap[errors.InternalServerError{}.Error()] = errors.InternalServerErrorBindingType()
 	errorBindingMap[errors.InvalidArgument{}.Error()] = errors.InvalidArgumentBindingType()
+	errorBindingMap[errors.InvalidElementConfiguration{}.Error()] = errors.InvalidElementConfigurationBindingType()
+	errorBindingMap[errors.InvalidElementType{}.Error()] = errors.InvalidElementTypeBindingType()
+	errorBindingMap[errors.InvalidRequest{}.Error()] = errors.InvalidRequestBindingType()
+	errorBindingMap[errors.NotFound{}.Error()] = errors.NotFoundBindingType()
+	errorBindingMap[errors.NotAllowedInCurrentState{}.Error()] = errors.NotAllowedInCurrentStateBindingType()
 	errorBindingMap[errors.OperationNotFound{}.Error()] = errors.OperationNotFoundBindingType()
-	errorBindingMap[errors.UnexpectedInput{}.Error()] = errors.UnexpectedInputBindingType()
+	errorBindingMap[errors.ResourceBusy{}.Error()] = errors.ResourceBusyBindingType()
+	errorBindingMap[errors.ResourceInUse{}.Error()] = errors.ResourceInUseBindingType()
+	errorBindingMap[errors.ResourceInaccessible{}.Error()] = errors.ResourceInaccessibleBindingType()
 	errorBindingMap[errors.ServiceUnavailable{}.Error()] = errors.ServiceUnavailableBindingType()
 	errorBindingMap[errors.TimedOut{}.Error()] = errors.TimedOutBindingType()
+	errorBindingMap[errors.UnableToAllocateResource{}.Error()] = errors.UnableToAllocateResourceBindingType()
+	errorBindingMap[errors.Unauthenticated{}.Error()] = errors.UnauthenticatedBindingType()
+	errorBindingMap[errors.Unauthorized{}.Error()] = errors.UnauthorizedBindingType()
+	errorBindingMap[errors.UnexpectedInput{}.Error()] = errors.UnexpectedInputBindingType()
+	errorBindingMap[errors.Unsupported{}.Error()] = errors.UnsupportedBindingType()
+	errorBindingMap[errors.UnverifiedPeer{}.Error()] = errors.UnverifiedPeerBindingType()
+
+
 	iIface := DefaultIpfixCollectorProfilesClient{interfaceName: interfaceName, methodIdentifiers: methodIdentifiers, interfaceDefinition: interfaceDefinition, errorBindingMap: errorBindingMap, interfaceIdentifier: interfaceIdentifier, connector: connector}
 	iIface.methodNameToDefMap = make(map[string]*core.MethodDefinition)
 	iIface.methodNameToDefMap["delete"] = iIface.deleteMethodDefinition()
@@ -61,12 +82,11 @@ func NewDefaultIpfixCollectorProfilesClient(connector client.Connector) *Default
 	return &iIface
 }
 
-func (iIface *DefaultIpfixCollectorProfilesClient) Delete(ipfixCollectorProfileIdParam string, overrideParam *bool) error {
+func (iIface *DefaultIpfixCollectorProfilesClient) Delete(ipfixCollectorProfileIdParam string) error {
 	typeConverter := iIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(iIface.interfaceIdentifier, "delete")
 	sv := bindings.NewStructValueBuilder(ipfixCollectorProfilesDeleteInputType(), typeConverter)
 	sv.AddStructField("IpfixCollectorProfileId", ipfixCollectorProfileIdParam)
-	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
@@ -157,13 +177,12 @@ func (iIface *DefaultIpfixCollectorProfilesClient) List(cursorParam *string, inc
 	}
 }
 
-func (iIface *DefaultIpfixCollectorProfilesClient) Patch(ipfixCollectorProfileIdParam string, iPFIXCollectorProfileParam model.IPFIXCollectorProfile, overrideParam *bool) error {
+func (iIface *DefaultIpfixCollectorProfilesClient) Patch(ipfixCollectorProfileIdParam string, iPFIXCollectorProfileParam model.IPFIXCollectorProfile) error {
 	typeConverter := iIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(iIface.interfaceIdentifier, "patch")
 	sv := bindings.NewStructValueBuilder(ipfixCollectorProfilesPatchInputType(), typeConverter)
 	sv.AddStructField("IpfixCollectorProfileId", ipfixCollectorProfileIdParam)
 	sv.AddStructField("IPFIXCollectorProfile", iPFIXCollectorProfileParam)
-	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
@@ -185,13 +204,12 @@ func (iIface *DefaultIpfixCollectorProfilesClient) Patch(ipfixCollectorProfileId
 	}
 }
 
-func (iIface *DefaultIpfixCollectorProfilesClient) Update(ipfixCollectorProfileIdParam string, iPFIXCollectorProfileParam model.IPFIXCollectorProfile, overrideParam *bool) (model.IPFIXCollectorProfile, error) {
+func (iIface *DefaultIpfixCollectorProfilesClient) Update(ipfixCollectorProfileIdParam string, iPFIXCollectorProfileParam model.IPFIXCollectorProfile) (model.IPFIXCollectorProfile, error) {
 	typeConverter := iIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(iIface.interfaceIdentifier, "update")
 	sv := bindings.NewStructValueBuilder(ipfixCollectorProfilesUpdateInputType(), typeConverter)
 	sv.AddStructField("IpfixCollectorProfileId", ipfixCollectorProfileIdParam)
 	sv.AddStructField("IPFIXCollectorProfile", iPFIXCollectorProfileParam)
-	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		var emptyOutput model.IPFIXCollectorProfile

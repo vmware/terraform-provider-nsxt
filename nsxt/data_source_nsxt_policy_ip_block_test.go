@@ -56,7 +56,7 @@ func testAccDataSourceNsxtPolicyIPBlockCreate(name string) error {
 	obj := model.IpAddressBlock{
 		Description: &description,
 		DisplayName: &displayName,
-		Cidr:        cidr,
+		Cidr:        &cidr,
 	}
 
 	// Generate a random ID for the resource

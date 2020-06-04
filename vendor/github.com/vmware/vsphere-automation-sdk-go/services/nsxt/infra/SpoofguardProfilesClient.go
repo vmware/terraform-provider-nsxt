@@ -19,13 +19,12 @@ type SpoofguardProfilesClient interface {
     // API will delete SpoofGuard profile with the given id.
     //
     // @param spoofguardProfileIdParam SpoofGuard profile id (required)
-    // @param overrideParam Locally override the global object (optional, default to false)
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Delete(spoofguardProfileIdParam string, overrideParam *bool) error
+	Delete(spoofguardProfileIdParam string) error
 
     // API will return details of the SpoofGuard profile with given id. If the profile does not exist, it will return 404.
     //
@@ -58,24 +57,22 @@ type SpoofguardProfilesClient interface {
     //
     // @param spoofguardProfileIdParam SpoofGuard profile id (required)
     // @param spoofGuardProfileParam (required)
-    // @param overrideParam Locally override the global object (optional, default to false)
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Patch(spoofguardProfileIdParam string, spoofGuardProfileParam model.SpoofGuardProfile, overrideParam *bool) error
+	Patch(spoofguardProfileIdParam string, spoofGuardProfileParam model.SpoofGuardProfile) error
 
     // API will create or replace SpoofGuard profile.
     //
     // @param spoofguardProfileIdParam SpoofGuard profile id (required)
     // @param spoofGuardProfileParam (required)
-    // @param overrideParam Locally override the global object (optional, default to false)
     // @return com.vmware.nsx_policy.model.SpoofGuardProfile
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Update(spoofguardProfileIdParam string, spoofGuardProfileParam model.SpoofGuardProfile, overrideParam *bool) (model.SpoofGuardProfile, error)
+	Update(spoofguardProfileIdParam string, spoofGuardProfileParam model.SpoofGuardProfile) (model.SpoofGuardProfile, error)
 }

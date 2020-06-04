@@ -48,6 +48,8 @@ func sessionTimerProfileBindingsDeleteRestMetadata() protocol.OperationRestMetad
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["tier0_id"] = bindings.NewStringType()
 	fields["locale_services_id"] = bindings.NewStringType()
 	fields["session_timer_profile_binding_id"] = bindings.NewStringType()
@@ -72,14 +74,18 @@ func sessionTimerProfileBindingsDeleteRestMetadata() protocol.OperationRestMetad
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"",
 		"DELETE",
 		"/policy/api/v1/infra/tier-0s/{tier0Id}/locale-services/{localeServicesId}/session-timer-profile-bindings/{sessionTimerProfileBindingId}",
+		"",
 		resultHeaders,
 		204,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func sessionTimerProfileBindingsGetInputType() bindings.StructType {
@@ -106,6 +112,8 @@ func sessionTimerProfileBindingsGetRestMetadata() protocol.OperationRestMetadata
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["tier0_id"] = bindings.NewStringType()
 	fields["locale_services_id"] = bindings.NewStringType()
 	fields["session_timer_profile_binding_id"] = bindings.NewStringType()
@@ -130,14 +138,18 @@ func sessionTimerProfileBindingsGetRestMetadata() protocol.OperationRestMetadata
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"",
 		"GET",
 		"/policy/api/v1/infra/tier-0s/{tier0Id}/locale-services/{localeServicesId}/session-timer-profile-bindings/{sessionTimerProfileBindingId}",
+		"",
 		resultHeaders,
 		200,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func sessionTimerProfileBindingsPatchInputType() bindings.StructType {
@@ -166,6 +178,8 @@ func sessionTimerProfileBindingsPatchRestMetadata() protocol.OperationRestMetada
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["tier0_id"] = bindings.NewStringType()
 	fields["locale_services_id"] = bindings.NewStringType()
 	fields["session_timer_profile_binding_id"] = bindings.NewStringType()
@@ -193,14 +207,18 @@ func sessionTimerProfileBindingsPatchRestMetadata() protocol.OperationRestMetada
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"session_timer_profile_binding_map",
 		"PATCH",
 		"/policy/api/v1/infra/tier-0s/{tier0Id}/locale-services/{localeServicesId}/session-timer-profile-bindings/{sessionTimerProfileBindingId}",
+		"",
 		resultHeaders,
 		204,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func sessionTimerProfileBindingsUpdateInputType() bindings.StructType {
@@ -229,6 +247,8 @@ func sessionTimerProfileBindingsUpdateRestMetadata() protocol.OperationRestMetad
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["tier0_id"] = bindings.NewStringType()
 	fields["locale_services_id"] = bindings.NewStringType()
 	fields["session_timer_profile_binding_id"] = bindings.NewStringType()
@@ -256,14 +276,18 @@ func sessionTimerProfileBindingsUpdateRestMetadata() protocol.OperationRestMetad
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"session_timer_profile_binding_map",
 		"PUT",
 		"/policy/api/v1/infra/tier-0s/{tier0Id}/locale-services/{localeServicesId}/session-timer-profile-bindings/{sessionTimerProfileBindingId}",
+		"",
 		resultHeaders,
 		200,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 

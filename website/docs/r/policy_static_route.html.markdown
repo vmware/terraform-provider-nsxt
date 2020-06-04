@@ -14,7 +14,7 @@ This resource provides a method for the management of a Static Route.
 ```hcl
 resource "nsxt_policy_static_route" "route1" {
   display_name = "sroute"
-  gateway_path = "${nsxt_policy_tier0_gateway.tier0_gw.path}"
+  gateway_path = nsxt_policy_tier0_gateway.tier0_gw.path
   network      = "13.1.1.0/24"
 
   next_hop {

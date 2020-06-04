@@ -69,6 +69,14 @@ func resourceNsxtPolicyTier0GatewayInterface() *schema.Resource {
 				Computed:    true,
 			},
 			"urpf_mode": getGatewayInterfaceUrpfModeSchema(),
+			"ip_addresses": {
+				Type:        schema.TypeList,
+				Description: "Ip addresses",
+				Computed:    true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
 		},
 	}
 }
@@ -167,7 +175,7 @@ func resourceNsxtPolicyTier0GatewayInterfaceCreate(d *schema.ResourceData, m int
 
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating Tier0 interface with ID %s", id)
-	err = client.Patch(tier0ID, localeServiceID, id, obj, nil)
+	err = client.Patch(tier0ID, localeServiceID, id, obj)
 	if err != nil {
 		return handleCreateError("Tier0 Interface", id, err)
 	}
@@ -224,11 +232,14 @@ func resourceNsxtPolicyTier0GatewayInterfaceRead(d *schema.ResourceData, m inter
 
 	if obj.Subnets != nil {
 		var subnetList []string
+		var ipList []string
 		for _, subnet := range obj.Subnets {
-			cidr := fmt.Sprintf("%s/%d", subnet.IpAddresses[0], subnet.PrefixLen)
+			cidr := fmt.Sprintf("%s/%d", subnet.IpAddresses[0], *subnet.PrefixLen)
 			subnetList = append(subnetList, cidr)
+			ipList = append(ipList, subnet.IpAddresses[0])
 		}
 		d.Set("subnets", subnetList)
+		d.Set("ip_addresses", ipList)
 	}
 
 	if obj.UrpfMode != nil {
@@ -249,8 +260,8 @@ func resourceNsxtPolicyTier0GatewayInterfaceUpdate(d *schema.ResourceData, m int
 	tier0Path := d.Get("gateway_path").(string)
 	localeServiceID := d.Get("locale_service_id").(string)
 	tier0ID := getPolicyIDFromPath(tier0Path)
-	if id == "" || tier0ID == "" {
-		return fmt.Errorf("Error obtaining Tier0 id")
+	if id == "" || tier0ID == "" || localeServiceID == "" {
+		return fmt.Errorf("Error obtaining Tier0 id or Locale Service id")
 	}
 
 	displayName := d.Get("display_name").(string)
@@ -290,7 +301,7 @@ func resourceNsxtPolicyTier0GatewayInterfaceUpdate(d *schema.ResourceData, m int
 
 	gatewayInterfaceVersionDepenantSet(d, &obj)
 
-	_, err := client.Update(tier0ID, localeServiceID, id, obj, nil)
+	_, err := client.Update(tier0ID, localeServiceID, id, obj)
 	if err != nil {
 		return handleUpdateError("Tier0 Interface", id, err)
 	}
@@ -305,11 +316,12 @@ func resourceNsxtPolicyTier0GatewayInterfaceDelete(d *schema.ResourceData, m int
 	id := d.Id()
 	tier0Path := d.Get("gateway_path").(string)
 	tier0ID := getPolicyIDFromPath(tier0Path)
-	if id == "" || tier0ID == "" {
-		return fmt.Errorf("Error obtaining Tier0 Interface id")
+	localeServiceID := d.Get("locale_service_id").(string)
+	if id == "" || tier0ID == "" || localeServiceID == "" {
+		return fmt.Errorf("Error obtaining Tier0 id or Locale Service id")
 	}
 
-	err := client.Delete(tier0ID, defaultPolicyLocaleServiceID, id, nil)
+	err := client.Delete(tier0ID, localeServiceID, id)
 	if err != nil {
 		return handleDeleteError("Tier0 Interface", id, err)
 	}

@@ -28,7 +28,9 @@ func sitesDeleteInputType() bindings.StructType {
 	fields := make(map[string]bindings.BindingType)
 	fieldNameMap := make(map[string]string)
 	fields["site_id"] = bindings.NewStringType()
+	fields["force"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["site_id"] = "SiteId"
+	fieldNameMap["force"] = "Force"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -44,11 +46,17 @@ func sitesDeleteRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["site_id"] = bindings.NewStringType()
+	fields["force"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["site_id"] = "SiteId"
+	fieldNameMap["force"] = "Force"
+	paramsTypeMap["force"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["site_id"] = bindings.NewStringType()
 	paramsTypeMap["siteId"] = bindings.NewStringType()
 	pathParams["site_id"] = "siteId"
+	queryParams["force"] = "force"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -58,14 +66,18 @@ func sitesDeleteRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"",
 		"DELETE",
 		"/policy/api/v1/infra/sites/{siteId}",
+		"",
 		resultHeaders,
 		204,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func sitesGetInputType() bindings.StructType {
@@ -88,6 +100,8 @@ func sitesGetRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["site_id"] = bindings.NewStringType()
 	fieldNameMap["site_id"] = "SiteId"
 	paramsTypeMap["site_id"] = bindings.NewStringType()
@@ -102,14 +116,18 @@ func sitesGetRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"",
 		"GET",
 		"/policy/api/v1/infra/sites/{siteId}",
+		"",
 		resultHeaders,
 		200,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func sitesListInputType() bindings.StructType {
@@ -142,6 +160,8 @@ func sitesListRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
 	fields["include_mark_for_delete_objects"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fields["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
@@ -175,14 +195,18 @@ func sitesListRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"",
 		"GET",
 		"/policy/api/v1/infra/sites",
+		"",
 		resultHeaders,
 		200,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func sitesPatchInputType() bindings.StructType {
@@ -207,6 +231,8 @@ func sitesPatchRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["site_id"] = bindings.NewStringType()
 	fields["site"] = bindings.NewReferenceType(model.SiteBindingType)
 	fieldNameMap["site_id"] = "SiteId"
@@ -224,14 +250,18 @@ func sitesPatchRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"site",
 		"PATCH",
 		"/policy/api/v1/infra/sites/{siteId}",
+		"",
 		resultHeaders,
 		204,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func sitesUpdateInputType() bindings.StructType {
@@ -256,6 +286,8 @@ func sitesUpdateRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["site_id"] = bindings.NewStringType()
 	fields["site"] = bindings.NewReferenceType(model.SiteBindingType)
 	fieldNameMap["site_id"] = "SiteId"
@@ -273,14 +305,18 @@ func sitesUpdateRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"site",
 		"PUT",
 		"/policy/api/v1/infra/sites/{siteId}",
+		"",
 		resultHeaders,
 		200,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 

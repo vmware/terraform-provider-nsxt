@@ -1,5 +1,5 @@
 //TODO refactor this class to share code with jsonrpc connector
-/* Copyright © 2019 VMware, Inc. All Rights Reserved.
+/* Copyright © 2019, 2020 VMware, Inc. All Rights Reserved.
    SPDX-License-Identifier: BSD-2-Clause */
 
 package client
@@ -18,23 +18,41 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/lib"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/log"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/security"
 )
 
 type RestConnector struct {
-	url                      string
-	httpClient               http.Client
-	securityContext          core.SecurityContext
-	appContext               *core.ApplicationContext
-	connectionMetadata       map[string]interface{}
-	enableDefaultContentType bool
+	url                          string
+	httpClient                   http.Client
+	securityContext              core.SecurityContext
+	appContext                   *core.ApplicationContext
+	connectionMetadata           map[string]interface{}
+	enableDefaultContentType     bool
+	securityContextSerializerMap map[string]rest.SecurityContextSerializer
+	requestProcessors            []rest.RequestProcessor
+	statusCode                   int
 }
 
 func NewRestConnector(url string, client http.Client) *RestConnector {
-	return &RestConnector{url: url, httpClient: client, enableDefaultContentType: true}
+	var secCtxSerializerMap = make(map[string]rest.SecurityContextSerializer)
+	secCtxSerializerMap[security.USER_PASSWORD_SCHEME_ID] = rest.NewUserPwdSecContextSerializer()
+	secCtxSerializerMap[security.SESSION_SCHEME_ID] = rest.NewSessionSecContextSerializer()
+	secCtxSerializerMap[security.OAUTH_SCHEME_ID] = rest.NewOauthSecContextSerializer()
+	return &RestConnector{
+		url:                          url,
+		httpClient:                   client,
+		enableDefaultContentType:     true,
+		securityContextSerializerMap: secCtxSerializerMap,
+		requestProcessors:            []rest.RequestProcessor{},
+	}
 }
 
 func (j *RestConnector) ApplicationContext() *core.ApplicationContext {
 	return j.appContext
+}
+
+func (j *RestConnector) StatusCode() int {
+	return j.statusCode
 }
 
 func (j *RestConnector) SetApplicationContext(ctx *core.ApplicationContext) {
@@ -60,6 +78,22 @@ func (j *RestConnector) ConnectionMetadata() map[string]interface{} {
 // If enableDefaultContentType is True then Header[Content-Type] gets overwritten to value 'application/json'
 func (j *RestConnector) SetEnableDefaultContentType(enableDefaultContentType bool) {
 	j.enableDefaultContentType = enableDefaultContentType
+}
+
+func (j *RestConnector) SetSecCtxSerializer(schemeID string, serializer rest.SecurityContextSerializer) {
+	j.securityContextSerializerMap[schemeID] = serializer
+}
+
+func (j *RestConnector) SecurityContextSerializerMap() map[string]rest.SecurityContextSerializer {
+	return j.securityContextSerializerMap
+}
+
+func (j *RestConnector) AddRequestProcessor(processor rest.RequestProcessor) {
+	j.requestProcessors = append(j.requestProcessors, processor)
+}
+
+func (j *RestConnector) RequestProcessors() []rest.RequestProcessor {
+	return j.requestProcessors
 }
 
 func (j *RestConnector) NewExecutionContext() *core.ExecutionContext {
@@ -92,8 +126,10 @@ func (j *RestConnector) buildHTTPRequest(serializedRequest *rest.Request,
 	if err != nil {
 		return nil, err
 	}
-	for k, v := range serializedRequest.InputHeaders() {
-		req.Header.Set(k, v)
+	for k, vlist := range serializedRequest.InputHeaders() {
+		for _, v := range vlist {
+			req.Header.Set(k, v)
+		}
 	}
 	if _, ok := req.Header[lib.HTTP_CONTENT_TYPE_HEADER]; !ok && j.enableDefaultContentType {
 		req.Header.Set(lib.HTTP_CONTENT_TYPE_HEADER, lib.JSON_CONTENT_TYPE)
@@ -147,8 +183,32 @@ func (j *RestConnector) Invoke(serviceID string, operationID string,
 		return core.NewMethodResult(nil, errVal)
 	}
 
+	securityCtx := ctx.SecurityContext()
+	var secCtxSerializer rest.SecurityContextSerializer
+	if securityCtx != nil {
+		// Get schemeID of the securityContext
+		schemeID, err := rest.GetSecurityCtxStrValue(securityCtx, security.AUTHENTICATION_SCHEME_ID)
+		if err != nil {
+			log.Error(err)
+			err := l10n.NewRuntimeErrorNoParam("vapi.protocol.client.request.error")
+			errVal := bindings.CreateErrorValueFromMessages(bindings.INVALID_REQUEST_ERROR_DEF, []error{err})
+			return core.NewMethodResult(nil, errVal)
+		}
+
+		if schemeID != nil {
+			log.Debug("SecurityContext schemeID is ", schemeID)
+			// Find the approprate SecurityContextSerializer based on the schemeID
+			if serializer, ok := j.securityContextSerializerMap[*schemeID]; ok {
+				secCtxSerializer = serializer
+			} else {
+				log.Debug("No appropriate SecurityContextSerializer for schemeID %s. HTTP headers will not be added to request", schemeID)
+			}
+		}
+	}
+
 	// Serialize urlPath, inputHeaders and requestBody
-	serializedRequest, err := rest.SerializeRequests(inputStructValue, ctx, restMetadata)
+	serializedRequest, err := rest.SerializeRequestsWithSecCtxSerializers(
+		inputStructValue, ctx, restMetadata, secCtxSerializer)
 	if err != nil {
 		err := l10n.NewRuntimeError("vapi.data.serializers.json.marshall.error",
 			map[string]string{"errorMessage": err.Error()})
@@ -157,6 +217,18 @@ func (j *RestConnector) Invoke(serviceID string, operationID string,
 	}
 
 	req, err := j.buildHTTPRequest(serializedRequest, ctx, restMetadata)
+
+	// Allow client to access the req object before sending the http request
+	for _, preProcessor := range j.requestProcessors {
+		err := preProcessor.Process(req)
+		if err != nil {
+			log.Debug(err)
+			err := l10n.NewRuntimeErrorNoParam("vapi.protocol.client.request.error")
+			errVal := bindings.CreateErrorValueFromMessages(bindings.INVALID_REQUEST_ERROR_DEF, []error{err})
+			return core.NewMethodResult(nil, errVal)
+		}
+	}
+
 	response, err := j.httpClient.Do(req)
 	if err != nil {
 		errString := err.Error()
@@ -187,7 +259,12 @@ func (j *RestConnector) Invoke(serviceID string, operationID string,
 		errVal := bindings.CreateErrorValueFromMessages(bindings.INTERNAL_SERVER_ERROR_DEF, []error{err})
 		return core.NewMethodResult(nil, errVal)
 	}
-	methodResult, err := rest.DeserializeResponse(response.StatusCode, string(resp))
+
+	// assign status code
+	j.statusCode = response.StatusCode
+
+	respHeader := response.Header
+	methodResult, err := rest.DeserializeResponse(response.StatusCode, respHeader, string(resp), restMetadata)
 	if err != nil {
 		err := l10n.NewRuntimeErrorNoParam("vapi.protocol.client.response.unmarshall.error")
 		// TODO create an appropriate binding error for this

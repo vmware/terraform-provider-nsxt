@@ -45,12 +45,33 @@ func NewDefaultFloodProtectionProfilesClient(connector client.Connector) *Defaul
 	}
 	interfaceDefinition := core.NewInterfaceDefinition(interfaceIdentifier, methodIdentifiers)
 	errorBindingMap := make(map[string]bindings.BindingType)
+	errorBindingMap[errors.AlreadyExists{}.Error()] = errors.AlreadyExistsBindingType()
+	errorBindingMap[errors.AlreadyInDesiredState{}.Error()] = errors.AlreadyInDesiredStateBindingType()
+	errorBindingMap[errors.Canceled{}.Error()] = errors.CanceledBindingType()
+	errorBindingMap[errors.ConcurrentChange{}.Error()] = errors.ConcurrentChangeBindingType()
+	errorBindingMap[errors.Error{}.Error()] = errors.ErrorBindingType()
+	errorBindingMap[errors.FeatureInUse{}.Error()] = errors.FeatureInUseBindingType()
 	errorBindingMap[errors.InternalServerError{}.Error()] = errors.InternalServerErrorBindingType()
 	errorBindingMap[errors.InvalidArgument{}.Error()] = errors.InvalidArgumentBindingType()
+	errorBindingMap[errors.InvalidElementConfiguration{}.Error()] = errors.InvalidElementConfigurationBindingType()
+	errorBindingMap[errors.InvalidElementType{}.Error()] = errors.InvalidElementTypeBindingType()
+	errorBindingMap[errors.InvalidRequest{}.Error()] = errors.InvalidRequestBindingType()
+	errorBindingMap[errors.NotFound{}.Error()] = errors.NotFoundBindingType()
+	errorBindingMap[errors.NotAllowedInCurrentState{}.Error()] = errors.NotAllowedInCurrentStateBindingType()
 	errorBindingMap[errors.OperationNotFound{}.Error()] = errors.OperationNotFoundBindingType()
-	errorBindingMap[errors.UnexpectedInput{}.Error()] = errors.UnexpectedInputBindingType()
+	errorBindingMap[errors.ResourceBusy{}.Error()] = errors.ResourceBusyBindingType()
+	errorBindingMap[errors.ResourceInUse{}.Error()] = errors.ResourceInUseBindingType()
+	errorBindingMap[errors.ResourceInaccessible{}.Error()] = errors.ResourceInaccessibleBindingType()
 	errorBindingMap[errors.ServiceUnavailable{}.Error()] = errors.ServiceUnavailableBindingType()
 	errorBindingMap[errors.TimedOut{}.Error()] = errors.TimedOutBindingType()
+	errorBindingMap[errors.UnableToAllocateResource{}.Error()] = errors.UnableToAllocateResourceBindingType()
+	errorBindingMap[errors.Unauthenticated{}.Error()] = errors.UnauthenticatedBindingType()
+	errorBindingMap[errors.Unauthorized{}.Error()] = errors.UnauthorizedBindingType()
+	errorBindingMap[errors.UnexpectedInput{}.Error()] = errors.UnexpectedInputBindingType()
+	errorBindingMap[errors.Unsupported{}.Error()] = errors.UnsupportedBindingType()
+	errorBindingMap[errors.UnverifiedPeer{}.Error()] = errors.UnverifiedPeerBindingType()
+
+
 	fIface := DefaultFloodProtectionProfilesClient{interfaceName: interfaceName, methodIdentifiers: methodIdentifiers, interfaceDefinition: interfaceDefinition, errorBindingMap: errorBindingMap, interfaceIdentifier: interfaceIdentifier, connector: connector}
 	fIface.methodNameToDefMap = make(map[string]*core.MethodDefinition)
 	fIface.methodNameToDefMap["delete"] = fIface.deleteMethodDefinition()
@@ -61,12 +82,11 @@ func NewDefaultFloodProtectionProfilesClient(connector client.Connector) *Defaul
 	return &fIface
 }
 
-func (fIface *DefaultFloodProtectionProfilesClient) Delete(floodProtectionProfileIdParam string, overrideParam *bool) error {
+func (fIface *DefaultFloodProtectionProfilesClient) Delete(floodProtectionProfileIdParam string) error {
 	typeConverter := fIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(fIface.interfaceIdentifier, "delete")
 	sv := bindings.NewStructValueBuilder(floodProtectionProfilesDeleteInputType(), typeConverter)
 	sv.AddStructField("FloodProtectionProfileId", floodProtectionProfileIdParam)
-	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
@@ -157,13 +177,12 @@ func (fIface *DefaultFloodProtectionProfilesClient) List(cursorParam *string, in
 	}
 }
 
-func (fIface *DefaultFloodProtectionProfilesClient) Patch(floodProtectionProfileIdParam string, floodProtectionProfileParam *data.StructValue, overrideParam *bool) error {
+func (fIface *DefaultFloodProtectionProfilesClient) Patch(floodProtectionProfileIdParam string, floodProtectionProfileParam *data.StructValue) error {
 	typeConverter := fIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(fIface.interfaceIdentifier, "patch")
 	sv := bindings.NewStructValueBuilder(floodProtectionProfilesPatchInputType(), typeConverter)
 	sv.AddStructField("FloodProtectionProfileId", floodProtectionProfileIdParam)
 	sv.AddStructField("FloodProtectionProfile", floodProtectionProfileParam)
-	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
@@ -185,13 +204,12 @@ func (fIface *DefaultFloodProtectionProfilesClient) Patch(floodProtectionProfile
 	}
 }
 
-func (fIface *DefaultFloodProtectionProfilesClient) Update(floodProtectionProfileIdParam string, floodProtectionProfileParam *data.StructValue, overrideParam *bool) (*data.StructValue, error) {
+func (fIface *DefaultFloodProtectionProfilesClient) Update(floodProtectionProfileIdParam string, floodProtectionProfileParam *data.StructValue) (*data.StructValue, error) {
 	typeConverter := fIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(fIface.interfaceIdentifier, "update")
 	sv := bindings.NewStructValueBuilder(floodProtectionProfilesUpdateInputType(), typeConverter)
 	sv.AddStructField("FloodProtectionProfileId", floodProtectionProfileIdParam)
 	sv.AddStructField("FloodProtectionProfile", floodProtectionProfileParam)
-	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		var emptyOutput *data.StructValue

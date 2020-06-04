@@ -63,6 +63,7 @@ In addition to arguments listed above, the following attributes are exported:
 * `id` - ID of the resource.
 * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
 * `path` - The NSX path of the policy resource.
+* `ip_addresses` - list of Ip Addresses picked from each subnet in `subnets` field. This attribute can serve as `source_addresses` field of `nsxt_policy_bgp_neighbor` resource.
 
 ## Importing
 

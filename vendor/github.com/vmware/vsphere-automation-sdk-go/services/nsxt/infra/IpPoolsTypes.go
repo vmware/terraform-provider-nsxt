@@ -44,6 +44,8 @@ func ipPoolsDeleteRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["ip_pool_id"] = bindings.NewStringType()
 	fieldNameMap["ip_pool_id"] = "IpPoolId"
 	paramsTypeMap["ip_pool_id"] = bindings.NewStringType()
@@ -58,14 +60,18 @@ func ipPoolsDeleteRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"",
 		"DELETE",
 		"/policy/api/v1/infra/ip-pools/{ipPoolId}",
+		"",
 		resultHeaders,
 		204,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func ipPoolsGetInputType() bindings.StructType {
@@ -88,6 +94,8 @@ func ipPoolsGetRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["ip_pool_id"] = bindings.NewStringType()
 	fieldNameMap["ip_pool_id"] = "IpPoolId"
 	paramsTypeMap["ip_pool_id"] = bindings.NewStringType()
@@ -102,14 +110,18 @@ func ipPoolsGetRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"",
 		"GET",
 		"/policy/api/v1/infra/ip-pools/{ipPoolId}",
+		"",
 		resultHeaders,
 		200,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func ipPoolsListInputType() bindings.StructType {
@@ -142,6 +154,8 @@ func ipPoolsListRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
 	fields["include_mark_for_delete_objects"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fields["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
@@ -175,14 +189,18 @@ func ipPoolsListRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"",
 		"GET",
 		"/policy/api/v1/infra/ip-pools",
+		"",
 		resultHeaders,
 		200,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func ipPoolsPatchInputType() bindings.StructType {
@@ -207,6 +225,8 @@ func ipPoolsPatchRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["ip_pool_id"] = bindings.NewStringType()
 	fields["ip_address_pool"] = bindings.NewReferenceType(model.IpAddressPoolBindingType)
 	fieldNameMap["ip_pool_id"] = "IpPoolId"
@@ -224,14 +244,18 @@ func ipPoolsPatchRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"ip_address_pool",
 		"PATCH",
 		"/policy/api/v1/infra/ip-pools/{ipPoolId}",
+		"",
 		resultHeaders,
 		204,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func ipPoolsUpdateInputType() bindings.StructType {
@@ -256,6 +280,8 @@ func ipPoolsUpdateRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["ip_pool_id"] = bindings.NewStringType()
 	fields["ip_address_pool"] = bindings.NewReferenceType(model.IpAddressPoolBindingType)
 	fieldNameMap["ip_pool_id"] = "IpPoolId"
@@ -273,14 +299,18 @@ func ipPoolsUpdateRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"ip_address_pool",
 		"PUT",
 		"/policy/api/v1/infra/ip-pools/{ipPoolId}",
+		"",
 		resultHeaders,
 		200,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 

@@ -7,8 +7,10 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/segments"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+	"log"
 	"time"
 )
 
@@ -29,6 +31,11 @@ func dataSourceNsxtPolicySegmentRealization() *schema.Resource {
 				Description: "The state of the realized resource on hypervisors",
 				Computed:    true,
 			},
+			"network_name": {
+				Type:        schema.TypeString,
+				Description: "Network name on the hypervisors",
+				Computed:    true,
+			},
 		},
 	}
 }
@@ -36,6 +43,7 @@ func dataSourceNsxtPolicySegmentRealization() *schema.Resource {
 func dataSourceNsxtPolicySegmentRealizationRead(d *schema.ResourceData, m interface{}) error {
 	// Read the realization info by the path, and wait till it is valid
 	connector := getPolicyConnector(m)
+	commonProviderConfig := getCommonProviderConfig(m)
 
 	// Get the realization info of this resource
 	path := d.Get("path").(string)
@@ -48,7 +56,7 @@ func dataSourceNsxtPolicySegmentRealizationRead(d *schema.ResourceData, m interf
 
 	// verifying segment realization on hypervisor
 	segmentID := getPolicyIDFromPath(path)
-	enforcementPointPath := getPolicyEnforcementPointPath()
+	enforcementPointPath := getPolicyEnforcementPointPath(m)
 	client := segments.NewDefaultStateClient(connector)
 	pendingStates := []string{model.SegmentConfigurationState_STATE_PENDING,
 		model.SegmentConfigurationState_STATE_IN_PROGRESS,
@@ -58,7 +66,7 @@ func dataSourceNsxtPolicySegmentRealizationRead(d *schema.ResourceData, m interf
 		model.SegmentConfigurationState_STATE_FAILED,
 		model.SegmentConfigurationState_STATE_ERROR,
 		model.SegmentConfigurationState_STATE_ORPHANED}
-	if toleratePartialSuccess {
+	if commonProviderConfig.ToleratePartialSuccess {
 		targetStates = append(targetStates, model.SegmentConfigurationState_STATE_PARTIAL_SUCCESS)
 	}
 	stateConf := &resource.StateChangeConf{
@@ -69,6 +77,8 @@ func dataSourceNsxtPolicySegmentRealizationRead(d *schema.ResourceData, m interf
 			if err != nil {
 				return state, model.SegmentConfigurationState_STATE_ERROR, logAPIError("Error while waiting for realization of segment", err)
 			}
+
+			log.Printf("[DEBUG] Current realization state for segment %s is %s", segmentID, *state.State)
 
 			d.Set("state", state.State)
 			return state, *state.State, nil
@@ -81,6 +91,21 @@ func dataSourceNsxtPolicySegmentRealizationRead(d *schema.ResourceData, m interf
 	if err != nil {
 		return fmt.Errorf("Failed to get realization information for %s: %v", path, err)
 	}
+
+	// In some cases success state is returned a moment before VC actually sees the network
+	// Adding a short sleep here prevents vsphere provider from erroring out
+	time.Sleep(1 * time.Second)
+
+	// We need to fetch network name to use in vpshere provider. However, state API does not
+	// return it in details yet. For now, we'll use segment display name, since its always
+	// translates to network name
+	segClient := infra.NewDefaultSegmentsClient(connector)
+	obj, err := segClient.Get(segmentID)
+	if err != nil {
+		return handleReadError(d, "Segment", segmentID, err)
+	}
+
+	d.Set("network_name", obj.DisplayName)
 
 	return nil
 }

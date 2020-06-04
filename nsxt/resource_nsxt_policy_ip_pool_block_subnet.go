@@ -64,16 +64,17 @@ func resourceNsxtPolicyIPPoolBlockSubnetSchemaToStructValue(d *schema.ResourceDa
 	blockPath := d.Get("block_path").(string)
 	autoAssignGateway := d.Get("auto_assign_gateway").(bool)
 	size := d.Get("size").(int)
+	size64 := int64(size)
 	tags := getPolicyTagsFromSchema(d)
 
 	obj := model.IpAddressPoolBlockSubnet{
 		DisplayName:       &displayName,
 		Description:       &description,
 		Tags:              tags,
-		Size:              int64(size),
+		Size:              &size64,
 		AutoAssignGateway: &autoAssignGateway,
 		ResourceType:      "IpAddressPoolBlockSubnet",
-		IpBlockPath:       blockPath,
+		IpBlockPath:       &blockPath,
 		Id:                &id,
 	}
 
@@ -122,7 +123,7 @@ func resourceNsxtPolicyIPPoolBlockSubnetRead(d *schema.ResourceData, m interface
 	d.Set("path", blockSubnet.Path)
 	d.Set("revision", blockSubnet.Revision)
 	d.Set("auto_assign_gateway", blockSubnet.AutoAssignGateway)
-	d.Set("size", int(blockSubnet.Size))
+	d.Set("size", blockSubnet.Size)
 	d.Set("pool_path", poolPath)
 	d.Set("block_path", blockSubnet.IpBlockPath)
 
@@ -228,7 +229,7 @@ func resourceNsxtPolicyIPPoolBlockSubnetVerifyDelete(d *schema.ResourceData, con
 		Target:  targetStates,
 		Refresh: func() (interface{}, string, error) {
 
-			_, realizationError := client.List(path)
+			_, realizationError := client.List(path, &policySite)
 			if realizationError != nil {
 				if isNotFoundError(realizationError) {
 					return 0, "DELETED", nil

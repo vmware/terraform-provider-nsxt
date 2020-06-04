@@ -29,10 +29,8 @@ func contextProfilesDeleteInputType() bindings.StructType {
 	fieldNameMap := make(map[string]string)
 	fields["context_profile_id"] = bindings.NewStringType()
 	fields["force"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["context_profile_id"] = "ContextProfileId"
 	fieldNameMap["force"] = "Force"
-	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -48,19 +46,17 @@ func contextProfilesDeleteRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["context_profile_id"] = bindings.NewStringType()
 	fields["force"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["context_profile_id"] = "ContextProfileId"
 	fieldNameMap["force"] = "Force"
-	fieldNameMap["override"] = "Override"
 	paramsTypeMap["force"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["context_profile_id"] = bindings.NewStringType()
 	paramsTypeMap["contextProfileId"] = bindings.NewStringType()
 	pathParams["context_profile_id"] = "contextProfileId"
 	queryParams["force"] = "force"
-	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -70,14 +66,18 @@ func contextProfilesDeleteRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"",
 		"DELETE",
 		"/policy/api/v1/infra/context-profiles/{contextProfileId}",
+		"",
 		resultHeaders,
 		204,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func contextProfilesGetInputType() bindings.StructType {
@@ -100,6 +100,8 @@ func contextProfilesGetRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["context_profile_id"] = bindings.NewStringType()
 	fieldNameMap["context_profile_id"] = "ContextProfileId"
 	paramsTypeMap["context_profile_id"] = bindings.NewStringType()
@@ -114,14 +116,18 @@ func contextProfilesGetRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"",
 		"GET",
 		"/policy/api/v1/infra/context-profiles/{contextProfileId}",
+		"",
 		resultHeaders,
 		200,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func contextProfilesListInputType() bindings.StructType {
@@ -154,6 +160,8 @@ func contextProfilesListRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
 	fields["include_mark_for_delete_objects"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fields["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
@@ -187,14 +195,18 @@ func contextProfilesListRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"",
 		"GET",
 		"/policy/api/v1/infra/context-profiles",
+		"",
 		resultHeaders,
 		200,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func contextProfilesPatchInputType() bindings.StructType {
@@ -202,10 +214,8 @@ func contextProfilesPatchInputType() bindings.StructType {
 	fieldNameMap := make(map[string]string)
 	fields["context_profile_id"] = bindings.NewStringType()
 	fields["policy_context_profile"] = bindings.NewReferenceType(model.PolicyContextProfileBindingType)
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["context_profile_id"] = "ContextProfileId"
 	fieldNameMap["policy_context_profile"] = "PolicyContextProfile"
-	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -221,18 +231,16 @@ func contextProfilesPatchRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["context_profile_id"] = bindings.NewStringType()
 	fields["policy_context_profile"] = bindings.NewReferenceType(model.PolicyContextProfileBindingType)
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["context_profile_id"] = "ContextProfileId"
 	fieldNameMap["policy_context_profile"] = "PolicyContextProfile"
-	fieldNameMap["override"] = "Override"
-	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["context_profile_id"] = bindings.NewStringType()
 	paramsTypeMap["policy_context_profile"] = bindings.NewReferenceType(model.PolicyContextProfileBindingType)
 	paramsTypeMap["contextProfileId"] = bindings.NewStringType()
 	pathParams["context_profile_id"] = "contextProfileId"
-	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -242,14 +250,18 @@ func contextProfilesPatchRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"policy_context_profile",
 		"PATCH",
 		"/policy/api/v1/infra/context-profiles/{contextProfileId}",
+		"",
 		resultHeaders,
 		204,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func contextProfilesUpdateInputType() bindings.StructType {
@@ -257,10 +269,8 @@ func contextProfilesUpdateInputType() bindings.StructType {
 	fieldNameMap := make(map[string]string)
 	fields["context_profile_id"] = bindings.NewStringType()
 	fields["policy_context_profile"] = bindings.NewReferenceType(model.PolicyContextProfileBindingType)
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["context_profile_id"] = "ContextProfileId"
 	fieldNameMap["policy_context_profile"] = "PolicyContextProfile"
-	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -276,18 +286,16 @@ func contextProfilesUpdateRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["context_profile_id"] = bindings.NewStringType()
 	fields["policy_context_profile"] = bindings.NewReferenceType(model.PolicyContextProfileBindingType)
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["context_profile_id"] = "ContextProfileId"
 	fieldNameMap["policy_context_profile"] = "PolicyContextProfile"
-	fieldNameMap["override"] = "Override"
-	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["context_profile_id"] = bindings.NewStringType()
 	paramsTypeMap["policy_context_profile"] = bindings.NewReferenceType(model.PolicyContextProfileBindingType)
 	paramsTypeMap["contextProfileId"] = bindings.NewStringType()
 	pathParams["context_profile_id"] = "contextProfileId"
-	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -297,14 +305,18 @@ func contextProfilesUpdateRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"policy_context_profile",
 		"PUT",
 		"/policy/api/v1/infra/context-profiles/{contextProfileId}",
+		"",
 		resultHeaders,
 		200,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 

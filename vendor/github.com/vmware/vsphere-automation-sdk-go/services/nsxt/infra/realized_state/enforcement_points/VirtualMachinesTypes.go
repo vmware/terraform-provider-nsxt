@@ -58,6 +58,8 @@ func virtualMachinesListRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["enforcement_point_name"] = bindings.NewStringType()
 	fields["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
 	fields["dsl"] = bindings.NewOptionalType(bindings.NewStringType())
@@ -100,14 +102,18 @@ func virtualMachinesListRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"",
 		"GET",
 		"/policy/api/v1/infra/realized-state/enforcement-points/{enforcementPointName}/virtual-machines",
+		"",
 		resultHeaders,
 		200,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func virtualMachinesUpdatetagsInputType() bindings.StructType {
@@ -132,6 +138,8 @@ func virtualMachinesUpdatetagsRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["enforcement_point_name"] = bindings.NewStringType()
 	fields["virtual_machine_tags_update"] = bindings.NewReferenceType(model.VirtualMachineTagsUpdateBindingType)
 	fieldNameMap["enforcement_point_name"] = "EnforcementPointName"
@@ -149,14 +157,18 @@ func virtualMachinesUpdatetagsRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"action=update_tags",
 		"virtual_machine_tags_update",
 		"POST",
 		"/policy/api/v1/infra/realized-state/enforcement-points/{enforcementPointName}/virtual-machines",
+		"",
 		resultHeaders,
 		204,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 

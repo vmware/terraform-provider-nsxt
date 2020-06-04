@@ -16,20 +16,19 @@ import (
 
 type EvpnTunnelEndpointsClient interface {
 
-    // Delete evpn tunnel endpoint Config.
+    // Delete evpn tunnel endpoint configuration.
     //
     // @param tier0IdParam tier0 id (required)
     // @param localeServicesIdParam locale services id (required)
     // @param tunnelEndpointIdParam tunnel endpoint id (required)
-    // @param overrideParam Locally override the global object (optional, default to false)
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Delete(tier0IdParam string, localeServicesIdParam string, tunnelEndpointIdParam string, overrideParam *bool) error
+	Delete(tier0IdParam string, localeServicesIdParam string, tunnelEndpointIdParam string) error
 
-    // Read evpn tunnel endpoint Config.
+    // Read evpn tunnel endpoint configuration.
     //
     // @param tier0IdParam tier0 id (required)
     // @param localeServicesIdParam locale services id (required)
@@ -42,7 +41,7 @@ type EvpnTunnelEndpointsClient interface {
     // @throws NotFound  Not Found
 	Get(tier0IdParam string, localeServicesIdParam string, tunnelEndpointIdParam string) (model.EvpnTunnelEndpointConfig, error)
 
-    // List all evpn tunnel endpoint config.
+    // List all evpn tunnel endpoint configuration.
     //
     // @param tier0IdParam (required)
     // @param localeServicesIdParam (required)
@@ -60,32 +59,30 @@ type EvpnTunnelEndpointsClient interface {
     // @throws NotFound  Not Found
 	List(tier0IdParam string, localeServicesIdParam string, cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.EvpnTunnelEndpointConfigListResult, error)
 
-    // Create a evpn tunnel endpoint config if the tunnel-endpoint-id is not already present, otherwise update the tunnel endpoint config.
+    // Create a evpn tunnel endpoint config if the tunnel-endpoint-id is not already present, otherwise update the tunnel endpoint configuration.
     //
     // @param tier0IdParam tier0 id (required)
     // @param localeServicesIdParam locale services id (required)
     // @param tunnelEndpointIdParam tunnel endpoint id (required)
     // @param evpnTunnelEndpointConfigParam (required)
-    // @param overrideParam Locally override the global object (optional, default to false)
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Patch(tier0IdParam string, localeServicesIdParam string, tunnelEndpointIdParam string, evpnTunnelEndpointConfigParam model.EvpnTunnelEndpointConfig, overrideParam *bool) error
+	Patch(tier0IdParam string, localeServicesIdParam string, tunnelEndpointIdParam string, evpnTunnelEndpointConfigParam model.EvpnTunnelEndpointConfig) error
 
-    // Create or update evpn tunnel endpoint config.
+    // Create or update evpn tunnel endpoint configuration.
     //
     // @param tier0IdParam tier0 id (required)
     // @param localeServicesIdParam locale services id (required)
     // @param tunnelEndpointIdParam tunnel endpoint id (required)
     // @param evpnTunnelEndpointConfigParam (required)
-    // @param overrideParam Locally override the global object (optional, default to false)
     // @return com.vmware.nsx_policy.model.EvpnTunnelEndpointConfig
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Update(tier0IdParam string, localeServicesIdParam string, tunnelEndpointIdParam string, evpnTunnelEndpointConfigParam model.EvpnTunnelEndpointConfig, overrideParam *bool) (model.EvpnTunnelEndpointConfig, error)
+	Update(tier0IdParam string, localeServicesIdParam string, tunnelEndpointIdParam string, evpnTunnelEndpointConfigParam model.EvpnTunnelEndpointConfig) (model.EvpnTunnelEndpointConfig, error)
 }

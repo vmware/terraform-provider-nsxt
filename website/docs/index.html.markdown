@@ -322,7 +322,7 @@ data "nsxt_policy_tier0_gateway" "t0_gateway" {
 
 #
 # Create a DHCP Profile that is used later
-#
+# Note, this resource is only in NSX 3.0.0+
 resource "nsxt_policy_dhcp_server" "tier_dhcp" {
   display_name     = "tier_dhcp"
   description      = "DHCP server servicing all 3 Segments"
@@ -345,7 +345,7 @@ resource "nsxt_policy_tier1_gateway" "t1_gateway" {
   default_rule_logging      = "false"
   enable_firewall           = "true"
   enable_standby_relocation = "false"
-  force_whitelisting        = "true"
+  force_whitelisting        = "false"
   tier0_path                = data.nsxt_policy_tier0_gateway.t0_gateway.path
   route_advertisement_types = ["TIER1_STATIC_ROUTES", "TIER1_CONNECTED"]
   pool_allocation           = "ROUTING"
@@ -389,11 +389,6 @@ resource "nsxt_policy_segment" "web" {
     }
   }
 
-  advanced_config {
-    connectivity = "OFF"
-    local_egress = "true"
-  }
-
   tag {
     scope = var.nsx_tag_scope
     tag   = var.nsx_tag
@@ -425,11 +420,6 @@ resource "nsxt_policy_segment" "app" {
     }
   }
 
-  advanced_config {
-    connectivity = "OFF"
-    local_egress = "true"
-  }
-
   tag {
     scope = var.nsx_tag_scope
     tag   = var.nsx_tag
@@ -459,11 +449,6 @@ resource "nsxt_policy_segment" "db" {
         next_hop = "1.1.1.21"
       }
     }
-  }
-
-  advanced_config {
-    connectivity = "OFF"
-    local_egress = "true"
   }
 
   tag {
@@ -759,7 +744,7 @@ data "nsxt_policy_vm" "db_vm" {
 }
 
 
-# Assigne the right tags to the VMs so that they get included in the
+# Assign the right tags to the VMs so that they get included in the
 # dynamic groups created above
 resource "nsxt_policy_vm_tags" "web_vm_tag" {
   instance_id = data.nsxt_policy_vm.web_vm.instance_id

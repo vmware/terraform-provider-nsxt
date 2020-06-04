@@ -226,7 +226,7 @@ func resourceNsxtPolicyServiceGetEntriesFromSchema(d *schema.ResourceData) ([]*d
 			Description:  &description,
 			IcmpType:     typePtr,
 			IcmpCode:     codePtr,
-			Protocol:     protocol,
+			Protocol:     &protocol,
 			ResourceType: model.ServiceEntry_RESOURCE_TYPE_ICMPTYPESERVICEENTRY,
 		}
 		dataValue, errs := converter.ConvertToVapi(serviceEntry, model.ICMPTypeServiceEntryBindingType())
@@ -257,7 +257,7 @@ func resourceNsxtPolicyServiceGetEntriesFromSchema(d *schema.ResourceData) ([]*d
 			Description:      &description,
 			DestinationPorts: destinationPorts,
 			SourcePorts:      sourcePorts,
-			L4Protocol:       l4Protocol,
+			L4Protocol:       &l4Protocol,
 			ResourceType:     model.ServiceEntry_RESOURCE_TYPE_L4PORTSETSERVICEENTRY,
 		}
 		dataValue, errs := converter.ConvertToVapi(serviceEntry, model.L4PortSetServiceEntryBindingType())
@@ -309,7 +309,7 @@ func resourceNsxtPolicyServiceGetEntriesFromSchema(d *schema.ResourceData) ([]*d
 			Id:           &id,
 			DisplayName:  &displayName,
 			Description:  &description,
-			EtherType:    etherType,
+			EtherType:    &etherType,
 			ResourceType: model.ServiceEntry_RESOURCE_TYPE_ETHERTYPESERVICEENTRY,
 		}
 		dataValue, errs := converter.ConvertToVapi(serviceEntry, model.EtherTypeServiceEntryBindingType())
@@ -336,7 +336,7 @@ func resourceNsxtPolicyServiceGetEntriesFromSchema(d *schema.ResourceData) ([]*d
 			Id:             &id,
 			DisplayName:    &displayName,
 			Description:    &description,
-			ProtocolNumber: protocolNumber,
+			ProtocolNumber: &protocolNumber,
 			ResourceType:   model.ServiceEntry_RESOURCE_TYPE_IPPROTOCOLSERVICEENTRY,
 		}
 		dataValue, errs := converter.ConvertToVapi(serviceEntry, model.IPProtocolServiceEntryBindingType())
@@ -366,7 +366,7 @@ func resourceNsxtPolicyServiceGetEntriesFromSchema(d *schema.ResourceData) ([]*d
 			Id:               &id,
 			DisplayName:      &displayName,
 			Description:      &description,
-			Alg:              alg,
+			Alg:              &alg,
 			DestinationPorts: destinationPorts,
 			SourcePorts:      sourcePorts,
 			ResourceType:     model.ServiceEntry_RESOURCE_TYPE_ALGTYPESERVICEENTRY,
@@ -476,8 +476,18 @@ func resourceNsxtPolicyServiceRead(d *schema.ResourceData, m interface{}) error 
 
 	for _, entry := range obj.ServiceEntries {
 		elem := make(map[string]interface{})
-		icmpEntry, errs := converter.ConvertToGolang(entry, model.ICMPTypeServiceEntryBindingType())
-		if errs == nil {
+		base, errs := converter.ConvertToGolang(entry, model.ServiceEntryBindingType())
+		resourceType := base.(model.ServiceEntry).ResourceType
+		if errs != nil {
+			return errs[0]
+		}
+
+		if resourceType == model.ServiceEntry_RESOURCE_TYPE_ICMPTYPESERVICEENTRY {
+			icmpEntry, errs := converter.ConvertToGolang(entry, model.ICMPTypeServiceEntryBindingType())
+			if errs != nil {
+				return errs[0]
+			}
+
 			serviceEntry := icmpEntry.(model.ICMPTypeServiceEntry)
 			elem["display_name"] = filterServiceEntryDisplayName(*serviceEntry.DisplayName, *serviceEntry.Id)
 			elem["description"] = serviceEntry.Description
@@ -493,57 +503,66 @@ func resourceNsxtPolicyServiceRead(d *schema.ResourceData, m interface{}) error 
 			}
 			elem["protocol"] = serviceEntry.Protocol
 			icmpEntriesList = append(icmpEntriesList, elem)
-		} else {
-			l4Entry, l4Errs := converter.ConvertToGolang(entry, model.L4PortSetServiceEntryBindingType())
-			if l4Errs == nil {
-				serviceEntry := l4Entry.(model.L4PortSetServiceEntry)
-				elem["display_name"] = filterServiceEntryDisplayName(*serviceEntry.DisplayName, *serviceEntry.Id)
-				elem["description"] = serviceEntry.Description
-				elem["destination_ports"] = serviceEntry.DestinationPorts
-				elem["source_ports"] = serviceEntry.SourcePorts
-				elem["protocol"] = serviceEntry.L4Protocol
-				l4EntriesList = append(l4EntriesList, elem)
-			} else {
-				etherEntry, etherErrs := converter.ConvertToGolang(entry, model.EtherTypeServiceEntryBindingType())
-				if etherErrs == nil {
-					serviceEntry := etherEntry.(model.EtherTypeServiceEntry)
-					elem["display_name"] = filterServiceEntryDisplayName(*serviceEntry.DisplayName, *serviceEntry.Id)
-					elem["description"] = serviceEntry.Description
-					elem["ether_type"] = serviceEntry.EtherType
-					etherEntriesList = append(etherEntriesList, elem)
-				} else {
-					ipProtEntry, ipProtErrs := converter.ConvertToGolang(entry, model.IPProtocolServiceEntryBindingType())
-					if ipProtErrs == nil {
-						serviceEntry := ipProtEntry.(model.IPProtocolServiceEntry)
-						elem["display_name"] = filterServiceEntryDisplayName(*serviceEntry.DisplayName, *serviceEntry.Id)
-						elem["description"] = serviceEntry.Description
-						elem["protocol"] = serviceEntry.ProtocolNumber
-						ipProtEntriesList = append(ipProtEntriesList, elem)
-					} else {
-						algEntry, algErrs := converter.ConvertToGolang(entry, model.ALGTypeServiceEntryBindingType())
-						if algErrs == nil {
-							serviceEntry := algEntry.(model.ALGTypeServiceEntry)
-							elem["display_name"] = filterServiceEntryDisplayName(*serviceEntry.DisplayName, *serviceEntry.Id)
-							elem["description"] = serviceEntry.Description
-							elem["algorithm"] = serviceEntry.Alg
-							elem["destination_port"] = serviceEntry.DestinationPorts[0]
-							elem["source_ports"] = serviceEntry.SourcePorts
-							algEntriesList = append(algEntriesList, elem)
-						} else {
-							igmpEntry, igmpErrs := converter.ConvertToGolang(entry, model.IGMPTypeServiceEntryBindingType())
-							if igmpErrs == nil {
-								serviceEntry := igmpEntry.(model.IGMPTypeServiceEntry)
-								elem["display_name"] = filterServiceEntryDisplayName(*serviceEntry.DisplayName, *serviceEntry.Id)
-								elem["description"] = serviceEntry.Description
-								igmpEntriesList = append(igmpEntriesList, elem)
-							} else {
-								// Unknown service entry type
-								return igmpErrs[0]
-							}
-						}
-					}
-				}
+		} else if resourceType == model.ServiceEntry_RESOURCE_TYPE_L4PORTSETSERVICEENTRY {
+			l4Entry, errs := converter.ConvertToGolang(entry, model.L4PortSetServiceEntryBindingType())
+			if errs != nil {
+				return errs[0]
 			}
+
+			serviceEntry := l4Entry.(model.L4PortSetServiceEntry)
+			elem["display_name"] = filterServiceEntryDisplayName(*serviceEntry.DisplayName, *serviceEntry.Id)
+			elem["description"] = serviceEntry.Description
+			elem["destination_ports"] = serviceEntry.DestinationPorts
+			elem["source_ports"] = serviceEntry.SourcePorts
+			elem["protocol"] = serviceEntry.L4Protocol
+			l4EntriesList = append(l4EntriesList, elem)
+		} else if resourceType == model.ServiceEntry_RESOURCE_TYPE_ETHERTYPESERVICEENTRY {
+			etherEntry, errs := converter.ConvertToGolang(entry, model.EtherTypeServiceEntryBindingType())
+			if errs != nil {
+				return errs[0]
+			}
+
+			serviceEntry := etherEntry.(model.EtherTypeServiceEntry)
+			elem["display_name"] = filterServiceEntryDisplayName(*serviceEntry.DisplayName, *serviceEntry.Id)
+			elem["description"] = serviceEntry.Description
+			elem["ether_type"] = serviceEntry.EtherType
+			etherEntriesList = append(etherEntriesList, elem)
+		} else if resourceType == model.ServiceEntry_RESOURCE_TYPE_IPPROTOCOLSERVICEENTRY {
+			ipProtEntry, errs := converter.ConvertToGolang(entry, model.IPProtocolServiceEntryBindingType())
+			if errs != nil {
+				return errs[0]
+			}
+
+			serviceEntry := ipProtEntry.(model.IPProtocolServiceEntry)
+			elem["display_name"] = filterServiceEntryDisplayName(*serviceEntry.DisplayName, *serviceEntry.Id)
+			elem["description"] = serviceEntry.Description
+			elem["protocol"] = serviceEntry.ProtocolNumber
+			ipProtEntriesList = append(ipProtEntriesList, elem)
+		} else if resourceType == model.ServiceEntry_RESOURCE_TYPE_ALGTYPESERVICEENTRY {
+			algEntry, errs := converter.ConvertToGolang(entry, model.ALGTypeServiceEntryBindingType())
+			if errs != nil {
+				return errs[0]
+			}
+
+			serviceEntry := algEntry.(model.ALGTypeServiceEntry)
+			elem["display_name"] = filterServiceEntryDisplayName(*serviceEntry.DisplayName, *serviceEntry.Id)
+			elem["description"] = serviceEntry.Description
+			elem["algorithm"] = serviceEntry.Alg
+			elem["destination_port"] = serviceEntry.DestinationPorts[0]
+			elem["source_ports"] = serviceEntry.SourcePorts
+			algEntriesList = append(algEntriesList, elem)
+		} else if resourceType == model.ServiceEntry_RESOURCE_TYPE_IGMPTYPESERVICEENTRY {
+			igmpEntry, errs := converter.ConvertToGolang(entry, model.IGMPTypeServiceEntryBindingType())
+			if errs != nil {
+				return errs[0]
+			}
+
+			serviceEntry := igmpEntry.(model.IGMPTypeServiceEntry)
+			elem["display_name"] = filterServiceEntryDisplayName(*serviceEntry.DisplayName, *serviceEntry.Id)
+			elem["description"] = serviceEntry.Description
+			igmpEntriesList = append(igmpEntriesList, elem)
+		} else {
+			return fmt.Errorf("Unrecognized Service Entry Type %s", resourceType)
 		}
 	}
 
@@ -624,7 +643,7 @@ func resourceNsxtPolicyServiceDelete(d *schema.ResourceData, m interface{}) erro
 	client := infra.NewDefaultServicesClient(connector)
 	err := client.Delete(id)
 	if err != nil {
-		err = handleDeleteError("Service", id, err)
+		return handleDeleteError("Service", id, err)
 	}
 
 	return nil

@@ -45,12 +45,33 @@ func NewDefaultSpoofguardProfilesClient(connector client.Connector) *DefaultSpoo
 	}
 	interfaceDefinition := core.NewInterfaceDefinition(interfaceIdentifier, methodIdentifiers)
 	errorBindingMap := make(map[string]bindings.BindingType)
+	errorBindingMap[errors.AlreadyExists{}.Error()] = errors.AlreadyExistsBindingType()
+	errorBindingMap[errors.AlreadyInDesiredState{}.Error()] = errors.AlreadyInDesiredStateBindingType()
+	errorBindingMap[errors.Canceled{}.Error()] = errors.CanceledBindingType()
+	errorBindingMap[errors.ConcurrentChange{}.Error()] = errors.ConcurrentChangeBindingType()
+	errorBindingMap[errors.Error{}.Error()] = errors.ErrorBindingType()
+	errorBindingMap[errors.FeatureInUse{}.Error()] = errors.FeatureInUseBindingType()
 	errorBindingMap[errors.InternalServerError{}.Error()] = errors.InternalServerErrorBindingType()
 	errorBindingMap[errors.InvalidArgument{}.Error()] = errors.InvalidArgumentBindingType()
+	errorBindingMap[errors.InvalidElementConfiguration{}.Error()] = errors.InvalidElementConfigurationBindingType()
+	errorBindingMap[errors.InvalidElementType{}.Error()] = errors.InvalidElementTypeBindingType()
+	errorBindingMap[errors.InvalidRequest{}.Error()] = errors.InvalidRequestBindingType()
+	errorBindingMap[errors.NotFound{}.Error()] = errors.NotFoundBindingType()
+	errorBindingMap[errors.NotAllowedInCurrentState{}.Error()] = errors.NotAllowedInCurrentStateBindingType()
 	errorBindingMap[errors.OperationNotFound{}.Error()] = errors.OperationNotFoundBindingType()
-	errorBindingMap[errors.UnexpectedInput{}.Error()] = errors.UnexpectedInputBindingType()
+	errorBindingMap[errors.ResourceBusy{}.Error()] = errors.ResourceBusyBindingType()
+	errorBindingMap[errors.ResourceInUse{}.Error()] = errors.ResourceInUseBindingType()
+	errorBindingMap[errors.ResourceInaccessible{}.Error()] = errors.ResourceInaccessibleBindingType()
 	errorBindingMap[errors.ServiceUnavailable{}.Error()] = errors.ServiceUnavailableBindingType()
 	errorBindingMap[errors.TimedOut{}.Error()] = errors.TimedOutBindingType()
+	errorBindingMap[errors.UnableToAllocateResource{}.Error()] = errors.UnableToAllocateResourceBindingType()
+	errorBindingMap[errors.Unauthenticated{}.Error()] = errors.UnauthenticatedBindingType()
+	errorBindingMap[errors.Unauthorized{}.Error()] = errors.UnauthorizedBindingType()
+	errorBindingMap[errors.UnexpectedInput{}.Error()] = errors.UnexpectedInputBindingType()
+	errorBindingMap[errors.Unsupported{}.Error()] = errors.UnsupportedBindingType()
+	errorBindingMap[errors.UnverifiedPeer{}.Error()] = errors.UnverifiedPeerBindingType()
+
+
 	sIface := DefaultSpoofguardProfilesClient{interfaceName: interfaceName, methodIdentifiers: methodIdentifiers, interfaceDefinition: interfaceDefinition, errorBindingMap: errorBindingMap, interfaceIdentifier: interfaceIdentifier, connector: connector}
 	sIface.methodNameToDefMap = make(map[string]*core.MethodDefinition)
 	sIface.methodNameToDefMap["delete"] = sIface.deleteMethodDefinition()
@@ -61,12 +82,11 @@ func NewDefaultSpoofguardProfilesClient(connector client.Connector) *DefaultSpoo
 	return &sIface
 }
 
-func (sIface *DefaultSpoofguardProfilesClient) Delete(spoofguardProfileIdParam string, overrideParam *bool) error {
+func (sIface *DefaultSpoofguardProfilesClient) Delete(spoofguardProfileIdParam string) error {
 	typeConverter := sIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(sIface.interfaceIdentifier, "delete")
 	sv := bindings.NewStructValueBuilder(spoofguardProfilesDeleteInputType(), typeConverter)
 	sv.AddStructField("SpoofguardProfileId", spoofguardProfileIdParam)
-	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
@@ -157,13 +177,12 @@ func (sIface *DefaultSpoofguardProfilesClient) List(cursorParam *string, include
 	}
 }
 
-func (sIface *DefaultSpoofguardProfilesClient) Patch(spoofguardProfileIdParam string, spoofGuardProfileParam model.SpoofGuardProfile, overrideParam *bool) error {
+func (sIface *DefaultSpoofguardProfilesClient) Patch(spoofguardProfileIdParam string, spoofGuardProfileParam model.SpoofGuardProfile) error {
 	typeConverter := sIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(sIface.interfaceIdentifier, "patch")
 	sv := bindings.NewStructValueBuilder(spoofguardProfilesPatchInputType(), typeConverter)
 	sv.AddStructField("SpoofguardProfileId", spoofguardProfileIdParam)
 	sv.AddStructField("SpoofGuardProfile", spoofGuardProfileParam)
-	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
@@ -185,13 +204,12 @@ func (sIface *DefaultSpoofguardProfilesClient) Patch(spoofguardProfileIdParam st
 	}
 }
 
-func (sIface *DefaultSpoofguardProfilesClient) Update(spoofguardProfileIdParam string, spoofGuardProfileParam model.SpoofGuardProfile, overrideParam *bool) (model.SpoofGuardProfile, error) {
+func (sIface *DefaultSpoofguardProfilesClient) Update(spoofguardProfileIdParam string, spoofGuardProfileParam model.SpoofGuardProfile) (model.SpoofGuardProfile, error) {
 	typeConverter := sIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(sIface.interfaceIdentifier, "update")
 	sv := bindings.NewStructValueBuilder(spoofguardProfilesUpdateInputType(), typeConverter)
 	sv.AddStructField("SpoofguardProfileId", spoofguardProfileIdParam)
 	sv.AddStructField("SpoofGuardProfile", spoofGuardProfileParam)
-	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		var emptyOutput model.SpoofGuardProfile

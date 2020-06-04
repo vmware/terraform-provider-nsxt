@@ -44,6 +44,8 @@ func ipsecVpnIkeProfilesDeleteRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["ike_profile_id"] = bindings.NewStringType()
 	fieldNameMap["ike_profile_id"] = "IkeProfileId"
 	paramsTypeMap["ike_profile_id"] = bindings.NewStringType()
@@ -58,14 +60,18 @@ func ipsecVpnIkeProfilesDeleteRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"",
 		"DELETE",
 		"/policy/api/v1/infra/ipsec-vpn-ike-profiles/{ikeProfileId}",
+		"",
 		resultHeaders,
 		204,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func ipsecVpnIkeProfilesGetInputType() bindings.StructType {
@@ -88,6 +94,8 @@ func ipsecVpnIkeProfilesGetRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["ike_profile_id"] = bindings.NewStringType()
 	fieldNameMap["ike_profile_id"] = "IkeProfileId"
 	paramsTypeMap["ike_profile_id"] = bindings.NewStringType()
@@ -102,14 +110,18 @@ func ipsecVpnIkeProfilesGetRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"",
 		"GET",
 		"/policy/api/v1/infra/ipsec-vpn-ike-profiles/{ikeProfileId}",
+		"",
 		resultHeaders,
 		200,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func ipsecVpnIkeProfilesListInputType() bindings.StructType {
@@ -142,6 +154,8 @@ func ipsecVpnIkeProfilesListRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
 	fields["include_mark_for_delete_objects"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fields["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
@@ -175,14 +189,18 @@ func ipsecVpnIkeProfilesListRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"",
 		"GET",
 		"/policy/api/v1/infra/ipsec-vpn-ike-profiles",
+		"",
 		resultHeaders,
 		200,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func ipsecVpnIkeProfilesPatchInputType() bindings.StructType {
@@ -207,6 +225,8 @@ func ipsecVpnIkeProfilesPatchRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["ike_profile_id"] = bindings.NewStringType()
 	fields["ip_sec_vpn_ike_profile"] = bindings.NewReferenceType(model.IPSecVpnIkeProfileBindingType)
 	fieldNameMap["ike_profile_id"] = "IkeProfileId"
@@ -224,14 +244,18 @@ func ipsecVpnIkeProfilesPatchRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"ip_sec_vpn_ike_profile",
 		"PATCH",
 		"/policy/api/v1/infra/ipsec-vpn-ike-profiles/{ikeProfileId}",
+		"",
 		resultHeaders,
 		204,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func ipsecVpnIkeProfilesUpdateInputType() bindings.StructType {
@@ -256,6 +280,8 @@ func ipsecVpnIkeProfilesUpdateRestMetadata() protocol.OperationRestMetadata {
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
 	fields["ike_profile_id"] = bindings.NewStringType()
 	fields["ip_sec_vpn_ike_profile"] = bindings.NewReferenceType(model.IPSecVpnIkeProfileBindingType)
 	fieldNameMap["ike_profile_id"] = "IkeProfileId"
@@ -273,14 +299,18 @@ func ipsecVpnIkeProfilesUpdateRestMetadata() protocol.OperationRestMetadata {
 		pathParams,
 		queryParams,
 		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
 		"",
 		"ip_sec_vpn_ike_profile",
 		"PUT",
 		"/policy/api/v1/infra/ipsec-vpn-ike-profiles/{ikeProfileId}",
+		"",
 		resultHeaders,
 		200,
+		"",
 		errorHeaders,
-		map[string]int{"InvalidRequest": 400,"Unauthorized": 403,"ServiceUnavailable": 503,"InternalServerError": 500,"NotFound": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
 }
 
 

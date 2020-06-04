@@ -55,7 +55,7 @@ The following arguments are supported:
 * `tag` - (Optional) A list of scope + tag pairs to associate with this policy.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `domain_name`- (Optional) DNS domain names.
-* `transport_zone_path` - (Optional) Policy path to the VLAN backed transport zone.
+* `transport_zone_path` - (Required) Policy path to the VLAN backed transport zone.
 * `vlan_ids` - (Optional) VLAN IDs for VLAN backed Segment.
 * `dhcp_config_path` - (Optional) Policy path to DHCP server or relay configuration to use for subnets configured on this segment. This attribute is supported with NSX 3.0.0 onwards.
 * `subnet` - (Required) Subnet configuration block.
@@ -85,10 +85,11 @@ The following arguments are supported:
   * `l2vpn_paths` - (Optional) Policy paths of associated L2 VPN sessions.
   * `tunnel_id` - (Optional) The Tunnel ID that's a int value between 1 and 4093.
 * `advanced_config` - (Optional) Advanced Segment configuration.
-  * `address_pool_paths` - (Optional) List of Policy path to IP address pools.
+  * `address_pool_path` - (Optional) Policy path to IP address pool.
   * `connectivity` - (Optional) Connectivity configuration to manually connect (ON) or disconnect (OFF).
   * `hybrid` - (Optional) Boolean flag to identify a hybrid logical switch.
-  * `local_egress` (Optional) Boolean flag to enable local egress.
+  * `local_egress` - (Optional) Boolean flag to enable local egress.
+  * `uplink_teaming_policy` - (Optional) The name of the switching uplink teaming policy for the bridge endpoint. This name corresponds to one of the switching uplink teaming policy names listed in the transport zone.
 
 ## Attributes Reference
 

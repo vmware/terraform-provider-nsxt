@@ -3,16 +3,17 @@
 
 package cleanjson
 
-
 import (
+	"bytes"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/l10n"
 	"reflect"
 	"strconv"
 	"strings"
+
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/l10n"
 )
 
 // Serializes DataValue to clean json.
@@ -28,7 +29,7 @@ func (d *DataValueToJsonEncoder) Encode(val interface{}) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	jsonBytes, err := json.Marshal(marshaller)
+	jsonBytes, err := jsonMarshallDisableEscapeHTML(marshaller)
 	if err != nil {
 		marshallError := l10n.NewRuntimeError("vapi.data.serializers.json.marshall.error",
 			map[string]string{"errorMessage": err.Error()})
@@ -105,7 +106,7 @@ func (svs *StructValueSerializer) MarshalJSON() ([]byte, error) {
 	var items = make(map[string]interface{})
 	for key, val := range svs.structValue.Fields() {
 		// Do not serialize empty optional value
-		if isNilOrEmptyOptionalValue(val) {
+		if isEmptyOptionalValue(val) {
 			continue
 		}
 
@@ -127,7 +128,7 @@ func NewStringValueSerializer(value *data.StringValue) *StringValueSerializer {
 }
 
 func (svs *StringValueSerializer) MarshalJSON() ([]byte, error) {
-	return json.Marshal(svs.stringValue.Value())
+	return jsonMarshallDisableEscapeHTML(svs.stringValue.Value())
 }
 
 type IntegerValueSerializer struct {
@@ -172,10 +173,6 @@ type ListValueSerializer struct {
 func (lvs *ListValueSerializer) MarshalJSON() ([]byte, error) {
 	result := make([]interface{}, 0)
 	for _, element := range lvs.listValue.List() {
-		// Do not serialize empty optional value
-		if isNilOrEmptyOptionalValue(element) {
-			continue
-		}
 
 		var serializer, err = getSerializer(element)
 		if err != nil {
@@ -217,7 +214,7 @@ func (evs *ErrorValueSerializer) MarshalJSON() ([]byte, error) {
 	var items = make(map[string]interface{})
 	for key, val := range evs.errorValue.Fields() {
 		// Do not serialize empty optional value
-		if isNilOrEmptyOptionalValue(val) {
+		if isEmptyOptionalValue(val) {
 			continue
 		}
 		var err error
@@ -255,14 +252,28 @@ func NewBooleanValueSerializer(value *data.BooleanValue) *BooleanValueSerializer
 	return &BooleanValueSerializer{booleanValue: value}
 }
 
-func isNilOrEmptyOptionalValue(val data.DataValue) bool {
-	if val == nil {
-		return true
-	}
+func isEmptyOptionalValue(val data.DataValue) bool {
 	if optVal, ok := val.(*data.OptionalValue); ok {
 		if !optVal.IsSet() {
 			return true
 		}
 	}
 	return false
+}
+
+// custom Json Marshal to escape HTML values
+func jsonMarshallDisableEscapeHTML(t interface{}) ([]byte, error) {
+	buffer := &bytes.Buffer{}
+	encoder := json.NewEncoder(buffer)
+	encoder.SetEscapeHTML(false)
+	err := encoder.Encode(t)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	// explicitly trim trailing '\n', this is required because setEscapeHtml is set to false
+	s := string(buffer.Bytes())
+	res := strings.TrimSuffix(s, "\n")
+
+	return []byte(res), err
 }

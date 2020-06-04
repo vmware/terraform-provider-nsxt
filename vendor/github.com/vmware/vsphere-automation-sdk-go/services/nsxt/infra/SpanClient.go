@@ -19,11 +19,12 @@ type SpanClient interface {
     // Get span for an entity with specified path.
     //
     // @param intentPathParam String Path of the intent object (required)
+    // @param sitePathParam Policy Path of the site (optional)
     // @return com.vmware.nsx_policy.model.Span
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Get(intentPathParam string) (model.Span, error)
+	Get(intentPathParam string, sitePathParam *string) (model.Span, error)
 }
