@@ -19,7 +19,7 @@ func TestAccResourceNsxtLogicalTier0Router_basic(t *testing.T) {
 	edgeClusterName := getEdgeClusterName()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLogicalTier0RouterCheckDestroy(state, name)
@@ -57,7 +57,7 @@ func TestAccResourceNsxtLogicalTier0Router_active(t *testing.T) {
 	edgeClusterName := getEdgeClusterName()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLogicalTier0RouterCheckDestroy(state, name)
@@ -94,7 +94,7 @@ func TestAccResourceNsxtLogicalTier0Router_importBasic(t *testing.T) {
 	edgeClusterName := getEdgeClusterName()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLogicalTier0RouterCheckDestroy(state, name)

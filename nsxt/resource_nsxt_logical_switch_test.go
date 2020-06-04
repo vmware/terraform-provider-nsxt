@@ -22,7 +22,7 @@ func TestAccResourceNsxtLogicalSwitch_basic(t *testing.T) {
 	transportZoneName := getOverlayTransportZoneName()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLogicalSwitchCheckDestroy(state, switchName, "nsxt_logical_switch")
@@ -75,7 +75,7 @@ func TestAccResourceNsxtLogicalSwitch_vlan(t *testing.T) {
 	replicationMode := ""
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLogicalSwitchCheckDestroy(state, switchName, "nsxt_logical_switch")
@@ -116,7 +116,7 @@ func TestAccResourceNsxtLogicalSwitch_withProfiles(t *testing.T) {
 	profileType := "SwitchSecuritySwitchingProfile"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			// Verify that the LS was deleted
@@ -171,7 +171,7 @@ func TestAccResourceNsxtLogicalSwitch_withMacPool(t *testing.T) {
 	replicationMode := "MTEP"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLogicalSwitchCheckDestroy(state, switchName, "nsxt_logical_switch")
@@ -206,7 +206,7 @@ func TestAccResourceNsxtLogicalSwitch_importBasic(t *testing.T) {
 	transportZoneName := getOverlayTransportZoneName()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLogicalSwitchCheckDestroy(state, switchName, "nsxt_logical_switch")

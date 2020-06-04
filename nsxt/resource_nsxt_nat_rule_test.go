@@ -19,7 +19,7 @@ func TestAccResourceNsxtNatRule_snat(t *testing.T) {
 	edgeClusterName := getEdgeClusterName()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXNATRuleCheckDestroy(state, ruleName)
@@ -70,7 +70,7 @@ func TestAccResourceNsxtNatRule_snatImport(t *testing.T) {
 	edgeClusterName := getEdgeClusterName()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXNATRuleCheckDestroy(state, ruleName)
@@ -95,7 +95,7 @@ func TestAccResourceNsxtNatRule_dnat(t *testing.T) {
 	edgeClusterName := getEdgeClusterName()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXNATRuleCheckDestroy(state, ruleName)
@@ -142,7 +142,7 @@ func TestAccResourceNsxtNatRule_dnatImport(t *testing.T) {
 	edgeClusterName := getEdgeClusterName()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXNATRuleCheckDestroy(state, ruleName)
@@ -166,7 +166,7 @@ func TestAccResourceNsxtNatRule_noNnat(t *testing.T) {
 	edgeClusterName := getEdgeClusterName()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersionLessThan(t, "3.0.0") },
+		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t); testAccNSXVersionLessThan(t, "3.0.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXNATRuleCheckDestroy(state, ruleName)

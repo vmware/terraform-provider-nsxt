@@ -13,7 +13,7 @@ func TestAccDataSourceNsxtPolicyPolicyLbPersistenceProfile_basic(t *testing.T) {
 	testResourceName := "data.nsxt_policy_lb_persistence_profile.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{

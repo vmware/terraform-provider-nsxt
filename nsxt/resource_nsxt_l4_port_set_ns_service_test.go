@@ -17,7 +17,7 @@ func TestAccResourceNsxtL4PortNsService_basic(t *testing.T) {
 	testResourceName := "nsxt_l4_port_set_ns_service.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXL4ServiceCheckDestroy(state, serviceName)
@@ -52,7 +52,7 @@ func TestAccResourceNsxtL4PortNsService_importBasic(t *testing.T) {
 	testResourceName := "nsxt_l4_port_set_ns_service.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXL4ServiceCheckDestroy(state, serviceName)
