@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	gm_domains "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/domains"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/domains"
 	"testing"
 )
@@ -60,6 +61,54 @@ func TestAccResourceNsxtPolicyGroup_singleIPAddressCriteria(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtGlobalPolicyGroup_singleIPAddressCriteria(t *testing.T) {
+	name := fmt.Sprintf("test-nsx-global-policy-group-ipaddrs")
+	updatedName := fmt.Sprintf("%s-update", name)
+	testResourceName := "nsxt_policy_group.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccSkipIfIsLocalManager(t)
+			testAccEnvDefined(t, "NSXT_TEST_SITE_NAME")
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyGroupCheckDestroy(state, name, getTestSiteName())
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtGlobalPolicyGroupIPAddressCreateTemplate(name, getTestSiteName()),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyGroupExists(testResourceName, getTestSiteName()),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "domain", getTestSiteName()),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckNoResourceAttr(testResourceName, "conjunction"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.#", "1"),
+				),
+			},
+			{
+				Config: testAccNsxtGlobalPolicyGroupIPAddressUpdateTemplate(updatedName, getTestSiteName()),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyGroupExists(testResourceName, getTestSiteName()),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "domain", getTestSiteName()),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "conjunction.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.#", "2"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtPolicyGroup_multipleIPAddressCriteria(t *testing.T) {
 	name := fmt.Sprintf("test-nsx-policy-group-ipaddrs")
 	updatedName := fmt.Sprintf("%s-update", name)
@@ -109,7 +158,14 @@ func TestAccResourceNsxtPolicyGroup_pathCriteria(t *testing.T) {
 	testResourceName := "nsxt_policy_group.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			//TODO Remove this line after segment support for GM is merged
+			testAccSkipIfIsGlobalManager(t)
+			if testAccIsGlobalManager() {
+				testAccEnvDefined(t, "NSXT_TEST_SITE_NAME")
+			}
+		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyGroupCheckDestroy(state, name, defaultDomain)
@@ -329,7 +385,6 @@ func testAccNsxtPolicyGroupExists(resourceName string, domainName string) resour
 	return func(state *terraform.State) error {
 
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-		nsxClient := domains.NewDefaultGroupsClient(connector)
 
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
@@ -341,7 +396,14 @@ func testAccNsxtPolicyGroupExists(resourceName string, domainName string) resour
 			return fmt.Errorf("Policy Group resource ID not set in resources")
 		}
 
-		_, err := nsxClient.Get(domainName, resourceID)
+		var err error
+		if isPolicyGlobalManager(testAccProvider.Meta()) {
+			nsxClient := gm_domains.NewDefaultGroupsClient(connector)
+			_, err = nsxClient.Get(domainName, resourceID)
+		} else {
+			nsxClient := domains.NewDefaultGroupsClient(connector)
+			_, err = nsxClient.Get(domainName, resourceID)
+		}
 		if err != nil {
 			return fmt.Errorf("Error while retrieving policy Group ID %s. Error: %v", resourceID, err)
 		}
@@ -352,7 +414,7 @@ func testAccNsxtPolicyGroupExists(resourceName string, domainName string) resour
 
 func testAccNsxtPolicyGroupCheckDestroy(state *terraform.State, displayName string, domainName string) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-	nsxClient := domains.NewDefaultGroupsClient(connector)
+
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_policy_group" {
@@ -360,9 +422,9 @@ func testAccNsxtPolicyGroupCheckDestroy(state *terraform.State, displayName stri
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		_, err := nsxClient.Get(domainName, resourceID)
-		if err == nil {
-			return fmt.Errorf("Policy Group %s still exists", displayName)
+		isPolicyGlobalManager := isPolicyGlobalManager(testAccProvider.Meta())
+		if resourceNsxtPolicyGroupExistsInDomain(resourceID, domainName, connector, isPolicyGlobalManager) {
+			return fmt.Errorf("Policy Group %s still exists in domain %s", displayName, domainName)
 		}
 	}
 	return nil
@@ -402,6 +464,64 @@ resource "nsxt_policy_group" "test" {
 `, name)
 }
 
+func testAccNsxtGlobalPolicyGroupIPAddressCreateTemplate(name string, siteName string) string {
+	return fmt.Sprintf(`
+data "nsxt_policy_site" "test" {
+  display_name = "%s"
+}
+resource "nsxt_policy_group" "test" {
+  display_name = "%s"
+  description  = "Acceptance Test"
+  domain       = data.nsxt_policy_site.test.id
+
+  criteria {
+    ipaddress_expression {
+	  ip_addresses = ["111.1.1.1", "222.2.2.2"]
+	}
+  }
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+
+  tag {
+    scope = "scope2"
+    tag   = "tag2"
+  }
+}
+`, siteName, name)
+}
+
+func testAccNsxtGlobalPolicyGroupIPAddressUpdateTemplate(name string, siteName string) string {
+	return fmt.Sprintf(`
+data "nsxt_policy_site" "test" {
+  display_name = "%s"
+}
+resource "nsxt_policy_group" "test" {
+  display_name = "%s"
+  description  = "Acceptance Test"
+  domain       = data.nsxt_policy_site.test.id
+
+  criteria {
+    ipaddress_expression {
+	  ip_addresses = ["111.2.1.1", "232.2.2.2"]
+	}
+  }
+
+  conjunction {
+	operator = "OR"
+  }
+
+  criteria {
+    ipaddress_expression {
+	  ip_addresses = ["111.1.1.3", "222.2.2.4"]
+	}
+  }
+}
+`, siteName, name)
+}
+
 func testAccNsxtPolicyGroupIPAddressMultipleCreateTemplate(name string) string {
 	return fmt.Sprintf(`
 resource "nsxt_policy_group" "test" {
@@ -438,11 +558,13 @@ resource "nsxt_policy_group" "test" {
 }
 
 func testAccNsxtPolicyGroupPathsPrerequisites() string {
-	return fmt.Sprintf(`
-data "nsxt_policy_transport_zone" "test"{
-  display_name = "%s"
-}
-
+	var preRequisites string
+	if testAccIsGlobalManager() {
+		preRequisites = testNsxtGlobalPolicyGroupPathsTransportZone()
+	} else {
+		preRequisites = testNsxtPolicyGroupPathsTransportZone()
+	}
+	return preRequisites + fmt.Sprintf(`
 resource "nsxt_policy_segment" "test-1" {
   display_name        = "group-test-1"
   transport_zone_path = data.nsxt_policy_transport_zone.test.path
@@ -451,8 +573,26 @@ resource "nsxt_policy_segment" "test-1" {
 resource "nsxt_policy_segment" "test-2" {
   display_name        = "group-test-1"
   transport_zone_path = data.nsxt_policy_transport_zone.test.path
-}`, getOverlayTransportZoneName())
+}`)
 
+}
+
+func testNsxtGlobalPolicyGroupPathsTransportZone() string {
+	return fmt.Sprintf(`
+data "nsxt_policy_site" "test" {
+  display_name = "%s"
+}
+data "nsxt_policy_transport_zone" "test"{
+  display_name = "%s"
+  site_path = data.nsxt_policy_site.test.path
+}`, getTestSiteName(), getOverlayTransportZoneName())
+}
+
+func testNsxtPolicyGroupPathsTransportZone() string {
+	return fmt.Sprintf(`
+data "nsxt_policy_transport_zone" "test"{
+  display_name = "%s"
+}`, getOverlayTransportZoneName())
 }
 
 func testAccNsxtPolicyGroupPathsCreateTemplate(name string) string {
