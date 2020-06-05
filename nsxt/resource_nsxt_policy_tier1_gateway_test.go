@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"testing"
 )
 
@@ -18,7 +17,7 @@ func TestAccResourceNsxtPolicyTier1Gateway_basic(t *testing.T) {
 	failoverMode := "NON_PREEMPTIVE"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTier1CheckDestroy(state, name)
@@ -38,8 +37,8 @@ func TestAccResourceNsxtPolicyTier1Gateway_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "tier0_path", ""),
 					resource.TestCheckResourceAttr(testResourceName, "route_advertisement_types.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "route_advertisement_rule.#", "0"),
-					resource.TestCheckResourceAttr(testResourceName, "ipv6_ndra_profile_path", "/infra/ipv6-ndra-profiles/default"),
-					resource.TestCheckResourceAttr(testResourceName, "ipv6_dad_profile_path", "/infra/ipv6-dad-profiles/default"),
+					resource.TestCheckResourceAttrSet(testResourceName, "ipv6_ndra_profile_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "ipv6_dad_profile_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 				),
@@ -59,8 +58,8 @@ func TestAccResourceNsxtPolicyTier1Gateway_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "tier0_path", ""),
 					resource.TestCheckResourceAttr(testResourceName, "route_advertisement_types.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "route_advertisement_rule.#", "0"),
-					resource.TestCheckResourceAttr(testResourceName, "ipv6_ndra_profile_path", "/infra/ipv6-ndra-profiles/default"),
-					resource.TestCheckResourceAttr(testResourceName, "ipv6_dad_profile_path", "/infra/ipv6-dad-profiles/default"),
+					resource.TestCheckResourceAttrSet(testResourceName, "ipv6_ndra_profile_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "ipv6_dad_profile_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 				),
@@ -80,8 +79,8 @@ func TestAccResourceNsxtPolicyTier1Gateway_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "tier0_path", ""),
 					resource.TestCheckResourceAttr(testResourceName, "route_advertisement_types.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "route_advertisement_rule.#", "0"),
-					resource.TestCheckResourceAttr(testResourceName, "ipv6_ndra_profile_path", "/infra/ipv6-ndra-profiles/default"),
-					resource.TestCheckResourceAttr(testResourceName, "ipv6_dad_profile_path", "/infra/ipv6-dad-profiles/default"),
+					resource.TestCheckResourceAttrSet(testResourceName, "ipv6_ndra_profile_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "ipv6_dad_profile_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 				),
@@ -426,7 +425,6 @@ func TestAccResourceNsxtPolicyTier1Gateway_withTier0(t *testing.T) {
 					testAccNsxtPolicyTier1Exists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updateName),
 					resource.TestCheckResourceAttr(testResourceName, "tier0_path", ""),
-					resource.TestCheckResourceAttr(realizationResourceName, "state", "REALIZED"),
 				),
 			},
 		},
@@ -461,7 +459,6 @@ func testAccNsxtPolicyTier1Exists(resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-		nsxClient := infra.NewDefaultTier1sClient(connector)
 
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
@@ -473,9 +470,8 @@ func testAccNsxtPolicyTier1Exists(resourceName string) resource.TestCheckFunc {
 			return fmt.Errorf("Policy Tier1 resource ID not set in resources")
 		}
 
-		_, err := nsxClient.Get(resourceID)
-		if err != nil {
-			return fmt.Errorf("Error while retrieving policy Tier1 ID %s. Error: %v", resourceID, err)
+		if !resourceNsxtPolicyTier1GatewayExists(resourceID, connector, testAccIsGlobalManager()) {
+			return fmt.Errorf("Policy Tier0 %s does not exist", resourceID)
 		}
 
 		return nil
@@ -484,7 +480,6 @@ func testAccNsxtPolicyTier1Exists(resourceName string) resource.TestCheckFunc {
 
 func testAccNsxtPolicyTier1CheckDestroy(state *terraform.State, displayName string) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-	nsxClient := infra.NewDefaultTier1sClient(connector)
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_policy_tier1_gateway" {
@@ -492,9 +487,9 @@ func testAccNsxtPolicyTier1CheckDestroy(state *terraform.State, displayName stri
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		_, err := nsxClient.Get(resourceID)
-		if err == nil {
-			return fmt.Errorf("Policy Tier1 %s still exists", displayName)
+		exists := resourceNsxtPolicyTier1GatewayExists(resourceID, connector, testAccIsGlobalManager())
+		if exists {
+			return fmt.Errorf("Policy Tier0 %s still exists", displayName)
 		}
 	}
 	return nil
@@ -548,7 +543,7 @@ func testAccNsxtPolicyTier1CreateTemplate(name string, failoverMode string, with
 		poolAllocation = `pool_allocation = "ROUTING"`
 	}
 
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nsxt_policy_tier1_gateway" "test" {
   display_name              = "%s"
   description               = "Acceptance Test"
@@ -559,6 +554,7 @@ resource "nsxt_policy_tier1_gateway" "test" {
   force_whitelisting        = "false"
   route_advertisement_types = ["TIER1_STATIC_ROUTES", "TIER1_CONNECTED"]
   ipv6_ndra_profile_path    = "/infra/ipv6-ndra-profiles/default"
+  ipv6_dad_profile_path     = "/infra/ipv6-dad-profiles/default"
   %s
 
   tag {
@@ -570,11 +566,8 @@ resource "nsxt_policy_tier1_gateway" "test" {
     scope = "scope2"
     tag   = "tag2"
   }
-}
-
-data "nsxt_policy_realization_info" "realization_info" {
-  path = nsxt_policy_tier1_gateway.test.path
 }`, name, failoverMode, poolAllocation)
+	return testAccAdjustPolicyInfraConfig(config)
 }
 
 func testAccNsxtPolicyTier1UpdateTemplate(name string, failoverMode string, withPoolAllocation bool) string {
@@ -582,7 +575,7 @@ func testAccNsxtPolicyTier1UpdateTemplate(name string, failoverMode string, with
 	if withPoolAllocation {
 		poolAllocation = `pool_allocation = "ROUTING"`
 	}
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nsxt_policy_tier1_gateway" "test" {
   display_name              = "%s"
   description               = "Acceptance Test Update"
@@ -592,6 +585,7 @@ resource "nsxt_policy_tier1_gateway" "test" {
   enable_standby_relocation = "false"
   force_whitelisting        = "true"
   route_advertisement_types = ["TIER1_CONNECTED"]
+  ipv6_ndra_profile_path    = "/infra/ipv6-ndra-profiles/default"
   ipv6_dad_profile_path     = "/infra/ipv6-dad-profiles/default"
   %s
 
@@ -599,11 +593,8 @@ resource "nsxt_policy_tier1_gateway" "test" {
     scope = "scope3"
     tag   = "tag3"
   }
-}
-
-data "nsxt_policy_realization_info" "realization_info" {
-  path = nsxt_policy_tier1_gateway.test.path
 }`, name, failoverMode, poolAllocation)
+	return testAccAdjustPolicyInfraConfig(config)
 }
 
 func testAccNsxtPolicyTier1Update2Template(name string, failoverMode string, withPoolAllocation bool) string {
@@ -611,7 +602,7 @@ func testAccNsxtPolicyTier1Update2Template(name string, failoverMode string, wit
 	if withPoolAllocation {
 		poolAllocation = `pool_allocation = "LB_SMALL"`
 	}
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nsxt_policy_tier1_gateway" "test" {
   display_name              = "%s"
   description               = "Acceptance Test Update"
@@ -621,6 +612,7 @@ resource "nsxt_policy_tier1_gateway" "test" {
   enable_standby_relocation = "false"
   force_whitelisting        = "true"
   route_advertisement_types = ["TIER1_CONNECTED"]
+  ipv6_ndra_profile_path    = "/infra/ipv6-ndra-profiles/default"
   ipv6_dad_profile_path     = "/infra/ipv6-dad-profiles/default"
   %s
 
@@ -628,11 +620,9 @@ resource "nsxt_policy_tier1_gateway" "test" {
     scope = "scope3"
     tag   = "tag3"
   }
-}
-
-data "nsxt_policy_realization_info" "realization_info" {
-  path = nsxt_policy_tier1_gateway.test.path
 }`, name, failoverMode, poolAllocation)
+
+	return testAccAdjustPolicyInfraConfig(config)
 }
 
 func testAccNsxtPolicyTier1ImportTemplate(name string, failoverMode string) string {

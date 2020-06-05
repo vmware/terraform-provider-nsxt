@@ -10,6 +10,7 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"net/http"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -128,7 +129,7 @@ func testAccNSXGlobalManagerSitePrecheck(t *testing.T) {
 	if testAccIsGlobalManager() && getTestSiteName() == "" {
 		str := fmt.Sprintf("%s must be set for this acceptance test", "NSXT_TEST_SITE_NAME")
 		t.Fatal(str)
-  }
+	}
 }
 
 // Create and delete CA and client cert for various tests
@@ -344,4 +345,12 @@ func testGetObjIDByName(objName string, resourceType string) (string, error) {
 	}
 
 	return "", fmt.Errorf("%s with name '%s' was not found", resourceType, objName)
+}
+
+func testAccAdjustPolicyInfraConfig(config string) string {
+	if testAccIsGlobalManager() {
+		return strings.ReplaceAll(config, "/infra/", "/global-infra/")
+	}
+
+	return config
 }
