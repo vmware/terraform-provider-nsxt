@@ -10,6 +10,7 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"net/http"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -357,4 +358,12 @@ func testAccNsxtGlobalPolicySite() string {
 data "nsxt_policy_site" "test" {
   display_name = "%s"
 }`, getTestSiteName())
+}
+
+func testAccAdjustPolicyInfraConfig(config string) string {
+	if testAccIsGlobalManager() {
+		return strings.ReplaceAll(config, "/infra/", "/global-infra/")
+	}
+
+	return config
 }
