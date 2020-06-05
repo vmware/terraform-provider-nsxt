@@ -64,6 +64,10 @@ resource "nsxt_policy_tier1_gateway" "tier1_gw" {
     preferred_edge_paths = [data.nsxt_policy_egde_node.edge1.path]
   }
 
+  intersite_config {
+    primary_site_path = data.nsxt_policy_site.paris.path
+  }
+
   tag {
     scope = "color"
     tag   = "blue"
@@ -102,6 +106,10 @@ The following arguments are supported:
 * `route_advertisement_types` - (Optional) List of desired types of route advertisements, supported values: `TIER1_STATIC_ROUTES`, `TIER1_CONNECTED`, `TIER1_NAT`, `TIER1_LB_VIP`, `TIER1_LB_SNAT`, `TIER1_DNS_FORWARDER_IP`, `TIER1_IPSEC_LOCAL_ENDPOINT`.
 * `ingress_qos_profile_path` - (Optional) QoS Profile path for ingress traffic on link connected to Tier0 gateway.
 * `egress_qos_profile_path` - (Optional) QoS Profile path for egress traffic on link connected to Tier0 gateway.
+* `intersite_config` - (Optional) This clause is relevant for Global Manager only.
+  * `transit_subnet` - (Optional) IPv4 subnet for inter-site transit segment connecting service routers across sites for stretched gateway. For IPv6 link local subnet is auto configured.
+  * `primary_site_path` - (Optional) Primary egress site for gateway.
+
 
 ## Attributes Reference
 
