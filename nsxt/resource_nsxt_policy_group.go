@@ -10,6 +10,8 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+	gm_domains "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/domains"
+	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/domains"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"log"
@@ -175,9 +177,14 @@ func getCriteriaSetSchema() *schema.Resource {
 }
 
 func resourceNsxtPolicyGroupExistsInDomain(id string, domain string, connector *client.RestConnector, isGlobalManager bool) bool {
-	client := domains.NewDefaultGroupsClient(connector)
-
-	_, err := client.Get(domain, id)
+	var err error
+	if isGlobalManager {
+		client := gm_domains.NewDefaultGroupsClient(connector)
+		_, err = client.Get(domain, id)
+	} else {
+		client := domains.NewDefaultGroupsClient(connector)
+		_, err = client.Get(domain, id)
+	}
 	if err == nil {
 		return true
 	}
@@ -569,7 +576,6 @@ func validateGroupCriteriaAndConjunctions(criteriaSets []interface{}, conjunctio
 
 func resourceNsxtPolicyGroupCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := domains.NewDefaultGroupsClient(connector)
 
 	// Initialize resource Id and verify this ID is not yet used
 	id, err := getOrGenerateID(d, m, resourceNsxtPolicyGroupExistsInDomainPartial(d.Get("domain").(string)))
@@ -601,9 +607,19 @@ func resourceNsxtPolicyGroupCreate(d *schema.ResourceData, m interface{}) error 
 		Expression:  expressionData,
 	}
 
+	if isPolicyGlobalManager(m) {
+		gmObj, err1 := convertModelBindingType(obj, model.GroupBindingType(), gm_model.GroupBindingType())
+		if err1 != nil {
+			return err1
+		}
+		client := gm_domains.NewDefaultGroupsClient(connector)
+		err = client.Patch(d.Get("domain").(string), id, gmObj.(gm_model.Group))
+	} else {
+		client := domains.NewDefaultGroupsClient(connector)
+		err = client.Patch(d.Get("domain").(string), id, obj)
+	}
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating Group with ID %s", id)
-	err = client.Patch(d.Get("domain").(string), id, obj)
 	if err != nil {
 		return handleCreateError("Group", id, err)
 	}
@@ -616,25 +632,31 @@ func resourceNsxtPolicyGroupCreate(d *schema.ResourceData, m interface{}) error 
 
 func resourceNsxtPolicyGroupRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := domains.NewDefaultGroupsClient(connector)
-
 	id := d.Id()
+	domainName := d.Get("domain").(string)
 	if id == "" {
 		return fmt.Errorf("Error obtaining Group ID")
 	}
-
-	domainName := d.Get("domain").(string)
-	obj, err := client.Get(domainName, id)
-	if err != nil {
-		return handleReadError(d, "Group", id, err)
+	var obj model.Group
+	if isPolicyGlobalManager(m) {
+		client := gm_domains.NewDefaultGroupsClient(connector)
+		gmObj, err := client.Get(domainName, id)
+		if err != nil {
+			return handleReadError(d, "Group", id, err)
+		}
+		rawObj, err := convertModelBindingType(gmObj, gm_model.GroupBindingType(), model.GroupBindingType())
+		if err != nil {
+			return err
+		}
+		obj = rawObj.(model.Group)
+	} else {
+		var err error
+		client := domains.NewDefaultGroupsClient(connector)
+		obj, err = client.Get(domainName, id)
+		if err != nil {
+			return handleReadError(d, "Group", id, err)
+		}
 	}
-
-	criteria, conditions, err := fromGroupExpressionData(obj.Expression)
-	log.Printf("[INFO] Found %d criteria, %d conjunctions for group %s", len(criteria), len(conditions), id)
-	if err != nil {
-		return err
-	}
-
 	d.Set("display_name", obj.DisplayName)
 	d.Set("description", obj.Description)
 	setPolicyTagsInSchema(d, obj.Tags)
@@ -642,6 +664,11 @@ func resourceNsxtPolicyGroupRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("path", obj.Path)
 	d.Set("domain", getDomainFromResourcePath(*obj.Path))
 	d.Set("revision", obj.Revision)
+	criteria, conditions, err := fromGroupExpressionData(obj.Expression)
+	log.Printf("[INFO] Found %d criteria, %d conjunctions for group %s", len(criteria), len(conditions), id)
+	if err != nil {
+		return err
+	}
 	d.Set("criteria", criteria)
 	d.Set("conjunction", conditions)
 
@@ -650,7 +677,6 @@ func resourceNsxtPolicyGroupRead(d *schema.ResourceData, m interface{}) error {
 
 func resourceNsxtPolicyGroupUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := domains.NewDefaultGroupsClient(connector)
 
 	id := d.Id()
 	if id == "" {
@@ -682,8 +708,22 @@ func resourceNsxtPolicyGroupUpdate(d *schema.ResourceData, m interface{}) error 
 		Expression:  expressionData,
 	}
 
-	// Update the resource using PATCH
-	err = client.Patch(d.Get("domain").(string), id, obj)
+	if isPolicyGlobalManager(m) {
+		gmObj, err1 := convertModelBindingType(obj, model.GroupBindingType(), gm_model.GroupBindingType())
+		if err1 != nil {
+			return err1
+		}
+		gmGroup := gmObj.(gm_model.Group)
+		client := gm_domains.NewDefaultGroupsClient(connector)
+
+		// Update the resource using PATCH
+		err = client.Patch(d.Get("domain").(string), id, gmGroup)
+	} else {
+		client := domains.NewDefaultGroupsClient(connector)
+
+		// Update the resource using PATCH
+		err = client.Patch(d.Get("domain").(string), id, obj)
+	}
 	if err != nil {
 		return handleUpdateError("Group", id, err)
 	}
@@ -698,11 +738,18 @@ func resourceNsxtPolicyGroupDelete(d *schema.ResourceData, m interface{}) error 
 	}
 
 	connector := getPolicyConnector(m)
-	client := domains.NewDefaultGroupsClient(connector)
-
+	var err error
 	forceDelete := true
 	failIfSubtreeExists := false
-	err := client.Delete(d.Get("domain").(string), id, &failIfSubtreeExists, &forceDelete)
+
+	if isPolicyGlobalManager(m) {
+		client := gm_domains.NewDefaultGroupsClient(connector)
+		err = client.Delete(d.Get("domain").(string), id, &failIfSubtreeExists, &forceDelete)
+	} else {
+		client := domains.NewDefaultGroupsClient(connector)
+		err = client.Delete(d.Get("domain").(string), id, &failIfSubtreeExists, &forceDelete)
+	}
+
 	if err != nil {
 		return handleDeleteError("Group", id, err)
 	}

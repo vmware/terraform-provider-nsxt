@@ -102,10 +102,6 @@ func getTestCertificateName(isClient bool) string {
 	return os.Getenv("NSXT_TEST_CERTIFICATE_NAME")
 }
 
-func getTestSitePath() string {
-	return os.Getenv("NSXT_TEST_SITE_PATH")
-}
-
 func testAccEnvDefined(t *testing.T, envVar string) {
 	if len(os.Getenv(envVar)) == 0 {
 		t.Skipf("This test requires %s environment variable to be set", envVar)
@@ -113,7 +109,7 @@ func testAccEnvDefined(t *testing.T, envVar string) {
 }
 
 func testAccIsGlobalManager() bool {
-	return os.Getenv("NSXT_GLOBAL_MANAGER") == "true"
+	return os.Getenv("NSXT_GLOBAL_MANAGER") == "true" || os.Getenv("NSXT_GLOBAL_MANAGER") == "1"
 }
 
 func testAccOnlyGlobalManager(t *testing.T) {
@@ -126,6 +122,19 @@ func testAccOnlyLocalManager(t *testing.T) {
 	if testAccIsGlobalManager() {
 		t.Skipf("This test requires a local manager environment")
 	}
+}
+
+func testAccSkipIfIsLocalManager(t *testing.T) {
+	if !testAccIsGlobalManager() {
+		t.Skipf("This test is for global manager only")
+	}
+}
+
+func testAccNSXGlobalManagerSitePrecheck(t *testing.T) {
+	if testAccIsGlobalManager() && getTestSiteName() == "" {
+		str := fmt.Sprintf("%s must be set for this acceptance test", "NSXT_TEST_SITE_NAME")
+		t.Fatal(str)
+  }
 }
 
 // Create and delete CA and client cert for various tests
