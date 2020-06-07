@@ -18,7 +18,7 @@ func TestAccResourceNsxtPolicyTier1Gateway_basic(t *testing.T) {
 	failoverMode := "NON_PREEMPTIVE"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTier1CheckDestroy(state, name)
@@ -97,7 +97,7 @@ func TestAccResourceNsxtPolicyTier1Gateway_withPoolAllocation(t *testing.T) {
 	failoverMode := "NON_PREEMPTIVE"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTier1CheckDestroy(state, name)
@@ -178,7 +178,7 @@ func TestAccResourceNsxtPolicyTier1Gateway_withDHCP(t *testing.T) {
 	testResourceName := "nsxt_policy_tier1_gateway.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTier1CheckDestroy(state, name)
@@ -218,7 +218,7 @@ func TestAccResourceNsxtPolicyTier1Gateway_withEdgeCluster(t *testing.T) {
 	edgeClusterName := getEdgeClusterName()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTier1CheckDestroy(state, name)
@@ -268,7 +268,7 @@ func TestAccResourceNsxtPolicyTier1Gateway_withId(t *testing.T) {
 	testResourceName := "nsxt_policy_tier1_gateway.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTier1CheckDestroy(state, name)
@@ -308,7 +308,7 @@ func TestAccResourceNsxtPolicyTier1Gateway_withQos(t *testing.T) {
 	testResourceName := "nsxt_policy_tier1_gateway.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			if err := testAccDataSourceNsxtPolicyGatewayQosProfileDeleteByName(profileName); err != nil {
@@ -355,7 +355,7 @@ func TestAccResourceNsxtPolicyTier1Gateway_withRules(t *testing.T) {
 	testResourceName := "nsxt_policy_tier1_gateway.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTier1CheckDestroy(state, name)
@@ -397,7 +397,7 @@ func TestAccResourceNsxtPolicyTier1Gateway_withTier0(t *testing.T) {
 	failoverMode := "NON_PREEMPTIVE"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			testAccDataSourceNsxtPolicyTier0DeleteByName(tier0Name)
@@ -439,7 +439,7 @@ func TestAccResourceNsxtPolicyTier1Gateway_importBasic(t *testing.T) {
 	failoverMode := "PREEMPTIVE"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTier1CheckDestroy(state, name)

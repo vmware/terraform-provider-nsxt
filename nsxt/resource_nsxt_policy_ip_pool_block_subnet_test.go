@@ -19,7 +19,7 @@ func TestAccResourceNsxtPolicyIPPoolBlockSubnet_minimal(t *testing.T) {
 	testResourceName := "nsxt_policy_ip_pool_block_subnet.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXPolicyIPPoolBlockSubnetCheckDestroy(state)
@@ -53,7 +53,7 @@ func TestAccResourceNsxtPolicyIPPoolBlockSubnet_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_ip_pool_block_subnet.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXPolicyIPPoolBlockSubnetCheckDestroy(state)
@@ -103,7 +103,7 @@ func TestAccResourceNsxtPolicyIPPoolBlockSubnet_import_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_ip_pool_block_subnet.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXPolicyIPPoolBlockSubnetCheckDestroy(state)

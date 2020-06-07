@@ -18,7 +18,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_basic(t *testing.T) {
 	failoverMode := "NON_PREEMPTIVE"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTier0CheckDestroy(state, name)
@@ -71,7 +71,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_withId(t *testing.T) {
 	testResourceName := "nsxt_policy_tier0_gateway.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTier0CheckDestroy(state, name)
@@ -108,7 +108,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_withSubnets(t *testing.T) {
 	testResourceName := "nsxt_policy_tier0_gateway.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTier0CheckDestroy(state, name)
@@ -135,7 +135,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_withDHCP(t *testing.T) {
 	testResourceName := "nsxt_policy_tier0_gateway.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTier0CheckDestroy(state, name)
@@ -176,7 +176,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_withEdgeCluster(t *testing.T) {
 	edgeClusterName := getEdgeClusterName()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTier0CheckDestroy(state, name)
@@ -264,7 +264,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_createWithBGP(t *testing.T) {
 	edgeClusterName := getEdgeClusterName()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTier0CheckDestroy(state, name)
@@ -305,7 +305,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_withVRF(t *testing.T) {
 	testInterfaceName := "nsxt_policy_tier0_gateway_interface.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTier0CheckDestroy(state, name)
@@ -354,7 +354,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_importBasic(t *testing.T) {
 	failoverMode := "PREEMPTIVE"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTier0CheckDestroy(state, name)

@@ -15,7 +15,7 @@ func TestAccDataSourceNsxtPolicyIPDiscoveryProfile_basic(t *testing.T) {
 	testResourceName := "data.nsxt_policy_ip_discovery_profile.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{

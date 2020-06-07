@@ -41,7 +41,7 @@ func TestAccResourceNsxtPolicyBgpNeighbor_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_bgp_neighbor.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyBgpNeighborCheckDestroy(state, accTestPolicyBgpNeighborConfigCreateAttributes["display_name"])
@@ -101,7 +101,7 @@ func TestAccResourceNsxtPolicyBgpNeighbor_minimalistic(t *testing.T) {
 	testResourceName := "nsxt_policy_bgp_neighbor.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyBgpNeighborCheckDestroy(state, accTestPolicyBgpNeighborConfigCreateAttributes["display_name"])
@@ -125,7 +125,7 @@ func TestAccResourceNsxtPolicyBgpNeighbor_subConfig(t *testing.T) {
 	testResourceName := "nsxt_policy_bgp_neighbor.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyBgpNeighborCheckDestroy(state, "tfbgp")
@@ -175,7 +175,7 @@ func TestAccResourceNsxtPolicyBgpNeighbor_subConfigSingleRoute(t *testing.T) {
 	testResourceName := "nsxt_policy_bgp_neighbor.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyBgpNeighborCheckDestroy(state, "tfbgp")
@@ -206,7 +206,7 @@ func TestAccResourceNsxtPolicyBgpNeighbor_importBasic(t *testing.T) {
 	testResourceName := "nsxt_policy_bgp_neighbor.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyBgpNeighborCheckDestroy(state, name)

@@ -15,7 +15,7 @@ func TestAccDataSourceNsxtPolicyCertificate_basic(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			testAccSkipIfIsGlobalManager(t)
+			testAccOnlyLocalManager(t)
 			testAccPreCheck(t)
 			testAccEnvDefined(t, "NSXT_TEST_CERTIFICATE_NAME")
 		},

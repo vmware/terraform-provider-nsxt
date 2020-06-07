@@ -17,7 +17,7 @@ func TestAccDataSourceNsxtLogicalTier1Router_basic(t *testing.T) {
 	testResourceName := "data.nsxt_logical_tier1_router.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccDataSourceNsxtTier1RouterDeleteByName(routerName)

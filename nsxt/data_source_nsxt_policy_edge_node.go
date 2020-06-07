@@ -36,7 +36,9 @@ func dataSourceNsxtPolicyEdgeNode() *schema.Resource {
 func dataSourceNsxtPolicyEdgeNodeRead(d *schema.ResourceData, m interface{}) error {
 	// Read an edge node by name or id
 	edgeClusterPath := d.Get("edge_cluster_path").(string)
-	memberIndex, memberIndexSet := d.GetOk("member_index")
+	// Note - according to the documentation GetOkExists should be used
+	// for bool types, but in this case it works and GetOk doesn't
+	memberIndex, memberIndexSet := d.GetOkExists("member_index")
 
 	if isPolicyGlobalManager(m) {
 		query := make(map[string]string)

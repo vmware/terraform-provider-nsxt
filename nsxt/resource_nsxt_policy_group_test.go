@@ -160,7 +160,7 @@ func TestAccResourceNsxtPolicyGroup_pathCriteria(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			//TODO Remove this line after segment support for GM is merged
-			testAccSkipIfIsGlobalManager(t)
+			testAccOnlyLocalManager(t)
 			testAccPreCheck(t)
 			if testAccIsGlobalManager() {
 				testAccEnvDefined(t, "NSXT_TEST_SITE_NAME")
