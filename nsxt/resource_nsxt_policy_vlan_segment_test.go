@@ -13,7 +13,7 @@ func TestAccResourceNsxtPolicyVlanSegment_basicImport(t *testing.T) {
 	testResourceName := "nsxt_policy_vlan_segment.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicySegmentCheckDestroy(state, name)
@@ -37,7 +37,7 @@ func TestAccResourceNsxtPolicyVlanSegment_basicUpdate(t *testing.T) {
 	testResourceName := "nsxt_policy_vlan_segment.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyVlanSegmentCheckDestroy(state, name)
@@ -75,7 +75,7 @@ func TestAccResourceNsxtPolicyVlanSegment_updateAdvConfig(t *testing.T) {
 	testResourceName := "nsxt_policy_vlan_segment.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyVlanSegmentCheckDestroy(state, name)
@@ -119,7 +119,7 @@ func TestAccResourceNsxtPolicyVlanSegment_withDhcp(t *testing.T) {
 	dnsServersV6 := []string{"2000::2", "3000::3"}
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicySegmentCheckDestroy(state, name)

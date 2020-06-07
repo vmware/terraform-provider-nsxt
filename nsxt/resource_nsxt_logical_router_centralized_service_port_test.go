@@ -20,7 +20,7 @@ func TestAccResourceNsxtLogicalRouterCentralizedServicePort_basic(t *testing.T) 
 	routerObj := "nsxt_logical_tier1_router.rtr1.id"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLogicalRouterCentralizedServicePortCheckDestroy(state, portName)
@@ -65,7 +65,7 @@ func TestAccResourceNsxtLogicalRouterCentralizedServicePort_onTier0(t *testing.T
 	routerObj := "data.nsxt_logical_tier0_router.tier0rtr.id"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLogicalRouterCentralizedServicePortCheckDestroy(state, portName)
@@ -109,7 +109,7 @@ func TestAccResourceNsxtLogicalRouterCentralizedServicePort_importBasic(t *testi
 	routerObj := "nsxt_logical_tier1_router.rtr1.id"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLogicalRouterCentralizedServicePortCheckDestroy(state, portName)
@@ -134,7 +134,7 @@ func TestAccResourceNsxtLogicalRouterCentralizedServicePort_onTier1(t *testing.T
 	edgeClusterName := getEdgeClusterName()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLogicalRouterCentralizedServicePortCheckDestroy(state, portName)

@@ -21,7 +21,7 @@ func TestAccResourceNsxtPolicyNATRule_minimalT0(t *testing.T) {
 	action := model.PolicyNatRule_ACTION_REFLEXIVE
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyNATRuleCheckDestroy(state, name)
@@ -56,7 +56,7 @@ func TestAccResourceNsxtPolicyNATRule_basicT1(t *testing.T) {
 	action := model.PolicyNatRule_ACTION_DNAT
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyNATRuleCheckDestroy(state, name)
@@ -133,7 +133,7 @@ func TestAccResourceNsxtPolicyNATRule_basicT0(t *testing.T) {
 	action := model.PolicyNatRule_ACTION_REFLEXIVE
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyNATRuleCheckDestroy(state, name)
@@ -186,7 +186,7 @@ func TestAccResourceNsxtPolicyNATRule_basicT1Import(t *testing.T) {
 	action := model.PolicyNatRule_ACTION_DNAT
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyNATRuleCheckDestroy(state, name)
