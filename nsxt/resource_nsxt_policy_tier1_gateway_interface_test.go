@@ -24,7 +24,7 @@ func TestAccResourceNsxtPolicyTier1GatewayInterface_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_tier1_gateway_interface.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTier1InterfaceCheckDestroy(state, name)
@@ -97,7 +97,7 @@ func TestAccResourceNsxtPolicyTier1GatewayInterface_withID(t *testing.T) {
 	testResourceName := "nsxt_policy_tier1_gateway_interface.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTier1InterfaceCheckDestroy(state, name)
@@ -171,7 +171,7 @@ func TestAccResourceNsxtPolicyTier1GatewayInterface_importBasic(t *testing.T) {
 	subnet := "1.1.12.2/24"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTier1InterfaceCheckDestroy(state, name)

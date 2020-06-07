@@ -41,7 +41,7 @@ func testAccResourceNsxtLbL4MonitorBasic(t *testing.T, protocol string) {
 	receive := "Server hello"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLbL4MonitorCheckDestroy(protocol, state, name)
@@ -87,7 +87,7 @@ func testAccResourceNsxtLbL4MonitorImport(t *testing.T, protocol string) {
 	name := "test-nsx-monitor"
 	testResourceName := fmt.Sprintf("nsxt_lb_%s_monitor.test", protocol)
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLbL4MonitorCheckDestroy(protocol, state, name)

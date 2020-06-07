@@ -17,7 +17,7 @@ func TestAccResourceNsxtIcmpTypeNsService_basic(t *testing.T) {
 	testResourceName := "nsxt_icmp_type_ns_service.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXIcmpServiceCheckDestroy(state, serviceName)
@@ -56,7 +56,7 @@ func TestAccResourceNsxtIcmpTypeNsService_importBasic(t *testing.T) {
 	testResourceName := "nsxt_icmp_type_ns_service.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXIcmpServiceCheckDestroy(state, serviceName)
