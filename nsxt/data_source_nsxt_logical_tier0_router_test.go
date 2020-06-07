@@ -14,7 +14,7 @@ func TestAccDataSourceNsxtLogicalTier0Router_basic(t *testing.T) {
 	testResourceName := "data.nsxt_logical_tier0_router.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{

@@ -15,7 +15,7 @@ func TestAccResourceNsxtPolicyVMTags_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_vm_tags.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t); testAccEnvDefined(t, "NSXT_TEST_VM_ID") },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccEnvDefined(t, "NSXT_TEST_VM_ID") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXPolicyVMTagsCheckDestroy(state)
@@ -49,7 +49,7 @@ func TestAccResourceNsxtPolicyVMTags_import_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_vm_tags.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t); testAccEnvDefined(t, "NSXT_TEST_VM_ID") },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccEnvDefined(t, "NSXT_TEST_VM_ID") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXPolicyVMTagsCheckDestroy(state)

@@ -20,7 +20,7 @@ func TestAccResourceNsxtLbHttpForwardingRule_basic(t *testing.T) {
 	updatedMatchType := "ENDS_WITH"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLbHTTPForwardingRuleCheckDestroy(state, name)
@@ -146,7 +146,7 @@ func TestAccResourceNsxtLbHttpForwardingRule_importBasic(t *testing.T) {
 	name := "test"
 	resourceName := "nsxt_lb_http_forwarding_rule.test"
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccSkipIfIsGlobalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLbHTTPForwardingRuleCheckDestroy(state, name)
