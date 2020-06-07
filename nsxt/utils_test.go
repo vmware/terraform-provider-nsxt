@@ -124,17 +124,11 @@ func testAccOnlyLocalManager(t *testing.T) {
 	}
 }
 
-func testAccSkipIfIsLocalManager(t *testing.T) {
-	if !testAccIsGlobalManager() {
-		t.Skipf("This test is for global manager only")
-	}
-}
-
 func testAccNSXGlobalManagerSitePrecheck(t *testing.T) {
 	if testAccIsGlobalManager() && getTestSiteName() == "" {
 		str := fmt.Sprintf("%s must be set for this acceptance test", "NSXT_TEST_SITE_NAME")
 		t.Fatal(str)
-  }
+	}
 }
 
 // Create and delete CA and client cert for various tests
