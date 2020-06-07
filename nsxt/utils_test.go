@@ -112,9 +112,15 @@ func testAccIsGlobalManager() bool {
 	return os.Getenv("NSXT_GLOBAL_MANAGER") == "true" || os.Getenv("NSXT_GLOBAL_MANAGER") == "1"
 }
 
-func testAccSkipIfIsGlobalManager(t *testing.T) {
+func testAccOnlyGlobalManager(t *testing.T) {
+	if !testAccIsGlobalManager() {
+		t.Skipf("This test requires a global manager environment")
+	}
+}
+
+func testAccOnlyLocalManager(t *testing.T) {
 	if testAccIsGlobalManager() {
-		t.Skipf("This test is for local manager only")
+		t.Skipf("This test requires a local manager environment")
 	}
 }
 
