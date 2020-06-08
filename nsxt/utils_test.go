@@ -10,6 +10,7 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"net/http"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -344,4 +345,12 @@ func testGetObjIDByName(objName string, resourceType string) (string, error) {
 	}
 
 	return "", fmt.Errorf("%s with name '%s' was not found", resourceType, objName)
+}
+
+func testAccAdjustPolicyInfraConfig(config string) string {
+	if testAccIsGlobalManager() {
+		return strings.ReplaceAll(config, "/infra/", "/global-infra/")
+	}
+
+	return config
 }

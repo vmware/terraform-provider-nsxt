@@ -72,6 +72,10 @@ resource "nsxt_policy_tier0_gateway" "tier0_gw" {
     preferred_edge_paths = [data.nsxt_policy_egde_node.edge1.path]
   }
 
+  intersite_config {
+    primary_site_path = data.nsxt_policy_site.paris.path
+  }
+
   tag {
     scope = "color"
     tag   = "blue"
@@ -124,6 +128,11 @@ The following arguments are supported:
     * `address_family` - (Optional) Address family, currently only `L2VPN_EVPN` is supported, which is the default.
     * `import_targets` - (Optional) List of import route targets. Format: <ASN>:<number>.
     * `export_targets` - (Optional) List of export route targets. Format: <ASN>:<number>.
+* `intersite_config` - (Optional) This clause is relevant for Global Manager only.
+  * `transit_subnet` - (Optional) IPv4 subnet for inter-site transit segment connecting service routers across sites for stretched gateway. For IPv6 link local subnet is auto configured.
+  * `primary_site_path` - (Optional) Primary egress site for gateway.
+  * `fallback_site_paths` - (Optional) Fallback sites to be used as new primary site on current primary site failure.
+
 
 ## Attributes Reference
 

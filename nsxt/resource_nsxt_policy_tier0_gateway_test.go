@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"testing"
 )
 
@@ -18,7 +17,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_basic(t *testing.T) {
 	failoverMode := "NON_PREEMPTIVE"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTier0CheckDestroy(state, name)
@@ -35,8 +34,8 @@ func TestAccResourceNsxtPolicyTier0Gateway_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "enable_firewall", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "ha_mode", "ACTIVE_STANDBY"),
 					resource.TestCheckResourceAttr(testResourceName, "force_whitelisting", "false"),
-					resource.TestCheckResourceAttr(testResourceName, "ipv6_ndra_profile_path", "/infra/ipv6-ndra-profiles/default"),
-					resource.TestCheckResourceAttr(testResourceName, "ipv6_dad_profile_path", "/infra/ipv6-dad-profiles/default"),
+					resource.TestCheckResourceAttrSet(testResourceName, "ipv6_ndra_profile_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "ipv6_dad_profile_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 				),
@@ -46,16 +45,15 @@ func TestAccResourceNsxtPolicyTier0Gateway_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTier0Exists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updateName),
-					// TODO: file a bug for description updates not sticking
-					//resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test Update"),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test Update"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "failover_mode", failoverMode),
 					resource.TestCheckResourceAttr(testResourceName, "default_rule_logging", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "enable_firewall", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "force_whitelisting", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "ha_mode", "ACTIVE_ACTIVE"),
-					resource.TestCheckResourceAttr(testResourceName, "ipv6_ndra_profile_path", "/infra/ipv6-ndra-profiles/default"),
-					resource.TestCheckResourceAttr(testResourceName, "ipv6_dad_profile_path", "/infra/ipv6-dad-profiles/default"),
+					resource.TestCheckResourceAttrSet(testResourceName, "ipv6_ndra_profile_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "ipv6_dad_profile_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 				),
@@ -376,7 +374,6 @@ func testAccNsxtPolicyTier0Exists(resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-		nsxClient := infra.NewDefaultTier0sClient(connector)
 
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
@@ -388,18 +385,16 @@ func testAccNsxtPolicyTier0Exists(resourceName string) resource.TestCheckFunc {
 			return fmt.Errorf("Policy Tier0 resource ID not set in resources")
 		}
 
-		_, err := nsxClient.Get(resourceID)
-		if err != nil {
-			return fmt.Errorf("Error while retrieving policy Tier0 ID %s. Error: %v", resourceID, err)
+		if !resourceNsxtPolicyTier0GatewayExists(resourceID, connector, testAccIsGlobalManager()) {
+			return fmt.Errorf("Policy Tier0 %s does not exist", resourceID)
 		}
-
 		return nil
 	}
+
 }
 
 func testAccNsxtPolicyTier0CheckDestroy(state *terraform.State, displayName string) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-	nsxClient := infra.NewDefaultTier0sClient(connector)
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_policy_tier0_gateway" {
@@ -407,8 +402,8 @@ func testAccNsxtPolicyTier0CheckDestroy(state *terraform.State, displayName stri
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		_, err := nsxClient.Get(resourceID)
-		if err == nil {
+		exists := resourceNsxtPolicyTier0GatewayExists(resourceID, connector, testAccIsGlobalManager())
+		if exists {
 			return fmt.Errorf("Policy Tier0 %s still exists", displayName)
 		}
 	}
@@ -533,7 +528,7 @@ data "nsxt_policy_realization_info" "realization_info" {
 }
 
 func testAccNsxtPolicyTier0CreateTemplate(name string, failoverMode string) string {
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nsxt_policy_tier0_gateway" "test" {
   display_name              = "%s"
   description               = "Acceptance Test"
@@ -543,6 +538,7 @@ resource "nsxt_policy_tier0_gateway" "test" {
   force_whitelisting        = "false"
   ha_mode                   = "ACTIVE_STANDBY"
   ipv6_ndra_profile_path    = "/infra/ipv6-ndra-profiles/default"
+  ipv6_dad_profile_path     = "/infra/ipv6-dad-profiles/default"
 
   tag {
     scope = "scope1"
@@ -554,34 +550,31 @@ resource "nsxt_policy_tier0_gateway" "test" {
     tag   = "tag2"
   }
 
-}
-
-data "nsxt_policy_realization_info" "realization_info" {
-  path = nsxt_policy_tier0_gateway.test.path
 }`, name, failoverMode)
+
+	return testAccAdjustPolicyInfraConfig(config)
 }
 
 func testAccNsxtPolicyTier0UpdateTemplate(name string, failoverMode string) string {
-	return fmt.Sprintf(`
+	config := fmt.Sprintf(`
 resource "nsxt_policy_tier0_gateway" "test" {
   display_name              = "%s"
-  description               = "Acceptance Test"
+  description               = "Acceptance Test Update"
   failover_mode             = "%s"
   default_rule_logging      = "false"
   enable_firewall           = "true"
   force_whitelisting        = "true"
   ha_mode                   = "ACTIVE_ACTIVE"
+  ipv6_ndra_profile_path    = "/infra/ipv6-ndra-profiles/default"
   ipv6_dad_profile_path     = "/infra/ipv6-dad-profiles/default"
 
   tag {
     scope = "scope3"
     tag   = "tag3"
   }
-}
+} `, name, failoverMode)
 
-data "nsxt_policy_realization_info" "realization_info" {
-  path = nsxt_policy_tier0_gateway.test.path
-}`, name, failoverMode)
+	return testAccAdjustPolicyInfraConfig(config)
 }
 
 func testAccNsxtPolicyTier0SetTemplateWithID(name string, id string) string {

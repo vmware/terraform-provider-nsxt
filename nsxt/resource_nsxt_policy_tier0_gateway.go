@@ -113,6 +113,7 @@ func resourceNsxtPolicyTier0Gateway() *schema.Resource {
 			"bgp_config":             getPolicyBGPConfigSchema(),
 			"vrf_config":             getPolicyVRFConfigSchema(),
 			"dhcp_config_path":       getPolicyPathSchema(false, false, "Policy path to DHCP server or relay configuration to use for this Tier0"),
+			"intersite_config":       getGatewayIntersiteConfigSchema(),
 		},
 	}
 }
@@ -716,6 +717,11 @@ func policyTier0GatewayResourceToInfraStruct(d *schema.ResourceData, connector *
 		t0Struct.DhcpConfigPaths = []string{}
 	}
 
+	if isGlobalManager {
+		intersiteConfig := getPolicyGatewayIntersiteConfigFromSchema(d)
+		t0Struct.IntersiteConfig = intersiteConfig
+	}
+
 	bgpConfig := d.Get("bgp_config").([]interface{})
 	if len(bgpConfig) > 0 && !isGlobalManager {
 		// BGP not supported for global manager yet
@@ -906,6 +912,13 @@ func resourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{}) e
 	err = setIpv6ProfilePathsInSchema(d, obj.Ipv6ProfilePaths)
 	if err != nil {
 		return fmt.Errorf("Failed to get Tier0 %s ipv6 profiles: %v", *obj.Id, err)
+	}
+
+	if isGlobalManager {
+		err = setPolicyGatewayIntersiteConfigInSchema(d, obj.IntersiteConfig)
+		if err != nil {
+			return fmt.Errorf("Failed to get Tier1 %s interset config: %v", *obj.Id, err)
+		}
 	}
 
 	return nil
