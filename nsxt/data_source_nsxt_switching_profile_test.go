@@ -13,11 +13,11 @@ import (
 )
 
 func TestAccDataSourceNsxtSwitchingProfile_basic(t *testing.T) {
-	profileName := "terraform_test_profile"
+	profileName := "terraform_ds_test_profile"
 	profileType := "QosSwitchingProfile"
 	testResourceName := "data.nsxt_switching_profile.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {

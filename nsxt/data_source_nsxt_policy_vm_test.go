@@ -12,7 +12,7 @@ import (
 func TestAccDataSourceNsxtPolicyVM_basic(t *testing.T) {
 	testResourceName := "data.nsxt_policy_vm.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccEnvDefined(t, "NSXT_TEST_VM_ID")

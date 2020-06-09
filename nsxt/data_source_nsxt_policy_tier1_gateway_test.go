@@ -13,10 +13,10 @@ import (
 )
 
 func TestAccDataSourceNsxtPolicyTier1Gateway_basic(t *testing.T) {
-	routerName := "terraform_test_tier1"
+	routerName := "terraform_ds_test_tier1"
 	testResourceName := "data.nsxt_policy_tier1_gateway.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {

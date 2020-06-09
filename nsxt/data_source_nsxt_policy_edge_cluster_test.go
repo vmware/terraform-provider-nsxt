@@ -13,7 +13,7 @@ func TestAccDataSourceNsxtPolicyEdgeCluster_basic(t *testing.T) {
 	edgeClusterName := getEdgeClusterName()
 	testResourceName := "data.nsxt_policy_edge_cluster.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccNSXGlobalManagerSitePrecheck(t)

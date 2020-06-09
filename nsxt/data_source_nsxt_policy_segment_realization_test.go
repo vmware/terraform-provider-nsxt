@@ -12,7 +12,7 @@ import (
 func testAccDataSourceNsxtPolicySegmentRealization(t *testing.T, vlan bool) {
 	testResourceName := "data.nsxt_policy_segment_realization.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
