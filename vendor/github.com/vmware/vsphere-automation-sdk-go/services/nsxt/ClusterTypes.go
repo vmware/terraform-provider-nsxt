@@ -64,7 +64,7 @@ func clusterBackuptoremoteRestMetadata() protocol.OperationRestMetadata {
 	queryParams["site_id"] = "site_id"
 	queryParams["frame_type"] = "frame_type"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -107,7 +107,7 @@ func clusterSummarizeinventorytoremoteRestMetadata() protocol.OperationRestMetad
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

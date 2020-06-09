@@ -52,7 +52,7 @@ func ipfixDfwProfilesDeleteRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["ipfixDfwProfileId"] = bindings.NewStringType()
 	pathParams["ipfix_dfw_profile_id"] = "ipfixDfwProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -102,7 +102,7 @@ func ipfixDfwProfilesGetRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["ipfixDfwProfileId"] = bindings.NewStringType()
 	pathParams["ipfix_dfw_profile_id"] = "ipfixDfwProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -181,7 +181,7 @@ func ipfixDfwProfilesListRestMetadata() protocol.OperationRestMetadata {
 	queryParams["include_mark_for_delete_objects"] = "include_mark_for_delete_objects"
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -236,7 +236,7 @@ func ipfixDfwProfilesPatchRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["ipfixDfwProfileId"] = bindings.NewStringType()
 	pathParams["ipfix_dfw_profile_id"] = "ipfixDfwProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -291,7 +291,7 @@ func ipfixDfwProfilesUpdateRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["ipfixDfwProfileId"] = bindings.NewStringType()
 	pathParams["ipfix_dfw_profile_id"] = "ipfixDfwProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

@@ -4,11 +4,13 @@
 package server
 
 import (
+	"net/http"
+	"strings"
+	"time"
+
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/core"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/lib"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/security"
-	"net/http"
-	"strings"
 )
 
 func CopyHeadersToContexts(ctx *core.ExecutionContext, r *http.Request) {
@@ -54,5 +56,27 @@ func CopyHeadersToContexts(ctx *core.ExecutionContext, r *http.Request) {
 	// When the request has $useragent header, it will override the custom one if present.
 	if userAgentVal, ok := r.Header["User-Agent"]; ok {
 		appCtx.SetProperty("$userAgent", &userAgentVal[0])
+	}
+}
+
+type simpleTask func() (bool, error)
+
+// WaitForFunc verifies given port is in a listening state
+func WaitForFunc(waitForSeconds int, fn simpleTask) (bool, error) {
+	timer := time.NewTimer(time.Duration(waitForSeconds) * time.Second)
+	ticker := time.NewTicker(1 * time.Second)
+
+	for {
+		select {
+		case <-ticker.C:
+			if fnResult, err := fn(); fnResult || err != nil {
+				ticker.Stop()
+				timer.Stop()
+				return true, err
+			}
+		case <-timer.C:
+			ticker.Stop()
+			return false, nil
+		}
 	}
 }

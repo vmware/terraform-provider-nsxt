@@ -58,7 +58,7 @@ func contextProfilesDeleteRestMetadata() protocol.OperationRestMetadata {
 	pathParams["context_profile_id"] = "contextProfileId"
 	queryParams["force"] = "force"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -108,7 +108,7 @@ func contextProfilesGetRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["contextProfileId"] = bindings.NewStringType()
 	pathParams["context_profile_id"] = "contextProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -187,7 +187,7 @@ func contextProfilesListRestMetadata() protocol.OperationRestMetadata {
 	queryParams["include_mark_for_delete_objects"] = "include_mark_for_delete_objects"
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -242,7 +242,7 @@ func contextProfilesPatchRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["contextProfileId"] = bindings.NewStringType()
 	pathParams["context_profile_id"] = "contextProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -297,7 +297,7 @@ func contextProfilesUpdateRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["contextProfileId"] = bindings.NewStringType()
 	pathParams["context_profile_id"] = "contextProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

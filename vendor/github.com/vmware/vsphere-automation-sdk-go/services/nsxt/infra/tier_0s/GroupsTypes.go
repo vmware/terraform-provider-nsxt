@@ -59,7 +59,7 @@ func groupsDeleteRestMetadata() protocol.OperationRestMetadata {
 	pathParams["group_id"] = "groupId"
 	pathParams["tier0_id"] = "tier0Id"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -116,7 +116,7 @@ func groupsGetRestMetadata() protocol.OperationRestMetadata {
 	pathParams["group_id"] = "groupId"
 	pathParams["tier0_id"] = "tier0Id"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -208,7 +208,7 @@ func groupsListRestMetadata() protocol.OperationRestMetadata {
 	queryParams["member_types"] = "member_types"
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -270,7 +270,7 @@ func groupsPatchRestMetadata() protocol.OperationRestMetadata {
 	pathParams["group_id"] = "groupId"
 	pathParams["tier0_id"] = "tier0Id"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -332,7 +332,7 @@ func groupsUpdateRestMetadata() protocol.OperationRestMetadata {
 	pathParams["group_id"] = "groupId"
 	pathParams["tier0_id"] = "tier0Id"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

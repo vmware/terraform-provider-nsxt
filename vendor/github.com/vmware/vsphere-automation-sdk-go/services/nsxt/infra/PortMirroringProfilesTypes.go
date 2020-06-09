@@ -52,7 +52,7 @@ func portMirroringProfilesDeleteRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["portMirroringProfileId"] = bindings.NewStringType()
 	pathParams["port_mirroring_profile_id"] = "portMirroringProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -102,7 +102,7 @@ func portMirroringProfilesGetRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["portMirroringProfileId"] = bindings.NewStringType()
 	pathParams["port_mirroring_profile_id"] = "portMirroringProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -175,7 +175,7 @@ func portMirroringProfilesListRestMetadata() protocol.OperationRestMetadata {
 	queryParams["sort_by"] = "sort_by"
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -230,7 +230,7 @@ func portMirroringProfilesPatchRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["portMirroringProfileId"] = bindings.NewStringType()
 	pathParams["port_mirroring_profile_id"] = "portMirroringProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -285,7 +285,7 @@ func portMirroringProfilesUpdateRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["portMirroringProfileId"] = bindings.NewStringType()
 	pathParams["port_mirroring_profile_id"] = "portMirroringProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

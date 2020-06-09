@@ -52,7 +52,7 @@ func qosProfilesDeleteRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["qosProfileId"] = bindings.NewStringType()
 	pathParams["qos_profile_id"] = "qosProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -102,7 +102,7 @@ func qosProfilesGetRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["qosProfileId"] = bindings.NewStringType()
 	pathParams["qos_profile_id"] = "qosProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -175,7 +175,7 @@ func qosProfilesListRestMetadata() protocol.OperationRestMetadata {
 	queryParams["sort_by"] = "sort_by"
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -230,7 +230,7 @@ func qosProfilesPatchRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["qosProfileId"] = bindings.NewStringType()
 	pathParams["qos_profile_id"] = "qosProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -285,7 +285,7 @@ func qosProfilesUpdateRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["qosProfileId"] = bindings.NewStringType()
 	pathParams["qos_profile_id"] = "qosProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

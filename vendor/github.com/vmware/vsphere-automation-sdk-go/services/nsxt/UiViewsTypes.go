@@ -50,7 +50,7 @@ func uiViewsCreateRestMetadata() protocol.OperationRestMetadata {
 	fieldNameMap["view"] = "View"
 	paramsTypeMap["view"] = bindings.NewReferenceType(model.ViewBindingType)
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -100,7 +100,7 @@ func uiViewsDeleteRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["viewId"] = bindings.NewStringType()
 	pathParams["view_id"] = "viewId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -161,7 +161,7 @@ func uiViewsGetRestMetadata() protocol.OperationRestMetadata {
 	queryParams["widget_id"] = "widget_id"
 	queryParams["tag"] = "tag"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -211,7 +211,7 @@ func uiViewsGet0RestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["viewId"] = bindings.NewStringType()
 	pathParams["view_id"] = "viewId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -266,7 +266,7 @@ func uiViewsUpdateRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["viewId"] = bindings.NewStringType()
 	pathParams["view_id"] = "viewId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

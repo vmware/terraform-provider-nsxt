@@ -52,7 +52,7 @@ func spoofguardProfilesDeleteRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["spoofguardProfileId"] = bindings.NewStringType()
 	pathParams["spoofguard_profile_id"] = "spoofguardProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -102,7 +102,7 @@ func spoofguardProfilesGetRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["spoofguardProfileId"] = bindings.NewStringType()
 	pathParams["spoofguard_profile_id"] = "spoofguardProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -181,7 +181,7 @@ func spoofguardProfilesListRestMetadata() protocol.OperationRestMetadata {
 	queryParams["include_mark_for_delete_objects"] = "include_mark_for_delete_objects"
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -236,7 +236,7 @@ func spoofguardProfilesPatchRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["spoofguardProfileId"] = bindings.NewStringType()
 	pathParams["spoofguard_profile_id"] = "spoofguardProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -291,7 +291,7 @@ func spoofguardProfilesUpdateRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["spoofguardProfileId"] = bindings.NewStringType()
 	pathParams["spoofguard_profile_id"] = "spoofguardProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

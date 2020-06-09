@@ -1,4 +1,4 @@
-/* Copyright © 2019 VMware, Inc. All Rights Reserved.
+/* Copyright © 2019-2020 VMware, Inc. All Rights Reserved.
    SPDX-License-Identifier: BSD-2-Clause */
 
 package security
@@ -11,12 +11,14 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
-	"github.com/beevik/etree"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/lib"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/log"
 	"reflect"
 	"strings"
 	"time"
+
+	"github.com/beevik/etree"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/lib"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/log"
 )
 
 // Extracts Security Context from request.
@@ -109,7 +111,8 @@ func PrepareCertificate(certString string) string {
 func GenerateRequestTimeStamp() map[string]string {
 	createdDate := time.Now().UTC()
 	expires := createdDate.Add(time.Minute * REQUEST_VALIDITY)
-	return map[string]string{"EXPIRES": expires.String(), "CREATED": createdDate.String()}
+	return map[string]string{TS_EXPIRES_KEY: expires.Format(bindings.VAPI_DATETIME_LAYOUT),
+		TS_CREATED_KEY: createdDate.Format(bindings.VAPI_DATETIME_LAYOUT)}
 }
 
 // Verify signature of sig by generating signature using public key with toVerify

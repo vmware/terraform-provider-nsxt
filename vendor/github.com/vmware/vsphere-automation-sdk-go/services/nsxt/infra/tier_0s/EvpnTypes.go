@@ -52,7 +52,7 @@ func evpnGetRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["tier0Id"] = bindings.NewStringType()
 	pathParams["tier0_id"] = "tier0Id"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -107,7 +107,7 @@ func evpnPatchRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["tier0Id"] = bindings.NewStringType()
 	pathParams["tier0_id"] = "tier0Id"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -162,7 +162,7 @@ func evpnUpdateRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["tier0Id"] = bindings.NewStringType()
 	pathParams["tier0_id"] = "tier0Id"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

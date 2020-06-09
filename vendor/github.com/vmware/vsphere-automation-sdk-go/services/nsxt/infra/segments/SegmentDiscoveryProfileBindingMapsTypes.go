@@ -59,7 +59,7 @@ func segmentDiscoveryProfileBindingMapsDeleteRestMetadata() protocol.OperationRe
 	pathParams["segment_discovery_profile_binding_map_id"] = "segmentDiscoveryProfileBindingMapId"
 	pathParams["infra_segment_id"] = "infraSegmentId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -116,7 +116,7 @@ func segmentDiscoveryProfileBindingMapsGetRestMetadata() protocol.OperationRestM
 	pathParams["segment_discovery_profile_binding_map_id"] = "segmentDiscoveryProfileBindingMapId"
 	pathParams["infra_segment_id"] = "infraSegmentId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -202,7 +202,7 @@ func segmentDiscoveryProfileBindingMapsListRestMetadata() protocol.OperationRest
 	queryParams["include_mark_for_delete_objects"] = "include_mark_for_delete_objects"
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -264,7 +264,7 @@ func segmentDiscoveryProfileBindingMapsPatchRestMetadata() protocol.OperationRes
 	pathParams["segment_discovery_profile_binding_map_id"] = "segmentDiscoveryProfileBindingMapId"
 	pathParams["infra_segment_id"] = "infraSegmentId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -326,7 +326,7 @@ func segmentDiscoveryProfileBindingMapsUpdateRestMetadata() protocol.OperationRe
 	pathParams["segment_discovery_profile_binding_map_id"] = "segmentDiscoveryProfileBindingMapId"
 	pathParams["infra_segment_id"] = "infraSegmentId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

@@ -52,7 +52,7 @@ func dnsForwarderZonesDeleteRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["dnsForwarderZoneId"] = bindings.NewStringType()
 	pathParams["dns_forwarder_zone_id"] = "dnsForwarderZoneId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -102,7 +102,7 @@ func dnsForwarderZonesGetRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["dnsForwarderZoneId"] = bindings.NewStringType()
 	pathParams["dns_forwarder_zone_id"] = "dnsForwarderZoneId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -181,7 +181,7 @@ func dnsForwarderZonesListRestMetadata() protocol.OperationRestMetadata {
 	queryParams["include_mark_for_delete_objects"] = "include_mark_for_delete_objects"
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -236,7 +236,7 @@ func dnsForwarderZonesPatchRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["dnsForwarderZoneId"] = bindings.NewStringType()
 	pathParams["dns_forwarder_zone_id"] = "dnsForwarderZoneId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -291,7 +291,7 @@ func dnsForwarderZonesUpdateRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["dnsForwarderZoneId"] = bindings.NewStringType()
 	pathParams["dns_forwarder_zone_id"] = "dnsForwarderZoneId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

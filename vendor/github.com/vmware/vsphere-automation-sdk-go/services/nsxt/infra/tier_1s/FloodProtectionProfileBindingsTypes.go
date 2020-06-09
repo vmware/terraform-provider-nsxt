@@ -59,7 +59,7 @@ func floodProtectionProfileBindingsDeleteRestMetadata() protocol.OperationRestMe
 	pathParams["tier1_id"] = "tier1Id"
 	pathParams["flood_protection_profile_binding_id"] = "floodProtectionProfileBindingId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -116,7 +116,7 @@ func floodProtectionProfileBindingsGetRestMetadata() protocol.OperationRestMetad
 	pathParams["tier1_id"] = "tier1Id"
 	pathParams["flood_protection_profile_binding_id"] = "floodProtectionProfileBindingId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -178,7 +178,7 @@ func floodProtectionProfileBindingsPatchRestMetadata() protocol.OperationRestMet
 	pathParams["tier1_id"] = "tier1Id"
 	pathParams["flood_protection_profile_binding_id"] = "floodProtectionProfileBindingId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -240,7 +240,7 @@ func floodProtectionProfileBindingsUpdateRestMetadata() protocol.OperationRestMe
 	pathParams["tier1_id"] = "tier1Id"
 	pathParams["flood_protection_profile_binding_id"] = "floodProtectionProfileBindingId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
