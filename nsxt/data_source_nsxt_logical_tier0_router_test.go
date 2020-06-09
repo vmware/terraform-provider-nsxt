@@ -13,7 +13,7 @@ func TestAccDataSourceNsxtLogicalTier0Router_basic(t *testing.T) {
 	routerName := getTier0RouterName()
 	testResourceName := "data.nsxt_logical_tier0_router.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{

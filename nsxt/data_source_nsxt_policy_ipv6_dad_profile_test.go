@@ -13,10 +13,10 @@ import (
 )
 
 func TestAccDataSourceNsxtPolicyIpv6DadProfile_basic(t *testing.T) {
-	name := "terraform_test"
+	name := "terraform_ds_test"
 	testResourceName := "data.nsxt_policy_ipv6_dad_profile.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {

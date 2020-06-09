@@ -13,7 +13,7 @@ func TestAccDataSourceNsxtTransportZone_basic(t *testing.T) {
 	transportZoneName := getVlanTransportZoneName()
 	testResourceName := "data.nsxt_transport_zone.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{

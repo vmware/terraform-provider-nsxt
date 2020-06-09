@@ -14,7 +14,7 @@ func TestAccDataSourceNsxtPolicySpoofGuardProfile_basic(t *testing.T) {
 	name := "default-spoofguard-profile"
 	testResourceName := "data.nsxt_policy_spoofguard_profile.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
