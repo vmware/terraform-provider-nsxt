@@ -56,7 +56,7 @@ The following arguments are supported:
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `domain_name`- (Optional) DNS domain names.
 * `transport_zone_path` - (Required) Policy path to the VLAN backed transport zone.
-* `vlan_ids` - (Optional) VLAN IDs for VLAN backed Segment.
+* `vlan_ids` - (Optional) List of VLAN IDs or VLAN ranges.
 * `dhcp_config_path` - (Optional) Policy path to DHCP server or relay configuration to use for subnets configured on this segment. This attribute is supported with NSX 3.0.0 onwards.
 * `subnet` - (Required) Subnet configuration block.
   * `cidr` - (Required) Gateway IP address CIDR.

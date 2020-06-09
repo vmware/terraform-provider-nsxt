@@ -59,8 +59,7 @@ func TestAccResourceNsxtPolicyVlanSegment_basicUpdate(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyVlanSegmentExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
-					// TODO: file bug for description not being updated
-					// resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test2"),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test2"),
 					resource.TestCheckResourceAttr(testResourceName, "domain_name", "tftest2.org"),
 					resource.TestCheckResourceAttr(testResourceName, "vlan_ids.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
@@ -272,10 +271,10 @@ func testAccNsxtPolicyVlanSegmentBasicUpdateTemplate(name string) string {
 
 resource "nsxt_policy_vlan_segment" "test" {
   display_name        = "%s"
-  description         = "Acceptance Test"
+  description         = "Acceptance Test2"
   transport_zone_path = data.nsxt_policy_transport_zone.vlantz.path
   domain_name         = "tftest2.org"
-  vlan_ids            = ["101", "102"]
+  vlan_ids            = ["101", "104-110"]
 
   tag {
     scope = "color"
