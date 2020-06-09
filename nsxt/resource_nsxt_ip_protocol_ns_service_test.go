@@ -17,7 +17,7 @@ func TestAccResourceNsxtIpProtocolNsService_basic(t *testing.T) {
 	testResourceName := "nsxt_ip_protocol_ns_service.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXIpProtocolServiceCheckDestroy(state, serviceName)
@@ -52,7 +52,7 @@ func TestAccResourceNsxtIpProtocolNsService_importBasic(t *testing.T) {
 	testResourceName := "nsxt_ip_protocol_ns_service.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXIpProtocolServiceCheckDestroy(state, serviceName)

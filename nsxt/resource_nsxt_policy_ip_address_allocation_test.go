@@ -27,7 +27,7 @@ func TestAccResourceNsxtPolicyIPAddressAllocation_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_ip_address_allocation.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyIPAddressAllocationCheckDestroy(state, accTestPolicyIPAddressAllocationCreateAttributes["display_name"])
@@ -75,7 +75,7 @@ func TestAccResourceNsxtPolicyIPAddressAllocation_anyIPBasic(t *testing.T) {
 	testResourceName := "nsxt_policy_ip_address_allocation.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyIPAddressAllocationCheckDestroy(state, accTestPolicyIPAddressAllocationCreateAttributes["display_name"])
@@ -124,7 +124,7 @@ func TestAccResourceNsxtPolicyIPAddressAllocation_importBasic(t *testing.T) {
 	testResourceName := "nsxt_policy_ip_address_allocation.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyIPAddressAllocationCheckDestroy(state, name)

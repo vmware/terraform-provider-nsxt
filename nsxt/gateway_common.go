@@ -135,6 +135,38 @@ func getGatewayInterfaceUrpfModeSchema() *schema.Schema {
 	}
 }
 
+func getGatewayIntersiteConfigSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeList,
+		Optional:    true,
+		Computed:    true,
+		Description: "Locale Service for the gateway",
+		MaxItems:    1,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"transit_subnet": {
+					Type:         schema.TypeString,
+					Description:  "IPv4 subnet for inter-site transit segment connecting service routers across sites for stretched gateway. For IPv6 link local subnet is auto configured",
+					Optional:     true,
+					ValidateFunc: validateCidr(),
+				},
+				"primary_site_path": {
+					Type:         schema.TypeString,
+					Description:  "Primary egress site for gateway",
+					Optional:     true,
+					ValidateFunc: validatePolicyPath(),
+				},
+				"fallback_site_paths": {
+					Type:        schema.TypeSet,
+					Description: "Fallback sites to be used as new primary site on current primary site failure",
+					Optional:    true,
+					Elem:        getElemPolicyPathSchema(),
+				},
+			},
+		},
+	}
+}
+
 func listPolicyGatewayLocaleServices(connector *client.RestConnector, gwID string, listLocaleServicesFunc func(*client.RestConnector, string, *string) (model.LocaleServicesListResult, error)) ([]model.LocaleServices, error) {
 	var results []model.LocaleServices
 	var cursor *string
@@ -241,6 +273,53 @@ func initGatewayLocaleServices(d *schema.ResourceData, connector *client.RestCon
 	}
 
 	return localeServices, nil
+}
+
+func getPolicyGatewayIntersiteConfigFromSchema(d *schema.ResourceData) *model.IntersiteGatewayConfig {
+	cfg, isSet := d.GetOk("intersite_config")
+	if !isSet {
+		return nil
+	}
+
+	configs := cfg.([]interface{})
+	for _, elem := range configs {
+		data := elem.(map[string]interface{})
+
+		subnet := data["transit_subnet"].(string)
+		primarySitePath := data["primary_site_path"].(string)
+		fallbackSites := interface2StringList(data["fallback_site_paths"].(*schema.Set).List())
+		intersiteConfig := model.IntersiteGatewayConfig{
+			IntersiteTransitSubnet: &subnet,
+			PrimarySitePath:        &primarySitePath,
+			FallbackSites:          fallbackSites,
+		}
+
+		return &intersiteConfig
+	}
+
+	return nil
+}
+
+func setPolicyGatewayIntersiteConfigInSchema(d *schema.ResourceData, config *model.IntersiteGatewayConfig) error {
+	if config == nil {
+		return nil
+	}
+
+	var result []map[string]interface{}
+	elem := make(map[string]interface{})
+
+	if config.IntersiteTransitSubnet != nil {
+		elem["transit_subnet"] = config.IntersiteTransitSubnet
+	}
+
+	if config.PrimarySitePath != nil {
+		elem["primary_site_path"] = config.PrimarySitePath
+	}
+
+	elem["fallback_site_paths"] = config.FallbackSites
+	result = append(result, elem)
+
+	return d.Set("intersite_config", result)
 }
 
 func policyInfraPatch(obj model.Infra, isGlobalManager bool, connector *client.RestConnector, enforceRevision bool) error {

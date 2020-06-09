@@ -17,7 +17,7 @@ func TestAccResourceNsxtPolicyIPBlock_minimal(t *testing.T) {
 	cidr := "192.168.1.0/24"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXPolicyIPBlockCheckDestroy(state)
@@ -46,7 +46,7 @@ func TestAccResourceNsxtPolicyIPBlock_basic(t *testing.T) {
 	cidr2 := "191.166.1.0/24"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXPolicyIPBlockCheckDestroy(state)
@@ -85,7 +85,7 @@ func TestAccResourceNsxtPolicyIPBlock_importBasic(t *testing.T) {
 	testResourceName := "nsxt_policy_ip_block.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXPolicyIPBlockCheckDestroy(state)

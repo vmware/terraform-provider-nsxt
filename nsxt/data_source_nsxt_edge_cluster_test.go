@@ -14,7 +14,7 @@ func TestAccDataSourceNsxtEdgeCluster_basic(t *testing.T) {
 	testResourceName := "data.nsxt_edge_cluster.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{

@@ -27,7 +27,7 @@ func TestAccResourceNsxtPolicySecurityPolicy_basic(t *testing.T) {
 	tag2 := "def"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicySecurityPolicyCheckDestroy(state, name, defaultDomain)
@@ -126,7 +126,7 @@ func TestAccResourceNsxtPolicySecurityPolicy_withDependencies(t *testing.T) {
 	defaultProtocol := "IPV4_IPV6"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicySecurityPolicyCheckDestroy(state, name, defaultDomain)
@@ -207,7 +207,7 @@ func TestAccResourceNsxtPolicySecurityPolicy_importBasic(t *testing.T) {
 	testResourceName := "nsxt_policy_security_policy.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicySecurityPolicyCheckDestroy(state, name, defaultDomain)

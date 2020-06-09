@@ -17,7 +17,7 @@ func TestAccDataSourceNsxtPolicyLBServerSslProfile_basic(t *testing.T) {
 	testResourceName := "data.nsxt_policy_lb_server_ssl_profile.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccDataSourceNsxtPolicyLBServerSslProfileDeleteByName(name)

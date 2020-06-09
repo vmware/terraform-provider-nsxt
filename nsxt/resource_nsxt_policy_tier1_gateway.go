@@ -115,6 +115,7 @@ func resourceNsxtPolicyTier1Gateway() *schema.Resource {
 			},
 			"ingress_qos_profile_path": getPolicyPathSchema(false, false, "Policy path to gateway QoS profile in ingress direction"),
 			"egress_qos_profile_path":  getPolicyPathSchema(false, false, "Policy path to gateway QoS profile in egress direction"),
+			"intersite_config":         getGatewayIntersiteConfigSchema(),
 		},
 	}
 }
@@ -410,6 +411,11 @@ func policyTier1GatewayResourceToInfraStruct(d *schema.ResourceData, connector *
 
 	resourceNsxtPolicyTier1GatewaySetVersionDependentAttrs(d, &obj)
 
+	if isGlobalManager {
+		intersiteConfig := getPolicyGatewayIntersiteConfigFromSchema(d)
+		obj.IntersiteConfig = intersiteConfig
+	}
+
 	// set edge cluster for local manager if needed
 	if d.HasChange("edge_cluster_path") && !isGlobalManager {
 		dataValue, err := initSingleTier1GatewayLocaleService(d, connector)
@@ -583,6 +589,13 @@ func resourceNsxtPolicyTier1GatewayRead(d *schema.ResourceData, m interface{}) e
 		return fmt.Errorf("Failed to get Tier1 %s ipv6 profiles: %v", *obj.Id, err)
 	}
 
+	if isGlobalManager {
+		err = setPolicyGatewayIntersiteConfigInSchema(d, obj.IntersiteConfig)
+		if err != nil {
+			return fmt.Errorf("Failed to get Tier1 %s interset config: %v", *obj.Id, err)
+		}
+	}
+
 	return nil
 }
 
@@ -644,6 +657,7 @@ func resourceNsxtPolicyTier1GatewayDelete(d *schema.ResourceData, m interface{})
 	if err != nil {
 		return err
 	}
+	log.Printf("[DEBUG] Success deleting Tier1 with ID %s", id)
 
 	return nil
 }

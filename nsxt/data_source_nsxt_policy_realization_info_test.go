@@ -17,7 +17,7 @@ func TestAccDataSourceNsxtPolicyRealizationInfo_tier1DataSource(t *testing.T) {
 	testResourceName := "data.nsxt_policy_realization_info.realization_info"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccDataSourceNsxtPolicyTier1GatewayDeleteByName(resourceName)
@@ -51,7 +51,7 @@ func TestAccDataSourceNsxtPolicyRealizationInfo_tier1DataSourceEntity(t *testing
 	testResourceName := "data.nsxt_policy_realization_info.realization_info"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccDataSourceNsxtPolicyTier1GatewayDeleteByName(resourceName)
@@ -85,7 +85,7 @@ func TestAccDataSourceNsxtPolicyRealizationInfo_tier1Resource(t *testing.T) {
 	testResourceName := "data.nsxt_policy_realization_info.realization_info"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0"); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -108,7 +108,7 @@ func TestAccDataSourceNsxtPolicyRealizationInfo_errorState(t *testing.T) {
 	testResourceName := "data.nsxt_policy_realization_info.realization_info"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -122,6 +122,55 @@ func TestAccDataSourceNsxtPolicyRealizationInfo_errorState(t *testing.T) {
 			},
 		},
 	})
+}
+
+func TestAccDataSourceNsxtPolicyRealizationInfo_gmServiceDataSource(t *testing.T) {
+	resourceDataType := "nsxt_policy_service"
+	resourceName := "DNS"
+	entityType := ""
+	testResourceName := "data.nsxt_policy_realization_info.realization_info"
+	site := getTestSiteName()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccEnvDefined(t, "NSXT_TEST_SITE_NAME")
+			testAccOnlyGlobalManager(t)
+		},
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyGMRealizationInfoReadDataSourceTemplate(resourceDataType, resourceName, entityType, site),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(testResourceName, "state", "REALIZED"),
+					resource.TestCheckResourceAttrSet(testResourceName, "entity_type"),
+					resource.TestCheckResourceAttrSet(testResourceName, "realized_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "site_path"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyNoRealizationInfoTemplate(),
+			},
+		},
+	})
+}
+
+func testAccNsxtPolicyGMRealizationInfoReadDataSourceTemplate(resourceDataType string, resourceName string, entityType string, site string) string {
+	return fmt.Sprintf(`
+data "%s" "policy_resource" {
+  display_name = "%s"
+}
+
+data "nsxt_policy_site" "test" {
+  display_name = "%s"
+}
+
+data "nsxt_policy_realization_info" "realization_info" {
+  path = data.%s.policy_resource.path
+  entity_type = "%s"
+  site_path = data.nsxt_policy_site.test.path
+}`, resourceDataType, resourceName, site, resourceDataType, entityType)
 }
 
 func testAccNsxtPolicyRealizationInfoReadDataSourceErrorTemplate() string {

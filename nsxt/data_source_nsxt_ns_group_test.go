@@ -17,7 +17,7 @@ func TestAccDataSourceNsxtNsGroup_basic(t *testing.T) {
 	testResourceName := "data.nsxt_ns_group.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccDataSourceNsxtNsGroupDeleteByName(groupName)

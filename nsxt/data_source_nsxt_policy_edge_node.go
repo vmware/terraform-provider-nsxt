@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/sites/enforcement_points/edge_clusters"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+	"strconv"
 	"strings"
 )
 
@@ -34,17 +35,31 @@ func dataSourceNsxtPolicyEdgeNode() *schema.Resource {
 
 func dataSourceNsxtPolicyEdgeNodeRead(d *schema.ResourceData, m interface{}) error {
 	// Read an edge node by name or id
+	edgeClusterPath := d.Get("edge_cluster_path").(string)
+	// Note - according to the documentation GetOkExists should be used
+	// for bool types, but in this case it works and GetOk doesn't
+	memberIndex, memberIndexSet := d.GetOkExists("member_index")
+
+	if isPolicyGlobalManager(m) {
+		query := make(map[string]string)
+		query["parent_path"] = edgeClusterPath
+		if memberIndexSet {
+			query["member_index"] = strconv.Itoa(memberIndex.(int))
+		}
+		_, err := policyDataSourceResourceReadWithValidation(d, getPolicyConnector(m), "PolicyEdgeNode", query, false)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+
+	// Local manager
 	connector := getPolicyConnector(m)
 	client := edge_clusters.NewDefaultEdgeNodesClient(connector)
-
-	edgeClusterPath := d.Get("edge_cluster_path").(string)
+	var obj model.PolicyEdgeNode
 	edgeClusterID := getPolicyIDFromPath(edgeClusterPath)
 	objID := d.Get("id").(string)
-	name, nameSet := d.GetOkExists("display_name")
-	objName := name.(string)
-	memberIndex, memberIndexSet := d.GetOkExists("member_index")
-	objMemberIndex := int64(memberIndex.(int))
-	var obj model.PolicyEdgeNode
+
 	if objID != "" {
 		// Get by id
 		objGet, err := client.Get(defaultSite, getPolicyEnforcementPoint(m), edgeClusterID, objID)
@@ -55,6 +70,9 @@ func dataSourceNsxtPolicyEdgeNodeRead(d *schema.ResourceData, m interface{}) err
 		obj = objGet
 	} else {
 		// Get by full name/prefix
+		name, nameSet := d.GetOk("display_name")
+		objName := name.(string)
+		objMemberIndex := int64(memberIndex.(int))
 		includeMarkForDeleteObjectsParam := false
 		objList, err := client.List(defaultSite, getPolicyEnforcementPoint(m), edgeClusterID, nil, &includeMarkForDeleteObjectsParam, nil, nil, nil, nil)
 		if err != nil {

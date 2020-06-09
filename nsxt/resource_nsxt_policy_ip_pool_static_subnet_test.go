@@ -18,7 +18,7 @@ func TestAccResourceNsxtPolicyIPPoolStaticSubnet_minimal(t *testing.T) {
 	testResourceName := "nsxt_policy_ip_pool_static_subnet.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXPolicyIPPoolStaticSubnetCheckDestroy(state)
@@ -51,7 +51,7 @@ func TestAccResourceNsxtPolicyIPPoolStaticSubnet_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_ip_pool_static_subnet.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXPolicyIPPoolStaticSubnetCheckDestroy(state)
@@ -117,7 +117,7 @@ func TestAccResourceNsxtPolicyIPPoolStaticSubnet_import_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_ip_pool_static_subnet.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXPolicyIPPoolStaticSubnetCheckDestroy(state)

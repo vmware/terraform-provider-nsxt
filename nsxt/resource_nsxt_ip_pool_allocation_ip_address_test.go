@@ -27,7 +27,7 @@ func TestAccResourceNsxtIPPoolAllocationIPAddress_basic(t *testing.T) {
 	resourceName := "nsxt_ip_pool_allocation_ip_address.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXIPPoolAllocationIPAddressCheckDestroy(state, poolResourceName, resourceName)

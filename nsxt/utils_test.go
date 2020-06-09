@@ -10,6 +10,7 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"net/http"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -109,18 +110,25 @@ func testAccEnvDefined(t *testing.T, envVar string) {
 }
 
 func testAccIsGlobalManager() bool {
-	return os.Getenv("NSXT_GLOBAL_MANAGER") == "true"
+	return os.Getenv("NSXT_GLOBAL_MANAGER") == "true" || os.Getenv("NSXT_GLOBAL_MANAGER") == "1"
 }
 
-func testAccSkipIfIsGlobalManager(t *testing.T) {
-	if testAccIsGlobalManager() {
-		t.Skipf("This test is for local manager only")
+func testAccOnlyGlobalManager(t *testing.T) {
+	if !testAccIsGlobalManager() {
+		t.Skipf("This test requires a global manager environment")
 	}
 }
 
-func testAccSkipIfIsLocalManager(t *testing.T) {
-	if !testAccIsGlobalManager() {
-		t.Skipf("This test is for global manager only")
+func testAccOnlyLocalManager(t *testing.T) {
+	if testAccIsGlobalManager() {
+		t.Skipf("This test requires a local manager environment")
+	}
+}
+
+func testAccNSXGlobalManagerSitePrecheck(t *testing.T) {
+	if testAccIsGlobalManager() && getTestSiteName() == "" {
+		str := fmt.Sprintf("%s must be set for this acceptance test", "NSXT_TEST_SITE_NAME")
+		t.Fatal(str)
 	}
 }
 
@@ -344,4 +352,12 @@ func testAccNsxtGlobalPolicySite(domainName string) string {
 data "nsxt_policy_site" "test" {
   display_name = "%s"
 }`, domainName)
+}
+
+func testAccAdjustPolicyInfraConfig(config string) string {
+	if testAccIsGlobalManager() {
+		return strings.ReplaceAll(config, "/infra/", "/global-infra/")
+	}
+
+	return config
 }

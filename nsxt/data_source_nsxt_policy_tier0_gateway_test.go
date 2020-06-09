@@ -17,7 +17,7 @@ func TestAccDataSourceNsxtPolicyTier0Gateway_basic(t *testing.T) {
 	testResourceName := "data.nsxt_policy_tier0_gateway.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccDataSourceNsxtPolicyTier0DeleteByName(routerName)

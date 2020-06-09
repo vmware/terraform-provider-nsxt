@@ -17,7 +17,7 @@ func TestAccDataSourceNsxtFirewallSection_basic(t *testing.T) {
 	testResourceName := "data.nsxt_firewall_section.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccDataSourceNsxtFirewallSectionDeleteByName(name)
