@@ -240,7 +240,7 @@ func TestAccResourceNsxtGlobalPolicySecurityPolicy_withSite(t *testing.T) {
 	domain := getTestSiteName()
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			testAccSkipIfIsLocalManager(t)
+			testAccOnlyLocalManager(t)
 			testAccEnvDefined(t, "NSXT_TEST_SITE_NAME")
 			testAccPreCheck(t)
 		},
