@@ -990,6 +990,7 @@ func resourceNsxtPolicyTier0GatewayDelete(d *schema.ResourceData, m interface{})
 	if err != nil {
 		return handleDeleteError("Tier0", id, err)
 	}
+	log.Printf("[DEBUG] Success deleting Tier0 with ID %s", id)
 
 	return nil
 

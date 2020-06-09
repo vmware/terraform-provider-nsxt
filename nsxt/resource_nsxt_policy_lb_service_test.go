@@ -31,7 +31,6 @@ var accTestPolicyLBServiceUpdateAttributes = map[string]string{
 
 func TestAccResourceNsxtPolicyLBService_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_lb_service.test"
-	edgeClusterName := getEdgeClusterName()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
@@ -41,7 +40,7 @@ func TestAccResourceNsxtPolicyLBService_basic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyLBServiceTemplate(edgeClusterName, true),
+				Config: testAccNsxtPolicyLBServiceTemplate(true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyLBServiceExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyLBServiceCreateAttributes["display_name"]),
@@ -58,7 +57,7 @@ func TestAccResourceNsxtPolicyLBService_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyLBServiceTemplate(edgeClusterName, false),
+				Config: testAccNsxtPolicyLBServiceTemplate(false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyLBServiceExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyLBServiceUpdateAttributes["display_name"]),
@@ -81,6 +80,7 @@ func TestAccResourceNsxtPolicyLBService_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttr(testResourceName, "connectivity_path", ""),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
 				),
@@ -155,21 +155,14 @@ func testAccNsxtPolicyLBServiceCheckDestroy(state *terraform.State, displayName 
 	return nil
 }
 
-func testAccNsxtPolicyLBServiceTemplate(edgeClusterName string, createFlow bool) string {
+func testAccNsxtPolicyLBServiceTemplate(createFlow bool) string {
 	var attrMap map[string]string
 	if createFlow {
 		attrMap = accTestPolicyLBServiceCreateAttributes
 	} else {
 		attrMap = accTestPolicyLBServiceUpdateAttributes
 	}
-	return fmt.Sprintf(`
-data "nsxt_policy_edge_cluster" "test" {
-  display_name = "%s"
-}
-
-resource "nsxt_policy_tier0_gateway" "test" {
-  display_name = "terraform-lb-test"
-}
+	return testAccNsxtPolicyLBServiceDeps() + fmt.Sprintf(`
 
 resource "nsxt_policy_tier1_gateway" "test1" {
   display_name      = "terraform-lb-test-1"
@@ -199,11 +192,22 @@ resource "nsxt_policy_lb_service" "test" {
 
 data "nsxt_policy_realization_info" "realization_info" {
   path = nsxt_policy_lb_service.test.path
-}`, edgeClusterName, attrMap["display_name"], attrMap["description"], attrMap["connectivity_path"], attrMap["enabled"], attrMap["error_log_level"], attrMap["size"])
+}`, attrMap["display_name"], attrMap["description"], attrMap["connectivity_path"], attrMap["enabled"], attrMap["error_log_level"], attrMap["size"])
 }
 
+// Terraform test does not respect T1-T0 dependency upon destroy,
+// so we need workaround that detaches T1 from T0 to avoid destroy error
 func testAccNsxtPolicyLBServiceMinimalistic() string {
-	return fmt.Sprintf(`
+	return testAccNsxtPolicyLBServiceDeps() + fmt.Sprintf(`
+resource "nsxt_policy_tier1_gateway" "test1" {
+  display_name      = "terraform-lb-test-1-update"
+  edge_cluster_path = data.nsxt_policy_edge_cluster.test.path
+}
+
+resource "nsxt_policy_tier1_gateway" "test2" {
+  display_name      = "terraform-lb-test-2-update"
+  edge_cluster_path = data.nsxt_policy_edge_cluster.test.path
+}
 resource "nsxt_policy_lb_service" "test" {
   display_name = "%s"
 }
@@ -211,4 +215,30 @@ resource "nsxt_policy_lb_service" "test" {
 data "nsxt_policy_realization_info" "realization_info" {
   path = nsxt_policy_lb_service.test.path
 }`, accTestPolicyLBServiceUpdateAttributes["display_name"])
+}
+
+func testAccNsxtPolicyLBServiceDeps() string {
+    return fmt.Sprintf(`
+data "nsxt_policy_edge_cluster" "test" {
+  display_name = "%s"
+}
+
+resource "nsxt_policy_tier0_gateway" "test" {
+  display_name = "terraform-lb-test"
+}`, getEdgeClusterName())
+
+}
+
+func testAccNsxtPolicyLBServiceTier1CleanUp() string {
+    return testAccNsxtPolicyLBServiceDeps() + `
+resource "nsxt_policy_tier1_gateway" "test1" {
+  display_name      = "terraform-lb-test-1-update"
+  edge_cluster_path = data.nsxt_policy_edge_cluster.test.path
+}
+
+resource "nsxt_policy_tier1_gateway" "test2" {
+  display_name      = "terraform-lb-test-2-update"
+  edge_cluster_path = data.nsxt_policy_edge_cluster.test.path
+}`
+
 }
