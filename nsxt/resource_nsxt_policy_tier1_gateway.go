@@ -657,6 +657,7 @@ func resourceNsxtPolicyTier1GatewayDelete(d *schema.ResourceData, m interface{})
 	if err != nil {
 		return err
 	}
+	log.Printf("[DEBUG] Success deleting Tier1 with ID %s", id)
 
 	return nil
 }
