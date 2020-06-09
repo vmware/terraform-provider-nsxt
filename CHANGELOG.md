@@ -2,7 +2,7 @@
 
 FEATURES:
 
-* The provider is extended to support NSXT on VMConAWS. Only a subset of object is supported, check the documentation for more details.
+* The provider is extended to support NSXT on VMConAWS. Only a subset of objects is supported, check the documentation for more details.
 
 BUG FIXES:
 
@@ -19,7 +19,7 @@ BUG FIXES:
 * `resource/nsxt_policy_group`: Fix issues with group subresource import ([#288](https://github.com/terraform-providers/terraform-provider-nsxt/pull/288))
 * `resource/nsxt_policy_nat_rule`: Make `source_networks` argument optional ([#294](https://github.com/terraform-providers/terraform-provider-nsxt/pull/294))
 * `resource/nsxt_ip_pool_allocation_ip_address`: Fix resource import ([#319](https://github.com/terraform-providers/terraform-provider-nsxt/pull/319))
-* `data/nsxt_policy_segment_realization`: Expose computed attribute network_name. This attribute can be used as network name in vsphere provider, and contributes to correct dependency tree ([#308](https://github.com/terraform-providers/terraform-provider-nsxt/pull/308))
+* `data/nsxt_policy_segment_realization`: Expose computed attribute network_name. This attribute can be used as network name in vsphere provider, which forms the necessary dependency([#308](https://github.com/terraform-providers/terraform-provider-nsxt/pull/308))
 
 ## 2.0.0 (March 30, 2020)
 
