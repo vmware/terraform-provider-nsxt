@@ -56,7 +56,7 @@ func batchCreateRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["atomic"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	queryParams["atomic"] = "atomic"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

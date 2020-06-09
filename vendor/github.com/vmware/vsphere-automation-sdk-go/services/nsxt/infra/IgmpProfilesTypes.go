@@ -52,7 +52,7 @@ func igmpProfilesDeleteRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["igmpProfileId"] = bindings.NewStringType()
 	pathParams["igmp_profile_id"] = "igmpProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -102,7 +102,7 @@ func igmpProfilesGetRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["igmpProfileId"] = bindings.NewStringType()
 	pathParams["igmp_profile_id"] = "igmpProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -181,7 +181,7 @@ func igmpProfilesListRestMetadata() protocol.OperationRestMetadata {
 	queryParams["include_mark_for_delete_objects"] = "include_mark_for_delete_objects"
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -236,7 +236,7 @@ func igmpProfilesPatchRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["igmpProfileId"] = bindings.NewStringType()
 	pathParams["igmp_profile_id"] = "igmpProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -291,7 +291,7 @@ func igmpProfilesUpdateRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["igmpProfileId"] = bindings.NewStringType()
 	pathParams["igmp_profile_id"] = "igmpProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

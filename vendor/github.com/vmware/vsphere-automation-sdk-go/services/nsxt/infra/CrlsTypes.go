@@ -54,7 +54,7 @@ func crlsDeleteRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["crlId"] = bindings.NewStringType()
 	pathParams["crl_id"] = "crlId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -110,7 +110,7 @@ func crlsGetRestMetadata() protocol.OperationRestMetadata {
 	pathParams["crl_id"] = "crlId"
 	queryParams["details"] = "details"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -165,7 +165,7 @@ func crlsImportcrlRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["crlId"] = bindings.NewStringType()
 	pathParams["crl_id"] = "crlId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -250,7 +250,7 @@ func crlsListRestMetadata() protocol.OperationRestMetadata {
 	queryParams["type"] = "type"
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -305,7 +305,7 @@ func crlsPatchRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["crlId"] = bindings.NewStringType()
 	pathParams["crl_id"] = "crlId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -360,7 +360,7 @@ func crlsUpdateRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["crlId"] = bindings.NewStringType()
 	pathParams["crl_id"] = "crlId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

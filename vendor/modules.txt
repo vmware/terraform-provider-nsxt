@@ -233,18 +233,18 @@ github.com/vmware/go-vmware-nsxt/monitoring
 github.com/vmware/go-vmware-nsxt/normalization
 github.com/vmware/go-vmware-nsxt/policy
 github.com/vmware/go-vmware-nsxt/upgrade
-# github.com/vmware/vsphere-automation-sdk-go/lib v0.2.0
+# github.com/vmware/vsphere-automation-sdk-go/lib v0.3.1
 github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std
 github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors
-# github.com/vmware/vsphere-automation-sdk-go/runtime v0.2.0
+# github.com/vmware/vsphere-automation-sdk-go/runtime v0.3.1
 github.com/vmware/vsphere-automation-sdk-go/runtime/bindings
 github.com/vmware/vsphere-automation-sdk-go/runtime/core
 github.com/vmware/vsphere-automation-sdk-go/runtime/data
 github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client
 github.com/vmware/vsphere-automation-sdk-go/runtime/security
+github.com/vmware/vsphere-automation-sdk-go/runtime/log
 github.com/vmware/vsphere-automation-sdk-go/runtime/l10n
 github.com/vmware/vsphere-automation-sdk-go/runtime/lib
-github.com/vmware/vsphere-automation-sdk-go/runtime/log
 github.com/vmware/vsphere-automation-sdk-go/runtime/common
 github.com/vmware/vsphere-automation-sdk-go/runtime/data/serializers/rest
 github.com/vmware/vsphere-automation-sdk-go/runtime/protocol
@@ -256,7 +256,7 @@ github.com/vmware/vsphere-automation-sdk-go/runtime/l10n/runtime
 github.com/vmware/vsphere-automation-sdk-go/runtime/data/serializers/cleanjson
 github.com/vmware/vsphere-automation-sdk-go/runtime/lib/rest
 github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/server
-# github.com/vmware/vsphere-automation-sdk-go/services/nsxt v0.3.0
+# github.com/vmware/vsphere-automation-sdk-go/services/nsxt v0.4.0
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/domains
@@ -312,7 +312,7 @@ golang.org/x/crypto/bcrypt
 golang.org/x/crypto/cast5
 golang.org/x/crypto/openpgp/elgamal
 golang.org/x/crypto/blowfish
-# golang.org/x/net v0.0.0-20200324143707-d3edc9973b7e
+# golang.org/x/net v0.0.0-20200602114024-627f9648deb9
 golang.org/x/net/context
 golang.org/x/net/trace
 golang.org/x/net/internal/timeseries

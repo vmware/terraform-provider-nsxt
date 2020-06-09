@@ -52,7 +52,7 @@ func tier1sDeleteRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["tier1Id"] = bindings.NewStringType()
 	pathParams["tier1_id"] = "tier1Id"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -102,7 +102,7 @@ func tier1sGetRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["tier1Id"] = bindings.NewStringType()
 	pathParams["tier1_id"] = "tier1Id"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -181,7 +181,7 @@ func tier1sListRestMetadata() protocol.OperationRestMetadata {
 	queryParams["include_mark_for_delete_objects"] = "include_mark_for_delete_objects"
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -236,7 +236,7 @@ func tier1sPatchRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["tier1Id"] = bindings.NewStringType()
 	pathParams["tier1_id"] = "tier1Id"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -292,7 +292,7 @@ func tier1sReprocessRestMetadata() protocol.OperationRestMetadata {
 	pathParams["tier1_id"] = "tier1Id"
 	queryParams["enforcement_point_path"] = "enforcement_point_path"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -347,7 +347,7 @@ func tier1sUpdateRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["tier1Id"] = bindings.NewStringType()
 	pathParams["tier1_id"] = "tier1Id"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

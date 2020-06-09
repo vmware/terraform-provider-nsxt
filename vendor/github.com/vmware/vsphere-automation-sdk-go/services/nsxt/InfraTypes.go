@@ -51,7 +51,7 @@ func infraGetRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["filter"] = bindings.NewOptionalType(bindings.NewStringType())
 	queryParams["filter"] = "filter"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -105,7 +105,7 @@ func infraPatchRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["infra"] = bindings.NewReferenceType(model.InfraBindingType)
 	queryParams["enforce_revision_check"] = "enforce_revision_check"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -153,7 +153,7 @@ func infraUpdateRestMetadata() protocol.OperationRestMetadata {
 	fieldNameMap["infra"] = "Infra"
 	paramsTypeMap["infra"] = bindings.NewReferenceType(model.InfraBindingType)
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

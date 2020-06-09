@@ -52,7 +52,7 @@ func draftsDeleteRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["draftId"] = bindings.NewStringType()
 	pathParams["draft_id"] = "draftId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -102,7 +102,7 @@ func draftsGetRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["draftId"] = bindings.NewStringType()
 	pathParams["draft_id"] = "draftId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -187,7 +187,7 @@ func draftsListRestMetadata() protocol.OperationRestMetadata {
 	queryParams["include_mark_for_delete_objects"] = "include_mark_for_delete_objects"
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -242,7 +242,7 @@ func draftsPatchRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["draftId"] = bindings.NewStringType()
 	pathParams["draft_id"] = "draftId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -297,7 +297,7 @@ func draftsPublishRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["draftId"] = bindings.NewStringType()
 	pathParams["draft_id"] = "draftId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -352,7 +352,7 @@ func draftsUpdateRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["draftId"] = bindings.NewStringType()
 	pathParams["draft_id"] = "draftId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

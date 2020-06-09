@@ -51,7 +51,7 @@ func lbServiceUsageSummaryGetRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["include_usages"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	queryParams["include_usages"] = "include_usages"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

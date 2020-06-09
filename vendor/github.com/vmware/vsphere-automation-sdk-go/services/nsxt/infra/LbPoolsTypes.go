@@ -58,7 +58,7 @@ func lbPoolsDeleteRestMetadata() protocol.OperationRestMetadata {
 	pathParams["lb_pool_id"] = "lbPoolId"
 	queryParams["force"] = "force"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -108,7 +108,7 @@ func lbPoolsGetRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["lbPoolId"] = bindings.NewStringType()
 	pathParams["lb_pool_id"] = "lbPoolId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -187,7 +187,7 @@ func lbPoolsListRestMetadata() protocol.OperationRestMetadata {
 	queryParams["include_mark_for_delete_objects"] = "include_mark_for_delete_objects"
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -242,7 +242,7 @@ func lbPoolsPatchRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["lbPoolId"] = bindings.NewStringType()
 	pathParams["lb_pool_id"] = "lbPoolId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -297,7 +297,7 @@ func lbPoolsUpdateRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["lbPoolId"] = bindings.NewStringType()
 	pathParams["lb_pool_id"] = "lbPoolId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

@@ -54,7 +54,7 @@ func certificatesDeleteRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["certificateId"] = bindings.NewStringType()
 	pathParams["certificate_id"] = "certificateId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -110,7 +110,7 @@ func certificatesGetRestMetadata() protocol.OperationRestMetadata {
 	pathParams["certificate_id"] = "certificateId"
 	queryParams["details"] = "details"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -195,7 +195,7 @@ func certificatesListRestMetadata() protocol.OperationRestMetadata {
 	queryParams["type"] = "type"
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -250,7 +250,7 @@ func certificatesPatchRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["certificateId"] = bindings.NewStringType()
 	pathParams["certificate_id"] = "certificateId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -305,7 +305,7 @@ func certificatesUpdateRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["certificateId"] = bindings.NewStringType()
 	pathParams["certificate_id"] = "certificateId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

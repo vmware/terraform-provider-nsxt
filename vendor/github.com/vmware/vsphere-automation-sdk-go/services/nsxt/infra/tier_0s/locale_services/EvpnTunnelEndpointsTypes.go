@@ -66,7 +66,7 @@ func evpnTunnelEndpointsDeleteRestMetadata() protocol.OperationRestMetadata {
 	pathParams["tier0_id"] = "tier0Id"
 	pathParams["tunnel_endpoint_id"] = "tunnelEndpointId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -130,7 +130,7 @@ func evpnTunnelEndpointsGetRestMetadata() protocol.OperationRestMetadata {
 	pathParams["tier0_id"] = "tier0Id"
 	pathParams["tunnel_endpoint_id"] = "tunnelEndpointId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -223,7 +223,7 @@ func evpnTunnelEndpointsListRestMetadata() protocol.OperationRestMetadata {
 	queryParams["include_mark_for_delete_objects"] = "include_mark_for_delete_objects"
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -292,7 +292,7 @@ func evpnTunnelEndpointsPatchRestMetadata() protocol.OperationRestMetadata {
 	pathParams["tier0_id"] = "tier0Id"
 	pathParams["tunnel_endpoint_id"] = "tunnelEndpointId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -361,7 +361,7 @@ func evpnTunnelEndpointsUpdateRestMetadata() protocol.OperationRestMetadata {
 	pathParams["tier0_id"] = "tier0Id"
 	pathParams["tunnel_endpoint_id"] = "tunnelEndpointId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

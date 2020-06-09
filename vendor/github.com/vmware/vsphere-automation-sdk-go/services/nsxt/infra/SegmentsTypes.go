@@ -52,7 +52,7 @@ func segmentsDeleteRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["segmentId"] = bindings.NewStringType()
 	pathParams["segment_id"] = "segmentId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -102,7 +102,7 @@ func segmentsDelete0RestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["segmentId"] = bindings.NewStringType()
 	pathParams["segment_id"] = "segmentId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -152,7 +152,7 @@ func segmentsGetRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["segmentId"] = bindings.NewStringType()
 	pathParams["segment_id"] = "segmentId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -231,7 +231,7 @@ func segmentsListRestMetadata() protocol.OperationRestMetadata {
 	queryParams["include_mark_for_delete_objects"] = "include_mark_for_delete_objects"
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -286,7 +286,7 @@ func segmentsPatchRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["segmentId"] = bindings.NewStringType()
 	pathParams["segment_id"] = "segmentId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -341,7 +341,7 @@ func segmentsPatch0RestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["segmentId"] = bindings.NewStringType()
 	pathParams["segment_id"] = "segmentId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -396,7 +396,7 @@ func segmentsUpdateRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["segmentId"] = bindings.NewStringType()
 	pathParams["segment_id"] = "segmentId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -451,7 +451,7 @@ func segmentsUpdate0RestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["segmentId"] = bindings.NewStringType()
 	pathParams["segment_id"] = "segmentId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

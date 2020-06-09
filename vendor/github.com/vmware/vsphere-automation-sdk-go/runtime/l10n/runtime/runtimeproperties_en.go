@@ -1,4 +1,4 @@
-/* Copyright © 2019 VMware, Inc. All Rights Reserved.
+/* Copyright © 2019-2020 VMware, Inc. All Rights Reserved.
    SPDX-License-Identifier: BSD-2-Clause */
 
 package runtime
@@ -72,6 +72,8 @@ vapi.security.authentication.certificate.invalid=Unable to verify server certifi
 
 vapi.security.authorization.exception=Exception in invoking authorization handler {msg}
 vapi.security.authorization.invalid=Unable to authorize user
+vapi.security.authorization.invalid_with_error=Unable to authorize user. Error occured: {err}
+vapi.security.authorization.internal_server_error=Internal server error occured on authorization: {err}
 
 vapi.security.sso.digest.invalid=Invalid digest.
 vapi.security.sso.hash.invalid=Invalid hash algorithm.
@@ -80,6 +82,8 @@ vapi.security.sso.pvtkey.invalid=Invalid private key.
 vapi.security.sso.samltoken.invalid=Invalid saml token.
 vapi.security.sso.signature.invalid=Invalid signature.
 vapi.security.sso.signature.algorithm.invalid=Invalid signature algorithm.
+
+vapi.protocol.server.error=Server error occured: {err}
 
 vapi.protocol.server.rest.param.invalid_value=Parsing failed because of '{errMsg}'
 vapi.protocol.server.rest.param.invalid_type=Invalid value for request parameter '{paramName}'. Expected a value of type '{expectedType}', but parsing failed because of '{errMsg}'
@@ -96,6 +100,8 @@ vapi.protocol.server.rest.param.body.unexpected=Request body data type expected 
 vapi.protocol.server.rest.param.internal_server_error= Request process params failure: {msg}
 vapi.protocol.server.rest.response.unsupport_type=Response data type '{dataType}' not supported for field '{fieldName}'
 vapi.protocol.server.rest.response.not_structure=Response result is not a structure type
+vapi.protocol.server.rest.response.not_error=Response result is not an error type
+vapi.protocol.server.rest.response.invalid=Response result is nil
 vapi.protocol.server.rest.response.error_not_structure=Response error is not a structure type
 vapi.protocol.server.rest.response.result_failed=Method execution failed, do not set response header
 vapi.protocol.server.rest.response.unsupport_http_status=Http status '{httpStatus}' not supported

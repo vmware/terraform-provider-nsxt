@@ -52,7 +52,7 @@ func errorResolverGetRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["errorId"] = bindings.NewStringType()
 	pathParams["error_id"] = "errorId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -95,7 +95,7 @@ func errorResolverListRestMetadata() protocol.OperationRestMetadata {
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -143,7 +143,7 @@ func errorResolverResolveerrorRestMetadata() protocol.OperationRestMetadata {
 	fieldNameMap["error_resolver_metadata_list"] = "ErrorResolverMetadataList"
 	paramsTypeMap["error_resolver_metadata_list"] = bindings.NewReferenceType(model.ErrorResolverMetadataListBindingType)
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

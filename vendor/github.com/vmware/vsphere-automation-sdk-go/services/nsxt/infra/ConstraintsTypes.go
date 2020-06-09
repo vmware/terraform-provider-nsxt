@@ -52,7 +52,7 @@ func constraintsDeleteRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["constraintId"] = bindings.NewStringType()
 	pathParams["constraint_id"] = "constraintId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -102,7 +102,7 @@ func constraintsGetRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["constraintId"] = bindings.NewStringType()
 	pathParams["constraint_id"] = "constraintId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -181,7 +181,7 @@ func constraintsListRestMetadata() protocol.OperationRestMetadata {
 	queryParams["include_mark_for_delete_objects"] = "include_mark_for_delete_objects"
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -236,7 +236,7 @@ func constraintsPatchRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["constraintId"] = bindings.NewStringType()
 	pathParams["constraint_id"] = "constraintId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -291,7 +291,7 @@ func constraintsUpdateRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["constraintId"] = bindings.NewStringType()
 	pathParams["constraint_id"] = "constraintId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

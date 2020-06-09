@@ -52,7 +52,7 @@ func vniPoolsDeleteRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["vniPoolId"] = bindings.NewStringType()
 	pathParams["vni_pool_id"] = "vniPoolId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -102,7 +102,7 @@ func vniPoolsGetRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["vniPoolId"] = bindings.NewStringType()
 	pathParams["vni_pool_id"] = "vniPoolId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -181,7 +181,7 @@ func vniPoolsListRestMetadata() protocol.OperationRestMetadata {
 	queryParams["include_mark_for_delete_objects"] = "include_mark_for_delete_objects"
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -236,7 +236,7 @@ func vniPoolsPatchRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["vniPoolId"] = bindings.NewStringType()
 	pathParams["vni_pool_id"] = "vniPoolId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -291,7 +291,7 @@ func vniPoolsUpdateRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["vniPoolId"] = bindings.NewStringType()
 	pathParams["vni_pool_id"] = "vniPoolId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

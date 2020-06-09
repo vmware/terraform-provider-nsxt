@@ -88,7 +88,7 @@ func vifsListRestMetadata() protocol.OperationRestMetadata {
 	queryParams["lport_attachment_id"] = "lport_attachment_id"
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

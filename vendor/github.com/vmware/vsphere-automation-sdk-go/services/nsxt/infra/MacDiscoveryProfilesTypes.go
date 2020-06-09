@@ -52,7 +52,7 @@ func macDiscoveryProfilesDeleteRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["macDiscoveryProfileId"] = bindings.NewStringType()
 	pathParams["mac_discovery_profile_id"] = "macDiscoveryProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -102,7 +102,7 @@ func macDiscoveryProfilesGetRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["macDiscoveryProfileId"] = bindings.NewStringType()
 	pathParams["mac_discovery_profile_id"] = "macDiscoveryProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -181,7 +181,7 @@ func macDiscoveryProfilesListRestMetadata() protocol.OperationRestMetadata {
 	queryParams["include_mark_for_delete_objects"] = "include_mark_for_delete_objects"
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -236,7 +236,7 @@ func macDiscoveryProfilesPatchRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["macDiscoveryProfileId"] = bindings.NewStringType()
 	pathParams["mac_discovery_profile_id"] = "macDiscoveryProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -291,7 +291,7 @@ func macDiscoveryProfilesUpdateRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["macDiscoveryProfileId"] = bindings.NewStringType()
 	pathParams["mac_discovery_profile_id"] = "macDiscoveryProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

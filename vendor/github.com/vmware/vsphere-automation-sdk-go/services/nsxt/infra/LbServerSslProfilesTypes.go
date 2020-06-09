@@ -58,7 +58,7 @@ func lbServerSslProfilesDeleteRestMetadata() protocol.OperationRestMetadata {
 	pathParams["lb_server_ssl_profile_id"] = "lbServerSslProfileId"
 	queryParams["force"] = "force"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -108,7 +108,7 @@ func lbServerSslProfilesGetRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["lbServerSslProfileId"] = bindings.NewStringType()
 	pathParams["lb_server_ssl_profile_id"] = "lbServerSslProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -187,7 +187,7 @@ func lbServerSslProfilesListRestMetadata() protocol.OperationRestMetadata {
 	queryParams["include_mark_for_delete_objects"] = "include_mark_for_delete_objects"
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -242,7 +242,7 @@ func lbServerSslProfilesPatchRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["lbServerSslProfileId"] = bindings.NewStringType()
 	pathParams["lb_server_ssl_profile_id"] = "lbServerSslProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -297,7 +297,7 @@ func lbServerSslProfilesUpdateRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["lbServerSslProfileId"] = bindings.NewStringType()
 	pathParams["lb_server_ssl_profile_id"] = "lbServerSslProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

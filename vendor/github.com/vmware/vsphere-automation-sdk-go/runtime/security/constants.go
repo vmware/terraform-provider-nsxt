@@ -1,4 +1,4 @@
-/* Copyright © 2019 VMware, Inc. All Rights Reserved.
+/* Copyright © 2019-2020 VMware, Inc. All Rights Reserved.
    SPDX-License-Identifier: BSD-2-Clause */
 
 package security
@@ -37,3 +37,6 @@ const ACCESS_TOKEN = "accessToken"
 const RS256 = "RS256"
 const RS384 = "RS384"
 const RS512 = "RS512"
+
+const TS_EXPIRES_KEY = "expires"
+const TS_CREATED_KEY = "created"

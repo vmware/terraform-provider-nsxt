@@ -52,7 +52,7 @@ func serviceSegmentsDeleteRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["serviceSegmentId"] = bindings.NewStringType()
 	pathParams["service_segment_id"] = "serviceSegmentId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -102,7 +102,7 @@ func serviceSegmentsGetRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["serviceSegmentId"] = bindings.NewStringType()
 	pathParams["service_segment_id"] = "serviceSegmentId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -175,7 +175,7 @@ func serviceSegmentsListRestMetadata() protocol.OperationRestMetadata {
 	queryParams["sort_by"] = "sort_by"
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -230,7 +230,7 @@ func serviceSegmentsPatchRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["serviceSegmentId"] = bindings.NewStringType()
 	pathParams["service_segment_id"] = "serviceSegmentId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -285,7 +285,7 @@ func serviceSegmentsUpdateRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["serviceSegmentId"] = bindings.NewStringType()
 	pathParams["service_segment_id"] = "serviceSegmentId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

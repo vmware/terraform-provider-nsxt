@@ -59,7 +59,7 @@ func domainDeploymentMapsDeleteRestMetadata() protocol.OperationRestMetadata {
 	pathParams["domain_deployment_map_id"] = "domainDeploymentMapId"
 	pathParams["domain_id"] = "domainId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -116,7 +116,7 @@ func domainDeploymentMapsGetRestMetadata() protocol.OperationRestMetadata {
 	pathParams["domain_deployment_map_id"] = "domainDeploymentMapId"
 	pathParams["domain_id"] = "domainId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -202,7 +202,7 @@ func domainDeploymentMapsListRestMetadata() protocol.OperationRestMetadata {
 	queryParams["include_mark_for_delete_objects"] = "include_mark_for_delete_objects"
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -264,7 +264,7 @@ func domainDeploymentMapsPatchRestMetadata() protocol.OperationRestMetadata {
 	pathParams["domain_deployment_map_id"] = "domainDeploymentMapId"
 	pathParams["domain_id"] = "domainId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -326,7 +326,7 @@ func domainDeploymentMapsUpdateRestMetadata() protocol.OperationRestMetadata {
 	pathParams["domain_deployment_map_id"] = "domainDeploymentMapId"
 	pathParams["domain_id"] = "domainId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

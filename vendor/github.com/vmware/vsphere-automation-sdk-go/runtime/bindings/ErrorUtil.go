@@ -1,14 +1,15 @@
-/* Copyright © 2019 VMware, Inc. All Rights Reserved.
+/* Copyright © 2019-2020 VMware, Inc. All Rights Reserved.
    SPDX-License-Identifier: BSD-2-Clause */
 
 package bindings
 
 import (
+	"reflect"
+	"time"
+
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/l10n"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/log"
-	"reflect"
-	"time"
 )
 
 //localizable message fields

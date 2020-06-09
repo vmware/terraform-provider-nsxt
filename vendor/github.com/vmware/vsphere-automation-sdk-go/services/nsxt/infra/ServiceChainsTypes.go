@@ -52,7 +52,7 @@ func serviceChainsDeleteRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["serviceChainId"] = bindings.NewStringType()
 	pathParams["service_chain_id"] = "serviceChainId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -102,7 +102,7 @@ func serviceChainsGetRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["serviceChainId"] = bindings.NewStringType()
 	pathParams["service_chain_id"] = "serviceChainId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -181,7 +181,7 @@ func serviceChainsListRestMetadata() protocol.OperationRestMetadata {
 	queryParams["include_mark_for_delete_objects"] = "include_mark_for_delete_objects"
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -236,7 +236,7 @@ func serviceChainsPatchRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["serviceChainId"] = bindings.NewStringType()
 	pathParams["service_chain_id"] = "serviceChainId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -291,7 +291,7 @@ func serviceChainsUpdateRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["serviceChainId"] = bindings.NewStringType()
 	pathParams["service_chain_id"] = "serviceChainId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

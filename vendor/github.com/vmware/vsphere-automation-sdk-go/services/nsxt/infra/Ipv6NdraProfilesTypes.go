@@ -52,7 +52,7 @@ func ipv6NdraProfilesDeleteRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["ndraProfileId"] = bindings.NewStringType()
 	pathParams["ndra_profile_id"] = "ndraProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -102,7 +102,7 @@ func ipv6NdraProfilesGetRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["ndraProfileId"] = bindings.NewStringType()
 	pathParams["ndra_profile_id"] = "ndraProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -181,7 +181,7 @@ func ipv6NdraProfilesListRestMetadata() protocol.OperationRestMetadata {
 	queryParams["include_mark_for_delete_objects"] = "include_mark_for_delete_objects"
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -236,7 +236,7 @@ func ipv6NdraProfilesPatchRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["ndraProfileId"] = bindings.NewStringType()
 	pathParams["ndra_profile_id"] = "ndraProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -291,7 +291,7 @@ func ipv6NdraProfilesUpdateRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["ndraProfileId"] = bindings.NewStringType()
 	pathParams["ndra_profile_id"] = "ndraProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

@@ -52,7 +52,7 @@ func pimProfilesDeleteRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["pimProfileId"] = bindings.NewStringType()
 	pathParams["pim_profile_id"] = "pimProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -102,7 +102,7 @@ func pimProfilesGetRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["pimProfileId"] = bindings.NewStringType()
 	pathParams["pim_profile_id"] = "pimProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -181,7 +181,7 @@ func pimProfilesListRestMetadata() protocol.OperationRestMetadata {
 	queryParams["include_mark_for_delete_objects"] = "include_mark_for_delete_objects"
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -236,7 +236,7 @@ func pimProfilesPatchRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["pimProfileId"] = bindings.NewStringType()
 	pathParams["pim_profile_id"] = "pimProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -291,7 +291,7 @@ func pimProfilesUpdateRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["pimProfileId"] = bindings.NewStringType()
 	pathParams["pim_profile_id"] = "pimProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
