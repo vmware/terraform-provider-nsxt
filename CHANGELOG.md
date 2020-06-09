@@ -9,7 +9,7 @@ BUG FIXES:
 * Fix remote authentication(vIDM) for policy objects. This fix is relevant for NSX version below 3.0.0. ([#302](https://github.com/terraform-providers/terraform-provider-nsxt/pull/302))
 * Fix client certificate authentication for policy objects ([#292](https://github.com/terraform-providers/terraform-provider-nsxt/pull/292))
 * Fix an issue related to non-admin NSX credentials ([#293](https://github.com/terraform-providers/terraform-provider-nsxt/pull/293))
-* `resource/nsxt_policy_vlan)segment`: Allow to specify vlan range ([#342](https://github.com/terraform-providers/terraform-provider-nsxt/pull/342))
+* `resource/nsxt_policy_vlan_segment`: Allow to specify vlan range ([#342](https://github.com/terraform-providers/terraform-provider-nsxt/pull/342))
 * `resource/nsxt_policy_segment`: Fix handling of segment deletion error ([#321](https://github.com/terraform-providers/terraform-provider-nsxt/pull/321))
 * `resource/nsxt_policy_segment`: Wait for potential VMs to free segment port before deleting the segment. ([#311](https://github.com/terraform-providers/terraform-provider-nsxt/pull/311))
 * `resource/nsxt_policy_vlan_segment`: Allow zero vlan ID ([#297](https://github.com/terraform-providers/terraform-provider-nsxt/pull/297))
