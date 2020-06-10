@@ -67,7 +67,7 @@ func dataSourceNsxtPolicyRealizationInfoRead(d *schema.ResourceData, m interface
 	}
 	if isPolicyGlobalManager(m) {
 		if objSitePath == "" {
-			return attributeRequiredGlobalManagerError("site_path")
+			return attributeRequiredGlobalManagerError("site_path", "nsxt_policy_realization_info")
 		}
 	}
 

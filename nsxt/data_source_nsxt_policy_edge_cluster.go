@@ -42,7 +42,7 @@ func dataSourceNsxtPolicyEdgeClusterRead(d *schema.ResourceData, m interface{}) 
 	}
 	if isPolicyGlobalManager(m) {
 		if objSitePath == "" {
-			return attributeRequiredGlobalManagerError("site_path")
+			return attributeRequiredGlobalManagerError("site_path", "nsxt_policy_edge_cluster")
 		}
 
 		query := make(map[string]string)
