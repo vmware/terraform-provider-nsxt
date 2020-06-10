@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"testing"
 )
@@ -14,7 +15,7 @@ func TestAccResourceNsxtPolicySegment_basicImport(t *testing.T) {
 	tzName := getOverlayTransportZoneName()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicySegmentCheckDestroy(state, name)
@@ -39,7 +40,7 @@ func TestAccResourceNsxtPolicySegment_basicUpdate(t *testing.T) {
 	tzName := getOverlayTransportZoneName()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicySegmentCheckDestroy(state, name)
@@ -82,7 +83,7 @@ func TestAccResourceNsxtPolicySegment_updateAdvConfig(t *testing.T) {
 	tzName := getOverlayTransportZoneName()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicySegmentCheckDestroy(state, name)
@@ -201,7 +202,6 @@ func testAccNsxtPolicySegmentExists(resourceName string) resource.TestCheckFunc 
 	return func(state *terraform.State) error {
 
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-		nsxClient := infra.NewDefaultSegmentsClient(connector)
 
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
@@ -213,7 +213,14 @@ func testAccNsxtPolicySegmentExists(resourceName string) resource.TestCheckFunc 
 			return fmt.Errorf("Policy Segment resource ID not set in resources")
 		}
 
-		_, err := nsxClient.Get(resourceID)
+		var err error
+		if testAccIsGlobalManager() {
+			nsxClient := gm_infra.NewDefaultSegmentsClient(connector)
+			_, err = nsxClient.Get(resourceID)
+		} else {
+			nsxClient := infra.NewDefaultSegmentsClient(connector)
+			_, err = nsxClient.Get(resourceID)
+		}
 		if err != nil {
 			return fmt.Errorf("Error while retrieving policy Segment ID %s. Error: %v", resourceID, err)
 		}
@@ -224,7 +231,6 @@ func testAccNsxtPolicySegmentExists(resourceName string) resource.TestCheckFunc 
 
 func testAccNsxtPolicySegmentCheckDestroy(state *terraform.State, displayName string) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-	nsxClient := infra.NewDefaultSegmentsClient(connector)
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_policy_segment" {
@@ -232,7 +238,14 @@ func testAccNsxtPolicySegmentCheckDestroy(state *terraform.State, displayName st
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		_, err := nsxClient.Get(resourceID)
+		var err error
+		if testAccIsGlobalManager() {
+			nsxClient := gm_infra.NewDefaultSegmentsClient(connector)
+			_, err = nsxClient.Get(resourceID)
+		} else {
+			nsxClient := infra.NewDefaultSegmentsClient(connector)
+			_, err = nsxClient.Get(resourceID)
+		}
 		if err == nil {
 			return fmt.Errorf("Policy Segment %s still exists", displayName)
 		}
@@ -241,21 +254,19 @@ func testAccNsxtPolicySegmentCheckDestroy(state *terraform.State, displayName st
 }
 
 func testAccNsxtPolicySegmentDeps(tzName string) string {
-	return fmt.Sprintf(`
-data "nsxt_policy_transport_zone" "test" {
-  display_name = "%s"
-}
+	return testAccNSXPolicyTransportZoneReadTemplate(tzName) + fmt.Sprintf(`
 
-resource "nsxt_policy_tier1_gateway" "test" {
+resource "nsxt_policy_tier1_gateway" "tier1ForSegments" {
   display_name              = "t1gw"
   description               = "Acceptance Test"
   default_rule_logging      = "true"
   enable_firewall           = "false"
-  enable_standby_relocation = "true"
+  enable_standby_relocation = "false"
   force_whitelisting        = "false"
+  failover_mode             = "NON_PREEMPTIVE"
+  pool_allocation           = "ROUTING"
   route_advertisement_types = ["TIER1_STATIC_ROUTES", "TIER1_CONNECTED"]
-  ipv6_ndra_profile_path    = "/infra/ipv6-ndra-profiles/default"
-}`, tzName)
+}`)
 }
 
 func testAccNsxtPolicySegmentImportTemplate(tzName string, name string) string {
@@ -263,7 +274,7 @@ func testAccNsxtPolicySegmentImportTemplate(tzName string, name string) string {
 resource "nsxt_policy_segment" "test" {
   display_name        = "%s"
   description         = "Acceptance Test"
-  connectivity_path   = nsxt_policy_tier1_gateway.test.path
+  connectivity_path   = nsxt_policy_tier1_gateway.tier1ForSegments.path
   transport_zone_path = data.nsxt_policy_transport_zone.test.path
 
   subnet {
@@ -377,12 +388,25 @@ resource "nsxt_policy_segment" "test" {
 `, name)
 }
 
-func testAccNsxtPolicySegmentWithDhcpTemplate(tzName string, name string, dnsServerV4 string, dnsServerV6 string, lease string, preferred string) string {
-	return testAccNsxtPolicySegmentDeps(tzName) + fmt.Sprintf(`
-
+func testAccNsxtPolicyEdgeCluster(name string) string {
+	if testAccIsGlobalManager() {
+		return fmt.Sprintf(`
 data "nsxt_policy_edge_cluster" "EC" {
   display_name = "%s"
+  site_path    = data.nsxt_policy_site.test.path
+}`, name)
+	} else {
+		return fmt.Sprintf(`
+data "nsxt_policy_edge_cluster" "EC" {
+  display_name = "%s"
+}`, name)
+	}
+
 }
+
+func testAccNsxtPolicySegmentWithDhcpTemplate(tzName string, name string, dnsServerV4 string, dnsServerV6 string, lease string, preferred string) string {
+	return testAccNsxtPolicySegmentDeps(tzName) +
+		testAccNsxtPolicyEdgeCluster(getEdgeClusterName()) + fmt.Sprintf(`
 
 resource "nsxt_policy_dhcp_server" "test" {
   edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
@@ -436,5 +460,5 @@ resource "nsxt_policy_segment" "test" {
   dhcp_config_path = nsxt_policy_dhcp_server.test.path
 
 }
-`, getEdgeClusterName(), name, lease, dnsServerV4, lease, preferred, dnsServerV6)
+`, name, lease, dnsServerV4, lease, preferred, dnsServerV6)
 }
