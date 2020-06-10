@@ -13,7 +13,7 @@ func TestAccDataSourceNsxtPolicySite_basic(t *testing.T) {
 	name := getTestSiteName()
 	testResourceName := "data.nsxt_policy_site.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyGlobalManager(t)

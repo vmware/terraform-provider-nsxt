@@ -13,10 +13,10 @@ import (
 )
 
 func TestAccDataSourceNsxtNsService_basic(t *testing.T) {
-	serviceName := "terraform_test_ns_service"
+	serviceName := "terraform_ds_test_ns_service"
 	testResourceName := "data.nsxt_ns_service.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -46,7 +46,7 @@ func TestAccDataSourceNsxtNsService_systemOwned(t *testing.T) {
 	serviceName := "WINS"
 	testResourceName := "data.nsxt_ns_service.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
