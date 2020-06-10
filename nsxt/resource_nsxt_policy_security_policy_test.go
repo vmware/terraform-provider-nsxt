@@ -7,8 +7,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	gm_domains "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/domains"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/domains"
 	"testing"
 )
 
@@ -27,7 +25,7 @@ func TestAccResourceNsxtPolicySecurityPolicy_basic(t *testing.T) {
 	tag2 := "def"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicySecurityPolicyCheckDestroy(state, name, defaultDomain)
@@ -126,7 +124,7 @@ func TestAccResourceNsxtPolicySecurityPolicy_withDependencies(t *testing.T) {
 	defaultProtocol := "IPV4_IPV6"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicySecurityPolicyCheckDestroy(state, name, defaultDomain)
@@ -207,7 +205,7 @@ func TestAccResourceNsxtPolicySecurityPolicy_importBasic(t *testing.T) {
 	testResourceName := "nsxt_policy_security_policy.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicySecurityPolicyCheckDestroy(state, name, defaultDomain)
@@ -240,7 +238,7 @@ func TestAccResourceNsxtGlobalPolicySecurityPolicy_withSite(t *testing.T) {
 	domain := getTestSiteName()
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			testAccOnlyLocalManager(t)
+			testAccOnlyGlobalManager(t)
 			testAccEnvDefined(t, "NSXT_TEST_SITE_NAME")
 			testAccPreCheck(t)
 		},
@@ -360,14 +358,7 @@ func testAccNsxtPolicySecurityPolicyExists(resourceName string, domainName strin
 
 func testAccNsxtPolicySecurityPolicyCheckDestroy(state *terraform.State, displayName string, domainName string) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-	var nsxClient interface{}
 	isPolicyGlobalManager := isPolicyGlobalManager(testAccProvider.Meta())
-	if isPolicyGlobalManager {
-		nsxClient = gm_domains.NewDefaultSecurityPoliciesClient(connector)
-	} else {
-		nsxClient = domains.NewDefaultSecurityPoliciesClient(connector)
-	}
-	var err error
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_policy_security_policy" {
@@ -375,12 +366,7 @@ func testAccNsxtPolicySecurityPolicyCheckDestroy(state *terraform.State, display
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		if isPolicyGlobalManager {
-			_, err = nsxClient.(*gm_domains.DefaultSecurityPoliciesClient).Get(domainName, resourceID)
-		} else {
-			_, err = nsxClient.(*domains.DefaultSecurityPoliciesClient).Get(domainName, resourceID)
-		}
-		if err == nil {
+		if resourceNsxtPolicySecurityPolicyExistsInDomain(resourceID, domainName, connector, isPolicyGlobalManager) {
 			return fmt.Errorf("Policy SecurityPolicy %s still exists", displayName)
 		}
 	}
