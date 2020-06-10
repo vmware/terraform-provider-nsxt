@@ -347,6 +347,13 @@ func testGetObjIDByName(objName string, resourceType string) (string, error) {
 	return "", fmt.Errorf("%s with name '%s' was not found", resourceType, objName)
 }
 
+func testAccNsxtGlobalPolicySite(domainName string) string {
+	return fmt.Sprintf(`
+data "nsxt_policy_site" "test" {
+  display_name = "%s"
+}`, domainName)
+}
+
 func testAccAdjustPolicyInfraConfig(config string) string {
 	if testAccIsGlobalManager() {
 		return strings.ReplaceAll(config, "/infra/", "/global-infra/")
