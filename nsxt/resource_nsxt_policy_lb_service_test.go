@@ -218,7 +218,7 @@ data "nsxt_policy_realization_info" "realization_info" {
 }
 
 func testAccNsxtPolicyLBServiceDeps() string {
-    return fmt.Sprintf(`
+	return fmt.Sprintf(`
 data "nsxt_policy_edge_cluster" "test" {
   display_name = "%s"
 }
@@ -230,7 +230,7 @@ resource "nsxt_policy_tier0_gateway" "test" {
 }
 
 func testAccNsxtPolicyLBServiceTier1CleanUp() string {
-    return testAccNsxtPolicyLBServiceDeps() + `
+	return testAccNsxtPolicyLBServiceDeps() + `
 resource "nsxt_policy_tier1_gateway" "test1" {
   display_name      = "terraform-lb-test-1-update"
   edge_cluster_path = data.nsxt_policy_edge_cluster.test.path
