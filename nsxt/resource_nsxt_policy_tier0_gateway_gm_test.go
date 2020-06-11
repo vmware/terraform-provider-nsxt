@@ -116,7 +116,6 @@ func TestAccResourceNsxtPolicyTier0Gateway_globalManagerNoSubnet(t *testing.T) {
 	})
 }
 
-
 // TODO: Add test for ACTIVE_ACTIVE when HA VIP config is supported
 
 func testAccNsxtPolicyGMGatewayDeps() string {
