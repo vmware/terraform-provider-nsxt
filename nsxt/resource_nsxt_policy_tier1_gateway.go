@@ -60,7 +60,7 @@ func resourceNsxtPolicyTier1Gateway() *schema.Resource {
 			"revision":          getRevisionSchema(),
 			"tag":               getTagsSchema(),
 			"edge_cluster_path": getPolicyEdgeClusterPathSchema(),
-			"locale_service":    getPolicyLocaleServiceSchema(),
+			"locale_service":    getPolicyLocaleServiceSchema(true),
 			"failover_mode":     getFailoverModeSchema(failOverModeDefaultValue),
 			"default_rule_logging": {
 				Type:        schema.TypeBool,
@@ -554,15 +554,16 @@ func resourceNsxtPolicyTier1GatewayRead(d *schema.ResourceData, m interface{}) e
 	if err != nil {
 		return handleReadError(d, "Locale Service for T1", id, err)
 	}
+	var services []map[string]interface{}
 	if len(localeServices) > 0 {
 
-		var services []map[string]interface{}
 		for _, service := range localeServices {
 			if isGlobalManager {
 				cfgMap := make(map[string]interface{})
 				cfgMap["path"] = service.Path
 				cfgMap["edge_cluster_path"] = service.EdgeClusterPath
 				cfgMap["preferred_edge_paths"] = service.PreferredEdgePaths
+				cfgMap["revision"] = service.Revision
 				services = append(services, cfgMap)
 
 			} else {
@@ -572,11 +573,12 @@ func resourceNsxtPolicyTier1GatewayRead(d *schema.ResourceData, m interface{}) e
 			}
 		}
 
-		if len(services) > 0 {
-			d.Set("locale_service", services)
-		}
 	} else {
 		d.Set("edge_cluster_path", "")
+	}
+
+	if isGlobalManager {
+		d.Set("locale_service", services)
 	}
 
 	err = setAdvRulesInSchema(d, obj.RouteAdvertisementRules)
