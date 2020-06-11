@@ -96,7 +96,7 @@ func TestAccResourceNsxtPolicyTier1Gateway_withPoolAllocation(t *testing.T) {
 	failoverMode := "NON_PREEMPTIVE"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTier1CheckDestroy(state, name)
@@ -117,8 +117,8 @@ func TestAccResourceNsxtPolicyTier1Gateway_withPoolAllocation(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "pool_allocation", "ROUTING"),
 					resource.TestCheckResourceAttr(testResourceName, "route_advertisement_types.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "route_advertisement_rule.#", "0"),
-					resource.TestCheckResourceAttr(testResourceName, "ipv6_ndra_profile_path", "/infra/ipv6-ndra-profiles/default"),
-					resource.TestCheckResourceAttr(testResourceName, "ipv6_dad_profile_path", "/infra/ipv6-dad-profiles/default"),
+					resource.TestCheckResourceAttrSet(testResourceName, "ipv6_ndra_profile_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "ipv6_dad_profile_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 				),
@@ -139,8 +139,8 @@ func TestAccResourceNsxtPolicyTier1Gateway_withPoolAllocation(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "pool_allocation", "ROUTING"),
 					resource.TestCheckResourceAttr(testResourceName, "route_advertisement_types.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "route_advertisement_rule.#", "0"),
-					resource.TestCheckResourceAttr(testResourceName, "ipv6_ndra_profile_path", "/infra/ipv6-ndra-profiles/default"),
-					resource.TestCheckResourceAttr(testResourceName, "ipv6_dad_profile_path", "/infra/ipv6-dad-profiles/default"),
+					resource.TestCheckResourceAttrSet(testResourceName, "ipv6_ndra_profile_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "ipv6_dad_profile_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 				),
@@ -161,8 +161,8 @@ func TestAccResourceNsxtPolicyTier1Gateway_withPoolAllocation(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "tier0_path", ""),
 					resource.TestCheckResourceAttr(testResourceName, "route_advertisement_types.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "route_advertisement_rule.#", "0"),
-					resource.TestCheckResourceAttr(testResourceName, "ipv6_ndra_profile_path", "/infra/ipv6-ndra-profiles/default"),
-					resource.TestCheckResourceAttr(testResourceName, "ipv6_dad_profile_path", "/infra/ipv6-dad-profiles/default"),
+					resource.TestCheckResourceAttrSet(testResourceName, "ipv6_ndra_profile_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "ipv6_dad_profile_path"),
 					resource.TestCheckResourceAttr(testResourceName, "pool_allocation", "LB_SMALL"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),

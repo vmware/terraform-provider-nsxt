@@ -10,6 +10,7 @@ import (
 	global_policy "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm"
 	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+	"log"
 	"strings"
 )
 
@@ -50,9 +51,15 @@ func getPolicyEdgeClusterPathSchema() *schema.Schema {
 	}
 }
 
-func getPolicyLocaleServiceSchema() *schema.Schema {
+func getPolicyLocaleServiceSchema(isTier1 bool) *schema.Schema {
+	nodeConficts := []string{}
+	if isTier1 {
+		// for Tier1, enable_standby_relocation can not be enabled if
+		// preferred nodes are specified
+		nodeConficts = append(nodeConficts, "enable_standby_relocation")
+	}
 	return &schema.Schema{
-		Type:          schema.TypeList,
+		Type:          schema.TypeSet,
 		Optional:      true,
 		Description:   "Locale Service for the gateway",
 		ConflictsWith: []string{"edge_cluster_path"},
@@ -65,12 +72,14 @@ func getPolicyLocaleServiceSchema() *schema.Schema {
 					ValidateFunc: validatePolicyPath(),
 				},
 				"preferred_edge_paths": {
-					Type:        schema.TypeSet,
-					Description: "Paths of specific edge nodes",
-					Optional:    true,
-					Elem:        getElemPolicyPathSchema(),
+					Type:          schema.TypeSet,
+					Description:   "Paths of specific edge nodes",
+					Optional:      true,
+					Elem:          getElemPolicyPathSchema(),
+					ConflictsWith: nodeConficts,
 				},
-				"path": getPathSchema(),
+				"path":     getPathSchema(),
+				"revision": getRevisionSchema(),
 			},
 		},
 	}
@@ -147,7 +156,9 @@ func getGatewayIntersiteConfigSchema() *schema.Schema {
 				"transit_subnet": {
 					Type:         schema.TypeString,
 					Description:  "IPv4 subnet for inter-site transit segment connecting service routers across sites for stretched gateway. For IPv6 link local subnet is auto configured",
+					Computed:     true,
 					Optional:     true,
+					ForceNew:     true,
 					ValidateFunc: validateCidr(),
 				},
 				"primary_site_path": {
@@ -212,10 +223,7 @@ func initChildLocaleService(serviceStruct *model.LocaleServices, markForDelete b
 func initGatewayLocaleServices(d *schema.ResourceData, connector *client.RestConnector, listLocaleServicesFunc func(*client.RestConnector, string, bool) ([]model.LocaleServices, error)) ([]*data.StructValue, error) {
 	var localeServices []*data.StructValue
 
-	services := d.Get("locale_service").([]interface{})
-	if len(services) == 0 {
-		return localeServices, nil
-	}
+	services := d.Get("locale_service").(*schema.Set).List()
 
 	existingServices := make(map[string]bool)
 	if len(d.Id()) > 0 {
@@ -235,18 +243,26 @@ func initGatewayLocaleServices(d *schema.ResourceData, connector *client.RestCon
 		edgeClusterPath := cfg["edge_cluster_path"].(string)
 		edgeNodes := interface2StringList(cfg["preferred_edge_paths"].(*schema.Set).List())
 		path := cfg["path"].(string)
+		revision := int64(d.Get("revision").(int))
 
 		var serviceID string
 		if path != "" {
 			serviceID = getPolicyIDFromPath(path)
 		} else {
 			serviceID = newUUID()
+			log.Printf("[DEBUG] Preparing to create locale service %s for gateway %s", serviceID, d.Id())
 		}
 		serviceStruct := model.LocaleServices{
 			Id:                 &serviceID,
 			ResourceType:       &lsType,
 			EdgeClusterPath:    &edgeClusterPath,
 			PreferredEdgePaths: edgeNodes,
+		}
+
+		if _, ok := existingServices[serviceID]; ok {
+			// if this is an update for existing locale service,
+			// we need revision
+			serviceStruct.Revision = &revision
 		}
 
 		dataValue, err := initChildLocaleService(&serviceStruct, false)
@@ -269,6 +285,7 @@ func initGatewayLocaleServices(d *schema.ResourceData, connector *client.RestCon
 				return localeServices, err
 			}
 			localeServices = append(localeServices, dataValue)
+			log.Printf("[DEBUG] Preparing to delete locale service %s for gateway %s", id, d.Id())
 		}
 	}
 
@@ -289,9 +306,11 @@ func getPolicyGatewayIntersiteConfigFromSchema(d *schema.ResourceData) *model.In
 		primarySitePath := data["primary_site_path"].(string)
 		fallbackSites := interface2StringList(data["fallback_site_paths"].(*schema.Set).List())
 		intersiteConfig := model.IntersiteGatewayConfig{
-			IntersiteTransitSubnet: &subnet,
-			PrimarySitePath:        &primarySitePath,
-			FallbackSites:          fallbackSites,
+			PrimarySitePath: &primarySitePath,
+			FallbackSites:   fallbackSites,
+		}
+		if len(subnet) > 0 {
+			intersiteConfig.IntersiteTransitSubnet = &subnet
 		}
 
 		return &intersiteConfig

@@ -69,7 +69,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_withId(t *testing.T) {
 	testResourceName := "nsxt_policy_tier0_gateway.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTier0CheckDestroy(state, name)
@@ -83,7 +83,6 @@ func TestAccResourceNsxtPolicyTier0Gateway_withId(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "id", id),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
-					resource.TestCheckResourceAttr(realizationResourceName, "state", "REALIZED"),
 				),
 			},
 			{
@@ -94,7 +93,6 @@ func TestAccResourceNsxtPolicyTier0Gateway_withId(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "id", id),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
-					resource.TestCheckResourceAttr(realizationResourceName, "state", "REALIZED"),
 				),
 			},
 		},
@@ -594,10 +592,6 @@ resource "nsxt_policy_tier0_gateway" "test" {
     scope = "scope2"
     tag   = "tag2"
   }
-}
-
-data "nsxt_policy_realization_info" "realization_info" {
-  path = nsxt_policy_tier0_gateway.test.path
 }`, id, name)
 }
 

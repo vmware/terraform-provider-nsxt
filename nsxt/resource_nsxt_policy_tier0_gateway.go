@@ -109,7 +109,7 @@ func resourceNsxtPolicyTier0Gateway() *schema.Resource {
 			"ipv6_ndra_profile_path": getIPv6NDRAPathSchema(),
 			"ipv6_dad_profile_path":  getIPv6DadPathSchema(),
 			"edge_cluster_path":      getPolicyEdgeClusterPathSchema(),
-			"locale_service":         getPolicyLocaleServiceSchema(),
+			"locale_service":         getPolicyLocaleServiceSchema(false),
 			"bgp_config":             getPolicyBGPConfigSchema(),
 			"vrf_config":             getPolicyVRFConfigSchema(),
 			"dhcp_config_path":       getPolicyPathSchema(false, false, "Policy path to DHCP server or relay configuration to use for this Tier0"),
@@ -878,15 +878,16 @@ func resourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{}) e
 	if err != nil {
 		return handleReadError(d, "Locale Service for T0", id, err)
 	}
+	var services []map[string]interface{}
 	if len(localeServices) > 0 {
 
-		var services []map[string]interface{}
 		for _, service := range localeServices {
 			if isGlobalManager {
 				cfgMap := make(map[string]interface{})
 				cfgMap["path"] = service.Path
 				cfgMap["edge_cluster_path"] = service.EdgeClusterPath
 				cfgMap["preferred_edge_paths"] = service.PreferredEdgePaths
+				cfgMap["revision"] = service.Revision
 				services = append(services, cfgMap)
 
 			} else {
@@ -901,12 +902,13 @@ func resourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{}) e
 			}
 		}
 
-		if len(services) > 0 {
-			d.Set("locale_service", services)
-		}
 	} else {
 		// set empty bgp_config to keep empty plan
 		d.Set("bgp_config", make([]map[string]interface{}, 0))
+	}
+
+	if isGlobalManager {
+		d.Set("locale_service", services)
 	}
 
 	err = setIpv6ProfilePathsInSchema(d, obj.Ipv6ProfilePaths)
