@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"testing"
 )
 
@@ -200,17 +198,8 @@ func testAccNsxtPolicyVlanSegmentExists(resourceName string) resource.TestCheckF
 		if resourceID == "" {
 			return fmt.Errorf("Policy VLAN Segment resource ID not set in resources")
 		}
-		var err error
-		if testAccIsGlobalManager() {
-			nsxClient := gm_infra.NewDefaultSegmentsClient(connector)
-			_, err = nsxClient.Get(resourceID)
-		} else {
-			nsxClient := infra.NewDefaultSegmentsClient(connector)
-			_, err = nsxClient.Get(resourceID)
-		}
-
-		if err != nil {
-			return fmt.Errorf("Error while retrieving policy VLAN Segment ID %s. Error: %v", resourceID, err)
+		if !resourceNsxtPolicySegmentExists(resourceID, connector, testAccIsGlobalManager()) {
+			return fmt.Errorf("Error while retrieving policy VLAN Segment ID %s", resourceID)
 		}
 
 		return nil
@@ -226,16 +215,9 @@ func testAccNsxtPolicyVlanSegmentCheckDestroy(state *terraform.State, displayNam
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		var err error
-		if testAccIsGlobalManager() {
-			nsxClient := gm_infra.NewDefaultSegmentsClient(connector)
-			_, err = nsxClient.Get(resourceID)
-		} else {
-			nsxClient := infra.NewDefaultSegmentsClient(connector)
-			_, err = nsxClient.Get(resourceID)
-		}
-		if err == nil {
-			return fmt.Errorf("Policy VLAN Segment %s still exists", displayName)
+
+		if resourceNsxtPolicySegmentExists(resourceID, connector, testAccIsGlobalManager()) {
+			return fmt.Errorf("Policy VLAN Segment %s (%s) still exists", displayName, resourceID)
 		}
 	}
 	return nil
