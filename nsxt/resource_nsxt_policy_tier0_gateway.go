@@ -739,7 +739,7 @@ func policyTier0GatewayResourceToInfraStruct(d *schema.ResourceData, connector *
 
 	edgeClusterPath := d.Get("edge_cluster_path").(string)
 	// Local Manager case
-	if len(lsChildren) > 0 || edgeClusterPath != "" {
+	if !isGlobalManager && (len(lsChildren) > 0 || edgeClusterPath != "") {
 		if d.Get("edge_cluster_path") == "" {
 			bgpMap := bgpConfig[0].(map[string]interface{})
 			if bgpMap["enabled"].(bool) {
@@ -758,12 +758,14 @@ func policyTier0GatewayResourceToInfraStruct(d *schema.ResourceData, connector *
 	}
 
 	// Global Manager case - multiple locale services. BGP not supported yet.
-	localeServices, err := initGatewayLocaleServices(d, connector, listPolicyTier0GatewayLocaleServices)
-	if err != nil {
-		return infraStruct, err
-	}
-	if len(localeServices) > 0 {
-		gwChildren = append(gwChildren, localeServices...)
+	if isGlobalManager {
+		localeServices, err := initGatewayLocaleServices(d, connector, listPolicyTier0GatewayLocaleServices)
+		if err != nil {
+			return infraStruct, err
+		}
+		if len(localeServices) > 0 {
+			gwChildren = append(gwChildren, localeServices...)
+		}
 	}
 
 	t0Struct.Children = gwChildren
