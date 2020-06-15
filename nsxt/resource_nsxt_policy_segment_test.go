@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"testing"
 )
 
@@ -70,6 +68,51 @@ func TestAccResourceNsxtPolicySegment_basicUpdate(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "domain_name", "tftest2.org"),
 					resource.TestCheckResourceAttr(testResourceName, "overlay_id", "1011"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicySegment_connectivityPath(t *testing.T) {
+	name := fmt.Sprintf("test-nsx-policy-segment")
+	updatedName := fmt.Sprintf("%s-update", name)
+	testResourceName := "nsxt_policy_segment.test"
+	tzName := getOverlayTransportZoneName()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicySegmentCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicySegmentBasicTemplate(tzName, name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicySegmentExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "subnet.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "subnet.0.cidr", "12.12.2.1/24"),
+					resource.TestCheckResourceAttr(testResourceName, "domain_name", "tftest.org"),
+					resource.TestCheckResourceAttr(testResourceName, "overlay_id", "1011"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, "connectivity_path"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicySegmentUpdateConnectivityTemplate(tzName, updatedName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicySegmentExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test2"),
+					resource.TestCheckResourceAttr(testResourceName, "subnet.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "subnet.0.cidr", "22.22.22.1/24"),
+					resource.TestCheckResourceAttr(testResourceName, "domain_name", "tftest2.org"),
+					resource.TestCheckResourceAttr(testResourceName, "overlay_id", "1011"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
+					resource.TestCheckResourceAttrSet(testResourceName, "connectivity_path"),
 				),
 			},
 		},
@@ -213,16 +256,8 @@ func testAccNsxtPolicySegmentExists(resourceName string) resource.TestCheckFunc 
 			return fmt.Errorf("Policy Segment resource ID not set in resources")
 		}
 
-		var err error
-		if testAccIsGlobalManager() {
-			nsxClient := gm_infra.NewDefaultSegmentsClient(connector)
-			_, err = nsxClient.Get(resourceID)
-		} else {
-			nsxClient := infra.NewDefaultSegmentsClient(connector)
-			_, err = nsxClient.Get(resourceID)
-		}
-		if err != nil {
-			return fmt.Errorf("Error while retrieving policy Segment ID %s. Error: %v", resourceID, err)
+		if !resourceNsxtPolicySegmentExists(resourceID, connector, testAccIsGlobalManager()) {
+			return fmt.Errorf("Error while retrieving policy Segment ID %s", resourceID)
 		}
 
 		return nil
@@ -238,15 +273,7 @@ func testAccNsxtPolicySegmentCheckDestroy(state *terraform.State, displayName st
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		var err error
-		if testAccIsGlobalManager() {
-			nsxClient := gm_infra.NewDefaultSegmentsClient(connector)
-			_, err = nsxClient.Get(resourceID)
-		} else {
-			nsxClient := infra.NewDefaultSegmentsClient(connector)
-			_, err = nsxClient.Get(resourceID)
-		}
-		if err == nil {
+		if resourceNsxtPolicySegmentExists(resourceID, connector, testAccIsGlobalManager()) {
 			return fmt.Errorf("Policy Segment %s still exists", displayName)
 		}
 	}
@@ -259,6 +286,18 @@ func testAccNsxtPolicySegmentDeps(tzName string) string {
 resource "nsxt_policy_tier1_gateway" "tier1ForSegments" {
   display_name              = "t1gw"
   description               = "Acceptance Test"
+  default_rule_logging      = "true"
+  enable_firewall           = "false"
+  enable_standby_relocation = "false"
+  force_whitelisting        = "false"
+  failover_mode             = "NON_PREEMPTIVE"
+  pool_allocation           = "ROUTING"
+  route_advertisement_types = ["TIER1_STATIC_ROUTES", "TIER1_CONNECTED"]
+}
+
+resource "nsxt_policy_tier1_gateway" "anotherTier1ForSegments" {
+  display_name              = "t1gw-b"
+  description               = "Another Tier1"
   default_rule_logging      = "true"
   enable_firewall           = "false"
   enable_standby_relocation = "false"
@@ -293,6 +332,7 @@ resource "nsxt_policy_segment" "test" {
   domain_name         = "tftest.org"
   overlay_id          = 1011
   transport_zone_path = data.nsxt_policy_transport_zone.test.path
+  connectivity_path   = nsxt_policy_tier1_gateway.tier1ForSegments.path
 
   subnet {
      cidr = "12.12.2.1/24"
@@ -315,6 +355,34 @@ resource "nsxt_policy_segment" "test" {
   domain_name         = "tftest2.org"
   overlay_id          = 1011
   transport_zone_path = data.nsxt_policy_transport_zone.test.path
+  connectivity_path   = nsxt_policy_tier1_gateway.tier1ForSegments.path
+
+  subnet {
+     cidr = "22.22.22.1/24"
+  }
+
+  tag {
+    scope = "color"
+    tag   = "green"
+  }
+  tag {
+    scope = "color"
+    tag   = "orange"
+  }
+}
+`, name)
+}
+
+func testAccNsxtPolicySegmentUpdateConnectivityTemplate(tzName string, name string) string {
+	return testAccNsxtPolicySegmentDeps(tzName) + fmt.Sprintf(`
+
+resource "nsxt_policy_segment" "test" {
+  display_name        = "%s"
+  description         = "Acceptance Test2"
+  domain_name         = "tftest2.org"
+  overlay_id          = 1011
+  transport_zone_path = data.nsxt_policy_transport_zone.test.path
+  connectivity_path   = nsxt_policy_tier1_gateway.anotherTier1ForSegments.path
 
   subnet {
      cidr = "22.22.22.1/24"

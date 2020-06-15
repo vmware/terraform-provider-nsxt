@@ -621,9 +621,15 @@ func policySegmentResourceToStruct(d *schema.ResourceData, isVlan bool) (model.S
 }
 
 func resourceNsxtPolicySegmentExists(id string, connector *client.RestConnector, isGlobalManager bool) bool {
-	client := infra.NewDefaultSegmentsClient(connector)
+	var err error
 
-	_, err := client.Get(id)
+	if isGlobalManager {
+		client := gm_infra.NewDefaultSegmentsClient(connector)
+		_, err = client.Get(id)
+	} else {
+		client := infra.NewDefaultSegmentsClient(connector)
+		_, err = client.Get(id)
+	}
 	if err == nil {
 		return true
 	}
