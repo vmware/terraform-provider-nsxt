@@ -23,6 +23,7 @@ const overlayTransportZoneNamePrefix string = "1-transportzone"
 const macPoolDefaultName string = "DefaultMacPool"
 
 const realizationResourceName string = "data.nsxt_policy_realization_info.realization_info"
+const defaultTestResourceName string = "terraform-acctest"
 
 const singleTag string = `
   tag {
@@ -94,6 +95,10 @@ func getTestVMName() string {
 
 func getTestSiteName() string {
 	return os.Getenv("NSXT_TEST_SITE_NAME")
+}
+
+func getTestAnotherSiteName() string {
+	return os.Getenv("NSXT_TEST_ANOTHER_SITE_NAME")
 }
 
 func getTestCertificateName(isClient bool) string {
