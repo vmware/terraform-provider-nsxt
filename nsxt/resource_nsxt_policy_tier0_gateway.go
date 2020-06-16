@@ -757,12 +757,6 @@ func policyTier0GatewayResourceToInfraStruct(d *schema.ResourceData, connector *
 		gwChildren = append(gwChildren, dataValue)
 	}
 
-	// Global Manager case - multiple locale services. BGP not supported yet.
-	localeServices, err := initGatewayLocaleServices(d, connector, listPolicyTier0GatewayLocaleServices)
-	if err != nil {
-		return infraStruct, err
-	}
-
 	if isGlobalManager {
 		localeServices, err := initGatewayLocaleServices(d, connector, listPolicyTier0GatewayLocaleServices)
 		if err != nil {
