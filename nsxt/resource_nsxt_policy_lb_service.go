@@ -73,7 +73,7 @@ func resourceNsxtPolicyLBService() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyLBServiceExists(id string, connector *client.RestConnector) bool {
+func resourceNsxtPolicyLBServiceExists(id string, connector *client.RestConnector, isGlobalManager bool) bool {
 	client := infra.NewDefaultLbServicesClient(connector)
 
 	_, err := client.Get(id)
@@ -99,7 +99,7 @@ func resourceNsxtPolicyLBServiceCreate(d *schema.ResourceData, m interface{}) er
 	}
 
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID(d, connector, resourceNsxtPolicyLBServiceExists)
+	id, err := getOrGenerateID(d, m, resourceNsxtPolicyLBServiceExists)
 	if err != nil {
 		return err
 	}

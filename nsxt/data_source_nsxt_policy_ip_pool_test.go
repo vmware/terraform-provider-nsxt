@@ -13,11 +13,11 @@ import (
 )
 
 func TestAccDataSourceNsxtPolicyIpPool_basic(t *testing.T) {
-	name := "terraform_test"
+	name := "terraform_ds_test"
 	testResourceName := "data.nsxt_policy_ip_pool.test"
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccDataSourceNsxtPolicyIPPoolDeleteByName(name)

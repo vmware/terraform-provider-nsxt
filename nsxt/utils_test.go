@@ -6,8 +6,11 @@ package nsxt
 import (
 	"fmt"
 	"github.com/vmware/go-vmware-nsxt/trust"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"net/http"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -20,6 +23,7 @@ const overlayTransportZoneNamePrefix string = "1-transportzone"
 const macPoolDefaultName string = "DefaultMacPool"
 
 const realizationResourceName string = "data.nsxt_policy_realization_info.realization_info"
+const defaultTestResourceName string = "terraform-acctest"
 
 const singleTag string = `
   tag {
@@ -89,6 +93,14 @@ func getTestVMName() string {
 	return os.Getenv("NSXT_TEST_VM_NAME")
 }
 
+func getTestSiteName() string {
+	return os.Getenv("NSXT_TEST_SITE_NAME")
+}
+
+func getTestAnotherSiteName() string {
+	return os.Getenv("NSXT_TEST_ANOTHER_SITE_NAME")
+}
+
 func getTestCertificateName(isClient bool) string {
 	if isClient {
 		return os.Getenv("NSXT_TEST_CLIENT_CERTIFICATE_NAME")
@@ -99,6 +111,35 @@ func getTestCertificateName(isClient bool) string {
 func testAccEnvDefined(t *testing.T, envVar string) {
 	if len(os.Getenv(envVar)) == 0 {
 		t.Skipf("This test requires %s environment variable to be set", envVar)
+	}
+}
+
+func testAccIsGlobalManager() bool {
+	return os.Getenv("NSXT_GLOBAL_MANAGER") == "true" || os.Getenv("NSXT_GLOBAL_MANAGER") == "1"
+}
+
+func testAccOnlyGlobalManager(t *testing.T) {
+	if !testAccIsGlobalManager() {
+		t.Skipf("This test requires a global manager environment")
+	}
+}
+
+func testAccOnlyLocalManager(t *testing.T) {
+	if testAccIsGlobalManager() {
+		t.Skipf("This test requires a local manager environment")
+	}
+}
+
+func testAccNSXGlobalManagerSitePrecheck(t *testing.T) {
+	if testAccIsGlobalManager() && getTestSiteName() == "" {
+		str := fmt.Sprintf("%s must be set for this acceptance test", "NSXT_TEST_SITE_NAME")
+		t.Fatal(str)
+	}
+}
+
+func testAccSkipIfIsLocalManager(t *testing.T) {
+	if !testAccIsGlobalManager() {
+		t.Skipf("This test is for global manager only")
 	}
 }
 
@@ -286,4 +327,48 @@ func testAccNSXDeleteCerts(t *testing.T, certID string, clientCertID string, caC
 
 func testAccNsxtPolicyEmptyTemplate() string {
 	return " "
+}
+
+func testGetObjIDByName(objName string, resourceType string) (string, error) {
+	connector, err1 := testAccGetPolicyConnector()
+	if err1 != nil {
+		return "", fmt.Errorf("Error during test client initialization: %v", err1)
+	}
+
+	resultValues, err2 := listPolicyResourcesByType(connector, &resourceType, nil)
+	if err2 != nil {
+		return "", err2
+	}
+
+	converter := bindings.NewTypeConverter()
+	converter.SetMode(bindings.REST)
+
+	for _, result := range resultValues {
+		dataValue, errors := converter.ConvertToGolang(result, model.PolicyResourceBindingType())
+		if len(errors) > 0 {
+			return "", errors[0]
+		}
+		policyResource := dataValue.(model.PolicyResource)
+
+		if *policyResource.DisplayName == objName {
+			return *policyResource.Id, nil
+		}
+	}
+
+	return "", fmt.Errorf("%s with name '%s' was not found", resourceType, objName)
+}
+
+func testAccNsxtGlobalPolicySite(domainName string) string {
+	return fmt.Sprintf(`
+data "nsxt_policy_site" "test" {
+  display_name = "%s"
+}`, domainName)
+}
+
+func testAccAdjustPolicyInfraConfig(config string) string {
+	if testAccIsGlobalManager() {
+		return strings.Replace(config, "/infra/", "/global-infra/", -1)
+	}
+
+	return config
 }

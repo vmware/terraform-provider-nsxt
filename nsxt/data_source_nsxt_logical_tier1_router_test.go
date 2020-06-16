@@ -13,11 +13,11 @@ import (
 )
 
 func TestAccDataSourceNsxtLogicalTier1Router_basic(t *testing.T) {
-	routerName := "terraform_test_tier1"
+	routerName := "terraform_ds_test_tier1"
 	testResourceName := "data.nsxt_logical_tier1_router.test"
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccDataSourceNsxtTier1RouterDeleteByName(routerName)

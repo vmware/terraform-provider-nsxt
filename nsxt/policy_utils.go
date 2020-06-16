@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/realized_state"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
@@ -15,13 +16,16 @@ import (
 	"time"
 )
 
-func getOrGenerateID(d *schema.ResourceData, connector *client.RestConnector, presenceChecker func(string, *client.RestConnector) bool) (string, error) {
+func getOrGenerateID(d *schema.ResourceData, m interface{}, presenceChecker func(string, *client.RestConnector, bool) bool) (string, error) {
+	connector := getPolicyConnector(m)
+	isGlobalManager := isPolicyGlobalManager(m)
+
 	id := d.Get("nsx_id").(string)
 	if id == "" {
 		return newUUID(), nil
 	}
 
-	if presenceChecker(id, connector) {
+	if presenceChecker(id, connector, isGlobalManager) {
 		return "", fmt.Errorf("Resource with id %s already exists", id)
 	}
 
@@ -215,4 +219,20 @@ func nsxtPolicyWaitForRealizationStateConf(connector *client.RestConnector, d *s
 
 func getPolicyEnforcementPointPath(m interface{}) string {
 	return "/infra/sites/default/enforcement-points/" + getPolicyEnforcementPoint(m)
+}
+
+func convertModelBindingType(obj interface{}, sourceType bindings.BindingType, destType bindings.BindingType) (interface{}, error) {
+	converter := bindings.NewTypeConverter()
+	converter.SetMode(bindings.REST)
+	dataValue, err := converter.ConvertToVapi(obj, sourceType)
+	if err != nil {
+		return nil, err[0]
+	}
+
+	gmObj, err := converter.ConvertToGolang(dataValue, destType)
+	if err != nil {
+		return nil, err[0]
+	}
+
+	return gmObj, nil
 }

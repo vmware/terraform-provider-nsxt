@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"testing"
 )
 
@@ -119,7 +118,7 @@ func TestAccResourceNsxtPolicyVlanSegment_withDhcp(t *testing.T) {
 	dnsServersV6 := []string{"2000::2", "3000::3"}
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicySegmentCheckDestroy(state, name)
@@ -189,7 +188,6 @@ func testAccNsxtPolicyVlanSegmentExists(resourceName string) resource.TestCheckF
 	return func(state *terraform.State) error {
 
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-		nsxClient := infra.NewDefaultSegmentsClient(connector)
 
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
@@ -200,10 +198,8 @@ func testAccNsxtPolicyVlanSegmentExists(resourceName string) resource.TestCheckF
 		if resourceID == "" {
 			return fmt.Errorf("Policy VLAN Segment resource ID not set in resources")
 		}
-
-		_, err := nsxClient.Get(resourceID)
-		if err != nil {
-			return fmt.Errorf("Error while retrieving policy VLAN Segment ID %s. Error: %v", resourceID, err)
+		if !resourceNsxtPolicySegmentExists(resourceID, connector, testAccIsGlobalManager()) {
+			return fmt.Errorf("Error while retrieving policy VLAN Segment ID %s", resourceID)
 		}
 
 		return nil
@@ -212,7 +208,6 @@ func testAccNsxtPolicyVlanSegmentExists(resourceName string) resource.TestCheckF
 
 func testAccNsxtPolicyVlanSegmentCheckDestroy(state *terraform.State, displayName string) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-	nsxClient := infra.NewDefaultSegmentsClient(connector)
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_policy_vlan_segment" {
@@ -220,21 +215,16 @@ func testAccNsxtPolicyVlanSegmentCheckDestroy(state *terraform.State, displayNam
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		_, err := nsxClient.Get(resourceID)
-		if err == nil {
-			return fmt.Errorf("Policy VLAN Segment %s still exists", displayName)
+
+		if resourceNsxtPolicySegmentExists(resourceID, connector, testAccIsGlobalManager()) {
+			return fmt.Errorf("Policy VLAN Segment %s (%s) still exists", displayName, resourceID)
 		}
 	}
 	return nil
 }
 
 func testAccNsxtPolicyVlanSegmentDeps() string {
-	return fmt.Sprintf(`
-data "nsxt_policy_transport_zone" "vlantz" {
-  display_name = "%s"
-}
-
-`, getVlanTransportZoneName())
+	return testAccNSXPolicyTransportZoneReadTemplate(getVlanTransportZoneName())
 }
 
 func testAccNsxtPolicyVlanSegmentImportTemplate(name string) string {
@@ -243,7 +233,7 @@ resource "nsxt_policy_vlan_segment" "test" {
   display_name        = "%s"
   description         = "Acceptance Test"
   vlan_ids            = ["101"]
-  transport_zone_path = data.nsxt_policy_transport_zone.vlantz.path
+  transport_zone_path = data.nsxt_policy_transport_zone.test.path
 }
 `, name)
 }
@@ -254,7 +244,7 @@ func testAccNsxtPolicyVlanSegmentBasicTemplate(name string) string {
 resource "nsxt_policy_vlan_segment" "test" {
   display_name        = "%s"
   description         = "Acceptance Test"
-  transport_zone_path = data.nsxt_policy_transport_zone.vlantz.path
+  transport_zone_path = data.nsxt_policy_transport_zone.test.path
   domain_name         = "tftest.org"
   vlan_ids            = ["101"]
 
@@ -272,7 +262,7 @@ func testAccNsxtPolicyVlanSegmentBasicUpdateTemplate(name string) string {
 resource "nsxt_policy_vlan_segment" "test" {
   display_name        = "%s"
   description         = "Acceptance Test2"
-  transport_zone_path = data.nsxt_policy_transport_zone.vlantz.path
+  transport_zone_path = data.nsxt_policy_transport_zone.test.path
   domain_name         = "tftest2.org"
   vlan_ids            = ["101", "104-110"]
 
@@ -295,7 +285,7 @@ resource "nsxt_policy_vlan_segment" "test" {
   display_name        = "%s"
   description         = "Acceptance Test"
   domain_name         = "tftest.org"
-  transport_zone_path = data.nsxt_policy_transport_zone.vlantz.path
+  transport_zone_path = data.nsxt_policy_transport_zone.test.path
   vlan_ids            = ["101", "102"]
 
   tag {
@@ -318,7 +308,7 @@ resource "nsxt_policy_vlan_segment" "test" {
   display_name        = "%s"
   description         = "Acceptance Test"
   domain_name         = "tftest.org"
-  transport_zone_path = data.nsxt_policy_transport_zone.vlantz.path
+  transport_zone_path = data.nsxt_policy_transport_zone.test.path
   vlan_ids            = ["101", "102"]
 
   tag {
@@ -348,7 +338,7 @@ resource "nsxt_policy_dhcp_server" "test" {
 
 resource "nsxt_policy_vlan_segment" "test" {
   display_name        = "%s"
-  transport_zone_path = data.nsxt_policy_transport_zone.vlantz.path
+  transport_zone_path = data.nsxt_policy_transport_zone.test.path
   vlan_ids            = ["101", "102"]
 
   subnet {

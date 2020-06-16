@@ -13,8 +13,12 @@ func TestAccDataSourceNsxtPolicyCertificate_basic(t *testing.T) {
 	name := getTestCertificateName(false)
 	testResourceName := "data.nsxt_policy_certificate.test"
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccEnvDefined(t, "NSXT_TEST_CERTIFICATE_NAME") },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccOnlyLocalManager(t)
+			testAccPreCheck(t)
+			testAccEnvDefined(t, "NSXT_TEST_CERTIFICATE_NAME")
+		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{

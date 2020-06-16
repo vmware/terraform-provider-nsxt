@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"testing"
 )
@@ -600,7 +601,6 @@ func testAccNsxtPolicyServiceExists(resourceName string) resource.TestCheckFunc 
 	return func(state *terraform.State) error {
 
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-		nsxClient := infra.NewDefaultServicesClient(connector)
 
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
@@ -612,7 +612,14 @@ func testAccNsxtPolicyServiceExists(resourceName string) resource.TestCheckFunc 
 			return fmt.Errorf("Policy service resource ID not set in resources")
 		}
 
-		_, err := nsxClient.Get(resourceID)
+		var err error
+		if testAccIsGlobalManager() {
+			nsxClient := gm_infra.NewDefaultServicesClient(connector)
+			_, err = nsxClient.Get(resourceID)
+		} else {
+			nsxClient := infra.NewDefaultServicesClient(connector)
+			_, err = nsxClient.Get(resourceID)
+		}
 		if err != nil {
 			return fmt.Errorf("Error while retrieving policy service ID %s. Error: %v", resourceID, err)
 		}
@@ -623,7 +630,7 @@ func testAccNsxtPolicyServiceExists(resourceName string) resource.TestCheckFunc 
 
 func testAccNsxtPolicyServiceCheckDestroy(state *terraform.State, displayName string) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-	nsxClient := infra.NewDefaultServicesClient(connector)
+	var err error
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_policy_service" {
@@ -631,7 +638,13 @@ func testAccNsxtPolicyServiceCheckDestroy(state *terraform.State, displayName st
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		_, err := nsxClient.Get(resourceID)
+		if testAccIsGlobalManager() {
+			nsxClient := gm_infra.NewDefaultServicesClient(connector)
+			_, err = nsxClient.Get(resourceID)
+		} else {
+			nsxClient := infra.NewDefaultServicesClient(connector)
+			_, err = nsxClient.Get(resourceID)
+		}
 		if err == nil {
 			return fmt.Errorf("Policy service %s still exists", displayName)
 		}

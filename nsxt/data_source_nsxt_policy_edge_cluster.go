@@ -20,17 +20,44 @@ func dataSourceNsxtPolicyEdgeCluster() *schema.Resource {
 			"display_name": getDataSourceDisplayNameSchema(),
 			"description":  getDataSourceDescriptionSchema(),
 			"path":         getPathSchema(),
+			"site_path": {
+				Type:         schema.TypeString,
+				Description:  "Path of the site this Edge cluster belongs to",
+				Optional:     true,
+				ValidateFunc: validatePolicyPath(),
+			},
 		},
 	}
 }
 
 func dataSourceNsxtPolicyEdgeClusterRead(d *schema.ResourceData, m interface{}) error {
 	// Read an edge cluster by name or id
-	connector := getPolicyConnector(m)
-	client := enforcement_points.NewDefaultEdgeClustersClient(connector)
+	objSitePath := d.Get("site_path").(string)
 
 	objID := d.Get("id").(string)
 	objName := d.Get("display_name").(string)
+
+	if !isPolicyGlobalManager(m) && objSitePath != "" {
+		return globalManagerOnlyError()
+	}
+	if isPolicyGlobalManager(m) {
+		if objSitePath == "" {
+			return attributeRequiredGlobalManagerError("site_path", "nsxt_policy_edge_cluster")
+		}
+
+		query := make(map[string]string)
+		globalPolicyEnforcementPointPath := getGlobalPolicyEnforcementPointPath(m, &objSitePath)
+		query["parent_path"] = globalPolicyEnforcementPointPath
+		_, err := policyDataSourceResourceReadWithValidation(d, getPolicyConnector(m), "PolicyEdgeCluster", query, false)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+
+	// Local manager
+	connector := getPolicyConnector(m)
+	client := enforcement_points.NewDefaultEdgeClustersClient(connector)
 	var obj model.PolicyEdgeCluster
 	if objID != "" {
 		// Get by id
@@ -74,7 +101,6 @@ func dataSourceNsxtPolicyEdgeClusterRead(d *schema.ResourceData, m interface{}) 
 			return fmt.Errorf("edge cluster '%s' was not found", objName)
 		}
 	}
-
 	d.SetId(*obj.Id)
 	d.Set("display_name", obj.DisplayName)
 	d.Set("description", obj.Description)

@@ -72,7 +72,6 @@ The following arguments are supported:
   * `tag` - (Optional) A list of scope + tag pairs to associate with this Rule.
   * `action` - (Optional) The action for the Rule. Must be one of: `ALLOW`, `DROP` or `REJECT`. Defaults to `ALLOW`.
 
-
 ## Attributes Reference
 
 In addition to arguments listed above, the following attributes are exported:

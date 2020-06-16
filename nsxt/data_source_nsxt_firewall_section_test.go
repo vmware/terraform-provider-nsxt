@@ -13,11 +13,11 @@ import (
 )
 
 func TestAccDataSourceNsxtFirewallSection_basic(t *testing.T) {
-	name := "terraform_test_firewall_section"
+	name := "terraform_ds_test_firewall_section"
 	testResourceName := "data.nsxt_firewall_section.test"
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccDataSourceNsxtFirewallSectionDeleteByName(name)

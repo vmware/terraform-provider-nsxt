@@ -39,7 +39,7 @@ func resourceNsxtPolicyIPBlock() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyIPBlockExists(id string, connector *client.RestConnector) bool {
+func resourceNsxtPolicyIPBlockExists(id string, connector *client.RestConnector, isGlobalManager bool) bool {
 	client := infra.NewDefaultIpBlocksClient(connector)
 
 	_, err := client.Get(id)
@@ -84,7 +84,7 @@ func resourceNsxtPolicyIPBlockCreate(d *schema.ResourceData, m interface{}) erro
 	connector := getPolicyConnector(m)
 	client := infra.NewDefaultIpBlocksClient(connector)
 
-	id, err := getOrGenerateID(d, connector, resourceNsxtPolicyIPBlockExists)
+	id, err := getOrGenerateID(d, m, resourceNsxtPolicyIPBlockExists)
 	if err != nil {
 		return err
 	}

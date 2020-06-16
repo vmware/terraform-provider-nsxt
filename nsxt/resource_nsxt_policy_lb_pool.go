@@ -401,7 +401,7 @@ func setPolicyPoolSnatInSchema(d *schema.ResourceData, snat *data.StructValue) e
 	return nil
 }
 
-func resourceNsxtPolicyLBPoolExists(id string, connector *client.RestConnector) bool {
+func resourceNsxtPolicyLBPoolExists(id string, connector *client.RestConnector, isGlobalManager bool) bool {
 	client := infra.NewDefaultLbPoolsClient(connector)
 
 	_, err := client.Get(id)
@@ -427,7 +427,7 @@ func resourceNsxtPolicyLBPoolCreate(d *schema.ResourceData, m interface{}) error
 	}
 
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID(d, connector, resourceNsxtPolicyLBPoolExists)
+	id, err := getOrGenerateID(d, m, resourceNsxtPolicyLBPoolExists)
 	if err != nil {
 		return err
 	}

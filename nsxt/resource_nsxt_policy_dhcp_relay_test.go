@@ -28,7 +28,7 @@ func TestAccResourceNsxtPolicyDhcpRelayConfig_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_dhcp_relay.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyDhcpRelayConfigCheckDestroy(state, accTestPolicyDhcpRelayConfigCreateAttributes["display_name"])
@@ -82,7 +82,7 @@ func TestAccResourceNsxtPolicyDhcpRelayConfig_importBasic(t *testing.T) {
 	testResourceName := "nsxt_policy_dhcp_relay.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyDhcpRelayConfigCheckDestroy(state, name)

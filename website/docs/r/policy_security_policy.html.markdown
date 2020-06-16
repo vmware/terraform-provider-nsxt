@@ -43,13 +43,49 @@ resource "nsxt_policy_security_policy" "policy1" {
 }
 ```
 
+Note: This usage is for Global Manager only
+```hcl
+data "nsxt_policy_site" "paris" {
+  display_name = "Paris"
+}
+resource "nsxt_policy_security_policy" "policy1" {
+    display_name = "policy1"
+    description  = "Terraform provisioned Security Policy"
+    category     = "Application"
+    locked       = false
+    stateful     = true
+    tcp_strict   = false
+    scope        = [nsxt_policy_group.pets.path]
+    domain       = data.nsxt_policy_site.paris.id
+
+    rule {
+      display_name       = "block_icmp"
+      destination_groups = [nsxt_policy_group.cats.path, nsxt_policy_group.dogs.path]
+      action             = "DROP"
+      services           = [nsxt_policy_service.icmp.path]
+      logged             = true
+    }
+
+    rule {
+      display_name     = "allow_udp"
+      source_groups    = [nsxt_policy_group.fish.path]
+      sources_excluded = true
+      scope            = [nsxt_policy_group.aquarium.path]
+      action           = "ALLOW"
+      services         = [nsxt_policy_service.udp.path]
+      logged           = true
+      disabled         = true
+      notes            = "Disabled by starfish for debugging"
+    }
+}
+
 ## Argument Reference
 
 The following arguments are supported:
 
 * `display_name` - (Required) Display name of the resource.
 * `description` - (Optional) Description of the resource.
-* `domain` - (Optional) The domain to use for the resource. This domain must already exist. For VMware Cloud on AWS use `cgw`.
+* `domain` - (Optional) The domain to use for the resource. This domain must already exist. For VMware Cloud on AWS use `cgw`. For Global Manager, please use site id for this field. If not specified, this field is default to `default`.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this policy.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `category` - (Required) Category of this policy, one of `Ethernet`, `Emergency`, `Infrastructure`, `Environment`, `Application`.

@@ -63,7 +63,7 @@ func resourceNsxtPolicyDhcpServer() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyDhcpServerExists(id string, connector *client.RestConnector) bool {
+func resourceNsxtPolicyDhcpServerExists(id string, connector *client.RestConnector, isGlobalManager bool) bool {
 	client := infra.NewDefaultDhcpServerConfigsClient(connector)
 
 	_, err := client.Get(id)
@@ -120,7 +120,7 @@ func resourceNsxtPolicyDhcpServerCreate(d *schema.ResourceData, m interface{}) e
 	}
 
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID(d, connector, resourceNsxtPolicyDhcpServerExists)
+	id, err := getOrGenerateID(d, m, resourceNsxtPolicyDhcpServerExists)
 	if err != nil {
 		return err
 	}

@@ -13,8 +13,8 @@ func TestAccDataSourceNsxtMacPool_basic(t *testing.T) {
 	macPoolName := getMacPoolName()
 	testResourceName := "data.nsxt_mac_pool.test"
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{

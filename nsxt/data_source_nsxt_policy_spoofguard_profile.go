@@ -25,6 +25,14 @@ func dataSourceNsxtPolicySpoofGuardProfile() *schema.Resource {
 }
 
 func dataSourceNsxtPolicySpoofGuardProfileRead(d *schema.ResourceData, m interface{}) error {
+	if isPolicyGlobalManager(m) {
+		_, err := policyDataSourceResourceRead(d, getPolicyConnector(m), "SpoofGuardProfile", nil)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+
 	connector := getPolicyConnector(m)
 	client := infra.NewDefaultSpoofguardProfilesClient(connector)
 

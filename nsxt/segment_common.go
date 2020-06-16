@@ -8,6 +8,9 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
+	gm_segments "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/segments"
+	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/segments"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
@@ -109,18 +112,16 @@ func getPolicySegmentSubnetSchema() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"dhcp_v4_config": {
-				Type:          schema.TypeList,
-				Optional:      true,
-				Elem:          getPolicySegmentDhcpV4ConfigSchema(),
-				MaxItems:      1,
-				ConflictsWith: []string{"subnet.dhcp_v6_config"},
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem:     getPolicySegmentDhcpV4ConfigSchema(),
+				MaxItems: 1,
 			},
 			"dhcp_v6_config": {
-				Type:          schema.TypeList,
-				Optional:      true,
-				Elem:          getPolicySegmentDhcpV6ConfigSchema(),
-				MaxItems:      1,
-				ConflictsWith: []string{"subnet.dhcp_v4_config"},
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem:     getPolicySegmentDhcpV6ConfigSchema(),
+				MaxItems: 1,
 			},
 			"dhcp_ranges": {
 				Type:        schema.TypeList,
@@ -619,10 +620,16 @@ func policySegmentResourceToStruct(d *schema.ResourceData, isVlan bool) (model.S
 	return obj, nil
 }
 
-func resourceNsxtPolicySegmentExists(id string, connector *client.RestConnector) bool {
-	client := infra.NewDefaultSegmentsClient(connector)
+func resourceNsxtPolicySegmentExists(id string, connector *client.RestConnector, isGlobalManager bool) bool {
+	var err error
 
-	_, err := client.Get(id)
+	if isGlobalManager {
+		client := gm_infra.NewDefaultSegmentsClient(connector)
+		_, err = client.Get(id)
+	} else {
+		client := infra.NewDefaultSegmentsClient(connector)
+		_, err = client.Get(id)
+	}
 	if err == nil {
 		return true
 	}
@@ -637,16 +644,31 @@ func resourceNsxtPolicySegmentExists(id string, connector *client.RestConnector)
 
 func nsxtPolicySegmentRead(d *schema.ResourceData, m interface{}, isVlan bool) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewDefaultSegmentsClient(connector)
 
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining Segment ID")
 	}
 
-	obj, err := client.Get(id)
-	if err != nil {
-		return handleReadError(d, "Segment", id, err)
+	var obj model.Segment
+	if isPolicyGlobalManager(m) {
+		client := gm_infra.NewDefaultSegmentsClient(connector)
+		gmObj, err := client.Get(id)
+		if err != nil {
+			return handleReadError(d, "Segment", id, err)
+		}
+		lmObj, err := convertModelBindingType(gmObj, gm_model.SegmentBindingType(), model.SegmentBindingType())
+		if err != nil {
+			return err
+		}
+		obj = lmObj.(model.Segment)
+	} else {
+		client := infra.NewDefaultSegmentsClient(connector)
+		var err error
+		obj, err = client.Get(id)
+		if err != nil {
+			return handleReadError(d, "Segment", id, err)
+		}
 	}
 
 	d.Set("display_name", obj.DisplayName)
@@ -715,10 +737,9 @@ func nsxtPolicySegmentRead(d *schema.ResourceData, m interface{}, isVlan bool) e
 
 func nsxtPolicySegmentCreate(d *schema.ResourceData, m interface{}, isVlan bool) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewDefaultSegmentsClient(connector)
 
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID(d, connector, resourceNsxtPolicySegmentExists)
+	id, err := getOrGenerateID(d, m, resourceNsxtPolicySegmentExists)
 	if err != nil {
 		return err
 	}
@@ -729,7 +750,17 @@ func nsxtPolicySegmentCreate(d *schema.ResourceData, m interface{}, isVlan bool)
 	if err != nil {
 		return err
 	}
-	err = client.Patch(id, obj)
+	if isPolicyGlobalManager(m) {
+		gmObj, err := convertModelBindingType(obj, model.SegmentBindingType(), gm_model.SegmentBindingType())
+		if err != nil {
+			return err
+		}
+		client := gm_infra.NewDefaultSegmentsClient(connector)
+		err = client.Patch(id, gmObj.(gm_model.Segment))
+	} else {
+		client := infra.NewDefaultSegmentsClient(connector)
+		err = client.Patch(id, obj)
+	}
 	if err != nil {
 		return handleCreateError("Segment", id, err)
 	}
@@ -742,7 +773,6 @@ func nsxtPolicySegmentCreate(d *schema.ResourceData, m interface{}, isVlan bool)
 
 func nsxtPolicySegmentUpdate(d *schema.ResourceData, m interface{}, isVlan bool) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewDefaultSegmentsClient(connector)
 
 	id := d.Id()
 	if id == "" {
@@ -753,7 +783,18 @@ func nsxtPolicySegmentUpdate(d *schema.ResourceData, m interface{}, isVlan bool)
 	if err != nil {
 		return err
 	}
-	_, err = client.Update(id, obj)
+
+	if isPolicyGlobalManager(m) {
+		gmObj, err := convertModelBindingType(obj, model.SegmentBindingType(), gm_model.SegmentBindingType())
+		if err != nil {
+			return err
+		}
+		client := gm_infra.NewDefaultSegmentsClient(connector)
+		_, err = client.Update(id, gmObj.(gm_model.Segment))
+	} else {
+		client := infra.NewDefaultSegmentsClient(connector)
+		_, err = client.Update(id, obj)
+	}
 	if err != nil {
 		return handleUpdateError("Segment", id, err)
 	}
@@ -768,10 +809,8 @@ func nsxtPolicySegmentDelete(d *schema.ResourceData, m interface{}) error {
 	}
 
 	connector := getPolicyConnector(m)
-	client := infra.NewDefaultSegmentsClient(connector)
-	portsClient := segments.NewDefaultPortsClient(connector)
 
-	// During buld destroy, VMs might be destroyed before segments, but
+	// During bulk destroy, VMs might be destroyed before segments, but
 	// VIF release is not yet propagated to NSX. NSX will reply with
 	// InvalidRequest on attempted delete if ports are present on the
 	// segment. The code below waits till possible ports are deleted.
@@ -781,14 +820,29 @@ func nsxtPolicySegmentDelete(d *schema.ResourceData, m interface{}) error {
 		Pending: pendingStates,
 		Target:  targetStates,
 		Refresh: func() (interface{}, string, error) {
-			ports, err := portsClient.List(id, nil, nil, nil, nil, nil, nil)
-			if err != nil {
-				return ports, "error", logAPIError("Error listing segment ports", err)
+			var ports interface{}
+			var numOfPorts int
+			if isPolicyGlobalManager(m) {
+				portsClient := gm_segments.NewDefaultPortsClient(connector)
+				gm_ports, err := portsClient.List(id, nil, nil, nil, nil, nil, nil)
+				if err != nil {
+					return gm_ports, "error", logAPIError("Error listing segment ports", err)
+				}
+				numOfPorts = len(gm_ports.Results)
+				ports = gm_ports
+			} else {
+				portsClient := segments.NewDefaultPortsClient(connector)
+				lm_ports, err := portsClient.List(id, nil, nil, nil, nil, nil, nil)
+				if err != nil {
+					return lm_ports, "error", logAPIError("Error listing segment ports", err)
+				}
+				numOfPorts = len(lm_ports.Results)
+				ports = lm_ports
 			}
 
-			log.Printf("[DEBUG] Current number of ports on segment %s is %d", id, len(ports.Results))
+			log.Printf("[DEBUG] Current number of ports on segment %s is %d", id, numOfPorts)
 
-			if len(ports.Results) > 0 {
+			if numOfPorts > 0 {
 				return ports, "pending", nil
 			}
 			return ports, "ok", nil
@@ -802,7 +856,15 @@ func nsxtPolicySegmentDelete(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return fmt.Errorf("Failed to get port information for segment %s: %v", id, err)
 	}
-	err = client.Delete(id)
+
+	if isPolicyGlobalManager(m) {
+		client := gm_infra.NewDefaultSegmentsClient(connector)
+		err = client.Delete(id)
+	} else {
+		client := infra.NewDefaultSegmentsClient(connector)
+		err = client.Delete(id)
+	}
+
 	if err != nil {
 		return handleDeleteError("Segment", id, err)
 	}

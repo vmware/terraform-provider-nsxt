@@ -56,6 +56,34 @@ resource "nsxt_policy_tier0_gateway" "tier0_gw" {
 }
 ```
 
+## Global manager example usage
+```hcl
+resource "nsxt_policy_tier0_gateway" "tier0_gw" {
+  description   = "Tier-0 provisioned by Terraform"
+  display_name  = "Tier0-gw1"
+  failover_mode = "PREEMPTIVE"
+
+  locale_service {
+    edge_cluster_path = data.nsxt_policy_edge_cluster.paris.path
+  }
+
+  locale_service {
+    edge_cluster_path = data.nsxt_policy_edge_cluster.london.path
+    preferred_edge_paths = [data.nsxt_policy_egde_node.edge1.path]
+  }
+
+  intersite_config {
+    primary_site_path = data.nsxt_policy_site.paris.path
+  }
+
+  tag {
+    scope = "color"
+    tag   = "blue"
+  }
+}
+```
+
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -64,7 +92,10 @@ The following arguments are supported:
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this Tier-0 gateway.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the policy resource.
-* `edge_cluster_path` - (Optional) The path of the edge cluster where the Tier-0 is placed. Must be specified when `bgp_config` is enabled.
+* `edge_cluster_path` - (Optional) The path of the edge cluster where the Tier-0 is placed. Must be specified when `bgp_config` is enabled. This argument is not applicable for NSX Global Manager - use locale-services clause instead.
+* `locale_service` - (Optional) This argument is applicable for NSX Global Manager only. Multiple locale services can be specified for multiple locations.
+  * `edge_cluster_path` - (Required) The path of the edge cluster where the Tier-0 is placed.
+  * `preferred_edge_nodes` - (Optional) Policy paths to edge nodes. Specified edge is used as preferred edge cluster member when failover mode is set to `PREEMPTIVE`.
 * `failover_mode` - (Optional) This failover mode determines, whether the preferred service router instance for given logical router will preempt the peer. Accepted values are PREEMPTIVE/NON_PREEMPTIVE.
 * `default_rule_logging` - (Optional) Boolean flag indicating if the default rule logging will be enabled or not. The default value is false.
 * `enable_firewall` - (Optional) Boolean flag indicating if the edge firewall will be enabled or not. The default value is true.
@@ -97,6 +128,11 @@ The following arguments are supported:
     * `address_family` - (Optional) Address family, currently only `L2VPN_EVPN` is supported, which is the default.
     * `import_targets` - (Optional) List of import route targets. Format: <ASN>:<number>.
     * `export_targets` - (Optional) List of export route targets. Format: <ASN>:<number>.
+* `intersite_config` - (Optional) This clause is relevant for Global Manager only.
+  * `transit_subnet` - (Optional) IPv4 subnet for inter-site transit segment connecting service routers across sites for stretched gateway. For IPv6 link local subnet is auto configured.
+  * `primary_site_path` - (Optional) Primary egress site for gateway.
+  * `fallback_site_paths` - (Optional) Fallback sites to be used as new primary site on current primary site failure.
+
 
 ## Attributes Reference
 

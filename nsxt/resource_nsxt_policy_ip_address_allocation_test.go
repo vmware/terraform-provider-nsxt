@@ -27,7 +27,7 @@ func TestAccResourceNsxtPolicyIPAddressAllocation_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_ip_address_allocation.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyIPAddressAllocationCheckDestroy(state, accTestPolicyIPAddressAllocationCreateAttributes["display_name"])
@@ -75,7 +75,7 @@ func TestAccResourceNsxtPolicyIPAddressAllocation_anyIPBasic(t *testing.T) {
 	testResourceName := "nsxt_policy_ip_address_allocation.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyIPAddressAllocationCheckDestroy(state, accTestPolicyIPAddressAllocationCreateAttributes["display_name"])
@@ -124,7 +124,7 @@ func TestAccResourceNsxtPolicyIPAddressAllocation_importBasic(t *testing.T) {
 	testResourceName := "nsxt_policy_ip_address_allocation.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyIPAddressAllocationCheckDestroy(state, name)
@@ -183,12 +183,9 @@ func testAccNsxtPolicyIPAddressAllocationExists(resourceName string) resource.Te
 		if poolPath == "" {
 			return fmt.Errorf("No pool_path found for IP Address Allocation with ID %s", resourceID)
 		}
-		poolID, err := resourceNsxtPolicyIPAddressParsePoolIDFromPath(poolPath, connector)
-		if err != nil {
-			return err
-		}
+		poolID := getPolicyIDFromPath(poolPath)
 
-		_, err = nsxClient.Get(poolID, resourceID)
+		_, err := nsxClient.Get(poolID, resourceID)
 		if err != nil {
 			return fmt.Errorf("Error while retrieving policy IPAddressAllocation ID %s. Error: %v", resourceID, err)
 		}
@@ -211,12 +208,9 @@ func testAccNsxtPolicyIPAddressAllocationCheckDestroy(state *terraform.State, di
 		if poolPath == "" {
 			return fmt.Errorf("No pool_path found for IP Address Allocation with ID %s", resourceID)
 		}
-		poolID, err := resourceNsxtPolicyIPAddressParsePoolIDFromPath(poolPath, connector)
-		if err != nil {
-			return err
-		}
+		poolID := getPolicyIDFromPath(poolPath)
 
-		_, err = nsxClient.Get(poolID, resourceID)
+		_, err := nsxClient.Get(poolID, resourceID)
 		if err == nil {
 			return fmt.Errorf("Policy IPAddressAllocation %s still exists", displayName)
 		}

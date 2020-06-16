@@ -72,7 +72,7 @@ func resourceNsxtPolicyTier1GatewayInterfaceCreate(d *schema.ResourceData, m int
 	id := d.Get("nsx_id").(string)
 	tier1Path := d.Get("gateway_path").(string)
 	tier1ID := getPolicyIDFromPath(tier1Path)
-	localeService, err := resourceNsxtPolicyTier1GatewayGetLocaleServiceEntry(tier1ID, connector)
+	localeService, err := getPolicyTier1GatewayLocaleServiceEntry(tier1ID, connector)
 	if err != nil {
 		return err
 	}

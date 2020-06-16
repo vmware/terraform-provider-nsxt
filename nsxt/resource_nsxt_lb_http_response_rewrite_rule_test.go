@@ -20,7 +20,7 @@ func TestAccResourceNsxtLbHttpResponseRewriteRule_basic(t *testing.T) {
 	updatedMatchType := "REGEX"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLbHTTPResponseRewriteRuleCheckDestroy(state, name)
@@ -140,7 +140,7 @@ func TestAccResourceNsxtLbHttpResponseRewriteRule_importBasic(t *testing.T) {
 	name := "test"
 	resourceName := "nsxt_lb_http_response_rewrite_rule.test"
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLbHTTPResponseRewriteRuleCheckDestroy(state, name)
