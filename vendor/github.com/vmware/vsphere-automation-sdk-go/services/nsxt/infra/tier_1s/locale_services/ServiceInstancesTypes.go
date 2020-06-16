@@ -66,7 +66,7 @@ func serviceInstancesDeleteRestMetadata() protocol.OperationRestMetadata {
 	pathParams["service_instance_id"] = "serviceInstanceId"
 	pathParams["locale_service_id"] = "localeServiceId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -130,7 +130,7 @@ func serviceInstancesGetRestMetadata() protocol.OperationRestMetadata {
 	pathParams["service_instance_id"] = "serviceInstanceId"
 	pathParams["locale_service_id"] = "localeServiceId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -223,7 +223,7 @@ func serviceInstancesListRestMetadata() protocol.OperationRestMetadata {
 	queryParams["include_mark_for_delete_objects"] = "include_mark_for_delete_objects"
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -292,7 +292,7 @@ func serviceInstancesPatchRestMetadata() protocol.OperationRestMetadata {
 	pathParams["service_instance_id"] = "serviceInstanceId"
 	pathParams["locale_service_id"] = "localeServiceId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -361,7 +361,7 @@ func serviceInstancesUpdateRestMetadata() protocol.OperationRestMetadata {
 	pathParams["service_instance_id"] = "serviceInstanceId"
 	pathParams["locale_service_id"] = "localeServiceId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

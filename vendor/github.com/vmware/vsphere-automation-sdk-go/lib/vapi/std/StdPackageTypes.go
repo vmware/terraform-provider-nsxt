@@ -15,6 +15,8 @@ package std
 import (
 	"reflect"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/log"
 	"time"
 )
 
@@ -102,6 +104,23 @@ const AuthenticationScheme_USER_PASSWORD = "com.vmware.vapi.std.security.user_pa
 //  vAPI runtime provides convenient factory methods that takes OAuth2 access token as input parameter and creates a security context that conforms to the above format.
 const AuthenticationScheme_OAUTH_ACCESS_TOKEN = "com.vmware.vapi.std.security.oauth"
 
+func (s AuthenticationScheme) GetType__() bindings.BindingType {
+	return AuthenticationSchemeBindingType()
+}
+
+func (s AuthenticationScheme) GetDataValue__() (data.DataValue, []error) {
+	typeConverter := bindings.NewTypeConverter()
+	typeConverter.SetMode(bindings.JSONRPC)
+	dataVal, err := typeConverter.ConvertToVapi(s, s.GetType__())
+	if err != nil {
+		log.Errorf("Error in ConvertToVapi for AuthenticationScheme._GetDataValue method - %s",
+			bindings.VAPIerrorsToError(err).Error())
+		return nil, err
+	}
+	return dataVal, nil
+}
+
+
 // The ``DynamicID`` class represents an identifier for a resource of an arbitrary type.
 type DynamicID struct {
     // The type of resource being identified (for example ``com.acme.Person``). 
@@ -111,6 +130,23 @@ type DynamicID struct {
     // The identifier for a resource whose type is specified by DynamicID#type.
 	Id string
 }
+
+func (s DynamicID) GetType__() bindings.BindingType {
+	return DynamicIDBindingType()
+}
+
+func (s DynamicID) GetDataValue__() (data.DataValue, []error) {
+	typeConverter := bindings.NewTypeConverter()
+	typeConverter.SetMode(bindings.JSONRPC)
+	dataVal, err := typeConverter.ConvertToVapi(s, s.GetType__())
+	if err != nil {
+		log.Errorf("Error in ConvertToVapi for DynamicID._GetDataValue method - %s",
+			bindings.VAPIerrorsToError(err).Error())
+		return nil, err
+	}
+	return dataVal, nil
+}
+
 
 // The ``LocalizableMessage`` class represents localizable string and message template. Interfaces include one or more localizable message templates in the exceptions they report so that clients can display diagnostic messages in the native language of the user. Interfaces can include localizable strings in the data returned from methods to allow clients to display localized status information in the native language of the user.
 type LocalizableMessage struct {
@@ -127,6 +163,23 @@ type LocalizableMessage struct {
     // Localized string value as per request requirements.
 	Localized *string
 }
+
+func (s LocalizableMessage) GetType__() bindings.BindingType {
+	return LocalizableMessageBindingType()
+}
+
+func (s LocalizableMessage) GetDataValue__() (data.DataValue, []error) {
+	typeConverter := bindings.NewTypeConverter()
+	typeConverter.SetMode(bindings.JSONRPC)
+	dataVal, err := typeConverter.ConvertToVapi(s, s.GetType__())
+	if err != nil {
+		log.Errorf("Error in ConvertToVapi for LocalizableMessage._GetDataValue method - %s",
+			bindings.VAPIerrorsToError(err).Error())
+		return nil, err
+	}
+	return dataVal, nil
+}
+
 
 // This class holds a single message parameter and formatting settings for it. The class has fields for string, int64, float64, date time and nested messages. Only one will be used depending on the type of data sent. For date, float64 and int64 it is possible to set additional formatting details.
 type LocalizationParam struct {
@@ -145,6 +198,23 @@ type LocalizationParam struct {
     // Number of fractional digits to include in formatted float64 value.
 	Precision *int64
 }
+
+func (s LocalizationParam) GetType__() bindings.BindingType {
+	return LocalizationParamBindingType()
+}
+
+func (s LocalizationParam) GetDataValue__() (data.DataValue, []error) {
+	typeConverter := bindings.NewTypeConverter()
+	typeConverter.SetMode(bindings.JSONRPC)
+	dataVal, err := typeConverter.ConvertToVapi(s, s.GetType__())
+	if err != nil {
+		log.Errorf("Error in ConvertToVapi for LocalizationParam._GetDataValue method - %s",
+			bindings.VAPIerrorsToError(err).Error())
+		return nil, err
+	}
+	return dataVal, nil
+}
+
 
 // The ``DateTimeFormat`` enumeration class lists possible date and time formatting options. It combines the Unicode CLDR format types - full, long, medium and short with 3 different presentations - date only, time only and combined date and time presentation.
 //
@@ -219,6 +289,23 @@ type NestedLocalizableMessage struct {
     // Named Arguments to be substituted into the message template.
 	Params map[string]LocalizationParam
 }
+
+func (s NestedLocalizableMessage) GetType__() bindings.BindingType {
+	return NestedLocalizableMessageBindingType()
+}
+
+func (s NestedLocalizableMessage) GetDataValue__() (data.DataValue, []error) {
+	typeConverter := bindings.NewTypeConverter()
+	typeConverter.SetMode(bindings.JSONRPC)
+	dataVal, err := typeConverter.ConvertToVapi(s, s.GetType__())
+	if err != nil {
+		log.Errorf("Error in ConvertToVapi for NestedLocalizableMessage._GetDataValue method - %s",
+			bindings.VAPIerrorsToError(err).Error())
+		return nil, err
+	}
+	return dataVal, nil
+}
+
 
 
 

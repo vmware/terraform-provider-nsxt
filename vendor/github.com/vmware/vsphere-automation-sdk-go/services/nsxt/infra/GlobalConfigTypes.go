@@ -45,7 +45,7 @@ func globalConfigGetRestMetadata() protocol.OperationRestMetadata {
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -93,7 +93,7 @@ func globalConfigPatchRestMetadata() protocol.OperationRestMetadata {
 	fieldNameMap["global_config"] = "GlobalConfig"
 	paramsTypeMap["global_config"] = bindings.NewReferenceType(model.GlobalConfigBindingType)
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -141,7 +141,7 @@ func globalConfigUpdateRestMetadata() protocol.OperationRestMetadata {
 	fieldNameMap["global_config"] = "GlobalConfig"
 	paramsTypeMap["global_config"] = bindings.NewReferenceType(model.GlobalConfigBindingType)
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

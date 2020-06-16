@@ -1,4 +1,27 @@
-## 2.1.0 (Unreleased)
+## 2.2.0 (Unreleased)
+## 2.1.0 (June 09, 2020)
+
+FEATURES:
+
+* The provider is extended to support NSXT on VMConAWS. Only a subset of objects is supported, check the documentation for more details.
+
+BUG FIXES:
+
+* Fix remote authentication(vIDM) for policy objects. This fix is relevant for NSX version below 3.0.0. ([#302](https://github.com/terraform-providers/terraform-provider-nsxt/pull/302))
+* Fix client certificate authentication for policy objects ([#292](https://github.com/terraform-providers/terraform-provider-nsxt/pull/292))
+* Fix an issue related to non-admin NSX credentials ([#293](https://github.com/terraform-providers/terraform-provider-nsxt/pull/293))
+* `resource/nsxt_policy_vlan_segment`: Allow to specify vlan range ([#342](https://github.com/terraform-providers/terraform-provider-nsxt/pull/342))
+* `resource/nsxt_policy_segment`: Fix handling of segment deletion error ([#321](https://github.com/terraform-providers/terraform-provider-nsxt/pull/321))
+* `resource/nsxt_policy_segment`: Wait for potential VMs to free segment port before deleting the segment. ([#311](https://github.com/terraform-providers/terraform-provider-nsxt/pull/311))
+* `resource/nsxt_policy_vlan_segment`: Allow zero vlan ID ([#297](https://github.com/terraform-providers/terraform-provider-nsxt/pull/297))
+* `resource/nsxt_policy_tierX_gateway_interface`: Fix a use case of preconfigured locale service on gateway ([#300](https://github.com/terraform-providers/terraform-provider-nsxt/pull/300))
+* `resource/nsxt_policy_security_policy`: Fix import crash ([#299](https://github.com/terraform-providers/terraform-provider-nsxt/pull/299))
+* `resource/nsxt_policy_security_policy`: Expose `log_label` argument ([#298](https://github.com/terraform-providers/terraform-provider-nsxt/pull/298))
+* `resource/nsxt_policy_group`: Fix issues with group subresource import ([#288](https://github.com/terraform-providers/terraform-provider-nsxt/pull/288))
+* `resource/nsxt_policy_nat_rule`: Make `source_networks` argument optional ([#294](https://github.com/terraform-providers/terraform-provider-nsxt/pull/294))
+* `resource/nsxt_ip_pool_allocation_ip_address`: Fix resource import ([#319](https://github.com/terraform-providers/terraform-provider-nsxt/pull/319))
+* `data/nsxt_policy_segment_realization`: Expose computed attribute network_name. This attribute can be used as network name in vsphere provider, which forms the necessary dependency ([#308](https://github.com/terraform-providers/terraform-provider-nsxt/pull/308))
+
 ## 2.0.0 (March 30, 2020)
 
 NOTES:

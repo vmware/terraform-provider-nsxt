@@ -52,7 +52,7 @@ func enforcementPointsGetRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["enforcementPointName"] = bindings.NewStringType()
 	pathParams["enforcement_point_name"] = "enforcementPointName"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -125,7 +125,7 @@ func enforcementPointsListRestMetadata() protocol.OperationRestMetadata {
 	queryParams["sort_by"] = "sort_by"
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

@@ -52,7 +52,7 @@ func floodProtectionProfilesDeleteRestMetadata() protocol.OperationRestMetadata 
 	paramsTypeMap["floodProtectionProfileId"] = bindings.NewStringType()
 	pathParams["flood_protection_profile_id"] = "floodProtectionProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -102,7 +102,7 @@ func floodProtectionProfilesGetRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["floodProtectionProfileId"] = bindings.NewStringType()
 	pathParams["flood_protection_profile_id"] = "floodProtectionProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -181,7 +181,7 @@ func floodProtectionProfilesListRestMetadata() protocol.OperationRestMetadata {
 	queryParams["include_mark_for_delete_objects"] = "include_mark_for_delete_objects"
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -236,7 +236,7 @@ func floodProtectionProfilesPatchRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["floodProtectionProfileId"] = bindings.NewStringType()
 	pathParams["flood_protection_profile_id"] = "floodProtectionProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -291,7 +291,7 @@ func floodProtectionProfilesUpdateRestMetadata() protocol.OperationRestMetadata 
 	paramsTypeMap["floodProtectionProfileId"] = bindings.NewStringType()
 	pathParams["flood_protection_profile_id"] = "floodProtectionProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

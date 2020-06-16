@@ -67,7 +67,7 @@ func gatewayPoliciesDeleteRestMetadata() protocol.OperationRestMetadata {
 	pathParams["gateway_policy_id"] = "gatewayPolicyId"
 	pathParams["domain_id"] = "domainId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -124,7 +124,7 @@ func gatewayPoliciesGetRestMetadata() protocol.OperationRestMetadata {
 	pathParams["gateway_policy_id"] = "gatewayPolicyId"
 	pathParams["domain_id"] = "domainId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -216,7 +216,7 @@ func gatewayPoliciesListRestMetadata() protocol.OperationRestMetadata {
 	queryParams["include_mark_for_delete_objects"] = "include_mark_for_delete_objects"
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -278,7 +278,7 @@ func gatewayPoliciesPatchRestMetadata() protocol.OperationRestMetadata {
 	pathParams["gateway_policy_id"] = "gatewayPolicyId"
 	pathParams["domain_id"] = "domainId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -352,7 +352,7 @@ func gatewayPoliciesReviseRestMetadata() protocol.OperationRestMetadata {
 	queryParams["anchor_path"] = "anchor_path"
 	queryParams["operation"] = "operation"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -414,7 +414,7 @@ func gatewayPoliciesUpdateRestMetadata() protocol.OperationRestMetadata {
 	pathParams["gateway_policy_id"] = "gatewayPolicyId"
 	pathParams["domain_id"] = "domainId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

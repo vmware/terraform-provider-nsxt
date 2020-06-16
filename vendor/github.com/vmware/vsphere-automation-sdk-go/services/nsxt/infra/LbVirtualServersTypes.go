@@ -58,7 +58,7 @@ func lbVirtualServersDeleteRestMetadata() protocol.OperationRestMetadata {
 	pathParams["lb_virtual_server_id"] = "lbVirtualServerId"
 	queryParams["force"] = "force"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -108,7 +108,7 @@ func lbVirtualServersGetRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["lbVirtualServerId"] = bindings.NewStringType()
 	pathParams["lb_virtual_server_id"] = "lbVirtualServerId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -187,7 +187,7 @@ func lbVirtualServersListRestMetadata() protocol.OperationRestMetadata {
 	queryParams["include_mark_for_delete_objects"] = "include_mark_for_delete_objects"
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -242,7 +242,7 @@ func lbVirtualServersPatchRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["lbVirtualServerId"] = bindings.NewStringType()
 	pathParams["lb_virtual_server_id"] = "lbVirtualServerId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -297,7 +297,7 @@ func lbVirtualServersUpdateRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["lbVirtualServerId"] = bindings.NewStringType()
 	pathParams["lb_virtual_server_id"] = "lbVirtualServerId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

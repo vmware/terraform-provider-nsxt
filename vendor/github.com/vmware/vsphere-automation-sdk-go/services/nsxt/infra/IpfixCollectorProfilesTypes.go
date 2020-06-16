@@ -52,7 +52,7 @@ func ipfixCollectorProfilesDeleteRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["ipfixCollectorProfileId"] = bindings.NewStringType()
 	pathParams["ipfix_collector_profile_id"] = "ipfixCollectorProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -102,7 +102,7 @@ func ipfixCollectorProfilesGetRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["ipfixCollectorProfileId"] = bindings.NewStringType()
 	pathParams["ipfix_collector_profile_id"] = "ipfixCollectorProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -181,7 +181,7 @@ func ipfixCollectorProfilesListRestMetadata() protocol.OperationRestMetadata {
 	queryParams["include_mark_for_delete_objects"] = "include_mark_for_delete_objects"
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -236,7 +236,7 @@ func ipfixCollectorProfilesPatchRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["ipfixCollectorProfileId"] = bindings.NewStringType()
 	pathParams["ipfix_collector_profile_id"] = "ipfixCollectorProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -291,7 +291,7 @@ func ipfixCollectorProfilesUpdateRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["ipfixCollectorProfileId"] = bindings.NewStringType()
 	pathParams["ipfix_collector_profile_id"] = "ipfixCollectorProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

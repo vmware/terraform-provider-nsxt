@@ -16,6 +16,7 @@ import (
 	"reflect"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/log"
 	"github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std"
 )
 
@@ -50,6 +51,23 @@ func (AlreadyExists AlreadyExists) Error() string {
 	return "com.vmware.vapi.std.errors.already_exists"
 }
 
+func (s AlreadyExists) GetType__() bindings.BindingType {
+	return AlreadyExistsBindingType()
+}
+
+func (s AlreadyExists) GetDataValue__() (data.DataValue, []error) {
+	typeConverter := bindings.NewTypeConverter()
+	typeConverter.SetMode(bindings.JSONRPC)
+	dataVal, err := typeConverter.ConvertToVapi(s, s.GetType__())
+	if err != nil {
+		log.Errorf("Error in ConvertToVapi for AlreadyExists._GetDataValue method - %s",
+			bindings.VAPIerrorsToError(err).Error())
+		return nil, err
+	}
+	return dataVal, nil
+}
+
+
 // The ``AlreadyInDesiredState`` exception indicates that an attempt to change the state of a resource or service had no effect because the resource or service is already in the desired state. 
 //
 //  Examples: 
@@ -77,6 +95,23 @@ func (AlreadyInDesiredState AlreadyInDesiredState) Error() string {
 	return "com.vmware.vapi.std.errors.already_in_desired_state"
 }
 
+func (s AlreadyInDesiredState) GetType__() bindings.BindingType {
+	return AlreadyInDesiredStateBindingType()
+}
+
+func (s AlreadyInDesiredState) GetDataValue__() (data.DataValue, []error) {
+	typeConverter := bindings.NewTypeConverter()
+	typeConverter.SetMode(bindings.JSONRPC)
+	dataVal, err := typeConverter.ConvertToVapi(s, s.GetType__())
+	if err != nil {
+		log.Errorf("Error in ConvertToVapi for AlreadyInDesiredState._GetDataValue method - %s",
+			bindings.VAPIerrorsToError(err).Error())
+		return nil, err
+	}
+	return dataVal, nil
+}
+
+
 // The ``ArgumentLocations`` class describes which part(s) of the input to the method caused the exception. 
 //
 //  Some types of exceptions are caused by the value of one of the inputs to the method, possibly due to an interaction with other inputs to the method. This class is intended to be used as the payload to identify those inputs when the method reports exceptions like InvalidArgument or NotFound. See Error#data.
@@ -86,6 +121,23 @@ type ArgumentLocations struct {
     // Array (possibly empty) of strings describing the locations of other inputs that caused the the primary input to trigger the exception.
 	Secondary []string
 }
+
+func (s ArgumentLocations) GetType__() bindings.BindingType {
+	return ArgumentLocationsBindingType()
+}
+
+func (s ArgumentLocations) GetDataValue__() (data.DataValue, []error) {
+	typeConverter := bindings.NewTypeConverter()
+	typeConverter.SetMode(bindings.JSONRPC)
+	dataVal, err := typeConverter.ConvertToVapi(s, s.GetType__())
+	if err != nil {
+		log.Errorf("Error in ConvertToVapi for ArgumentLocations._GetDataValue method - %s",
+			bindings.VAPIerrorsToError(err).Error())
+		return nil, err
+	}
+	return dataVal, nil
+}
+
 
 // The ``Canceled`` exception indicates that the method canceled itself in response to an explicit request to do so. Methods being "canceled" for other reasons (for example the client connection was closed, a time out occured, or due to excessive resource consumption) should not report this exception. 
 //
@@ -122,6 +174,23 @@ func (Canceled Canceled) Error() string {
 	return "com.vmware.vapi.std.errors.canceled"
 }
 
+func (s Canceled) GetType__() bindings.BindingType {
+	return CanceledBindingType()
+}
+
+func (s Canceled) GetDataValue__() (data.DataValue, []error) {
+	typeConverter := bindings.NewTypeConverter()
+	typeConverter.SetMode(bindings.JSONRPC)
+	dataVal, err := typeConverter.ConvertToVapi(s, s.GetType__())
+	if err != nil {
+		log.Errorf("Error in ConvertToVapi for Canceled._GetDataValue method - %s",
+			bindings.VAPIerrorsToError(err).Error())
+		return nil, err
+	}
+	return dataVal, nil
+}
+
+
 // The ``ConcurrentChange`` exception indicates that a data structure, entity, or resource has been modified since some earlier point in time. Typically this happens when the client is doing the *write* portion of a read-modify-write sequence and indicates that it wants the server to notify it if the data in the server has changed after it did the *read*, so that it can avoid overwriting that change inadvertantly.
 type ConcurrentChange struct {
     // Stack of one or more localizable messages for human exception consumers. 
@@ -144,6 +213,23 @@ func NewConcurrentChange() *ConcurrentChange {
 func (ConcurrentChange ConcurrentChange) Error() string {
 	return "com.vmware.vapi.std.errors.concurrent_change"
 }
+
+func (s ConcurrentChange) GetType__() bindings.BindingType {
+	return ConcurrentChangeBindingType()
+}
+
+func (s ConcurrentChange) GetDataValue__() (data.DataValue, []error) {
+	typeConverter := bindings.NewTypeConverter()
+	typeConverter.SetMode(bindings.JSONRPC)
+	dataVal, err := typeConverter.ConvertToVapi(s, s.GetType__())
+	if err != nil {
+		log.Errorf("Error in ConvertToVapi for ConcurrentChange._GetDataValue method - %s",
+			bindings.VAPIerrorsToError(err).Error())
+		return nil, err
+	}
+	return dataVal, nil
+}
+
 
 // The ``Error`` exception describes theproperties common to all standard exceptions. 
 //
@@ -172,6 +258,23 @@ func NewError() *Error {
 func (Error Error) Error() string {
 	return "com.vmware.vapi.std.errors.error"
 }
+
+func (s Error) GetType__() bindings.BindingType {
+	return ErrorBindingType()
+}
+
+func (s Error) GetDataValue__() (data.DataValue, []error) {
+	typeConverter := bindings.NewTypeConverter()
+	typeConverter.SetMode(bindings.JSONRPC)
+	dataVal, err := typeConverter.ConvertToVapi(s, s.GetType__())
+	if err != nil {
+		log.Errorf("Error in ConvertToVapi for Error._GetDataValue method - %s",
+			bindings.VAPIerrorsToError(err).Error())
+		return nil, err
+	}
+	return dataVal, nil
+}
+
 
 // Enumeration of all standard errors. Used as discriminator in protocols that have no standard means for transporting the error type, e.g. REST.
 //
@@ -317,6 +420,23 @@ func (FeatureInUse FeatureInUse) Error() string {
 	return "com.vmware.vapi.std.errors.feature_in_use"
 }
 
+func (s FeatureInUse) GetType__() bindings.BindingType {
+	return FeatureInUseBindingType()
+}
+
+func (s FeatureInUse) GetDataValue__() (data.DataValue, []error) {
+	typeConverter := bindings.NewTypeConverter()
+	typeConverter.SetMode(bindings.JSONRPC)
+	dataVal, err := typeConverter.ConvertToVapi(s, s.GetType__())
+	if err != nil {
+		log.Errorf("Error in ConvertToVapi for FeatureInUse._GetDataValue method - %s",
+			bindings.VAPIerrorsToError(err).Error())
+		return nil, err
+	}
+	return dataVal, nil
+}
+
+
 // The ``FileLocations`` class identifies the file(s) that caused the method to report the exception. 
 //
 //  Some types of exceptions are caused by a problem with one or more files. This class is intended to be used as the payload to identify those files when the method reports exceptions like NotFound. See Error#data.
@@ -326,6 +446,23 @@ type FileLocations struct {
     // Array (possibly empty) of strings identifying other files that caused the primary file to trigger the exception.
 	Secondary []string
 }
+
+func (s FileLocations) GetType__() bindings.BindingType {
+	return FileLocationsBindingType()
+}
+
+func (s FileLocations) GetDataValue__() (data.DataValue, []error) {
+	typeConverter := bindings.NewTypeConverter()
+	typeConverter.SetMode(bindings.JSONRPC)
+	dataVal, err := typeConverter.ConvertToVapi(s, s.GetType__())
+	if err != nil {
+		log.Errorf("Error in ConvertToVapi for FileLocations._GetDataValue method - %s",
+			bindings.VAPIerrorsToError(err).Error())
+		return nil, err
+	}
+	return dataVal, nil
+}
+
 
 // The ``InternalServerError`` exception indicates that the server encounters an unexpected condition that prevented it from fulfilling the request. 
 //
@@ -356,6 +493,23 @@ func NewInternalServerError() *InternalServerError {
 func (InternalServerError InternalServerError) Error() string {
 	return "com.vmware.vapi.std.errors.internal_server_error"
 }
+
+func (s InternalServerError) GetType__() bindings.BindingType {
+	return InternalServerErrorBindingType()
+}
+
+func (s InternalServerError) GetDataValue__() (data.DataValue, []error) {
+	typeConverter := bindings.NewTypeConverter()
+	typeConverter.SetMode(bindings.JSONRPC)
+	dataVal, err := typeConverter.ConvertToVapi(s, s.GetType__())
+	if err != nil {
+		log.Errorf("Error in ConvertToVapi for InternalServerError._GetDataValue method - %s",
+			bindings.VAPIerrorsToError(err).Error())
+		return nil, err
+	}
+	return dataVal, nil
+}
+
 
 // The ``InvalidArgument`` exception indicates that the values received for one or more parameters are not acceptable. 
 //
@@ -398,6 +552,23 @@ func (InvalidArgument InvalidArgument) Error() string {
 	return "com.vmware.vapi.std.errors.invalid_argument"
 }
 
+func (s InvalidArgument) GetType__() bindings.BindingType {
+	return InvalidArgumentBindingType()
+}
+
+func (s InvalidArgument) GetDataValue__() (data.DataValue, []error) {
+	typeConverter := bindings.NewTypeConverter()
+	typeConverter.SetMode(bindings.JSONRPC)
+	dataVal, err := typeConverter.ConvertToVapi(s, s.GetType__())
+	if err != nil {
+		log.Errorf("Error in ConvertToVapi for InvalidArgument._GetDataValue method - %s",
+			bindings.VAPIerrorsToError(err).Error())
+		return nil, err
+	}
+	return dataVal, nil
+}
+
+
 // The ``InvalidElementConfiguration`` exception indicates that an attempt to modify the configuration of an element or a group containing the element failed due to the configuraton of the element. A typical case is when the method is am attempt to change the group membership of the element fails, in which case a configuration change on the element may allow the group membership change to succeed. 
 //
 //  Examples: 
@@ -425,6 +596,23 @@ func NewInvalidElementConfiguration() *InvalidElementConfiguration {
 func (InvalidElementConfiguration InvalidElementConfiguration) Error() string {
 	return "com.vmware.vapi.std.errors.invalid_element_configuration"
 }
+
+func (s InvalidElementConfiguration) GetType__() bindings.BindingType {
+	return InvalidElementConfigurationBindingType()
+}
+
+func (s InvalidElementConfiguration) GetDataValue__() (data.DataValue, []error) {
+	typeConverter := bindings.NewTypeConverter()
+	typeConverter.SetMode(bindings.JSONRPC)
+	dataVal, err := typeConverter.ConvertToVapi(s, s.GetType__())
+	if err != nil {
+		log.Errorf("Error in ConvertToVapi for InvalidElementConfiguration._GetDataValue method - %s",
+			bindings.VAPIerrorsToError(err).Error())
+		return nil, err
+	}
+	return dataVal, nil
+}
+
 
 // The ``InvalidElementType`` exception indicates that the server was unable to fulfil the request because an element of a specific type cannot be a member of particular group. 
 //
@@ -459,6 +647,23 @@ func NewInvalidElementType() *InvalidElementType {
 func (InvalidElementType InvalidElementType) Error() string {
 	return "com.vmware.vapi.std.errors.invalid_element_type"
 }
+
+func (s InvalidElementType) GetType__() bindings.BindingType {
+	return InvalidElementTypeBindingType()
+}
+
+func (s InvalidElementType) GetDataValue__() (data.DataValue, []error) {
+	typeConverter := bindings.NewTypeConverter()
+	typeConverter.SetMode(bindings.JSONRPC)
+	dataVal, err := typeConverter.ConvertToVapi(s, s.GetType__())
+	if err != nil {
+		log.Errorf("Error in ConvertToVapi for InvalidElementType._GetDataValue method - %s",
+			bindings.VAPIerrorsToError(err).Error())
+		return nil, err
+	}
+	return dataVal, nil
+}
+
 
 // The ``InvalidRequest`` exception indicates that the request is malformed in such a way that the server is unable to process it. 
 //
@@ -502,6 +707,23 @@ func (InvalidRequest InvalidRequest) Error() string {
 	return "com.vmware.vapi.std.errors.invalid_request"
 }
 
+func (s InvalidRequest) GetType__() bindings.BindingType {
+	return InvalidRequestBindingType()
+}
+
+func (s InvalidRequest) GetDataValue__() (data.DataValue, []error) {
+	typeConverter := bindings.NewTypeConverter()
+	typeConverter.SetMode(bindings.JSONRPC)
+	dataVal, err := typeConverter.ConvertToVapi(s, s.GetType__())
+	if err != nil {
+		log.Errorf("Error in ConvertToVapi for InvalidRequest._GetDataValue method - %s",
+			bindings.VAPIerrorsToError(err).Error())
+		return nil, err
+	}
+	return dataVal, nil
+}
+
+
 // The ``NotAllowedInCurrentState`` exception indicates that the requested method is not allowed with a resource or service in its current state. This could be because the method is performing a configuration change that is not allowed in the current state or because method itself is not allowed in the current state. 
 //
 //  Examples: 
@@ -537,6 +759,23 @@ func (NotAllowedInCurrentState NotAllowedInCurrentState) Error() string {
 	return "com.vmware.vapi.std.errors.not_allowed_in_current_state"
 }
 
+func (s NotAllowedInCurrentState) GetType__() bindings.BindingType {
+	return NotAllowedInCurrentStateBindingType()
+}
+
+func (s NotAllowedInCurrentState) GetDataValue__() (data.DataValue, []error) {
+	typeConverter := bindings.NewTypeConverter()
+	typeConverter.SetMode(bindings.JSONRPC)
+	dataVal, err := typeConverter.ConvertToVapi(s, s.GetType__())
+	if err != nil {
+		log.Errorf("Error in ConvertToVapi for NotAllowedInCurrentState._GetDataValue method - %s",
+			bindings.VAPIerrorsToError(err).Error())
+		return nil, err
+	}
+	return dataVal, nil
+}
+
+
 // The ``NotFound`` exception indicates that a specified element could not be found. 
 //
 //  Examples: 
@@ -565,6 +804,23 @@ func NewNotFound() *NotFound {
 func (NotFound NotFound) Error() string {
 	return "com.vmware.vapi.std.errors.not_found"
 }
+
+func (s NotFound) GetType__() bindings.BindingType {
+	return NotFoundBindingType()
+}
+
+func (s NotFound) GetDataValue__() (data.DataValue, []error) {
+	typeConverter := bindings.NewTypeConverter()
+	typeConverter.SetMode(bindings.JSONRPC)
+	dataVal, err := typeConverter.ConvertToVapi(s, s.GetType__())
+	if err != nil {
+		log.Errorf("Error in ConvertToVapi for NotFound._GetDataValue method - %s",
+			bindings.VAPIerrorsToError(err).Error())
+		return nil, err
+	}
+	return dataVal, nil
+}
+
 
 // The ``OperationNotFound`` exception indicates that the method specified in the request could not be found. 
 //
@@ -604,6 +860,23 @@ func (OperationNotFound OperationNotFound) Error() string {
 	return "com.vmware.vapi.std.errors.operation_not_found"
 }
 
+func (s OperationNotFound) GetType__() bindings.BindingType {
+	return OperationNotFoundBindingType()
+}
+
+func (s OperationNotFound) GetDataValue__() (data.DataValue, []error) {
+	typeConverter := bindings.NewTypeConverter()
+	typeConverter.SetMode(bindings.JSONRPC)
+	dataVal, err := typeConverter.ConvertToVapi(s, s.GetType__())
+	if err != nil {
+		log.Errorf("Error in ConvertToVapi for OperationNotFound._GetDataValue method - %s",
+			bindings.VAPIerrorsToError(err).Error())
+		return nil, err
+	}
+	return dataVal, nil
+}
+
+
 // The ``ResourceBusy`` exception indicates that the method could not be completed because a resource it needs is busy. 
 //
 //  Examples: 
@@ -636,6 +909,23 @@ func NewResourceBusy() *ResourceBusy {
 func (ResourceBusy ResourceBusy) Error() string {
 	return "com.vmware.vapi.std.errors.resource_busy"
 }
+
+func (s ResourceBusy) GetType__() bindings.BindingType {
+	return ResourceBusyBindingType()
+}
+
+func (s ResourceBusy) GetDataValue__() (data.DataValue, []error) {
+	typeConverter := bindings.NewTypeConverter()
+	typeConverter.SetMode(bindings.JSONRPC)
+	dataVal, err := typeConverter.ConvertToVapi(s, s.GetType__())
+	if err != nil {
+		log.Errorf("Error in ConvertToVapi for ResourceBusy._GetDataValue method - %s",
+			bindings.VAPIerrorsToError(err).Error())
+		return nil, err
+	}
+	return dataVal, nil
+}
+
 
 // The ``ResourceInUse`` exception indicates that the method could not be completed because a resource is in use. 
 //
@@ -670,6 +960,23 @@ func NewResourceInUse() *ResourceInUse {
 func (ResourceInUse ResourceInUse) Error() string {
 	return "com.vmware.vapi.std.errors.resource_in_use"
 }
+
+func (s ResourceInUse) GetType__() bindings.BindingType {
+	return ResourceInUseBindingType()
+}
+
+func (s ResourceInUse) GetDataValue__() (data.DataValue, []error) {
+	typeConverter := bindings.NewTypeConverter()
+	typeConverter.SetMode(bindings.JSONRPC)
+	dataVal, err := typeConverter.ConvertToVapi(s, s.GetType__())
+	if err != nil {
+		log.Errorf("Error in ConvertToVapi for ResourceInUse._GetDataValue method - %s",
+			bindings.VAPIerrorsToError(err).Error())
+		return nil, err
+	}
+	return dataVal, nil
+}
+
 
 // The ``ResourceInaccessible`` exception indicates that the method could not be completed because an entity is not accessible. 
 //
@@ -706,6 +1013,23 @@ func (ResourceInaccessible ResourceInaccessible) Error() string {
 	return "com.vmware.vapi.std.errors.resource_inaccessible"
 }
 
+func (s ResourceInaccessible) GetType__() bindings.BindingType {
+	return ResourceInaccessibleBindingType()
+}
+
+func (s ResourceInaccessible) GetDataValue__() (data.DataValue, []error) {
+	typeConverter := bindings.NewTypeConverter()
+	typeConverter.SetMode(bindings.JSONRPC)
+	dataVal, err := typeConverter.ConvertToVapi(s, s.GetType__())
+	if err != nil {
+		log.Errorf("Error in ConvertToVapi for ResourceInaccessible._GetDataValue method - %s",
+			bindings.VAPIerrorsToError(err).Error())
+		return nil, err
+	}
+	return dataVal, nil
+}
+
+
 // The ``ServiceUnavailable`` exception indicates that the interface is unavailable. 
 //
 //  Examples: 
@@ -741,6 +1065,23 @@ func NewServiceUnavailable() *ServiceUnavailable {
 func (ServiceUnavailable ServiceUnavailable) Error() string {
 	return "com.vmware.vapi.std.errors.service_unavailable"
 }
+
+func (s ServiceUnavailable) GetType__() bindings.BindingType {
+	return ServiceUnavailableBindingType()
+}
+
+func (s ServiceUnavailable) GetDataValue__() (data.DataValue, []error) {
+	typeConverter := bindings.NewTypeConverter()
+	typeConverter.SetMode(bindings.JSONRPC)
+	dataVal, err := typeConverter.ConvertToVapi(s, s.GetType__())
+	if err != nil {
+		log.Errorf("Error in ConvertToVapi for ServiceUnavailable._GetDataValue method - %s",
+			bindings.VAPIerrorsToError(err).Error())
+		return nil, err
+	}
+	return dataVal, nil
+}
+
 
 // The ``TimedOut`` exception indicates that the method did not complete within the allowed amount of time. The allowed amount of time might be: 
 //
@@ -782,6 +1123,23 @@ func (TimedOut TimedOut) Error() string {
 	return "com.vmware.vapi.std.errors.timed_out"
 }
 
+func (s TimedOut) GetType__() bindings.BindingType {
+	return TimedOutBindingType()
+}
+
+func (s TimedOut) GetDataValue__() (data.DataValue, []error) {
+	typeConverter := bindings.NewTypeConverter()
+	typeConverter.SetMode(bindings.JSONRPC)
+	dataVal, err := typeConverter.ConvertToVapi(s, s.GetType__())
+	if err != nil {
+		log.Errorf("Error in ConvertToVapi for TimedOut._GetDataValue method - %s",
+			bindings.VAPIerrorsToError(err).Error())
+		return nil, err
+	}
+	return dataVal, nil
+}
+
+
 // The ``TransientIndication`` class indicates whether or not the exception is transient. 
 //
 //  Some types of exceptions are transient in certain situtations and not transient in other situtations. This exception payload can be used to indicate to clients whether a particular exception is transient. See Error#data.
@@ -789,6 +1147,23 @@ type TransientIndication struct {
     // Indicates that the exception this class is attached to is transient.
 	IsTransient bool
 }
+
+func (s TransientIndication) GetType__() bindings.BindingType {
+	return TransientIndicationBindingType()
+}
+
+func (s TransientIndication) GetDataValue__() (data.DataValue, []error) {
+	typeConverter := bindings.NewTypeConverter()
+	typeConverter.SetMode(bindings.JSONRPC)
+	dataVal, err := typeConverter.ConvertToVapi(s, s.GetType__())
+	if err != nil {
+		log.Errorf("Error in ConvertToVapi for TransientIndication._GetDataValue method - %s",
+			bindings.VAPIerrorsToError(err).Error())
+		return nil, err
+	}
+	return dataVal, nil
+}
+
 
 // The ``UnableToAllocateResource`` exception indicates that the method failed because it was unable to allocate or acquire a required resource. 
 //
@@ -826,6 +1201,23 @@ func NewUnableToAllocateResource() *UnableToAllocateResource {
 func (UnableToAllocateResource UnableToAllocateResource) Error() string {
 	return "com.vmware.vapi.std.errors.unable_to_allocate_resource"
 }
+
+func (s UnableToAllocateResource) GetType__() bindings.BindingType {
+	return UnableToAllocateResourceBindingType()
+}
+
+func (s UnableToAllocateResource) GetDataValue__() (data.DataValue, []error) {
+	typeConverter := bindings.NewTypeConverter()
+	typeConverter.SetMode(bindings.JSONRPC)
+	dataVal, err := typeConverter.ConvertToVapi(s, s.GetType__())
+	if err != nil {
+		log.Errorf("Error in ConvertToVapi for UnableToAllocateResource._GetDataValue method - %s",
+			bindings.VAPIerrorsToError(err).Error())
+		return nil, err
+	}
+	return dataVal, nil
+}
+
 
 // The ``Unauthenticated`` exception indicates that the method requires authentication and the user is not authenticated. 
 //
@@ -869,6 +1261,23 @@ func NewUnauthenticated() *Unauthenticated {
 func (Unauthenticated Unauthenticated) Error() string {
 	return "com.vmware.vapi.std.errors.unauthenticated"
 }
+
+func (s Unauthenticated) GetType__() bindings.BindingType {
+	return UnauthenticatedBindingType()
+}
+
+func (s Unauthenticated) GetDataValue__() (data.DataValue, []error) {
+	typeConverter := bindings.NewTypeConverter()
+	typeConverter.SetMode(bindings.JSONRPC)
+	dataVal, err := typeConverter.ConvertToVapi(s, s.GetType__())
+	if err != nil {
+		log.Errorf("Error in ConvertToVapi for Unauthenticated._GetDataValue method - %s",
+			bindings.VAPIerrorsToError(err).Error())
+		return nil, err
+	}
+	return dataVal, nil
+}
+
 
 // The ``Unauthorized`` exception indicates that the user is not authorized to perform the method. 
 //
@@ -914,6 +1323,23 @@ func (Unauthorized Unauthorized) Error() string {
 	return "com.vmware.vapi.std.errors.unauthorized"
 }
 
+func (s Unauthorized) GetType__() bindings.BindingType {
+	return UnauthorizedBindingType()
+}
+
+func (s Unauthorized) GetDataValue__() (data.DataValue, []error) {
+	typeConverter := bindings.NewTypeConverter()
+	typeConverter.SetMode(bindings.JSONRPC)
+	dataVal, err := typeConverter.ConvertToVapi(s, s.GetType__())
+	if err != nil {
+		log.Errorf("Error in ConvertToVapi for Unauthorized._GetDataValue method - %s",
+			bindings.VAPIerrorsToError(err).Error())
+		return nil, err
+	}
+	return dataVal, nil
+}
+
+
 // The ``UnexpectedInput`` exception indicates that the request contained a parameter or property whose name is not known by the server. 
 //
 //  Every method expects parameters with known names. Some of those parameters may be (or contain) classes, and the method expects those classes to contain properties with known names. If the method receives parameters or properties with names that is does not expect, this exception may be reported. 
@@ -946,6 +1372,23 @@ func (UnexpectedInput UnexpectedInput) Error() string {
 	return "com.vmware.vapi.std.errors.unexpected_input"
 }
 
+func (s UnexpectedInput) GetType__() bindings.BindingType {
+	return UnexpectedInputBindingType()
+}
+
+func (s UnexpectedInput) GetDataValue__() (data.DataValue, []error) {
+	typeConverter := bindings.NewTypeConverter()
+	typeConverter.SetMode(bindings.JSONRPC)
+	dataVal, err := typeConverter.ConvertToVapi(s, s.GetType__())
+	if err != nil {
+		log.Errorf("Error in ConvertToVapi for UnexpectedInput._GetDataValue method - %s",
+			bindings.VAPIerrorsToError(err).Error())
+		return nil, err
+	}
+	return dataVal, nil
+}
+
+
 // The ``Unsupported`` exception indicates that the method is not supported by the interface. 
 //
 //  Examples: 
@@ -973,6 +1416,23 @@ func NewUnsupported() *Unsupported {
 func (Unsupported Unsupported) Error() string {
 	return "com.vmware.vapi.std.errors.unsupported"
 }
+
+func (s Unsupported) GetType__() bindings.BindingType {
+	return UnsupportedBindingType()
+}
+
+func (s Unsupported) GetDataValue__() (data.DataValue, []error) {
+	typeConverter := bindings.NewTypeConverter()
+	typeConverter.SetMode(bindings.JSONRPC)
+	dataVal, err := typeConverter.ConvertToVapi(s, s.GetType__())
+	if err != nil {
+		log.Errorf("Error in ConvertToVapi for Unsupported._GetDataValue method - %s",
+			bindings.VAPIerrorsToError(err).Error())
+		return nil, err
+	}
+	return dataVal, nil
+}
+
 
 // The ``UnverifiedPeer`` exception indicates that an attempt to connect to an unknown or not-yet-trusted endpoint failed because the system was unable to verify the identity of the endpoint. 
 //
@@ -1005,6 +1465,23 @@ func NewUnverifiedPeer() *UnverifiedPeer {
 func (UnverifiedPeer UnverifiedPeer) Error() string {
 	return "com.vmware.vapi.std.errors.unverified_peer"
 }
+
+func (s UnverifiedPeer) GetType__() bindings.BindingType {
+	return UnverifiedPeerBindingType()
+}
+
+func (s UnverifiedPeer) GetDataValue__() (data.DataValue, []error) {
+	typeConverter := bindings.NewTypeConverter()
+	typeConverter.SetMode(bindings.JSONRPC)
+	dataVal, err := typeConverter.ConvertToVapi(s, s.GetType__())
+	if err != nil {
+		log.Errorf("Error in ConvertToVapi for UnverifiedPeer._GetDataValue method - %s",
+			bindings.VAPIerrorsToError(err).Error())
+		return nil, err
+	}
+	return dataVal, nil
+}
+
 
 
 

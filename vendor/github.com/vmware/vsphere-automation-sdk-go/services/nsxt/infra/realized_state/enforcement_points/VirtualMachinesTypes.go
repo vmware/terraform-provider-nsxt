@@ -94,7 +94,7 @@ func virtualMachinesListRestMetadata() protocol.OperationRestMetadata {
 	queryParams["dsl"] = "dsl"
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -149,7 +149,7 @@ func virtualMachinesUpdatetagsRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["enforcementPointName"] = bindings.NewStringType()
 	pathParams["enforcement_point_name"] = "enforcementPointName"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

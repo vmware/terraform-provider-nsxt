@@ -52,7 +52,7 @@ func ipBlocksDeleteRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["ipBlockId"] = bindings.NewStringType()
 	pathParams["ip_block_id"] = "ipBlockId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -102,7 +102,7 @@ func ipBlocksGetRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["ipBlockId"] = bindings.NewStringType()
 	pathParams["ip_block_id"] = "ipBlockId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -181,7 +181,7 @@ func ipBlocksListRestMetadata() protocol.OperationRestMetadata {
 	queryParams["include_mark_for_delete_objects"] = "include_mark_for_delete_objects"
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -236,7 +236,7 @@ func ipBlocksPatchRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["ipBlockId"] = bindings.NewStringType()
 	pathParams["ip_block_id"] = "ipBlockId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -291,7 +291,7 @@ func ipBlocksUpdateRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["ipBlockId"] = bindings.NewStringType()
 	pathParams["ip_block_id"] = "ipBlockId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

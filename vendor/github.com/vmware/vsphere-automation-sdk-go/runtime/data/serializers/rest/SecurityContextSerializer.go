@@ -4,8 +4,8 @@
 package rest
 
 import (
-	"errors"
 	"encoding/base64"
+	"errors"
 	"fmt"
 
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/core"
@@ -78,7 +78,7 @@ func NewOauthSecContextSerializer() *OauthSecContextSerializer {
 	return &OauthSecContextSerializer{}
 }
 
-//  Serialize authorization headers for oauth security context.
+// Serialize authorization headers for oauth security context.
 func (o *OauthSecContextSerializer) Serialize(ctx core.SecurityContext) (map[string]interface{}, error) {
 	oauthToken, err := GetSecurityCtxStrValue(ctx, security.ACCESS_TOKEN)
 	if err != nil {

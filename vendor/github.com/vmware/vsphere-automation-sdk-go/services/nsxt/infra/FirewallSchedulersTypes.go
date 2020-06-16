@@ -58,7 +58,7 @@ func firewallSchedulersDeleteRestMetadata() protocol.OperationRestMetadata {
 	pathParams["firewall_scheduler_id"] = "firewallSchedulerId"
 	queryParams["force"] = "force"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -108,7 +108,7 @@ func firewallSchedulersGetRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["firewallSchedulerId"] = bindings.NewStringType()
 	pathParams["firewall_scheduler_id"] = "firewallSchedulerId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -187,7 +187,7 @@ func firewallSchedulersListRestMetadata() protocol.OperationRestMetadata {
 	queryParams["include_mark_for_delete_objects"] = "include_mark_for_delete_objects"
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -242,7 +242,7 @@ func firewallSchedulersPatchRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["firewallSchedulerId"] = bindings.NewStringType()
 	pathParams["firewall_scheduler_id"] = "firewallSchedulerId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -297,7 +297,7 @@ func firewallSchedulersUpdateRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["firewallSchedulerId"] = bindings.NewStringType()
 	pathParams["firewall_scheduler_id"] = "firewallSchedulerId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

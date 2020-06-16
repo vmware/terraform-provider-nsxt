@@ -695,7 +695,7 @@ func resourceNsxtPolicyServiceDelete(d *schema.ResourceData, m interface{}) erro
 		err = client.Delete(id)
 	}
 	if err != nil {
-		err = handleDeleteError("Service", id, err)
+		return handleDeleteError("Service", id, err)
 	}
 
 	return nil

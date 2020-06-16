@@ -52,7 +52,7 @@ func ipsecVpnTunnelProfilesDeleteRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["tunnelProfileId"] = bindings.NewStringType()
 	pathParams["tunnel_profile_id"] = "tunnelProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -102,7 +102,7 @@ func ipsecVpnTunnelProfilesGetRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["tunnelProfileId"] = bindings.NewStringType()
 	pathParams["tunnel_profile_id"] = "tunnelProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -181,7 +181,7 @@ func ipsecVpnTunnelProfilesListRestMetadata() protocol.OperationRestMetadata {
 	queryParams["include_mark_for_delete_objects"] = "include_mark_for_delete_objects"
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -236,7 +236,7 @@ func ipsecVpnTunnelProfilesPatchRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["tunnelProfileId"] = bindings.NewStringType()
 	pathParams["tunnel_profile_id"] = "tunnelProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -291,7 +291,7 @@ func ipsecVpnTunnelProfilesUpdateRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["tunnelProfileId"] = bindings.NewStringType()
 	pathParams["tunnel_profile_id"] = "tunnelProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

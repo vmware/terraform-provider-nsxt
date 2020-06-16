@@ -59,7 +59,7 @@ func dataSourceNsxtPolicyLbPersistenceProfileRead(d *schema.ResourceData, m inte
 
 	objID := d.Get("id").(string)
 	objName := d.Get("display_name").(string)
-	objTypeValue, typeSet := d.GetOkExists("type")
+	objTypeValue, typeSet := d.GetOk("type")
 	objType := objTypeValue.(string)
 
 	var obj model.PolicyLbPersistenceProfile

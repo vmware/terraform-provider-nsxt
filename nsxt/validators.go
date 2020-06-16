@@ -407,9 +407,28 @@ func validateVLANId(i interface{}, k string) (s []string, es []error) {
 		}
 	}
 	if vlan < 0 || vlan > 4095 {
-		es = append(es, fmt.Errorf("invalid VLAN ID %d", vlan))
+		es = append(es, fmt.Errorf("Invalid VLAN ID %d", vlan))
 		return
 	}
+	return
+}
+
+func validateVLANIdOrRange(i interface{}, k string) (s []string, es []error) {
+	v, ok := i.(string)
+	if !ok {
+		s, es = validateVLANId(i, k)
+		return
+	}
+
+	tokens := strings.Split(v, "-")
+	if len(tokens) > 2 {
+		es = append(es, fmt.Errorf("Invalid vlan range %s", v))
+		return
+	}
+	for _, token := range tokens {
+		s, es = validateVLANId(token, k)
+	}
+
 	return
 }
 

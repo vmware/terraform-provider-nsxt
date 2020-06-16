@@ -52,7 +52,7 @@ func firewallSessionTimerProfilesDeleteRestMetadata() protocol.OperationRestMeta
 	paramsTypeMap["firewallSessionTimerProfileId"] = bindings.NewStringType()
 	pathParams["firewall_session_timer_profile_id"] = "firewallSessionTimerProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -102,7 +102,7 @@ func firewallSessionTimerProfilesGetRestMetadata() protocol.OperationRestMetadat
 	paramsTypeMap["firewallSessionTimerProfileId"] = bindings.NewStringType()
 	pathParams["firewall_session_timer_profile_id"] = "firewallSessionTimerProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -181,7 +181,7 @@ func firewallSessionTimerProfilesListRestMetadata() protocol.OperationRestMetada
 	queryParams["include_mark_for_delete_objects"] = "include_mark_for_delete_objects"
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -236,7 +236,7 @@ func firewallSessionTimerProfilesPatchRestMetadata() protocol.OperationRestMetad
 	paramsTypeMap["firewallSessionTimerProfileId"] = bindings.NewStringType()
 	pathParams["firewall_session_timer_profile_id"] = "firewallSessionTimerProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -291,7 +291,7 @@ func firewallSessionTimerProfilesUpdateRestMetadata() protocol.OperationRestMeta
 	paramsTypeMap["firewallSessionTimerProfileId"] = bindings.NewStringType()
 	pathParams["firewall_session_timer_profile_id"] = "firewallSessionTimerProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
