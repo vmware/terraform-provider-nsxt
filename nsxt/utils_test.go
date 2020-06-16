@@ -137,12 +137,6 @@ func testAccNSXGlobalManagerSitePrecheck(t *testing.T) {
 	}
 }
 
-func testAccSkipIfIsLocalManager(t *testing.T) {
-	if !testAccIsGlobalManager() {
-		t.Skipf("This test is for global manager only")
-	}
-}
-
 // Create and delete CA and client cert for various tests
 func testAccNSXCreateCert(t *testing.T, name string, certPem string, certPK string, certType string) string {
 	nsxClient, err := testAccGetClient()
