@@ -261,7 +261,7 @@ func testAccNsxtPolicyVlanSegmentBasicUpdateTemplate(name string) string {
 
 resource "nsxt_policy_vlan_segment" "test" {
   display_name        = "%s"
-  description         = "Acceptance Test"
+  description         = "Acceptance Test2"
   transport_zone_path = data.nsxt_policy_transport_zone.test.path
   domain_name         = "tftest2.org"
   vlan_ids            = ["101", "104-110"]

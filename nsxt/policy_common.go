@@ -471,7 +471,7 @@ func buildQueryStringFromMap(query map[string]string) string {
 	keyValues := make([]string, 0, len(query))
 	for key, value := range query {
 		if strings.Contains(value, "/") {
-			value = strings.ReplaceAll(value, "/", "\\/")
+			value = strings.Replace(value, "/", "\\/", -1)
 		}
 		keyValue := strings.Join([]string{key, value}, ":")
 		keyValues = append(keyValues, keyValue)
