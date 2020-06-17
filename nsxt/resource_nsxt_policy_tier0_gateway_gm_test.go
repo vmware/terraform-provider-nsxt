@@ -21,6 +21,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_globalManager(t *testing.T) {
 			testAccPreCheck(t)
 			testAccEnvDefined(t, "NSXT_TEST_SITE_NAME")
 			testAccEnvDefined(t, "NSXT_TEST_ANOTHER_SITE_NAME")
+			testAccOnlyGlobalManager(t)
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -80,6 +81,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_globalManagerNoSubnet(t *testing.T) {
 			testAccPreCheck(t)
 			testAccEnvDefined(t, "NSXT_TEST_SITE_NAME")
 			testAccEnvDefined(t, "NSXT_TEST_ANOTHER_SITE_NAME")
+			testAccOnlyGlobalManager(t)
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
