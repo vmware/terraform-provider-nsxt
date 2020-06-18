@@ -366,3 +366,43 @@ func testAccAdjustPolicyInfraConfig(config string) string {
 
 	return config
 }
+
+func testAccNsxtPolicyTier0WithEdgeClusterTemplate(edgeClusterName string, standby bool) string {
+	return testAccNsxtPolicyGatewayWithEdgeClusterTemplate(edgeClusterName, true, standby)
+}
+
+func testAccNsxtPolicyTier1WithEdgeClusterTemplate(edgeClusterName string, standby bool) string {
+	return testAccNsxtPolicyGatewayWithEdgeClusterTemplate(edgeClusterName, false, standby)
+}
+
+func testAccNsxtPolicyGatewayWithEdgeClusterTemplate(edgeClusterName string, tier0 bool, standby bool) string {
+	var tier string
+	if tier0 {
+		tier = "0"
+	} else {
+		tier = "1"
+	}
+	var haMode string
+	if standby {
+		haMode = fmt.Sprintf(`ha_mode = "%s"`, model.Tier0_HA_MODE_STANDBY)
+	}
+	if testAccIsGlobalManager() {
+		return fmt.Sprintf(`
+resource "nsxt_policy_tier%s_gateway" "t%stest" {
+  display_name              = "terraform-t%s-gw"
+  description               = "Acceptance Test"
+  locale_service {
+    edge_cluster_path = data.nsxt_policy_edge_cluster.%s.path
+  }
+  %s
+}`, tier, tier, tier, edgeClusterName, haMode)
+	} else {
+		return fmt.Sprintf(`
+resource "nsxt_policy_tier%s_gateway" "t%stest" {
+  display_name              = "terraform-t%s-gw"
+  description               = "Acceptance Test"
+  edge_cluster_path         = data.nsxt_policy_edge_cluster.%s.path
+  %s
+}`, tier, tier, tier, edgeClusterName, haMode)
+	}
+}

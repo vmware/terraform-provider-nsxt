@@ -659,7 +659,7 @@ func verifyPolicyTier0GatewayConfig(d *schema.ResourceData, isGlobalManager bool
 		return nil
 	}
 
-	_, isSet := d.GetOk("locale_serviceee")
+	_, isSet := d.GetOk("locale_service")
 	if isSet {
 		return fmt.Errorf("locale_service setting is only supported with NSX Global Manager")
 	}

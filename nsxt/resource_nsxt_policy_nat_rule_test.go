@@ -21,7 +21,7 @@ func TestAccResourceNsxtPolicyNATRule_minimalT0(t *testing.T) {
 	action := model.PolicyNatRule_ACTION_REFLEXIVE
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyNATRuleCheckDestroy(state, name)
@@ -56,7 +56,7 @@ func TestAccResourceNsxtPolicyNATRule_basicT1(t *testing.T) {
 	action := model.PolicyNatRule_ACTION_DNAT
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyNATRuleCheckDestroy(state, name)
@@ -133,7 +133,11 @@ func TestAccResourceNsxtPolicyNATRule_basicT0(t *testing.T) {
 	action := model.PolicyNatRule_ACTION_REFLEXIVE
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() {
+			testAccPreCheck(t)
+			// TODO: remove this line after Tier0 GW interface merges
+			t.Skip()
+		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyNATRuleCheckDestroy(state, name)
@@ -186,7 +190,7 @@ func TestAccResourceNsxtPolicyNATRule_basicT1Import(t *testing.T) {
 	action := model.PolicyNatRule_ACTION_DNAT
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyNATRuleCheckDestroy(state, name)
@@ -238,7 +242,7 @@ func testAccNsxtPolicyNATRuleExists(resourceName string) resource.TestCheckFunc 
 
 		gwPath := rs.Primary.Attributes["gateway_path"]
 		isT0, gwID := parseGatewayPolicyPath(gwPath)
-		_, err := getNsxtPolicyNATRuleByID(connector, gwID, isT0, resourceID)
+		_, err := getNsxtPolicyNATRuleByID(connector, gwID, isT0, resourceID, testAccIsGlobalManager())
 		if err != nil {
 			return fmt.Errorf("Error while retrieving policy NAT Rule ID %s. Error: %v", resourceID, err)
 		}
@@ -258,7 +262,7 @@ func testAccNsxtPolicyNATRuleCheckDestroy(state *terraform.State, displayName st
 		resourceID := rs.Primary.Attributes["id"]
 		gwPath := rs.Primary.Attributes["gateway_path"]
 		isT0, gwID := parseGatewayPolicyPath(gwPath)
-		_, err := getNsxtPolicyNATRuleByID(connector, gwID, isT0, resourceID)
+		_, err := getNsxtPolicyNATRuleByID(connector, gwID, isT0, resourceID, testAccIsGlobalManager())
 		if err == nil {
 			return fmt.Errorf("Policy NAT Rule %s still exists", displayName)
 		}
@@ -267,17 +271,8 @@ func testAccNsxtPolicyNATRuleCheckDestroy(state *terraform.State, displayName st
 }
 
 func testAccNsxtPolicyNATRuleTier0MinimalCreateTemplate(name, sourceNet, translatedNet string) string {
-	return fmt.Sprintf(`
-data "nsxt_policy_edge_cluster" "EC" {
-  display_name = "%s"
-}
-
-resource "nsxt_policy_tier0_gateway" "t0test" {
-  display_name              = "terraform-t0-gw"
-  description               = "Acceptance Test"
-  edge_cluster_path         = "${data.nsxt_policy_edge_cluster.EC.path}"
-}
-
+	return testAccNsxtPolicyEdgeClusterReadTemplate(getEdgeClusterName()) +
+		testAccNsxtPolicyTier0WithEdgeClusterTemplate("test", false) + fmt.Sprintf(`
 resource "nsxt_policy_nat_rule" "test" {
   display_name         = "%s"
   gateway_path         = "${nsxt_policy_tier0_gateway.t0test.path}"
@@ -285,21 +280,12 @@ resource "nsxt_policy_nat_rule" "test" {
   source_networks      = ["%s"]
   translated_networks  = ["%s"]
 }
-`, getEdgeClusterName(), name, model.PolicyNatRule_ACTION_REFLEXIVE, sourceNet, translatedNet)
+`, name, model.PolicyNatRule_ACTION_REFLEXIVE, sourceNet, translatedNet)
 }
 
 func testAccNsxtPolicyNATRuleTier1CreateTemplate(name string, action string, sourceNet string, destNet string, translatedNet string) string {
-	return fmt.Sprintf(`
-data "nsxt_policy_edge_cluster" "EC" {
-  display_name = "%s"
-}
-
-resource "nsxt_policy_tier1_gateway" "t1test" {
-  display_name              = "terraform-t1-gw"
-  description               = "Acceptance Test"
-  edge_cluster_path         = "${data.nsxt_policy_edge_cluster.EC.path}"
-}
-
+	return testAccNsxtPolicyEdgeClusterReadTemplate(getEdgeClusterName()) +
+		testAccNsxtPolicyTier1WithEdgeClusterTemplate("test", false) + fmt.Sprintf(`
 resource "nsxt_policy_nat_rule" "test" {
   display_name         = "%s"
   description          = "Acceptance Test"
@@ -321,21 +307,12 @@ resource "nsxt_policy_nat_rule" "test" {
     tag   = "tag2"
   }
 }
-`, getEdgeClusterName(), name, action, sourceNet, destNet, translatedNet, model.PolicyNatRule_FIREWALL_MATCH_MATCH_EXTERNAL_ADDRESS)
+`, name, action, sourceNet, destNet, translatedNet, model.PolicyNatRule_FIREWALL_MATCH_MATCH_EXTERNAL_ADDRESS)
 }
 
 func testAccNsxtPolicyNATRuleTier1UpdateMultipleSourceNetworksTemplate(name string, action string, sourceNet1 string, sourceNet2 string, destNet string, translatedNet string) string {
-	return fmt.Sprintf(`
-data "nsxt_policy_edge_cluster" "EC" {
-  display_name = "%s"
-}
-
-resource "nsxt_policy_tier1_gateway" "t1test" {
-  display_name              = "terraform-t1-gw"
-  description               = "Acceptance Test"
-  edge_cluster_path         = "${data.nsxt_policy_edge_cluster.EC.path}"
-}
-
+	return testAccNsxtPolicyEdgeClusterReadTemplate(getEdgeClusterName()) +
+		testAccNsxtPolicyTier1WithEdgeClusterTemplate("test", false) + fmt.Sprintf(`
 resource "nsxt_policy_nat_rule" "test" {
   display_name         = "%s"
   description          = "Acceptance Test"
@@ -357,26 +334,26 @@ resource "nsxt_policy_nat_rule" "test" {
     tag   = "tag2"
   }
 }
-`, getEdgeClusterName(), name, action, sourceNet1, sourceNet2, destNet, translatedNet, model.PolicyNatRule_FIREWALL_MATCH_MATCH_EXTERNAL_ADDRESS)
+`, name, action, sourceNet1, sourceNet2, destNet, translatedNet, model.PolicyNatRule_FIREWALL_MATCH_MATCH_EXTERNAL_ADDRESS)
 }
 
 func testAccNsxtPolicyNATRuleTier0CreateTemplate(name string, action string, sourceNet string, translatedNet string) string {
-	return fmt.Sprintf(`
-data "nsxt_policy_edge_cluster" "EC" {
-  display_name = "%s"
-}
 
+	var transportZone string
+	if testAccIsGlobalManager() {
+		transportZone = fmt.Sprintf(`
 data "nsxt_policy_transport_zone" "test" {
   display_name = "%s"
-}
-
-resource "nsxt_policy_tier0_gateway" "t0test" {
-  display_name              = "terraform-t0-gw"
-  description               = "Acceptance Test"
-  ha_mode                   = "ACTIVE_STANDBY"
-  edge_cluster_path         = "${data.nsxt_policy_edge_cluster.EC.path}"
-}
-
+  site_path    = data.nsxt_policy_site.test.path
+}`, getVlanTransportZoneName())
+	} else {
+		transportZone = fmt.Sprintf(`
+data "nsxt_policy_transport_zone" "test" {
+  display_name = "%s"
+}`, getVlanTransportZoneName())
+	}
+	return testAccNsxtPolicyEdgeClusterReadTemplate(getEdgeClusterName()) +
+		transportZone + testAccNsxtPolicyTier0WithEdgeClusterTemplate("test", true) + fmt.Sprintf(`
 resource "nsxt_policy_vlan_segment" "test" {
   transport_zone_path = data.nsxt_policy_transport_zone.test.path
   display_name        = "interface_test"
@@ -413,5 +390,5 @@ resource "nsxt_policy_nat_rule" "test" {
   }
 }
 
-`, getEdgeClusterName(), getVlanTransportZoneName(), name, action, sourceNet, translatedNet, model.PolicyNatRule_FIREWALL_MATCH_MATCH_EXTERNAL_ADDRESS)
+`, name, action, sourceNet, translatedNet, model.PolicyNatRule_FIREWALL_MATCH_MATCH_EXTERNAL_ADDRESS)
 }
