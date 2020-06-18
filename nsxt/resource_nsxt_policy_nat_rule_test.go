@@ -133,7 +133,7 @@ func TestAccResourceNsxtPolicyNATRule_basicT0(t *testing.T) {
 	action := model.PolicyNatRule_ACTION_REFLEXIVE
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() {
+		PreCheck: func() {
 			testAccPreCheck(t)
 			// TODO: remove this line after Tier0 GW interface merges
 			t.Skip()
