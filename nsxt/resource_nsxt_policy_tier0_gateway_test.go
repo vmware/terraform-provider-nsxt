@@ -165,6 +165,56 @@ func TestAccResourceNsxtPolicyTier0Gateway_withDHCP(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyTier0Gateway_redistribution(t *testing.T) {
+	name := "test-nsx-policy-tier0-redistribution"
+	testResourceName := "nsxt_policy_tier0_gateway.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyTier0CheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyTier0CreateWithRedistribution(name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyTier0Exists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.0.enabled", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.0.rule.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.0.rule.0.types.#", "3"),
+					resource.TestCheckResourceAttr(realizationResourceName, "state", "REALIZED"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyTier0UpdateWithRedistribution(name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyTier0Exists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.0.enabled", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.0.rule.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.0.rule.0.types.#", "0"),
+					resource.TestCheckResourceAttr(realizationResourceName, "state", "REALIZED"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyTier0Update2WithRedistribution(name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyTier0Exists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.0.enabled", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.0.rule.#", "0"),
+					resource.TestCheckResourceAttr(realizationResourceName, "state", "REALIZED"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtPolicyTier0Gateway_withEdgeCluster(t *testing.T) {
 	name := fmt.Sprintf("test-nsx-policy-tier0-ec")
 	updateName := fmt.Sprintf("%s-update", name)
@@ -697,4 +747,57 @@ resource "nsxt_policy_tier0_gateway_interface" "parent-loopback" {
   edge_node_path = data.nsxt_policy_edge_node.EN.path
   subnets        = ["4.4.4.12/24"]
 }`
+}
+
+func testAccNsxtPolicyTier0CreateWithRedistribution(name string) string {
+	return fmt.Sprintf(`
+resource "nsxt_policy_tier0_gateway" "test" {
+  display_name = "%s"
+  redistribution_config {
+    enabled = false
+    rule {
+        name = "test-rule-1"
+        types = ["TIER0_SEGMENT", "TIER0_EVPN_TEP_IP", "TIER1_CONNECTED"]
+    }
+  }
+}
+
+data "nsxt_policy_realization_info" "realization_info" {
+  path = nsxt_policy_tier0_gateway.test.path
+}`, name)
+}
+
+func testAccNsxtPolicyTier0UpdateWithRedistribution(name string) string {
+	return fmt.Sprintf(`
+resource "nsxt_policy_tier0_gateway" "test" {
+  display_name = "%s"
+  redistribution_config {
+    enabled = false
+    rule {
+        name = "test-rule-1"
+    }
+    rule {
+        name  = "test-rule-3"
+        types = ["TIER1_CONNECTED"]
+    }
+  }
+}
+
+data "nsxt_policy_realization_info" "realization_info" {
+  path = nsxt_policy_tier0_gateway.test.path
+}`, name)
+}
+
+func testAccNsxtPolicyTier0Update2WithRedistribution(name string) string {
+	return fmt.Sprintf(`
+resource "nsxt_policy_tier0_gateway" "test" {
+  display_name = "%s"
+  redistribution_config {
+    enabled = false
+  }
+}
+
+data "nsxt_policy_realization_info" "realization_info" {
+  path = nsxt_policy_tier0_gateway.test.path
+}`, name)
 }

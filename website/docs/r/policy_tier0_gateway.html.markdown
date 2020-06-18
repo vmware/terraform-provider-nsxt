@@ -49,6 +49,14 @@ resource "nsxt_policy_tier0_gateway" "tier0_gw" {
     }
   }
 
+  redistribution_config {
+    enabled = true
+    rule {
+      name  = "rule1"
+      types = ["TIER0_STATIC", "TIER0_CONNECTED", "TIER1_CONNECTED"]
+    }
+  }
+
   tag {
     scope = "color"
     tag   = "blue"
@@ -132,7 +140,12 @@ The following arguments are supported:
   * `transit_subnet` - (Optional) IPv4 subnet for inter-site transit segment connecting service routers across sites for stretched gateway. For IPv6 link local subnet is auto configured.
   * `primary_site_path` - (Optional) Primary egress site for gateway.
   * `fallback_site_paths` - (Optional) Fallback sites to be used as new primary site on current primary site failure.
-
+  * `redistribution_config` - (Optional) Route redistribution properties. This setting is for local manager only.
+    * `enabled` - (Optional) Enable route redistribution for BGP
+    * `rule` - (Optional) List of redistribution rules.
+      * `name` - (Optional) Rule name.
+      * `route_map_path` - (Optional) Route map to be associated with the redistribution rule.
+      * `types` - (Optional) List of redistribution types, possible values are: `TIER0_STATIC`, `TIER0_CONNECTED`, `TIER0_EXTERNAL_INTERFACE`, `TIER0_SEGMENT`, `TIER0_ROUTER_LINK`, `TIER0_SERVICE_INTERFACE`, `TIER0_LOOPBACK_INTERFACE`, `TIER0_DNS_FORWARDER_IP`, `TIER0_IPSEC_LOCAL_IP`, `TIER0_NAT`, `TIER0_EVPN_TEP_IP`, `TIER1_NAT`, `TIER1_STATIC`, `TIER1_LB_VIP`, `TIER1_LB_SNAT`, `TIER1_DNS_FORWARDER_IP`, `TIER1_CONNECTED`, `TIER1_SERVICE_INTERFACE`, `TIER1_SEGMENT`, `TIER1_IPSEC_LOCAL_ENDPOINT`.
 
 ## Attributes Reference
 
