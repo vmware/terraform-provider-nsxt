@@ -392,8 +392,8 @@ resource "nsxt_policy_security_policy" "test" {
   }
 
 }`, name, comments)
-	} else {
-		return testAccNsxtGlobalPolicySite(domainName) + fmt.Sprintf(`
+	}
+	return testAccNsxtGlobalPolicySite(domainName) + fmt.Sprintf(`
 resource "nsxt_policy_security_policy" "test" {
   display_name    = "%s"
   description     = "Acceptance Test"
@@ -411,7 +411,6 @@ resource "nsxt_policy_security_policy" "test" {
   }
 
 }`, name, comments)
-	}
 }
 
 func testAccNsxtPolicySecurityPolicyWithRule(name string, direction string, protocol string, ruleTag string, domainName string) string {
@@ -443,8 +442,8 @@ resource "nsxt_policy_security_policy" "test" {
     }
   }
 }`, name, name, direction, protocol, ruleTag)
-	} else {
-		return testAccNsxtGlobalPolicySite(domainName) + fmt.Sprintf(`
+	}
+	return testAccNsxtGlobalPolicySite(domainName) + fmt.Sprintf(`
 resource "nsxt_policy_security_policy" "test" {
   display_name    = "%s"
   description     = "Acceptance Test"
@@ -472,7 +471,6 @@ resource "nsxt_policy_security_policy" "test" {
     }
   }
 }`, name, name, direction, protocol, ruleTag)
-	}
 }
 
 func testAccNsxtPolicySecurityPolicyDeps() string {

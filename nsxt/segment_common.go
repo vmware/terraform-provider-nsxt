@@ -824,20 +824,20 @@ func nsxtPolicySegmentDelete(d *schema.ResourceData, m interface{}) error {
 			var numOfPorts int
 			if isPolicyGlobalManager(m) {
 				portsClient := gm_segments.NewDefaultPortsClient(connector)
-				gm_ports, err := portsClient.List(id, nil, nil, nil, nil, nil, nil)
+				gmPorts, err := portsClient.List(id, nil, nil, nil, nil, nil, nil)
 				if err != nil {
-					return gm_ports, "error", logAPIError("Error listing segment ports", err)
+					return gmPorts, "error", logAPIError("Error listing segment ports", err)
 				}
-				numOfPorts = len(gm_ports.Results)
-				ports = gm_ports
+				numOfPorts = len(gmPorts.Results)
+				ports = gmPorts
 			} else {
 				portsClient := segments.NewDefaultPortsClient(connector)
-				lm_ports, err := portsClient.List(id, nil, nil, nil, nil, nil, nil)
+				lmPorts, err := portsClient.List(id, nil, nil, nil, nil, nil, nil)
 				if err != nil {
-					return lm_ports, "error", logAPIError("Error listing segment ports", err)
+					return lmPorts, "error", logAPIError("Error listing segment ports", err)
 				}
-				numOfPorts = len(lm_ports.Results)
-				ports = lm_ports
+				numOfPorts = len(lmPorts.Results)
+				ports = lmPorts
 			}
 
 			log.Printf("[DEBUG] Current number of ports on segment %s is %d", id, numOfPorts)

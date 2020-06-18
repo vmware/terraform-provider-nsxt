@@ -463,13 +463,11 @@ data "nsxt_policy_edge_cluster" "EC" {
   display_name = "%s"
   site_path    = data.nsxt_policy_site.test.path
 }`, name)
-	} else {
-		return fmt.Sprintf(`
+	}
+	return fmt.Sprintf(`
 data "nsxt_policy_edge_cluster" "EC" {
   display_name = "%s"
 }`, name)
-	}
-
 }
 
 func testAccNsxtPolicySegmentWithDhcpTemplate(tzName string, name string, dnsServerV4 string, dnsServerV6 string, lease string, preferred string) string {

@@ -461,7 +461,7 @@ func globalManagerOnlyError() error {
 }
 
 func attributeRequiredGlobalManagerError(attribute string, resource string) error {
-	return fmt.Errorf("%s requires %s configuration for NSX Global Manager.", resource, attribute)
+	return fmt.Errorf("%s requires %s configuration for NSX Global Manager", resource, attribute)
 }
 
 func buildQueryStringFromMap(query map[string]string) string {
