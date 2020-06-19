@@ -405,6 +405,7 @@ func getDataSourceIDSchema() *schema.Schema {
 
 func parseGatewayPolicyPath(gwPath string) (bool, string) {
 	// sample path looks like "/infra/tier-0s/mytier0gw"
+	// Or "/global-infra/tier-0s/mytier0gw" in Global Manager
 	isT0 := true
 	segs := strings.Split(gwPath, "/")
 	if segs[len(segs)-2] != "tier-0s" {

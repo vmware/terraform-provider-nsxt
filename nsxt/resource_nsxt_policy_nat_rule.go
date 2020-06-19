@@ -8,6 +8,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
+	gm_t0nat "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s/nat"
+	gm_t1nat "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_1s/nat"
+	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	t0nat "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/nat"
 	t1nat "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/nat"
@@ -130,7 +134,15 @@ func resourceNsxtPolicyNATRule() *schema.Resource {
 	}
 }
 
-func deleteNsxtPolicyNATRule(connector *client.RestConnector, gwID string, isT0 bool, ruleID string) error {
+func deleteNsxtPolicyNATRule(connector *client.RestConnector, gwID string, isT0 bool, ruleID string, isGlobalManager bool) error {
+	if isGlobalManager {
+		if isT0 {
+			client := gm_t0nat.NewDefaultNatRulesClient(connector)
+			return client.Delete(gwID, gm_model.PolicyNat_NAT_TYPE_USER, ruleID)
+		}
+		client := gm_t1nat.NewDefaultNatRulesClient(connector)
+		return client.Delete(gwID, gm_model.PolicyNat_NAT_TYPE_USER, ruleID)
+	}
 	if isT0 {
 		client := t0nat.NewDefaultNatRulesClient(connector)
 		return client.Delete(gwID, model.PolicyNat_NAT_TYPE_USER, ruleID)
@@ -148,7 +160,7 @@ func resourceNsxtPolicyNATRuleDelete(d *schema.ResourceData, m interface{}) erro
 	gwPolicyPath := d.Get("gateway_path").(string)
 	isT0, gwID := parseGatewayPolicyPath(gwPolicyPath)
 
-	err := deleteNsxtPolicyNATRule(getPolicyConnector(m), gwID, isT0, id)
+	err := deleteNsxtPolicyNATRule(getPolicyConnector(m), gwID, isT0, id, isPolicyGlobalManager(m))
 	if err != nil {
 		return handleDeleteError("Static Route", id, err)
 	}
@@ -156,7 +168,28 @@ func resourceNsxtPolicyNATRuleDelete(d *schema.ResourceData, m interface{}) erro
 	return nil
 }
 
-func getNsxtPolicyNATRuleByID(connector *client.RestConnector, gwID string, isT0 bool, ruleID string) (model.PolicyNatRule, error) {
+func getNsxtPolicyNATRuleByID(connector *client.RestConnector, gwID string, isT0 bool, ruleID string, isGlobalManager bool) (model.PolicyNatRule, error) {
+	if isGlobalManager {
+		var obj model.PolicyNatRule
+		var gmObj gm_model.PolicyNatRule
+		var rawObj interface{}
+		var err error
+		if isT0 {
+			client := gm_t0nat.NewDefaultNatRulesClient(connector)
+			gmObj, err = client.Get(gwID, gm_model.PolicyNat_NAT_TYPE_USER, ruleID)
+		} else {
+			client := gm_t1nat.NewDefaultNatRulesClient(connector)
+			gmObj, err = client.Get(gwID, gm_model.PolicyNat_NAT_TYPE_USER, ruleID)
+		}
+		if err != nil {
+			return obj, err
+		}
+		rawObj, err = convertModelBindingType(gmObj, gm_model.PolicyNatRuleBindingType(), model.PolicyNatRuleBindingType())
+		if err != nil {
+			return obj, err
+		}
+		return rawObj.(model.PolicyNatRule), err
+	}
 	if isT0 {
 		client := t0nat.NewDefaultNatRulesClient(connector)
 		return client.Get(gwID, model.PolicyNat_NAT_TYPE_USER, ruleID)
@@ -165,7 +198,19 @@ func getNsxtPolicyNATRuleByID(connector *client.RestConnector, gwID string, isT0
 	return client.Get(gwID, model.PolicyNat_NAT_TYPE_USER, ruleID)
 }
 
-func patchNsxtPolicyNATRule(connector *client.RestConnector, gwID string, rule model.PolicyNatRule, isT0 bool) error {
+func patchNsxtPolicyNATRule(connector *client.RestConnector, gwID string, rule model.PolicyNatRule, isT0 bool, isGlobalManager bool) error {
+	if isGlobalManager {
+		rawObj, err := convertModelBindingType(rule, model.PolicyNatRuleBindingType(), gm_model.PolicyNatRuleBindingType())
+		if err != nil {
+			return err
+		}
+		if isT0 {
+			client := gm_t0nat.NewDefaultNatRulesClient(connector)
+			return client.Patch(gwID, model.PolicyNat_NAT_TYPE_USER, *rule.Id, rawObj.(gm_model.PolicyNatRule))
+		}
+		client := gm_t1nat.NewDefaultNatRulesClient(connector)
+		return client.Patch(gwID, model.PolicyNat_NAT_TYPE_USER, *rule.Id, rawObj.(gm_model.PolicyNatRule))
+	}
 	if isT0 {
 		client := t0nat.NewDefaultNatRulesClient(connector)
 		return client.Patch(gwID, model.PolicyNat_NAT_TYPE_USER, *rule.Id, rule)
@@ -185,7 +230,7 @@ func resourceNsxtPolicyNATRuleRead(d *schema.ResourceData, m interface{}) error 
 	gwPolicyPath := d.Get("gateway_path").(string)
 	isT0, gwID := parseGatewayPolicyPath(gwPolicyPath)
 
-	obj, err := getNsxtPolicyNATRuleByID(connector, gwID, isT0, id)
+	obj, err := getNsxtPolicyNATRuleByID(connector, gwID, isT0, id, isPolicyGlobalManager(m))
 	if err != nil {
 		return handleReadError(d, "NAT Rule", id, err)
 	}
@@ -224,12 +269,13 @@ func resourceNsxtPolicyNATRuleCreate(d *schema.ResourceData, m interface{}) erro
 
 	gwPolicyPath := d.Get("gateway_path").(string)
 	isT0, gwID := parseGatewayPolicyPath(gwPolicyPath)
+	isGlobalManager := isPolicyGlobalManager(m)
 
 	id := d.Get("nsx_id").(string)
 	if id == "" {
 		id = newUUID()
 	} else {
-		_, err := getNsxtPolicyNATRuleByID(connector, gwID, isT0, id)
+		_, err := getNsxtPolicyNATRuleByID(connector, gwID, isT0, id, isGlobalManager)
 		if err == nil {
 			return fmt.Errorf("NAT Rule with nsx_id '%s' already exists", id)
 		} else if !isNotFoundError(err) {
@@ -278,7 +324,7 @@ func resourceNsxtPolicyNATRuleCreate(d *schema.ResourceData, m interface{}) erro
 
 	log.Printf("[INFO] Creating NAT Rule with ID %s", id)
 
-	err := patchNsxtPolicyNATRule(connector, gwID, ruleStruct, isT0)
+	err := patchNsxtPolicyNATRule(connector, gwID, ruleStruct, isT0, isGlobalManager)
 	if err != nil {
 		return handleCreateError("NAT Rule", id, err)
 	}
@@ -340,7 +386,7 @@ func resourceNsxtPolicyNATRuleUpdate(d *schema.ResourceData, m interface{}) erro
 	}
 
 	log.Printf("[INFO] Updating NAT Rule with ID %s", id)
-	err := patchNsxtPolicyNATRule(connector, gwID, routeStruct, isT0)
+	err := patchNsxtPolicyNATRule(connector, gwID, routeStruct, isT0, isPolicyGlobalManager(m))
 	if err != nil {
 		return handleUpdateError("NAT Rule", id, err)
 	}
@@ -360,22 +406,39 @@ func resourceNsxtPolicyNATRuleImport(d *schema.ResourceData, m interface{}) ([]*
 
 	gwID := s[0]
 	connector := getPolicyConnector(m)
-	t0Client := infra.NewDefaultTier0sClient(connector)
-	t0gw, err := t0Client.Get(gwID)
-	if err != nil {
-		if !isNotFoundError(err) {
-			return nil, err
-		}
-		t1Client := infra.NewDefaultTier1sClient(connector)
-		t1gw, err := t1Client.Get(gwID)
+	if isPolicyGlobalManager(m) {
+		t0Client := gm_infra.NewDefaultTier0sClient(connector)
+		t0gw, err := t0Client.Get(gwID)
 		if err != nil {
-			return nil, err
+			if !isNotFoundError(err) {
+				return nil, err
+			}
+			t1Client := gm_infra.NewDefaultTier1sClient(connector)
+			t1gw, err := t1Client.Get(gwID)
+			if err != nil {
+				return nil, err
+			}
+			d.Set("gateway_path", t1gw.Path)
+		} else {
+			d.Set("gateway_path", t0gw.Path)
 		}
-		d.Set("gateway_path", t1gw.Path)
 	} else {
-		d.Set("gateway_path", t0gw.Path)
+		t0Client := infra.NewDefaultTier0sClient(connector)
+		t0gw, err := t0Client.Get(gwID)
+		if err != nil {
+			if !isNotFoundError(err) {
+				return nil, err
+			}
+			t1Client := infra.NewDefaultTier1sClient(connector)
+			t1gw, err := t1Client.Get(gwID)
+			if err != nil {
+				return nil, err
+			}
+			d.Set("gateway_path", t1gw.Path)
+		} else {
+			d.Set("gateway_path", t0gw.Path)
+		}
 	}
-
 	d.SetId(s[1])
 
 	return []*schema.ResourceData{d}, nil
