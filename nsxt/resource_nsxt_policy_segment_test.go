@@ -281,7 +281,7 @@ func testAccNsxtPolicySegmentCheckDestroy(state *terraform.State, displayName st
 }
 
 func testAccNsxtPolicySegmentDeps(tzName string) string {
-	return testAccNSXPolicyTransportZoneReadTemplate(tzName) + fmt.Sprintf(`
+	return testAccNSXPolicyTransportZoneReadTemplate(tzName, false) + fmt.Sprintf(`
 
 resource "nsxt_policy_tier1_gateway" "tier1ForSegments" {
   display_name              = "t1gw"

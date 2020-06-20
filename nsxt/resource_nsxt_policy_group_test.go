@@ -579,9 +579,10 @@ data "nsxt_policy_site" "test" {
   display_name = "%s"
 }
 data "nsxt_policy_transport_zone" "test"{
-  display_name = "%s"
-  site_path = data.nsxt_policy_site.test.path
-}`, getTestSiteName(), getOverlayTransportZoneName())
+  site_path      = data.nsxt_policy_site.test.path
+  transport_type = "OVERLAY_STANDARD"
+  is_default     = true
+}`, getTestSiteName())
 }
 
 func testNsxtPolicyGroupPathsTransportZone() string {
