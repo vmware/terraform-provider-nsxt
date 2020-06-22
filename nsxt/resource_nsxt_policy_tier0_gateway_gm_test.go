@@ -35,6 +35,8 @@ func TestAccResourceNsxtPolicyTier0Gateway_globalManager(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "display_name", defaultTestResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "ha_mode", "ACTIVE_ACTIVE"),
 					resource.TestCheckResourceAttr(testResourceName, "locale_service.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, "locale_service.1468023214.edge_cluster_path"),
+					resource.TestCheckResourceAttr(testResourceName, "locale_service.1468023214.preferred_edge_paths.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "intersite_config.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "intersite_config.0.transit_subnet", testAccGmGatewayIntersiteSubnet),
 					resource.TestCheckResourceAttrSet(testResourceName, "intersite_config.0.primary_site_path"),
@@ -49,6 +51,10 @@ func TestAccResourceNsxtPolicyTier0Gateway_globalManager(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "display_name", defaultTestResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "ha_mode", "ACTIVE_ACTIVE"),
 					resource.TestCheckResourceAttr(testResourceName, "locale_service.#", "2"),
+					resource.TestCheckResourceAttrSet(testResourceName, "locale_service.1468023214.edge_cluster_path"),
+					resource.TestCheckResourceAttr(testResourceName, "locale_service.1468023214.preferred_edge_paths.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, "locale_service.2067877406.edge_cluster_path"),
+					resource.TestCheckResourceAttr(testResourceName, "locale_service.2067877406.preferred_edge_paths.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "intersite_config.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "intersite_config.0.transit_subnet", testAccGmGatewayIntersiteSubnet),
 					resource.TestCheckResourceAttrSet(testResourceName, "intersite_config.0.primary_site_path"),
@@ -95,6 +101,8 @@ func TestAccResourceNsxtPolicyTier0Gateway_globalManagerNoSubnet(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "display_name", defaultTestResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "locale_service.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "intersite_config.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, "locale_service.1468023214.edge_cluster_path"),
+					resource.TestCheckResourceAttr(testResourceName, "locale_service.1468023214.preferred_edge_paths.#", "1"),
 					resource.TestCheckResourceAttrSet(testResourceName, "intersite_config.0.transit_subnet"),
 					resource.TestCheckResourceAttrSet(testResourceName, "intersite_config.0.primary_site_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -107,9 +115,77 @@ func TestAccResourceNsxtPolicyTier0Gateway_globalManagerNoSubnet(t *testing.T) {
 					testAccNsxtPolicyTier0Exists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", defaultTestResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "locale_service.#", "2"),
+					resource.TestCheckResourceAttrSet(testResourceName, "locale_service.1468023214.edge_cluster_path"),
+					resource.TestCheckResourceAttr(testResourceName, "locale_service.1468023214.preferred_edge_paths.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, "locale_service.2067877406.edge_cluster_path"),
+					resource.TestCheckResourceAttr(testResourceName, "locale_service.2067877406.preferred_edge_paths.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "intersite_config.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "intersite_config.0.transit_subnet", testAccGmGatewayIntersiteSubnet),
 					resource.TestCheckResourceAttrSet(testResourceName, "intersite_config.0.primary_site_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+				),
+			},
+		},
+	})
+}
+
+// NOTE: This test assumes single edge cluster on both sites
+func TestAccResourceNsxtPolicyTier0Gateway_globalManagerRedistribution(t *testing.T) {
+	testResourceName := "nsxt_policy_tier0_gateway.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccEnvDefined(t, "NSXT_TEST_SITE_NAME")
+			testAccEnvDefined(t, "NSXT_TEST_ANOTHER_SITE_NAME")
+			testAccOnlyGlobalManager(t)
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyTier0CheckDestroy(state, defaultTestResourceName)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyTier0GMCreateTemplateWithRedistribution(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyTier0Exists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", defaultTestResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "ha_mode", "ACTIVE_ACTIVE"),
+					resource.TestCheckResourceAttr(testResourceName, "locale_service.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, "locale_service.3003024250.edge_cluster_path"),
+					resource.TestCheckResourceAttr(testResourceName, "locale_service.3003024250.redistribution_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "locale_service.3003024250.redistribution_config.0.enabled", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "locale_service.3003024250.redistribution_config.0.rule.0.name", "test-rule-1"),
+					resource.TestCheckResourceAttr(testResourceName, "locale_service.3003024250.redistribution_config.0.rule.0.types.#", "3"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyTier0GMUpdateTemplateWithRedistribution(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyTier0Exists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", defaultTestResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "ha_mode", "ACTIVE_ACTIVE"),
+					resource.TestCheckResourceAttr(testResourceName, "locale_service.#", "2"),
+					resource.TestCheckResourceAttrSet(testResourceName, "locale_service.4275508675.edge_cluster_path"),
+					resource.TestCheckResourceAttr(testResourceName, "locale_service.4275508675.redistribution_config.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "locale_service.2737202166.redistribution_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "locale_service.2737202166.redistribution_config.0.enabled", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "locale_service.2737202166.redistribution_config.0.rule.0.name", "test-rule-2"),
+					resource.TestCheckResourceAttr(testResourceName, "locale_service.2737202166.redistribution_config.0.rule.0.types.#", "3"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyTier0GMMinimalistic(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyTier0Exists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", defaultTestResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "ha_mode", "ACTIVE_ACTIVE"),
+					resource.TestCheckResourceAttr(testResourceName, "locale_service.#", "0"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 				),
@@ -194,5 +270,49 @@ func testAccNsxtPolicyTier0GMMinimalistic() string {
 	return testAccNsxtPolicyGMGatewayDeps() + fmt.Sprintf(`
 resource "nsxt_policy_tier0_gateway" "test" {
   display_name = "%s"
+}`, defaultTestResourceName)
+}
+
+func testAccNsxtPolicyTier0GMCreateTemplateWithRedistribution() string {
+	return testAccNsxtPolicyGMGatewayDeps() + fmt.Sprintf(`
+resource "nsxt_policy_tier0_gateway" "test" {
+  display_name = "%s"
+  ha_mode      = "ACTIVE_ACTIVE"
+
+  locale_service {
+    edge_cluster_path = data.nsxt_policy_edge_cluster.ec_site1.path
+    redistribution_config {
+      enabled = false
+      rule {
+        name = "test-rule-1"
+        types = ["TIER0_SEGMENT", "TIER0_EVPN_TEP_IP", "TIER1_CONNECTED"]
+      }
+    }
+  }
+
+}`, defaultTestResourceName)
+}
+
+func testAccNsxtPolicyTier0GMUpdateTemplateWithRedistribution() string {
+	return testAccNsxtPolicyGMGatewayDeps() + fmt.Sprintf(`
+resource "nsxt_policy_tier0_gateway" "test" {
+  display_name = "%s"
+  ha_mode      = "ACTIVE_ACTIVE"
+
+  locale_service {
+    edge_cluster_path = data.nsxt_policy_edge_cluster.ec_site1.path
+  }
+
+  locale_service {
+    edge_cluster_path = data.nsxt_policy_edge_cluster.ec_site2.path
+    redistribution_config {
+      enabled = true
+      rule {
+        name = "test-rule-2"
+        types = ["TIER0_SEGMENT", "TIER0_EVPN_TEP_IP", "TIER1_CONNECTED"]
+      }
+    }
+  }
+
 }`, defaultTestResourceName)
 }

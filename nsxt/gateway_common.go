@@ -14,6 +14,29 @@ import (
 	"strings"
 )
 
+var nsxtPolicyTier0GatewayRedistributionRuleTypes = []string{
+	model.Tier0RouteRedistributionRule_ROUTE_REDISTRIBUTION_TYPES_TIER0_STATIC,
+	model.Tier0RouteRedistributionRule_ROUTE_REDISTRIBUTION_TYPES_TIER0_CONNECTED,
+	model.Tier0RouteRedistributionRule_ROUTE_REDISTRIBUTION_TYPES_TIER0_EXTERNAL_INTERFACE,
+	model.Tier0RouteRedistributionRule_ROUTE_REDISTRIBUTION_TYPES_TIER0_SEGMENT,
+	model.Tier0RouteRedistributionRule_ROUTE_REDISTRIBUTION_TYPES_TIER0_ROUTER_LINK,
+	model.Tier0RouteRedistributionRule_ROUTE_REDISTRIBUTION_TYPES_TIER0_SERVICE_INTERFACE,
+	model.Tier0RouteRedistributionRule_ROUTE_REDISTRIBUTION_TYPES_TIER0_LOOPBACK_INTERFACE,
+	model.Tier0RouteRedistributionRule_ROUTE_REDISTRIBUTION_TYPES_TIER0_DNS_FORWARDER_IP,
+	model.Tier0RouteRedistributionRule_ROUTE_REDISTRIBUTION_TYPES_TIER0_IPSEC_LOCAL_IP,
+	model.Tier0RouteRedistributionRule_ROUTE_REDISTRIBUTION_TYPES_TIER0_NAT,
+	model.Tier0RouteRedistributionRule_ROUTE_REDISTRIBUTION_TYPES_TIER0_EVPN_TEP_IP,
+	model.Tier0RouteRedistributionRule_ROUTE_REDISTRIBUTION_TYPES_TIER1_NAT,
+	model.Tier0RouteRedistributionRule_ROUTE_REDISTRIBUTION_TYPES_TIER1_STATIC,
+	model.Tier0RouteRedistributionRule_ROUTE_REDISTRIBUTION_TYPES_TIER1_LB_VIP,
+	model.Tier0RouteRedistributionRule_ROUTE_REDISTRIBUTION_TYPES_TIER1_LB_SNAT,
+	model.Tier0RouteRedistributionRule_ROUTE_REDISTRIBUTION_TYPES_TIER1_DNS_FORWARDER_IP,
+	model.Tier0RouteRedistributionRule_ROUTE_REDISTRIBUTION_TYPES_TIER1_CONNECTED,
+	model.Tier0RouteRedistributionRule_ROUTE_REDISTRIBUTION_TYPES_TIER1_SERVICE_INTERFACE,
+	model.Tier0RouteRedistributionRule_ROUTE_REDISTRIBUTION_TYPES_TIER1_SEGMENT,
+	model.Tier0RouteRedistributionRule_ROUTE_REDISTRIBUTION_TYPES_TIER1_IPSEC_LOCAL_ENDPOINT,
+}
+
 func getFailoverModeSchema(defaultValue string) *schema.Schema {
 	return &schema.Schema{
 		Type:         schema.TypeString,
@@ -59,31 +82,40 @@ func getPolicyLocaleServiceSchema(isTier1 bool) *schema.Schema {
 		// preferred nodes are specified
 		nodeConficts = append(nodeConficts, "enable_standby_relocation")
 	}
-	return &schema.Schema{
+
+	elemSchema := map[string]*schema.Schema{
+		"edge_cluster_path": {
+			Type:         schema.TypeString,
+			Description:  "The path of the edge cluster connected to this gateway",
+			Required:     true,
+			ValidateFunc: validatePolicyPath(),
+		},
+		"preferred_edge_paths": {
+			Type:          schema.TypeSet,
+			Description:   "Paths of specific edge nodes",
+			Optional:      true,
+			Elem:          getElemPolicyPathSchema(),
+			ConflictsWith: nodeConficts,
+		},
+		"redistribution_config": getRedistributionConfigSchema(),
+		"path":                  getPathSchema(),
+		"revision":              getRevisionSchema(),
+	}
+	if isTier1 {
+		delete(elemSchema, "redistribution_config")
+	}
+
+	result := &schema.Schema{
 		Type:          schema.TypeSet,
 		Optional:      true,
 		Description:   "Locale Service for the gateway",
 		ConflictsWith: []string{"edge_cluster_path"},
 		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{
-				"edge_cluster_path": {
-					Type:         schema.TypeString,
-					Description:  "The path of the edge cluster connected to this gateway",
-					Required:     true,
-					ValidateFunc: validatePolicyPath(),
-				},
-				"preferred_edge_paths": {
-					Type:          schema.TypeSet,
-					Description:   "Paths of specific edge nodes",
-					Optional:      true,
-					Elem:          getElemPolicyPathSchema(),
-					ConflictsWith: nodeConficts,
-				},
-				"path":     getPathSchema(),
-				"revision": getRevisionSchema(),
-			},
+			Schema: elemSchema,
 		},
 	}
+
+	return result
 }
 
 func getIpv6ProfilePathsFromSchema(d *schema.ResourceData) []string {
@@ -260,6 +292,9 @@ func initGatewayLocaleServices(d *schema.ResourceData, connector *client.RestCon
 			PreferredEdgePaths: edgeNodes,
 		}
 
+		redistributionConfigs := cfg["redistribution_config"].([]interface{})
+		setLocaleServiceRedistributionConfig(redistributionConfigs, &serviceStruct)
+
 		if _, ok := existingServices[serviceID]; ok {
 			// if this is an update for existing locale service,
 			// we need revision
@@ -355,4 +390,113 @@ func policyInfraPatch(obj model.Infra, isGlobalManager bool, connector *client.R
 
 	infraClient := nsx_policy.NewDefaultInfraClient(connector)
 	return infraClient.Patch(obj, &enforceRevision)
+}
+
+func getRedistributionConfigSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeList,
+		Description: "Route Redistribution configuration",
+		Optional:    true,
+		MaxItems:    1,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"enabled": {
+					Type:        schema.TypeBool,
+					Description: "Flag to enable route redistribution for BGP",
+					Optional:    true,
+					Default:     true,
+				},
+				"rule": {
+					Type:        schema.TypeList,
+					Description: "List of routes to be aggregated",
+					Optional:    true,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"name": {
+								Type:        schema.TypeString,
+								Description: "Rule name",
+								Optional:    true,
+							},
+							"route_map_path": {
+								Type:        schema.TypeString,
+								Description: "Route map to be associated with the redistribution rule",
+								Optional:    true,
+							},
+							"types": {
+								Type:        schema.TypeSet,
+								Description: "List of redistribution types",
+								Optional:    true,
+								Elem: &schema.Schema{
+									Type:         schema.TypeString,
+									ValidateFunc: validation.StringInSlice(nsxtPolicyTier0GatewayRedistributionRuleTypes, false),
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func setLocaleServiceRedistributionConfig(redistributionConfigs []interface{}, serviceStruct *model.LocaleServices) {
+	var rules []model.Tier0RouteRedistributionRule
+	if len(redistributionConfigs) == 0 {
+		return
+	}
+
+	redistributionConfig := redistributionConfigs[0].(map[string]interface{})
+	bgp := redistributionConfig["enabled"].(bool)
+	rulesConfig := redistributionConfig["rule"].([]interface{})
+
+	for _, ruleConfig := range rulesConfig {
+		data := ruleConfig.(map[string]interface{})
+		name := data["name"].(string)
+		routeMapPath := data["route_map_path"].(string)
+		types := data["types"].(*schema.Set).List()
+
+		rule := model.Tier0RouteRedistributionRule{
+			RouteRedistributionTypes: interface2StringList(types),
+		}
+
+		if len(name) > 0 {
+			rule.Name = &name
+		}
+
+		if len(routeMapPath) > 0 {
+			rule.RouteMapPath = &routeMapPath
+		}
+
+		rules = append(rules, rule)
+	}
+
+	redistributionStruct := model.Tier0RouteRedistributionConfig{
+		BgpEnabled:          &bgp,
+		RedistributionRules: rules,
+	}
+
+	serviceStruct.RouteRedistributionConfig = &redistributionStruct
+}
+
+func getLocaleServiceRedistributionConfig(serviceStruct *model.LocaleServices) []map[string]interface{} {
+	var redistributionConfigs []map[string]interface{}
+	config := serviceStruct.RouteRedistributionConfig
+	if config == nil {
+		return redistributionConfigs
+	}
+
+	var rules []map[string]interface{}
+	elem := make(map[string]interface{})
+	elem["enabled"] = config.BgpEnabled
+	for _, ruleConfig := range config.RedistributionRules {
+		rule := make(map[string]interface{})
+		rule["name"] = ruleConfig.Name
+		rule["route_map_path"] = ruleConfig.RouteMapPath
+		rule["types"] = ruleConfig.RouteRedistributionTypes
+		rules = append(rules, rule)
+	}
+
+	elem["rule"] = rules
+	redistributionConfigs = append(redistributionConfigs, elem)
+	return redistributionConfigs
 }
