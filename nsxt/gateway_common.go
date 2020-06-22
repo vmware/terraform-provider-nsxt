@@ -292,8 +292,10 @@ func initGatewayLocaleServices(d *schema.ResourceData, connector *client.RestCon
 			PreferredEdgePaths: edgeNodes,
 		}
 
-		redistributionConfigs := cfg["redistribution_config"].([]interface{})
-		setLocaleServiceRedistributionConfig(redistributionConfigs, &serviceStruct)
+		redistributionConfigs := cfg["redistribution_config"]
+		if redistributionConfigs != nil {
+			setLocaleServiceRedistributionConfig(redistributionConfigs.([]interface{}), &serviceStruct)
+		}
 
 		if _, ok := existingServices[serviceID]; ok {
 			// if this is an update for existing locale service,
