@@ -389,20 +389,19 @@ func testAccNsxtPolicyGatewayWithEdgeClusterTemplate(edgeClusterName string, tie
 	if testAccIsGlobalManager() {
 		return fmt.Sprintf(`
 resource "nsxt_policy_tier%s_gateway" "t%stest" {
-  display_name              = "terraform-t%s-gw"
-  description               = "Acceptance Test"
+  display_name = "terraform-t%s-gw"
+  description  = "Acceptance Test"
   locale_service {
     edge_cluster_path = data.nsxt_policy_edge_cluster.%s.path
   }
   %s
 }`, tier, tier, tier, edgeClusterName, haMode)
-	} else {
-		return fmt.Sprintf(`
+	}
+	return fmt.Sprintf(`
 resource "nsxt_policy_tier%s_gateway" "t%stest" {
-  display_name              = "terraform-t%s-gw"
-  description               = "Acceptance Test"
-  edge_cluster_path         = data.nsxt_policy_edge_cluster.%s.path
+  display_name      = "terraform-t%s-gw"
+  description       = "Acceptance Test"
+  edge_cluster_path = data.nsxt_policy_edge_cluster.%s.path
   %s
 }`, tier, tier, tier, edgeClusterName, haMode)
-	}
 }

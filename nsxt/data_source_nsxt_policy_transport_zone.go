@@ -56,6 +56,8 @@ func dataSourceNsxtPolicyTransportZone() *schema.Resource {
 func dataSourceNsxtPolicyTransportZoneRead(d *schema.ResourceData, m interface{}) error {
 	objSitePath := d.Get("site_path").(string)
 	transportType := d.Get("transport_type").(string)
+	defaultVal, isDefaultSet := d.GetOkExists("is_default")
+	isDefault := isDefaultSet && defaultVal.(bool)
 	if !isPolicyGlobalManager(m) && objSitePath != "" {
 		return globalManagerOnlyError()
 	}
@@ -69,7 +71,10 @@ func dataSourceNsxtPolicyTransportZoneRead(d *schema.ResourceData, m interface{}
 		if transportType != "" {
 			query["tz_type"] = transportType
 		}
-		obj, err := policyDataSourceResourceRead(d, getPolicyConnector(m), "PolicyTransportZone", query)
+		if isDefault {
+			query["is_default"] = "true"
+		}
+		obj, err := policyDataSourceResourceReadWithValidation(d, getPolicyConnector(m), "PolicyTransportZone", query, false)
 		if err != nil {
 			return err
 		}
@@ -92,8 +97,6 @@ func dataSourceNsxtPolicyTransportZoneRead(d *schema.ResourceData, m interface{}
 	// TODO: support non-default site and enforcement point possibly as a triple; site/point/tz_id
 	objID := d.Get("id").(string)
 	objName := d.Get("display_name").(string)
-	defaultVal, isDefaultSet := d.GetOkExists("is_default")
-	isDefault := isDefaultSet && defaultVal.(bool)
 	var obj lm_model.PolicyTransportZone
 	if objID != "" {
 		// Get by id

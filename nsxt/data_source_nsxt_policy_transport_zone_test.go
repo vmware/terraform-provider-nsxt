@@ -21,15 +21,30 @@ func TestAccDataSourceNsxtPolicyTransportZone_basic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXPolicyTransportZoneReadTemplate(transportZoneName),
+				Config: testAccNSXPolicyTransportZoneReadTemplate(transportZoneName, true),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(testResourceName, "display_name", transportZoneName),
+					resource.TestCheckResourceAttrSet(testResourceName, "display_name"),
 					resource.TestCheckResourceAttrSet(testResourceName, "id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "is_default"),
 					resource.TestCheckResourceAttr(testResourceName, "transport_type", "VLAN_BACKED"),
 				),
 			},
+		},
+	})
+}
+
+func TestAccDataSourceNsxtPolicyTransportZone_withTransportType(t *testing.T) {
+	transportZoneName := getVlanTransportZoneName()
+	testResourceName := "data.nsxt_policy_transport_zone.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccOnlyLocalManager(t)
+			testAccPreCheck(t)
+		},
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
 			{
 				Config: testAccNSXPolicyTransportZoneWithTransportTypeTemplate(transportZoneName),
 				Check: resource.ComposeTestCheckFunc(
@@ -44,9 +59,9 @@ func TestAccDataSourceNsxtPolicyTransportZone_basic(t *testing.T) {
 	})
 }
 
-func testAccNSXPolicyTransportZoneReadTemplate(transportZoneName string) string {
+func testAccNSXPolicyTransportZoneReadTemplate(transportZoneName string, isVlan bool) string {
 	if testAccIsGlobalManager() {
-		return testAccNSXGlobalPolicyTransportZoneReadTemplate(transportZoneName)
+		return testAccNSXGlobalPolicyTransportZoneReadTemplate(isVlan)
 	}
 	return fmt.Sprintf(`
 data "nsxt_policy_transport_zone" "test" {
@@ -65,16 +80,21 @@ data "nsxt_policy_transport_zone" "test" {
 }`, transportZoneName)
 }
 
-func testAccNSXGlobalPolicyTransportZoneReadTemplate(transportZoneName string) string {
+func testAccNSXGlobalPolicyTransportZoneReadTemplate(isVlan bool) string {
+	transportType := "OVERLAY_STANDARD"
+	if isVlan {
+		transportType = "VLAN_BACKED"
+	}
 	return fmt.Sprintf(`
 data "nsxt_policy_site" "test" {
   display_name = "%s"
 }
 
 data "nsxt_policy_transport_zone" "test" {
-  display_name = "%s"
-  site_path = data.nsxt_policy_site.test.path
-}`, getTestSiteName(), transportZoneName)
+  transport_type = "%s"
+  site_path      = data.nsxt_policy_site.test.path
+  is_default     = true
+}`, getTestSiteName(), transportType)
 }
 
 func testAccNSXGlobalPolicyTransportZoneWithTransportTypeTemplate(transportZoneName string) string {
