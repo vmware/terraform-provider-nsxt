@@ -16,7 +16,7 @@ func TestAccResourceNsxtIpSet_basic(t *testing.T) {
 	updateName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_ip_set.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -51,7 +51,7 @@ func TestAccResourceNsxtIpSet_noName(t *testing.T) {
 	name := ""
 	testResourceName := "nsxt_ip_set.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -86,7 +86,7 @@ func TestAccResourceNsxtIpSet_importBasic(t *testing.T) {
 	name := fmt.Sprintf("test-nsx-ip-set")
 	testResourceName := "nsxt_ip_set.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {

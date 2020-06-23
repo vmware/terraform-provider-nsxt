@@ -16,7 +16,7 @@ func TestAccResourceNsxtIgmpTypeNsService_basic(t *testing.T) {
 	updateServiceName := fmt.Sprintf("%s-update", serviceName)
 	testResourceName := "nsxt_igmp_type_ns_service.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -49,7 +49,7 @@ func TestAccResourceNsxtIgmpTypeNsService_importBasic(t *testing.T) {
 	serviceName := fmt.Sprintf("test-nsx-igmp-service")
 	testResourceName := "nsxt_igmp_type_ns_service.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {

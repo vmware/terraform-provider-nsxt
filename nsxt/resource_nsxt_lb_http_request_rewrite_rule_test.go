@@ -19,7 +19,7 @@ func TestAccResourceNsxtLbHttpRequestRewriteRule_basic(t *testing.T) {
 	matchType := "STARTS_WITH"
 	updatedMatchType := "ENDS_WITH"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -173,7 +173,7 @@ func testLbRuleConditionAttr(resourceName string, conditionType string, setHash 
 func TestAccResourceNsxtLbHttpRequestRewriteRule_importBasic(t *testing.T) {
 	name := "test"
 	resourceName := "nsxt_lb_http_request_rewrite_rule.test"
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {

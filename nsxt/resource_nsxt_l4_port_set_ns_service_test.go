@@ -16,7 +16,7 @@ func TestAccResourceNsxtL4PortNsService_basic(t *testing.T) {
 	updateServiceName := fmt.Sprintf("%s-update", serviceName)
 	testResourceName := "nsxt_l4_port_set_ns_service.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -51,7 +51,7 @@ func TestAccResourceNsxtL4PortNsService_importBasic(t *testing.T) {
 	serviceName := fmt.Sprintf("test-nsx-l4-service")
 	testResourceName := "nsxt_l4_port_set_ns_service.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {

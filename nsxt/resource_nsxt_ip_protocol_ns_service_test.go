@@ -16,7 +16,7 @@ func TestAccResourceNsxtIpProtocolNsService_basic(t *testing.T) {
 	updateServiceName := fmt.Sprintf("%s-update", serviceName)
 	testResourceName := "nsxt_ip_protocol_ns_service.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -51,7 +51,7 @@ func TestAccResourceNsxtIpProtocolNsService_importBasic(t *testing.T) {
 	serviceName := fmt.Sprintf("test-nsx-ip-protocol-service")
 	testResourceName := "nsxt_ip_protocol_ns_service.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
