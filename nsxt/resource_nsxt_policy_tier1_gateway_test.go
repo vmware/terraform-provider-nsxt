@@ -245,17 +245,6 @@ func TestAccResourceNsxtPolicyTier1Gateway_withEdgeCluster(t *testing.T) {
 					resource.TestCheckResourceAttr(realizationResourceName, "state", "REALIZED"),
 				),
 			},
-			{
-				Config: testAccNsxtPolicyTier1CreateWithEcRemovedTemplate(updateName, edgeClusterName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyTier1Exists(testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", updateName),
-					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
-					resource.TestCheckResourceAttr(testResourceName, "edge_cluster_path", ""),
-					resource.TestCheckResourceAttr(testResourceName, "tier0_path", ""),
-					resource.TestCheckResourceAttr(realizationResourceName, "state", "REALIZED"),
-				),
-			},
 		},
 	})
 }
@@ -664,32 +653,6 @@ resource "nsxt_policy_tier1_gateway" "test" {
   display_name      = "%s"
   description       = "Acceptance Test"
   edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
-
-  tag {
-    scope = "scope1"
-    tag   = "tag1"
-  }
-
-  tag {
-    scope = "scope2"
-    tag   = "tag2"
-  }
-}
-
-data "nsxt_policy_realization_info" "realization_info" {
-  path = nsxt_policy_tier1_gateway.test.path
-}`, edgeClusterName, name)
-}
-
-func testAccNsxtPolicyTier1CreateWithEcRemovedTemplate(name string, edgeClusterName string) string {
-	return fmt.Sprintf(`
-data "nsxt_policy_edge_cluster" "EC" {
-  display_name = "%s"
-}
-
-resource "nsxt_policy_tier1_gateway" "test" {
-  display_name      = "%s"
-  description       = "Acceptance Test"
 
   tag {
     scope = "scope1"

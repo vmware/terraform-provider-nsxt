@@ -21,7 +21,7 @@ func TestAccResourceNsxtVlanLogicalSwitch_basic(t *testing.T) {
 	origvlan := "1"
 	updatedvlan := "2"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -62,7 +62,7 @@ func TestAccResourceNsxtVlanLogicalSwitch_withProfiles(t *testing.T) {
 	customProfileName := "terraform_test_LS_profile"
 	profileType := "SwitchSecuritySwitchingProfile"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -116,7 +116,7 @@ func TestAccResourceNsxtVlanLogicalSwitch_withMacPool(t *testing.T) {
 	macPoolName := getMacPoolName()
 	novlan := "0"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -149,7 +149,7 @@ func TestAccResourceNsxtVlanLogicalSwitch_importBasic(t *testing.T) {
 	vlan := "5"
 	transportZoneName := getVlanTransportZoneName()
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {

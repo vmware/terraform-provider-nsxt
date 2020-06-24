@@ -21,7 +21,7 @@ func TestAccResourceNsxtLogicalSwitch_basic(t *testing.T) {
 	replicationMode := "MTEP"
 	transportZoneName := getOverlayTransportZoneName()
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -74,7 +74,7 @@ func TestAccResourceNsxtLogicalSwitch_vlan(t *testing.T) {
 	updatedvlan := "2"
 	replicationMode := ""
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -115,7 +115,7 @@ func TestAccResourceNsxtLogicalSwitch_withProfiles(t *testing.T) {
 	customProfileName := "terraform_test_LS_profile"
 	profileType := "SwitchSecuritySwitchingProfile"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -170,7 +170,7 @@ func TestAccResourceNsxtLogicalSwitch_withMacPool(t *testing.T) {
 	novlan := "0"
 	replicationMode := "MTEP"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -205,7 +205,7 @@ func TestAccResourceNsxtLogicalSwitch_importBasic(t *testing.T) {
 	replicationMode := "MTEP"
 	transportZoneName := getOverlayTransportZoneName()
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
