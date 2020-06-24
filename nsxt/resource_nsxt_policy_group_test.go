@@ -381,6 +381,67 @@ func TestAccResourceNsxtPolicyGroup_multipleNestedCriteria(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyGroup_identityGroup(t *testing.T) {
+	name := fmt.Sprintf("test-nsx-policy-group-identity-group")
+	testResourceName := "nsxt_policy_group.test"
+	updatedName := fmt.Sprintf("%s-update", name)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyGroupCheckDestroy(state, name, defaultDomain)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyGroupIdentityGroup(name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "domain", defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "conjunction.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "identity_group.#", "1"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyGroupIdentityGroupUpdateChangeAD(updatedName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "domain", defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "conjunction.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "identity_group.#", "1"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyGroupIdentityGroupUpdateDeleteAD(updatedName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "domain", defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "conjunction.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "identity_group.#", "0"),
+				),
+			},
+		},
+	})
+}
+
 func testAccNsxtPolicyGroupExists(resourceName string, domainName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
@@ -959,6 +1020,43 @@ resource "nsxt_policy_group" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
+}
+`, name)
+}
+
+func testAccNsxtPolicyGroupIdentityGroup(name string) string {
+	return fmt.Sprintf(`
+resource "nsxt_policy_group" "test" {
+  display_name = "%s"
+  description  = "Acceptance Test"
+
+  identity_group {
+        distinguished_name = "test-dn"
+        domain_base_distinguished_name = "test-dbdn"
+    }
+}
+`, name)
+}
+
+func testAccNsxtPolicyGroupIdentityGroupUpdateChangeAD(name string) string {
+	return fmt.Sprintf(`
+resource "nsxt_policy_group" "test" {
+  display_name = "%s"
+  description  = "Acceptance Test"
+
+  identity_group {
+        distinguished_name = "test-dn-update"
+        domain_base_distinguished_name = "test-dbdn-update"
+    }
+}
+`, name)
+}
+
+func testAccNsxtPolicyGroupIdentityGroupUpdateDeleteAD(name string) string {
+	return fmt.Sprintf(`
+resource "nsxt_policy_group" "test" {
+  display_name = "%s"
+  description  = "Acceptance Test"
 }
 `, name)
 }
