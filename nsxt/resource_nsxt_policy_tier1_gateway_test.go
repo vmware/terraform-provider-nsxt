@@ -388,14 +388,14 @@ func TestAccResourceNsxtPolicyTier1Gateway_withTier0(t *testing.T) {
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			testAccDataSourceNsxtPolicyTier0DeleteByName(tier0Name)
+			testAccDataSourceNsxtPolicyTier0GatewayDeleteByName(tier0Name)
 			return testAccNsxtPolicyTier1CheckDestroy(state, name)
 
 		},
 		Steps: []resource.TestStep{
 			{
 				PreConfig: func() {
-					if err := testAccDataSourceNsxtPolicyTier0Create(tier0Name); err != nil {
+					if err := testAccDataSourceNsxtPolicyTier0GatewayCreate(tier0Name); err != nil {
 						panic(err)
 					}
 				},
