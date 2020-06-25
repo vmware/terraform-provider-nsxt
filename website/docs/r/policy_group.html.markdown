@@ -40,6 +40,17 @@ resource "nsxt_policy_group" "group1" {
             ip_addresses = ["211.1.1.1", "212.1.1.1", "192.168.1.1-192.168.1.100"]
         }
     }
+
+    extended_criteria {
+        identity_group {
+          distinguished_name             = "cn=u1,ou=users,dc=example,dc=local"
+          domain_base_distinguished_name = "ou=users,dc=example,dc=local"
+        }
+        identity_group {
+          distinguished_name             = "cn=a1,ou=admin,dc=example,dc=local"
+          domain_base_distinguished_name = "ou=admin,dc=example,dc=local"
+        }
+    }
 }
 ```
 
@@ -101,6 +112,8 @@ The following arguments are supported:
     * `value` (Required for a `condition`) User specified string value to use in the query. For `Tag` criteria, use 'scope|value' notation if you wish to specify scope in criteria.
 * `conjunction` (Required for multiple `criteria`) When specifying multiple `criteria`, a conjunction is used to specify if the criteria should selected using `AND` or `OR`.
   * `operator` (Required for `conjunction`) The operator to use. Must be one of `AND` or `OR`. If `AND` is used, then the `criteria` block before/after must be of the same type and if using `condition` then also must use the same `member_type`.
+* `extended_criteria` (Optional) A condition block to specify higher level context to include in this Group's members. (e.g. user AD group). Currently only one block is supported by NSX. Note that `extended_criteria` is implicitly `AND` with `criteria`.
+  * `identity_group` (Optional) A repeatable condition block select user AD groups to be included in this Group. Note that `identity_groups` are `OR` with each other.
 
 
 ## Attributes Reference
