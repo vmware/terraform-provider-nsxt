@@ -72,10 +72,10 @@ func resourceNsxtPolicyGroup() *schema.Resource {
 				Elem:        getConjunctionSchema(),
 				Optional:    true,
 			},
-			"identity_group": {
-				Type:        schema.TypeSet,
-				Description: "Identity Group expression",
-				Elem:        getIdentityGroupSchema(),
+			"extended_criteria": {
+				Type:        schema.TypeList,
+				Description: "Extended criteria to determine group membership. extended_criteria is implicitly \"AND\" with criteria",
+				Elem:        getExtendedCriteriaSetSchema(),
 				Optional:    true,
 				MaxItems:    1,
 			},
@@ -200,6 +200,19 @@ func getCriteriaSetSchema() *schema.Resource {
 				Description: "A list of object paths for members in the group",
 				Elem:        getPathExpressionSchema(),
 				MaxItems:    1,
+			},
+		},
+	}
+}
+
+func getExtendedCriteriaSetSchema() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"identity_group": {
+				Type:        schema.TypeSet,
+				Description: "Identity Group expression",
+				Elem:        getIdentityGroupSchema(),
+				Optional:    true,
 			},
 		},
 	}
@@ -673,17 +686,11 @@ func resourceNsxtPolicyGroupCreate(d *schema.ResourceData, m interface{}) error 
 		return err
 	}
 
-	identityGroups := d.Get("identity_group").(*schema.Set).List()
-
-	var extendedExpressionList []*data.StructValue
-	if len(identityGroups) > 0 {
-		identityGroupExpressionListData, err := buildIdentityGroupExpressionListData(identityGroups)
-		if err != nil {
-			return err
-		}
-		extendedExpressionList = append(extendedExpressionList, identityGroupExpressionListData)
+	extendedCriteriaSets := d.Get("extended_criteria").([]interface{})
+	extendedExpressionList, err := buildGroupExtendedExpressionListData(extendedCriteriaSets)
+	if err != nil {
+		return err
 	}
-
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
 	tags := getPolicyTagsFromSchema(d)
@@ -765,7 +772,12 @@ func resourceNsxtPolicyGroupRead(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return err
 	}
-	d.Set("identity_group", identityGroups)
+	identityGroupsMap := make(map[string]interface{})
+	identityGroupsMap["identity_group"] = identityGroups
+
+	var extendedCriteria []map[string]interface{}
+	extendedCriteria = append(extendedCriteria, identityGroupsMap)
+	d.Set("extended_criteria", extendedCriteria)
 
 	return nil
 }
@@ -791,15 +803,10 @@ func resourceNsxtPolicyGroupUpdate(d *schema.ResourceData, m interface{}) error 
 		return err
 	}
 
-	identityGroups := d.Get("identity_group").(*schema.Set).List()
-
-	var extendedExpressionList []*data.StructValue
-	if len(identityGroups) > 0 {
-		identityGroupExpressionListData, err := buildIdentityGroupExpressionListData(identityGroups)
-		if err != nil {
-			return err
-		}
-		extendedExpressionList = append(extendedExpressionList, identityGroupExpressionListData)
+	extendedCriteriaSets := d.Get("extended_criteria").([]interface{})
+	extendedExpressionList, err := buildGroupExtendedExpressionListData(extendedCriteriaSets)
+	if err != nil {
+		return err
 	}
 
 	// Read the rest of the configured parameters
@@ -862,4 +869,24 @@ func resourceNsxtPolicyGroupDelete(d *schema.ResourceData, m interface{}) error 
 	}
 
 	return nil
+}
+
+func buildGroupExtendedExpressionListData(extendedCriteriaSets []interface{}) ([]*data.StructValue, error) {
+	// Currently no nested criteria is supported in extended_expression, so extendedCriteriaSets has at most one element
+	// Currently only identity groups are supported in extended_expression
+	var identityGroups []interface{}
+	for _, extendedCriteria := range extendedCriteriaSets {
+		extendedCriteriaMap := extendedCriteria.(map[string]interface{})
+		identityGroups = append(identityGroups, extendedCriteriaMap["identity_group"].(*schema.Set).List()...)
+	}
+
+	var extendedExpressionList []*data.StructValue
+	if len(identityGroups) > 0 {
+		identityGroupExpressionListData, err := buildIdentityGroupExpressionListData(identityGroups)
+		if err != nil {
+			return nil, err
+		}
+		extendedExpressionList = append(extendedExpressionList, identityGroupExpressionListData)
+	}
+	return extendedExpressionList, nil
 }

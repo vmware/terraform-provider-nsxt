@@ -405,7 +405,7 @@ func TestAccResourceNsxtPolicyGroup_identityGroup(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "conjunction.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "criteria.#", "0"),
-					resource.TestCheckResourceAttr(testResourceName, "identity_group.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.#", "1"),
 				),
 			},
 			{
@@ -420,7 +420,22 @@ func TestAccResourceNsxtPolicyGroup_identityGroup(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "conjunction.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "criteria.#", "0"),
-					resource.TestCheckResourceAttr(testResourceName, "identity_group.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.#", "1"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyGroupIdentityGroupUpdateMultipleAD(updatedName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "domain", defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "conjunction.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.#", "2"),
 				),
 			},
 			{
@@ -435,7 +450,7 @@ func TestAccResourceNsxtPolicyGroup_identityGroup(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "conjunction.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "criteria.#", "0"),
-					resource.TestCheckResourceAttr(testResourceName, "identity_group.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.#", "0"),
 				),
 			},
 		},
@@ -1030,10 +1045,12 @@ resource "nsxt_policy_group" "test" {
   display_name = "%s"
   description  = "Acceptance Test"
 
-  identity_group {
-        distinguished_name = "test-dn"
-        domain_base_distinguished_name = "test-dbdn"
+  extended_criteria {
+    identity_group {
+      distinguished_name             = "test-dn"
+      domain_base_distinguished_name = "test-dbdn"
     }
+  }
 }
 `, name)
 }
@@ -1044,10 +1061,36 @@ resource "nsxt_policy_group" "test" {
   display_name = "%s"
   description  = "Acceptance Test"
 
-  identity_group {
-        distinguished_name = "test-dn-update"
-        domain_base_distinguished_name = "test-dbdn-update"
+  extended_criteria {
+    identity_group {
+          distinguished_name             = "test-dn-update"
+          domain_base_distinguished_name = "test-dbdn-update"
+          sid                            = "test-sid"
     }
+  }
+}
+`, name)
+}
+
+func testAccNsxtPolicyGroupIdentityGroupUpdateMultipleAD(name string) string {
+	return fmt.Sprintf(`
+resource "nsxt_policy_group" "test" {
+  display_name = "%s"
+  description  = "Acceptance Test"
+
+  extended_criteria {
+    identity_group {
+          distinguished_name             = "test-dn-1"
+          domain_base_distinguished_name = "test-dbdn-1"
+          sid                            = "test-sid-1"
+    }
+
+    identity_group {
+          distinguished_name             = "test-dn-2"
+          domain_base_distinguished_name = "test-dbdn-2"
+          sid                            = "test-sid-2"
+    }
+  }
 }
 `, name)
 }
