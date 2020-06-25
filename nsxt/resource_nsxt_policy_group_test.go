@@ -406,6 +406,7 @@ func TestAccResourceNsxtPolicyGroup_identityGroup(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "conjunction.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "criteria.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.0.identity_group.#", "1"),
 				),
 			},
 			{
@@ -421,6 +422,7 @@ func TestAccResourceNsxtPolicyGroup_identityGroup(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "conjunction.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "criteria.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.0.identity_group.#", "1"),
 				),
 			},
 			{
@@ -435,7 +437,8 @@ func TestAccResourceNsxtPolicyGroup_identityGroup(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "conjunction.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "criteria.#", "0"),
-					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.0.identity_group.#", "2"),
 				),
 			},
 			{

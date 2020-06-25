@@ -772,12 +772,14 @@ func resourceNsxtPolicyGroupRead(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return err
 	}
-	identityGroupsMap := make(map[string]interface{})
-	identityGroupsMap["identity_group"] = identityGroups
+	if len(identityGroups) > 0 {
+		identityGroupsMap := make(map[string]interface{})
+		identityGroupsMap["identity_group"] = identityGroups
 
-	var extendedCriteria []map[string]interface{}
-	extendedCriteria = append(extendedCriteria, identityGroupsMap)
-	d.Set("extended_criteria", extendedCriteria)
+		var extendedCriteria []map[string]interface{}
+		extendedCriteria = append(extendedCriteria, identityGroupsMap)
+		d.Set("extended_criteria", extendedCriteria)
+	}
 
 	return nil
 }
