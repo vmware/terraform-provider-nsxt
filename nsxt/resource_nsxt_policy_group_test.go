@@ -407,6 +407,8 @@ func TestAccResourceNsxtPolicyGroup_identityGroup(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "criteria.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.0.identity_group.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.0.identity_group.4011320614.distinguished_name", "test-dn"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.0.identity_group.4011320614.domain_base_distinguished_name", "test-dbdn"),
 				),
 			},
 			{
@@ -423,6 +425,9 @@ func TestAccResourceNsxtPolicyGroup_identityGroup(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "criteria.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.0.identity_group.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.0.identity_group.1065127354.distinguished_name", "test-dn-update"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.0.identity_group.1065127354.domain_base_distinguished_name", "test-dbdn-update"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.0.identity_group.1065127354.sid", "test-sid"),
 				),
 			},
 			{
@@ -439,6 +444,12 @@ func TestAccResourceNsxtPolicyGroup_identityGroup(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "criteria.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.0.identity_group.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.0.identity_group.3656676384.distinguished_name", "test-dn-1"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.0.identity_group.3656676384.domain_base_distinguished_name", "test-dbdn-1"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.0.identity_group.3656676384.sid", "test-sid-1"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.0.identity_group.625404343.distinguished_name", "test-dn-2"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.0.identity_group.625404343.domain_base_distinguished_name", "test-dbdn-2"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.0.identity_group.625404343.sid", "test-sid-2"),
 				),
 			},
 			{
