@@ -687,6 +687,10 @@ func resourceNsxtPolicyGroupCreate(d *schema.ResourceData, m interface{}) error 
 	}
 
 	extendedCriteriaSets := d.Get("extended_criteria").([]interface{})
+	err = validateExtendedCriteriaLocalManager(extendedCriteriaSets, m)
+	if err != nil {
+		return err
+	}
 	extendedExpressionList, err := buildGroupExtendedExpressionListData(extendedCriteriaSets)
 	if err != nil {
 		return err
@@ -806,6 +810,10 @@ func resourceNsxtPolicyGroupUpdate(d *schema.ResourceData, m interface{}) error 
 	}
 
 	extendedCriteriaSets := d.Get("extended_criteria").([]interface{})
+	err = validateExtendedCriteriaLocalManager(extendedCriteriaSets, m)
+	if err != nil {
+		return err
+	}
 	extendedExpressionList, err := buildGroupExtendedExpressionListData(extendedCriteriaSets)
 	if err != nil {
 		return err
@@ -891,4 +899,12 @@ func buildGroupExtendedExpressionListData(extendedCriteriaSets []interface{}) ([
 		extendedExpressionList = append(extendedExpressionList, identityGroupExpressionListData)
 	}
 	return extendedExpressionList, nil
+}
+
+func validateExtendedCriteriaLocalManager(extendedCriteriaSets []interface{}, clients interface{}) error {
+	if len(extendedCriteriaSets) > 0 && isPolicyGlobalManager(clients) {
+		err := fmt.Errorf("%s is not supported for Global Manager", "extended_criteria")
+		return err
+	}
+	return nil
 }
