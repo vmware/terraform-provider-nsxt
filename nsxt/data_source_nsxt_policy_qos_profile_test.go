@@ -62,9 +62,9 @@ func testAccDataSourceNsxtPolicyQosProfileCreate(name string) error {
 	id := newUUID()
 
 	if testAccIsGlobalManager() {
-		gmObj, err := convertModelBindingType(obj, model.QosProfileBindingType(), gm_model.QosProfileBindingType())
-		if err != nil {
-			return err
+		gmObj, convErr := convertModelBindingType(obj, model.QosProfileBindingType(), gm_model.QosProfileBindingType())
+		if convErr != nil {
+			return convErr
 		}
 
 		client := gm_infra.NewDefaultQosProfilesClient(connector)

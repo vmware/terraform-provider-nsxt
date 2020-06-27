@@ -751,9 +751,9 @@ func nsxtPolicySegmentCreate(d *schema.ResourceData, m interface{}, isVlan bool)
 		return err
 	}
 	if isPolicyGlobalManager(m) {
-		gmObj, err := convertModelBindingType(obj, model.SegmentBindingType(), gm_model.SegmentBindingType())
-		if err != nil {
-			return err
+		gmObj, convErr := convertModelBindingType(obj, model.SegmentBindingType(), gm_model.SegmentBindingType())
+		if convErr != nil {
+			return convErr
 		}
 		client := gm_infra.NewDefaultSegmentsClient(connector)
 		err = client.Patch(id, gmObj.(gm_model.Segment))
@@ -785,9 +785,9 @@ func nsxtPolicySegmentUpdate(d *schema.ResourceData, m interface{}, isVlan bool)
 	}
 
 	if isPolicyGlobalManager(m) {
-		gmObj, err := convertModelBindingType(obj, model.SegmentBindingType(), gm_model.SegmentBindingType())
-		if err != nil {
-			return err
+		gmObj, convErr := convertModelBindingType(obj, model.SegmentBindingType(), gm_model.SegmentBindingType())
+		if convErr != nil {
+			return convErr
 		}
 		client := gm_infra.NewDefaultSegmentsClient(connector)
 		_, err = client.Update(id, gmObj.(gm_model.Segment))
