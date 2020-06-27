@@ -377,6 +377,96 @@ func TestAccResourceNsxtPolicyGroup_multipleNestedCriteria(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyGroup_identityGroup(t *testing.T) {
+	name := fmt.Sprintf("test-nsx-policy-group-identity-group")
+	testResourceName := "nsxt_policy_group.test"
+	updatedName := fmt.Sprintf("%s-update", name)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyGroupCheckDestroy(state, name, defaultDomain)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyGroupIdentityGroup(name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "domain", defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "conjunction.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.0.identity_group.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.0.identity_group.4011320614.distinguished_name", "test-dn"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.0.identity_group.4011320614.domain_base_distinguished_name", "test-dbdn"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyGroupIdentityGroupUpdateChangeAD(updatedName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "domain", defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "conjunction.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.0.identity_group.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.0.identity_group.1065127354.distinguished_name", "test-dn-update"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.0.identity_group.1065127354.domain_base_distinguished_name", "test-dbdn-update"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.0.identity_group.1065127354.sid", "test-sid"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyGroupIdentityGroupUpdateMultipleAD(updatedName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "domain", defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "conjunction.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.0.identity_group.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.0.identity_group.3656676384.distinguished_name", "test-dn-1"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.0.identity_group.3656676384.domain_base_distinguished_name", "test-dbdn-1"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.0.identity_group.3656676384.sid", "test-sid-1"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.0.identity_group.625404343.distinguished_name", "test-dn-2"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.0.identity_group.625404343.domain_base_distinguished_name", "test-dbdn-2"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.0.identity_group.625404343.sid", "test-sid-2"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyGroupIdentityGroupUpdateDeleteAD(updatedName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "domain", defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "conjunction.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.#", "0"),
+				),
+			},
+		},
+	})
+}
+
 func testAccNsxtPolicyGroupExists(resourceName string, domainName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
@@ -956,6 +1046,71 @@ resource "nsxt_policy_group" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
+}
+`, name)
+}
+
+func testAccNsxtPolicyGroupIdentityGroup(name string) string {
+	return fmt.Sprintf(`
+resource "nsxt_policy_group" "test" {
+  display_name = "%s"
+  description  = "Acceptance Test"
+
+  extended_criteria {
+    identity_group {
+      distinguished_name             = "test-dn"
+      domain_base_distinguished_name = "test-dbdn"
+    }
+  }
+}
+`, name)
+}
+
+func testAccNsxtPolicyGroupIdentityGroupUpdateChangeAD(name string) string {
+	return fmt.Sprintf(`
+resource "nsxt_policy_group" "test" {
+  display_name = "%s"
+  description  = "Acceptance Test"
+
+  extended_criteria {
+    identity_group {
+          distinguished_name             = "test-dn-update"
+          domain_base_distinguished_name = "test-dbdn-update"
+          sid                            = "test-sid"
+    }
+  }
+}
+`, name)
+}
+
+func testAccNsxtPolicyGroupIdentityGroupUpdateMultipleAD(name string) string {
+	return fmt.Sprintf(`
+resource "nsxt_policy_group" "test" {
+  display_name = "%s"
+  description  = "Acceptance Test"
+
+  extended_criteria {
+    identity_group {
+          distinguished_name             = "test-dn-1"
+          domain_base_distinguished_name = "test-dbdn-1"
+          sid                            = "test-sid-1"
+    }
+
+    identity_group {
+          distinguished_name             = "test-dn-2"
+          domain_base_distinguished_name = "test-dbdn-2"
+          sid                            = "test-sid-2"
+    }
+  }
+}
+`, name)
+}
+
+func testAccNsxtPolicyGroupIdentityGroupUpdateDeleteAD(name string) string {
+	return fmt.Sprintf(`
+resource "nsxt_policy_group" "test" {
+  display_name = "%s"
+  description  = "Acceptance Test"
 }
 `, name)
 }
