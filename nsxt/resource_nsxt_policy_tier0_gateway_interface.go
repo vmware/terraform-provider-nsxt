@@ -80,6 +80,12 @@ func resourceNsxtPolicyTier0GatewayInterface() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
+			"site_path": {
+				Type:         schema.TypeString,
+				Description:  "Path of the site the Tier0 edge cluster belongs to",
+				Optional:     true,
+				ValidateFunc: validatePolicyPath(),
+			},
 		},
 	}
 }
@@ -115,6 +121,7 @@ func resourceNsxtPolicyTier0GatewayInterfaceCreate(d *schema.ResourceData, m int
 	tier0ID := getPolicyIDFromPath(tier0Path)
 
 	segmentPath := d.Get("segment_path").(string)
+	objSitePath := d.Get("site_path").(string)
 	ifType := d.Get("type").(string)
 	if len(segmentPath) == 0 && ifType != model.Tier0Interface_TYPE_LOOPBACK {
 		// segment_path in required for all interfaces other than loopback
@@ -132,14 +139,19 @@ func resourceNsxtPolicyTier0GatewayInterfaceCreate(d *schema.ResourceData, m int
 		}
 		for _, objInList := range localeServices {
 			if objInList.EdgeClusterPath != nil {
-				localeServiceID = *objInList.Id
-				break
+				if objSitePath == "" || strings.HasPrefix(*objInList.EdgeClusterPath, objSitePath) {
+					localeServiceID = *objInList.Id
+					break
+				}
 			}
 		}
 		if localeServiceID == "" {
 			return fmt.Errorf("Edge cluster is mandatory on GM gateway %s in order to create interfaces", tier0ID)
 		}
 	} else {
+		if objSitePath != "" {
+			return globalManagerOnlyError()
+		}
 		localeService, err := getPolicyTier0GatewayLocaleServiceWithEdgeCluster(tier0ID, connector)
 		if err != nil {
 			return err

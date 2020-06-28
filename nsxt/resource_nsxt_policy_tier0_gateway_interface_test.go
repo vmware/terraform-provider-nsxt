@@ -98,6 +98,91 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_service(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyTier0GatewayInterface_site(t *testing.T) {
+	name := "test-nsx-policy-tier0-interface-basic"
+	updatedName := fmt.Sprintf("%s-update", name)
+	mtu := "1500"
+	updatedMtu := "1800"
+	subnet := "1.1.12.2/24"
+	updatedSubnet := "1.2.12.2/24"
+	ipAddress := "1.1.12.2"
+	updatedIPAddress := "1.2.12.2"
+	testResourceName := "nsxt_policy_tier0_gateway_interface.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccOnlyGlobalManager(t); testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyTier0InterfaceCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyTier0InterfaceServiceSiteTemplate(name, subnet, mtu),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyTier0InterfaceExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "mtu", mtu),
+					resource.TestCheckResourceAttr(testResourceName, "type", "SERVICE"),
+					resource.TestCheckResourceAttr(testResourceName, "subnets.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "subnets.0", subnet),
+					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.0", ipAddress),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, "segment_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "gateway_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "locale_service_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttrSet(testResourceName, "site_path"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyTier0InterfaceServiceSiteTemplate(updatedName, updatedSubnet, updatedMtu),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyTier0InterfaceExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "mtu", updatedMtu),
+					resource.TestCheckResourceAttr(testResourceName, "type", "SERVICE"),
+					resource.TestCheckResourceAttr(testResourceName, "subnets.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "subnets.0", updatedSubnet),
+					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.0", updatedIPAddress),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, "segment_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "gateway_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "locale_service_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttrSet(testResourceName, "site_path"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyTier0InterfaceThinTemplate(name, subnet),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyTier0InterfaceExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "description", ""),
+					resource.TestCheckResourceAttr(testResourceName, "mtu", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "subnets.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "subnets.0", subnet),
+					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.0", ipAddress),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+					resource.TestCheckResourceAttrSet(testResourceName, "segment_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "gateway_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "locale_service_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtPolicyTier0GatewayInterface_external(t *testing.T) {
 	name := "test-nsx-policy-tier0-interface-basic"
 	updatedName := fmt.Sprintf("%s-update", name)
@@ -500,6 +585,34 @@ resource "nsxt_policy_tier0_gateway_interface" "test" {
   gateway_path = nsxt_policy_tier0_gateway.test.path
   segment_path = nsxt_policy_vlan_segment.test.path
   subnets      = ["%s"]
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+}`, nsxtPolicyTier0GatewayID, nsxtPolicyTier0GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, mtu, subnet) +
+		testAcctPolicyTier0InterfaceRealziationTemplate()
+}
+
+func testAccNsxtPolicyTier0InterfaceServiceSiteTemplate(name string, subnet string, mtu string) string {
+	return testAccNsxtPolicyGatewayInterfaceDeps("11") + fmt.Sprintf(`
+
+resource "nsxt_policy_tier0_gateway" "test" {
+  nsx_id            = "%s"
+  display_name      = "%s"
+  ha_mode           = "ACTIVE_STANDBY"
+  %s
+}
+
+resource "nsxt_policy_tier0_gateway_interface" "test" {
+  display_name = "%s"
+  description  = "Acceptance Test"
+  type         = "SERVICE"
+  mtu          = %s
+  gateway_path = nsxt_policy_tier0_gateway.test.path
+  segment_path = nsxt_policy_vlan_segment.test.path
+  subnets      = ["%s"]
+  site_path    = data.nsxt_policy_site.test.path
 
   tag {
     scope = "scope1"
