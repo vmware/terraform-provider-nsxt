@@ -837,7 +837,6 @@ func resourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{}) e
 	}
 
 	var obj model.Tier0
-	var err error
 	isGlobalManager := isPolicyGlobalManager(m)
 	if isGlobalManager {
 		client := gm_infra.NewDefaultTier0sClient(connector)
@@ -854,12 +853,12 @@ func resourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{}) e
 		obj = convertedObj.(model.Tier0)
 
 	} else {
+		var err error
 		client := infra.NewDefaultTier0sClient(connector)
 		obj, err = client.Get(id)
-	}
-
-	if err != nil {
-		return handleReadError(d, "Tier0", id, err)
+		if err != nil {
+			return handleReadError(d, "Tier0", id, err)
+		}
 	}
 
 	d.Set("display_name", obj.DisplayName)

@@ -498,14 +498,14 @@ func resourceNsxtPolicyTier1GatewayRead(d *schema.ResourceData, m interface{}) e
 	isGlobalManager := isPolicyGlobalManager(m)
 	if isGlobalManager {
 		client := gm_infra.NewDefaultTier1sClient(connector)
-		gmObj, err := client.Get(id)
-		if err != nil {
-			return handleReadError(d, "Tier0", id, err)
+		gmObj, getErr := client.Get(id)
+		if getErr != nil {
+			return handleReadError(d, "Tier0", id, getErr)
 		}
 
-		convertedObj, err := convertModelBindingType(gmObj, model.Tier1BindingType(), model.Tier1BindingType())
-		if err != nil {
-			return err
+		convertedObj, convErr := convertModelBindingType(gmObj, model.Tier1BindingType(), model.Tier1BindingType())
+		if convErr != nil {
+			return convErr
 		}
 		obj = convertedObj.(model.Tier1)
 	} else {

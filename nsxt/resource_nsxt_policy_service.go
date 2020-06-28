@@ -442,9 +442,9 @@ func resourceNsxtPolicyServiceCreate(d *schema.ResourceData, m interface{}) erro
 	log.Printf("[INFO] Creating service with ID %s", id)
 
 	if isPolicyGlobalManager(m) {
-		gmObj, err := convertModelBindingType(obj, model.ServiceBindingType(), gm_model.ServiceBindingType())
-		if err != nil {
-			return err
+		gmObj, convErr := convertModelBindingType(obj, model.ServiceBindingType(), gm_model.ServiceBindingType())
+		if convErr != nil {
+			return convErr
 		}
 		client := gm_infra.NewDefaultServicesClient(connector)
 		err = client.Patch(id, gmObj.(gm_model.Service))
@@ -661,9 +661,9 @@ func resourceNsxtPolicyServiceUpdate(d *schema.ResourceData, m interface{}) erro
 	var err error
 	if isPolicyGlobalManager(m) {
 
-		gmObj, err := convertModelBindingType(obj, model.ServiceBindingType(), gm_model.ServiceBindingType())
-		if err != nil {
-			return err
+		gmObj, convErr := convertModelBindingType(obj, model.ServiceBindingType(), gm_model.ServiceBindingType())
+		if convErr != nil {
+			return convErr
 		}
 		client := gm_infra.NewDefaultServicesClient(connector)
 		_, err = client.Update(id, gmObj.(gm_model.Service))
