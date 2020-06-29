@@ -1,13 +1,13 @@
-/* Copyright © 2019 VMware, Inc. All Rights Reserved.
+/* Copyright © 2020 VMware, Inc. All Rights Reserved.
    SPDX-License-Identifier: MPL-2.0 */
 
 package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/vmware/go-nsx-t-policy/bindings/nsx_policy/infra"
-	"github.com/vmware/go-nsx-t-policy/bindings/nsx_policy/model"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"strings"
 )
 
@@ -26,10 +26,19 @@ func dataSourceNsxtPolicy<!RESOURCE!>() *schema.Resource {
 
 func dataSourceNsxtPolicy<!RESOURCE!>Read(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewDefault<!RESOURCE!>sClient(connector)
+
+        if isPolicyGlobalManager(m) {
+            _, err := policyDataSourceResourceRead(d, connector, "<!RESOURCE!>", nil)
+            if err != nil {
+                return err
+            }
+
+            return nil
+        }
 
 	objID := d.Get("id").(string)
 	objName := d.Get("display_name").(string)
+	client := infra.NewDefault<!RESOURCE!>sClient(connector)
 	var obj model.<!RESOURCE!>
 	if objID != "" {
 		// Get by id
