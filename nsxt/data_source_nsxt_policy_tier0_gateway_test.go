@@ -19,11 +19,6 @@ func TestAccDataSourceNsxtPolicyTier0Gateway_basic(t *testing.T) {
 	name := "terraform_test"
 	testResourceName := "data.nsxt_policy_tier0_gateway.test"
 
-	testEdgeClusterFunc := resource.TestCheckResourceAttrSet(testResourceName, "edge_cluster_path")
-	if testAccIsGlobalManager() {
-		testEdgeClusterFunc = resource.TestCheckResourceAttr(testResourceName, "edge_cluster_path", "")
-	}
-
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
@@ -42,7 +37,6 @@ func TestAccDataSourceNsxtPolicyTier0Gateway_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", name),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
-					testEdgeClusterFunc,
 				),
 			},
 			{

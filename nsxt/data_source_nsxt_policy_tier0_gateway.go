@@ -104,8 +104,10 @@ func dataSourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{})
 		return fmt.Errorf("Failed to read locale services for '%s'", objName)
 	}
 	for _, service := range localeServices {
-		d.Set("edge_cluster_path", service.EdgeClusterPath)
-		break
+		if service.EdgeClusterPath != nil {
+			d.Set("edge_cluster_path", service.EdgeClusterPath)
+			break
+		}
 	}
 	return nil
 }
