@@ -16,8 +16,8 @@ func TestAccResourceNsxtNsServiceGroup_basic(t *testing.T) {
 	updateServiceName := fmt.Sprintf("%s-update", serviceName)
 	testResourceName := "nsxt_ns_service_group.test"
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXServiceGroupCheckDestroy(state, serviceName)
@@ -51,8 +51,8 @@ func TestAccResourceNsxtNsServiceGroup_importBasic(t *testing.T) {
 	serviceName := fmt.Sprintf("test-nsx-service-group")
 	testResourceName := "nsxt_ns_service_group.test"
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXServiceGroupCheckDestroy(state, serviceName)

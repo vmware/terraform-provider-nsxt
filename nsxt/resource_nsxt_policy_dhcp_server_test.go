@@ -26,7 +26,7 @@ var accTestPolicyDhcpServerUpdateAttributes = map[string]string{
 func TestAccResourceNsxtPolicyDhcpServer_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_dhcp_server.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -88,7 +88,7 @@ func TestAccResourceNsxtPolicyDhcpServer_importBasic(t *testing.T) {
 	name := "terra-test-import"
 	testResourceName := "nsxt_policy_dhcp_server.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {

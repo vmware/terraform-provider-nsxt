@@ -18,8 +18,8 @@ func TestAccResourceNsxtSwitchSecuritySwitchingProfile_basic(t *testing.T) {
 	limit := "700"
 	updatedLimit := "400"
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXSwitchSecuritySwitchingProfileCheckDestroy(state, name)
@@ -79,8 +79,8 @@ func TestAccResourceNsxtSwitchSecuritySwitchingProfile_basic(t *testing.T) {
 func TestAccResourceNsxtSwitchSecuritySwitchingProfile_importBasic(t *testing.T) {
 	name := "test-nsx-application-profile"
 	testResourceName := "nsxt_switch_security_switching_profile.test"
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXSwitchSecuritySwitchingProfileCheckDestroy(state, name)

@@ -16,8 +16,8 @@ func TestAccResourceNsxtDhcpRelayService_basic(t *testing.T) {
 	updatePrfName := fmt.Sprintf("%s-update", prfName)
 	testResourceName := "nsxt_dhcp_relay_service.test"
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXDhcpRelayServiceCheckDestroy(state, prfName)
@@ -49,8 +49,8 @@ func TestAccResourceNsxtDhcpRelayService_importBasic(t *testing.T) {
 	prfName := fmt.Sprintf("test-nsx-dhcp-relay-service")
 	testResourceName := "nsxt_dhcp_relay_service.test"
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXDhcpRelayServiceCheckDestroy(state, prfName)
