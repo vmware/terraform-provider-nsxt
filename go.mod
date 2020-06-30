@@ -1,5 +1,7 @@
 module github.com/terraform-providers/terraform-provider-nsxt
 
+go 1.14
+
 require (
 	github.com/google/uuid v1.1.1
 	github.com/hashicorp/go-version v1.2.0
