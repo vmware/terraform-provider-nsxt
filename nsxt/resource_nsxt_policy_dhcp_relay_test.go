@@ -27,7 +27,7 @@ var accTestPolicyDhcpRelayConfigUpdateAttributes = map[string]string{
 func TestAccResourceNsxtPolicyDhcpRelayConfig_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_dhcp_relay.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -81,7 +81,7 @@ func TestAccResourceNsxtPolicyDhcpRelayConfig_importBasic(t *testing.T) {
 	name := "terra-test-import"
 	testResourceName := "nsxt_policy_dhcp_relay.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
