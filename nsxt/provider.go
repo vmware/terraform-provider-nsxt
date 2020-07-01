@@ -411,7 +411,9 @@ func getConnectorTLSConfig(insecure bool, clientCertFile string, clientKeyFile s
 			return nil, fmt.Errorf("Failed to load client cert/key pair: %v", err)
 		}
 
-		tlsConfig.Certificates = []tls.Certificate{cert}
+		tlsConfig.GetClientCertificate = func(*tls.CertificateRequestInfo) (*tls.Certificate, error) {
+			return &cert, nil
+		}
 	}
 
 	if len(caFile) > 0 {
