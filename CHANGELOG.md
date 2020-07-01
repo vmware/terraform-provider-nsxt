@@ -1,4 +1,8 @@
-## 2.2.0 (Unreleased)
+## 2.1.1 (Unreleased)
+
+BUG FIXES:
+* Fix to bypass certificate validation against cert request ([#381](https://github.com/terraform-providers/terraform-provider-nsxt/pull/381))
+
 ## 2.1.0 (June 09, 2020)
 
 FEATURES:
