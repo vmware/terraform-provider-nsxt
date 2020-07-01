@@ -5,7 +5,7 @@ sidebar_current: "docs-nsxt-resource-policy-tier0-gateway-interface"
 description: A resource to configure an Interface on Tier-0 gateway in NSX Policy manager.
 ---
 
-# nsxt_policy_tier0_gateway
+# nsxt_policy_tier0_gateway_interface
 
 This resource provides a method for the management of a Tier-0 gateway Interface. Note that edge cluster must be configured on Tier-0 Gateway in order to configure interfaces on it.
 
