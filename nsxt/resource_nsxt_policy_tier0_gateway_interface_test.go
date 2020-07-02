@@ -498,19 +498,9 @@ func testAccNsxtPolicyTier0InterfaceCheckDestroy(state *terraform.State, display
 
 func testAccNsxtPolicyGatewayGMFabricInterfaceDeps() string {
 	return fmt.Sprintf(`
-data "nsxt_policy_site" "test" {
-  display_name = "%s"
-}
-
 data "nsxt_policy_edge_cluster" "EC" {
-  display_name = "%s"
   site_path = data.nsxt_policy_site.test.path
-}
-
-data "nsxt_policy_transport_zone" "test" {
-  display_name = "%s"
-  site_path = data.nsxt_policy_site.test.path
-}`, getTestSiteName(), getEdgeClusterName(), getVlanTransportZoneName())
+}`) + testAccNSXGlobalPolicyTransportZoneReadTemplate(true)
 }
 
 func testAccNsxtPolicyGatewayFabricInterfaceDeps() string {
