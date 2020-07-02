@@ -432,7 +432,7 @@ resource "nsxt_policy_tier1_gateway_interface" "test" {
 }
 
 func testAccNextPolicyTier1InterfaceRealizationTemplate() string {
-	return strings.ReplaceAll(testAcctPolicyTier0InterfaceRealziationTemplate(), "tier0", "tier1")
+	return strings.Replace(testAcctPolicyTier0InterfaceRealziationTemplate(), "tier0", "tier1", -1)
 }
 
 func testAccNsxtPolicyTier1InterfaceTemplateWithSite(name string, subnet string, mtu string) string {
