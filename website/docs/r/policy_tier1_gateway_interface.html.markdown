@@ -50,6 +50,7 @@ The following arguments are supported:
 * `mtu` - (Optional) Maximum Transmission Unit for this interface.
 * `ipv6_ndra_profile_path` - (Optional) IPv6 NDRA profile to be associated with this interface.
 * `urpf_mode` - (Optional) Unicast Reverse Path Forwarding mode, one of `NONE`, `STRICT`. Default is `STRICT`. This attribute is supported with NSX 3.0.0 onwards.
+* `site_path` - (Optional for global manager only) Path of the site the Tier0 edge cluster belongs to
 
 ## Attributes Reference
 

@@ -215,7 +215,7 @@ func TestAccResourceNsxtPolicyTier1GatewayInterface_withIPv6(t *testing.T) {
 	testResourceName := "nsxt_policy_tier1_gateway_interface.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTier1InterfaceCheckDestroy(state, name)
@@ -230,8 +230,8 @@ func TestAccResourceNsxtPolicyTier1GatewayInterface_withIPv6(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "subnets.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "subnets.0", subnet),
 					resource.TestCheckResourceAttr(testResourceName, "urpf_mode", "NONE"),
-					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "ipv6_ndra_profile_path", "/infra/ipv6-ndra-profiles/default"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
 					resource.TestCheckResourceAttrSet(testResourceName, "segment_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "gateway_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -391,7 +391,7 @@ resource "nsxt_policy_tier1_gateway_interface" "test" {
     tag   = "tag1"
   }
 }`, nsxtPolicyTier1GatewayID, nsxtPolicyTier1GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, mtu, subnet) +
-		testAccNsxtPolicyTier1InterfaceRealziationTemplate()
+		testAccNextPolicyTier1InterfaceRealizationTemplate()
 }
 
 func testAccNsxtPolicyTier1InterfaceThinTemplate(name string, subnet string) string {
@@ -408,7 +408,7 @@ resource "nsxt_policy_tier1_gateway_interface" "test" {
   segment_path = nsxt_policy_vlan_segment.test.path
   subnets      = ["%s"]
 }`, nsxtPolicyTier1GatewayID, nsxtPolicyTier1GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, subnet) +
-		testAccNsxtPolicyTier1InterfaceRealziationTemplate()
+		testAccNextPolicyTier1InterfaceRealizationTemplate()
 }
 
 func testAccNsxtPolicyTier1InterfaceTemplateWithID(name string, subnet string) string {
@@ -428,10 +428,10 @@ resource "nsxt_policy_tier1_gateway_interface" "test" {
   subnets                = ["%s"]
   urpf_mode              = "NONE"
 }`, nsxtPolicyTier1GatewayID, nsxtPolicyTier1GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, subnet) +
-		testAccNsxtPolicyTier1InterfaceRealziationTemplate()
+		testAccNextPolicyTier1InterfaceRealizationTemplate()
 }
 
-func testAccNsxtPolicyTier1InterfaceRealziationTemplate() string {
+func testAccNextPolicyTier1InterfaceRealizationTemplate() string {
 	return strings.ReplaceAll(testAcctPolicyTier0InterfaceRealziationTemplate(), "tier0", "tier1")
 }
 
@@ -457,7 +457,7 @@ resource "nsxt_policy_tier1_gateway_interface" "test" {
     tag   = "tag1"
   }
 }`, nsxtPolicyTier1GatewayID, nsxtPolicyTier1GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, mtu, subnet) +
-		testAccNsxtPolicyTier1InterfaceRealziationTemplate()
+		testAccNextPolicyTier1InterfaceRealizationTemplate()
 }
 
 func testAccNsxtPolicyTier1InterfaceTemplateWithIPv6(name string, subnet string) string {
@@ -467,19 +467,19 @@ data "nsxt_policy_ipv6_ndra_profile" "default" {
 }
 
 resource "nsxt_policy_tier1_gateway" "test" {
+  nsx_id            = "%s"
   display_name      = "%s"
   %s
 }
 
 resource "nsxt_policy_tier1_gateway_interface" "test" {
   display_name           = "%s"
-  nsx_id                 = "test"
   description            = "Acceptance Test"
   gateway_path           = nsxt_policy_tier1_gateway.test.path
   segment_path           = nsxt_policy_vlan_segment.test.path
   subnets                = ["%s"]
   ipv6_ndra_profile_path = data.nsxt_policy_ipv6_ndra_profile.default.path
   urpf_mode              = "NONE"
-}`, nsxtPolicyTier1GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, subnet) +
-		testAccNsxtPolicyTier1InterfaceRealziationTemplate()
+}`, nsxtPolicyTier1GatewayID, nsxtPolicyTier1GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, subnet) +
+		testAccNextPolicyTier1InterfaceRealizationTemplate()
 }
