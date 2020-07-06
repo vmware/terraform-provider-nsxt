@@ -115,6 +115,9 @@ func TestAccResourceNsxtPolicySegment_connectivityPath(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "connectivity_path"),
 				),
 			},
+			{
+				Config: testAccNsxtPolicySegmentDeps(tzName),
+			},
 		},
 	})
 }

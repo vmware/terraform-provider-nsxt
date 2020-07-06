@@ -40,8 +40,7 @@ resource "nsxt_policy_vlan_segment" "vlansegment1" {
   }
 
   advanced_config {
-    connectivity = "OFF"
-    local_egress = true
+    connectivity = "ON"
   }
 }
 ```
@@ -90,6 +89,14 @@ The following arguments are supported:
   * `hybrid` - (Optional) Boolean flag to identify a hybrid logical switch.
   * `local_egress` - (Optional) Boolean flag to enable local egress.
   * `uplink_teaming_policy` - (Optional) The name of the switching uplink teaming policy for the bridge endpoint. This name corresponds to one of the switching uplink teaming policy names listed in the transport zone.
+  * `discovery_profile` - (Optional) IP and MAC discovery profile specification for the segment.
+    * `ip_discovery_profile_path` - (Optional) Path for IP discovery profile to be associated with the segment.
+    * `mac_discovery_profile_path` - (Optional) Path for MAC discovery profile to be associated with the segment.
+  * `security_profile` - (Optional) Security profile specification for the segment.
+    * `spoofguard_profile_path` - (Optional) Path for spoofguard profile to be associated with the segment.
+    * `security_profile_path` - (Optional) Path for segment security profile to be associated with the segment.
+  * `qos_profile` - (Optional) QoS profile specification for the segment.
+    * `qos_profile_path` - (Optional) Path for qos profile to be associated with the segment.
 
 ## Attributes Reference
 
