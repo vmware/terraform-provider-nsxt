@@ -208,8 +208,8 @@ func getPolicySegmentAdvancedConfigurationSchema() *schema.Resource {
 func getPolicySegmentDiscoveryProfilesSchema() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
-			"ip_discovery_profile_path":  getComputedPolicyPathSchema("Policy path of associated IP Discovery Profile"),
-			"mac_discovery_profile_path": getComputedPolicyPathSchema("Policy path of associated Mac Discovery Profile"),
+			"ip_discovery_profile_path":  getPolicyPathSchema(false, false, "Policy path of associated IP Discovery Profile"),
+			"mac_discovery_profile_path": getPolicyPathSchema(false, false, "Policy path of associated Mac Discovery Profile"),
 			"binding_map_path":           getComputedPolicyPathSchema("Policy path of profile binding map"),
 			"revision":                   getRevisionSchema(),
 		},
@@ -229,8 +229,8 @@ func getPolicySegmentQosProfilesSchema() *schema.Resource {
 func getPolicySegmentSecurityProfilesSchema() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
-			"spoofguard_profile_path": getComputedPolicyPathSchema("Policy path of associated Spoofguard Profile"),
-			"security_profile_path":   getComputedPolicyPathSchema("Policy path of associated Segment Security Profile"),
+			"spoofguard_profile_path": getPolicyPathSchema(false, false, "Policy path of associated Spoofguard Profile"),
+			"security_profile_path":   getPolicyPathSchema(false, false, "Policy path of associated Segment Security Profile"),
 			"binding_map_path":        getComputedPolicyPathSchema("Policy path of profile binding map"),
 			"revision":                getRevisionSchema(),
 		},

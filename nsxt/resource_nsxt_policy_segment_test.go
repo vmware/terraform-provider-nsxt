@@ -169,6 +169,75 @@ func TestAccResourceNsxtPolicySegment_updateAdvConfig(t *testing.T) {
 	})
 }
 
+// TODO: Rewrite this test based on profile resources when these are available.
+const testAccSegmentQosProfileName = "test-nsx-policy-segment-qos-profile"
+
+func TestAccResourceNsxtPolicySegment_withProfiles(t *testing.T) {
+	name := fmt.Sprintf("test-nsx-policy-segment")
+	updatedName := fmt.Sprintf("%s-update", name)
+	testResourceName := "nsxt_policy_segment.test"
+	tzName := getOverlayTransportZoneName()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			err := testAccNsxtPolicySegmentCheckDestroy(state, name)
+			if err != nil {
+				return err
+			}
+
+			return testAccDataSourceNsxtPolicyQosProfileDeleteByName(testAccSegmentQosProfileName)
+		},
+		Steps: []resource.TestStep{
+			{
+				PreConfig: func() {
+					if err := testAccDataSourceNsxtPolicyQosProfileCreate(testAccSegmentQosProfileName); err != nil {
+						panic(err)
+					}
+				},
+				Config: testAccNsxtPolicySegmentWithProfilesTemplate(tzName, name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicySegmentExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "security_profile.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, "security_profile.0.spoofguard_profile_path"),
+					resource.TestCheckResourceAttr(testResourceName, "security_profile.0.security_profile_path", ""),
+					resource.TestCheckResourceAttr(testResourceName, "qos_profile.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, "qos_profile.0.qos_profile_path"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicySegmentWithProfilesUpdateTemplate(tzName, updatedName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicySegmentExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "security_profile.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, "security_profile.0.spoofguard_profile_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "security_profile.0.security_profile_path"),
+					resource.TestCheckResourceAttr(testResourceName, "qos_profile.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "discovery_profile.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, "discovery_profile.0.ip_discovery_profile_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "discovery_profile.0.mac_discovery_profile_path"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicySegmentWithProfilesRemoveAll(tzName, updatedName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicySegmentExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "security_profile.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "qos_profile.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "discovery_profile.#", "0"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyEmptyTemplate(),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtPolicySegment_withDhcp(t *testing.T) {
 	name := fmt.Sprintf("test-nsx-policy-segment")
 	updatedName := fmt.Sprintf("%s-update", name)
@@ -399,6 +468,80 @@ resource "nsxt_policy_segment" "test" {
     scope = "color"
     tag   = "orange"
   }
+}
+`, name)
+}
+
+func testAccNsxtPolicySegmentWithProfileDeps(tzName string) string {
+	return testAccNSXPolicyTransportZoneReadTemplate(tzName, false) + fmt.Sprintf(`
+data "nsxt_policy_qos_profile" "test" {
+    display_name = "%s"
+}
+
+data "nsxt_policy_segment_security_profile" "test" {
+    display_name = "default-segment-security-profile"
+}
+
+data "nsxt_policy_spoofguard_profile" "test" {
+    display_name = "default-spoofguard-profile"
+}
+
+data "nsxt_policy_ip_discovery_profile" "test" {
+    display_name = "default-ip-discovery-profile"
+}
+
+data "nsxt_policy_mac_discovery_profile" "test" {
+    display_name = "default-mac-discovery-profile"
+}
+
+`, testAccSegmentQosProfileName)
+}
+
+func testAccNsxtPolicySegmentWithProfilesTemplate(tzName string, name string) string {
+	return testAccNsxtPolicySegmentWithProfileDeps(tzName) + fmt.Sprintf(`
+
+resource "nsxt_policy_segment" "test" {
+  display_name        = "%s"
+  transport_zone_path = data.nsxt_policy_transport_zone.test.path
+
+  security_profile {
+    spoofguard_profile_path = data.nsxt_policy_spoofguard_profile.test.path
+  }
+
+  qos_profile {
+    qos_profile_path = data.nsxt_policy_qos_profile.test.path
+  }
+
+}
+`, name)
+}
+
+func testAccNsxtPolicySegmentWithProfilesUpdateTemplate(tzName string, name string) string {
+	return testAccNsxtPolicySegmentWithProfileDeps(tzName) + fmt.Sprintf(`
+
+resource "nsxt_policy_segment" "test" {
+  display_name        = "%s"
+  transport_zone_path = data.nsxt_policy_transport_zone.test.path
+
+  security_profile {
+    spoofguard_profile_path = data.nsxt_policy_spoofguard_profile.test.path
+    security_profile_path   = data.nsxt_policy_segment_security_profile.test.path
+  }
+
+  discovery_profile {
+    ip_discovery_profile_path = data.nsxt_policy_ip_discovery_profile.test.path
+    mac_discovery_profile_path   = data.nsxt_policy_mac_discovery_profile.test.path
+  }
+}
+`, name)
+}
+
+func testAccNsxtPolicySegmentWithProfilesRemoveAll(tzName string, name string) string {
+	return testAccNsxtPolicySegmentWithProfileDeps(tzName) + fmt.Sprintf(`
+
+resource "nsxt_policy_segment" "test" {
+  display_name        = "%s"
+  transport_zone_path = data.nsxt_policy_transport_zone.test.path
 }
 `, name)
 }
