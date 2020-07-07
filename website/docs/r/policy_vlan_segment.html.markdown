@@ -42,6 +42,14 @@ resource "nsxt_policy_vlan_segment" "vlansegment1" {
   advanced_config {
     connectivity = "ON"
   }
+
+  qos_profile {
+    qos_profile_path = data.nsxt_policy_qos_profile.myprofile.path
+  }
+
+  discovery_profile {
+    ip_discovery_profile_path = data.nsxt_policy_ip_discovery_profile.myprofile.path
+  }
 }
 ```
 
