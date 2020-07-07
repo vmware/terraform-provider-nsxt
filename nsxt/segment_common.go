@@ -205,6 +205,38 @@ func getPolicySegmentAdvancedConfigurationSchema() *schema.Resource {
 	}
 }
 
+func getPolicySegmentDiscoveryProfilesSchema() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"ip_discovery_profile_path":  getPolicyPathSchema(false, false, "Policy path of associated IP Discovery Profile"),
+			"mac_discovery_profile_path": getPolicyPathSchema(false, false, "Policy path of associated Mac Discovery Profile"),
+			"binding_map_path":           getComputedPolicyPathSchema("Policy path of profile binding map"),
+			"revision":                   getRevisionSchema(),
+		},
+	}
+}
+
+func getPolicySegmentQosProfilesSchema() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"qos_profile_path": getPolicyPathSchema(true, false, "Policy path of associated QoS Profile"),
+			"binding_map_path": getComputedPolicyPathSchema("Policy path of profile binding map"),
+			"revision":         getRevisionSchema(),
+		},
+	}
+}
+
+func getPolicySegmentSecurityProfilesSchema() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"spoofguard_profile_path": getPolicyPathSchema(false, false, "Policy path of associated Spoofguard Profile"),
+			"security_profile_path":   getPolicyPathSchema(false, false, "Policy path of associated Segment Security Profile"),
+			"binding_map_path":        getComputedPolicyPathSchema("Policy path of profile binding map"),
+			"revision":                getRevisionSchema(),
+		},
+	}
+}
+
 func getPolicyCommonSegmentSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"nsx_id":       getNsxIDSchema(),
@@ -265,6 +297,27 @@ func getPolicyCommonSegmentSchema() map[string]*schema.Schema {
 				ValidateFunc: validateVLANIdOrRange,
 			},
 			Required: true,
+		},
+		"discovery_profile": {
+			Type:        schema.TypeList,
+			Description: "IP and MAC discovery profiles for this segment",
+			Elem:        getPolicySegmentDiscoveryProfilesSchema(),
+			Optional:    true,
+			MaxItems:    1,
+		},
+		"qos_profile": {
+			Type:        schema.TypeList,
+			Description: "QoS profiles for this segment",
+			Elem:        getPolicySegmentQosProfilesSchema(),
+			Optional:    true,
+			MaxItems:    1,
+		},
+		"security_profile": {
+			Type:        schema.TypeList,
+			Description: "Security profiles for this segment",
+			Elem:        getPolicySegmentSecurityProfilesSchema(),
+			Optional:    true,
+			MaxItems:    1,
 		},
 	}
 }
@@ -496,8 +549,10 @@ func setSegmentSubnetDhcpConfigInSchema(schemaConfig map[string]interface{}, sub
 
 }
 
-func policySegmentResourceToStruct(d *schema.ResourceData, isVlan bool) (model.Segment, error) {
+func policySegmentResourceToInfraStruct(id string, d *schema.ResourceData, isVlan bool) (model.Infra, error) {
 	// Read the rest of the configured parameters
+	var infraChildren []*data.StructValue
+
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	tags := getPolicyTagsFromSchema(d)
@@ -505,11 +560,14 @@ func policySegmentResourceToStruct(d *schema.ResourceData, isVlan bool) (model.S
 	tzPath := d.Get("transport_zone_path").(string)
 	dhcpConfigPath := d.Get("dhcp_config_path").(string)
 	revision := int64(d.Get("revision").(int))
+	resourceType := "Segment"
 
 	obj := model.Segment{
-		DisplayName: &displayName,
-		Tags:        tags,
-		Revision:    &revision,
+		Id:           &id,
+		DisplayName:  &displayName,
+		Tags:         tags,
+		Revision:     &revision,
+		ResourceType: &resourceType,
 	}
 
 	if description != "" {
@@ -566,7 +624,7 @@ func policySegmentResourceToStruct(d *schema.ResourceData, isVlan bool) (model.S
 			}
 			config, err := getSegmentSubnetDhcpConfigFromSchema(subnetMap)
 			if err != nil {
-				return obj, err
+				return model.Infra{}, err
 			}
 
 			subnetStruct.DhcpConfig = config
@@ -617,7 +675,31 @@ func policySegmentResourceToStruct(d *schema.ResourceData, isVlan bool) (model.S
 		obj.L2Extension = &l2Struct
 	}
 
-	return obj, nil
+	err := nsxtPolicySegmentProfilesSetInStruct(d, &obj)
+	if err != nil {
+		return model.Infra{}, err
+	}
+
+	childSegment := model.ChildSegment{
+		Segment:      &obj,
+		ResourceType: "ChildSegment",
+	}
+
+	converter := bindings.NewTypeConverter()
+	converter.SetMode(bindings.REST)
+	dataValue, errors := converter.ConvertToVapi(childSegment, model.ChildSegmentBindingType())
+	if errors != nil {
+		return model.Infra{}, fmt.Errorf("Error converting Segment Child: %v", errors[0])
+	}
+
+	infraChildren = append(infraChildren, dataValue.(*data.StructValue))
+	infraType := "Infra"
+	infraStruct := model.Infra{
+		Children:     infraChildren,
+		ResourceType: &infraType,
+	}
+
+	return infraStruct, nil
 }
 
 func resourceNsxtPolicySegmentExists(id string, connector *client.RestConnector, isGlobalManager bool) bool {
@@ -640,6 +722,373 @@ func resourceNsxtPolicySegmentExists(id string, connector *client.RestConnector,
 
 	logAPIError("Error retrieving Segment", err)
 	return false
+}
+
+func nsxtPolicySegmentProfilesSetInStruct(d *schema.ResourceData, segment *model.Segment) error {
+	var children []*data.StructValue
+
+	child, err := nsxtPolicySegmentDiscoveryProfileSetInStruct(d)
+	if err != nil {
+		return err
+	}
+
+	if child != nil {
+		children = append(children, child)
+	}
+
+	child, err = nsxtPolicySegmentQosProfileSetInStruct(d)
+	if err != nil {
+		return err
+	}
+
+	if child != nil {
+		children = append(children, child)
+	}
+
+	child, err = nsxtPolicySegmentSecurityProfileSetInStruct(d)
+	if err != nil {
+		return err
+	}
+
+	if child != nil {
+		children = append(children, child)
+	}
+
+	segment.Children = children
+	return nil
+
+}
+
+func getOldProfileDataForRemoval(oldProfiles interface{}) (string, int64) {
+	profileMap := oldProfiles.([]interface{})[0].(map[string]interface{})
+	segmentProfileMapID := getPolicyIDFromPath(profileMap["binding_map_path"].(string))
+	revision := int64(profileMap["revision"].(int))
+
+	return segmentProfileMapID, revision
+}
+
+func nsxtPolicySegmentDiscoveryProfileSetInStruct(d *schema.ResourceData) (*data.StructValue, error) {
+	segmentProfileMapID := "default"
+
+	ipDiscoveryProfilePath := ""
+	macDiscoveryProfilePath := ""
+	revision := int64(0)
+	shouldDelete := false
+	oldProfiles, newProfiles := d.GetChange("discovery_profile")
+	if len(newProfiles.([]interface{})) > 0 {
+		profileMap := newProfiles.([]interface{})[0].(map[string]interface{})
+
+		ipDiscoveryProfilePath = profileMap["ip_discovery_profile_path"].(string)
+		macDiscoveryProfilePath = profileMap["mac_discovery_profile_path"].(string)
+		if len(profileMap["binding_map_path"].(string)) > 0 {
+			segmentProfileMapID = getPolicyIDFromPath(profileMap["binding_map_path"].(string))
+		}
+
+		revision = int64(profileMap["revision"].(int))
+	} else {
+		if len(oldProfiles.([]interface{})) == 0 {
+			return nil, nil
+		}
+		segmentProfileMapID, revision = getOldProfileDataForRemoval(oldProfiles)
+		shouldDelete = true
+	}
+
+	resourceType := "SegmentDiscoveryProfileBindingMap"
+	discoveryMap := model.SegmentDiscoveryProfileBindingMap{
+		ResourceType: &resourceType,
+		Id:           &segmentProfileMapID,
+	}
+
+	if len(oldProfiles.([]interface{})) > 0 {
+		// This is an update
+		discoveryMap.Revision = &revision
+	}
+
+	if len(ipDiscoveryProfilePath) > 0 {
+		discoveryMap.IpDiscoveryProfilePath = &ipDiscoveryProfilePath
+	}
+
+	if len(macDiscoveryProfilePath) > 0 {
+		discoveryMap.MacDiscoveryProfilePath = &macDiscoveryProfilePath
+	}
+
+	childConfig := model.ChildSegmentDiscoveryProfileBindingMap{
+		ResourceType:                      "ChildSegmentDiscoveryProfileBindingMap",
+		SegmentDiscoveryProfileBindingMap: &discoveryMap,
+		Id:                                &segmentProfileMapID,
+		MarkedForDelete:                   &shouldDelete,
+	}
+
+	converter := bindings.NewTypeConverter()
+	converter.SetMode(bindings.REST)
+	dataValue, errors := converter.ConvertToVapi(childConfig, model.ChildSegmentDiscoveryProfileBindingMapBindingType())
+	if errors != nil {
+		return nil, fmt.Errorf("Error converting child segment discovery map: %v", errors[0])
+	}
+
+	return dataValue.(*data.StructValue), nil
+}
+
+func nsxtPolicySegmentQosProfileSetInStruct(d *schema.ResourceData) (*data.StructValue, error) {
+	segmentProfileMapID := "default"
+
+	qosProfilePath := ""
+	revision := int64(0)
+	oldProfiles, newProfiles := d.GetChange("qos_profile")
+	shouldDelete := false
+	if len(newProfiles.([]interface{})) > 0 {
+		profileMap := newProfiles.([]interface{})[0].(map[string]interface{})
+
+		qosProfilePath = profileMap["qos_profile_path"].(string)
+		if len(profileMap["binding_map_path"].(string)) > 0 {
+			segmentProfileMapID = getPolicyIDFromPath(profileMap["binding_map_path"].(string))
+		}
+
+		revision = int64(profileMap["revision"].(int))
+	} else {
+		if len(oldProfiles.([]interface{})) == 0 {
+			return nil, nil
+		}
+		// Profile should be deleted
+		segmentProfileMapID, revision = getOldProfileDataForRemoval(oldProfiles)
+		shouldDelete = true
+	}
+
+	resourceType := "SegmentQoSProfileBindingMap"
+	qosMap := model.SegmentQosProfileBindingMap{
+		ResourceType: &resourceType,
+		Id:           &segmentProfileMapID,
+	}
+
+	if len(oldProfiles.([]interface{})) > 0 {
+		// This is an update
+		qosMap.Revision = &revision
+	}
+
+	if len(qosProfilePath) > 0 {
+		qosMap.QosProfilePath = &qosProfilePath
+	}
+
+	childConfig := model.ChildSegmentQosProfileBindingMap{
+		ResourceType:                "ChildSegmentQoSProfileBindingMap",
+		SegmentQosProfileBindingMap: &qosMap,
+		Id:                          &segmentProfileMapID,
+		MarkedForDelete:             &shouldDelete,
+	}
+
+	converter := bindings.NewTypeConverter()
+	converter.SetMode(bindings.REST)
+	dataValue, errors := converter.ConvertToVapi(childConfig, model.ChildSegmentQosProfileBindingMapBindingType())
+	if errors != nil {
+		return nil, fmt.Errorf("Error converting child segment QoS map: %v", errors[0])
+	}
+
+	return dataValue.(*data.StructValue), nil
+}
+
+func nsxtPolicySegmentSecurityProfileSetInStruct(d *schema.ResourceData) (*data.StructValue, error) {
+	segmentProfileMapID := "default"
+
+	spoofguardProfilePath := ""
+	securityProfilePath := ""
+	revision := int64(0)
+	oldProfiles, newProfiles := d.GetChange("security_profile")
+	shouldDelete := false
+	if len(newProfiles.([]interface{})) > 0 {
+		profileMap := newProfiles.([]interface{})[0].(map[string]interface{})
+
+		spoofguardProfilePath = profileMap["spoofguard_profile_path"].(string)
+		securityProfilePath = profileMap["security_profile_path"].(string)
+		if len(profileMap["binding_map_path"].(string)) > 0 {
+			segmentProfileMapID = getPolicyIDFromPath(profileMap["binding_map_path"].(string))
+		}
+
+		revision = int64(profileMap["revision"].(int))
+	} else {
+		if len(oldProfiles.([]interface{})) == 0 {
+			return nil, nil
+		}
+		// Profile should be deleted
+		segmentProfileMapID, revision = getOldProfileDataForRemoval(oldProfiles)
+		shouldDelete = true
+	}
+
+	resourceType := "SegmentSecurityProfileBindingMap"
+	securityMap := model.SegmentSecurityProfileBindingMap{
+		ResourceType: &resourceType,
+		Id:           &segmentProfileMapID,
+	}
+
+	if len(oldProfiles.([]interface{})) > 0 {
+		// This is an update
+		securityMap.Revision = &revision
+	}
+
+	if len(spoofguardProfilePath) > 0 {
+		securityMap.SpoofguardProfilePath = &spoofguardProfilePath
+	}
+
+	if len(securityProfilePath) > 0 {
+		securityMap.SegmentSecurityProfilePath = &securityProfilePath
+	}
+
+	childConfig := model.ChildSegmentSecurityProfileBindingMap{
+		ResourceType:                     "ChildSegmentSecurityProfileBindingMap",
+		SegmentSecurityProfileBindingMap: &securityMap,
+		Id:                               &segmentProfileMapID,
+		MarkedForDelete:                  &shouldDelete,
+	}
+
+	converter := bindings.NewTypeConverter()
+	converter.SetMode(bindings.REST)
+	dataValue, errors := converter.ConvertToVapi(childConfig, model.ChildSegmentSecurityProfileBindingMapBindingType())
+	if errors != nil {
+		return nil, fmt.Errorf("Error converting child segment security map: %v", errors[0])
+	}
+
+	return dataValue.(*data.StructValue), nil
+}
+
+func nsxtPolicySegmentDiscoveryProfileRead(d *schema.ResourceData, m interface{}) error {
+	errorMessage := "Failed to read Discovery Profile Map for segment %s: %s"
+	connector := getPolicyConnector(m)
+	segmentID := d.Id()
+	var results model.SegmentDiscoveryProfileBindingMapListResult
+	if isPolicyGlobalManager(m) {
+		client := gm_segments.NewDefaultSegmentDiscoveryProfileBindingMapsClient(connector)
+		gmResults, err := client.List(segmentID, nil, nil, nil, nil, nil, nil)
+		if err != nil {
+			return fmt.Errorf(errorMessage, segmentID, err)
+		}
+		lmResults, err := convertModelBindingType(gmResults, gm_model.SegmentDiscoveryProfileBindingMapListResultBindingType(), model.SegmentDiscoveryProfileBindingMapListResultBindingType())
+		if err != nil {
+			return err
+		}
+		results = lmResults.(model.SegmentDiscoveryProfileBindingMapListResult)
+	} else {
+		client := segments.NewDefaultSegmentDiscoveryProfileBindingMapsClient(connector)
+		var err error
+		results, err = client.List(segmentID, nil, nil, nil, nil, nil, nil)
+		if err != nil {
+			return fmt.Errorf(errorMessage, segmentID, err)
+		}
+	}
+
+	config := make(map[string]interface{})
+	var configList []map[string]interface{}
+
+	for _, obj := range results.Results {
+		config["ip_discovery_profile_path"] = obj.IpDiscoveryProfilePath
+		config["mac_discovery_profile_path"] = obj.MacDiscoveryProfilePath
+		config["binding_map_path"] = obj.Path
+		config["revision"] = obj.Revision
+		configList = append(configList, config)
+		d.Set("discovery_profile", configList)
+		return nil
+	}
+
+	return nil
+}
+
+func nsxtPolicySegmentQosProfileRead(d *schema.ResourceData, m interface{}) error {
+	errorMessage := "Failed to read QoS Profile Map for segment %s: %s"
+	connector := getPolicyConnector(m)
+	segmentID := d.Id()
+	var results model.SegmentQosProfileBindingMapListResult
+	if isPolicyGlobalManager(m) {
+		client := gm_segments.NewDefaultSegmentQosProfileBindingMapsClient(connector)
+		gmResults, err := client.List(segmentID, nil, nil, nil, nil, nil)
+		if err != nil {
+			return fmt.Errorf(errorMessage, segmentID, err)
+		}
+		lmResults, err := convertModelBindingType(gmResults, gm_model.SegmentQosProfileBindingMapListResultBindingType(), model.SegmentQosProfileBindingMapListResultBindingType())
+		if err != nil {
+			return err
+		}
+		results = lmResults.(model.SegmentQosProfileBindingMapListResult)
+	} else {
+		client := segments.NewDefaultSegmentQosProfileBindingMapsClient(connector)
+		var err error
+		results, err = client.List(segmentID, nil, nil, nil, nil, nil)
+		if err != nil {
+			return fmt.Errorf(errorMessage, segmentID, err)
+		}
+	}
+
+	config := make(map[string]interface{})
+	var configList []map[string]interface{}
+
+	for _, obj := range results.Results {
+		config["qos_profile_path"] = obj.QosProfilePath
+		config["binding_map_path"] = obj.Path
+		config["revision"] = obj.Revision
+		configList = append(configList, config)
+		d.Set("qos_profile", configList)
+		return nil
+	}
+
+	return nil
+}
+
+func nsxtPolicySegmentSecurityProfileRead(d *schema.ResourceData, m interface{}) error {
+	errorMessage := "Failed to read Security Profile Map for segment %s: %s"
+	connector := getPolicyConnector(m)
+	segmentID := d.Id()
+	var results model.SegmentSecurityProfileBindingMapListResult
+	if isPolicyGlobalManager(m) {
+		client := gm_segments.NewDefaultSegmentSecurityProfileBindingMapsClient(connector)
+		gmResults, err := client.List(segmentID, nil, nil, nil, nil, nil)
+		if err != nil {
+			return fmt.Errorf(errorMessage, segmentID, err)
+		}
+		lmResults, err := convertModelBindingType(gmResults, gm_model.SegmentSecurityProfileBindingMapListResultBindingType(), model.SegmentSecurityProfileBindingMapListResultBindingType())
+		if err != nil {
+			return err
+		}
+		results = lmResults.(model.SegmentSecurityProfileBindingMapListResult)
+	} else {
+		client := segments.NewDefaultSegmentSecurityProfileBindingMapsClient(connector)
+		var err error
+		results, err = client.List(segmentID, nil, nil, nil, nil, nil)
+		if err != nil {
+			return fmt.Errorf(errorMessage, segmentID, err)
+		}
+	}
+
+	config := make(map[string]interface{})
+	var configList []map[string]interface{}
+
+	for _, obj := range results.Results {
+		config["security_profile_path"] = obj.SegmentSecurityProfilePath
+		config["spoofguard_profile_path"] = obj.SpoofguardProfilePath
+		config["binding_map_path"] = obj.Path
+		config["revision"] = obj.Revision
+		configList = append(configList, config)
+		d.Set("security_profile", configList)
+		return nil
+	}
+
+	return nil
+}
+
+func nsxtPolicySegmentProfilesRead(d *schema.ResourceData, m interface{}) error {
+
+	err := nsxtPolicySegmentDiscoveryProfileRead(d, m)
+	if err != nil {
+		return err
+	}
+
+	err = nsxtPolicySegmentQosProfileRead(d, m)
+	if err != nil {
+		return err
+	}
+
+	err = nsxtPolicySegmentSecurityProfileRead(d, m)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func nsxtPolicySegmentRead(d *schema.ResourceData, m interface{}, isVlan bool) error {
@@ -732,11 +1181,15 @@ func nsxtPolicySegmentRead(d *schema.ResourceData, m interface{}, isVlan bool) e
 
 	d.Set("subnet", subnetSegments)
 
+	err := nsxtPolicySegmentProfilesRead(d, m)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func nsxtPolicySegmentCreate(d *schema.ResourceData, m interface{}, isVlan bool) error {
-	connector := getPolicyConnector(m)
 
 	// Initialize resource Id and verify this ID is not yet used
 	id, err := getOrGenerateID(d, m, resourceNsxtPolicySegmentExists)
@@ -744,23 +1197,12 @@ func nsxtPolicySegmentCreate(d *schema.ResourceData, m interface{}, isVlan bool)
 		return err
 	}
 
-	// Create the resource using PATCH
-	log.Printf("[INFO] Creating Segment with ID %s", id)
-	obj, err := policySegmentResourceToStruct(d, isVlan)
+	obj, err := policySegmentResourceToInfraStruct(id, d, isVlan)
 	if err != nil {
 		return err
 	}
-	if isPolicyGlobalManager(m) {
-		gmObj, convErr := convertModelBindingType(obj, model.SegmentBindingType(), gm_model.SegmentBindingType())
-		if convErr != nil {
-			return convErr
-		}
-		client := gm_infra.NewDefaultSegmentsClient(connector)
-		err = client.Patch(id, gmObj.(gm_model.Segment))
-	} else {
-		client := infra.NewDefaultSegmentsClient(connector)
-		err = client.Patch(id, obj)
-	}
+
+	err = policyInfraPatch(obj, isPolicyGlobalManager(m), getPolicyConnector(m), false)
 	if err != nil {
 		return handleCreateError("Segment", id, err)
 	}
@@ -772,31 +1214,20 @@ func nsxtPolicySegmentCreate(d *schema.ResourceData, m interface{}, isVlan bool)
 }
 
 func nsxtPolicySegmentUpdate(d *schema.ResourceData, m interface{}, isVlan bool) error {
-	connector := getPolicyConnector(m)
 
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining Segment ID")
 	}
 
-	obj, err := policySegmentResourceToStruct(d, isVlan)
+	obj, err := policySegmentResourceToInfraStruct(id, d, isVlan)
 	if err != nil {
 		return err
 	}
 
-	if isPolicyGlobalManager(m) {
-		gmObj, convErr := convertModelBindingType(obj, model.SegmentBindingType(), gm_model.SegmentBindingType())
-		if convErr != nil {
-			return convErr
-		}
-		client := gm_infra.NewDefaultSegmentsClient(connector)
-		_, err = client.Update(id, gmObj.(gm_model.Segment))
-	} else {
-		client := infra.NewDefaultSegmentsClient(connector)
-		_, err = client.Update(id, obj)
-	}
+	err = policyInfraPatch(obj, isPolicyGlobalManager(m), getPolicyConnector(m), true)
 	if err != nil {
-		return handleUpdateError("Segment", id, err)
+		return handleCreateError("Segment", id, err)
 	}
 
 	return nsxtPolicySegmentRead(d, m, isVlan)
@@ -857,17 +1288,40 @@ func nsxtPolicySegmentDelete(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("Failed to get port information for segment %s: %v", id, err)
 	}
 
-	if isPolicyGlobalManager(m) {
-		client := gm_infra.NewDefaultSegmentsClient(connector)
-		err = client.Delete(id)
-	} else {
-		client := infra.NewDefaultSegmentsClient(connector)
-		err = client.Delete(id)
+	var infraChildren []*data.StructValue
+	converter := bindings.NewTypeConverter()
+	converter.SetMode(bindings.REST)
+	boolTrue := true
+
+	objType := "Segment"
+	obj := model.Segment{
+		Id:           &id,
+		ResourceType: &objType,
 	}
 
+	childObj := model.ChildSegment{
+		MarkedForDelete: &boolTrue,
+		Segment:         &obj,
+		ResourceType:    "ChildSegment",
+	}
+	dataValue, errors := converter.ConvertToVapi(childObj, model.ChildSegmentBindingType())
+	if errors != nil {
+		return fmt.Errorf("Error converting Child Segment: %v", errors[0])
+	}
+	infraChildren = append(infraChildren, dataValue.(*data.StructValue))
+
+	infraType := "Infra"
+	infraObj := model.Infra{
+		Children:     infraChildren,
+		ResourceType: &infraType,
+	}
+
+	log.Printf("[DEBUG] Using H-API to delete segment with ID %s", id)
+	err = policyInfraPatch(infraObj, isPolicyGlobalManager(m), getPolicyConnector(m), false)
 	if err != nil {
 		return handleDeleteError("Segment", id, err)
 	}
+	log.Printf("[DEBUG] Success deleting Segment with ID %s", id)
 
 	return nil
 }

@@ -425,6 +425,16 @@ func getPolicyPathSchema(isRequired bool, forceNew bool, description string) *sc
 	}
 }
 
+func getComputedPolicyPathSchema(description string) *schema.Schema {
+	return &schema.Schema{
+		Type:         schema.TypeString,
+		Description:  description,
+		Optional:     true,
+		Computed:     true,
+		ValidateFunc: validatePolicyPath(),
+	}
+}
+
 func getElemPolicyPathSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:         schema.TypeString,
