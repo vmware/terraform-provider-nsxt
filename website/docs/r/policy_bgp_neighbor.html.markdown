@@ -19,7 +19,7 @@ resource "nsxt_policy_bgp_neighbor" "test" {
   allow_as_in           = true
   graceful_restart_mode = "HELPER_ONLY"
   hold_down_time        = 300
-  keep_alive_time       = 200
+  keep_alive_time       = 100
   neighbor_address      = "12.12.11.23"
   password              = "passw0rd"
   remote_as_num         = "60000"
