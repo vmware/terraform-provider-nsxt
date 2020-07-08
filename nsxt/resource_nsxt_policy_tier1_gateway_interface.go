@@ -92,12 +92,9 @@ func resourceNsxtPolicyTier1GatewayInterfaceCreate(d *schema.ResourceData, m int
 		if err != nil {
 			return err
 		}
-		if len(localeServices) == 0 {
-			return fmt.Errorf("Edge cluster is mandatory on gateway %s in order to create interfaces", tier1ID)
-		}
-		localeServiceID = getGatewayLocaleServiceIDWithSite(localeServices, sitePath)
-		if localeServiceID == "" {
-			return fmt.Errorf("Edge cluster is mandatory on GM gateway %s in order to create interfaces", tier1ID)
+		localeServiceID, err = getGlobalPolicyGatewayLocaleServiceIDWithSite(localeServices, sitePath, tier1ID)
+		if err != nil {
+			return err
 		}
 
 	} else {

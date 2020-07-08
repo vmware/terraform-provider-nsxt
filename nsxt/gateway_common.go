@@ -1,6 +1,7 @@
 package nsxt
 
 import (
+	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
@@ -235,16 +236,19 @@ func listPolicyGatewayLocaleServices(connector *client.RestConnector, gwID strin
 	}
 }
 
-func getGatewayLocaleServiceIDWithSite(localeServices []model.LocaleServices, sitePath string) string {
+func getGlobalPolicyGatewayLocaleServiceIDWithSite(localeServices []model.LocaleServices, sitePath string, gatewayID string) (string, error) {
+	if len(localeServices) == 0 {
+		return "", fmt.Errorf("Edge cluster is mandatory on gateway %s in order to create interfaces", gatewayID)
+	}
 	for _, localeService := range localeServices {
 		if localeService.EdgeClusterPath != nil {
 			if strings.HasPrefix(*localeService.EdgeClusterPath, sitePath) {
 				localeServiceID := *localeService.Id
-				return localeServiceID
+				return localeServiceID, nil
 			}
 		}
 	}
-	return ""
+	return "", fmt.Errorf("Edge cluster is mandatory on gateway %s in order to create interfaces", gatewayID)
 }
 
 func initChildLocaleService(serviceStruct *model.LocaleServices, markForDelete bool) (*data.StructValue, error) {
