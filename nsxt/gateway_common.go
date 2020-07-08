@@ -235,6 +235,18 @@ func listPolicyGatewayLocaleServices(connector *client.RestConnector, gwID strin
 	}
 }
 
+func getGatewayLocaleServiceIDWithSite(localeServices []model.LocaleServices, sitePath string) string {
+	for _, localeService := range localeServices {
+		if localeService.EdgeClusterPath != nil {
+			if strings.HasPrefix(*localeService.EdgeClusterPath, sitePath) {
+				localeServiceID := *localeService.Id
+				return localeServiceID
+			}
+		}
+	}
+	return ""
+}
+
 func initChildLocaleService(serviceStruct *model.LocaleServices, markForDelete bool) (*data.StructValue, error) {
 	childService := model.ChildLocaleServices{
 		ResourceType:    "ChildLocaleServices",

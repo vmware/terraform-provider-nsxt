@@ -164,7 +164,7 @@ func TestAccResourceNsxtPolicyTier1GatewayInterface_withSite(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyTier1InterfaceTemplateWithSite(name, subnet, mtu),
+				Config: testAccNsxtPolicyTier1InterfaceTemplate(name, subnet, mtu),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTier1InterfaceExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -175,15 +175,15 @@ func TestAccResourceNsxtPolicyTier1GatewayInterface_withSite(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 					resource.TestCheckResourceAttrSet(testResourceName, "segment_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "gateway_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "site_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "locale_service_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
-					resource.TestCheckResourceAttrSet(testResourceName, "site_path"),
 				),
 			},
 			{
-				Config: testAccNsxtPolicyTier1InterfaceTemplateWithSite(updatedName, updatedSubnet, updatedMtu),
+				Config: testAccNsxtPolicyTier1InterfaceTemplate(updatedName, updatedSubnet, updatedMtu),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTier1InterfaceExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -194,11 +194,29 @@ func TestAccResourceNsxtPolicyTier1GatewayInterface_withSite(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 					resource.TestCheckResourceAttrSet(testResourceName, "segment_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "gateway_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "site_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "locale_service_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyTier1InterfaceThinTemplate(name, subnet),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyTier1InterfaceExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "description", ""),
+					resource.TestCheckResourceAttr(testResourceName, "mtu", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "subnets.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "subnets.0", subnet),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+					resource.TestCheckResourceAttrSet(testResourceName, "segment_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "gateway_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "site_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "locale_service_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 				),
 			},
 		},
@@ -385,12 +403,13 @@ resource "nsxt_policy_tier1_gateway_interface" "test" {
   gateway_path = nsxt_policy_tier1_gateway.test.path
   segment_path = nsxt_policy_vlan_segment.test.path
   subnets      = ["%s"]
+  %s
 
   tag {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, nsxtPolicyTier1GatewayID, nsxtPolicyTier1GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, mtu, subnet) +
+}`, nsxtPolicyTier1GatewayID, nsxtPolicyTier1GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, mtu, subnet, testAccNsxtPolicyTier0InterfaceSiteTemplate()) +
 		testAccNextPolicyTier1InterfaceRealizationTemplate()
 }
 
@@ -407,7 +426,8 @@ resource "nsxt_policy_tier1_gateway_interface" "test" {
   gateway_path = nsxt_policy_tier1_gateway.test.path
   segment_path = nsxt_policy_vlan_segment.test.path
   subnets      = ["%s"]
-}`, nsxtPolicyTier1GatewayID, nsxtPolicyTier1GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, subnet) +
+  %s
+}`, nsxtPolicyTier1GatewayID, nsxtPolicyTier1GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, subnet, testAccNsxtPolicyTier0InterfaceSiteTemplate()) +
 		testAccNextPolicyTier1InterfaceRealizationTemplate()
 }
 
@@ -427,37 +447,13 @@ resource "nsxt_policy_tier1_gateway_interface" "test" {
   segment_path           = nsxt_policy_vlan_segment.test.path
   subnets                = ["%s"]
   urpf_mode              = "NONE"
-}`, nsxtPolicyTier1GatewayID, nsxtPolicyTier1GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, subnet) +
+  %s
+}`, nsxtPolicyTier1GatewayID, nsxtPolicyTier1GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, subnet, testAccNsxtPolicyTier0InterfaceSiteTemplate()) +
 		testAccNextPolicyTier1InterfaceRealizationTemplate()
 }
 
 func testAccNextPolicyTier1InterfaceRealizationTemplate() string {
-	return strings.Replace(testAcctPolicyTier0InterfaceRealziationTemplate(), "tier0", "tier1", -1)
-}
-
-func testAccNsxtPolicyTier1InterfaceTemplateWithSite(name string, subnet string, mtu string) string {
-	return testAccNsxtPolicyGatewayInterfaceDeps("11") + fmt.Sprintf(`
-resource "nsxt_policy_tier1_gateway" "test" {
-  nsx_id            = "%s"
-  display_name      = "%s"
-  %s
-}
-
-resource "nsxt_policy_tier1_gateway_interface" "test" {
-  display_name = "%s"
-  description  = "Acceptance Test"
-  mtu          = %s
-  gateway_path = nsxt_policy_tier1_gateway.test.path
-  segment_path = nsxt_policy_vlan_segment.test.path
-  subnets      = ["%s"]
-  site_path    = data.nsxt_policy_site.test.path
-
-  tag {
-    scope = "scope1"
-    tag   = "tag1"
-  }
-}`, nsxtPolicyTier1GatewayID, nsxtPolicyTier1GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, mtu, subnet) +
-		testAccNextPolicyTier1InterfaceRealizationTemplate()
+	return strings.Replace(testAccNsxtPolicyTier0InterfaceRealizationTemplate(), "tier0", "tier1", -1)
 }
 
 func testAccNsxtPolicyTier1InterfaceTemplateWithIPv6(name string, subnet string) string {

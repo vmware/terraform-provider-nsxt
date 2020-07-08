@@ -55,7 +55,7 @@ The following arguments are supported:
 * `enable_pim` - (Optional) Flag to enable Protocol Independent Multicast, relevant only for interfaces of type `EXTERNAL`. This attribute is supported with NSX 3.0.0 onwards.
 * `access_vlan_id`- (Optional) Access VLAN ID, relevant only for VRF interfaces. This attribute is supported with NSX 3.0.0 onwards.
 * `urpf_mode` - (Optional) Unicast Reverse Path Forwarding mode, one of `NONE`, `STRICT`. Default is `STRICT`. This attribute is supported with NSX 3.0.0 onwards.
-* `site_path` - (Optional for global manager only) Path of the site the Tier0 edge cluster belongs to
+* `site_path` - (Required for global manager only) Path of the site the Tier0 edge cluster belongs to. This configuration is required for global manager only. `path` field of the existing `nsxt_policy_site` can be used here.
 
 ## Attributes Reference
 

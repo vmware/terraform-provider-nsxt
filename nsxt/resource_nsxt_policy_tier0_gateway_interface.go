@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
+	gm_tier0s "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s"
 	gm_locale_services "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s/locale_services"
 	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
@@ -84,6 +85,7 @@ func resourceNsxtPolicyTier0GatewayInterface() *schema.Resource {
 				Type:         schema.TypeString,
 				Description:  "Path of the site the Tier0 edge cluster belongs to",
 				Optional:     true,
+				ForceNew:     true,
 				ValidateFunc: validatePolicyPath(),
 			},
 		},
@@ -130,6 +132,9 @@ func resourceNsxtPolicyTier0GatewayInterfaceCreate(d *schema.ResourceData, m int
 
 	localeServiceID := ""
 	if isPolicyGlobalManager(m) {
+		if objSitePath == "" {
+			return attributeRequiredGlobalManagerError("site_path", "nsxt_policy_tier0_gateway_interface")
+		}
 		localeServices, err := listPolicyTier0GatewayLocaleServices(connector, tier0ID, true)
 		if err != nil {
 			return err
@@ -137,14 +142,7 @@ func resourceNsxtPolicyTier0GatewayInterfaceCreate(d *schema.ResourceData, m int
 		if len(localeServices) == 0 {
 			return fmt.Errorf("Edge cluster is mandatory on gateway %s in order to create interfaces", tier0ID)
 		}
-		for _, objInList := range localeServices {
-			if objInList.EdgeClusterPath != nil {
-				if objSitePath == "" || strings.HasPrefix(*objInList.EdgeClusterPath, objSitePath) {
-					localeServiceID = *objInList.Id
-					break
-				}
-			}
-		}
+		localeServiceID = getGatewayLocaleServiceIDWithSite(localeServices, objSitePath)
 		if localeServiceID == "" {
 			return fmt.Errorf("Edge cluster is mandatory on GM gateway %s in order to create interfaces", tier0ID)
 		}
@@ -264,6 +262,13 @@ func resourceNsxtPolicyTier0GatewayInterfaceRead(d *schema.ResourceData, m inter
 			return err2
 		}
 		obj = lmObj.(model.Tier0Interface)
+		tier0Client := gm_tier0s.NewDefaultLocaleServicesClient(connector)
+		localeService, err := tier0Client.Get(tier0ID, localeServiceID)
+		if err != nil {
+			return err
+		}
+		sitePath := getSitePathFromEdgePath(*localeService.EdgeClusterPath)
+		d.Set("site_path", sitePath)
 	} else {
 		client := locale_services.NewDefaultInterfacesClient(connector)
 		obj, err = client.Get(tier0ID, defaultPolicyLocaleServiceID, id)
