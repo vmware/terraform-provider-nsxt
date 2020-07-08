@@ -13,7 +13,6 @@ import (
 )
 
 var nsxtPolicyTier0GatewayName = "test"
-var nsxtPolicyTier0GatewayID = "test"
 
 func TestAccResourceNsxtPolicyTier0GatewayInterface_service(t *testing.T) {
 	name := "test-nsx-policy-tier0-interface-service"
@@ -455,13 +454,14 @@ func testAccNsxtPolicyTier0InterfaceExists(resourceName string) resource.TestChe
 		}
 
 		var err error
+		localeServiceID := rs.Primary.Attributes["locale_service_id"]
+		gwID := getPolicyIDFromPath(rs.Primary.Attributes["gateway_path"])
 		if testAccIsGlobalManager() {
-			localeServiceID := rs.Primary.Attributes["locale_service_id"]
 			nsxClient := gm_locale_services.NewDefaultInterfacesClient(connector)
-			_, err = nsxClient.Get(nsxtPolicyTier0GatewayID, localeServiceID, resourceID)
+			_, err = nsxClient.Get(gwID, localeServiceID, resourceID)
 		} else {
 			nsxClient := locale_services.NewDefaultInterfacesClient(connector)
-			_, err = nsxClient.Get(nsxtPolicyTier0GatewayID, defaultPolicyLocaleServiceID, resourceID)
+			_, err = nsxClient.Get(gwID, localeServiceID, resourceID)
 		}
 		if err != nil {
 			return fmt.Errorf("Error while retrieving policy Tier0 Interface ID %s. Error: %v", resourceID, err)
@@ -481,14 +481,15 @@ func testAccNsxtPolicyTier0InterfaceCheckDestroy(state *terraform.State, display
 
 		resourceID := rs.Primary.Attributes["id"]
 		localeServiceID := rs.Primary.Attributes["locale_service_id"]
+		gwID := getPolicyIDFromPath(rs.Primary.Attributes["gateway_path"])
 
 		var err error
 		if testAccIsGlobalManager() {
 			nsxClient := gm_locale_services.NewDefaultInterfacesClient(connector)
-			_, err = nsxClient.Get(nsxtPolicyTier0GatewayID, localeServiceID, resourceID)
+			_, err = nsxClient.Get(gwID, localeServiceID, resourceID)
 		} else {
 			nsxClient := locale_services.NewDefaultInterfacesClient(connector)
-			_, err = nsxClient.Get(nsxtPolicyTier0GatewayID, localeServiceID, resourceID)
+			_, err = nsxClient.Get(gwID, localeServiceID, resourceID)
 		}
 		if err == nil {
 			return fmt.Errorf("Policy Tier0 Interface %s still exists", displayName)
@@ -547,9 +548,8 @@ func testAccNsxtPolicyTier0EdgeClusterTemplate() string {
 func testAccNsxtPolicyTier0InterfaceSiteTemplate() string {
 	if testAccIsGlobalManager() {
 		return fmt.Sprintf("site_path = data.nsxt_policy_site.test.path")
-	} else {
-		return ""
 	}
+	return ""
 }
 
 func testAccNsxtPolicyTier0InterfaceRealizationTemplate() string {
@@ -570,7 +570,6 @@ func testAccNsxtPolicyTier0InterfaceServiceTemplate(name string, subnet string, 
 	return testAccNsxtPolicyGatewayInterfaceDeps("11") + fmt.Sprintf(`
 
 resource "nsxt_policy_tier0_gateway" "test" {
-  nsx_id            = "%s"
   display_name      = "%s"
   ha_mode           = "ACTIVE_STANDBY"
   %s
@@ -590,7 +589,7 @@ resource "nsxt_policy_tier0_gateway_interface" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, nsxtPolicyTier0GatewayID, nsxtPolicyTier0GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, mtu, subnet, testAccNsxtPolicyTier0InterfaceSiteTemplate()) +
+}`, nsxtPolicyTier0GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, mtu, subnet, testAccNsxtPolicyTier0InterfaceSiteTemplate()) +
 		testAccNsxtPolicyTier0InterfaceRealizationTemplate()
 }
 
@@ -598,7 +597,6 @@ func testAccNsxtPolicyTier0InterfaceServiceSiteTemplate(name string, subnet stri
 	return testAccNsxtPolicyGatewayInterfaceDeps("11") + fmt.Sprintf(`
 
 resource "nsxt_policy_tier0_gateway" "test" {
-  nsx_id            = "%s"
   display_name      = "%s"
   ha_mode           = "ACTIVE_STANDBY"
   %s
@@ -618,14 +616,13 @@ resource "nsxt_policy_tier0_gateway_interface" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, nsxtPolicyTier0GatewayID, nsxtPolicyTier0GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, mtu, subnet) +
+}`, nsxtPolicyTier0GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, mtu, subnet) +
 		testAccNsxtPolicyTier0InterfaceRealizationTemplate()
 }
 
 func testAccNsxtPolicyTier0InterfaceThinTemplate(name string, subnet string) string {
 	return testAccNsxtPolicyGatewayInterfaceDeps("11") + fmt.Sprintf(`
 resource "nsxt_policy_tier0_gateway" "test" {
-  nsx_id            = "%s"
   display_name      = "%s"
   ha_mode           = "ACTIVE_STANDBY"
   %s
@@ -638,14 +635,13 @@ resource "nsxt_policy_tier0_gateway_interface" "test" {
   segment_path = nsxt_policy_vlan_segment.test.path
   subnets      = ["%s"]
   %s
-}`, nsxtPolicyTier0GatewayID, nsxtPolicyTier0GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, subnet, testAccNsxtPolicyTier0InterfaceSiteTemplate()) +
+}`, nsxtPolicyTier0GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, subnet, testAccNsxtPolicyTier0InterfaceSiteTemplate()) +
 		testAccNsxtPolicyTier0InterfaceRealizationTemplate()
 }
 
 func testAccNsxtPolicyTier0InterfaceTemplateWithID(name string, subnet string) string {
 	return testAccNsxtPolicyGatewayInterfaceDeps("11") + fmt.Sprintf(`
 resource "nsxt_policy_tier0_gateway" "test" {
-  nsx_id            = "%s"
   display_name      = "%s"
   ha_mode           = "ACTIVE_STANDBY"
   %s
@@ -660,7 +656,7 @@ resource "nsxt_policy_tier0_gateway_interface" "test" {
   segment_path           = nsxt_policy_vlan_segment.test.path
   subnets                = ["%s"]
   %s
-}`, nsxtPolicyTier0GatewayID, nsxtPolicyTier0GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, subnet, testAccNsxtPolicyTier0InterfaceSiteTemplate()) +
+}`, nsxtPolicyTier0GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, subnet, testAccNsxtPolicyTier0InterfaceSiteTemplate()) +
 		testAccNsxtPolicyTier0InterfaceRealizationTemplate()
 }
 
@@ -671,7 +667,6 @@ data "nsxt_policy_ipv6_ndra_profile" "default" {
 }
 
 resource "nsxt_policy_tier0_gateway" "test" {
-  nsx_id            = "%s"
   display_name      = "%s"
   ha_mode           = "ACTIVE_STANDBY"
   %s
@@ -685,7 +680,7 @@ resource "nsxt_policy_tier0_gateway_interface" "test" {
   segment_path           = nsxt_policy_vlan_segment.test.path
   subnets                = ["%s"]
   ipv6_ndra_profile_path = data.nsxt_policy_ipv6_ndra_profile.default.path
-}`, nsxtPolicyTier0GatewayID, nsxtPolicyTier0GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, subnet) +
+}`, nsxtPolicyTier0GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, subnet) +
 		testAccNsxtPolicyTier0InterfaceRealizationTemplate()
 }
 
@@ -697,7 +692,6 @@ data "nsxt_policy_edge_node" "EN" {
 }
 
 resource "nsxt_policy_tier0_gateway" "test" {
-  nsx_id            = "%s"
   display_name      = "%s"
   ha_mode           = "ACTIVE_STANDBY"
   %s
@@ -720,6 +714,6 @@ resource "nsxt_policy_tier0_gateway_interface" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, nsxtPolicyTier0GatewayID, nsxtPolicyTier0GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, mtu, subnet, testAccNsxtPolicyTier0InterfaceSiteTemplate()) +
+}`, nsxtPolicyTier0GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, mtu, subnet, testAccNsxtPolicyTier0InterfaceSiteTemplate()) +
 		testAccNsxtPolicyTier0InterfaceRealizationTemplate()
 }
