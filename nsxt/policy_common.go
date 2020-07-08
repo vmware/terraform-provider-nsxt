@@ -489,3 +489,10 @@ func buildQueryStringFromMap(query map[string]string) string {
 	}
 	return strings.Join(keyValues, " AND ")
 }
+
+func getSitePathFromEdgePath(edgePath string) string {
+	// Sample Edge cluster path looks like:
+	//"/global-infra/sites/<site-id>/enforcement-points/default/edge-clusters/<edge-cluster-id>"
+	pathList := strings.Split(edgePath, "/")[:4]
+	return strings.Join(pathList, "/")
+}

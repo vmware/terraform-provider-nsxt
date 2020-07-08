@@ -16,7 +16,7 @@ var nsxtPolicyTier0GatewayName = "test"
 var nsxtPolicyTier0GatewayID = "test"
 
 func TestAccResourceNsxtPolicyTier0GatewayInterface_service(t *testing.T) {
-	name := "test-nsx-policy-tier0-interface-basic"
+	name := "test-nsx-policy-tier0-interface-service"
 	updatedName := fmt.Sprintf("%s-update", name)
 	mtu := "1500"
 	updatedMtu := "1800"
@@ -99,7 +99,7 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_service(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyTier0GatewayInterface_site(t *testing.T) {
-	name := "test-nsx-policy-tier0-interface-basic"
+	name := "test-nsx-policy-tier0-interface-site"
 	updatedName := fmt.Sprintf("%s-update", name)
 	mtu := "1500"
 	updatedMtu := "1800"
@@ -117,7 +117,7 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_site(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyTier0InterfaceServiceSiteTemplate(name, subnet, mtu),
+				Config: testAccNsxtPolicyTier0InterfaceServiceTemplate(name, subnet, mtu),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTier0InterfaceExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -139,7 +139,7 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_site(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyTier0InterfaceServiceSiteTemplate(updatedName, updatedSubnet, updatedMtu),
+				Config: testAccNsxtPolicyTier0InterfaceServiceTemplate(updatedName, updatedSubnet, updatedMtu),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTier0InterfaceExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -173,6 +173,7 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_site(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
 					resource.TestCheckResourceAttrSet(testResourceName, "segment_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "gateway_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "site_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "locale_service_id"),
@@ -184,7 +185,7 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_site(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyTier0GatewayInterface_external(t *testing.T) {
-	name := "test-nsx-policy-tier0-interface-basic"
+	name := "test-nsx-policy-tier0-interface-external"
 	updatedName := fmt.Sprintf("%s-update", name)
 	mtu := "1500"
 	updatedMtu := "1800"
@@ -254,7 +255,7 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_external(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyTier0GatewayInterface_withID(t *testing.T) {
-	name := "test-nsx-policy-tier0-interface-basic"
+	name := "test-nsx-policy-tier0-interface-id"
 	updatedName := fmt.Sprintf("%s-update", name)
 	subnet := "1.1.12.2/24"
 	// Update to 2 addresses
@@ -315,7 +316,7 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_withID(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyTier0GatewayInterface_withV6(t *testing.T) {
-	name := "test-nsx-policy-tier0-interface-basic"
+	name := "test-nsx-policy-tier0-interface-v6"
 	updatedName := fmt.Sprintf("%s-update", name)
 	subnet := "1.1.12.2/24"
 	// Update to 2 addresses
@@ -498,19 +499,9 @@ func testAccNsxtPolicyTier0InterfaceCheckDestroy(state *terraform.State, display
 
 func testAccNsxtPolicyGatewayGMFabricInterfaceDeps() string {
 	return fmt.Sprintf(`
-data "nsxt_policy_site" "test" {
-  display_name = "%s"
-}
-
 data "nsxt_policy_edge_cluster" "EC" {
-  display_name = "%s"
   site_path = data.nsxt_policy_site.test.path
-}
-
-data "nsxt_policy_transport_zone" "test" {
-  display_name = "%s"
-  site_path = data.nsxt_policy_site.test.path
-}`, getTestSiteName(), getEdgeClusterName(), getVlanTransportZoneName())
+}`) + testAccNSXGlobalPolicyTransportZoneReadTemplate(true)
 }
 
 func testAccNsxtPolicyGatewayFabricInterfaceDeps() string {
@@ -553,7 +544,15 @@ func testAccNsxtPolicyTier0EdgeClusterTemplate() string {
 `)
 }
 
-func testAcctPolicyTier0InterfaceRealziationTemplate() string {
+func testAccNsxtPolicyTier0InterfaceSiteTemplate() string {
+	if testAccIsGlobalManager() {
+		return fmt.Sprintf("site_path = data.nsxt_policy_site.test.path")
+	} else {
+		return ""
+	}
+}
+
+func testAccNsxtPolicyTier0InterfaceRealizationTemplate() string {
 	if testAccIsGlobalManager() {
 		return fmt.Sprintf(`
 data "nsxt_policy_realization_info" "realization_info" {
@@ -585,13 +584,14 @@ resource "nsxt_policy_tier0_gateway_interface" "test" {
   gateway_path = nsxt_policy_tier0_gateway.test.path
   segment_path = nsxt_policy_vlan_segment.test.path
   subnets      = ["%s"]
+  %s
 
   tag {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, nsxtPolicyTier0GatewayID, nsxtPolicyTier0GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, mtu, subnet) +
-		testAcctPolicyTier0InterfaceRealziationTemplate()
+}`, nsxtPolicyTier0GatewayID, nsxtPolicyTier0GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, mtu, subnet, testAccNsxtPolicyTier0InterfaceSiteTemplate()) +
+		testAccNsxtPolicyTier0InterfaceRealizationTemplate()
 }
 
 func testAccNsxtPolicyTier0InterfaceServiceSiteTemplate(name string, subnet string, mtu string) string {
@@ -619,7 +619,7 @@ resource "nsxt_policy_tier0_gateway_interface" "test" {
     tag   = "tag1"
   }
 }`, nsxtPolicyTier0GatewayID, nsxtPolicyTier0GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, mtu, subnet) +
-		testAcctPolicyTier0InterfaceRealziationTemplate()
+		testAccNsxtPolicyTier0InterfaceRealizationTemplate()
 }
 
 func testAccNsxtPolicyTier0InterfaceThinTemplate(name string, subnet string) string {
@@ -637,8 +637,9 @@ resource "nsxt_policy_tier0_gateway_interface" "test" {
   gateway_path = nsxt_policy_tier0_gateway.test.path
   segment_path = nsxt_policy_vlan_segment.test.path
   subnets      = ["%s"]
-}`, nsxtPolicyTier0GatewayID, nsxtPolicyTier0GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, subnet) +
-		testAcctPolicyTier0InterfaceRealziationTemplate()
+  %s
+}`, nsxtPolicyTier0GatewayID, nsxtPolicyTier0GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, subnet, testAccNsxtPolicyTier0InterfaceSiteTemplate()) +
+		testAccNsxtPolicyTier0InterfaceRealizationTemplate()
 }
 
 func testAccNsxtPolicyTier0InterfaceTemplateWithID(name string, subnet string) string {
@@ -658,8 +659,9 @@ resource "nsxt_policy_tier0_gateway_interface" "test" {
   gateway_path           = nsxt_policy_tier0_gateway.test.path
   segment_path           = nsxt_policy_vlan_segment.test.path
   subnets                = ["%s"]
-}`, nsxtPolicyTier0GatewayID, nsxtPolicyTier0GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, subnet) +
-		testAcctPolicyTier0InterfaceRealziationTemplate()
+  %s
+}`, nsxtPolicyTier0GatewayID, nsxtPolicyTier0GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, subnet, testAccNsxtPolicyTier0InterfaceSiteTemplate()) +
+		testAccNsxtPolicyTier0InterfaceRealizationTemplate()
 }
 
 func testAccNsxtPolicyTier0InterfaceTemplateWithV6(name string, subnet string) string {
@@ -684,7 +686,7 @@ resource "nsxt_policy_tier0_gateway_interface" "test" {
   subnets                = ["%s"]
   ipv6_ndra_profile_path = data.nsxt_policy_ipv6_ndra_profile.default.path
 }`, nsxtPolicyTier0GatewayID, nsxtPolicyTier0GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, subnet) +
-		testAcctPolicyTier0InterfaceRealziationTemplate()
+		testAccNsxtPolicyTier0InterfaceRealizationTemplate()
 }
 
 func testAccNsxtPolicyTier0InterfaceExternalTemplate(name string, subnet string, mtu string) string {
@@ -712,11 +714,12 @@ resource "nsxt_policy_tier0_gateway_interface" "test" {
   subnets        = ["%s"]
   enable_pim     = true
   urpf_mode      = "STRICT"
+  %s
 
   tag {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, nsxtPolicyTier0GatewayID, nsxtPolicyTier0GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, mtu, subnet) +
-		testAcctPolicyTier0InterfaceRealziationTemplate()
+}`, nsxtPolicyTier0GatewayID, nsxtPolicyTier0GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, mtu, subnet, testAccNsxtPolicyTier0InterfaceSiteTemplate()) +
+		testAccNsxtPolicyTier0InterfaceRealizationTemplate()
 }
