@@ -15,6 +15,7 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/domains"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"log"
+	"strings"
 )
 
 var conditionKeyValues = []string{
@@ -93,6 +94,22 @@ func getIPAddressExpressionSchema() *schema.Resource {
 				Elem: &schema.Schema{
 					Type:         schema.TypeString,
 					ValidateFunc: validateCidrOrIPOrRange(),
+				},
+			},
+		},
+	}
+}
+
+func getMACAddressExpressionSchema() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"mac_addresses": {
+				Type:        schema.TypeSet,
+				Required:    true,
+				Description: "List of Mac Addresses",
+				Elem: &schema.Schema{
+					Type:         schema.TypeString,
+					ValidateFunc: validation.IsMACAddress,
 				},
 			},
 		},
@@ -201,6 +218,13 @@ func getCriteriaSetSchema() *schema.Resource {
 				Elem:        getPathExpressionSchema(),
 				MaxItems:    1,
 			},
+			"macaddress_expression": {
+				Type:        schema.TypeList,
+				Description: "An MAC address expression specifying MAC Address members in the Group",
+				Elem:        getMACAddressExpressionSchema(),
+				Optional:    true,
+				MaxItems:    1,
+			},
 		},
 	}
 }
@@ -287,7 +311,7 @@ func validateGroupCriteriaSets(criteriaSets []interface{}) ([]criteriaMeta, erro
 						return nil, err
 					}
 					memberType = mType
-				} else if expName == "ipaddress_expression" || expName == "path_expression" {
+				} else if strings.HasSuffix(expName, "_expression") {
 					memberType = ""
 				} else {
 					return nil, fmt.Errorf("Unknown criteria: %v", expName)
@@ -380,6 +404,25 @@ func buildGroupIPAddressData(ipaddr interface{}) (*data.StructValue, error) {
 	return dataValue.(*data.StructValue), nil
 }
 
+func buildGroupMacAddressData(ipaddr interface{}) (*data.StructValue, error) {
+	addrMap := ipaddr.(map[string]interface{})
+	var macList []string
+	for _, mac := range addrMap["mac_addresses"].(*schema.Set).List() {
+		macList = append(macList, mac.(string))
+	}
+	addrStruct := model.MACAddressExpression{
+		MacAddresses: macList,
+		ResourceType: model.MACAddressExpression__TYPE_IDENTIFIER,
+	}
+	converter := bindings.NewTypeConverter()
+	converter.SetMode(bindings.REST)
+	dataValue, errors := converter.ConvertToVapi(addrStruct, model.MACAddressExpressionBindingType())
+	if errors != nil {
+		return nil, errors[0]
+	}
+	return dataValue.(*data.StructValue), nil
+}
+
 func buildGroupMemberPathData(paths interface{}) (*data.StructValue, error) {
 	pathMap := paths.(map[string]interface{})
 	var pathList []string
@@ -440,6 +483,12 @@ func buildGroupExpressionDataFromType(expressionType string, datum interface{}) 
 		return data, nil
 	} else if expressionType == "path_expression" {
 		data, err := buildGroupMemberPathData(datum)
+		if err != nil {
+			return nil, err
+		}
+		return data, nil
+	} else if expressionType == "macaddress_expression" {
+		data, err := buildGroupMacAddressData(datum)
 		if err != nil {
 			return nil, err
 		}
@@ -577,6 +626,20 @@ func fromGroupExpressionData(expressions []*data.StructValue) ([]map[string]inte
 			pathList = append(pathList, pathMap)
 			exprMap["path_expression"] = pathList
 			parsedCriteria = append(parsedCriteria, exprMap)
+		} else if expStruct.ResourceType == model.MACAddressExpression__TYPE_IDENTIFIER {
+			log.Printf("[DEBUG] Parsing mac address expression")
+			macData, errors := converter.ConvertToGolang(expression, model.MACAddressExpressionBindingType())
+			if len(errors) > 0 {
+				return nil, nil, errors[0]
+			}
+			macStruct := macData.(model.MACAddressExpression)
+			var addrList []map[string]interface{}
+			var addrMap = make(map[string]interface{})
+			addrMap["mac_addresses"] = macStruct.MacAddresses
+			var macMap = make(map[string]interface{})
+			addrList = append(addrList, addrMap)
+			macMap["macaddress_expression"] = addrList
+			parsedCriteria = append(parsedCriteria, macMap)
 		} else if expStruct.ResourceType == model.Condition__TYPE_IDENTIFIER {
 			log.Printf("[DEBUG] Parsing condition")
 			condMap, err := groupConditionDataToMap(expression)

@@ -41,6 +41,16 @@ resource "nsxt_policy_group" "group1" {
         }
     }
 
+    conjunction {
+        operator = "OR"
+    }
+
+    criteria {
+        macaddress_expression {
+            mac_addresses = ["b2:54:00:98:b0:83"]
+        }
+    }
+
     extended_criteria {
         identity_group {
           distinguished_name             = "cn=u1,ou=users,dc=example,dc=local"
@@ -102,16 +112,18 @@ The following arguments are supported:
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the group resource.
 * `criteria` - (Optional) A repeatable block to specify criteria for members of this Group. If more than 1 criteria block is specified, it must be separated by a `conjunction`. In a `criteria` block the following membership selection expressions can be used:
   * `ipaddress_expression` - (Optional) An expression block to specify individual IP Addresses, ranges of IP Addresses or subnets for this Group.
-    * `ip_addresses` - (Required for a `ipaddress_expression`) This list can consist of a single IP address, IP address range or a subnet. Its type can be of either IPv4 or IPv6. Both IPv4 and IPv6 addresses within one expression is not allowed.
+    * `ip_addresses` - (Required) This list can consist of a single IP address, IP address range or a subnet. Its type can be of either IPv4 or IPv6. Both IPv4 and IPv6 addresses within one expression is not allowed.
+  * `macaddress_expression` - (Optional) An expression block to specify individual MAC Addresses for this Group.
+    * `mac_addresses` - (Required) List of MAC addresses.
   * `path_expression` - (Optional) An expression block to specify direct group members by policy path.
-    * `member_paths` - (Required for a `path_expression`) List of policy paths for direct members for this Group (such as Segments, Segment ports, Groups etc).
+    * `member_paths` - (Required) List of policy paths for direct members for this Group (such as Segments, Segment ports, Groups etc).
   * `condition` (Optional) A repeatable condition block to select this Group's members. When multiple `condition` blocks are used in a single `criteria` they form a nested expression that's implicitly ANDed together and each nested condition must used the same `member_type`.
-    * `key` (Required for a `condition`) Specifies the attribute to query. Must be one of: `Tag`, `ComputerName`, `OSName` or `Name`. For a `member_type` other than `VirtualMachine`, only the `Tag` key is supported.
-    * `member_type` (Required for a `condition`) Specifies the type of resource to query. Must be one of: `IPSet`, `LogicalPort`, `LogicalSwitch`, `Segment`, `SegmentPort` or `VirtualMachine`.
-    * `operator` (Required for a `condition`) Specifies the query operator to use. Must be one of: `CONTAINS`, `ENDSWITH`, `EQUALS`, `NOTEQUALS` or `STARTSWITH`.
-    * `value` (Required for a `condition`) User specified string value to use in the query. For `Tag` criteria, use 'scope|value' notation if you wish to specify scope in criteria.
+    * `key` (Required) Specifies the attribute to query. Must be one of: `Tag`, `ComputerName`, `OSName` or `Name`. For a `member_type` other than `VirtualMachine`, only the `Tag` key is supported.
+    * `member_type` (Required) Specifies the type of resource to query. Must be one of: `IPSet`, `LogicalPort`, `LogicalSwitch`, `Segment`, `SegmentPort` or `VirtualMachine`.
+    * `operator` (Required) Specifies the query operator to use. Must be one of: `CONTAINS`, `ENDSWITH`, `EQUALS`, `NOTEQUALS` or `STARTSWITH`.
+    * `value` (Required) User specified string value to use in the query. For `Tag` criteria, use 'scope|value' notation if you wish to specify scope in criteria.
 * `conjunction` (Required for multiple `criteria`) When specifying multiple `criteria`, a conjunction is used to specify if the criteria should selected using `AND` or `OR`.
-  * `operator` (Required for `conjunction`) The operator to use. Must be one of `AND` or `OR`. If `AND` is used, then the `criteria` block before/after must be of the same type and if using `condition` then also must use the same `member_type`.
+  * `operator` (Required) The operator to use. Must be one of `AND` or `OR`. If `AND` is used, then the `criteria` block before/after must be of the same type and if using `condition` then also must use the same `member_type`.
 * `extended_criteria` (Optional) A condition block to specify higher level context to include in this Group's members. (e.g. user AD group). This configuration is for Local Manager only. Currently only one block is supported by NSX. Note that `extended_criteria` is implicitly `AND` with `criteria`.
   * `identity_group` (Optional) A repeatable condition block selecting user AD groups to be included in this Group. Note that `identity_groups` are `OR` with each other.
     * `distinguished_name` (Required for an `identity_group`) LDAP distinguished name (DN). A valid fully qualified distinguished name should be provided here. This value is valid only if it matches to exactly 1 LDAP object on the LDAP server.
