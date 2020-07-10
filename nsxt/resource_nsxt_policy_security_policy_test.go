@@ -303,6 +303,7 @@ func TestAccResourceNsxtGlobalPolicySecurityPolicy_withSite(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.action", defaultAction),
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.log_label", tag1),
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.tag.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.source_groups.#", "1"),
 				),
 			},
 			{
@@ -326,6 +327,7 @@ func TestAccResourceNsxtGlobalPolicySecurityPolicy_withSite(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.action", defaultAction),
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.log_label", tag2),
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.tag.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.source_groups.#", "1"),
 				),
 			},
 		},
@@ -443,7 +445,7 @@ resource "nsxt_policy_security_policy" "test" {
   }
 }`, name, name, direction, protocol, ruleTag)
 	}
-	return testAccNsxtGlobalPolicySite(domainName) + fmt.Sprintf(`
+	return testAccNsxtGlobalPolicyGroupIPAddressCreateTemplate("group", domainName) + fmt.Sprintf(`
 resource "nsxt_policy_security_policy" "test" {
   display_name    = "%s"
   description     = "Acceptance Test"
@@ -464,6 +466,7 @@ resource "nsxt_policy_security_policy" "test" {
     direction    = "%s"
     ip_version   = "%s"
     log_label    = "%s"
+    source_groups = [nsxt_policy_group.test.path]
 
     tag {
       scope = "color"
