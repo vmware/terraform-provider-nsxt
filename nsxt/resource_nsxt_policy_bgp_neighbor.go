@@ -247,19 +247,21 @@ func resourceNsxtPolicyBgpNeighborResourceDataToStruct(d *schema.ResourceData, i
 		}
 		enabled := data["enabled"].(bool)
 
-		var inFilters, outFilters []string
-		if d.Get("in_route_filter") != nil {
-			inFilters = append(inFilters, d.Get("in_route_filter").(string))
-		}
-		if d.Get("out_route_filter") != nil {
-			outFilters = append(outFilters, d.Get("out_route_filter").(string))
+		filterStruct := model.BgpRouteFiltering{
+			AddressFamily: &addrFamily,
+			Enabled:       &enabled,
 		}
 
-		filterStruct := model.BgpRouteFiltering{
-			AddressFamily:   &addrFamily,
-			Enabled:         &enabled,
-			InRouteFilters:  inFilters,
-			OutRouteFilters: outFilters,
+		var inFilters, outFilters []string
+		inFilter := data["in_route_filter"].(string)
+		outFilter := data["out_route_filter"].(string)
+		if len(inFilter) > 0 {
+			inFilters = append(inFilters, inFilter)
+			filterStruct.InRouteFilters = inFilters
+		}
+		if len(outFilter) > 0 {
+			outFilters = append(outFilters, outFilter)
+			filterStruct.OutRouteFilters = outFilters
 		}
 
 		if nsxVersionHigherOrEqual("3.0.0") && data["maximum_routes"] != 0 {
