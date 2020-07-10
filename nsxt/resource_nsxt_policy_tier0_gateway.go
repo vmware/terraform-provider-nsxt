@@ -765,7 +765,7 @@ func policyTier0GatewayResourceToInfraStruct(d *schema.ResourceData, connector *
 		}
 	} else {
 		// Global Manager
-		localeServices, err := initGatewayLocaleServices(d, connector, listPolicyTier0GatewayLocaleServices)
+		localeServices, err := initGatewayLocaleServices(d, connector)
 		if err != nil {
 			return infraStruct, err
 		}
