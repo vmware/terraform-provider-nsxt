@@ -14,7 +14,6 @@ import (
 )
 
 var nsxtPolicyTier1GatewayName = "test"
-var nsxtPolicyTier1GatewayID = "test"
 
 func TestAccResourceNsxtPolicyTier1GatewayInterface_basic(t *testing.T) {
 	name := "test-nsx-policy-tier1-interface-basic"
@@ -337,6 +336,8 @@ func testAccNsxtPolicyTier1InterfaceExists(resourceName string) resource.TestChe
 
 		resourceID := rs.Primary.ID
 		localeServiceID := rs.Primary.Attributes["locale_service_id"]
+		gwID := getPolicyIDFromPath(rs.Primary.Attributes["gateway_path"])
+
 		if resourceID == "" {
 			return fmt.Errorf("Policy Tier1 Interface resource ID not set in resources")
 		}
@@ -344,10 +345,10 @@ func testAccNsxtPolicyTier1InterfaceExists(resourceName string) resource.TestChe
 		var err error
 		if testAccIsGlobalManager() {
 			nsxClient := gm_locale_services.NewDefaultInterfacesClient(connector)
-			_, err = nsxClient.Get(nsxtPolicyTier1GatewayID, localeServiceID, resourceID)
+			_, err = nsxClient.Get(gwID, localeServiceID, resourceID)
 		} else {
 			nsxClient := locale_services.NewDefaultInterfacesClient(connector)
-			_, err = nsxClient.Get(nsxtPolicyTier1GatewayID, localeServiceID, resourceID)
+			_, err = nsxClient.Get(gwID, localeServiceID, resourceID)
 		}
 
 		if err != nil {
@@ -376,10 +377,11 @@ func testAccNsxtPolicyTier1InterfaceCheckDestroy(state *terraform.State, display
 
 		resourceID := rs.Primary.Attributes["id"]
 		localeServicesID := rs.Primary.Attributes["locale_service_id"]
+		gwID := getPolicyIDFromPath(rs.Primary.Attributes["gateway_path"])
 		if testAccIsGlobalManager() {
-			_, err = nsxClient.(*gm_locale_services.DefaultInterfacesClient).Get(nsxtPolicyTier1GatewayID, localeServicesID, resourceID)
+			_, err = nsxClient.(*gm_locale_services.DefaultInterfacesClient).Get(gwID, localeServicesID, resourceID)
 		} else {
-			_, err = nsxClient.(*locale_services.DefaultInterfacesClient).Get(nsxtPolicyTier1GatewayID, localeServicesID, resourceID)
+			_, err = nsxClient.(*locale_services.DefaultInterfacesClient).Get(gwID, localeServicesID, resourceID)
 		}
 		if err == nil {
 			return fmt.Errorf("Policy Tier1 Interface %s still exists", displayName)
@@ -391,7 +393,6 @@ func testAccNsxtPolicyTier1InterfaceCheckDestroy(state *terraform.State, display
 func testAccNsxtPolicyTier1InterfaceTemplate(name string, subnet string, mtu string) string {
 	return testAccNsxtPolicyGatewayInterfaceDeps("11") + fmt.Sprintf(`
 resource "nsxt_policy_tier1_gateway" "test" {
-  nsx_id            = "%s"
   display_name      = "%s"
   %s
 }
@@ -409,14 +410,13 @@ resource "nsxt_policy_tier1_gateway_interface" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, nsxtPolicyTier1GatewayID, nsxtPolicyTier1GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, mtu, subnet, testAccNsxtPolicyTier0InterfaceSiteTemplate()) +
+}`, nsxtPolicyTier1GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, mtu, subnet, testAccNsxtPolicyTier0InterfaceSiteTemplate()) +
 		testAccNextPolicyTier1InterfaceRealizationTemplate()
 }
 
 func testAccNsxtPolicyTier1InterfaceThinTemplate(name string, subnet string) string {
 	return testAccNsxtPolicyGatewayInterfaceDeps("11") + fmt.Sprintf(`
 resource "nsxt_policy_tier1_gateway" "test" {
-  nsx_id            = "%s"
   display_name      = "%s"
   %s
 }
@@ -427,14 +427,13 @@ resource "nsxt_policy_tier1_gateway_interface" "test" {
   segment_path = nsxt_policy_vlan_segment.test.path
   subnets      = ["%s"]
   %s
-}`, nsxtPolicyTier1GatewayID, nsxtPolicyTier1GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, subnet, testAccNsxtPolicyTier0InterfaceSiteTemplate()) +
+}`, nsxtPolicyTier1GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, subnet, testAccNsxtPolicyTier0InterfaceSiteTemplate()) +
 		testAccNextPolicyTier1InterfaceRealizationTemplate()
 }
 
 func testAccNsxtPolicyTier1InterfaceTemplateWithID(name string, subnet string) string {
 	return testAccNsxtPolicyGatewayInterfaceDeps("11") + fmt.Sprintf(`
 resource "nsxt_policy_tier1_gateway" "test" {
-  nsx_id            = "%s"
   display_name      = "%s"
   %s
 }
@@ -448,7 +447,7 @@ resource "nsxt_policy_tier1_gateway_interface" "test" {
   subnets                = ["%s"]
   urpf_mode              = "NONE"
   %s
-}`, nsxtPolicyTier1GatewayID, nsxtPolicyTier1GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, subnet, testAccNsxtPolicyTier0InterfaceSiteTemplate()) +
+}`, nsxtPolicyTier1GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, subnet, testAccNsxtPolicyTier0InterfaceSiteTemplate()) +
 		testAccNextPolicyTier1InterfaceRealizationTemplate()
 }
 
@@ -463,7 +462,6 @@ data "nsxt_policy_ipv6_ndra_profile" "default" {
 }
 
 resource "nsxt_policy_tier1_gateway" "test" {
-  nsx_id            = "%s"
   display_name      = "%s"
   %s
 }
@@ -476,6 +474,6 @@ resource "nsxt_policy_tier1_gateway_interface" "test" {
   subnets                = ["%s"]
   ipv6_ndra_profile_path = data.nsxt_policy_ipv6_ndra_profile.default.path
   urpf_mode              = "NONE"
-}`, nsxtPolicyTier1GatewayID, nsxtPolicyTier1GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, subnet) +
+}`, nsxtPolicyTier1GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, subnet) +
 		testAccNextPolicyTier1InterfaceRealizationTemplate()
 }
