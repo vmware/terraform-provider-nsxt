@@ -88,7 +88,7 @@ The following arguments are supported:
 * `domain` - (Optional) The domain to use for the resource. This domain must already exist. For VMware Cloud on AWS use `cgw`. For Global Manager, please use site id for this field. If not specified, this field is default to `default`.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this policy.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
-* `category` - (Required) Category of this policy, one of `Ethernet`, `Emergency`, `Infrastructure`, `Environment`, `Application`.
+* `category` - (Required) Category of this policy. For local manager must be one of `Ethernet`, `Emergency`, `Infrastructure`, `Environment`, `Application`. For global manager must be one of: `Infrastructure`, `Environment`, `Application`.
 * `comments` - (Optional) Comments for security policy lock/unlock.
 * `locked` - (Optional) Indicates whether a security policy should be locked. If locked by a user, no other user would be able to modify this policy.
 * `scope` - (Optional) The list of policy object paths where the rules in this policy will get applied.
