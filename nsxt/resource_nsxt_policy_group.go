@@ -220,7 +220,7 @@ func getCriteriaSetSchema() *schema.Resource {
 			},
 			"macaddress_expression": {
 				Type:        schema.TypeList,
-				Description: "An MAC address expression specifying MAC Address members in the Group",
+				Description: "MAC address expression specifying MAC Address members in the Group",
 				Elem:        getMACAddressExpressionSchema(),
 				Optional:    true,
 				MaxItems:    1,
