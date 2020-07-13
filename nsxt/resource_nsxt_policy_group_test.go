@@ -32,7 +32,7 @@ func TestAccResourceNsxtPolicyGroup_basicImport(t *testing.T) {
 	})
 }
 
-func TestAccResourceNsxtPolicyGroup_singleIPAddressCriteria(t *testing.T) {
+func TestAccResourceNsxtPolicyGroup_AddressCriteria(t *testing.T) {
 	name := fmt.Sprintf("test-nsx-policy-group-ipaddrs")
 	testResourceName := "nsxt_policy_group.test"
 
@@ -44,7 +44,7 @@ func TestAccResourceNsxtPolicyGroup_singleIPAddressCriteria(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyGroupIPAddressCreateTemplate(name),
+				Config: testAccNsxtPolicyGroupAddressCreateTemplate(name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -52,9 +52,30 @@ func TestAccResourceNsxtPolicyGroup_singleIPAddressCriteria(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "domain", defaultDomain),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
-					resource.TestCheckNoResourceAttr(testResourceName, "conjunction"),
+					resource.TestCheckResourceAttr(testResourceName, "conjunction.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.0.ipaddress_expression.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.0.ipaddress_expression.0.ip_addresses.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.1.macaddress_expression.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.1.macaddress_expression.0.mac_addresses.#", "2"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyGroupAddressUpdateTemplate(name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "domain", defaultDomain),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "conjunction.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "criteria.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.0.ipaddress_expression.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.0.ipaddress_expression.0.ip_addresses.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.1.macaddress_expression.#", "0"),
 				),
 			},
 		},
@@ -525,7 +546,7 @@ resource "nsxt_policy_group" "test" {
 `, name)
 }
 
-func testAccNsxtPolicyGroupIPAddressCreateTemplate(name string) string {
+func testAccNsxtPolicyGroupAddressCreateTemplate(name string) string {
 	return fmt.Sprintf(`
 resource "nsxt_policy_group" "test" {
   display_name = "%s"
@@ -534,7 +555,17 @@ resource "nsxt_policy_group" "test" {
   criteria {
     ipaddress_expression {
 	  ip_addresses = ["111.1.1.1", "222.2.2.2"]
-	}
+    }
+  }
+
+  conjunction {
+	operator = "OR"
+  }
+
+  criteria {
+    macaddress_expression {
+        mac_addresses = ["a2:54:00:68:b0:83", "fa:10:3e:01:49:5e"]
+    }
   }
 
   tag {
@@ -545,6 +576,21 @@ resource "nsxt_policy_group" "test" {
   tag {
     scope = "scope2"
     tag   = "tag2"
+  }
+}
+`, name)
+}
+
+func testAccNsxtPolicyGroupAddressUpdateTemplate(name string) string {
+	return fmt.Sprintf(`
+resource "nsxt_policy_group" "test" {
+  display_name = "%s"
+  description  = "Acceptance Test"
+
+  criteria {
+    ipaddress_expression {
+	  ip_addresses = ["111.1.1.1"]
+    }
   }
 }
 `, name)
