@@ -13,7 +13,7 @@ func TestAccResourceNsxtPolicyGroup_basicImport(t *testing.T) {
 	name := fmt.Sprintf("test-nsx-policy-group-ipaddrs")
 	testResourceName := "nsxt_policy_group.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -36,7 +36,7 @@ func TestAccResourceNsxtPolicyGroup_AddressCriteria(t *testing.T) {
 	name := fmt.Sprintf("test-nsx-policy-group-ipaddrs")
 	testResourceName := "nsxt_policy_group.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -87,7 +87,7 @@ func TestAccResourceNsxtGlobalPolicyGroup_singleIPAddressCriteria(t *testing.T) 
 	updatedName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_policy_group.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyGlobalManager(t)
@@ -135,7 +135,7 @@ func TestAccResourceNsxtPolicyGroup_multipleIPAddressCriteria(t *testing.T) {
 	updatedName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_policy_group.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -178,7 +178,7 @@ func TestAccResourceNsxtPolicyGroup_pathCriteria(t *testing.T) {
 	name := fmt.Sprintf("test-nsx-policy-group-paths")
 	testResourceName := "nsxt_policy_group.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccNSXGlobalManagerSitePrecheck(t)
@@ -230,7 +230,7 @@ func TestAccResourceNsxtPolicyGroup_nestedCriteria(t *testing.T) {
 	updatedName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_policy_group.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -276,7 +276,7 @@ func TestAccResourceNsxtPolicyGroup_multipleCriteria(t *testing.T) {
 	updatedName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_policy_group.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -323,7 +323,7 @@ func TestAccResourceNsxtPolicyGroup_multipleNestedCriteria(t *testing.T) {
 	name := fmt.Sprintf("test-nsx-policy-group-multiple-nested")
 	testResourceName := "nsxt_policy_group.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -403,7 +403,7 @@ func TestAccResourceNsxtPolicyGroup_identityGroup(t *testing.T) {
 	testResourceName := "nsxt_policy_group.test"
 	updatedName := fmt.Sprintf("%s-update", name)
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
