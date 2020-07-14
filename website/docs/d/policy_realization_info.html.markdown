@@ -33,7 +33,7 @@ data "nsxt_policy_site" "site" {
   display_name = "Paris"
 }
 
-data "nsxt_policy_gm_realization_info" "info" {
+data "nsxt_policy_realization_info" "info" {
   path = data.nsxt_policy_tier1_gateway.tier1_gw.path
   entity_type = "RealizedLogicalRouter"
   site_path = data.nsxt_policy_site.site.path
