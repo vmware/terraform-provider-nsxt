@@ -154,7 +154,7 @@ func deleteNsxtPolicyNATRule(connector *client.RestConnector, gwID string, isT0 
 func resourceNsxtPolicyNATRuleDelete(d *schema.ResourceData, m interface{}) error {
 	id := d.Id()
 	if id == "" {
-		return fmt.Errorf("Error obtaining NAT Rule  ID")
+		return fmt.Errorf("Error obtaining NAT Rule ID")
 	}
 
 	gwPolicyPath := d.Get("gateway_path").(string)
@@ -162,7 +162,7 @@ func resourceNsxtPolicyNATRuleDelete(d *schema.ResourceData, m interface{}) erro
 
 	err := deleteNsxtPolicyNATRule(getPolicyConnector(m), gwID, isT0, id, isPolicyGlobalManager(m))
 	if err != nil {
-		return handleDeleteError("Static Route", id, err)
+		return handleDeleteError("NAT Rule", id, err)
 	}
 
 	return nil
