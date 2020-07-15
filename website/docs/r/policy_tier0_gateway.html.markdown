@@ -114,7 +114,7 @@ The following arguments are supported:
 * `internal_transit_subnets` - (Optional) Internal transit subnets in CIDR format. At most 1 CIDR.
 * `transit_subnets` - (Optional) Transit subnets in CIDR format.
 * `dhcp_config_path` - (Optional) Policy path to DHCP server or relay configuration to use for this gateway.
-* `bgp_config` - (Optional) The BGP configuration for the Tier-0 gateway. When enabled a valid `edge_cluster_path` must be set on the Tier-0 gateway.
+* `bgp_config` - (Optional) The BGP configuration for the Tier-0 gateway. When enabled a valid `edge_cluster_path` must be set on the Tier-0 gateway. This clause is not applicable for Global Manager - use `nsxt_policy_bgp_config` resource instead.
   * `tag` - (Optional) A list of scope + tag pairs to associate with this Tier-0 gateway's BGP configuration.
   * `ecmp` - (Optional) A boolean flag to enable/disable ECMP. Default is `true`.
   * `enabled` - (Optional) A boolean flag to enable/disable BGP. Default is `true`.

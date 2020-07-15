@@ -269,7 +269,7 @@ func initChildLocaleService(serviceStruct *model.LocaleServices, markForDelete b
 	return dataValue.(*data.StructValue), nil
 }
 
-func initGatewayLocaleServices(d *schema.ResourceData, connector *client.RestConnector) ([]*data.StructValue, error) {
+func initGatewayLocaleServices(d *schema.ResourceData) ([]*data.StructValue, error) {
 	var localeServices []*data.StructValue
 
 	oldServices, newServices := d.GetChange("locale_service")
@@ -314,7 +314,6 @@ func initGatewayLocaleServices(d *schema.ResourceData, connector *client.RestCon
 			// we need revision
 			serviceStruct.Revision = &revision
 		}
-
 		dataValue, err := initChildLocaleService(&serviceStruct, false)
 		if err != nil {
 			return localeServices, err
@@ -513,4 +512,12 @@ func getLocaleServiceRedistributionConfig(serviceStruct *model.LocaleServices) [
 	elem["rule"] = rules
 	redistributionConfigs = append(redistributionConfigs, elem)
 	return redistributionConfigs
+}
+
+func findTier0LocaleServiceForSite(connector *client.RestConnector, gwID string, sitePath string) (string, error) {
+	localeServices, err := listPolicyTier0GatewayLocaleServices(connector, gwID, true)
+	if err != nil {
+		return "", err
+	}
+	return getGlobalPolicyGatewayLocaleServiceIDWithSite(localeServices, sitePath, gwID)
 }
