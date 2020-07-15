@@ -11,7 +11,7 @@ func TestAccResourceNsxtPolicyVlanSegment_basicImport(t *testing.T) {
 	name := fmt.Sprintf("test-nsx-policy-vlan-segment")
 	testResourceName := "nsxt_policy_vlan_segment.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -35,7 +35,7 @@ func TestAccResourceNsxtPolicyVlanSegment_basicUpdate(t *testing.T) {
 	updatedName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_policy_vlan_segment.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -73,7 +73,7 @@ func TestAccResourceNsxtPolicyVlanSegment_updateAdvConfig(t *testing.T) {
 	updatedName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_policy_vlan_segment.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -117,7 +117,7 @@ func TestAccResourceNsxtPolicyVlanSegment_withDhcp(t *testing.T) {
 	dnsServersV4 := []string{"2.2.2.2", "3.3.3.3"}
 	dnsServersV6 := []string{"2000::2", "3000::3"}
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {

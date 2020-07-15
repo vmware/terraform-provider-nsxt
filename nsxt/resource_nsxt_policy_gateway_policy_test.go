@@ -24,7 +24,7 @@ func TestAccResourceNsxtPolicyGatewayPolicy_basic(t *testing.T) {
 	tag1 := "abc"
 	tag2 := "def"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -119,7 +119,7 @@ func TestAccResourceNsxtPolicyGatewayPolicy_withDependencies(t *testing.T) {
 	defaultDirection := "IN_OUT"
 	defaultProtocol := "IPV4_IPV6"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -195,7 +195,7 @@ func TestAccResourceNsxtPolicyGatewayPolicy_importBasic(t *testing.T) {
 	name := fmt.Sprintf("terraform-test-import")
 	testResourceName := "nsxt_policy_gateway_policy.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -218,7 +218,7 @@ func TestAccResourceNsxtPolicyGatewayPolicy_importNoTcpStrict(t *testing.T) {
 	name := fmt.Sprintf("terraform-test-import")
 	testResourceName := "nsxt_policy_gateway_policy.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -252,7 +252,7 @@ func TestAccResourceNsxtGlobalPolicyGatewayPolicy_withSite(t *testing.T) {
 	tag1 := "abc"
 	tag2 := "def"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyGlobalManager(t)
 			testAccEnvDefined(t, "NSXT_TEST_SITE_NAME")

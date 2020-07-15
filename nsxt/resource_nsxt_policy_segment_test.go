@@ -12,7 +12,7 @@ func TestAccResourceNsxtPolicySegment_basicImport(t *testing.T) {
 	testResourceName := "nsxt_policy_segment.test"
 	tzName := getOverlayTransportZoneName()
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -37,7 +37,7 @@ func TestAccResourceNsxtPolicySegment_basicUpdate(t *testing.T) {
 	testResourceName := "nsxt_policy_segment.test"
 	tzName := getOverlayTransportZoneName()
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -80,7 +80,7 @@ func TestAccResourceNsxtPolicySegment_connectivityPath(t *testing.T) {
 	testResourceName := "nsxt_policy_segment.test"
 	tzName := getOverlayTransportZoneName()
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -128,7 +128,7 @@ func TestAccResourceNsxtPolicySegment_updateAdvConfig(t *testing.T) {
 	testResourceName := "nsxt_policy_segment.test"
 	tzName := getOverlayTransportZoneName()
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -178,7 +178,7 @@ func TestAccResourceNsxtPolicySegment_withProfiles(t *testing.T) {
 	testResourceName := "nsxt_policy_segment.test"
 	tzName := getOverlayTransportZoneName()
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -248,7 +248,7 @@ func TestAccResourceNsxtPolicySegment_withDhcp(t *testing.T) {
 	dnsServersV6 := []string{"2000::2", "3000::3"}
 	tzName := getOverlayTransportZoneName()
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
