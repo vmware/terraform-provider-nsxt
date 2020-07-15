@@ -12,6 +12,7 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
 	gm_tier_0s "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s"
+	gm_locale_services "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s/locale_services"
 	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s"
@@ -110,7 +111,7 @@ func resourceNsxtPolicyTier0Gateway() *schema.Resource {
 			"ipv6_dad_profile_path":  getIPv6DadPathSchema(),
 			"edge_cluster_path":      getPolicyEdgeClusterPathSchema(),
 			"locale_service":         getPolicyLocaleServiceSchema(false),
-			"bgp_config":             getPolicyBGPConfigSchema(),
+			"bgp_config":             getPolicyTier0BGPConfigSchema(),
 			"vrf_config":             getPolicyVRFConfigSchema(),
 			"dhcp_config_path":       getPolicyPathSchema(false, false, "Policy path to DHCP server or relay configuration to use for this Tier0"),
 			"intersite_config":       getGatewayIntersiteConfigSchema(),
@@ -119,7 +120,9 @@ func resourceNsxtPolicyTier0Gateway() *schema.Resource {
 	}
 }
 
-func getPolicyBGPConfigSchema() *schema.Schema {
+func getPolicyTier0BGPConfigSchema() *schema.Schema {
+	schemaMap := getPolicyBGPConfigSchema()
+	delete(schemaMap, "locale_service_path")
 	return &schema.Schema{
 		// NOTE: setting bpg_config requires a edge_cluster_path
 		Type:        schema.TypeList,
@@ -128,88 +131,91 @@ func getPolicyBGPConfigSchema() *schema.Schema {
 		Computed:    true,
 		MaxItems:    1,
 		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{
-				"tag":      getTagsSchema(),
-				"revision": getRevisionSchema(),
-				"path":     getPathSchema(),
-				"ecmp": {
-					Type:        schema.TypeBool,
-					Description: "Flag to enable ECMP",
-					Optional:    true,
-					Default:     true,
-				},
-				"enabled": {
-					Type:        schema.TypeBool,
-					Description: "Flag to enable BGP configuration",
-					Optional:    true,
-					Default:     true,
-				},
-				"inter_sr_ibgp": {
-					Type:        schema.TypeBool,
-					Description: "Enable inter SR IBGP configuration",
-					Optional:    true,
-					Default:     true,
-				},
-				"local_as_num": {
-					Type: schema.TypeString,
-					Description: "	BGP AS number in ASPLAIN/ASDOT Format",
-					Optional:     true,
-					Default:      policyBGPLocalAsNumDefault, //NOTE: empty string disables
-					ValidateFunc: validate4ByteASNPlain,
-				},
-				"multipath_relax": {
-					Type:        schema.TypeBool,
-					Description: "Flag to enable BGP multipath relax option",
-					Optional:    true,
-					Default:     true,
-				},
-				"route_aggregation": {
-					Type:        schema.TypeList,
-					Description: "List of routes to be aggregated",
-					Optional:    true,
-					MaxItems:    1000,
-					Elem: &schema.Resource{
-						Schema: map[string]*schema.Schema{
-							"prefix": {
-								Type:         schema.TypeString,
-								Description:  "CIDR of aggregate address",
-								Optional:     true,
-								ValidateFunc: validateCidr(),
-							},
-							"summary_only": {
-								Type:        schema.TypeBool,
-								Description: "Send only summarized route",
-								Optional:    true,
-								Default:     true,
-							},
-						},
+			Schema: getPolicyBGPConfigSchema(),
+		},
+	}
+}
+func getPolicyBGPConfigSchema() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"tag":      getTagsSchema(),
+		"revision": getRevisionSchema(),
+		"path":     getPathSchema(),
+		"ecmp": {
+			Type:        schema.TypeBool,
+			Description: "Flag to enable ECMP",
+			Optional:    true,
+			Default:     true,
+		},
+		"enabled": {
+			Type:        schema.TypeBool,
+			Description: "Flag to enable BGP configuration",
+			Optional:    true,
+			Default:     true,
+		},
+		"inter_sr_ibgp": {
+			Type:        schema.TypeBool,
+			Description: "Enable inter SR IBGP configuration",
+			Optional:    true,
+			Default:     true,
+		},
+		"local_as_num": {
+			Type: schema.TypeString,
+			Description: "	BGP AS number in ASPLAIN/ASDOT Format",
+			Optional:     true,
+			Default:      policyBGPLocalAsNumDefault, //NOTE: empty string disables
+			ValidateFunc: validate4ByteASNPlain,
+		},
+		"multipath_relax": {
+			Type:        schema.TypeBool,
+			Description: "Flag to enable BGP multipath relax option",
+			Optional:    true,
+			Default:     true,
+		},
+		"route_aggregation": {
+			Type:        schema.TypeList,
+			Description: "List of routes to be aggregated",
+			Optional:    true,
+			MaxItems:    1000,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"prefix": {
+						Type:         schema.TypeString,
+						Description:  "CIDR of aggregate address",
+						Optional:     true,
+						ValidateFunc: validateCidr(),
+					},
+					"summary_only": {
+						Type:        schema.TypeBool,
+						Description: "Send only summarized route",
+						Optional:    true,
+						Default:     true,
 					},
 				},
-				"graceful_restart_mode": {
-					// BgpGracefulRestartConfig.mode
-					Type:         schema.TypeString,
-					Description:  "BGP Graceful Restart Configuration Mode",
-					ValidateFunc: validation.StringInSlice(nsxtPolicyTier0GatewayBgpGracefulRestartModes, false),
-					Optional:     true,
-					Default:      model.BgpGracefulRestartConfig_MODE_HELPER_ONLY,
-				},
-				"graceful_restart_timer": {
-					// BgpGracefulRestartConfig.timer.restart_timer
-					Type:         schema.TypeInt,
-					Description:  "BGP Graceful Restart Timer",
-					Optional:     true,
-					Default:      policyBGPGracefulRestartTimerDefault,
-					ValidateFunc: validation.IntBetween(1, 3600),
-				},
-				"graceful_restart_stale_route_timer": {
-					// BgpGracefulRestartConfig.timer.stale_route_timer
-					Type:         schema.TypeInt,
-					Description:  "BGP Stale Route Timer",
-					Optional:     true,
-					Default:      policyBGPGracefulRestartStaleRouteTimerDefault,
-					ValidateFunc: validation.IntBetween(1, 3600),
-				},
 			},
+		},
+		"graceful_restart_mode": {
+			// BgpGracefulRestartConfig.mode
+			Type:         schema.TypeString,
+			Description:  "BGP Graceful Restart Configuration Mode",
+			ValidateFunc: validation.StringInSlice(nsxtPolicyTier0GatewayBgpGracefulRestartModes, false),
+			Optional:     true,
+			Default:      model.BgpGracefulRestartConfig_MODE_HELPER_ONLY,
+		},
+		"graceful_restart_timer": {
+			// BgpGracefulRestartConfig.timer.restart_timer
+			Type:         schema.TypeInt,
+			Description:  "BGP Graceful Restart Timer",
+			Optional:     true,
+			Default:      policyBGPGracefulRestartTimerDefault,
+			ValidateFunc: validation.IntBetween(1, 3600),
+		},
+		"graceful_restart_stale_route_timer": {
+			// BgpGracefulRestartConfig.timer.stale_route_timer
+			Type:         schema.TypeInt,
+			Description:  "BGP Stale Route Timer",
+			Optional:     true,
+			Default:      policyBGPGracefulRestartStaleRouteTimerDefault,
+			ValidateFunc: validation.IntBetween(1, 3600),
 		},
 	}
 }
@@ -346,18 +352,7 @@ func getPolicyTier0GatewayLocaleServiceWithEdgeCluster(gwID string, connector *c
 	return nil, nil
 }
 
-func resourceNsxtPolicyTier0GatewayReadBGPConfig(d *schema.ResourceData, connector *client.RestConnector, localeService model.LocaleServices) error {
-	var bgpConfigs []map[string]interface{}
-	client := locale_services.NewDefaultBgpClient(connector)
-
-	t0Id := d.Id()
-	bgpConfig, err := client.Get(t0Id, *localeService.Id)
-	if err != nil {
-		if isNotFoundError(err) {
-			return d.Set("bgp_config", bgpConfigs)
-		}
-		return err
-	}
+func initPolicyTier0BGPConfigMap(bgpConfig *model.BgpRoutingConfig) map[string]interface{} {
 
 	cfgMap := make(map[string]interface{})
 	cfgMap["revision"] = int(*bgpConfig.Revision)
@@ -399,8 +394,24 @@ func resourceNsxtPolicyTier0GatewayReadBGPConfig(d *schema.ResourceData, connect
 	}
 	cfgMap["route_aggregation"] = aggregationList
 
-	bgpConfigs = append(bgpConfigs, cfgMap)
+	return cfgMap
+}
 
+func resourceNsxtPolicyTier0GatewayReadBGPConfig(d *schema.ResourceData, connector *client.RestConnector, localeService model.LocaleServices) error {
+	var bgpConfigs []map[string]interface{}
+	client := locale_services.NewDefaultBgpClient(connector)
+
+	t0Id := d.Id()
+	bgpConfig, err := client.Get(t0Id, *localeService.Id)
+	if err != nil {
+		if isNotFoundError(err) {
+			return d.Set("bgp_config", bgpConfigs)
+		}
+		return err
+	}
+
+	data := initPolicyTier0BGPConfigMap(&bgpConfig)
+	bgpConfigs = append(bgpConfigs, data)
 	return d.Set("bgp_config", bgpConfigs)
 }
 
@@ -671,6 +682,21 @@ func verifyPolicyTier0GatewayConfig(d *schema.ResourceData, isGlobalManager bool
 	return nil
 }
 
+func initPolicyTier0ChildBgpConfig(config *model.BgpRoutingConfig) (*data.StructValue, error) {
+	converter := bindings.NewTypeConverter()
+	converter.SetMode(bindings.REST)
+	childConfig := model.ChildBgpRoutingConfig{
+		ResourceType:     "ChildBgpRoutingConfig",
+		BgpRoutingConfig: config,
+	}
+	dataValue, errors := converter.ConvertToVapi(childConfig, model.ChildBgpRoutingConfigBindingType())
+	if errors != nil {
+		return nil, fmt.Errorf("Error converting child BGP Routing Configuration: %v", errors[0])
+	}
+
+	return dataValue.(*data.StructValue), nil
+}
+
 func policyTier0GatewayResourceToInfraStruct(d *schema.ResourceData, connector *client.RestConnector, isGlobalManager bool, id string) (model.Infra, error) {
 	var infraChildren, gwChildren, lsChildren []*data.StructValue
 	var infraStruct model.Infra
@@ -728,17 +754,13 @@ func policyTier0GatewayResourceToInfraStruct(d *schema.ResourceData, connector *
 
 	bgpConfig := d.Get("bgp_config").([]interface{})
 	if len(bgpConfig) > 0 && !isGlobalManager {
-		// BGP not supported for global manager yet
+		// For Global Manager BGP is defined under locale services
 		routingConfigStruct := resourceNsxtPolicyTier0GatewayBGPConfigSchemaToStruct(bgpConfig[0], vrfConfig != nil, id)
-		childConfig := model.ChildBgpRoutingConfig{
-			ResourceType:     "ChildBgpRoutingConfig",
-			BgpRoutingConfig: &routingConfigStruct,
+		structValue, err := initPolicyTier0ChildBgpConfig(&routingConfigStruct)
+		if err != nil {
+			return infraStruct, err
 		}
-		dataValue, errors := converter.ConvertToVapi(childConfig, model.ChildBgpRoutingConfigBindingType())
-		if errors != nil {
-			return infraStruct, fmt.Errorf("Error converting child BGP Routing Configuration: %v", errors[0])
-		}
-		lsChildren = append(lsChildren, dataValue.(*data.StructValue))
+		lsChildren = append(lsChildren, structValue)
 	}
 
 	edgeClusterPath := d.Get("edge_cluster_path").(string)
@@ -765,12 +787,14 @@ func policyTier0GatewayResourceToInfraStruct(d *schema.ResourceData, connector *
 		}
 	} else {
 		// Global Manager
-		localeServices, err := initGatewayLocaleServices(d, connector)
-		if err != nil {
-			return infraStruct, err
-		}
-		if len(localeServices) > 0 {
-			gwChildren = append(gwChildren, localeServices...)
+		if d.HasChange("locale_service") {
+			localeServices, err := initGatewayLocaleServices(d)
+			if err != nil {
+				return infraStruct, err
+			}
+			if len(localeServices) > 0 {
+				gwChildren = append(gwChildren, localeServices...)
+			}
 		}
 	}
 
@@ -897,6 +921,27 @@ func resourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{}) e
 				cfgMap["revision"] = service.Revision
 				redistributionConfigs := getLocaleServiceRedistributionConfig(&service)
 				cfgMap["redistribution_config"] = redistributionConfigs
+
+				var bgpConfigs []map[string]interface{}
+				bgpClient := gm_locale_services.NewDefaultBgpClient(connector)
+
+				bgpConfig, err := bgpClient.Get(id, *service.Id)
+				if err != nil {
+					if !isNotFoundError(err) {
+						return err
+					}
+				} else {
+
+					lmObj, convErr := convertModelBindingType(bgpConfig, gm_model.BgpRoutingConfigBindingType(), model.BgpRoutingConfigBindingType())
+					if convErr != nil {
+						return convErr
+					}
+					lmBgpConfig := lmObj.(model.BgpRoutingConfig)
+					data := initPolicyTier0BGPConfigMap(&lmBgpConfig)
+					bgpConfigs = append(bgpConfigs, data)
+				}
+				cfgMap["bgp_config"] = bgpConfigs
+
 				services = append(services, cfgMap)
 
 			} else {
