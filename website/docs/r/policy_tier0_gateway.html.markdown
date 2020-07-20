@@ -40,7 +40,7 @@ resource "nsxt_policy_tier0_gateway" "tier0_gw" {
 
   vrf_config {
     gateway_path       = data.nsxt_policy_tier0_gateway.vrf.path
-    route_distinuisher = "62000:10"
+    route_distinguisher = "62000:10"
     evpn_transit_vni   = 76001
     route_target {
       auto_mode      = false
