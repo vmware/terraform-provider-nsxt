@@ -553,3 +553,23 @@ func resourceNotSupportedError() error {
 func dataSourceNotSupportedError() error {
 	return fmt.Errorf("This data source is not supported with given provider settings")
 }
+
+func stringInList(target string, list []string) bool {
+	// util to check if target string is in list
+	for _, value := range list {
+		if target == value {
+			return true
+		}
+	}
+	return false
+}
+
+func containsElements(target []string, list []string) bool {
+	// util to check if all strings in target []string is in list. NOT ordered
+	for _, value := range target {
+		if !stringInList(value, list) {
+			return false
+		}
+	}
+	return true
+}

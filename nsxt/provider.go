@@ -280,6 +280,7 @@ func Provider() terraform.ResourceProvider {
 			"nsxt_policy_bgp_neighbor":                     resourceNsxtPolicyBgpNeighbor(),
 			"nsxt_policy_dhcp_relay":                       resourceNsxtPolicyDhcpRelayConfig(),
 			"nsxt_policy_dhcp_server":                      resourceNsxtPolicyDhcpServer(),
+			"nsxt_policy_context_profile":                  resourceNsxtPolicyContextProfile(),
 		},
 
 		ConfigureFunc: providerConfigure,
