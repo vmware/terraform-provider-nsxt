@@ -169,6 +169,17 @@ func resourceNsxtPolicyContextProfileRead(d *schema.ResourceData, m interface{})
 	d.Set("path", obj.Path)
 	d.Set("revision", obj.Revision)
 	d.Set("attribute", fillAttributesInSchema(obj.Attributes))
+	myset := d.Get("attribute").(*schema.Set)
+	print("attributestrings!!!!\n")
+	print(myset.GoString())
+	print("\n")
+	for _, attr := range myset.List() {
+		attributeMap := attr.(map[string]interface{})
+		subAttributes := attributeMap["sub_attribute"].(*schema.Set)
+		print("subattributestrings!!!!\n")
+		print(subAttributes.GoString())
+		print("\n")
+	}
 	return nil
 }
 
@@ -251,11 +262,6 @@ func getContextProfilePolicyAttributesSchema() *schema.Schema {
 		Required: true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				"description": {
-					Type:        schema.TypeString,
-					Description: "Description for attribute value",
-					Computed:    true,
-				},
 				"data_type": {
 					Type:         schema.TypeString,
 					Description:  "Data type of attribute",
@@ -425,7 +431,6 @@ func fillAttributesInSchema(policyAttributes []model.PolicyAttributes) []map[str
 	attributes := make([]map[string]interface{}, 0, len(policyAttributes))
 	for _, policyAttribute := range policyAttributes {
 		elem := make(map[string]interface{})
-		elem["description"] = policyAttribute.Description
 		elem["data_type"] = policyAttribute.Datatype
 		elem["key"] = policyAttribute.Key
 		elem["value"] = policyAttribute.Value
