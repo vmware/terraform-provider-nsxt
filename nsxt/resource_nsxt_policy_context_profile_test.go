@@ -96,7 +96,7 @@ func TestAccResourceNsxtPolicyContextProfile_multipleAttributes(t *testing.T) {
 	updatedName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_policy_context_profile.test"
 	attributes := testAccNsxtPolicyContextProfileAttributeDomainNameTemplate()
-	updatedAttributes := testAccNsxtPolicyContextProfileAttributeURLCategoryTemplate() + testAccNsxtPolicyContextProfileAttributeAppIDTemplate()
+	updatedAttributes := testAccNsxtPolicyContextProfileAttributeDomainNameTemplate() + testAccNsxtPolicyContextProfileAttributeAppIDTemplate()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -134,6 +134,7 @@ func TestAccResourceNsxtPolicyContextProfile_multipleAttributes(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "attribute.#", "2"),
+
 					resource.TestCheckResourceAttr(testResourceName, "attribute.3133243585.data_type", "STRING"),
 					resource.TestCheckResourceAttr(testResourceName, "attribute.3133243585.key", "APP_ID"),
 					resource.TestCheckResourceAttrSet(testResourceName, "attribute.3133243585.is_alg_type"),
@@ -141,11 +142,12 @@ func TestAccResourceNsxtPolicyContextProfile_multipleAttributes(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "attribute.3133243585.value.2076247700", "SSL"),
 					resource.TestCheckResourceAttr(testResourceName, "attribute.3133243585.value.2328579708", "HTTP"),
 					resource.TestCheckResourceAttr(testResourceName, "attribute.3133243585.value.531481488", "SSH"),
-					resource.TestCheckResourceAttr(testResourceName, "attribute.951130521.data_type", "STRING"),
-					resource.TestCheckResourceAttr(testResourceName, "attribute.951130521.key", "URL_CATEGORY"),
-					resource.TestCheckResourceAttrSet(testResourceName, "attribute.951130521.is_alg_type"),
-					resource.TestCheckResourceAttr(testResourceName, "attribute.951130521.value.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "attribute.951130521.value.3317229948", "Abortion"),
+
+					resource.TestCheckResourceAttr(testResourceName, "attribute.885794191.data_type", "STRING"),
+					resource.TestCheckResourceAttr(testResourceName, "attribute.885794191.key", "DOMAIN_NAME"),
+					resource.TestCheckResourceAttrSet(testResourceName, "attribute.885794191.is_alg_type"),
+					resource.TestCheckResourceAttr(testResourceName, "attribute.885794191.value.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "attribute.885794191.value.608540107", "*-myfiles.sharepoint.com"),
 				),
 			},
 		},
@@ -157,7 +159,7 @@ func TestAccResourceNsxtPolicyContextProfile_subAttributes(t *testing.T) {
 	updatedName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_policy_context_profile.test"
 	attributes := testAccNsxtPolicyContextProfileAttributeAppIDSubAttributesTemplate()
-	updatedAttributes := testAccNsxtPolicyContextProfileAttributeURLCategoryTemplate() + testAccNsxtPolicyContextProfileAttributeAppIDSubAttributesUpdatedTemplate()
+	updatedAttributes := testAccNsxtPolicyContextProfileAttributeAppIDSubAttributesUpdatedTemplate()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -202,7 +204,7 @@ func TestAccResourceNsxtPolicyContextProfile_subAttributes(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "attribute.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "attribute.#", "1"),
 
 					resource.TestCheckResourceAttr(testResourceName, "attribute.2585605962.data_type", "STRING"),
 					resource.TestCheckResourceAttr(testResourceName, "attribute.2585605962.key", "APP_ID"),
@@ -215,12 +217,6 @@ func TestAccResourceNsxtPolicyContextProfile_subAttributes(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "attribute.2585605962.sub_attribute.2040405228.value.3787226665", "CIFS_SMB_V2"),
 					resource.TestCheckResourceAttr(testResourceName, "attribute.2585605962.value.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "attribute.2585605962.value.1810355442", "CIFS"),
-
-					resource.TestCheckResourceAttr(testResourceName, "attribute.951130521.data_type", "STRING"),
-					resource.TestCheckResourceAttr(testResourceName, "attribute.951130521.key", "URL_CATEGORY"),
-					resource.TestCheckResourceAttrSet(testResourceName, "attribute.951130521.is_alg_type"),
-					resource.TestCheckResourceAttr(testResourceName, "attribute.951130521.value.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "attribute.951130521.value.3317229948", "Abortion"),
 				),
 			},
 		},

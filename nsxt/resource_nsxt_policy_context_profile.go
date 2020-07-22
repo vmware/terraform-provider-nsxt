@@ -169,17 +169,6 @@ func resourceNsxtPolicyContextProfileRead(d *schema.ResourceData, m interface{})
 	d.Set("path", obj.Path)
 	d.Set("revision", obj.Revision)
 	d.Set("attribute", fillAttributesInSchema(obj.Attributes))
-	myset := d.Get("attribute").(*schema.Set)
-	print("attributestrings!!!!\n")
-	print(myset.GoString())
-	print("\n")
-	for _, attr := range myset.List() {
-		attributeMap := attr.(map[string]interface{})
-		subAttributes := attributeMap["sub_attribute"].(*schema.Set)
-		print("subattributestrings!!!!\n")
-		print(subAttributes.GoString())
-		print("\n")
-	}
 	return nil
 }
 
