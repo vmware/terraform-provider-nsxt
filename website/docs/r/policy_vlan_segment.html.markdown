@@ -65,7 +65,7 @@ The following arguments are supported:
 * `transport_zone_path` - (Required) Policy path to the VLAN backed transport zone.
 * `vlan_ids` - (Optional) List of VLAN IDs or VLAN ranges.
 * `dhcp_config_path` - (Optional) Policy path to DHCP server or relay configuration to use for subnets configured on this segment. This attribute is supported with NSX 3.0.0 onwards.
-* `subnet` - (Required) Subnet configuration block.
+* `subnet` - (Optional) Subnet configuration block.
   * `cidr` - (Required) Gateway IP address CIDR.
   * `dhcp_ranges` - (Optional) List of DHCP address ranges for dynamic IP allocation.
   * `dhcp_v4_config` - (Optional) DHCPv4 config for IPv4 subnet. This attribute is supported with NSX 3.0.0 onwards.
