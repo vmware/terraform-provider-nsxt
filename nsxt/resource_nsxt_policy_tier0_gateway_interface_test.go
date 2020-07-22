@@ -502,7 +502,7 @@ func testAccNsxtPolicyGatewayGMFabricInterfaceDeps() string {
 	return fmt.Sprintf(`
 data "nsxt_policy_edge_cluster" "EC" {
   site_path = data.nsxt_policy_site.test.path
-}`) + testAccNSXGlobalPolicyTransportZoneReadTemplate(true)
+}`) + testAccNSXGlobalPolicyTransportZoneReadTemplate(true, true)
 }
 
 func testAccNsxtPolicyGatewayFabricInterfaceDeps() string {

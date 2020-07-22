@@ -224,7 +224,7 @@ func testAccNsxtPolicyVlanSegmentCheckDestroy(state *terraform.State, displayNam
 }
 
 func testAccNsxtPolicyVlanSegmentDeps() string {
-	return testAccNSXPolicyTransportZoneReadTemplate(getVlanTransportZoneName(), true)
+	return testAccNSXPolicyTransportZoneReadTemplate(getVlanTransportZoneName(), true, true)
 }
 
 func testAccNsxtPolicyVlanSegmentImportTemplate(name string) string {

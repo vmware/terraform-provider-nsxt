@@ -353,7 +353,7 @@ func testAccNsxtPolicySegmentCheckDestroy(state *terraform.State, displayName st
 }
 
 func testAccNsxtPolicySegmentDeps(tzName string) string {
-	return testAccNSXPolicyTransportZoneReadTemplate(tzName, false) + fmt.Sprintf(`
+	return testAccNSXPolicyTransportZoneReadTemplate(tzName, false, true) + fmt.Sprintf(`
 
 resource "nsxt_policy_tier1_gateway" "tier1ForSegments" {
   display_name              = "t1gw"
@@ -473,7 +473,7 @@ resource "nsxt_policy_segment" "test" {
 }
 
 func testAccNsxtPolicySegmentWithProfileDeps(tzName string) string {
-	return testAccNSXPolicyTransportZoneReadTemplate(tzName, false) + fmt.Sprintf(`
+	return testAccNSXPolicyTransportZoneReadTemplate(tzName, false, true) + fmt.Sprintf(`
 data "nsxt_policy_qos_profile" "test" {
     display_name = "%s"
 }
