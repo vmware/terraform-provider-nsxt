@@ -204,6 +204,38 @@ func TestAccResourceNsxtPolicyBgpNeighbor_subConfigSingleRoute(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyBgpNeighbor_subConfigPrefixList(t *testing.T) {
+	testResourceName := "nsxt_policy_bgp_neighbor.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyBgpNeighborCheckDestroy(state, "tfbgp")
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyBgpNeighborSubConfigCreatePrefixList(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyBgpNeighborExists(testResourceName),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "bfd_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "bfd_config.0.enabled", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "bfd_config.0.interval", "2000"),
+					resource.TestCheckResourceAttr(testResourceName, "bfd_config.0.multiple", "3"),
+					resource.TestCheckResourceAttr(testResourceName, "route_filtering.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "route_filtering.0.address_family", "IPV4"),
+					resource.TestCheckResourceAttrSet(testResourceName, "route_filtering.0.in_route_filter"),
+					resource.TestCheckResourceAttrSet(testResourceName, "route_filtering.0.out_route_filter"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtPolicyBgpNeighbor_importBasic(t *testing.T) {
 	name := "terra-test-import"
 	testResourceName := "nsxt_policy_bgp_neighbor.test"
@@ -548,6 +580,66 @@ resource "nsxt_policy_bgp_neighbor" "test" {
     address_family = "IPV4"
   }
 
+}
+
+data "nsxt_policy_realization_info" "realization_info" {
+  path = nsxt_policy_bgp_neighbor.test.path
+}`, getEdgeClusterName())
+}
+
+func testAccNsxtPolicyBgpNeighborSubConfigCreatePrefixList() string {
+	return fmt.Sprintf(`
+data "nsxt_policy_edge_cluster" "EC" {
+  display_name = "%s"
+}
+
+resource "nsxt_policy_tier0_gateway" "test" {
+  display_name      = "terraformt0gw"
+  description       = "Acceptance Test"
+  edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
+
+  bgp_config {
+    local_as_num    = "60000"
+    multipath_relax = true
+    route_aggregation {
+      prefix = "12.12.12.0/24"
+    }
+  }
+}
+
+data "nsxt_policy_realization_info" "bgp_realization_info" {
+  path = nsxt_policy_tier0_gateway.test.bgp_config.0.path
+}
+
+resource "nsxt_policy_gateway_prefix_list" "test" {
+  display_name = "prefix_list"
+  gateway_path = "${nsxt_policy_tier0_gateway.test.path}"
+
+  prefix {
+  	action  = "DENY"
+  	ge      = "20"
+  	le      = "23"
+  	network = "4.4.0.0/20"
+  }
+}
+
+resource "nsxt_policy_bgp_neighbor" "test" {
+  bgp_path         = nsxt_policy_tier0_gateway.test.bgp_config.0.path
+  display_name     = "tfbgp"
+  neighbor_address = "12.12.12.12"
+  remote_as_num    = "60000"
+
+  bfd_config {
+    enabled  = false
+    interval = 2000
+    multiple = 3
+  }
+
+  route_filtering {
+    address_family  = "IPV4"
+    in_route_filter = nsxt_policy_gateway_prefix_list.test.path
+    out_route_filter = nsxt_policy_gateway_prefix_list.test.path
+  }
 }
 
 data "nsxt_policy_realization_info" "realization_info" {
