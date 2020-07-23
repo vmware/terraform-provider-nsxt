@@ -15,24 +15,21 @@ This resource provides a method for the management of a Context Profile.
 resource "nsxt_policy_context_profile" "test" {
     display_name      = "test"
     description       = "Terraform provisioned ContextProfile"
-    attributes {
-        data_type = "STRING"
-        key = "DOMAIN_NAME"
-        value = ["*-myfiles.sharepoint.com"]
+    attribute {
+        data_type   = "STRING"
+        description = "test-domain-name-attribute"
+        key         = "DOMAIN_NAME"
+        value       = ["*-myfiles.sharepoint.com"]
     }
-    attributes {
-        data_type = "STRING"
-        key = "URL_CATEGORY"
-        value = ["Abortion"]
-    }
-    attributes {
-        data_type = "STRING"
-        key = "APP_ID"
-        value = ["SSL"]
-        sub_attributes {
+    attribute {
+        data_type   = "STRING"
+        description = "test-app-id-attribute"
+        key         = "APP_ID"
+        value       = ["SSL"]
+        sub_attribute {
             data_type = "STRING"
-            key = "TLS_VERSION"
-            value = ["SSL_V3"]
+            key       = "TLS_VERSION"
+            value     = ["SSL_V3"]
         }
     }
 }
@@ -49,6 +46,7 @@ The following arguments are supported:
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `attribute` - (Required) A repeatable block to specify attributes for the context profile. At least one block is required.
   * `datatype` - (Required) Datatype for `attribute`, must be `STRING`.
+  * `description` - (Optional) Description of the attribute.
   * `key` - (Required) A string value indicating key for the `attribute`. Must be one of `APP_ID`, `DOMAIN_NAME`, or `URL_CATEGORY`.
   * `value` - (Required) A list of string indicating values for the `attribute`. Must be a subset of the preset list of valid values for the `key` on NSX.
   * `sub_attribute` - (Optional) A repeatable block to specify sub attributes for the attribute. This configuration is only valid when `value` has only one element, and `sub_attribute` is supported for that value on NSX.
@@ -64,7 +62,6 @@ In addition to arguments listed above, the following attributes are exported:
 * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
 * `path` - The NSX path of the policy resource.
 * `attribute`:
-  * `description` - Description of the attribute value.
   * `is_alg_type` - Describes whether the APP_ID value is ALG type or not.
 
 ## Importing

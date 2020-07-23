@@ -59,6 +59,77 @@ func resourceNsxtPolicyContextProfile() *schema.Resource {
 	}
 }
 
+func getContextProfilePolicyAttributesSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:     schema.TypeSet,
+		Required: true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"data_type": {
+					Type:         schema.TypeString,
+					Description:  "Data type of attribute",
+					Required:     true,
+					ValidateFunc: validation.StringInSlice(attributeDataTypes, false),
+				},
+				"description": getDescriptionSchema(),
+				"is_alg_type": {
+					Type:        schema.TypeBool,
+					Description: "Whether the APP_ID value is ALG type or not",
+					Computed:    true,
+				},
+				"key": {
+					Type:         schema.TypeString,
+					Description:  "Key for attribute",
+					Required:     true,
+					ValidateFunc: validation.StringInSlice(attributeKeys, false),
+				},
+				"value": {
+					Type:        schema.TypeSet,
+					Description: "Values for attribute key",
+					Required:    true,
+					MinItems:    1,
+					Elem: &schema.Schema{
+						Type: schema.TypeString,
+					},
+				},
+				"sub_attribute": getPolicyAttributeSubAttributesSchema(),
+			},
+		},
+	}
+}
+
+func getPolicyAttributeSubAttributesSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:     schema.TypeSet,
+		Optional: true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"data_type": {
+					Type:         schema.TypeString,
+					Description:  "Data type of sub attribute",
+					Required:     true,
+					ValidateFunc: validation.StringInSlice(subAttributeDataTypes, false),
+				},
+				"key": {
+					Type:         schema.TypeString,
+					Description:  "Key for attribute",
+					Required:     true,
+					ValidateFunc: validation.StringInSlice(subAttributeKeys, false),
+				},
+				"value": {
+					Type:        schema.TypeSet,
+					Description: "Values for attribute key",
+					Required:    true,
+					MinItems:    1,
+					Elem: &schema.Schema{
+						Type: schema.TypeString,
+					},
+				},
+			},
+		},
+	}
+}
+
 func resourceNsxtPolicyContextProfileExists(id string, connector *client.RestConnector, isGlobalManager bool) bool {
 	var err error
 	if isGlobalManager {
@@ -245,44 +316,6 @@ func resourceNsxtPolicyContextProfileDelete(d *schema.ResourceData, m interface{
 	return nil
 }
 
-func getContextProfilePolicyAttributesSchema() *schema.Schema {
-	return &schema.Schema{
-		Type:     schema.TypeSet,
-		Required: true,
-		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{
-				"data_type": {
-					Type:         schema.TypeString,
-					Description:  "Data type of attribute",
-					Required:     true,
-					ValidateFunc: validation.StringInSlice(attributeDataTypes, false),
-				},
-				"is_alg_type": {
-					Type:        schema.TypeBool,
-					Description: "Whether the APP_ID value is ALG type or not",
-					Computed:    true,
-				},
-				"key": {
-					Type:         schema.TypeString,
-					Description:  "Key for attribute",
-					Required:     true,
-					ValidateFunc: validation.StringInSlice(attributeKeys, false),
-				},
-				"value": {
-					Type:        schema.TypeSet,
-					Description: "Values for attribute key",
-					Required:    true,
-					MinItems:    1,
-					Elem: &schema.Schema{
-						Type: schema.TypeString,
-					},
-				},
-				"sub_attribute": getPolicyAttributeSubAttributesSchema(),
-			},
-		},
-	}
-}
-
 func checkAttributesValid(attributes []interface{}, m interface{}) error {
 
 	var attrClient interface{}
@@ -381,6 +414,7 @@ func constructAttributesModelList(rawAttributes []interface{}) ([]model.PolicyAt
 	for _, rawAttribute := range rawAttributes {
 		attributeMap := rawAttribute.(map[string]interface{})
 		dataType := attributeMap["data_type"].(string)
+		description := attributeMap["description"].(string)
 		key := attributeMap["key"].(string)
 		values := interface2StringList(attributeMap["value"].(*schema.Set).List())
 		subAttributes := attributeMap["sub_attribute"].(*schema.Set).List()
@@ -390,6 +424,7 @@ func constructAttributesModelList(rawAttributes []interface{}) ([]model.PolicyAt
 		}
 		attributeStruct := model.PolicyAttributes{
 			Datatype:      &dataType,
+			Description:   &description,
 			Key:           &key,
 			Value:         values,
 			SubAttributes: subAttributesList,
@@ -421,6 +456,7 @@ func fillAttributesInSchema(policyAttributes []model.PolicyAttributes) []map[str
 	for _, policyAttribute := range policyAttributes {
 		elem := make(map[string]interface{})
 		elem["data_type"] = policyAttribute.Datatype
+		elem["description"] = policyAttribute.Description
 		elem["key"] = policyAttribute.Key
 		elem["value"] = policyAttribute.Value
 		elem["is_alg_type"] = policyAttribute.IsALGType
@@ -440,36 +476,4 @@ func fillSubAttributesInSchema(policySubAttributes []model.PolicySubAttributes) 
 		subAttributes = append(subAttributes, elem)
 	}
 	return subAttributes
-}
-
-func getPolicyAttributeSubAttributesSchema() *schema.Schema {
-	return &schema.Schema{
-		Type:     schema.TypeSet,
-		Optional: true,
-		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{
-				"data_type": {
-					Type:         schema.TypeString,
-					Description:  "Data type of sub attribute",
-					Required:     true,
-					ValidateFunc: validation.StringInSlice(subAttributeDataTypes, false),
-				},
-				"key": {
-					Type:         schema.TypeString,
-					Description:  "Key for attribute",
-					Required:     true,
-					ValidateFunc: validation.StringInSlice(subAttributeKeys, false),
-				},
-				"value": {
-					Type:        schema.TypeSet,
-					Description: "Values for attribute key",
-					Required:    true,
-					MinItems:    1,
-					Elem: &schema.Schema{
-						Type: schema.TypeString,
-					},
-				},
-			},
-		},
-	}
 }
