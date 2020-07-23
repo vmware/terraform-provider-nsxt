@@ -278,6 +278,7 @@ func Provider() terraform.ResourceProvider {
 			"nsxt_policy_lb_virtual_server":                resourceNsxtPolicyLBVirtualServer(),
 			"nsxt_policy_ip_address_allocation":            resourceNsxtPolicyIPAddressAllocation(),
 			"nsxt_policy_bgp_neighbor":                     resourceNsxtPolicyBgpNeighbor(),
+			"nsxt_policy_bgp_config":                       resourceNsxtPolicyBgpConfig(),
 			"nsxt_policy_dhcp_relay":                       resourceNsxtPolicyDhcpRelayConfig(),
 			"nsxt_policy_dhcp_server":                      resourceNsxtPolicyDhcpServer(),
 		},
