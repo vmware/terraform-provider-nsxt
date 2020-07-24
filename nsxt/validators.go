@@ -466,3 +466,31 @@ func validateNsxtProviderHostFormat() schema.SchemaValidateFunc {
 		return
 	}
 }
+
+func validateASPlainOrDot(i interface{}, k string) (s []string, es []error) {
+	v, ok := i.(string)
+	if !ok {
+		es = append(es, fmt.Errorf("String is expected, got %s", v))
+		return
+	}
+
+	tokens := strings.Split(v, ".")
+	if len(tokens) > 2 {
+		es = append(es, fmt.Errorf("ASPlain/ASDot format is expected, got %s", v))
+		return
+	}
+	intSize := 32
+	if len(tokens) == 2 {
+		// Dot notation
+		intSize = 16
+	}
+	for _, token := range tokens {
+		_, err := strconv.ParseUint(token, 10, intSize)
+		if err != nil {
+			es = append(es, fmt.Errorf("%dbit number is expected, got %s", intSize, token))
+			return
+		}
+	}
+
+	return
+}

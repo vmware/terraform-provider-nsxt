@@ -57,7 +57,7 @@ The following arguments are supported:
 * `maximum_hop_limit` - (Optional) Maximum number of hops allowed to reach BGP neighbor. Defaults to `1`.
 * `neighbor_address` - (Required) Neighbor IP Address.
 * `password` - (Optional) Password for BGP neighbor authentication. Set to the empty string to clear out the password.
-* `remote_as_num` - (Required) 4 Byte ASN of the neighbor in ASPLAIN Format.
+* `remote_as_num` - (Required) ASN of the neighbor in ASPLAIN/ASDOT Format.
 * `source_addresses` - (Optional) A list of up to 8 source IP Addresses for BGP peering. `ip_addresses` field of an existing `nsxt_policy_tier0_gateway_interface` can be used here.
 * `bfd_config` - (Optional) The BFD configuration.
   * `enabled` - (Optional) A boolean flag to enable/disable BFD. Defaults to `false`.
