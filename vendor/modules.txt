@@ -297,8 +297,11 @@ github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/domain
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/realized_state
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/segments
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s
+github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s/locale_services
+github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s/locale_services/bgp
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s/nat
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_1s
+github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_1s/locale_services
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_1s/nat
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/search

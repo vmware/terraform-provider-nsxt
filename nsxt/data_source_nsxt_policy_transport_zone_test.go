@@ -21,7 +21,7 @@ func TestAccDataSourceNsxtPolicyTransportZone_basic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXPolicyTransportZoneReadTemplate(transportZoneName, true),
+				Config: testAccNSXPolicyTransportZoneReadTemplate(transportZoneName, true, true),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(testResourceName, "display_name"),
 					resource.TestCheckResourceAttrSet(testResourceName, "id"),
@@ -59,9 +59,9 @@ func TestAccDataSourceNsxtPolicyTransportZone_withTransportType(t *testing.T) {
 	})
 }
 
-func testAccNSXPolicyTransportZoneReadTemplate(transportZoneName string, isVlan bool) string {
+func testAccNSXPolicyTransportZoneReadTemplate(transportZoneName string, isVlan bool, addSite bool) string {
 	if testAccIsGlobalManager() {
-		return testAccNSXGlobalPolicyTransportZoneReadTemplate(isVlan)
+		return testAccNSXGlobalPolicyTransportZoneReadTemplate(isVlan, addSite)
 	}
 	return fmt.Sprintf(`
 data "nsxt_policy_transport_zone" "test" {
@@ -80,21 +80,24 @@ data "nsxt_policy_transport_zone" "test" {
 }`, transportZoneName)
 }
 
-func testAccNSXGlobalPolicyTransportZoneReadTemplate(isVlan bool) string {
+func testAccNSXGlobalPolicyTransportZoneReadTemplate(isVlan bool, addSite bool) string {
 	transportType := "OVERLAY_STANDARD"
 	if isVlan {
 		transportType = "VLAN_BACKED"
 	}
-	return fmt.Sprintf(`
+	site := ""
+	if addSite {
+		site = fmt.Sprintf(`
 data "nsxt_policy_site" "test" {
   display_name = "%s"
-}
-
+}`, getTestSiteName())
+	}
+	return site + fmt.Sprintf(`
 data "nsxt_policy_transport_zone" "test" {
   transport_type = "%s"
   site_path      = data.nsxt_policy_site.test.path
   is_default     = true
-}`, getTestSiteName(), transportType)
+}`, transportType)
 }
 
 func testAccNSXGlobalPolicyTransportZoneWithTransportTypeTemplate(transportZoneName string) string {
