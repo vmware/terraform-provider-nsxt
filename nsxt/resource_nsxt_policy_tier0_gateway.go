@@ -156,11 +156,11 @@ func getPolicyBGPConfigSchema() map[string]*schema.Schema {
 			Default:     true,
 		},
 		"local_as_num": {
-			Type: schema.TypeString,
-			Description: "	BGP AS number in ASPLAIN/ASDOT Format",
+			Type:         schema.TypeString,
+			Description:  "BGP AS number in ASPLAIN/ASDOT Format",
 			Optional:     true,
 			Default:      policyBGPLocalAsNumDefault, //NOTE: empty string disables
-			ValidateFunc: validate4ByteASNPlain,
+			ValidateFunc: validateASPlainOrDot,
 		},
 		"multipath_relax": {
 			Type:        schema.TypeBool,

@@ -34,7 +34,7 @@ var accTestPolicyBgpNeighborConfigUpdateAttributes = map[string]string{
 	"maximum_hop_limit":     "1",
 	"neighbor_address":      "12.12.12.13",
 	"password":              "test-update",
-	"remote_as_num":         "12000013",
+	"remote_as_num":         "12.013",
 }
 
 func TestAccResourceNsxtPolicyBgpNeighbor_basic(t *testing.T) {

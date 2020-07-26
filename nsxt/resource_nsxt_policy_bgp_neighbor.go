@@ -123,8 +123,8 @@ func resourceNsxtPolicyBgpNeighbor() *schema.Resource {
 			"remote_as_num": {
 				Type:         schema.TypeString,
 				Required:     true,
-				Description:  "4 Byte ASN of the neighbor in ASPLAIN Format",
-				ValidateFunc: validate4ByteASNPlain,
+				Description:  "ASN of the neighbor in ASPLAIN or ASDOT Format",
+				ValidateFunc: validateASPlainOrDot,
 			},
 			"source_addresses": {
 				Type:        schema.TypeList,

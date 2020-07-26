@@ -12,7 +12,7 @@ import (
 var accTestPolicyBgpConfigCreateAttributes = map[string]string{
 	"enabled":                            "false",
 	"inter_sr_ibgp":                      "false",
-	"local_as_num":                       "12000012",
+	"local_as_num":                       "1200.12",
 	"multipath_relax":                    "true",
 	"prefix":                             "20.0.1.0/24",
 	"summary_only":                       "true",
@@ -24,7 +24,7 @@ var accTestPolicyBgpConfigCreateAttributes = map[string]string{
 var accTestPolicyBgpConfigUpdateAttributes = map[string]string{
 	"enabled":                            "true",
 	"inter_sr_ibgp":                      "true",
-	"local_as_num":                       "12000013",
+	"local_as_num":                       "1200.13",
 	"multipath_relax":                    "false",
 	"prefix":                             "20.0.2.0/24",
 	"summary_only":                       "false",
