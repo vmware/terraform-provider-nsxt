@@ -19,7 +19,7 @@ func TestAccResourceNsxtLogicalRouterCentralizedServicePort_basic(t *testing.T) 
 	edgeClusterName := getEdgeClusterName()
 	routerObj := "nsxt_logical_tier1_router.rtr1.id"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {

@@ -18,7 +18,7 @@ func TestAccResourceNsxtLogicalTier1Router_basic(t *testing.T) {
 	failoverMode := "PREEMPTIVE"
 	edgeClusterName := getEdgeClusterName()
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -67,7 +67,7 @@ func TestAccResourceNsxtLogicalTier1Router_importBasic(t *testing.T) {
 	failoverMode := "PREEMPTIVE"
 	edgeClusterName := getEdgeClusterName()
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {

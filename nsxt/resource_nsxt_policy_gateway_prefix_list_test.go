@@ -23,7 +23,7 @@ func TestAccResourceNsxtPolicyGatewayPrefixList_basic(t *testing.T) {
 	le := "23"
 	network := "4.4.0.0/20"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -81,7 +81,7 @@ func TestAccResourceNsxtPolicyGatewayPrefixList_import(t *testing.T) {
 	le := "0"
 	network := "4.4.0.0/24"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {

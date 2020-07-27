@@ -18,7 +18,7 @@ func TestAccResourceNsxtNatRule_snat(t *testing.T) {
 	updateRuleName := fmt.Sprintf("%s-update", ruleName)
 	edgeClusterName := getEdgeClusterName()
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -69,7 +69,7 @@ func TestAccResourceNsxtNatRule_snatImport(t *testing.T) {
 	ruleName := fmt.Sprintf("test-nsx-snat-rule")
 	edgeClusterName := getEdgeClusterName()
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -94,7 +94,7 @@ func TestAccResourceNsxtNatRule_dnat(t *testing.T) {
 	updateRuleName := fmt.Sprintf("%s-update", ruleName)
 	edgeClusterName := getEdgeClusterName()
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -141,7 +141,7 @@ func TestAccResourceNsxtNatRule_dnatImport(t *testing.T) {
 	ruleName := fmt.Sprintf("test-nsx-dnat-rule")
 	edgeClusterName := getEdgeClusterName()
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -165,7 +165,7 @@ func TestAccResourceNsxtNatRule_noNnat(t *testing.T) {
 	ruleName := fmt.Sprintf("test-nsx-nonat-rule")
 	edgeClusterName := getEdgeClusterName()
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersionLessThan(t, "3.0.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
