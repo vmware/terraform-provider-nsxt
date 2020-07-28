@@ -38,6 +38,33 @@ func newUUID() string {
 	return uuid.String()
 }
 
+func getPolicyTagsFromSet(tagSet *schema.Set) []model.Tag {
+	tags := tagSet.List()
+	var tagList []model.Tag
+	for _, tag := range tags {
+		data := tag.(map[string]interface{})
+		tagScope := data["scope"].(string)
+		tagTag := data["tag"].(string)
+		elem := model.Tag{
+			Scope: &tagScope,
+			Tag:   &tagTag}
+
+		tagList = append(tagList, elem)
+	}
+	return tagList
+}
+
+func initPolicyTagsSet(tags []model.Tag) []map[string]interface{} {
+	var tagList []map[string]interface{}
+	for _, tag := range tags {
+		elem := make(map[string]interface{})
+		elem["scope"] = tag.Scope
+		elem["tag"] = tag.Tag
+		tagList = append(tagList, elem)
+	}
+	return tagList
+}
+
 func getCustomizedPolicyTagsFromSchema(d *schema.ResourceData, schemaName string) []model.Tag {
 	tags := d.Get(schemaName).(*schema.Set).List()
 	var tagList []model.Tag

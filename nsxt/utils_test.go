@@ -89,6 +89,10 @@ func getTestVMID() string {
 	return os.Getenv("NSXT_TEST_VM_ID")
 }
 
+func getTestVMSegmentID() string {
+	return os.Getenv("NSXT_TEST_VM_SEGMENT_ID")
+}
+
 func getTestVMName() string {
 	return os.Getenv("NSXT_TEST_VM_NAME")
 }
