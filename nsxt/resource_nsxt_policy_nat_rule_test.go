@@ -20,7 +20,7 @@ func TestAccResourceNsxtPolicyNATRule_minimalT0(t *testing.T) {
 	name := fmt.Sprintf("test-nsx-policy-nat-rule-basic")
 	action := model.PolicyNatRule_ACTION_REFLEXIVE
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -55,7 +55,7 @@ func TestAccResourceNsxtPolicyNATRule_basicT1(t *testing.T) {
 	tnet := "44.1.1.2"
 	action := model.PolicyNatRule_ACTION_DNAT
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -132,11 +132,9 @@ func TestAccResourceNsxtPolicyNATRule_basicT0(t *testing.T) {
 	tnet := "44.1.1.2"
 	action := model.PolicyNatRule_ACTION_REFLEXIVE
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			// TODO: remove this line after Tier0 GW interface merges
-			t.Skip()
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -189,7 +187,7 @@ func TestAccResourceNsxtPolicyNATRule_basicT1Import(t *testing.T) {
 	name := fmt.Sprintf("test-nsx-policy-nat-rule-basic")
 	action := model.PolicyNatRule_ACTION_DNAT
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {

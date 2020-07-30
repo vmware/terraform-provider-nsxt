@@ -18,7 +18,7 @@ func TestAccResourceNsxtLogicalRouterLinkPortOnTier1_basic(t *testing.T) {
 	updateName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_logical_router_link_port_on_tier1.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -57,7 +57,7 @@ func TestAccResourceNsxtLogicalRouterLinkPortOnTier1_importBasic(t *testing.T) {
 	edgeClusterName := getEdgeClusterName()
 	testResourceName := "nsxt_logical_router_link_port_on_tier1.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
