@@ -338,12 +338,15 @@ resource "nsxt_policy_nat_rule" "test" {
 func testAccNsxtPolicyNATRuleTier0CreateTemplate(name string, action string, sourceNet string, translatedNet string) string {
 
 	var transportZone string
+	interfaceSite := ""
 	if testAccIsGlobalManager() {
 		transportZone = fmt.Sprintf(`
 data "nsxt_policy_transport_zone" "test" {
-  display_name = "%s"
-  site_path    = data.nsxt_policy_site.test.path
-}`, getVlanTransportZoneName())
+  transport_type = "VLAN_BACKED"
+  is_default     = true
+  site_path      = data.nsxt_policy_site.test.path
+}`)
+		interfaceSite = "site_path = data.nsxt_policy_site.test.path"
 	} else {
 		transportZone = fmt.Sprintf(`
 data "nsxt_policy_transport_zone" "test" {
@@ -364,6 +367,7 @@ resource "nsxt_policy_tier0_gateway_interface" "test" {
   gateway_path = nsxt_policy_tier0_gateway.t0test.path
   segment_path = nsxt_policy_vlan_segment.test.path
   subnets      = ["1.1.12.2/24"]
+  %s
 }
 
 resource "nsxt_policy_nat_rule" "test" {
@@ -388,5 +392,5 @@ resource "nsxt_policy_nat_rule" "test" {
   }
 }
 
-`, name, action, sourceNet, translatedNet, model.PolicyNatRule_FIREWALL_MATCH_MATCH_EXTERNAL_ADDRESS)
+`, interfaceSite, name, action, sourceNet, translatedNet, model.PolicyNatRule_FIREWALL_MATCH_MATCH_EXTERNAL_ADDRESS)
 }
