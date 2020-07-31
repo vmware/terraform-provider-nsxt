@@ -11,8 +11,6 @@ import (
 	"testing"
 )
 
-var nsxtPolicyStaticSubnetPoolID = "tfpool1"
-
 func TestAccResourceNsxtPolicyIPPoolStaticSubnet_minimal(t *testing.T) {
 	name := "staticsubnet1"
 	testResourceName := "nsxt_policy_ip_pool_static_subnet.test"
@@ -113,7 +111,7 @@ func TestAccResourceNsxtPolicyIPPoolStaticSubnet_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyIPPoolStaticSubnet_import_basic(t *testing.T) {
-	name := "tfpool1"
+	name := "tfpool8"
 	testResourceName := "nsxt_policy_ip_pool_static_subnet.test"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -164,11 +162,12 @@ func testAccNSXPolicyIPPoolStaticSubnetCheckExists(resourceName string) resource
 		}
 
 		resourceID := rs.Primary.ID
+		poolID := getPolicyIDFromPath(rs.Primary.Attributes["pool_path"])
 		if resourceID == "" {
 			return fmt.Errorf("NSX Policy Static Subnet resource ID not set in resources")
 		}
 
-		_, err := client.Get(nsxtPolicyStaticSubnetPoolID, resourceID)
+		_, err := client.Get(poolID, resourceID)
 		if err != nil {
 			return fmt.Errorf("Failed to find Static Subnet %s", resourceID)
 		}
@@ -186,8 +185,9 @@ func testAccNSXPolicyIPPoolStaticSubnetCheckDestroy(state *terraform.State) erro
 			continue
 		}
 
-		resourceID := rs.Primary.Attributes["id"]
-		_, err := client.Get(nsxtPolicyStaticSubnetPoolID, resourceID)
+		resourceID := rs.Primary.ID
+		poolID := getPolicyIDFromPath(rs.Primary.Attributes["pool_path"])
+		_, err := client.Get(poolID, resourceID)
 		if err == nil {
 			return fmt.Errorf("Static Subnet still exists %s", resourceID)
 		}
@@ -199,8 +199,7 @@ func testAccNSXPolicyIPPoolStaticSubnetCheckDestroy(state *terraform.State) erro
 func testAccNSXPolicyIPPoolStaticSubnetCreateMinimalTemplate(name string) string {
 	return fmt.Sprintf(`
 resource "nsxt_policy_ip_pool" "pool1" {
-  display_name = "%s"
-  nsx_id       = "%s"
+  display_name = "tf-pool-static-subnet"
 }
 
 resource "nsxt_policy_ip_pool_static_subnet" "test" {
@@ -211,14 +210,13 @@ resource "nsxt_policy_ip_pool_static_subnet" "test" {
     start = "12.12.12.10"
     end   = "12.12.12.20"
   }
-}`, nsxtPolicyStaticSubnetPoolID, nsxtPolicyStaticSubnetPoolID, name)
+}`, name)
 }
 
 func testAccNSXPolicyIPPoolStaticSubnetCreateTemplate(name string) string {
 	return fmt.Sprintf(`
 resource "nsxt_policy_ip_pool" "pool1" {
-  display_name = "%s"
-  nsx_id       = "%s"
+  display_name = "tf-pool-static-subnet"
 }
 
 resource "nsxt_policy_ip_pool_static_subnet" "test" {
@@ -234,14 +232,13 @@ resource "nsxt_policy_ip_pool_static_subnet" "test" {
     scope = "scope2"
     tag   = "tag2"
   }
-}`, nsxtPolicyStaticSubnetPoolID, nsxtPolicyStaticSubnetPoolID, name)
+}`, name)
 }
 
 func testAccNSXPolicyIPPoolStaticSubnet3AllocationsTemplate(name string) string {
 	return fmt.Sprintf(`
 resource "nsxt_policy_ip_pool" "pool1" {
-  display_name = "%s"
-  nsx_id       = "%s"
+  display_name = "tf-pool-static-subnet"
 }
 
 resource "nsxt_policy_ip_pool_static_subnet" "test" {
@@ -272,14 +269,13 @@ resource "nsxt_policy_ip_pool_static_subnet" "test" {
     scope = "scope2"
     tag   = "tag2"
   }
-}`, nsxtPolicyStaticSubnetPoolID, nsxtPolicyStaticSubnetPoolID, name)
+}`, name)
 }
 
 func testAccNSXPolicyIPPoolStaticSubnet2AllocationsTemplate(name string) string {
 	return fmt.Sprintf(`
 resource "nsxt_policy_ip_pool" "pool1" {
-  display_name = "%s"
-  nsx_id       = "%s"
+  display_name = "tf-pool-static-subnet"
 }
 
 resource "nsxt_policy_ip_pool_static_subnet" "test" {
@@ -306,5 +302,5 @@ resource "nsxt_policy_ip_pool_static_subnet" "test" {
     scope = "scope2"
     tag   = "tag2"
   }
-}`, nsxtPolicyStaticSubnetPoolID, nsxtPolicyStaticSubnetPoolID, name)
+}`, name)
 }

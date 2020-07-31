@@ -272,7 +272,7 @@ data "nsxt_policy_realization_info" "realization_info" {
 func testAccNsxtPolicyIPAddressAllocationDependenciesTemplate() string {
 	return fmt.Sprintf(`
 resource "nsxt_policy_ip_pool" "test" {
-  display_name = "tfpool1"
+  display_name = "tfpool4"
 }
 
 resource "nsxt_policy_ip_pool_static_subnet" "test" {

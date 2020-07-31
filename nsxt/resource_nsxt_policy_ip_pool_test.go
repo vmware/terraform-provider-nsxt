@@ -12,7 +12,7 @@ import (
 )
 
 func TestAccResourceNsxtPolicyIPPool_minimal(t *testing.T) {
-	name := "tfpool1"
+	name := "tfpool0"
 	testResourceName := "nsxt_policy_ip_pool.test"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -69,7 +69,7 @@ func TestAccResourceNsxtPolicyIPPool_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyIPPool_import_basic(t *testing.T) {
-	name := "tfpool1"
+	name := "tfpool2"
 	testResourceName := "nsxt_policy_ip_pool.test"
 
 	resource.ParallelTest(t, resource.TestCase{
