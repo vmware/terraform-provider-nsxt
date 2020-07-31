@@ -15,21 +15,15 @@ This resource provides a method for the management of a Context Profile.
 resource "nsxt_policy_context_profile" "test" {
     display_name      = "test"
     description       = "Terraform provisioned ContextProfile"
-    attribute {
-        data_type   = "STRING"
+    domain_name {
         description = "test-domain-name-attribute"
-        key         = "DOMAIN_NAME"
         value       = ["*-myfiles.sharepoint.com"]
     }
-    attribute {
-        data_type   = "STRING"
+    app_id {
         description = "test-app-id-attribute"
-        key         = "APP_ID"
         value       = ["SSL"]
         sub_attribute {
-            data_type = "STRING"
-            key       = "TLS_VERSION"
-            value     = ["SSL_V3"]
+            tls_version = ["SSL_V3"]
         }
     }
 }
@@ -39,20 +33,33 @@ resource "nsxt_policy_context_profile" "test" {
 ## Argument Reference
 
 The following arguments are supported:
+Note: At least one of `app_id`, `domain_name`, or `url_category` must present.
 
 * `display_name` - (Required) Display name of the resource.
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
-* `attribute` - (Required) A repeatable block to specify attributes for the context profile. At least one block is required.
-  * `datatype` - (Required) Datatype for `attribute`, must be `STRING`.
+* `app_id` - (Optional) A block to specify app id attributes for the context profile. 
   * `description` - (Optional) Description of the attribute.
-  * `key` - (Required) A string value indicating key for the `attribute`. Must be one of `APP_ID`, `DOMAIN_NAME`, or `URL_CATEGORY`.
-  * `value` - (Required) A list of string indicating values for the `attribute`. Must be a subset of the preset list of valid values for the `key` on NSX.
-  * `sub_attribute` - (Optional) A repeatable block to specify sub attributes for the attribute. This configuration is only valid when `value` has only one element, and `sub_attribute` is supported for that value on NSX.
-    * `datatype` - (Required for `sub_attribute`) Datatype for `sub_attribute`, must be `STRING`.
-    * `key` - (Required for `sub_attribute`) A string value indicating key for the `sub_attribute`. Must be one of `TLS_CIPHER_SUITE`, `TLS_VERSION`, or `CIFS_SMB_VERSION`.
-    * `value` - (Required for `sub_attribute`) A list of string indicating values for the `sub_attribute`. Must be a subset of the preset list of valid values for the `key` on NSX.
+  * `value` - (Required) A list of string indicating values for the `app_id`. Must be a subset of the preset list of valid values for attribute `app_id` on NSX.
+  * `sub_attribute` - (Optional) A block to specify sub attribute for the attribute. Only one block is allowed.
+    * `tls_cipher_suite` - (Optional) A list of string indicating values for `tls_cipher_suite`.
+    * `tls_version` - (Optional) A list of string indicating values for `tls_version`.
+    * `cifs_smb_version` - (Optional) A list of string indicating values for `cifs_smb_version`.
+* `domain_name` - (Optional) A block to specify domain name (FQDN) attributes for the context profile. Only one block is allowed.
+  * `description` - (Optional) Description of the attribute.
+  * `value` - (Required) A list of string indicating values for the `domain_name`. Must be a subset of the preset list of valid values for attribute `domain_name` on NSX.
+  * `sub_attribute` - (Optional) A block to specify sub attribute for the attribute. Only one block is allowed.
+    * `tls_cipher_suite` - (Optional) A list of string indicating values for `tls_cipher_suite`.
+    * `tls_version` - (Optional) A list of string indicating values for `tls_version`.
+    * `cifs_smb_version` - (Optional) A list of string indicating values for `cifs_smb_version`.
+* `url_category` - (Optional) A block to specify url category attributes for the context profile. Only one block is allowed.
+  * `description` - (Optional) Description of the attribute.
+  * `value` - (Required) A list of string indicating values for the `url_category`. Must be a subset of the preset list of valid values for attribute `url_category` on NSX.
+  * `sub_attribute` - (Optional) A block to specify sub attribute for the attribute. Only one block is allowed.
+    * `tls_cipher_suite` - (Optional) A list of string indicating values for `tls_cipher_suite`.
+    * `tls_version` - (Optional) A list of string indicating values for `tls_version`.
+    * `cifs_smb_version` - (Optional) A list of string indicating values for `cifs_smb_version`.
  
 ## Attributes Reference
 
@@ -61,7 +68,7 @@ In addition to arguments listed above, the following attributes are exported:
 * `id` - ID of the resource.
 * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
 * `path` - The NSX path of the policy resource.
-* `attribute`:
+* `app_id`:
   * `is_alg_type` - Describes whether the APP_ID value is ALG type or not.
 
 ## Importing

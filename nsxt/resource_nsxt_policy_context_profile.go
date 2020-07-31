@@ -6,7 +6,6 @@ package nsxt
 import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
 	gm_cont_prof "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/context_profiles"
@@ -17,24 +16,28 @@ import (
 	"log"
 )
 
-var attributeDataTypes = []string{
-	model.PolicyAttributes_DATATYPE_STRING,
+var attributeKeyMap = map[string]string{
+	"app_id":       model.PolicyAttributes_KEY_APP_ID,
+	"domain_name":  model.PolicyAttributes_KEY_DOMAIN_NAME,
+	"url_category": model.PolicyAttributes_KEY_URL_CATEGORY,
 }
 
-var attributeKeys = []string{
-	model.PolicyAttributes_KEY_APP_ID,
-	model.PolicyAttributes_KEY_DOMAIN_NAME,
-	model.PolicyAttributes_KEY_URL_CATEGORY,
+var attributeReverseKeyMap = map[string]string{
+	model.PolicyAttributes_KEY_APP_ID:       "app_id",
+	model.PolicyAttributes_KEY_DOMAIN_NAME:  "domain_name",
+	model.PolicyAttributes_KEY_URL_CATEGORY: "url_category",
 }
 
-var subAttributeDataTypes = []string{
-	model.PolicySubAttributes_DATATYPE_STRING,
+var subAttributeKeyMap = map[string]string{
+	"tls_cipher_suite": model.PolicySubAttributes_KEY_TLS_CIPHER_SUITE,
+	"tls_version":      model.PolicySubAttributes_KEY_TLS_VERSION,
+	"cifs_smb_version": model.PolicySubAttributes_KEY_CIFS_SMB_VERSION,
 }
 
-var subAttributeKeys = []string{
-	model.PolicySubAttributes_KEY_CIFS_SMB_VERSION,
-	model.PolicySubAttributes_KEY_TLS_CIPHER_SUITE,
-	model.PolicySubAttributes_KEY_TLS_VERSION,
+var subAttributeReverseKeyMap = map[string]string{
+	model.PolicySubAttributes_KEY_TLS_CIPHER_SUITE: "tls_cipher_suite",
+	model.PolicySubAttributes_KEY_TLS_VERSION:      "tls_version",
+	model.PolicySubAttributes_KEY_CIFS_SMB_VERSION: "cifs_smb_version",
 }
 
 func resourceNsxtPolicyContextProfile() *schema.Resource {
@@ -54,68 +57,48 @@ func resourceNsxtPolicyContextProfile() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
-			"attribute":    getContextProfilePolicyAttributesSchema(),
+			"app_id":       getContextProfilePolicyAppIDAttributesSchema(),
+			"domain_name":  getContextProfilePolicyOtherAttributesSchema(),
+			"url_category": getContextProfilePolicyOtherAttributesSchema(),
 		},
 	}
 }
 
-func getContextProfilePolicyAttributesSchema() *schema.Schema {
-	return &schema.Schema{
-		Type:     schema.TypeSet,
-		Required: true,
-		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{
-				"data_type": {
-					Type:         schema.TypeString,
-					Description:  "Data type of attribute",
-					Required:     true,
-					ValidateFunc: validation.StringInSlice(attributeDataTypes, false),
-				},
-				"description": getDescriptionSchema(),
-				"is_alg_type": {
-					Type:        schema.TypeBool,
-					Description: "Whether the APP_ID value is ALG type or not",
-					Computed:    true,
-				},
-				"key": {
-					Type:         schema.TypeString,
-					Description:  "Key for attribute",
-					Required:     true,
-					ValidateFunc: validation.StringInSlice(attributeKeys, false),
-				},
-				"value": {
-					Type:        schema.TypeSet,
-					Description: "Values for attribute key",
-					Required:    true,
-					MinItems:    1,
-					Elem: &schema.Schema{
-						Type: schema.TypeString,
-					},
-				},
-				"sub_attribute": getPolicyAttributeSubAttributesSchema(),
-			},
-		},
-	}
-}
-
-func getPolicyAttributeSubAttributesSchema() *schema.Schema {
+func getContextProfilePolicyAppIDAttributesSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:     schema.TypeSet,
 		Optional: true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				"data_type": {
-					Type:         schema.TypeString,
-					Description:  "Data type of sub attribute",
-					Required:     true,
-					ValidateFunc: validation.StringInSlice(subAttributeDataTypes, false),
+				"description": getDescriptionSchema(),
+				"is_alg_type": {
+					Type:        schema.TypeBool,
+					Description: "Whether the app_id value is ALG type or not",
+					Computed:    true,
 				},
-				"key": {
-					Type:         schema.TypeString,
-					Description:  "Key for attribute",
-					Required:     true,
-					ValidateFunc: validation.StringInSlice(subAttributeKeys, false),
+				"value": {
+					Type:        schema.TypeSet,
+					Description: "Values for attribute key",
+					MinItems:    1,
+					Required:    true,
+					Elem: &schema.Schema{
+						Type: schema.TypeString,
+					},
 				},
+				"sub_attribute": getPolicyAttributeSubAttributeSchema(),
+			},
+		},
+	}
+}
+
+func getContextProfilePolicyOtherAttributesSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:     schema.TypeSet,
+		Optional: true,
+		MaxItems: 1,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"description": getDescriptionSchema(),
 				"value": {
 					Type:        schema.TypeSet,
 					Description: "Values for attribute key",
@@ -125,7 +108,35 @@ func getPolicyAttributeSubAttributesSchema() *schema.Schema {
 						Type: schema.TypeString,
 					},
 				},
+				"sub_attribute": getPolicyAttributeSubAttributeSchema(),
 			},
+		},
+	}
+}
+
+func getPolicyAttributeSubAttributeSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:     schema.TypeSet,
+		Optional: true,
+		MaxItems: 1,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"tls_cipher_suite": getPolicyAttributeSubAttributeValueSchema("tls_cipher_suite"),
+				"tls_version":      getPolicyAttributeSubAttributeValueSchema("tls_version"),
+				"cifs_smb_version": getPolicyAttributeSubAttributeValueSchema("cifs_smb_version"),
+			},
+		},
+	}
+}
+func getPolicyAttributeSubAttributeValueSchema(subAttributeKey string) *schema.Schema {
+	description := fmt.Sprintf("Values for sub attribute key %s", subAttributeKey)
+	return &schema.Schema{
+		Type:        schema.TypeSet,
+		Description: description,
+		Optional:    true,
+		MinItems:    1,
+		Elem: &schema.Schema{
+			Type: schema.TypeString,
 		},
 	}
 }
@@ -164,15 +175,25 @@ func resourceNsxtPolicyContextProfileCreate(d *schema.ResourceData, m interface{
 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	attributes := d.Get("attribute").(*schema.Set).List()
-	err = checkAttributesValid(attributes, m)
-	if err != nil {
-		return err
+	attributesStructList := make([]model.PolicyAttributes, 0, 0)
+	for key := range attributeKeyMap {
+		attributes := d.Get(key).(*schema.Set).List()
+		if len(attributes) > 0 {
+			err = checkAttributesValid(attributes, m, key)
+			if err != nil {
+				return err
+			}
+			attributeStructList, err := constructAttributesModelList(attributes, key)
+			if err != nil {
+				return err
+			}
+			attributesStructList = append(attributesStructList, attributeStructList...)
+		}
 	}
-	attributesStructList, err := constructAttributesModelList(attributes)
-	if err != nil {
-		return err
+	if len(attributesStructList) == 0 {
+		return fmt.Errorf("At least one attribute should be set")
 	}
+
 	tags := getPolicyTagsFromSchema(d)
 
 	obj := model.PolicyContextProfile{
@@ -239,7 +260,8 @@ func resourceNsxtPolicyContextProfileRead(d *schema.ResourceData, m interface{})
 	d.Set("nsx_id", id)
 	d.Set("path", obj.Path)
 	d.Set("revision", obj.Revision)
-	d.Set("attribute", fillAttributesInSchema(obj.Attributes))
+	fillAttributesInSchema(d, obj.Attributes)
+
 	return nil
 }
 
@@ -251,19 +273,23 @@ func resourceNsxtPolicyContextProfileUpdate(d *schema.ResourceData, m interface{
 	}
 
 	// Read the rest of the configured parameters
-	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
+	description := d.Get("description").(string)
+	attributesStructList := make([]model.PolicyAttributes, 0, 0)
+	var err error
+	for _, key := range []string{"app_id", "domain_name", "url_category"} {
+		attributes := d.Get(key).(*schema.Set).List()
+		err := checkAttributesValid(attributes, m, key)
+		if err != nil {
+			return err
+		}
+		attributeStructList, err := constructAttributesModelList(attributes, key)
+		if err != nil {
+			return err
+		}
+		attributesStructList = append(attributesStructList, attributeStructList...)
+	}
 	tags := getPolicyTagsFromSchema(d)
-	attributes := d.Get("attribute").(*schema.Set).List()
-	err := checkAttributesValid(attributes, m)
-	if err != nil {
-		return err
-	}
-	var attributesStructList []model.PolicyAttributes
-	attributesStructList, err = constructAttributesModelList(attributes)
-	if err != nil {
-		return err
-	}
 
 	obj := model.PolicyContextProfile{
 		DisplayName: &displayName,
@@ -316,7 +342,12 @@ func resourceNsxtPolicyContextProfileDelete(d *schema.ResourceData, m interface{
 	return nil
 }
 
-func checkAttributesValid(attributes []interface{}, m interface{}) error {
+func checkAttributesValid(attributes []interface{}, m interface{}, key string) error {
+
+	err := validateSubAttributes(attributes)
+	if err != nil {
+		return err
+	}
 
 	var attrClient interface{}
 	connector := getPolicyConnector(m)
@@ -326,21 +357,13 @@ func checkAttributesValid(attributes []interface{}, m interface{}) error {
 	} else {
 		attrClient = cont_prof.NewDefaultAttributesClient(connector)
 	}
-	attributeMap, err := validateAndConstructAttributesMap(attributes)
+	attributeValues, err := listAttributesWithKey(attributeKeyMap[key], attrClient, isPolicyGlobalManager)
 	if err != nil {
 		return err
 	}
-
-	for key, values := range attributeMap {
-		attributeValues, err := listAttributesWithKey(&key, attrClient, isPolicyGlobalManager)
-		if err != nil {
-			return err
-		}
-		if len(attributeValues) == 0 {
-			// Theoretically impossible as the attributes are pre-set on NSX
-			err := fmt.Errorf("No attribute values are available for attribute type %s", key)
-			return err
-		}
+	for _, attribute := range attributes {
+		attributeMap := attribute.(map[string]interface{})
+		values := interface2StringList(attributeMap["value"].(*schema.Set).List())
 		if !containsElements(values, attributeValues) {
 			err := fmt.Errorf("Attribute values %s are not valid for attribute type %s", values, key)
 			return err
@@ -349,32 +372,23 @@ func checkAttributesValid(attributes []interface{}, m interface{}) error {
 	return nil
 }
 
-func validateAndConstructAttributesMap(attributes []interface{}) (map[string][]string, error) {
-	// Validate that attribute keys are unique
-	res := make(map[string][]string)
+func validateSubAttributes(attributes []interface{}) error {
+	// Validates that sub-attribute keys only present in an attribute with one value
 	for _, attribute := range attributes {
 		attributeMap := attribute.(map[string]interface{})
-		key := attributeMap["key"].(string)
-		values := interface2StringList(attributeMap["value"].(*schema.Set).List())
-		subAttributes := attributeMap["sub_attribute"].(*schema.Set).List()
-		// There should be only one value if sub attributes are specified
-		if len(subAttributes) > 0 && len(values) > 1 {
-			err := fmt.Errorf("Multiple values found for attribute key %s. Sub-attribtes are only applicable to an attribute with a single value", key)
-			return nil, err
+		values := attributeMap["value"].(*schema.Set).List()
+		if len(attributeMap["sub_attribute"].(*schema.Set).List()) > 0 && len(values) > 1 {
+			err := fmt.Errorf("Multiple values found for attribute. Sub-attribtes are only applicable to an attribute with a single value")
+			return err
 		}
-		if res[key] != nil {
-			err := fmt.Errorf("Duplicate attribute key found: %s", key)
-			return nil, err
-		}
-		res[key] = values
 	}
-	return res, nil
+	return nil
 }
 
-func listAttributesWithKey(attributeKey *string, attributeClient interface{}, isPolicyGlobalManager bool) ([]string, error) {
+func listAttributesWithKey(attributeKey string, attributeClient interface{}, isPolicyGlobalManager bool) ([]string, error) {
 	// returns a list of attribute values
 	policyAttributes := make([]string, 0)
-	policyContextProfileListResult, err := listContextProfileWithKey(attributeKey, attributeClient, isPolicyGlobalManager)
+	policyContextProfileListResult, err := listContextProfileWithKey(&attributeKey, attributeClient, isPolicyGlobalManager)
 	if err != nil {
 		return policyAttributes, err
 	}
@@ -409,23 +423,24 @@ func listContextProfileWithKey(attributeKey *string, attributeClient interface{}
 	return policyContextProfileListResult, err
 }
 
-func constructAttributesModelList(rawAttributes []interface{}) ([]model.PolicyAttributes, error) {
+func constructAttributesModelList(rawAttributes []interface{}, key string) ([]model.PolicyAttributes, error) {
 	res := make([]model.PolicyAttributes, 0, len(rawAttributes))
 	for _, rawAttribute := range rawAttributes {
 		attributeMap := rawAttribute.(map[string]interface{})
-		dataType := attributeMap["data_type"].(string)
+		dataType := model.PolicyAttributes_DATATYPE_STRING
 		description := attributeMap["description"].(string)
-		key := attributeMap["key"].(string)
+		attrKey := attributeKeyMap[key]
 		values := interface2StringList(attributeMap["value"].(*schema.Set).List())
 		subAttributes := attributeMap["sub_attribute"].(*schema.Set).List()
 		subAttributesList, err := constructSubAttributeModelList(subAttributes)
+
 		if err != nil {
 			return nil, err
 		}
 		attributeStruct := model.PolicyAttributes{
 			Datatype:      &dataType,
 			Description:   &description,
-			Key:           &key,
+			Key:           &attrKey,
 			Value:         values,
 			SubAttributes: subAttributesList,
 		}
@@ -435,45 +450,57 @@ func constructAttributesModelList(rawAttributes []interface{}) ([]model.PolicyAt
 }
 
 func constructSubAttributeModelList(rawSubAttributes []interface{}) ([]model.PolicySubAttributes, error) {
-	res := make([]model.PolicySubAttributes, 0, len(rawSubAttributes))
+	res := make([]model.PolicySubAttributes, 0, 0)
+	dataType := model.PolicySubAttributes_DATATYPE_STRING
 	for _, rawSubAttribute := range rawSubAttributes {
 		rawSubAttributeMap := rawSubAttribute.(map[string]interface{})
-		dataType := rawSubAttributeMap["data_type"].(string)
-		key := rawSubAttributeMap["key"].(string)
-		values := interface2StringList(rawSubAttributeMap["value"].(*schema.Set).List())
-		subAttributeStruct := model.PolicySubAttributes{
-			Datatype: &dataType,
-			Key:      &key,
-			Value:    values,
+		for key, subAttrKey := range subAttributeKeyMap {
+			vals := rawSubAttributeMap[key]
+			if vals != nil {
+				values := interface2StringList(vals.(*schema.Set).List())
+				if len(values) > 0 {
+					tmp := subAttrKey
+					subAttributeStruct := model.PolicySubAttributes{
+						Datatype: &dataType,
+						Key:      &tmp,
+						Value:    values,
+					}
+					res = append(res, subAttributeStruct)
+				}
+			}
 		}
-		res = append(res, subAttributeStruct)
 	}
 	return res, nil
 }
 
-func fillAttributesInSchema(policyAttributes []model.PolicyAttributes) []map[string]interface{} {
-	attributes := make([]map[string]interface{}, 0, len(policyAttributes))
+func fillAttributesInSchema(d *schema.ResourceData, policyAttributes []model.PolicyAttributes) {
+	attributes := make(map[string][]interface{})
 	for _, policyAttribute := range policyAttributes {
 		elem := make(map[string]interface{})
-		elem["data_type"] = policyAttribute.Datatype
+		key := attributeReverseKeyMap[*policyAttribute.Key]
 		elem["description"] = policyAttribute.Description
-		elem["key"] = policyAttribute.Key
 		elem["value"] = policyAttribute.Value
-		elem["is_alg_type"] = policyAttribute.IsALGType
-		elem["sub_attribute"] = fillSubAttributesInSchema(policyAttribute.SubAttributes)
-		attributes = append(attributes, elem)
+		if len(policyAttribute.SubAttributes) > 0 {
+			elem["sub_attribute"] = fillSubAttributesInSchema(policyAttribute.SubAttributes)
+		}
+		if *policyAttribute.Key == model.PolicyAttributes_KEY_APP_ID {
+			elem["is_alg_type"] = policyAttribute.IsALGType
+		}
+		attributes[key] = append(attributes[key], elem)
 	}
-	return attributes
+
+	for key, attributeList := range attributes {
+		d.Set(key, attributeList)
+	}
 }
 
-func fillSubAttributesInSchema(policySubAttributes []model.PolicySubAttributes) []map[string]interface{} {
-	subAttributes := make([]map[string]interface{}, 0, len(policySubAttributes))
+func fillSubAttributesInSchema(policySubAttributes []model.PolicySubAttributes) []interface{} {
+	subAttributes := make(map[string]interface{})
 	for _, policySubAttribute := range policySubAttributes {
-		elem := make(map[string]interface{})
-		elem["data_type"] = policySubAttribute.Datatype
-		elem["key"] = policySubAttribute.Key
-		elem["value"] = policySubAttribute.Value
-		subAttributes = append(subAttributes, elem)
+		key := subAttributeReverseKeyMap[*policySubAttribute.Key]
+		subAttributes[key] = policySubAttribute.Value
 	}
-	return subAttributes
+	res := make([]interface{}, 0, 1)
+	res = append(res, subAttributes)
+	return res
 }
