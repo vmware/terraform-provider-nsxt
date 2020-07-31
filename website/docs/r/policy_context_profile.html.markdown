@@ -41,21 +41,21 @@ Note: At least one of `app_id`, `domain_name`, or `url_category` must present.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `app_id` - (Optional) A block to specify app id attributes for the context profile. 
   * `description` - (Optional) Description of the attribute.
-  * `value` - (Required) A list of string indicating values for the `app_id`. Must be a subset of the preset list of valid values for attribute `app_id` on NSX.
+  * `value` - (Required) A list of string indicating values for the `app_id`. Must be a subset of valid values for `app_id` on NSX.
   * `sub_attribute` - (Optional) A block to specify sub attribute for the attribute. Only one block is allowed.
     * `tls_cipher_suite` - (Optional) A list of string indicating values for `tls_cipher_suite`.
     * `tls_version` - (Optional) A list of string indicating values for `tls_version`.
     * `cifs_smb_version` - (Optional) A list of string indicating values for `cifs_smb_version`.
 * `domain_name` - (Optional) A block to specify domain name (FQDN) attributes for the context profile. Only one block is allowed.
   * `description` - (Optional) Description of the attribute.
-  * `value` - (Required) A list of string indicating values for the `domain_name`. Must be a subset of the preset list of valid values for attribute `domain_name` on NSX.
+  * `value` - (Required) A list of string indicating values for the `domain_name`. Must be a subset of valid values for `domain_name` on NSX.
   * `sub_attribute` - (Optional) A block to specify sub attribute for the attribute. Only one block is allowed.
     * `tls_cipher_suite` - (Optional) A list of string indicating values for `tls_cipher_suite`.
     * `tls_version` - (Optional) A list of string indicating values for `tls_version`.
     * `cifs_smb_version` - (Optional) A list of string indicating values for `cifs_smb_version`.
 * `url_category` - (Optional) A block to specify url category attributes for the context profile. Only one block is allowed.
   * `description` - (Optional) Description of the attribute.
-  * `value` - (Required) A list of string indicating values for the `url_category`. Must be a subset of the preset list of valid values for attribute `url_category` on NSX.
+  * `value` - (Required) A list of string indicating values for the `url_category`. Must be a subset of valid values for `url_category` on NSX.
   * `sub_attribute` - (Optional) A block to specify sub attribute for the attribute. Only one block is allowed.
     * `tls_cipher_suite` - (Optional) A list of string indicating values for `tls_cipher_suite`.
     * `tls_version` - (Optional) A list of string indicating values for `tls_version`.
