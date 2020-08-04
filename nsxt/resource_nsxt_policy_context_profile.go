@@ -108,7 +108,6 @@ func getContextProfilePolicyOtherAttributesSchema() *schema.Schema {
 						Type: schema.TypeString,
 					},
 				},
-				"sub_attribute": getPolicyAttributeSubAttributeSchema(),
 			},
 		},
 	}
@@ -277,7 +276,7 @@ func resourceNsxtPolicyContextProfileUpdate(d *schema.ResourceData, m interface{
 	description := d.Get("description").(string)
 	attributesStructList := make([]model.PolicyAttributes, 0, 0)
 	var err error
-	for _, key := range []string{"app_id", "domain_name", "url_category"} {
+	for key := range attributeKeyMap {
 		attributes := d.Get(key).(*schema.Set).List()
 		err := checkAttributesValid(attributes, m, key)
 		if err != nil {
@@ -344,11 +343,12 @@ func resourceNsxtPolicyContextProfileDelete(d *schema.ResourceData, m interface{
 
 func checkAttributesValid(attributes []interface{}, m interface{}, key string) error {
 
-	err := validateSubAttributes(attributes)
-	if err != nil {
-		return err
+	if key == "app_id" {
+		err := validateSubAttributes(attributes)
+		if err != nil {
+			return err
+		}
 	}
-
 	var attrClient interface{}
 	connector := getPolicyConnector(m)
 	isPolicyGlobalManager := isPolicyGlobalManager(m)
@@ -373,12 +373,12 @@ func checkAttributesValid(attributes []interface{}, m interface{}, key string) e
 }
 
 func validateSubAttributes(attributes []interface{}) error {
-	// Validates that sub-attribute keys only present in an attribute with one value
+	// Validates that sub_attribute keys only present in an attribute with one value
 	for _, attribute := range attributes {
 		attributeMap := attribute.(map[string]interface{})
 		values := attributeMap["value"].(*schema.Set).List()
 		if len(attributeMap["sub_attribute"].(*schema.Set).List()) > 0 && len(values) > 1 {
-			err := fmt.Errorf("Multiple values found for attribute. Sub-attribtes are only applicable to an attribute with a single value")
+			err := fmt.Errorf("Multiple values found for attribute. Sub-attributes are only applicable to an attribute with a single value")
 			return err
 		}
 	}
@@ -431,11 +431,14 @@ func constructAttributesModelList(rawAttributes []interface{}, key string) ([]mo
 		description := attributeMap["description"].(string)
 		attrKey := attributeKeyMap[key]
 		values := interface2StringList(attributeMap["value"].(*schema.Set).List())
-		subAttributes := attributeMap["sub_attribute"].(*schema.Set).List()
-		subAttributesList, err := constructSubAttributeModelList(subAttributes)
-
-		if err != nil {
-			return nil, err
+		subAttributesList := make([]model.PolicySubAttributes, 0, 0)
+		if key == "app_id" {
+			var err error
+			subAttributes := attributeMap["sub_attribute"].(*schema.Set).List()
+			subAttributesList, err = constructSubAttributeModelList(subAttributes)
+			if err != nil {
+				return nil, err
+			}
 		}
 		attributeStruct := model.PolicyAttributes{
 			Datatype:      &dataType,
@@ -480,15 +483,14 @@ func fillAttributesInSchema(d *schema.ResourceData, policyAttributes []model.Pol
 		key := attributeReverseKeyMap[*policyAttribute.Key]
 		elem["description"] = policyAttribute.Description
 		elem["value"] = policyAttribute.Value
-		if len(policyAttribute.SubAttributes) > 0 {
-			elem["sub_attribute"] = fillSubAttributesInSchema(policyAttribute.SubAttributes)
-		}
 		if *policyAttribute.Key == model.PolicyAttributes_KEY_APP_ID {
+			if len(policyAttribute.SubAttributes) > 0 {
+				elem["sub_attribute"] = fillSubAttributesInSchema(policyAttribute.SubAttributes)
+			}
 			elem["is_alg_type"] = policyAttribute.IsALGType
 		}
 		attributes[key] = append(attributes[key], elem)
 	}
-
 	for key, attributeList := range attributes {
 		d.Set(key, attributeList)
 	}
