@@ -459,10 +459,13 @@ func validateNsxtProviderHostFormat() schema.SchemaValidateFunc {
 			return
 		}
 
-		if strings.HasPrefix(v, "https://") || strings.HasPrefix(v, "http://") {
-			es = append(es, fmt.Errorf("not expecting http:// or https:// in the host, but got %s", v))
+		withSchema := v
+		if !strings.HasPrefix(v, "https://") {
+			// Add schema for validation
+			withSchema = fmt.Sprintf("https://%s", v)
 		}
 
+		s, es = validation.IsURLWithHTTPS(withSchema, k)
 		return
 	}
 }

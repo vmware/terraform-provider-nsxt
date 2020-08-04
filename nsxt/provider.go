@@ -319,6 +319,10 @@ func configureNsxtClient(d *schema.ResourceData, clients *nsxtClients) error {
 	}
 
 	host := d.Get("host").(string)
+	// Remove schema
+	if strings.HasPrefix(host, "https://") {
+		host = host[len("https://"):]
+	}
 
 	if host == "" {
 		return fmt.Errorf("host must be provided")
@@ -445,7 +449,7 @@ func getConnectorTLSConfig(insecure bool, clientCertFile string, clientKeyFile s
 }
 
 func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) error {
-	hostIP := d.Get("host").(string)
+	host := d.Get("host").(string)
 	username := d.Get("username").(string)
 	password := d.Get("password").(string)
 	vmcAccessToken := d.Get("vmc_token").(string)
@@ -457,11 +461,14 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 	policyEnforcementPoint := d.Get("enforcement_point").(string)
 	policyGlobalManager := d.Get("global_manager").(bool)
 
-	if hostIP == "" {
+	if host == "" {
 		return fmt.Errorf("host must be provided")
 	}
 
-	host := fmt.Sprintf("https://%s", hostIP)
+	if !strings.HasPrefix(host, "https://") {
+		host = fmt.Sprintf("https://%s", host)
+	}
+
 	securityCtx := core.NewSecurityContextImpl()
 	securityContextNeeded := true
 	if len(clientAuthCertFile) > 0 && !clients.CommonConfig.RemoteAuth {
