@@ -79,7 +79,6 @@ func getContextProfilePolicyAppIDAttributesSchema() *schema.Schema {
 				"value": {
 					Type:        schema.TypeSet,
 					Description: "Values for attribute key",
-					MinItems:    1,
 					Required:    true,
 					Elem: &schema.Schema{
 						Type: schema.TypeString,
@@ -103,7 +102,6 @@ func getContextProfilePolicyOtherAttributesSchema() *schema.Schema {
 					Type:        schema.TypeSet,
 					Description: "Values for attribute key",
 					Required:    true,
-					MinItems:    1,
 					Elem: &schema.Schema{
 						Type: schema.TypeString,
 					},
