@@ -357,11 +357,11 @@ func TestAccResourceNsxtGlobalPolicySecurityPolicy_withSite(t *testing.T) {
 			{
 				Config: testAccNsxtPolicySecurityPolicyWithProfiles(updatedName, direction2, proto2, tag2, domain),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicySecurityPolicyExists(testResourceName, defaultDomain),
+					testAccNsxtPolicySecurityPolicyExists(testResourceName, domain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttr(testResourceName, "category", "Application"),
-					resource.TestCheckResourceAttr(testResourceName, "domain", defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "domain", domain),
 					resource.TestCheckResourceAttr(testResourceName, "comments", ""),
 					resource.TestCheckResourceAttr(testResourceName, "locked", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "scope.#", "0"),
@@ -622,5 +622,4 @@ func testAccNsxtPolicySecurityPolicyWithProfiles(name string, direction string, 
 profiles = [nsxt_policy_context_profile.test.path]
 `
 	return testAccNsxtPolicyContextProfileTemplate("security-policy-test-profile", testAccNsxtPolicyContextProfileAttributeDomainNameTemplate()) + testAccNsxtPolicySecurityPolicyWithRule(name, direction, protocol, ruleTag, domainName, profiles)
-
 }
