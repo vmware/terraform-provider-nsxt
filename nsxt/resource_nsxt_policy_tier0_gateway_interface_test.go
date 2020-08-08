@@ -195,7 +195,12 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_external(t *testing.T) {
 	testResourceName := "nsxt_policy_tier0_gateway_interface.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccNSXVersion(t, "3.0.0")
+			// PIM is not supported on GM
+			testAccOnlyLocalManager(t)
+		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTier0InterfaceCheckDestroy(state, name)
