@@ -132,6 +132,10 @@ func resourceNsxtPolicyTier0GatewayInterfaceCreate(d *schema.ResourceData, m int
 
 	localeServiceID := ""
 	if isPolicyGlobalManager(m) {
+		enablePIM := d.Get("enable_pim").(bool)
+		if enablePIM {
+			return fmt.Errorf("enable_pim configuration is only supported with NSX Local Manager")
+		}
 		if objSitePath == "" {
 			return attributeRequiredGlobalManagerError("site_path", "nsxt_policy_tier0_gateway_interface")
 		}
