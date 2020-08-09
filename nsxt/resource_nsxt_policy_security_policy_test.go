@@ -67,7 +67,7 @@ func TestAccResourceNsxtPolicySecurityPolicy_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicySecurityPolicyWithRule(updatedName, direction1, proto1, tag1, defaultDomain),
+				Config: testAccNsxtPolicySecurityPolicyWithRule(updatedName, direction1, proto1, tag1, defaultDomain, ""),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySecurityPolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -90,7 +90,7 @@ func TestAccResourceNsxtPolicySecurityPolicy_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicySecurityPolicyWithRule(updatedName, direction2, proto2, tag2, defaultDomain),
+				Config: testAccNsxtPolicySecurityPolicyWithRule(updatedName, direction2, proto2, tag2, defaultDomain, ""),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySecurityPolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -110,6 +110,30 @@ func TestAccResourceNsxtPolicySecurityPolicy_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.action", defaultAction),
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.log_label", tag2),
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.tag.#", "1"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicySecurityPolicyWithProfiles(updatedName, direction2, proto2, tag2, defaultDomain),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicySecurityPolicyExists(testResourceName, defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "category", "Application"),
+					resource.TestCheckResourceAttr(testResourceName, "domain", defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "comments", ""),
+					resource.TestCheckResourceAttr(testResourceName, "locked", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "scope.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "sequence_number", "3"),
+					resource.TestCheckResourceAttr(testResourceName, "stateful", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "tcp_strict", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.direction", direction2),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.ip_version", proto2),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.action", defaultAction),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.log_label", tag2),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.tag.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.profiles.#", "1"),
 				),
 			},
 		},
@@ -283,7 +307,7 @@ func TestAccResourceNsxtGlobalPolicySecurityPolicy_withSite(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicySecurityPolicyWithRule(updatedName, direction1, proto1, tag1, domain),
+				Config: testAccNsxtPolicySecurityPolicyWithRule(updatedName, direction1, proto1, tag1, domain, ""),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySecurityPolicyExists(testResourceName, domain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -307,7 +331,7 @@ func TestAccResourceNsxtGlobalPolicySecurityPolicy_withSite(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicySecurityPolicyWithRule(updatedName, direction2, proto2, tag2, domain),
+				Config: testAccNsxtPolicySecurityPolicyWithRule(updatedName, direction2, proto2, tag2, domain, ""),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySecurityPolicyExists(testResourceName, domain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -330,9 +354,32 @@ func TestAccResourceNsxtGlobalPolicySecurityPolicy_withSite(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.source_groups.#", "1"),
 				),
 			},
+			{
+				Config: testAccNsxtPolicySecurityPolicyWithProfiles(updatedName, direction2, proto2, tag2, domain),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicySecurityPolicyExists(testResourceName, domain),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "category", "Application"),
+					resource.TestCheckResourceAttr(testResourceName, "domain", domain),
+					resource.TestCheckResourceAttr(testResourceName, "comments", ""),
+					resource.TestCheckResourceAttr(testResourceName, "locked", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "scope.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "sequence_number", "3"),
+					resource.TestCheckResourceAttr(testResourceName, "stateful", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "tcp_strict", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.direction", direction2),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.ip_version", proto2),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.action", defaultAction),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.log_label", tag2),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.tag.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.profiles.#", "1"),
+				),
+			},
 		},
 	})
-
 }
 
 func testAccNsxtPolicySecurityPolicyExists(resourceName string, domainName string) resource.TestCheckFunc {
@@ -415,7 +462,7 @@ resource "nsxt_policy_security_policy" "test" {
 }`, name, comments)
 }
 
-func testAccNsxtPolicySecurityPolicyWithRule(name string, direction string, protocol string, ruleTag string, domainName string) string {
+func testAccNsxtPolicySecurityPolicyWithRule(name string, direction string, protocol string, ruleTag string, domainName string, profiles string) string {
 	if domainName == defaultDomain {
 		return fmt.Sprintf(`
 resource "nsxt_policy_security_policy" "test" {
@@ -442,8 +489,9 @@ resource "nsxt_policy_security_policy" "test" {
       scope = "color"
       tag   = "blue"
     }
+    %s
   }
-}`, name, name, direction, protocol, ruleTag)
+}`, name, name, direction, protocol, ruleTag, profiles)
 	}
 	return testAccNsxtGlobalPolicyGroupIPAddressCreateTemplate("group", domainName) + fmt.Sprintf(`
 resource "nsxt_policy_security_policy" "test" {
@@ -472,8 +520,9 @@ resource "nsxt_policy_security_policy" "test" {
       scope = "color"
       tag   = "blue"
     }
+    %s
   }
-}`, name, name, direction, protocol, ruleTag)
+}`, name, name, direction, protocol, ruleTag, profiles)
 }
 
 func testAccNsxtPolicySecurityPolicyDeps() string {
@@ -566,4 +615,11 @@ resource "nsxt_policy_security_policy" "test" {
   }
 
 }`, name)
+}
+
+func testAccNsxtPolicySecurityPolicyWithProfiles(name string, direction string, protocol string, ruleTag string, domainName string) string {
+	profiles := `
+profiles = [nsxt_policy_context_profile.test.path]
+`
+	return testAccNsxtPolicyContextProfileTemplate("security-policy-test-profile", testAccNsxtPolicyContextProfileAttributeDomainNameTemplate()) + testAccNsxtPolicySecurityPolicyWithRule(name, direction, protocol, ruleTag, domainName, profiles)
 }
