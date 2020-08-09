@@ -427,7 +427,7 @@ func policyTier1GatewayResourceToInfraStruct(d *schema.ResourceData, connector *
 	}
 
 	if isGlobalManager {
-		localeServices, err := initGatewayLocaleServices(d)
+		localeServices, err := initGatewayLocaleServices(d, connector, listPolicyTier1GatewayLocaleServices)
 		if err != nil {
 			return infraStruct, err
 		}

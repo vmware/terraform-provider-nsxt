@@ -269,21 +269,25 @@ func initChildLocaleService(serviceStruct *model.LocaleServices, markForDelete b
 	return dataValue.(*data.StructValue), nil
 }
 
-func initGatewayLocaleServices(d *schema.ResourceData) ([]*data.StructValue, error) {
+func initGatewayLocaleServices(d *schema.ResourceData, connector *client.RestConnector, listLocaleServicesFunc func(*client.RestConnector, string, bool) ([]model.LocaleServices, error)) ([]*data.StructValue, error) {
 	var localeServices []*data.StructValue
 
-	oldServices, newServices := d.GetChange("locale_service")
+	services := d.Get("locale_service").(*schema.Set).List()
 
 	existingServices := make(map[string]bool)
 	if len(d.Id()) > 0 {
-		for _, obj := range oldServices.(*schema.Set).List() {
-			cfg := obj.(map[string]interface{})
-			serviceID := getPolicyIDFromPath(cfg["path"].(string))
-			existingServices[serviceID] = true
+		// This is an update - we might need to delete locale services
+		existingServiceObjects, errList := listLocaleServicesFunc(connector, d.Id(), true)
+		if errList != nil {
+			return nil, errList
+		}
+
+		for _, obj := range existingServiceObjects {
+			existingServices[*obj.Id] = true
 		}
 	}
 	lsType := "LocaleServices"
-	for _, service := range newServices.(*schema.Set).List() {
+	for _, service := range services {
 		cfg := service.(map[string]interface{})
 		edgeClusterPath := cfg["edge_cluster_path"].(string)
 		edgeNodes := interface2StringList(cfg["preferred_edge_paths"].(*schema.Set).List())
