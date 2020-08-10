@@ -92,13 +92,13 @@ func resourceNsxtPolicyTier0GatewayInterface() *schema.Resource {
 	}
 }
 
-func gatewayInterfaceVersionDepenantSet(d *schema.ResourceData, obj *model.Tier0Interface) {
+func gatewayInterfaceVersionDepenantSet(d *schema.ResourceData, m interface{}, obj *model.Tier0Interface) {
 	if nsxVersionLower("3.0.0") {
 		return
 	}
 	interfaceType := d.Get("type").(string)
-	// PIM config can only be configured on external interface
-	if interfaceType == model.Tier0Interface_TYPE_EXTERNAL {
+	// PIM config can only be configured on external interface and local manager
+	if interfaceType == model.Tier0Interface_TYPE_EXTERNAL && !isPolicyGlobalManager(m) {
 		enablePIM := d.Get("enable_pim").(bool)
 		pimConfig := model.Tier0InterfacePimConfig{
 			Enabled: &enablePIM,
@@ -132,6 +132,10 @@ func resourceNsxtPolicyTier0GatewayInterfaceCreate(d *schema.ResourceData, m int
 
 	localeServiceID := ""
 	if isPolicyGlobalManager(m) {
+		enablePIM := d.Get("enable_pim").(bool)
+		if enablePIM {
+			return fmt.Errorf("enable_pim configuration is only supported with NSX Local Manager")
+		}
 		if objSitePath == "" {
 			return attributeRequiredGlobalManagerError("site_path", "nsxt_policy_tier0_gateway_interface")
 		}
@@ -207,7 +211,7 @@ func resourceNsxtPolicyTier0GatewayInterfaceCreate(d *schema.ResourceData, m int
 	if edgePath != "" {
 		obj.EdgePath = &edgePath
 	}
-	gatewayInterfaceVersionDepenantSet(d, &obj)
+	gatewayInterfaceVersionDepenantSet(d, m, &obj)
 
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating Tier0 interface with ID %s", id)
@@ -334,6 +338,13 @@ func resourceNsxtPolicyTier0GatewayInterfaceUpdate(d *schema.ResourceData, m int
 		return fmt.Errorf("Error obtaining Tier0 id or Locale Service id")
 	}
 
+	if isPolicyGlobalManager(m) {
+		enablePIM := d.Get("enable_pim").(bool)
+		if enablePIM {
+			return fmt.Errorf("enable_pim configuration is only supported with NSX Local Manager")
+		}
+	}
+
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
 	tags := getPolicyTagsFromSchema(d)
@@ -369,7 +380,7 @@ func resourceNsxtPolicyTier0GatewayInterfaceUpdate(d *schema.ResourceData, m int
 		obj.SegmentPath = &segmentPath
 	}
 
-	gatewayInterfaceVersionDepenantSet(d, &obj)
+	gatewayInterfaceVersionDepenantSet(d, m, &obj)
 
 	var err error
 	if isPolicyGlobalManager(m) {

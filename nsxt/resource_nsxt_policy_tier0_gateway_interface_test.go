@@ -194,6 +194,13 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_external(t *testing.T) {
 	updatedIPAddress := "1.2.12.2"
 	testResourceName := "nsxt_policy_tier0_gateway_interface.test"
 
+	var enablePim string
+	// enablePim is supported only with local manager
+	if testAccIsGlobalManager() {
+		enablePim = "false"
+	} else {
+		enablePim = "true"
+	}
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
@@ -202,7 +209,7 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_external(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyTier0InterfaceExternalTemplate(name, subnet, mtu),
+				Config: testAccNsxtPolicyTier0InterfaceExternalTemplate(name, subnet, mtu, enablePim),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTier0InterfaceExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -213,7 +220,7 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_external(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "subnets.0", subnet),
 					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.0", ipAddress),
-					resource.TestCheckResourceAttr(testResourceName, "enable_pim", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "enable_pim", enablePim),
 					resource.TestCheckResourceAttr(testResourceName, "urpf_mode", "STRICT"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 					resource.TestCheckResourceAttrSet(testResourceName, "segment_path"),
@@ -226,7 +233,7 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_external(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyTier0InterfaceExternalTemplate(updatedName, updatedSubnet, updatedMtu),
+				Config: testAccNsxtPolicyTier0InterfaceExternalTemplate(updatedName, updatedSubnet, updatedMtu, enablePim),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTier0InterfaceExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -237,7 +244,7 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_external(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "subnets.0", updatedSubnet),
 					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.0", updatedIPAddress),
-					resource.TestCheckResourceAttr(testResourceName, "enable_pim", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "enable_pim", enablePim),
 					resource.TestCheckResourceAttr(testResourceName, "urpf_mode", "STRICT"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 					resource.TestCheckResourceAttrSet(testResourceName, "segment_path"),
@@ -684,7 +691,7 @@ resource "nsxt_policy_tier0_gateway_interface" "test" {
 		testAccNsxtPolicyTier0InterfaceRealizationTemplate()
 }
 
-func testAccNsxtPolicyTier0InterfaceExternalTemplate(name string, subnet string, mtu string) string {
+func testAccNsxtPolicyTier0InterfaceExternalTemplate(name string, subnet string, mtu string, enablePim string) string {
 	return testAccNsxtPolicyGatewayInterfaceDeps("11") + fmt.Sprintf(`
 data "nsxt_policy_edge_node" "EN" {
   edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
@@ -706,7 +713,7 @@ resource "nsxt_policy_tier0_gateway_interface" "test" {
   segment_path   = nsxt_policy_vlan_segment.test.path
   edge_node_path = data.nsxt_policy_edge_node.EN.path
   subnets        = ["%s"]
-  enable_pim     = true
+  enable_pim     = "%s"
   urpf_mode      = "STRICT"
   %s
 
@@ -714,6 +721,6 @@ resource "nsxt_policy_tier0_gateway_interface" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, nsxtPolicyTier0GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, mtu, subnet, testAccNsxtPolicyTier0InterfaceSiteTemplate()) +
+}`, nsxtPolicyTier0GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, mtu, subnet, enablePim, testAccNsxtPolicyTier0InterfaceSiteTemplate()) +
 		testAccNsxtPolicyTier0InterfaceRealizationTemplate()
 }
