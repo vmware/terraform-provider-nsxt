@@ -193,16 +193,15 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_external(t *testing.T) {
 	ipAddress := "1.1.12.2"
 	updatedIPAddress := "1.2.12.2"
 	testResourceName := "nsxt_policy_tier0_gateway_interface.test"
-	var enablePim string
-	// enablePim is supported only with local manager
-	if testAccIsGlobalManager() {
-		enablePim = "false"
-	} else {
-		enablePim = "true"
-	}
+	enablePim := "true"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccNSXVersion(t, "3.0.0")
+			// PIM is not supported on GM
+			testAccOnlyLocalManager(t)
+		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTier0InterfaceCheckDestroy(state, name)
