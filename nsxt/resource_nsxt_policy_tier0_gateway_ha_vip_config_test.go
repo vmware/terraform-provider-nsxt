@@ -7,46 +7,101 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	gm_locale_services "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s/locale_services"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services"
+	gm_tier0s "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s"
 	"testing"
 )
 
-func TestAccResourceNsxtPolicyTier0GatewayHaVip_basic(t *testing.T) {
-	name := "test-nsx-policy-tier0-ha-vip"
-	subnet := "1.1.12.2/24"
-	testResourceName := "nsxt_policy_tier0_gateway_interface.test"
+func TestAccResourceNsxtPolicyTier0GatewayHaVipConfig_basic(t *testing.T) {
+	subnet1 := "1.1.12.1/24"
+	subnet2 := "1.1.12.2/24"
+	vipSubnet := "1.1.12.4/24"
+	testResourceName := "nsxt_policy_tier0_gateway_ha_vip_config.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccEnvDefined(t, "NSXT_TEST_SITE_NAME")
+			testAccOnlyGlobalManager(t)
+		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyTier0HAVipConfigCheckDestroy(state, name)
+			return testAccNsxtPolicyTier0HAVipConfigCheckDestroy(state, "")
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyTier0HAVipConfigTemplate(subnet),
+				Config: testAccNsxtPolicyTier0HAVipConfigTemplate("true", subnet1, subnet2, vipSubnet),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTier0HAVipConfigExists(testResourceName),
-					// resource.TestCheckResourceAttr(testResourceName, "display_name", name),
-					// resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
-					// resource.TestCheckResourceAttr(testResourceName, "mtu", mtu),
-					// resource.TestCheckResourceAttr(testResourceName, "type", "EXTERNAL"),
-					// resource.TestCheckResourceAttr(testResourceName, "subnets.#", "1"),
-					// resource.TestCheckResourceAttr(testResourceName, "subnets.0", subnet),
-					// resource.TestCheckResourceAttr(testResourceName, "ip_addresses.#", "1"),
-					// resource.TestCheckResourceAttr(testResourceName, "ip_addresses.0", ipAddress),
-					// resource.TestCheckResourceAttr(testResourceName, "enable_pim", "true"),
-					// resource.TestCheckResourceAttr(testResourceName, "urpf_mode", "STRICT"),
-					// resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
-					// resource.TestCheckResourceAttrSet(testResourceName, "segment_path"),
-					// resource.TestCheckResourceAttrSet(testResourceName, "gateway_path"),
-					// resource.TestCheckResourceAttrSet(testResourceName, "edge_node_path"),
-					// resource.TestCheckResourceAttrSet(testResourceName, "path"),
-					// resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
-					// resource.TestCheckResourceAttrSet(testResourceName, "locale_service_id"),
-					// resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "config.0.enabled", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "config.0.external_interface_paths.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "config.0.vip_subnets.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "config.0.vip_subnets.0", vipSubnet),
+					resource.TestCheckResourceAttrSet(testResourceName, "tier0_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "locale_service_id"),
 				),
+			},
+			{
+				Config: testAccNsxtPolicyTier0HAVipConfigTemplate("false", subnet1, subnet2, vipSubnet),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyTier0HAVipConfigExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "config.0.enabled", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "config.0.external_interface_paths.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "config.0.vip_subnets.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "config.0.vip_subnets.0", vipSubnet),
+					resource.TestCheckResourceAttrSet(testResourceName, "tier0_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "locale_service_id"),
+				),
+			},
+		},
+	})
+}
+
+func testAccNSXPolicyTier0HAVipConfigImporterGetID(s *terraform.State) (string, error) {
+	testResourceName := "nsxt_policy_tier0_gateway_ha_vip_config.test"
+	rs, ok := s.RootModule().Resources[testResourceName]
+	if !ok {
+		return "", fmt.Errorf("NSX Policy Tier0 HA Vip config resource %s not found in resources", testResourceName)
+	}
+	resourceID := rs.Primary.ID
+	if resourceID == "" {
+		return "", fmt.Errorf("NSX Policy Tier0 HA Vip config resource ID not set in resources ")
+	}
+	gwID := rs.Primary.Attributes["tier0_id"]
+	if gwID == "" {
+		return "", fmt.Errorf("NSX Policy HA Vip config Tier0 Gateway ID not set in resources ")
+	}
+	localeServiceID := rs.Primary.Attributes["locale_service_id"]
+	if localeServiceID == "" {
+		return "", fmt.Errorf("NSX Policy HA Vip config Tier0 Gateway locale service ID not set in resources ")
+	}
+
+	return fmt.Sprintf("%s/%s", gwID, localeServiceID), nil
+}
+
+func TestAccResourceNsxtPolicyTier0GatewayHaVipConfig_importBasic(t *testing.T) {
+	testResourceName := "nsxt_policy_tier0_gateway_ha_vip_config.test"
+	subnet1 := "1.1.12.1/24"
+	subnet2 := "1.1.12.2/24"
+	vipSubnet := "1.1.12.4/24"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyTier0HAVipConfigCheckDestroy(state, "")
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyTier0HAVipConfigTemplate("true", subnet1, subnet2, vipSubnet),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: false,
+				ImportStateIdFunc: testAccNSXPolicyTier0HAVipConfigImporterGetID,
 			},
 		},
 	})
@@ -54,9 +109,6 @@ func TestAccResourceNsxtPolicyTier0GatewayHaVip_basic(t *testing.T) {
 
 func testAccNsxtPolicyTier0HAVipConfigExists(resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
-
-		//connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
 			return fmt.Errorf("Policy Tier0 HA vip config resource %s not found in resources", resourceName)
@@ -67,19 +119,29 @@ func testAccNsxtPolicyTier0HAVipConfigExists(resourceName string) resource.TestC
 			return fmt.Errorf("Policy Tier0 HA vip config resource ID not set in resources")
 		}
 
-		// var err error
-		// localeServiceID := rs.Primary.Attributes["locale_service_id"]
-		// gwID := getPolicyIDFromPath(rs.Primary.Attributes["gateway_path"])
-		// if testAccIsGlobalManager() {
-		// 	nsxClient := gm_locale_services.NewDefaultInterfacesClient(connector)
-		// 	_, err = nsxClient.Get(gwID, localeServiceID, resourceID)
-		// } else {
-		// 	nsxClient := locale_services.NewDefaultInterfacesClient(connector)
-		// 	_, err = nsxClient.Get(gwID, localeServiceID, resourceID)
-		// }
-		// if err != nil {
-		// 	return fmt.Errorf("Error while retrieving policy Tier0 Interface ID %s. Error: %v", resourceID, err)
-		// }
+		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
+
+		localeServiceID := rs.Primary.Attributes["locale_service_id"]
+		gwID := rs.Primary.Attributes["tier0_id"]
+		if testAccIsGlobalManager() {
+			nsxClient := gm_tier0s.NewDefaultLocaleServicesClient(connector)
+			obj, err := nsxClient.Get(gwID, localeServiceID)
+			if err != nil {
+				return fmt.Errorf("Error while retrieving policy Tier0 HA vip config %s. Error: %v", resourceID, err)
+			}
+			if obj.HaVipConfigs == nil {
+				return fmt.Errorf("Error while retrieving policy Tier0 HA vip config %s. HaVipConfigs is empty", resourceID)
+			}
+		} else {
+			nsxClient := tier_0s.NewDefaultLocaleServicesClient(connector)
+			obj, err := nsxClient.Get(gwID, localeServiceID)
+			if err != nil {
+				return fmt.Errorf("Error while retrieving policy Tier0 HA vip config %s. Error: %v", resourceID, err)
+			}
+			if obj.HaVipConfigs == nil {
+				return fmt.Errorf("Error while retrieving policy Tier0 HA vip config %s. HaVipConfigs is empty", resourceID)
+			}
+		}
 
 		return nil
 	}
@@ -89,24 +151,25 @@ func testAccNsxtPolicyTier0HAVipConfigCheckDestroy(state *terraform.State, displ
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
 	for _, rs := range state.RootModule().Resources {
 
-		if rs.Type != "nsxt_policy_tier0_gateway_interface" {
+		if rs.Type != "nsxt_policy'_tier0_gateway_interface" {
 			continue
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
 		localeServiceID := rs.Primary.Attributes["locale_service_id"]
-		gwID := getPolicyIDFromPath(rs.Primary.Attributes["gateway_path"])
-
-		var err error
+		gwID := rs.Primary.Attributes["tier0_id"]
 		if testAccIsGlobalManager() {
-			nsxClient := gm_locale_services.NewDefaultInterfacesClient(connector)
-			_, err = nsxClient.Get(gwID, localeServiceID, resourceID)
+			nsxClient := gm_tier0s.NewDefaultLocaleServicesClient(connector)
+			obj, err := nsxClient.Get(gwID, localeServiceID)
+			if err == nil && obj.HaVipConfigs != nil {
+				return fmt.Errorf("Policy Tier0 HA vip config %s still exists", resourceID)
+			}
 		} else {
-			nsxClient := locale_services.NewDefaultInterfacesClient(connector)
-			_, err = nsxClient.Get(gwID, localeServiceID, resourceID)
-		}
-		if err == nil {
-			return fmt.Errorf("Policy Tier0 Interface %s still exists", displayName)
+			nsxClient := tier_0s.NewDefaultLocaleServicesClient(connector)
+			obj, err := nsxClient.Get(gwID, localeServiceID)
+			if err == nil && obj.HaVipConfigs != nil {
+				return fmt.Errorf("Policy Tier0 HA vip config %s still exists", resourceID)
+			}
 		}
 	}
 	return nil
@@ -119,7 +182,7 @@ func testAccNsxtPolicyTier0HAVipConfigSiteTemplate() string {
 	return ""
 }
 
-func testAccNsxtPolicyTier0HAVipConfigTemplate(subnet string) string {
+func testAccNsxtPolicyTier0HAVipConfigTemplate(enabled string, subnet1 string, subnet2 string, vipSubnet string) string {
 	return testAccNsxtPolicyGatewayFabricInterfaceDeps() + fmt.Sprintf(`
 
 resource "nsxt_policy_vlan_segment" "test1" {
@@ -178,7 +241,16 @@ resource "nsxt_policy_tier0_gateway_interface" "test2" {
   subnets        = ["%s"]
   urpf_mode      = "STRICT"
   %s
+  depends_on     = ["nsxt_policy_tier0_gateway_interface.test1"]
+}
+
+resource "nsxt_policy_tier0_gateway_ha_vip_config" "test" {
+	config {
+		enabled                  = "%s"
+		external_interface_paths = [nsxt_policy_tier0_gateway_interface.test1.path, nsxt_policy_tier0_gateway_interface.test2.path]
+		vip_subnets              = ["%s"]
+	}
 }`, testAccNsxtPolicyTier0EdgeClusterTemplate(),
-    subnet, testAccNsxtPolicyTier0HAVipConfigSiteTemplate(),
-    subnet, testAccNsxtPolicyTier0HAVipConfigSiteTemplate())
+		subnet1, testAccNsxtPolicyTier0HAVipConfigSiteTemplate(),
+		subnet2, testAccNsxtPolicyTier0HAVipConfigSiteTemplate(), enabled, vipSubnet)
 }

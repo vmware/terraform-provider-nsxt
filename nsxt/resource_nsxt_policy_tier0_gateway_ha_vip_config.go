@@ -6,26 +6,26 @@ package nsxt
 import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	//"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
-	//gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
-	//gm_tier0s "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s"
-	//gm_locale_services "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s/locale_services"
-	//gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
-	//"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
-	//"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services"
-	//"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	"log"
+	gm_tier0s "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s"
+	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+	"strconv"
 	"strings"
 )
 
-func resourceNsxtPolicyTier0HAVipConfig() *schema.Resource {
+var interfacePathLen = 8
+var interfaceTier0Location = 3
+var interfaceLocaleSrvLocation = 5
+
+func resourceNsxtPolicyTier0GatewayHAVipConfig() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNsxtPolicyTier0HAVipConfigCreate,
-		Read:   resourceNsxtPolicyTier0HAVipConfigRead,
-		Update: resourceNsxtPolicyTier0HAVipConfigUpdate,
-		Delete: resourceNsxtPolicyTier0HAVipConfigDelete,
+		Create: resourceNsxtPolicyTier0GatewayHAVipConfigCreate,
+		Read:   resourceNsxtPolicyTier0GatewayHAVipConfigRead,
+		Update: resourceNsxtPolicyTier0GatewayHAVipConfigUpdate,
+		Delete: resourceNsxtPolicyTier0GatewayHAVipConfigDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceNsxtPolicyTier0HAVipConfigImport,
+			State: resourceNsxtPolicyTier0GatewayHAVipConfigImport,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -46,8 +46,9 @@ func resourceNsxtPolicyTier0HAVipConfig() *schema.Resource {
 							Description: "paths to Tier0 external interfaces which are to be paired to provide redundancy",
 							Required:    true,
 							MinItems:    2,
+							MaxItems:    2,
 							Elem: &schema.Schema{
-								Type: schema.TypeString,
+								Type:         schema.TypeString,
 								ValidateFunc: validatePolicyPath(),
 							},
 						},
@@ -79,43 +80,102 @@ func resourceNsxtPolicyTier0HAVipConfig() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyTier0HAVipConfigCreate(d *schema.ResourceData, m interface{}) error {
-	//connector := getPolicyConnector(m)
+func getHaVipInterfaceSubnetList(configData map[string]interface{}) []model.InterfaceSubnet {
+	subnets := interface2StringList(configData["vip_subnets"].([]interface{}))
+	var interfaceSubnetList []model.InterfaceSubnet
+	for _, subnet := range subnets {
+		result := strings.Split(subnet, "/")
+		var ipAddresses []string
+		ipAddresses = append(ipAddresses, result[0])
+		prefix, _ := strconv.Atoi(result[1])
+		prefix64 := int64(prefix)
+		interfaceSubnet := model.InterfaceSubnet{
+			IpAddresses: ipAddresses,
+			PrefixLen:   &prefix64,
+		}
+		interfaceSubnetList = append(interfaceSubnetList, interfaceSubnet)
+	}
 
-	// Get the tier0 id and locale-service id from the interfaces
+	return interfaceSubnetList
+}
+
+func resourceNsxtPolicyTier0GatewayHAVipConfigCreate(d *schema.ResourceData, m interface{}) error {
+	connector := getPolicyConnector(m)
+
+	// Get the tier0 id and locale-service id from the interfaces and make sure
+	// all the interfaces belong to the same locale service
+	var tier0ID string
+	var localeServiceID string
 	configs := d.Get("config").([]interface{})
+	var haVipConfigs []model.Tier0HaVipConfig
 	for _, config := range configs {
-		config_data := config.(map[string]interface{})
-		interfaces := config_data["external_interface_paths"].(*schema.Set).List()
-		example_interface := interfaces[0].(string)
-		log.Printf("[ERROR] DEBUG ADIT path %s", example_interface)
-		result := strings.Split(example_interface, "/")
-		log.Printf("[ERROR] DEBUG ADIT result %v", result)
+		configData := config.(map[string]interface{})
+		interfaces := configData["external_interface_paths"].([]interface{})
+		var externalInterfacePaths []string
+		for _, intf := range interfaces {
+			splitPath := strings.Split(intf.(string), "/")
+			if len(splitPath) != interfacePathLen {
+				return fmt.Errorf("Error obtaining Tier0 id or Locale Service id from interface %s", intf)
+			}
+			if tier0ID == "" {
+				tier0ID = splitPath[interfaceTier0Location]
+			} else if tier0ID != splitPath[interfaceTier0Location] {
+				return fmt.Errorf("Interface %s has a different tier0 instead of %s", intf, tier0ID)
+			}
+			if localeServiceID == "" {
+				localeServiceID = splitPath[interfaceLocaleSrvLocation]
+			} else if localeServiceID != splitPath[interfaceLocaleSrvLocation] {
+				return fmt.Errorf("Interface %s has a different locale-service instead of %s", intf, localeServiceID)
+			}
+			externalInterfacePaths = append(externalInterfacePaths, intf.(string))
+		}
+		enabled := configData["enabled"].(bool)
+		subnets := getHaVipInterfaceSubnetList(configData)
+		elem := model.Tier0HaVipConfig{
+			Enabled:                &enabled,
+			ExternalInterfacePaths: externalInterfacePaths,
+			VipSubnets:             subnets,
+		}
+		haVipConfigs = append(haVipConfigs, elem)
+	}
+
+	// Update the locale service id
+	lsType := "LocaleServices"
+	serviceStruct := model.LocaleServices{
+		Id:           &localeServiceID,
+		ResourceType: &lsType,
+		HaVipConfigs: haVipConfigs,
 	}
 
 	id := newUUID()
-	d.SetId(id)
-	//d.Set("tier0_id", tier0ID)
-	//d.Set("locale_service_id", localeServiceID)
 
-	return resourceNsxtPolicyTier0HAVipConfigRead(d, m)
-}
+	var err error
+	if isPolicyGlobalManager(m) {
+		// Use patch to only update the relevant fields
+		rawObj, err := convertModelBindingType(serviceStruct, model.LocaleServicesBindingType(), gm_model.LocaleServicesBindingType())
+		if err != nil {
+			return err
+		}
+		client := gm_tier0s.NewDefaultLocaleServicesClient(connector)
+		err = client.Patch(tier0ID, localeServiceID, rawObj.(gm_model.LocaleServices))
 
-func resourceNsxtPolicyTier0HAVipConfigRead(d *schema.ResourceData, m interface{}) error {
-	//connector := getPolicyConnector(m)
-
-	id := d.Id()
-	tier0ID := d.Get("tier0_id").(string)
-	localeServiceID := d.Get("locale_service_id").(string)
-	if id == "" || tier0ID == "" || localeServiceID == ""{
-		return fmt.Errorf("Error obtaining Tier0 id or Locale Service id")
+	} else {
+		client := tier_0s.NewDefaultLocaleServicesClient(connector)
+		err = client.Patch(tier0ID, localeServiceID, serviceStruct)
+	}
+	if err != nil {
+		return handleCreateError("Tier0 HA Vip config", id, err)
 	}
 
-	return nil
+	d.SetId(id)
+	d.Set("tier0_id", tier0ID)
+	d.Set("locale_service_id", localeServiceID)
+
+	return resourceNsxtPolicyTier0GatewayHAVipConfigRead(d, m)
 }
 
-func resourceNsxtPolicyTier0HAVipConfigUpdate(d *schema.ResourceData, m interface{}) error {
-	//connector := getPolicyConnector(m)
+func resourceNsxtPolicyTier0GatewayHAVipConfigRead(d *schema.ResourceData, m interface{}) error {
+	connector := getPolicyConnector(m)
 
 	id := d.Id()
 	tier0ID := d.Get("tier0_id").(string)
@@ -124,59 +184,181 @@ func resourceNsxtPolicyTier0HAVipConfigUpdate(d *schema.ResourceData, m interfac
 		return fmt.Errorf("Error obtaining Tier0 id or Locale Service id")
 	}
 
-	return resourceNsxtPolicyTier0HAVipConfigRead(d, m)
+	var obj model.LocaleServices
+	if isPolicyGlobalManager(m) {
+		client := gm_tier0s.NewDefaultLocaleServicesClient(connector)
+		gmObj, err1 := client.Get(tier0ID, localeServiceID)
+		if err1 != nil {
+			return handleReadError(d, "Tier0 HA Vip config", id, err1)
+		}
+		lmObj, err2 := convertModelBindingType(gmObj, model.LocaleServicesBindingType(), model.LocaleServicesBindingType())
+		if err2 != nil {
+			return err2
+		}
+		obj = lmObj.(model.LocaleServices)
+	} else {
+		var err error
+		client := tier_0s.NewDefaultLocaleServicesClient(connector)
+		obj, err = client.Get(tier0ID, defaultPolicyLocaleServiceID)
+		if err != nil {
+			return handleReadError(d, "Tier0 HA Vip config", id, err)
+		}
+	}
+
+	// Set the ha config values in the scheme
+	var configList []map[string]interface{}
+	for _, config := range obj.HaVipConfigs {
+		elem := make(map[string]interface{})
+		elem["enabled"] = config.Enabled
+
+		var subnetList []string
+		for _, subnet := range config.VipSubnets {
+			cidr := fmt.Sprintf("%s/%d", subnet.IpAddresses[0], *subnet.PrefixLen)
+			subnetList = append(subnetList, cidr)
+		}
+		elem["vip_subnets"] = subnetList
+		elem["external_interface_paths"] = config.ExternalInterfacePaths
+
+		configList = append(configList, elem)
+	}
+	d.Set("config", configList)
+
+	return nil
 }
 
-func resourceNsxtPolicyTier0HAVipConfigDelete(d *schema.ResourceData, m interface{}) error {
-	//connector := getPolicyConnector(m)
+func resourceNsxtPolicyTier0GatewayHAVipConfigUpdate(d *schema.ResourceData, m interface{}) error {
+	connector := getPolicyConnector(m)
 
 	id := d.Id()
 	tier0ID := d.Get("tier0_id").(string)
 	localeServiceID := d.Get("locale_service_id").(string)
-	if id == "" || tier0ID == "" || localeServiceID == ""{
+	if id == "" || tier0ID == "" || localeServiceID == "" {
 		return fmt.Errorf("Error obtaining Tier0 id or Locale Service id")
+	}
+
+	// Make sure all the interfaces belong to the same locale service
+	configs := d.Get("config").([]interface{})
+	var haVipConfigs []model.Tier0HaVipConfig
+	for _, config := range configs {
+		configData := config.(map[string]interface{})
+		interfaces := configData["external_interface_paths"].([]interface{})
+		var externalInterfacePaths []string
+		for _, intf := range interfaces {
+			splitPath := strings.Split(intf.(string), "/")
+			if len(splitPath) != interfacePathLen {
+				return fmt.Errorf("Error obtaining Tier0 id or Locale Service id from interface %s", intf)
+			}
+			if tier0ID != splitPath[interfaceTier0Location] {
+				return fmt.Errorf("Interface %s has a different tier0 instead of %s", intf, tier0ID)
+			}
+			if localeServiceID != splitPath[interfaceLocaleSrvLocation] {
+				return fmt.Errorf("Interface %s has a different locale-service instead of %s", intf, localeServiceID)
+			}
+			externalInterfacePaths = append(externalInterfacePaths, intf.(string))
+		}
+		enabled := configData["enabled"].(bool)
+		subnets := getHaVipInterfaceSubnetList(configData)
+		elem := model.Tier0HaVipConfig{
+			Enabled:                &enabled,
+			ExternalInterfacePaths: externalInterfacePaths,
+			VipSubnets:             subnets,
+		}
+		haVipConfigs = append(haVipConfigs, elem)
+	}
+
+	// Update the locale service
+	lsType := "LocaleServices"
+	serviceStruct := model.LocaleServices{
+		Id:           &localeServiceID,
+		ResourceType: &lsType,
+		HaVipConfigs: haVipConfigs,
+	}
+
+	var err error
+	if isPolicyGlobalManager(m) {
+		// Use patch to only update the relevant fields
+		rawObj, err := convertModelBindingType(serviceStruct, model.LocaleServicesBindingType(), gm_model.LocaleServicesBindingType())
+		if err != nil {
+			return err
+		}
+		client := gm_tier0s.NewDefaultLocaleServicesClient(connector)
+		err = client.Patch(tier0ID, localeServiceID, rawObj.(gm_model.LocaleServices))
+
+	} else {
+		client := tier_0s.NewDefaultLocaleServicesClient(connector)
+		err = client.Patch(tier0ID, localeServiceID, serviceStruct)
+	}
+	if err != nil {
+		return handleUpdateError("Tier0 HA Vip config", id, err)
+	}
+
+	return resourceNsxtPolicyTier0GatewayHAVipConfigRead(d, m)
+}
+
+func resourceNsxtPolicyTier0GatewayHAVipConfigDelete(d *schema.ResourceData, m interface{}) error {
+	connector := getPolicyConnector(m)
+
+	id := d.Id()
+	tier0ID := d.Get("tier0_id").(string)
+	localeServiceID := d.Get("locale_service_id").(string)
+	if id == "" || tier0ID == "" || localeServiceID == "" {
+		return fmt.Errorf("Error obtaining Tier0 id or Locale Service id")
+	}
+
+	// Update the locale service with empty HaVipConfigs using get/post
+	var err error
+	if isPolicyGlobalManager(m) {
+		client := gm_tier0s.NewDefaultLocaleServicesClient(connector)
+		gmObj, err1 := client.Get(tier0ID, localeServiceID)
+		if err1 != nil {
+			return handleDeleteError("Tier0 HA Vip config", id, err)
+		}
+		gmObj.HaVipConfigs = nil
+		_, err = client.Update(tier0ID, localeServiceID, gmObj)
+	} else {
+		client := tier_0s.NewDefaultLocaleServicesClient(connector)
+		obj, err1 := client.Get(tier0ID, localeServiceID)
+		if err1 != nil {
+			return handleDeleteError("Tier0 HA Vip config", id, err)
+		}
+		obj.HaVipConfigs = nil
+		_, err = client.Update(tier0ID, localeServiceID, obj)
+	}
+	if err != nil {
+		return handleDeleteError("Tier0 HA Vip config", id, err)
 	}
 
 	return nil
 }
 
-func resourceNsxtPolicyTier0HAVipConfigImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+func resourceNsxtPolicyTier0GatewayHAVipConfigImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	importID := d.Id()
 	s := strings.Split(importID, "/")
 	if len(s) != 2 {
 		return nil, fmt.Errorf("Please provide <gateway-id>/<locale-service-id> as an input")
 	}
 
-	gwID := s[0]
+	tier0ID := s[0]
 	localeServiceID := s[1]
-	// connector := getPolicyConnector(m)
-	// var tier0GW model.Tier0
-	// if isPolicyGlobalManager(m) {
-	// 	client := gm_infra.NewDefaultTier0sClient(connector)
-	// 	gmObj, err1 := client.Get(gwID)
-	// 	if err1 != nil {
-	// 		return nil, err1
-	// 	}
+	connector := getPolicyConnector(m)
+	if isPolicyGlobalManager(m) {
+		client := gm_tier0s.NewDefaultLocaleServicesClient(connector)
+		obj, err := client.Get(tier0ID, localeServiceID)
+		if err != nil || obj.HaVipConfigs == nil {
+			return nil, err
+		}
+	} else {
+		var err error
+		client := tier_0s.NewDefaultLocaleServicesClient(connector)
+		obj, err := client.Get(tier0ID, localeServiceID)
+		if err != nil || obj.HaVipConfigs == nil {
+			return nil, err
+		}
+	}
 
-	// 	convertedObj, err2 := convertModelBindingType(gmObj, model.Tier0BindingType(), model.Tier0BindingType())
-	// 	if err2 != nil {
-	// 		return nil, err2
-	// 	}
-
-	// 	tier0GW = convertedObj.(model.Tier0)
-	// } else {
-	// 	client := infra.NewDefaultTier0sClient(connector)
-	// 	var err error
-	// 	tier0GW, err = client.Get(gwID)
-	// 	if err != nil {
-	// 		return nil, err
-	// 	}
-	// }
-
-	d.Set("tier0_id", gwID)
+	d.Set("tier0_id", tier0ID)
 	d.Set("locale_service_id", localeServiceID)
-	id := newUUID()
-	d.SetId(id)
+	d.SetId(localeServiceID)
 
 	return []*schema.ResourceData{d}, nil
 }
