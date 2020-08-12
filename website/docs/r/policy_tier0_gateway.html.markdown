@@ -101,7 +101,7 @@ The following arguments are supported:
 * `tag` - (Optional) A list of scope + tag pairs to associate with this Tier-0 gateway.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the policy resource.
 * `edge_cluster_path` - (Optional) The path of the edge cluster where the Tier-0 is placed. Must be specified when `bgp_config` is enabled. This argument is not applicable for NSX Global Manager - use locale-services clause instead.
-* `locale_service` - (Optional) This argument is applicable for NSX Global Manager only. Multiple locale services can be specified for multiple locations.
+* `locale_service` - (Required) This argument is applicable for NSX Global Manager only. Multiple locale services can be specified for multiple locations.
   * `edge_cluster_path` - (Required) The path of the edge cluster where the Tier-0 is placed.
   * `preferred_edge_paths` - (Optional) Policy paths to edge nodes. Specified edge is used as preferred edge cluster member when failover mode is set to `PREEMPTIVE`.
 * `failover_mode` - (Optional) This failover mode determines, whether the preferred service router instance for given logical router will preempt the peer. Accepted values are PREEMPTIVE/NON_PREEMPTIVE.
