@@ -5,7 +5,7 @@ sidebar_current: "docs-nsxt-resource-policy-tier1-gateway-interface"
 description: A resource to configure an Interface on Tier-1 gateway in NSX Policy manager.
 ---
 
-# nsxt_policy_tier1_gateway
+# nsxt_policy_tier1_gateway_interface
 
 This resource provides a method for the management of a Tier-1 gateway Interface. Note that edge cluster must be configured on Tier-1 Gateway in order to configure interfaces on it.
 
