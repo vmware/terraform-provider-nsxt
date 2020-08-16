@@ -22,7 +22,7 @@ func TestAccResourceNsxtPolicyTier0GatewayHaVipConfig_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccNSXGlobalManagerSitePrecheck()
+			testAccNSXGlobalManagerSitePrecheck(t)
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
