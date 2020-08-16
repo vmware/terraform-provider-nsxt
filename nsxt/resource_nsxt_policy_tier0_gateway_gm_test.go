@@ -282,6 +282,10 @@ func testAccNsxtPolicyTier0GMMinimalistic() string {
 	return testAccNsxtPolicyGMGatewayDeps() + fmt.Sprintf(`
 resource "nsxt_policy_tier0_gateway" "test" {
   display_name = "%s"
+
+  locale_service {
+    edge_cluster_path = data.nsxt_policy_edge_cluster.ec_site1.path
+  }
 }`, defaultTestResourceName)
 }
 

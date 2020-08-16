@@ -576,7 +576,7 @@ data "nsxt_policy_realization_info" "realization_info" {
 }
 
 func testAccNsxtPolicyTier0CreateTemplate(name string, failoverMode string) string {
-	config := fmt.Sprintf(`
+	config := testAccNsxtPolicyGatewayFabricInterfaceDeps() + fmt.Sprintf(`
 resource "nsxt_policy_tier0_gateway" "test" {
   display_name              = "%s"
   description               = "Acceptance Test"
@@ -587,6 +587,7 @@ resource "nsxt_policy_tier0_gateway" "test" {
   ha_mode                   = "ACTIVE_STANDBY"
   ipv6_ndra_profile_path    = "/infra/ipv6-ndra-profiles/default"
   ipv6_dad_profile_path     = "/infra/ipv6-dad-profiles/default"
+  %s
 
   tag {
     scope = "scope1"
@@ -598,13 +599,13 @@ resource "nsxt_policy_tier0_gateway" "test" {
     tag   = "tag2"
   }
 
-}`, name, failoverMode)
+}`, name, failoverMode, testAccNsxtPolicyTier0EdgeClusterTemplate())
 
 	return testAccAdjustPolicyInfraConfig(config)
 }
 
 func testAccNsxtPolicyTier0UpdateTemplate(name string, failoverMode string) string {
-	config := fmt.Sprintf(`
+	config := testAccNsxtPolicyGatewayFabricInterfaceDeps() + fmt.Sprintf(`
 resource "nsxt_policy_tier0_gateway" "test" {
   display_name              = "%s"
   description               = "Acceptance Test Update"
@@ -615,23 +616,25 @@ resource "nsxt_policy_tier0_gateway" "test" {
   ha_mode                   = "ACTIVE_ACTIVE"
   ipv6_ndra_profile_path    = "/infra/ipv6-ndra-profiles/default"
   ipv6_dad_profile_path     = "/infra/ipv6-dad-profiles/default"
+  %s
 
   tag {
     scope = "scope3"
     tag   = "tag3"
   }
-} `, name, failoverMode)
+} `, name, failoverMode, testAccNsxtPolicyTier0EdgeClusterTemplate())
 
 	return testAccAdjustPolicyInfraConfig(config)
 }
 
 func testAccNsxtPolicyTier0SetTemplateWithID(name string, id string) string {
-	return fmt.Sprintf(`
+	return testAccNsxtPolicyGatewayFabricInterfaceDeps() + fmt.Sprintf(`
 
 resource "nsxt_policy_tier0_gateway" "test" {
   nsx_id       = "%s"
   display_name = "%s"
   description  = "Acceptance Test"
+  %s
 
   tag {
     scope = "scope1"
@@ -642,7 +645,7 @@ resource "nsxt_policy_tier0_gateway" "test" {
     scope = "scope2"
     tag   = "tag2"
   }
-}`, id, name)
+}`, id, name, testAccNsxtPolicyTier0EdgeClusterTemplate())
 }
 
 func testAccNsxtPolicyTier0SubnetsTemplate(name string) string {
