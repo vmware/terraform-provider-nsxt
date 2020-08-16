@@ -12,6 +12,7 @@ import (
 	"testing"
 )
 
+// Note that this test depends on having at least 2 edge nodes in the cluster
 func TestAccResourceNsxtPolicyTier0GatewayHaVipConfig_basic(t *testing.T) {
 	subnet1 := "1.1.12.1/24"
 	subnet2 := "1.1.12.2/24"
@@ -21,8 +22,7 @@ func TestAccResourceNsxtPolicyTier0GatewayHaVipConfig_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccEnvDefined(t, "NSXT_TEST_SITE_NAME")
-			testAccOnlyGlobalManager(t)
+			testAccNSXGlobalManagerSitePrecheck()
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
