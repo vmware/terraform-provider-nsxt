@@ -12,6 +12,19 @@ This resource provides a method for the management of a BGP Neighbor.
 ## Example Usage
 
 ```hcl
+
+resource "nsxt_policy_gateway_prefix_list" "test" {
+  display_name = "prefix_list"
+  gateway_path = "nsxt_policy_tier0_gateway.testresource.path"
+
+  prefix {
+    action  = "DENY"
+    ge      = "20"
+    le      = "23"
+    network = "4.4.0.0/20"
+  }
+}
+
 resource "nsxt_policy_bgp_neighbor" "test" {
   display_name          = "tfbpg"
   description           = "Terraform provisioned BgpNeighborConfig"
@@ -34,6 +47,8 @@ resource "nsxt_policy_bgp_neighbor" "test" {
   route_filtering {
     address_family = "IPV4"
     maximum_routes = 20
+    in_route_filter = nsxt_policy_gateway_prefix_list.test.path
+    out_route_filter = nsxt_policy_gateway_prefix_list.test.path
   }
 }
 ```
