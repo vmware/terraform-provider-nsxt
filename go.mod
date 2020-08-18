@@ -1,4 +1,4 @@
-module github.com/terraform-providers/terraform-provider-nsxt
+module github.com/vmware/terraform-provider-nsxt
 
 go 1.14
 

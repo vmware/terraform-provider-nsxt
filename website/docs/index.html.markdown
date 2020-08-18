@@ -847,4 +847,4 @@ For more information how how to submit feature requests, bug reports, or
 details on how to make your own contributions to the provider, see the [NSX-T
 provider project page][nsxt-provider-project-page].
 
-[nsxt-provider-project-page]: https://github.com/terraform-providers/terraform-provider-nsxt
+[nsxt-provider-project-page]: https://github.com/vmware/terraform-provider-nsxt
