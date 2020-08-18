@@ -17,6 +17,9 @@ func TestAccResourceNsxtPolicyTier0GatewayHaVipConfig_basic(t *testing.T) {
 	subnet1 := "1.1.12.1/24"
 	subnet2 := "1.1.12.2/24"
 	vipSubnet := "1.1.12.4/24"
+	updatedVipSubnet := "1.1.12.5/24"
+	tier0Name := "ha_tier0"
+	updatedTier0Name := "updated_ha_tier0"
 	testResourceName := "nsxt_policy_tier0_gateway_ha_vip_config.test"
 
 	resource.Test(t, resource.TestCase{
@@ -30,7 +33,8 @@ func TestAccResourceNsxtPolicyTier0GatewayHaVipConfig_basic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyTier0HAVipConfigTemplate("true", subnet1, subnet2, vipSubnet),
+				// create the vip config with all the dependencies
+				Config: testAccNsxtPolicyTier0HAVipConfigTemplate(tier0Name, "true", subnet1, subnet2, vipSubnet),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTier0HAVipConfigExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "config.#", "1"),
@@ -43,18 +47,47 @@ func TestAccResourceNsxtPolicyTier0GatewayHaVipConfig_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyTier0HAVipConfigTemplate("false", subnet1, subnet2, vipSubnet),
+				// update the vip config
+				Config: testAccNsxtPolicyTier0HAVipConfigTemplate(tier0Name, "false", subnet1, subnet2, updatedVipSubnet),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTier0HAVipConfigExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "config.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "config.0.enabled", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "config.0.external_interface_paths.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "config.0.vip_subnets.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "config.0.vip_subnets.0", vipSubnet),
+					resource.TestCheckResourceAttr(testResourceName, "config.0.vip_subnets.0", updatedVipSubnet),
 					resource.TestCheckResourceAttrSet(testResourceName, "tier0_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "locale_service_id"),
 				),
 			},
+			{
+				// update the tier0 only
+				Config: testAccNsxtPolicyTier0HAVipConfigTemplate(updatedTier0Name, "false", subnet1, subnet2, updatedVipSubnet),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyTier0HAVipConfigExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "config.0.enabled", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "config.0.external_interface_paths.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "config.0.vip_subnets.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "config.0.vip_subnets.0", updatedVipSubnet),
+					resource.TestCheckResourceAttrSet(testResourceName, "tier0_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "locale_service_id"),
+				),
+			},
+			// {
+			// 	// Update Tier0 and HA vip config at the same time (This doesn't work currently)
+			// 	Config: testAccNsxtPolicyTier0HAVipConfigTemplate(tier0Name, "true", subnet1, subnet2, vipSubnet),
+			// 	Check: resource.ComposeTestCheckFunc(
+			// 		testAccNsxtPolicyTier0HAVipConfigExists(testResourceName),
+			// 		resource.TestCheckResourceAttr(testResourceName, "config.#", "1"),
+			// 		resource.TestCheckResourceAttr(testResourceName, "config.0.enabled", "true"),
+			// 		resource.TestCheckResourceAttr(testResourceName, "config.0.external_interface_paths.#", "2"),
+			// 		resource.TestCheckResourceAttr(testResourceName, "config.0.vip_subnets.#", "1"),
+			// 		resource.TestCheckResourceAttr(testResourceName, "config.0.vip_subnets.0", vipSubnet),
+			// 		resource.TestCheckResourceAttrSet(testResourceName, "tier0_id"),
+			// 		resource.TestCheckResourceAttrSet(testResourceName, "locale_service_id"),
+			// 	),
+			// },
 		},
 	})
 }
@@ -86,6 +119,7 @@ func TestAccResourceNsxtPolicyTier0GatewayHaVipConfig_importBasic(t *testing.T) 
 	subnet1 := "1.1.12.1/24"
 	subnet2 := "1.1.12.2/24"
 	vipSubnet := "1.1.12.4/24"
+	tier0Name := "ha_tier0"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -95,7 +129,7 @@ func TestAccResourceNsxtPolicyTier0GatewayHaVipConfig_importBasic(t *testing.T) 
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyTier0HAVipConfigTemplate("true", subnet1, subnet2, vipSubnet),
+				Config: testAccNsxtPolicyTier0HAVipConfigTemplate(tier0Name, "true", subnet1, subnet2, vipSubnet),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -182,7 +216,7 @@ func testAccNsxtPolicyTier0HAVipConfigSiteTemplate() string {
 	return ""
 }
 
-func testAccNsxtPolicyTier0HAVipConfigTemplate(enabled string, subnet1 string, subnet2 string, vipSubnet string) string {
+func testAccNsxtPolicyTier0HAVipConfigTemplate(tier0Name string, enabled string, subnet1 string, subnet2 string, vipSubnet string) string {
 	return testAccNsxtPolicyGatewayFabricInterfaceDeps() + fmt.Sprintf(`
 
 resource "nsxt_policy_vlan_segment" "test1" {
@@ -214,7 +248,7 @@ data "nsxt_policy_edge_node" "EN1" {
 }
 
 resource "nsxt_policy_tier0_gateway" "test" {
-  display_name      = "ha_vip_test"
+  display_name      = "%s"
   ha_mode           = "ACTIVE_STANDBY"
   %s
 }
@@ -250,7 +284,7 @@ resource "nsxt_policy_tier0_gateway_ha_vip_config" "test" {
 		external_interface_paths = [nsxt_policy_tier0_gateway_interface.test1.path, nsxt_policy_tier0_gateway_interface.test2.path]
 		vip_subnets              = ["%s"]
 	}
-}`, testAccNsxtPolicyTier0EdgeClusterTemplate(),
+}`, tier0Name, testAccNsxtPolicyTier0EdgeClusterTemplate(),
 		subnet1, testAccNsxtPolicyTier0HAVipConfigSiteTemplate(),
 		subnet2, testAccNsxtPolicyTier0HAVipConfigSiteTemplate(), enabled, vipSubnet)
 }
