@@ -72,7 +72,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_globalManager(t *testing.T) {
 					testAccNsxtPolicyTier0Exists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", defaultTestResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "ha_mode", "ACTIVE_ACTIVE"),
-					resource.TestCheckResourceAttr(testResourceName, "locale_service.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "locale_service.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "intersite_config.#", "1"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
@@ -197,7 +197,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_globalManagerRedistribution(t *testin
 					testAccNsxtPolicyTier0Exists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", defaultTestResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "ha_mode", "ACTIVE_ACTIVE"),
-					resource.TestCheckResourceAttr(testResourceName, "locale_service.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "locale_service.#", "1"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 				),
@@ -282,6 +282,10 @@ func testAccNsxtPolicyTier0GMMinimalistic() string {
 	return testAccNsxtPolicyGMGatewayDeps() + fmt.Sprintf(`
 resource "nsxt_policy_tier0_gateway" "test" {
   display_name = "%s"
+
+  locale_service {
+    edge_cluster_path = data.nsxt_policy_edge_cluster.ec_site1.path
+  }
 }`, defaultTestResourceName)
 }
 

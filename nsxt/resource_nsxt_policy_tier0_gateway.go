@@ -662,17 +662,20 @@ func initSingleTier0GatewayLocaleService(d *schema.ResourceData, children []*dat
 }
 
 func verifyPolicyTier0GatewayConfig(d *schema.ResourceData, isGlobalManager bool) error {
+	_, isSetLocaleService := d.GetOk("locale_service")
 	if isGlobalManager {
 		_, isSet := d.GetOk("edge_cluster_path")
 		if isSet {
 			return fmt.Errorf("edge_cluster_path setting is not supported with NSX Global Manager, please use locale_service instead")
 		}
 
+		if !isSetLocaleService {
+			return fmt.Errorf("locale_service setting is mandatory with NSX Global Manager")
+		}
 		return nil
 	}
 
-	_, isSet := d.GetOk("locale_service")
-	if isSet {
+	if isSetLocaleService {
 		return fmt.Errorf("locale_service setting is only supported with NSX Global Manager")
 	}
 
