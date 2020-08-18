@@ -5,10 +5,11 @@ package nsxt
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/ip_pools"
-	"testing"
 )
 
 var accTestPolicyIPAddressAllocationCreateAttributes = map[string]string{
@@ -270,7 +271,7 @@ data "nsxt_policy_realization_info" "realization_info" {
 }
 
 func testAccNsxtPolicyIPAddressAllocationDependenciesTemplate() string {
-	return fmt.Sprintf(`
+	return `
 resource "nsxt_policy_ip_pool" "test" {
   display_name = "tfpool4"
 }
@@ -283,5 +284,5 @@ resource "nsxt_policy_ip_pool_static_subnet" "test" {
     start = "12.12.12.10"
     end   = "12.12.12.20"
   }
-}`)
+}`
 }

@@ -5,11 +5,12 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/vmware/go-vmware-nsxt/manager"
-	"log"
-	"net/http"
 )
 
 var ingressRateShaperIndex = 0
@@ -138,7 +139,7 @@ func getQosRateShaperFromSchema(d *schema.ResourceData, index int) *manager.QosB
 	return nil
 }
 
-func setQosRateShaperInSchema(d *schema.ResourceData, shaperConf []manager.QosBaseRateShaper, index int) error {
+func setQosRateShaperInSchema(d *schema.ResourceData, shaperConf []manager.QosBaseRateShaper, index int) {
 	scale := rateShaperScales[index]
 	schemaName := rateShaperSchemaNames[index]
 	resourceType := rateShaperResourceTypes[index]
@@ -153,7 +154,7 @@ func setQosRateShaperInSchema(d *schema.ResourceData, shaperConf []manager.QosBa
 			}
 			// Do not define schema for default shaper to avoid non-empty plan
 			if !shaper.Enabled && (average+shaper.BurstSizeBytes+peak == 0) {
-				return nil
+				return
 			}
 			elem := make(map[string]interface{})
 			elem["enabled"] = shaper.Enabled
@@ -164,11 +165,11 @@ func setQosRateShaperInSchema(d *schema.ResourceData, shaperConf []manager.QosBa
 
 			shapers = append(shapers, elem)
 			err := d.Set(schemaName, shapers)
-			return err
+			if err != nil {
+				log.Printf("[WARNING] Failed to set shapers in schema: %v", err)
+			}
 		}
 	}
-
-	return nil
 
 }
 
@@ -303,7 +304,7 @@ func resourceNsxtQosSwitchingProfileUpdate(d *schema.ResourceData, m interface{}
 		Revision:            revision,
 	}
 
-	qosSwitchingProfile, resp, err := nsxClient.LogicalSwitchingApi.UpdateQosSwitchingProfile(nsxClient.Context, id, qosSwitchingProfile)
+	_, resp, err := nsxClient.LogicalSwitchingApi.UpdateQosSwitchingProfile(nsxClient.Context, id, qosSwitchingProfile)
 
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during QosSwitchingProfile update: %v", err)

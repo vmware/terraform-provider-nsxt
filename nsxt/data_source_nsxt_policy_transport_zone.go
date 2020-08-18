@@ -5,13 +5,14 @@ package nsxt
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/sites/enforcement_points"
 	lm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	"strings"
 )
 
 var policyTransportZoneTransportTypes = [](string){

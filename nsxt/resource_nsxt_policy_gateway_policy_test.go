@@ -5,9 +5,10 @@ package nsxt
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"testing"
 )
 
 func TestAccResourceNsxtPolicyGatewayPolicy_basic(t *testing.T) {
@@ -192,7 +193,7 @@ func TestAccResourceNsxtPolicyGatewayPolicy_withDependencies(t *testing.T) {
 	})
 }
 func TestAccResourceNsxtPolicyGatewayPolicy_importBasic(t *testing.T) {
-	name := fmt.Sprintf("terraform-test-import")
+	name := "terraform-test-import"
 	testResourceName := "nsxt_policy_gateway_policy.test"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -215,7 +216,7 @@ func TestAccResourceNsxtPolicyGatewayPolicy_importBasic(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyGatewayPolicy_importNoTcpStrict(t *testing.T) {
-	name := fmt.Sprintf("terraform-test-import")
+	name := "terraform-test-import"
 	testResourceName := "nsxt_policy_gateway_policy.test"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -359,7 +360,11 @@ func testAccNsxtPolicyGatewayPolicyExists(resourceName string, domainName string
 			return fmt.Errorf("Policy GatewayPolicy resource ID not set in resources")
 		}
 
-		if !resourceNsxtPolicyGatewayPolicyExistsInDomain(resourceID, domainName, connector, testAccIsGlobalManager()) {
+		exists, err := resourceNsxtPolicyGatewayPolicyExistsInDomain(resourceID, domainName, connector, testAccIsGlobalManager())
+		if err != nil {
+			return err
+		}
+		if !exists {
 			return fmt.Errorf("Error while retrieving policy GatewayPolicy ID %s", resourceID)
 		}
 		return nil
@@ -375,7 +380,11 @@ func testAccNsxtPolicyGatewayPolicyCheckDestroy(state *terraform.State, displayN
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		if resourceNsxtPolicyGatewayPolicyExistsInDomain(resourceID, domainName, connector, testAccIsGlobalManager()) {
+		exists, err := resourceNsxtPolicyGatewayPolicyExistsInDomain(resourceID, domainName, connector, testAccIsGlobalManager())
+		if err != nil {
+			return err
+		}
+		if exists {
 			return fmt.Errorf("Policy GatewayPolicy %s still exists", displayName)
 		}
 	}

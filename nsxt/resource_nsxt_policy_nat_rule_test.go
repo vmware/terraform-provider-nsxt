@@ -5,10 +5,11 @@ package nsxt
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	"testing"
 )
 
 var testAccResourcePolicyNATRuleName = "nsxt_policy_nat_rule.test"
@@ -17,7 +18,7 @@ var testAccResourcePolicyNATRuleDestNet = "15.1.1.3"
 var testAccResourcePolicyNATRuleTransNet = "16.1.1.3"
 
 func TestAccResourceNsxtPolicyNATRule_minimalT0(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-policy-nat-rule-basic")
+	name := "test-nsx-policy-nat-rule-basic"
 	action := model.PolicyNatRule_ACTION_REFLEXIVE
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -48,7 +49,7 @@ func TestAccResourceNsxtPolicyNATRule_minimalT0(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyNATRule_basicT1(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-policy-nat-rule-basic")
+	name := "test-nsx-policy-nat-rule-basic"
 	updateName := name + "updated"
 	snet := "22.1.1.2"
 	dnet := "33.1.1.2"
@@ -126,7 +127,7 @@ func TestAccResourceNsxtPolicyNATRule_basicT1(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyNATRule_basicT0(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-policy-nat-rule-basic")
+	name := "test-nsx-policy-nat-rule-basic"
 	updateName := name + "updated"
 	snet := "22.1.1.2"
 	tnet := "44.1.1.2"
@@ -184,7 +185,7 @@ func TestAccResourceNsxtPolicyNATRule_basicT0(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyNATRule_basicT1Import(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-policy-nat-rule-basic")
+	name := "test-nsx-policy-nat-rule-basic"
 	action := model.PolicyNatRule_ACTION_DNAT
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -340,12 +341,12 @@ func testAccNsxtPolicyNATRuleTier0CreateTemplate(name string, action string, sou
 	var transportZone string
 	interfaceSite := ""
 	if testAccIsGlobalManager() {
-		transportZone = fmt.Sprintf(`
+		transportZone = `
 data "nsxt_policy_transport_zone" "test" {
   transport_type = "VLAN_BACKED"
   is_default     = true
   site_path      = data.nsxt_policy_site.test.path
-}`)
+}`
 		interfaceSite = "site_path = data.nsxt_policy_site.test.path"
 	} else {
 		transportZone = fmt.Sprintf(`

@@ -5,10 +5,11 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/vmware/go-vmware-nsxt/manager"
 	"log"
 	"net/http"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/vmware/go-vmware-nsxt/manager"
 )
 
 var dhcpType = "DHCP_SERVICE"
@@ -156,7 +157,7 @@ func resourceNsxtLogicalDhcpPortUpdate(d *schema.ResourceData, m interface{}) er
 		Attachment:      &attachment,
 	}
 
-	lp, resp, err := nsxClient.LogicalSwitchingApi.UpdateLogicalPort(nsxClient.Context, id, lp)
+	_, resp, err := nsxClient.LogicalSwitchingApi.UpdateLogicalPort(nsxClient.Context, id, lp)
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error while updating logical DHCP port %s: %v", id, err)
 	}

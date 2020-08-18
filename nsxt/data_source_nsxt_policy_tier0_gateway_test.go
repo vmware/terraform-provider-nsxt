@@ -5,6 +5,8 @@ package nsxt
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
@@ -12,7 +14,6 @@ import (
 	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	"testing"
 )
 
 func TestAccDataSourceNsxtPolicyTier0Gateway_basic(t *testing.T) {
@@ -40,7 +41,7 @@ func TestAccDataSourceNsxtPolicyTier0Gateway_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyEmptyTemplate(),
+				Config: testAccNsxtEmptyTemplate(),
 			},
 		},
 	})
@@ -64,9 +65,9 @@ func testAccDataSourceNsxtPolicyTier0GatewayCreate(name string) error {
 	id := uuid.String()
 
 	if testAccIsGlobalManager() {
-		gmObj, err := convertModelBindingType(obj, model.Tier0BindingType(), gm_model.Tier0BindingType())
-		if err != nil {
-			return err
+		gmObj, convErr := convertModelBindingType(obj, model.Tier0BindingType(), gm_model.Tier0BindingType())
+		if convErr != nil {
+			return convErr
 		}
 
 		client := gm_infra.NewDefaultTier0sClient(connector)

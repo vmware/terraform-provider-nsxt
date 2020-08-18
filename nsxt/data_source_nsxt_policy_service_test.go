@@ -5,8 +5,9 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
 func TestAccDataSourceNsxtPolicyService_basic(t *testing.T) {
@@ -26,7 +27,7 @@ func TestAccDataSourceNsxtPolicyService_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyNoServiceTemplate(),
+				Config: testAccNsxtEmptyTemplate(),
 			},
 		},
 	})
@@ -49,7 +50,7 @@ func TestAccDataSourceNsxtPolicyService_byId(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyNoServiceTemplate(),
+				Config: testAccNsxtEmptyTemplate(),
 			},
 		},
 	})
@@ -73,7 +74,7 @@ func TestAccDataSourceNsxtPolicyService_byPrefix(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyNoServiceTemplate(),
+				Config: testAccNsxtEmptyTemplate(),
 			},
 		},
 	})
@@ -91,8 +92,4 @@ func testAccNsxtPolicyServiceReadIDTemplate(id string) string {
 data "nsxt_policy_service" "test" {
   id = "%s"
 }`, id)
-}
-
-func testAccNsxtPolicyNoServiceTemplate() string {
-	return fmt.Sprintf(` `)
 }

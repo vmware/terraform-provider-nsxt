@@ -5,14 +5,15 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"net/http"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccResourceNsxtFirewallSection_basic(t *testing.T) {
-	sectionName := fmt.Sprintf("test-nsx-firewall-section-basic")
+	sectionName := "test-nsx-firewall-section-basic"
 	updatesectionName := fmt.Sprintf("%s-update", sectionName)
 	testResourceName := "nsxt_firewall_section.test"
 	tags := singleTag
@@ -57,7 +58,7 @@ func TestAccResourceNsxtFirewallSection_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtFirewallSection_withTos(t *testing.T) {
-	sectionName := fmt.Sprintf("test-nsx-firewall-section-tos")
+	sectionName := "test-nsx-firewall-section-tos"
 	updatesectionName := fmt.Sprintf("%s-update", sectionName)
 	testResourceName := "nsxt_firewall_section.test"
 	tags := singleTag
@@ -112,7 +113,7 @@ target_id   = "${nsxt_ns_group.grp2.id}"
 }
 
 func TestAccResourceNsxtFirewallSection_withRules(t *testing.T) {
-	sectionName := fmt.Sprintf("test-nsx-firewall-section-rules")
+	sectionName := "test-nsx-firewall-section-rules"
 	updatesectionName := fmt.Sprintf("%s-update", sectionName)
 	testResourceName := "nsxt_firewall_section.test"
 	ruleName := "rule1.0"
@@ -162,7 +163,7 @@ func TestAccResourceNsxtFirewallSection_withRules(t *testing.T) {
 }
 
 func TestAccResourceNsxtFirewallSection_withRulesAndTags(t *testing.T) {
-	sectionName := fmt.Sprintf("test-nsx-firewall-section-tags")
+	sectionName := "test-nsx-firewall-section-tags"
 	updatesectionName := fmt.Sprintf("%s-update", sectionName)
 	testResourceName := "nsxt_firewall_section.test"
 	ruleName := "rule1.0"
@@ -212,7 +213,7 @@ func TestAccResourceNsxtFirewallSection_withRulesAndTags(t *testing.T) {
 }
 
 func TestAccResourceNsxtFirewallSection_withRulesAndTos(t *testing.T) {
-	sectionName := fmt.Sprintf("test-nsx-firewall-section-rules_and_tos")
+	sectionName := "test-nsx-firewall-section-rules_and_tos"
 	updatesectionName := fmt.Sprintf("%s-update", sectionName)
 	testResourceName := "nsxt_firewall_section.test"
 	ruleName := "rule1.0"
@@ -329,7 +330,7 @@ func TestAccResourceNsxtFirewallSection_ordered(t *testing.T) {
 }
 
 func TestAccResourceNsxtFirewallSection_edge(t *testing.T) {
-	sectionName := fmt.Sprintf("test-nsx-firewall-section-basic")
+	sectionName := "test-nsx-firewall-section-basic"
 	edgeClusterName := getEdgeClusterName()
 	transportZoneName := getOverlayTransportZoneName()
 	updatesectionName := fmt.Sprintf("%s-update", sectionName)
@@ -376,7 +377,7 @@ func TestAccResourceNsxtFirewallSection_edge(t *testing.T) {
 }
 
 func TestAccResourceNsxtFirewallSection_importBasic(t *testing.T) {
-	sectionName := fmt.Sprintf("test-nsx-firewall-section-basic")
+	sectionName := "test-nsx-firewall-section-basic"
 	testResourceName := "nsxt_firewall_section.test"
 	tags := singleTag
 	tos := string("")
@@ -401,7 +402,7 @@ func TestAccResourceNsxtFirewallSection_importBasic(t *testing.T) {
 }
 
 func TestAccResourceNsxtFirewallSection_importWithRules(t *testing.T) {
-	sectionName := fmt.Sprintf("test-nsx-firewall-section-rules")
+	sectionName := "test-nsx-firewall-section-rules"
 	testResourceName := "nsxt_firewall_section.test"
 	ruleName := "rule1.0"
 	tags := singleTag
@@ -427,7 +428,7 @@ func TestAccResourceNsxtFirewallSection_importWithRules(t *testing.T) {
 }
 
 func TestAccResourceNsxtFirewallSection_importWithTos(t *testing.T) {
-	sectionName := fmt.Sprintf("test-nsx-firewall-section-tos")
+	sectionName := "test-nsx-firewall-section-tos"
 	testResourceName := "nsxt_firewall_section.test"
 	tags := singleTag
 	tos := `applied_to {
@@ -511,7 +512,7 @@ func testAccNSXFirewallSectionCheckDestroy(state *terraform.State, displayName s
 }
 
 func testAccNSXFirewallSectionNSGroups() string {
-	return fmt.Sprintf(`
+	return `
 resource "nsxt_ns_group" "grp1" {
   display_name = "grp1"
 }
@@ -534,7 +535,7 @@ resource "nsxt_ns_group" "grp5" {
 
 resource "nsxt_ip_protocol_ns_service" "test" {
   protocol = "6"
-}`)
+}`
 }
 
 func testAccNSXFirewallSectionCreateTemplate(name string, ruleName string, tags string, tos string, ruleTos string) string {

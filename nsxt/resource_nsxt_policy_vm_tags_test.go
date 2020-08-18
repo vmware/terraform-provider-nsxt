@@ -5,9 +5,10 @@ package nsxt
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"testing"
 )
 
 func TestAccResourceNsxtPolicyVMTags_basic(t *testing.T) {
@@ -38,7 +39,7 @@ func TestAccResourceNsxtPolicyVMTags_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyEmptyTemplate(),
+				Config: testAccNsxtEmptyTemplate(),
 			},
 		},
 	})
@@ -83,7 +84,7 @@ func TestAccResourceNsxtPolicyVMTags_withPorts(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyEmptyTemplate(),
+				Config: testAccNsxtEmptyTemplate(),
 			},
 		},
 	})
@@ -110,7 +111,7 @@ func TestAccResourceNsxtPolicyVMTags_import_basic(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"instance_id"},
 			},
 			{
-				Config: testAccNsxtPolicyEmptyTemplate(),
+				Config: testAccNsxtEmptyTemplate(),
 			},
 		},
 	})

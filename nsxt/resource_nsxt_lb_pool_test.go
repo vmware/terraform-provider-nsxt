@@ -5,10 +5,11 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"net/http"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccResourceNsxtLbPool_basic(t *testing.T) {
@@ -380,7 +381,7 @@ resource "nsxt_lb_pool" "test" {
 }
 
 func testAccNSXLbPoolMonitorsTemplate() string {
-	return fmt.Sprintf(`
+	return `
 resource "nsxt_lb_icmp_monitor" "lb_icmp_monitor" {
   display_name = "lb_icmp_monitor"
   fall_count   = 3
@@ -392,7 +393,7 @@ resource "nsxt_lb_passive_monitor" "lb_passive_monitor" {
   max_fails    = 3
   timeout      = 10
 }
-`)
+`
 }
 
 func testAccNSXLbPoolCreateWithMonitorsTemplate(name string) string {

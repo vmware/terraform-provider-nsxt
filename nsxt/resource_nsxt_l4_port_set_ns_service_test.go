@@ -5,14 +5,15 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"net/http"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccResourceNsxtL4PortNsService_basic(t *testing.T) {
-	serviceName := fmt.Sprintf("test-nsx-l4-service")
+	serviceName := "test-nsx-l4-service"
 	updateServiceName := fmt.Sprintf("%s-update", serviceName)
 	testResourceName := "nsxt_l4_port_set_ns_service.test"
 
@@ -48,7 +49,7 @@ func TestAccResourceNsxtL4PortNsService_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtL4PortNsService_importBasic(t *testing.T) {
-	serviceName := fmt.Sprintf("test-nsx-l4-service")
+	serviceName := "test-nsx-l4-service"
 	testResourceName := "nsxt_l4_port_set_ns_service.test"
 
 	resource.ParallelTest(t, resource.TestCase{

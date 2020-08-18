@@ -8,15 +8,16 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/vmware/go-vmware-nsxt"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/core"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/security"
 	"io/ioutil"
 	"net/http"
 	"strings"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	api "github.com/vmware/go-vmware-nsxt"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/core"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/security"
 )
 
 var defaultRetryOnStatusCodes = []int{429, 503}
@@ -31,7 +32,7 @@ type commonProviderConfig struct {
 type nsxtClients struct {
 	CommonConfig commonProviderConfig
 	// NSX Manager client - based on go-vmware-nsxt SDK
-	NsxtClient *nsxt.APIClient
+	NsxtClient *api.APIClient
 	// Data for NSX Policy client - based on vsphere-automation-sdk-go SDK
 	// First offering of Policy SDK does not support concurrent
 	// operations in single connector. In order to avoid heavy locks,
@@ -321,9 +322,7 @@ func configureNsxtClient(d *schema.ResourceData, clients *nsxtClients) error {
 
 	host := d.Get("host").(string)
 	// Remove schema
-	if strings.HasPrefix(host, "https://") {
-		host = host[len("https://"):]
-	}
+	host = strings.TrimPrefix(host, "https://")
 
 	if host == "" {
 		return fmt.Errorf("host must be provided")
@@ -347,14 +346,14 @@ func configureNsxtClient(d *schema.ResourceData, clients *nsxtClients) error {
 		retryStatuses = append(retryStatuses, s.(int))
 	}
 
-	retriesConfig := nsxt.ClientRetriesConfiguration{
+	retriesConfig := api.ClientRetriesConfiguration{
 		MaxRetries:      maxRetries,
 		RetryMinDelay:   retryMinDelay,
 		RetryMaxDelay:   retryMaxDelay,
 		RetryOnStatuses: retryStatuses,
 	}
 
-	cfg := nsxt.Configuration{
+	cfg := api.Configuration{
 		BasePath:             "/api/v1",
 		Host:                 host,
 		Scheme:               "https",
@@ -369,7 +368,7 @@ func configureNsxtClient(d *schema.ResourceData, clients *nsxtClients) error {
 		RetriesConfiguration: retriesConfig,
 	}
 
-	nsxClient, err := nsxt.NewAPIClient(&cfg)
+	nsxClient, err := api.NewAPIClient(&cfg)
 	if err != nil {
 		return err
 	}
@@ -407,7 +406,10 @@ func getAPIToken(vmcAuthHost string, vmcAccessToken string) (string, error) {
 
 	defer res.Body.Close()
 	token := jwtToken{}
-	json.NewDecoder(res.Body).Decode(&token)
+	err = json.NewDecoder(res.Body).Decode(&token)
+	if err != nil {
+		return "", fmt.Errorf("Failed to decode access token from response: %v", err)
+	}
 
 	return token.AccessToken, nil
 }
@@ -443,8 +445,6 @@ func getConnectorTLSConfig(insecure bool, clientCertFile string, clientKeyFile s
 
 		tlsConfig.RootCAs = caCertPool
 	}
-
-	tlsConfig.BuildNameToCertificate()
 
 	return &tlsConfig, nil
 }
@@ -585,10 +585,6 @@ func getPolicyConnector(clients interface{}) *client.RestConnector {
 
 func getPolicyEnforcementPoint(clients interface{}) string {
 	return clients.(nsxtClients).PolicyEnforcementPoint
-}
-
-func getPolicySite(clients interface{}) string {
-	return clients.(nsxtClients).PolicySite
 }
 
 func isPolicyGlobalManager(clients interface{}) bool {

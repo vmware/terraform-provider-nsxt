@@ -2,13 +2,14 @@ package nsxt
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"testing"
 )
 
 func TestAccResourceNsxtPolicySegment_basicImport(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-policy-segment")
+	name := "test-nsx-policy-segment"
 	testResourceName := "nsxt_policy_segment.test"
 	tzName := getOverlayTransportZoneName()
 
@@ -32,7 +33,7 @@ func TestAccResourceNsxtPolicySegment_basicImport(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicySegment_basicUpdate(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-policy-segment")
+	name := "test-nsx-policy-segment"
 	updatedName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_policy_segment.test"
 	tzName := getOverlayTransportZoneName()
@@ -75,7 +76,7 @@ func TestAccResourceNsxtPolicySegment_basicUpdate(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicySegment_connectivityPath(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-policy-segment")
+	name := "test-nsx-policy-segment"
 	updatedName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_policy_segment.test"
 	tzName := getOverlayTransportZoneName()
@@ -123,7 +124,7 @@ func TestAccResourceNsxtPolicySegment_connectivityPath(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicySegment_updateAdvConfig(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-policy-segment")
+	name := "test-nsx-policy-segment"
 	updatedName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_policy_segment.test"
 	tzName := getOverlayTransportZoneName()
@@ -173,7 +174,7 @@ func TestAccResourceNsxtPolicySegment_updateAdvConfig(t *testing.T) {
 const testAccSegmentQosProfileName = "test-nsx-policy-segment-qos-profile"
 
 func TestAccResourceNsxtPolicySegment_withProfiles(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-policy-segment")
+	name := "test-nsx-policy-segment"
 	updatedName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_policy_segment.test"
 	tzName := getOverlayTransportZoneName()
@@ -232,14 +233,14 @@ func TestAccResourceNsxtPolicySegment_withProfiles(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyEmptyTemplate(),
+				Config: testAccNsxtEmptyTemplate(),
 			},
 		},
 	})
 }
 
 func TestAccResourceNsxtPolicySegment_withDhcp(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-policy-segment")
+	name := "test-nsx-policy-segment"
 	updatedName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_policy_segment.test"
 	leaseTimes := []string{"3600", "36000"}
@@ -314,46 +315,15 @@ func TestAccResourceNsxtPolicySegment_withDhcp(t *testing.T) {
 // TODO: add tests for l2_extension; requires L2 VPN Session
 
 func testAccNsxtPolicySegmentExists(resourceName string) resource.TestCheckFunc {
-	return func(state *terraform.State) error {
-
-		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-
-		rs, ok := state.RootModule().Resources[resourceName]
-		if !ok {
-			return fmt.Errorf("Policy Segment resource %s not found in resources", resourceName)
-		}
-
-		resourceID := rs.Primary.ID
-		if resourceID == "" {
-			return fmt.Errorf("Policy Segment resource ID not set in resources")
-		}
-
-		if !resourceNsxtPolicySegmentExists(resourceID, connector, testAccIsGlobalManager()) {
-			return fmt.Errorf("Error while retrieving policy Segment ID %s", resourceID)
-		}
-
-		return nil
-	}
+	return testAccNsxtPolicyResourceExists(resourceName, resourceNsxtPolicySegmentExists)
 }
 
 func testAccNsxtPolicySegmentCheckDestroy(state *terraform.State, displayName string) error {
-	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-	for _, rs := range state.RootModule().Resources {
-
-		if rs.Type != "nsxt_policy_segment" {
-			continue
-		}
-
-		resourceID := rs.Primary.Attributes["id"]
-		if resourceNsxtPolicySegmentExists(resourceID, connector, testAccIsGlobalManager()) {
-			return fmt.Errorf("Policy Segment %s still exists", displayName)
-		}
-	}
-	return nil
+	return testAccNsxtPolicyResourceCheckDestroy(state, displayName, "nsxt_policy_segment", resourceNsxtPolicySegmentExists)
 }
 
 func testAccNsxtPolicySegmentDeps(tzName string) string {
-	return testAccNSXPolicyTransportZoneReadTemplate(tzName, false, true) + fmt.Sprintf(`
+	return testAccNSXPolicyTransportZoneReadTemplate(tzName, false, true) + `
 
 resource "nsxt_policy_tier1_gateway" "tier1ForSegments" {
   display_name              = "t1gw"
@@ -377,7 +347,7 @@ resource "nsxt_policy_tier1_gateway" "anotherTier1ForSegments" {
   failover_mode             = "NON_PREEMPTIVE"
   pool_allocation           = "ROUTING"
   route_advertisement_types = ["TIER1_STATIC_ROUTES", "TIER1_CONNECTED"]
-}`)
+}`
 }
 
 func testAccNsxtPolicySegmentImportTemplate(tzName string, name string) string {

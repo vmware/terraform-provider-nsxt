@@ -5,10 +5,11 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"net/http"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 var testAccResourceStaticRouteName = "nsxt_static_route.test"
@@ -22,7 +23,7 @@ func TestAccResourceNsxtStaticRoute_onT0(t *testing.T) {
 }
 
 func testAccResourceNsxtStaticRoute(t *testing.T, tier string) {
-	name := fmt.Sprintf("test-nsx-static-route")
+	name := "test-nsx-static-route"
 	updateName := fmt.Sprintf("%s-update", name)
 	edgeClusterName := getEdgeClusterName()
 	transportZoneName := getOverlayTransportZoneName()
@@ -74,7 +75,7 @@ func TestAccResourceNsxtStaticRoute_importOnTier0(t *testing.T) {
 }
 
 func testAccResourceNsxtStaticRouteImport(t *testing.T, tier string) {
-	name := fmt.Sprintf("test-nsx-static-route")
+	name := "test-nsx-static-route"
 	edgeClusterName := getEdgeClusterName()
 	transportZoneName := getOverlayTransportZoneName()
 

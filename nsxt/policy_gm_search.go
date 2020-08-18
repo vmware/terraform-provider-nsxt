@@ -5,13 +5,14 @@ package nsxt
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/search"
-	"strings"
 )
 
 type policySearchDataValue struct {
@@ -121,38 +122,6 @@ func searchPolicyResources(connector *client.RestConnector, query string) ([]*da
 			return results, err
 		}
 		results = append(results, searchResponse.Results...)
-		if total == 0 {
-			// first response
-			total = int(*searchResponse.ResultCount)
-		}
-		cursor = searchResponse.Cursor
-		if len(results) >= total {
-			return results, nil
-		}
-	}
-}
-
-func searchPolicyResourcesTyped(connector *client.RestConnector, query string) ([]model.PolicyResource, error) {
-	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
-	client := search.NewDefaultQueryClient(connector)
-	var results []model.PolicyResource
-	var cursor *string
-	total := 0
-
-	for {
-		searchResponse, err := client.List(query, cursor, nil, nil, nil, nil)
-		if err != nil {
-			return results, err
-		}
-		for _, result := range searchResponse.Results {
-			dataValue, errors := converter.ConvertToGolang(result, model.PolicyResourceBindingType())
-			if len(errors) > 0 {
-				return nil, errors[0]
-			}
-			results = append(results, dataValue.(model.PolicyResource))
-		}
-
 		if total == 0 {
 			// first response
 			total = int(*searchResponse.ResultCount)

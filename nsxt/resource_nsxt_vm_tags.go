@@ -2,13 +2,14 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/common"
 	"github.com/vmware/go-vmware-nsxt/manager"
-	"log"
-	"net/http"
-	"strings"
 )
 
 // Note - this resource is time consuming to configure since

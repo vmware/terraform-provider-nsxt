@@ -5,13 +5,14 @@ package nsxt
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"testing"
 )
 
 func TestAccResourceNsxtLogicalDhcpPort_basic(t *testing.T) {
-	portName := fmt.Sprintf("test-nsx-logical-dhcp-port")
+	portName := "test-nsx-logical-dhcp-port"
 	updatePortName := fmt.Sprintf("%s-update", portName)
 	testResourceName := "nsxt_logical_dhcp_port.test"
 	transportZoneName := getOverlayTransportZoneName()
@@ -53,7 +54,7 @@ func TestAccResourceNsxtLogicalDhcpPort_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtLogicalDhcpPort_importBasic(t *testing.T) {
-	portName := fmt.Sprintf("test-nsx-logical-dhcp-port")
+	portName := "test-nsx-logical-dhcp-port"
 	testResourceName := "nsxt_logical_dhcp_port.test"
 	transportZoneName := getOverlayTransportZoneName()
 	edgeClusterName := getEdgeClusterName()

@@ -5,14 +5,15 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
+	"strings"
+
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/ip_pools"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	"log"
-	"strings"
 )
 
 func resourceNsxtPolicyIPAddressAllocation() *schema.Resource {
@@ -51,21 +52,19 @@ func resourceNsxtPolicyIPAddressAllocation() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyIPAddressAllocationExists(poolID string, allocationID string, connector *client.RestConnector) bool {
+func resourceNsxtPolicyIPAddressAllocationExists(poolID string, allocationID string, connector *client.RestConnector) (bool, error) {
 	client := ip_pools.NewDefaultIpAllocationsClient(connector)
 
 	_, err := client.Get(poolID, allocationID)
 	if err == nil {
-		return true
+		return true, nil
 	}
 
 	if isNotFoundError(err) {
-		return false
+		return false, nil
 	}
 
-	logAPIError("Error retrieving resource", err)
-
-	return false
+	return false, logAPIError("Error retrieving resource", err)
 }
 
 func resourceNsxtPolicyIPAddressAllocationCreate(d *schema.ResourceData, m interface{}) error {
@@ -84,7 +83,11 @@ func resourceNsxtPolicyIPAddressAllocationCreate(d *schema.ResourceData, m inter
 		id = uuid.String()
 	}
 
-	if resourceNsxtPolicyIPAddressAllocationExists(poolID, id, connector) {
+	exists, err := resourceNsxtPolicyIPAddressAllocationExists(poolID, id, connector)
+	if err != nil {
+		return err
+	}
+	if exists {
 		return fmt.Errorf("Resource with ID %s already exists", id)
 	}
 
@@ -105,7 +108,7 @@ func resourceNsxtPolicyIPAddressAllocationCreate(d *schema.ResourceData, m inter
 
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating IPAddressAllocation with ID %s", id)
-	err := client.Patch(poolID, id, obj)
+	err = client.Patch(poolID, id, obj)
 	if err != nil {
 		return handleCreateError("IPAddressAllocation", id, err)
 	}

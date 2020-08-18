@@ -5,9 +5,10 @@ package nsxt
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"testing"
 )
 
 func TestAccDataSourceNsxtPolicyRealizationInfo_tier1DataSource(t *testing.T) {
@@ -38,7 +39,7 @@ func TestAccDataSourceNsxtPolicyRealizationInfo_tier1DataSource(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyNoRealizationInfoTemplate(),
+				Config: testAccNsxtEmptyTemplate(),
 			},
 		},
 	})
@@ -72,7 +73,7 @@ func TestAccDataSourceNsxtPolicyRealizationInfo_tier1DataSourceEntity(t *testing
 				),
 			},
 			{
-				Config: testAccNsxtPolicyNoRealizationInfoTemplate(),
+				Config: testAccNsxtEmptyTemplate(),
 			},
 		},
 	})
@@ -98,7 +99,7 @@ func TestAccDataSourceNsxtPolicyRealizationInfo_tier1Resource(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyNoRealizationInfoTemplate(),
+				Config: testAccNsxtEmptyTemplate(),
 			},
 		},
 	})
@@ -150,7 +151,7 @@ func TestAccDataSourceNsxtPolicyRealizationInfo_gmServiceDataSource(t *testing.T
 				),
 			},
 			{
-				Config: testAccNsxtPolicyNoRealizationInfoTemplate(),
+				Config: testAccNsxtEmptyTemplate(),
 			},
 		},
 	})
@@ -174,7 +175,7 @@ data "nsxt_policy_realization_info" "realization_info" {
 }
 
 func testAccNsxtPolicyRealizationInfoReadDataSourceErrorTemplate() string {
-	return fmt.Sprintf(`
+	return `
 resource "nsxt_policy_ip_pool" "test" {
   display_name = "tfippool1"
 }
@@ -199,7 +200,7 @@ resource "nsxt_policy_ip_address_allocation" "test" {
 data "nsxt_policy_realization_info" "realization_info" {
   path = nsxt_policy_ip_address_allocation.test.path
 }
-`)
+`
 }
 
 func testAccNsxtPolicyRealizationInfoReadDataSourceTemplate(resourceDataType string, resourceName string, entityType string) string {
@@ -224,8 +225,4 @@ data "nsxt_policy_realization_info" "realization_info" {
   path = %s.policy_resource.path
   entity_type = "%s"
 }`, resourceType, resourceName, resourceType, entityType)
-}
-
-func testAccNsxtPolicyNoRealizationInfoTemplate() string {
-	return fmt.Sprintf(` `)
 }

@@ -5,10 +5,11 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/vmware/go-vmware-nsxt/manager"
 	"log"
 	"net/http"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/vmware/go-vmware-nsxt/manager"
 )
 
 func resourceNsxtLogicalRouterLinkPortOnTier1() *schema.Resource {
@@ -141,7 +142,7 @@ func resourceNsxtLogicalRouterLinkPortOnTier1Update(d *schema.ResourceData, m in
 		ResourceType:              "LogicalRouterLinkPortOnTIER1",
 	}
 
-	logicalRouterLinkPort, resp, err := nsxClient.LogicalRoutingAndServicesApi.UpdateLogicalRouterLinkPortOnTier1(nsxClient.Context, id, logicalRouterLinkPort)
+	_, resp, err := nsxClient.LogicalRoutingAndServicesApi.UpdateLogicalRouterLinkPortOnTier1(nsxClient.Context, id, logicalRouterLinkPort)
 
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during LogicalRouterLinkPortOnTier1 %v update: %v (%+v)", id, err, resp)

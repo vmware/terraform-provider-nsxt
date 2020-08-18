@@ -5,11 +5,12 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/vmware/go-vmware-nsxt/loadbalancer"
-	"log"
-	"net/http"
 )
 
 // Helpers for common LB monitor schema settings
@@ -117,11 +118,7 @@ func getLbMonitorResponseStatusCodesSchema() *schema.Schema {
 }
 
 func isLbMonitorDataRequired(protocol string) bool {
-	if protocol == "udp" {
-		return true
-	}
-
-	return false
+	return protocol == "udp"
 }
 
 func getLbMonitorSendDescription(protocol string) string {

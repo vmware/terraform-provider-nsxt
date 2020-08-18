@@ -5,14 +5,15 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"net/http"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccResourceNsxtNSGroup_basic(t *testing.T) {
-	grpName := fmt.Sprintf("test-nsx-ns-group")
+	grpName := "test-nsx-ns-group"
 	updateGrpName := fmt.Sprintf("%s-update", grpName)
 	testResourceName := "nsxt_ns_group.test"
 
@@ -48,7 +49,7 @@ func TestAccResourceNsxtNSGroup_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtNSGroup_nested(t *testing.T) {
-	grpName := fmt.Sprintf("test-nsx-ns-group")
+	grpName := "test-nsx-ns-group"
 	updateGrpName := fmt.Sprintf("%s-update", grpName)
 	testResourceName := "nsxt_ns_group.test"
 
@@ -82,7 +83,7 @@ func TestAccResourceNsxtNSGroup_nested(t *testing.T) {
 }
 
 func TestAccResourceNsxtNSGroup_withCriteria(t *testing.T) {
-	grpName := fmt.Sprintf("test-nsx-ns-group")
+	grpName := "test-nsx-ns-group"
 	updateGrpName := fmt.Sprintf("%s-update", grpName)
 	testResourceName := "nsxt_ns_group.test"
 	transportZoneName := getOverlayTransportZoneName()
@@ -119,7 +120,7 @@ func TestAccResourceNsxtNSGroup_withCriteria(t *testing.T) {
 }
 
 func TestAccResourceNsxtNSGroup_importBasic(t *testing.T) {
-	grpName := fmt.Sprintf("test-nsx-ns-group")
+	grpName := "test-nsx-ns-group"
 	testResourceName := "nsxt_ns_group.test"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -142,7 +143,7 @@ func TestAccResourceNsxtNSGroup_importBasic(t *testing.T) {
 }
 
 func TestAccResourceNsxtNSGroup_importWithCriteria(t *testing.T) {
-	grpName := fmt.Sprintf("test-nsx-ns-group")
+	grpName := "test-nsx-ns-group"
 	testResourceName := "nsxt_ns_group.test"
 
 	resource.ParallelTest(t, resource.TestCase{

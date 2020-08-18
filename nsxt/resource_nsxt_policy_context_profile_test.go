@@ -5,11 +5,12 @@ package nsxt
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
-	"testing"
 )
 
 func TestAccResourceNsxtPolicyContextProfile_basic(t *testing.T) {

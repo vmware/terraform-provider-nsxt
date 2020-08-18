@@ -5,14 +5,15 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"net/http"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccResourceNsxtLogicalTier0Router_basic(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-logical-tier0-router")
+	name := "test-nsx-logical-tier0-router"
 	updateName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_logical_tier0_router.test"
 	haMode := "ACTIVE_STANDBY"
@@ -50,7 +51,7 @@ func TestAccResourceNsxtLogicalTier0Router_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtLogicalTier0Router_active(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-logical-tier0-router")
+	name := "test-nsx-logical-tier0-router"
 	updateName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_logical_tier0_router.test"
 	haMode := "ACTIVE_ACTIVE"
@@ -88,7 +89,7 @@ func TestAccResourceNsxtLogicalTier0Router_active(t *testing.T) {
 }
 
 func TestAccResourceNsxtLogicalTier0Router_importBasic(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-logical-tier0-router")
+	name := "test-nsx-logical-tier0-router"
 	testResourceName := "nsxt_logical_tier0_router.test"
 	haMode := "ACTIVE_STANDBY"
 	edgeClusterName := getEdgeClusterName()

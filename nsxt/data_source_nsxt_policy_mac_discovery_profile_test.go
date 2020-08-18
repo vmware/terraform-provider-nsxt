@@ -5,8 +5,9 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
 func TestAccDataSourceNsxtPolicyMacDiscoveryProfile_basic(t *testing.T) {
@@ -27,7 +28,7 @@ func TestAccDataSourceNsxtPolicyMacDiscoveryProfile_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyEmptyTemplate(),
+				Config: testAccNsxtEmptyTemplate(),
 			},
 		},
 	})
@@ -36,7 +37,7 @@ func TestAccDataSourceNsxtPolicyMacDiscoveryProfile_basic(t *testing.T) {
 func TestAccDataSourceNsxtPolicyMacDiscoveryProfile_prefix(t *testing.T) {
 	// Use existing system defined profile
 	name := "default-mac-discovery-profile"
-	namePrefix := string(name[0:15])
+	namePrefix := name[0:15]
 	testResourceName := "data.nsxt_policy_mac_discovery_profile.test"
 
 	resource.Test(t, resource.TestCase{
@@ -52,7 +53,7 @@ func TestAccDataSourceNsxtPolicyMacDiscoveryProfile_prefix(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyEmptyTemplate(),
+				Config: testAccNsxtEmptyTemplate(),
 			},
 		},
 	})

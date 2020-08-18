@@ -2,17 +2,19 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt"
+	nsx_policy "github.com/vmware/vsphere-automation-sdk-go/services/nsxt"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
 	global_policy "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm"
 	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	"log"
-	"strings"
 )
 
 var nsxtPolicyTier0GatewayRedistributionRuleTypes = []string{

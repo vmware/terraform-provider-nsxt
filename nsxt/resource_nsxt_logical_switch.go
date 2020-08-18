@@ -5,14 +5,15 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+	"time"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/manager"
-	"log"
-	"net/http"
-	"time"
 )
 
 var logicalSwitchReplicationModeValues = []string{"MTEP", "SOURCE", ""}
@@ -286,7 +287,7 @@ func resourceNsxtLogicalSwitchUpdate(d *schema.ResourceData, m interface{}) erro
 		Revision:            revision,
 	}
 
-	logicalSwitch, resp, err := nsxClient.LogicalSwitchingApi.UpdateLogicalSwitch(nsxClient.Context, id, logicalSwitch)
+	_, resp, err := nsxClient.LogicalSwitchingApi.UpdateLogicalSwitch(nsxClient.Context, id, logicalSwitch)
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during LogicalSwitch update: %v", err)
 	}

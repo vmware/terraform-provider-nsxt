@@ -5,11 +5,12 @@ package nsxt
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	gm_locale_services "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s/locale_services"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services"
-	"testing"
 )
 
 var nsxtPolicyTier0GatewayName = "test"
@@ -506,10 +507,10 @@ func testAccNsxtPolicyTier0InterfaceCheckDestroy(state *terraform.State, display
 }
 
 func testAccNsxtPolicyGatewayGMFabricInterfaceDeps() string {
-	return fmt.Sprintf(`
+	return `
 data "nsxt_policy_edge_cluster" "EC" {
   site_path = data.nsxt_policy_site.test.path
-}`) + testAccNSXGlobalPolicyTransportZoneReadTemplate(true, true)
+}` + testAccNSXGlobalPolicyTransportZoneReadTemplate(true, true)
 }
 
 func testAccNsxtPolicyGatewayFabricInterfaceDeps() string {
@@ -541,36 +542,36 @@ resource "nsxt_policy_vlan_segment" "test" {
 
 func testAccNsxtPolicyTier0EdgeClusterTemplate() string {
 	if testAccIsGlobalManager() {
-		return fmt.Sprintf(`
+		return `
   locale_service {
     edge_cluster_path    = data.nsxt_policy_edge_cluster.EC.path
   }
-`)
+`
 	}
-	return fmt.Sprintf(`
+	return `
 	edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
-`)
+`
 }
 
 func testAccNsxtPolicyTier0InterfaceSiteTemplate() string {
 	if testAccIsGlobalManager() {
-		return fmt.Sprintf("site_path = data.nsxt_policy_site.test.path")
+		return "site_path = data.nsxt_policy_site.test.path"
 	}
 	return ""
 }
 
 func testAccNsxtPolicyTier0InterfaceRealizationTemplate() string {
 	if testAccIsGlobalManager() {
-		return fmt.Sprintf(`
+		return `
 data "nsxt_policy_realization_info" "realization_info" {
   path = nsxt_policy_tier0_gateway_interface.test.path
   site_path = data.nsxt_policy_site.test.path
-}`)
+}`
 	}
-	return fmt.Sprintf(`
+	return `
 data "nsxt_policy_realization_info" "realization_info" {
   path = nsxt_policy_tier0_gateway_interface.test.path
-}`)
+}`
 }
 
 func testAccNsxtPolicyTier0InterfaceServiceTemplate(name string, subnet string, mtu string) string {
@@ -597,33 +598,6 @@ resource "nsxt_policy_tier0_gateway_interface" "test" {
     tag   = "tag1"
   }
 }`, nsxtPolicyTier0GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, mtu, subnet, testAccNsxtPolicyTier0InterfaceSiteTemplate()) +
-		testAccNsxtPolicyTier0InterfaceRealizationTemplate()
-}
-
-func testAccNsxtPolicyTier0InterfaceServiceSiteTemplate(name string, subnet string, mtu string) string {
-	return testAccNsxtPolicyGatewayInterfaceDeps("11") + fmt.Sprintf(`
-
-resource "nsxt_policy_tier0_gateway" "test" {
-  display_name      = "%s"
-  ha_mode           = "ACTIVE_STANDBY"
-  %s
-}
-
-resource "nsxt_policy_tier0_gateway_interface" "test" {
-  display_name = "%s"
-  description  = "Acceptance Test"
-  type         = "SERVICE"
-  mtu          = %s
-  gateway_path = nsxt_policy_tier0_gateway.test.path
-  segment_path = nsxt_policy_vlan_segment.test.path
-  subnets      = ["%s"]
-  site_path    = data.nsxt_policy_site.test.path
-
-  tag {
-    scope = "scope1"
-    tag   = "tag1"
-  }
-}`, nsxtPolicyTier0GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, mtu, subnet) +
 		testAccNsxtPolicyTier0InterfaceRealizationTemplate()
 }
 

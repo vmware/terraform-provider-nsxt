@@ -5,12 +5,13 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/ip_pools"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	"log"
 )
 
 func resourceNsxtPolicyIPPoolStaticSubnet() *schema.Resource {

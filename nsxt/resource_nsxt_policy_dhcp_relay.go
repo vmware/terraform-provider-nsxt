@@ -5,11 +5,12 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	"log"
 )
 
 func resourceNsxtPolicyDhcpRelayConfig() *schema.Resource {
@@ -41,21 +42,19 @@ func resourceNsxtPolicyDhcpRelayConfig() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyDhcpRelayConfigExists(id string, connector *client.RestConnector, isGlobalManager bool) bool {
+func resourceNsxtPolicyDhcpRelayConfigExists(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
 	client := infra.NewDefaultDhcpRelayConfigsClient(connector)
 
 	_, err := client.Get(id)
 	if err == nil {
-		return true
+		return true, nil
 	}
 
 	if isNotFoundError(err) {
-		return false
+		return false, nil
 	}
 
-	logAPIError("Error retrieving resource", err)
-
-	return false
+	return false, logAPIError("Error retrieving resource", err)
 }
 
 func resourceNsxtPolicyDhcpRelayConfigCreate(d *schema.ResourceData, m interface{}) error {

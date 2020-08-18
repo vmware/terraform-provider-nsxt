@@ -5,9 +5,10 @@ package nsxt
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"testing"
 )
 
 func TestAccResourceNsxtPolicySecurityPolicy_basic(t *testing.T) {
@@ -225,7 +226,7 @@ func TestAccResourceNsxtPolicySecurityPolicy_withDependencies(t *testing.T) {
 	})
 }
 func TestAccResourceNsxtPolicySecurityPolicy_importBasic(t *testing.T) {
-	name := fmt.Sprintf("terraform-test-import")
+	name := "terraform-test-import"
 	testResourceName := "nsxt_policy_security_policy.test"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -247,7 +248,7 @@ func TestAccResourceNsxtPolicySecurityPolicy_importBasic(t *testing.T) {
 	})
 }
 func TestAccResourceNsxtGlobalPolicySecurityPolicy_withSite(t *testing.T) {
-	name := fmt.Sprintf("terraform-test-site")
+	name := "terraform-test-site"
 	testResourceName := "nsxt_policy_security_policy.test"
 	updatedName := fmt.Sprintf("%s-update", name)
 	comments1 := "Acceptance test create"
@@ -398,7 +399,11 @@ func testAccNsxtPolicySecurityPolicyExists(resourceName string, domainName strin
 		}
 
 		isPolicyGlobalManager := isPolicyGlobalManager(testAccProvider.Meta())
-		if !resourceNsxtPolicySecurityPolicyExistsInDomain(resourceID, domainName, connector, isPolicyGlobalManager) {
+		exists, err := resourceNsxtPolicySecurityPolicyExistsInDomain(resourceID, domainName, connector, isPolicyGlobalManager)
+		if err != nil {
+			return err
+		}
+		if !exists {
 			return fmt.Errorf("Error while retrieving policy SecurityPolicy ID %s", resourceID)
 		}
 		return nil
@@ -415,7 +420,11 @@ func testAccNsxtPolicySecurityPolicyCheckDestroy(state *terraform.State, display
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		if resourceNsxtPolicySecurityPolicyExistsInDomain(resourceID, domainName, connector, isPolicyGlobalManager) {
+		exists, err := resourceNsxtPolicySecurityPolicyExistsInDomain(resourceID, domainName, connector, isPolicyGlobalManager)
+		if err != nil {
+			return err
+		}
+		if exists {
 			return fmt.Errorf("Policy SecurityPolicy %s still exists", displayName)
 		}
 	}

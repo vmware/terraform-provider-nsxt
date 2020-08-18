@@ -5,11 +5,12 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/vmware/go-vmware-nsxt/manager"
-	"log"
-	"net/http"
 )
 
 var algTypeValues = []string{"ORACLE_TNS", "FTP", "SUN_RPC_TCP", "SUN_RPC_UDP", "MS_RPC_TCP", "MS_RPC_UDP", "NBNS_BROADCAST", "NBDG_BROADCAST", "TFTP"}
@@ -179,7 +180,7 @@ func resourceNsxtAlgorithmTypeNsServiceUpdate(d *schema.ResourceData, m interfac
 		},
 	}
 
-	nsService, resp, err := nsxClient.GroupingObjectsApi.UpdateAlgTypeNSService(nsxClient.Context, id, nsService)
+	_, resp, err := nsxClient.GroupingObjectsApi.UpdateAlgTypeNSService(nsxClient.Context, id, nsService)
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during NsService update: %v %v", err, resp)
 	}

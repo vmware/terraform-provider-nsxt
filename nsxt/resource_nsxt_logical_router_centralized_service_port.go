@@ -5,11 +5,12 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/vmware/go-vmware-nsxt/manager"
-	"log"
-	"net/http"
 )
 
 func resourceNsxtLogicalRouterCentralizedServicePort() *schema.Resource {
@@ -166,7 +167,7 @@ func resourceNsxtLogicalRouterCentralizedServicePortUpdate(d *schema.ResourceDat
 		ResourceType:              "LogicalRouterCentralizedServicePort",
 	}
 
-	LogicalRouterCentralizedServicePort, resp, err := nsxClient.LogicalRoutingAndServicesApi.UpdateLogicalRouterCentralizedServicePort(nsxClient.Context, id, LogicalRouterCentralizedServicePort)
+	_, resp, err := nsxClient.LogicalRoutingAndServicesApi.UpdateLogicalRouterCentralizedServicePort(nsxClient.Context, id, LogicalRouterCentralizedServicePort)
 
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during LogicalRouterCentralizedServicePort update: %v", err)

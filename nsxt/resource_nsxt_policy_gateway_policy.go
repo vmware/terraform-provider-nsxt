@@ -5,13 +5,14 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	gm_domains "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/domains"
 	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/domains"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	"log"
 )
 
 func resourceNsxtPolicyGatewayPolicy() *schema.Resource {
@@ -28,7 +29,7 @@ func resourceNsxtPolicyGatewayPolicy() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyGatewayPolicyExistsInDomain(id string, domainName string, connector *client.RestConnector, isGlobalManager bool) bool {
+func resourceNsxtPolicyGatewayPolicyExistsInDomain(id string, domainName string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
 	var err error
 	if isGlobalManager {
 		client := gm_domains.NewDefaultGatewayPoliciesClient(connector)
@@ -39,19 +40,18 @@ func resourceNsxtPolicyGatewayPolicyExistsInDomain(id string, domainName string,
 	}
 
 	if err == nil {
-		return true
+		return true, nil
 	}
 
 	if isNotFoundError(err) {
-		return false
+		return false, nil
 	}
 
-	logAPIError("Error retrieving Gateway Policy", err)
-	return false
+	return false, logAPIError("Error retrieving Gateway Policy", err)
 }
 
-func resourceNsxtPolicyGatewayPolicyExistsPartial(domainName string) func(id string, connector *client.RestConnector, isGlobalManager bool) bool {
-	return func(id string, connector *client.RestConnector, isGlobalManager bool) bool {
+func resourceNsxtPolicyGatewayPolicyExistsPartial(domainName string) func(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
+	return func(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
 		return resourceNsxtPolicyGatewayPolicyExistsInDomain(id, domainName, connector, isGlobalManager)
 	}
 }
@@ -160,9 +160,7 @@ func resourceNsxtPolicyGatewayPolicyRead(d *schema.ResourceData, m interface{}) 
 		d.Set("tcp_strict", *obj.TcpStrict)
 	}
 	d.Set("revision", obj.Revision)
-	setPolicyRulesInSchema(d, obj.Rules)
-
-	return nil
+	return setPolicyRulesInSchema(d, obj.Rules)
 }
 
 func resourceNsxtPolicyGatewayPolicyUpdate(d *schema.ResourceData, m interface{}) error {

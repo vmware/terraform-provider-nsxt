@@ -5,8 +5,9 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
 var accTestPolicyBgpConfigCreateAttributes = map[string]string{
@@ -146,7 +147,7 @@ data "nsxt_policy_realization_info" "bgp_realization_info" {
 }
 
 func testAccNsxtPolicyBgpConfigMinimalistic() string {
-	return testAccNsxtPolicyGMGatewayDeps() + fmt.Sprintf(`
+	return testAccNsxtPolicyGMGatewayDeps() + `
 
 resource "nsxt_policy_tier0_gateway" "test" {
   display_name = "terraform-bgp-test"
@@ -163,5 +164,5 @@ resource "nsxt_policy_bgp_config" "test" {
 data "nsxt_policy_realization_info" "realization_info" {
   path      = nsxt_policy_bgp_config.test.path
   site_path = data.nsxt_policy_site.site1.path
-}`)
+}`
 }

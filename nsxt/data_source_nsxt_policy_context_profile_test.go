@@ -5,8 +5,9 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
 func TestAccDataSourceNsxtPolicyContextProfile_basic(t *testing.T) {
@@ -27,7 +28,7 @@ func TestAccDataSourceNsxtPolicyContextProfile_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyEmptyTemplate(),
+				Config: testAccNsxtEmptyTemplate(),
 			},
 		},
 	})
@@ -36,7 +37,7 @@ func TestAccDataSourceNsxtPolicyContextProfile_basic(t *testing.T) {
 func TestAccDataSourceNsxtPolicyContextProfile_prefix(t *testing.T) {
 	// Use existing system defined profile
 	name := "DIAMETER"
-	namePrefix := string(name[0:5])
+	namePrefix := name[0:5]
 	testResourceName := "data.nsxt_policy_context_profile.test"
 
 	resource.Test(t, resource.TestCase{
@@ -52,7 +53,7 @@ func TestAccDataSourceNsxtPolicyContextProfile_prefix(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyEmptyTemplate(),
+				Config: testAccNsxtEmptyTemplate(),
 			},
 		},
 	})

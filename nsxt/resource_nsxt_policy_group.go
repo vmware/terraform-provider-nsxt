@@ -5,6 +5,9 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
@@ -14,8 +17,6 @@ import (
 	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/domains"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	"log"
-	"strings"
 )
 
 var conditionKeyValues = []string{
@@ -242,7 +243,7 @@ func getExtendedCriteriaSetSchema() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyGroupExistsInDomain(id string, domain string, connector *client.RestConnector, isGlobalManager bool) bool {
+func resourceNsxtPolicyGroupExistsInDomain(id string, domain string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
 	var err error
 	if isGlobalManager {
 		client := gm_domains.NewDefaultGroupsClient(connector)
@@ -252,20 +253,19 @@ func resourceNsxtPolicyGroupExistsInDomain(id string, domain string, connector *
 		_, err = client.Get(domain, id)
 	}
 	if err == nil {
-		return true
+		return true, nil
 	}
 
 	if isNotFoundError(err) {
-		return false
+		return false, nil
 	}
 
-	logAPIError("Error retrieving Group", err)
-	return false
+	return false, logAPIError("Error retrieving Group", err)
 
 }
 
-func resourceNsxtPolicyGroupExistsInDomainPartial(domain string) func(id string, connector *client.RestConnector, isGlobalManager bool) bool {
-	return func(id string, connector *client.RestConnector, isGlobalManager bool) bool {
+func resourceNsxtPolicyGroupExistsInDomainPartial(domain string) func(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
+	return func(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
 		return resourceNsxtPolicyGroupExistsInDomain(id, domain, connector, isGlobalManager)
 	}
 }

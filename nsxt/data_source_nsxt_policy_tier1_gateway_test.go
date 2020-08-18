@@ -5,11 +5,12 @@ package nsxt
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	"testing"
 )
 
 func TestAccDataSourceNsxtPolicyTier1Gateway_basic(t *testing.T) {
@@ -37,7 +38,7 @@ func TestAccDataSourceNsxtPolicyTier1Gateway_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyNoTier1Template(),
+				Config: testAccNsxtEmptyTemplate(),
 			},
 		},
 	})
@@ -96,8 +97,4 @@ func testAccNsxtPolicyTier1ReadTemplate(name string) string {
 data "nsxt_policy_tier1_gateway" "test" {
   display_name = "%s"
 }`, name)
-}
-
-func testAccNsxtPolicyNoTier1Template() string {
-	return fmt.Sprintf(` `)
 }

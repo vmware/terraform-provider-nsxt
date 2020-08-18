@@ -5,6 +5,8 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
@@ -16,7 +18,6 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	"log"
 )
 
 var advertismentTypeValues = []string{
@@ -245,7 +246,7 @@ func resourceNsxtPolicyTier1GatewayReadEdgeCluster(d *schema.ResourceData, conne
 	return nil
 }
 
-func resourceNsxtPolicyTier1GatewayExists(id string, connector *client.RestConnector, isGlobalManager bool) bool {
+func resourceNsxtPolicyTier1GatewayExists(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
 	var err error
 	if isGlobalManager {
 		client := gm_infra.NewDefaultTier1sClient(connector)
@@ -256,15 +257,14 @@ func resourceNsxtPolicyTier1GatewayExists(id string, connector *client.RestConne
 	}
 
 	if err == nil {
-		return true
+		return true, nil
 	}
 
 	if isNotFoundError(err) {
-		return false
+		return false, nil
 	}
 
-	logAPIError("Error retrieving Tier1", err)
-	return false
+	return false, logAPIError("Error retrieving Tier1", err)
 }
 
 func setAdvRulesInSchema(d *schema.ResourceData, rules []model.RouteAdvertisementRule) error {

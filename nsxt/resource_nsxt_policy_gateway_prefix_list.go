@@ -5,6 +5,9 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
@@ -14,8 +17,6 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	"log"
-	"strings"
 )
 
 var gatewayPrefixListActionTypeValues = []string{
@@ -82,7 +83,7 @@ func resourceNsxtPolicyGatewayPrefixList() *schema.Resource {
 	}
 }
 
-func setPrefixesInSchema(d *schema.ResourceData, prefixes []model.PrefixEntry) error {
+func setPrefixesInSchema(d *schema.ResourceData, prefixes []model.PrefixEntry) {
 	var entriesList []map[string]interface{}
 	for _, prefix := range prefixes {
 		elem := make(map[string]interface{})
@@ -98,7 +99,10 @@ func setPrefixesInSchema(d *schema.ResourceData, prefixes []model.PrefixEntry) e
 		entriesList = append(entriesList, elem)
 	}
 
-	return d.Set("prefix", entriesList)
+	err := d.Set("prefix", entriesList)
+	if err != nil {
+		log.Printf("[WARNING] Failed to set prefix in schema: %v", err)
+	}
 }
 
 func getPrefixesFromSchema(d *schema.ResourceData) []model.PrefixEntry {

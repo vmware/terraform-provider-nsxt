@@ -5,11 +5,12 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/vmware/go-vmware-nsxt/loadbalancer"
-	"log"
-	"net/http"
 )
 
 func resourceNsxtLbFastTCPApplicationProfile() *schema.Resource {
@@ -155,7 +156,7 @@ func resourceNsxtLbFastTCPApplicationProfileUpdate(d *schema.ResourceData, m int
 		IdleTimeout:            idleTimeout,
 	}
 
-	lbFastTCPProfile, resp, err := nsxClient.ServicesApi.UpdateLoadBalancerFastTcpProfile(nsxClient.Context, id, lbFastTCPProfile)
+	_, resp, err := nsxClient.ServicesApi.UpdateLoadBalancerFastTcpProfile(nsxClient.Context, id, lbFastTCPProfile)
 
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during LbFastTcpProfile update: %v", err)

@@ -5,13 +5,14 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
-	"github.com/vmware/go-vmware-nsxt/manager"
 	"log"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/vmware/go-vmware-nsxt/manager"
 )
 
 var logicalRouterPortUrpfModeValues = []string{"NONE", "STRICT"}
@@ -210,7 +211,7 @@ func resourceNsxtLogicalRouterDownLinkPortUpdate(d *schema.ResourceData, m inter
 		ResourceType:              "LogicalRouterDownLinkPort",
 	}
 
-	logicalRouterDownLinkPort, resp, err := nsxClient.LogicalRoutingAndServicesApi.UpdateLogicalRouterDownLinkPort(nsxClient.Context, id, logicalRouterDownLinkPort)
+	_, resp, err := nsxClient.LogicalRoutingAndServicesApi.UpdateLogicalRouterDownLinkPort(nsxClient.Context, id, logicalRouterDownLinkPort)
 
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during LogicalRouterDownLinkPort update: %v", err)

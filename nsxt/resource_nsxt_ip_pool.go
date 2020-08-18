@@ -5,11 +5,12 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/vmware/go-vmware-nsxt/manager"
 	"log"
 	"net/http"
 	"strings"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/vmware/go-vmware-nsxt/manager"
 )
 
 func resourceNsxtIPPool() *schema.Resource {
@@ -236,7 +237,7 @@ func resourceNsxtIPPoolUpdate(d *schema.ResourceData, m interface{}) error {
 		Revision:    revision,
 	}
 
-	ipPool, resp, err := nsxClient.PoolManagementApi.UpdateIpPool(nsxClient.Context, id, ipPool)
+	_, resp, err := nsxClient.PoolManagementApi.UpdateIpPool(nsxClient.Context, id, ipPool)
 
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during IpPool update: %v", err)

@@ -5,11 +5,12 @@ package nsxt
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	"testing"
 )
 
 func TestAccDataSourceNsxtPolicyLBClientSslProfile_basic(t *testing.T) {
@@ -37,7 +38,7 @@ func TestAccDataSourceNsxtPolicyLBClientSslProfile_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyEmptyTemplate(),
+				Config: testAccNsxtEmptyTemplate(),
 			},
 		},
 	})

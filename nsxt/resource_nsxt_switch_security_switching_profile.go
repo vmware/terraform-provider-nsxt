@@ -5,11 +5,12 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/vmware/go-vmware-nsxt/manager"
-	"log"
-	"net/http"
 )
 
 var switchSecurityProfileBpduMacs = []string{
@@ -146,10 +147,10 @@ func getSwitchSecurityRateLimitsFromSchema(d *schema.ResourceData) *manager.Rate
 	return nil
 }
 
-func setSwitchSecurityRateLimitsInSchema(d *schema.ResourceData, rateLimitConf *manager.RateLimits) error {
+func setSwitchSecurityRateLimitsInSchema(d *schema.ResourceData, rateLimitConf *manager.RateLimits) {
 	var limits []map[string]interface{}
 	if rateLimitConf == nil {
-		return nil
+		return
 	}
 
 	elem := make(map[string]interface{})
@@ -161,7 +162,9 @@ func setSwitchSecurityRateLimitsInSchema(d *schema.ResourceData, rateLimitConf *
 
 	limits = append(limits, elem)
 	err := d.Set("rate_limits", limits)
-	return err
+	if err != nil {
+		log.Printf("[WARNING] Failed to set rate limits in schema: %v", err)
+	}
 }
 
 func resourceNsxtSwitchSecuritySwitchingProfileCreate(d *schema.ResourceData, m interface{}) error {
@@ -288,7 +291,7 @@ func resourceNsxtSwitchSecuritySwitchingProfileUpdate(d *schema.ResourceData, m 
 		Revision:   revision,
 	}
 
-	switchSecurityProfile, resp, err := nsxClient.LogicalSwitchingApi.UpdateSwitchSecuritySwitchingProfile(nsxClient.Context, id, switchSecurityProfile)
+	_, resp, err := nsxClient.LogicalSwitchingApi.UpdateSwitchSecuritySwitchingProfile(nsxClient.Context, id, switchSecurityProfile)
 
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during SwitchSecurityProfile update: %v", err)

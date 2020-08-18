@@ -5,10 +5,11 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/vmware/go-vmware-nsxt/loadbalancer"
 	"log"
 	"net/http"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/vmware/go-vmware-nsxt/loadbalancer"
 )
 
 func resourceNsxtLbSourceIPPersistenceProfile() *schema.Resource {
@@ -75,7 +76,7 @@ func resourceNsxtLbSourceIPPersistenceProfileCreate(d *schema.ResourceData, m in
 	haPersistenceMirroring := d.Get("ha_persistence_mirroring").(bool)
 	purgeFlag := d.Get("purge_when_full").(bool)
 	purge := "FULL"
-	if purgeFlag == false {
+	if !purgeFlag {
 		purge = "NO_PURGE"
 	}
 	timeout := int64(d.Get("timeout").(int))
@@ -159,7 +160,7 @@ func resourceNsxtLbSourceIPPersistenceProfileUpdate(d *schema.ResourceData, m in
 	haPersistenceMirroring := d.Get("ha_persistence_mirroring").(bool)
 	purgeFlag := d.Get("purge_when_full").(bool)
 	purge := "FULL"
-	if purgeFlag == false {
+	if !purgeFlag {
 		purge = "NO_PURGE"
 	}
 	timeout := int64(d.Get("timeout").(int))
@@ -174,7 +175,7 @@ func resourceNsxtLbSourceIPPersistenceProfileUpdate(d *schema.ResourceData, m in
 		Timeout:                       timeout,
 	}
 
-	lbSourceIPPersistenceProfile, resp, err := nsxClient.ServicesApi.UpdateLoadBalancerSourceIpPersistenceProfile(nsxClient.Context, id, lbSourceIPPersistenceProfile)
+	_, resp, err := nsxClient.ServicesApi.UpdateLoadBalancerSourceIpPersistenceProfile(nsxClient.Context, id, lbSourceIPPersistenceProfile)
 
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during LbSourceIPPersistenceProfile update: %v", err)

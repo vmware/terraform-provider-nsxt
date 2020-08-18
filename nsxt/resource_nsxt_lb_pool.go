@@ -5,12 +5,13 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/vmware/go-vmware-nsxt/common"
 	"github.com/vmware/go-vmware-nsxt/loadbalancer"
-	"log"
-	"net/http"
 )
 
 var poolAlgTypeValues = []string{"ROUND_ROBIN", "WEIGHTED_ROUND_ROBIN", "LEAST_CONNECTION", "WEIGHTED_LEAST_CONNECTION", "IP_HASH"}
@@ -486,7 +487,7 @@ func resourceNsxtLbPoolUpdate(d *schema.ResourceData, m interface{}) error {
 		MemberGroup:            memberGroup,
 	}
 
-	lbPool, resp, err := nsxClient.ServicesApi.UpdateLoadBalancerPool(nsxClient.Context, id, lbPool)
+	_, resp, err := nsxClient.ServicesApi.UpdateLoadBalancerPool(nsxClient.Context, id, lbPool)
 
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during LbPool update: %v", err)

@@ -5,11 +5,12 @@ package nsxt
 
 import (
 	"fmt"
+	"net/http"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/vmware/go-vmware-nsxt/manager"
-	"net/http"
-	"testing"
 )
 
 func TestAccDataSourceNsxtFirewallSection_basic(t *testing.T) {
@@ -36,7 +37,7 @@ func TestAccDataSourceNsxtFirewallSection_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXNoFirewallSectionTemplate(),
+				Config: testAccNsxtEmptyTemplate(),
 			},
 		},
 	})
@@ -98,8 +99,4 @@ func testAccNSXFirewallSectionReadTemplate(name string) string {
 data "nsxt_firewall_section" "test" {
   display_name = "%s"
 }`, name)
-}
-
-func testAccNSXNoFirewallSectionTemplate() string {
-	return fmt.Sprintf(` `)
 }

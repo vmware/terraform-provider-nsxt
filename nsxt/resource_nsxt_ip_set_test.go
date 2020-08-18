@@ -5,14 +5,15 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"net/http"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccResourceNsxtIpSet_basic(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-ip-set")
+	name := "test-nsx-ip-set"
 	updateName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_ip_set.test"
 
@@ -83,7 +84,7 @@ func TestAccResourceNsxtIpSet_noName(t *testing.T) {
 }
 
 func TestAccResourceNsxtIpSet_importBasic(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-ip-set")
+	name := "test-nsx-ip-set"
 	testResourceName := "nsxt_ip_set.test"
 
 	resource.ParallelTest(t, resource.TestCase{

@@ -5,6 +5,10 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
+	"strings"
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -13,11 +17,9 @@ import (
 	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/realized_state"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	"strings"
-	"time"
 )
 
-func getOrGenerateID(d *schema.ResourceData, m interface{}, presenceChecker func(string, *client.RestConnector, bool) bool) (string, error) {
+func getOrGenerateID(d *schema.ResourceData, m interface{}, presenceChecker func(string, *client.RestConnector, bool) (bool, error)) (string, error) {
 	connector := getPolicyConnector(m)
 	isGlobalManager := isPolicyGlobalManager(m)
 
@@ -26,7 +28,12 @@ func getOrGenerateID(d *schema.ResourceData, m interface{}, presenceChecker func
 		return newUUID(), nil
 	}
 
-	if presenceChecker(id, connector, isGlobalManager) {
+	exists, err := presenceChecker(id, connector, isGlobalManager)
+	if err != nil {
+		return "", err
+	}
+
+	if exists {
 		return "", fmt.Errorf("Resource with id %s already exists", id)
 	}
 
@@ -81,7 +88,7 @@ func getCustomizedPolicyTagsFromSchema(d *schema.ResourceData, schemaName string
 	return tagList
 }
 
-func setCustomizedPolicyTagsInSchema(d *schema.ResourceData, tags []model.Tag, schemaName string) error {
+func setCustomizedPolicyTagsInSchema(d *schema.ResourceData, tags []model.Tag, schemaName string) {
 	var tagList []map[string]interface{}
 	for _, tag := range tags {
 		elem := make(map[string]interface{})
@@ -90,15 +97,17 @@ func setCustomizedPolicyTagsInSchema(d *schema.ResourceData, tags []model.Tag, s
 		tagList = append(tagList, elem)
 	}
 	err := d.Set(schemaName, tagList)
-	return err
+	if err != nil {
+		log.Printf("[WARNING] Failed to set tag in schema: %v", err)
+	}
 }
 
 func getPolicyTagsFromSchema(d *schema.ResourceData) []model.Tag {
 	return getCustomizedPolicyTagsFromSchema(d, "tag")
 }
 
-func setPolicyTagsInSchema(d *schema.ResourceData, tags []model.Tag) error {
-	return setCustomizedPolicyTagsInSchema(d, tags, "tag")
+func setPolicyTagsInSchema(d *schema.ResourceData, tags []model.Tag) {
+	setCustomizedPolicyTagsInSchema(d, tags, "tag")
 }
 
 func getPolicyGlobalManagerTagsFromSchema(d *schema.ResourceData) []gm_model.Tag {
@@ -196,8 +205,7 @@ func policyResourceNotSupportedError() error {
 }
 
 func collectSeparatedStringListToMap(stringList []string, separator string) map[string]string {
-	var strMap map[string]string
-	strMap = make(map[string]string)
+	strMap := make(map[string]string)
 	for _, elem := range stringList {
 		segs := strings.Split(elem, separator)
 		if len(segs) > 1 {

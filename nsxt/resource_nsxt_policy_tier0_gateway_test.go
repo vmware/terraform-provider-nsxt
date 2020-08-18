@@ -5,13 +5,14 @@ package nsxt
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"testing"
 )
 
 func TestAccResourceNsxtPolicyTier0Gateway_basic(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-policy-tier0-basic")
+	name := "test-nsx-policy-tier0-basic"
 	updateName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_policy_tier0_gateway.test"
 	failoverMode := "NON_PREEMPTIVE"
@@ -63,8 +64,8 @@ func TestAccResourceNsxtPolicyTier0Gateway_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyTier0Gateway_withId(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-policy-tier0-id")
-	id := fmt.Sprintf("test-id")
+	name := "test-nsx-policy-tier0-id"
+	id := "test-id"
 	updateName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_policy_tier0_gateway.test"
 
@@ -100,7 +101,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_withId(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyTier0Gateway_withSubnets(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-policy-tier0-subnets")
+	name := "test-nsx-policy-tier0-subnets"
 	testResourceName := "nsxt_policy_tier0_gateway.test"
 
 	resource.Test(t, resource.TestCase{
@@ -127,7 +128,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_withSubnets(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyTier0Gateway_withDHCP(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-policy-tier0-dhcp")
+	name := "test-nsx-policy-tier0-dhcp"
 	testResourceName := "nsxt_policy_tier0_gateway.test"
 
 	resource.Test(t, resource.TestCase{
@@ -216,7 +217,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_redistribution(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyTier0Gateway_withEdgeCluster(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-policy-tier0-ec")
+	name := "test-nsx-policy-tier0-ec"
 	updateName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_policy_tier0_gateway.test"
 	edgeClusterName := getEdgeClusterName()
@@ -304,7 +305,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_withEdgeCluster(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyTier0Gateway_createWithBGP(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-policy-tier0-bgp")
+	name := "test-nsx-policy-tier0-bgp"
 	updateName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_policy_tier0_gateway.test"
 	edgeClusterName := getEdgeClusterName()
@@ -345,7 +346,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_createWithBGP(t *testing.T) {
 
 // TODO: add route_distinguisher when VNI pool DS is exposed
 func TestAccResourceNsxtPolicyTier0Gateway_withVRF(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-policy-tier0-vrf")
+	name := "test-nsx-policy-tier0-vrf"
 	updateName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_policy_tier0_gateway.test"
 	testInterfaceName := "nsxt_policy_tier0_gateway_interface.test"
@@ -395,7 +396,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_withVRF(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyTier0Gateway_importBasic(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-policy-tier0-import")
+	name := "test-nsx-policy-tier0-import"
 	testResourceName := "nsxt_policy_tier0_gateway.test"
 	failoverMode := "PREEMPTIVE"
 
@@ -433,7 +434,11 @@ func testAccNsxtPolicyTier0Exists(resourceName string) resource.TestCheckFunc {
 			return fmt.Errorf("Policy Tier0 resource ID not set in resources")
 		}
 
-		if !resourceNsxtPolicyTier0GatewayExists(resourceID, connector, testAccIsGlobalManager()) {
+		exists, err := resourceNsxtPolicyTier0GatewayExists(resourceID, connector, testAccIsGlobalManager())
+		if err != nil {
+			return err
+		}
+		if !exists {
 			return fmt.Errorf("Policy Tier0 %s does not exist", resourceID)
 		}
 		return nil
@@ -450,7 +455,10 @@ func testAccNsxtPolicyTier0CheckDestroy(state *terraform.State, displayName stri
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		exists := resourceNsxtPolicyTier0GatewayExists(resourceID, connector, testAccIsGlobalManager())
+		exists, err := resourceNsxtPolicyTier0GatewayExists(resourceID, connector, testAccIsGlobalManager())
+		if err != nil {
+			return err
+		}
 		if exists {
 			return fmt.Errorf("Policy Tier0 %s still exists", displayName)
 		}
