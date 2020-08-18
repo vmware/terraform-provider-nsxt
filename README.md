@@ -95,12 +95,12 @@ In addition, this may cause difficulties in housekeeping and issue reporting.
 ## Cloning the Project
 
 First, you will want to clone the repository to
-`$GOPATH/src/github.com/terraform-providers/terraform-provider-nsxt`:
+`$GOPATH/src/github.com/vmware/terraform-provider-nsxt`:
 
 ```sh
 mkdir -p $GOPATH/src/github.com/terraform-providers
 cd $GOPATH/src/github.com/terraform-providers
-git clone git@github.com:terraform-providers/terraform-provider-nsxt
+git clone git@github.com:vmware/terraform-provider-nsxt
 ```
 
 ## Building and Installing the Provider
@@ -108,7 +108,7 @@ git clone git@github.com:terraform-providers/terraform-provider-nsxt
 After the clone has been completed, you can enter the provider directory and build the provider. 
 
 ```sh
-cd $GOPATH/src/github.com/terraform-providers/terraform-provider-nsxt
+cd $GOPATH/src/github.com/vmware/terraform-provider-nsxt
 make 
 ```
 
@@ -126,8 +126,8 @@ match.
 work is not being duplicated. For further clarification, you can also ask in a
 new issue.
 
-[gh-issues]: https://github.com/terraform-providers/terraform-provider-nsxt/issues
-[gh-prs]: https://github.com/terraform-providers/terraform-provider-nsxt/pulls
+[gh-issues]: https://github.com/vmware/terraform-provider-nsxt/issues
+[gh-prs]: https://github.com/vmware/terraform-provider-nsxt/pulls
 
 If you wish to work on the provider, you'll first need [Go][go-website]
 installed on your machine (version 1.11+ is **required**). You'll also need to
@@ -195,4 +195,4 @@ The NSX Terraform provider is now VMware supported as well as community supporte
 
 Copyright © 2015-2019 VMware, Inc. All Rights Reserved.
 
-The NSX Terraform provider is available under [MPL2.0 license](https://github.com/terraform-providers/terraform-provider-nsxt/blob/master/LICENSE.txt).
+The NSX Terraform provider is available under [MPL2.0 license](https://github.com/vmware/terraform-provider-nsxt/blob/master/LICENSE.txt).

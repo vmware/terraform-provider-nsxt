@@ -7,20 +7,20 @@ FEATURES:
 
 BUG FIXES:
 
-* Fix remote authentication(vIDM) for policy objects. This fix is relevant for NSX version below 3.0.0. ([#302](https://github.com/terraform-providers/terraform-provider-nsxt/pull/302))
-* Fix client certificate authentication for policy objects ([#292](https://github.com/terraform-providers/terraform-provider-nsxt/pull/292))
-* Fix an issue related to non-admin NSX credentials ([#293](https://github.com/terraform-providers/terraform-provider-nsxt/pull/293))
-* `resource/nsxt_policy_vlan_segment`: Allow to specify vlan range ([#342](https://github.com/terraform-providers/terraform-provider-nsxt/pull/342))
-* `resource/nsxt_policy_segment`: Fix handling of segment deletion error ([#321](https://github.com/terraform-providers/terraform-provider-nsxt/pull/321))
-* `resource/nsxt_policy_segment`: Wait for potential VMs to free segment port before deleting the segment. ([#311](https://github.com/terraform-providers/terraform-provider-nsxt/pull/311))
-* `resource/nsxt_policy_vlan_segment`: Allow zero vlan ID ([#297](https://github.com/terraform-providers/terraform-provider-nsxt/pull/297))
-* `resource/nsxt_policy_tierX_gateway_interface`: Fix a use case of preconfigured locale service on gateway ([#300](https://github.com/terraform-providers/terraform-provider-nsxt/pull/300))
-* `resource/nsxt_policy_security_policy`: Fix import crash ([#299](https://github.com/terraform-providers/terraform-provider-nsxt/pull/299))
-* `resource/nsxt_policy_security_policy`: Expose `log_label` argument ([#298](https://github.com/terraform-providers/terraform-provider-nsxt/pull/298))
-* `resource/nsxt_policy_group`: Fix issues with group subresource import ([#288](https://github.com/terraform-providers/terraform-provider-nsxt/pull/288))
-* `resource/nsxt_policy_nat_rule`: Make `source_networks` argument optional ([#294](https://github.com/terraform-providers/terraform-provider-nsxt/pull/294))
-* `resource/nsxt_ip_pool_allocation_ip_address`: Fix resource import ([#319](https://github.com/terraform-providers/terraform-provider-nsxt/pull/319))
-* `data/nsxt_policy_segment_realization`: Expose computed attribute network_name. This attribute can be used as network name in vsphere provider, which forms the necessary dependency ([#308](https://github.com/terraform-providers/terraform-provider-nsxt/pull/308))
+* Fix remote authentication(vIDM) for policy objects. This fix is relevant for NSX version below 3.0.0. ([#302](https://github.com/vmware/terraform-provider-nsxt/pull/302))
+* Fix client certificate authentication for policy objects ([#292](https://github.com/vmware/terraform-provider-nsxt/pull/292))
+* Fix an issue related to non-admin NSX credentials ([#293](https://github.com/vmware/terraform-provider-nsxt/pull/293))
+* `resource/nsxt_policy_vlan_segment`: Allow to specify vlan range ([#342](https://github.com/vmware/terraform-provider-nsxt/pull/342))
+* `resource/nsxt_policy_segment`: Fix handling of segment deletion error ([#321](https://github.com/vmware/terraform-provider-nsxt/pull/321))
+* `resource/nsxt_policy_segment`: Wait for potential VMs to free segment port before deleting the segment. ([#311](https://github.com/vmware/terraform-provider-nsxt/pull/311))
+* `resource/nsxt_policy_vlan_segment`: Allow zero vlan ID ([#297](https://github.com/vmware/terraform-provider-nsxt/pull/297))
+* `resource/nsxt_policy_tierX_gateway_interface`: Fix a use case of preconfigured locale service on gateway ([#300](https://github.com/vmware/terraform-provider-nsxt/pull/300))
+* `resource/nsxt_policy_security_policy`: Fix import crash ([#299](https://github.com/vmware/terraform-provider-nsxt/pull/299))
+* `resource/nsxt_policy_security_policy`: Expose `log_label` argument ([#298](https://github.com/vmware/terraform-provider-nsxt/pull/298))
+* `resource/nsxt_policy_group`: Fix issues with group subresource import ([#288](https://github.com/vmware/terraform-provider-nsxt/pull/288))
+* `resource/nsxt_policy_nat_rule`: Make `source_networks` argument optional ([#294](https://github.com/vmware/terraform-provider-nsxt/pull/294))
+* `resource/nsxt_ip_pool_allocation_ip_address`: Fix resource import ([#319](https://github.com/vmware/terraform-provider-nsxt/pull/319))
+* `data/nsxt_policy_segment_realization`: Expose computed attribute network_name. This attribute can be used as network name in vsphere provider, which forms the necessary dependency ([#308](https://github.com/vmware/terraform-provider-nsxt/pull/308))
 
 ## 2.0.0 (March 30, 2020)
 
@@ -81,33 +81,33 @@ FEATURES:
 * **New Resource**: `nsxt_policy_dhcp_server`
 
 IMPROVEMENTS:
-* Migrate to Terraform Plugin SDK ([#210](https://github.com/terraform-providers/terraform-provider-nsxt/pull/210))
-* `resource/nsxt_vm_tags`: Avoid backend calls if no change required in corresponding tags ([#261](https://github.com/terraform-providers/terraform-provider-nsxt/pull/261))
+* Migrate to Terraform Plugin SDK ([#210](https://github.com/vmware/terraform-provider-nsxt/pull/210))
+* `resource/nsxt_vm_tags`: Avoid backend calls if no change required in corresponding tags ([#261](https://github.com/vmware/terraform-provider-nsxt/pull/261))
 
 BUG FIXES:
-* Fix client authentication error that used to occur when client certificate is not self signed ([#207](https://github.com/terraform-providers/terraform-provider-nsxt/pull/207))
-* Allow IPv6 in IP addresses and CIDR validations ([#204](https://github.com/terraform-providers/terraform-provider-nsxt/pull/204))
-* `resource/nsxt_vm_tags`: Fix tag removal ([#240](https://github.com/terraform-providers/terraform-provider-nsxt/pull/240))
-* `resource/nsxt_vm_tags`: Apply tags to all logical ports on given vm ([#235](https://github.com/terraform-providers/terraform-provider-nsxt/pull/235))
-* `resource/nsxt_logical_dhcp_server`: Mark gateway_ip as optional rather than required ([#245](https://github.com/terraform-providers/terraform-provider-nsxt/pull/245))
+* Fix client authentication error that used to occur when client certificate is not self signed ([#207](https://github.com/vmware/terraform-provider-nsxt/pull/207))
+* Allow IPv6 in IP addresses and CIDR validations ([#204](https://github.com/vmware/terraform-provider-nsxt/pull/204))
+* `resource/nsxt_vm_tags`: Fix tag removal ([#240](https://github.com/vmware/terraform-provider-nsxt/pull/240))
+* `resource/nsxt_vm_tags`: Apply tags to all logical ports on given vm ([#235](https://github.com/vmware/terraform-provider-nsxt/pull/235))
+* `resource/nsxt_logical_dhcp_server`: Mark gateway_ip as optional rather than required ([#245](https://github.com/vmware/terraform-provider-nsxt/pull/245))
 
 
 ## 1.1.2 (November 18, 2019)
 
 FEATURES:
-* **New Data Source**: `nsxt_ip_pool` ([#190](https://github.com/terraform-providers/terraform-provider-nsxt/pull/190))
-* **New Resource**: `nsxt_ip_pool_allocation_ip_address` ([#190](https://github.com/terraform-providers/terraform-provider-nsxt/pull/190))
+* **New Data Source**: `nsxt_ip_pool` ([#190](https://github.com/vmware/terraform-provider-nsxt/pull/190))
+* **New Resource**: `nsxt_ip_pool_allocation_ip_address` ([#190](https://github.com/vmware/terraform-provider-nsxt/pull/190))
 
 IMPROVEMENTS:
-* `resource/nsxt_ns_group`: Support IPSet type in membership criteria ([#195](https://github.com/terraform-providers/terraform-provider-nsxt/pull/195))
+* `resource/nsxt_ns_group`: Support IPSet type in membership criteria ([#195](https://github.com/vmware/terraform-provider-nsxt/pull/195))
 
 BUG FIXES:
-* Fix refresh failures for most of resources. When resource was deleted on backend, the provider is expected to refresh state, discover resource absence and re-create it on next apply. Instead, the provider errored out ([#195]https://github.com/terraform-providers/terraform-provider-nsxt/pull/191))
+* Fix refresh failures for most of resources. When resource was deleted on backend, the provider is expected to refresh state, discover resource absence and re-create it on next apply. Instead, the provider errored out ([#195]https://github.com/vmware/terraform-provider-nsxt/pull/191))
 * `resource/nsxt_ip_set`: Allow force-deletion of IPSet even if its referenced in ns groups.
-* `resource/nsxt_logical_router_downlink_port`: Fix crash that happened during import with specific configuration ([#193](https://github.com/terraform-providers/terraform-provider-nsxt/pull/193))
-* `resource/nsxt_logical_router_link_port_on_tier1`: Fix crash that happened during import with specific configuration ([#193](https://github.com/terraform-providers/terraform-provider-nsxt/pull/193))
-* `resource/nsxt_*_switching_profile`: Fix update error that occured in some cases due to omitted revision ([#201](https://github.com/terraform-providers/terraform-provider-nsxt/pull/201))
-* `resource/nsxt_logical_switch`: On delete operation, detach logical switch in order to avoid possible dependency errors ([#202](https://github.com/terraform-providers/terraform-provider-nsxt/pull/202))
+* `resource/nsxt_logical_router_downlink_port`: Fix crash that happened during import with specific configuration ([#193](https://github.com/vmware/terraform-provider-nsxt/pull/193))
+* `resource/nsxt_logical_router_link_port_on_tier1`: Fix crash that happened during import with specific configuration ([#193](https://github.com/vmware/terraform-provider-nsxt/pull/193))
+* `resource/nsxt_*_switching_profile`: Fix update error that occured in some cases due to omitted revision ([#201](https://github.com/vmware/terraform-provider-nsxt/pull/201))
+* `resource/nsxt_logical_switch`: On delete operation, detach logical switch in order to avoid possible dependency errors ([#202](https://github.com/vmware/terraform-provider-nsxt/pull/202))
 
 ## 1.1.1 (August 05, 2019)
 
@@ -117,21 +117,21 @@ NOTES:
 
 IMPROVEMENTS:
 
-* `resource/nsxt_vm_tag`: Support tagging of logical port for the VM ([#171](https://github.com/terraform-providers/terraform-provider-nsxt/pull/171))
-* `resource/nsxt_firewall_section`: Add ability to control order of FW sections ([#150](https://github.com/terraform-providers/terraform-provider-nsxt/pull/150))
-* `resource/nsxt_firewall_section`: Add support for LogicalRouter and LogicalRouterPort in as applied_to type ([#157](https://github.com/terraform-providers/terraform-provider-nsxt/pull/157))
-* Introduce flag to tolerate partial_success realization state. This can be controlled by tolerate_partial_success provider attribute or NSXT_TOLERATE_PARTIAL_SUCCESS environment variable. The default is False ([#181](https://github.com/terraform-providers/terraform-provider-nsxt/pull/181))
-* Add Go Modules support ([#155](https://github.com/terraform-providers/terraform-provider-nsxt/pull/155))
-* Fix syntax in documentation and tests according to terraform 0.12 requirements ([#178](https://github.com/terraform-providers/terraform-provider-nsxt/pull/178))
+* `resource/nsxt_vm_tag`: Support tagging of logical port for the VM ([#171](https://github.com/vmware/terraform-provider-nsxt/pull/171))
+* `resource/nsxt_firewall_section`: Add ability to control order of FW sections ([#150](https://github.com/vmware/terraform-provider-nsxt/pull/150))
+* `resource/nsxt_firewall_section`: Add support for LogicalRouter and LogicalRouterPort in as applied_to type ([#157](https://github.com/vmware/terraform-provider-nsxt/pull/157))
+* Introduce flag to tolerate partial_success realization state. This can be controlled by tolerate_partial_success provider attribute or NSXT_TOLERATE_PARTIAL_SUCCESS environment variable. The default is False ([#181](https://github.com/vmware/terraform-provider-nsxt/pull/181))
+* Add Go Modules support ([#155](https://github.com/vmware/terraform-provider-nsxt/pull/155))
+* Fix syntax in documentation and tests according to terraform 0.12 requirements ([#178](https://github.com/vmware/terraform-provider-nsxt/pull/178))
 * Verify interoperability with NSX 2.5
 * Improve documentation and test coverage
 
 
 BUG FIXES:
 
-* `resource/nsxt_nat_rule`: Fix deletion of NAT rule that was due to a platform bug in versions 2.4 and below ([#166](https://github.com/terraform-providers/terraform-provider-nsxt/pull/166)).
-* `resource/nsxt_firewall_section`: Do not enforce order of services in rules. This fixes the bug of non-empty plan when services were registered on backend in order different that defined in terraform ([#156](https://github.com/terraform-providers/terraform-provider-nsxt/pull/156))
-* `resource/nsxt_firewall_section`: Prevent re-creation of rules by retaining rule ids ([#154](https://github.com/terraform-providers/terraform-provider-nsxt/pull/154))
+* `resource/nsxt_nat_rule`: Fix deletion of NAT rule that was due to a platform bug in versions 2.4 and below ([#166](https://github.com/vmware/terraform-provider-nsxt/pull/166)).
+* `resource/nsxt_firewall_section`: Do not enforce order of services in rules. This fixes the bug of non-empty plan when services were registered on backend in order different that defined in terraform ([#156](https://github.com/vmware/terraform-provider-nsxt/pull/156))
+* `resource/nsxt_firewall_section`: Prevent re-creation of rules by retaining rule ids ([#154](https://github.com/vmware/terraform-provider-nsxt/pull/154))
 * `resource/nsxt_nat_rule`: Allow setting rule_priority ([#182](https://github.com/te    rraform-providers/terraform-provider-nsxt/pull/182))
 
 ## 1.1.0 (February 22, 2019)
