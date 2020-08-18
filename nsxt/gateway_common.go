@@ -292,7 +292,6 @@ func initGatewayLocaleServices(d *schema.ResourceData, connector *client.RestCon
 		edgeClusterPath := cfg["edge_cluster_path"].(string)
 		edgeNodes := interface2StringList(cfg["preferred_edge_paths"].(*schema.Set).List())
 		path := cfg["path"].(string)
-		revision := int64(cfg["revision"].(int))
 
 		var serviceID string
 		if path != "" {
@@ -325,21 +324,20 @@ func initGatewayLocaleServices(d *schema.ResourceData, connector *client.RestCon
 		}
 
 		localeServices = append(localeServices, dataValue)
-		existingServices[serviceID] = nil
+		delete(existingServices, serviceID)
 	}
 	// Add instruction to delete services that are no longer present in intent
-	for id, shouldDelete != nil {
-			serviceStruct := model.LocaleServices{
-				Id:           &id,
-				ResourceType: &lsType,
-			}
-			dataValue, err := initChildLocaleService(&serviceStruct, true)
-			if err != nil {
-				return localeServices, err
-			}
-			localeServices = append(localeServices, dataValue)
-			log.Printf("[DEBUG] Preparing to delete locale service %s for gateway %s", id, d.Id())
+	for id := range existingServices {
+		serviceStruct := model.LocaleServices{
+			Id:           &id,
+			ResourceType: &lsType,
 		}
+		dataValue, err := initChildLocaleService(&serviceStruct, true)
+		if err != nil {
+			return localeServices, err
+		}
+		localeServices = append(localeServices, dataValue)
+		log.Printf("[DEBUG] Preparing to delete locale service %s for gateway %s", id, d.Id())
 	}
 
 	return localeServices, nil
