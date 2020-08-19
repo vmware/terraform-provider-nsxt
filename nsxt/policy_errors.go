@@ -12,8 +12,13 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/data/serializers/cleanjson"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
+
+func isEmptyAPIError(apiError model.ApiError) bool {
+	return (apiError.ErrorCode == nil && apiError.ErrorMessage == nil)
+}
 
 func printAPIError(apiError model.ApiError) string {
 	if apiError.ErrorMessage != nil && apiError.ErrorCode != nil {
@@ -48,6 +53,21 @@ func printRelatedAPIError(apiError model.RelatedApiError) string {
 	return ""
 }
 
+func logRawVapiErrorData(message string, vapiType *errors.ErrorType, apiErrorDataValue *data.StructValue) error {
+	dataValueToJSONEncoder := cleanjson.NewDataValueToJsonEncoder()
+	errorStr, convErr := dataValueToJSONEncoder.Encode(apiErrorDataValue)
+	if convErr != nil {
+		log.Printf("[ERROR]: Failed to encode error details: %s", convErr)
+		if vapiType != nil {
+			return fmt.Errorf("%s (%s)", message, *vapiType)
+		}
+		return fmt.Errorf("%s (no additional details provided)", message)
+	}
+
+	log.Printf("[ERROR]: %s: %s", message, errorStr)
+	return fmt.Errorf("%s: %s", message, errorStr)
+}
+
 func logVapiErrorData(message string, vapiMessages []std.LocalizableMessage, vapiType *errors.ErrorType, apiErrorDataValue *data.StructValue) error {
 
 	if apiErrorDataValue == nil {
@@ -65,20 +85,12 @@ func logVapiErrorData(message string, vapiMessages []std.LocalizableMessage, vap
 	typeConverter.SetMode(bindings.REST)
 	data, err := typeConverter.ConvertToGolang(apiErrorDataValue, model.ApiErrorBindingType())
 
-	if err != nil {
-		log.Printf("[ERROR]: Failed to extract error details: %s", err)
-		// In NSX 2.5 error is sent in wrong format, hence the sdk fails to decode it
-		// In order to ease user experience, print default message in case its present
-		// This bug is fixed in NSX 3.0 onwards
-		if len(vapiMessages) > 0 {
-			return fmt.Errorf("%s (%s)", message, vapiMessages[0].DefaultMessage)
-		}
-		// error type is the only piece of info we have here
-		if vapiType != nil {
-			return fmt.Errorf("%s (%s)", message, *vapiType)
-		}
-
-		return fmt.Errorf("%s (no additional details provided)", message)
+	// As of today, we cannot trust converter to return error in case target type doesn't
+	// match the actual error. This issue is being looked into on VAPI level.
+	// For now, we check both conversion error and actual contents of converted struct
+	if err != nil || isEmptyAPIError(data.(model.ApiError)) {
+		// This is likely not an error coming from NSX
+		return logRawVapiErrorData(message, vapiType, apiErrorDataValue)
 	}
 
 	apiError := data.(model.ApiError)
