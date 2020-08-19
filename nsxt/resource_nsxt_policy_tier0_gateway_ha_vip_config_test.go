@@ -212,7 +212,7 @@ func testAccNsxtPolicyTier0HAVipConfigCheckDestroy(state *terraform.State, displ
 
 func testAccNsxtPolicyTier0HAVipConfigSiteTemplate() string {
 	if testAccIsGlobalManager() {
-		return fmt.Sprintf("site_path = data.nsxt_policy_site.test.path")
+		return "site_path = data.nsxt_policy_site.test.path"
 	}
 	return ""
 }
