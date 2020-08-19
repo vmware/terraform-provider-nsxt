@@ -5,13 +5,14 @@ package nsxt
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	gm_tier0s "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s"
 	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	"strconv"
-	"strings"
 )
 
 var interfacePathLen = 8
@@ -152,9 +153,9 @@ func resourceNsxtPolicyTier0GatewayHAVipConfigCreate(d *schema.ResourceData, m i
 	var err error
 	if isPolicyGlobalManager(m) {
 		// Use patch to only update the relevant fields
-		rawObj, err := convertModelBindingType(serviceStruct, model.LocaleServicesBindingType(), gm_model.LocaleServicesBindingType())
-		if err != nil {
-			return err
+		rawObj, err1 := convertModelBindingType(serviceStruct, model.LocaleServicesBindingType(), gm_model.LocaleServicesBindingType())
+		if err1 != nil {
+			return err1
 		}
 		client := gm_tier0s.NewDefaultLocaleServicesClient(connector)
 		err = client.Patch(tier0ID, localeServiceID, rawObj.(gm_model.LocaleServices))
@@ -277,9 +278,9 @@ func resourceNsxtPolicyTier0GatewayHAVipConfigUpdate(d *schema.ResourceData, m i
 	var err error
 	if isPolicyGlobalManager(m) {
 		// Use patch to only update the relevant fields
-		rawObj, err := convertModelBindingType(serviceStruct, model.LocaleServicesBindingType(), gm_model.LocaleServicesBindingType())
-		if err != nil {
-			return err
+		rawObj, err1 := convertModelBindingType(serviceStruct, model.LocaleServicesBindingType(), gm_model.LocaleServicesBindingType())
+		if err1 != nil {
+			return err1
 		}
 		client := gm_tier0s.NewDefaultLocaleServicesClient(connector)
 		err = client.Patch(tier0ID, localeServiceID, rawObj.(gm_model.LocaleServices))
