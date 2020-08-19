@@ -5,11 +5,12 @@ package nsxt
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	gm_tier0s "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s"
-	"testing"
 )
 
 // Note that this test depends on having at least 2 edge nodes in the cluster
@@ -280,7 +281,7 @@ resource "nsxt_policy_tier0_gateway_interface" "test2" {
 
 resource "nsxt_policy_tier0_gateway_ha_vip_config" "test" {
 	config {
-		enabled                  = "%s"
+		enabled                  = %s
 		external_interface_paths = [nsxt_policy_tier0_gateway_interface.test1.path, nsxt_policy_tier0_gateway_interface.test2.path]
 		vip_subnets              = ["%s"]
 	}

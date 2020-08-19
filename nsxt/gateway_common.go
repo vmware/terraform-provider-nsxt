@@ -314,6 +314,7 @@ func initGatewayLocaleServices(d *schema.ResourceData, connector *client.RestCon
 			setLocaleServiceRedistributionConfig(redistributionConfigs.([]interface{}), &serviceStruct)
 		}
 
+		// TODO(asarfaty): Update the locale-service only if really changed, which is very rare
 		if obj, ok := existingServices[serviceID]; ok {
 			// if this is an update for existing locale service,
 			// we need revision, and keep the HA vip config
