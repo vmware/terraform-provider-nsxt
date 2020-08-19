@@ -5,15 +5,16 @@ package nsxt
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"testing"
 )
 
 var testAccResourcePolicyStaticRouteName = "nsxt_policy_static_route.test"
 
 func TestAccResourceNsxtPolicyStaticRoute_basicT0(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-policy-static-route-basic")
+	name := "test-nsx-policy-static-route-basic"
 	updateName := name + "updated"
 	network := "14.1.1.0/24"
 	updateNetwork := "15.1.1.0/24"
@@ -69,7 +70,7 @@ func TestAccResourceNsxtPolicyStaticRoute_basicT0(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyStaticRoute_basicT1(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-policy-static-route-basic")
+	name := "test-nsx-policy-static-route-basic"
 	updateName := name + "updated"
 	network := "14.1.1.0/24"
 	updateNetwork := "15.1.1.0/24"
@@ -125,7 +126,7 @@ func TestAccResourceNsxtPolicyStaticRoute_basicT1(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyStaticRoute_basicT0Import(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-policy-static-route-basic")
+	name := "test-nsx-policy-static-route-basic"
 	network := "14.1.1.0/24"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -149,7 +150,7 @@ func TestAccResourceNsxtPolicyStaticRoute_basicT0Import(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyStaticRoute_basicT1Import(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-policy-static-route-basic")
+	name := "test-nsx-policy-static-route-basic"
 	network := "14.1.1.0/24"
 
 	resource.ParallelTest(t, resource.TestCase{

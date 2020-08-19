@@ -5,6 +5,8 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
@@ -13,7 +15,6 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	cont_prof "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/context_profiles"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	"log"
 )
 
 var attributeKeyMap = map[string]string{
@@ -138,7 +139,7 @@ func getPolicyAttributeSubAttributeValueSchema(subAttributeKey string) *schema.S
 	}
 }
 
-func resourceNsxtPolicyContextProfileExists(id string, connector *client.RestConnector, isGlobalManager bool) bool {
+func resourceNsxtPolicyContextProfileExists(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
 	var err error
 	if isGlobalManager {
 		client := gm_infra.NewDefaultContextProfilesClient(connector)
@@ -149,16 +150,14 @@ func resourceNsxtPolicyContextProfileExists(id string, connector *client.RestCon
 	}
 
 	if err == nil {
-		return true
+		return true, nil
 	}
 
 	if isNotFoundError(err) {
-		return false
+		return false, nil
 	}
 
-	logAPIError("Error retrieving ContextProfile", err)
-
-	return false
+	return false, logAPIError("Error retrieving ContextProfile", err)
 }
 
 func resourceNsxtPolicyContextProfileCreate(d *schema.ResourceData, m interface{}) error {
@@ -172,7 +171,7 @@ func resourceNsxtPolicyContextProfileCreate(d *schema.ResourceData, m interface{
 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	attributesStructList := make([]model.PolicyAttributes, 0, 0)
+	attributesStructList := make([]model.PolicyAttributes, 0)
 	for key := range attributeKeyMap {
 		attributes := d.Get(key).(*schema.Set).List()
 		if len(attributes) > 0 {
@@ -272,7 +271,7 @@ func resourceNsxtPolicyContextProfileUpdate(d *schema.ResourceData, m interface{
 	// Read the rest of the configured parameters
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	attributesStructList := make([]model.PolicyAttributes, 0, 0)
+	attributesStructList := make([]model.PolicyAttributes, 0)
 	var err error
 	for key := range attributeKeyMap {
 		attributes := d.Get(key).(*schema.Set).List()
@@ -405,7 +404,6 @@ func listContextProfileWithKey(attributeKey *string, attributeClient interface{}
 		client := attributeClient.(*gm_cont_prof.DefaultAttributesClient)
 		gmPolicyContextProfileListResult, err := client.List(attributeKey, nil, &includeMarkForDeleteObjectsParam, nil, nil, nil, nil)
 		if err != nil {
-			logAPIError("Error listing Policy Attributes", err)
 			return policyContextProfileListResult, err
 		}
 		lmPolicyContextProfileListResult, err := convertModelBindingType(gmPolicyContextProfileListResult, gm_model.PolicyContextProfileListResultBindingType(), model.PolicyContextProfileListResultBindingType())
@@ -429,7 +427,7 @@ func constructAttributesModelList(rawAttributes []interface{}, key string) ([]mo
 		description := attributeMap["description"].(string)
 		attrKey := attributeKeyMap[key]
 		values := interface2StringList(attributeMap["value"].(*schema.Set).List())
-		subAttributesList := make([]model.PolicySubAttributes, 0, 0)
+		subAttributesList := make([]model.PolicySubAttributes, 0)
 		if key == "app_id" {
 			var err error
 			subAttributes := attributeMap["sub_attribute"].(*schema.Set).List()
@@ -451,7 +449,7 @@ func constructAttributesModelList(rawAttributes []interface{}, key string) ([]mo
 }
 
 func constructSubAttributeModelList(rawSubAttributes []interface{}) ([]model.PolicySubAttributes, error) {
-	res := make([]model.PolicySubAttributes, 0, 0)
+	res := make([]model.PolicySubAttributes, 0)
 	dataType := model.PolicySubAttributes_DATATYPE_STRING
 	for _, rawSubAttribute := range rawSubAttributes {
 		rawSubAttributeMap := rawSubAttribute.(map[string]interface{})

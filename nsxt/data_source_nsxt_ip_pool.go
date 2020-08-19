@@ -5,9 +5,11 @@ package nsxt
 
 import (
 	"fmt"
+
+	"net/http"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/vmware/go-vmware-nsxt/manager"
-	"net/http"
 )
 
 func dataSourceNsxtIPPool() *schema.Resource {

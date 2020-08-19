@@ -5,11 +5,12 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/vmware/go-vmware-nsxt/loadbalancer"
-	"log"
-	"net/http"
 )
 
 var lbServiceLogLevels = []string{"DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL", "ALERT", "EMERGENCY"}
@@ -190,7 +191,7 @@ func resourceNsxtLbServiceUpdate(d *schema.ResourceData, m interface{}) error {
 		VirtualServerIds: virtualServerIds,
 	}
 
-	lbService, resp, err := nsxClient.ServicesApi.UpdateLoadBalancerService(nsxClient.Context, id, lbService)
+	_, resp, err := nsxClient.ServicesApi.UpdateLoadBalancerService(nsxClient.Context, id, lbService)
 
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during LbService update: %v", err)

@@ -5,12 +5,13 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	"log"
 )
 
 var lbClientSSLModeValues = []string{
@@ -254,7 +255,7 @@ func getPolicyClientSSLBindingFromSchema(d *schema.ResourceData) *model.LBClient
 	return nil
 }
 
-func setPolicyClientSSLBindingInSchema(d *schema.ResourceData, binding *model.LBClientSslProfileBinding) error {
+func setPolicyClientSSLBindingInSchema(d *schema.ResourceData, binding *model.LBClientSslProfileBinding) {
 	var bindingList []map[string]interface{}
 	if binding != nil {
 		elem := make(map[string]interface{})
@@ -275,7 +276,9 @@ func setPolicyClientSSLBindingInSchema(d *schema.ResourceData, binding *model.LB
 	}
 
 	err := d.Set("client_ssl", bindingList)
-	return err
+	if err != nil {
+		log.Printf("[WARNING] Failed to set client ssl in schema: %v", err)
+	}
 }
 
 func getPolicyServerSSLBindingFromSchema(d *schema.ResourceData) *model.LBServerSslProfileBinding {
@@ -304,7 +307,7 @@ func getPolicyServerSSLBindingFromSchema(d *schema.ResourceData) *model.LBServer
 	return nil
 }
 
-func setPolicyServerSSLBindingInSchema(d *schema.ResourceData, binding *model.LBServerSslProfileBinding) error {
+func setPolicyServerSSLBindingInSchema(d *schema.ResourceData, binding *model.LBServerSslProfileBinding) {
 	var bindingList []map[string]interface{}
 	if binding != nil {
 		elem := make(map[string]interface{})
@@ -327,7 +330,9 @@ func setPolicyServerSSLBindingInSchema(d *schema.ResourceData, binding *model.LB
 	}
 
 	err := d.Set("server_ssl", bindingList)
-	return err
+	if err != nil {
+		log.Printf("[WARNING] Failed to set server ssl in schema: %v", err)
+	}
 }
 
 func getPolicyAccessListControlFromSchema(d *schema.ResourceData) *model.LBAccessListControl {
@@ -350,7 +355,7 @@ func getPolicyAccessListControlFromSchema(d *schema.ResourceData) *model.LBAcces
 	return nil
 }
 
-func setPolicyAccessListControlInSchema(d *schema.ResourceData, control *model.LBAccessListControl) error {
+func setPolicyAccessListControlInSchema(d *schema.ResourceData, control *model.LBAccessListControl) {
 	var controlList []map[string]interface{}
 	if control != nil {
 		elem := make(map[string]interface{})
@@ -362,7 +367,9 @@ func setPolicyAccessListControlInSchema(d *schema.ResourceData, control *model.L
 	}
 
 	err := d.Set("access_list_control", controlList)
-	return err
+	if err != nil {
+		log.Printf("[WARNING] Failed to set access list control in schema: %v", err)
+	}
 }
 
 func policyLBVirtualServerVersionDepenantSet(d *schema.ResourceData, obj *model.LBVirtualServer) {
@@ -373,21 +380,19 @@ func policyLBVirtualServerVersionDepenantSet(d *schema.ResourceData, obj *model.
 	}
 }
 
-func resourceNsxtPolicyLBVirtualServerExists(id string, connector *client.RestConnector, isGlobalManager bool) bool {
+func resourceNsxtPolicyLBVirtualServerExists(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
 	client := infra.NewDefaultLbVirtualServersClient(connector)
 
 	_, err := client.Get(id)
 	if err == nil {
-		return true
+		return true, nil
 	}
 
 	if isNotFoundError(err) {
-		return false
+		return false, nil
 	}
 
-	logAPIError("Error retrieving resource", err)
-
-	return false
+	return false, logAPIError("Error retrieving resource", err)
 }
 
 func resourceNsxtPolicyLBVirtualServerCreate(d *schema.ResourceData, m interface{}) error {
@@ -504,7 +509,6 @@ func resourceNsxtPolicyLBVirtualServerRead(d *schema.ResourceData, m interface{}
 	d.Set("sorry_pool_path", obj.SorryPoolPath)
 	d.Set("log_significant_event_only", obj.LogSignificantEventOnly)
 	setPolicyAccessListControlInSchema(d, obj.AccessListControl)
-
 	return nil
 }
 

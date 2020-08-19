@@ -5,13 +5,14 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	gm_domains "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/domains"
 	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/domains"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	"log"
 )
 
 func resourceNsxtPolicySecurityPolicy() *schema.Resource {
@@ -27,7 +28,7 @@ func resourceNsxtPolicySecurityPolicy() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicySecurityPolicyExistsInDomain(id string, domainName string, connector *client.RestConnector, isGlobalManager bool) bool {
+func resourceNsxtPolicySecurityPolicyExistsInDomain(id string, domainName string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
 	var err error
 	if isGlobalManager {
 		client := gm_domains.NewDefaultSecurityPoliciesClient(connector)
@@ -38,19 +39,18 @@ func resourceNsxtPolicySecurityPolicyExistsInDomain(id string, domainName string
 	}
 
 	if err == nil {
-		return true
+		return true, nil
 	}
 
 	if isNotFoundError(err) {
-		return false
+		return false, nil
 	}
 
-	logAPIError("Error retrieving Security Policy", err)
-	return false
+	return false, logAPIError("Error retrieving Security Policy", err)
 }
 
-func resourceNsxtPolicySecurityPolicyExistsPartial(domainName string) func(id string, connector *client.RestConnector, isGlobalManager bool) bool {
-	return func(id string, connector *client.RestConnector, isGlobalManager bool) bool {
+func resourceNsxtPolicySecurityPolicyExistsPartial(domainName string) func(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
+	return func(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
 		return resourceNsxtPolicySecurityPolicyExistsInDomain(id, domainName, connector, isGlobalManager)
 	}
 }
@@ -157,9 +157,7 @@ func resourceNsxtPolicySecurityPolicyRead(d *schema.ResourceData, m interface{})
 	d.Set("stateful", obj.Stateful)
 	d.Set("tcp_strict", obj.TcpStrict)
 	d.Set("revision", obj.Revision)
-	setPolicyRulesInSchema(d, obj.Rules)
-
-	return nil
+	return setPolicyRulesInSchema(d, obj.Rules)
 }
 
 func resourceNsxtPolicySecurityPolicyUpdate(d *schema.ResourceData, m interface{}) error {

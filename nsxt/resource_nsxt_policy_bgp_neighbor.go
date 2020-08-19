@@ -5,6 +5,9 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
@@ -12,8 +15,6 @@ import (
 	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services/bgp"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	"log"
-	"strings"
 )
 
 var bgpNeighborConfigGracefulRestartModeValues = []string{
@@ -189,7 +190,7 @@ func resourceNsxtPolicyBgpNeighborParseIDs(bgpPath string) (string, string) {
 	return t0ID, lsID
 }
 
-func resourceNsxtPolicyBgpNeighborExists(t0ID string, localeServiceID string, neighborID string, isGlobalManager bool, connector *client.RestConnector) bool {
+func resourceNsxtPolicyBgpNeighborExists(t0ID string, localeServiceID string, neighborID string, isGlobalManager bool, connector *client.RestConnector) (bool, error) {
 
 	var err error
 	if isGlobalManager {
@@ -200,16 +201,14 @@ func resourceNsxtPolicyBgpNeighborExists(t0ID string, localeServiceID string, ne
 		_, err = client.Get(t0ID, localeServiceID, neighborID)
 	}
 	if err == nil {
-		return true
+		return true, nil
 	}
 
 	if isNotFoundError(err) {
-		return false
+		return false, nil
 	}
 
-	logAPIError("Error retrieving resource", err)
-
-	return false
+	return false, logAPIError("Error retrieving resource", err)
 }
 
 func resourceNsxtPolicyBgpNeighborResourceDataToStruct(d *schema.ResourceData, id string) (model.BgpNeighborConfig, error) {
@@ -348,11 +347,15 @@ func resourceNsxtPolicyBgpNeighborCreate(d *schema.ResourceData, m interface{}) 
 	if t0ID == "" || serviceID == "" {
 		return fmt.Errorf("Invalid bgp_path %s", bgpPath)
 	}
-	if resourceNsxtPolicyBgpNeighborExists(t0ID, serviceID, id, isGlobalManager, connector) {
+	exists, err := resourceNsxtPolicyBgpNeighborExists(t0ID, serviceID, id, isGlobalManager, connector)
+	if err != nil {
+		return err
+	}
+	if exists {
 		return fmt.Errorf("BGP Neighbor with ID %s already exists for Tier-O %s and Locale Service %s", id, t0ID, serviceID)
 	}
 
-	err := resourceNsxtPolicyBgpNeighborConvertAndPatch(id, d, m)
+	err = resourceNsxtPolicyBgpNeighborConvertAndPatch(id, d, m)
 	if err != nil {
 		return err
 	}

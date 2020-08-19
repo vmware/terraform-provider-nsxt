@@ -5,10 +5,11 @@ package nsxt
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
-	"testing"
 )
 
 func TestAccResourceNsxtPolicyIPPool_minimal(t *testing.T) {

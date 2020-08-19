@@ -5,10 +5,11 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/vmware/go-vmware-nsxt/manager"
 	"log"
 	"net/http"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/vmware/go-vmware-nsxt/manager"
 )
 
 func resourceNsxtDhcpServerProfile() *schema.Resource {
@@ -143,7 +144,7 @@ func resourceNsxtDhcpServerProfileUpdate(d *schema.ResourceData, m interface{}) 
 		Revision:                 revision,
 	}
 
-	dhcpProfile, resp, err := nsxClient.ServicesApi.UpdateDhcpProfile(nsxClient.Context, id, dhcpProfile)
+	_, resp, err := nsxClient.ServicesApi.UpdateDhcpProfile(nsxClient.Context, id, dhcpProfile)
 
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during DhcpProfile update: %v", err)

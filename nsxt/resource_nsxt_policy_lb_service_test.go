@@ -5,10 +5,11 @@ package nsxt
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
-	"testing"
 )
 
 var accTestPolicyLBServiceCreateAttributes = map[string]string{
@@ -226,19 +227,5 @@ data "nsxt_policy_edge_cluster" "test" {
 resource "nsxt_policy_tier0_gateway" "test" {
   display_name = "terraform-lb-test"
 }`, getEdgeClusterName())
-
-}
-
-func testAccNsxtPolicyLBServiceTier1CleanUp() string {
-	return testAccNsxtPolicyLBServiceDeps() + `
-resource "nsxt_policy_tier1_gateway" "test1" {
-  display_name      = "terraform-lb-test-1-update"
-  edge_cluster_path = data.nsxt_policy_edge_cluster.test.path
-}
-
-resource "nsxt_policy_tier1_gateway" "test2" {
-  display_name      = "terraform-lb-test-2-update"
-  edge_cluster_path = data.nsxt_policy_edge_cluster.test.path
-}`
 
 }

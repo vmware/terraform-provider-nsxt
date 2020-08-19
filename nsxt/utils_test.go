@@ -5,13 +5,17 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/vmware/go-vmware-nsxt/trust"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"net/http"
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/vmware/go-vmware-nsxt/trust"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
 // Default names or prefixed of NSX backend existing objects used in the acceptance tests.
@@ -323,7 +327,7 @@ func testAccNSXDeleteCerts(t *testing.T, certID string, clientCertID string, caC
 	testAccNSXDeleteCert(t, caCertID)
 }
 
-func testAccNsxtPolicyEmptyTemplate() string {
+func testAccNsxtEmptyTemplate() string {
 	return " "
 }
 
@@ -408,4 +412,52 @@ resource "nsxt_policy_tier%s_gateway" "t%stest" {
   edge_cluster_path = data.nsxt_policy_edge_cluster.%s.path
   %s
 }`, tier, tier, tier, edgeClusterName, haMode)
+}
+
+func testAccNsxtPolicyResourceExists(resourceName string, presenceChecker func(string, *client.RestConnector, bool) (bool, error)) resource.TestCheckFunc {
+	return func(state *terraform.State) error {
+
+		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
+
+		rs, ok := state.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("Policy resource %s not found in resources", resourceName)
+		}
+
+		resourceID := rs.Primary.ID
+		if resourceID == "" {
+			return fmt.Errorf("Policy resource ID not set in resources")
+		}
+
+		exists, err := presenceChecker(resourceID, connector, testAccIsGlobalManager())
+		if err != nil {
+			return err
+		}
+
+		if !exists {
+			return fmt.Errorf("Policy resource %s does not exist", resourceID)
+		}
+
+		return nil
+	}
+}
+
+func testAccNsxtPolicyResourceCheckDestroy(state *terraform.State, displayName string, resourceType string, presenceChecker func(string, *client.RestConnector, bool) (bool, error)) error {
+	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
+	for _, rs := range state.RootModule().Resources {
+
+		if rs.Type != resourceType {
+			continue
+		}
+
+		resourceID := rs.Primary.Attributes["id"]
+		exists, err := presenceChecker(resourceID, connector, testAccIsGlobalManager())
+		if err != nil {
+			return err
+		}
+		if exists {
+			return fmt.Errorf("Policy resource %s still exists", displayName)
+		}
+	}
+	return nil
 }

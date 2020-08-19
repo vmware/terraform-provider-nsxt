@@ -2,10 +2,11 @@ package nsxt
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	"strings"
 )
 
 var defaultDomain = "default"
@@ -468,7 +469,7 @@ func getAllocationRangeListSchema(required bool, description string) *schema.Sch
 }
 
 func globalManagerOnlyError() error {
-	return fmt.Errorf("This configuration is only supported with NSX Global Manager. To mark your endpoint as Global Manager, please set 'global_manager' flag to 'true' in the provider.")
+	return fmt.Errorf("This configuration is only supported with NSX Global Manager. To mark your endpoint as Global Manager, please set 'global_manager' flag to 'true' in the provider")
 }
 
 func attributeRequiredGlobalManagerError(attribute string, resource string) error {

@@ -5,10 +5,11 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/vmware/go-vmware-nsxt/manager"
 	"log"
 	"net/http"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/vmware/go-vmware-nsxt/manager"
 )
 
 func resourceNsxtEtherTypeNsService() *schema.Resource {
@@ -148,7 +149,7 @@ func resourceNsxtEtherTypeNsServiceUpdate(d *schema.ResourceData, m interface{})
 		},
 	}
 
-	nsService, resp, err := nsxClient.GroupingObjectsApi.UpdateEtherTypeNSService(nsxClient.Context, id, nsService)
+	_, resp, err := nsxClient.GroupingObjectsApi.UpdateEtherTypeNSService(nsxClient.Context, id, nsService)
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during NsService update: %v %v", err, resp)
 	}

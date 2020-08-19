@@ -2,6 +2,9 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
+	"time"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
@@ -14,8 +17,6 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/segments"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	"log"
-	"time"
 )
 
 var connectivityValues = []string{
@@ -702,7 +703,7 @@ func policySegmentResourceToInfraStruct(id string, d *schema.ResourceData, isVla
 	return infraStruct, nil
 }
 
-func resourceNsxtPolicySegmentExists(id string, connector *client.RestConnector, isGlobalManager bool) bool {
+func resourceNsxtPolicySegmentExists(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
 	var err error
 
 	if isGlobalManager {
@@ -713,15 +714,14 @@ func resourceNsxtPolicySegmentExists(id string, connector *client.RestConnector,
 		_, err = client.Get(id)
 	}
 	if err == nil {
-		return true
+		return true, nil
 	}
 
 	if isNotFoundError(err) {
-		return false
+		return false, nil
 	}
 
-	logAPIError("Error retrieving Segment", err)
-	return false
+	return false, logAPIError("Error retrieving Segment", err)
 }
 
 func nsxtPolicySegmentProfilesSetInStruct(d *schema.ResourceData, segment *model.Segment) error {
@@ -1175,7 +1175,10 @@ func nsxtPolicySegmentRead(d *schema.ResourceData, m interface{}, isVlan bool) e
 		seg["dhcp_ranges"] = subnetSeg.DhcpRanges
 		seg["cidr"] = subnetSeg.GatewayAddress
 		seg["network"] = subnetSeg.Network
-		setSegmentSubnetDhcpConfigInSchema(seg, subnetSeg)
+		err := setSegmentSubnetDhcpConfigInSchema(seg, subnetSeg)
+		if err != nil {
+			return err
+		}
 		subnetSegments = append(subnetSegments, seg)
 	}
 

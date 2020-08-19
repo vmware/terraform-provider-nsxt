@@ -5,13 +5,14 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std"
 	"github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	"log"
 )
 
 func printAPIError(apiError model.ApiError) string {
@@ -145,7 +146,7 @@ func handleReadError(d *schema.ResourceData, resourceType string, resourceID str
 	msg := fmt.Sprintf("Failed to read %s %s", resourceType, resourceID)
 	if isNotFoundError(err) {
 		d.SetId("")
-		log.Printf(msg)
+		log.Print(msg)
 		return nil
 	}
 	return logAPIError(msg, err)

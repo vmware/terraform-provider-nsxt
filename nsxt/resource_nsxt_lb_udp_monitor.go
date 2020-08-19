@@ -5,10 +5,11 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/vmware/go-vmware-nsxt/loadbalancer"
 	"log"
 	"net/http"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/vmware/go-vmware-nsxt/loadbalancer"
 )
 
 func resourceNsxtLbUDPMonitor() *schema.Resource {
@@ -140,7 +141,7 @@ func resourceNsxtLbUDPMonitorUpdate(d *schema.ResourceData, m interface{}) error
 		Send:        send,
 	}
 
-	lbUDPMonitor, resp, err := nsxClient.ServicesApi.UpdateLoadBalancerUdpMonitor(nsxClient.Context, id, lbUDPMonitor)
+	_, resp, err := nsxClient.ServicesApi.UpdateLoadBalancerUdpMonitor(nsxClient.Context, id, lbUDPMonitor)
 
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during LbMonitor update: %v", err)

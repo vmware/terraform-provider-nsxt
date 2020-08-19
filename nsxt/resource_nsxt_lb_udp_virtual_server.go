@@ -5,10 +5,11 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/vmware/go-vmware-nsxt/loadbalancer"
 	"log"
 	"net/http"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/vmware/go-vmware-nsxt/loadbalancer"
 )
 
 func resourceNsxtLbUDPVirtualServer() *schema.Resource {
@@ -243,7 +244,7 @@ func resourceNsxtLbUDPVirtualServerUpdate(d *schema.ResourceData, m interface{})
 		SorryPoolId:              sorryPoolID,
 	}
 
-	lbVirtualServer, resp, err := nsxClient.ServicesApi.UpdateLoadBalancerVirtualServer(nsxClient.Context, id, lbVirtualServer)
+	_, resp, err := nsxClient.ServicesApi.UpdateLoadBalancerVirtualServer(nsxClient.Context, id, lbVirtualServer)
 
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during LbVirtualServer update: %v", err)

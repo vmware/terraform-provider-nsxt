@@ -5,11 +5,12 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"net"
 	"strconv"
 	"strings"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 )
 
 // Validations for Port objects
@@ -229,19 +230,6 @@ func validateIPorASNPair(i interface{}, k string) (s []string, es []error) {
 		es = append(es, err)
 	}
 
-	return
-}
-
-func validate4ByteASNPlain(i interface{}, k string) (s []string, es []error) {
-	v, ok := i.(string)
-	if !ok {
-		es = append(es, fmt.Errorf("expected type of %s to be string", k))
-		return
-	}
-	if !isValidStringUint(v, 32) {
-		es = append(es, fmt.Errorf("invalid ASN number %s", v))
-		return
-	}
 	return
 }
 

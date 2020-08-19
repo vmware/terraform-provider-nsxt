@@ -5,14 +5,15 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"net/http"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccResourceNsxtIpBlock_basic(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-ip-block")
+	name := "test-nsx-ip-block"
 	updateName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_ip_block.test"
 	cidr1 := "1.1.1.0/24"

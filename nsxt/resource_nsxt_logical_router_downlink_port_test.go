@@ -5,14 +5,15 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"net/http"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccResourceNsxtLogicalRouterDownlinkPort_basic(t *testing.T) {
-	portName := fmt.Sprintf("test-nsx-logical-router-downlink-port")
+	portName := "test-nsx-logical-router-downlink-port"
 	updatePortName := fmt.Sprintf("%s-update", portName)
 	testResourceName := "nsxt_logical_router_downlink_port.test"
 	transportZoneName := getOverlayTransportZoneName()
@@ -58,7 +59,7 @@ func TestAccResourceNsxtLogicalRouterDownlinkPort_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtLogicalRouterDownlinkPort_withRelay(t *testing.T) {
-	portName := fmt.Sprintf("test-nsx-logical-router-downlink-port")
+	portName := "test-nsx-logical-router-downlink-port"
 	updatePortName := fmt.Sprintf("%s-update", portName)
 	testResourceName := "nsxt_logical_router_downlink_port.test"
 	transportZoneName := getOverlayTransportZoneName()
@@ -112,7 +113,7 @@ func TestAccResourceNsxtLogicalRouterDownlinkPort_withRelay(t *testing.T) {
 }
 
 func TestAccResourceNsxtLogicalRouterDownlinkPort_importBasic(t *testing.T) {
-	portName := fmt.Sprintf("test-nsx-logical-router-downlink-port")
+	portName := "test-nsx-logical-router-downlink-port"
 	testResourceName := "nsxt_logical_router_downlink_port.test"
 	transportZoneName := getOverlayTransportZoneName()
 	edgeClusterName := getEdgeClusterName()
@@ -223,7 +224,7 @@ resource "nsxt_logical_tier1_router" "rtr1" {
 }
 
 func testAccNSXLogicalRouterDownlinkPortRelayTemplate() string {
-	return fmt.Sprintf(`
+	return `
 resource "nsxt_dhcp_relay_profile" "drp1" {
   display_name     = "prf"
   server_addresses = ["1.1.1.1"]
@@ -233,7 +234,7 @@ resource "nsxt_dhcp_relay_service" "drs1" {
 	display_name = "srv"
 	description = "Acceptance Test"
 	dhcp_relay_profile_id = "${nsxt_dhcp_relay_profile.drp1.id}"
-}`)
+}`
 }
 
 func testAccNSXLogicalRouterDownlinkPortCreateTemplate(portName string, transportZoneName string, edgeClusterName string) string {

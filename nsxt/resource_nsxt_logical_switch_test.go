@@ -5,15 +5,16 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"net/http"
 	"regexp"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccResourceNsxtLogicalSwitch_basic(t *testing.T) {
-	switchName := fmt.Sprintf("test-nsx-logical-switch-overlay")
+	switchName := "test-nsx-logical-switch-overlay"
 	updateSwitchName := fmt.Sprintf("%s-update", switchName)
 	resourceName := "testoverlay"
 	testResourceName := fmt.Sprintf("nsxt_logical_switch.%s", resourceName)
@@ -107,7 +108,7 @@ func TestAccResourceNsxtLogicalSwitch_vlan(t *testing.T) {
 }
 
 func TestAccResourceNsxtLogicalSwitch_withProfiles(t *testing.T) {
-	switchName := fmt.Sprintf("test-nsx-logical-switch-with-profiles")
+	switchName := "test-nsx-logical-switch-with-profiles"
 	updateSwitchName := fmt.Sprintf("%s-update", switchName)
 	resourceName := "test_profiles"
 	testResourceName := fmt.Sprintf("nsxt_logical_switch.%s", resourceName)
@@ -155,14 +156,14 @@ func TestAccResourceNsxtLogicalSwitch_withProfiles(t *testing.T) {
 			},
 			{
 				// remove the data source for the custom switching profile
-				Config: testAccNSXSwitchingNoProfileTemplate(),
+				Config: testAccNsxtEmptyTemplate(),
 			},
 		},
 	})
 }
 
 func TestAccResourceNsxtLogicalSwitch_withMacPool(t *testing.T) {
-	switchName := fmt.Sprintf("test-nsx-logical-switch-with-mac")
+	switchName := "test-nsx-logical-switch-with-mac"
 	resourceName := "test_mac_pool"
 	testResourceName := fmt.Sprintf("nsxt_logical_switch.%s", resourceName)
 	transportZoneName := getOverlayTransportZoneName()
@@ -198,7 +199,7 @@ func TestAccResourceNsxtLogicalSwitch_withMacPool(t *testing.T) {
 }
 
 func TestAccResourceNsxtLogicalSwitch_importBasic(t *testing.T) {
-	switchName := fmt.Sprintf("test-nsx-logical-switch-overlay")
+	switchName := "test-nsx-logical-switch-overlay"
 	resourceName := "testoverlay"
 	testResourceName := fmt.Sprintf("nsxt_logical_switch.%s", resourceName)
 	novlan := "0"

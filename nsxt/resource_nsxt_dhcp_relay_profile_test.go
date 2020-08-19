@@ -5,14 +5,15 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"net/http"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccResourceNsxtDhcpRelayProfile_basic(t *testing.T) {
-	prfName := fmt.Sprintf("test-nsx-dhcp-relay-profile")
+	prfName := "test-nsx-dhcp-relay-profile"
 	updatePrfName := fmt.Sprintf("%s-update", prfName)
 	testResourceName := "nsxt_dhcp_relay_profile.test"
 
@@ -48,7 +49,7 @@ func TestAccResourceNsxtDhcpRelayProfile_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtDhcpRelayProfile_importBasic(t *testing.T) {
-	prfName := fmt.Sprintf("test-nsx-dhcp-relay-profile")
+	prfName := "test-nsx-dhcp-relay-profile"
 	testResourceName := "nsxt_dhcp_relay_profile.test"
 
 	resource.Test(t, resource.TestCase{

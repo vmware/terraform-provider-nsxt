@@ -5,11 +5,12 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/vmware/go-vmware-nsxt/common"
 	"github.com/vmware/go-vmware-nsxt/manager"
-	"log"
-	"net/http"
 )
 
 func resourceNsxtNsServiceGroup() *schema.Resource {
@@ -156,7 +157,7 @@ func resourceNsxtNsServiceGroupUpdate(d *schema.ResourceData, m interface{}) err
 		Members:     members,
 	}
 
-	nsServiceGroup, resp, err := nsxClient.GroupingObjectsApi.UpdateNSServiceGroup(nsxClient.Context, id, nsServiceGroup)
+	_, resp, err := nsxClient.GroupingObjectsApi.UpdateNSServiceGroup(nsxClient.Context, id, nsServiceGroup)
 
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during NsServiceGroup update: %v", err)

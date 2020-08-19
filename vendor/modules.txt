@@ -274,6 +274,7 @@ github.com/vmware/vsphere-automation-sdk-go/runtime/security
 ## explicit
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra
+github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/context_profiles
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/domains
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/ip_pools
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/realized_state
@@ -293,6 +294,7 @@ github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
 ## explicit
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra
+github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/context_profiles
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/domains
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/realized_state
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/segments

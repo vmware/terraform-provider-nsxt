@@ -5,16 +5,17 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"net/http"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 var testAccResourceNatRuleName = "nsxt_nat_rule.test"
 
 func TestAccResourceNsxtNatRule_snat(t *testing.T) {
-	ruleName := fmt.Sprintf("test-nsx-snat-rule")
+	ruleName := "test-nsx-snat-rule"
 	updateRuleName := fmt.Sprintf("%s-update", ruleName)
 	edgeClusterName := getEdgeClusterName()
 
@@ -66,7 +67,7 @@ func TestAccResourceNsxtNatRule_snat(t *testing.T) {
 }
 
 func TestAccResourceNsxtNatRule_snatImport(t *testing.T) {
-	ruleName := fmt.Sprintf("test-nsx-snat-rule")
+	ruleName := "test-nsx-snat-rule"
 	edgeClusterName := getEdgeClusterName()
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -90,7 +91,7 @@ func TestAccResourceNsxtNatRule_snatImport(t *testing.T) {
 }
 
 func TestAccResourceNsxtNatRule_dnat(t *testing.T) {
-	ruleName := fmt.Sprintf("test-nsx-dnat-rule")
+	ruleName := "test-nsx-dnat-rule"
 	updateRuleName := fmt.Sprintf("%s-update", ruleName)
 	edgeClusterName := getEdgeClusterName()
 
@@ -138,7 +139,7 @@ func TestAccResourceNsxtNatRule_dnat(t *testing.T) {
 }
 
 func TestAccResourceNsxtNatRule_dnatImport(t *testing.T) {
-	ruleName := fmt.Sprintf("test-nsx-dnat-rule")
+	ruleName := "test-nsx-dnat-rule"
 	edgeClusterName := getEdgeClusterName()
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -162,7 +163,7 @@ func TestAccResourceNsxtNatRule_dnatImport(t *testing.T) {
 }
 
 func TestAccResourceNsxtNatRule_noNnat(t *testing.T) {
-	ruleName := fmt.Sprintf("test-nsx-nonat-rule")
+	ruleName := "test-nsx-nonat-rule"
 	edgeClusterName := getEdgeClusterName()
 
 	resource.ParallelTest(t, resource.TestCase{

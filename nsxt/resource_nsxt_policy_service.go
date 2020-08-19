@@ -5,6 +5,9 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
+	"strconv"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
@@ -14,8 +17,6 @@ import (
 	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	"log"
-	"strconv"
 )
 
 func resourceNsxtPolicyService() *schema.Resource {
@@ -235,8 +236,7 @@ func resourceNsxtPolicyServiceGetEntriesFromSchema(d *schema.ResourceData) ([]*d
 		if errs != nil {
 			return serviceEntries, errs[0]
 		}
-		var entryStruct *data.StructValue
-		entryStruct = dataValue.(*data.StructValue)
+		entryStruct := dataValue.(*data.StructValue)
 		serviceEntries = append(serviceEntries, entryStruct)
 	}
 
@@ -266,8 +266,7 @@ func resourceNsxtPolicyServiceGetEntriesFromSchema(d *schema.ResourceData) ([]*d
 		if errs != nil {
 			return serviceEntries, errs[0]
 		}
-		var entryStruct *data.StructValue
-		entryStruct = dataValue.(*data.StructValue)
+		entryStruct := dataValue.(*data.StructValue)
 		serviceEntries = append(serviceEntries, entryStruct)
 	}
 
@@ -291,8 +290,7 @@ func resourceNsxtPolicyServiceGetEntriesFromSchema(d *schema.ResourceData) ([]*d
 		if errs != nil {
 			return serviceEntries, errs[0]
 		}
-		var entryStruct *data.StructValue
-		entryStruct = dataValue.(*data.StructValue)
+		entryStruct := dataValue.(*data.StructValue)
 		serviceEntries = append(serviceEntries, entryStruct)
 	}
 
@@ -318,8 +316,7 @@ func resourceNsxtPolicyServiceGetEntriesFromSchema(d *schema.ResourceData) ([]*d
 		if errs != nil {
 			return serviceEntries, errs[0]
 		}
-		var entryStruct *data.StructValue
-		entryStruct = dataValue.(*data.StructValue)
+		entryStruct := dataValue.(*data.StructValue)
 		serviceEntries = append(serviceEntries, entryStruct)
 	}
 
@@ -345,8 +342,7 @@ func resourceNsxtPolicyServiceGetEntriesFromSchema(d *schema.ResourceData) ([]*d
 		if errs != nil {
 			return serviceEntries, errs[0]
 		}
-		var entryStruct *data.StructValue
-		entryStruct = dataValue.(*data.StructValue)
+		entryStruct := dataValue.(*data.StructValue)
 		serviceEntries = append(serviceEntries, entryStruct)
 	}
 
@@ -377,15 +373,14 @@ func resourceNsxtPolicyServiceGetEntriesFromSchema(d *schema.ResourceData) ([]*d
 		if errs != nil {
 			return serviceEntries, errs[0]
 		}
-		var entryStruct *data.StructValue
-		entryStruct = dataValue.(*data.StructValue)
+		entryStruct := dataValue.(*data.StructValue)
 		serviceEntries = append(serviceEntries, entryStruct)
 	}
 
 	return serviceEntries, nil
 }
 
-func resourceNsxtPolicyServiceExists(id string, connector *client.RestConnector, isGlobalManager bool) bool {
+func resourceNsxtPolicyServiceExists(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
 	var err error
 	if isGlobalManager {
 		client := gm_infra.NewDefaultServicesClient(connector)
@@ -396,15 +391,14 @@ func resourceNsxtPolicyServiceExists(id string, connector *client.RestConnector,
 	}
 
 	if err == nil {
-		return true
+		return true, nil
 	}
 
 	if isNotFoundError(err) {
-		return false
+		return false, nil
 	}
 
-	logAPIError("Error retrieving service", err)
-	return false
+	return false, logAPIError("Error retrieving service", err)
 }
 
 func filterServiceEntryDisplayName(entryDisplayName string, entryID string) string {

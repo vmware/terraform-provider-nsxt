@@ -5,6 +5,10 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
+	"strconv"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
 	gm_tier1s "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_1s"
@@ -13,9 +17,6 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/locale_services"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	"log"
-	"strconv"
-	"strings"
 )
 
 func resourceNsxtPolicyTier1GatewayInterface() *schema.Resource {
@@ -163,9 +164,9 @@ func resourceNsxtPolicyTier1GatewayInterfaceCreate(d *schema.ResourceData, m int
 	log.Printf("[INFO] Creating tier1 interface with ID %s", id)
 	var err error
 	if isPolicyGlobalManager(m) {
-		gmObj, err := convertModelBindingType(obj, model.Tier1InterfaceBindingType(), gm_model.Tier1InterfaceBindingType())
-		if err != nil {
-			return err
+		gmObj, convErr := convertModelBindingType(obj, model.Tier1InterfaceBindingType(), gm_model.Tier1InterfaceBindingType())
+		if convErr != nil {
+			return convErr
 		}
 		client := gm_locale_services.NewDefaultInterfacesClient(connector)
 		err = client.Patch(tier1ID, localeServiceID, id, gmObj.(gm_model.Tier1Interface))

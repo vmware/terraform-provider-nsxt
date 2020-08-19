@@ -5,11 +5,12 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	"log"
 )
 
 func resourceNsxtPolicyIPPool() *schema.Resource {
@@ -33,20 +34,19 @@ func resourceNsxtPolicyIPPool() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyIPPoolExists(id string, connector *client.RestConnector, isGlobalManager bool) bool {
+func resourceNsxtPolicyIPPoolExists(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
 	client := infra.NewDefaultIpPoolsClient(connector)
 
 	_, err := client.Get(id)
 	if err == nil {
-		return true
+		return true, nil
 	}
 
 	if isNotFoundError(err) {
-		return false
+		return false, nil
 	}
 
-	logAPIError("Error retrieving IP Pool", err)
-	return false
+	return false, logAPIError("Error retrieving IP Pool", err)
 }
 
 func resourceNsxtPolicyIPPoolRead(d *schema.ResourceData, m interface{}) error {

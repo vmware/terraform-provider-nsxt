@@ -2,15 +2,16 @@ package nsxt
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	gm_domains "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/domains"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/domains"
-	"testing"
 )
 
 func TestAccResourceNsxtPolicyGroup_basicImport(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-policy-group-ipaddrs")
+	name := "test-nsx-policy-group-ipaddrs"
 	testResourceName := "nsxt_policy_group.test"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -33,7 +34,7 @@ func TestAccResourceNsxtPolicyGroup_basicImport(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyGroup_AddressCriteria(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-policy-group-ipaddrs")
+	name := "test-nsx-policy-group-ipaddrs"
 	testResourceName := "nsxt_policy_group.test"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -83,7 +84,7 @@ func TestAccResourceNsxtPolicyGroup_AddressCriteria(t *testing.T) {
 }
 
 func TestAccResourceNsxtGlobalPolicyGroup_singleIPAddressCriteria(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-global-policy-group-ipaddrs")
+	name := "test-nsx-global-policy-group-ipaddrs"
 	updatedName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_policy_group.test"
 
@@ -131,7 +132,7 @@ func TestAccResourceNsxtGlobalPolicyGroup_singleIPAddressCriteria(t *testing.T) 
 }
 
 func TestAccResourceNsxtPolicyGroup_multipleIPAddressCriteria(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-policy-group-ipaddrs")
+	name := "test-nsx-policy-group-ipaddrs"
 	updatedName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_policy_group.test"
 
@@ -175,7 +176,7 @@ func TestAccResourceNsxtPolicyGroup_multipleIPAddressCriteria(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyGroup_pathCriteria(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-policy-group-paths")
+	name := "test-nsx-policy-group-paths"
 	testResourceName := "nsxt_policy_group.test"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -226,7 +227,7 @@ func TestAccResourceNsxtPolicyGroup_pathCriteria(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyGroup_nestedCriteria(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-policy-group-nested")
+	name := "test-nsx-policy-group-nested"
 	updatedName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_policy_group.test"
 
@@ -272,7 +273,7 @@ func TestAccResourceNsxtPolicyGroup_nestedCriteria(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyGroup_multipleCriteria(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-policy-group-multiple")
+	name := "test-nsx-policy-group-multiple"
 	updatedName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_policy_group.test"
 
@@ -320,7 +321,7 @@ func TestAccResourceNsxtPolicyGroup_multipleCriteria(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyGroup_multipleNestedCriteria(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-policy-group-multiple-nested")
+	name := "test-nsx-policy-group-multiple-nested"
 	testResourceName := "nsxt_policy_group.test"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -399,7 +400,7 @@ func TestAccResourceNsxtPolicyGroup_multipleNestedCriteria(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyGroup_identityGroup(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-policy-group-identity-group")
+	name := "test-nsx-policy-group-identity-group"
 	testResourceName := "nsxt_policy_group.test"
 	updatedName := fmt.Sprintf("%s-update", name)
 
@@ -530,7 +531,11 @@ func testAccNsxtPolicyGroupCheckDestroy(state *terraform.State, displayName stri
 
 		resourceID := rs.Primary.Attributes["id"]
 		isPolicyGlobalManager := isPolicyGlobalManager(testAccProvider.Meta())
-		if resourceNsxtPolicyGroupExistsInDomain(resourceID, domainName, connector, isPolicyGlobalManager) {
+		exists, err := resourceNsxtPolicyGroupExistsInDomain(resourceID, domainName, connector, isPolicyGlobalManager)
+		if err != nil {
+			return err
+		}
+		if exists {
 			return fmt.Errorf("Policy Group %s still exists in domain %s", displayName, domainName)
 		}
 	}
@@ -696,7 +701,7 @@ func testAccNsxtPolicyGroupPathsPrerequisites() string {
 	} else {
 		preRequisites = testNsxtPolicyGroupPathsTransportZone()
 	}
-	return preRequisites + fmt.Sprintf(`
+	return preRequisites + `
 resource "nsxt_policy_segment" "test-1" {
   display_name        = "group-test-1"
   transport_zone_path = data.nsxt_policy_transport_zone.test.path
@@ -705,7 +710,7 @@ resource "nsxt_policy_segment" "test-1" {
 resource "nsxt_policy_segment" "test-2" {
   display_name        = "group-test-1"
   transport_zone_path = data.nsxt_policy_transport_zone.test.path
-}`)
+}`
 
 }
 

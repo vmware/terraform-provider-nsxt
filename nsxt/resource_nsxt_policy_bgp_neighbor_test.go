@@ -5,9 +5,10 @@ package nsxt
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"testing"
 )
 
 var accTestPolicyBgpNeighborConfigCreateAttributes = map[string]string{
@@ -357,7 +358,10 @@ func testAccNsxtPolicyBgpNeighborExists(resourceName string) resource.TestCheckF
 		bgpPath := rs.Primary.Attributes["bgp_path"]
 		t0ID, serviceID := resourceNsxtPolicyBgpNeighborParseIDs(bgpPath)
 
-		exists := resourceNsxtPolicyBgpNeighborExists(t0ID, serviceID, resourceID, testAccIsGlobalManager(), connector)
+		exists, err := resourceNsxtPolicyBgpNeighborExists(t0ID, serviceID, resourceID, testAccIsGlobalManager(), connector)
+		if err != nil {
+			return err
+		}
 		if !exists {
 			return fmt.Errorf("BgpNeighbor ID %s does not exist on backend", resourceID)
 		}
@@ -377,7 +381,10 @@ func testAccNsxtPolicyBgpNeighborCheckDestroy(state *terraform.State, displayNam
 		resourceID := rs.Primary.Attributes["id"]
 		bgpPath := rs.Primary.Attributes["bgp_path"]
 		t0ID, serviceID := resourceNsxtPolicyBgpNeighborParseIDs(bgpPath)
-		exists := resourceNsxtPolicyBgpNeighborExists(t0ID, serviceID, resourceID, testAccIsGlobalManager(), connector)
+		exists, err := resourceNsxtPolicyBgpNeighborExists(t0ID, serviceID, resourceID, testAccIsGlobalManager(), connector)
+		if err != nil {
+			return err
+		}
 		if exists {
 			return fmt.Errorf("Policy BgpNeighbor %s still exists", displayName)
 		}

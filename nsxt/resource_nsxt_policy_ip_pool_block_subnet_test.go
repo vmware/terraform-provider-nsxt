@@ -5,10 +5,11 @@ package nsxt
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/ip_pools"
-	"testing"
 )
 
 // TODO: remove extra test step config once IP Blocks don't need a delay to delete
@@ -190,11 +191,11 @@ func testAccNSXPolicyIPPoolBlockSubnetCheckDestroy(state *terraform.State) error
 }
 
 func testAccNSXPolicyIPPoolBlockSubnetIPBlockTemplate() string {
-	return fmt.Sprintf(`
+	return `
 resource "nsxt_policy_ip_block" "block1" {
   display_name = "tfblock2"
   cidr         = "11.11.12.0/24"
-}`)
+}`
 }
 
 func testAccNSXPolicyIPPoolBlockSubnetCreateMinimalTemplate(poolName string, name string) string {

@@ -6,16 +6,17 @@ package nsxt
 import (
 	"crypto/tls"
 	"fmt"
+	"net/http"
+	"os"
+	"strings"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/core"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/security"
-	"net/http"
-	"os"
-	"strings"
-	"testing"
 )
 
 var testAccProviders map[string]terraform.ResourceProvider
@@ -87,7 +88,11 @@ func testAccNSXVersion(t *testing.T, requiredVersion string) {
 			return
 		}
 
-		initNSXVersion(client)
+		err = initNSXVersion(client)
+		if err != nil {
+			t.Errorf("Failed to retrieve NSX version")
+			return
+		}
 	}
 
 	if nsxVersionLower(requiredVersion) {
@@ -103,7 +108,11 @@ func testAccNSXVersionLessThan(t *testing.T, requiredVersion string) {
 			return
 		}
 
-		initNSXVersion(client)
+		err = initNSXVersion(client)
+		if err != nil {
+			t.Errorf("Failed to retrieve NSX version")
+			return
+		}
 	}
 
 	if nsxVersionHigherOrEqual(requiredVersion) {

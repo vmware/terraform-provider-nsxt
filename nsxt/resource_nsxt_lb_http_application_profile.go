@@ -5,11 +5,12 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/vmware/go-vmware-nsxt/loadbalancer"
-	"log"
-	"net/http"
 )
 
 var xForwardedValues = []string{"INSERT", "REPLACE"}
@@ -211,7 +212,7 @@ func resourceNsxtLbHTTPApplicationProfileUpdate(d *schema.ResourceData, m interf
 		XForwardedFor:       xForwardedFor,
 	}
 
-	lbHTTPApplicationProfile, resp, err := nsxClient.ServicesApi.UpdateLoadBalancerHttpProfile(nsxClient.Context, id, lbHTTPApplicationProfile)
+	_, resp, err := nsxClient.ServicesApi.UpdateLoadBalancerHttpProfile(nsxClient.Context, id, lbHTTPApplicationProfile)
 
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during LbHTTPApplicationProfile update: %v", err)

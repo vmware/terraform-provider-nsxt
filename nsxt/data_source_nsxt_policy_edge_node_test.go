@@ -4,9 +4,9 @@
 package nsxt
 
 import (
-	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
 func TestAccDataSourceNsxtPolicyEdgeNode_basic(t *testing.T) {
@@ -29,21 +29,17 @@ func TestAccDataSourceNsxtPolicyEdgeNode_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyNoEdgeNodeTemplate(),
+				Config: testAccNsxtEmptyTemplate(),
 			},
 		},
 	})
 }
 
 func testAccNsxtPolicyEdgeNodeReadTemplate(name string) string {
-	return testAccNsxtPolicyEdgeClusterReadTemplate(name) + fmt.Sprintf(`
+	return testAccNsxtPolicyEdgeClusterReadTemplate(name) + `
 
 data "nsxt_policy_edge_node" "test" {
   edge_cluster_path = data.nsxt_policy_edge_cluster.test.path
   member_index      = 0
-}`)
-}
-
-func testAccNsxtPolicyNoEdgeNodeTemplate() string {
-	return fmt.Sprintf(` `)
+}`
 }

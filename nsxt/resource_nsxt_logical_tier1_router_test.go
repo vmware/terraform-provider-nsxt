@@ -5,14 +5,15 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"net/http"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccResourceNsxtLogicalTier1Router_basic(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-logical-tier1-router")
+	name := "test-nsx-logical-tier1-router"
 	updateName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_logical_tier1_router.test"
 	failoverMode := "PREEMPTIVE"
@@ -62,7 +63,7 @@ func TestAccResourceNsxtLogicalTier1Router_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtLogicalTier1Router_importBasic(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-logical-tier1-router")
+	name := "test-nsx-logical-tier1-router"
 	testResourceName := "nsxt_logical_tier1_router.test"
 	failoverMode := "PREEMPTIVE"
 	edgeClusterName := getEdgeClusterName()

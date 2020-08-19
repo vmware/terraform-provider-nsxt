@@ -5,6 +5,8 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
@@ -17,7 +19,6 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	"log"
 )
 
 var haModeValues = []string{
@@ -515,7 +516,7 @@ func setPolicyVRFConfigInSchema(d *schema.ResourceData, config *model.Tier0VrfCo
 	return d.Set("vrf_config", vrfConfigs)
 }
 
-func resourceNsxtPolicyTier0GatewayExists(id string, connector *client.RestConnector, isGlobalManager bool) bool {
+func resourceNsxtPolicyTier0GatewayExists(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
 	var err error
 	if isGlobalManager {
 		client := gm_infra.NewDefaultTier0sClient(connector)
@@ -526,15 +527,14 @@ func resourceNsxtPolicyTier0GatewayExists(id string, connector *client.RestConne
 	}
 
 	if err == nil {
-		return true
+		return true, nil
 	}
 
 	if isNotFoundError(err) {
-		return false
+		return false, nil
 	}
 
-	logAPIError("Error retrieving Tier0", err)
-	return false
+	return false, logAPIError("Error retrieving Tier0", err)
 }
 
 func resourceNsxtPolicyTier0GatewayBGPConfigSchemaToStruct(cfg interface{}, isVrf bool, gwID string) model.BgpRoutingConfig {
@@ -605,13 +605,13 @@ func resourceNsxtPolicyTier0GatewayBGPConfigSchemaToStruct(cfg interface{}, isVr
 	if !isVrf {
 		// backend complains if the below config appears on VRF gateway.
 		// We print a warning if property differs from default
-		if interSrIbgp == false {
+		if !interSrIbgp {
 			log.Printf("[WARNING] BGP setting inter_sr_ibgp is not applicable for VRF gateway %s, and will be ignored", gwID)
 		}
 		if localAsNum != policyBGPLocalAsNumDefault {
 			log.Printf("[WARNING] BGP setting local_as_num is not applicable for VRF gateway %s, and will be ignored", gwID)
 		}
-		if multipathRelax == false {
+		if !multipathRelax {
 			log.Printf("[WARNING] BGP setting multipath_relax is not applicable for VRF gateway %s, and will be ignored", gwID)
 		}
 		if (restartMode != model.BgpGracefulRestartConfig_MODE_HELPER_ONLY) || (restartTimer != int64(policyBGPGracefulRestartStaleRouteTimerDefault)) || (staleTimer != int64(policyBGPGracefulRestartStaleRouteTimerDefault)) {
@@ -896,7 +896,10 @@ func resourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{}) e
 	d.Set("internal_transit_subnets", obj.InternalTransitSubnets)
 	d.Set("transit_subnets", obj.TransitSubnets)
 	d.Set("revision", obj.Revision)
-	setPolicyVRFConfigInSchema(d, obj.VrfConfig)
+	vrfErr := setPolicyVRFConfigInSchema(d, obj.VrfConfig)
+	if vrfErr != nil {
+		return vrfErr
+	}
 
 	dhcpPaths := obj.DhcpConfigPaths
 	if len(dhcpPaths) > 0 {

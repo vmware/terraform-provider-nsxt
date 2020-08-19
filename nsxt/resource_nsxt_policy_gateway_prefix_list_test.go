@@ -5,18 +5,19 @@ package nsxt
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	gm_tier_0s "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	"testing"
 )
 
 var testAccResourcePolicyGWPrefixListName = "nsxt_policy_gateway_prefix_list.test"
 
 func TestAccResourceNsxtPolicyGatewayPrefixList_basic(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-policy-gw-prefix-list-basic")
+	name := "test-nsx-policy-gw-prefix-list-basic"
 	action := model.PrefixEntry_ACTION_DENY
 	actionUpdated := model.PrefixEntry_ACTION_PERMIT
 	ge := "20"
@@ -75,7 +76,7 @@ func TestAccResourceNsxtPolicyGatewayPrefixList_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyGatewayPrefixList_import(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-policy-gw-prefix-list-import")
+	name := "test-nsx-policy-gw-prefix-list-import"
 	action := model.PrefixEntry_ACTION_DENY
 	ge := "0"
 	le := "0"

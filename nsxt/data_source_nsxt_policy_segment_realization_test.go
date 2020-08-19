@@ -5,8 +5,9 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
 func testAccDataSourceNsxtPolicySegmentRealization(t *testing.T, vlan bool) {
@@ -25,7 +26,7 @@ func testAccDataSourceNsxtPolicySegmentRealization(t *testing.T, vlan bool) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyEmptyTemplate(),
+				Config: testAccNsxtEmptyTemplate(),
 			},
 		},
 	})

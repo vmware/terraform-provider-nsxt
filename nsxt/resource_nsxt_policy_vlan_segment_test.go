@@ -2,13 +2,14 @@ package nsxt
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"testing"
 )
 
 func TestAccResourceNsxtPolicyVlanSegment_basicImport(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-policy-vlan-segment")
+	name := "test-nsx-policy-vlan-segment"
 	testResourceName := "nsxt_policy_vlan_segment.test"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -31,7 +32,7 @@ func TestAccResourceNsxtPolicyVlanSegment_basicImport(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyVlanSegment_basicUpdate(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-policy-vlan-segment")
+	name := "test-nsx-policy-vlan-segment"
 	updatedName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_policy_vlan_segment.test"
 
@@ -69,7 +70,7 @@ func TestAccResourceNsxtPolicyVlanSegment_basicUpdate(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyVlanSegment_updateAdvConfig(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-policy-vlan-segment")
+	name := "test-nsx-policy-vlan-segment"
 	updatedName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_policy_vlan_segment.test"
 
@@ -109,7 +110,7 @@ func TestAccResourceNsxtPolicyVlanSegment_updateAdvConfig(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyVlanSegment_withDhcp(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-policy-vlan-segment")
+	name := "test-nsx-policy-vlan-segment"
 	updatedName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_policy_vlan_segment.test"
 	leaseTimes := []string{"3600", "36000"}
@@ -198,7 +199,11 @@ func testAccNsxtPolicyVlanSegmentExists(resourceName string) resource.TestCheckF
 		if resourceID == "" {
 			return fmt.Errorf("Policy VLAN Segment resource ID not set in resources")
 		}
-		if !resourceNsxtPolicySegmentExists(resourceID, connector, testAccIsGlobalManager()) {
+		exists, err := resourceNsxtPolicySegmentExists(resourceID, connector, testAccIsGlobalManager())
+		if err != nil {
+			return err
+		}
+		if !exists {
 			return fmt.Errorf("Error while retrieving policy VLAN Segment ID %s", resourceID)
 		}
 
@@ -216,7 +221,11 @@ func testAccNsxtPolicyVlanSegmentCheckDestroy(state *terraform.State, displayNam
 
 		resourceID := rs.Primary.Attributes["id"]
 
-		if resourceNsxtPolicySegmentExists(resourceID, connector, testAccIsGlobalManager()) {
+		exists, err := resourceNsxtPolicySegmentExists(resourceID, connector, testAccIsGlobalManager())
+		if err != nil {
+			return err
+		}
+		if exists {
 			return fmt.Errorf("Policy VLAN Segment %s (%s) still exists", displayName, resourceID)
 		}
 	}
