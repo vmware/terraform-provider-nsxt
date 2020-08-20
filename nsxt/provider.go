@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strings"
 
@@ -409,7 +410,8 @@ func getAPIToken(vmcAuthHost string, vmcAccessToken string) (string, error) {
 	token := jwtToken{}
 	err = json.NewDecoder(res.Body).Decode(&token)
 	if err != nil {
-		return "", fmt.Errorf("Failed to decode access token from response: %v", err)
+		// Not fatal
+		log.Printf("[WARNING]: Failed to decode access token from response: %v", err)
 	}
 
 	return token.AccessToken, nil
