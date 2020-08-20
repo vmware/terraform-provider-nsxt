@@ -1,7 +1,42 @@
-## 2.2.0 (Unreleased)
-## 2.1.0 (June 09, 2020)
+## 3.0.0 (Unreleased)
 
 FEATURES:
+
+* The provider is extended to support NSXT Global Manager. Only a subset of objects is supported, check the documentation for more details.
+
+* **New Data Source**: `nsxt_policy_site`. Applicable for NSX Global Manager only.
+
+* **New Resource**: `nsxt_policy_bgp_config`. Applicable for NSX Global Manager only.
+
+EXPERIMENTAL FEATURES:
+
+* **New Data Source**: `nsxt_policy_context_profile`.
+
+* **New Resource**: `nsxt_policy_context_profile`.
+* **New Resource**: `nsxt_policy_tier0_gateway_ha_vip_config`.
+* **New Resource**: `nsxt_policy_gateway_prefix_list`.
+
+IMPROVEMENTS:
+
+* Improve error handling for policy resources. This fixes some scenarios (mostly relevant for VMConAWS) where error was swallowed by the provider ([#428] (https://github.com/vmware/terraform-provider-nsxt/pull/428))
+* Improve provider host validation and allow schema to be specified ([#413](https://github.com/vmware/terraform-provider-nsxt/pull/413))
+* `resource/nsxt_policy_vm_tags`: Support tagging specific logical port on the VM, based on segment path ([#406](https://github.com/vmware/terraform-provider-nsxt/pull/406))
+* `resource/nsxt_policy_group`: Support MAC address criteria ([#388](https://github.com/vmware/terraform-provider-nsxt/pull/388))
+* `resource/nsxt_policy_segment`, `resource/nsxt_policy_vlan_segment`: Support assigning custome segment profiles ([#384](https://github.com/vmware/terraform-provider-nsxt/pull/384))
+* `resource/nsxt_policy_segment`, `resource/nsxt_policy_vlan_segment`: Wait for VM ports to be deleted before proceeding with segment delete. This avoids potential dependency error on deletion ([#311](https://github.com/vmware/terraform-provider-nsxt/pull/311))
+* `resource/nsxt_policy_vlan_segment`: Allow specifying vlan range ([#342](https://github.com/vmware/terraform-provider-nsxt/pull/342))
+* `resource/nsxt_policy_tier0_gateway`: Support assigning custome segment profiles ([#363](https://github.com/vmware/terraform-provider-nsxt/pull/363))
+
+BUG FIXES:
+
+* Fix to bypass certificate validation against cert request ([#381](https://github.com/vmware/terraform-provider-nsxt/pull/381))
+* Fix potential crashes in some policy resources ([#305](https://github.com/vmware/terraform-provider-nsxt/pull/305))
+* `resource/nsxt_policy_segment`: Fix error reporting on segment deletion ([#321](https://github.com/vmware/terraform-provider-nsxt/pull/321))
+* `resource/nsxt_policy_vlan_segment`: Allow to specify zero as vlan id ([#304](https://github.com/vmware/terraform-provider-nsxt/pull/304))
+* `resource/nsxt_policy_bgp_neighbor`: Fix route filters configuration ([#387](https://github.com/vmware/terraform-provider-nsxt/pull/387))
+* `resource/nsxt_ip_pool_allocation_ip_address`: Fix import ([#319](https://github.com/vmware/terraform-provider-nsxt/pull/319))
+
+## 2.1.0 (June 09, 2020)
 
 * The provider is extended to support NSXT on VMConAWS. Only a subset of objects is supported, check the documentation for more details.
 
