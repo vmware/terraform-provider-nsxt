@@ -82,6 +82,9 @@ version of the provider (see [the section above](#using-the-provider)).
 
 **NOTE:** Recommended way to compile the provider is using [Go Modules](https://blog.golang.org/using-go-modules), however vendored dependencies are still supported.
 
+**NOTE:** For terraform 0.13, please refer to [provider installation configuration][install-013] in order to use custom provider.
+[install-013]: https://www.terraform.io/docs/commands/cli-config.html#provider-installation
+
 **NOTE:** Note that if the provider is manually copied to your running folder (rather than fetched with the “terraform init” based on provider block), Terraform is not aware of the version of the provider you’re running. It will appear as “unversioned”:
 ```hcl
 $ ./terraform version
@@ -98,18 +101,18 @@ First, you will want to clone the repository to
 `$GOPATH/src/github.com/vmware/terraform-provider-nsxt`:
 
 ```sh
-mkdir -p $GOPATH/src/github.com/terraform-providers
-cd $GOPATH/src/github.com/terraform-providers
-git clone git@github.com:vmware/terraform-provider-nsxt
+mkdir -p $GOPATH/src/github.com/vmware
+cd $GOPATH/src/github.com/vmware
+git clone https://github.com/vmware/terraform-provider-nsxt.git
 ```
 
 ## Building and Installing the Provider
 
-After the clone has been completed, you can enter the provider directory and build the provider. 
+After the clone has been completed, you can enter the provider directory and build the provider.
 
 ```sh
 cd $GOPATH/src/github.com/vmware/terraform-provider-nsxt
-make 
+make
 ```
 
 After the build is complete, if your terraform running folder does not match your GOPATH environment, you need to copy the `terraform-provider-nsxt` executable to your running folder and re-run `terraform init` to make terraform aware of your local provider executable.
