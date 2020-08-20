@@ -260,6 +260,7 @@ func Provider() terraform.ResourceProvider {
 			"nsxt_policy_tier1_gateway_interface":          resourceNsxtPolicyTier1GatewayInterface(),
 			"nsxt_policy_tier0_gateway":                    resourceNsxtPolicyTier0Gateway(),
 			"nsxt_policy_tier0_gateway_interface":          resourceNsxtPolicyTier0GatewayInterface(),
+			"nsxt_policy_tier0_gateway_ha_vip_config":      resourceNsxtPolicyTier0GatewayHAVipConfig(),
 			"nsxt_policy_group":                            resourceNsxtPolicyGroup(),
 			"nsxt_policy_security_policy":                  resourceNsxtPolicySecurityPolicy(),
 			"nsxt_policy_service":                          resourceNsxtPolicyService(),

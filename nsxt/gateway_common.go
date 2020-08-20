@@ -276,7 +276,7 @@ func initGatewayLocaleServices(d *schema.ResourceData, connector *client.RestCon
 
 	services := d.Get("locale_service").(*schema.Set).List()
 
-	existingServices := make(map[string]bool)
+	existingServices := make(map[string]model.LocaleServices)
 	if len(d.Id()) > 0 {
 		// This is an update - we might need to delete locale services
 		existingServiceObjects, errList := listLocaleServicesFunc(connector, d.Id(), true)
@@ -285,7 +285,7 @@ func initGatewayLocaleServices(d *schema.ResourceData, connector *client.RestCon
 		}
 
 		for _, obj := range existingServiceObjects {
-			existingServices[*obj.Id] = true
+			existingServices[*obj.Id] = obj
 		}
 	}
 	lsType := "LocaleServices"
@@ -294,7 +294,6 @@ func initGatewayLocaleServices(d *schema.ResourceData, connector *client.RestCon
 		edgeClusterPath := cfg["edge_cluster_path"].(string)
 		edgeNodes := interface2StringList(cfg["preferred_edge_paths"].(*schema.Set).List())
 		path := cfg["path"].(string)
-		revision := int64(cfg["revision"].(int))
 
 		var serviceID string
 		if path != "" {
@@ -315,10 +314,12 @@ func initGatewayLocaleServices(d *schema.ResourceData, connector *client.RestCon
 			setLocaleServiceRedistributionConfig(redistributionConfigs.([]interface{}), &serviceStruct)
 		}
 
-		if _, ok := existingServices[serviceID]; ok {
+		// TODO(asarfaty): Update the locale-service only if really changed, which is very rare
+		if obj, ok := existingServices[serviceID]; ok {
 			// if this is an update for existing locale service,
-			// we need revision
-			serviceStruct.Revision = &revision
+			// we need revision, and keep the HA vip config
+			serviceStruct.Revision = obj.Revision
+			serviceStruct.HaVipConfigs = obj.HaVipConfigs
 		}
 		dataValue, err := initChildLocaleService(&serviceStruct, false)
 		if err != nil {
@@ -326,22 +327,20 @@ func initGatewayLocaleServices(d *schema.ResourceData, connector *client.RestCon
 		}
 
 		localeServices = append(localeServices, dataValue)
-		existingServices[serviceID] = false
+		delete(existingServices, serviceID)
 	}
 	// Add instruction to delete services that are no longer present in intent
-	for id, shouldDelete := range existingServices {
-		if shouldDelete {
-			serviceStruct := model.LocaleServices{
-				Id:           &id,
-				ResourceType: &lsType,
-			}
-			dataValue, err := initChildLocaleService(&serviceStruct, true)
-			if err != nil {
-				return localeServices, err
-			}
-			localeServices = append(localeServices, dataValue)
-			log.Printf("[DEBUG] Preparing to delete locale service %s for gateway %s", id, d.Id())
+	for id := range existingServices {
+		serviceStruct := model.LocaleServices{
+			Id:           &id,
+			ResourceType: &lsType,
 		}
+		dataValue, err := initChildLocaleService(&serviceStruct, true)
+		if err != nil {
+			return localeServices, err
+		}
+		localeServices = append(localeServices, dataValue)
+		log.Printf("[DEBUG] Preparing to delete locale service %s for gateway %s", id, d.Id())
 	}
 
 	return localeServices, nil
