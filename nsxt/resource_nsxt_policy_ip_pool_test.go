@@ -5,18 +5,19 @@ package nsxt
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
-	"testing"
 )
 
 func TestAccResourceNsxtPolicyIPPool_minimal(t *testing.T) {
-	name := "tfpool1"
+	name := "tfpool0"
 	testResourceName := "nsxt_policy_ip_pool.test"
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXPolicyIPPoolCheckDestroy(state)
@@ -39,8 +40,8 @@ func TestAccResourceNsxtPolicyIPPool_basic(t *testing.T) {
 	updatedName := fmt.Sprintf("%s-updated", name)
 	testResourceName := "nsxt_policy_ip_pool.test"
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXPolicyIPPoolCheckDestroy(state)
@@ -69,11 +70,11 @@ func TestAccResourceNsxtPolicyIPPool_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyIPPool_import_basic(t *testing.T) {
-	name := "tfpool1"
+	name := "tfpool2"
 	testResourceName := "nsxt_policy_ip_pool.test"
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXPolicyIPPoolCheckDestroy(state)

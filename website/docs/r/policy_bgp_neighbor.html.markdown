@@ -12,6 +12,19 @@ This resource provides a method for the management of a BGP Neighbor.
 ## Example Usage
 
 ```hcl
+
+resource "nsxt_policy_gateway_prefix_list" "test" {
+  display_name = "prefix_list"
+  gateway_path = "nsxt_policy_tier0_gateway.testresource.path"
+
+  prefix {
+    action  = "DENY"
+    ge      = "20"
+    le      = "23"
+    network = "4.4.0.0/20"
+  }
+}
+
 resource "nsxt_policy_bgp_neighbor" "test" {
   display_name          = "tfbpg"
   description           = "Terraform provisioned BgpNeighborConfig"
@@ -19,7 +32,7 @@ resource "nsxt_policy_bgp_neighbor" "test" {
   allow_as_in           = true
   graceful_restart_mode = "HELPER_ONLY"
   hold_down_time        = 300
-  keep_alive_time       = 200
+  keep_alive_time       = 100
   neighbor_address      = "12.12.11.23"
   password              = "passw0rd"
   remote_as_num         = "60000"
@@ -34,6 +47,8 @@ resource "nsxt_policy_bgp_neighbor" "test" {
   route_filtering {
     address_family = "IPV4"
     maximum_routes = 20
+    in_route_filter = nsxt_policy_gateway_prefix_list.test.path
+    out_route_filter = nsxt_policy_gateway_prefix_list.test.path
   }
 }
 ```
@@ -57,7 +72,7 @@ The following arguments are supported:
 * `maximum_hop_limit` - (Optional) Maximum number of hops allowed to reach BGP neighbor. Defaults to `1`.
 * `neighbor_address` - (Required) Neighbor IP Address.
 * `password` - (Optional) Password for BGP neighbor authentication. Set to the empty string to clear out the password.
-* `remote_as_num` - (Required) 4 Byte ASN of the neighbor in ASPLAIN Format.
+* `remote_as_num` - (Required) ASN of the neighbor in ASPLAIN/ASDOT Format.
 * `source_addresses` - (Optional) A list of up to 8 source IP Addresses for BGP peering. `ip_addresses` field of an existing `nsxt_policy_tier0_gateway_interface` can be used here.
 * `bfd_config` - (Optional) The BFD configuration.
   * `enabled` - (Optional) A boolean flag to enable/disable BFD. Defaults to `false`.

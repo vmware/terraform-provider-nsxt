@@ -5,20 +5,21 @@ package nsxt
 
 import (
 	"fmt"
+	"net/http"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/vmware/go-vmware-nsxt/manager"
-	"net/http"
-	"testing"
 )
 
 func TestAccDataSourceNsxtSwitchingProfile_basic(t *testing.T) {
-	profileName := "terraform_test_profile"
+	profileName := "terraform_ds_test_profile"
 	profileType := "QosSwitchingProfile"
 	testResourceName := "data.nsxt_switching_profile.test"
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccDataSourceNsxtSwitchingProfileDeleteByName(profileName)
@@ -38,7 +39,7 @@ func TestAccDataSourceNsxtSwitchingProfile_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXSwitchingNoProfileTemplate(),
+				Config: testAccNsxtEmptyTemplate(),
 			},
 		},
 	})
@@ -54,7 +55,7 @@ func testAccDataSourceNsxtSwitchingProfileCreate(profileName string, profileType
 		ResourceType: profileType,
 		Description:  profileName,
 	}
-	profile, responseCode, err := nsxClient.LogicalSwitchingApi.CreateSwitchingProfile(nsxClient.Context, profile)
+	_, responseCode, err := nsxClient.LogicalSwitchingApi.CreateSwitchingProfile(nsxClient.Context, profile)
 	if err != nil {
 		return fmt.Errorf("Error during SwitchingProfile creation: %v", err)
 	}
@@ -96,8 +97,4 @@ func testAccNSXSwitchingProfileReadTemplate(profileName string) string {
 data "nsxt_switching_profile" "test" {
   display_name = "%s"
 }`, profileName)
-}
-
-func testAccNSXSwitchingNoProfileTemplate() string {
-	return fmt.Sprintf(` `)
 }

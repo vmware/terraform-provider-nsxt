@@ -59,7 +59,7 @@ func ipSubnetsDeleteRestMetadata() protocol.OperationRestMetadata {
 	pathParams["ip_pool_id"] = "ipPoolId"
 	pathParams["ip_subnet_id"] = "ipSubnetId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -116,7 +116,7 @@ func ipSubnetsGetRestMetadata() protocol.OperationRestMetadata {
 	pathParams["ip_pool_id"] = "ipPoolId"
 	pathParams["ip_subnet_id"] = "ipSubnetId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -202,7 +202,7 @@ func ipSubnetsListRestMetadata() protocol.OperationRestMetadata {
 	queryParams["include_mark_for_delete_objects"] = "include_mark_for_delete_objects"
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -264,7 +264,7 @@ func ipSubnetsPatchRestMetadata() protocol.OperationRestMetadata {
 	pathParams["ip_pool_id"] = "ipPoolId"
 	pathParams["ip_subnet_id"] = "ipSubnetId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -326,7 +326,7 @@ func ipSubnetsUpdateRestMetadata() protocol.OperationRestMetadata {
 	pathParams["ip_pool_id"] = "ipPoolId"
 	pathParams["ip_subnet_id"] = "ipSubnetId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

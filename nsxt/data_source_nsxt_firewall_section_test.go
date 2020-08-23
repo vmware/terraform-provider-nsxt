@@ -5,19 +5,20 @@ package nsxt
 
 import (
 	"fmt"
+	"net/http"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/vmware/go-vmware-nsxt/manager"
-	"net/http"
-	"testing"
 )
 
 func TestAccDataSourceNsxtFirewallSection_basic(t *testing.T) {
-	name := "terraform_test_firewall_section"
+	name := "terraform_ds_test_firewall_section"
 	testResourceName := "data.nsxt_firewall_section.test"
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccDataSourceNsxtFirewallSectionDeleteByName(name)
@@ -36,7 +37,7 @@ func TestAccDataSourceNsxtFirewallSection_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXNoFirewallSectionTemplate(),
+				Config: testAccNsxtEmptyTemplate(),
 			},
 		},
 	})
@@ -98,8 +99,4 @@ func testAccNSXFirewallSectionReadTemplate(name string) string {
 data "nsxt_firewall_section" "test" {
   display_name = "%s"
 }`, name)
-}
-
-func testAccNSXNoFirewallSectionTemplate() string {
-	return fmt.Sprintf(` `)
 }

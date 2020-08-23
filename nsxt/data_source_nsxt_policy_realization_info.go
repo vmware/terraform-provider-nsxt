@@ -5,10 +5,14 @@ package nsxt
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	gm_realized_state "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/realized_state"
+	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/realized_state"
-	"time"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
 func dataSourceNsxtPolicyRealizationInfo() *schema.Resource {
@@ -39,6 +43,12 @@ func dataSourceNsxtPolicyRealizationInfo() *schema.Resource {
 				Description: "The ID of the realized resource",
 				Computed:    true,
 			},
+			"site_path": {
+				Type:         schema.TypeString,
+				Description:  "Path of the site this resource belongs to",
+				Optional:     true,
+				ValidateFunc: validatePolicyPath(),
+			},
 		},
 	}
 }
@@ -46,11 +56,21 @@ func dataSourceNsxtPolicyRealizationInfo() *schema.Resource {
 func dataSourceNsxtPolicyRealizationInfoRead(d *schema.ResourceData, m interface{}) error {
 	// Read the realization info by the path, and wait till it is valid
 	connector := getPolicyConnector(m)
-	client := realized_state.NewDefaultRealizedEntitiesClient(connector)
 
 	// Get the realization info of this resource
 	path := d.Get("path").(string)
 	entityType := d.Get("entity_type").(string)
+	objSitePath := d.Get("site_path").(string)
+
+	// Site is mandatory got GM and irrelevant else
+	if !isPolicyGlobalManager(m) && objSitePath != "" {
+		return globalManagerOnlyError()
+	}
+	if isPolicyGlobalManager(m) {
+		if objSitePath == "" {
+			return attributeRequiredGlobalManagerError("site_path", "nsxt_policy_realization_info")
+		}
+	}
 
 	// Dummy id, just because each data source needs one
 	id := d.Get("id").(string)
@@ -65,7 +85,21 @@ func dataSourceNsxtPolicyRealizationInfoRead(d *schema.ResourceData, m interface
 		Target:  targetStates,
 		Refresh: func() (interface{}, string, error) {
 
-			realizationResult, realizationError := client.List(path, &policySite)
+			var realizationError error
+			var realizationResult model.GenericPolicyRealizedResourceListResult
+			if isPolicyGlobalManager(m) {
+				client := gm_realized_state.NewDefaultRealizedEntitiesClient(connector)
+				var gmResults gm_model.GenericPolicyRealizedResourceListResult
+				gmResults, realizationError = client.List(path, &objSitePath)
+				if realizationError == nil {
+					var lmResults interface{}
+					lmResults, realizationError = convertModelBindingType(gmResults, gm_model.GenericPolicyRealizedResourceListResultBindingType(), model.GenericPolicyRealizedResourceListResultBindingType())
+					realizationResult = lmResults.(model.GenericPolicyRealizedResourceListResult)
+				}
+			} else {
+				client := realized_state.NewDefaultRealizedEntitiesClient(connector)
+				realizationResult, realizationError = client.List(path, &policySite)
+			}
 			state := "UNKNOWN"
 			if realizationError == nil {
 				// Find the right entry

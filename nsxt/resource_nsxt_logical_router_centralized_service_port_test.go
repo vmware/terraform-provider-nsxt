@@ -5,22 +5,23 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"net/http"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccResourceNsxtLogicalRouterCentralizedServicePort_basic(t *testing.T) {
-	portName := fmt.Sprintf("test-nsx-logical-router-centralized-service-port")
+	portName := "test-nsx-logical-router-centralized-service-port"
 	updatePortName := fmt.Sprintf("%s-update", portName)
 	testResourceName := "nsxt_logical_router_centralized_service_port.test"
 	transportZoneName := getOverlayTransportZoneName()
 	edgeClusterName := getEdgeClusterName()
 	routerObj := "nsxt_logical_tier1_router.rtr1.id"
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLogicalRouterCentralizedServicePortCheckDestroy(state, portName)
@@ -57,7 +58,7 @@ func TestAccResourceNsxtLogicalRouterCentralizedServicePort_basic(t *testing.T) 
 }
 
 func TestAccResourceNsxtLogicalRouterCentralizedServicePort_onTier0(t *testing.T) {
-	portName := fmt.Sprintf("test-nsx-logical-router-centralized-service-port")
+	portName := "test-nsx-logical-router-centralized-service-port"
 	updatePortName := fmt.Sprintf("%s-update", portName)
 	testResourceName := "nsxt_logical_router_centralized_service_port.test"
 	transportZoneName := getOverlayTransportZoneName()
@@ -65,7 +66,7 @@ func TestAccResourceNsxtLogicalRouterCentralizedServicePort_onTier0(t *testing.T
 	routerObj := "data.nsxt_logical_tier0_router.tier0rtr.id"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLogicalRouterCentralizedServicePortCheckDestroy(state, portName)
@@ -102,14 +103,14 @@ func TestAccResourceNsxtLogicalRouterCentralizedServicePort_onTier0(t *testing.T
 }
 
 func TestAccResourceNsxtLogicalRouterCentralizedServicePort_importBasic(t *testing.T) {
-	portName := fmt.Sprintf("test-nsx-logical-router-centralized-service-port")
+	portName := "test-nsx-logical-router-centralized-service-port"
 	testResourceName := "nsxt_logical_router_centralized_service_port.test"
 	transportZoneName := getOverlayTransportZoneName()
 	edgeClusterName := getEdgeClusterName()
 	routerObj := "nsxt_logical_tier1_router.rtr1.id"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLogicalRouterCentralizedServicePortCheckDestroy(state, portName)
@@ -134,7 +135,7 @@ func TestAccResourceNsxtLogicalRouterCentralizedServicePort_onTier1(t *testing.T
 	edgeClusterName := getEdgeClusterName()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLogicalRouterCentralizedServicePortCheckDestroy(state, portName)

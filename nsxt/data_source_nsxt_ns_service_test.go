@@ -5,19 +5,20 @@ package nsxt
 
 import (
 	"fmt"
+	"net/http"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/vmware/go-vmware-nsxt/manager"
-	"net/http"
-	"testing"
 )
 
 func TestAccDataSourceNsxtNsService_basic(t *testing.T) {
-	serviceName := "terraform_test_ns_service"
+	serviceName := "terraform_ds_test_ns_service"
 	testResourceName := "data.nsxt_ns_service.test"
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccDataSourceNsxtNsServiceDeleteByName(serviceName)
@@ -36,7 +37,7 @@ func TestAccDataSourceNsxtNsService_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXNoNsServiceTemplate(),
+				Config: testAccNsxtEmptyTemplate(),
 			},
 		},
 	})
@@ -46,7 +47,7 @@ func TestAccDataSourceNsxtNsService_systemOwned(t *testing.T) {
 	serviceName := "WINS"
 	testResourceName := "data.nsxt_ns_service.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -77,7 +78,7 @@ func testAccDataSourceNsxtNsServiceCreate(serviceName string) error {
 			ResourceType: "IGMPTypeNSService",
 		},
 	}
-	nsService, responseCode, err := nsxClient.GroupingObjectsApi.CreateIgmpTypeNSService(nsxClient.Context, nsService)
+	_, responseCode, err := nsxClient.GroupingObjectsApi.CreateIgmpTypeNSService(nsxClient.Context, nsService)
 	if err != nil {
 		return fmt.Errorf("Error during nsService creation: %v", err)
 	}
@@ -122,8 +123,4 @@ func testAccNSXNsServiceReadTemplate(serviceName string) string {
 data "nsxt_ns_service" "test" {
   display_name = "%s"
 }`, serviceName)
-}
-
-func testAccNSXNoNsServiceTemplate() string {
-	return fmt.Sprintf(` `)
 }

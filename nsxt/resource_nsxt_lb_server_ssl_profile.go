@@ -5,10 +5,11 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/vmware/go-vmware-nsxt/loadbalancer"
 	"log"
 	"net/http"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/vmware/go-vmware-nsxt/loadbalancer"
 )
 
 func resourceNsxtLbServerSslProfile() *schema.Resource {
@@ -144,7 +145,7 @@ func resourceNsxtLbServerSslProfileUpdate(d *schema.ResourceData, m interface{})
 		SessionCacheEnabled: sessionCacheEnabled,
 	}
 
-	lbServerSslProfile, resp, err := nsxClient.ServicesApi.UpdateLoadBalancerServerSslProfile(nsxClient.Context, id, lbServerSslProfile)
+	_, resp, err := nsxClient.ServicesApi.UpdateLoadBalancerServerSslProfile(nsxClient.Context, id, lbServerSslProfile)
 
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during LbServerSslProfile update: %v", err)

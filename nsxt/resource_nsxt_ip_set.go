@@ -5,10 +5,11 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/vmware/go-vmware-nsxt/manager"
 	"log"
 	"net/http"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/vmware/go-vmware-nsxt/manager"
 )
 
 func resourceNsxtIPSet() *schema.Resource {
@@ -133,7 +134,7 @@ func resourceNsxtIPSetUpdate(d *schema.ResourceData, m interface{}) error {
 		IpAddresses: ipAddresses,
 	}
 
-	ipSet, resp, err := nsxClient.GroupingObjectsApi.UpdateIPSet(nsxClient.Context, id, ipSet)
+	_, resp, err := nsxClient.GroupingObjectsApi.UpdateIPSet(nsxClient.Context, id, ipSet)
 
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during IpSet update: %v", err)

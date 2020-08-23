@@ -37,10 +37,12 @@ resource "nsxt_policy_segment" "segment1" {
         }
       }
     }
-  
-    advanced_config {	
-      connectivity = "ON"	
+
+    security_profile {
+      spoofguard_profile_path = data.nsxt_policy_spoofguard_profile.myprofile.path
+      security_profile_path   = data.nsxt_policy_segment_security_profile.myprofile.path
     }
+
 }
 ```
 
@@ -57,7 +59,7 @@ The following arguments are supported:
 * `overlay_id` - (Optional) Overlay connectivity ID for this Segment.
 * `transport_zone_path` - (Required) Policy path to the Overlay transport zone. This property is required if more than one overlay transport zone is defined, and none is marked as default.
 * `dhcp_config_path` - (Optional) Policy path to DHCP server or relay configuration to use for subnets configured on this segment. This attribute is supported with NSX 3.0.0 onwards.
-* `subnet` - (Required) Subnet configuration block.
+* `subnet` - (Optional) Subnet configuration block.
   * `cidr` - (Required) Gateway IP address CIDR. This argument can not be changed if DHCP is enabled for the subnet.
   * `dhcp_ranges` - (Optional) List of DHCP address ranges for dynamic IP allocation.
   * `dhcp_v4_config` - (Optional) DHCPv4 config for IPv4 subnet. This clause is supported with NSX 3.0.0 onwards.
@@ -89,12 +91,20 @@ The following arguments are supported:
   * `hybrid` - (Optional) Boolean flag to identify a hybrid logical switch.
   * `local_egress` - (Optional) Boolean flag to enable local egress when used in conjunction with L2VPN.
   * `uplink_teaming_policy` - (Optional) The name of the switching uplink teaming policy for the bridge endpoint. This name corresponds to one of the switching uplink teaming policy names listed in the transport zone.
+  * `discovery_profile` - (Optional) IP and MAC discovery profile specification for the segment.
+    * `ip_discovery_profile_path` - (Optional) Path for IP discovery profile to be associated with the segment.
+    * `mac_discovery_profile_path` - (Optional) Path for MAC discovery profile to be associated with the segment.
+  * `security_profile` - (Optional) Security profile specification for the segment.
+    * `spoofguard_profile_path` - (Optional) Path for spoofguard profile to be associated with the segment.
+    * `security_profile_path` - (Optional) Path for segment security profile to be associated with the segment.
+  * `qos_profile` - (Optional) QoS profile specification for the segment.
+    * `qos_profile_path` - (Optional) Path for qos profile to be associated with the segment.
 
 ## Attributes Reference
 
 In addition to arguments listed above, the following attributes are exported:
 
-* `id` - ID of the Secuirty Policy.
+* `id` - ID of the Security Policy.
 * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
 * `path` - The NSX path of the policy resource.
 * In the `subnet`:

@@ -5,10 +5,11 @@ package nsxt
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	"strings"
 )
 
 func dataSourceNsxtPolicySpoofGuardProfile() *schema.Resource {
@@ -25,6 +26,14 @@ func dataSourceNsxtPolicySpoofGuardProfile() *schema.Resource {
 }
 
 func dataSourceNsxtPolicySpoofGuardProfileRead(d *schema.ResourceData, m interface{}) error {
+	if isPolicyGlobalManager(m) {
+		_, err := policyDataSourceResourceRead(d, getPolicyConnector(m), "SpoofGuardProfile", nil)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+
 	connector := getPolicyConnector(m)
 	client := infra.NewDefaultSpoofguardProfilesClient(connector)
 

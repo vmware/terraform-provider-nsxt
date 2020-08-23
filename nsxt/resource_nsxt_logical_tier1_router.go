@@ -5,12 +5,13 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/manager"
-	"log"
-	"net/http"
 )
 
 var failOverModeValues = []string{"PREEMPTIVE", "NON_PREEMPTIVE"}
@@ -295,7 +296,7 @@ func resourceNsxtLogicalTier1RouterUpdate(d *schema.ResourceData, m interface{})
 		RouterType:    routerType,
 		EdgeClusterId: edgeClusterID,
 	}
-	logicalRouter, resp, err := nsxClient.LogicalRoutingAndServicesApi.UpdateLogicalRouter(nsxClient.Context, id, logicalRouter)
+	_, resp, err := nsxClient.LogicalRoutingAndServicesApi.UpdateLogicalRouter(nsxClient.Context, id, logicalRouter)
 
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during LogicalTier1Router update error: %v, resp %+v", err, resp)

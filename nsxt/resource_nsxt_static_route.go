@@ -5,13 +5,14 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/vmware/go-vmware-nsxt/common"
 	"github.com/vmware/go-vmware-nsxt/manager"
-	"log"
-	"net/http"
-	"strings"
 )
 
 func resourceNsxtStaticRoute() *schema.Resource {
@@ -34,7 +35,7 @@ func resourceNsxtStaticRoute() *schema.Resource {
 				Type:         schema.TypeString,
 				Description:  "CIDR",
 				Required:     true,
-				ValidateFunc: validation.CIDRNetwork(0, 32),
+				ValidateFunc: validation.IsCIDRNetwork(0, 32),
 			},
 			"next_hop": getNextHopsSchema(),
 			"revision": getRevisionSchema(),
@@ -244,7 +245,7 @@ func resourceNsxtStaticRouteUpdate(d *schema.ResourceData, m interface{}) error 
 		NextHops:        nextHops,
 	}
 
-	staticRoute, resp, err := nsxClient.LogicalRoutingAndServicesApi.UpdateStaticRoute(nsxClient.Context, logicalRouterID, id, staticRoute)
+	_, resp, err := nsxClient.LogicalRoutingAndServicesApi.UpdateStaticRoute(nsxClient.Context, logicalRouterID, id, staticRoute)
 
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during StaticRoute update: %v", err)

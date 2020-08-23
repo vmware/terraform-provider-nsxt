@@ -5,10 +5,11 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/vmware/go-vmware-nsxt/loadbalancer"
 	"log"
 	"net/http"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/vmware/go-vmware-nsxt/loadbalancer"
 )
 
 func resourceNsxtLbHTTPVirtualServer() *schema.Resource {
@@ -183,11 +184,7 @@ func getAuthFromBool(value bool) string {
 }
 
 func getBoolFromAuth(value string) bool {
-	if value == "IGNORE" {
-		return false
-	}
-
-	return true
+	return value != "IGNORE"
 }
 
 func getClientSSLBindingFromSchema(d *schema.ResourceData) *loadbalancer.ClientSslProfileBinding {
@@ -211,7 +208,7 @@ func getClientSSLBindingFromSchema(d *schema.ResourceData) *loadbalancer.ClientS
 	return nil
 }
 
-func setClientSSLBindingInSchema(d *schema.ResourceData, binding *loadbalancer.ClientSslProfileBinding) error {
+func setClientSSLBindingInSchema(d *schema.ResourceData, binding *loadbalancer.ClientSslProfileBinding) {
 	var bindingList []map[string]interface{}
 	if binding != nil {
 		elem := make(map[string]interface{})
@@ -227,7 +224,9 @@ func setClientSSLBindingInSchema(d *schema.ResourceData, binding *loadbalancer.C
 	}
 
 	err := d.Set("client_ssl", bindingList)
-	return err
+	if err != nil {
+		log.Printf("[WARNING]: Failed to set client SSL in schema: %v", err)
+	}
 }
 
 func getServerSSLBindingFromSchema(d *schema.ResourceData) *loadbalancer.ServerSslProfileBinding {
@@ -250,7 +249,7 @@ func getServerSSLBindingFromSchema(d *schema.ResourceData) *loadbalancer.ServerS
 	return nil
 }
 
-func setServerSSLBindingInSchema(d *schema.ResourceData, binding *loadbalancer.ServerSslProfileBinding) error {
+func setServerSSLBindingInSchema(d *schema.ResourceData, binding *loadbalancer.ServerSslProfileBinding) {
 	var bindingList []map[string]interface{}
 	if binding != nil {
 		elem := make(map[string]interface{})
@@ -265,7 +264,9 @@ func setServerSSLBindingInSchema(d *schema.ResourceData, binding *loadbalancer.S
 	}
 
 	err := d.Set("server_ssl", bindingList)
-	return err
+	if err != nil {
+		log.Printf("[WARNING]: Failed to set server SSL in schema: %v", err)
+	}
 }
 
 func resourceNsxtLbHTTPVirtualServerCreate(d *schema.ResourceData, m interface{}) error {
@@ -431,7 +432,7 @@ func resourceNsxtLbHTTPVirtualServerUpdate(d *schema.ResourceData, m interface{}
 		SorryPoolId:              sorryPoolID,
 	}
 
-	lbVirtualServer, resp, err := nsxClient.ServicesApi.UpdateLoadBalancerVirtualServer(nsxClient.Context, id, lbVirtualServer)
+	_, resp, err := nsxClient.ServicesApi.UpdateLoadBalancerVirtualServer(nsxClient.Context, id, lbVirtualServer)
 
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during LbVirtualServer update: %v", err)

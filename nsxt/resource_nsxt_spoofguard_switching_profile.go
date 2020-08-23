@@ -5,10 +5,11 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/vmware/go-vmware-nsxt/manager"
 	"log"
 	"net/http"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/vmware/go-vmware-nsxt/manager"
 )
 
 func resourceNsxtSpoofGuardSwitchingProfile() *schema.Resource {
@@ -142,7 +143,7 @@ func resourceNsxtSpoofGuardSwitchingProfileUpdate(d *schema.ResourceData, m inte
 		Revision:           revision,
 	}
 
-	sgSwitchingProfile, resp, err := nsxClient.LogicalSwitchingApi.UpdateSpoofGuardSwitchingProfile(nsxClient.Context, id, sgSwitchingProfile)
+	_, resp, err := nsxClient.LogicalSwitchingApi.UpdateSpoofGuardSwitchingProfile(nsxClient.Context, id, sgSwitchingProfile)
 
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during SpoofGuardSwitchingProfile update: %v", err)

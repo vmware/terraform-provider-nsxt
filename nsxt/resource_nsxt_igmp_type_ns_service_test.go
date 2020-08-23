@@ -5,19 +5,20 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"net/http"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccResourceNsxtIgmpTypeNsService_basic(t *testing.T) {
-	serviceName := fmt.Sprintf("test-nsx-igmp-service")
+	serviceName := "test-nsx-igmp-service"
 	updateServiceName := fmt.Sprintf("%s-update", serviceName)
 	testResourceName := "nsxt_igmp_type_ns_service.test"
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXIgmpServiceCheckDestroy(state, serviceName)
@@ -46,11 +47,11 @@ func TestAccResourceNsxtIgmpTypeNsService_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtIgmpTypeNsService_importBasic(t *testing.T) {
-	serviceName := fmt.Sprintf("test-nsx-igmp-service")
+	serviceName := "test-nsx-igmp-service"
 	testResourceName := "nsxt_igmp_type_ns_service.test"
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXIgmpServiceCheckDestroy(state, serviceName)

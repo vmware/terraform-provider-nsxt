@@ -59,7 +59,7 @@ func segmentSecurityProfileBindingMapsDeleteRestMetadata() protocol.OperationRes
 	pathParams["segment_id"] = "segmentId"
 	pathParams["segment_security_profile_binding_map_id"] = "segmentSecurityProfileBindingMapId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -116,7 +116,7 @@ func segmentSecurityProfileBindingMapsGetRestMetadata() protocol.OperationRestMe
 	pathParams["segment_id"] = "segmentId"
 	pathParams["segment_security_profile_binding_map_id"] = "segmentSecurityProfileBindingMapId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -196,7 +196,7 @@ func segmentSecurityProfileBindingMapsListRestMetadata() protocol.OperationRestM
 	queryParams["sort_by"] = "sort_by"
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -258,7 +258,7 @@ func segmentSecurityProfileBindingMapsPatchRestMetadata() protocol.OperationRest
 	pathParams["segment_id"] = "segmentId"
 	pathParams["segment_security_profile_binding_map_id"] = "segmentSecurityProfileBindingMapId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -320,7 +320,7 @@ func segmentSecurityProfileBindingMapsUpdateRestMetadata() protocol.OperationRes
 	pathParams["segment_id"] = "segmentId"
 	pathParams["segment_security_profile_binding_map_id"] = "segmentSecurityProfileBindingMapId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

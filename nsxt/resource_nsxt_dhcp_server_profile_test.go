@@ -5,20 +5,21 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"net/http"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccResourceNsxtDhcpServerProfile_basic(t *testing.T) {
-	prfName := fmt.Sprintf("test-nsx-dhcp-server-profile")
+	prfName := "test-nsx-dhcp-server-profile"
 	updatePrfName := fmt.Sprintf("%s-update", prfName)
 	testResourceName := "nsxt_dhcp_server_profile.test"
 	edgeClusterName := getEdgeClusterName()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXDhcpServerProfileCheckDestroy(state, prfName)
@@ -49,12 +50,12 @@ func TestAccResourceNsxtDhcpServerProfile_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtDhcpServerProfile_importBasic(t *testing.T) {
-	prfName := fmt.Sprintf("test-nsx-dhcp-server-profile")
+	prfName := "test-nsx-dhcp-server-profile"
 	testResourceName := "nsxt_dhcp_server_profile.test"
 	edgeClusterName := getEdgeClusterName()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXDhcpServerProfileCheckDestroy(state, prfName)

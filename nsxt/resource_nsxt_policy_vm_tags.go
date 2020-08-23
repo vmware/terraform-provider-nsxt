@@ -5,13 +5,15 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/realized_state"
-	updateClient "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/realized_state/enforcement_points"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/realized_state/enforcement_points"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/segments"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	"log"
-	"strings"
 )
 
 var (
@@ -35,7 +37,18 @@ func resourceNsxtPolicyVMTags() *schema.Resource {
 				Description: "Instance id",
 				Required:    true,
 			},
-			"tag": getRequiredTagsSchema(),
+			"tag": getTagsSchema(),
+			"port": {
+				Type:        schema.TypeList,
+				Description: "Tag specificiation for corresponding segment port",
+				Optional:    true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"segment_path": getPolicyPathSchema(true, true, "Segment path where VM port should be tagged"),
+						"tag":          getTagsSchema(),
+					},
+				},
+			},
 		},
 	}
 }
@@ -47,9 +60,9 @@ func listAllPolicyVirtualMachines(connector *client.RestConnector, m interface{}
 	var cursor *string
 	total := 0
 
+	enforcementPointPath := getPolicyEnforcementPointPath(m)
 	for {
-		// NOTE: the search API does not return resource_type of VirtualMachine
-		enforcementPointPath := getPolicyEnforcementPointPath(m)
+		// NOTE: Search API doesn't filter by realized state resources
 		vms, err := client.List(cursor, &enforcementPointPath, &boolFalse, nil, nil, &boolFalse, nil)
 		if err != nil {
 			return results, err
@@ -60,6 +73,58 @@ func listAllPolicyVirtualMachines(connector *client.RestConnector, m interface{}
 			total = int(*vms.ResultCount)
 		}
 		cursor = vms.Cursor
+		if len(results) >= total {
+			return results, nil
+		}
+	}
+}
+
+func listAllPolicySegmentPorts(connector *client.RestConnector, segmentPath string) ([]model.SegmentPort, error) {
+	client := segments.NewDefaultPortsClient(connector)
+	segmentID := getPolicyIDFromPath(segmentPath)
+	var results []model.SegmentPort
+	boolFalse := false
+	var cursor *string
+	total := 0
+
+	for {
+		vms, err := client.List(segmentID, cursor, &boolFalse, nil, nil, &boolFalse, nil)
+		if err != nil {
+			return results, err
+		}
+		results = append(results, vms.Results...)
+		if total == 0 && vms.ResultCount != nil {
+			// first response
+			total = int(*vms.ResultCount)
+		}
+		cursor = vms.Cursor
+		if len(results) >= total {
+			log.Printf("[DEBUG] Found %d ports for segment %s", len(results), segmentID)
+			return results, nil
+		}
+	}
+}
+
+func listAllPolicyVifs(m interface{}) ([]model.VirtualNetworkInterface, error) {
+
+	client := enforcement_points.NewDefaultVifsClient(getPolicyConnector(m))
+	var results []model.VirtualNetworkInterface
+	var cursor *string
+	total := 0
+
+	enforcementPointPath := getPolicyEnforcementPoint(m)
+	for {
+		// NOTE: Search API doesn't filter by realized state resources
+		vifs, err := client.List(enforcementPointPath, cursor, nil, nil, nil, nil, nil)
+		if err != nil {
+			return results, err
+		}
+		results = append(results, vifs.Results...)
+		if total == 0 && vifs.ResultCount != nil {
+			// first response
+			total = int(*vifs.ResultCount)
+		}
+		cursor = vifs.Cursor
 		if len(results) >= total {
 			return results, nil
 		}
@@ -109,13 +174,112 @@ func findNsxtPolicyVMByID(connector *client.RestConnector, vmID string, m interf
 }
 
 func updateNsxtPolicyVMTags(connector *client.RestConnector, externalID string, tags []model.Tag, m interface{}) error {
-	client := updateClient.NewDefaultVirtualMachinesClient(connector)
+	client := enforcement_points.NewDefaultVirtualMachinesClient(connector)
 
 	tagUpdate := model.VirtualMachineTagsUpdate{
 		Tags:             tags,
 		VirtualMachineId: &externalID,
 	}
 	return client.Updatetags(getPolicyEnforcementPoint(m), tagUpdate)
+}
+
+func listPolicyVifAttachmentsForVM(m interface{}, externalID string) ([]string, error) {
+	var vifAttachmentIds []string
+	vifs, err := listAllPolicyVifs(m)
+	if err != nil {
+		return vifAttachmentIds, err
+	}
+
+	for _, vif := range vifs {
+		if (vif.LportAttachmentId != nil) && (vif.OwnerVmId != nil) && *vif.OwnerVmId == externalID {
+			vifAttachmentIds = append(vifAttachmentIds, *vif.LportAttachmentId)
+		}
+	}
+
+	return vifAttachmentIds, nil
+}
+
+func updateNsxtPolicyVMPortTags(connector *client.RestConnector, externalID string, portTags []interface{}, m interface{}, isDelete bool) error {
+
+	client := segments.NewDefaultPortsClient(connector)
+
+	vifAttachmentIds, err := listPolicyVifAttachmentsForVM(m, externalID)
+	if err != nil {
+		return err
+	}
+
+	for _, portTag := range portTags {
+		data := portTag.(map[string]interface{})
+		segmentPath := data["segment_path"].(string)
+		var tags []model.Tag
+		if !isDelete {
+			tags = getPolicyTagsFromSet(data["tag"].(*schema.Set))
+		}
+
+		ports, portsErr := listAllPolicySegmentPorts(connector, segmentPath)
+		if portsErr != nil {
+			return portsErr
+		}
+		for _, port := range ports {
+			if port.Attachment == nil || port.Attachment.Id == nil {
+				continue
+			}
+
+			for _, attachment := range vifAttachmentIds {
+				if attachment == *port.Attachment.Id {
+					port.Tags = tags
+					log.Printf("[DEBUG] Updating port %s with %d tags", *port.Path, len(tags))
+					segmentID := getPolicyIDFromPath(segmentPath)
+					_, err = client.Update(segmentID, *port.Id, port)
+					if err != nil {
+						return err
+					}
+					break
+				}
+			}
+		}
+	}
+
+	return nil
+}
+
+func setPolicyVMPortTagsInSchema(d *schema.ResourceData, m interface{}, externalID string) error {
+
+	connector := getPolicyConnector(m)
+	vifAttachmentIds, err := listPolicyVifAttachmentsForVM(m, externalID)
+	if err != nil {
+		return err
+	}
+
+	portTags := d.Get("port").([]interface{})
+	var actualPortTags []map[string]interface{}
+	for _, portTag := range portTags {
+		data := portTag.(map[string]interface{})
+		segmentPath := data["segment_path"].(string)
+
+		ports, portsErr := listAllPolicySegmentPorts(connector, segmentPath)
+		if portsErr != nil {
+			return portsErr
+		}
+		for _, port := range ports {
+			if port.Attachment == nil || port.Attachment.Id == nil {
+				continue
+			}
+
+			for _, attachment := range vifAttachmentIds {
+				if attachment == *port.Attachment.Id {
+					tags := make(map[string]interface{})
+					tags["segment_path"] = segmentPath
+					tags["tag"] = initPolicyTagsSet(port.Tags)
+					actualPortTags = append(actualPortTags, tags)
+				}
+			}
+		}
+	}
+
+	d.Set("port", actualPortTags)
+
+	return nil
 }
 
 func resourceNsxtPolicyVMTagsRead(d *schema.ResourceData, m interface{}) error {
@@ -138,7 +302,7 @@ func resourceNsxtPolicyVMTagsRead(d *schema.ResourceData, m interface{}) error {
 		d.Set("instance_id", vm.ExternalId)
 	}
 
-	return nil
+	return setPolicyVMPortTagsInSchema(d, m, *vm.ExternalId)
 }
 
 func resourceNsxtPolicyVMTagsCreate(d *schema.ResourceData, m interface{}) error {
@@ -154,12 +318,20 @@ func resourceNsxtPolicyVMTagsCreate(d *schema.ResourceData, m interface{}) error
 	if tags == nil {
 		tags = make([]model.Tag, 0)
 	}
+
 	err = updateNsxtPolicyVMTags(connector, *vm.ExternalId, tags, m)
 	if err != nil {
 		return handleCreateError("Virtual Machine Tag", *vm.ExternalId, err)
 	}
 
+	portTags := d.Get("port").([]interface{})
+	err = updateNsxtPolicyVMPortTags(connector, *vm.ExternalId, portTags, m, false)
+	if err != nil {
+		return handleCreateError("Segment Port Tag", *vm.ExternalId, err)
+	}
+
 	d.SetId(*vm.ExternalId)
+	d.Set("port", portTags)
 
 	return resourceNsxtPolicyVMTagsRead(d, m)
 }
@@ -182,6 +354,12 @@ func resourceNsxtPolicyVMTagsDelete(d *schema.ResourceData, m interface{}) error
 
 	if err != nil {
 		return handleDeleteError("Virtual Machine Tag", *vm.ExternalId, err)
+	}
+
+	portTags := d.Get("port").([]interface{})
+	err = updateNsxtPolicyVMPortTags(connector, *vm.ExternalId, portTags, m, true)
+	if err != nil {
+		return handleCreateError("Segment Port Tag", *vm.ExternalId, err)
 	}
 
 	return err

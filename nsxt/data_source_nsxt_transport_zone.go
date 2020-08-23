@@ -5,10 +5,12 @@ package nsxt
 
 import (
 	"fmt"
+	"strings"
+
+	"net/http"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/vmware/go-vmware-nsxt/manager"
-	"net/http"
-	"strings"
 )
 
 func dataSourceNsxtTransportZone() *schema.Resource {

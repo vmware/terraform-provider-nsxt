@@ -52,7 +52,7 @@ func fullSyncStatesGetRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["fullSyncId"] = bindings.NewStringType()
 	pathParams["full_sync_id"] = "fullSyncId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -131,7 +131,7 @@ func fullSyncStatesListRestMetadata() protocol.OperationRestMetadata {
 	queryParams["include_mark_for_delete_objects"] = "include_mark_for_delete_objects"
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

@@ -9,6 +9,8 @@ description: A resource to configure tags for a Virtual Machine in NSX Policy.
 
   This resource provides a means to configure tags that are applied to objects such as Virtual Machines. A Virtual Machine is not directly managed by NSX however, NSX allows attachment of tags to a virtual machine. This tagging enables tag based grouping of objects. Deletion of `nsxt_policy_vm_tags` resource will remove all tags from the Virtual Machine and is equivalent to update operation with empty tag set.
 
+  When updating resource, if you wish to delete existing port tags while leaving VM tags in place, please specify `port` clause with no tags.
+
 ## Example Usage
 
 ```hcl
@@ -24,6 +26,16 @@ resource "nsxt_policy_vm_tags" "vm1_tags" {
     scope = "env"
     tag   = "test"
   }
+
+  port {
+    segment_path = nsxt_policy_segment.seg1.path
+    tag {
+      tag {
+        scope = "color"
+        tag   = "green"
+      }
+    }
+  }
 }
 ```
 
@@ -33,10 +45,13 @@ The following arguments are supported:
 
 * `instance_id` - (Required) ID of the Virtual Machine. Can be the instance UUID or BIOS UUID.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this Virtual Machine.
+* `port` - (Optional) Option to tag segment port auto-created for the VM on specified segment.
+  * `segment_path` - (Required) Segment where the port is to be tagged.
+  * `tag` - (Optional) A list of scope + tag pairs to associate with this segment port.
 
 ## Importing
 
-An existing Tags collection can be [imported][docs-import] into this resource, via the following command:
+An existing VM Tags collection can be [imported][docs-import] into this resource, via the following command:
 
 [docs-import]: /docs/import/index.html
 
@@ -45,3 +60,4 @@ terraform import nsxt_policy_vm_tags.vm1_tags ID
 ```
 
 The above would import NSX Virtual Machine tags as a resource named `vm1_tags` with the NSX ID `ID`, where ID is external ID of the Virtual Machine.
+Note that import of port tags is not supported.

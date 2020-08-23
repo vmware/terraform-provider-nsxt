@@ -5,10 +5,11 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"net/http"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccResourceNsxtLbHttpResponseRewriteRule_basic(t *testing.T) {
@@ -19,8 +20,8 @@ func TestAccResourceNsxtLbHttpResponseRewriteRule_basic(t *testing.T) {
 	matchType := "CONTAINS"
 	updatedMatchType := "REGEX"
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLbHTTPResponseRewriteRuleCheckDestroy(state, name)
@@ -139,8 +140,8 @@ func TestAccResourceNsxtLbHttpResponseRewriteRule_basic(t *testing.T) {
 func TestAccResourceNsxtLbHttpResponseRewriteRule_importBasic(t *testing.T) {
 	name := "test"
 	resourceName := "nsxt_lb_http_response_rewrite_rule.test"
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLbHTTPResponseRewriteRuleCheckDestroy(state, name)

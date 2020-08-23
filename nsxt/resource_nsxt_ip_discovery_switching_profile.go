@@ -5,11 +5,12 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/vmware/go-vmware-nsxt/manager"
-	"log"
-	"net/http"
 )
 
 func resourceNsxtIPDiscoverySwitchingProfile() *schema.Resource {
@@ -167,7 +168,7 @@ func resourceNsxtIPDiscoverySwitchingProfileUpdate(d *schema.ResourceData, m int
 		Revision:            revision,
 	}
 
-	switchingProfile, resp, err := nsxClient.LogicalSwitchingApi.UpdateIpDiscoverySwitchingProfile(nsxClient.Context, id, switchingProfile)
+	_, resp, err := nsxClient.LogicalSwitchingApi.UpdateIpDiscoverySwitchingProfile(nsxClient.Context, id, switchingProfile)
 
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during IPDiscoverySwitchingProfile update: %v", err)

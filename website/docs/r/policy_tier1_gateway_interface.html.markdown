@@ -5,7 +5,7 @@ sidebar_current: "docs-nsxt-resource-policy-tier1-gateway-interface"
 description: A resource to configure an Interface on Tier-1 gateway in NSX Policy manager.
 ---
 
-# nsxt_policy_tier1_gateway
+# nsxt_policy_tier1_gateway_interface
 
 This resource provides a method for the management of a Tier-1 gateway Interface. Note that edge cluster must be configured on Tier-1 Gateway in order to configure interfaces on it.
 
@@ -50,6 +50,7 @@ The following arguments are supported:
 * `mtu` - (Optional) Maximum Transmission Unit for this interface.
 * `ipv6_ndra_profile_path` - (Optional) IPv6 NDRA profile to be associated with this interface.
 * `urpf_mode` - (Optional) Unicast Reverse Path Forwarding mode, one of `NONE`, `STRICT`. Default is `STRICT`. This attribute is supported with NSX 3.0.0 onwards.
+* `site_path` - (Required for global manager only) Path of the site the Tier1 edge cluster belongs to. This configuration is required for global manager only. `path` field of the existing `nsxt_policy_site` can be used here.
 
 ## Attributes Reference
 

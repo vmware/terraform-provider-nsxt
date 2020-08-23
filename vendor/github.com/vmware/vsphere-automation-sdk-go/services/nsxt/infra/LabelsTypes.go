@@ -52,7 +52,7 @@ func labelsDeleteRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["labelId"] = bindings.NewStringType()
 	pathParams["label_id"] = "labelId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -102,7 +102,7 @@ func labelsGetRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["labelId"] = bindings.NewStringType()
 	pathParams["label_id"] = "labelId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -181,7 +181,7 @@ func labelsListRestMetadata() protocol.OperationRestMetadata {
 	queryParams["include_mark_for_delete_objects"] = "include_mark_for_delete_objects"
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -236,7 +236,7 @@ func labelsPatchRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["labelId"] = bindings.NewStringType()
 	pathParams["label_id"] = "labelId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -291,7 +291,7 @@ func labelsUpdateRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["labelId"] = bindings.NewStringType()
 	pathParams["label_id"] = "labelId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

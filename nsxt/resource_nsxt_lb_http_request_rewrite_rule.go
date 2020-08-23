@@ -5,11 +5,12 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/vmware/go-vmware-nsxt/loadbalancer"
-	"log"
-	"net/http"
 )
 
 func resourceNsxtLbHTTPRequestRewriteRule() *schema.Resource {
@@ -155,7 +156,7 @@ func getLbRuleHTTPRequestConditionsFromSchema(d *schema.ResourceData) []loadbala
 	return conditionList
 }
 
-func setLbRuleHTTPRequestConditionsInSchema(d *schema.ResourceData, conditions []loadbalancer.LbRuleCondition) error {
+func setLbRuleHTTPRequestConditionsInSchema(d *schema.ResourceData, conditions []loadbalancer.LbRuleCondition) {
 	var headerConditionList []map[string]interface{}
 	var cookieConditionList []map[string]interface{}
 	var bodyConditionList []map[string]interface{}
@@ -235,53 +236,54 @@ func setLbRuleHTTPRequestConditionsInSchema(d *schema.ResourceData, conditions [
 			tcpConditionList = append(tcpConditionList, elem)
 		}
 
+		// TODO: optimize this code with map of conditions and a loop
+		warningString := "[WARNING]: Failed to set %s in schema: %v"
 		err := d.Set("header_condition", headerConditionList)
 		if err != nil {
-			return err
+			log.Printf(warningString, "header_condition", err)
 		}
 
 		err = d.Set("cookie_condition", cookieConditionList)
 		if err != nil {
-			return err
+			log.Printf(warningString, "cookie_condition", err)
 		}
 
 		err = d.Set("body_condition", bodyConditionList)
 		if err != nil {
-			return err
+			log.Printf(warningString, "body_condition", err)
 		}
 
 		err = d.Set("method_condition", methodConditionList)
 		if err != nil {
-			return err
+			log.Printf(warningString, "method_condition", err)
 		}
 
 		err = d.Set("version_condition", versionConditionList)
 		if err != nil {
-			return err
+			log.Printf(warningString, "version_condition", err)
 		}
 
 		err = d.Set("uri_condition", uriConditionList)
 		if err != nil {
-			return err
+			log.Printf(warningString, "uri_condition", err)
 		}
 
 		err = d.Set("uri_arguments_condition", uriArgumentsConditionList)
 		if err != nil {
-			return err
+			log.Printf(warningString, "uri_arguments_condition", err)
 		}
 
 		err = d.Set("ip_condition", ipConditionList)
 		if err != nil {
-			return err
+			log.Printf(warningString, "ip_condition", err)
 		}
 
 		err = d.Set("tcp_condition", tcpConditionList)
 		if err != nil {
-			return err
+			log.Printf(warningString, "tcp_condition", err)
 		}
 
 	}
-	return nil
 }
 
 func getLbRuleRequestRewriteActionsFromSchema(d *schema.ResourceData) []loadbalancer.LbRuleAction {
@@ -451,7 +453,7 @@ func resourceNsxtLbHTTPRequestRewriteRuleUpdate(d *schema.ResourceData, m interf
 		Tags:            tags,
 	}
 
-	lbRule, resp, err := nsxClient.ServicesApi.UpdateLoadBalancerRule(nsxClient.Context, id, lbRule)
+	_, resp, err := nsxClient.ServicesApi.UpdateLoadBalancerRule(nsxClient.Context, id, lbRule)
 
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during LoadBalancerRule update: %v", err)

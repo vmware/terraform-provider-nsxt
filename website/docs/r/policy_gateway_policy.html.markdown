@@ -43,7 +43,7 @@ resource "nsxt_policy_gateway_policy" "test" {
 The following arguments are supported:
 
 * `display_name` - (Required) Display name of the resource.
-* `category` - (Required) The category to use for priority of this Gateway Policy. Must be one of: `Emergency`, `SystemRules`, `SharedPreRules`, `LocalGatewayRules`, `AutoServiceRules` and `Default`.
+* `category` - (Required) The category to use for priority of this Gateway Policy. For local manager must be one of: `Emergency`, `SystemRules`, `SharedPreRules`, `LocalGatewayRules`, `AutoServiceRules` and `Default`. For global manager must be `SharedPreRules` or `LocalGatewayRules`.
 * `description` - (Optional) Description of the resource.
 * `domain` - (Optional) The domain to use for the Gateway Policy. This domain must already exist. For VMware Cloud on AWS use `cgw`.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this Gateway Policy.
@@ -71,7 +71,6 @@ The following arguments are supported:
   * `log_label` - (Optional) Additional information (string) which will be propagated to the rule syslog.
   * `tag` - (Optional) A list of scope + tag pairs to associate with this Rule.
   * `action` - (Optional) The action for the Rule. Must be one of: `ALLOW`, `DROP` or `REJECT`. Defaults to `ALLOW`.
-
 
 ## Attributes Reference
 

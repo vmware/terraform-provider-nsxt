@@ -51,7 +51,7 @@ func realizedEntityGetRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["realized_path"] = bindings.NewStringType()
 	queryParams["realized_path"] = "realized_path"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -106,7 +106,7 @@ func realizedEntityRefreshRestMetadata() protocol.OperationRestMetadata {
 	queryParams["enforcement_point_path"] = "enforcement_point_path"
 	queryParams["intent_path"] = "intent_path"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

@@ -5,12 +5,13 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	"log"
 )
 
 var lBServiceErrorLogLevelValues = []string{
@@ -73,21 +74,19 @@ func resourceNsxtPolicyLBService() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyLBServiceExists(id string, connector *client.RestConnector) bool {
+func resourceNsxtPolicyLBServiceExists(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
 	client := infra.NewDefaultLbServicesClient(connector)
 
 	_, err := client.Get(id)
 	if err == nil {
-		return true
+		return true, nil
 	}
 
 	if isNotFoundError(err) {
-		return false
+		return false, nil
 	}
 
-	logAPIError("Error retrieving resource", err)
-
-	return false
+	return false, logAPIError("Error retrieving resource", err)
 }
 
 func resourceNsxtPolicyLBServiceCreate(d *schema.ResourceData, m interface{}) error {
@@ -99,7 +98,7 @@ func resourceNsxtPolicyLBServiceCreate(d *schema.ResourceData, m interface{}) er
 	}
 
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID(d, connector, resourceNsxtPolicyLBServiceExists)
+	id, err := getOrGenerateID(d, m, resourceNsxtPolicyLBServiceExists)
 	if err != nil {
 		return err
 	}

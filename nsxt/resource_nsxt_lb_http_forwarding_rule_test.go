@@ -5,10 +5,11 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"net/http"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccResourceNsxtLbHttpForwardingRule_basic(t *testing.T) {
@@ -19,8 +20,8 @@ func TestAccResourceNsxtLbHttpForwardingRule_basic(t *testing.T) {
 	matchType := "STARTS_WITH"
 	updatedMatchType := "ENDS_WITH"
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLbHTTPForwardingRuleCheckDestroy(state, name)
@@ -145,8 +146,8 @@ func TestAccResourceNsxtLbHttpForwardingRule_basic(t *testing.T) {
 func TestAccResourceNsxtLbHttpForwardingRule_importBasic(t *testing.T) {
 	name := "test"
 	resourceName := "nsxt_lb_http_forwarding_rule.test"
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLbHTTPForwardingRuleCheckDestroy(state, name)

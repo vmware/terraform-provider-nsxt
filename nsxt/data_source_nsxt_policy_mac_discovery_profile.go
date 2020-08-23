@@ -5,10 +5,11 @@ package nsxt
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	"strings"
 )
 
 func dataSourceNsxtPolicyMacDiscoveryProfile() *schema.Resource {
@@ -25,6 +26,15 @@ func dataSourceNsxtPolicyMacDiscoveryProfile() *schema.Resource {
 }
 
 func dataSourceNsxtPolicyMacDiscoveryProfileRead(d *schema.ResourceData, m interface{}) error {
+	if isPolicyGlobalManager(m) {
+		_, err := policyDataSourceResourceRead(d, getPolicyConnector(m), "MacDiscoveryProfile", nil)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+
+	// Local manager support:
 	connector := getPolicyConnector(m)
 	client := infra.NewDefaultMacDiscoveryProfilesClient(connector)
 

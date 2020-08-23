@@ -5,10 +5,11 @@ package nsxt
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
-	"testing"
 )
 
 var accTestPolicyDhcpRelayConfigCreateAttributes = map[string]string{
@@ -27,8 +28,8 @@ var accTestPolicyDhcpRelayConfigUpdateAttributes = map[string]string{
 func TestAccResourceNsxtPolicyDhcpRelayConfig_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_dhcp_relay.test"
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyDhcpRelayConfigCheckDestroy(state, accTestPolicyDhcpRelayConfigCreateAttributes["display_name"])
@@ -81,8 +82,8 @@ func TestAccResourceNsxtPolicyDhcpRelayConfig_importBasic(t *testing.T) {
 	name := "terra-test-import"
 	testResourceName := "nsxt_policy_dhcp_relay.test"
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyDhcpRelayConfigCheckDestroy(state, name)

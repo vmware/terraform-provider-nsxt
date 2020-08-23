@@ -5,13 +5,14 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/vmware/go-vmware-nsxt/manager"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	"log"
-	"net/http"
-	"strings"
 )
 
 var natRuleActionValues = []string{
@@ -265,7 +266,7 @@ func resourceNsxtNatRuleUpdate(d *schema.ResourceData, m interface{}) error {
 		TranslatedPorts:    translatedPorts,
 	}
 
-	natRule, resp, err := nsxClient.LogicalRoutingAndServicesApi.UpdateNatRule(nsxClient.Context, logicalRouterID, id, natRule)
+	_, resp, err := nsxClient.LogicalRoutingAndServicesApi.UpdateNatRule(nsxClient.Context, logicalRouterID, id, natRule)
 
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during NatRule update: %v", err)

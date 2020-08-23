@@ -5,19 +5,20 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"net/http"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccResourceNsxtNsServiceGroup_basic(t *testing.T) {
-	serviceName := fmt.Sprintf("test-nsx-service-group-for-import")
+	serviceName := "test-nsx-service-group-for-import"
 	updateServiceName := fmt.Sprintf("%s-update", serviceName)
 	testResourceName := "nsxt_ns_service_group.test"
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXServiceGroupCheckDestroy(state, serviceName)
@@ -48,11 +49,11 @@ func TestAccResourceNsxtNsServiceGroup_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtNsServiceGroup_importBasic(t *testing.T) {
-	serviceName := fmt.Sprintf("test-nsx-service-group")
+	serviceName := "test-nsx-service-group"
 	testResourceName := "nsxt_ns_service_group.test"
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXServiceGroupCheckDestroy(state, serviceName)
@@ -127,7 +128,7 @@ func testAccNSXServiceGroupCheckDestroy(state *terraform.State, displayName stri
 }
 
 func testAccNSXServiceGroupCreateServices() string {
-	return fmt.Sprintf(`
+	return `
 resource "nsxt_ip_protocol_ns_service" "srv1" {
   display_name = "test_ip_protocol_service"
   protocol     = "17"
@@ -137,7 +138,7 @@ resource "nsxt_l4_port_set_ns_service" "srv2" {
   display_name      = "test_l4_service"
   protocol          = "TCP"
   destination_ports = [ "8080" ]
-}`)
+}`
 }
 
 func testAccNSXServiceGroupCreateTemplate(serviceName string) string {

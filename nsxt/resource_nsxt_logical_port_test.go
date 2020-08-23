@@ -5,20 +5,21 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"net/http"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccResourceNsxtLogicalPort_basic(t *testing.T) {
-	portName := fmt.Sprintf("test-nsx-logical-port")
+	portName := "test-nsx-logical-port"
 	updatePortName := fmt.Sprintf("%s-update", portName)
 	testResourceName := "nsxt_logical_port.test"
 	transportZoneName := getOverlayTransportZoneName()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLogicalPortCheckDestroy(state, portName)
@@ -49,7 +50,7 @@ func TestAccResourceNsxtLogicalPort_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtLogicalPort_withProfiles(t *testing.T) {
-	portName := fmt.Sprintf("test-nsx-logical-port-with-profiles")
+	portName := "test-nsx-logical-port-with-profiles"
 	updatePortName := fmt.Sprintf("%s-update", portName)
 	testResourceName := "nsxt_logical_port.test"
 	transportZoneName := getOverlayTransportZoneName()
@@ -57,7 +58,7 @@ func TestAccResourceNsxtLogicalPort_withProfiles(t *testing.T) {
 	profileType := "QosSwitchingProfile"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			// Verify that the LP was deleted
@@ -94,7 +95,7 @@ func TestAccResourceNsxtLogicalPort_withProfiles(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXSwitchingNoProfileTemplate(),
+				Config: testAccNsxtEmptyTemplate(),
 			},
 		},
 	})
@@ -103,12 +104,12 @@ func TestAccResourceNsxtLogicalPort_withProfiles(t *testing.T) {
 func TestAccResourceNsxtLogicalPort_withNSGroup(t *testing.T) {
 	// Verify port can be deleted if its an effective member
 	// of existing NS Group
-	portName := fmt.Sprintf("test-nsx-logical-port")
+	portName := "test-nsx-logical-port"
 	testResourceName := "nsxt_logical_port.test"
 	transportZoneName := getOverlayTransportZoneName()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLogicalPortCheckDestroy(state, portName)
@@ -132,12 +133,12 @@ func TestAccResourceNsxtLogicalPort_withNSGroup(t *testing.T) {
 }
 
 func TestAccResourceNsxtLogicalPort_importBasic(t *testing.T) {
-	portName := fmt.Sprintf("test-nsx-logical-port")
+	portName := "test-nsx-logical-port"
 	testResourceName := "nsxt_logical_port.test"
 	transportZoneName := getOverlayTransportZoneName()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLogicalPortCheckDestroy(state, portName)

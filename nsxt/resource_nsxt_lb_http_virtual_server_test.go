@@ -5,10 +5,11 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"net/http"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 var testLbVirtualServerCertID string
@@ -24,7 +25,7 @@ func TestAccResourceNsxtLbHttpVirtualServer_basic(t *testing.T) {
 	updatedEnabled := "false"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLbHTTPVirtualServerCheckDestroy(state, name)
@@ -81,7 +82,7 @@ func TestAccResourceNsxtLbHttpVirtualServer_withRules(t *testing.T) {
 	updatedRule2 := "rule1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLbHTTPVirtualServerCheckDestroy(state, name)
@@ -116,7 +117,7 @@ func TestAccResourceNsxtLbHttpVirtualServer_withSSL(t *testing.T) {
 	updatedDepth := "4"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			testAccNSXDeleteCerts(t, testLbVirtualServerCertID, testLbVirtualServerClientCertID, testLbVirtualServerCaCertID)
@@ -187,7 +188,7 @@ func TestAccResourceNsxtLbHttpVirtualServer_importBasic(t *testing.T) {
 	name := "test"
 	resourceName := "nsxt_lb_http_virtual_server.test"
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLbHTTPVirtualServerCheckDestroy(state, name)

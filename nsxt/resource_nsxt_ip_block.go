@@ -5,10 +5,11 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/vmware/go-vmware-nsxt/manager"
 	"log"
 	"net/http"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/vmware/go-vmware-nsxt/manager"
 )
 
 func resourceNsxtIPBlock() *schema.Resource {
@@ -130,7 +131,7 @@ func resourceNsxtIPBlockUpdate(d *schema.ResourceData, m interface{}) error {
 		Revision:    revision,
 	}
 	// Update the IP block
-	ipBlock, resp, err := nsxClient.PoolManagementApi.UpdateIpBlock(nsxClient.Context, id, ipBlock)
+	_, resp, err := nsxClient.PoolManagementApi.UpdateIpBlock(nsxClient.Context, id, ipBlock)
 
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during IpBlock update: %v", err)

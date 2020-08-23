@@ -5,11 +5,12 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"net/http"
 	"testing"
 	"time"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 const (
@@ -22,7 +23,7 @@ var testAccIPPoolName = "data.nsxt_ip_pool.acceptance_test"
 
 func TestAccResourceNsxtIPPoolAllocationIPAddress_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccEnvDefined(t, "NSXT_TEST_IP_POOL") },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccEnvDefined(t, "NSXT_TEST_IP_POOL") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXIPPoolAllocationIPAddressCheckDestroy(state)
@@ -43,7 +44,7 @@ func TestAccResourceNsxtIPPoolAllocationIPAddress_basic(t *testing.T) {
 func TestAccResourceNsxtIPPoolAllocationIPAddress_import(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccEnvDefined(t, "NSXT_TEST_IP_POOL") },
+		PreCheck:  func() { testAccPreCheck(t); testAccEnvDefined(t, "NSXT_TEST_IP_POOL"); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXIPPoolAllocationIPAddressCheckDestroy(state)

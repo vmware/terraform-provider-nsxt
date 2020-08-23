@@ -59,7 +59,7 @@ func dhcpStaticBindingConfigsDeleteRestMetadata() protocol.OperationRestMetadata
 	pathParams["segment_id"] = "segmentId"
 	pathParams["binding_id"] = "bindingId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -116,7 +116,7 @@ func dhcpStaticBindingConfigsGetRestMetadata() protocol.OperationRestMetadata {
 	pathParams["segment_id"] = "segmentId"
 	pathParams["binding_id"] = "bindingId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -202,7 +202,7 @@ func dhcpStaticBindingConfigsListRestMetadata() protocol.OperationRestMetadata {
 	queryParams["include_mark_for_delete_objects"] = "include_mark_for_delete_objects"
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -264,7 +264,7 @@ func dhcpStaticBindingConfigsPatchRestMetadata() protocol.OperationRestMetadata 
 	pathParams["segment_id"] = "segmentId"
 	pathParams["binding_id"] = "bindingId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -326,7 +326,7 @@ func dhcpStaticBindingConfigsUpdateRestMetadata() protocol.OperationRestMetadata
 	pathParams["segment_id"] = "segmentId"
 	pathParams["binding_id"] = "bindingId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

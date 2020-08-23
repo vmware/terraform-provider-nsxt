@@ -5,28 +5,28 @@ package nsxt
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/ip_pools"
-	"testing"
 )
-
-var nsxtPolicyBlockSubnetPoolID = "tfpool1"
 
 // TODO: remove extra test step config once IP Blocks don't need a delay to delete
 func TestAccResourceNsxtPolicyIPPoolBlockSubnet_minimal(t *testing.T) {
+	poolName := "tfpool5"
 	name := "blocksubnet1"
 	testResourceName := "nsxt_policy_ip_pool_block_subnet.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXPolicyIPPoolBlockSubnetCheckDestroy(state)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXPolicyIPPoolBlockSubnetCreateMinimalTemplate(name),
+				Config: testAccNSXPolicyIPPoolBlockSubnetCreateMinimalTemplate(poolName, name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXPolicyIPPoolBlockSubnetCheckExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
@@ -48,19 +48,20 @@ func TestAccResourceNsxtPolicyIPPoolBlockSubnet_minimal(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyIPPoolBlockSubnet_basic(t *testing.T) {
-	name := "tfpool1"
+	poolName := "tfpool1"
+	name := "subnet1"
 	updatedName := fmt.Sprintf("%s-updated", name)
 	testResourceName := "nsxt_policy_ip_pool_block_subnet.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXPolicyIPPoolBlockSubnetCheckDestroy(state)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXPolicyIPPoolBlockSubnetCreateTemplate(name),
+				Config: testAccNSXPolicyIPPoolBlockSubnetCreateTemplate(poolName, name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXPolicyIPPoolBlockSubnetCheckExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
@@ -76,7 +77,7 @@ func TestAccResourceNsxtPolicyIPPoolBlockSubnet_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXPolicyIPPoolBlockSubnetUpdateTemplate(updatedName),
+				Config: testAccNSXPolicyIPPoolBlockSubnetUpdateTemplate(poolName, updatedName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXPolicyIPPoolBlockSubnetCheckExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
@@ -99,18 +100,19 @@ func TestAccResourceNsxtPolicyIPPoolBlockSubnet_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyIPPoolBlockSubnet_import_basic(t *testing.T) {
-	name := "tfpool1"
+	poolName := "tfpool7"
+	name := "subnet2"
 	testResourceName := "nsxt_policy_ip_pool_block_subnet.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXPolicyIPPoolBlockSubnetCheckDestroy(state)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXPolicyIPPoolBlockSubnetCreateTemplate(name),
+				Config: testAccNSXPolicyIPPoolBlockSubnetCreateTemplate(poolName, name),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -143,6 +145,7 @@ func testAccNSXPolicyIPPoolBlockSubnetImporterGetID(s *terraform.State) (string,
 }
 
 func testAccNSXPolicyIPPoolBlockSubnetCheckExists(resourceName string) resource.TestCheckFunc {
+
 	return func(state *terraform.State) error {
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
 		client := ip_pools.NewDefaultIpSubnetsClient(connector)
@@ -153,11 +156,12 @@ func testAccNSXPolicyIPPoolBlockSubnetCheckExists(resourceName string) resource.
 		}
 
 		resourceID := rs.Primary.ID
+		poolID := getPolicyIDFromPath(rs.Primary.Attributes["pool_path"])
 		if resourceID == "" {
 			return fmt.Errorf("NSX Policy Block Subnet resource ID not set in resources")
 		}
 
-		_, err := client.Get(nsxtPolicyBlockSubnetPoolID, resourceID)
+		_, err := client.Get(poolID, resourceID)
 		if err != nil {
 			return fmt.Errorf("Failed to find Block Subnet %s", resourceID)
 		}
@@ -175,8 +179,9 @@ func testAccNSXPolicyIPPoolBlockSubnetCheckDestroy(state *terraform.State) error
 			continue
 		}
 
-		resourceID := rs.Primary.Attributes["id"]
-		_, err := client.Get(nsxtPolicyBlockSubnetPoolID, resourceID)
+		resourceID := rs.Primary.ID
+		poolID := getPolicyIDFromPath(rs.Primary.Attributes["pool_path"])
+		_, err := client.Get(poolID, resourceID)
 		if err == nil {
 			return fmt.Errorf("Block Subnet still exists %s", resourceID)
 		}
@@ -186,18 +191,17 @@ func testAccNSXPolicyIPPoolBlockSubnetCheckDestroy(state *terraform.State) error
 }
 
 func testAccNSXPolicyIPPoolBlockSubnetIPBlockTemplate() string {
-	return fmt.Sprintf(`
+	return `
 resource "nsxt_policy_ip_block" "block1" {
-  display_name = "tfblock1"
+  display_name = "tfblock2"
   cidr         = "11.11.12.0/24"
-}`)
+}`
 }
 
-func testAccNSXPolicyIPPoolBlockSubnetCreateMinimalTemplate(name string) string {
+func testAccNSXPolicyIPPoolBlockSubnetCreateMinimalTemplate(poolName string, name string) string {
 	return testAccNSXPolicyIPPoolBlockSubnetIPBlockTemplate() + fmt.Sprintf(`
 resource "nsxt_policy_ip_pool" "pool1" {
   display_name = "%s"
-  nsx_id       = "%s"
 }
 
 resource "nsxt_policy_ip_pool_block_subnet" "test" {
@@ -205,14 +209,13 @@ resource "nsxt_policy_ip_pool_block_subnet" "test" {
   size         = 4
   pool_path    = nsxt_policy_ip_pool.pool1.path
   block_path   = nsxt_policy_ip_block.block1.path
-}`, nsxtPolicyBlockSubnetPoolID, nsxtPolicyBlockSubnetPoolID, name)
+}`, poolName, name)
 }
 
-func testAccNSXPolicyIPPoolBlockSubnetCreateTemplate(name string) string {
+func testAccNSXPolicyIPPoolBlockSubnetCreateTemplate(poolName string, name string) string {
 	return testAccNSXPolicyIPPoolBlockSubnetIPBlockTemplate() + fmt.Sprintf(`
 resource "nsxt_policy_ip_pool" "pool1" {
   display_name = "%s"
-  nsx_id       = "%s"
 }
 
 resource "nsxt_policy_ip_pool_block_subnet" "test" {
@@ -226,14 +229,13 @@ resource "nsxt_policy_ip_pool_block_subnet" "test" {
     scope = "scope2"
     tag   = "tag2"
   }
-}`, nsxtPolicyBlockSubnetPoolID, nsxtPolicyBlockSubnetPoolID, name)
+}`, poolName, name)
 }
 
-func testAccNSXPolicyIPPoolBlockSubnetUpdateTemplate(name string) string {
+func testAccNSXPolicyIPPoolBlockSubnetUpdateTemplate(poolName string, name string) string {
 	return testAccNSXPolicyIPPoolBlockSubnetIPBlockTemplate() + fmt.Sprintf(`
 resource "nsxt_policy_ip_pool" "pool1" {
   display_name = "%s"
-  nsx_id       = "%s"
 }
 
 resource "nsxt_policy_ip_pool_block_subnet" "test" {
@@ -251,5 +253,5 @@ resource "nsxt_policy_ip_pool_block_subnet" "test" {
     scope = "scope2"
     tag   = "tag2"
   }
-}`, nsxtPolicyBlockSubnetPoolID, nsxtPolicyBlockSubnetPoolID, name)
+}`, poolName, name)
 }

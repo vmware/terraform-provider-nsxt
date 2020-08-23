@@ -5,21 +5,22 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"net/http"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccResourceNsxtLogicalTier1Router_basic(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-logical-tier1-router")
+	name := "test-nsx-logical-tier1-router"
 	updateName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_logical_tier1_router.test"
 	failoverMode := "PREEMPTIVE"
 	edgeClusterName := getEdgeClusterName()
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLogicalTier1RouterCheckDestroy(state, name)
@@ -62,13 +63,13 @@ func TestAccResourceNsxtLogicalTier1Router_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtLogicalTier1Router_importBasic(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-logical-tier1-router")
+	name := "test-nsx-logical-tier1-router"
 	testResourceName := "nsxt_logical_tier1_router.test"
 	failoverMode := "PREEMPTIVE"
 	edgeClusterName := getEdgeClusterName()
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLogicalTier1RouterCheckDestroy(state, name)

@@ -5,10 +5,11 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"net/http"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccResourceNsxtLbCookiePersistenceProfile_basic(t *testing.T) {
@@ -21,7 +22,7 @@ func TestAccResourceNsxtLbCookiePersistenceProfile_basic(t *testing.T) {
 	updatedCookieName := "new_cookie"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLbCookiePersistenceProfileCheckDestroy(state, name)
@@ -71,7 +72,7 @@ func TestAccResourceNsxtLbCookiePersistenceProfile_insertMode(t *testing.T) {
 	updatedCookiePath := "/subfolder1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLbCookiePersistenceProfileCheckDestroy(state, name)
@@ -125,7 +126,7 @@ func TestAccResourceNsxtLbCookiePersistenceProfile_importBasic(t *testing.T) {
 	name := "test-nsx-persistence-profile"
 	testResourceName := "nsxt_lb_cookie_persistence_profile.test"
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLbCookiePersistenceProfileCheckDestroy(state, name)

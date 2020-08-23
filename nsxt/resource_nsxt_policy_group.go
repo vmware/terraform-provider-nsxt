@@ -5,14 +5,18 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+	gm_domains "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/domains"
+	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/domains"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	"log"
 )
 
 var conditionKeyValues = []string{
@@ -70,6 +74,13 @@ func resourceNsxtPolicyGroup() *schema.Resource {
 				Elem:        getConjunctionSchema(),
 				Optional:    true,
 			},
+			"extended_criteria": {
+				Type:        schema.TypeList,
+				Description: "Extended criteria to determine group membership. extended_criteria is implicitly \"AND\" with criteria",
+				Elem:        getExtendedCriteriaSetSchema(),
+				Optional:    true,
+				MaxItems:    1,
+			},
 		},
 	}
 }
@@ -84,6 +95,22 @@ func getIPAddressExpressionSchema() *schema.Resource {
 				Elem: &schema.Schema{
 					Type:         schema.TypeString,
 					ValidateFunc: validateCidrOrIPOrRange(),
+				},
+			},
+		},
+	}
+}
+
+func getMACAddressExpressionSchema() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"mac_addresses": {
+				Type:        schema.TypeSet,
+				Required:    true,
+				Description: "List of Mac Addresses",
+				Elem: &schema.Schema{
+					Type:         schema.TypeString,
+					ValidateFunc: validation.IsMACAddress,
 				},
 			},
 		},
@@ -146,6 +173,28 @@ func getConjunctionSchema() *schema.Resource {
 	}
 }
 
+func getIdentityGroupSchema() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"distinguished_name": {
+				Type:        schema.TypeString,
+				Description: "LDAP distinguished name",
+				Optional:    true,
+			},
+			"domain_base_distinguished_name": {
+				Type:        schema.TypeString,
+				Description: "Identity (Directory) domain base distinguished name",
+				Optional:    true,
+			},
+			"sid": {
+				Type:        schema.TypeString,
+				Description: "Identity (Directory) Group SID (security identifier)",
+				Optional:    true,
+			},
+		},
+	}
+}
+
 func getCriteriaSetSchema() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
@@ -170,30 +219,54 @@ func getCriteriaSetSchema() *schema.Resource {
 				Elem:        getPathExpressionSchema(),
 				MaxItems:    1,
 			},
+			"macaddress_expression": {
+				Type:        schema.TypeList,
+				Description: "MAC address expression specifying MAC Address members in the Group",
+				Elem:        getMACAddressExpressionSchema(),
+				Optional:    true,
+				MaxItems:    1,
+			},
 		},
 	}
 }
 
-func resourceNsxtPolicyGroupExistsInDomain(id string, domain string, connector *client.RestConnector) bool {
-	client := domains.NewDefaultGroupsClient(connector)
+func getExtendedCriteriaSetSchema() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"identity_group": {
+				Type:        schema.TypeSet,
+				Description: "Identity Group expression",
+				Elem:        getIdentityGroupSchema(),
+				Optional:    true,
+			},
+		},
+	}
+}
 
-	_, err := client.Get(domain, id)
+func resourceNsxtPolicyGroupExistsInDomain(id string, domain string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
+	var err error
+	if isGlobalManager {
+		client := gm_domains.NewDefaultGroupsClient(connector)
+		_, err = client.Get(domain, id)
+	} else {
+		client := domains.NewDefaultGroupsClient(connector)
+		_, err = client.Get(domain, id)
+	}
 	if err == nil {
-		return true
+		return true, nil
 	}
 
 	if isNotFoundError(err) {
-		return false
+		return false, nil
 	}
 
-	logAPIError("Error retrieving Group", err)
-	return false
+	return false, logAPIError("Error retrieving Group", err)
 
 }
 
-func resourceNsxtPolicyGroupExistsInDomainPartial(domain string) func(id string, connector *client.RestConnector) bool {
-	return func(id string, connector *client.RestConnector) bool {
-		return resourceNsxtPolicyGroupExistsInDomain(id, domain, connector)
+func resourceNsxtPolicyGroupExistsInDomainPartial(domain string) func(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
+	return func(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
+		return resourceNsxtPolicyGroupExistsInDomain(id, domain, connector, isGlobalManager)
 	}
 }
 
@@ -238,7 +311,7 @@ func validateGroupCriteriaSets(criteriaSets []interface{}) ([]criteriaMeta, erro
 						return nil, err
 					}
 					memberType = mType
-				} else if expName == "ipaddress_expression" || expName == "path_expression" {
+				} else if strings.HasSuffix(expName, "_expression") {
 					memberType = ""
 				} else {
 					return nil, fmt.Errorf("Unknown criteria: %v", expName)
@@ -331,6 +404,25 @@ func buildGroupIPAddressData(ipaddr interface{}) (*data.StructValue, error) {
 	return dataValue.(*data.StructValue), nil
 }
 
+func buildGroupMacAddressData(ipaddr interface{}) (*data.StructValue, error) {
+	addrMap := ipaddr.(map[string]interface{})
+	var macList []string
+	for _, mac := range addrMap["mac_addresses"].(*schema.Set).List() {
+		macList = append(macList, mac.(string))
+	}
+	addrStruct := model.MACAddressExpression{
+		MacAddresses: macList,
+		ResourceType: model.MACAddressExpression__TYPE_IDENTIFIER,
+	}
+	converter := bindings.NewTypeConverter()
+	converter.SetMode(bindings.REST)
+	dataValue, errors := converter.ConvertToVapi(addrStruct, model.MACAddressExpressionBindingType())
+	if errors != nil {
+		return nil, errors[0]
+	}
+	return dataValue.(*data.StructValue), nil
+}
+
 func buildGroupMemberPathData(paths interface{}) (*data.StructValue, error) {
 	pathMap := paths.(map[string]interface{})
 	var pathList []string
@@ -395,8 +487,40 @@ func buildGroupExpressionDataFromType(expressionType string, datum interface{}) 
 			return nil, err
 		}
 		return data, nil
+	} else if expressionType == "macaddress_expression" {
+		data, err := buildGroupMacAddressData(datum)
+		if err != nil {
+			return nil, err
+		}
+		return data, nil
 	}
 	return nil, fmt.Errorf("Unknown expression type: %v", expressionType)
+}
+
+func buildIdentityGroupExpressionListData(identityGroups []interface{}) (*data.StructValue, error) {
+	var identityGroupExpressionList model.IdentityGroupExpression
+	var identityGroupsList []model.IdentityGroupInfo
+	for _, value := range identityGroups {
+		identityGroupMap := value.(map[string]interface{})
+		distinguishedName := identityGroupMap["distinguished_name"].(string)
+		domainBaseDistinguishedName := identityGroupMap["domain_base_distinguished_name"].(string)
+		sid := identityGroupMap["sid"].(string)
+		identityGroupStruct := model.IdentityGroupInfo{
+			DistinguishedName:           &distinguishedName,
+			DomainBaseDistinguishedName: &domainBaseDistinguishedName,
+			Sid:                         &sid,
+		}
+		identityGroupsList = append(identityGroupsList, identityGroupStruct)
+	}
+	identityGroupExpressionList.IdentityGroups = identityGroupsList
+	identityGroupExpressionList.ResourceType = model.Expression_RESOURCE_TYPE_IDENTITYGROUPEXPRESSION
+	converter := bindings.NewTypeConverter()
+	converter.SetMode(bindings.REST)
+	dataValue, errors := converter.ConvertToVapi(identityGroupExpressionList, model.IdentityGroupExpressionBindingType())
+	if errors != nil {
+		return nil, errors[0]
+	}
+	return dataValue.(*data.StructValue), nil
 }
 
 func buildGroupExpressionData(criteriaMeta []criteriaMeta, conjunctions []interface{}) ([]*data.StructValue, error) {
@@ -502,6 +626,20 @@ func fromGroupExpressionData(expressions []*data.StructValue) ([]map[string]inte
 			pathList = append(pathList, pathMap)
 			exprMap["path_expression"] = pathList
 			parsedCriteria = append(parsedCriteria, exprMap)
+		} else if expStruct.ResourceType == model.MACAddressExpression__TYPE_IDENTIFIER {
+			log.Printf("[DEBUG] Parsing mac address expression")
+			macData, errors := converter.ConvertToGolang(expression, model.MACAddressExpressionBindingType())
+			if len(errors) > 0 {
+				return nil, nil, errors[0]
+			}
+			macStruct := macData.(model.MACAddressExpression)
+			var addrList []map[string]interface{}
+			var addrMap = make(map[string]interface{})
+			addrMap["mac_addresses"] = macStruct.MacAddresses
+			var macMap = make(map[string]interface{})
+			addrList = append(addrList, addrMap)
+			macMap["macaddress_expression"] = addrList
+			parsedCriteria = append(parsedCriteria, macMap)
 		} else if expStruct.ResourceType == model.Condition__TYPE_IDENTIFIER {
 			log.Printf("[DEBUG] Parsing condition")
 			condMap, err := groupConditionDataToMap(expression)
@@ -545,6 +683,28 @@ func fromGroupExpressionData(expressions []*data.StructValue) ([]map[string]inte
 	return parsedCriteria, parsedConjunctions, nil
 }
 
+func getIdentityGroupsData(expressions []*data.StructValue) ([]map[string]interface{}, error) {
+	var parsedIdentityGroups []map[string]interface{}
+	converter := bindings.NewTypeConverter()
+	converter.SetMode(bindings.REST)
+	for _, expr := range expressions {
+		exprData, errs := converter.ConvertToGolang(expr, model.IdentityGroupExpressionBindingType())
+		if len(errs) > 0 {
+			return nil, errs[0]
+		}
+		exprStruct := exprData.(model.IdentityGroupExpression)
+		log.Printf("[DEBUG] Parsing identity group")
+		for _, identityGroup := range exprStruct.IdentityGroups {
+			identityGroupMap := make(map[string]interface{})
+			identityGroupMap["distinguished_name"] = identityGroup.DistinguishedName
+			identityGroupMap["sid"] = identityGroup.Sid
+			identityGroupMap["domain_base_distinguished_name"] = identityGroup.DomainBaseDistinguishedName
+			parsedIdentityGroups = append(parsedIdentityGroups, identityGroupMap)
+		}
+	}
+	return parsedIdentityGroups, nil
+}
+
 func validateGroupCriteriaAndConjunctions(criteriaSets []interface{}, conjunctions []interface{}) ([]criteriaMeta, error) {
 	if len(criteriaSets)+len(conjunctions) == 0 {
 		return nil, nil
@@ -569,10 +729,9 @@ func validateGroupCriteriaAndConjunctions(criteriaSets []interface{}, conjunctio
 
 func resourceNsxtPolicyGroupCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := domains.NewDefaultGroupsClient(connector)
 
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID(d, connector, resourceNsxtPolicyGroupExistsInDomainPartial(d.Get("domain").(string)))
+	id, err := getOrGenerateID(d, m, resourceNsxtPolicyGroupExistsInDomainPartial(d.Get("domain").(string)))
 	if err != nil {
 		return err
 	}
@@ -590,20 +749,40 @@ func resourceNsxtPolicyGroupCreate(d *schema.ResourceData, m interface{}) error 
 		return err
 	}
 
+	extendedCriteriaSets := d.Get("extended_criteria").([]interface{})
+	err = validateExtendedCriteriaLocalManager(extendedCriteriaSets, m)
+	if err != nil {
+		return err
+	}
+	extendedExpressionList, err := buildGroupExtendedExpressionListData(extendedCriteriaSets)
+	if err != nil {
+		return err
+	}
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
 	tags := getPolicyTagsFromSchema(d)
 
 	obj := model.Group{
-		DisplayName: &displayName,
-		Description: &description,
-		Tags:        tags,
-		Expression:  expressionData,
+		DisplayName:        &displayName,
+		Description:        &description,
+		Tags:               tags,
+		Expression:         expressionData,
+		ExtendedExpression: extendedExpressionList,
 	}
 
+	if isPolicyGlobalManager(m) {
+		gmObj, err1 := convertModelBindingType(obj, model.GroupBindingType(), gm_model.GroupBindingType())
+		if err1 != nil {
+			return err1
+		}
+		client := gm_domains.NewDefaultGroupsClient(connector)
+		err = client.Patch(d.Get("domain").(string), id, gmObj.(gm_model.Group))
+	} else {
+		client := domains.NewDefaultGroupsClient(connector)
+		err = client.Patch(d.Get("domain").(string), id, obj)
+	}
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating Group with ID %s", id)
-	err = client.Patch(d.Get("domain").(string), id, obj)
 	if err != nil {
 		return handleCreateError("Group", id, err)
 	}
@@ -616,25 +795,31 @@ func resourceNsxtPolicyGroupCreate(d *schema.ResourceData, m interface{}) error 
 
 func resourceNsxtPolicyGroupRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := domains.NewDefaultGroupsClient(connector)
-
 	id := d.Id()
+	domainName := d.Get("domain").(string)
 	if id == "" {
 		return fmt.Errorf("Error obtaining Group ID")
 	}
-
-	domainName := d.Get("domain").(string)
-	obj, err := client.Get(domainName, id)
-	if err != nil {
-		return handleReadError(d, "Group", id, err)
+	var obj model.Group
+	if isPolicyGlobalManager(m) {
+		client := gm_domains.NewDefaultGroupsClient(connector)
+		gmObj, err := client.Get(domainName, id)
+		if err != nil {
+			return handleReadError(d, "Group", id, err)
+		}
+		rawObj, err := convertModelBindingType(gmObj, gm_model.GroupBindingType(), model.GroupBindingType())
+		if err != nil {
+			return err
+		}
+		obj = rawObj.(model.Group)
+	} else {
+		var err error
+		client := domains.NewDefaultGroupsClient(connector)
+		obj, err = client.Get(domainName, id)
+		if err != nil {
+			return handleReadError(d, "Group", id, err)
+		}
 	}
-
-	criteria, conditions, err := fromGroupExpressionData(obj.Expression)
-	log.Printf("[INFO] Found %d criteria, %d conjunctions for group %s", len(criteria), len(conditions), id)
-	if err != nil {
-		return err
-	}
-
 	d.Set("display_name", obj.DisplayName)
 	d.Set("description", obj.Description)
 	setPolicyTagsInSchema(d, obj.Tags)
@@ -642,15 +827,32 @@ func resourceNsxtPolicyGroupRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("path", obj.Path)
 	d.Set("domain", getDomainFromResourcePath(*obj.Path))
 	d.Set("revision", obj.Revision)
+	criteria, conditions, err := fromGroupExpressionData(obj.Expression)
+	log.Printf("[INFO] Found %d criteria, %d conjunctions for group %s", len(criteria), len(conditions), id)
+	if err != nil {
+		return err
+	}
 	d.Set("criteria", criteria)
 	d.Set("conjunction", conditions)
+	identityGroups, err := getIdentityGroupsData(obj.ExtendedExpression)
+	log.Printf("[INFO] Found %d identity groups for group %s", len(identityGroups), id)
+	if err != nil {
+		return err
+	}
+	if len(identityGroups) > 0 {
+		identityGroupsMap := make(map[string]interface{})
+		identityGroupsMap["identity_group"] = identityGroups
+
+		var extendedCriteria []map[string]interface{}
+		extendedCriteria = append(extendedCriteria, identityGroupsMap)
+		d.Set("extended_criteria", extendedCriteria)
+	}
 
 	return nil
 }
 
 func resourceNsxtPolicyGroupUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := domains.NewDefaultGroupsClient(connector)
 
 	id := d.Id()
 	if id == "" {
@@ -670,20 +872,45 @@ func resourceNsxtPolicyGroupUpdate(d *schema.ResourceData, m interface{}) error 
 		return err
 	}
 
+	extendedCriteriaSets := d.Get("extended_criteria").([]interface{})
+	err = validateExtendedCriteriaLocalManager(extendedCriteriaSets, m)
+	if err != nil {
+		return err
+	}
+	extendedExpressionList, err := buildGroupExtendedExpressionListData(extendedCriteriaSets)
+	if err != nil {
+		return err
+	}
+
 	// Read the rest of the configured parameters
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	tags := getPolicyTagsFromSchema(d)
 
 	obj := model.Group{
-		DisplayName: &displayName,
-		Description: &description,
-		Tags:        tags,
-		Expression:  expressionData,
+		DisplayName:        &displayName,
+		Description:        &description,
+		Tags:               tags,
+		Expression:         expressionData,
+		ExtendedExpression: extendedExpressionList,
 	}
 
-	// Update the resource using PATCH
-	err = client.Patch(d.Get("domain").(string), id, obj)
+	if isPolicyGlobalManager(m) {
+		gmObj, err1 := convertModelBindingType(obj, model.GroupBindingType(), gm_model.GroupBindingType())
+		if err1 != nil {
+			return err1
+		}
+		gmGroup := gmObj.(gm_model.Group)
+		client := gm_domains.NewDefaultGroupsClient(connector)
+
+		// Update the resource using PATCH
+		err = client.Patch(d.Get("domain").(string), id, gmGroup)
+	} else {
+		client := domains.NewDefaultGroupsClient(connector)
+
+		// Update the resource using PATCH
+		err = client.Patch(d.Get("domain").(string), id, obj)
+	}
 	if err != nil {
 		return handleUpdateError("Group", id, err)
 	}
@@ -698,14 +925,49 @@ func resourceNsxtPolicyGroupDelete(d *schema.ResourceData, m interface{}) error 
 	}
 
 	connector := getPolicyConnector(m)
-	client := domains.NewDefaultGroupsClient(connector)
-
+	var err error
 	forceDelete := true
 	failIfSubtreeExists := false
-	err := client.Delete(d.Get("domain").(string), id, &failIfSubtreeExists, &forceDelete)
+
+	if isPolicyGlobalManager(m) {
+		client := gm_domains.NewDefaultGroupsClient(connector)
+		err = client.Delete(d.Get("domain").(string), id, &failIfSubtreeExists, &forceDelete)
+	} else {
+		client := domains.NewDefaultGroupsClient(connector)
+		err = client.Delete(d.Get("domain").(string), id, &failIfSubtreeExists, &forceDelete)
+	}
+
 	if err != nil {
 		return handleDeleteError("Group", id, err)
 	}
 
+	return nil
+}
+
+func buildGroupExtendedExpressionListData(extendedCriteriaSets []interface{}) ([]*data.StructValue, error) {
+	// Currently no nested criteria is supported in extended_expression, so extendedCriteriaSets has at most one element
+	// Currently only identity groups are supported in extended_expression
+	var identityGroups []interface{}
+	for _, extendedCriteria := range extendedCriteriaSets {
+		extendedCriteriaMap := extendedCriteria.(map[string]interface{})
+		identityGroups = append(identityGroups, extendedCriteriaMap["identity_group"].(*schema.Set).List()...)
+	}
+
+	var extendedExpressionList []*data.StructValue
+	if len(identityGroups) > 0 {
+		identityGroupExpressionListData, err := buildIdentityGroupExpressionListData(identityGroups)
+		if err != nil {
+			return nil, err
+		}
+		extendedExpressionList = append(extendedExpressionList, identityGroupExpressionListData)
+	}
+	return extendedExpressionList, nil
+}
+
+func validateExtendedCriteriaLocalManager(extendedCriteriaSets []interface{}, clients interface{}) error {
+	if len(extendedCriteriaSets) > 0 && isPolicyGlobalManager(clients) {
+		err := fmt.Errorf("%s is not supported for Global Manager", "extended_criteria")
+		return err
+	}
 	return nil
 }

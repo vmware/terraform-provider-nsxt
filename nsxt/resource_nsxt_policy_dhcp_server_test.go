@@ -5,10 +5,11 @@ package nsxt
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
-	"testing"
 )
 
 var accTestPolicyDhcpServerCreateAttributes = map[string]string{
@@ -26,8 +27,8 @@ var accTestPolicyDhcpServerUpdateAttributes = map[string]string{
 func TestAccResourceNsxtPolicyDhcpServer_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_dhcp_server.test"
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyDhcpServerCheckDestroy(state, accTestPolicyDhcpServerCreateAttributes["display_name"])
@@ -88,8 +89,8 @@ func TestAccResourceNsxtPolicyDhcpServer_importBasic(t *testing.T) {
 	name := "terra-test-import"
 	testResourceName := "nsxt_policy_dhcp_server.test"
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyDhcpServerCheckDestroy(state, name)

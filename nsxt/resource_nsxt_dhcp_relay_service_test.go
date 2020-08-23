@@ -5,19 +5,20 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"net/http"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccResourceNsxtDhcpRelayService_basic(t *testing.T) {
-	prfName := fmt.Sprintf("test-nsx-dhcp-relay-service")
+	prfName := "test-nsx-dhcp-relay-service"
 	updatePrfName := fmt.Sprintf("%s-update", prfName)
 	testResourceName := "nsxt_dhcp_relay_service.test"
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXDhcpRelayServiceCheckDestroy(state, prfName)
@@ -46,11 +47,11 @@ func TestAccResourceNsxtDhcpRelayService_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtDhcpRelayService_importBasic(t *testing.T) {
-	prfName := fmt.Sprintf("test-nsx-dhcp-relay-service")
+	prfName := "test-nsx-dhcp-relay-service"
 	testResourceName := "nsxt_dhcp_relay_service.test"
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXDhcpRelayServiceCheckDestroy(state, prfName)

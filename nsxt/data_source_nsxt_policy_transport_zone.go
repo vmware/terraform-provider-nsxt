@@ -5,18 +5,21 @@ package nsxt
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/sites/enforcement_points"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	"strings"
+	lm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
 var policyTransportZoneTransportTypes = [](string){
-	model.PolicyTransportZone_TZ_TYPE_OVERLAY_STANDARD,
-	model.PolicyTransportZone_TZ_TYPE_OVERLAY_ENS,
-	model.PolicyTransportZone_TZ_TYPE_VLAN_BACKED,
-	model.PolicyTransportZone_TZ_TYPE_UNKNOWN,
+	lm_model.PolicyTransportZone_TZ_TYPE_OVERLAY_STANDARD,
+	lm_model.PolicyTransportZone_TZ_TYPE_OVERLAY_ENS,
+	lm_model.PolicyTransportZone_TZ_TYPE_VLAN_BACKED,
+	lm_model.PolicyTransportZone_TZ_TYPE_UNKNOWN,
 }
 
 func dataSourceNsxtPolicyTransportZone() *schema.Resource {
@@ -41,21 +44,61 @@ func dataSourceNsxtPolicyTransportZone() *schema.Resource {
 				Computed:     true,
 				ValidateFunc: validation.StringInSlice(policyTransportZoneTransportTypes, false),
 			},
+			"site_path": {
+				Type:         schema.TypeString,
+				Description:  "Path of the site this Transport Zone belongs to",
+				Optional:     true,
+				ValidateFunc: validatePolicyPath(),
+			},
 		},
 	}
 }
 
 func dataSourceNsxtPolicyTransportZoneRead(d *schema.ResourceData, m interface{}) error {
+	objSitePath := d.Get("site_path").(string)
+	transportType := d.Get("transport_type").(string)
+	defaultVal, isDefaultSet := d.GetOkExists("is_default")
+	isDefault := isDefaultSet && defaultVal.(bool)
+	if !isPolicyGlobalManager(m) && objSitePath != "" {
+		return globalManagerOnlyError()
+	}
+	if isPolicyGlobalManager(m) {
+		if objSitePath == "" {
+			return attributeRequiredGlobalManagerError("site_path", "nsxt_policy_transport_zone")
+		}
+		query := make(map[string]string)
+		globalPolicyEnforcementPointPath := getGlobalPolicyEnforcementPointPath(m, &objSitePath)
+		query["parent_path"] = globalPolicyEnforcementPointPath
+		if transportType != "" {
+			query["tz_type"] = transportType
+		}
+		if isDefault {
+			query["is_default"] = "true"
+		}
+		obj, err := policyDataSourceResourceReadWithValidation(d, getPolicyConnector(m), "PolicyTransportZone", query, false)
+		if err != nil {
+			return err
+		}
+		converter := bindings.NewTypeConverter()
+		converter.SetMode(bindings.REST)
+		dataValue, errors := converter.ConvertToGolang(obj, gm_model.PolicyTransportZoneBindingType())
+		if len(errors) > 0 {
+			return errors[0]
+		}
+		transportZoneResource := dataValue.(gm_model.PolicyTransportZone)
+
+		d.Set("is_default", transportZoneResource.IsDefault)
+		d.Set("transport_type", transportZoneResource.TzType)
+		d.Set("parent_path", transportZoneResource.ParentPath)
+		return nil
+	}
 	connector := getPolicyConnector(m)
 	client := enforcement_points.NewDefaultTransportZonesClient(connector)
 
 	// TODO: support non-default site and enforcement point possibly as a triple; site/point/tz_id
 	objID := d.Get("id").(string)
 	objName := d.Get("display_name").(string)
-	defaultVal, isDefaultSet := d.GetOkExists("is_default")
-	isDefault := isDefaultSet && defaultVal.(bool)
-	transportType := d.Get("transport_type").(string)
-	var obj model.PolicyTransportZone
+	var obj lm_model.PolicyTransportZone
 	if objID != "" {
 		// Get by id
 		objGet, err := client.Get(defaultSite, getPolicyEnforcementPoint(m), objID)
@@ -74,8 +117,8 @@ func dataSourceNsxtPolicyTransportZoneRead(d *schema.ResourceData, m interface{}
 			return handleListError("TransportZone", err)
 		}
 		// go over the list to find the correct one (prefer a perfect match. If not - prefix match)
-		var perfectMatch []model.PolicyTransportZone
-		var prefixMatch []model.PolicyTransportZone
+		var perfectMatch []lm_model.PolicyTransportZone
+		var prefixMatch []lm_model.PolicyTransportZone
 		for _, objInList := range objList.Results {
 			if transportType != "" && transportType != *objInList.TzType {
 				// no match for transport type

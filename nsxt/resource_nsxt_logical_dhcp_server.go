@@ -5,11 +5,12 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/vmware/go-vmware-nsxt/manager"
-	"log"
-	"net/http"
 )
 
 func resourceNsxtLogicalDhcpServer() *schema.Resource {
@@ -325,7 +326,7 @@ func resourceNsxtLogicalDhcpServerUpdate(d *schema.ResourceData, m interface{}) 
 		Revision:       revision,
 	}
 
-	logicalDhcpServer, resp, err := nsxClient.ServicesApi.UpdateDhcpServer(nsxClient.Context, id, logicalDhcpServer)
+	_, resp, err := nsxClient.ServicesApi.UpdateDhcpServer(nsxClient.Context, id, logicalDhcpServer)
 
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during LogicalDhcpServer update: %v", err)

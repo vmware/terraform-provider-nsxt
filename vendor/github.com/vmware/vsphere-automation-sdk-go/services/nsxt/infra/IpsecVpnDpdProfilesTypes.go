@@ -52,7 +52,7 @@ func ipsecVpnDpdProfilesDeleteRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["dpdProfileId"] = bindings.NewStringType()
 	pathParams["dpd_profile_id"] = "dpdProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -102,7 +102,7 @@ func ipsecVpnDpdProfilesGetRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["dpdProfileId"] = bindings.NewStringType()
 	pathParams["dpd_profile_id"] = "dpdProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -181,7 +181,7 @@ func ipsecVpnDpdProfilesListRestMetadata() protocol.OperationRestMetadata {
 	queryParams["include_mark_for_delete_objects"] = "include_mark_for_delete_objects"
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -236,7 +236,7 @@ func ipsecVpnDpdProfilesPatchRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["dpdProfileId"] = bindings.NewStringType()
 	pathParams["dpd_profile_id"] = "dpdProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -291,7 +291,7 @@ func ipsecVpnDpdProfilesUpdateRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["dpdProfileId"] = bindings.NewStringType()
 	pathParams["dpd_profile_id"] = "dpdProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

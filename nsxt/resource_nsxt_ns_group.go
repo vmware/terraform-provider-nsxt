@@ -2,11 +2,12 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/vmware/go-vmware-nsxt/manager"
-	"log"
-	"net/http"
 )
 
 var nsGroupTargetTypeValues = []string{"NSGroup", "IPSet", "LogicalPort", "LogicalSwitch", "MACSet"}
@@ -96,9 +97,9 @@ func resourceNsxtNsGroup() *schema.Resource {
 }
 
 func getMembershipCriteriaFromSchema(d *schema.ResourceData) []manager.NsGroupTagExpression {
-	criterias := d.Get("membership_criteria").([]interface{})
+	criteriaList := d.Get("membership_criteria").([]interface{})
 	var expresionList []manager.NsGroupTagExpression
-	for _, criteria := range criterias {
+	for _, criteria := range criteriaList {
 		data := criteria.(map[string]interface{})
 		elem := manager.NsGroupTagExpression{
 			ResourceType: "NSGroupTagExpression",
@@ -254,7 +255,7 @@ func resourceNsxtNsGroupUpdate(d *schema.ResourceData, m interface{}) error {
 		MembershipCriteria: membershipCriteria,
 	}
 
-	nsGroup, resp, err := nsxClient.GroupingObjectsApi.UpdateNSGroup(nsxClient.Context, id, nsGroup)
+	_, resp, err := nsxClient.GroupingObjectsApi.UpdateNSGroup(nsxClient.Context, id, nsGroup)
 
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during NsGroup update: %v", err)

@@ -5,11 +5,12 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/vmware/go-vmware-nsxt/manager"
-	"log"
-	"net/http"
 )
 
 func resourceNsxtMacManagementSwitchingProfile() *schema.Resource {
@@ -206,7 +207,7 @@ func resourceNsxtMacManagementSwitchingProfileUpdate(d *schema.ResourceData, m i
 		Revision:         revision,
 	}
 
-	switchingProfile, resp, err := nsxClient.LogicalSwitchingApi.UpdateMacManagementSwitchingProfile(nsxClient.Context, id, switchingProfile)
+	_, resp, err := nsxClient.LogicalSwitchingApi.UpdateMacManagementSwitchingProfile(nsxClient.Context, id, switchingProfile)
 
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during MacManagementSwitchingProfile update: %v", err)

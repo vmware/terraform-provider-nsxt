@@ -66,7 +66,7 @@ func sessionTimerProfileBindingsDeleteRestMetadata() protocol.OperationRestMetad
 	pathParams["tier1_id"] = "tier1Id"
 	pathParams["session_timer_profile_binding_id"] = "sessionTimerProfileBindingId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -130,7 +130,7 @@ func sessionTimerProfileBindingsGetRestMetadata() protocol.OperationRestMetadata
 	pathParams["tier1_id"] = "tier1Id"
 	pathParams["session_timer_profile_binding_id"] = "sessionTimerProfileBindingId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -199,7 +199,7 @@ func sessionTimerProfileBindingsPatchRestMetadata() protocol.OperationRestMetada
 	pathParams["tier1_id"] = "tier1Id"
 	pathParams["session_timer_profile_binding_id"] = "sessionTimerProfileBindingId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -268,7 +268,7 @@ func sessionTimerProfileBindingsUpdateRestMetadata() protocol.OperationRestMetad
 	pathParams["tier1_id"] = "tier1Id"
 	pathParams["session_timer_profile_binding_id"] = "sessionTimerProfileBindingId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

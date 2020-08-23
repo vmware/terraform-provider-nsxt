@@ -5,11 +5,12 @@ package nsxt
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	"strings"
 )
 
 func dataSourceNsxtPolicyService() *schema.Resource {
@@ -50,6 +51,13 @@ func dataSourceNsxtPolicyServiceReadAllServices(connector *client.RestConnector)
 }
 
 func dataSourceNsxtPolicyServiceRead(d *schema.ResourceData, m interface{}) error {
+	if isPolicyGlobalManager(m) {
+		_, err := policyDataSourceResourceRead(d, getPolicyConnector(m), "Service", nil)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
 	// Read a service by name or id
 	connector := getPolicyConnector(m)
 	client := infra.NewDefaultServicesClient(connector)

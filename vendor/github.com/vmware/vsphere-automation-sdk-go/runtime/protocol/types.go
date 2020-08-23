@@ -94,7 +94,7 @@ type OperationRestMetadata struct {
 	// Map from result field name to http header name
 	resultHeadersNameMap map[string]string
 	// Map from error field name to http header name
-	errorHeadersNameMap map[string]string
+	errorHeadersNameMap map[string]map[string]string
 }
 
 func NewOperationRestMetadata(
@@ -114,7 +114,7 @@ func NewOperationRestMetadata(
 	resultHeadersNameMap map[string]string,
 	successCode int,
 	responseBodyName string,
-	errorHeadersNameMap map[string]string,
+	errorHeadersNameMap map[string]map[string]string,
 	errorCodeMap map[string]int) OperationRestMetadata {
 
 	return OperationRestMetadata{
@@ -205,7 +205,7 @@ func (meta OperationRestMetadata) ErrorCodeMap() map[string]int {
 func (meta OperationRestMetadata) ResultHeadersNameMap() map[string]string {
 	return meta.resultHeadersNameMap
 }
-func (meta OperationRestMetadata) ErrorHeadersNameMap() map[string]string {
+func (meta OperationRestMetadata) ErrorHeadersNameMap() map[string]map[string]string {
 	return meta.errorHeadersNameMap
 }
 

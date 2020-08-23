@@ -59,7 +59,7 @@ func ipfixSwitchCollectionInstancesDeleteRestMetadata() protocol.OperationRestMe
 	pathParams["tier1_id"] = "tier1Id"
 	pathParams["ipfix_switch_collection_instance_id"] = "ipfixSwitchCollectionInstanceId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -116,7 +116,7 @@ func ipfixSwitchCollectionInstancesGetRestMetadata() protocol.OperationRestMetad
 	pathParams["tier1_id"] = "tier1Id"
 	pathParams["ipfix_switch_collection_instance_id"] = "ipfixSwitchCollectionInstanceId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -202,7 +202,7 @@ func ipfixSwitchCollectionInstancesListRestMetadata() protocol.OperationRestMeta
 	queryParams["include_mark_for_delete_objects"] = "include_mark_for_delete_objects"
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -264,7 +264,7 @@ func ipfixSwitchCollectionInstancesPatchRestMetadata() protocol.OperationRestMet
 	pathParams["tier1_id"] = "tier1Id"
 	pathParams["ipfix_switch_collection_instance_id"] = "ipfixSwitchCollectionInstanceId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -326,7 +326,7 @@ func ipfixSwitchCollectionInstancesUpdateRestMetadata() protocol.OperationRestMe
 	pathParams["tier1_id"] = "tier1Id"
 	pathParams["ipfix_switch_collection_instance_id"] = "ipfixSwitchCollectionInstanceId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

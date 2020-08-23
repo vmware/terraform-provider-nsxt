@@ -5,11 +5,11 @@ package nsxt
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	"strings"
 )
 
 func dataSourceNsxtPolicyTier0Gateway() *schema.Resource {
@@ -31,58 +31,48 @@ func dataSourceNsxtPolicyTier0Gateway() *schema.Resource {
 	}
 }
 
-func dataSourceNsxtPolicyTier0GatewayReadAllTier0(connector *client.RestConnector) ([]model.Tier0, error) {
-	var results []model.Tier0
-	client := infra.NewDefaultTier0sClient(connector)
-	boolFalse := false
-	var cursor *string
-	total := 0
-
-	for {
-		gateways, err := client.List(cursor, &boolFalse, nil, nil, &boolFalse, nil)
-		if err != nil {
-			return results, err
-		}
-		results = append(results, gateways.Results...)
-		if total == 0 && gateways.ResultCount != nil {
-			// first response
-			total = int(*gateways.ResultCount)
-		}
-		cursor = gateways.Cursor
-		if len(results) >= total {
-			return results, nil
-		}
-	}
-}
-
 func dataSourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{}) error {
-	// Read a tier0 by name or id
 	connector := getPolicyConnector(m)
-	client := infra.NewDefaultTier0sClient(connector)
+
+	if isPolicyGlobalManager(m) {
+		_, err := policyDataSourceResourceRead(d, connector, "Tier0", nil)
+		if err != nil {
+			return err
+		}
+
+		// Single edgle cluster is not informative for global manager
+		d.Set("edge_cluster_path", "")
+		return nil
+	}
 
 	objID := d.Get("id").(string)
 	objName := d.Get("display_name").(string)
+	client := infra.NewDefaultTier0sClient(connector)
 	var obj model.Tier0
 	if objID != "" {
 		// Get by id
 		objGet, err := client.Get(objID)
+		if isNotFoundError(err) {
+			return fmt.Errorf("Tier0 with ID %s was not found", objID)
+		}
 
 		if err != nil {
-			return handleDataSourceReadError(d, "Tier0", objID, err)
+			return fmt.Errorf("Error while reading Tier0 %s: %v", objID, err)
 		}
 		obj = objGet
 	} else if objName == "" {
 		return fmt.Errorf("Error obtaining Tier0 ID or name during read")
 	} else {
 		// Get by full name/prefix
-		objList, err := dataSourceNsxtPolicyTier0GatewayReadAllTier0(connector)
+		includeMarkForDeleteObjectsParam := false
+		objList, err := client.List(nil, &includeMarkForDeleteObjectsParam, nil, nil, nil, nil)
 		if err != nil {
-			return handleListError("Tier0", err)
+			return fmt.Errorf("Error while reading Tier0s: %v", err)
 		}
 		// go over the list to find the correct one (prefer a perfect match. If not - prefix match)
 		var perfectMatch []model.Tier0
 		var prefixMatch []model.Tier0
-		for _, objInList := range objList {
+		for _, objInList := range objList.Results {
 			if strings.HasPrefix(*objInList.DisplayName, objName) {
 				prefixMatch = append(prefixMatch, objInList)
 			}
@@ -101,7 +91,7 @@ func dataSourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{})
 			}
 			obj = prefixMatch[0]
 		} else {
-			return fmt.Errorf("Tier0 router '%s' was not found", objName)
+			return fmt.Errorf("Tier0 with name '%s' was not found", objName)
 		}
 	}
 
@@ -109,5 +99,16 @@ func dataSourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{})
 	d.Set("display_name", obj.DisplayName)
 	d.Set("description", obj.Description)
 	d.Set("path", obj.Path)
+
+	localeServices, err := listPolicyTier0GatewayLocaleServices(connector, *obj.Id, false)
+	if err != nil {
+		return fmt.Errorf("Failed to read locale services for '%s'", objName)
+	}
+	for _, service := range localeServices {
+		if service.EdgeClusterPath != nil {
+			d.Set("edge_cluster_path", service.EdgeClusterPath)
+			break
+		}
+	}
 	return nil
 }

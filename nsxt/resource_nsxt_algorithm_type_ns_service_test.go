@@ -5,21 +5,22 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"net/http"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccResourceNsxtAlgorithmTypeNsService_basic(t *testing.T) {
-	serviceName := fmt.Sprintf("test-nsx-alg-service")
+	serviceName := "test-nsx-alg-service"
 	updateServiceName := fmt.Sprintf("%s-update", serviceName)
 	testResourceName := "nsxt_algorithm_type_ns_service.test"
 	destPort := "21"
 	updatedDestPort := "21"
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXAlgServiceCheckDestroy(state, serviceName)
@@ -54,10 +55,10 @@ func TestAccResourceNsxtAlgorithmTypeNsService_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtAlgorithmTypeNsService_importBasic(t *testing.T) {
-	serviceName := fmt.Sprintf("test-nsx-alg-service")
+	serviceName := "test-nsx-alg-service"
 	testResourceName := "nsxt_algorithm_type_ns_service.test"
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXAlgServiceCheckDestroy(state, serviceName)

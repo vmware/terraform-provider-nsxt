@@ -5,21 +5,22 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"net/http"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccResourceNsxtLogicalTier0Router_basic(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-logical-tier0-router")
+	name := "test-nsx-logical-tier0-router"
 	updateName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_logical_tier0_router.test"
 	haMode := "ACTIVE_STANDBY"
 	edgeClusterName := getEdgeClusterName()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLogicalTier0RouterCheckDestroy(state, name)
@@ -50,14 +51,14 @@ func TestAccResourceNsxtLogicalTier0Router_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtLogicalTier0Router_active(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-logical-tier0-router")
+	name := "test-nsx-logical-tier0-router"
 	updateName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_logical_tier0_router.test"
 	haMode := "ACTIVE_ACTIVE"
 	edgeClusterName := getEdgeClusterName()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLogicalTier0RouterCheckDestroy(state, name)
@@ -88,13 +89,13 @@ func TestAccResourceNsxtLogicalTier0Router_active(t *testing.T) {
 }
 
 func TestAccResourceNsxtLogicalTier0Router_importBasic(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-logical-tier0-router")
+	name := "test-nsx-logical-tier0-router"
 	testResourceName := "nsxt_logical_tier0_router.test"
 	haMode := "ACTIVE_STANDBY"
 	edgeClusterName := getEdgeClusterName()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLogicalTier0RouterCheckDestroy(state, name)

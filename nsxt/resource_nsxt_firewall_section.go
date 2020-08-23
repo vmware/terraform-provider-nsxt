@@ -5,11 +5,12 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/vmware/go-vmware-nsxt/manager"
-	"log"
-	"net/http"
 )
 
 var firewallRuleIPProtocolValues = []string{"IPV4", "IPV6", "IPV4_IPV6"}
@@ -394,7 +395,10 @@ func resourceNsxtFirewallSectionUpdate(d *schema.ResourceData, m interface{}) er
 				return fmt.Errorf("Error during FirewallSection %s update empty: cannot read the section: %v", id, err2)
 			}
 			for _, rule := range currSection.Rules {
-				nsxClient.ServicesApi.DeleteRule(nsxClient.Context, id, rule.Id)
+				_, err3 := nsxClient.ServicesApi.DeleteRule(nsxClient.Context, id, rule.Id)
+				if err3 != nil {
+					return fmt.Errorf("Error during FirewallSection %s update: failed to delete rule %s due to %v", id, rule.Id, err3)
+				}
 			}
 		}
 	}

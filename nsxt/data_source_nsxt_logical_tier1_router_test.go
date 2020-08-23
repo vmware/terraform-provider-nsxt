@@ -5,19 +5,20 @@ package nsxt
 
 import (
 	"fmt"
+	"net/http"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/vmware/go-vmware-nsxt/manager"
-	"net/http"
-	"testing"
 )
 
 func TestAccDataSourceNsxtLogicalTier1Router_basic(t *testing.T) {
-	routerName := "terraform_test_tier1"
+	routerName := "terraform_ds_test_tier1"
 	testResourceName := "data.nsxt_logical_tier1_router.test"
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccDataSourceNsxtTier1RouterDeleteByName(routerName)
@@ -36,7 +37,7 @@ func TestAccDataSourceNsxtLogicalTier1Router_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXNoTier1RouterTemplate(),
+				Config: testAccNsxtEmptyTemplate(),
 			},
 		},
 	})
@@ -57,7 +58,7 @@ func testAccDataSourceNsxtTier1RouterCreate(routerName string) error {
 		RouterType:  routerType,
 	}
 
-	logicalRouter, resp, err := nsxClient.LogicalRoutingAndServicesApi.CreateLogicalRouter(nsxClient.Context, logicalRouter)
+	_, resp, err := nsxClient.LogicalRoutingAndServicesApi.CreateLogicalRouter(nsxClient.Context, logicalRouter)
 	if err != nil {
 		return fmt.Errorf("Error during router creation: %v", err)
 	}
@@ -102,8 +103,4 @@ func testAccNSXTier1RouterReadTemplate(name string) string {
 data "nsxt_logical_tier1_router" "test" {
   display_name = "%s"
 }`, name)
-}
-
-func testAccNSXNoTier1RouterTemplate() string {
-	return fmt.Sprintf(` `)
 }

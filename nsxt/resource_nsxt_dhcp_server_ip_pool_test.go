@@ -5,11 +5,12 @@ package nsxt
 
 import (
 	"fmt"
+	"net/http"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/vmware/go-vmware-nsxt/manager"
-	"net/http"
-	"testing"
 )
 
 var testNsxtDhcpServerIPPoolName = "test"
@@ -26,7 +27,7 @@ func TestAccResourceNsxtDhcpServerIPPool_basic(t *testing.T) {
 	updatedLeaseTime := "1000000"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXDhcpServerIPPoolCheckDestroy(state, name)
@@ -93,7 +94,7 @@ func TestAccResourceNsxtDhcpServerIPPool_noOpts(t *testing.T) {
 	end2 := "1.1.1.160"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXDhcpServerIPPoolCheckDestroy(state, name)
@@ -139,7 +140,7 @@ func TestAccResourceNsxtDhcpServerIPPool_Import(t *testing.T) {
 	edgeClusterName := getEdgeClusterName()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXNATRuleCheckDestroy(state, name)

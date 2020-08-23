@@ -5,14 +5,15 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"net/http"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccResourceNsxtLogicalDhcpServer_basic(t *testing.T) {
-	prfName := fmt.Sprintf("test-nsx-logical-dhcp-server")
+	prfName := "test-nsx-logical-dhcp-server"
 	updatePrfName := fmt.Sprintf("%s-update", prfName)
 	testResourceName := "nsxt_logical_dhcp_server.test"
 	edgeClusterName := getEdgeClusterName()
@@ -25,7 +26,7 @@ func TestAccResourceNsxtLogicalDhcpServer_basic(t *testing.T) {
 	ip5 := "1.1.1.23"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLogicalDhcpServerCheckDestroy(state, prfName)
@@ -73,7 +74,7 @@ func TestAccResourceNsxtLogicalDhcpServer_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtLogicalDhcpServer_noOpts(t *testing.T) {
-	prfName := fmt.Sprintf("test-nsx-logical-dhcp-server")
+	prfName := "test-nsx-logical-dhcp-server"
 	updatePrfName := fmt.Sprintf("%s-update", prfName)
 	testResourceName := "nsxt_logical_dhcp_server.test"
 	edgeClusterName := getEdgeClusterName()
@@ -85,7 +86,7 @@ func TestAccResourceNsxtLogicalDhcpServer_noOpts(t *testing.T) {
 	ip4 := "1.1.1.22"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLogicalDhcpServerCheckDestroy(state, prfName)
@@ -126,12 +127,12 @@ func TestAccResourceNsxtLogicalDhcpServer_noOpts(t *testing.T) {
 }
 
 func TestAccResourceNsxtLogicalDhcpServer_importBasic(t *testing.T) {
-	prfName := fmt.Sprintf("test-nsx-logical-dhcp-server")
+	prfName := "test-nsx-logical-dhcp-server"
 	testResourceName := "nsxt_logical_dhcp_server.test"
 	edgeClusterName := getEdgeClusterName()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLogicalDhcpServerCheckDestroy(state, prfName)

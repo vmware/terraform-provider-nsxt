@@ -5,9 +5,10 @@ package nsxt
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"testing"
 )
 
 func TestAccResourceNsxtPolicyVMTags_basic(t *testing.T) {
@@ -15,7 +16,7 @@ func TestAccResourceNsxtPolicyVMTags_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_vm_tags.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccEnvDefined(t, "NSXT_TEST_VM_ID") },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccEnvDefined(t, "NSXT_TEST_VM_ID") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXPolicyVMTagsCheckDestroy(state)
@@ -38,7 +39,52 @@ func TestAccResourceNsxtPolicyVMTags_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyEmptyTemplate(),
+				Config: testAccNsxtEmptyTemplate(),
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicyVMTags_withPorts(t *testing.T) {
+	vmID := getTestVMID()
+	testResourceName := "nsxt_policy_vm_tags.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccOnlyLocalManager(t)
+			testAccPreCheck(t)
+			testAccEnvDefined(t, "NSXT_TEST_VM_ID")
+			testAccEnvDefined(t, "NSXT_TEST_VM_SEGMENT_ID")
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXPolicyVMTagsCheckDestroy(state)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXPolicyVMPortTagsCreateTemplate(vmID),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXPolicyVMTagsCheckExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "port.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, "port.0.segment_path"),
+					resource.TestCheckResourceAttr(testResourceName, "port.0.tag.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "instance_id", vmID),
+				),
+			},
+			{
+				Config: testAccNSXPolicyVMPortTagsUpdateTemplate(vmID),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXPolicyVMTagsCheckExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "port.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, "port.0.segment_path"),
+					resource.TestCheckResourceAttr(testResourceName, "port.0.tag.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "instance_id", vmID),
+				),
+			},
+			{
+				Config: testAccNsxtEmptyTemplate(),
 			},
 		},
 	})
@@ -49,7 +95,7 @@ func TestAccResourceNsxtPolicyVMTags_import_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_vm_tags.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccEnvDefined(t, "NSXT_TEST_VM_ID") },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccEnvDefined(t, "NSXT_TEST_VM_ID") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXPolicyVMTagsCheckDestroy(state)
@@ -65,7 +111,7 @@ func TestAccResourceNsxtPolicyVMTags_import_basic(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"instance_id"},
 			},
 			{
-				Config: testAccNsxtPolicyEmptyTemplate(),
+				Config: testAccNsxtEmptyTemplate(),
 			},
 		},
 	})
@@ -142,4 +188,43 @@ resource "nsxt_policy_vm_tags" "test" {
     tag   = "tag2"
   }
 }`, instanceID)
+}
+
+func testAccNSXPolicyVMPortTagsCreateTemplate(instanceID string) string {
+	return fmt.Sprintf(`
+resource "nsxt_policy_vm_tags" "test" {
+  instance_id = "%s"
+
+  tag {
+    scope = "color"
+    tag   = "blue"
+  }
+
+  port {
+    segment_path = "/infra/segments/%s"
+    tag {
+      scope = "color"
+      tag   = "green"
+    }
+  }
+}`, instanceID, getTestVMSegmentID())
+}
+
+func testAccNSXPolicyVMPortTagsUpdateTemplate(instanceID string) string {
+	return fmt.Sprintf(`
+resource "nsxt_policy_vm_tags" "test" {
+  instance_id = "%s"
+
+  port {
+    segment_path = "/infra/segments/%s"
+    tag {
+      scope = "color"
+      tag   = "green"
+    }
+    tag {
+      scope = "shape"
+      tag   = "round"
+    }
+  }
+}`, instanceID, getTestVMSegmentID())
 }

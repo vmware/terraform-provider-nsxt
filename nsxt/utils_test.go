@@ -5,10 +5,17 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/vmware/go-vmware-nsxt/trust"
 	"net/http"
 	"os"
+	"strings"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/vmware/go-vmware-nsxt/trust"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
 // Default names or prefixed of NSX backend existing objects used in the acceptance tests.
@@ -20,6 +27,7 @@ const overlayTransportZoneNamePrefix string = "1-transportzone"
 const macPoolDefaultName string = "DefaultMacPool"
 
 const realizationResourceName string = "data.nsxt_policy_realization_info.realization_info"
+const defaultTestResourceName string = "terraform-acctest"
 
 const singleTag string = `
   tag {
@@ -85,8 +93,20 @@ func getTestVMID() string {
 	return os.Getenv("NSXT_TEST_VM_ID")
 }
 
+func getTestVMSegmentID() string {
+	return os.Getenv("NSXT_TEST_VM_SEGMENT_ID")
+}
+
 func getTestVMName() string {
 	return os.Getenv("NSXT_TEST_VM_NAME")
+}
+
+func getTestSiteName() string {
+	return os.Getenv("NSXT_TEST_SITE_NAME")
+}
+
+func getTestAnotherSiteName() string {
+	return os.Getenv("NSXT_TEST_ANOTHER_SITE_NAME")
 }
 
 func getTestCertificateName(isClient bool) string {
@@ -99,6 +119,29 @@ func getTestCertificateName(isClient bool) string {
 func testAccEnvDefined(t *testing.T, envVar string) {
 	if len(os.Getenv(envVar)) == 0 {
 		t.Skipf("This test requires %s environment variable to be set", envVar)
+	}
+}
+
+func testAccIsGlobalManager() bool {
+	return os.Getenv("NSXT_GLOBAL_MANAGER") == "true" || os.Getenv("NSXT_GLOBAL_MANAGER") == "1"
+}
+
+func testAccOnlyGlobalManager(t *testing.T) {
+	if !testAccIsGlobalManager() {
+		t.Skipf("This test requires a global manager environment")
+	}
+}
+
+func testAccOnlyLocalManager(t *testing.T) {
+	if testAccIsGlobalManager() {
+		t.Skipf("This test requires a local manager environment")
+	}
+}
+
+func testAccNSXGlobalManagerSitePrecheck(t *testing.T) {
+	if testAccIsGlobalManager() && getTestSiteName() == "" {
+		str := fmt.Sprintf("%s must be set for this acceptance test", "NSXT_TEST_SITE_NAME")
+		t.Fatal(str)
 	}
 }
 
@@ -284,6 +327,137 @@ func testAccNSXDeleteCerts(t *testing.T, certID string, clientCertID string, caC
 	testAccNSXDeleteCert(t, caCertID)
 }
 
-func testAccNsxtPolicyEmptyTemplate() string {
+func testAccNsxtEmptyTemplate() string {
 	return " "
+}
+
+func testGetObjIDByName(objName string, resourceType string) (string, error) {
+	connector, err1 := testAccGetPolicyConnector()
+	if err1 != nil {
+		return "", fmt.Errorf("Error during test client initialization: %v", err1)
+	}
+
+	resultValues, err2 := listPolicyResourcesByType(connector, &resourceType, nil)
+	if err2 != nil {
+		return "", err2
+	}
+
+	converter := bindings.NewTypeConverter()
+	converter.SetMode(bindings.REST)
+
+	for _, result := range resultValues {
+		dataValue, errors := converter.ConvertToGolang(result, model.PolicyResourceBindingType())
+		if len(errors) > 0 {
+			return "", errors[0]
+		}
+		policyResource := dataValue.(model.PolicyResource)
+
+		if *policyResource.DisplayName == objName {
+			return *policyResource.Id, nil
+		}
+	}
+
+	return "", fmt.Errorf("%s with name '%s' was not found", resourceType, objName)
+}
+
+func testAccNsxtGlobalPolicySite(domainName string) string {
+	return fmt.Sprintf(`
+data "nsxt_policy_site" "test" {
+  display_name = "%s"
+}`, domainName)
+}
+
+func testAccAdjustPolicyInfraConfig(config string) string {
+	if testAccIsGlobalManager() {
+		return strings.Replace(config, "/infra/", "/global-infra/", -1)
+	}
+
+	return config
+}
+
+func testAccNsxtPolicyTier0WithEdgeClusterTemplate(edgeClusterName string, standby bool) string {
+	return testAccNsxtPolicyGatewayWithEdgeClusterTemplate(edgeClusterName, true, standby)
+}
+
+func testAccNsxtPolicyTier1WithEdgeClusterTemplate(edgeClusterName string, standby bool) string {
+	return testAccNsxtPolicyGatewayWithEdgeClusterTemplate(edgeClusterName, false, standby)
+}
+
+func testAccNsxtPolicyGatewayWithEdgeClusterTemplate(edgeClusterName string, tier0 bool, standby bool) string {
+	var tier string
+	if tier0 {
+		tier = "0"
+	} else {
+		tier = "1"
+	}
+	var haMode string
+	if standby {
+		haMode = fmt.Sprintf(`ha_mode = "%s"`, model.Tier0_HA_MODE_STANDBY)
+	}
+	if testAccIsGlobalManager() {
+		return fmt.Sprintf(`
+resource "nsxt_policy_tier%s_gateway" "t%stest" {
+  display_name = "terraform-t%s-gw"
+  description  = "Acceptance Test"
+  locale_service {
+    edge_cluster_path = data.nsxt_policy_edge_cluster.%s.path
+  }
+  %s
+}`, tier, tier, tier, edgeClusterName, haMode)
+	}
+	return fmt.Sprintf(`
+resource "nsxt_policy_tier%s_gateway" "t%stest" {
+  display_name      = "terraform-t%s-gw"
+  description       = "Acceptance Test"
+  edge_cluster_path = data.nsxt_policy_edge_cluster.%s.path
+  %s
+}`, tier, tier, tier, edgeClusterName, haMode)
+}
+
+func testAccNsxtPolicyResourceExists(resourceName string, presenceChecker func(string, *client.RestConnector, bool) (bool, error)) resource.TestCheckFunc {
+	return func(state *terraform.State) error {
+
+		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
+
+		rs, ok := state.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("Policy resource %s not found in resources", resourceName)
+		}
+
+		resourceID := rs.Primary.ID
+		if resourceID == "" {
+			return fmt.Errorf("Policy resource ID not set in resources")
+		}
+
+		exists, err := presenceChecker(resourceID, connector, testAccIsGlobalManager())
+		if err != nil {
+			return err
+		}
+
+		if !exists {
+			return fmt.Errorf("Policy resource %s does not exist", resourceID)
+		}
+
+		return nil
+	}
+}
+
+func testAccNsxtPolicyResourceCheckDestroy(state *terraform.State, displayName string, resourceType string, presenceChecker func(string, *client.RestConnector, bool) (bool, error)) error {
+	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
+	for _, rs := range state.RootModule().Resources {
+
+		if rs.Type != resourceType {
+			continue
+		}
+
+		resourceID := rs.Primary.Attributes["id"]
+		exists, err := presenceChecker(resourceID, connector, testAccIsGlobalManager())
+		if err != nil {
+			return err
+		}
+		if exists {
+			return fmt.Errorf("Policy resource %s still exists", displayName)
+		}
+	}
+	return nil
 }

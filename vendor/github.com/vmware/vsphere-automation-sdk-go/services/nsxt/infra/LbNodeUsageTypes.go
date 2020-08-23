@@ -51,7 +51,7 @@ func lbNodeUsageGetRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["node_path"] = bindings.NewStringType()
 	queryParams["node_path"] = "node_path"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

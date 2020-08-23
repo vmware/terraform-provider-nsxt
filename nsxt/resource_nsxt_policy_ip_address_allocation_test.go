@@ -5,10 +5,11 @@ package nsxt
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/ip_pools"
-	"testing"
 )
 
 var accTestPolicyIPAddressAllocationCreateAttributes = map[string]string{
@@ -27,7 +28,7 @@ func TestAccResourceNsxtPolicyIPAddressAllocation_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_ip_address_allocation.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyIPAddressAllocationCheckDestroy(state, accTestPolicyIPAddressAllocationCreateAttributes["display_name"])
@@ -75,7 +76,7 @@ func TestAccResourceNsxtPolicyIPAddressAllocation_anyIPBasic(t *testing.T) {
 	testResourceName := "nsxt_policy_ip_address_allocation.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyIPAddressAllocationCheckDestroy(state, accTestPolicyIPAddressAllocationCreateAttributes["display_name"])
@@ -124,7 +125,7 @@ func TestAccResourceNsxtPolicyIPAddressAllocation_importBasic(t *testing.T) {
 	testResourceName := "nsxt_policy_ip_address_allocation.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyIPAddressAllocationCheckDestroy(state, name)
@@ -183,12 +184,9 @@ func testAccNsxtPolicyIPAddressAllocationExists(resourceName string) resource.Te
 		if poolPath == "" {
 			return fmt.Errorf("No pool_path found for IP Address Allocation with ID %s", resourceID)
 		}
-		poolID, err := resourceNsxtPolicyIPAddressParsePoolIDFromPath(poolPath, connector)
-		if err != nil {
-			return err
-		}
+		poolID := getPolicyIDFromPath(poolPath)
 
-		_, err = nsxClient.Get(poolID, resourceID)
+		_, err := nsxClient.Get(poolID, resourceID)
 		if err != nil {
 			return fmt.Errorf("Error while retrieving policy IPAddressAllocation ID %s. Error: %v", resourceID, err)
 		}
@@ -211,12 +209,9 @@ func testAccNsxtPolicyIPAddressAllocationCheckDestroy(state *terraform.State, di
 		if poolPath == "" {
 			return fmt.Errorf("No pool_path found for IP Address Allocation with ID %s", resourceID)
 		}
-		poolID, err := resourceNsxtPolicyIPAddressParsePoolIDFromPath(poolPath, connector)
-		if err != nil {
-			return err
-		}
+		poolID := getPolicyIDFromPath(poolPath)
 
-		_, err = nsxClient.Get(poolID, resourceID)
+		_, err := nsxClient.Get(poolID, resourceID)
 		if err == nil {
 			return fmt.Errorf("Policy IPAddressAllocation %s still exists", displayName)
 		}
@@ -276,9 +271,9 @@ data "nsxt_policy_realization_info" "realization_info" {
 }
 
 func testAccNsxtPolicyIPAddressAllocationDependenciesTemplate() string {
-	return fmt.Sprintf(`
+	return `
 resource "nsxt_policy_ip_pool" "test" {
-  display_name = "tfpool1"
+  display_name = "tfpool4"
 }
 
 resource "nsxt_policy_ip_pool_static_subnet" "test" {
@@ -289,5 +284,5 @@ resource "nsxt_policy_ip_pool_static_subnet" "test" {
     start = "12.12.12.10"
     end   = "12.12.12.20"
   }
-}`)
+}`
 }

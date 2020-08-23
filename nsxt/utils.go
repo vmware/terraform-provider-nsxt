@@ -6,16 +6,16 @@ package nsxt
 import (
 	"bytes"
 	"fmt"
+	"log"
+	"net/http"
+
 	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
-	"github.com/vmware/go-vmware-nsxt"
 	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/common"
 	"github.com/vmware/go-vmware-nsxt/manager"
-	"log"
-	"net/http"
 )
 
 var adminStateValues = []string{"UP", "DOWN"}
@@ -116,10 +116,6 @@ func getTagsSchema() *schema.Schema {
 	return getTagsSchemaInternal(false, false)
 }
 
-func getRequiredTagsSchema() *schema.Schema {
-	return getTagsSchemaInternal(true, false)
-}
-
 func getTagsSchemaForceNew() *schema.Schema {
 	return getTagsSchemaInternal(false, true)
 }
@@ -138,7 +134,7 @@ func getCustomizedTagsFromSchema(d *schema.ResourceData, schemaName string) []co
 	return tagList
 }
 
-func setCustomizedTagsInSchema(d *schema.ResourceData, tags []common.Tag, schemaName string) error {
+func setCustomizedTagsInSchema(d *schema.ResourceData, tags []common.Tag, schemaName string) {
 	var tagList []map[string]string
 	for _, tag := range tags {
 		elem := make(map[string]string)
@@ -147,14 +143,17 @@ func setCustomizedTagsInSchema(d *schema.ResourceData, tags []common.Tag, schema
 		tagList = append(tagList, elem)
 	}
 	err := d.Set(schemaName, tagList)
-	return err
+	if err != nil {
+		log.Printf("[WARNING] Failed to set tag in schema: %v", err)
+	}
 }
+
 func getTagsFromSchema(d *schema.ResourceData) []common.Tag {
 	return getCustomizedTagsFromSchema(d, "tag")
 }
 
-func setTagsInSchema(d *schema.ResourceData, tags []common.Tag) error {
-	return setCustomizedTagsInSchema(d, tags, "tag")
+func setTagsInSchema(d *schema.ResourceData, tags []common.Tag) {
+	setCustomizedTagsInSchema(d, tags, "tag")
 }
 
 // utilities to define & handle switching profiles
@@ -194,7 +193,7 @@ func getSwitchingProfileIdsFromSchema(d *schema.ResourceData) []manager.Switchin
 	return profileList
 }
 
-func setSwitchingProfileIdsInSchema(d *schema.ResourceData, nsxClient *nsxt.APIClient, profiles []manager.SwitchingProfileTypeIdEntry) error {
+func setSwitchingProfileIdsInSchema(d *schema.ResourceData, nsxClient *api.APIClient, profiles []manager.SwitchingProfileTypeIdEntry) error {
 	var profileList []map[string]string
 	for _, profile := range profiles {
 		// ignore system owned profiles
@@ -489,7 +488,7 @@ func getIPRangesFromSchema(d *schema.ResourceData) []manager.IpPoolRange {
 	return rangeList
 }
 
-func setIPRangesInSchema(d *schema.ResourceData, ranges []manager.IpPoolRange) error {
+func setIPRangesInSchema(d *schema.ResourceData, ranges []manager.IpPoolRange) {
 	var rangeList []map[string]string
 	for _, r := range ranges {
 		elem := make(map[string]string)
@@ -497,7 +496,10 @@ func setIPRangesInSchema(d *schema.ResourceData, ranges []manager.IpPoolRange) e
 		elem["end"] = r.End
 		rangeList = append(rangeList, elem)
 	}
-	return d.Set("ip_range", rangeList)
+	err := d.Set("ip_range", rangeList)
+	if err != nil {
+		log.Printf("[WARNING]: Failed to set ip range in schema: %v", err)
+	}
 }
 
 func makeResourceReference(resourceType string, resourceID string) *common.ResourceReference {
@@ -552,4 +554,24 @@ func resourceNotSupportedError() error {
 
 func dataSourceNotSupportedError() error {
 	return fmt.Errorf("This data source is not supported with given provider settings")
+}
+
+func stringInList(target string, list []string) bool {
+	// util to check if target string is in list
+	for _, value := range list {
+		if target == value {
+			return true
+		}
+	}
+	return false
+}
+
+func containsElements(target []string, list []string) bool {
+	// util to check if all strings in target []string is in list. NOT ordered
+	for _, value := range target {
+		if !stringInList(value, list) {
+			return false
+		}
+	}
+	return true
 }

@@ -5,10 +5,11 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"net/http"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccResourceNsxtLbTCPVirtualServer_basic(t *testing.T) {
@@ -28,7 +29,7 @@ func testAccResourceNsxtLbL4VirtualServer(t *testing.T, protocol string) {
 	updatedMemberPort := "10098"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLbL4VirtualServerCheckDestroy(state, protocol, name)
@@ -96,7 +97,7 @@ func testAccResourceNsxtLbL4VirtualServerImport(t *testing.T, protocol string) {
 	name := "test"
 	resourceName := fmt.Sprintf("nsxt_lb_%s_virtual_server.test", protocol)
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLbL4VirtualServerCheckDestroy(state, protocol, name)

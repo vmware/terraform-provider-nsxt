@@ -5,11 +5,12 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/vmware/go-vmware-nsxt/manager"
-	"log"
-	"net/http"
 )
 
 var highAvailabilityValues = []string{"ACTIVE_ACTIVE", "ACTIVE_STANDBY"}
@@ -169,7 +170,7 @@ func resourceNsxtLogicalTier0RouterUpdate(d *schema.ResourceData, m interface{})
 		HighAvailabilityMode: highAvailabilityMode,
 		FailoverMode:         failoverMode,
 	}
-	logicalRouter, resp, err := nsxClient.LogicalRoutingAndServicesApi.UpdateLogicalRouter(nsxClient.Context, id, logicalRouter)
+	_, resp, err := nsxClient.LogicalRoutingAndServicesApi.UpdateLogicalRouter(nsxClient.Context, id, logicalRouter)
 
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during LogicalTier0Router update error: %v, resp %+v", err, resp)

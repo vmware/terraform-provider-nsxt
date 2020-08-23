@@ -5,19 +5,20 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"net/http"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccResourceNsxtIpProtocolNsService_basic(t *testing.T) {
-	serviceName := fmt.Sprintf("test-nsx-ip-protocol-service")
+	serviceName := "test-nsx-ip-protocol-service"
 	updateServiceName := fmt.Sprintf("%s-update", serviceName)
 	testResourceName := "nsxt_ip_protocol_ns_service.test"
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXIpProtocolServiceCheckDestroy(state, serviceName)
@@ -48,11 +49,11 @@ func TestAccResourceNsxtIpProtocolNsService_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtIpProtocolNsService_importBasic(t *testing.T) {
-	serviceName := fmt.Sprintf("test-nsx-ip-protocol-service")
+	serviceName := "test-nsx-ip-protocol-service"
 	testResourceName := "nsxt_ip_protocol_ns_service.test"
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXIpProtocolServiceCheckDestroy(state, serviceName)

@@ -5,10 +5,11 @@ package nsxt
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
-	"testing"
 )
 
 var accTestPolicyLBPoolCreateAttributes = map[string]string{
@@ -31,7 +32,7 @@ func TestAccResourceNsxtPolicyLBPool_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_lb_pool.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyLBPoolCheckDestroy(state, accTestPolicyLBPoolCreateAttributes["display_name"])
@@ -130,7 +131,7 @@ func TestAccResourceNsxtPolicyLBPool_snat(t *testing.T) {
 	testResourceName := "nsxt_policy_lb_pool.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyLBPoolCheckDestroy(state, accTestPolicyLBPoolCreateAttributes["display_name"])
@@ -196,7 +197,7 @@ func TestAccResourceNsxtPolicyLBPool_importBasic(t *testing.T) {
 	testResourceName := "nsxt_policy_lb_pool.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyLBPoolCheckDestroy(state, name)

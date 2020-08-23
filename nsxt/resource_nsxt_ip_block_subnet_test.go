@@ -5,19 +5,20 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"net/http"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccResourceNsxtIpBlockSubnet_basic(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-ip-block-subnet")
+	name := "test-nsx-ip-block-subnet"
 	updateName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_ip_block_subnet.test"
 	size := 16
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "2.4.0") },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "2.4.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXIpBlockSubnetCheckDestroy(state, name)
@@ -63,7 +64,7 @@ func TestAccResourceNsxtIpBlockSubnet_importBasic(t *testing.T) {
 	testResourceName := "nsxt_ip_block_subnet.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "2.4.0") },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "2.4.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXIpBlockSubnetCheckDestroy(state, name)
@@ -138,11 +139,11 @@ func testAccNSXIpBlockSubnetCheckDestroy(state *terraform.State, displayName str
 }
 
 func testAccNSXIpBlockTemplate() string {
-	return fmt.Sprintf(`
+	return `
 resource "nsxt_ip_block" "ip_block" {
   display_name = "block1"
   cidr         = "55.0.0.0/24"
-}`)
+}`
 }
 
 func testAccNSXIpBlockSubnetCreateTemplate(name string, size int) string {

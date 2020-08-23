@@ -64,7 +64,7 @@ func (result *Request) SetRequestBody(body string) {
 	result.requestBody = body
 }
 
-// Deprecated: Use SerializeRequestsWithSecCtxSerializers() instead.
+// SerializeRequests Deprecated: Use SerializeRequestsWithSecCtxSerializers() instead.
 // SerializeRequests serializes a request as a REST request
 // Return Request with urlPath, inputHeaders and requestBody
 func SerializeRequests(inputValue *data.StructValue, ctx *core.ExecutionContext,

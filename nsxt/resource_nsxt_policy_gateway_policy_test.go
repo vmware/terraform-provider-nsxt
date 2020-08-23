@@ -5,10 +5,10 @@ package nsxt
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/domains"
-	"testing"
 )
 
 func TestAccResourceNsxtPolicyGatewayPolicy_basic(t *testing.T) {
@@ -25,7 +25,7 @@ func TestAccResourceNsxtPolicyGatewayPolicy_basic(t *testing.T) {
 	tag1 := "abc"
 	tag2 := "def"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -120,7 +120,7 @@ func TestAccResourceNsxtPolicyGatewayPolicy_withDependencies(t *testing.T) {
 	defaultDirection := "IN_OUT"
 	defaultProtocol := "IPV4_IPV6"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -193,10 +193,10 @@ func TestAccResourceNsxtPolicyGatewayPolicy_withDependencies(t *testing.T) {
 	})
 }
 func TestAccResourceNsxtPolicyGatewayPolicy_importBasic(t *testing.T) {
-	name := fmt.Sprintf("terraform-test-import")
+	name := "terraform-test-import"
 	testResourceName := "nsxt_policy_gateway_policy.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -216,10 +216,10 @@ func TestAccResourceNsxtPolicyGatewayPolicy_importBasic(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyGatewayPolicy_importNoTcpStrict(t *testing.T) {
-	name := fmt.Sprintf("terraform-test-import")
+	name := "terraform-test-import"
 	testResourceName := "nsxt_policy_gateway_policy.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -238,11 +238,117 @@ func TestAccResourceNsxtPolicyGatewayPolicy_importNoTcpStrict(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtGlobalPolicyGatewayPolicy_withSite(t *testing.T) {
+	name := "terraform-test"
+	updatedName := fmt.Sprintf("%s-update", name)
+	domainName := getTestSiteName()
+	testResourceName := "nsxt_policy_gateway_policy.test"
+	comments1 := "Acceptance test create"
+	comments2 := "Acceptance test update"
+	direction1 := "IN"
+	direction2 := "OUT"
+	proto1 := "IPV4"
+	proto2 := "IPV4_IPV6"
+	defaultAction := "ALLOW"
+	tag1 := "abc"
+	tag2 := "def"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccOnlyGlobalManager(t)
+			testAccEnvDefined(t, "NSXT_TEST_SITE_NAME")
+			testAccPreCheck(t)
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyGatewayPolicyCheckDestroy(state, name, domainName)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtGlobalPolicyGatewayPolicyBasic(name, comments1, domainName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyGatewayPolicyExists(testResourceName, domainName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "category", "LocalGatewayRules"),
+					resource.TestCheckResourceAttr(testResourceName, "domain", domainName),
+					resource.TestCheckResourceAttr(testResourceName, "comments", comments1),
+					resource.TestCheckResourceAttr(testResourceName, "locked", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "sequence_number", "3"),
+					resource.TestCheckResourceAttr(testResourceName, "stateful", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "tcp_strict", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.#", "0"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+				),
+			},
+			{
+				Config: testAccNsxtGlobalPolicyGatewayPolicyBasic(updatedName, comments2, domainName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyGatewayPolicyExists(testResourceName, domainName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "category", "LocalGatewayRules"),
+					resource.TestCheckResourceAttr(testResourceName, "domain", domainName),
+					resource.TestCheckResourceAttr(testResourceName, "comments", comments2),
+					resource.TestCheckResourceAttr(testResourceName, "locked", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "sequence_number", "3"),
+					resource.TestCheckResourceAttr(testResourceName, "stateful", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "tcp_strict", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.#", "0"),
+				),
+			},
+			{
+				Config: testAccNsxtGlobalPolicyGatewayPolicyWithRule(updatedName, direction1, proto1, tag1, domainName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyGatewayPolicyExists(testResourceName, domainName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "category", "LocalGatewayRules"),
+					resource.TestCheckResourceAttr(testResourceName, "domain", domainName),
+					resource.TestCheckResourceAttr(testResourceName, "comments", ""),
+					resource.TestCheckResourceAttr(testResourceName, "locked", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "sequence_number", "3"),
+					resource.TestCheckResourceAttr(testResourceName, "stateful", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "tcp_strict", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.direction", direction1),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.ip_version", proto1),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.action", defaultAction),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.log_label", tag1),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.tag.#", "1"),
+				),
+			},
+			{
+				Config: testAccNsxtGlobalPolicyGatewayPolicyWithRule(updatedName, direction2, proto2, tag2, domainName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyGatewayPolicyExists(testResourceName, domainName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "category", "LocalGatewayRules"),
+					resource.TestCheckResourceAttr(testResourceName, "domain", domainName),
+					resource.TestCheckResourceAttr(testResourceName, "comments", ""),
+					resource.TestCheckResourceAttr(testResourceName, "locked", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "sequence_number", "3"),
+					resource.TestCheckResourceAttr(testResourceName, "stateful", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "tcp_strict", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.direction", direction2),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.ip_version", proto2),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.action", defaultAction),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.log_label", tag2),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.tag.#", "1"),
+				),
+			},
+		},
+	})
+}
+
 func testAccNsxtPolicyGatewayPolicyExists(resourceName string, domainName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-		nsxClient := domains.NewDefaultGatewayPoliciesClient(connector)
 
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
@@ -254,18 +360,19 @@ func testAccNsxtPolicyGatewayPolicyExists(resourceName string, domainName string
 			return fmt.Errorf("Policy GatewayPolicy resource ID not set in resources")
 		}
 
-		_, err := nsxClient.Get(domainName, resourceID)
+		exists, err := resourceNsxtPolicyGatewayPolicyExistsInDomain(resourceID, domainName, connector, testAccIsGlobalManager())
 		if err != nil {
-			return fmt.Errorf("Error while retrieving policy GatewayPolicy ID %s. Error: %v", resourceID, err)
+			return err
 		}
-
+		if !exists {
+			return fmt.Errorf("Error while retrieving policy GatewayPolicy ID %s", resourceID)
+		}
 		return nil
 	}
 }
 
 func testAccNsxtPolicyGatewayPolicyCheckDestroy(state *terraform.State, displayName string, domainName string) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-	nsxClient := domains.NewDefaultGatewayPoliciesClient(connector)
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_policy_gateway_policy" {
@@ -273,8 +380,11 @@ func testAccNsxtPolicyGatewayPolicyCheckDestroy(state *terraform.State, displayN
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		_, err := nsxClient.Get(domainName, resourceID)
-		if err == nil {
+		exists, err := resourceNsxtPolicyGatewayPolicyExistsInDomain(resourceID, domainName, connector, testAccIsGlobalManager())
+		if err != nil {
+			return err
+		}
+		if exists {
 			return fmt.Errorf("Policy GatewayPolicy %s still exists", displayName)
 		}
 	}
@@ -467,4 +577,63 @@ resource "nsxt_policy_gateway_policy" "test" {
   }
 
 }`, name)
+}
+
+func testAccNsxtGlobalPolicyGatewayPolicyBasic(name string, comments string, domainName string) string {
+	return testAccNsxtGlobalPolicySite(domainName) + fmt.Sprintf(`
+resource "nsxt_policy_gateway_policy" "test" {
+  display_name    = "%s"
+  description     = "Acceptance Test"
+  category        = "LocalGatewayRules"
+  comments        = "%s"
+  locked          = true
+  sequence_number = 3
+  stateful        = true
+  tcp_strict      = false
+  domain          = data.nsxt_policy_site.test.id
+
+  tag {
+    scope = "color"
+    tag   = "orange"
+  }
+
+}`, name, comments)
+}
+
+func testAccNsxtGlobalPolicyGatewayPolicyWithRule(name string, direction string, protocol string, ruleTag string, domainName string) string {
+	return testAccNsxtGlobalPolicySite(domainName) + fmt.Sprintf(`
+resource "nsxt_policy_tier1_gateway" "gwt1test" {
+  display_name      = "tf-t1-gw"
+  description       = "Acceptance Test"
+}
+
+resource "nsxt_policy_gateway_policy" "test" {
+  display_name    = "%s"
+  description     = "Acceptance Test"
+  category        = "LocalGatewayRules"
+  locked          = false
+  sequence_number = 3
+  stateful        = true
+  tcp_strict      = false
+  domain          = data.nsxt_policy_site.test.id
+
+
+  tag {
+    scope = "color"
+    tag   = "orange"
+  }
+
+  rule {
+    display_name = "%s"
+    direction    = "%s"
+    ip_version   = "%s"
+    scope        = [nsxt_policy_tier1_gateway.gwt1test.path]
+    log_label    = "%s"
+
+    tag {
+      scope = "color"
+      tag   = "blue"
+    }
+  }
+}`, name, name, direction, protocol, ruleTag)
 }

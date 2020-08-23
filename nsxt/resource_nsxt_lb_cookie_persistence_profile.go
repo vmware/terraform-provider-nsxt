@@ -5,11 +5,12 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/vmware/go-vmware-nsxt/loadbalancer"
-	"log"
-	"net/http"
 )
 
 var cookieModeTypes = []string{"INSERT", "PREFIX", "REWRITE"}
@@ -146,7 +147,7 @@ func getInsertParamsFromSchema(d *schema.ResourceData) (string, string, *loadbal
 	return "", "", nil
 }
 
-func setInsertParamsInSchema(d *schema.ResourceData, cookieDomain string, cookiePath string, cookieTime *loadbalancer.LbCookieTime) error {
+func setInsertParamsInSchema(d *schema.ResourceData, cookieDomain string, cookiePath string, cookieTime *loadbalancer.LbCookieTime) {
 	var insertConfigList []map[string]interface{}
 	elem := make(map[string]interface{})
 	elem["cookie_domain"] = cookieDomain
@@ -162,7 +163,9 @@ func setInsertParamsInSchema(d *schema.ResourceData, cookieDomain string, cookie
 	}
 	insertConfigList = append(insertConfigList, elem)
 	err := d.Set("insert_mode_params", insertConfigList)
-	return err
+	if err != nil {
+		log.Printf("[WARNING]: Failed to set insert_mode_params in schema: %v", err)
+	}
 }
 
 func resourceNsxtLbCookiePersistenceProfileCreate(d *schema.ResourceData, m interface{}) error {
@@ -279,7 +282,7 @@ func resourceNsxtLbCookiePersistenceProfileUpdate(d *schema.ResourceData, m inte
 		CookieTime:        cookieTime,
 	}
 
-	lbCookiePersistenceProfile, resp, err := nsxClient.ServicesApi.UpdateLoadBalancerCookiePersistenceProfile(nsxClient.Context, id, lbCookiePersistenceProfile)
+	_, resp, err := nsxClient.ServicesApi.UpdateLoadBalancerCookiePersistenceProfile(nsxClient.Context, id, lbCookiePersistenceProfile)
 
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during LbCookiePersistenceProfile update: %v", err)

@@ -5,11 +5,12 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	"log"
 )
 
 func resourceNsxtPolicyIPBlock() *schema.Resource {
@@ -39,20 +40,19 @@ func resourceNsxtPolicyIPBlock() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyIPBlockExists(id string, connector *client.RestConnector) bool {
+func resourceNsxtPolicyIPBlockExists(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
 	client := infra.NewDefaultIpBlocksClient(connector)
 
 	_, err := client.Get(id)
 	if err == nil {
-		return true
+		return true, nil
 	}
 
 	if isNotFoundError(err) {
-		return false
+		return false, nil
 	}
 
-	logAPIError("Error retrieving IP Block", err)
-	return false
+	return false, logAPIError("Error retrieving IP Block", err)
 }
 
 func resourceNsxtPolicyIPBlockRead(d *schema.ResourceData, m interface{}) error {
@@ -84,7 +84,7 @@ func resourceNsxtPolicyIPBlockCreate(d *schema.ResourceData, m interface{}) erro
 	connector := getPolicyConnector(m)
 	client := infra.NewDefaultIpBlocksClient(connector)
 
-	id, err := getOrGenerateID(d, connector, resourceNsxtPolicyIPBlockExists)
+	id, err := getOrGenerateID(d, m, resourceNsxtPolicyIPBlockExists)
 	if err != nil {
 		return err
 	}

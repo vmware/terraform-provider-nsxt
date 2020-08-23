@@ -5,11 +5,12 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/vmware/go-vmware-nsxt/loadbalancer"
-	"log"
-	"net/http"
 )
 
 func resourceNsxtLbFastUDPApplicationProfile() *schema.Resource {
@@ -142,7 +143,7 @@ func resourceNsxtLbFastUDPApplicationProfileUpdate(d *schema.ResourceData, m int
 		FlowMirroringEnabled: haFlowMirroringEnabled,
 	}
 
-	lbFastUDPProfile, resp, err := nsxClient.ServicesApi.UpdateLoadBalancerFastUdpProfile(nsxClient.Context, id, lbFastUDPProfile)
+	_, resp, err := nsxClient.ServicesApi.UpdateLoadBalancerFastUdpProfile(nsxClient.Context, id, lbFastUDPProfile)
 
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during LbFastUdpProfile update: %v", err)

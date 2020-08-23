@@ -2,17 +2,19 @@ package nsxt
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	gm_domains "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/domains"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/domains"
-	"testing"
 )
 
 func TestAccResourceNsxtPolicyGroup_basicImport(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-policy-group-ipaddrs")
+	name := "test-nsx-policy-group-ipaddrs"
 	testResourceName := "nsxt_policy_group.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -31,11 +33,11 @@ func TestAccResourceNsxtPolicyGroup_basicImport(t *testing.T) {
 	})
 }
 
-func TestAccResourceNsxtPolicyGroup_singleIPAddressCriteria(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-policy-group-ipaddrs")
+func TestAccResourceNsxtPolicyGroup_AddressCriteria(t *testing.T) {
+	name := "test-nsx-policy-group-ipaddrs"
 	testResourceName := "nsxt_policy_group.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -43,7 +45,7 @@ func TestAccResourceNsxtPolicyGroup_singleIPAddressCriteria(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyGroupIPAddressCreateTemplate(name),
+				Config: testAccNsxtPolicyGroupAddressCreateTemplate(name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -51,9 +53,78 @@ func TestAccResourceNsxtPolicyGroup_singleIPAddressCriteria(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "domain", defaultDomain),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "conjunction.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.0.ipaddress_expression.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.0.ipaddress_expression.0.ip_addresses.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.1.macaddress_expression.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.1.macaddress_expression.0.mac_addresses.#", "2"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyGroupAddressUpdateTemplate(name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "domain", defaultDomain),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "conjunction.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.0.ipaddress_expression.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.0.ipaddress_expression.0.ip_addresses.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.1.macaddress_expression.#", "0"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtGlobalPolicyGroup_singleIPAddressCriteria(t *testing.T) {
+	name := "test-nsx-global-policy-group-ipaddrs"
+	updatedName := fmt.Sprintf("%s-update", name)
+	testResourceName := "nsxt_policy_group.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyGlobalManager(t)
+			testAccEnvDefined(t, "NSXT_TEST_SITE_NAME")
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyGroupCheckDestroy(state, name, getTestSiteName())
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtGlobalPolicyGroupIPAddressCreateTemplate(name, getTestSiteName()),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyGroupExists(testResourceName, getTestSiteName()),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "domain", getTestSiteName()),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckNoResourceAttr(testResourceName, "conjunction"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "criteria.#", "1"),
+				),
+			},
+			{
+				Config: testAccNsxtGlobalPolicyGroupIPAddressUpdateTemplate(updatedName, getTestSiteName()),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyGroupExists(testResourceName, getTestSiteName()),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "domain", getTestSiteName()),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "conjunction.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.#", "2"),
 				),
 			},
 		},
@@ -61,11 +132,11 @@ func TestAccResourceNsxtPolicyGroup_singleIPAddressCriteria(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyGroup_multipleIPAddressCriteria(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-policy-group-ipaddrs")
+	name := "test-nsx-policy-group-ipaddrs"
 	updatedName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_policy_group.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -105,11 +176,14 @@ func TestAccResourceNsxtPolicyGroup_multipleIPAddressCriteria(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyGroup_pathCriteria(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-policy-group-paths")
+	name := "test-nsx-policy-group-paths"
 	testResourceName := "nsxt_policy_group.test"
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccNSXGlobalManagerSitePrecheck(t)
+		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyGroupCheckDestroy(state, name, defaultDomain)
@@ -153,11 +227,11 @@ func TestAccResourceNsxtPolicyGroup_pathCriteria(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyGroup_nestedCriteria(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-policy-group-nested")
+	name := "test-nsx-policy-group-nested"
 	updatedName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_policy_group.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -199,11 +273,11 @@ func TestAccResourceNsxtPolicyGroup_nestedCriteria(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyGroup_multipleCriteria(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-policy-group-multiple")
+	name := "test-nsx-policy-group-multiple"
 	updatedName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_policy_group.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -247,10 +321,10 @@ func TestAccResourceNsxtPolicyGroup_multipleCriteria(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyGroup_multipleNestedCriteria(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-policy-group-multiple-nested")
+	name := "test-nsx-policy-group-multiple-nested"
 	testResourceName := "nsxt_policy_group.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -325,11 +399,100 @@ func TestAccResourceNsxtPolicyGroup_multipleNestedCriteria(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyGroup_identityGroup(t *testing.T) {
+	name := "test-nsx-policy-group-identity-group"
+	testResourceName := "nsxt_policy_group.test"
+	updatedName := fmt.Sprintf("%s-update", name)
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyGroupCheckDestroy(state, name, defaultDomain)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyGroupIdentityGroup(name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "domain", defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "conjunction.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.0.identity_group.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.0.identity_group.4011320614.distinguished_name", "test-dn"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.0.identity_group.4011320614.domain_base_distinguished_name", "test-dbdn"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyGroupIdentityGroupUpdateChangeAD(updatedName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "domain", defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "conjunction.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.0.identity_group.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.0.identity_group.1065127354.distinguished_name", "test-dn-update"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.0.identity_group.1065127354.domain_base_distinguished_name", "test-dbdn-update"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.0.identity_group.1065127354.sid", "test-sid"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyGroupIdentityGroupUpdateMultipleAD(updatedName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "domain", defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "conjunction.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.0.identity_group.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.0.identity_group.3656676384.distinguished_name", "test-dn-1"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.0.identity_group.3656676384.domain_base_distinguished_name", "test-dbdn-1"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.0.identity_group.3656676384.sid", "test-sid-1"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.0.identity_group.625404343.distinguished_name", "test-dn-2"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.0.identity_group.625404343.domain_base_distinguished_name", "test-dbdn-2"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.0.identity_group.625404343.sid", "test-sid-2"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyGroupIdentityGroupUpdateDeleteAD(updatedName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "domain", defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "conjunction.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "extended_criteria.#", "0"),
+				),
+			},
+		},
+	})
+}
+
 func testAccNsxtPolicyGroupExists(resourceName string, domainName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-		nsxClient := domains.NewDefaultGroupsClient(connector)
 
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
@@ -341,7 +504,14 @@ func testAccNsxtPolicyGroupExists(resourceName string, domainName string) resour
 			return fmt.Errorf("Policy Group resource ID not set in resources")
 		}
 
-		_, err := nsxClient.Get(domainName, resourceID)
+		var err error
+		if isPolicyGlobalManager(testAccProvider.Meta()) {
+			nsxClient := gm_domains.NewDefaultGroupsClient(connector)
+			_, err = nsxClient.Get(domainName, resourceID)
+		} else {
+			nsxClient := domains.NewDefaultGroupsClient(connector)
+			_, err = nsxClient.Get(domainName, resourceID)
+		}
 		if err != nil {
 			return fmt.Errorf("Error while retrieving policy Group ID %s. Error: %v", resourceID, err)
 		}
@@ -352,7 +522,7 @@ func testAccNsxtPolicyGroupExists(resourceName string, domainName string) resour
 
 func testAccNsxtPolicyGroupCheckDestroy(state *terraform.State, displayName string, domainName string) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-	nsxClient := domains.NewDefaultGroupsClient(connector)
+
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_policy_group" {
@@ -360,9 +530,13 @@ func testAccNsxtPolicyGroupCheckDestroy(state *terraform.State, displayName stri
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		_, err := nsxClient.Get(domainName, resourceID)
-		if err == nil {
-			return fmt.Errorf("Policy Group %s still exists", displayName)
+		isPolicyGlobalManager := isPolicyGlobalManager(testAccProvider.Meta())
+		exists, err := resourceNsxtPolicyGroupExistsInDomain(resourceID, domainName, connector, isPolicyGlobalManager)
+		if err != nil {
+			return err
+		}
+		if exists {
+			return fmt.Errorf("Policy Group %s still exists in domain %s", displayName, domainName)
 		}
 	}
 	return nil
@@ -377,11 +551,65 @@ resource "nsxt_policy_group" "test" {
 `, name)
 }
 
-func testAccNsxtPolicyGroupIPAddressCreateTemplate(name string) string {
+func testAccNsxtPolicyGroupAddressCreateTemplate(name string) string {
 	return fmt.Sprintf(`
 resource "nsxt_policy_group" "test" {
   display_name = "%s"
   description  = "Acceptance Test"
+
+  criteria {
+    ipaddress_expression {
+	  ip_addresses = ["111.1.1.1", "222.2.2.2"]
+    }
+  }
+
+  conjunction {
+	operator = "OR"
+  }
+
+  criteria {
+    macaddress_expression {
+        mac_addresses = ["a2:54:00:68:b0:83", "fa:10:3e:01:49:5e"]
+    }
+  }
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+
+  tag {
+    scope = "scope2"
+    tag   = "tag2"
+  }
+}
+`, name)
+}
+
+func testAccNsxtPolicyGroupAddressUpdateTemplate(name string) string {
+	return fmt.Sprintf(`
+resource "nsxt_policy_group" "test" {
+  display_name = "%s"
+  description  = "Acceptance Test"
+
+  criteria {
+    ipaddress_expression {
+	  ip_addresses = ["111.1.1.1"]
+    }
+  }
+}
+`, name)
+}
+
+func testAccNsxtGlobalPolicyGroupIPAddressCreateTemplate(name string, siteName string) string {
+	return fmt.Sprintf(`
+data "nsxt_policy_site" "test" {
+  display_name = "%s"
+}
+resource "nsxt_policy_group" "test" {
+  display_name = "%s"
+  description  = "Acceptance Test"
+  domain       = data.nsxt_policy_site.test.id
 
   criteria {
     ipaddress_expression {
@@ -399,7 +627,36 @@ resource "nsxt_policy_group" "test" {
     tag   = "tag2"
   }
 }
-`, name)
+`, siteName, name)
+}
+
+func testAccNsxtGlobalPolicyGroupIPAddressUpdateTemplate(name string, siteName string) string {
+	return fmt.Sprintf(`
+data "nsxt_policy_site" "test" {
+  display_name = "%s"
+}
+resource "nsxt_policy_group" "test" {
+  display_name = "%s"
+  description  = "Acceptance Test"
+  domain       = data.nsxt_policy_site.test.id
+
+  criteria {
+    ipaddress_expression {
+	  ip_addresses = ["111.2.1.1", "232.2.2.2"]
+	}
+  }
+
+  conjunction {
+	operator = "OR"
+  }
+
+  criteria {
+    ipaddress_expression {
+	  ip_addresses = ["111.1.1.3", "222.2.2.4"]
+	}
+  }
+}
+`, siteName, name)
 }
 
 func testAccNsxtPolicyGroupIPAddressMultipleCreateTemplate(name string) string {
@@ -438,11 +695,13 @@ resource "nsxt_policy_group" "test" {
 }
 
 func testAccNsxtPolicyGroupPathsPrerequisites() string {
-	return fmt.Sprintf(`
-data "nsxt_policy_transport_zone" "test"{
-  display_name = "%s"
-}
-
+	var preRequisites string
+	if testAccIsGlobalManager() {
+		preRequisites = testNsxtGlobalPolicyGroupPathsTransportZone()
+	} else {
+		preRequisites = testNsxtPolicyGroupPathsTransportZone()
+	}
+	return preRequisites + `
 resource "nsxt_policy_segment" "test-1" {
   display_name        = "group-test-1"
   transport_zone_path = data.nsxt_policy_transport_zone.test.path
@@ -451,8 +710,27 @@ resource "nsxt_policy_segment" "test-1" {
 resource "nsxt_policy_segment" "test-2" {
   display_name        = "group-test-1"
   transport_zone_path = data.nsxt_policy_transport_zone.test.path
-}`, getOverlayTransportZoneName())
+}`
 
+}
+
+func testNsxtGlobalPolicyGroupPathsTransportZone() string {
+	return fmt.Sprintf(`
+data "nsxt_policy_site" "test" {
+  display_name = "%s"
+}
+data "nsxt_policy_transport_zone" "test"{
+  site_path      = data.nsxt_policy_site.test.path
+  transport_type = "OVERLAY_STANDARD"
+  is_default     = true
+}`, getTestSiteName())
+}
+
+func testNsxtPolicyGroupPathsTransportZone() string {
+	return fmt.Sprintf(`
+data "nsxt_policy_transport_zone" "test"{
+  display_name = "%s"
+}`, getOverlayTransportZoneName())
 }
 
 func testAccNsxtPolicyGroupPathsCreateTemplate(name string) string {
@@ -819,6 +1097,71 @@ resource "nsxt_policy_group" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
+}
+`, name)
+}
+
+func testAccNsxtPolicyGroupIdentityGroup(name string) string {
+	return fmt.Sprintf(`
+resource "nsxt_policy_group" "test" {
+  display_name = "%s"
+  description  = "Acceptance Test"
+
+  extended_criteria {
+    identity_group {
+      distinguished_name             = "test-dn"
+      domain_base_distinguished_name = "test-dbdn"
+    }
+  }
+}
+`, name)
+}
+
+func testAccNsxtPolicyGroupIdentityGroupUpdateChangeAD(name string) string {
+	return fmt.Sprintf(`
+resource "nsxt_policy_group" "test" {
+  display_name = "%s"
+  description  = "Acceptance Test"
+
+  extended_criteria {
+    identity_group {
+          distinguished_name             = "test-dn-update"
+          domain_base_distinguished_name = "test-dbdn-update"
+          sid                            = "test-sid"
+    }
+  }
+}
+`, name)
+}
+
+func testAccNsxtPolicyGroupIdentityGroupUpdateMultipleAD(name string) string {
+	return fmt.Sprintf(`
+resource "nsxt_policy_group" "test" {
+  display_name = "%s"
+  description  = "Acceptance Test"
+
+  extended_criteria {
+    identity_group {
+          distinguished_name             = "test-dn-1"
+          domain_base_distinguished_name = "test-dbdn-1"
+          sid                            = "test-sid-1"
+    }
+
+    identity_group {
+          distinguished_name             = "test-dn-2"
+          domain_base_distinguished_name = "test-dbdn-2"
+          sid                            = "test-sid-2"
+    }
+  }
+}
+`, name)
+}
+
+func testAccNsxtPolicyGroupIdentityGroupUpdateDeleteAD(name string) string {
+	return fmt.Sprintf(`
+resource "nsxt_policy_group" "test" {
+  display_name = "%s"
+  description  = "Acceptance Test"
 }
 `, name)
 }

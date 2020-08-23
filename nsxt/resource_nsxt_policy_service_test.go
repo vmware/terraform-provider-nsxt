@@ -5,14 +5,16 @@ package nsxt
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
-	"testing"
 )
 
 func TestAccResourceNsxtPolicyService_icmp(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-policy-icmp-type-service-basic")
+	name := "test-nsx-policy-icmp-type-service-basic"
 	updateName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_policy_service.test"
 
@@ -148,7 +150,7 @@ func TestAccResourceNsxtPolicyService_icmp(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyService_icmpNoEntryDisplayName(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-policy-icmp-type-service-no-display-name")
+	name := "test-nsx-policy-icmp-type-service-no-display-name"
 	testResourceName := "nsxt_policy_service.test"
 
 	resource.Test(t, resource.TestCase{
@@ -185,7 +187,7 @@ func TestAccResourceNsxtPolicyService_icmpNoEntryDisplayName(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyService_l4PortSet(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-policy-l4-port-set-type-service-basic")
+	name := "test-nsx-policy-l4-port-set-type-service-basic"
 	updateName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_policy_service.test"
 
@@ -294,7 +296,7 @@ func TestAccResourceNsxtPolicyService_l4PortSet(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyService_mixedServices(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-policy-mixed-service")
+	name := "test-nsx-policy-mixed-service"
 	testResourceName := "nsxt_policy_service.test"
 
 	resource.Test(t, resource.TestCase{
@@ -343,7 +345,7 @@ func TestAccResourceNsxtPolicyService_mixedServices(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyService_igmp(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-policy-igmp-type-service")
+	name := "test-nsx-policy-igmp-type-service"
 	updateName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_policy_service.test"
 
@@ -397,7 +399,7 @@ func TestAccResourceNsxtPolicyService_igmp(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyService_etherType(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-policy-ether-type-service")
+	name := "test-nsx-policy-ether-type-service"
 	updateName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_policy_service.test"
 
@@ -453,7 +455,7 @@ func TestAccResourceNsxtPolicyService_etherType(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyService_ipProtocolType(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-policy-ip-protocol-type-service")
+	name := "test-nsx-policy-ip-protocol-type-service"
 	updateName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_policy_service.test"
 
@@ -509,7 +511,7 @@ func TestAccResourceNsxtPolicyService_ipProtocolType(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyService_algType(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-policy-alg-service")
+	name := "test-nsx-policy-alg-service"
 	updateName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_policy_service.test"
 	alg := "SUN_RPC_UDP"
@@ -574,7 +576,7 @@ func TestAccResourceNsxtPolicyService_algType(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyService_importBasic(t *testing.T) {
-	name := fmt.Sprintf("test-nsx-policy-service-import")
+	name := "test-nsx-policy-service-import"
 	testResourceName := "nsxt_policy_service.test"
 
 	resource.Test(t, resource.TestCase{
@@ -600,7 +602,6 @@ func testAccNsxtPolicyServiceExists(resourceName string) resource.TestCheckFunc 
 	return func(state *terraform.State) error {
 
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-		nsxClient := infra.NewDefaultServicesClient(connector)
 
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
@@ -612,7 +613,14 @@ func testAccNsxtPolicyServiceExists(resourceName string) resource.TestCheckFunc 
 			return fmt.Errorf("Policy service resource ID not set in resources")
 		}
 
-		_, err := nsxClient.Get(resourceID)
+		var err error
+		if testAccIsGlobalManager() {
+			nsxClient := gm_infra.NewDefaultServicesClient(connector)
+			_, err = nsxClient.Get(resourceID)
+		} else {
+			nsxClient := infra.NewDefaultServicesClient(connector)
+			_, err = nsxClient.Get(resourceID)
+		}
 		if err != nil {
 			return fmt.Errorf("Error while retrieving policy service ID %s. Error: %v", resourceID, err)
 		}
@@ -623,7 +631,7 @@ func testAccNsxtPolicyServiceExists(resourceName string) resource.TestCheckFunc 
 
 func testAccNsxtPolicyServiceCheckDestroy(state *terraform.State, displayName string) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-	nsxClient := infra.NewDefaultServicesClient(connector)
+	var err error
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_policy_service" {
@@ -631,7 +639,13 @@ func testAccNsxtPolicyServiceCheckDestroy(state *terraform.State, displayName st
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		_, err := nsxClient.Get(resourceID)
+		if testAccIsGlobalManager() {
+			nsxClient := gm_infra.NewDefaultServicesClient(connector)
+			_, err = nsxClient.Get(resourceID)
+		} else {
+			nsxClient := infra.NewDefaultServicesClient(connector)
+			_, err = nsxClient.Get(resourceID)
+		}
 		if err == nil {
 			return fmt.Errorf("Policy service %s still exists", displayName)
 		}

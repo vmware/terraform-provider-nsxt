@@ -52,7 +52,7 @@ func ipv6DadProfilesDeleteRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["dadProfileId"] = bindings.NewStringType()
 	pathParams["dad_profile_id"] = "dadProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -102,7 +102,7 @@ func ipv6DadProfilesGetRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["dadProfileId"] = bindings.NewStringType()
 	pathParams["dad_profile_id"] = "dadProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -181,7 +181,7 @@ func ipv6DadProfilesListRestMetadata() protocol.OperationRestMetadata {
 	queryParams["include_mark_for_delete_objects"] = "include_mark_for_delete_objects"
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -236,7 +236,7 @@ func ipv6DadProfilesPatchRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["dadProfileId"] = bindings.NewStringType()
 	pathParams["dad_profile_id"] = "dadProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
@@ -291,7 +291,7 @@ func ipv6DadProfilesUpdateRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["dadProfileId"] = bindings.NewStringType()
 	pathParams["dad_profile_id"] = "dadProfileId"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

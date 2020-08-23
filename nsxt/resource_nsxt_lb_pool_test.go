@@ -5,10 +5,11 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"net/http"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccResourceNsxtLbPool_basic(t *testing.T) {
@@ -23,7 +24,7 @@ func TestAccResourceNsxtLbPool_basic(t *testing.T) {
 	updatedSnatTranslationType := "SNAT_AUTO_MAP"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLbPoolCheckDestroy(state, name)
@@ -65,7 +66,7 @@ func TestAccResourceNsxtLbPool_withMonitors(t *testing.T) {
 	testResourceName := "nsxt_lb_pool.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLbPoolCheckDestroy(state, name)
@@ -113,7 +114,7 @@ func TestAccResourceNsxtLbPool_withIpSnat(t *testing.T) {
 	updatedIPAddress := "1.1.1.2-1.1.1.20"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLbPoolCheckDestroy(state, name)
@@ -164,7 +165,7 @@ func TestAccResourceNsxtLbPool_withMember(t *testing.T) {
 	memberIP := "1.1.1.1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLbPoolCheckDestroy(state, name)
@@ -214,7 +215,7 @@ func TestAccResourceNsxtLbPool_withMemberGroup(t *testing.T) {
 	updatedPort := "60"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLbPoolCheckDestroy(state, name)
@@ -264,7 +265,7 @@ func TestAccResourceNsxtLbPool_importBasic(t *testing.T) {
 	name := "test-nsx-lb-pool"
 	testResourceName := "nsxt_lb_pool.test"
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLbPoolCheckDestroy(state, name)
@@ -380,7 +381,7 @@ resource "nsxt_lb_pool" "test" {
 }
 
 func testAccNSXLbPoolMonitorsTemplate() string {
-	return fmt.Sprintf(`
+	return `
 resource "nsxt_lb_icmp_monitor" "lb_icmp_monitor" {
   display_name = "lb_icmp_monitor"
   fall_count   = 3
@@ -392,7 +393,7 @@ resource "nsxt_lb_passive_monitor" "lb_passive_monitor" {
   max_fails    = 3
   timeout      = 10
 }
-`)
+`
 }
 
 func testAccNSXLbPoolCreateWithMonitorsTemplate(name string) string {

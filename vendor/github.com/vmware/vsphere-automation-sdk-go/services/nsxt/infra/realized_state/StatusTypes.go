@@ -63,7 +63,7 @@ func statusGetRestMetadata() protocol.OperationRestMetadata {
 	queryParams["intent_path"] = "intent_path"
 	queryParams["include_enforced_status"] = "include_enforced_status"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

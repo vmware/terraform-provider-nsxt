@@ -5,19 +5,20 @@ package nsxt
 
 import (
 	"fmt"
+	"net/http"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/vmware/go-vmware-nsxt/manager"
-	"net/http"
-	"testing"
 )
 
 func TestAccDataSourceNsxtNsGroup_basic(t *testing.T) {
-	groupName := "terraform_test_ns_group"
+	groupName := "terraform_ds_test_ns_group"
 	testResourceName := "data.nsxt_ns_group.test"
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccDataSourceNsxtNsGroupDeleteByName(groupName)
@@ -36,7 +37,7 @@ func TestAccDataSourceNsxtNsGroup_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXNoNsGroupTemplate(),
+				Config: testAccNsxtEmptyTemplate(),
 			},
 		},
 	})
@@ -53,7 +54,7 @@ func testAccDataSourceNsxtNsGroupCreate(groupName string) error {
 		DisplayName: groupName,
 	}
 
-	nsGroup, responseCode, err := nsxClient.GroupingObjectsApi.CreateNSGroup(nsxClient.Context, nsGroup)
+	_, responseCode, err := nsxClient.GroupingObjectsApi.CreateNSGroup(nsxClient.Context, nsGroup)
 	if err != nil {
 		return fmt.Errorf("Error during nsGroup creation: %v", err)
 	}
@@ -98,8 +99,4 @@ func testAccNSXNsGroupReadTemplate(groupName string) string {
 data "nsxt_ns_group" "test" {
   display_name = "%s"
 }`, groupName)
-}
-
-func testAccNSXNoNsGroupTemplate() string {
-	return fmt.Sprintf(` `)
 }

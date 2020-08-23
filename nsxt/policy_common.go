@@ -1,10 +1,12 @@
 package nsxt
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	"strings"
 )
 
 var defaultDomain = "default"
@@ -75,43 +77,7 @@ func getDomainNameSchema() *schema.Schema {
 		Description: "The domain name to use for resources. If not specified 'default' is used",
 		Optional:    true,
 		Default:     defaultDomain,
-	}
-}
-
-func getFailoverModeSchema(defaultValue string) *schema.Schema {
-	return &schema.Schema{
-		Type:         schema.TypeString,
-		Description:  "Failover mode",
-		Default:      defaultValue,
-		Optional:     true,
-		ValidateFunc: validation.StringInSlice(policyFailOverModeValues, false),
-	}
-}
-
-func getIPv6NDRAPathSchema() *schema.Schema {
-	return &schema.Schema{
-		Type:        schema.TypeString,
-		Description: "The path of an IPv6 NDRA profile",
-		Optional:    true,
-		Computed:    true,
-	}
-}
-
-func getIPv6DadPathSchema() *schema.Schema {
-	return &schema.Schema{
-		Type:        schema.TypeString,
-		Description: "The path of an IPv6 DAD profile",
-		Optional:    true,
-		Computed:    true,
-	}
-}
-
-func getPolicyEdgeClusterPathSchema() *schema.Schema {
-	return &schema.Schema{
-		Type:         schema.TypeString,
-		Description:  "The path of the edge cluster connected to this gateway",
-		Optional:     true,
-		ValidateFunc: validatePolicyPath(),
+		ForceNew:    true,
 	}
 }
 
@@ -438,31 +404,9 @@ func getDataSourceIDSchema() *schema.Schema {
 	return getDataSourceStringSchema("Unique ID of this resource")
 }
 
-func getIpv6ProfilePathsFromSchema(d *schema.ResourceData) []string {
-	var profiles []string
-	if d.Get("ipv6_ndra_profile_path") != "" {
-		profiles = append(profiles, d.Get("ipv6_ndra_profile_path").(string))
-	}
-	if d.Get("ipv6_dad_profile_path") != "" {
-		profiles = append(profiles, d.Get("ipv6_dad_profile_path").(string))
-	}
-	return profiles
-}
-
-func setIpv6ProfilePathsInSchema(d *schema.ResourceData, paths []string) error {
-	for _, path := range paths {
-		if strings.HasPrefix(path, "/infra/ipv6-ndra-profiles") {
-			d.Set("ipv6_ndra_profile_path", path)
-		}
-		if strings.HasPrefix(path, "/infra/ipv6-dad-profiles") {
-			d.Set("ipv6_dad_profile_path", path)
-		}
-	}
-	return nil
-}
-
 func parseGatewayPolicyPath(gwPath string) (bool, string) {
 	// sample path looks like "/infra/tier-0s/mytier0gw"
+	// Or "/global-infra/tier-0s/mytier0gw" in Global Manager
 	isT0 := true
 	segs := strings.Split(gwPath, "/")
 	if segs[len(segs)-2] != "tier-0s" {
@@ -482,31 +426,20 @@ func getPolicyPathSchema(isRequired bool, forceNew bool, description string) *sc
 	}
 }
 
-func getElemPolicyPathSchema() *schema.Schema {
+func getComputedPolicyPathSchema(description string) *schema.Schema {
 	return &schema.Schema{
 		Type:         schema.TypeString,
+		Description:  description,
+		Optional:     true,
+		Computed:     true,
 		ValidateFunc: validatePolicyPath(),
 	}
 }
 
-func getGatewayInterfaceSubnetsSchema() *schema.Schema {
+func getElemPolicyPathSchema() *schema.Schema {
 	return &schema.Schema{
-		Type:        schema.TypeList,
-		Description: "List of IP addresses and network prefixes for this interface",
-		Elem: &schema.Schema{
-			Type:         schema.TypeString,
-			ValidateFunc: validateIPCidr(),
-		},
-		Required: true,
-	}
-}
-
-func getMtuSchema() *schema.Schema {
-	return &schema.Schema{
-		Type:         schema.TypeInt,
-		Optional:     true,
-		Description:  "Maximum transmission unit specifies the size of the largest packet that a network protocol can transmit",
-		ValidateFunc: validation.IntAtLeast(64),
+		Type:         schema.TypeString,
+		ValidateFunc: validatePolicyPath(),
 	}
 }
 
@@ -535,17 +468,32 @@ func getAllocationRangeListSchema(required bool, description string) *schema.Sch
 	}
 }
 
-var gatewayInterfaceUrpfModeValues = []string{
-	model.Tier0Interface_URPF_MODE_NONE,
-	model.Tier0Interface_URPF_MODE_STRICT,
+func globalManagerOnlyError() error {
+	return fmt.Errorf("This configuration is only supported with NSX Global Manager. To mark your endpoint as Global Manager, please set 'global_manager' flag to 'true' in the provider")
 }
 
-func getGatewayInterfaceUrpfModeSchema() *schema.Schema {
-	return &schema.Schema{
-		Type:         schema.TypeString,
-		Optional:     true,
-		Description:  "Unicast Reverse Path Forwarding mode",
-		ValidateFunc: validation.StringInSlice(gatewayInterfaceUrpfModeValues, false),
-		Default:      model.Tier0Interface_URPF_MODE_STRICT,
+func attributeRequiredGlobalManagerError(attribute string, resource string) error {
+	return fmt.Errorf("%s requires %s configuration for NSX Global Manager", resource, attribute)
+}
+
+func buildQueryStringFromMap(query map[string]string) string {
+	if query == nil {
+		return ""
 	}
+	keyValues := make([]string, 0, len(query))
+	for key, value := range query {
+		if strings.Contains(value, "/") {
+			value = strings.Replace(value, "/", "\\/", -1)
+		}
+		keyValue := strings.Join([]string{key, value}, ":")
+		keyValues = append(keyValues, keyValue)
+	}
+	return strings.Join(keyValues, " AND ")
+}
+
+func getSitePathFromEdgePath(edgePath string) string {
+	// Sample Edge cluster path looks like:
+	//"/global-infra/sites/<site-id>/enforcement-points/default/edge-clusters/<edge-cluster-id>"
+	pathList := strings.Split(edgePath, "/")[:4]
+	return strings.Join(pathList, "/")
 }

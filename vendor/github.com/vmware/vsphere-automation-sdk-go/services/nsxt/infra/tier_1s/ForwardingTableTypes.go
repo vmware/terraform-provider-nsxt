@@ -118,7 +118,7 @@ func forwardingTableListRestMetadata() protocol.OperationRestMetadata {
 	queryParams["route_source"] = "route_source"
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
-	errorHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,

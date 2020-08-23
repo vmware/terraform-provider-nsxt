@@ -5,11 +5,12 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"net"
 	"strconv"
 	"strings"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 )
 
 // Validations for Port objects
@@ -232,19 +233,6 @@ func validateIPorASNPair(i interface{}, k string) (s []string, es []error) {
 	return
 }
 
-func validate4ByteASNPlain(i interface{}, k string) (s []string, es []error) {
-	v, ok := i.(string)
-	if !ok {
-		es = append(es, fmt.Errorf("expected type of %s to be string", k))
-		return
-	}
-	if !isValidStringUint(v, 32) {
-		es = append(es, fmt.Errorf("invalid ASN number %s", v))
-		return
-	}
-	return
-}
-
 func validateIPRange() schema.SchemaValidateFunc {
 	return func(i interface{}, k string) (s []string, es []error) {
 		v, ok := i.(string)
@@ -407,9 +395,28 @@ func validateVLANId(i interface{}, k string) (s []string, es []error) {
 		}
 	}
 	if vlan < 0 || vlan > 4095 {
-		es = append(es, fmt.Errorf("invalid VLAN ID %d", vlan))
+		es = append(es, fmt.Errorf("Invalid VLAN ID %d", vlan))
 		return
 	}
+	return
+}
+
+func validateVLANIdOrRange(i interface{}, k string) (s []string, es []error) {
+	v, ok := i.(string)
+	if !ok {
+		s, es = validateVLANId(i, k)
+		return
+	}
+
+	tokens := strings.Split(v, "-")
+	if len(tokens) > 2 {
+		es = append(es, fmt.Errorf("Invalid vlan range %s", v))
+		return
+	}
+	for _, token := range tokens {
+		s, es = validateVLANId(token, k)
+	}
+
 	return
 }
 
@@ -440,10 +447,41 @@ func validateNsxtProviderHostFormat() schema.SchemaValidateFunc {
 			return
 		}
 
-		if strings.HasPrefix(v, "https://") || strings.HasPrefix(v, "http://") {
-			es = append(es, fmt.Errorf("not expecting http:// or https:// in the host, but got %s", v))
+		withSchema := v
+		if !strings.HasPrefix(v, "https://") {
+			// Add schema for validation
+			withSchema = fmt.Sprintf("https://%s", v)
 		}
 
+		s, es = validation.IsURLWithHTTPS(withSchema, k)
 		return
 	}
+}
+
+func validateASPlainOrDot(i interface{}, k string) (s []string, es []error) {
+	v, ok := i.(string)
+	if !ok {
+		es = append(es, fmt.Errorf("String is expected, got %s", v))
+		return
+	}
+
+	tokens := strings.Split(v, ".")
+	if len(tokens) > 2 {
+		es = append(es, fmt.Errorf("ASPlain/ASDot format is expected, got %s", v))
+		return
+	}
+	intSize := 32
+	if len(tokens) == 2 {
+		// Dot notation
+		intSize = 16
+	}
+	for _, token := range tokens {
+		_, err := strconv.ParseUint(token, 10, intSize)
+		if err != nil {
+			es = append(es, fmt.Errorf("%dbit number is expected, got %s", intSize, token))
+			return
+		}
+	}
+
+	return
 }

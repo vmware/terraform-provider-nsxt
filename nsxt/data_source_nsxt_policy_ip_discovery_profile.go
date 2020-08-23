@@ -5,10 +5,11 @@ package nsxt
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	"strings"
 )
 
 func dataSourceNsxtPolicyIPDiscoveryProfile() *schema.Resource {
@@ -25,6 +26,13 @@ func dataSourceNsxtPolicyIPDiscoveryProfile() *schema.Resource {
 }
 
 func dataSourceNsxtPolicyIPDiscoveryProfileRead(d *schema.ResourceData, m interface{}) error {
+	if isPolicyGlobalManager(m) {
+		_, err := policyDataSourceResourceRead(d, getPolicyConnector(m), "IPDiscoveryProfile", nil)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
 	connector := getPolicyConnector(m)
 	client := infra.NewDefaultIpDiscoveryProfilesClient(connector)
 

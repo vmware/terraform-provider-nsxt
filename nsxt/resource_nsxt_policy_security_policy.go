@@ -5,11 +5,14 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+	gm_domains "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/domains"
+	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/domains"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	"log"
 )
 
 func resourceNsxtPolicySecurityPolicy() *schema.Resource {
@@ -25,34 +28,38 @@ func resourceNsxtPolicySecurityPolicy() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicySecurityPolicyExistsInDomain(id string, domainName string, connector *client.RestConnector) bool {
-	client := domains.NewDefaultSecurityPoliciesClient(connector)
+func resourceNsxtPolicySecurityPolicyExistsInDomain(id string, domainName string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
+	var err error
+	if isGlobalManager {
+		client := gm_domains.NewDefaultSecurityPoliciesClient(connector)
+		_, err = client.Get(domainName, id)
+	} else {
+		client := domains.NewDefaultSecurityPoliciesClient(connector)
+		_, err = client.Get(domainName, id)
+	}
 
-	_, err := client.Get(domainName, id)
 	if err == nil {
-		return true
+		return true, nil
 	}
 
 	if isNotFoundError(err) {
-		return false
+		return false, nil
 	}
 
-	logAPIError("Error retrieving Security Policy", err)
-	return false
+	return false, logAPIError("Error retrieving Security Policy", err)
 }
 
-func resourceNsxtPolicySecurityPolicyExistsPartial(domainName string) func(id string, connector *client.RestConnector) bool {
-	return func(id string, connector *client.RestConnector) bool {
-		return resourceNsxtPolicySecurityPolicyExistsInDomain(id, domainName, connector)
+func resourceNsxtPolicySecurityPolicyExistsPartial(domainName string) func(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
+	return func(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
+		return resourceNsxtPolicySecurityPolicyExistsInDomain(id, domainName, connector, isGlobalManager)
 	}
 }
 
 func resourceNsxtPolicySecurityPolicyCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := domains.NewDefaultSecurityPoliciesClient(connector)
 
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID(d, connector, resourceNsxtPolicySecurityPolicyExistsPartial(d.Get("domain").(string)))
+	id, err := getOrGenerateID(d, m, resourceNsxtPolicySecurityPolicyExistsPartial(d.Get("domain").(string)))
 	if err != nil {
 		return err
 	}
@@ -82,9 +89,19 @@ func resourceNsxtPolicySecurityPolicyCreate(d *schema.ResourceData, m interface{
 		TcpStrict:      &tcpStrict,
 		Rules:          rules,
 	}
-
 	log.Printf("[INFO] Creating Security Policy with ID %s", id)
-	err = client.Patch(d.Get("domain").(string), id, obj)
+	if isPolicyGlobalManager(m) {
+		gmObj, err1 := convertModelBindingType(obj, model.SecurityPolicyBindingType(), gm_model.SecurityPolicyBindingType())
+		if err1 != nil {
+			return err1
+		}
+		client := gm_domains.NewDefaultSecurityPoliciesClient(connector)
+		err = client.Patch(d.Get("domain").(string), id, gmObj.(gm_model.SecurityPolicy))
+	} else {
+		client := domains.NewDefaultSecurityPoliciesClient(connector)
+		err = client.Patch(d.Get("domain").(string), id, obj)
+	}
+
 	if err != nil {
 		return handleCreateError("Security Policy", id, err)
 	}
@@ -97,19 +114,31 @@ func resourceNsxtPolicySecurityPolicyCreate(d *schema.ResourceData, m interface{
 
 func resourceNsxtPolicySecurityPolicyRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := domains.NewDefaultSecurityPoliciesClient(connector)
-
 	id := d.Id()
+	domainName := d.Get("domain").(string)
 	if id == "" {
 		return fmt.Errorf("Error obtaining Security Policy id")
 	}
-
-	domainName := d.Get("domain").(string)
-	obj, err := client.Get(domainName, id)
-	if err != nil {
-		return handleReadError(d, "Security Policy", id, err)
+	var obj model.SecurityPolicy
+	if isPolicyGlobalManager(m) {
+		client := gm_domains.NewDefaultSecurityPoliciesClient(connector)
+		gmObj, err := client.Get(domainName, id)
+		if err != nil {
+			return handleReadError(d, "SecurityPolicy", id, err)
+		}
+		rawObj, err := convertModelBindingType(gmObj, gm_model.SecurityPolicyBindingType(), model.SecurityPolicyBindingType())
+		if err != nil {
+			return err
+		}
+		obj = rawObj.(model.SecurityPolicy)
+	} else {
+		var err error
+		client := domains.NewDefaultSecurityPoliciesClient(connector)
+		obj, err = client.Get(domainName, id)
+		if err != nil {
+			return handleReadError(d, "SecurityPolicy", id, err)
+		}
 	}
-
 	d.Set("display_name", obj.DisplayName)
 	d.Set("description", obj.Description)
 	setPolicyTagsInSchema(d, obj.Tags)
@@ -128,14 +157,11 @@ func resourceNsxtPolicySecurityPolicyRead(d *schema.ResourceData, m interface{})
 	d.Set("stateful", obj.Stateful)
 	d.Set("tcp_strict", obj.TcpStrict)
 	d.Set("revision", obj.Revision)
-	setPolicyRulesInSchema(d, obj.Rules)
-
-	return nil
+	return setPolicyRulesInSchema(d, obj.Rules)
 }
 
 func resourceNsxtPolicySecurityPolicyUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := domains.NewDefaultSecurityPoliciesClient(connector)
 
 	id := d.Id()
 	if id == "" {
@@ -170,8 +196,23 @@ func resourceNsxtPolicySecurityPolicyUpdate(d *schema.ResourceData, m interface{
 		Rules:          rules,
 	}
 
-	// We need to use PUT, because PATCH will not replace the whole rule list
-	_, err := client.Update(d.Get("domain").(string), id, obj)
+	var err error
+	if isPolicyGlobalManager(m) {
+		gmObj, err1 := convertModelBindingType(obj, model.SecurityPolicyBindingType(), gm_model.SecurityPolicyBindingType())
+		if err1 != nil {
+			return err1
+		}
+		gmSecurityPolicy := gmObj.(gm_model.SecurityPolicy)
+		client := gm_domains.NewDefaultSecurityPoliciesClient(connector)
+
+		// We need to use PUT, because PATCH will not replace the whole rule list
+		_, err = client.Update(d.Get("domain").(string), id, gmSecurityPolicy)
+	} else {
+		client := domains.NewDefaultSecurityPoliciesClient(connector)
+
+		// We need to use PUT, because PATCH will not replace the whole rule list
+		_, err = client.Update(d.Get("domain").(string), id, obj)
+	}
 	if err != nil {
 		return handleUpdateError("Security Policy", id, err)
 	}
@@ -186,9 +227,16 @@ func resourceNsxtPolicySecurityPolicyDelete(d *schema.ResourceData, m interface{
 	}
 
 	connector := getPolicyConnector(m)
-	client := domains.NewDefaultSecurityPoliciesClient(connector)
+	var err error
 
-	err := client.Delete(d.Get("domain").(string), id)
+	if isPolicyGlobalManager(m) {
+		client := gm_domains.NewDefaultSecurityPoliciesClient(connector)
+		err = client.Delete(d.Get("domain").(string), id)
+	} else {
+		client := domains.NewDefaultSecurityPoliciesClient(connector)
+		err = client.Delete(d.Get("domain").(string), id)
+	}
+
 	if err != nil {
 		return handleDeleteError("Security Policy", id, err)
 	}

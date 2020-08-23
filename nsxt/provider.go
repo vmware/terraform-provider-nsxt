@@ -8,15 +8,17 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"log"
+	"net/http"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/vmware/go-vmware-nsxt"
+	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/core"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/security"
-	"io/ioutil"
-	"net/http"
-	"strings"
 )
 
 var defaultRetryOnStatusCodes = []int{429, 503}
@@ -31,7 +33,7 @@ type commonProviderConfig struct {
 type nsxtClients struct {
 	CommonConfig commonProviderConfig
 	// NSX Manager client - based on go-vmware-nsxt SDK
-	NsxtClient *nsxt.APIClient
+	NsxtClient *api.APIClient
 	// Data for NSX Policy client - based on vsphere-automation-sdk-go SDK
 	// First offering of Policy SDK does not support concurrent
 	// operations in single connector. In order to avoid heavy locks,
@@ -44,6 +46,7 @@ type nsxtClients struct {
 	Host                   string
 	PolicyEnforcementPoint string
 	PolicySite             string
+	PolicyGlobalManager    bool
 }
 
 // Provider for VMWare NSX-T. Returns terraform.ResourceProvider
@@ -145,6 +148,12 @@ func Provider() terraform.ResourceProvider {
 				Description: "Enforcement Point for NSXT Policy",
 				DefaultFunc: schema.EnvDefaultFunc("NSXT_POLICY_ENFORCEMENT_POINT", "default"),
 			},
+			"global_manager": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Is this a policy global manager endpoint",
+				DefaultFunc: schema.EnvDefaultFunc("NSXT_GLOBAL_MANAGER", false),
+			},
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
@@ -185,6 +194,8 @@ func Provider() terraform.ResourceProvider {
 			"nsxt_policy_vni_pool":                 dataSourceNsxtPolicyVniPool(),
 			"nsxt_policy_ip_block":                 dataSourceNsxtPolicyIPBlock(),
 			"nsxt_policy_ip_pool":                  dataSourceNsxtPolicyIPPool(),
+			"nsxt_policy_context_profile":          dataSourceNsxtPolicyContextProfile(),
+			"nsxt_policy_site":                     dataSourceNsxtPolicySite(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -250,6 +261,7 @@ func Provider() terraform.ResourceProvider {
 			"nsxt_policy_tier1_gateway_interface":          resourceNsxtPolicyTier1GatewayInterface(),
 			"nsxt_policy_tier0_gateway":                    resourceNsxtPolicyTier0Gateway(),
 			"nsxt_policy_tier0_gateway_interface":          resourceNsxtPolicyTier0GatewayInterface(),
+			"nsxt_policy_tier0_gateway_ha_vip_config":      resourceNsxtPolicyTier0GatewayHAVipConfig(),
 			"nsxt_policy_group":                            resourceNsxtPolicyGroup(),
 			"nsxt_policy_security_policy":                  resourceNsxtPolicySecurityPolicy(),
 			"nsxt_policy_service":                          resourceNsxtPolicyService(),
@@ -257,6 +269,7 @@ func Provider() terraform.ResourceProvider {
 			"nsxt_policy_segment":                          resourceNsxtPolicySegment(),
 			"nsxt_policy_vlan_segment":                     resourceNsxtPolicyVlanSegment(),
 			"nsxt_policy_static_route":                     resourceNsxtPolicyStaticRoute(),
+			"nsxt_policy_gateway_prefix_list":              resourceNsxtPolicyGatewayPrefixList(),
 			"nsxt_policy_vm_tags":                          resourceNsxtPolicyVMTags(),
 			"nsxt_policy_nat_rule":                         resourceNsxtPolicyNATRule(),
 			"nsxt_policy_ip_block":                         resourceNsxtPolicyIPBlock(),
@@ -268,8 +281,10 @@ func Provider() terraform.ResourceProvider {
 			"nsxt_policy_lb_virtual_server":                resourceNsxtPolicyLBVirtualServer(),
 			"nsxt_policy_ip_address_allocation":            resourceNsxtPolicyIPAddressAllocation(),
 			"nsxt_policy_bgp_neighbor":                     resourceNsxtPolicyBgpNeighbor(),
+			"nsxt_policy_bgp_config":                       resourceNsxtPolicyBgpConfig(),
 			"nsxt_policy_dhcp_relay":                       resourceNsxtPolicyDhcpRelayConfig(),
 			"nsxt_policy_dhcp_server":                      resourceNsxtPolicyDhcpServer(),
+			"nsxt_policy_context_profile":                  resourceNsxtPolicyContextProfile(),
 		},
 
 		ConfigureFunc: providerConfigure,
@@ -308,6 +323,8 @@ func configureNsxtClient(d *schema.ResourceData, clients *nsxtClients) error {
 	}
 
 	host := d.Get("host").(string)
+	// Remove schema
+	host = strings.TrimPrefix(host, "https://")
 
 	if host == "" {
 		return fmt.Errorf("host must be provided")
@@ -331,14 +348,14 @@ func configureNsxtClient(d *schema.ResourceData, clients *nsxtClients) error {
 		retryStatuses = append(retryStatuses, s.(int))
 	}
 
-	retriesConfig := nsxt.ClientRetriesConfiguration{
+	retriesConfig := api.ClientRetriesConfiguration{
 		MaxRetries:      maxRetries,
 		RetryMinDelay:   retryMinDelay,
 		RetryMaxDelay:   retryMaxDelay,
 		RetryOnStatuses: retryStatuses,
 	}
 
-	cfg := nsxt.Configuration{
+	cfg := api.Configuration{
 		BasePath:             "/api/v1",
 		Host:                 host,
 		Scheme:               "https",
@@ -353,7 +370,7 @@ func configureNsxtClient(d *schema.ResourceData, clients *nsxtClients) error {
 		RetriesConfiguration: retriesConfig,
 	}
 
-	nsxClient, err := nsxt.NewAPIClient(&cfg)
+	nsxClient, err := api.NewAPIClient(&cfg)
 	if err != nil {
 		return err
 	}
@@ -391,7 +408,11 @@ func getAPIToken(vmcAuthHost string, vmcAccessToken string) (string, error) {
 
 	defer res.Body.Close()
 	token := jwtToken{}
-	json.NewDecoder(res.Body).Decode(&token)
+	err = json.NewDecoder(res.Body).Decode(&token)
+	if err != nil {
+		// Not fatal
+		log.Printf("[WARNING]: Failed to decode access token from response: %v", err)
+	}
 
 	return token.AccessToken, nil
 }
@@ -411,7 +432,9 @@ func getConnectorTLSConfig(insecure bool, clientCertFile string, clientKeyFile s
 			return nil, fmt.Errorf("Failed to load client cert/key pair: %v", err)
 		}
 
-		tlsConfig.Certificates = []tls.Certificate{cert}
+		tlsConfig.GetClientCertificate = func(*tls.CertificateRequestInfo) (*tls.Certificate, error) {
+			return &cert, nil
+		}
 	}
 
 	if len(caFile) > 0 {
@@ -426,13 +449,11 @@ func getConnectorTLSConfig(insecure bool, clientCertFile string, clientKeyFile s
 		tlsConfig.RootCAs = caCertPool
 	}
 
-	tlsConfig.BuildNameToCertificate()
-
 	return &tlsConfig, nil
 }
 
 func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) error {
-	hostIP := d.Get("host").(string)
+	host := d.Get("host").(string)
 	username := d.Get("username").(string)
 	password := d.Get("password").(string)
 	vmcAccessToken := d.Get("vmc_token").(string)
@@ -442,12 +463,16 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 	clientAuthKeyFile := d.Get("client_auth_key_file").(string)
 	caFile := d.Get("ca_file").(string)
 	policyEnforcementPoint := d.Get("enforcement_point").(string)
+	policyGlobalManager := d.Get("global_manager").(bool)
 
-	if hostIP == "" {
+	if host == "" {
 		return fmt.Errorf("host must be provided")
 	}
 
-	host := fmt.Sprintf("https://%s", hostIP)
+	if !strings.HasPrefix(host, "https://") {
+		host = fmt.Sprintf("https://%s", host)
+	}
+
 	securityCtx := core.NewSecurityContextImpl()
 	securityContextNeeded := true
 	if len(clientAuthCertFile) > 0 && !clients.CommonConfig.RemoteAuth {
@@ -500,6 +525,7 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 	clients.Host = host
 	clients.PolicyEnforcementPoint = policyEnforcementPoint
 	clients.PolicySite = policySite
+	clients.PolicyGlobalManager = policyGlobalManager
 
 	return nil
 }
@@ -564,10 +590,14 @@ func getPolicyEnforcementPoint(clients interface{}) string {
 	return clients.(nsxtClients).PolicyEnforcementPoint
 }
 
-func getPolicySite(clients interface{}) string {
-	return clients.(nsxtClients).PolicySite
+func isPolicyGlobalManager(clients interface{}) bool {
+	return clients.(nsxtClients).PolicyGlobalManager
 }
 
 func getCommonProviderConfig(clients interface{}) commonProviderConfig {
 	return clients.(nsxtClients).CommonConfig
+}
+
+func getGlobalPolicyEnforcementPointPath(m interface{}, sitePath *string) string {
+	return fmt.Sprintf("%s/enforcement-points/%s", *sitePath, getPolicyEnforcementPoint(m))
 }

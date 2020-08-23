@@ -5,10 +5,11 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/vmware/go-vmware-nsxt/manager"
 	"log"
 	"net/http"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/vmware/go-vmware-nsxt/manager"
 )
 
 func resourceNsxtDhcpRelayService() *schema.Resource {
@@ -129,7 +130,7 @@ func resourceNsxtDhcpRelayServiceUpdate(d *schema.ResourceData, m interface{}) e
 		DhcpRelayProfileId: dhcpRelayProfileID,
 	}
 
-	dhcpRelayService, resp, err := nsxClient.LogicalRoutingAndServicesApi.UpdateDhcpRelay(nsxClient.Context, id, dhcpRelayService)
+	_, resp, err := nsxClient.LogicalRoutingAndServicesApi.UpdateDhcpRelay(nsxClient.Context, id, dhcpRelayService)
 
 	if err != nil || resp.StatusCode == http.StatusNotFound {
 		return fmt.Errorf("Error during DhcpRelayService update: %v", err)

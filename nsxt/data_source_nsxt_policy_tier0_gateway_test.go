@@ -5,90 +5,118 @@ package nsxt
 
 import (
 	"fmt"
+	"testing"
+
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
+	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	"testing"
 )
 
 func TestAccDataSourceNsxtPolicyTier0Gateway_basic(t *testing.T) {
-	routerName := "terraform_test_tier0"
+	name := "terraform_test"
 	testResourceName := "data.nsxt_policy_tier0_gateway.test"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccDataSourceNsxtPolicyTier0DeleteByName(routerName)
+			return testAccDataSourceNsxtPolicyTier0GatewayDeleteByName(name)
 		},
 		Steps: []resource.TestStep{
 			{
 				PreConfig: func() {
-					if err := testAccDataSourceNsxtPolicyTier0Create(routerName); err != nil {
+					if err := testAccDataSourceNsxtPolicyTier0GatewayCreate(name); err != nil {
 						panic(err)
 					}
 				},
-				Config: testAccNsxtPolicyTier0GatewayReadTemplate(routerName),
+				Config: testAccNsxtPolicyTier0GatewayReadTemplate(name),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(testResourceName, "display_name", routerName),
-					resource.TestCheckResourceAttr(testResourceName, "description", routerName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "description", name),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 				),
 			},
 			{
-				Config: testAccNsxtPolicyNoTier0Template(),
+				Config: testAccNsxtEmptyTemplate(),
 			},
 		},
 	})
 }
 
-func testAccDataSourceNsxtPolicyTier0Create(routerName string) error {
+func testAccDataSourceNsxtPolicyTier0GatewayCreate(name string) error {
 	connector, err := testAccGetPolicyConnector()
 	if err != nil {
 		return fmt.Errorf("Error during test client initialization: %v", err)
 	}
-	client := infra.NewDefaultTier0sClient(connector)
 
-	displayName := routerName
-	description := routerName
+	displayName := name
+	description := name
 	obj := model.Tier0{
 		Description: &description,
 		DisplayName: &displayName,
 	}
 
 	// Generate a random ID for the resource
-	id := newUUID()
+	uuid, _ := uuid.NewRandom()
+	id := uuid.String()
 
-	err = client.Patch(id, obj)
+	if testAccIsGlobalManager() {
+		gmObj, convErr := convertModelBindingType(obj, model.Tier0BindingType(), gm_model.Tier0BindingType())
+		if convErr != nil {
+			return convErr
+		}
+
+		client := gm_infra.NewDefaultTier0sClient(connector)
+		err = client.Patch(id, gmObj.(gm_model.Tier0))
+
+	} else {
+		client := infra.NewDefaultTier0sClient(connector)
+		err = client.Patch(id, obj)
+	}
 	if err != nil {
-		return handleCreateError("Tier0", id, err)
+		return fmt.Errorf("Error during Tier0 creation: %v", err)
 	}
 	return nil
 }
 
-func testAccDataSourceNsxtPolicyTier0DeleteByName(routerName string) error {
+func testAccDataSourceNsxtPolicyTier0GatewayDeleteByName(name string) error {
 	connector, err := testAccGetPolicyConnector()
 	if err != nil {
 		return fmt.Errorf("Error during test client initialization: %v", err)
 	}
-	client := infra.NewDefaultTier0sClient(connector)
 
 	// Find the object by name
-	objList, err := client.List(nil, nil, nil, nil, nil, nil)
-	if err != nil {
-		return handleListError("Tier0", err)
-	}
-	for _, objInList := range objList.Results {
-		if *objInList.DisplayName == routerName {
-			err := client.Delete(*objInList.Id)
+	if testAccIsGlobalManager() {
+		objID, err := testGetObjIDByName(name, "Tier0")
+		if err == nil {
+			client := gm_infra.NewDefaultTier0sClient(connector)
+			err := client.Delete(objID)
 			if err != nil {
-				return handleDeleteError("Tier0", *objInList.Id, err)
+				return handleDeleteError("Tier0", objID, err)
 			}
 			return nil
 		}
+	} else {
+		client := infra.NewDefaultTier0sClient(connector)
+		objList, err := client.List(nil, nil, nil, nil, nil, nil)
+		if err != nil {
+			return fmt.Errorf("Error while reading Tier0s: %v", err)
+		}
+		for _, objInList := range objList.Results {
+			if *objInList.DisplayName == name {
+				err := client.Delete(*objInList.Id)
+				if err != nil {
+					return fmt.Errorf("Error during Tier0 deletion: %v", err)
+				}
+				return nil
+			}
+		}
 	}
-	return fmt.Errorf("Error while deleting Tier0 '%s': resource not found", routerName)
+	return fmt.Errorf("Error while deleting Tier0 '%s': resource not found", name)
 }
 
 func testAccNsxtPolicyTier0GatewayReadTemplate(name string) string {
@@ -96,8 +124,4 @@ func testAccNsxtPolicyTier0GatewayReadTemplate(name string) string {
 data "nsxt_policy_tier0_gateway" "test" {
   display_name = "%s"
 }`, name)
-}
-
-func testAccNsxtPolicyNoTier0Template() string {
-	return fmt.Sprintf(` `)
 }

@@ -5,6 +5,10 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
+	"strconv"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
@@ -12,9 +16,6 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	"log"
-	"strconv"
-	"strings"
 )
 
 var lbPoolAlgorithmValues = []string{
@@ -218,7 +219,7 @@ func getPolicyPoolMemberGroupFromSchema(d *schema.ResourceData) *model.LBPoolMem
 		port := data["port"].(string)
 		maxIPListSize := int64(data["max_ip_list_size"].(int))
 		ipRevisionFilter := model.LBPoolMemberGroup_IP_REVISION_FILTER_IPV4
-		if allowIPv4 == false {
+		if !allowIPv4 {
 			ipRevisionFilter = model.LBPoolMemberGroup_IP_REVISION_FILTER_IPV6
 		} else if allowIPv6 {
 			ipRevisionFilter = model.LBPoolMemberGroup_IP_REVISION_FILTER_IPV4_IPV6
@@ -401,21 +402,19 @@ func setPolicyPoolSnatInSchema(d *schema.ResourceData, snat *data.StructValue) e
 	return nil
 }
 
-func resourceNsxtPolicyLBPoolExists(id string, connector *client.RestConnector) bool {
+func resourceNsxtPolicyLBPoolExists(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
 	client := infra.NewDefaultLbPoolsClient(connector)
 
 	_, err := client.Get(id)
 	if err == nil {
-		return true
+		return true, nil
 	}
 
 	if isNotFoundError(err) {
-		return false
+		return false, nil
 	}
 
-	logAPIError("Error retrieving resource", err)
-
-	return false
+	return false, logAPIError("Error retrieving resource", err)
 }
 
 func resourceNsxtPolicyLBPoolCreate(d *schema.ResourceData, m interface{}) error {
@@ -427,7 +426,7 @@ func resourceNsxtPolicyLBPoolCreate(d *schema.ResourceData, m interface{}) error
 	}
 
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID(d, connector, resourceNsxtPolicyLBPoolExists)
+	id, err := getOrGenerateID(d, m, resourceNsxtPolicyLBPoolExists)
 	if err != nil {
 		return err
 	}
