@@ -16,6 +16,8 @@ var testAccGmGatewayIntersiteSubnet = "10.10.2.0/24"
 // NOTE: This test assumes single edge cluster on both sites
 func TestAccResourceNsxtPolicyTier0Gateway_globalManager(t *testing.T) {
 	testResourceName := "nsxt_policy_tier0_gateway.test"
+	description := "first try"
+	updatedDescription := "second try"
 
 	// TODO: drop hashes when terraform plugin tests align with terraform plugin
 	localeService1Path := "locale_service.3094672441."
@@ -50,10 +52,30 @@ func TestAccResourceNsxtPolicyTier0Gateway_globalManager(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyTier0GMUpdateTemplate(),
+				Config: testAccNsxtPolicyTier0GMUpdateTemplate(description),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTier0Exists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", defaultTestResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "description", description),
+					resource.TestCheckResourceAttr(testResourceName, "ha_mode", "ACTIVE_ACTIVE"),
+					resource.TestCheckResourceAttr(testResourceName, "locale_service.#", "2"),
+					resource.TestCheckResourceAttrSet(testResourceName, localeService1Path+"edge_cluster_path"),
+					resource.TestCheckResourceAttr(testResourceName, localeService1Path+"preferred_edge_paths.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, localeService2Path+"edge_cluster_path"),
+					resource.TestCheckResourceAttr(testResourceName, localeService2Path+"preferred_edge_paths.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "intersite_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "intersite_config.0.transit_subnet", testAccGmGatewayIntersiteSubnet),
+					resource.TestCheckResourceAttrSet(testResourceName, "intersite_config.0.primary_site_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyTier0GMUpdateTemplate(updatedDescription),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyTier0Exists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", defaultTestResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "description", updatedDescription),
 					resource.TestCheckResourceAttr(testResourceName, "ha_mode", "ACTIVE_ACTIVE"),
 					resource.TestCheckResourceAttr(testResourceName, "locale_service.#", "2"),
 					resource.TestCheckResourceAttrSet(testResourceName, localeService1Path+"edge_cluster_path"),
@@ -86,6 +108,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_globalManager(t *testing.T) {
 // NOTE: This test assumes single edge cluster on both sites
 func TestAccResourceNsxtPolicyTier0Gateway_globalManagerNoSubnet(t *testing.T) {
 	testResourceName := "nsxt_policy_tier0_gateway.test"
+	description := "desc"
 
 	// TODO: drop hashes when terraform plugin tests align with terraform plugin
 	localeService1Path := "locale_service.3094672441."
@@ -119,10 +142,11 @@ func TestAccResourceNsxtPolicyTier0Gateway_globalManagerNoSubnet(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyTier0GMUpdateTemplate(),
+				Config: testAccNsxtPolicyTier0GMUpdateTemplate(description),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTier0Exists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", defaultTestResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "description", description),
 					resource.TestCheckResourceAttr(testResourceName, "locale_service.#", "2"),
 					resource.TestCheckResourceAttrSet(testResourceName, localeService1Path+"edge_cluster_path"),
 					resource.TestCheckResourceAttr(testResourceName, localeService1Path+"preferred_edge_paths.#", "1"),
@@ -257,10 +281,11 @@ resource "nsxt_policy_tier0_gateway" "test" {
 }`, defaultTestResourceName, subnet)
 }
 
-func testAccNsxtPolicyTier0GMUpdateTemplate() string {
+func testAccNsxtPolicyTier0GMUpdateTemplate(tier0Description string) string {
 	return testAccNsxtPolicyGMGatewayDeps() + fmt.Sprintf(`
 resource "nsxt_policy_tier0_gateway" "test" {
   display_name = "%s"
+  description  = "%s"
   ha_mode      = "ACTIVE_ACTIVE"
 
   locale_service {
@@ -276,7 +301,7 @@ resource "nsxt_policy_tier0_gateway" "test" {
     primary_site_path = data.nsxt_policy_site.site2.path
     transit_subnet    = "%s"
   }
-}`, defaultTestResourceName, testAccGmGatewayIntersiteSubnet)
+}`, defaultTestResourceName, tier0Description, testAccGmGatewayIntersiteSubnet)
 }
 
 func testAccNsxtPolicyTier0GMMinimalistic() string {

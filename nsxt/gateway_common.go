@@ -271,6 +271,51 @@ func initChildLocaleService(serviceStruct *model.LocaleServices, markForDelete b
 	return dataValue.(*data.StructValue), nil
 }
 
+func policyGatewayLocalServiceChanged(d *schema.ResourceData) bool {
+	// Return true if the locale service configuration changed on scheme
+	//First compare the number of locale services
+	oldS, newS := d.GetChange("locale_service")
+	if oldS.(*schema.Set).Len() != newS.(*schema.Set).Len() {
+		return true
+	}
+
+	// Compare each locale service
+	oldLocaleServices := oldS.(*schema.Set).List()
+	newLocaleServices := newS.(*schema.Set).List()
+	for index := range oldLocaleServices {
+		new := newLocaleServices[index].(map[string]interface{})
+		old := oldLocaleServices[index].(map[string]interface{})
+
+		// Compare the edge cluster path
+		if old["edge_cluster_path"] != new["edge_cluster_path"] {
+			return true
+		}
+
+		// compare the redistribution config
+		// If it has redistribution_config assume it changed because it is hard to compare
+		// TODO(asarfaty): improve this logic
+		oldRDC := old["redistribution_config"].([]interface{})
+		newRDC := new["redistribution_config"].([]interface{})
+		if len(oldRDC) > 0 || len(newRDC) > 0 {
+			return true
+		}
+
+		// Compare preferred edge paths
+		oldPEP := interface2StringList(old["preferred_edge_paths"].(*schema.Set).List())
+		newPEP := interface2StringList(new["preferred_edge_paths"].(*schema.Set).List())
+		if len(oldPEP) != len(newPEP) {
+			return true
+		} else {
+			for j := range oldPEP {
+				if oldPEP[j] != newPEP[j] {
+					return true
+				}
+			}
+		}
+	}
+	return false
+}
+
 func initGatewayLocaleServices(d *schema.ResourceData, connector *client.RestConnector, listLocaleServicesFunc func(*client.RestConnector, string, bool) ([]model.LocaleServices, error)) ([]*data.StructValue, error) {
 	var localeServices []*data.StructValue
 
@@ -314,7 +359,6 @@ func initGatewayLocaleServices(d *schema.ResourceData, connector *client.RestCon
 			setLocaleServiceRedistributionConfig(redistributionConfigs.([]interface{}), &serviceStruct)
 		}
 
-		// TODO(asarfaty): Update the locale-service only if really changed, which is very rare
 		if obj, ok := existingServices[serviceID]; ok {
 			// if this is an update for existing locale service,
 			// we need revision, and keep the HA vip config

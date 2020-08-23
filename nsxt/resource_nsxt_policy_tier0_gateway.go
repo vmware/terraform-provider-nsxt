@@ -697,7 +697,7 @@ func initPolicyTier0ChildBgpConfig(config *model.BgpRoutingConfig) (*data.Struct
 	return dataValue.(*data.StructValue), nil
 }
 
-func policyTier0GatewayResourceToInfraStruct(d *schema.ResourceData, connector *client.RestConnector, isGlobalManager bool, id string) (model.Infra, error) {
+func policyTier0GatewayResourceToInfraStruct(d *schema.ResourceData, connector *client.RestConnector, isGlobalManager bool, id string, isCreate bool) (model.Infra, error) {
 	var infraChildren, gwChildren, lsChildren []*data.StructValue
 	var infraStruct model.Infra
 	converter := bindings.NewTypeConverter()
@@ -787,12 +787,19 @@ func policyTier0GatewayResourceToInfraStruct(d *schema.ResourceData, connector *
 		}
 	} else {
 		// Global Manager
-		localeServices, err := initGatewayLocaleServices(d, connector, listPolicyTier0GatewayLocaleServices)
-		if err != nil {
-			return infraStruct, err
+		addLocaleServices := true
+		// If its an update scenario - update locale services only if they have changed
+		if !isCreate {
+			addLocaleServices = policyGatewayLocalServiceChanged(d)
 		}
-		if len(localeServices) > 0 {
-			gwChildren = append(gwChildren, localeServices...)
+		if addLocaleServices {
+			localeServices, err := initGatewayLocaleServices(d, connector, listPolicyTier0GatewayLocaleServices)
+			if err != nil {
+				return infraStruct, err
+			}
+			if len(localeServices) > 0 {
+				gwChildren = append(gwChildren, localeServices...)
+			}
 		}
 	}
 
@@ -832,7 +839,7 @@ func resourceNsxtPolicyTier0GatewayCreate(d *schema.ResourceData, m interface{})
 		return err
 	}
 
-	obj, err := policyTier0GatewayResourceToInfraStruct(d, connector, isGlobalManager, id)
+	obj, err := policyTier0GatewayResourceToInfraStruct(d, connector, isGlobalManager, id, true)
 	if err != nil {
 		return err
 	}
@@ -977,7 +984,7 @@ func resourceNsxtPolicyTier0GatewayUpdate(d *schema.ResourceData, m interface{})
 		return fmt.Errorf("Error obtaining Tier0 ID")
 	}
 
-	obj, err := policyTier0GatewayResourceToInfraStruct(d, connector, isGlobalManager, id)
+	obj, err := policyTier0GatewayResourceToInfraStruct(d, connector, isGlobalManager, id, false)
 	if err != nil {
 		return err
 	}
