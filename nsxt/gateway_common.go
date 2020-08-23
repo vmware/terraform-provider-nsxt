@@ -305,11 +305,10 @@ func policyGatewayLocalServiceChanged(d *schema.ResourceData) bool {
 		newPEP := interface2StringList(new["preferred_edge_paths"].(*schema.Set).List())
 		if len(oldPEP) != len(newPEP) {
 			return true
-		} else {
-			for j := range oldPEP {
-				if oldPEP[j] != newPEP[j] {
-					return true
-				}
+		}
+		for j := range oldPEP {
+			if oldPEP[j] != newPEP[j] {
+				return true
 			}
 		}
 	}
