@@ -9,6 +9,8 @@ description: Policy Context Profile Profile data source.
 
 This data source provides information about Policy Context Profile configured in NSX.
 
+**NOTE:** This data source is experimental.
+
 ## Example Usage
 
 ```hcl

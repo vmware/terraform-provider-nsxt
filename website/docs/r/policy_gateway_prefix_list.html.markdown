@@ -9,6 +9,8 @@ description: A resource to configure a prefix list on Tier-0 gateway in NSX Poli
 
 This resource provides a method for the management of a Tier-0 gateway prefix list.
 
+**NOTE:** This resource is experimental.
+
 # Example Usage
 
 ```hcl

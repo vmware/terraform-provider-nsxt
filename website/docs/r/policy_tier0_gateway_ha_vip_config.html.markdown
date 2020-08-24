@@ -9,6 +9,8 @@ description: A resource to configure HA Vip config on Tier-0 gateway in NSX Poli
 
 This resource provides a method for the management of a Tier-0 gateway HA Vip config. Note that this configuration can be defined only for Active-Standby Tier0 gateway.
 
+**NOTE:** This resource is experimental.
+
 # Example Usage
 
 ```hcl
@@ -50,7 +52,7 @@ The following arguments are supported:
 * `config` - (Required) List of HA vip configurations (all belonging to the same Tier0 locale-service) containing:
   * `enabled` - (Optional) Flag indicating if this HA VIP config is enabled. True by default.
   * `vip_subnets` - (Required) 1 or 2 Ip Addresses/Prefixes in CIDR format, which will be used as floating IP addresses.
-  * `external_interface_paths` - (Required) Paths of 2 external interfaces belonging to the same Tier0 gateway locale-service, which are to be paired to provide redundancy. Floating IP will be owned by one of these interfaces depending upon which edge node is Active.
+  * `external_interface_paths` - (Required) Paths of 2 external interfaces belonging to the same Tier0 gateway locale-service, which are to be paired to provide redundancy. Floating IP will be owned by one of these interfaces depending upon which edge node is active.
 
 ## Attributes Reference
 
