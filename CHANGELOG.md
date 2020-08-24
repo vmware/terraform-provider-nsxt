@@ -1,4 +1,4 @@
-## 3.0.0 (Unreleased)
+## 3.0.0 (August 24, 2020)
 
 FEATURES:
 
@@ -25,7 +25,7 @@ IMPROVEMENTS:
 * `resource/nsxt_policy_segment`, `resource/nsxt_policy_vlan_segment`: Support assigning custome segment profiles ([#384](https://github.com/vmware/terraform-provider-nsxt/pull/384))
 * `resource/nsxt_policy_segment`, `resource/nsxt_policy_vlan_segment`: Wait for VM ports to be deleted before proceeding with segment delete. This avoids potential dependency error on deletion ([#311](https://github.com/vmware/terraform-provider-nsxt/pull/311))
 * `resource/nsxt_policy_vlan_segment`: Allow specifying vlan range ([#342](https://github.com/vmware/terraform-provider-nsxt/pull/342))
-* `resource/nsxt_policy_tier0_gateway`: Support assigning custome segment profiles ([#363](https://github.com/vmware/terraform-provider-nsxt/pull/363))
+* `resource/nsxt_policy_tier0_gateway`: Support assigning custom segment profiles ([#363](https://github.com/vmware/terraform-provider-nsxt/pull/363))
 
 BUG FIXES:
 
