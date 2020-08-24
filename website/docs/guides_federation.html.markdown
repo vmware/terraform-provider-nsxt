@@ -51,8 +51,6 @@ The following Resources are available to use with Federation:
  * Gateway Policy [nsxt_policy_gateway_policy](https://www.terraform.io/docs/providers/nsxt/r/nsxt_policy_gateway_policy.html)
  * NAT Rules [nsxt_policy_nat_rules](https://www.terraform.io/docs/providers/nsxt/r/nsxt_policy_nat_rules.html)
 
-* Tier-0 Gateway: [nsxt_policy_tier0_gateway](https://www.terraform.io/docs/providers/nsxt/r/policy_tier0_gateway.html)
-
 ## Available Data Sources for use with NSX-T Federation
 
 The following Data Sources are available to use with Federation:
