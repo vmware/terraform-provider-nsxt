@@ -790,7 +790,7 @@ func policyTier0GatewayResourceToInfraStruct(d *schema.ResourceData, connector *
 		addLocaleServices := true
 		// If its an update scenario - update locale services only if they have changed
 		if !isCreate {
-			addLocaleServices = policyGatewayLocalServiceChanged(d)
+			addLocaleServices = d.HasChange("locale_service")
 		}
 		if addLocaleServices {
 			localeServices, err := initGatewayLocaleServices(d, connector, listPolicyTier0GatewayLocaleServices)
