@@ -1,18 +1,18 @@
 ---
 layout: "nsxt"
-page_title: "NSXT: cluster"
-sidebar_current: "docs-nsxt-datasource-cluster"
-description: A cluster data source.
+page_title: "NSXT: management_cluster"
+sidebar_current: "docs-nsxt-datasource-management-cluster"
+description: A NSX-T management cluster data source.
 ---
 
-# nsxt_certificate
+# nsxt_management_cluster
 
 This data source provides information about the NSX-T management cluster.
 
 ## Example Usage
 
 ```hcl
-data "nsxt_cluster" "cluster" {}
+data "nsxt_management_cluster" "cluster" {}
 ```
 
 ## Attributes Reference

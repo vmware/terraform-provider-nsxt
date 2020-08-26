@@ -1,4 +1,4 @@
-/* Copyright © 2017 VMware, Inc. All Rights Reserved.
+/* Copyright © 2020 VMware, Inc. All Rights Reserved.
    SPDX-License-Identifier: MPL-2.0 */
 
 package nsxt
@@ -9,9 +9,9 @@ import (
 	"net/http"
 )
 
-func dataSourceNsxtCluster() *schema.Resource {
+func dataSourceNsxtManagementCluster() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceNsxtClusterRead,
+		Read: dataSourceNsxtManagementClusterRead,
 
 		Schema: map[string]*schema.Schema{
 			"id": {
@@ -30,7 +30,7 @@ func dataSourceNsxtCluster() *schema.Resource {
 	}
 }
 
-func dataSourceNsxtClusterRead(d *schema.ResourceData, m interface{}) error {
+func dataSourceNsxtManagementClusterRead(d *schema.ResourceData, m interface{}) error {
 	nsxClient := m.(nsxtClients).NsxtClient
 	if nsxClient == nil {
 		return dataSourceNotSupportedError()
@@ -38,7 +38,7 @@ func dataSourceNsxtClusterRead(d *schema.ResourceData, m interface{}) error {
 
 	clusterObj, resp, err := nsxClient.NsxComponentAdministrationApi.ReadClusterConfig(nsxClient.Context)
 	if err != nil {
-		return fmt.Errorf("Error while reading cluster configuration", err)
+		return fmt.Errorf("Error while reading cluster configuration: %v", err)
 	}
 	if resp != nil && resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("Unexpected Response while reading cluster configuration. Status Code: %d", resp.StatusCode)
@@ -46,7 +46,7 @@ func dataSourceNsxtClusterRead(d *schema.ResourceData, m interface{}) error {
 
 	nodeList, resp, err := nsxClient.NsxComponentAdministrationApi.ListClusterNodeConfigs(nsxClient.Context, nil)
 	if err != nil {
-		return fmt.Errorf("Error while reading cluster node configuration", err)
+		return fmt.Errorf("Error while reading cluster node configuration: %v", err)
 	}
 	if resp != nil && resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("Unexpected Response while reading cluster node configuration. Status Code: %d", resp.StatusCode)

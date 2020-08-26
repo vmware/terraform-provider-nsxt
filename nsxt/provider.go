@@ -157,7 +157,6 @@ func Provider() terraform.ResourceProvider {
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
-			"nsxt_cluster":                         dataSourceNsxtCluster(),
 			"nsxt_transport_zone":                  dataSourceNsxtTransportZone(),
 			"nsxt_switching_profile":               dataSourceNsxtSwitchingProfile(),
 			"nsxt_logical_tier0_router":            dataSourceNsxtLogicalTier0Router(),
@@ -169,6 +168,7 @@ func Provider() terraform.ResourceProvider {
 			"nsxt_certificate":                     dataSourceNsxtCertificate(),
 			"nsxt_ip_pool":                         dataSourceNsxtIPPool(),
 			"nsxt_firewall_section":                dataSourceNsxtFirewallSection(),
+			"nsxt_management_cluster":              dataSourceNsxtManagementCluster(),
 			"nsxt_policy_edge_cluster":             dataSourceNsxtPolicyEdgeCluster(),
 			"nsxt_policy_edge_node":                dataSourceNsxtPolicyEdgeNode(),
 			"nsxt_policy_tier0_gateway":            dataSourceNsxtPolicyTier0Gateway(),
