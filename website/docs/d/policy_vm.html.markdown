@@ -1,13 +1,15 @@
 ---
+subcategory: "Policy - Grouping and Tagging"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_vm"
-sidebar_current: "docs-nsxt-datasource-policy-vm"
-description: A Policy Virtual Machine ID data source.
+description: A Discovered Policy Virtual Machine data source.
 ---
 
 # nsxt_policy_vm
 
-This data source provides information about Policy based Virtual Machine (VM) configured in NSX and allows look-up of the VM by `display_name` or the BIOS, external or instance ID exposed on the VM resource.
+This data source provides information about Policy based Virtual Machine (VM) listed in NSX inventory, and allows look-up of the VM by `display_name` or the BIOS, external or instance ID exposed on the VM resource.
+
+This data source is applicable to NSX Policy Manager and VMC.
 
 ## Example Usage
 

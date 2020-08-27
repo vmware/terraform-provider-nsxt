@@ -1,7 +1,7 @@
 ---
+subcategory: "Manager"
 layout: "nsxt"
 page_title: "NSXT: nsxt_lb_tcp_virtual_server"
-sidebar_current: "docs-nsxt-resource-lb-tcp-virtual-server"
 description: |-
   Provides a resource to configure lb tcp virtual server on NSX-T manager
 ---
@@ -47,16 +47,16 @@ resource "nsxt_lb_tcp_virtual_server" "lb_virtual_server" {
   description                = "lb_virtual_server provisioned by terraform"
   display_name               = "virtual server 1"
   access_log_enabled         = true
-  application_profile_id     = "${nsxt_lb_fast_tcp_application_profile.timeout_60.id}"
+  application_profile_id     = nsxt_lb_fast_tcp_application_profile.timeout_60.id
   enabled                    = true
   ip_address                 = "10.0.0.2"
   ports                      = ["443"]
   default_pool_member_ports  = ["8888"]
   max_concurrent_connections = 50
   max_new_connection_rate    = 20
-  persistence_profile_id     = "${nsxt_lb_source_ip_persistence_profile.ip_profile.id}"
-  pool_id                    = "${nsxt_lb_pool.pool1.id}"
-  sorry_pool_id              = "${nsxt_lb_pool.sorry_pool.id}"
+  persistence_profile_id     = nsxt_lb_source_ip_persistence_profile.ip_profile.id
+  pool_id                    = nsxt_lb_pool.pool1.id
+  sorry_pool_id              = nsxt_lb_pool.sorry_pool.id
 
   tag {
     scope = "color"

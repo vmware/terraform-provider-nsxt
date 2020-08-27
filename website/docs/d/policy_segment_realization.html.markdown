@@ -1,7 +1,7 @@
 ---
+subcategory: "Policy - Realization"
 layout: "nsxt"
 page_title: "NSXT: policy_segment_realization"
-sidebar_current: "docs-nsxt-datasource-policy-segment-realization"
 description: State of segment realization on hypervisors.
 ---
 
@@ -11,6 +11,8 @@ This data source provides information about the realization of a policy segment 
 This data source will wait until realization is complete with either success, partial success or error. It is recommended
 to use this data source in conjunction with vsphere provider, in order to ensure segment is realized on hypervisor before
 VM is created on same network.
+
+This data source is applicable to NSX Policy Manager.
 
 ## Example Usage
 

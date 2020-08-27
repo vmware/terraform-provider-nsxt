@@ -1,13 +1,16 @@
 ---
+subcategory: "Policy - Segments"
 layout: "nsxt"
 page_title: "NSXT: policy_vni_pool"
-sidebar_current: "docs-nsxt-datasource-policy-vni-pool"
 description: Policy VNI Pool Config data source.
 ---
 
 # nsxt_policy_vni_pool
 
 This data source provides information about policy VNI Pools configured in NSX.
+
+This data source is applicable to NSX Policy Manager.
+
 This data source is supported with NSX 3.0.0 onwards.
 
 ## Example Usage

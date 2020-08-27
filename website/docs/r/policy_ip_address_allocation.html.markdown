@@ -1,7 +1,7 @@
 ---
+subcategory: "Policy - IPAM"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_ip_address_allocation"
-sidebar_current: "docs-nsxt-resource-policy-ip-address-allocation"
 description: A resource to configure a IP Address allocations.
 ---
 
@@ -10,7 +10,9 @@ description: A resource to configure a IP Address allocations.
 This resource provides a method for the management of a IP Address Allocations.
 Note that IP Address Allocations cannot be updated once created and changing any attributes of
 an existing allocation will re-create it.
- 
+
+This resource is applicable to NSX Policy Manager.
+
 ## Example Usage
 
 ```hcl

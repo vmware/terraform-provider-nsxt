@@ -1,7 +1,7 @@
 ---
+subcategory: "Manager"
 layout: "nsxt"
 page_title: "NSXT: transport_zone"
-sidebar_current: "docs-nsxt-datasource-transport-zone"
 description: A transport zone data source.
 ---
 

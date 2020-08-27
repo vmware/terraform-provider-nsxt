@@ -1,7 +1,7 @@
 ---
+subcategory: "Manager"
 layout: "nsxt"
 page_title: "NSXT: nsxt_mac_management_switching_profile"
-sidebar_current: "docs-nsxt-switching-profile-resource"
 description: |-
   Provides a resource to configure MAC management switching profile on NSX-T manager
 ---

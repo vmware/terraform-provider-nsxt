@@ -1,13 +1,15 @@
 ---
+subcategory: "Policy - Gateways and Routing"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_tier1_gateway"
-sidebar_current: "docs-nsxt-resource-policy-tier1-gateway"
-description: A resource to configure a Tier-1 gateway in NSX Policy manager.
+description: A resource to configure a Tier-1 gateway on NSX Policy manager.
 ---
 
 # nsxt_policy_tier1_gateway
 
-This resource provides a method for the management of a Tier-1 gateway. A Tier-1 gateway is often used for tenants, users and applications. There can be many Tier-1 gateways connected to a common Tier-0 provider gateway.
+This resource provides a method for the management of a Tier-1 Gateway. A Tier-1 Gateway is often used for tenants, users and applications. There can be many Tier-1 gateways connected to a common Tier-0 provider gateway.
+
+This resource is applicable to NSX Global Manager, NSX Policy Manager and VMC.
 
 ## Example Usage
 

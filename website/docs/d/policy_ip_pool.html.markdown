@@ -1,13 +1,15 @@
 ---
+subcategory: "Policy - IPAM"
 layout: "nsxt"
 page_title: "NSXT: policy_ip_pool"
-sidebar_current: "docs-nsxt-datasource-policy-ip-pool"
 description: Policy IP Pool Config data source.
 ---
 
 # nsxt_policy_ip_pool
 
-This data source provides information about policy IP Pools configured in NSX.
+This data source provides information about policy IP Pools configured on NSX.
+
+This data source is applicable to NSX Policy Manager.
 
 ## Example Usage
 

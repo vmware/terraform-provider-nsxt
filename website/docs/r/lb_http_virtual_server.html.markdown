@@ -1,7 +1,7 @@
 ---
+subcategory: "Manager"
 layout: "nsxt"
 page_title: "NSXT: nsxt_lb_http_virtual_server"
-sidebar_current: "docs-nsxt-resource-lb-http-virtual-server"
 description: |-
   Provides a resource to configure lb http virtual server on NSX-T manager
 ---
@@ -63,35 +63,35 @@ resource "nsxt_lb_http_virtual_server" "lb_virtual_server" {
   description                = "lb_virtual_server provisioned by terraform"
   display_name               = "virtual server 1"
   access_log_enabled         = true
-  application_profile_id     = "${nsxt_lb_http_application_profile.http_xff.id}"
+  application_profile_id     = nsxt_lb_http_application_profile.http_xff.id
   enabled                    = true
   ip_address                 = "10.0.0.2"
   port                       = "443"
   default_pool_member_port   = "8888"
   max_concurrent_connections = 50
   max_new_connection_rate    = 20
-  persistence_profile_id     = "${nsxt_lb_cookie_persistence_profile.session_persistence.id}"
-  pool_id                    = "${nsxt_lb_pool.pool1.id}"
-  sorry_pool_id              = "${nsxt_lb_pool.sorry_pool.id}"
-  rule_ids                   = ["${nsxt_lb_http_request_rewrite_rule.redirect_post.id}"]
+  persistence_profile_id     = nsxt_lb_cookie_persistence_profile.session_persistence.id
+  pool_id                    = nsxt_lb_pool.pool1.id
+  sorry_pool_id              = nsxt_lb_pool.sorry_pool.id
+  rule_ids                   = [nsxt_lb_http_request_rewrite_rule.redirect_post.id]
 
   client_ssl {
-    client_ssl_profile_id   = "${nsxt_lb_client_ssl_profile.ssl1.id}"
-    default_certificate_id  = "${data.nsxt_certificate.cert1.id}"
+    client_ssl_profile_id   = nsxt_lb_client_ssl_profile.ssl1.id
+    default_certificate_id  = data.nsxt_certificate.cert1.id
     certificate_chain_depth = 2
     client_auth             = true
-    ca_ids                  = ["${data.nsxt_certificate.ca.id}"]
-    crl_ids                 = ["${data.nsxt_certificate.crl.id}"]
-    sni_certificate_ids     = ["${data.nsxt_certificate.sni.id}"]
+    ca_ids                  = [data.nsxt_certificate.ca.id]
+    crl_ids                 = [data.nsxt_certificate.crl.id]
+    sni_certificate_ids     = [data.nsxt_certificate.sni.id]
   }
 
   server_ssl {
-    server_ssl_profile_id   = "${nsxt_lb_server_ssl_profile.ssl1.id}"
-    client_certificate_id   = "${data.nsxt_certificate.client.id}"
+    server_ssl_profile_id   = nsxt_lb_server_ssl_profile.ssl1.id
+    client_certificate_id   = data.nsxt_certificate.client.id
     certificate_chain_depth = 2
     server_auth             = true
-    ca_ids                  = ["${data.nsxt_certificate.server_ca.id}"]
-    crl_ids                 = ["${data.nsxt_certificate.crl.id}"]
+    ca_ids                  = [data.nsxt_certificate.server_ca.id]
+    crl_ids                 = [data.nsxt_certificate.crl.id]
   }
 
   tag {

@@ -1,7 +1,7 @@
 ---
+subcategory: "Manager"
 layout: "nsxt"
 page_title: "NSXT: nsxt_vlan_logical_switch"
-sidebar_current: "docs-nsxt-resource-vlan-logical-switch"
 description: A resource to configure vlan logical switch in NSX.
 ---
 
@@ -16,7 +16,7 @@ resource "nsxt_vlan_logical_switch" "switch1" {
   admin_state       = "UP"
   description       = "LS1 provisioned by Terraform"
   display_name      = "LS1"
-  transport_zone_id = "${data.nsxt_transport_zone.vlan_transport_zone.id}"
+  transport_zone_id = data.nsxt_transport_zone.vlan_transport_zone.id
   vlan              = 2
 
   tag {
@@ -25,8 +25,8 @@ resource "nsxt_vlan_logical_switch" "switch1" {
   }
 
   switching_profile_id {
-    key   = "${data.nsxt_switching_profile.qos_profiles.resource_type}"
-    value = "${data.nsxt_switching_profile.qos_profiles.id}"
+    key   = data.nsxt_switching_profile.qos_profiles.resource_type
+    value = data.nsxt_switching_profile.qos_profiles.id
   }
 }
 ```

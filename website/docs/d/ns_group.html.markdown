@@ -1,7 +1,7 @@
 ---
+subcategory: "Manager"
 layout: "nsxt"
 page_title: "NSXT: ns_group"
-sidebar_current: "docs-nsxt-datasource-ns-group"
 description: A networking and security group data source.
 ---
 

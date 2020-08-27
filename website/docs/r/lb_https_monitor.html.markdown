@@ -1,7 +1,7 @@
 ---
+subcategory: "Manager"
 layout: "nsxt"
 page_title: "NSXT: nsxt_lb_https_monitor"
-sidebar_current: "docs-nsxt-lb-monitor-resource-https"
 description: |-
   Provides a resource to configure lb https monitor on NSX-T manager
 ---
@@ -32,7 +32,7 @@ resource "nsxt_lb_https_monitor" "lb_https_monitor" {
   timeout                 = 10
   certificate_chain_depth = 2
   ciphers                 = ["TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256", "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384"]
-  client_certificate_id   = "${data.nsxt_certificate.client.id}"
+  client_certificate_id   = data.nsxt_certificate.client.id
   protocols               = ["TLS_V1_2"]
   request_body            = "ping"
   request_method          = "HEAD"
@@ -41,7 +41,7 @@ resource "nsxt_lb_https_monitor" "lb_https_monitor" {
   response_body           = "pong"
   response_status_codes   = [200, 304]
   server_auth             = "REQUIRED"
-  server_auth_ca_ids      = ["${data.nsxt_certificate.CA.id}"]
+  server_auth_ca_ids      = data.nsxt_certificate.CA.id
   server_auth_crl_ids     = ["78ba3814-bfe1-45e5-89d3-46862bed7896"]
 
   request_header {

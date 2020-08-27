@@ -1,7 +1,7 @@
 ---
+subcategory: "Manager"
 layout: "nsxt"
 page_title: "NSXT: nsxt_lb_source_ip_persistence_profile"
-sidebar_current: "docs-nsxt-resource-lb-source-ip-persistence-profile"
 description: |-
   Provides a resource to configure lb source ip persistence profile on NSX-T manager
 ---

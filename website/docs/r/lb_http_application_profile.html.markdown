@@ -1,14 +1,14 @@
 ---
+subcategory: "Manager"
 layout: "nsxt"
 page_title: "NSXT: nsxt_lb_http_application_profile"
-sidebar_current: "docs-nsxt-resource-lb-http-application-profile"
 description: |-
   Provides a resource to configure LB HTTP application profile on NSX-T manager
 ---
 
 # nsxt_lb_http_application_profile
 
-Provides a resource to configure LB HTTP application profile on NSX-T manager
+Provides a resource to configure Load Balancer HTTP application profile on NSX-T manager
 
 ~> **NOTE:** This resource requires NSX version 2.3 or higher.
 

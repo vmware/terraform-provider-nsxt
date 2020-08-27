@@ -1,15 +1,15 @@
 ---
+subcategory: "Beta"
 layout: "nsxt"
 page_title: "NSXT: policy_context_profile"
-sidebar_current: "docs-nsxt-datasource-policy-context-profile"
 description: Policy Context Profile Profile data source.
 ---
 
 # nsxt_policy_context_profile
 
-This data source provides information about Policy Context Profile configured in NSX.
+This data source provides information about Policy Context Profile configured on NSX.
 
-**NOTE:** This data source is experimental.
+This data source is applicable to NSX Global Manager and NSX Policy Manager.
 
 ## Example Usage
 

@@ -1,7 +1,7 @@
 ---
+subcategory: "Manager"
 layout: "nsxt"
 page_title: "NSXT: nsxt_lb_tcp_monitor"
-sidebar_current: "docs-nsxt-resource-lb-tcp-monitor"
 description: |-
   Provides a resource to configure load balancer tcp monitor on NSX-T manager
 ---

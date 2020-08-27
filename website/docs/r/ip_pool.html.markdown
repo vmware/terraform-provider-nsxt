@@ -1,7 +1,7 @@
 ---
+subcategory: "Manager"
 layout: "nsxt"
 page_title: "NSXT: nsxt_ip_pool"
-sidebar_current: "docs-nsxt-resource-ip-pool"
 description: |-
   Provides a resource to configure IP pool on NSX-T manager
 ---

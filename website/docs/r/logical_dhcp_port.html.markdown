@@ -1,7 +1,7 @@
 ---
+subcategory: "Manager"
 layout: "nsxt"
 page_title: "NSXT: nsxt_logical_dhcp_port"
-sidebar_current: "docs-nsxt-resource-logical-dhcp-port"
 description: A resource that can be used to configure a Logical DHCP Port in NSX.
 ---
 
@@ -14,7 +14,7 @@ This resource provides a resource to configure a logical port on a logical switc
 ```hcl
 resource "nsxt_logical_dhcp_server" "logical_dhcp_server" {
   display_name    = "logical_dhcp_server"
-  dhcp_profile_id = "${nsxt_dhcp_server_profile.PRF.id}"
+  dhcp_profile_id = nsxt_dhcp_server_profile.PRF.id
   dhcp_server_ip  = "1.1.1.10/24"
   gateway_ip      = "1.1.1.20"
 }
@@ -22,15 +22,15 @@ resource "nsxt_logical_dhcp_server" "logical_dhcp_server" {
 resource "nsxt_logical_switch" "switch" {
   display_name      = "LS1"
   admin_state       = "UP"
-  transport_zone_id = "${data.nsxt_transport_zone.transport_zone.id}"
+  transport_zone_id = data.nsxt_transport_zone.transport_zone.id
 }
 
 resource "nsxt_logical_dhcp_port" "dhcp_port" {
   admin_state       = "UP"
   description       = "LP1 provisioned by Terraform"
   display_name      = "LP1"
-  logical_switch_id = "${nsxt_logical_switch.switch.id}"
-  dhcp_server_id    = "${nsxt_logical_dhcp_server.logical_dhcp_server.id}"
+  logical_switch_id = nsxt_logical_switch.switch.id
+  dhcp_server_id    = nsxt_logical_dhcp_server.logical_dhcp_server.id
 
   tag {
     scope = "color"

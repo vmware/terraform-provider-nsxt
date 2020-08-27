@@ -1,7 +1,7 @@
 ---
+subcategory: "Manager"
 layout: "nsxt"
 page_title: "NSXT: nsxt_ns_group"
-sidebar_current: "docs-nsxt-resource-ns-group"
 description: A resource to configure a networking and security group in NSX.
 ---
 
@@ -18,7 +18,7 @@ resource "nsxt_ns_group" "group2" {
 
   member {
     target_type = "NSGroup"
-    value       = "${nsxt_ns_group.group1.id}"
+    value       = nsxt_ns_group.group1.id
   }
 
   membership_criteria {

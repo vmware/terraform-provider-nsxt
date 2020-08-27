@@ -1,7 +1,7 @@
 ---
+subcategory: "Manager"
 layout: "nsxt"
 page_title: "NSXT: nsxt_switch_security_switching_profile"
-sidebar_current: "docs-nsxt-switching-profile-resource"
 description: |-
   Provides a resource to configure switch security switching profile on NSX-T manager
 ---

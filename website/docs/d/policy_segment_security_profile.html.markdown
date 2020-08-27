@@ -1,13 +1,15 @@
 ---
+subcategory: "Policy - Segments"
 layout: "nsxt"
 page_title: "NSXT: policy_segment_security_profile"
-sidebar_current: "docs-nsxt-datasource-policy-segment-security-profile"
 description: Policy SegmentSecurityProfile data source.
 ---
 
 # nsxt_policy_segment_security_profile
 
-This data source provides information about policy SegmentSecurityProfile configured in NSX.
+This data source provides information about policy Segment Security Profile configured on NSX.
+
+This data source is applicable to NSX Policy Manager, NSX Global Manager and VMC.
 
 ## Example Usage
 

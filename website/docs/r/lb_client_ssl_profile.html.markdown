@@ -1,14 +1,14 @@
 ---
+subcategory: "Manager"
 layout: "nsxt"
 page_title: "NSXT: nsxt_lb_client_ssl_profile"
-sidebar_current: "docs-nsxt-resource-lb-client-ssl-profile"
 description: |-
   Provides a resource to configure lb client ssl profile on NSX-T manager
 ---
 
 # nsxt_lb_client_ssl_profile
 
-Provides a resource to configure lb client ssl profile on NSX-T manager
+Provides a resource to configure Load Balancer Client SSL Profile on NSX-T manager
 
 ~> **NOTE:** This resource requires NSX version 2.3 or higher.
 

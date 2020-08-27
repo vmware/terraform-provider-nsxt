@@ -1,14 +1,14 @@
 ---
+subcategory: "Manager"
 layout: "nsxt"
 page_title: "NSXT: nsxt_lb_pool"
-sidebar_current: "docs-nsxt-resource-lb-pool"
 description: |-
-  Provides a resource to configure lb pool on NSX-T manager
+  Provides a resource to configure Load Balancer Pool on NSX-T manager
 ---
 
 # nsxt_lb_pool
 
-Provides a resource to configure lb pool on NSX-T manager
+Provides a resource to configure Load Balancer Pool on NSX-T manager
 
 ~> **NOTE:** This resource requires NSX version 2.3 or higher.
 
@@ -34,8 +34,8 @@ resource "nsxt_lb_pool" "lb_pool" {
   min_active_members       = 1
   tcp_multiplexing_enabled = false
   tcp_multiplexing_number  = 3
-  active_monitor_id        = "${nsxt_lb_icmp_monitor.lb_icmp_monitor.id}"
-  passive_monitor_id       = "${nsxt_lb_passive_monitor.lb_passive_monitor.id}"
+  active_monitor_id        = nsxt_lb_icmp_monitor.lb_icmp_monitor.id
+  passive_monitor_id       = nsxt_lb_passive_monitor.lb_passive_monitor.id
 
   member {
     admin_state                = "ENABLED"
@@ -60,8 +60,8 @@ resource "nsxt_lb_pool" "lb_pool_with_dynamic_membership" {
   min_active_members       = 1
   tcp_multiplexing_enabled = false
   tcp_multiplexing_number  = 3
-  active_monitor_id        = "${nsxt_lb_icmp_monitor.lb_icmp_monitor.id}"
-  passive_monitor_id       = "${nsxt_lb_passive_monitor.lb_passive_monitor.id}"
+  active_monitor_id        = nsxt_lb_icmp_monitor.lb_icmp_monitor.id
+  passive_monitor_id       = nsxt_lb_passive_monitor.lb_passive_monitor.id
 
   snat_translation {
     type          = "SNAT_IP_POOL"
@@ -76,7 +76,7 @@ resource "nsxt_lb_pool" "lb_pool_with_dynamic_membership" {
 
     grouping_object {
       target_type = "NSGroup"
-      target_id   = "${nsxt_ns_group.group1.id}"
+      target_id   = nsxt_ns_group.group1.id
       }
     }
   }

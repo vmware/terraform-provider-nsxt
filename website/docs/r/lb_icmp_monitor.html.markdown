@@ -1,7 +1,7 @@
 ---
+subcategory: "Manager"
 layout: "nsxt"
 page_title: "NSXT: nsxt_lb_icmp_monitor"
-sidebar_current: "docs-nsxt-lb-monitor-resource-icmp"
 description: |-
   Provides a resource to configure load balancer icmp monitor on NSX-T manager
 ---

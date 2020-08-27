@@ -1,13 +1,15 @@
 ---
+subcategory: "Policy - Gateways and Routing"
 layout: "nsxt"
 page_title: "NSXT: policy_tier1_gateway"
-sidebar_current: "docs-nsxt-datasource-policy-tier1-gateway"
 description: A policy Tier-1 gateway data source.
 ---
 
 # nsxt_policy_tier1_gateway
 
-This data source provides information about policy Tier-1s configured in NSX.
+This data source provides information about policy Tier-1s configured on NSX.
+
+This data source is applicable to NSX Policy Manager and VMC.
 
 ## Example Usage
 

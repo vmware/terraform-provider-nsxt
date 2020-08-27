@@ -1,13 +1,15 @@
 ---
+subcategory: "Policy - Gateways and Routing"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_tier1_gateway_interface"
-sidebar_current: "docs-nsxt-resource-policy-tier1-gateway-interface"
-description: A resource to configure an Interface on Tier-1 gateway in NSX Policy manager.
+description: A resource to configure an Interface on Tier-1 gateway on NSX Policy manager.
 ---
 
 # nsxt_policy_tier1_gateway_interface
 
 This resource provides a method for the management of a Tier-1 gateway Interface. Note that edge cluster must be configured on Tier-1 Gateway in order to configure interfaces on it.
+
+This resource is applicable to NSX Global Manager, NSX Policy Manager and VMC.
 
 # Example Usage
 

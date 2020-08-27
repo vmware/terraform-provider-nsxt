@@ -1,8 +1,8 @@
 ---
+subcategory: "Manager"
 layout: "nsxt"
 page_title: "NSXT: nsxt_firewall_section"
-sidebar_current: "docs-nsxt-resource-firewall-section"
-description: A resource that can be used to configure a firewall section in NSX.
+description: A resource that can be used to configure a firewall section on NSX.
 ---
 
 # nsxt_firewall_section
@@ -28,12 +28,12 @@ resource "nsxt_firewall_section" "firewall_sect" {
 
   applied_to {
     target_type = "NSGroup"
-    target_id   = "${nsxt_ns_group.group1.id}"
+    target_id   = nsxt_ns_group.group1.id
   }
 
   section_type  = "LAYER3"
   stateful      = true
-  insert_before = "${data.nsxt_firewall_section.block_all.id}"
+  insert_before = data.nsxt_firewall_section.block_all.id
 
   rule {
     display_name          = "out_rule"
@@ -47,12 +47,12 @@ resource "nsxt_firewall_section" "firewall_sect" {
 
     source {
       target_type = "LogicalSwitch"
-      target_id   = "${nsxt_logical_switch.switch1.id}"
+      target_id   = nsxt_logical_switch.switch1.id
     }
 
     destination {
       target_type = "LogicalSwitch"
-      target_id   = "${nsxt_logical_switch.switch2.id}"
+      target_id   = nsxt_logical_switch.switch2.id
     }
   }
 
@@ -71,7 +71,7 @@ resource "nsxt_firewall_section" "firewall_sect" {
 
     service {
       target_type = "NSService"
-      target_id   = "${nsxt_l4_port_set_ns_service.http.id}"
+      target_id   = nsxt_l4_port_set_ns_service.http.id
     }
   }
 }

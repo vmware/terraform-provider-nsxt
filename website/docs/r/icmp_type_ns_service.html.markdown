@@ -1,7 +1,7 @@
 ---
+subcategory: "Manager"
 layout: "nsxt"
 page_title: "NSXT: nsxt_icmp_type_ns_service"
-sidebar_current: "docs-nsxt-ns-service-resource-icmp-type"
 description: A resource that can be used to configure an ICMP based networking and security service in NSX.
 ---
 

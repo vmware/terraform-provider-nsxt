@@ -1,7 +1,7 @@
 ---
+subcategory: "Manager"
 layout: "nsxt"
 page_title: "NSXT: nsxt_lb_service"
-sidebar_current: "docs-nsxt-resource-lb-service"
 description: |-
   Provides a resource to configure lb service on NSX-T manager
 ---
@@ -33,17 +33,17 @@ data "nsxt_logical_tier0_router" "test" {
 
 resource "nsxt_logical_router_link_port_on_tier0" "test" {
   display_name      = "port_on_tier0"
-  logical_router_id = "${data.nsxt_logical_tier0_router.test.id}"
+  logical_router_id = data.nsxt_logical_tier0_router.test.id
 }
 
 resource "nsxt_logical_tier1_router" "test" {
   display_name    = "test"
-  edge_cluster_id = "${data.nsxt_edge_cluster.EC.id}"
+  edge_cluster_id = data.nsxt_edge_cluster.EC.id
 }
 
 resource "nsxt_logical_router_link_port_on_tier1" "test" {
-  logical_router_id             = "${nsxt_logical_tier1_router.test.id}"
-  linked_logical_router_port_id = "${nsxt_logical_router_link_port_on_tier0.test.id}"
+  logical_router_id             = nsxt_logical_tier1_router.test.id
+  linked_logical_router_port_id = nsxt_logical_router_link_port_on_tier0.test.id
 }
 
 resource "nsxt_lb_service" "lb_service" {
@@ -56,11 +56,11 @@ resource "nsxt_lb_service" "lb_service" {
   }
 
   enabled           = true
-  logical_router_id = "${nsxt_logical_tier1_router.test.id}"
+  logical_router_id = nsxt_logical_tier1_router.test.id
   error_log_level   = "INFO"
   size              = "MEDIUM"
 
-  depends_on        = ["nsxt_logical_router_link_port_on_tier1.test"]
+  depends_on        = [nsxt_logical_router_link_port_on_tier1.test]
 }
 ```
 

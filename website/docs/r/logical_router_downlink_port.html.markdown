@@ -1,7 +1,7 @@
 ---
+subcategory: "Manager"
 layout: "nsxt"
 page_title: "NSXT: nsxt_logical_router_downlink_port"
-sidebar_current: "docs-nsxt-resource-logical-router-downlink-port"
 description: A resource that can be used to configure logical router downlink port in NSX.
 ---
 
@@ -15,12 +15,12 @@ This resource provides a means to define a downlink port on a logical router to 
 resource "nsxt_logical_router_downlink_port" "downlink_port" {
   description                   = "DP1 provisioned by Terraform"
   display_name                  = "DP1"
-  logical_router_id             = "${nsxt_logical_tier1_router.rtr1.id}"
-  linked_logical_switch_port_id = "${nsxt_logical_port.logical_port1.id}"
+  logical_router_id             = nsxt_logical_tier1_router.rtr1.id
+  linked_logical_switch_port_id = nsxt_logical_port.logical_port1.id
   ip_address                    = "1.1.0.1/24"
 
   service_binding {
-    target_id   = "${nsxt_dhcp_relay_service.dr_service.id}"
+    target_id   = nsxt_dhcp_relay_service.dr_service.id
     target_type = "LogicalService"
   }
 

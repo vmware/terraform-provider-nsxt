@@ -1,14 +1,16 @@
 ---
+subcategory: "Policy - Segments"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_vlan_segment"
-sidebar_current: "docs-nsxt-resource-policy-vlan-segment"
 description: A resource to configure a VLAN backed network Segment.
 ---
 
 # nsxt_policy_vlan_segment
 
 This resource provides a method for the management of VLAN backed Segments.
- 
+
+This resource is applicable to NSX Global Manager, NSX Policy Manager and VMC.
+
 ## Example Usage
 
 ```hcl
@@ -125,3 +127,5 @@ terraform import nsxt_policy_vlan_segment.segment1 ID
 ```
 
 The above command imports the VLAN backed segment  named `segment1` with the NSX Segment ID `ID`.
+
+~> **NOTE:** Only flexible (infra) segments can be imported. Segments that are fixed under certain gateway are not supported.

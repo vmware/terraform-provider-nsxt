@@ -1,13 +1,15 @@
 ---
+subcategory: "Policy - Gateways and Routing"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_static_route"
-sidebar_current: "docs-nsxt-resource-policy-static-route"
 description: A resource to configure Static Routes in NSX Policy manager.
 ---
 
 # nsxt_policy_static_route
 
 This resource provides a method for the management of a Static Route.
+
+This resource is applicable to NSX Global Manager, NSX Policy Manager and VMC.
 
 ## Example Usage
 

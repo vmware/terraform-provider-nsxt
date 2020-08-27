@@ -1,7 +1,7 @@
 ---
+subcategory: "Manager"
 layout: "nsxt"
 page_title: "NSXT: nsxt_lb_fast_udp_application_profile"
-sidebar_current: "docs-nsxt-resource-lb-fast-udp-application-profile"
 description: |-
   Provides a resource to configure LB fast UDP application profile on NSX-T manager
 ---

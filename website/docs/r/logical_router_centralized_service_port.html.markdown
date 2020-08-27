@@ -1,7 +1,7 @@
 ---
+subcategory: "Manager"
 layout: "nsxt"
 page_title: "NSXT: nsxt_logical_router_centralized_service_port"
-sidebar_current: "docs-nsxt-resource-logical-router-centralized-service-port"
 description: A resource that can be used to configure logical router centralized service port in NSX.
 ---
 
@@ -17,8 +17,8 @@ This resource provides a means to define a centralized service port on a logical
 resource "nsxt_logical_router_centralized_service_port" "cs_port" {
   description                   = "Centralized service port provisioned by Terraform"
   display_name                  = "CSP1"
-  logical_router_id             = "${nsxt_logical_tier1_router.rtr1.id}"
-  linked_logical_switch_port_id = "${nsxt_logical_port.logical_port1.id}"
+  logical_router_id             = nsxt_logical_tier1_router.rtr1.id
+  linked_logical_switch_port_id = nsxt_logical_port.logical_port1.id
   ip_address                    = "1.1.0.1/24"
 
   tag {

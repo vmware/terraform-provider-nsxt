@@ -1,14 +1,16 @@
 ---
+subcategory: "Policy - Load Balancer"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_lb_virtual_server"
-sidebar_current: "docs-nsxt-resource-policy-lb-virtual-server"
 description: A resource to configure a Load Balancer Virtual Server.
 ---
 
 # nsxt_policy_lb_virtual_server
 
 This resource provides a method for the management of a Load Balancer Virtual Server.
- 
+
+This resource is applicable to NSX Policy Manager.
+
 ## Example Usage
 
 ```hcl

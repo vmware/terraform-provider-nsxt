@@ -1,14 +1,16 @@
 ---
+subcategory: "Policy - Gateways and Routing"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_bgp_neighbor"
-sidebar_current: "docs-nsxt-resource-policy-bgp-neighbor"
 description: A resource to configure a BGP Neighbor.
 ---
 
 # nsxt_policy_bgp_neighbor
 
 This resource provides a method for the management of a BGP Neighbor.
- 
+
+This resource is applicable to NSX Global Manager and NSX Policy Manager.
+
 ## Example Usage
 
 ```hcl

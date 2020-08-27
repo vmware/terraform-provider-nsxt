@@ -1,13 +1,15 @@
 ---
+subcategory: "Policy - IPAM"
 layout: "nsxt"
 page_title: "NSXT: policy_ip_block"
-sidebar_current: "docs-nsxt-datasource-policy-ip-block"
-description: Policy IP Block Config data source.
+description: Policy IP Block data source.
 ---
 
 # nsxt_policy_ip_block
 
-This data source provides information about policy IP Blocks configured in NSX.
+This data source provides information about Policy IP Blocks configured on NSX.
+
+This data source is applicable to NSX Policy Manager.
 
 ## Example Usage
 
@@ -19,8 +21,8 @@ data "nsxt_policy_ip_block" "test" {
 
 ## Argument Reference
 
-* `id` - (Optional) The ID of IP Block Config to retrieve.
-* `display_name` - (Optional) The Display Name prefix of the IP Block Config to retrieve.
+* `id` - (Optional) The ID of IP Block to retrieve.
+* `display_name` - (Optional) The Display Name prefix of the IP Block to retrieve.
 
 ## Attributes Reference
 

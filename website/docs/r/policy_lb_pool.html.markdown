@@ -1,13 +1,15 @@
 ---
+subcategory: "Policy - Load Balancer"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_lb_pool"
-sidebar_current: "docs-nsxt-resource-policy-lb-pool"
-description: A resource to configure a LBPool.
+description: A resource to configure Load Balancer Pool.
 ---
 
 # nsxt_policy_lb_pool
 
-This resource provides a method for the management of a LBPool.
+This resource provides a method for the management of Load Balancer Pool.
+
+This resource is applicable to NSX Policy Manager.
  
 ## Example Usage
 

@@ -1,7 +1,7 @@
 ---
+subcategory: "Manager"
 layout: "nsxt"
 page_title: "NSXT: nsxt_logical_dhcp_server"
-sidebar_current: "docs-nsxt-resource-logical-dhcp-server"
 description: |-
   Provides a resource to configure logical DHCP server on NSX-T manager
 ---
@@ -18,13 +18,13 @@ data "nsxt_edge_cluster" "edgecluster" {
 }
 
 resource "nsxt_dhcp_server_profile" "serverprofile" {
-  edge_cluster_id = "${data.nsxt_edge_cluster.edgecluster.id}"
+  edge_cluster_id = data.nsxt_edge_cluster.edgecluster.id
 }
 
 resource "nsxt_logical_dhcp_server" "logical_dhcp_server" {
   display_name     = "logical_dhcp_server"
   description      = "logical_dhcp_server provisioned by Terraform"
-  dhcp_profile_id  = "${nsxt_dhcp_server_profile.PRF.id}"
+  dhcp_profile_id  = nsxt_dhcp_server_profile.PRF.id
   dhcp_server_ip   = "1.1.1.10/24"
   gateway_ip       = "1.1.1.20"
   domain_name      = "abc.com"

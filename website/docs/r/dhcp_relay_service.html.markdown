@@ -1,8 +1,8 @@
 ---
+subcategory: "Manager"
 layout: "nsxt"
 page_title: "NSXT: nsxt_dhcp_relay_service"
-sidebar_current: "docs-nsxt-resource-dhcp-relay-service"
-description: A resource that can be used to configure a DHCP relay service in NSX.
+description: A resource that can be used to configure a DHCP relay service on NSX.
 ---
 
 # nsxt_dhcp_relay_service
@@ -29,13 +29,13 @@ resource "nsxt_dhcp_relay_profile" "dr_profile" {
 
 resource "nsxt_dhcp_relay_service" "dr_service" {
   display_name          = "DRS"
-  dhcp_relay_profile_id = "${nsxt_dhcp_relay_profile.dr_profile.id}"
+  dhcp_relay_profile_id = nsxt_dhcp_relay_profile.dr_profile.id
 }
 
 resource "nsxt_logical_router_downlink_port" "router_downlink" {
   display_name                  = "logical_router_downlink_port"
-  linked_logical_switch_port_id = "${nsxt_logical_port.port1.id}"
-  logical_router_id             = "${nsxt_logical_tier1_router.rtr1.id}"
+  linked_logical_switch_port_id = nsxt_logical_port.port1.id
+  logical_router_id             = nsxt_logical_tier1_router.rtr1.id
 
   subnet {
     ip_addresses  = ["8.0.0.1"]
@@ -43,7 +43,7 @@ resource "nsxt_logical_router_downlink_port" "router_downlink" {
   }
 
   service_binding {
-    target_id   = "${nsxt_dhcp_relay_service.dr_service.id}"
+    target_id   = nsxt_dhcp_relay_service.dr_service.id
     target_type = "LogicalService"
   }
 }

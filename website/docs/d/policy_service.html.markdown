@@ -1,7 +1,7 @@
 ---
+subcategory: "Policy - Firewall"
 layout: "nsxt"
 page_title: "NSXT: policy_service"
-sidebar_current: "docs-nsxt-datasource-policy-service"
 description: A policy service data source.
 ---
 

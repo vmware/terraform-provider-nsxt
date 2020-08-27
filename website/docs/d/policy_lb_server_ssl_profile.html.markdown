@@ -1,13 +1,15 @@
 ---
+subcategory: "Policy - Load Balancer"
 layout: "nsxt"
 page_title: "NSXT: policy_lb_server_ssl_profile"
-sidebar_current: "docs-nsxt-datasource-policy-lb-server-ssl-profile"
 description: Policy Load Balancer Server SSL Profile data source.
 ---
 
 # nsxt_policy_lb_server_ssl_profile
 
-This data source provides information about policy Server SSL Profile for Load Balancer configured in NSX.
+This data source provides information about Policy Server SSL Profile for Load Balancer configured on NSX.
+
+This data source is applicable to NSX Policy Manager.
 
 ## Example Usage
 

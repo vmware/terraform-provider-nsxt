@@ -1,13 +1,15 @@
 ---
+subcategory: "Policy - Segments"
 layout: "nsxt"
 page_title: "NSXT: policy_mac_discovery_profile"
-sidebar_current: "docs-nsxt-datasource-policy-mac-discovery-profile"
 description: Policy MacDiscoveryProfile data source.
 ---
 
 # nsxt_policy_mac_discovery_profile
 
-This data source provides information about policy MacDiscoveryProfile configured in NSX.
+This data source provides information about policy MAC Discovery Profile configured on NSX.
+
+This data source is applicable to NSX Policy Manager, NSX Global Manager and VMC.
 
 ## Example Usage
 
@@ -19,9 +21,9 @@ data "nsxt_policy_mac_discovery_profile" "test" {
 
 ## Argument Reference
 
-* `id` - (Optional) The ID of MacDiscoveryProfile to retrieve.
+* `id` - (Optional) The ID of Profile to retrieve.
 
-* `display_name` - (Optional) The Display Name prefix of the MacDiscoveryProfile to retrieve.
+* `display_name` - (Optional) The Display Name prefix of Profile to retrieve.
 
 ## Attributes Reference
 

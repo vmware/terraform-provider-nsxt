@@ -1,13 +1,15 @@
 ---
+subcategory: "Policy - Gateways and Routing"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_tier0_gateway"
-sidebar_current: "docs-nsxt-resource-policy-tier0-gateway"
-description: A resource to configure a Tier-0 gateway in NSX Policy manager.
+description: A resource to configure a Tier-0 gateway on NSX Policy manager.
 ---
 
 # nsxt_policy_tier0_gateway
 
 This resource provides a method for the management of a Tier-0 gateway.
+
+This resource is applicable to NSX Global Manager, NSX Policy Manager and VMC.
 
 ## Example Usage
 
@@ -15,7 +17,6 @@ This resource provides a method for the management of a Tier-0 gateway.
 resource "nsxt_policy_tier0_gateway" "tier0_gw" {
   description               = "Tier-0 provisioned by Terraform"
   display_name              = "Tier0-gw1"
-  nsx_id                    = "predefined_id"
   failover_mode             = "PREEMPTIVE"
   default_rule_logging      = false
   enable_firewall           = true

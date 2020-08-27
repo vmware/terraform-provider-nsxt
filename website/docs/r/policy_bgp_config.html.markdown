@@ -1,13 +1,18 @@
 ---
+subcategory: "Policy - Gateways and Routing"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_bgp_config"
-sidebar_current: "docs-nsxt-resource-policy-bgp-config"
 description: A resource to configure BGP Settings of Tier0 Gateway on NSX Global Manager.
 ---
 
 # nsxt_policy_bgp_config
 
-This resource provides a method for the management of BGP for T0 Gateway on specific site. This resource is only supported on NSX Global Manager. A single resource should be specified per T0 Gateway + Site.
+This resource provides a method for the management of BGP for T0 Gateway on specific site. A single resource should be specified per T0 Gateway + Site.
+
+This resource is applicable to NSX Global Manager only. For Local Manager, use `bgp_config` clause in gateway resource configuration.
+
+~> **NOTE:** Since BGP config is auto-created on NSX, this resource will update NSX object, but never create or delete it.
+
 ## Example Usage
 
 ```hcl
@@ -18,7 +23,7 @@ resource "nsxt_policy_bgp_config" "gw1-paris" {
   enabled                = true
   inter_sr_ibgp          = true
   local_as_num           = 60001
-  graceful_restart_mode  = HELPER_ONLY
+  graceful_restart_mode  = "HELPER_ONLY"
   graceful_restart_timer = 2400
 
   route_aggregation {
@@ -27,8 +32,6 @@ resource "nsxt_policy_bgp_config" "gw1-paris" {
   }
 }
 ```
-
-~> **NOTE:** Since BGP config is auto-created on NSX, this resource will update NSX object, but never create or delete it.
 
 ## Argument Reference
 

@@ -1,13 +1,15 @@
 ---
+subcategory: "Policy - Fabric"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_transport_zone"
-sidebar_current: "docs-nsxt-datasource-policy-transport-zone"
 description: A Policy Transport Zone data source.
 ---
 
 # nsxt_policy_transport_zone
 
 This data source provides information about Policy based Transport Zones (TZ) configured in NSX. A Transport Zone defines the scope to which a network can extend in NSX. For example an overlay based Transport Zone is associated with both hypervisors and logical switches and defines which hypervisors will be able to serve the defined logical switch. Virtual machines on the hypervisor associated with a Transport Zone can be attached to logical switches in that same Transport Zone.
+
+This data source is applicable to NSX Global Manager, NSX Policy Manager and VMC.
 
 ## Example Usage
 

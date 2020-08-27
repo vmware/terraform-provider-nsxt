@@ -1,7 +1,7 @@
 ---
+subcategory: "Manager"
 layout: "nsxt"
 page_title: "NSXT: nsxt_dhcp_server_profile"
-sidebar_current: "docs-nsxt-resource-dhcp-server_profile"
 description: |-
   Provides a resource to configure DHCP server profile on NSX-T manager
 ---
@@ -20,7 +20,7 @@ data "nsxt_edge_cluster" "edge_cluster1" {
 resource "nsxt_dhcp_server_profile" "dhcp_profile" {
   description                 = "dhcp_profile provisioned by Terraform"
   display_name                = "dhcp_profile"
-  edge_cluster_id             = "${data.nsxt_edge_cluster.edge_cluster1.id}"
+  edge_cluster_id             = data.nsxt_edge_cluster.edge_cluster1.id
   edge_cluster_member_indexes = [0, 1]
 
   tag {
