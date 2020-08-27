@@ -13,7 +13,7 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s"
 )
 
-// Note that this test depends on having at least 2 edge nodes in the cluster
+// Note that this test depends on having at least 2 edge nodes in the cluster.
 func TestAccResourceNsxtPolicyTier0GatewayHaVipConfig_basic(t *testing.T) {
 	subnet1 := "1.1.12.1/24"
 	subnet2 := "1.1.12.2/24"
