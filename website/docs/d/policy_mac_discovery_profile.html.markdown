@@ -9,7 +9,7 @@ description: Policy MacDiscoveryProfile data source.
 
 This data source provides information about policy MAC Discovery Profile configured on NSX.
 
-This data source is applicable to NSX Policy Local Manager, NSX Global Manager and VMC.
+This data source is applicable to NSX Policy Manager, NSX Global Manager and VMC.
 
 ## Example Usage
 

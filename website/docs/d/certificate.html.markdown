@@ -9,7 +9,7 @@ description: A certificate data source.
 
 This data source provides information about various types of certificates imported into NSX trust management.
 
-This data source is applicable to NSX-T Local Manager.
+This data source is applicable to NSX-T Policy Manager.
 
 ## Example Usage
 

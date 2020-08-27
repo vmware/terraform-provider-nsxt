@@ -1,7 +1,6 @@
 ---
 layout: "nsxt"
-page_title: "Provider: NSXT"
-sidebar_current: "docs-nsxt-guides-federation-index"
+page_title: "VMware NSX-T Terraform Provider support for Federation (Global Manager)"
 description: |-
   The VMware NSX-T Terraform Provider support for Federation (Global Manager)
 ---

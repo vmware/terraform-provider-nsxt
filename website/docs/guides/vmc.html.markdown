@@ -1,7 +1,6 @@
 ---
 layout: "nsxt"
-page_title: "Provider: NSXT"
-sidebar_current: "docs-nsxt-guides-vmc-index"
+page_title: "VMware NSX-T Terraform Provider for VMConAWS"
 description: |-
   The VMware NSX-T Terraform Provider for VMConAWS
 ---
