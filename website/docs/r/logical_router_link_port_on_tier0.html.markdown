@@ -1,8 +1,8 @@
 ---
+subcategory: "Manager"
 layout: "nsxt"
 page_title: "NSXT: nsxt_logical_router_link_port_on_tier0"
-sidebar_current: "docs-nsxt-resource-logical-router-link-port-on-tier0"
-description: A resource that can be used to configure a logical router link port on Tier-0 router in NSX.
+description: A resource that can be used to configure a logical router link port on Tier-0 router on NSX.
 ---
 
 # nsxt_logical_router_link_port_on_tier0
@@ -15,7 +15,7 @@ This resource provides the ability to configure a logical router link port on a 
 resource "nsxt_logical_router_link_port_on_tier0" "link_port_tier0" {
   description       = "TIER0_PORT1 provisioned by Terraform"
   display_name      = "TIER0_PORT1"
-  logical_router_id = "${data.nsxt_logical_tier0_router.rtr1.id}"
+  logical_router_id = data.nsxt_logical_tier0_router.rtr1.id
 
   tag {
     scope = "color"

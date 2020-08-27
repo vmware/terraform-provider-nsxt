@@ -1,13 +1,15 @@
 ---
+subcategory: "Policy - Firewall"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_gateway_policy"
-sidebar_current: "docs-nsxt-resource-policy-gateway-policy"
 description: A resource to Gateway security policies.
 ---
 
 # nsxt_policy_gateway_policy
 
 This resource provides a method for the management of a Gateway Policy and its Rules.
+
+This resource is applicable to NSX Global Manager and NSX Policy Manager.
 
 ## Example Usage
 

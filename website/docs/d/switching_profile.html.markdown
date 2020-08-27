@@ -1,7 +1,7 @@
 ---
+subcategory: "Manager"
 layout: "nsxt"
 page_title: "NSXT: switching_profile"
-sidebar_current: "docs-nsxt-datasource-switching-profile"
 description: A switching profile data source.
 ---
 

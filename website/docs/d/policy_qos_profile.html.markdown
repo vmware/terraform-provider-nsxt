@@ -1,13 +1,15 @@
 ---
+subcategory: "Policy - Segments"
 layout: "nsxt"
 page_title: "NSXT: policy_qos_profile"
-sidebar_current: "docs-nsxt-datasource-policy-qos-profile"
 description: Policy QosProfile data source.
 ---
 
 # nsxt_policy_qos_profile
 
-This data source provides information about policy QosProfile configured in NSX.
+This data source provides information about policy Quality of Service Profile configured on NSX.
+
+This data source is applicable to NSX Policy Manager, NSX Global Manager and VMC.
 
 ## Example Usage
 
@@ -19,9 +21,9 @@ data "nsxt_policy_qos_profile" "test" {
 
 ## Argument Reference
 
-* `id` - (Optional) The ID of QosProfile to retrieve.
+* `id` - (Optional) The ID of Profile to retrieve.
 
-* `display_name` - (Optional) The Display Name prefix of the QosProfile to retrieve.
+* `display_name` - (Optional) The Display Name prefix of the Profile to retrieve.
 
 ## Attributes Reference
 

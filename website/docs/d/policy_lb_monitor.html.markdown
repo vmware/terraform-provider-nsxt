@@ -1,13 +1,15 @@
 ---
+subcategory: "Policy - Load Balancer"
 layout: "nsxt"
 page_title: "NSXT: policy_lb_monitor"
-sidebar_current: "docs-nsxt-datasource-policy-lb-monitor"
 description: Policy Load Balancer Monitor data source.
 ---
 
 # nsxt_policy_lb_monitor
 
-This data source provides information about policy Load Balancer Monitor configured in NSX.
+This data source provides information about Policy Load Balancer Monitor configured on NSX.
+
+This data source is applicable to NSX Policy Manager.
 
 ## Example Usage
 

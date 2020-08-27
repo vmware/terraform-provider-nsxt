@@ -1,13 +1,15 @@
 ---
+subcategory: "Policy - IPAM"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_ip_pool"
-sidebar_current: "docs-nsxt-resource-policy-ip-pool"
 description: A resource to configure IP Pools in NSX Policy.
 ---
 
 # nsxt_policy_ip_pool
 
-  This resource provides a means to configure IP Pools in NSX Policy.
+This resource provides a means to configure IP Pools in NSX Policy.
+
+This resource is applicable to NSX Policy Manager.
 
 ## Example Usage
 

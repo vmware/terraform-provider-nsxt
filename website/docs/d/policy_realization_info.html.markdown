@@ -1,13 +1,15 @@
 ---
+subcategory: "Policy - Realization"
 layout: "nsxt"
 page_title: "NSXT: policy_realization_info"
-sidebar_current: "docs-nsxt-datasource-policy-realization-info"
 description: A policy resource realization information.
 ---
 
 # nsxt_policy_realization_info
 
 This data source provides information about the realization of a policy resource on NSX manager. This data source will wait until realization is determined as either success or error. It is recommended to use this data source if further configuration depends on resource realization.
+
+This data source is applicable to NSX Policy Manager and NSX Global Manager.
 
 ## Example Usage
 

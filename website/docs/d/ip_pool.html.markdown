@@ -1,13 +1,13 @@
 ---
+subcategory: "Manager"
 layout: "nsxt"
 page_title: "NSXT: ip_pool"
-sidebar_current: "docs-nsxt-datasource-ip-pool"
 description: A IP pool data source.
 ---
 
 # nsxt_ip_pool
 
-This data source provides information about a IP pool configured in NSX.
+This data source provides information about a IP Pool configured on NSX.
 
 ## Example Usage
 

@@ -1,13 +1,15 @@
 ---
+subcategory: "Policy - Load Balancer"
 layout: "nsxt"
 page_title: "NSXT: policy_lb_app_profile"
-sidebar_current: "docs-nsxt-datasource-policy-lb-app-profile"
 description: Policy Load Balancer Application Profile data source.
 ---
 
 # nsxt_policy_lb_app_profile
 
 This data source provides information about policy Load Balancer Application Profile configured in NSX.
+
+This data source is applicable to NSX Policy Manager.
 
 ## Example Usage
 

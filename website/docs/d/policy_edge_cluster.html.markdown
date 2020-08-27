@@ -1,13 +1,15 @@
 ---
+subcategory: "Policy - Fabric"
 layout: "nsxt"
 page_title: "NSXT: policy_edge cluster"
-sidebar_current: "docs-nsxt-datasource-policy-edge-cluster"
 description: A policy Edge Cluster data source.
 ---
 
 # nsxt_policy_edge_cluster
 
-This data source provides information about policy edge clusters configured in NSX.
+This data source provides information about policy edge cluster configured on NSX.
+
+This data source is applicable to NSX Global Manager, NSX Policy Manager and VMC.
 
 ## Example Usage
 

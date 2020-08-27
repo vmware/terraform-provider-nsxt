@@ -1,7 +1,7 @@
 ---
+subcategory: "Manager"
 layout: "nsxt"
 page_title: "NSXT: nsxt_lb_udp_monitor"
-sidebar_current: "docs-nsxt-resource-lb-udp-monitor"
 description: |-
   Provides a resource to configure load balancer udp monitor on NSX-T manager
 ---

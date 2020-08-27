@@ -1,13 +1,15 @@
 ---
+subcategory: "Policy - Segments"
 layout: "nsxt"
 page_title: "NSXT: policy_spoofguard_profile"
-sidebar_current: "docs-nsxt-datasource-policy-spoofguard-profile"
 description: Policy SpoofGuardProfile data source.
 ---
 
 # nsxt_policy_spoofguard_profile
 
 This data source provides information about policy Spoofguard Profile configured on NSX.
+
+This data source is applicable to NSX Policy Manager, NSX Global Manager and VMC.
 
 ## Example Usage
 

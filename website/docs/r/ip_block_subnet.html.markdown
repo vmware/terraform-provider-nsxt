@@ -1,7 +1,7 @@
 ---
+subcategory: "Manager"
 layout: "nsxt"
 page_title: "NSXT: nsxt_ip_block_subnet"
-sidebar_current: "docs-nsxt-resource-ip-block-subnet"
 description: |-
   Provides a resource to configure IP block subnet on NSX-T manager
 ---
@@ -21,7 +21,7 @@ resource "nsxt_ip_block" "ip_block" {
 resource "nsxt_ip_block_subnet" "ip_block_subnet" {
   description  = "ip_block_subnet provisioned by Terraform"
   display_name = "ip_block_subnet"
-  block_id     = "${nsxt_ip_block.ip_block.id}"
+  block_id     = nsxt_ip_block.ip_block.id
   size         = 16
 
   tag {

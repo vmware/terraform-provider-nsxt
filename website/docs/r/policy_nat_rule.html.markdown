@@ -1,13 +1,15 @@
 ---
+subcategory: "Policy - Gateways and Routing"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_nat_rule"
-sidebar_current: "docs-nsxt-resource-policy-nat-rule"
-description: A resource to configure NAT Ruels in NSX Policy manager.
+description: A resource to configure NAT Rules in NSX Policy manager.
 ---
 
 # nsxt_policy_nat_rule
 
 This resource provides a method for the management of a NAT Rule.
+
+This resource is applicable to NSX Global Manager, NSX Policy Manager and VMC.
 
 ## Example Usage
 

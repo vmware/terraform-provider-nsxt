@@ -1,7 +1,7 @@
 ---
+subcategory: "Manager"
 layout: "nsxt"
 page_title: "NSXT: nsxt_ip_pool_allocation_ip_address"
-sidebar_current: "docs-nsxt-resource-ip-pool-allocation-ip-address"
 description: |-
   Provides a resource to allocate an IP address from an IP pool on NSX-T manager
 ---
@@ -18,7 +18,7 @@ data "nsxt_ip_pool" "ip_pool" {
 }
 
 resource "nsxt_ip_pool_allocation_ip_address" "pool_ip_address" {
-  ip_pool_id = "${data.nsxt_ip_pool.ip_pool.id}"
+  ip_pool_id = data.nsxt_ip_pool.ip_pool.id
 }
 ```
 

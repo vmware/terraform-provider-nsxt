@@ -1,13 +1,15 @@
 ---
+subcategory: "Policy - IPAM"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_ip_pool_static_subnet"
-sidebar_current: "docs-nsxt-resource-policy-ip-pool-static-subnet"
 description: A resource to configure IP Pool Static Subnets in NSX Policy.
 ---
 
 # nsxt_policy_ip_pool_static_subnet
 
-  This resource provides a means to configure IP Pool Static Subnets in NSX Policy.
+This resource provides a means to configure IP Pool Static Subnets in NSX Policy.
+
+This resource is applicable to NSX Policy Manager.
 
 ## Example Usage
 

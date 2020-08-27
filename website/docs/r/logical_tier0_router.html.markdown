@@ -1,7 +1,7 @@
 ---
+subcategory: "Manager"
 layout: "nsxt"
 page_title: "NSXT: nsxt_logical_tier0 router"
-sidebar_current: "docs-nsxt-resource-logical-tier0-router"
 description: A resource to configure a logical Tier0 router in NSX.
 ---
 
@@ -16,7 +16,7 @@ resource "nsxt_logical_tier0_router" "tier0_router" {
   display_name           = "RTR"
   description            = "ACTIVE-STANDBY Tier0 router provisioned by Terraform"
   high_availability_mode = "ACTIVE_STANDBY"
-  edge_cluster_id        = "${data.nsxt_edge_cluster.edge_cluster.id}"
+  edge_cluster_id        = data.nsxt_edge_cluster.edge_cluster.id
 
   tag {
     scope = "color"

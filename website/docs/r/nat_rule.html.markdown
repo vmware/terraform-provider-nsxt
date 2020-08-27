@@ -1,7 +1,7 @@
 ---
+subcategory: "Manager"
 layout: "nsxt"
 page_title: "NSXT: nsxt_nat_rule"
-sidebar_current: "docs-nsxt-resource-nat-rule"
 description: A resource to configure a NAT rule in NSX.
 ---
 
@@ -13,7 +13,7 @@ This resource provides a means to configure a NAT rule in NSX. NAT provides netw
 
 ```hcl
 resource "nsxt_nat_rule" "rule1" {
-  logical_router_id         = "${nsxt_logical_tier1_router.rtr1.id}"
+  logical_router_id         = nsxt_logical_tier1_router.rtr1.id
   description               = "NR provisioned by Terraform"
   display_name              = "NR"
   action                    = "SNAT"

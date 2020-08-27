@@ -1,13 +1,15 @@
 ---
+subcategory: "Policy - Gateways and Routing"
 layout: "nsxt"
 page_title: "NSXT: policy_gateway_qos_profile"
-sidebar_current: "docs-nsxt-datasource-policy-gateway-qos-profile"
 description: Policy GatewayQosProfile data source.
 ---
 
 # nsxt_policy_gateway_qos_profile
 
-This data source provides information about policy GatewayQosProfile configured in NSX.
+This data source provides information about policy GatewayQosProfile configured on NSX.
+
+This data source is applicable to NSX Policy Manager.
 
 ## Example Usage
 

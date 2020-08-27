@@ -1,13 +1,15 @@
 ---
+subcategory: "Policy - Fabric"
 layout: "nsxt"
 page_title: "NSXT: policy_site"
-sidebar_current: "docs-nsxt-datasource-policy-site"
 description: Policy Site data source.
 ---
 
 # nsxt_policy_site
 
-This data source provides information about Site (or Region) configured in NSX Global Manager. This data source is applicable for Global Manager provider only.
+This data source provides information about Site (or Region) configured on NSX Global Manager.
+
+This data source is applicable to NSX Global Manager only.
 
 ## Example Usage
 

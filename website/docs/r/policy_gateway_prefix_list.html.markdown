@@ -1,15 +1,13 @@
 ---
+subcategory: "Beta"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_gateway_prefix_list"
-sidebar_current: "docs-nsxt-resource-policy-gateway-prefix-list"
-description: A resource to configure a prefix list on Tier-0 gateway in NSX Policy manager.
+description: A resource to configure a Tier 0 Gateway Prefix Liston NSX Policy manager.
 ---
 
 # nsxt_policy_gateway_prefix_list
 
-This resource provides a method for the management of a Tier-0 gateway prefix list.
-
-**NOTE:** This resource is experimental.
+This resource provides a method for the management of a Tier-0 Gateway Prefix List.
 
 # Example Usage
 

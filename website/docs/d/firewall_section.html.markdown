@@ -1,13 +1,13 @@
 ---
+subcategory: "Manager"
 layout: "nsxt"
 page_title: "NSXT: firewall_section"
-sidebar_current: "docs-nsxt-datasource-firewall-section"
 description: A firewall section data source.
 ---
 
 # nsxt_firewall_section
 
-This data source provides information about firewall section in NSX.
+This data source provides information about firewall section configured on NSX. It can be useful to enforce placement of newly created firewall sections.
 
 ## Example Usage
 

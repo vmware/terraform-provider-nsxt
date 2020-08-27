@@ -1,7 +1,7 @@
 ---
+subcategory: "Manager"
 layout: "nsxt"
 page_title: "NSXT: nsxt_ip_set"
-sidebar_current: "docs-nsxt-resource-ip-set"
 description: A resource that can be used to configure an IP set in NSX.
 ---
 

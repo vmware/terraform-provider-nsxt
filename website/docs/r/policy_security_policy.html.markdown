@@ -1,14 +1,16 @@
 ---
+subcategory: "Policy - Firewall"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_security_policy"
-sidebar_current: "docs-nsxt-resource-policy-security-policy"
 description: A resource to configure a Security Group and its rules.
 ---
 
 # nsxt_policy_security_policy
 
 This resource provides a method for the management of Security Policy and rules under it.
- 
+
+This resource is applicable to NSX Global Manager, NSX Policy Manager and VMC.
+
 ## Example Usage
 
 ```hcl

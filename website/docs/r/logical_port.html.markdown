@@ -1,7 +1,7 @@
 ---
+subcategory: "Manager"
 layout: "nsxt"
 page_title: "NSXT: nsxt_logical_port"
-sidebar_current: "docs-nsxt-resource-logical-port"
 description: A resource that can be used to configure a Logical Port in NSX.
 ---
 
@@ -16,7 +16,7 @@ resource "nsxt_logical_port" "logical_port" {
   admin_state       = "UP"
   description       = "LP1 provisioned by Terraform"
   display_name      = "LP1"
-  logical_switch_id = "${nsxt_logical_switch.switch1.id}"
+  logical_switch_id = nsxt_logical_switch.switch1.id
 
   tag {
     scope = "color"
@@ -24,8 +24,8 @@ resource "nsxt_logical_port" "logical_port" {
   }
 
   switching_profile_id {
-    key   = "${data.nsxt_switching_profile.qos_profile.resource_type}"
-    value = "${data.nsxt_switching_profile.qos_profile.id}"
+    key   = data.nsxt_switching_profile.qos_profile.resource_type
+    value = data.nsxt_switching_profile.qos_profile.id
   }
 }
 ```

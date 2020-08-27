@@ -1,13 +1,15 @@
 ---
+subcategory: "Policy - Fabric"
 layout: "nsxt"
 page_title: "NSXT: policy_edge node"
-sidebar_current: "docs-nsxt-datasource-policy-edge-node"
 description: A policy Edge Node data source.
 ---
 
 # nsxt_policy_edge_node
 
-This data source provides information about policy edge nodes configured in NSX.
+This data source provides information about policy edge nodes configured on NSX.
+
+This data source is applicable to NSX Global Manager and NSX Policy Manager.
 
 ## Example Usage
 

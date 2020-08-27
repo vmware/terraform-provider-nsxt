@@ -1,13 +1,15 @@
 ---
+subcategory: "Policy - Segments"
 layout: "nsxt"
 page_title: "NSXT: policy_ip_discovery_profile"
-sidebar_current: "docs-nsxt-datasource-policy-ip-discovery-profile"
-description: Policy IpDiscoveryProfile data source.
+description: Policy IP Discovery Profile data source.
 ---
 
 # nsxt_policy_ip_discovery_profile
 
-This data source provides information about policy IpDiscoveryProfile configured in NSX.
+This data source provides information about Policy IP Discovery Profile configured on NSX.
+
+This data source is applicable to NSX Global Manager, NSX Policy Manager and VMC.
 
 ## Example Usage
 
@@ -19,9 +21,9 @@ data "nsxt_policy_ip_discovery_profile" "test" {
 
 ## Argument Reference
 
-* `id` - (Optional) The ID of IpDiscoveryProfile to retrieve.
+* `id` - (Optional) The ID of Profile to retrieve.
 
-* `display_name` - (Optional) The Display Name prefix of the IpDiscoveryProfile to retrieve.
+* `display_name` - (Optional) The Display Name prefix of the Profile to retrieve.
 
 ## Attributes Reference
 

@@ -1,7 +1,7 @@
 ---
+subcategory: "Manager"
 layout: "nsxt"
 page_title: "NSXT: nsxt_dhcp_server_ip_pool"
-sidebar_current: "docs-nsxt-resource-dhcp-server-ip-pool"
 description: |-
   Provides a resource to configure IP Pool for logical DHCP server on NSX-T manager
 ---
@@ -18,12 +18,12 @@ data "nsxt_edge_cluster" "edgecluster" {
 }
 
 resource "nsxt_dhcp_server_profile" "serverprofile" {
-  edge_cluster_id = "${data.nsxt_edge_cluster.edgecluster.id}"
+  edge_cluster_id = data.nsxt_edge_cluster.edgecluster.id
 }
 
 resource "nsxt_logical_dhcp_server" "logical_dhcp_server" {
   display_name     = "logical_dhcp_server"
-  dhcp_profile_id  = "${nsxt_dhcp_server_profile.PRF.id}"
+  dhcp_profile_id  = nsxt_dhcp_server_profile.PRF.id
   dhcp_server_ip   = "1.1.1.10/24"
   gateway_ip       = "1.1.1.20"
 }
@@ -31,7 +31,7 @@ resource "nsxt_logical_dhcp_server" "logical_dhcp_server" {
 resource "nsxt_dhcp_server_ip_pool" "dhcp_ip_pool" {
   display_name           = "ip pool"
   description            = "ip pool"
-  logical_dhcp_server_id = "${nsxt_logical_dhcp_server.logical_dhcp_server.id}"
+  logical_dhcp_server_id = nsxt_logical_dhcp_server.logical_dhcp_server.id
   gateway_ip             = "1.1.1.21"
   lease_time             = 1296000
   error_threshold        = 98

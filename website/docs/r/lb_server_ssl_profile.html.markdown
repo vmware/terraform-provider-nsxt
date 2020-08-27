@@ -1,7 +1,7 @@
 ---
+subcategory: "Manager"
 layout: "nsxt"
 page_title: "NSXT: nsxt_lb_server_ssl_profile"
-sidebar_current: "docs-nsxt-resource-lb-server-ssl-profile"
 description: |-
   Provides a resource to configure lb server ssl profile on NSX-T manager
 ---

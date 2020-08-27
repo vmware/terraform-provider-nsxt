@@ -1,7 +1,7 @@
 ---
+subcategory: "Manager"
 layout: "nsxt"
 page_title: "NSXT: nsxt_vm_tags"
-sidebar_current: "docs-nsxt-resource-vm-tags"
 description: A resource to configure tags for a virtual machine in NSX.
 ---
 
@@ -13,7 +13,7 @@ description: A resource to configure tags for a virtual machine in NSX.
 
 ```hcl
 resource "nsxt_vm_tags" "vm1_tags" {
-  instance_id = "${vsphere_virtual_machine.vm1.id}"
+  instance_id = vsphere_virtual_machine.vm1.id
 
   tag {
     scope = "color"

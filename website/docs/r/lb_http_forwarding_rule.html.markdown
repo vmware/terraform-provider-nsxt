@@ -1,7 +1,7 @@
 ---
+subcategory: "Manager"
 layout: "nsxt"
 page_title: "NSXT: nsxt_lb_http_forwarding_rule"
-sidebar_current: "docs-nsxt-resource-lb-http-forwarding-rule"
 description: |-
   Provides a resource to configure lb rule on NSX-T manager
 ---
@@ -87,7 +87,7 @@ resource "nsxt_lb_http_forwarding_rule" "lb_rule" {
   }
 
   select_pool_action {
-    pool_id  = "${nsxt_lb_pool.pool.id}"
+    pool_id  = nsxt_lb_pool.pool.id
   }
 }
 ```
@@ -143,7 +143,7 @@ resource "nsxt_lb_http_forwarding_rule" "lb_rule1" {
   }
 
   select_pool_action {
-    pool_id  = "${nsxt_lb_pool.pool.id}"
+    pool_id  = nsxt_lb_pool.pool.id
   }
 }
 ```

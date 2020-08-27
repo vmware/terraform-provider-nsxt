@@ -1,14 +1,16 @@
 ---
+subcategory: "Policy - Load Balancer"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_lb_service"
-sidebar_current: "docs-nsxt-resource-policy-lb-service"
 description: A resource to configure a Load Balancer Service.
 ---
 
 # nsxt_policy_lb_service
 
 This resource provides a method for the management of a Load Balancer Service.
- 
+
+This resource is applicable to NSX Policy Manager.
+
 ## Example Usage
 
 ```hcl

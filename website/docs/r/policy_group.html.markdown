@@ -1,13 +1,15 @@
 ---
+subcategory: "Policy - Grouping and Tagging"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_group"
-sidebar_current: "docs-nsxt-resource-policy-group"
 description: A resource to configure a Group and its members.
 ---
 
 # nsxt_policy_group
 
 This resource provides a method for the management of an inventory Group and its members. Groups as often used as sources and destinations, as well as in the Applied To field, in firewall rules.
+
+This resource is applicable to NSX Global Manager, NSX Policy Manager and VMC.
 
 ## Example Usage
 

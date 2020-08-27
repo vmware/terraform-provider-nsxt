@@ -1,13 +1,15 @@
 ---
+subcategory: "Policy - IPAM"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_ip_block"
-sidebar_current: "docs-nsxt-resource-policy-ip-block"
-description: A resource to configure IP Blocks in NSX Policy.
+description: A resource to configure IP Block on NSX Policy.
 ---
 
 # nsxt_policy_ip_block
 
-  This resource provides a means to configure IP Blocks in NSX Policy.
+This resource provides a means to configure IP Block on NSX Policy.
+
+This resource is applicable to NSX Policy Manager.
 
 ## Example Usage
 

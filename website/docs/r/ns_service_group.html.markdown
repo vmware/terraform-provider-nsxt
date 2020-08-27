@@ -1,7 +1,7 @@
 ---
+subcategory: "Manager"
 layout: "nsxt"
 page_title: "NSXT: nsxt_ns_service_group"
-sidebar_current: "docs-nsxt-ns-service-resource-service_group"
 description: |-
   Provides a resource to configure NS service group on NSX-T manager
 ---
@@ -26,7 +26,7 @@ resource "nsxt_ip_protocol_ns_service" "prot17" {
 resource "nsxt_ns_service_group" "ns_service_group" {
   description  = "ns_service_group provisioned by Terraform"
   display_name = "ns_service_group"
-  members      = ["${nsxt_ip_protocol_ns_service.prot17.id}", "${data.nsxt_ns_service.dns.id}"]
+  members      = [nsxt_ip_protocol_ns_service.prot17.id, data.nsxt_ns_service.dns.id]
 
   tag {
     scope = "color"

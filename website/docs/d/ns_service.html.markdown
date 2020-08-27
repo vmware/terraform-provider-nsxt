@@ -1,7 +1,7 @@
 ---
+subcategory: "Manager"
 layout: "nsxt"
 page_title: "NSXT: ns_service"
-sidebar_current: "docs-nsxt-datasource-ns-service"
 description: A networking and security service data source.
 ---
 

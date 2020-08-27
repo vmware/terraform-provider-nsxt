@@ -1,14 +1,16 @@
 ---
+subcategory: "Policy - Segments"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_segment"
-sidebar_current: "docs-nsxt-resource-policy-segment"
 description: A resource to configure a network Segment.
 ---
 
 # nsxt_policy_segment
 
 This resource provides a method for the management of Segments.
- 
+
+This resource is applicable to NSX Global Manager, NSX Policy Manager and VMC.
+
 ## Example Usage
 
 ```hcl
@@ -121,3 +123,5 @@ terraform import nsxt_policy_segment.segment1 ID
 ```
 
 The above command imports the segment  named `segment1` with the NSX Segment ID `ID`.
+
+~> **NOTE:** Only flexible (infra) segments can be imported. Segments that are fixed under certain gateway are not supported.

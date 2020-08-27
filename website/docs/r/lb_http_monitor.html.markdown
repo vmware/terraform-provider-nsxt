@@ -1,14 +1,14 @@
 ---
+subcategory: "Manager"
 layout: "nsxt"
 page_title: "NSXT: nsxt_lb_http_monitor"
-sidebar_current: "docs-nsxt-lb-monitor-resource-http"
 description: |-
   Provides a resource to configure lb http monitor on NSX-T manager
 ---
 
 # nsxt_lb_http_monitor
 
-Provides a resource to configure lb http monitor on NSX-T manager
+Provides a resource to configure Load Balancer HTTP Monitor on NSX-T manager
 
 ~> **NOTE:** This resource requires NSX version 2.3 or higher.
 

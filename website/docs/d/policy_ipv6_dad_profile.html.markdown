@@ -1,13 +1,15 @@
 ---
+subcategory: "Policy - Gateways and Routing"
 layout: "nsxt"
 page_title: "NSXT: policy_ipv6_dad_profile"
-sidebar_current: "docs-nsxt-datasource-policy-ipv6-dad-profile"
-description: Policy Ipv6DadProfile data source.
+description: Policy IPv6 DAD Profile data source.
 ---
 
 # nsxt_policy_ipv6_dad_profile
 
-This data source provides information about policy Ipv6DadProfile configured in NSX.
+This data source provides information about policy IPv6 Duplicate Address Discovery Profile configured on NSX.
+
+This data source is applicable to NSX Policy Manager.
 
 ## Example Usage
 
@@ -19,9 +21,9 @@ data "nsxt_policy_ipv6_dad_profile" "test" {
 
 ## Argument Reference
 
-* `id` - (Optional) The ID of Ipv6DadProfile to retrieve.
+* `id` - (Optional) The ID of Profile to retrieve.
 
-* `display_name` - (Optional) The Display Name prefix of the Ipv6DadProfile to retrieve.
+* `display_name` - (Optional) The Display Name prefix of the Profile to retrieve.
 
 ## Attributes Reference
 

@@ -1,13 +1,15 @@
 ---
+subcategory: "Policy - Firewall"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_service"
-sidebar_current: "docs-nsxt-resource-policy-service"
 description: A resource that can be used to configure a networking and security service in NSX Policy.
 ---
 
 # nsxt_policy_service
 
 This resource provides a way to configure a networking and security service which can be used within NSX Policy.
+
+This resource is applicable to NSX Global Manager, NSX Policy Manager and VMC.
 
 ## Example Usage
 

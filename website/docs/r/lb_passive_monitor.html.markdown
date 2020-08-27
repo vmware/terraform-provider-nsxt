@@ -1,7 +1,7 @@
 ---
+subcategory: "Manager"
 layout: "nsxt"
 page_title: "NSXT: nsxt_lb_passive_monitor"
-sidebar_current: "docs-nsxt-lb-monitor-resource-passive"
 description: |-
   Provides a resource to configure load balancer passive monitor on NSX-T manager
 ---

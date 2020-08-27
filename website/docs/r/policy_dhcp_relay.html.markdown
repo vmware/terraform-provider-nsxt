@@ -1,13 +1,15 @@
 ---
+subcategory: "Policy - DHCP"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_dhcp_relay"
-sidebar_current: "docs-nsxt-resource-policy-dhcp-relay"
 description: A resource to configure a Dhcp Relay.
 ---
 
 # nsxt_policy_dhcp_relay
 
 This resource provides a method for the management of a Dhcp Relay.
+
+This resource is applicable to NSX Policy Manager.
  
 ## Example Usage
 

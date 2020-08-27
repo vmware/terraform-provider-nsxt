@@ -1,15 +1,13 @@
 ---
+subcategory: "Beta"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_context_profile"
-sidebar_current: "docs-nsxt-resource-policy-context-profile"
 description: A resource to configure a Context Profile.
 ---
 
 # nsxt_policy_context_profile
 
 This resource provides a method for the management of a Context Profile.
-
-**NOTE:** This resource is experimental.
 
 ## Example Usage
 

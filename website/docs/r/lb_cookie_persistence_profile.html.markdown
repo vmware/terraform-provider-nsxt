@@ -1,7 +1,7 @@
 ---
+subcategory: "Manager"
 layout: "nsxt"
 page_title: "NSXT: nsxt_lb_cookie_persistence_profile"
-sidebar_current: "docs-nsxt-resource-lb-cookie-persistence-profile"
 description: |-
   Provides a resource to configure lb cookie persistence profile on NSX-T manager
 ---

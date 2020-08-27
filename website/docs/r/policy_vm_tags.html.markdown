@@ -1,7 +1,7 @@
 ---
+subcategory: "Policy - Grouping and Tagging"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_vm_tags"
-sidebar_current: "docs-nsxt-resource-policy-vm-tags"
 description: A resource to configure tags for a Virtual Machine in NSX Policy.
 ---
 
@@ -11,11 +11,13 @@ description: A resource to configure tags for a Virtual Machine in NSX Policy.
 
   When updating resource, if you wish to delete existing port tags while leaving VM tags in place, please specify `port` clause with no tags.
 
+This resource is applicable to NSX Policy Manager and VMC.
+
 ## Example Usage
 
 ```hcl
 resource "nsxt_policy_vm_tags" "vm1_tags" {
-  instance_id = "${vsphere_virtual_machine.vm1.id}"
+  instance_id = vsphere_virtual_machine.vm1.id
 
   tag {
     scope = "color"
