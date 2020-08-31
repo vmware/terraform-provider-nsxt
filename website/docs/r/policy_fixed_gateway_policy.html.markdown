@@ -2,7 +2,7 @@
 subcategory: "Policy - Firewall"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_fixed_gateway_policy"
-description: A resource to Fixed Gateway Security Policies.
+description: A resource to update Fixed Gateway Security Policies.
 ---
 
 # nsxt_policy_fixed_gateway_policy
