@@ -30,6 +30,23 @@ func getNsxIDSchema() *schema.Schema {
 	}
 }
 
+func getFlexNsxIDSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeString,
+		Description: "NSX ID for this resource",
+		Optional:    true,
+		Computed:    true,
+	}
+}
+
+func getComputedNsxIDSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeString,
+		Description: "NSX ID for this resource",
+		Computed:    true,
+	}
+}
+
 func getPathSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:        schema.TypeString,
@@ -46,11 +63,12 @@ func getDisplayNameSchema() *schema.Schema {
 	}
 }
 
-func getOptionalDisplayNameSchema() *schema.Schema {
+func getOptionalDisplayNameSchema(isComputed bool) *schema.Schema {
 	return &schema.Schema{
 		Type:        schema.TypeString,
 		Description: "Display name for this resource",
 		Optional:    true,
+		Computed:    isComputed,
 	}
 }
 
@@ -59,6 +77,15 @@ func getDescriptionSchema() *schema.Schema {
 		Type:        schema.TypeString,
 		Description: "Description for this resource",
 		Optional:    true,
+	}
+}
+
+func getComputedDescriptionSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeString,
+		Description: "Description for this resource",
+		Optional:    true,
+		Computed:    true,
 	}
 }
 
@@ -99,12 +126,14 @@ func getSecurityPolicyAndGatewayRulesSchema(scopeRequired bool) *schema.Schema {
 		MaxItems:    1000,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
+				"nsx_id":       getFlexNsxIDSchema(),
 				"display_name": getDisplayNameSchema(),
 				"description":  getDescriptionSchema(),
 				"revision":     getRevisionSchema(),
 				"sequence_number": {
 					Type:        schema.TypeInt,
 					Description: "Sequence number of the this rule",
+					Optional:    true,
 					Computed:    true,
 				},
 				"destination_groups": {
@@ -310,6 +339,7 @@ func setPolicyRulesInSchema(d *schema.ResourceData, rules []model.Rule) error {
 		setPathListInMap(elem, "services", rule.Services)
 		setPathListInMap(elem, "scope", rule.Scope)
 		elem["sequence_number"] = rule.SequenceNumber
+		elem["nsx_id"] = rule.Id
 
 		var tagList []map[string]string
 		for _, tag := range rule.Tags {
@@ -344,6 +374,10 @@ func getPolicyRulesFromSchema(d *schema.ResourceData) []model.Rule {
 		direction := data["direction"].(string)
 		notes := data["notes"].(string)
 		sequenceNumber := int64(seq)
+		nsxID := ""
+		if id, ok := data["nsx_id"]; ok {
+			nsxID = id.(string)
+		}
 
 		var tagStructs []model.Tag
 		if data["tag"] != nil {
@@ -364,7 +398,9 @@ func getPolicyRulesFromSchema(d *schema.ResourceData) []model.Rule {
 		// to be set for existing rules, and NOT be set for new rules
 		id := newUUID()
 
+		resourceType := "Rule"
 		elem := model.Rule{
+			ResourceType:         &resourceType,
 			Id:                   &id,
 			DisplayName:          &displayName,
 			Notes:                &notes,
@@ -384,6 +420,10 @@ func getPolicyRulesFromSchema(d *schema.ResourceData) []model.Rule {
 			Scope:                getPathListFromMap(data, "scope"),
 			Profiles:             getPathListFromMap(data, "profiles"),
 			SequenceNumber:       &sequenceNumber,
+		}
+
+		if len(nsxID) > 0 {
+			elem.Id = &nsxID
 		}
 		ruleList = append(ruleList, elem)
 		seq = seq + 1

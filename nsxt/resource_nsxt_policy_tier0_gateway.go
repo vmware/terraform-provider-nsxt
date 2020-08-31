@@ -516,6 +516,26 @@ func setPolicyVRFConfigInSchema(d *schema.ResourceData, config *model.Tier0VrfCo
 	return d.Set("vrf_config", vrfConfigs)
 }
 
+func getPolicyTier0Gateway(id string, connector *client.RestConnector, isGlobalManager bool) (model.Tier0, error) {
+	if isGlobalManager {
+		client := gm_infra.NewDefaultTier0sClient(connector)
+		gmObj, err := client.Get(id)
+		if err != nil {
+			return model.Tier0{}, err
+		}
+
+		convertedObj, err := convertModelBindingType(gmObj, model.Tier0BindingType(), model.Tier0BindingType())
+		if err != nil {
+			return model.Tier0{}, err
+		}
+
+		return convertedObj.(model.Tier0), nil
+	}
+
+	client := infra.NewDefaultTier0sClient(connector)
+	return client.Get(id)
+}
+
 func resourceNsxtPolicyTier0GatewayExists(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
 	var err error
 	if isGlobalManager {
