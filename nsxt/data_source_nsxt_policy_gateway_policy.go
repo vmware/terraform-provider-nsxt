@@ -71,7 +71,7 @@ func dataSourceNsxtPolicyGatewayPolicyRead(d *schema.ResourceData, m interface{}
 	domain := d.Get("domain").(string)
 	if isPolicyGlobalManager(m) {
 		query := make(map[string]string)
-		query["parent_path"] = getDomainPath(domain, m)
+		query["parent_path"] = "*/" + domain
 		if category != "" {
 			query["category"] = category
 		}

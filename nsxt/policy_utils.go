@@ -148,14 +148,6 @@ func getDomainFromResourcePath(rPath string) string {
 	return getResourceIDFromResourcePath(rPath, "domains")
 }
 
-func getDomainPath(domain string, m interface{}) string {
-	if isPolicyGlobalManager(m) {
-		return "/global-infra/domains/" + domain
-	}
-
-	return "/infra/domains/" + domain
-}
-
 func getResourceIDFromResourcePath(rPath string, rType string) string {
 	segments := strings.Split(rPath, "/")
 	for i, seg := range segments {
