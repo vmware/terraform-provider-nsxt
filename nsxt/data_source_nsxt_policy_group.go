@@ -28,7 +28,10 @@ func dataSourceNsxtPolicyGroup() *schema.Resource {
 
 func dataSourceNsxtPolicyGroupRead(d *schema.ResourceData, m interface{}) error {
 	if isPolicyGlobalManager(m) {
-		_, err := policyDataSourceResourceRead(d, getPolicyConnector(m), "Group", nil)
+		domain := d.Get("domain").(string)
+		query := make(map[string]string)
+		query["parent_path"] = "*/" + domain
+		_, err := policyDataSourceResourceRead(d, getPolicyConnector(m), "Group", query)
 		if err != nil {
 			return err
 		}

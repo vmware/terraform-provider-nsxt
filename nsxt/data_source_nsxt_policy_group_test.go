@@ -48,6 +48,43 @@ func TestAccDataSourceNsxtPolicyGroup_basic(t *testing.T) {
 	})
 }
 
+func TestAccDataSourceNsxtGlobalPolicyGroup_basic(t *testing.T) {
+	name := "terraform_ds_test"
+	domain := getTestSiteName()
+	testResourceName := "data.nsxt_policy_group.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyGlobalManager(t)
+			testAccEnvDefined(t, "NSXT_TEST_SITE_NAME")
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccDataSourceNsxtPolicyGroupDeleteByName(domain, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				PreConfig: func() {
+					if err := testAccDataSourceNsxtPolicyGroupCreate(domain, name); err != nil {
+						panic(err)
+					}
+				},
+				Config: testAccNsxtPolicyGroupReadTemplate(domain, name),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "description", name),
+					resource.TestCheckResourceAttr(testResourceName, "domain", domain),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+				),
+			},
+			{
+				Config: testAccNsxtEmptyTemplate(),
+			},
+		},
+	})
+}
+
 func testAccDataSourceNsxtPolicyGroupCreate(domain string, name string) error {
 	connector, err := testAccGetPolicyConnector()
 	if err != nil {
