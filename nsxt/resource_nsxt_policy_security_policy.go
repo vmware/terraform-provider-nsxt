@@ -74,7 +74,7 @@ func resourceNsxtPolicySecurityPolicyCreate(d *schema.ResourceData, m interface{
 	sequenceNumber := int64(d.Get("sequence_number").(int))
 	stateful := d.Get("stateful").(bool)
 	tcpStrict := d.Get("tcp_strict").(bool)
-	rules := getPolicyRulesFromSchema(d)
+	rules := getPolicyRulesFromSchema(d, false)
 
 	obj := model.SecurityPolicy{
 		DisplayName:    &displayName,
@@ -178,7 +178,7 @@ func resourceNsxtPolicySecurityPolicyUpdate(d *schema.ResourceData, m interface{
 	sequenceNumber := int64(d.Get("sequence_number").(int))
 	stateful := d.Get("stateful").(bool)
 	tcpStrict := d.Get("tcp_strict").(bool)
-	rules := getPolicyRulesFromSchema(d)
+	rules := getPolicyRulesFromSchema(d, false)
 	revision := int64(d.Get("revision").(int))
 
 	obj := model.SecurityPolicy{
