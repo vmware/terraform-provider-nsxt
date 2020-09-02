@@ -5,7 +5,6 @@ package nsxt
 
 import (
 	"fmt"
-
 	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -64,24 +63,36 @@ func dataSourceNsxtNsGroupRead(d *schema.ResourceData, m interface{}) error {
 		obj = objGet
 	} else if objName != "" {
 		// Get by full name
-		// TODO use 2nd parameter localVarOptionals for paging
-		objList, _, err := nsxClient.GroupingObjectsApi.ListNSGroups(nsxClient.Context, nil)
-		if err != nil {
-			return fmt.Errorf("Error while reading NS groups: %v", err)
-		}
-		// go over the list to find the correct one
+		// Handle paging here as it is limited to 50 per page in the api, even if configured otherwise
+		localVarOptionals := make(map[string]interface{})
+		localVarOptionals["pageSize"] = int64(50)
 		found := false
-		for _, objInList := range objList.Results {
-			if objInList.DisplayName == objName {
-				if found {
-					return fmt.Errorf("Found multiple NS groups with name '%s'", objName)
-				}
-				obj = objInList
-				found = true
+		total := 0
+		count := 0
+		for !found && (total == 0 || count < total) {
+			objList, _, err := nsxClient.GroupingObjectsApi.ListNSGroups(nsxClient.Context, localVarOptionals)
+			if err != nil {
+				return fmt.Errorf("Error while reading NS groups: %v", err)
 			}
+			if total == 0 && objList.ResultCount > 0 {
+				// first response
+				total = int(objList.ResultCount)
+			}
+			count += len(objList.Results)
+			// go over the list to find the correct one
+			for _, objInList := range objList.Results {
+				if objInList.DisplayName == objName {
+					if found {
+						return fmt.Errorf("Found multiple NS groups with name '%s'", objName)
+					}
+					obj = objInList
+					found = true
+				}
+			}
+			localVarOptionals["cursor"] = objList.Cursor
 		}
 		if !found {
-			return fmt.Errorf("NS group with  name '%s' was not found among %d groups", objName, len(objList.Results))
+			return fmt.Errorf("NS group with name '%s' was not found among %d groups", objName, total)
 		}
 	} else {
 		return fmt.Errorf("Error obtaining NS group ID or name during read")

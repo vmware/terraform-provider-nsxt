@@ -427,13 +427,16 @@ func policyTier1GatewayResourceToInfraStruct(d *schema.ResourceData, connector *
 	}
 
 	if isGlobalManager {
-		localeServices, err := initGatewayLocaleServices(d, connector, listPolicyTier1GatewayLocaleServices)
-		if err != nil {
-			return infraStruct, err
-		}
+		if d.HasChange("locale_service") {
+			// Update localse services only if configuration changed
+			localeServices, err := initGatewayLocaleServices(d, connector, listPolicyTier1GatewayLocaleServices)
+			if err != nil {
+				return infraStruct, err
+			}
 
-		if len(localeServices) > 0 {
-			gwChildren = append(gwChildren, localeServices...)
+			if len(localeServices) > 0 {
+				gwChildren = append(gwChildren, localeServices...)
+			}
 		}
 	}
 
