@@ -81,6 +81,15 @@ func getDomainNameSchema() *schema.Schema {
 	}
 }
 
+func getDataSourceDomainNameSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeString,
+		Description: "The domain name. If not specified 'default' is used",
+		Optional:    true,
+		Default:     defaultDomain,
+	}
+}
+
 func getPolicyGatewayPathSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:         schema.TypeString,

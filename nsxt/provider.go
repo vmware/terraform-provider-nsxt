@@ -196,6 +196,7 @@ func Provider() terraform.ResourceProvider {
 			"nsxt_policy_ip_pool":                  dataSourceNsxtPolicyIPPool(),
 			"nsxt_policy_context_profile":          dataSourceNsxtPolicyContextProfile(),
 			"nsxt_policy_site":                     dataSourceNsxtPolicySite(),
+			"nsxt_policy_gateway_policy":           dataSourceNsxtPolicyGatewayPolicy(),
 			"nsxt_policy_group":                    dataSourceNsxtPolicyGroup(),
 		},
 
