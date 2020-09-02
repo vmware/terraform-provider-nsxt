@@ -6,7 +6,6 @@ package nsxt
 import (
 	"fmt"
 	"log"
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
@@ -47,6 +46,7 @@ func getPolicyDefaultRulesSchema() *schema.Schema {
 		Type:          schema.TypeList,
 		Description:   "List of default rules",
 		Optional:      true,
+		Computed:      true,
 		ConflictsWith: []string{"rule"},
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
@@ -117,10 +117,7 @@ func updateGatewayPolicyDefaultRuleByScope(rule model.Rule, d *schema.ResourceDa
 		oldRuleMap := oldRule.(map[string]interface{})
 		if oldID, ok := oldRuleMap["nsx_id"]; ok {
 			if (rule.Id != nil) && (*rule.Id == oldID.(string)) {
-				rule, err := revertDefaultRuleByScope(rule, connector, isGlobalManager)
-				if err != nil {
-					log.Printf("[WARNING]: Failed to revert rule: %s", err)
-				}
+				rule := revertGatewayPolicyDefaultRule(rule)
 
 				log.Printf("[DEBUG] Reverting Default Rule with ID %s", *rule.Id)
 				return &rule
@@ -140,7 +137,9 @@ func setPolicyDefaultRulesInSchema(d *schema.ResourceData, rules []model.Rule) e
 		elem["logged"] = rule.Logged
 		elem["action"] = rule.Action
 		elem["revision"] = rule.Revision
-		setPathListInMap(elem, "scope", rule.Scope)
+		if len(rule.Scope) > 0 {
+			elem["scope"] = rule.Scope[0]
+		}
 		elem["sequence_number"] = rule.SequenceNumber
 		elem["tag"] = initPolicyTagsSet(rule.Tags)
 		elem["path"] = rule.Path
@@ -153,21 +152,17 @@ func setPolicyDefaultRulesInSchema(d *schema.ResourceData, rules []model.Rule) e
 }
 
 func revertPolicyPredefinedGatewayPolicy(predefinedPolicy model.GatewayPolicy, m interface{}) (model.GatewayPolicy, error) {
-	connector := getPolicyConnector(m)
-	isGlobalManager := isPolicyGlobalManager(m)
 
 	// Default values for Name and Description are ID
-	predefinedPolicy.Description = predefinedPolicy.DisplayName
+	empty := ""
+	predefinedPolicy.Description = &empty
 
 	var childRules []*data.StructValue
 
 	for _, rule := range predefinedPolicy.Rules {
 		if rule.IsDefault != nil && *rule.IsDefault {
 			log.Printf("[DEBUG]: Reverting default rule %s", *rule.Id)
-			revertedRule, err := revertDefaultRuleByScope(rule, connector, isGlobalManager)
-			if err != nil {
-				return model.GatewayPolicy{}, fmt.Errorf("[WARNING]: Failed to revert default rule: %s", err)
-			}
+			revertedRule := revertGatewayPolicyDefaultRule(rule)
 			childRule, err := createPolicyChildRule(*revertedRule.Id, revertedRule, false)
 			if err != nil {
 				return model.GatewayPolicy{}, err
@@ -197,41 +192,20 @@ func revertPolicyPredefinedGatewayPolicy(predefinedPolicy model.GatewayPolicy, m
 	return predefinedPolicy, nil
 }
 
-func revertDefaultRuleByScope(rule model.Rule, connector *client.RestConnector, isGlobalManager bool) (model.Rule, error) {
-	if len(rule.Scope) != 1 {
-		return model.Rule{}, fmt.Errorf("Expected default rule %s to have single scope", *rule.Path)
-	}
+func revertGatewayPolicyDefaultRule(rule model.Rule) model.Rule {
 
+	// NOTE: ability to control default action from gateway config is deprecated and discouraged
+	// Deleting default rule in here will not respect force_whitelisting setting on the gateway
 	if len(rule.Tags) > 0 {
 		tags := make([]model.Tag, 0)
 		rule.Tags = tags
 	}
 
-	if !strings.Contains(rule.Scope[0], "infra/tier-0s") {
-		// This rule is not based on T0
-		defaultAction := "DROP"
-		rule.DisplayName = &rule.Scope[0]
-		rule.Description = &rule.Scope[0]
-		rule.Action = &defaultAction
-		return rule, nil
-	}
-
-	// Default rule default values are set according to scope Tier0
-	gwID := getPolicyIDFromPath(rule.Scope[0])
-	gw, err := getPolicyTier0Gateway(gwID, connector, isGlobalManager)
-	if err != nil {
-		return rule, fmt.Errorf("Failed to retrieve scope object %s for rule %s", gwID, *rule.Path)
-	}
-
-	rule.DisplayName = gw.DisplayName
-	rule.Description = gw.Description
+	empty := ""
+	rule.Description = &empty
 	defaultAction := "DROP"
-	if gw.ForceWhitelisting != nil && *gw.ForceWhitelisting {
-		defaultAction = "ALLOW"
-	}
 	rule.Action = &defaultAction
-
-	return rule, nil
+	return rule
 }
 
 func createPolicyChildRule(ruleID string, rule model.Rule, shouldDelete bool) (*data.StructValue, error) {
@@ -321,7 +295,6 @@ func updatePolicyPredefinedGatewayPolicy(id string, d *schema.ResourceData, m in
 		return err
 	}
 
-	predefinedPolicy.Rules = nil
 	if d.HasChange("description") {
 		description := d.Get("description").(string)
 		predefinedPolicy.Description = &description
@@ -376,6 +349,7 @@ func updatePolicyPredefinedGatewayPolicy(id string, d *schema.ResourceData, m in
 	}
 
 	if d.HasChange("default_rule") {
+		log.Printf("[DEBUG]: Default rule configuration has changed")
 		for _, existingDefaultRule := range predefinedPolicy.Rules {
 			if existingDefaultRule.IsDefault != nil && *existingDefaultRule.IsDefault {
 				updatedDefaultRule := updateGatewayPolicyDefaultRuleByScope(existingDefaultRule, d, connector, isGlobalManager)
@@ -391,6 +365,7 @@ func updatePolicyPredefinedGatewayPolicy(id string, d *schema.ResourceData, m in
 	}
 
 	log.Printf("[DEBUG]: Updating default policy %s with %d child rules", id, len(childRules))
+	predefinedPolicy.Rules = nil
 	if len(childRules) > 0 {
 		predefinedPolicy.Children = childRules
 	}

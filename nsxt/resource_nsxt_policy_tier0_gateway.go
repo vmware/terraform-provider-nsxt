@@ -75,6 +75,7 @@ func resourceNsxtPolicyTier0Gateway() *schema.Resource {
 				Description: "Force whitelisting",
 				Default:     false,
 				Optional:    true,
+				Deprecated:  "Use nsxt_policy_predefined_gateway_policy resource to control default action",
 			},
 			"ha_mode": {
 				Type:         schema.TypeString,
@@ -514,26 +515,6 @@ func setPolicyVRFConfigInSchema(d *schema.ResourceData, config *model.Tier0VrfCo
 	vrfConfigs = append(vrfConfigs, elem)
 
 	return d.Set("vrf_config", vrfConfigs)
-}
-
-func getPolicyTier0Gateway(id string, connector *client.RestConnector, isGlobalManager bool) (model.Tier0, error) {
-	if isGlobalManager {
-		client := gm_infra.NewDefaultTier0sClient(connector)
-		gmObj, err := client.Get(id)
-		if err != nil {
-			return model.Tier0{}, err
-		}
-
-		convertedObj, err := convertModelBindingType(gmObj, model.Tier0BindingType(), model.Tier0BindingType())
-		if err != nil {
-			return model.Tier0{}, err
-		}
-
-		return convertedObj.(model.Tier0), nil
-	}
-
-	client := infra.NewDefaultTier0sClient(connector)
-	return client.Get(id)
 }
 
 func resourceNsxtPolicyTier0GatewayExists(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
