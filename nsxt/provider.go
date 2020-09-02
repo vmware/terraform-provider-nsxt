@@ -383,7 +383,7 @@ func configureNsxtClient(d *schema.ResourceData, clients *nsxtClients) error {
 type jwtToken struct {
 	IDToken      string `json:"id_token"`
 	TokenType    string `json:"token_type"`
-	ExpiresIn    string `json:"expires_in"`
+	ExpiresIn    int64  `json:"expires_in"`
 	Scope        string `json:"scope"`
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
