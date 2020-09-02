@@ -36,7 +36,7 @@ func getPolicyPredefinedGatewayPolicySchema() map[string]*schema.Schema {
 		"path":         getPolicyPathSchema(true, true, "Path for this Gateway Policy"),
 		"description":  getComputedDescriptionSchema(),
 		"tag":          getTagsSchema(),
-		"rule":         getSecurityPolicyAndGatewayRulesSchema(false),
+		"rule":         getSecurityPolicyAndGatewayRulesSchema(true),
 		"default_rule": getPolicyDefaultRulesSchema(),
 		"revision":     getRevisionSchema(),
 	}
@@ -157,13 +157,13 @@ func revertPolicyPredefinedGatewayPolicy(predefinedPolicy model.GatewayPolicy, m
 	isGlobalManager := isPolicyGlobalManager(m)
 
 	// Default values for Name and Description are ID
-	predefinedPolicy.Rules = nil
 	predefinedPolicy.Description = predefinedPolicy.DisplayName
 
 	var childRules []*data.StructValue
 
 	for _, rule := range predefinedPolicy.Rules {
 		if rule.IsDefault != nil && *rule.IsDefault {
+			log.Printf("[DEBUG]: Reverting default rule %s", *rule.Id)
 			revertedRule, err := revertDefaultRuleByScope(rule, connector, isGlobalManager)
 			if err != nil {
 				return model.GatewayPolicy{}, fmt.Errorf("[WARNING]: Failed to revert default rule: %s", err)
@@ -173,9 +173,18 @@ func revertPolicyPredefinedGatewayPolicy(predefinedPolicy model.GatewayPolicy, m
 				return model.GatewayPolicy{}, err
 			}
 			childRules = append(childRules, childRule)
+		} else {
+			// Mark for delete all non-default rules
+			log.Printf("[DEBUG]: Deleting rule %s", *rule.Id)
+			childRule, err := createPolicyChildRule(*rule.Id, rule, true)
+			if err != nil {
+				return model.GatewayPolicy{}, err
+			}
+			childRules = append(childRules, childRule)
 		}
 	}
 
+	predefinedPolicy.Rules = nil
 	if len(childRules) > 0 {
 		predefinedPolicy.Children = childRules
 	}
@@ -230,8 +239,8 @@ func createPolicyChildRule(ruleID string, rule model.Rule, shouldDelete bool) (*
 	converter.SetMode(bindings.REST)
 
 	childRule := model.ChildRule{
-		ResourceType: "ChildRule",
-		//Id:              &ruleID,
+		ResourceType:    "ChildRule",
+		Id:              &ruleID,
 		Rule:            &rule,
 		MarkedForDelete: &shouldDelete,
 	}
@@ -249,7 +258,7 @@ func createChildDomainWithGatewayPolicy(domain string, policyID string, policy m
 	converter.SetMode(bindings.REST)
 
 	childPolicy := model.ChildGatewayPolicy{
-		//Id:            &policyID,
+		Id:            &policyID,
 		ResourceType:  "ChildGatewayPolicy",
 		GatewayPolicy: &policy,
 	}
@@ -277,7 +286,7 @@ func createChildDomainWithGatewayPolicy(domain string, policyID string, policy m
 	return dataValue.(*data.StructValue), nil
 }
 
-func predefinedPolicyInfraPatch(policy model.GatewayPolicy, domain string, m interface{}) error {
+func gatewayPolicyInfraPatch(policy model.GatewayPolicy, domain string, m interface{}) error {
 	childDomain, err := createChildDomainWithGatewayPolicy(domain, *policy.Id, policy)
 	if err != nil {
 		return fmt.Errorf("Failed to create H-API for Predefined Gateway Policy: %s", err)
@@ -292,7 +301,7 @@ func predefinedPolicyInfraPatch(policy model.GatewayPolicy, domain string, m int
 		ResourceType: &infraType,
 	}
 
-	return policyInfraPatch(infraObj, isPolicyGlobalManager(m), getPolicyConnector(m), true)
+	return policyInfraPatch(infraObj, isPolicyGlobalManager(m), getPolicyConnector(m), false)
 
 }
 
@@ -386,7 +395,7 @@ func updatePolicyPredefinedGatewayPolicy(id string, d *schema.ResourceData, m in
 		predefinedPolicy.Children = childRules
 	}
 
-	err = predefinedPolicyInfraPatch(predefinedPolicy, domain, m)
+	err = gatewayPolicyInfraPatch(predefinedPolicy, domain, m)
 	if err != nil {
 		return handleUpdateError("Predefined Gateway Policy", id, err)
 	}
@@ -501,7 +510,7 @@ func resourceNsxtPolicyPredefinedGatewayPolicyDelete(d *schema.ResourceData, m i
 		return fmt.Errorf("Failed to revert Predefined Gateway Policy %s: %s", id, err)
 	}
 
-	err = predefinedPolicyInfraPatch(revertedPolicy, domain, m)
+	err = gatewayPolicyInfraPatch(revertedPolicy, domain, m)
 	if err != nil {
 		return handleUpdateError("Predefined Gateway Policy", id, err)
 	}
