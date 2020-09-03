@@ -203,7 +203,7 @@ func revertGatewayPolicyDefaultRule(rule model.Rule) model.Rule {
 
 	empty := ""
 	rule.Description = &empty
-	defaultAction := "DROP"
+	defaultAction := model.Rule_ACTION_ALLOW
 	rule.Action = &defaultAction
 	return rule
 }
