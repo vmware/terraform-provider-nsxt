@@ -43,7 +43,7 @@ func resourceNsxtPolicyService() *schema.Resource {
 				Optional:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"display_name": getOptionalDisplayNameSchema(),
+						"display_name": getOptionalDisplayNameSchema(false),
 						"description":  getDescriptionSchema(),
 						"protocol": {
 							Type:         schema.TypeString,
@@ -74,7 +74,7 @@ func resourceNsxtPolicyService() *schema.Resource {
 				Optional:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"display_name": getOptionalDisplayNameSchema(),
+						"display_name": getOptionalDisplayNameSchema(false),
 						"description":  getDescriptionSchema(),
 						"destination_ports": {
 							Type:        schema.TypeSet,
@@ -110,7 +110,7 @@ func resourceNsxtPolicyService() *schema.Resource {
 				Optional:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"display_name": getOptionalDisplayNameSchema(),
+						"display_name": getOptionalDisplayNameSchema(false),
 						"description":  getDescriptionSchema(),
 					},
 				},
@@ -123,7 +123,7 @@ func resourceNsxtPolicyService() *schema.Resource {
 				ConflictsWith: []string{"algorithm_entry", "igmp_entry", "icmp_entry", "l4_port_set_entry", "ip_protocol_entry"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"display_name": getOptionalDisplayNameSchema(),
+						"display_name": getOptionalDisplayNameSchema(false),
 						"description":  getDescriptionSchema(),
 						"ether_type": {
 							Type:        schema.TypeInt,
@@ -140,7 +140,7 @@ func resourceNsxtPolicyService() *schema.Resource {
 				Optional:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"display_name": getOptionalDisplayNameSchema(),
+						"display_name": getOptionalDisplayNameSchema(false),
 						"description":  getDescriptionSchema(),
 						"protocol": {
 							Type:         schema.TypeInt,
@@ -158,7 +158,7 @@ func resourceNsxtPolicyService() *schema.Resource {
 				Optional:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"display_name": getOptionalDisplayNameSchema(),
+						"display_name": getOptionalDisplayNameSchema(false),
 						"description":  getDescriptionSchema(),
 						"destination_port": {
 							Type:         schema.TypeString,

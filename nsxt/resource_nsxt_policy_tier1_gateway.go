@@ -86,6 +86,7 @@ func resourceNsxtPolicyTier1Gateway() *schema.Resource {
 				Description: "Force whitelisting",
 				Default:     false,
 				Optional:    true,
+				Deprecated:  "Use nsxt_policy_predefined_gateway_policy resource to control default action",
 			},
 			"tier0_path": {
 				Type:         schema.TypeString,

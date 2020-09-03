@@ -75,6 +75,7 @@ func resourceNsxtPolicyTier0Gateway() *schema.Resource {
 				Description: "Force whitelisting",
 				Default:     false,
 				Optional:    true,
+				Deprecated:  "Use nsxt_policy_predefined_gateway_policy resource to control default action",
 			},
 			"ha_mode": {
 				Type:         schema.TypeString,

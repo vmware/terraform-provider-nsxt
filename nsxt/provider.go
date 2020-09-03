@@ -268,6 +268,7 @@ func Provider() terraform.ResourceProvider {
 			"nsxt_policy_security_policy":                  resourceNsxtPolicySecurityPolicy(),
 			"nsxt_policy_service":                          resourceNsxtPolicyService(),
 			"nsxt_policy_gateway_policy":                   resourceNsxtPolicyGatewayPolicy(),
+			"nsxt_policy_predefined_gateway_policy":        resourceNsxtPolicyPredefinedGatewayPolicy(),
 			"nsxt_policy_segment":                          resourceNsxtPolicySegment(),
 			"nsxt_policy_vlan_segment":                     resourceNsxtPolicyVlanSegment(),
 			"nsxt_policy_static_route":                     resourceNsxtPolicyStaticRoute(),

@@ -29,15 +29,26 @@ func resourceNsxtPolicyGatewayPolicy() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyGatewayPolicyExistsInDomain(id string, domainName string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
-	var err error
+func getGatewayPolicyInDomain(id string, domainName string, connector *client.RestConnector, isGlobalManager bool) (model.GatewayPolicy, error) {
 	if isGlobalManager {
 		client := gm_domains.NewDefaultGatewayPoliciesClient(connector)
-		_, err = client.Get(domainName, id)
-	} else {
-		client := domains.NewDefaultGatewayPoliciesClient(connector)
-		_, err = client.Get(domainName, id)
+		gmObj, err := client.Get(domainName, id)
+		if err != nil {
+			return model.GatewayPolicy{}, err
+		}
+		rawObj, convErr := convertModelBindingType(gmObj, gm_model.GatewayPolicyBindingType(), model.GatewayPolicyBindingType())
+		if convErr != nil {
+			return model.GatewayPolicy{}, convErr
+		}
+		return rawObj.(model.GatewayPolicy), nil
 	}
+	client := domains.NewDefaultGatewayPoliciesClient(connector)
+	return client.Get(domainName, id)
+
+}
+
+func resourceNsxtPolicyGatewayPolicyExistsInDomain(id string, domainName string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
+	_, err := getGatewayPolicyInDomain(id, domainName, connector, isGlobalManager)
 
 	if err == nil {
 		return true, nil
@@ -73,7 +84,7 @@ func resourceNsxtPolicyGatewayPolicyCreate(d *schema.ResourceData, m interface{}
 	locked := d.Get("locked").(bool)
 	sequenceNumber := int64(d.Get("sequence_number").(int))
 	stateful := d.Get("stateful").(bool)
-	rules := getPolicyRulesFromSchema(d)
+	rules := getPolicyRulesFromSchema(d, false)
 
 	obj := model.GatewayPolicy{
 		DisplayName:    &displayName,
@@ -123,25 +134,9 @@ func resourceNsxtPolicyGatewayPolicyRead(d *schema.ResourceData, m interface{}) 
 		return fmt.Errorf("Error obtaining Gateway Policy ID")
 	}
 
-	var obj model.GatewayPolicy
-	if isPolicyGlobalManager(m) {
-		client := gm_domains.NewDefaultGatewayPoliciesClient(connector)
-		gmObj, err := client.Get(d.Get("domain").(string), id)
-		if err != nil {
-			return handleReadError(d, "Gateway Policy", id, err)
-		}
-		rawObj, err := convertModelBindingType(gmObj, gm_model.GatewayPolicyBindingType(), model.GatewayPolicyBindingType())
-		if err != nil {
-			return err
-		}
-		obj = rawObj.(model.GatewayPolicy)
-	} else {
-		var err error
-		client := domains.NewDefaultGatewayPoliciesClient(connector)
-		obj, err = client.Get(d.Get("domain").(string), id)
-		if err != nil {
-			return handleReadError(d, "Gateway Policy", id, err)
-		}
+	obj, err := getGatewayPolicyInDomain(id, d.Get("domain").(string), connector, isPolicyGlobalManager(m))
+	if err != nil {
+		return handleReadError(d, "Gateway Policy", id, err)
 	}
 
 	d.Set("display_name", obj.DisplayName)
@@ -180,7 +175,7 @@ func resourceNsxtPolicyGatewayPolicyUpdate(d *schema.ResourceData, m interface{}
 	sequenceNumber := int64(d.Get("sequence_number").(int))
 	stateful := d.Get("stateful").(bool)
 	tcpStrict := d.Get("tcp_strict").(bool)
-	rules := getPolicyRulesFromSchema(d)
+	rules := getPolicyRulesFromSchema(d, false)
 	revision := int64(d.Get("revision").(int))
 
 	obj := model.GatewayPolicy{
