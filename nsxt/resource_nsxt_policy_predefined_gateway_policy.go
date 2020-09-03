@@ -327,6 +327,7 @@ func updatePolicyPredefinedGatewayPolicy(id string, d *schema.ResourceData, m in
 			childRules = append(childRules, childRule)
 		}
 
+                // We need to delete old rules that are not present in config anymore
 		for _, oldRule := range oldRules.([]interface{}) {
 			oldRuleMap := oldRule.(map[string]interface{})
 			oldRuleID := oldRuleMap["nsx_id"].(string)
@@ -346,9 +347,7 @@ func updatePolicyPredefinedGatewayPolicy(id string, d *schema.ResourceData, m in
 
 			}
 		}
-	}
-
-	if d.HasChange("default_rule") {
+	} else if d.HasChange("default_rule") {
 		log.Printf("[DEBUG]: Default rule configuration has changed")
 		for _, existingDefaultRule := range predefinedPolicy.Rules {
 			if existingDefaultRule.IsDefault != nil && *existingDefaultRule.IsDefault {

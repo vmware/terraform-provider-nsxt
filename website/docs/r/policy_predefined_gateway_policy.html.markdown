@@ -60,7 +60,7 @@ The following arguments are supported:
 * `path` - (Required) Policy path for the predefined Gateway Policy to modify.
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this Gateway Policy.
-* `rule` (Optional) A repeatable block to specify rules for the Gateway Policy. This setting is applicable to non-Default policies only. This setting is not applicable to policy belonging to `DEFAULT` category. Each rule includes the following fields:
+* `rule` (Optional) A repeatable block to specify rules for the Gateway Policy. This setting is not applicable to policy belonging to `DEFAULT` category. Each rule includes the following fields:
   * `display_name` - (Required) Display name of the resource.
   * `description` - (Optional) Description of the resource.
   * `destination_groups` - (Optional) A list of destination group paths to use for the policy.
@@ -78,7 +78,7 @@ The following arguments are supported:
   * `log_label` - (Optional) Additional information (string) which will be propagated to the rule syslog.
   * `tag` - (Optional) A list of scope + tag pairs to associate with this Rule.
   * `action` - (Optional) The action for the Rule. Must be one of: `ALLOW`, `DROP` or `REJECT`. Defaults to `ALLOW`.
-* `default_rule` (Optional) A repeatable block to modify default rules for the Gateway Policy in a `DEFAULT` category. This setting is only applicable to policies in `DEFAULT` category. Each rule includes the following fields:
+* `default_rule` (Optional) A repeatable block to modify default rules for the Gateway Policy in a `DEFAULT` category. Each rule includes the following fields:
   * `scope` - (Required) Scope for the default rule that should be modified. Only one default rule can be present for each scope.
   * `description` - (Optional) Description of the resource.
   * `logged` - (Optional) A boolean flag to enable packet logging.
@@ -90,10 +90,8 @@ The following arguments are supported:
 
 In addition to arguments listed above, the following attributes are exported:
 
-* `id` - ID of the Secuirty Policy.
 * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
-* `path` - The NSX path of the policy resource.
-* `rule`:
+* `rule`, `default_rule`:
   * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
   * `path` - The NSX path of the policy resource.
   * `sequence_number` - Sequence number of the this rule, is defined by order of rules in the list.

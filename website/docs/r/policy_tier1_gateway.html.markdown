@@ -31,7 +31,6 @@ resource "nsxt_policy_tier1_gateway" "tier1_gw" {
   default_rule_logging      = "false"
   enable_firewall           = "true"
   enable_standby_relocation = "false"
-  force_whitelisting        = "true"
   tier0_path                = data.nsxt_policy_tier0_gateway.T0.path
   route_advertisement_types = ["TIER1_STATIC_ROUTES", "TIER1_CONNECTED"]
   pool_allocation           = "ROUTING"
@@ -93,7 +92,7 @@ The following arguments are supported:
 * `default_rule_logging` - (Optional) Boolean flag indicating if the default rule logging will be enabled or not. The default value is false.
 * `enable_firewall` - (Optional) Boolean flag indicating if the edge firewall will be enabled or not. The default value is true.
 * `enable_standby_relocation` - (Optional) Boolean flag indicating if the standby relocation will be enabled or not. The default value is false.
-* `force_whitelisting` - (Optional) Boolean flag indicating if white-listing will be forced or not. The default value is false. Setting it to `true` will create a base deny entry rule on Tier-1 firewall.
+* `force_whitelisting` - (Deprecated) Boolean flag indicating if white-listing will be forced or not. The default value is false. This argument is deprecated and will be removed. Please use `nsxt_policy_predefined_gateway_policy` resource to control default action.
 * `tier0_path` - (Optional) The path of the connected Tier0.
 * `route_advertisement_types` - (Optional) Enable different types of route advertisements: TIER1_STATIC_ROUTES, TIER1_CONNECTED, TIER1_NAT, TIER1_LB_VIP, TIER1_LB_SNAT, TIER1_DNS_FORWARDER_IP, TIER1_IPSEC_LOCAL_ENDPOINT.
 * `ipv6_ndra_profile_path` - (Optional) Policy path to IPv6 NDRA profile.

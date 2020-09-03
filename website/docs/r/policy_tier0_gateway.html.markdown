@@ -20,7 +20,6 @@ resource "nsxt_policy_tier0_gateway" "tier0_gw" {
   failover_mode             = "PREEMPTIVE"
   default_rule_logging      = false
   enable_firewall           = true
-  force_whitelisting        = false
   ha_mode                   = "ACTIVE_STANDBY"
   internal_transit_subnets  = ["102.64.0.0/16"]
   transit_subnets           = ["101.64.0.0/16"]
@@ -108,7 +107,7 @@ The following arguments are supported:
 * `failover_mode` - (Optional) This failover mode determines, whether the preferred service router instance for given logical router will preempt the peer. Accepted values are PREEMPTIVE/NON_PREEMPTIVE.
 * `default_rule_logging` - (Optional) Boolean flag indicating if the default rule logging will be enabled or not. The default value is false.
 * `enable_firewall` - (Optional) Boolean flag indicating if the edge firewall will be enabled or not. The default value is true.
-* `force_whitelisting` - (Optional) Boolean flag indicating if white-listing will be forced or not. The default value is false.
+* `force_whitelisting` - (Deprecated) Boolean flag indicating if white-listing will be forced or not. The default value is false. This argument is deprecated and will be removed. Please use `nsxt_policy_predefined_gateway_policy` resource to control default action.
 * `ipv6_ndra_profile_path` - (Optional) Policy path to IPv6 NDRA profile.
 * `ipv6_dad_profile_path` - (Optional) Policy path to IPv6 DAD profile.
 * `ha_mode` - (Optional) High-availability Mode for Tier-0. Valid values are `ACTIVE_ACTIVE` and `ACTIVE_STANDBY`.
