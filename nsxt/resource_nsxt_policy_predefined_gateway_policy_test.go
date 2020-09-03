@@ -58,7 +58,8 @@ func TestAccResourceNsxtPolicyPredefinedGatewayPolicy_basic(t *testing.T) {
 	})
 }
 
-// NOTE: This test assumes clean environment - no Tier0 routers for NSX < 3.1.0
+// NOTE: This test assumes clean environment - no gateways
+// This test will be refactored for NSX >= 3.1.0 to avoid this limitation
 func TestAccResourceNsxtPolicyPredefinedGatewayPolicy_defaultRule(t *testing.T) {
 	path := "/infra/domains/default/gateway-policies/Policy_Default_Infra"
 	testResourceName := "nsxt_policy_predefined_gateway_policy.test"
