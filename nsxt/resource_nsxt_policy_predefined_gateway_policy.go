@@ -327,7 +327,7 @@ func updatePolicyPredefinedGatewayPolicy(id string, d *schema.ResourceData, m in
 			childRules = append(childRules, childRule)
 		}
 
-                // We need to delete old rules that are not present in config anymore
+		// We need to delete old rules that are not present in config anymore
 		for _, oldRule := range oldRules.([]interface{}) {
 			oldRuleMap := oldRule.(map[string]interface{})
 			oldRuleID := oldRuleMap["nsx_id"].(string)
