@@ -8,7 +8,7 @@ description: A resource to update Predefined (Default) Security Security Policie
 # nsxt_policy_predefined_security_policy
 
 This resource provides a method to modify default Security Policy and its rules.
-This can be default layer2 policy or default layer2 policy. Maximum one resource
+This can be default layer2 policy or default layer3 policy. Maximum one resource
 for each type should exist in your configuration.
 
 This resource is applicable to NSX Global Manager, NSX Policy Manager and VMC.
