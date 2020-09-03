@@ -8,7 +8,7 @@ description: A policy Gateway Policy data source.
 # nsxt_policy_gateway_policy
 
 This data source provides information about policy Gateway Policues configured on NSX.
-This data source can be useful for fetching policy path to use in `nsxt_policy_fixed_gateway_policy` resource.
+This data source can be useful for fetching policy path to use in `nsxt_policy_predefined_gateway_policy` resource.
 
 This data source is applicable to NSX Policy Manager, NSX Global Manager and VMC.
 
@@ -22,7 +22,7 @@ data "nsxt_policy_gateway_policy" "predefined" {
 
 ## Argument Reference
 
-* `id` - (Optional) The ID of Tier-0 gateway to retrieve.
+* `id` - (Optional) The ID of the gateway policy to retrieve.
 * `domain` - (Optional) The domain of the policy, defaults to `default`. Needs to be specified in VMC environment.
 * `category` - (Optional) Category of the policy to retrieve. May be useful to retrieve default policy.
 * `display_name` - (Optional) The Display Name prefix of the policy to retrieve.
