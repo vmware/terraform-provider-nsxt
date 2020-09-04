@@ -36,12 +36,12 @@ func getPolicyPredefinedGatewayPolicySchema() map[string]*schema.Schema {
 		"description":  getComputedDescriptionSchema(),
 		"tag":          getTagsSchema(),
 		"rule":         getSecurityPolicyAndGatewayRulesSchema(true),
-		"default_rule": getPolicyDefaultRulesSchema(),
+		"default_rule": getGatewayPolicyDefaultRulesSchema(),
 		"revision":     getRevisionSchema(),
 	}
 }
 
-func getPolicyDefaultRulesSchema() *schema.Schema {
+func getGatewayPolicyDefaultRulesSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:          schema.TypeList,
 		Description:   "List of default rules",

@@ -28,6 +28,24 @@ func resourceNsxtPolicySecurityPolicy() *schema.Resource {
 	}
 }
 
+func getSecurityPolicyInDomain(id string, domainName string, connector *client.RestConnector, isGlobalManager bool) (model.SecurityPolicy, error) {
+	if isGlobalManager {
+		client := gm_domains.NewDefaultSecurityPoliciesClient(connector)
+		gmObj, err := client.Get(domainName, id)
+		if err != nil {
+			return model.SecurityPolicy{}, err
+		}
+		rawObj, convErr := convertModelBindingType(gmObj, gm_model.SecurityPolicyBindingType(), model.SecurityPolicyBindingType())
+		if convErr != nil {
+			return model.SecurityPolicy{}, convErr
+		}
+		return rawObj.(model.SecurityPolicy), nil
+	}
+	client := domains.NewDefaultSecurityPoliciesClient(connector)
+	return client.Get(domainName, id)
+
+}
+
 func resourceNsxtPolicySecurityPolicyExistsInDomain(id string, domainName string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
 	var err error
 	if isGlobalManager {
