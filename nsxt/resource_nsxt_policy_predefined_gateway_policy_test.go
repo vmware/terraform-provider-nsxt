@@ -10,10 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
-// TODO: Rewrite this test based on GW Policy data source when available,
-// use 3.1.0 as baseline for the test and remove testAccOnlyLocalManager
 func TestAccResourceNsxtPolicyPredefinedGatewayPolicy_basic(t *testing.T) {
-	path := "/infra/domains/default/gateway-policies/Policy_Default_Infra"
 	testResourceName := "nsxt_policy_predefined_gateway_policy.test"
 	testGatewayResourceName := "nsxt_policy_tier0_gateway.test"
 	description1 := "test 1"
@@ -23,13 +20,12 @@ func TestAccResourceNsxtPolicyPredefinedGatewayPolicy_basic(t *testing.T) {
             tag   = "orange"
         }`
 
-	// NOTE: These tests cannot be parallel, as they modify same default policy
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t); testAccNSXVersion(t, "3.1.0") },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyPredefinedGatewayPolicyBasic(path, description1, tags),
+				Config: testAccNsxtPolicyPredefinedGatewayPolicyBasic(description1, tags),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyGatewayPolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "description", description1),
@@ -39,7 +35,7 @@ func TestAccResourceNsxtPolicyPredefinedGatewayPolicy_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyPredefinedGatewayPolicyBasic(path, description2, ""),
+				Config: testAccNsxtPolicyPredefinedGatewayPolicyBasic(description2, ""),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyGatewayPolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "description", description2),
@@ -58,10 +54,7 @@ func TestAccResourceNsxtPolicyPredefinedGatewayPolicy_basic(t *testing.T) {
 	})
 }
 
-// NOTE: This test assumes clean environment - no gateways
-// This test will be refactored for NSX >= 3.1.0 to avoid this limitation
 func TestAccResourceNsxtPolicyPredefinedGatewayPolicy_defaultRule(t *testing.T) {
-	path := "/infra/domains/default/gateway-policies/Policy_Default_Infra"
 	testResourceName := "nsxt_policy_predefined_gateway_policy.test"
 	testGatewayResourceName := "nsxt_policy_tier0_gateway.test"
 	action1 := "REJECT"
@@ -73,12 +66,12 @@ func TestAccResourceNsxtPolicyPredefinedGatewayPolicy_defaultRule(t *testing.T) 
             tag   = "orange"
         }`
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t); testAccNSXVersion(t, "3.1.0") },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyPredefinedGatewayPolicyDefaultRule(path, description1, action1, action1, tags),
+				Config: testAccNsxtPolicyPredefinedGatewayPolicyDefaultRule(description1, action1, action1, tags),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyGatewayPolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "rule.#", "0"),
@@ -92,7 +85,7 @@ func TestAccResourceNsxtPolicyPredefinedGatewayPolicy_defaultRule(t *testing.T) 
 				),
 			},
 			{
-				Config: testAccNsxtPolicyPredefinedGatewayPolicyDefaultRule(path, description2, action2, action2, ""),
+				Config: testAccNsxtPolicyPredefinedGatewayPolicyDefaultRule(description2, action2, action2, ""),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyGatewayPolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "rule.#", "0"),
@@ -124,22 +117,28 @@ data "nsxt_policy_edge_cluster" "test" {
 resource "nsxt_policy_tier0_gateway" "test" {
   display_name      = "predefined-gw-policy-test"
   edge_cluster_path = data.nsxt_policy_edge_cluster.test.path
+}
+
+data "nsxt_policy_gateway_policy" "test" {
+  category     = "Default"
+  display_name = "Policy_Default_Infra-tier0-${nsxt_policy_tier0_gateway.test.nsx_id}"
 }`, getEdgeClusterName())
 }
 
-func testAccNsxtPolicyPredefinedGatewayPolicyBasic(path string, description string, tags string) string {
+func testAccNsxtPolicyPredefinedGatewayPolicyBasic(description string, tags string) string {
 	return testAccNsxtPolicyPredefinedGatewayPolicyPrerequisites() + fmt.Sprintf(`
+
 resource "nsxt_policy_predefined_gateway_policy" "test" {
-  path        = "%s"
+  path        = data.nsxt_policy_gateway_policy.test.path
   description = "%s"
   %s
-}`, path, description, tags)
+}`, description, tags)
 }
 
-func testAccNsxtPolicyPredefinedGatewayPolicyDefaultRule(path string, description string, action string, label string, tags string) string {
+func testAccNsxtPolicyPredefinedGatewayPolicyDefaultRule(description string, action string, label string, tags string) string {
 	return testAccNsxtPolicyPredefinedGatewayPolicyPrerequisites() + fmt.Sprintf(`
 resource "nsxt_policy_predefined_gateway_policy" "test" {
-  path        = "%s"
+  path        = data.nsxt_policy_gateway_policy.test.path
   default_rule {
     scope        = nsxt_policy_tier0_gateway.test.path
     description  = "%s"
@@ -148,5 +147,5 @@ resource "nsxt_policy_predefined_gateway_policy" "test" {
     logged       = true
     %s
   }
-}`, path, description, action, label, tags)
+}`, description, action, label, tags)
 }
