@@ -56,12 +56,13 @@ func TestAccDataSourceNsxtPolicyGatewayPolicy_basic(t *testing.T) {
 	})
 }
 
-// TODO: Add Precheck for NSX < 3.1.0
+// This test is applicable to earlier NSX versions, where a single default GW
+// policy is auto-created. In later versions a policy is created per GW.
 func TestAccDataSourceNsxtPolicyGatewayPolicy_default(t *testing.T) {
 	testResourceName := "data.nsxt_policy_gateway_policy.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersionLessThan(t, "3.1.0") },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
