@@ -36,7 +36,7 @@ resource "nsxt_logical_dhcp_server" "logical_dhcp_server" {
   }
 
   dhcp_generic_option {
-    code = "119"
+    code   = "119"
     values = ["abc"]
   }
 

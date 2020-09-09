@@ -60,7 +60,7 @@ resource "nsxt_lb_service" "lb_service" {
   error_log_level   = "INFO"
   size              = "MEDIUM"
 
-  depends_on        = [nsxt_logical_router_link_port_on_tier1.test]
+  depends_on = [nsxt_logical_router_link_port_on_tier1.test]
 }
 ```
 

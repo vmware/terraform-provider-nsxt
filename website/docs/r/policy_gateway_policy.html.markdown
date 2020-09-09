@@ -29,12 +29,12 @@ resource "nsxt_policy_gateway_policy" "test" {
   }
 
   rule {
-    display_name          = "rule1"
-    destination_groups    = [nsxt_policy_group.group1.path, nsxt_policy_group.group2.path]
-    disabled              = true
-    action                = "DROP"
-    logged                = true
-    scope                 = [nsxt_policy_tier1_gateway.policygateway.path]
+    display_name       = "rule1"
+    destination_groups = [nsxt_policy_group.group1.path, nsxt_policy_group.group2.path]
+    disabled           = true
+    action             = "DROP"
+    logged             = true
+    scope              = [nsxt_policy_tier1_gateway.policygateway.path]
   }
 
 }
@@ -78,7 +78,7 @@ The following arguments are supported:
 
 In addition to arguments listed above, the following attributes are exported:
 
-* `id` - ID of the Secuirty Policy.
+* `id` - ID of the Security Policy.
 * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
 * `path` - The NSX path of the policy resource.
 * `rule`:

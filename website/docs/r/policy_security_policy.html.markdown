@@ -15,71 +15,73 @@ This resource is applicable to NSX Global Manager, NSX Policy Manager and VMC.
 
 ```hcl
 resource "nsxt_policy_security_policy" "policy1" {
-    display_name = "policy1"
-    description  = "Terraform provisioned Security Policy"
-    category     = "Application"
-    locked       = false
-    stateful     = true
-    tcp_strict   = false
-    scope        = [nsxt_policy_group.pets.path]
+  display_name = "policy1"
+  description  = "Terraform provisioned Security Policy"
+  category     = "Application"
+  locked       = false
+  stateful     = true
+  tcp_strict   = false
+  scope        = [nsxt_policy_group.pets.path]
 
-    rule {
-      display_name       = "block_icmp"
-      destination_groups = [nsxt_policy_group.cats.path, nsxt_policy_group.dogs.path]
-      action             = "DROP"
-      services           = [nsxt_policy_service.icmp.path]
-      logged             = true
-    }
+  rule {
+    display_name       = "block_icmp"
+    destination_groups = [nsxt_policy_group.cats.path, nsxt_policy_group.dogs.path]
+    action             = "DROP"
+    services           = [nsxt_policy_service.icmp.path]
+    logged             = true
+  }
 
-    rule {
-      display_name     = "allow_udp"
-      source_groups    = [nsxt_policy_group.fish.path]
-      sources_excluded = true
-      scope            = [nsxt_policy_group.aquarium.path]
-      action           = "ALLOW"
-      services         = [nsxt_policy_service.udp.path]
-      logged           = true
-      disabled         = true
-      notes            = "Disabled by starfish for debugging"
-    }
+  rule {
+    display_name     = "allow_udp"
+    source_groups    = [nsxt_policy_group.fish.path]
+    sources_excluded = true
+    scope            = [nsxt_policy_group.aquarium.path]
+    action           = "ALLOW"
+    services         = [nsxt_policy_service.udp.path]
+    logged           = true
+    disabled         = true
+    notes            = "Disabled by starfish for debugging"
+  }
 }
 ```
 
 Note: This usage is for Global Manager only
+
 ```hcl
 data "nsxt_policy_site" "paris" {
   display_name = "Paris"
 }
 resource "nsxt_policy_security_policy" "policy1" {
-    display_name = "policy1"
-    description  = "Terraform provisioned Security Policy"
-    category     = "Application"
-    locked       = false
-    stateful     = true
-    tcp_strict   = false
-    scope        = [nsxt_policy_group.pets.path]
-    domain       = data.nsxt_policy_site.paris.id
+  display_name = "policy1"
+  description  = "Terraform provisioned Security Policy"
+  category     = "Application"
+  locked       = false
+  stateful     = true
+  tcp_strict   = false
+  scope        = [nsxt_policy_group.pets.path]
+  domain       = data.nsxt_policy_site.paris.id
 
-    rule {
-      display_name       = "block_icmp"
-      destination_groups = [nsxt_policy_group.cats.path, nsxt_policy_group.dogs.path]
-      action             = "DROP"
-      services           = [nsxt_policy_service.icmp.path]
-      logged             = true
-    }
+  rule {
+    display_name       = "block_icmp"
+    destination_groups = [nsxt_policy_group.cats.path, nsxt_policy_group.dogs.path]
+    action             = "DROP"
+    services           = [nsxt_policy_service.icmp.path]
+    logged             = true
+  }
 
-    rule {
-      display_name     = "allow_udp"
-      source_groups    = [nsxt_policy_group.fish.path]
-      sources_excluded = true
-      scope            = [nsxt_policy_group.aquarium.path]
-      action           = "ALLOW"
-      services         = [nsxt_policy_service.udp.path]
-      logged           = true
-      disabled         = true
-      notes            = "Disabled by starfish for debugging"
-    }
+  rule {
+    display_name     = "allow_udp"
+    source_groups    = [nsxt_policy_group.fish.path]
+    sources_excluded = true
+    scope            = [nsxt_policy_group.aquarium.path]
+    action           = "ALLOW"
+    services         = [nsxt_policy_service.udp.path]
+    logged           = true
+    disabled         = true
+    notes            = "Disabled by starfish for debugging"
+  }
 }
+```
 
 ## Argument Reference
 

@@ -80,7 +80,7 @@ The following arguments are supported:
 * `default_pool_member_ports` - (Optional) List of default pool member ports.
 * `max_concurrent_connections` - (Optional) To ensure one virtual server does not over consume resources, affecting other applications hosted on the same LBS, connections to a virtual server can be capped. If it is not specified, it means that connections are unlimited.
 * `max_new_connection_rate` - (Optional) To ensure one virtual server does not over consume resources, connections to a member can be rate limited. If it is not specified, it means that connection rate is unlimited.
-* `persistence_profile_id` - (Optional) Persistence profile is used to allow related client connections to be sent to the same backend server. Only source ip persistance profile is accepted.
+* `persistence_profile_id` - (Optional) Persistence profile is used to allow related client connections to be sent to the same backend server. Only source ip persistence profile is accepted.
 * `pool_id` - (Optional) Pool of backend servers. Server pool consists of one or more servers, also referred to as pool members, that are similarly configured and are running the same application.
 * `sorry_pool_id` - (Optional) When load balancer can not select a backend server to serve the request in default pool or pool in rules, the request would be served by sorry server pool.
 

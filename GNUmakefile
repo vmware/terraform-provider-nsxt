@@ -5,6 +5,11 @@ PKG_NAME=nsxt
 
 default: build
 
+tools:
+	GO111MODULE=on go install -mod=mod github.com/client9/misspell/cmd/misspell
+	GO111MODULE=on go install -mod=mod github.com/golangci/golangci-lint/cmd/golangci-lint
+	GO111MODULE=on go install -mod=mod github.com/katbyte/terrafmt
+
 build: fmtcheck
 	go install
 
@@ -43,5 +48,22 @@ test-compile:
 	fi
 	go test -c $(TEST) $(TESTARGS)
 
-.PHONY: build test testacc vet fmt fmtcheck errcheck test-compile website website-test
+website-lint:
+	@echo "==> Checking website against linters..."
+	@misspell -error -source=text website/ || (echo; \
+	    echo "Unexpected mispelling found in website files."; \
+	    echo "To automatically fix the misspelling, run 'make website-lint-fix' and commit the changes."; \
+	    exit 1)
+	@terrafmt diff ./website --check --pattern '*.markdown' --quiet || (echo; \
+	    echo "Unexpected differences in website HCL formatting."; \
+	    echo "To see the full differences, run: terrafmt diff ./website --pattern '*.markdown'"; \
+	    echo "To automatically fix the formatting, run 'make website-lint-fix' and commit the changes."; \
+	    exit 1)
+
+website-lint-fix:
+	@echo "==> Applying automatic website linter fixes..."
+	@misspell -w -source=text website/
+	@terrafmt fmt ./website --pattern '*.markdown'
+
+.PHONY: build test testacc vet fmt fmtcheck errcheck test-compile website-lint website-lint-fix tools
 

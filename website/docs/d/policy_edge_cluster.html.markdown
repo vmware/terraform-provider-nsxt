@@ -28,7 +28,7 @@ data "nsxt_policy_site" "paris" {
 
 data "nsxt_policy_edge_cluster" "gm_ec" {
   display_name = "ec"
-  site_path = data.nsxt_policy_site.paris.path
+  site_path    = data.nsxt_policy_site.paris.path
 }
 ```
 

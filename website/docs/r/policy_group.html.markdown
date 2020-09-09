@@ -15,54 +15,54 @@ This resource is applicable to NSX Global Manager, NSX Policy Manager and VMC.
 
 ```hcl
 resource "nsxt_policy_group" "group1" {
-    display_name = "tf-group1"
-    description  = "Terraform provisioned Group"
+  display_name = "tf-group1"
+  description  = "Terraform provisioned Group"
 
-    criteria {
-        condition {
-            key         = "Name"
-            member_type = "VirtualMachine"
-            operator    = "STARTSWITH"
-            value       = "public"
-        }
-        condition {
-            key         = "OSName"
-            member_type = "VirtualMachine"
-            operator    = "CONTAINS"
-            value       = "Ubuntu"
-        }
+  criteria {
+    condition {
+      key         = "Name"
+      member_type = "VirtualMachine"
+      operator    = "STARTSWITH"
+      value       = "public"
     }
+    condition {
+      key         = "OSName"
+      member_type = "VirtualMachine"
+      operator    = "CONTAINS"
+      value       = "Ubuntu"
+    }
+  }
 
-    conjunction {
-        operator = "OR"
-    }
+  conjunction {
+    operator = "OR"
+  }
 
-    criteria {
-        ipaddress_expression {
-            ip_addresses = ["211.1.1.1", "212.1.1.1", "192.168.1.1-192.168.1.100"]
-        }
+  criteria {
+    ipaddress_expression {
+      ip_addresses = ["211.1.1.1", "212.1.1.1", "192.168.1.1-192.168.1.100"]
     }
+  }
 
-    conjunction {
-        operator = "OR"
-    }
+  conjunction {
+    operator = "OR"
+  }
 
-    criteria {
-        macaddress_expression {
-            mac_addresses = ["b2:54:00:98:b0:83"]
-        }
+  criteria {
+    macaddress_expression {
+      mac_addresses = ["b2:54:00:98:b0:83"]
     }
+  }
 
-    extended_criteria {
-        identity_group {
-          distinguished_name             = "cn=u1,ou=users,dc=example,dc=local"
-          domain_base_distinguished_name = "ou=users,dc=example,dc=local"
-        }
-        identity_group {
-          distinguished_name             = "cn=a1,ou=admin,dc=example,dc=local"
-          domain_base_distinguished_name = "ou=admin,dc=example,dc=local"
-        }
+  extended_criteria {
+    identity_group {
+      distinguished_name             = "cn=u1,ou=users,dc=example,dc=local"
+      domain_base_distinguished_name = "ou=users,dc=example,dc=local"
     }
+    identity_group {
+      distinguished_name             = "cn=a1,ou=admin,dc=example,dc=local"
+      domain_base_distinguished_name = "ou=admin,dc=example,dc=local"
+    }
+  }
 }
 ```
 
@@ -72,34 +72,34 @@ data "nsxt_policy_site" "paris" {
   display_name = "Paris"
 }
 resource "nsxt_policy_group" "group1" {
-    display_name = "tf-group1"
-    description  = "Terraform provisioned Group"
-    domain = data.nsxt_policy_site.paris.id
+  display_name = "tf-group1"
+  description  = "Terraform provisioned Group"
+  domain       = data.nsxt_policy_site.paris.id
 
-    criteria {
-        condition {
-            key         = "Name"
-            member_type = "VirtualMachine"
-            operator    = "STARTSWITH"
-            value       = "public"
-        }
-        condition {
-            key         = "OSName"
-            member_type = "VirtualMachine"
-            operator    = "CONTAINS"
-            value       = "Ubuntu"
-        }
+  criteria {
+    condition {
+      key         = "Name"
+      member_type = "VirtualMachine"
+      operator    = "STARTSWITH"
+      value       = "public"
     }
+    condition {
+      key         = "OSName"
+      member_type = "VirtualMachine"
+      operator    = "CONTAINS"
+      value       = "Ubuntu"
+    }
+  }
 
-    conjunction {
-        operator = "OR"
-    }
+  conjunction {
+    operator = "OR"
+  }
 
-    criteria {
-        ipaddress_expression {
-            ip_addresses = ["211.1.1.1", "212.1.1.1", "192.168.1.1-192.168.1.100"]
-        }
+  criteria {
+    ipaddress_expression {
+      ip_addresses = ["211.1.1.1", "212.1.1.1", "192.168.1.1-192.168.1.100"]
     }
+  }
 }
 ```
 

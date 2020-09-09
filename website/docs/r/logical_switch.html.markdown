@@ -25,7 +25,7 @@ resource "nsxt_logical_switch" "switch1" {
   }
 
   address_binding {
-    ip_address = "2.2.2.2"
+    ip_address  = "2.2.2.2"
     mac_address = "00:11:22:33:44:55"
   }
 

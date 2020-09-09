@@ -40,7 +40,7 @@ resource "nsxt_policy_service" "service_l4port" {
     display_name      = "TCP80"
     description       = "TCP port 80 entry"
     protocol          = "TCP"
-    destination_ports = [ "80" ]
+    destination_ports = ["80"]
   }
 
   tag {

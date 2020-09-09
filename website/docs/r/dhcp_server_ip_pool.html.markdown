@@ -22,10 +22,10 @@ resource "nsxt_dhcp_server_profile" "serverprofile" {
 }
 
 resource "nsxt_logical_dhcp_server" "logical_dhcp_server" {
-  display_name     = "logical_dhcp_server"
-  dhcp_profile_id  = nsxt_dhcp_server_profile.PRF.id
-  dhcp_server_ip   = "1.1.1.10/24"
-  gateway_ip       = "1.1.1.20"
+  display_name    = "logical_dhcp_server"
+  dhcp_profile_id = nsxt_dhcp_server_profile.PRF.id
+  dhcp_server_ip  = "1.1.1.10/24"
+  gateway_ip      = "1.1.1.20"
 }
 
 resource "nsxt_dhcp_server_ip_pool" "dhcp_ip_pool" {
