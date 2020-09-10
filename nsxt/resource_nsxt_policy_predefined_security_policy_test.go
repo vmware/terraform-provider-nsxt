@@ -10,10 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
-// TODO: Rewrite this test based on GW Policy data source when available
-// and enable global manager test
 func TestAccResourceNsxtPolicyPredefinedSecurityPolicy_basic(t *testing.T) {
-	path := "/infra/domains/default/security-policies/default-layer3-section"
 	testResourceName := "nsxt_policy_predefined_security_policy.test"
 	description1 := "test 1"
 	description2 := "test 2"
@@ -24,11 +21,11 @@ func TestAccResourceNsxtPolicyPredefinedSecurityPolicy_basic(t *testing.T) {
 
 	// NOTE: These tests cannot be parallel, as they modify same default policy
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyPredefinedSecurityPolicyBasic(path, description1, tags),
+				Config: testAccNsxtPolicyPredefinedSecurityPolicyBasic(description1, tags),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySecurityPolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "description", description1),
@@ -38,7 +35,7 @@ func TestAccResourceNsxtPolicyPredefinedSecurityPolicy_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyPredefinedSecurityPolicyBasic(path, description2, ""),
+				Config: testAccNsxtPolicyPredefinedSecurityPolicyBasic(description2, ""),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySecurityPolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "description", description2),
@@ -52,7 +49,6 @@ func TestAccResourceNsxtPolicyPredefinedSecurityPolicy_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyPredefinedSecurityPolicy_defaultRule(t *testing.T) {
-	path := "/infra/domains/default/security-policies/default-layer2-section"
 	testResourceName := "nsxt_policy_predefined_security_policy.test"
 	action1 := "DROP"
 	action2 := "ALLOW"
@@ -64,11 +60,11 @@ func TestAccResourceNsxtPolicyPredefinedSecurityPolicy_defaultRule(t *testing.T)
         }`
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyPredefinedSecurityPolicyDefaultRule(path, description1, action1, action1, tags),
+				Config: testAccNsxtPolicyPredefinedSecurityPolicyDefaultRule(description1, action1, action1, tags),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySecurityPolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "rule.#", "0"),
@@ -82,7 +78,7 @@ func TestAccResourceNsxtPolicyPredefinedSecurityPolicy_defaultRule(t *testing.T)
 				),
 			},
 			{
-				Config: testAccNsxtPolicyPredefinedSecurityPolicyDefaultRule(path, description2, action2, action2, ""),
+				Config: testAccNsxtPolicyPredefinedSecurityPolicyDefaultRule(description2, action2, action2, ""),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySecurityPolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "rule.#", "0"),
@@ -100,15 +96,14 @@ func TestAccResourceNsxtPolicyPredefinedSecurityPolicy_defaultRule(t *testing.T)
 }
 
 func TestAccResourceNsxtPolicyPredefinedSecurityPolicy_rules(t *testing.T) {
-	path := "/infra/domains/default/security-policies/default-layer3-section"
 	testResourceName := "nsxt_policy_predefined_security_policy.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyPredefinedSecurityPolicyWithRules(path),
+				Config: testAccNsxtPolicyPredefinedSecurityPolicyWithRules(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySecurityPolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "rule.#", "1"),
@@ -122,7 +117,7 @@ func TestAccResourceNsxtPolicyPredefinedSecurityPolicy_rules(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyPredefinedSecurityPolicyWithRulesUpdate1(path),
+				Config: testAccNsxtPolicyPredefinedSecurityPolicyWithRulesUpdate1(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySecurityPolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "rule.#", "2"),
@@ -141,7 +136,7 @@ func TestAccResourceNsxtPolicyPredefinedSecurityPolicy_rules(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyPredefinedSecurityPolicyWithRulesUpdate2(path),
+				Config: testAccNsxtPolicyPredefinedSecurityPolicyWithRulesUpdate2(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySecurityPolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "rule.#", "1"),
@@ -169,22 +164,27 @@ resource "nsxt_policy_group" "group1" {
 
 resource "nsxt_policy_group" "group2" {
   display_name = "predefined-policy-test2"
+}
+
+data "nsxt_policy_security_policy" "test" {
+  is_default = true
+  category   = "Application"
 }`
 }
 
-func testAccNsxtPolicyPredefinedSecurityPolicyBasic(path string, description string, tags string) string {
-	return fmt.Sprintf(`
+func testAccNsxtPolicyPredefinedSecurityPolicyBasic(description string, tags string) string {
+	return testAccNsxtPolicyPredefinedSecurityPolicyPrerequisites() + fmt.Sprintf(`
 resource "nsxt_policy_predefined_security_policy" "test" {
-  path        = "%s"
+  path        = data.nsxt_policy_security_policy.test.path
   description = "%s"
   %s
-}`, path, description, tags)
+}`, description, tags)
 }
 
-func testAccNsxtPolicyPredefinedSecurityPolicyDefaultRule(path string, description string, action string, label string, tags string) string {
-	return fmt.Sprintf(`
+func testAccNsxtPolicyPredefinedSecurityPolicyDefaultRule(description string, action string, label string, tags string) string {
+	return testAccNsxtPolicyPredefinedSecurityPolicyPrerequisites() + fmt.Sprintf(`
 resource "nsxt_policy_predefined_security_policy" "test" {
-  path        = "%s"
+  path = data.nsxt_policy_security_policy.test.path
   default_rule {
     description  = "%s"
     action       = "%s"
@@ -192,13 +192,13 @@ resource "nsxt_policy_predefined_security_policy" "test" {
     logged       = true
     %s
   }
-}`, path, description, action, label, tags)
+}`, description, action, label, tags)
 }
 
-func testAccNsxtPolicyPredefinedSecurityPolicyWithRules(path string) string {
-	return testAccNsxtPolicyPredefinedSecurityPolicyPrerequisites() + fmt.Sprintf(`
+func testAccNsxtPolicyPredefinedSecurityPolicyWithRules() string {
+	return testAccNsxtPolicyPredefinedSecurityPolicyPrerequisites() + `
 resource "nsxt_policy_predefined_security_policy" "test" {
-  path        = "%s"
+  path = data.nsxt_policy_security_policy.test.path
 
   rule {
       display_name  = "rule2"
@@ -207,13 +207,13 @@ resource "nsxt_policy_predefined_security_policy" "test" {
       action        = "ALLOW"
       disabled      = true
   }
-}`, path)
+}`
 }
 
-func testAccNsxtPolicyPredefinedSecurityPolicyWithRulesUpdate1(path string) string {
-	return testAccNsxtPolicyPredefinedSecurityPolicyPrerequisites() + fmt.Sprintf(`
+func testAccNsxtPolicyPredefinedSecurityPolicyWithRulesUpdate1() string {
+	return testAccNsxtPolicyPredefinedSecurityPolicyPrerequisites() + `
 resource "nsxt_policy_predefined_security_policy" "test" {
-  path        = "%s"
+  path = data.nsxt_policy_security_policy.test.path
 
   rule {
       display_name  = "rule1"
@@ -228,13 +228,13 @@ resource "nsxt_policy_predefined_security_policy" "test" {
       action        = "ALLOW"
       disabled      = false
   }
-}`, path)
+}`
 }
 
-func testAccNsxtPolicyPredefinedSecurityPolicyWithRulesUpdate2(path string) string {
-	return testAccNsxtPolicyPredefinedSecurityPolicyPrerequisites() + fmt.Sprintf(`
+func testAccNsxtPolicyPredefinedSecurityPolicyWithRulesUpdate2() string {
+	return testAccNsxtPolicyPredefinedSecurityPolicyPrerequisites() + `
 resource "nsxt_policy_predefined_security_policy" "test" {
-  path        = "%s"
+  path = data.nsxt_policy_security_policy.test.path
 
   rule {
       display_name  = "rule2"
@@ -246,5 +246,5 @@ resource "nsxt_policy_predefined_security_policy" "test" {
   default_rule {
       action = "REJECT"
   }
-}`, path)
+}`
 }
