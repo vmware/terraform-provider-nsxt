@@ -14,12 +14,12 @@ import (
 var testAccGmGatewayIntersiteSubnet = "10.10.2.0/24"
 
 // NOTE: This test assumes single edge cluster on both sites
-func TestAccResourceNsxtPolicyTier0Gateway_globalManager(t *testing.T) {
+func TestAccResourceNsxtPolicyTier0Gateway_globalManagerBasic(t *testing.T) {
 	testResourceName := "nsxt_policy_tier0_gateway.test"
 
 	// TODO: drop hashes when terraform plugin tests align with terraform plugin
-	localeService1Path := "locale_service.3094672441."
-	localeService2Path := "locale_service.2076840360."
+	localeService1Path := "locale_service.1704315080."
+	localeService2Path := "locale_service.2632928165."
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -88,8 +88,8 @@ func TestAccResourceNsxtPolicyTier0Gateway_globalManagerNoSubnet(t *testing.T) {
 	testResourceName := "nsxt_policy_tier0_gateway.test"
 
 	// TODO: drop hashes when terraform plugin tests align with terraform plugin
-	localeService1Path := "locale_service.3094672441."
-	localeService2Path := "locale_service.2076840360."
+	localeService1Path := "locale_service.1704315080."
+	localeService2Path := "locale_service.2632928165."
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -144,9 +144,9 @@ func TestAccResourceNsxtPolicyTier0Gateway_globalManagerRedistribution(t *testin
 	testResourceName := "nsxt_policy_tier0_gateway.test"
 
 	// TODO: drop hashes when terraform plugin tests align with terraform plugin
-	localeService1Path := "locale_service.4137057876."
-	localeService2Path := "locale_service.3979779051."
-	localeService3Path := "locale_service.3834617261."
+	localeService1Path := "locale_service.1305767334."
+	localeService2Path := "locale_service.3957791215."
+	localeService3Path := "locale_service.2747282."
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
