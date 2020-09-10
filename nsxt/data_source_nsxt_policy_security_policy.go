@@ -53,7 +53,7 @@ func listSecurityPolicies(domain string, connector *client.RestConnector) ([]mod
 	total := 0
 
 	for {
-		policies, err := client.List(domain, cursor, nil, &boolFalse, nil, nil, &boolFalse, nil)
+		policies, err := client.List(domain, cursor, nil, nil, nil, nil, &boolFalse, nil)
 		if err != nil {
 			return results, err
 		}
