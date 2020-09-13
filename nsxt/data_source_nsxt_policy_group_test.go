@@ -48,8 +48,8 @@ func TestAccDataSourceNsxtPolicyGroup_basic(t *testing.T) {
 	})
 }
 
-func TestAccDataSourceNsxtGlobalPolicyGroup_basic(t *testing.T) {
-	name := "terraform_ds_test"
+func TestAccDataSourceNsxtPolicyGroup_withSite(t *testing.T) {
+	name := "terraform_gm_ds_test"
 	domain := getTestSiteName()
 	testResourceName := "data.nsxt_policy_group.test"
 
