@@ -21,7 +21,7 @@ func TestAccResourceNsxtPolicyPredefinedGatewayPolicy_basic(t *testing.T) {
         }`
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t); testAccNSXVersion(t, "3.1.0") },
+		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.1.0") },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -67,7 +67,7 @@ func TestAccResourceNsxtPolicyPredefinedGatewayPolicy_defaultRule(t *testing.T) 
         }`
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t); testAccNSXVersion(t, "3.1.0") },
+		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.1.0") },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -109,20 +109,22 @@ func TestAccResourceNsxtPolicyPredefinedGatewayPolicy_defaultRule(t *testing.T) 
 }
 
 func testAccNsxtPolicyPredefinedGatewayPolicyPrerequisites() string {
-	return fmt.Sprintf(`
-data "nsxt_policy_edge_cluster" "test" {
-  display_name = "%s"
-}
+	t0EdgeCluster := `edge_cluster_path = data.nsxt_policy_edge_cluster.test.path`
+	if testAccIsGlobalManager() {
+		t0EdgeCluster = fmt.Sprintf(`locale_service { %s }`, t0EdgeCluster)
+	}
+
+	return testAccNsxtPolicyEdgeClusterReadTemplate(getEdgeClusterName()) + fmt.Sprintf(`
 
 resource "nsxt_policy_tier0_gateway" "test" {
   display_name      = "predefined-gw-policy-test"
-  edge_cluster_path = data.nsxt_policy_edge_cluster.test.path
+  %s
 }
 
 data "nsxt_policy_gateway_policy" "test" {
   category     = "Default"
   display_name = "Policy_Default_Infra-tier0-${nsxt_policy_tier0_gateway.test.nsx_id}"
-}`, getEdgeClusterName())
+}`, t0EdgeCluster)
 }
 
 func testAccNsxtPolicyPredefinedGatewayPolicyBasic(description string, tags string) string {
