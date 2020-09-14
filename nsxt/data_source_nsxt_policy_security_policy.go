@@ -97,6 +97,7 @@ func dataSourceNsxtPolicySecurityPolicyRead(d *schema.ResourceData, m interface{
 
 		policy := dataValue.(gm_model.SecurityPolicy)
 		d.Set("category", policy.Category)
+		d.Set("is_default", policy.IsDefault)
 		return nil
 	}
 
@@ -164,6 +165,7 @@ func dataSourceNsxtPolicySecurityPolicyRead(d *schema.ResourceData, m interface{
 	d.Set("description", obj.Description)
 	d.Set("path", obj.Path)
 	d.Set("category", obj.Category)
+	d.Set("is_default", obj.IsDefault)
 
 	return nil
 }
