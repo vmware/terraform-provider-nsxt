@@ -238,7 +238,7 @@ func getPolicySegmentSecurityProfilesSchema() *schema.Resource {
 	}
 }
 
-func getPolicyCommonSegmentSchema() map[string]*schema.Schema {
+func getPolicyCommonSegmentSchema(vlanRequired bool) map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"nsx_id":       getNsxIDSchema(),
 		"path":         getPathSchema(),
@@ -297,7 +297,8 @@ func getPolicyCommonSegmentSchema() map[string]*schema.Schema {
 				Type:         schema.TypeString,
 				ValidateFunc: validateVLANIdOrRange,
 			},
-			Required: true,
+			Required: vlanRequired,
+			Optional: !vlanRequired,
 		},
 		"discovery_profile": {
 			Type:        schema.TypeList,

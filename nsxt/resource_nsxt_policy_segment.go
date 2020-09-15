@@ -8,9 +8,6 @@ import (
 )
 
 func resourceNsxtPolicySegment() *schema.Resource {
-	segSchema := getPolicyCommonSegmentSchema()
-	delete(segSchema, "vlan_ids")
-
 	return &schema.Resource{
 		Create: resourceNsxtPolicySegmentCreate,
 		Read:   resourceNsxtPolicySegmentRead,
@@ -20,7 +17,7 @@ func resourceNsxtPolicySegment() *schema.Resource {
 			State: schema.ImportStatePassthrough,
 		},
 
-		Schema: segSchema,
+		Schema: getPolicyCommonSegmentSchema(false),
 	}
 }
 

@@ -146,6 +146,7 @@ func TestAccResourceNsxtPolicySegment_updateAdvConfig(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "subnet.0.cidr", "12.12.2.1/24"),
 					resource.TestCheckResourceAttr(testResourceName, "domain_name", "tftest.org"),
 					resource.TestCheckResourceAttr(testResourceName, "overlay_id", "1011"),
+					resource.TestCheckResourceAttr(testResourceName, "vlan_ids.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "advanced_config.0.connectivity", "OFF"),
 					resource.TestCheckResourceAttr(testResourceName, "advanced_config.0.local_egress", "true"),
@@ -161,6 +162,7 @@ func TestAccResourceNsxtPolicySegment_updateAdvConfig(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "subnet.0.cidr", "12.12.2.1/24"),
 					resource.TestCheckResourceAttr(testResourceName, "domain_name", "tftest.org"),
 					resource.TestCheckResourceAttr(testResourceName, "overlay_id", "1011"),
+					resource.TestCheckResourceAttr(testResourceName, "vlan_ids.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "advanced_config.0.connectivity", "ON"),
 					resource.TestCheckResourceAttr(testResourceName, "advanced_config.0.local_egress", "false"),
@@ -524,6 +526,7 @@ resource "nsxt_policy_segment" "test" {
   description  = "Acceptance Test"
   domain_name  = "tftest.org"
   overlay_id   = 1011
+  vlan_ids     = ["101", "102"]
 
   transport_zone_path = data.nsxt_policy_transport_zone.test.path
 
@@ -552,6 +555,7 @@ resource "nsxt_policy_segment" "test" {
   description  = "Acceptance Test"
   domain_name  = "tftest.org"
   overlay_id   = 1011
+  vlan_ids     = ["101-104"]
 
   transport_zone_path = data.nsxt_policy_transport_zone.test.path
 
