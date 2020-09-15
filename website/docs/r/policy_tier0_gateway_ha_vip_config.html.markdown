@@ -19,7 +19,7 @@ data "nsxt_policy_tier0_gateway" "gw1" {
 resource "nsxt_policy_tier0_gateway_interface" "if1" {
   display_name           = "segment0_interface"
   description            = "connection to segment1"
-  type                   = "SERVICE"
+  type                   = "EXTERNAL"
   gateway_path           = data.nsxt_policy_tier0_gateway.gw1.path
   segment_path           = nsxt_policy_vlan_segment.segment1.path
   subnets                = ["12.12.2.1/24"]
@@ -28,7 +28,7 @@ resource "nsxt_policy_tier0_gateway_interface" "if1" {
 resource "nsxt_policy_tier0_gateway_interface" "if2" {
   display_name           = "segment0_interface"
   description            = "connection to segment2"
-  type                   = "SERVICE"
+  type                   = "EXTERNAL"
   gateway_path           = data.nsxt_policy_tier0_gateway.gw1.path
   segment_path           = nsxt_policy_vlan_segment.segment2.path
   subnets                = ["12.12.2.2/24"]
