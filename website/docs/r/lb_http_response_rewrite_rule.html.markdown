@@ -18,8 +18,8 @@ More specific examples are provided below.
 
 ```hcl
 resource "nsxt_lb_http_response_rewrite_rule" "lb_rule" {
-  description = "lb_rule provisioned by Terraform"
-  display_name = "lb_rule"
+  description    = "lb_rule provisioned by Terraform"
+  display_name   = "lb_rule"
   match_strategy = "ALL"
 
   tag {

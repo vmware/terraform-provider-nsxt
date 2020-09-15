@@ -13,11 +13,11 @@ This resource provides a way to configure a networking and security service whic
 
 ```hcl
 resource "nsxt_algorithm_type_ns_service" "ns_service_alg" {
-  description       = "S1 provisioned by Terraform"
-  display_name      = "S1"
-  algorithm         = "FTP"
-  destination_port  = "21"
-  source_ports      = ["9001-9003"]
+  description      = "S1 provisioned by Terraform"
+  display_name     = "S1"
+  algorithm        = "FTP"
+  destination_port = "21"
+  source_ports     = ["9001-9003"]
 
   tag {
     scope = "color"

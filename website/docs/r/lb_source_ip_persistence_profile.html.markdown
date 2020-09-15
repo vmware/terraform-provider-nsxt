@@ -16,8 +16,8 @@ Provides a resource to configure lb source ip persistence profile on NSX-T manag
 
 ```hcl
 resource "nsxt_lb_source_ip_persistence_profile" "lb_source_ip_persistence_profile" {
-  description = "lb_source_ip_persistence_profile provisioned by Terraform"
-  display_name = "lb_source_ip_persistence_profile"
+  description              = "lb_source_ip_persistence_profile provisioned by Terraform"
+  display_name             = "lb_source_ip_persistence_profile"
   persistence_shared       = "true"
   ha_persistence_mirroring = "true"
   purge_when_full          = "true"

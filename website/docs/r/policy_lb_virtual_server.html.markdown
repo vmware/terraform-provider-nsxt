@@ -60,7 +60,7 @@ The following arguments are supported:
 * `enabled` - (Optional) Flag to enable this Virtual Server.
 * `ip_address` - (Required) Virtual Server IP address.
 * `ports` - (Required) Virtual Server Ports.
-* `persistence_profile_path` - (Optional) Path to persistance profile allowing related client connections to be sent to the same backend server.
+* `persistence_profile_path` - (Optional) Path to persistence profile allowing related client connections to be sent to the same backend server.
 * `service_path` - (Optional) Virtual Server can be associated with Load Balancer Service.
 * `max_concurrent_connections` - (Optional) To ensure one virtual server does not over consume resources, connections to Virtual Server can be capped.
 * `max_new_connection_rate` - (Optional) To ensure one virtual server does not over consume resources, connections to a member can be rate limited.

@@ -16,7 +16,7 @@ Provides a resource to configure Load Balancer UDP Virtual Server on NSX-T manag
 
 ```hcl
 resource "nsxt_lb_fast_udp_application_profile" "timeout_60" {
-  idle_timeout  = 60
+  idle_timeout = 60
 }
 
 resource "nsxt_lb_source_ip_persistence_profile" "ip_profile" {

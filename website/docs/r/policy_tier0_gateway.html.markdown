@@ -15,33 +15,33 @@ This resource is applicable to NSX Global Manager, NSX Policy Manager and VMC.
 
 ```hcl
 resource "nsxt_policy_tier0_gateway" "tier0_gw" {
-  description               = "Tier-0 provisioned by Terraform"
-  display_name              = "Tier0-gw1"
-  failover_mode             = "PREEMPTIVE"
-  default_rule_logging      = false
-  enable_firewall           = true
-  ha_mode                   = "ACTIVE_STANDBY"
-  internal_transit_subnets  = ["102.64.0.0/16"]
-  transit_subnets           = ["101.64.0.0/16"]
-  edge_cluster_path         = data.nsxt_policy_edge_cluster.EC.path
+  description              = "Tier-0 provisioned by Terraform"
+  display_name             = "Tier0-gw1"
+  failover_mode            = "PREEMPTIVE"
+  default_rule_logging     = false
+  enable_firewall          = true
+  ha_mode                  = "ACTIVE_STANDBY"
+  internal_transit_subnets = ["102.64.0.0/16"]
+  transit_subnets          = ["101.64.0.0/16"]
+  edge_cluster_path        = data.nsxt_policy_edge_cluster.EC.path
 
   bgp_config {
-      local_as_num    = "60000"
-      multipath_relax = false
+    local_as_num    = "60000"
+    multipath_relax = false
 
-      route_aggregation {
-        prefix = "12.10.10.0/24"
-      }
+    route_aggregation {
+      prefix = "12.10.10.0/24"
+    }
 
-      route_aggregation {
-        prefix = "12.11.10.0/24"
-      }
+    route_aggregation {
+      prefix = "12.11.10.0/24"
+    }
   }
 
   vrf_config {
-    gateway_path       = data.nsxt_policy_tier0_gateway.vrf.path
+    gateway_path        = data.nsxt_policy_tier0_gateway.vrf.path
     route_distinguisher = "62000:10"
-    evpn_transit_vni   = 76001
+    evpn_transit_vni    = 76001
     route_target {
       auto_mode      = false
       import_targets = ["62000:2"]
@@ -76,7 +76,7 @@ resource "nsxt_policy_tier0_gateway" "tier0_gw" {
   }
 
   locale_service {
-    edge_cluster_path = data.nsxt_policy_edge_cluster.london.path
+    edge_cluster_path    = data.nsxt_policy_edge_cluster.london.path
     preferred_edge_paths = [data.nsxt_policy_egde_node.edge1.path]
   }
 

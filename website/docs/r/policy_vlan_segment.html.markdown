@@ -35,7 +35,7 @@ resource "nsxt_policy_vlan_segment" "vlansegment1" {
       }
 
       dhcp_generic_option {
-        code = "119"
+        code   = "119"
         values = ["abc"]
       }
     }
@@ -112,7 +112,7 @@ The following arguments are supported:
 
 In addition to arguments listed above, the following attributes are exported:
 
-* `id` - ID of the Secuirty Policy.
+* `id` - ID of the Security Policy.
 * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
 * `path` - The NSX path of the policy resource.
 

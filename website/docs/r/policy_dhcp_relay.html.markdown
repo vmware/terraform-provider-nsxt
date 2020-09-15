@@ -15,9 +15,9 @@ This resource is applicable to NSX Policy Manager.
 
 ```hcl
 resource "nsxt_policy_dhcp_relay" "test" {
-    display_name      = "test"
-    description       = "Terraform provisioned Dhcp Relay"
-    server_addresses = ["10.0.0.2", "7001::2"]
+  display_name     = "test"
+  description      = "Terraform provisioned Dhcp Relay"
+  server_addresses = ["10.0.0.2", "7001::2"]
 }
 ```
 

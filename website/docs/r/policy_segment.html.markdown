@@ -15,35 +15,35 @@ This resource is applicable to NSX Global Manager, NSX Policy Manager and VMC.
 
 ```hcl
 resource "nsxt_policy_segment" "segment1" {
-    display_name        = "segment1"
-    description         = "Terraform provisioned Segment"
-    connectivity_path   = nsxt_policy_tier1_gateway.mygateway.path
-    transport_zone_path = data.nsxt_policy_transport_zone.overlay_tz.path
+  display_name        = "segment1"
+  description         = "Terraform provisioned Segment"
+  connectivity_path   = nsxt_policy_tier1_gateway.mygateway.path
+  transport_zone_path = data.nsxt_policy_transport_zone.overlay_tz.path
 
-    subnet {
-      cidr        = "12.12.2.1/24"
-      dhcp_ranges = ["12.12.2.100-12.12.2.160"]
+  subnet {
+    cidr        = "12.12.2.1/24"
+    dhcp_ranges = ["12.12.2.100-12.12.2.160"]
 
-      dhcp_v4_config {
-        server_address = "12.12.2.2/24"
-        lease_time     = 36000
+    dhcp_v4_config {
+      server_address = "12.12.2.2/24"
+      lease_time     = 36000
 
-        dhcp_option_121 {
-          network  = "6.6.6.0/24"
-          next_hop = "1.1.1.21"
-        }
+      dhcp_option_121 {
+        network  = "6.6.6.0/24"
+        next_hop = "1.1.1.21"
+      }
 
-        dhcp_generic_option {
-          code = "119"
-          values = ["abc"]
-        }
+      dhcp_generic_option {
+        code   = "119"
+        values = ["abc"]
       }
     }
+  }
 
-    security_profile {
-      spoofguard_profile_path = data.nsxt_policy_spoofguard_profile.myprofile.path
-      security_profile_path   = data.nsxt_policy_segment_security_profile.myprofile.path
-    }
+  security_profile {
+    spoofguard_profile_path = data.nsxt_policy_spoofguard_profile.myprofile.path
+    security_profile_path   = data.nsxt_policy_segment_security_profile.myprofile.path
+  }
 
 }
 ```

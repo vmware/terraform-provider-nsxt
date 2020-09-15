@@ -30,7 +30,7 @@ resource "nsxt_policy_predefined_gateway_policy" "test" {
     scope     = nsxt_policy_tier0_gateway.main.path
     logged    = true
     log_label = "orange default"
-    action  = "ALLOW"
+    action    = "ALLOW"
   }
 
 }

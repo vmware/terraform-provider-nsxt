@@ -64,20 +64,19 @@ resource "nsxt_lb_pool" "lb_pool_with_dynamic_membership" {
   passive_monitor_id       = nsxt_lb_passive_monitor.lb_passive_monitor.id
 
   snat_translation {
-    type          = "SNAT_IP_POOL"
-    ip            = "1.1.1.1"
+    type = "SNAT_IP_POOL"
+    ip   = "1.1.1.1"
   }
 
   member_group {
-    ip_version_filter   = "IPV4"
-    limit_ip_list_size  = true
-    max_ip_list_size    = "4"
-    port                = "80"
+    ip_version_filter  = "IPV4"
+    limit_ip_list_size = true
+    max_ip_list_size   = "4"
+    port               = "80"
 
     grouping_object {
       target_type = "NSGroup"
       target_id   = nsxt_ns_group.group1.id
-      }
     }
   }
 

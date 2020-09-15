@@ -15,26 +15,26 @@ This resource is applicable to NSX Policy Manager.
 
 ```hcl
 resource "nsxt_policy_lb_pool" "test" {
-    display_name         = "test"
-    description          = "Terraform provisioned LB Pool"
-    algorithm            = "IP_HASH"
-    min_active_members   = 2
-    active_monitor_path  = "/infra/lb-monitor-profiles/default-icmp-lb-monitor"
-    passive_monitor_path = "/infra/lb-monitor-profiles/default-passive-lb-monitor"
-    member {
-      admin_state                = "ENABLED"
-      backup_member              = false
-      display_name               = "member1"
-      ip_address                 = "5.5.5.5"
-      max_concurrent_connections = 12
-      port                       = "77"
-      weight                     = 1
-    }
-    snat {
-       type = "AUTOMAP"
-    }
-    tcp_multiplexing_enabled = true
-    tcp_multiplexing_number  = 8
+  display_name         = "test"
+  description          = "Terraform provisioned LB Pool"
+  algorithm            = "IP_HASH"
+  min_active_members   = 2
+  active_monitor_path  = "/infra/lb-monitor-profiles/default-icmp-lb-monitor"
+  passive_monitor_path = "/infra/lb-monitor-profiles/default-passive-lb-monitor"
+  member {
+    admin_state                = "ENABLED"
+    backup_member              = false
+    display_name               = "member1"
+    ip_address                 = "5.5.5.5"
+    max_concurrent_connections = 12
+    port                       = "77"
+    weight                     = 1
+  }
+  snat {
+    type = "AUTOMAP"
+  }
+  tcp_multiplexing_enabled = true
+  tcp_multiplexing_number  = 8
 }
 ```
 
@@ -74,7 +74,7 @@ The following arguments are supported:
 
 In addition to arguments listed above, the following attributes are exported:
 
-* `id` - ID of the Secuirty Policy.
+* `id` - ID of the Security Policy.
 * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
 * `path` - The NSX path of the policy resource.
 

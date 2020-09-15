@@ -14,7 +14,7 @@ Provides a resource to configure IP pool on NSX-T manager
 
 ```hcl
 resource "nsxt_ip_pool" "ip_pool" {
-  description = "ip_pool provisioned by Terraform"
+  description  = "ip_pool provisioned by Terraform"
   display_name = "ip_pool"
 
   tag {

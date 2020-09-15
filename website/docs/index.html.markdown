@@ -65,21 +65,21 @@ deployment.
 
 ```hcl
 provider "nsxt" {
-  host                     = "192.168.110.41"
-  username                 = "admin"
-  password                 = "default"
-  allow_unverified_ssl     = true
-  max_retries              = 10
-  retry_min_delay          = 500
-  retry_max_delay          = 5000
-  retry_on_status_codes    = [429]
+  host                  = "192.168.110.41"
+  username              = "admin"
+  password              = "default"
+  allow_unverified_ssl  = true
+  max_retries           = 10
+  retry_min_delay       = 500
+  retry_max_delay       = 5000
+  retry_on_status_codes = [429]
 }
 
 ```
 
 ### Example of Setting Environment Variables
 
-```hcl
+```
 export NSXT_MANAGER_HOST="192.168.110.41"
 export NSXT_USERNAME="admin"
 export NSXT_PASSWORD="default"
@@ -178,7 +178,7 @@ The following arguments are used to configure the VMware NSX-T Provider:
   The default for this flag is false. Can also be specified with the
   `NSXT_REMOTE_AUTH` environment variable.
 * `tolerate_partial_success` - (Optional) Setting this flag to true would treat
-  partially succesful realization as valid state and not fail apply.
+  partially successful realization as valid state and not fail apply.
 * `vmc_token` - (Optional) Long-lived API token for authenticating with VMware
   Cloud Services APIs. This token will be used to short-lived token that is
   needed to communicate with NSX Manager in VMC environment.
@@ -275,7 +275,7 @@ nsx_password = "default"
 #   - SSH
 #
 # The configuration also assumes the following Virtual Machines (VMs)
-# are available through the vCenter (Compute Manager) Inventory. Assignemnt
+# are available through the vCenter (Compute Manager) Inventory. Assignment
 # of the Virtual Machine network to the Segments provided is done outside
 # the scope of this example
 #   - web-VM
@@ -317,7 +317,7 @@ variable "nsx_tag" {
 # This part of the example shows some data sources we will need to refer to
 # later in the .tf file. They include the transport zone, tier 0 router and
 # edge cluster.
-# Ther Tier-0 (T0) Gateway is considered a "provider" router that is pre-created
+# There Tier-0 (T0) Gateway is considered a "provider" router that is pre-created
 # by the NSX Admin. A T0 Gateway is used for north/south connectivity between
 # the logical networking space and the physical networking space. Many Tier1
 # Gateways will be connected to the T0 Gateway
@@ -833,12 +833,12 @@ The datasource in the above example should be referred in `network_id` inside
 
 ```hcl
 resource "vsphere_virtual_machine" "appvm" {
-    ... other attributes ...
-    # Attach the VM to the network data source that refers to the newly created Segments
-    network_interface {
-      network_id = data.vsphere_network.tf_app.id
-    }
-    ... other attributes ...
+  # ...
+  # Attach the VM to the network data source that refers to the newly created Segments
+  network_interface {
+    network_id = data.vsphere_network.tf_app.id
+  }
+}
 ```
 
 ## Feature Requests, Bug Reports, and Contributing
