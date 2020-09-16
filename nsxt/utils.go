@@ -6,13 +6,13 @@ package nsxt
 import (
 	"bytes"
 	"fmt"
+	"hash/crc32"
 	"log"
 	"net/http"
 
 	"github.com/hashicorp/go-version"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/common"
 	"github.com/vmware/go-vmware-nsxt/manager"
@@ -378,7 +378,11 @@ func resourceReferenceHash(v interface{}) int {
 		m := v.(map[string]interface{})
 		buf.WriteString(fmt.Sprintf("%s-%s", m["target_type"], m["target_id"]))
 	}
-	return hashcode.String(buf.String())
+	result := int(crc32.ChecksumIEEE(buf.Bytes()))
+	if result < 0 {
+		return -result
+	}
+	return result
 }
 
 func returnResourceReferencesSet(references []common.ResourceReference) *schema.Set {

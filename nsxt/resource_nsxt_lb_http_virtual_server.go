@@ -8,7 +8,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/go-vmware-nsxt/loadbalancer"
 )
 
@@ -364,7 +364,6 @@ func resourceNsxtLbHTTPVirtualServerRead(d *schema.ResourceData, m interface{}) 
 	}
 	d.Set("enabled", lbVirtualServer.Enabled)
 	d.Set("ip_address", lbVirtualServer.IpAddress)
-	d.Set("ip_protocol", lbVirtualServer.IpProtocol)
 	d.Set("max_concurrent_connections", lbVirtualServer.MaxConcurrentConnections)
 	d.Set("max_new_connection_rate", lbVirtualServer.MaxNewConnectionRate)
 	d.Set("persistence_profile_id", lbVirtualServer.PersistenceProfileId)

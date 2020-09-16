@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/vmware/go-vmware-nsxt/manager"
 )
 
@@ -35,9 +35,6 @@ func TestAccDataSourceNsxtLogicalTier1Router_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "display_name", routerName),
 					resource.TestCheckResourceAttr(testResourceName, "description", routerName),
 				),
-			},
-			{
-				Config: testAccNsxtEmptyTemplate(),
 			},
 		},
 	})
@@ -82,6 +79,7 @@ func testAccDataSourceNsxtTier1RouterDeleteByName(routerName string) error {
 	}
 	// go over the list to find the correct one
 	for _, objInList := range objList.Results {
+
 		if objInList.DisplayName == routerName {
 			localVarOptionals := make(map[string]interface{})
 			responseCode, err := nsxClient.LogicalRoutingAndServicesApi.DeleteLogicalRouter(nsxClient.Context, objInList.Id, localVarOptionals)

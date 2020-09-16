@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccDataSourceNsxtPolicyPolicyLbPersistenceProfile_basic(t *testing.T) {
@@ -70,9 +70,6 @@ func TestAccDataSourceNsxtPolicyPolicyLbPersistenceProfile_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "id"),
 					resource.TestCheckResourceAttr(testResourceName, "type", "GENERIC"),
 				),
-			},
-			{
-				Config: testAccNsxtEmptyTemplate(),
 			},
 		},
 	})
