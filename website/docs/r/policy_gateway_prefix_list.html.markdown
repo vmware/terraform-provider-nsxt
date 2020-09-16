@@ -24,8 +24,8 @@ resource "nsxt_policy_gateway_prefix_list" "pf1" {
   prefix {
     action  = "PERMIT"
     network = "4.4.0.0/20"
-    le      = "20"
-    ge      = "23"
+    le      = 23
+    ge      = 20
   }
 
   tag {
