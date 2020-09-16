@@ -53,15 +53,15 @@ resource "nsxt_policy_tier1_gateway" "tier1_gw" {
 ## Global manager example usage
 ```hcl
 resource "nsxt_policy_tier1_gateway" "tier1_gw" {
-  description   = "Tier-1 provisioned by Terraform"
-  display_name  = "Tier1-gw1"
+  description  = "Tier-1 provisioned by Terraform"
+  display_name = "Tier1-gw1"
 
   locale_service {
     edge_cluster_path = data.nsxt_policy_edge_cluster.paris.path
   }
 
   locale_service {
-    edge_cluster_path = data.nsxt_policy_edge_cluster.london.path
+    edge_cluster_path    = data.nsxt_policy_edge_cluster.london.path
     preferred_edge_paths = [data.nsxt_policy_egde_node.edge1.path]
   }
 

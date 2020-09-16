@@ -15,19 +15,19 @@ This resource is applicable to NSX Policy Manager.
 
 ```hcl
 resource "nsxt_policy_ip_pool_static_subnet" "static_subnet1" {
-  display_name        = "static-subnet1"
-  pool_path           = nsxt_policy_ip_pool.pool1.path
-  cidr                = "12.12.12.0/24"
-  gateway             = "12.12.12.1"
+  display_name = "static-subnet1"
+  pool_path    = nsxt_policy_ip_pool.pool1.path
+  cidr         = "12.12.12.0/24"
+  gateway      = "12.12.12.1"
 
   allocation_range {
     start = "12.12.12.10"
     end   = "12.12.12.20"
   }
   allocation_range {
-      start = "12.12.12.100"
-      end   = "12.12.12.120"
-    }
+    start = "12.12.12.100"
+    end   = "12.12.12.120"
+  }
 
   tag {
     scope = "color"

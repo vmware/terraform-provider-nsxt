@@ -44,7 +44,7 @@ resource "nsxt_policy_predefined_security_policy" "test" {
   }
 
   default_rule {
-    action  = "DROP"
+    action = "DROP"
   }
 
 }

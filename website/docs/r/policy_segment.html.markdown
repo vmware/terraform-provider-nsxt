@@ -15,35 +15,35 @@ This resource is applicable to NSX Global Manager, NSX Policy Manager and VMC.
 
 ```hcl
 resource "nsxt_policy_segment" "segment1" {
-    display_name        = "segment1"
-    description         = "Terraform provisioned Segment"
-    connectivity_path   = nsxt_policy_tier1_gateway.mygateway.path
-    transport_zone_path = data.nsxt_policy_transport_zone.overlay_tz.path
+  display_name        = "segment1"
+  description         = "Terraform provisioned Segment"
+  connectivity_path   = nsxt_policy_tier1_gateway.mygateway.path
+  transport_zone_path = data.nsxt_policy_transport_zone.overlay_tz.path
 
-    subnet {
-      cidr        = "12.12.2.1/24"
-      dhcp_ranges = ["12.12.2.100-12.12.2.160"]
+  subnet {
+    cidr        = "12.12.2.1/24"
+    dhcp_ranges = ["12.12.2.100-12.12.2.160"]
 
-      dhcp_v4_config {
-        server_address = "12.12.2.2/24"
-        lease_time     = 36000
+    dhcp_v4_config {
+      server_address = "12.12.2.2/24"
+      lease_time     = 36000
 
-        dhcp_option_121 {
-          network  = "6.6.6.0/24"
-          next_hop = "1.1.1.21"
-        }
+      dhcp_option_121 {
+        network  = "6.6.6.0/24"
+        next_hop = "1.1.1.21"
+      }
 
-        dhcp_generic_option {
-          code = "119"
-          values = ["abc"]
-        }
+      dhcp_generic_option {
+        code   = "119"
+        values = ["abc"]
       }
     }
+  }
 
-    security_profile {
-      spoofguard_profile_path = data.nsxt_policy_spoofguard_profile.myprofile.path
-      security_profile_path   = data.nsxt_policy_segment_security_profile.myprofile.path
-    }
+  security_profile {
+    spoofguard_profile_path = data.nsxt_policy_spoofguard_profile.myprofile.path
+    security_profile_path   = data.nsxt_policy_segment_security_profile.myprofile.path
+  }
 
 }
 ```
@@ -59,6 +59,7 @@ The following arguments are supported:
 * `connectivity_path` - (Optional) Policy path to the connecting Tier-0 or Tier-1.
 * `domain_name`- (Optional) DNS domain names.
 * `overlay_id` - (Optional) Overlay connectivity ID for this Segment.
+* `vlan_ids` - (Optional) List of VLAN IDs or ranges. Specifying vlan ids can be useful for overlay segments, f.e. for EVPN.
 * `transport_zone_path` - (Required) Policy path to the Overlay transport zone. This property is required if more than one overlay transport zone is defined, and none is marked as default.
 * `dhcp_config_path` - (Optional) Policy path to DHCP server or relay configuration to use for subnets configured on this segment. This attribute is supported with NSX 3.0.0 onwards.
 * `subnet` - (Optional) Subnet configuration block.

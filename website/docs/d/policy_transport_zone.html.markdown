@@ -34,7 +34,7 @@ data "nsxt_policy_site" "paris" {
 
 data "nsxt_policy_transport_zone" "overlay_transport_zone" {
   display_name = "1-transportzone-87"
-  site_path = data.nsxt_policy_site.paris.path
+  site_path    = data.nsxt_policy_site.paris.path
 }
 ```
 

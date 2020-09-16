@@ -47,9 +47,9 @@ resource "nsxt_policy_bgp_neighbor" "test" {
   }
 
   route_filtering {
-    address_family = "IPV4"
-    maximum_routes = 20
-    in_route_filter = nsxt_policy_gateway_prefix_list.test.path
+    address_family   = "IPV4"
+    maximum_routes   = 20
+    in_route_filter  = nsxt_policy_gateway_prefix_list.test.path
     out_route_filter = nsxt_policy_gateway_prefix_list.test.path
   }
 }

@@ -23,9 +23,9 @@ resource "nsxt_policy_lb_service" "test" {
   display_name      = "test"
   description       = "Terraform provisioned Service"
   connectivity_path = data.nsxt_policy_tier1_gateway.test.path
-  size = "SMALL"
-  enabled = true
-  error_log_level = "ERROR"
+  size              = "SMALL"
+  enabled           = true
+  error_log_level   = "ERROR"
 }
 ```
 

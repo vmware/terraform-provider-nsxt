@@ -8,7 +8,7 @@ import (
 )
 
 func resourceNsxtPolicyVlanSegment() *schema.Resource {
-	segSchema := getPolicyCommonSegmentSchema()
+	segSchema := getPolicyCommonSegmentSchema(true)
 	delete(segSchema, "overlay_id")
 	delete(segSchema, "connectivity_path")
 

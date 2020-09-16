@@ -34,7 +34,7 @@ For example, consider the resource nsxt_policy_tier0_gateway. While the same res
 
 Remember to check out the documentation for the resource you are interested in for such differences.
 
-**NOTE:** Only Policy resources are avaiable to use with Federation.
+**NOTE:** Only Policy resources are available to use with Federation.
 
 ## Available Resources for use with NSX-T Federation
 

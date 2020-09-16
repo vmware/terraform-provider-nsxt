@@ -17,14 +17,14 @@ data "nsxt_policy_tier0_gateway" "gw1" {
 }
 
 resource "nsxt_policy_gateway_prefix_list" "pf1" {
-  display_name           = "t0_prefix_list"
-  description            = "Prefix list for tier0 GW gw1"
+  display_name = "t0_prefix_list"
+  description  = "Prefix list for tier0 GW gw1"
 
   prefix {
-    action = "PERMIT"
+    action  = "PERMIT"
     network = "4.4.0.0/20"
-    le = "20"
-    ge = "23"
+    le      = "20"
+    ge      = "23"
   }
 
   tag {

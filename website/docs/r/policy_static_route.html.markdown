@@ -26,7 +26,7 @@ resource "nsxt_policy_static_route" "route1" {
 
   next_hop {
     admin_distance = "4"
-    ip_address = "12.10.10.1"
+    ip_address     = "12.10.10.1"
   }
 
   tag {
