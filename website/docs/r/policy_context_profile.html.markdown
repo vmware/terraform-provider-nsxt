@@ -8,6 +8,7 @@ description: A resource to configure a Context Profile.
 # nsxt_policy_context_profile
 
 This resource provides a method for the management of a Context Profile.
+This resource is supported with NSX 3.0.0 onwards.
 
 ## Example Usage
 
