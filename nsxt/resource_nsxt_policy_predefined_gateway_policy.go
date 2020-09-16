@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
@@ -430,7 +430,6 @@ func resourceNsxtPolicyPredefinedGatewayPolicyRead(d *schema.ResourceData, m int
 	d.Set("description", obj.Description)
 	setPolicyTagsInSchema(d, obj.Tags)
 	d.Set("path", obj.Path)
-	d.Set("domain", getDomainFromResourcePath(*obj.Path))
 	d.Set("revision", obj.Revision)
 
 	var rules []model.Rule

@@ -6,7 +6,7 @@ package nsxt
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccDataSourceNsxtPolicyEdgeNode_basic(t *testing.T) {
@@ -27,9 +27,6 @@ func TestAccDataSourceNsxtPolicyEdgeNode_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "member_index", "0"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 				),
-			},
-			{
-				Config: testAccNsxtEmptyTemplate(),
 			},
 		},
 	})

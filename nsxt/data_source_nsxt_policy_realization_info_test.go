@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccDataSourceNsxtPolicyRealizationInfo_tier1DataSource(t *testing.T) {
@@ -37,9 +37,6 @@ func TestAccDataSourceNsxtPolicyRealizationInfo_tier1DataSource(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "realized_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 				),
-			},
-			{
-				Config: testAccNsxtEmptyTemplate(),
 			},
 		},
 	})
@@ -72,9 +69,6 @@ func TestAccDataSourceNsxtPolicyRealizationInfo_tier1DataSourceEntity(t *testing
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 				),
 			},
-			{
-				Config: testAccNsxtEmptyTemplate(),
-			},
 		},
 	})
 }
@@ -97,9 +91,6 @@ func TestAccDataSourceNsxtPolicyRealizationInfo_tier1Resource(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "realized_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 				),
-			},
-			{
-				Config: testAccNsxtEmptyTemplate(),
 			},
 		},
 	})
@@ -149,9 +140,6 @@ func TestAccDataSourceNsxtPolicyRealizationInfo_gmServiceDataSource(t *testing.T
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "site_path"),
 				),
-			},
-			{
-				Config: testAccNsxtEmptyTemplate(),
 			},
 		},
 	})

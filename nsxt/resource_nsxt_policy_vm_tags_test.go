@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccResourceNsxtPolicyVMTags_basic(t *testing.T) {
@@ -37,9 +37,6 @@ func TestAccResourceNsxtPolicyVMTags_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "instance_id", vmID),
 				),
-			},
-			{
-				Config: testAccNsxtEmptyTemplate(),
 			},
 		},
 	})
@@ -83,9 +80,6 @@ func TestAccResourceNsxtPolicyVMTags_withPorts(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "instance_id", vmID),
 				),
 			},
-			{
-				Config: testAccNsxtEmptyTemplate(),
-			},
 		},
 	})
 }
@@ -109,9 +103,6 @@ func TestAccResourceNsxtPolicyVMTags_import_basic(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"instance_id"},
-			},
-			{
-				Config: testAccNsxtEmptyTemplate(),
 			},
 		},
 	})

@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccDataSourceNsxtPolicyMacDiscoveryProfile_basic(t *testing.T) {
@@ -26,9 +26,6 @@ func TestAccDataSourceNsxtPolicyMacDiscoveryProfile_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 				),
-			},
-			{
-				Config: testAccNsxtEmptyTemplate(),
 			},
 		},
 	})
@@ -51,9 +48,6 @@ func TestAccDataSourceNsxtPolicyMacDiscoveryProfile_prefix(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 				),
-			},
-			{
-				Config: testAccNsxtEmptyTemplate(),
 			},
 		},
 	})

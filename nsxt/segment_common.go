@@ -6,9 +6,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
@@ -549,6 +549,7 @@ func setSegmentSubnetDhcpConfigInSchema(schemaConfig map[string]interface{}, sub
 		resultConfig["dns_servers"] = dhcpV6Config.DnsServers
 		resultConfig["sntp_servers"] = dhcpV6Config.SntpServers
 		resultConfig["domain_names"] = dhcpV6Config.DomainNames
+
 		var excludedRanges []map[string]interface{}
 		for _, excludedRange := range dhcpV6Config.ExcludedRanges {
 			addresses := strings.Split(excludedRange, "-")
@@ -559,7 +560,6 @@ func setSegmentSubnetDhcpConfigInSchema(schemaConfig map[string]interface{}, sub
 				excludedRanges = append(excludedRanges, rangeMap)
 			}
 		}
-
 		resultConfig["excluded_range"] = excludedRanges
 
 		resultConfigs = append(resultConfigs, resultConfig)
@@ -1146,7 +1146,9 @@ func nsxtPolicySegmentRead(d *schema.ResourceData, m interface{}, isVlan bool) e
 	d.Set("nsx_id", id)
 	d.Set("path", obj.Path)
 	d.Set("revision", obj.Revision)
-	d.Set("connectivity_path", obj.ConnectivityPath)
+	if !isVlan {
+		d.Set("connectivity_path", obj.ConnectivityPath)
+	}
 	d.Set("dhcp_config_path", obj.DhcpConfigPath)
 	d.Set("domain_name", obj.DomainName)
 	d.Set("transport_zone_path", obj.TransportZonePath)
@@ -1156,7 +1158,7 @@ func nsxtPolicySegmentRead(d *schema.ResourceData, m interface{}, isVlan bool) e
 		if obj.OverlayId != nil {
 			d.Set("overlay_id", int(*obj.OverlayId))
 		} else {
-			d.Set("overlay_id", "")
+			d.Set("overlay_id", 0)
 		}
 	}
 

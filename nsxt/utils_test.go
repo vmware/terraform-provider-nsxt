@@ -10,8 +10,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/vmware/go-vmware-nsxt/trust"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
@@ -331,10 +331,6 @@ func testAccNSXDeleteCerts(t *testing.T, certID string, clientCertID string, caC
 	testAccNSXDeleteCert(t, certID)
 	testAccNSXDeleteCert(t, clientCertID)
 	testAccNSXDeleteCert(t, caCertID)
-}
-
-func testAccNsxtEmptyTemplate() string {
-	return " "
 }
 
 func testGetObjIDByName(objName string, resourceType string) (string, error) {

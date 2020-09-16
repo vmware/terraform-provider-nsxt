@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccDataSourceNsxtPolicyService_basic(t *testing.T) {
@@ -25,9 +25,6 @@ func TestAccDataSourceNsxtPolicyService_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "description", serviceName),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 				),
-			},
-			{
-				Config: testAccNsxtEmptyTemplate(),
 			},
 		},
 	})
@@ -49,9 +46,6 @@ func TestAccDataSourceNsxtPolicyService_byId(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 				),
 			},
-			{
-				Config: testAccNsxtEmptyTemplate(),
-			},
 		},
 	})
 }
@@ -72,9 +66,6 @@ func TestAccDataSourceNsxtPolicyService_byPrefix(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "description", serviceName),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 				),
-			},
-			{
-				Config: testAccNsxtEmptyTemplate(),
 			},
 		},
 	})

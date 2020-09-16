@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccResourceNsxtSwitchSecuritySwitchingProfile_basic(t *testing.T) {
@@ -37,7 +37,7 @@ func TestAccResourceNsxtSwitchSecuritySwitchingProfile_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "block_client_dhcp", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "bpdu_filter_enabled", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "bpdu_filter_whitelist.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "bpdu_filter_whitelist.2765851914", "01:80:c2:00:00:01"),
+					resource.TestCheckResourceAttr(testResourceName, "bpdu_filter_whitelist.0", "01:80:c2:00:00:01"),
 					resource.TestCheckResourceAttr(testResourceName, "rate_limits.0.rx_broadcast", limit),
 					resource.TestCheckResourceAttr(testResourceName, "rate_limits.0.rx_multicast", limit),
 					resource.TestCheckResourceAttr(testResourceName, "rate_limits.0.tx_broadcast", limit),
@@ -56,7 +56,7 @@ func TestAccResourceNsxtSwitchSecuritySwitchingProfile_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "block_client_dhcp", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "bpdu_filter_enabled", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "bpdu_filter_whitelist.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "bpdu_filter_whitelist.2765851914", "01:80:c2:00:00:01"),
+					resource.TestCheckResourceAttr(testResourceName, "bpdu_filter_whitelist.0", "01:80:c2:00:00:01"),
 					resource.TestCheckResourceAttr(testResourceName, "rate_limits.0.rx_broadcast", updatedLimit),
 					resource.TestCheckResourceAttr(testResourceName, "rate_limits.0.rx_multicast", updatedLimit),
 					resource.TestCheckResourceAttr(testResourceName, "rate_limits.0.tx_broadcast", updatedLimit),
