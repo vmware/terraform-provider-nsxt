@@ -1,7 +1,7 @@
 ---
+subcategory: "Manager"
 layout: "nsxt"
 page_title: "NSXT: management_cluster"
-sidebar_current: "docs-nsxt-datasource-management-cluster"
 description: A NSX-T management cluster data source.
 ---
 
@@ -20,4 +20,5 @@ data "nsxt_management_cluster" "cluster" {}
 In addition to arguments listed above, the following attributes are exported:
 
 * `id` - Unique identifier of this cluster.
+
 * `node_sha256_thumbprint` - SHA256 of certificate thumbprint of this manager node.

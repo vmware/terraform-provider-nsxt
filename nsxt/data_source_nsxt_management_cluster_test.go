@@ -5,6 +5,7 @@ package nsxt
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+
 	"testing"
 )
 
