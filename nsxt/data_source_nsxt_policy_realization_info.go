@@ -98,7 +98,7 @@ func dataSourceNsxtPolicyRealizationInfoRead(d *schema.ResourceData, m interface
 				}
 			} else {
 				client := realized_state.NewDefaultRealizedEntitiesClient(connector)
-				realizationResult, realizationError = client.List(path, &policySite)
+				realizationResult, realizationError = client.List(path, nil)
 			}
 			state := "UNKNOWN"
 			if realizationError == nil {
