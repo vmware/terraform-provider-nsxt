@@ -17,14 +17,15 @@ data "nsxt_policy_tier0_gateway" "gw1" {
 }
 
 resource "nsxt_policy_gateway_prefix_list" "pf1" {
+  gateway_path = nsxt_policy_tier0_gateway.gw1.path
   display_name = "t0_prefix_list"
   description  = "Prefix list for tier0 GW gw1"
 
   prefix {
     action  = "PERMIT"
     network = "4.4.0.0/20"
-    le      = "20"
-    ge      = "23"
+    le      = 23
+    ge      = 20
   }
 
   tag {
@@ -38,6 +39,7 @@ resource "nsxt_policy_gateway_prefix_list" "pf1" {
 
 The following arguments are supported:
 
+* `gateway_path` - (Required) Gateway where the prefix is defined.
 * `display_name` - (Required) Display name of the resource.
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
