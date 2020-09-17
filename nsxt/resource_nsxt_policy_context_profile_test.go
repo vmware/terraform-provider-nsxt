@@ -21,7 +21,7 @@ func TestAccResourceNsxtPolicyContextProfile_basic(t *testing.T) {
 	updatedAttributes := testAccNsxtPolicyContextProfileAttributeURLCategoryTemplate()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyContextProfileCheckDestroy(state, testResourceName)
@@ -71,7 +71,7 @@ func TestAccResourceNsxtPolicyContextProfile_importBasic(t *testing.T) {
 	attributes := testAccNsxtPolicyContextProfileAttributeDomainNameTemplate()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyContextProfileCheckDestroy(state, name)
@@ -97,7 +97,7 @@ func TestAccResourceNsxtPolicyContextProfile_multipleAttributes(t *testing.T) {
 	updatedAttributes := testAccNsxtPolicyContextProfileAttributeDomainNameTemplate() + testAccNsxtPolicyContextProfileAttributeAppIDTemplate()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyContextProfileCheckDestroy(state, testResourceName)
@@ -156,7 +156,7 @@ func TestAccResourceNsxtPolicyContextProfile_subAttributes(t *testing.T) {
 	attributesDomainName := testAccNsxtPolicyContextProfileAttributeDomainNameTemplate()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyContextProfileCheckDestroy(state, testResourceName)
