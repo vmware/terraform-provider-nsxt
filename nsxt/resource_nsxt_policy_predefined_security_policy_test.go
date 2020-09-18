@@ -21,7 +21,7 @@ func TestAccResourceNsxtPolicyPredefinedSecurityPolicy_basic(t *testing.T) {
 
 	// NOTE: These tests cannot be parallel, as they modify same default policy
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -60,7 +60,7 @@ func TestAccResourceNsxtPolicyPredefinedSecurityPolicy_defaultRule(t *testing.T)
         }`
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -99,7 +99,7 @@ func TestAccResourceNsxtPolicyPredefinedSecurityPolicy_rules(t *testing.T) {
 	testResourceName := "nsxt_policy_predefined_security_policy.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
