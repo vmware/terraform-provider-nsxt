@@ -230,7 +230,7 @@ func resourceNsxtPolicyIPPoolBlockSubnetVerifyDelete(d *schema.ResourceData, con
 		Target:  targetStates,
 		Refresh: func() (interface{}, string, error) {
 
-			_, realizationError := client.List(path, &policySite)
+			_, realizationError := client.List(path, nil)
 			if realizationError != nil {
 				if isNotFoundError(realizationError) {
 					return 0, "DELETED", nil

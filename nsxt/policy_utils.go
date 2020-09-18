@@ -248,7 +248,7 @@ func nsxtPolicyWaitForRealizationStateConf(connector *client.RestConnector, d *s
 		Target:  targetStates,
 		Refresh: func() (interface{}, string, error) {
 
-			realizationResult, realizationError := client.List(realizedEntityPath, &policySite)
+			realizationResult, realizationError := client.List(realizedEntityPath, nil)
 			if realizationError == nil {
 				// Find the right entry
 				for _, objInList := range realizationResult.Results {
