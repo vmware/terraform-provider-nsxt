@@ -25,7 +25,7 @@ func TestAccResourceNsxtPolicyGatewayPrefixList_basic(t *testing.T) {
 	network := "4.4.0.0/20"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyGWPrefixListCheckDestroy(state, name)

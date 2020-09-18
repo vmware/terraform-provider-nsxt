@@ -171,7 +171,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_redistribution(t *testing.T) {
 	testResourceName := "nsxt_policy_tier0_gateway.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTier0CheckDestroy(state, name)
