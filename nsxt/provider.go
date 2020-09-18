@@ -22,7 +22,6 @@ import (
 )
 
 var defaultRetryOnStatusCodes = []int{429, 503}
-var policySite = "default"
 
 // Provider configuration that is shared for policy and MP
 type commonProviderConfig struct {
@@ -45,7 +44,6 @@ type nsxtClients struct {
 	PolicyHTTPClient       *http.Client
 	Host                   string
 	PolicyEnforcementPoint string
-	PolicySite             string
 	PolicyGlobalManager    bool
 }
 
@@ -529,7 +527,6 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 	}
 	clients.Host = host
 	clients.PolicyEnforcementPoint = policyEnforcementPoint
-	clients.PolicySite = policySite
 	clients.PolicyGlobalManager = policyGlobalManager
 
 	return nil
