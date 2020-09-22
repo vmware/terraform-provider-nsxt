@@ -128,13 +128,13 @@ func dataSourceNsxtPolicySecurityPolicyRead(d *schema.ResourceData, m interface{
 		var perfectMatch []model.SecurityPolicy
 		var prefixMatch []model.SecurityPolicy
 		for _, objInList := range objList {
-			if category != "" && category != *objInList.Category {
+			if category != "" && objInList.Category != nil && category != *objInList.Category {
 				continue
 			}
-			if *objInList.IsDefault != isDefault {
+			if objInList.IsDefault != nil && *objInList.IsDefault != isDefault {
 				continue
 			}
-			if objName != "" {
+			if objName != "" && objInList.DisplayName != nil {
 				if strings.HasPrefix(*objInList.DisplayName, objName) {
 					prefixMatch = append(prefixMatch, objInList)
 				}
