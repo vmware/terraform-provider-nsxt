@@ -18,13 +18,11 @@ func dataSourceNsxtManagementCluster() *schema.Resource {
 			"id": {
 				Type:        schema.TypeString,
 				Description: "Unique identifier of this cluster.",
-				Optional:    true,
 				Computed:    true,
 			},
 			"node_sha256_thumbprint": {
 				Type:        schema.TypeString,
 				Description: "SHA256 of certificate thumbprint of this manager node.",
-				Optional:    true,
 				Computed:    true,
 			},
 		},
@@ -53,7 +51,6 @@ func dataSourceNsxtManagementClusterRead(d *schema.ResourceData, m interface{}) 
 		return fmt.Errorf("Unexpected Response while reading cluster node configuration. Status Code: %d", resp.StatusCode)
 	}
 	for _, nodeConfig := range nodeList.Results {
-		fmt.Printf("%v", nodeConfig)
 		if nodeConfig.ManagerRole != nil && nodeConfig.ManagerRole.ApiListenAddr != nil && nodeConfig.ManagerRole.ApiListenAddr.IpAddress == m.(nsxtClients).Host[len("https://"):] {
 			if nodeConfig.ManagerRole.ApiListenAddr.CertificateSha256Thumbprint == "" {
 				return fmt.Errorf("Manager node thumbprint not found while reading cluster node configuration")

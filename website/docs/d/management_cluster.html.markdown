@@ -17,8 +17,6 @@ data "nsxt_management_cluster" "cluster" {}
 
 ## Attributes Reference
 
-In addition to arguments listed above, the following attributes are exported:
-
 * `id` - Unique identifier of this cluster.
 
 * `node_sha256_thumbprint` - SHA256 of certificate thumbprint of this manager node.
