@@ -119,10 +119,10 @@ func dataSourceNsxtPolicyGatewayPolicyRead(d *schema.ResourceData, m interface{}
 		var perfectMatch []model.GatewayPolicy
 		var prefixMatch []model.GatewayPolicy
 		for _, objInList := range objList {
-			if category != "" && category != *objInList.Category {
+			if category != "" && objInList.Category != nil && category != *objInList.Category {
 				continue
 			}
-			if objName != "" {
+			if objName != "" && objInList.DisplayName != nil {
 				if strings.HasPrefix(*objInList.DisplayName, objName) {
 					prefixMatch = append(prefixMatch, objInList)
 				}
