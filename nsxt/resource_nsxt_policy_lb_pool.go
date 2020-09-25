@@ -505,7 +505,10 @@ func resourceNsxtPolicyLBPoolRead(d *schema.ResourceData, m interface{}) error {
 		d.Set("active_monitor_path", "")
 	}
 	d.Set("algorithm", obj.Algorithm)
-	d.Set("member_group", obj.MemberGroup)
+	err = setPolicyPoolMemberGroupInSchema(d, obj.MemberGroup)
+	if err != nil {
+		return err
+	}
 	err = setPolicyPoolMembersInSchema(d, obj.Members)
 	if err != nil {
 		return err
