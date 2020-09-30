@@ -23,7 +23,7 @@ func TestAccResourceNsxtLogicalSwitch_basic(t *testing.T) {
 	transportZoneName := getOverlayTransportZoneName()
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLogicalSwitchCheckDestroy(state, switchName, "nsxt_logical_switch")
@@ -76,7 +76,7 @@ func TestAccResourceNsxtLogicalSwitch_vlan(t *testing.T) {
 	replicationMode := ""
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLogicalSwitchCheckDestroy(state, switchName, "nsxt_logical_switch")
@@ -117,7 +117,7 @@ func TestAccResourceNsxtLogicalSwitch_withProfiles(t *testing.T) {
 	profileType := "SwitchSecuritySwitchingProfile"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			// Verify that the LS was deleted
@@ -172,7 +172,7 @@ func TestAccResourceNsxtLogicalSwitch_withMacPool(t *testing.T) {
 	replicationMode := "MTEP"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLogicalSwitchCheckDestroy(state, switchName, "nsxt_logical_switch")
@@ -207,7 +207,7 @@ func TestAccResourceNsxtLogicalSwitch_importBasic(t *testing.T) {
 	transportZoneName := getOverlayTransportZoneName()
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLogicalSwitchCheckDestroy(state, switchName, "nsxt_logical_switch")

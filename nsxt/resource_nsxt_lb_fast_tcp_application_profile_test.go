@@ -24,7 +24,12 @@ func TestAccResourceNsxtLbFastTCPApplicationProfile_basic(t *testing.T) {
 	updatedMirroring := "false"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
+		PreCheck: func() {
+			testAccOnlyLocalManager(t)
+			testAccTestMP(t)
+			testAccPreCheck(t)
+			testAccNSXVersion(t, "2.3.0")
+		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLbFastTCPApplicationProfileCheckDestroy(state, name)
@@ -61,7 +66,12 @@ func TestAccResourceNsxtLbFastTCPApplicationProfile_importBasic(t *testing.T) {
 	name := "test-nsx-application-profile"
 	testResourceName := "nsxt_lb_fast_tcp_application_profile.test"
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
+		PreCheck: func() {
+			testAccOnlyLocalManager(t)
+			testAccTestMP(t)
+			testAccPreCheck(t)
+			testAccNSXVersion(t, "2.3.0")
+		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLbFastTCPApplicationProfileCheckDestroy(state, name)

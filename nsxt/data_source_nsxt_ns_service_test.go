@@ -18,7 +18,7 @@ func TestAccDataSourceNsxtNsService_basic(t *testing.T) {
 	testResourceName := "data.nsxt_ns_service.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccDataSourceNsxtNsServiceDeleteByName(serviceName)
@@ -48,7 +48,7 @@ func TestAccDataSourceNsxtNsService_systemOwned(t *testing.T) {
 	testResourceName := "data.nsxt_ns_service.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{

@@ -29,7 +29,7 @@ func testAccResourceNsxtLbL4VirtualServer(t *testing.T, protocol string) {
 	updatedMemberPort := "10098"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLbL4VirtualServerCheckDestroy(state, protocol, name)
@@ -97,7 +97,7 @@ func testAccResourceNsxtLbL4VirtualServerImport(t *testing.T, protocol string) {
 	name := "test"
 	resourceName := fmt.Sprintf("nsxt_lb_%s_virtual_server.test", protocol)
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLbL4VirtualServerCheckDestroy(state, protocol, name)

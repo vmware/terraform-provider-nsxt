@@ -22,7 +22,7 @@ func TestAccResourceNsxtQosSwitchingProfile_basic(t *testing.T) {
 	updatedPeak := "400"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXQosSwitchingProfileCheckDestroy(state, name)
@@ -85,7 +85,7 @@ func TestAccResourceNsxtQosSwitchingProfile_importBasic(t *testing.T) {
 	name := "test-nsx-application-profile"
 	testResourceName := "nsxt_qos_switching_profile.test"
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXQosSwitchingProfileCheckDestroy(state, name)

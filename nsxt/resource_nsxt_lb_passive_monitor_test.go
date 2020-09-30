@@ -21,7 +21,12 @@ func TestAccResourceNsxtLbPassiveMonitor_basic(t *testing.T) {
 	updatedTimeout := "7"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
+		PreCheck: func() {
+			testAccOnlyLocalManager(t)
+			testAccTestMP(t)
+			testAccPreCheck(t)
+			testAccNSXVersion(t, "2.3.0")
+		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLbPassiveMonitorCheckDestroy(state, name)
@@ -57,7 +62,12 @@ func TestAccResourceNsxtLbPassiveMonitor_importBasic(t *testing.T) {
 	name := "test-nsx-monitor"
 	testResourceName := "nsxt_lb_passive_monitor.test"
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
+		PreCheck: func() {
+			testAccOnlyLocalManager(t)
+			testAccTestMP(t)
+			testAccPreCheck(t)
+			testAccNSXVersion(t, "2.3.0")
+		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLbPassiveMonitorCheckDestroy(state, name)

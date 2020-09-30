@@ -145,6 +145,12 @@ func testAccNSXGlobalManagerSitePrecheck(t *testing.T) {
 	}
 }
 
+func testAccTestMP(t *testing.T) {
+	if os.Getenv("NSXT_TEST_MP") != "true" && os.Getenv("NSXT_TEST_MP") != "1" {
+		t.Skipf("To run MP test suite, please enable NSXT_TEST_MP in your environment.")
+	}
+}
+
 // Create and delete CA and client cert for various tests
 func testAccNSXCreateCert(t *testing.T, name string, certPem string, certPK string, certType string) string {
 	nsxClient, err := testAccGetClient()

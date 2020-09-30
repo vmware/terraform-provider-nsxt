@@ -26,7 +26,7 @@ func TestAccResourceNsxtLogicalDhcpServer_basic(t *testing.T) {
 	ip5 := "1.1.1.23"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLogicalDhcpServerCheckDestroy(state, prfName)
@@ -86,7 +86,7 @@ func TestAccResourceNsxtLogicalDhcpServer_noOpts(t *testing.T) {
 	ip4 := "1.1.1.22"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLogicalDhcpServerCheckDestroy(state, prfName)
@@ -132,7 +132,7 @@ func TestAccResourceNsxtLogicalDhcpServer_importBasic(t *testing.T) {
 	edgeClusterName := getEdgeClusterName()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLogicalDhcpServerCheckDestroy(state, prfName)

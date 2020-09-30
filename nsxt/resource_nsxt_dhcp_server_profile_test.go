@@ -19,7 +19,7 @@ func TestAccResourceNsxtDhcpServerProfile_basic(t *testing.T) {
 	edgeClusterName := getEdgeClusterName()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXDhcpServerProfileCheckDestroy(state, prfName)
@@ -55,7 +55,7 @@ func TestAccResourceNsxtDhcpServerProfile_importBasic(t *testing.T) {
 	edgeClusterName := getEdgeClusterName()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXDhcpServerProfileCheckDestroy(state, prfName)
