@@ -41,7 +41,12 @@ func testAccResourceNsxtLbL7MonitorBasic(t *testing.T, protocol string) {
 	body2 := "YYYYYYYYYYYYYYYYYYY"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
+		PreCheck: func() {
+			testAccOnlyLocalManager(t)
+			testAccTestMP(t)
+			testAccPreCheck(t)
+			testAccNSXVersion(t, "2.3.0")
+		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLbL7MonitorCheckDestroy(state, name)
@@ -86,7 +91,12 @@ func TestAccResourceNsxtLbHTTPSMonitor_withAuth(t *testing.T) {
 	testResourceName := "nsxt_lb_https_monitor.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
+		PreCheck: func() {
+			testAccOnlyLocalManager(t)
+			testAccTestMP(t)
+			testAccPreCheck(t)
+			testAccNSXVersion(t, "2.3.0")
+		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			testAccNSXDeleteCerts(t, testLbMonitorCertID, testLbMonitorClientCertID, testLbMonitorCaCertID)
@@ -120,7 +130,12 @@ func testAccResourceNsxtLbL7MonitorImport(t *testing.T, protocol string) {
 	name := "test-nsx-monitor"
 	testResourceName := fmt.Sprintf("nsxt_lb_%s_monitor.test", protocol)
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
+		PreCheck: func() {
+			testAccOnlyLocalManager(t)
+			testAccTestMP(t)
+			testAccPreCheck(t)
+			testAccNSXVersion(t, "2.3.0")
+		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLbL7MonitorCheckDestroy(state, name)

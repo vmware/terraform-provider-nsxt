@@ -18,7 +18,12 @@ func TestAccResourceNsxtLbServerSSLProfile_basic(t *testing.T) {
 	testResourceName := "nsxt_lb_server_ssl_profile.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
+		PreCheck: func() {
+			testAccOnlyLocalManager(t)
+			testAccTestMP(t)
+			testAccPreCheck(t)
+			testAccNSXVersion(t, "2.3.0")
+		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLbServerSSLProfileCheckDestroy(state, name)
@@ -58,7 +63,12 @@ func TestAccResourceNsxtLbServerSSLProfile_importBasic(t *testing.T) {
 	name := "test"
 	testResourceName := "nsxt_lb_server_ssl_profile.test"
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "2.3.0") },
+		PreCheck: func() {
+			testAccOnlyLocalManager(t)
+			testAccTestMP(t)
+			testAccPreCheck(t)
+			testAccNSXVersion(t, "2.3.0")
+		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLbServerSSLProfileCheckDestroy(state, name)

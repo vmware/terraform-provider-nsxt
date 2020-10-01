@@ -18,7 +18,7 @@ func TestAccResourceNsxtNsServiceGroup_basic(t *testing.T) {
 	testResourceName := "nsxt_ns_service_group.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXServiceGroupCheckDestroy(state, serviceName)
@@ -53,7 +53,7 @@ func TestAccResourceNsxtNsServiceGroup_importBasic(t *testing.T) {
 	testResourceName := "nsxt_ns_service_group.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXServiceGroupCheckDestroy(state, serviceName)

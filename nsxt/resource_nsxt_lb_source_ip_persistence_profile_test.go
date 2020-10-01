@@ -20,7 +20,7 @@ func TestAccResourceNsxtLbSourceIpPersistenceProfile_basic(t *testing.T) {
 	updatedTimeout := "200"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLbSourceIPPersistenceProfileCheckDestroy(state, name)
@@ -60,7 +60,7 @@ func TestAccResourceNsxtLbSourceIpPersistenceProfile_importBasic(t *testing.T) {
 	name := "test-nsx-persistence-profile"
 	testResourceName := "nsxt_lb_source_ip_persistence_profile.test"
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLbSourceIPPersistenceProfileCheckDestroy(state, name)

@@ -18,7 +18,7 @@ func TestAccResourceNsxtIpDiscoverySwitchingProfile_basic(t *testing.T) {
 	testResourceName := "nsxt_ip_discovery_switching_profile.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXIpDiscoverySwitchingProfileCheckDestroy(state, name)
@@ -65,7 +65,7 @@ func TestAccResourceNsxtIpDiscoverySwitchingProfile_importBasic(t *testing.T) {
 	name := "test-nsx-application-profile"
 	testResourceName := "nsxt_ip_discovery_switching_profile.test"
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXIpDiscoverySwitchingProfileCheckDestroy(state, name)

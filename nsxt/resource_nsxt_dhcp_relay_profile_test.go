@@ -18,7 +18,7 @@ func TestAccResourceNsxtDhcpRelayProfile_basic(t *testing.T) {
 	testResourceName := "nsxt_dhcp_relay_profile.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXDhcpRelayProfileCheckDestroy(state, prfName)
@@ -53,7 +53,7 @@ func TestAccResourceNsxtDhcpRelayProfile_importBasic(t *testing.T) {
 	testResourceName := "nsxt_dhcp_relay_profile.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXDhcpRelayProfileCheckDestroy(state, prfName)
