@@ -13,13 +13,21 @@ There are two separate use cases for this resource:
 * Modify predefined Gateway Policy that is not listed under Default category, and add rules to it.
   This use case is relevant for VMC.
 
+~> **NOTE:** An absolute path, can be provided for this resource (this approach will work slightly faster, as the roundtrip for data source retrieval will be spared). In one of the examples below a data source is used in order to pull the predefined policy, while the other uses absolute path.
+
+~> **NOTE:** Default gateway policy generation behavior have changed in NSX 3.1.0. Below this version, there is a single default policy, while default rules are created under it per Gateway. Above NSX 3.1.0, a default policy is generated per Gateway. The first example provided here is limited to NSX 3.0.0 and below.
+
 This resource is applicable to NSX Global Manager, NSX Policy Manager and VMC.
 
 ## Example Usage for NSX Policy Manager
 
 ```hcl
+data "nsxt_policy_gateway_policy" "default" {
+  category = "Default"
+}
+
 resource "nsxt_policy_predefined_gateway_policy" "test" {
-  path = "/infra/domains/default/gateway-policies/Policy_Default_Infra"
+  path = data.nsxt_policy_gateway_policy.default.path
 
   tag {
     scope = "color"

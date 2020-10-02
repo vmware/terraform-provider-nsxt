@@ -11,13 +11,20 @@ This resource provides a method to modify default Security Policy and its rules.
 This can be default layer2 policy or default layer3 policy. Maximum one resource
 for each type should exist in your configuration.
 
+~> **NOTE:** An absolute path, such as `/infra/domains/default/security-policies/default-layer3-section`, can be provided for this resource (this approach will work slightly faster, as the roundtrip for data source retrieval will be spared) In the example below a data source is used in order to pull the predefined policy.
+
 This resource is applicable to NSX Global Manager, NSX Policy Manager and VMC.
 
 ## Example Usage
 
 ```hcl
+data "nsxt_policy_security_policy" "default_l3" {
+  is_default = true
+  category   = "Application"
+}
+
 resource "nsxt_policy_predefined_security_policy" "test" {
-  path = "/infra/domains/default/security-policies/default-layer3-section"
+  path = data.nsxt_policy_security_policy.default_l3.path
 
   tag {
     scope = "color"
