@@ -37,7 +37,6 @@ var policyVRFRouteValues = []string{
 
 var policyBGPGracefulRestartTimerDefault = 180
 var policyBGPGracefulRestartStaleRouteTimerDefault = 600
-var policyBGPLocalAsNumDefault = "65000"
 
 func resourceNsxtPolicyTier0Gateway() *schema.Resource {
 
@@ -155,20 +154,19 @@ func getPolicyBGPConfigSchema() map[string]*schema.Schema {
 			Type:        schema.TypeBool,
 			Description: "Enable inter SR IBGP configuration",
 			Optional:    true,
-			Default:     true,
+			Computed:    true,
 		},
 		"local_as_num": {
 			Type:         schema.TypeString,
 			Description:  "BGP AS number in ASPLAIN/ASDOT Format",
 			Optional:     true,
-			Default:      policyBGPLocalAsNumDefault, //NOTE: empty string disables
 			ValidateFunc: validateASPlainOrDot,
 		},
 		"multipath_relax": {
 			Type:        schema.TypeBool,
 			Description: "Flag to enable BGP multipath relax option",
 			Optional:    true,
-			Default:     true,
+			Computed:    true,
 		},
 		"route_aggregation": {
 			Type:        schema.TypeList,
@@ -603,21 +601,16 @@ func resourceNsxtPolicyTier0GatewayBGPConfigSchemaToStruct(cfg interface{}, isVr
 		Revision:          &revision,
 	}
 
-	if !isVrf {
+	if isVrf {
 		// backend complains if the below config appears on VRF gateway.
 		// We print a warning if property differs from default
-		if !interSrIbgp {
-			log.Printf("[WARNING] BGP setting inter_sr_ibgp is not applicable for VRF gateway %s, and will be ignored", gwID)
-		}
-		if localAsNum != policyBGPLocalAsNumDefault {
+		if localAsNum != "" {
 			log.Printf("[WARNING] BGP setting local_as_num is not applicable for VRF gateway %s, and will be ignored", gwID)
-		}
-		if !multipathRelax {
-			log.Printf("[WARNING] BGP setting multipath_relax is not applicable for VRF gateway %s, and will be ignored", gwID)
 		}
 		if (restartMode != model.BgpGracefulRestartConfig_MODE_HELPER_ONLY) || (restartTimer != int64(policyBGPGracefulRestartStaleRouteTimerDefault)) || (staleTimer != int64(policyBGPGracefulRestartStaleRouteTimerDefault)) {
 			log.Printf("[WARNING] BGP graceful restart settings are not applicable for VRF gateway %s, and will be ignored", gwID)
 		}
+	} else {
 		routeStruct.InterSrIbgp = &interSrIbgp
 		routeStruct.LocalAsNum = &localAsNum
 		routeStruct.MultipathRelax = &multipathRelax

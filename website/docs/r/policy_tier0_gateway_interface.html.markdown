@@ -9,6 +9,8 @@ description: A resource to configure an Interface on Tier-0 gateway on NSX Polic
 
 This resource provides a method for the management of a Tier-0 gateway Interface. Note that edge cluster must be configured on Tier-0 Gateway in order to configure interfaces on it.
 
+~> **NOTE:** When configuring VRF-Lite interfaces, please specify explicit dependency on parent Tier-0 Gateway interface(see VRF interface example below).  This will ensure correct order of object deletion.
+
 This resource is applicable to NSX Global Manager, NSX Policy Manager and VMC.
 
 # Example Usage
@@ -36,6 +38,23 @@ resource "nsxt_policy_tier0_gateway_interface" "if1" {
   subnets                = ["12.12.2.13/24"]
   mtu                    = 1500
   ipv6_ndra_profile_path = data.nsxt_policy_ipv6_ndra_profile.slaac.path
+}
+```
+
+# VRF Interface Example Usage
+
+```hcl
+resource "nsxt_policy_tier0_gateway_interface" "red_vrf_uplink1" {
+  display_name   = "Uplink-01"
+  type           = "EXTERNAL"
+  edge_node_path = data.nsxt_policy_edge_node.edge_node_1.path
+  gateway_path   = nsxt_policy_tier0_gateway.red_vrf.path
+  segment_path   = nsxt_policy_vlan_segment.vrf_trunk_1.path
+  access_vlan_id = 112
+  subnets        = ["192.168.112.254/24"]
+  mtu            = 1500
+
+  depends_on = [nsxt_policy_tier0_gateway_interface.parent_uplink1]
 }
 ```
 
