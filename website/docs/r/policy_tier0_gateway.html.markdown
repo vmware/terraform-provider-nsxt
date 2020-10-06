@@ -144,7 +144,7 @@ The following arguments are supported:
   * `ecmp` - (Optional) A boolean flag to enable/disable ECMP. Default is `true`.
   * `enabled` - (Optional) A boolean flag to enable/disable BGP. Default is `true`.
   * `inter_sr_ibgp` - (Optional) A boolean flag to enable/disable inter SR IBGP configuration. Default is `true`. This setting is not applicable to VRF-Lite Gateway.
-  * `local_as_num` - (Optional) BGP AS number in ASPLAIN/ASDOT Format. This setting is not applicable to VRF-Lite Gateway.
+  * `local_as_num` - (Optional) BGP AS number in ASPLAIN/ASDOT Format. This setting is not applicable to VRF-Lite Gateway, and is required otherwise.
   * `multipath_relax` - (Optional) A boolean flag to enable/disable multipath relax for BGP. Default is `true`. This setting is not applicable to VRF-Lite Gateway.
   * `graceful_restart_mode` - (Optional) Setting to control BGP graceful restart mode, one of `DISABLE`, `GR_AND_HELPER`, `HELPER_ONLY`. This setting is not applicable to VRF-Lite Gateway.
   * `graceful_restart_timer` - (Optional) BGP graceful restart timer. Default is `180`. This setting is not applicable to VRF-Lite Gateway.
