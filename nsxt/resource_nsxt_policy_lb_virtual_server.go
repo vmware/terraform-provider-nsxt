@@ -514,6 +514,9 @@ func resourceNsxtPolicyLBVirtualServerRead(d *schema.ResourceData, m interface{}
 
 func resourceNsxtPolicyLBVirtualServerUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
+	// NOTE: Partial patch is required to respect rules that might have
+	// been added manually
+	connector.AddRequestProcessor(newEnablePartialPatchHeaderProcessor())
 	client := infra.NewDefaultLbVirtualServersClient(connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
