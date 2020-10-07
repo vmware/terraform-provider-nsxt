@@ -506,6 +506,7 @@ resource "nsxt_policy_tier0_gateway" "test" {
 
   bgp_config {
     local_as_num    = "60000"
+    inter_sr_ibgp   = true
     multipath_relax = true
     route_aggregation {
       prefix = "12.12.12.0/24"

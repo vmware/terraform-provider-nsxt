@@ -157,8 +157,9 @@ resource "nsxt_policy_tier0_gateway" "test" {
 }
 
 resource "nsxt_policy_bgp_config" "test" {
-  gateway_path    = nsxt_policy_tier0_gateway.test.path
-  site_path       = data.nsxt_policy_site.site1.path
+  gateway_path = nsxt_policy_tier0_gateway.test.path
+  site_path    = data.nsxt_policy_site.site1.path
+  local_as_num = 65001
 }
 
 data "nsxt_policy_realization_info" "realization_info" {

@@ -7,7 +7,7 @@ description: A resource to configure a Tier-0 gateway on NSX Policy manager.
 
 # nsxt_policy_tier0_gateway
 
-This resource provides a method for the management of a Tier-0 gateway.
+This resource provides a method for the management of a Tier-0 gateway or VRF-Lite gateway.
 
 This resource is applicable to NSX Global Manager, NSX Policy Manager and VMC.
 
@@ -38,17 +38,6 @@ resource "nsxt_policy_tier0_gateway" "tier0_gw" {
     }
   }
 
-  vrf_config {
-    gateway_path        = data.nsxt_policy_tier0_gateway.vrf.path
-    route_distinguisher = "62000:10"
-    evpn_transit_vni    = 76001
-    route_target {
-      auto_mode      = false
-      import_targets = ["62000:2"]
-      export_targets = ["62000:3", "10.2.2.0:3"]
-    }
-  }
-
   redistribution_config {
     enabled = true
     rule {
@@ -63,6 +52,42 @@ resource "nsxt_policy_tier0_gateway" "tier0_gw" {
   }
 }
 ```
+
+## VRF-Lite Example Usage
+
+```hcl
+resource "nsxt_policy_tier0_gateway" "vrf-blue" {
+  description              = "Tier-0 VRF provisioned by Terraform"
+  display_name             = "Tier0-vrf"
+  failover_mode            = "PREEMPTIVE"
+  default_rule_logging     = false
+  enable_firewall          = true
+  ha_mode                  = "ACTIVE_STANDBY"
+  internal_transit_subnets = ["102.64.0.0/16"]
+  transit_subnets          = ["101.64.0.0/16"]
+  edge_cluster_path        = data.nsxt_policy_edge_cluster.EC.path
+
+  bgp_config {
+    ecmp = true
+
+    route_aggregation {
+      prefix = "12.10.10.0/24"
+    }
+  }
+
+  vrf_config {
+    gateway_path        = data.nsxt_policy_tier0_gateway.parent.path
+    route_distinguisher = "62000:10"
+    evpn_transit_vni    = 76001
+    route_target {
+      auto_mode      = false
+      import_targets = ["62000:2"]
+      export_targets = ["62000:3", "10.2.2.0:3"]
+    }
+  }
+}
+```
+
 
 ## Global manager example usage
 ```hcl
@@ -100,7 +125,7 @@ The following arguments are supported:
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this Tier-0 gateway.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the policy resource.
-* `edge_cluster_path` - (Optional) The path of the edge cluster where the Tier-0 is placed. Must be specified when `bgp_config` is enabled. This argument is not applicable for NSX Global Manager - use locale-services clause instead.
+* `edge_cluster_path` - (Optional) The path of the edge cluster where the Tier-0 is placed. Must be specified when `bgp_config` is enabled. This argument is not applicable to NSX Global Manager - use locale-services clause instead.
 * `locale_service` - (Optional) This is required for NSX Global Manager only. Multiple locale services can be specified for multiple locations.
   * `edge_cluster_path` - (Required) The path of the edge cluster where the Tier-0 is placed.
   * `preferred_edge_paths` - (Optional) Policy paths to edge nodes. Specified edge is used as preferred edge cluster member when failover mode is set to `PREEMPTIVE`.
@@ -114,16 +139,16 @@ The following arguments are supported:
 * `internal_transit_subnets` - (Optional) Internal transit subnets in CIDR format. At most 1 CIDR.
 * `transit_subnets` - (Optional) Transit subnets in CIDR format.
 * `dhcp_config_path` - (Optional) Policy path to DHCP server or relay configuration to use for this gateway.
-* `bgp_config` - (Optional) The BGP configuration for the Tier-0 gateway. When enabled a valid `edge_cluster_path` must be set on the Tier-0 gateway. This clause is not applicable for Global Manager - use `nsxt_policy_bgp_config` resource instead.
+* `bgp_config` - (Optional) The BGP configuration for the Tier-0 gateway. When enabled a valid `edge_cluster_path` must be set on the Tier-0 gateway. This clause is not applicable to Global Manager - use `nsxt_policy_bgp_config` resource instead.
   * `tag` - (Optional) A list of scope + tag pairs to associate with this Tier-0 gateway's BGP configuration.
   * `ecmp` - (Optional) A boolean flag to enable/disable ECMP. Default is `true`.
   * `enabled` - (Optional) A boolean flag to enable/disable BGP. Default is `true`.
-  * `inter_sr_ibgp` - (Optional) A boolean flag to enable/disable inter SR IBGP configuration. Default is `true`.
-  * `local_as_num` - (Optional) BGP AS number in ASPLAIN/ASDOT Format. Default is `65000`.
-  * `multipath_relax` - (Optional) A boolean flag to enable/disable multipath relax for BGP. Default is `true`.
-  * `graceful_restart_mode` - (Optional) Setting to control BGP graceful restart mode, one of `DISABLE`, `GR_AND_HELPER`, `HELPER_ONLY`.
-  * `graceful_restart_timer` - (Optional) BGP graceful restart timer. Default is `180`.
-  * `graceful_restart_stale_route_timer` - (Optional) BGP stale route timer. Default is `600`.
+  * `inter_sr_ibgp` - (Optional) A boolean flag to enable/disable inter SR IBGP configuration. Default is `true`. This setting is not applicable to VRF-Lite Gateway.
+  * `local_as_num` - (Optional) BGP AS number in ASPLAIN/ASDOT Format. This setting is not applicable to VRF-Lite Gateway, and is required otherwise.
+  * `multipath_relax` - (Optional) A boolean flag to enable/disable multipath relax for BGP. Default is `true`. This setting is not applicable to VRF-Lite Gateway.
+  * `graceful_restart_mode` - (Optional) Setting to control BGP graceful restart mode, one of `DISABLE`, `GR_AND_HELPER`, `HELPER_ONLY`. This setting is not applicable to VRF-Lite Gateway.
+  * `graceful_restart_timer` - (Optional) BGP graceful restart timer. Default is `180`. This setting is not applicable to VRF-Lite Gateway.
+  * `graceful_restart_stale_route_timer` - (Optional) BGP stale route timer. Default is `600`. This setting is not applicable to VRF-Lite Gateway.
   * `route_aggregation`- (Optional) Zero or more route aggregations for BGP.
     * `prefix` - (Required) CIDR of aggregate address.
     * `summary_only` - (Optional) A boolean flag to enable/disable summarized route info. Default is `true`.
