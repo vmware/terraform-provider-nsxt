@@ -533,18 +533,6 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 	return nil
 }
 
-type enablePartialPatchHeaderProcessor struct {
-}
-
-func newEnablePartialPatchHeaderProcessor() *enablePartialPatchHeaderProcessor {
-	return &enablePartialPatchHeaderProcessor{}
-}
-
-func (processor enablePartialPatchHeaderProcessor) Process(req *http.Request) error {
-	req.Header.Set("nsx-enable-partial-patch", "true")
-	return nil
-}
-
 type remoteBasicAuthHeaderProcessor struct {
 }
 
