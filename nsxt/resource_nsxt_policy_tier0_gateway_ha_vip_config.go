@@ -359,7 +359,7 @@ func resourceNsxtPolicyTier0GatewayHAVipConfigImport(d *schema.ResourceData, m i
 
 	d.Set("tier0_id", tier0ID)
 	d.Set("locale_service_id", localeServiceID)
-	d.SetId(localeServiceID)
+	d.SetId(newUUID())
 
 	return []*schema.ResourceData{d}, nil
 }
