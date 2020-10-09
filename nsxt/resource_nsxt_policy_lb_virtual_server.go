@@ -514,9 +514,6 @@ func resourceNsxtPolicyLBVirtualServerRead(d *schema.ResourceData, m interface{}
 
 func resourceNsxtPolicyLBVirtualServerUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	// NOTE: Partial patch is required to respect rules that might have
-	// been added manually
-	connector.AddRequestProcessor(newEnablePartialPatchHeaderProcessor())
 	client := infra.NewDefaultLbVirtualServersClient(connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
@@ -567,6 +564,16 @@ func resourceNsxtPolicyLBVirtualServerUpdate(d *schema.ResourceData, m interface
 
 	policyLBVirtualServerVersionDepenantSet(d, &obj)
 
+	// The user might have defined the rules outside terraform, lets keep these
+	existingObj, err := client.Get(id)
+	if err != nil {
+		return handleUpdateError("LBVirtualServer", id, err)
+	}
+
+	if len(existingObj.Rules) > 0 {
+		obj.Rules = existingObj.Rules
+	}
+
 	if maxNewConnectionRate > 0 {
 		obj.MaxNewConnectionRate = &maxNewConnectionRate
 	}
@@ -576,7 +583,7 @@ func resourceNsxtPolicyLBVirtualServerUpdate(d *schema.ResourceData, m interface
 	}
 
 	// Update the resource using PATCH
-	err := client.Patch(id, obj)
+	err = client.Patch(id, obj)
 	if err != nil {
 		return handleUpdateError("LBVirtualServer", id, err)
 	}
