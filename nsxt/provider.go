@@ -562,7 +562,7 @@ func (processor remoteBasicAuthHeaderProcessor) Process(req *http.Request) error
 	return nil
 }
 
-func applyLicense(c *nsxt.APIClient, licenseKey string) error {
+func applyLicense(c *api.APIClient, licenseKey string) error {
 	if c == nil {
 		return fmt.Errorf("API client not configured")
 	}
@@ -579,6 +579,7 @@ func applyLicense(c *nsxt.APIClient, licenseKey string) error {
 	return nil
 }
 
+// license keys are applied on terraform plan and are not removed
 func configureLicenses(d *schema.ResourceData, clients *nsxtClients) error {
 	for _, lic_key := range d.Get("license_keys").([]interface{}) {
 		err := applyLicense(clients.NsxtClient, lic_key.(string))
