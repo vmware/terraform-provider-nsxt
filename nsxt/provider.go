@@ -581,10 +581,10 @@ func applyLicense(c *api.APIClient, licenseKey string) error {
 
 // license keys are applied on terraform plan and are not removed
 func configureLicenses(d *schema.ResourceData, clients *nsxtClients) error {
-	for _, lic_key := range d.Get("license_keys").([]interface{}) {
-		err := applyLicense(clients.NsxtClient, lic_key.(string))
+	for _, licKey := range d.Get("license_keys").([]interface{}) {
+		err := applyLicense(clients.NsxtClient, licKey.(string))
 		if err != nil {
-			return fmt.Errorf("Error applying license key: %s. %s", lic_key, err.Error())
+			return fmt.Errorf("Error applying license key: %s. %s", licKey, err.Error())
 		}
 	}
 	return nil
