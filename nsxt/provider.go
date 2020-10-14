@@ -11,11 +11,14 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"regexp"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	api "github.com/vmware/go-vmware-nsxt"
+	"github.com/vmware/go-vmware-nsxt/licensing"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/core"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/security"
@@ -151,6 +154,19 @@ func Provider() terraform.ResourceProvider {
 				Optional:    true,
 				Description: "Is this a policy global manager endpoint",
 				DefaultFunc: schema.EnvDefaultFunc("NSXT_GLOBAL_MANAGER", false),
+			},
+			"license_keys": {
+				Type:          schema.TypeList,
+				Optional:      true,
+				Description:   "license keys",
+				ConflictsWith: []string{"vmc_token"},
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+					ValidateFunc: validation.StringMatch(
+						regexp.MustCompile(
+							"^[A-Z0-9]{5}-[A-Z0-9]{5}-[A-Z0-9]{5}-[A-Z0-9]{5}-[A-Z0-9]{5}$"),
+						"Must be a valid nsx license key matching: ^[A-Z0-9]{5}-[A-Z0-9]{5}-[A-Z0-9]{5}-[A-Z0-9]{5}-[A-Z0-9]{5}$"),
+				},
 			},
 		},
 
@@ -547,6 +563,34 @@ func (processor remoteBasicAuthHeaderProcessor) Process(req *http.Request) error
 	return nil
 }
 
+func applyLicense(c *api.APIClient, licenseKey string) error {
+	if c == nil {
+		return fmt.Errorf("API client not configured")
+	}
+
+	license := licensing.License{LicenseKey: licenseKey}
+	_, resp, err := c.LicensingApi.CreateLicense(c.Context, license)
+	if err != nil {
+		return fmt.Errorf("Error during license create: %v", err)
+	}
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("Unexpected status returned during license create: %v", resp.StatusCode)
+	}
+
+	return nil
+}
+
+// license keys are applied on terraform plan and are not removed
+func configureLicenses(d *schema.ResourceData, clients *nsxtClients) error {
+	for _, licKey := range d.Get("license_keys").([]interface{}) {
+		err := applyLicense(clients.NsxtClient, licKey.(string))
+		if err != nil {
+			return fmt.Errorf("Error applying license key: %s. %s", licKey, err.Error())
+		}
+	}
+	return nil
+}
+
 func initCommonConfig(d *schema.ResourceData) commonProviderConfig {
 	remoteAuth := d.Get("remote_auth").(bool)
 	toleratePartialSuccess := d.Get("tolerate_partial_success").(bool)
@@ -569,6 +613,11 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	}
 
 	err = configurePolicyConnectorData(d, &clients)
+	if err != nil {
+		return nil, err
+	}
+
+	err = configureLicenses(d, &clients)
 	if err != nil {
 		return nil, err
 	}

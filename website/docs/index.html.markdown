@@ -191,6 +191,8 @@ The following arguments are used to configure the VMware NSX-T Provider:
   For on-prem deployments, this setting should not be specified.
 * `global_manager` - (Optional) True if this is a global manager endpoint.
   False by default.
+* `license_keys` - (Optional) List of NSX-T license keys. License keys are applied
+  during plan and will not be deleted if they are removed from the configuration.
 
 ## NSX Logical Networking
 
