@@ -162,17 +162,17 @@ The following arguments are used to configure the VMware NSX-T Provider:
   variable.
 * `max_retries` - (Optional) The maximum number of retires before failing an API
   request. Default: `10` Can also be specified with the `NSXT_MAX_RETRIES`
-  environment variable.
+  environment variable. Not supported yet for policy resources.
 * `retry_min_delay` - (Optional) The minimum delay, in milliseconds, between
   retires made to the API. Default:`500`. Can also be specified with the
-  `NSXT_RETRY_MIN_DELAY` environment variable.
+  `NSXT_RETRY_MIN_DELAY` environment variable. Not supported yet for policy resources.
 * `retry_max_delay` - (Optional) The maximum delay, in milliseconds, between
   retires made to the API. Default:`5000`. Can also be specified with the
-  `NSXT_RETRY_MAX_DELAY` environment variable.
+  `NSXT_RETRY_MAX_DELAY` environment variable. Not supported yet for policy resources.
 * `retry_on_status_codes` - (Optional) A list of HTTP status codes to retry on.
   By default, the provider will retry on HTTP error 429 (too many requests),
   essentially retrying on throttled connections. Can also be specified with the
-  `NSXT_RETRY_ON_STATUS_CODES` environment variable.
+  `NSXT_RETRY_ON_STATUS_CODES` environment variable. Not supported yet for policy resources.
 * `remote_auth` - (Optional) Would trigger remote authorization instead of basic
   authorization. This is required for users based on vIDM authentication.
   The default for this flag is false. Can also be specified with the
