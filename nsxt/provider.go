@@ -156,9 +156,10 @@ func Provider() terraform.ResourceProvider {
 				DefaultFunc: schema.EnvDefaultFunc("NSXT_GLOBAL_MANAGER", false),
 			},
 			"license_keys": {
-				Type:        schema.TypeList,
-				Optional:    true,
-				Description: "license keys",
+				Type:          schema.TypeList,
+				Optional:      true,
+				Description:   "license keys",
+				ConflictsWith: []string{"vmc_token"},
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 					ValidateFunc: validation.StringMatch(
