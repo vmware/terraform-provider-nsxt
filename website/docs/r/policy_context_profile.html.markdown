@@ -1,5 +1,5 @@
 ---
-subcategory: "Beta"
+subcategory: "Policy - Firewall"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_context_profile"
 description: A resource to configure a Context Profile.

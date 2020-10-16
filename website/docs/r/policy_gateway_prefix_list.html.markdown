@@ -1,5 +1,5 @@
 ---
-subcategory: "Beta"
+subcategory: "Policy - Gateways and Routing"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_gateway_prefix_list"
 description: A resource to configure a Tier 0 Gateway Prefix Liston NSX Policy manager.

@@ -1,5 +1,5 @@
 ---
-subcategory: "Beta"
+subcategory: "Policy - Firewall"
 layout: "nsxt"
 page_title: "NSXT: policy_context_profile"
 description: Policy Context Profile Profile data source.
