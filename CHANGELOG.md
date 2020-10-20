@@ -1,6 +1,39 @@
-## 3.0.0 (August 24, 2020)
+## 3.1.0 (October 20, 2020)
 
 FEATURES:
+
+* **New Data Source**: `nsxt_policy_security_policy`.
+* **New Data Source**: `nsxt_policy_gateway_policy`.
+* **New Data Source**: `nsxt_policy_group`.
+* **New Data Source**: `nsxt_policy_context_profile` (official support).
+
+* **New Resource**: `nsxt_policy_context_profile` (official support).
+* **New Resource**: `nsxt_policy_tier0_gateway_ha_vip_config` (official support).
+* **New Resource**: `nsxt_policy_gateway_prefix_list` (official support).
+
+EXPERIMENTAL FEATURES:
+
+* **New Data Source**: `nsxt_management_cluster`.
+
+* **New Resource**: `nsxt_policy_predefined_security_policy`. This resource allows users to modify default security policy. Please refer to docs for more details.
+* **New Resource**: `nsxt_policy_predefined_gateway_policy`. This resource enables gateway policy configuration for VMC. Please refer to docs for more details.
+
+IMPROVEMENTS:
+
+* Allow specifying `vlan_ids` for overlay segments ([#462](https://github.com/vmware/terraform-provider-nsxt/pull/462))
+* Allow specifying NSX lisence via provider attribute. Note: the lisence is not considered part of configuration, and is applied at plan time! ([#423](https://github.com/vmware/terraform-provider-nsxt/pull/423))
+
+BUG FIXES:
+
+* `resource/nsxt_policy_tier0_gateway`: Fix non-empty state issue for VRF use case ([#478](https://github.com/vmware/terraform-provider-nsxt/pull/478))
+* `resource/nsxt_policy_segment`: Fix a bug with `excluded_range` assignment ([#473](https://github.com/vmware/terraform-provider-nsxt/pull/473))
+* `resource/nsxt_policy_lb_pool`: Fix read function for `member_group` attribute ([#473](https://github.com/vmware/terraform-provider-nsxt/pull/473))
+* `resource/nsxt_policy_ip_address_allocation`: Fix address allocation with older NSX versions ([#468](https://github.com/vmware/terraform-provider-nsxt/pull/468))
+* `data/nsxt_policy_realization_info`: Fix realization polling with older NSX versions ([#468](https://github.com/vmware/terraform-provider-nsxt/pull/468))
+* `data/nsxt_ns_group`: Add pagination support to fix group retrieval with many group objects defined ([#440](https://github.com/vmware/terraform-provider-nsxt/pull/440))
+* `resource/nsxt_policy_lb_virtual_server`: Preserve existing rules that are defined outside terraform ([#482](https://github.com/vmware/terraform-provider-nsxt/pull/482))
+
+## 3.0.0 (August 24, 2020)
 
 * The provider is extended to support NSXT Global Manager. Only a subset of objects is supported, check the documentation for more details.
 
