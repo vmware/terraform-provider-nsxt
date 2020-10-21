@@ -21,7 +21,7 @@ EXPERIMENTAL FEATURES:
 IMPROVEMENTS:
 
 * Allow specifying `vlan_ids` for overlay segments ([#462](https://github.com/vmware/terraform-provider-nsxt/pull/462))
-* Allow specifying NSX lisence via provider attribute. Note: the lisence is not considered part of configuration, and is applied at plan time! ([#423](https://github.com/vmware/terraform-provider-nsxt/pull/423))
+* Allow specifying NSX license via provider attribute. Note: the lisence is not considered part of configuration, and is applied at plan time! ([#423](https://github.com/vmware/terraform-provider-nsxt/pull/423))
 
 BUG FIXES:
 
