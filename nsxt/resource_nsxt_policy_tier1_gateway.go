@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
@@ -549,8 +549,8 @@ func resourceNsxtPolicyTier1GatewayRead(d *schema.ResourceData, m interface{}) e
 	}
 
 	if obj.QosProfile != nil {
-		d.Set("ingressQosProfile", obj.QosProfile.IngressQosProfilePath)
-		d.Set("egressQosProfile", obj.QosProfile.EgressQosProfilePath)
+		d.Set("ingress_qos_profile_path", obj.QosProfile.IngressQosProfilePath)
+		d.Set("egress_qos_profile_path", obj.QosProfile.EgressQosProfilePath)
 	}
 
 	// Get the edge cluster Id or locale services

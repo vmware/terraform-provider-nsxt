@@ -9,8 +9,8 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccResourceNsxtLogicalSwitch_basic(t *testing.T) {
@@ -153,10 +153,6 @@ func TestAccResourceNsxtLogicalSwitch_withProfiles(t *testing.T) {
 					// Counting only custom profiles so count should be 0
 					resource.TestCheckResourceAttr(testResourceName, "switching_profile_id.#", "0"),
 				),
-			},
-			{
-				// remove the data source for the custom switching profile
-				Config: testAccNsxtEmptyTemplate(),
 			},
 		},
 	})

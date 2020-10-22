@@ -8,8 +8,8 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
 	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
@@ -39,9 +39,6 @@ func TestAccDataSourceNsxtPolicyTier0Gateway_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "description", name),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 				),
-			},
-			{
-				Config: testAccNsxtEmptyTemplate(),
 			},
 		},
 	})

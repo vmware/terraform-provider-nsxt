@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccDataSourceNsxtPolicyCertificate_basic(t *testing.T) {
@@ -28,9 +28,6 @@ func TestAccDataSourceNsxtPolicyCertificate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 				),
-			},
-			{
-				Config: testAccNsxtEmptyTemplate(),
 			},
 		},
 	})

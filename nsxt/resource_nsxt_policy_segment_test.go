@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccResourceNsxtPolicySegment_basicImport(t *testing.T) {
@@ -233,9 +233,6 @@ func TestAccResourceNsxtPolicySegment_withProfiles(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "qos_profile.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "discovery_profile.#", "0"),
 				),
-			},
-			{
-				Config: testAccNsxtEmptyTemplate(),
 			},
 		},
 	})

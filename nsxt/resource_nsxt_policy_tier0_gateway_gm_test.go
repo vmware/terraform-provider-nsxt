@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 var testAccGmGatewayIntersiteSubnet = "10.10.2.0/24"
@@ -17,9 +17,8 @@ var testAccGmGatewayIntersiteSubnet = "10.10.2.0/24"
 func TestAccResourceNsxtPolicyTier0Gateway_globalManagerBasic(t *testing.T) {
 	testResourceName := "nsxt_policy_tier0_gateway.test"
 
-	// TODO: drop hashes when terraform plugin tests align with terraform plugin
-	localeService1Path := "locale_service.1704315080."
-	localeService2Path := "locale_service.2632928165."
+	localeService1Path := "locale_service.0."
+	localeService2Path := "locale_service.1."
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -56,10 +55,10 @@ func TestAccResourceNsxtPolicyTier0Gateway_globalManagerBasic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "display_name", defaultTestResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "ha_mode", "ACTIVE_ACTIVE"),
 					resource.TestCheckResourceAttr(testResourceName, "locale_service.#", "2"),
-					resource.TestCheckResourceAttrSet(testResourceName, localeService1Path+"edge_cluster_path"),
-					resource.TestCheckResourceAttr(testResourceName, localeService1Path+"preferred_edge_paths.#", "1"),
 					resource.TestCheckResourceAttrSet(testResourceName, localeService2Path+"edge_cluster_path"),
-					resource.TestCheckResourceAttr(testResourceName, localeService2Path+"preferred_edge_paths.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, localeService2Path+"preferred_edge_paths.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, localeService1Path+"edge_cluster_path"),
+					resource.TestCheckResourceAttr(testResourceName, localeService1Path+"preferred_edge_paths.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "intersite_config.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "intersite_config.0.transit_subnet", testAccGmGatewayIntersiteSubnet),
 					resource.TestCheckResourceAttrSet(testResourceName, "intersite_config.0.primary_site_path"),
@@ -87,9 +86,8 @@ func TestAccResourceNsxtPolicyTier0Gateway_globalManagerBasic(t *testing.T) {
 func TestAccResourceNsxtPolicyTier0Gateway_globalManagerNoSubnet(t *testing.T) {
 	testResourceName := "nsxt_policy_tier0_gateway.test"
 
-	// TODO: drop hashes when terraform plugin tests align with terraform plugin
-	localeService1Path := "locale_service.1704315080."
-	localeService2Path := "locale_service.2632928165."
+	localeService1Path := "locale_service.0."
+	localeService2Path := "locale_service.1."
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -124,10 +122,10 @@ func TestAccResourceNsxtPolicyTier0Gateway_globalManagerNoSubnet(t *testing.T) {
 					testAccNsxtPolicyTier0Exists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", defaultTestResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "locale_service.#", "2"),
-					resource.TestCheckResourceAttrSet(testResourceName, localeService1Path+"edge_cluster_path"),
-					resource.TestCheckResourceAttr(testResourceName, localeService1Path+"preferred_edge_paths.#", "1"),
 					resource.TestCheckResourceAttrSet(testResourceName, localeService2Path+"edge_cluster_path"),
-					resource.TestCheckResourceAttr(testResourceName, localeService2Path+"preferred_edge_paths.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, localeService2Path+"preferred_edge_paths.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, localeService1Path+"edge_cluster_path"),
+					resource.TestCheckResourceAttr(testResourceName, localeService1Path+"preferred_edge_paths.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "intersite_config.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "intersite_config.0.transit_subnet", testAccGmGatewayIntersiteSubnet),
 					resource.TestCheckResourceAttrSet(testResourceName, "intersite_config.0.primary_site_path"),
@@ -143,10 +141,8 @@ func TestAccResourceNsxtPolicyTier0Gateway_globalManagerNoSubnet(t *testing.T) {
 func TestAccResourceNsxtPolicyTier0Gateway_globalManagerRedistribution(t *testing.T) {
 	testResourceName := "nsxt_policy_tier0_gateway.test"
 
-	// TODO: drop hashes when terraform plugin tests align with terraform plugin
-	localeService1Path := "locale_service.1305767334."
-	localeService2Path := "locale_service.3957791215."
-	localeService3Path := "locale_service.2747282."
+	localeService1Path := "locale_service.0."
+	localeService2Path := "locale_service.1."
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -184,10 +180,10 @@ func TestAccResourceNsxtPolicyTier0Gateway_globalManagerRedistribution(t *testin
 					resource.TestCheckResourceAttr(testResourceName, "locale_service.#", "2"),
 					resource.TestCheckResourceAttrSet(testResourceName, localeService2Path+"edge_cluster_path"),
 					resource.TestCheckResourceAttr(testResourceName, localeService2Path+"redistribution_config.#", "0"),
-					resource.TestCheckResourceAttr(testResourceName, localeService3Path+"redistribution_config.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, localeService3Path+"redistribution_config.0.enabled", "true"),
-					resource.TestCheckResourceAttr(testResourceName, localeService3Path+"redistribution_config.0.rule.0.name", "test-rule-2"),
-					resource.TestCheckResourceAttr(testResourceName, localeService3Path+"redistribution_config.0.rule.0.types.#", "3"),
+					resource.TestCheckResourceAttr(testResourceName, localeService1Path+"redistribution_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, localeService1Path+"redistribution_config.0.enabled", "true"),
+					resource.TestCheckResourceAttr(testResourceName, localeService1Path+"redistribution_config.0.rule.0.name", "test-rule-2"),
+					resource.TestCheckResourceAttr(testResourceName, localeService1Path+"redistribution_config.0.rule.0.types.#", "3"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 				),
