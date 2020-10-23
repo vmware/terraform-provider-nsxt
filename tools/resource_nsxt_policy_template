@@ -5,12 +5,15 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/hashicorp/terraform/helper/validation"
-	"github.com/vmware/go-nsx-t-policy/bindings/nsx_policy/infra"
-	"github.com/vmware/go-nsx-t-policy/bindings/nsx_policy/model"
-	"github.com/vmware/go-nsx-t-policy/runtime/protocol/client"
 	"log"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+        "github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+        "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
+        "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+        gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
+        gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 )
 
 <!ENUMS!>
@@ -37,30 +40,28 @@ func resourceNsxtPolicy<!RESOURCE!>() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicy<!RESOURCE!>Exists(id string, connector *client.RestConnector) bool {
-	client := infra.NewDefault<!RESOURCE!>sClient(connector)
-
-        _, err := client.Get(id)
+func resourceNsxtPolicy<!RESOURCE!>Exists(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
+        var err error
+        if isGlobalManager {
+            client := gm_infra.NewDefault<!RESOURCE!>sClient(connector)
+             _, err = client.Get(id)
+        } else {
+            client := infra.NewDefault<!RESOURCE!>sClient(connector)
+            _, err = client.Get(id)
+        }
 	if err == nil {
-		return true
+		return true, nil
 	}
 
 	if isNotFoundError(err) {
-		return false
+		return false, nil
 	}
 
-	logAPIError("Error retrieving resource", err)
-
-	return false
+	return false, logAPIError("Error retrieving resource", err)
 }
 
 func resourceNsxtPolicy<!RESOURCE!>Create(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewDefault<!RESOURCE!>sClient(connector)
-
-        if client == nil {
-            return policyResourceNotSupportedError()
-        }
 
 	// Initialize resource Id and verify this ID is not yet used
 	id, err := getOrGenerateID(d, connector, resourceNsxtPolicy<!RESOURCE!>Exists)
@@ -82,7 +83,17 @@ func resourceNsxtPolicy<!RESOURCE!>Create(d *schema.ResourceData, m interface{})
 
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating <!RESOURCE!> with ID %s", id)
-	err = client.Patch(id, obj)
+        if isPolicyGlobalManager(m) {
+            gmObj, convErr := convertModelBindingType(obj, model.<!RESOURCE!>BindingType(), gm_model.<!RESOURCE!>BindingType())
+            if convErr != nil {
+                return convErr
+            }
+	    client := gm_infra.NewDefault<!RESOURCE!>sClient(connector)
+            err = client.Patch(id, gmObj.(gm_model.<!RESOURCE!>))
+        } else {
+	    client := infra.NewDefault<!RESOURCE!>sClient(connector)
+            err = client.Patch(id, obj)
+        }
 	if err != nil {
 		return handleCreateError("<!RESOURCE!>", id, err)
 	}
@@ -95,21 +106,33 @@ func resourceNsxtPolicy<!RESOURCE!>Create(d *schema.ResourceData, m interface{})
 
 func resourceNsxtPolicy<!RESOURCE!>Read(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewDefault<!RESOURCE!>sClient(connector)
-
-        if client == nil {
-            return policyResourceNotSupportedError()
-        }
 
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining <!RESOURCE!> ID")
 	}
 
-	obj, err := client.Get(id)
-	if err != nil {
-		return handleReadError(d, "<!RESOURCE!>", id, err)
-	}
+        var obj model.<!RESOURCE!>
+        if isPolicyGlobalManager(m) {
+            client := gm_infra.NewDefault<!RESOURCE!>sClient(connector)
+            gmObj, err := client.Get(id)
+            if err != nil {
+                return handleReadError(d, "<!RESOURCE!>", id, err)
+            }
+
+            lmObj, err := convertModelBindingType(gmObj, gm_model.<!RESOURCE!>BindingType(), model.<!RESOURCE!>BindingType())
+            if err != nil {
+                return err
+            }
+            obj = lmObj.(model.<!RESOURCE!>)
+        } else {
+	    client := infra.NewDefault<!RESOURCE!>sClient(connector)
+            var err error
+            obj, err = client.Get(id)
+            if err != nil {
+                return handleReadError(d, "<!RESOURCE!>", id, err)
+            }
+        }
 
 	d.Set("display_name", obj.DisplayName)
 	d.Set("description", obj.Description)
@@ -150,7 +173,18 @@ func resourceNsxtPolicy<!RESOURCE!>Update(d *schema.ResourceData, m interface{})
         }
 
 	// Update the resource using PATCH
-	err := client.Patch(id, obj)
+        var err error
+        if isPolicyGlobalManager(m) {
+            gmObj, convErr := convertModelBindingType(obj, model.<!RESOURCE!>BindingType(), gm_model.<!RESOURCE!>BindingType())
+            if convErr != nil {
+                return convErr
+            }
+            client := gm_infra.NewDefault<!RESOURCE!>sClient(connector)
+            _, err = client.Update(id, gmObj.(gm_model.<!RESOURCE!>))
+        } else {
+            client := infra.NewDefault<!RESOURCE!>sClient(connector)
+            _, err = client.Update(id, obj)
+        }
 	if err != nil {
 		return handleUpdateError("<!RESOURCE!>", id, err)
 	}
@@ -165,12 +199,15 @@ func resourceNsxtPolicy<!RESOURCE!>Delete(d *schema.ResourceData, m interface{})
 	}
 
 	connector := getPolicyConnector(m)
-	client := infra.NewDefault<!RESOURCE!>sClient(connector)
-        if client == nil {
-            return policyResourceNotSupportedError()
+        var err error
+        if isPolicyGlobalManager(m) {
+            client := gm_infra.NewDefault<!RESOURCE!>sClient(connector)
+            err = client.Delete(id)
+        } else {
+            client := infra.NewDefault<!RESOURCE!>sClient(connector)
+            err = client.Delete(id)
         }
 
-	err := client.Delete(id)
 	if err != nil {
 		return handleDeleteError("<!RESOURCE!>", id, err)
 	}

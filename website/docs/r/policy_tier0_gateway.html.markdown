@@ -102,7 +102,7 @@ resource "nsxt_policy_tier0_gateway" "tier0_gw" {
 
   locale_service {
     edge_cluster_path    = data.nsxt_policy_edge_cluster.london.path
-    preferred_edge_paths = [data.nsxt_policy_egde_node.edge1.path]
+    preferred_edge_paths = [data.nsxt_policy_edge_node.edge1.path]
   }
 
   intersite_config {
