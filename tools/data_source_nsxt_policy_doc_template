@@ -1,13 +1,15 @@
 ---
+subcategory: "Policy - FIXME"
 layout: "nsxt"
 page_title: "NSXT: policy_<!resource_lower!>"
-sidebar_current: "docs-nsxt-datasource-policy-<!resource-lower!>"
 description: Policy <!RESOURCE!> data source.
 ---
 
 # nsxt_policy_<!resource_lower!>
 
-This data source provides information about policy <!RESOURCE!> configured in NSX.
+This data source provides information about policy <!RESOURCE!> configured on NSX.
+
+This data source is applicable to NSX Global Manager, NSX Policy Manager and VMC.
 
 ## Example Usage
 

@@ -1,14 +1,16 @@
 ---
+subcategory: "Policy - FIXME"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_<!resource_lower!>"
-sidebar_current: "docs-nsxt-resource-policy-<!resource-lower!>"
 description: A resource to configure a <!RESOURCE!>.
 ---
 
 # nsxt_policy_<!resource_lower!>
 
 This resource provides a method for the management of a <!RESOURCE!>.
- 
+
+This resource is applicable to NSX Global Manager, NSX Policy Manager and VMC.
+
 ## Example Usage
 
 ```hcl
