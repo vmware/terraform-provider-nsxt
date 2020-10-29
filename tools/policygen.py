@@ -38,7 +38,9 @@ TEMPLATE_DATA_SOURCE_DOC_FILE = "data_source_nsxt_policy_doc_template"
 
 DONT_SPLIT_US = ["IP", "LB", "SSL", "TCP", "UDP"]
 
-LAST_COMMON_ATTR = "MarkedForDelete"
+# Resource-specific attributes are either in the beginning or the end
+FIRST_COMMON_ATTR = "Links []ResourceLink"
+LAST_COMMON_ATTR = "Overriden *bool"
 
 TYPE_MAP = {"string": "schema.TypeString",
             "int32": "schema.TypeInt",
@@ -227,10 +229,10 @@ def load_resource_metadata():
             continue
 
         if line.startswith("type %s struct" % resource):
-            stage = "struct"
+            stage = "attrs"
             continue
 
-        if stage == "struct":
+        if stage == "skip":
             if LAST_COMMON_ATTR in line:
                 stage = "attrs"
                 continue
@@ -243,6 +245,10 @@ def load_resource_metadata():
 
             if line.strip().startswith('//'):
                 description += line
+                continue
+
+            if FIRST_COMMON_ATTR in line:
+                stage = "skip"
                 continue
 
             tokens = line.split()

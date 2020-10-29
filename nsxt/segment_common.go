@@ -29,10 +29,9 @@ func getPolicySegmentDhcpV4ConfigSchema() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"server_address": {
-				Type:        schema.TypeString,
-				Description: "IP address of the DHCP server in CIDR format",
-				Optional:    true,
-				// TODO: validate IPv4 only
+				Type:         schema.TypeString,
+				Description:  "IP address of the DHCP server in CIDR format",
+				Optional:     true,
 				ValidateFunc: validateIPCidr(),
 			},
 			"dns_servers": {
@@ -44,12 +43,7 @@ func getPolicySegmentDhcpV4ConfigSchema() *schema.Resource {
 				},
 				Optional: true,
 			},
-			"lease_time": {
-				Type:         schema.TypeInt,
-				Description:  "DHCP lease time in seconds",
-				Optional:     true,
-				ValidateFunc: validation.IntAtLeast(60),
-			},
+			"lease_time":          getDhcpLeaseTimeSchema(),
 			"dhcp_option_121":     getDhcpOptions121Schema(),
 			"dhcp_generic_option": getDhcpGenericOptionsSchema(),
 		},
@@ -75,12 +69,7 @@ func getPolicySegmentDhcpV6ConfigSchema() *schema.Resource {
 				},
 				Optional: true,
 			},
-			"lease_time": {
-				Type:         schema.TypeInt,
-				Description:  "DHCP lease time in seconds",
-				Optional:     true,
-				ValidateFunc: validation.IntAtLeast(60),
-			},
+			"lease_time": getDhcpLeaseTimeSchema(),
 			"domain_names": {
 				Type:        schema.TypeList,
 				Description: "Domain names for subnet",
@@ -346,6 +335,16 @@ func getPolicyDhcpOptions121(opts []interface{}) model.DhcpOption121 {
 	return opt121Struct
 }
 
+func getDhcpLeaseTimeSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:         schema.TypeInt,
+		Description:  "DHCP lease time in seconds",
+		Optional:     true,
+		ValidateFunc: validation.IntAtLeast(60),
+		Default:      86400,
+	}
+}
+
 func getPolicyDhcpOptions121FromStruct(opt *model.DhcpOption121) []map[string]interface{} {
 	var dhcpOpt121 []map[string]interface{}
 	for _, route := range opt.StaticRoutes {
@@ -382,6 +381,29 @@ func getPolicyDhcpGenericOptionsFromStruct(opts []model.GenericDhcpOption) []map
 	return dhcpOptions
 }
 
+func getDhcpOptsFromMap(dhcpConfig map[string]interface{}) *model.DhcpV4Options {
+	dhcpOpts := model.DhcpV4Options{}
+
+	dhcp121Opts := dhcpConfig["dhcp_option_121"].([]interface{})
+	if len(dhcp121Opts) > 0 {
+		dhcp121OptStruct := getPolicyDhcpOptions121(dhcp121Opts)
+		dhcpOpts.Option121 = &dhcp121OptStruct
+	}
+
+	otherDhcpOpts := dhcpConfig["dhcp_generic_option"].([]interface{})
+	if len(otherDhcpOpts) > 0 {
+		otherOptStructs := getPolicyDhcpGenericOptions(otherDhcpOpts)
+		dhcpOpts.Others = otherOptStructs
+	}
+
+	if len(dhcp121Opts)+len(otherDhcpOpts) > 0 {
+		return &dhcpOpts
+	}
+
+	return nil
+
+}
+
 func getSegmentSubnetDhcpConfigFromSchema(schemaConfig map[string]interface{}) (*data.StructValue, error) {
 	if nsxVersionLower("3.0.0") {
 		return nil, nil
@@ -408,23 +430,7 @@ func getSegmentSubnetDhcpConfigFromSchema(schemaConfig map[string]interface{}) (
 			config.ServerAddress = &serverAddress
 		}
 
-		dhcpOpts := model.DhcpV4Options{}
-
-		dhcp121Opts := dhcpConfig["dhcp_option_121"].([]interface{})
-		if len(dhcp121Opts) > 0 {
-			dhcp121OptStruct := getPolicyDhcpOptions121(dhcp121Opts)
-			dhcpOpts.Option121 = &dhcp121OptStruct
-		}
-
-		otherDhcpOpts := dhcpConfig["dhcp_generic_option"].([]interface{})
-		if len(otherDhcpOpts) > 0 {
-			otherOptStructs := getPolicyDhcpGenericOptions(otherDhcpOpts)
-			dhcpOpts.Others = otherOptStructs
-		}
-
-		if len(dhcp121Opts)+len(otherDhcpOpts) > 0 {
-			config.Options = &dhcpOpts
-		}
+		config.Options = getDhcpOptsFromMap(dhcpConfig)
 
 		if leaseTime > 0 {
 			config.LeaseTime = &leaseTime

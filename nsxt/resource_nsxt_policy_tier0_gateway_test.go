@@ -585,7 +585,7 @@ data "nsxt_policy_realization_info" "realization_info" {
 }
 
 func testAccNsxtPolicyTier0CreateTemplate(name string, failoverMode string) string {
-	config := testAccNsxtPolicyGatewayFabricInterfaceDeps() + fmt.Sprintf(`
+	config := testAccNsxtPolicyGatewayFabricDeps(true) + fmt.Sprintf(`
 resource "nsxt_policy_tier0_gateway" "test" {
   display_name              = "%s"
   description               = "Acceptance Test"
@@ -614,7 +614,7 @@ resource "nsxt_policy_tier0_gateway" "test" {
 }
 
 func testAccNsxtPolicyTier0UpdateTemplate(name string, failoverMode string) string {
-	config := testAccNsxtPolicyGatewayFabricInterfaceDeps() + fmt.Sprintf(`
+	config := testAccNsxtPolicyGatewayFabricDeps(true) + fmt.Sprintf(`
 resource "nsxt_policy_tier0_gateway" "test" {
   display_name              = "%s"
   description               = "Acceptance Test Update"
@@ -637,7 +637,7 @@ resource "nsxt_policy_tier0_gateway" "test" {
 }
 
 func testAccNsxtPolicyTier0SetTemplateWithID(name string, id string) string {
-	return testAccNsxtPolicyGatewayFabricInterfaceDeps() + fmt.Sprintf(`
+	return testAccNsxtPolicyGatewayFabricDeps(true) + fmt.Sprintf(`
 
 resource "nsxt_policy_tier0_gateway" "test" {
   nsx_id       = "%s"
