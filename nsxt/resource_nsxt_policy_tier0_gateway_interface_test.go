@@ -506,18 +506,22 @@ func testAccNsxtPolicyTier0InterfaceCheckDestroy(state *terraform.State, display
 	return nil
 }
 
-func testAccNsxtPolicyGatewayGMFabricInterfaceDeps() string {
+func testAccNsxtPolicyGatewayGMFabricDeps(isVlan bool) string {
 	return `
 data "nsxt_policy_edge_cluster" "EC" {
   site_path = data.nsxt_policy_site.test.path
-}` + testAccNSXGlobalPolicyTransportZoneReadTemplate(true, true)
+}` + testAccNSXGlobalPolicyTransportZoneReadTemplate(isVlan, true)
 }
 
-func testAccNsxtPolicyGatewayFabricInterfaceDeps() string {
+func testAccNsxtPolicyGatewayFabricDeps(isVlan bool) string {
 	if testAccIsGlobalManager() {
-		return testAccNsxtPolicyGatewayGMFabricInterfaceDeps()
+		return testAccNsxtPolicyGatewayGMFabricDeps(isVlan)
 	}
 
+	tzName := getOverlayTransportZoneName()
+	if isVlan {
+		tzName = getVlanTransportZoneName()
+	}
 	return fmt.Sprintf(`
 data "nsxt_policy_edge_cluster" "EC" {
   display_name = "%s"
@@ -525,11 +529,11 @@ data "nsxt_policy_edge_cluster" "EC" {
 
 data "nsxt_policy_transport_zone" "test" {
   display_name = "%s"
-}`, getEdgeClusterName(), getVlanTransportZoneName())
+}`, getEdgeClusterName(), tzName)
 }
 
 func testAccNsxtPolicyGatewayInterfaceDeps(vlans string) string {
-	return testAccNsxtPolicyGatewayFabricInterfaceDeps() + fmt.Sprintf(`
+	return testAccNsxtPolicyGatewayFabricDeps(true) + fmt.Sprintf(`
 resource "nsxt_policy_vlan_segment" "test" {
   transport_zone_path = data.nsxt_policy_transport_zone.test.path
   display_name        = "interface_test"

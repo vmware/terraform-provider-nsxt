@@ -225,7 +225,7 @@ func testAccNsxtPolicyTier0HAVipConfigSiteTemplate() string {
 }
 
 func testAccNsxtPolicyTier0HAVipConfigTemplate(tier0Name string, enabled string, subnet1 string, subnet2 string, vipSubnet string) string {
-	return testAccNsxtPolicyGatewayFabricInterfaceDeps() + fmt.Sprintf(`
+	return testAccNsxtPolicyGatewayFabricDeps(true) + fmt.Sprintf(`
 
 resource "nsxt_policy_vlan_segment" "test1" {
   transport_zone_path = data.nsxt_policy_transport_zone.test.path

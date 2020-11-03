@@ -64,7 +64,7 @@ func resourceNsxtPolicy<!RESOURCE!>Create(d *schema.ResourceData, m interface{})
 	connector := getPolicyConnector(m)
 
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID(d, connector, resourceNsxtPolicy<!RESOURCE!>Exists)
+	id, err := getOrGenerateID(d, m, resourceNsxtPolicy<!RESOURCE!>Exists)
 	if err != nil {
 		return err
 	}
