@@ -9,7 +9,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 )
 
 var accTestPolicyDhcpServerCreateAttributes = map[string]string{
@@ -28,7 +27,7 @@ func TestAccResourceNsxtPolicyDhcpServer_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_dhcp_server.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyDhcpServerCheckDestroy(state, accTestPolicyDhcpServerCreateAttributes["display_name"])
@@ -112,7 +111,6 @@ func testAccNsxtPolicyDhcpServerExists(resourceName string) resource.TestCheckFu
 	return func(state *terraform.State) error {
 
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-		nsxClient := infra.NewDefaultDhcpServerConfigsClient(connector)
 
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
@@ -124,8 +122,11 @@ func testAccNsxtPolicyDhcpServerExists(resourceName string) resource.TestCheckFu
 			return fmt.Errorf("Policy DhcpServer resource ID not set in resources")
 		}
 
-		_, err := nsxClient.Get(resourceID)
+		exists, err := resourceNsxtPolicyDhcpServerExists(resourceID, connector, testAccIsGlobalManager())
 		if err != nil {
+			return err
+		}
+		if !exists {
 			return fmt.Errorf("Error while retrieving policy DhcpServer ID %s. Error: %v", resourceID, err)
 		}
 
@@ -135,7 +136,6 @@ func testAccNsxtPolicyDhcpServerExists(resourceName string) resource.TestCheckFu
 
 func testAccNsxtPolicyDhcpServerCheckDestroy(state *terraform.State, displayName string) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-	nsxClient := infra.NewDefaultDhcpServerConfigsClient(connector)
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_policy_dhcp_server" {
@@ -143,27 +143,27 @@ func testAccNsxtPolicyDhcpServerCheckDestroy(state *terraform.State, displayName
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		_, err := nsxClient.Get(resourceID)
+		exists, err := resourceNsxtPolicyDhcpServerExists(resourceID, connector, testAccIsGlobalManager())
 		if err == nil {
+			return err
+		}
+
+		if exists {
 			return fmt.Errorf("Policy DhcpServer %s still exists", displayName)
 		}
 	}
 	return nil
 }
 
-// TODO: add realization DS to configs when bug 2488834 is resolved
 func testAccNsxtPolicyDhcpServerCreateTemplate() string {
 	attrMap := accTestPolicyDhcpServerCreateAttributes
 
-	return fmt.Sprintf(`
-data "nsxt_policy_edge_cluster" "test" {
-  display_name = "%s"
-}
+	return testAccNsxtPolicyGatewayFabricDeps(false) + fmt.Sprintf(`
 
 resource "nsxt_policy_dhcp_server" "test" {
   display_name = "%s"
   description  = "%s"
-  edge_cluster_path = data.nsxt_policy_edge_cluster.test.path
+  edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
   lease_time = %s
   server_addresses = ["110.64.0.1/16"]
 
@@ -172,21 +172,17 @@ resource "nsxt_policy_dhcp_server" "test" {
     tag   = "tag1"
   }
 }
-`, getEdgeClusterName(), attrMap["display_name"], attrMap["description"], attrMap["lease_time"])
+`, attrMap["display_name"], attrMap["description"], attrMap["lease_time"])
 }
 
 func testAccNsxtPolicyDhcpServerUpdateTemplate() string {
 	attrMap := accTestPolicyDhcpServerUpdateAttributes
 
-	return fmt.Sprintf(`
-data "nsxt_policy_edge_cluster" "test" {
-  display_name = "%s"
-}
-
+	return testAccNsxtPolicyGatewayFabricDeps(false) + fmt.Sprintf(`
 resource "nsxt_policy_dhcp_server" "test" {
   display_name = "%s"
   description  = "%s"
-  edge_cluster_path = data.nsxt_policy_edge_cluster.test.path
+  edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
   lease_time = %s
   server_addresses = ["2001::1234:abcd:ffff:c0a8:101/64", "110.64.0.1/16"]
 
@@ -195,7 +191,7 @@ resource "nsxt_policy_dhcp_server" "test" {
     tag   = "tag1"
   }
 }
-`, getEdgeClusterName(), attrMap["display_name"], attrMap["description"], attrMap["lease_time"])
+`, attrMap["display_name"], attrMap["description"], attrMap["lease_time"])
 }
 
 func testAccNsxtPolicyDhcpServerMinimalistic() string {
