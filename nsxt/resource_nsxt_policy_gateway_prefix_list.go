@@ -148,6 +148,9 @@ func resourceNsxtPolicyGatewayPrefixListDelete(d *schema.ResourceData, m interfa
 
 	gwPolicyPath := d.Get("gateway_path").(string)
 	_, gwID := parseGatewayPolicyPath(gwPolicyPath)
+	if gwID == "" {
+		return fmt.Errorf("gateway_path is not valid")
+	}
 
 	var err error
 	if isGlobalManager {
@@ -175,6 +178,9 @@ func resourceNsxtPolicyGatewayPrefixListRead(d *schema.ResourceData, m interface
 
 	gwPolicyPath := d.Get("gateway_path").(string)
 	_, gwID := parseGatewayPolicyPath(gwPolicyPath)
+	if gwID == "" {
+		return fmt.Errorf("gateway_path is not valid")
+	}
 
 	var obj model.PrefixList
 	var err error
@@ -229,6 +235,9 @@ func resourceNsxtPolicyGatewayPrefixListCreate(d *schema.ResourceData, m interfa
 
 	gwPolicyPath := d.Get("gateway_path").(string)
 	_, gwID := parseGatewayPolicyPath(gwPolicyPath)
+	if gwID == "" {
+		return fmt.Errorf("gateway_path is not valid")
+	}
 	isGlobalManager := isPolicyGlobalManager(m)
 
 	// Initialize resource Id and verify this ID is not yet used
@@ -287,6 +296,9 @@ func resourceNsxtPolicyGatewayPrefixListUpdate(d *schema.ResourceData, m interfa
 
 	gwPolicyPath := d.Get("gateway_path").(string)
 	_, gwID := parseGatewayPolicyPath(gwPolicyPath)
+	if gwID == "" {
+		return fmt.Errorf("gateway_path is not valid")
+	}
 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)

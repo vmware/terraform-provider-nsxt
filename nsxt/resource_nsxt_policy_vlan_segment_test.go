@@ -199,7 +199,7 @@ func testAccNsxtPolicyVlanSegmentExists(resourceName string) resource.TestCheckF
 		if resourceID == "" {
 			return fmt.Errorf("Policy VLAN Segment resource ID not set in resources")
 		}
-		exists, err := resourceNsxtPolicySegmentExists(resourceID, connector, testAccIsGlobalManager())
+		exists, err := resourceNsxtPolicySegmentExists("", false)(resourceID, connector, testAccIsGlobalManager())
 		if err != nil {
 			return err
 		}
@@ -221,7 +221,7 @@ func testAccNsxtPolicyVlanSegmentCheckDestroy(state *terraform.State, displayNam
 
 		resourceID := rs.Primary.Attributes["id"]
 
-		exists, err := resourceNsxtPolicySegmentExists(resourceID, connector, testAccIsGlobalManager())
+		exists, err := resourceNsxtPolicySegmentExists("", false)(resourceID, connector, testAccIsGlobalManager())
 		if err != nil {
 			return err
 		}

@@ -444,6 +444,9 @@ func parseGatewayPolicyPath(gwPath string) (bool, string) {
 	// Or "/global-infra/tier-0s/mytier0gw" in Global Manager
 	isT0 := true
 	segs := strings.Split(gwPath, "/")
+	if len(segs) < 3 {
+		return false, ""
+	}
 	if segs[len(segs)-2] != "tier-0s" {
 		isT0 = false
 	}

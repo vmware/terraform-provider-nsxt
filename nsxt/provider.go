@@ -287,6 +287,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_predefined_security_policy":       resourceNsxtPolicyPredefinedSecurityPolicy(),
 			"nsxt_policy_segment":                          resourceNsxtPolicySegment(),
 			"nsxt_policy_vlan_segment":                     resourceNsxtPolicyVlanSegment(),
+			"nsxt_policy_fixed_segment":                    resourceNsxtPolicyFixedSegment(),
 			"nsxt_policy_static_route":                     resourceNsxtPolicyStaticRoute(),
 			"nsxt_policy_gateway_prefix_list":              resourceNsxtPolicyGatewayPrefixList(),
 			"nsxt_policy_vm_tags":                          resourceNsxtPolicyVMTags(),

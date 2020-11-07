@@ -8,7 +8,7 @@ import (
 )
 
 func resourceNsxtPolicyVlanSegment() *schema.Resource {
-	segSchema := getPolicyCommonSegmentSchema(true)
+	segSchema := getPolicyCommonSegmentSchema(true, false)
 	delete(segSchema, "overlay_id")
 	delete(segSchema, "connectivity_path")
 
@@ -26,17 +26,17 @@ func resourceNsxtPolicyVlanSegment() *schema.Resource {
 }
 
 func resourceNsxtPolicyVlanSegmentCreate(d *schema.ResourceData, m interface{}) error {
-	return nsxtPolicySegmentCreate(d, m, true)
+	return nsxtPolicySegmentCreate(d, m, true, false)
 }
 
 func resourceNsxtPolicyVlanSegmentRead(d *schema.ResourceData, m interface{}) error {
-	return nsxtPolicySegmentRead(d, m, true)
+	return nsxtPolicySegmentRead(d, m, true, false)
 }
 
 func resourceNsxtPolicyVlanSegmentUpdate(d *schema.ResourceData, m interface{}) error {
-	return nsxtPolicySegmentUpdate(d, m, true)
+	return nsxtPolicySegmentUpdate(d, m, true, false)
 }
 
 func resourceNsxtPolicyVlanSegmentDelete(d *schema.ResourceData, m interface{}) error {
-	return nsxtPolicySegmentDelete(d, m)
+	return nsxtPolicySegmentDelete(d, m, false)
 }

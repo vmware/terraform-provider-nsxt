@@ -14,9 +14,11 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
 	gm_segments "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/segments"
+	gm_tier_1s "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_1s"
 	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/segments"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
@@ -228,8 +230,8 @@ func getPolicySegmentSecurityProfilesSchema() *schema.Resource {
 	}
 }
 
-func getPolicyCommonSegmentSchema(vlanRequired bool) map[string]*schema.Schema {
-	return map[string]*schema.Schema{
+func getPolicyCommonSegmentSchema(vlanRequired bool, isFixed bool) map[string]*schema.Schema {
+	schema := map[string]*schema.Schema{
 		"nsx_id":       getNsxIDSchema(),
 		"path":         getPathSchema(),
 		"display_name": getDisplayNameSchema(),
@@ -246,7 +248,9 @@ func getPolicyCommonSegmentSchema(vlanRequired bool) map[string]*schema.Schema {
 		"connectivity_path": {
 			Type:         schema.TypeString,
 			Description:  "Policy path to the connecting Tier-0 or Tier-1",
-			Optional:     true,
+			Required:     isFixed,
+			Optional:     !isFixed,
+			ForceNew:     isFixed,
 			ValidateFunc: validatePolicyPath(),
 		},
 		"domain_name": {
@@ -312,6 +316,15 @@ func getPolicyCommonSegmentSchema(vlanRequired bool) map[string]*schema.Schema {
 			MaxItems:    1,
 		},
 	}
+
+	if isFixed {
+		// Profile assignment is not yet supported in the SDK
+		delete(schema, "discovery_profile")
+		delete(schema, "qos_profile")
+		delete(schema, "security_profile")
+	}
+
+	return schema
 }
 
 func getPolicyDhcpOptions121(opts []interface{}) model.DhcpOption121 {
@@ -577,7 +590,35 @@ func setSegmentSubnetDhcpConfigInSchema(schemaConfig map[string]interface{}, sub
 
 }
 
-func policySegmentResourceToInfraStruct(id string, d *schema.ResourceData, isVlan bool) (model.Infra, error) {
+func nsxtPolicySegmentAddGatewayToInfraStruct(d *schema.ResourceData, dataValue *data.StructValue) (*data.StructValue, error) {
+	var gwChildren []*data.StructValue
+	converter := bindings.NewTypeConverter()
+	converter.SetMode(bindings.REST)
+	gwChildren = append(gwChildren, dataValue)
+	targetType := "Tier1"
+	gwPath := d.Get("connectivity_path").(string)
+	isT0, gwID := parseGatewayPolicyPath(gwPath)
+	if gwID == "" {
+		return nil, fmt.Errorf("connectivity_path is not a valid gateway path")
+	}
+	if isT0 {
+		return nil, fmt.Errorf("Tier0 fixed segments are not supported")
+	}
+	childGW := model.ChildResourceReference{
+		Id:           &gwID,
+		ResourceType: "ChildResourceReference",
+		TargetType:   &targetType,
+		Children:     gwChildren,
+	}
+	dataValue1, errors := converter.ConvertToVapi(childGW, model.ChildResourceReferenceBindingType())
+	if errors != nil {
+		return nil, fmt.Errorf("Error converting Gateway Child: %v", errors[0])
+	}
+
+	return dataValue1.(*data.StructValue), nil
+}
+
+func policySegmentResourceToInfraStruct(id string, d *schema.ResourceData, isVlan bool, isFixed bool) (model.Infra, error) {
 	// Read the rest of the configured parameters
 	var infraChildren []*data.StructValue
 
@@ -627,7 +668,7 @@ func policySegmentResourceToInfraStruct(id string, d *schema.ResourceData, isVla
 			overlayID64 := int64(overlayID.(int))
 			obj.OverlayId = &overlayID64
 		}
-		if connectivityPath != "" {
+		if connectivityPath != "" && !isFixed {
 			obj.ConnectivityPath = &connectivityPath
 		}
 	}
@@ -702,9 +743,11 @@ func policySegmentResourceToInfraStruct(id string, d *schema.ResourceData, isVla
 		obj.L2Extension = &l2Struct
 	}
 
-	err := nsxtPolicySegmentProfilesSetInStruct(d, &obj)
-	if err != nil {
-		return model.Infra{}, err
+	if !isFixed {
+		err := nsxtPolicySegmentProfilesSetInStruct(d, &obj)
+		if err != nil {
+			return model.Infra{}, err
+		}
 	}
 
 	childSegment := model.ChildSegment{
@@ -719,7 +762,18 @@ func policySegmentResourceToInfraStruct(id string, d *schema.ResourceData, isVla
 		return model.Infra{}, fmt.Errorf("Error converting Segment Child: %v", errors[0])
 	}
 
-	infraChildren = append(infraChildren, dataValue.(*data.StructValue))
+	if isFixed {
+		dataValue, err := nsxtPolicySegmentAddGatewayToInfraStruct(d, dataValue.(*data.StructValue))
+		if err != nil {
+			return model.Infra{}, err
+		}
+		infraChildren = append(infraChildren, dataValue)
+
+	} else {
+		infraChildren = append(infraChildren, dataValue.(*data.StructValue))
+
+	}
+
 	infraType := "Infra"
 	infraStruct := model.Infra{
 		Children:     infraChildren,
@@ -729,25 +783,26 @@ func policySegmentResourceToInfraStruct(id string, d *schema.ResourceData, isVla
 	return infraStruct, nil
 }
 
-func resourceNsxtPolicySegmentExists(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
-	var err error
+func resourceNsxtPolicySegmentExists(gwPath string, isFixed bool) func(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
+	return func(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
+		var err error
 
-	if isGlobalManager {
-		client := gm_infra.NewDefaultSegmentsClient(connector)
-		_, err = client.Get(id)
-	} else {
-		client := infra.NewDefaultSegmentsClient(connector)
-		_, err = client.Get(id)
-	}
-	if err == nil {
-		return true, nil
-	}
+		if isGlobalManager {
+			_, err = nsxtPolicyGlobalManagerGetSegment(connector, id, gwPath, isFixed)
+		} else {
+			_, err = nsxtPolicyLocalManagerGetSegment(connector, id, gwPath, isFixed)
+		}
+		if err == nil {
+			return true, nil
+		}
 
-	if isNotFoundError(err) {
-		return false, nil
-	}
+		if isNotFoundError(err) {
+			return false, nil
+		}
 
-	return false, logAPIError("Error retrieving Segment", err)
+		return false, logAPIError("Error retrieving Segment", err)
+
+	}
 }
 
 func nsxtPolicySegmentProfilesSetInStruct(d *schema.ResourceData, segment *model.Segment) error {
@@ -1117,7 +1172,51 @@ func nsxtPolicySegmentProfilesRead(d *schema.ResourceData, m interface{}) error 
 	return nil
 }
 
-func nsxtPolicySegmentRead(d *schema.ResourceData, m interface{}, isVlan bool) error {
+func nsxtPolicyLocalManagerGetSegment(connector *client.RestConnector, id string, gwPath string, isFixed bool) (model.Segment, error) {
+	if !isFixed {
+		return infra.NewDefaultSegmentsClient(connector).Get(id)
+	}
+
+	isT0, gwID := parseGatewayPolicyPath(gwPath)
+	if gwID == "" {
+		return model.Segment{}, fmt.Errorf("connectivity_path is not a valid gateway path")
+	}
+	if isT0 {
+		return model.Segment{}, fmt.Errorf("Tier-0 fixed segments are not supported")
+	}
+
+	return tier_1s.NewDefaultSegmentsClient(connector).Get(gwID, id)
+}
+
+func nsxtPolicyGlobalManagerGetSegment(connector *client.RestConnector, id string, gwPath string, isFixed bool) (model.Segment, error) {
+	var err error
+	var gmObj gm_model.Segment
+
+	if !isFixed {
+		gmObj, err = gm_infra.NewDefaultSegmentsClient(connector).Get(id)
+	} else {
+		isT0, gwID := parseGatewayPolicyPath(gwPath)
+		if gwID == "" {
+			return model.Segment{}, fmt.Errorf("connectivity_path is not a valid gateway path")
+		}
+		if isT0 {
+			return model.Segment{}, fmt.Errorf("Tier-0 fixed segments are not supported")
+		}
+		gmObj, err = gm_tier_1s.NewDefaultSegmentsClient(connector).Get(gwID, id)
+	}
+
+	if err != nil {
+		return model.Segment{}, err
+	}
+
+	lmObj, err := convertModelBindingType(gmObj, gm_model.SegmentBindingType(), model.SegmentBindingType())
+	if err != nil {
+		return model.Segment{}, err
+	}
+	return lmObj.(model.Segment), nil
+}
+
+func nsxtPolicySegmentRead(d *schema.ResourceData, m interface{}, isVlan bool, isFixed bool) error {
 	connector := getPolicyConnector(m)
 
 	id := d.Id()
@@ -1126,24 +1225,17 @@ func nsxtPolicySegmentRead(d *schema.ResourceData, m interface{}, isVlan bool) e
 	}
 
 	var obj model.Segment
+	var err error
+	gwPath := d.Get("connectivity_path").(string)
+
 	if isPolicyGlobalManager(m) {
-		client := gm_infra.NewDefaultSegmentsClient(connector)
-		gmObj, err := client.Get(id)
-		if err != nil {
-			return handleReadError(d, "Segment", id, err)
-		}
-		lmObj, err := convertModelBindingType(gmObj, gm_model.SegmentBindingType(), model.SegmentBindingType())
-		if err != nil {
-			return err
-		}
-		obj = lmObj.(model.Segment)
+		obj, err = nsxtPolicyGlobalManagerGetSegment(connector, id, gwPath, isFixed)
 	} else {
-		client := infra.NewDefaultSegmentsClient(connector)
-		var err error
-		obj, err = client.Get(id)
-		if err != nil {
-			return handleReadError(d, "Segment", id, err)
-		}
+		obj, err = nsxtPolicyLocalManagerGetSegment(connector, id, gwPath, isFixed)
+	}
+
+	if err != nil {
+		return handleReadError(d, "Segment", id, err)
 	}
 
 	d.Set("display_name", obj.DisplayName)
@@ -1211,23 +1303,25 @@ func nsxtPolicySegmentRead(d *schema.ResourceData, m interface{}, isVlan bool) e
 
 	d.Set("subnet", subnetSegments)
 
-	err := nsxtPolicySegmentProfilesRead(d, m)
-	if err != nil {
-		return err
+	if !isFixed {
+		err = nsxtPolicySegmentProfilesRead(d, m)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
 }
 
-func nsxtPolicySegmentCreate(d *schema.ResourceData, m interface{}, isVlan bool) error {
+func nsxtPolicySegmentCreate(d *schema.ResourceData, m interface{}, isVlan bool, isFixed bool) error {
 
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID(d, m, resourceNsxtPolicySegmentExists)
+	id, err := getOrGenerateID(d, m, resourceNsxtPolicySegmentExists(d.Get("connectivity_path").(string), isFixed))
 	if err != nil {
 		return err
 	}
 
-	obj, err := policySegmentResourceToInfraStruct(id, d, isVlan)
+	obj, err := policySegmentResourceToInfraStruct(id, d, isVlan, isFixed)
 	if err != nil {
 		return err
 	}
@@ -1240,17 +1334,17 @@ func nsxtPolicySegmentCreate(d *schema.ResourceData, m interface{}, isVlan bool)
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
-	return nsxtPolicySegmentRead(d, m, isVlan)
+	return nsxtPolicySegmentRead(d, m, isVlan, isFixed)
 }
 
-func nsxtPolicySegmentUpdate(d *schema.ResourceData, m interface{}, isVlan bool) error {
+func nsxtPolicySegmentUpdate(d *schema.ResourceData, m interface{}, isVlan bool, isFixed bool) error {
 
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining Segment ID")
 	}
 
-	obj, err := policySegmentResourceToInfraStruct(id, d, isVlan)
+	obj, err := policySegmentResourceToInfraStruct(id, d, isVlan, isFixed)
 	if err != nil {
 		return err
 	}
@@ -1260,10 +1354,10 @@ func nsxtPolicySegmentUpdate(d *schema.ResourceData, m interface{}, isVlan bool)
 		return handleCreateError("Segment", id, err)
 	}
 
-	return nsxtPolicySegmentRead(d, m, isVlan)
+	return nsxtPolicySegmentRead(d, m, isVlan, isFixed)
 }
 
-func nsxtPolicySegmentDelete(d *schema.ResourceData, m interface{}) error {
+func nsxtPolicySegmentDelete(d *schema.ResourceData, m interface{}, isFixed bool) error {
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining Segment ID")
@@ -1313,9 +1407,11 @@ func nsxtPolicySegmentDelete(d *schema.ResourceData, m interface{}) error {
 		MinTimeout: 1 * time.Second,
 		Delay:      1 * time.Second,
 	}
-	_, err := stateConf.WaitForState()
-	if err != nil {
-		return fmt.Errorf("Failed to get port information for segment %s: %v", id, err)
+	if !isFixed {
+		_, err := stateConf.WaitForState()
+		if err != nil {
+			return fmt.Errorf("Failed to get port information for segment %s: %v", id, err)
+		}
 	}
 
 	var infraChildren []*data.StructValue
@@ -1338,7 +1434,18 @@ func nsxtPolicySegmentDelete(d *schema.ResourceData, m interface{}) error {
 	if errors != nil {
 		return fmt.Errorf("Error converting Child Segment: %v", errors[0])
 	}
-	infraChildren = append(infraChildren, dataValue.(*data.StructValue))
+
+	if isFixed {
+		dataValue, err := nsxtPolicySegmentAddGatewayToInfraStruct(d, dataValue.(*data.StructValue))
+		if err != nil {
+			return err
+		}
+		infraChildren = append(infraChildren, dataValue)
+
+	} else {
+		infraChildren = append(infraChildren, dataValue.(*data.StructValue))
+
+	}
 
 	infraType := "Infra"
 	infraObj := model.Infra{
@@ -1347,7 +1454,7 @@ func nsxtPolicySegmentDelete(d *schema.ResourceData, m interface{}) error {
 	}
 
 	log.Printf("[DEBUG] Using H-API to delete segment with ID %s", id)
-	err = policyInfraPatch(infraObj, isPolicyGlobalManager(m), getPolicyConnector(m), false)
+	err := policyInfraPatch(infraObj, isPolicyGlobalManager(m), getPolicyConnector(m), false)
 	if err != nil {
 		return handleDeleteError("Segment", id, err)
 	}
