@@ -73,9 +73,9 @@ func testAccDataSourceNsxtPolicyIpv6NdraProfileCreate(name string) error {
 	} else {
 		client := infra.NewDefaultIpv6NdraProfilesClient(connector)
 		err = client.Patch(id, obj)
-		if err != nil {
-			return handleCreateError("Ipv6NdraProfile", id, err)
-		}
+	}
+	if err != nil {
+		return handleCreateError("Ipv6NdraProfile", id, err)
 	}
 	return nil
 }
