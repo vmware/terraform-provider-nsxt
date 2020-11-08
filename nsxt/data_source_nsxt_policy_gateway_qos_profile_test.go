@@ -20,7 +20,7 @@ func TestAccDataSourceNsxtPolicyGatewayQosProfile_basic(t *testing.T) {
 	testResourceName := "data.nsxt_policy_gateway_qos_profile.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccDataSourceNsxtPolicyGatewayQosProfileDeleteByName(name)
@@ -87,7 +87,7 @@ func testAccDataSourceNsxtPolicyGatewayQosProfileDeleteByName(name string) error
 	if testAccIsGlobalManager() {
 		objID, err := testGetObjIDByName(name, "GatewayQosProfile")
 		if err == nil {
-			client := gm_infra.NewDefaultQosProfilesClient(connector)
+			client := gm_infra.NewDefaultGatewayQosProfilesClient(connector)
 			err := client.Delete(objID)
 			if err != nil {
 				return handleDeleteError("GatewayQosProfile", objID, err)
