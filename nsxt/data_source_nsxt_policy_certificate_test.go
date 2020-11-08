@@ -16,7 +16,6 @@ func TestAccDataSourceNsxtPolicyCertificate_basic(t *testing.T) {
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccOnlyLocalManager(t)
 			testAccPreCheck(t)
 			testAccEnvDefined(t, "NSXT_TEST_CERTIFICATE_NAME")
 		},
