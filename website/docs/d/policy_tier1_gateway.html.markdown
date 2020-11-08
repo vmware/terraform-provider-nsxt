@@ -9,7 +9,7 @@ description: A policy Tier-1 gateway data source.
 
 This data source provides information about policy Tier-1s configured on NSX.
 
-This data source is applicable to NSX Policy Manager and VMC.
+This data source is applicable to NSX Policy Manager, NSX Global Manager and VMC.
 
 ## Example Usage
 
