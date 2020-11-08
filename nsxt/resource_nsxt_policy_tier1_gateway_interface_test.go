@@ -231,9 +231,12 @@ func TestAccResourceNsxtPolicyTier1GatewayInterface_withIPv6(t *testing.T) {
 	ipv6Subnet := "4003::12/64"
 	updatedSubnet := fmt.Sprintf("%s\",\"%s", subnet, ipv6Subnet)
 	testResourceName := "nsxt_policy_tier1_gateway_interface.test"
-
+	profilePath := "/infra/ipv6-ndra-profiles/default"
+	if testAccIsGlobalManager() {
+		profilePath = "/global-infra/ipv6-ndra-profiles/default"
+	}
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTier1InterfaceCheckDestroy(state, name)
@@ -248,7 +251,7 @@ func TestAccResourceNsxtPolicyTier1GatewayInterface_withIPv6(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "subnets.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "subnets.0", subnet),
 					resource.TestCheckResourceAttr(testResourceName, "urpf_mode", "NONE"),
-					resource.TestCheckResourceAttr(testResourceName, "ipv6_ndra_profile_path", "/infra/ipv6-ndra-profiles/default"),
+					resource.TestCheckResourceAttr(testResourceName, "ipv6_ndra_profile_path", profilePath),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
 					resource.TestCheckResourceAttrSet(testResourceName, "segment_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "gateway_path"),
@@ -268,7 +271,7 @@ func TestAccResourceNsxtPolicyTier1GatewayInterface_withIPv6(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "subnets.0", subnet),
 					resource.TestCheckResourceAttr(testResourceName, "subnets.1", ipv6Subnet),
 					resource.TestCheckResourceAttr(testResourceName, "urpf_mode", "NONE"),
-					resource.TestCheckResourceAttr(testResourceName, "ipv6_ndra_profile_path", "/infra/ipv6-ndra-profiles/default"),
+					resource.TestCheckResourceAttr(testResourceName, "ipv6_ndra_profile_path", profilePath),
 					resource.TestCheckResourceAttrSet(testResourceName, "segment_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "gateway_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -475,6 +478,7 @@ resource "nsxt_policy_tier1_gateway_interface" "test" {
   subnets                = ["%s"]
   ipv6_ndra_profile_path = data.nsxt_policy_ipv6_ndra_profile.default.path
   urpf_mode              = "NONE"
-}`, nsxtPolicyTier1GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, subnet) +
+  %s
+}`, nsxtPolicyTier1GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, subnet, testAccNsxtPolicyTier0InterfaceSiteTemplate()) +
 		testAccNextPolicyTier1InterfaceRealizationTemplate()
 }
