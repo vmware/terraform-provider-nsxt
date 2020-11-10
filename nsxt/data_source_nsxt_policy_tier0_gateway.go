@@ -40,7 +40,7 @@ func dataSourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{})
 			return err
 		}
 
-		// Single edgle cluster is not informative for global manager
+		// Single edge cluster is not informative for global manager
 		d.Set("edge_cluster_path", "")
 		return nil
 	}
