@@ -9,7 +9,7 @@ description: A resource to configure a DHCP Servers in NSX-T.
 
 This resource provides a method for the management of a DHCP Server configurations.
 
-This resource is applicable to NSX Policy Manager.
+This resource is applicable to NSX Global Manager, and NSX Policy Manager.
 
 This resource is supported with NSX 3.0.0 onwards.
 

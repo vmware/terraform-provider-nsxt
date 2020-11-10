@@ -10,6 +10,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
+	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
@@ -65,9 +67,15 @@ func resourceNsxtPolicyDhcpServer() *schema.Resource {
 }
 
 func resourceNsxtPolicyDhcpServerExists(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
-	client := infra.NewDefaultDhcpServerConfigsClient(connector)
 
-	_, err := client.Get(id)
+	var err error
+	if isGlobalManager {
+		client := gm_infra.NewDefaultDhcpServerConfigsClient(connector)
+		_, err = client.Get(id)
+	} else {
+		client := infra.NewDefaultDhcpServerConfigsClient(connector)
+		_, err = client.Get(id)
+	}
 	if err == nil {
 		return true, nil
 	}
@@ -112,11 +120,6 @@ func resourceNsxtPolicyDhcpServerSchemaToModel(d *schema.ResourceData) model.Dhc
 
 func resourceNsxtPolicyDhcpServerCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewDefaultDhcpServerConfigsClient(connector)
-
-	if client == nil {
-		return policyResourceNotSupportedError()
-	}
 
 	// Initialize resource Id and verify this ID is not yet used
 	id, err := getOrGenerateID(d, m, resourceNsxtPolicyDhcpServerExists)
@@ -126,7 +129,19 @@ func resourceNsxtPolicyDhcpServerCreate(d *schema.ResourceData, m interface{}) e
 
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating DhcpServer with ID %s", id)
-	err = client.Patch(id, resourceNsxtPolicyDhcpServerSchemaToModel(d))
+	if isPolicyGlobalManager(m) {
+		obj := resourceNsxtPolicyDhcpServerSchemaToModel(d)
+		gmObj, err1 := convertModelBindingType(obj, model.DhcpServerConfigBindingType(), gm_model.DhcpServerConfigBindingType())
+		if err1 != nil {
+			return err1
+		}
+
+		client := gm_infra.NewDefaultDhcpServerConfigsClient(connector)
+		err = client.Patch(id, gmObj.(gm_model.DhcpServerConfig))
+	} else {
+		client := infra.NewDefaultDhcpServerConfigsClient(connector)
+		err = client.Patch(id, resourceNsxtPolicyDhcpServerSchemaToModel(d))
+	}
 	if err != nil {
 		return handleCreateError("DhcpServer", id, err)
 	}
@@ -139,20 +154,31 @@ func resourceNsxtPolicyDhcpServerCreate(d *schema.ResourceData, m interface{}) e
 
 func resourceNsxtPolicyDhcpServerRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewDefaultDhcpServerConfigsClient(connector)
-
-	if client == nil {
-		return policyResourceNotSupportedError()
-	}
 
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining DhcpServer ID")
 	}
 
-	obj, err := client.Get(id)
-	if err != nil {
-		return handleReadError(d, "DhcpServer", id, err)
+	var obj model.DhcpServerConfig
+	if isPolicyGlobalManager(m) {
+		client := gm_infra.NewDefaultDhcpServerConfigsClient(connector)
+		gmObj, err := client.Get(id)
+		if err != nil {
+			return handleReadError(d, "DhcpServer", id, err)
+		}
+		rawObj, err := convertModelBindingType(gmObj, gm_model.DhcpServerConfigBindingType(), model.DhcpServerConfigBindingType())
+		if err != nil {
+			return err
+		}
+		obj = rawObj.(model.DhcpServerConfig)
+	} else {
+		var err error
+		client := infra.NewDefaultDhcpServerConfigsClient(connector)
+		obj, err = client.Get(id)
+		if err != nil {
+			return handleReadError(d, "DhcpServer", id, err)
+		}
 	}
 
 	d.Set("display_name", obj.DisplayName)
@@ -183,7 +209,20 @@ func resourceNsxtPolicyDhcpServerUpdate(d *schema.ResourceData, m interface{}) e
 	}
 
 	// Update the resource using PATCH
-	err := client.Patch(id, resourceNsxtPolicyDhcpServerSchemaToModel(d))
+	var err error
+	if isPolicyGlobalManager(m) {
+		obj := resourceNsxtPolicyDhcpServerSchemaToModel(d)
+		gmObj, err1 := convertModelBindingType(obj, model.DhcpServerConfigBindingType(), gm_model.DhcpServerConfigBindingType())
+		if err1 != nil {
+			return err1
+		}
+
+		client := gm_infra.NewDefaultDhcpServerConfigsClient(connector)
+		err = client.Patch(id, gmObj.(gm_model.DhcpServerConfig))
+	} else {
+		client := infra.NewDefaultDhcpServerConfigsClient(connector)
+		err = client.Patch(id, resourceNsxtPolicyDhcpServerSchemaToModel(d))
+	}
 	if err != nil {
 		return handleUpdateError("DhcpServer", id, err)
 	}
@@ -197,13 +236,16 @@ func resourceNsxtPolicyDhcpServerDelete(d *schema.ResourceData, m interface{}) e
 		return fmt.Errorf("Error obtaining DhcpServer ID")
 	}
 
+	var err error
 	connector := getPolicyConnector(m)
-	client := infra.NewDefaultDhcpServerConfigsClient(connector)
-	if client == nil {
-		return policyResourceNotSupportedError()
+	if isPolicyGlobalManager(m) {
+		client := gm_infra.NewDefaultDhcpServerConfigsClient(connector)
+		err = client.Delete(id)
+	} else {
+		client := infra.NewDefaultDhcpServerConfigsClient(connector)
+		err = client.Delete(id)
 	}
 
-	err := client.Delete(id)
 	if err != nil {
 		return handleDeleteError("DhcpServer", id, err)
 	}
