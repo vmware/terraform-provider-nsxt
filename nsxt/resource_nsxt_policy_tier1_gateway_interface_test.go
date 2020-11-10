@@ -231,10 +231,7 @@ func TestAccResourceNsxtPolicyTier1GatewayInterface_withIPv6(t *testing.T) {
 	ipv6Subnet := "4003::12/64"
 	updatedSubnet := fmt.Sprintf("%s\",\"%s", subnet, ipv6Subnet)
 	testResourceName := "nsxt_policy_tier1_gateway_interface.test"
-	profilePath := "/infra/ipv6-ndra-profiles/default"
-	if testAccIsGlobalManager() {
-		profilePath = "/global-infra/ipv6-ndra-profiles/default"
-	}
+	profilePath := testAccAdjustPolicyInfraConfig("/infra/ipv6-ndra-profiles/default")
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
