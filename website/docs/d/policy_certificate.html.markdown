@@ -9,7 +9,7 @@ description: Policy Certificate data source.
 
 This data source provides information about Service Certificate configured on NSX Policy.
 
-This data source is applicable to NSX Policy Manager.
+This data source is applicable to NSX Global Manager, and NSX Policy Manager.
 
 ## Example Usage
 
