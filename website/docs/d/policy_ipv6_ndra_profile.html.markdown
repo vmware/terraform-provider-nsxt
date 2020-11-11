@@ -9,7 +9,7 @@ description: Policy IPv6 NDRA Profile data source.
 
 This data source provides information about policy IPv6 Neighbor Discovery and Router Advertisement Profile configured on NSX.
 
-This data source is applicable to NSX Policy Manager.
+This data source is applicable to NSX Global Manager, and NSX Policy Manager.
 
 ## Example Usage
 
