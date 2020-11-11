@@ -9,7 +9,7 @@ description: Policy GatewayQosProfile data source.
 
 This data source provides information about policy GatewayQosProfile configured on NSX.
 
-This data source is applicable to NSX Policy Manager.
+This data source is applicable to NSX Global Manager, and NSX Policy Manager.
 
 ## Example Usage
 
