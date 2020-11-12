@@ -7,7 +7,7 @@ description: Policy Site data source.
 
 # nsxt_policy_site
 
-This data source provides information about Site (or Region) configured on NSX Global Manager.
+This data source provides information about Site (or Location) configured on NSX Global Manager.
 
 This data source is applicable to NSX Global Manager only.
 
