@@ -111,4 +111,4 @@ An existing segment can be [imported][docs-import] into this resource, via the f
 terraform import nsxt_policy_fixed_segment.segment1 GW-ID/ID
 ```
 
-The above command imports the segmentnamed `segment1` with the NSX Segment ID `ID` on Tier-1 Gateway GW-ID.
+The above command imports the segment named `segment1` with the NSX Segment ID `ID` on Tier-1 Gateway GW-ID.
