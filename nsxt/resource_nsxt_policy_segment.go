@@ -17,22 +17,22 @@ func resourceNsxtPolicySegment() *schema.Resource {
 			State: schema.ImportStatePassthrough,
 		},
 
-		Schema: getPolicyCommonSegmentSchema(false),
+		Schema: getPolicyCommonSegmentSchema(false, false),
 	}
 }
 
 func resourceNsxtPolicySegmentCreate(d *schema.ResourceData, m interface{}) error {
-	return nsxtPolicySegmentCreate(d, m, false)
+	return nsxtPolicySegmentCreate(d, m, false, false)
 }
 
 func resourceNsxtPolicySegmentRead(d *schema.ResourceData, m interface{}) error {
-	return nsxtPolicySegmentRead(d, m, false)
+	return nsxtPolicySegmentRead(d, m, false, false)
 }
 
 func resourceNsxtPolicySegmentUpdate(d *schema.ResourceData, m interface{}) error {
-	return nsxtPolicySegmentUpdate(d, m, false)
+	return nsxtPolicySegmentUpdate(d, m, false, false)
 }
 
 func resourceNsxtPolicySegmentDelete(d *schema.ResourceData, m interface{}) error {
-	return nsxtPolicySegmentDelete(d, m)
+	return nsxtPolicySegmentDelete(d, m, false)
 }

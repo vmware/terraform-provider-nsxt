@@ -1,22 +1,22 @@
 ---
 subcategory: "Policy - Segments"
 layout: "nsxt"
-page_title: "NSXT: nsxt_policy_segment"
-description: A resource to configure a network Segment.
+page_title: "NSXT: nsxt_policy_fixed_segment"
+description: A resource to configure a network Segment on specific Tier1 Gateway.
 ---
 
-# nsxt_policy_segment
+# nsxt_policy_fixed_segment
 
-This resource provides a method for the management of Segments.
+This resource provides a method for the management of Fixed Segments (attached to
+specifice Tier-1 Gateway)
 
-This resource is applicable to NSX Global Manager, NSX Policy Manager and VMC.
-
-~> **NOTE:** For best user experience, it is recommended to use `nsxt_policy_fixed_segment` resource on VMC. Flexible segments and not supported so far on VMC UI.
+This resource is applicable to VMC. For NSX Global Manager and NSX Policy Manager, it
+is recommended to use nsxt_policy_segment resource instead.
 
 ## Example Usage
 
 ```hcl
-resource "nsxt_policy_segment" "segment1" {
+resource "nsxt_policy_fixed_segment" "segment1" {
   display_name        = "segment1"
   description         = "Terraform provisioned Segment"
   connectivity_path   = nsxt_policy_tier1_gateway.mygateway.path
@@ -41,12 +41,6 @@ resource "nsxt_policy_segment" "segment1" {
       }
     }
   }
-
-  security_profile {
-    spoofguard_profile_path = data.nsxt_policy_spoofguard_profile.myprofile.path
-    security_profile_path   = data.nsxt_policy_segment_security_profile.myprofile.path
-  }
-
 }
 ```
 
@@ -58,11 +52,11 @@ The following arguments are supported:
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this policy.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
-* `connectivity_path` - (Optional) Policy path to the connecting Tier-0 or Tier-1.
+* `connectivity_path` - (Required) Policy path to the connecting Tier-0 or Tier-1.
 * `domain_name`- (Optional) DNS domain names.
 * `overlay_id` - (Optional) Overlay connectivity ID for this Segment.
 * `vlan_ids` - (Optional) List of VLAN IDs or ranges. Specifying vlan ids can be useful for overlay segments, f.e. for EVPN.
-* `transport_zone_path` - (Required) Policy path to the Overlay transport zone. This property is required if more than one overlay transport zone is defined, and none is marked as default.
+* `transport_zone_path` - (Required) Policy path to the Overlay transport zone.
 * `dhcp_config_path` - (Optional) Policy path to DHCP server or relay configuration to use for subnets configured on this segment. This attribute is supported with NSX 3.0.0 onwards.
 * `subnet` - (Optional) Subnet configuration block.
   * `cidr` - (Required) Gateway IP address CIDR. This argument can not be changed if DHCP is enabled for the subnet.
@@ -96,14 +90,6 @@ The following arguments are supported:
   * `hybrid` - (Optional) Boolean flag to identify a hybrid logical switch.
   * `local_egress` - (Optional) Boolean flag to enable local egress when used in conjunction with L2VPN.
   * `uplink_teaming_policy` - (Optional) The name of the switching uplink teaming policy for the bridge endpoint. This name corresponds to one of the switching uplink teaming policy names listed in the transport zone.
-  * `discovery_profile` - (Optional) IP and MAC discovery profile specification for the segment.
-    * `ip_discovery_profile_path` - (Optional) Path for IP discovery profile to be associated with the segment.
-    * `mac_discovery_profile_path` - (Optional) Path for MAC discovery profile to be associated with the segment.
-  * `security_profile` - (Optional) Security profile specification for the segment.
-    * `spoofguard_profile_path` - (Optional) Path for spoofguard profile to be associated with the segment.
-    * `security_profile_path` - (Optional) Path for segment security profile to be associated with the segment.
-  * `qos_profile` - (Optional) QoS profile specification for the segment.
-    * `qos_profile_path` - (Optional) Path for qos profile to be associated with the segment.
 
 ## Attributes Reference
 
@@ -122,9 +108,7 @@ An existing segment can be [imported][docs-import] into this resource, via the f
 [docs-import]: /docs/import/index.html
 
 ```
-terraform import nsxt_policy_segment.segment1 ID
+terraform import nsxt_policy_fixed_segment.segment1 GW-ID/ID
 ```
 
-The above command imports the segment  named `segment1` with the NSX Segment ID `ID`.
-
-~> **NOTE:** Only flexible (infra) segments can be imported here. To import fixed segment, please use `nsxt_policy_fixed_segment` resource.
+The above command imports the segment named `segment1` with the NSX Segment ID `ID` on Tier-1 Gateway GW-ID.

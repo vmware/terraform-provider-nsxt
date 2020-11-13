@@ -107,6 +107,9 @@ func resourceNsxtPolicyStaticRouteCreate(d *schema.ResourceData, m interface{}) 
 
 	gwPolicyPath := d.Get("gateway_path").(string)
 	isT0, gwID := parseGatewayPolicyPath(gwPolicyPath)
+	if gwID == "" {
+		return fmt.Errorf("gateway_path is not a valid")
+	}
 
 	id := d.Get("nsx_id").(string)
 	if id == "" {
@@ -178,6 +181,9 @@ func resourceNsxtPolicyStaticRouteRead(d *schema.ResourceData, m interface{}) er
 
 	gwPolicyPath := d.Get("gateway_path").(string)
 	isT0, gwID := parseGatewayPolicyPath(gwPolicyPath)
+	if gwID == "" {
+		return fmt.Errorf("gateway_path is not a valid")
+	}
 
 	obj, err := getNsxtPolicyStaticRouteByID(connector, gwID, isT0, id)
 	if err != nil {
@@ -225,6 +231,9 @@ func resourceNsxtPolicyStaticRouteUpdate(d *schema.ResourceData, m interface{}) 
 
 	gwPolicyPath := d.Get("gateway_path").(string)
 	isT0, gwID := parseGatewayPolicyPath(gwPolicyPath)
+	if gwID == "" {
+		return fmt.Errorf("gateway_path is not valid")
+	}
 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
@@ -282,6 +291,9 @@ func resourceNsxtPolicyStaticRouteDelete(d *schema.ResourceData, m interface{}) 
 
 	gwPolicyPath := d.Get("gateway_path").(string)
 	isT0, gwID := parseGatewayPolicyPath(gwPolicyPath)
+	if gwID == "" {
+		return fmt.Errorf("gateway_path is not valid")
+	}
 
 	err := deleteNsxtPolicyStaticRoute(getPolicyConnector(m), gwID, isT0, id)
 	if err != nil {

@@ -8,47 +8,49 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccResourceNsxtPolicySegment_basicImport(t *testing.T) {
-	name := "test-nsx-policy-segment"
-	testResourceName := "nsxt_policy_segment.test"
+var testAccPolicyFixedSegmentResourceName = "nsxt_policy_fixed_segment.test"
+
+func TestAccResourceNsxtPolicyFixedSegment_basicImport(t *testing.T) {
+	name := "terraform-test"
 	tzName := getOverlayTransportZoneName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicySegmentCheckDestroy(state, name)
+			return testAccNsxtPolicyFixedSegmentCheckDestroy(state, name)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicySegmentImportTemplate(tzName, name),
+				Config: testAccNsxtPolicyFixedSegmentImportTemplate(tzName, name),
 			},
 			{
-				ResourceName:      testResourceName,
+				ResourceName:      testAccPolicyFixedSegmentResourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateIdFunc: testAccNSXPolicyFixedSegmentImporterGetID,
 			},
 		},
 	})
 }
 
-func TestAccResourceNsxtPolicySegment_basicUpdate(t *testing.T) {
-	name := "test-nsx-policy-segment"
+func TestAccResourceNsxtPolicyFixedSegment_basicUpdate(t *testing.T) {
+	name := "terraform-test"
 	updatedName := fmt.Sprintf("%s-update", name)
-	testResourceName := "nsxt_policy_segment.test"
+	testResourceName := testAccPolicyFixedSegmentResourceName
 	tzName := getOverlayTransportZoneName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicySegmentCheckDestroy(state, name)
+			return testAccNsxtPolicyFixedSegmentCheckDestroy(state, name)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicySegmentBasicTemplate(tzName, name),
+				Config: testAccNsxtPolicyFixedSegmentBasicTemplate(tzName, name),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicySegmentExists(testResourceName),
+					testAccNsxtPolicyFixedSegmentExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.#", "1"),
@@ -59,9 +61,9 @@ func TestAccResourceNsxtPolicySegment_basicUpdate(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicySegmentBasicUpdateTemplate(tzName, updatedName),
+				Config: testAccNsxtPolicyFixedSegmentBasicUpdateTemplate(tzName, updatedName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicySegmentExists(testResourceName),
+					testAccNsxtPolicyFixedSegmentExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test2"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.#", "1"),
@@ -75,23 +77,23 @@ func TestAccResourceNsxtPolicySegment_basicUpdate(t *testing.T) {
 	})
 }
 
-func TestAccResourceNsxtPolicySegment_connectivityPath(t *testing.T) {
-	name := "test-nsx-policy-segment"
+func TestAccResourceNsxtPolicyFixedSegment_connectivityPath(t *testing.T) {
+	name := "terraform-test"
 	updatedName := fmt.Sprintf("%s-update", name)
-	testResourceName := "nsxt_policy_segment.test"
+	testResourceName := testAccPolicyFixedSegmentResourceName
 	tzName := getOverlayTransportZoneName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicySegmentCheckDestroy(state, name)
+			return testAccNsxtPolicyFixedSegmentCheckDestroy(state, name)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicySegmentBasicTemplate(tzName, name),
+				Config: testAccNsxtPolicyFixedSegmentBasicTemplate(tzName, name),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicySegmentExists(testResourceName),
+					testAccNsxtPolicyFixedSegmentExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.#", "1"),
@@ -103,9 +105,9 @@ func TestAccResourceNsxtPolicySegment_connectivityPath(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicySegmentUpdateConnectivityTemplate(tzName, updatedName),
+				Config: testAccNsxtPolicyFixedSegmentUpdateConnectivityTemplate(tzName, updatedName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicySegmentExists(testResourceName),
+					testAccNsxtPolicyFixedSegmentExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test2"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.#", "1"),
@@ -123,23 +125,23 @@ func TestAccResourceNsxtPolicySegment_connectivityPath(t *testing.T) {
 	})
 }
 
-func TestAccResourceNsxtPolicySegment_updateAdvConfig(t *testing.T) {
-	name := "test-nsx-policy-segment"
+func TestAccResourceNsxtPolicyFixedSegment_updateAdvConfig(t *testing.T) {
+	name := "terraform-test"
 	updatedName := fmt.Sprintf("%s-update", name)
-	testResourceName := "nsxt_policy_segment.test"
+	testResourceName := testAccPolicyFixedSegmentResourceName
 	tzName := getOverlayTransportZoneName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicySegmentCheckDestroy(state, name)
+			return testAccNsxtPolicyFixedSegmentCheckDestroy(state, name)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicySegmentBasicAdvConfigTemplate(tzName, name),
+				Config: testAccNsxtPolicyFixedSegmentBasicAdvConfigTemplate(tzName, name),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicySegmentExists(testResourceName),
+					testAccNsxtPolicyFixedSegmentExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.#", "1"),
@@ -153,9 +155,9 @@ func TestAccResourceNsxtPolicySegment_updateAdvConfig(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicySegmentBasicAdvConfigUpdateTemplate(tzName, updatedName),
+				Config: testAccNsxtPolicyFixedSegmentBasicAdvConfigUpdateTemplate(tzName, updatedName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicySegmentExists(testResourceName),
+					testAccNsxtPolicyFixedSegmentExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.#", "1"),
@@ -172,76 +174,10 @@ func TestAccResourceNsxtPolicySegment_updateAdvConfig(t *testing.T) {
 	})
 }
 
-// TODO: Rewrite this test based on profile resources when these are available.
-const testAccSegmentQosProfileName = "test-nsx-policy-segment-qos-profile"
-
-func TestAccResourceNsxtPolicySegment_withProfiles(t *testing.T) {
-	name := "test-nsx-policy-segment"
+func TestAccResourceNsxtPolicyFixedSegment_withDhcp(t *testing.T) {
+	name := "terraform-test"
 	updatedName := fmt.Sprintf("%s-update", name)
-	testResourceName := "nsxt_policy_segment.test"
-	tzName := getOverlayTransportZoneName()
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
-		CheckDestroy: func(state *terraform.State) error {
-			err := testAccNsxtPolicySegmentCheckDestroy(state, name)
-			if err != nil {
-				return err
-			}
-
-			return testAccDataSourceNsxtPolicyQosProfileDeleteByName(testAccSegmentQosProfileName)
-		},
-		Steps: []resource.TestStep{
-			{
-				PreConfig: func() {
-					if err := testAccDataSourceNsxtPolicyQosProfileCreate(testAccSegmentQosProfileName); err != nil {
-						panic(err)
-					}
-				},
-				Config: testAccNsxtPolicySegmentWithProfilesTemplate(tzName, name),
-				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicySegmentExists(testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
-					resource.TestCheckResourceAttr(testResourceName, "security_profile.#", "1"),
-					resource.TestCheckResourceAttrSet(testResourceName, "security_profile.0.spoofguard_profile_path"),
-					resource.TestCheckResourceAttr(testResourceName, "security_profile.0.security_profile_path", ""),
-					resource.TestCheckResourceAttr(testResourceName, "qos_profile.#", "1"),
-					resource.TestCheckResourceAttrSet(testResourceName, "qos_profile.0.qos_profile_path"),
-				),
-			},
-			{
-				Config: testAccNsxtPolicySegmentWithProfilesUpdateTemplate(tzName, updatedName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicySegmentExists(testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
-					resource.TestCheckResourceAttr(testResourceName, "security_profile.#", "1"),
-					resource.TestCheckResourceAttrSet(testResourceName, "security_profile.0.spoofguard_profile_path"),
-					resource.TestCheckResourceAttrSet(testResourceName, "security_profile.0.security_profile_path"),
-					resource.TestCheckResourceAttr(testResourceName, "qos_profile.#", "0"),
-					resource.TestCheckResourceAttr(testResourceName, "discovery_profile.#", "1"),
-					resource.TestCheckResourceAttrSet(testResourceName, "discovery_profile.0.ip_discovery_profile_path"),
-					resource.TestCheckResourceAttrSet(testResourceName, "discovery_profile.0.mac_discovery_profile_path"),
-				),
-			},
-			{
-				Config: testAccNsxtPolicySegmentWithProfilesRemoveAll(tzName, updatedName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicySegmentExists(testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
-					resource.TestCheckResourceAttr(testResourceName, "security_profile.#", "0"),
-					resource.TestCheckResourceAttr(testResourceName, "qos_profile.#", "0"),
-					resource.TestCheckResourceAttr(testResourceName, "discovery_profile.#", "0"),
-				),
-			},
-		},
-	})
-}
-
-func TestAccResourceNsxtPolicySegment_withDhcp(t *testing.T) {
-	name := "test-nsx-policy-segment"
-	updatedName := fmt.Sprintf("%s-update", name)
-	testResourceName := "nsxt_policy_segment.test"
+	testResourceName := testAccPolicyFixedSegmentResourceName
 	leaseTimes := []string{"3600", "36000"}
 	preferredTimes := []string{"3200", "32000"}
 	dnsServersV4 := []string{"2.2.2.2", "3.3.3.3"}
@@ -252,13 +188,13 @@ func TestAccResourceNsxtPolicySegment_withDhcp(t *testing.T) {
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicySegmentCheckDestroy(state, name)
+			return testAccNsxtPolicyFixedSegmentCheckDestroy(state, name)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicySegmentWithDhcpTemplate(tzName, name, dnsServersV4[0], dnsServersV6[0], leaseTimes[0], preferredTimes[0]),
+				Config: testAccNsxtPolicyFixedSegmentWithDhcpTemplate(tzName, name, dnsServersV4[0], dnsServersV6[0], leaseTimes[0], preferredTimes[0]),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicySegmentExists(testResourceName),
+					testAccNsxtPolicyFixedSegmentExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.0.cidr", "12.12.2.1/24"),
@@ -283,9 +219,9 @@ func TestAccResourceNsxtPolicySegment_withDhcp(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicySegmentWithDhcpTemplate(tzName, updatedName, dnsServersV4[1], dnsServersV6[1], leaseTimes[1], preferredTimes[1]),
+				Config: testAccNsxtPolicyFixedSegmentWithDhcpTemplate(tzName, updatedName, dnsServersV4[1], dnsServersV6[1], leaseTimes[1], preferredTimes[1]),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicySegmentExists(testResourceName),
+					testAccNsxtPolicyFixedSegmentExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.0.cidr", "12.12.2.1/24"),
@@ -313,45 +249,77 @@ func TestAccResourceNsxtPolicySegment_withDhcp(t *testing.T) {
 
 // TODO: add tests for l2_extension; requires L2 VPN Session
 
-func testAccNsxtPolicySegmentExists(resourceName string) resource.TestCheckFunc {
-	return testAccNsxtPolicyResourceExists(resourceName, resourceNsxtPolicySegmentExists("", false))
+func testAccNsxtPolicyFixedSegmentExists(resourceName string) resource.TestCheckFunc {
+	return func(state *terraform.State) error {
+		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
+
+		rs, ok := state.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("NSX Policy IP Pool resource %s not found in resources", resourceName)
+		}
+		resourceID := rs.Primary.ID
+		if resourceID == "" {
+			return fmt.Errorf("Policy resource ID not set in resources")
+		}
+		gwPath := rs.Primary.Attributes["connectivity_path"]
+		exists, err := resourceNsxtPolicySegmentExists(gwPath, true)(resourceID, connector, testAccIsGlobalManager())
+		if err != nil {
+			return err
+		}
+
+		if !exists {
+			return fmt.Errorf("Policy resource %s does not exist", resourceID)
+		}
+
+		return nil
+	}
 }
 
-func testAccNsxtPolicySegmentCheckDestroy(state *terraform.State, displayName string) error {
-	return testAccNsxtPolicyResourceCheckDestroy(state, displayName, "nsxt_policy_segment", resourceNsxtPolicySegmentExists("", false))
+func testAccNsxtPolicyFixedSegmentCheckDestroy(state *terraform.State, displayName string) error {
+	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
+	for _, rs := range state.RootModule().Resources {
+
+		if rs.Type != "nsxt_policy_fixed_segment" {
+			continue
+		}
+
+		resourceID := rs.Primary.ID
+		if resourceID == "" {
+			return fmt.Errorf("Policy resource ID not set in resources")
+		}
+		gwPath := rs.Primary.Attributes["connectivity_path"]
+		exists, err := resourceNsxtPolicySegmentExists(gwPath, true)(resourceID, connector, testAccIsGlobalManager())
+		if err == nil {
+			return err
+		}
+
+		if exists {
+			return fmt.Errorf("Policy fixed segment %s still exists", displayName)
+		}
+	}
+	return nil
 }
 
-func testAccNsxtPolicySegmentDeps(tzName string) string {
-	return testAccNSXPolicyTransportZoneReadTemplate(tzName, false, true) + `
-
-resource "nsxt_policy_tier1_gateway" "tier1ForSegments" {
-  display_name              = "t1gw"
-  description               = "Acceptance Test"
-  default_rule_logging      = "true"
-  enable_firewall           = "false"
-  enable_standby_relocation = "false"
-  force_whitelisting        = "false"
-  failover_mode             = "NON_PREEMPTIVE"
-  pool_allocation           = "ROUTING"
-  route_advertisement_types = ["TIER1_STATIC_ROUTES", "TIER1_CONNECTED"]
+func testAccNSXPolicyFixedSegmentImporterGetID(s *terraform.State) (string, error) {
+	rs, ok := s.RootModule().Resources[testAccPolicyFixedSegmentResourceName]
+	if !ok {
+		return "", fmt.Errorf("NSX Policy Fixed Segment resource %s not found in resources", testAccPolicyFixedSegmentResourceName)
+	}
+	resourceID := rs.Primary.ID
+	if resourceID == "" {
+		return "", fmt.Errorf("NSX Policy Fixed Segment resource ID not set in resources")
+	}
+	gwPath := rs.Primary.Attributes["connectivity_path"]
+	if gwPath == "" {
+		return "", fmt.Errorf("NSX Policy Fixed Segment connectivity_path not specified")
+	}
+	_, gwID := parseGatewayPolicyPath(gwPath)
+	return fmt.Sprintf("%s/%s", gwID, resourceID), nil
 }
 
-resource "nsxt_policy_tier1_gateway" "anotherTier1ForSegments" {
-  display_name              = "t1gw-b"
-  description               = "Another Tier1"
-  default_rule_logging      = "true"
-  enable_firewall           = "false"
-  enable_standby_relocation = "false"
-  force_whitelisting        = "false"
-  failover_mode             = "NON_PREEMPTIVE"
-  pool_allocation           = "ROUTING"
-  route_advertisement_types = ["TIER1_STATIC_ROUTES", "TIER1_CONNECTED"]
-}`
-}
-
-func testAccNsxtPolicySegmentImportTemplate(tzName string, name string) string {
+func testAccNsxtPolicyFixedSegmentImportTemplate(tzName string, name string) string {
 	return testAccNsxtPolicySegmentDeps(tzName) + fmt.Sprintf(`
-resource "nsxt_policy_segment" "test" {
+resource "nsxt_policy_fixed_segment" "test" {
   display_name        = "%s"
   description         = "Acceptance Test"
   connectivity_path   = nsxt_policy_tier1_gateway.tier1ForSegments.path
@@ -364,10 +332,10 @@ resource "nsxt_policy_segment" "test" {
 `, name)
 }
 
-func testAccNsxtPolicySegmentBasicTemplate(tzName string, name string) string {
+func testAccNsxtPolicyFixedSegmentBasicTemplate(tzName string, name string) string {
 	return testAccNsxtPolicySegmentDeps(tzName) + fmt.Sprintf(`
 
-resource "nsxt_policy_segment" "test" {
+resource "nsxt_policy_fixed_segment" "test" {
   display_name        = "%s"
   description         = "Acceptance Test"
   domain_name         = "tftest.org"
@@ -387,10 +355,10 @@ resource "nsxt_policy_segment" "test" {
 `, name)
 }
 
-func testAccNsxtPolicySegmentBasicUpdateTemplate(tzName string, name string) string {
+func testAccNsxtPolicyFixedSegmentBasicUpdateTemplate(tzName string, name string) string {
 	return testAccNsxtPolicySegmentDeps(tzName) + fmt.Sprintf(`
 
-resource "nsxt_policy_segment" "test" {
+resource "nsxt_policy_fixed_segment" "test" {
   display_name        = "%s"
   description         = "Acceptance Test2"
   domain_name         = "tftest2.org"
@@ -414,10 +382,10 @@ resource "nsxt_policy_segment" "test" {
 `, name)
 }
 
-func testAccNsxtPolicySegmentUpdateConnectivityTemplate(tzName string, name string) string {
+func testAccNsxtPolicyFixedSegmentUpdateConnectivityTemplate(tzName string, name string) string {
 	return testAccNsxtPolicySegmentDeps(tzName) + fmt.Sprintf(`
 
-resource "nsxt_policy_segment" "test" {
+resource "nsxt_policy_fixed_segment" "test" {
   display_name        = "%s"
   description         = "Acceptance Test2"
   domain_name         = "tftest2.org"
@@ -441,90 +409,17 @@ resource "nsxt_policy_segment" "test" {
 `, name)
 }
 
-func testAccNsxtPolicySegmentWithProfileDeps(tzName string) string {
-	return testAccNSXPolicyTransportZoneReadTemplate(tzName, false, true) + fmt.Sprintf(`
-data "nsxt_policy_qos_profile" "test" {
-    display_name = "%s"
-}
-
-data "nsxt_policy_segment_security_profile" "test" {
-    display_name = "default-segment-security-profile"
-}
-
-data "nsxt_policy_spoofguard_profile" "test" {
-    display_name = "default-spoofguard-profile"
-}
-
-data "nsxt_policy_ip_discovery_profile" "test" {
-    display_name = "default-ip-discovery-profile"
-}
-
-data "nsxt_policy_mac_discovery_profile" "test" {
-    display_name = "default-mac-discovery-profile"
-}
-
-`, testAccSegmentQosProfileName)
-}
-
-func testAccNsxtPolicySegmentWithProfilesTemplate(tzName string, name string) string {
-	return testAccNsxtPolicySegmentWithProfileDeps(tzName) + fmt.Sprintf(`
-
-resource "nsxt_policy_segment" "test" {
-  display_name        = "%s"
-  transport_zone_path = data.nsxt_policy_transport_zone.test.path
-
-  security_profile {
-    spoofguard_profile_path = data.nsxt_policy_spoofguard_profile.test.path
-  }
-
-  qos_profile {
-    qos_profile_path = data.nsxt_policy_qos_profile.test.path
-  }
-
-}
-`, name)
-}
-
-func testAccNsxtPolicySegmentWithProfilesUpdateTemplate(tzName string, name string) string {
-	return testAccNsxtPolicySegmentWithProfileDeps(tzName) + fmt.Sprintf(`
-
-resource "nsxt_policy_segment" "test" {
-  display_name        = "%s"
-  transport_zone_path = data.nsxt_policy_transport_zone.test.path
-
-  security_profile {
-    spoofguard_profile_path = data.nsxt_policy_spoofguard_profile.test.path
-    security_profile_path   = data.nsxt_policy_segment_security_profile.test.path
-  }
-
-  discovery_profile {
-    ip_discovery_profile_path = data.nsxt_policy_ip_discovery_profile.test.path
-    mac_discovery_profile_path   = data.nsxt_policy_mac_discovery_profile.test.path
-  }
-}
-`, name)
-}
-
-func testAccNsxtPolicySegmentWithProfilesRemoveAll(tzName string, name string) string {
-	return testAccNsxtPolicySegmentWithProfileDeps(tzName) + fmt.Sprintf(`
-
-resource "nsxt_policy_segment" "test" {
-  display_name        = "%s"
-  transport_zone_path = data.nsxt_policy_transport_zone.test.path
-}
-`, name)
-}
-
-func testAccNsxtPolicySegmentBasicAdvConfigTemplate(tzName string, name string) string {
+func testAccNsxtPolicyFixedSegmentBasicAdvConfigTemplate(tzName string, name string) string {
 	return testAccNsxtPolicySegmentDeps(tzName) + fmt.Sprintf(`
 
-resource "nsxt_policy_segment" "test" {
+resource "nsxt_policy_fixed_segment" "test" {
   display_name = "%s"
   description  = "Acceptance Test"
   domain_name  = "tftest.org"
   overlay_id   = 1011
   vlan_ids     = ["101", "102"]
 
+  connectivity_path   = nsxt_policy_tier1_gateway.anotherTier1ForSegments.path
   transport_zone_path = data.nsxt_policy_transport_zone.test.path
 
   subnet {
@@ -544,16 +439,17 @@ resource "nsxt_policy_segment" "test" {
 `, name)
 }
 
-func testAccNsxtPolicySegmentBasicAdvConfigUpdateTemplate(tzName string, name string) string {
+func testAccNsxtPolicyFixedSegmentBasicAdvConfigUpdateTemplate(tzName string, name string) string {
 	return testAccNsxtPolicySegmentDeps(tzName) + fmt.Sprintf(`
 
-resource "nsxt_policy_segment" "test" {
+resource "nsxt_policy_fixed_segment" "test" {
   display_name = "%s"
   description  = "Acceptance Test"
   domain_name  = "tftest.org"
   overlay_id   = 1011
   vlan_ids     = ["101-104"]
 
+  connectivity_path   = nsxt_policy_tier1_gateway.anotherTier1ForSegments.path
   transport_zone_path = data.nsxt_policy_transport_zone.test.path
 
   subnet {
@@ -573,21 +469,7 @@ resource "nsxt_policy_segment" "test" {
 `, name)
 }
 
-func testAccNsxtPolicyEdgeCluster(name string) string {
-	if testAccIsGlobalManager() {
-		return fmt.Sprintf(`
-data "nsxt_policy_edge_cluster" "EC" {
-  display_name = "%s"
-  site_path    = data.nsxt_policy_site.test.path
-}`, name)
-	}
-	return fmt.Sprintf(`
-data "nsxt_policy_edge_cluster" "EC" {
-  display_name = "%s"
-}`, name)
-}
-
-func testAccNsxtPolicySegmentWithDhcpTemplate(tzName string, name string, dnsServerV4 string, dnsServerV6 string, lease string, preferred string) string {
+func testAccNsxtPolicyFixedSegmentWithDhcpTemplate(tzName string, name string, dnsServerV4 string, dnsServerV6 string, lease string, preferred string) string {
 	return testAccNsxtPolicySegmentDeps(tzName) +
 		testAccNsxtPolicyEdgeCluster(getEdgeClusterName()) + fmt.Sprintf(`
 
@@ -596,9 +478,10 @@ resource "nsxt_policy_dhcp_server" "test" {
   display_name      = "segment-test"
 }
 
-resource "nsxt_policy_segment" "test" {
+resource "nsxt_policy_fixed_segment" "test" {
   display_name        = "%s"
   transport_zone_path = data.nsxt_policy_transport_zone.test.path
+  connectivity_path   = nsxt_policy_tier1_gateway.anotherTier1ForSegments.path
 
   subnet {
     cidr = "12.12.2.1/24"

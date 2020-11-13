@@ -175,7 +175,7 @@ func testAccNsxtPolicyDhcpV4StaticBindingCheckDestroy(state *terraform.State, di
 func testAccNSXPolicyDhcpV4StaticBindingImporterGetID(s *terraform.State) (string, error) {
 	rs, ok := s.RootModule().Resources[testAccPolicyDhcpV4StaticBindingResourceName]
 	if !ok {
-		return "", fmt.Errorf("NSX Policy Dhcp Static Binding resource %s not found in resources", testAccResourcePolicyStaticRouteName)
+		return "", fmt.Errorf("NSX Policy Dhcp Static Binding resource %s not found in resources", testAccPolicyDhcpV4StaticBindingResourceName)
 	}
 	resourceID := rs.Primary.ID
 	if resourceID == "" {

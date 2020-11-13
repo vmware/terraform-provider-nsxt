@@ -160,6 +160,9 @@ func resourceNsxtPolicyNATRuleDelete(d *schema.ResourceData, m interface{}) erro
 
 	gwPolicyPath := d.Get("gateway_path").(string)
 	isT0, gwID := parseGatewayPolicyPath(gwPolicyPath)
+	if gwID == "" {
+		return fmt.Errorf("gateway_path is not valid")
+	}
 
 	err := deleteNsxtPolicyNATRule(getPolicyConnector(m), gwID, isT0, id, isPolicyGlobalManager(m))
 	if err != nil {
@@ -230,6 +233,9 @@ func resourceNsxtPolicyNATRuleRead(d *schema.ResourceData, m interface{}) error 
 
 	gwPolicyPath := d.Get("gateway_path").(string)
 	isT0, gwID := parseGatewayPolicyPath(gwPolicyPath)
+	if gwID == "" {
+		return fmt.Errorf("gateway_path is not valid")
+	}
 
 	obj, err := getNsxtPolicyNATRuleByID(connector, gwID, isT0, id, isPolicyGlobalManager(m))
 	if err != nil {
@@ -270,6 +276,9 @@ func resourceNsxtPolicyNATRuleCreate(d *schema.ResourceData, m interface{}) erro
 
 	gwPolicyPath := d.Get("gateway_path").(string)
 	isT0, gwID := parseGatewayPolicyPath(gwPolicyPath)
+	if gwID == "" {
+		return fmt.Errorf("gateway_path is not valid")
+	}
 	isGlobalManager := isPolicyGlobalManager(m)
 
 	id := d.Get("nsx_id").(string)
@@ -346,6 +355,9 @@ func resourceNsxtPolicyNATRuleUpdate(d *schema.ResourceData, m interface{}) erro
 
 	gwPolicyPath := d.Get("gateway_path").(string)
 	isT0, gwID := parseGatewayPolicyPath(gwPolicyPath)
+	if gwID == "" {
+		return fmt.Errorf("gateway_path is not valid")
+	}
 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
