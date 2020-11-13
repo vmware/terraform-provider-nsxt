@@ -359,7 +359,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_withVRF(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyTier0WithVRFTemplate(name, true),
+				Config: testAccNsxtPolicyTier0WithVRFTemplate(name, true, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTier0Exists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -373,10 +373,11 @@ func TestAccResourceNsxtPolicyTier0Gateway_withVRF(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testInterfaceName, "display_name", name),
 					resource.TestCheckResourceAttr(testInterfaceName, "access_vlan_id", "12"),
+					resource.TestCheckResourceAttr(testResourceName, "rd_admin_address", "192.168.0.2"),
 				),
 			},
 			{
-				Config: testAccNsxtPolicyTier0WithVRFTemplate(updateName, false),
+				Config: testAccNsxtPolicyTier0WithVRFTemplate(updateName, false, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTier0Exists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updateName),
@@ -386,6 +387,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_withVRF(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testInterfaceName, "display_name", updateName),
 					resource.TestCheckResourceAttr(testInterfaceName, "access_vlan_id", "12"),
+					resource.TestCheckResourceAttr(testResourceName, "rd_admin_address", ""),
 				),
 			},
 			{
@@ -683,7 +685,7 @@ data "nsxt_policy_realization_info" "realization_info" {
 }
 
 // TODO: add vrf_config tags when bug 2557096 is resolved
-func testAccNsxtPolicyTier0WithVRFTemplate(name string, targets bool) string {
+func testAccNsxtPolicyTier0WithVRFTemplate(name string, targets bool, rdAdmin bool) string {
 
 	var routeTargets string
 	if targets {
@@ -694,6 +696,10 @@ func testAccNsxtPolicyTier0WithVRFTemplate(name string, targets bool) string {
             export_targets = ["8999:123", "2:14"]
         }
             `
+	}
+	var rdAdminAddress string
+	if rdAdmin {
+		rdAdminAddress = `rd_admin_address = "192.168.0.2"`
 	}
 	return testAccNsxtPolicyGatewayInterfaceDeps("11, 12") + fmt.Sprintf(`
 resource "nsxt_policy_tier0_gateway" "parent" {
@@ -709,6 +715,7 @@ resource "nsxt_policy_tier0_gateway" "test" {
     gateway_path = nsxt_policy_tier0_gateway.parent.path
     %s
   }
+  %s
 }
 
 resource "nsxt_policy_tier0_gateway_interface" "parent-loopback" {
@@ -736,7 +743,7 @@ resource "nsxt_policy_tier0_gateway_interface" "test" {
 
 data "nsxt_policy_realization_info" "realization_info" {
   path = nsxt_policy_tier0_gateway.test.path
-}`, name, routeTargets, name)
+}`, name, routeTargets, rdAdminAddress, name)
 }
 
 func testAccNsxtPolicyTier0WithVRFTearDown() string {
