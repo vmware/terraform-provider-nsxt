@@ -35,6 +35,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "enable_firewall", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "ha_mode", "ACTIVE_STANDBY"),
 					resource.TestCheckResourceAttr(testResourceName, "force_whitelisting", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "rd_admin_address", "192.168.0.2"),
 					resource.TestCheckResourceAttrSet(testResourceName, "ipv6_ndra_profile_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "ipv6_dad_profile_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -53,6 +54,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "enable_firewall", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "force_whitelisting", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "ha_mode", "ACTIVE_ACTIVE"),
+					resource.TestCheckResourceAttr(testResourceName, "rd_admin_address", ""),
 					resource.TestCheckResourceAttrSet(testResourceName, "ipv6_ndra_profile_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "ipv6_dad_profile_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -598,6 +600,7 @@ resource "nsxt_policy_tier0_gateway" "test" {
   ha_mode                   = "ACTIVE_STANDBY"
   ipv6_ndra_profile_path    = "/infra/ipv6-ndra-profiles/default"
   ipv6_dad_profile_path     = "/infra/ipv6-dad-profiles/default"
+  rd_admin_address          = "192.168.0.2"
   %s
 
   tag {
