@@ -1226,7 +1226,10 @@ func nsxtPolicySegmentRead(d *schema.ResourceData, m interface{}, isVlan bool, i
 
 	var obj model.Segment
 	var err error
-	gwPath := d.Get("connectivity_path").(string)
+	gwPath := ""
+	if !isVlan {
+		gwPath = d.Get("connectivity_path").(string)
+	}
 
 	if isPolicyGlobalManager(m) {
 		obj, err = nsxtPolicyGlobalManagerGetSegment(connector, id, gwPath, isFixed)
@@ -1316,7 +1319,12 @@ func nsxtPolicySegmentRead(d *schema.ResourceData, m interface{}, isVlan bool, i
 func nsxtPolicySegmentCreate(d *schema.ResourceData, m interface{}, isVlan bool, isFixed bool) error {
 
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID(d, m, resourceNsxtPolicySegmentExists(d.Get("connectivity_path").(string), isFixed))
+	gwPath := ""
+	if !isVlan {
+		gwPath = d.Get("connectivity_path").(string)
+	}
+
+	id, err := getOrGenerateID(d, m, resourceNsxtPolicySegmentExists(gwPath, isFixed))
 	if err != nil {
 		return err
 	}
