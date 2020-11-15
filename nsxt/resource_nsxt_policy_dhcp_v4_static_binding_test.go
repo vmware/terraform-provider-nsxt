@@ -34,12 +34,11 @@ var accTestPolicyDhcpV4StaticBindingUpdateAttributes = map[string]string{
 
 var testAccPolicyDhcpV4StaticBindingResourceName = "nsxt_policy_dhcp_v4_static_binding.test"
 
-// TODO: Enable this test for GM when dhcp server GM support is added
 func TestAccResourceNsxtPolicyDhcpV4StaticBinding_basic(t *testing.T) {
 	testResourceName := testAccPolicyDhcpV4StaticBindingResourceName
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyDhcpV4StaticBindingCheckDestroy(state, accTestPolicyDhcpV4StaticBindingCreateAttributes["display_name"])
@@ -96,12 +95,11 @@ func TestAccResourceNsxtPolicyDhcpV4StaticBinding_basic(t *testing.T) {
 	})
 }
 
-// TODO: Enable this test for GM when dhcp server GM support is added
 func TestAccResourceNsxtPolicyDhcpV4StaticBinding_importBasic(t *testing.T) {
 	name := "terra-test-import"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyDhcpV4StaticBindingCheckDestroy(state, name)
@@ -216,6 +214,13 @@ func testAccNsxtPolicyDhcpV4StaticBindingTemplate(createFlow bool) string {
 	} else {
 		attrMap = accTestPolicyDhcpV4StaticBindingUpdateAttributes
 	}
+	realizationData := ""
+	if !testAccIsGlobalManager() {
+		realizationData = ` 
+data "nsxt_policy_realization_info" "realization_info" {
+  path = nsxt_policy_dhcp_v4_static_binding.test.path
+}`
+	}
 	return testAccNsxtPolicyDhcpV4StaticBindingPrerequisites() + fmt.Sprintf(`
 
 resource "nsxt_policy_dhcp_v4_static_binding" "test" {
@@ -233,10 +238,7 @@ resource "nsxt_policy_dhcp_v4_static_binding" "test" {
     tag   = "tag1"
   }
 }
-
-data "nsxt_policy_realization_info" "realization_info" {
-  path = nsxt_policy_dhcp_v4_static_binding.test.path
-}`, attrMap["display_name"], attrMap["description"], attrMap["gateway_address"], attrMap["hostname"], attrMap["ip_address"], attrMap["lease_time"], attrMap["mac_address"])
+%s`, attrMap["display_name"], attrMap["description"], attrMap["gateway_address"], attrMap["hostname"], attrMap["ip_address"], attrMap["lease_time"], attrMap["mac_address"], realizationData)
 }
 
 func testAccNsxtPolicyDhcpV4StaticBindingMinimalistic() string {
@@ -247,9 +249,5 @@ resource "nsxt_policy_dhcp_v4_static_binding" "test" {
   display_name = "%s"
   ip_address   = "%s"
   mac_address  = "%s"
-}
-
-data "nsxt_policy_realization_info" "realization_info" {
-  path = nsxt_policy_dhcp_v4_static_binding.test.path
 }`, attrMap["display_name"], attrMap["ip_address"], attrMap["mac_address"])
 }
