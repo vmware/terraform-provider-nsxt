@@ -66,7 +66,7 @@ An existing object can be [imported][docs-import] into this resource, via the fo
 [docs-import]: /docs/import/index.html
 
 ```
-terraform import nsxt_policy_dhcp_v4_static_binding_config.test UUID
+terraform import nsxt_policy_dhcp_v4_static_binding_config.test SEG-ID/UUID
 ```
 
-The above command imports DhcpV4StaticBindingConfig named `test` with the NSX DhcpV4StaticBindingConfig ID `UUID`.
+The above command imports DHCP V6 Static Binding named `test` with the NSX ID `UUID` under segment SEG-ID.
