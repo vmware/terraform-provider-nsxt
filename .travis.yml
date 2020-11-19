@@ -15,7 +15,8 @@ install:
 
 script:
 - make test
-- make vet
+- make tools
+- make website-lint
 
 branches:
   only:
