@@ -306,6 +306,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_dhcp_server":                      resourceNsxtPolicyDhcpServer(),
 			"nsxt_policy_context_profile":                  resourceNsxtPolicyContextProfile(),
 			"nsxt_policy_dhcp_v4_static_binding":           resourceNsxtPolicyDhcpV4StaticBinding(),
+			"nsxt_policy_dhcp_v6_static_binding":           resourceNsxtPolicyDhcpV6StaticBinding(),
 		},
 
 		ConfigureFunc: providerConfigure,
