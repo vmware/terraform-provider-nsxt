@@ -170,6 +170,7 @@ func Provider() *schema.Provider {
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
+			"nsxt_provider_info":                   dataSourceNsxtProviderInfo(),
 			"nsxt_transport_zone":                  dataSourceNsxtTransportZone(),
 			"nsxt_switching_profile":               dataSourceNsxtSwitchingProfile(),
 			"nsxt_logical_tier0_router":            dataSourceNsxtLogicalTier0Router(),
