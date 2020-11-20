@@ -2,6 +2,7 @@ TEST?=$$(go list ./... |grep -v 'vendor')
 GOFMT_FILES?=$$(find . -name '*.go' |grep -v vendor)
 WEBSITE_REPO=github.com/hashicorp/terraform-website
 PKG_NAME=nsxt
+GIT_COMMIT=$$(git rev-list -1 HEAD)
 
 default: build
 
@@ -11,7 +12,7 @@ tools:
 	GO111MODULE=on go install -mod=mod github.com/katbyte/terrafmt
 
 build: fmtcheck
-	go install
+	go install -ldflags "-X github.com/vmware/terraform-provider-nsxt/nsxt.GitCommit=$(GIT_COMMIT)"
 
 test: fmtcheck
 	go test -i $(TEST) || exit 1
