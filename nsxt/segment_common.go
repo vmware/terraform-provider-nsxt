@@ -281,7 +281,7 @@ func getPolicyCommonSegmentSchema(vlanRequired bool, isFixed bool) map[string]*s
 		"transport_zone_path": {
 			Type:         schema.TypeString,
 			Description:  "Policy path to the transport zone",
-			Required:     true,
+			Optional:     true,
 			ValidateFunc: validatePolicyPath(),
 		},
 		"vlan_ids": {
@@ -618,7 +618,7 @@ func nsxtPolicySegmentAddGatewayToInfraStruct(d *schema.ResourceData, dataValue 
 	return dataValue1.(*data.StructValue), nil
 }
 
-func policySegmentResourceToInfraStruct(id string, d *schema.ResourceData, isVlan bool, isFixed bool) (model.Infra, error) {
+func policySegmentResourceToInfraStruct(id string, d *schema.ResourceData, isVlan bool, isFixed bool, isGlobalManager bool) (model.Infra, error) {
 	// Read the rest of the configured parameters
 	var infraChildren []*data.StructValue
 
@@ -630,6 +630,10 @@ func policySegmentResourceToInfraStruct(id string, d *schema.ResourceData, isVla
 	dhcpConfigPath := d.Get("dhcp_config_path").(string)
 	revision := int64(d.Get("revision").(int))
 	resourceType := "Segment"
+
+	if (tzPath == "") && !isGlobalManager {
+		return model.Infra{}, fmt.Errorf("transport_zone_path needs to be specified for segment on local manager")
+	}
 
 	obj := model.Segment{
 		Id:           &id,
@@ -1329,7 +1333,7 @@ func nsxtPolicySegmentCreate(d *schema.ResourceData, m interface{}, isVlan bool,
 		return err
 	}
 
-	obj, err := policySegmentResourceToInfraStruct(id, d, isVlan, isFixed)
+	obj, err := policySegmentResourceToInfraStruct(id, d, isVlan, isFixed, isPolicyGlobalManager(m))
 	if err != nil {
 		return err
 	}
@@ -1352,7 +1356,7 @@ func nsxtPolicySegmentUpdate(d *schema.ResourceData, m interface{}, isVlan bool,
 		return fmt.Errorf("Error obtaining Segment ID")
 	}
 
-	obj, err := policySegmentResourceToInfraStruct(id, d, isVlan, isFixed)
+	obj, err := policySegmentResourceToInfraStruct(id, d, isVlan, isFixed, isPolicyGlobalManager(m))
 	if err != nil {
 		return err
 	}

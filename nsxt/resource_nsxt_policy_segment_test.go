@@ -172,6 +172,54 @@ func TestAccResourceNsxtPolicySegment_updateAdvConfig(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicySegment_noTransportZone(t *testing.T) {
+	name := "test-nsx-policy-segment"
+	updatedName := fmt.Sprintf("%s-update", name)
+	testResourceName := "nsxt_policy_segment.test"
+	cidr := "4003::1/64"
+	updatedCidr := "4004::1/64"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyGlobalManager(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicySegmentCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicySegmentNoTransportZoneTemplate(name, cidr),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicySegmentExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "subnet.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "subnet.0.cidr", cidr),
+					resource.TestCheckResourceAttr(testResourceName, "domain_name", "tftest.org"),
+					resource.TestCheckResourceAttr(testResourceName, "overlay_id", "1011"),
+					resource.TestCheckResourceAttr(testResourceName, "vlan_ids.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "advanced_config.#", "0"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicySegmentNoTransportZoneTemplate(updatedName, updatedCidr),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicySegmentExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "subnet.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "subnet.0.cidr", updatedCidr),
+					resource.TestCheckResourceAttr(testResourceName, "domain_name", "tftest.org"),
+					resource.TestCheckResourceAttr(testResourceName, "overlay_id", "1011"),
+					resource.TestCheckResourceAttr(testResourceName, "vlan_ids.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "advanced_config.#", "0"),
+				),
+			},
+		},
+	})
+}
+
 // TODO: Rewrite this test based on profile resources when these are available.
 const testAccSegmentQosProfileName = "test-nsx-policy-segment-qos-profile"
 
@@ -644,4 +692,26 @@ resource "nsxt_policy_segment" "test" {
 
 }
 `, name, lease, dnsServerV4, lease, preferred, dnsServerV6)
+}
+
+func testAccNsxtPolicySegmentNoTransportZoneTemplate(name string, cidr string) string {
+	return fmt.Sprintf(`
+
+resource "nsxt_policy_tier1_gateway" "tier1ForSegments" {
+  display_name              = "terraform-segment-test"
+  failover_mode             = "NON_PREEMPTIVE"
+}
+
+resource "nsxt_policy_segment" "test" {
+  display_name        = "%s"
+  description         = "Acceptance Test"
+  domain_name         = "tftest.org"
+  overlay_id          = 1011
+  connectivity_path   = nsxt_policy_tier1_gateway.tier1ForSegments.path
+
+  subnet {
+     cidr = "%s"
+  }
+}
+`, name, cidr)
 }
