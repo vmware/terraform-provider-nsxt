@@ -5,6 +5,8 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
@@ -13,7 +15,6 @@ import (
 	gm_domain "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/domains"
 	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	"log"
 )
 
 // This resource is supported only for Policy Global Manager
