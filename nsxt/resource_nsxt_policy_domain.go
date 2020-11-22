@@ -5,8 +5,6 @@ package nsxt
 
 import (
 	"fmt"
-	"log"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
@@ -15,6 +13,7 @@ import (
 	gm_domain "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/domains"
 	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+	"log"
 )
 
 // This resource is supported only for Policy Global Manager
@@ -116,7 +115,7 @@ func setDomainStructWithChildren(m interface{}, domain *model.Domain, locations 
 		converter := bindings.NewTypeConverter()
 		dmClient := gm_domain.NewDefaultDomainDeploymentMapsClient(connector)
 		// Get all currenlt locations
-		objList, err := dmClient.List(*domain.Id, nil, nil, nil, nil, nil, nil,)
+		objList, err := dmClient.List(*domain.Id, nil, nil, nil, nil, nil, nil)
 		if err != nil {
 			return handleListError("Domain", err)
 		}
@@ -172,14 +171,17 @@ func resourceNsxtPolicyDomainCreate(d *schema.ResourceData, m interface{}) error
 
 	Type := "Domain"
 	obj := model.Domain{
-		Id          :       &id,
-		DisplayName :       &displayName,
-		Description :       &description,
-		Tags        :       tags,
-		ResourceType:       &Type,
+		Id:           &id,
+		DisplayName:  &displayName,
+		Description:  &description,
+		Tags:         tags,
+		ResourceType: &Type,
 	}
 	locations := getStringListFromSchemaSet(d, "location")
-	setDomainStructWithChildren(m, &obj, locations, false)
+	err = setDomainStructWithChildren(m, &obj, locations, false)
+	if err != nil {
+		return err
+	}
 
 	childDomain := model.ChildDomain{
 		Domain:       &obj,
@@ -246,7 +248,7 @@ func resourceNsxtPolicyDomainRead(d *schema.ResourceData, m interface{}) error {
 
 	// Also read deployment maps
 	dmClient := gm_domain.NewDefaultDomainDeploymentMapsClient(connector)
-	objList, err := dmClient.List(id, nil, nil, nil, nil, nil, nil,)
+	objList, err := dmClient.List(id, nil, nil, nil, nil, nil, nil)
 	if err != nil {
 		return handleListError("Domain", err)
 	}
@@ -273,14 +275,17 @@ func resourceNsxtPolicyDomainUpdate(d *schema.ResourceData, m interface{}) error
 	tags := getPolicyTagsFromSchema(d)
 	Type := "Domain"
 	obj := model.Domain{
-		Id          :       &id,
-		DisplayName :       &displayName,
-		Description :       &description,
-		Tags        :       tags,
-		ResourceType:       &Type,
+		Id:           &id,
+		DisplayName:  &displayName,
+		Description:  &description,
+		Tags:         tags,
+		ResourceType: &Type,
 	}
 	locations := getStringListFromSchemaSet(d, "location")
-	setDomainStructWithChildren(m, &obj, locations, true)
+	err := setDomainStructWithChildren(m, &obj, locations, true)
+	if err != nil {
+		return err
+	}
 
 	childDomain := model.ChildDomain{
 		Domain:       &obj,
@@ -302,7 +307,7 @@ func resourceNsxtPolicyDomainUpdate(d *schema.ResourceData, m interface{}) error
 		ResourceType: &infraType,
 	}
 
-	err := policyInfraPatch(infraStruct, isPolicyGlobalManager(m), getPolicyConnector(m), false)
+	err = policyInfraPatch(infraStruct, isPolicyGlobalManager(m), getPolicyConnector(m), false)
 	if err != nil {
 		return handleUpdateError("Domain", id, err)
 	}

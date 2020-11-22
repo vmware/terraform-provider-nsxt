@@ -75,7 +75,6 @@ func TestAccResourceNsxtPolicyDomain_basic(t *testing.T) {
 	})
 }
 
-
 func TestAccResourceNsxtPolicyDomain_importBasic(t *testing.T) {
 	name := "test-nsx-policy-domain-import"
 	testResourceName := "nsxt_policy_domain.test"
