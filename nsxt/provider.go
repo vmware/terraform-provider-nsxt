@@ -280,6 +280,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_tier0_gateway_interface":          resourceNsxtPolicyTier0GatewayInterface(),
 			"nsxt_policy_tier0_gateway_ha_vip_config":      resourceNsxtPolicyTier0GatewayHAVipConfig(),
 			"nsxt_policy_group":                            resourceNsxtPolicyGroup(),
+			"nsxt_policy_domain":                           resourceNsxtPolicyDomain(),
 			"nsxt_policy_security_policy":                  resourceNsxtPolicySecurityPolicy(),
 			"nsxt_policy_service":                          resourceNsxtPolicyService(),
 			"nsxt_policy_gateway_policy":                   resourceNsxtPolicyGatewayPolicy(),

@@ -273,6 +273,10 @@ func getPolicyEnforcementPointPath(m interface{}) string {
 	return "/infra/sites/default/enforcement-points/" + getPolicyEnforcementPoint(m)
 }
 
+func getGlobalPolicyEnforcementPointPathWithLocation(m interface{}, location string) string {
+	return "/global-infra/sites/" + location + "/enforcement-points/" + getPolicyEnforcementPoint(m)
+}
+
 func convertModelBindingType(obj interface{}, sourceType bindings.BindingType, destType bindings.BindingType) (interface{}, error) {
 	converter := bindings.NewTypeConverter()
 	converter.SetMode(bindings.REST)
