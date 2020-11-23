@@ -116,6 +116,12 @@ func resourceNsxtPolicyTier0Gateway() *schema.Resource {
 			"dhcp_config_path":       getPolicyPathSchema(false, false, "Policy path to DHCP server or relay configuration to use for this Tier0"),
 			"intersite_config":       getGatewayIntersiteConfigSchema(),
 			"redistribution_config":  getRedistributionConfigSchema(),
+			"rd_admin_address": {
+				Type:         schema.TypeString,
+				Description:  "Route distinguisher administrator address",
+				Optional:     true,
+				ValidateFunc: validateSingleIP(),
+			},
 		},
 	}
 }
@@ -711,6 +717,11 @@ func policyTier0GatewayResourceToInfraStruct(d *schema.ResourceData, connector *
 	ipv6ProfilePaths := getIpv6ProfilePathsFromSchema(d)
 	vrfConfig := getPolicyVRFConfigFromSchema(d)
 	dhcpPath := d.Get("dhcp_config_path").(string)
+	rdAdminAddress := d.Get("rd_admin_address").(string)
+	rdAdminField := &rdAdminAddress
+	if rdAdminAddress == "" {
+		rdAdminField = nil
+	}
 
 	t0Type := "Tier0"
 	t0Struct := model.Tier0{
@@ -728,6 +739,7 @@ func policyTier0GatewayResourceToInfraStruct(d *schema.ResourceData, connector *
 		ResourceType:           &t0Type,
 		Id:                     &id,
 		VrfConfig:              vrfConfig,
+		RdAdminField:           rdAdminField,
 	}
 
 	if len(d.Id()) > 0 {
@@ -893,6 +905,7 @@ func resourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{}) e
 	d.Set("internal_transit_subnets", obj.InternalTransitSubnets)
 	d.Set("transit_subnets", obj.TransitSubnets)
 	d.Set("revision", obj.Revision)
+	d.Set("rd_admin_address", obj.RdAdminField)
 	vrfErr := setPolicyVRFConfigInSchema(d, obj.VrfConfig)
 	if vrfErr != nil {
 		return vrfErr
