@@ -101,7 +101,7 @@ func policyDataSourceResourceReadWithValidation(d *schema.ResourceData, connecto
 }
 
 func listPolicyResourcesByType(connector *client.RestConnector, resourceType *string, additionalQuery *string) ([]*data.StructValue, error) {
-	query := fmt.Sprintf("resource_type:%s", *resourceType)
+	query := fmt.Sprintf("resource_type:%s AND marked_for_delete:false", *resourceType)
 	return searchPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
 }
 
