@@ -109,6 +109,52 @@ func TestAccResourceNsxtPolicyVlanSegment_updateAdvConfig(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyiVlanSegment_noTransportZone(t *testing.T) {
+	name := "test-nsx-policy-segment"
+	updatedName := fmt.Sprintf("%s-update", name)
+	testResourceName := "nsxt_policy_vlan_segment.test"
+	cidr := "4003::1/64"
+	updatedCidr := "4004::1/64"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyGlobalManager(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicySegmentCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyVlanSegmentNoTransportZoneTemplate(name, cidr),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicySegmentExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "subnet.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "subnet.0.cidr", cidr),
+					resource.TestCheckResourceAttr(testResourceName, "domain_name", "tftest.org"),
+					resource.TestCheckResourceAttr(testResourceName, "vlan_ids.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "advanced_config.#", "0"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyVlanSegmentNoTransportZoneTemplate(updatedName, updatedCidr),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicySegmentExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "subnet.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "subnet.0.cidr", updatedCidr),
+					resource.TestCheckResourceAttr(testResourceName, "domain_name", "tftest.org"),
+					resource.TestCheckResourceAttr(testResourceName, "vlan_ids.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "advanced_config.#", "0"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtPolicyVlanSegment_withDhcp(t *testing.T) {
 	name := "test-nsx-policy-vlan-segment"
 	updatedName := fmt.Sprintf("%s-update", name)
@@ -394,4 +440,20 @@ resource "nsxt_policy_vlan_segment" "test" {
 
 }
 `, getEdgeClusterName(), name, lease, dnsServerV4, lease, preferred, dnsServerV6)
+}
+
+func testAccNsxtPolicyVlanSegmentNoTransportZoneTemplate(name string, cidr string) string {
+	return fmt.Sprintf(`
+
+resource "nsxt_policy_segment" "test" {
+  display_name        = "%s"
+  description         = "Acceptance Test"
+  domain_name         = "tftest.org"
+  vlan_ids            = ["101"]
+
+  subnet {
+     cidr = "%s"
+  }
+}
+`, name, cidr)
 }

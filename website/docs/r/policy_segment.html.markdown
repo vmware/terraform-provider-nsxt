@@ -62,7 +62,7 @@ The following arguments are supported:
 * `domain_name`- (Optional) DNS domain names.
 * `overlay_id` - (Optional) Overlay connectivity ID for this Segment.
 * `vlan_ids` - (Optional) List of VLAN IDs or ranges. Specifying vlan ids can be useful for overlay segments, f.e. for EVPN.
-* `transport_zone_path` - (Required) Policy path to the Overlay transport zone. This property is required if more than one overlay transport zone is defined, and none is marked as default.
+* `transport_zone_path` - (Optional) Policy path to the Overlay transport zone. This property is required for NSX Local Manager, and should not be specified for NSX Global Manager, where NSX will automatically assign default transport zone on each site.
 * `dhcp_config_path` - (Optional) Policy path to DHCP server or relay configuration to use for subnets configured on this segment. This attribute is supported with NSX 3.0.0 onwards.
 * `subnet` - (Optional) Subnet configuration block.
   * `cidr` - (Required) Gateway IP address CIDR. This argument can not be changed if DHCP is enabled for the subnet.
