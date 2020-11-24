@@ -15,17 +15,17 @@ This resource is applicable to NSX Global Manager, NSX Policy Manager and VMC.
 
 ```hcl
 resource "nsxt_policy_tier0_gateway" "tier0_gw" {
-  description               = "Tier-0 provisioned by Terraform"
-  display_name              = "Tier0-gw1"
-  failover_mode             = "PREEMPTIVE"
-  default_rule_logging      = false
-  enable_firewall           = true
-  force_whitelisting        = false
-  ha_mode                   = "ACTIVE_STANDBY"
-  internal_transit_subnets  = ["102.64.0.0/16"]
-  transit_subnets           = ["101.64.0.0/16"]
-  edge_cluster_path         = data.nsxt_policy_edge_cluster.EC.path
-  rd_admin_address          = "192.168.0.2"
+  description              = "Tier-0 provisioned by Terraform"
+  display_name             = "Tier0-gw1"
+  failover_mode            = "PREEMPTIVE"
+  default_rule_logging     = false
+  enable_firewall          = true
+  force_whitelisting       = false
+  ha_mode                  = "ACTIVE_STANDBY"
+  internal_transit_subnets = ["102.64.0.0/16"]
+  transit_subnets          = ["101.64.0.0/16"]
+  edge_cluster_path        = data.nsxt_policy_edge_cluster.EC.path
+  rd_admin_address         = "192.168.0.2"
 
   bgp_config {
     local_as_num    = "60000"
