@@ -50,7 +50,7 @@ The following arguments are supported:
 * `member_group` - (Optional) Grouping specification for pool members. When `member_group` is set, `member` should not be specified.
   * `group_path` - (Required) Path for policy group.
   * `allow_ipv4` - (Optional) Use IPv4 addresses from the grouping object, default is `true`.
-  * `allow_ipv6` - (Optional) Use IPv6 addresses from the grouping object, default is `true`
+  * `allow_ipv6` - (Optional) Use IPv6 addresses from the grouping object, default is `false`. Note: this setting is only supported for pools that contain IPv6 addresses.
   * `max_ip_list_size` - (Optional) Maximum number of IPs to use from the grouping object.
   * `port` - (Optional) If port is specified, all connections will be redirected to this port.
 * `member`- (Optional) Members of the pool. When `member' is set, `member_group` should not be specified.
