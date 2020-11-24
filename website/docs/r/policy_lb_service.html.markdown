@@ -11,6 +11,9 @@ This resource provides a method for the management of a Load Balancer Service.
 
 This resource is applicable to NSX Policy Manager.
 
+In order to enforce correct order of create/delete, it is recommended to add
+depends_on clause to lb service.
+
 ## Example Usage
 
 ```hcl
@@ -26,6 +29,7 @@ resource "nsxt_policy_lb_service" "test" {
   size              = "SMALL"
   enabled           = true
   error_log_level   = "ERROR"
+  depends_on        = [nsxt_policy_tier1_gateway_interface.tier1_gateway_interface]
 }
 ```
 

@@ -105,8 +105,8 @@ The following arguments are supported:
   * `action` - (Optional) Rule action, one of `ALLOW`, `DROP`, `REJECT`. Default is `ALLOW`.
   * `destination_groups` - (Optional) Set of group paths that serve as destination for this rule.
   * `source_groups` - (Optional) Set of group paths that serve as source for this rule.
-  * `destinations_excluded` - (Optional) Negation of destination groups.
-  * `sources_excluded` - (Optional) Negation of source groups.
+  * `destinations_excluded` - (Optional) A boolean value indicating negation of destination groups.
+  * `sources_excluded` - (Optional) A boolean value indicating negation of source groups.
   * `direction` - (Optional) Traffic direction, one of `IN`, `OUT` or `IN_OUT`. Default is `IN_OUT`.
   * `disabled` - (Optional) Flag to disable this rule. Default is false.
   * `ip_version` - (Optional) Version of IP protocol, one of `IPV4`, `IPV6`, `IPV4_IPV6`. Default is `IPV4_IPV6`.
