@@ -425,6 +425,10 @@ func getSegmentSubnetDhcpConfigFromSchema(schemaConfig map[string]interface{}) (
 	dhcpV4Config := schemaConfig["dhcp_v4_config"].([]interface{})
 	dhcpV6Config := schemaConfig["dhcp_v6_config"].([]interface{})
 
+	if (len(dhcpV4Config) > 0) && (len(dhcpV6Config) > 0) {
+		return nil, fmt.Errorf("Only one of ['dhcp_v4_config','dhcp_v6_config'] should be specified in single subnet")
+	}
+
 	converter := bindings.NewTypeConverter()
 	converter.SetMode(bindings.REST)
 
