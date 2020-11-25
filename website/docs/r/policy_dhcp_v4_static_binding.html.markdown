@@ -1,11 +1,11 @@
 ---
 subcategory: "Policy - DHCP"
 layout: "nsxt"
-page_title: "NSXT: nsxt_policy_dhcp_v4_static_binding_config"
+page_title: "NSXT: nsxt_policy_dhcp_v4_static_binding"
 description: A resource to configure IPv4 DHCP Static Binding.
 ---
 
-# nsxt_policy_dhcp_v4_static_binding_config
+# nsxt_policy_dhcp_v4_static_binding
 
 This resource provides a method for the management of IPv4 DHCP Static Binding.
 
@@ -14,7 +14,7 @@ This resource is applicable to NSX Global Manager, NSX Policy Manager and VMC.
 ## Example Usage
 
 ```hcl
-resource "nsxt_policy_dhcp_v4_static_binding_config" "test" {
+resource "nsxt_policy_dhcp_v4_static_binding" "test" {
   display_name    = "test"
   description     = "Terraform provisioned static binding"
   gateway_address = "10.0.2.1"
@@ -66,7 +66,7 @@ An existing object can be [imported][docs-import] into this resource, via the fo
 [docs-import]: /docs/import/index.html
 
 ```
-terraform import nsxt_policy_dhcp_v4_static_binding_config.test UUID
+terraform import nsxt_policy_dhcp_v4_static_binding.test SEG-ID/ID
 ```
 
-The above command imports DhcpV4StaticBindingConfig named `test` with the NSX DhcpV4StaticBindingConfig ID `UUID`.
+The above command imports DHCP V4 static binding named `test` with the NSX ID `ID` on segment SEG-ID.

@@ -71,22 +71,10 @@ func getPolicySegmentDhcpV6ConfigSchema() *schema.Resource {
 				},
 				Optional: true,
 			},
-			"lease_time": getDhcpLeaseTimeSchema(),
-			"domain_names": {
-				Type:        schema.TypeList,
-				Description: "Domain names for subnet",
-				Optional:    true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-			},
+			"lease_time":     getDhcpLeaseTimeSchema(),
+			"domain_names":   getDhcpDomainNamesSchema(),
 			"excluded_range": getAllocationRangeListSchema(false, "Excluded addresses to define dynamic ip allocation ranges"),
-			"preferred_time": {
-				Type:         schema.TypeInt,
-				Description:  "The time interval in seconds, in which the prefix is advertised as preferred",
-				Optional:     true,
-				ValidateFunc: validation.IntAtLeast(60),
-			},
+			"preferred_time": getDhcpPreferredTimeSchema(),
 			"sntp_servers": {
 				Type:        schema.TypeList,
 				Description: "IPv6 address of SNTP servers for subnet",
@@ -355,6 +343,26 @@ func getDhcpLeaseTimeSchema() *schema.Schema {
 		Optional:     true,
 		ValidateFunc: validation.IntAtLeast(60),
 		Default:      86400,
+	}
+}
+
+func getDhcpPreferredTimeSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:         schema.TypeInt,
+		Description:  "The time interval in seconds, in which the prefix is advertised as preferred",
+		Optional:     true,
+		ValidateFunc: validation.IntAtLeast(48),
+	}
+}
+
+func getDhcpDomainNamesSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeList,
+		Description: "Domain names",
+		Optional:    true,
+		Elem: &schema.Schema{
+			Type: schema.TypeString,
+		},
 	}
 }
 
