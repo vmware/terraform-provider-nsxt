@@ -106,7 +106,7 @@ func listPolicyResourcesByType(connector *client.RestConnector, resourceType *st
 }
 
 func listPolicyResourcesByID(connector *client.RestConnector, resourceID *string, additionalQuery *string) ([]*data.StructValue, error) {
-	query := fmt.Sprintf("id:%s", *resourceID)
+	query := fmt.Sprintf("id:%s AND marked_for_delete:false", *resourceID)
 	return searchPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
 }
 
