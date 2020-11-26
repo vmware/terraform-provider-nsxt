@@ -12,8 +12,8 @@ import (
 )
 
 func TestAccResourceNsxtPolicyGatewayPolicy_basic(t *testing.T) {
-	name := "terraform-test"
-	updatedName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
+	updatedName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_gateway_policy.test"
 	comments1 := "Acceptance test create"
 	comments2 := "Acceptance test update"
@@ -29,7 +29,7 @@ func TestAccResourceNsxtPolicyGatewayPolicy_basic(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyGatewayPolicyCheckDestroy(state, name, defaultDomain)
+			return testAccNsxtPolicyGatewayPolicyCheckDestroy(state, updatedName, defaultDomain)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -114,7 +114,7 @@ func TestAccResourceNsxtPolicyGatewayPolicy_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyGatewayPolicy_withDependencies(t *testing.T) {
-	name := "terraform-test"
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_gateway_policy.test"
 	defaultAction := "ALLOW"
 	defaultDirection := "IN_OUT"
@@ -193,7 +193,7 @@ func TestAccResourceNsxtPolicyGatewayPolicy_withDependencies(t *testing.T) {
 	})
 }
 func TestAccResourceNsxtPolicyGatewayPolicy_importBasic(t *testing.T) {
-	name := "terraform-test-import"
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_gateway_policy.test"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -216,7 +216,7 @@ func TestAccResourceNsxtPolicyGatewayPolicy_importBasic(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyGatewayPolicy_importNoTcpStrict(t *testing.T) {
-	name := "terraform-test-import"
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_gateway_policy.test"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -239,8 +239,8 @@ func TestAccResourceNsxtPolicyGatewayPolicy_importNoTcpStrict(t *testing.T) {
 }
 
 func TestAccResourceNsxtGlobalPolicyGatewayPolicy_withSite(t *testing.T) {
-	name := "terraform-test"
-	updatedName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
+	updatedName := getAccTestResourceName()
 	domainName := getTestSiteName()
 	testResourceName := "nsxt_policy_gateway_policy.test"
 	comments1 := "Acceptance test create"
@@ -261,7 +261,7 @@ func TestAccResourceNsxtGlobalPolicyGatewayPolicy_withSite(t *testing.T) {
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyGatewayPolicyCheckDestroy(state, name, domainName)
+			return testAccNsxtPolicyGatewayPolicyCheckDestroy(state, updatedName, domainName)
 		},
 		Steps: []resource.TestStep{
 			{

@@ -13,8 +13,8 @@ import (
 )
 
 func TestAccResourceNsxtAlgorithmTypeNsService_basic(t *testing.T) {
-	serviceName := "test-nsx-alg-service"
-	updateServiceName := fmt.Sprintf("%s-update", serviceName)
+	serviceName := getAccTestResourceName()
+	updateServiceName := getAccTestResourceName()
 	testResourceName := "nsxt_algorithm_type_ns_service.test"
 	destPort := "21"
 	updatedDestPort := "21"
@@ -23,7 +23,7 @@ func TestAccResourceNsxtAlgorithmTypeNsService_basic(t *testing.T) {
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXAlgServiceCheckDestroy(state, serviceName)
+			return testAccNSXAlgServiceCheckDestroy(state, updateServiceName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -55,7 +55,7 @@ func TestAccResourceNsxtAlgorithmTypeNsService_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtAlgorithmTypeNsService_importBasic(t *testing.T) {
-	serviceName := "test-nsx-alg-service"
+	serviceName := getAccTestResourceName()
 	testResourceName := "nsxt_algorithm_type_ns_service.test"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },

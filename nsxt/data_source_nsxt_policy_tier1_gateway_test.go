@@ -16,7 +16,7 @@ import (
 )
 
 func TestAccDataSourceNsxtPolicyTier1Gateway_basic(t *testing.T) {
-	routerName := "terraform_ds_test_tier1"
+	routerName := getAccTestDataSourceName()
 	testResourceName := "data.nsxt_policy_tier1_gateway.test"
 
 	resource.ParallelTest(t, resource.TestCase{

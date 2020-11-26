@@ -16,7 +16,7 @@ import (
 )
 
 func TestAccDataSourceNsxtPolicyQosProfile_basic(t *testing.T) {
-	name := "terraform_ds_test"
+	name := getAccTestDataSourceName()
 	testResourceName := "data.nsxt_policy_qos_profile.test"
 
 	resource.ParallelTest(t, resource.TestCase{

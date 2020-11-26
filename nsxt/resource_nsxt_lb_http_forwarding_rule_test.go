@@ -13,7 +13,7 @@ import (
 )
 
 func TestAccResourceNsxtLbHttpForwardingRule_basic(t *testing.T) {
-	name := "test"
+	name := getAccTestResourceName()
 	fullName := "nsxt_lb_http_forwarding_rule.test"
 	matchStrategy := "ALL"
 	updatedMatchStrategy := "ANY"
@@ -149,7 +149,7 @@ func TestAccResourceNsxtLbHttpForwardingRule_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtLbHttpForwardingRule_importBasic(t *testing.T) {
-	name := "test"
+	name := getAccTestResourceName()
 	resourceName := "nsxt_lb_http_forwarding_rule.test"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {

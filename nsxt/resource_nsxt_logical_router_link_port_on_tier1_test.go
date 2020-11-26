@@ -13,17 +13,17 @@ import (
 )
 
 func TestAccResourceNsxtLogicalRouterLinkPortOnTier1_basic(t *testing.T) {
-	name := "test-nsx-port-on-tier1"
+	name := getAccTestResourceName()
+	updateName := getAccTestResourceName()
 	tier0RouterName := getTier0RouterName()
 	edgeClusterName := getEdgeClusterName()
-	updateName := fmt.Sprintf("%s-update", name)
 	testResourceName := "nsxt_logical_router_link_port_on_tier1.test"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXLogicalRouterLinkPortOnTier1CheckDestroy(state, name)
+			return testAccNSXLogicalRouterLinkPortOnTier1CheckDestroy(state, updateName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -53,7 +53,7 @@ func TestAccResourceNsxtLogicalRouterLinkPortOnTier1_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtLogicalRouterLinkPortOnTier1_importBasic(t *testing.T) {
-	name := "test-nsx-port-on-tier1"
+	name := getAccTestResourceName()
 	tier0RouterName := getTier0RouterName()
 	edgeClusterName := getEdgeClusterName()
 	testResourceName := "nsxt_logical_router_link_port_on_tier1.test"

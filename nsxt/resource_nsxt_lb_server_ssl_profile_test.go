@@ -13,8 +13,8 @@ import (
 )
 
 func TestAccResourceNsxtLbServerSSLProfile_basic(t *testing.T) {
-	name := "test"
-	updatedName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
+	updatedName := getAccTestResourceName()
 	testResourceName := "nsxt_lb_server_ssl_profile.test"
 
 	resource.Test(t, resource.TestCase{
@@ -26,7 +26,7 @@ func TestAccResourceNsxtLbServerSSLProfile_basic(t *testing.T) {
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXLbServerSSLProfileCheckDestroy(state, name)
+			return testAccNSXLbServerSSLProfileCheckDestroy(state, updatedName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -60,7 +60,7 @@ func TestAccResourceNsxtLbServerSSLProfile_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtLbServerSSLProfile_importBasic(t *testing.T) {
-	name := "test"
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_lb_server_ssl_profile.test"
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {

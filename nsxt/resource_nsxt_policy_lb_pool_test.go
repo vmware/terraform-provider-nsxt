@@ -13,7 +13,7 @@ import (
 )
 
 var accTestPolicyLBPoolCreateAttributes = map[string]string{
-	"display_name":            "terra-test",
+	"display_name":            getAccTestResourceName(),
 	"description":             "terraform created",
 	"algorithm":               "IP_HASH",
 	"min_active_members":      "2",
@@ -21,7 +21,7 @@ var accTestPolicyLBPoolCreateAttributes = map[string]string{
 }
 
 var accTestPolicyLBPoolUpdateAttributes = map[string]string{
-	"display_name":            "terra-test-updated",
+	"display_name":            getAccTestResourceName(),
 	"description":             "terraform updated",
 	"algorithm":               "WEIGHTED_ROUND_ROBIN",
 	"min_active_members":      "5",
@@ -35,7 +35,7 @@ func TestAccResourceNsxtPolicyLBPool_basic(t *testing.T) {
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyLBPoolCheckDestroy(state, accTestPolicyLBPoolCreateAttributes["display_name"])
+			return testAccNsxtPolicyLBPoolCheckDestroy(state, accTestPolicyLBPoolUpdateAttributes["display_name"])
 		},
 		Steps: []resource.TestStep{
 			{
@@ -193,7 +193,7 @@ func TestAccResourceNsxtPolicyLBPool_snat(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyLBPool_importBasic(t *testing.T) {
-	name := "terra-test-import"
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_lb_pool.test"
 
 	resource.Test(t, resource.TestCase{

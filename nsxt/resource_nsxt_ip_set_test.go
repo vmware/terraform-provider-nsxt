@@ -13,15 +13,15 @@ import (
 )
 
 func TestAccResourceNsxtIpSet_basic(t *testing.T) {
-	name := "test-nsx-ip-set"
-	updateName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
+	updateName := getAccTestResourceName()
 	testResourceName := "nsxt_ip_set.test"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXIpSetCheckDestroy(state, name)
+			return testAccNSXIpSetCheckDestroy(state, updateName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -84,7 +84,7 @@ func TestAccResourceNsxtIpSet_noName(t *testing.T) {
 }
 
 func TestAccResourceNsxtIpSet_importBasic(t *testing.T) {
-	name := "test-nsx-ip-set"
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_ip_set.test"
 
 	resource.ParallelTest(t, resource.TestCase{

@@ -13,7 +13,7 @@ import (
 )
 
 func TestAccResourceNsxtPolicyIPPoolStaticSubnet_minimal(t *testing.T) {
-	name := "staticsubnet1"
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_ip_pool_static_subnet.test"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -45,8 +45,8 @@ func TestAccResourceNsxtPolicyIPPoolStaticSubnet_minimal(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyIPPoolStaticSubnet_basic(t *testing.T) {
-	name := "tfpool1"
-	updatedName := fmt.Sprintf("%s-updated", name)
+	name := getAccTestResourceName()
+	updatedName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_ip_pool_static_subnet.test"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -112,7 +112,7 @@ func TestAccResourceNsxtPolicyIPPoolStaticSubnet_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyIPPoolStaticSubnet_import_basic(t *testing.T) {
-	name := "tfpool8"
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_ip_pool_static_subnet.test"
 
 	resource.ParallelTest(t, resource.TestCase{

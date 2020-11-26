@@ -14,7 +14,7 @@ import (
 )
 
 func TestAccDataSourceNsxtPolicyVniPoolConfig_basic(t *testing.T) {
-	name := "terraform_ds_test"
+	name := getAccTestDataSourceName()
 	testResourceName := "data.nsxt_policy_vni_pool.test"
 
 	resource.ParallelTest(t, resource.TestCase{

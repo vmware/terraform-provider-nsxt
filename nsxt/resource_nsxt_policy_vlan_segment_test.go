@@ -9,7 +9,7 @@ import (
 )
 
 func TestAccResourceNsxtPolicyVlanSegment_basicImport(t *testing.T) {
-	name := "test-nsx-policy-vlan-segment"
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_vlan_segment.test"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -32,15 +32,15 @@ func TestAccResourceNsxtPolicyVlanSegment_basicImport(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyVlanSegment_basicUpdate(t *testing.T) {
-	name := "test-nsx-policy-vlan-segment"
-	updatedName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
+	updatedName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_vlan_segment.test"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyVlanSegmentCheckDestroy(state, name)
+			return testAccNsxtPolicyVlanSegmentCheckDestroy(state, updatedName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -70,8 +70,7 @@ func TestAccResourceNsxtPolicyVlanSegment_basicUpdate(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyVlanSegment_updateAdvConfig(t *testing.T) {
-	name := "test-nsx-policy-vlan-segment"
-	updatedName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_vlan_segment.test"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -94,10 +93,10 @@ func TestAccResourceNsxtPolicyVlanSegment_updateAdvConfig(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyVlanSegmentBasicAdvConfigUpdateTemplate(updatedName),
+				Config: testAccNsxtPolicyVlanSegmentBasicAdvConfigUpdateTemplate(name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyVlanSegmentExists(testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttr(testResourceName, "domain_name", "tftest.org"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
@@ -109,9 +108,8 @@ func TestAccResourceNsxtPolicyVlanSegment_updateAdvConfig(t *testing.T) {
 	})
 }
 
-func TestAccResourceNsxtPolicyiVlanSegment_noTransportZone(t *testing.T) {
-	name := "test-nsx-policy-segment"
-	updatedName := fmt.Sprintf("%s-update", name)
+func TestAccResourceNsxtPolicyVlanSegment_noTransportZone(t *testing.T) {
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_vlan_segment.test"
 	cidr := "4003::1/64"
 	updatedCidr := "4004::1/64"
@@ -138,10 +136,10 @@ func TestAccResourceNsxtPolicyiVlanSegment_noTransportZone(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyVlanSegmentNoTransportZoneTemplate(updatedName, updatedCidr),
+				Config: testAccNsxtPolicyVlanSegmentNoTransportZoneTemplate(name, updatedCidr),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySegmentExists(testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.0.cidr", updatedCidr),
@@ -156,8 +154,7 @@ func TestAccResourceNsxtPolicyiVlanSegment_noTransportZone(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyVlanSegment_withDhcp(t *testing.T) {
-	name := "test-nsx-policy-vlan-segment"
-	updatedName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_vlan_segment.test"
 	leaseTimes := []string{"3600", "36000"}
 	preferredTimes := []string{"3200", "32000"}
@@ -199,10 +196,10 @@ func TestAccResourceNsxtPolicyVlanSegment_withDhcp(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyVlanSegmentWithDhcpTemplate(updatedName, dnsServersV4[1], dnsServersV6[1], leaseTimes[1], preferredTimes[1]),
+				Config: testAccNsxtPolicyVlanSegmentWithDhcpTemplate(name, dnsServersV4[1], dnsServersV6[1], leaseTimes[1], preferredTimes[1]),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySegmentExists(testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.0.cidr", "12.12.2.1/24"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.0.dhcp_v6_config.#", "0"),
@@ -445,7 +442,7 @@ resource "nsxt_policy_vlan_segment" "test" {
 func testAccNsxtPolicyVlanSegmentNoTransportZoneTemplate(name string, cidr string) string {
 	return fmt.Sprintf(`
 
-resource "nsxt_policy_segment" "test" {
+resource "nsxt_policy_vlan_segment" "test" {
   display_name        = "%s"
   description         = "Acceptance Test"
   domain_name         = "tftest.org"

@@ -13,8 +13,8 @@ import (
 )
 
 func TestAccResourceNsxtLogicalRouterDownlinkPort_basic(t *testing.T) {
-	portName := "test-nsx-logical-router-downlink-port"
-	updatePortName := fmt.Sprintf("%s-update", portName)
+	portName := getAccTestResourceName()
+	updatePortName := getAccTestResourceName()
 	testResourceName := "nsxt_logical_router_downlink_port.test"
 	transportZoneName := getOverlayTransportZoneName()
 	edgeClusterName := getEdgeClusterName()
@@ -23,7 +23,7 @@ func TestAccResourceNsxtLogicalRouterDownlinkPort_basic(t *testing.T) {
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXLogicalRouterDownlinkPortCheckDestroy(state, portName)
+			return testAccNSXLogicalRouterDownlinkPortCheckDestroy(state, updatePortName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -59,8 +59,8 @@ func TestAccResourceNsxtLogicalRouterDownlinkPort_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtLogicalRouterDownlinkPort_withRelay(t *testing.T) {
-	portName := "test-nsx-logical-router-downlink-port"
-	updatePortName := fmt.Sprintf("%s-update", portName)
+	portName := getAccTestResourceName()
+	updatePortName := getAccTestResourceName()
 	testResourceName := "nsxt_logical_router_downlink_port.test"
 	transportZoneName := getOverlayTransportZoneName()
 	edgeClusterName := getEdgeClusterName()
@@ -77,7 +77,7 @@ func TestAccResourceNsxtLogicalRouterDownlinkPort_withRelay(t *testing.T) {
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXLogicalRouterDownlinkPortCheckDestroy(state, portName)
+			return testAccNSXLogicalRouterDownlinkPortCheckDestroy(state, updatePortName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -113,7 +113,7 @@ func TestAccResourceNsxtLogicalRouterDownlinkPort_withRelay(t *testing.T) {
 }
 
 func TestAccResourceNsxtLogicalRouterDownlinkPort_importBasic(t *testing.T) {
-	portName := "test-nsx-logical-router-downlink-port"
+	portName := getAccTestResourceName()
 	testResourceName := "nsxt_logical_router_downlink_port.test"
 	transportZoneName := getOverlayTransportZoneName()
 	edgeClusterName := getEdgeClusterName()

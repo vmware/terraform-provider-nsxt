@@ -9,7 +9,7 @@ import (
 )
 
 func TestAccResourceNsxtPolicySegment_basicImport(t *testing.T) {
-	name := "test-nsx-policy-segment"
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_segment.test"
 	tzName := getOverlayTransportZoneName()
 
@@ -33,8 +33,8 @@ func TestAccResourceNsxtPolicySegment_basicImport(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicySegment_basicUpdate(t *testing.T) {
-	name := "test-nsx-policy-segment"
-	updatedName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
+	updatedName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_segment.test"
 	tzName := getOverlayTransportZoneName()
 
@@ -42,7 +42,7 @@ func TestAccResourceNsxtPolicySegment_basicUpdate(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicySegmentCheckDestroy(state, name)
+			return testAccNsxtPolicySegmentCheckDestroy(state, updatedName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -76,8 +76,7 @@ func TestAccResourceNsxtPolicySegment_basicUpdate(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicySegment_connectivityPath(t *testing.T) {
-	name := "test-nsx-policy-segment"
-	updatedName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_segment.test"
 	tzName := getOverlayTransportZoneName()
 
@@ -103,10 +102,10 @@ func TestAccResourceNsxtPolicySegment_connectivityPath(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicySegmentUpdateConnectivityTemplate(tzName, updatedName),
+				Config: testAccNsxtPolicySegmentUpdateConnectivityTemplate(tzName, name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySegmentExists(testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test2"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.0.cidr", "22.22.22.1/24"),
@@ -124,8 +123,7 @@ func TestAccResourceNsxtPolicySegment_connectivityPath(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicySegment_updateAdvConfig(t *testing.T) {
-	name := "test-nsx-policy-segment"
-	updatedName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_segment.test"
 	tzName := getOverlayTransportZoneName()
 
@@ -153,10 +151,10 @@ func TestAccResourceNsxtPolicySegment_updateAdvConfig(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicySegmentBasicAdvConfigUpdateTemplate(tzName, updatedName),
+				Config: testAccNsxtPolicySegmentBasicAdvConfigUpdateTemplate(tzName, name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySegmentExists(testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.0.cidr", "12.12.2.1/24"),
@@ -173,8 +171,7 @@ func TestAccResourceNsxtPolicySegment_updateAdvConfig(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicySegment_noTransportZone(t *testing.T) {
-	name := "test-nsx-policy-segment"
-	updatedName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_segment.test"
 	cidr := "4003::1/64"
 	updatedCidr := "4004::1/64"
@@ -202,10 +199,10 @@ func TestAccResourceNsxtPolicySegment_noTransportZone(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicySegmentNoTransportZoneTemplate(updatedName, updatedCidr),
+				Config: testAccNsxtPolicySegmentNoTransportZoneTemplate(name, updatedCidr),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySegmentExists(testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.0.cidr", updatedCidr),
@@ -221,11 +218,10 @@ func TestAccResourceNsxtPolicySegment_noTransportZone(t *testing.T) {
 }
 
 // TODO: Rewrite this test based on profile resources when these are available.
-const testAccSegmentQosProfileName = "test-nsx-policy-segment-qos-profile"
+var testAccSegmentQosProfileName = getAccTestResourceName()
 
 func TestAccResourceNsxtPolicySegment_withProfiles(t *testing.T) {
-	name := "test-nsx-policy-segment"
-	updatedName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_segment.test"
 	tzName := getOverlayTransportZoneName()
 
@@ -259,10 +255,10 @@ func TestAccResourceNsxtPolicySegment_withProfiles(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicySegmentWithProfilesUpdateTemplate(tzName, updatedName),
+				Config: testAccNsxtPolicySegmentWithProfilesUpdateTemplate(tzName, name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySegmentExists(testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "security_profile.#", "1"),
 					resource.TestCheckResourceAttrSet(testResourceName, "security_profile.0.spoofguard_profile_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "security_profile.0.security_profile_path"),
@@ -273,10 +269,10 @@ func TestAccResourceNsxtPolicySegment_withProfiles(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicySegmentWithProfilesRemoveAll(tzName, updatedName),
+				Config: testAccNsxtPolicySegmentWithProfilesRemoveAll(tzName, name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySegmentExists(testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "security_profile.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "qos_profile.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "discovery_profile.#", "0"),
@@ -287,8 +283,7 @@ func TestAccResourceNsxtPolicySegment_withProfiles(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicySegment_withDhcp(t *testing.T) {
-	name := "test-nsx-policy-segment"
-	updatedName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_segment.test"
 	leaseTimes := []string{"3600", "36000"}
 	preferredTimes := []string{"3200", "32000"}
@@ -331,10 +326,10 @@ func TestAccResourceNsxtPolicySegment_withDhcp(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicySegmentWithDhcpTemplate(tzName, updatedName, dnsServersV4[1], dnsServersV6[1], leaseTimes[1], preferredTimes[1]),
+				Config: testAccNsxtPolicySegmentWithDhcpTemplate(tzName, name, dnsServersV4[1], dnsServersV6[1], leaseTimes[1], preferredTimes[1]),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySegmentExists(testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.0.cidr", "12.12.2.1/24"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.0.dhcp_v6_config.#", "0"),

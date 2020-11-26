@@ -14,8 +14,8 @@ import (
 )
 
 func TestAccResourceNsxtPolicyService_icmp(t *testing.T) {
-	name := "test-nsx-policy-icmp-type-service-basic"
-	updateName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
+	updateName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_service.test"
 
 	resource.Test(t, resource.TestCase{
@@ -150,7 +150,7 @@ func TestAccResourceNsxtPolicyService_icmp(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyService_icmpNoEntryDisplayName(t *testing.T) {
-	name := "test-nsx-policy-icmp-type-service-no-display-name"
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_service.test"
 
 	resource.Test(t, resource.TestCase{
@@ -187,8 +187,8 @@ func TestAccResourceNsxtPolicyService_icmpNoEntryDisplayName(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyService_l4PortSet(t *testing.T) {
-	name := "test-nsx-policy-l4-port-set-type-service-basic"
-	updateName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
+	updateName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_service.test"
 
 	resource.Test(t, resource.TestCase{
@@ -296,7 +296,7 @@ func TestAccResourceNsxtPolicyService_l4PortSet(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyService_mixedServices(t *testing.T) {
-	name := "test-nsx-policy-mixed-service"
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_service.test"
 
 	resource.Test(t, resource.TestCase{
@@ -345,15 +345,15 @@ func TestAccResourceNsxtPolicyService_mixedServices(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyService_igmp(t *testing.T) {
-	name := "test-nsx-policy-igmp-type-service"
-	updateName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
+	updateName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_service.test"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyServiceCheckDestroy(state, name)
+			return testAccNsxtPolicyServiceCheckDestroy(state, updateName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -399,15 +399,15 @@ func TestAccResourceNsxtPolicyService_igmp(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyService_etherType(t *testing.T) {
-	name := "test-nsx-policy-ether-type-service"
-	updateName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
+	updateName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_service.test"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyServiceCheckDestroy(state, name)
+			return testAccNsxtPolicyServiceCheckDestroy(state, updateName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -455,15 +455,15 @@ func TestAccResourceNsxtPolicyService_etherType(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyService_ipProtocolType(t *testing.T) {
-	name := "test-nsx-policy-ip-protocol-type-service"
-	updateName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
+	updateName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_service.test"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyServiceCheckDestroy(state, name)
+			return testAccNsxtPolicyServiceCheckDestroy(state, updateName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -511,8 +511,8 @@ func TestAccResourceNsxtPolicyService_ipProtocolType(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyService_algType(t *testing.T) {
-	name := "test-nsx-policy-alg-service"
-	updateName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
+	updateName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_service.test"
 	alg := "SUN_RPC_UDP"
 	destPort := "210"
@@ -524,7 +524,7 @@ func TestAccResourceNsxtPolicyService_algType(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyServiceCheckDestroy(state, name)
+			return testAccNsxtPolicyServiceCheckDestroy(state, updateName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -576,7 +576,7 @@ func TestAccResourceNsxtPolicyService_algType(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyService_importBasic(t *testing.T) {
-	name := "test-nsx-policy-service-import"
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_service.test"
 
 	resource.Test(t, resource.TestCase{

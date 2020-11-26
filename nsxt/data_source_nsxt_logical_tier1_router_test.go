@@ -14,7 +14,7 @@ import (
 )
 
 func TestAccDataSourceNsxtLogicalTier1Router_basic(t *testing.T) {
-	routerName := "terraform_ds_test_tier1"
+	routerName := getAccTestDataSourceName()
 	testResourceName := "data.nsxt_logical_tier1_router.test"
 
 	resource.ParallelTest(t, resource.TestCase{

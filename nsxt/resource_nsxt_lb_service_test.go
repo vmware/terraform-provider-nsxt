@@ -13,7 +13,7 @@ import (
 )
 
 func TestAccResourceNsxtLbService_basic(t *testing.T) {
-	name := "test"
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_lb_service.test"
 
 	resource.Test(t, resource.TestCase{
@@ -54,7 +54,7 @@ func TestAccResourceNsxtLbService_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtLbService_withServers(t *testing.T) {
-	name := "test"
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_lb_service.test"
 	logLevel := "EMERGENCY"
 	updatedLogLevel := "INFO"
@@ -95,7 +95,7 @@ func TestAccResourceNsxtLbService_withServers(t *testing.T) {
 }
 
 func TestAccResourceNsxtLbService_importBasic(t *testing.T) {
-	name := "test"
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_lb_service.test"
 
 	resource.Test(t, resource.TestCase{

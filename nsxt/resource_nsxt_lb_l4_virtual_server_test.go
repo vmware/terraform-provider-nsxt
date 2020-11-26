@@ -21,7 +21,7 @@ func TestAccResourceNsxtLbUDPVirtualServer_basic(t *testing.T) {
 }
 
 func testAccResourceNsxtLbL4VirtualServer(t *testing.T, protocol string) {
-	name := "test"
+	name := getAccTestResourceName()
 	fullName := fmt.Sprintf("nsxt_lb_%s_virtual_server.test", protocol)
 	port := "888-890"
 	updatedPort := "999"
@@ -39,7 +39,7 @@ func testAccResourceNsxtLbL4VirtualServer(t *testing.T, protocol string) {
 				Config: testAccNSXLbL4VirtualServerCreateTemplate(protocol, port, memberPort),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXLbL4VirtualServerExists(name, fullName),
-					resource.TestCheckResourceAttr(fullName, "display_name", "test"),
+					resource.TestCheckResourceAttr(fullName, "display_name", name),
 					resource.TestCheckResourceAttr(fullName, "description", "test description"),
 					resource.TestCheckResourceAttr(fullName, "access_log_enabled", "false"),
 					resource.TestCheckResourceAttrSet(fullName, "application_profile_id"),
@@ -62,7 +62,7 @@ func testAccResourceNsxtLbL4VirtualServer(t *testing.T, protocol string) {
 				Config: testAccNSXLbL4VirtualServerCreateTemplate(protocol, updatedPort, updatedMemberPort),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXLbL4VirtualServerExists(name, fullName),
-					resource.TestCheckResourceAttr(fullName, "display_name", "test"),
+					resource.TestCheckResourceAttr(fullName, "display_name", name),
 					resource.TestCheckResourceAttr(fullName, "description", "test description"),
 					resource.TestCheckResourceAttr(fullName, "access_log_enabled", "false"),
 					resource.TestCheckResourceAttrSet(fullName, "application_profile_id"),
@@ -94,7 +94,7 @@ func TestAccResourceNsxtLbUDPVirtualServer_importBasic(t *testing.T) {
 }
 
 func testAccResourceNsxtLbL4VirtualServerImport(t *testing.T, protocol string) {
-	name := "test"
+	name := getAccTestResourceName()
 	resourceName := fmt.Sprintf("nsxt_lb_%s_virtual_server.test", protocol)
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },

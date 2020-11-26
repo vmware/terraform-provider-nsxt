@@ -13,15 +13,15 @@ import (
 )
 
 func TestAccResourceNsxtL4PortNsService_basic(t *testing.T) {
-	serviceName := "test-nsx-l4-service"
-	updateServiceName := fmt.Sprintf("%s-update", serviceName)
+	serviceName := getAccTestResourceName()
+	updateServiceName := getAccTestResourceName()
 	testResourceName := "nsxt_l4_port_set_ns_service.test"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXL4ServiceCheckDestroy(state, serviceName)
+			return testAccNSXL4ServiceCheckDestroy(state, updateServiceName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -49,7 +49,7 @@ func TestAccResourceNsxtL4PortNsService_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtL4PortNsService_importBasic(t *testing.T) {
-	serviceName := "test-nsx-l4-service"
+	serviceName := getAccTestResourceName()
 	testResourceName := "nsxt_l4_port_set_ns_service.test"
 
 	resource.ParallelTest(t, resource.TestCase{

@@ -13,15 +13,15 @@ import (
 )
 
 func TestAccResourceNsxtEtherTypeNsService_basic(t *testing.T) {
-	serviceName := "test-nsx-ether-service"
-	updateServiceName := fmt.Sprintf("%s-update", serviceName)
+	serviceName := getAccTestResourceName()
+	updateServiceName := getAccTestResourceName()
 	testResourceName := "nsxt_ether_type_ns_service.test"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXEtherServiceCheckDestroy(state, serviceName)
+			return testAccNSXEtherServiceCheckDestroy(state, updateServiceName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -49,7 +49,7 @@ func TestAccResourceNsxtEtherTypeNsService_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtEtherTypeNsService_importBasic(t *testing.T) {
-	serviceName := "test-nsx-ether-service"
+	serviceName := getAccTestResourceName()
 	testResourceName := "nsxt_ether_type_ns_service.test"
 
 	resource.ParallelTest(t, resource.TestCase{

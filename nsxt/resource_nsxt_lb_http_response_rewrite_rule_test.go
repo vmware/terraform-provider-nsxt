@@ -13,7 +13,7 @@ import (
 )
 
 func TestAccResourceNsxtLbHttpResponseRewriteRule_basic(t *testing.T) {
-	name := "test"
+	name := getAccTestResourceName()
 	fullName := "nsxt_lb_http_response_rewrite_rule.test"
 	matchStrategy := "ANY"
 	updatedMatchStrategy := "ALL"
@@ -138,7 +138,7 @@ func TestAccResourceNsxtLbHttpResponseRewriteRule_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtLbHttpResponseRewriteRule_importBasic(t *testing.T) {
-	name := "test"
+	name := getAccTestResourceName()
 	resourceName := "nsxt_lb_http_response_rewrite_rule.test"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },

@@ -13,15 +13,15 @@ import (
 )
 
 func TestAccResourceNsxtIpPool_basic(t *testing.T) {
-	name := "test-nsx-ip-pool"
-	updateName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
+	updateName := getAccTestResourceName()
 	testResourceName := "nsxt_ip_pool.test"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXIpPoolCheckDestroy(state, name)
+			return testAccNSXIpPoolCheckDestroy(state, updateName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -54,7 +54,7 @@ func TestAccResourceNsxtIpPool_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtIpPool_importBasic(t *testing.T) {
-	name := "test-nsx-ip-pool"
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_ip_pool.test"
 
 	resource.Test(t, resource.TestCase{

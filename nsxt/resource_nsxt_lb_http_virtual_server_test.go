@@ -17,7 +17,7 @@ var testLbVirtualServerClientCertID string
 var testLbVirtualServerCaCertID string
 
 func TestAccResourceNsxtLbHttpVirtualServer_basic(t *testing.T) {
-	name := "test"
+	name := getAccTestResourceName()
 	fullName := "nsxt_lb_http_virtual_server.test"
 	port := "888"
 	updatedPort := "999"
@@ -79,7 +79,7 @@ func TestAccResourceNsxtLbHttpVirtualServer_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtLbHttpVirtualServer_withRules(t *testing.T) {
-	name := "test"
+	name := getAccTestResourceName()
 	fullName := "nsxt_lb_http_virtual_server.test"
 	rule1 := "rule1"
 	rule2 := "rule3"
@@ -121,7 +121,7 @@ func TestAccResourceNsxtLbHttpVirtualServer_withRules(t *testing.T) {
 }
 
 func TestAccResourceNsxtLbHttpVirtualServer_withSSL(t *testing.T) {
-	name := "test"
+	name := getAccTestResourceName()
 	fullName := "nsxt_lb_http_virtual_server.test"
 	depth := "2"
 	updatedDepth := "4"
@@ -199,7 +199,7 @@ func TestAccResourceNsxtLbHttpVirtualServer_withSSL(t *testing.T) {
 }
 
 func TestAccResourceNsxtLbHttpVirtualServer_importBasic(t *testing.T) {
-	name := "test"
+	name := getAccTestResourceName()
 	resourceName := "nsxt_lb_http_virtual_server.test"
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {

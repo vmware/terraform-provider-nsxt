@@ -13,8 +13,8 @@ import (
 )
 
 func TestAccResourceNsxtLbIcmpMonitor_basic(t *testing.T) {
-	name := "test-nsx-monitor"
-	updatedName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
+	updatedName := getAccTestResourceName()
 	testResourceName := "nsxt_lb_icmp_monitor.test"
 	port := "7887"
 	updatedPort := "8778"
@@ -33,7 +33,7 @@ func TestAccResourceNsxtLbIcmpMonitor_basic(t *testing.T) {
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXLbIcmpMonitorCheckDestroy(state, name)
+			return testAccNSXLbIcmpMonitorCheckDestroy(state, updatedName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -71,7 +71,7 @@ func TestAccResourceNsxtLbIcmpMonitor_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtLbIcmpMonitor_importBasic(t *testing.T) {
-	name := "test-nsx-monitor"
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_lb_icmp_monitor.test"
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {

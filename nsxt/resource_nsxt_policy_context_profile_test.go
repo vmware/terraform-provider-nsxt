@@ -14,8 +14,8 @@ import (
 )
 
 func TestAccResourceNsxtPolicyContextProfile_basic(t *testing.T) {
-	name := "terraform-test"
-	updatedName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
+	updatedName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_context_profile.test"
 	attributes := testAccNsxtPolicyContextProfileAttributeDomainNameTemplate()
 	updatedAttributes := testAccNsxtPolicyContextProfileAttributeURLCategoryTemplate()
@@ -66,7 +66,7 @@ func TestAccResourceNsxtPolicyContextProfile_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyContextProfile_importBasic(t *testing.T) {
-	name := "terra-test-import"
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_context_profile.test"
 	attributes := testAccNsxtPolicyContextProfileAttributeDomainNameTemplate()
 
@@ -90,8 +90,8 @@ func TestAccResourceNsxtPolicyContextProfile_importBasic(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyContextProfile_multipleAttributes(t *testing.T) {
-	name := "terraform-test"
-	updatedName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
+	updatedName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_context_profile.test"
 	attributes := testAccNsxtPolicyContextProfileAttributeDomainNameTemplate()
 	updatedAttributes := testAccNsxtPolicyContextProfileAttributeDomainNameTemplate() + testAccNsxtPolicyContextProfileAttributeAppIDTemplate()
@@ -147,8 +147,8 @@ func TestAccResourceNsxtPolicyContextProfile_multipleAttributes(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyContextProfile_subAttributes(t *testing.T) {
-	name := "terraform-test"
-	updatedName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
+	updatedName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_context_profile.test"
 	attributes := testAccNsxtPolicyContextProfileAttributeAppIDSubAttributesTemplate()
 	updatedAttributes := testAccNsxtPolicyContextProfileAttributeAppIDSubAttributesUpdatedTemplate()

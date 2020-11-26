@@ -13,8 +13,8 @@ import (
 )
 
 func TestAccResourceNsxtLogicalRouterCentralizedServicePort_basic(t *testing.T) {
-	portName := "test-nsx-logical-router-centralized-service-port"
-	updatePortName := fmt.Sprintf("%s-update", portName)
+	portName := getAccTestResourceName()
+	updatePortName := getAccTestResourceName()
 	testResourceName := "nsxt_logical_router_centralized_service_port.test"
 	transportZoneName := getOverlayTransportZoneName()
 	edgeClusterName := getEdgeClusterName()
@@ -29,7 +29,7 @@ func TestAccResourceNsxtLogicalRouterCentralizedServicePort_basic(t *testing.T) 
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXLogicalRouterCentralizedServicePortCheckDestroy(state, portName)
+			return testAccNSXLogicalRouterCentralizedServicePortCheckDestroy(state, updatePortName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -63,8 +63,8 @@ func TestAccResourceNsxtLogicalRouterCentralizedServicePort_basic(t *testing.T) 
 }
 
 func TestAccResourceNsxtLogicalRouterCentralizedServicePort_onTier0(t *testing.T) {
-	portName := "test-nsx-logical-router-centralized-service-port"
-	updatePortName := fmt.Sprintf("%s-update", portName)
+	portName := getAccTestResourceName()
+	updatePortName := getAccTestResourceName()
 	testResourceName := "nsxt_logical_router_centralized_service_port.test"
 	transportZoneName := getOverlayTransportZoneName()
 	edgeClusterName := getEdgeClusterName()
@@ -79,7 +79,7 @@ func TestAccResourceNsxtLogicalRouterCentralizedServicePort_onTier0(t *testing.T
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXLogicalRouterCentralizedServicePortCheckDestroy(state, portName)
+			return testAccNSXLogicalRouterCentralizedServicePortCheckDestroy(state, updatePortName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -113,7 +113,7 @@ func TestAccResourceNsxtLogicalRouterCentralizedServicePort_onTier0(t *testing.T
 }
 
 func TestAccResourceNsxtLogicalRouterCentralizedServicePort_importBasic(t *testing.T) {
-	portName := "test-nsx-logical-router-centralized-service-port"
+	portName := getAccTestResourceName()
 	testResourceName := "nsxt_logical_router_centralized_service_port.test"
 	transportZoneName := getOverlayTransportZoneName()
 	edgeClusterName := getEdgeClusterName()

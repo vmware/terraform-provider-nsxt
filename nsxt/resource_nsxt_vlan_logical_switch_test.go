@@ -13,8 +13,8 @@ import (
 )
 
 func TestAccResourceNsxtVlanLogicalSwitch_basic(t *testing.T) {
-	switchName := "test-nsx-logical-switch-vlan"
-	updateSwitchName := fmt.Sprintf("%s-update", switchName)
+	switchName := getAccTestResourceName()
+	updateSwitchName := getAccTestResourceName()
 	transportZoneName := getVlanTransportZoneName()
 	resourceName := "testvlan"
 	testResourceName := fmt.Sprintf("nsxt_vlan_logical_switch.%s", resourceName)
@@ -26,7 +26,7 @@ func TestAccResourceNsxtVlanLogicalSwitch_basic(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t); testAccTestMP(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXLogicalSwitchCheckDestroy(state, switchName, "nsxt_vlan_logical_switch")
+			return testAccNSXLogicalSwitchCheckDestroy(state, updateSwitchName, "nsxt_vlan_logical_switch")
 		},
 		Steps: []resource.TestStep{
 			{
@@ -55,8 +55,8 @@ func TestAccResourceNsxtVlanLogicalSwitch_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtVlanLogicalSwitch_withProfiles(t *testing.T) {
-	switchName := "test-nsx-logical-switch-with-profiles"
-	updateSwitchName := fmt.Sprintf("%s-update", switchName)
+	switchName := getAccTestResourceName()
+	updateSwitchName := getAccTestResourceName()
 	resourceName := "test_profiles"
 	testResourceName := fmt.Sprintf("nsxt_vlan_logical_switch.%s", resourceName)
 	transportZoneName := getVlanTransportZoneName()
@@ -68,7 +68,7 @@ func TestAccResourceNsxtVlanLogicalSwitch_withProfiles(t *testing.T) {
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			// Verify that the LS was deleted
-			err := testAccNSXLogicalSwitchCheckDestroy(state, switchName, "nsxt_vlan_logical_switch")
+			err := testAccNSXLogicalSwitchCheckDestroy(state, updateSwitchName, "nsxt_vlan_logical_switch")
 			if err != nil {
 				return err
 			}
@@ -106,7 +106,7 @@ func TestAccResourceNsxtVlanLogicalSwitch_withProfiles(t *testing.T) {
 }
 
 func TestAccResourceNsxtVlanLogicalSwitch_withMacPool(t *testing.T) {
-	switchName := "test-nsx-logical-switch-with-mac"
+	switchName := getAccTestResourceName()
 	resourceName := "test_mac_pool"
 	testResourceName := fmt.Sprintf("nsxt_vlan_logical_switch.%s", resourceName)
 	transportZoneName := getVlanTransportZoneName()
@@ -140,7 +140,7 @@ func TestAccResourceNsxtVlanLogicalSwitch_withMacPool(t *testing.T) {
 }
 
 func TestAccResourceNsxtVlanLogicalSwitch_importBasic(t *testing.T) {
-	switchName := "test-nsx-logical-switch"
+	switchName := getAccTestResourceName()
 	resourceName := "test"
 	testResourceName := fmt.Sprintf("nsxt_vlan_logical_switch.%s", resourceName)
 	vlan := "5"

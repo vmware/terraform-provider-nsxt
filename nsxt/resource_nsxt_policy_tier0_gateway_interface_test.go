@@ -13,11 +13,11 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services"
 )
 
-var nsxtPolicyTier0GatewayName = "test"
+var nsxtPolicyTier0GatewayName = getAccTestResourceName()
 
 func TestAccResourceNsxtPolicyTier0GatewayInterface_service(t *testing.T) {
-	name := "test-nsx-policy-tier0-interface-service"
-	updatedName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
+	updatedName := getAccTestResourceName()
 	mtu := "1500"
 	updatedMtu := "1800"
 	subnet := "1.1.12.2/24"
@@ -99,8 +99,8 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_service(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyTier0GatewayInterface_site(t *testing.T) {
-	name := "test-nsx-policy-tier0-interface-site"
-	updatedName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
+	updatedName := getAccTestResourceName()
 	mtu := "1500"
 	updatedMtu := "1800"
 	subnet := "1.1.12.2/24"
@@ -185,8 +185,8 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_site(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyTier0GatewayInterface_external(t *testing.T) {
-	name := "test-nsx-policy-tier0-interface-external"
-	updatedName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
+	updatedName := getAccTestResourceName()
 	mtu := "1500"
 	updatedMtu := "1800"
 	subnet := "1.1.12.2/24"
@@ -206,7 +206,7 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_external(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyTier0InterfaceCheckDestroy(state, name)
+			return testAccNsxtPolicyTier0InterfaceCheckDestroy(state, updatedName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -262,8 +262,8 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_external(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyTier0GatewayInterface_withID(t *testing.T) {
-	name := "test-nsx-policy-tier0-interface-id"
-	updatedName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
+	updatedName := getAccTestResourceName()
 	subnet := "1.1.12.2/24"
 	// Update to 2 addresses
 	ipv6Subnet := "4003::12/64"
@@ -276,7 +276,7 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_withID(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyTier0InterfaceCheckDestroy(state, name)
+			return testAccNsxtPolicyTier0InterfaceCheckDestroy(state, updatedName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -323,8 +323,8 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_withID(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyTier0GatewayInterface_withV6(t *testing.T) {
-	name := "test-nsx-policy-tier0-interface-v6"
-	updatedName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
+	updatedName := getAccTestResourceName()
 	subnet := "1.1.12.2/24"
 	// Update to 2 addresses
 	ipv6Subnet := "4003::12/64"
@@ -337,7 +337,7 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_withV6(t *testing.T) {
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyTier0InterfaceCheckDestroy(state, name)
+			return testAccNsxtPolicyTier0InterfaceCheckDestroy(state, updatedName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -422,7 +422,7 @@ func testAccNSXPolicyTier0InterfaceImporterGetID(s *terraform.State) (string, er
 }
 
 func TestAccResourceNsxtPolicyTier0GatewayInterface_importBasic(t *testing.T) {
-	name := "test-nsx-policy-tier0-interface-import"
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_tier0_gateway_interface.test"
 	subnet := "1.1.12.2/24"
 

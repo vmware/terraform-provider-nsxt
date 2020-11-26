@@ -14,7 +14,7 @@ import (
 )
 
 func TestAccDataSourceNsxtNsGroup_basic(t *testing.T) {
-	groupName := "terraform_ds_test_ns_group"
+	groupName := getAccTestDataSourceName()
 	testResourceName := "data.nsxt_ns_group.test"
 
 	resource.ParallelTest(t, resource.TestCase{

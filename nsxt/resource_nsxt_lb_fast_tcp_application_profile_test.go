@@ -13,8 +13,8 @@ import (
 )
 
 func TestAccResourceNsxtLbFastTCPApplicationProfile_basic(t *testing.T) {
-	name := "test-nsx-application-profile"
-	updatedName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
+	updatedName := getAccTestResourceName()
 	testResourceName := "nsxt_lb_fast_tcp_application_profile.test"
 	closeTimeout := "10"
 	updatedCloseTimeout := "20"
@@ -32,7 +32,7 @@ func TestAccResourceNsxtLbFastTCPApplicationProfile_basic(t *testing.T) {
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXLbFastTCPApplicationProfileCheckDestroy(state, name)
+			return testAccNSXLbFastTCPApplicationProfileCheckDestroy(state, updatedName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -63,7 +63,7 @@ func TestAccResourceNsxtLbFastTCPApplicationProfile_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtLbFastTCPApplicationProfile_importBasic(t *testing.T) {
-	name := "test-nsx-application-profile"
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_lb_fast_tcp_application_profile.test"
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {

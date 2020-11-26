@@ -12,7 +12,7 @@ import (
 )
 
 func TestAccDataSourceNsxtPolicyGatewayPolicy_basic(t *testing.T) {
-	name := "terraform_ds_test"
+	name := getAccTestDataSourceName()
 	category := "LocalGatewayRules"
 	testResourceName := "data.nsxt_policy_gateway_policy.test"
 	withCategory := fmt.Sprintf(`category = "%s"`, category)

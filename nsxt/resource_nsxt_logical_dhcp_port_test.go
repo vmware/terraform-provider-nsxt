@@ -12,8 +12,8 @@ import (
 )
 
 func TestAccResourceNsxtLogicalDhcpPort_basic(t *testing.T) {
-	portName := "test-nsx-logical-dhcp-port"
-	updatePortName := fmt.Sprintf("%s-update", portName)
+	portName := getAccTestResourceName()
+	updatePortName := getAccTestResourceName()
 	testResourceName := "nsxt_logical_dhcp_port.test"
 	transportZoneName := getOverlayTransportZoneName()
 	edgeClusterName := getEdgeClusterName()
@@ -22,7 +22,7 @@ func TestAccResourceNsxtLogicalDhcpPort_basic(t *testing.T) {
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXLogicalPortCheckDestroy(state, portName)
+			return testAccNSXLogicalPortCheckDestroy(state, updatePortName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -54,7 +54,7 @@ func TestAccResourceNsxtLogicalDhcpPort_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtLogicalDhcpPort_importBasic(t *testing.T) {
-	portName := "test-nsx-logical-dhcp-port"
+	portName := getAccTestResourceName()
 	testResourceName := "nsxt_logical_dhcp_port.test"
 	transportZoneName := getOverlayTransportZoneName()
 	edgeClusterName := getEdgeClusterName()

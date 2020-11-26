@@ -13,7 +13,7 @@ import (
 )
 
 var accTestPolicyDhcpV6StaticBindingCreateAttributes = map[string]string{
-	"display_name":    "terra-test",
+	"display_name":    getAccTestResourceName(),
 	"description":     "terraform created",
 	"ip_addresses":    "1001::2",
 	"lease_time":      "3600",
@@ -25,7 +25,7 @@ var accTestPolicyDhcpV6StaticBindingCreateAttributes = map[string]string{
 }
 
 var accTestPolicyDhcpV6StaticBindingUpdateAttributes = map[string]string{
-	"display_name":    "terra-test-updated",
+	"display_name":    getAccTestResourceName(),
 	"description":     "terraform updated",
 	"lease_time":      "500",
 	"preferred_time":  "380",
@@ -41,11 +41,11 @@ var testAccPolicyDhcpV6StaticBindingResourceName = "nsxt_policy_dhcp_v6_static_b
 func TestAccResourceNsxtPolicyDhcpV6StaticBinding_basic(t *testing.T) {
 	testResourceName := testAccPolicyDhcpV6StaticBindingResourceName
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyDhcpV6StaticBindingCheckDestroy(state, accTestPolicyDhcpV6StaticBindingCreateAttributes["display_name"])
+			return testAccNsxtPolicyDhcpV6StaticBindingCheckDestroy(state, accTestPolicyDhcpV6StaticBindingUpdateAttributes["display_name"])
 		},
 		Steps: []resource.TestStep{
 			{
@@ -114,9 +114,9 @@ func TestAccResourceNsxtPolicyDhcpV6StaticBinding_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyDhcpV6StaticBinding_importBasic(t *testing.T) {
-	name := "terra-test-import"
+	name := getAccTestResourceName()
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {

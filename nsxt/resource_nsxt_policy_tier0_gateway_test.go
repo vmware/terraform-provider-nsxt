@@ -12,8 +12,8 @@ import (
 )
 
 func TestAccResourceNsxtPolicyTier0Gateway_basic(t *testing.T) {
-	name := "test-nsx-policy-tier0-basic"
-	updateName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
+	updateName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_tier0_gateway.test"
 	failoverMode := "NON_PREEMPTIVE"
 
@@ -21,7 +21,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_basic(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyTier0CheckDestroy(state, name)
+			return testAccNsxtPolicyTier0CheckDestroy(state, updateName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -66,16 +66,16 @@ func TestAccResourceNsxtPolicyTier0Gateway_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyTier0Gateway_withId(t *testing.T) {
-	name := "test-nsx-policy-tier0-id"
+	name := getAccTestResourceName()
 	id := "test-id"
-	updateName := fmt.Sprintf("%s-update", name)
+	updateName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_tier0_gateway.test"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyTier0CheckDestroy(state, name)
+			return testAccNsxtPolicyTier0CheckDestroy(state, updateName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -103,7 +103,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_withId(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyTier0Gateway_withSubnets(t *testing.T) {
-	name := "test-nsx-policy-tier0-subnets"
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_tier0_gateway.test"
 
 	resource.Test(t, resource.TestCase{
@@ -130,7 +130,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_withSubnets(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyTier0Gateway_withDHCP(t *testing.T) {
-	name := "test-nsx-policy-tier0-dhcp"
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_tier0_gateway.test"
 
 	resource.Test(t, resource.TestCase{
@@ -169,7 +169,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_withDHCP(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyTier0Gateway_redistribution(t *testing.T) {
-	name := "test-nsx-policy-tier0-redistribution"
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_tier0_gateway.test"
 
 	resource.Test(t, resource.TestCase{
@@ -219,8 +219,8 @@ func TestAccResourceNsxtPolicyTier0Gateway_redistribution(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyTier0Gateway_withEdgeCluster(t *testing.T) {
-	name := "test-nsx-policy-tier0-ec"
-	updateName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
+	updateName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_tier0_gateway.test"
 	edgeClusterName := getEdgeClusterName()
 
@@ -228,7 +228,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_withEdgeCluster(t *testing.T) {
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyTier0CheckDestroy(state, name)
+			return testAccNsxtPolicyTier0CheckDestroy(state, updateName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -307,8 +307,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_withEdgeCluster(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyTier0Gateway_createWithBGP(t *testing.T) {
-	name := "test-nsx-policy-tier0-bgp"
-	updateName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_tier0_gateway.test"
 	edgeClusterName := getEdgeClusterName()
 
@@ -320,10 +319,10 @@ func TestAccResourceNsxtPolicyTier0Gateway_createWithBGP(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyTier0UpdateWithEcTemplate(updateName, edgeClusterName),
+				Config: testAccNsxtPolicyTier0UpdateWithEcTemplate(name, edgeClusterName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTier0Exists(testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", updateName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttrSet(testResourceName, "edge_cluster_path"),
 					resource.TestCheckResourceAttr(realizationResourceName, "state", "REALIZED"),
@@ -348,8 +347,8 @@ func TestAccResourceNsxtPolicyTier0Gateway_createWithBGP(t *testing.T) {
 
 // TODO: add route_distinguisher when VNI pool DS is exposed
 func TestAccResourceNsxtPolicyTier0Gateway_withVRF(t *testing.T) {
-	name := "test-nsx-policy-tier0-vrf"
-	updateName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
+	updateName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_tier0_gateway.test"
 	testInterfaceName := "nsxt_policy_tier0_gateway_interface.test"
 
@@ -357,7 +356,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_withVRF(t *testing.T) {
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyTier0CheckDestroy(state, name)
+			return testAccNsxtPolicyTier0CheckDestroy(state, updateName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -400,7 +399,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_withVRF(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyTier0Gateway_importBasic(t *testing.T) {
-	name := "test-nsx-policy-tier0-import"
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_tier0_gateway.test"
 	failoverMode := "PREEMPTIVE"
 

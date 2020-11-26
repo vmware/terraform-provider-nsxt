@@ -19,8 +19,8 @@ func TestAccResourceNsxtPolicyTier0GatewayHaVipConfig_basic(t *testing.T) {
 	subnet2 := "1.1.12.2/24"
 	vipSubnet := "1.1.12.4/24"
 	updatedVipSubnet := "1.1.12.5/24"
-	tier0Name := "ha_tier0"
-	updatedTier0Name := "updated_ha_tier0"
+	tier0Name := getAccTestResourceName()
+	updatedTier0Name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_tier0_gateway_ha_vip_config.test"
 
 	resource.Test(t, resource.TestCase{

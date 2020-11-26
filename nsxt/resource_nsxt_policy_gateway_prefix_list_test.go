@@ -17,7 +17,7 @@ import (
 var testAccResourcePolicyGWPrefixListName = "nsxt_policy_gateway_prefix_list.test"
 
 func TestAccResourceNsxtPolicyGatewayPrefixList_basic(t *testing.T) {
-	name := "test-nsx-policy-gw-prefix-list-basic"
+	name := getAccTestResourceName()
 	action := model.PrefixEntry_ACTION_DENY
 	actionUpdated := model.PrefixEntry_ACTION_PERMIT
 	ge := "20"
@@ -76,7 +76,7 @@ func TestAccResourceNsxtPolicyGatewayPrefixList_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyGatewayPrefixList_import(t *testing.T) {
-	name := "test-nsx-policy-gw-prefix-list-import"
+	name := getAccTestResourceName()
 	action := model.PrefixEntry_ACTION_DENY
 	ge := "0"
 	le := "0"

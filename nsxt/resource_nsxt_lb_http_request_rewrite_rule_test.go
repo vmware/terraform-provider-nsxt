@@ -13,7 +13,7 @@ import (
 )
 
 func TestAccResourceNsxtLbHttpRequestRewriteRule_basic(t *testing.T) {
-	name := "test"
+	name := getAccTestResourceName()
 	fullName := "nsxt_lb_http_request_rewrite_rule.test"
 	matchStrategy := "ALL"
 	updatedMatchStrategy := "ANY"
@@ -172,7 +172,7 @@ func testLbRuleConditionAttr(resourceName string, conditionType string, setHash 
 }
 
 func TestAccResourceNsxtLbHttpRequestRewriteRule_importBasic(t *testing.T) {
-	name := "test"
+	name := getAccTestResourceName()
 	resourceName := "nsxt_lb_http_request_rewrite_rule.test"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },

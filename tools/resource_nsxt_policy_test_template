@@ -12,13 +12,13 @@ import (
 )
 
 var accTestPolicy<!RESOURCE!>CreateAttributes = map[string]string{
-	"display_name": "terra-test",
+	"display_name": getAccTestResourceName(),
 	"description":  "terraform created",
         <!TEST_ATTRS_CREATE!>
 }
 
 var accTestPolicy<!RESOURCE!>UpdateAttributes = map[string]string{
-	"display_name": "terra-test-updated",
+	"display_name": getAccTestResourceName(),
 	"description":  "terraform updated",
         <!TEST_ATTRS_UPDATE!>
 }
@@ -26,11 +26,11 @@ var accTestPolicy<!RESOURCE!>UpdateAttributes = map[string]string{
 func TestAccResourceNsxtPolicy<!RESOURCE!>_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_<!resource_lower!>.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicy<!RESOURCE!>CheckDestroy(state, accTestPolicy<!RESOURCE!>CreateAttributes["display_name"])
+			return testAccNsxtPolicy<!RESOURCE!>CheckDestroy(state, accTestPolicy<!RESOURCE!>UpdateAttributes["display_name"])
 		},
 		Steps: []resource.TestStep{
 			{
@@ -75,10 +75,10 @@ func TestAccResourceNsxtPolicy<!RESOURCE!>_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicy<!RESOURCE!>_importBasic(t *testing.T) {
-	name := "terra-test-import"
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_<!resource_lower!>.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {

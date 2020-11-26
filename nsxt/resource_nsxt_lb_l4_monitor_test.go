@@ -29,8 +29,8 @@ func TestAccResourceNsxtLbUdpMonitor_importBasic(t *testing.T) {
 }
 
 func testAccResourceNsxtLbL4MonitorBasic(t *testing.T, protocol string) {
-	name := "test-nsx-monitor"
-	updatedName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
+	updatedName := getAccTestResourceName()
 	testResourceName := fmt.Sprintf("nsxt_lb_%s_monitor.test", protocol)
 	port := "7887"
 	updatedPort := "8778"
@@ -50,7 +50,7 @@ func testAccResourceNsxtLbL4MonitorBasic(t *testing.T, protocol string) {
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXLbL4MonitorCheckDestroy(protocol, state, name)
+			return testAccNSXLbL4MonitorCheckDestroy(protocol, state, updatedName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -90,7 +90,7 @@ func testAccResourceNsxtLbL4MonitorBasic(t *testing.T, protocol string) {
 }
 
 func testAccResourceNsxtLbL4MonitorImport(t *testing.T, protocol string) {
-	name := "test-nsx-monitor"
+	name := getAccTestResourceName()
 	testResourceName := fmt.Sprintf("nsxt_lb_%s_monitor.test", protocol)
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
