@@ -41,7 +41,7 @@ func testAccResourceNsxtLbL4MonitorBasic(t *testing.T, protocol string) {
 	send := "Client hello"
 	receive := "Server hello"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
 			testAccTestMP(t)

@@ -33,10 +33,10 @@ func TestAccResourceNsxtLbHttpForwardingRule_basic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXLbHTTPForwardingRuleCreateTemplate(matchStrategy, matchType, "true", "false"),
+				Config: testAccNSXLbHTTPForwardingRuleCreateTemplate(name, matchStrategy, matchType, "true", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXLbHTTPForwardingRuleExists(name, fullName),
-					resource.TestCheckResourceAttr(fullName, "display_name", "test"),
+					resource.TestCheckResourceAttr(fullName, "display_name", name),
 					resource.TestCheckResourceAttr(fullName, "description", "test description"),
 					resource.TestCheckResourceAttr(fullName, "match_strategy", matchStrategy),
 					testLbRuleConditionCount(fullName, "body", 2),
@@ -89,10 +89,10 @@ func TestAccResourceNsxtLbHttpForwardingRule_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXLbHTTPForwardingRuleCreateTemplate(updatedMatchStrategy, updatedMatchType, "false", "true"),
+				Config: testAccNSXLbHTTPForwardingRuleCreateTemplate(name, updatedMatchStrategy, updatedMatchType, "false", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXLbHTTPForwardingRuleExists(name, fullName),
-					resource.TestCheckResourceAttr(fullName, "display_name", "test"),
+					resource.TestCheckResourceAttr(fullName, "display_name", name),
 					resource.TestCheckResourceAttr(fullName, "description", "test description"),
 					resource.TestCheckResourceAttr(fullName, "match_strategy", updatedMatchStrategy),
 					testLbRuleConditionCount(fullName, "body", 2),
@@ -228,17 +228,17 @@ func testAccNSXLbHTTPForwardingRuleCheckDestroy(state *terraform.State, displayN
 	return nil
 }
 
-func testAccNSXLbHTTPForwardingRuleCreateTemplate(matchStrategy string, matchType string, caseSensitive string, inverse string) string {
+func testAccNSXLbHTTPForwardingRuleCreateTemplate(name string, matchStrategy string, matchType string, caseSensitive string, inverse string) string {
 	return fmt.Sprintf(`
 resource "nsxt_lb_pool" "pool" {
   description = "test description"
 }
 
 resource "nsxt_lb_http_forwarding_rule" "test" {
-  display_name   = "test"
+  display_name   = "%s"
   description    = "test description"
   match_strategy = "%s"
-`, matchStrategy) +
+`, name, matchStrategy) +
 		testAccNSXLbRuleValueConditionTemplate("body", "value", "EQUALS", "false", "false", 1) +
 		testAccNSXLbRuleValueConditionTemplate("body", "value", matchType, caseSensitive, inverse, 2) +
 		testAccNSXLbRuleNameValueConditionTemplate("header", "EQUALS", "false", "false", 1) +

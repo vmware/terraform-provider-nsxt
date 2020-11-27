@@ -24,7 +24,7 @@ func TestAccResourceNsxtLbIcmpMonitor_basic(t *testing.T) {
 	dataLength := "100"
 	updatedCount := "5"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
 			testAccTestMP(t)
@@ -73,7 +73,7 @@ func TestAccResourceNsxtLbIcmpMonitor_basic(t *testing.T) {
 func TestAccResourceNsxtLbIcmpMonitor_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
 	testResourceName := "nsxt_lb_icmp_monitor.test"
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
 			testAccTestMP(t)

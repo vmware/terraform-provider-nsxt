@@ -23,7 +23,7 @@ func TestAccResourceNsxtLbFastTCPApplicationProfile_basic(t *testing.T) {
 	mirroring := "true"
 	updatedMirroring := "false"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
 			testAccTestMP(t)
@@ -65,7 +65,7 @@ func TestAccResourceNsxtLbFastTCPApplicationProfile_basic(t *testing.T) {
 func TestAccResourceNsxtLbFastTCPApplicationProfile_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
 	testResourceName := "nsxt_lb_fast_tcp_application_profile.test"
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
 			testAccTestMP(t)

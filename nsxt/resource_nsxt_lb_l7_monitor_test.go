@@ -40,7 +40,7 @@ func testAccResourceNsxtLbL7MonitorBasic(t *testing.T, protocol string) {
 	body1 := "XXXXXXXXXXXXXXXXXXX"
 	body2 := "YYYYYYYYYYYYYYYYYYY"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
 			testAccTestMP(t)
@@ -90,7 +90,7 @@ func TestAccResourceNsxtLbHTTPSMonitor_withAuth(t *testing.T) {
 	name := getAccTestResourceName()
 	testResourceName := "nsxt_lb_https_monitor.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
 			testAccTestMP(t)

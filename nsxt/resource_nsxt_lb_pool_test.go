@@ -23,7 +23,7 @@ func TestAccResourceNsxtLbPool_basic(t *testing.T) {
 	snatTranslationType := "TRANSPARENT"
 	updatedSnatTranslationType := "SNAT_AUTO_MAP"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
 			testAccTestMP(t)
@@ -69,7 +69,7 @@ func TestAccResourceNsxtLbPool_withMonitors(t *testing.T) {
 	name := getAccTestResourceName()
 	testResourceName := "nsxt_lb_pool.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
 			testAccTestMP(t)
@@ -121,7 +121,7 @@ func TestAccResourceNsxtLbPool_withIpSnat(t *testing.T) {
 	ipAddress := "1.1.1.1"
 	updatedIPAddress := "1.1.1.2-1.1.1.20"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
 			testAccTestMP(t)
@@ -176,7 +176,7 @@ func TestAccResourceNsxtLbPool_withMember(t *testing.T) {
 	updatedSnatTranslationType := "SNAT_AUTO_MAP"
 	memberIP := "1.1.1.1"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
 			testAccTestMP(t)
@@ -230,7 +230,7 @@ func TestAccResourceNsxtLbPool_withMemberGroup(t *testing.T) {
 	port := "50"
 	updatedPort := "60"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
 			testAccTestMP(t)
@@ -285,7 +285,7 @@ func TestAccResourceNsxtLbPool_withMemberGroup(t *testing.T) {
 func TestAccResourceNsxtLbPool_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
 	testResourceName := "nsxt_lb_pool.test"
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
 			testAccTestMP(t)

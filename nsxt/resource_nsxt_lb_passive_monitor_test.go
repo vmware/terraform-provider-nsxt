@@ -20,7 +20,7 @@ func TestAccResourceNsxtLbPassiveMonitor_basic(t *testing.T) {
 	timeout := "20"
 	updatedTimeout := "7"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
 			testAccTestMP(t)
@@ -61,7 +61,7 @@ func TestAccResourceNsxtLbPassiveMonitor_basic(t *testing.T) {
 func TestAccResourceNsxtLbPassiveMonitor_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
 	testResourceName := "nsxt_lb_passive_monitor.test"
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
 			testAccTestMP(t)

@@ -12,6 +12,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
+var accTestLbVirtualServerHelper1Name = getAccTestResourceName()
+var accTestLbVirtualServerHelper2Name = getAccTestResourceName()
+
 func TestAccResourceNsxtLbTCPVirtualServer_basic(t *testing.T) {
 	testAccResourceNsxtLbL4VirtualServer(t, "tcp")
 }
@@ -36,7 +39,7 @@ func testAccResourceNsxtLbL4VirtualServer(t *testing.T, protocol string) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXLbL4VirtualServerCreateTemplate(protocol, port, memberPort),
+				Config: testAccNSXLbL4VirtualServerCreateTemplate(name, protocol, port, memberPort),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXLbL4VirtualServerExists(name, fullName),
 					resource.TestCheckResourceAttr(fullName, "display_name", name),
@@ -59,7 +62,7 @@ func testAccResourceNsxtLbL4VirtualServer(t *testing.T, protocol string) {
 				),
 			},
 			{
-				Config: testAccNSXLbL4VirtualServerCreateTemplate(protocol, updatedPort, updatedMemberPort),
+				Config: testAccNSXLbL4VirtualServerCreateTemplate(name, protocol, updatedPort, updatedMemberPort),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXLbL4VirtualServerExists(name, fullName),
 					resource.TestCheckResourceAttr(fullName, "display_name", name),
@@ -168,28 +171,28 @@ func testAccNSXLbL4VirtualServerCheckDestroy(state *terraform.State, protocol st
 	return nil
 }
 
-func testAccNSXLbL4VirtualServerCreateTemplate(protocol string, port string, memberPort string) string {
+func testAccNSXLbL4VirtualServerCreateTemplate(name string, protocol string, port string, memberPort string) string {
 	return fmt.Sprintf(`
 resource "nsxt_lb_fast_%s_application_profile" "test" {
-  display_name = "lb virtual server test"
+  display_name = "%s"
 }
 
 resource "nsxt_lb_source_ip_persistence_profile" "test" {
-  display_name = "lb virtual server test"
+  display_name = "%s"
 }
 
 resource "nsxt_lb_pool" "test" {
-  display_name = "lb virtual server test"
+  display_name = "%s"
   algorithm    = "ROUND_ROBIN"
 }
 
 resource "nsxt_lb_pool" "sorry" {
-  display_name = "lb virtual server test sorry pool"
+  display_name = "%s"
   algorithm    = "ROUND_ROBIN"
 }
 
 resource "nsxt_lb_%s_virtual_server" "test" {
-  display_name               = "test"
+  display_name               = "%s"
   description                = "test description"
   access_log_enabled         = false
   application_profile_id     = "${nsxt_lb_fast_%s_application_profile.test.id}"
@@ -208,7 +211,7 @@ resource "nsxt_lb_%s_virtual_server" "test" {
     tag   = "tag1"
   }
 }
-`, protocol, protocol, protocol, port, memberPort)
+`, protocol, name, name, accTestLbVirtualServerHelper1Name, accTestLbVirtualServerHelper2Name, protocol, name, protocol, port, memberPort)
 }
 
 func testAccNSXLbL4VirtualServerCreateTemplateTrivial(protocol string) string {

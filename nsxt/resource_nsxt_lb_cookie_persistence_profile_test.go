@@ -21,7 +21,7 @@ func TestAccResourceNsxtLbCookiePersistenceProfile_basic(t *testing.T) {
 	cookieName := "my_cookie"
 	updatedCookieName := "new_cookie"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
 			testAccTestMP(t)
@@ -75,7 +75,7 @@ func TestAccResourceNsxtLbCookiePersistenceProfile_insertMode(t *testing.T) {
 	cookiePath := "/subfolder1"
 	updatedCookiePath := "/subfolder1"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
 			testAccTestMP(t)
@@ -134,7 +134,7 @@ func TestAccResourceNsxtLbCookiePersistenceProfile_insertMode(t *testing.T) {
 func TestAccResourceNsxtLbCookiePersistenceProfile_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
 	testResourceName := "nsxt_lb_cookie_persistence_profile.test"
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
 			testAccTestMP(t)

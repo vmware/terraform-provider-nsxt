@@ -28,10 +28,10 @@ func TestAccResourceNsxtLbHttpResponseRewriteRule_basic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXLbHTTPResponseRewriteRuleCreateTemplate(matchStrategy, matchType, "true", "false"),
+				Config: testAccNSXLbHTTPResponseRewriteRuleCreateTemplate(name, matchStrategy, matchType, "true", "false"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXLbHTTPResponseRewriteRuleExists(name, fullName),
-					resource.TestCheckResourceAttr(fullName, "display_name", "test"),
+					resource.TestCheckResourceAttr(fullName, "display_name", name),
 					resource.TestCheckResourceAttr(fullName, "description", "test description"),
 					resource.TestCheckResourceAttr(fullName, "match_strategy", matchStrategy),
 					testLbRuleConditionCount(fullName, "request_header", 1),
@@ -80,10 +80,10 @@ func TestAccResourceNsxtLbHttpResponseRewriteRule_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXLbHTTPResponseRewriteRuleCreateTemplate(updatedMatchStrategy, updatedMatchType, "false", "true"),
+				Config: testAccNSXLbHTTPResponseRewriteRuleCreateTemplate(name, updatedMatchStrategy, updatedMatchType, "false", "true"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXLbHTTPResponseRewriteRuleExists(name, fullName),
-					resource.TestCheckResourceAttr(fullName, "display_name", "test"),
+					resource.TestCheckResourceAttr(fullName, "display_name", name),
 					resource.TestCheckResourceAttr(fullName, "description", "test description"),
 					resource.TestCheckResourceAttr(fullName, "match_strategy", updatedMatchStrategy),
 					testLbRuleConditionCount(fullName, "request_header", 1),
@@ -212,13 +212,13 @@ func testAccNSXLbHTTPResponseRewriteRuleCheckDestroy(state *terraform.State, dis
 	return nil
 }
 
-func testAccNSXLbHTTPResponseRewriteRuleCreateTemplate(matchStrategy string, matchType string, caseSensitive string, inverse string) string {
+func testAccNSXLbHTTPResponseRewriteRuleCreateTemplate(name string, matchStrategy string, matchType string, caseSensitive string, inverse string) string {
 	return fmt.Sprintf(`
 resource "nsxt_lb_http_response_rewrite_rule" "test" {
-  display_name   = "test"
+  display_name   = "%s"
   description    = "test description"
   match_strategy = "%s"
-`, matchStrategy) +
+`, name, matchStrategy) +
 		testAccNSXLbRuleNameValueConditionTemplate("request_header", "EQUALS", "true", "true", 1) +
 		testAccNSXLbRuleNameValueConditionTemplate("response_header", matchType, caseSensitive, inverse, 2) +
 		testAccNSXLbRuleNameValueConditionTemplate("cookie", matchType, caseSensitive, inverse, 1) +

@@ -17,7 +17,7 @@ func TestAccResourceNsxtLbClientSSLProfile_basic(t *testing.T) {
 	updatedName := getAccTestResourceName()
 	testResourceName := "nsxt_lb_client_ssl_profile.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
 			testAccTestMP(t)
@@ -66,7 +66,7 @@ func TestAccResourceNsxtLbClientSSLProfile_basic(t *testing.T) {
 func TestAccResourceNsxtLbClientSSLProfile_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
 	testResourceName := "nsxt_lb_client_ssl_profile.test"
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
 			testAccTestMP(t)
