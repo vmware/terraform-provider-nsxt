@@ -291,7 +291,7 @@ func TestAccResourceNsxtFirewallSection_ordered(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXFirewallSectionCreateOrderedTemplate(),
+				Config: testAccNSXFirewallSectionCreateOrderedTemplate(sectionNames),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXFirewallSectionExists(sectionNames[0], testResourceNames[0]),
 					resource.TestCheckResourceAttr(testResourceNames[0], "display_name", sectionNames[0]),
@@ -305,7 +305,7 @@ func TestAccResourceNsxtFirewallSection_ordered(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXFirewallSectionUpdateOrderedTemplate(),
+				Config: testAccNSXFirewallSectionUpdateOrderedTemplate(sectionNames),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXFirewallSectionExists(sectionNames[0], testResourceNames[0]),
 					resource.TestCheckResourceAttr(testResourceNames[0], "display_name", sectionNames[0]),
@@ -645,16 +645,16 @@ resource "nsxt_firewall_section" "test" {
 }`, updatedName, tags, tos)
 }
 
-func testAccNSXFirewallSectionCreateOrderedTemplate() string {
-	return `
+func testAccNSXFirewallSectionCreateOrderedTemplate(names [4]string) string {
+	return fmt.Sprintf(`
 resource "nsxt_firewall_section" "test1" {
-  display_name = "s1"
+  display_name = "%s"
   section_type = "LAYER3"
   stateful     = true
 }
 
 resource "nsxt_firewall_section" "test2" {
-  display_name  = "s2"
+  display_name  = "%s"
   section_type  = "LAYER3"
   insert_before = "${nsxt_firewall_section.test1.id}"
   stateful      = true
@@ -669,44 +669,44 @@ resource "nsxt_firewall_section" "test2" {
 }
 
 resource "nsxt_firewall_section" "test3" {
-  display_name  = "s3"
+  display_name  = "%s"
   section_type  = "LAYER3"
   insert_before = "${nsxt_firewall_section.test2.id}"
   stateful      = true
 }
 
-`
+`, names[0], names[1], names[2])
 }
 
-func testAccNSXFirewallSectionUpdateOrderedTemplate() string {
-	return `
+func testAccNSXFirewallSectionUpdateOrderedTemplate(names [4]string) string {
+	return fmt.Sprintf(`
 resource "nsxt_firewall_section" "test1" {
-  display_name  = "s1"
+  display_name  = "%s"
   section_type  = "LAYER3"
   insert_before = "${nsxt_firewall_section.test4.id}"
   stateful      = true
 }
 
 resource "nsxt_firewall_section" "test2" {
-  display_name  = "s2"
+  display_name  = "%s"
   section_type  = "LAYER3"
   insert_before = "${nsxt_firewall_section.test1.id}"
   stateful      = true
 }
 
 resource "nsxt_firewall_section" "test3" {
-  display_name = "s3"
+  display_name = "%s"
   section_type = "LAYER3"
   stateful     = true
 }
 
 resource "nsxt_firewall_section" "test4" {
-  display_name = "s4"
+  display_name = "%s"
   section_type = "LAYER3"
   stateful     = true
 }
 
-`
+`, names[0], names[1], names[2], names[3])
 }
 
 func testAccNSXEdgeFirewallSectionCreateTemplate(edgeCluster string, transportZone string, name string, ruleName string) string {

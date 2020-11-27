@@ -8,6 +8,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
+var testPolicySegmentHelper1Name = getAccTestResourceName()
+var testPolicySegmentHelper2Name = getAccTestResourceName()
+
 func TestAccResourceNsxtPolicySegment_basicImport(t *testing.T) {
 	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_segment.test"
@@ -365,10 +368,10 @@ func testAccNsxtPolicySegmentCheckDestroy(state *terraform.State, displayName st
 }
 
 func testAccNsxtPolicySegmentDeps(tzName string) string {
-	return testAccNSXPolicyTransportZoneReadTemplate(tzName, false, true) + `
+	return testAccNSXPolicyTransportZoneReadTemplate(tzName, false, true) + fmt.Sprintf(`
 
 resource "nsxt_policy_tier1_gateway" "tier1ForSegments" {
-  display_name              = "t1gw"
+  display_name              = "%s"
   description               = "Acceptance Test"
   default_rule_logging      = "true"
   enable_firewall           = "false"
@@ -380,7 +383,7 @@ resource "nsxt_policy_tier1_gateway" "tier1ForSegments" {
 }
 
 resource "nsxt_policy_tier1_gateway" "anotherTier1ForSegments" {
-  display_name              = "t1gw-b"
+  display_name              = "%s"
   description               = "Another Tier1"
   default_rule_logging      = "true"
   enable_firewall           = "false"
@@ -389,7 +392,7 @@ resource "nsxt_policy_tier1_gateway" "anotherTier1ForSegments" {
   failover_mode             = "NON_PREEMPTIVE"
   pool_allocation           = "ROUTING"
   route_advertisement_types = ["TIER1_STATIC_ROUTES", "TIER1_CONNECTED"]
-}`
+}`, testPolicySegmentHelper1Name, testPolicySegmentHelper2Name)
 }
 
 func testAccNsxtPolicySegmentImportTemplate(tzName string, name string) string {
