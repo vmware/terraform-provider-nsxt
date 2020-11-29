@@ -540,16 +540,16 @@ func testAccNsxtPolicyGroupExists(resourceName string, domainName string) resour
 
 		var err error
 		if isPolicyGlobalManager(testAccProvider.Meta()) {
-			domainId := domainName
+			domainID := domainName
 			if domainName != "default" {
 				// get the non default domain id
-				domainId, err = testGetObjIDByName(domainName, "Domain")
+				domainID, err = testGetObjIDByName(domainName, "Domain")
 				if err != nil {
 					return fmt.Errorf("Error while retrieving policy domain %s. Error: %v", domainName, err)
 				}
 			}
 			nsxClient := gm_domains.NewDefaultGroupsClient(connector)
-			_, err = nsxClient.Get(domainId, resourceID)
+			_, err = nsxClient.Get(domainID, resourceID)
 		} else {
 			nsxClient := domains.NewDefaultGroupsClient(connector)
 			_, err = nsxClient.Get(domainName, resourceID)
@@ -573,16 +573,16 @@ func testAccNsxtPolicyGroupCheckDestroy(state *terraform.State, displayName stri
 
 		resourceID := rs.Primary.Attributes["id"]
 		isPolicyGlobalManager := isPolicyGlobalManager(testAccProvider.Meta())
-		domainId := domainName
+		domainID := domainName
 		if isPolicyGlobalManager && domainName != "default" {
 			// get the non default domain id
 			var errDomain error
-			domainId, errDomain = testGetObjIDByName(domainName, "Domain")
+			domainID, errDomain = testGetObjIDByName(domainName, "Domain")
 			if errDomain != nil {
 				return fmt.Errorf("Error while retrieving policy domain %s. Error: %v", domainName, errDomain)
 			}
 		}
-		exists, err := resourceNsxtPolicyGroupExistsInDomain(resourceID, domainId, connector, isPolicyGlobalManager)
+		exists, err := resourceNsxtPolicyGroupExistsInDomain(resourceID, domainID, connector, isPolicyGlobalManager)
 		if err != nil {
 			return err
 		}
