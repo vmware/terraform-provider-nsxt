@@ -345,6 +345,45 @@ func TestAccResourceNsxtGlobalPolicyGatewayPolicy_withSite(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtGlobalPolicyGatewayPolicy_withDomain(t *testing.T) {
+	name := "terraform-test"
+	siteName := getTestSiteName()
+	domainName := "new-domain"
+	testResourceName := "nsxt_policy_gateway_policy.test"
+	comments := "Acceptance test create"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccOnlyGlobalManager(t)
+			testAccEnvDefined(t, "NSXT_TEST_SITE_NAME")
+			testAccPreCheck(t)
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyGatewayPolicyCheckDestroy(state, name, domainName)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtGlobalPolicyGatewayPolicyWithDomain(name, comments, domainName, siteName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyGatewayPolicyExists(testResourceName, domainName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "category", "LocalGatewayRules"),
+					resource.TestCheckResourceAttr(testResourceName, "domain", domainName),
+					resource.TestCheckResourceAttr(testResourceName, "comments", comments),
+					resource.TestCheckResourceAttr(testResourceName, "locked", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "sequence_number", "3"),
+					resource.TestCheckResourceAttr(testResourceName, "stateful", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "tcp_strict", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.#", "0"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+				),
+			},
+		},
+	})
+}
+
 func testAccNsxtPolicyGatewayPolicyExists(resourceName string, domainName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
@@ -598,6 +637,33 @@ resource "nsxt_policy_gateway_policy" "test" {
   }
 
 }`, name, comments)
+}
+
+func testAccNsxtGlobalPolicyGatewayPolicyWithDomain(name string, comments string, domainName string, siteName string) string {
+	return fmt.Sprintf(`
+resource "nsxt_policy_domain" "domain1" {
+  display_name = "%s"
+  sites        = ["%s"]
+  nsx_id       = "%s"
+}
+
+resource "nsxt_policy_gateway_policy" "test" {
+  display_name    = "%s"
+  description     = "Acceptance Test"
+  category        = "LocalGatewayRules"
+  comments        = "%s"
+  locked          = true
+  sequence_number = 3
+  stateful        = true
+  tcp_strict      = false
+  domain          = nsxt_policy_domain.domain1.id
+
+  tag {
+    scope = "color"
+    tag   = "orange"
+  }
+
+}`, domainName, siteName, domainName, name, comments)
 }
 
 func testAccNsxtGlobalPolicyGatewayPolicyWithRule(name string, direction string, protocol string, ruleTag string, domainName string) string {

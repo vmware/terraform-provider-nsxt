@@ -131,6 +131,40 @@ func TestAccResourceNsxtGlobalPolicyGroup_singleIPAddressCriteria(t *testing.T) 
 	})
 }
 
+func TestAccResourceNsxtGlobalPolicyGroup_withDomain(t *testing.T) {
+	name := "test-nsx-global-policy-group-domain"
+	testResourceName := "nsxt_policy_group.test"
+	domainName := "new-domain"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyGlobalManager(t)
+			testAccEnvDefined(t, "NSXT_TEST_SITE_NAME")
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyGroupCheckDestroy(state, name, domainName)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtGlobalPolicyGroupCreateTemplateWithDomain(name, domainName, getTestSiteName()),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyGroupExists(testResourceName, domainName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "domain", domainName),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckNoResourceAttr(testResourceName, "conjunction"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.#", "1"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtPolicyGroup_multipleIPAddressCriteria(t *testing.T) {
 	name := "test-nsx-policy-group-ipaddrs"
 	updatedName := fmt.Sprintf("%s-update", name)
@@ -506,14 +540,22 @@ func testAccNsxtPolicyGroupExists(resourceName string, domainName string) resour
 
 		var err error
 		if isPolicyGlobalManager(testAccProvider.Meta()) {
+			domainId := domainName
+			if domainName != "default" {
+				// get the non default domain id
+				domainId, err = testGetObjIDByName(domainName, "Domain")
+				if err != nil {
+					return fmt.Errorf("Error while retrieving policy domain %s. Error: %v", domainName, err)
+				}
+			}
 			nsxClient := gm_domains.NewDefaultGroupsClient(connector)
-			_, err = nsxClient.Get(domainName, resourceID)
+			_, err = nsxClient.Get(domainId, resourceID)
 		} else {
 			nsxClient := domains.NewDefaultGroupsClient(connector)
 			_, err = nsxClient.Get(domainName, resourceID)
 		}
 		if err != nil {
-			return fmt.Errorf("Error while retrieving policy Group ID %s. Error: %v", resourceID, err)
+			return fmt.Errorf("Error while retrieving policy Group ID %s domain %s. Error: %v", resourceID, domainName, err)
 		}
 
 		return nil
@@ -531,7 +573,16 @@ func testAccNsxtPolicyGroupCheckDestroy(state *terraform.State, displayName stri
 
 		resourceID := rs.Primary.Attributes["id"]
 		isPolicyGlobalManager := isPolicyGlobalManager(testAccProvider.Meta())
-		exists, err := resourceNsxtPolicyGroupExistsInDomain(resourceID, domainName, connector, isPolicyGlobalManager)
+		domainId := domainName
+		if isPolicyGlobalManager && domainName != "default" {
+			// get the non default domain id
+			var errDomain error
+			domainId, errDomain = testGetObjIDByName(domainName, "Domain")
+			if errDomain != nil {
+				return fmt.Errorf("Error while retrieving policy domain %s. Error: %v", domainName, errDomain)
+			}
+		}
+		exists, err := resourceNsxtPolicyGroupExistsInDomain(resourceID, domainId, connector, isPolicyGlobalManager)
 		if err != nil {
 			return err
 		}
@@ -657,6 +708,38 @@ resource "nsxt_policy_group" "test" {
   }
 }
 `, siteName, name)
+}
+
+func testAccNsxtGlobalPolicyGroupCreateTemplateWithDomain(name string, domainName string, siteName string) string {
+	return fmt.Sprintf(`
+resource "nsxt_policy_domain" "%s" {
+  display_name = "%s"
+  sites        = ["%s"]
+  nsx_id       = "%s"
+}
+
+resource "nsxt_policy_group" "test" {
+  display_name = "%s"
+  description  = "Acceptance Test"
+  domain       = nsxt_policy_domain.%s.id
+
+  criteria {
+    ipaddress_expression {
+	  ip_addresses = ["111.1.1.1", "222.2.2.2"]
+	}
+  }
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+
+  tag {
+    scope = "scope2"
+    tag   = "tag2"
+  }
+}
+`, domainName, domainName, siteName, domainName, name, domainName)
 }
 
 func testAccNsxtPolicyGroupIPAddressMultipleCreateTemplate(name string) string {

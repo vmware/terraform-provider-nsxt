@@ -66,7 +66,7 @@ resource "nsxt_policy_group" "group1" {
 }
 ```
 
-Note: This usage is for Global Manager only
+Note: This usage is for Global Manager only using site
 ```hcl
 data "nsxt_policy_site" "paris" {
   display_name = "Paris"
@@ -75,6 +75,45 @@ resource "nsxt_policy_group" "group1" {
   display_name = "tf-group1"
   description  = "Terraform provisioned Group"
   domain       = data.nsxt_policy_site.paris.id
+
+  criteria {
+    condition {
+      key         = "Name"
+      member_type = "VirtualMachine"
+      operator    = "STARTSWITH"
+      value       = "public"
+    }
+    condition {
+      key         = "OSName"
+      member_type = "VirtualMachine"
+      operator    = "CONTAINS"
+      value       = "Ubuntu"
+    }
+  }
+
+  conjunction {
+    operator = "OR"
+  }
+
+  criteria {
+    ipaddress_expression {
+      ip_addresses = ["211.1.1.1", "212.1.1.1", "192.168.1.1-192.168.1.100"]
+    }
+  }
+}
+```
+
+Note: This usage is for Global Manager only using domain
+```hcl
+resource "nsxt_policy_domain" "france" {
+  display_name = "France"
+  sites        = ["Paris"]
+}
+
+resource "nsxt_policy_group" "group1" {
+  display_name = "tf-group1"
+  description  = "Terraform provisioned Group"
+  domain       = nsxt_policy_domain.france.id
 
   criteria {
     condition {

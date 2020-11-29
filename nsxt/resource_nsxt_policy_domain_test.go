@@ -40,8 +40,8 @@ func TestAccResourceNsxtPolicyDomain_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "location.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "location.0", locationName1),
+					resource.TestCheckResourceAttr(testResourceName, "sites.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "sites.0", locationName1),
 				),
 			},
 			{
@@ -54,7 +54,7 @@ func TestAccResourceNsxtPolicyDomain_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
-					resource.TestCheckResourceAttr(testResourceName, "location.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "sites.#", "2"),
 				),
 			},
 			{
@@ -67,8 +67,8 @@ func TestAccResourceNsxtPolicyDomain_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "location.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "location.0", locationName2),
+					resource.TestCheckResourceAttr(testResourceName, "sites.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "sites.0", locationName2),
 				),
 			},
 		},
@@ -151,7 +151,7 @@ func testAccNsxtPolicyDomainOneLocationTemplate(name string, locationName string
 resource "nsxt_policy_domain" "test" {
   display_name = "%s"
   description  = "Acceptance Test"
-  location     = ["%s"]
+  sites        = ["%s"]
 
   tag {
     scope = "scope1"
@@ -165,7 +165,7 @@ func testAccNsxtPolicyDomainTwoLocationTemplate(name string, locationName1 strin
 resource "nsxt_policy_domain" "test" {
   display_name = "%s"
   description  = "Acceptance Test"
-  location     = ["%s", "%s"]
+  sites        = ["%s", "%s"]
 
   tag {
     scope = "scope1"

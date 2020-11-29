@@ -16,7 +16,7 @@ This resource is applicable to NSX Global Manager.
 ```hcl
 resource "nsxt_policy_domain" "domain1" {
   display_name = "Domain 1"
-  location     = ["here", "there"]
+  sites        = ["here", "there"]
 }
 ```
 
@@ -25,7 +25,7 @@ resource "nsxt_policy_domain" "domain1" {
 The following arguments are supported:
 
 * `display_name` - (Required) Display name of the resource.
-* `location` - (Required) A list of locations for this domain.
+* `sites` - (Required) A list of sites (a.k.a locations) for this domain.
 
 * `description` - (Optional) Description of the resource.
 

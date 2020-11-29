@@ -35,9 +35,9 @@ func resourceNsxtPolicyDomain() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
-			"location": {
+			"sites": {
 				Type:        schema.TypeSet,
-				Description: "Locations where this domain is deployed",
+				Description: "Sites where this domain is deployed",
 				Required:    true,
 				MinItems:    1,
 				Elem: &schema.Schema{
@@ -115,7 +115,7 @@ func setDomainStructWithChildren(m interface{}, domain *model.Domain, locations 
 		connector := getPolicyConnector(m)
 		converter := bindings.NewTypeConverter()
 		dmClient := gm_domain.NewDefaultDomainDeploymentMapsClient(connector)
-		// Get all currenlt locations
+		// Get all current locations
 		objList, err := dmClient.List(*domain.Id, nil, nil, nil, nil, nil, nil)
 		if err != nil {
 			return handleListError("Domain", err)
@@ -162,10 +162,6 @@ func resourceNsxtPolicyDomainCreate(d *schema.ResourceData, m interface{}) error
 		return err
 	}
 
-	if !isPolicyGlobalManager(m) {
-		return handleCreateError("Domain", id, fmt.Errorf("Domain resource is not supported for local manager"))
-	}
-
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
 	tags := getPolicyTagsFromSchema(d)
@@ -178,7 +174,7 @@ func resourceNsxtPolicyDomainCreate(d *schema.ResourceData, m interface{}) error
 		Tags:         tags,
 		ResourceType: &Type,
 	}
-	locations := getStringListFromSchemaSet(d, "location")
+	locations := getStringListFromSchemaSet(d, "sites")
 	err = setDomainStructWithChildren(m, &obj, locations, false)
 	if err != nil {
 		return err
@@ -257,7 +253,7 @@ func resourceNsxtPolicyDomainRead(d *schema.ResourceData, m interface{}) error {
 	for _, objInList := range objList.Results {
 		locations = append(locations, *objInList.DisplayName)
 	}
-	d.Set("location", stringList2Interface(locations))
+	d.Set("sites", stringList2Interface(locations))
 	return nil
 }
 
@@ -265,10 +261,6 @@ func resourceNsxtPolicyDomainUpdate(d *schema.ResourceData, m interface{}) error
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining Domain ID")
-	}
-
-	if !isPolicyGlobalManager(m) {
-		return handleCreateError("Domain", id, fmt.Errorf("Domain resource is not supported for local manager"))
 	}
 
 	displayName := d.Get("display_name").(string)
@@ -282,7 +274,7 @@ func resourceNsxtPolicyDomainUpdate(d *schema.ResourceData, m interface{}) error
 		Tags:         tags,
 		ResourceType: &Type,
 	}
-	locations := getStringListFromSchemaSet(d, "location")
+	locations := getStringListFromSchemaSet(d, "sites")
 	err := setDomainStructWithChildren(m, &obj, locations, true)
 	if err != nil {
 		return err
@@ -319,10 +311,6 @@ func resourceNsxtPolicyDomainDelete(d *schema.ResourceData, m interface{}) error
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining Domain ID")
-	}
-
-	if !isPolicyGlobalManager(m) {
-		return handleCreateError("Domain", id, fmt.Errorf("Domain resource is not supported for local manager"))
 	}
 
 	connector := getPolicyConnector(m)
