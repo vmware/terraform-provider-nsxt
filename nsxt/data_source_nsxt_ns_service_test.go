@@ -14,7 +14,7 @@ import (
 )
 
 func TestAccDataSourceNsxtNsService_basic(t *testing.T) {
-	serviceName := "terraform_ds_test_ns_service"
+	serviceName := getAccTestDataSourceName()
 	testResourceName := "data.nsxt_ns_service.test"
 
 	resource.ParallelTest(t, resource.TestCase{

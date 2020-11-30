@@ -12,8 +12,8 @@ import (
 )
 
 func TestAccResourceNsxtPolicySecurityPolicy_basic(t *testing.T) {
-	name := "terraform-test"
-	updatedName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
+	updatedName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_security_policy.test"
 	comments1 := "Acceptance test create"
 	comments2 := "Acceptance test update"
@@ -29,7 +29,7 @@ func TestAccResourceNsxtPolicySecurityPolicy_basic(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicySecurityPolicyCheckDestroy(state, name, defaultDomain)
+			return testAccNsxtPolicySecurityPolicyCheckDestroy(state, updatedName, defaultDomain)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -142,7 +142,7 @@ func TestAccResourceNsxtPolicySecurityPolicy_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicySecurityPolicy_withDependencies(t *testing.T) {
-	name := "terraform-test"
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_security_policy.test"
 	defaultAction := "ALLOW"
 	defaultDirection := "IN_OUT"
@@ -226,7 +226,7 @@ func TestAccResourceNsxtPolicySecurityPolicy_withDependencies(t *testing.T) {
 	})
 }
 func TestAccResourceNsxtPolicySecurityPolicy_importBasic(t *testing.T) {
-	name := "terraform-test-import"
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_security_policy.test"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -248,9 +248,9 @@ func TestAccResourceNsxtPolicySecurityPolicy_importBasic(t *testing.T) {
 	})
 }
 func TestAccResourceNsxtGlobalPolicySecurityPolicy_withSite(t *testing.T) {
-	name := "terraform-test-site"
+	name := getAccTestResourceName()
+	updatedName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_security_policy.test"
-	updatedName := fmt.Sprintf("%s-update", name)
 	comments1 := "Acceptance test create"
 	comments2 := "Acceptance test update"
 	direction1 := "IN"
@@ -269,7 +269,7 @@ func TestAccResourceNsxtGlobalPolicySecurityPolicy_withSite(t *testing.T) {
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicySecurityPolicyCheckDestroy(state, name, domain)
+			return testAccNsxtPolicySecurityPolicyCheckDestroy(state, updatedName, domain)
 		},
 		Steps: []resource.TestStep{
 			{

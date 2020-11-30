@@ -14,7 +14,7 @@ import (
 
 // TODO: remove extra test step config once IP Blocks don't need a delay to delete
 func TestAccResourceNsxtPolicyIPPoolBlockSubnet_minimal(t *testing.T) {
-	poolName := "tfpool5"
+	poolName := getAccTestResourceName()
 	name := "blocksubnet1"
 	testResourceName := "nsxt_policy_ip_pool_block_subnet.test"
 
@@ -48,8 +48,8 @@ func TestAccResourceNsxtPolicyIPPoolBlockSubnet_minimal(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyIPPoolBlockSubnet_basic(t *testing.T) {
-	poolName := "tfpool1"
-	name := "subnet1"
+	poolName := getAccTestResourceName()
+	name := getAccTestResourceName()
 	updatedName := fmt.Sprintf("%s-updated", name)
 	testResourceName := "nsxt_policy_ip_pool_block_subnet.test"
 
@@ -100,8 +100,8 @@ func TestAccResourceNsxtPolicyIPPoolBlockSubnet_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyIPPoolBlockSubnet_import_basic(t *testing.T) {
-	poolName := "tfpool7"
-	name := "subnet2"
+	poolName := getAccTestResourceName()
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_ip_pool_block_subnet.test"
 
 	resource.Test(t, resource.TestCase{

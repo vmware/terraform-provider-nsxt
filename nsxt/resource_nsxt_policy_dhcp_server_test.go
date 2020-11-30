@@ -12,13 +12,13 @@ import (
 )
 
 var accTestPolicyDhcpServerCreateAttributes = map[string]string{
-	"display_name": "terra-test",
+	"display_name": getAccTestResourceName(),
 	"description":  "terraform created",
 	"lease_time":   "200",
 }
 
 var accTestPolicyDhcpServerUpdateAttributes = map[string]string{
-	"display_name": "terra-test-updated",
+	"display_name": getAccTestResourceName(),
 	"description":  "terraform updated",
 	"lease_time":   "500",
 }
@@ -30,7 +30,7 @@ func TestAccResourceNsxtPolicyDhcpServer_basic(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyDhcpServerCheckDestroy(state, accTestPolicyDhcpServerCreateAttributes["display_name"])
+			return testAccNsxtPolicyDhcpServerCheckDestroy(state, accTestPolicyDhcpServerUpdateAttributes["display_name"])
 		},
 		Steps: []resource.TestStep{
 			{
@@ -85,7 +85,7 @@ func TestAccResourceNsxtPolicyDhcpServer_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyDhcpServer_importBasic(t *testing.T) {
-	name := "terra-test-import"
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_dhcp_server.test"
 
 	resource.ParallelTest(t, resource.TestCase{

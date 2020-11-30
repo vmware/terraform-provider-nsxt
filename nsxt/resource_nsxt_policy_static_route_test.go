@@ -12,10 +12,11 @@ import (
 )
 
 var testAccResourcePolicyStaticRouteName = "nsxt_policy_static_route.test"
+var testAccResourcePolicyStaticRouteGatewayName = getAccTestResourceName()
 
 func TestAccResourceNsxtPolicyStaticRoute_basicT0(t *testing.T) {
-	name := "test-nsx-policy-static-route-basic"
-	updateName := name + "updated"
+	name := getAccTestResourceName()
+	updateName := getAccTestResourceName()
 	network := "14.1.1.0/24"
 	updateNetwork := "15.1.1.0/24"
 
@@ -23,7 +24,7 @@ func TestAccResourceNsxtPolicyStaticRoute_basicT0(t *testing.T) {
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyStaticRouteCheckDestroy(state, name)
+			return testAccNsxtPolicyStaticRouteCheckDestroy(state, updateName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -70,8 +71,8 @@ func TestAccResourceNsxtPolicyStaticRoute_basicT0(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyStaticRoute_basicT1(t *testing.T) {
-	name := "test-nsx-policy-static-route-basic"
-	updateName := name + "updated"
+	name := getAccTestResourceName()
+	updateName := getAccTestResourceName()
 	network := "14.1.1.0/24"
 	updateNetwork := "15.1.1.0/24"
 
@@ -79,7 +80,7 @@ func TestAccResourceNsxtPolicyStaticRoute_basicT1(t *testing.T) {
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyStaticRouteCheckDestroy(state, name)
+			return testAccNsxtPolicyStaticRouteCheckDestroy(state, updateName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -126,7 +127,7 @@ func TestAccResourceNsxtPolicyStaticRoute_basicT1(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyStaticRoute_basicT0Import(t *testing.T) {
-	name := "test-nsx-policy-static-route-basic"
+	name := getAccTestResourceName()
 	network := "14.1.1.0/24"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -150,7 +151,7 @@ func TestAccResourceNsxtPolicyStaticRoute_basicT0Import(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyStaticRoute_basicT1Import(t *testing.T) {
-	name := "test-nsx-policy-static-route-basic"
+	name := getAccTestResourceName()
 	network := "14.1.1.0/24"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -301,7 +302,7 @@ resource "nsxt_policy_static_route" "test" {
 func testAccNsxtPolicyStaticRouteTier1CreateTemplate(name string, network string) string {
 	return fmt.Sprintf(`
 resource "nsxt_policy_tier1_gateway" "t1test" {
-  display_name              = "terraform-t1-gw"
+  display_name              = "%s"
   description               = "Acceptance Test"
 
 }
@@ -324,13 +325,13 @@ resource "nsxt_policy_static_route" "test" {
     tag   = "tag2"
   }
 }
-`, name, network)
+`, testAccResourcePolicyStaticRouteGatewayName, name, network)
 }
 
 func testAccNsxtPolicyStaticRouteMultipleHopsTier1CreateTemplate(name string, network string) string {
 	return fmt.Sprintf(`
 resource "nsxt_policy_tier1_gateway" "t1test" {
-  display_name              = "terraform-t1-gw"
+  display_name              = "%s"
   description               = "Acceptance Test"
 
 }
@@ -359,5 +360,5 @@ resource "nsxt_policy_static_route" "test" {
     tag   = "tag2"
   }
 }
-`, name, network)
+`, testAccResourcePolicyStaticRouteGatewayName, name, network)
 }

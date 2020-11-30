@@ -80,7 +80,7 @@ func TestAccResourceNsxtPolicyTier1Gateway_globalManager(t *testing.T) {
 // NOTE: This test assumes single edge cluster on both sites
 func TestAccResourceNsxtPolicyTier1Gateway_globalManagerWithQos(t *testing.T) {
 	testResourceName := "nsxt_policy_tier1_gateway.test"
-	profileName := "test-nsx-qos-profile"
+	profileName := getAccTestResourceName()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {

@@ -13,7 +13,7 @@ import (
 )
 
 func TestAccResourceNsxtPolicyIPBlock_minimal(t *testing.T) {
-	name := "test-nsx-policy-ip-block"
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_ip_block.test"
 	cidr := "192.168.1.0/24"
 
@@ -41,7 +41,7 @@ func TestAccResourceNsxtPolicyIPBlock_minimal(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyIPBlock_basic(t *testing.T) {
-	name := "test-nsx-policy-ip-block"
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_ip_block.test"
 	cidr := "192.168.1.0/24"
 	cidr2 := "191.166.1.0/24"
@@ -82,7 +82,7 @@ func TestAccResourceNsxtPolicyIPBlock_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyIPBlock_importBasic(t *testing.T) {
-	name := "test-nsx-policy-ip-block-import"
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_ip_block.test"
 
 	resource.ParallelTest(t, resource.TestCase{

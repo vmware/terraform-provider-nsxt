@@ -12,7 +12,7 @@ import (
 )
 
 var accTestPolicyBgpNeighborConfigCreateAttributes = map[string]string{
-	"display_name":          "terra-test",
+	"display_name":          getAccTestResourceName(),
 	"description":           "terraform created",
 	"allow_as_in":           "true",
 	"graceful_restart_mode": "HELPER_ONLY",
@@ -25,7 +25,7 @@ var accTestPolicyBgpNeighborConfigCreateAttributes = map[string]string{
 }
 
 var accTestPolicyBgpNeighborConfigUpdateAttributes = map[string]string{
-	"display_name":          "terra-test-updated",
+	"display_name":          getAccTestResourceName(),
 	"description":           "terraform created",
 	"allow_as_in":           "false",
 	"graceful_restart_mode": "GR_AND_HELPER",
@@ -300,7 +300,7 @@ func TestAccResourceNsxtPolicyBgpNeighbor_subConfigPrefixList(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyBgpNeighbor_importBasic(t *testing.T) {
-	name := "terra-test-import"
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_bgp_neighbor.test"
 
 	resource.Test(t, resource.TestCase{

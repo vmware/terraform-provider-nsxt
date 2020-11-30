@@ -13,7 +13,7 @@ import (
 )
 
 var accTestPolicyLBVirtualServerCreateAttributes = map[string]string{
-	"display_name":                "terra-test",
+	"display_name":                getAccTestResourceName(),
 	"description":                 "terraform created",
 	"access_log_enabled":          "true",
 	"default_pool_member_ports":   "777-778",
@@ -29,7 +29,7 @@ var accTestPolicyLBVirtualServerCreateAttributes = map[string]string{
 }
 
 var accTestPolicyLBVirtualServerUpdateAttributes = map[string]string{
-	"display_name":                "terra-test-updated",
+	"display_name":                getAccTestResourceName(),
 	"description":                 "terraform updated",
 	"access_log_enabled":          "false",
 	"default_pool_member_ports":   "555",
@@ -257,7 +257,7 @@ func TestAccResourceNsxtPolicyLBVirtualServer_withAccessList(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyLBVirtualServer_importBasic(t *testing.T) {
-	name := "terra-test-import"
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_lb_virtual_server.test"
 
 	resource.Test(t, resource.TestCase{

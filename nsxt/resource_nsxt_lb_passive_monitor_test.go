@@ -13,14 +13,14 @@ import (
 )
 
 func TestAccResourceNsxtLbPassiveMonitor_basic(t *testing.T) {
-	name := "test-nsx-monitor"
-	updatedName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
+	updatedName := getAccTestResourceName()
 	testResourceName := "nsxt_lb_passive_monitor.test"
 	maxFails := "9"
 	timeout := "20"
 	updatedTimeout := "7"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
 			testAccTestMP(t)
@@ -29,7 +29,7 @@ func TestAccResourceNsxtLbPassiveMonitor_basic(t *testing.T) {
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXLbPassiveMonitorCheckDestroy(state, name)
+			return testAccNSXLbPassiveMonitorCheckDestroy(state, updatedName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -59,9 +59,9 @@ func TestAccResourceNsxtLbPassiveMonitor_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtLbPassiveMonitor_importBasic(t *testing.T) {
-	name := "test-nsx-monitor"
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_lb_passive_monitor.test"
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
 			testAccTestMP(t)

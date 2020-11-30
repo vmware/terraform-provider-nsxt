@@ -14,7 +14,7 @@ import (
 )
 
 func TestAccDataSourceNsxtFirewallSection_basic(t *testing.T) {
-	name := "terraform_ds_test_firewall_section"
+	name := getAccTestDataSourceName()
 	testResourceName := "data.nsxt_firewall_section.test"
 
 	resource.ParallelTest(t, resource.TestCase{

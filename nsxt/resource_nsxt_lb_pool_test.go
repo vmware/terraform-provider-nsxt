@@ -13,8 +13,8 @@ import (
 )
 
 func TestAccResourceNsxtLbPool_basic(t *testing.T) {
-	name := "test-nsx-lb-pool"
-	updatedName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
+	updatedName := getAccTestResourceName()
 	testResourceName := "nsxt_lb_pool.test"
 	algorithm := "LEAST_CONNECTION"
 	updatedAlgorithm := "WEIGHTED_ROUND_ROBIN"
@@ -23,7 +23,7 @@ func TestAccResourceNsxtLbPool_basic(t *testing.T) {
 	snatTranslationType := "TRANSPARENT"
 	updatedSnatTranslationType := "SNAT_AUTO_MAP"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
 			testAccTestMP(t)
@@ -32,7 +32,7 @@ func TestAccResourceNsxtLbPool_basic(t *testing.T) {
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXLbPoolCheckDestroy(state, name)
+			return testAccNSXLbPoolCheckDestroy(state, updatedName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -66,11 +66,10 @@ func TestAccResourceNsxtLbPool_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtLbPool_withMonitors(t *testing.T) {
-	name := "test-nsx-lb-pool"
-	updatedName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_lb_pool.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
 			testAccTestMP(t)
@@ -96,10 +95,10 @@ func TestAccResourceNsxtLbPool_withMonitors(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXLbPoolUpdateWithMonitorsTemplate(updatedName),
+				Config: testAccNSXLbPoolUpdateWithMonitorsTemplate(name),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNSXLbPoolExists(updatedName, testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					testAccNSXLbPoolExists(name, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Updated Acceptance Test"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "member.#", "0"),
@@ -112,8 +111,7 @@ func TestAccResourceNsxtLbPool_withMonitors(t *testing.T) {
 }
 
 func TestAccResourceNsxtLbPool_withIpSnat(t *testing.T) {
-	name := "test-nsx-lb-pool"
-	updatedName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_lb_pool.test"
 	algorithm := "LEAST_CONNECTION"
 	updatedAlgorithm := "WEIGHTED_ROUND_ROBIN"
@@ -123,7 +121,7 @@ func TestAccResourceNsxtLbPool_withIpSnat(t *testing.T) {
 	ipAddress := "1.1.1.1"
 	updatedIPAddress := "1.1.1.2-1.1.1.20"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
 			testAccTestMP(t)
@@ -150,10 +148,10 @@ func TestAccResourceNsxtLbPool_withIpSnat(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXLbPoolUpdateWithSnatTemplate(updatedName, updatedAlgorithm, updatedMinActiveMembers, snatTranslationType, updatedIPAddress),
+				Config: testAccNSXLbPoolUpdateWithSnatTemplate(name, updatedAlgorithm, updatedMinActiveMembers, snatTranslationType, updatedIPAddress),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNSXLbPoolExists(updatedName, testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					testAccNSXLbPoolExists(name, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Updated Acceptance Test"),
 					resource.TestCheckResourceAttr(testResourceName, "algorithm", updatedAlgorithm),
 					resource.TestCheckResourceAttr(testResourceName, "min_active_members", updatedMinActiveMembers),
@@ -168,8 +166,7 @@ func TestAccResourceNsxtLbPool_withIpSnat(t *testing.T) {
 }
 
 func TestAccResourceNsxtLbPool_withMember(t *testing.T) {
-	name := "test-nsx-lb-pool"
-	updatedName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_lb_pool.test"
 	algorithm := "LEAST_CONNECTION"
 	updatedAlgorithm := "WEIGHTED_ROUND_ROBIN"
@@ -179,7 +176,7 @@ func TestAccResourceNsxtLbPool_withMember(t *testing.T) {
 	updatedSnatTranslationType := "SNAT_AUTO_MAP"
 	memberIP := "1.1.1.1"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
 			testAccTestMP(t)
@@ -207,17 +204,17 @@ func TestAccResourceNsxtLbPool_withMember(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXLbPoolUpdateWithMemberTemplate(updatedName, updatedAlgorithm, updatedMinActiveMembers, updatedSnatTranslationType, memberIP),
+				Config: testAccNSXLbPoolUpdateWithMemberTemplate(name, updatedAlgorithm, updatedMinActiveMembers, updatedSnatTranslationType, memberIP),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNSXLbPoolExists(updatedName, testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					testAccNSXLbPoolExists(name, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Updated Acceptance Test"),
 					resource.TestCheckResourceAttr(testResourceName, "algorithm", updatedAlgorithm),
 					resource.TestCheckResourceAttr(testResourceName, "min_active_members", updatedMinActiveMembers),
 					resource.TestCheckResourceAttr(testResourceName, "snat_translation.0.type", updatedSnatTranslationType),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "member.#", "2"),
-					resource.TestCheckResourceAttr(testResourceName, "member.0.display_name", updatedName+"-member"),
+					resource.TestCheckResourceAttr(testResourceName, "member.0.display_name", name+"-member"),
 					resource.TestCheckResourceAttr(testResourceName, "member.0.ip_address", memberIP),
 				),
 			},
@@ -226,15 +223,14 @@ func TestAccResourceNsxtLbPool_withMember(t *testing.T) {
 }
 
 func TestAccResourceNsxtLbPool_withMemberGroup(t *testing.T) {
-	name := "test-nsx-lb-pool"
-	updatedName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_lb_pool.test"
 	algorithm := "LEAST_CONNECTION"
 	size := "3"
 	port := "50"
 	updatedPort := "60"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
 			testAccTestMP(t)
@@ -265,10 +261,10 @@ func TestAccResourceNsxtLbPool_withMemberGroup(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXLbPoolUpdateWithMemberGroupTemplate(updatedName, algorithm, updatedPort),
+				Config: testAccNSXLbPoolUpdateWithMemberGroupTemplate(name, algorithm, updatedPort),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNSXLbPoolExists(updatedName, testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					testAccNSXLbPoolExists(name, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Updated Acceptance Test"),
 					resource.TestCheckResourceAttr(testResourceName, "algorithm", algorithm),
 					resource.TestCheckResourceAttr(testResourceName, "member.#", "0"),
@@ -287,9 +283,9 @@ func TestAccResourceNsxtLbPool_withMemberGroup(t *testing.T) {
 }
 
 func TestAccResourceNsxtLbPool_importBasic(t *testing.T) {
-	name := "test-nsx-lb-pool"
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_lb_pool.test"
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
 			testAccTestMP(t)

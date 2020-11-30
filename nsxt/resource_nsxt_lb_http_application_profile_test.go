@@ -13,8 +13,8 @@ import (
 )
 
 func TestAccResourceNsxtLbHTTPApplicationProfile_basic(t *testing.T) {
-	name := "test"
-	updatedName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
+	updatedName := getAccTestResourceName()
 	testResourceName := "nsxt_lb_http_application_profile.test"
 	httpRedirect := "http://www.aaa.com"
 	httpsRedirect := "false"
@@ -43,7 +43,7 @@ func TestAccResourceNsxtLbHTTPApplicationProfile_basic(t *testing.T) {
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXLbHTTPApplicationProfileCheckDestroy(state, name)
+			return testAccNSXLbHTTPApplicationProfileCheckDestroy(state, updatedName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -77,7 +77,7 @@ func TestAccResourceNsxtLbHTTPApplicationProfile_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtLbHTTPApplicationProfile_importBasic(t *testing.T) {
-	name := "test"
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_lb_http_application_profile.test"
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {

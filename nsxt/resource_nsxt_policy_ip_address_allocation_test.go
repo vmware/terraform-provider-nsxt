@@ -13,16 +13,19 @@ import (
 )
 
 var accTestPolicyIPAddressAllocationCreateAttributes = map[string]string{
-	"display_name":  "terra-test",
+	"display_name":  getAccTestResourceName(),
 	"description":   "terraform created",
 	"allocation_ip": "12.12.12.11",
 }
 
 var accTestPolicyIPAddressAllocationUpdateAttributes = map[string]string{
-	"display_name":  "terra-test-updated",
+	"display_name":  getAccTestResourceName(),
 	"description":   "terraform updated",
 	"allocation_ip": "12.12.12.12",
 }
+
+var accTestPolicyIPAddressAllocationPoolName = getAccTestResourceName()
+var accTestPolicyIPAddressAllocationSubnetName = getAccTestResourceName()
 
 func TestAccResourceNsxtPolicyIPAddressAllocation_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_ip_address_allocation.test"
@@ -31,7 +34,7 @@ func TestAccResourceNsxtPolicyIPAddressAllocation_basic(t *testing.T) {
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyIPAddressAllocationCheckDestroy(state, accTestPolicyIPAddressAllocationCreateAttributes["display_name"])
+			return testAccNsxtPolicyIPAddressAllocationCheckDestroy(state, accTestPolicyIPAddressAllocationUpdateAttributes["display_name"])
 		},
 		Steps: []resource.TestStep{
 			{
@@ -121,7 +124,7 @@ func TestAccResourceNsxtPolicyIPAddressAllocation_anyIPBasic(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyIPAddressAllocation_importBasic(t *testing.T) {
-	name := "terra-test-import"
+	name := accTestPolicyIPAddressAllocationUpdateAttributes["display_name"]
 	testResourceName := "nsxt_policy_ip_address_allocation.test"
 
 	resource.Test(t, resource.TestCase{
@@ -271,18 +274,18 @@ data "nsxt_policy_realization_info" "realization_info" {
 }
 
 func testAccNsxtPolicyIPAddressAllocationDependenciesTemplate() string {
-	return `
+	return fmt.Sprintf(`
 resource "nsxt_policy_ip_pool" "test" {
-  display_name = "tfpool4"
+  display_name = "%s"
 }
 
 resource "nsxt_policy_ip_pool_static_subnet" "test" {
-  display_name = "tfsnet1"
+  display_name = "%s"
   pool_path    = nsxt_policy_ip_pool.test.path
   cidr         = "12.12.12.0/24"
   allocation_range {
     start = "12.12.12.10"
     end   = "12.12.12.20"
   }
-}`
+}`, accTestPolicyIPAddressAllocationPoolName, accTestPolicyIPAddressAllocationSubnetName)
 }

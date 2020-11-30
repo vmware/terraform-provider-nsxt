@@ -13,8 +13,8 @@ import (
 )
 
 func TestAccResourceNsxtLogicalDhcpServer_basic(t *testing.T) {
-	prfName := "test-nsx-logical-dhcp-server"
-	updatePrfName := fmt.Sprintf("%s-update", prfName)
+	prfName := getAccTestResourceName()
+	updatePrfName := getAccTestResourceName()
 	testResourceName := "nsxt_logical_dhcp_server.test"
 	edgeClusterName := getEdgeClusterName()
 	ip1 := "1.1.1.10/24"
@@ -29,7 +29,7 @@ func TestAccResourceNsxtLogicalDhcpServer_basic(t *testing.T) {
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXLogicalDhcpServerCheckDestroy(state, prfName)
+			return testAccNSXLogicalDhcpServerCheckDestroy(state, updatePrfName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -74,8 +74,7 @@ func TestAccResourceNsxtLogicalDhcpServer_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtLogicalDhcpServer_noOpts(t *testing.T) {
-	prfName := "test-nsx-logical-dhcp-server"
-	updatePrfName := fmt.Sprintf("%s-update", prfName)
+	prfName := getAccTestResourceName()
 	testResourceName := "nsxt_logical_dhcp_server.test"
 	edgeClusterName := getEdgeClusterName()
 	ip1 := "1.1.1.10/24"
@@ -108,10 +107,10 @@ func TestAccResourceNsxtLogicalDhcpServer_noOpts(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXLogicalDhcpServerUpdateNoOptsTemplate(edgeClusterName, updatePrfName, ip1upd, ip2upd, ip3, ip4),
+				Config: testAccNSXLogicalDhcpServerUpdateNoOptsTemplate(edgeClusterName, prfName, ip1upd, ip2upd, ip3, ip4),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNSXLogicalDhcpServerExists(updatePrfName, testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", updatePrfName),
+					testAccNSXLogicalDhcpServerExists(prfName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", prfName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test Update"),
 					resource.TestCheckResourceAttrSet(testResourceName, "dhcp_profile_id"),
 					resource.TestCheckResourceAttr(testResourceName, "dhcp_server_ip", ip1upd),
@@ -127,7 +126,7 @@ func TestAccResourceNsxtLogicalDhcpServer_noOpts(t *testing.T) {
 }
 
 func TestAccResourceNsxtLogicalDhcpServer_importBasic(t *testing.T) {
-	prfName := "test-nsx-logical-dhcp-server"
+	prfName := getAccTestResourceName()
 	testResourceName := "nsxt_logical_dhcp_server.test"
 	edgeClusterName := getEdgeClusterName()
 

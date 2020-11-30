@@ -16,7 +16,7 @@ import (
 )
 
 func TestAccDataSourceNsxtPolicyGroup_basic(t *testing.T) {
-	name := "terraform_ds_test"
+	name := getAccTestDataSourceName()
 	domain := "default"
 	testResourceName := "data.nsxt_policy_group.test"
 
@@ -46,7 +46,7 @@ func TestAccDataSourceNsxtPolicyGroup_basic(t *testing.T) {
 }
 
 func TestAccDataSourceNsxtPolicyGroup_withSite(t *testing.T) {
-	name := "terraform_gm_ds_test"
+	name := getAccTestDataSourceName()
 	domain := getTestSiteName()
 	testResourceName := "data.nsxt_policy_group.test"
 

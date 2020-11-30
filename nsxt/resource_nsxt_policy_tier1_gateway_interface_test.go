@@ -17,8 +17,8 @@ import (
 var nsxtPolicyTier1GatewayName = "test"
 
 func TestAccResourceNsxtPolicyTier1GatewayInterface_basic(t *testing.T) {
-	name := "test-nsx-policy-tier1-interface-basic"
-	updatedName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
+	updatedName := getAccTestResourceName()
 	mtu := "1500"
 	updatedMtu := "1800"
 	subnet := "1.1.12.2/24"
@@ -90,8 +90,8 @@ func TestAccResourceNsxtPolicyTier1GatewayInterface_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyTier1GatewayInterface_withID(t *testing.T) {
-	name := "test-nsx-policy-tier1-interface-id"
-	updatedName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
+	updatedName := getAccTestResourceName()
 	subnet := "1.1.12.2/24"
 	// Update to 2 addresses
 	ipv6Subnet := "4003::12/64"
@@ -102,7 +102,7 @@ func TestAccResourceNsxtPolicyTier1GatewayInterface_withID(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyTier1InterfaceCheckDestroy(state, name)
+			return testAccNsxtPolicyTier1InterfaceCheckDestroy(state, updatedName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -148,8 +148,8 @@ func TestAccResourceNsxtPolicyTier1GatewayInterface_withID(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyTier1GatewayInterface_withSite(t *testing.T) {
-	name := "test-nsx-policy-tier1-interface-site"
-	updatedName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
+	updatedName := getAccTestResourceName()
 	mtu := "1500"
 	updatedMtu := "1800"
 	subnet := "1.1.12.2/24"
@@ -224,8 +224,7 @@ func TestAccResourceNsxtPolicyTier1GatewayInterface_withSite(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyTier1GatewayInterface_withIPv6(t *testing.T) {
-	name := "test-nsx-policy-tier1-interface-ipv6"
-	updatedName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
 	subnet := "1.1.12.2/24"
 	// Update to 2 addresses
 	ipv6Subnet := "4003::12/64"
@@ -259,10 +258,10 @@ func TestAccResourceNsxtPolicyTier1GatewayInterface_withIPv6(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyTier1InterfaceTemplateWithIPv6(updatedName, updatedSubnet),
+				Config: testAccNsxtPolicyTier1InterfaceTemplateWithIPv6(name, updatedSubnet),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTier1InterfaceExists(testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttr(testResourceName, "subnets.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "subnets.0", subnet),
@@ -301,7 +300,7 @@ func testAccNSXPolicyTier1InterfaceImporterGetID(s *terraform.State) (string, er
 }
 
 func TestAccResourceNsxtPolicyTier1GatewayInterface_importBasic(t *testing.T) {
-	name := "test-nsx-policy-tier1-interface-import"
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_tier1_gateway_interface.test"
 	subnet := "1.1.12.2/24"
 

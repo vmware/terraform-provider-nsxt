@@ -13,8 +13,8 @@ import (
 )
 
 func TestAccResourceNsxtLogicalTier0Router_basic(t *testing.T) {
-	name := "test-nsx-logical-tier0-router"
-	updateName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
+	updateName := getAccTestResourceName()
 	testResourceName := "nsxt_logical_tier0_router.test"
 	haMode := "ACTIVE_STANDBY"
 	edgeClusterName := getEdgeClusterName()
@@ -23,7 +23,7 @@ func TestAccResourceNsxtLogicalTier0Router_basic(t *testing.T) {
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXLogicalTier0RouterCheckDestroy(state, name)
+			return testAccNSXLogicalTier0RouterCheckDestroy(state, updateName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -51,8 +51,7 @@ func TestAccResourceNsxtLogicalTier0Router_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtLogicalTier0Router_active(t *testing.T) {
-	name := "test-nsx-logical-tier0-router"
-	updateName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_logical_tier0_router.test"
 	haMode := "ACTIVE_ACTIVE"
 	edgeClusterName := getEdgeClusterName()
@@ -75,10 +74,10 @@ func TestAccResourceNsxtLogicalTier0Router_active(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXLogicalTier0RouterUpdateTemplate(updateName, haMode, edgeClusterName),
+				Config: testAccNSXLogicalTier0RouterUpdateTemplate(name, haMode, edgeClusterName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNSXLogicalTier0RouterExists(updateName, testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", updateName),
+					testAccNSXLogicalTier0RouterExists(name, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test Update"),
 					resource.TestCheckResourceAttr(testResourceName, "high_availability_mode", haMode),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
@@ -89,7 +88,7 @@ func TestAccResourceNsxtLogicalTier0Router_active(t *testing.T) {
 }
 
 func TestAccResourceNsxtLogicalTier0Router_importBasic(t *testing.T) {
-	name := "test-nsx-logical-tier0-router"
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_logical_tier0_router.test"
 	haMode := "ACTIVE_STANDBY"
 	edgeClusterName := getEdgeClusterName()

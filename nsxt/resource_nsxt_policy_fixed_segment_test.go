@@ -11,7 +11,7 @@ import (
 var testAccPolicyFixedSegmentResourceName = "nsxt_policy_fixed_segment.test"
 
 func TestAccResourceNsxtPolicyFixedSegment_basicImport(t *testing.T) {
-	name := "terraform-test"
+	name := getAccTestResourceName()
 	tzName := getOverlayTransportZoneName()
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -35,8 +35,8 @@ func TestAccResourceNsxtPolicyFixedSegment_basicImport(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyFixedSegment_basicUpdate(t *testing.T) {
-	name := "terraform-test"
-	updatedName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
+	updatedName := getAccTestResourceName()
 	testResourceName := testAccPolicyFixedSegmentResourceName
 	tzName := getOverlayTransportZoneName()
 
@@ -44,7 +44,7 @@ func TestAccResourceNsxtPolicyFixedSegment_basicUpdate(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyFixedSegmentCheckDestroy(state, name)
+			return testAccNsxtPolicyFixedSegmentCheckDestroy(state, updatedName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -78,8 +78,7 @@ func TestAccResourceNsxtPolicyFixedSegment_basicUpdate(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyFixedSegment_connectivityPath(t *testing.T) {
-	name := "terraform-test"
-	updatedName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
 	testResourceName := testAccPolicyFixedSegmentResourceName
 	tzName := getOverlayTransportZoneName()
 
@@ -105,10 +104,10 @@ func TestAccResourceNsxtPolicyFixedSegment_connectivityPath(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyFixedSegmentUpdateConnectivityTemplate(tzName, updatedName),
+				Config: testAccNsxtPolicyFixedSegmentUpdateConnectivityTemplate(tzName, name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyFixedSegmentExists(testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test2"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.0.cidr", "22.22.22.1/24"),
@@ -126,8 +125,7 @@ func TestAccResourceNsxtPolicyFixedSegment_connectivityPath(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyFixedSegment_updateAdvConfig(t *testing.T) {
-	name := "terraform-test"
-	updatedName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
 	testResourceName := testAccPolicyFixedSegmentResourceName
 	tzName := getOverlayTransportZoneName()
 
@@ -155,10 +153,10 @@ func TestAccResourceNsxtPolicyFixedSegment_updateAdvConfig(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyFixedSegmentBasicAdvConfigUpdateTemplate(tzName, updatedName),
+				Config: testAccNsxtPolicyFixedSegmentBasicAdvConfigUpdateTemplate(tzName, name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyFixedSegmentExists(testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.0.cidr", "12.12.2.1/24"),
@@ -175,8 +173,7 @@ func TestAccResourceNsxtPolicyFixedSegment_updateAdvConfig(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyFixedSegment_withDhcp(t *testing.T) {
-	name := "terraform-test"
-	updatedName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
 	testResourceName := testAccPolicyFixedSegmentResourceName
 	leaseTimes := []string{"3600", "36000"}
 	preferredTimes := []string{"3200", "32000"}
@@ -219,10 +216,10 @@ func TestAccResourceNsxtPolicyFixedSegment_withDhcp(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyFixedSegmentWithDhcpTemplate(tzName, updatedName, dnsServersV4[1], dnsServersV6[1], leaseTimes[1], preferredTimes[1]),
+				Config: testAccNsxtPolicyFixedSegmentWithDhcpTemplate(tzName, name, dnsServersV4[1], dnsServersV6[1], leaseTimes[1], preferredTimes[1]),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyFixedSegmentExists(testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.0.cidr", "12.12.2.1/24"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.0.dhcp_v6_config.#", "0"),

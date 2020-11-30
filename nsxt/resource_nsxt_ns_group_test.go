@@ -12,16 +12,18 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
+var testAccNsxtNSGroupHelperName = getAccTestResourceName()
+
 func TestAccResourceNsxtNSGroup_basic(t *testing.T) {
-	grpName := "test-nsx-ns-group"
-	updateGrpName := fmt.Sprintf("%s-update", grpName)
+	grpName := getAccTestResourceName()
+	updateGrpName := getAccTestResourceName()
 	testResourceName := "nsxt_ns_group.test"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXNSGroupCheckDestroy(state, grpName)
+			return testAccNSXNSGroupCheckDestroy(state, updateGrpName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -49,15 +51,15 @@ func TestAccResourceNsxtNSGroup_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtNSGroup_nested(t *testing.T) {
-	grpName := "test-nsx-ns-group"
-	updateGrpName := fmt.Sprintf("%s-update", grpName)
+	grpName := getAccTestResourceName()
+	updateGrpName := getAccTestResourceName()
 	testResourceName := "nsxt_ns_group.test"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXNSGroupCheckDestroy(state, grpName)
+			return testAccNSXNSGroupCheckDestroy(state, updateGrpName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -83,8 +85,7 @@ func TestAccResourceNsxtNSGroup_nested(t *testing.T) {
 }
 
 func TestAccResourceNsxtNSGroup_withCriteria(t *testing.T) {
-	grpName := "test-nsx-ns-group"
-	updateGrpName := fmt.Sprintf("%s-update", grpName)
+	grpName := getAccTestResourceName()
 	testResourceName := "nsxt_ns_group.test"
 	transportZoneName := getOverlayTransportZoneName()
 
@@ -106,10 +107,10 @@ func TestAccResourceNsxtNSGroup_withCriteria(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXNSGroupCriteriaUpdateTemplate(updateGrpName, transportZoneName),
+				Config: testAccNSXNSGroupCriteriaUpdateTemplate(grpName, transportZoneName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNSXNSGroupExists(updateGrpName, testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", updateGrpName),
+					testAccNSXNSGroupExists(grpName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", grpName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test Update"),
 					resource.TestCheckResourceAttr(testResourceName, "member.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "membership_criteria.#", "1"),
@@ -120,7 +121,7 @@ func TestAccResourceNsxtNSGroup_withCriteria(t *testing.T) {
 }
 
 func TestAccResourceNsxtNSGroup_importBasic(t *testing.T) {
-	grpName := "test-nsx-ns-group"
+	grpName := getAccTestResourceName()
 	testResourceName := "nsxt_ns_group.test"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -143,7 +144,7 @@ func TestAccResourceNsxtNSGroup_importBasic(t *testing.T) {
 }
 
 func TestAccResourceNsxtNSGroup_importWithCriteria(t *testing.T) {
-	grpName := "test-nsx-ns-group"
+	grpName := getAccTestResourceName()
 	testResourceName := "nsxt_ns_group.test"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -322,7 +323,7 @@ data "nsxt_transport_zone" "tz1" {
 }
 
 resource "nsxt_logical_switch" "test" {
-  display_name      = "test-nsx-switch-for-group"
+  display_name      = "%s"
   admin_state       = "DOWN"
   replication_mode  = "MTEP"
   transport_zone_id = "${data.nsxt_transport_zone.tz1.id}"
@@ -341,5 +342,5 @@ resource "nsxt_ns_group" "test" {
     target_type = "LogicalSwitch"
     value = "${nsxt_logical_switch.test.id}"
   }
-}`, tzName, name)
+}`, tzName, testAccNsxtNSGroupHelperName, name)
 }

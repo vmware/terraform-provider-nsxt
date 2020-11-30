@@ -13,7 +13,7 @@ import (
 
 func TestAccDataSourceNsxtPolicyRealizationInfo_tier1DataSource(t *testing.T) {
 	resourceDataType := "nsxt_policy_tier1_gateway"
-	resourceName := "terraform_test_tier1_1"
+	resourceName := getAccTestDataSourceName()
 	entityType := ""
 	testResourceName := "data.nsxt_policy_realization_info.realization_info"
 
@@ -44,7 +44,7 @@ func TestAccDataSourceNsxtPolicyRealizationInfo_tier1DataSource(t *testing.T) {
 
 func TestAccDataSourceNsxtPolicyRealizationInfo_tier1DataSourceEntity(t *testing.T) {
 	resourceDataType := "nsxt_policy_tier1_gateway"
-	resourceName := "terraform_test_tier1_2"
+	resourceName := getAccTestDataSourceName()
 	entityType := "RealizedLogicalRouter"
 	testResourceName := "data.nsxt_policy_realization_info.realization_info"
 
@@ -75,7 +75,7 @@ func TestAccDataSourceNsxtPolicyRealizationInfo_tier1DataSourceEntity(t *testing
 
 func TestAccDataSourceNsxtPolicyRealizationInfo_tier1Resource(t *testing.T) {
 	resourceType := "nsxt_policy_tier1_gateway"
-	resourceName := "terraform_test_tier1_3"
+	resourceName := getAccTestDataSourceName()
 	entityType := "RealizedLogicalRouter"
 	testResourceName := "data.nsxt_policy_realization_info.realization_info"
 

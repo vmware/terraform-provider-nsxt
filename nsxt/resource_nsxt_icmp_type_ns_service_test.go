@@ -13,15 +13,15 @@ import (
 )
 
 func TestAccResourceNsxtIcmpTypeNsService_basic(t *testing.T) {
-	serviceName := "test-nsx-icmp-service"
-	updateServiceName := fmt.Sprintf("%s-update", serviceName)
+	serviceName := getAccTestResourceName()
+	updateServiceName := getAccTestResourceName()
 	testResourceName := "nsxt_icmp_type_ns_service.test"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXIcmpServiceCheckDestroy(state, serviceName)
+			return testAccNSXIcmpServiceCheckDestroy(state, updateServiceName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -53,7 +53,7 @@ func TestAccResourceNsxtIcmpTypeNsService_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtIcmpTypeNsService_importBasic(t *testing.T) {
-	serviceName := "test-nsx-icmp-service"
+	serviceName := getAccTestResourceName()
 	testResourceName := "nsxt_icmp_type_ns_service.test"
 
 	resource.ParallelTest(t, resource.TestCase{

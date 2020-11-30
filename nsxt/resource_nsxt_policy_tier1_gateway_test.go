@@ -12,8 +12,8 @@ import (
 )
 
 func TestAccResourceNsxtPolicyTier1Gateway_basic(t *testing.T) {
-	name := "test-nsx-policy-tier1-basic"
-	updateName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
+	updateName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_tier1_gateway.test"
 	failoverMode := "NON_PREEMPTIVE"
 
@@ -91,8 +91,8 @@ func TestAccResourceNsxtPolicyTier1Gateway_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyTier1Gateway_withPoolAllocation(t *testing.T) {
-	name := "test-nsx-policy-tier1-basic"
-	updateName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
+	updateName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_tier1_gateway.test"
 	failoverMode := "NON_PREEMPTIVE"
 
@@ -100,7 +100,7 @@ func TestAccResourceNsxtPolicyTier1Gateway_withPoolAllocation(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyTier1CheckDestroy(state, name)
+			return testAccNsxtPolicyTier1CheckDestroy(state, updateName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -174,7 +174,7 @@ func TestAccResourceNsxtPolicyTier1Gateway_withPoolAllocation(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyTier1Gateway_withDHCP(t *testing.T) {
-	name := "test-nsx-policy-tier1-dhcp"
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_tier1_gateway.test"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -212,8 +212,8 @@ func TestAccResourceNsxtPolicyTier1Gateway_withDHCP(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyTier1Gateway_withEdgeCluster(t *testing.T) {
-	name := "test-nsx-policy-tier1-ec"
-	updateName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
+	updateName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_tier1_gateway.test"
 	edgeClusterName := getEdgeClusterName()
 
@@ -221,7 +221,7 @@ func TestAccResourceNsxtPolicyTier1Gateway_withEdgeCluster(t *testing.T) {
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyTier1CheckDestroy(state, name)
+			return testAccNsxtPolicyTier1CheckDestroy(state, updateName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -251,16 +251,16 @@ func TestAccResourceNsxtPolicyTier1Gateway_withEdgeCluster(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyTier1Gateway_withId(t *testing.T) {
-	name := "test-nsx-policy-tier1-id"
+	name := getAccTestResourceName()
 	id := "test-id"
-	updateName := fmt.Sprintf("%s-update", name)
+	updateName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_tier1_gateway.test"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyTier1CheckDestroy(state, name)
+			return testAccNsxtPolicyTier1CheckDestroy(state, updateName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -291,9 +291,9 @@ func TestAccResourceNsxtPolicyTier1Gateway_withId(t *testing.T) {
 	})
 }
 func TestAccResourceNsxtPolicyTier1Gateway_withQos(t *testing.T) {
-	name := "test-nsx-policy-tier1"
-	profileName := "test-nsx-qos-profile"
-	updateName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
+	profileName := getAccTestResourceName()
+	updateName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_tier1_gateway.test"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -303,7 +303,7 @@ func TestAccResourceNsxtPolicyTier1Gateway_withQos(t *testing.T) {
 			if err := testAccDataSourceNsxtPolicyGatewayQosProfileDeleteByName(profileName); err != nil {
 				return err
 			}
-			return testAccNsxtPolicyTier1CheckDestroy(state, name)
+			return testAccNsxtPolicyTier1CheckDestroy(state, updateName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -336,15 +336,15 @@ func TestAccResourceNsxtPolicyTier1Gateway_withQos(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyTier1Gateway_withRules(t *testing.T) {
-	name := "test-nsx-policy-tier1-rule"
-	updateName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
+	updateName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_tier1_gateway.test"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyTier1CheckDestroy(state, name)
+			return testAccNsxtPolicyTier1CheckDestroy(state, updateName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -376,10 +376,10 @@ func TestAccResourceNsxtPolicyTier1Gateway_withRules(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyTier1Gateway_withTier0(t *testing.T) {
-	name := "test-nsx-policy-tier1-t0"
-	updateName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
+	updateName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_tier1_gateway.test"
-	tier0Name := "tier-0-test-for-tier1"
+	tier0Name := getAccTestResourceName()
 	failoverMode := "NON_PREEMPTIVE"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -387,7 +387,7 @@ func TestAccResourceNsxtPolicyTier1Gateway_withTier0(t *testing.T) {
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			err := testAccDataSourceNsxtPolicyTier0GatewayDeleteByName(tier0Name)
-			err2 := testAccNsxtPolicyTier1CheckDestroy(state, name)
+			err2 := testAccNsxtPolicyTier1CheckDestroy(state, updateName)
 			if err != nil {
 				return err
 			}
@@ -427,7 +427,7 @@ func TestAccResourceNsxtPolicyTier1Gateway_withTier0(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyTier1Gateway_importBasic(t *testing.T) {
-	name := "test-nsx-policy-tier1-import"
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_tier1_gateway.test"
 	failoverMode := "PREEMPTIVE"
 

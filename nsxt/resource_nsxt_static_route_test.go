@@ -13,6 +13,7 @@ import (
 )
 
 var testAccResourceStaticRouteName = "nsxt_static_route.test"
+var testAccResourceStaticRouteHelperName = getAccTestResourceName()
 
 func TestAccResourceNsxtStaticRoute_basic(t *testing.T) {
 	testAccResourceNsxtStaticRoute(t, "tier1")
@@ -23,8 +24,8 @@ func TestAccResourceNsxtStaticRoute_onT0(t *testing.T) {
 }
 
 func testAccResourceNsxtStaticRoute(t *testing.T, tier string) {
-	name := "test-nsx-static-route"
-	updateName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
+	updateName := getAccTestResourceName()
 	edgeClusterName := getEdgeClusterName()
 	transportZoneName := getOverlayTransportZoneName()
 
@@ -32,7 +33,7 @@ func testAccResourceNsxtStaticRoute(t *testing.T, tier string) {
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXStaticRouteCheckDestroy(state, name)
+			return testAccNSXStaticRouteCheckDestroy(state, updateName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -75,7 +76,7 @@ func TestAccResourceNsxtStaticRoute_importOnTier0(t *testing.T) {
 }
 
 func testAccResourceNsxtStaticRouteImport(t *testing.T, tier string) {
-	name := "test-nsx-static-route"
+	name := getAccTestResourceName()
 	edgeClusterName := getEdgeClusterName()
 	transportZoneName := getOverlayTransportZoneName()
 
@@ -192,7 +193,7 @@ data "nsxt_transport_zone" "tz1" {
 }
 
 resource "nsxt_logical_switch" "ls1" {
-  display_name      = "test-nsx-downlink-switch"
+  display_name      = "%s"
   admin_state       = "UP"
   replication_mode  = "MTEP"
   vlan              = "0"
@@ -200,7 +201,7 @@ resource "nsxt_logical_switch" "ls1" {
 }
 
 resource "nsxt_logical_port" "port1" {
-  display_name      = "test-nsx-logical-port-for-route"
+  display_name      = "%s"
   admin_state       = "UP"
   description       = "Acceptance Test"
   logical_switch_id = "${nsxt_logical_switch.ls1.id}"
@@ -212,7 +213,7 @@ resource "nsxt_logical_router_downlink_port" "lrp1" {
   linked_logical_switch_port_id = "${nsxt_logical_port.port1.id}"
   logical_router_id             = "${nsxt_logical_%s_router.rtr1.id}"
   ip_address                    = "8.0.0.1/24"
-}`, edgeClusterName, tier, tzName, tier)
+}`, edgeClusterName, tier, tzName, testAccResourceStaticRouteHelperName, testAccResourceStaticRouteHelperName, tier)
 }
 
 func testAccNSXStaticRouteCreateTemplate(tier string, name string, edgeClusterName string, tzName string) string {

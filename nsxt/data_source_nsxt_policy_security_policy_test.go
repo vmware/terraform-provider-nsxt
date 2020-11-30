@@ -12,7 +12,7 @@ import (
 )
 
 func TestAccDataSourceNsxtPolicySecurityPolicy_basic(t *testing.T) {
-	name := "terraform_ds_test"
+	name := getAccTestDataSourceName()
 	category := "Application"
 	testResourceName := "data.nsxt_policy_security_policy.test"
 	withCategory := fmt.Sprintf(`category = "%s"`, category)

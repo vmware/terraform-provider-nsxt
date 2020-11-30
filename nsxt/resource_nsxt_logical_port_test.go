@@ -13,8 +13,8 @@ import (
 )
 
 func TestAccResourceNsxtLogicalPort_basic(t *testing.T) {
-	portName := "test-nsx-logical-port"
-	updatePortName := fmt.Sprintf("%s-update", portName)
+	portName := getAccTestResourceName()
+	updatePortName := getAccTestResourceName()
 	testResourceName := "nsxt_logical_port.test"
 	transportZoneName := getOverlayTransportZoneName()
 
@@ -22,7 +22,7 @@ func TestAccResourceNsxtLogicalPort_basic(t *testing.T) {
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXLogicalPortCheckDestroy(state, portName)
+			return testAccNSXLogicalPortCheckDestroy(state, updatePortName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -50,8 +50,8 @@ func TestAccResourceNsxtLogicalPort_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtLogicalPort_withProfiles(t *testing.T) {
-	portName := "test-nsx-logical-port-with-profiles"
-	updatePortName := fmt.Sprintf("%s-update", portName)
+	portName := getAccTestResourceName()
+	updatePortName := getAccTestResourceName()
 	testResourceName := "nsxt_logical_port.test"
 	transportZoneName := getOverlayTransportZoneName()
 	customProfileName := "terraform_test_LP_profile"
@@ -62,7 +62,7 @@ func TestAccResourceNsxtLogicalPort_withProfiles(t *testing.T) {
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			// Verify that the LP was deleted
-			err := testAccNSXLogicalPortCheckDestroy(state, portName)
+			err := testAccNSXLogicalPortCheckDestroy(state, updatePortName)
 			if err != nil {
 				return err
 			}
@@ -101,7 +101,7 @@ func TestAccResourceNsxtLogicalPort_withProfiles(t *testing.T) {
 func TestAccResourceNsxtLogicalPort_withNSGroup(t *testing.T) {
 	// Verify port can be deleted if its an effective member
 	// of existing NS Group
-	portName := "test-nsx-logical-port"
+	portName := getAccTestResourceName()
 	testResourceName := "nsxt_logical_port.test"
 	transportZoneName := getOverlayTransportZoneName()
 
@@ -130,7 +130,7 @@ func TestAccResourceNsxtLogicalPort_withNSGroup(t *testing.T) {
 }
 
 func TestAccResourceNsxtLogicalPort_importBasic(t *testing.T) {
-	portName := "test-nsx-logical-port"
+	portName := getAccTestResourceName()
 	testResourceName := "nsxt_logical_port.test"
 	transportZoneName := getOverlayTransportZoneName()
 

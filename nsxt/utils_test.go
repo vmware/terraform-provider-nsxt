@@ -5,6 +5,7 @@ package nsxt
 
 import (
 	"fmt"
+	"math/rand"
 	"net/http"
 	"os"
 	"strings"
@@ -29,6 +30,9 @@ const macPoolDefaultName string = "DefaultMacPool"
 const realizationResourceName string = "data.nsxt_policy_realization_info.realization_info"
 const defaultTestResourceName string = "terraform-acctest"
 
+const testAccDataSourceName string = "terraform-acctest-data"
+const testAccResourceName string = "terraform-acctest-resource"
+
 const singleTag string = `
   tag {
     scope = "scope1"
@@ -44,6 +48,14 @@ const doubleTags string = `
     scope = "scope2"
     tag   = "tag2"
   }`
+
+func getAccTestDataSourceName() string {
+	return fmt.Sprintf("%s-%d", testAccDataSourceName, rand.Intn(100000))
+}
+
+func getAccTestResourceName() string {
+	return fmt.Sprintf("%s-%d", testAccResourceName, rand.Intn(100000))
+}
 
 func getTier0RouterName() string {
 	name := os.Getenv("NSXT_TEST_TIER0_ROUTER")

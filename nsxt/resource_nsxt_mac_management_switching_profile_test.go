@@ -13,8 +13,8 @@ import (
 )
 
 func TestAccResourceNsxtMacManagementSwitchingProfile_basic(t *testing.T) {
-	name := "test-nsx-switching-profile"
-	updatedName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
+	updatedName := getAccTestResourceName()
 	testResourceName := "nsxt_mac_management_switching_profile.test"
 	limit := "100"
 	updatedLimit := "101"
@@ -23,7 +23,7 @@ func TestAccResourceNsxtMacManagementSwitchingProfile_basic(t *testing.T) {
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXMacManagementSwitchingProfileCheckDestroy(state, name)
+			return testAccNSXMacManagementSwitchingProfileCheckDestroy(state, updatedName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -67,7 +67,7 @@ func TestAccResourceNsxtMacManagementSwitchingProfile_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtMacManagementSwitchingProfile_importBasic(t *testing.T) {
-	name := "test-nsx-application-profile"
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_mac_management_switching_profile.test"
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },

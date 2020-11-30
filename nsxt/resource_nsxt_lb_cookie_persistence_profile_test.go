@@ -13,15 +13,15 @@ import (
 )
 
 func TestAccResourceNsxtLbCookiePersistenceProfile_basic(t *testing.T) {
-	name := "test-nsx-persistence-profile"
-	updatedName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
+	updatedName := getAccTestResourceName()
 	testResourceName := "nsxt_lb_cookie_persistence_profile.test"
 	mode := "PREFIX"
 	updatedMode := "REWRITE"
 	cookieName := "my_cookie"
 	updatedCookieName := "new_cookie"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
 			testAccTestMP(t)
@@ -30,7 +30,7 @@ func TestAccResourceNsxtLbCookiePersistenceProfile_basic(t *testing.T) {
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXLbCookiePersistenceProfileCheckDestroy(state, name)
+			return testAccNSXLbCookiePersistenceProfileCheckDestroy(state, updatedName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -66,8 +66,7 @@ func TestAccResourceNsxtLbCookiePersistenceProfile_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtLbCookiePersistenceProfile_insertMode(t *testing.T) {
-	name := "test-nsx-persistence-profile"
-	updatedName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_lb_cookie_persistence_profile.test"
 	cookieName := "my_cookie"
 	updatedCookieName := "new_cookie"
@@ -76,7 +75,7 @@ func TestAccResourceNsxtLbCookiePersistenceProfile_insertMode(t *testing.T) {
 	cookiePath := "/subfolder1"
 	updatedCookiePath := "/subfolder1"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
 			testAccTestMP(t)
@@ -109,10 +108,10 @@ func TestAccResourceNsxtLbCookiePersistenceProfile_insertMode(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXLbCookiePersistenceProfileInsertTemplate(updatedName, updatedCookieName, updatedCookieDomain, updatedCookiePath),
+				Config: testAccNSXLbCookiePersistenceProfileInsertTemplate(name, updatedCookieName, updatedCookieDomain, updatedCookiePath),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNSXLbCookiePersistenceProfileExists(updatedName, testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					testAccNSXLbCookiePersistenceProfileExists(name, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "test description"),
 					resource.TestCheckResourceAttr(testResourceName, "cookie_mode", "INSERT"),
 					resource.TestCheckResourceAttr(testResourceName, "cookie_name", updatedCookieName),
@@ -133,9 +132,9 @@ func TestAccResourceNsxtLbCookiePersistenceProfile_insertMode(t *testing.T) {
 }
 
 func TestAccResourceNsxtLbCookiePersistenceProfile_importBasic(t *testing.T) {
-	name := "test-nsx-persistence-profile"
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_lb_cookie_persistence_profile.test"
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
 			testAccTestMP(t)

@@ -18,7 +18,7 @@ var testAccResourcePolicyNATRuleDestNet = "15.1.1.3"
 var testAccResourcePolicyNATRuleTransNet = "16.1.1.3"
 
 func TestAccResourceNsxtPolicyNATRule_minimalT0(t *testing.T) {
-	name := "test-nsx-policy-nat-rule-basic"
+	name := getAccTestResourceName()
 	action := model.PolicyNatRule_ACTION_REFLEXIVE
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -49,8 +49,8 @@ func TestAccResourceNsxtPolicyNATRule_minimalT0(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyNATRule_basicT1(t *testing.T) {
-	name := "test-nsx-policy-nat-rule-basic"
-	updateName := name + "updated"
+	name := getAccTestResourceName()
+	updateName := getAccTestResourceName()
 	snet := "22.1.1.2"
 	dnet := "33.1.1.2"
 	tnet := "44.1.1.2"
@@ -104,10 +104,10 @@ func TestAccResourceNsxtPolicyNATRule_basicT1(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyNATRuleTier1UpdateMultipleSourceNetworksTemplate(updateName, action, testAccResourcePolicyNATRuleSourceNet, snet, dnet, tnet),
+				Config: testAccNsxtPolicyNATRuleTier1UpdateMultipleSourceNetworksTemplate(name, action, testAccResourcePolicyNATRuleSourceNet, snet, dnet, tnet),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyNATRuleExists(testAccResourcePolicyNATRuleName),
-					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "display_name", updateName),
+					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "display_name", name),
 					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "destination_networks.#", "1"),
 					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "source_networks.#", "2"),
@@ -127,8 +127,8 @@ func TestAccResourceNsxtPolicyNATRule_basicT1(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyNATRule_basicT0(t *testing.T) {
-	name := "test-nsx-policy-nat-rule-basic"
-	updateName := name + "updated"
+	name := getAccTestResourceName()
+	updateName := getAccTestResourceName()
 	snet := "22.1.1.2"
 	tnet := "44.1.1.2"
 	action := model.PolicyNatRule_ACTION_REFLEXIVE
@@ -139,7 +139,7 @@ func TestAccResourceNsxtPolicyNATRule_basicT0(t *testing.T) {
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyNATRuleCheckDestroy(state, name)
+			return testAccNsxtPolicyNATRuleCheckDestroy(state, updateName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -185,7 +185,7 @@ func TestAccResourceNsxtPolicyNATRule_basicT0(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyNATRule_basicT1Import(t *testing.T) {
-	name := "test-nsx-policy-nat-rule-basic"
+	name := getAccTestResourceName()
 	action := model.PolicyNatRule_ACTION_DNAT
 
 	resource.ParallelTest(t, resource.TestCase{

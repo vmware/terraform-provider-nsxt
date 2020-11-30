@@ -14,8 +14,8 @@ import (
 )
 
 func TestAccResourceNsxtLogicalSwitch_basic(t *testing.T) {
-	switchName := "test-nsx-logical-switch-overlay"
-	updateSwitchName := fmt.Sprintf("%s-update", switchName)
+	switchName := getAccTestResourceName()
+	updateSwitchName := getAccTestResourceName()
 	resourceName := "testoverlay"
 	testResourceName := fmt.Sprintf("nsxt_logical_switch.%s", resourceName)
 	novlan := "0"
@@ -26,7 +26,7 @@ func TestAccResourceNsxtLogicalSwitch_basic(t *testing.T) {
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXLogicalSwitchCheckDestroy(state, switchName, "nsxt_logical_switch")
+			return testAccNSXLogicalSwitchCheckDestroy(state, updateSwitchName, "nsxt_logical_switch")
 		},
 		Steps: []resource.TestStep{
 			{
@@ -63,10 +63,9 @@ func TestAccResourceNsxtLogicalSwitch_basic(t *testing.T) {
 	})
 }
 
-// This use case is deprecated and should be removed with next major release
 func TestAccResourceNsxtLogicalSwitch_vlan(t *testing.T) {
-	switchName := "test-nsx-logical-switch-vlan"
-	updateSwitchName := fmt.Sprintf("%s-update", switchName)
+	switchName := getAccTestResourceName()
+	updateSwitchName := getAccTestResourceName()
 	transportZoneName := getVlanTransportZoneName()
 	resourceName := "testvlan"
 	testResourceName := fmt.Sprintf("nsxt_logical_switch.%s", resourceName)
@@ -79,7 +78,7 @@ func TestAccResourceNsxtLogicalSwitch_vlan(t *testing.T) {
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXLogicalSwitchCheckDestroy(state, switchName, "nsxt_logical_switch")
+			return testAccNSXLogicalSwitchCheckDestroy(state, updateSwitchName, "nsxt_logical_switch")
 		},
 		Steps: []resource.TestStep{
 			{
@@ -108,8 +107,7 @@ func TestAccResourceNsxtLogicalSwitch_vlan(t *testing.T) {
 }
 
 func TestAccResourceNsxtLogicalSwitch_withProfiles(t *testing.T) {
-	switchName := "test-nsx-logical-switch-with-profiles"
-	updateSwitchName := fmt.Sprintf("%s-update", switchName)
+	switchName := getAccTestResourceName()
 	resourceName := "test_profiles"
 	testResourceName := fmt.Sprintf("nsxt_logical_switch.%s", resourceName)
 	transportZoneName := getOverlayTransportZoneName()
@@ -146,10 +144,10 @@ func TestAccResourceNsxtLogicalSwitch_withProfiles(t *testing.T) {
 			},
 			{
 				// Replace the custom switching profile with OOB one
-				Config: testAccNSXLogicalSwitchUpdateWithProfilesTemplate(resourceName, updateSwitchName, transportZoneName),
+				Config: testAccNSXLogicalSwitchUpdateWithProfilesTemplate(resourceName, switchName, transportZoneName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNSXLogicalSwitchExists(updateSwitchName, testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", updateSwitchName),
+					testAccNSXLogicalSwitchExists(switchName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", switchName),
 					// Counting only custom profiles so count should be 0
 					resource.TestCheckResourceAttr(testResourceName, "switching_profile_id.#", "0"),
 				),
@@ -159,7 +157,7 @@ func TestAccResourceNsxtLogicalSwitch_withProfiles(t *testing.T) {
 }
 
 func TestAccResourceNsxtLogicalSwitch_withMacPool(t *testing.T) {
-	switchName := "test-nsx-logical-switch-with-mac"
+	switchName := getAccTestResourceName()
 	resourceName := "test_mac_pool"
 	testResourceName := fmt.Sprintf("nsxt_logical_switch.%s", resourceName)
 	transportZoneName := getOverlayTransportZoneName()
@@ -195,7 +193,7 @@ func TestAccResourceNsxtLogicalSwitch_withMacPool(t *testing.T) {
 }
 
 func TestAccResourceNsxtLogicalSwitch_importBasic(t *testing.T) {
-	switchName := "test-nsx-logical-switch-overlay"
+	switchName := getAccTestResourceName()
 	resourceName := "testoverlay"
 	testResourceName := fmt.Sprintf("nsxt_logical_switch.%s", resourceName)
 	novlan := "0"

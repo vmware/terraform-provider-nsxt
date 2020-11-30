@@ -13,12 +13,12 @@ import (
 	"github.com/vmware/go-vmware-nsxt/manager"
 )
 
-var testNsxtDhcpServerIPPoolName = "test"
+var testNsxtDhcpServerIPPoolName = getAccTestResourceName()
 var testNsxtDhcpServerIPPoolResourceName = "nsxt_dhcp_server_ip_pool.test"
 
 func TestAccResourceNsxtDhcpServerIPPool_basic(t *testing.T) {
 	name := testNsxtDhcpServerIPPoolName
-	updatedName := "test-update"
+	updatedName := getAccTestResourceName()
 	testResourceName := testNsxtDhcpServerIPPoolResourceName
 	edgeClusterName := getEdgeClusterName()
 	gateway := "1.1.1.1"
@@ -30,7 +30,7 @@ func TestAccResourceNsxtDhcpServerIPPool_basic(t *testing.T) {
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXDhcpServerIPPoolCheckDestroy(state, name)
+			return testAccNSXDhcpServerIPPoolCheckDestroy(state, updatedName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -85,7 +85,7 @@ func TestAccResourceNsxtDhcpServerIPPool_basic(t *testing.T) {
 
 func TestAccResourceNsxtDhcpServerIPPool_noOpts(t *testing.T) {
 	name := testNsxtDhcpServerIPPoolName
-	updatedName := "test-update"
+	updatedName := getAccTestResourceName()
 	testResourceName := testNsxtDhcpServerIPPoolResourceName
 	edgeClusterName := getEdgeClusterName()
 	start1 := "1.1.1.100"
@@ -97,7 +97,7 @@ func TestAccResourceNsxtDhcpServerIPPool_noOpts(t *testing.T) {
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXDhcpServerIPPoolCheckDestroy(state, name)
+			return testAccNSXDhcpServerIPPoolCheckDestroy(state, updatedName)
 		},
 		Steps: []resource.TestStep{
 			{

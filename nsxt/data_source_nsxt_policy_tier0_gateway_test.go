@@ -17,7 +17,7 @@ import (
 )
 
 func TestAccDataSourceNsxtPolicyTier0Gateway_basic(t *testing.T) {
-	name := "terraform_test"
+	name := getAccTestDataSourceName()
 	testResourceName := "data.nsxt_policy_tier0_gateway.test"
 
 	resource.Test(t, resource.TestCase{

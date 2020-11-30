@@ -16,8 +16,12 @@ var testLbVirtualServerCertID string
 var testLbVirtualServerClientCertID string
 var testLbVirtualServerCaCertID string
 
+var testLbVirtualServerHelper1Name = getAccTestResourceName()
+var testLbVirtualServerHelper2Name = getAccTestResourceName()
+var testLbVirtualServerHelper3Name = getAccTestResourceName()
+
 func TestAccResourceNsxtLbHttpVirtualServer_basic(t *testing.T) {
-	name := "test"
+	name := getAccTestResourceName()
 	fullName := "nsxt_lb_http_virtual_server.test"
 	port := "888"
 	updatedPort := "999"
@@ -37,10 +41,10 @@ func TestAccResourceNsxtLbHttpVirtualServer_basic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXLbHTTPVirtualServerCreateTemplate(port, enabled),
+				Config: testAccNSXLbHTTPVirtualServerCreateTemplate(name, port, enabled),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXLbHTTPVirtualServerExists(name, fullName),
-					resource.TestCheckResourceAttr(fullName, "display_name", "test"),
+					resource.TestCheckResourceAttr(fullName, "display_name", name),
 					resource.TestCheckResourceAttr(fullName, "description", "test description"),
 					resource.TestCheckResourceAttr(fullName, "access_log_enabled", "true"),
 					resource.TestCheckResourceAttrSet(fullName, "application_profile_id"),
@@ -56,10 +60,10 @@ func TestAccResourceNsxtLbHttpVirtualServer_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXLbHTTPVirtualServerCreateTemplate(updatedPort, updatedEnabled),
+				Config: testAccNSXLbHTTPVirtualServerCreateTemplate(name, updatedPort, updatedEnabled),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXLbHTTPVirtualServerExists(name, fullName),
-					resource.TestCheckResourceAttr(fullName, "display_name", "test"),
+					resource.TestCheckResourceAttr(fullName, "display_name", name),
 					resource.TestCheckResourceAttr(fullName, "description", "test description"),
 					resource.TestCheckResourceAttr(fullName, "access_log_enabled", "true"),
 					resource.TestCheckResourceAttrSet(fullName, "application_profile_id"),
@@ -79,7 +83,7 @@ func TestAccResourceNsxtLbHttpVirtualServer_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtLbHttpVirtualServer_withRules(t *testing.T) {
-	name := "test"
+	name := getAccTestResourceName()
 	fullName := "nsxt_lb_http_virtual_server.test"
 	rule1 := "rule1"
 	rule2 := "rule3"
@@ -99,7 +103,7 @@ func TestAccResourceNsxtLbHttpVirtualServer_withRules(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXLbHTTPVirtualServerCreateTemplateWithRules(rule1, rule2),
+				Config: testAccNSXLbHTTPVirtualServerCreateTemplateWithRules(name, rule1, rule2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXLbHTTPVirtualServerExists(name, fullName),
 					resource.TestCheckResourceAttr(fullName, "ip_address", "1.1.1.1"),
@@ -108,7 +112,7 @@ func TestAccResourceNsxtLbHttpVirtualServer_withRules(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXLbHTTPVirtualServerCreateTemplateWithRules(updatedRule1, updatedRule2),
+				Config: testAccNSXLbHTTPVirtualServerCreateTemplateWithRules(name, updatedRule1, updatedRule2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXLbHTTPVirtualServerExists(name, fullName),
 					resource.TestCheckResourceAttr(fullName, "ip_address", "1.1.1.1"),
@@ -121,7 +125,7 @@ func TestAccResourceNsxtLbHttpVirtualServer_withRules(t *testing.T) {
 }
 
 func TestAccResourceNsxtLbHttpVirtualServer_withSSL(t *testing.T) {
-	name := "test"
+	name := getAccTestResourceName()
 	fullName := "nsxt_lb_http_virtual_server.test"
 	depth := "2"
 	updatedDepth := "4"
@@ -143,10 +147,10 @@ func TestAccResourceNsxtLbHttpVirtualServer_withSSL(t *testing.T) {
 				PreConfig: func() {
 					testLbVirtualServerCertID, testLbVirtualServerClientCertID, testLbVirtualServerCaCertID = testAccNSXCreateCerts(t)
 				},
-				Config: testAccNSXLbHTTPVirtualServerCreateTemplateWithSSL(depth),
+				Config: testAccNSXLbHTTPVirtualServerCreateTemplateWithSSL(name, depth),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXLbHTTPVirtualServerExists(name, fullName),
-					resource.TestCheckResourceAttr(fullName, "display_name", "test"),
+					resource.TestCheckResourceAttr(fullName, "display_name", name),
 					resource.TestCheckResourceAttr(fullName, "description", "test description"),
 					resource.TestCheckResourceAttr(fullName, "access_log_enabled", "false"),
 					resource.TestCheckResourceAttrSet(fullName, "application_profile_id"),
@@ -169,10 +173,10 @@ func TestAccResourceNsxtLbHttpVirtualServer_withSSL(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXLbHTTPVirtualServerCreateTemplateWithSSL(updatedDepth),
+				Config: testAccNSXLbHTTPVirtualServerCreateTemplateWithSSL(name, updatedDepth),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXLbHTTPVirtualServerExists(name, fullName),
-					resource.TestCheckResourceAttr(fullName, "display_name", "test"),
+					resource.TestCheckResourceAttr(fullName, "display_name", name),
 					resource.TestCheckResourceAttr(fullName, "description", "test description"),
 					resource.TestCheckResourceAttr(fullName, "access_log_enabled", "false"),
 					resource.TestCheckResourceAttrSet(fullName, "application_profile_id"),
@@ -199,7 +203,7 @@ func TestAccResourceNsxtLbHttpVirtualServer_withSSL(t *testing.T) {
 }
 
 func TestAccResourceNsxtLbHttpVirtualServer_importBasic(t *testing.T) {
-	name := "test"
+	name := getAccTestResourceName()
 	resourceName := "nsxt_lb_http_virtual_server.test"
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -278,29 +282,29 @@ func testAccNSXLbHTTPVirtualServerCheckDestroy(state *terraform.State, displayNa
 	return nil
 }
 
-func testAccNSXLbHTTPVirtualServerCreateTemplate(port string, enabled string) string {
+func testAccNSXLbHTTPVirtualServerCreateTemplate(name string, port string, enabled string) string {
 	return fmt.Sprintf(`
 resource "nsxt_lb_http_application_profile" "test" {
-  display_name = "lb virtual server test"
+  display_name = "%s"
 }
 
 resource "nsxt_lb_cookie_persistence_profile" "test" {
-  display_name = "lb virtual server test"
+  display_name = "%s"
   cookie_name  = "test"
 }
 
 resource "nsxt_lb_pool" "test" {
-  display_name = "lb virtual server test"
+  display_name = "%s"
   algorithm    = "ROUND_ROBIN"
 }
 
 resource "nsxt_lb_pool" "sorry" {
-  display_name = "lb virtual server test sorry pool"
+  display_name = "%s"
   algorithm    = "ROUND_ROBIN"
 }
 
 resource "nsxt_lb_http_virtual_server" "test" {
-  display_name               = "test"
+  display_name               = "%s"
   description                = "test description"
   access_log_enabled         = true
   application_profile_id     = "${nsxt_lb_http_application_profile.test.id}"
@@ -319,18 +323,18 @@ resource "nsxt_lb_http_virtual_server" "test" {
     tag   = "tag1"
   }
 }
-`, enabled, port)
+`, name, name, testLbVirtualServerHelper1Name, testLbVirtualServerHelper2Name, name, enabled, port)
 }
 
 // TODO: add other types of rules
-func testAccNSXLbHTTPVirtualServerCreateTemplateWithRules(rule1 string, rule2 string) string {
+func testAccNSXLbHTTPVirtualServerCreateTemplateWithRules(name string, rule1 string, rule2 string) string {
 	return fmt.Sprintf(`
 resource "nsxt_lb_http_application_profile" "test" {
-  display_name = "lb virtual server test"
+  display_name = "%s"
 }
 
 resource "nsxt_lb_http_request_rewrite_rule" "rule1" {
-  display_name = "lb virtual server test rule1"
+  display_name = "%s"
   method_condition {
     method = "HEAD"
   }
@@ -342,7 +346,7 @@ resource "nsxt_lb_http_request_rewrite_rule" "rule1" {
 }
 
 resource "nsxt_lb_http_request_rewrite_rule" "rule2" {
-  display_name = "lb virtual server test rule2"
+  display_name = "%s"
   uri_condition {
     uri        = "/hello"
     match_type = "STARTS_WITH"
@@ -355,7 +359,7 @@ resource "nsxt_lb_http_request_rewrite_rule" "rule2" {
 }
 
 resource "nsxt_lb_http_request_rewrite_rule" "rule3" {
-  display_name = "lb virtual server test rule3"
+  display_name = "%s"
   uri_condition {
     uri = "html"
     match_type = "ENDS_WITH"
@@ -368,19 +372,19 @@ resource "nsxt_lb_http_request_rewrite_rule" "rule3" {
 }
 
 resource "nsxt_lb_http_virtual_server" "test" {
-  display_name           = "test"
+  display_name           = "%s"
   application_profile_id = "${nsxt_lb_http_application_profile.test.id}"
   ip_address             = "1.1.1.1"
   port                   = "443"
   rule_ids               = ["${nsxt_lb_http_request_rewrite_rule.%s.id}", "${nsxt_lb_http_request_rewrite_rule.%s.id}"]
 }
-`, rule1, rule2)
+`, testLbVirtualServerHelper1Name, testLbVirtualServerHelper1Name, testLbVirtualServerHelper2Name, testLbVirtualServerHelper3Name, name, rule1, rule2)
 }
 
-func testAccNSXLbHTTPVirtualServerCreateTemplateWithSSL(depth string) string {
+func testAccNSXLbHTTPVirtualServerCreateTemplateWithSSL(name string, depth string) string {
 	return fmt.Sprintf(`
 resource "nsxt_lb_http_application_profile" "test" {
-  display_name = "lb virtual server test"
+  display_name = "%s"
 }
 
 data "nsxt_certificate" "ca" {
@@ -396,15 +400,15 @@ data "nsxt_certificate" "mine" {
 }
 
 resource "nsxt_lb_client_ssl_profile" "test" {
-  display_name = "lb virtual server test"
+  display_name = "%s"
 }
 
 resource "nsxt_lb_server_ssl_profile" "test" {
-  display_name = "lb virtual server test"
+  display_name = "%s"
 }
 
 resource "nsxt_lb_http_virtual_server" "test" {
-  display_name           = "test"
+  display_name           = "%s"
   description            = "test description"
   application_profile_id = "${nsxt_lb_http_application_profile.test.id}"
   ip_address             = "1.1.1.1"
@@ -427,14 +431,14 @@ resource "nsxt_lb_http_virtual_server" "test" {
   }
 
 }
-`, depth, depth)
+`, name, name, name, name, depth, depth)
 }
 
 func testAccNSXLbHTTPVirtualServerCreateTemplateTrivial() string {
-	return `
+	return fmt.Sprintf(`
 
 resource "nsxt_lb_http_application_profile" "test" {
-  display_name = "lb virtual server test"
+  display_name = "%s"
 }
 
 resource "nsxt_lb_http_virtual_server" "test" {
@@ -443,5 +447,5 @@ resource "nsxt_lb_http_virtual_server" "test" {
   ip_address             = "2.2.2.2"
   port                   = "443"
 }
-`
+`, testLbVirtualServerHelper1Name)
 }

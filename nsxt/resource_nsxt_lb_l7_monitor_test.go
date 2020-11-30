@@ -33,14 +33,14 @@ func TestAccResourceNsxtLbHTTPSMonitor_importBasic(t *testing.T) {
 }
 
 func testAccResourceNsxtLbL7MonitorBasic(t *testing.T, protocol string) {
-	name := "test-nsx-monitor"
+	name := getAccTestResourceName()
 	testResourceName := fmt.Sprintf("nsxt_lb_%s_monitor.test", protocol)
 	requestMethod := "HEAD"
 	updatedRequestMethod := "POST"
 	body1 := "XXXXXXXXXXXXXXXXXXX"
 	body2 := "YYYYYYYYYYYYYYYYYYY"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
 			testAccTestMP(t)
@@ -87,10 +87,10 @@ func testAccResourceNsxtLbL7MonitorBasic(t *testing.T, protocol string) {
 }
 
 func TestAccResourceNsxtLbHTTPSMonitor_withAuth(t *testing.T) {
-	name := "test-nsx-monitor"
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_lb_https_monitor.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
 			testAccTestMP(t)
@@ -126,7 +126,7 @@ func TestAccResourceNsxtLbHTTPSMonitor_withAuth(t *testing.T) {
 }
 
 func testAccResourceNsxtLbL7MonitorImport(t *testing.T, protocol string) {
-	name := "test-nsx-monitor"
+	name := getAccTestResourceName()
 	testResourceName := fmt.Sprintf("nsxt_lb_%s_monitor.test", protocol)
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {

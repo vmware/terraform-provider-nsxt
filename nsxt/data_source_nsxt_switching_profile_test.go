@@ -14,7 +14,7 @@ import (
 )
 
 func TestAccDataSourceNsxtSwitchingProfile_basic(t *testing.T) {
-	profileName := "terraform_ds_test_profile"
+	profileName := getAccTestDataSourceName()
 	profileType := "QosSwitchingProfile"
 	testResourceName := "data.nsxt_switching_profile.test"
 

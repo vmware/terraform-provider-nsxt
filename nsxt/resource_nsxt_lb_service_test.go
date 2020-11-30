@@ -13,7 +13,7 @@ import (
 )
 
 func TestAccResourceNsxtLbService_basic(t *testing.T) {
-	name := "test"
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_lb_service.test"
 
 	resource.Test(t, resource.TestCase{
@@ -24,7 +24,7 @@ func TestAccResourceNsxtLbService_basic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXLbServiceCreateTemplate(),
+				Config: testAccNSXLbServiceCreateTemplate(name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXLbServiceExists(name, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -37,7 +37,7 @@ func TestAccResourceNsxtLbService_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXLbServiceUpdateTemplate(),
+				Config: testAccNSXLbServiceUpdateTemplate(name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXLbServiceExists(name, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -54,7 +54,7 @@ func TestAccResourceNsxtLbService_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtLbService_withServers(t *testing.T) {
-	name := "test"
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_lb_service.test"
 	logLevel := "EMERGENCY"
 	updatedLogLevel := "INFO"
@@ -67,7 +67,7 @@ func TestAccResourceNsxtLbService_withServers(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXLbServiceCreateTemplateWithServers(logLevel),
+				Config: testAccNSXLbServiceCreateTemplateWithServers(name, logLevel),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXLbServiceExists(name, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -79,7 +79,7 @@ func TestAccResourceNsxtLbService_withServers(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXLbServiceCreateTemplateWithServers(updatedLogLevel),
+				Config: testAccNSXLbServiceCreateTemplateWithServers(name, updatedLogLevel),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXLbServiceExists(name, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -95,7 +95,7 @@ func TestAccResourceNsxtLbService_withServers(t *testing.T) {
 }
 
 func TestAccResourceNsxtLbService_importBasic(t *testing.T) {
-	name := "test"
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_lb_service.test"
 
 	resource.Test(t, resource.TestCase{
@@ -106,7 +106,7 @@ func TestAccResourceNsxtLbService_importBasic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXLbServiceCreateTemplate(),
+				Config: testAccNSXLbServiceCreateTemplate(name),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -200,10 +200,10 @@ resource "nsxt_logical_router_link_port_on_tier1" "test" {
 }`, edgeClusterName, tier0Name)
 }
 
-func testAccNSXLbServiceCreateTemplate() string {
-	return testAccNSXLbCreateTopology() + `
+func testAccNSXLbServiceCreateTemplate(name string) string {
+	return testAccNSXLbCreateTopology() + fmt.Sprintf(`
 resource "nsxt_lb_service" "test" {
-  display_name      = "test"
+  display_name      = "%s"
   enabled           = true
   description       = "Acceptance Test"
   logical_router_id = "${nsxt_logical_tier1_router.test.id}"
@@ -216,13 +216,13 @@ resource "nsxt_lb_service" "test" {
   }
 
   depends_on = ["nsxt_logical_router_link_port_on_tier1.test"]
-}`
+}`, name)
 }
 
-func testAccNSXLbServiceUpdateTemplate() string {
-	return testAccNSXLbCreateTopology() + `
+func testAccNSXLbServiceUpdateTemplate(name string) string {
+	return testAccNSXLbCreateTopology() + fmt.Sprintf(`
 resource "nsxt_lb_service" "test" {
-  display_name      = "test"
+  display_name      = "%s"
   enabled           = false
   description       = "Acceptance Test Update"
   logical_router_id = "${nsxt_logical_tier1_router.test.id}"
@@ -240,10 +240,10 @@ resource "nsxt_lb_service" "test" {
   }
 
   depends_on = ["nsxt_logical_router_link_port_on_tier1.test"]
-}`
+}`, name)
 }
 
-func testAccNSXLbServiceCreateTemplateWithServers(logLevel string) string {
+func testAccNSXLbServiceCreateTemplateWithServers(name string, logLevel string) string {
 	return testAccNSXLbCreateTopology() + fmt.Sprintf(`
 
 resource "nsxt_lb_fast_tcp_application_profile" "test" {
@@ -267,11 +267,11 @@ resource "nsxt_lb_udp_virtual_server" "test"{
 }
 
 resource "nsxt_lb_service" "test" {
-  display_name       = "test"
+  display_name       = "%s"
   logical_router_id  = "${nsxt_logical_tier1_router.test.id}"
   error_log_level    = "%s"
   virtual_server_ids = ["${nsxt_lb_tcp_virtual_server.test.id}", "${nsxt_lb_udp_virtual_server.test.id}"]
 
   depends_on = ["nsxt_logical_router_link_port_on_tier1.test"]
-}`, logLevel)
+}`, name, logLevel)
 }

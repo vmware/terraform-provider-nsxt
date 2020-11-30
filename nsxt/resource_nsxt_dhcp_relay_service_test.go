@@ -13,8 +13,8 @@ import (
 )
 
 func TestAccResourceNsxtDhcpRelayService_basic(t *testing.T) {
-	prfName := "test-nsx-dhcp-relay-service"
-	updatePrfName := fmt.Sprintf("%s-update", prfName)
+	prfName := getAccTestResourceName()
+	updatePrfName := getAccTestResourceName()
 	testResourceName := "nsxt_dhcp_relay_service.test"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -47,7 +47,7 @@ func TestAccResourceNsxtDhcpRelayService_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtDhcpRelayService_importBasic(t *testing.T) {
-	prfName := "test-nsx-dhcp-relay-service"
+	prfName := getAccTestResourceName()
 	testResourceName := "nsxt_dhcp_relay_service.test"
 
 	resource.ParallelTest(t, resource.TestCase{

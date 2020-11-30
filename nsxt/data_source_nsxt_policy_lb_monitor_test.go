@@ -16,7 +16,7 @@ import (
 )
 
 func TestAccDataSourceNsxtPolicyLBMonitor_basic(t *testing.T) {
-	name := "terraform_ds_test"
+	name := getAccTestDataSourceName()
 	testResourceName := "data.nsxt_policy_lb_monitor.test"
 
 	resource.ParallelTest(t, resource.TestCase{

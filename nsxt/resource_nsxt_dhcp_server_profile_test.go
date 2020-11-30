@@ -13,8 +13,8 @@ import (
 )
 
 func TestAccResourceNsxtDhcpServerProfile_basic(t *testing.T) {
-	prfName := "test-nsx-dhcp-server-profile"
-	updatePrfName := fmt.Sprintf("%s-update", prfName)
+	prfName := getAccTestResourceName()
+	updatePrfName := getAccTestResourceName()
 	testResourceName := "nsxt_dhcp_server_profile.test"
 	edgeClusterName := getEdgeClusterName()
 
@@ -22,7 +22,7 @@ func TestAccResourceNsxtDhcpServerProfile_basic(t *testing.T) {
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXDhcpServerProfileCheckDestroy(state, prfName)
+			return testAccNSXDhcpServerProfileCheckDestroy(state, updatePrfName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -50,7 +50,7 @@ func TestAccResourceNsxtDhcpServerProfile_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtDhcpServerProfile_importBasic(t *testing.T) {
-	prfName := "test-nsx-dhcp-server-profile"
+	prfName := getAccTestResourceName()
 	testResourceName := "nsxt_dhcp_server_profile.test"
 	edgeClusterName := getEdgeClusterName()
 

@@ -13,8 +13,8 @@ import (
 )
 
 func TestAccResourceNsxtIpBlockSubnet_basic(t *testing.T) {
-	name := "test-nsx-ip-block-subnet"
-	updateName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
+	updateName := getAccTestResourceName()
 	testResourceName := "nsxt_ip_block_subnet.test"
 	size := 16
 	resource.Test(t, resource.TestCase{
@@ -26,7 +26,7 @@ func TestAccResourceNsxtIpBlockSubnet_basic(t *testing.T) {
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXIpBlockSubnetCheckDestroy(state, name)
+			return testAccNSXIpBlockSubnetCheckDestroy(state, updateName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -65,7 +65,7 @@ func TestAccResourceNsxtIpBlockSubnet_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtIpBlockSubnet_importBasic(t *testing.T) {
-	name := "test-nsx-ip-block-subnet"
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_ip_block_subnet.test"
 
 	resource.Test(t, resource.TestCase{

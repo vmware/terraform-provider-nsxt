@@ -13,7 +13,7 @@ import (
 )
 
 var accTestPolicyLBServiceCreateAttributes = map[string]string{
-	"display_name":      "terra-test",
+	"display_name":      getAccTestResourceName(),
 	"description":       "terraform created",
 	"connectivity_path": "nsxt_policy_tier1_gateway.test1.path",
 	"enabled":           "true",
@@ -22,13 +22,16 @@ var accTestPolicyLBServiceCreateAttributes = map[string]string{
 }
 
 var accTestPolicyLBServiceUpdateAttributes = map[string]string{
-	"display_name":      "terra-test-updated",
+	"display_name":      getAccTestResourceName(),
 	"description":       "terraform updated",
 	"connectivity_path": "nsxt_policy_tier1_gateway.test2.path",
 	"enabled":           "false",
 	"error_log_level":   "EMERGENCY",
 	"size":              "MEDIUM",
 }
+
+var accTestPolicyLBServiceGateway1Name = getAccTestResourceName()
+var accTestPolicyLBServiceGateway2Name = getAccTestResourceName()
 
 func TestAccResourceNsxtPolicyLBService_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_lb_service.test"
@@ -91,7 +94,7 @@ func TestAccResourceNsxtPolicyLBService_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyLBService_importBasic(t *testing.T) {
-	name := "terra-test-import"
+	name := accTestPolicyLBServiceUpdateAttributes["display_name"]
 	testResourceName := "nsxt_policy_lb_service.test"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -166,13 +169,13 @@ func testAccNsxtPolicyLBServiceTemplate(createFlow bool) string {
 	return testAccNsxtPolicyLBServiceDeps() + fmt.Sprintf(`
 
 resource "nsxt_policy_tier1_gateway" "test1" {
-  display_name      = "terraform-lb-test-1"
+  display_name      = "%s"
   edge_cluster_path = data.nsxt_policy_edge_cluster.test.path
   tier0_path        = nsxt_policy_tier0_gateway.test.path
 }
 
 resource "nsxt_policy_tier1_gateway" "test2" {
-  display_name      = "terraform-lb-test-2"
+  display_name      = "%s"
   edge_cluster_path = data.nsxt_policy_edge_cluster.test.path
   tier0_path        = nsxt_policy_tier0_gateway.test.path
 }
@@ -193,7 +196,7 @@ resource "nsxt_policy_lb_service" "test" {
 
 data "nsxt_policy_realization_info" "realization_info" {
   path = nsxt_policy_lb_service.test.path
-}`, attrMap["display_name"], attrMap["description"], attrMap["connectivity_path"], attrMap["enabled"], attrMap["error_log_level"], attrMap["size"])
+}`, accTestPolicyLBServiceGateway1Name, accTestPolicyLBServiceGateway2Name, attrMap["display_name"], attrMap["description"], attrMap["connectivity_path"], attrMap["enabled"], attrMap["error_log_level"], attrMap["size"])
 }
 
 // Terraform test does not respect T1-T0 dependency upon destroy,
@@ -201,12 +204,12 @@ data "nsxt_policy_realization_info" "realization_info" {
 func testAccNsxtPolicyLBServiceMinimalistic() string {
 	return testAccNsxtPolicyLBServiceDeps() + fmt.Sprintf(`
 resource "nsxt_policy_tier1_gateway" "test1" {
-  display_name      = "terraform-lb-test-1-update"
+  display_name      = "%s"
   edge_cluster_path = data.nsxt_policy_edge_cluster.test.path
 }
 
 resource "nsxt_policy_tier1_gateway" "test2" {
-  display_name      = "terraform-lb-test-2-update"
+  display_name      = "%s"
   edge_cluster_path = data.nsxt_policy_edge_cluster.test.path
 }
 resource "nsxt_policy_lb_service" "test" {
@@ -215,7 +218,7 @@ resource "nsxt_policy_lb_service" "test" {
 
 data "nsxt_policy_realization_info" "realization_info" {
   path = nsxt_policy_lb_service.test.path
-}`, accTestPolicyLBServiceUpdateAttributes["display_name"])
+}`, accTestPolicyLBServiceGateway1Name, accTestPolicyLBServiceGateway2Name, accTestPolicyLBServiceUpdateAttributes["display_name"])
 }
 
 func testAccNsxtPolicyLBServiceDeps() string {

@@ -15,15 +15,15 @@ import (
 var testAccResourceNatRuleName = "nsxt_nat_rule.test"
 
 func TestAccResourceNsxtNatRule_snat(t *testing.T) {
-	ruleName := "test-nsx-snat-rule"
-	updateRuleName := fmt.Sprintf("%s-update", ruleName)
+	ruleName := getAccTestResourceName()
+	updateRuleName := getAccTestResourceName()
 	edgeClusterName := getEdgeClusterName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXNATRuleCheckDestroy(state, ruleName)
+			return testAccNSXNATRuleCheckDestroy(state, updateRuleName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -67,7 +67,7 @@ func TestAccResourceNsxtNatRule_snat(t *testing.T) {
 }
 
 func TestAccResourceNsxtNatRule_snatImport(t *testing.T) {
-	ruleName := "test-nsx-snat-rule"
+	ruleName := getAccTestResourceName()
 	edgeClusterName := getEdgeClusterName()
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -91,8 +91,7 @@ func TestAccResourceNsxtNatRule_snatImport(t *testing.T) {
 }
 
 func TestAccResourceNsxtNatRule_dnat(t *testing.T) {
-	ruleName := "test-nsx-dnat-rule"
-	updateRuleName := fmt.Sprintf("%s-update", ruleName)
+	ruleName := getAccTestResourceName()
 	edgeClusterName := getEdgeClusterName()
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -119,10 +118,10 @@ func TestAccResourceNsxtNatRule_dnat(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXDNATRuleUpdateTemplate(updateRuleName, edgeClusterName),
+				Config: testAccNSXDNATRuleUpdateTemplate(ruleName, edgeClusterName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNSXNATRuleCheckExists(updateRuleName, testAccResourceNatRuleName),
-					resource.TestCheckResourceAttr(testAccResourceNatRuleName, "display_name", updateRuleName),
+					testAccNSXNATRuleCheckExists(ruleName, testAccResourceNatRuleName),
+					resource.TestCheckResourceAttr(testAccResourceNatRuleName, "display_name", ruleName),
 					resource.TestCheckResourceAttr(testAccResourceNatRuleName, "description", "Acceptance Test Update"),
 					resource.TestCheckResourceAttrSet(testAccResourceNatRuleName, "logical_router_id"),
 					resource.TestCheckResourceAttr(testAccResourceNatRuleName, "tag.#", "2"),
@@ -139,7 +138,7 @@ func TestAccResourceNsxtNatRule_dnat(t *testing.T) {
 }
 
 func TestAccResourceNsxtNatRule_dnatImport(t *testing.T) {
-	ruleName := "test-nsx-dnat-rule"
+	ruleName := getAccTestResourceName()
 	edgeClusterName := getEdgeClusterName()
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -163,7 +162,7 @@ func TestAccResourceNsxtNatRule_dnatImport(t *testing.T) {
 }
 
 func TestAccResourceNsxtNatRule_noNnat(t *testing.T) {
-	ruleName := "test-nsx-nonat-rule"
+	ruleName := getAccTestResourceName()
 	edgeClusterName := getEdgeClusterName()
 
 	resource.ParallelTest(t, resource.TestCase{

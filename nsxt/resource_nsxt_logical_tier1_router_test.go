@@ -13,8 +13,8 @@ import (
 )
 
 func TestAccResourceNsxtLogicalTier1Router_basic(t *testing.T) {
-	name := "test-nsx-logical-tier1-router"
-	updateName := fmt.Sprintf("%s-update", name)
+	name := getAccTestResourceName()
+	updateName := getAccTestResourceName()
 	testResourceName := "nsxt_logical_tier1_router.test"
 	failoverMode := "PREEMPTIVE"
 	edgeClusterName := getEdgeClusterName()
@@ -23,7 +23,7 @@ func TestAccResourceNsxtLogicalTier1Router_basic(t *testing.T) {
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXLogicalTier1RouterCheckDestroy(state, name)
+			return testAccNSXLogicalTier1RouterCheckDestroy(state, updateName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -63,7 +63,7 @@ func TestAccResourceNsxtLogicalTier1Router_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtLogicalTier1Router_importBasic(t *testing.T) {
-	name := "test-nsx-logical-tier1-router"
+	name := getAccTestResourceName()
 	testResourceName := "nsxt_logical_tier1_router.test"
 	failoverMode := "PREEMPTIVE"
 	edgeClusterName := getEdgeClusterName()

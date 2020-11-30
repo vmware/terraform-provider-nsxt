@@ -16,7 +16,7 @@ import (
 )
 
 func TestAccDataSourceNsxtPolicyIpv6NdraProfile_basic(t *testing.T) {
-	name := "terraform_ds_test"
+	name := getAccTestDataSourceName()
 	testResourceName := "data.nsxt_policy_ipv6_ndra_profile.test"
 
 	resource.ParallelTest(t, resource.TestCase{

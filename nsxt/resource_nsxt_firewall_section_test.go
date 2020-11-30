@@ -13,8 +13,8 @@ import (
 )
 
 func TestAccResourceNsxtFirewallSection_basic(t *testing.T) {
-	sectionName := "test-nsx-firewall-section-basic"
-	updatesectionName := fmt.Sprintf("%s-update", sectionName)
+	sectionName := getAccTestResourceName()
+	updateSectionName := getAccTestResourceName()
 	testResourceName := "nsxt_firewall_section.test"
 	tags := singleTag
 	updatedTags := doubleTags
@@ -24,7 +24,7 @@ func TestAccResourceNsxtFirewallSection_basic(t *testing.T) {
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNSXFirewallSectionCheckDestroy(state, sectionName)
+			return testAccNSXFirewallSectionCheckDestroy(state, updateSectionName)
 		},
 		Steps: []resource.TestStep{
 			{
@@ -41,10 +41,10 @@ func TestAccResourceNsxtFirewallSection_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXFirewallSectionUpdateEmptyTemplate(updatesectionName, updatedTags, tos),
+				Config: testAccNSXFirewallSectionUpdateEmptyTemplate(updateSectionName, updatedTags, tos),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNSXFirewallSectionExists(updatesectionName, testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", updatesectionName),
+					testAccNSXFirewallSectionExists(updateSectionName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updateSectionName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test Update"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "section_type", "LAYER3"),
@@ -58,8 +58,7 @@ func TestAccResourceNsxtFirewallSection_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtFirewallSection_withTos(t *testing.T) {
-	sectionName := "test-nsx-firewall-section-tos"
-	updatesectionName := fmt.Sprintf("%s-update", sectionName)
+	sectionName := getAccTestResourceName()
 	testResourceName := "nsxt_firewall_section.test"
 	tags := singleTag
 	tos := `applied_to {
@@ -96,10 +95,10 @@ target_id   = "${nsxt_ns_group.grp2.id}"
 				),
 			},
 			{
-				Config: testAccNSXFirewallSectionUpdateEmptyTemplate(updatesectionName, tags, updatedTos),
+				Config: testAccNSXFirewallSectionUpdateEmptyTemplate(sectionName, tags, updatedTos),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNSXFirewallSectionExists(updatesectionName, testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", updatesectionName),
+					testAccNSXFirewallSectionExists(sectionName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", sectionName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test Update"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "section_type", "LAYER3"),
@@ -113,8 +112,7 @@ target_id   = "${nsxt_ns_group.grp2.id}"
 }
 
 func TestAccResourceNsxtFirewallSection_withRules(t *testing.T) {
-	sectionName := "test-nsx-firewall-section-rules"
-	updatesectionName := fmt.Sprintf("%s-update", sectionName)
+	sectionName := getAccTestResourceName()
 	testResourceName := "nsxt_firewall_section.test"
 	ruleName := "rule1.0"
 	updatedRuleName := "rule1.1"
@@ -145,10 +143,10 @@ func TestAccResourceNsxtFirewallSection_withRules(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXFirewallSectionUpdateTemplate(updatesectionName, updatedRuleName, tags, tos),
+				Config: testAccNSXFirewallSectionUpdateTemplate(sectionName, updatedRuleName, tags, tos),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNSXFirewallSectionExists(updatesectionName, testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", updatesectionName),
+					testAccNSXFirewallSectionExists(sectionName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", sectionName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test Update"),
 					resource.TestCheckResourceAttr(testResourceName, "section_type", "LAYER3"),
 					resource.TestCheckResourceAttr(testResourceName, "stateful", "true"),
@@ -163,8 +161,7 @@ func TestAccResourceNsxtFirewallSection_withRules(t *testing.T) {
 }
 
 func TestAccResourceNsxtFirewallSection_withRulesAndTags(t *testing.T) {
-	sectionName := "test-nsx-firewall-section-tags"
-	updatesectionName := fmt.Sprintf("%s-update", sectionName)
+	sectionName := getAccTestResourceName()
 	testResourceName := "nsxt_firewall_section.test"
 	ruleName := "rule1.0"
 	updatedRuleName := "rule1.1"
@@ -195,10 +192,10 @@ func TestAccResourceNsxtFirewallSection_withRulesAndTags(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXFirewallSectionUpdateTemplate(updatesectionName, updatedRuleName, updatedTags, tos),
+				Config: testAccNSXFirewallSectionUpdateTemplate(sectionName, updatedRuleName, updatedTags, tos),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNSXFirewallSectionExists(updatesectionName, testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", updatesectionName),
+					testAccNSXFirewallSectionExists(sectionName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", sectionName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test Update"),
 					resource.TestCheckResourceAttr(testResourceName, "section_type", "LAYER3"),
 					resource.TestCheckResourceAttr(testResourceName, "stateful", "true"),
@@ -213,8 +210,7 @@ func TestAccResourceNsxtFirewallSection_withRulesAndTags(t *testing.T) {
 }
 
 func TestAccResourceNsxtFirewallSection_withRulesAndTos(t *testing.T) {
-	sectionName := "test-nsx-firewall-section-rules_and_tos"
-	updatesectionName := fmt.Sprintf("%s-update", sectionName)
+	sectionName := getAccTestResourceName()
 	testResourceName := "nsxt_firewall_section.test"
 	ruleName := "rule1.0"
 	updatedRuleName := "rule1.1"
@@ -259,10 +255,10 @@ applied_to {
 				),
 			},
 			{
-				Config: testAccNSXFirewallSectionUpdateTemplate(updatesectionName, updatedRuleName, tags, updatedTos),
+				Config: testAccNSXFirewallSectionUpdateTemplate(sectionName, updatedRuleName, tags, updatedTos),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNSXFirewallSectionExists(updatesectionName, testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", updatesectionName),
+					testAccNSXFirewallSectionExists(sectionName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", sectionName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test Update"),
 					resource.TestCheckResourceAttr(testResourceName, "section_type", "LAYER3"),
 					resource.TestCheckResourceAttr(testResourceName, "stateful", "true"),
@@ -277,7 +273,7 @@ applied_to {
 }
 
 func TestAccResourceNsxtFirewallSection_ordered(t *testing.T) {
-	sectionNames := [4]string{"s1", "s2", "s3", "s4"}
+	sectionNames := [4]string{getAccTestResourceName(), getAccTestResourceName(), getAccTestResourceName(), getAccTestResourceName()}
 	testResourceNames := [4]string{"nsxt_firewall_section.test1", "nsxt_firewall_section.test2", "nsxt_firewall_section.test3", "nsxt_firewall_section.test4"}
 
 	resource.Test(t, resource.TestCase{
@@ -295,7 +291,7 @@ func TestAccResourceNsxtFirewallSection_ordered(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXFirewallSectionCreateOrderedTemplate(),
+				Config: testAccNSXFirewallSectionCreateOrderedTemplate(sectionNames),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXFirewallSectionExists(sectionNames[0], testResourceNames[0]),
 					resource.TestCheckResourceAttr(testResourceNames[0], "display_name", sectionNames[0]),
@@ -309,7 +305,7 @@ func TestAccResourceNsxtFirewallSection_ordered(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXFirewallSectionUpdateOrderedTemplate(),
+				Config: testAccNSXFirewallSectionUpdateOrderedTemplate(sectionNames),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXFirewallSectionExists(sectionNames[0], testResourceNames[0]),
 					resource.TestCheckResourceAttr(testResourceNames[0], "display_name", sectionNames[0]),
@@ -330,10 +326,9 @@ func TestAccResourceNsxtFirewallSection_ordered(t *testing.T) {
 }
 
 func TestAccResourceNsxtFirewallSection_edge(t *testing.T) {
-	sectionName := "test-nsx-firewall-section-basic"
+	sectionName := getAccTestResourceName()
 	edgeClusterName := getEdgeClusterName()
 	transportZoneName := getOverlayTransportZoneName()
-	updatesectionName := fmt.Sprintf("%s-update", sectionName)
 	ruleName := "test"
 	testResourceName := "nsxt_firewall_section.test"
 
@@ -364,10 +359,10 @@ func TestAccResourceNsxtFirewallSection_edge(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXEdgeFirewallSectionCreateTemplate(edgeClusterName, transportZoneName, updatesectionName, ruleName),
+				Config: testAccNSXEdgeFirewallSectionCreateTemplate(edgeClusterName, transportZoneName, sectionName, ruleName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNSXFirewallSectionExists(updatesectionName, testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", updatesectionName),
+					testAccNSXFirewallSectionExists(sectionName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", sectionName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttr(testResourceName, "section_type", "LAYER3"),
 					resource.TestCheckResourceAttr(testResourceName, "stateful", "false"),
@@ -382,7 +377,7 @@ func TestAccResourceNsxtFirewallSection_edge(t *testing.T) {
 }
 
 func TestAccResourceNsxtFirewallSection_importBasic(t *testing.T) {
-	sectionName := "test-nsx-firewall-section-basic"
+	sectionName := getAccTestResourceName()
 	testResourceName := "nsxt_firewall_section.test"
 	tags := singleTag
 	tos := string("")
@@ -407,7 +402,7 @@ func TestAccResourceNsxtFirewallSection_importBasic(t *testing.T) {
 }
 
 func TestAccResourceNsxtFirewallSection_importWithRules(t *testing.T) {
-	sectionName := "test-nsx-firewall-section-rules"
+	sectionName := getAccTestResourceName()
 	testResourceName := "nsxt_firewall_section.test"
 	ruleName := "rule1.0"
 	tags := singleTag
@@ -433,7 +428,7 @@ func TestAccResourceNsxtFirewallSection_importWithRules(t *testing.T) {
 }
 
 func TestAccResourceNsxtFirewallSection_importWithTos(t *testing.T) {
-	sectionName := "test-nsx-firewall-section-tos"
+	sectionName := getAccTestResourceName()
 	testResourceName := "nsxt_firewall_section.test"
 	tags := singleTag
 	tos := `applied_to {
@@ -650,16 +645,16 @@ resource "nsxt_firewall_section" "test" {
 }`, updatedName, tags, tos)
 }
 
-func testAccNSXFirewallSectionCreateOrderedTemplate() string {
-	return `
+func testAccNSXFirewallSectionCreateOrderedTemplate(names [4]string) string {
+	return fmt.Sprintf(`
 resource "nsxt_firewall_section" "test1" {
-  display_name = "s1"
+  display_name = "%s"
   section_type = "LAYER3"
   stateful     = true
 }
 
 resource "nsxt_firewall_section" "test2" {
-  display_name  = "s2"
+  display_name  = "%s"
   section_type  = "LAYER3"
   insert_before = "${nsxt_firewall_section.test1.id}"
   stateful      = true
@@ -674,44 +669,44 @@ resource "nsxt_firewall_section" "test2" {
 }
 
 resource "nsxt_firewall_section" "test3" {
-  display_name  = "s3"
+  display_name  = "%s"
   section_type  = "LAYER3"
   insert_before = "${nsxt_firewall_section.test2.id}"
   stateful      = true
 }
 
-`
+`, names[0], names[1], names[2])
 }
 
-func testAccNSXFirewallSectionUpdateOrderedTemplate() string {
-	return `
+func testAccNSXFirewallSectionUpdateOrderedTemplate(names [4]string) string {
+	return fmt.Sprintf(`
 resource "nsxt_firewall_section" "test1" {
-  display_name  = "s1"
+  display_name  = "%s"
   section_type  = "LAYER3"
   insert_before = "${nsxt_firewall_section.test4.id}"
   stateful      = true
 }
 
 resource "nsxt_firewall_section" "test2" {
-  display_name  = "s2"
+  display_name  = "%s"
   section_type  = "LAYER3"
   insert_before = "${nsxt_firewall_section.test1.id}"
   stateful      = true
 }
 
 resource "nsxt_firewall_section" "test3" {
-  display_name = "s3"
+  display_name = "%s"
   section_type = "LAYER3"
   stateful     = true
 }
 
 resource "nsxt_firewall_section" "test4" {
-  display_name = "s4"
+  display_name = "%s"
   section_type = "LAYER3"
   stateful     = true
 }
 
-`
+`, names[0], names[1], names[2], names[3])
 }
 
 func testAccNSXEdgeFirewallSectionCreateTemplate(edgeCluster string, transportZone string, name string, ruleName string) string {
