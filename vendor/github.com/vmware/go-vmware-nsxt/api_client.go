@@ -70,6 +70,10 @@ type APIClient struct {
 	TransportEntitiesApi            *TransportEntitiesApiService
 	TroubleshootingAndMonitoringApi *TroubleshootingAndMonitoringApiService
 	UpgradeApi                      *UpgradeApiService
+	ContainerApplicationsApi        *ManagementPlaneApiFabricContainerApplicationsApiService
+	ContainerClustersApi            *ManagementPlaneApiFabricContainerClustersApiService
+	ContainerInventoryApi           *ManagementPlaneApiFabricContainerInventoryApiService
+	ContainerProjectsApi            *ManagementPlaneApiFabricContainerProjectsApiService
 }
 
 type service struct {
@@ -77,7 +81,7 @@ type service struct {
 }
 
 func GetContext(cfg *Configuration) context.Context {
-	if len(cfg.ClientAuthCertFile) == 0 && cfg.RemoteAuth == false {
+	if len(cfg.ClientAuthCertFile) == 0 && len(cfg.ClientAuthCertString) == 0 && cfg.RemoteAuth == false {
 		auth := BasicAuth{UserName: cfg.UserName,
 			Password: cfg.Password}
 		return context.WithValue(context.Background(), ContextBasicAuth, auth)
@@ -181,6 +185,19 @@ func InitHttpClient(cfg *Configuration) error {
 
 	}
 
+	if len(cfg.ClientAuthCertString) > 0 {
+		cert, err := tls.X509KeyPair([]byte(cfg.ClientAuthCertString),
+			[]byte(cfg.ClientAuthKeyString))
+		if err != nil {
+			return err
+		}
+
+		tlsConfig.GetClientCertificate = func(*tls.CertificateRequestInfo) (*tls.Certificate, error) {
+			return &cert, nil
+		}
+
+	}
+
 	if len(cfg.CAFile) > 0 {
 		caCert, err := ioutil.ReadFile(cfg.CAFile)
 		if err != nil {
@@ -193,7 +210,13 @@ func InitHttpClient(cfg *Configuration) error {
 		tlsConfig.RootCAs = caCertPool
 	}
 
-	tlsConfig.BuildNameToCertificate()
+	if len(cfg.CAString) > 0 {
+
+		caCertPool := x509.NewCertPool()
+		caCertPool.AppendCertsFromPEM([]byte(cfg.CAString))
+
+		tlsConfig.RootCAs = caCertPool
+	}
 
 	transport := &http.Transport{Proxy: http.ProxyFromEnvironment,
 		TLSClientConfig:     tlsConfig,
@@ -249,6 +272,10 @@ func NewAPIClient(cfg *Configuration) (*APIClient, error) {
 	c.TransportEntitiesApi = (*TransportEntitiesApiService)(&c.common)
 	c.TroubleshootingAndMonitoringApi = (*TroubleshootingAndMonitoringApiService)(&c.common)
 	c.UpgradeApi = (*UpgradeApiService)(&c.common)
+	c.ContainerApplicationsApi = (*ManagementPlaneApiFabricContainerApplicationsApiService)(&c.common)
+	c.ContainerClustersApi = (*ManagementPlaneApiFabricContainerClustersApiService)(&c.common)
+	c.ContainerInventoryApi = (*ManagementPlaneApiFabricContainerInventoryApiService)(&c.common)
+	c.ContainerProjectsApi = (*ManagementPlaneApiFabricContainerProjectsApiService)(&c.common)
 
 	return c, nil
 }
@@ -362,7 +389,11 @@ func (c *APIClient) callAPI(request *http.Request) (*http.Response, error) {
 			}
 			log.Printf("[DEBUG] Retrying request %s %s for the %d time because of status %d", request.Method, request.URL, n_try, status)
 			// sleep a random increasing time
-			float_delay := float64(rand.Intn(config.RetryMinDelay * n_try))
+			minDelay := 1
+			if config.RetryMinDelay > 0 {
+				minDelay = config.RetryMinDelay
+			}
+			float_delay := float64(rand.Intn(minDelay * n_try))
 			fixed_delay := time.Duration(math.Min(float64(config.RetryMaxDelay), float_delay))
 			time.Sleep(fixed_delay * time.Millisecond)
 			// reset Request.Body
@@ -665,4 +696,42 @@ func CacheExpires(r *http.Response) time.Time {
 
 func strlen(s string) int {
 	return utf8.RuneCountInString(s)
+}
+
+// Added for supporting NSX 3.0 Container Inventory API
+func (c *APIClient) decode(v interface{}, b []byte, contentType string) (err error) {
+	if strings.Contains(contentType, "application/xml") {
+		if err = xml.Unmarshal(b, v); err != nil {
+			return err
+		}
+		return nil
+	} else if strings.Contains(contentType, "application/json") {
+		if err = json.Unmarshal(b, v); err != nil {
+			return err
+		}
+		return nil
+	}
+	return errors.New("undefined response type")
+}
+
+// GenericSwaggerError Provides access to the body, error and model on returned errors.
+type GenericSwaggerError struct {
+	body  []byte
+	error string
+	model interface{}
+}
+
+// Error returns non-empty string if there was an error.
+func (e GenericSwaggerError) Error() string {
+	return e.error
+}
+
+// Body returns the raw bytes of the response
+func (e GenericSwaggerError) Body() []byte {
+	return e.body
+}
+
+// Model returns the unpacked model of the error
+func (e GenericSwaggerError) Model() interface{} {
+	return e.model
 }

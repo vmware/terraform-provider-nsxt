@@ -8,7 +8,7 @@ require (
 	github.com/hashicorp/go-version v1.2.1
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.0.2
 	github.com/stretchr/testify v1.6.1 // indirect
-	github.com/vmware/go-vmware-nsxt v0.0.0-20191219213550-f4221331f638
+	github.com/vmware/go-vmware-nsxt v0.0.0-20201201191552-e8b90e7eb469
 	github.com/vmware/vsphere-automation-sdk-go/lib v0.3.1
 	github.com/vmware/vsphere-automation-sdk-go/runtime v0.3.1
 	github.com/vmware/vsphere-automation-sdk-go/services/nsxt v0.4.0

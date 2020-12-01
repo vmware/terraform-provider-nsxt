@@ -8329,6 +8329,152 @@ func (a *ServicesApiService) ReadLoadBalancerService(ctx context.Context, servic
 	return successPayload, localVarHttpResponse, err
 }
 
+/* ServicesApiService Retrieve a status of load balancer service.
+Retrieve a status of load balancer service.
+* @param ctx context.Context for authentication, logging, tracing, etc.
+@param serviceId
+@param optional (nil or map[string]interface{}) with one or more of:
+	@param "source" (string) Data source type.
+@return loadbalancer.LbServiceStatus*/
+func (a *ServicesApiService) ReadLoadBalancerServiceStatus(ctx context.Context, serviceId string, localVarOptionals map[string]interface{}) (loadbalancer.LbServiceStatus, *http.Response, error) {
+	var (
+		localVarHttpMethod = strings.ToUpper("Get")
+		localVarPostBody   interface{}
+		localVarFileName   string
+		localVarFileBytes  []byte
+		successPayload     loadbalancer.LbServiceStatus
+	)
+
+	// create path and map variables
+	localVarPath := a.client.cfg.BasePath + "/loadbalancer/services/{service-id}/status"
+	localVarPath = strings.Replace(localVarPath, "{"+"service-id"+"}", fmt.Sprintf("%v", serviceId), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if err := typeCheckParameter(localVarOptionals["source"], "string", "source"); err != nil {
+		return successPayload, nil, err
+	}
+
+	if localVarTempParam, localVarOk := localVarOptionals["source"].(string); localVarOk {
+		localVarQueryParams.Add("source", parameterToString(localVarTempParam, ""))
+	}
+
+	// to determine the Content-Type header
+	localVarHttpContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHttpContentType := selectHeaderContentType(localVarHttpContentTypes)
+	if localVarHttpContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHttpContentType
+	}
+
+	// to determine the Accept header
+	localVarHttpHeaderAccepts := []string{
+		"application/json",
+	}
+
+	// set Accept header
+	localVarHttpHeaderAccept := selectHeaderAccept(localVarHttpHeaderAccepts)
+	if localVarHttpHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHttpHeaderAccept
+	}
+	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHttpMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFileName, localVarFileBytes)
+	if err != nil {
+		return successPayload, nil, err
+	}
+
+	localVarHttpResponse, err := a.client.callAPI(r)
+	if err != nil || localVarHttpResponse == nil {
+		return successPayload, localVarHttpResponse, err
+	}
+	defer localVarHttpResponse.Body.Close()
+	if localVarHttpResponse.StatusCode >= 300 {
+		bodyBytes, _ := ioutil.ReadAll(localVarHttpResponse.Body)
+		return successPayload, localVarHttpResponse, reportError("Status: %v, Body: %s", localVarHttpResponse.Status, bodyBytes)
+	}
+
+	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
+		return successPayload, localVarHttpResponse, err
+	}
+
+	return successPayload, localVarHttpResponse, err
+}
+
+/* ServicesApiService Retrieve a statistics of load balancer service.
+Retrieve the statistics of load balancer service.
+* @param ctx context.Context for authentication, logging, tracing, etc.
+@param serviceId
+@param optional (nil or map[string]interface{}) with one or more of:
+	@param "source" (string) Data source type.
+@return loadbalancer.LbServiceStatistics*/
+func (a *ServicesApiService) ReadLoadBalancerServiceStatistics(ctx context.Context, serviceId string, localVarOptionals map[string]interface{}) (loadbalancer.LbServiceStatistics, *http.Response, error) {
+	var (
+		localVarHttpMethod = strings.ToUpper("Get")
+		localVarPostBody   interface{}
+		localVarFileName   string
+		localVarFileBytes  []byte
+		successPayload     loadbalancer.LbServiceStatistics
+	)
+
+	// create path and map variables
+	localVarPath := a.client.cfg.BasePath + "/loadbalancer/services/{service-id}/statistics"
+	localVarPath = strings.Replace(localVarPath, "{"+"service-id"+"}", fmt.Sprintf("%v", serviceId), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if err := typeCheckParameter(localVarOptionals["source"], "string", "source"); err != nil {
+		return successPayload, nil, err
+	}
+
+	if localVarTempParam, localVarOk := localVarOptionals["source"].(string); localVarOk {
+		localVarQueryParams.Add("source", parameterToString(localVarTempParam, ""))
+	}
+
+	// to determine the Content-Type header
+	localVarHttpContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHttpContentType := selectHeaderContentType(localVarHttpContentTypes)
+	if localVarHttpContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHttpContentType
+	}
+
+	// to determine the Accept header
+	localVarHttpHeaderAccepts := []string{
+		"application/json",
+	}
+
+	// set Accept header
+	localVarHttpHeaderAccept := selectHeaderAccept(localVarHttpHeaderAccepts)
+	if localVarHttpHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHttpHeaderAccept
+	}
+	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHttpMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFileName, localVarFileBytes)
+	if err != nil {
+		return successPayload, nil, err
+	}
+
+	localVarHttpResponse, err := a.client.callAPI(r)
+	if err != nil || localVarHttpResponse == nil {
+		return successPayload, localVarHttpResponse, err
+	}
+	defer localVarHttpResponse.Body.Close()
+	if localVarHttpResponse.StatusCode >= 300 {
+		bodyBytes, _ := ioutil.ReadAll(localVarHttpResponse.Body)
+		return successPayload, localVarHttpResponse, reportError("Status: %v, Body: %s", localVarHttpResponse.Status, bodyBytes)
+	}
+
+	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
+		return successPayload, localVarHttpResponse, err
+	}
+
+	return successPayload, localVarHttpResponse, err
+}
+
 /* ServicesApiService Read the debug information of the load balancer service
 API to download below information which will be used for debugging and troubleshooting. 1) Load balancer service 2) Load balancer associated virtual servers 3) Load balancer associated pools 4) Load balancer associated profiles such as persistence, SSL, application. 5) Load balancer associated monitors 6) Load balancer associated rules
 * @param ctx context.Context for authentication, logging, tracing, etc.
@@ -11800,6 +11946,390 @@ func (a *ServicesApiService) UpdateSectionWithRulesUpdateWithRules(ctx context.C
 	}
 	// body params
 	localVarPostBody = &firewallSectionRuleList
+	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHttpMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFileName, localVarFileBytes)
+	if err != nil {
+		return successPayload, nil, err
+	}
+
+	localVarHttpResponse, err := a.client.callAPI(r)
+	if err != nil || localVarHttpResponse == nil {
+		return successPayload, localVarHttpResponse, err
+	}
+	defer localVarHttpResponse.Body.Close()
+	if localVarHttpResponse.StatusCode >= 300 {
+		return successPayload, localVarHttpResponse, reportError(localVarHttpResponse.Status)
+	}
+
+	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
+		return successPayload, localVarHttpResponse, err
+	}
+
+	return successPayload, localVarHttpResponse, err
+}
+
+/* ServicesApiService Get a paginated list of Lb services
+ @param ctx context.Context Authentication Context
+@param optional (nil or map[string]interface{}) with one or more of:
+    @param "cursor" (string) Opaque cursor to be used for getting next page of records (supplied by current result page)
+    @param "includedFields" (string) Comma separated list of fields that should be included to result of query
+    @param "pageSize" (int64) Maximum number of results to return in this page (server may return fewer)
+    @param "sortAscending" (bool)
+    @param "sortBy" (string) Field by which records are sorted
+@return l.LbServiceListResult*/
+func (a *ServicesApiService) ListLoadBalancerServices(ctx context.Context, localVarOptionals map[string]interface{}) (loadbalancer.LbServiceListResult, *http.Response, error) {
+	var (
+		localVarHttpMethod = strings.ToUpper("Get")
+		localVarPostBody   interface{}
+		localVarFileName   string
+		localVarFileBytes  []byte
+		successPayload     loadbalancer.LbServiceListResult
+	)
+
+	// create path and map variables
+	localVarPath := a.client.cfg.BasePath + "/loadbalancer/services"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if err := typeCheckParameter(localVarOptionals["cursor"], "string", "cursor"); err != nil {
+		return successPayload, nil, err
+	}
+	if err := typeCheckParameter(localVarOptionals["includedFields"], "string", "includedFields"); err != nil {
+		return successPayload, nil, err
+	}
+	if err := typeCheckParameter(localVarOptionals["pageSize"], "int64", "pageSize"); err != nil {
+		return successPayload, nil, err
+	}
+	if err := typeCheckParameter(localVarOptionals["sortAscending"], "bool", "sortAscending"); err != nil {
+		return successPayload, nil, err
+	}
+	if err := typeCheckParameter(localVarOptionals["sortBy"], "string", "sortBy"); err != nil {
+		return successPayload, nil, err
+	}
+
+	if localVarTempParam, localVarOk := localVarOptionals["cursor"].(string); localVarOk {
+		localVarQueryParams.Add("cursor", parameterToString(localVarTempParam, ""))
+	}
+	if localVarTempParam, localVarOk := localVarOptionals["includedFields"].(string); localVarOk {
+		localVarQueryParams.Add("included_fields", parameterToString(localVarTempParam, ""))
+	}
+	if localVarTempParam, localVarOk := localVarOptionals["pageSize"].(int64); localVarOk {
+		localVarQueryParams.Add("page_size", parameterToString(localVarTempParam, ""))
+	}
+	if localVarTempParam, localVarOk := localVarOptionals["sortAscending"].(bool); localVarOk {
+		localVarQueryParams.Add("sort_ascending", parameterToString(localVarTempParam, ""))
+	}
+	if localVarTempParam, localVarOk := localVarOptionals["sortBy"].(string); localVarOk {
+		localVarQueryParams.Add("sort_by", parameterToString(localVarTempParam, ""))
+	}
+	// to determine the Content-Type header
+	localVarHttpContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHttpContentType := selectHeaderContentType(localVarHttpContentTypes)
+	if localVarHttpContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHttpContentType
+	}
+
+	// to determine the Accept header
+	localVarHttpHeaderAccepts := []string{
+		"application/json",
+	}
+
+	// set Accept header
+	localVarHttpHeaderAccept := selectHeaderAccept(localVarHttpHeaderAccepts)
+	if localVarHttpHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHttpHeaderAccept
+	}
+	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHttpMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFileName, localVarFileBytes)
+	if err != nil {
+		return successPayload, nil, err
+	}
+
+	localVarHttpResponse, err := a.client.callAPI(r)
+	if err != nil || localVarHttpResponse == nil {
+		return successPayload, localVarHttpResponse, err
+	}
+	defer localVarHttpResponse.Body.Close()
+	if localVarHttpResponse.StatusCode >= 300 {
+		return successPayload, localVarHttpResponse, reportError(localVarHttpResponse.Status)
+	}
+
+	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
+		return successPayload, localVarHttpResponse, err
+	}
+
+	return successPayload, localVarHttpResponse, err
+}
+
+/* ServicesApiService Get a paginated list of Lb virtual servers
+ @param ctx context.Context Authentication Context
+@param optional (nil or map[string]interface{}) with one or more of:
+    @param "cursor" (string) Opaque cursor to be used for getting next page of records (supplied by current result page)
+    @param "includedFields" (string) Comma separated list of fields that should be included to result of query
+    @param "pageSize" (int64) Maximum number of results to return in this page (server may return fewer)
+    @param "sortAscending" (bool)
+    @param "sortBy" (string) Field by which records are sorted
+@return l.LbVirtualServerListResult*/
+func (a *ServicesApiService) ListLoadBalancerVirtualServers(ctx context.Context, localVarOptionals map[string]interface{}) (loadbalancer.LbVirtualServerListResult, *http.Response, error) {
+	var (
+		localVarHttpMethod = strings.ToUpper("Get")
+		localVarPostBody   interface{}
+		localVarFileName   string
+		localVarFileBytes  []byte
+		successPayload     loadbalancer.LbVirtualServerListResult
+	)
+
+	// create path and map variables
+	localVarPath := a.client.cfg.BasePath + "/loadbalancer/virtual-servers"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if err := typeCheckParameter(localVarOptionals["cursor"], "string", "cursor"); err != nil {
+		return successPayload, nil, err
+	}
+	if err := typeCheckParameter(localVarOptionals["includedFields"], "string", "includedFields"); err != nil {
+		return successPayload, nil, err
+	}
+	if err := typeCheckParameter(localVarOptionals["pageSize"], "int64", "pageSize"); err != nil {
+		return successPayload, nil, err
+	}
+	if err := typeCheckParameter(localVarOptionals["sortAscending"], "bool", "sortAscending"); err != nil {
+		return successPayload, nil, err
+	}
+	if err := typeCheckParameter(localVarOptionals["sortBy"], "string", "sortBy"); err != nil {
+		return successPayload, nil, err
+	}
+
+	if localVarTempParam, localVarOk := localVarOptionals["cursor"].(string); localVarOk {
+		localVarQueryParams.Add("cursor", parameterToString(localVarTempParam, ""))
+	}
+	if localVarTempParam, localVarOk := localVarOptionals["includedFields"].(string); localVarOk {
+		localVarQueryParams.Add("included_fields", parameterToString(localVarTempParam, ""))
+	}
+	if localVarTempParam, localVarOk := localVarOptionals["pageSize"].(int64); localVarOk {
+		localVarQueryParams.Add("page_size", parameterToString(localVarTempParam, ""))
+	}
+	if localVarTempParam, localVarOk := localVarOptionals["sortAscending"].(bool); localVarOk {
+		localVarQueryParams.Add("sort_ascending", parameterToString(localVarTempParam, ""))
+	}
+	if localVarTempParam, localVarOk := localVarOptionals["sortBy"].(string); localVarOk {
+		localVarQueryParams.Add("sort_by", parameterToString(localVarTempParam, ""))
+	}
+	// to determine the Content-Type header
+	localVarHttpContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHttpContentType := selectHeaderContentType(localVarHttpContentTypes)
+	if localVarHttpContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHttpContentType
+	}
+
+	// to determine the Accept header
+	localVarHttpHeaderAccepts := []string{
+		"application/json",
+	}
+
+	// set Accept header
+	localVarHttpHeaderAccept := selectHeaderAccept(localVarHttpHeaderAccepts)
+	if localVarHttpHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHttpHeaderAccept
+	}
+	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHttpMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFileName, localVarFileBytes)
+	if err != nil {
+		return successPayload, nil, err
+	}
+
+	localVarHttpResponse, err := a.client.callAPI(r)
+	if err != nil || localVarHttpResponse == nil {
+		return successPayload, localVarHttpResponse, err
+	}
+	defer localVarHttpResponse.Body.Close()
+	if localVarHttpResponse.StatusCode >= 300 {
+		return successPayload, localVarHttpResponse, reportError(localVarHttpResponse.Status)
+	}
+
+	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
+		return successPayload, localVarHttpResponse, err
+	}
+
+	return successPayload, localVarHttpResponse, err
+}
+
+/* ServicesApiService Get a paginated list of Lb pools
+ @param ctx context.Context Authentication Context
+@param optional (nil or map[string]interface{}) with one or more of:
+    @param "cursor" (string) Opaque cursor to be used for getting next page of records (supplied by current result page)
+    @param "includedFields" (string) Comma separated list of fields that should be included to result of query
+    @param "pageSize" (int64) Maximum number of results to return in this page (server may return fewer)
+    @param "sortAscending" (bool)
+    @param "sortBy" (string) Field by which records are sorted
+@return l.LbPoolListResult*/
+func (a *ServicesApiService) ListLoadBalancerPools(ctx context.Context, localVarOptionals map[string]interface{}) (loadbalancer.LbPoolListResult, *http.Response, error) {
+	var (
+		localVarHttpMethod = strings.ToUpper("Get")
+		localVarPostBody   interface{}
+		localVarFileName   string
+		localVarFileBytes  []byte
+		successPayload     loadbalancer.LbPoolListResult
+	)
+
+	// create path and map variables
+	localVarPath := a.client.cfg.BasePath + "/loadbalancer/pools"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if err := typeCheckParameter(localVarOptionals["cursor"], "string", "cursor"); err != nil {
+		return successPayload, nil, err
+	}
+	if err := typeCheckParameter(localVarOptionals["includedFields"], "string", "includedFields"); err != nil {
+		return successPayload, nil, err
+	}
+	if err := typeCheckParameter(localVarOptionals["pageSize"], "int64", "pageSize"); err != nil {
+		return successPayload, nil, err
+	}
+	if err := typeCheckParameter(localVarOptionals["sortAscending"], "bool", "sortAscending"); err != nil {
+		return successPayload, nil, err
+	}
+	if err := typeCheckParameter(localVarOptionals["sortBy"], "string", "sortBy"); err != nil {
+		return successPayload, nil, err
+	}
+
+	if localVarTempParam, localVarOk := localVarOptionals["cursor"].(string); localVarOk {
+		localVarQueryParams.Add("cursor", parameterToString(localVarTempParam, ""))
+	}
+	if localVarTempParam, localVarOk := localVarOptionals["includedFields"].(string); localVarOk {
+		localVarQueryParams.Add("included_fields", parameterToString(localVarTempParam, ""))
+	}
+	if localVarTempParam, localVarOk := localVarOptionals["pageSize"].(int64); localVarOk {
+		localVarQueryParams.Add("page_size", parameterToString(localVarTempParam, ""))
+	}
+	if localVarTempParam, localVarOk := localVarOptionals["sortAscending"].(bool); localVarOk {
+		localVarQueryParams.Add("sort_ascending", parameterToString(localVarTempParam, ""))
+	}
+	if localVarTempParam, localVarOk := localVarOptionals["sortBy"].(string); localVarOk {
+		localVarQueryParams.Add("sort_by", parameterToString(localVarTempParam, ""))
+	}
+	// to determine the Content-Type header
+	localVarHttpContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHttpContentType := selectHeaderContentType(localVarHttpContentTypes)
+	if localVarHttpContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHttpContentType
+	}
+
+	// to determine the Accept header
+	localVarHttpHeaderAccepts := []string{
+		"application/json",
+	}
+
+	// set Accept header
+	localVarHttpHeaderAccept := selectHeaderAccept(localVarHttpHeaderAccepts)
+	if localVarHttpHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHttpHeaderAccept
+	}
+	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHttpMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFileName, localVarFileBytes)
+	if err != nil {
+		return successPayload, nil, err
+	}
+
+	localVarHttpResponse, err := a.client.callAPI(r)
+	if err != nil || localVarHttpResponse == nil {
+		return successPayload, localVarHttpResponse, err
+	}
+	defer localVarHttpResponse.Body.Close()
+	if localVarHttpResponse.StatusCode >= 300 {
+		return successPayload, localVarHttpResponse, reportError(localVarHttpResponse.Status)
+	}
+
+	if err = json.NewDecoder(localVarHttpResponse.Body).Decode(&successPayload); err != nil {
+		return successPayload, localVarHttpResponse, err
+	}
+
+	return successPayload, localVarHttpResponse, err
+}
+
+/* ServicesApiService Get a paginated list of Lb monitors
+ @param ctx context.Context Authentication Context
+@param optional (nil or map[string]interface{}) with one or more of:
+    @param "cursor" (string) Opaque cursor to be used for getting next page of records (supplied by current result page)
+    @param "includedFields" (string) Comma separated list of fields that should be included to result of query
+    @param "pageSize" (int64) Maximum number of results to return in this page (server may return fewer)
+    @param "sortAscending" (bool)
+    @param "sortBy" (string) Field by which records are sorted
+@return l.LbMonitorListResult*/
+func (a *ServicesApiService) ListLoadBalancerMonitors(ctx context.Context, localVarOptionals map[string]interface{}) (loadbalancer.LbMonitorListResult, *http.Response, error) {
+	var (
+		localVarHttpMethod = strings.ToUpper("Get")
+		localVarPostBody   interface{}
+		localVarFileName   string
+		localVarFileBytes  []byte
+		successPayload     loadbalancer.LbMonitorListResult
+	)
+
+	// create path and map variables
+	localVarPath := a.client.cfg.BasePath + "/loadbalancer/monitors"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if err := typeCheckParameter(localVarOptionals["cursor"], "string", "cursor"); err != nil {
+		return successPayload, nil, err
+	}
+	if err := typeCheckParameter(localVarOptionals["includedFields"], "string", "includedFields"); err != nil {
+		return successPayload, nil, err
+	}
+	if err := typeCheckParameter(localVarOptionals["pageSize"], "int64", "pageSize"); err != nil {
+		return successPayload, nil, err
+	}
+	if err := typeCheckParameter(localVarOptionals["sortAscending"], "bool", "sortAscending"); err != nil {
+		return successPayload, nil, err
+	}
+	if err := typeCheckParameter(localVarOptionals["sortBy"], "string", "sortBy"); err != nil {
+		return successPayload, nil, err
+	}
+
+	if localVarTempParam, localVarOk := localVarOptionals["cursor"].(string); localVarOk {
+		localVarQueryParams.Add("cursor", parameterToString(localVarTempParam, ""))
+	}
+	if localVarTempParam, localVarOk := localVarOptionals["includedFields"].(string); localVarOk {
+		localVarQueryParams.Add("included_fields", parameterToString(localVarTempParam, ""))
+	}
+	if localVarTempParam, localVarOk := localVarOptionals["pageSize"].(int64); localVarOk {
+		localVarQueryParams.Add("page_size", parameterToString(localVarTempParam, ""))
+	}
+	if localVarTempParam, localVarOk := localVarOptionals["sortAscending"].(bool); localVarOk {
+		localVarQueryParams.Add("sort_ascending", parameterToString(localVarTempParam, ""))
+	}
+	if localVarTempParam, localVarOk := localVarOptionals["sortBy"].(string); localVarOk {
+		localVarQueryParams.Add("sort_by", parameterToString(localVarTempParam, ""))
+	}
+	// to determine the Content-Type header
+	localVarHttpContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHttpContentType := selectHeaderContentType(localVarHttpContentTypes)
+	if localVarHttpContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHttpContentType
+	}
+
+	// to determine the Accept header
+	localVarHttpHeaderAccepts := []string{
+		"application/json",
+	}
+
+	// set Accept header
+	localVarHttpHeaderAccept := selectHeaderAccept(localVarHttpHeaderAccepts)
+	if localVarHttpHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHttpHeaderAccept
+	}
 	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHttpMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFileName, localVarFileBytes)
 	if err != nil {
 		return successPayload, nil, err

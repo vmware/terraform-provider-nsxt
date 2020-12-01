@@ -167,6 +167,24 @@ func Provider() *schema.Provider {
 						"Must be a valid nsx license key matching: ^[A-Z0-9]{5}-[A-Z0-9]{5}-[A-Z0-9]{5}-[A-Z0-9]{5}-[A-Z0-9]{5}$"),
 				},
 			},
+			"client_auth_cert": {
+				Type:        schema.TypeString,
+				Description: "Client certificate passed as string",
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("NSXT_CLIENT_AUTH_CERT", nil),
+			},
+			"client_auth_key": {
+				Type:        schema.TypeString,
+				Description: "Client certificate key passed as string",
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("NSXT_CLIENT_AUTH_KEY", nil),
+			},
+			"ca": {
+				Type:        schema.TypeString,
+				Description: "CA certificate passed as string",
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("NSXT_CA", nil),
+			},
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
@@ -319,6 +337,8 @@ func Provider() *schema.Provider {
 func configureNsxtClient(d *schema.ResourceData, clients *nsxtClients) error {
 	clientAuthCertFile := d.Get("client_auth_cert_file").(string)
 	clientAuthKeyFile := d.Get("client_auth_key_file").(string)
+	clientAuthCert := d.Get("client_auth_cert").(string)
+	clientAuthKey := d.Get("client_auth_key").(string)
 	vmcToken := d.Get("vmc_token").(string)
 
 	if len(vmcToken) > 0 {
@@ -330,6 +350,14 @@ func configureNsxtClient(d *schema.ResourceData, clients *nsxtClients) error {
 		if len(clientAuthKeyFile) == 0 {
 			return fmt.Errorf("Please provide key file for client certificate")
 		}
+		needCreds = false
+	}
+
+	if len(clientAuthCert) > 0 {
+		if len(clientAuthKey) == 0 {
+			return fmt.Errorf("Please provide key for client certificate")
+		}
+		// only supported for policy resources
 		needCreds = false
 	}
 
@@ -356,6 +384,7 @@ func configureNsxtClient(d *schema.ResourceData, clients *nsxtClients) error {
 	}
 
 	caFile := d.Get("ca_file").(string)
+	caString := d.Get("ca").(string)
 
 	maxRetries := d.Get("max_retries").(int)
 	retryMinDelay := d.Get("retry_min_delay").(int)
@@ -391,6 +420,9 @@ func configureNsxtClient(d *schema.ResourceData, clients *nsxtClients) error {
 		ClientAuthCertFile:   clientAuthCertFile,
 		ClientAuthKeyFile:    clientAuthKeyFile,
 		CAFile:               caFile,
+		ClientAuthCertString: clientAuthCert,
+		ClientAuthKeyString:  clientAuthKey,
+		CAString:             caString,
 		Insecure:             insecure,
 		RetriesConfiguration: retriesConfig,
 	}
@@ -442,17 +474,43 @@ func getAPIToken(vmcAuthHost string, vmcAccessToken string) (string, error) {
 	return token.AccessToken, nil
 }
 
-func getConnectorTLSConfig(insecure bool, clientCertFile string, clientKeyFile string, caFile string) (*tls.Config, error) {
+func getConnectorTLSConfig(d *schema.ResourceData) (*tls.Config, error) {
 
+	insecure := d.Get("allow_unverified_ssl").(bool)
+	clientAuthCertFile := d.Get("client_auth_cert_file").(string)
+	clientAuthKeyFile := d.Get("client_auth_key_file").(string)
+	caFile := d.Get("ca_file").(string)
+	clientAuthCert := d.Get("client_auth_cert").(string)
+	clientAuthKey := d.Get("client_auth_key").(string)
+	caCert := d.Get("ca").(string)
 	tlsConfig := tls.Config{InsecureSkipVerify: insecure}
 
-	if len(clientCertFile) > 0 {
+	if len(clientAuthCertFile) > 0 {
 
-		if len(clientKeyFile) == 0 {
+		// cert and key are passed via filesystem
+		if len(clientAuthKeyFile) == 0 {
 			return nil, fmt.Errorf("Please provide key file for client certificate")
 		}
 
-		cert, err := tls.LoadX509KeyPair(clientCertFile, clientKeyFile)
+		cert, err := tls.LoadX509KeyPair(clientAuthCertFile, clientAuthKeyFile)
+
+		if err != nil {
+			return nil, fmt.Errorf("Failed to load client cert/key pair: %v", err)
+		}
+
+		tlsConfig.GetClientCertificate = func(*tls.CertificateRequestInfo) (*tls.Certificate, error) {
+			return &cert, nil
+		}
+	}
+
+	if len(clientAuthCert) > 0 {
+		// cert and key are passed as strings
+		if len(clientAuthKey) == 0 {
+			return nil, fmt.Errorf("Please provide key for client certificate")
+		}
+
+		cert, err := tls.X509KeyPair([]byte(clientAuthCert), []byte(clientAuthKey))
+
 		if err != nil {
 			return nil, fmt.Errorf("Failed to load client cert/key pair: %v", err)
 		}
@@ -474,6 +532,13 @@ func getConnectorTLSConfig(insecure bool, clientCertFile string, clientKeyFile s
 		tlsConfig.RootCAs = caCertPool
 	}
 
+	if len(caCert) > 0 {
+		caCertPool := x509.NewCertPool()
+		caCertPool.AppendCertsFromPEM([]byte(caCert))
+
+		tlsConfig.RootCAs = caCertPool
+	}
+
 	return &tlsConfig, nil
 }
 
@@ -483,10 +548,9 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 	password := d.Get("password").(string)
 	vmcAccessToken := d.Get("vmc_token").(string)
 	vmcAuthHost := d.Get("vmc_auth_host").(string)
-	insecure := d.Get("allow_unverified_ssl").(bool)
 	clientAuthCertFile := d.Get("client_auth_cert_file").(string)
-	clientAuthKeyFile := d.Get("client_auth_key_file").(string)
-	caFile := d.Get("ca_file").(string)
+	clientAuthCert := d.Get("client_auth_cert").(string)
+	clientAuthDefined := (len(clientAuthCertFile) > 0) || (len(clientAuthCert) > 0)
 	policyEnforcementPoint := d.Get("enforcement_point").(string)
 	policyGlobalManager := d.Get("global_manager").(bool)
 
@@ -500,7 +564,7 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 
 	securityCtx := core.NewSecurityContextImpl()
 	securityContextNeeded := true
-	if len(clientAuthCertFile) > 0 && !clients.CommonConfig.RemoteAuth {
+	if clientAuthDefined && !clients.CommonConfig.RemoteAuth {
 		securityContextNeeded = false
 	}
 
@@ -532,7 +596,7 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 		}
 	}
 
-	tlsConfig, err := getConnectorTLSConfig(insecure, clientAuthCertFile, clientAuthKeyFile, caFile)
+	tlsConfig, err := getConnectorTLSConfig(d)
 	if err != nil {
 		return err
 	}
