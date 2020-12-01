@@ -15,6 +15,7 @@ This resource is applicable to NSX Global Manager, NSX Policy Manager and VMC.
 
 ```hcl
 resource "nsxt_policy_dhcp_v4_static_binding" "test" {
+  segment_path    = nsxt_policy_segment.test.path
   display_name    = "test"
   description     = "Terraform provisioned static binding"
   gateway_address = "10.0.2.1"
@@ -34,11 +35,11 @@ resource "nsxt_policy_dhcp_v4_static_binding" "test" {
 
 The following arguments are supported:
 
+* `segment_path` - (Required) Policy path for segment to configure this binding on.
 * `display_name` - (Required) Display name of the resource.
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
-* `segment_path` - (Required) Policy path for segment to configure this binding on.
 * `ip_address` - (Required) The IPv4 address must belong to the subnet, if any, configured on Segment.
 * `mac_address` - (Required) MAC address of the host.
 * `gateway_address` - (Optional) Gateway IPv4 Address. When not specified, gateway address is auto-assigned from segment configuration.
@@ -48,7 +49,7 @@ The following arguments are supported:
   * `network` - (Required) Destination in cidr format.
   * `next_hop` - (Required) IP address of next hop.
 * `dhcp_generic_option` - (Optional) Generic DHCP options.
-  * `dhcp_generic_option` - (Optional) Generic DHCP options.
+  * `dhcp_generic_option` - (Optional) Generic DHCP option number. Please note not all options are supported by the platform.
   * `values` - (Required) List of DHCP option values.
 
 ## Attributes Reference
@@ -66,7 +67,8 @@ An existing object can be [imported][docs-import] into this resource, via the fo
 [docs-import]: /docs/import/index.html
 
 ```
-terraform import nsxt_policy_dhcp_v4_static_binding.test SEG-ID/ID
+terraform import nsxt_policy_dhcp_v4_static_binding.test [GW-ID]/SEG-ID/ID
 ```
 
-The above command imports DHCP V4 static binding named `test` with the NSX ID `ID` on segment SEG-ID.
+The above command imports DHCP V4 static binding named `test` with the NSX ID `ID` on segment `SEG-ID`.
+For fixed segments (VMC), `GW-ID` needs to be specified. Otherwise, `GW-ID` should be omitted.

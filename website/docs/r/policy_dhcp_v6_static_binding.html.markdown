@@ -15,6 +15,7 @@ This resource is applicable to NSX Global Manager, NSX Policy Manager and VMC.
 
 ```hcl
 resource "nsxt_policy_dhcp_v6_static_binding" "test" {
+  segment_path   = nsxt_policy_segment.test.path
   display_name   = "test"
   description    = "Terraform provisioned static binding"
   ip_addresses   = ["1002::1"]
@@ -28,11 +29,11 @@ resource "nsxt_policy_dhcp_v6_static_binding" "test" {
 
 The following arguments are supported:
 
+* `segment_path` - (Required) Policy path for segment to configure this binding on.
 * `display_name` - (Required) Display name of the resource.
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
-* `segment_path` - (Required) Policy path for segment to configure this binding on.
 * `ip_addresses` - (Optional) List of IPv6 addresses.
 * `mac_address` - (Required) MAC address of the host.
 * `lease_time` - (Optional) Lease time, in seconds. Defaults to 86400.
@@ -56,7 +57,8 @@ An existing object can be [imported][docs-import] into this resource, via the fo
 [docs-import]: /docs/import/index.html
 
 ```
-terraform import nsxt_policy_dhcp_v6_static_binding.test SEG-ID/ID
+terraform import nsxt_policy_dhcp_v6_static_binding.test [GW-ID]/SEG-ID/ID
 ```
 
 The above command imports DHCP V6 Static Binding named `test` with the NSX ID `ID` under segment SEG-ID.
+For fixed segments (VMC), `GW-ID` needs to be specified. Otherwise, `GW-ID` should be omitted.
