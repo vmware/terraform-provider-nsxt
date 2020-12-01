@@ -146,12 +146,16 @@ The following arguments are used to configure the VMware NSX-T Provider:
   also be specified with the `NSXT_USERNAME` environment variable.
 * `password` - (Required) The password for the NSX-T manager user. Can also be
   specified with the `NSXT_PASSWORD` environment variable.
-* `client_auth_cert_file` - (Optional) The path to a certificate file for
+* `client_auth_cert_file` - (Optional) The path to a certificate file for client
   certificate authorization. Can also be specified with the
   `NSXT_CLIENT_AUTH_CERT_FILE` environment variable.
 * `client_auth_key_file` - (Optional) The path to a private key file for the
   certificate supplied to `client_auth_cert_file`. Can also be specified with
   the `NSXT_CLIENT_AUTH_KEY_FILE` environment variable.
+* `client_auth_cert` - (Optional) Client certificate string.
+  Can also be specified with the `NSXT_CLIENT_AUTH_CERT` environment variable.
+* `client_auth_key` - (Optional) Client certificate private key string.
+  Can also be specified with the `NSXT_CLIENT_AUTH_KEY` environment variable.
 * `allow_unverified_ssl` - (Optional) Boolean that can be set to true to disable
   SSL certificate verification. This should be used with care as it could allow
   an attacker to intercept your auth token. If omitted, default value is
@@ -160,6 +164,8 @@ The following arguments are used to configure the VMware NSX-T Provider:
 * `ca_file` - (Optional) The path to an optional CA certificate file for SSL
   validation. Can also be specified with the `NSXT_CA_FILE` environment
   variable.
+* `ca` - (Optional) CA certificate string for SSL validation.
+  Can also be specified with the `NSXT_CA` environment variable.
 * `max_retries` - (Optional) The maximum number of retires before failing an API
   request. Default: `10` Can also be specified with the `NSXT_MAX_RETRIES`
   environment variable. Not supported yet for policy resources.

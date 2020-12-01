@@ -19,14 +19,14 @@ type FirewallStats struct {
 	Self *common.SelfResourceLink `json:"_self,omitempty"`
 
 	// Aggregated number of bytes processed by the rule.
-	ByteCount string `json:"byte_count,omitempty"`
+	ByteCount int64 `json:"byte_count,omitempty"`
 
 	// Aggregated number of packets processed by the rule.
-	PacketCount string `json:"packet_count,omitempty"`
+	PacketCount int64 `json:"packet_count,omitempty"`
 
 	// Rule Identifier of the Firewall rule. This is a globally unique number.
 	RuleId string `json:"rule_id,omitempty"`
 
 	// Aggregated number of sessions processed by the rule
-	SessionCount string `json:"session_count,omitempty"`
+	SessionCount int64 `json:"session_count,omitempty"`
 }
