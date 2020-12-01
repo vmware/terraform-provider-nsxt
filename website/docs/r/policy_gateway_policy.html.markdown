@@ -40,7 +40,42 @@ resource "nsxt_policy_gateway_policy" "test" {
 }
 ```
 
+## Example Usage with Global Manager
+
+```hcl
+resource "nsxt_policy_domain" "france" {
+  display_name = "France"
+  sites        = ["Paris"]
+}
+
+resource "nsxt_policy_gateway_policy" "test" {
+  display_name    = "tf-gw-policy"
+  description     = "Terraform provisioned Gateway Policy"
+  domain          = nsxt_policy_domain.france.id
+  category        = "LocalGatewayRules"
+  locked          = false
+  sequence_number = 3
+  stateful        = true
+  tcp_strict      = false
+
+  tag {
+    scope = "color"
+    tag   = "orange"
+  }
+
+  rule {
+    display_name       = "rule1"
+    destination_groups = [nsxt_policy_group.group1.path, nsxt_policy_group.group2.path]
+    disabled           = true
+    action             = "DROP"
+    logged             = true
+    scope              = [nsxt_policy_tier1_gateway.policygateway.path]
+  }
+
+}
+```
 ## Argument Reference
+
 
 The following arguments are supported:
 
