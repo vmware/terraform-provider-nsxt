@@ -13,7 +13,7 @@ There are two separate use cases for this resource:
 * Modify predefined Gateway Policy that is not listed under Default category, and add rules to it.
   This use case is relevant for VMC.
 
-~> **NOTE:** An absolute path, can be provided for this resource (this approach will work slightly faster, as the roundtrip for data source retrieval will be spared). In one of the examples below a data source is used in order to pull the predefined policy, while the other uses absolute path.
+~> **NOTE:** An absolute path can be provided for this resource (this approach will work slightly faster, as the roundtrip for data source retrieval will be spared). In one of the examples below a data source is used in order to pull the predefined policy, while the other uses absolute path.
 
 ~> **NOTE:** Default gateway policy generation behavior have changed in NSX 3.1.0. Below this version, there is a single default policy, while default rules are created under it per Gateway. Above NSX 3.1.0, a default policy is generated per Gateway. The first example provided here is limited to NSX 3.0.0 and below.
 
@@ -45,10 +45,18 @@ resource "nsxt_policy_predefined_gateway_policy" "test" {
 ```
 
 ## Example Usage for VMC
+~> **NOTE:** VMC may auto-generate rules under the default gateway policy. If you want these rules to remain post-apply, please copy them into your terraform configuration, including matching `nsx_id`. Sample below includes excample of such auto-generated rule (`default-vti-rule`). If you want re-configure your policy from scratch and dispose of generated rule, it is recommended that you import the policy first (otherwise you may need to apply twice in order to sync backend state with terraform configuration).
 
 ```hcl
 resource "nsxt_policy_predefined_gateway_policy" "test" {
   path = "/infra/domains/cgw/gateway-policies/default"
+
+  rule {
+    display_name = "Default VTI Rule"
+    nsx_id       = "default-vti-rule"
+    action       = "DROP"
+    scope        = ["/infra/labels/cgw-vpn"]
+  }
 
   rule {
     display_name  = "Allow ICMP"
@@ -105,3 +113,15 @@ In addition to arguments listed above, the following attributes are exported:
   * `sequence_number` - Sequence number of the this rule, is defined by order of rules in the list.
   * `rule_id` - Unique positive number that is assigned by the system and is useful for debugging.
 
+## Importing
+
+An existing Gateway Policy can be [imported][docs-import] into this resource, via the following command:
+
+[docs-import]: /docs/import/index.html
+
+```
+terraform import nsxt_policy_gateway_policy.default policy-path
+```
+
+The above command imports the policy Gateway Policy named `default` with the NSX Path `policy-path`.
+The import command is recommended in case the NSX policy in question already has rules configured, and you with to reconfigure the policy from scratch. If your terraform configuration copies existing rules, like in VMC example above, import step can be skipped.
