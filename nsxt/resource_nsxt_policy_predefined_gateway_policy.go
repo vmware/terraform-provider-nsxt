@@ -25,6 +25,9 @@ func resourceNsxtPolicyPredefinedGatewayPolicy() *schema.Resource {
 		Read:   resourceNsxtPolicyPredefinedGatewayPolicyRead,
 		Update: resourceNsxtPolicyPredefinedGatewayPolicyUpdate,
 		Delete: resourceNsxtPolicyPredefinedGatewayPolicyDelete,
+		Importer: &schema.ResourceImporter{
+			State: nsxtPredefinedPolicyImporter,
+		},
 
 		Schema: getPolicyPredefinedGatewayPolicySchema(),
 	}
@@ -488,4 +491,13 @@ func resourceNsxtPolicyPredefinedGatewayPolicyDelete(d *schema.ResourceData, m i
 		return handleUpdateError("Predefined Gateway Policy", id, err)
 	}
 	return nil
+}
+
+func nsxtPredefinedPolicyImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	importPath := d.Id()
+	d.Set("path", importPath)
+	id := getPolicyIDFromPath(importPath)
+	d.SetId(id)
+
+	return []*schema.ResourceData{d}, nil
 }
