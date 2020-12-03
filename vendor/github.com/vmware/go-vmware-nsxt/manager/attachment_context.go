@@ -12,4 +12,7 @@ type AttachmentContext struct {
 
 	// Used to identify which concrete class it is
 	ResourceType string `json:"resource_type"`
+
+	// Used to indicate what the port is created for
+	VifType string `json:"vif_type,omitempty"`
 }

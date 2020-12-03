@@ -60,6 +60,9 @@ type LogicalPort struct {
 	// Logical port attachment
 	Attachment *LogicalPortAttachment `json:"attachment,omitempty"`
 
+	// This property could be used for vendor specific configuration in key value string pairs. Logical port setting will override logical switch setting if the same key was set on both logical switch and logical port.
+	ExtraConfigs []ExtraConfig `json:"extra_configs,omitempty"`
+
 	// Id of the Logical switch that this port belongs to.
 	LogicalSwitchId string `json:"logical_switch_id"`
 
