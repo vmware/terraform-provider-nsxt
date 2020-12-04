@@ -725,7 +725,7 @@ resource "nsxt_policy_tier0_gateway_interface" "parent-loopback" {
   type           = "LOOPBACK"
   gateway_path   = nsxt_policy_tier0_gateway.parent.path
   edge_node_path = data.nsxt_policy_edge_node.EN.path
-  subnets        = ["4.4.4.12/24"]
+  subnets        = ["4.4.4.12/32"]
 }
 
 data "nsxt_policy_edge_node" "EN" {

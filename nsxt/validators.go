@@ -87,10 +87,10 @@ func isCidr(v string, allowMaxPrefix bool, isIP bool) bool {
 	if ipnet == nil {
 		return false
 	}
-	if isIP && v == ipnet.String() {
+	if isIP && (v == ipnet.String()) && !allowMaxPrefix {
 		return false
 	}
-	if !isIP && v != ipnet.String() {
+	if !isIP && (v != ipnet.String()) {
 		return false
 	}
 
