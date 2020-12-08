@@ -72,7 +72,7 @@ func getPolicySegmentDhcpV6ConfigSchema() *schema.Resource {
 				Optional: true,
 			},
 			"lease_time":     getDhcpLeaseTimeSchema(),
-			"domain_names":   getDhcpDomainNamesSchema(),
+			"domain_names":   getDomainNamesSchema(),
 			"excluded_range": getAllocationRangeListSchema(false, "Excluded addresses to define dynamic ip allocation ranges"),
 			"preferred_time": getDhcpPreferredTimeSchema(),
 			"sntp_servers": {
@@ -355,7 +355,7 @@ func getDhcpPreferredTimeSchema() *schema.Schema {
 	}
 }
 
-func getDhcpDomainNamesSchema() *schema.Schema {
+func getDomainNamesSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:        schema.TypeList,
 		Description: "Domain names",

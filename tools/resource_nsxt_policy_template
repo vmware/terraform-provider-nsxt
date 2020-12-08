@@ -148,10 +148,6 @@ func resourceNsxtPolicy<!RESOURCE!>Read(d *schema.ResourceData, m interface{}) e
 
 func resourceNsxtPolicy<!RESOURCE!>Update(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewDefault<!RESOURCE!>sClient(connector)
-        if client == nil {
-            return policyResourceNotSupportedError()
-        }
 
 	id := d.Id()
 	if id == "" {

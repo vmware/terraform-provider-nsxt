@@ -40,7 +40,7 @@ DONT_SPLIT_US = ["IP", "LB", "SSL", "TCP", "UDP"]
 
 # Resource-specific attributes are either in the beginning or the end
 FIRST_COMMON_ATTR = "Links []ResourceLink"
-LAST_COMMON_ATTR = "Overriden *bool"
+LAST_COMMON_ATTR = "Overridden *bool"
 
 TYPE_MAP = {"string": "schema.TypeString",
             "int32": "schema.TypeInt",
@@ -235,6 +235,11 @@ def load_resource_metadata():
         if stage == "skip":
             if LAST_COMMON_ATTR in line:
                 stage = "attrs"
+                continue
+
+            if line.startswith("}"):
+                # end of type struct
+                stage = ""
                 continue
 
         if stage == "attrs":
@@ -434,6 +439,7 @@ def replace_templates(line):
     result = result.replace("<!CHECK_ATTRS_UPDATE!>", metadata['check_attrs_update'])
     result = result.replace("<!DOC_ATTRS!>", metadata['doc_attrs'])
     result = result.replace("<!DOC_ATTRS_REFERENCE!>", metadata['doc_attrs_reference'])
+    result = result.replace("PolicyPolicy", "Policy")
     return result
 
 
@@ -451,6 +457,9 @@ def main():
     metadata['resource'] = resource
     metadata['module'] = resource[0].lower() + resource[1:] + 's'
     resource_lower = to_lower_separated(resource)
+    if resource_lower.startswith("policy_"):
+        # remove double "policy" indication
+        resource_lower = resource_lower[len("policy_"):]
     metadata['resource_lower'] = resource_lower
     metadata['resource-lower'] = resource_lower.replace('_','-')
     print("Building resource from %s" % resource)
