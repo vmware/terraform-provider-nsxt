@@ -274,7 +274,7 @@ func testAccNsxtPolicyNATRuleTier0MinimalCreateTemplate(name, sourceNet, transla
 		testAccNsxtPolicyTier0WithEdgeClusterTemplate("test", false) + fmt.Sprintf(`
 resource "nsxt_policy_nat_rule" "test" {
   display_name         = "%s"
-  gateway_path         = "${nsxt_policy_tier0_gateway.t0test.path}"
+  gateway_path         = nsxt_policy_tier0_gateway.test.path
   action               = "%s"
   source_networks      = ["%s"]
   translated_networks  = ["%s"]
@@ -288,7 +288,7 @@ func testAccNsxtPolicyNATRuleTier1CreateTemplate(name string, action string, sou
 resource "nsxt_policy_nat_rule" "test" {
   display_name         = "%s"
   description          = "Acceptance Test"
-  gateway_path         = "${nsxt_policy_tier1_gateway.t1test.path}"
+  gateway_path         = nsxt_policy_tier1_gateway.test.path
   action               = "%s"
   source_networks      = ["%s"]
   destination_networks = ["%s"]
@@ -315,7 +315,7 @@ func testAccNsxtPolicyNATRuleTier1UpdateMultipleSourceNetworksTemplate(name stri
 resource "nsxt_policy_nat_rule" "test" {
   display_name         = "%s"
   description          = "Acceptance Test"
-  gateway_path         = "${nsxt_policy_tier1_gateway.t1test.path}"
+  gateway_path         = nsxt_policy_tier1_gateway.test.path
   action               = "%s"
   source_networks      = ["%s", "%s"]
   destination_networks = ["%s"]
@@ -365,7 +365,7 @@ resource "nsxt_policy_vlan_segment" "test" {
 resource "nsxt_policy_tier0_gateway_interface" "test" {
   display_name = "t0gwinterface"
   type         = "SERVICE"
-  gateway_path = nsxt_policy_tier0_gateway.t0test.path
+  gateway_path = nsxt_policy_tier0_gateway.test.path
   segment_path = nsxt_policy_vlan_segment.test.path
   subnets      = ["1.1.12.2/24"]
   %s
@@ -374,13 +374,13 @@ resource "nsxt_policy_tier0_gateway_interface" "test" {
 resource "nsxt_policy_nat_rule" "test" {
   display_name         = "%s"
   description          = "Acceptance Test"
-  gateway_path         = "${nsxt_policy_tier0_gateway.t0test.path}"
+  gateway_path         = nsxt_policy_tier0_gateway.test.path
   action               = "%s"
   source_networks      = ["%s"]
   translated_networks  = ["%s"]
   logging              = false
   firewall_match       = "%s"
-  scope                = ["${nsxt_policy_tier0_gateway_interface.test.path}"]
+  scope                = [nsxt_policy_tier0_gateway_interface.test.path]
 
   tag {
     scope = "scope1"

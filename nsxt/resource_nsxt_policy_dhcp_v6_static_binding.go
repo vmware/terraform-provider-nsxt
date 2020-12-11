@@ -52,7 +52,7 @@ func resourceNsxtPolicyDhcpV6StaticBinding() *schema.Resource {
 					ValidateFunc: validation.IsIPv6Address,
 				},
 			},
-			"domain_names": getDhcpDomainNamesSchema(),
+			"domain_names": getDomainNamesSchema(),
 			"ip_addresses": {
 				Type:        schema.TypeList,
 				Description: "IP addresses",

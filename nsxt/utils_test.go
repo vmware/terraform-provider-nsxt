@@ -405,27 +405,27 @@ func testAccNsxtPolicyGatewayWithEdgeClusterTemplate(edgeClusterName string, tie
 		tier = "1"
 	}
 	var haMode string
-	if standby {
+	if standby && tier0 {
 		haMode = fmt.Sprintf(`ha_mode = "%s"`, model.Tier0_HA_MODE_STANDBY)
 	}
 	if testAccIsGlobalManager() {
 		return fmt.Sprintf(`
-resource "nsxt_policy_tier%s_gateway" "t%stest" {
+resource "nsxt_policy_tier%s_gateway" "test" {
   display_name = "terraform-t%s-gw"
   description  = "Acceptance Test"
   locale_service {
     edge_cluster_path = data.nsxt_policy_edge_cluster.%s.path
   }
   %s
-}`, tier, tier, tier, edgeClusterName, haMode)
+}`, tier, tier, edgeClusterName, haMode)
 	}
 	return fmt.Sprintf(`
-resource "nsxt_policy_tier%s_gateway" "t%stest" {
+resource "nsxt_policy_tier%s_gateway" "test" {
   display_name      = "terraform-t%s-gw"
   description       = "Acceptance Test"
   edge_cluster_path = data.nsxt_policy_edge_cluster.%s.path
   %s
-}`, tier, tier, tier, edgeClusterName, haMode)
+}`, tier, tier, edgeClusterName, haMode)
 }
 
 func testAccNsxtPolicyResourceExists(resourceName string, presenceChecker func(string, *client.RestConnector, bool) (bool, error)) resource.TestCheckFunc {

@@ -185,7 +185,7 @@ func testAccNsxtPolicyGWPrefixListCreateTemplate(name string, action string, ge 
 resource "nsxt_policy_gateway_prefix_list" "test" {
   display_name = "%s"
   description  = "test"
-  gateway_path = nsxt_policy_tier0_gateway.t0test.path
+  gateway_path = nsxt_policy_tier0_gateway.test.path
 
   prefix {
   	action  = "%s"
@@ -208,7 +208,7 @@ func testAccNsxtPolicyGWPrefixListUpdateTemplate(name string, action string, ge 
 resource "nsxt_policy_gateway_prefix_list" "test" {
   display_name = "%s"
   description  = "updated"
-  gateway_path = nsxt_policy_tier0_gateway.t0test.path
+  gateway_path = nsxt_policy_tier0_gateway.test.path
 
   prefix {
   	action  = "%s"

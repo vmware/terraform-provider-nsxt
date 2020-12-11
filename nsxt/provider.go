@@ -328,6 +328,8 @@ func Provider() *schema.Provider {
 			"nsxt_policy_context_profile":                  resourceNsxtPolicyContextProfile(),
 			"nsxt_policy_dhcp_v4_static_binding":           resourceNsxtPolicyDhcpV4StaticBinding(),
 			"nsxt_policy_dhcp_v6_static_binding":           resourceNsxtPolicyDhcpV6StaticBinding(),
+			"nsxt_policy_dns_forwarder_zone":               resourceNsxtPolicyDNSForwarderZone(),
+			"nsxt_policy_gateway_dns_forwarder":            resourceNsxtPolicyGatewayDNSForwarder(),
 		},
 
 		ConfigureFunc: providerConfigure,
