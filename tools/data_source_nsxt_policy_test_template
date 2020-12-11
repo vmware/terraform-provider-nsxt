@@ -8,8 +8,8 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
@@ -20,7 +20,7 @@ func TestAccDataSourceNsxtPolicy<!RESOURCE!>_basic(t *testing.T) {
 	name := getAccTestDataSourceName()
 	testResourceName := "data.nsxt_policy_<!resource_lower!>.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -65,9 +65,9 @@ func testAccDataSourceNsxtPolicy<!RESOURCE!>Create(name string) error {
 	id := uuid.String()
 
         if testAccIsGlobalManager() {
-                gmObj, err := convertModelBindingType(obj, model.<!RESOURCE!>BindingType(), gm_model.<!RESOURCE!>BindingType())
-                if err != nil {
-                        return err
+                gmObj, convErr := convertModelBindingType(obj, model.<!RESOURCE!>BindingType(), gm_model.<!RESOURCE!>BindingType())
+                if convErr != nil {
+                        return convErr
                 }
 
                 client := gm_infra.NewDefault<!RESOURCE!>sClient(connector)
