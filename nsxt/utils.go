@@ -530,6 +530,11 @@ func initNSXVersion(nsxClient *api.APIClient) error {
 	return err
 }
 
+func initNSXVersionVMC() {
+	// TODO: find a way to retrieve NSX version on VMC
+	nsxVersion = "3.0.0"
+}
+
 func nsxVersionLower(ver string) bool {
 
 	requestedVersion, err1 := version.NewVersion(ver)

@@ -344,6 +344,7 @@ func configureNsxtClient(d *schema.ResourceData, clients *nsxtClients) error {
 	vmcToken := d.Get("vmc_token").(string)
 
 	if len(vmcToken) > 0 {
+		initNSXVersionVMC()
 		return nil
 	}
 
