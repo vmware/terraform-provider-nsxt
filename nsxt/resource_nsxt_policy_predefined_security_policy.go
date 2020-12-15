@@ -81,7 +81,7 @@ func getPolicyPredefinedSecurityPolicySchema() map[string]*schema.Schema {
 		"path":         getPolicyPathSchema(true, true, "Path for this Security Policy"),
 		"description":  getComputedDescriptionSchema(),
 		"tag":          getTagsSchema(),
-		"rule":         getSecurityPolicyAndGatewayRulesSchema(false),
+		"rule":         getSecurityPolicyAndGatewayRulesSchema(false, false),
 		"default_rule": getSecurityPolicyDefaultRulesSchema(),
 		"revision":     getRevisionSchema(),
 	}

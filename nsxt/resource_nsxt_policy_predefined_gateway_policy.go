@@ -38,7 +38,7 @@ func getPolicyPredefinedGatewayPolicySchema() map[string]*schema.Schema {
 		"path":         getPolicyPathSchema(true, true, "Path for this Gateway Policy"),
 		"description":  getComputedDescriptionSchema(),
 		"tag":          getTagsSchema(),
-		"rule":         getSecurityPolicyAndGatewayRulesSchema(true),
+		"rule":         getSecurityPolicyAndGatewayRulesSchema(true, false),
 		"default_rule": getGatewayPolicyDefaultRulesSchema(),
 		"revision":     getRevisionSchema(),
 	}
