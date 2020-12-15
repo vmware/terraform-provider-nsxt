@@ -127,148 +127,162 @@ func getPolicyGatewayPathSchema() *schema.Schema {
 	}
 }
 
-func getSecurityPolicyAndGatewayRulesSchema(scopeRequired bool) *schema.Schema {
+func getPolicyRuleActionSchema(isIds bool) *schema.Schema {
+	validationSlice := securityPolicyActionValues
+	defaultValue := model.Rule_ACTION_ALLOW
+	if isIds {
+		validationSlice = policyIntrusionServiceRuleActionValues
+		defaultValue = model.IdsRule_ACTION_DETECT
+	}
+	return &schema.Schema{
+		Type:         schema.TypeString,
+		Description:  "Action",
+		Optional:     true,
+		ValidateFunc: validation.StringInSlice(validationSlice, false),
+		Default:      defaultValue,
+	}
+}
+
+func getSecurityPolicyAndGatewayRulesSchema(scopeRequired bool, isIds bool) *schema.Schema {
+	ruleSchema := map[string]*schema.Schema{
+		"nsx_id":       getFlexNsxIDSchema(),
+		"display_name": getDisplayNameSchema(),
+		"description":  getDescriptionSchema(),
+		"revision":     getRevisionSchema(),
+		"sequence_number": {
+			Type:        schema.TypeInt,
+			Description: "Sequence number of the this rule",
+			Optional:    true,
+			Computed:    true,
+		},
+		"destination_groups": {
+			Type:        schema.TypeSet,
+			Description: "List of destination groups",
+			Elem: &schema.Schema{
+				Type:         schema.TypeString,
+				ValidateFunc: validatePolicyPath(),
+			},
+			Optional: true,
+		},
+		"destinations_excluded": {
+			Type:        schema.TypeBool,
+			Description: "Negation of destination groups",
+			Optional:    true,
+			Default:     false,
+		},
+		"direction": {
+			Type:         schema.TypeString,
+			Description:  "Traffic direction",
+			Optional:     true,
+			ValidateFunc: validation.StringInSlice(securityPolicyDirectionValues, false),
+			Default:      model.Rule_DIRECTION_IN_OUT,
+		},
+		"disabled": {
+			Type:        schema.TypeBool,
+			Description: "Flag to disable the rule",
+			Optional:    true,
+			Default:     false,
+		},
+		"ip_version": {
+			Type:         schema.TypeString,
+			Description:  "IP version",
+			Optional:     true,
+			ValidateFunc: validation.StringInSlice(securityPolicyIPProtocolValues, false),
+			Default:      model.Rule_IP_PROTOCOL_IPV4_IPV6,
+		},
+		"logged": {
+			Type:        schema.TypeBool,
+			Description: "Flag to enable packet logging",
+			Optional:    true,
+			Default:     false,
+		},
+		"notes": {
+			Type:        schema.TypeString,
+			Description: "Text for additional notes on changes",
+			Optional:    true,
+		},
+		"profiles": {
+			Type:        schema.TypeSet,
+			Description: "List of profiles",
+			Elem: &schema.Schema{
+				Type:         schema.TypeString,
+				ValidateFunc: validatePolicyPath(),
+			},
+			Optional: true,
+		},
+		"rule_id": {
+			Type:        schema.TypeInt,
+			Description: "Unique positive number that is assigned by the system and is useful for debugging",
+			Computed:    true,
+		},
+		"scope": {
+			Type:        schema.TypeSet,
+			Description: "List of policy paths where the rule is applied",
+			Elem: &schema.Schema{
+				Type:         schema.TypeString,
+				ValidateFunc: validatePolicyPath(),
+			},
+			Optional: !scopeRequired,
+			Required: scopeRequired,
+		},
+		"services": {
+			Type:        schema.TypeSet,
+			Description: "List of services to match",
+			Elem: &schema.Schema{
+				Type:         schema.TypeString,
+				ValidateFunc: validatePolicyPath(),
+			},
+			Optional: true,
+		},
+		"source_groups": {
+			Type:        schema.TypeSet,
+			Description: "List of source groups",
+			Elem: &schema.Schema{
+				Type:         schema.TypeString,
+				ValidateFunc: validatePolicyPath(),
+			},
+			Optional: true,
+		},
+		"sources_excluded": {
+			Type:        schema.TypeBool,
+			Description: "Negation of source groups",
+			Optional:    true,
+			Default:     false,
+		},
+		"tag": getTagsSchema(),
+		"log_label": {
+			Type:        schema.TypeString,
+			Description: "Additional information (string) which will be propagated to the rule syslog",
+			Optional:    true,
+		},
+		"action": getPolicyRuleActionSchema(isIds),
+	}
+	if isIds {
+		ruleSchema["ids_profiles"] = getIdsProfilesSchema()
+	}
 	return &schema.Schema{
 		Type:        schema.TypeList,
 		Description: "List of rules in the section",
 		Optional:    true,
 		MaxItems:    1000,
 		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{
-				"nsx_id":       getFlexNsxIDSchema(),
-				"display_name": getDisplayNameSchema(),
-				"description":  getDescriptionSchema(),
-				"revision":     getRevisionSchema(),
-				"sequence_number": {
-					Type:        schema.TypeInt,
-					Description: "Sequence number of the this rule",
-					Optional:    true,
-					Computed:    true,
-				},
-				"destination_groups": {
-					Type:        schema.TypeSet,
-					Description: "List of destination groups",
-					Elem: &schema.Schema{
-						Type:         schema.TypeString,
-						ValidateFunc: validatePolicyPath(),
-					},
-					Optional: true,
-				},
-				"destinations_excluded": {
-					Type:        schema.TypeBool,
-					Description: "Negation of destination groups",
-					Optional:    true,
-					Default:     false,
-				},
-				"direction": {
-					Type:         schema.TypeString,
-					Description:  "Traffic direction",
-					Optional:     true,
-					ValidateFunc: validation.StringInSlice(securityPolicyDirectionValues, false),
-					Default:      model.Rule_DIRECTION_IN_OUT,
-				},
-				"disabled": {
-					Type:        schema.TypeBool,
-					Description: "Flag to disable the rule",
-					Optional:    true,
-					Default:     false,
-				},
-				"ip_version": {
-					Type:         schema.TypeString,
-					Description:  "IP version",
-					Optional:     true,
-					ValidateFunc: validation.StringInSlice(securityPolicyIPProtocolValues, false),
-					Default:      model.Rule_IP_PROTOCOL_IPV4_IPV6,
-				},
-				"logged": {
-					Type:        schema.TypeBool,
-					Description: "Flag to enable packet logging",
-					Optional:    true,
-					Default:     false,
-				},
-				"notes": {
-					Type:        schema.TypeString,
-					Description: "Text for additional notes on changes",
-					Optional:    true,
-				},
-				"profiles": {
-					Type:        schema.TypeSet,
-					Description: "List of profiles",
-					Elem: &schema.Schema{
-						Type:         schema.TypeString,
-						ValidateFunc: validatePolicyPath(),
-					},
-					Optional: true,
-				},
-				"rule_id": {
-					Type:        schema.TypeInt,
-					Description: "Unique positive number that is assigned by the system and is useful for debugging",
-					Computed:    true,
-				},
-				"scope": {
-					Type:        schema.TypeSet,
-					Description: "List of policy paths where the rule is applied",
-					Elem: &schema.Schema{
-						Type:         schema.TypeString,
-						ValidateFunc: validatePolicyPath(),
-					},
-					Optional: !scopeRequired,
-					Required: scopeRequired,
-				},
-				"services": {
-					Type:        schema.TypeSet,
-					Description: "List of services to match",
-					Elem: &schema.Schema{
-						Type:         schema.TypeString,
-						ValidateFunc: validatePolicyPath(),
-					},
-					Optional: true,
-				},
-				"source_groups": {
-					Type:        schema.TypeSet,
-					Description: "List of source groups",
-					Elem: &schema.Schema{
-						Type:         schema.TypeString,
-						ValidateFunc: validatePolicyPath(),
-					},
-					Optional: true,
-				},
-				"sources_excluded": {
-					Type:        schema.TypeBool,
-					Description: "Negation of source groups",
-					Optional:    true,
-					Default:     false,
-				},
-				"tag": getTagsSchema(),
-				"log_label": {
-					Type:        schema.TypeString,
-					Description: "Additional information (string) which will be propagated to the rule syslog",
-					Optional:    true,
-				},
-				"action": {
-					Type:         schema.TypeString,
-					Description:  "Action",
-					Optional:     true,
-					ValidateFunc: validation.StringInSlice(securityPolicyActionValues, false),
-					Default:      model.Rule_ACTION_ALLOW,
-				},
-			},
+			Schema: ruleSchema,
 		},
 	}
 }
 
 func getPolicyGatewayPolicySchema() map[string]*schema.Schema {
-	secPolicy := getPolicySecurityPolicySchema()
+	secPolicy := getPolicySecurityPolicySchema(false)
 	// GW Policies don't support scope
 	delete(secPolicy, "scope")
 	secPolicy["category"].ValidateFunc = validation.StringInSlice(gatewayPolicyCategoryValues, false)
 	// GW Policy rules require scope to be set
-	secPolicy["rule"] = getSecurityPolicyAndGatewayRulesSchema(true)
+	secPolicy["rule"] = getSecurityPolicyAndGatewayRulesSchema(true, false)
 	return secPolicy
 }
 
-func getPolicySecurityPolicySchema() map[string]*schema.Schema {
-	return map[string]*schema.Schema{
+func getPolicySecurityPolicySchema(isIds bool) map[string]*schema.Schema {
+	result := map[string]*schema.Schema{
 		"nsx_id":       getNsxIDSchema(),
 		"path":         getPathSchema(),
 		"display_name": getDisplayNameSchema(),
@@ -322,8 +336,16 @@ func getPolicySecurityPolicySchema() map[string]*schema.Schema {
 			Optional:    true,
 			Computed:    true,
 		},
-		"rule": getSecurityPolicyAndGatewayRulesSchema(false),
+		"rule": getSecurityPolicyAndGatewayRulesSchema(false, isIds),
 	}
+
+	if isIds {
+		delete(result, "category")
+		delete(result, "scope")
+		delete(result, "tcp_strict")
+	}
+
+	return result
 }
 
 func setPolicyRulesInSchema(d *schema.ResourceData, rules []model.Rule) error {
