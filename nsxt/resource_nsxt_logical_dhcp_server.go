@@ -91,7 +91,7 @@ func getDhcpOptions121Schema() *schema.Schema {
 					Type:         schema.TypeString,
 					Description:  "Destination in cidr",
 					Required:     true,
-					ValidateFunc: validateCidr(),
+					ValidateFunc: validateIPCidr(),
 				},
 				"next_hop": {
 					Type:         schema.TypeString,
