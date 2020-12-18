@@ -28,6 +28,7 @@ var defaultRetryOnStatusCodes = []int{429, 503}
 // Provider configuration that is shared for policy and MP
 type commonProviderConfig struct {
 	RemoteAuth             bool
+	BearerToken            string
 	ToleratePartialSuccess bool
 }
 
@@ -141,6 +142,13 @@ func Provider() *schema.Provider {
 				Optional:    true,
 				Description: "Long-living API token for VMC authorization",
 				DefaultFunc: schema.EnvDefaultFunc("NSXT_VMC_TOKEN", nil),
+			},
+			"vmc_auth_mode": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				DefaultFunc:  schema.EnvDefaultFunc("NSXT_VMC_AUTH_MODE", "Default"),
+				ValidateFunc: validation.StringInSlice([]string{"Default", "Bearer"}, false),
+				Description:  "Mode for VMC authorization",
 			},
 			"enforcement_point": {
 				Type:        schema.TypeString,
@@ -556,6 +564,7 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 	clientAuthDefined := (len(clientAuthCertFile) > 0) || (len(clientAuthCert) > 0)
 	policyEnforcementPoint := d.Get("enforcement_point").(string)
 	policyGlobalManager := d.Get("global_manager").(bool)
+	vmcAuthMode := d.Get("vmc_auth_mode").(string)
 
 	if host == "" {
 		return fmt.Errorf("host must be provided")
@@ -582,8 +591,13 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 				return err
 			}
 
-			securityCtx.SetProperty(security.AUTHENTICATION_SCHEME_ID, security.OAUTH_SCHEME_ID)
-			securityCtx.SetProperty(security.ACCESS_TOKEN, apiToken)
+			if vmcAuthMode == "Bearer" {
+				clients.CommonConfig.BearerToken = apiToken
+			} else {
+
+				securityCtx.SetProperty(security.AUTHENTICATION_SCHEME_ID, security.OAUTH_SCHEME_ID)
+				securityCtx.SetProperty(security.ACCESS_TOKEN, apiToken)
+			}
 		} else {
 			if username == "" {
 				return fmt.Errorf("username must be provided")
@@ -621,16 +635,30 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 	return nil
 }
 
-type remoteBasicAuthHeaderProcessor struct {
+type remoteAuthHeaderProcessor struct {
 }
 
-func newRemoteBasicAuthHeaderProcessor() *remoteBasicAuthHeaderProcessor {
-	return &remoteBasicAuthHeaderProcessor{}
+func newRemoteAuthHeaderProcessor() *remoteAuthHeaderProcessor {
+	return &remoteAuthHeaderProcessor{}
 }
 
-func (processor remoteBasicAuthHeaderProcessor) Process(req *http.Request) error {
+func (processor remoteAuthHeaderProcessor) Process(req *http.Request) error {
 	oldAuthHeader := req.Header.Get("Authorization")
 	newAuthHeader := strings.Replace(oldAuthHeader, "Basic", "Remote", 1)
+	req.Header.Set("Authorization", newAuthHeader)
+	return nil
+}
+
+type bearerAuthHeaderProcessor struct {
+	Token string
+}
+
+func newBearerAuthHeaderProcessor(token string) *bearerAuthHeaderProcessor {
+	return &bearerAuthHeaderProcessor{Token: token}
+}
+
+func (processor bearerAuthHeaderProcessor) Process(req *http.Request) error {
+	newAuthHeader := fmt.Sprintf("Bearer %s", processor.Token)
 	req.Header.Set("Authorization", newAuthHeader)
 	return nil
 }
@@ -704,7 +732,10 @@ func getPolicyConnector(clients interface{}) *client.RestConnector {
 		connector.SetSecurityContext(c.PolicySecurityContext)
 	}
 	if c.CommonConfig.RemoteAuth {
-		connector.AddRequestProcessor(newRemoteBasicAuthHeaderProcessor())
+		connector.AddRequestProcessor(newRemoteAuthHeaderProcessor())
+	}
+	if len(c.CommonConfig.BearerToken) > 0 {
+		connector.AddRequestProcessor(newBearerAuthHeaderProcessor(c.CommonConfig.BearerToken))
 	}
 
 	return connector
