@@ -13,6 +13,7 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/search"
+	lm_search "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/search"
 )
 
 type policySearchDataValue struct {
@@ -75,11 +76,11 @@ func policyDataSourceResourceFilterAndSet(d *schema.ResourceData, resultValues [
 	return obj.StructValue, nil
 }
 
-func policyDataSourceResourceRead(d *schema.ResourceData, connector *client.RestConnector, resourceType string, additionalQuery map[string]string) (*data.StructValue, error) {
-	return policyDataSourceResourceReadWithValidation(d, connector, resourceType, additionalQuery, true)
+func policyDataSourceResourceRead(d *schema.ResourceData, connector *client.RestConnector, isGlobalManager bool, resourceType string, additionalQuery map[string]string) (*data.StructValue, error) {
+	return policyDataSourceResourceReadWithValidation(d, connector, isGlobalManager, resourceType, additionalQuery, true)
 }
 
-func policyDataSourceResourceReadWithValidation(d *schema.ResourceData, connector *client.RestConnector, resourceType string, additionalQuery map[string]string, paramsValidation bool) (*data.StructValue, error) {
+func policyDataSourceResourceReadWithValidation(d *schema.ResourceData, connector *client.RestConnector, isGlobalManager bool, resourceType string, additionalQuery map[string]string, paramsValidation bool) (*data.StructValue, error) {
 	objName := d.Get("display_name").(string)
 	objID := d.Get("id").(string)
 	var err error
@@ -89,9 +90,9 @@ func policyDataSourceResourceReadWithValidation(d *schema.ResourceData, connecto
 		return nil, fmt.Errorf("No 'id' or 'display_name' specified for %s", resourceType)
 	}
 	if objID != "" {
-		resultValues, err = listPolicyResourcesByID(connector, &objID, &additionalQueryString)
+		resultValues, err = listPolicyResourcesByID(connector, isGlobalManager, &objID, &additionalQueryString)
 	} else {
-		resultValues, err = listPolicyResourcesByType(connector, &resourceType, &additionalQueryString)
+		resultValues, err = listPolicyResourcesByType(connector, isGlobalManager, &resourceType, &additionalQueryString)
 	}
 	if err != nil {
 		return nil, err
@@ -100,17 +101,30 @@ func policyDataSourceResourceReadWithValidation(d *schema.ResourceData, connecto
 	return policyDataSourceResourceFilterAndSet(d, resultValues, resourceType)
 }
 
-func listPolicyResourcesByType(connector *client.RestConnector, resourceType *string, additionalQuery *string) ([]*data.StructValue, error) {
+func listPolicyResourcesByType(connector *client.RestConnector, isGlobalManager bool, resourceType *string, additionalQuery *string) ([]*data.StructValue, error) {
 	query := fmt.Sprintf("resource_type:%s AND marked_for_delete:false", *resourceType)
-	return searchPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
+	if isGlobalManager {
+		return searchGMPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
+	}
+	return searchLMPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
 }
 
-func listPolicyResourcesByID(connector *client.RestConnector, resourceID *string, additionalQuery *string) ([]*data.StructValue, error) {
+func listPolicyResourcesByID(connector *client.RestConnector, isGlobalManager bool, resourceID *string, additionalQuery *string) ([]*data.StructValue, error) {
 	query := fmt.Sprintf("id:%s AND marked_for_delete:false", *resourceID)
-	return searchPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
+	if isGlobalManager {
+		return searchGMPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
+	}
+	return searchLMPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
 }
 
-func searchPolicyResources(connector *client.RestConnector, query string) ([]*data.StructValue, error) {
+func buildPolicyResourcesQuery(query *string, additionalQuery *string) *string {
+	if additionalQuery != nil && *additionalQuery != "" {
+		*query = *query + " AND " + *additionalQuery
+	}
+	return query
+}
+
+func searchGMPolicyResources(connector *client.RestConnector, query string) ([]*data.StructValue, error) {
 	client := search.NewDefaultQueryClient(connector)
 	var results []*data.StructValue
 	var cursor *string
@@ -133,9 +147,25 @@ func searchPolicyResources(connector *client.RestConnector, query string) ([]*da
 	}
 }
 
-func buildPolicyResourcesQuery(query *string, additionalQuery *string) *string {
-	if additionalQuery != nil && *additionalQuery != "" {
-		*query = *query + " AND " + *additionalQuery
+func searchLMPolicyResources(connector *client.RestConnector, query string) ([]*data.StructValue, error) {
+	client := lm_search.NewDefaultQueryClient(connector)
+	var results []*data.StructValue
+	var cursor *string
+	total := 0
+
+	for {
+		searchResponse, err := client.List(query, cursor, nil, nil, nil, nil)
+		if err != nil {
+			return results, err
+		}
+		results = append(results, searchResponse.Results...)
+		if total == 0 {
+			// first response
+			total = int(*searchResponse.ResultCount)
+		}
+		cursor = searchResponse.Cursor
+		if len(results) >= total {
+			return results, nil
+		}
 	}
-	return query
 }

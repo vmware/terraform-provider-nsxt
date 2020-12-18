@@ -21,7 +21,7 @@ func TestAccDataSourceNsxtPolicyBfdProfile_basic(t *testing.T) {
 	testResourceName := "data.nsxt_policy_bfd_profile.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccDataSourceNsxtPolicyBfdProfileDeleteByName(name)
@@ -87,33 +87,21 @@ func testAccDataSourceNsxtPolicyBfdProfileDeleteByName(name string) error {
 	}
 
 	// Find the object by name
+	objID, err := testGetObjIDByName(name, "BfdProfile")
+	if err != nil {
+		return nil
+	}
 	if testAccIsGlobalManager() {
-		objID, err := testGetObjIDByName(name, "Bfd Profile")
-		if err == nil {
-			client := gm_infra.NewDefaultBfdProfilesClient(connector)
-			err := client.Delete(objID)
-			if err != nil {
-				return handleDeleteError("Bfd Profile", objID, err)
-			}
-			return nil
-		}
+		client := gm_infra.NewDefaultBfdProfilesClient(connector)
+		err = client.Delete(objID)
 	} else {
 		client := infra.NewDefaultBfdProfilesClient(connector)
-		objList, err := client.List(nil, nil, nil, nil, nil, nil)
-		if err != nil {
-			return fmt.Errorf("Error while reading Bfd Profiles: %v", err)
-		}
-		for _, objInList := range objList.Results {
-			if *objInList.DisplayName == name {
-				err := client.Delete(*objInList.Id)
-				if err != nil {
-					return fmt.Errorf("Error during Bfd Profile deletion: %v", err)
-				}
-				return nil
-			}
-		}
+		err = client.Delete(objID)
 	}
-	return fmt.Errorf("Error while deleting Bfd Profile '%s': resource not found", name)
+	if err != nil {
+		return fmt.Errorf("Error during Bfd Profile deletion: %v", err)
+	}
+	return nil
 }
 
 func testAccNsxtPolicyBfdProfileReadTemplate(name string) string {

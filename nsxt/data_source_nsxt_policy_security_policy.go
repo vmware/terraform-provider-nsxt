@@ -83,7 +83,7 @@ func dataSourceNsxtPolicySecurityPolicyRead(d *schema.ResourceData, m interface{
 			query["category"] = category
 		}
 		query["is_default"] = fmt.Sprintf("%v", isDefault)
-		obj, err := policyDataSourceResourceReadWithValidation(d, connector, "SecurityPolicy", query, false)
+		obj, err := policyDataSourceResourceReadWithValidation(d, connector, true, "SecurityPolicy", query, false)
 		if err != nil {
 			return err
 		}

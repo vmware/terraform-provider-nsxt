@@ -27,7 +27,7 @@ func dataSourceNsxtPolicyMacDiscoveryProfile() *schema.Resource {
 
 func dataSourceNsxtPolicyMacDiscoveryProfileRead(d *schema.ResourceData, m interface{}) error {
 	if isPolicyGlobalManager(m) {
-		_, err := policyDataSourceResourceRead(d, getPolicyConnector(m), "MacDiscoveryProfile", nil)
+		_, err := policyDataSourceResourceRead(d, getPolicyConnector(m), true, "MacDiscoveryProfile", nil)
 		if err != nil {
 			return err
 		}

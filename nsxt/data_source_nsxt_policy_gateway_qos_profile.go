@@ -27,7 +27,7 @@ func dataSourceNsxtPolicyGatewayQosProfile() *schema.Resource {
 
 func dataSourceNsxtPolicyGatewayQosProfileRead(d *schema.ResourceData, m interface{}) error {
 	if isPolicyGlobalManager(m) {
-		_, err := policyDataSourceResourceRead(d, getPolicyConnector(m), "GatewayQosProfile", nil)
+		_, err := policyDataSourceResourceRead(d, getPolicyConnector(m), true, "GatewayQosProfile", nil)
 		if err != nil {
 			return err
 		}

@@ -75,7 +75,7 @@ func dataSourceNsxtPolicyGatewayPolicyRead(d *schema.ResourceData, m interface{}
 		if category != "" {
 			query["category"] = category
 		}
-		obj, err := policyDataSourceResourceReadWithValidation(d, connector, "GatewayPolicy", query, false)
+		obj, err := policyDataSourceResourceReadWithValidation(d, connector, true, "GatewayPolicy", query, false)
 		if err != nil {
 			return err
 		}

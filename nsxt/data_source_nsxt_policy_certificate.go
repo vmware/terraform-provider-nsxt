@@ -27,7 +27,7 @@ func dataSourceNsxtPolicyCertificate() *schema.Resource {
 
 func dataSourceNsxtPolicyCertificateRead(d *schema.ResourceData, m interface{}) error {
 	if isPolicyGlobalManager(m) {
-		_, err := policyDataSourceResourceRead(d, getPolicyConnector(m), "Certificate", nil)
+		_, err := policyDataSourceResourceRead(d, getPolicyConnector(m), true, "Certificate", nil)
 		if err != nil {
 			return err
 		}
