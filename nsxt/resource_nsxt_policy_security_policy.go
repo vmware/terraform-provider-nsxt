@@ -24,7 +24,7 @@ func resourceNsxtPolicySecurityPolicy() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: nsxtDomainResourceImporter,
 		},
-		Schema: getPolicySecurityPolicySchema(),
+		Schema: getPolicySecurityPolicySchema(false),
 	}
 }
 
