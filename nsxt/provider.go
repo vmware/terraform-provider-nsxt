@@ -619,6 +619,10 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 	clients.PolicyEnforcementPoint = policyEnforcementPoint
 	clients.PolicyGlobalManager = policyGlobalManager
 
+	if len(vmcAccessToken) > 0 {
+		// Special treatment for VMC since MP API is not available there
+		initNSXVersionVMC(*clients)
+	}
 	return nil
 }
 

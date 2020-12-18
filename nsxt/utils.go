@@ -16,6 +16,8 @@ import (
 	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/common"
 	"github.com/vmware/go-vmware-nsxt/manager"
+
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/search"
 )
 
 var adminStateValues = []string{"UP", "DOWN"}
@@ -528,6 +530,34 @@ func initNSXVersion(nsxClient *api.APIClient) error {
 	var err error
 	nsxVersion, err = getNSXVersion(nsxClient)
 	return err
+}
+
+func initNSXVersionVMC(clients interface{}) {
+	// TODO: find a ireliable way to retrieve NSX version on VMC
+	// For now, we need to determine whether the deployment is 3.0.0 and up, or below
+	// For this purpose, we fire indicator search API (introduced in 3.0.0)
+	nsxVersion = "3.0.0"
+
+	connector := getPolicyConnector(clients)
+	client := search.NewDefaultQueryClient(connector)
+	var cursor *string
+	query := "resource_type:dummy"
+	_, err := client.List(query, cursor, nil, nil, nil, nil)
+	if err == nil {
+		// we are 3.0.0 and above
+		log.Printf("[INFO] Assuming NSX version >= 3.0.0 in VMC environment")
+		return
+	}
+
+	if isNotFoundError(err) {
+		// search API not supported
+		log.Printf("[INFO] Assuming NSX version < 3.0.0 in VMC environment")
+		nsxVersion = "2.5.0"
+		return
+	}
+
+	// Connectivity error - alert the user
+	log.Printf("[ERROR] Failed to determine NSX version in VMC environment: %s", err)
 }
 
 func nsxVersionLower(ver string) bool {
