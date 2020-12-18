@@ -192,6 +192,10 @@ The following arguments are used to configure the VMware NSX-T Provider:
 * `vmc_auth_host` - (Optional) URL for VMC authorization service that is used
   to obtain short-lived token for NSX manager access. Defaults to VMC
   console authorization URL.
+* `vmc_auth_mode` - (Optional) VMC authorization mode, that determines what HTTP
+  header is used for authorization. Accepted values are `Default`, `Bearer`. For
+  direct VMC connections, use `Bearer` mode, otherwise no need to specify this
+  setting.
 * `enforcement_point` - (Optional) Enforcement point, mostly relevant for policy
   data sources. For VMC environment, this should be set to `vmc-enforcementpoint`.
   For on-prem deployments, this setting should not be specified.
