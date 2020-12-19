@@ -29,7 +29,7 @@ func TestAccResourceNsxtPolicyIntrusionServicePolicy_basic(t *testing.T) {
 	tag2 := "def"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyIntrusionServicePolicyCheckDestroy(state, updatedName, defaultDomain)
@@ -118,7 +118,7 @@ func TestAccResourceNsxtPolicyIntrusionServicePolicy_withDependencies(t *testing
 	defaultProtocol := "IPV4_IPV6"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyIntrusionServicePolicyCheckDestroy(state, name, defaultDomain)
@@ -193,7 +193,7 @@ func TestAccResourceNsxtPolicyIntrusionServicePolicy_importBasic(t *testing.T) {
 	testResourceName := "nsxt_policy_intrusion_service_policy.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyIntrusionServicePolicyCheckDestroy(state, name, defaultDomain)
