@@ -1,3 +1,37 @@
+## 3.1.1 (December 23, 2020)
+
+FEATURES:
+
+* **New Resource**: `nsxt_policy_dhcp_server`.
+* **New Resource**: `nsxt_policy_domain` (Global Manager only).
+* **New Resource**: `nsxt_policy_dhcp_v4_static_binding`.
+* **New Resource**: `nsxt_policy_dhcp_v6_static_binding`.
+* **New Resource**: `nsxt_policy_fixed_segment` (VMC only).
+
+EXPERIMENTAL FEATURES:
+
+* **New Data Source**: `nsxt_policy_bfd_profile`.
+
+* **New Resource**: `nsxt_policy_dns_forwarder_zone`.
+* **New Resource**: `nsxt_policy_gateway_dns_forwarder`.
+* **New Resource**: `nsxt_policy_intrusion_service_policy`.
+* **New Resource**: `nsxt_policy_gateway_community_list`.
+
+IMPROVEMENTS:
+
+* New provider attributes `client_auth_cert`, `client_auth_key` to allow passing these values as string rather than a file ([#524](https://github.com/vmware/terraform-provider-nsxt/pull/524))
+* Allow Bearer token authorization type for VMC deployments (Experimental). This behavior is configured by setting new provider attribute `vmc_auth_mode` to `Bearer` ([#539](https://github.com/vmware/terraform-provider-nsxt/pull/539))
+* Complete Global Manager support for data sources (T1 Gateway, IPv6 Profiles, Ceritificate)
+* `resource/nsxt_policy_tier1_gateway`: Enhance T0 Gateway resource with `rd_admin_address` attribute ([#503](https://github.com/vmware/terraform-provider-nsxt/pull/503))
+* `resource/nsxt_policy_predefined_gateway_policy`: Add Importer for this resource to match user expectations in case predefined rules exist. Documentation was also extended to cover import and no-import usage ([#527](https://github.com/vmware/terraform-provider-nsxt/pull/527))
+
+
+BUG FIXES:
+* Allow maximum subnet length in Gateway Interface validation ([#528](https://github.com/vmware/terraform-provider-nsxt/pull/528))
+* Make sure policy data sources ignore deleted objects ([#516](https://github.com/vmware/terraform-provider-nsxt/pull/516))
+* `resource/nsxt_policy_segment`: Allow configuration of segment on Global Manager without transport zone ([#513](https://github.com/vmware/terraform-provider-nsxt/pull/513)).
+* Determine major NSX version behind VMC deployment, thus making 3.0.0 features (such as segment DHCP) available for VMC. This requires a more robust solution in futire ([#531](https://github.com/vmware/terraform-provider-nsxt/pull/531)).
+
 ## 3.1.0 (October 20, 2020)
 
 FEATURES:
