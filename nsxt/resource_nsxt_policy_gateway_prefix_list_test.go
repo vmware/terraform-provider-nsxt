@@ -96,27 +96,29 @@ func TestAccResourceNsxtPolicyGatewayPrefixList_import(t *testing.T) {
 				ResourceName:      testAccResourcePolicyGWPrefixListName,
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateIdFunc: testAccNSXPolicyGWPrefixListImporterGetID,
+				ImportStateIdFunc: testAccNSXPolicyGetGatewayImporterIDGenerator(testAccResourcePolicyGWPrefixListName),
 			},
 		},
 	})
 }
 
-func testAccNSXPolicyGWPrefixListImporterGetID(s *terraform.State) (string, error) {
-	rs, ok := s.RootModule().Resources[testAccResourcePolicyGWPrefixListName]
-	if !ok {
-		return "", fmt.Errorf("NSX Policy Gateway Prefix List resource %s not found in resources", testAccResourcePolicyGWPrefixListName)
+func testAccNSXPolicyGetGatewayImporterIDGenerator(testResourceName string) func(*terraform.State) (string, error) {
+	return func(s *terraform.State) (string, error) {
+		rs, ok := s.RootModule().Resources[testResourceName]
+		if !ok {
+			return "", fmt.Errorf("NSX Policy resource %s not found in resources", testAccResourcePolicyGWPrefixListName)
+		}
+		resourceID := rs.Primary.ID
+		if resourceID == "" {
+			return "", fmt.Errorf("NSX Policy resource ID not set in resources ")
+		}
+		gwPath := rs.Primary.Attributes["gateway_path"]
+		if gwPath == "" {
+			return "", fmt.Errorf("NSX Policy Gateway Path not set in resources ")
+		}
+		_, gwID := parseGatewayPolicyPath(gwPath)
+		return fmt.Sprintf("%s/%s", gwID, resourceID), nil
 	}
-	resourceID := rs.Primary.ID
-	if resourceID == "" {
-		return "", fmt.Errorf("NSX Policy Gateway Prefix List resource ID not set in resources ")
-	}
-	gwPath := rs.Primary.Attributes["gateway_path"]
-	if gwPath == "" {
-		return "", fmt.Errorf("NSX Policy Gateway Prefix List Gateway Policy Path not set in resources ")
-	}
-	_, gwID := parseGatewayPolicyPath(gwPath)
-	return fmt.Sprintf("%s/%s", gwID, resourceID), nil
 }
 
 func testAccNsxtPolicyGWPrefixListExists(resourceName string) resource.TestCheckFunc {

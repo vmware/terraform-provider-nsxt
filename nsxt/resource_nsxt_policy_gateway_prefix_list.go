@@ -31,7 +31,7 @@ func resourceNsxtPolicyGatewayPrefixList() *schema.Resource {
 		Update: resourceNsxtPolicyGatewayPrefixListUpdate,
 		Delete: resourceNsxtPolicyGatewayPrefixListDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceNsxtPolicyGatewayPrefixListImport,
+			State: resourceNsxtPolicyTier0GatewayImporter,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -325,11 +325,11 @@ func resourceNsxtPolicyGatewayPrefixListUpdate(d *schema.ResourceData, m interfa
 	return resourceNsxtPolicyGatewayPrefixListRead(d, m)
 }
 
-func resourceNsxtPolicyGatewayPrefixListImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+func resourceNsxtPolicyTier0GatewayImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	importID := d.Id()
 	s := strings.Split(importID, "/")
 	if len(s) != 2 {
-		return nil, fmt.Errorf("Please provide <gateway-id>/<prefix-list-id> as an input")
+		return nil, fmt.Errorf("Please provide <gateway-id>/<id> as an input")
 	}
 
 	gwID := s[0]
