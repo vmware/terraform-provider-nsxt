@@ -9,7 +9,7 @@ description: A resource to configure a Tier-1 gateway on NSX Policy manager.
 
 This resource provides a method for the management of a Tier-1 Gateway. A Tier-1 Gateway is often used for tenants, users and applications. There can be many Tier-1 gateways connected to a common Tier-0 provider gateway.
 
-This resource is applicable to NSX Global Manager, NSX Policy Manager and VMC.
+This resource is applicable to NSX Global Manager and NSX Policy Manager.
 
 ## Example Usage
 

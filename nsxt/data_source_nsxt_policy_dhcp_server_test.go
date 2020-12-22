@@ -15,7 +15,7 @@ func TestAccDataSourceNsxtPolicyDhcpServer_basic(t *testing.T) {
 	testResourceName := "data.nsxt_policy_dhcp_server.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
