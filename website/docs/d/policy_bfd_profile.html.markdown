@@ -9,7 +9,7 @@ description: Policy BFD Profile data source.
 
 This data source provides information about policy BFD Profile configured on NSX.
 
-This data source is applicable to NSX Global Manager, NSX Policy Manager and VMC.
+This data source is applicable to NSX Global Manager, NSX Policy Manager and VMC (NSX 3.0.0 and up).
 
 ## Example Usage
 

@@ -130,7 +130,7 @@ func TestAccResourceNsxtPolicyFixedSegment_updateAdvConfig(t *testing.T) {
 	tzName := getOverlayTransportZoneName()
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyFixedSegmentCheckDestroy(state, name)
