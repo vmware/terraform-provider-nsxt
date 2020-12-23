@@ -106,7 +106,7 @@ func testAccResourceNsxtPolicyGatewayDNSForwarderImport(t *testing.T, isT0 bool)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyGatewayDNSForwarderTemplate(isT0, true),
+				Config: testAccNsxtPolicyGatewayDNSForwarderMinimalistic(isT0),
 			},
 			{
 				ResourceName:      testAccResourcePolicyGatewayDNSForwarderName,
@@ -212,4 +212,17 @@ resource "nsxt_policy_gateway_dns_forwarder" "test" {
   }
 }
 `, attrMap["display_name"], attrMap["description"], whyDoesGoNeedToBeSoComplicated[isT0], attrMap["listener_ip"], attrMap["enabled"], attrMap["log_level"])
+}
+
+func testAccNsxtPolicyGatewayDNSForwarderMinimalistic(isT0 bool) string {
+	whyDoesGoNeedToBeSoComplicated := map[bool]int8{false: 1, true: 0}
+	return testAccNsxtPolicyGatewayDNSForwarderPrerequisites(testAccPolicyDNSForwarderHelperNames, isT0) + fmt.Sprintf(`
+resource "nsxt_policy_gateway_dns_forwarder" "test" {
+  display_name = "%s"
+  gateway_path = nsxt_policy_tier%d_gateway.test.path
+  listener_ip  = "78.2.1.12"
+
+  default_forwarder_zone_path      = nsxt_policy_dns_forwarder_zone.default.path
+}
+`, accTestPolicyGatewayDNSForwarderCreateAttributes["display_name"], whyDoesGoNeedToBeSoComplicated[isT0])
 }
