@@ -161,7 +161,7 @@ func TestAccResourceNsxtPolicySecurityPolicy_withDependencies(t *testing.T) {
 					testAccNsxtPolicySecurityPolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
-					resource.TestCheckResourceAttr(testResourceName, "category", "Application"),
+					resource.TestCheckResourceAttr(testResourceName, "category", "Environment"),
 					resource.TestCheckResourceAttr(testResourceName, "domain", defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "comments", ""),
 					resource.TestCheckResourceAttr(testResourceName, "locked", "false"),
@@ -199,7 +199,7 @@ func TestAccResourceNsxtPolicySecurityPolicy_withDependencies(t *testing.T) {
 					testAccNsxtPolicySecurityPolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
-					resource.TestCheckResourceAttr(testResourceName, "category", "Application"),
+					resource.TestCheckResourceAttr(testResourceName, "category", "Environment"),
 					resource.TestCheckResourceAttr(testResourceName, "domain", defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "comments", ""),
 					resource.TestCheckResourceAttr(testResourceName, "locked", "true"),
@@ -213,7 +213,7 @@ func TestAccResourceNsxtPolicySecurityPolicy_withDependencies(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.display_name", "rule1"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.direction", defaultDirection),
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.ip_version", defaultProtocol),
-					resource.TestCheckResourceAttr(testResourceName, "rule.0.action", "DROP"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.action", "JUMP_TO_APPLICATION"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.source_groups.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.destination_groups.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.sources_excluded", "false"),
@@ -566,7 +566,7 @@ func testAccNsxtPolicySecurityPolicyWithDepsCreate(name string) string {
 resource "nsxt_policy_security_policy" "test" {
   display_name    = "%s"
   description     = "Acceptance Test"
-  category        = "Application"
+  category        = "Environment"
   locked          = false
   sequence_number = 3
   stateful        = true
@@ -601,7 +601,7 @@ func testAccNsxtPolicySecurityPolicyWithDepsUpdate(name string) string {
 resource "nsxt_policy_security_policy" "test" {
   display_name    = "%s"
   description     = "Acceptance Test"
-  category        = "Application"
+  category        = "Environment"
   locked          = true
   sequence_number = 3
   stateful        = true
@@ -619,7 +619,7 @@ resource "nsxt_policy_security_policy" "test" {
     sources_excluded      = false
     destinations_excluded = false
     disabled              = true
-    action                = "DROP"
+    action                = "JUMP_TO_APPLICATION"
     logged                = true
   }
 

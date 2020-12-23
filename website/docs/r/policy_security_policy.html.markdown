@@ -102,7 +102,7 @@ The following arguments are supported:
 * `rule` - (Optional) A repeatable block to specify rules for the Security Policy. Each rule includes the following fields:
   * `display_name` - (Required) Display name of the resource.
   * `description` - (Optional) Description of the resource.
-  * `action` - (Optional) Rule action, one of `ALLOW`, `DROP`, `REJECT`. Default is `ALLOW`.
+  * `action` - (Optional) Rule action, one of `ALLOW`, `DROP`, `REJECT` and `JUMP_TO_APPLICATION`. Default is `ALLOW`. `JUMP_TO_APPLICATION` is only applicable in `Environment` category.
   * `destination_groups` - (Optional) Set of group paths that serve as destination for this rule.
   * `source_groups` - (Optional) Set of group paths that serve as source for this rule.
   * `destinations_excluded` - (Optional) A boolean value indicating negation of destination groups.

@@ -14,7 +14,9 @@ var defaultSite = "default"
 var securityPolicyCategoryValues = []string{"Ethernet", "Emergency", "Infrastructure", "Environment", "Application"}
 var securityPolicyDirectionValues = []string{model.Rule_DIRECTION_IN, model.Rule_DIRECTION_OUT, model.Rule_DIRECTION_IN_OUT}
 var securityPolicyIPProtocolValues = []string{model.Rule_IP_PROTOCOL_IPV4, model.Rule_IP_PROTOCOL_IPV6, model.Rule_IP_PROTOCOL_IPV4_IPV6}
-var securityPolicyActionValues = []string{model.Rule_ACTION_ALLOW, model.Rule_ACTION_DROP, model.Rule_ACTION_REJECT}
+
+// TODO: change last string to sdk constant when available
+var securityPolicyActionValues = []string{model.Rule_ACTION_ALLOW, model.Rule_ACTION_DROP, model.Rule_ACTION_REJECT, "JUMP_TO_APPLICATION"}
 var gatewayPolicyCategoryValues = []string{"Emergency", "SystemRules", "SharedPreRules", "LocalGatewayRules", "AutoServiceRules", "Default"}
 var policyFailOverModeValues = []string{model.Tier1_FAILOVER_MODE_PREEMPTIVE, model.Tier1_FAILOVER_MODE_NON_PREEMPTIVE}
 var failOverModeDefaultPolicyT0Value = model.Tier0_FAILOVER_MODE_NON_PREEMPTIVE
