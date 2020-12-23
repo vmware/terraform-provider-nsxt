@@ -74,7 +74,7 @@ func initPolicyTagsSet(tags []model.Tag) []map[string]interface{} {
 
 func getCustomizedPolicyTagsFromSchema(d *schema.ResourceData, schemaName string) []model.Tag {
 	tags := d.Get(schemaName).(*schema.Set).List()
-	var tagList []model.Tag
+	tagList := make([]model.Tag, 0)
 	for _, tag := range tags {
 		data := tag.(map[string]interface{})
 		tagScope := data["scope"].(string)

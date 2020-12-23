@@ -680,7 +680,7 @@ data "nsxt_policy_realization_info" "bgp_realization_info" {
 
 resource "nsxt_policy_gateway_prefix_list" "test" {
   display_name = "prefix_list"
-  gateway_path = "${nsxt_policy_tier0_gateway.test.path}"
+  gateway_path = nsxt_policy_tier0_gateway.test.path
 
   prefix {
   	action  = "DENY"

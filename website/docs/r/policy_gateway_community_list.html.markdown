@@ -52,4 +52,4 @@ An existing object can be [imported][docs-import] into this resource, via the fo
 terraform import nsxt_policy_gateway_community_list.test GW-ID/ID
 ```
 
-The above command imports Tier0GatewayCommunityList named `test` with the NSX Community List ID `ID` on Tier0 Gateway `GW-ID`.
+The above command imports Tier0 Gateway Community List named `test` with the NSX Community List ID `ID` on Tier0 Gateway `GW-ID`.
