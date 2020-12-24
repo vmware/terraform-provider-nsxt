@@ -1,4 +1,4 @@
-## 3.1.1 (December 23, 2020)
+## 3.1.1 (January 4, 2021)
 
 FEATURES:
 

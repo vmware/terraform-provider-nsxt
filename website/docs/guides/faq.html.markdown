@@ -22,7 +22,7 @@ Error:  Failed to delete <object>: The object path=[..] cannot be deleted as eit
 
 Usually this error results from terraform engine assuming certain order of delete/update operation that is not consistent with NSX. In order to imply correct order on terraform and thus fix the issue, add the following clause to affected resources:
 
-```
+```hcl
 resource "nsxt_policy_group" "example" {
   # ...
 
