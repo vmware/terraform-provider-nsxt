@@ -88,7 +88,7 @@ func testAccDataSourceNsxtPolicyBfdProfileDeleteByName(name string) error {
 
 	// Find the object by name
 	if testAccIsGlobalManager() {
-		objID, err := testGetObjIDByName(name, "Bfd Profile")
+		objID, err := testGetObjIDByName(name, "BfdProfile")
 		if err == nil {
 			client := gm_infra.NewDefaultBfdProfilesClient(connector)
 			err := client.Delete(objID)
