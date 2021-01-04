@@ -6,7 +6,6 @@ FEATURES:
 * **New Resource**: `nsxt_policy_domain` (Global Manager only).
 * **New Resource**: `nsxt_policy_dhcp_v4_static_binding`.
 * **New Resource**: `nsxt_policy_dhcp_v6_static_binding`.
-* **New Resource**: `nsxt_policy_fixed_segment` (VMC only).
 
 EXPERIMENTAL FEATURES:
 
@@ -16,6 +15,7 @@ EXPERIMENTAL FEATURES:
 * **New Resource**: `nsxt_policy_gateway_dns_forwarder`.
 * **New Resource**: `nsxt_policy_intrusion_service_policy`.
 * **New Resource**: `nsxt_policy_gateway_community_list`.
+* **New Resource**: `nsxt_policy_fixed_segment` (VMC only).
 
 IMPROVEMENTS:
 
