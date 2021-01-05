@@ -59,7 +59,7 @@ func dataSourceNsxtPolicyTier1GatewayReadAllTier1(connector *client.RestConnecto
 func dataSourceNsxtPolicyTier1GatewayRead(d *schema.ResourceData, m interface{}) error {
 	if isPolicyGlobalManager(m) {
 		connector := getPolicyConnector(m)
-		_, err := policyDataSourceResourceRead(d, connector, "Tier1", nil)
+		_, err := policyDataSourceResourceRead(d, connector, true, "Tier1", nil)
 		if err != nil {
 			return err
 		}

@@ -35,7 +35,7 @@ func dataSourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{})
 	connector := getPolicyConnector(m)
 
 	if isPolicyGlobalManager(m) {
-		_, err := policyDataSourceResourceRead(d, connector, "Tier0", nil)
+		_, err := policyDataSourceResourceRead(d, connector, true, "Tier0", nil)
 		if err != nil {
 			return err
 		}

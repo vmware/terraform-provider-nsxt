@@ -29,7 +29,7 @@ func dataSourceNsxtPolicyDhcpServerRead(d *schema.ResourceData, m interface{}) e
 	connector := getPolicyConnector(m)
 
 	if isPolicyGlobalManager(m) {
-		_, err := policyDataSourceResourceRead(d, connector, "DhcpServerConfig", nil)
+		_, err := policyDataSourceResourceRead(d, connector, true, "DhcpServerConfig", nil)
 		if err != nil {
 			return err
 		}

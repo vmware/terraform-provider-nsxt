@@ -27,7 +27,7 @@ func dataSourceNsxtPolicyIpv6DadProfile() *schema.Resource {
 
 func dataSourceNsxtPolicyIpv6DadProfileRead(d *schema.ResourceData, m interface{}) error {
 	if isPolicyGlobalManager(m) {
-		_, err := policyDataSourceResourceRead(d, getPolicyConnector(m), "Ipv6DadProfile", nil)
+		_, err := policyDataSourceResourceRead(d, getPolicyConnector(m), true, "Ipv6DadProfile", nil)
 		if err != nil {
 			return err
 		}

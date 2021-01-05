@@ -27,7 +27,7 @@ func dataSourceNsxtPolicySegmentSecurityProfile() *schema.Resource {
 
 func dataSourceNsxtPolicySegmentSecurityProfileRead(d *schema.ResourceData, m interface{}) error {
 	if isPolicyGlobalManager(m) {
-		_, err := policyDataSourceResourceRead(d, getPolicyConnector(m), "SegmentSecurityProfile", nil)
+		_, err := policyDataSourceResourceRead(d, getPolicyConnector(m), true, "SegmentSecurityProfile", nil)
 		if err != nil {
 			return err
 		}
