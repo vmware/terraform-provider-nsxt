@@ -9,7 +9,7 @@ description: A resource to configure a Tier-0 gateway on NSX Policy manager.
 
 This resource provides a method for the management of a Tier-0 gateway or VRF-Lite gateway.
 
-This resource is applicable to NSX Global Manager, NSX Policy Manager and VMC.
+This resource is applicable to NSX Global Manager and NSX Policy Manager.
 
 ## Example Usage
 

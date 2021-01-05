@@ -110,7 +110,9 @@ func dataSourceNsxtPolicyRealizationInfoRead(d *schema.ResourceData, m interface
 					if entityType == "" {
 						// Take the first one
 						d.Set("state", state)
-						d.Set("entity_type", *objInList.EntityType)
+						if objInList.EntityType != nil {
+							d.Set("entity_type", *objInList.EntityType)
+						}
 						if objInList.RealizationSpecificIdentifier == nil {
 							d.Set("realized_id", "")
 						} else {

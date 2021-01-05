@@ -9,7 +9,7 @@ description: A resource to configure IPv6 DHCP Static Binding.
 
 This resource provides a method for the management of IPv6 DHCP Static Binding.
 
-This resource is applicable to NSX Global Manager, NSX Policy Manager and VMC.
+This resource is applicable to NSX Global Manager, NSX Policy Manager and VMC (NSX version 3.0.0 and up)
 
 ## Example Usage
 

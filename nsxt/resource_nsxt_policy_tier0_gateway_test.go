@@ -18,7 +18,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_basic(t *testing.T) {
 	failoverMode := "NON_PREEMPTIVE"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTier0CheckDestroy(state, updateName)
@@ -404,7 +404,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_importBasic(t *testing.T) {
 	failoverMode := "PREEMPTIVE"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTier0CheckDestroy(state, name)

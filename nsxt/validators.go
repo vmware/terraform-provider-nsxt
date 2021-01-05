@@ -485,3 +485,32 @@ func validateASPlainOrDot(i interface{}, k string) (s []string, es []error) {
 
 	return
 }
+
+func validatePolicyBGPCommunity(i interface{}, k string) (s []string, es []error) {
+	v, ok := i.(string)
+	if !ok {
+		es = append(es, fmt.Errorf("String is expected, got %s", v))
+		return
+	}
+
+	if (v == "NO_EXPORT") || (v == "NO_ADVERTISE") || (v == "NO_EXPORT_SUBCONFED") {
+		return
+	}
+
+	formatErr := "aa:nn or aa:bb:nn format is expected, got %s"
+	tokens := strings.Split(v, ":")
+	if (len(tokens) > 3) || (len(tokens) < 2) {
+		es = append(es, fmt.Errorf(formatErr, v))
+		return
+	}
+
+	for _, token := range tokens {
+		_, err := strconv.Atoi(token)
+		if err != nil {
+			es = append(es, fmt.Errorf(formatErr, v))
+			return
+		}
+	}
+
+	return
+}

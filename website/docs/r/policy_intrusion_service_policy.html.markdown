@@ -9,7 +9,7 @@ description: A resource to configure Intrusion Service Policy and its rules.
 
 This resource provides a method for the management of Intrusion Service (IDS) Policy and rules under it.
 
-This resource is applicable to NSX Policy Manager and VMC.
+This resource is applicable to NSX Policy Manager and VMC (NSX version 3.0.0 and up).
 
 ## Example Usage
 

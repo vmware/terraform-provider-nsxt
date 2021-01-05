@@ -8,7 +8,6 @@ description: Policy BFD Profile data source.
 # nsxt_policy_bfd_profile
 
 This data source provides information about policy BFD Profile configured on NSX.
-
 This data source is applicable to NSX Global Manager, NSX Policy Manager and VMC (NSX version 3.0.0 onwards).
 
 ## Example Usage

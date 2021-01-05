@@ -739,7 +739,10 @@ func policyTier0GatewayResourceToInfraStruct(d *schema.ResourceData, connector *
 		ResourceType:           &t0Type,
 		Id:                     &id,
 		VrfConfig:              vrfConfig,
-		RdAdminField:           rdAdminField,
+	}
+
+	if nsxVersionHigherOrEqual("3.0.0") {
+		t0Struct.RdAdminField = rdAdminField
 	}
 
 	if len(d.Id()) > 0 {
@@ -905,7 +908,9 @@ func resourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{}) e
 	d.Set("internal_transit_subnets", obj.InternalTransitSubnets)
 	d.Set("transit_subnets", obj.TransitSubnets)
 	d.Set("revision", obj.Revision)
-	d.Set("rd_admin_address", obj.RdAdminField)
+	if nsxVersionHigherOrEqual("3.0.0") {
+		d.Set("rd_admin_address", obj.RdAdminField)
+	}
 	vrfErr := setPolicyVRFConfigInSchema(d, obj.VrfConfig)
 	if vrfErr != nil {
 		return vrfErr
