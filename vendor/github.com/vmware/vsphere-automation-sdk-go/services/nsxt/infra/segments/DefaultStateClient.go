@@ -38,6 +38,7 @@ func NewDefaultStateClient(connector client.Connector) *DefaultStateClient {
 	interfaceIdentifier := core.NewInterfaceIdentifier(interfaceName)
 	methodIdentifiers := []core.MethodIdentifier{
 		core.NewMethodIdentifier(interfaceIdentifier, "get"),
+		core.NewMethodIdentifier(interfaceIdentifier, "list"),
 	}
 	interfaceDefinition := core.NewInterfaceDefinition(interfaceIdentifier, methodIdentifiers)
 	errorBindingMap := make(map[string]bindings.BindingType)
@@ -71,6 +72,7 @@ func NewDefaultStateClient(connector client.Connector) *DefaultStateClient {
 	sIface := DefaultStateClient{interfaceName: interfaceName, methodIdentifiers: methodIdentifiers, interfaceDefinition: interfaceDefinition, errorBindingMap: errorBindingMap, interfaceIdentifier: interfaceIdentifier, connector: connector}
 	sIface.methodNameToDefMap = make(map[string]*core.MethodDefinition)
 	sIface.methodNameToDefMap["get"] = sIface.getMethodDefinition()
+	sIface.methodNameToDefMap["list"] = sIface.listMethodDefinition()
 	return &sIface
 }
 
@@ -105,6 +107,40 @@ func (sIface *DefaultStateClient) Get(segmentsIdParam string, cursorParam *strin
 			return emptyOutput, bindings.VAPIerrorsToError(errorInOutput)
 		}
 		return output.(model.SegmentConfigurationState), nil
+	} else {
+		methodError, errorInError := typeConverter.ConvertToGolang(methodResult.Error(), sIface.errorBindingMap[methodResult.Error().Name()])
+		if errorInError != nil {
+			return emptyOutput, bindings.VAPIerrorsToError(errorInError)
+		}
+		return emptyOutput, methodError.(error)
+	}
+}
+
+func (sIface *DefaultStateClient) List(configurationStateParam *string, enforcementPointPathParam *string, sourceParam *string) (model.SegmentConfigurationStateListResult, error) {
+	typeConverter := sIface.connector.TypeConverter()
+	methodIdentifier := core.NewMethodIdentifier(sIface.interfaceIdentifier, "list")
+	sv := bindings.NewStructValueBuilder(stateListInputType(), typeConverter)
+	sv.AddStructField("ConfigurationState", configurationStateParam)
+	sv.AddStructField("EnforcementPointPath", enforcementPointPathParam)
+	sv.AddStructField("Source", sourceParam)
+	inputDataValue, inputError := sv.GetStructValue()
+	if inputError != nil {
+		var emptyOutput model.SegmentConfigurationStateListResult
+		return emptyOutput, bindings.VAPIerrorsToError(inputError)
+	}
+	operationRestMetaData := stateListRestMetadata()
+	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
+	sIface.connector.SetConnectionMetadata(connectionMetadata)
+	executionContext := sIface.connector.NewExecutionContext()
+	methodResult := sIface.Invoke(executionContext, methodIdentifier, inputDataValue)
+	var emptyOutput model.SegmentConfigurationStateListResult
+	if methodResult.IsSuccess() {
+		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), stateListOutputType())
+		if errorInOutput != nil {
+			return emptyOutput, bindings.VAPIerrorsToError(errorInOutput)
+		}
+		return output.(model.SegmentConfigurationStateListResult), nil
 	} else {
 		methodError, errorInError := typeConverter.ConvertToGolang(methodResult.Error(), sIface.errorBindingMap[methodResult.Error().Name()])
 		if errorInError != nil {
@@ -175,6 +211,69 @@ func (sIface *DefaultStateClient) getMethodDefinition() *core.MethodDefinition {
 	errDef5, errError5 := typeConverter.ConvertToDataDefinition(errors.NotFoundBindingType())
 	if errError5 != nil {
 		log.Errorf("Error in ConvertToDataDefinition for DefaultStateClient.get method's errors.NotFound error - %s",
+			bindings.VAPIerrorsToError(errError5).Error())
+		return nil
+	}
+	errorDefinitions = append(errorDefinitions, errDef5.(data.ErrorDefinition))
+
+	methodDefinition := core.NewMethodDefinition(methodIdentifier, input, output, errorDefinitions)
+	return &methodDefinition
+}
+
+func (sIface *DefaultStateClient) listMethodDefinition() *core.MethodDefinition {
+	interfaceIdentifier := core.NewInterfaceIdentifier(sIface.interfaceName)
+	typeConverter := sIface.connector.TypeConverter()
+
+	input, inputError := typeConverter.ConvertToDataDefinition(stateListInputType())
+	output, outputError := typeConverter.ConvertToDataDefinition(stateListOutputType())
+	if inputError != nil {
+		log.Errorf("Error in ConvertToDataDefinition for DefaultStateClient.list method's input - %s",
+			bindings.VAPIerrorsToError(inputError).Error())
+		return nil
+	}
+	if outputError != nil {
+		log.Errorf("Error in ConvertToDataDefinition for DefaultStateClient.list method's output - %s",
+			bindings.VAPIerrorsToError(outputError).Error())
+		return nil
+	}
+	methodIdentifier := core.NewMethodIdentifier(interfaceIdentifier, "list")
+	errorDefinitions := make([]data.ErrorDefinition, 0)
+	sIface.errorBindingMap[errors.InvalidRequest{}.Error()] = errors.InvalidRequestBindingType()
+	errDef1, errError1 := typeConverter.ConvertToDataDefinition(errors.InvalidRequestBindingType())
+	if errError1 != nil {
+		log.Errorf("Error in ConvertToDataDefinition for DefaultStateClient.list method's errors.InvalidRequest error - %s",
+			bindings.VAPIerrorsToError(errError1).Error())
+		return nil
+	}
+	errorDefinitions = append(errorDefinitions, errDef1.(data.ErrorDefinition))
+	sIface.errorBindingMap[errors.Unauthorized{}.Error()] = errors.UnauthorizedBindingType()
+	errDef2, errError2 := typeConverter.ConvertToDataDefinition(errors.UnauthorizedBindingType())
+	if errError2 != nil {
+		log.Errorf("Error in ConvertToDataDefinition for DefaultStateClient.list method's errors.Unauthorized error - %s",
+			bindings.VAPIerrorsToError(errError2).Error())
+		return nil
+	}
+	errorDefinitions = append(errorDefinitions, errDef2.(data.ErrorDefinition))
+	sIface.errorBindingMap[errors.ServiceUnavailable{}.Error()] = errors.ServiceUnavailableBindingType()
+	errDef3, errError3 := typeConverter.ConvertToDataDefinition(errors.ServiceUnavailableBindingType())
+	if errError3 != nil {
+		log.Errorf("Error in ConvertToDataDefinition for DefaultStateClient.list method's errors.ServiceUnavailable error - %s",
+			bindings.VAPIerrorsToError(errError3).Error())
+		return nil
+	}
+	errorDefinitions = append(errorDefinitions, errDef3.(data.ErrorDefinition))
+	sIface.errorBindingMap[errors.InternalServerError{}.Error()] = errors.InternalServerErrorBindingType()
+	errDef4, errError4 := typeConverter.ConvertToDataDefinition(errors.InternalServerErrorBindingType())
+	if errError4 != nil {
+		log.Errorf("Error in ConvertToDataDefinition for DefaultStateClient.list method's errors.InternalServerError error - %s",
+			bindings.VAPIerrorsToError(errError4).Error())
+		return nil
+	}
+	errorDefinitions = append(errorDefinitions, errDef4.(data.ErrorDefinition))
+	sIface.errorBindingMap[errors.NotFound{}.Error()] = errors.NotFoundBindingType()
+	errDef5, errError5 := typeConverter.ConvertToDataDefinition(errors.NotFoundBindingType())
+	if errError5 != nil {
+		log.Errorf("Error in ConvertToDataDefinition for DefaultStateClient.list method's errors.NotFound error - %s",
 			bindings.VAPIerrorsToError(errError5).Error())
 		return nil
 	}

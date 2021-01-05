@@ -19,12 +19,13 @@ type BfdProfilesClient interface {
     // Delete BFD Config and all the entities contained by this BfdProfile.
     //
     // @param bfdProfileIdParam BfdProfile ID (required)
+    // @param overrideParam Locally override the global object (optional, default to false)
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Delete(bfdProfileIdParam string) error
+	Delete(bfdProfileIdParam string, overrideParam *bool) error
 
     // Read a BfdProfile.
     //
@@ -57,22 +58,24 @@ type BfdProfilesClient interface {
     //
     // @param bfdProfileIdParam BfdProfile ID (required)
     // @param bfdProfileParam (required)
+    // @param overrideParam Locally override the global object (optional, default to false)
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Patch(bfdProfileIdParam string, bfdProfileParam model.BfdProfile) error
+	Patch(bfdProfileIdParam string, bfdProfileParam model.BfdProfile, overrideParam *bool) error
 
     // If a BfdProfile with the bfd-profile-id is not already present, create a new BfdProfile. If it already exists, update the BfdProfile. This operation will fully replace the object.
     //
     // @param bfdProfileIdParam BfdProfile ID (required)
     // @param bfdProfileParam (required)
+    // @param overrideParam Locally override the global object (optional, default to false)
     // @return com.vmware.nsx_global_policy.model.BfdProfile
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Update(bfdProfileIdParam string, bfdProfileParam model.BfdProfile) (model.BfdProfile, error)
+	Update(bfdProfileIdParam string, bfdProfileParam model.BfdProfile, overrideParam *bool) (model.BfdProfile, error)
 }

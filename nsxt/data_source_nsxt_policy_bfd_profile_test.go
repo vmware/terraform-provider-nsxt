@@ -68,11 +68,11 @@ func testAccDataSourceNsxtPolicyBfdProfileCreate(name string) error {
 		}
 
 		client := gm_infra.NewDefaultBfdProfilesClient(connector)
-		err = client.Patch(id, gmObj.(gm_model.BfdProfile))
+		err = client.Patch(id, gmObj.(gm_model.BfdProfile), nil)
 
 	} else {
 		client := infra.NewDefaultBfdProfilesClient(connector)
-		err = client.Patch(id, obj)
+		err = client.Patch(id, obj, nil)
 	}
 	if err != nil {
 		return fmt.Errorf("Error during Bfd Profile creation: %v", err)
@@ -93,10 +93,10 @@ func testAccDataSourceNsxtPolicyBfdProfileDeleteByName(name string) error {
 	}
 	if testAccIsGlobalManager() {
 		client := gm_infra.NewDefaultBfdProfilesClient(connector)
-		err = client.Delete(objID)
+		err = client.Delete(objID, nil)
 	} else {
 		client := infra.NewDefaultBfdProfilesClient(connector)
-		err = client.Delete(objID)
+		err = client.Delete(objID, nil)
 	}
 	if err != nil {
 		return fmt.Errorf("Error during Bfd Profile deletion: %v", err)

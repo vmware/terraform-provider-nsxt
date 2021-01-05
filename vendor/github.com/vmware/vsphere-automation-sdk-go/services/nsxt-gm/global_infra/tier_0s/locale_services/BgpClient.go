@@ -33,23 +33,25 @@ type BgpClient interface {
     // @param tier0IdParam (required)
     // @param localeServiceIdParam (required)
     // @param bgpRoutingConfigParam (required)
+    // @param overrideParam Locally override the global object (optional, default to false)
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Patch(tier0IdParam string, localeServiceIdParam string, bgpRoutingConfigParam model.BgpRoutingConfig) error
+	Patch(tier0IdParam string, localeServiceIdParam string, bgpRoutingConfigParam model.BgpRoutingConfig, overrideParam *bool) error
 
     // If BGP routing config is not already present, create BGP routing config. If it already exists, replace the BGP routing config with this object.
     //
     // @param tier0IdParam (required)
     // @param localeServiceIdParam (required)
     // @param bgpRoutingConfigParam (required)
+    // @param overrideParam Locally override the global object (optional, default to false)
     // @return com.vmware.nsx_global_policy.model.BgpRoutingConfig
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Update(tier0IdParam string, localeServiceIdParam string, bgpRoutingConfigParam model.BgpRoutingConfig) (model.BgpRoutingConfig, error)
+	Update(tier0IdParam string, localeServiceIdParam string, bgpRoutingConfigParam model.BgpRoutingConfig, overrideParam *bool) (model.BgpRoutingConfig, error)
 }

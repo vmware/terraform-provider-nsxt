@@ -82,11 +82,12 @@ func NewDefaultFloodProtectionProfilesClient(connector client.Connector) *Defaul
 	return &fIface
 }
 
-func (fIface *DefaultFloodProtectionProfilesClient) Delete(floodProtectionProfileIdParam string) error {
+func (fIface *DefaultFloodProtectionProfilesClient) Delete(floodProtectionProfileIdParam string, overrideParam *bool) error {
 	typeConverter := fIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(fIface.interfaceIdentifier, "delete")
 	sv := bindings.NewStructValueBuilder(floodProtectionProfilesDeleteInputType(), typeConverter)
 	sv.AddStructField("FloodProtectionProfileId", floodProtectionProfileIdParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
@@ -177,12 +178,13 @@ func (fIface *DefaultFloodProtectionProfilesClient) List(cursorParam *string, in
 	}
 }
 
-func (fIface *DefaultFloodProtectionProfilesClient) Patch(floodProtectionProfileIdParam string, floodProtectionProfileParam *data.StructValue) error {
+func (fIface *DefaultFloodProtectionProfilesClient) Patch(floodProtectionProfileIdParam string, floodProtectionProfileParam *data.StructValue, overrideParam *bool) error {
 	typeConverter := fIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(fIface.interfaceIdentifier, "patch")
 	sv := bindings.NewStructValueBuilder(floodProtectionProfilesPatchInputType(), typeConverter)
 	sv.AddStructField("FloodProtectionProfileId", floodProtectionProfileIdParam)
 	sv.AddStructField("FloodProtectionProfile", floodProtectionProfileParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
@@ -204,12 +206,13 @@ func (fIface *DefaultFloodProtectionProfilesClient) Patch(floodProtectionProfile
 	}
 }
 
-func (fIface *DefaultFloodProtectionProfilesClient) Update(floodProtectionProfileIdParam string, floodProtectionProfileParam *data.StructValue) (*data.StructValue, error) {
+func (fIface *DefaultFloodProtectionProfilesClient) Update(floodProtectionProfileIdParam string, floodProtectionProfileParam *data.StructValue, overrideParam *bool) (*data.StructValue, error) {
 	typeConverter := fIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(fIface.interfaceIdentifier, "update")
 	sv := bindings.NewStructValueBuilder(floodProtectionProfilesUpdateInputType(), typeConverter)
 	sv.AddStructField("FloodProtectionProfileId", floodProtectionProfileIdParam)
 	sv.AddStructField("FloodProtectionProfile", floodProtectionProfileParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		var emptyOutput *data.StructValue

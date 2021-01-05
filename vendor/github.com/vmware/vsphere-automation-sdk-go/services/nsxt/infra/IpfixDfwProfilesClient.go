@@ -19,12 +19,13 @@ type IpfixDfwProfilesClient interface {
     // API deletes IPFIX DFW Profile. Selected IPFIX Collectors will stop receiving flows.
     //
     // @param ipfixDfwProfileIdParam IPFIX DFW Profile ID (required)
+    // @param overrideParam Locally override the global object (optional, default to false)
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Delete(ipfixDfwProfileIdParam string) error
+	Delete(ipfixDfwProfileIdParam string, overrideParam *bool) error
 
     // API will return details of IPFIX DFW profile.
     //
@@ -57,22 +58,24 @@ type IpfixDfwProfilesClient interface {
     //
     // @param ipfixDfwProfileIdParam IPFIX DFW Profile ID (required)
     // @param iPFIXDFWProfileParam (required)
+    // @param overrideParam Locally override the global object (optional, default to false)
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Patch(ipfixDfwProfileIdParam string, iPFIXDFWProfileParam model.IPFIXDFWProfile) error
+	Patch(ipfixDfwProfileIdParam string, iPFIXDFWProfileParam model.IPFIXDFWProfile, overrideParam *bool) error
 
     // Create or replace IPFIX DFW profile. Config will start forwarding data to provided IPFIX DFW collector.
     //
     // @param ipfixDfwProfileIdParam IPFIX DFW Profile ID (required)
     // @param iPFIXDFWProfileParam (required)
+    // @param overrideParam Locally override the global object (optional, default to false)
     // @return com.vmware.nsx_policy.model.IPFIXDFWProfile
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Update(ipfixDfwProfileIdParam string, iPFIXDFWProfileParam model.IPFIXDFWProfile) (model.IPFIXDFWProfile, error)
+	Update(ipfixDfwProfileIdParam string, iPFIXDFWProfileParam model.IPFIXDFWProfile, overrideParam *bool) (model.IPFIXDFWProfile, error)
 }

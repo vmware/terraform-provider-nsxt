@@ -21,12 +21,13 @@ type NeighborsClient interface {
     // @param tier0IdParam (required)
     // @param localeServiceIdParam (required)
     // @param neighborIdParam (required)
+    // @param overrideParam Locally override the global object (optional, default to false)
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Delete(tier0IdParam string, localeServiceIdParam string, neighborIdParam string) error
+	Delete(tier0IdParam string, localeServiceIdParam string, neighborIdParam string, overrideParam *bool) error
 
     // Read BGP neighbor config
     //
@@ -65,12 +66,13 @@ type NeighborsClient interface {
     // @param localeServiceIdParam (required)
     // @param neighborIdParam (required)
     // @param bgpNeighborConfigParam (required)
+    // @param overrideParam Locally override the global object (optional, default to false)
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Patch(tier0IdParam string, localeServiceIdParam string, neighborIdParam string, bgpNeighborConfigParam model.BgpNeighborConfig) error
+	Patch(tier0IdParam string, localeServiceIdParam string, neighborIdParam string, bgpNeighborConfigParam model.BgpNeighborConfig, overrideParam *bool) error
 
     // If BGP neighbor config with the neighbor-id is not already present, create a new neighbor config. If it already exists, replace the BGP neighbor config with this object.
     //
@@ -78,11 +80,12 @@ type NeighborsClient interface {
     // @param localeServiceIdParam (required)
     // @param neighborIdParam (required)
     // @param bgpNeighborConfigParam (required)
+    // @param overrideParam Locally override the global object (optional, default to false)
     // @return com.vmware.nsx_global_policy.model.BgpNeighborConfig
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Update(tier0IdParam string, localeServiceIdParam string, neighborIdParam string, bgpNeighborConfigParam model.BgpNeighborConfig) (model.BgpNeighborConfig, error)
+	Update(tier0IdParam string, localeServiceIdParam string, neighborIdParam string, bgpNeighborConfigParam model.BgpNeighborConfig, overrideParam *bool) (model.BgpNeighborConfig, error)
 }

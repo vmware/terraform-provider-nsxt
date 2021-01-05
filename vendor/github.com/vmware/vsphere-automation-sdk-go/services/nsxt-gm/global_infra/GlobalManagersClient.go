@@ -16,17 +16,6 @@ import (
 
 type GlobalManagersClient interface {
 
-    // Switch over from Active to Standby Global Manager. This operation will fail if there is no Standby Global Manager.
-    //
-    // @param actionParam Indicates whether it is managed switchover or due to failure (required)
-    // @return com.vmware.nsx_global_policy.model.GlobalManager
-    // @throws InvalidRequest  Bad Request, Precondition Failed
-    // @throws Unauthorized  Forbidden
-    // @throws ServiceUnavailable  Service Unavailable
-    // @throws InternalServerError  Internal Server Error
-    // @throws NotFound  Not Found
-	Create(actionParam string) (model.GlobalManager, error)
-
     // Delete a particular global manager under Infra. Global Manager id 'self' is reserved and can be used for referring to local logged in Global Manager. Example - /infra/global-managers/self
     //
     // @param globalManagerIdParam (required)
@@ -68,22 +57,24 @@ type GlobalManagersClient interface {
     //
     // @param globalManagerIdParam (required)
     // @param globalManagerParam (required)
+    // @param forceParam Indciates force switchover to Active (optional)
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Patch(globalManagerIdParam string, globalManagerParam model.GlobalManager) error
+	Patch(globalManagerIdParam string, globalManagerParam model.GlobalManager, forceParam *bool) error
 
     // Create or fully replace Global Manager under Infra. Revision is optional for creation and required for update. Global Manager id 'self' is reserved and can be used for referring to local logged in Global Manager. Example - /infra/global-managers/self
     //
     // @param globalManagerIdParam (required)
     // @param globalManagerParam (required)
+    // @param forceParam Indciates force switchover to Active (optional)
     // @return com.vmware.nsx_global_policy.model.GlobalManager
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Update(globalManagerIdParam string, globalManagerParam model.GlobalManager) (model.GlobalManager, error)
+	Update(globalManagerIdParam string, globalManagerParam model.GlobalManager, forceParam *bool) (model.GlobalManager, error)
 }

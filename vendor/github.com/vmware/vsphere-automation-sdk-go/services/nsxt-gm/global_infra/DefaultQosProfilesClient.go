@@ -82,11 +82,12 @@ func NewDefaultQosProfilesClient(connector client.Connector) *DefaultQosProfiles
 	return &qIface
 }
 
-func (qIface *DefaultQosProfilesClient) Delete(qosProfileIdParam string) error {
+func (qIface *DefaultQosProfilesClient) Delete(qosProfileIdParam string, overrideParam *bool) error {
 	typeConverter := qIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(qIface.interfaceIdentifier, "delete")
 	sv := bindings.NewStructValueBuilder(qosProfilesDeleteInputType(), typeConverter)
 	sv.AddStructField("QosProfileId", qosProfileIdParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
@@ -176,12 +177,13 @@ func (qIface *DefaultQosProfilesClient) List(cursorParam *string, includedFields
 	}
 }
 
-func (qIface *DefaultQosProfilesClient) Patch(qosProfileIdParam string, qosProfileParam model.QosProfile) error {
+func (qIface *DefaultQosProfilesClient) Patch(qosProfileIdParam string, qosProfileParam model.QosProfile, overrideParam *bool) error {
 	typeConverter := qIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(qIface.interfaceIdentifier, "patch")
 	sv := bindings.NewStructValueBuilder(qosProfilesPatchInputType(), typeConverter)
 	sv.AddStructField("QosProfileId", qosProfileIdParam)
 	sv.AddStructField("QosProfile", qosProfileParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
@@ -203,12 +205,13 @@ func (qIface *DefaultQosProfilesClient) Patch(qosProfileIdParam string, qosProfi
 	}
 }
 
-func (qIface *DefaultQosProfilesClient) Update(qosProfileIdParam string, qosProfileParam model.QosProfile) (model.QosProfile, error) {
+func (qIface *DefaultQosProfilesClient) Update(qosProfileIdParam string, qosProfileParam model.QosProfile, overrideParam *bool) (model.QosProfile, error) {
 	typeConverter := qIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(qIface.interfaceIdentifier, "update")
 	sv := bindings.NewStructValueBuilder(qosProfilesUpdateInputType(), typeConverter)
 	sv.AddStructField("QosProfileId", qosProfileIdParam)
 	sv.AddStructField("QosProfile", qosProfileParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		var emptyOutput model.QosProfile

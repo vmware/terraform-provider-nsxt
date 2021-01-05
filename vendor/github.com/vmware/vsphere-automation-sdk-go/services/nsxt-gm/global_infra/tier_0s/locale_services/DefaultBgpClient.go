@@ -111,13 +111,14 @@ func (bIface *DefaultBgpClient) Get(tier0IdParam string, localeServiceIdParam st
 	}
 }
 
-func (bIface *DefaultBgpClient) Patch(tier0IdParam string, localeServiceIdParam string, bgpRoutingConfigParam model.BgpRoutingConfig) error {
+func (bIface *DefaultBgpClient) Patch(tier0IdParam string, localeServiceIdParam string, bgpRoutingConfigParam model.BgpRoutingConfig, overrideParam *bool) error {
 	typeConverter := bIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(bIface.interfaceIdentifier, "patch")
 	sv := bindings.NewStructValueBuilder(bgpPatchInputType(), typeConverter)
 	sv.AddStructField("Tier0Id", tier0IdParam)
 	sv.AddStructField("LocaleServiceId", localeServiceIdParam)
 	sv.AddStructField("BgpRoutingConfig", bgpRoutingConfigParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
@@ -139,13 +140,14 @@ func (bIface *DefaultBgpClient) Patch(tier0IdParam string, localeServiceIdParam 
 	}
 }
 
-func (bIface *DefaultBgpClient) Update(tier0IdParam string, localeServiceIdParam string, bgpRoutingConfigParam model.BgpRoutingConfig) (model.BgpRoutingConfig, error) {
+func (bIface *DefaultBgpClient) Update(tier0IdParam string, localeServiceIdParam string, bgpRoutingConfigParam model.BgpRoutingConfig, overrideParam *bool) (model.BgpRoutingConfig, error) {
 	typeConverter := bIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(bIface.interfaceIdentifier, "update")
 	sv := bindings.NewStructValueBuilder(bgpUpdateInputType(), typeConverter)
 	sv.AddStructField("Tier0Id", tier0IdParam)
 	sv.AddStructField("LocaleServiceId", localeServiceIdParam)
 	sv.AddStructField("BgpRoutingConfig", bgpRoutingConfigParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		var emptyOutput model.BgpRoutingConfig

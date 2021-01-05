@@ -34,4 +34,17 @@ type StateClient interface {
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
 	Get(segmentsIdParam string, cursorParam *string, edgePathParam *string, enforcementPointPathParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.SegmentConfigurationState, error)
+
+    // Returns all infra segments with configuration state on the enforcement point specified in the request
+    //
+    // @param configurationStateParam Configuration state of the segment on enforcement point (optional)
+    // @param enforcementPointPathParam String Path of the enforcement point (optional)
+    // @param sourceParam Data source type. (optional)
+    // @return com.vmware.nsx_policy.model.SegmentConfigurationStateListResult
+    // @throws InvalidRequest  Bad Request, Precondition Failed
+    // @throws Unauthorized  Forbidden
+    // @throws ServiceUnavailable  Service Unavailable
+    // @throws InternalServerError  Internal Server Error
+    // @throws NotFound  Not Found
+	List(configurationStateParam *string, enforcementPointPathParam *string, sourceParam *string) (model.SegmentConfigurationStateListResult, error)
 }

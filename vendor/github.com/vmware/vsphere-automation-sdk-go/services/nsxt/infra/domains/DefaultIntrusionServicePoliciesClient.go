@@ -144,13 +144,14 @@ func (iIface *DefaultIntrusionServicePoliciesClient) Get(domainIdParam string, p
 	}
 }
 
-func (iIface *DefaultIntrusionServicePoliciesClient) List(domainIdParam string, cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.IdsSecurityPolicyListResult, error) {
+func (iIface *DefaultIntrusionServicePoliciesClient) List(domainIdParam string, cursorParam *string, includeMarkForDeleteObjectsParam *bool, includeRuleCountParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.IdsSecurityPolicyListResult, error) {
 	typeConverter := iIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(iIface.interfaceIdentifier, "list")
 	sv := bindings.NewStructValueBuilder(intrusionServicePoliciesListInputType(), typeConverter)
 	sv.AddStructField("DomainId", domainIdParam)
 	sv.AddStructField("Cursor", cursorParam)
 	sv.AddStructField("IncludeMarkForDeleteObjects", includeMarkForDeleteObjectsParam)
+	sv.AddStructField("IncludeRuleCount", includeRuleCountParam)
 	sv.AddStructField("IncludedFields", includedFieldsParam)
 	sv.AddStructField("PageSize", pageSizeParam)
 	sv.AddStructField("SortAscending", sortAscendingParam)

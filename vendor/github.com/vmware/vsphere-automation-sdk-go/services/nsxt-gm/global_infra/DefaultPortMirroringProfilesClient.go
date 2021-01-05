@@ -82,11 +82,12 @@ func NewDefaultPortMirroringProfilesClient(connector client.Connector) *DefaultP
 	return &pIface
 }
 
-func (pIface *DefaultPortMirroringProfilesClient) Delete(portMirroringProfileIdParam string) error {
+func (pIface *DefaultPortMirroringProfilesClient) Delete(portMirroringProfileIdParam string, overrideParam *bool) error {
 	typeConverter := pIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(pIface.interfaceIdentifier, "delete")
 	sv := bindings.NewStructValueBuilder(portMirroringProfilesDeleteInputType(), typeConverter)
 	sv.AddStructField("PortMirroringProfileId", portMirroringProfileIdParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
@@ -176,12 +177,13 @@ func (pIface *DefaultPortMirroringProfilesClient) List(cursorParam *string, incl
 	}
 }
 
-func (pIface *DefaultPortMirroringProfilesClient) Patch(portMirroringProfileIdParam string, portMirroringProfileParam model.PortMirroringProfile) error {
+func (pIface *DefaultPortMirroringProfilesClient) Patch(portMirroringProfileIdParam string, portMirroringProfileParam model.PortMirroringProfile, overrideParam *bool) error {
 	typeConverter := pIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(pIface.interfaceIdentifier, "patch")
 	sv := bindings.NewStructValueBuilder(portMirroringProfilesPatchInputType(), typeConverter)
 	sv.AddStructField("PortMirroringProfileId", portMirroringProfileIdParam)
 	sv.AddStructField("PortMirroringProfile", portMirroringProfileParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
@@ -203,12 +205,13 @@ func (pIface *DefaultPortMirroringProfilesClient) Patch(portMirroringProfileIdPa
 	}
 }
 
-func (pIface *DefaultPortMirroringProfilesClient) Update(portMirroringProfileIdParam string, portMirroringProfileParam model.PortMirroringProfile) (model.PortMirroringProfile, error) {
+func (pIface *DefaultPortMirroringProfilesClient) Update(portMirroringProfileIdParam string, portMirroringProfileParam model.PortMirroringProfile, overrideParam *bool) (model.PortMirroringProfile, error) {
 	typeConverter := pIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(pIface.interfaceIdentifier, "update")
 	sv := bindings.NewStructValueBuilder(portMirroringProfilesUpdateInputType(), typeConverter)
 	sv.AddStructField("PortMirroringProfileId", portMirroringProfileIdParam)
 	sv.AddStructField("PortMirroringProfile", portMirroringProfileParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		var emptyOutput model.PortMirroringProfile

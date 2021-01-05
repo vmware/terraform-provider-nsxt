@@ -69,10 +69,10 @@ func testAccDataSourceNsxtPolicyIpv6NdraProfileCreate(name string) error {
 			return convErr
 		}
 		client := gm_infra.NewDefaultIpv6NdraProfilesClient(connector)
-		err = client.Patch(id, gmObj.(gm_model.Ipv6NdraProfile))
+		err = client.Patch(id, gmObj.(gm_model.Ipv6NdraProfile), nil)
 	} else {
 		client := infra.NewDefaultIpv6NdraProfilesClient(connector)
-		err = client.Patch(id, obj)
+		err = client.Patch(id, obj, nil)
 	}
 	if err != nil {
 		return handleCreateError("Ipv6NdraProfile", id, err)
@@ -90,7 +90,7 @@ func testAccDataSourceNsxtPolicyIpv6NdraProfileDeleteByName(name string) error {
 		objID, err := testGetObjIDByName(name, "Ipv6NdraProfile")
 		if err == nil {
 			client := gm_infra.NewDefaultIpv6NdraProfilesClient(connector)
-			err := client.Delete(objID)
+			err := client.Delete(objID, nil)
 			if err != nil {
 				return handleDeleteError("Ipv6NdraProfile", objID, err)
 			}
@@ -106,7 +106,7 @@ func testAccDataSourceNsxtPolicyIpv6NdraProfileDeleteByName(name string) error {
 		}
 		for _, objInList := range objList.Results {
 			if *objInList.DisplayName == name {
-				err := client.Delete(*objInList.Id)
+				err := client.Delete(*objInList.Id, nil)
 				if err != nil {
 					return fmt.Errorf("Error during Ipv6NdraProfile deletion: %v", err)
 				}

@@ -20,6 +20,24 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol"
 )
 
+// Possible value for ``configurationState`` of method State#list.
+const State_LIST_CONFIGURATION_STATE_PENDING = "pending"
+// Possible value for ``configurationState`` of method State#list.
+const State_LIST_CONFIGURATION_STATE_IN_PROGRESS = "in_progress"
+// Possible value for ``configurationState`` of method State#list.
+const State_LIST_CONFIGURATION_STATE_SUCCESS = "success"
+// Possible value for ``configurationState`` of method State#list.
+const State_LIST_CONFIGURATION_STATE_FAILED = "failed"
+// Possible value for ``configurationState`` of method State#list.
+const State_LIST_CONFIGURATION_STATE_PARTIAL_SUCCESS = "partial_success"
+// Possible value for ``configurationState`` of method State#list.
+const State_LIST_CONFIGURATION_STATE_ORPHANED = "orphaned"
+// Possible value for ``configurationState`` of method State#list.
+const State_LIST_CONFIGURATION_STATE_UNKNOWN = "unknown"
+// Possible value for ``source`` of method State#list.
+const State_LIST_SOURCE_REALTIME = "realtime"
+// Possible value for ``source`` of method State#list.
+const State_LIST_SOURCE_CACHED = "cached"
 
 
 
@@ -114,6 +132,67 @@ func stateGetRestMetadata() protocol.OperationRestMetadata {
 		"",
 		"GET",
 		"/global-manager/api/v1/global-infra/segments/{segmentsId}/state",
+		"",
+		resultHeaders,
+		200,
+		"",
+		errorHeaders,
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
+}
+
+func stateListInputType() bindings.StructType {
+	fields := make(map[string]bindings.BindingType)
+	fieldNameMap := make(map[string]string)
+	fields["configuration_state"] = bindings.NewOptionalType(bindings.NewStringType())
+	fields["enforcement_point_path"] = bindings.NewOptionalType(bindings.NewStringType())
+	fields["source"] = bindings.NewOptionalType(bindings.NewStringType())
+	fieldNameMap["configuration_state"] = "ConfigurationState"
+	fieldNameMap["enforcement_point_path"] = "EnforcementPointPath"
+	fieldNameMap["source"] = "Source"
+	var validators = []bindings.Validator{}
+	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+}
+
+func stateListOutputType() bindings.BindingType {
+	return bindings.NewReferenceType(model.SegmentConfigurationStateListResultBindingType)
+}
+
+func stateListRestMetadata() protocol.OperationRestMetadata {
+	fields := map[string]bindings.BindingType{}
+	fieldNameMap := map[string]string{}
+	paramsTypeMap := map[string]bindings.BindingType{}
+	pathParams := map[string]string{}
+	queryParams := map[string]string{}
+	headerParams := map[string]string{}
+	dispatchHeaderParams := map[string]string{}
+	bodyFieldsMap := map[string]string{}
+	fields["configuration_state"] = bindings.NewOptionalType(bindings.NewStringType())
+	fields["enforcement_point_path"] = bindings.NewOptionalType(bindings.NewStringType())
+	fields["source"] = bindings.NewOptionalType(bindings.NewStringType())
+	fieldNameMap["configuration_state"] = "ConfigurationState"
+	fieldNameMap["enforcement_point_path"] = "EnforcementPointPath"
+	fieldNameMap["source"] = "Source"
+	paramsTypeMap["source"] = bindings.NewOptionalType(bindings.NewStringType())
+	paramsTypeMap["enforcement_point_path"] = bindings.NewOptionalType(bindings.NewStringType())
+	paramsTypeMap["configuration_state"] = bindings.NewOptionalType(bindings.NewStringType())
+	queryParams["configuration_state"] = "configuration_state"
+	queryParams["enforcement_point_path"] = "enforcement_point_path"
+	queryParams["source"] = "source"
+	resultHeaders := map[string]string{}
+	errorHeaders := map[string]map[string]string{}
+	return protocol.NewOperationRestMetadata(
+		fields,
+		fieldNameMap,
+		paramsTypeMap,
+		pathParams,
+		queryParams,
+		headerParams,
+		dispatchHeaderParams,
+		bodyFieldsMap,
+		"",
+		"",
+		"GET",
+		"/global-manager/api/v1/global-infra/segments/state",
 		"",
 		resultHeaders,
 		200,

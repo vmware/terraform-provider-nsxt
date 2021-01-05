@@ -19,12 +19,13 @@ type Ipv6NdraProfilesClient interface {
     // Delete IPv6 NDRA profile
     //
     // @param ndraProfileIdParam (required)
+    // @param overrideParam Locally override the global object (optional, default to false)
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Delete(ndraProfileIdParam string) error
+	Delete(ndraProfileIdParam string, overrideParam *bool) error
 
     // Read IPv6 NDRA profile
     //
@@ -57,22 +58,24 @@ type Ipv6NdraProfilesClient interface {
     //
     // @param ndraProfileIdParam (required)
     // @param ipv6NdraProfileParam (required)
+    // @param overrideParam Locally override the global object (optional, default to false)
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Patch(ndraProfileIdParam string, ipv6NdraProfileParam model.Ipv6NdraProfile) error
+	Patch(ndraProfileIdParam string, ipv6NdraProfileParam model.Ipv6NdraProfile, overrideParam *bool) error
 
     // If profile with the ndra-profile-id is not already present, create a new IPv6 NDRA profile instance. If it already exists, replace the IPv6 NDRA profile instance with this object.
     //
     // @param ndraProfileIdParam (required)
     // @param ipv6NdraProfileParam (required)
+    // @param overrideParam Locally override the global object (optional, default to false)
     // @return com.vmware.nsx_policy.model.Ipv6NdraProfile
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Update(ndraProfileIdParam string, ipv6NdraProfileParam model.Ipv6NdraProfile) (model.Ipv6NdraProfile, error)
+	Update(ndraProfileIdParam string, ipv6NdraProfileParam model.Ipv6NdraProfile, overrideParam *bool) (model.Ipv6NdraProfile, error)
 }

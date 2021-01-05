@@ -78,11 +78,13 @@ func NewDefaultInfraClient(connector client.Connector) *DefaultInfraClient {
 	return &iIface
 }
 
-func (iIface *DefaultInfraClient) Get(filterParam *string) (model.Infra, error) {
+func (iIface *DefaultInfraClient) Get(basePathParam *string, filterParam *string, typeFilterParam *string) (model.Infra, error) {
 	typeConverter := iIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(iIface.interfaceIdentifier, "get")
 	sv := bindings.NewStructValueBuilder(infraGetInputType(), typeConverter)
+	sv.AddStructField("BasePath", basePathParam)
 	sv.AddStructField("Filter", filterParam)
+	sv.AddStructField("TypeFilter", typeFilterParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		var emptyOutput model.Infra

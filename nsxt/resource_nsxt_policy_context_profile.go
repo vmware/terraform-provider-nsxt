@@ -207,10 +207,10 @@ func resourceNsxtPolicyContextProfileCreate(d *schema.ResourceData, m interface{
 		if err1 != nil {
 			return err1
 		}
-		err = client.Patch(id, gmObj.(gm_model.PolicyContextProfile))
+		err = client.Patch(id, gmObj.(gm_model.PolicyContextProfile), nil)
 	} else {
 		client := infra.NewDefaultContextProfilesClient(connector)
-		err = client.Patch(id, obj)
+		err = client.Patch(id, obj, nil)
 	}
 	if err != nil {
 		return handleCreateError("ContextProfile", id, err)
@@ -302,10 +302,10 @@ func resourceNsxtPolicyContextProfileUpdate(d *schema.ResourceData, m interface{
 		}
 		gmObj := rawObj.(gm_model.PolicyContextProfile)
 		client := gm_infra.NewDefaultContextProfilesClient(connector)
-		err = client.Patch(id, gmObj)
+		err = client.Patch(id, gmObj, nil)
 	} else {
 		client := infra.NewDefaultContextProfilesClient(connector)
-		err = client.Patch(id, obj)
+		err = client.Patch(id, obj, nil)
 	}
 
 	if err != nil {
@@ -326,10 +326,10 @@ func resourceNsxtPolicyContextProfileDelete(d *schema.ResourceData, m interface{
 	force := true
 	if isPolicyGlobalManager(m) {
 		client := gm_infra.NewDefaultContextProfilesClient(connector)
-		err = client.Delete(id, &force)
+		err = client.Delete(id, &force, nil)
 	} else {
 		client := infra.NewDefaultContextProfilesClient(connector)
-		err = client.Delete(id, &force)
+		err = client.Delete(id, &force, nil)
 	}
 	if err != nil {
 		return handleDeleteError("ContextProfile", id, err)
@@ -402,7 +402,7 @@ func listContextProfileWithKey(attributeKey *string, attributeClient interface{}
 	includeMarkForDeleteObjectsParam := false
 	if isPolicyGlobalManager {
 		client := attributeClient.(*gm_cont_prof.DefaultAttributesClient)
-		gmPolicyContextProfileListResult, err := client.List(attributeKey, nil, &includeMarkForDeleteObjectsParam, nil, nil, nil, nil)
+		gmPolicyContextProfileListResult, err := client.List(attributeKey, nil, nil, &includeMarkForDeleteObjectsParam, nil, nil, nil, nil)
 		if err != nil {
 			return policyContextProfileListResult, err
 		}
@@ -415,7 +415,7 @@ func listContextProfileWithKey(attributeKey *string, attributeClient interface{}
 	}
 	var err error
 	client := attributeClient.(*cont_prof.DefaultAttributesClient)
-	policyContextProfileListResult, err = client.List(attributeKey, nil, &includeMarkForDeleteObjectsParam, nil, nil, nil, nil)
+	policyContextProfileListResult, err = client.List(attributeKey, nil, nil, &includeMarkForDeleteObjectsParam, nil, nil, nil, nil)
 	return policyContextProfileListResult, err
 }
 

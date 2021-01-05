@@ -20,62 +20,9 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol"
 )
 
-// Possible value for ``action`` of method GlobalManagers#create.
-const GlobalManagers_CREATE_ACTION_MANAGED_SWITCHOVER = "managed_switchover"
-// Possible value for ``action`` of method GlobalManagers#create.
-const GlobalManagers_CREATE_ACTION_ACTIVE_FAILED = "active_failed"
 
 
 
-
-func globalManagersCreateInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
-	fieldNameMap := make(map[string]string)
-	fields["action"] = bindings.NewStringType()
-	fieldNameMap["action"] = "Action"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
-}
-
-func globalManagersCreateOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.GlobalManagerBindingType)
-}
-
-func globalManagersCreateRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
-	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
-	pathParams := map[string]string{}
-	queryParams := map[string]string{}
-	headerParams := map[string]string{}
-	dispatchHeaderParams := map[string]string{}
-	bodyFieldsMap := map[string]string{}
-	fields["action"] = bindings.NewStringType()
-	fieldNameMap["action"] = "Action"
-	paramsTypeMap["action"] = bindings.NewStringType()
-	queryParams["action"] = "action"
-	resultHeaders := map[string]string{}
-	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
-		fields,
-		fieldNameMap,
-		paramsTypeMap,
-		pathParams,
-		queryParams,
-		headerParams,
-		dispatchHeaderParams,
-		bodyFieldsMap,
-		"",
-		"",
-		"POST",
-		"/policy/api/v1/infra/global-managers",
-		"",
-		resultHeaders,
-		201,
-		"",
-		errorHeaders,
-		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
-}
 
 func globalManagersDeleteInputType() bindings.StructType {
 	fields := make(map[string]bindings.BindingType)
@@ -261,8 +208,10 @@ func globalManagersPatchInputType() bindings.StructType {
 	fieldNameMap := make(map[string]string)
 	fields["global_manager_id"] = bindings.NewStringType()
 	fields["global_manager"] = bindings.NewReferenceType(model.GlobalManagerBindingType)
+	fields["force"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["global_manager_id"] = "GlobalManagerId"
 	fieldNameMap["global_manager"] = "GlobalManager"
+	fieldNameMap["force"] = "Force"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -282,12 +231,16 @@ func globalManagersPatchRestMetadata() protocol.OperationRestMetadata {
 	bodyFieldsMap := map[string]string{}
 	fields["global_manager_id"] = bindings.NewStringType()
 	fields["global_manager"] = bindings.NewReferenceType(model.GlobalManagerBindingType)
+	fields["force"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["global_manager_id"] = "GlobalManagerId"
 	fieldNameMap["global_manager"] = "GlobalManager"
+	fieldNameMap["force"] = "Force"
+	paramsTypeMap["force"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["global_manager_id"] = bindings.NewStringType()
 	paramsTypeMap["global_manager"] = bindings.NewReferenceType(model.GlobalManagerBindingType)
 	paramsTypeMap["globalManagerId"] = bindings.NewStringType()
 	pathParams["global_manager_id"] = "globalManagerId"
+	queryParams["force"] = "force"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -316,8 +269,10 @@ func globalManagersUpdateInputType() bindings.StructType {
 	fieldNameMap := make(map[string]string)
 	fields["global_manager_id"] = bindings.NewStringType()
 	fields["global_manager"] = bindings.NewReferenceType(model.GlobalManagerBindingType)
+	fields["force"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["global_manager_id"] = "GlobalManagerId"
 	fieldNameMap["global_manager"] = "GlobalManager"
+	fieldNameMap["force"] = "Force"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -337,12 +292,16 @@ func globalManagersUpdateRestMetadata() protocol.OperationRestMetadata {
 	bodyFieldsMap := map[string]string{}
 	fields["global_manager_id"] = bindings.NewStringType()
 	fields["global_manager"] = bindings.NewReferenceType(model.GlobalManagerBindingType)
+	fields["force"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["global_manager_id"] = "GlobalManagerId"
 	fieldNameMap["global_manager"] = "GlobalManager"
+	fieldNameMap["force"] = "Force"
+	paramsTypeMap["force"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["global_manager_id"] = bindings.NewStringType()
 	paramsTypeMap["global_manager"] = bindings.NewReferenceType(model.GlobalManagerBindingType)
 	paramsTypeMap["globalManagerId"] = bindings.NewStringType()
 	pathParams["global_manager_id"] = "globalManagerId"
+	queryParams["force"] = "force"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(

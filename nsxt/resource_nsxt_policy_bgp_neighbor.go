@@ -321,11 +321,11 @@ func resourceNsxtPolicyBgpNeighborConvertAndPatch(id string, d *schema.ResourceD
 			return convErr
 		}
 		client := gm_bgp.NewDefaultNeighborsClient(connector)
-		err = client.Patch(t0ID, serviceID, id, gmObj.(gm_model.BgpNeighborConfig))
+		err = client.Patch(t0ID, serviceID, id, gmObj.(gm_model.BgpNeighborConfig), nil)
 
 	} else {
 		client := bgp.NewDefaultNeighborsClient(connector)
-		err = client.Patch(t0ID, serviceID, id, obj)
+		err = client.Patch(t0ID, serviceID, id, obj, nil)
 	}
 	if err != nil {
 		return handleCreateError("BgpNeighbor", id, err)
@@ -487,10 +487,10 @@ func resourceNsxtPolicyBgpNeighborDelete(d *schema.ResourceData, m interface{}) 
 	var err error
 	if isPolicyGlobalManager(m) {
 		client := gm_bgp.NewDefaultNeighborsClient(connector)
-		err = client.Delete(t0ID, serviceID, id)
+		err = client.Delete(t0ID, serviceID, id, nil)
 	} else {
 		client := bgp.NewDefaultNeighborsClient(connector)
-		err = client.Delete(t0ID, serviceID, id)
+		err = client.Delete(t0ID, serviceID, id, nil)
 	}
 	if err != nil {
 		return handleDeleteError("BgpNeighbor", id, err)

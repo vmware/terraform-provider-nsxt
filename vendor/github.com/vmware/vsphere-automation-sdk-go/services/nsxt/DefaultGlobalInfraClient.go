@@ -78,11 +78,13 @@ func NewDefaultGlobalInfraClient(connector client.Connector) *DefaultGlobalInfra
 	return &gIface
 }
 
-func (gIface *DefaultGlobalInfraClient) Get(filterParam *string) (model.Infra, error) {
+func (gIface *DefaultGlobalInfraClient) Get(basePathParam *string, filterParam *string, typeFilterParam *string) (model.Infra, error) {
 	typeConverter := gIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(gIface.interfaceIdentifier, "get")
 	sv := bindings.NewStructValueBuilder(globalInfraGetInputType(), typeConverter)
+	sv.AddStructField("BasePath", basePathParam)
 	sv.AddStructField("Filter", filterParam)
+	sv.AddStructField("TypeFilter", typeFilterParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		var emptyOutput model.Infra

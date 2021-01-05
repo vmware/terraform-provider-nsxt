@@ -20,6 +20,12 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol"
 )
 
+// Possible value for ``attributeSource`` of method Attributes#list.
+const Attributes_LIST_ATTRIBUTE_SOURCE_ALL = "ALL"
+// Possible value for ``attributeSource`` of method Attributes#list.
+const Attributes_LIST_ATTRIBUTE_SOURCE_CUSTOM = "CUSTOM"
+// Possible value for ``attributeSource`` of method Attributes#list.
+const Attributes_LIST_ATTRIBUTE_SOURCE_SYSTEM = "SYSTEM"
 
 
 
@@ -28,6 +34,7 @@ func attributesListInputType() bindings.StructType {
 	fields := make(map[string]bindings.BindingType)
 	fieldNameMap := make(map[string]string)
 	fields["attribute_key"] = bindings.NewOptionalType(bindings.NewStringType())
+	fields["attribute_source"] = bindings.NewOptionalType(bindings.NewStringType())
 	fields["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
 	fields["include_mark_for_delete_objects"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fields["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
@@ -35,6 +42,7 @@ func attributesListInputType() bindings.StructType {
 	fields["sort_ascending"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fields["sort_by"] = bindings.NewOptionalType(bindings.NewStringType())
 	fieldNameMap["attribute_key"] = "AttributeKey"
+	fieldNameMap["attribute_source"] = "AttributeSource"
 	fieldNameMap["cursor"] = "Cursor"
 	fieldNameMap["include_mark_for_delete_objects"] = "IncludeMarkForDeleteObjects"
 	fieldNameMap["included_fields"] = "IncludedFields"
@@ -59,6 +67,7 @@ func attributesListRestMetadata() protocol.OperationRestMetadata {
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
 	fields["attribute_key"] = bindings.NewOptionalType(bindings.NewStringType())
+	fields["attribute_source"] = bindings.NewOptionalType(bindings.NewStringType())
 	fields["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
 	fields["include_mark_for_delete_objects"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fields["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
@@ -66,6 +75,7 @@ func attributesListRestMetadata() protocol.OperationRestMetadata {
 	fields["sort_ascending"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fields["sort_by"] = bindings.NewOptionalType(bindings.NewStringType())
 	fieldNameMap["attribute_key"] = "AttributeKey"
+	fieldNameMap["attribute_source"] = "AttributeSource"
 	fieldNameMap["cursor"] = "Cursor"
 	fieldNameMap["include_mark_for_delete_objects"] = "IncludeMarkForDeleteObjects"
 	fieldNameMap["included_fields"] = "IncludedFields"
@@ -78,8 +88,10 @@ func attributesListRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["include_mark_for_delete_objects"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
 	paramsTypeMap["sort_by"] = bindings.NewOptionalType(bindings.NewStringType())
+	paramsTypeMap["attribute_source"] = bindings.NewOptionalType(bindings.NewStringType())
 	paramsTypeMap["sort_ascending"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	queryParams["cursor"] = "cursor"
+	queryParams["attribute_source"] = "attribute_source"
 	queryParams["sort_ascending"] = "sort_ascending"
 	queryParams["included_fields"] = "included_fields"
 	queryParams["attribute_key"] = "attribute_key"

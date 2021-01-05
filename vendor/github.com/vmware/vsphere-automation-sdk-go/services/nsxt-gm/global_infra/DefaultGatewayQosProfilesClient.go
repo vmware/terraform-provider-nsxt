@@ -82,11 +82,12 @@ func NewDefaultGatewayQosProfilesClient(connector client.Connector) *DefaultGate
 	return &gIface
 }
 
-func (gIface *DefaultGatewayQosProfilesClient) Delete(qosProfileIdParam string) error {
+func (gIface *DefaultGatewayQosProfilesClient) Delete(qosProfileIdParam string, overrideParam *bool) error {
 	typeConverter := gIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(gIface.interfaceIdentifier, "delete")
 	sv := bindings.NewStructValueBuilder(gatewayQosProfilesDeleteInputType(), typeConverter)
 	sv.AddStructField("QosProfileId", qosProfileIdParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
@@ -177,12 +178,13 @@ func (gIface *DefaultGatewayQosProfilesClient) List(cursorParam *string, include
 	}
 }
 
-func (gIface *DefaultGatewayQosProfilesClient) Patch(qosProfileIdParam string, gatewayQosProfileParam model.GatewayQosProfile) error {
+func (gIface *DefaultGatewayQosProfilesClient) Patch(qosProfileIdParam string, gatewayQosProfileParam model.GatewayQosProfile, overrideParam *bool) error {
 	typeConverter := gIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(gIface.interfaceIdentifier, "patch")
 	sv := bindings.NewStructValueBuilder(gatewayQosProfilesPatchInputType(), typeConverter)
 	sv.AddStructField("QosProfileId", qosProfileIdParam)
 	sv.AddStructField("GatewayQosProfile", gatewayQosProfileParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
@@ -204,12 +206,13 @@ func (gIface *DefaultGatewayQosProfilesClient) Patch(qosProfileIdParam string, g
 	}
 }
 
-func (gIface *DefaultGatewayQosProfilesClient) Update(qosProfileIdParam string, gatewayQosProfileParam model.GatewayQosProfile) (model.GatewayQosProfile, error) {
+func (gIface *DefaultGatewayQosProfilesClient) Update(qosProfileIdParam string, gatewayQosProfileParam model.GatewayQosProfile, overrideParam *bool) (model.GatewayQosProfile, error) {
 	typeConverter := gIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(gIface.interfaceIdentifier, "update")
 	sv := bindings.NewStructValueBuilder(gatewayQosProfilesUpdateInputType(), typeConverter)
 	sv.AddStructField("QosProfileId", qosProfileIdParam)
 	sv.AddStructField("GatewayQosProfile", gatewayQosProfileParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		var emptyOutput model.GatewayQosProfile

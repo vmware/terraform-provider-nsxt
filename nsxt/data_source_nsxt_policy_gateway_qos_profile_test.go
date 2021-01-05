@@ -65,10 +65,10 @@ func testAccDataSourceNsxtPolicyGatewayQosProfileCreate(name string) error {
 			return convErr
 		}
 		client := gm_infra.NewDefaultGatewayQosProfilesClient(connector)
-		err = client.Patch(id, gmObj.(gm_model.GatewayQosProfile))
+		err = client.Patch(id, gmObj.(gm_model.GatewayQosProfile), nil)
 	} else {
 		client := infra.NewDefaultGatewayQosProfilesClient(connector)
-		err = client.Patch(id, obj)
+		err = client.Patch(id, obj, nil)
 	}
 
 	if err != nil {
@@ -88,7 +88,7 @@ func testAccDataSourceNsxtPolicyGatewayQosProfileDeleteByName(name string) error
 		objID, err := testGetObjIDByName(name, "GatewayQosProfile")
 		if err == nil {
 			client := gm_infra.NewDefaultGatewayQosProfilesClient(connector)
-			err := client.Delete(objID)
+			err := client.Delete(objID, nil)
 			if err != nil {
 				return handleDeleteError("GatewayQosProfile", objID, err)
 			}
@@ -103,7 +103,7 @@ func testAccDataSourceNsxtPolicyGatewayQosProfileDeleteByName(name string) error
 		}
 		for _, objInList := range objList.Results {
 			if *objInList.DisplayName == name {
-				err := client.Delete(*objInList.Id)
+				err := client.Delete(*objInList.Id, nil)
 				if err != nil {
 					return handleDeleteError("GatewayQosProfile", *objInList.Id, err)
 				}

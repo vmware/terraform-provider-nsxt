@@ -37,7 +37,6 @@ func NewDefaultGlobalManagersClient(connector client.Connector) *DefaultGlobalMa
 	interfaceName := "com.vmware.nsx_policy.infra.global_managers"
 	interfaceIdentifier := core.NewInterfaceIdentifier(interfaceName)
 	methodIdentifiers := []core.MethodIdentifier{
-		core.NewMethodIdentifier(interfaceIdentifier, "create"),
 		core.NewMethodIdentifier(interfaceIdentifier, "delete"),
 		core.NewMethodIdentifier(interfaceIdentifier, "get"),
 		core.NewMethodIdentifier(interfaceIdentifier, "list"),
@@ -75,45 +74,12 @@ func NewDefaultGlobalManagersClient(connector client.Connector) *DefaultGlobalMa
 
 	gIface := DefaultGlobalManagersClient{interfaceName: interfaceName, methodIdentifiers: methodIdentifiers, interfaceDefinition: interfaceDefinition, errorBindingMap: errorBindingMap, interfaceIdentifier: interfaceIdentifier, connector: connector}
 	gIface.methodNameToDefMap = make(map[string]*core.MethodDefinition)
-	gIface.methodNameToDefMap["create"] = gIface.createMethodDefinition()
 	gIface.methodNameToDefMap["delete"] = gIface.deleteMethodDefinition()
 	gIface.methodNameToDefMap["get"] = gIface.getMethodDefinition()
 	gIface.methodNameToDefMap["list"] = gIface.listMethodDefinition()
 	gIface.methodNameToDefMap["patch"] = gIface.patchMethodDefinition()
 	gIface.methodNameToDefMap["update"] = gIface.updateMethodDefinition()
 	return &gIface
-}
-
-func (gIface *DefaultGlobalManagersClient) Create(actionParam string) (model.GlobalManager, error) {
-	typeConverter := gIface.connector.TypeConverter()
-	methodIdentifier := core.NewMethodIdentifier(gIface.interfaceIdentifier, "create")
-	sv := bindings.NewStructValueBuilder(globalManagersCreateInputType(), typeConverter)
-	sv.AddStructField("Action", actionParam)
-	inputDataValue, inputError := sv.GetStructValue()
-	if inputError != nil {
-		var emptyOutput model.GlobalManager
-		return emptyOutput, bindings.VAPIerrorsToError(inputError)
-	}
-	operationRestMetaData := globalManagersCreateRestMetadata()
-	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
-	connectionMetadata["isStreamingResponse"] = false
-	gIface.connector.SetConnectionMetadata(connectionMetadata)
-	executionContext := gIface.connector.NewExecutionContext()
-	methodResult := gIface.Invoke(executionContext, methodIdentifier, inputDataValue)
-	var emptyOutput model.GlobalManager
-	if methodResult.IsSuccess() {
-		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), globalManagersCreateOutputType())
-		if errorInOutput != nil {
-			return emptyOutput, bindings.VAPIerrorsToError(errorInOutput)
-		}
-		return output.(model.GlobalManager), nil
-	} else {
-		methodError, errorInError := typeConverter.ConvertToGolang(methodResult.Error(), gIface.errorBindingMap[methodResult.Error().Name()])
-		if errorInError != nil {
-			return emptyOutput, bindings.VAPIerrorsToError(errorInError)
-		}
-		return emptyOutput, methodError.(error)
-	}
 }
 
 func (gIface *DefaultGlobalManagersClient) Delete(globalManagerIdParam string) error {
@@ -211,12 +177,13 @@ func (gIface *DefaultGlobalManagersClient) List(cursorParam *string, includeMark
 	}
 }
 
-func (gIface *DefaultGlobalManagersClient) Patch(globalManagerIdParam string, globalManagerParam model.GlobalManager) error {
+func (gIface *DefaultGlobalManagersClient) Patch(globalManagerIdParam string, globalManagerParam model.GlobalManager, forceParam *bool) error {
 	typeConverter := gIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(gIface.interfaceIdentifier, "patch")
 	sv := bindings.NewStructValueBuilder(globalManagersPatchInputType(), typeConverter)
 	sv.AddStructField("GlobalManagerId", globalManagerIdParam)
 	sv.AddStructField("GlobalManager", globalManagerParam)
+	sv.AddStructField("Force", forceParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
@@ -238,12 +205,13 @@ func (gIface *DefaultGlobalManagersClient) Patch(globalManagerIdParam string, gl
 	}
 }
 
-func (gIface *DefaultGlobalManagersClient) Update(globalManagerIdParam string, globalManagerParam model.GlobalManager) (model.GlobalManager, error) {
+func (gIface *DefaultGlobalManagersClient) Update(globalManagerIdParam string, globalManagerParam model.GlobalManager, forceParam *bool) (model.GlobalManager, error) {
 	typeConverter := gIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(gIface.interfaceIdentifier, "update")
 	sv := bindings.NewStructValueBuilder(globalManagersUpdateInputType(), typeConverter)
 	sv.AddStructField("GlobalManagerId", globalManagerIdParam)
 	sv.AddStructField("GlobalManager", globalManagerParam)
+	sv.AddStructField("Force", forceParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		var emptyOutput model.GlobalManager
@@ -277,69 +245,6 @@ func (gIface *DefaultGlobalManagersClient) Invoke(ctx *core.ExecutionContext, me
 	return methodResult
 }
 
-
-func (gIface *DefaultGlobalManagersClient) createMethodDefinition() *core.MethodDefinition {
-	interfaceIdentifier := core.NewInterfaceIdentifier(gIface.interfaceName)
-	typeConverter := gIface.connector.TypeConverter()
-
-	input, inputError := typeConverter.ConvertToDataDefinition(globalManagersCreateInputType())
-	output, outputError := typeConverter.ConvertToDataDefinition(globalManagersCreateOutputType())
-	if inputError != nil {
-		log.Errorf("Error in ConvertToDataDefinition for DefaultGlobalManagersClient.create method's input - %s",
-			bindings.VAPIerrorsToError(inputError).Error())
-		return nil
-	}
-	if outputError != nil {
-		log.Errorf("Error in ConvertToDataDefinition for DefaultGlobalManagersClient.create method's output - %s",
-			bindings.VAPIerrorsToError(outputError).Error())
-		return nil
-	}
-	methodIdentifier := core.NewMethodIdentifier(interfaceIdentifier, "create")
-	errorDefinitions := make([]data.ErrorDefinition, 0)
-	gIface.errorBindingMap[errors.InvalidRequest{}.Error()] = errors.InvalidRequestBindingType()
-	errDef1, errError1 := typeConverter.ConvertToDataDefinition(errors.InvalidRequestBindingType())
-	if errError1 != nil {
-		log.Errorf("Error in ConvertToDataDefinition for DefaultGlobalManagersClient.create method's errors.InvalidRequest error - %s",
-			bindings.VAPIerrorsToError(errError1).Error())
-		return nil
-	}
-	errorDefinitions = append(errorDefinitions, errDef1.(data.ErrorDefinition))
-	gIface.errorBindingMap[errors.Unauthorized{}.Error()] = errors.UnauthorizedBindingType()
-	errDef2, errError2 := typeConverter.ConvertToDataDefinition(errors.UnauthorizedBindingType())
-	if errError2 != nil {
-		log.Errorf("Error in ConvertToDataDefinition for DefaultGlobalManagersClient.create method's errors.Unauthorized error - %s",
-			bindings.VAPIerrorsToError(errError2).Error())
-		return nil
-	}
-	errorDefinitions = append(errorDefinitions, errDef2.(data.ErrorDefinition))
-	gIface.errorBindingMap[errors.ServiceUnavailable{}.Error()] = errors.ServiceUnavailableBindingType()
-	errDef3, errError3 := typeConverter.ConvertToDataDefinition(errors.ServiceUnavailableBindingType())
-	if errError3 != nil {
-		log.Errorf("Error in ConvertToDataDefinition for DefaultGlobalManagersClient.create method's errors.ServiceUnavailable error - %s",
-			bindings.VAPIerrorsToError(errError3).Error())
-		return nil
-	}
-	errorDefinitions = append(errorDefinitions, errDef3.(data.ErrorDefinition))
-	gIface.errorBindingMap[errors.InternalServerError{}.Error()] = errors.InternalServerErrorBindingType()
-	errDef4, errError4 := typeConverter.ConvertToDataDefinition(errors.InternalServerErrorBindingType())
-	if errError4 != nil {
-		log.Errorf("Error in ConvertToDataDefinition for DefaultGlobalManagersClient.create method's errors.InternalServerError error - %s",
-			bindings.VAPIerrorsToError(errError4).Error())
-		return nil
-	}
-	errorDefinitions = append(errorDefinitions, errDef4.(data.ErrorDefinition))
-	gIface.errorBindingMap[errors.NotFound{}.Error()] = errors.NotFoundBindingType()
-	errDef5, errError5 := typeConverter.ConvertToDataDefinition(errors.NotFoundBindingType())
-	if errError5 != nil {
-		log.Errorf("Error in ConvertToDataDefinition for DefaultGlobalManagersClient.create method's errors.NotFound error - %s",
-			bindings.VAPIerrorsToError(errError5).Error())
-		return nil
-	}
-	errorDefinitions = append(errorDefinitions, errDef5.(data.ErrorDefinition))
-
-	methodDefinition := core.NewMethodDefinition(methodIdentifier, input, output, errorDefinitions)
-	return &methodDefinition
-}
 
 func (gIface *DefaultGlobalManagersClient) deleteMethodDefinition() *core.MethodDefinition {
 	interfaceIdentifier := core.NewInterfaceIdentifier(gIface.interfaceName)

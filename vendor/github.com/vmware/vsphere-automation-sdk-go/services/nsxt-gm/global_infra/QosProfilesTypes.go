@@ -28,7 +28,9 @@ func qosProfilesDeleteInputType() bindings.StructType {
 	fields := make(map[string]bindings.BindingType)
 	fieldNameMap := make(map[string]string)
 	fields["qos_profile_id"] = bindings.NewStringType()
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["qos_profile_id"] = "QosProfileId"
+	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -47,10 +49,14 @@ func qosProfilesDeleteRestMetadata() protocol.OperationRestMetadata {
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
 	fields["qos_profile_id"] = bindings.NewStringType()
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["qos_profile_id"] = "QosProfileId"
+	fieldNameMap["override"] = "Override"
 	paramsTypeMap["qos_profile_id"] = bindings.NewStringType()
+	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["qosProfileId"] = bindings.NewStringType()
 	pathParams["qos_profile_id"] = "qosProfileId"
+	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -202,8 +208,10 @@ func qosProfilesPatchInputType() bindings.StructType {
 	fieldNameMap := make(map[string]string)
 	fields["qos_profile_id"] = bindings.NewStringType()
 	fields["qos_profile"] = bindings.NewReferenceType(model.QosProfileBindingType)
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["qos_profile_id"] = "QosProfileId"
 	fieldNameMap["qos_profile"] = "QosProfile"
+	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -223,12 +231,16 @@ func qosProfilesPatchRestMetadata() protocol.OperationRestMetadata {
 	bodyFieldsMap := map[string]string{}
 	fields["qos_profile_id"] = bindings.NewStringType()
 	fields["qos_profile"] = bindings.NewReferenceType(model.QosProfileBindingType)
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["qos_profile_id"] = "QosProfileId"
 	fieldNameMap["qos_profile"] = "QosProfile"
+	fieldNameMap["override"] = "Override"
 	paramsTypeMap["qos_profile_id"] = bindings.NewStringType()
 	paramsTypeMap["qos_profile"] = bindings.NewReferenceType(model.QosProfileBindingType)
+	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["qosProfileId"] = bindings.NewStringType()
 	pathParams["qos_profile_id"] = "qosProfileId"
+	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -257,8 +269,10 @@ func qosProfilesUpdateInputType() bindings.StructType {
 	fieldNameMap := make(map[string]string)
 	fields["qos_profile_id"] = bindings.NewStringType()
 	fields["qos_profile"] = bindings.NewReferenceType(model.QosProfileBindingType)
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["qos_profile_id"] = "QosProfileId"
 	fieldNameMap["qos_profile"] = "QosProfile"
+	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -278,12 +292,16 @@ func qosProfilesUpdateRestMetadata() protocol.OperationRestMetadata {
 	bodyFieldsMap := map[string]string{}
 	fields["qos_profile_id"] = bindings.NewStringType()
 	fields["qos_profile"] = bindings.NewReferenceType(model.QosProfileBindingType)
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["qos_profile_id"] = "QosProfileId"
 	fieldNameMap["qos_profile"] = "QosProfile"
+	fieldNameMap["override"] = "Override"
 	paramsTypeMap["qos_profile_id"] = bindings.NewStringType()
 	paramsTypeMap["qos_profile"] = bindings.NewReferenceType(model.QosProfileBindingType)
+	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["qosProfileId"] = bindings.NewStringType()
 	pathParams["qos_profile_id"] = "qosProfileId"
+	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(

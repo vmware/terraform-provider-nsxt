@@ -74,7 +74,7 @@ type RedirectionPoliciesClient interface {
     // @throws NotFound  Not Found
 	List0(domainIdParam string, cursorParam *string, includeMarkForDeleteObjectsParam *bool, includeRuleCountParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.RedirectionPolicyListResult, error)
 
-    // Create or update the redirection policy.
+    // Create or update the redirection policy. Performance Note: If you want to edit several rules in a redirection policy use this API. It will perform better than several individual rule APIs. Just pass all the rules which you wish to edit as embedded rules to it.
     //
     // @param domainIdParam Domain id (required)
     // @param redirectionPolicyIdParam Redirection map id (required)
@@ -86,7 +86,7 @@ type RedirectionPoliciesClient interface {
     // @throws NotFound  Not Found
 	Patch(domainIdParam string, redirectionPolicyIdParam string, redirectionPolicyParam model.RedirectionPolicy) error
 
-    // Create or update the redirection policy.
+    // Create or update the redirection policy. Performance Note: If you want to edit several rules in a redirection policy use this API. It will perform better than several individual rule APIs. Just pass all the rules which you wish to edit as embedded rules to it.
     //
     // @param domainIdParam Domain id (required)
     // @param redirectionPolicyIdParam Redirection map id (required)

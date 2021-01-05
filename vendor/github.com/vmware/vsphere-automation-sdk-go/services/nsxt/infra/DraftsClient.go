@@ -65,7 +65,7 @@ type DraftsClient interface {
     // @throws NotFound  Not Found
 	Patch(draftIdParam string, policyDraftParam model.PolicyDraft) error
 
-    // Read a draft and publish it by applying changes onto current configuration.
+    // Read a draft and publish it by applying changes onto current configuration. If there are additional changes on top of draft configuration, pass it as a request body, in form of Infra object. Otherwise, if there are no additional changes, then pass empty Infra object as a request body.
     //
     // @param draftIdParam (required)
     // @param infraParam (required)

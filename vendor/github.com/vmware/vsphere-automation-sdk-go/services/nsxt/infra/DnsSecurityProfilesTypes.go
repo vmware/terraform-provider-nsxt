@@ -28,7 +28,9 @@ func dnsSecurityProfilesDeleteInputType() bindings.StructType {
 	fields := make(map[string]bindings.BindingType)
 	fieldNameMap := make(map[string]string)
 	fields["profile_id"] = bindings.NewStringType()
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["profile_id"] = "ProfileId"
+	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -47,10 +49,14 @@ func dnsSecurityProfilesDeleteRestMetadata() protocol.OperationRestMetadata {
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
 	fields["profile_id"] = bindings.NewStringType()
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["profile_id"] = "ProfileId"
+	fieldNameMap["override"] = "Override"
 	paramsTypeMap["profile_id"] = bindings.NewStringType()
+	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["profileId"] = bindings.NewStringType()
 	pathParams["profile_id"] = "profileId"
+	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -208,8 +214,10 @@ func dnsSecurityProfilesPatchInputType() bindings.StructType {
 	fieldNameMap := make(map[string]string)
 	fields["profile_id"] = bindings.NewStringType()
 	fields["dns_security_profile"] = bindings.NewReferenceType(model.DnsSecurityProfileBindingType)
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["profile_id"] = "ProfileId"
 	fieldNameMap["dns_security_profile"] = "DnsSecurityProfile"
+	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -229,12 +237,16 @@ func dnsSecurityProfilesPatchRestMetadata() protocol.OperationRestMetadata {
 	bodyFieldsMap := map[string]string{}
 	fields["profile_id"] = bindings.NewStringType()
 	fields["dns_security_profile"] = bindings.NewReferenceType(model.DnsSecurityProfileBindingType)
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["profile_id"] = "ProfileId"
 	fieldNameMap["dns_security_profile"] = "DnsSecurityProfile"
+	fieldNameMap["override"] = "Override"
 	paramsTypeMap["dns_security_profile"] = bindings.NewReferenceType(model.DnsSecurityProfileBindingType)
 	paramsTypeMap["profile_id"] = bindings.NewStringType()
+	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["profileId"] = bindings.NewStringType()
 	pathParams["profile_id"] = "profileId"
+	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -263,8 +275,10 @@ func dnsSecurityProfilesUpdateInputType() bindings.StructType {
 	fieldNameMap := make(map[string]string)
 	fields["profile_id"] = bindings.NewStringType()
 	fields["dns_security_profile"] = bindings.NewReferenceType(model.DnsSecurityProfileBindingType)
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["profile_id"] = "ProfileId"
 	fieldNameMap["dns_security_profile"] = "DnsSecurityProfile"
+	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -284,12 +298,16 @@ func dnsSecurityProfilesUpdateRestMetadata() protocol.OperationRestMetadata {
 	bodyFieldsMap := map[string]string{}
 	fields["profile_id"] = bindings.NewStringType()
 	fields["dns_security_profile"] = bindings.NewReferenceType(model.DnsSecurityProfileBindingType)
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["profile_id"] = "ProfileId"
 	fieldNameMap["dns_security_profile"] = "DnsSecurityProfile"
+	fieldNameMap["override"] = "Override"
 	paramsTypeMap["dns_security_profile"] = bindings.NewReferenceType(model.DnsSecurityProfileBindingType)
 	paramsTypeMap["profile_id"] = bindings.NewStringType()
+	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["profileId"] = bindings.NewStringType()
 	pathParams["profile_id"] = "profileId"
+	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(

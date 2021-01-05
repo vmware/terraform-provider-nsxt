@@ -152,6 +152,7 @@ func intrusionServicePoliciesListInputType() bindings.StructType {
 	fields["domain_id"] = bindings.NewStringType()
 	fields["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
 	fields["include_mark_for_delete_objects"] = bindings.NewOptionalType(bindings.NewBooleanType())
+	fields["include_rule_count"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fields["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
 	fields["page_size"] = bindings.NewOptionalType(bindings.NewIntegerType())
 	fields["sort_ascending"] = bindings.NewOptionalType(bindings.NewBooleanType())
@@ -159,6 +160,7 @@ func intrusionServicePoliciesListInputType() bindings.StructType {
 	fieldNameMap["domain_id"] = "DomainId"
 	fieldNameMap["cursor"] = "Cursor"
 	fieldNameMap["include_mark_for_delete_objects"] = "IncludeMarkForDeleteObjects"
+	fieldNameMap["include_rule_count"] = "IncludeRuleCount"
 	fieldNameMap["included_fields"] = "IncludedFields"
 	fieldNameMap["page_size"] = "PageSize"
 	fieldNameMap["sort_ascending"] = "SortAscending"
@@ -183,6 +185,7 @@ func intrusionServicePoliciesListRestMetadata() protocol.OperationRestMetadata {
 	fields["domain_id"] = bindings.NewStringType()
 	fields["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
 	fields["include_mark_for_delete_objects"] = bindings.NewOptionalType(bindings.NewBooleanType())
+	fields["include_rule_count"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fields["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
 	fields["page_size"] = bindings.NewOptionalType(bindings.NewIntegerType())
 	fields["sort_ascending"] = bindings.NewOptionalType(bindings.NewBooleanType())
@@ -190,11 +193,13 @@ func intrusionServicePoliciesListRestMetadata() protocol.OperationRestMetadata {
 	fieldNameMap["domain_id"] = "DomainId"
 	fieldNameMap["cursor"] = "Cursor"
 	fieldNameMap["include_mark_for_delete_objects"] = "IncludeMarkForDeleteObjects"
+	fieldNameMap["include_rule_count"] = "IncludeRuleCount"
 	fieldNameMap["included_fields"] = "IncludedFields"
 	fieldNameMap["page_size"] = "PageSize"
 	fieldNameMap["sort_ascending"] = "SortAscending"
 	fieldNameMap["sort_by"] = "SortBy"
 	paramsTypeMap["domain_id"] = bindings.NewStringType()
+	paramsTypeMap["include_rule_count"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
 	paramsTypeMap["page_size"] = bindings.NewOptionalType(bindings.NewIntegerType())
 	paramsTypeMap["include_mark_for_delete_objects"] = bindings.NewOptionalType(bindings.NewBooleanType())
@@ -204,6 +209,7 @@ func intrusionServicePoliciesListRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["domainId"] = bindings.NewStringType()
 	pathParams["domain_id"] = "domainId"
 	queryParams["cursor"] = "cursor"
+	queryParams["include_rule_count"] = "include_rule_count"
 	queryParams["sort_ascending"] = "sort_ascending"
 	queryParams["included_fields"] = "included_fields"
 	queryParams["sort_by"] = "sort_by"

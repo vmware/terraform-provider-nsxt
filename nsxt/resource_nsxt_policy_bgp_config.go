@@ -139,7 +139,7 @@ func resourceNsxtPolicyBgpConfigCreate(d *schema.ResourceData, m interface{}) er
 	}
 
 	client := gm_locale_services.NewDefaultBgpClient(connector)
-	err = client.Patch(gwID, serviceID, *obj)
+	err = client.Patch(gwID, serviceID, *obj, nil)
 	if err != nil {
 		return handleCreateError("BgpRoutingConfig", gwID, err)
 	}
@@ -169,7 +169,7 @@ func resourceNsxtPolicyBgpConfigUpdate(d *schema.ResourceData, m interface{}) er
 	obj.Revision = &revision
 
 	client := gm_locale_services.NewDefaultBgpClient(connector)
-	_, err = client.Update(gwID, serviceID, *obj)
+	_, err = client.Update(gwID, serviceID, *obj, nil)
 	if err != nil {
 		return handleUpdateError("BgpRoutingConfig", gwID, err)
 	}

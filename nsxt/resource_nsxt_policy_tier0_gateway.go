@@ -435,23 +435,8 @@ func getPolicyVRFConfigFromSchema(d *schema.ResourceData) *model.Tier0VrfConfig 
 	gwPath := vrfConfig["gateway_path"].(string)
 	routeDist := vrfConfig["route_distinguisher"].(string)
 
-	var tagStructs []model.Tag
-	if vrfConfig["tag"] != nil {
-		vrfTags := vrfConfig["tag"].(*schema.Set).List()
-		for _, tag := range vrfTags {
-			data := tag.(map[string]interface{})
-			tagScope := data["scope"].(string)
-			tagTag := data["tag"].(string)
-			elem := model.Tag{
-				Scope: &tagScope,
-				Tag:   &tagTag}
-			tagStructs = append(tagStructs, elem)
-		}
-	}
-
 	config := model.Tier0VrfConfig{
 		Tier0Path: &gwPath,
-		Tags:      tagStructs,
 	}
 
 	if len(routeDist) > 0 {
@@ -506,15 +491,6 @@ func setPolicyVRFConfigInSchema(d *schema.ResourceData, config *model.Tier0VrfCo
 		routeTargets = append(routeTargets, routeTarget)
 		elem["route_target"] = routeTargets
 	}
-
-	var tagList []map[string]string
-	for _, tag := range config.Tags {
-		tagElem := make(map[string]string)
-		tagElem["scope"] = *tag.Scope
-		tagElem["tag"] = *tag.Tag
-		tagList = append(tagList, tagElem)
-	}
-	elem["tag"] = tagList
 
 	vrfConfigs = append(vrfConfigs, elem)
 

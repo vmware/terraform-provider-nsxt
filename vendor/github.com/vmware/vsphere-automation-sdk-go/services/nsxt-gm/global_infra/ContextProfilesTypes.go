@@ -29,8 +29,10 @@ func contextProfilesDeleteInputType() bindings.StructType {
 	fieldNameMap := make(map[string]string)
 	fields["context_profile_id"] = bindings.NewStringType()
 	fields["force"] = bindings.NewOptionalType(bindings.NewBooleanType())
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["context_profile_id"] = "ContextProfileId"
 	fieldNameMap["force"] = "Force"
+	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -50,13 +52,17 @@ func contextProfilesDeleteRestMetadata() protocol.OperationRestMetadata {
 	bodyFieldsMap := map[string]string{}
 	fields["context_profile_id"] = bindings.NewStringType()
 	fields["force"] = bindings.NewOptionalType(bindings.NewBooleanType())
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["context_profile_id"] = "ContextProfileId"
 	fieldNameMap["force"] = "Force"
+	fieldNameMap["override"] = "Override"
 	paramsTypeMap["force"] = bindings.NewOptionalType(bindings.NewBooleanType())
+	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["context_profile_id"] = bindings.NewStringType()
 	paramsTypeMap["contextProfileId"] = bindings.NewStringType()
 	pathParams["context_profile_id"] = "contextProfileId"
 	queryParams["force"] = "force"
+	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -214,8 +220,10 @@ func contextProfilesPatchInputType() bindings.StructType {
 	fieldNameMap := make(map[string]string)
 	fields["context_profile_id"] = bindings.NewStringType()
 	fields["policy_context_profile"] = bindings.NewReferenceType(model.PolicyContextProfileBindingType)
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["context_profile_id"] = "ContextProfileId"
 	fieldNameMap["policy_context_profile"] = "PolicyContextProfile"
+	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -235,12 +243,16 @@ func contextProfilesPatchRestMetadata() protocol.OperationRestMetadata {
 	bodyFieldsMap := map[string]string{}
 	fields["context_profile_id"] = bindings.NewStringType()
 	fields["policy_context_profile"] = bindings.NewReferenceType(model.PolicyContextProfileBindingType)
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["context_profile_id"] = "ContextProfileId"
 	fieldNameMap["policy_context_profile"] = "PolicyContextProfile"
+	fieldNameMap["override"] = "Override"
+	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["context_profile_id"] = bindings.NewStringType()
 	paramsTypeMap["policy_context_profile"] = bindings.NewReferenceType(model.PolicyContextProfileBindingType)
 	paramsTypeMap["contextProfileId"] = bindings.NewStringType()
 	pathParams["context_profile_id"] = "contextProfileId"
+	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -269,8 +281,10 @@ func contextProfilesUpdateInputType() bindings.StructType {
 	fieldNameMap := make(map[string]string)
 	fields["context_profile_id"] = bindings.NewStringType()
 	fields["policy_context_profile"] = bindings.NewReferenceType(model.PolicyContextProfileBindingType)
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["context_profile_id"] = "ContextProfileId"
 	fieldNameMap["policy_context_profile"] = "PolicyContextProfile"
+	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -290,12 +304,16 @@ func contextProfilesUpdateRestMetadata() protocol.OperationRestMetadata {
 	bodyFieldsMap := map[string]string{}
 	fields["context_profile_id"] = bindings.NewStringType()
 	fields["policy_context_profile"] = bindings.NewReferenceType(model.PolicyContextProfileBindingType)
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["context_profile_id"] = "ContextProfileId"
 	fieldNameMap["policy_context_profile"] = "PolicyContextProfile"
+	fieldNameMap["override"] = "Override"
+	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["context_profile_id"] = bindings.NewStringType()
 	paramsTypeMap["policy_context_profile"] = bindings.NewReferenceType(model.PolicyContextProfileBindingType)
 	paramsTypeMap["contextProfileId"] = bindings.NewStringType()
 	pathParams["context_profile_id"] = "contextProfileId"
+	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
