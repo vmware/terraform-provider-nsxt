@@ -16,6 +16,18 @@ import (
 
 type BgpClient interface {
 
+    // Deletes the specified overridden BgpRoutingConfig. If the BgpRoutingConfig is not overridden, it won't get deleted.
+    //
+    // @param tier0IdParam (required)
+    // @param localeServiceIdParam (required)
+    // @param overrideParam Locally override the global object (optional, default to false)
+    // @throws InvalidRequest  Bad Request, Precondition Failed
+    // @throws Unauthorized  Forbidden
+    // @throws ServiceUnavailable  Service Unavailable
+    // @throws InternalServerError  Internal Server Error
+    // @throws NotFound  Not Found
+	Delete(tier0IdParam string, localeServiceIdParam string, overrideParam *bool) error
+
     // Read BGP routing config
     //
     // @param tier0IdParam (required)
@@ -33,23 +45,25 @@ type BgpClient interface {
     // @param tier0IdParam (required)
     // @param localeServiceIdParam (required)
     // @param bgpRoutingConfigParam (required)
+    // @param overrideParam Locally override the global object (optional, default to false)
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Patch(tier0IdParam string, localeServiceIdParam string, bgpRoutingConfigParam model.BgpRoutingConfig) error
+	Patch(tier0IdParam string, localeServiceIdParam string, bgpRoutingConfigParam model.BgpRoutingConfig, overrideParam *bool) error
 
     // If BGP routing config is not already present, create BGP routing config. If it already exists, replace the BGP routing config with this object.
     //
     // @param tier0IdParam (required)
     // @param localeServiceIdParam (required)
     // @param bgpRoutingConfigParam (required)
+    // @param overrideParam Locally override the global object (optional, default to false)
     // @return com.vmware.nsx_policy.model.BgpRoutingConfig
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
     // @throws ServiceUnavailable  Service Unavailable
     // @throws InternalServerError  Internal Server Error
     // @throws NotFound  Not Found
-	Update(tier0IdParam string, localeServiceIdParam string, bgpRoutingConfigParam model.BgpRoutingConfig) (model.BgpRoutingConfig, error)
+	Update(tier0IdParam string, localeServiceIdParam string, bgpRoutingConfigParam model.BgpRoutingConfig, overrideParam *bool) (model.BgpRoutingConfig, error)
 }

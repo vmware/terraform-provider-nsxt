@@ -82,11 +82,12 @@ func NewDefaultBfdProfilesClient(connector client.Connector) *DefaultBfdProfiles
 	return &bIface
 }
 
-func (bIface *DefaultBfdProfilesClient) Delete(bfdProfileIdParam string) error {
+func (bIface *DefaultBfdProfilesClient) Delete(bfdProfileIdParam string, overrideParam *bool) error {
 	typeConverter := bIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(bIface.interfaceIdentifier, "delete")
 	sv := bindings.NewStructValueBuilder(bfdProfilesDeleteInputType(), typeConverter)
 	sv.AddStructField("BfdProfileId", bfdProfileIdParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
@@ -177,12 +178,13 @@ func (bIface *DefaultBfdProfilesClient) List(cursorParam *string, includeMarkFor
 	}
 }
 
-func (bIface *DefaultBfdProfilesClient) Patch(bfdProfileIdParam string, bfdProfileParam model.BfdProfile) error {
+func (bIface *DefaultBfdProfilesClient) Patch(bfdProfileIdParam string, bfdProfileParam model.BfdProfile, overrideParam *bool) error {
 	typeConverter := bIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(bIface.interfaceIdentifier, "patch")
 	sv := bindings.NewStructValueBuilder(bfdProfilesPatchInputType(), typeConverter)
 	sv.AddStructField("BfdProfileId", bfdProfileIdParam)
 	sv.AddStructField("BfdProfile", bfdProfileParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
@@ -204,12 +206,13 @@ func (bIface *DefaultBfdProfilesClient) Patch(bfdProfileIdParam string, bfdProfi
 	}
 }
 
-func (bIface *DefaultBfdProfilesClient) Update(bfdProfileIdParam string, bfdProfileParam model.BfdProfile) (model.BfdProfile, error) {
+func (bIface *DefaultBfdProfilesClient) Update(bfdProfileIdParam string, bfdProfileParam model.BfdProfile, overrideParam *bool) (model.BfdProfile, error) {
 	typeConverter := bIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(bIface.interfaceIdentifier, "update")
 	sv := bindings.NewStructValueBuilder(bfdProfilesUpdateInputType(), typeConverter)
 	sv.AddStructField("BfdProfileId", bfdProfileIdParam)
 	sv.AddStructField("BfdProfile", bfdProfileParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		var emptyOutput model.BfdProfile

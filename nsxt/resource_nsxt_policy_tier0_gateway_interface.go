@@ -223,10 +223,10 @@ func resourceNsxtPolicyTier0GatewayInterfaceCreate(d *schema.ResourceData, m int
 			return err1
 		}
 		client := gm_locale_services.NewDefaultInterfacesClient(connector)
-		err = client.Patch(tier0ID, localeServiceID, id, gmObj.(gm_model.Tier0Interface))
+		err = client.Patch(tier0ID, localeServiceID, id, gmObj.(gm_model.Tier0Interface), nil)
 	} else {
 		client := locale_services.NewDefaultInterfacesClient(connector)
-		err = client.Patch(tier0ID, localeServiceID, id, obj)
+		err = client.Patch(tier0ID, localeServiceID, id, obj, nil)
 	}
 
 	if err != nil {
@@ -390,10 +390,10 @@ func resourceNsxtPolicyTier0GatewayInterfaceUpdate(d *schema.ResourceData, m int
 			return err1
 		}
 		client := gm_locale_services.NewDefaultInterfacesClient(connector)
-		_, err = client.Update(tier0ID, localeServiceID, id, gmObj.(gm_model.Tier0Interface))
+		_, err = client.Update(tier0ID, localeServiceID, id, gmObj.(gm_model.Tier0Interface), nil)
 	} else {
 		client := locale_services.NewDefaultInterfacesClient(connector)
-		_, err = client.Update(tier0ID, localeServiceID, id, obj)
+		_, err = client.Update(tier0ID, localeServiceID, id, obj, nil)
 	}
 	if err != nil {
 		return handleUpdateError("Tier0 Interface", id, err)
@@ -415,10 +415,10 @@ func resourceNsxtPolicyTier0GatewayInterfaceDelete(d *schema.ResourceData, m int
 	var err error
 	if isPolicyGlobalManager(m) {
 		client := gm_locale_services.NewDefaultInterfacesClient(connector)
-		err = client.Delete(tier0ID, localeServiceID, id)
+		err = client.Delete(tier0ID, localeServiceID, id, nil)
 	} else {
 		client := locale_services.NewDefaultInterfacesClient(connector)
-		err = client.Delete(tier0ID, localeServiceID, id)
+		err = client.Delete(tier0ID, localeServiceID, id, nil)
 	}
 	if err != nil {
 		return handleDeleteError("Tier0 Interface", id, err)

@@ -74,11 +74,12 @@ func NewDefaultAttributesClient(connector client.Connector) *DefaultAttributesCl
 	return &aIface
 }
 
-func (aIface *DefaultAttributesClient) List(attributeKeyParam *string, cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.PolicyContextProfileListResult, error) {
+func (aIface *DefaultAttributesClient) List(attributeKeyParam *string, attributeSourceParam *string, cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.PolicyContextProfileListResult, error) {
 	typeConverter := aIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(aIface.interfaceIdentifier, "list")
 	sv := bindings.NewStructValueBuilder(attributesListInputType(), typeConverter)
 	sv.AddStructField("AttributeKey", attributeKeyParam)
+	sv.AddStructField("AttributeSource", attributeSourceParam)
 	sv.AddStructField("Cursor", cursorParam)
 	sv.AddStructField("IncludeMarkForDeleteObjects", includeMarkForDeleteObjectsParam)
 	sv.AddStructField("IncludedFields", includedFieldsParam)

@@ -65,10 +65,10 @@ func testAccDataSourceNsxtPolicyIpv6DadProfileCreate(name string) error {
 			return convErr
 		}
 		client := gm_infra.NewDefaultIpv6DadProfilesClient(connector)
-		err = client.Patch(id, gmObj.(gm_model.Ipv6DadProfile))
+		err = client.Patch(id, gmObj.(gm_model.Ipv6DadProfile), nil)
 	} else {
 		client := infra.NewDefaultIpv6DadProfilesClient(connector)
-		err = client.Patch(id, obj)
+		err = client.Patch(id, obj, nil)
 	}
 
 	if err != nil {
@@ -87,7 +87,7 @@ func testAccDataSourceNsxtPolicyIpv6DadProfileDeleteByName(name string) error {
 		objID, err := testGetObjIDByName(name, "Ipv6DadProfile")
 		if err == nil {
 			client := gm_infra.NewDefaultIpv6DadProfilesClient(connector)
-			err := client.Delete(objID)
+			err := client.Delete(objID, nil)
 			if err != nil {
 				return handleDeleteError("Ipv6DadProfile", objID, err)
 			}
@@ -103,7 +103,7 @@ func testAccDataSourceNsxtPolicyIpv6DadProfileDeleteByName(name string) error {
 		}
 		for _, objInList := range objList.Results {
 			if *objInList.DisplayName == name {
-				err := client.Delete(*objInList.Id)
+				err := client.Delete(*objInList.Id, nil)
 				if err != nil {
 					return handleDeleteError("Ipv6DadProfile", *objInList.Id, err)
 				}

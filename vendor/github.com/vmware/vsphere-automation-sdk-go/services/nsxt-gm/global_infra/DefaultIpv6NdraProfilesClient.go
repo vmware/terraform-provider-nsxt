@@ -82,11 +82,12 @@ func NewDefaultIpv6NdraProfilesClient(connector client.Connector) *DefaultIpv6Nd
 	return &iIface
 }
 
-func (iIface *DefaultIpv6NdraProfilesClient) Delete(ndraProfileIdParam string) error {
+func (iIface *DefaultIpv6NdraProfilesClient) Delete(ndraProfileIdParam string, overrideParam *bool) error {
 	typeConverter := iIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(iIface.interfaceIdentifier, "delete")
 	sv := bindings.NewStructValueBuilder(ipv6NdraProfilesDeleteInputType(), typeConverter)
 	sv.AddStructField("NdraProfileId", ndraProfileIdParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
@@ -177,12 +178,13 @@ func (iIface *DefaultIpv6NdraProfilesClient) List(cursorParam *string, includeMa
 	}
 }
 
-func (iIface *DefaultIpv6NdraProfilesClient) Patch(ndraProfileIdParam string, ipv6NdraProfileParam model.Ipv6NdraProfile) error {
+func (iIface *DefaultIpv6NdraProfilesClient) Patch(ndraProfileIdParam string, ipv6NdraProfileParam model.Ipv6NdraProfile, overrideParam *bool) error {
 	typeConverter := iIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(iIface.interfaceIdentifier, "patch")
 	sv := bindings.NewStructValueBuilder(ipv6NdraProfilesPatchInputType(), typeConverter)
 	sv.AddStructField("NdraProfileId", ndraProfileIdParam)
 	sv.AddStructField("Ipv6NdraProfile", ipv6NdraProfileParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
@@ -204,12 +206,13 @@ func (iIface *DefaultIpv6NdraProfilesClient) Patch(ndraProfileIdParam string, ip
 	}
 }
 
-func (iIface *DefaultIpv6NdraProfilesClient) Update(ndraProfileIdParam string, ipv6NdraProfileParam model.Ipv6NdraProfile) (model.Ipv6NdraProfile, error) {
+func (iIface *DefaultIpv6NdraProfilesClient) Update(ndraProfileIdParam string, ipv6NdraProfileParam model.Ipv6NdraProfile, overrideParam *bool) (model.Ipv6NdraProfile, error) {
 	typeConverter := iIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(iIface.interfaceIdentifier, "update")
 	sv := bindings.NewStructValueBuilder(ipv6NdraProfilesUpdateInputType(), typeConverter)
 	sv.AddStructField("NdraProfileId", ndraProfileIdParam)
 	sv.AddStructField("Ipv6NdraProfile", ipv6NdraProfileParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		var emptyOutput model.Ipv6NdraProfile

@@ -82,13 +82,14 @@ func NewDefaultNeighborsClient(connector client.Connector) *DefaultNeighborsClie
 	return &nIface
 }
 
-func (nIface *DefaultNeighborsClient) Delete(tier0IdParam string, localeServiceIdParam string, neighborIdParam string) error {
+func (nIface *DefaultNeighborsClient) Delete(tier0IdParam string, localeServiceIdParam string, neighborIdParam string, overrideParam *bool) error {
 	typeConverter := nIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(nIface.interfaceIdentifier, "delete")
 	sv := bindings.NewStructValueBuilder(neighborsDeleteInputType(), typeConverter)
 	sv.AddStructField("Tier0Id", tier0IdParam)
 	sv.AddStructField("LocaleServiceId", localeServiceIdParam)
 	sv.AddStructField("NeighborId", neighborIdParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
@@ -183,7 +184,7 @@ func (nIface *DefaultNeighborsClient) List(tier0IdParam string, localeServiceIdP
 	}
 }
 
-func (nIface *DefaultNeighborsClient) Patch(tier0IdParam string, localeServiceIdParam string, neighborIdParam string, bgpNeighborConfigParam model.BgpNeighborConfig) error {
+func (nIface *DefaultNeighborsClient) Patch(tier0IdParam string, localeServiceIdParam string, neighborIdParam string, bgpNeighborConfigParam model.BgpNeighborConfig, overrideParam *bool) error {
 	typeConverter := nIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(nIface.interfaceIdentifier, "patch")
 	sv := bindings.NewStructValueBuilder(neighborsPatchInputType(), typeConverter)
@@ -191,6 +192,7 @@ func (nIface *DefaultNeighborsClient) Patch(tier0IdParam string, localeServiceId
 	sv.AddStructField("LocaleServiceId", localeServiceIdParam)
 	sv.AddStructField("NeighborId", neighborIdParam)
 	sv.AddStructField("BgpNeighborConfig", bgpNeighborConfigParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
@@ -212,7 +214,7 @@ func (nIface *DefaultNeighborsClient) Patch(tier0IdParam string, localeServiceId
 	}
 }
 
-func (nIface *DefaultNeighborsClient) Update(tier0IdParam string, localeServiceIdParam string, neighborIdParam string, bgpNeighborConfigParam model.BgpNeighborConfig) (model.BgpNeighborConfig, error) {
+func (nIface *DefaultNeighborsClient) Update(tier0IdParam string, localeServiceIdParam string, neighborIdParam string, bgpNeighborConfigParam model.BgpNeighborConfig, overrideParam *bool) (model.BgpNeighborConfig, error) {
 	typeConverter := nIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(nIface.interfaceIdentifier, "update")
 	sv := bindings.NewStructValueBuilder(neighborsUpdateInputType(), typeConverter)
@@ -220,6 +222,7 @@ func (nIface *DefaultNeighborsClient) Update(tier0IdParam string, localeServiceI
 	sv.AddStructField("LocaleServiceId", localeServiceIdParam)
 	sv.AddStructField("NeighborId", neighborIdParam)
 	sv.AddStructField("BgpNeighborConfig", bgpNeighborConfigParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		var emptyOutput model.BgpNeighborConfig

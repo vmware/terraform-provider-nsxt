@@ -30,9 +30,11 @@ func neighborsDeleteInputType() bindings.StructType {
 	fields["tier0_id"] = bindings.NewStringType()
 	fields["locale_service_id"] = bindings.NewStringType()
 	fields["neighbor_id"] = bindings.NewStringType()
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["tier0_id"] = "Tier0Id"
 	fieldNameMap["locale_service_id"] = "LocaleServiceId"
 	fieldNameMap["neighbor_id"] = "NeighborId"
+	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -53,18 +55,22 @@ func neighborsDeleteRestMetadata() protocol.OperationRestMetadata {
 	fields["tier0_id"] = bindings.NewStringType()
 	fields["locale_service_id"] = bindings.NewStringType()
 	fields["neighbor_id"] = bindings.NewStringType()
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["tier0_id"] = "Tier0Id"
 	fieldNameMap["locale_service_id"] = "LocaleServiceId"
 	fieldNameMap["neighbor_id"] = "NeighborId"
+	fieldNameMap["override"] = "Override"
 	paramsTypeMap["tier0_id"] = bindings.NewStringType()
 	paramsTypeMap["locale_service_id"] = bindings.NewStringType()
 	paramsTypeMap["neighbor_id"] = bindings.NewStringType()
+	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["tier0Id"] = bindings.NewStringType()
 	paramsTypeMap["localeServiceId"] = bindings.NewStringType()
 	paramsTypeMap["neighborId"] = bindings.NewStringType()
 	pathParams["neighbor_id"] = "neighborId"
 	pathParams["tier0_id"] = "tier0Id"
 	pathParams["locale_service_id"] = "localeServiceId"
+	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -252,10 +258,12 @@ func neighborsPatchInputType() bindings.StructType {
 	fields["locale_service_id"] = bindings.NewStringType()
 	fields["neighbor_id"] = bindings.NewStringType()
 	fields["bgp_neighbor_config"] = bindings.NewReferenceType(model.BgpNeighborConfigBindingType)
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["tier0_id"] = "Tier0Id"
 	fieldNameMap["locale_service_id"] = "LocaleServiceId"
 	fieldNameMap["neighbor_id"] = "NeighborId"
 	fieldNameMap["bgp_neighbor_config"] = "BgpNeighborConfig"
+	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -277,20 +285,24 @@ func neighborsPatchRestMetadata() protocol.OperationRestMetadata {
 	fields["locale_service_id"] = bindings.NewStringType()
 	fields["neighbor_id"] = bindings.NewStringType()
 	fields["bgp_neighbor_config"] = bindings.NewReferenceType(model.BgpNeighborConfigBindingType)
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["tier0_id"] = "Tier0Id"
 	fieldNameMap["locale_service_id"] = "LocaleServiceId"
 	fieldNameMap["neighbor_id"] = "NeighborId"
 	fieldNameMap["bgp_neighbor_config"] = "BgpNeighborConfig"
+	fieldNameMap["override"] = "Override"
 	paramsTypeMap["tier0_id"] = bindings.NewStringType()
 	paramsTypeMap["locale_service_id"] = bindings.NewStringType()
 	paramsTypeMap["bgp_neighbor_config"] = bindings.NewReferenceType(model.BgpNeighborConfigBindingType)
 	paramsTypeMap["neighbor_id"] = bindings.NewStringType()
+	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["tier0Id"] = bindings.NewStringType()
 	paramsTypeMap["localeServiceId"] = bindings.NewStringType()
 	paramsTypeMap["neighborId"] = bindings.NewStringType()
 	pathParams["neighbor_id"] = "neighborId"
 	pathParams["tier0_id"] = "tier0Id"
 	pathParams["locale_service_id"] = "localeServiceId"
+	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -321,10 +333,12 @@ func neighborsUpdateInputType() bindings.StructType {
 	fields["locale_service_id"] = bindings.NewStringType()
 	fields["neighbor_id"] = bindings.NewStringType()
 	fields["bgp_neighbor_config"] = bindings.NewReferenceType(model.BgpNeighborConfigBindingType)
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["tier0_id"] = "Tier0Id"
 	fieldNameMap["locale_service_id"] = "LocaleServiceId"
 	fieldNameMap["neighbor_id"] = "NeighborId"
 	fieldNameMap["bgp_neighbor_config"] = "BgpNeighborConfig"
+	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -346,20 +360,24 @@ func neighborsUpdateRestMetadata() protocol.OperationRestMetadata {
 	fields["locale_service_id"] = bindings.NewStringType()
 	fields["neighbor_id"] = bindings.NewStringType()
 	fields["bgp_neighbor_config"] = bindings.NewReferenceType(model.BgpNeighborConfigBindingType)
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["tier0_id"] = "Tier0Id"
 	fieldNameMap["locale_service_id"] = "LocaleServiceId"
 	fieldNameMap["neighbor_id"] = "NeighborId"
 	fieldNameMap["bgp_neighbor_config"] = "BgpNeighborConfig"
+	fieldNameMap["override"] = "Override"
 	paramsTypeMap["tier0_id"] = bindings.NewStringType()
 	paramsTypeMap["locale_service_id"] = bindings.NewStringType()
 	paramsTypeMap["bgp_neighbor_config"] = bindings.NewReferenceType(model.BgpNeighborConfigBindingType)
 	paramsTypeMap["neighbor_id"] = bindings.NewStringType()
+	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["tier0Id"] = bindings.NewStringType()
 	paramsTypeMap["localeServiceId"] = bindings.NewStringType()
 	paramsTypeMap["neighborId"] = bindings.NewStringType()
 	pathParams["neighbor_id"] = "neighborId"
 	pathParams["tier0_id"] = "tier0Id"
 	pathParams["locale_service_id"] = "localeServiceId"
+	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(

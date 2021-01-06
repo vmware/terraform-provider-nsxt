@@ -82,11 +82,12 @@ func NewDefaultFirewallSessionTimerProfilesClient(connector client.Connector) *D
 	return &fIface
 }
 
-func (fIface *DefaultFirewallSessionTimerProfilesClient) Delete(firewallSessionTimerProfileIdParam string) error {
+func (fIface *DefaultFirewallSessionTimerProfilesClient) Delete(firewallSessionTimerProfileIdParam string, overrideParam *bool) error {
 	typeConverter := fIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(fIface.interfaceIdentifier, "delete")
 	sv := bindings.NewStructValueBuilder(firewallSessionTimerProfilesDeleteInputType(), typeConverter)
 	sv.AddStructField("FirewallSessionTimerProfileId", firewallSessionTimerProfileIdParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
@@ -177,12 +178,13 @@ func (fIface *DefaultFirewallSessionTimerProfilesClient) List(cursorParam *strin
 	}
 }
 
-func (fIface *DefaultFirewallSessionTimerProfilesClient) Patch(firewallSessionTimerProfileIdParam string, policyFirewallSessionTimerProfileParam model.PolicyFirewallSessionTimerProfile) error {
+func (fIface *DefaultFirewallSessionTimerProfilesClient) Patch(firewallSessionTimerProfileIdParam string, policyFirewallSessionTimerProfileParam model.PolicyFirewallSessionTimerProfile, overrideParam *bool) error {
 	typeConverter := fIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(fIface.interfaceIdentifier, "patch")
 	sv := bindings.NewStructValueBuilder(firewallSessionTimerProfilesPatchInputType(), typeConverter)
 	sv.AddStructField("FirewallSessionTimerProfileId", firewallSessionTimerProfileIdParam)
 	sv.AddStructField("PolicyFirewallSessionTimerProfile", policyFirewallSessionTimerProfileParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
@@ -204,12 +206,13 @@ func (fIface *DefaultFirewallSessionTimerProfilesClient) Patch(firewallSessionTi
 	}
 }
 
-func (fIface *DefaultFirewallSessionTimerProfilesClient) Update(firewallSessionTimerProfileIdParam string, policyFirewallSessionTimerProfileParam model.PolicyFirewallSessionTimerProfile) (model.PolicyFirewallSessionTimerProfile, error) {
+func (fIface *DefaultFirewallSessionTimerProfilesClient) Update(firewallSessionTimerProfileIdParam string, policyFirewallSessionTimerProfileParam model.PolicyFirewallSessionTimerProfile, overrideParam *bool) (model.PolicyFirewallSessionTimerProfile, error) {
 	typeConverter := fIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(fIface.interfaceIdentifier, "update")
 	sv := bindings.NewStructValueBuilder(firewallSessionTimerProfilesUpdateInputType(), typeConverter)
 	sv.AddStructField("FirewallSessionTimerProfileId", firewallSessionTimerProfileIdParam)
 	sv.AddStructField("PolicyFirewallSessionTimerProfile", policyFirewallSessionTimerProfileParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		var emptyOutput model.PolicyFirewallSessionTimerProfile

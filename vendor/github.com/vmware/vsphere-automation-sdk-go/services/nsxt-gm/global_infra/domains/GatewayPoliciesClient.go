@@ -57,7 +57,7 @@ type GatewayPoliciesClient interface {
     // @throws NotFound  Not Found
 	List(domainIdParam string, cursorParam *string, includeMarkForDeleteObjectsParam *bool, includeRuleCountParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.GatewayPolicyListResult, error)
 
-    // Update the gateway policy for a domain. This is a full replace. All the rules are replaced.
+    // Update the gateway policy for a domain. This is a full replace. All the rules are replaced. Performance Note: If you want to edit several rules in a gateway policy use this API. It will perform better than several individual rule APIs. Just pass all the rules which you wish to edit as embedded rules to it.
     //
     // @param domainIdParam (required)
     // @param gatewayPolicyIdParam (required)
@@ -84,7 +84,7 @@ type GatewayPoliciesClient interface {
     // @throws NotFound  Not Found
 	Revise(domainIdParam string, gatewayPolicyIdParam string, gatewayPolicyParam model.GatewayPolicy, anchorPathParam *string, operationParam *string) (model.GatewayPolicy, error)
 
-    // Update the gateway policy for a domain. This is a full replace. All the rules are replaced.
+    // Update the gateway policy for a domain. This is a full replace. All the rules are replaced. Performance Note: If you want to edit several rules in a gateway policy, use this API. It will perform better than several individual rule APIs. Just pass all the rules which you wish to edit as embedded rules to it.
     //
     // @param domainIdParam (required)
     // @param gatewayPolicyIdParam (required)

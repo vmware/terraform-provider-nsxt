@@ -16,7 +16,7 @@ import (
 
 type GroupAssociationsClient interface {
 
-    // Get policy groups for which the given object is a member.
+    // Get policy groups for which the given object is a member. In Federation environment, if the given object is a global entity (eg: global segment) and if the entity is not stretched to the site specified in the enforcement_point_path parameter,then the following is returned:- 1)If the entity is a member of any global group and that group is stretched to the enforcement_point_path site,then the API returns an empty list. 2)If the entity is not a member of any global group,this API returns an 'invalid path' error message. 3)If both the entity and its corresponding groups are stretched to the enforcement_point_path site , then the API returns the groups list.
     //
     // @param intentPathParam String path of the intent object (required)
     // @param cursorParam Opaque cursor to be used for getting next page of records (supplied by current result page) (optional)

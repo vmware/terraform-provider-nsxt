@@ -28,11 +28,11 @@ type ByodServiceInstancesClient interface {
     // @throws NotFound  Not Found
 	Delete(tier0IdParam string, localeServiceIdParam string, serviceInstanceIdParam string) error
 
-    // Read byod service instance
+    // Read BYOD service instance
     //
     // @param tier0IdParam Tier-0 id (required)
     // @param localeServiceIdParam Locale service id (required)
-    // @param serviceInstanceIdParam Service instance id (required)
+    // @param serviceInstanceIdParam BYOD Service instance id (required)
     // @return com.vmware.nsx_policy.model.ByodPolicyServiceInstance
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
@@ -63,7 +63,7 @@ type ByodServiceInstancesClient interface {
     //
     // @param tier0IdParam Tier-0 id (required)
     // @param localeServiceIdParam Locale service id (required)
-    // @param serviceInstanceIdParam Service instance id (required)
+    // @param serviceInstanceIdParam BYOD Service instance id (required)
     // @param byodPolicyServiceInstanceParam (required)
     // @throws InvalidRequest  Bad Request, Precondition Failed
     // @throws Unauthorized  Forbidden
@@ -76,7 +76,7 @@ type ByodServiceInstancesClient interface {
     //
     // @param tier0IdParam Tier-0 id (required)
     // @param localeServiceIdParam Locale service id (required)
-    // @param serviceInstanceIdParam Byod service instance id (required)
+    // @param serviceInstanceIdParam BYOD service instance id (required)
     // @param byodPolicyServiceInstanceParam (required)
     // @return com.vmware.nsx_policy.model.ByodPolicyServiceInstance
     // @throws InvalidRequest  Bad Request, Precondition Failed

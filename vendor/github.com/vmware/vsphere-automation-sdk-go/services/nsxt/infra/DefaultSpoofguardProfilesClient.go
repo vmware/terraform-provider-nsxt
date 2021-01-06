@@ -82,11 +82,12 @@ func NewDefaultSpoofguardProfilesClient(connector client.Connector) *DefaultSpoo
 	return &sIface
 }
 
-func (sIface *DefaultSpoofguardProfilesClient) Delete(spoofguardProfileIdParam string) error {
+func (sIface *DefaultSpoofguardProfilesClient) Delete(spoofguardProfileIdParam string, overrideParam *bool) error {
 	typeConverter := sIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(sIface.interfaceIdentifier, "delete")
 	sv := bindings.NewStructValueBuilder(spoofguardProfilesDeleteInputType(), typeConverter)
 	sv.AddStructField("SpoofguardProfileId", spoofguardProfileIdParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
@@ -177,12 +178,13 @@ func (sIface *DefaultSpoofguardProfilesClient) List(cursorParam *string, include
 	}
 }
 
-func (sIface *DefaultSpoofguardProfilesClient) Patch(spoofguardProfileIdParam string, spoofGuardProfileParam model.SpoofGuardProfile) error {
+func (sIface *DefaultSpoofguardProfilesClient) Patch(spoofguardProfileIdParam string, spoofGuardProfileParam model.SpoofGuardProfile, overrideParam *bool) error {
 	typeConverter := sIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(sIface.interfaceIdentifier, "patch")
 	sv := bindings.NewStructValueBuilder(spoofguardProfilesPatchInputType(), typeConverter)
 	sv.AddStructField("SpoofguardProfileId", spoofguardProfileIdParam)
 	sv.AddStructField("SpoofGuardProfile", spoofGuardProfileParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
@@ -204,12 +206,13 @@ func (sIface *DefaultSpoofguardProfilesClient) Patch(spoofguardProfileIdParam st
 	}
 }
 
-func (sIface *DefaultSpoofguardProfilesClient) Update(spoofguardProfileIdParam string, spoofGuardProfileParam model.SpoofGuardProfile) (model.SpoofGuardProfile, error) {
+func (sIface *DefaultSpoofguardProfilesClient) Update(spoofguardProfileIdParam string, spoofGuardProfileParam model.SpoofGuardProfile, overrideParam *bool) (model.SpoofGuardProfile, error) {
 	typeConverter := sIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(sIface.interfaceIdentifier, "update")
 	sv := bindings.NewStructValueBuilder(spoofguardProfilesUpdateInputType(), typeConverter)
 	sv.AddStructField("SpoofguardProfileId", spoofguardProfileIdParam)
 	sv.AddStructField("SpoofGuardProfile", spoofGuardProfileParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		var emptyOutput model.SpoofGuardProfile

@@ -28,7 +28,9 @@ func bfdProfilesDeleteInputType() bindings.StructType {
 	fields := make(map[string]bindings.BindingType)
 	fieldNameMap := make(map[string]string)
 	fields["bfd_profile_id"] = bindings.NewStringType()
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["bfd_profile_id"] = "BfdProfileId"
+	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -47,10 +49,14 @@ func bfdProfilesDeleteRestMetadata() protocol.OperationRestMetadata {
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
 	fields["bfd_profile_id"] = bindings.NewStringType()
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["bfd_profile_id"] = "BfdProfileId"
+	fieldNameMap["override"] = "Override"
 	paramsTypeMap["bfd_profile_id"] = bindings.NewStringType()
+	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["bfdProfileId"] = bindings.NewStringType()
 	pathParams["bfd_profile_id"] = "bfdProfileId"
+	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -208,8 +214,10 @@ func bfdProfilesPatchInputType() bindings.StructType {
 	fieldNameMap := make(map[string]string)
 	fields["bfd_profile_id"] = bindings.NewStringType()
 	fields["bfd_profile"] = bindings.NewReferenceType(model.BfdProfileBindingType)
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["bfd_profile_id"] = "BfdProfileId"
 	fieldNameMap["bfd_profile"] = "BfdProfile"
+	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -229,12 +237,16 @@ func bfdProfilesPatchRestMetadata() protocol.OperationRestMetadata {
 	bodyFieldsMap := map[string]string{}
 	fields["bfd_profile_id"] = bindings.NewStringType()
 	fields["bfd_profile"] = bindings.NewReferenceType(model.BfdProfileBindingType)
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["bfd_profile_id"] = "BfdProfileId"
 	fieldNameMap["bfd_profile"] = "BfdProfile"
+	fieldNameMap["override"] = "Override"
 	paramsTypeMap["bfd_profile_id"] = bindings.NewStringType()
 	paramsTypeMap["bfd_profile"] = bindings.NewReferenceType(model.BfdProfileBindingType)
+	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["bfdProfileId"] = bindings.NewStringType()
 	pathParams["bfd_profile_id"] = "bfdProfileId"
+	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -263,8 +275,10 @@ func bfdProfilesUpdateInputType() bindings.StructType {
 	fieldNameMap := make(map[string]string)
 	fields["bfd_profile_id"] = bindings.NewStringType()
 	fields["bfd_profile"] = bindings.NewReferenceType(model.BfdProfileBindingType)
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["bfd_profile_id"] = "BfdProfileId"
 	fieldNameMap["bfd_profile"] = "BfdProfile"
+	fieldNameMap["override"] = "Override"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -284,12 +298,16 @@ func bfdProfilesUpdateRestMetadata() protocol.OperationRestMetadata {
 	bodyFieldsMap := map[string]string{}
 	fields["bfd_profile_id"] = bindings.NewStringType()
 	fields["bfd_profile"] = bindings.NewReferenceType(model.BfdProfileBindingType)
+	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fieldNameMap["bfd_profile_id"] = "BfdProfileId"
 	fieldNameMap["bfd_profile"] = "BfdProfile"
+	fieldNameMap["override"] = "Override"
 	paramsTypeMap["bfd_profile_id"] = bindings.NewStringType()
 	paramsTypeMap["bfd_profile"] = bindings.NewReferenceType(model.BfdProfileBindingType)
+	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	paramsTypeMap["bfdProfileId"] = bindings.NewStringType()
 	pathParams["bfd_profile_id"] = "bfdProfileId"
+	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(

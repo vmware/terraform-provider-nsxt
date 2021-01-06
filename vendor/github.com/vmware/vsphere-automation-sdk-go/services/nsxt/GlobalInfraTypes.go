@@ -27,8 +27,12 @@ import (
 func globalInfraGetInputType() bindings.StructType {
 	fields := make(map[string]bindings.BindingType)
 	fieldNameMap := make(map[string]string)
+	fields["base_path"] = bindings.NewOptionalType(bindings.NewStringType())
 	fields["filter"] = bindings.NewOptionalType(bindings.NewStringType())
+	fields["type_filter"] = bindings.NewOptionalType(bindings.NewStringType())
+	fieldNameMap["base_path"] = "BasePath"
 	fieldNameMap["filter"] = "Filter"
+	fieldNameMap["type_filter"] = "TypeFilter"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -46,10 +50,18 @@ func globalInfraGetRestMetadata() protocol.OperationRestMetadata {
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
+	fields["base_path"] = bindings.NewOptionalType(bindings.NewStringType())
 	fields["filter"] = bindings.NewOptionalType(bindings.NewStringType())
+	fields["type_filter"] = bindings.NewOptionalType(bindings.NewStringType())
+	fieldNameMap["base_path"] = "BasePath"
 	fieldNameMap["filter"] = "Filter"
+	fieldNameMap["type_filter"] = "TypeFilter"
+	paramsTypeMap["base_path"] = bindings.NewOptionalType(bindings.NewStringType())
 	paramsTypeMap["filter"] = bindings.NewOptionalType(bindings.NewStringType())
+	paramsTypeMap["type_filter"] = bindings.NewOptionalType(bindings.NewStringType())
 	queryParams["filter"] = "filter"
+	queryParams["base_path"] = "base_path"
+	queryParams["type_filter"] = "type_filter"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(

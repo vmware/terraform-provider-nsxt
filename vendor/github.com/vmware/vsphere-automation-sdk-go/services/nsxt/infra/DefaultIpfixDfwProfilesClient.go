@@ -82,11 +82,12 @@ func NewDefaultIpfixDfwProfilesClient(connector client.Connector) *DefaultIpfixD
 	return &iIface
 }
 
-func (iIface *DefaultIpfixDfwProfilesClient) Delete(ipfixDfwProfileIdParam string) error {
+func (iIface *DefaultIpfixDfwProfilesClient) Delete(ipfixDfwProfileIdParam string, overrideParam *bool) error {
 	typeConverter := iIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(iIface.interfaceIdentifier, "delete")
 	sv := bindings.NewStructValueBuilder(ipfixDfwProfilesDeleteInputType(), typeConverter)
 	sv.AddStructField("IpfixDfwProfileId", ipfixDfwProfileIdParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
@@ -177,12 +178,13 @@ func (iIface *DefaultIpfixDfwProfilesClient) List(cursorParam *string, includeMa
 	}
 }
 
-func (iIface *DefaultIpfixDfwProfilesClient) Patch(ipfixDfwProfileIdParam string, iPFIXDFWProfileParam model.IPFIXDFWProfile) error {
+func (iIface *DefaultIpfixDfwProfilesClient) Patch(ipfixDfwProfileIdParam string, iPFIXDFWProfileParam model.IPFIXDFWProfile, overrideParam *bool) error {
 	typeConverter := iIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(iIface.interfaceIdentifier, "patch")
 	sv := bindings.NewStructValueBuilder(ipfixDfwProfilesPatchInputType(), typeConverter)
 	sv.AddStructField("IpfixDfwProfileId", ipfixDfwProfileIdParam)
 	sv.AddStructField("IPFIXDFWProfile", iPFIXDFWProfileParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
@@ -204,12 +206,13 @@ func (iIface *DefaultIpfixDfwProfilesClient) Patch(ipfixDfwProfileIdParam string
 	}
 }
 
-func (iIface *DefaultIpfixDfwProfilesClient) Update(ipfixDfwProfileIdParam string, iPFIXDFWProfileParam model.IPFIXDFWProfile) (model.IPFIXDFWProfile, error) {
+func (iIface *DefaultIpfixDfwProfilesClient) Update(ipfixDfwProfileIdParam string, iPFIXDFWProfileParam model.IPFIXDFWProfile, overrideParam *bool) (model.IPFIXDFWProfile, error) {
 	typeConverter := iIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(iIface.interfaceIdentifier, "update")
 	sv := bindings.NewStructValueBuilder(ipfixDfwProfilesUpdateInputType(), typeConverter)
 	sv.AddStructField("IpfixDfwProfileId", ipfixDfwProfileIdParam)
 	sv.AddStructField("IPFIXDFWProfile", iPFIXDFWProfileParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		var emptyOutput model.IPFIXDFWProfile

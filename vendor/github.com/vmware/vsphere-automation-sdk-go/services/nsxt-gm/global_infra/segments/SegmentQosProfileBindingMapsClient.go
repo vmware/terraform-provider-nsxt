@@ -55,7 +55,7 @@ type SegmentQosProfileBindingMapsClient interface {
     // @throws NotFound  Not Found
 	List(segmentIdParam string, cursorParam *string, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.SegmentQosProfileBindingMapListResult, error)
 
-    // API will create segment QoS profile binding map.
+    // API will create segment QoS profile binding map. For objects with no binding maps, default profile is applied.
     //
     // @param segmentIdParam Segment ID (required)
     // @param segmentQosProfileBindingMapIdParam Segment QoS Profile Binding Map ID (required)
@@ -67,7 +67,7 @@ type SegmentQosProfileBindingMapsClient interface {
     // @throws NotFound  Not Found
 	Patch(segmentIdParam string, segmentQosProfileBindingMapIdParam string, segmentQosProfileBindingMapParam model.SegmentQosProfileBindingMap) error
 
-    // API will update Segment QoS Profile Binding Map.
+    // API will update Segment QoS Profile Binding Map. For objects with no binding maps, default profile is applied.
     //
     // @param segmentIdParam Segment ID (required)
     // @param segmentQosProfileBindingMapIdParam Segment QoS Profile Binding Map ID (required)

@@ -82,11 +82,12 @@ func NewDefaultSegmentSecurityProfilesClient(connector client.Connector) *Defaul
 	return &sIface
 }
 
-func (sIface *DefaultSegmentSecurityProfilesClient) Delete(segmentSecurityProfileIdParam string) error {
+func (sIface *DefaultSegmentSecurityProfilesClient) Delete(segmentSecurityProfileIdParam string, overrideParam *bool) error {
 	typeConverter := sIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(sIface.interfaceIdentifier, "delete")
 	sv := bindings.NewStructValueBuilder(segmentSecurityProfilesDeleteInputType(), typeConverter)
 	sv.AddStructField("SegmentSecurityProfileId", segmentSecurityProfileIdParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
@@ -177,12 +178,13 @@ func (sIface *DefaultSegmentSecurityProfilesClient) List(cursorParam *string, in
 	}
 }
 
-func (sIface *DefaultSegmentSecurityProfilesClient) Patch(segmentSecurityProfileIdParam string, segmentSecurityProfileParam model.SegmentSecurityProfile) error {
+func (sIface *DefaultSegmentSecurityProfilesClient) Patch(segmentSecurityProfileIdParam string, segmentSecurityProfileParam model.SegmentSecurityProfile, overrideParam *bool) error {
 	typeConverter := sIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(sIface.interfaceIdentifier, "patch")
 	sv := bindings.NewStructValueBuilder(segmentSecurityProfilesPatchInputType(), typeConverter)
 	sv.AddStructField("SegmentSecurityProfileId", segmentSecurityProfileIdParam)
 	sv.AddStructField("SegmentSecurityProfile", segmentSecurityProfileParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
@@ -204,12 +206,13 @@ func (sIface *DefaultSegmentSecurityProfilesClient) Patch(segmentSecurityProfile
 	}
 }
 
-func (sIface *DefaultSegmentSecurityProfilesClient) Update(segmentSecurityProfileIdParam string, segmentSecurityProfileParam model.SegmentSecurityProfile) (model.SegmentSecurityProfile, error) {
+func (sIface *DefaultSegmentSecurityProfilesClient) Update(segmentSecurityProfileIdParam string, segmentSecurityProfileParam model.SegmentSecurityProfile, overrideParam *bool) (model.SegmentSecurityProfile, error) {
 	typeConverter := sIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(sIface.interfaceIdentifier, "update")
 	sv := bindings.NewStructValueBuilder(segmentSecurityProfilesUpdateInputType(), typeConverter)
 	sv.AddStructField("SegmentSecurityProfileId", segmentSecurityProfileIdParam)
 	sv.AddStructField("SegmentSecurityProfile", segmentSecurityProfileParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		var emptyOutput model.SegmentSecurityProfile

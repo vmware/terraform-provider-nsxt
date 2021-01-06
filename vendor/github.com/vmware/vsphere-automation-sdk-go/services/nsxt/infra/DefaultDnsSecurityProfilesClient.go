@@ -82,11 +82,12 @@ func NewDefaultDnsSecurityProfilesClient(connector client.Connector) *DefaultDns
 	return &dIface
 }
 
-func (dIface *DefaultDnsSecurityProfilesClient) Delete(profileIdParam string) error {
+func (dIface *DefaultDnsSecurityProfilesClient) Delete(profileIdParam string, overrideParam *bool) error {
 	typeConverter := dIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(dIface.interfaceIdentifier, "delete")
 	sv := bindings.NewStructValueBuilder(dnsSecurityProfilesDeleteInputType(), typeConverter)
 	sv.AddStructField("ProfileId", profileIdParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
@@ -177,12 +178,13 @@ func (dIface *DefaultDnsSecurityProfilesClient) List(cursorParam *string, includ
 	}
 }
 
-func (dIface *DefaultDnsSecurityProfilesClient) Patch(profileIdParam string, dnsSecurityProfileParam model.DnsSecurityProfile) error {
+func (dIface *DefaultDnsSecurityProfilesClient) Patch(profileIdParam string, dnsSecurityProfileParam model.DnsSecurityProfile, overrideParam *bool) error {
 	typeConverter := dIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(dIface.interfaceIdentifier, "patch")
 	sv := bindings.NewStructValueBuilder(dnsSecurityProfilesPatchInputType(), typeConverter)
 	sv.AddStructField("ProfileId", profileIdParam)
 	sv.AddStructField("DnsSecurityProfile", dnsSecurityProfileParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
@@ -204,12 +206,13 @@ func (dIface *DefaultDnsSecurityProfilesClient) Patch(profileIdParam string, dns
 	}
 }
 
-func (dIface *DefaultDnsSecurityProfilesClient) Update(profileIdParam string, dnsSecurityProfileParam model.DnsSecurityProfile) (model.DnsSecurityProfile, error) {
+func (dIface *DefaultDnsSecurityProfilesClient) Update(profileIdParam string, dnsSecurityProfileParam model.DnsSecurityProfile, overrideParam *bool) (model.DnsSecurityProfile, error) {
 	typeConverter := dIface.connector.TypeConverter()
 	methodIdentifier := core.NewMethodIdentifier(dIface.interfaceIdentifier, "update")
 	sv := bindings.NewStructValueBuilder(dnsSecurityProfilesUpdateInputType(), typeConverter)
 	sv.AddStructField("ProfileId", profileIdParam)
 	sv.AddStructField("DnsSecurityProfile", dnsSecurityProfileParam)
+	sv.AddStructField("Override", overrideParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		var emptyOutput model.DnsSecurityProfile

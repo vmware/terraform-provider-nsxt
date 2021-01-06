@@ -57,7 +57,7 @@ type SecurityPoliciesClient interface {
     // @throws NotFound  Not Found
 	List(domainIdParam string, cursorParam *string, includeMarkForDeleteObjectsParam *bool, includeRuleCountParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.SecurityPolicyListResult, error)
 
-    // Patch the security policy for a domain. If a security policy for the given security-policy-id is not present, the object will get created and if it is present it will be updated. This is a full replace
+    // Patch the security policy for a domain. If a security policy for the given security-policy-id is not present, the object will get created and if it is present it will be updated. This is a full replace. Performance Note: If you want to edit several rules in a security policy use this API. It will perform better than several individual rule APIs. Just pass all the rules which you wish to edit as embedded rules to it.
     //
     // @param domainIdParam (required)
     // @param securityPolicyIdParam (required)
@@ -84,7 +84,7 @@ type SecurityPoliciesClient interface {
     // @throws NotFound  Not Found
 	Revise(domainIdParam string, securityPolicyIdParam string, securityPolicyParam model.SecurityPolicy, anchorPathParam *string, operationParam *string) (model.SecurityPolicy, error)
 
-    // Create or Update the security policy for a domain. This is a full replace. All the rules are replaced.
+    // Create or Update the security policy for a domain. This is a full replace. All the rules are replaced. Performance Note: If you want to edit several rules in a security policy, use this API. It will perform better than several individual rule APIs. Just pass all the rules which you wish to edit as embedded rules to it.
     //
     // @param domainIdParam (required)
     // @param securityPolicyIdParam (required)
