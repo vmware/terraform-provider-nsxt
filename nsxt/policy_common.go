@@ -530,6 +530,10 @@ func getAllocationRangeListSchema(required bool, description string) *schema.Sch
 	}
 }
 
+func localManagerOnlyError() error {
+	return fmt.Errorf("This configuration is not supported with NSX Global Manager")
+}
+
 func globalManagerOnlyError() error {
 	return fmt.Errorf("This configuration is only supported with NSX Global Manager. To mark your endpoint as Global Manager, please set 'global_manager' flag to 'true' in the provider")
 }
