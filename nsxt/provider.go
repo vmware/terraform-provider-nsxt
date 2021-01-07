@@ -341,6 +341,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_dns_forwarder_zone":               resourceNsxtPolicyDNSForwarderZone(),
 			"nsxt_policy_gateway_dns_forwarder":            resourceNsxtPolicyGatewayDNSForwarder(),
 			"nsxt_policy_gateway_community_list":           resourceNsxtPolicyGatewayCommunityList(),
+			"nsxt_policy_gateway_route_map":                resourceNsxtPolicyGatewayRouteMap(),
 			"nsxt_policy_intrusion_service_policy":         resourceNsxtPolicyIntrusionServicePolicy(),
 		},
 
