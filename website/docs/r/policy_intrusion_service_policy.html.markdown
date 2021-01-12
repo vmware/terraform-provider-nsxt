@@ -26,7 +26,7 @@ resource "nsxt_policy_intrusion_service_policy" "policy1" {
     action             = "DETECT"
     services           = [nsxt_policy_service.icmp.path]
     logged             = true
-    ids_profiles       = [data.nsxt_policy_ids_profile.default.path]
+    ids_profiles       = [data.nsxt_policy_intrusion_service_profile.default.path]
   }
 
   rule {
@@ -39,7 +39,7 @@ resource "nsxt_policy_intrusion_service_policy" "policy1" {
     logged           = true
     disabled         = true
     notes            = "Disabled till Sunday"
-    ids_profiles     = [data.nsxt_policy_ids_profile.default.path]
+    ids_profiles     = [data.nsxt_policy_intrusion_service_profile.default.path]
   }
 }
 ```
@@ -53,10 +53,10 @@ The following arguments are supported:
 * `domain` - (Optional) The domain to use for the resource. This domain must already exist. For VMware Cloud on AWS use `cgw`. If not specified, this field is default to `default`.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this policy.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
-* `comments` - (Optional) Comments for security policy lock/unlock.
-* `locked` - (Optional) Indicates whether a security policy should be locked. If locked by a user, no other user would be able to modify this policy.
+* `comments` - (Optional) Comments for IDS policy lock/unlock.
+* `locked` - (Optional) Indicates whether the policy should be locked. If locked by a user, no other user would be able to modify this policy.
 * `scope` - (Optional) The list of policy object paths where the rules in this policy will get applied.
-* `sequence_number` - (Optional) This field is used to resolve conflicts between security policies across domains.
+* `sequence_number` - (Optional) This field is used to resolve conflicts between IDS policies across domains.
 * `stateful` - (Optional) If true, state of the network connects are tracked and a stateful packet inspection is performed. Default is true.
 * `rule` - (Optional) A repeatable block to specify rules for the Policy. Each rule includes the following fields:
   * `display_name` - (Required) Display name of the resource.
@@ -82,7 +82,7 @@ The following arguments are supported:
 
 In addition to arguments listed above, the following attributes are exported:
 
-* `id` - ID of the Security Policy.
+* `id` - ID of the IDS Policy.
 * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
 * `path` - The NSX path of the policy resource.
 * `rule`:
@@ -93,7 +93,7 @@ In addition to arguments listed above, the following attributes are exported:
 
 ## Importing
 
-An existing security policy can be [imported][docs-import] into this resource, via the following command:
+An existing policy can be [imported][docs-import] into this resource, via the following command:
 
 [docs-import]: /docs/import/index.html
 

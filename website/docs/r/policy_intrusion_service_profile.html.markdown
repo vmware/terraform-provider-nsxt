@@ -42,7 +42,7 @@ The following arguments are supported:
 
 * `display_name` - (Required) Display name of the resource.
 * `description` - (Optional) Description of the resource.
-* `tag` - (Optional) A list of scope + tag pairs to associate with this policy.
+* `tag` - (Optional) A list of scope + tag pairs to associate with this profile.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `severities` - (Required) List of profile severities, supported values are `LOW`, `MEDIUM`, `HIGH`, 'CRITICAL`.
 * `criteria` - (Required) Filtering criteria for the IDS Profile.
@@ -60,13 +60,13 @@ The following arguments are supported:
 
 In addition to arguments listed above, the following attributes are exported:
 
-* `id` - ID of the Security Policy.
+* `id` - ID of the Profile.
 * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
-* `path` - The NSX path of the policy resource.
+* `path` - The NSX policy path of the resource.
 
 ## Importing
 
-An existing security policy can be [imported][docs-import] into this resource, via the following command:
+An existing profile can be [imported][docs-import] into this resource, via the following command:
 
 [docs-import]: /docs/import/index.html
 
@@ -74,4 +74,4 @@ An existing security policy can be [imported][docs-import] into this resource, v
 terraform import nsxt_policy_intrusion_service_profile.profile1 ID
 ```
 
-The above command imports the policy named `profile1` with the NSX Policy ID `ID`.
+The above command imports the profile named `profile1` with the NSX Policy ID `ID`.
