@@ -97,11 +97,11 @@ func getPolicyQosRateShaperFromSchema(d *schema.ResourceData, index int) *data.S
 		peakBW := int64(shaperData[fmt.Sprintf("peak_bw_%s", scale)].(int))
 
 		shaper := model.IngressRateLimiter{
-			ResourceType:    resourceType,
-			Enabled:         &enabled,
-			BurstSize:       &burstSize,
-			AverageBandwidth:&averageBW,
-			PeakBandwidth:   &peakBW,
+			ResourceType:     resourceType,
+			Enabled:          &enabled,
+			BurstSize:        &burstSize,
+			AverageBandwidth: &averageBW,
+			PeakBandwidth:    &peakBW,
 		}
 		converter := bindings.NewTypeConverter()
 		converter.SetMode(bindings.REST)
@@ -174,10 +174,10 @@ func resourceNsxtPolicyQosProfileCreate(d *schema.ResourceData, m interface{}) e
 	}
 
 	obj := model.QosProfile{
-		DisplayName:     &displayName,
-		Description:     &description,
-		Tags:            tags,
-		ClassOfService:  &classOfService,
+		DisplayName:    &displayName,
+		Description:    &description,
+		Tags:           tags,
+		ClassOfService: &classOfService,
 		Dscp: &model.QosDscp{
 			Mode:     &dscpTrusted,
 			Priority: &dscpPriority,
@@ -293,10 +293,10 @@ func resourceNsxtPolicyQosProfileUpdate(d *schema.ResourceData, m interface{}) e
 	}
 
 	obj := model.QosProfile{
-		DisplayName:     &displayName,
-		Description:     &description,
-		Tags:            tags,
-		ClassOfService:  &classOfService,
+		DisplayName:    &displayName,
+		Description:    &description,
+		Tags:           tags,
+		ClassOfService: &classOfService,
 		Dscp: &model.QosDscp{
 			Mode:     &dscpTrusted,
 			Priority: &dscpPriority,
