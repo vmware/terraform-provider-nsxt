@@ -27,8 +27,8 @@ except Exception:
     print("Please set GOPATH in your environment")
     exit(2)
 
-BASE_SDK_PATH = "%s/src/github.com/vmware/go-nsx-t-policy" % GO_PATH
-STRUCTS_FILE = "%s/bindings/nsx_policy/model/ModelPackageTypes.go" % BASE_SDK_PATH
+BASE_SDK_PATH = "%s/src/github.com/vmware/vsphere-automation-sdk-go/services/nsxt" % GO_PATH
+STRUCTS_FILE = "%s/model/ModelPackageTypes.go" % BASE_SDK_PATH
 TEMPLATE_RESOURCE_FILE = "resource_nsxt_policy_template"
 TEMPLATE_RESOURCE_TEST_FILE = "resource_nsxt_policy_test_template"
 TEMPLATE_RESOURCE_DOC_FILE = "resource_nsxt_policy_doc_template"
