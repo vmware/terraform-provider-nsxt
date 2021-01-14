@@ -18,7 +18,7 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
-var rateLimiterResourceTypes = []string{"IngressRateLimiter", "IngressBroadcastRateLimiter", "EgressRateLimiter"}
+var rateLimiterResourceTypes = []string{model.QosBaseRateLimiter_RESOURCE_TYPE_INGRESSRATELIMITER, QosBaseRateLimiter_RESOURCE_TYPE_INGRESSBROADCASTRATELIMITER, QosBaseRateLimiter_RESOURCE_TYPE_EGRESSRATELIMITER}
 
 func resourceNsxtPolicyQosProfile() *schema.Resource {
 	return &schema.Resource{
@@ -345,7 +345,7 @@ func resourceNsxtPolicyQosProfileDelete(d *schema.ResourceData, m interface{}) e
 	}
 
 	if err != nil {
-		return handleDeleteError("DhcpServer", id, err)
+		return handleDeleteError("QosProfile", id, err)
 	}
 
 	return nil
