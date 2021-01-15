@@ -300,6 +300,7 @@ github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/ip_pools
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/realized_state
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/realized_state/enforcement_points
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/segments
+github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/settings/firewall/security/intrusion_services
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/sites/enforcement_points
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/sites/enforcement_points/edge_clusters
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s
@@ -309,6 +310,7 @@ github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/nat
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/locale_services
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/nat
+github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/segments
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt/search
 # github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm v0.3.0
