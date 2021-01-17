@@ -68,6 +68,24 @@ func TestAccResourceNsxtPolicyQosProfile_basic(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccNSXPolicyQosProfileUpdateTemplate(updatedName, updatedCos, updatedPeak, "egress"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNSXPolicyQosProfileExists(updatedName, testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "test description"),
+					resource.TestCheckResourceAttr(testResourceName, "class_of_service", updatedCos),
+					resource.TestCheckResourceAttr(testResourceName, "dscp_trusted", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "dscp_priority", "53"),
+					resource.TestCheckResourceAttr(testResourceName, "egress_rate_shaper.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "igress_rate_shaper.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "ingress_broadcast_rate_shaper.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "ingress_broadcast_rate_shaper.0.average_bw_kbps", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "ingress_broadcast_rate_shaper.0.burst_size", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "ingress_broadcast_rate_shaper.0.peak_bw_kbps", updatedPeak),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
+				),
+			},
+			{
 				Config: testAccNSXPolicyQosProfileEmptyTemplate(updatedName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXPolicyQosProfileExists(updatedName, testResourceName),
@@ -176,6 +194,32 @@ resource "nsxt_policy_qos_profile" "test" {
   }
 }
 `, name, cos, direction, peak, peak)
+}
+
+func testAccNSXPolicyQosProfileUpdateTemplate(name string, cos string, peak string, direction string) string {
+	return fmt.Sprintf(`
+resource "nsxt_policy_qos_profile" "test" {
+  display_name     = "%s"
+  description      = "test description"
+  class_of_service = %s
+  dscp_trusted     = true
+  dscp_priority    = 53
+
+  ingress_broadcast_rate_shaper {
+    peak_bw_kbps = "%s"
+  }
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+
+  tag {
+    scope = "scope2"
+    tag   = "tag2"
+  }
+}
+`, name, cos, peak)
 }
 
 func testAccNSXPolicyQosProfileEmptyTemplate(name string) string {

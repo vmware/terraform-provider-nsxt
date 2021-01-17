@@ -18,7 +18,7 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
-var rateLimiterResourceTypes = []string{model.QosBaseRateLimiter_RESOURCE_TYPE_INGRESSRATELIMITER, QosBaseRateLimiter_RESOURCE_TYPE_INGRESSBROADCASTRATELIMITER, QosBaseRateLimiter_RESOURCE_TYPE_EGRESSRATELIMITER}
+var rateLimiterResourceTypes = []string{model.QosBaseRateLimiter_RESOURCE_TYPE_INGRESSRATELIMITER, model.QosBaseRateLimiter_RESOURCE_TYPE_INGRESSBROADCASTRATELIMITER, model.QosBaseRateLimiter_RESOURCE_TYPE_EGRESSRATELIMITER}
 
 func resourceNsxtPolicyQosProfile() *schema.Resource {
 	return &schema.Resource{
