@@ -106,7 +106,7 @@ func testAccNSXPolicyGetGatewayImporterIDGenerator(testResourceName string) func
 	return func(s *terraform.State) (string, error) {
 		rs, ok := s.RootModule().Resources[testResourceName]
 		if !ok {
-			return "", fmt.Errorf("NSX Policy resource %s not found in resources", testAccResourcePolicyGWPrefixListName)
+			return "", fmt.Errorf("NSX Policy resource %s not found in resources", testResourceName)
 		}
 		resourceID := rs.Primary.ID
 		if resourceID == "" {
