@@ -9,8 +9,11 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
+
+var accTestPolicyDhcpV4StaticBindingHelperName = getAccTestResourceName()
 
 var accTestPolicyDhcpV4StaticBindingCreateAttributes = map[string]string{
 	"display_name":    getAccTestResourceName(),
@@ -34,18 +37,38 @@ var accTestPolicyDhcpV4StaticBindingUpdateAttributes = map[string]string{
 
 var testAccPolicyDhcpV4StaticBindingResourceName = "nsxt_policy_dhcp_v4_static_binding.test"
 
+func testAccOnlyLocalManagerForFixedSegments(t *testing.T, isFixed bool) {
+	if !isFixed {
+		return
+	}
+
+	testAccOnlyLocalManager(t)
+}
+
 func TestAccResourceNsxtPolicyDhcpV4StaticBinding_basic(t *testing.T) {
+	testAccResourceNsxtPolicyDhcpV4StaticBindingBasic(t, false)
+}
+
+func TestAccResourceNsxtPolicyDhcpV4StaticBinding_fixedSegment(t *testing.T) {
+	testAccResourceNsxtPolicyDhcpV4StaticBindingBasic(t, true)
+}
+
+func testAccResourceNsxtPolicyDhcpV4StaticBindingBasic(t *testing.T, isFixed bool) {
 	testResourceName := testAccPolicyDhcpV4StaticBindingResourceName
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccNSXVersion(t, "3.0.0")
+			testAccOnlyLocalManagerForFixedSegments(t, isFixed)
+		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyDhcpV4StaticBindingCheckDestroy(state, accTestPolicyDhcpV4StaticBindingCreateAttributes["display_name"])
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyDhcpV4StaticBindingTemplate(true),
+				Config: testAccNsxtPolicyDhcpV4StaticBindingTemplate(isFixed, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyDhcpV4StaticBindingExists(accTestPolicyDhcpV4StaticBindingCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyDhcpV4StaticBindingCreateAttributes["display_name"]),
@@ -63,7 +86,7 @@ func TestAccResourceNsxtPolicyDhcpV4StaticBinding_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyDhcpV4StaticBindingTemplate(false),
+				Config: testAccNsxtPolicyDhcpV4StaticBindingTemplate(isFixed, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyDhcpV4StaticBindingExists(accTestPolicyDhcpV4StaticBindingUpdateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyDhcpV4StaticBindingUpdateAttributes["display_name"]),
@@ -81,7 +104,7 @@ func TestAccResourceNsxtPolicyDhcpV4StaticBinding_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyDhcpV4StaticBindingMinimalistic(),
+				Config: testAccNsxtPolicyDhcpV4StaticBindingMinimalistic(isFixed),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyDhcpV4StaticBindingExists(accTestPolicyDhcpV4StaticBindingCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
@@ -106,7 +129,7 @@ func TestAccResourceNsxtPolicyDhcpV4StaticBinding_importBasic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyDhcpV4StaticBindingMinimalistic(),
+				Config: testAccNsxtPolicyDhcpV4StaticBindingMinimalistic(false),
 			},
 			{
 				ResourceName:      testAccPolicyDhcpV4StaticBindingResourceName,
@@ -130,12 +153,11 @@ func testAccNsxtPolicyDhcpV4StaticBindingExists(displayName string, resourceName
 
 		resourceID := rs.Primary.ID
 		segmentPath := rs.Primary.Attributes["segment_path"]
-		segmentID := getPolicyIDFromPath(segmentPath)
 		if resourceID == "" {
 			return fmt.Errorf("Policy DhcpV4StaticBinding resource ID not set in resources")
 		}
 
-		exists, err := resourceNsxtPolicyDhcpStaticBindingExistsOnSegment(resourceID, segmentID, connector, testAccIsGlobalManager())
+		exists, err := resourceNsxtPolicyDhcpStaticBindingExistsOnSegment(resourceID, segmentPath, connector, testAccIsGlobalManager())
 		if err != nil {
 			return err
 		}
@@ -157,8 +179,7 @@ func testAccNsxtPolicyDhcpV4StaticBindingCheckDestroy(state *terraform.State, di
 
 		resourceID := rs.Primary.Attributes["id"]
 		segmentPath := rs.Primary.Attributes["segment_path"]
-		segmentID := getPolicyIDFromPath(segmentPath)
-		exists, err := resourceNsxtPolicyDhcpStaticBindingExistsOnSegment(resourceID, segmentID, connector, testAccIsGlobalManager())
+		exists, err := resourceNsxtPolicyDhcpStaticBindingExistsOnSegment(resourceID, segmentPath, connector, testAccIsGlobalManager())
 		if err == nil {
 			return err
 		}
@@ -187,27 +208,53 @@ func testAccNSXPolicyDhcpV4StaticBindingImporterGetID(s *terraform.State) (strin
 	return fmt.Sprintf("%s/%s", segs[len(segs)-1], resourceID), nil
 }
 
-func testAccNsxtPolicyDhcpV4StaticBindingPrerequisites() string {
-	return testAccNsxtPolicyGatewayFabricDeps(false) + `
+func testAccNsxtPolicyDhcpStaticBindingPrerequisites(isFixed bool, isIpv6 bool) string {
+	helperName := accTestPolicyDhcpV4StaticBindingHelperName
+	segmentResource := "nsxt_policy_segment"
+	if isFixed {
+		segmentResource = "nsxt_policy_fixed_segment"
+	}
+	address := "10.2.2.3/24"
+	cidr := "10.2.2.1/24"
+	version := "v4"
+	if isIpv6 {
+		address = "1001::3/24"
+		cidr = "1001::1/64"
+		version = "v6"
+	}
+	return testAccNsxtPolicyGatewayFabricDeps(false) + fmt.Sprintf(`
+resource "nsxt_policy_tier1_gateway" "test" {
+  display_name = "%s"
+}
+
 resource "nsxt_policy_dhcp_server" "test" {
-  display_name      = "terraform-test"
+  display_name      = "%s"
   edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
 }
 
-resource "nsxt_policy_segment" "test" {
-  display_name        = "terraform-test"
+resource "%s" "test" {
+  display_name        = "%s"
+  connectivity_path   = nsxt_policy_tier1_gateway.test.path
   transport_zone_path = data.nsxt_policy_transport_zone.test.path
   dhcp_config_path    = nsxt_policy_dhcp_server.test.path
   subnet {
-    cidr = "10.2.2.1/24"
-    dhcp_v4_config {
-        server_address = "10.2.2.3/24"
+    cidr = "%s"
+    dhcp_%s_config {
+        server_address = "%s"
     }
   }
-}`
+}`, helperName, helperName, segmentResource, helperName, cidr, version, address)
 }
 
-func testAccNsxtPolicyDhcpV4StaticBindingTemplate(createFlow bool) string {
+func testAccNsxtPolicyGetSegmentResourceName(isFixed bool) string {
+	if isFixed {
+		return "nsxt_policy_fixed_segment"
+	}
+
+	return "nsxt_policy_segment"
+}
+
+func testAccNsxtPolicyDhcpV4StaticBindingTemplate(isFixed bool, createFlow bool) string {
 	var attrMap map[string]string
 	if createFlow {
 		attrMap = accTestPolicyDhcpV4StaticBindingCreateAttributes
@@ -216,15 +263,15 @@ func testAccNsxtPolicyDhcpV4StaticBindingTemplate(createFlow bool) string {
 	}
 	realizationData := ""
 	if !testAccIsGlobalManager() {
-		realizationData = ` 
+		realizationData = `
 data "nsxt_policy_realization_info" "realization_info" {
   path = nsxt_policy_dhcp_v4_static_binding.test.path
 }`
 	}
-	return testAccNsxtPolicyDhcpV4StaticBindingPrerequisites() + fmt.Sprintf(`
+	return testAccNsxtPolicyDhcpStaticBindingPrerequisites(isFixed, false) + fmt.Sprintf(`
 
 resource "nsxt_policy_dhcp_v4_static_binding" "test" {
-  segment_path    = nsxt_policy_segment.test.path
+  segment_path    = %s.test.path
   display_name    = "%s"
   description     = "%s"
   gateway_address = "%s"
@@ -238,16 +285,16 @@ resource "nsxt_policy_dhcp_v4_static_binding" "test" {
     tag   = "tag1"
   }
 }
-%s`, attrMap["display_name"], attrMap["description"], attrMap["gateway_address"], attrMap["hostname"], attrMap["ip_address"], attrMap["lease_time"], attrMap["mac_address"], realizationData)
+%s`, testAccNsxtPolicyGetSegmentResourceName(isFixed), attrMap["display_name"], attrMap["description"], attrMap["gateway_address"], attrMap["hostname"], attrMap["ip_address"], attrMap["lease_time"], attrMap["mac_address"], realizationData)
 }
 
-func testAccNsxtPolicyDhcpV4StaticBindingMinimalistic() string {
+func testAccNsxtPolicyDhcpV4StaticBindingMinimalistic(isFixed bool) string {
 	attrMap := accTestPolicyDhcpV4StaticBindingUpdateAttributes
-	return testAccNsxtPolicyDhcpV4StaticBindingPrerequisites() + fmt.Sprintf(`
+	return testAccNsxtPolicyDhcpStaticBindingPrerequisites(isFixed, false) + fmt.Sprintf(`
 resource "nsxt_policy_dhcp_v4_static_binding" "test" {
-  segment_path    = nsxt_policy_segment.test.path
+  segment_path = %s.test.path
   display_name = "%s"
   ip_address   = "%s"
   mac_address  = "%s"
-}`, attrMap["display_name"], attrMap["ip_address"], attrMap["mac_address"])
+}`, testAccNsxtPolicyGetSegmentResourceName(isFixed), attrMap["display_name"], attrMap["ip_address"], attrMap["mac_address"])
 }

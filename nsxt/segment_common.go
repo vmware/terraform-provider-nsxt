@@ -1486,3 +1486,24 @@ func nsxtPolicySegmentDelete(d *schema.ResourceData, m interface{}, isFixed bool
 
 	return nil
 }
+
+func parseSegmentPolicyPath(path string) (bool, string, string) {
+	segs := strings.Split(path, "/")
+	if (len(segs) < 3) || (segs[len(segs)-2] != "segments") {
+		// error - this is not a segment path
+		return false, "", ""
+	}
+
+	segmentID := segs[len(segs)-1]
+
+	if len(segs) == 4 {
+		// This is an infra segment
+		return false, "", segmentID
+	}
+
+	// This is a fixed segment
+	gwPath := strings.Join(segs[:4], "/")
+
+	isT0, gwID := parseGatewayPolicyPath(gwPath)
+	return isT0, gwID, segmentID
+}

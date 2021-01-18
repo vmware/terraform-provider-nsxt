@@ -344,6 +344,8 @@ func Provider() *schema.Provider {
 			"nsxt_policy_gateway_route_map":                resourceNsxtPolicyGatewayRouteMap(),
 			"nsxt_policy_intrusion_service_policy":         resourceNsxtPolicyIntrusionServicePolicy(),
 			"nsxt_policy_qos_profile":                      resourceNsxtPolicyQosProfile(),
+			"nsxt_policy_evpn_tenant":                      resourceNsxtPolicyEvpnTenant(),
+			"nsxt_policy_intrusion_service_profile":        resourceNsxtPolicyIntrusionServiceProfile(),
 		},
 
 		ConfigureFunc: providerConfigure,
