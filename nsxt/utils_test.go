@@ -10,6 +10,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -49,11 +50,23 @@ const doubleTags string = `
     tag   = "tag2"
   }`
 
+var randomized = false
+
+func initRand() {
+	if randomized {
+		return
+	}
+	rand.Seed(time.Now().UnixNano())
+	randomized = true
+}
+
 func getAccTestDataSourceName() string {
+	initRand()
 	return fmt.Sprintf("%s-%d", testAccDataSourceName, rand.Intn(100000))
 }
 
 func getAccTestResourceName() string {
+	initRand()
 	return fmt.Sprintf("%s-%d", testAccResourceName, rand.Intn(100000))
 }
 
