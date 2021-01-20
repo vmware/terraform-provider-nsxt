@@ -123,18 +123,11 @@ func setPolicyQosRateShaperInSchema(d *schema.ResourceData, shaperConf []*data.S
 		dataValue, _ := converter.ConvertToGolang(dataShaper, model.IngressRateLimiterBindingType())
 		shaper := dataValue.(model.IngressRateLimiter)
 		if shaper.ResourceType == resourceType {
-			average := *shaper.AverageBandwidth
-			peak := *shaper.PeakBandwidth
-			burst := *shaper.BurstSize
-			// Do not define schema for default shaper to avoid non-empty plan
-			if !*shaper.Enabled && (average+burst+peak == 0) {
-				return
-			}
 			elem := make(map[string]interface{})
-			elem["enabled"] = *shaper.Enabled
-			elem["burst_size"] = burst
-			elem[fmt.Sprintf("average_bw_%s", scale)] = average
-			elem[fmt.Sprintf("peak_bw_%s", scale)] = peak
+			elem["enabled"] = shaper.Enabled
+			elem["burst_size"] = shaper.BurstSize
+			elem[fmt.Sprintf("average_bw_%s", scale)] = shaper.AverageBandwidth
+			elem[fmt.Sprintf("peak_bw_%s", scale)] = shaper.PeakBandwidth
 
 			shapers = append(shapers, elem)
 			err := d.Set(schemaName, shapers)
