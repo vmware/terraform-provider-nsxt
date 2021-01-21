@@ -143,7 +143,7 @@ func resourceNsxtPolicyBgpConfigCreate(d *schema.ResourceData, m interface{}) er
 	if err != nil {
 		return handleCreateError("BgpRoutingConfig", gwID, err)
 	}
-	d.SetId("bgp")
+	d.SetId(newUUID())
 
 	return resourceNsxtPolicyBgpConfigRead(d, m)
 }
