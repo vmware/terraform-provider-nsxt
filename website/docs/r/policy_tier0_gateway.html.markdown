@@ -41,7 +41,7 @@ resource "nsxt_policy_tier0_gateway" "tier0_gw" {
   }
 
   redistribution_config {
-    enabled = true
+    bgp_enabled = true
     rule {
       name  = "rule1"
       types = ["TIER0_STATIC", "TIER0_CONNECTED", "TIER1_CONNECTED"]
@@ -169,7 +169,9 @@ The following arguments are supported:
   * `primary_site_path` - (Optional) Primary egress site for gateway.
   * `fallback_site_paths` - (Optional) Fallback sites to be used as new primary site on current primary site failure.
   * `redistribution_config` - (Optional) Route redistribution properties. This setting is for local manager only.
-    * `enabled` - (Optional) Enable route redistribution for BGP
+    * `enabled` - (Deprecated) Enable route redistribution for BGP. This attribute is deprecated, please use `bgp_enabled` instead.
+    * `bgp_enabled` - (Optional) Enable route redistribution for BGP. Defaults to true.
+    * `ospf_enabled` - (Optional) Enable route redistribution for OSPF. Defaults to false.
     * `rule` - (Optional) List of redistribution rules.
       * `name` - (Optional) Rule name.
       * `route_map_path` - (Optional) Route map to be associated with the redistribution rule.
