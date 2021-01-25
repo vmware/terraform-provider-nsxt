@@ -348,6 +348,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_evpn_config":                      resourceNsxtPolicyEvpnConfig(),
 			"nsxt_policy_intrusion_service_profile":        resourceNsxtPolicyIntrusionServiceProfile(),
 			"nsxt_policy_ospf_config":                      resourceNsxtPolicyOspfConfig(),
+			"nsxt_policy_ospf_area":                        resourceNsxtPolicyOspfArea(),
 		},
 
 		ConfigureFunc: providerConfigure,

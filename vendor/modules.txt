@@ -306,6 +306,7 @@ github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/sites/enforcemen
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services/bgp
+github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services/ospf
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/nat
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/locale_services
