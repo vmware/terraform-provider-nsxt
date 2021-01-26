@@ -210,7 +210,7 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_external(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyTier0InterfaceExternalTemplate(name, subnet, mtu, enablePim),
+				Config: testAccNsxtPolicyTier0InterfaceExternalTemplate(name, subnet, mtu, enablePim, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTier0InterfaceExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -234,7 +234,7 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_external(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyTier0InterfaceExternalTemplate(updatedName, updatedSubnet, updatedMtu, enablePim),
+				Config: testAccNsxtPolicyTier0InterfaceExternalTemplate(updatedName, updatedSubnet, updatedMtu, enablePim, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTier0InterfaceExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -247,6 +247,84 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_external(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.0", updatedIPAddress),
 					resource.TestCheckResourceAttr(testResourceName, "enable_pim", enablePim),
 					resource.TestCheckResourceAttr(testResourceName, "urpf_mode", "STRICT"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, "segment_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "gateway_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "edge_node_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "locale_service_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicyTier0GatewayInterface_ospf(t *testing.T) {
+	name := getAccTestResourceName()
+	updatedName := getAccTestResourceName()
+	mtu := "1500"
+	updatedMtu := "1800"
+	subnet := "1.1.12.2/24"
+	updatedSubnet := "1.2.12.2/24"
+	ipAddress := "1.1.12.2"
+	updatedIPAddress := "1.2.12.2"
+	testResourceName := "nsxt_policy_tier0_gateway_interface.test"
+	enablePim := "false"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t); testAccNSXVersion(t, "3.0.0") },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyTier0InterfaceCheckDestroy(state, updatedName)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyTier0InterfaceExternalTemplate(name, subnet, mtu, enablePim, true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyTier0InterfaceExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "mtu", mtu),
+					resource.TestCheckResourceAttr(testResourceName, "type", "EXTERNAL"),
+					resource.TestCheckResourceAttr(testResourceName, "subnets.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "subnets.0", subnet),
+					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.0", ipAddress),
+					resource.TestCheckResourceAttr(testResourceName, "enable_pim", enablePim),
+					resource.TestCheckResourceAttr(testResourceName, "urpf_mode", "STRICT"),
+					resource.TestCheckResourceAttr(testResourceName, "ospf.0.enabled", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "ospf.0.enable_bfd", "false"),
+					resource.TestCheckResourceAttrSet(testResourceName, "ospf.0.area_path"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, "segment_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "gateway_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "edge_node_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "locale_service_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyTier0InterfaceExternalTemplate(updatedName, updatedSubnet, updatedMtu, enablePim, true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyTier0InterfaceExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "mtu", updatedMtu),
+					resource.TestCheckResourceAttr(testResourceName, "type", "EXTERNAL"),
+					resource.TestCheckResourceAttr(testResourceName, "subnets.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "subnets.0", updatedSubnet),
+					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.0", updatedIPAddress),
+					resource.TestCheckResourceAttr(testResourceName, "enable_pim", enablePim),
+					resource.TestCheckResourceAttr(testResourceName, "urpf_mode", "STRICT"),
+					resource.TestCheckResourceAttr(testResourceName, "ospf.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "ospf.0.enabled", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "ospf.0.enable_bfd", "false"),
+					resource.TestCheckResourceAttrSet(testResourceName, "ospf.0.area_path"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 					resource.TestCheckResourceAttrSet(testResourceName, "segment_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "gateway_path"),
@@ -669,8 +747,35 @@ resource "nsxt_policy_tier0_gateway_interface" "test" {
 		testAccNsxtPolicyTier0InterfaceRealizationTemplate()
 }
 
-func testAccNsxtPolicyTier0InterfaceExternalTemplate(name string, subnet string, mtu string, enablePim string) string {
-	return testAccNsxtPolicyGatewayInterfaceDeps("11") + fmt.Sprintf(`
+func testAccNsxtPolicyTier0InterfaceOspfDeps() string {
+	return fmt.Sprintf(`
+resource "nsxt_policy_ospf_config" "test" {
+  gateway_path = nsxt_policy_tier0_gateway.test.path
+  display_name = "%s"
+}
+
+resource "nsxt_policy_ospf_area" "test" {
+  ospf_path    = nsxt_policy_ospf_config.test.path
+  display_name = "%s"
+  area_id      = "12"
+}`, nsxtPolicyTier0GatewayName, nsxtPolicyTier0GatewayName)
+}
+
+func testAccNsxtPolicyTier0InterfaceExternalTemplate(name string, subnet string, mtu string, enablePim string, withOspf bool) string {
+	ospfDeps := ""
+	ospfConfig := ""
+	if withOspf {
+		ospfConfig = `
+    ospf {
+      enabled        = true
+      enable_bfd     = false
+      area_path      = nsxt_policy_ospf_area.test.path
+      hello_interval = 360
+      dead_interval  = 1800
+    }`
+		ospfDeps = testAccNsxtPolicyTier0InterfaceOspfDeps()
+	}
+	return testAccNsxtPolicyGatewayInterfaceDeps("11") + ospfDeps + fmt.Sprintf(`
 data "nsxt_policy_edge_node" "EN" {
   edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
   member_index      = 0
@@ -699,6 +804,6 @@ resource "nsxt_policy_tier0_gateway_interface" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, nsxtPolicyTier0GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, mtu, subnet, enablePim, testAccNsxtPolicyTier0InterfaceSiteTemplate()) +
+}`, nsxtPolicyTier0GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, mtu, subnet, enablePim, ospfConfig) +
 		testAccNsxtPolicyTier0InterfaceRealizationTemplate()
 }

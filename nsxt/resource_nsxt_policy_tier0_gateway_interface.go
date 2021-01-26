@@ -25,6 +25,11 @@ var gatewayInterfaceTypeValues = []string{
 	model.Tier0Interface_TYPE_LOOPBACK,
 }
 
+var gatewayInterfaceOspfNetworkTypeValues = []string{
+	model.PolicyInterfaceOspfConfig_NETWORK_TYPE_BROADCAST,
+	model.PolicyInterfaceOspfConfig_NETWORK_TYPE_P2P,
+}
+
 func resourceNsxtPolicyTier0GatewayInterface() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyTier0GatewayInterfaceCreate,
@@ -89,13 +94,58 @@ func resourceNsxtPolicyTier0GatewayInterface() *schema.Resource {
 				ForceNew:     true,
 				ValidateFunc: validatePolicyPath(),
 			},
+			"ospf": getGatewayInterfaceOspfSchema(),
 		},
 	}
 }
 
-func gatewayInterfaceVersionDepenantSet(d *schema.ResourceData, m interface{}, obj *model.Tier0Interface) {
+func getGatewayInterfaceOspfSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeList,
+		Optional:    true,
+		Description: "OSPF configuration for the interface",
+		MaxItems:    1,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"enabled": {
+					Type:     schema.TypeBool,
+					Optional: true,
+					Default:  false,
+				},
+				"area_path": getPolicyPathSchema(true, false, "OSPF Area Path"),
+				"enable_bfd": {
+					Type:     schema.TypeBool,
+					Optional: true,
+					Default:  false,
+				},
+				"bfd_profile_path": getPolicyPathSchema(false, false, "BFD profile path to be applied to all OSPF peers in this interface"),
+				"hello_interval": {
+					Type:        schema.TypeInt,
+					Description: "Interval in seconds between hello packets that OSPF sends on this interface",
+					Optional:    true,
+					Default:     10,
+				},
+				"dead_interval": {
+					Type:        schema.TypeInt,
+					Description: "Number of seconds that router must wait before it declares OSPF neighbor router as down",
+					Optional:    true,
+					Default:     40,
+				},
+				"network_type": {
+					Type:         schema.TypeString,
+					Description:  "OSPF network type",
+					ValidateFunc: validation.StringInSlice(gatewayInterfaceOspfNetworkTypeValues, false),
+					Optional:     true,
+					Default:      model.PolicyInterfaceOspfConfig_NETWORK_TYPE_BROADCAST,
+				},
+			},
+		},
+	}
+}
+
+func gatewayInterfaceVersionDepenantSet(d *schema.ResourceData, m interface{}, obj *model.Tier0Interface) error {
 	if nsxVersionLower("3.0.0") {
-		return
+		return nil
 	}
 	interfaceType := d.Get("type").(string)
 	// PIM config can only be configured on external interface and local manager
@@ -114,6 +164,70 @@ func gatewayInterfaceVersionDepenantSet(d *schema.ResourceData, m interface{}, o
 
 	urpfMode := d.Get("urpf_mode").(string)
 	obj.UrpfMode = &urpfMode
+
+	return policyTier0GatewayInterfaceOspfSet(d, m, obj)
+}
+
+func policyTier0GatewayInterfaceOspfSet(d *schema.ResourceData, m interface{}, obj *model.Tier0Interface) error {
+	ospfConfigs := d.Get("ospf").([]interface{})
+	if len(ospfConfigs) == 0 {
+		return nil
+	}
+
+	if isPolicyGlobalManager(m) {
+		return fmt.Errorf("Ospf configuration is not supported on Global Manager")
+	}
+
+	interfaceType := d.Get("type").(string)
+	if interfaceType != model.Tier0Interface_TYPE_EXTERNAL {
+		// Ospf config can not be set for non-external interface
+		return fmt.Errorf("Ospf configuration can only be set for EXTERNAL interface")
+	}
+
+	ospfConfig := ospfConfigs[0].(map[string]interface{})
+	enabled := ospfConfig["enabled"].(bool)
+	enableBfd := ospfConfig["enable_bfd"].(bool)
+	bfdProfilePath := ospfConfig["bfd_profile_path"].(string)
+	areaPath := ospfConfig["area_path"].(string)
+	networkType := ospfConfig["network_type"].(string)
+	helloInterval := int64(ospfConfig["hello_interval"].(int))
+	deadInterval := int64(ospfConfig["dead_interval"].(int))
+
+	ospf := model.PolicyInterfaceOspfConfig{
+		Enabled:       &enabled,
+		EnableBfd:     &enableBfd,
+		OspfArea:      &areaPath,
+		NetworkType:   &networkType,
+		HelloInterval: &helloInterval,
+		DeadInterval:  &deadInterval,
+	}
+
+	if bfdProfilePath != "" {
+		ospf.BfdPath = &bfdProfilePath
+	}
+
+	obj.Ospf = &ospf
+	return nil
+}
+
+func policyTier0GatewayInterfaceOspfSetInSchema(d *schema.ResourceData, obj *model.Tier0Interface) error {
+
+	if obj.Ospf == nil {
+		return nil
+	}
+
+	var ospfConfigs []map[string]interface{}
+	ospfConfig := make(map[string]interface{})
+	ospfConfig["enabled"] = obj.Ospf.Enabled
+	ospfConfig["enable_bfd"] = obj.Ospf.EnableBfd
+	ospfConfig["bfd_profile_path"] = obj.Ospf.BfdPath
+	ospfConfig["area_path"] = obj.Ospf.OspfArea
+	ospfConfig["network_type"] = obj.Ospf.NetworkType
+	ospfConfig["hello_interval"] = obj.Ospf.HelloInterval
+	ospfConfig["dead_interval"] = obj.Ospf.DeadInterval
+
+	ospfConfigs = append(ospfConfigs, ospfConfig)
+	return d.Set("ospf", ospfConfigs)
 }
 
 func resourceNsxtPolicyTier0GatewayInterfaceCreate(d *schema.ResourceData, m interface{}) error {
@@ -212,11 +326,14 @@ func resourceNsxtPolicyTier0GatewayInterfaceCreate(d *schema.ResourceData, m int
 	if edgePath != "" {
 		obj.EdgePath = &edgePath
 	}
-	gatewayInterfaceVersionDepenantSet(d, m, &obj)
+
+	err := gatewayInterfaceVersionDepenantSet(d, m, &obj)
+	if err != nil {
+		return handleCreateError("Tier0 Interface", id, err)
+	}
 
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating Tier0 interface with ID %s", id)
-	var err error
 	if isPolicyGlobalManager(m) {
 		gmObj, err1 := convertModelBindingType(obj, model.Tier0InterfaceBindingType(), gm_model.Tier0InterfaceBindingType())
 		if err1 != nil {
@@ -325,7 +442,7 @@ func resourceNsxtPolicyTier0GatewayInterfaceRead(d *schema.ResourceData, m inter
 		d.Set("urpf_mode", model.Tier0Interface_URPF_MODE_STRICT)
 	}
 
-	return nil
+	return policyTier0GatewayInterfaceOspfSetInSchema(d, &obj)
 }
 
 func resourceNsxtPolicyTier0GatewayInterfaceUpdate(d *schema.ResourceData, m interface{}) error {
@@ -381,9 +498,11 @@ func resourceNsxtPolicyTier0GatewayInterfaceUpdate(d *schema.ResourceData, m int
 		obj.SegmentPath = &segmentPath
 	}
 
-	gatewayInterfaceVersionDepenantSet(d, m, &obj)
+	err := gatewayInterfaceVersionDepenantSet(d, m, &obj)
+	if err != nil {
+		return handleUpdateError("Tier0 Interface", id, err)
+	}
 
-	var err error
 	if isPolicyGlobalManager(m) {
 		gmObj, err1 := convertModelBindingType(obj, model.Tier0InterfaceBindingType(), gm_model.Tier0InterfaceBindingType())
 		if err1 != nil {
