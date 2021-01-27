@@ -763,9 +763,9 @@ resource "nsxt_policy_ospf_area" "test" {
 
 func testAccNsxtPolicyTier0InterfaceExternalTemplate(name string, subnet string, mtu string, enablePim string, withOspf bool) string {
 	ospfDeps := ""
-	ospfConfig := ""
+	extraConfig := testAccNsxtPolicyTier0InterfaceSiteTemplate()
 	if withOspf {
-		ospfConfig = `
+		extraConfig = `
     ospf {
       enabled        = true
       enable_bfd     = false
@@ -804,6 +804,6 @@ resource "nsxt_policy_tier0_gateway_interface" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, nsxtPolicyTier0GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, mtu, subnet, enablePim, ospfConfig) +
+}`, nsxtPolicyTier0GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, mtu, subnet, enablePim, extraConfig) +
 		testAccNsxtPolicyTier0InterfaceRealizationTemplate()
 }
