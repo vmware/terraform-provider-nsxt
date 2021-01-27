@@ -23,7 +23,7 @@ func TestAccResourceNsxtPolicyEvpnConfig_inline(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			if err := testAccDataSourceNsxtPolicyVniPoolConfigDeleteByName(accTestPolicyEvpnTenantHelperName); err != nil {
+			if err := testAccDataSourceNsxtPolicyVniPoolConfigDelete(); err != nil {
 				panic(err)
 			}
 			return testAccNsxtPolicyEvpnConfigCheckDestroy(state, displayName)
@@ -31,7 +31,7 @@ func TestAccResourceNsxtPolicyEvpnConfig_inline(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				PreConfig: func() {
-					if err := testAccDataSourceNsxtPolicyVniPoolConfigCreate(accTestPolicyEvpnTenantHelperName); err != nil {
+					if err := testAccDataSourceNsxtPolicyVniPoolConfigCreate(); err != nil {
 						panic(err)
 					}
 				},
@@ -79,7 +79,7 @@ func TestAccResourceNsxtPolicyEvpnConfig_routeServer(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			if err := testAccDataSourceNsxtPolicyVniPoolConfigDeleteByName(accTestPolicyEvpnTenantHelperName); err != nil {
+			if err := testAccDataSourceNsxtPolicyVniPoolConfigDelete(); err != nil {
 				panic(err)
 			}
 			return testAccNsxtPolicyEvpnConfigCheckDestroy(state, displayName)
@@ -87,7 +87,7 @@ func TestAccResourceNsxtPolicyEvpnConfig_routeServer(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				PreConfig: func() {
-					if err := testAccDataSourceNsxtPolicyVniPoolConfigCreate(accTestPolicyEvpnTenantHelperName); err != nil {
+					if err := testAccDataSourceNsxtPolicyVniPoolConfigCreate(); err != nil {
 						panic(err)
 					}
 				},
@@ -133,7 +133,7 @@ func TestAccResourceNsxtPolicyEvpnConfig_importBasic(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			if err := testAccDataSourceNsxtPolicyVniPoolConfigDeleteByName(accTestPolicyEvpnTenantHelperName); err != nil {
+			if err := testAccDataSourceNsxtPolicyVniPoolConfigDelete(); err != nil {
 				panic(err)
 			}
 			return testAccNsxtPolicyEvpnConfigCheckDestroy(state, name)
@@ -141,7 +141,7 @@ func TestAccResourceNsxtPolicyEvpnConfig_importBasic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				PreConfig: func() {
-					if err := testAccDataSourceNsxtPolicyVniPoolConfigCreate(accTestPolicyEvpnTenantHelperName); err != nil {
+					if err := testAccDataSourceNsxtPolicyVniPoolConfigCreate(); err != nil {
 						panic(err)
 					}
 				},
@@ -240,7 +240,7 @@ resource "nsxt_policy_evpn_tenant" "test" {
   transport_zone_path = data.nsxt_policy_transport_zone.test.path
 
   mapping {
-    vnis  = "75003"
+    vnis  = "75503"
     vlans = "103"
   }
 }

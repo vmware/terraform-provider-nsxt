@@ -422,6 +422,19 @@ func getRedistributionConfigSchema() *schema.Schema {
 					Description: "Flag to enable route redistribution for BGP",
 					Optional:    true,
 					Default:     true,
+					Deprecated:  "Use bgp_enabled attribute instead",
+				},
+				"bgp_enabled": {
+					Type:        schema.TypeBool,
+					Description: "Flag to enable route redistribution for BGP",
+					Optional:    true,
+					Default:     true,
+				},
+				"ospf_enabled": {
+					Type:        schema.TypeBool,
+					Description: "Flag to enable route redistribution for OSPF",
+					Optional:    true,
+					Default:     false,
 				},
 				"rule": {
 					Type:        schema.TypeList,
@@ -463,7 +476,12 @@ func setLocaleServiceRedistributionConfig(redistributionConfigs []interface{}, s
 	}
 
 	redistributionConfig := redistributionConfigs[0].(map[string]interface{})
-	bgp := redistributionConfig["enabled"].(bool)
+	bgpEnabled := redistributionConfig["bgp_enabled"].(bool)
+	bgpEnabledDeprected := redistributionConfig["enabled"].(bool)
+	if !bgpEnabledDeprected {
+		bgpEnabled = false
+	}
+	ospfEnabled := redistributionConfig["ospf_enabled"].(bool)
 	rulesConfig := redistributionConfig["rule"].([]interface{})
 
 	for _, ruleConfig := range rulesConfig {
@@ -488,7 +506,8 @@ func setLocaleServiceRedistributionConfig(redistributionConfigs []interface{}, s
 	}
 
 	redistributionStruct := model.Tier0RouteRedistributionConfig{
-		BgpEnabled:          &bgp,
+		BgpEnabled:          &bgpEnabled,
+		OspfEnabled:         &ospfEnabled,
 		RedistributionRules: rules,
 	}
 
@@ -505,6 +524,8 @@ func getLocaleServiceRedistributionConfig(serviceStruct *model.LocaleServices) [
 	var rules []map[string]interface{}
 	elem := make(map[string]interface{})
 	elem["enabled"] = config.BgpEnabled
+	elem["bgp_enabled"] = config.BgpEnabled
+	elem["ospf_enabled"] = config.OspfEnabled
 	for _, ruleConfig := range config.RedistributionRules {
 		rule := make(map[string]interface{})
 		rule["name"] = ruleConfig.Name
@@ -524,4 +545,24 @@ func findTier0LocaleServiceForSite(connector *client.RestConnector, gwID string,
 		return "", err
 	}
 	return getGlobalPolicyGatewayLocaleServiceIDWithSite(localeServices, sitePath, gwID)
+}
+
+func parseGatewayInterfacePolicyPath(path string) (bool, string, string, string) {
+	// interface path must be /*infra/tier-Xs/gw-id/locale-services/ls-id/interfaces/if-id
+	segs := strings.Split(path, "/")
+	if (len(segs) != 8) || (segs[len(segs)-2] != "interfaces") {
+		// error - this is not an interface path
+		return false, "", "", ""
+	}
+
+	isT0 := true
+	if segs[2] != "tier-0s" {
+		isT0 = false
+	}
+
+	gwID := segs[3]
+	localeServiceID := segs[5]
+	interfaceID := segs[7]
+
+	return isT0, gwID, localeServiceID, interfaceID
 }
