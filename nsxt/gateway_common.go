@@ -422,13 +422,6 @@ func getRedistributionConfigSchema() *schema.Schema {
 					Description: "Flag to enable route redistribution for BGP",
 					Optional:    true,
 					Default:     true,
-					Deprecated:  "Use bgp_enabled attribute instead",
-				},
-				"bgp_enabled": {
-					Type:        schema.TypeBool,
-					Description: "Flag to enable route redistribution for BGP",
-					Optional:    true,
-					Default:     true,
 				},
 				"ospf_enabled": {
 					Type:        schema.TypeBool,
@@ -476,11 +469,7 @@ func setLocaleServiceRedistributionConfig(redistributionConfigs []interface{}, s
 	}
 
 	redistributionConfig := redistributionConfigs[0].(map[string]interface{})
-	bgpEnabled := redistributionConfig["bgp_enabled"].(bool)
-	bgpEnabledDeprected := redistributionConfig["enabled"].(bool)
-	if !bgpEnabledDeprected {
-		bgpEnabled = false
-	}
+	bgpEnabled := redistributionConfig["enabled"].(bool)
 	ospfEnabled := redistributionConfig["ospf_enabled"].(bool)
 	rulesConfig := redistributionConfig["rule"].([]interface{})
 
@@ -524,7 +513,6 @@ func getLocaleServiceRedistributionConfig(serviceStruct *model.LocaleServices) [
 	var rules []map[string]interface{}
 	elem := make(map[string]interface{})
 	elem["enabled"] = config.BgpEnabled
-	elem["bgp_enabled"] = config.BgpEnabled
 	elem["ospf_enabled"] = config.OspfEnabled
 	for _, ruleConfig := range config.RedistributionRules {
 		rule := make(map[string]interface{})

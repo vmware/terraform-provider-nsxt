@@ -185,7 +185,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_redistribution(t *testing.T) {
 					testAccNsxtPolicyTier0Exists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.0.bgp_enabled", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.0.enabled", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.0.ospf_enabled", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.0.rule.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.0.rule.0.types.#", "3"),
@@ -198,7 +198,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_redistribution(t *testing.T) {
 					testAccNsxtPolicyTier0Exists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.0.bgp_enabled", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.0.enabled", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.0.ospf_enabled", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.0.rule.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.0.rule.0.types.#", "0"),
@@ -211,7 +211,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_redistribution(t *testing.T) {
 					testAccNsxtPolicyTier0Exists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.0.bgp_enabled", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.0.enabled", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.0.ospf_enabled", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "redistribution_config.0.rule.#", "0"),
 					resource.TestCheckResourceAttr(realizationResourceName, "state", "REALIZED"),
@@ -778,7 +778,7 @@ func testAccNsxtPolicyTier0CreateWithRedistribution(name string) string {
 resource "nsxt_policy_tier0_gateway" "test" {
   display_name = "%s"
   redistribution_config {
-    bgp_enabled  = false
+    enabled  = false
     ospf_enabled = false
     rule {
         name = "test-rule-1"
@@ -797,7 +797,7 @@ func testAccNsxtPolicyTier0UpdateWithRedistribution(name string) string {
 resource "nsxt_policy_tier0_gateway" "test" {
   display_name = "%s"
   redistribution_config {
-    bgp_enabled  = false
+    enabled  = false
     ospf_enabled = false
     rule {
         name = "test-rule-1"
@@ -819,7 +819,7 @@ func testAccNsxtPolicyTier0Update2WithRedistribution(name string) string {
 resource "nsxt_policy_tier0_gateway" "test" {
   display_name = "%s"
   redistribution_config {
-    bgp_enabled  = false
+    enabled  = false
     ospf_enabled = true
   }
 }
