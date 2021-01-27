@@ -546,3 +546,23 @@ func findTier0LocaleServiceForSite(connector *client.RestConnector, gwID string,
 	}
 	return getGlobalPolicyGatewayLocaleServiceIDWithSite(localeServices, sitePath, gwID)
 }
+
+func parseGatewayInterfacePolicyPath(path string) (bool, string, string, string) {
+	// interface path must be /*infra/tier-Xs/gw-id/locale-services/ls-id/interfaces/if-id
+	segs := strings.Split(path, "/")
+	if (len(segs) != 8) || (segs[len(segs)-2] != "interfaces") {
+		// error - this is not an interface path
+		return false, "", "", ""
+	}
+
+	isT0 := true
+	if segs[2] != "tier-0s" {
+		isT0 = false
+	}
+
+	gwID := segs[3]
+	localeServiceID := segs[5]
+	interfaceID := segs[7]
+
+	return isT0, gwID, localeServiceID, interfaceID
+}

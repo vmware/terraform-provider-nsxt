@@ -30,7 +30,7 @@ func TestAccResourceNsxtPolicyEvpnTenant_basic(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			if err := testAccDataSourceNsxtPolicyVniPoolConfigDeleteByName(accTestPolicyEvpnTenantHelperName); err != nil {
+			if err := testAccDataSourceNsxtPolicyVniPoolConfigDelete(); err != nil {
 				panic(err)
 			}
 			return testAccNsxtPolicyEvpnTenantCheckDestroy(state, accTestPolicyEvpnTenantUpdateAttributes["display_name"])
@@ -38,7 +38,7 @@ func TestAccResourceNsxtPolicyEvpnTenant_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				PreConfig: func() {
-					if err := testAccDataSourceNsxtPolicyVniPoolConfigCreate(accTestPolicyEvpnTenantHelperName); err != nil {
+					if err := testAccDataSourceNsxtPolicyVniPoolConfigCreate(); err != nil {
 						panic(err)
 					}
 				},
@@ -84,7 +84,7 @@ func TestAccResourceNsxtPolicyEvpnTenant_importBasic(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			if err := testAccDataSourceNsxtPolicyVniPoolConfigDeleteByName(accTestPolicyEvpnTenantHelperName); err != nil {
+			if err := testAccDataSourceNsxtPolicyVniPoolConfigDelete(); err != nil {
 				panic(err)
 			}
 			return testAccNsxtPolicyEvpnTenantCheckDestroy(state, accTestPolicyEvpnTenantUpdateAttributes["display_name"])
@@ -92,7 +92,7 @@ func TestAccResourceNsxtPolicyEvpnTenant_importBasic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				PreConfig: func() {
-					if err := testAccDataSourceNsxtPolicyVniPoolConfigCreate(accTestPolicyEvpnTenantHelperName); err != nil {
+					if err := testAccDataSourceNsxtPolicyVniPoolConfigCreate(); err != nil {
 						panic(err)
 					}
 				},
@@ -156,15 +156,11 @@ func testAccNsxtPolicyEvpnTenantCheckDestroy(state *terraform.State, displayName
 }
 
 func testAccNsxtPolicyEvpnTenantPrerequisites() string {
-	return fmt.Sprintf(`
-    data "nsxt_policy_vni_pool" "test" {
-      display_name = "%s"
-    }
-
+	return testAccNsxtPolicyVniPoolConfigReadTemplate() + fmt.Sprintf(`
     data "nsxt_policy_transport_zone" "test" {
       display_name = "%s"
     }
-    `, accTestPolicyEvpnTenantHelperName, getOverlayTransportZoneName())
+    `, getOverlayTransportZoneName())
 }
 
 func testAccNsxtPolicyEvpnTenantCreate() string {
@@ -178,12 +174,12 @@ resource "nsxt_policy_evpn_tenant" "test" {
   transport_zone_path = data.nsxt_policy_transport_zone.test.path
 
   mapping {
-    vnis  = "75003"
+    vnis  = "75503"
     vlans = "103"
   }
 
   mapping {
-    vnis  = "75012-75015"
+    vnis  = "75512-75515"
     vlans = "112-115"
   }
 
@@ -205,7 +201,7 @@ resource "nsxt_policy_evpn_tenant" "test" {
   transport_zone_path = data.nsxt_policy_transport_zone.test.path
 
   mapping {
-    vnis  = "75005"
+    vnis  = "75505"
     vlans = "100"
   }
 }`, attrMap["display_name"], attrMap["description"])
