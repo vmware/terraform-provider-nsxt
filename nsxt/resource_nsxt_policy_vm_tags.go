@@ -6,6 +6,7 @@ package nsxt
 import (
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -63,17 +64,29 @@ func listAllPolicyVirtualMachines(connector *client.RestConnector, m interface{}
 	enforcementPointPath := getPolicyEnforcementPointPath(m)
 	for {
 		// NOTE: Search API doesn't filter by realized state resources
+		// NOTE: Contrary to the spec, this API does not populate cursor and result count
+		// parameters, respects cursor input. Therefore we determine end of VM list by
+		// looking for empty result.
 		vms, err := client.List(cursor, &enforcementPointPath, &boolFalse, nil, nil, &boolFalse, nil)
 		if err != nil {
 			return results, err
 		}
 		results = append(results, vms.Results...)
+		if len(vms.Results) == 0 {
+			// no more results
+			return results, nil
+		}
 		if total == 0 && vms.ResultCount != nil {
 			// first response
 			total = int(*vms.ResultCount)
 		}
 		cursor = vms.Cursor
-		if len(results) >= total {
+		if cursor == nil {
+			resultCount := strconv.Itoa(len(results))
+			cursor = &resultCount
+		}
+
+		if (total > 0) && (len(results) >= total) {
 			return results, nil
 		}
 	}

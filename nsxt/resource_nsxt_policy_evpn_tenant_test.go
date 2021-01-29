@@ -21,8 +21,6 @@ var accTestPolicyEvpnTenantUpdateAttributes = map[string]string{
 	"description":  "terraform updated",
 }
 
-var accTestPolicyEvpnTenantHelperName = getAccTestResourceName()
-
 func TestAccResourceNsxtPolicyEvpnTenant_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_evpn_tenant.test"
 
