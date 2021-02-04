@@ -83,15 +83,8 @@ func getPolicyOspfConfigSchema() map[string]*schema.Schema {
 				},
 			},
 		},
-		"locale_service_id": {
-			Type:        schema.TypeString,
-			Description: "Id of associated Gateway Locale Service on NSX",
-			Computed:    true,
-		},
-		"gateway_id": {
-			Type: schema.TypeString, Description: "Id of associated Tier0 Gateway on NSX",
-			Computed: true,
-		},
+		"locale_service_id": getComputedLocaleServiceIDSchema(),
+		"gateway_id":        getComputedGatewayIDSchema(),
 	}
 }
 

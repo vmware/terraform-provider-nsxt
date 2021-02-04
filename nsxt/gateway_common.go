@@ -554,3 +554,19 @@ func parseGatewayInterfacePolicyPath(path string) (bool, string, string, string)
 
 	return isT0, gwID, localeServiceID, interfaceID
 }
+
+func getComputedLocaleServiceIDSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeString,
+		Description: "NSX ID of associated Gateway Locale Service",
+		Computed:    true,
+	}
+}
+
+func getComputedGatewayIDSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeString,
+		Description: "NSX ID of associated Tier0 Gateway",
+		Computed:    true,
+	}
+}

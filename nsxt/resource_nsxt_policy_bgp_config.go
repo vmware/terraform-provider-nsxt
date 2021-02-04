@@ -9,15 +9,16 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	gm_locale_services "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s/locale_services"
 	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
-// Note: this resource is supported for global manager only
-// TODO: consider supporting it for local manager and deprecating bgp config on T0 gateway
 func resourceNsxtPolicyBgpConfig() *schema.Resource {
 	bgpSchema := getPolicyBGPConfigSchema()
 	bgpSchema["gateway_path"] = getPolicyPathSchema(true, true, "Gateway for this BGP config")
-	bgpSchema["site_path"] = getPolicyPathSchema(true, true, "Site Path for this BGP config")
+	bgpSchema["site_path"] = getPolicyPathSchema(false, true, "Site Path for this BGP config")
+	bgpSchema["gateway_id"] = getComputedGatewayIDSchema()
+	bgpSchema["locale_service_id"] = getComputedLocaleServiceIDSchema()
 
 	return &schema.Resource{
 		Create: resourceNsxtPolicyBgpConfigCreate,
@@ -30,32 +31,35 @@ func resourceNsxtPolicyBgpConfig() *schema.Resource {
 }
 
 func resourceNsxtPolicyBgpConfigRead(d *schema.ResourceData, m interface{}) error {
-	if !isPolicyGlobalManager(m) {
-		return globalManagerOnlyError()
-	}
 	connector := getPolicyConnector(m)
 
 	gwPath := d.Get("gateway_path").(string)
-	gwID := getPolicyIDFromPath(gwPath)
-	sitePath := d.Get("site_path").(string)
-	if !isPolicyGlobalManager(m) {
-		return fmt.Errorf("This resource is not supported for local manager")
+	isT0, gwID := parseGatewayPolicyPath(gwPath)
+	if !isT0 {
+		return fmt.Errorf("Tier0 Gateway path expected, got %s", gwPath)
 	}
+	serviceID := d.Get("locale_service_id").(string)
+	var lmRoutingConfig model.BgpRoutingConfig
+	if isPolicyGlobalManager(m) {
 
-	serviceID, err := findTier0LocaleServiceForSite(connector, gwID, sitePath)
-	if err != nil {
-		return err
+		client := gm_locale_services.NewDefaultBgpClient(connector)
+		gmObj, err := client.Get(gwID, serviceID)
+		if err != nil {
+			return handleReadError(d, "BGP Config", serviceID, err)
+		}
+		lmObj, convErr := convertModelBindingType(gmObj, gm_model.BgpRoutingConfigBindingType(), model.BgpRoutingConfigBindingType())
+		if convErr != nil {
+			return convErr
+		}
+		lmRoutingConfig = lmObj.(model.BgpRoutingConfig)
+	} else {
+		var err error
+		client := locale_services.NewDefaultBgpClient(connector)
+		lmRoutingConfig, err = client.Get(gwID, serviceID)
+		if err != nil {
+			return handleReadError(d, "BGP Config", serviceID, err)
+		}
 	}
-	client := gm_locale_services.NewDefaultBgpClient(connector)
-	gmObj, err := client.Get(gwID, serviceID)
-	if err != nil {
-		return handleReadError(d, "BGP Config", serviceID, err)
-	}
-	lmObj, convErr := convertModelBindingType(gmObj, gm_model.BgpRoutingConfigBindingType(), model.BgpRoutingConfigBindingType())
-	if convErr != nil {
-		return convErr
-	}
-	lmRoutingConfig := lmObj.(model.BgpRoutingConfig)
 
 	data := initPolicyTier0BGPConfigMap(&lmRoutingConfig)
 
@@ -66,7 +70,7 @@ func resourceNsxtPolicyBgpConfigRead(d *schema.ResourceData, m interface{}) erro
 	return nil
 }
 
-func resourceNsxtPolicyBgpConfigToStruct(d *schema.ResourceData) (*gm_model.BgpRoutingConfig, error) {
+func resourceNsxtPolicyBgpConfigToStruct(d *schema.ResourceData) (*model.BgpRoutingConfig, error) {
 	ecmp := d.Get("ecmp").(bool)
 	enabled := d.Get("enabled").(bool)
 	interSrIbgp := d.Get("inter_sr_ibgp").(bool)
@@ -75,16 +79,16 @@ func resourceNsxtPolicyBgpConfigToStruct(d *schema.ResourceData) (*gm_model.BgpR
 	restartMode := d.Get("graceful_restart_mode").(string)
 	restartTimer := int64(d.Get("graceful_restart_timer").(int))
 	staleTimer := int64(d.Get("graceful_restart_stale_route_timer").(int))
-	tags := getPolicyGlobalManagerTagsFromSchema(d)
+	tags := getPolicyTagsFromSchema(d)
 
-	var aggregationStructs []gm_model.RouteAggregationEntry
+	var aggregationStructs []model.RouteAggregationEntry
 	routeAggregations := d.Get("route_aggregation").([]interface{})
 	if len(routeAggregations) > 0 {
 		for _, agg := range routeAggregations {
 			data := agg.(map[string]interface{})
 			prefix := data["prefix"].(string)
 			summary := data["summary_only"].(bool)
-			elem := gm_model.RouteAggregationEntry{
+			elem := model.RouteAggregationEntry{
 				Prefix:      &prefix,
 				SummaryOnly: &summary,
 			}
@@ -93,17 +97,17 @@ func resourceNsxtPolicyBgpConfigToStruct(d *schema.ResourceData) (*gm_model.BgpR
 		}
 	}
 
-	restartTimerStruct := gm_model.BgpGracefulRestartTimer{
+	restartTimerStruct := model.BgpGracefulRestartTimer{
 		RestartTimer:    &restartTimer,
 		StaleRouteTimer: &staleTimer,
 	}
 
-	restartConfigStruct := gm_model.BgpGracefulRestartConfig{
+	restartConfigStruct := model.BgpGracefulRestartConfig{
 		Mode:  &restartMode,
 		Timer: &restartTimerStruct,
 	}
 
-	routeStruct := gm_model.BgpRoutingConfig{
+	routeStruct := model.BgpRoutingConfig{
 		Ecmp:                  &ecmp,
 		Enabled:               &enabled,
 		RouteAggregations:     aggregationStructs,
@@ -118,14 +122,14 @@ func resourceNsxtPolicyBgpConfigToStruct(d *schema.ResourceData) (*gm_model.BgpR
 }
 
 func resourceNsxtPolicyBgpConfigCreate(d *schema.ResourceData, m interface{}) error {
-	if !isPolicyGlobalManager(m) {
-		return globalManagerOnlyError()
-	}
 	// This is not a create operation on NSX, since BGP config us auto created
 	connector := getPolicyConnector(m)
 
 	gwPath := d.Get("gateway_path").(string)
-	gwID := getPolicyIDFromPath(gwPath)
+	isT0, gwID := parseGatewayPolicyPath(gwPath)
+	if !isT0 {
+		return fmt.Errorf("Tier0 Gateway path expected, got %s", gwPath)
+	}
 	sitePath := d.Get("site_path").(string)
 
 	obj, err := resourceNsxtPolicyBgpConfigToStruct(d)
@@ -133,17 +137,40 @@ func resourceNsxtPolicyBgpConfigCreate(d *schema.ResourceData, m interface{}) er
 		return handleCreateError("BgpRoutingConfig", gwID, err)
 	}
 
-	serviceID, err := findTier0LocaleServiceForSite(connector, gwID, sitePath)
+	var localeServiceID string
+	if isPolicyGlobalManager(m) {
+		serviceID, err1 := findTier0LocaleServiceForSite(connector, gwID, sitePath)
+		if err1 != nil {
+			return handleCreateError("BgpRoutingConfig", gwID, err1)
+		}
+
+		localeServiceID = serviceID
+
+		gmObj, convErr := convertModelBindingType(obj, model.BgpRoutingConfigBindingType(), gm_model.BgpRoutingConfigBindingType())
+		if convErr != nil {
+			return convErr
+		}
+		gmRoutingConfig := gmObj.(gm_model.BgpRoutingConfig)
+
+		client := gm_locale_services.NewDefaultBgpClient(connector)
+		err = client.Patch(gwID, serviceID, gmRoutingConfig, nil)
+	} else {
+		localeService, err1 := getPolicyTier0GatewayLocaleServiceWithEdgeCluster(gwID, connector)
+		if err1 != nil {
+			return fmt.Errorf("Tier0 Gateway path with configured edge cluster expected, got %s", gwPath)
+		}
+		localeServiceID = *localeService.Id
+
+		client := locale_services.NewDefaultBgpClient(connector)
+		err = client.Patch(gwID, localeServiceID, *obj, nil)
+	}
 	if err != nil {
 		return handleCreateError("BgpRoutingConfig", gwID, err)
 	}
 
-	client := gm_locale_services.NewDefaultBgpClient(connector)
-	err = client.Patch(gwID, serviceID, *obj, nil)
-	if err != nil {
-		return handleCreateError("BgpRoutingConfig", gwID, err)
-	}
 	d.SetId(newUUID())
+	d.Set("gateway_id", gwID)
+	d.Set("locale_service_id", localeServiceID)
 
 	return resourceNsxtPolicyBgpConfigRead(d, m)
 }
@@ -151,25 +178,31 @@ func resourceNsxtPolicyBgpConfigCreate(d *schema.ResourceData, m interface{}) er
 func resourceNsxtPolicyBgpConfigUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
-	gwPath := d.Get("gateway_path").(string)
-	gwID := getPolicyIDFromPath(gwPath)
-	sitePath := d.Get("site_path").(string)
 	revision := int64(d.Get("revision").(int))
+	gwPath := d.Get("gateway_path").(string)
+	_, gwID := parseGatewayPolicyPath(gwPath)
+	serviceID := d.Get("locale_service_id").(string)
 
 	obj, err := resourceNsxtPolicyBgpConfigToStruct(d)
 	if err != nil {
 		return handleUpdateError("BgpRoutingConfig", gwID, err)
 	}
 
-	serviceID, err := findTier0LocaleServiceForSite(connector, gwID, sitePath)
-	if err != nil {
-		return handleUpdateError("BgpRoutingConfig", gwID, err)
+	obj.Revision = &revision
+	if isPolicyGlobalManager(m) {
+		gmObj, convErr := convertModelBindingType(obj, model.BgpRoutingConfigBindingType(), gm_model.BgpRoutingConfigBindingType())
+		if convErr != nil {
+			return convErr
+		}
+		gmRoutingConfig := gmObj.(gm_model.BgpRoutingConfig)
+
+		client := gm_locale_services.NewDefaultBgpClient(connector)
+		_, err = client.Update(gwID, serviceID, gmRoutingConfig, nil)
+	} else {
+		client := locale_services.NewDefaultBgpClient(connector)
+		_, err = client.Update(gwID, serviceID, *obj, nil)
 	}
 
-	obj.Revision = &revision
-
-	client := gm_locale_services.NewDefaultBgpClient(connector)
-	_, err = client.Update(gwID, serviceID, *obj, nil)
 	if err != nil {
 		return handleUpdateError("BgpRoutingConfig", gwID, err)
 	}
