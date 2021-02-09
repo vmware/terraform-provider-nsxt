@@ -14,7 +14,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/realized_state"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
@@ -108,22 +107,6 @@ func getPolicyTagsFromSchema(d *schema.ResourceData) []model.Tag {
 
 func setPolicyTagsInSchema(d *schema.ResourceData, tags []model.Tag) {
 	setCustomizedPolicyTagsInSchema(d, tags, "tag")
-}
-
-func getPolicyGlobalManagerTagsFromSchema(d *schema.ResourceData) []gm_model.Tag {
-	tags := d.Get("tag").(*schema.Set).List()
-	var tagList []gm_model.Tag
-	for _, tag := range tags {
-		data := tag.(map[string]interface{})
-		tagScope := data["scope"].(string)
-		tagTag := data["tag"].(string)
-		elem := gm_model.Tag{
-			Scope: &tagScope,
-			Tag:   &tagTag}
-
-		tagList = append(tagList, elem)
-	}
-	return tagList
 }
 
 func getPathListFromMap(data map[string]interface{}, attrName string) []string {

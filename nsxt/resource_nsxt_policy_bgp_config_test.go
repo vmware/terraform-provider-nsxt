@@ -38,7 +38,7 @@ func TestAccResourceNsxtPolicyBgpConfig_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_bgp_config.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyGlobalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -85,7 +85,7 @@ func TestAccResourceNsxtPolicyBgpConfig_minimalistic(t *testing.T) {
 	testResourceName := "nsxt_policy_bgp_config.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyGlobalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -107,15 +107,11 @@ func testAccNsxtPolicyBgpConfigTemplate(createFlow bool) string {
 	} else {
 		attrMap = accTestPolicyBgpConfigUpdateAttributes
 	}
-	return testAccNsxtPolicyGMGatewayDeps() + fmt.Sprintf(`
-
-resource "nsxt_policy_tier0_gateway" "test" {
-  display_name = "terraform-bgp-test"
-  locale_service {
-    edge_cluster_path = data.nsxt_policy_edge_cluster.ec_site1.path
-  }
-}
-
+	extraConfig := ""
+	if testAccIsGlobalManager() {
+		extraConfig = `site_path    = data.nsxt_policy_site.test.path`
+	}
+	return testAccNsxtPolicyEdgeClusterReadTemplate(getEdgeClusterName()) + testAccNsxtPolicyTier0WithEdgeClusterTemplate("test", false) + fmt.Sprintf(`
 resource "nsxt_policy_bgp_config" "test" {
   enabled         = %s
   inter_sr_ibgp   = %s
@@ -132,7 +128,7 @@ resource "nsxt_policy_bgp_config" "test" {
   graceful_restart_stale_route_timer = %s
 
   gateway_path = nsxt_policy_tier0_gateway.test.path
-  site_path    = data.nsxt_policy_site.site1.path
+  %s
   tag {
     scope = "scope1"
     tag   = "tag1"
@@ -142,28 +138,24 @@ resource "nsxt_policy_bgp_config" "test" {
 
 data "nsxt_policy_realization_info" "bgp_realization_info" {
   path      = nsxt_policy_bgp_config.test.path
-  site_path = data.nsxt_policy_site.site1.path
-}`, attrMap["enabled"], attrMap["inter_sr_ibgp"], attrMap["local_as_num"], attrMap["multipath_relax"], attrMap["prefix"], attrMap["summary_only"], attrMap["graceful_restart_mode"], attrMap["graceful_restart_timer"], attrMap["graceful_restart_stale_route_timer"])
+  %s
+}`, attrMap["enabled"], attrMap["inter_sr_ibgp"], attrMap["local_as_num"], attrMap["multipath_relax"], attrMap["prefix"], attrMap["summary_only"], attrMap["graceful_restart_mode"], attrMap["graceful_restart_timer"], attrMap["graceful_restart_stale_route_timer"], extraConfig, extraConfig)
 }
 
 func testAccNsxtPolicyBgpConfigMinimalistic() string {
-	return testAccNsxtPolicyGMGatewayDeps() + `
-
-resource "nsxt_policy_tier0_gateway" "test" {
-  display_name = "terraform-bgp-test"
-  locale_service {
-    edge_cluster_path = data.nsxt_policy_edge_cluster.ec_site1.path
-  }
-}
-
+	extraConfig := ""
+	if testAccIsGlobalManager() {
+		extraConfig = `site_path    = data.nsxt_policy_site.test.path`
+	}
+	return testAccNsxtPolicyEdgeClusterReadTemplate(getEdgeClusterName()) + testAccNsxtPolicyTier0WithEdgeClusterTemplate("test", false) + fmt.Sprintf(`
 resource "nsxt_policy_bgp_config" "test" {
   gateway_path = nsxt_policy_tier0_gateway.test.path
-  site_path    = data.nsxt_policy_site.site1.path
+  %s
   local_as_num = 65001
 }
 
 data "nsxt_policy_realization_info" "realization_info" {
   path      = nsxt_policy_bgp_config.test.path
-  site_path = data.nsxt_policy_site.site1.path
-}`
+  %s
+}`, extraConfig, extraConfig)
 }
