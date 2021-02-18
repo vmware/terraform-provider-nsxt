@@ -319,7 +319,6 @@ func resourceNsxtPolicyNATRuleCreate(d *schema.ResourceData, m interface{}) erro
 		Logging:            &logging,
 		SequenceNumber:     &priority,
 		Service:            &service,
-		SourceNetwork:      &sNets,
 		TranslatedNetwork:  &tNets,
 		Scope:              scope,
 	}
@@ -330,6 +329,10 @@ func resourceNsxtPolicyNATRuleCreate(d *schema.ResourceData, m interface{}) erro
 	}
 	if ports != "" {
 		ruleStruct.TranslatedPorts = &ports
+	}
+
+	if len(sNets) > 0 {
+		ruleStruct.SourceNetwork = &sNets
 	}
 
 	log.Printf("[INFO] Creating NAT Rule with ID %s", id)
@@ -372,7 +375,7 @@ func resourceNsxtPolicyNATRuleUpdate(d *schema.ResourceData, m interface{}) erro
 	tags := getPolicyTagsFromSchema(d)
 	scope := interfaceListToStringList(d.Get("scope").([]interface{}))
 
-	routeStruct := model.PolicyNatRule{
+	ruleStruct := model.PolicyNatRule{
 		Id:                 &id,
 		DisplayName:        &displayName,
 		Description:        &description,
@@ -383,7 +386,6 @@ func resourceNsxtPolicyNATRuleUpdate(d *schema.ResourceData, m interface{}) erro
 		Logging:            &logging,
 		SequenceNumber:     &priority,
 		Service:            &service,
-		SourceNetwork:      &sNets,
 		TranslatedNetwork:  &tNets,
 		Scope:              scope,
 	}
@@ -391,15 +393,18 @@ func resourceNsxtPolicyNATRuleUpdate(d *schema.ResourceData, m interface{}) erro
 	// handle values that can't be an empty string
 	fwMatch := d.Get("firewall_match").(string)
 	if fwMatch != "" {
-		routeStruct.FirewallMatch = &fwMatch
+		ruleStruct.FirewallMatch = &fwMatch
 	}
 	tPorts := d.Get("translated_ports").(string)
 	if tPorts != "" {
-		routeStruct.TranslatedPorts = &tPorts
+		ruleStruct.TranslatedPorts = &tPorts
+	}
+	if len(sNets) > 0 {
+		ruleStruct.SourceNetwork = &sNets
 	}
 
 	log.Printf("[INFO] Updating NAT Rule with ID %s", id)
-	err := patchNsxtPolicyNATRule(connector, gwID, routeStruct, isT0, isPolicyGlobalManager(m))
+	err := patchNsxtPolicyNATRule(connector, gwID, ruleStruct, isT0, isPolicyGlobalManager(m))
 	if err != nil {
 		return handleUpdateError("NAT Rule", id, err)
 	}
