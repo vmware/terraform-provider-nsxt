@@ -100,7 +100,7 @@ The following arguments are supported:
   * `ip_version` - (Optional) The IP Protocol for the rule. Must be one of: `IPV4`, `IPV6` or `IPV4_IPV6`. Defaults to `IPV4_IPV6`.
   * `logged` - (Optional) A boolean flag to enable packet logging.
   * `notes` - (Optional) Text for additional notes on changes for the rule.
-  * `profiles` - (Optional) A list of profiles for the rule.
+  * `profiles` - (Optional) A list of context profiles for the rule. Note: due to platform issue, this setting is only supported with NSX 3.2 onwards.
   * `scope` - (Required) List of policy paths where the rule is applied.
   * `services` - (Optional) List of services to match.
   * `source_groups` - (Optional) A list of source group paths to use for the policy.
