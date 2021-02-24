@@ -147,7 +147,7 @@ func Provider() *schema.Provider {
 				Type:         schema.TypeString,
 				Optional:     true,
 				DefaultFunc:  schema.EnvDefaultFunc("NSXT_VMC_AUTH_MODE", "Default"),
-				ValidateFunc: validation.StringInSlice([]string{"Default", "Bearer"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"Default", "Bearer", "Basic"}, false),
 				Description:  "Mode for VMC authorization",
 			},
 			"enforcement_point": {
@@ -363,8 +363,11 @@ func configureNsxtClient(d *schema.ResourceData, clients *nsxtClients) error {
 	clientAuthCert := d.Get("client_auth_cert").(string)
 	clientAuthKey := d.Get("client_auth_key").(string)
 	vmcToken := d.Get("vmc_token").(string)
+	vmcAuthMode := d.Get("vmc_auth_mode").(string)
 
-	if len(vmcToken) > 0 {
+	if (len(vmcToken) > 0) || (vmcAuthMode == "Basic") {
+		// VMC can operate without token with basic auth, however MP API is not
+		// available for cloud admin user
 		return nil
 	}
 
@@ -644,7 +647,7 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 	clients.PolicyEnforcementPoint = policyEnforcementPoint
 	clients.PolicyGlobalManager = policyGlobalManager
 
-	if len(vmcAccessToken) > 0 {
+	if (len(vmcAccessToken) > 0) || (vmcAuthMode == "Basic") {
 		// Special treatment for VMC since MP API is not available there
 		initNSXVersionVMC(*clients)
 	}
