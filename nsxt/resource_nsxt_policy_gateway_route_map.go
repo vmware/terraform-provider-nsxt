@@ -167,6 +167,7 @@ func policyGatewayRouteMapBuildEntry(schemaEntry map[string]interface{}) model.R
 	}
 
 	commListMatches := schemaEntry["community_list_match"].([]interface{})
+	prefixListMatches := schemaEntry["prefix_list_matches"].(*schema.Set).List()
 
 	if len(commListMatches) > 0 {
 		var commCriteriaList []model.CommunityMatchCriteria
@@ -183,12 +184,11 @@ func policyGatewayRouteMapBuildEntry(schemaEntry map[string]interface{}) model.R
 		}
 
 		obj.CommunityListMatches = commCriteriaList
+	} else if len(prefixListMatches) > 0 {
+		obj.PrefixListMatches = interfaceListToStringList(prefixListMatches)
 	}
 
-	prefixListMatches := schemaEntry["prefix_list_matches"].(*schema.Set).List()
-	if len(prefixListMatches) > 0 {
-		obj.PrefixListMatches = interfaceListToStringList(prefixListMatches)
-	} else if len(schemaEntry["set"].([]interface{})) > 0 {
+	if len(schemaEntry["set"].([]interface{})) > 0 {
 		data := schemaEntry["set"].([]interface{})[0].(map[string]interface{})
 		asPathPrepend := data["as_path_prepend"].(string)
 		community := data["community"].(string)
