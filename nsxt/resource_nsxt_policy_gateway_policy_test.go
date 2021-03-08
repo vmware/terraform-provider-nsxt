@@ -85,6 +85,7 @@ func TestAccResourceNsxtPolicyGatewayPolicy_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.action", defaultAction),
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.log_label", tag1),
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.tag.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, "rule.0.rule_id"),
 				),
 			},
 			{
