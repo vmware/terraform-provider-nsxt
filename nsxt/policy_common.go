@@ -162,7 +162,7 @@ func getSecurityPolicyAndGatewayRulesSchema(scopeRequired bool, isIds bool) *sch
 			Description: "List of destination groups",
 			Elem: &schema.Schema{
 				Type:         schema.TypeString,
-				ValidateFunc: validatePolicyPath(),
+				ValidateFunc: validatePolicySourceDestinationGroups(),
 			},
 			Optional: true,
 		},
@@ -241,7 +241,7 @@ func getSecurityPolicyAndGatewayRulesSchema(scopeRequired bool, isIds bool) *sch
 			Description: "List of source groups",
 			Elem: &schema.Schema{
 				Type:         schema.TypeString,
-				ValidateFunc: validatePolicyPath(),
+				ValidateFunc: validatePolicySourceDestinationGroups(),
 			},
 			Optional: true,
 		},

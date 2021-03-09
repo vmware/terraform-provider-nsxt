@@ -79,7 +79,7 @@ The following arguments are supported:
 * `rule` (Optional) A repeatable block to specify rules for the Gateway Policy. This setting is not applicable to policy belonging to `DEFAULT` category. Each rule includes the following fields:
   * `display_name` - (Required) Display name of the resource.
   * `description` - (Optional) Description of the resource.
-  * `destination_groups` - (Optional) A list of destination group paths to use for the policy.
+  * `destination_groups` - (Optional) Set of group paths that serve as the destination for this rule. IPs, IP ranges, or CIDRs may also be used starting in NSX-T 3.0. An empty set can be used to specify "Any".
   * `destinations_excluded` - (Optional) A boolean value indicating negation of destination groups.
   * `direction` - (Optional) The traffic direction for the policy. Must be one of: `IN`, `OUT` or `IN_OUT`. Defaults to `IN_OUT`.
   * `disabled` - (Optional) A boolean value to indicate the rule is disabled. Defaults to `false`.
@@ -89,7 +89,7 @@ The following arguments are supported:
   * `profiles` - (Optional) A list of context profiles for the rule. Note: due to platform issue, this setting is only supported with NSX 3.2 onwards.
   * `scope` - (Required) List of policy paths where the rule is applied.
   * `services` - (Optional) List of services to match.
-  * `source_groups` - (Optional) A list of source group paths to use for the policy.
+  * `source_groups` - (Optional) Set of group paths that serve as the source for this rule. IPs, IP ranges, or CIDRs may also be used starting in NSX-T 3.0. An empty set can be used to specify "Any".
   * `source_excluded` - (Optional) A boolean value indicating negation of source groups.
   * `log_label` - (Optional) Additional information (string) which will be propagated to the rule syslog.
   * `tag` - (Optional) A list of scope + tag pairs to associate with this Rule.

@@ -103,8 +103,8 @@ The following arguments are supported:
   * `display_name` - (Required) Display name of the resource.
   * `description` - (Optional) Description of the resource.
   * `action` - (Optional) Rule action, one of `ALLOW`, `DROP`, `REJECT` and `JUMP_TO_APPLICATION`. Default is `ALLOW`. `JUMP_TO_APPLICATION` is only applicable in `Environment` category.
-  * `destination_groups` - (Optional) Set of group paths that serve as destination for this rule.
-  * `source_groups` - (Optional) Set of group paths that serve as source for this rule.
+  * `destination_groups` - (Optional) Set of group paths that serve as the destination for this rule. IPs, IP ranges, or CIDRs may also be used starting in NSX-T 3.0. An empty set can be used to specify "Any".
+  * `source_groups` - (Optional) Set of group paths that serve as the source for this rule. IPs, IP ranges, or CIDRs may also be used starting in NSX-T 3.0. An empty set can be used to specify "Any".
   * `destinations_excluded` - (Optional) A boolean value indicating negation of destination groups.
   * `sources_excluded` - (Optional) A boolean value indicating negation of source groups.
   * `direction` - (Optional) Traffic direction, one of `IN`, `OUT` or `IN_OUT`. Default is `IN_OUT`.

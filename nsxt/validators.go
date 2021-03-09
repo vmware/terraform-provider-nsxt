@@ -361,6 +361,23 @@ func validateSSLCiphers() schema.SchemaValidateFunc {
 	return validation.StringInSlice(supportedSSLCiphers, false)
 }
 
+func validatePolicySourceDestinationGroups() schema.SchemaValidateFunc {
+	return func(i interface{}, k string) (s []string, es []error) {
+		v, ok := i.(string)
+		if !ok {
+			es = append(es, fmt.Errorf("expected type of %s to be string", k))
+			return
+		}
+
+		if !isCidr(v, true, false) && !isSingleIP(v) && !isIPRange(v) && !isPolicyPath(v) {
+			es = append(es, fmt.Errorf(
+				"expected %s to contain a valid IP, Range, CIDR, or Group Path. Got: %s", k, v))
+		}
+		return
+
+	}
+}
+
 func validatePolicyPath() schema.SchemaValidateFunc {
 	return func(i interface{}, k string) (s []string, es []error) {
 		v, ok := i.(string)

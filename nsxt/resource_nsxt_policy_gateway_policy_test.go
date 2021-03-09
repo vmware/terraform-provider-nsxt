@@ -384,6 +384,147 @@ func TestAccResourceNsxtGlobalPolicyGatewayPolicy_withDomain(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyGatewayPolicy_withIPCidrRange(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_gateway_policy.test"
+	defaultDirection := "IN_OUT"
+	defaultProtocol := "IPV4_IPV6"
+	policyIP := "10.10.20.5"
+	policyCidr := "10.10.20.0/22"
+	policyRange := "10.10.20.6-10.10.20.7"
+	updatedPolicyIP := "10.10.40.5"
+	updatedPolicyCidr := "10.10.40.0/22"
+	updatedPolicyRange := "10.10.40.6-10.10.40.7"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyGatewayPolicyCheckDestroy(state, name, defaultDomain)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyGatewayPolicyWithIPCidrRange(name, policyIP, policyCidr, policyRange, policyIP, policyCidr, policyRange),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyGatewayPolicyExists(testResourceName, defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "category", "LocalGatewayRules"),
+					resource.TestCheckResourceAttr(testResourceName, "domain", defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "comments", ""),
+					resource.TestCheckResourceAttr(testResourceName, "locked", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "sequence_number", "3"),
+					resource.TestCheckResourceAttr(testResourceName, "stateful", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "tcp_strict", "false"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.#", "6"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.display_name", "rule1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.direction", defaultDirection),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.ip_version", defaultProtocol),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.action", "ALLOW"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.source_groups.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.destination_groups.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.destination_groups.0", policyIP),
+					resource.TestCheckResourceAttr(testResourceName, "rule.1.display_name", "rule2"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.1.direction", defaultDirection),
+					resource.TestCheckResourceAttr(testResourceName, "rule.1.ip_version", defaultProtocol),
+					resource.TestCheckResourceAttr(testResourceName, "rule.1.action", "ALLOW"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.1.source_groups.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.1.destination_groups.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.1.destination_groups.0", policyCidr),
+					resource.TestCheckResourceAttr(testResourceName, "rule.2.display_name", "rule3"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.2.direction", defaultDirection),
+					resource.TestCheckResourceAttr(testResourceName, "rule.2.ip_version", defaultProtocol),
+					resource.TestCheckResourceAttr(testResourceName, "rule.2.action", "ALLOW"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.2.source_groups.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.2.destination_groups.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.2.destination_groups.0", policyRange),
+					resource.TestCheckResourceAttr(testResourceName, "rule.3.display_name", "rule4"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.3.direction", defaultDirection),
+					resource.TestCheckResourceAttr(testResourceName, "rule.3.ip_version", defaultProtocol),
+					resource.TestCheckResourceAttr(testResourceName, "rule.3.action", "ALLOW"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.3.source_groups.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.3.source_groups.0", policyIP),
+					resource.TestCheckResourceAttr(testResourceName, "rule.3.destination_groups.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.4.display_name", "rule5"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.4.direction", defaultDirection),
+					resource.TestCheckResourceAttr(testResourceName, "rule.4.ip_version", defaultProtocol),
+					resource.TestCheckResourceAttr(testResourceName, "rule.4.action", "ALLOW"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.4.source_groups.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.4.source_groups.0", policyCidr),
+					resource.TestCheckResourceAttr(testResourceName, "rule.4.destination_groups.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.5.display_name", "rule6"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.5.direction", defaultDirection),
+					resource.TestCheckResourceAttr(testResourceName, "rule.5.ip_version", defaultProtocol),
+					resource.TestCheckResourceAttr(testResourceName, "rule.5.action", "ALLOW"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.5.source_groups.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.5.source_groups.0", policyRange),
+					resource.TestCheckResourceAttr(testResourceName, "rule.5.destination_groups.#", "1"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyGatewayPolicyWithIPCidrRange(name, updatedPolicyIP, updatedPolicyCidr, updatedPolicyRange, updatedPolicyIP, updatedPolicyCidr, updatedPolicyRange),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyGatewayPolicyExists(testResourceName, defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "category", "LocalGatewayRules"),
+					resource.TestCheckResourceAttr(testResourceName, "domain", defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "comments", ""),
+					resource.TestCheckResourceAttr(testResourceName, "locked", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "sequence_number", "3"),
+					resource.TestCheckResourceAttr(testResourceName, "stateful", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "tcp_strict", "false"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.#", "6"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.display_name", "rule1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.direction", defaultDirection),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.ip_version", defaultProtocol),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.action", "ALLOW"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.source_groups.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.destination_groups.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.destination_groups.0", updatedPolicyIP),
+					resource.TestCheckResourceAttr(testResourceName, "rule.1.display_name", "rule2"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.1.direction", defaultDirection),
+					resource.TestCheckResourceAttr(testResourceName, "rule.1.ip_version", defaultProtocol),
+					resource.TestCheckResourceAttr(testResourceName, "rule.1.action", "ALLOW"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.1.source_groups.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.1.destination_groups.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.1.destination_groups.0", updatedPolicyCidr),
+					resource.TestCheckResourceAttr(testResourceName, "rule.2.display_name", "rule3"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.2.direction", defaultDirection),
+					resource.TestCheckResourceAttr(testResourceName, "rule.2.ip_version", defaultProtocol),
+					resource.TestCheckResourceAttr(testResourceName, "rule.2.action", "ALLOW"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.2.source_groups.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.2.destination_groups.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.2.destination_groups.0", updatedPolicyRange),
+					resource.TestCheckResourceAttr(testResourceName, "rule.3.display_name", "rule4"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.3.direction", defaultDirection),
+					resource.TestCheckResourceAttr(testResourceName, "rule.3.ip_version", defaultProtocol),
+					resource.TestCheckResourceAttr(testResourceName, "rule.3.action", "ALLOW"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.3.source_groups.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.3.source_groups.0", updatedPolicyIP),
+					resource.TestCheckResourceAttr(testResourceName, "rule.3.destination_groups.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.4.display_name", "rule5"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.4.direction", defaultDirection),
+					resource.TestCheckResourceAttr(testResourceName, "rule.4.ip_version", defaultProtocol),
+					resource.TestCheckResourceAttr(testResourceName, "rule.4.action", "ALLOW"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.4.source_groups.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.4.source_groups.0", updatedPolicyCidr),
+					resource.TestCheckResourceAttr(testResourceName, "rule.4.destination_groups.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.5.display_name", "rule6"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.5.direction", defaultDirection),
+					resource.TestCheckResourceAttr(testResourceName, "rule.5.ip_version", defaultProtocol),
+					resource.TestCheckResourceAttr(testResourceName, "rule.5.action", "ALLOW"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.5.source_groups.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.5.source_groups.0", updatedPolicyRange),
+					resource.TestCheckResourceAttr(testResourceName, "rule.5.destination_groups.#", "1"),
+				),
+			},
+		},
+	})
+}
+
 func testAccNsxtPolicyGatewayPolicyExists(resourceName string, domainName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
@@ -702,4 +843,99 @@ resource "nsxt_policy_gateway_policy" "test" {
     }
   }
 }`, name, name, direction, protocol, ruleTag)
+}
+
+func testAccNsxtPolicyGatewayPolicyDeps() string {
+	return `
+resource "nsxt_policy_tier1_gateway" "gwt1test" {
+	display_name      = "tf-t1-gw"
+	description       = "Acceptance Test"
+}
+
+resource "nsxt_policy_group" "group1" {
+  display_name = "terraform testacc 1"
+}
+
+resource "nsxt_policy_group" "group2" {
+  display_name = "terraform testacc 2"
+}
+
+resource "nsxt_policy_service" "icmp" {
+    display_name = "security-policy-test-icmp"
+    icmp_entry {
+        protocol = "ICMPv4"
+    }
+}`
+}
+
+func testAccNsxtPolicyGatewayPolicyWithIPCidrRange(name string, destIP string, destCidr string, destIPRange string, sourceIP string, sourceCidr string, sourceIPRange string) string {
+	return testAccNsxtPolicyGatewayPolicyDeps() + fmt.Sprintf(`
+	resource "nsxt_policy_gateway_policy" "test" {
+		display_name    = "%s"
+		description     = "Acceptance Test"
+		category        = "LocalGatewayRules"
+		sequence_number = 3
+		locked          = false
+		stateful        = true
+		tcp_strict      = false
+	  
+		tag {
+		  scope = "color"
+		  tag   = "orange"
+		}
+	  
+		rule {
+		  display_name          = "rule1"
+		  source_groups         = [nsxt_policy_group.group1.path]
+		  destination_groups    = ["%s"]
+		  services              = [nsxt_policy_service.icmp.path]
+		  scope                 = [nsxt_policy_tier1_gateway.gwt1test.path]
+		  action                = "ALLOW"
+		}
+
+		rule {
+			display_name          = "rule2"
+			source_groups         = [nsxt_policy_group.group1.path]			
+			destination_groups    = ["%s"]
+			services              = [nsxt_policy_service.icmp.path]
+			scope                 = [nsxt_policy_tier1_gateway.gwt1test.path]			
+			action                = "ALLOW"
+		  }
+
+		  rule {
+			display_name          = "rule3"
+			source_groups         = [nsxt_policy_group.group1.path]
+			destination_groups    = ["%s"]
+			services              = [nsxt_policy_service.icmp.path]
+			scope                 = [nsxt_policy_tier1_gateway.gwt1test.path]			
+			action                = "ALLOW"
+		  }
+
+		  rule {
+			display_name          = "rule4"
+			source_groups         = ["%s"]
+			destination_groups    = [nsxt_policy_group.group2.path]
+			services              = [nsxt_policy_service.icmp.path]
+			scope                 = [nsxt_policy_tier1_gateway.gwt1test.path]		  
+			action                = "ALLOW"
+		  }
+  
+		  rule {
+			  display_name          = "rule5"
+			  source_groups         = ["%s"]			
+			  destination_groups    = [nsxt_policy_group.group2.path]
+			  services              = [nsxt_policy_service.icmp.path]
+			  scope                 = [nsxt_policy_tier1_gateway.gwt1test.path]			
+			  action                = "ALLOW"
+			}
+  
+			rule {
+			  display_name          = "rule6"
+			  source_groups         = ["%s"]
+			  destination_groups    = [nsxt_policy_group.group2.path]
+			  services              = [nsxt_policy_service.icmp.path]
+			  scope                 = [nsxt_policy_tier1_gateway.gwt1test.path]			
+			  action                = "ALLOW"
+			}
+}`, name, destIP, destCidr, destIPRange, sourceIP, sourceCidr, sourceIPRange)
 }
