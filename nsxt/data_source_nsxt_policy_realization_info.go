@@ -9,6 +9,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	gm_realized_state "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/realized_state"
 	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/realized_state"
@@ -49,6 +50,20 @@ func dataSourceNsxtPolicyRealizationInfo() *schema.Resource {
 				Optional:     true,
 				ValidateFunc: validatePolicyPath(),
 			},
+			"timeout": {
+				Type:         schema.TypeInt,
+				Description:  "Realization timeout in seconds",
+				Optional:     true,
+				Default:      1200,
+				ValidateFunc: validation.IntAtLeast(1),
+			},
+			"delay": {
+				Type:         schema.TypeInt,
+				Description:  "Initial delay to start realization checks in seconds",
+				Optional:     true,
+				Default:      1,
+				ValidateFunc: validation.IntAtLeast(0),
+			},
 		},
 	}
 }
@@ -61,6 +76,8 @@ func dataSourceNsxtPolicyRealizationInfoRead(d *schema.ResourceData, m interface
 	path := d.Get("path").(string)
 	entityType := d.Get("entity_type").(string)
 	objSitePath := d.Get("site_path").(string)
+	delay := d.Get("delay").(int)
+	timeout := d.Get("timeout").(int)
 
 	// Site is mandatory got GM and irrelevant else
 	if !isPolicyGlobalManager(m) && objSitePath != "" {
@@ -136,9 +153,9 @@ func dataSourceNsxtPolicyRealizationInfoRead(d *schema.ResourceData, m interface
 			}
 			return realizationResult, "", realizationError
 		},
-		Timeout:    d.Timeout(schema.TimeoutCreate),
+		Timeout:    time.Duration(timeout) * time.Second,
 		MinTimeout: 1 * time.Second,
-		Delay:      1 * time.Second,
+		Delay:      time.Duration(delay) * time.Second,
 	}
 	_, err := stateConf.WaitForState()
 	if err != nil {
