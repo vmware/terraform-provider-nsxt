@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/domains"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
@@ -23,6 +24,32 @@ func dataSourceNsxtPolicyGroup() *schema.Resource {
 			"path":         getPathSchema(),
 			"domain":       getDomainNameSchema(),
 		},
+	}
+}
+
+func listPolicyGroups(domain string, connector *client.RestConnector) ([]model.Group, error) {
+	// Local Manager only
+	client := domains.NewDefaultGroupsClient(connector)
+
+	var results []model.Group
+	var cursor *string
+	total := 0
+
+	for {
+		groups, err := client.List(domain, cursor, nil, nil, nil, nil, nil, nil)
+		if err != nil {
+			return results, err
+		}
+		results = append(results, groups.Results...)
+		if total == 0 && groups.ResultCount != nil {
+			// first response
+			total = int(*groups.ResultCount)
+		}
+
+		cursor = groups.Cursor
+		if len(results) >= total {
+			return results, nil
+		}
 	}
 }
 
@@ -56,14 +83,15 @@ func dataSourceNsxtPolicyGroupRead(d *schema.ResourceData, m interface{}) error 
 		return fmt.Errorf("Error obtaining Group ID or name during read")
 	} else {
 		// Get by full name/prefix
-		objList, err := client.List(domain, nil, nil, nil, nil, nil, nil, nil)
+		objList, err := listPolicyGroups(domain, connector)
 		if err != nil {
 			return handleListError("Group", err)
 		}
+
 		// go over the list to find the correct one (prefer a perfect match. If not - prefix match)
 		var perfectMatch []model.Group
 		var prefixMatch []model.Group
-		for _, objInList := range objList.Results {
+		for _, objInList := range objList {
 			if strings.HasPrefix(*objInList.DisplayName, objName) {
 				prefixMatch = append(prefixMatch, objInList)
 			}
