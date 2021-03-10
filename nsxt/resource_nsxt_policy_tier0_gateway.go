@@ -454,13 +454,15 @@ func getPolicyVRFConfigFromSchema(d *schema.ResourceData) *model.Tier0VrfConfig 
 		exportTargets := interface2StringList(routeTarget["export_targets"].([]interface{}))
 		importTargets := interface2StringList(routeTarget["import_targets"].([]interface{}))
 		// Only one is supported for now
-		targets := model.VrfRouteTargets{
-			AddressFamily:      &addressFamily,
-			ExportRouteTargets: exportTargets,
-			ImportRouteTargets: importTargets,
-		}
+		if len(exportTargets)+len(importTargets) > 0 {
+			targets := model.VrfRouteTargets{
+				AddressFamily:      &addressFamily,
+				ExportRouteTargets: exportTargets,
+				ImportRouteTargets: importTargets,
+			}
 
-		config.RouteTargets = []model.VrfRouteTargets{targets}
+			config.RouteTargets = []model.VrfRouteTargets{targets}
+		}
 	}
 
 	if vni > 0 {
