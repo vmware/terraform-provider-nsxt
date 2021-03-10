@@ -87,6 +87,7 @@ func TestAccResourceNsxtPolicySecurityPolicy_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.ip_version", proto1),
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.action", defaultAction),
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.log_label", tag1),
+					resource.TestCheckResourceAttrSet(testResourceName, "rule.0.rule_id"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.tag.#", "1"),
 				),
 			},
@@ -191,6 +192,7 @@ func TestAccResourceNsxtPolicySecurityPolicy_withDependencies(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "rule.1.destinations_excluded", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.1.disabled", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.1.services.#", "0"),
+					resource.TestCheckResourceAttrSet(testResourceName, "rule.1.rule_id"),
 				),
 			},
 			{

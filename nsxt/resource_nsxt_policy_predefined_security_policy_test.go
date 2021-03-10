@@ -112,6 +112,7 @@ func TestAccResourceNsxtPolicyPredefinedSecurityPolicy_rules(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.source_groups.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.log_label", "group2"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.disabled", "true"),
+					resource.TestCheckResourceAttrSet(testResourceName, "rule.0.rule_id"),
 					resource.TestCheckResourceAttr(testResourceName, "default_rule.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "default_rule.0.action", "ALLOW"),
 				),

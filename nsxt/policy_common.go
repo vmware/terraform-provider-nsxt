@@ -373,6 +373,7 @@ func setPolicyRulesInSchema(d *schema.ResourceData, rules []model.Rule) error {
 		setPathListInMap(elem, "scope", rule.Scope)
 		elem["sequence_number"] = rule.SequenceNumber
 		elem["nsx_id"] = rule.Id
+		elem["rule_id"] = rule.RuleId
 
 		var tagList []map[string]string
 		for _, tag := range rule.Tags {
