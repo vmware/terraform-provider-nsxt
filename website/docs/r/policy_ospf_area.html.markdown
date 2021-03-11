@@ -22,7 +22,7 @@ resource "nsxt_policy_ospf_area" "test" {
   area_type    = "NORMAL"
 
   auth_mode  = "PASSWORD"
-  secret_key = "af12a1ed2496"
+  secret_key = "af12a1ed"
 }
 ```
 
@@ -39,7 +39,7 @@ The following arguments are supported:
 * `area_type` - (Optional) OSPF Area type, one of `NORMAL` or `NSSA`. Default is `NSSA`.
 * `auth_mode` - (Optional) OSPF Authentication mode, one of `NONE`, `PASSWORD` or `MD5`. By default, OSPF authentication is disabled with mode `NONE`.
 * `key_id` - (Optional) Authentication secret key id, required for authenication mode `MD5`. This attribute is sensitive.
-* `secret_key` - (Optional) Authentication secret key, required for authentication mode other than `NONE`. This attribute is sensitive.
+* `secret_key` - (Optional) Authentication secret key, required for authentication mode other than `NONE`. This attribute is sensitive. Length should not exceed 8 characters.
 
 ## Attributes Reference
 
@@ -56,7 +56,7 @@ An existing OSPF Area can be [imported][docs-import] into this resource, via the
 [docs-import]: /docs/import/index.html
 
 ```
-terraform import nsxt_policy_ospf_area.test GW-ID/LOCALE-SERVICE-ID/AREA-ID
+terraform import nsxt_policy_ospf_area.test GW-ID/LOCALE-SERVICE-ID/ID
 ```
 
-The above command imports OSPF Area named `test` with ID `AREA-ID` on Tier-0 Gateway `GW-ID` and Locale Service `LOCALE-SERVICE-ID`.
+The above command imports OSPF Area named `test` with NSX ID `ID` on Tier-0 Gateway `GW-ID` and Locale Service `LOCALE-SERVICE-ID`.

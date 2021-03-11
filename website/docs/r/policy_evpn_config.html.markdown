@@ -32,7 +32,6 @@ The following arguments are supported:
   * `gateway_path` - (Required) Policy Path for Tier0 Gateway to configure EVPN on.
   * `mode` - (Required) EVPN Mode, one of `INLINE` or `ROUTE_SERVER`. In `ROUTE_SERVER` mode, edge nodes participate in the BGP EVPN control plane route exchanges only and do not participate in the data forwarding
   * `vni_pool_path` - (Optional) This setting is only applicable (and required) with `INLINE` mode.
-  * `vni_pool_path` - (Optional) This setting is only applicable (and required) with `ROUTE_SERVER` mode.
   * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 
 ## Attributes Reference
