@@ -122,6 +122,11 @@ func resourceNsxtPolicyTier0Gateway() *schema.Resource {
 				Optional:     true,
 				ValidateFunc: validateSingleIP(),
 			},
+			"redistribution_set": {
+				Type:        schema.TypeBool,
+				Description: "Internal flag to indicate whether legacy redistribution config is used",
+				Computed:    true,
+			},
 		},
 	}
 }
@@ -914,7 +919,12 @@ func resourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{}) e
 				cfgMap["preferred_edge_paths"] = service.PreferredEdgePaths
 				cfgMap["revision"] = service.Revision
 				redistributionConfigs := getLocaleServiceRedistributionConfig(&service)
-				cfgMap["redistribution_config"] = redistributionConfigs
+				if d.Get("redistribution_set").(bool) {
+					// redistribution_config is deprecated and should be
+					// assigned only if actively set by customer
+					// (Computed flag does not work for sub-clauses)
+					cfgMap["redistribution_config"] = redistributionConfigs
+				}
 
 				services = append(services, cfgMap)
 
