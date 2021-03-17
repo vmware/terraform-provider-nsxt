@@ -99,6 +99,14 @@ func Destroy(destroy bool) *DestroyFlagOption {
 	return &DestroyFlagOption{destroy}
 }
 
+type ForceOption struct {
+	force bool
+}
+
+func Force(force bool) *ForceOption {
+	return &ForceOption{force}
+}
+
 type ForceCopyOption struct {
 	forceCopy bool
 }
@@ -215,6 +223,14 @@ type ReconfigureOption struct {
 
 func Reconfigure(reconfigure bool) *ReconfigureOption {
 	return &ReconfigureOption{reconfigure}
+}
+
+type RecursiveOption struct {
+	recursive bool
+}
+
+func Recursive(r bool) *RecursiveOption {
+	return &RecursiveOption{r}
 }
 
 type RefreshOption struct {

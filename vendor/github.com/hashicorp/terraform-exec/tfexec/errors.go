@@ -11,7 +11,7 @@ import (
 var (
 	// The "Required variable not set:" case is for 0.11
 	missingVarErrRegexp  = regexp.MustCompile(`Error: No value for required variable|Error: Required variable not set:`)
-	missingVarNameRegexp = regexp.MustCompile(`The root module input variable "(.+)" is not set, and has no default|Error: Required variable not set: (.+)`)
+	missingVarNameRegexp = regexp.MustCompile(`The root module input variable\s"(.+)"\sis\snot\sset,\sand\shas\sno\sdefault|Error: Required variable not set: (.+)`)
 
 	usageRegexp = regexp.MustCompile(`Too many command line arguments|^Usage: .*Options:.*|Error: Invalid -\d+ option`)
 
@@ -23,14 +23,43 @@ var (
 	workspaceDoesNotExistRegexp = regexp.MustCompile(`Workspace "(.+)" doesn't exist.`)
 
 	workspaceAlreadyExistsRegexp = regexp.MustCompile(`Workspace "(.+)" already exists`)
+
+	tfVersionMismatchErrRegexp        = regexp.MustCompile(`Error: The currently running version of Terraform doesn't meet the|Error: Unsupported Terraform Core version`)
+	tfVersionMismatchConstraintRegexp = regexp.MustCompile(`required_version = "(.+)"|Required version: (.+)\b`)
 )
 
-func parseError(err error, stderr string) error {
-	if _, ok := err.(*exec.ExitError); !ok {
+func (tf *Terraform) parseError(err error, stderr string) error {
+	ee, ok := err.(*exec.ExitError)
+	if !ok {
 		return err
 	}
 
 	switch {
+	case tfVersionMismatchErrRegexp.MatchString(stderr):
+		constraint := ""
+		constraints := tfVersionMismatchConstraintRegexp.FindStringSubmatch(stderr)
+		for i := 1; i < len(constraints); i++ {
+			constraint = strings.TrimSpace(constraints[i])
+			if constraint != "" {
+				break
+			}
+		}
+
+		if constraint == "" {
+			// hardcode a value here for weird cases (incl. 0.12)
+			constraint = "unknown"
+		}
+
+		// only set this if it happened to be cached already
+		ver := ""
+		if tf != nil && tf.execVersion != nil {
+			ver = tf.execVersion.String()
+		}
+
+		return &ErrTFVersionMismatch{
+			Constraint: constraint,
+			TFVersion:  ver,
+		}
 	case missingVarErrRegexp.MatchString(stderr):
 		name := ""
 		names := missingVarNameRegexp.FindStringSubmatch(stderr)
@@ -59,6 +88,11 @@ func parseError(err error, stderr string) error {
 			return &ErrWorkspaceExists{submatches[1]}
 		}
 	}
+	errString := strings.TrimSpace(stderr)
+	if errString == "" {
+		// if stderr is empty, return the ExitError directly, as it will have a better message
+		return ee
+	}
 	return errors.New(stderr)
 }
 
@@ -68,6 +102,19 @@ type ErrNoSuitableBinary struct {
 
 func (e *ErrNoSuitableBinary) Error() string {
 	return fmt.Sprintf("no suitable terraform binary could be found: %s", e.err.Error())
+}
+
+// ErrTFVersionMismatch is returned when the running Terraform version is not compatible with the
+// value specified for required_version in the terraform block.
+type ErrTFVersionMismatch struct {
+	TFVersion string
+
+	// Constraint is not returned in the error messaging on 0.12
+	Constraint string
+}
+
+func (e *ErrTFVersionMismatch) Error() string {
+	return "terraform core version not supported by configuration"
 }
 
 // ErrVersionMismatch is returned when the detected Terraform version is not compatible with the
