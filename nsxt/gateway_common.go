@@ -11,6 +11,8 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	nsx_policy "github.com/vmware/vsphere-automation-sdk-go/services/nsxt"
+	gm_tier0s "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
 	global_policy "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm"
@@ -314,9 +316,15 @@ func initGatewayLocaleServices(d *schema.ResourceData, connector *client.RestCon
 			PreferredEdgePaths: edgeNodes,
 		}
 
-		redistributionConfigs := cfg["redistribution_config"]
-		if redistributionConfigs != nil {
-			setLocaleServiceRedistributionConfig(redistributionConfigs.([]interface{}), &serviceStruct)
+		redistribution := cfg["redistribution_config"]
+		if redistribution != nil {
+			redistributionConfigs := redistribution.([]interface{})
+			if len(redistributionConfigs) > 0 {
+				setLocaleServiceRedistributionConfig(redistributionConfigs, &serviceStruct)
+				d.Set("redistribution_set", true)
+			} else {
+				d.Set("redistribution_set", false)
+			}
 		}
 
 		if obj, ok := existingServices[serviceID]; ok {
@@ -414,12 +422,45 @@ func policyInfraPatch(obj model.Infra, isGlobalManager bool, connector *client.R
 	return infraClient.Patch(obj, &enforceRevision)
 }
 
+func getRedistributionConfigRuleSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeList,
+		Description: "List of routes to be aggregated",
+		Optional:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"name": {
+					Type:        schema.TypeString,
+					Description: "Rule name",
+					Optional:    true,
+				},
+				"route_map_path": {
+					Type:        schema.TypeString,
+					Description: "Route map to be associated with the redistribution rule",
+					Optional:    true,
+				},
+				"types": {
+					Type:        schema.TypeSet,
+					Description: "List of redistribution types",
+					Optional:    true,
+					Elem: &schema.Schema{
+						Type:         schema.TypeString,
+						ValidateFunc: validation.StringInSlice(nsxtPolicyTier0GatewayRedistributionRuleTypes, false),
+					},
+				},
+			},
+		},
+	}
+}
+
 func getRedistributionConfigSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:        schema.TypeList,
 		Description: "Route Redistribution configuration",
 		Optional:    true,
 		MaxItems:    1,
+		Computed:    true,
+		Deprecated:  "Use nsxt_policy_gateway_redistribution_config resource instead",
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"enabled": {
@@ -434,50 +475,14 @@ func getRedistributionConfigSchema() *schema.Schema {
 					Optional:    true,
 					Default:     false,
 				},
-				"rule": {
-					Type:        schema.TypeList,
-					Description: "List of routes to be aggregated",
-					Optional:    true,
-					Elem: &schema.Resource{
-						Schema: map[string]*schema.Schema{
-							"name": {
-								Type:        schema.TypeString,
-								Description: "Rule name",
-								Optional:    true,
-							},
-							"route_map_path": {
-								Type:        schema.TypeString,
-								Description: "Route map to be associated with the redistribution rule",
-								Optional:    true,
-							},
-							"types": {
-								Type:        schema.TypeSet,
-								Description: "List of redistribution types",
-								Optional:    true,
-								Elem: &schema.Schema{
-									Type:         schema.TypeString,
-									ValidateFunc: validation.StringInSlice(nsxtPolicyTier0GatewayRedistributionRuleTypes, false),
-								},
-							},
-						},
-					},
-				},
+				"rule": getRedistributionConfigRuleSchema(),
 			},
 		},
 	}
 }
 
-func setLocaleServiceRedistributionConfig(redistributionConfigs []interface{}, serviceStruct *model.LocaleServices) {
+func setLocaleServiceRedistributionRulesConfig(rulesConfig []interface{}, config *model.Tier0RouteRedistributionConfig) {
 	var rules []model.Tier0RouteRedistributionRule
-	if len(redistributionConfigs) == 0 {
-		return
-	}
-
-	redistributionConfig := redistributionConfigs[0].(map[string]interface{})
-	bgpEnabled := redistributionConfig["enabled"].(bool)
-	ospfEnabled := redistributionConfig["ospf_enabled"].(bool)
-	rulesConfig := redistributionConfig["rule"].([]interface{})
-
 	for _, ruleConfig := range rulesConfig {
 		data := ruleConfig.(map[string]interface{})
 		name := data["name"].(string)
@@ -499,13 +504,41 @@ func setLocaleServiceRedistributionConfig(redistributionConfigs []interface{}, s
 		rules = append(rules, rule)
 	}
 
-	redistributionStruct := model.Tier0RouteRedistributionConfig{
-		BgpEnabled:          &bgpEnabled,
-		OspfEnabled:         &ospfEnabled,
-		RedistributionRules: rules,
+	if len(rules) > 0 {
+		config.RedistributionRules = rules
+	}
+}
+
+func setLocaleServiceRedistributionConfig(redistributionConfigs []interface{}, serviceStruct *model.LocaleServices) {
+	if len(redistributionConfigs) == 0 {
+		return
 	}
 
+	redistributionConfig := redistributionConfigs[0].(map[string]interface{})
+	bgpEnabled := redistributionConfig["enabled"].(bool)
+	ospfEnabled := redistributionConfig["ospf_enabled"].(bool)
+	rulesConfig := redistributionConfig["rule"].([]interface{})
+
+	redistributionStruct := model.Tier0RouteRedistributionConfig{
+		BgpEnabled:  &bgpEnabled,
+		OspfEnabled: &ospfEnabled,
+	}
+
+	setLocaleServiceRedistributionRulesConfig(rulesConfig, &redistributionStruct)
 	serviceStruct.RouteRedistributionConfig = &redistributionStruct
+}
+
+func getLocaleServiceRedistributionRuleConfig(config *model.Tier0RouteRedistributionConfig) []map[string]interface{} {
+	var rules []map[string]interface{}
+	for _, ruleConfig := range config.RedistributionRules {
+		rule := make(map[string]interface{})
+		rule["name"] = ruleConfig.Name
+		rule["route_map_path"] = ruleConfig.RouteMapPath
+		rule["types"] = ruleConfig.RouteRedistributionTypes
+		rules = append(rules, rule)
+	}
+
+	return rules
 }
 
 func getLocaleServiceRedistributionConfig(serviceStruct *model.LocaleServices) []map[string]interface{} {
@@ -515,19 +548,10 @@ func getLocaleServiceRedistributionConfig(serviceStruct *model.LocaleServices) [
 		return redistributionConfigs
 	}
 
-	var rules []map[string]interface{}
 	elem := make(map[string]interface{})
 	elem["enabled"] = config.BgpEnabled
 	elem["ospf_enabled"] = config.OspfEnabled
-	for _, ruleConfig := range config.RedistributionRules {
-		rule := make(map[string]interface{})
-		rule["name"] = ruleConfig.Name
-		rule["route_map_path"] = ruleConfig.RouteMapPath
-		rule["types"] = ruleConfig.RouteRedistributionTypes
-		rules = append(rules, rule)
-	}
-
-	elem["rule"] = rules
+	elem["rule"] = getLocaleServiceRedistributionRuleConfig(config)
 	redistributionConfigs = append(redistributionConfigs, elem)
 	return redistributionConfigs
 }
@@ -574,4 +598,30 @@ func getComputedGatewayIDSchema() *schema.Schema {
 		Description: "NSX ID of associated Tier0 Gateway",
 		Computed:    true,
 	}
+}
+
+func policyTier0GetLocaleService(gwID string, localeServiceID string, connector *client.RestConnector, isGlobalManager bool) *model.LocaleServices {
+	if isGlobalManager {
+		nsxClient := gm_tier0s.NewDefaultLocaleServicesClient(connector)
+		gmObj, err := nsxClient.Get(gwID, localeServiceID)
+		if err != nil {
+			log.Printf("[DEBUG] Failed to get locale service %s for gateway %s: %s", gwID, localeServiceID, err)
+			return nil
+		}
+
+		convObj, convErr := convertModelBindingType(gmObj, gm_model.LocaleServicesBindingType(), model.LocaleServicesBindingType())
+		if convErr != nil {
+			log.Printf("[DEBUG] Failed to convert locale service %s for gateway %s: %s", gwID, localeServiceID, convErr)
+			return nil
+		}
+		obj := convObj.(model.LocaleServices)
+		return &obj
+	}
+	nsxClient := tier_0s.NewDefaultLocaleServicesClient(connector)
+	obj, err := nsxClient.Get(gwID, localeServiceID)
+	if err != nil {
+		log.Printf("[DEBUG] Failed to get locale service %s for gateway %s: %s", gwID, localeServiceID, err)
+		return nil
+	}
+	return &obj
 }
