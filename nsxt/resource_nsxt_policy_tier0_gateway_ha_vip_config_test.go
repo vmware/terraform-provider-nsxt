@@ -165,24 +165,13 @@ func testAccNsxtPolicyTier0HAVipConfigExists(resourceName string) resource.TestC
 
 		localeServiceID := rs.Primary.Attributes["locale_service_id"]
 		gwID := rs.Primary.Attributes["tier0_id"]
-		if testAccIsGlobalManager() {
-			nsxClient := gm_tier0s.NewDefaultLocaleServicesClient(connector)
-			obj, err := nsxClient.Get(gwID, localeServiceID)
-			if err != nil {
-				return fmt.Errorf("Error while retrieving policy Tier0 HA vip config %s. Error: %v", resourceID, err)
-			}
-			if obj.HaVipConfigs == nil {
-				return fmt.Errorf("Error while retrieving policy Tier0 HA vip config %s. HaVipConfigs is empty", resourceID)
-			}
-		} else {
-			nsxClient := tier_0s.NewDefaultLocaleServicesClient(connector)
-			obj, err := nsxClient.Get(gwID, localeServiceID)
-			if err != nil {
-				return fmt.Errorf("Error while retrieving policy Tier0 HA vip config %s. Error: %v", resourceID, err)
-			}
-			if obj.HaVipConfigs == nil {
-				return fmt.Errorf("Error while retrieving policy Tier0 HA vip config %s. HaVipConfigs is empty", resourceID)
-			}
+		localeService := policyTier0GetLocaleService(gwID, localeServiceID, connector, testAccIsGlobalManager())
+		if localeService == nil {
+			return fmt.Errorf("Error while retrieving Locale Service %s for Gateway %s", localeServiceID, gwID)
+		}
+
+		if localeService.HaVipConfigs == nil {
+			return fmt.Errorf("Error while retrieving policy Tier0 HA vip config %s. HaVipConfigs is empty", resourceID)
 		}
 
 		return nil
