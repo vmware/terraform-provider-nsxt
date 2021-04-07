@@ -17,10 +17,10 @@ func TestAccResourceNsxtPolicyTier1Gateway_globalManager(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
 			testAccOnlyGlobalManager(t)
 			testAccEnvDefined(t, "NSXT_TEST_SITE_NAME")
 			testAccEnvDefined(t, "NSXT_TEST_ANOTHER_SITE_NAME")
+			testAccPreCheck(t)
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -84,10 +84,10 @@ func TestAccResourceNsxtPolicyTier1Gateway_globalManagerWithQos(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
 			testAccOnlyGlobalManager(t)
 			testAccEnvDefined(t, "NSXT_TEST_SITE_NAME")
 			testAccEnvDefined(t, "NSXT_TEST_ANOTHER_SITE_NAME")
+			testAccPreCheck(t)
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -144,10 +144,10 @@ func TestAccResourceNsxtPolicyTier1Gateway_globalManagerNoSubnet(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
 			testAccOnlyGlobalManager(t)
 			testAccEnvDefined(t, "NSXT_TEST_SITE_NAME")
 			testAccEnvDefined(t, "NSXT_TEST_ANOTHER_SITE_NAME")
+			testAccPreCheck(t)
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {

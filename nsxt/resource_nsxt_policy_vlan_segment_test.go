@@ -115,7 +115,10 @@ func TestAccResourceNsxtPolicyVlanSegment_noTransportZone(t *testing.T) {
 	updatedCidr := "4004::1/64"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyGlobalManager(t) },
+		PreCheck: func() {
+			testAccOnlyGlobalManager(t)
+			testAccPreCheck(t)
+		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicySegmentCheckDestroy(state, name)

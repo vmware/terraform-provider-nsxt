@@ -125,9 +125,9 @@ func TestAccDataSourceNsxtPolicyRealizationInfo_gmServiceDataSource(t *testing.T
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
-			testAccEnvDefined(t, "NSXT_TEST_SITE_NAME")
 			testAccOnlyGlobalManager(t)
+			testAccEnvDefined(t, "NSXT_TEST_SITE_NAME")
+			testAccPreCheck(t)
 		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{

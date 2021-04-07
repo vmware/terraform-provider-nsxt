@@ -16,9 +16,9 @@ func TestAccDataSourceNsxtPolicySite_basic(t *testing.T) {
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
 			testAccOnlyGlobalManager(t)
 			testAccEnvDefined(t, "NSXT_TEST_SITE_NAME")
+			testAccPreCheck(t)
 		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{

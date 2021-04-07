@@ -26,9 +26,9 @@ func TestAccResourceNsxtPolicyTier0GatewayHaVipConfig_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		// This test works with local manager but only with 2 edge nodes
 		PreCheck: func() {
-			testAccPreCheck(t)
-			testAccEnvDefined(t, "NSXT_TEST_SITE_NAME")
 			testAccOnlyGlobalManager(t)
+			testAccEnvDefined(t, "NSXT_TEST_SITE_NAME")
+			testAccPreCheck(t)
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -127,9 +127,9 @@ func TestAccResourceNsxtPolicyTier0GatewayHaVipConfig_importBasic(t *testing.T) 
 	resource.Test(t, resource.TestCase{
 		// This test works with local manager but only with 2 edge nodes
 		PreCheck: func() {
-			testAccPreCheck(t)
-			testAccEnvDefined(t, "NSXT_TEST_SITE_NAME")
 			testAccOnlyGlobalManager(t)
+			testAccEnvDefined(t, "NSXT_TEST_SITE_NAME")
+			testAccPreCheck(t)
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {

@@ -90,9 +90,9 @@ func TestAccResourceNsxtGlobalPolicyGroup_singleIPAddressCriteria(t *testing.T) 
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
 			testAccOnlyGlobalManager(t)
 			testAccEnvDefined(t, "NSXT_TEST_SITE_NAME")
+			testAccPreCheck(t)
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -138,9 +138,9 @@ func TestAccResourceNsxtGlobalPolicyGroup_withDomain(t *testing.T) {
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
 			testAccOnlyGlobalManager(t)
 			testAccEnvDefined(t, "NSXT_TEST_SITE_NAME")
+			testAccPreCheck(t)
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
