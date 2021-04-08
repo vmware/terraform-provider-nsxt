@@ -469,6 +469,9 @@ func buildNestedGroupExpressionData(expressions []*data.StructValue) (*data.Stru
 }
 
 func buildGroupExpressionDataFromType(expressionType string, datum interface{}) (*data.StructValue, error) {
+	if datum == nil {
+		return nil, fmt.Errorf("Empty set is not supported for expression type: %v", expressionType)
+	}
 	if expressionType == "condition" {
 		data, err := buildGroupConditionData(datum)
 		if err != nil {
