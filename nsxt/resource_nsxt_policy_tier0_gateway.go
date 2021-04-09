@@ -935,11 +935,13 @@ func resourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{}) e
 					if err != nil {
 						return handleReadError(d, "BGP Configuration for T0", id, err)
 					}
+
+					redistributionConfigs := getLocaleServiceRedistributionConfig(&service)
+					if d.Get("redistribution_set").(bool) {
+						d.Set("redistribution_config", redistributionConfigs)
+					}
 					break
 				}
-
-				redistributionConfigs := getLocaleServiceRedistributionConfig(&service)
-				d.Set("redistribution_config", redistributionConfigs)
 			}
 		}
 

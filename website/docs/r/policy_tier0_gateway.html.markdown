@@ -198,3 +198,6 @@ terraform import nsxt_policy_tier0_gateway.tier0_gw ID
 ```
 
 The above command imports the policy Tier-0 gateway named `tier0_gw` with the NSX Policy ID `ID`.
+
+~> **NOTE:** Redistribution config on Tier-0 resource is deprecated and thus will not be imported. Please import this configuration with `policy_gateway_redistribution_config` resource.
+
