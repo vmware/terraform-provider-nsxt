@@ -21,10 +21,10 @@ func TestAccResourceNsxtPolicyDomain_basic(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccOnlyGlobalManager(t)
 			testAccEnvDefined(t, "NSXT_TEST_SITE_NAME")
 			testAccEnvDefined(t, "NSXT_TEST_ANOTHER_SITE_NAME")
-			testAccOnlyGlobalManager(t)
+			testAccPreCheck(t)
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -82,9 +82,9 @@ func TestAccResourceNsxtPolicyDomain_importBasic(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
-			testAccEnvDefined(t, "NSXT_TEST_SITE_NAME")
 			testAccOnlyGlobalManager(t)
+			testAccEnvDefined(t, "NSXT_TEST_SITE_NAME")
+			testAccPreCheck(t)
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
