@@ -456,6 +456,16 @@ func getDataSourceDisplayNameSchema() *schema.Schema {
 	return getDataSourceStringSchema("Display name of this resource")
 }
 
+func getDataSourceExtendedDisplayNameSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:          schema.TypeString,
+		Description:   "Display name of this resource",
+		ConflictsWith: []string{"id"},
+		Optional:      true,
+		Computed:      true,
+	}
+}
+
 func getDataSourceDescriptionSchema() *schema.Schema {
 	return getDataSourceStringSchema("Description for this resource")
 }
