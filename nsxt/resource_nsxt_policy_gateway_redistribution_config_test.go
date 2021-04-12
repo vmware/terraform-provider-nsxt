@@ -31,6 +31,8 @@ func TestAccResourceNsxtPolicyGatewayRedistributionConfig_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "rule.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.name", "test-rule-1"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.types.#", "3"),
+					resource.TestCheckResourceAttrSet(testResourceName, "gateway_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "site_path"),
 				),
 			},
 			{
@@ -44,6 +46,8 @@ func TestAccResourceNsxtPolicyGatewayRedistributionConfig_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.types.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.1.name", "test-rule-2"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.1.types.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, "gateway_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "site_path"),
 				),
 			},
 			{
@@ -53,6 +57,8 @@ func TestAccResourceNsxtPolicyGatewayRedistributionConfig_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "bgp_enabled", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "ospf_enabled", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.#", "0"),
+					resource.TestCheckResourceAttrSet(testResourceName, "gateway_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "site_path"),
 				),
 			},
 		},
