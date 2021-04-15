@@ -13,7 +13,7 @@ func dataSourceNsxtPolicyIntrusionServiceProfile() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"id":           getDataSourceIDSchema(),
-			"display_name": getDataSourceDisplayNameSchema(),
+			"display_name": getDataSourceExtendedDisplayNameSchema(),
 			"description":  getDataSourceDescriptionSchema(),
 			"path":         getPathSchema(),
 		},
