@@ -54,10 +54,10 @@ The following arguments are supported:
 * `gateway_path` - (Required) Policy path of relevant Tier0 Gateway.
 * `entry` - (Required) List of entries for the Route Map.
   * `action` - (Optional) Action for the route map entry, either `PERMIT` or `DENY`, with default being `PERMIT`.
-  * `community_list_match` - (Optional) List of Prefix List match criteria for route map. Can not be configured together with `prefix_list_matches`.
+  * `community_list_match` - (Optional) List of Prefix List match criteria for route map. Cannot be configured together with `prefix_list_matches`. If configured together, `prefix_list_matches` will be ignored.
     * `criteria` - (Required) Community list path or a regular expression.
     * `match_operator` - (Required) Match operator for the criteria, one of `ANY`, `ALL`, `EXACT`, `COMMUNITY_REGEX`, `LARGE_COMMUNITY_REGEX`. Only last two operators can be used together with regular expression criteria.
-  * `prefix_list_matches` - (Optional) List of policy paths for Prefix Lists configured on this Gateway. Can not be configured together with `community_list_match`.
+  * `prefix_list_matches` - (Optional) List of policy paths for Prefix Lists configured on this Gateway. Cannot be configured together with `community_list_match`. If configured together, `prefix_list_matches` will be ignored.
   * `set` - (Optional) Set criteria for route map entry.
     * `as_path_prepend` - (Optional) Autonomous System (AS) path prepend to influence route selection.
     * `community` - (Optional) BGP regular or large community for matching routes.
