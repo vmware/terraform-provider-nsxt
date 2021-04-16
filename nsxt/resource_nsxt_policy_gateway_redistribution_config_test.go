@@ -76,7 +76,7 @@ func TestAccResourceNsxtPolicyGatewayRedistributionConfig_importBasic(t *testing
 			{
 				ResourceName:      testResourceName,
 				ImportState:       true,
-				ImportStateVerify: true,
+				ImportStateVerify: false,
 				ImportStateIdFunc: testAccNSXPolicyRedistributionConfigImporterGetID,
 			},
 		},
