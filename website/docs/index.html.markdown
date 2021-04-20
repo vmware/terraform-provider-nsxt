@@ -57,9 +57,21 @@ provider connects to the NSX REST API. It is recommended you leave these to the
 defaults unless you experience issues in which case they can be tuned to
 optimize the system in your environment.
 
-Note that in all of the examples you will need to update the `host`,
-`username`, and `password` settings to match those configured in your NSX
-deployment.
+Note that with terraform 0.14 onwards, `terraform` block should be added to your
+configuration:
+
+```hcl
+terraform {
+  required_providers {
+    nsxt = {
+      source = "vmware/nsxt"
+    }
+  }
+}
+```
+
+Note that in all of the examples you will need to update attributes such as
+`host`, `username`, `password`, `vmc_token` to match your NSX deployment.
 
 ### Example of Configuration with Credentials
 
@@ -76,6 +88,7 @@ provider "nsxt" {
 }
 
 ```
+
 
 ### Example of Setting Environment Variables
 
@@ -117,6 +130,20 @@ Note that only a limited subset of policy resources are supported with VMC.
 provider "nsxt" {
   host                 = "x-54-200-54-5.rp.vmwarevmc.com/vmc/reverse-proxy/api/orgs/b003c3a5-3f68-4a8c-a74f-f79a0625da17/sddcs/d2f43050-f4e2-4989-ab52-2eb0b89d8487/sks-nsxt-manager"
   vmc_token            = "5aVZEj6dJN1bQ6ZheakMyV0Qbj7P65sa2pYuhgx7Mp5glvgCkFKHcGxy3KmslllT"
+  allow_unverified_ssl = true
+  enforcement_point    = "vmc-enforcementpoint"
+}
+
+```
+
+### VMC PCI Compliant Environment Example
+
+```hcl
+provider "nsxt" {
+  host                 = "10.4.14.23"
+  username             = "admin"
+  password             = "qwerty"
+  vmc_auth_mode        = "Basic"
   allow_unverified_ssl = true
   enforcement_point    = "vmc-enforcementpoint"
 }
@@ -193,9 +220,9 @@ The following arguments are used to configure the VMware NSX-T Provider:
   to obtain short-lived token for NSX manager access. Defaults to VMC
   console authorization URL.
 * `vmc_auth_mode` - (Optional) VMC authorization mode, that determines what HTTP
-  header is used for authorization. Accepted values are `Default`, `Bearer`. For
-  direct VMC connections, use `Bearer` mode, otherwise no need to specify this
-  setting.
+  header is used for authorization. Accepted values are `Default`, `Bearer`, `Basic`.
+  For direct VMC connections with a token, use `Bearer` mode. For PCI mode with basic
+  authentication, use `Basic`. Otherwise no need to specify this setting.
 * `enforcement_point` - (Optional) Enforcement point, mostly relevant for policy
   data sources. For VMC environment, this should be set to `vmc-enforcementpoint`.
   For on-prem deployments, this setting should not be specified.
@@ -212,7 +239,7 @@ and offer additional capabilities.The NSX-T Terraform Providerextends withadditi
 resources and data sources covering layer 2, layer 3, firewall (distributed and
 centralized), tags, load balancerand IP allocation (DHCP, IP pools, IP blocks etc...).
 This typically allowsto expose new capabilities such as vRFlite on the Tier-0 which
-are only made available from the Policy API.While you can still build topologies from
+are only made available from the Policy API. While you can still build topologies from
 the imperative API and existing config files will continue to work, the recommendation
 is to build logical topologies from the declarative API(Policy Objects).The resources
 and data sources using the policy API have _policy_ in their name. All these resources

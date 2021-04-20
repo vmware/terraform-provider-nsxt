@@ -5,15 +5,16 @@ description: |-
   Frequently Asked Questions and Workarounds
 ---
 
-<!-- TOC -->
+<!-- TOC depthFrom:2 -->
 
 - [Dependency Errors on Update or Destroy](#dependency-errors-lifecycle)
 - [Dependency Error on Destroy](#dependency-error-nsx)
 - [Authorization Error on VMC ](#auth-error-vmc)
+- [Error Unmarshalling Server Response on VMC ](#proxy-vmc)
 
 <!-- /TOC -->
 
-## Dependency Error on Update or Destroy
+## Dependency Error on Update or Destroy <a name="dependency-errors-lifecycle"></a>
 
 Consider the following error:
 ```
@@ -35,7 +36,7 @@ resource "nsxt_policy_group" "example" {
 However, sometimes the error above is symptom of misconfiguration, i.e. there are legitimate dependencies on the platform that prevent given delete/update.
 
 
-## Dependency Error on Destroy
+## Dependency Error on Destroy <a name="dependency-error-nsx"></a>
 
 Consider same error as above:
 ```
@@ -45,7 +46,7 @@ Error:  Failed to delete <object>: The object path=[..] cannot be deleted as eit
 Sometimes this error is due to the fact that certain resource cleanup on NSX needs more time. For now, the workaround would be to re-run the destroy command after few seconds. In future versions of provider, this issue will be solved with automatic retry.
 
 
-## Authorization Error on VMC
+## Authorization Error on VMC <a name="auth-error-vmc"></a>
 
 Consider the following error:
 ```
@@ -62,3 +63,14 @@ resource "nsxt_policy_group" "group1" {
 ```
 
 Be sure to also specify `enforcement_point` as `vmc-enforcementpoint` in provider section.
+
+
+## Error Unmarshalling Server Response on VMC <a name="proxy-vmc"></a>
+
+Consider the following error:
+```
+Failed to read <object type> (Error unmarshalling server response)
+```
+
+This issue is usually caused by proxy timeout on VMC side. Re-apply can help. If you run into this a lot, please consider direct connection to NSX in your VMC environment to avoid the proxy overhead. If this is not an option for you, another way to reduce the load on the proxy could be to avoid heavy usage of data sources, and instead use policy path directly in your configuration.
+
