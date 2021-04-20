@@ -33,7 +33,6 @@ resource "nsxt_policy_intrusion_service_policy" "policy1" {
     display_name     = "rule2"
     source_groups    = [nsxt_policy_group.fish.path]
     sources_excluded = true
-    scope            = [nsxt_policy_group.aquarium.path]
     action           = "DETECT_PREVENT"
     services         = [nsxt_policy_service.udp.path]
     logged           = true
@@ -55,7 +54,6 @@ The following arguments are supported:
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `comments` - (Optional) Comments for IDS policy lock/unlock.
 * `locked` - (Optional) Indicates whether the policy should be locked. If locked by a user, no other user would be able to modify this policy.
-* `scope` - (Optional) The list of policy object paths where the rules in this policy will get applied.
 * `sequence_number` - (Optional) This field is used to resolve conflicts between IDS policies across domains.
 * `stateful` - (Optional) If true, state of the network connects are tracked and a stateful packet inspection is performed. Default is true.
 * `rule` - (Optional) A repeatable block to specify rules for the Policy. Each rule includes the following fields:
@@ -72,7 +70,6 @@ The following arguments are supported:
   * `logged` - (Optional) Flag to enable packet logging. Default is false.
   * `notes` - (Optional) Additional notes on changes.
   * `ids_profiles` - (Required) Set of IDS profile paths relevant for this rule.
-  * `scope` - (Optional) Set of policy object paths where the rule is applied.
   * `services` - (Optional) Set of service paths to match.
   * `log_label` - (Optional) Additional information (string) which will be propagated to the rule syslog.
   * `tag` - (Optional) A list of scope + tag pairs to associate with this Rule.
