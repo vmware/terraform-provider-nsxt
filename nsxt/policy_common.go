@@ -574,3 +574,10 @@ func getSitePathFromEdgePath(edgePath string) string {
 	pathList := strings.Split(edgePath, "/")[:4]
 	return strings.Join(pathList, "/")
 }
+
+func getGatewayPathFromLocaleServicesPath(localeServicesPath string) string {
+	// Sample Locale services path looks like:
+	// "/infra/tier-0s/<tier0-id>/locale-services/<locale-services-id>"
+	pathList := strings.Split(localeServicesPath, "/")[:4]
+	return strings.Join(pathList, "/")
+}
