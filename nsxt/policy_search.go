@@ -35,16 +35,20 @@ func policyDataSourceResourceFilterAndSet(d *schema.ResourceData, resultValues [
 			return nil, errors[0]
 		}
 		policyResource := dataValue.(model.PolicyResource)
-
-		if objID != "" && resourceType == *policyResource.ResourceType {
-			perfectMatch = append(perfectMatch, policySearchDataValue{StructValue: result, Resource: policyResource})
+		if resourceType != *policyResource.ResourceType {
 			continue
 		}
-		if *policyResource.DisplayName == objName {
+
+		if objID != "" {
 			perfectMatch = append(perfectMatch, policySearchDataValue{StructValue: result, Resource: policyResource})
-		}
-		if strings.HasPrefix(*policyResource.DisplayName, objName) {
-			prefixMatch = append(prefixMatch, policySearchDataValue{StructValue: result, Resource: policyResource})
+			break
+		} else {
+			if *policyResource.DisplayName == objName {
+				perfectMatch = append(perfectMatch, policySearchDataValue{StructValue: result, Resource: policyResource})
+			}
+			if strings.HasPrefix(*policyResource.DisplayName, objName) {
+				prefixMatch = append(prefixMatch, policySearchDataValue{StructValue: result, Resource: policyResource})
+			}
 		}
 	}
 
