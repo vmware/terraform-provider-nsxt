@@ -44,7 +44,7 @@ func TestAccResourceNsxtPolicyGatewayDNSForwarder_tier1(t *testing.T) {
 
 func testAccResourceNsxtPolicyGatewayDNSForwarder(t *testing.T, isT0 bool) {
 	resourceName := testAccResourcePolicyGatewayDNSForwarderName
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -98,7 +98,7 @@ func TestAccResourceNsxtPolicyGatewayDNSForwarder_importTier1(t *testing.T) {
 }
 
 func testAccResourceNsxtPolicyGatewayDNSForwarderImport(t *testing.T, isT0 bool) {
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
