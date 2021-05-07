@@ -320,7 +320,6 @@ resource "nsxt_policy_fixed_segment" "test" {
   display_name        = "%s"
   description         = "Acceptance Test"
   connectivity_path   = nsxt_policy_tier1_gateway.tier1ForSegments.path
-  transport_zone_path = data.nsxt_policy_transport_zone.test.path
 
   subnet {
      cidr = "12.12.2.1/24"
@@ -337,7 +336,6 @@ resource "nsxt_policy_fixed_segment" "test" {
   description         = "Acceptance Test"
   domain_name         = "tftest.org"
   overlay_id          = 1011
-  transport_zone_path = data.nsxt_policy_transport_zone.test.path
   connectivity_path   = nsxt_policy_tier1_gateway.tier1ForSegments.path
 
   subnet {
@@ -360,7 +358,6 @@ resource "nsxt_policy_fixed_segment" "test" {
   description         = "Acceptance Test2"
   domain_name         = "tftest2.org"
   overlay_id          = 1011
-  transport_zone_path = data.nsxt_policy_transport_zone.test.path
   connectivity_path   = nsxt_policy_tier1_gateway.tier1ForSegments.path
 
   subnet {
@@ -387,7 +384,6 @@ resource "nsxt_policy_fixed_segment" "test" {
   description         = "Acceptance Test2"
   domain_name         = "tftest2.org"
   overlay_id          = 1011
-  transport_zone_path = data.nsxt_policy_transport_zone.test.path
   connectivity_path   = nsxt_policy_tier1_gateway.anotherTier1ForSegments.path
 
   subnet {
@@ -417,7 +413,6 @@ resource "nsxt_policy_fixed_segment" "test" {
   vlan_ids     = ["101", "102"]
 
   connectivity_path   = nsxt_policy_tier1_gateway.anotherTier1ForSegments.path
-  transport_zone_path = data.nsxt_policy_transport_zone.test.path
 
   subnet {
      cidr = "12.12.2.1/24"
@@ -447,7 +442,6 @@ resource "nsxt_policy_fixed_segment" "test" {
   vlan_ids     = ["101-104"]
 
   connectivity_path   = nsxt_policy_tier1_gateway.anotherTier1ForSegments.path
-  transport_zone_path = data.nsxt_policy_transport_zone.test.path
 
   subnet {
      cidr = "12.12.2.1/24"

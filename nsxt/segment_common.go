@@ -270,6 +270,7 @@ func getPolicyCommonSegmentSchema(vlanRequired bool, isFixed bool) map[string]*s
 			Type:         schema.TypeString,
 			Description:  "Policy path to the transport zone",
 			Optional:     true,
+			ForceNew:     true,
 			ValidateFunc: validatePolicyPath(),
 		},
 		"vlan_ids": {
@@ -643,8 +644,8 @@ func policySegmentResourceToInfraStruct(id string, d *schema.ResourceData, isVla
 	revision := int64(d.Get("revision").(int))
 	resourceType := "Segment"
 
-	if (tzPath == "") && !isGlobalManager {
-		return model.Infra{}, fmt.Errorf("transport_zone_path needs to be specified for segment on local manager")
+	if (tzPath == "") && !isGlobalManager && !isFixed {
+		return model.Infra{}, fmt.Errorf("transport_zone_path needs to be specified for infra segment on local manager")
 	}
 
 	obj := model.Segment{
