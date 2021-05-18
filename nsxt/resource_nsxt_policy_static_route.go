@@ -57,7 +57,7 @@ func resourceNsxtPolicyStaticRoute() *schema.Resource {
 						},
 						"ip_address": {
 							Type:         schema.TypeString,
-							Required:     true,
+							Optional:     true,
 							Description:  "Next hop gateway IP address",
 							ValidateFunc: validateSingleIP(),
 						},
@@ -139,12 +139,15 @@ func resourceNsxtPolicyStaticRouteCreate(d *schema.ResourceData, m interface{}) 
 		if scope != "" {
 			scopeList = append(scopeList, scope)
 		}
-		hopStuct := model.RouterNexthop{
+		hopStruct := model.RouterNexthop{
 			AdminDistance: &distance,
-			IpAddress:     &ip,
 			Scope:         scopeList,
 		}
-		nextHopsStructs = append(nextHopsStructs, hopStuct)
+
+		if len(ip) > 0 {
+			hopStruct.IpAddress = &ip
+		}
+		nextHopsStructs = append(nextHopsStructs, hopStruct)
 	}
 
 	routeStruct := model.StaticRoutes{
@@ -208,8 +211,12 @@ func resourceNsxtPolicyStaticRouteRead(d *schema.ResourceData, m interface{}) er
 			iface = scope[0]
 		}
 		nextHopMap["interface"] = iface
-		nextHopMap["ip_address"] = *nextHop.IpAddress
-		nextHopMap["admin_distance"] = *nextHop.AdminDistance
+		if nextHop.IpAddress != nil {
+			nextHopMap["ip_address"] = *nextHop.IpAddress
+		}
+		if nextHop.AdminDistance != nil {
+			nextHopMap["admin_distance"] = nextHop.AdminDistance
+		}
 
 		nextHopMaps = append(nextHopMaps, nextHopMap)
 	}
@@ -251,12 +258,14 @@ func resourceNsxtPolicyStaticRouteUpdate(d *schema.ResourceData, m interface{}) 
 		if scope != "" {
 			scopeList = append(scopeList, scope)
 		}
-		hopStuct := model.RouterNexthop{
+		hopStruct := model.RouterNexthop{
 			AdminDistance: &distance,
-			IpAddress:     &ip,
 			Scope:         scopeList,
 		}
-		nextHopsStructs = append(nextHopsStructs, hopStuct)
+		if len(ip) > 0 {
+			hopStruct.IpAddress = &ip
+		}
+		nextHopsStructs = append(nextHopsStructs, hopStruct)
 	}
 
 	routeStruct := model.StaticRoutes{
