@@ -48,7 +48,7 @@ The following arguments are supported:
 * `gateway_path` (Required) The NSX Policy path to the Tier0 or Tier1 Gateway for this Static Route.
 * `next_hop` - (Required) One or more next hops for the static route.
   * `admin_distance` - (Optional) The cost associated with the next hop. Valid values are 1 - 255 and the default is 1.
-  * `ip_address` - (Required) The gateway address of the next hop.
+  * `ip_address` - (Optional) The gateway address of the next hop.
   * `interface` - (Optional) The policy path to the interface associated with the static route.
 
 ## Attributes Reference
