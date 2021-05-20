@@ -348,7 +348,7 @@ resource "nsxt_policy_static_route" "test" {
     ip_address = "10.10.10.1"
   }
   next_hop {
-    ip_address = "11.10.10.1"
+    admin_distance = 2
   }
   tag {
     scope = "scope1"
