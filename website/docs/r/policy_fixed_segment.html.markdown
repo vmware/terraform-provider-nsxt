@@ -17,9 +17,9 @@ is recommended to use nsxt_policy_segment resource instead.
 
 ```hcl
 resource "nsxt_policy_fixed_segment" "segment1" {
-  display_name        = "segment1"
-  description         = "Terraform provisioned Segment"
-  connectivity_path   = nsxt_policy_tier1_gateway.mygateway.path
+  display_name      = "segment1"
+  description       = "Terraform provisioned Segment"
+  connectivity_path = nsxt_policy_tier1_gateway.mygateway.path
 
   subnet {
     cidr        = "12.12.2.1/24"
