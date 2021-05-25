@@ -21,7 +21,7 @@ data "nsxt_policy_dhcp_server" "test" {
 
 ## Argument Reference
 
-* `id` - (Optional) The ID of DHCP server to retrieve.
+* `id` - (Optional) The ID of Profile to retrieve. If ID is specified, no additional argument should be configured.
 
 * `display_name` - (Optional) The Display Name prefix of DHCP server to retrieve.
 
