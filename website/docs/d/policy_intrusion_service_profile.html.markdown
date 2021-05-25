@@ -20,7 +20,7 @@ data "nsxt_policy_intrusion_service_profile" "test" {
 
 ## Argument Reference
 
-* `id` - (Optional) The ID of Profile to retrieve.
+* `id` - (Optional) The ID of Profile to retrieve. If ID is specified, no additional argument should be configured.
 
 * `display_name` - (Optional) The Display Name prefix of the Profile to retrieve.
 
