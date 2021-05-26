@@ -99,6 +99,7 @@ The following arguments are supported:
   * `hybrid` - (Optional) Boolean flag to identify a hybrid logical switch.
   * `local_egress` - (Optional) Boolean flag to enable local egress.
   * `uplink_teaming_policy` - (Optional) The name of the switching uplink teaming policy for the bridge endpoint. This name corresponds to one of the switching uplink teaming policy names listed in the transport zone.
+  * `urpf_mode` - (Optional) URPF mode to be applied to gateway downlink interface. One of `STRICT`, `NONE`.
 * `discovery_profile` - (Optional) IP and MAC discovery profile specification for the segment.
   * `ip_discovery_profile_path` - (Optional) Path for IP discovery profile to be associated with the segment.
   * `mac_discovery_profile_path` - (Optional) Path for MAC discovery profile to be associated with the segment.
