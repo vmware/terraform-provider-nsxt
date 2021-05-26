@@ -27,6 +27,11 @@ var connectivityValues = []string{
 	model.SegmentAdvancedConfig_CONNECTIVITY_OFF,
 }
 
+var urpfModeValues = []string{
+	model.SegmentAdvancedConfig_URPF_MODE_NONE,
+	model.SegmentAdvancedConfig_URPF_MODE_STRICT,
+}
+
 func getPolicySegmentDhcpV4ConfigSchema() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
@@ -181,6 +186,13 @@ func getPolicySegmentAdvancedConfigurationSchema() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "The name of the switching uplink teaming policy for the bridge endpoint",
 				Optional:    true,
+			},
+			"urpf_mode": {
+				Type:         schema.TypeString,
+				Description:  "This URPF mode is applied to the downlink logical router port created while attaching this segment to gateway",
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice(urpfModeValues, false),
+				Default:      model.SegmentAdvancedConfig_URPF_MODE_STRICT,
 			},
 		},
 	}
@@ -744,6 +756,9 @@ func policySegmentResourceToInfraStruct(id string, d *schema.ResourceData, isVla
 			if teamingPolicy != "" {
 				advConfigStruct.UplinkTeamingPolicyName = &teamingPolicy
 			}
+
+			urpfMode := advConfigMap["urpf_mode"].(string)
+			advConfigStruct.UrpfMode = &urpfMode
 		}
 		obj.AdvancedConfig = &advConfigStruct
 	}
@@ -1291,6 +1306,9 @@ func nsxtPolicySegmentRead(d *schema.ResourceData, m interface{}, isVlan bool, i
 		advConfig["local_egress"] = obj.AdvancedConfig.LocalEgress
 		if obj.AdvancedConfig.UplinkTeamingPolicyName != nil {
 			advConfig["uplink_teaming_policy"] = *obj.AdvancedConfig.UplinkTeamingPolicyName
+		}
+		if obj.AdvancedConfig.UrpfMode != nil {
+			advConfig["urpf_mode"] = *obj.AdvancedConfig.UrpfMode
 		}
 		// This is a list with 1 element
 		var advConfigList []map[string]interface{}
