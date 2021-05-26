@@ -63,7 +63,7 @@ func resourceNsxtPolicyTier0GatewayInterface() *schema.Resource {
 			"edge_node_path": getPolicyPathSchema(false, false, "Policy path for edge node"),
 			"enable_pim": {
 				Type:        schema.TypeBool,
-				Description: "Enable Protocol Independent Multicast on Interface",
+				Description: "Enable Protocol Independent Multicast on Interface, applicable only when interface type is EXTERNAL",
 				Optional:    true,
 				Default:     false,
 			},
