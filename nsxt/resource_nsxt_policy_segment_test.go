@@ -151,6 +151,7 @@ func TestAccResourceNsxtPolicySegment_updateAdvConfig(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "advanced_config.0.connectivity", "OFF"),
 					resource.TestCheckResourceAttr(testResourceName, "advanced_config.0.local_egress", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "advanced_config.0.urpf_mode", "STRICT"),
 				),
 			},
 			{
@@ -167,6 +168,7 @@ func TestAccResourceNsxtPolicySegment_updateAdvConfig(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "advanced_config.0.connectivity", "ON"),
 					resource.TestCheckResourceAttr(testResourceName, "advanced_config.0.local_egress", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "advanced_config.0.urpf_mode", "NONE"),
 				),
 			},
 		},
@@ -588,6 +590,7 @@ resource "nsxt_policy_segment" "test" {
   advanced_config {
     connectivity = "OFF"
     local_egress = true
+    urpf_mode    = "STRICT"
   }
 }
 `, name)
@@ -617,6 +620,7 @@ resource "nsxt_policy_segment" "test" {
   advanced_config {
     connectivity = "ON"
     local_egress = false
+    urpf_mode    = "NONE"
   }
 }
 `, name)
