@@ -1,3 +1,55 @@
+## 3.2.0 (June 7, 2021)
+
+FEATURES:
+
+* **New Data Source**: `nsxt_policy_bfd_profile`.
+* **New Data Source**: `nsxt_policy_intrusion_service_profile`.
+
+* **New Resource**: `nsxt_policy_dns_forwarder_zone`.
+* **New Resource**: `nsxt_policy_gateway_dns_forwarder`.
+* **New Resource**: `nsxt_policy_intrusion_service_profile` (Local Manager only).
+* **New Resource**: `nsxt_policy_intrusion_service_policy` (Local Manager only).
+* **New Resource**: `nsxt_policy_gateway_community_list`.
+* **New Resource**: `nsxt_policy_fixed_segment` (VMC only).
+* **New Resource**: `nsxt_policy_dns_forwarder_zone`.
+* **New Resource**: `nsxt_policy_gateway_dns_forwarder`.
+* **New Resource**: `nsxt_policy_gateway_community_list`.
+* **New Resource**: `nsxt_policy_gateway_route_map`.
+* **New Resource**: `nsxt_policy_static_route_bfd_peer`.
+* **New Resource**: `nsxt_policy_evpn_tenant` (Local Manager only).
+* **New Resource**: `nsxt_policy_evpn_config` (Local Manager only).
+* **New Resource**: `nsxt_policy_evpn_tunnel_endpoint` (Local Manager only).
+* **New Resource**: `nsxt_policy_ospf_config` (Local Manager only).
+* **New Resource**: `nsxt_policy_ospf_area` (Local Manager only).
+* **New Resource**: `nsxt_policy_gateway_redistribution_config`.
+* **New Resource**: `nsxt_policy_qos_profile`.
+
+IMPROVEMENTS:
+
+* `resource/nsxt_policy_fixed_segment`: Add support for dhcp static bindings(([#557](https://github.com/vmware/terraform-provider-nsxt/pull/557))
+* `resource/nsxt_policy_bgp_config`: Add support for Local Manager(([#572](https://github.com/vmware/terraform-provider-nsxt/pull/572))
+* Support basic auth mode for VMC PCI use case([#577](https://github.com/vmware/terraform-provider-nsxt/pull/577))
+* Security Policy and Gateway policy resources: Allow IP CIDR or Range as source/dest groups([#589](https://github.com/vmware/terraform-provider-nsxt/pull/589))
+* `data/nsxt_policy_realization_info`: Introduce timeout and delay realization arguments([#590](https://github.com/vmware/terraform-provider-nsxt/pull/590))
+* Segment resources: Support urpf_mode in advanced config (([#627](https://github.com/vmware/terraform-provider-nsxt/pull/627))
+* Support darwin arm64 release([#628](https://github.com/vmware/terraform-provider-nsxt/pull/628))
+
+BUG FIXES:
+
+* `data/nsxt_policy_vm`: Fix fetching by `display_name` by adding pagination support([#570](https://github.com/vmware/terraform-provider-nsxt/pull/570))
+* `resource/nsxt_policy_nat_rule`: Fix source network assignment that caused API error on VMC([#575](https://github.com/vmware/terraform-provider-nsxt/pull/575))
+* Gateway resources: Fix ipv6 profiles assignment on Global Manager ([#582](https://github.com/vmware/terraform-provider-nsxt/pull/582))
+* `data/nsxt_policy_group`: Fix fetching by `display_name` by adding pagination support([#586](https://github.com/vmware/terraform-provider-nsxt/pull/586))
+* `resource/nsxt_policy_tier0_gateway`: Fix VRF realization error due to empty route configuration([#588](https://github.com/vmware/terraform-provider-nsxt/pull/588))
+* `resource/nsxt_policy_group`: Fix provider crush due to empty configuration([#607](https://github.com/vmware/terraform-provider-nsxt/pull/607))
+* `resource/nsxt_policy_fixed_segment`: Define `transport_zone_path` as optional force-new argument, rather than required([#617](https://github.com/vmware/terraform-provider-nsxt/pull/617))
+* `resource/nsxt_policy_static_route`: Define `ip_address` as optional argument, rather than required([#621](https://github.com/vmware/terraform-provider-nsxt/pull/621))
+
+DEPRECATIONS:
+
+* `resource/nsxt_policy_tier0_gateway`: `redistribution_config` clause is now deprecated. Please use `nsxt_policy_gateway_redistribution_config` resource instead.
+
+
 ## 3.1.1 (January 4, 2021)
 
 FEATURES:
