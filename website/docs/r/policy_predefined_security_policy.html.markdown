@@ -1,5 +1,5 @@
 ---
-subcategory: "Beta"
+subcategory: "Policy - Firewall"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_predefined_security_policy"
 description: A resource to update Predefined (Default) Security Security Policies.

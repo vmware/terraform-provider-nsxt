@@ -1,5 +1,5 @@
 ---
-subcategory: "Beta"
+subcategory: "Policy - Firewall"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_predefined_gateway_policy"
 description: A resource to update Predefined Gateway Security Policies.
@@ -12,6 +12,8 @@ There are two separate use cases for this resource:
 * Modify certain settings of default Gateway Policy and its Default Rule.
 * Modify predefined Gateway Policy that is not listed under Default category, and add rules to it.
   This use case is relevant for VMC.
+
+~> **NOTE:** Importing the resource first is recommended if you with to reconfigure the policy from scratch. Terraform state does is not aware of attributes/rules that are already configured on your NSX!
 
 ~> **NOTE:** An absolute path can be provided for this resource (this approach will work slightly faster, as the roundtrip for data source retrieval will be spared). In one of the examples below a data source is used in order to pull the predefined policy, while the other uses absolute path.
 
@@ -124,4 +126,4 @@ terraform import nsxt_policy_gateway_policy.default policy-path
 ```
 
 The above command imports the policy Gateway Policy named `default` with the NSX Path `policy-path`.
-The import command is recommended in case the NSX policy in question already has rules configured, and you with to reconfigure the policy from scratch. If your terraform configuration copies existing rules, like in VMC example above, import step can be skipped.
+The import command is recommended in case the NSX policy in question already has rules configured, and you wish to reconfigure the policy from scratch. If your terraform configuration copies existing rules, like in VMC example above, import step can be skipped.
