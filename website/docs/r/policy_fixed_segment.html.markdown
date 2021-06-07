@@ -1,5 +1,5 @@
 ---
-subcategory: "Beta"
+subcategory: "Segments"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_fixed_segment"
 description: A resource to configure a network Segment on specific Tier1 Gateway.
