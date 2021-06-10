@@ -10,6 +10,7 @@ description: A resource to configure EVPN Tenant in NSX Policy manager.
 This resource provides a method for the management of EVPN Tenant.
 
 This resource is applicable to NSX Policy Manager.
+This resource is supported with NSX 3.1.0 onwards.
 
 ## Example Usage
 

@@ -69,8 +69,11 @@ func policyGatewayRedistributionConfigPatch(d *schema.ResourceData, m interface{
 	rulesConfig := d.Get("rule").([]interface{})
 
 	redistributionStruct := model.Tier0RouteRedistributionConfig{
-		BgpEnabled:  &bgpEnabled,
-		OspfEnabled: &ospfEnabled,
+		BgpEnabled: &bgpEnabled,
+	}
+
+	if nsxVersionHigherOrEqual("3.1.0") {
+		redistributionStruct.OspfEnabled = &ospfEnabled
 	}
 
 	setLocaleServiceRedistributionRulesConfig(rulesConfig, &redistributionStruct)

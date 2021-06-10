@@ -17,7 +17,7 @@ func TestAccResourceNsxtPolicyIntrusionServiceProfile_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_intrusion_service_profile.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t); testAccNSXVersion(t, "3.1.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyIntrusionServiceProfileCheckDestroy(state, updatedName)
@@ -82,7 +82,7 @@ func TestAccResourceNsxtPolicyIntrusionServiceProfile_importBasic(t *testing.T) 
 	testResourceName := "nsxt_policy_intrusion_service_profile.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t); testAccNSXVersion(t, "3.1.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyIntrusionServiceProfileCheckDestroy(state, name)

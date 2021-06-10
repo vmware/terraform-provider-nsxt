@@ -18,7 +18,7 @@ func TestAccResourceNsxtPolicyGatewayRedistributionConfig_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_gateway_redistribution_config.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck:     func() { testAccPreCheck(t); testAccNSXVersion(t, "3.1.0") },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccNsxtPolicyTier0CheckNoRedistribution(testAccNsxtPolicyGatewayRedistributionHelperName),
 		Steps: []resource.TestStep{
@@ -66,7 +66,7 @@ func TestAccResourceNsxtPolicyGatewayRedistributionConfig_importBasic(t *testing
 	testResourceName := "nsxt_policy_gateway_redistribution_config.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck:     func() { testAccPreCheck(t); testAccNSXVersion(t, "3.1.0") },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccNsxtPolicyTier0CheckNoRedistribution(testAccNsxtPolicyGatewayRedistributionHelperName),
 		Steps: []resource.TestStep{
