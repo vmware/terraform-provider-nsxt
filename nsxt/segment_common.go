@@ -757,8 +757,10 @@ func policySegmentResourceToInfraStruct(id string, d *schema.ResourceData, isVla
 				advConfigStruct.UplinkTeamingPolicyName = &teamingPolicy
 			}
 
-			urpfMode := advConfigMap["urpf_mode"].(string)
-			advConfigStruct.UrpfMode = &urpfMode
+			if nsxVersionHigherOrEqual("3.1.0") {
+				urpfMode := advConfigMap["urpf_mode"].(string)
+				advConfigStruct.UrpfMode = &urpfMode
+			}
 		}
 		obj.AdvancedConfig = &advConfigStruct
 	}
@@ -1309,6 +1311,11 @@ func nsxtPolicySegmentRead(d *schema.ResourceData, m interface{}, isVlan bool, i
 		}
 		if obj.AdvancedConfig.UrpfMode != nil {
 			advConfig["urpf_mode"] = *obj.AdvancedConfig.UrpfMode
+		} else {
+			if nsxVersionLower("3.1.0") {
+				// set to default in early versions
+				advConfig["urpf_mode"] = model.SegmentAdvancedConfig_URPF_MODE_STRICT
+			}
 		}
 		// This is a list with 1 element
 		var advConfigList []map[string]interface{}

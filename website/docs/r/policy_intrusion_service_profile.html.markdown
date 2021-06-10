@@ -9,7 +9,7 @@ description: A resource to configure Intrusion Service Profile.
 
 This resource provides a method for the management of Intrusion Service (IDS) Profile.
 
-This resource is applicable to NSX Policy Manager and VMC (NSX version 3.0.0 and up).
+This resource is applicable to NSX Policy Manager and VMC (NSX version 3.1.0 and up).
 
 ## Example Usage
 
