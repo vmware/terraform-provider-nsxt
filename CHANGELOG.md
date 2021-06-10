@@ -1,3 +1,9 @@
+## 3.2.1 (June 10, 2021)
+
+BUG FIXES:
+
+* Fix provider compatibility with NSX 3.0.x version line ([#636](https://github.com/vmware/terraform-provider-nsxt/pull/636))
+
 ## 3.2.0 (June 7, 2021)
 
 FEATURES:
