@@ -55,7 +55,7 @@ The following arguments are supported:
 * `gateway_path` - (Required) Policy path to Tier0 Gateway.
 * `site_path` - (Optional) Policy path to Global Manager site (domain). This attribute is required for NSX Global Manager and not applicable otherwise.
 * `bgp_enabled` - (Optional) Enable route redistribution for BGP. Defaults to `true`.
-* `ospf_enabled` - (Optional) Enable route redistribution for OSPF. Defaults to `false`.
+* `ospf_enabled` - (Optional) Enable route redistribution for OSPF. Defaults to `false`. Applicable from NSX 3.1.0 onwards.
 * `rule` - (Optional) List of redistribution rules.
   * `name` - (Optional) Rule name.
   * `route_map_path` - (Optional) Route map to be associated with the redistribution rule.

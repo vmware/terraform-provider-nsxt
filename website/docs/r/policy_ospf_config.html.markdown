@@ -10,6 +10,7 @@ description: A resource to configure OSPF Settings of Tier0 Gateway on NSX Polic
 This resource provides a method for the management of OSPF for T0 Gateway on default locale service. A single resource should be specified per T0 Gateway. Edge Cluster is expected to be configured on the Gateway.
 
 This resource is applicable to NSX Policy Manager only.
+This resource is supported with NSX 3.1.0 onwards.
 
 ~> **NOTE:** NSX does not support deleting OSPF config on gateway, therefore this resource will update NSX object, but never delete it. To undo OSPF configuration, please disable it within the resource.
 

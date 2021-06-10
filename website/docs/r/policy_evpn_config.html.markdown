@@ -10,6 +10,7 @@ description: A resource to configure EVPN Settings of Tier0 Gateway.
 This resource provides a method to configure EVPN on T0 Gateway. A single resource should be configured per Gateway.
 
 This resource is applicable to NSX Policy Manager only.
+This resource is supported with NSX 3.1.0 onwards.
 
 ## Example Usage
 
