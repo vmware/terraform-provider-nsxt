@@ -23,12 +23,12 @@ resource "nsxt_policy_gateway_route_map" "test" {
     action = "PERMIT"
     community_list_match {
       criteria       = "11:*"
-      match_operator = "MATCH_COMMUNITY_REGEX"
+      match_operator = "COMMUNITY_REGEX"
     }
 
     community_list_match {
       criteria       = "11:*"
-      match_operator = "MATCH_LARGE_COMMUNITY_REGEX"
+      match_operator = "LARGE_COMMUNITY_REGEX"
     }
   }
 
