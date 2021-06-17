@@ -198,7 +198,6 @@ func policyGatewayRouteMapBuildEntry(schemaEntry map[string]interface{}) model.R
 		weight := int64(data["weight"].(int))
 
 		entrySet := model.RouteMapEntrySet{
-			AsPathPrepend:         &asPathPrepend,
 			Community:             &community,
 			LocalPreference:       &localPreference,
 			Med:                   &med,
@@ -206,6 +205,12 @@ func policyGatewayRouteMapBuildEntry(schemaEntry map[string]interface{}) model.R
 			Weight:                &weight,
 		}
 
+		if len(asPathPrepend) > 0 {
+			entrySet.AsPathPrepend = &asPathPrepend
+		}
+		if len(community) > 0 {
+			entrySet.Community = &community
+		}
 		obj.Set = &entrySet
 	}
 
