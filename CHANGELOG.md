@@ -1,3 +1,9 @@
+## 3.2.2 (June 21, 2021)
+
+BUG FIXES:
+
+* Fix realization issue for gateway route map ([#640](https://github.com/vmware/terraform-provider-nsxt/pull/640))
+
 ## 3.2.1 (June 10, 2021)
 
 BUG FIXES:
