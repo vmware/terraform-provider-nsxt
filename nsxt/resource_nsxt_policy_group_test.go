@@ -144,7 +144,8 @@ func TestAccResourceNsxtGlobalPolicyGroup_withDomain(t *testing.T) {
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyGroupCheckDestroy(state, name, domainName)
+			return testAccNsxtPolicyDomainCheckDestroy(state, name)
+
 		},
 		Steps: []resource.TestStep{
 			{
