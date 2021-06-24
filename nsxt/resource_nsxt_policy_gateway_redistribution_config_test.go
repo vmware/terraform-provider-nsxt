@@ -12,20 +12,21 @@ import (
 )
 
 var testAccNsxtPolicyGatewayRedistributionHelperName = getAccTestResourceName()
+var testAccNsxtPolicyGatewayRedistributionGatewayID = ""
+var testAccNsxtPolicyGatewayRedistributionLocaleService = ""
 
 func TestAccResourceNsxtPolicyGatewayRedistributionConfig_basic(t *testing.T) {
 	tier0ResourceName := "nsxt_policy_tier0_gateway.test"
 	testResourceName := "nsxt_policy_gateway_redistribution_config.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t); testAccNSXVersion(t, "3.1.0") },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccNsxtPolicyTier0CheckNoRedistribution(testAccNsxtPolicyGatewayRedistributionHelperName),
+		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.1.0") },
+		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNsxtPolicyGatewayRedistributionCreateTemplate(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyTier0Exists(tier0ResourceName),
+					testAccNsxtPolicyTier0CheckRedistributionExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "bgp_enabled", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "ospf_enabled", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.#", "1"),
@@ -37,7 +38,6 @@ func TestAccResourceNsxtPolicyGatewayRedistributionConfig_basic(t *testing.T) {
 			{
 				Config: testAccNsxtPolicyGatewayRedistributionUpdateTemplate(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyTier0Exists(tier0ResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "bgp_enabled", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "ospf_enabled", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.#", "2"),
@@ -51,11 +51,16 @@ func TestAccResourceNsxtPolicyGatewayRedistributionConfig_basic(t *testing.T) {
 			{
 				Config: testAccNsxtPolicyGatewayRedistributionUpdate2Template(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyTier0Exists(tier0ResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "bgp_enabled", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "ospf_enabled", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.#", "0"),
 					resource.TestCheckResourceAttrSet(testResourceName, "gateway_path"),
+				),
+			},
+			{ // delete redistribution resource while leaving the gateway
+				Config: testAccNsxtPolicyGatewayRedistributionPrerequisites(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyTier0CheckNoRedistribution(tier0ResourceName),
 				),
 			},
 		},
@@ -66,9 +71,8 @@ func TestAccResourceNsxtPolicyGatewayRedistributionConfig_importBasic(t *testing
 	testResourceName := "nsxt_policy_gateway_redistribution_config.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t); testAccNSXVersion(t, "3.1.0") },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccNsxtPolicyTier0CheckNoRedistribution(testAccNsxtPolicyGatewayRedistributionHelperName),
+		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.1.0") },
+		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNsxtPolicyGatewayRedistributionCreateTemplate(),
@@ -83,29 +87,56 @@ func TestAccResourceNsxtPolicyGatewayRedistributionConfig_importBasic(t *testing
 	})
 }
 
-func testAccNsxtPolicyTier0CheckNoRedistribution(resourceName string) resource.TestCheckFunc {
+func testAccNsxtPolicyTier0CheckRedistributionExists(resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
-			return fmt.Errorf("Policy Tier0 Redistribution config resource %s not found in resources", resourceName)
+			return fmt.Errorf("Policy Tier0 Redistribution Config resource %s not found in resources", resourceName)
 		}
 
 		resourceID := rs.Primary.ID
 		if resourceID == "" {
-			return fmt.Errorf("Policy Tier0 Redistribution config resource ID not set in resources")
+			return fmt.Errorf("Policy Tier0 Redistribution Config resource ID not set in resources")
 		}
 
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
 
-		localeServiceID := rs.Primary.Attributes["locale_service_id"]
-		gwID := rs.Primary.Attributes["gateway_id"]
-		localeService := policyTier0GetLocaleService(gwID, localeServiceID, connector, testAccIsGlobalManager())
+		testAccNsxtPolicyGatewayRedistributionLocaleService = rs.Primary.Attributes["locale_service_id"]
+		testAccNsxtPolicyGatewayRedistributionGatewayID = rs.Primary.Attributes["gateway_id"]
+		localeService := policyTier0GetLocaleService(testAccNsxtPolicyGatewayRedistributionGatewayID, testAccNsxtPolicyGatewayRedistributionLocaleService, connector, testAccIsGlobalManager())
 		if localeService == nil {
-			return fmt.Errorf("Error while retrieving Locale Service %s for Gateway %s", localeServiceID, gwID)
+			return fmt.Errorf("Error while retrieving Locale Service %s for Gateway %s", testAccNsxtPolicyGatewayRedistributionLocaleService, testAccNsxtPolicyGatewayRedistributionGatewayID)
 		}
 
 		if localeService.RouteRedistributionConfig == nil {
-			return fmt.Errorf("Error while retrieving policy Tier0 Redistribution config %s. HaVipConfigs is empty", resourceID)
+			return fmt.Errorf("Tier0 Redistribution config for %s absent", resourceID)
+		}
+
+		return nil
+	}
+
+}
+func testAccNsxtPolicyTier0CheckNoRedistribution(tier0Name string) resource.TestCheckFunc {
+	return func(state *terraform.State) error {
+		rs, ok := state.RootModule().Resources[tier0Name]
+		if !ok {
+			return fmt.Errorf("Policy Tier0 resource %s not found in resources", tier0Name)
+		}
+
+		resourceID := rs.Primary.ID
+		if resourceID == "" {
+			return fmt.Errorf("Policy Tier0 resource ID not set in resources")
+		}
+
+		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
+
+		localeService := policyTier0GetLocaleService(testAccNsxtPolicyGatewayRedistributionGatewayID, testAccNsxtPolicyGatewayRedistributionLocaleService, connector, testAccIsGlobalManager())
+		if localeService == nil {
+			return fmt.Errorf("Error while retrieving Locale Service %s for Gateway %s", testAccNsxtPolicyGatewayRedistributionLocaleService, testAccNsxtPolicyGatewayRedistributionGatewayID)
+		}
+
+		if localeService.RouteRedistributionConfig != nil {
+			return fmt.Errorf("Tier0 Redistribution config for %s still exists", resourceID)
 		}
 
 		return nil
