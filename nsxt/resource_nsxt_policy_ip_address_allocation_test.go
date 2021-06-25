@@ -258,9 +258,10 @@ func testAccNsxtPolicyIPAddressAllocationAnyFreeIPTemplate(createFlow bool) stri
 	return testAccNsxtPolicyIPAddressAllocationDependenciesTemplate() + fmt.Sprintf(`
 
 resource "nsxt_policy_ip_address_allocation" "test" {
-  display_name  = "%s"
-  description   = "%s"
-  pool_path     = nsxt_policy_ip_pool.test.path
+  display_name = "%s"
+  description  = "%s"
+  pool_path    = nsxt_policy_ip_pool.test.path
+  depends_on   = [nsxt_policy_ip_pool_static_subnet.test]
 
   tag {
     scope = "scope1"

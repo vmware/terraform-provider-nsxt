@@ -38,7 +38,6 @@ resource "nsxt_policy_dhcp_server" "test" {
 }
 
 data "nsxt_policy_dhcp_server" "test" {
-  display_name = nsxt_policy_dhcp_server.test.display_name
-  depends_on   = [nsxt_policy_dhcp_server.test]
+  id = nsxt_policy_dhcp_server.test.nsx_id
 }`, name)
 }
