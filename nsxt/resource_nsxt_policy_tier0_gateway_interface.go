@@ -390,7 +390,7 @@ func resourceNsxtPolicyTier0GatewayInterfaceRead(d *schema.ResourceData, m inter
 		d.Set("site_path", sitePath)
 	} else {
 		client := locale_services.NewDefaultInterfacesClient(connector)
-		obj, err = client.Get(tier0ID, defaultPolicyLocaleServiceID, id)
+		obj, err = client.Get(tier0ID, localeServiceID, id)
 	}
 	if err != nil {
 		return handleReadError(d, "Tier0 Interface", id, err)

@@ -200,7 +200,7 @@ func resourceNsxtPolicyTier0GatewayHAVipConfigRead(d *schema.ResourceData, m int
 	} else {
 		var err error
 		client := tier_0s.NewDefaultLocaleServicesClient(connector)
-		obj, err = client.Get(tier0ID, defaultPolicyLocaleServiceID)
+		obj, err = client.Get(tier0ID, localeServiceID)
 		if err != nil {
 			return handleReadError(d, "Tier0 HA Vip config", id, err)
 		}

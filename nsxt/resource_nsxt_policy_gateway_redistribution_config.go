@@ -174,7 +174,7 @@ func resourceNsxtPolicyGatewayRedistributionConfigRead(d *schema.ResourceData, m
 	} else {
 		var err error
 		client := tier_0s.NewDefaultLocaleServicesClient(connector)
-		obj, err = client.Get(gwID, defaultPolicyLocaleServiceID)
+		obj, err = client.Get(gwID, localeServiceID)
 		if err != nil {
 			return handleReadError(d, "Tier0 Redistribution Config", id, err)
 		}

@@ -218,7 +218,7 @@ func resourceNsxtPolicyTier1GatewayInterfaceRead(d *schema.ResourceData, m inter
 	} else {
 		var err error
 		client := locale_services.NewDefaultInterfacesClient(connector)
-		obj, err = client.Get(tier1ID, defaultPolicyLocaleServiceID, id)
+		obj, err = client.Get(tier1ID, localeServiceID, id)
 		if err != nil {
 			return handleReadError(d, "Tier1 Interface", id, err)
 		}
