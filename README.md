@@ -21,16 +21,13 @@ Documentation on the NSX platform can be found at the [NSX-T Documentation page]
 
 The latest version of this provider requires Terraform v0.12 or higher to run.
 
-The VMware supported version of the provider requires NSX version 2.2 onwards and Terraform 0.12 onwards.
+The VMware supported version of the provider requires NSX version 3.0.0 onwards and Terraform 0.12 onwards.
 Version 2.0.0 of the provider offers NSX consumption via policy APIs, which is the recommended way.
-Most policy resources are supported with NSX version 2.5 onwards, however some resources or attributes require NSX 3.0 onwards. Please refer to documentation for more details.
+Most policy resources are supported with NSX version 3.0.0 onwards, however some resources or attributes require later releases. Please refer to documentation for more details.
 The recommended vSphere provider to be used in conjunction with the NSX-T Terraform Provider is 1.3.3 or above.
 
 Note that you need to run `terraform init` to fetch the provider before
-deploying. Read about the provider split and other changes to TF v0.10.0 in the
-official release announcement found [here][tf-0.10-announce].
-
-[tf-0.10-announce]: https://www.hashicorp.com/blog/hashicorp-terraform-0-10/
+deploying.
 
 ## Full Provider Documentation
 
@@ -39,7 +36,7 @@ The provider is documented in full on the Terraform website and can be found
 your connection information and how to get started with writing configuration
 for vSphere resources.
 
-[tf-nsxt-docs]: https://www.terraform.io/docs/providers/nsxt/index.html
+[tf-nsxt-docs]: https://registry.terraform.io/providers/vmware/nsxt/latest
 
 ### Controlling the provider version
 
@@ -51,13 +48,13 @@ The syntax is as follows:
 
 ```hcl
 provider "nsxt" {
-  version = "~> 1.0"
+  version = "~> 3.0"
   ...
 }
 ```
 
 Version locking uses a pessimistic operator, so this version lock would mean
-anything within the 1.x namespace, including or after 1.0.0. [Read
+anything within the 3.x namespace, including or after 3.0.0. [Read
 more][provider-vc] on provider version control.
 
 [provider-vc]: https://www.terraform.io/docs/configuration/providers.html#provider-versions
@@ -69,9 +66,9 @@ You can list versions of providers installed in your environment by running “t
 
 ```hcl
 $ ./terraform version
-Terraform v0.12.7
-+ provider.nsxt v2.0.0
-+ provider.vsphere v1.5.0
+Terraform v1.0.0
+on linux_amd64
++ provider registry.terraform.io/vmware/nsxt v3.2.2
 ```
 
 # Manual Installation
@@ -80,20 +77,10 @@ Terraform v0.12.7
 pre-release bugfix or feature, you will want to use the officially released
 version of the provider (see [the section above](#using-the-provider)).
 
-**NOTE:** Recommended way to compile the provider is using [Go Modules](https://blog.golang.org/using-go-modules), however vendored dependencies are still supported.
+**NOTE:** Recommended way to compile the provider is using [Go Modules](https://blog.golang.org/using-go-modules).
 
 **NOTE:** For terraform 0.13, please refer to [provider installation configuration][install-013] in order to use custom provider.
 [install-013]: https://www.terraform.io/docs/commands/cli-config.html#provider-installation
-
-**NOTE:** Note that if the provider is manually copied to your running folder (rather than fetched with the “terraform init” based on provider block), Terraform is not aware of the version of the provider you’re running. It will appear as “unversioned”:
-```hcl
-$ ./terraform version
-Terraform v0.12.7
-+ provider.nsxt (unversioned)
-+ provider.vsphere v1.5.0
-```
-Since Terraform has no indication of version, it cannot upgrade in a native way, based on the “version” attribute in provider block.
-In addition, this may cause difficulties in housekeeping and issue reporting.
 
 ## Cloning the Project
 
@@ -108,6 +95,7 @@ git clone https://github.com/vmware/terraform-provider-nsxt.git
 
 ## Building and Installing the Provider
 
+Recommended golang version is go1.14 onwards.
 After the clone has been completed, you can enter the provider directory and build the provider.
 
 ```sh
@@ -115,12 +103,9 @@ cd $GOPATH/src/github.com/vmware/terraform-provider-nsxt
 make
 ```
 
-After the build is complete, if your terraform running folder does not match your GOPATH environment, you need to copy the `terraform-provider-nsxt` executable to your running folder and re-run `terraform init` to make terraform aware of your local provider executable.
-
-After this, your project-local `.terraform/plugins/ARCH/lock.json` (where `ARCH`
-matches the architecture of your machine) file should contain a SHA256 sum that
-matches the local plugin. Run `shasum -a 256` on the binary to verify the values
-match.
+After the build is complete, copy the provider executable `terraform-provider-nsxt` into location specified in your [provider installation configuration][install-013]. Make sure to delete provider lock files that might exist in your working directory due to prior provider usage. Run `terraform init`.
+For developing, consider using [dev overrides configuration][dev-overrides]. Please note that `terraform init` should not be used with dev overrides.
+[dev-overrides]: https://www.terraform.io/docs/cli/config/config-file.html#development-overrides-for-provider-developers
 
 # Developing the Provider
 
@@ -133,7 +118,7 @@ new issue.
 [gh-prs]: https://github.com/vmware/terraform-provider-nsxt/pulls
 
 If you wish to work on the provider, you'll first need [Go][go-website]
-installed on your machine (version 1.11+ is **required**). You'll also need to
+installed on your machine (version 1.14+ is recommended). You'll also need to
 correctly setup a [GOPATH][gopath], as well as adding `$GOPATH/bin` to your
 `$PATH`.
 
@@ -147,7 +132,8 @@ provider.
 
 **NOTE:** Testing the NSX-T provider is currently a complex operation as it
 requires having a NSX-T manager endpoint to test against, which should be
-hosting a standard configuration for a NSX-T cluster.
+hosting a standard configuration for a NSX-T cluster. To cover Global Manager
+test cases, NSX-T Global Manager suite needs to be preconfigured.
 
 ## Configuring Environment Variables
 
@@ -170,25 +156,22 @@ If you want to run against a specific set of tests, run `make testacc` with the
 `TESTARGS` parameter containing the run mask as per below:
 
 ```sh
-make testacc TESTARGS="-run=TestAccResourceNsxtLogicalSwitch"
+make testacc TESTARGS="-run=TestAccResourceNsxtPolicyTier0Gateway"
 ```
 
 This following example would run all of the acceptance tests matching
-`TestAccResourceNsxtLogicalSwitch`. Change this for the specific tests you want
+`TestAccResourceNsxtPolicyTier0Gateway`. Change this for the specific tests you want
 to run.
 
 # Interoperability
 
 The following versions of NSX are supported:
 
- * NSX-T 3.0
- * NSX-T 2.5.*
- * NSX-T 2.4.*
- * NSX-T 2.3.*
- * NSX-T 2.2.*
+ * NSX-T 3.1.*
+ * NSX-T 3.0.*
+ * NSX-T 2.5.* support is limited with provider version 3.2.x and above
  
-
-Some specific resources may require later versions of NSX-T.
+Some specific resources and attributed may require recent versions of NSX-T. Please refer to documentation for more details.
 
 # Support
 
