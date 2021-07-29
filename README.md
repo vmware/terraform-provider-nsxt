@@ -32,11 +32,7 @@ deploying.
 ## Full Provider Documentation
 
 The provider is documented in full on the Terraform website and can be found
-[here][tf-nsxt-docs]. Check the provider documentation for details on entering
-your connection information and how to get started with writing configuration
-for vSphere resources.
-
-[tf-nsxt-docs]: https://registry.terraform.io/providers/vmware/nsxt/latest
+[here](https://registry.terraform.io/providers/vmware/nsxt/latest). Check the provider documentation for details on entering your connection information and how to get started with writing configuration for vSphere resources.
 
 ### Controlling the provider version
 
@@ -54,8 +50,7 @@ provider "nsxt" {
 ```
 
 Version locking uses a pessimistic operator, so this version lock would mean
-anything within the 3.x namespace, including or after 3.0.0. [Read
-more][provider-vc] on provider version control.
+anything within the 3.x namespace, including or after 3.0.0. [Read more][provider-vc] on provider version control.
 
 [provider-vc]: https://www.terraform.io/docs/configuration/providers.html#provider-versions
 
@@ -80,6 +75,7 @@ version of the provider (see [the section above](#using-the-provider)).
 **NOTE:** Recommended way to compile the provider is using [Go Modules](https://blog.golang.org/using-go-modules).
 
 **NOTE:** For terraform 0.13, please refer to [provider installation configuration][install-013] in order to use custom provider.
+
 [install-013]: https://www.terraform.io/docs/commands/cli-config.html#provider-installation
 
 ## Cloning the Project
@@ -103,8 +99,9 @@ cd $GOPATH/src/github.com/vmware/terraform-provider-nsxt
 make
 ```
 
-After the build is complete, copy the provider executable `terraform-provider-nsxt` into location specified in your [provider installation configuration][install-013]. Make sure to delete provider lock files that might exist in your working directory due to prior provider usage. Run `terraform init`.
+After the build is complete, copy the provider executable `terraform-provider-nsxt` into location specified in your provider installation configuration. Make sure to delete provider lock files that might exist in your working directory due to prior provider usage. Run `terraform init`.
 For developing, consider using [dev overrides configuration][dev-overrides]. Please note that `terraform init` should not be used with dev overrides.
+
 [dev-overrides]: https://www.terraform.io/docs/cli/config/config-file.html#development-overrides-for-provider-developers
 
 # Developing the Provider
