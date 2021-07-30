@@ -1,3 +1,9 @@
+## 3.2.3 (July 29, 2021)
+
+BUG FIXES:
+
+* Fix import functionality for Tier0 resources that were preconfigured with non-default locale service ([#648](https://github.com/vmware/terraform-provider-nsxt/pull/648))
+
 ## 3.2.2 (June 21, 2021)
 
 BUG FIXES:
