@@ -125,7 +125,7 @@ func resourceNsxtPolicyNATRule() *schema.Resource {
 				ValidateFunc: validatePortRange(),
 			},
 			"scope": {
-				Type:        schema.TypeList,
+				Type:        schema.TypeSet,
 				Description: "Policy paths to interfaces or labels where the NAT Rule is enforced",
 				Optional:    true,
 				Computed:    true,
@@ -305,7 +305,7 @@ func resourceNsxtPolicyNATRuleCreate(d *schema.ResourceData, m interface{}) erro
 	dNets := stringListToCommaSeparatedString(interfaceListToStringList(d.Get("destination_networks").([]interface{})))
 	sNets := stringListToCommaSeparatedString(interfaceListToStringList(d.Get("source_networks").([]interface{})))
 	tNets := stringListToCommaSeparatedString(interfaceListToStringList(d.Get("translated_networks").([]interface{})))
-	scope := interfaceListToStringList(d.Get("scope").([]interface{}))
+	scope := getStringListFromSchemaSet(d, "scope")
 	tags := getPolicyTagsFromSchema(d)
 
 	ruleStruct := model.PolicyNatRule{
@@ -373,7 +373,7 @@ func resourceNsxtPolicyNATRuleUpdate(d *schema.ResourceData, m interface{}) erro
 	sNets := stringListToCommaSeparatedString(interfaceListToStringList(d.Get("source_networks").([]interface{})))
 	tNets := stringListToCommaSeparatedString(interfaceListToStringList(d.Get("translated_networks").([]interface{})))
 	tags := getPolicyTagsFromSchema(d)
-	scope := interfaceListToStringList(d.Get("scope").([]interface{}))
+	scope := getStringListFromSchemaSet(d, "scope")
 
 	ruleStruct := model.PolicyNatRule{
 		Id:                 &id,

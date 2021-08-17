@@ -156,7 +156,7 @@ func TestAccResourceNsxtPolicyNATRule_basicT0(t *testing.T) {
 					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "action", action),
 					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "logging", "false"),
 					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "firewall_match", model.PolicyNatRule_FIREWALL_MATCH_MATCH_EXTERNAL_ADDRESS),
-					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "scope.#", "1"),
+					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "scope.#", "2"),
 					resource.TestCheckResourceAttrSet(testAccResourcePolicyNATRuleName, "path"),
 					resource.TestCheckResourceAttrSet(testAccResourcePolicyNATRuleName, "revision"),
 				),
@@ -175,7 +175,7 @@ func TestAccResourceNsxtPolicyNATRule_basicT0(t *testing.T) {
 					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "action", action),
 					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "logging", "false"),
 					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "firewall_match", model.PolicyNatRule_FIREWALL_MATCH_MATCH_EXTERNAL_ADDRESS),
-					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "scope.#", "1"),
+					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "scope.#", "2"),
 					resource.TestCheckResourceAttrSet(testAccResourcePolicyNATRuleName, "path"),
 					resource.TestCheckResourceAttrSet(testAccResourcePolicyNATRuleName, "revision"),
 				),
@@ -357,17 +357,19 @@ data "nsxt_policy_transport_zone" "test" {
 	return testAccNsxtPolicyEdgeClusterReadTemplate(getEdgeClusterName()) +
 		transportZone + testAccNsxtPolicyTier0WithEdgeClusterTemplate("test", true) + fmt.Sprintf(`
 resource "nsxt_policy_vlan_segment" "test" {
+  count               = 2
   transport_zone_path = data.nsxt_policy_transport_zone.test.path
-  display_name        = "interface_test"
-  vlan_ids            = [12]
+  display_name        = "interface-test-${count.index}"
+  vlan_ids            = [10 + count.index]
 }
 
 resource "nsxt_policy_tier0_gateway_interface" "test" {
-  display_name = "t0gwinterface"
+  count        = 2
+  display_name = "gwinterface-test-${count.index}"
   type         = "SERVICE"
   gateway_path = nsxt_policy_tier0_gateway.test.path
-  segment_path = nsxt_policy_vlan_segment.test.path
-  subnets      = ["1.1.12.2/24"]
+  segment_path = nsxt_policy_vlan_segment.test[count.index].path
+  subnets      = ["1.1.${count.index}.2/24"]
   %s
 }
 
@@ -380,7 +382,7 @@ resource "nsxt_policy_nat_rule" "test" {
   translated_networks  = ["%s"]
   logging              = false
   firewall_match       = "%s"
-  scope                = [nsxt_policy_tier0_gateway_interface.test.path]
+  scope                = [nsxt_policy_tier0_gateway_interface.test[1].path, nsxt_policy_tier0_gateway_interface.test[0].path]
 
   tag {
     scope = "scope1"
