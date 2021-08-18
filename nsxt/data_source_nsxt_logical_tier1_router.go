@@ -74,24 +74,37 @@ func dataSourceNsxtLogicalTier1RouterRead(d *schema.ResourceData, m interface{})
 		return fmt.Errorf("Error obtaining logical tier1 router ID or name during read")
 	} else {
 		// Get by full name/prefix
-		// TODO use 2nd parameter localVarOptionals for paging
-		objList, _, err := nsxClient.LogicalRoutingAndServicesApi.ListLogicalRouters(nsxClient.Context, nil)
-		if err != nil {
-			return fmt.Errorf("Error while reading logical tier1 routers: %v", err)
-		}
-		// go over the list to find the correct one (prefer a perfect match. If not - prefix match)
 		var perfectMatch []manager.LogicalRouter
 		var prefixMatch []manager.LogicalRouter
-		for _, objInList := range objList.Results {
-			if objInList.RouterType == "TIER1" {
-				if strings.HasPrefix(objInList.DisplayName, objName) {
-					prefixMatch = append(prefixMatch, objInList)
-				}
-				if objInList.DisplayName == objName {
-					perfectMatch = append(perfectMatch, objInList)
+		lister := func(info *paginationInfo) error {
+			objList, _, err := nsxClient.LogicalRoutingAndServicesApi.ListLogicalRouters(nsxClient.Context, info.LocalVarOptionals)
+			if err != nil {
+				return fmt.Errorf("Error while reading logical tier1 routers: %v", err)
+			}
+
+			info.PageCount = int64(len(objList.Results))
+			info.TotalCount = objList.ResultCount
+			info.Cursor = objList.Cursor
+
+			// go over the list to find the correct one (prefer a perfect match. If not - prefix match)
+			for _, objInList := range objList.Results {
+				if objInList.RouterType == "TIER1" {
+					if strings.HasPrefix(objInList.DisplayName, objName) {
+						prefixMatch = append(prefixMatch, objInList)
+					}
+					if objInList.DisplayName == objName {
+						perfectMatch = append(perfectMatch, objInList)
+					}
 				}
 			}
+			return nil
 		}
+
+		total, err := handlePagination(lister)
+		if err != nil {
+			return err
+		}
+
 		if len(perfectMatch) > 0 {
 			if len(perfectMatch) > 1 {
 				return fmt.Errorf("Found multiple logical tier1 routers with name '%s'", objName)
@@ -103,7 +116,7 @@ func dataSourceNsxtLogicalTier1RouterRead(d *schema.ResourceData, m interface{})
 			}
 			obj = prefixMatch[0]
 		} else {
-			return fmt.Errorf("Logical tier1 router with name '%s' was not found", objName)
+			return fmt.Errorf("Logical tier1 router with name '%s' was not found among %d objects", objName, total)
 		}
 	}
 

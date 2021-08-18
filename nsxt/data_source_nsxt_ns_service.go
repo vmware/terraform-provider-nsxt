@@ -61,24 +61,36 @@ func dataSourceNsxtNsServiceRead(d *schema.ResourceData, m interface{}) error {
 		obj = objGet
 	} else if objName != "" {
 		// Get by full name
-		// TODO use 2nd parameter localVarOptionals for paging
-		objList, _, err := nsxClient.GroupingObjectsApi.ListNSServices(nsxClient.Context, nil)
-		if err != nil {
-			return fmt.Errorf("Error while reading NS services: %v", err)
-		}
-		// go over the list to find the correct one
 		found := false
-		for _, objInList := range objList.Results {
-			if objInList.DisplayName == objName {
-				if found {
-					return fmt.Errorf("Found multiple NS services with name '%s'", objName)
-				}
-				obj = objInList
-				found = true
+		lister := func(info *paginationInfo) error {
+			objList, _, err := nsxClient.GroupingObjectsApi.ListNSServices(nsxClient.Context, info.LocalVarOptionals)
+			if err != nil {
+				return fmt.Errorf("Error while reading NS services: %v", err)
 			}
+			info.PageCount = int64(len(objList.Results))
+			info.TotalCount = objList.ResultCount
+			info.Cursor = objList.Cursor
+
+			// go over the list to find the correct one
+			for _, objInList := range objList.Results {
+				if objInList.DisplayName == objName {
+					if found {
+						return fmt.Errorf("Found multiple NS services with name '%s'", objName)
+					}
+					obj = objInList
+					found = true
+				}
+			}
+			return nil
 		}
+
+		total, err := handlePagination(lister)
+		if err != nil {
+			return err
+		}
+
 		if !found {
-			return fmt.Errorf("NS service with name '%s' was not found among %d services", objName, len(objList.Results))
+			return fmt.Errorf("NS service with name '%s' was not found among %d services", objName, total)
 		}
 	} else {
 		return fmt.Errorf("Error obtaining NS service ID or name during read")

@@ -66,26 +66,38 @@ func dataSourceNsxtSwitchingProfileRead(d *schema.ResourceData, m interface{}) e
 		obj = objGet
 	} else if objName != "" {
 		// Get by full name
-		// TODO use localVarOptionals for paging
-		localVarOptionals := make(map[string]interface{})
-		localVarOptionals["includeSystemOwned"] = true
-		objList, _, err := nsxClient.LogicalSwitchingApi.ListSwitchingProfiles(nsxClient.Context, localVarOptionals)
-		if err != nil {
-			return fmt.Errorf("Error while reading switching profiles: %v", err)
-		}
-		// go over the list to find the correct one
 		found := false
-		for _, objInList := range objList.Results {
-			if objInList.DisplayName == objName {
-				if found {
-					return fmt.Errorf("Found multiple switching profiles with name '%s'", objName)
-				}
-				obj = objInList
-				found = true
+		lister := func(info *paginationInfo) error {
+			info.LocalVarOptionals["includeSystemOwned"] = true
+			objList, _, err := nsxClient.LogicalSwitchingApi.ListSwitchingProfiles(nsxClient.Context, info.LocalVarOptionals)
+			if err != nil {
+				return fmt.Errorf("Error while reading switching profiles: %v", err)
 			}
+
+			info.PageCount = int64(len(objList.Results))
+			info.TotalCount = objList.ResultCount
+			info.Cursor = objList.Cursor
+
+			// go over the list to find the correct one
+			for _, objInList := range objList.Results {
+				if objInList.DisplayName == objName {
+					if found {
+						return fmt.Errorf("Found multiple switching profiles with name '%s'", objName)
+					}
+					obj = objInList
+					found = true
+				}
+			}
+			return nil
 		}
+
+		total, err := handlePagination(lister)
+		if err != nil {
+			return err
+		}
+
 		if !found {
-			return fmt.Errorf("Switching profile with name '%s' was not found", objName)
+			return fmt.Errorf("Switching profile with name '%s' was not found among %d objects", objName, total)
 		}
 	} else {
 		return fmt.Errorf("Error obtaining switching profile ID or name during read")

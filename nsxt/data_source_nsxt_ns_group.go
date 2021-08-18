@@ -63,22 +63,16 @@ func dataSourceNsxtNsGroupRead(d *schema.ResourceData, m interface{}) error {
 		obj = objGet
 	} else if objName != "" {
 		// Get by full name
-		// Handle paging here as it is limited to 50 per page in the api, even if configured otherwise
-		localVarOptionals := make(map[string]interface{})
-		localVarOptionals["pageSize"] = int64(50)
 		found := false
-		total := 0
-		count := 0
-		for !found && (total == 0 || count < total) {
-			objList, _, err := nsxClient.GroupingObjectsApi.ListNSGroups(nsxClient.Context, localVarOptionals)
+		lister := func(info *paginationInfo) error {
+			objList, _, err := nsxClient.GroupingObjectsApi.ListNSGroups(nsxClient.Context, info.LocalVarOptionals)
 			if err != nil {
 				return fmt.Errorf("Error while reading NS groups: %v", err)
 			}
-			if total == 0 && objList.ResultCount > 0 {
-				// first response
-				total = int(objList.ResultCount)
-			}
-			count += len(objList.Results)
+			info.PageCount = int64(len(objList.Results))
+			info.TotalCount = objList.ResultCount
+			info.Cursor = objList.Cursor
+
 			// go over the list to find the correct one
 			for _, objInList := range objList.Results {
 				if objInList.DisplayName == objName {
@@ -89,7 +83,12 @@ func dataSourceNsxtNsGroupRead(d *schema.ResourceData, m interface{}) error {
 					found = true
 				}
 			}
-			localVarOptionals["cursor"] = objList.Cursor
+			return nil
+		}
+
+		total, err := handlePagination(lister)
+		if err != nil {
+			return err
 		}
 		if !found {
 			return fmt.Errorf("NS group with name '%s' was not found among %d groups", objName, total)
