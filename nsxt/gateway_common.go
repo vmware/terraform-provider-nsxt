@@ -372,8 +372,10 @@ func getPolicyGatewayIntersiteConfigFromSchema(d *schema.ResourceData) *model.In
 		primarySitePath := data["primary_site_path"].(string)
 		fallbackSites := interface2StringList(data["fallback_site_paths"].(*schema.Set).List())
 		intersiteConfig := model.IntersiteGatewayConfig{
-			PrimarySitePath: &primarySitePath,
-			FallbackSites:   fallbackSites,
+			FallbackSites: fallbackSites,
+		}
+		if len(primarySitePath) > 0 {
+			intersiteConfig.PrimarySitePath = &primarySitePath
 		}
 		if len(subnet) > 0 {
 			intersiteConfig.IntersiteTransitSubnet = &subnet
