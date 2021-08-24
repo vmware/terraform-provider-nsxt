@@ -60,25 +60,36 @@ func dataSourceNsxtFirewallSectionRead(d *schema.ResourceData, m interface{}) er
 		}
 		obj = objGet
 	} else if objName != "" {
-		// Get by full name
-		// TODO use 2nd parameter localVarOptionals for paging
-		objList, _, err := nsxClient.ServicesApi.ListSections(nsxClient.Context, nil)
-		if err != nil {
-			return fmt.Errorf("Error while reading Firewall sections: %v", err)
-		}
-		// go over the list to find the correct one
 		found := false
-		for _, objInList := range objList.Results {
-			if objInList.DisplayName == objName {
-				if found {
-					return fmt.Errorf("Found multiple Firewall sections with name '%s'", objName)
-				}
-				obj = objInList
-				found = true
+		// Get by full name
+		lister := func(info *paginationInfo) error {
+			objList, _, err := nsxClient.ServicesApi.ListSections(nsxClient.Context, info.LocalVarOptionals)
+			if err != nil {
+				return fmt.Errorf("Error while reading Firewall sections: %v", err)
 			}
+
+			info.PageCount = int64(len(objList.Results))
+			info.TotalCount = objList.ResultCount
+			info.Cursor = objList.Cursor
+
+			// go over the list to find the correct one
+			for _, objInList := range objList.Results {
+				if objInList.DisplayName == objName {
+					if found {
+						return fmt.Errorf("Found multiple Firewall sections with name '%s'", objName)
+					}
+					obj = objInList
+					found = true
+				}
+			}
+			return nil
+		}
+		total, err := handlePagination(lister)
+		if err != nil {
+			return err
 		}
 		if !found {
-			return fmt.Errorf("Firewall section with  name '%s' was not found among %d sections", objName, len(objList.Results))
+			return fmt.Errorf("Firewall section with  name '%s' was not found among %d sections", objName, total)
 		}
 	} else {
 		return fmt.Errorf("Error obtaining Firewall section ID or name during read")

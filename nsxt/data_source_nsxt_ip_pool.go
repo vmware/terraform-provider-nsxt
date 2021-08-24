@@ -61,23 +61,36 @@ func dataSourceNsxtIPPoolRead(d *schema.ResourceData, m interface{}) error {
 		obj = objGet
 	} else if objName != "" {
 		// Get by full name
-		objList, _, err := nsxClient.PoolManagementApi.ListIpPools(nsxClient.Context, nil)
-		if err != nil {
-			return fmt.Errorf("Error while reading IP pool: %v", err)
-		}
-		// go over the list to find the correct one
 		found := false
-		for _, objInList := range objList.Results {
-			if objInList.DisplayName == objName {
-				if found {
-					return fmt.Errorf("Found multiple IP pool with name '%s'", objName)
-				}
-				obj = objInList
-				found = true
+		lister := func(info *paginationInfo) error {
+			objList, _, err := nsxClient.PoolManagementApi.ListIpPools(nsxClient.Context, info.LocalVarOptionals)
+			if err != nil {
+				return fmt.Errorf("Error while reading IP pool: %v", err)
 			}
+
+			info.PageCount = int64(len(objList.Results))
+			info.TotalCount = objList.ResultCount
+			info.Cursor = objList.Cursor
+
+			// go over the list to find the correct one
+			for _, objInList := range objList.Results {
+				if objInList.DisplayName == objName {
+					if found {
+						return fmt.Errorf("Found multiple IP pool with name '%s'", objName)
+					}
+					obj = objInList
+					found = true
+				}
+			}
+			return nil
+		}
+
+		total, err := handlePagination(lister)
+		if err != nil {
+			return err
 		}
 		if !found {
-			return fmt.Errorf("IP pool '%s' was not found out of %d objects", objName, len(objList.Results))
+			return fmt.Errorf("IP pool '%s' was not found out of %d objects", objName, total)
 		}
 	} else {
 		return fmt.Errorf("Error obtaining IP pool ID or name during read")

@@ -609,3 +609,40 @@ func containsElements(target []string, list []string) bool {
 	}
 	return true
 }
+
+type paginationInfo struct {
+	TotalCount        int64
+	PageCount         int64
+	Cursor            string
+	LocalVarOptionals map[string]interface{}
+}
+
+func handlePagination(lister func(*paginationInfo) error) (int64, error) {
+	info := paginationInfo{}
+	info.LocalVarOptionals = make(map[string]interface{})
+
+	total := int64(0)
+	count := int64(0)
+
+	for total == 0 || (count < total) {
+		err := lister(&info)
+		if err != nil {
+			return total, err
+		}
+
+		if total == 0 {
+			// first response
+			total = info.TotalCount
+			if total == 0 {
+				// empty list
+				return total, nil
+			}
+		}
+		count += info.PageCount
+		log.Printf("[DEBUG] Fetching next page after %d/%d inspected", count, total)
+
+		info.LocalVarOptionals["cursor"] = info.Cursor
+	}
+
+	return total, nil
+}
