@@ -89,7 +89,7 @@ The service must contain at least 1 entry (of at least one of the types), and po
     * `description` - (Optional) Description of the service entry.
     * `destination_port` - (Required) a single destination port.
     * `source_ports` - (Optional) Set of source ports/ranges.
-    * `algorithm` - (Required) Algorithm one of "ORACLE_TNS", "FTP", "SUN_RPC_TCP", "SUN_RPC_UDP", "MS_RPC_TCP", "MS_RPC_UDP", "NBNS_BROADCAST", "NBDG_BROADCAST", "TFTP"
+    * `algorithm` - (Required) Algorithm, one of `ORACLE_TNS`, `FTP`, `SUN_RPC_TCP`, `SUN_RPC_UDP`, `MS_RPC_TCP`, `MS_RPC_UDP`, `NBNS_BROADCAST`(Deprecated), `NBDG_BROADCAST`(Deprecated), `TFTP`.
 
 ## Attributes Reference
 

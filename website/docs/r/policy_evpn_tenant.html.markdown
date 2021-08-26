@@ -51,7 +51,7 @@ The following arguments are supported:
 * `vni_pool_path` - (Required) Policy path for existing VNI pool.
 * `mapping` - (Required) List of VLAN - VNI mappings for this tenant.
   * `vlans` - (Required) Single VLAN Id or range of VLAN Ids.
-  * `vnis` - (Required) Single VNI or ranged of VNIs. Please note that the range should match exactly to the range of vlans.
+  * `vnis` - (Required) Single VNI or range of VNIs. Please note that the range should match the range of vlans exactly.
 
 ## Attributes Reference
 

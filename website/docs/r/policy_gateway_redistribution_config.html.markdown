@@ -10,6 +10,7 @@ description: A resource to configure Route Redistribution on Tier-0 gateway in N
 This resource provides a method for the management of a Tier-0 Gateway Route Redistribution config. Note that this configuration can be defined only for Active-Standby Tier0 gateway.
 
 This resource is applicable to NSX Global Manager and NSX Policy Manager.
+This resource is supported with NSX 3.0.0 onwards.
 
 # Example Usage
 
