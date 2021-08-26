@@ -364,7 +364,7 @@ func testGetObjIDByName(objName string, resourceType string) (string, error) {
 		return "", fmt.Errorf("Error during test client initialization: %v", err1)
 	}
 
-	resultValues, err2 := listPolicyResourcesByType(connector, testAccIsGlobalManager(), &resourceType, nil)
+	resultValues, err2 := listPolicyResourcesByNameAndType(connector, testAccIsGlobalManager(), objName, resourceType, nil)
 	if err2 != nil {
 		return "", err2
 	}

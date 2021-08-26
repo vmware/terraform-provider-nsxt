@@ -96,7 +96,7 @@ func policyDataSourceResourceReadWithValidation(d *schema.ResourceData, connecto
 	if objID != "" {
 		resultValues, err = listPolicyResourcesByID(connector, isGlobalManager, &objID, &additionalQueryString)
 	} else {
-		resultValues, err = listPolicyResourcesByType(connector, isGlobalManager, &resourceType, &additionalQueryString)
+		resultValues, err = listPolicyResourcesByNameAndType(connector, isGlobalManager, objName, resourceType, &additionalQueryString)
 	}
 	if err != nil {
 		return nil, err
@@ -105,8 +105,8 @@ func policyDataSourceResourceReadWithValidation(d *schema.ResourceData, connecto
 	return policyDataSourceResourceFilterAndSet(d, resultValues, resourceType)
 }
 
-func listPolicyResourcesByType(connector *client.RestConnector, isGlobalManager bool, resourceType *string, additionalQuery *string) ([]*data.StructValue, error) {
-	query := fmt.Sprintf("resource_type:%s AND marked_for_delete:false", *resourceType)
+func listPolicyResourcesByNameAndType(connector *client.RestConnector, isGlobalManager bool, displayName string, resourceType string, additionalQuery *string) ([]*data.StructValue, error) {
+	query := fmt.Sprintf("resource_type:%s AND display_name:%s* AND marked_for_delete:false", resourceType, displayName)
 	if isGlobalManager {
 		return searchGMPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
 	}

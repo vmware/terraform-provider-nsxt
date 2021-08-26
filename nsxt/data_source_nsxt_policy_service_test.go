@@ -71,6 +71,26 @@ func TestAccDataSourceNsxtPolicyService_byPrefix(t *testing.T) {
 	})
 }
 
+func TestAccDataSourceNsxtPolicyService_spaces(t *testing.T) {
+	serviceName := "Enterprise Manager Servlet port SSL"
+	testResourceName := "data.nsxt_policy_service.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyServiceReadTemplate(serviceName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(testResourceName, "display_name", serviceName),
+					resource.TestCheckResourceAttr(testResourceName, "description", serviceName),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+				),
+			},
+		},
+	})
+}
+
 func testAccNsxtPolicyServiceReadTemplate(name string) string {
 	return fmt.Sprintf(`
 data "nsxt_policy_service" "test" {
