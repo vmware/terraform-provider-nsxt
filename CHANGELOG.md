@@ -1,3 +1,12 @@
+## 3.2.4 (August 26, 2021)
+
+BUG FIXES:
+
+* Fix pagination for non-policy data sources. This fix is relevant for big scale (1K+ per object type) environments where non-policy data sources are still used ([#656](https://github.com/vmware/terraform-provider-nsxt/pull/656))
+* `resource/nsxt_policy_tier0_gateway`: Fix potential apply error on Global Manager ([#659](https://github.com/vmware/terraform-provider-nsxt/pull/659))
+* `resource/nsxt_policy_nat_rule`: Fix potential non-empty diff when multiple scopes are used ([#655](https://github.com/vmware/terraform-provider-nsxt/pull/655))
+* `data/nsxt_policy_certificate`: Fix broken functionality on Global Manager ([#653](https://github.com/vmware/terraform-provider-nsxt/pull/653))
+
 ## 3.2.3 (July 29, 2021)
 
 BUG FIXES:

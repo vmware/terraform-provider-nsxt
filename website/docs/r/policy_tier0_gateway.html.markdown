@@ -168,7 +168,7 @@ The following arguments are supported:
   * `transit_subnet` - (Optional) IPv4 subnet for inter-site transit segment connecting service routers across sites for stretched gateway. For IPv6 link local subnet is auto configured.
   * `primary_site_path` - (Optional) Primary egress site for gateway.
   * `fallback_site_paths` - (Optional) Fallback sites to be used as new primary site on current primary site failure.
-* `redistribution_config` - (Deprecated) Route redistribution properties. This setting is for local manager only. This setting is deprecated, please use `nsxt_policy_gateway_redistribution_config` resource instead.
+* `redistribution_config` - (Deprecated) Route redistribution properties. This setting is for local manager only and supported with NSXt 3.0.0 onwards. This setting is deprecated, please use `nsxt_policy_gateway_redistribution_config` resource instead.
   * `enabled` - Enable route redistribution for BGP. Defaults to `true`.
   * `ospf_enabled` - (Optional) Enable route redistribution for OSPF. Defaults to `false`. Applicable from NSX 3.1.0 onwards.
   * `rule` - (Optional) List of redistribution rules.

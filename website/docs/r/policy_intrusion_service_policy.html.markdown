@@ -9,7 +9,7 @@ description: A resource to configure Intrusion Service Policy and its rules.
 
 This resource provides a method for the management of Intrusion Service (IDS) Policy and rules under it.
 
-This resource is applicable to NSX Policy Manager and VMC (NSX version 3.1.0 and up).
+This resource is applicable to NSX Policy Manager and VMC (NSX version 3.1.0 onwards).
 
 ## Example Usage
 
@@ -84,7 +84,7 @@ In addition to arguments listed above, the following attributes are exported:
 * `path` - The NSX path of the policy resource.
 * `rule`:
   * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
-  * `path` - The NSX path of the policy resource.
+  * `path` - The NSX policy path for this rule.
   * `sequence_number` - Sequence number of the this rule, is defined by order of rules in the list.
   * `rule_id` - Unique positive number that is assigned by the system and is useful for debugging.
 
