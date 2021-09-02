@@ -38,7 +38,7 @@ resource "nsxt_policy_gateway_redistribution_config" "test" {
 ```hcl
 resource "nsxt_policy_gateway_redistribution_config" "test" {
   gateway_path = data.nsxt_policy_tier0_gateway.gw1.path
-  site_path    = nsxt_policy_site.paris.path
+  site_path    = data.nsxt_policy_site.paris.path
 
   bgp_enabled = true
 
