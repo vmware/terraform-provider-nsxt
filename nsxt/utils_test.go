@@ -141,6 +141,10 @@ func getTestCertificateName(isClient bool) string {
 	return os.Getenv("NSXT_TEST_CERTIFICATE_NAME")
 }
 
+func getTestLBServiceName() string {
+	return os.Getenv("NSXT_TEST_LB_SERVICE_NAME")
+}
+
 func testAccEnvDefined(t *testing.T, envVar string) {
 	if len(os.Getenv(envVar)) == 0 {
 		t.Skipf("This test requires %s environment variable to be set", envVar)
