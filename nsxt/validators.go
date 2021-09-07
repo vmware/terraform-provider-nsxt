@@ -503,6 +503,21 @@ func validateASPlainOrDot(i interface{}, k string) (s []string, es []error) {
 	return
 }
 
+func validateASPath(i interface{}, k string) (s []string, es []error) {
+	v, ok := i.(string)
+	if !ok {
+		es = append(es, fmt.Errorf("String is expected, got %s", v))
+		return
+	}
+
+	tokens := strings.Split(v, " ")
+	for _, token := range tokens {
+		s, es = validateASPlainOrDot(token, k)
+	}
+
+	return
+}
+
 func validatePolicyBGPCommunity(i interface{}, k string) (s []string, es []error) {
 	v, ok := i.(string)
 	if !ok {

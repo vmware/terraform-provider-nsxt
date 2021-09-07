@@ -173,7 +173,7 @@ resource "nsxt_policy_gateway_route_map" "test" {
     }
 
     set {
-      as_path_prepend           = "12.998"
+      as_path_prepend           = "100 100"
       community                 = "11:22"
       local_preference          = 1122
       med                       = 120
