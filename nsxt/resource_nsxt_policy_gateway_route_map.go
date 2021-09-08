@@ -103,7 +103,7 @@ func getPolicyRouteMapEntrySchema() *schema.Resource {
 						"as_path_prepend": {
 							Type:         schema.TypeString,
 							Optional:     true,
-							ValidateFunc: validateASPlainOrDot,
+							ValidateFunc: validateASPath,
 							Description:  "Autonomous System (AS) path prepend to influence route selection",
 						},
 						"community": {
