@@ -245,6 +245,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_dhcp_server":               dataSourceNsxtPolicyDhcpServer(),
 			"nsxt_policy_bfd_profile":               dataSourceNsxtPolicyBfdProfile(),
 			"nsxt_policy_intrusion_service_profile": dataSourceNsxtPolicyIntrusionServiceProfile(),
+			"nsxt_policy_lb_service":                dataSourceNsxtPolicyLbService(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
