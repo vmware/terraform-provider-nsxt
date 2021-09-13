@@ -1320,7 +1320,10 @@ func nsxtPolicySegmentRead(d *schema.ResourceData, m interface{}, isVlan bool, i
 		// This is a list with 1 element
 		var advConfigList []map[string]interface{}
 		advConfigList = append(advConfigList, advConfig)
-		d.Set("advanced_config", advConfigList)
+		userConfig := d.Get("advanced_config").([]interface{})
+		if len(userConfig) > 0 {
+			d.Set("advanced_config", advConfigList)
+		}
 	}
 
 	if obj.L2Extension != nil {
