@@ -90,7 +90,7 @@ func setPrefixesInSchema(d *schema.ResourceData, prefixes []model.PrefixEntry) {
 		elem["action"] = *prefix.Action
 		elem["ge"] = prefix.Ge
 		elem["le"] = prefix.Le
-		if *prefix.Network == "ANY" {
+		if *prefix.Network == "ANY" || *prefix.Network == "any" {
 			elem["network"] = ""
 		} else {
 			elem["network"] = prefix.Network
