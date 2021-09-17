@@ -9,7 +9,7 @@ description: Policy Load Balancer Service data source.
 
 This data source provides information about Policy Service for Load Balancer configured on NSX.
 
-This data source is applicable to NSX Policy Manager.
+This data source is applicable to NSX Global Manager, NSX Policy Manager and VMC (NSX version 3.0.0 onwards).
 
 ## Example Usage
 
