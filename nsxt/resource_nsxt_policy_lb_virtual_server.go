@@ -9,6 +9,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
@@ -28,6 +30,107 @@ var lbServerSSLModeValues = []string{
 var lbAccessListControlActionValues = []string{
 	model.LBAccessListControl_ACTION_ALLOW,
 	model.LBAccessListControl_ACTION_DROP,
+}
+
+var lbRuleMatchStrategyValues = []string{
+	model.LBRule_MATCH_STRATEGY_ALL,
+	model.LBRule_MATCH_STRATEGY_ANY,
+}
+
+var lbRulePhaseValues = []string{
+	model.LBRule_PHASE_HTTP_REQUEST_REWRITE,
+	model.LBRule_PHASE_HTTP_FORWARDING,
+	model.LBRule_PHASE_HTTP_RESPONSE_REWRITE,
+	model.LBRule_PHASE_HTTP_ACCESS,
+	model.LBRule_PHASE_TRANSPORT,
+}
+
+var lbHttpSslConditionUsedSslCipherValues = []string{
+	model.LBHttpSslCondition_USED_SSL_CIPHER_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+	model.LBHttpSslCondition_USED_SSL_CIPHER_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+	model.LBHttpSslCondition_USED_SSL_CIPHER_ECDHE_RSA_WITH_AES_256_CBC_SHA,
+	model.LBHttpSslCondition_USED_SSL_CIPHER_ECDHE_ECDSA_WITH_AES_256_CBC_SHA,
+	model.LBHttpSslCondition_USED_SSL_CIPHER_ECDH_ECDSA_WITH_AES_256_CBC_SHA,
+	model.LBHttpSslCondition_USED_SSL_CIPHER_ECDH_RSA_WITH_AES_256_CBC_SHA,
+	model.LBHttpSslCondition_USED_SSL_CIPHER_RSA_WITH_AES_256_CBC_SHA,
+	model.LBHttpSslCondition_USED_SSL_CIPHER_RSA_WITH_AES_128_CBC_SHA,
+	model.LBHttpSslCondition_USED_SSL_CIPHER_RSA_WITH_3DES_EDE_CBC_SHA,
+	model.LBHttpSslCondition_USED_SSL_CIPHER_ECDHE_RSA_WITH_AES_128_CBC_SHA,
+	model.LBHttpSslCondition_USED_SSL_CIPHER_ECDHE_RSA_WITH_AES_128_CBC_SHA256,
+	model.LBHttpSslCondition_USED_SSL_CIPHER_ECDHE_RSA_WITH_AES_256_CBC_SHA384,
+	model.LBHttpSslCondition_USED_SSL_CIPHER_RSA_WITH_AES_128_CBC_SHA256,
+	model.LBHttpSslCondition_USED_SSL_CIPHER_RSA_WITH_AES_128_GCM_SHA256,
+	model.LBHttpSslCondition_USED_SSL_CIPHER_RSA_WITH_AES_256_CBC_SHA256,
+	model.LBHttpSslCondition_USED_SSL_CIPHER_RSA_WITH_AES_256_GCM_SHA384,
+	model.LBHttpSslCondition_USED_SSL_CIPHER_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,
+	model.LBHttpSslCondition_USED_SSL_CIPHER_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,
+	model.LBHttpSslCondition_USED_SSL_CIPHER_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+	model.LBHttpSslCondition_USED_SSL_CIPHER_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384,
+	model.LBHttpSslCondition_USED_SSL_CIPHER_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+	model.LBHttpSslCondition_USED_SSL_CIPHER_ECDH_ECDSA_WITH_AES_128_CBC_SHA,
+	model.LBHttpSslCondition_USED_SSL_CIPHER_ECDH_ECDSA_WITH_AES_128_CBC_SHA256,
+	model.LBHttpSslCondition_USED_SSL_CIPHER_ECDH_ECDSA_WITH_AES_128_GCM_SHA256,
+	model.LBHttpSslCondition_USED_SSL_CIPHER_ECDH_ECDSA_WITH_AES_256_CBC_SHA384,
+	model.LBHttpSslCondition_USED_SSL_CIPHER_ECDH_ECDSA_WITH_AES_256_GCM_SHA384,
+	model.LBHttpSslCondition_USED_SSL_CIPHER_ECDH_RSA_WITH_AES_128_CBC_SHA,
+	model.LBHttpSslCondition_USED_SSL_CIPHER_ECDH_RSA_WITH_AES_128_CBC_SHA256,
+	model.LBHttpSslCondition_USED_SSL_CIPHER_ECDH_RSA_WITH_AES_128_GCM_SHA256,
+	model.LBHttpSslCondition_USED_SSL_CIPHER_ECDH_RSA_WITH_AES_256_CBC_SHA384,
+	model.LBHttpSslCondition_USED_SSL_CIPHER_ECDH_RSA_WITH_AES_256_GCM_SHA384,
+}
+
+var lbHttpSslConditionClientSupportedSslCiphersValues = []string{
+	model.LBHttpSslCondition_CLIENT_SUPPORTED_SSL_CIPHERS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+	model.LBHttpSslCondition_CLIENT_SUPPORTED_SSL_CIPHERS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+	model.LBHttpSslCondition_CLIENT_SUPPORTED_SSL_CIPHERS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
+	model.LBHttpSslCondition_CLIENT_SUPPORTED_SSL_CIPHERS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA,
+	model.LBHttpSslCondition_CLIENT_SUPPORTED_SSL_CIPHERS_ECDH_ECDSA_WITH_AES_256_CBC_SHA,
+	model.LBHttpSslCondition_CLIENT_SUPPORTED_SSL_CIPHERS_ECDH_RSA_WITH_AES_256_CBC_SHA,
+	model.LBHttpSslCondition_CLIENT_SUPPORTED_SSL_CIPHERS_RSA_WITH_AES_256_CBC_SHA,
+	model.LBHttpSslCondition_CLIENT_SUPPORTED_SSL_CIPHERS_RSA_WITH_AES_128_CBC_SHA,
+	model.LBHttpSslCondition_CLIENT_SUPPORTED_SSL_CIPHERS_RSA_WITH_3DES_EDE_CBC_SHA,
+	model.LBHttpSslCondition_CLIENT_SUPPORTED_SSL_CIPHERS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
+	model.LBHttpSslCondition_CLIENT_SUPPORTED_SSL_CIPHERS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,
+	model.LBHttpSslCondition_CLIENT_SUPPORTED_SSL_CIPHERS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,
+	model.LBHttpSslCondition_CLIENT_SUPPORTED_SSL_CIPHERS_RSA_WITH_AES_128_CBC_SHA256,
+	model.LBHttpSslCondition_CLIENT_SUPPORTED_SSL_CIPHERS_RSA_WITH_AES_128_GCM_SHA256,
+	model.LBHttpSslCondition_CLIENT_SUPPORTED_SSL_CIPHERS_RSA_WITH_AES_256_CBC_SHA256,
+	model.LBHttpSslCondition_CLIENT_SUPPORTED_SSL_CIPHERS_RSA_WITH_AES_256_GCM_SHA384,
+	model.LBHttpSslCondition_CLIENT_SUPPORTED_SSL_CIPHERS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,
+	model.LBHttpSslCondition_CLIENT_SUPPORTED_SSL_CIPHERS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,
+	model.LBHttpSslCondition_CLIENT_SUPPORTED_SSL_CIPHERS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+	model.LBHttpSslCondition_CLIENT_SUPPORTED_SSL_CIPHERS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384,
+	model.LBHttpSslCondition_CLIENT_SUPPORTED_SSL_CIPHERS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+	model.LBHttpSslCondition_CLIENT_SUPPORTED_SSL_CIPHERS_ECDH_ECDSA_WITH_AES_128_CBC_SHA,
+	model.LBHttpSslCondition_CLIENT_SUPPORTED_SSL_CIPHERS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256,
+	model.LBHttpSslCondition_CLIENT_SUPPORTED_SSL_CIPHERS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256,
+	model.LBHttpSslCondition_CLIENT_SUPPORTED_SSL_CIPHERS_ECDH_ECDSA_WITH_AES_256_CBC_SHA384,
+	model.LBHttpSslCondition_CLIENT_SUPPORTED_SSL_CIPHERS_ECDH_ECDSA_WITH_AES_256_GCM_SHA384,
+	model.LBHttpSslCondition_CLIENT_SUPPORTED_SSL_CIPHERS_ECDH_RSA_WITH_AES_128_CBC_SHA,
+	model.LBHttpSslCondition_CLIENT_SUPPORTED_SSL_CIPHERS_ECDH_RSA_WITH_AES_128_CBC_SHA256,
+	model.LBHttpSslCondition_CLIENT_SUPPORTED_SSL_CIPHERS_ECDH_RSA_WITH_AES_128_GCM_SHA256,
+	model.LBHttpSslCondition_CLIENT_SUPPORTED_SSL_CIPHERS_ECDH_RSA_WITH_AES_256_CBC_SHA384,
+	model.LBHttpSslCondition_CLIENT_SUPPORTED_SSL_CIPHERS_ECDH_RSA_WITH_AES_256_GCM_SHA384,
+}
+
+var lbHttpSslConditionSessionReusedValues = []string{
+	model.LBHttpSslCondition_SESSION_REUSED_IGNORE,
+	model.LBHttpSslCondition_SESSION_REUSED_REUSED,
+	model.LBHttpSslCondition_SESSION_REUSED_NEW,
+}
+
+var lbHttpSslConditionUsedProtocolValues = []string{
+	model.LBHttpSslCondition_USED_PROTOCOL_SSL_V2,
+	model.LBHttpSslCondition_USED_PROTOCOL_SSL_V3,
+	model.LBHttpSslCondition_USED_PROTOCOL_TLS_V1,
+	model.LBHttpSslCondition_USED_PROTOCOL_TLS_V1_1,
+	model.LBHttpSslCondition_USED_PROTOCOL_TLS_V1_2,
+}
+
+var lbSslModeSelectionActionValues = []string{
+	model.LBSslModeSelectionAction_SSL_MODE_PASSTHROUGH,
+	model.LBSslModeSelectionAction_SSL_MODE_END_TO_END,
+	model.LBSslModeSelectionAction_SSL_MODE_OFFLOAD,
 }
 
 func resourceNsxtPolicyLBVirtualServer() *schema.Resource {
@@ -128,7 +231,13 @@ func resourceNsxtPolicyLBVirtualServer() *schema.Resource {
 				Optional:    true,
 				MaxItems:    1,
 			},
-			// TODO: add rules
+			"rule": {
+				Type:        schema.TypeList,
+				Description: "List of load balancer rules for layer 7 virtual servers with LBHttpProfile",
+				Optional:    true,
+				MaxItems:    4000,
+				Elem:        getPolicyLbRuleBindingSchema(),
+			},
 		},
 	}
 }
@@ -225,6 +334,487 @@ func getPolicyLbAccessListControlSchema() *schema.Resource {
 				Default:     true,
 			},
 			"group_path": getPolicyPathSchema(true, false, "The path of grouping object which defines the IP addresses or ranges to match the client IP"),
+		},
+	}
+}
+
+func getPolicyLbRuleBindingSchema() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"display_name": getDisplayNameSchema(),
+			"match_strategy": {
+				Description:  "Match strategy for determining match of multiple conditions (ALL or ANY, default: ANY).",
+				Type:         schema.TypeString,
+				ValidateFunc: validation.StringInSlice(lbRuleMatchStrategyValues, false),
+				Optional:     true,
+				Default:      "ANY",
+			},
+			"phase": {
+				Description:  "Load balancer processing phase, one of HTTP_REQUEST_REWRITE, HTTP_FORWARDING (Default), HTTP_RESPONSE_REWRITE, HTTP_ACCESS, TRANSPORT.",
+				Type:         schema.TypeString,
+				ValidateFunc: validation.StringInSlice(lbRulePhaseValues, false),
+				Optional:     true,
+				Default:      "HTTP_FORWARDING",
+			},
+			/*
+			  I had this initially seperated using an "action" and "method" section but although that would map the api better,
+			  there's not really a reason to do that and looking at the manager API implementation this is much more similar
+			*/
+			// ACTIONS
+			"connection_drop_action":              getPolicyLbRuleConnectionDropActionSchema(),
+			"http_redirect_action":                getPolicyLbRuleHttpRedirectActionSchema(),
+			"http_reject_action":                  getPolicyLbRuleHttpRejectActionSchema(),
+			"http_request_header_delete_action":   getPolicyLbRuleHttpRequestHeaderDeleteActionSchema(),
+			"http_request_header_rewrite_action":  getPolicyLbRuleHttpRequestHeaderRewriteActionSchema(),
+			"http_request_uri_rewrite_action":     getPolicyLbRuleHttpRequestUriRewriteActionSchema(),
+			"http_response_header_delete_action":  getPolicyLbRuleHttpResponseHeaderDeleteActionSchema(),
+			"http_response_header_rewrite_action": getPolicyLbRuleHttpResponseHeaderRewriteActionSchema(),
+			"jwt_auth_action":                     getPolicyLbRuleJwtAuthActionSchema(),
+			"select_pool_action":                  getPolicyLbRuleSelectPoolActionSchema(),
+			"ssl_mode_selection_action":           getPolicyLbRuleSslModeSelectionSchema(),
+			"variable_assignment_action":          getPolicyLbRuleVariableAssignmentActionSchema(),
+			"variable_persistence_learn_action":   getPolicyLbRuleVariablePersistenceLearnActionSchema(),
+			"variable_persistence_on_action":      getPolicyLbRuleVariablePersistenceLearnActionSchema(),
+			// MATCH-CONDITIONS
+			"http_request_body_condition":          getPolicyLbRuleHTTPRequestBodyConditionSchema(),
+			"http_request_cookie_condition":        getPolicyLbRuleNameValueConditionSchema("cookie", "Rule condition based on HTTP cookie"),
+			"http_request_header_condition":        getPolicyLbRuleNameValueConditionSchema("header", "Rule condition based on HTTP request header"),
+			"http_request_method_condition":        getLbRuleHTTPRequestMethodConditionSchema(),
+			"http_request_uri_arguments_condition": getLbRuleHTTPRequestURIArgumentsConditionSchema(),
+			"http_request_uri_condition":           getLbRuleHTTPRequestURIConditionSchema(),
+			"http_request_version_condition":       getLbRuleHTTPVersionConditionSchema(),
+			"http_response_header_condition":       getPolicyLbRuleNameValueConditionSchema("header", "Rule condition based on HTTP response header"),
+			"http_ssl_condition":                   getPolicyLbRuleHTTPSslConditionSchema(),
+			"ip_header_condition":                  getPolicyLbRuleIPConditionSchema(),
+			"ssl_sni_condition":                    getPolicyLbRuleSslSniConditionSchema(),
+			"tcp_header_condition":                 getLbRuleTCPConditionSchema(),
+			"variable_condition":                   getPolicyLbRuleNameValueConditionSchema("variable", "Rule condition based on IP header"),
+		},
+	}
+}
+
+func getPolicyLbRuleHTTPRequestBodyConditionSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeSet,
+		Description: "Rule condition based on HTTP request body",
+		Optional:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"inverse": getLbRuleInverseSchema(),
+				"body_value": {
+					Type:     schema.TypeString,
+					Required: true,
+				},
+				"case_sensitive": getLbRuleCaseSensitiveSchema(),
+				"match_type":     getLbRuleMatchTypeSchema(),
+			},
+		},
+	}
+}
+
+func getPolicyLbRuleNameValueConditionSchema(key string, desc string) *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeSet,
+		Description: desc,
+		Optional:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"inverse":        getLbRuleInverseSchema(),
+				"case_sensitive": getLbRuleCaseSensitiveSchema(),
+				"match_type":     getLbRuleMatchTypeSchema(),
+				key + "_name": {
+					Type:     schema.TypeString,
+					Required: true,
+				},
+				key + "_value": {
+					Type:     schema.TypeString,
+					Required: true,
+				},
+			},
+		},
+	}
+}
+
+func getPolicyLbRuleHTTPSslConditionSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeSet,
+		Description: "Rule condition based on HTTP SSL handshake and connection",
+		Optional:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"inverse": getLbRuleInverseSchema(),
+				"client_certificate_issuer_dn": {
+					Type: schema.TypeSet,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"issuer_dn": {
+								Type:     schema.TypeString,
+								Required: true,
+							},
+							"case_sensitive": getLbRuleCaseSensitiveSchema(),
+							"match_type":     getLbRuleMatchTypeSchema(),
+						},
+					},
+					Optional: true,
+				},
+				"client_certificate_subject_dn": {
+					Type: schema.TypeSet,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"subject_dn": {
+								Type:     schema.TypeString,
+								Required: true,
+							},
+							"case_sensitive": getLbRuleCaseSensitiveSchema(),
+							"match_type":     getLbRuleMatchTypeSchema(),
+						},
+					},
+					Optional: true,
+				},
+				"client_supported_ssl_ciphers": {
+					Type:        schema.TypeList,
+					Description: "Supported SSL ciphers",
+					Optional:    true,
+					Elem: &schema.Schema{
+						Type:         schema.TypeString,
+						ValidateFunc: validation.StringInSlice(lbHttpSslConditionClientSupportedSslCiphersValues, false),
+					},
+				},
+				"session_reused": {
+					Type:         schema.TypeString,
+					Optional:     true,
+					ValidateFunc: validation.StringInSlice(lbHttpSslConditionSessionReusedValues, false),
+				},
+				"used_protocol": {
+					Type:         schema.TypeString,
+					Optional:     true,
+					ValidateFunc: validation.StringInSlice(lbHttpSslConditionUsedProtocolValues, false),
+				},
+				"used_ssl_cipher": {
+					Type:         schema.TypeString,
+					Optional:     true,
+					ValidateFunc: validation.StringInSlice(lbHttpSslConditionUsedSslCipherValues, false),
+				},
+			},
+		},
+	}
+}
+
+func getPolicyLbRuleIPConditionSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeSet,
+		Description: "Rule condition based on IP settings of the message",
+		Optional:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"inverse": getLbRuleInverseSchema(),
+				"source_address": {
+					Type:         schema.TypeString,
+					Optional:     true,
+					ValidateFunc: validateSingleIP(),
+				},
+				"group_path": {
+					Type:     schema.TypeString,
+					Optional: true,
+				},
+			},
+		},
+	}
+}
+
+func getPolicyLbRuleSslSniConditionSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeSet,
+		Description: "Rule condition based on SSL SNI in client hello",
+		Optional:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"inverse": getLbRuleInverseSchema(),
+				"sni": {
+					Type:     schema.TypeString,
+					Required: true,
+				},
+				"case_sensitive": getLbRuleCaseSensitiveSchema(),
+				"match_type":     getLbRuleMatchTypeSchema(),
+			},
+		},
+	}
+}
+
+func getPolicyLbRuleConnectionDropActionSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeSet,
+		Description: "Action to drop the connection.",
+		Optional:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"_dummy": {
+					Type:     schema.TypeString,
+					Optional: true,
+					Default:  "dummy_value_to_indicate_presence_of_section",
+				},
+			},
+		},
+	}
+}
+
+func getPolicyLbRuleHttpRedirectActionSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeSet,
+		Description: "Action to redirect HTTP request messages to a new URL.",
+		Optional:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"redirect_status": {
+					Type:     schema.TypeString,
+					Required: true,
+				},
+				"redirect_url": {
+					Type:     schema.TypeString,
+					Required: true,
+				},
+			},
+		},
+	}
+}
+
+func getPolicyLbRuleHttpRejectActionSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeSet,
+		Description: "Action to reject HTTP request messages",
+		Optional:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"reply_message": {
+					Type:     schema.TypeString,
+					Optional: true,
+				},
+				"reply_status": {
+					Type:     schema.TypeString,
+					Required: true,
+				},
+			},
+		},
+	}
+}
+
+func getPolicyLbRuleHttpRequestHeaderDeleteActionSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeSet,
+		Description: "Action to delete header fields of HTTP request messages at HTTP_REQUEST_REWRITE phase.",
+		Optional:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"header_name": {
+					Type:     schema.TypeString,
+					Required: true,
+				},
+			},
+		},
+	}
+}
+
+func getPolicyLbRuleHttpRequestHeaderRewriteActionSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeSet,
+		Description: "Action to rewrite header fields of matched HTTP request messages to specified new values.",
+		Optional:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"header_name": {
+					Type:     schema.TypeString,
+					Required: true,
+				},
+				"header_value": {
+					Type:     schema.TypeString,
+					Required: true,
+				},
+			},
+		},
+	}
+}
+
+func getPolicyLbRuleHttpRequestUriRewriteActionSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeSet,
+		Description: "Action to rewrite URIs in matched HTTP request messages.",
+		Optional:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"uri": {
+					Type:     schema.TypeString,
+					Required: true,
+				},
+				"uri_arguments": {
+					Type:     schema.TypeString,
+					Optional: true,
+				},
+			},
+		},
+	}
+}
+
+func getPolicyLbRuleHttpResponseHeaderDeleteActionSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeSet,
+		Description: "Action to delete header fields of HTTP response messages at HTTP_RESPONSE_REWRITE phase.",
+		Optional:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"header_name": {
+					Type:     schema.TypeString,
+					Required: true,
+				},
+			},
+		},
+	}
+}
+
+func getPolicyLbRuleHttpResponseHeaderRewriteActionSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeSet,
+		Description: "Action to rewrite header fields of HTTP response messages to specified new values at HTTP_RESPONSE_REWRITE phase.",
+		Optional:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"header_name": {
+					Type:     schema.TypeString,
+					Required: true,
+				},
+				"header_value": {
+					Type:     schema.TypeString,
+					Required: true,
+				},
+			},
+		},
+	}
+}
+
+func getPolicyLbRuleJwtAuthActionSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeSet,
+		Description: "Action  to control access to backend server resources using JSON Web Token(JWT) authentication.",
+		Optional:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"key": {
+					Type:     schema.TypeSet,
+					Optional: true,
+					MaxItems: 1,
+					MinItems: 1,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"certificate_path": {
+								Type:     schema.TypeString,
+								Optional: true,
+							},
+							"public_key_content": {
+								Type:     schema.TypeString,
+								Optional: true,
+							},
+							"symmetric_key": {
+								Type:     schema.TypeString,
+								Optional: true,
+							},
+						},
+					},
+				},
+				"pass_jwt_to_pool": {
+					Type:     schema.TypeBool,
+					Optional: true,
+					Default:  false,
+				},
+				"realm": {
+					Type:     schema.TypeString,
+					Optional: true,
+				},
+				"tokens": {
+					Type:        schema.TypeList,
+					Description: "JWT tokens",
+					Optional:    true,
+					Elem: &schema.Schema{
+						Type: schema.TypeString,
+					},
+				},
+			},
+		},
+	}
+}
+
+func getPolicyLbRuleSelectPoolActionSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeSet,
+		Description: "Action to select a pool for matched HTTP request messages.",
+		Optional:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"pool_id": {
+					Type:     schema.TypeString,
+					Required: true,
+				},
+			},
+		},
+	}
+}
+
+func getPolicyLbRuleSslModeSelectionSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeSet,
+		Description: "Action to select SSL mode.",
+		Optional:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"ssl_mode": {
+					Type:         schema.TypeString,
+					Required:     true,
+					ValidateFunc: validation.StringInSlice(lbSslModeSelectionActionValues, false),
+				},
+			},
+		},
+	}
+}
+
+func getPolicyLbRuleVariableAssignmentActionSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeSet,
+		Description: "Action to create a new variable and assign value to it.",
+		Optional:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"variable_name": {
+					Type:     schema.TypeString,
+					Required: true,
+				},
+				"variable_value": {
+					Type:     schema.TypeString,
+					Required: true,
+				},
+			},
+		},
+	}
+}
+
+func getPolicyLbRuleVariablePersistenceLearnActionSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeSet,
+		Description: "Action to create a new variable and assign value to it.",
+		Optional:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"persistence_profile_path": {
+					Type:     schema.TypeString,
+					Optional: true,
+				},
+				"variable_hash_enabled": {
+					Type:     schema.TypeBool,
+					Optional: true,
+					Default:  false,
+				},
+				"variable_name": {
+					Type:     schema.TypeString,
+					Required: true,
+				},
+			},
 		},
 	}
 }
@@ -372,7 +962,494 @@ func setPolicyAccessListControlInSchema(d *schema.ResourceData, control *model.L
 	}
 }
 
-func policyLBVirtualServerVersionDepenantSet(d *schema.ResourceData, obj *model.LBVirtualServer) {
+func setPolicyLbRulesInSchema(d *schema.ResourceData, rules []model.LBRule) {
+	converter := bindings.NewTypeConverter()
+	converter.SetMode(bindings.REST)
+
+	var ruleList []interface{}
+	for _, rule := range rules {
+
+		elem := make(map[string]interface{})
+		if rule.DisplayName != nil {
+			elem["display_name"] = *rule.DisplayName
+		}
+		if rule.MatchStrategy != nil {
+			elem["match_strategy"] = *rule.MatchStrategy
+		}
+		if rule.Phase != nil {
+			elem["phase"] = *rule.Phase
+		}
+
+		// Actions
+		var connectionDropActionList []interface{}
+		var selectPoolActionList []interface{}
+		var httpRedirectActionList []interface{}
+		var httpRequestUriRewriteActionList []interface{}
+		var httpRequestHeaderRewriteActionList []interface{}
+		var httpRejectActionList []interface{}
+		var httpResponseHeaderRewriteActionList []interface{}
+		var httpRequestHeaderDeleteActionList []interface{}
+		var httpResponseHeaderDeleteActionList []interface{}
+		var variableAssignmentActionList []interface{}
+		var variablePersistenceOnActionList []interface{}
+		var variablePersistenceLearnActionList []interface{}
+		var jwtAuthActionList []interface{}
+		var sslModeSelectionActionList []interface{}
+
+		for _, action := range rule.Actions {
+			actionElem := make(map[string]interface{})
+
+			basicType, _ := converter.ConvertToGolang(action, model.LBRuleActionBindingType())
+			actionType := basicType.(model.LBRuleAction).Type_
+
+			if actionType == model.LBRuleAction_TYPE_LBCONNECTIONDROPACTION {
+				actionElem["_dummy"] = "dummy_value_to_indicate_presence_of_section"
+				connectionDropActionList = append(connectionDropActionList, actionElem)
+			} else if actionType == model.LBRuleAction_TYPE_LBSELECTPOOLACTION {
+				specificType, _ := converter.ConvertToGolang(action, model.LBSelectPoolActionBindingType())
+				actionElem["pool_id"] = specificType.(model.LBSelectPoolAction).PoolId
+				selectPoolActionList = append(selectPoolActionList, actionElem)
+			} else if actionType == model.LBRuleAction_TYPE_LBHTTPREDIRECTACTION {
+				specificType, _ := converter.ConvertToGolang(action, model.LBHttpRedirectActionBindingType())
+				actionElem["redirect_status"] = specificType.(model.LBHttpRedirectAction).RedirectStatus
+				actionElem["redirect_url"] = specificType.(model.LBHttpRedirectAction).RedirectUrl
+				httpRedirectActionList = append(httpRedirectActionList, actionElem)
+			} else if actionType == model.LBRuleAction_TYPE_LBHTTPREQUESTURIREWRITEACTION {
+				specificType, _ := converter.ConvertToGolang(action, model.LBHttpRequestUriRewriteActionBindingType())
+				actionElem["uri"] = specificType.(model.LBHttpRequestUriRewriteAction).Uri
+				actionElem["uri_arguments"] = specificType.(model.LBHttpRequestUriRewriteAction).UriArguments
+				httpRequestUriRewriteActionList = append(httpRequestUriRewriteActionList, actionElem)
+			} else if actionType == model.LBRuleAction_TYPE_LBHTTPREQUESTHEADERREWRITEACTION {
+				specificType, _ := converter.ConvertToGolang(action, model.LBHttpRequestHeaderRewriteActionBindingType())
+				actionElem["header_name"] = specificType.(model.LBHttpRequestHeaderRewriteAction).HeaderName
+				actionElem["header_value"] = specificType.(model.LBHttpRequestHeaderRewriteAction).HeaderValue
+				httpRequestHeaderRewriteActionList = append(httpRequestHeaderRewriteActionList, actionElem)
+			} else if actionType == model.LBRuleAction_TYPE_LBHTTPREJECTACTION {
+				specificType, _ := converter.ConvertToGolang(action, model.LBHttpRejectActionBindingType())
+				actionElem["reply_message"] = specificType.(model.LBHttpRejectAction).ReplyMessage
+				actionElem["reply_status"] = specificType.(model.LBHttpRejectAction).ReplyStatus
+				httpRejectActionList = append(httpRejectActionList, actionElem)
+			} else if actionType == model.LBRuleAction_TYPE_LBHTTPRESPONSEHEADERREWRITEACTION {
+				specificType, _ := converter.ConvertToGolang(action, model.LBHttpResponseHeaderRewriteActionBindingType())
+				actionElem["header_name"] = specificType.(model.LBHttpResponseHeaderRewriteAction).HeaderName
+				actionElem["header_value"] = specificType.(model.LBHttpResponseHeaderRewriteAction).HeaderValue
+				httpResponseHeaderRewriteActionList = append(httpResponseHeaderRewriteActionList, actionElem)
+			} else if actionType == model.LBRuleAction_TYPE_LBHTTPREQUESTHEADERDELETEACTION {
+				specificType, _ := converter.ConvertToGolang(action, model.LBHttpRequestHeaderDeleteActionBindingType())
+				actionElem["header_name"] = specificType.(model.LBHttpRequestHeaderDeleteAction).HeaderName
+				httpRequestHeaderDeleteActionList = append(httpRequestHeaderDeleteActionList, actionElem)
+			} else if actionType == model.LBRuleAction_TYPE_LBHTTPRESPONSEHEADERDELETEACTION {
+				specificType, _ := converter.ConvertToGolang(action, model.LBHttpResponseHeaderDeleteActionBindingType())
+				actionElem["header_name"] = specificType.(model.LBHttpResponseHeaderDeleteAction).HeaderName
+				httpResponseHeaderDeleteActionList = append(httpResponseHeaderDeleteActionList, actionElem)
+			} else if actionType == model.LBRuleAction_TYPE_LBVARIABLEASSIGNMENTACTION {
+				specificType, _ := converter.ConvertToGolang(action, model.LBVariableAssignmentActionBindingType())
+				actionElem["variable_name"] = specificType.(model.LBVariableAssignmentAction).VariableName
+				actionElem["variable_value"] = specificType.(model.LBVariableAssignmentAction).VariableValue
+				variableAssignmentActionList = append(variableAssignmentActionList, actionElem)
+			} else if actionType == model.LBRuleAction_TYPE_LBVARIABLEPERSISTENCEONACTION {
+				specificType, _ := converter.ConvertToGolang(action, model.LBVariablePersistenceOnActionBindingType())
+				actionElem["persistence_profile_path"] = specificType.(model.LBVariablePersistenceOnAction).PersistenceProfilePath
+				actionElem["variable_hash_enabled"] = specificType.(model.LBVariablePersistenceOnAction).VariableHashEnabled
+				actionElem["variable_name"] = specificType.(model.LBVariablePersistenceOnAction).VariableName
+				variablePersistenceOnActionList = append(variablePersistenceOnActionList, actionElem)
+			} else if actionType == model.LBRuleAction_TYPE_LBVARIABLEPERSISTENCELEARNACTION {
+				specificType, _ := converter.ConvertToGolang(action, model.LBVariablePersistenceLearnActionBindingType())
+				actionElem["persistence_profile_path"] = specificType.(model.LBVariablePersistenceLearnAction).PersistenceProfilePath
+				actionElem["variable_hash_enabled"] = specificType.(model.LBVariablePersistenceLearnAction).VariableHashEnabled
+				actionElem["variable_name"] = specificType.(model.LBVariablePersistenceLearnAction).VariableName
+				variablePersistenceLearnActionList = append(variablePersistenceLearnActionList, actionElem)
+			} else if actionType == model.LBRuleAction_TYPE_LBSSLMODESELECTIONACTION {
+				specificType, _ := converter.ConvertToGolang(action, model.LBSslModeSelectionActionBindingType())
+				actionElem["ssl_mode"] = specificType.(model.LBSslModeSelectionAction).SslMode
+				sslModeSelectionActionList = append(sslModeSelectionActionList, actionElem)
+			} else if actionType == model.LBRuleAction_TYPE_LBJWTAUTHACTION {
+				specificType, _ := converter.ConvertToGolang(action, model.LBJwtAuthActionBindingType())
+				actionElem["pass_jwt_to_pool"] = specificType.(model.LBJwtAuthAction).PassJwtToPool
+				actionElem["realm"] = specificType.(model.LBJwtAuthAction).Realm
+
+				var keyList []interface{}
+				keyElem := make(map[string]interface{})
+
+				key := specificType.(model.LBJwtAuthAction).Key
+				basicKeyType, _ := converter.ConvertToGolang(key, model.LBJwtKeyBindingType())
+				keyType := basicKeyType.(model.LBJwtKey).Type_
+
+				if keyType == model.LBJwtKey_TYPE_LBJWTCERTIFICATEKEY {
+					specificKeyType, _ := converter.ConvertToGolang(key, model.LBJwtCertificateKeyBindingType())
+					keyElem["certificate_path"] = specificKeyType.(model.LBJwtCertificateKey).CertificatePath
+				} else if keyType == model.LBJwtKey_TYPE_LBJWTSYMMETRICKEY {
+					keyElem["symmetric_key"] = "dummy"
+				} else if keyType == model.LBJwtKey_TYPE_LBJWTPUBLICKEY {
+					specificKeyType, _ := converter.ConvertToGolang(key, model.LBJwtPublicKeyBindingType())
+					keyElem["public_key_content"] = specificKeyType.(model.LBJwtPublicKey).PublicKeyContent
+				}
+
+				keyList = append(keyList, keyElem)
+				actionElem["key"] = schema.NewSet(resourceKeyValueHash, keyList)
+
+				var tokens []interface{}
+				for _, v := range specificType.(model.LBJwtAuthAction).Tokens {
+					tokens = append(tokens, v)
+				}
+				actionElem["tokens"] = tokens
+
+				jwtAuthActionList = append(jwtAuthActionList, actionElem)
+			}
+		}
+
+		elem["connection_drop_action"] = schema.NewSet(resourceKeyValueHash, connectionDropActionList)
+		elem["select_pool_action"] = schema.NewSet(resourceKeyValueHash, selectPoolActionList)
+		elem["http_redirect_action"] = schema.NewSet(resourceKeyValueHash, httpRedirectActionList)
+		elem["http_request_uri_rewrite_action"] = schema.NewSet(resourceKeyValueHash, httpRequestUriRewriteActionList)
+		elem["http_request_header_rewrite_action"] = schema.NewSet(resourceKeyValueHash, httpRequestHeaderRewriteActionList)
+		elem["http_reject_action"] = schema.NewSet(resourceKeyValueHash, httpRejectActionList)
+		elem["http_response_header_rewrite_action"] = schema.NewSet(resourceKeyValueHash, httpResponseHeaderRewriteActionList)
+		elem["http_request_header_delete_action"] = schema.NewSet(resourceKeyValueHash, httpRequestHeaderDeleteActionList)
+		elem["http_response_header_delete_action"] = schema.NewSet(resourceKeyValueHash, httpResponseHeaderDeleteActionList)
+		elem["variable_assignment_action"] = schema.NewSet(resourceKeyValueHash, variableAssignmentActionList)
+		elem["variable_persistence_on_action"] = schema.NewSet(resourceKeyValueHash, variablePersistenceOnActionList)
+		elem["variable_persistence_learn_action"] = schema.NewSet(resourceKeyValueHash, variablePersistenceLearnActionList)
+		elem["jwt_auth_action"] = schema.NewSet(resourceKeyValueHash, jwtAuthActionList)
+		elem["ssl_mode_selection_action"] = schema.NewSet(resourceKeyValueHash, sslModeSelectionActionList)
+
+		// MatchConditions
+		var httpRequestBodyConditionList []interface{}
+		var httpRequestUriConditionList []interface{}
+		var httpRequestHeaderConditionList []interface{}
+		var httpRequestMethodConditionList []interface{}
+		var httpRequestUriArgumentsConditionList []interface{}
+		var httpRequestVersionConditionList []interface{}
+		var httpRequestCookieConditionList []interface{}
+		var httpResponseHeaderConditionList []interface{}
+		var tcpHeaderConditionList []interface{}
+		var ipHeaderConditionList []interface{}
+		var variableConditionList []interface{}
+		var httpSslConditionList []interface{}
+		var sslSniConditionList []interface{}
+
+		for _, condition := range rule.MatchConditions {
+			conditionElem := make(map[string]interface{})
+
+			basicType, _ := converter.ConvertToGolang(condition, model.LBRuleConditionBindingType())
+			conditionType := basicType.(model.LBRuleCondition).Type_
+
+			if conditionType == model.LBRuleCondition_TYPE_LBHTTPREQUESTBODYCONDITION {
+				specificType, _ := converter.ConvertToGolang(condition, model.LBHttpRequestBodyConditionBindingType())
+				conditionElem["case_sensitive"] = specificType.(model.LBHttpRequestBodyCondition).CaseSensitive
+				conditionElem["inverse"] = specificType.(model.LBHttpRequestBodyCondition).Inverse
+				conditionElem["match_type"] = specificType.(model.LBHttpRequestBodyCondition).MatchType
+				conditionElem["body_value"] = specificType.(model.LBHttpRequestBodyCondition).BodyValue
+				httpRequestBodyConditionList = append(httpRequestBodyConditionList, conditionElem)
+			} else if conditionType == model.LBRuleCondition_TYPE_LBHTTPREQUESTURICONDITION {
+				specificType, _ := converter.ConvertToGolang(condition, model.LBHttpRequestUriConditionBindingType())
+				conditionElem["case_sensitive"] = specificType.(model.LBHttpRequestUriCondition).CaseSensitive
+				conditionElem["inverse"] = specificType.(model.LBHttpRequestUriCondition).Inverse
+				conditionElem["match_type"] = specificType.(model.LBHttpRequestUriCondition).MatchType
+				conditionElem["uri"] = specificType.(model.LBHttpRequestUriCondition).Uri
+				httpRequestUriConditionList = append(httpRequestUriConditionList, conditionElem)
+			} else if conditionType == model.LBRuleCondition_TYPE_LBHTTPREQUESTHEADERCONDITION {
+				specificType, _ := converter.ConvertToGolang(condition, model.LBHttpRequestHeaderConditionBindingType())
+				conditionElem["case_sensitive"] = specificType.(model.LBHttpRequestHeaderCondition).CaseSensitive
+				conditionElem["header_name"] = specificType.(model.LBHttpRequestHeaderCondition).HeaderName
+				conditionElem["header_value"] = specificType.(model.LBHttpRequestHeaderCondition).HeaderValue
+				conditionElem["inverse"] = specificType.(model.LBHttpRequestHeaderCondition).Inverse
+				conditionElem["match_type"] = specificType.(model.LBHttpRequestHeaderCondition).MatchType
+				httpRequestHeaderConditionList = append(httpRequestHeaderConditionList, conditionElem)
+			} else if conditionType == model.LBRuleCondition_TYPE_LBHTTPREQUESTMETHODCONDITION {
+				specificType, _ := converter.ConvertToGolang(condition, model.LBHttpRequestMethodConditionBindingType())
+				conditionElem["inverse"] = specificType.(model.LBHttpRequestMethodCondition).Inverse
+				conditionElem["method"] = specificType.(model.LBHttpRequestMethodCondition).Method
+				httpRequestMethodConditionList = append(httpRequestMethodConditionList, conditionElem)
+			} else if conditionType == model.LBRuleCondition_TYPE_LBHTTPREQUESTURIARGUMENTSCONDITION {
+				specificType, _ := converter.ConvertToGolang(condition, model.LBHttpRequestUriArgumentsConditionBindingType())
+				conditionElem["case_sensitive"] = specificType.(model.LBHttpRequestUriArgumentsCondition).CaseSensitive
+				conditionElem["inverse"] = specificType.(model.LBHttpRequestUriArgumentsCondition).Inverse
+				conditionElem["match_type"] = specificType.(model.LBHttpRequestUriArgumentsCondition).MatchType
+				conditionElem["uri_arguments"] = specificType.(model.LBHttpRequestUriArgumentsCondition).UriArguments
+				httpRequestUriArgumentsConditionList = append(httpRequestUriArgumentsConditionList, conditionElem)
+			} else if conditionType == model.LBRuleCondition_TYPE_LBHTTPREQUESTVERSIONCONDITION {
+				specificType, _ := converter.ConvertToGolang(condition, model.LBHttpRequestVersionConditionBindingType())
+				conditionElem["inverse"] = specificType.(model.LBHttpRequestVersionCondition).Inverse
+				conditionElem["version"] = specificType.(model.LBHttpRequestVersionCondition).Version
+				httpRequestVersionConditionList = append(httpRequestVersionConditionList, conditionElem)
+			} else if conditionType == model.LBRuleCondition_TYPE_LBHTTPREQUESTCOOKIECONDITION {
+				specificType, _ := converter.ConvertToGolang(condition, model.LBHttpRequestCookieConditionBindingType())
+				conditionElem["case_sensitive"] = specificType.(model.LBHttpRequestCookieCondition).CaseSensitive
+				conditionElem["cookie_name"] = specificType.(model.LBHttpRequestCookieCondition).CookieName
+				conditionElem["cookie_value"] = specificType.(model.LBHttpRequestCookieCondition).CookieValue
+				conditionElem["inverse"] = specificType.(model.LBHttpRequestCookieCondition).Inverse
+				conditionElem["match_type"] = specificType.(model.LBHttpRequestCookieCondition).MatchType
+				httpRequestCookieConditionList = append(httpRequestCookieConditionList, conditionElem)
+			} else if conditionType == model.LBRuleCondition_TYPE_LBHTTPRESPONSEHEADERCONDITION {
+				specificType, _ := converter.ConvertToGolang(condition, model.LBHttpResponseHeaderConditionBindingType())
+				conditionElem["case_sensitive"] = specificType.(model.LBHttpResponseHeaderCondition).CaseSensitive
+				conditionElem["header_name"] = specificType.(model.LBHttpResponseHeaderCondition).HeaderName
+				conditionElem["header_value"] = specificType.(model.LBHttpResponseHeaderCondition).HeaderValue
+				conditionElem["inverse"] = specificType.(model.LBHttpResponseHeaderCondition).Inverse
+				conditionElem["match_type"] = specificType.(model.LBHttpResponseHeaderCondition).MatchType
+				httpResponseHeaderConditionList = append(httpResponseHeaderConditionList, conditionElem)
+			} else if conditionType == model.LBRuleCondition_TYPE_LBTCPHEADERCONDITION {
+				specificType, _ := converter.ConvertToGolang(condition, model.LBTcpHeaderConditionBindingType())
+				conditionElem["inverse"] = specificType.(model.LBTcpHeaderCondition).Inverse
+				conditionElem["source_port"] = specificType.(model.LBTcpHeaderCondition).SourcePort
+				tcpHeaderConditionList = append(tcpHeaderConditionList, conditionElem)
+			} else if conditionType == model.LBRuleCondition_TYPE_LBIPHEADERCONDITION {
+				specificType, _ := converter.ConvertToGolang(condition, model.LBIpHeaderConditionBindingType())
+				conditionElem["group_path"] = specificType.(model.LBIpHeaderCondition).GroupPath
+				conditionElem["inverse"] = specificType.(model.LBIpHeaderCondition).Inverse
+				conditionElem["source_address"] = specificType.(model.LBIpHeaderCondition).SourceAddress
+				ipHeaderConditionList = append(ipHeaderConditionList, conditionElem)
+			} else if conditionType == model.LBRuleCondition_TYPE_LBVARIABLECONDITION {
+				specificType, _ := converter.ConvertToGolang(condition, model.LBVariableConditionBindingType())
+				conditionElem["case_sensitive"] = specificType.(model.LBVariableCondition).CaseSensitive
+				conditionElem["inverse"] = specificType.(model.LBVariableCondition).Inverse
+				conditionElem["match_type"] = specificType.(model.LBVariableCondition).MatchType
+				conditionElem["variable_name"] = specificType.(model.LBVariableCondition).VariableName
+				conditionElem["variable_value"] = specificType.(model.LBVariableCondition).VariableValue
+				variableConditionList = append(variableConditionList, conditionElem)
+			} else if conditionType == model.LBRuleCondition_TYPE_LBSSLSNICONDITION {
+				specificType, _ := converter.ConvertToGolang(condition, model.LBSslSniConditionBindingType())
+				conditionElem["case_sensitive"] = specificType.(model.LBSslSniCondition).CaseSensitive
+				conditionElem["inverse"] = specificType.(model.LBSslSniCondition).Inverse
+				conditionElem["match_type"] = specificType.(model.LBSslSniCondition).MatchType
+				conditionElem["sni"] = specificType.(model.LBSslSniCondition).Sni
+				sslSniConditionList = append(sslSniConditionList, conditionElem)
+			} else if conditionType == model.LBRuleCondition_TYPE_LBHTTPSSLCONDITION {
+				specificType, _ := converter.ConvertToGolang(condition, model.LBHttpSslConditionBindingType())
+				conditionElem["inverse"] = specificType.(model.LBHttpSslCondition).Inverse
+				conditionElem["session_reused"] = specificType.(model.LBHttpSslCondition).SessionReused
+				conditionElem["used_protocol"] = specificType.(model.LBHttpSslCondition).UsedProtocol
+				conditionElem["used_ssl_cipher"] = specificType.(model.LBHttpSslCondition).UsedSslCipher
+
+				issuer_dn := specificType.(model.LBHttpSslCondition).ClientCertificateIssuerDn
+				var issuerDnList []interface{}
+				issuerElem := make(map[string]interface{})
+				issuerElem["case_sensitive"] = issuer_dn.CaseSensitive
+				issuerElem["issuer_dn"] = issuer_dn.IssuerDn
+				issuerElem["match_type"] = issuer_dn.MatchType
+				issuerDnList = append(issuerDnList, issuerElem)
+				conditionElem["client_certificate_issuer_dn"] = schema.NewSet(resourceKeyValueHash, issuerDnList)
+
+				subject_dn := specificType.(model.LBHttpSslCondition).ClientCertificateSubjectDn
+				var subjectDnList []interface{}
+				subjectElem := make(map[string]interface{})
+				subjectElem["case_sensitive"] = subject_dn.CaseSensitive
+				subjectElem["subject_dn"] = subject_dn.SubjectDn
+				subjectElem["match_type"] = subject_dn.MatchType
+				subjectDnList = append(subjectDnList, subjectElem)
+				conditionElem["client_certificate_subject_dn"] = schema.NewSet(resourceKeyValueHash, subjectDnList)
+
+				var ssl_ciphers []interface{}
+				for _, v := range specificType.(model.LBHttpSslCondition).ClientSupportedSslCiphers {
+					ssl_ciphers = append(ssl_ciphers, v)
+				}
+				conditionElem["client_supported_ssl_ciphers"] = ssl_ciphers
+
+				httpSslConditionList = append(httpSslConditionList, conditionElem)
+			}
+		}
+
+		elem["http_request_body_condition"] = schema.NewSet(resourceKeyValueHash, httpRequestBodyConditionList)
+		elem["http_request_uri_condition"] = schema.NewSet(resourceKeyValueHash, httpRequestUriConditionList)
+		elem["http_request_header_condition"] = schema.NewSet(resourceKeyValueHash, httpRequestHeaderConditionList)
+		elem["http_request_method_condition"] = schema.NewSet(resourceKeyValueHash, httpRequestMethodConditionList)
+		elem["http_request_uri_arguments_condition"] = schema.NewSet(resourceKeyValueHash, httpRequestUriArgumentsConditionList)
+		elem["http_request_version_condition"] = schema.NewSet(resourceKeyValueHash, httpRequestVersionConditionList)
+		elem["http_request_cookie_condition"] = schema.NewSet(resourceKeyValueHash, httpRequestCookieConditionList)
+		elem["http_response_header_condition"] = schema.NewSet(resourceKeyValueHash, httpResponseHeaderConditionList)
+		elem["tcp_header_condition"] = schema.NewSet(resourceKeyValueHash, tcpHeaderConditionList)
+		elem["ip_header_condition"] = schema.NewSet(resourceKeyValueHash, ipHeaderConditionList)
+		elem["variable_condition"] = schema.NewSet(resourceKeyValueHash, variableConditionList)
+		elem["http_ssl_condition"] = schema.NewSet(resourceKeyValueHash, httpSslConditionList)
+		elem["ssl_sni_condition"] = schema.NewSet(resourceKeyValueHash, sslSniConditionList)
+
+		ruleList = append(ruleList, elem)
+	}
+
+	err := d.Set("rule", ruleList)
+	if err != nil {
+		log.Printf("[WARNING] Failed to set rule list in schema: %v", err)
+	}
+
+}
+
+func getRuleActionOrMethod(ruleData map[string]interface{}, key string, string_fields []string, bool_fields []string, internal_type string) []*data.StructValue {
+	var result []*data.StructValue
+	for _, object := range ruleData[key].(*schema.Set).List() {
+		object_data := object.(map[string]interface{})
+		var fields = make(map[string]data.DataValue)
+		fields["type"] = data.NewStringValue(internal_type)
+		for _, field := range string_fields {
+			if object_data[field] != nil && object_data[field].(string) != "" {
+				fields[field] = data.NewStringValue(object_data[field].(string))
+			}
+		}
+		for _, field := range bool_fields {
+			if object_data[field] != nil {
+				fields[field] = data.NewBooleanValue(object_data[field].(bool))
+			}
+		}
+		elem := data.NewStructValue("", fields)
+		result = append(result, elem)
+	}
+	return result
+}
+
+func getPolicyLbRulesFromSchema(d *schema.ResourceData) []model.LBRule {
+	var ruleList []model.LBRule
+	rules := d.Get("rule").([]interface{})
+
+	for _, rule := range rules {
+		rule_data := rule.(map[string]interface{})
+
+		displayName := rule_data["display_name"].(string)
+		matchStrategy := rule_data["match_strategy"].(string)
+		phase := rule_data["phase"].(string)
+
+		var actions []*data.StructValue
+
+		// Just strings and booleans, we use a helper function for there
+		actions = append(actions, getRuleActionOrMethod(rule_data, "connection_drop_action", []string{}, []string{}, model.LBRuleAction_TYPE_LBCONNECTIONDROPACTION)...)
+		actions = append(actions, getRuleActionOrMethod(rule_data, "http_redirect_action", []string{"redirect_status", "redirect_url"}, []string{}, model.LBRuleAction_TYPE_LBHTTPREDIRECTACTION)...)
+		actions = append(actions, getRuleActionOrMethod(rule_data, "http_reject_action", []string{"reply_message", "reply_status"}, []string{}, model.LBRuleAction_TYPE_LBHTTPREJECTACTION)...)
+		actions = append(actions, getRuleActionOrMethod(rule_data, "http_request_header_delete_action", []string{"header_name"}, []string{}, model.LBRuleAction_TYPE_LBHTTPREQUESTHEADERDELETEACTION)...)
+		actions = append(actions, getRuleActionOrMethod(rule_data, "http_request_header_rewrite_action", []string{"header_name", "header_value"}, []string{}, model.LBRuleAction_TYPE_LBHTTPREQUESTHEADERREWRITEACTION)...)
+		actions = append(actions, getRuleActionOrMethod(rule_data, "http_request_uri_rewrite_action", []string{"uri", "uri_arguments"}, []string{}, model.LBRuleAction_TYPE_LBHTTPREQUESTURIREWRITEACTION)...)
+		actions = append(actions, getRuleActionOrMethod(rule_data, "http_response_header_delete_action", []string{"header_name"}, []string{}, model.LBRuleAction_TYPE_LBHTTPRESPONSEHEADERDELETEACTION)...)
+		actions = append(actions, getRuleActionOrMethod(rule_data, "http_response_header_rewrite_action", []string{"header_name", "header_value"}, []string{}, model.LBRuleAction_TYPE_LBHTTPRESPONSEHEADERREWRITEACTION)...)
+		actions = append(actions, getRuleActionOrMethod(rule_data, "select_pool_action", []string{"pool_id"}, []string{}, model.LBRuleAction_TYPE_LBSELECTPOOLACTION)...)
+		actions = append(actions, getRuleActionOrMethod(rule_data, "ssl_mode_selection_action", []string{"ssl_mode"}, []string{}, model.LBRuleAction_TYPE_LBSSLMODESELECTIONACTION)...)
+		actions = append(actions, getRuleActionOrMethod(rule_data, "variable_assignment_action", []string{"variable_name", "variable_value"}, []string{}, model.LBRuleAction_TYPE_LBVARIABLEASSIGNMENTACTION)...)
+		actions = append(actions, getRuleActionOrMethod(rule_data, "variable_persistence_learn_action", []string{"persistence_profile_path", "variable_name"}, []string{"variable_hash_enabled"}, model.LBRuleAction_TYPE_LBVARIABLEPERSISTENCELEARNACTION)...)
+		actions = append(actions, getRuleActionOrMethod(rule_data, "variable_persistence_on_action", []string{"persistence_profile_path", "variable_name"}, []string{"variable_hash_enabled"}, model.LBRuleAction_TYPE_LBVARIABLEPERSISTENCEONACTION)...)
+
+		// more complicated actions
+		for _, action := range rule_data["jwt_auth_action"].(*schema.Set).List() {
+			action_data := action.(map[string]interface{})
+			var fields = make(map[string]data.DataValue)
+			fields["type"] = data.NewStringValue(model.LBRuleAction_TYPE_LBJWTAUTHACTION)
+			if action_data["realm"] != nil {
+				fields["realm"] = data.NewStringValue(action_data["realm"].(string))
+			}
+			if action_data["pass_jwt_to_pool"] != nil {
+				fields["pass_jwt_to_pool"] = data.NewBooleanValue(action_data["pass_jwt_to_pool"].(bool))
+			}
+			// I still haven't fully figured out why key comes as a (*schema.Set) but that's what we want,
+			// a set where no key can be there more than once
+			for _, key := range action_data["key"].(*schema.Set).List() {
+				key_data := key.(map[string]interface{})
+				var key_fields = make(map[string]data.DataValue)
+				if key_data["certificate_path"] != nil && key_data["certificate_path"].(string) != "" {
+					key_fields["certificate_path"] = data.NewStringValue(key_data["certificate_path"].(string))
+					key_fields["type"] = data.NewStringValue(model.LBJwtKey_TYPE_LBJWTCERTIFICATEKEY)
+				} else if key_data["public_key_content"] != nil && key_data["public_key_content"].(string) != "" {
+					key_fields["public_key_content"] = data.NewStringValue(key_data["public_key_content"].(string))
+					key_fields["type"] = data.NewStringValue(model.LBJwtKey_TYPE_LBJWTPUBLICKEY)
+				} else if key_data["symmetric_key"] != nil && key_data["symmetric_key"].(string) != "" {
+					// the API only wants the marker id, no actual content parameters
+					key_fields["type"] = data.NewStringValue(model.LBJwtKey_TYPE_LBJWTSYMMETRICKEY)
+				}
+				fields["key"] = data.NewStructValue("", key_fields)
+			}
+			if action_data["tokens"] != nil {
+				token_list := data.NewListValue()
+				for _, token := range action_data["tokens"].([]interface{}) {
+					token_list.Add(data.NewStringValue(token.(string)))
+				}
+				fields["tokens"] = token_list
+			}
+			elem := data.NewStructValue("", fields)
+			actions = append(actions, elem)
+		}
+
+		var matchConditions []*data.StructValue
+
+		// Just strings and booleans, we use a helper function for there
+		matchConditions = append(matchConditions, getRuleActionOrMethod(rule_data, "http_request_body_condition", []string{"body_value", "match_type"}, []string{"case_sensitive", "inverse"}, model.LBRuleCondition_TYPE_LBHTTPREQUESTBODYCONDITION)...)
+		matchConditions = append(matchConditions, getRuleActionOrMethod(rule_data, "http_request_cookie_condition", []string{"cookie_name", "cookie_value", "match_type"}, []string{"case_sensitive", "inverse"}, model.LBRuleCondition_TYPE_LBHTTPREQUESTCOOKIECONDITION)...)
+		matchConditions = append(matchConditions, getRuleActionOrMethod(rule_data, "http_request_header_condition", []string{"header_name", "header_value", "match_type"}, []string{"case_sensitive", "inverse"}, model.LBRuleCondition_TYPE_LBHTTPREQUESTHEADERCONDITION)...)
+		matchConditions = append(matchConditions, getRuleActionOrMethod(rule_data, "http_request_method_condition", []string{"method"}, []string{}, model.LBRuleCondition_TYPE_LBHTTPREQUESTMETHODCONDITION)...)
+		matchConditions = append(matchConditions, getRuleActionOrMethod(rule_data, "http_request_uri_arguments_condition", []string{"uri_arguments", "match_type"}, []string{"case_sensitive", "inverse"}, model.LBRuleCondition_TYPE_LBHTTPREQUESTURIARGUMENTSCONDITION)...)
+		matchConditions = append(matchConditions, getRuleActionOrMethod(rule_data, "http_request_uri_condition", []string{"uri", "match_type"}, []string{"case_sensitive", "inverse"}, model.LBRuleCondition_TYPE_LBHTTPREQUESTURICONDITION)...)
+		matchConditions = append(matchConditions, getRuleActionOrMethod(rule_data, "http_request_version_condition", []string{"version"}, []string{"inverse"}, model.LBRuleCondition_TYPE_LBHTTPREQUESTVERSIONCONDITION)...)
+		matchConditions = append(matchConditions, getRuleActionOrMethod(rule_data, "http_response_header_condition", []string{"header_name", "header_value", "match_type"}, []string{"case_sensitive", "inverse"}, model.LBRuleCondition_TYPE_LBHTTPRESPONSEHEADERCONDITION)...)
+		matchConditions = append(matchConditions, getRuleActionOrMethod(rule_data, "ip_header_condition", []string{"group_path", "source_address"}, []string{"inverse"}, model.LBRuleCondition_TYPE_LBIPHEADERCONDITION)...)
+		matchConditions = append(matchConditions, getRuleActionOrMethod(rule_data, "ssl_sni_condition", []string{"sni", "match_type"}, []string{"case_sensitive", "inverse"}, model.LBRuleCondition_TYPE_LBSSLSNICONDITION)...)
+		matchConditions = append(matchConditions, getRuleActionOrMethod(rule_data, "tcp_header_condition", []string{"source_port"}, []string{"inverse"}, model.LBRuleCondition_TYPE_LBTCPHEADERCONDITION)...)
+		matchConditions = append(matchConditions, getRuleActionOrMethod(rule_data, "variable_condition", []string{"match_type", "variable_name", "variable_value"}, []string{"case_sensitive", "inverse"}, model.LBRuleCondition_TYPE_LBVARIABLECONDITION)...)
+
+		// more complicated conditions
+		for _, condition := range rule_data["http_ssl_condition"].(*schema.Set).List() {
+			condition_data := condition.(map[string]interface{})
+			var fields = make(map[string]data.DataValue)
+			fields["type"] = data.NewStringValue(model.LBRuleCondition_TYPE_LBHTTPSSLCONDITION)
+			// Not actually a list but that's what the Schems says
+			for _, issuer_dn := range condition_data["client_certificate_issuer_dn"].(*schema.Set).List() {
+				issuer_dn_data := issuer_dn.(map[string]interface{})
+				var issuer_dn_fields = make(map[string]data.DataValue)
+				if issuer_dn_data["case_sensitive"] != nil {
+					issuer_dn_fields["case_sensitive"] = data.NewBooleanValue(issuer_dn_data["case_sensitive"].(bool))
+				}
+				if issuer_dn_data["issuer_dn"] != nil {
+					issuer_dn_fields["issuer_dn"] = data.NewStringValue(issuer_dn_data["issuer_dn"].(string))
+				}
+				if issuer_dn_data["match_type"] != nil {
+					issuer_dn_fields["match_type"] = data.NewStringValue(issuer_dn_data["match_type"].(string))
+				}
+				fields["client_certificate_issuer_dn"] = data.NewStructValue("", issuer_dn_fields)
+			}
+			// Not actually a list but that's what the Schems says
+			for _, subject_dn := range condition_data["client_certificate_subject_dn"].(*schema.Set).List() {
+				subject_dn_data := subject_dn.(map[string]interface{})
+				var subject_dn_fields = make(map[string]data.DataValue)
+				if subject_dn_data["case_sensitive"] != nil {
+					subject_dn_fields["case_sensitive"] = data.NewBooleanValue(subject_dn_data["case_sensitive"].(bool))
+				}
+				if subject_dn_data["subject_dn"] != nil {
+					subject_dn_fields["subject_dn"] = data.NewStringValue(subject_dn_data["subject_dn"].(string))
+				}
+				if subject_dn_data["match_type"] != nil {
+					subject_dn_fields["match_type"] = data.NewStringValue(subject_dn_data["match_type"].(string))
+				}
+				fields["client_certificate_subject_dn"] = data.NewStructValue("", subject_dn_fields)
+			}
+			if condition_data["client_supported_ssl_ciphers"] != nil {
+				cipher_list := data.NewListValue()
+				for _, cipher := range condition_data["client_supported_ssl_ciphers"].([]interface{}) {
+					cipher_list.Add(data.NewStringValue(cipher.(string)))
+				}
+				fields["client_supported_ssl_ciphers"] = cipher_list
+			}
+			if condition_data["inverse"] != nil {
+				fields["inverse"] = data.NewBooleanValue(condition_data["inverse"].(bool))
+			}
+			if condition_data["session_reused"] != nil {
+				fields["session_reused"] = data.NewStringValue(condition_data["session_reused"].(string))
+			}
+			if condition_data["used_protocol"] != nil {
+				fields["used_protocol"] = data.NewStringValue(condition_data["used_protocol"].(string))
+			}
+			if condition_data["used_ssl_cipher"] != nil {
+				fields["used_ssl_cipher"] = data.NewStringValue(condition_data["used_ssl_cipher"].(string))
+			}
+			elem := data.NewStructValue("", fields)
+			matchConditions = append(matchConditions, elem)
+		}
+
+		elem := model.LBRule{
+			DisplayName:     &displayName,
+			MatchStrategy:   &matchStrategy,
+			Phase:           &phase,
+			Actions:         actions,
+			MatchConditions: matchConditions,
+		}
+		ruleList = append(ruleList, elem)
+	}
+	return ruleList
+}
+
+func policyLBVirtualServerVersionDependantSet(d *schema.ResourceData, obj *model.LBVirtualServer) {
 	if nsxVersionHigherOrEqual("3.0.0") {
 		logSignificantOnly := d.Get("log_significant_event_only").(bool)
 		obj.LogSignificantEventOnly = &logSignificantOnly
@@ -426,6 +1503,7 @@ func resourceNsxtPolicyLBVirtualServerCreate(d *schema.ResourceData, m interface
 	ports := getStringListFromSchemaList(d, "ports")
 	serverSSLProfileBinding := getPolicyServerSSLBindingFromSchema(d)
 	sorryPoolPath := d.Get("sorry_pool_path").(string)
+	rules := getPolicyLbRulesFromSchema(d)
 
 	obj := model.LBVirtualServer{
 		DisplayName:              &displayName,
@@ -443,9 +1521,10 @@ func resourceNsxtPolicyLBVirtualServerCreate(d *schema.ResourceData, m interface
 		Ports:                    ports,
 		ServerSslProfileBinding:  serverSSLProfileBinding,
 		SorryPoolPath:            &sorryPoolPath,
+		Rules:                    rules,
 	}
 
-	policyLBVirtualServerVersionDepenantSet(d, &obj)
+	policyLBVirtualServerVersionDependantSet(d, &obj)
 
 	if maxNewConnectionRate > 0 {
 		obj.MaxNewConnectionRate = &maxNewConnectionRate
@@ -509,6 +1588,8 @@ func resourceNsxtPolicyLBVirtualServerRead(d *schema.ResourceData, m interface{}
 	d.Set("sorry_pool_path", obj.SorryPoolPath)
 	d.Set("log_significant_event_only", obj.LogSignificantEventOnly)
 	setPolicyAccessListControlInSchema(d, obj.AccessListControl)
+	setPolicyLbRulesInSchema(d, obj.Rules)
+
 	return nil
 }
 
@@ -543,6 +1624,7 @@ func resourceNsxtPolicyLBVirtualServerUpdate(d *schema.ResourceData, m interface
 	ports := getStringListFromSchemaList(d, "ports")
 	serverSSLProfileBinding := getPolicyServerSSLBindingFromSchema(d)
 	sorryPoolPath := d.Get("sorry_pool_path").(string)
+	rules := getPolicyLbRulesFromSchema(d)
 
 	obj := model.LBVirtualServer{
 		DisplayName:              &displayName,
@@ -560,9 +1642,10 @@ func resourceNsxtPolicyLBVirtualServerUpdate(d *schema.ResourceData, m interface
 		Ports:                    ports,
 		ServerSslProfileBinding:  serverSSLProfileBinding,
 		SorryPoolPath:            &sorryPoolPath,
+		Rules:                    rules,
 	}
 
-	policyLBVirtualServerVersionDepenantSet(d, &obj)
+	policyLBVirtualServerVersionDependantSet(d, &obj)
 
 	// The user might have defined the rules outside terraform, lets keep these
 	existingObj, err := client.Get(id)
