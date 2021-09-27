@@ -450,6 +450,18 @@ func getRedistributionConfigRuleSchema() *schema.Schema {
 						ValidateFunc: validation.StringInSlice(nsxtPolicyTier0GatewayRedistributionRuleTypes, false),
 					},
 				},
+				"bgp": {
+					Type:        schema.TypeBool,
+					Description: "BGP destination for this rule",
+					Optional:    true,
+					Default:     true,
+				},
+				"ospf": {
+					Type:        schema.TypeBool,
+					Description: "OSPF destination for this rule",
+					Optional:    true,
+					Default:     false,
+				},
 			},
 		},
 	}
@@ -490,6 +502,8 @@ func setLocaleServiceRedistributionRulesConfig(rulesConfig []interface{}, config
 		name := data["name"].(string)
 		routeMapPath := data["route_map_path"].(string)
 		types := data["types"].(*schema.Set).List()
+		bgp := data["bgp"].(bool)
+		ospf := data["ospf"].(bool)
 
 		rule := model.Tier0RouteRedistributionRule{
 			RouteRedistributionTypes: interface2StringList(types),
@@ -501,6 +515,15 @@ func setLocaleServiceRedistributionRulesConfig(rulesConfig []interface{}, config
 
 		if len(routeMapPath) > 0 {
 			rule.RouteMapPath = &routeMapPath
+		}
+
+		if nsxVersionHigherOrEqual("3.1.0") {
+			if bgp {
+				rule.Destinations = append(rule.Destinations, model.Tier0RouteRedistributionRule_DESTINATIONS_BGP)
+			}
+			if ospf {
+				rule.Destinations = append(rule.Destinations, model.Tier0RouteRedistributionRule_DESTINATIONS_OSPF)
+			}
 		}
 
 		rules = append(rules, rule)
@@ -540,6 +563,21 @@ func getLocaleServiceRedistributionRuleConfig(config *model.Tier0RouteRedistribu
 		rule["name"] = ruleConfig.Name
 		rule["route_map_path"] = ruleConfig.RouteMapPath
 		rule["types"] = ruleConfig.RouteRedistributionTypes
+		if nsxVersionHigherOrEqual("3.1.0") {
+			bgp := false
+			ospf := false
+			for _, destination := range ruleConfig.Destinations {
+				if destination == model.Tier0RouteRedistributionRule_DESTINATIONS_BGP {
+					bgp = true
+				}
+				if destination == model.Tier0RouteRedistributionRule_DESTINATIONS_OSPF {
+					ospf = true
+				}
+			}
+			rule["bgp"] = bgp
+			rule["ospf"] = ospf
+		}
+
 		rules = append(rules, rule)
 	}
 

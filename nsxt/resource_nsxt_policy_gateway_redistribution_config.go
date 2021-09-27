@@ -181,9 +181,11 @@ func resourceNsxtPolicyGatewayRedistributionConfigRead(d *schema.ResourceData, m
 	}
 
 	config := obj.RouteRedistributionConfig
-	d.Set("bgp_enabled", config.BgpEnabled)
-	d.Set("ospf_enabled", config.OspfEnabled)
-	d.Set("rule", getLocaleServiceRedistributionRuleConfig(config))
+	if config != nil {
+		d.Set("bgp_enabled", config.BgpEnabled)
+		d.Set("ospf_enabled", config.OspfEnabled)
+		d.Set("rule", getLocaleServiceRedistributionRuleConfig(config))
+	}
 	if isPolicyGlobalManager(m) && obj.EdgeClusterPath != nil {
 		d.Set("site_path", getSitePathFromEdgePath(*obj.EdgeClusterPath))
 	} else {

@@ -32,6 +32,8 @@ func TestAccResourceNsxtPolicyGatewayRedistributionConfig_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "rule.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.name", "test-rule-1"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.types.#", "3"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.bgp", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.ospf", "true"),
 					resource.TestCheckResourceAttrSet(testResourceName, "gateway_path"),
 				),
 			},
@@ -43,8 +45,12 @@ func TestAccResourceNsxtPolicyGatewayRedistributionConfig_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "rule.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.name", "test-rule-1"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.types.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.bgp", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.ospf", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.1.name", "test-rule-2"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.1.types.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.1.bgp", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.1.ospf", "false"),
 					resource.TestCheckResourceAttrSet(testResourceName, "gateway_path"),
 				),
 			},
@@ -191,8 +197,9 @@ resource "nsxt_policy_gateway_redistribution_config" "test" {
   bgp_enabled  = false
   ospf_enabled = true
   rule {
-      name = "test-rule-1"
+      name  = "test-rule-1"
       types = ["TIER0_SEGMENT", "TIER0_EVPN_TEP_IP", "TIER1_CONNECTED"]
+      ospf  = true
   }
 }`, getAccTestSitePathConfig())
 }
@@ -206,8 +213,10 @@ resource "nsxt_policy_gateway_redistribution_config" "test" {
   bgp_enabled  = true
   ospf_enabled = false
   rule {
-      name = "test-rule-1"
+      name  = "test-rule-1"
       types = ["TIER1_CONNECTED"]
+      bgp   = false
+      ospf  = true
   }
   rule {
       name  = "test-rule-2"
