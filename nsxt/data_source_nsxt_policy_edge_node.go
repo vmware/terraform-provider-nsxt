@@ -41,13 +41,13 @@ func dataSourceNsxtPolicyEdgeNodeRead(d *schema.ResourceData, m interface{}) err
 	// for bool types, but in this case it works and GetOk doesn't
 	memberIndex, memberIndexSet := d.GetOkExists("member_index")
 
-	if isPolicyGlobalManager(m) {
+	if isPolicyGlobalManager(m) || nsxVersionHigherOrEqual("3.2.0") {
 		query := make(map[string]string)
 		query["parent_path"] = edgeClusterPath
 		if memberIndexSet {
 			query["member_index"] = strconv.Itoa(memberIndex.(int))
 		}
-		_, err := policyDataSourceResourceReadWithValidation(d, getPolicyConnector(m), true, "PolicyEdgeNode", query, false)
+		_, err := policyDataSourceResourceReadWithValidation(d, getPolicyConnector(m), isPolicyGlobalManager(m), "PolicyEdgeNode", query, false)
 		if err != nil {
 			return err
 		}
