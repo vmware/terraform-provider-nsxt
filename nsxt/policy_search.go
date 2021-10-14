@@ -94,7 +94,13 @@ func policyDataSourceResourceReadWithValidation(d *schema.ResourceData, connecto
 		return nil, fmt.Errorf("No 'id' or 'display_name' specified for %s", resourceType)
 	}
 	if objID != "" {
-		resultValues, err = listPolicyResourcesByID(connector, isGlobalManager, &objID, &additionalQueryString)
+		if resourceType == "PolicyEdgeNode" {
+			// Edge Node is a special case where id != nsx_id
+			// TODO: consider switching all searches to nsx id
+			resultValues, err = listPolicyResourcesByNsxID(connector, isGlobalManager, &objID, &additionalQueryString)
+		} else {
+			resultValues, err = listPolicyResourcesByID(connector, isGlobalManager, &objID, &additionalQueryString)
+		}
 	} else {
 		resultValues, err = listPolicyResourcesByNameAndType(connector, isGlobalManager, objName, resourceType, &additionalQueryString)
 	}
@@ -115,6 +121,14 @@ func listPolicyResourcesByNameAndType(connector *client.RestConnector, isGlobalM
 
 func listPolicyResourcesByID(connector *client.RestConnector, isGlobalManager bool, resourceID *string, additionalQuery *string) ([]*data.StructValue, error) {
 	query := fmt.Sprintf("id:%s AND marked_for_delete:false", *resourceID)
+	if isGlobalManager {
+		return searchGMPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
+	}
+	return searchLMPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
+}
+
+func listPolicyResourcesByNsxID(connector *client.RestConnector, isGlobalManager bool, resourceID *string, additionalQuery *string) ([]*data.StructValue, error) {
+	query := fmt.Sprintf("nsx_id:%s AND marked_for_delete:false", *resourceID)
 	if isGlobalManager {
 		return searchGMPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
 	}
