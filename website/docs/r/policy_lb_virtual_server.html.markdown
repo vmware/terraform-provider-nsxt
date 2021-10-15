@@ -45,7 +45,7 @@ resource "nsxt_policy_lb_virtual_server" "test" {
   }
 
   rule {
-  	display_name   = "rule_test"
+    display_name   = "rule_test"
     match_strategy = "ALL"
     phase          = "HTTP_REQUEST_REWRITE"
 
