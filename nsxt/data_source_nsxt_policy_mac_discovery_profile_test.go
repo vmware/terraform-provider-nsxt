@@ -23,7 +23,6 @@ func TestAccDataSourceNsxtPolicyMacDiscoveryProfile_basic(t *testing.T) {
 				Config: testAccNsxtPolicyMacDiscoveryProfileReadTemplate(name),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
-					resource.TestCheckResourceAttr(testResourceName, "description", ""),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 				),
 			},
@@ -33,19 +32,19 @@ func TestAccDataSourceNsxtPolicyMacDiscoveryProfile_basic(t *testing.T) {
 
 func TestAccDataSourceNsxtPolicyMacDiscoveryProfile_prefix(t *testing.T) {
 	// Use existing system defined profile
-	name := "default-mac-discovery-profile"
-	namePrefix := name[0:15]
+	name := "default-mac-discovery-profile-for-ens"
+	namePrefix := name[0 : len(name)-3]
 	testResourceName := "data.nsxt_policy_mac_discovery_profile.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.2.0") },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNsxtPolicyMacDiscoveryProfileReadTemplate(namePrefix),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
-					resource.TestCheckResourceAttr(testResourceName, "description", ""),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Default MacDiscovery Profile for ENS"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 				),
 			},

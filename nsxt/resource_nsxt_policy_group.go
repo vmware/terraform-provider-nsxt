@@ -10,6 +10,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
@@ -932,12 +933,30 @@ func resourceNsxtPolicyGroupDelete(d *schema.ResourceData, m interface{}) error 
 	forceDelete := true
 	failIfSubtreeExists := false
 
-	if isPolicyGlobalManager(m) {
-		client := gm_domains.NewDefaultGroupsClient(connector)
-		err = client.Delete(d.Get("domain").(string), id, &failIfSubtreeExists, &forceDelete)
-	} else {
-		client := domains.NewDefaultGroupsClient(connector)
-		err = client.Delete(d.Get("domain").(string), id, &failIfSubtreeExists, &forceDelete)
+	// NOTE: this is temporary solution until global retry mechanism is introduced
+	// via SDK decorator.
+	// Delete operation on platform is asyncrounous, meaning that even correct order of
+	// deletion can cause dependency issues that require retry from client side.
+	maxRetryAttempts := 2
+	for i := 0; i <= maxRetryAttempts; i++ {
+		if isPolicyGlobalManager(m) {
+			client := gm_domains.NewDefaultGroupsClient(connector)
+			err = client.Delete(d.Get("domain").(string), id, &failIfSubtreeExists, &forceDelete)
+		} else {
+			client := domains.NewDefaultGroupsClient(connector)
+			err = client.Delete(d.Get("domain").(string), id, &failIfSubtreeExists, &forceDelete)
+		}
+
+		if err != nil {
+			if _, ok := err.(errors.InvalidRequest); ok {
+				log.Printf("[INFO] Retrying group deletion due to potenitially transient error `%s`, attempt %d", err, i+1)
+			} else {
+				// other type of error - probably legit
+				break
+			}
+		} else {
+			break
+		}
 	}
 
 	if err != nil {

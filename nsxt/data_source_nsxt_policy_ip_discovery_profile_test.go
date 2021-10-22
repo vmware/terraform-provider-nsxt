@@ -23,7 +23,6 @@ func TestAccDataSourceNsxtPolicyIPDiscoveryProfile_basic(t *testing.T) {
 				Config: testAccNsxtPolicyIPDiscoveryProfileReadTemplate(name),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
-					resource.TestCheckResourceAttr(testResourceName, "description", ""),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 				),
 			},
