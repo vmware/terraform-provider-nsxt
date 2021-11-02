@@ -62,7 +62,7 @@ func resourceNsxtPolicyIntrusionServiceProfile() *schema.Resource {
 				MaxItems:    1,
 			},
 			"overridden_signature": {
-				Type:        schema.TypeList,
+				Type:        schema.TypeSet,
 				Description: "Signatures that has been overridden for this Profile",
 				Optional:    true,
 				Elem:        getIdsProfileSignatureSchema(),
@@ -84,7 +84,7 @@ func getIdsProfileCriteriaSchema() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"attack_types": {
-				Type:        schema.TypeList,
+				Type:        schema.TypeSet,
 				Description: "List of attack type criteria",
 				Optional:    true,
 				Elem: &schema.Schema{
@@ -92,7 +92,7 @@ func getIdsProfileCriteriaSchema() *schema.Resource {
 				},
 			},
 			"attack_targets": {
-				Type:        schema.TypeList,
+				Type:        schema.TypeSet,
 				Description: "List of attack target criteria",
 				Optional:    true,
 				Elem: &schema.Schema{
@@ -100,7 +100,7 @@ func getIdsProfileCriteriaSchema() *schema.Resource {
 				},
 			},
 			"cvss": {
-				Type:        schema.TypeList,
+				Type:        schema.TypeSet,
 				Description: "Common Vulnerability Scoring System Ranges",
 				Optional:    true,
 				Elem: &schema.Schema{
@@ -109,7 +109,7 @@ func getIdsProfileCriteriaSchema() *schema.Resource {
 				},
 			},
 			"products_affected": {
-				Type:        schema.TypeList,
+				Type:        schema.TypeSet,
 				Description: "List of products affected",
 				Optional:    true,
 				Elem: &schema.Schema{
@@ -186,10 +186,10 @@ func getIdsProfileCriteriaFromSchema(d *schema.ResourceData) ([]*data.StructValu
 	}
 
 	data := criteria[0].(map[string]interface{})
-	attackTypes := interfaceListToStringList(data["attack_types"].([]interface{}))
-	attackTargets := interfaceListToStringList(data["attack_targets"].([]interface{}))
-	cvss := interfaceListToStringList(data["cvss"].([]interface{}))
-	productsAffected := interfaceListToStringList(data["products_affected"].([]interface{}))
+	attackTypes := interfaceListToStringList(data["attack_types"].(*schema.Set).List())
+	attackTargets := interfaceListToStringList(data["attack_targets"].(*schema.Set).List())
+	cvss := interfaceListToStringList(data["cvss"].(*schema.Set).List())
+	productsAffected := interfaceListToStringList(data["products_affected"].(*schema.Set).List())
 
 	if len(attackTypes) > 0 {
 		item, err := buildIdsProfileCriteriaFilter(model.IdsProfileFilterCriteria_FILTER_NAME_ATTACK_TYPE, attackTypes)
@@ -291,7 +291,7 @@ func setIdsProfileCriteriaInSchema(criteriaList []*data.StructValue, d *schema.R
 func getIdsProfileSignaturesFromSchema(d *schema.ResourceData) []model.IdsProfileLocalSignature {
 	var result []model.IdsProfileLocalSignature
 
-	signatures := d.Get("overridden_signature").([]interface{})
+	signatures := d.Get("overridden_signature").(*schema.Set).List()
 	if len(signatures) == 0 {
 		return result
 	}
