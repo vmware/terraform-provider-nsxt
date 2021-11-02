@@ -23,7 +23,6 @@ func TestAccDataSourceNsxtPolicySpoofGuardProfile_basic(t *testing.T) {
 				Config: testAccNsxtPolicySpoofGuardProfileReadTemplate(name),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
-					resource.TestCheckResourceAttr(testResourceName, "description", ""),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 				),
 			},
