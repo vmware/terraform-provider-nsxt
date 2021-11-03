@@ -31,8 +31,8 @@ func TestAccResourceNsxtPolicyIntrusionServiceProfile_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttr(testResourceName, "severities.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "criteria.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "criteria.0.attack_types.#", "2"),
-					resource.TestCheckResourceAttr(testResourceName, "criteria.0.attack_targets.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.0.attack_types.#", "3"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.0.attack_targets.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "criteria.0.cvss.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "criteria.0.products_affected.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "overridden_signature.#", "1"),
@@ -50,10 +50,10 @@ func TestAccResourceNsxtPolicyIntrusionServiceProfile_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttr(testResourceName, "severities.#", "3"),
 					resource.TestCheckResourceAttr(testResourceName, "criteria.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "criteria.0.attack_types.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.0.attack_types.#", "3"),
 					resource.TestCheckResourceAttr(testResourceName, "criteria.0.attack_targets.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "criteria.0.cvss.#", "4"),
-					resource.TestCheckResourceAttr(testResourceName, "criteria.0.products_affected.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.0.products_affected.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "overridden_signature.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 				),
@@ -154,12 +154,12 @@ resource "nsxt_policy_intrusion_service_profile" "test" {
   severities   = ["HIGH", "CRITICAL"]
 
   criteria {
-    attack_types   = ["trojan-activity", "successful-admin"]
-    attack_targets = ["SERVER"]
+    attack_types   = ["trojan-activity", "policy-violation", "attempted-admin"]
+    attack_targets = ["SERVER", "SMTP Server"]
   }
 
   overridden_signature {
-    signature_id = "2026323"
+    signature_id = "2030240"
     action       = "REJECT"
     enabled      = true
   }
@@ -179,19 +179,19 @@ resource "nsxt_policy_intrusion_service_profile" "test" {
   severities   = ["HIGH", "CRITICAL", "LOW"]
 
   criteria {
-    attack_types      = ["trojan-activity", "successful-admin"]
+    attack_types      = ["trojan-activity", "policy-violation", "attempted-admin"]
     cvss              = ["NONE", "MEDIUM", "HIGH", "CRITICAL"]
-    products_affected = ["Linux"]
+    products_affected = ["Linux", "VMware"]
   }
 
   overridden_signature {
-    signature_id = "2026323"
+    signature_id = "2030240"
     action       = "REJECT"
     enabled      = true
   }
 
   overridden_signature {
-    signature_id = "2026325"
+    signature_id = "2030241"
     action       = "REJECT"
     enabled      = true
   }
