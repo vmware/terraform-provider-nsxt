@@ -12,6 +12,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/realized_state"
@@ -274,4 +275,39 @@ func convertModelBindingType(obj interface{}, sourceType bindings.BindingType, d
 	}
 
 	return gmObj, nil
+}
+
+func isTransientAPIError(err error) bool {
+	if _, ok := err.(errors.InvalidRequest); ok {
+		return true
+	}
+	if _, ok := err.(errors.ConcurrentChange); ok {
+		return true
+	}
+
+	return false
+}
+
+func retryUponTransientAPIError(operation func() error) error {
+	// NOTE: this is temporary solution until global retry mechanism is introduced
+	// via SDK decorator.
+	// Delete operation on platform is asyncrounous, meaning that even correct order of
+	// deletion can cause dependency issues that require retry from client side.
+	maxRetryAttempts := 3
+	var err error
+	for i := 0; i <= maxRetryAttempts; i++ {
+		err = operation()
+		if err == nil {
+			return nil
+		}
+
+		if !isTransientAPIError(err) {
+			// other type of error - probably legit
+			return err
+		}
+
+		log.Printf("[INFO] Retrying operation due to potenitially transient error `%s`, attempt %d", err, i+1)
+	}
+
+	return err
 }

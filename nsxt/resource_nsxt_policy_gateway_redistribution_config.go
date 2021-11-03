@@ -85,18 +85,23 @@ func policyGatewayRedistributionConfigPatch(d *schema.ResourceData, m interface{
 		RouteRedistributionConfig: &redistributionStruct,
 	}
 
-	if isPolicyGlobalManager(m) {
-		// Use patch to only update the relevant fields
-		rawObj, err := convertModelBindingType(serviceStruct, model.LocaleServicesBindingType(), gm_model.LocaleServicesBindingType())
-		if err != nil {
-			return err
-		}
-		client := gm_tier0s.NewDefaultLocaleServicesClient(connector)
-		return client.Patch(gwID, localeServiceID, rawObj.(gm_model.LocaleServices))
+	doPatch := func() error {
+		if isPolicyGlobalManager(m) {
+			// Use patch to only update the relevant fields
+			rawObj, errConv := convertModelBindingType(serviceStruct, model.LocaleServicesBindingType(), gm_model.LocaleServicesBindingType())
+			if errConv != nil {
+				return errConv
+			}
+			client := gm_tier0s.NewDefaultLocaleServicesClient(connector)
+			return client.Patch(gwID, localeServiceID, rawObj.(gm_model.LocaleServices))
 
+		}
+		client := tier_0s.NewDefaultLocaleServicesClient(connector)
+		return client.Patch(gwID, localeServiceID, serviceStruct)
 	}
-	client := tier_0s.NewDefaultLocaleServicesClient(connector)
-	return client.Patch(gwID, localeServiceID, serviceStruct)
+	// since redistribution config is not a separate API endpoint, but sub-clause of Tier0,
+	// concurrency issues may arise that require retry from client side.
+	return retryUponTransientAPIError(doPatch)
 }
 
 func resourceNsxtPolicyGatewayRedistributionConfigCreate(d *schema.ResourceData, m interface{}) error {
@@ -223,17 +228,19 @@ func resourceNsxtPolicyGatewayRedistributionConfigDelete(d *schema.ResourceData,
 		return fmt.Errorf("Error obtaining Tier0 Gateway id or Locale Service id")
 	}
 
-	// Update the locale service with empty HaVipConfigs using get/post
-	var err error
-	if isPolicyGlobalManager(m) {
-		client := gm_tier0s.NewDefaultLocaleServicesClient(connector)
-		gmObj, err1 := client.Get(gwID, localeServiceID)
-		if err1 != nil {
-			return handleDeleteError("Tier0 Redistribution config", id, err)
+	// Update the locale service with empty Redistribution config using get/post
+	doUpdate := func() error {
+		var err error
+		if isPolicyGlobalManager(m) {
+			client := gm_tier0s.NewDefaultLocaleServicesClient(connector)
+			gmObj, err1 := client.Get(gwID, localeServiceID)
+			if err1 != nil {
+				return handleDeleteError("Tier0 Redistribution config", id, err)
+			}
+			gmObj.RouteRedistributionConfig = nil
+			_, err = client.Update(gwID, localeServiceID, gmObj)
+			return err
 		}
-		gmObj.RouteRedistributionConfig = nil
-		_, err = client.Update(gwID, localeServiceID, gmObj)
-	} else {
 		client := tier_0s.NewDefaultLocaleServicesClient(connector)
 		obj, err1 := client.Get(gwID, localeServiceID)
 		if err1 != nil {
@@ -241,7 +248,11 @@ func resourceNsxtPolicyGatewayRedistributionConfigDelete(d *schema.ResourceData,
 		}
 		obj.RouteRedistributionConfig = nil
 		_, err = client.Update(gwID, localeServiceID, obj)
+		return err
+
 	}
+
+	err := retryUponTransientAPIError(doUpdate)
 	if err != nil {
 		return handleDeleteError("Tier0 RedistributionConfig config", id, err)
 	}
