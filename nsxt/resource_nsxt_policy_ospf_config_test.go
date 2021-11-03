@@ -23,7 +23,7 @@ var accTestPolicyOspfConfigCreateAttributes = map[string]string{
 
 var accTestPolicyOspfConfigUpdateAttributes = map[string]string{
 	"display_name":          getAccTestResourceName(),
-	"description":           "terraform created",
+	"description":           "terraform updated",
 	"enabled":               "true",
 	"ecmp":                  "false",
 	"prefix":                "20.0.2.0/24",
