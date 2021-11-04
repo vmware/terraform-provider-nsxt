@@ -130,3 +130,5 @@ terraform import nsxt_policy_vlan_segment.segment1 ID
 The above command imports the VLAN backed segment  named `segment1` with the NSX Segment ID `ID`.
 
 ~> **NOTE:** Only flexible (infra) segments can be imported. Segments that are fixed under certain gateway are not supported.
+
+~> **NOTE:** Please make sure `advanced_config` clause is present in configuration if you with to include it in import, otherwise it will be ignored with NSX 3.2 onwards. This is due to a platform change in handling advanced config in the API.
