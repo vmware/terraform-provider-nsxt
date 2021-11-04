@@ -129,3 +129,4 @@ terraform import nsxt_policy_segment.segment1 ID
 The above command imports the segment  named `segment1` with the NSX Segment ID `ID`.
 
 ~> **NOTE:** Only flexible (infra) segments can be imported here. To import fixed segment, please use `nsxt_policy_fixed_segment` resource.
+~> **NOTE:** Please make sure `advanced_config` clause is present in configuration if you with to include it in import, otherwise it will be ignored with NSX 3.2 onwards. This is due to a platform change in handling advanced config in the API.
