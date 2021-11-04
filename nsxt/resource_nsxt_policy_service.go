@@ -680,14 +680,17 @@ func resourceNsxtPolicyServiceDelete(d *schema.ResourceData, m interface{}) erro
 
 	connector := getPolicyConnector(m)
 
-	var err error
-	if isPolicyGlobalManager(m) {
-		client := gm_infra.NewDefaultServicesClient(connector)
-		err = client.Delete(id)
-	} else {
+	doDelete := func() error {
+		if isPolicyGlobalManager(m) {
+			client := gm_infra.NewDefaultServicesClient(connector)
+			return client.Delete(id)
+		}
 		client := infra.NewDefaultServicesClient(connector)
-		err = client.Delete(id)
+		return client.Delete(id)
 	}
+
+	err := retryUponTransientAPIError(doDelete)
+
 	if err != nil {
 		return handleDeleteError("Service", id, err)
 	}
