@@ -11,10 +11,6 @@ website][tf-website] and the [GitHub project page][tf-github].
 [tf-website]: https://terraform.io/
 [tf-github]: https://github.com/hashicorp/terraform
 
-This provider plugin is maintained by a collaboration between
-[VMware](https://www.vmware.com/) and the Terraform team at
-[HashiCorp](https://www.hashicorp.com/).
-
 Documentation on the NSX platform can be found at the [NSX-T Documentation page](https://docs.vmware.com/en/VMware-NSX-T/index.html)
 
 # Using the Provider
@@ -36,15 +32,13 @@ The provider is documented in full on the Terraform website and can be found
 
 ### Controlling the provider version
 
-Note that you can also control the provider version. This requires the use of a
-`provider` block in your Terraform configuration if you have not added one
-already.
+Note that you can also control the provider version. This requires the use of a `provider` block in your Terraform configuration if you have not added one already.
 
 The syntax is as follows:
 
 ```hcl
 provider "nsxt" {
-  version = "~> 3.0"
+  version = "~> 3.2"
   ...
 }
 ```
@@ -63,7 +57,7 @@ You can list versions of providers installed in your environment by running “t
 $ ./terraform version
 Terraform v1.0.0
 on linux_amd64
-+ provider registry.terraform.io/vmware/nsxt v3.2.2
++ provider registry.terraform.io/vmware/nsxt v3.2.4
 ```
 
 # Manual Installation
@@ -164,6 +158,7 @@ to run.
 
 The following versions of NSX are supported:
 
+ * NSX-T 3.2.*
  * NSX-T 3.1.*
  * NSX-T 3.0.*
  * NSX-T 2.5.* support is limited with provider version 3.2.x and above

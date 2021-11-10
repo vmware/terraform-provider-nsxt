@@ -939,6 +939,9 @@ func resourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{}) e
 					redistributionConfigs := getLocaleServiceRedistributionConfig(&service)
 					if d.Get("redistribution_set").(bool) {
 						d.Set("redistribution_config", redistributionConfigs)
+					} else {
+						// convert from null to false during import for consistency
+						d.Set("redistribution_set", false)
 					}
 					break
 				}
