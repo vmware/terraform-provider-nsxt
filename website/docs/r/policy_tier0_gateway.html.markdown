@@ -40,14 +40,6 @@ resource "nsxt_policy_tier0_gateway" "tier0_gw" {
     }
   }
 
-  redistribution_config {
-    bgp_enabled = true
-    rule {
-      name  = "rule1"
-      types = ["TIER0_STATIC", "TIER0_CONNECTED", "TIER1_CONNECTED"]
-    }
-  }
-
   tag {
     scope = "color"
     tag   = "blue"
