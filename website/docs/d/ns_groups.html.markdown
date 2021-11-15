@@ -1,5 +1,5 @@
 ---
-subcategory: "Manager"
+subcategory: "Beta"
 layout: "nsxt"
 page_title: "NSXT: ns_groups"
 description: A networking and security groups data source. This data source builds "display name to id" map representation of the whole table.
@@ -13,7 +13,7 @@ time at scale, compared to multiple instances of `nsxt_ns_group` data source.
 ## Example Usage
 
 ```hcl
-data "nsxt_ns_group" "map" {
+data "nsxt_ns_groups" "map" {
 }
 
 resource "nsxt_firewall_section" "s1" {
