@@ -1,3 +1,26 @@
+## 3.2.5 (October 15, 2021)
+
+BUG FIXES:
+
+* `resource/nsxt_policy_gateway_route_map`: Allow multiple areas in AS path validation ([#666](https://github.com/vmware/terraform-provider-nsxt/pull/666))
+* `resource/nsxt_policy_intrusion_service_profile`: Fix potential non-empty plan issues by switching argument type from List to Set where appropriate. This fix is relevant with NSX 3.2 onwards ([#684](https://github.com/vmware/terraform-provider-nsxt/pull/684))
+
+EXPERIMENTAL FEATURES:
+
+* **New Data Source**: `nsxt_policy_lb_service`.
+* **New Data Source**: `nsxt_ns_groups`. This data source is introduced to address scale issues. Please note this data source uses non-policy (Manager) API and should only be used with features that have limited Policy support.
+* **New Data Source**: `nsxt_ns_services`. This data source is introduced to address scale issues. Please note this data source uses non-policy (Manager) API and should only be used with features that have limited Policy support.
+
+IMPROVEMENTS:
+
+* `resource/nsxt_policy_gateway_redistribution_config`: Add `bgp` and `ospf` markers to redistribution rules([#673](https://github.com/vmware/terraform-provider-nsxt/pull/673))
+* Introduce retries in selected resources to avoid most common deletion syncronization issues. This measure is temporary until provider-wide retry is implemented with SDK enhancement ([#681](https://github.com/vmware/terraform-provider-nsxt/pull/681), [#686](https://github.com/vmware/terraform-provider-nsxt/pull/686), [#687](https://github.com/vmware/terraform-provider-nsxt/pull/687))
+
+NSX 3.2.0 NOTES:
+
+* `data/nsxt_policy_edge_node`: Policy API for edge node has changed in NSX 3.2.0. While backwards compatibility is not broken with this resource, it is important to note that `path` attribute to edge node no longer reflects node UUID, but rather its ordinal value ([#679](https://github.com/vmware/terraform-provider-nsxt/pull/679))
+* Policy Segment resources: Following change in populating `advanced_config` segment sub-clause, there is a new nuance while importing segment resources with NSX 3.2.0. If you wish to import `advanced_config` settings, `advanced_config` needs to be specified in your terraform configuration prior to importing ([#671](https://github.com/vmware/terraform-provider-nsxt/pull/671))
+
 ## 3.2.4 (August 26, 2021)
 
 BUG FIXES:

@@ -1,5 +1,5 @@
 ---
-subcategory: "Manager"
+subcategory: "Beta"
 layout: "nsxt"
 page_title: "NSXT: ns_services"
 description: A networking and security services data source. This data source builds "display name to id" map representation of the whole table.
@@ -13,7 +13,7 @@ time at scale, compared to multiple instances of `nsxt_ns_service` data source.
 ## Example Usage
 
 ```hcl
-data "nsxt_ns_service" "map" {
+data "nsxt_ns_services" "map" {
 }
 
 resource "nsxt_firewall_section" "s1" {

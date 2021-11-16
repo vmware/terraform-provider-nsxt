@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - Load Balancer"
+subcategory: "Beta"
 layout: "nsxt"
 page_title: "NSXT: policy_lb_service"
 description: Policy Load Balancer Service data source.
