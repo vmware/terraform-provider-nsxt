@@ -19,6 +19,8 @@ body:
       label: Terraform Provider
       description: Please provide the Terraform provider for NSX-T Data Center version.
       placeholder: e.g. v3.2.5
+    validations:
+       required: true
   - type: input
     id: version-nsx
     attributes:
