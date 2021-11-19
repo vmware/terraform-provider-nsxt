@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Provider Documentation
+    url: https://registry.terraform.io/providers/vmware/nsxt/latest/docs
+    about: Having trouble with this Terraform provider? Check out the provider documentation.
+  - name: Product Documentation
+    url: https://docs.vmware.com/en/VMware-NSX-T-Data-Center/index.html
+    about: Having trouble with NSX-T Data Center? Check out the product documentation.
