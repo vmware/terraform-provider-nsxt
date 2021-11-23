@@ -362,6 +362,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_ospf_config":                      resourceNsxtPolicyOspfConfig(),
 			"nsxt_policy_ospf_area":                        resourceNsxtPolicyOspfArea(),
 			"nsxt_policy_gateway_redistribution_config":    resourceNsxtPolicyGatewayRedistributionConfig(),
+			"nsxt_policy_mac_discovery_profile":            resourceNsxtPolicyMacDiscoveryProfile(),
 		},
 
 		ConfigureFunc: providerConfigure,
