@@ -135,6 +135,14 @@ directory for more details, in addition to
 used to specify the locations of certain pre-created resources that some tests
 require.
 
+Minimum environment variable :
+```sh
+$ export NSXT_MANAGER_HOST="192.168.110.41"
+$ export NSXT_USERNAME="admin"
+$ export NSXT_PASSWORD="MyPassword123!"
+$ export NSXT_ALLOW_UNVERIFIED_SSL=true
+```
+
 ## Running the Acceptance Tests
 
 After this is done, you can run the acceptance tests by running:
