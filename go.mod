@@ -17,4 +17,5 @@ require (
 	github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm v0.4.0
 	golang.org/x/mod v0.4.0 // indirect
 	golang.org/x/tools v0.1.0 // indirect
+	github.com/hashicorp/terraform-json v0.12.0
 )
