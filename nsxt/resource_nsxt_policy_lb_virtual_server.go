@@ -1692,7 +1692,19 @@ func resourceNsxtPolicyLBVirtualServerRead(d *schema.ResourceData, m interface{}
 	d.Set("sorry_pool_path", obj.SorryPoolPath)
 	d.Set("log_significant_event_only", obj.LogSignificantEventOnly)
 	setPolicyAccessListControlInSchema(d, obj.AccessListControl)
-	setPolicyLbRulesInSchema(d, obj.Rules)
+
+	/*
+		This needs some explanation: we introduced the "rule" attribute in a later version, but we don't want
+		to break existing virtual servers where the rules might have been defined manually.
+
+		As such, we don't want to change anything as long as the user doesn't define any "rule" section in the resource.
+
+		This, in turn, should also not trigger the "plan" phase for existing rules, so we also ignore any existing "live"
+		rules unless we find rules to also exist in the resource state.
+	*/
+	if d.State().Attributes["rule.#"] != "0" {
+		setPolicyLbRulesInSchema(d, obj.Rules)
+	}
 
 	return nil
 }
@@ -1750,6 +1762,32 @@ func resourceNsxtPolicyLBVirtualServerUpdate(d *schema.ResourceData, m interface
 	}
 
 	policyLBVirtualServerVersionDependantSet(d, &obj)
+
+	/*
+		This needs some explanation: we introduced the "rule" attribute in a later version, but we don't want
+		to break existing virtual servers where the rules might have been defined manually.
+
+		As such, we don't want to change anything as long as the user doesn't define any "rule" section in the resource.
+
+		For the "plan" phase, we only read the "live" rules if there are also rules in the state. So a "change" can also
+		only be detected if there have been rules in the state already, this is our trigger to apply the change.
+
+		no rules in resource / no rules in state / no rules in NSX => no change
+		no rules in resource / no rules in state /    rules in NSX => no change (legacy behaviour)
+		   rules in resource / no rules in state / no rules in NSX => rules will be created
+		   rules in resource /    rules in state /    rules in NSX => rules will be changed
+		no rules in resource /    rules in state /    rules in NSX => rules will be deleted
+	*/
+	if !d.HasChange("rule.#") {
+		existingObj, err := client.Get(id)
+		if err != nil {
+			return handleUpdateError("LBVirtualServer", id, err)
+		}
+
+		if len(existingObj.Rules) > 0 {
+			obj.Rules = existingObj.Rules
+		}
+	}
 
 	if maxNewConnectionRate > 0 {
 		obj.MaxNewConnectionRate = &maxNewConnectionRate

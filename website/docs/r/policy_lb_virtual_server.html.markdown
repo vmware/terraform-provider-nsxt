@@ -11,6 +11,8 @@ This resource provides a method for the management of a Load Balancer Virtual Se
 
 This resource is applicable to NSX Policy Manager.
 
+Note that the 'rule' section has been added at a later date. In order to preserve backward compatibility for users that have created rules manually, existing ("live") rules will not be changed if there is no 'rule' section present in the resource definition. If you want to delete manually created rules from a managed resource, you might have to initially add a 'rule' section and subsequentially delete it again. 
+
 ## Example Usage
 
 ```hcl
