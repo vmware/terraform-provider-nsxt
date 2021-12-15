@@ -387,6 +387,22 @@ func resourceReferenceHash(v interface{}) int {
 	return result
 }
 
+func resourceKeyValueHash(v interface{}) int {
+	var buf bytes.Buffer
+
+	if v != nil {
+		m := v.(map[string]interface{})
+		for k, v := range m {
+			buf.WriteString(fmt.Sprintf("%s-%s", k, v))
+		}
+	}
+	result := int(crc32.ChecksumIEEE(buf.Bytes()))
+	if result < 0 {
+		return -result
+	}
+	return result
+}
+
 func returnResourceReferencesSet(references []common.ResourceReference) *schema.Set {
 	var referenceList []interface{}
 	for _, reference := range references {
