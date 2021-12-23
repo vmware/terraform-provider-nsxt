@@ -3,7 +3,6 @@
 
 package info
 
-
 type PrivilegeInfo struct {
 	propertyPath string
 	privileges   []string

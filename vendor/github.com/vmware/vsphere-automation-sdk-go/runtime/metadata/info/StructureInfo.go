@@ -3,7 +3,6 @@
 
 package info
 
-
 type StructureInfo struct {
 	identifier      string
 	isError         bool

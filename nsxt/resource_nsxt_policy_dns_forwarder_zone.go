@@ -57,10 +57,10 @@ func resourceNsxtPolicyDNSForwarderZone() *schema.Resource {
 func resourceNsxtPolicyDNSForwarderZoneExists(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
 	var err error
 	if isGlobalManager {
-		client := gm_infra.NewDefaultDnsForwarderZonesClient(connector)
+		client := gm_infra.NewDnsForwarderZonesClient(connector)
 		_, err = client.Get(id)
 	} else {
-		client := infra.NewDefaultDnsForwarderZonesClient(connector)
+		client := infra.NewDnsForwarderZonesClient(connector)
 		_, err = client.Get(id)
 	}
 	if err == nil {
@@ -103,11 +103,11 @@ func policyDNSForwarderZonePatch(id string, d *schema.ResourceData, connector cl
 		if convErr != nil {
 			return convErr
 		}
-		client := gm_infra.NewDefaultDnsForwarderZonesClient(connector)
+		client := gm_infra.NewDnsForwarderZonesClient(connector)
 		return client.Patch(id, gmObj.(gm_model.PolicyDnsForwarderZone))
 	}
 
-	client := infra.NewDefaultDnsForwarderZonesClient(connector)
+	client := infra.NewDnsForwarderZonesClient(connector)
 	return client.Patch(id, obj)
 }
 
@@ -143,7 +143,7 @@ func resourceNsxtPolicyDNSForwarderZoneRead(d *schema.ResourceData, m interface{
 
 	var obj model.PolicyDnsForwarderZone
 	if isPolicyGlobalManager(m) {
-		client := gm_infra.NewDefaultDnsForwarderZonesClient(connector)
+		client := gm_infra.NewDnsForwarderZonesClient(connector)
 		gmObj, err := client.Get(id)
 		if err != nil {
 			return handleReadError(d, "Dns Forwarder Zone", id, err)
@@ -155,7 +155,7 @@ func resourceNsxtPolicyDNSForwarderZoneRead(d *schema.ResourceData, m interface{
 		}
 		obj = lmObj.(model.PolicyDnsForwarderZone)
 	} else {
-		client := infra.NewDefaultDnsForwarderZonesClient(connector)
+		client := infra.NewDnsForwarderZonesClient(connector)
 		var err error
 		obj, err = client.Get(id)
 		if err != nil {
@@ -203,10 +203,10 @@ func resourceNsxtPolicyDNSForwarderZoneDelete(d *schema.ResourceData, m interfac
 	connector := getPolicyConnector(m)
 	var err error
 	if isPolicyGlobalManager(m) {
-		client := gm_infra.NewDefaultDnsForwarderZonesClient(connector)
+		client := gm_infra.NewDnsForwarderZonesClient(connector)
 		err = client.Delete(id)
 	} else {
-		client := infra.NewDefaultDnsForwarderZonesClient(connector)
+		client := infra.NewDnsForwarderZonesClient(connector)
 		err = client.Delete(id)
 	}
 

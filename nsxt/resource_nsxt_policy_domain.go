@@ -51,7 +51,7 @@ func resourceNsxtPolicyDomain() *schema.Resource {
 func resourceNsxtPolicyDomainExists(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
 	var err error
 	if isGlobalManager {
-		client := gm_infra.NewDefaultDomainsClient(connector)
+		client := gm_infra.NewDomainsClient(connector)
 		_, err = client.Get(id)
 	} else {
 		return false, fmt.Errorf("Domain resource is not supported for local manager")
@@ -114,7 +114,7 @@ func setDomainStructWithChildren(m interface{}, domain *model.Domain, locations 
 		// Delete old existing locations
 		connector := getPolicyConnector(m)
 		converter := bindings.NewTypeConverter()
-		dmClient := gm_domain.NewDefaultDomainDeploymentMapsClient(connector)
+		dmClient := gm_domain.NewDomainDeploymentMapsClient(connector)
 		// Get all current locations
 		objList, err := dmClient.List(*domain.Id, nil, nil, nil, nil, nil, nil)
 		if err != nil {
@@ -224,7 +224,7 @@ func resourceNsxtPolicyDomainRead(d *schema.ResourceData, m interface{}) error {
 		return handleCreateError("Domain", id, fmt.Errorf("Domain resource is not supported for local manager"))
 	}
 
-	client := gm_infra.NewDefaultDomainsClient(connector)
+	client := gm_infra.NewDomainsClient(connector)
 	gmObj, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "Domain", id, err)
@@ -244,7 +244,7 @@ func resourceNsxtPolicyDomainRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("revision", obj.Revision)
 
 	// Also read deployment maps
-	dmClient := gm_domain.NewDefaultDomainDeploymentMapsClient(connector)
+	dmClient := gm_domain.NewDomainDeploymentMapsClient(connector)
 	objList, err := dmClient.List(id, nil, nil, nil, nil, nil, nil)
 	if err != nil {
 		return handleListError("Domain", err)
@@ -314,7 +314,7 @@ func resourceNsxtPolicyDomainDelete(d *schema.ResourceData, m interface{}) error
 	}
 
 	connector := getPolicyConnector(m)
-	client := gm_infra.NewDefaultDomainsClient(connector)
+	client := gm_infra.NewDomainsClient(connector)
 	err := client.Delete(id)
 	if err != nil {
 		return handleDeleteError("Domain", id, err)

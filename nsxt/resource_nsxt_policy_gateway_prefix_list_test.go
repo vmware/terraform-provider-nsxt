@@ -140,10 +140,10 @@ func testAccNsxtPolicyGWPrefixListExists(resourceName string) resource.TestCheck
 
 		var err error
 		if testAccIsGlobalManager() {
-			client := gm_tier_0s.NewDefaultPrefixListsClient(connector)
+			client := gm_tier_0s.NewPrefixListsClient(connector)
 			_, err = client.Get(gwID, resourceID)
 		} else {
-			client := tier_0s.NewDefaultPrefixListsClient(connector)
+			client := tier_0s.NewPrefixListsClient(connector)
 			_, err = client.Get(gwID, resourceID)
 		}
 		if err != nil {
@@ -168,10 +168,10 @@ func testAccNsxtPolicyGWPrefixListCheckDestroy(state *terraform.State, displayNa
 
 		var err error
 		if testAccIsGlobalManager() {
-			client := gm_tier_0s.NewDefaultPrefixListsClient(connector)
+			client := gm_tier_0s.NewPrefixListsClient(connector)
 			_, err = client.Get(gwID, resourceID)
 		} else {
-			client := tier_0s.NewDefaultPrefixListsClient(connector)
+			client := tier_0s.NewPrefixListsClient(connector)
 			_, err = client.Get(gwID, resourceID)
 		}
 		if err == nil {

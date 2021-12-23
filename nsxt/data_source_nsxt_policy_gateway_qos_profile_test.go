@@ -64,10 +64,10 @@ func testAccDataSourceNsxtPolicyGatewayQosProfileCreate(name string) error {
 		if convErr != nil {
 			return convErr
 		}
-		client := gm_infra.NewDefaultGatewayQosProfilesClient(connector)
+		client := gm_infra.NewGatewayQosProfilesClient(connector)
 		err = client.Patch(id, gmObj.(gm_model.GatewayQosProfile), nil)
 	} else {
-		client := infra.NewDefaultGatewayQosProfilesClient(connector)
+		client := infra.NewGatewayQosProfilesClient(connector)
 		err = client.Patch(id, obj, nil)
 	}
 
@@ -87,7 +87,7 @@ func testAccDataSourceNsxtPolicyGatewayQosProfileDeleteByName(name string) error
 	if testAccIsGlobalManager() {
 		objID, err := testGetObjIDByName(name, "GatewayQosProfile")
 		if err == nil {
-			client := gm_infra.NewDefaultGatewayQosProfilesClient(connector)
+			client := gm_infra.NewGatewayQosProfilesClient(connector)
 			err := client.Delete(objID, nil)
 			if err != nil {
 				return handleDeleteError("GatewayQosProfile", objID, err)
@@ -95,7 +95,7 @@ func testAccDataSourceNsxtPolicyGatewayQosProfileDeleteByName(name string) error
 			return nil
 		}
 	} else {
-		client := infra.NewDefaultGatewayQosProfilesClient(connector)
+		client := infra.NewGatewayQosProfilesClient(connector)
 		// Find the object by name
 		objList, err := client.List(nil, nil, nil, nil, nil, nil)
 		if err != nil {

@@ -336,7 +336,7 @@ func resourceNsxtPolicyPredefinedSecurityPolicyRead(d *schema.ResourceData, m in
 
 	var obj model.SecurityPolicy
 	if isPolicyGlobalManager(m) {
-		client := gm_domains.NewDefaultSecurityPoliciesClient(connector)
+		client := gm_domains.NewSecurityPoliciesClient(connector)
 		gmObj, err := client.Get(domain, id)
 		if err != nil {
 			return handleReadError(d, "Predefined Security Policy", id, err)
@@ -348,7 +348,7 @@ func resourceNsxtPolicyPredefinedSecurityPolicyRead(d *schema.ResourceData, m in
 		obj = rawObj.(model.SecurityPolicy)
 	} else {
 		var err error
-		client := domains.NewDefaultSecurityPoliciesClient(connector)
+		client := domains.NewSecurityPoliciesClient(connector)
 		obj, err = client.Get(domain, id)
 		if err != nil {
 			return handleReadError(d, "Predefined Security Policy", id, err)

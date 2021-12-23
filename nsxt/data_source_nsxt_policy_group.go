@@ -29,7 +29,7 @@ func dataSourceNsxtPolicyGroup() *schema.Resource {
 
 func listPolicyGroups(domain string, connector *client.RestConnector) ([]model.Group, error) {
 	// Local Manager only
-	client := domains.NewDefaultGroupsClient(connector)
+	client := domains.NewGroupsClient(connector)
 
 	var results []model.Group
 	var cursor *string
@@ -66,7 +66,7 @@ func dataSourceNsxtPolicyGroupRead(d *schema.ResourceData, m interface{}) error 
 	}
 
 	connector := getPolicyConnector(m)
-	client := domains.NewDefaultGroupsClient(connector)
+	client := domains.NewGroupsClient(connector)
 	domain := d.Get("domain").(string)
 	objID := d.Get("id").(string)
 	objName := d.Get("display_name").(string)

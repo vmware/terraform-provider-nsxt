@@ -34,7 +34,7 @@ func dataSourceNsxtPolicyIPDiscoveryProfileRead(d *schema.ResourceData, m interf
 		return nil
 	}
 	connector := getPolicyConnector(m)
-	client := infra.NewDefaultIpDiscoveryProfilesClient(connector)
+	client := infra.NewIpDiscoveryProfilesClient(connector)
 
 	objID := d.Get("id").(string)
 	objName := d.Get("display_name").(string)

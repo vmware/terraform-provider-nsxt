@@ -1,4 +1,4 @@
-/* Copyright © 2019 VMware, Inc. All Rights Reserved.
+/* Copyright © 2019, 2021 VMware, Inc. All Rights Reserved.
    SPDX-License-Identifier: BSD-2-Clause */
 
 package l10n
@@ -20,14 +20,14 @@ func NewRuntimeError(id string, args map[string]string) *Error {
 	if args == nil {
 		args = map[string]string{}
 	}
-	runtimeMessages := NewDefaultRuntimeMessageFormatter()
+	runtimeMessages := DefaultMessageFormatter()
 	msg := runtimeMessages.GetLocalizedMessage(id, args)
 	log.Error(msg)
 	return &Error{id: id, defaultMessage: msg, args: args}
 }
 
 func NewRuntimeErrorNoParam(id string) *Error {
-	runtimeMessages := NewDefaultRuntimeMessageFormatter()
+	runtimeMessages := DefaultMessageFormatter()
 	args := map[string]string{}
 	msg := runtimeMessages.GetLocalizedMessage(id, args)
 	log.Error(msg)

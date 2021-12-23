@@ -1,28 +1,22 @@
-/* Copyright © 2019 VMware, Inc. All Rights Reserved.
-   SPDX-License-Identifier: BSD-2-Clause */
+// Copyright © 2019-2021 VMware, Inc. All Rights Reserved.
+// SPDX-License-Identifier: BSD-2-Clause
 
-// Code generated. DO NOT EDIT.
+// Auto generated code. DO NOT EDIT.
 
-/*
- * Data type definitions file for service: IpSubnets.
- * Includes binding types of a structures and enumerations defined in the service.
- * Shared by client-side stubs and server-side skeletons to ensure type
- * compatibility.
- */
+// Data type definitions file for service: IpSubnets.
+// Includes binding types of a structures and enumerations defined in the service.
+// Shared by client-side stubs and server-side skeletons to ensure type
+// compatibility.
 
 package ip_pools
 
 import (
-	"reflect"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+	"reflect"
 )
-
-
-
-
 
 func ipSubnetsDeleteInputType() bindings.StructType {
 	fields := make(map[string]bindings.BindingType)
@@ -78,7 +72,7 @@ func ipSubnetsDeleteRestMetadata() protocol.OperationRestMetadata {
 		204,
 		"",
 		errorHeaders,
-		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func ipSubnetsGetInputType() bindings.StructType {
@@ -93,7 +87,7 @@ func ipSubnetsGetInputType() bindings.StructType {
 }
 
 func ipSubnetsGetOutputType() bindings.BindingType {
-	return bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.IpAddressPoolSubnetBindingType),}, bindings.REST)
+	return bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.IpAddressPoolSubnetBindingType)}, bindings.REST)
 }
 
 func ipSubnetsGetRestMetadata() protocol.OperationRestMetadata {
@@ -135,7 +129,7 @@ func ipSubnetsGetRestMetadata() protocol.OperationRestMetadata {
 		200,
 		"",
 		errorHeaders,
-		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func ipSubnetsListInputType() bindings.StructType {
@@ -221,7 +215,7 @@ func ipSubnetsListRestMetadata() protocol.OperationRestMetadata {
 		200,
 		"",
 		errorHeaders,
-		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func ipSubnetsPatchInputType() bindings.StructType {
@@ -229,7 +223,7 @@ func ipSubnetsPatchInputType() bindings.StructType {
 	fieldNameMap := make(map[string]string)
 	fields["ip_pool_id"] = bindings.NewStringType()
 	fields["ip_subnet_id"] = bindings.NewStringType()
-	fields["ip_address_pool_subnet"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.IpAddressPoolSubnetBindingType),}, bindings.REST)
+	fields["ip_address_pool_subnet"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.IpAddressPoolSubnetBindingType)}, bindings.REST)
 	fieldNameMap["ip_pool_id"] = "IpPoolId"
 	fieldNameMap["ip_subnet_id"] = "IpSubnetId"
 	fieldNameMap["ip_address_pool_subnet"] = "IpAddressPoolSubnet"
@@ -252,12 +246,12 @@ func ipSubnetsPatchRestMetadata() protocol.OperationRestMetadata {
 	bodyFieldsMap := map[string]string{}
 	fields["ip_pool_id"] = bindings.NewStringType()
 	fields["ip_subnet_id"] = bindings.NewStringType()
-	fields["ip_address_pool_subnet"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.IpAddressPoolSubnetBindingType),}, bindings.REST)
+	fields["ip_address_pool_subnet"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.IpAddressPoolSubnetBindingType)}, bindings.REST)
 	fieldNameMap["ip_pool_id"] = "IpPoolId"
 	fieldNameMap["ip_subnet_id"] = "IpSubnetId"
 	fieldNameMap["ip_address_pool_subnet"] = "IpAddressPoolSubnet"
 	paramsTypeMap["ip_pool_id"] = bindings.NewStringType()
-	paramsTypeMap["ip_address_pool_subnet"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.IpAddressPoolSubnetBindingType),}, bindings.REST)
+	paramsTypeMap["ip_address_pool_subnet"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.IpAddressPoolSubnetBindingType)}, bindings.REST)
 	paramsTypeMap["ip_subnet_id"] = bindings.NewStringType()
 	paramsTypeMap["ipPoolId"] = bindings.NewStringType()
 	paramsTypeMap["ipSubnetId"] = bindings.NewStringType()
@@ -283,7 +277,7 @@ func ipSubnetsPatchRestMetadata() protocol.OperationRestMetadata {
 		204,
 		"",
 		errorHeaders,
-		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func ipSubnetsUpdateInputType() bindings.StructType {
@@ -291,7 +285,7 @@ func ipSubnetsUpdateInputType() bindings.StructType {
 	fieldNameMap := make(map[string]string)
 	fields["ip_pool_id"] = bindings.NewStringType()
 	fields["ip_subnet_id"] = bindings.NewStringType()
-	fields["ip_address_pool_subnet"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.IpAddressPoolSubnetBindingType),}, bindings.REST)
+	fields["ip_address_pool_subnet"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.IpAddressPoolSubnetBindingType)}, bindings.REST)
 	fieldNameMap["ip_pool_id"] = "IpPoolId"
 	fieldNameMap["ip_subnet_id"] = "IpSubnetId"
 	fieldNameMap["ip_address_pool_subnet"] = "IpAddressPoolSubnet"
@@ -300,7 +294,7 @@ func ipSubnetsUpdateInputType() bindings.StructType {
 }
 
 func ipSubnetsUpdateOutputType() bindings.BindingType {
-	return bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.IpAddressPoolSubnetBindingType),}, bindings.REST)
+	return bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.IpAddressPoolSubnetBindingType)}, bindings.REST)
 }
 
 func ipSubnetsUpdateRestMetadata() protocol.OperationRestMetadata {
@@ -314,12 +308,12 @@ func ipSubnetsUpdateRestMetadata() protocol.OperationRestMetadata {
 	bodyFieldsMap := map[string]string{}
 	fields["ip_pool_id"] = bindings.NewStringType()
 	fields["ip_subnet_id"] = bindings.NewStringType()
-	fields["ip_address_pool_subnet"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.IpAddressPoolSubnetBindingType),}, bindings.REST)
+	fields["ip_address_pool_subnet"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.IpAddressPoolSubnetBindingType)}, bindings.REST)
 	fieldNameMap["ip_pool_id"] = "IpPoolId"
 	fieldNameMap["ip_subnet_id"] = "IpSubnetId"
 	fieldNameMap["ip_address_pool_subnet"] = "IpAddressPoolSubnet"
 	paramsTypeMap["ip_pool_id"] = bindings.NewStringType()
-	paramsTypeMap["ip_address_pool_subnet"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.IpAddressPoolSubnetBindingType),}, bindings.REST)
+	paramsTypeMap["ip_address_pool_subnet"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.IpAddressPoolSubnetBindingType)}, bindings.REST)
 	paramsTypeMap["ip_subnet_id"] = bindings.NewStringType()
 	paramsTypeMap["ipPoolId"] = bindings.NewStringType()
 	paramsTypeMap["ipSubnetId"] = bindings.NewStringType()
@@ -345,7 +339,5 @@ func ipSubnetsUpdateRestMetadata() protocol.OperationRestMetadata {
 		200,
 		"",
 		errorHeaders,
-		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
-
-

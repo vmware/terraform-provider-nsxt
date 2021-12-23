@@ -107,7 +107,7 @@ func TestAccResourceNsxtPolicyIPBlock_importBasic(t *testing.T) {
 func testAccNSXPolicyIPBlockCheckExists(resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-		client := infra.NewDefaultIpBlocksClient(connector)
+		client := infra.NewIpBlocksClient(connector)
 
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
@@ -130,7 +130,7 @@ func testAccNSXPolicyIPBlockCheckExists(resourceName string) resource.TestCheckF
 
 func testAccNSXPolicyIPBlockCheckDestroy(state *terraform.State) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-	client := infra.NewDefaultIpBlocksClient(connector)
+	client := infra.NewIpBlocksClient(connector)
 
 	for _, rs := range state.RootModule().Resources {
 		if rs.Type != "nsxt_policy_ip_block" {

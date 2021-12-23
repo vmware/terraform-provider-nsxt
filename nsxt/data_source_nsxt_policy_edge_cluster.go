@@ -58,7 +58,7 @@ func dataSourceNsxtPolicyEdgeClusterRead(d *schema.ResourceData, m interface{}) 
 
 	// Local manager
 	connector := getPolicyConnector(m)
-	client := enforcement_points.NewDefaultEdgeClustersClient(connector)
+	client := enforcement_points.NewEdgeClustersClient(connector)
 	var obj model.PolicyEdgeCluster
 	if objID != "" {
 		// Get by id

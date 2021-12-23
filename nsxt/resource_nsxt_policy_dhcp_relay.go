@@ -43,7 +43,7 @@ func resourceNsxtPolicyDhcpRelayConfig() *schema.Resource {
 }
 
 func resourceNsxtPolicyDhcpRelayConfigExists(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
-	client := infra.NewDefaultDhcpRelayConfigsClient(connector)
+	client := infra.NewDhcpRelayConfigsClient(connector)
 
 	_, err := client.Get(id)
 	if err == nil {
@@ -59,7 +59,7 @@ func resourceNsxtPolicyDhcpRelayConfigExists(id string, connector *client.RestCo
 
 func resourceNsxtPolicyDhcpRelayConfigCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewDefaultDhcpRelayConfigsClient(connector)
+	client := infra.NewDhcpRelayConfigsClient(connector)
 
 	if client == nil {
 		return policyResourceNotSupportedError()
@@ -98,7 +98,7 @@ func resourceNsxtPolicyDhcpRelayConfigCreate(d *schema.ResourceData, m interface
 
 func resourceNsxtPolicyDhcpRelayConfigRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewDefaultDhcpRelayConfigsClient(connector)
+	client := infra.NewDhcpRelayConfigsClient(connector)
 
 	if client == nil {
 		return policyResourceNotSupportedError()
@@ -128,7 +128,7 @@ func resourceNsxtPolicyDhcpRelayConfigRead(d *schema.ResourceData, m interface{}
 
 func resourceNsxtPolicyDhcpRelayConfigUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewDefaultDhcpRelayConfigsClient(connector)
+	client := infra.NewDhcpRelayConfigsClient(connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -169,7 +169,7 @@ func resourceNsxtPolicyDhcpRelayConfigDelete(d *schema.ResourceData, m interface
 	}
 
 	connector := getPolicyConnector(m)
-	client := infra.NewDefaultDhcpRelayConfigsClient(connector)
+	client := infra.NewDhcpRelayConfigsClient(connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}

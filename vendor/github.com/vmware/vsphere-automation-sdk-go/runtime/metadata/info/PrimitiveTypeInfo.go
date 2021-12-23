@@ -3,7 +3,6 @@
 
 package info
 
-
 type PrimitiveTypeInfo struct {
 	name          string
 	primitiveType PrimitiveType

@@ -172,7 +172,7 @@ func getAdvRulesSchema() *schema.Schema {
 }
 
 func listGlobalManagerTier1GatewayLocaleServices(connector *client.RestConnector, gwID string, cursor *string) (model.LocaleServicesListResult, error) {
-	client := gm_tier_1s.NewDefaultLocaleServicesClient(connector)
+	client := gm_tier_1s.NewLocaleServicesClient(connector)
 	markForDelete := false
 	listResponse, err := client.List(gwID, cursor, &markForDelete, nil, nil, nil, nil)
 	if err != nil {
@@ -188,7 +188,7 @@ func listGlobalManagerTier1GatewayLocaleServices(connector *client.RestConnector
 }
 
 func listLocalManagerTier1GatewayLocaleServices(connector *client.RestConnector, gwID string, cursor *string) (model.LocaleServicesListResult, error) {
-	client := tier_1s.NewDefaultLocaleServicesClient(connector)
+	client := tier_1s.NewLocaleServicesClient(connector)
 	markForDelete := false
 	return client.List(gwID, cursor, &markForDelete, nil, nil, nil, nil)
 }
@@ -204,7 +204,7 @@ func listPolicyTier1GatewayLocaleServices(connector *client.RestConnector, gwID 
 
 func getPolicyTier1GatewayLocaleServiceEntry(gwID string, connector *client.RestConnector) (*model.LocaleServices, error) {
 	// Get the locale services of this Tier1 for the edge-cluster id
-	client := tier_1s.NewDefaultLocaleServicesClient(connector)
+	client := tier_1s.NewLocaleServicesClient(connector)
 	obj, err := client.Get(gwID, defaultPolicyLocaleServiceID)
 	if err == nil {
 		return &obj, nil
@@ -250,10 +250,10 @@ func resourceNsxtPolicyTier1GatewayReadEdgeCluster(d *schema.ResourceData, conne
 func resourceNsxtPolicyTier1GatewayExists(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
 	var err error
 	if isGlobalManager {
-		client := gm_infra.NewDefaultTier1sClient(connector)
+		client := gm_infra.NewTier1sClient(connector)
 		_, err = client.Get(id)
 	} else {
-		client := infra.NewDefaultTier1sClient(connector)
+		client := infra.NewTier1sClient(connector)
 		_, err = client.Get(id)
 	}
 
@@ -501,7 +501,7 @@ func resourceNsxtPolicyTier1GatewayRead(d *schema.ResourceData, m interface{}) e
 
 	isGlobalManager := isPolicyGlobalManager(m)
 	if isGlobalManager {
-		client := gm_infra.NewDefaultTier1sClient(connector)
+		client := gm_infra.NewTier1sClient(connector)
 		gmObj, getErr := client.Get(id)
 		if getErr != nil {
 			return handleReadError(d, "Tier0", id, getErr)
@@ -513,7 +513,7 @@ func resourceNsxtPolicyTier1GatewayRead(d *schema.ResourceData, m interface{}) e
 		}
 		obj = convertedObj.(model.Tier1)
 	} else {
-		client := infra.NewDefaultTier1sClient(connector)
+		client := infra.NewTier1sClient(connector)
 		obj, err = client.Get(id)
 	}
 

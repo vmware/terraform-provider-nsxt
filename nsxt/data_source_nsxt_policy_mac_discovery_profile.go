@@ -36,7 +36,7 @@ func dataSourceNsxtPolicyMacDiscoveryProfileRead(d *schema.ResourceData, m inter
 
 	// Local manager support:
 	connector := getPolicyConnector(m)
-	client := infra.NewDefaultMacDiscoveryProfilesClient(connector)
+	client := infra.NewMacDiscoveryProfilesClient(connector)
 
 	objID := d.Get("id").(string)
 	objName := d.Get("display_name").(string)

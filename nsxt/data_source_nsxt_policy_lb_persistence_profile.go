@@ -54,7 +54,7 @@ func dataSourceNsxtPolicyLbPersistenceProfileTypeMatches(profile model.PolicyLbP
 
 func dataSourceNsxtPolicyLbPersistenceProfileRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewDefaultLbPersistenceProfilesClient(connector)
+	client := infra.NewLbPersistenceProfilesClient(connector)
 	converter := bindings.NewTypeConverter()
 	converter.SetMode(bindings.REST)
 

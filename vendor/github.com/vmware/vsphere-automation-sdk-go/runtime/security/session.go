@@ -1,17 +1,13 @@
-/* Copyright © 2019 VMware, Inc. All Rights Reserved.
+/* Copyright © 2019, 2021 VMware, Inc. All Rights Reserved.
    SPDX-License-Identifier: BSD-2-Clause */
 
 package security
-
 
 import (
 	"encoding/json"
 )
 
-/**
- * represents the security context needed for authentication
- * using session ID.
- */
+// SessionSecurityContext represents the security context needed for authentication using session ID.
 type SessionSecurityContext struct {
 	properties map[string]interface{}
 }
@@ -39,10 +35,7 @@ func (s *SessionSecurityContext) SetProperty(property string, value interface{})
 	s.properties[property] = value
 }
 
-/**
- * represents a security context suitable for user/password
- * authentication.
- */
+//UserPasswordSecurityContext represents a security context suitable for user/password authentication.
 type UserPasswordSecurityContext struct {
 	properties map[string]interface{}
 }
@@ -79,10 +72,7 @@ func (u *UserPasswordSecurityContext) MarshalJSON() ([]byte, error) {
 	return json.Marshal(u.properties)
 }
 
-/**
- * represents a security context suitable for oauth
- * authentication.
- */
+// OauthSecurityContext represents a security context suitable for oauth authentication.
 type OauthSecurityContext struct {
 	properties map[string]interface{}
 }

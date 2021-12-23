@@ -411,7 +411,7 @@ func setPolicyGatewayIntersiteConfigInSchema(d *schema.ResourceData, config *mod
 
 func policyInfraPatch(obj model.Infra, isGlobalManager bool, connector *client.RestConnector, enforceRevision bool) error {
 	if isGlobalManager {
-		infraClient := global_policy.NewDefaultGlobalInfraClient(connector)
+		infraClient := global_policy.NewGlobalInfraClient(connector)
 		gmObj, err := convertModelBindingType(obj, model.InfraBindingType(), gm_model.InfraBindingType())
 		if err != nil {
 			return err
@@ -420,7 +420,7 @@ func policyInfraPatch(obj model.Infra, isGlobalManager bool, connector *client.R
 		return infraClient.Patch(gmObj.(gm_model.Infra), &enforceRevision)
 	}
 
-	infraClient := nsx_policy.NewDefaultInfraClient(connector)
+	infraClient := nsx_policy.NewInfraClient(connector)
 	return infraClient.Patch(obj, &enforceRevision)
 }
 
@@ -645,7 +645,7 @@ func getComputedGatewayIDSchema() *schema.Schema {
 
 func policyTier0GetLocaleService(gwID string, localeServiceID string, connector *client.RestConnector, isGlobalManager bool) *model.LocaleServices {
 	if isGlobalManager {
-		nsxClient := gm_tier0s.NewDefaultLocaleServicesClient(connector)
+		nsxClient := gm_tier0s.NewLocaleServicesClient(connector)
 		gmObj, err := nsxClient.Get(gwID, localeServiceID)
 		if err != nil {
 			log.Printf("[DEBUG] Failed to get locale service %s for gateway %s: %s", gwID, localeServiceID, err)
@@ -660,7 +660,7 @@ func policyTier0GetLocaleService(gwID string, localeServiceID string, connector 
 		obj := convObj.(model.LocaleServices)
 		return &obj
 	}
-	nsxClient := tier_0s.NewDefaultLocaleServicesClient(connector)
+	nsxClient := tier_0s.NewLocaleServicesClient(connector)
 	obj, err := nsxClient.Get(gwID, localeServiceID)
 	if err != nil {
 		log.Printf("[DEBUG] Failed to get locale service %s for gateway %s: %s", gwID, localeServiceID, err)

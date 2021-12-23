@@ -101,10 +101,10 @@ func testAccDataSourceNsxtPolicyGroupCreate(domain string, name string) error {
 			return convErr
 		}
 
-		client := gm_domains.NewDefaultGroupsClient(connector)
+		client := gm_domains.NewGroupsClient(connector)
 		err = client.Patch(domain, id, gmObj.(gm_model.Group))
 	} else {
-		client := domains.NewDefaultGroupsClient(connector)
+		client := domains.NewGroupsClient(connector)
 		err = client.Patch(domain, id, obj)
 	}
 
@@ -124,7 +124,7 @@ func testAccDataSourceNsxtPolicyGroupDeleteByName(domain string, name string) er
 	if testAccIsGlobalManager() {
 		objID, err := testGetObjIDByName(name, "Group")
 		if err == nil {
-			client := gm_domains.NewDefaultGroupsClient(connector)
+			client := gm_domains.NewGroupsClient(connector)
 			err := client.Delete(domain, objID, nil, nil)
 			if err != nil {
 				return handleDeleteError("Group", objID, err)
@@ -132,7 +132,7 @@ func testAccDataSourceNsxtPolicyGroupDeleteByName(domain string, name string) er
 			return nil
 		}
 	} else {
-		client := domains.NewDefaultGroupsClient(connector)
+		client := domains.NewGroupsClient(connector)
 		objList, err := client.List(domain, nil, nil, nil, nil, nil, nil, nil)
 		if err != nil {
 			return handleListError("Group", err)

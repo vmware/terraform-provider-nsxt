@@ -3,7 +3,6 @@
 
 package info
 
-
 type ParamPrivilegeInfo struct {
 	paramName          string
 	resourceType       string

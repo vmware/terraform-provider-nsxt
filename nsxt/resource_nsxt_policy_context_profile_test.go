@@ -276,10 +276,10 @@ func nsxtPolicyContextProfileExists(resourceID string) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
 	var err error
 	if testAccIsGlobalManager() {
-		nsxClient := gm_infra.NewDefaultContextProfilesClient(connector)
+		nsxClient := gm_infra.NewContextProfilesClient(connector)
 		_, err = nsxClient.Get(resourceID)
 	} else {
-		nsxClient := infra.NewDefaultContextProfilesClient(connector)
+		nsxClient := infra.NewContextProfilesClient(connector)
 		_, err = nsxClient.Get(resourceID)
 	}
 	return err

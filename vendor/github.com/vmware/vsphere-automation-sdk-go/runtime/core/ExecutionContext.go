@@ -1,4 +1,4 @@
-/* Copyright © 2019-2020 VMware, Inc. All Rights Reserved.
+/* Copyright © 2019-2021 VMware, Inc. All Rights Reserved.
    SPDX-License-Identifier: BSD-2-Clause */
 
 package core
@@ -12,6 +12,7 @@ import (
 type ExecutionContext struct {
 	securityContext    SecurityContext
 	applicationContext *ApplicationContext
+	runtimeData        *RuntimeData
 	ctx                context.Context
 }
 
@@ -20,7 +21,17 @@ func NewExecutionContext(applicationContext *ApplicationContext, securityContext
 		applicationContext = NewApplicationContext(nil)
 	}
 
-	return &ExecutionContext{applicationContext: applicationContext, securityContext: securityContext}
+	return &ExecutionContext{
+		applicationContext: applicationContext,
+		securityContext:    securityContext,
+		runtimeData:        NewRuntimeData(nil, nil),
+
+		// TODO: Go context should live only on the stack
+		// see here for more info: https://golang.org/pkg/context/
+		// It would probably make more sense to rewrite runtime so that
+		// ExecutionContext is inside go's context (as a value) not vice versa
+		ctx: context.Background(),
+	}
 }
 
 // Set request context
@@ -41,17 +52,21 @@ func (e *ExecutionContext) ApplicationContext() *ApplicationContext {
 	return e.applicationContext
 }
 
+func (e *ExecutionContext) RuntimeData() *RuntimeData {
+	return e.runtimeData
+}
+
 func (e *ExecutionContext) SetSecurityContext(secContext SecurityContext) {
 	e.securityContext = secContext
 }
 
 // Construct a message formatter from the localization headers set in application
 // context in the execution context of a request
-func (ctx *ExecutionContext) GetMessageFormatter(m l10n.LocalizableMessageFactory) (l10n.MessageFormatter, error) {
-	if ctx == nil || ctx.ApplicationContext() == nil {
+func (e *ExecutionContext) GetMessageFormatter(m l10n.LocalizableMessageFactory) (l10n.MessageFormatter, error) {
+	if e == nil || e.ApplicationContext() == nil {
 		return *m.GetDefaultFormatter(), nil
 	}
-	applicationCtx := ctx.ApplicationContext()
+	applicationCtx := e.ApplicationContext()
 
 	formatter, _ := m.GetFormatterForLocalizationParams(
 		applicationCtx.GetProperty(lib.HTTP_ACCEPT_LANGUAGE),
@@ -59,4 +74,17 @@ func (ctx *ExecutionContext) GetMessageFormatter(m l10n.LocalizableMessageFactor
 		applicationCtx.GetProperty(lib.VAPI_L10N_TIMEZONE))
 
 	return formatter, nil
+}
+
+// WithResponseAcceptor returns shallow copy of ExecutionContext object and updates RuntimeData with given
+// response acceptor
+func (e *ExecutionContext) WithResponseAcceptor(acceptor ResponseAcceptor) *ExecutionContext {
+	responseAcceptors := append(e.runtimeData.GetResponseAcceptors(), acceptor)
+	runtimeData := NewRuntimeData(e.runtimeData.GetRequestProcessors(), responseAcceptors)
+	return &ExecutionContext{
+		applicationContext: e.applicationContext,
+		securityContext:    e.securityContext,
+		runtimeData:        runtimeData,
+		ctx:                e.ctx,
+	}
 }

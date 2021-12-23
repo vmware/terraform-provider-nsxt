@@ -56,7 +56,7 @@ func dataSourceNsxtPolicyEdgeNodeRead(d *schema.ResourceData, m interface{}) err
 
 	// Local manager
 	connector := getPolicyConnector(m)
-	client := edge_clusters.NewDefaultEdgeNodesClient(connector)
+	client := edge_clusters.NewEdgeNodesClient(connector)
 	var obj model.PolicyEdgeNode
 	edgeClusterID := getPolicyIDFromPath(edgeClusterPath)
 	objID := d.Get("id").(string)

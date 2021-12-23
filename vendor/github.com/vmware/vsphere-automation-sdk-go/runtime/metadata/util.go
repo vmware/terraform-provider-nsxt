@@ -3,7 +3,6 @@
 
 package metadata
 
-
 import "github.com/vmware/vsphere-automation-sdk-go/runtime/l10n"
 
 func getError(msg string) error {

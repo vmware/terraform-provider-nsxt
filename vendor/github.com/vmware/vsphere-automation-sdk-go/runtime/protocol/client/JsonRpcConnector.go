@@ -18,7 +18,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httputil"
-	"strings"
 )
 
 type JsonRpcConnector struct {
@@ -146,17 +145,9 @@ func (j *JsonRpcConnector) Invoke(serviceId string, operationId string, inputVal
 		go func() {
 			response, requestErr := j.httpClient.Do(req)
 			if requestErr != nil {
-				if strings.HasSuffix(requestErr.Error(), "connection refused") {
-					err := l10n.NewRuntimeErrorNoParam("vapi.server.unavailable")
-					errVal := bindings.CreateErrorValueFromMessages(bindings.SERVICE_UNAVAILABLE_ERROR_DEF, []error{err})
-					methodResultChan <- core.NewMethodResult(nil, errVal)
-					return
-				} else if strings.HasSuffix(requestErr.Error(), "i/o timeout") {
-					err := l10n.NewRuntimeErrorNoParam("vapi.server.timedout")
-					errVal := bindings.CreateErrorValueFromMessages(bindings.TIMEDOUT_ERROR_DEF, []error{err})
-					methodResultChan <- core.NewMethodResult(nil, errVal)
-					return
-				}
+				errVal := getVAPIError(requestErr)
+				methodResultChan <- core.NewMethodResult(nil, errVal)
+				return
 			}
 			defer response.Body.Close()
 			dec := json.NewDecoder(httputil.NewChunkedReader(response.Body))
@@ -213,17 +204,16 @@ func (j *JsonRpcConnector) Invoke(serviceId string, operationId string, inputVal
 	// non streaming responses.
 	response, requestErr := j.httpClient.Do(req)
 	if requestErr != nil {
-		if strings.HasSuffix(requestErr.Error(), "connection refused") {
-			err := l10n.NewRuntimeErrorNoParam("vapi.server.unavailable")
-			errVal := bindings.CreateErrorValueFromMessages(bindings.SERVICE_UNAVAILABLE_ERROR_DEF, []error{err})
-			return core.NewMethodResult(nil, errVal)
-		} else if strings.HasSuffix(requestErr.Error(), "i/o timeout") {
-			err := l10n.NewRuntimeErrorNoParam("vapi.server.timedout")
-			errVal := bindings.CreateErrorValueFromMessages(bindings.TIMEDOUT_ERROR_DEF, []error{err})
-			return core.NewMethodResult(nil, errVal)
-		}
+		errVal := getVAPIError(requestErr)
+		return core.NewMethodResult(nil, errVal)
 	}
-	defer response.Body.Close()
+
+	defer func() {
+		if response != nil && response.Body != nil {
+			response.Body.Close()
+		}
+	}()
+
 	resp, readErr := ioutil.ReadAll(response.Body)
 	if readErr != nil {
 		log.Error(readErr)

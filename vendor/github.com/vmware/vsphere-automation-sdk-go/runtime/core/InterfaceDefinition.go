@@ -5,10 +5,10 @@ package core
 
 type InterfaceDefinition struct {
 	id        InterfaceIdentifier
-	methodIds []MethodIdentifier
+	methodIds map[string]MethodIdentifier
 }
 
-func NewInterfaceDefinition(id InterfaceIdentifier, methodIds []MethodIdentifier) InterfaceDefinition {
+func NewInterfaceDefinition(id InterfaceIdentifier, methodIds map[string]MethodIdentifier) InterfaceDefinition {
 	return InterfaceDefinition{id: id, methodIds: methodIds}
 }
 
@@ -16,7 +16,7 @@ func (interfaceDefinition InterfaceDefinition) Identifier() InterfaceIdentifier 
 	return interfaceDefinition.id
 }
 
-func (interfaceDefinition InterfaceDefinition) MethodIdentifiers() []MethodIdentifier {
+func (interfaceDefinition InterfaceDefinition) MethodIdentifiers() map[string]MethodIdentifier {
 	return interfaceDefinition.methodIds
 }
 

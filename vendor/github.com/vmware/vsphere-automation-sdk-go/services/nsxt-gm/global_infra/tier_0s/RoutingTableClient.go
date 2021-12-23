@@ -1,39 +1,110 @@
-/* Copyright © 2019 VMware, Inc. All Rights Reserved.
-   SPDX-License-Identifier: BSD-2-Clause */
+// Copyright © 2019-2021 VMware, Inc. All Rights Reserved.
+// SPDX-License-Identifier: BSD-2-Clause
 
-// Code generated. DO NOT EDIT.
+// Auto generated code. DO NOT EDIT.
 
-/*
- * Interface file for service: RoutingTable
- * Used by client-side stubs.
- */
+// Interface file for service: RoutingTable
+// Used by client-side stubs.
 
 package tier_0s
 
 import (
+	"github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/core"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/lib"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 )
 
+const _ = core.SupportedByRuntimeVersion1
+
 type RoutingTableClient interface {
 
-    // Get routing table from tier-0
-    //
-    // @param tier0IdParam (required)
-    // @param cursorParam Opaque cursor to be used for getting next page of records (supplied by current result page) (optional)
-    // @param edgeIdParam UUID of edge node (optional)
-    // @param edgePathParam Policy path of edge node (optional)
-    // @param enforcementPointPathParam Enforcement point path (optional)
-    // @param includedFieldsParam Comma separated list of fields that should be included in query result (optional)
-    // @param networkPrefixParam IPv4 or IPv6 CIDR Block (optional)
-    // @param pageSizeParam Maximum number of results to return in this page (server may return fewer) (optional, default to 1000)
-    // @param routeSourceParam Filter routes based on the source from which route is learned (optional)
-    // @param sortAscendingParam (optional)
-    // @param sortByParam Field by which records are sorted (optional)
-    // @return com.vmware.nsx_global_policy.model.RoutingTableListResult
-    // @throws InvalidRequest  Bad Request, Precondition Failed
-    // @throws Unauthorized  Forbidden
-    // @throws ServiceUnavailable  Service Unavailable
-    // @throws InternalServerError  Internal Server Error
-    // @throws NotFound  Not Found
+	// Get routing table from tier-0
+	//
+	// @param tier0IdParam (required)
+	// @param cursorParam Opaque cursor to be used for getting next page of records (supplied by current result page) (optional)
+	// @param edgeIdParam UUID of edge node (optional)
+	// @param edgePathParam Policy path of edge node (optional)
+	// @param enforcementPointPathParam Enforcement point path (optional)
+	// @param includedFieldsParam Comma separated list of fields that should be included in query result (optional)
+	// @param networkPrefixParam IPv4 or IPv6 CIDR Block (optional)
+	// @param pageSizeParam Maximum number of results to return in this page (server may return fewer) (optional, default to 1000)
+	// @param routeSourceParam Filter routes based on the source from which route is learned (optional)
+	// @param sortAscendingParam (optional)
+	// @param sortByParam Field by which records are sorted (optional)
+	// @return com.vmware.nsx_global_policy.model.RoutingTableListResult
+	// @throws InvalidRequest  Bad Request, Precondition Failed
+	// @throws Unauthorized  Forbidden
+	// @throws ServiceUnavailable  Service Unavailable
+	// @throws InternalServerError  Internal Server Error
+	// @throws NotFound  Not Found
 	List(tier0IdParam string, cursorParam *string, edgeIdParam *string, edgePathParam *string, enforcementPointPathParam *string, includedFieldsParam *string, networkPrefixParam *string, pageSizeParam *int64, routeSourceParam *string, sortAscendingParam *bool, sortByParam *string) (model.RoutingTableListResult, error)
+}
+
+type routingTableClient struct {
+	connector           client.Connector
+	interfaceDefinition core.InterfaceDefinition
+	errorsBindingMap    map[string]bindings.BindingType
+}
+
+func NewRoutingTableClient(connector client.Connector) *routingTableClient {
+	interfaceIdentifier := core.NewInterfaceIdentifier("com.vmware.nsx_global_policy.global_infra.tier_0s.routing_table")
+	methodIdentifiers := map[string]core.MethodIdentifier{
+		"list": core.NewMethodIdentifier(interfaceIdentifier, "list"),
+	}
+	interfaceDefinition := core.NewInterfaceDefinition(interfaceIdentifier, methodIdentifiers)
+	errorsBindingMap := make(map[string]bindings.BindingType)
+
+	rIface := routingTableClient{interfaceDefinition: interfaceDefinition, errorsBindingMap: errorsBindingMap, connector: connector}
+	return &rIface
+}
+
+func (rIface *routingTableClient) GetErrorBindingType(errorName string) bindings.BindingType {
+	if entry, ok := rIface.errorsBindingMap[errorName]; ok {
+		return entry
+	}
+	return errors.ERROR_BINDINGS_MAP[errorName]
+}
+
+func (rIface *routingTableClient) List(tier0IdParam string, cursorParam *string, edgeIdParam *string, edgePathParam *string, enforcementPointPathParam *string, includedFieldsParam *string, networkPrefixParam *string, pageSizeParam *int64, routeSourceParam *string, sortAscendingParam *bool, sortByParam *string) (model.RoutingTableListResult, error) {
+	typeConverter := rIface.connector.TypeConverter()
+	executionContext := rIface.connector.NewExecutionContext()
+	sv := bindings.NewStructValueBuilder(routingTableListInputType(), typeConverter)
+	sv.AddStructField("Tier0Id", tier0IdParam)
+	sv.AddStructField("Cursor", cursorParam)
+	sv.AddStructField("EdgeId", edgeIdParam)
+	sv.AddStructField("EdgePath", edgePathParam)
+	sv.AddStructField("EnforcementPointPath", enforcementPointPathParam)
+	sv.AddStructField("IncludedFields", includedFieldsParam)
+	sv.AddStructField("NetworkPrefix", networkPrefixParam)
+	sv.AddStructField("PageSize", pageSizeParam)
+	sv.AddStructField("RouteSource", routeSourceParam)
+	sv.AddStructField("SortAscending", sortAscendingParam)
+	sv.AddStructField("SortBy", sortByParam)
+	inputDataValue, inputError := sv.GetStructValue()
+	if inputError != nil {
+		var emptyOutput model.RoutingTableListResult
+		return emptyOutput, bindings.VAPIerrorsToError(inputError)
+	}
+	operationRestMetaData := routingTableListRestMetadata()
+	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
+	rIface.connector.SetConnectionMetadata(connectionMetadata)
+	methodResult := rIface.connector.GetApiProvider().Invoke("com.vmware.nsx_global_policy.global_infra.tier_0s.routing_table", "list", inputDataValue, executionContext)
+	var emptyOutput model.RoutingTableListResult
+	if methodResult.IsSuccess() {
+		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), routingTableListOutputType())
+		if errorInOutput != nil {
+			return emptyOutput, bindings.VAPIerrorsToError(errorInOutput)
+		}
+		return output.(model.RoutingTableListResult), nil
+	} else {
+		methodError, errorInError := typeConverter.ConvertToGolang(methodResult.Error(), rIface.GetErrorBindingType(methodResult.Error().Name()))
+		if errorInError != nil {
+			return emptyOutput, bindings.VAPIerrorsToError(errorInError)
+		}
+		return emptyOutput, methodError.(error)
+	}
 }

@@ -3,7 +3,6 @@
 
 package security
 
-
 import (
 	cjson "github.com/gibson042/canonicaljson-go"
 )

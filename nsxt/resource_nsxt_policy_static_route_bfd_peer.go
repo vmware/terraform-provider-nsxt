@@ -63,10 +63,10 @@ func resourceNsxtPolicyStaticRouteBfdPeer() *schema.Resource {
 func resourceNsxtPolicyStaticRouteBfdPeerExists(gwID string, id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
 	var err error
 	if isGlobalManager {
-		client := gm_static_routes.NewDefaultBfdPeersClient(connector)
+		client := gm_static_routes.NewBfdPeersClient(connector)
 		_, err = client.Get(gwID, id)
 	} else {
-		client := static_routes.NewDefaultBfdPeersClient(connector)
+		client := static_routes.NewBfdPeersClient(connector)
 		_, err = client.Get(gwID, id)
 	}
 	if err == nil {
@@ -111,11 +111,11 @@ func policyStaticRouteBfdPeerPatch(d *schema.ResourceData, m interface{}, gwID s
 		if convErr != nil {
 			return convErr
 		}
-		client := gm_static_routes.NewDefaultBfdPeersClient(connector)
+		client := gm_static_routes.NewBfdPeersClient(connector)
 		return client.Patch(gwID, id, gmObj.(gm_model.StaticRouteBfdPeer))
 	}
 
-	client := static_routes.NewDefaultBfdPeersClient(connector)
+	client := static_routes.NewBfdPeersClient(connector)
 	return client.Patch(gwID, id, obj)
 }
 
@@ -166,7 +166,7 @@ func resourceNsxtPolicyStaticRouteBfdPeerRead(d *schema.ResourceData, m interfac
 
 	var obj model.StaticRouteBfdPeer
 	if isPolicyGlobalManager(m) {
-		client := gm_static_routes.NewDefaultBfdPeersClient(connector)
+		client := gm_static_routes.NewBfdPeersClient(connector)
 		gmObj, err := client.Get(gwID, id)
 		if err != nil {
 			return handleReadError(d, "Gateway BFD Peer", id, err)
@@ -178,7 +178,7 @@ func resourceNsxtPolicyStaticRouteBfdPeerRead(d *schema.ResourceData, m interfac
 		}
 		obj = lmObj.(model.StaticRouteBfdPeer)
 	} else {
-		client := static_routes.NewDefaultBfdPeersClient(connector)
+		client := static_routes.NewBfdPeersClient(connector)
 		var err error
 		obj, err = client.Get(gwID, id)
 		if err != nil {
@@ -228,10 +228,10 @@ func resourceNsxtPolicyStaticRouteBfdPeerDelete(d *schema.ResourceData, m interf
 	connector := getPolicyConnector(m)
 	var err error
 	if isPolicyGlobalManager(m) {
-		client := gm_static_routes.NewDefaultBfdPeersClient(connector)
+		client := gm_static_routes.NewBfdPeersClient(connector)
 		err = client.Delete(gwID, id)
 	} else {
-		client := static_routes.NewDefaultBfdPeersClient(connector)
+		client := static_routes.NewBfdPeersClient(connector)
 		err = client.Delete(gwID, id)
 	}
 

@@ -117,10 +117,10 @@ func resourceNsxtPolicyTier1GatewayInterfaceCreate(d *schema.ResourceData, m int
 	} else {
 		var err error
 		if isPolicyGlobalManager(m) {
-			client := gm_locale_services.NewDefaultInterfacesClient(connector)
+			client := gm_locale_services.NewInterfacesClient(connector)
 			_, err = client.Get(tier1ID, localeServiceID, id)
 		} else {
-			client := locale_services.NewDefaultInterfacesClient(connector)
+			client := locale_services.NewInterfacesClient(connector)
 			_, err = client.Get(tier1ID, localeServiceID, id)
 		}
 
@@ -168,10 +168,10 @@ func resourceNsxtPolicyTier1GatewayInterfaceCreate(d *schema.ResourceData, m int
 		if convErr != nil {
 			return convErr
 		}
-		client := gm_locale_services.NewDefaultInterfacesClient(connector)
+		client := gm_locale_services.NewInterfacesClient(connector)
 		err = client.Patch(tier1ID, localeServiceID, id, gmObj.(gm_model.Tier1Interface))
 	} else {
-		client := locale_services.NewDefaultInterfacesClient(connector)
+		client := locale_services.NewInterfacesClient(connector)
 		err = client.Patch(tier1ID, localeServiceID, id, obj)
 	}
 
@@ -198,7 +198,7 @@ func resourceNsxtPolicyTier1GatewayInterfaceRead(d *schema.ResourceData, m inter
 
 	var obj model.Tier1Interface
 	if isPolicyGlobalManager(m) {
-		client := gm_locale_services.NewDefaultInterfacesClient(connector)
+		client := gm_locale_services.NewInterfacesClient(connector)
 		gmObj, err := client.Get(tier1ID, localeServiceID, id)
 		if err != nil {
 			return handleReadError(d, "Tier1 Interface", id, err)
@@ -208,7 +208,7 @@ func resourceNsxtPolicyTier1GatewayInterfaceRead(d *schema.ResourceData, m inter
 			return err1
 		}
 		obj = lmObj.(model.Tier1Interface)
-		tier1Client := gm_tier1s.NewDefaultLocaleServicesClient(connector)
+		tier1Client := gm_tier1s.NewLocaleServicesClient(connector)
 		localeService, err := tier1Client.Get(tier1ID, localeServiceID)
 		if err != nil {
 			return err
@@ -217,7 +217,7 @@ func resourceNsxtPolicyTier1GatewayInterfaceRead(d *schema.ResourceData, m inter
 		d.Set("site_path", sitePath)
 	} else {
 		var err error
-		client := locale_services.NewDefaultInterfacesClient(connector)
+		client := locale_services.NewInterfacesClient(connector)
 		obj, err = client.Get(tier1ID, localeServiceID, id)
 		if err != nil {
 			return handleReadError(d, "Tier1 Interface", id, err)
@@ -301,10 +301,10 @@ func resourceNsxtPolicyTier1GatewayInterfaceUpdate(d *schema.ResourceData, m int
 		if err1 != nil {
 			return err1
 		}
-		client := gm_locale_services.NewDefaultInterfacesClient(connector)
+		client := gm_locale_services.NewInterfacesClient(connector)
 		_, err = client.Update(tier1ID, localeServiceID, id, gmObj.(gm_model.Tier1Interface))
 	} else {
-		client := locale_services.NewDefaultInterfacesClient(connector)
+		client := locale_services.NewInterfacesClient(connector)
 		_, err = client.Update(tier1ID, localeServiceID, id, obj)
 	}
 	if err != nil {
@@ -327,10 +327,10 @@ func resourceNsxtPolicyTier1GatewayInterfaceDelete(d *schema.ResourceData, m int
 
 	var err error
 	if isPolicyGlobalManager(m) {
-		client := gm_locale_services.NewDefaultInterfacesClient(connector)
+		client := gm_locale_services.NewInterfacesClient(connector)
 		err = client.Delete(tier1ID, localeServiceID, id)
 	} else {
-		client := locale_services.NewDefaultInterfacesClient(connector)
+		client := locale_services.NewInterfacesClient(connector)
 		err = client.Delete(tier1ID, localeServiceID, id)
 	}
 	if err != nil {
@@ -351,7 +351,7 @@ func resourceNsxtPolicyTier1GatewayInterfaceImport(d *schema.ResourceData, m int
 	connector := getPolicyConnector(m)
 	var tier1GW model.Tier1
 	if isPolicyGlobalManager(m) {
-		client := gm_infra.NewDefaultTier1sClient(connector)
+		client := gm_infra.NewTier1sClient(connector)
 		gmObj, err := client.Get(gwID)
 		if err != nil {
 			return nil, err
@@ -363,7 +363,7 @@ func resourceNsxtPolicyTier1GatewayInterfaceImport(d *schema.ResourceData, m int
 		tier1GW = lmObj.(model.Tier1)
 	} else {
 		var err error
-		client := infra.NewDefaultTier1sClient(connector)
+		client := infra.NewTier1sClient(connector)
 		tier1GW, err = client.Get(gwID)
 		if err != nil {
 			return nil, err

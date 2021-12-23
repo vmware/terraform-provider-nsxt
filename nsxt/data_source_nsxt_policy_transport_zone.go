@@ -93,7 +93,7 @@ func dataSourceNsxtPolicyTransportZoneRead(d *schema.ResourceData, m interface{}
 		return nil
 	}
 	connector := getPolicyConnector(m)
-	client := enforcement_points.NewDefaultTransportZonesClient(connector)
+	client := enforcement_points.NewTransportZonesClient(connector)
 
 	// TODO: support non-default site and enforcement point possibly as a triple; site/point/tz_id
 	objID := d.Get("id").(string)

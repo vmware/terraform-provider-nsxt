@@ -58,7 +58,7 @@ func dataSourceNsxtPolicySegmentRealizationRead(d *schema.ResourceData, m interf
 	// verifying segment realization on hypervisor
 	segmentID := getPolicyIDFromPath(path)
 	enforcementPointPath := getPolicyEnforcementPointPath(m)
-	client := segments.NewDefaultStateClient(connector)
+	client := segments.NewStateClient(connector)
 	pendingStates := []string{model.SegmentConfigurationState_STATE_PENDING,
 		model.SegmentConfigurationState_STATE_IN_PROGRESS,
 		model.SegmentConfigurationState_STATE_IN_SYNC,
@@ -100,7 +100,7 @@ func dataSourceNsxtPolicySegmentRealizationRead(d *schema.ResourceData, m interf
 	// We need to fetch network name to use in vpshere provider. However, state API does not
 	// return it in details yet. For now, we'll use segment display name, since its always
 	// translates to network name
-	segClient := infra.NewDefaultSegmentsClient(connector)
+	segClient := infra.NewSegmentsClient(connector)
 	obj, err := segClient.Get(segmentID)
 	if err != nil {
 		return handleReadError(d, "Segment", segmentID, err)

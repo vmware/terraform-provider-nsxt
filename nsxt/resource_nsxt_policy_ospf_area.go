@@ -82,7 +82,7 @@ func resourceNsxtPolicyOspfArea() *schema.Resource {
 
 func resourceNsxtPolicyOspfAreaExists(gwID string, localeServiceID string, areaID string, isGlobalManager bool, connector *client.RestConnector) (bool, error) {
 
-	client := ospf.NewDefaultAreasClient(connector)
+	client := ospf.NewAreasClient(connector)
 	_, err := client.Get(gwID, localeServiceID, areaID)
 	if err == nil {
 		return true, nil
@@ -144,7 +144,7 @@ func policyOspfAreaPatch(d *schema.ResourceData, m interface{}, id string) error
 	}
 
 	connector := getPolicyConnector(m)
-	client := ospf.NewDefaultAreasClient(connector)
+	client := ospf.NewAreasClient(connector)
 	_, err := client.Patch(gwID, localeServiceID, id, obj)
 	return err
 }
@@ -184,7 +184,7 @@ func resourceNsxtPolicyOspfAreaRead(d *schema.ResourceData, m interface{}) error
 		return fmt.Errorf("Expecting OSPF config path, got %s", ospfPath)
 	}
 
-	client := ospf.NewDefaultAreasClient(connector)
+	client := ospf.NewAreasClient(connector)
 	obj, err := client.Get(gwID, localeServiceID, id)
 	if err != nil {
 		return handleReadError(d, "Ospf Area", id, err)
@@ -236,7 +236,7 @@ func resourceNsxtPolicyOspfAreaDelete(d *schema.ResourceData, m interface{}) err
 		return fmt.Errorf("Expecting OSPF config path, got %s", ospfPath)
 	}
 
-	client := ospf.NewDefaultAreasClient(connector)
+	client := ospf.NewAreasClient(connector)
 	err := client.Delete(gwID, localeServiceID, id)
 	if err != nil {
 		return handleDeleteError("Ospf Area", id, err)
@@ -256,7 +256,7 @@ func resourceNsxtPolicyOspfAreaImport(d *schema.ResourceData, m interface{}) ([]
 	serviceID := s[1]
 	areaID := s[2]
 	connector := getPolicyConnector(m)
-	client := ospf.NewDefaultAreasClient(connector)
+	client := ospf.NewAreasClient(connector)
 
 	area, err := client.Get(gwID, serviceID, areaID)
 	if err != nil {

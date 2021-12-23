@@ -118,7 +118,7 @@ func testAccNsxtPolicyDomainExists(resourceName string) resource.TestCheckFunc {
 			return fmt.Errorf("Policy domain resource ID not set in resources")
 		}
 
-		nsxClient := gm_infra.NewDefaultDomainsClient(connector)
+		nsxClient := gm_infra.NewDomainsClient(connector)
 		_, err := nsxClient.Get(resourceID)
 		if err != nil {
 			return fmt.Errorf("Error while retrieving policy domain ID %s. Error: %v", resourceID, err)
@@ -137,7 +137,7 @@ func testAccNsxtPolicyDomainCheckDestroy(state *terraform.State, displayName str
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		nsxClient := gm_infra.NewDefaultDomainsClient(connector)
+		nsxClient := gm_infra.NewDomainsClient(connector)
 		_, err := nsxClient.Get(resourceID)
 		if err == nil {
 			return fmt.Errorf("Policy domain %s still exists", displayName)

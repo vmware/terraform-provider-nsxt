@@ -34,7 +34,7 @@ func dataSourceNsxtPolicyTier1Gateway() *schema.Resource {
 
 func dataSourceNsxtPolicyTier1GatewayReadAllTier1(connector *client.RestConnector) ([]model.Tier1, error) {
 	var results []model.Tier1
-	client := infra.NewDefaultTier1sClient(connector)
+	client := infra.NewTier1sClient(connector)
 	boolFalse := false
 	var cursor *string
 	total := 0
@@ -71,7 +71,7 @@ func dataSourceNsxtPolicyTier1GatewayRead(d *schema.ResourceData, m interface{})
 
 	// Read a tier1 by name or id
 	connector := getPolicyConnector(m)
-	client := infra.NewDefaultTier1sClient(connector)
+	client := infra.NewTier1sClient(connector)
 
 	objID := d.Get("id").(string)
 	objName := d.Get("display_name").(string)

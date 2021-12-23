@@ -543,10 +543,10 @@ func testAccNsxtPolicyTier0InterfaceExists(resourceName string) resource.TestChe
 		localeServiceID := rs.Primary.Attributes["locale_service_id"]
 		gwID := getPolicyIDFromPath(rs.Primary.Attributes["gateway_path"])
 		if testAccIsGlobalManager() {
-			nsxClient := gm_locale_services.NewDefaultInterfacesClient(connector)
+			nsxClient := gm_locale_services.NewInterfacesClient(connector)
 			_, err = nsxClient.Get(gwID, localeServiceID, resourceID)
 		} else {
-			nsxClient := locale_services.NewDefaultInterfacesClient(connector)
+			nsxClient := locale_services.NewInterfacesClient(connector)
 			_, err = nsxClient.Get(gwID, localeServiceID, resourceID)
 		}
 		if err != nil {
@@ -571,10 +571,10 @@ func testAccNsxtPolicyTier0InterfaceCheckDestroy(state *terraform.State, display
 
 		var err error
 		if testAccIsGlobalManager() {
-			nsxClient := gm_locale_services.NewDefaultInterfacesClient(connector)
+			nsxClient := gm_locale_services.NewInterfacesClient(connector)
 			_, err = nsxClient.Get(gwID, localeServiceID, resourceID)
 		} else {
-			nsxClient := locale_services.NewDefaultInterfacesClient(connector)
+			nsxClient := locale_services.NewInterfacesClient(connector)
 			_, err = nsxClient.Get(gwID, localeServiceID, resourceID)
 		}
 		if err == nil {

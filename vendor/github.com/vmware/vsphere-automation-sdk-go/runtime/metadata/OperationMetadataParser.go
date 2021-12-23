@@ -3,7 +3,6 @@
 
 package metadata
 
-
 // Note:
 // Parser is incomplete
 // Only valid to find resource/hasFieldOf metadata of structure info for given params info, Need to implement enumeration info

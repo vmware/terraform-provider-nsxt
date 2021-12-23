@@ -1,6 +1,7 @@
-//TODO refactor this class to share code with jsonrpc connector
-/* Copyright © 2019, 2020 VMware, Inc. All Rights Reserved.
+/* Copyright © 2019-2021 VMware, Inc. All Rights Reserved.
    SPDX-License-Identifier: BSD-2-Clause */
+
+//TODO refactor this class to share code with jsonrpc connector
 
 package client
 
@@ -22,33 +23,89 @@ import (
 )
 
 type RestConnector struct {
-	url                          string
-	httpClient                   http.Client
+	url        string
+	httpClient http.Client
+	options    *connectorOptions
+	provider   core.APIProvider
+
+	statusCode int
+}
+
+type connectorOptions struct {
+	decorators                   []core.APIProviderDecorator
 	securityContext              core.SecurityContext
 	appContext                   *core.ApplicationContext
 	connectionMetadata           map[string]interface{}
 	enableDefaultContentType     bool
+	requestProcessors            []core.RequestProcessor
+	responseAcceptors            []core.ResponseAcceptor
+	typeConverter                *bindings.TypeConverter
 	securityContextSerializerMap map[string]rest.SecurityContextSerializer
-	requestProcessors            []rest.RequestProcessor
-	statusCode                   int
 }
 
-func NewRestConnector(url string, client http.Client) *RestConnector {
-	var secCtxSerializerMap = make(map[string]rest.SecurityContextSerializer)
-	secCtxSerializerMap[security.USER_PASSWORD_SCHEME_ID] = rest.NewUserPwdSecContextSerializer()
-	secCtxSerializerMap[security.SESSION_SCHEME_ID] = rest.NewSessionSecContextSerializer()
-	secCtxSerializerMap[security.OAUTH_SCHEME_ID] = rest.NewOauthSecContextSerializer()
-	return &RestConnector{
-		url:                          url,
-		httpClient:                   client,
-		enableDefaultContentType:     true,
-		securityContextSerializerMap: secCtxSerializerMap,
-		requestProcessors:            []rest.RequestProcessor{},
+type ConnectorOption func(*connectorOptions)
+
+func NewRestConnector(url string, client http.Client, options ...ConnectorOption) *RestConnector {
+	connectorOptions := defaultRESTConnectorOptions()
+
+	for _, o := range options {
+		o(connectorOptions)
+	}
+
+	connector := &RestConnector{
+		url:        url,
+		httpClient: client,
+		options:    connectorOptions,
+	}
+	connector.provider = connector
+
+	chainDecorators(connector)
+
+	return connector
+}
+
+func chainDecorators(connector *RestConnector) {
+	for _, decorator := range connector.options.decorators {
+		connector.provider = decorator(connector.provider)
+	}
+}
+
+func defaultRESTConnectorOptions() *connectorOptions {
+	return &connectorOptions{
+		securityContextSerializerMap: map[string]rest.SecurityContextSerializer{
+			security.USER_PASSWORD_SCHEME_ID: rest.NewUserPwdSecContextSerializer(),
+			security.SESSION_SCHEME_ID:       rest.NewSessionSecContextSerializer(),
+			security.OAUTH_SCHEME_ID:         rest.NewOauthSecContextSerializer(),
+		},
+		typeConverter:            bindings.NewTypeConverter(bindings.InRestMode()),
+		enableDefaultContentType: true,
+	}
+}
+
+// WithDecorators sets decorating APIProvider.
+// APIProvider decorators wrap execution of Invoke method to extend runtime with additional functionality.
+func WithDecorators(decorators ...core.APIProviderDecorator) ConnectorOption {
+	return func(options *connectorOptions) {
+		options.decorators = append(options.decorators, decorators...)
+	}
+}
+
+// WithRequestProcessors defines request processors for RestConnector
+func WithRequestProcessors(requestProcessors ...core.RequestProcessor) ConnectorOption {
+	return func(options *connectorOptions) {
+		options.requestProcessors = requestProcessors
+	}
+}
+
+// WithResponseAcceptors defines response acceptors for RestConnector
+func WithResponseAcceptors(responseAcceptors ...core.ResponseAcceptor) ConnectorOption {
+	return func(options *connectorOptions) {
+		options.responseAcceptors = responseAcceptors
 	}
 }
 
 func (j *RestConnector) ApplicationContext() *core.ApplicationContext {
-	return j.appContext
+	return j.options.appContext
 }
 
 func (j *RestConnector) StatusCode() int {
@@ -56,63 +113,70 @@ func (j *RestConnector) StatusCode() int {
 }
 
 func (j *RestConnector) SetApplicationContext(ctx *core.ApplicationContext) {
-	j.appContext = ctx
+	j.options.appContext = ctx
 }
 
 func (j *RestConnector) SecurityContext() core.SecurityContext {
-	return j.securityContext
+	return j.options.securityContext
 }
 
 func (j *RestConnector) SetSecurityContext(ctx core.SecurityContext) {
-	j.securityContext = ctx
+	j.options.securityContext = ctx
 }
 
 func (j *RestConnector) SetConnectionMetadata(connectionMetadata map[string]interface{}) {
-	j.connectionMetadata = connectionMetadata
+	j.options.connectionMetadata = connectionMetadata
 }
 
 func (j *RestConnector) ConnectionMetadata() map[string]interface{} {
-	return j.connectionMetadata
+	return j.options.connectionMetadata
 }
 
 // If enableDefaultContentType is True then Header[Content-Type] gets overwritten to value 'application/json'
 func (j *RestConnector) SetEnableDefaultContentType(enableDefaultContentType bool) {
-	j.enableDefaultContentType = enableDefaultContentType
+	j.options.enableDefaultContentType = enableDefaultContentType
 }
 
 func (j *RestConnector) SetSecCtxSerializer(schemeID string, serializer rest.SecurityContextSerializer) {
-	j.securityContextSerializerMap[schemeID] = serializer
+	j.options.securityContextSerializerMap[schemeID] = serializer
 }
 
 func (j *RestConnector) SecurityContextSerializerMap() map[string]rest.SecurityContextSerializer {
-	return j.securityContextSerializerMap
+	return j.options.securityContextSerializerMap
 }
 
+// AddRequestProcessor adds request processor to connector.
+// Request processors are executed right before request is made to the server
+// Deprecated: use WithRequestProcessors instead
 func (j *RestConnector) AddRequestProcessor(processor rest.RequestProcessor) {
-	j.requestProcessors = append(j.requestProcessors, processor)
+	j.options.requestProcessors = append(j.options.requestProcessors, processor.Process)
 }
 
-func (j *RestConnector) RequestProcessors() []rest.RequestProcessor {
-	return j.requestProcessors
+// RequestProcessors gets list of all request processors defined in connector
+func (j *RestConnector) RequestProcessors() []core.RequestProcessor {
+	return j.options.requestProcessors
+}
+
+// ResponseAcceptors gets list of all response acceptors defined in connector
+func (j *RestConnector) ResponseAcceptors() []core.ResponseAcceptor {
+	return j.options.responseAcceptors
 }
 
 func (j *RestConnector) NewExecutionContext() *core.ExecutionContext {
-	if j.appContext == nil {
-		j.appContext = common.NewDefaultApplicationContext()
-	} else {
-		common.InsertOperationId(j.appContext)
+	if j.options.appContext == nil {
+		j.options.appContext = common.NewDefaultApplicationContext()
 	}
-	return core.NewExecutionContext(j.appContext, j.securityContext)
+	appCopy := j.options.appContext.Copy()
+	common.InsertOperationId(appCopy)
+	return core.NewExecutionContext(appCopy, j.options.securityContext)
 }
 
 func (j *RestConnector) GetApiProvider() core.APIProvider {
-	return j
+	return j.provider
 }
 
 func (j *RestConnector) TypeConverter() *bindings.TypeConverter {
-	typeConverter := bindings.NewTypeConverter()
-	typeConverter.SetMode(bindings.REST)
-	return typeConverter
+	return j.options.typeConverter
 }
 
 func (j *RestConnector) buildHTTPRequest(serializedRequest *rest.Request,
@@ -131,7 +195,7 @@ func (j *RestConnector) buildHTTPRequest(serializedRequest *rest.Request,
 			req.Header.Set(k, v)
 		}
 	}
-	if _, ok := req.Header[lib.HTTP_CONTENT_TYPE_HEADER]; !ok && j.enableDefaultContentType {
+	if _, ok := req.Header[lib.HTTP_CONTENT_TYPE_HEADER]; !ok && j.options.enableDefaultContentType {
 		req.Header.Set(lib.HTTP_CONTENT_TYPE_HEADER, lib.JSON_CONTENT_TYPE)
 	}
 	req.Header.Set(lib.HTTP_USER_AGENT_HEADER, GetRuntimeUserAgentHeader())
@@ -139,33 +203,12 @@ func (j *RestConnector) buildHTTPRequest(serializedRequest *rest.Request,
 	return req, nil
 }
 
-func (j *RestConnector) retrieveOperationRestMetadata() (*protocol.OperationRestMetadata, *data.ErrorValue) {
-	var connMetadata interface{}
-	if connMeta, ok := j.ConnectionMetadata()[lib.REST_METADATA]; ok {
-		connMetadata = connMeta
-	} else {
-		err := l10n.NewRuntimeErrorNoParam("vapi.bindings.stub.rest_metadata.unavailable")
-		errVal := bindings.CreateErrorValueFromMessages(bindings.INVALID_REQUEST_ERROR_DEF, []error{err})
-		return nil, errVal
-	}
-
-	if restMeta, ok := connMetadata.(protocol.OperationRestMetadata); ok {
-		return &restMeta, nil
-	}
-
-	err := l10n.NewRuntimeErrorNoParam("vapi.bindings.stub.rest_metadata.type.mismatch")
-	errVal := bindings.CreateErrorValueFromMessages(bindings.INVALID_REQUEST_ERROR_DEF, []error{err})
-	return nil, errVal
-}
-
 func (j *RestConnector) Invoke(serviceID string, operationID string,
 	inputValue data.DataValue, ctx *core.ExecutionContext) core.MethodResult {
+
 	//TODO do we need serviceID and opID for rest connector?
 	if ctx == nil {
 		ctx = j.NewExecutionContext()
-	}
-	if !ctx.ApplicationContext().HasProperty(lib.OPID) {
-		common.InsertOperationId(ctx.ApplicationContext())
 	}
 
 	// Get operation metadata from connector
@@ -198,7 +241,7 @@ func (j *RestConnector) Invoke(serviceID string, operationID string,
 		if schemeID != nil {
 			log.Debug("SecurityContext schemeID is ", schemeID)
 			// Find the approprate SecurityContextSerializer based on the schemeID
-			if serializer, ok := j.securityContextSerializerMap[*schemeID]; ok {
+			if serializer, ok := j.options.securityContextSerializerMap[*schemeID]; ok {
 				secCtxSerializer = serializer
 			} else {
 				log.Debug("No appropriate SecurityContextSerializer for schemeID %s. HTTP headers will not be added to request", schemeID)
@@ -218,9 +261,14 @@ func (j *RestConnector) Invoke(serviceID string, operationID string,
 
 	req, err := j.buildHTTPRequest(serializedRequest, ctx, restMetadata)
 
+	if ctx.Context() != nil {
+		req = req.WithContext(ctx.Context())
+	}
+
 	// Allow client to access the req object before sending the http request
-	for _, preProcessor := range j.requestProcessors {
-		err := preProcessor.Process(req)
+	allRequestProcessors := append(ctx.RuntimeData().GetRequestProcessors(), j.options.requestProcessors...)
+	for _, preProcessor := range allRequestProcessors {
+		err := preProcessor(req)
 		if err != nil {
 			log.Debug(err)
 			err := l10n.NewRuntimeErrorNoParam("vapi.protocol.client.request.error")
@@ -230,28 +278,46 @@ func (j *RestConnector) Invoke(serviceID string, operationID string,
 	}
 
 	response, err := j.httpClient.Do(req)
+
 	if err != nil {
-		errString := err.Error()
-		if strings.HasSuffix(errString, "connection refused") {
-			err := l10n.NewRuntimeErrorNoParam("vapi.server.unavailable")
-			errVal := bindings.CreateErrorValueFromMessages(bindings.SERVICE_UNAVAILABLE_ERROR_DEF, []error{err})
-			return core.NewMethodResult(nil, errVal)
-		} else if strings.HasSuffix(errString, "i/o timeout") {
-			err := l10n.NewRuntimeErrorNoParam("vapi.server.timedout")
-			errVal := bindings.CreateErrorValueFromMessages(bindings.TIMEDOUT_ERROR_DEF, []error{err})
-			return core.NewMethodResult(nil, errVal)
-		} else if strings.Contains(errString, "x509") {
-			err := l10n.NewRuntimeErrorNoParam("vapi.security.authentication.certificate.invalid")
-			errVal := bindings.CreateErrorValueFromMessages(bindings.UNAUTHENTICATED_ERROR_DEF, []error{err})
-			return core.NewMethodResult(nil, errVal)
-		} else {
-			// TODO add more specific errors
-			err := l10n.NewRuntimeError("vapi.protocol.client.request.error", map[string]string{"errMsg": errString})
-			errVal := bindings.CreateErrorValueFromMessages(bindings.INVALID_REQUEST_ERROR_DEF, []error{err})
-			return core.NewMethodResult(nil, errVal)
-		}
+		errVal := getVAPIError(err)
+		return core.NewMethodResult(nil, errVal)
 	}
-	defer response.Body.Close()
+
+	// Provides access to raw response coming from the server
+	allResponseAcceptors := append(ctx.RuntimeData().GetResponseAcceptors(), j.options.responseAcceptors...)
+	for _, responseAcceptor := range allResponseAcceptors {
+		responseAcceptor(response)
+	}
+
+	return j.PrepareMethodResult(response, restMetadata)
+}
+
+func (j *RestConnector) retrieveOperationRestMetadata() (*protocol.OperationRestMetadata, *data.ErrorValue) {
+	var connMetadata interface{}
+	if connMeta, ok := j.ConnectionMetadata()[lib.REST_METADATA]; ok {
+		connMetadata = connMeta
+	} else {
+		err := l10n.NewRuntimeErrorNoParam("vapi.bindings.stub.rest_metadata.unavailable")
+		errVal := bindings.CreateErrorValueFromMessages(bindings.INVALID_REQUEST_ERROR_DEF, []error{err})
+		return nil, errVal
+	}
+
+	if restMeta, ok := connMetadata.(protocol.OperationRestMetadata); ok {
+		return &restMeta, nil
+	}
+
+	err := l10n.NewRuntimeErrorNoParam("vapi.bindings.stub.rest_metadata.type.mismatch")
+	errVal := bindings.CreateErrorValueFromMessages(bindings.INVALID_REQUEST_ERROR_DEF, []error{err})
+	return nil, errVal
+}
+
+func (j *RestConnector) PrepareMethodResult(response *http.Response, restMetadata *protocol.OperationRestMetadata) core.MethodResult {
+	defer func() {
+		if response != nil && response.Body != nil {
+			response.Body.Close()
+		}
+	}()
 	resp, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		err := l10n.NewRuntimeErrorNoParam("vapi.protocol.client.response.error")
@@ -264,9 +330,10 @@ func (j *RestConnector) Invoke(serviceID string, operationID string,
 	j.statusCode = response.StatusCode
 
 	respHeader := response.Header
-	methodResult, err := rest.DeserializeResponse(response.StatusCode, respHeader, string(resp), restMetadata)
+	responseBody := string(resp)
+	methodResult, err := rest.DeserializeResponse(response.StatusCode, respHeader, responseBody, restMetadata)
 	if err != nil {
-		err := l10n.NewRuntimeErrorNoParam("vapi.protocol.client.response.unmarshall.error")
+		err := l10n.NewRuntimeError("vapi.protocol.client.response.unmarshall.error", map[string]string{"responseBody": responseBody})
 		// TODO create an appropriate binding error for this
 		errVal := bindings.CreateErrorValueFromMessages(bindings.INTERNAL_SERVER_ERROR_DEF, []error{err})
 		return core.NewMethodResult(nil, errVal)

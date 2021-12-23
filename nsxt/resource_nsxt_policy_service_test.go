@@ -615,10 +615,10 @@ func testAccNsxtPolicyServiceExists(resourceName string) resource.TestCheckFunc 
 
 		var err error
 		if testAccIsGlobalManager() {
-			nsxClient := gm_infra.NewDefaultServicesClient(connector)
+			nsxClient := gm_infra.NewServicesClient(connector)
 			_, err = nsxClient.Get(resourceID)
 		} else {
-			nsxClient := infra.NewDefaultServicesClient(connector)
+			nsxClient := infra.NewServicesClient(connector)
 			_, err = nsxClient.Get(resourceID)
 		}
 		if err != nil {
@@ -640,10 +640,10 @@ func testAccNsxtPolicyServiceCheckDestroy(state *terraform.State, displayName st
 
 		resourceID := rs.Primary.Attributes["id"]
 		if testAccIsGlobalManager() {
-			nsxClient := gm_infra.NewDefaultServicesClient(connector)
+			nsxClient := gm_infra.NewServicesClient(connector)
 			_, err = nsxClient.Get(resourceID)
 		} else {
-			nsxClient := infra.NewDefaultServicesClient(connector)
+			nsxClient := infra.NewServicesClient(connector)
 			_, err = nsxClient.Get(resourceID)
 		}
 		if err == nil {

@@ -105,7 +105,7 @@ func dataSourceNsxtPolicyRealizationInfoRead(d *schema.ResourceData, m interface
 			var realizationError error
 			var realizationResult model.GenericPolicyRealizedResourceListResult
 			if isPolicyGlobalManager(m) {
-				client := gm_realized_state.NewDefaultRealizedEntitiesClient(connector)
+				client := gm_realized_state.NewRealizedEntitiesClient(connector)
 				var gmResults gm_model.GenericPolicyRealizedResourceListResult
 				gmResults, realizationError = client.List(path, &objSitePath)
 				if realizationError == nil {
@@ -114,7 +114,7 @@ func dataSourceNsxtPolicyRealizationInfoRead(d *schema.ResourceData, m interface
 					realizationResult = lmResults.(model.GenericPolicyRealizedResourceListResult)
 				}
 			} else {
-				client := realized_state.NewDefaultRealizedEntitiesClient(connector)
+				client := realized_state.NewRealizedEntitiesClient(connector)
 				realizationResult, realizationError = client.List(path, nil)
 			}
 			state := "UNKNOWN"

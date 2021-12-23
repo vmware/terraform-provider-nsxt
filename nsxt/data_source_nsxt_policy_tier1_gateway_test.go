@@ -64,11 +64,11 @@ func testAccDataSourceNsxtPolicyTier1GatewayCreate(routerName string) error {
 			return convErr
 		}
 
-		client := gm_infra.NewDefaultTier1sClient(connector)
+		client := gm_infra.NewTier1sClient(connector)
 		err = client.Patch(id, gmObj.(gm_model.Tier1))
 
 	} else {
-		client := infra.NewDefaultTier1sClient(connector)
+		client := infra.NewTier1sClient(connector)
 		err = client.Patch(id, obj)
 	}
 	if err != nil {
@@ -87,7 +87,7 @@ func testAccDataSourceNsxtPolicyTier1GatewayDeleteByName(routerName string) erro
 	if testAccIsGlobalManager() {
 		objID, err := testGetObjIDByName(routerName, "Tier1")
 		if err == nil {
-			client := gm_infra.NewDefaultTier1sClient(connector)
+			client := gm_infra.NewTier1sClient(connector)
 			err := client.Delete(objID)
 			if err != nil {
 				return handleDeleteError("Tier1", objID, err)
@@ -95,7 +95,7 @@ func testAccDataSourceNsxtPolicyTier1GatewayDeleteByName(routerName string) erro
 			return nil
 		}
 	} else {
-		client := infra.NewDefaultTier1sClient(connector)
+		client := infra.NewTier1sClient(connector)
 
 		// Find the object by name
 		objList, err := client.List(nil, nil, nil, nil, nil, nil)

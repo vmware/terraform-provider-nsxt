@@ -4,17 +4,25 @@
 package core
 
 import (
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/log"
+	"sort"
 	"strings"
 )
 
 type MethodDefinition struct {
-	id                  MethodIdentifier
-	input               data.DataDefinition
-	output              data.DataDefinition
-	errorDefinitionList []data.ErrorDefinition
-	errorDefinitionMap  map[string]data.ErrorDefinition
+	id                 MethodIdentifier
+	input              data.DataDefinition
+	output             data.DataDefinition
+	errorDefinitionMap map[string]data.ErrorDefinition
+}
+
+var allowedErrors = []data.ErrorDefinition{
+	bindings.INTERNAL_SERVER_ERROR_DEF,
+	bindings.INVALID_ARGUMENT_ERROR_DEF,
+	bindings.UNEXPECTED_INPUT_ERROR_DEF,
+	bindings.OP_NOT_FOUND_ERROR_DEF,
 }
 
 func NewMethodDefinition(id MethodIdentifier, input data.DataDefinition, output data.DataDefinition, errorDefs []data.ErrorDefinition) MethodDefinition {
@@ -28,18 +36,16 @@ func NewMethodDefinition(id MethodIdentifier, input data.DataDefinition, output 
 		return MethodDefinition{}
 	}
 
-	if errorDefs == nil {
-		var errorDefinitionList = make([]data.ErrorDefinition, 0)
-		var errorDefinitionMap = make(map[string]data.ErrorDefinition)
-		return MethodDefinition{id: id, input: input, output: output, errorDefinitionList: errorDefinitionList, errorDefinitionMap: errorDefinitionMap}
-	} else {
-		var errorDefMap = make(map[string]data.ErrorDefinition)
-		for _, errorDef := range errorDefs {
-			errorDefMap[errorDef.Name()] = errorDef
-		}
-		return MethodDefinition{id: id, input: input, output: output, errorDefinitionList: errorDefs, errorDefinitionMap: errorDefMap}
+	errorDefinitionMap := make(map[string]data.ErrorDefinition)
+	for _, errorDef := range allowedErrors {
+		errorDefinitionMap[errorDef.Name()] = errorDef
 	}
 
+	for _, errorDef := range errorDefs {
+		errorDefinitionMap[errorDef.Name()] = errorDef
+	}
+
+	return MethodDefinition{id: id, input: input, output: output, errorDefinitionMap: errorDefinitionMap}
 }
 
 func (md MethodDefinition) Identifier() MethodIdentifier {
@@ -54,8 +60,21 @@ func (md MethodDefinition) OutputDefinition() data.DataDefinition {
 	return md.output
 }
 
+// ErrorDefinitions Returns method's error definitions sorted by error name
 func (md MethodDefinition) ErrorDefinitions() []data.ErrorDefinition {
-	return md.errorDefinitionList
+	var errorDefinitions = make([]data.ErrorDefinition, 0, len(md.errorDefinitionMap))
+	keys := make([]string, 0, len(md.errorDefinitionMap))
+
+	for key, _ := range md.errorDefinitionMap {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+
+	for _, key := range keys {
+		errorDefinitions = append(errorDefinitions, md.errorDefinitionMap[key])
+	}
+
+	return errorDefinitions
 }
 
 func (md MethodDefinition) ErrorDefinition(errorName string) data.ErrorDefinition {
@@ -80,8 +99,8 @@ func (md MethodDefinition) String() string {
 	if md.output != nil {
 		sb.WriteString("Output: " + md.output.String())
 	}
-	for i := 0; i < len(md.errorDefinitionList); i++ {
-		sb.WriteString("Error: " + md.errorDefinitionList[i].Name())
+	for _, errorDef := range md.ErrorDefinitions() {
+		sb.WriteString("Error: " + errorDef.Name())
 	}
 	return sb.String()
 }

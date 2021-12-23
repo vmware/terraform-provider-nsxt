@@ -105,7 +105,7 @@ func testAccNsxtPolicyDhcpRelayConfigExists(resourceName string) resource.TestCh
 	return func(state *terraform.State) error {
 
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-		nsxClient := infra.NewDefaultDhcpRelayConfigsClient(connector)
+		nsxClient := infra.NewDhcpRelayConfigsClient(connector)
 
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
@@ -128,7 +128,7 @@ func testAccNsxtPolicyDhcpRelayConfigExists(resourceName string) resource.TestCh
 
 func testAccNsxtPolicyDhcpRelayConfigCheckDestroy(state *terraform.State, displayName string) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-	nsxClient := infra.NewDefaultDhcpRelayConfigsClient(connector)
+	nsxClient := infra.NewDhcpRelayConfigsClient(connector)
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_policy_dhcp_relay" {

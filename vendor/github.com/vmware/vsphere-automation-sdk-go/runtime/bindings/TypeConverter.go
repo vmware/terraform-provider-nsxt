@@ -1,8 +1,7 @@
-/* Copyright © 2019 VMware, Inc. All Rights Reserved.
+/* Copyright © 2019-2021 VMware, Inc. All Rights Reserved.
    SPDX-License-Identifier: BSD-2-Clause */
 
 package bindings
-
 
 import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
@@ -17,20 +16,33 @@ var JSONRPC ConverterMode = "JSONRPC"
 
 // TypeConverter converts between Golang Native data model and API runtime data model.
 type TypeConverter struct {
+	// mode controls the way native types are rendered to DataValue. Most importantly if Maps will be represented as
+	// struct or list
+	options *typeConverterOptions
+}
 
-	//TODO
-	//remove permissive mode. typeconverter's default mode is permissive.
-	/**
-	 * Activates permissive mode of converter which is disabled by default.
-	 * In permissive mode, Optional wrappers need not be present for deserializing DynamicStructures.
-	 */
-	permissive bool
-
+type typeConverterOptions struct {
 	mode ConverterMode
 }
 
-func NewTypeConverter() *TypeConverter {
-	return &TypeConverter{permissive: true}
+type TypeConverterOption func(*typeConverterOptions)
+
+func NewTypeConverter(options ...TypeConverterOption) *TypeConverter {
+	doptions := &typeConverterOptions{
+		mode: JSONRPC,
+	}
+
+	for _, o := range options {
+		o(doptions)
+	}
+
+	return &TypeConverter{options: doptions}
+}
+
+func InRestMode() TypeConverterOption {
+	return func(opts *typeConverterOptions) {
+		opts.mode = REST
+	}
 }
 
 // ConvertToGolang converts vapiValue which is an API runtime representation to its equivalent golang native representation
@@ -39,20 +51,12 @@ func (t *TypeConverter) ConvertToGolang(vapiValue data.DataValue, bindingType Bi
 	if bindingType == nil {
 		return nil, []error{l10n.NewRuntimeErrorNoParam("vapi.bindings.typeconverter.nil.type")}
 	}
-	if t.mode == REST {
-		var visitor = NewRestToGolangVisitor(vapiValue, t)
-		err := bindingType.Accept(visitor)
-		if err != nil {
-			return nil, err
-		}
-		return visitor.OutputValue(), nil
-	}
-	var visitor = NewVapiJsonRpcDataValueToGolangVisitor(vapiValue, t)
-	err := bindingType.Accept(visitor)
+	var nativeConverter = NewDataValueToNativeConverter(vapiValue, t)
+	err := nativeConverter.visit(bindingType)
 	if err != nil {
 		return nil, err
 	}
-	return visitor.OutputValue(), nil
+	return nativeConverter.OutputValue(), nil
 }
 
 // ConvertToVapi converts golangValue which is native golang value to its equivalent api runtime representation
@@ -71,16 +75,16 @@ func (t *TypeConverter) ConvertToVapi(golangValue interface{}, bindingType Bindi
 		}
 	}
 
-	if t.mode == REST {
+	if t.options.mode == REST {
 		visitor := NewGolangToRestDataValueVisitor(golangValue)
-		err := bindingType.Accept(visitor)
+		err := visitor.visit(bindingType)
 		if err != nil {
 			return nil, err
 		}
 		return visitor.OutputValue(), nil
 	} else {
 		visitor := NewGolangToVapiDataValueVisitor(golangValue)
-		err := bindingType.Accept(visitor)
+		err := visitor.visit(bindingType)
 		if err != nil {
 			return nil, err
 		}
@@ -95,8 +99,8 @@ func (t *TypeConverter) ConvertToDataDefinition(bindingType BindingType) (data.D
 	}
 	referenceResolver := data.NewReferenceResolver()
 	seenStructures := map[string]bool{}
-	var visitor = NewBindingTypeToDataDefinitionVisitor(bindingType, referenceResolver, seenStructures)
-	err := bindingType.Accept(visitor)
+	var visitor = NewBindingTypeToDataDefinitionConverter(bindingType, referenceResolver, seenStructures)
+	err := visitor.convert(bindingType)
 	if err != nil {
 		return nil, err
 	}
@@ -107,18 +111,17 @@ func (t *TypeConverter) ConvertToDataDefinition(bindingType BindingType) (data.D
 	return visitor.OutputValue(), nil
 }
 
-/**
- * Sets permissive mode for TypeConverter.
- * todo: remove this method. default mode is permissive.
- */
+// Deprecated: SetPermissive does nothing and is left to keep code compatiblity
 func (t *TypeConverter) SetPermissive(permissive bool) {
-	t.permissive = permissive
+	// Deprecated
 }
 
+// SetMode controls the way native types are rendered to DataValue. Most importantly if Maps will be represented as
+// struct or list
 func (t *TypeConverter) SetMode(mode ConverterMode) {
-	t.mode = mode
+	t.options.mode = mode
 }
 
 func (t *TypeConverter) Mode() ConverterMode {
-	return t.mode
+	return t.options.mode
 }

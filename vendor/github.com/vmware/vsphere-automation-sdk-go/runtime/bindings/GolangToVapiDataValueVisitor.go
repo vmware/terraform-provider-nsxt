@@ -406,11 +406,11 @@ func (g *GolangToVapiDataValueVisitor) unexpectedValueError(expectedType string)
 	var actualType string
 	if g.inValue == nil {
 		actualType = "nil"
-	} else{
+	} else {
 		actualType = reflect.TypeOf(g.inValue).String()
 	}
 	var args = map[string]string{
 		"expectedType": expectedType,
-		"actualType": actualType  }
+		"actualType":   actualType}
 	return []error{l10n.NewRuntimeError("vapi.bindings.typeconverter.unexpected.runtime.value", args)}
 }

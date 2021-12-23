@@ -3,7 +3,6 @@
 
 package info
 
-
 type EnumerationInfo struct {
 	identifier    string
 	documentation string

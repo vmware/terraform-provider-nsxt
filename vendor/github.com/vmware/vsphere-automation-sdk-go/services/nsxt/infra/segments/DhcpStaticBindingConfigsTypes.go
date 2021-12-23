@@ -1,28 +1,22 @@
-/* Copyright © 2019 VMware, Inc. All Rights Reserved.
-   SPDX-License-Identifier: BSD-2-Clause */
+// Copyright © 2019-2021 VMware, Inc. All Rights Reserved.
+// SPDX-License-Identifier: BSD-2-Clause
 
-// Code generated. DO NOT EDIT.
+// Auto generated code. DO NOT EDIT.
 
-/*
- * Data type definitions file for service: DhcpStaticBindingConfigs.
- * Includes binding types of a structures and enumerations defined in the service.
- * Shared by client-side stubs and server-side skeletons to ensure type
- * compatibility.
- */
+// Data type definitions file for service: DhcpStaticBindingConfigs.
+// Includes binding types of a structures and enumerations defined in the service.
+// Shared by client-side stubs and server-side skeletons to ensure type
+// compatibility.
 
 package segments
 
 import (
-	"reflect"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+	"reflect"
 )
-
-
-
-
 
 func dhcpStaticBindingConfigsDeleteInputType() bindings.StructType {
 	fields := make(map[string]bindings.BindingType)
@@ -78,7 +72,7 @@ func dhcpStaticBindingConfigsDeleteRestMetadata() protocol.OperationRestMetadata
 		204,
 		"",
 		errorHeaders,
-		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func dhcpStaticBindingConfigsGetInputType() bindings.StructType {
@@ -93,7 +87,7 @@ func dhcpStaticBindingConfigsGetInputType() bindings.StructType {
 }
 
 func dhcpStaticBindingConfigsGetOutputType() bindings.BindingType {
-	return bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.DhcpStaticBindingConfigBindingType),}, bindings.REST)
+	return bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.DhcpStaticBindingConfigBindingType)}, bindings.REST)
 }
 
 func dhcpStaticBindingConfigsGetRestMetadata() protocol.OperationRestMetadata {
@@ -135,7 +129,7 @@ func dhcpStaticBindingConfigsGetRestMetadata() protocol.OperationRestMetadata {
 		200,
 		"",
 		errorHeaders,
-		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func dhcpStaticBindingConfigsListInputType() bindings.StructType {
@@ -221,7 +215,7 @@ func dhcpStaticBindingConfigsListRestMetadata() protocol.OperationRestMetadata {
 		200,
 		"",
 		errorHeaders,
-		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func dhcpStaticBindingConfigsPatchInputType() bindings.StructType {
@@ -229,7 +223,7 @@ func dhcpStaticBindingConfigsPatchInputType() bindings.StructType {
 	fieldNameMap := make(map[string]string)
 	fields["segment_id"] = bindings.NewStringType()
 	fields["binding_id"] = bindings.NewStringType()
-	fields["dhcp_static_binding_config"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.DhcpStaticBindingConfigBindingType),}, bindings.REST)
+	fields["dhcp_static_binding_config"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.DhcpStaticBindingConfigBindingType)}, bindings.REST)
 	fieldNameMap["segment_id"] = "SegmentId"
 	fieldNameMap["binding_id"] = "BindingId"
 	fieldNameMap["dhcp_static_binding_config"] = "DhcpStaticBindingConfig"
@@ -252,11 +246,11 @@ func dhcpStaticBindingConfigsPatchRestMetadata() protocol.OperationRestMetadata 
 	bodyFieldsMap := map[string]string{}
 	fields["segment_id"] = bindings.NewStringType()
 	fields["binding_id"] = bindings.NewStringType()
-	fields["dhcp_static_binding_config"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.DhcpStaticBindingConfigBindingType),}, bindings.REST)
+	fields["dhcp_static_binding_config"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.DhcpStaticBindingConfigBindingType)}, bindings.REST)
 	fieldNameMap["segment_id"] = "SegmentId"
 	fieldNameMap["binding_id"] = "BindingId"
 	fieldNameMap["dhcp_static_binding_config"] = "DhcpStaticBindingConfig"
-	paramsTypeMap["dhcp_static_binding_config"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.DhcpStaticBindingConfigBindingType),}, bindings.REST)
+	paramsTypeMap["dhcp_static_binding_config"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.DhcpStaticBindingConfigBindingType)}, bindings.REST)
 	paramsTypeMap["segment_id"] = bindings.NewStringType()
 	paramsTypeMap["binding_id"] = bindings.NewStringType()
 	paramsTypeMap["segmentId"] = bindings.NewStringType()
@@ -283,7 +277,7 @@ func dhcpStaticBindingConfigsPatchRestMetadata() protocol.OperationRestMetadata 
 		204,
 		"",
 		errorHeaders,
-		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func dhcpStaticBindingConfigsUpdateInputType() bindings.StructType {
@@ -291,7 +285,7 @@ func dhcpStaticBindingConfigsUpdateInputType() bindings.StructType {
 	fieldNameMap := make(map[string]string)
 	fields["segment_id"] = bindings.NewStringType()
 	fields["binding_id"] = bindings.NewStringType()
-	fields["dhcp_static_binding_config"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.DhcpStaticBindingConfigBindingType),}, bindings.REST)
+	fields["dhcp_static_binding_config"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.DhcpStaticBindingConfigBindingType)}, bindings.REST)
 	fieldNameMap["segment_id"] = "SegmentId"
 	fieldNameMap["binding_id"] = "BindingId"
 	fieldNameMap["dhcp_static_binding_config"] = "DhcpStaticBindingConfig"
@@ -300,7 +294,7 @@ func dhcpStaticBindingConfigsUpdateInputType() bindings.StructType {
 }
 
 func dhcpStaticBindingConfigsUpdateOutputType() bindings.BindingType {
-	return bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.DhcpStaticBindingConfigBindingType),}, bindings.REST)
+	return bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.DhcpStaticBindingConfigBindingType)}, bindings.REST)
 }
 
 func dhcpStaticBindingConfigsUpdateRestMetadata() protocol.OperationRestMetadata {
@@ -314,11 +308,11 @@ func dhcpStaticBindingConfigsUpdateRestMetadata() protocol.OperationRestMetadata
 	bodyFieldsMap := map[string]string{}
 	fields["segment_id"] = bindings.NewStringType()
 	fields["binding_id"] = bindings.NewStringType()
-	fields["dhcp_static_binding_config"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.DhcpStaticBindingConfigBindingType),}, bindings.REST)
+	fields["dhcp_static_binding_config"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.DhcpStaticBindingConfigBindingType)}, bindings.REST)
 	fieldNameMap["segment_id"] = "SegmentId"
 	fieldNameMap["binding_id"] = "BindingId"
 	fieldNameMap["dhcp_static_binding_config"] = "DhcpStaticBindingConfig"
-	paramsTypeMap["dhcp_static_binding_config"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.DhcpStaticBindingConfigBindingType),}, bindings.REST)
+	paramsTypeMap["dhcp_static_binding_config"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.DhcpStaticBindingConfigBindingType)}, bindings.REST)
 	paramsTypeMap["segment_id"] = bindings.NewStringType()
 	paramsTypeMap["binding_id"] = bindings.NewStringType()
 	paramsTypeMap["segmentId"] = bindings.NewStringType()
@@ -345,7 +339,5 @@ func dhcpStaticBindingConfigsUpdateRestMetadata() protocol.OperationRestMetadata
 		200,
 		"",
 		errorHeaders,
-		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
-
-

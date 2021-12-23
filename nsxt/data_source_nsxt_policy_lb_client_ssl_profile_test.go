@@ -46,7 +46,7 @@ func testAccDataSourceNsxtPolicyLBClientSslProfileCreate(name string) error {
 	if err != nil {
 		return fmt.Errorf("Error during test client initialization: %v", err)
 	}
-	client := infra.NewDefaultLbClientSslProfilesClient(connector)
+	client := infra.NewLbClientSslProfilesClient(connector)
 
 	displayName := name
 	description := name
@@ -70,7 +70,7 @@ func testAccDataSourceNsxtPolicyLBClientSslProfileDeleteByName(name string) erro
 	if err != nil {
 		return fmt.Errorf("Error during test client initialization: %v", err)
 	}
-	client := infra.NewDefaultLbClientSslProfilesClient(connector)
+	client := infra.NewLbClientSslProfilesClient(connector)
 
 	// Find the object by name
 	objList, err := client.List(nil, nil, nil, nil, nil, nil)

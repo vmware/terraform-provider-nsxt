@@ -1,4 +1,4 @@
-/* Copyright © 2019-2020 VMware, Inc. All Rights Reserved.
+/* Copyright © 2019-2021 VMware, Inc. All Rights Reserved.
    SPDX-License-Identifier: BSD-2-Clause */
 
 package security
@@ -35,10 +35,14 @@ func (a *AuthorizationFilter) Invoke(serviceID string, operationID string,
 	fullyQualifiedOperName := serviceID + "." + operationID
 
 	userId, err := RetrieveUserIdentity(ctx)
+	if err != nil {
+		return a.getInvalidAuthzMethodResult(err)
+	}
 	if userId == nil {
 		// No security context, or not authn data (because method doesn't require authn) => no authentication;
 		// without user information, no authorization as well
-		log.Debugf("Skipping authorization checks, because there is no authentication data for: " + fullyQualifiedOperName)
+		log.Debugf("Skipping authorization checks, "+
+			"because there is no authentication data for: %s", fullyQualifiedOperName)
 		return a.provider.Invoke(serviceID, operationID, inputValue, ctx)
 	}
 	userName := RetrieveUserName(userId)

@@ -3,12 +3,12 @@
 
 package security
 
-
 import (
 	"errors"
 )
 
 // Verifies subject confirmation data of token matches bearer token.
+// Deprecated: This validation is now part of JsonSsoVerifier processor. Use it instead.
 type BearerTokenSCVerifier struct {
 }
 

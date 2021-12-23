@@ -35,7 +35,7 @@ func dataSourceNsxtPolicyQosProfileRead(d *schema.ResourceData, m interface{}) e
 	}
 
 	connector := getPolicyConnector(m)
-	client := infra.NewDefaultQosProfilesClient(connector)
+	client := infra.NewQosProfilesClient(connector)
 
 	objID := d.Get("id").(string)
 	objName := d.Get("display_name").(string)

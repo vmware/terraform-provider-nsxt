@@ -3,7 +3,6 @@
 
 package info
 
-
 type UserDefinedTypeInfo struct {
 	name          string
 	structureInfo *StructureInfo

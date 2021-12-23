@@ -383,10 +383,10 @@ func resourceNsxtPolicyServiceGetEntriesFromSchema(d *schema.ResourceData) ([]*d
 func resourceNsxtPolicyServiceExists(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
 	var err error
 	if isGlobalManager {
-		client := gm_infra.NewDefaultServicesClient(connector)
+		client := gm_infra.NewServicesClient(connector)
 		_, err = client.Get(id)
 	} else {
-		client := infra.NewDefaultServicesClient(connector)
+		client := infra.NewServicesClient(connector)
 		_, err = client.Get(id)
 	}
 
@@ -440,10 +440,10 @@ func resourceNsxtPolicyServiceCreate(d *schema.ResourceData, m interface{}) erro
 		if convErr != nil {
 			return convErr
 		}
-		client := gm_infra.NewDefaultServicesClient(connector)
+		client := gm_infra.NewServicesClient(connector)
 		err = client.Patch(id, gmObj.(gm_model.Service))
 	} else {
-		client := infra.NewDefaultServicesClient(connector)
+		client := infra.NewServicesClient(connector)
 		err = client.Patch(id, obj)
 	}
 	if err != nil {
@@ -465,7 +465,7 @@ func resourceNsxtPolicyServiceRead(d *schema.ResourceData, m interface{}) error 
 
 	var obj model.Service
 	if isPolicyGlobalManager(m) {
-		client := gm_infra.NewDefaultServicesClient(connector)
+		client := gm_infra.NewServicesClient(connector)
 		gmObj, err := client.Get(id)
 		if err != nil {
 			return handleReadError(d, "Service", id, err)
@@ -476,7 +476,7 @@ func resourceNsxtPolicyServiceRead(d *schema.ResourceData, m interface{}) error 
 		}
 		obj = lmObj.(model.Service)
 	} else {
-		client := infra.NewDefaultServicesClient(connector)
+		client := infra.NewServicesClient(connector)
 		var err error
 		obj, err = client.Get(id)
 		if err != nil {
@@ -659,10 +659,10 @@ func resourceNsxtPolicyServiceUpdate(d *schema.ResourceData, m interface{}) erro
 		if convErr != nil {
 			return convErr
 		}
-		client := gm_infra.NewDefaultServicesClient(connector)
+		client := gm_infra.NewServicesClient(connector)
 		_, err = client.Update(id, gmObj.(gm_model.Service))
 	} else {
-		client := infra.NewDefaultServicesClient(connector)
+		client := infra.NewServicesClient(connector)
 		_, err = client.Update(id, obj)
 	}
 
@@ -682,10 +682,10 @@ func resourceNsxtPolicyServiceDelete(d *schema.ResourceData, m interface{}) erro
 
 	doDelete := func() error {
 		if isPolicyGlobalManager(m) {
-			client := gm_infra.NewDefaultServicesClient(connector)
+			client := gm_infra.NewServicesClient(connector)
 			return client.Delete(id)
 		}
-		client := infra.NewDefaultServicesClient(connector)
+		client := infra.NewServicesClient(connector)
 		return client.Delete(id)
 	}
 

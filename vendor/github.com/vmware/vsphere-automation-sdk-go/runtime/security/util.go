@@ -91,7 +91,7 @@ func ExtractCertificate(samlToken string) (*x509.Certificate, error) {
 	}
 	x509, err := x509.ParseCertificate(block.Bytes)
 	if err != nil {
-		errors.New("failed to parse certificate: " + err.Error())
+		return nil, errors.New("failed to parse certificate: " + err.Error())
 	}
 	return x509, nil
 }

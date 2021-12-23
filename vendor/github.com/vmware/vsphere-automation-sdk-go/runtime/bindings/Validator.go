@@ -129,7 +129,7 @@ func (uv UnionValidator) Validate(structVal *data.StructValue) []error {
 // required fields of the class specified
 type HasFieldsOfValidator struct {
 	hasFieldsOfTypes []ReferenceType
-	mode ConverterMode
+	mode             ConverterMode
 }
 
 func NewHasFieldsOfValidator(hasFieldsOfTypes []ReferenceType, mode ConverterMode) HasFieldsOfValidator {

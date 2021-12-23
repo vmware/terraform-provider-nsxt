@@ -49,10 +49,10 @@ func resourceNsxtPolicyGatewayCommunityList() *schema.Resource {
 func resourceNsxtPolicyGatewayCommunityListExists(tier0Id string, id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
 	var err error
 	if isGlobalManager {
-		client := gm_tier0s.NewDefaultCommunityListsClient(connector)
+		client := gm_tier0s.NewCommunityListsClient(connector)
 		_, err = client.Get(tier0Id, id)
 	} else {
-		client := tier_0s.NewDefaultCommunityListsClient(connector)
+		client := tier_0s.NewCommunityListsClient(connector)
 		_, err = client.Get(tier0Id, id)
 	}
 	if err == nil {
@@ -82,10 +82,10 @@ func resourceNsxtPolicyGatewayCommunityListCreate(d *schema.ResourceData, m inte
 	} else {
 		var err error
 		if isPolicyGlobalManager(m) {
-			client := gm_tier0s.NewDefaultCommunityListsClient(connector)
+			client := gm_tier0s.NewCommunityListsClient(connector)
 			_, err = client.Get(gwID, id)
 		} else {
-			client := tier_0s.NewDefaultCommunityListsClient(connector)
+			client := tier_0s.NewCommunityListsClient(connector)
 			_, err = client.Get(gwID, id)
 		}
 		if err == nil {
@@ -115,10 +115,10 @@ func resourceNsxtPolicyGatewayCommunityListCreate(d *schema.ResourceData, m inte
 		if convErr != nil {
 			return convErr
 		}
-		client := gm_tier0s.NewDefaultCommunityListsClient(connector)
+		client := gm_tier0s.NewCommunityListsClient(connector)
 		err = client.Patch(gwID, id, gmObj.(gm_model.CommunityList))
 	} else {
-		client := tier_0s.NewDefaultCommunityListsClient(connector)
+		client := tier_0s.NewCommunityListsClient(connector)
 		err = client.Patch(gwID, id, obj)
 	}
 	if err != nil {
@@ -146,7 +146,7 @@ func resourceNsxtPolicyGatewayCommunityListRead(d *schema.ResourceData, m interf
 
 	var obj model.CommunityList
 	if isPolicyGlobalManager(m) {
-		client := gm_tier0s.NewDefaultCommunityListsClient(connector)
+		client := gm_tier0s.NewCommunityListsClient(connector)
 		gmObj, err := client.Get(gwID, id)
 		if err != nil {
 			return handleReadError(d, "Gateway Community List", id, err)
@@ -158,7 +158,7 @@ func resourceNsxtPolicyGatewayCommunityListRead(d *schema.ResourceData, m interf
 		}
 		obj = lmObj.(model.CommunityList)
 	} else {
-		client := tier_0s.NewDefaultCommunityListsClient(connector)
+		client := tier_0s.NewCommunityListsClient(connector)
 		var err error
 		obj, err = client.Get(gwID, id)
 		if err != nil {
@@ -209,10 +209,10 @@ func resourceNsxtPolicyGatewayCommunityListUpdate(d *schema.ResourceData, m inte
 		if convErr != nil {
 			return convErr
 		}
-		client := gm_tier0s.NewDefaultCommunityListsClient(connector)
+		client := gm_tier0s.NewCommunityListsClient(connector)
 		_, err = client.Update(gwID, id, gmObj.(gm_model.CommunityList))
 	} else {
-		client := tier_0s.NewDefaultCommunityListsClient(connector)
+		client := tier_0s.NewCommunityListsClient(connector)
 		_, err = client.Update(gwID, id, obj)
 	}
 	if err != nil {
@@ -236,10 +236,10 @@ func resourceNsxtPolicyGatewayCommunityListDelete(d *schema.ResourceData, m inte
 	connector := getPolicyConnector(m)
 	var err error
 	if isPolicyGlobalManager(m) {
-		client := gm_tier0s.NewDefaultCommunityListsClient(connector)
+		client := gm_tier0s.NewCommunityListsClient(connector)
 		err = client.Delete(gwID, id)
 	} else {
-		client := tier_0s.NewDefaultCommunityListsClient(connector)
+		client := tier_0s.NewCommunityListsClient(connector)
 		err = client.Delete(gwID, id)
 	}
 

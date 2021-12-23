@@ -197,7 +197,7 @@ func SerializeInput(inputValue *data.StructValue, metadata *protocol.OperationRe
 	// Update Content-Type if consumes is provided
 	consumes := metadata.OperationConsumes()
 	if consumes != "" {
-		headerFields["Content-Type"] = []string{consumes}
+		headerFields[lib.HTTP_CONTENT_TYPE_HEADER] = []string{consumes}
 	}
 
 	// Add @Query Fields

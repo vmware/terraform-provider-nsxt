@@ -403,7 +403,7 @@ func setPolicyPoolSnatInSchema(d *schema.ResourceData, snat *data.StructValue) e
 }
 
 func resourceNsxtPolicyLBPoolExists(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
-	client := infra.NewDefaultLbPoolsClient(connector)
+	client := infra.NewLbPoolsClient(connector)
 
 	_, err := client.Get(id)
 	if err == nil {
@@ -419,7 +419,7 @@ func resourceNsxtPolicyLBPoolExists(id string, connector *client.RestConnector, 
 
 func resourceNsxtPolicyLBPoolCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewDefaultLbPoolsClient(connector)
+	client := infra.NewLbPoolsClient(connector)
 
 	if client == nil {
 		return policyResourceNotSupportedError()
@@ -477,7 +477,7 @@ func resourceNsxtPolicyLBPoolCreate(d *schema.ResourceData, m interface{}) error
 
 func resourceNsxtPolicyLBPoolRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewDefaultLbPoolsClient(connector)
+	client := infra.NewLbPoolsClient(connector)
 
 	if client == nil {
 		return policyResourceNotSupportedError()
@@ -537,7 +537,7 @@ func resourceNsxtPolicyLBPoolRead(d *schema.ResourceData, m interface{}) error {
 
 func resourceNsxtPolicyLBPoolUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewDefaultLbPoolsClient(connector)
+	client := infra.NewLbPoolsClient(connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -598,7 +598,7 @@ func resourceNsxtPolicyLBPoolDelete(d *schema.ResourceData, m interface{}) error
 	}
 
 	connector := getPolicyConnector(m)
-	client := infra.NewDefaultLbPoolsClient(connector)
+	client := infra.NewLbPoolsClient(connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}

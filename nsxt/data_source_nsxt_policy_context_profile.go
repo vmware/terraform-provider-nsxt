@@ -36,7 +36,7 @@ func dataSourceNsxtPolicyContextProfileRead(d *schema.ResourceData, m interface{
 
 	// Local manager support:
 	connector := getPolicyConnector(m)
-	client := infra.NewDefaultContextProfilesClient(connector)
+	client := infra.NewContextProfilesClient(connector)
 
 	objID := d.Get("id").(string)
 	objName := d.Get("display_name").(string)

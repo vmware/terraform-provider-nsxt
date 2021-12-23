@@ -157,11 +157,11 @@ func resourceNsxtPolicyTier0GatewayHAVipConfigCreate(d *schema.ResourceData, m i
 		if err1 != nil {
 			return err1
 		}
-		client := gm_tier0s.NewDefaultLocaleServicesClient(connector)
+		client := gm_tier0s.NewLocaleServicesClient(connector)
 		err = client.Patch(tier0ID, localeServiceID, rawObj.(gm_model.LocaleServices))
 
 	} else {
-		client := tier_0s.NewDefaultLocaleServicesClient(connector)
+		client := tier_0s.NewLocaleServicesClient(connector)
 		err = client.Patch(tier0ID, localeServiceID, serviceStruct)
 	}
 	if err != nil {
@@ -187,7 +187,7 @@ func resourceNsxtPolicyTier0GatewayHAVipConfigRead(d *schema.ResourceData, m int
 
 	var obj model.LocaleServices
 	if isPolicyGlobalManager(m) {
-		client := gm_tier0s.NewDefaultLocaleServicesClient(connector)
+		client := gm_tier0s.NewLocaleServicesClient(connector)
 		gmObj, err1 := client.Get(tier0ID, localeServiceID)
 		if err1 != nil {
 			return handleReadError(d, "Tier0 HA Vip config", id, err1)
@@ -199,7 +199,7 @@ func resourceNsxtPolicyTier0GatewayHAVipConfigRead(d *schema.ResourceData, m int
 		obj = lmObj.(model.LocaleServices)
 	} else {
 		var err error
-		client := tier_0s.NewDefaultLocaleServicesClient(connector)
+		client := tier_0s.NewLocaleServicesClient(connector)
 		obj, err = client.Get(tier0ID, localeServiceID)
 		if err != nil {
 			return handleReadError(d, "Tier0 HA Vip config", id, err)
@@ -282,11 +282,11 @@ func resourceNsxtPolicyTier0GatewayHAVipConfigUpdate(d *schema.ResourceData, m i
 		if err1 != nil {
 			return err1
 		}
-		client := gm_tier0s.NewDefaultLocaleServicesClient(connector)
+		client := gm_tier0s.NewLocaleServicesClient(connector)
 		err = client.Patch(tier0ID, localeServiceID, rawObj.(gm_model.LocaleServices))
 
 	} else {
-		client := tier_0s.NewDefaultLocaleServicesClient(connector)
+		client := tier_0s.NewLocaleServicesClient(connector)
 		err = client.Patch(tier0ID, localeServiceID, serviceStruct)
 	}
 	if err != nil {
@@ -309,7 +309,7 @@ func resourceNsxtPolicyTier0GatewayHAVipConfigDelete(d *schema.ResourceData, m i
 	// Update the locale service with empty HaVipConfigs using get/post
 	var err error
 	if isPolicyGlobalManager(m) {
-		client := gm_tier0s.NewDefaultLocaleServicesClient(connector)
+		client := gm_tier0s.NewLocaleServicesClient(connector)
 		gmObj, err1 := client.Get(tier0ID, localeServiceID)
 		if err1 != nil {
 			return handleDeleteError("Tier0 HA Vip config", id, err)
@@ -317,7 +317,7 @@ func resourceNsxtPolicyTier0GatewayHAVipConfigDelete(d *schema.ResourceData, m i
 		gmObj.HaVipConfigs = nil
 		_, err = client.Update(tier0ID, localeServiceID, gmObj)
 	} else {
-		client := tier_0s.NewDefaultLocaleServicesClient(connector)
+		client := tier_0s.NewLocaleServicesClient(connector)
 		obj, err1 := client.Get(tier0ID, localeServiceID)
 		if err1 != nil {
 			return handleDeleteError("Tier0 HA Vip config", id, err)
@@ -343,14 +343,14 @@ func resourceNsxtPolicyTier0GatewayHAVipConfigImport(d *schema.ResourceData, m i
 	localeServiceID := s[1]
 	connector := getPolicyConnector(m)
 	if isPolicyGlobalManager(m) {
-		client := gm_tier0s.NewDefaultLocaleServicesClient(connector)
+		client := gm_tier0s.NewLocaleServicesClient(connector)
 		obj, err := client.Get(tier0ID, localeServiceID)
 		if err != nil || obj.HaVipConfigs == nil {
 			return nil, err
 		}
 	} else {
 		var err error
-		client := tier_0s.NewDefaultLocaleServicesClient(connector)
+		client := tier_0s.NewLocaleServicesClient(connector)
 		obj, err := client.Get(tier0ID, localeServiceID)
 		if err != nil || obj.HaVipConfigs == nil {
 			return nil, err

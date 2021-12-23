@@ -1,4 +1,4 @@
-/* Copyright © 2019 VMware, Inc. All Rights Reserved.
+/* Copyright © 2019-2020 VMware, Inc. All Rights Reserved.
    SPDX-License-Identifier: BSD-2-Clause */
 
 package bindings
@@ -9,13 +9,9 @@ import (
 	"reflect"
 )
 
-type BindingTypeVisitor interface {
-	visit(bindingType BindingType) []error
-}
-
 type BindingType interface {
 	Definition() data.DataDefinition
-	Accept(BindingTypeVisitor) []error
+	Type() data.DataType
 }
 
 type VoidType struct{}
@@ -24,8 +20,8 @@ func (i VoidType) Definition() data.DataDefinition {
 	return data.NewVoidDefinition()
 }
 
-func (i VoidType) Accept(btv BindingTypeVisitor) []error {
-	return btv.visit(i)
+func (i VoidType) Type() data.DataType {
+	return data.VOID
 }
 
 func NewVoidType() VoidType {
@@ -39,8 +35,8 @@ func (i IntegerType) Definition() data.DataDefinition {
 	return data.NewIntegerDefinition()
 }
 
-func (i IntegerType) Accept(btv BindingTypeVisitor) []error {
-	return btv.visit(i)
+func (i IntegerType) Type() data.DataType {
+	return data.INTEGER
 }
 
 func NewIntegerType() IntegerType {
@@ -57,8 +53,8 @@ func (s StringType) Definition() data.DataDefinition {
 	return data.NewStringDefinition()
 }
 
-func (v StringType) Accept(btv BindingTypeVisitor) []error {
-	return btv.visit(v)
+func (i StringType) Type() data.DataType {
+	return data.STRING
 }
 
 type BooleanType struct{}
@@ -70,8 +66,8 @@ func (b BooleanType) Definition() data.DataDefinition {
 	return data.NewBooleanDefinition()
 }
 
-func (b BooleanType) Accept(btv BindingTypeVisitor) []error {
-	return btv.visit(b)
+func (i BooleanType) Type() data.DataType {
+	return data.BOOLEAN
 }
 
 type OptionalType struct {
@@ -86,12 +82,12 @@ func (o OptionalType) Definition() data.DataDefinition {
 	return data.NewOptionalDefinition(o.elementType.Definition())
 }
 
-func (o OptionalType) ElementType() BindingType {
-	return o.elementType
+func (i OptionalType) Type() data.DataType {
+	return data.OPTIONAL
 }
 
-func (o OptionalType) Accept(btv BindingTypeVisitor) []error {
-	return btv.visit(o)
+func (o OptionalType) ElementType() BindingType {
+	return o.elementType
 }
 
 // ListType Representation of List IDL in Golang Binding
@@ -124,8 +120,8 @@ func (l ListType) Definition() data.DataDefinition {
 	return data.NewListDefinition(l.elementType.Definition())
 }
 
-func (l ListType) Accept(btv BindingTypeVisitor) []error {
-	return btv.visit(l)
+func (i ListType) Type() data.DataType {
+	return data.LIST
 }
 
 type OpaqueType struct {
@@ -139,8 +135,8 @@ func (o OpaqueType) Definition() data.DataDefinition {
 	return data.NewOpaqueDefinition()
 }
 
-func (o OpaqueType) Accept(btv BindingTypeVisitor) []error {
-	return btv.visit(o)
+func (i OpaqueType) Type() data.DataType {
+	return data.OPAQUE
 }
 
 type StructType struct {
@@ -194,8 +190,8 @@ func (s StructType) Definition() data.DataDefinition {
 	return result
 }
 
-func (s StructType) Accept(btv BindingTypeVisitor) []error {
-	return btv.visit(s)
+func (i StructType) Type() data.DataType {
+	return data.STRUCTURE
 }
 
 func (s StructType) Validate(structValue *data.StructValue) []error {
@@ -228,8 +224,8 @@ func (m MapType) Definition() data.DataDefinition {
 	return data.NewListDefinition(elementDef)
 }
 
-func (m MapType) Accept(btv BindingTypeVisitor) []error {
-	return btv.visit(m)
+func (i MapType) Type() data.DataType {
+	return data.LIST
 }
 
 type IdType struct {
@@ -241,12 +237,12 @@ func NewIdType(resourceTypes []string, typeHolder string) IdType {
 	return IdType{ResourceTypes: resourceTypes, ResourceTypeHolder: typeHolder}
 }
 
-func (i IdType) Accept(btv BindingTypeVisitor) []error {
-	return btv.visit(i)
-}
-
 func (i IdType) Definition() data.DataDefinition {
 	return data.NewStringDefinition()
+}
+
+func (i IdType) Type() data.DataType {
+	return data.STRING
 }
 
 type EnumType struct {
@@ -266,12 +262,12 @@ func NewEnumType(name string, bindingStruct reflect.Type) EnumType {
 	return EnumType{name: name, bindingStruct: bindingStruct}
 }
 
-func (e EnumType) Accept(btv BindingTypeVisitor) []error {
-	return btv.visit(e)
-}
-
 func (e EnumType) Definition() data.DataDefinition {
 	return data.NewStringDefinition()
+}
+
+func (i EnumType) Type() data.DataType {
+	return data.STRING
 }
 
 type SetType struct {
@@ -289,12 +285,12 @@ func (s SetType) BindingStruct() reflect.Type {
 	return s.bindingStruct
 }
 
-func (s SetType) Accept(btv BindingTypeVisitor) []error {
-	return btv.visit(s)
-}
-
 func (s SetType) Definition() data.DataDefinition {
 	return data.NewListDefinition(s.elementType.Definition())
+}
+
+func (i SetType) Type() data.DataType {
+	return data.LIST
 }
 
 type ErrorType struct {
@@ -336,8 +332,8 @@ func (e ErrorType) Definition() data.DataDefinition {
 	return result
 }
 
-func (e ErrorType) Accept(btv BindingTypeVisitor) []error {
-	return btv.visit(e)
+func (i ErrorType) Type() data.DataType {
+	return data.ERROR
 }
 
 type DynamicStructType struct {
@@ -378,8 +374,8 @@ func (d DynamicStructType) Definition() data.DataDefinition {
 	return data.NewDynamicStructDefinition()
 }
 
-func (d DynamicStructType) Accept(btv BindingTypeVisitor) []error {
-	return btv.visit(d)
+func (i DynamicStructType) Type() data.DataType {
+	return data.DYNAMIC_STRUCTURE
 }
 
 func (d DynamicStructType) Validate(structValue *data.StructValue) []error {
@@ -400,8 +396,8 @@ func (d DoubleType) Definition() data.DataDefinition {
 	return data.NewDoubleDefinition()
 }
 
-func (d DoubleType) Accept(btv BindingTypeVisitor) []error {
-	return btv.visit(d)
+func (i DoubleType) Type() data.DataType {
+	return data.DOUBLE
 }
 
 type DateTimeType struct {
@@ -415,8 +411,8 @@ func (d DateTimeType) Definition() data.DataDefinition {
 	return data.NewStringDefinition()
 }
 
-func (d DateTimeType) Accept(btv BindingTypeVisitor) []error {
-	return btv.visit(d)
+func (i DateTimeType) Type() data.DataType {
+	return data.STRING
 }
 
 type BlobType struct {
@@ -430,8 +426,8 @@ func (b BlobType) Definition() data.DataDefinition {
 	return data.NewBlobDefinition()
 }
 
-func (b BlobType) Accept(btv BindingTypeVisitor) []error {
-	return btv.visit(b)
+func (i BlobType) Type() data.DataType {
+	return data.BLOB
 }
 
 type SecretType struct {
@@ -445,8 +441,8 @@ func (s SecretType) Definition() data.DataDefinition {
 	return data.NewSecretDefinition()
 }
 
-func (s SecretType) Accept(btv BindingTypeVisitor) []error {
-	return btv.visit(s)
+func (i SecretType) Type() data.DataType {
+	return data.SECRET
 }
 
 type UriType struct {
@@ -460,8 +456,8 @@ func (u UriType) Definition() data.DataDefinition {
 	return data.NewStringDefinition()
 }
 
-func (u UriType) Accept(btv BindingTypeVisitor) []error {
-	return btv.visit(u)
+func (i UriType) Type() data.DataType {
+	return data.STRING
 }
 
 type AnyErrorType struct {
@@ -477,8 +473,8 @@ func (e AnyErrorType) Definition() data.DataDefinition {
 	return result
 }
 
-func (e AnyErrorType) Accept(btv BindingTypeVisitor) []error {
-	return btv.visit(e)
+func (i AnyErrorType) Type() data.DataType {
+	return data.ANY_ERROR
 }
 
 type BindingTypeFunction func() BindingType
@@ -498,6 +494,6 @@ func (r ReferenceType) Definition() data.DataDefinition {
 	return r.Fn().Definition()
 }
 
-func (r ReferenceType) Accept(btv BindingTypeVisitor) []error {
-	return btv.visit(r)
+func (i ReferenceType) Type() data.DataType {
+	return data.STRUCTURE_REF
 }

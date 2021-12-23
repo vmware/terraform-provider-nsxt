@@ -154,10 +154,10 @@ func resourceNsxtPolicyGatewayPrefixListDelete(d *schema.ResourceData, m interfa
 
 	var err error
 	if isGlobalManager {
-		client := gm_tier_0s.NewDefaultPrefixListsClient(connector)
+		client := gm_tier_0s.NewPrefixListsClient(connector)
 		err = client.Delete(gwID, id)
 	} else {
-		client := tier_0s.NewDefaultPrefixListsClient(connector)
+		client := tier_0s.NewPrefixListsClient(connector)
 		err = client.Delete(gwID, id)
 	}
 	if err != nil {
@@ -187,7 +187,7 @@ func resourceNsxtPolicyGatewayPrefixListRead(d *schema.ResourceData, m interface
 	if isGlobalManager {
 		var gmObj gm_model.PrefixList
 		var rawObj interface{}
-		client := gm_tier_0s.NewDefaultPrefixListsClient(connector)
+		client := gm_tier_0s.NewPrefixListsClient(connector)
 		gmObj, err = client.Get(gwID, id)
 		if err != nil {
 			return handleReadError(d, "Gateway Prefix List", id, err)
@@ -198,7 +198,7 @@ func resourceNsxtPolicyGatewayPrefixListRead(d *schema.ResourceData, m interface
 		}
 		obj = rawObj.(model.PrefixList)
 	} else {
-		client := tier_0s.NewDefaultPrefixListsClient(connector)
+		client := tier_0s.NewPrefixListsClient(connector)
 		obj, err = client.Get(gwID, id)
 		if err != nil {
 			return handleReadError(d, "Gateway Prefix List", id, err)
@@ -223,10 +223,10 @@ func patchNsxtPolicyGatewayPrefixList(connector *client.RestConnector, gwID stri
 		if err != nil {
 			return err
 		}
-		client := gm_tier_0s.NewDefaultPrefixListsClient(connector)
+		client := gm_tier_0s.NewPrefixListsClient(connector)
 		return client.Patch(gwID, *prefixList.Id, rawObj.(gm_model.PrefixList))
 	}
-	client := tier_0s.NewDefaultPrefixListsClient(connector)
+	client := tier_0s.NewPrefixListsClient(connector)
 	return client.Patch(gwID, *prefixList.Id, prefixList)
 }
 
@@ -247,10 +247,10 @@ func resourceNsxtPolicyGatewayPrefixListCreate(d *schema.ResourceData, m interfa
 	} else {
 		var err error
 		if isGlobalManager {
-			client := gm_tier_0s.NewDefaultPrefixListsClient(connector)
+			client := gm_tier_0s.NewPrefixListsClient(connector)
 			_, err = client.Get(gwID, id)
 		} else {
-			client := tier_0s.NewDefaultPrefixListsClient(connector)
+			client := tier_0s.NewPrefixListsClient(connector)
 			_, err = client.Get(gwID, id)
 		}
 		if err == nil {
@@ -335,14 +335,14 @@ func resourceNsxtPolicyTier0GatewayImporter(d *schema.ResourceData, m interface{
 	gwID := s[0]
 	connector := getPolicyConnector(m)
 	if isPolicyGlobalManager(m) {
-		t0Client := gm_infra.NewDefaultTier0sClient(connector)
+		t0Client := gm_infra.NewTier0sClient(connector)
 		t0gw, err := t0Client.Get(gwID)
 		if err != nil {
 			return nil, err
 		}
 		d.Set("gateway_path", t0gw.Path)
 	} else {
-		t0Client := infra.NewDefaultTier0sClient(connector)
+		t0Client := infra.NewTier0sClient(connector)
 		t0gw, err := t0Client.Get(gwID)
 		if err != nil {
 			return nil, err

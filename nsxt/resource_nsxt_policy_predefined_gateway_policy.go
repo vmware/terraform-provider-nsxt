@@ -411,7 +411,7 @@ func resourceNsxtPolicyPredefinedGatewayPolicyRead(d *schema.ResourceData, m int
 
 	var obj model.GatewayPolicy
 	if isPolicyGlobalManager(m) {
-		client := gm_domains.NewDefaultGatewayPoliciesClient(connector)
+		client := gm_domains.NewGatewayPoliciesClient(connector)
 		gmObj, err := client.Get(domain, id)
 		if err != nil {
 			return handleReadError(d, "Predefined Gateway Policy", id, err)
@@ -423,7 +423,7 @@ func resourceNsxtPolicyPredefinedGatewayPolicyRead(d *schema.ResourceData, m int
 		obj = rawObj.(model.GatewayPolicy)
 	} else {
 		var err error
-		client := domains.NewDefaultGatewayPoliciesClient(connector)
+		client := domains.NewGatewayPoliciesClient(connector)
 		obj, err = client.Get(domain, id)
 		if err != nil {
 			return handleReadError(d, "Predefined Gateway Policy", id, err)
