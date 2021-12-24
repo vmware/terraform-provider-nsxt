@@ -83,16 +83,17 @@ func resourceNsxtPolicy<!RESOURCE!>Create(d *schema.ResourceData, m interface{})
 
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating <!RESOURCE!> with ID %s", id)
+        boolFalse := false
         if isPolicyGlobalManager(m) {
             gmObj, convErr := convertModelBindingType(obj, model.<!RESOURCE!>BindingType(), gm_model.<!RESOURCE!>BindingType())
             if convErr != nil {
                 return convErr
             }
 	    client := gm_infra.NewDefault<!RESOURCE!>sClient(connector)
-            err = client.Patch(id, gmObj.(gm_model.<!RESOURCE!>))
+            err = client.Patch(id, gmObj.(gm_model.<!RESOURCE!>), &boolFalse)
         } else {
 	    client := infra.NewDefault<!RESOURCE!>sClient(connector)
-            err = client.Patch(id, obj)
+            err = client.Patch(id, obj, &boolFalse)
         }
 	if err != nil {
 		return handleCreateError("<!RESOURCE!>", id, err)
@@ -170,16 +171,17 @@ func resourceNsxtPolicy<!RESOURCE!>Update(d *schema.ResourceData, m interface{})
 
 	// Update the resource using PATCH
         var err error
+        boolFalse := false
         if isPolicyGlobalManager(m) {
             gmObj, convErr := convertModelBindingType(obj, model.<!RESOURCE!>BindingType(), gm_model.<!RESOURCE!>BindingType())
             if convErr != nil {
                 return convErr
             }
             client := gm_infra.NewDefault<!RESOURCE!>sClient(connector)
-            _, err = client.Update(id, gmObj.(gm_model.<!RESOURCE!>))
+            _, err = client.Update(id, gmObj.(gm_model.<!RESOURCE!>), &boolFalse)
         } else {
             client := infra.NewDefault<!RESOURCE!>sClient(connector)
-            _, err = client.Update(id, obj)
+            _, err = client.Update(id, obj, &boolFalse)
         }
 	if err != nil {
 		return handleUpdateError("<!RESOURCE!>", id, err)
@@ -196,12 +198,13 @@ func resourceNsxtPolicy<!RESOURCE!>Delete(d *schema.ResourceData, m interface{})
 
 	connector := getPolicyConnector(m)
         var err error
+        boolFalse := false
         if isPolicyGlobalManager(m) {
             client := gm_infra.NewDefault<!RESOURCE!>sClient(connector)
-            err = client.Delete(id)
+            err = client.Delete(id, &boolFalse)
         } else {
             client := infra.NewDefault<!RESOURCE!>sClient(connector)
-            err = client.Delete(id)
+            err = client.Delete(id, &bootFalse)
         }
 
 	if err != nil {
