@@ -37,7 +37,7 @@ func TestAccDataSourceNsxtPolicyMacDiscoveryProfile_prefix(t *testing.T) {
 	testResourceName := "data.nsxt_policy_mac_discovery_profile.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.2.0") },
+		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.2.0"); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
