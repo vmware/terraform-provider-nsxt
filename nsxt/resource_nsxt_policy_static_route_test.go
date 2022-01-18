@@ -20,7 +20,7 @@ func TestAccResourceNsxtPolicyStaticRoute_basicT0(t *testing.T) {
 	network := "14.1.1.0/24"
 	updateNetwork := "15.1.1.0/24"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -130,7 +130,7 @@ func TestAccResourceNsxtPolicyStaticRoute_basicT0Import(t *testing.T) {
 	name := getAccTestResourceName()
 	network := "14.1.1.0/24"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {

@@ -318,7 +318,6 @@ func TestAccResourceNsxtPolicyTier1Gateway_withQos(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttrSet(testResourceName, "ingress_qos_profile_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "egress_qos_profile_path"),
-					resource.TestCheckResourceAttr(realizationResourceName, "state", "REALIZED"),
 				),
 			},
 			{
@@ -328,7 +327,6 @@ func TestAccResourceNsxtPolicyTier1Gateway_withQos(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updateName),
 					resource.TestCheckResourceAttr(testResourceName, "ingress_qos_profile_path", ""),
 					resource.TestCheckResourceAttr(testResourceName, "egress_qos_profile_path", ""),
-					resource.TestCheckResourceAttr(realizationResourceName, "state", "REALIZED"),
 				),
 			},
 		},
@@ -357,7 +355,6 @@ func TestAccResourceNsxtPolicyTier1Gateway_withRules(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "route_advertisement_rule.0.name", "rule1"),
 					resource.TestCheckResourceAttr(testResourceName, "route_advertisement_rule.0.prefix_operator", "EQ"),
 					resource.TestCheckResourceAttr(testResourceName, "tier0_path", ""),
-					resource.TestCheckResourceAttr(realizationResourceName, "state", "REALIZED"),
 				),
 			},
 			{
@@ -368,7 +365,6 @@ func TestAccResourceNsxtPolicyTier1Gateway_withRules(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttr(testResourceName, "route_advertisement_rule.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "tier0_path", ""),
-					resource.TestCheckResourceAttr(realizationResourceName, "state", "REALIZED"),
 				),
 			},
 		},
@@ -735,10 +731,6 @@ resource "nsxt_policy_tier1_gateway" "test" {
     subnets         = ["30.0.0.0/24", "31.0.0.0/24"]
     prefix_operator = "GE"
   }
-}
-
-data "nsxt_policy_realization_info" "realization_info" {
-  path = nsxt_policy_tier1_gateway.test.path
 }`, name)
 }
 
@@ -752,10 +744,6 @@ resource "nsxt_policy_tier1_gateway" "test" {
   display_name             = "%s"
   ingress_qos_profile_path = data.nsxt_policy_gateway_qos_profile.test.path
   egress_qos_profile_path  = data.nsxt_policy_gateway_qos_profile.test.path
-}
-
-data "nsxt_policy_realization_info" "realization_info" {
-  path = nsxt_policy_tier1_gateway.test.path
 }`, profileName, name)
 }
 
@@ -767,9 +755,5 @@ data "nsxt_policy_gateway_qos_profile" "test" {
 
 resource "nsxt_policy_tier1_gateway" "test" {
   display_name             = "%s"
-}
-
-data "nsxt_policy_realization_info" "realization_info" {
-  path = nsxt_policy_tier1_gateway.test.path
 }`, profileName, name)
 }
