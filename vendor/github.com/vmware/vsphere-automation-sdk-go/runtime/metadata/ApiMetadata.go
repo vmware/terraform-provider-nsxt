@@ -3,7 +3,6 @@
 
 package metadata
 
-
 import (
 	"encoding/json"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/log"

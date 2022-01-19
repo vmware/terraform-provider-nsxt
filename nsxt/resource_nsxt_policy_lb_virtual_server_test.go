@@ -673,7 +673,7 @@ func testAccNsxtPolicyLBVirtualServerExists(resourceName string) resource.TestCh
 	return func(state *terraform.State) error {
 
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-		nsxClient := infra.NewDefaultLbVirtualServersClient(connector)
+		nsxClient := infra.NewLbVirtualServersClient(connector)
 
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
@@ -696,7 +696,7 @@ func testAccNsxtPolicyLBVirtualServerExists(resourceName string) resource.TestCh
 
 func testAccNsxtPolicyLBVirtualServerCheckDestroy(state *terraform.State, displayName string) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-	nsxClient := infra.NewDefaultLbVirtualServersClient(connector)
+	nsxClient := infra.NewLbVirtualServersClient(connector)
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_policy_lb_virtual_server" {

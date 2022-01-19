@@ -27,7 +27,7 @@ func dataSourceNsxtPolicyIPPool() *schema.Resource {
 
 func dataSourceNsxtPolicyIPPoolRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewDefaultIpPoolsClient(connector)
+	client := infra.NewIpPoolsClient(connector)
 
 	objID := d.Get("id").(string)
 	objName := d.Get("display_name").(string)

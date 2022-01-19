@@ -55,7 +55,7 @@ func resourceNsxtPolicyVMTags() *schema.Resource {
 }
 
 func listAllPolicyVirtualMachines(connector *client.RestConnector, m interface{}) ([]model.VirtualMachine, error) {
-	client := realized_state.NewDefaultVirtualMachinesClient(connector)
+	client := realized_state.NewVirtualMachinesClient(connector)
 	var results []model.VirtualMachine
 	boolFalse := false
 	var cursor *string
@@ -93,7 +93,7 @@ func listAllPolicyVirtualMachines(connector *client.RestConnector, m interface{}
 }
 
 func listAllPolicySegmentPorts(connector *client.RestConnector, segmentPath string) ([]model.SegmentPort, error) {
-	client := segments.NewDefaultPortsClient(connector)
+	client := segments.NewPortsClient(connector)
 	segmentID := getPolicyIDFromPath(segmentPath)
 	var results []model.SegmentPort
 	boolFalse := false
@@ -120,7 +120,7 @@ func listAllPolicySegmentPorts(connector *client.RestConnector, segmentPath stri
 
 func listAllPolicyVifs(m interface{}) ([]model.VirtualNetworkInterface, error) {
 
-	client := enforcement_points.NewDefaultVifsClient(getPolicyConnector(m))
+	client := enforcement_points.NewVifsClient(getPolicyConnector(m))
 	var results []model.VirtualNetworkInterface
 	var cursor *string
 	total := 0
@@ -187,7 +187,7 @@ func findNsxtPolicyVMByID(connector *client.RestConnector, vmID string, m interf
 }
 
 func updateNsxtPolicyVMTags(connector *client.RestConnector, externalID string, tags []model.Tag, m interface{}) error {
-	client := enforcement_points.NewDefaultVirtualMachinesClient(connector)
+	client := enforcement_points.NewVirtualMachinesClient(connector)
 
 	tagUpdate := model.VirtualMachineTagsUpdate{
 		Tags:             tags,
@@ -214,7 +214,7 @@ func listPolicyVifAttachmentsForVM(m interface{}, externalID string) ([]string, 
 
 func updateNsxtPolicyVMPortTags(connector *client.RestConnector, externalID string, portTags []interface{}, m interface{}, isDelete bool) error {
 
-	client := segments.NewDefaultPortsClient(connector)
+	client := segments.NewPortsClient(connector)
 
 	vifAttachmentIds, err := listPolicyVifAttachmentsForVM(m, externalID)
 	if err != nil {

@@ -64,7 +64,7 @@ func policyLbAppProfileConvert(obj *data.StructValue, requestedType string) (*mo
 
 func dataSourceNsxtPolicyLBAppProfileRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewDefaultLbAppProfilesClient(connector)
+	client := infra.NewLbAppProfilesClient(connector)
 
 	objID := d.Get("id").(string)
 	objTypeValue, typeSet := d.GetOk("type")

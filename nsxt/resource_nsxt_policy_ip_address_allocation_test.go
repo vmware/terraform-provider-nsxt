@@ -171,7 +171,7 @@ func testAccNsxtPolicyIPAddressAllocationExists(resourceName string) resource.Te
 	return func(state *terraform.State) error {
 
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-		nsxClient := ip_pools.NewDefaultIpAllocationsClient(connector)
+		nsxClient := ip_pools.NewIpAllocationsClient(connector)
 
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
@@ -200,7 +200,7 @@ func testAccNsxtPolicyIPAddressAllocationExists(resourceName string) resource.Te
 
 func testAccNsxtPolicyIPAddressAllocationCheckDestroy(state *terraform.State, displayName string) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-	nsxClient := ip_pools.NewDefaultIpAllocationsClient(connector)
+	nsxClient := ip_pools.NewIpAllocationsClient(connector)
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_policy_ip_address_allocation" {

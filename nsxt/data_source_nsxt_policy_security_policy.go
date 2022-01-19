@@ -45,7 +45,7 @@ func dataSourceNsxtPolicySecurityPolicy() *schema.Resource {
 
 // Local Manager Only
 func listSecurityPolicies(domain string, connector *client.RestConnector) ([]model.SecurityPolicy, error) {
-	client := domains.NewDefaultSecurityPoliciesClient(connector)
+	client := domains.NewSecurityPoliciesClient(connector)
 
 	var results []model.SecurityPolicy
 	boolFalse := false
@@ -107,7 +107,7 @@ func dataSourceNsxtPolicySecurityPolicyRead(d *schema.ResourceData, m interface{
 	var obj model.SecurityPolicy
 	if objID != "" {
 		// Get by id
-		client := domains.NewDefaultSecurityPoliciesClient(connector)
+		client := domains.NewSecurityPoliciesClient(connector)
 		objGet, err := client.Get(domain, objID)
 		if isNotFoundError(err) {
 			return fmt.Errorf("Security Policy with ID %s was not found", objID)

@@ -330,7 +330,7 @@ func setIdsProfileSignaturesInSchema(profileList []model.IdsProfileLocalSignatur
 
 func resourceNsxtPolicyIntrusionServiceProfileExists(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
 	var err error
-	client := services.NewDefaultProfilesClient(connector)
+	client := services.NewProfilesClient(connector)
 	_, err = client.Get(id)
 	if err == nil {
 		return true, nil
@@ -373,7 +373,7 @@ func resourceNsxtPolicyIntrusionServiceProfileCreate(d *schema.ResourceData, m i
 
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating Intrusion Service Profile with ID %s", id)
-	client := services.NewDefaultProfilesClient(connector)
+	client := services.NewProfilesClient(connector)
 	err = client.Patch(id, obj)
 	if err != nil {
 		return handleCreateError("Ids Profile", id, err)
@@ -393,7 +393,7 @@ func resourceNsxtPolicyIntrusionServiceProfileRead(d *schema.ResourceData, m int
 		return fmt.Errorf("Error obtaining Ids Profile ID")
 	}
 
-	client := services.NewDefaultProfilesClient(connector)
+	client := services.NewProfilesClient(connector)
 	obj, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "Ids Profile", id, err)
@@ -449,7 +449,7 @@ func resourceNsxtPolicyIntrusionServiceProfileUpdate(d *schema.ResourceData, m i
 
 	// Create the resource using PATCH
 	log.Printf("[INFO] Update Intrusion Service Profile with ID %s", id)
-	client := services.NewDefaultProfilesClient(connector)
+	client := services.NewProfilesClient(connector)
 	err = client.Patch(id, obj)
 	if err != nil {
 		return handleUpdateError("Ids Profile", id, err)
@@ -469,7 +469,7 @@ func resourceNsxtPolicyIntrusionServiceProfileDelete(d *schema.ResourceData, m i
 
 	connector := getPolicyConnector(m)
 	var err error
-	client := services.NewDefaultProfilesClient(connector)
+	client := services.NewProfilesClient(connector)
 	err = client.Delete(id)
 
 	if err != nil {

@@ -28,7 +28,7 @@ func dataSourceNsxtPolicyService() *schema.Resource {
 
 func dataSourceNsxtPolicyServiceReadAllServices(connector *client.RestConnector) ([]model.Service, error) {
 	var results []model.Service
-	client := infra.NewDefaultServicesClient(connector)
+	client := infra.NewServicesClient(connector)
 	boolFalse := false
 	var cursor *string
 	total := 0
@@ -60,7 +60,7 @@ func dataSourceNsxtPolicyServiceRead(d *schema.ResourceData, m interface{}) erro
 	}
 	// Read a service by name or id
 	connector := getPolicyConnector(m)
-	client := infra.NewDefaultServicesClient(connector)
+	client := infra.NewServicesClient(connector)
 
 	objID := d.Get("id").(string)
 	objName := d.Get("display_name").(string)

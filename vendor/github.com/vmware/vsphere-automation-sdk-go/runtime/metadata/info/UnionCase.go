@@ -3,7 +3,6 @@
 
 package info
 
-
 type UnionCase struct {
 	caseValue  string
 	fieldNames []string

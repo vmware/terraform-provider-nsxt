@@ -3,7 +3,6 @@
 
 package info
 
-
 type FieldInfo struct {
 	fieldName               string
 	documentation           string

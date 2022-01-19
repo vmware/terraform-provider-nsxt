@@ -148,7 +148,7 @@ func testAccNSXPolicyIPPoolBlockSubnetCheckExists(resourceName string) resource.
 
 	return func(state *terraform.State) error {
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-		client := ip_pools.NewDefaultIpSubnetsClient(connector)
+		client := ip_pools.NewIpSubnetsClient(connector)
 
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
@@ -172,7 +172,7 @@ func testAccNSXPolicyIPPoolBlockSubnetCheckExists(resourceName string) resource.
 
 func testAccNSXPolicyIPPoolBlockSubnetCheckDestroy(state *terraform.State) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-	client := ip_pools.NewDefaultIpSubnetsClient(connector)
+	client := ip_pools.NewIpSubnetsClient(connector)
 
 	for _, rs := range state.RootModule().Resources {
 		if rs.Type != "nsxt_policy_ip_pool_block_subnet" {

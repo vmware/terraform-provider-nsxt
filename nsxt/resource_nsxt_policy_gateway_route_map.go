@@ -142,10 +142,10 @@ func getPolicyRouteMapEntrySchema() *schema.Resource {
 func resourceNsxtPolicyGatewayRouteMapExists(tier0Id string, id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
 	var err error
 	if isGlobalManager {
-		client := gm_tier0s.NewDefaultRouteMapsClient(connector)
+		client := gm_tier0s.NewRouteMapsClient(connector)
 		_, err = client.Get(tier0Id, id)
 	} else {
-		client := tier_0s.NewDefaultRouteMapsClient(connector)
+		client := tier_0s.NewRouteMapsClient(connector)
 		_, err = client.Get(tier0Id, id)
 	}
 	if err == nil {
@@ -239,10 +239,10 @@ func resourceNsxtPolicyGatewayRouteMapPatch(gwID string, id string, d *schema.Re
 		if convErr != nil {
 			return convErr
 		}
-		client := gm_tier0s.NewDefaultRouteMapsClient(connector)
+		client := gm_tier0s.NewRouteMapsClient(connector)
 		return client.Patch(gwID, id, gmObj.(gm_model.Tier0RouteMap))
 	}
-	client := tier_0s.NewDefaultRouteMapsClient(connector)
+	client := tier_0s.NewRouteMapsClient(connector)
 	return client.Patch(gwID, id, obj)
 }
 
@@ -262,10 +262,10 @@ func resourceNsxtPolicyGatewayRouteMapCreate(d *schema.ResourceData, m interface
 	} else {
 		var err error
 		if isPolicyGlobalManager(m) {
-			client := gm_tier0s.NewDefaultRouteMapsClient(connector)
+			client := gm_tier0s.NewRouteMapsClient(connector)
 			_, err = client.Get(gwID, id)
 		} else {
-			client := tier_0s.NewDefaultRouteMapsClient(connector)
+			client := tier_0s.NewRouteMapsClient(connector)
 			_, err = client.Get(gwID, id)
 		}
 		if err == nil {
@@ -302,7 +302,7 @@ func resourceNsxtPolicyGatewayRouteMapRead(d *schema.ResourceData, m interface{}
 
 	var obj model.Tier0RouteMap
 	if isPolicyGlobalManager(m) {
-		client := gm_tier0s.NewDefaultRouteMapsClient(connector)
+		client := gm_tier0s.NewRouteMapsClient(connector)
 		gmObj, err := client.Get(gwID, id)
 		if err != nil {
 			return handleReadError(d, "Gateway Route Map", id, err)
@@ -314,7 +314,7 @@ func resourceNsxtPolicyGatewayRouteMapRead(d *schema.ResourceData, m interface{}
 		}
 		obj = lmObj.(model.Tier0RouteMap)
 	} else {
-		client := tier_0s.NewDefaultRouteMapsClient(connector)
+		client := tier_0s.NewRouteMapsClient(connector)
 		var err error
 		obj, err = client.Get(gwID, id)
 		if err != nil {
@@ -401,10 +401,10 @@ func resourceNsxtPolicyGatewayRouteMapDelete(d *schema.ResourceData, m interface
 	connector := getPolicyConnector(m)
 	var err error
 	if isPolicyGlobalManager(m) {
-		client := gm_tier0s.NewDefaultRouteMapsClient(connector)
+		client := gm_tier0s.NewRouteMapsClient(connector)
 		err = client.Delete(gwID, id)
 	} else {
-		client := tier_0s.NewDefaultRouteMapsClient(connector)
+		client := tier_0s.NewRouteMapsClient(connector)
 		err = client.Delete(gwID, id)
 	}
 

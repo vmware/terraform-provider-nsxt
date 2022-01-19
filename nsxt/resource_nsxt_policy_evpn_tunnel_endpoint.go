@@ -77,12 +77,12 @@ func policyEvpnTunnelEndpointPatch(d *schema.ResourceData, m interface{}, gwID s
 		obj.Mtu = &mtu
 	}
 
-	client := locale_services.NewDefaultEvpnTunnelEndpointsClient(connector)
+	client := locale_services.NewEvpnTunnelEndpointsClient(connector)
 	return client.Patch(gwID, localeServiceID, id, obj)
 }
 
 func resourceNsxtPolicyEvpnTunnelEndpointExists(connector *client.RestConnector, gwID string, localeServiceID string, id string) (bool, error) {
-	client := locale_services.NewDefaultEvpnTunnelEndpointsClient(connector)
+	client := locale_services.NewEvpnTunnelEndpointsClient(connector)
 	_, err := client.Get(gwID, localeServiceID, id)
 
 	if err == nil {
@@ -139,7 +139,7 @@ func resourceNsxtPolicyEvpnTunnelEndpointRead(d *schema.ResourceData, m interfac
 	gwID := d.Get("gateway_id").(string)
 	localeServiceID := d.Get("locale_service_id").(string)
 
-	client := locale_services.NewDefaultEvpnTunnelEndpointsClient(connector)
+	client := locale_services.NewEvpnTunnelEndpointsClient(connector)
 	obj, err := client.Get(gwID, localeServiceID, id)
 	if err != nil {
 		return handleReadError(d, "EVPN Tunnel Endpoint", id, err)
@@ -189,7 +189,7 @@ func resourceNsxtPolicyEvpnTunnelEndpointDelete(d *schema.ResourceData, m interf
 		return fmt.Errorf("Error obtaining Tier0 id or Locale Service id")
 	}
 
-	client := locale_services.NewDefaultEvpnTunnelEndpointsClient(connector)
+	client := locale_services.NewEvpnTunnelEndpointsClient(connector)
 	err := client.Delete(gwID, localeServiceID, id)
 
 	if err != nil {

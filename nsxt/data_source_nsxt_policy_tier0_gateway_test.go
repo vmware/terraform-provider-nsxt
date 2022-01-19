@@ -67,11 +67,11 @@ func testAccDataSourceNsxtPolicyTier0GatewayCreate(name string) error {
 			return convErr
 		}
 
-		client := gm_infra.NewDefaultTier0sClient(connector)
+		client := gm_infra.NewTier0sClient(connector)
 		err = client.Patch(id, gmObj.(gm_model.Tier0))
 
 	} else {
-		client := infra.NewDefaultTier0sClient(connector)
+		client := infra.NewTier0sClient(connector)
 		err = client.Patch(id, obj)
 	}
 	if err != nil {
@@ -90,7 +90,7 @@ func testAccDataSourceNsxtPolicyTier0GatewayDeleteByName(name string) error {
 	if testAccIsGlobalManager() {
 		objID, err := testGetObjIDByName(name, "Tier0")
 		if err == nil {
-			client := gm_infra.NewDefaultTier0sClient(connector)
+			client := gm_infra.NewTier0sClient(connector)
 			err := client.Delete(objID)
 			if err != nil {
 				return handleDeleteError("Tier0", objID, err)
@@ -98,7 +98,7 @@ func testAccDataSourceNsxtPolicyTier0GatewayDeleteByName(name string) error {
 			return nil
 		}
 	} else {
-		client := infra.NewDefaultTier0sClient(connector)
+		client := infra.NewTier0sClient(connector)
 		objList, err := client.List(nil, nil, nil, nil, nil, nil)
 		if err != nil {
 			return fmt.Errorf("Error while reading Tier0s: %v", err)

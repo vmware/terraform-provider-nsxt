@@ -37,7 +37,7 @@ func dataSourceNsxtPolicyVniPool() *schema.Resource {
 
 func dataSourceNsxtPolicyVniPoolRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewDefaultVniPoolsClient(connector)
+	client := infra.NewVniPoolsClient(connector)
 
 	objID := d.Get("id").(string)
 	objName := d.Get("display_name").(string)

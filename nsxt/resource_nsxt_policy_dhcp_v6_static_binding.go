@@ -134,7 +134,7 @@ func policyDhcpV6StaticBindingConvertAndPatch(d *schema.ResourceData, segmentPat
 		if convErrs != nil {
 			return convErrs[0]
 		}
-		client := gm_segments.NewDefaultDhcpStaticBindingConfigsClient(connector)
+		client := gm_segments.NewDhcpStaticBindingConfigsClient(connector)
 		return client.Patch(segmentID, id, convObj.(*data.StructValue))
 	}
 	convObj, convErrs := converter.ConvertToVapi(obj, model.DhcpV6StaticBindingConfigBindingType())
@@ -143,12 +143,12 @@ func policyDhcpV6StaticBindingConvertAndPatch(d *schema.ResourceData, segmentPat
 	}
 	if gwID == "" {
 		// infra segment
-		client := segments.NewDefaultDhcpStaticBindingConfigsClient(connector)
+		client := segments.NewDhcpStaticBindingConfigsClient(connector)
 		return client.Patch(segmentID, id, convObj.(*data.StructValue))
 	}
 
 	// fixed segment
-	client := t1_segments.NewDefaultDhcpStaticBindingConfigsClient(connector)
+	client := t1_segments.NewDhcpStaticBindingConfigsClient(connector)
 	return client.Patch(gwID, segmentID, id, convObj.(*data.StructValue))
 }
 
@@ -195,17 +195,17 @@ func resourceNsxtPolicyDhcpV6StaticBindingRead(d *schema.ResourceData, m interfa
 	var err error
 	var dhcpObj *data.StructValue
 	if isPolicyGlobalManager(m) {
-		client := gm_segments.NewDefaultDhcpStaticBindingConfigsClient(connector)
+		client := gm_segments.NewDhcpStaticBindingConfigsClient(connector)
 		dhcpObj, err = client.Get(segmentID, id)
 
 	} else {
 		if gwID == "" {
 			// infra segment
-			client := segments.NewDefaultDhcpStaticBindingConfigsClient(connector)
+			client := segments.NewDhcpStaticBindingConfigsClient(connector)
 			dhcpObj, err = client.Get(segmentID, id)
 		} else {
 			// fixed segment
-			client := t1_segments.NewDefaultDhcpStaticBindingConfigsClient(connector)
+			client := t1_segments.NewDhcpStaticBindingConfigsClient(connector)
 			dhcpObj, err = client.Get(gwID, segmentID, id)
 		}
 	}

@@ -224,7 +224,7 @@ func commaSeparatedStringToStringList(commaString string) []string {
 }
 
 func nsxtPolicyWaitForRealizationStateConf(connector *client.RestConnector, d *schema.ResourceData, realizedEntityPath string) *resource.StateChangeConf {
-	client := realized_state.NewDefaultRealizedEntitiesClient(connector)
+	client := realized_state.NewRealizedEntitiesClient(connector)
 	pendingStates := []string{"UNKNOWN", "UNREALIZED"}
 	targetStates := []string{"REALIZED", "ERROR"}
 	stateConf := &resource.StateChangeConf{

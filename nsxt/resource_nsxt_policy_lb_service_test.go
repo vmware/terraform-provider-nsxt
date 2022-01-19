@@ -120,7 +120,7 @@ func testAccNsxtPolicyLBServiceExists(resourceName string) resource.TestCheckFun
 	return func(state *terraform.State) error {
 
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-		nsxClient := infra.NewDefaultLbServicesClient(connector)
+		nsxClient := infra.NewLbServicesClient(connector)
 
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
@@ -143,7 +143,7 @@ func testAccNsxtPolicyLBServiceExists(resourceName string) resource.TestCheckFun
 
 func testAccNsxtPolicyLBServiceCheckDestroy(state *terraform.State, displayName string) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-	nsxClient := infra.NewDefaultLbServicesClient(connector)
+	nsxClient := infra.NewLbServicesClient(connector)
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_policy_lb_service" {

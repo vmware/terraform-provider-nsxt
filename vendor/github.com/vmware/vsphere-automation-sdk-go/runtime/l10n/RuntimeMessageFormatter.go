@@ -1,4 +1,4 @@
-/* Copyright © 2019 VMware, Inc. All Rights Reserved.
+/* Copyright © 2019, 2021 VMware, Inc. All Rights Reserved.
    SPDX-License-Identifier: BSD-2-Clause */
 
 package l10n
@@ -14,7 +14,7 @@ var runtimeMessageFormatter *MessageFormatter
 
 // Error formatter with default localization parameters
 // backed by message bundle for the runtime
-func NewDefaultRuntimeMessageFormatter() *MessageFormatter {
+func DefaultMessageFormatter() *MessageFormatter {
 	if runtimeMessageFormatter == nil {
 		runtimeFactory := NewMessageFactory()
 		err := runtimeFactory.AddBundle("en", bytes.NewReader(runtime.RuntimeProperties_EN))

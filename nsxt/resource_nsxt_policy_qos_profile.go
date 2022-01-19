@@ -66,10 +66,10 @@ func resourceNsxtPolicyQosProfile() *schema.Resource {
 func resourceNsxtPolicyQosProfileExists(id string, connector *client.RestConnector, isGlobalmodel bool) (bool, error) {
 	var err error
 	if isGlobalmodel {
-		client := gm_infra.NewDefaultQosProfilesClient(connector)
+		client := gm_infra.NewQosProfilesClient(connector)
 		_, err = client.Get(id)
 	} else {
-		client := infra.NewDefaultQosProfilesClient(connector)
+		client := infra.NewQosProfilesClient(connector)
 		_, err = client.Get(id)
 	}
 	if err == nil {
@@ -187,10 +187,10 @@ func resourceNsxtPolicyQosProfileCreate(d *schema.ResourceData, m interface{}) e
 			return err1
 		}
 
-		client := gm_infra.NewDefaultQosProfilesClient(connector)
+		client := gm_infra.NewQosProfilesClient(connector)
 		err = client.Patch(id, gmObj.(gm_model.QosProfile), &boolFalse)
 	} else {
-		client := infra.NewDefaultQosProfilesClient(connector)
+		client := infra.NewQosProfilesClient(connector)
 		err = client.Patch(id, obj, &boolFalse)
 	}
 	if err != nil {
@@ -213,7 +213,7 @@ func resourceNsxtPolicyQosProfileRead(d *schema.ResourceData, m interface{}) err
 
 	var obj model.QosProfile
 	if isPolicyGlobalManager(m) {
-		client := gm_infra.NewDefaultQosProfilesClient(connector)
+		client := gm_infra.NewQosProfilesClient(connector)
 		gmObj, err := client.Get(id)
 		if err != nil {
 			return handleReadError(d, "QosProfile", id, err)
@@ -226,7 +226,7 @@ func resourceNsxtPolicyQosProfileRead(d *schema.ResourceData, m interface{}) err
 
 	} else {
 		var err error
-		client := infra.NewDefaultQosProfilesClient(connector)
+		client := infra.NewQosProfilesClient(connector)
 		obj, err = client.Get(id)
 		if err != nil {
 			return handleReadError(d, "QosProfile", id, err)
@@ -255,7 +255,7 @@ func resourceNsxtPolicyQosProfileRead(d *schema.ResourceData, m interface{}) err
 
 func resourceNsxtPolicyQosProfileUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewDefaultQosProfilesClient(connector)
+	client := infra.NewQosProfilesClient(connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -307,10 +307,10 @@ func resourceNsxtPolicyQosProfileUpdate(d *schema.ResourceData, m interface{}) e
 			return err1
 		}
 
-		client := gm_infra.NewDefaultQosProfilesClient(connector)
+		client := gm_infra.NewQosProfilesClient(connector)
 		err = client.Patch(id, gmObj.(gm_model.QosProfile), &boolFalse)
 	} else {
-		client := infra.NewDefaultQosProfilesClient(connector)
+		client := infra.NewQosProfilesClient(connector)
 		err = client.Patch(id, obj, &boolFalse)
 	}
 	if err != nil {
@@ -330,10 +330,10 @@ func resourceNsxtPolicyQosProfileDelete(d *schema.ResourceData, m interface{}) e
 	connector := getPolicyConnector(m)
 	boolFalse := false
 	if isPolicyGlobalManager(m) {
-		client := gm_infra.NewDefaultQosProfilesClient(connector)
+		client := gm_infra.NewQosProfilesClient(connector)
 		err = client.Delete(id, &boolFalse)
 	} else {
-		client := infra.NewDefaultQosProfilesClient(connector)
+		client := infra.NewQosProfilesClient(connector)
 		err = client.Delete(id, &boolFalse)
 	}
 

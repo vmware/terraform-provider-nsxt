@@ -53,7 +53,7 @@ func printRelatedAPIError(apiError model.RelatedApiError) string {
 	return ""
 }
 
-func logRawVapiErrorData(message string, vapiType *errors.ErrorType, apiErrorDataValue *data.StructValue) error {
+func logRawVapiErrorData(message string, vapiType *errors.ErrorTypeEnum, apiErrorDataValue *data.StructValue) error {
 	dataValueToJSONEncoder := cleanjson.NewDataValueToJsonEncoder()
 	errorStr, convErr := dataValueToJSONEncoder.Encode(apiErrorDataValue)
 	if convErr != nil {
@@ -68,7 +68,7 @@ func logRawVapiErrorData(message string, vapiType *errors.ErrorType, apiErrorDat
 	return fmt.Errorf("%s: %s", message, errorStr)
 }
 
-func logVapiErrorData(message string, vapiMessages []std.LocalizableMessage, vapiType *errors.ErrorType, apiErrorDataValue *data.StructValue) error {
+func logVapiErrorData(message string, vapiMessages []std.LocalizableMessage, vapiType *errors.ErrorTypeEnum, apiErrorDataValue *data.StructValue) error {
 
 	if apiErrorDataValue == nil {
 		if len(vapiMessages) > 0 {

@@ -3,7 +3,6 @@
 
 package info
 
-
 type GenericTypeInfo struct {
 	name         string
 	isList       bool

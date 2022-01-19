@@ -445,7 +445,7 @@ func (jsonResp JsonRpc20ResponseSerializer) MarshalJSON() ([]byte, error) {
 		result[lib.METHOD_RESULT] = getCustomSerializer(jsonResp.jsonResponse.result, jsonResp.redactSecret)
 	} else {
 		result[lib.METHOD_RESULT_ERROR] = jsonResp.jsonResponse.error
-		if jsonResp.jsonResponse.error[lib.ERROR_CODE] == string(JSONRPC_PARSE_ERROR) ||
+		if jsonResp.jsonResponse.error[lib.ERROR_CODE] == fmt.Sprint(JSONRPC_PARSE_ERROR) ||
 			jsonResp.jsonResponse.error[lib.ERROR_CODE] == JSONRPC_INVALID_REQUEST {
 			result[lib.JSONRPC_ID] = nil
 		}

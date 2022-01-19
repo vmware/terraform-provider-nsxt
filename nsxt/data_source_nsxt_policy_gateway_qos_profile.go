@@ -34,7 +34,7 @@ func dataSourceNsxtPolicyGatewayQosProfileRead(d *schema.ResourceData, m interfa
 		return nil
 	}
 	connector := getPolicyConnector(m)
-	client := infra.NewDefaultGatewayQosProfilesClient(connector)
+	client := infra.NewGatewayQosProfilesClient(connector)
 
 	objID := d.Get("id").(string)
 	objName := d.Get("display_name").(string)

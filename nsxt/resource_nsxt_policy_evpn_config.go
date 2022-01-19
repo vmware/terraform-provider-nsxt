@@ -55,7 +55,7 @@ func resourceNsxtPolicyEvpnConfig() *schema.Resource {
 }
 
 func policyEvpnConfigGet(connector *client.RestConnector, gwID string) (model.EvpnConfig, error) {
-	client := tier_0s.NewDefaultEvpnClient(connector)
+	client := tier_0s.NewEvpnClient(connector)
 	return client.Get(gwID)
 }
 
@@ -121,7 +121,7 @@ func patchNsxtPolicyEvpnConfig(connector *client.RestConnector, d *schema.Resour
 		mode := model.EvpnConfig_MODE_DISABLE
 		obj.Mode = &mode
 	}
-	client := tier_0s.NewDefaultEvpnClient(connector)
+	client := tier_0s.NewEvpnClient(connector)
 	return client.Patch(gwID, obj)
 }
 

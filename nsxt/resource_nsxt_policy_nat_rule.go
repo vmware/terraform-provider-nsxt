@@ -138,17 +138,17 @@ func resourceNsxtPolicyNATRule() *schema.Resource {
 func deleteNsxtPolicyNATRule(connector *client.RestConnector, gwID string, isT0 bool, ruleID string, isGlobalManager bool) error {
 	if isGlobalManager {
 		if isT0 {
-			client := gm_t0nat.NewDefaultNatRulesClient(connector)
+			client := gm_t0nat.NewNatRulesClient(connector)
 			return client.Delete(gwID, gm_model.PolicyNat_NAT_TYPE_USER, ruleID)
 		}
-		client := gm_t1nat.NewDefaultNatRulesClient(connector)
+		client := gm_t1nat.NewNatRulesClient(connector)
 		return client.Delete(gwID, gm_model.PolicyNat_NAT_TYPE_USER, ruleID)
 	}
 	if isT0 {
-		client := t0nat.NewDefaultNatRulesClient(connector)
+		client := t0nat.NewNatRulesClient(connector)
 		return client.Delete(gwID, model.PolicyNat_NAT_TYPE_USER, ruleID)
 	}
-	client := t1nat.NewDefaultNatRulesClient(connector)
+	client := t1nat.NewNatRulesClient(connector)
 	return client.Delete(gwID, model.PolicyNat_NAT_TYPE_USER, ruleID)
 }
 
@@ -179,10 +179,10 @@ func getNsxtPolicyNATRuleByID(connector *client.RestConnector, gwID string, isT0
 		var rawObj interface{}
 		var err error
 		if isT0 {
-			client := gm_t0nat.NewDefaultNatRulesClient(connector)
+			client := gm_t0nat.NewNatRulesClient(connector)
 			gmObj, err = client.Get(gwID, gm_model.PolicyNat_NAT_TYPE_USER, ruleID)
 		} else {
-			client := gm_t1nat.NewDefaultNatRulesClient(connector)
+			client := gm_t1nat.NewNatRulesClient(connector)
 			gmObj, err = client.Get(gwID, gm_model.PolicyNat_NAT_TYPE_USER, ruleID)
 		}
 		if err != nil {
@@ -195,10 +195,10 @@ func getNsxtPolicyNATRuleByID(connector *client.RestConnector, gwID string, isT0
 		return rawObj.(model.PolicyNatRule), err
 	}
 	if isT0 {
-		client := t0nat.NewDefaultNatRulesClient(connector)
+		client := t0nat.NewNatRulesClient(connector)
 		return client.Get(gwID, model.PolicyNat_NAT_TYPE_USER, ruleID)
 	}
-	client := t1nat.NewDefaultNatRulesClient(connector)
+	client := t1nat.NewNatRulesClient(connector)
 	return client.Get(gwID, model.PolicyNat_NAT_TYPE_USER, ruleID)
 }
 
@@ -209,17 +209,17 @@ func patchNsxtPolicyNATRule(connector *client.RestConnector, gwID string, rule m
 			return err
 		}
 		if isT0 {
-			client := gm_t0nat.NewDefaultNatRulesClient(connector)
+			client := gm_t0nat.NewNatRulesClient(connector)
 			return client.Patch(gwID, model.PolicyNat_NAT_TYPE_USER, *rule.Id, rawObj.(gm_model.PolicyNatRule))
 		}
-		client := gm_t1nat.NewDefaultNatRulesClient(connector)
+		client := gm_t1nat.NewNatRulesClient(connector)
 		return client.Patch(gwID, model.PolicyNat_NAT_TYPE_USER, *rule.Id, rawObj.(gm_model.PolicyNatRule))
 	}
 	if isT0 {
-		client := t0nat.NewDefaultNatRulesClient(connector)
+		client := t0nat.NewNatRulesClient(connector)
 		return client.Patch(gwID, model.PolicyNat_NAT_TYPE_USER, *rule.Id, rule)
 	}
-	client := t1nat.NewDefaultNatRulesClient(connector)
+	client := t1nat.NewNatRulesClient(connector)
 	return client.Patch(gwID, model.PolicyNat_NAT_TYPE_USER, *rule.Id, rule)
 }
 
@@ -425,13 +425,13 @@ func resourceNsxtPolicyNATRuleImport(d *schema.ResourceData, m interface{}) ([]*
 	gwID := s[0]
 	connector := getPolicyConnector(m)
 	if isPolicyGlobalManager(m) {
-		t0Client := gm_infra.NewDefaultTier0sClient(connector)
+		t0Client := gm_infra.NewTier0sClient(connector)
 		t0gw, err := t0Client.Get(gwID)
 		if err != nil {
 			if !isNotFoundError(err) {
 				return nil, err
 			}
-			t1Client := gm_infra.NewDefaultTier1sClient(connector)
+			t1Client := gm_infra.NewTier1sClient(connector)
 			t1gw, err := t1Client.Get(gwID)
 			if err != nil {
 				return nil, err
@@ -441,13 +441,13 @@ func resourceNsxtPolicyNATRuleImport(d *schema.ResourceData, m interface{}) ([]*
 			d.Set("gateway_path", t0gw.Path)
 		}
 	} else {
-		t0Client := infra.NewDefaultTier0sClient(connector)
+		t0Client := infra.NewTier0sClient(connector)
 		t0gw, err := t0Client.Get(gwID)
 		if err != nil {
 			if !isNotFoundError(err) {
 				return nil, err
 			}
-			t1Client := infra.NewDefaultTier1sClient(connector)
+			t1Client := infra.NewTier1sClient(connector)
 			t1gw, err := t1Client.Get(gwID)
 			if err != nil {
 				return nil, err

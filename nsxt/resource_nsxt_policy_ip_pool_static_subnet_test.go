@@ -155,7 +155,7 @@ func testAccNSXPolicyIPPoolStaticSubnetImporterGetID(s *terraform.State) (string
 func testAccNSXPolicyIPPoolStaticSubnetCheckExists(resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-		client := ip_pools.NewDefaultIpSubnetsClient(connector)
+		client := ip_pools.NewIpSubnetsClient(connector)
 
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
@@ -179,7 +179,7 @@ func testAccNSXPolicyIPPoolStaticSubnetCheckExists(resourceName string) resource
 
 func testAccNSXPolicyIPPoolStaticSubnetCheckDestroy(state *terraform.State) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-	client := ip_pools.NewDefaultIpSubnetsClient(connector)
+	client := ip_pools.NewIpSubnetsClient(connector)
 
 	for _, rs := range state.RootModule().Resources {
 		if rs.Type != "nsxt_policy_ip_pool_static_subnet" {

@@ -42,7 +42,7 @@ func resourceNsxtPolicyBgpConfigRead(d *schema.ResourceData, m interface{}) erro
 	var lmRoutingConfig model.BgpRoutingConfig
 	if isPolicyGlobalManager(m) {
 
-		client := gm_locale_services.NewDefaultBgpClient(connector)
+		client := gm_locale_services.NewBgpClient(connector)
 		gmObj, err := client.Get(gwID, serviceID)
 		if err != nil {
 			return handleReadError(d, "BGP Config", serviceID, err)
@@ -54,7 +54,7 @@ func resourceNsxtPolicyBgpConfigRead(d *schema.ResourceData, m interface{}) erro
 		lmRoutingConfig = lmObj.(model.BgpRoutingConfig)
 	} else {
 		var err error
-		client := locale_services.NewDefaultBgpClient(connector)
+		client := locale_services.NewBgpClient(connector)
 		lmRoutingConfig, err = client.Get(gwID, serviceID)
 		if err != nil {
 			return handleReadError(d, "BGP Config", serviceID, err)
@@ -152,7 +152,7 @@ func resourceNsxtPolicyBgpConfigCreate(d *schema.ResourceData, m interface{}) er
 		}
 		gmRoutingConfig := gmObj.(gm_model.BgpRoutingConfig)
 
-		client := gm_locale_services.NewDefaultBgpClient(connector)
+		client := gm_locale_services.NewBgpClient(connector)
 		err = client.Patch(gwID, serviceID, gmRoutingConfig, nil)
 	} else {
 		localeService, err1 := getPolicyTier0GatewayLocaleServiceWithEdgeCluster(gwID, connector)
@@ -161,7 +161,7 @@ func resourceNsxtPolicyBgpConfigCreate(d *schema.ResourceData, m interface{}) er
 		}
 		localeServiceID = *localeService.Id
 
-		client := locale_services.NewDefaultBgpClient(connector)
+		client := locale_services.NewBgpClient(connector)
 		err = client.Patch(gwID, localeServiceID, *obj, nil)
 	}
 	if err != nil {
@@ -196,10 +196,10 @@ func resourceNsxtPolicyBgpConfigUpdate(d *schema.ResourceData, m interface{}) er
 		}
 		gmRoutingConfig := gmObj.(gm_model.BgpRoutingConfig)
 
-		client := gm_locale_services.NewDefaultBgpClient(connector)
+		client := gm_locale_services.NewBgpClient(connector)
 		_, err = client.Update(gwID, serviceID, gmRoutingConfig, nil)
 	} else {
-		client := locale_services.NewDefaultBgpClient(connector)
+		client := locale_services.NewBgpClient(connector)
 		_, err = client.Update(gwID, serviceID, *obj, nil)
 	}
 

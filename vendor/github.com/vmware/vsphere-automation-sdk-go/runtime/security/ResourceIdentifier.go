@@ -3,7 +3,6 @@
 
 package security
 
-
 type ResourceIdentifier struct {
 	isOperation  bool
 	id           string

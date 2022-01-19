@@ -3,7 +3,6 @@
 
 package info
 
-
 type TypeInfo interface {
 	Name() string
 }

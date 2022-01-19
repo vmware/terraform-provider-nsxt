@@ -31,7 +31,7 @@ func resourceNsxtPolicyGatewayPolicy() *schema.Resource {
 
 func getGatewayPolicyInDomain(id string, domainName string, connector *client.RestConnector, isGlobalManager bool) (model.GatewayPolicy, error) {
 	if isGlobalManager {
-		client := gm_domains.NewDefaultGatewayPoliciesClient(connector)
+		client := gm_domains.NewGatewayPoliciesClient(connector)
 		gmObj, err := client.Get(domainName, id)
 		if err != nil {
 			return model.GatewayPolicy{}, err
@@ -42,7 +42,7 @@ func getGatewayPolicyInDomain(id string, domainName string, connector *client.Re
 		}
 		return rawObj.(model.GatewayPolicy), nil
 	}
-	client := domains.NewDefaultGatewayPoliciesClient(connector)
+	client := domains.NewGatewayPoliciesClient(connector)
 	return client.Get(domainName, id)
 
 }
@@ -106,14 +106,14 @@ func resourceNsxtPolicyGatewayPolicyCreate(d *schema.ResourceData, m interface{}
 
 	log.Printf("[INFO] Creating Gateway Policy with ID %s", id)
 	if isPolicyGlobalManager(m) {
-		client := gm_domains.NewDefaultGatewayPoliciesClient(connector)
+		client := gm_domains.NewGatewayPoliciesClient(connector)
 		gmObj, err1 := convertModelBindingType(obj, model.GatewayPolicyBindingType(), gm_model.GatewayPolicyBindingType())
 		if err1 != nil {
 			return err1
 		}
 		err = client.Patch(d.Get("domain").(string), id, gmObj.(gm_model.GatewayPolicy))
 	} else {
-		client := domains.NewDefaultGatewayPoliciesClient(connector)
+		client := domains.NewGatewayPoliciesClient(connector)
 		err = client.Patch(d.Get("domain").(string), id, obj)
 	}
 	if err != nil {
@@ -199,11 +199,11 @@ func resourceNsxtPolicyGatewayPolicyUpdate(d *schema.ResourceData, m interface{}
 			return err1
 		}
 		gmObj := rawObj.(gm_model.GatewayPolicy)
-		client := gm_domains.NewDefaultGatewayPoliciesClient(connector)
+		client := gm_domains.NewGatewayPoliciesClient(connector)
 		// We need to use PUT, because PATCH will not replace the whole rule list
 		_, err = client.Update(d.Get("domain").(string), id, gmObj)
 	} else {
-		client := domains.NewDefaultGatewayPoliciesClient(connector)
+		client := domains.NewGatewayPoliciesClient(connector)
 		// We need to use PUT, because PATCH will not replace the whole rule list
 		_, err = client.Update(d.Get("domain").(string), id, obj)
 	}
@@ -224,10 +224,10 @@ func resourceNsxtPolicyGatewayPolicyDelete(d *schema.ResourceData, m interface{}
 	connector := getPolicyConnector(m)
 	var err error
 	if isPolicyGlobalManager(m) {
-		client := gm_domains.NewDefaultGatewayPoliciesClient(connector)
+		client := gm_domains.NewGatewayPoliciesClient(connector)
 		err = client.Delete(d.Get("domain").(string), id)
 	} else {
-		client := domains.NewDefaultGatewayPoliciesClient(connector)
+		client := domains.NewGatewayPoliciesClient(connector)
 		err = client.Delete(d.Get("domain").(string), id)
 	}
 	if err != nil {

@@ -1,8 +1,14 @@
 package client
 
 import (
+	"encoding/asn1"
 	"fmt"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/l10n"
+	"net"
 	"runtime"
+	"syscall"
 
 	"net/http"
 	"reflect"
@@ -52,4 +58,38 @@ func CopyContextsToHeaders(ctx *core.ExecutionContext, req *http.Request) {
 			}
 		}
 	}
+}
+
+func getVAPIError(err error) *data.ErrorValue {
+	log.Error(err)
+	if netError, ok := err.(net.Error); ok && netError.Timeout() {
+		err := l10n.NewRuntimeError("vapi.server.timedout", map[string]string{"errMsg": err.Error()})
+		errVal := bindings.CreateErrorValueFromMessages(bindings.TIMEDOUT_ERROR_DEF, []error{err})
+		return errVal
+	}
+
+	switch t := err.(type) {
+	case *net.OpError:
+		err := l10n.NewRuntimeError("vapi.server.unavailable", map[string]string{"errMsg": err.Error()})
+		errVal := bindings.CreateErrorValueFromMessages(bindings.SERVICE_UNAVAILABLE_ERROR_DEF, []error{err})
+		return errVal
+	case syscall.Errno:
+		if t == syscall.ECONNREFUSED {
+			err := l10n.NewRuntimeError("vapi.server.unavailable", map[string]string{"errMsg": err.Error()})
+			errVal := bindings.CreateErrorValueFromMessages(bindings.SERVICE_UNAVAILABLE_ERROR_DEF, []error{err})
+			return errVal
+		}
+	case asn1.SyntaxError:
+		err := l10n.NewRuntimeError("vapi.security.authentication.certificate.invalid", map[string]string{"errMsg": err.Error()})
+		errVal := bindings.CreateErrorValueFromMessages(bindings.SERVICE_UNAVAILABLE_ERROR_DEF, []error{err})
+		return errVal
+	case asn1.StructuralError:
+		err := l10n.NewRuntimeError("vapi.security.authentication.certificate.invalid", map[string]string{"errMsg": err.Error()})
+		errVal := bindings.CreateErrorValueFromMessages(bindings.SERVICE_UNAVAILABLE_ERROR_DEF, []error{err})
+		return errVal
+	}
+
+	err = l10n.NewRuntimeError("vapi.protocol.client.request.error", map[string]string{"errMsg": err.Error()})
+	errVal := bindings.CreateErrorValueFromMessages(bindings.SERVICE_UNAVAILABLE_ERROR_DEF, []error{err})
+	return errVal
 }

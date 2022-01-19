@@ -67,4 +67,7 @@ const VAPI_STREAMING_CONTENT_TYPE = "application/vnd.vmware.vapi.stream.json"
 
 const REST_METADATA = "rest-metadata"
 
+// Response type related
+const INVALID_JSON = "INVALID_JSON"
+
 var CRLFBytes = []byte("\r\n")

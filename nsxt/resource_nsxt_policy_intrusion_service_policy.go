@@ -44,7 +44,7 @@ func getIdsProfilesSchema() *schema.Schema {
 }
 
 func resourceNsxtPolicyIntrusionServicePolicyExistsInDomain(id string, domainName string, connector *client.RestConnector) (bool, error) {
-	client := domains.NewDefaultIntrusionServicePoliciesClient(connector)
+	client := domains.NewIntrusionServicePoliciesClient(connector)
 	_, err := client.Get(domainName, id)
 
 	if err == nil {
@@ -334,7 +334,7 @@ func resourceNsxtPolicyIntrusionServicePolicyRead(d *schema.ResourceData, m inte
 	if id == "" {
 		return fmt.Errorf("Error obtaining Intrusion Service Policy id")
 	}
-	client := domains.NewDefaultIntrusionServicePoliciesClient(connector)
+	client := domains.NewIntrusionServicePoliciesClient(connector)
 	obj, err := client.Get(domainName, id)
 	if err != nil {
 		return handleReadError(d, "Intrusion Service Policy", id, err)
@@ -378,7 +378,7 @@ func resourceNsxtPolicyIntrusionServicePolicyDelete(d *schema.ResourceData, m in
 
 	connector := getPolicyConnector(m)
 
-	client := domains.NewDefaultIntrusionServicePoliciesClient(connector)
+	client := domains.NewIntrusionServicePoliciesClient(connector)
 	err := client.Delete(d.Get("domain").(string), id)
 
 	if err != nil {

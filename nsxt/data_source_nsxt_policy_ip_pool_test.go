@@ -46,7 +46,7 @@ func testAccDataSourceNsxtPolicyIPPoolCreate(name string) error {
 	if err != nil {
 		return fmt.Errorf("Error during test client initialization: %v", err)
 	}
-	client := infra.NewDefaultIpPoolsClient(connector)
+	client := infra.NewIpPoolsClient(connector)
 
 	displayName := name
 	description := name
@@ -70,7 +70,7 @@ func testAccDataSourceNsxtPolicyIPPoolDeleteByName(name string) error {
 	if err != nil {
 		return fmt.Errorf("Error during test client initialization: %v", err)
 	}
-	client := infra.NewDefaultIpPoolsClient(connector)
+	client := infra.NewIpPoolsClient(connector)
 
 	// Find the object by name
 	objList, err := client.List(nil, nil, nil, nil, nil, nil)

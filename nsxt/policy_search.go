@@ -143,7 +143,7 @@ func buildPolicyResourcesQuery(query *string, additionalQuery *string) *string {
 }
 
 func searchGMPolicyResources(connector *client.RestConnector, query string) ([]*data.StructValue, error) {
-	client := search.NewDefaultQueryClient(connector)
+	client := search.NewQueryClient(connector)
 	var results []*data.StructValue
 	var cursor *string
 	total := 0
@@ -166,7 +166,7 @@ func searchGMPolicyResources(connector *client.RestConnector, query string) ([]*
 }
 
 func searchLMPolicyResources(connector *client.RestConnector, query string) ([]*data.StructValue, error) {
-	client := lm_search.NewDefaultQueryClient(connector)
+	client := lm_search.NewQueryClient(connector)
 	var results []*data.StructValue
 	var cursor *string
 	total := 0

@@ -56,7 +56,7 @@ func resourceNsxtPolicyEvpnTenant() *schema.Resource {
 
 func resourceNsxtPolicyEvpnTenantExists(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
 	var err error
-	client := infra.NewDefaultEvpnTenantConfigsClient(connector)
+	client := infra.NewEvpnTenantConfigsClient(connector)
 	_, err = client.Get(id)
 	if err == nil {
 		return true, nil
@@ -118,7 +118,7 @@ func policyEvpnTenantPatch(id string, d *schema.ResourceData, m interface{}) err
 	}
 
 	// Create the resource using PATCH
-	client := infra.NewDefaultEvpnTenantConfigsClient(connector)
+	client := infra.NewEvpnTenantConfigsClient(connector)
 	return client.Patch(id, obj)
 }
 
@@ -150,7 +150,7 @@ func resourceNsxtPolicyEvpnTenantRead(d *schema.ResourceData, m interface{}) err
 		return fmt.Errorf("Error obtaining Evpn Tenant ID")
 	}
 
-	client := infra.NewDefaultEvpnTenantConfigsClient(connector)
+	client := infra.NewEvpnTenantConfigsClient(connector)
 	obj, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "Evpn Tenant", id, err)
@@ -196,7 +196,7 @@ func resourceNsxtPolicyEvpnTenantDelete(d *schema.ResourceData, m interface{}) e
 	}
 
 	connector := getPolicyConnector(m)
-	client := infra.NewDefaultEvpnTenantConfigsClient(connector)
+	client := infra.NewEvpnTenantConfigsClient(connector)
 	err := client.Delete(id)
 
 	if err != nil {

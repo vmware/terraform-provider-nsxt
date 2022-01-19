@@ -3,7 +3,6 @@
 
 package info
 
-
 type UnionInfo struct {
 	tag   string
 	cases []*UnionCase

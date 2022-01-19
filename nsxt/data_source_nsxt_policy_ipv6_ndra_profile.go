@@ -35,7 +35,7 @@ func dataSourceNsxtPolicyIpv6NdraProfileRead(d *schema.ResourceData, m interface
 	}
 
 	connector := getPolicyConnector(m)
-	client := infra.NewDefaultIpv6NdraProfilesClient(connector)
+	client := infra.NewIpv6NdraProfilesClient(connector)
 
 	objID := d.Get("id").(string)
 	objName := d.Get("display_name").(string)

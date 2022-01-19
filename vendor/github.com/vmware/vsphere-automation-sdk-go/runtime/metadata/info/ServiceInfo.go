@@ -3,7 +3,6 @@
 
 package info
 
-
 type ServiceInfo struct {
 	identifier           string
 	documentation        string

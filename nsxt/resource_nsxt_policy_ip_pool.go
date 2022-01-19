@@ -35,7 +35,7 @@ func resourceNsxtPolicyIPPool() *schema.Resource {
 }
 
 func resourceNsxtPolicyIPPoolExists(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
-	client := infra.NewDefaultIpPoolsClient(connector)
+	client := infra.NewIpPoolsClient(connector)
 
 	_, err := client.Get(id)
 	if err == nil {
@@ -51,7 +51,7 @@ func resourceNsxtPolicyIPPoolExists(id string, connector *client.RestConnector, 
 
 func resourceNsxtPolicyIPPoolRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewDefaultIpPoolsClient(connector)
+	client := infra.NewIpPoolsClient(connector)
 
 	id := d.Id()
 	if id == "" {
@@ -80,7 +80,7 @@ func resourceNsxtPolicyIPPoolRead(d *schema.ResourceData, m interface{}) error {
 
 func resourceNsxtPolicyIPPoolCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewDefaultIpPoolsClient(connector)
+	client := infra.NewIpPoolsClient(connector)
 
 	id, err := getOrGenerateID(d, m, resourceNsxtPolicyIPPoolExists)
 	if err != nil {
@@ -111,7 +111,7 @@ func resourceNsxtPolicyIPPoolCreate(d *schema.ResourceData, m interface{}) error
 
 func resourceNsxtPolicyIPPoolUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewDefaultIpPoolsClient(connector)
+	client := infra.NewIpPoolsClient(connector)
 
 	id := d.Id()
 	if id == "" {
@@ -142,7 +142,7 @@ func resourceNsxtPolicyIPPoolUpdate(d *schema.ResourceData, m interface{}) error
 
 func resourceNsxtPolicyIPPoolDelete(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewDefaultIpPoolsClient(connector)
+	client := infra.NewIpPoolsClient(connector)
 
 	id := d.Id()
 	if id == "" {

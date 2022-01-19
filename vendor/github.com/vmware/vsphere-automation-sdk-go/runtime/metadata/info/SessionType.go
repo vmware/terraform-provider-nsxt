@@ -3,7 +3,6 @@
 
 package info
 
-
 type SessionType int
 
 const (

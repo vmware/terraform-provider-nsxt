@@ -120,7 +120,7 @@ func resourceNsxtPolicyIPPoolStaticSubnetSchemaToStructValue(d *schema.ResourceD
 
 func resourceNsxtPolicyIPPoolStaticSubnetRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := ip_pools.NewDefaultIpSubnetsClient(connector)
+	client := ip_pools.NewIpSubnetsClient(connector)
 	converter := bindings.NewTypeConverter()
 	converter.SetMode(bindings.REST)
 
@@ -174,7 +174,7 @@ func resourceNsxtPolicyIPPoolStaticSubnetRead(d *schema.ResourceData, m interfac
 
 func resourceNsxtPolicyIPPoolStaticSubnetCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := ip_pools.NewDefaultIpSubnetsClient(connector)
+	client := ip_pools.NewIpSubnetsClient(connector)
 
 	poolPath := d.Get("pool_path").(string)
 	poolID := getPolicyIDFromPath(poolPath)
@@ -209,7 +209,7 @@ func resourceNsxtPolicyIPPoolStaticSubnetCreate(d *schema.ResourceData, m interf
 
 func resourceNsxtPolicyIPPoolStaticSubnetUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := ip_pools.NewDefaultIpSubnetsClient(connector)
+	client := ip_pools.NewIpSubnetsClient(connector)
 
 	poolPath := d.Get("pool_path").(string)
 	poolID := getPolicyIDFromPath(poolPath)
@@ -237,7 +237,7 @@ func resourceNsxtPolicyIPPoolStaticSubnetUpdate(d *schema.ResourceData, m interf
 
 func resourceNsxtPolicyIPPoolStaticSubnetDelete(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := ip_pools.NewDefaultIpSubnetsClient(connector)
+	client := ip_pools.NewIpSubnetsClient(connector)
 
 	poolPath := d.Get("pool_path").(string)
 	poolID := getPolicyIDFromPath(poolPath)

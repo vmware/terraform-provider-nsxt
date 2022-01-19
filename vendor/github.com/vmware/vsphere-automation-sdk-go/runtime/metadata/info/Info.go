@@ -3,7 +3,6 @@
 
 package info
 
-
 type Info interface {
 	Identifier() string
 	SetFieldInfo(name string, fieldinfo *FieldInfo)

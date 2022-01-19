@@ -3,7 +3,6 @@
 
 package info
 
-
 type AuthenticationScheme struct {
 	interfaceName  string
 	sessionManager string

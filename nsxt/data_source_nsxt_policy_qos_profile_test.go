@@ -65,10 +65,10 @@ func testAccDataSourceNsxtPolicyQosProfileCreate(name string) error {
 			return convErr
 		}
 
-		client := gm_infra.NewDefaultQosProfilesClient(connector)
+		client := gm_infra.NewQosProfilesClient(connector)
 		err = client.Patch(id, gmObj.(gm_model.QosProfile), nil)
 	} else {
-		client := infra.NewDefaultQosProfilesClient(connector)
+		client := infra.NewQosProfilesClient(connector)
 		err = client.Patch(id, obj, nil)
 	}
 
@@ -88,7 +88,7 @@ func testAccDataSourceNsxtPolicyQosProfileDeleteByName(name string) error {
 	if testAccIsGlobalManager() {
 		objID, err := testGetObjIDByName(name, "QosProfile")
 		if err == nil {
-			client := gm_infra.NewDefaultQosProfilesClient(connector)
+			client := gm_infra.NewQosProfilesClient(connector)
 			err := client.Delete(objID, nil)
 			if err != nil {
 				return handleDeleteError("QosProfile", objID, err)
@@ -96,7 +96,7 @@ func testAccDataSourceNsxtPolicyQosProfileDeleteByName(name string) error {
 			return nil
 		}
 	} else {
-		client := infra.NewDefaultQosProfilesClient(connector)
+		client := infra.NewQosProfilesClient(connector)
 		objList, err := client.List(nil, nil, nil, nil, nil)
 		if err != nil {
 			return handleListError("QosProfile", err)

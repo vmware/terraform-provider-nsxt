@@ -194,10 +194,10 @@ func resourceNsxtPolicyBgpNeighborExists(t0ID string, localeServiceID string, ne
 
 	var err error
 	if isGlobalManager {
-		client := gm_bgp.NewDefaultNeighborsClient(connector)
+		client := gm_bgp.NewNeighborsClient(connector)
 		_, err = client.Get(t0ID, localeServiceID, neighborID)
 	} else {
-		client := bgp.NewDefaultNeighborsClient(connector)
+		client := bgp.NewNeighborsClient(connector)
 		_, err = client.Get(t0ID, localeServiceID, neighborID)
 	}
 	if err == nil {
@@ -320,11 +320,11 @@ func resourceNsxtPolicyBgpNeighborConvertAndPatch(id string, d *schema.ResourceD
 		if convErr != nil {
 			return convErr
 		}
-		client := gm_bgp.NewDefaultNeighborsClient(connector)
+		client := gm_bgp.NewNeighborsClient(connector)
 		err = client.Patch(t0ID, serviceID, id, gmObj.(gm_model.BgpNeighborConfig), nil)
 
 	} else {
-		client := bgp.NewDefaultNeighborsClient(connector)
+		client := bgp.NewNeighborsClient(connector)
 		err = client.Patch(t0ID, serviceID, id, obj, nil)
 	}
 	if err != nil {
@@ -382,7 +382,7 @@ func resourceNsxtPolicyBgpNeighborRead(d *schema.ResourceData, m interface{}) er
 
 	var obj model.BgpNeighborConfig
 	if isPolicyGlobalManager(m) {
-		client := gm_bgp.NewDefaultNeighborsClient(connector)
+		client := gm_bgp.NewNeighborsClient(connector)
 		gmObj, err := client.Get(t0ID, serviceID, id)
 		if err != nil {
 			return handleReadError(d, "BgpNeighbor", id, err)
@@ -395,7 +395,7 @@ func resourceNsxtPolicyBgpNeighborRead(d *schema.ResourceData, m interface{}) er
 
 	} else {
 		var err error
-		client := bgp.NewDefaultNeighborsClient(connector)
+		client := bgp.NewNeighborsClient(connector)
 		obj, err = client.Get(t0ID, serviceID, id)
 		if err != nil {
 			return handleReadError(d, "BgpNeighbor", id, err)
@@ -486,10 +486,10 @@ func resourceNsxtPolicyBgpNeighborDelete(d *schema.ResourceData, m interface{}) 
 
 	var err error
 	if isPolicyGlobalManager(m) {
-		client := gm_bgp.NewDefaultNeighborsClient(connector)
+		client := gm_bgp.NewNeighborsClient(connector)
 		err = client.Delete(t0ID, serviceID, id, nil)
 	} else {
-		client := bgp.NewDefaultNeighborsClient(connector)
+		client := bgp.NewNeighborsClient(connector)
 		err = client.Delete(t0ID, serviceID, id, nil)
 	}
 	if err != nil {
@@ -510,7 +510,7 @@ func resourceNsxtPolicyBgpNeighborImport(d *schema.ResourceData, m interface{}) 
 	serviceID := s[1]
 	neighborID := s[2]
 	connector := getPolicyConnector(m)
-	client := bgp.NewDefaultNeighborsClient(connector)
+	client := bgp.NewNeighborsClient(connector)
 
 	neighbor, err := client.Get(tier0ID, serviceID, neighborID)
 	if err != nil {

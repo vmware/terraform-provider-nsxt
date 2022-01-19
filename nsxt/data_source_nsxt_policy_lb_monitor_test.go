@@ -68,7 +68,7 @@ func testAccDataSourceNsxtPolicyLBMonitorCreate(name string) error {
 	if err != nil {
 		return fmt.Errorf("Error during test client initialization: %v", err)
 	}
-	client := infra.NewDefaultLbMonitorProfilesClient(connector)
+	client := infra.NewLbMonitorProfilesClient(connector)
 	converter := bindings.NewTypeConverter()
 	converter.SetMode(bindings.REST)
 
@@ -101,7 +101,7 @@ func testAccDataSourceNsxtPolicyLBMonitorDeleteByName(name string) error {
 	if err != nil {
 		return fmt.Errorf("Error during test client initialization: %v", err)
 	}
-	client := infra.NewDefaultLbMonitorProfilesClient(connector)
+	client := infra.NewLbMonitorProfilesClient(connector)
 
 	// Find the object by name
 	objList, err := client.List(nil, nil, nil, nil, nil, nil)

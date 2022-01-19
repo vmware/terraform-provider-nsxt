@@ -55,6 +55,10 @@ func (j *JSONSsoVerifier) Process(jsonMessage *map[string]interface{}) error {
 		return nil
 	}
 	if schemeId, ok := securityContext[AUTHENTICATION_SCHEME_ID]; ok {
+		if schemeId == SAML_BEARER_SCHEME_ID && !isSamlBearerToken(securityContext[SAML_TOKEN].(string)) {
+			log.Error("Bearer token provided is not valid.")
+			return l10n.NewRuntimeErrorNoParam("vapi.security.sso.bearertoken.invalid")
+		}
 		if schemeId != SAML_HOK_SCHEME_ID {
 			return nil
 		}

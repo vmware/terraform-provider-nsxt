@@ -79,10 +79,10 @@ func policyGatewayDNSForwarderGet(connector *client.RestConnector, gwID string, 
 	if isGlobalManager {
 		var gmObj gm_model.PolicyDnsForwarder
 		if isT0 {
-			client := gm_tier_0s.NewDefaultDnsForwarderClient(connector)
+			client := gm_tier_0s.NewDnsForwarderClient(connector)
 			gmObj, err = client.Get(gwID)
 		} else {
-			client := gm_tier_1s.NewDefaultDnsForwarderClient(connector)
+			client := gm_tier_1s.NewDnsForwarderClient(connector)
 			gmObj, err = client.Get(gwID)
 		}
 		if err != nil {
@@ -95,10 +95,10 @@ func policyGatewayDNSForwarderGet(connector *client.RestConnector, gwID string, 
 		return rawObj.(model.PolicyDnsForwarder), nil
 	}
 	if isT0 {
-		client := tier_0s.NewDefaultDnsForwarderClient(connector)
+		client := tier_0s.NewDnsForwarderClient(connector)
 		return client.Get(gwID)
 	}
-	client := tier_1s.NewDefaultDnsForwarderClient(connector)
+	client := tier_1s.NewDnsForwarderClient(connector)
 	return client.Get(gwID)
 }
 
@@ -162,19 +162,19 @@ func patchNsxtPolicyGatewayDNSForwarder(connector *client.RestConnector, d *sche
 			return err
 		}
 		if isT0 {
-			client := gm_tier_0s.NewDefaultDnsForwarderClient(connector)
+			client := gm_tier_0s.NewDnsForwarderClient(connector)
 			return client.Patch(gwID, rawObj.(gm_model.PolicyDnsForwarder))
 		}
 
-		client := gm_tier_1s.NewDefaultDnsForwarderClient(connector)
+		client := gm_tier_1s.NewDnsForwarderClient(connector)
 		return client.Patch(gwID, rawObj.(gm_model.PolicyDnsForwarder))
 
 	}
 	if isT0 {
-		client := tier_0s.NewDefaultDnsForwarderClient(connector)
+		client := tier_0s.NewDnsForwarderClient(connector)
 		return client.Patch(gwID, obj)
 	}
-	client := tier_1s.NewDefaultDnsForwarderClient(connector)
+	client := tier_1s.NewDnsForwarderClient(connector)
 	return client.Patch(gwID, obj)
 }
 
@@ -192,18 +192,18 @@ func resourceNsxtPolicyGatewayDNSForwarderCreate(d *schema.ResourceData, m inter
 	var err error
 	if isGlobalManager {
 		if isT0 {
-			client := gm_tier_0s.NewDefaultDnsForwarderClient(connector)
+			client := gm_tier_0s.NewDnsForwarderClient(connector)
 			_, err = client.Get(gwID)
 		} else {
-			client := gm_tier_1s.NewDefaultDnsForwarderClient(connector)
+			client := gm_tier_1s.NewDnsForwarderClient(connector)
 			_, err = client.Get(gwID)
 		}
 	} else {
 		if isT0 {
-			client := tier_0s.NewDefaultDnsForwarderClient(connector)
+			client := tier_0s.NewDnsForwarderClient(connector)
 			_, err = client.Get(gwID)
 		} else {
-			client := tier_1s.NewDefaultDnsForwarderClient(connector)
+			client := tier_1s.NewDnsForwarderClient(connector)
 			_, err = client.Get(gwID)
 		}
 	}
@@ -255,18 +255,18 @@ func resourceNsxtPolicyGatewayDNSForwarderDelete(d *schema.ResourceData, m inter
 	var err error
 	if isGlobalManager {
 		if isT0 {
-			client := gm_tier_0s.NewDefaultDnsForwarderClient(connector)
+			client := gm_tier_0s.NewDnsForwarderClient(connector)
 			err = client.Delete(gwID)
 		} else {
-			client := gm_tier_1s.NewDefaultDnsForwarderClient(connector)
+			client := gm_tier_1s.NewDnsForwarderClient(connector)
 			err = client.Delete(gwID)
 		}
 	} else {
 		if isT0 {
-			client := tier_0s.NewDefaultDnsForwarderClient(connector)
+			client := tier_0s.NewDnsForwarderClient(connector)
 			err = client.Delete(gwID)
 		} else {
-			client := tier_1s.NewDefaultDnsForwarderClient(connector)
+			client := tier_1s.NewDnsForwarderClient(connector)
 			err = client.Delete(gwID)
 		}
 	}

@@ -219,7 +219,7 @@ func testAccNsxtPolicyLBPoolExists(resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-		nsxClient := infra.NewDefaultLbPoolsClient(connector)
+		nsxClient := infra.NewLbPoolsClient(connector)
 
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
@@ -242,7 +242,7 @@ func testAccNsxtPolicyLBPoolExists(resourceName string) resource.TestCheckFunc {
 
 func testAccNsxtPolicyLBPoolCheckDestroy(state *terraform.State, displayName string) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-	nsxClient := infra.NewDefaultLbPoolsClient(connector)
+	nsxClient := infra.NewLbPoolsClient(connector)
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_policy_lb_pool" {

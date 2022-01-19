@@ -1,4 +1,4 @@
-/* Copyright © 2019 VMware, Inc. All Rights Reserved.
+/* Copyright © 2019-2020 VMware, Inc. All Rights Reserved.
    SPDX-License-Identifier: BSD-2-Clause */
 
 package rest
@@ -6,6 +6,9 @@ package rest
 import (
 	"encoding/json"
 	"strings"
+
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/l10n"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/lib"
 
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/core"
@@ -62,6 +65,12 @@ func deserializeResponseToDataValue(status int, headers map[string][]string, res
 
 // DeserializeResponse Deserializes returned server response into data-value-like method result object
 func DeserializeResponse(status int, headers map[string][]string, response string, restmetadata *protocol.OperationRestMetadata) (core.MethodResult, error) {
+	if contentType, ok := headers[lib.HTTP_CONTENT_TYPE_HEADER]; ok &&
+		!strings.Contains(strings.Join(contentType, ","), lib.JSON_CONTENT_TYPE) {
+		errorDataValue := buildContentTypeError(status, strings.Join(contentType, ","), response)
+		return core.NewMethodResult(nil, errorDataValue), nil
+	}
+
 	dataVal, err := deserializeResponseToDataValue(status, headers, response, restmetadata)
 	if err != nil {
 		return core.MethodResult{}, err
@@ -170,4 +179,15 @@ func fillDataValueFromHeaders(headers map[string][]string, dataValue data.DataVa
 			structValue.SetField(dataValName, headerDataVal)
 		}
 	}
+}
+
+func buildContentTypeError(status int, contentType, response string) *data.ErrorValue {
+	err := l10n.NewRuntimeError("vapi.data.serializers.rest.deserialize.not_a_json", map[string]string{"contentType": contentType})
+	errorVal := bindings.CreateErrorValueFromMessages(bindings.CreateStdErrorDefinition("com.vmware.vapi.std.errors.internal_server_error"), []error{err})
+	dataStruct := data.NewStructValue("", nil)
+	dataStruct.SetField("response_type", data.NewStringValue(lib.INVALID_JSON)) // discriminator field
+	dataStruct.SetField("status", data.NewIntegerValue(int64(status)))
+	dataStruct.SetField("response_body", data.NewStringValue(response))
+	errorVal.SetField("data", data.NewOptionalValue(dataStruct))
+	return errorVal
 }

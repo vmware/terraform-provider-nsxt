@@ -35,7 +35,7 @@ func dataSourceNsxtPolicySpoofGuardProfileRead(d *schema.ResourceData, m interfa
 	}
 
 	connector := getPolicyConnector(m)
-	client := infra.NewDefaultSpoofguardProfilesClient(connector)
+	client := infra.NewSpoofguardProfilesClient(connector)
 
 	objID := d.Get("id").(string)
 	objName := d.Get("display_name").(string)

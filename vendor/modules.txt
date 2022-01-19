@@ -77,7 +77,7 @@ github.com/golang/protobuf/ptypes/any
 github.com/golang/protobuf/ptypes/duration
 github.com/golang/protobuf/ptypes/empty
 github.com/golang/protobuf/ptypes/timestamp
-# github.com/google/uuid v1.1.2
+# github.com/google/uuid v1.2.0
 ## explicit
 github.com/google/uuid
 # github.com/googleapis/gax-go/v2 v2.0.5
@@ -213,11 +213,11 @@ github.com/vmware/go-vmware-nsxt/normalization
 github.com/vmware/go-vmware-nsxt/policy
 github.com/vmware/go-vmware-nsxt/trust
 github.com/vmware/go-vmware-nsxt/upgrade
-# github.com/vmware/vsphere-automation-sdk-go/lib v0.3.1
+# github.com/vmware/vsphere-automation-sdk-go/lib v0.4.0
 ## explicit
 github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std
 github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors
-# github.com/vmware/vsphere-automation-sdk-go/runtime v0.3.1
+# github.com/vmware/vsphere-automation-sdk-go/runtime v0.4.0
 ## explicit
 github.com/vmware/vsphere-automation-sdk-go/runtime/bindings
 github.com/vmware/vsphere-automation-sdk-go/runtime/common
@@ -238,7 +238,7 @@ github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client/metadata
 github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/server
 github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/server/rpc/msg
 github.com/vmware/vsphere-automation-sdk-go/runtime/security
-# github.com/vmware/vsphere-automation-sdk-go/services/nsxt v0.5.0
+# github.com/vmware/vsphere-automation-sdk-go/services/nsxt v0.6.0
 ## explicit
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra
@@ -263,7 +263,7 @@ github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/nat
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/segments
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt/search
-# github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm v0.3.0
+# github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm v0.4.0
 ## explicit
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra
@@ -321,7 +321,7 @@ golang.org/x/lint/golint
 ## explicit
 golang.org/x/mod/module
 golang.org/x/mod/semver
-# golang.org/x/net v0.0.0-20210326060303-6b1517762897
+# golang.org/x/net v0.0.0-20210510120150-4163338589ed
 golang.org/x/net/context
 golang.org/x/net/context/ctxhttp
 golang.org/x/net/http/httpguts
@@ -336,11 +336,11 @@ golang.org/x/oauth2/google
 golang.org/x/oauth2/internal
 golang.org/x/oauth2/jws
 golang.org/x/oauth2/jwt
-# golang.org/x/sys v0.0.0-20210324051608-47abb6519492
+# golang.org/x/sys v0.0.0-20210423082822-04245dca01da
 golang.org/x/sys/execabs
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
-# golang.org/x/text v0.3.5
+# golang.org/x/text v0.3.6
 golang.org/x/text/feature/plural
 golang.org/x/text/internal
 golang.org/x/text/internal/catmsg

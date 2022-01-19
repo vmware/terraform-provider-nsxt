@@ -261,13 +261,6 @@ func testAccNsxtPolicyDhcpV4StaticBindingTemplate(isFixed bool, createFlow bool)
 	} else {
 		attrMap = accTestPolicyDhcpV4StaticBindingUpdateAttributes
 	}
-	realizationData := ""
-	if !testAccIsGlobalManager() {
-		realizationData = `
-data "nsxt_policy_realization_info" "realization_info" {
-  path = nsxt_policy_dhcp_v4_static_binding.test.path
-}`
-	}
 	return testAccNsxtPolicyDhcpStaticBindingPrerequisites(isFixed, false) + fmt.Sprintf(`
 
 resource "nsxt_policy_dhcp_v4_static_binding" "test" {
@@ -285,7 +278,7 @@ resource "nsxt_policy_dhcp_v4_static_binding" "test" {
     tag   = "tag1"
   }
 }
-%s`, testAccNsxtPolicyGetSegmentResourceName(isFixed), attrMap["display_name"], attrMap["description"], attrMap["gateway_address"], attrMap["hostname"], attrMap["ip_address"], attrMap["lease_time"], attrMap["mac_address"], realizationData)
+`, testAccNsxtPolicyGetSegmentResourceName(isFixed), attrMap["display_name"], attrMap["description"], attrMap["gateway_address"], attrMap["hostname"], attrMap["ip_address"], attrMap["lease_time"], attrMap["mac_address"])
 }
 
 func testAccNsxtPolicyDhcpV4StaticBindingMinimalistic(isFixed bool) string {

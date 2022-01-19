@@ -89,7 +89,7 @@ func resourceNsxtPolicyIPPoolBlockSubnetSchemaToStructValue(d *schema.ResourceDa
 
 func resourceNsxtPolicyIPPoolBlockSubnetRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := ip_pools.NewDefaultIpSubnetsClient(connector)
+	client := ip_pools.NewIpSubnetsClient(connector)
 	converter := bindings.NewTypeConverter()
 	converter.SetMode(bindings.REST)
 
@@ -133,7 +133,7 @@ func resourceNsxtPolicyIPPoolBlockSubnetRead(d *schema.ResourceData, m interface
 
 func resourceNsxtPolicyIPPoolBlockSubnetCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := ip_pools.NewDefaultIpSubnetsClient(connector)
+	client := ip_pools.NewIpSubnetsClient(connector)
 
 	poolPath := d.Get("pool_path").(string)
 	poolID := getPolicyIDFromPath(poolPath)
@@ -168,7 +168,7 @@ func resourceNsxtPolicyIPPoolBlockSubnetCreate(d *schema.ResourceData, m interfa
 
 func resourceNsxtPolicyIPPoolBlockSubnetUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := ip_pools.NewDefaultIpSubnetsClient(connector)
+	client := ip_pools.NewIpSubnetsClient(connector)
 
 	poolPath := d.Get("pool_path").(string)
 	poolID := getPolicyIDFromPath(poolPath)
@@ -196,7 +196,7 @@ func resourceNsxtPolicyIPPoolBlockSubnetUpdate(d *schema.ResourceData, m interfa
 
 func resourceNsxtPolicyIPPoolBlockSubnetDelete(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := ip_pools.NewDefaultIpSubnetsClient(connector)
+	client := ip_pools.NewIpSubnetsClient(connector)
 
 	poolPath := d.Get("pool_path").(string)
 	poolID := getPolicyIDFromPath(poolPath)
@@ -218,7 +218,7 @@ func resourceNsxtPolicyIPPoolBlockSubnetDelete(d *schema.ResourceData, m interfa
 // NOTE: This will not be needed when IPAM is handled by NSXT Policy
 func resourceNsxtPolicyIPPoolBlockSubnetVerifyDelete(d *schema.ResourceData, connector *client.RestConnector) error {
 
-	client := realized_state.NewDefaultRealizedEntitiesClient(connector)
+	client := realized_state.NewRealizedEntitiesClient(connector)
 
 	path := d.Get("path").(string)
 	// Wait for realization state to disappear (not_found) - this means
@@ -262,7 +262,7 @@ func resourceNsxtPolicyIPPoolSubnetImport(d *schema.ResourceData, m interface{})
 
 	poolID := s[0]
 	connector := getPolicyConnector(m)
-	client := infra.NewDefaultIpPoolsClient(connector)
+	client := infra.NewIpPoolsClient(connector)
 
 	pool, err := client.Get(poolID)
 	if err != nil {

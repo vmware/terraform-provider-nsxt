@@ -124,7 +124,7 @@ func policyOspfConfigPatch(d *schema.ResourceData, m interface{}, gwID string, l
 	}
 
 	connector := getPolicyConnector(m)
-	client := locale_services.NewDefaultOspfClient(connector)
+	client := locale_services.NewOspfClient(connector)
 	_, err := client.Patch(gwID, localeServiceID, obj)
 	return err
 }
@@ -175,7 +175,7 @@ func resourceNsxtPolicyOspfConfigRead(d *schema.ResourceData, m interface{}) err
 
 	localeServiceID := d.Get("locale_service_id").(string)
 
-	client := locale_services.NewDefaultOspfClient(connector)
+	client := locale_services.NewOspfClient(connector)
 	obj, err := client.Get(gwID, localeServiceID)
 	if err != nil {
 		return handleReadError(d, "Ospf Config", gwID, err)

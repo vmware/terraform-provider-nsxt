@@ -1070,7 +1070,7 @@ func nsxtPolicySegmentDiscoveryProfileRead(d *schema.ResourceData, m interface{}
 	segmentID := d.Id()
 	var results model.SegmentDiscoveryProfileBindingMapListResult
 	if isPolicyGlobalManager(m) {
-		client := gm_segments.NewDefaultSegmentDiscoveryProfileBindingMapsClient(connector)
+		client := gm_segments.NewSegmentDiscoveryProfileBindingMapsClient(connector)
 		gmResults, err := client.List(segmentID, nil, nil, nil, nil, nil, nil)
 		if err != nil {
 			return fmt.Errorf(errorMessage, segmentID, err)
@@ -1081,7 +1081,7 @@ func nsxtPolicySegmentDiscoveryProfileRead(d *schema.ResourceData, m interface{}
 		}
 		results = lmResults.(model.SegmentDiscoveryProfileBindingMapListResult)
 	} else {
-		client := segments.NewDefaultSegmentDiscoveryProfileBindingMapsClient(connector)
+		client := segments.NewSegmentDiscoveryProfileBindingMapsClient(connector)
 		var err error
 		results, err = client.List(segmentID, nil, nil, nil, nil, nil, nil)
 		if err != nil {
@@ -1111,7 +1111,7 @@ func nsxtPolicySegmentQosProfileRead(d *schema.ResourceData, m interface{}) erro
 	segmentID := d.Id()
 	var results model.SegmentQosProfileBindingMapListResult
 	if isPolicyGlobalManager(m) {
-		client := gm_segments.NewDefaultSegmentQosProfileBindingMapsClient(connector)
+		client := gm_segments.NewSegmentQosProfileBindingMapsClient(connector)
 		gmResults, err := client.List(segmentID, nil, nil, nil, nil, nil)
 		if err != nil {
 			return fmt.Errorf(errorMessage, segmentID, err)
@@ -1122,7 +1122,7 @@ func nsxtPolicySegmentQosProfileRead(d *schema.ResourceData, m interface{}) erro
 		}
 		results = lmResults.(model.SegmentQosProfileBindingMapListResult)
 	} else {
-		client := segments.NewDefaultSegmentQosProfileBindingMapsClient(connector)
+		client := segments.NewSegmentQosProfileBindingMapsClient(connector)
 		var err error
 		results, err = client.List(segmentID, nil, nil, nil, nil, nil)
 		if err != nil {
@@ -1151,7 +1151,7 @@ func nsxtPolicySegmentSecurityProfileRead(d *schema.ResourceData, m interface{})
 	segmentID := d.Id()
 	var results model.SegmentSecurityProfileBindingMapListResult
 	if isPolicyGlobalManager(m) {
-		client := gm_segments.NewDefaultSegmentSecurityProfileBindingMapsClient(connector)
+		client := gm_segments.NewSegmentSecurityProfileBindingMapsClient(connector)
 		gmResults, err := client.List(segmentID, nil, nil, nil, nil, nil)
 		if err != nil {
 			return fmt.Errorf(errorMessage, segmentID, err)
@@ -1162,7 +1162,7 @@ func nsxtPolicySegmentSecurityProfileRead(d *schema.ResourceData, m interface{})
 		}
 		results = lmResults.(model.SegmentSecurityProfileBindingMapListResult)
 	} else {
-		client := segments.NewDefaultSegmentSecurityProfileBindingMapsClient(connector)
+		client := segments.NewSegmentSecurityProfileBindingMapsClient(connector)
 		var err error
 		results, err = client.List(segmentID, nil, nil, nil, nil, nil)
 		if err != nil {
@@ -1208,7 +1208,7 @@ func nsxtPolicySegmentProfilesRead(d *schema.ResourceData, m interface{}) error 
 
 func nsxtPolicyLocalManagerGetSegment(connector *client.RestConnector, id string, gwPath string, isFixed bool) (model.Segment, error) {
 	if !isFixed {
-		return infra.NewDefaultSegmentsClient(connector).Get(id)
+		return infra.NewSegmentsClient(connector).Get(id)
 	}
 
 	isT0, gwID := parseGatewayPolicyPath(gwPath)
@@ -1219,7 +1219,7 @@ func nsxtPolicyLocalManagerGetSegment(connector *client.RestConnector, id string
 		return model.Segment{}, fmt.Errorf("Tier-0 fixed segments are not supported")
 	}
 
-	return tier_1s.NewDefaultSegmentsClient(connector).Get(gwID, id)
+	return tier_1s.NewSegmentsClient(connector).Get(gwID, id)
 }
 
 func nsxtPolicyGlobalManagerGetSegment(connector *client.RestConnector, id string, gwPath string, isFixed bool) (model.Segment, error) {
@@ -1227,7 +1227,7 @@ func nsxtPolicyGlobalManagerGetSegment(connector *client.RestConnector, id strin
 	var gmObj gm_model.Segment
 
 	if !isFixed {
-		gmObj, err = gm_infra.NewDefaultSegmentsClient(connector).Get(id)
+		gmObj, err = gm_infra.NewSegmentsClient(connector).Get(id)
 	} else {
 		isT0, gwID := parseGatewayPolicyPath(gwPath)
 		if gwID == "" {
@@ -1236,7 +1236,7 @@ func nsxtPolicyGlobalManagerGetSegment(connector *client.RestConnector, id strin
 		if isT0 {
 			return model.Segment{}, fmt.Errorf("Tier-0 fixed segments are not supported")
 		}
-		gmObj, err = gm_tier_1s.NewDefaultSegmentsClient(connector).Get(gwID, id)
+		gmObj, err = gm_tier_1s.NewSegmentsClient(connector).Get(gwID, id)
 	}
 
 	if err != nil {
@@ -1431,7 +1431,7 @@ func nsxtPolicySegmentDelete(d *schema.ResourceData, m interface{}, isFixed bool
 			var ports interface{}
 			var numOfPorts int
 			if isPolicyGlobalManager(m) {
-				portsClient := gm_segments.NewDefaultPortsClient(connector)
+				portsClient := gm_segments.NewPortsClient(connector)
 				gmPorts, err := portsClient.List(id, nil, nil, nil, nil, nil, nil)
 				if err != nil {
 					return gmPorts, "error", logAPIError("Error listing segment ports", err)
@@ -1439,7 +1439,7 @@ func nsxtPolicySegmentDelete(d *schema.ResourceData, m interface{}, isFixed bool
 				numOfPorts = len(gmPorts.Results)
 				ports = gmPorts
 			} else {
-				portsClient := segments.NewDefaultPortsClient(connector)
+				portsClient := segments.NewPortsClient(connector)
 				lmPorts, err := portsClient.List(id, nil, nil, nil, nil, nil, nil)
 				if err != nil {
 					return lmPorts, "error", logAPIError("Error listing segment ports", err)

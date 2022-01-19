@@ -463,10 +463,6 @@ resource "nsxt_policy_bgp_neighbor" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
-}
-
-data "nsxt_policy_realization_info" "realization_info" {
-  path = nsxt_policy_bgp_neighbor.test.path
 }`, getEdgeClusterName(), getVlanTransportZoneName(), subnet, attrMap["display_name"], attrMap["description"], attrMap["allow_as_in"], attrMap["graceful_restart_mode"], attrMap["hold_down_time"], attrMap["keep_alive_time"], attrMap["maximum_hop_limit"], attrMap["neighbor_address"], attrMap["remote_as_num"], attrMap["password"])
 }
 
@@ -490,10 +486,6 @@ resource "nsxt_policy_tier0_gateway" "test" {
   }
 }
 
-data "nsxt_policy_realization_info" "bgp_realization_info" {
-  path = nsxt_policy_tier0_gateway.test.bgp_config.0.path
-}
-
 resource "nsxt_policy_bgp_neighbor" "test" {
   bgp_path         = nsxt_policy_tier0_gateway.test.bgp_config.0.path
   display_name     = "%s"
@@ -501,10 +493,7 @@ resource "nsxt_policy_bgp_neighbor" "test" {
   remote_as_num    = "%s"
 
 }
-
-data "nsxt_policy_realization_info" "realization_info" {
-  path = nsxt_policy_bgp_neighbor.test.path
-}`, getEdgeClusterName(), accTestPolicyBgpNeighborConfigCreateAttributes["display_name"], accTestPolicyBgpNeighborConfigCreateAttributes["neighbor_address"], accTestPolicyBgpNeighborConfigCreateAttributes["remote_as_num"])
+`, getEdgeClusterName(), accTestPolicyBgpNeighborConfigCreateAttributes["display_name"], accTestPolicyBgpNeighborConfigCreateAttributes["neighbor_address"], accTestPolicyBgpNeighborConfigCreateAttributes["remote_as_num"])
 }
 
 func testAccNsxtPolicyBgpNeighborSubConfigCreate() string {
@@ -579,10 +568,6 @@ resource "nsxt_policy_tier0_gateway" "test" {
   }
 }
 
-data "nsxt_policy_realization_info" "bgp_realization_info" {
-  path = nsxt_policy_tier0_gateway.test.bgp_config.0.path
-}
-
 resource "nsxt_policy_bgp_neighbor" "test" {
   bgp_path         = nsxt_policy_tier0_gateway.test.bgp_config.0.path
   display_name     = "tfbgp"
@@ -600,10 +585,6 @@ resource "nsxt_policy_bgp_neighbor" "test" {
     maximum_routes = 20
   }
 
-}
-
-data "nsxt_policy_realization_info" "realization_info" {
-  path = nsxt_policy_bgp_neighbor.test.path
 }`, getEdgeClusterName())
 }
 
@@ -627,10 +608,6 @@ resource "nsxt_policy_tier0_gateway" "test" {
   }
 }
 
-data "nsxt_policy_realization_info" "bgp_realization_info" {
-  path = nsxt_policy_tier0_gateway.test.bgp_config.0.path
-}
-
 resource "nsxt_policy_bgp_neighbor" "test" {
   bgp_path         = nsxt_policy_tier0_gateway.test.bgp_config.0.path
   display_name     = "tfbgp"
@@ -647,10 +624,6 @@ resource "nsxt_policy_bgp_neighbor" "test" {
     address_family = "IPV4"
   }
 
-}
-
-data "nsxt_policy_realization_info" "realization_info" {
-  path = nsxt_policy_bgp_neighbor.test.path
 }`, getEdgeClusterName())
 }
 
@@ -672,10 +645,6 @@ resource "nsxt_policy_tier0_gateway" "test" {
       prefix = "12.12.12.0/24"
     }
   }
-}
-
-data "nsxt_policy_realization_info" "bgp_realization_info" {
-  path = nsxt_policy_tier0_gateway.test.bgp_config.0.path
 }
 
 resource "nsxt_policy_gateway_prefix_list" "test" {
@@ -707,10 +676,6 @@ resource "nsxt_policy_bgp_neighbor" "test" {
     in_route_filter = nsxt_policy_gateway_prefix_list.test.path
     out_route_filter = nsxt_policy_gateway_prefix_list.test.path
   }
-}
-
-data "nsxt_policy_realization_info" "realization_info" {
-  path = nsxt_policy_bgp_neighbor.test.path
 }`, getEdgeClusterName())
 }
 

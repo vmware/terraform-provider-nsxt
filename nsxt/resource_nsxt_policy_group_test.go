@@ -549,10 +549,10 @@ func testAccNsxtPolicyGroupExists(resourceName string, domainName string) resour
 					return fmt.Errorf("Error while retrieving policy domain %s. Error: %v", domainName, err)
 				}
 			}
-			nsxClient := gm_domains.NewDefaultGroupsClient(connector)
+			nsxClient := gm_domains.NewGroupsClient(connector)
 			_, err = nsxClient.Get(domainID, resourceID)
 		} else {
-			nsxClient := domains.NewDefaultGroupsClient(connector)
+			nsxClient := domains.NewGroupsClient(connector)
 			_, err = nsxClient.Get(domainName, resourceID)
 		}
 		if err != nil {

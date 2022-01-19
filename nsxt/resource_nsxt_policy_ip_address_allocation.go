@@ -53,7 +53,7 @@ func resourceNsxtPolicyIPAddressAllocation() *schema.Resource {
 }
 
 func resourceNsxtPolicyIPAddressAllocationExists(poolID string, allocationID string, connector *client.RestConnector) (bool, error) {
-	client := ip_pools.NewDefaultIpAllocationsClient(connector)
+	client := ip_pools.NewIpAllocationsClient(connector)
 
 	_, err := client.Get(poolID, allocationID)
 	if err == nil {
@@ -69,7 +69,7 @@ func resourceNsxtPolicyIPAddressAllocationExists(poolID string, allocationID str
 
 func resourceNsxtPolicyIPAddressAllocationCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := ip_pools.NewDefaultIpAllocationsClient(connector)
+	client := ip_pools.NewIpAllocationsClient(connector)
 
 	if client == nil {
 		return policyResourceNotSupportedError()
@@ -121,7 +121,7 @@ func resourceNsxtPolicyIPAddressAllocationCreate(d *schema.ResourceData, m inter
 
 func resourceNsxtPolicyIPAddressAllocationRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := ip_pools.NewDefaultIpAllocationsClient(connector)
+	client := ip_pools.NewIpAllocationsClient(connector)
 
 	if client == nil {
 		return policyResourceNotSupportedError()
@@ -172,7 +172,7 @@ func resourceNsxtPolicyIPAddressAllocationRead(d *schema.ResourceData, m interfa
 
 func resourceNsxtPolicyIPAddressAllocationDelete(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := ip_pools.NewDefaultIpAllocationsClient(connector)
+	client := ip_pools.NewIpAllocationsClient(connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -201,7 +201,7 @@ func resourceNsxtPolicyIPAddressAllocationImport(d *schema.ResourceData, m inter
 
 	poolID := s[0]
 	connector := getPolicyConnector(m)
-	client := infra.NewDefaultIpPoolsClient(connector)
+	client := infra.NewIpPoolsClient(connector)
 
 	pool, err := client.Get(poolID)
 	if err != nil {

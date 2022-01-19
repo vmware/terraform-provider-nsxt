@@ -75,7 +75,7 @@ func resourceNsxtPolicyLBService() *schema.Resource {
 }
 
 func resourceNsxtPolicyLBServiceExists(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
-	client := infra.NewDefaultLbServicesClient(connector)
+	client := infra.NewLbServicesClient(connector)
 
 	_, err := client.Get(id)
 	if err == nil {
@@ -91,7 +91,7 @@ func resourceNsxtPolicyLBServiceExists(id string, connector *client.RestConnecto
 
 func resourceNsxtPolicyLBServiceCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewDefaultLbServicesClient(connector)
+	client := infra.NewLbServicesClient(connector)
 
 	if client == nil {
 		return policyResourceNotSupportedError()
@@ -139,7 +139,7 @@ func resourceNsxtPolicyLBServiceCreate(d *schema.ResourceData, m interface{}) er
 
 func resourceNsxtPolicyLBServiceRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewDefaultLbServicesClient(connector)
+	client := infra.NewLbServicesClient(connector)
 
 	if client == nil {
 		return policyResourceNotSupportedError()
@@ -172,7 +172,7 @@ func resourceNsxtPolicyLBServiceRead(d *schema.ResourceData, m interface{}) erro
 
 func resourceNsxtPolicyLBServiceUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewDefaultLbServicesClient(connector)
+	client := infra.NewLbServicesClient(connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -221,7 +221,7 @@ func resourceNsxtPolicyLBServiceDelete(d *schema.ResourceData, m interface{}) er
 	}
 
 	connector := getPolicyConnector(m)
-	client := infra.NewDefaultLbServicesClient(connector)
+	client := infra.NewLbServicesClient(connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}

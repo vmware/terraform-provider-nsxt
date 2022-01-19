@@ -1,4 +1,4 @@
-/* Copyright © 2019 VMware, Inc. All Rights Reserved.
+/* Copyright © 2019-2020 VMware, Inc. All Rights Reserved.
    SPDX-License-Identifier: BSD-2-Clause */
 
 package cleanjson
@@ -8,8 +8,8 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/lib"
 	"reflect"
-	"strconv"
 	"strings"
 
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
@@ -106,7 +106,8 @@ func (svs *StructValueSerializer) MarshalJSON() ([]byte, error) {
 	var items = make(map[string]interface{})
 	for key, val := range svs.structValue.Fields() {
 		// Do not serialize empty optional value
-		if isEmptyOptionalValue(val) {
+		if isEmptyOptionalValue(val) &&
+			!isMapStructValue(svs.structValue) {
 			continue
 		}
 
@@ -149,17 +150,7 @@ type DoubleValueSerializer struct {
 }
 
 func (svs *DoubleValueSerializer) MarshalJSON() ([]byte, error) {
-	var buf []byte
-	splitResult := strings.Split(svs.doubleValue.String(), ".")
-	var prec int
-	if len(splitResult) > 1 {
-		prec = len(splitResult[1])
-	} else {
-		//setting minimum precision to 1
-		prec = 1
-	}
-	buf = strconv.AppendFloat(buf, svs.doubleValue.Value(), 'f', prec, 64)
-	return buf, nil
+	return json.Marshal(svs.doubleValue.Value())
 }
 
 func NewDoubleValueSerializer(value *data.DoubleValue) *DoubleValueSerializer {
@@ -214,7 +205,8 @@ func (evs *ErrorValueSerializer) MarshalJSON() ([]byte, error) {
 	var items = make(map[string]interface{})
 	for key, val := range evs.errorValue.Fields() {
 		// Do not serialize empty optional value
-		if isEmptyOptionalValue(val) {
+		if isEmptyOptionalValue(val) &&
+			!isMapStructValue(&evs.errorValue.StructValue) {
 			continue
 		}
 		var err error
@@ -250,6 +242,11 @@ func (bvs *BooleanValueSerializer) MarshalJSON() ([]byte, error) {
 
 func NewBooleanValueSerializer(value *data.BooleanValue) *BooleanValueSerializer {
 	return &BooleanValueSerializer{booleanValue: value}
+}
+
+func isMapStructValue(val *data.StructValue) bool {
+	return val.Name() == lib.MAP_STRUCT ||
+		val.Name() == lib.MAP_ENTRY
 }
 
 func isEmptyOptionalValue(val data.DataValue) bool {

@@ -30,7 +30,7 @@ func resourceNsxtPolicySecurityPolicy() *schema.Resource {
 
 func getSecurityPolicyInDomain(id string, domainName string, connector *client.RestConnector, isGlobalManager bool) (model.SecurityPolicy, error) {
 	if isGlobalManager {
-		client := gm_domains.NewDefaultSecurityPoliciesClient(connector)
+		client := gm_domains.NewSecurityPoliciesClient(connector)
 		gmObj, err := client.Get(domainName, id)
 		if err != nil {
 			return model.SecurityPolicy{}, err
@@ -41,7 +41,7 @@ func getSecurityPolicyInDomain(id string, domainName string, connector *client.R
 		}
 		return rawObj.(model.SecurityPolicy), nil
 	}
-	client := domains.NewDefaultSecurityPoliciesClient(connector)
+	client := domains.NewSecurityPoliciesClient(connector)
 	return client.Get(domainName, id)
 
 }
@@ -49,10 +49,10 @@ func getSecurityPolicyInDomain(id string, domainName string, connector *client.R
 func resourceNsxtPolicySecurityPolicyExistsInDomain(id string, domainName string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
 	var err error
 	if isGlobalManager {
-		client := gm_domains.NewDefaultSecurityPoliciesClient(connector)
+		client := gm_domains.NewSecurityPoliciesClient(connector)
 		_, err = client.Get(domainName, id)
 	} else {
-		client := domains.NewDefaultSecurityPoliciesClient(connector)
+		client := domains.NewSecurityPoliciesClient(connector)
 		_, err = client.Get(domainName, id)
 	}
 
@@ -113,10 +113,10 @@ func resourceNsxtPolicySecurityPolicyCreate(d *schema.ResourceData, m interface{
 		if err1 != nil {
 			return err1
 		}
-		client := gm_domains.NewDefaultSecurityPoliciesClient(connector)
+		client := gm_domains.NewSecurityPoliciesClient(connector)
 		err = client.Patch(d.Get("domain").(string), id, gmObj.(gm_model.SecurityPolicy))
 	} else {
-		client := domains.NewDefaultSecurityPoliciesClient(connector)
+		client := domains.NewSecurityPoliciesClient(connector)
 		err = client.Patch(d.Get("domain").(string), id, obj)
 	}
 
@@ -139,7 +139,7 @@ func resourceNsxtPolicySecurityPolicyRead(d *schema.ResourceData, m interface{})
 	}
 	var obj model.SecurityPolicy
 	if isPolicyGlobalManager(m) {
-		client := gm_domains.NewDefaultSecurityPoliciesClient(connector)
+		client := gm_domains.NewSecurityPoliciesClient(connector)
 		gmObj, err := client.Get(domainName, id)
 		if err != nil {
 			return handleReadError(d, "SecurityPolicy", id, err)
@@ -151,7 +151,7 @@ func resourceNsxtPolicySecurityPolicyRead(d *schema.ResourceData, m interface{})
 		obj = rawObj.(model.SecurityPolicy)
 	} else {
 		var err error
-		client := domains.NewDefaultSecurityPoliciesClient(connector)
+		client := domains.NewSecurityPoliciesClient(connector)
 		obj, err = client.Get(domainName, id)
 		if err != nil {
 			return handleReadError(d, "SecurityPolicy", id, err)
@@ -221,12 +221,12 @@ func resourceNsxtPolicySecurityPolicyUpdate(d *schema.ResourceData, m interface{
 			return err1
 		}
 		gmSecurityPolicy := gmObj.(gm_model.SecurityPolicy)
-		client := gm_domains.NewDefaultSecurityPoliciesClient(connector)
+		client := gm_domains.NewSecurityPoliciesClient(connector)
 
 		// We need to use PUT, because PATCH will not replace the whole rule list
 		_, err = client.Update(d.Get("domain").(string), id, gmSecurityPolicy)
 	} else {
-		client := domains.NewDefaultSecurityPoliciesClient(connector)
+		client := domains.NewSecurityPoliciesClient(connector)
 
 		// We need to use PUT, because PATCH will not replace the whole rule list
 		_, err = client.Update(d.Get("domain").(string), id, obj)
@@ -248,10 +248,10 @@ func resourceNsxtPolicySecurityPolicyDelete(d *schema.ResourceData, m interface{
 	var err error
 
 	if isPolicyGlobalManager(m) {
-		client := gm_domains.NewDefaultSecurityPoliciesClient(connector)
+		client := gm_domains.NewSecurityPoliciesClient(connector)
 		err = client.Delete(d.Get("domain").(string), id)
 	} else {
-		client := domains.NewDefaultSecurityPoliciesClient(connector)
+		client := domains.NewSecurityPoliciesClient(connector)
 		err = client.Delete(d.Get("domain").(string), id)
 	}
 

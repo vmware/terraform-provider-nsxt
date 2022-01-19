@@ -1,28 +1,22 @@
-/* Copyright © 2019 VMware, Inc. All Rights Reserved.
-   SPDX-License-Identifier: BSD-2-Clause */
+// Copyright © 2019-2021 VMware, Inc. All Rights Reserved.
+// SPDX-License-Identifier: BSD-2-Clause
 
-// Code generated. DO NOT EDIT.
+// Auto generated code. DO NOT EDIT.
 
-/*
- * Data type definitions file for service: LbAppProfiles.
- * Includes binding types of a structures and enumerations defined in the service.
- * Shared by client-side stubs and server-side skeletons to ensure type
- * compatibility.
- */
+// Data type definitions file for service: LbAppProfiles.
+// Includes binding types of a structures and enumerations defined in the service.
+// Shared by client-side stubs and server-side skeletons to ensure type
+// compatibility.
 
 package infra
 
 import (
-	"reflect"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+	"reflect"
 )
-
-
-
-
 
 func lbAppProfilesDeleteInputType() bindings.StructType {
 	fields := make(map[string]bindings.BindingType)
@@ -77,7 +71,7 @@ func lbAppProfilesDeleteRestMetadata() protocol.OperationRestMetadata {
 		204,
 		"",
 		errorHeaders,
-		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func lbAppProfilesGetInputType() bindings.StructType {
@@ -90,7 +84,7 @@ func lbAppProfilesGetInputType() bindings.StructType {
 }
 
 func lbAppProfilesGetOutputType() bindings.BindingType {
-	return bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.LBAppProfileBindingType),}, bindings.REST)
+	return bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.LBAppProfileBindingType)}, bindings.REST)
 }
 
 func lbAppProfilesGetRestMetadata() protocol.OperationRestMetadata {
@@ -127,7 +121,7 @@ func lbAppProfilesGetRestMetadata() protocol.OperationRestMetadata {
 		200,
 		"",
 		errorHeaders,
-		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func lbAppProfilesListInputType() bindings.StructType {
@@ -206,14 +200,14 @@ func lbAppProfilesListRestMetadata() protocol.OperationRestMetadata {
 		200,
 		"",
 		errorHeaders,
-		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func lbAppProfilesPatchInputType() bindings.StructType {
 	fields := make(map[string]bindings.BindingType)
 	fieldNameMap := make(map[string]string)
 	fields["lb_app_profile_id"] = bindings.NewStringType()
-	fields["lb_app_profile"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.LBAppProfileBindingType),}, bindings.REST)
+	fields["lb_app_profile"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.LBAppProfileBindingType)}, bindings.REST)
 	fieldNameMap["lb_app_profile_id"] = "LbAppProfileId"
 	fieldNameMap["lb_app_profile"] = "LbAppProfile"
 	var validators = []bindings.Validator{}
@@ -234,10 +228,10 @@ func lbAppProfilesPatchRestMetadata() protocol.OperationRestMetadata {
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
 	fields["lb_app_profile_id"] = bindings.NewStringType()
-	fields["lb_app_profile"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.LBAppProfileBindingType),}, bindings.REST)
+	fields["lb_app_profile"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.LBAppProfileBindingType)}, bindings.REST)
 	fieldNameMap["lb_app_profile_id"] = "LbAppProfileId"
 	fieldNameMap["lb_app_profile"] = "LbAppProfile"
-	paramsTypeMap["lb_app_profile"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.LBAppProfileBindingType),}, bindings.REST)
+	paramsTypeMap["lb_app_profile"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.LBAppProfileBindingType)}, bindings.REST)
 	paramsTypeMap["lb_app_profile_id"] = bindings.NewStringType()
 	paramsTypeMap["lbAppProfileId"] = bindings.NewStringType()
 	pathParams["lb_app_profile_id"] = "lbAppProfileId"
@@ -261,14 +255,14 @@ func lbAppProfilesPatchRestMetadata() protocol.OperationRestMetadata {
 		204,
 		"",
 		errorHeaders,
-		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
 func lbAppProfilesUpdateInputType() bindings.StructType {
 	fields := make(map[string]bindings.BindingType)
 	fieldNameMap := make(map[string]string)
 	fields["lb_app_profile_id"] = bindings.NewStringType()
-	fields["lb_app_profile"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.LBAppProfileBindingType),}, bindings.REST)
+	fields["lb_app_profile"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.LBAppProfileBindingType)}, bindings.REST)
 	fieldNameMap["lb_app_profile_id"] = "LbAppProfileId"
 	fieldNameMap["lb_app_profile"] = "LbAppProfile"
 	var validators = []bindings.Validator{}
@@ -276,7 +270,7 @@ func lbAppProfilesUpdateInputType() bindings.StructType {
 }
 
 func lbAppProfilesUpdateOutputType() bindings.BindingType {
-	return bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.LBAppProfileBindingType),}, bindings.REST)
+	return bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.LBAppProfileBindingType)}, bindings.REST)
 }
 
 func lbAppProfilesUpdateRestMetadata() protocol.OperationRestMetadata {
@@ -289,10 +283,10 @@ func lbAppProfilesUpdateRestMetadata() protocol.OperationRestMetadata {
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
 	fields["lb_app_profile_id"] = bindings.NewStringType()
-	fields["lb_app_profile"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.LBAppProfileBindingType),}, bindings.REST)
+	fields["lb_app_profile"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.LBAppProfileBindingType)}, bindings.REST)
 	fieldNameMap["lb_app_profile_id"] = "LbAppProfileId"
 	fieldNameMap["lb_app_profile"] = "LbAppProfile"
-	paramsTypeMap["lb_app_profile"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.LBAppProfileBindingType),}, bindings.REST)
+	paramsTypeMap["lb_app_profile"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.LBAppProfileBindingType)}, bindings.REST)
 	paramsTypeMap["lb_app_profile_id"] = bindings.NewStringType()
 	paramsTypeMap["lbAppProfileId"] = bindings.NewStringType()
 	pathParams["lb_app_profile_id"] = "lbAppProfileId"
@@ -316,7 +310,5 @@ func lbAppProfilesUpdateRestMetadata() protocol.OperationRestMetadata {
 		200,
 		"",
 		errorHeaders,
-		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400,"com.vmware.vapi.std.errors.unauthorized": 403,"com.vmware.vapi.std.errors.service_unavailable": 503,"com.vmware.vapi.std.errors.internal_server_error": 500,"com.vmware.vapi.std.errors.not_found": 404})
+		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
-
-

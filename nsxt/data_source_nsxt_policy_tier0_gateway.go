@@ -47,7 +47,7 @@ func dataSourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{})
 
 	objID := d.Get("id").(string)
 	objName := d.Get("display_name").(string)
-	client := infra.NewDefaultTier0sClient(connector)
+	client := infra.NewTier0sClient(connector)
 	var obj model.Tier0
 	if objID != "" {
 		// Get by id

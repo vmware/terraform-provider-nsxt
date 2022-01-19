@@ -41,7 +41,7 @@ func resourceNsxtPolicyIPBlock() *schema.Resource {
 }
 
 func resourceNsxtPolicyIPBlockExists(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
-	client := infra.NewDefaultIpBlocksClient(connector)
+	client := infra.NewIpBlocksClient(connector)
 
 	_, err := client.Get(id)
 	if err == nil {
@@ -57,7 +57,7 @@ func resourceNsxtPolicyIPBlockExists(id string, connector *client.RestConnector,
 
 func resourceNsxtPolicyIPBlockRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewDefaultIpBlocksClient(connector)
+	client := infra.NewIpBlocksClient(connector)
 
 	id := d.Id()
 	if id == "" {
@@ -82,7 +82,7 @@ func resourceNsxtPolicyIPBlockRead(d *schema.ResourceData, m interface{}) error 
 
 func resourceNsxtPolicyIPBlockCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewDefaultIpBlocksClient(connector)
+	client := infra.NewIpBlocksClient(connector)
 
 	id, err := getOrGenerateID(d, m, resourceNsxtPolicyIPBlockExists)
 	if err != nil {
@@ -115,7 +115,7 @@ func resourceNsxtPolicyIPBlockCreate(d *schema.ResourceData, m interface{}) erro
 
 func resourceNsxtPolicyIPBlockUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewDefaultIpBlocksClient(connector)
+	client := infra.NewIpBlocksClient(connector)
 
 	id := d.Id()
 	if id == "" {
@@ -153,7 +153,7 @@ func resourceNsxtPolicyIPBlockDelete(d *schema.ResourceData, m interface{}) erro
 	}
 
 	connector := getPolicyConnector(m)
-	client := infra.NewDefaultIpBlocksClient(connector)
+	client := infra.NewIpBlocksClient(connector)
 	err := client.Delete(id)
 	if err != nil {
 		return handleDeleteError("IP Block", id, err)

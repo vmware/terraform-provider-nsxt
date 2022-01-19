@@ -555,7 +555,7 @@ func initNSXVersionVMC(clients interface{}) {
 	nsxVersion = "3.0.0"
 
 	connector := getPolicyConnector(clients)
-	client := search.NewDefaultQueryClient(connector)
+	client := search.NewQueryClient(connector)
 	var cursor *string
 	query := "resource_type:dummy"
 	_, err := client.List(query, cursor, nil, nil, nil, nil)

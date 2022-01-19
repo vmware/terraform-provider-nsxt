@@ -77,28 +77,28 @@ func resourceNsxtPolicyStaticRoute() *schema.Resource {
 
 func patchNsxtPolicyStaticRoute(connector *client.RestConnector, gwID string, route model.StaticRoutes, isT0 bool) error {
 	if isT0 {
-		routeClient := tier_0s.NewDefaultStaticRoutesClient(connector)
+		routeClient := tier_0s.NewStaticRoutesClient(connector)
 		return routeClient.Patch(gwID, *route.Id, route)
 	}
-	routeClient := tier_1s.NewDefaultStaticRoutesClient(connector)
+	routeClient := tier_1s.NewStaticRoutesClient(connector)
 	return routeClient.Patch(gwID, *route.Id, route)
 }
 
 func deleteNsxtPolicyStaticRoute(connector *client.RestConnector, gwID string, isT0 bool, routeID string) error {
 	if isT0 {
-		routeClient := tier_0s.NewDefaultStaticRoutesClient(connector)
+		routeClient := tier_0s.NewStaticRoutesClient(connector)
 		return routeClient.Delete(gwID, routeID)
 	}
-	routeClient := tier_1s.NewDefaultStaticRoutesClient(connector)
+	routeClient := tier_1s.NewStaticRoutesClient(connector)
 	return routeClient.Delete(gwID, routeID)
 }
 
 func getNsxtPolicyStaticRouteByID(connector *client.RestConnector, gwID string, isT0 bool, routeID string) (model.StaticRoutes, error) {
 	if isT0 {
-		routeClient := tier_0s.NewDefaultStaticRoutesClient(connector)
+		routeClient := tier_0s.NewStaticRoutesClient(connector)
 		return routeClient.Get(gwID, routeID)
 	}
-	routeClient := tier_1s.NewDefaultStaticRoutesClient(connector)
+	routeClient := tier_1s.NewStaticRoutesClient(connector)
 	return routeClient.Get(gwID, routeID)
 }
 
@@ -321,13 +321,13 @@ func resourceNsxtPolicyStaticRouteImport(d *schema.ResourceData, m interface{}) 
 
 	gwID := s[0]
 	connector := getPolicyConnector(m)
-	t0Client := infra.NewDefaultTier0sClient(connector)
+	t0Client := infra.NewTier0sClient(connector)
 	t0gw, err := t0Client.Get(gwID)
 	if err != nil {
 		if !isNotFoundError(err) {
 			return nil, err
 		}
-		t1Client := infra.NewDefaultTier1sClient(connector)
+		t1Client := infra.NewTier1sClient(connector)
 		t1gw, err := t1Client.Get(gwID)
 		if err != nil {
 			return nil, err

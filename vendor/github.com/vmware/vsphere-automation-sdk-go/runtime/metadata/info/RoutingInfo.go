@@ -3,7 +3,6 @@
 
 package info
 
-
 const ROUTING_PATH_SEPARATOR = ","
 
 type RoutingInfo struct {

@@ -35,7 +35,7 @@ func dataSourceNsxtPolicySegmentSecurityProfileRead(d *schema.ResourceData, m in
 	}
 
 	connector := getPolicyConnector(m)
-	client := infra.NewDefaultSegmentSecurityProfilesClient(connector)
+	client := infra.NewSegmentSecurityProfilesClient(connector)
 
 	objID := d.Get("id").(string)
 	objName := d.Get("display_name").(string)

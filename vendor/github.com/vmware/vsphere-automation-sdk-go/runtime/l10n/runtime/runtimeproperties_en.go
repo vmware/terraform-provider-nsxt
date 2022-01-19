@@ -1,4 +1,4 @@
-/* Copyright © 2019-2020 VMware, Inc. All Rights Reserved.
+/* Copyright © 2019-2021 VMware, Inc. All Rights Reserved.
    SPDX-License-Identifier: BSD-2-Clause */
 
 package runtime
@@ -64,11 +64,12 @@ vapi.method.status.errors.invalid=Invalid error '{errorName}' reported from meth
 vapi.security.rest.context.error=Security context creation failed, Failure: {err}
 vapi.security.authentication.scheme.invalid=Authentication scheme '{scheme}' is invalid
 vapi.security.authentication.invalid=Unable to authenticate user
-vapi.security.authentication.failed=Invalid authentication result
+vapi.security.authentication.failed.missing_security_context=Missing Security Context
+vapi.security.authentication.failed.identity_convert_error=An error occurred when trying to convert security's context authentication identity information
 vapi.security.authentication.exception=Exception in invoking authentication handler %s
 vapi.security.authentication.metadata.invalid=Cannot parse authentication metadata for operation %s of service %s
 vapi.security.authentication.scheme=Expected one of the following schemes {allowedSchemes}, but got {providedScheme}
-vapi.security.authentication.certificate.invalid=Unable to verify server certificate
+vapi.security.authentication.certificate.invalid=Unable to verify server certificate ({errMsg})
 
 vapi.security.authorization.exception=Exception in invoking authorization handler {msg}
 vapi.security.authorization.invalid=Unable to authorize user
@@ -80,15 +81,18 @@ vapi.security.sso.hash.invalid=Invalid hash algorithm.
 vapi.security.sso.pubkey.invalid=Invalid public key.
 vapi.security.sso.pvtkey.invalid=Invalid private key.
 vapi.security.sso.samltoken.invalid=Invalid saml token.
+vapi.security.sso.bearertoken.invalid=Invalid bearer token provided.
 vapi.security.sso.signature.invalid=Invalid signature.
 vapi.security.sso.signature.algorithm.invalid=Invalid signature algorithm.
 
 vapi.protocol.server.error=Server error occured: {err}
 
+vapi.protocol.server.rest.http_not_found=Not found.
 vapi.protocol.server.rest.param.invalid_value=Parsing failed because of '{errMsg}'
 vapi.protocol.server.rest.param.invalid_type=Invalid value for request parameter '{paramName}'. Expected a value of type '{expectedType}', but parsing failed because of '{errMsg}'
-com.vmware.vapi.rest.unsupported_property=Unsupported property with name: {arg}.
-com.vmware.vapi.rest.unsupported_media_type=Unsupported media type.
+vapi.protocol.server.rest.unsupported_property=Unsupported property with name: {arg}.
+vapi.protocol.server.rest.unsupported_media_type=Unsupported media type.
+vapi.protocol.server.rest.invalid_json_content=Invalid json content found: {errMsg}.
 vapi.protocol.server.rest.param.name_type_map_not_found='{paramName}' is not found in parameter name to type map
 vapi.protocol.server.rest.param.unsupport_type=Request parameter data type '{dataType}' not supported
 vapi.protocol.server.rest.param.body_parse_error=Error when parsing request body, '{errMsg}'
@@ -96,8 +100,8 @@ vapi.protocol.server.rest.param.bodyfield_parse_invalid=Body Field data is not o
 vapi.protocol.server.rest.param.bodyfield.unexpected_field=Body Field contains unexpected field : '{msg}'
 vapi.protocol.server.rest.param.bodyfield.missing_field=Body Field does not contain required field : '{msg}'
 vapi.protocol.server.rest.param.body.unsupport_type=Request body data type '{dataType}' not supported
-vapi.protocol.server.rest.param.body.unexpected=Request body data type expected '{required}' but got '{type}'
-vapi.protocol.server.rest.param.internal_server_error= Request process params failure: {msg}
+vapi.protocol.server.rest.param.body.unexpected=Invalid request body value. Expected data type '{required}' but got '{type}'
+vapi.protocol.server.rest.param.invalid_argument= Request process params failure: {msg}
 vapi.protocol.server.rest.response.unsupport_type=Response data type '{dataType}' not supported for field '{fieldName}'
 vapi.protocol.server.rest.response.not_structure=Response result is not a structure type
 vapi.protocol.server.rest.response.not_error=Response result is not an error type
@@ -110,12 +114,12 @@ vapi.protocol.server.rest.error.not_supported=Http status '{errorName}' not supp
 vapi.protocol.client.request.not_structure=Input request is not a structure type
 vapi.protocol.client.response.error=Error reading server response
 vapi.protocol.client.request.error=Error completing client request '{errMsg}'
-vapi.protocol.client.response.unmarshall.error=Error unmarshalling server response
+vapi.protocol.client.response.unmarshall.error=Error unmarshalling server response: {responseBody}
+vapi.protocol.client.middleware.retry.unexpected=Unexpected error occurred on request retry functionality
 
-vapi.server.timedout = Request Timed out
-vapi.server.unavailable = Service not available
-vapi.server.response.error= Error reading server response '{errMsg}'
-
+vapi.server.timedout = Request Timed out: {errMsg}
+vapi.server.unavailable = Service not available: {errMsg}
+vapi.server.response.error = Error reading server response: {errMsg}
 
 #unused by golang
 vapi.bindings.skeleton.task.invalidstate=Service did not set the task state
@@ -154,6 +158,7 @@ vapi.data.serializers.python.unsupported.python.type=Unsupported python type '%s
 vapi.data.serializers.invalid.type=Unsupported python type '%s' provided
 vapi.data.serializers.security_context.unsupported=Security Context with scheme %s is not supported for this operation
 vapi.data.serializers.rest.marshall.error=Error serializing REST requests
+vapi.data.serializers.rest.deserialize.not_a_json=content type is not application/json it is {contentType} instead
 vapi.data.structref.already.resolved=Structure reference of type %s is already resolved
 vapi.data.structref.resolve.type.mismatch=Structure reference of type %s cannot point to structure definition %s
 vapi.data.structure.field.extra=Structure value has a field not in the definition = %s

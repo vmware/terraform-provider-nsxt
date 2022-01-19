@@ -1,4 +1,4 @@
-/* Copyright © 2019 VMware, Inc. All Rights Reserved.
+/* Copyright © 2019-2020 VMware, Inc. All Rights Reserved.
    SPDX-License-Identifier: BSD-2-Clause */
 
 package bindings
@@ -12,67 +12,65 @@ import (
 
 var stringDefinition = data.NewStringDefinition()
 
-/**
- * Builds DataDefinition by visiting a BindingType
- */
-type BindingTypeToDataDefinitionVisitor struct {
+// BindingTypeToDataDefinitionConverter creates data.DataDefinition from BindingType
+type BindingTypeToDataDefinitionConverter struct {
 	ctx            *data.ReferenceResolver
 	seenStructures map[string]bool
 	inValue        BindingType
 	outValue       data.DataDefinition
 }
 
-func NewBindingTypeToDataDefinitionVisitor(inValue BindingType, ctx *data.ReferenceResolver, seenStructures map[string]bool) *BindingTypeToDataDefinitionVisitor {
-	return &BindingTypeToDataDefinitionVisitor{inValue: inValue, ctx: ctx, seenStructures: seenStructures}
+func NewBindingTypeToDataDefinitionConverter(inValue BindingType, ctx *data.ReferenceResolver, seenStructures map[string]bool) *BindingTypeToDataDefinitionConverter {
+	return &BindingTypeToDataDefinitionConverter{inValue: inValue, ctx: ctx, seenStructures: seenStructures}
 }
-func (b *BindingTypeToDataDefinitionVisitor) OutputValue() data.DataDefinition {
-	return b.outValue
+func (converter *BindingTypeToDataDefinitionConverter) OutputValue() data.DataDefinition {
+	return converter.outValue
 }
 
-func (b *BindingTypeToDataDefinitionVisitor) visit(typ BindingType) []error {
+func (converter *BindingTypeToDataDefinitionConverter) convert(typ BindingType) []error {
 	switch reflect.TypeOf(typ) {
 	case VoidBindingType:
-		b.visitVoidType(typ.(VoidType))
+		converter.visitVoidType(typ.(VoidType))
 	case DoubleBindingType:
-		b.outValue = data.NewDoubleDefinition()
+		converter.outValue = data.NewDoubleDefinition()
 	case BlobBindingType:
-		b.outValue = data.NewBlobDefinition()
+		converter.outValue = data.NewBlobDefinition()
 	case IntegerBindingType:
-		b.visitIntegerType(typ.(IntegerType))
+		converter.visitIntegerType(typ.(IntegerType))
 	case StringBindingType:
-		b.outValue = stringDefinition
+		converter.outValue = stringDefinition
 	case SecretBindingType:
-		b.outValue = data.NewSecretDefinition()
+		converter.outValue = data.NewSecretDefinition()
 	case OptionalBindingType:
-		return b.visitOptionalType(typ.(OptionalType))
+		return converter.visitOptionalType(typ.(OptionalType))
 	case BooleanBindingType:
-		b.visitBooleanType(typ.(BooleanType))
+		converter.visitBooleanType(typ.(BooleanType))
 	case OpaqueBindingType:
-		b.visitOpaqueType(typ.(OpaqueType))
+		converter.visitOpaqueType(typ.(OpaqueType))
 	case StructBindingType:
-		b.visitStructType(typ.(StructType))
+		converter.visitStructType(typ.(StructType))
 	case ListBindingType:
-		return b.visitListType(typ.(ListType))
+		return converter.visitListType(typ.(ListType))
 	case MapBindingType:
-		return b.visitMapType(typ.(MapType))
+		return converter.visitMapType(typ.(MapType))
 	case IdBindingType:
-		b.visitIdType(typ.(IdType))
+		converter.visitIdType(typ.(IdType))
 	case EnumBindingType:
-		b.visitEnumType(typ.(EnumType))
+		converter.visitEnumType(typ.(EnumType))
 	case SetBindingType:
-		return b.visitSetType(typ.(SetType))
+		return converter.visitSetType(typ.(SetType))
 	case DynamicStructBindingType:
-		b.visitDynamicStructType(typ.(DynamicStructType))
+		converter.visitDynamicStructType(typ.(DynamicStructType))
 	case DateTimeBindingType:
-		b.visitDateTimeType(typ.(DateTimeType))
+		converter.visitDateTimeType(typ.(DateTimeType))
 	case UriBindingType:
-		b.visitUriType(typ.(UriType))
+		converter.visitUriType(typ.(UriType))
 	case ReferenceBindingType:
-		b.visitReferenceType(typ.(ReferenceType))
+		converter.visitReferenceType(typ.(ReferenceType))
 	case ErrorBindingType:
-		b.visitErrorType(typ.(ErrorType))
+		converter.visitErrorType(typ.(ErrorType))
 	case AnyErrorBindingType:
-		b.visitAnyErrorType(typ.(AnyErrorType))
+		converter.visitAnyErrorType(typ.(AnyErrorType))
 	default:
 		return []error{l10n.NewRuntimeError(
 			"vapi.bindings.typeconverter.invalid.type",
@@ -81,125 +79,125 @@ func (b *BindingTypeToDataDefinitionVisitor) visit(typ BindingType) []error {
 	return nil
 }
 
-func (visitor *BindingTypeToDataDefinitionVisitor) visitReferenceType(i ReferenceType) {
-	visitor.visitStructType(i.Resolve().(StructType))
+func (converter *BindingTypeToDataDefinitionConverter) visitReferenceType(i ReferenceType) {
+	converter.visitStructType(i.Resolve().(StructType))
 }
-func (visitor *BindingTypeToDataDefinitionVisitor) visitIntegerType(i IntegerType) {
-	visitor.outValue = data.NewIntegerDefinition()
+func (converter *BindingTypeToDataDefinitionConverter) visitIntegerType(i IntegerType) {
+	converter.outValue = data.NewIntegerDefinition()
 }
-func (visitor *BindingTypeToDataDefinitionVisitor) visitSetType(i SetType) []error {
-	err := i.ElementType().Accept(visitor)
+func (converter *BindingTypeToDataDefinitionConverter) visitSetType(i SetType) []error {
+	err := converter.convert(i.ElementType())
 	if err != nil {
 		return err
 	}
-	elementDef := visitor.outValue
-	visitor.outValue = data.NewListDefinition(elementDef)
+	elementDef := converter.outValue
+	converter.outValue = data.NewListDefinition(elementDef)
 	return nil
 }
 
-func (visitor *BindingTypeToDataDefinitionVisitor) visitEnumType(i EnumType) {
-	visitor.outValue = stringDefinition
+func (converter *BindingTypeToDataDefinitionConverter) visitEnumType(i EnumType) {
+	converter.outValue = stringDefinition
 }
 
-func (visitor *BindingTypeToDataDefinitionVisitor) visitIdType(i IdType) {
-	visitor.outValue = stringDefinition
+func (converter *BindingTypeToDataDefinitionConverter) visitIdType(i IdType) {
+	converter.outValue = stringDefinition
 }
 
-func (visitor *BindingTypeToDataDefinitionVisitor) visitMapType(i MapType) []error {
+func (converter *BindingTypeToDataDefinitionConverter) visitMapType(i MapType) []error {
 	fieldDefs := make(map[string]data.DataDefinition)
-	err := i.KeyType.Accept(visitor)
+	err := converter.convert(i.KeyType)
 	if err != nil {
 		return err
 	}
-	keyDef := visitor.outValue
+	keyDef := converter.outValue
 	fieldDefs[lib.MAP_KEY_FIELD] = keyDef
-	err = i.ValueType.Accept(visitor)
+	err = converter.convert(i.ValueType)
 	if err != nil {
 		return err
 	}
-	valueDef := visitor.outValue
+	valueDef := converter.outValue
 	fieldDefs[lib.MAP_VALUE_FIELD] = valueDef
 	elementDef := data.NewStructDefinition(lib.MAP_ENTRY, fieldDefs)
-	visitor.outValue = data.NewListDefinition(elementDef)
+	converter.outValue = data.NewListDefinition(elementDef)
 	return nil
 }
-func (visitor *BindingTypeToDataDefinitionVisitor) visitListType(i ListType) []error {
-	err := i.ElementType().Accept(visitor)
+func (converter *BindingTypeToDataDefinitionConverter) visitListType(i ListType) []error {
+	err := converter.convert(i.ElementType())
 	if err != nil {
 		return err
 	}
-	elementDef := visitor.outValue
-	visitor.outValue = data.NewListDefinition(elementDef)
+	elementDef := converter.outValue
+	converter.outValue = data.NewListDefinition(elementDef)
 	return nil
 }
 
-func (visitor *BindingTypeToDataDefinitionVisitor) visitStructType(i StructType) {
+func (converter *BindingTypeToDataDefinitionConverter) visitStructType(i StructType) {
 	structName := i.Name()
-	if visitor.seenStructures[structName] {
-		if visitor.ctx.IsDefined(structName) {
-			visitor.outValue = visitor.ctx.Definition(structName)
+	if converter.seenStructures[structName] {
+		if converter.ctx.IsDefined(structName) {
+			converter.outValue = converter.ctx.Definition(structName)
 		} else {
 			// For recursive/self-referencing structures the resolution
-			// of first/top-level is not yet completed when we visit the
+			// of first/top-level is not yet completed when we convert the
 			// second level of structure reference.
 			// So, to break the cycle in building definitions we create
 			// an unresolved reference (StructRefDefinition) to end it.
 			structRef := data.NewStructRefDefinition(structName, nil)
-			visitor.ctx.AddReference(structRef)
-			visitor.outValue = structRef
+			converter.ctx.AddReference(structRef)
+			converter.outValue = structRef
 		}
 	} else {
-		visitor.seenStructures[structName] = true
+		converter.seenStructures[structName] = true
 		fieldDefMap := make(map[string]data.DataDefinition)
 		for key, field := range i.fields {
-			field.Accept(visitor)
-			fieldDefMap[key] = visitor.outValue
+			converter.convert(field)
+			fieldDefMap[key] = converter.outValue
 		}
 		structDef := data.NewStructDefinition(i.name, fieldDefMap)
-		visitor.ctx.AddDefinition(structDef)
-		visitor.outValue = structDef
+		converter.ctx.AddDefinition(structDef)
+		converter.outValue = structDef
 	}
 
 }
 
-func (visitor *BindingTypeToDataDefinitionVisitor) visitOpaqueType(i OpaqueType) {
-	visitor.outValue = data.NewOpaqueDefinition()
+func (converter *BindingTypeToDataDefinitionConverter) visitOpaqueType(i OpaqueType) {
+	converter.outValue = data.NewOpaqueDefinition()
 }
 
-func (visitor *BindingTypeToDataDefinitionVisitor) visitBooleanType(i BooleanType) {
-	visitor.outValue = data.NewBooleanDefinition()
+func (converter *BindingTypeToDataDefinitionConverter) visitBooleanType(i BooleanType) {
+	converter.outValue = data.NewBooleanDefinition()
 }
 
-func (visitor *BindingTypeToDataDefinitionVisitor) visitOptionalType(i OptionalType) []error {
-	err := i.ElementType().Accept(visitor)
+func (converter *BindingTypeToDataDefinitionConverter) visitOptionalType(i OptionalType) []error {
+	err := converter.convert(i.ElementType())
 	if err != nil {
 		return err
 	}
-	elementDef := visitor.outValue
-	visitor.outValue = data.NewOptionalDefinition(elementDef)
+	elementDef := converter.outValue
+	converter.outValue = data.NewOptionalDefinition(elementDef)
 	return nil
 }
-func (visitor *BindingTypeToDataDefinitionVisitor) visitVoidType(i VoidType) {
-	visitor.outValue = data.NewVoidDefinition()
+func (converter *BindingTypeToDataDefinitionConverter) visitVoidType(i VoidType) {
+	converter.outValue = data.NewVoidDefinition()
 }
-func (visitor *BindingTypeToDataDefinitionVisitor) visitDynamicStructType(i DynamicStructType) {
-	visitor.outValue = data.NewDynamicStructDefinition()
+func (converter *BindingTypeToDataDefinitionConverter) visitDynamicStructType(i DynamicStructType) {
+	converter.outValue = data.NewDynamicStructDefinition()
 }
-func (visitor *BindingTypeToDataDefinitionVisitor) visitDateTimeType(timeType DateTimeType) {
-	visitor.outValue = stringDefinition
+func (converter *BindingTypeToDataDefinitionConverter) visitDateTimeType(timeType DateTimeType) {
+	converter.outValue = stringDefinition
 }
-func (visitor *BindingTypeToDataDefinitionVisitor) visitUriType(i UriType) {
-	visitor.outValue = stringDefinition
+func (converter *BindingTypeToDataDefinitionConverter) visitUriType(i UriType) {
+	converter.outValue = stringDefinition
 }
-func (visitor *BindingTypeToDataDefinitionVisitor) visitErrorType(i ErrorType) {
+func (converter *BindingTypeToDataDefinitionConverter) visitErrorType(i ErrorType) {
 	fieldDefMap := make(map[string]data.DataDefinition)
 	for key, field := range i.fields {
-		field.Accept(visitor)
-		fieldDefMap[key] = visitor.outValue
+		converter.convert(field)
+		fieldDefMap[key] = converter.outValue
 	}
 	errorDef := data.NewErrorDefinition(i.name, fieldDefMap)
-	visitor.outValue = errorDef
+	converter.outValue = errorDef
 }
-func (visitor *BindingTypeToDataDefinitionVisitor) visitAnyErrorType(i AnyErrorType) {
-	visitor.outValue = data.NewAnyErrorDefinition()
+func (converter *BindingTypeToDataDefinitionConverter) visitAnyErrorType(i AnyErrorType) {
+	converter.outValue = data.NewAnyErrorDefinition()
 }

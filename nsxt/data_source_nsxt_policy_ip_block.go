@@ -27,7 +27,7 @@ func dataSourceNsxtPolicyIPBlock() *schema.Resource {
 
 func dataSourceNsxtPolicyIPBlockRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewDefaultIpBlocksClient(connector)
+	client := infra.NewIpBlocksClient(connector)
 
 	objID := d.Get("id").(string)
 	objName := d.Get("display_name").(string)

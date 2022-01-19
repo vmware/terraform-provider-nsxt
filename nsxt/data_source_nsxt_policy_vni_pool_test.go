@@ -50,7 +50,7 @@ func testAccDataSourceNsxtPolicyVniPoolConfigCreate() error {
 	if err != nil {
 		return fmt.Errorf("Error during test client initialization: %v", err)
 	}
-	client := infra.NewDefaultVniPoolsClient(connector)
+	client := infra.NewVniPoolsClient(connector)
 
 	displayName := accTestPolicyVniPoolName
 	description := accTestPolicyVniPoolName
@@ -78,7 +78,7 @@ func testAccDataSourceNsxtPolicyVniPoolConfigDelete() error {
 	if err != nil {
 		return fmt.Errorf("Error during test client initialization: %v", err)
 	}
-	client := infra.NewDefaultVniPoolsClient(connector)
+	client := infra.NewVniPoolsClient(connector)
 
 	// Find the object by name
 	objList, err := client.List(nil, nil, nil, nil, nil, nil)
