@@ -101,7 +101,7 @@ func policyGatewayRedistributionConfigPatch(d *schema.ResourceData, m interface{
 	}
 	// since redistribution config is not a separate API endpoint, but sub-clause of Tier0,
 	// concurrency issues may arise that require retry from client side.
-	return retryUponTransientAPIError(doPatch)
+	return doPatch()
 }
 
 func resourceNsxtPolicyGatewayRedistributionConfigCreate(d *schema.ResourceData, m interface{}) error {
@@ -252,7 +252,8 @@ func resourceNsxtPolicyGatewayRedistributionConfigDelete(d *schema.ResourceData,
 
 	}
 
-	err := retryUponTransientAPIError(doUpdate)
+	commonProviderConfig := getCommonProviderConfig(m)
+	err := retryUponPreconditionFailed(doUpdate, commonProviderConfig.MaxRetries)
 	if err != nil {
 		return handleDeleteError("Tier0 RedistributionConfig config", id, err)
 	}

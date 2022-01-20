@@ -235,6 +235,7 @@ github.com/vmware/vsphere-automation-sdk-go/runtime/metadata/info
 github.com/vmware/vsphere-automation-sdk-go/runtime/protocol
 github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client
 github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client/metadata
+github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client/middleware/retry
 github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/server
 github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/server/rpc/msg
 github.com/vmware/vsphere-automation-sdk-go/runtime/security

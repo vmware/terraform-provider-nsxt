@@ -63,8 +63,8 @@ resource "nsxt_policy_lb_virtual_server" "test" {
     }
     condition {
       http_request_body {
-        body_value    = "xyz"	
-        match_type    = "REGEX"
+        body_value = "xyz"
+        match_type = "REGEX"
       }
     }
   }
@@ -182,21 +182,21 @@ The following arguments are supported:
 
     * `http_request_body` - (Optional) Condition to match the message body of an HTTP request.
       * `body_value` - (Required) HTTP request body.
-      * `case_sensitive` - (Optional) A case senstive flag for HTTP body comparison, Boolean, Default `true`.
+      * `case_sensitive` - (Optional) A case sensitive flag for HTTP body comparison, Boolean, Default `true`.
       * `inverse` - (Optional) A flag to indicate whether to reverse the match result of this condition, Boolean, Default `false`
       * `match_type` - (Optional) Match type of HTTP body, one of `REGEX`, `STARTS_WITH`, `ENDS_WITH`. `EQUALS` or `CONTAINS`. Default is `REGEX`.
 
     * `http_request_cookie` - (Optional) Condition to match HTTP request messages by cookie.
       * `cookie_name` - (Required) Name of cookie.
       * `cookie_value` - (Required) Value of cookie.
-      * `case_sensitive` - (Optional) A case senstive flag for cookie comparison, Boolean, Default `true`.
+      * `case_sensitive` - (Optional) A case sensitive flag for cookie comparison, Boolean, Default `true`.
       * `inverse` - (Optional) A flag to indicate whether to reverse the match result of this condition, Boolean, Default `false`
       * `match_type` - (Optional) Match type of cookie, one of `REGEX`, `STARTS_WITH`, `ENDS_WITH`. `EQUALS` or `CONTAINS`. Default is `REGEX`.
 
     * `http_request_header` - (Optional) Condition to match HTTP request messages by HTTP header fields.
       * `header_name` - (Required) Name of HTTP header.
       * `header_value` - (Required) Value of HTTP header.
-      * `case_sensitive` - (Optional) A case senstive flag for HTTP header comparison, Boolean, Default `true`.
+      * `case_sensitive` - (Optional) A case sensitive flag for HTTP header comparison, Boolean, Default `true`.
       * `inverse` - (Optional) A flag to indicate whether to reverse the match result of this condition, Boolean, Default `false`
       * `match_type` - (Optional) Match type of HTTP header, one of `REGEX`, `STARTS_WITH`, `ENDS_WITH`. `EQUALS` or `CONTAINS`. Default is `REGEX`.
 
@@ -206,13 +206,13 @@ The following arguments are supported:
 
     * `http_request_uri_arguments` - (Optional) Condition to match URI arguments.
       * `uri_arguments` - (Required) URI arguments.
-      * `case_sensitive` - (Optional) A case senstive flag for HTTP uri arguments comparison, Boolean, Default `true`.
+      * `case_sensitive` - (Optional) A case sensitive flag for HTTP uri arguments comparison, Boolean, Default `true`.
       * `inverse` - (Optional) A flag to indicate whether to reverse the match result of this condition, Boolean, Default `false`
       * `match_type` - (Optional) Match type of HTTP uri arguments, one of `REGEX`, `STARTS_WITH`, `ENDS_WITH`. `EQUALS` or `CONTAINS`. Default is `REGEX`.
 
     * `http_request_uri` - (Optional) Condition to match URIs of HTTP requests messages.
       * `uri` - (Required) A string used to identify resource.
-      * `case_sensitive` - (Optional) A case senstive flag for HTTP uri comparison, Boolean, Default `true`.
+      * `case_sensitive` - (Optional) A case sensitive flag for HTTP uri comparison, Boolean, Default `true`.
       * `inverse` - (Optional) A flag to indicate whether to reverse the match result of this condition, Boolean, Default `false`
       * `match_type` - (Optional) Match type of HTTP uri, one of `REGEX`, `STARTS_WITH`, `ENDS_WITH`. `EQUALS` or `CONTAINS`. Default is `REGEX`.
 
@@ -223,18 +223,18 @@ The following arguments are supported:
     * `http_response_header` - (Optional) Condition to match HTTP response messages from backend servers by HTTP header fields.
       * `header_name` - (Required) Name of HTTP header field.
       * `header_value` - (Required) Value of HTTP header field.
-      * `case_sensitive` - (Optional) A case senstive flag for HTTP header comparison, Boolean, Default `true`.
+      * `case_sensitive` - (Optional) A case sensitive flag for HTTP header comparison, Boolean, Default `true`.
       * `inverse` - (Optional) A flag to indicate whether to reverse the match result of this condition, Boolean, Default `false`
       * `match_type` - (Optional) Match type of HTTP header, one of `REGEX`, `STARTS_WITH`, `ENDS_WITH`. `EQUALS` or `CONTAINS`. Default is `REGEX`.
 
     * `http_ssl` - (Optional) Condition to match SSL handshake and SSL connection.
       * `client_certificate_issuer_dn` - (Optional) The issuer DN match condition of the client certificate.
         * `issuer_dn` - (Required) Value of issuer DN.
-        * `case_sensitive` - (Optional) A case senstive flag for issuer DN comparison, Boolean, Default `true`.
+        * `case_sensitive` - (Optional) A case sensitive flag for issuer DN comparison, Boolean, Default `true`.
         * `match_type` - (Optional) Match type of issuer DN, one of `REGEX`, `STARTS_WITH`, `ENDS_WITH`. `EQUALS` or `CONTAINS`. Default is `REGEX`.
       * `client_certificate_subject_dn` - (Optional) The subject DN match condition of the client certificate.
         * `subject_dn` - (Required) Value of subject DN.
-        * `case_sensitive` - (Optional) A case senstive flag for subject DN comparison, Boolean, Default `true`.
+        * `case_sensitive` - (Optional) A case sensitive flag for subject DN comparison, Boolean, Default `true`.
         * `match_type` - (Optional) Match type of subject DN, one of `REGEX`, `STARTS_WITH`, `ENDS_WITH`. `EQUALS` or `CONTAINS`. Default is `REGEX`.
       * `client_support_ssl_ciphers` - (Optional) List of ciphers supported by client (see documentation for possible values).
       * `inverse` - (Optional) A flag to indicate whether to reverse the match result of this condition, Boolean, Default `false`
@@ -249,7 +249,7 @@ The following arguments are supported:
 
     * `ssl_sni` - (Optional) Condition to match SSL SNI in client hello.
       * `sni` - (Required) The server name indication.
-      * `case_sensitive` - (Optional) A case senstive flag for SNI comparison, Boolean, Default `true`.
+      * `case_sensitive` - (Optional) A case sensitive flag for SNI comparison, Boolean, Default `true`.
       * `inverse` - (Optional) A flag to indicate whether to reverse the match result of this condition, Boolean, Default `false`
       * `match_type` - (Optional) Match type of SNI, one of `REGEX`, `STARTS_WITH`, `ENDS_WITH`. `EQUALS` or `CONTAINS`. Default is `REGEX`.
 
@@ -260,7 +260,7 @@ The following arguments are supported:
     * `variable` - (Optional) Condition to match variable's name and value.
       * `variable_name` - (Required) Name of the variable to be matched.
       * `variable_value` - (Required) Value of the variable to be matched.
-      * `case_sensitive` - (Optional) A case senstive flag for variable comparison, Boolean, Default `true`.
+      * `case_sensitive` - (Optional) A case sensitive flag for variable comparison, Boolean, Default `true`.
       * `inverse` - (Optional) A flag to indicate whether to reverse the match result of this condition, Boolean, Default `false`
       * `match_type` - (Optional) Match type of variable, one of `REGEX`, `STARTS_WITH`, `ENDS_WITH`. `EQUALS` or `CONTAINS`. Default is `REGEX`.
 

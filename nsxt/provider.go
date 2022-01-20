@@ -10,9 +10,11 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"net/http"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -20,16 +22,21 @@ import (
 	"github.com/vmware/go-vmware-nsxt/licensing"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/core"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client/middleware/retry"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/security"
 )
 
-var defaultRetryOnStatusCodes = []int{429, 503}
+var defaultRetryOnStatusCodes = []int{409, 429, 500, 503, 504}
 
 // Provider configuration that is shared for policy and MP
 type commonProviderConfig struct {
 	RemoteAuth             bool
 	BearerToken            string
 	ToleratePartialSuccess bool
+	MaxRetries             int
+	MinRetryInterval       int
+	MaxRetryInterval       int
+	RetryStatusCodes       []int
 }
 
 type nsxtClients struct {
@@ -102,19 +109,19 @@ func Provider() *schema.Provider {
 				Type:        schema.TypeInt,
 				Optional:    true,
 				Description: "Maximum number of HTTP client retries",
-				DefaultFunc: schema.EnvDefaultFunc("NSXT_MAX_RETRIES", 8),
+				DefaultFunc: schema.EnvDefaultFunc("NSXT_MAX_RETRIES", 4),
 			},
 			"retry_min_delay": {
 				Type:        schema.TypeInt,
 				Optional:    true,
 				Description: "Minimum delay in milliseconds between retries of a request",
-				DefaultFunc: schema.EnvDefaultFunc("NSXT_RETRY_MIN_DELAY", 500),
+				DefaultFunc: schema.EnvDefaultFunc("NSXT_RETRY_MIN_DELAY", 0),
 			},
 			"retry_max_delay": {
 				Type:        schema.TypeInt,
 				Optional:    true,
 				Description: "Maximum delay in milliseconds between retries of a request",
-				DefaultFunc: schema.EnvDefaultFunc("NSXT_RETRY_MAX_DELAY", 5000),
+				DefaultFunc: schema.EnvDefaultFunc("NSXT_RETRY_MAX_DELAY", 500),
 			},
 			"retry_on_status_codes": {
 				Type:        schema.TypeList,
@@ -416,27 +423,11 @@ func configureNsxtClient(d *schema.ResourceData, clients *nsxtClients) error {
 	caFile := d.Get("ca_file").(string)
 	caString := d.Get("ca").(string)
 
-	maxRetries := d.Get("max_retries").(int)
-	retryMinDelay := d.Get("retry_min_delay").(int)
-	retryMaxDelay := d.Get("retry_max_delay").(int)
-
-	statuses := d.Get("retry_on_status_codes").([]interface{})
-	if len(statuses) == 0 {
-		// Set to the defaults if empty
-		for _, val := range defaultRetryOnStatusCodes {
-			statuses = append(statuses, val)
-		}
-	}
-	retryStatuses := make([]int, 0, len(statuses))
-	for _, s := range statuses {
-		retryStatuses = append(retryStatuses, s.(int))
-	}
-
 	retriesConfig := api.ClientRetriesConfiguration{
-		MaxRetries:      maxRetries,
-		RetryMinDelay:   retryMinDelay,
-		RetryMaxDelay:   retryMaxDelay,
-		RetryOnStatuses: retryStatuses,
+		MaxRetries:      clients.CommonConfig.MaxRetries,
+		RetryMinDelay:   clients.CommonConfig.MinRetryInterval,
+		RetryMaxDelay:   clients.CommonConfig.MaxRetryInterval,
+		RetryOnStatuses: clients.CommonConfig.RetryStatusCodes,
 	}
 
 	cfg := api.Configuration{
@@ -717,10 +708,28 @@ func configureLicenses(d *schema.ResourceData, clients *nsxtClients) error {
 func initCommonConfig(d *schema.ResourceData) commonProviderConfig {
 	remoteAuth := d.Get("remote_auth").(bool)
 	toleratePartialSuccess := d.Get("tolerate_partial_success").(bool)
+	maxRetries := d.Get("max_retries").(int)
+	retryMinDelay := d.Get("retry_min_delay").(int)
+	retryMaxDelay := d.Get("retry_max_delay").(int)
+
+	statuses := d.Get("retry_on_status_codes").([]interface{})
+	retryStatuses := make([]int, 0, len(statuses))
+	for _, s := range statuses {
+		retryStatuses = append(retryStatuses, s.(int))
+	}
+
+	if len(retryStatuses) == 0 {
+		// Set to the defaults if empty
+		retryStatuses = append(retryStatuses, defaultRetryOnStatusCodes...)
+	}
 
 	return commonProviderConfig{
 		RemoteAuth:             remoteAuth,
 		ToleratePartialSuccess: toleratePartialSuccess,
+		MaxRetries:             maxRetries,
+		MinRetryInterval:       retryMinDelay,
+		MaxRetryInterval:       retryMaxDelay,
+		RetryStatusCodes:       retryStatuses,
 	}
 }
 
@@ -750,7 +759,37 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 
 func getPolicyConnector(clients interface{}) *client.RestConnector {
 	c := clients.(nsxtClients)
-	connector := client.NewRestConnector(c.Host, *c.PolicyHTTPClient)
+
+	retryFunc := func(retryContext retry.RetryContext) bool {
+		shouldRetry := false
+		if retryContext.Response != nil {
+			for _, code := range c.CommonConfig.RetryStatusCodes {
+				if retryContext.Response.StatusCode == code {
+					shouldRetry = true
+					break
+				}
+			}
+		} else {
+			shouldRetry = true
+		}
+
+		if !shouldRetry {
+			return false
+		}
+
+		log.Printf("[DEBUG]: Retrying request due to error code %d", retryContext.Response.StatusCode)
+		min := c.CommonConfig.MinRetryInterval
+		max := c.CommonConfig.MaxRetryInterval
+		if max > 0 {
+			interval := (rand.Intn(max-min) + min)
+			time.Sleep(time.Duration(interval) * time.Millisecond)
+			log.Printf("[DEBUG]: Waited %d ms before retrying", interval)
+		}
+
+		return true
+	}
+
+	connector := client.NewRestConnector(c.Host, *c.PolicyHTTPClient, client.WithDecorators(retry.NewRetryDecorator(uint(c.CommonConfig.MaxRetries), retryFunc)))
 	if c.PolicySecurityContext != nil {
 		connector.SetSecurityContext(c.PolicySecurityContext)
 	}
