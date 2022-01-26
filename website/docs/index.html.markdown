@@ -77,14 +77,11 @@ Note that in all of the examples you will need to update attributes such as
 
 ```hcl
 provider "nsxt" {
-  host                  = "192.168.110.41"
-  username              = "admin"
-  password              = "default"
-  allow_unverified_ssl  = true
-  max_retries           = 10
-  retry_min_delay       = 500
-  retry_max_delay       = 5000
-  retry_on_status_codes = [429]
+  host                 = "192.168.110.41"
+  username             = "admin"
+  password             = "default"
+  allow_unverified_ssl = true
+  max_retries          = 2
 }
 
 ```
@@ -194,18 +191,18 @@ The following arguments are used to configure the VMware NSX-T Provider:
 * `ca` - (Optional) CA certificate string for SSL validation.
   Can also be specified with the `NSXT_CA` environment variable.
 * `max_retries` - (Optional) The maximum number of retires before failing an API
-  request. Default: `10` Can also be specified with the `NSXT_MAX_RETRIES`
+  request. Default: `4` Can also be specified with the `NSXT_MAX_RETRIES`
   environment variable. Not supported yet for policy resources.
 * `retry_min_delay` - (Optional) The minimum delay, in milliseconds, between
-  retires made to the API. Default:`500`. Can also be specified with the
-  `NSXT_RETRY_MIN_DELAY` environment variable. Not supported yet for policy resources.
+  retries. Default: `0`.
+  Can also be specified with the `NSXT_RETRY_MIN_DELAY` environment variable.
 * `retry_max_delay` - (Optional) The maximum delay, in milliseconds, between
-  retires made to the API. Default:`5000`. Can also be specified with the
-  `NSXT_RETRY_MAX_DELAY` environment variable. Not supported yet for policy resources.
+  retries. Default: `500`.
+  Can also be specified with the `NSXT_RETRY_MAX_DELAY` environment variable.
 * `retry_on_status_codes` - (Optional) A list of HTTP status codes to retry on.
-  By default, the provider will retry on HTTP error 429 (too many requests),
-  essentially retrying on throttled connections. Can also be specified with the
-  `NSXT_RETRY_ON_STATUS_CODES` environment variable. Not supported yet for policy resources.
+  By default, the provider supplies a set of status codes recommended for retry with
+  policy resources: `409, 429, 500, 503, 504`. Can also be specified with the
+  `NSXT_RETRY_ON_STATUS_CODES` environment variable.
 * `remote_auth` - (Optional) Would trigger remote authorization instead of basic
   authorization. This is required for users based on vIDM authentication.
   The default for this flag is false. Can also be specified with the

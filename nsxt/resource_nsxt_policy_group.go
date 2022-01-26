@@ -940,7 +940,7 @@ func resourceNsxtPolicyGroupDelete(d *schema.ResourceData, m interface{}) error 
 		return client.Delete(d.Get("domain").(string), id, &failIfSubtreeExists, &forceDelete)
 	}
 
-	err := retryUponTransientAPIError(doDelete)
+	err := doDelete()
 	if err != nil {
 		return handleDeleteError("Group", id, err)
 	}

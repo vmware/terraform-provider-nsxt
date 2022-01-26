@@ -73,11 +73,44 @@ func TestAccResourceNsxtPolicyGatewayRedistributionConfig_basic(t *testing.T) {
 	})
 }
 
+// Platform returns concurrent change for this scenario
+// This test verifies retry is working properly
+func TestAccResourceNsxtPolicyGatewayRedistributionConfig_rename(t *testing.T) {
+	testResourceName := "nsxt_policy_gateway_redistribution_config.test"
+	testResourceNameRenamed := "nsxt_policy_gateway_redistribution_config.prod"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t); testAccNSXVersion(t, "3.1.3") },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyGatewayRedistributionCreateTemplate(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyTier0CheckRedistributionExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "bgp_enabled", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "ospf_enabled", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, "gateway_path"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyGatewayRedistributionRenameTemplate(),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(testResourceNameRenamed, "bgp_enabled", "false"),
+					resource.TestCheckResourceAttr(testResourceNameRenamed, "ospf_enabled", "true"),
+					resource.TestCheckResourceAttr(testResourceNameRenamed, "rule.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceNameRenamed, "gateway_path"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtPolicyGatewayRedistributionConfig_importBasic(t *testing.T) {
 	testResourceName := "nsxt_policy_gateway_redistribution_config.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.1.0") },
+		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.1.3") },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -233,5 +266,21 @@ resource "nsxt_policy_gateway_redistribution_config" "test" {
 
   bgp_enabled  = true
   ospf_enabled = false
+}`, getAccTestSitePathConfig())
+}
+
+func testAccNsxtPolicyGatewayRedistributionRenameTemplate() string {
+	return testAccNsxtPolicyGatewayRedistributionPrerequisites() + fmt.Sprintf(`
+resource "nsxt_policy_gateway_redistribution_config" "prod" {
+  gateway_path = nsxt_policy_tier0_gateway.test.path
+  %s
+
+  bgp_enabled  = false
+  ospf_enabled = true
+  rule {
+      name  = "test-rule-1"
+      types = ["TIER0_SEGMENT", "TIER0_EVPN_TEP_IP", "TIER1_CONNECTED"]
+      ospf  = true
+  }
 }`, getAccTestSitePathConfig())
 }

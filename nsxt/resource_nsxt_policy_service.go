@@ -689,7 +689,7 @@ func resourceNsxtPolicyServiceDelete(d *schema.ResourceData, m interface{}) erro
 		return client.Delete(id)
 	}
 
-	err := retryUponTransientAPIError(doDelete)
+	err := doDelete()
 
 	if err != nil {
 		return handleDeleteError("Service", id, err)

@@ -277,36 +277,24 @@ func convertModelBindingType(obj interface{}, sourceType bindings.BindingType, d
 	return gmObj, nil
 }
 
-func isTransientAPIError(err error) bool {
-	if _, ok := err.(errors.InvalidRequest); ok {
-		return true
-	}
-	if _, ok := err.(errors.ConcurrentChange); ok {
-		return true
-	}
-
-	return false
-}
-
-func retryUponTransientAPIError(operation func() error) error {
-	// NOTE: this is temporary solution until global retry mechanism is introduced
-	// via SDK decorator.
-	// Delete operation on platform is asyncrounous, meaning that even correct order of
-	// deletion can cause dependency issues that require retry from client side.
-	maxRetryAttempts := 3
+func retryUponPreconditionFailed(readAndUpdate func() error, maxRetryAttempts int) error {
+	// This retry specific to Precondition Error, and solution
+	// here required refreshing the object, and updating revision
+	// in request body. This can not be solved with SDK-based retry
+	// functionality since it always retries with same request.
 	var err error
 	for i := 0; i <= maxRetryAttempts; i++ {
-		err = operation()
+		err = readAndUpdate()
 		if err == nil {
 			return nil
 		}
 
-		if !isTransientAPIError(err) {
-			// other type of error - probably legit
+		if _, ok := err.(errors.InvalidRequest); !ok {
+			// other type of error
 			return err
 		}
 
-		log.Printf("[INFO] Retrying operation due to potenitially transient error `%s`, attempt %d", err, i+1)
+		log.Printf("[INFO] Refreshing object and repeating operation, attempt %d", i+1)
 	}
 
 	return err
