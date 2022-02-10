@@ -757,6 +757,11 @@ func policySegmentResourceToInfraStruct(id string, d *schema.ResourceData, isVla
 				advConfigStruct.UplinkTeamingPolicyName = &teamingPolicy
 			}
 
+			poolPath := advConfigMap["address_pool_path"].(string)
+			if poolPath != "" {
+				advConfigStruct.AddressPoolPaths = append(advConfigStruct.AddressPoolPaths, poolPath)
+			}
+
 			if nsxVersionHigherOrEqual("3.1.0") {
 				urpfMode := advConfigMap["urpf_mode"].(string)
 				advConfigStruct.UrpfMode = &urpfMode
