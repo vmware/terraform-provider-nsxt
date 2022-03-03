@@ -305,7 +305,8 @@ func resourceNsxtPolicyVMTagsRead(d *schema.ResourceData, m interface{}) error {
 
 	vm, err := findNsxtPolicyVMByID(connector, vmID, m)
 	if err != nil {
-		return fmt.Errorf("Error during Virtual Machine retrieval: %v", err)
+		log.Printf("[ERROR] Cannot find VM with ID %s, skip reading VM tag", vmID)
+		return nil
 	}
 
 	setPolicyTagsInSchema(d, vm.Tags)
@@ -324,7 +325,8 @@ func resourceNsxtPolicyVMTagsCreate(d *schema.ResourceData, m interface{}) error
 
 	vm, err := findNsxtPolicyVMByID(connector, instanceID, m)
 	if err != nil {
-		return fmt.Errorf("Error finding Virtual Machine: %v", err)
+		log.Printf("[ERROR] Cannot find VM with ID %s, skip creating/updating VM Tag", instanceID)
+		return nil
 	}
 
 	tags := getPolicyTagsFromSchema(d)
@@ -358,8 +360,10 @@ func resourceNsxtPolicyVMTagsDelete(d *schema.ResourceData, m interface{}) error
 	instanceID := d.Get("instance_id").(string)
 
 	vm, err := findNsxtPolicyVMByID(connector, instanceID, m)
+
 	if err != nil {
-		return fmt.Errorf("Error finding Virtual Machine: %v", err)
+		log.Printf("[ERROR] Cannot find VM with ID %s, deleting stale VM Tag on provider", instanceID)
+		return nil
 	}
 
 	tags := make([]model.Tag, 0)
