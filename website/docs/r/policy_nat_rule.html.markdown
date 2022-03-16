@@ -66,7 +66,7 @@ An existing policy NAT Rule can be [imported][docs-import] into this resource, v
 [docs-import]: /docs/import/index.html
 
 ```
-terraform import nsxt_policy_nat_rule.rule1 GWID/ID
+terraform import nsxt_policy_nat_rule.rule1 GWID/ID/[NAT64]
 ```
 
-The above command imports the policy NAT Rule named `rule1` for the NSX Tier0 or Tier1 Gateway `GWID` with the NSX Policy ID `ID`.
+The above command imports the policy NAT Rule named `rule1` for the NSX Tier0 or Tier1 Gateway `GWID` with the NSX Policy ID `ID`. `NAT64` as nat type should be specified only for NAT64 case, otherwise it should be omitted.
