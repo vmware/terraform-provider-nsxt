@@ -10,7 +10,7 @@ description: A resource to configure a OSPF Area.
 This resource provides a method for the management of OSPF Area. Only a single area is supported so far per Tier-0 Gateway OSPF Config.
 
 This resource is applicable to NSX Policy Manager only.
-This resource is supported with NSX 3.1.0 onwards.
+This resource is supported with NSX 3.1.1 onwards.
 
 ## Example Usage
 

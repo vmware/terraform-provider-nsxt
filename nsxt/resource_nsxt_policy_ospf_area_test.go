@@ -37,7 +37,7 @@ func TestAccResourceNsxtPolicyOspfArea_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_ospf_area.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "3.1.0") },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "3.1.1") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyOspfAreaCheckDestroy(state, accTestPolicyOspfAreaCreateAttributes["display_name"])
@@ -96,7 +96,7 @@ func TestAccResourceNsxtPolicyOspfArea_importBasic(t *testing.T) {
 	testResourceName := "nsxt_policy_ospf_area.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "3.1.0") },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "3.1.1") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyOspfAreaCheckDestroy(state, name)

@@ -435,7 +435,7 @@ func configureNsxtClient(d *schema.ResourceData, clients *nsxtClients) error {
 		BasePath:             "/api/v1",
 		Host:                 host,
 		Scheme:               "https",
-		UserAgent:            "terraform-provider-nsxt/1.0",
+		UserAgent:            "terraform-provider-nsxt",
 		UserName:             username,
 		Password:             password,
 		RemoteAuth:           clients.CommonConfig.RemoteAuth,
