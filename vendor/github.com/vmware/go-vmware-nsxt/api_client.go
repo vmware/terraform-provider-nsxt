@@ -62,11 +62,13 @@ type APIClient struct {
 	NetworkTransportApi             *NetworkTransportApiService
 	NormalizationApi                *NormalizationApiService
 	NsxComponentAdministrationApi   *NsxComponentAdministrationApiService
+	NsxManagerHealthApi             *NsxManagerHealthApiService
 	OperationsApi                   *OperationsApiService
 	PolicyApi                       *PolicyApiService
 	PoolManagementApi               *PoolManagementApiService
 	RealizationApi                  *RealizationApiService
 	ServicesApi                     *ServicesApiService
+	SupportBundleApi                *SupportBundleApiService
 	TransportEntitiesApi            *TransportEntitiesApiService
 	TroubleshootingAndMonitoringApi *TroubleshootingAndMonitoringApiService
 	UpgradeApi                      *UpgradeApiService
@@ -74,6 +76,7 @@ type APIClient struct {
 	ContainerClustersApi            *ManagementPlaneApiFabricContainerClustersApiService
 	ContainerInventoryApi           *ManagementPlaneApiFabricContainerInventoryApiService
 	ContainerProjectsApi            *ManagementPlaneApiFabricContainerProjectsApiService
+	ClusterControlPlaneApi          *SystemAdministrationPolicyClusterControlPlaneApiService
 }
 
 type service struct {
@@ -96,7 +99,6 @@ func GetDefaultHeaders(client *APIClient) error {
 	XSRF_TOKEN := "X-XSRF-TOKEN"
 	var (
 		httpMethod = strings.ToUpper("Post")
-		postBody   interface{}
 		fileName   string
 		fileBytes  []byte
 	)
@@ -108,6 +110,10 @@ func GetDefaultHeaders(client *APIClient) error {
 		"Content-Type": "application/x-www-form-urlencoded",
 	}
 
+	if client.cfg.DefaultHeader == nil {
+		client.cfg.DefaultHeader = make(map[string]string)
+	}
+
 	// For remote Auth (vIDM use case), construct the REMOTE auth header
 	remoteAuthHeader := ""
 	if client.cfg.RemoteAuth {
@@ -115,8 +121,11 @@ func GetDefaultHeaders(client *APIClient) error {
 		encoded := base64.StdEncoding.EncodeToString([]byte(auth))
 		remoteAuthHeader = "Remote " + encoded
 		requestHeaders["Authorization"] = remoteAuthHeader
+
+		client.cfg.DefaultHeader["Authorization"] = remoteAuthHeader
 	}
 
+	postBody := fmt.Sprintf("j_username=%s&j_password=%s", client.cfg.UserName, client.cfg.Password)
 	path := strings.TrimSuffix(client.cfg.BasePath, "v1") + "session/create"
 	// Call session create
 	r, err := client.prepareRequest(
@@ -130,15 +139,15 @@ func GetDefaultHeaders(client *APIClient) error {
 		fileName,
 		fileBytes)
 	if err != nil {
-		return fmt.Errorf("Failed to create session: %s.", err)
+		return fmt.Errorf("Failed to create session: %s", err)
 	}
 	response, err := client.callAPI(r)
 	if err != nil || response == nil {
-		return fmt.Errorf("Failed to create session: %s.", err)
+		return fmt.Errorf("Failed to create session: %s", err)
 	}
 
-	if client.cfg.DefaultHeader == nil {
-		client.cfg.DefaultHeader = make(map[string]string)
+	if response.StatusCode != 200 {
+		return fmt.Errorf("Failed to create session: status code %d", response.StatusCode)
 	}
 
 	// Go over the headers
@@ -157,10 +166,6 @@ func GetDefaultHeaders(client *APIClient) error {
 
 	response.Body.Close()
 
-	// For remote Auth (vIDM use case), construct the REMOTE auth header
-	if client.cfg.RemoteAuth {
-		client.cfg.DefaultHeader["Authorization"] = remoteAuthHeader
-	}
 	return nil
 }
 
@@ -243,9 +248,11 @@ func NewAPIClient(cfg *Configuration) (*APIClient, error) {
 	c.cfg = cfg
 	c.Context = GetContext(cfg)
 	c.common.client = c
-	err := GetDefaultHeaders(c)
-	if err != nil {
-		return nil, err
+	if !c.cfg.SkipSessionAuth {
+		err := GetDefaultHeaders(c)
+		if err != nil {
+			log.Printf("Warning: %v", err)
+		}
 	}
 
 	// API Services
@@ -264,11 +271,13 @@ func NewAPIClient(cfg *Configuration) (*APIClient, error) {
 	c.NetworkTransportApi = (*NetworkTransportApiService)(&c.common)
 	c.NormalizationApi = (*NormalizationApiService)(&c.common)
 	c.NsxComponentAdministrationApi = (*NsxComponentAdministrationApiService)(&c.common)
+	c.NsxManagerHealthApi = (*NsxManagerHealthApiService)(&c.common)
 	c.OperationsApi = (*OperationsApiService)(&c.common)
 	c.PolicyApi = (*PolicyApiService)(&c.common)
 	c.PoolManagementApi = (*PoolManagementApiService)(&c.common)
 	c.RealizationApi = (*RealizationApiService)(&c.common)
 	c.ServicesApi = (*ServicesApiService)(&c.common)
+	c.SupportBundleApi = (*SupportBundleApiService)(&c.common)
 	c.TransportEntitiesApi = (*TransportEntitiesApiService)(&c.common)
 	c.TroubleshootingAndMonitoringApi = (*TroubleshootingAndMonitoringApiService)(&c.common)
 	c.UpgradeApi = (*UpgradeApiService)(&c.common)
@@ -276,7 +285,7 @@ func NewAPIClient(cfg *Configuration) (*APIClient, error) {
 	c.ContainerClustersApi = (*ManagementPlaneApiFabricContainerClustersApiService)(&c.common)
 	c.ContainerInventoryApi = (*ManagementPlaneApiFabricContainerInventoryApiService)(&c.common)
 	c.ContainerProjectsApi = (*ManagementPlaneApiFabricContainerProjectsApiService)(&c.common)
-
+	c.ClusterControlPlaneApi = (*SystemAdministrationPolicyClusterControlPlaneApiService)(&c.common)
 	return c, nil
 }
 
@@ -452,6 +461,7 @@ func (c *APIClient) prepareRequest(
 		if err != nil {
 			return nil, err
 		}
+		headerParams["Content-Length"] = fmt.Sprintf("%d", body.Len())
 	}
 
 	// add form paramters and file if available.

@@ -31,6 +31,8 @@ type ContainerClusterNode struct {
 	ResourceType string `json:"resource_type"`
 	// Opaque identifiers meaningful to the API user
 	Tags []common.Tag `json:"tags,omitempty"`
+	// Specifies Container Network Interface agent status of container cluster node.
+	CniAgentStatus string `json:"cni_agent_status,omitempty"`
 	// External identifier of the container cluster.
 	ContainerClusterId string `json:"container_cluster_id,omitempty"`
 	// External identifier of the container cluster node in K8S/PAS. 
@@ -43,4 +45,6 @@ type ContainerClusterNode struct {
 	NetworkStatus string `json:"network_status,omitempty"`
 	// Array of additional specific properties of container cluster node in key-value format. 
 	OriginProperties []common.KeyValuePair `json:"origin_properties,omitempty"`
+	// Specifies identifier of container cluster node given by infrastructure provider of container cluster. e.g. in case of vSpehere, it will be instance uuid of worker node virtual machine.
+	ProviderId string `json:"provider_id,omitempty"`
 }

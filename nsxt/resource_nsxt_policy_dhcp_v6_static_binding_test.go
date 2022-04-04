@@ -49,7 +49,7 @@ func TestAccResourceNsxtPolicyDhcpV6StaticBinding_fixed(t *testing.T) {
 func testAccResourceNsxtPolicyDhcpV6StaticBindingBasic(t *testing.T, isFixed bool) {
 	testResourceName := testAccPolicyDhcpV6StaticBindingResourceName
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccNSXVersion(t, "3.0.0")
@@ -128,7 +128,7 @@ func testAccResourceNsxtPolicyDhcpV6StaticBindingBasic(t *testing.T, isFixed boo
 func TestAccResourceNsxtPolicyDhcpV6StaticBinding_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {

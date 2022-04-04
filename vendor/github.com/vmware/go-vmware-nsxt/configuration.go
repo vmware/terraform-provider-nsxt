@@ -47,6 +47,7 @@ type Configuration struct {
 	ClientAuthKeyString  string
 	CAString             string
 	Insecure             bool
+	SkipSessionAuth      bool
 	RetriesConfiguration ClientRetriesConfiguration
 	HTTPClient           *http.Client
 }
