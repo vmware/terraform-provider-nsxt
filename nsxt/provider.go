@@ -235,6 +235,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_segment_security_profile":  dataSourceNsxtPolicySegmentSecurityProfile(),
 			"nsxt_policy_mac_discovery_profile":     dataSourceNsxtPolicyMacDiscoveryProfile(),
 			"nsxt_policy_vm":                        dataSourceNsxtPolicyVM(),
+			"nsxt_policy_vms":                       dataSourceNsxtPolicyVMs(),
 			"nsxt_policy_lb_app_profile":            dataSourceNsxtPolicyLBAppProfile(),
 			"nsxt_policy_lb_client_ssl_profile":     dataSourceNsxtPolicyLBClientSslProfile(),
 			"nsxt_policy_lb_server_ssl_profile":     dataSourceNsxtPolicyLBServerSslProfile(),

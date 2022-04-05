@@ -305,6 +305,7 @@ func resourceNsxtPolicyVMTagsRead(d *schema.ResourceData, m interface{}) error {
 
 	vm, err := findNsxtPolicyVMByID(connector, vmID, m)
 	if err != nil {
+		d.SetId("")
 		log.Printf("[ERROR] Cannot find VM with ID %s, skip reading VM tag", vmID)
 		return nil
 	}
@@ -325,7 +326,13 @@ func resourceNsxtPolicyVMTagsCreate(d *schema.ResourceData, m interface{}) error
 
 	vm, err := findNsxtPolicyVMByID(connector, instanceID, m)
 	if err != nil {
-		log.Printf("[ERROR] Cannot find VM with ID %s, skip creating/updating VM Tag", instanceID)
+		if len(d.Id()) == 0 {
+			// This is create flow
+			return fmt.Errorf("Cannot find VM with ID %s", instanceID)
+		}
+		// Update flow - when VM is deleted, we don't want to error out,
+		// Customers prefer to swallow the error
+		log.Printf("[ERROR] Cannot find VM with ID %s, swallowing error", instanceID)
 		return nil
 	}
 
@@ -362,6 +369,7 @@ func resourceNsxtPolicyVMTagsDelete(d *schema.ResourceData, m interface{}) error
 	vm, err := findNsxtPolicyVMByID(connector, instanceID, m)
 
 	if err != nil {
+		d.SetId("")
 		log.Printf("[ERROR] Cannot find VM with ID %s, deleting stale VM Tag on provider", instanceID)
 		return nil
 	}
@@ -376,7 +384,7 @@ func resourceNsxtPolicyVMTagsDelete(d *schema.ResourceData, m interface{}) error
 	portTags := d.Get("port").([]interface{})
 	err = updateNsxtPolicyVMPortTags(connector, *vm.ExternalId, portTags, m, true)
 	if err != nil {
-		return handleCreateError("Segment Port Tag", *vm.ExternalId, err)
+		return handleDeleteError("Segment Port Tag", *vm.ExternalId, err)
 	}
 
 	return err
