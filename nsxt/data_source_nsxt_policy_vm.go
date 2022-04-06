@@ -7,7 +7,6 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
@@ -42,8 +41,6 @@ func getNsxtPolicyVMIDFromSchema(d *schema.ResourceData) string {
 }
 
 func dataSourceNsxtPolicyVMIDRead(d *schema.ResourceData, m interface{}) error {
-	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 	var vmModel model.VirtualMachine
 	connector := getPolicyConnector(m)
 
