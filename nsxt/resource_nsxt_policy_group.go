@@ -44,6 +44,13 @@ var conjunctionOperatorValues = []string{
 	model.ConjunctionOperator_CONJUNCTION_OPERATOR_AND,
 }
 
+var externalMemberTypeValues = []string{
+	model.ExternalIDExpression_MEMBER_TYPE_VIRTUALMACHINE,
+	model.ExternalIDExpression_MEMBER_TYPE_VIRTUALNETWORKINTERFACE,
+	model.ExternalIDExpression_MEMBER_TYPE_CLOUDNATIVESERVICEINSTANCE,
+	model.ExternalIDExpression_MEMBER_TYPE_PHYSICALSERVER,
+}
+
 func resourceNsxtPolicyGroup() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyGroupCreate,
@@ -112,6 +119,27 @@ func getMACAddressExpressionSchema() *schema.Resource {
 					Type:         schema.TypeString,
 					ValidateFunc: validation.IsMACAddress,
 				},
+			},
+		},
+	}
+}
+
+func getExternalIDExpressionSchema() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"external_ids": {
+				Type:        schema.TypeSet,
+				Required:    true,
+				Description: "List of external ids",
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"member_type": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Description:  "External ID member type, default to virtual machine if not specified",
+				ValidateFunc: validation.StringInSlice(externalMemberTypeValues, false),
 			},
 		},
 	}
@@ -225,6 +253,12 @@ func getCriteriaSetSchema() *schema.Resource {
 				Elem:        getMACAddressExpressionSchema(),
 				Optional:    true,
 				MaxItems:    1,
+			},
+			"external_id_expression": {
+				Type:        schema.TypeList,
+				Description: "External ID expression specifying additional members in the Group",
+				Elem:        getExternalIDExpressionSchema(),
+				Optional:    true,
 			},
 		},
 	}
@@ -423,6 +457,32 @@ func buildGroupMacAddressData(ipaddr interface{}) (*data.StructValue, error) {
 	return dataValue.(*data.StructValue), nil
 }
 
+func buildGroupExternalIDExpressionData(externalID interface{}) (*data.StructValue, error) {
+	idMap := externalID.(map[string]interface{})
+	memberType := idMap["member_type"].(string)
+	if memberType == "" {
+		memberType = model.ExternalIDExpression_MEMBER_TYPE_VIRTUALMACHINE
+	}
+	var extIDs []string
+
+	for _, extID := range idMap["external_ids"].(*schema.Set).List() {
+		extIDs = append(extIDs, extID.(string))
+	}
+	extIDStruct := model.ExternalIDExpression{
+		MemberType:   &memberType,
+		ExternalIds:  extIDs,
+		ResourceType: model.ExternalIDExpression__TYPE_IDENTIFIER,
+	}
+
+	converter := bindings.NewTypeConverter()
+	converter.SetMode(bindings.REST)
+	dataValue, errors := converter.ConvertToVapi(extIDStruct, model.ExternalIDExpressionBindingType())
+	if errors != nil {
+		return nil, errors[0]
+	}
+	return dataValue.(*data.StructValue), nil
+}
+
 func buildGroupMemberPathData(paths interface{}) (*data.StructValue, error) {
 	pathMap := paths.(map[string]interface{})
 	var pathList []string
@@ -492,6 +552,12 @@ func buildGroupExpressionDataFromType(expressionType string, datum interface{}) 
 		return data, nil
 	} else if expressionType == "macaddress_expression" {
 		data, err := buildGroupMacAddressData(datum)
+		if err != nil {
+			return nil, err
+		}
+		return data, nil
+	} else if expressionType == "external_id_expression" {
+		data, err := buildGroupExternalIDExpressionData(datum)
 		if err != nil {
 			return nil, err
 		}
@@ -643,6 +709,21 @@ func fromGroupExpressionData(expressions []*data.StructValue) ([]map[string]inte
 			addrList = append(addrList, addrMap)
 			macMap["macaddress_expression"] = addrList
 			parsedCriteria = append(parsedCriteria, macMap)
+		} else if expStruct.ResourceType == model.ExternalIDExpression__TYPE_IDENTIFIER {
+			log.Printf("[DEBUG] Parsing external id expression")
+			extIDData, errors := converter.ConvertToGolang(expression, model.ExternalIDExpressionBindingType())
+			if len(errors) > 0 {
+				return nil, nil, errors[0]
+			}
+			extIDStruct := extIDData.(model.ExternalIDExpression)
+			var idList []map[string]interface{}
+			var extIDMap = make(map[string]interface{})
+			extIDMap["member_type"] = extIDStruct.MemberType
+			extIDMap["external_ids"] = extIDStruct.ExternalIds
+			var idMap = make(map[string]interface{})
+			idList = append(idList, extIDMap)
+			idMap["external_id_expression"] = idList
+			parsedCriteria = append(parsedCriteria, idMap)
 		} else if expStruct.ResourceType == model.Condition__TYPE_IDENTIFIER {
 			log.Printf("[DEBUG] Parsing condition")
 			condMap, err := groupConditionDataToMap(expression)

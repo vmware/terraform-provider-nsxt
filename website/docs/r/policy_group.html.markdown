@@ -53,6 +53,17 @@ resource "nsxt_policy_group" "group1" {
     }
   }
 
+  conjunction {
+    operator = "OR"
+  }
+
+  criteria {
+    external_id_expression {
+      member_type = "VirtualMachine"
+      external_ids = ["520ba7b0-d9f8-87b1-6f44-15bbeb7935c7", "52748a9e-d61d-e29b-d54b-07f169ff0ee8-4000"]
+    }
+  }
+
   extended_criteria {
     identity_group {
       distinguished_name             = "cn=u1,ou=users,dc=example,dc=local"
@@ -158,6 +169,9 @@ The following arguments are supported:
     * `mac_addresses` - (Required) List of MAC addresses.
   * `path_expression` - (Optional) An expression block to specify direct group members by policy path.
     * `member_paths` - (Required) List of policy paths for direct members for this Group (such as Segments, Segment ports, Groups etc).
+  * `external_id_expression` - (Optional) An expression block to specify external IDs for the specified member type for this Group.
+    * `member_type` - (Required) External ID member type. Must be one of: `VirtualMachine`, `VirtualNetworkInterface`, `CloudNativeServiceInstance`, or `PhysicalServer`.
+    * `external_ids	` - (Required) List of external IDs for the specified member type.
   * `condition` (Optional) A repeatable condition block to select this Group's members. When multiple `condition` blocks are used in a single `criteria` they form a nested expression that's implicitly ANDed together and each nested condition must used the same `member_type`.
     * `key` (Required) Specifies the attribute to query. Must be one of: `Tag`, `ComputerName`, `OSName` or `Name`. For a `member_type` other than `VirtualMachine`, only the `Tag` key is supported.
     * `member_type` (Required) Specifies the type of resource to query. Must be one of: `IPSet`, `LogicalPort`, `LogicalSwitch`, `Segment`, `SegmentPort` or `VirtualMachine`.
