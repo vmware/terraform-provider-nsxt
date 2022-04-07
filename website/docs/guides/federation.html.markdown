@@ -41,9 +41,9 @@ Remember to check out the documentation for the resource you are interested in f
 The following Resources are available to use with Federation:
 
  * Tier-0 Gateway [nsxt_policy_tier0_gateway](https://www.terraform.io/docs/providers/nsxt/r/policy_tier0_gateway)
- * Tier-0 Interface [nsxt_policy_tier0_interface](https://www.terraform.io/docs/providers/nsxt/r/policy_tier0_interface)
+ * Tier-0 Gateway Interface [nsxt_policy_tier0_interface](https://www.terraform.io/docs/providers/nsxt/r/policy_tier0_gateway_interface)
  * Tier-1 Gateway [nsxt_policy_tier1_gateway](https://www.terraform.io/docs/providers/nsxt/r/policy_tier1_gateway)
- * Tier-1 Interface [nsxt_policy_tier1_interface](https://www.terraform.io/docs/providers/nsxt/r/policy_tier1_interface)
+ * Tier-1 Gateway Interface [nsxt_policy_tier1_interface](https://www.terraform.io/docs/providers/nsxt/r/policy_tier1_gateway_interface)
  * Segment [nsxt_policy_segment](https://www.terraform.io/docs/providers/nsxt/r/policy_segment)
  * VLAN Segment [nsxt_policy_vlan_segment](https://www.terraform.io/docs/providers/nsxt/r/policy_vlan_segment)
  * Group [nsxt_policy_group](https://www.terraform.io/docs/providers/nsxt/r/policy_group)
