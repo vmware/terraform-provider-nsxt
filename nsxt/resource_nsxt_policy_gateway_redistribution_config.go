@@ -230,21 +230,20 @@ func resourceNsxtPolicyGatewayRedistributionConfigDelete(d *schema.ResourceData,
 
 	// Update the locale service with empty Redistribution config using get/post
 	doUpdate := func() error {
-		var err error
 		if isPolicyGlobalManager(m) {
 			client := gm_tier0s.NewLocaleServicesClient(connector)
-			gmObj, err1 := client.Get(gwID, localeServiceID)
-			if err1 != nil {
-				return handleDeleteError("Tier0 Redistribution config", id, err)
+			gmObj, err := client.Get(gwID, localeServiceID)
+			if err != nil {
+				return err
 			}
 			gmObj.RouteRedistributionConfig = nil
 			_, err = client.Update(gwID, localeServiceID, gmObj)
 			return err
 		}
 		client := tier_0s.NewLocaleServicesClient(connector)
-		obj, err1 := client.Get(gwID, localeServiceID)
-		if err1 != nil {
-			return handleDeleteError("Tier0 Redistribution config", id, err)
+		obj, err := client.Get(gwID, localeServiceID)
+		if err != nil {
+			return err
 		}
 		obj.RouteRedistributionConfig = nil
 		_, err = client.Update(gwID, localeServiceID, obj)
