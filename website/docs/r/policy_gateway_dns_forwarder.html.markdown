@@ -5,7 +5,7 @@ page_title: "NSXT: nsxt_policy_gateway_dns_forwarder"
 description: A resource to configure DNS Forwarder on Gateway.
 ---
 
-# nsxt_policy_dns_forwarder_zone
+# nsxt_policy_gateway_dns_forwarder
 
 This resource provides a method for the management of DNS Forwarder on Tier0 or Tier1 Gateway.
 
@@ -60,7 +60,7 @@ An existing object can be [imported][docs-import] into this resource, via the fo
 [docs-import]: /docs/import/index.html
 
 ```
-terraform import nsxt_policy_dns_forwarder_zone.test GATEWAY-PATH
+terraform import nsxt_policy_gateway_dns_forwarder.test GATEWAY-PATH
 ```
 
 The above command imports Dns Forwarder named `test` for NSX Gateway `GATEWAY-PATH`. Note that in order to support both Tier0 and Tier1 Gateways, a full Gateway path is expected here, rather than the usual ID.

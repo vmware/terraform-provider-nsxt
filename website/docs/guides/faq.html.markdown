@@ -9,8 +9,9 @@ description: |-
 
 - [Dependency Errors on Update or Destroy](#dependency-errors-lifecycle)
 - [Dependency Error on Destroy](#dependency-error-nsx)
-- [Authorization Error on VMC ](#auth-error-vmc)
-- [Error Unmarshalling Server Response on VMC ](#proxy-vmc)
+- [Authorization Error on VMC](#auth-error-vmc)
+- [Error Unmarshalling Server Response on VMC](#proxy-vmc)
+- [User is not authorized to perform this operation on the application on VMC](#domain-vmc)
 
 <!-- /TOC -->
 
@@ -73,4 +74,23 @@ Failed to read <object type> (Error unmarshalling server response)
 ```
 
 This issue is usually caused by proxy timeout on VMC side. Re-apply can help. If you run into this a lot, please consider direct connection to NSX in your VMC environment to avoid the proxy overhead. If this is not an option for you, another way to reduce the load on the proxy could be to avoid heavy usage of data sources, and instead use policy path directly in your configuration.
+
+
+## User is not authorized to perform this operation on the application on VMC <a name="domain-vmc"></a>
+
+Consider the following error:
+```
+User is not authorized to perform this operation on the application. Please contact the system administrator to get access. (code 401)
+```
+
+Provided your VMC token is accurate and you have sufficient permissions, it is likely that `domain` is missing from resource configuration. Domains of VMC are different from default value that is set in the provider.For group resource, the fix would be specifying relevant domain like in the example below:
+
+```
+resource "nsxt_policy_group" "test" {
+  display_name = "test"
+  domain = "cgw"
+
+  ..
+}
+```
 
