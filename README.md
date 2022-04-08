@@ -85,7 +85,7 @@ git clone https://github.com/vmware/terraform-provider-nsxt.git
 
 ## Building and Installing the Provider
 
-Recommended golang version is go1.14 onwards.
+Recommended golang version is go1.17 onwards.
 After the clone has been completed, you can enter the provider directory and build the provider.
 
 ```sh

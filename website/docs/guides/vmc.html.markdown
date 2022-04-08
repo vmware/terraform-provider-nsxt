@@ -47,3 +47,19 @@ The following Data Sources are available to use with VMConAWS:
 * Transport Zone: [nsxt_policy_transport_zone](https://www.terraform.io/docs/providers/nsxt/d/policy_transport_zone)
 * Tier-0 Gateway: [nsxt_policy_tier0_gateway](https://www.terraform.io/docs/providers/nsxt/d/policy_tier0_gateway)
 * Tier-1 Gateway: [nsxt_policy_tier1_gateway](https://www.terraform.io/docs/providers/nsxt/d/policy_tier1_gateway)
+
+
+Note that in relevant resources, a domain needs to be specified, since on VMC the domain is different from `default` domain. For example:
+
+```
+resource "nsxt_policy_group" "test" {
+  display_name = "test"
+  domain = "cgw"
+
+  criteria {
+    ipaddress_expression {
+      ip_addresses = ["10.1.60.20", "10.1.60.21"]
+    }
+  }
+}
+```
