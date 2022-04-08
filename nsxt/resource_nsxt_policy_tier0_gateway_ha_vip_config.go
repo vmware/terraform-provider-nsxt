@@ -307,24 +307,29 @@ func resourceNsxtPolicyTier0GatewayHAVipConfigDelete(d *schema.ResourceData, m i
 	}
 
 	// Update the locale service with empty HaVipConfigs using get/post
-	var err error
-	if isPolicyGlobalManager(m) {
-		client := gm_tier0s.NewLocaleServicesClient(connector)
-		gmObj, err1 := client.Get(tier0ID, localeServiceID)
-		if err1 != nil {
-			return handleDeleteError("Tier0 HA Vip config", id, err)
+	doUpdate := func() error {
+		if isPolicyGlobalManager(m) {
+			client := gm_tier0s.NewLocaleServicesClient(connector)
+			gmObj, err := client.Get(tier0ID, localeServiceID)
+			if err != nil {
+				return err
+			}
+			gmObj.HaVipConfigs = nil
+			_, err = client.Update(tier0ID, localeServiceID, gmObj)
+			return err
 		}
-		gmObj.HaVipConfigs = nil
-		_, err = client.Update(tier0ID, localeServiceID, gmObj)
-	} else {
 		client := tier_0s.NewLocaleServicesClient(connector)
-		obj, err1 := client.Get(tier0ID, localeServiceID)
-		if err1 != nil {
-			return handleDeleteError("Tier0 HA Vip config", id, err)
+		obj, err := client.Get(tier0ID, localeServiceID)
+		if err != nil {
+			return err
 		}
 		obj.HaVipConfigs = nil
 		_, err = client.Update(tier0ID, localeServiceID, obj)
+		return err
 	}
+
+	commonProviderConfig := getCommonProviderConfig(m)
+	err := retryUponPreconditionFailed(doUpdate, commonProviderConfig.MaxRetries)
 	if err != nil {
 		return handleDeleteError("Tier0 HA Vip config", id, err)
 	}
