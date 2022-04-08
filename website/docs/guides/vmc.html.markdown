@@ -30,20 +30,20 @@ Note that `host` is the ProxyURL and `vmc_token` is the API Access Token
 
 The following Resources are available to use with VMConAWS:
 
-* Flexible Segments: [nsxt_policy_segment](https://www.terraform.io/docs/providers/nsxt/r/policy_segment.html)
-* Distributed Firewall Section: [nsxt_policy_security_policy](https://www.terraform.io/docs/providers/nsxt/r/policy_security_policy.html)
-* NAT: [nsxt_policy_nat_rule](https://www.terraform.io/docs/providers/nsxt/r/policy_nat_rule.html)
-* Security Groups: [nsxt_policy_group](https://www.terraform.io/docs/providers/nsxt/r/policy_group.html)
-* Services: [nsxt_policy_service](https://www.terraform.io/docs/providers/nsxt/r/policy_service.html)
-* DHCP Relay: [nsxt_policy_dhcp_relay](https://www.terraform.io/docs/providers/nsxt/r/policy_dhcp_relay.html)
-* Virtual Machine Tags: [nsxt_policy_vm_tag](https://www.terraform.io/docs/providers/nsxt/r/policy_vm_tags.html)
+* Flexible Segments: [nsxt_policy_segment](https://www.terraform.io/docs/providers/nsxt/r/policy_segment)
+* Distributed Firewall Section: [nsxt_policy_security_policy](https://www.terraform.io/docs/providers/nsxt/r/policy_security_policy)
+* NAT: [nsxt_policy_nat_rule](https://www.terraform.io/docs/providers/nsxt/r/policy_nat_rule)
+* Security Groups: [nsxt_policy_group](https://www.terraform.io/docs/providers/nsxt/r/policy_group)
+* Services: [nsxt_policy_service](https://www.terraform.io/docs/providers/nsxt/r/policy_service)
+* DHCP Relay: [nsxt_policy_dhcp_relay](https://www.terraform.io/docs/providers/nsxt/r/policy_dhcp_relay)
+* Virtual Machine Tags: [nsxt_policy_vm_tag](https://www.terraform.io/docs/providers/nsxt/r/policy_vm_tags)
 
 ## Available Data Sources for use with VMConAWS
 
 The following Data Sources are available to use with VMConAWS:
 
-* Services: [nsxt_policy_service](https://www.terraform.io/docs/providers/nsxt/d/policy_service.html)
-* Edge Cluster: [nsxt_policy_edge_cluster](https://www.terraform.io/docs/providers/nsxt/d/policy_edge_cluster.html)
-* Transport Zone: [nsxt_policy_transport_zone](https://www.terraform.io/docs/providers/nsxt/d/policy_transport_zone.html)
-* Tier-0 Gateway: [nsxt_policy_tier0_gateway](https://www.terraform.io/docs/providers/nsxt/d/policy_tier0_gateway.html)
-* Tier-1 Gateway: [nsxt_policy_tier1_gateway](https://www.terraform.io/docs/providers/nsxt/d/policy_tier1_gateway.html)
+* Services: [nsxt_policy_service](https://www.terraform.io/docs/providers/nsxt/d/policy_service)
+* Edge Cluster: [nsxt_policy_edge_cluster](https://www.terraform.io/docs/providers/nsxt/d/policy_edge_cluster)
+* Transport Zone: [nsxt_policy_transport_zone](https://www.terraform.io/docs/providers/nsxt/d/policy_transport_zone)
+* Tier-0 Gateway: [nsxt_policy_tier0_gateway](https://www.terraform.io/docs/providers/nsxt/d/policy_tier0_gateway)
+* Tier-1 Gateway: [nsxt_policy_tier1_gateway](https://www.terraform.io/docs/providers/nsxt/d/policy_tier1_gateway)
