@@ -1,13 +1,13 @@
 ---
-subcategory: "Policy - Segments"
+subcategory: "Beta"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_mac_discovery_profile"
-description: A resource to configure a MacDiscoveryProfile.
+description: A resource to configure a MAC Discovery Profile.
 ---
 
 # nsxt_policy_mac_discovery_profile
 
-This resource provides a method for the management of a MacDiscoveryProfile.
+This resource provides a method for the management of a MAC Discovery Profile.
 
 This resource is applicable to NSX Global Manager, NSX Policy Manager and VMC.
 
@@ -16,7 +16,7 @@ This resource is applicable to NSX Global Manager, NSX Policy Manager and VMC.
 ```hcl
 resource "nsxt_policy_mac_discovery_profile" "test" {
   display_name                     = "test"
-  description                      = "Terraform provisioned MacDiscoveryProfile"
+  description                      = "Terraform provisioned"
   mac_change_enabled               = true
   mac_learning_enabled             = true
   mac_limit                        = 4096
@@ -34,12 +34,12 @@ The following arguments are supported:
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
-* `mac_change_enabled` - (Optional) Allowing source MAC address learning
-* `mac_learning_enabled` - (Optional) Allowing source MAC address learning
-* `mac_limit` - (Optional) The maximum number of MAC addresses that can be learned on this port
-* `mac_limit_policy` - (Optional) The policy after MAC Limit is exceeded
-* `remote_overlay_mac_limit` - (Optional) The maximum number of MAC addresses learned on an overlay Logical Switch
-* `unknown_unicast_flooding_enabled` - (Optional) Allowing flooding for unlearned MAC for ingress traffic
+* `mac_change_enabled` - (Optional) MAC address change feature.
+* `mac_learning_enabled` - (Optional) MAC learning feature.
+* `mac_limit` - (Optional) The maximum number of MAC addresses that can be learned on this port.
+* `mac_limit_policy` - (Optional) The policy after MAC Limit is exceeded. Possible values are `ALLOW` and `DROP`, with default being `ALLOW`.
+* `remote_overlay_mac_limit` - (Optional) The maximum number of MAC addresses learned on an overlay Logical Switch.
+* `unknown_unicast_flooding_enabled` - (Optional) Allowing flooding for unlearned MAC for ingress traffic.
 
 
 ## Attributes Reference
@@ -60,4 +60,4 @@ An existing object can be [imported][docs-import] into this resource, via the fo
 terraform import nsxt_policy_mac_discovery_profile.test UUID
 ```
 
-The above command imports MacDiscoveryProfile named `test` with the NSX MacDiscoveryProfile ID `UUID`.
+The above command imports MAC Discovery Profile named `test` with ID `UUID`.

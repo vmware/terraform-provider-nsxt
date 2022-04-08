@@ -1,3 +1,22 @@
+## 3.2.6 (April 8, 2022)
+
+BUG FIXES:
+
+* `resource/nsxt_policy_nat_rule`: Support NAT64 action ([#725](https://github.com/vmware/terraform-provider-nsxt/pull/725))
+* Segment resources: Fix IP pool assignment ([#712](https://github.com/vmware/terraform-provider-nsxt/pull/712))
+* Fix SDK bug with Cookie header assignment in session create API for MP resources. This fix can improve performance in VIDM environments ([#730](https://github.com/vmware/terraform-provider-nsxt/pull/730))
+
+EXPERIMENTAL FEATURES:
+
+* **New Data Source**: `nsxt_policy_vms`. This data source is populated with a map of all VMS in inventory, and can be used as an alternative for `nsxt_policy_vm` to address scale issues.
+* **New Resource**: `nsxt_policy_mac_discovery_profile`
+
+IMPROVEMENTS:
+
+* Support global retry for policy resources. Retry parameters are configured in provider section - please refer to documentation ([#708](https://github.com/vmware/terraform-provider-nsxt/pull/708))
+* `resource/nsxt_policy_vm_tags`: Avoid erroring out on refresh/apply if given VM no longer exists on backend. Note that `nsxt_policy_vm` data source would still error out when VM is not found, so users seeking behavior where `not found` error is swallowed, are encouraged to use `nsxt_policy_vms` data source instead, and look up VM names in `items` map ([#718](https://github.com/vmware/terraform-provider-nsxt/pull/718))
+
+
 ## 3.2.5 (October 15, 2021)
 
 BUG FIXES:
