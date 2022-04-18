@@ -14,6 +14,7 @@ EXPERIMENTAL FEATURES:
 IMPROVEMENTS:
 
 * Support global retry for policy resources. Retry parameters are configured in provider section - please refer to documentation ([#708](https://github.com/vmware/terraform-provider-nsxt/pull/708))
+* `resource/resource_nsxt_policy_lb_virtual_server`: Support rules for this resource ([#676](https://github.com/vmware/terraform-provider-nsxt/pull/676))
 * `resource/nsxt_policy_vm_tags`: Avoid erroring out on refresh/apply if given VM no longer exists on backend. Note that `nsxt_policy_vm` data source would still error out when VM is not found, so users seeking behavior where `not found` error is swallowed, are encouraged to use `nsxt_policy_vms` data source instead, and look up VM names in `items` map ([#718](https://github.com/vmware/terraform-provider-nsxt/pull/718))
 
 
