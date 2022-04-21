@@ -57,7 +57,7 @@ In addition to arguments listed above, the following attributes are exported:
 
 An existing ns service group can be [imported][docs-import] into this resource, via the following command:
 
-[docs-import]: /docs/import/index.html
+[docs-import]: https://www.terraform.io/cli/import
 
 ```
 terraform import nsxt_ns_service_group.ns_service_group UUID

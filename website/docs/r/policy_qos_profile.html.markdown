@@ -88,7 +88,7 @@ In addition to arguments listed above, the following attributes are exported:
 
 An existing profile can be [imported][docs-import] into this resource, via the following command:
 
-[docs-import]: /docs/import/index.html
+[docs-import]: https://www.terraform.io/cli/import
 
 ```
 terraform import nsxt_policy_qos_profile.qos_profile ID

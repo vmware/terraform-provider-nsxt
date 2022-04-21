@@ -119,7 +119,7 @@ In addition to arguments listed above, the following attributes are exported:
 
 An existing Gateway Policy can be [imported][docs-import] into this resource, via the following command:
 
-[docs-import]: /docs/import/index.html
+[docs-import]: https://www.terraform.io/cli/import
 
 ```
 terraform import nsxt_policy_gateway_policy.default policy-path

@@ -47,7 +47,7 @@ In addition to arguments listed above, the following attributes are exported:
 
 An existing spoofguard switching profile can be [imported][docs-import] into this resource, via the following command:
 
-[docs-import]: /docs/import/index.html
+[docs-import]: https://www.terraform.io/cli/import
 
 ```
 terraform import nsxt_spoofguard_switching_profile.spoofguard_switching_profile UUID

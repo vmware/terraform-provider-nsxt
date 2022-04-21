@@ -222,7 +222,7 @@ An existing lb rule can be [imported][docs-import] into this resource, via the f
   }
 }
 
-[docs-import]: /docs/import/index.html
+[docs-import]: https://www.terraform.io/cli/import
 
 ```
 terraform import nsxt_lb_http_response_rewrite_rule.lb_rule UUID

@@ -70,7 +70,7 @@ In addition to arguments listed above, the following attributes are exported:
 
 An existing Static can be [imported][docs-import] into this resource, via the following command:
 
-[docs-import]: /docs/import/index.html
+[docs-import]: https://www.terraform.io/cli/import
 
 ```
 terraform import nsxt_policy_ip_pool_static_subnet.static_subnet1 pool-id/subnet-id
