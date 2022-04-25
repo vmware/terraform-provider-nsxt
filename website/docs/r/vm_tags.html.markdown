@@ -39,7 +39,7 @@ The following arguments are supported:
 
 An existing Tags collection can be [imported][docs-import] into this resource, via the following command:
 
-[docs-import]: /docs/import/index.html
+[docs-import]: https://www.terraform.io/cli/import
 
 ```
 terraform import nsxt_vm_tags.vm1_tags id

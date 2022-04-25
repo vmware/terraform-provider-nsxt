@@ -56,7 +56,7 @@ In addition to arguments listed above, the following attributes are exported:
 
 An existing lb source ip persistence profile can be [imported][docs-import] into this resource, via the following command:
 
-[docs-import]: /docs/import/index.html
+[docs-import]: https://www.terraform.io/cli/import
 
 ```
 terraform import nsxt_lb_source_ip_persistence_profile.lb_source_ip_persistence_profile UUID

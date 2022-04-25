@@ -45,7 +45,7 @@ In addition to arguments listed above, the following attributes are exported:
 
 An existing logical router link port on Tier-0 can be [imported][docs-import] into this resource, via the following command:
 
-[docs-import]: /docs/import/index.html
+[docs-import]: https://www.terraform.io/cli/import
 
 ```
 terraform import nsxt_logical_router_link_port_on_tier0.link_port_tier0 UUID

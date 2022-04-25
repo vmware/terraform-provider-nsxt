@@ -45,7 +45,7 @@ In addition to arguments listed above, the following attributes are exported:
 
 An existing Ethernet type NS service can be [imported][docs-import] into this resource, via the following command:
 
-[docs-import]: /docs/import/index.html
+[docs-import]: https://www.terraform.io/cli/import
 
 ```
 terraform import nsxt_ether_type_ns_service.etns UUID

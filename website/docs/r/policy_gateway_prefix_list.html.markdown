@@ -63,7 +63,7 @@ In addition to arguments listed above, the following attributes are exported:
 
 An existing policy Tier-0 Gateway prefix list can be [imported][docs-import] into this resource, via the following command:
 
-[docs-import]: /docs/import/index.html
+[docs-import]: https://www.terraform.io/cli/import
 
 ```
 terraform import nsxt_policy_gateway_prefix_list.pf1 GW-ID/ID

@@ -81,7 +81,7 @@ In addition to arguments listed above, the following attributes are exported:
 
 An existing logical DHCP server can be [imported][docs-import] into this resource, via the following command:
 
-[docs-import]: /docs/import/index.html
+[docs-import]: https://www.terraform.io/cli/import
 
 ```
 terraform import nsxt_logical_dhcp_server.logical_dhcp_server UUID

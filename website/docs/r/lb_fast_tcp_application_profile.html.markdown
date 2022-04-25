@@ -53,7 +53,7 @@ In addition to arguments listed above, the following attributes are exported:
 
 An existing lb fast tcp profile can be [imported][docs-import] into this resource, via the following command:
 
-[docs-import]: /docs/import/index.html
+[docs-import]: https://www.terraform.io/cli/import
 
 ```
 terraform import nsxt_lb_fast_tcp_application_profile.lb_fast_tcp_profile UUID
