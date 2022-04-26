@@ -25,8 +25,11 @@ func TestAccResourceNsxtPolicyTier0GatewayHaVipConfig_basic(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		// This test works with local manager but only with 2 edge nodes
+		// 3.2.0 added an edge node constraint, meaning we need big edge
+		// topology for this test
 		PreCheck: func() {
 			testAccOnlyGlobalManager(t)
+			testAccNSXVersionLessThan(t, "3.2.0")
 			testAccEnvDefined(t, "NSXT_TEST_SITE_NAME")
 			testAccPreCheck(t)
 		},
@@ -77,20 +80,20 @@ func TestAccResourceNsxtPolicyTier0GatewayHaVipConfig_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "locale_service_id"),
 				),
 			},
-			// {
-			// 	// Update Tier0 and HA vip config at the same time (This doesn't work currently)
-			// 	Config: testAccNsxtPolicyTier0HAVipConfigTemplate(tier0Name, "true", subnet1, subnet2, vipSubnet),
-			// 	Check: resource.ComposeTestCheckFunc(
-			// 		testAccNsxtPolicyTier0HAVipConfigExists(testResourceName),
-			// 		resource.TestCheckResourceAttr(testResourceName, "config.#", "1"),
-			// 		resource.TestCheckResourceAttr(testResourceName, "config.0.enabled", "true"),
-			// 		resource.TestCheckResourceAttr(testResourceName, "config.0.external_interface_paths.#", "2"),
-			// 		resource.TestCheckResourceAttr(testResourceName, "config.0.vip_subnets.#", "1"),
-			// 		resource.TestCheckResourceAttr(testResourceName, "config.0.vip_subnets.0", vipSubnet),
-			// 		resource.TestCheckResourceAttrSet(testResourceName, "tier0_id"),
-			// 		resource.TestCheckResourceAttrSet(testResourceName, "locale_service_id"),
-			// 	),
-			// },
+			{
+				// Update Tier0 and HA vip config at the same time (This doesn't work currently)
+				Config: testAccNsxtPolicyTier0HAVipConfigTemplate(tier0Name, "true", subnet1, subnet2, vipSubnet),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyTier0HAVipConfigExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "config.0.enabled", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "config.0.external_interface_paths.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "config.0.vip_subnets.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "config.0.vip_subnets.0", vipSubnet),
+					resource.TestCheckResourceAttrSet(testResourceName, "tier0_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "locale_service_id"),
+				),
+			},
 		},
 	})
 }
@@ -128,6 +131,7 @@ func TestAccResourceNsxtPolicyTier0GatewayHaVipConfig_importBasic(t *testing.T) 
 		// This test works with local manager but only with 2 edge nodes
 		PreCheck: func() {
 			testAccOnlyGlobalManager(t)
+			testAccNSXVersionLessThan(t, "3.2.0")
 			testAccEnvDefined(t, "NSXT_TEST_SITE_NAME")
 			testAccPreCheck(t)
 		},
