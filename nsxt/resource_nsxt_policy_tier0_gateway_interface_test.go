@@ -203,7 +203,8 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_external(t *testing.T) {
 		enablePim = "true"
 	}
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
+		// More edge nodes are required since 3.2.0 for this test
+		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0"); testAccNSXVersionLessThan(t, "3.2.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTier0InterfaceCheckDestroy(state, updatedName)

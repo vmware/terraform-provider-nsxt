@@ -22,6 +22,7 @@ import (
 
 var testAccProviders map[string]*schema.Provider
 var testAccProvider *schema.Provider
+var testAccConnector *client.RestConnector
 
 func init() {
 
@@ -128,6 +129,10 @@ func testAccNSXVersionLessThan(t *testing.T, requiredVersion string) {
 }
 
 func testAccGetPolicyConnector() (*client.RestConnector, error) {
+	if testAccConnector != nil {
+		return testAccConnector, nil
+	}
+
 	if os.Getenv("NSXT_MANAGER_HOST") == "" {
 		return nil, fmt.Errorf("NSXT_MANAGER_HOST is not set in environment")
 	}
@@ -157,6 +162,8 @@ func testAccGetPolicyConnector() (*client.RestConnector, error) {
 	httpClient := http.Client{Transport: tr}
 	connector := client.NewRestConnector(host, httpClient)
 	connector.SetSecurityContext(securityCtx)
+
+	testAccConnector = connector
 
 	return connector, nil
 }
