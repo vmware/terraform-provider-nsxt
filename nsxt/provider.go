@@ -26,7 +26,7 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/security"
 )
 
-var defaultRetryOnStatusCodes = []int{409, 429, 500, 503, 504}
+var defaultRetryOnStatusCodes = []int{400, 409, 429, 500, 503, 504}
 
 // Provider configuration that is shared for policy and MP
 type commonProviderConfig struct {
@@ -767,19 +767,20 @@ func getPolicyConnector(clients interface{}) *client.RestConnector {
 		if retryContext.Response != nil {
 			for _, code := range c.CommonConfig.RetryStatusCodes {
 				if retryContext.Response.StatusCode == code {
+					log.Printf("[DEBUG]: Retrying request due to error code %d", code)
 					shouldRetry = true
 					break
 				}
 			}
 		} else {
 			shouldRetry = true
+			log.Printf("[DEBUG]: Retrying request due to error")
 		}
 
 		if !shouldRetry {
 			return false
 		}
 
-		log.Printf("[DEBUG]: Retrying request due to error code %d", retryContext.Response.StatusCode)
 		min := c.CommonConfig.MinRetryInterval
 		max := c.CommonConfig.MaxRetryInterval
 		if max > 0 {

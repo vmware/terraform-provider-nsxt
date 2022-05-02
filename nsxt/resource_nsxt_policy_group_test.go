@@ -440,7 +440,7 @@ func TestAccResourceNsxtPolicyGroup_identityGroup(t *testing.T) {
 	updatedName := getAccTestResourceName()
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyGroupCheckDestroy(state, updatedName, defaultDomain)

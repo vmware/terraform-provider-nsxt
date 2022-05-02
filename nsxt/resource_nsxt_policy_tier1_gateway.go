@@ -661,7 +661,7 @@ func resourceNsxtPolicyTier1GatewayDelete(d *schema.ResourceData, m interface{})
 	log.Printf("[DEBUG] Using H-API to delete Tier1 with ID %s", id)
 	err := policyInfraPatch(obj, isPolicyGlobalManager(m), getPolicyConnector(m), false)
 	if err != nil {
-		return err
+		return handleDeleteError("Tier1", id, err)
 	}
 	log.Printf("[DEBUG] Success deleting Tier1 with ID %s", id)
 

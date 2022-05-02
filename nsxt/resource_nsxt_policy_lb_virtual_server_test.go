@@ -285,7 +285,7 @@ func TestAccResourceNsxtPolicyLBVirtualServer_withRules(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 
-					resource.TestCheckResourceAttr(testResourceName, "rule.#", "14"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.#", "13"),
 
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.display_name", "connection_drop_test"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.action.#", "1"),
@@ -387,69 +387,61 @@ func TestAccResourceNsxtPolicyLBVirtualServer_withRules(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "rule.8.condition.0.ssl_sni.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.8.condition.0.ssl_sni.0.match_type", "REGEX"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.8.condition.0.ssl_sni.0.sni", "HELO"),
-
-					resource.TestCheckResourceAttr(testResourceName, "rule.9.display_name", "ssl_mode_selection_test"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.9.phase", "TRANSPORT"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.9.display_name", "variable_assignment_test"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.9.phase", "HTTP_ACCESS"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.9.action.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.9.action.0.ssl_mode_selection.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.9.action.0.ssl_mode_selection.0.ssl_mode", "SSL_PASSTHROUGH"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.9.condition.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.9.action.0.variable_assignment.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.9.action.0.variable_assignment.0.variable_name", "foo"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.9.action.0.variable_assignment.0.variable_value", "bar"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.9.condition.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.9.condition.0.variable.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.9.condition.0.variable.0.variable_name", "my_var"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.9.condition.0.variable.0.variable_value", "my_value"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.9.condition.0.variable.0.match_type", "REGEX"),
 
-					resource.TestCheckResourceAttr(testResourceName, "rule.10.display_name", "variable_assignment_test"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.10.phase", "HTTP_ACCESS"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.10.display_name", "variable_persistence_learn_test"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.10.phase", "HTTP_RESPONSE_REWRITE"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.10.action.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.10.action.0.variable_assignment.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.10.action.0.variable_assignment.0.variable_name", "foo"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.10.action.0.variable_assignment.0.variable_value", "bar"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.10.action.0.variable_persistence_learn.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, "rule.10.action.0.variable_persistence_learn.0.persistence_profile_path"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.10.action.0.variable_persistence_learn.0.variable_hash_enabled", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.10.action.0.variable_persistence_learn.0.variable_name", "my_name"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.variable.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.variable.0.variable_name", "my_var"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.variable.0.variable_value", "my_value"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.variable.0.match_type", "REGEX"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.session_reused", "IGNORE"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.used_protocol", "SSL_V2"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.used_ssl_cipher", "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.session_reused", "IGNORE"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.used_protocol", "SSL_V2"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.client_certificate_issuer_dn.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.client_certificate_issuer_dn.0.issuer_dn", "something"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.client_certificate_issuer_dn.0.match_type", "REGEX"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.client_certificate_subject_dn.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.client_certificate_subject_dn.0.subject_dn", "something"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.client_certificate_subject_dn.0.match_type", "REGEX"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.client_supported_ssl_ciphers.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.client_supported_ssl_ciphers.0", "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.client_supported_ssl_ciphers.1", "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"),
 
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.display_name", "variable_persistence_learn_test"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.phase", "HTTP_RESPONSE_REWRITE"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.11.display_name", "variable_persistence_on_test"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.11.phase", "HTTP_FORWARDING"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.11.action.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.action.0.variable_persistence_learn.#", "1"),
-					resource.TestCheckResourceAttrSet(testResourceName, "rule.11.action.0.variable_persistence_learn.0.persistence_profile_path"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.action.0.variable_persistence_learn.0.variable_hash_enabled", "true"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.action.0.variable_persistence_learn.0.variable_name", "my_name"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.condition.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.condition.0.http_ssl.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.condition.0.http_ssl.0.session_reused", "IGNORE"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.condition.0.http_ssl.0.used_protocol", "SSL_V2"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.condition.0.http_ssl.0.used_ssl_cipher", "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.condition.0.http_ssl.0.session_reused", "IGNORE"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.condition.0.http_ssl.0.used_protocol", "SSL_V2"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.condition.0.http_ssl.0.client_certificate_issuer_dn.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.condition.0.http_ssl.0.client_certificate_issuer_dn.0.issuer_dn", "something"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.condition.0.http_ssl.0.client_certificate_issuer_dn.0.match_type", "REGEX"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.condition.0.http_ssl.0.client_certificate_subject_dn.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.condition.0.http_ssl.0.client_certificate_subject_dn.0.subject_dn", "something"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.condition.0.http_ssl.0.client_certificate_subject_dn.0.match_type", "REGEX"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.condition.0.http_ssl.0.client_supported_ssl_ciphers.#", "2"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.condition.0.http_ssl.0.client_supported_ssl_ciphers.0", "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.condition.0.http_ssl.0.client_supported_ssl_ciphers.1", "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.11.action.0.variable_persistence_on.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, "rule.11.action.0.variable_persistence_on.0.persistence_profile_path"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.11.action.0.variable_persistence_on.0.variable_hash_enabled", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.11.action.0.variable_persistence_on.0.variable_name", "my_name"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.11.condition.#", "0"),
 
-					resource.TestCheckResourceAttr(testResourceName, "rule.12.display_name", "variable_persistence_on_test"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.12.phase", "HTTP_FORWARDING"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.12.display_name", "jwt_auth_test"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.12.phase", "HTTP_ACCESS"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.12.action.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.12.action.0.variable_persistence_on.#", "1"),
-					resource.TestCheckResourceAttrSet(testResourceName, "rule.12.action.0.variable_persistence_on.0.persistence_profile_path"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.12.action.0.variable_persistence_on.0.variable_hash_enabled", "false"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.12.action.0.variable_persistence_on.0.variable_name", "my_name"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.12.condition.#", "0"),
-
-					resource.TestCheckResourceAttr(testResourceName, "rule.13.display_name", "jwt_auth_test"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.13.phase", "HTTP_ACCESS"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.13.action.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.13.action.0.jwt_auth.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.13.action.0.jwt_auth.0.key.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.13.action.0.jwt_auth.0.key.0.public_key_content", "xxx"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.13.action.0.jwt_auth.0.pass_jwt_to_pool", "true"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.13.action.0.jwt_auth.0.realm", "realm"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.13.action.0.jwt_auth.0.tokens.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.13.action.0.jwt_auth.0.tokens.0", "a"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.12.action.0.jwt_auth.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.12.action.0.jwt_auth.0.key.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.12.action.0.jwt_auth.0.key.0.public_key_content", "xxx"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.12.action.0.jwt_auth.0.pass_jwt_to_pool", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.12.action.0.jwt_auth.0.realm", "realm"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.12.action.0.jwt_auth.0.tokens.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.12.action.0.jwt_auth.0.tokens.0", "a"),
 				),
 			},
 			{
@@ -465,7 +457,7 @@ func TestAccResourceNsxtPolicyLBVirtualServer_withRules(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 
-					resource.TestCheckResourceAttr(testResourceName, "rule.#", "14"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.#", "13"),
 
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.display_name", "connection_drop_test"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.action.#", "1"),
@@ -568,68 +560,61 @@ func TestAccResourceNsxtPolicyLBVirtualServer_withRules(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "rule.8.condition.0.ssl_sni.0.match_type", "REGEX"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.8.condition.0.ssl_sni.0.sni", "HELO"),
 
-					resource.TestCheckResourceAttr(testResourceName, "rule.9.display_name", "ssl_mode_selection_test"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.9.phase", "TRANSPORT"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.9.display_name", "variable_assignment_test"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.9.phase", "HTTP_ACCESS"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.9.action.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.9.action.0.ssl_mode_selection.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.9.action.0.ssl_mode_selection.0.ssl_mode", "SSL_PASSTHROUGH"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.9.condition.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.9.action.0.variable_assignment.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.9.action.0.variable_assignment.0.variable_name", "foo"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.9.action.0.variable_assignment.0.variable_value", "bar"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.9.condition.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.9.condition.0.variable.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.9.condition.0.variable.0.variable_name", "my_var"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.9.condition.0.variable.0.variable_value", "my_value"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.9.condition.0.variable.0.match_type", "REGEX"),
 
-					resource.TestCheckResourceAttr(testResourceName, "rule.10.display_name", "variable_assignment_test"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.10.phase", "HTTP_ACCESS"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.10.display_name", "variable_persistence_learn_test"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.10.phase", "HTTP_RESPONSE_REWRITE"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.10.action.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.10.action.0.variable_assignment.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.10.action.0.variable_assignment.0.variable_name", "foo"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.10.action.0.variable_assignment.0.variable_value", "bar"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.10.action.0.variable_persistence_learn.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, "rule.10.action.0.variable_persistence_learn.0.persistence_profile_path"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.10.action.0.variable_persistence_learn.0.variable_hash_enabled", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.10.action.0.variable_persistence_learn.0.variable_name", "my_name"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.variable.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.variable.0.variable_name", "my_var"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.variable.0.variable_value", "my_value"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.variable.0.match_type", "REGEX"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.session_reused", "IGNORE"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.used_protocol", "SSL_V2"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.used_ssl_cipher", "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.session_reused", "IGNORE"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.used_protocol", "SSL_V2"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.client_certificate_issuer_dn.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.client_certificate_issuer_dn.0.issuer_dn", "something"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.client_certificate_issuer_dn.0.match_type", "REGEX"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.client_certificate_subject_dn.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.client_certificate_subject_dn.0.subject_dn", "something"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.client_certificate_subject_dn.0.match_type", "REGEX"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.client_supported_ssl_ciphers.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.client_supported_ssl_ciphers.0", "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.client_supported_ssl_ciphers.1", "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"),
 
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.display_name", "variable_persistence_learn_test"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.phase", "HTTP_RESPONSE_REWRITE"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.11.display_name", "variable_persistence_on_test"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.11.phase", "HTTP_FORWARDING"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.11.action.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.action.0.variable_persistence_learn.#", "1"),
-					resource.TestCheckResourceAttrSet(testResourceName, "rule.11.action.0.variable_persistence_learn.0.persistence_profile_path"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.action.0.variable_persistence_learn.0.variable_hash_enabled", "true"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.action.0.variable_persistence_learn.0.variable_name", "my_name"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.condition.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.condition.0.http_ssl.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.condition.0.http_ssl.0.session_reused", "IGNORE"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.condition.0.http_ssl.0.used_protocol", "SSL_V2"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.condition.0.http_ssl.0.used_ssl_cipher", "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.condition.0.http_ssl.0.session_reused", "IGNORE"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.condition.0.http_ssl.0.used_protocol", "SSL_V2"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.condition.0.http_ssl.0.client_certificate_issuer_dn.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.condition.0.http_ssl.0.client_certificate_issuer_dn.0.issuer_dn", "something"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.condition.0.http_ssl.0.client_certificate_issuer_dn.0.match_type", "REGEX"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.condition.0.http_ssl.0.client_certificate_subject_dn.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.condition.0.http_ssl.0.client_certificate_subject_dn.0.subject_dn", "something"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.condition.0.http_ssl.0.client_certificate_subject_dn.0.match_type", "REGEX"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.condition.0.http_ssl.0.client_supported_ssl_ciphers.#", "2"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.condition.0.http_ssl.0.client_supported_ssl_ciphers.0", "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.condition.0.http_ssl.0.client_supported_ssl_ciphers.1", "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.11.action.0.variable_persistence_on.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, "rule.11.action.0.variable_persistence_on.0.persistence_profile_path"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.11.action.0.variable_persistence_on.0.variable_hash_enabled", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.11.action.0.variable_persistence_on.0.variable_name", "my_name"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.11.condition.#", "0"),
 
-					resource.TestCheckResourceAttr(testResourceName, "rule.12.display_name", "variable_persistence_on_test"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.12.phase", "HTTP_FORWARDING"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.12.display_name", "jwt_auth_test"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.12.phase", "HTTP_ACCESS"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.12.action.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.12.action.0.variable_persistence_on.#", "1"),
-					resource.TestCheckResourceAttrSet(testResourceName, "rule.12.action.0.variable_persistence_on.0.persistence_profile_path"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.12.action.0.variable_persistence_on.0.variable_hash_enabled", "false"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.12.action.0.variable_persistence_on.0.variable_name", "my_name"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.12.condition.#", "0"),
-
-					resource.TestCheckResourceAttr(testResourceName, "rule.13.display_name", "jwt_auth_test"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.13.phase", "HTTP_ACCESS"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.13.action.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.13.action.0.jwt_auth.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.13.action.0.jwt_auth.0.key.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.13.action.0.jwt_auth.0.key.0.public_key_content", "xxx"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.13.action.0.jwt_auth.0.pass_jwt_to_pool", "true"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.13.action.0.jwt_auth.0.realm", "realm"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.13.action.0.jwt_auth.0.tokens.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.13.action.0.jwt_auth.0.tokens.0", "a"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.12.action.0.jwt_auth.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.12.action.0.jwt_auth.0.key.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.12.action.0.jwt_auth.0.key.0.public_key_content", "xxx"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.12.action.0.jwt_auth.0.pass_jwt_to_pool", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.12.action.0.jwt_auth.0.realm", "realm"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.12.action.0.jwt_auth.0.tokens.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.12.action.0.jwt_auth.0.tokens.0", "a"),
 				),
 			},
 			{
@@ -927,12 +912,12 @@ resource "nsxt_policy_lb_virtual_server" "test" {
 	display_name = "http_redirect_test"
 	action {
 	  http_redirect {
-        redirect_status = "301"
-        redirect_url = "dummy"
+            redirect_status = "301"
+            redirect_url = "dummy"
 	  }
 	  http_redirect {
-        redirect_status = "302"
-        redirect_url = "other_dummy"
+            redirect_status = "302"
+            redirect_url = "other_dummy"
 	  }
 	}
 	condition {
@@ -954,7 +939,7 @@ resource "nsxt_policy_lb_virtual_server" "test" {
 	}
 	condition {
 	  http_request_cookie {
-        cookie_name = "is"
+            cookie_name = "is"
 	    cookie_value = "brownie"
 	    match_type = "REGEX"
 	  }
@@ -1011,7 +996,7 @@ resource "nsxt_policy_lb_virtual_server" "test" {
 	    uri = "uri_test"
 	  }
 	  http_request_uri_rewrite {
-        uri = "uri_test2"
+            uri = "uri_test2"
 	    uri_arguments = "foo=bar"
 	  }
 	}
@@ -1027,10 +1012,10 @@ resource "nsxt_policy_lb_virtual_server" "test" {
 	action {
 	  http_response_header_delete {
 	    header_name = "clever"
-      }
-      http_response_header_delete {
+          }
+          http_response_header_delete {
 	    header_name = "smart"
-      }
+          }
 	}
 	condition {
 	  http_response_header {
@@ -1064,10 +1049,10 @@ resource "nsxt_policy_lb_virtual_server" "test" {
 	phase = "HTTP_FORWARDING"
 	action {
 	  select_pool {
-        pool_id = nsxt_policy_lb_pool.pool.path
+            pool_id = nsxt_policy_lb_pool.pool.path
 	  } 
 	}
-    condition {
+        condition {
 	  ssl_sni {
 	    match_type = "REGEX"
 	    sni = "HELO"
@@ -1075,20 +1060,11 @@ resource "nsxt_policy_lb_virtual_server" "test" {
 	}
   }
   rule {
-	display_name = "ssl_mode_selection_test"
-	phase = "TRANSPORT"
-	action {
-	  ssl_mode_selection {
-        ssl_mode = "SSL_PASSTHROUGH"
-  	  }
-	}
-  }
-  rule {
 	display_name = "variable_assignment_test"
 	phase = "HTTP_ACCESS"
 	action {
 	  variable_assignment {
-        variable_name = "foo"
+            variable_name = "foo"
 	    variable_value = "bar"
 	  }
 	}
@@ -1108,7 +1084,7 @@ resource "nsxt_policy_lb_virtual_server" "test" {
 	phase = "HTTP_RESPONSE_REWRITE"
 	action {
 	  variable_persistence_learn {
-        persistence_profile_path = data.nsxt_policy_lb_persistence_profile.generic.path
+            persistence_profile_path = data.nsxt_policy_lb_persistence_profile.generic.path
 	    variable_hash_enabled = true
 	    variable_name = "my_name"
 	  }  
@@ -1135,7 +1111,7 @@ resource "nsxt_policy_lb_virtual_server" "test" {
 	phase = "HTTP_FORWARDING"
 	action {
 	  variable_persistence_on {
-        persistence_profile_path = data.nsxt_policy_lb_persistence_profile.generic.path
+            persistence_profile_path = data.nsxt_policy_lb_persistence_profile.generic.path
 	    variable_hash_enabled = false
 	    variable_name = "my_name"
 	  }  
