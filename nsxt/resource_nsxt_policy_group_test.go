@@ -131,6 +131,52 @@ func TestAccResourceNsxtGlobalPolicyGroup_singleIPAddressCriteria(t *testing.T) 
 	})
 }
 
+func TestAccResourceNsxtGlobalPolicyGroup_externalIDCriteria(t *testing.T) {
+	name := getAccTestResourceName()
+	updatedName := getAccTestResourceName()
+	testResourceName := "nsxt_policy_group.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyGroupCheckDestroy(state, updatedName, defaultDomain)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyGroupExternalIDCreateTemplate(name, defaultDomain),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "domain", defaultDomain),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "conjunction.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.#", "1"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyGroupExternalIDUpdateTemplate(updatedName, defaultDomain),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "domain", defaultDomain),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "conjunction.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.#", "2"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtGlobalPolicyGroup_withDomain(t *testing.T) {
 	name := "test-nsx-global-policy-group-domain"
 	testResourceName := "nsxt_policy_group.test"
@@ -773,6 +819,59 @@ resource "nsxt_policy_group" "test" {
   tag {
     scope = "scope2"
     tag   = "tag2"
+  }
+}
+`, name)
+}
+
+func testAccNsxtPolicyGroupExternalIDCreateTemplate(name string, siteName string) string {
+	return fmt.Sprintf(`
+resource "nsxt_policy_group" "test" {
+  display_name = "%s"
+  description  = "Acceptance Test"
+
+  criteria {
+    external_id_expression {
+      member_type = "VirtualMachine"
+      external_ids = ["520ba7b0-d9f8-87b1-6f44-15bbeb7935c7", "52748a9e-d61d-e29b-d54b-07f169ff0ee8-4000"]
+    }
+  }
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+
+  tag {
+    scope = "scope2"
+    tag   = "tag2"
+  }
+}
+`, name)
+}
+
+func testAccNsxtPolicyGroupExternalIDUpdateTemplate(name string, siteName string) string {
+	return fmt.Sprintf(`
+resource "nsxt_policy_group" "test" {
+  display_name = "%s"
+  description  = "Acceptance Test"
+
+  criteria {
+    external_id_expression {
+      member_type = "VirtualMachine"
+      external_ids = ["520ba7b0-d9f8-87b1-6f44-15bbeb7935c7", "52748a9e-d61d-e29b-d54b-07f169ff0ee8-4000"]
+    }
+  }
+
+  conjunction {
+	operator = "OR"
+  }
+
+  criteria {
+    external_id_expression {
+      member_type = "VirtualNetworkInterface"
+      external_ids = ["520ba7b0-d9f8-87b1-6f44-15bbeb7935c7", "52748a9e-d61d-e29b-d54b-07f169ff0ee8-4000"]
+    }
   }
 }
 `, name)
