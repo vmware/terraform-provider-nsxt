@@ -130,7 +130,7 @@ func getExternalIDExpressionSchema() *schema.Resource {
 			"external_ids": {
 				Type:        schema.TypeSet,
 				Required:    true,
-				Description: "List of external ids",
+				Description: "List of external IDs",
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -140,6 +140,7 @@ func getExternalIDExpressionSchema() *schema.Resource {
 				Optional:     true,
 				Description:  "External ID member type, default to virtual machine if not specified",
 				ValidateFunc: validation.StringInSlice(externalMemberTypeValues, false),
+				Default:      model.ExternalIDExpression_MEMBER_TYPE_VIRTUALMACHINE,
 			},
 		},
 	}
@@ -460,9 +461,6 @@ func buildGroupMacAddressData(ipaddr interface{}) (*data.StructValue, error) {
 func buildGroupExternalIDExpressionData(externalID interface{}) (*data.StructValue, error) {
 	idMap := externalID.(map[string]interface{})
 	memberType := idMap["member_type"].(string)
-	if memberType == "" {
-		memberType = model.ExternalIDExpression_MEMBER_TYPE_VIRTUALMACHINE
-	}
 	var extIDs []string
 
 	for _, extID := range idMap["external_ids"].(*schema.Set).List() {

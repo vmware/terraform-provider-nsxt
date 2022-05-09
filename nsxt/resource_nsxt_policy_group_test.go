@@ -154,7 +154,7 @@ func TestAccResourceNsxtGlobalPolicyGroup_externalIDCriteria(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "domain", defaultDomain),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
-					resource.TestCheckNoResourceAttr(testResourceName, "conjunction"),
+					resource.TestCheckResourceAttr(testResourceName, "conjunction.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "criteria.#", "1"),
 				),
