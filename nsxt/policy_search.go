@@ -119,8 +119,22 @@ func listPolicyResourcesByNameAndType(connector *client.RestConnector, isGlobalM
 	return searchLMPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
 }
 
+func escapeSpecialCharacters(str string) string {
+	// we replace special characters that can be encountered in object IDs
+	specials := "()[]"
+	if !strings.ContainsAny(str, specials) {
+		return str
+	}
+	for _, chr := range specials {
+		strchr := string(chr)
+		str = strings.Replace(str, strchr, "\\"+strchr, -1)
+	}
+
+	return str
+}
+
 func listPolicyResourcesByID(connector *client.RestConnector, isGlobalManager bool, resourceID *string, additionalQuery *string) ([]*data.StructValue, error) {
-	query := fmt.Sprintf("id:%s AND marked_for_delete:false", *resourceID)
+	query := fmt.Sprintf("id:%s AND marked_for_delete:false", escapeSpecialCharacters(*resourceID))
 	if isGlobalManager {
 		return searchGMPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
 	}
@@ -128,7 +142,7 @@ func listPolicyResourcesByID(connector *client.RestConnector, isGlobalManager bo
 }
 
 func listPolicyResourcesByNsxID(connector *client.RestConnector, isGlobalManager bool, resourceID *string, additionalQuery *string) ([]*data.StructValue, error) {
-	query := fmt.Sprintf("nsx_id:%s AND marked_for_delete:false", *resourceID)
+	query := fmt.Sprintf("nsx_id:%s AND marked_for_delete:false", escapeSpecialCharacters(*resourceID))
 	if isGlobalManager {
 		return searchGMPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
 	}
