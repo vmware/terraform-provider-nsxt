@@ -1,3 +1,15 @@
+## 3.2.7 (May 12, 2022)
+
+BUG FIXES:
+
+* Fix potential segmentation fault in API retry ([#746](https://github.com/vmware/terraform-provider-nsxt/pull/746))
+* Support special characters in IDs of NSX objects in data source search ([#751](https://github.com/vmware/terraform-provider-nsxt/pull/751))
+
+IMPROVEMENTS:
+* `resource/nsxt_policy_group`: Support external IDs ([#733](https://github.com/vmware/terraform-provider-nsxt/pull/733))
+* `resource/nsxt_policy_tier1_gateway`: Improve error handling in delete ([#746](https://github.com/vmware/terraform-provider-nsxt/pull/746))
+
+
 ## 3.2.6 (April 8, 2022)
 
 BUG FIXES:
