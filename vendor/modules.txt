@@ -14,7 +14,6 @@ github.com/fatih/color
 # github.com/gibson042/canonicaljson-go v1.0.3
 github.com/gibson042/canonicaljson-go
 # github.com/golang/protobuf v1.5.2
-## explicit
 github.com/golang/protobuf/proto
 github.com/golang/protobuf/ptypes
 github.com/golang/protobuf/ptypes/any
@@ -258,8 +257,6 @@ golang.org/x/crypto/openpgp/elgamal
 golang.org/x/crypto/openpgp/errors
 golang.org/x/crypto/openpgp/packet
 golang.org/x/crypto/openpgp/s2k
-# golang.org/x/mod v0.4.0
-## explicit
 # golang.org/x/net v0.0.0-20220325170049-de3da57026de
 ## explicit
 golang.org/x/net/context
@@ -294,8 +291,6 @@ golang.org/x/text/secure/bidirule
 golang.org/x/text/transform
 golang.org/x/text/unicode/bidi
 golang.org/x/text/unicode/norm
-# golang.org/x/tools v0.1.0
-## explicit
 # google.golang.org/appengine v1.6.7
 ## explicit
 google.golang.org/appengine
@@ -364,7 +359,6 @@ google.golang.org/grpc/stats
 google.golang.org/grpc/status
 google.golang.org/grpc/tap
 # google.golang.org/protobuf v1.28.0
-## explicit
 google.golang.org/protobuf/encoding/prototext
 google.golang.org/protobuf/encoding/protowire
 google.golang.org/protobuf/internal/descfmt
