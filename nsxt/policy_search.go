@@ -162,6 +162,9 @@ func searchGMPolicyResources(connector *client.RestConnector, query string) ([]*
 	var cursor *string
 	total := 0
 
+	// Make sure local objects are not found (path needs to start with global-infra)
+	query = query + " AND path:\\/global-infra*"
+
 	for {
 		searchResponse, err := client.List(query, cursor, nil, nil, nil, nil)
 		if err != nil {
@@ -184,6 +187,9 @@ func searchLMPolicyResources(connector *client.RestConnector, query string) ([]*
 	var results []*data.StructValue
 	var cursor *string
 	total := 0
+
+	// Make sure global objects are not found (path needs to start with infra)
+	query = query + " AND path:\\/infra*"
 
 	for {
 		searchResponse, err := client.List(query, cursor, nil, nil, nil, nil)
