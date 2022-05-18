@@ -357,7 +357,7 @@ func getPolicyTier0GatewayLocaleServiceWithEdgeCluster(gwID string, connector *c
 		return &objInList, nil
 	}
 
-	return nil, nil
+	return nil, fmt.Errorf("No locale services found for GW %v", gwID)
 }
 
 func initPolicyTier0BGPConfigMap(bgpConfig *model.BgpRoutingConfig) map[string]interface{} {
@@ -516,6 +516,32 @@ func resourceNsxtPolicyTier0GatewayExists(id string, connector *client.RestConne
 
 	if err == nil {
 		return true, nil
+	}
+
+	if isNotFoundError(err) {
+		return false, nil
+	}
+
+	return false, logAPIError("Error retrieving Tier0", err)
+}
+
+func resourceNsxtPolicyTier0GatewayIsVrf(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
+	if isGlobalManager {
+		client := gm_infra.NewTier0sClient(connector)
+		obj, err := client.Get(id)
+
+		if err == nil {
+			return obj.VrfConfig != nil, nil
+		}
+
+		return false, err
+	}
+
+	client := infra.NewTier0sClient(connector)
+	obj, err := client.Get(id)
+
+	if err == nil {
+		return obj.VrfConfig != nil, nil
 	}
 
 	if isNotFoundError(err) {

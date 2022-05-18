@@ -363,7 +363,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_withVRF(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyTier0WithVRFTemplate(name, true, true),
+				Config: testAccNsxtPolicyTier0WithVRFTemplate(name, true, true, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTier0Exists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -381,7 +381,7 @@ func TestAccResourceNsxtPolicyTier0Gateway_withVRF(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyTier0WithVRFTemplate(updateName, false, false),
+				Config: testAccNsxtPolicyTier0WithVRFTemplate(updateName, false, false, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTier0Exists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updateName),
@@ -689,8 +689,7 @@ data "nsxt_policy_realization_info" "realization_info" {
 }`, name)
 }
 
-// TODO: add vrf_config tags when bug 2557096 is resolved
-func testAccNsxtPolicyTier0WithVRFTemplate(name string, targets bool, rdAdmin bool) string {
+func testAccNsxtPolicyTier0WithVRFTemplate(name string, targets bool, rdAdmin bool, withBGP bool) string {
 
 	var routeTargets string
 	if targets {
@@ -705,6 +704,16 @@ func testAccNsxtPolicyTier0WithVRFTemplate(name string, targets bool, rdAdmin bo
 	var rdAdminAddress string
 	if rdAdmin {
 		rdAdminAddress = `rd_admin_address = "192.168.0.2"`
+	}
+
+	var bgpConfig string
+	if withBGP {
+		bgpConfig = `
+resource "nsxt_policy_bgp_config" "test" {
+	  gateway_path = nsxt_policy_tier0_gateway.test.path
+	  enabled      = true
+	  ecmp         = true
+}`
 	}
 	return testAccNsxtPolicyGatewayInterfaceDeps("11, 12") + fmt.Sprintf(`
 resource "nsxt_policy_tier0_gateway" "parent" {
@@ -746,9 +755,11 @@ resource "nsxt_policy_tier0_gateway_interface" "test" {
   access_vlan_id = 12
 }
 
+%s
+
 data "nsxt_policy_realization_info" "realization_info" {
   path = nsxt_policy_tier0_gateway.test.path
-}`, name, routeTargets, rdAdminAddress, name)
+}`, name, routeTargets, rdAdminAddress, name, bgpConfig)
 }
 
 func testAccNsxtPolicyTier0WithVRFTearDown() string {
