@@ -70,7 +70,7 @@ func resourceNsxtPolicyBgpConfigRead(d *schema.ResourceData, m interface{}) erro
 	return nil
 }
 
-func resourceNsxtPolicyBgpConfigToStruct(d *schema.ResourceData) (*model.BgpRoutingConfig, error) {
+func resourceNsxtPolicyBgpConfigToStruct(d *schema.ResourceData, isVRF bool) (*model.BgpRoutingConfig, error) {
 	ecmp := d.Get("ecmp").(bool)
 	enabled := d.Get("enabled").(bool)
 	interSrIbgp := d.Get("inter_sr_ibgp").(bool)
@@ -97,25 +97,40 @@ func resourceNsxtPolicyBgpConfigToStruct(d *schema.ResourceData) (*model.BgpRout
 		}
 	}
 
-	restartTimerStruct := model.BgpGracefulRestartTimer{
-		RestartTimer:    &restartTimer,
-		StaleRouteTimer: &staleTimer,
-	}
-
-	restartConfigStruct := model.BgpGracefulRestartConfig{
-		Mode:  &restartMode,
-		Timer: &restartTimerStruct,
-	}
-
 	routeStruct := model.BgpRoutingConfig{
-		Ecmp:                  &ecmp,
-		Enabled:               &enabled,
-		RouteAggregations:     aggregationStructs,
-		Tags:                  tags,
-		InterSrIbgp:           &interSrIbgp,
-		LocalAsNum:            &localAsNum,
-		MultipathRelax:        &multipathRelax,
-		GracefulRestartConfig: &restartConfigStruct,
+		Ecmp:              &ecmp,
+		Enabled:           &enabled,
+		RouteAggregations: aggregationStructs,
+	}
+
+	// For BGP on VRF, only limited attributes can be set
+	if isVRF {
+		vrfError := "%s can not be specified on VRF Gateway"
+		if restartTimer != int64(policyBGPGracefulRestartTimerDefault) {
+			return &routeStruct, fmt.Errorf(vrfError, "graceful_restart_timer")
+		}
+		if staleTimer != int64(policyBGPGracefulRestartStaleRouteTimerDefault) {
+			return &routeStruct, fmt.Errorf(vrfError, "graceful_restart_stale_route_timer")
+		}
+		if restartMode != model.BgpGracefulRestartConfig_MODE_HELPER_ONLY {
+			return &routeStruct, fmt.Errorf(vrfError, "graceful_restart_mode")
+		}
+	} else {
+		restartTimerStruct := model.BgpGracefulRestartTimer{
+			RestartTimer:    &restartTimer,
+			StaleRouteTimer: &staleTimer,
+		}
+
+		restartConfigStruct := model.BgpGracefulRestartConfig{
+			Mode:  &restartMode,
+			Timer: &restartTimerStruct,
+		}
+
+		routeStruct.Tags = tags
+		routeStruct.InterSrIbgp = &interSrIbgp
+		routeStruct.LocalAsNum = &localAsNum
+		routeStruct.MultipathRelax = &multipathRelax
+		routeStruct.GracefulRestartConfig = &restartConfigStruct
 	}
 
 	return &routeStruct, nil
@@ -132,7 +147,11 @@ func resourceNsxtPolicyBgpConfigCreate(d *schema.ResourceData, m interface{}) er
 	}
 	sitePath := d.Get("site_path").(string)
 
-	obj, err := resourceNsxtPolicyBgpConfigToStruct(d)
+	isVrf, err := resourceNsxtPolicyTier0GatewayIsVrf(gwID, connector, isPolicyGlobalManager(m))
+	if err != nil {
+		return handleCreateError("BgpRoutingConfig", gwID, err)
+	}
+	obj, err := resourceNsxtPolicyBgpConfigToStruct(d, isVrf)
 	if err != nil {
 		return handleCreateError("BgpRoutingConfig", gwID, err)
 	}
@@ -183,7 +202,12 @@ func resourceNsxtPolicyBgpConfigUpdate(d *schema.ResourceData, m interface{}) er
 	_, gwID := parseGatewayPolicyPath(gwPath)
 	serviceID := d.Get("locale_service_id").(string)
 
-	obj, err := resourceNsxtPolicyBgpConfigToStruct(d)
+	isVrf, err := resourceNsxtPolicyTier0GatewayIsVrf(gwID, connector, isPolicyGlobalManager(m))
+	if err != nil {
+		return handleCreateError("BgpRoutingConfig", gwID, err)
+	}
+
+	obj, err := resourceNsxtPolicyBgpConfigToStruct(d, isVrf)
 	if err != nil {
 		return handleUpdateError("BgpRoutingConfig", gwID, err)
 	}
