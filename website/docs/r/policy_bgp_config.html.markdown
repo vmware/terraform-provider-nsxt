@@ -23,7 +23,6 @@ resource "nsxt_policy_bgp_config" "gw1" {
   inter_sr_ibgp          = true
   local_as_num           = 60001
   graceful_restart_mode  = "HELPER_ONLY"
-  graceful_restart_timer = 2400
 
   route_aggregation {
     prefix       = "20.1.0.0/24"

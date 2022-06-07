@@ -685,10 +685,6 @@ func verifyPolicyTier0GatewayConfig(d *schema.ResourceData, isGlobalManager bool
 		return nil
 	}
 
-	if isSetLocaleService {
-		return fmt.Errorf("locale_service setting is only supported with NSX Global Manager")
-	}
-
 	return nil
 }
 
@@ -784,7 +780,17 @@ func policyTier0GatewayResourceToInfraStruct(d *schema.ResourceData, connector *
 
 	edgeClusterPath := d.Get("edge_cluster_path").(string)
 	_, redistributionSet := d.GetOk("redistribution_config")
-	if !isGlobalManager {
+	// The user can either define locale_service (GL or LM) or edge_cluster_path (LM only)
+	if d.HasChange("locale_service") {
+		// Update locale services only if configuration changed
+		localeServices, err := initGatewayLocaleServices(d, connector, isGlobalManager, listPolicyTier0GatewayLocaleServices)
+		if err != nil {
+			return infraStruct, err
+		}
+		if len(localeServices) > 0 {
+			gwChildren = append(gwChildren, localeServices...)
+		}
+	} else if !isGlobalManager {
 		localeServiceNeeded := (len(lsChildren) > 0 || edgeClusterPath != "" || redistributionSet)
 		// Local Manager
 		if localeServiceNeeded {
@@ -803,18 +809,6 @@ func policyTier0GatewayResourceToInfraStruct(d *schema.ResourceData, connector *
 				return infraStruct, err
 			}
 			gwChildren = append(gwChildren, dataValue)
-		}
-	} else {
-		// Global Manager
-		if d.HasChange("locale_service") {
-			// Update localse services only if configuration changed
-			localeServices, err := initGatewayLocaleServices(d, connector, listPolicyTier0GatewayLocaleServices)
-			if err != nil {
-				return infraStruct, err
-			}
-			if len(localeServices) > 0 {
-				gwChildren = append(gwChildren, localeServices...)
-			}
 		}
 	}
 
@@ -936,10 +930,15 @@ func resourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{}) e
 		return handleReadError(d, "Locale Service for T0", id, err)
 	}
 	var services []map[string]interface{}
+	_, shouldSetLS := d.GetOk("locale_service")
+	// decide if we should set locale_service or edge_cluser_path
+	// for GM, it is always locale_service; for LM, config dependent
+	if isGlobalManager {
+		shouldSetLS = true
+	}
 	if len(localeServices) > 0 {
-
 		for _, service := range localeServices {
-			if isGlobalManager {
+			if shouldSetLS {
 				cfgMap := make(map[string]interface{})
 				cfgMap["path"] = service.Path
 				cfgMap["edge_cluster_path"] = service.EdgeClusterPath
@@ -980,7 +979,7 @@ func resourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{}) e
 		d.Set("bgp_config", make([]map[string]interface{}, 0))
 	}
 
-	if isGlobalManager {
+	if shouldSetLS {
 		d.Set("locale_service", services)
 	}
 
@@ -1014,7 +1013,7 @@ func resourceNsxtPolicyTier0GatewayUpdate(d *schema.ResourceData, m interface{})
 
 	obj, err := policyTier0GatewayResourceToInfraStruct(d, connector, isGlobalManager, id)
 	if err != nil {
-		return err
+		return handleUpdateError("Tier0", id, err)
 	}
 
 	log.Printf("[INFO] Using H-API to update Tier0 with ID %s", id)

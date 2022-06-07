@@ -285,7 +285,7 @@ resource "nsxt_policy_tier0_gateway_ha_vip_config" "test" {
 		external_interface_paths = [nsxt_policy_tier0_gateway_interface.test1.path, nsxt_policy_tier0_gateway_interface.test2.path]
 		vip_subnets              = ["%s"]
 	}
-}`, tier0Name, testAccNsxtPolicyTier0EdgeClusterTemplate(),
+}`, tier0Name, testAccNsxtPolicyLocaleServiceECTemplate(),
 		subnet1, testAccNsxtPolicyTier0HAVipConfigSiteTemplate(),
 		subnet2, testAccNsxtPolicyTier0HAVipConfigSiteTemplate(), enabled, vipSubnet)
 }

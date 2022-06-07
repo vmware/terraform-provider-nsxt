@@ -278,7 +278,7 @@ func initChildLocaleService(serviceStruct *model.LocaleServices, markForDelete b
 	return dataValue.(*data.StructValue), nil
 }
 
-func initGatewayLocaleServices(d *schema.ResourceData, connector *client.RestConnector, listLocaleServicesFunc func(*client.RestConnector, string, bool) ([]model.LocaleServices, error)) ([]*data.StructValue, error) {
+func initGatewayLocaleServices(d *schema.ResourceData, connector *client.RestConnector, isGlobalManager bool, listLocaleServicesFunc func(*client.RestConnector, string, bool) ([]model.LocaleServices, error)) ([]*data.StructValue, error) {
 	var localeServices []*data.StructValue
 
 	services := d.Get("locale_service").(*schema.Set).List()
@@ -286,7 +286,7 @@ func initGatewayLocaleServices(d *schema.ResourceData, connector *client.RestCon
 	existingServices := make(map[string]model.LocaleServices)
 	if len(d.Id()) > 0 {
 		// This is an update - we might need to delete locale services
-		existingServiceObjects, errList := listLocaleServicesFunc(connector, d.Id(), true)
+		existingServiceObjects, errList := listLocaleServicesFunc(connector, d.Id(), isGlobalManager)
 		if errList != nil {
 			return nil, errList
 		}
