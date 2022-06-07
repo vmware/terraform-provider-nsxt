@@ -7,7 +7,9 @@ description: A resource to configure HA Vip config on Tier-0 gateway in NSX Poli
 
 # nsxt_policy_tier0_gateway_ha_vip_config
 
-This resource provides a method for the management of a Tier-0 gateway HA Vip config. Note that this configuration can be defined only for Active-Standby Tier0 gateway.
+This resource provides a method for the management of a Tier-0 gateway HA VIP config. Note that this configuration can be defined only for Active-Standby Tier0 gateway.
+
+~> **NOTE:** All HA VIP configuration for particular Gateway should be defined within single resource clause - use multiple `config` sections to define HA on multiple interfaces. Defining multiple resources for same Gateway may result in apply conflicts.
 
 # Example Usage
 
