@@ -128,7 +128,9 @@ func resourceNsxtPolicyBgpConfigToStruct(d *schema.ResourceData, isVRF bool) (*m
 
 		routeStruct.Tags = tags
 		routeStruct.InterSrIbgp = &interSrIbgp
-		routeStruct.LocalAsNum = &localAsNum
+		if len(localAsNum) > 0 {
+			routeStruct.LocalAsNum = &localAsNum
+		}
 		routeStruct.MultipathRelax = &multipathRelax
 		routeStruct.GracefulRestartConfig = &restartConfigStruct
 	}
