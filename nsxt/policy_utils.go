@@ -200,17 +200,18 @@ func collectSeparatedStringListToMap(stringList []string, separator string) map[
 	return strMap
 }
 
-func stringListToCommaSeparatedString(stringList []string) string {
-	var str string
+func stringListToCommaSeparatedString(stringList []string) *string {
 	if len(stringList) > 0 {
+		var str string
 		for i, seg := range stringList {
 			str += seg
 			if i < len(stringList)-1 {
 				str += ","
 			}
 		}
+		return &str
 	}
-	return str
+	return nil
 }
 
 func commaSeparatedStringToStringList(commaString string) []string {

@@ -268,6 +268,61 @@ func TestAccResourceNsxtPolicyNATRule_nat64T1(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyNATRuleNoSnatWithoutTNet(t *testing.T) {
+	name := getAccTestResourceName()
+	updateName := getAccTestResourceName()
+	snet := "22.1.1.2"
+	dnet := "33.1.1.2"
+	action := model.PolicyNatRule_ACTION_NO_SNAT
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyNATRuleCheckDestroy(state, updateName, false)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxPolicyNatRuleNoTranslatedNetworkTemplate(name, action, testAccResourcePolicyNATRuleSourceNet, testAccResourcePolicyNATRuleDestNet),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyNATRuleExists(testAccResourcePolicyNATRuleName, false),
+					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "display_name", name),
+					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "destination_networks.#", "1"),
+					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "source_networks.#", "1"),
+					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "source_networks.0", testAccResourcePolicyNATRuleSourceNet),
+					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "destination_networks.0", testAccResourcePolicyNATRuleDestNet),
+					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "tag.#", "2"),
+					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "action", action),
+					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "logging", "false"),
+					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "firewall_match", model.PolicyNatRule_FIREWALL_MATCH_MATCH_EXTERNAL_ADDRESS),
+					resource.TestCheckResourceAttrSet(testAccResourcePolicyNATRuleName, "path"),
+					resource.TestCheckResourceAttrSet(testAccResourcePolicyNATRuleName, "revision"),
+				),
+			},
+			{
+				Config: testAccNsxPolicyNatRuleNoTranslatedNetworkTemplate(updateName, action, snet, dnet),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyNATRuleExists(testAccResourcePolicyNATRuleName, false),
+					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "display_name", updateName),
+					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "destination_networks.#", "1"),
+					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "source_networks.#", "1"),
+					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "source_networks.0", snet),
+					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "destination_networks.0", dnet),
+					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "tag.#", "2"),
+					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "action", action),
+					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "logging", "false"),
+					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "firewall_match", model.PolicyNatRule_FIREWALL_MATCH_MATCH_EXTERNAL_ADDRESS),
+					resource.TestCheckResourceAttrSet(testAccResourcePolicyNATRuleName, "path"),
+					resource.TestCheckResourceAttrSet(testAccResourcePolicyNATRuleName, "revision"),
+				),
+			},
+		},
+	})
+}
+
 func testAccNSXPolicyNATRuleImporterGetID(s *terraform.State) (string, error) {
 	rs, ok := s.RootModule().Resources[testAccResourcePolicyNATRuleName]
 	if !ok {
@@ -469,4 +524,30 @@ resource "nsxt_policy_nat_rule" "test" {
 }
 
 `, interfaceSite, name, action, sourceNet, translatedNet, model.PolicyNatRule_FIREWALL_MATCH_MATCH_EXTERNAL_ADDRESS)
+}
+
+func testAccNsxPolicyNatRuleNoTranslatedNetworkTemplate(name string, action string, sourceNet string, destNet string) string {
+	return testAccNsxtPolicyEdgeClusterReadTemplate(getEdgeClusterName()) +
+		testAccNsxtPolicyTier1WithEdgeClusterTemplate("test", false) + fmt.Sprintf(`
+	resource "nsxt_policy_nat_rule" "test" {
+	  display_name         = "%s"
+	  description          = "Acceptance Test"
+	  gateway_path         = nsxt_policy_tier1_gateway.test.path
+	  action               = "%s"
+	  source_networks      = ["%s"]
+	  destination_networks = ["%s"]
+	  logging              = false
+	  firewall_match       = "%s"
+	
+	  tag {
+		scope = "scope1"
+		tag   = "tag1"
+	  }
+	
+	  tag {
+		scope = "scope2"
+		tag   = "tag2"
+	  }
+	}
+	`, name, action, sourceNet, destNet, model.PolicyNatRule_FIREWALL_MATCH_MATCH_EXTERNAL_ADDRESS)
 }

@@ -112,7 +112,7 @@ func resourceNsxtPolicyNATRule() *schema.Resource {
 			"translated_networks": {
 				Type:        schema.TypeList,
 				Description: "The translated network(s) for the NAT Rule",
-				Required:    true,
+				Optional:    true,
 				Elem: &schema.Schema{
 					Type:         schema.TypeString,
 					ValidateFunc: validateCidrOrIPOrRange(),
@@ -206,6 +206,10 @@ func getNsxtPolicyNATRuleByID(connector *client.RestConnector, gwID string, isT0
 
 func patchNsxtPolicyNATRule(connector *client.RestConnector, gwID string, rule model.PolicyNatRule, isT0 bool, isGlobalManager bool) error {
 	natType := getNatTypeByAction(*rule.Action)
+	_, err := getTranslatedNetworks(rule)
+	if err != nil {
+		return err
+	}
 	if isGlobalManager {
 		rawObj, err := convertModelBindingType(rule, model.PolicyNatRuleBindingType(), gm_model.PolicyNatRuleBindingType())
 		if err != nil {
@@ -232,6 +236,19 @@ func getNatTypeByAction(action string) string {
 	}
 
 	return model.PolicyNat_NAT_TYPE_USER
+}
+
+func translatedNetworksNeeded(action string) bool {
+	return action != model.PolicyNatRule_ACTION_NO_SNAT && action != model.PolicyNatRule_ACTION_NO_DNAT
+}
+
+func getTranslatedNetworks(rule model.PolicyNatRule) (*string, error) {
+	tNets := rule.TranslatedNetwork
+	action := rule.Action
+	if tNets == nil && translatedNetworksNeeded(*action) {
+		return tNets, fmt.Errorf("Translated Network must be specified for action type: %s", *action)
+	}
+	return tNets, nil
 }
 
 func resourceNsxtPolicyNATRuleRead(d *schema.ResourceData, m interface{}) error {
@@ -328,12 +345,13 @@ func resourceNsxtPolicyNATRuleCreate(d *schema.ResourceData, m interface{}) erro
 		Description:        &description,
 		Tags:               tags,
 		Action:             &action,
-		DestinationNetwork: &dNets,
+		DestinationNetwork: dNets,
+		SourceNetwork:      sNets,
 		Enabled:            &enabled,
 		Logging:            &logging,
 		SequenceNumber:     &priority,
 		Service:            &service,
-		TranslatedNetwork:  &tNets,
+		TranslatedNetwork:  tNets,
 		Scope:              scope,
 	}
 
@@ -343,10 +361,6 @@ func resourceNsxtPolicyNATRuleCreate(d *schema.ResourceData, m interface{}) erro
 	}
 	if ports != "" {
 		ruleStruct.TranslatedPorts = &ports
-	}
-
-	if len(sNets) > 0 {
-		ruleStruct.SourceNetwork = &sNets
 	}
 
 	log.Printf("[INFO] Creating NAT Rule with ID %s", id)
@@ -395,12 +409,13 @@ func resourceNsxtPolicyNATRuleUpdate(d *schema.ResourceData, m interface{}) erro
 		Description:        &description,
 		Tags:               tags,
 		Action:             &action,
-		DestinationNetwork: &dNets,
+		DestinationNetwork: dNets,
+		SourceNetwork:      sNets,
 		Enabled:            &enabled,
 		Logging:            &logging,
 		SequenceNumber:     &priority,
 		Service:            &service,
-		TranslatedNetwork:  &tNets,
+		TranslatedNetwork:  tNets,
 		Scope:              scope,
 	}
 
@@ -412,9 +427,6 @@ func resourceNsxtPolicyNATRuleUpdate(d *schema.ResourceData, m interface{}) erro
 	tPorts := d.Get("translated_ports").(string)
 	if tPorts != "" {
 		ruleStruct.TranslatedPorts = &tPorts
-	}
-	if len(sNets) > 0 {
-		ruleStruct.SourceNetwork = &sNets
 	}
 
 	log.Printf("[INFO] Updating NAT Rule with ID %s", id)
