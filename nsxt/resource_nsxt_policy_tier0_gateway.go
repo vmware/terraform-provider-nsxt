@@ -172,6 +172,7 @@ func getPolicyBGPConfigSchema() map[string]*schema.Schema {
 			Description:  "BGP AS number in ASPLAIN/ASDOT Format",
 			Optional:     true,
 			ValidateFunc: validateASPlainOrDot,
+			Computed:     true,
 		},
 		"multipath_relax": {
 			Type:        schema.TypeBool,
