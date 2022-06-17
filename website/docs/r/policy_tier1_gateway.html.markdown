@@ -84,8 +84,8 @@ The following arguments are supported:
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this Tier-1 gateway.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the policy resource.
-* `edge_cluster_path` - (Optional) The path of the edge cluster where the Tier-1 is placed.
-* `locale_service` - (Optional) This argument is applicable for NSX Global Manager only. Multiple locale services can be specified for multiple locations.
+* `edge_cluster_path` - (Optional) The path of the edge cluster where the Tier-1 is placed.For advanced configuration, use `locale_service` clause instead. 
+* `locale_service` - (Optional) This argument is required on NSX Global Manager. Multiple locale services can be specified for multiple locations.
   * `edge_cluster_path` - (Required) The path of the edge cluster where the Tier-0 is placed.
   * `preferred_edge_paths` - (Optional) Policy paths to edge nodes. Specified edge is used as preferred edge cluster member when failover mode is set to `PREEMPTIVE`.
 * `failover_mode` - (Optional) This failover mode determines, whether the preferred service router instance for given logical router will preempt the peer. Accepted values are PREEMPTIVE/NON_PREEMPTIVE.
@@ -131,3 +131,5 @@ terraform import nsxt_policy_tier1_gateway.tier1_gw ID
 ```
 
 The above command imports the policy Tier-1 gateway named `tier1_gw` with the NSX Policy ID `ID`.
+
+~> **NOTE:** When importing Gateway, `edge_cluster_path` will be assigned rather than `locale_service`. In order to switch to `locale_service` configuration, additional apply will be required.

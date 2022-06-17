@@ -625,14 +625,18 @@ resource "nsxt_policy_vlan_segment" "test" {
 
 func testAccNsxtPolicyTier0EdgeClusterTemplate() string {
 	if testAccIsGlobalManager() {
-		return `
-  locale_service {
-    edge_cluster_path    = data.nsxt_policy_edge_cluster.EC.path
-  }
-`
+		return testAccNsxtPolicyLocaleServiceECTemplate()
 	}
 	return `
 	edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
+`
+}
+
+func testAccNsxtPolicyLocaleServiceECTemplate() string {
+	return `
+  locale_service {
+    edge_cluster_path    = data.nsxt_policy_edge_cluster.EC.path
+  }
 `
 }
 

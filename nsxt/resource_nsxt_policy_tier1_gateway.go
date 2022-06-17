@@ -427,17 +427,15 @@ func policyTier1GatewayResourceToInfraStruct(d *schema.ResourceData, connector *
 		gwChildren = append(gwChildren, dataValue)
 	}
 
-	if isGlobalManager {
-		if d.HasChange("locale_service") {
-			// Update localse services only if configuration changed
-			localeServices, err := initGatewayLocaleServices(d, connector, listPolicyTier1GatewayLocaleServices)
-			if err != nil {
-				return infraStruct, err
-			}
+	if d.HasChange("locale_service") {
+		// Update locale services only if configuration changed
+		localeServices, err := initGatewayLocaleServices(d, connector, isGlobalManager, listPolicyTier1GatewayLocaleServices)
+		if err != nil {
+			return infraStruct, err
+		}
 
-			if len(localeServices) > 0 {
-				gwChildren = append(gwChildren, localeServices...)
-			}
+		if len(localeServices) > 0 {
+			gwChildren = append(gwChildren, localeServices...)
 		}
 	}
 
@@ -559,10 +557,14 @@ func resourceNsxtPolicyTier1GatewayRead(d *schema.ResourceData, m interface{}) e
 		return handleReadError(d, "Locale Service for T1", id, err)
 	}
 	var services []map[string]interface{}
-	if len(localeServices) > 0 {
+	_, shouldSetLS := d.GetOk("locale_service")
+	if isGlobalManager {
+		shouldSetLS = true
+	}
 
+	if len(localeServices) > 0 {
 		for _, service := range localeServices {
-			if isGlobalManager {
+			if shouldSetLS {
 				cfgMap := make(map[string]interface{})
 				cfgMap["path"] = service.Path
 				cfgMap["edge_cluster_path"] = service.EdgeClusterPath
@@ -581,7 +583,7 @@ func resourceNsxtPolicyTier1GatewayRead(d *schema.ResourceData, m interface{}) e
 		d.Set("edge_cluster_path", "")
 	}
 
-	if isGlobalManager {
+	if shouldSetLS {
 		d.Set("locale_service", services)
 	}
 

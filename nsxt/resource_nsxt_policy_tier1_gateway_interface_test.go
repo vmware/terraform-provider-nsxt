@@ -475,6 +475,6 @@ resource "nsxt_policy_tier1_gateway_interface" "test" {
   ipv6_ndra_profile_path = data.nsxt_policy_ipv6_ndra_profile.default.path
   urpf_mode              = "NONE"
   %s
-}`, nsxtPolicyTier1GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, subnet, testAccNsxtPolicyTier0InterfaceSiteTemplate()) +
+}`, nsxtPolicyTier1GatewayName, testAccNsxtPolicyLocaleServiceECTemplate(), name, subnet, testAccNsxtPolicyTier0InterfaceSiteTemplate()) +
 		testAccNextPolicyTier1InterfaceRealizationTemplate()
 }

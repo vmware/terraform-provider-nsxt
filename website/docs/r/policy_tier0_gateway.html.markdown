@@ -119,8 +119,8 @@ The following arguments are supported:
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this Tier-0 gateway.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the policy resource.
-* `edge_cluster_path` - (Optional) The path of the edge cluster where the Tier-0 is placed. Must be specified when `bgp_config` is enabled. This argument is not applicable to NSX Global Manager - use locale-services clause instead.
-* `locale_service` - (Optional) This is required for NSX Global Manager only. Multiple locale services can be specified for multiple locations.
+* `edge_cluster_path` - (Optional) The path of the edge cluster where the Tier-0 is placed.For advanced configuration and on Global Manager, use `locale_service` clause instead. Note that for some configurations (such as BGP) setting edge cluster is required.
+* `locale_service` - (Optional) This is required on NSX Global Manager. Multiple locale services can be specified for multiple locations.
   * `edge_cluster_path` - (Required) The path of the edge cluster where the Tier-0 is placed.
   * `preferred_edge_paths` - (Optional) Policy paths to edge nodes. Specified edge is used as preferred edge cluster member when failover mode is set to `PREEMPTIVE`.
 * `failover_mode` - (Optional) This failover mode determines, whether the preferred service router instance for given logical router will preempt the peer. Accepted values are PREEMPTIVE/NON_PREEMPTIVE.
@@ -190,6 +190,8 @@ terraform import nsxt_policy_tier0_gateway.tier0_gw ID
 ```
 
 The above command imports the policy Tier-0 gateway named `tier0_gw` with the NSX Policy ID `ID`.
+
+~> **NOTE:** When importing Gateway, `edge_cluster_path` will be assigned rather than `locale_service`. In order to switch to `locale_service` configuration, additional apply will be required.
 
 ~> **NOTE:** Redistribution config on Tier-0 resource is deprecated and thus will not be imported. Please import this configuration with `policy_gateway_redistribution_config` resource.
 
