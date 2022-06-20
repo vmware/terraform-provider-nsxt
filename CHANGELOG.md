@@ -1,3 +1,18 @@
+## 3.2.8 (June 20, 2022)
+
+BUG FIXES:
+
+* `resource/nsxt_policy_bgp_config`: Avoid assigning irrelevant values for VRF configurations, since those cause NSX validation error, even if those values are set to default ([#756](https://github.com/vmware/terraform-provider-nsxt/pull/756))
+* `resource/nsxt_policy_bgp_config`: Mark `local_as_num` as Computed, this ensures configuration consistency for VRF use case where BGP configuration is inherited ([#762](https://github.com/vmware/terraform-provider-nsxt/pull/762))
+* `resource/nsxt_policy_bgp_config`: Fix segmentation fault when edge cluster is not set on Gateway ([#756](https://github.com/vmware/terraform-provider-nsxt/pull/756))
+* `resource/nsxt_policy_nat_rule`: Fix REFLECTIVE NAT rule configuration ([#759](https://github.com/vmware/terraform-provider-nsxt/pull/759))
+* `resource/nsxt_policy_nat_rule`: Change translated_network attribute definition from Required to Optional for sake of NO_SNAT/NO_DNAT rule types([#759](https://github.com/vmware/terraform-provider-nsxt/pull/759))
+
+IMPROVEMENTS:
+
+* Include object scope (LM or GM) in policy search for data sources. This improvement would narrow down object search to scope relevant to current backend, for example, Global Manager objects will not show up in data source query on Local Manager([#755](https://github.com/vmware/terraform-provider-nsxt/pull/755))
+* (Exterimental) Support `locale_service` configuration on Local Manager. This offers more flexibility to specify locale configuration such as edge cluster, preferred node, redistribution, and should not be used together with `edge_cluster_path` argument. Previsouly this clause was only supported on Global Manager([#764](https://github.com/vmware/terraform-provider-nsxt/pull/764))
+
 ## 3.2.7 (May 12, 2022)
 
 BUG FIXES:
