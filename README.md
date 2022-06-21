@@ -55,9 +55,9 @@ You can list versions of providers installed in your environment by running “t
 
 ```hcl
 $ ./terraform version
-Terraform v1.0.0
+Terraform v1.2.1
 on linux_amd64
-+ provider registry.terraform.io/vmware/nsxt v3.2.4
++ provider registry.terraform.io/vmware/nsxt v3.2.8
 ```
 
 # Manual Installation
@@ -85,7 +85,7 @@ git clone https://github.com/vmware/terraform-provider-nsxt.git
 
 ## Building and Installing the Provider
 
-Recommended golang version is go1.17 onwards.
+Recommended golang version is go1.18 onwards.
 After the clone has been completed, you can enter the provider directory and build the provider.
 
 ```sh
@@ -179,6 +179,6 @@ The NSX Terraform provider is now VMware supported as well as community supporte
 
 # License
 
-Copyright © 2015-2021 VMware, Inc. All Rights Reserved.
+Copyright © 2015-2022 VMware, Inc. All Rights Reserved.
 
 The NSX Terraform provider is available under [MPL2.0 license](https://github.com/vmware/terraform-provider-nsxt/blob/master/LICENSE.txt).

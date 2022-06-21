@@ -19,10 +19,10 @@ This resource provides a method for the management of BGP for T0 Gateway on spec
 resource "nsxt_policy_bgp_config" "gw1" {
   gateway_path = nsxt_policy_tier0_gateway.gw1.path
 
-  enabled                = true
-  inter_sr_ibgp          = true
-  local_as_num           = 60001
-  graceful_restart_mode  = "HELPER_ONLY"
+  enabled               = true
+  inter_sr_ibgp         = true
+  local_as_num          = 60001
+  graceful_restart_mode = "HELPER_ONLY"
 
   route_aggregation {
     prefix       = "20.1.0.0/24"
