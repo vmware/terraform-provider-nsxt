@@ -364,6 +364,9 @@ func Provider() *schema.Provider {
 			"nsxt_policy_ospf_area":                        resourceNsxtPolicyOspfArea(),
 			"nsxt_policy_gateway_redistribution_config":    resourceNsxtPolicyGatewayRedistributionConfig(),
 			"nsxt_policy_mac_discovery_profile":            resourceNsxtPolicyMacDiscoveryProfile(),
+			"nsxt_policy_ipsec_vpn_ike_profile":            resourceNsxtPolicyIPSecVpnIkeProfile(),
+			"nsxt_policy_ipsec_vpn_tunnel_profile":         resourceNsxtPolicyIPSecVpnTunnelProfile(),
+			"nsxt_policy_ipsec_vpn_dpd_profile":            resourceNsxtPolicyIPSecVpnDpdProfile(),
 		},
 
 		ConfigureFunc: providerConfigure,
