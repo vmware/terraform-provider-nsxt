@@ -141,6 +141,7 @@ def build_schema_attr(attr):
         # significant, these should be changed to lists
         # TODO: add both with choice comment
         attr['helper'] = "%sListFromSchemaSet" % name_to_upper(attr_type)
+        is_array = True
 
     if attr_type not in TYPE_MAP:
         # TODO: support sub-structs
@@ -305,7 +306,10 @@ def build_get_attrs_from_schema():
 def build_set_attrs_in_obj():
     result = ""
     for attr in metadata['attrs']:
-        result += "%s: &%s,\n" % (attr['name'], lowercase_first(attr['name']))
+        if attr['list']:
+            result += "%s: %s,\n" % (attr['name'], lowercase_first(attr['name']))
+        else:
+            result += "%s: &%s,\n" % (attr['name'], lowercase_first(attr['name']))
 
     return result
 
@@ -325,10 +329,14 @@ def build_test_attrs(required_only=False):
         if required_only and not attr['required']:
             continue
         result += "%s = " % attr['schema_name']
+        if attr['list']:
+            result += '['
         if attr['type'] == 'string':
             result += '"%s"'
         else:
             result += '%s'
+        if attr['list']:
+            result += ']'
 
         result += "\n"
 
@@ -356,7 +364,10 @@ def build_check_test_attrs(is_create=True):
 
     result = ""
     for attr in metadata['attrs']:
-        result += 'resource.TestCheckResourceAttr(testResourceName, "%s", ' % attr['schema_name']
+        if attr['list']:
+            result += 'resource.TestCheckResourceAttr(testResourceName, "%s.0", ' % attr['schema_name']
+        else:
+            result += 'resource.TestCheckResourceAttr(testResourceName, "%s", ' % attr['schema_name']
         result += 'accTestPolicy%s%sAttributes["%s"]),\n' % (metadata['resource'], "Create" if is_create else "Update", attr['schema_name'])
 
     return result
