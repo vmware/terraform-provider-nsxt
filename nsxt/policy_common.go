@@ -494,6 +494,22 @@ func parseGatewayPolicyPath(gwPath string) (bool, string) {
 	return isT0, segs[len(segs)-1]
 }
 
+func parseLocaleServicePolicyPath(path string) (bool, string, string, error) {
+	segs := strings.Split(path, "/")
+	// Path should be like /infra/tier-0s/aaa/locale-services/default
+	segCount := len(segs)
+	if (segCount < 6) || (segs[segCount-2] != "locale-services") {
+		// error - this is not a segment path
+		return false, "", "", fmt.Errorf("Invalid Locale service path %s", path)
+	}
+
+	localeServiceID := segs[segCount-1]
+	gwPath := strings.Join(segs[:4], "/")
+
+	isT0, gwID := parseGatewayPolicyPath(gwPath)
+	return isT0, gwID, localeServiceID, nil
+}
+
 func getPolicyPathSchema(isRequired bool, forceNew bool, description string) *schema.Schema {
 	return &schema.Schema{
 		Type:         schema.TypeString,

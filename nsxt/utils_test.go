@@ -446,6 +446,19 @@ resource "nsxt_policy_tier%s_gateway" "test" {
 }`, tier, tier, edgeClusterName, haMode)
 }
 
+func testAccNsxtPolicyTier0WithEdgeClusterForVPN(edgeClusterName string) string {
+	// VPN is supported only on Tier-0 with ACTIVE-STANDBY HA mode
+	return fmt.Sprintf(`
+resource "nsxt_policy_tier0_gateway" "test" {
+  display_name = "%s"
+  description  = "Acceptance Test"
+  locale_service {
+    edge_cluster_path = data.nsxt_policy_edge_cluster.%s.path
+  }
+  ha_mode = "ACTIVE_STANDBY"
+}`, getAccTestResourceName(), edgeClusterName)
+}
+
 func testAccNsxtPolicyResourceExists(resourceName string, presenceChecker func(string, *client.RestConnector, bool) (bool, error)) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 

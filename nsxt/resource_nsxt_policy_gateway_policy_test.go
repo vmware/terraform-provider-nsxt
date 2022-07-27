@@ -642,7 +642,7 @@ resource "nsxt_policy_gateway_policy" "test" {
 }`, name, name, direction, protocol, ruleTag)
 }
 
-//TODO: add  profiles when available
+// TODO: add  profiles when available
 func testAccNsxtPolicyGatewayPolicyWithMultipleRulesCreate(name string) string {
 	return fmt.Sprintf(`
 resource "nsxt_policy_tier1_gateway" "gwt1test" {
