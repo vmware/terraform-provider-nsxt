@@ -1702,8 +1702,11 @@ func resourceNsxtPolicyLBVirtualServerRead(d *schema.ResourceData, m interface{}
 		This, in turn, should also not trigger the "plan" phase for existing rules, so we also ignore any existing "live"
 		rules unless we find rules to also exist in the resource state.
 	*/
-	if d.State().Attributes["rule.#"] != "0" {
+	rules := d.Get("rule").([]interface{})
+	if len(rules) > 0 {
 		setPolicyLbRulesInSchema(d, obj.Rules)
+	} else {
+		log.Printf("[INFO] Ignoring rules since the user did not specify them in configuration")
 	}
 
 	return nil
@@ -1778,7 +1781,8 @@ func resourceNsxtPolicyLBVirtualServerUpdate(d *schema.ResourceData, m interface
 		   rules in resource /    rules in state /    rules in NSX => rules will be changed
 		no rules in resource /    rules in state /    rules in NSX => rules will be deleted
 	*/
-	if !d.HasChange("rule.#") {
+	if d.HasChange("rule") {
+		log.Printf("[INFO] Changes detected in rule section")
 		existingObj, err := client.Get(id)
 		if err != nil {
 			return handleUpdateError("LBVirtualServer", id, err)
@@ -1787,6 +1791,8 @@ func resourceNsxtPolicyLBVirtualServerUpdate(d *schema.ResourceData, m interface
 		if len(existingObj.Rules) > 0 {
 			obj.Rules = existingObj.Rules
 		}
+	} else {
+		log.Printf("[INFO] No changes in rule section")
 	}
 
 	if maxNewConnectionRate > 0 {
