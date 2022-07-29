@@ -21,7 +21,7 @@ const _ = core.SupportedByRuntimeVersion1
 
 type LbPoolsClient interface {
 
-	// Delete the LBPool along with all the entities contained by this LBPool.
+	// Delete the LBPool along with all the entities contained by this LBPool. This API is deprecated for the NSX-T Load Balancer, but not for the NSX-T Distributed Load Balancer.
 	//
 	// @param lbPoolIdParam LBPool ID (required)
 	// @param forceParam Force delete the resource even if it is being used somewhere (optional, default to false)
@@ -32,7 +32,7 @@ type LbPoolsClient interface {
 	// @throws NotFound  Not Found
 	Delete(lbPoolIdParam string, forceParam *bool) error
 
-	// Read a LBPool.
+	// Read a LBPool. This API is deprecated for the NSX-T Load Balancer, but not for the NSX-T Distributed Load Balancer.
 	//
 	// @param lbPoolIdParam LBPool ID (required)
 	// @return com.vmware.nsx_policy.model.LBPool
@@ -43,7 +43,7 @@ type LbPoolsClient interface {
 	// @throws NotFound  Not Found
 	Get(lbPoolIdParam string) (model.LBPool, error)
 
-	// Paginated list of all LBPools.
+	// Paginated list of all LBPools. This API is deprecated for the NSX-T Load Balancer, but not for the NSX-T Distributed Load Balancer.
 	//
 	// @param cursorParam Opaque cursor to be used for getting next page of records (supplied by current result page) (optional)
 	// @param includeMarkForDeleteObjectsParam Include objects that are marked for deletion in results (optional, default to false)
@@ -59,7 +59,7 @@ type LbPoolsClient interface {
 	// @throws NotFound  Not Found
 	List(cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.LBPoolListResult, error)
 
-	// If a LBPool with the lb-pool-id is not already present, create a new LBPool. If it already exists, update the LBPool. This is a full replace.
+	// If a LBPool with the lb-pool-id is not already present, create a new LBPool. If it already exists, update the LBPool. This is a full replace. This API is deprecated for the NSX-T Load Balancer, but not for the NSX-T Distributed Load Balancer.
 	//
 	// @param lbPoolIdParam LBPool ID (required)
 	// @param lbPoolParam (required)
@@ -70,7 +70,7 @@ type LbPoolsClient interface {
 	// @throws NotFound  Not Found
 	Patch(lbPoolIdParam string, lbPoolParam model.LBPool) error
 
-	// If a LBPool with the lb-pool-id is not already present, create a new LBPool. If it already exists, update the LBPool. This is a full replace.
+	// If a LBPool with the lb-pool-id is not already present, create a new LBPool. If it already exists, update the LBPool. This is a full replace. This API is deprecated for the NSX-T Load Balancer, but not for the NSX-T Distributed Load Balancer.
 	//
 	// @param lbPoolIdParam LBPool ID (required)
 	// @param lbPoolParam (required)

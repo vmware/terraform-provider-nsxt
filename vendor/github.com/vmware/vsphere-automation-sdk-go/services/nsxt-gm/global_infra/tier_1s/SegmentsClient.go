@@ -43,7 +43,20 @@ type SegmentsClient interface {
 	// @throws NotFound  Not Found
 	Delete0(tier1IdParam string, segmentIdParam string) error
 
-	// Read segment
+	// Delete one or multiple DHCP lease(s) specified by IP and MAC under a Tier-1. If there is a DHCP server running upon the given segment, or this segment is using a DHCP server running in its connected Tier-1, the DHCP lease(s) which match exactly the IP address and the MAC address will be deleted. If no such lease matches, the deletion for this lease will be ignored. The DHCP lease to be deleted will be removed by the system from both active and standby node. The system will report error if the DHCP lease could not be removed from both nodes. If the DHCP lease could not be removed on either node, please check the DHCP server status. Once the DHCP server status is UP, please invoke the deletion API again to ensure the lease gets deleted from both nodes.
+	//
+	// @param tier1IdParam (required)
+	// @param segmentIdParam (required)
+	// @param dhcpDeleteLeasesParam (required)
+	// @param enforcementPointPathParam Enforcement point path (optional)
+	// @throws InvalidRequest  Bad Request, Precondition Failed
+	// @throws Unauthorized  Forbidden
+	// @throws ServiceUnavailable  Service Unavailable
+	// @throws InternalServerError  Internal Server Error
+	// @throws NotFound  Not Found
+	Deletedhcpleases(tier1IdParam string, segmentIdParam string, dhcpDeleteLeasesParam model.DhcpDeleteLeases, enforcementPointPathParam *string) error
+
+	// Read segment Note: Extended Segment: Please note that old vpn path deprecated. If user specify old l2vpn path in the \"l2_extension\" object in the PUT/PATCH API payload, the path returned in the GET response payload may include the new path instead of the deprecated l2vpn path. Both old and new l2vpn path refer to same resource. there is no functional impact. Also note that l2vpn path included in the error messages returned from validation may include the new VPN path instead of the deprecated l2vpn path. Both new path and old vpn path refer to same resource.
 	//
 	// @param tier1IdParam (required)
 	// @param segmentIdParam (required)
@@ -55,13 +68,14 @@ type SegmentsClient interface {
 	// @throws NotFound  Not Found
 	Get(tier1IdParam string, segmentIdParam string) (model.Segment, error)
 
-	// Paginated list of all segments under Tier-1 instance
+	//
 	//
 	// @param tier1IdParam (required)
 	// @param cursorParam Opaque cursor to be used for getting next page of records (supplied by current result page) (optional)
 	// @param includeMarkForDeleteObjectsParam Include objects that are marked for deletion in results (optional, default to false)
 	// @param includedFieldsParam Comma separated list of fields that should be included in query result (optional)
 	// @param pageSizeParam Maximum number of results to return in this page (server may return fewer) (optional, default to 1000)
+	// @param segmentTypeParam Segment type (optional)
 	// @param sortAscendingParam (optional)
 	// @param sortByParam Field by which records are sorted (optional)
 	// @return com.vmware.nsx_global_policy.model.SegmentListResult
@@ -70,9 +84,9 @@ type SegmentsClient interface {
 	// @throws ServiceUnavailable  Service Unavailable
 	// @throws InternalServerError  Internal Server Error
 	// @throws NotFound  Not Found
-	List(tier1IdParam string, cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.SegmentListResult, error)
+	List(tier1IdParam string, cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, segmentTypeParam *string, sortAscendingParam *bool, sortByParam *string) (model.SegmentListResult, error)
 
-	// If segment with the segment-id is not already present, create a new segment. If it already exists, update the segment with specified attributes.
+	// If segment with the segment-id is not already present, create a new segment. If it already exists, update the segment with specified attributes. Note: Extended Segment: Please note that old vpn path deprecated. If user specify old l2vpn path in the \"l2_extension\" object in the PATCH API payload, the path returned in the GET response payload may include the new path instead of the deprecated l2vpn path. Both old and new l2vpn path refer to same resource. there is no functional impact. Also note that l2vpn path included in the Alarm, GPRR, error messages returned from validation may include the new VPN path instead of the deprecated l2vpn path. Both new path and old vpn path refer to same resource.
 	//
 	// @param tier1IdParam (required)
 	// @param segmentIdParam (required)
@@ -84,7 +98,7 @@ type SegmentsClient interface {
 	// @throws NotFound  Not Found
 	Patch(tier1IdParam string, segmentIdParam string, segmentParam model.Segment) error
 
-	// If segment with the segment-id is not already present, create a new segment. If it already exists, replace the segment with this object.
+	// If segment with the segment-id is not already present, create a new segment. If it already exists, replace the segment with this object. Note: Extended Segment: Please note that old vpn path deprecated. If user specify old l2vpn path in the \"l2_extension\" object in the PUT API payload, the path returned in the PUT/GET response payload may include the new path instead of the deprecated l2vpn path. Both old and new l2vpn path refer to same resource. there is no functional impact. Also note that l2vpn path included in the Alarm, GPRR, error messages returned from validation may include the new VPN path instead of the deprecated l2vpn path. Both new path and old vpn path refer to same resource.
 	//
 	// @param tier1IdParam (required)
 	// @param segmentIdParam (required)
@@ -107,12 +121,13 @@ type segmentsClient struct {
 func NewSegmentsClient(connector client.Connector) *segmentsClient {
 	interfaceIdentifier := core.NewInterfaceIdentifier("com.vmware.nsx_global_policy.global_infra.tier_1s.segments")
 	methodIdentifiers := map[string]core.MethodIdentifier{
-		"delete":   core.NewMethodIdentifier(interfaceIdentifier, "delete"),
-		"delete_0": core.NewMethodIdentifier(interfaceIdentifier, "delete_0"),
-		"get":      core.NewMethodIdentifier(interfaceIdentifier, "get"),
-		"list":     core.NewMethodIdentifier(interfaceIdentifier, "list"),
-		"patch":    core.NewMethodIdentifier(interfaceIdentifier, "patch"),
-		"update":   core.NewMethodIdentifier(interfaceIdentifier, "update"),
+		"delete":           core.NewMethodIdentifier(interfaceIdentifier, "delete"),
+		"delete_0":         core.NewMethodIdentifier(interfaceIdentifier, "delete_0"),
+		"deletedhcpleases": core.NewMethodIdentifier(interfaceIdentifier, "deletedhcpleases"),
+		"get":              core.NewMethodIdentifier(interfaceIdentifier, "get"),
+		"list":             core.NewMethodIdentifier(interfaceIdentifier, "list"),
+		"patch":            core.NewMethodIdentifier(interfaceIdentifier, "patch"),
+		"update":           core.NewMethodIdentifier(interfaceIdentifier, "update"),
 	}
 	interfaceDefinition := core.NewInterfaceDefinition(interfaceIdentifier, methodIdentifiers)
 	errorsBindingMap := make(map[string]bindings.BindingType)
@@ -180,6 +195,34 @@ func (sIface *segmentsClient) Delete0(tier1IdParam string, segmentIdParam string
 	}
 }
 
+func (sIface *segmentsClient) Deletedhcpleases(tier1IdParam string, segmentIdParam string, dhcpDeleteLeasesParam model.DhcpDeleteLeases, enforcementPointPathParam *string) error {
+	typeConverter := sIface.connector.TypeConverter()
+	executionContext := sIface.connector.NewExecutionContext()
+	sv := bindings.NewStructValueBuilder(segmentsDeletedhcpleasesInputType(), typeConverter)
+	sv.AddStructField("Tier1Id", tier1IdParam)
+	sv.AddStructField("SegmentId", segmentIdParam)
+	sv.AddStructField("DhcpDeleteLeases", dhcpDeleteLeasesParam)
+	sv.AddStructField("EnforcementPointPath", enforcementPointPathParam)
+	inputDataValue, inputError := sv.GetStructValue()
+	if inputError != nil {
+		return bindings.VAPIerrorsToError(inputError)
+	}
+	operationRestMetaData := segmentsDeletedhcpleasesRestMetadata()
+	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
+	sIface.connector.SetConnectionMetadata(connectionMetadata)
+	methodResult := sIface.connector.GetApiProvider().Invoke("com.vmware.nsx_global_policy.global_infra.tier_1s.segments", "deletedhcpleases", inputDataValue, executionContext)
+	if methodResult.IsSuccess() {
+		return nil
+	} else {
+		methodError, errorInError := typeConverter.ConvertToGolang(methodResult.Error(), sIface.GetErrorBindingType(methodResult.Error().Name()))
+		if errorInError != nil {
+			return bindings.VAPIerrorsToError(errorInError)
+		}
+		return methodError.(error)
+	}
+}
+
 func (sIface *segmentsClient) Get(tier1IdParam string, segmentIdParam string) (model.Segment, error) {
 	typeConverter := sIface.connector.TypeConverter()
 	executionContext := sIface.connector.NewExecutionContext()
@@ -212,7 +255,7 @@ func (sIface *segmentsClient) Get(tier1IdParam string, segmentIdParam string) (m
 	}
 }
 
-func (sIface *segmentsClient) List(tier1IdParam string, cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.SegmentListResult, error) {
+func (sIface *segmentsClient) List(tier1IdParam string, cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, segmentTypeParam *string, sortAscendingParam *bool, sortByParam *string) (model.SegmentListResult, error) {
 	typeConverter := sIface.connector.TypeConverter()
 	executionContext := sIface.connector.NewExecutionContext()
 	sv := bindings.NewStructValueBuilder(segmentsListInputType(), typeConverter)
@@ -221,6 +264,7 @@ func (sIface *segmentsClient) List(tier1IdParam string, cursorParam *string, inc
 	sv.AddStructField("IncludeMarkForDeleteObjects", includeMarkForDeleteObjectsParam)
 	sv.AddStructField("IncludedFields", includedFieldsParam)
 	sv.AddStructField("PageSize", pageSizeParam)
+	sv.AddStructField("SegmentType", segmentTypeParam)
 	sv.AddStructField("SortAscending", sortAscendingParam)
 	sv.AddStructField("SortBy", sortByParam)
 	inputDataValue, inputError := sv.GetStructValue()

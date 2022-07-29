@@ -21,7 +21,7 @@ const _ = core.SupportedByRuntimeVersion1
 
 type GlobalConfigClient interface {
 
-	// Read global configuration
+	// This rest routine is deprecated. Use /infra/connectivity-global-config for Connectivity global config and /infra/ops-global-config for Operations global config. Read global configuration.
 	// @return com.vmware.nsx_policy.model.GlobalConfig
 	// @throws InvalidRequest  Bad Request, Precondition Failed
 	// @throws Unauthorized  Forbidden
@@ -30,7 +30,7 @@ type GlobalConfigClient interface {
 	// @throws NotFound  Not Found
 	Get() (model.GlobalConfig, error)
 
-	// Update the global configuration
+	// This rest routine is deprecated. Use /infra/connectivity-global-config for Connectivity global config and /infra/ops-global-config for Operations global config. Update the global configuration.
 	//
 	// @param globalConfigParam (required)
 	// @throws InvalidRequest  Bad Request, Precondition Failed
@@ -40,7 +40,7 @@ type GlobalConfigClient interface {
 	// @throws NotFound  Not Found
 	Patch(globalConfigParam model.GlobalConfig) error
 
-	// Update the global configuration
+	// This rest routine is deprecated. Use /infra/connectivity-global-config for Connectivity global config and /infra/ops-global-config for Operations global config. Update the global configuration.
 	//
 	// @param globalConfigParam (required)
 	// @return com.vmware.nsx_policy.model.GlobalConfig

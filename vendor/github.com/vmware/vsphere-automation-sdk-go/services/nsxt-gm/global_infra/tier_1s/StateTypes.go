@@ -18,6 +18,15 @@ import (
 	"reflect"
 )
 
+// Possible value for ``type`` of method State#get.
+const State_GET_TYPE_GATEWAY_STATE = "GATEWAY_STATE"
+
+// Possible value for ``type`` of method State#get.
+const State_GET_TYPE_GATEWAY_STATUS = "GATEWAY_STATUS"
+
+// Possible value for ``type`` of method State#get.
+const State_GET_TYPE_IPV6_STATUS = "IPV6_STATUS"
+
 func stateGetInputType() bindings.StructType {
 	fields := make(map[string]bindings.BindingType)
 	fieldNameMap := make(map[string]string)
@@ -29,6 +38,7 @@ func stateGetInputType() bindings.StructType {
 	fields["page_size"] = bindings.NewOptionalType(bindings.NewIntegerType())
 	fields["sort_ascending"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fields["sort_by"] = bindings.NewOptionalType(bindings.NewStringType())
+	fields["type"] = bindings.NewOptionalType(bindings.NewStringType())
 	fieldNameMap["tier1_id"] = "Tier1Id"
 	fieldNameMap["cursor"] = "Cursor"
 	fieldNameMap["enforcement_point_path"] = "EnforcementPointPath"
@@ -37,6 +47,7 @@ func stateGetInputType() bindings.StructType {
 	fieldNameMap["page_size"] = "PageSize"
 	fieldNameMap["sort_ascending"] = "SortAscending"
 	fieldNameMap["sort_by"] = "SortBy"
+	fieldNameMap["type"] = "Type_"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -62,6 +73,7 @@ func stateGetRestMetadata() protocol.OperationRestMetadata {
 	fields["page_size"] = bindings.NewOptionalType(bindings.NewIntegerType())
 	fields["sort_ascending"] = bindings.NewOptionalType(bindings.NewBooleanType())
 	fields["sort_by"] = bindings.NewOptionalType(bindings.NewStringType())
+	fields["type"] = bindings.NewOptionalType(bindings.NewStringType())
 	fieldNameMap["tier1_id"] = "Tier1Id"
 	fieldNameMap["cursor"] = "Cursor"
 	fieldNameMap["enforcement_point_path"] = "EnforcementPointPath"
@@ -70,10 +82,12 @@ func stateGetRestMetadata() protocol.OperationRestMetadata {
 	fieldNameMap["page_size"] = "PageSize"
 	fieldNameMap["sort_ascending"] = "SortAscending"
 	fieldNameMap["sort_by"] = "SortBy"
+	fieldNameMap["type"] = "Type_"
 	paramsTypeMap["enforcement_point_path"] = bindings.NewOptionalType(bindings.NewStringType())
 	paramsTypeMap["tier1_id"] = bindings.NewStringType()
 	paramsTypeMap["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
 	paramsTypeMap["page_size"] = bindings.NewOptionalType(bindings.NewIntegerType())
+	paramsTypeMap["type"] = bindings.NewOptionalType(bindings.NewStringType())
 	paramsTypeMap["interface_path"] = bindings.NewOptionalType(bindings.NewStringType())
 	paramsTypeMap["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
 	paramsTypeMap["sort_by"] = bindings.NewOptionalType(bindings.NewStringType())
@@ -86,6 +100,7 @@ func stateGetRestMetadata() protocol.OperationRestMetadata {
 	queryParams["included_fields"] = "included_fields"
 	queryParams["enforcement_point_path"] = "enforcement_point_path"
 	queryParams["sort_by"] = "sort_by"
+	queryParams["type"] = "type"
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}

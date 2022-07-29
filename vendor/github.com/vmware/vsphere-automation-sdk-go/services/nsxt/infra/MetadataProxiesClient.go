@@ -58,7 +58,7 @@ type MetadataProxiesClient interface {
 	// @throws NotFound  Not Found
 	List(cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.MetadataProxyConfigListResult, error)
 
-	// API will create or update Metadata Proxy Config with ID profile-id
+	// API will create or update Metadata Proxy Config with ID profile-id. Maximum 10 Metadata Proxy Configurations are supported.
 	//
 	// @param metadataProxyIdParam Metadata Proxy ID (required)
 	// @param metadataProxyConfigParam (required)

@@ -77,7 +77,7 @@ type ServiceInstancesClient interface {
 	// @throws NotFound  Not Found
 	Patch(tier0IdParam string, localeServiceIdParam string, serviceInstanceIdParam string, policyServiceInstanceParam model.PolicyServiceInstance) error
 
-	//
+	// Use this API when an alarm complaining JWT expiry is raised while deploying partner service VM. The OVF for partner service needs to be downloaded from partner services provider. It might be possible that the authentication token for this communication is expired when the service VM deployment starts. That will either require re-login through UI or use of this API. Certain authentication and authorization steps are internally processed in order to enable communication with partner service provider. This API offers the functionality to re-establish communication with partner services provider. This API needs open id and access token to be passed as headers. Those can be obtained from CSP authorize API. Please make sure to pass headers - Authorization:<Bearer ACCESS_TOKEN> and X-NSX-OpenId:<OPEN_ID>.
 	//
 	// @param tier0IdParam Tier-0 id (required)
 	// @param localeServiceIdParam Locale service id (required)

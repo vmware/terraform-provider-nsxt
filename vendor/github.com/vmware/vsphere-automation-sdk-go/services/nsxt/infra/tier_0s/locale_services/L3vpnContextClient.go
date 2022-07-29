@@ -21,7 +21,7 @@ const _ = core.SupportedByRuntimeVersion1
 
 type L3vpnContextClient interface {
 
-	//
+	// Read the L3Vpn Context under tier-0. This API is deprecated. Please use GET /infra/tier-0s/<tier-0-id>/locale-services/ <locale-service-id>/ipsec-vpn-services/default instead.
 	//
 	// @param tier0IdParam (required)
 	// @param localeServiceIdParam (required)

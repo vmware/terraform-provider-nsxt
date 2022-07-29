@@ -21,6 +21,18 @@ const _ = core.SupportedByRuntimeVersion1
 
 type TransportZonesClient interface {
 
+	// Delete a Transport Zone under an Enforcement Point.
+	//
+	// @param siteIdParam (required)
+	// @param enforcementpointIdParam (required)
+	// @param transportZoneIdParam (required)
+	// @throws InvalidRequest  Bad Request, Precondition Failed
+	// @throws Unauthorized  Forbidden
+	// @throws ServiceUnavailable  Service Unavailable
+	// @throws InternalServerError  Internal Server Error
+	// @throws NotFound  Not Found
+	Delete(siteIdParam string, enforcementpointIdParam string, transportZoneIdParam string) error
+
 	// Read a Transport Zone under an Enforcement Point
 	//
 	// @param siteIdParam (required)
@@ -51,6 +63,34 @@ type TransportZonesClient interface {
 	// @throws InternalServerError  Internal Server Error
 	// @throws NotFound  Not Found
 	List(siteIdParam string, enforcementpointIdParam string, cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.PolicyTransportZoneListResult, error)
+
+	// Patch a Transport Zone under an Enforcement Point
+	//
+	// @param siteIdParam (required)
+	// @param enforcementpointIdParam (required)
+	// @param transportZoneIdParam (required)
+	// @param policyTransportZoneParam (required)
+	// @return com.vmware.nsx_policy.model.PolicyTransportZone
+	// @throws InvalidRequest  Bad Request, Precondition Failed
+	// @throws Unauthorized  Forbidden
+	// @throws ServiceUnavailable  Service Unavailable
+	// @throws InternalServerError  Internal Server Error
+	// @throws NotFound  Not Found
+	Patch(siteIdParam string, enforcementpointIdParam string, transportZoneIdParam string, policyTransportZoneParam model.PolicyTransportZone) (model.PolicyTransportZone, error)
+
+	// PUT a Transport Zone under an Enforcement Point
+	//
+	// @param siteIdParam (required)
+	// @param enforcementpointIdParam (required)
+	// @param transportZoneIdParam (required)
+	// @param policyTransportZoneParam (required)
+	// @return com.vmware.nsx_policy.model.PolicyTransportZone
+	// @throws InvalidRequest  Bad Request, Precondition Failed
+	// @throws Unauthorized  Forbidden
+	// @throws ServiceUnavailable  Service Unavailable
+	// @throws InternalServerError  Internal Server Error
+	// @throws NotFound  Not Found
+	Update(siteIdParam string, enforcementpointIdParam string, transportZoneIdParam string, policyTransportZoneParam model.PolicyTransportZone) (model.PolicyTransportZone, error)
 }
 
 type transportZonesClient struct {
@@ -62,8 +102,11 @@ type transportZonesClient struct {
 func NewTransportZonesClient(connector client.Connector) *transportZonesClient {
 	interfaceIdentifier := core.NewInterfaceIdentifier("com.vmware.nsx_policy.infra.sites.enforcement_points.transport_zones")
 	methodIdentifiers := map[string]core.MethodIdentifier{
-		"get":  core.NewMethodIdentifier(interfaceIdentifier, "get"),
-		"list": core.NewMethodIdentifier(interfaceIdentifier, "list"),
+		"delete": core.NewMethodIdentifier(interfaceIdentifier, "delete"),
+		"get":    core.NewMethodIdentifier(interfaceIdentifier, "get"),
+		"list":   core.NewMethodIdentifier(interfaceIdentifier, "list"),
+		"patch":  core.NewMethodIdentifier(interfaceIdentifier, "patch"),
+		"update": core.NewMethodIdentifier(interfaceIdentifier, "update"),
 	}
 	interfaceDefinition := core.NewInterfaceDefinition(interfaceIdentifier, methodIdentifiers)
 	errorsBindingMap := make(map[string]bindings.BindingType)
@@ -77,6 +120,33 @@ func (tIface *transportZonesClient) GetErrorBindingType(errorName string) bindin
 		return entry
 	}
 	return errors.ERROR_BINDINGS_MAP[errorName]
+}
+
+func (tIface *transportZonesClient) Delete(siteIdParam string, enforcementpointIdParam string, transportZoneIdParam string) error {
+	typeConverter := tIface.connector.TypeConverter()
+	executionContext := tIface.connector.NewExecutionContext()
+	sv := bindings.NewStructValueBuilder(transportZonesDeleteInputType(), typeConverter)
+	sv.AddStructField("SiteId", siteIdParam)
+	sv.AddStructField("EnforcementpointId", enforcementpointIdParam)
+	sv.AddStructField("TransportZoneId", transportZoneIdParam)
+	inputDataValue, inputError := sv.GetStructValue()
+	if inputError != nil {
+		return bindings.VAPIerrorsToError(inputError)
+	}
+	operationRestMetaData := transportZonesDeleteRestMetadata()
+	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
+	tIface.connector.SetConnectionMetadata(connectionMetadata)
+	methodResult := tIface.connector.GetApiProvider().Invoke("com.vmware.nsx_policy.infra.sites.enforcement_points.transport_zones", "delete", inputDataValue, executionContext)
+	if methodResult.IsSuccess() {
+		return nil
+	} else {
+		methodError, errorInError := typeConverter.ConvertToGolang(methodResult.Error(), tIface.GetErrorBindingType(methodResult.Error().Name()))
+		if errorInError != nil {
+			return bindings.VAPIerrorsToError(errorInError)
+		}
+		return methodError.(error)
+	}
 }
 
 func (tIface *transportZonesClient) Get(siteIdParam string, enforcementpointIdParam string, transportZoneIdParam string) (model.PolicyTransportZone, error) {
@@ -141,6 +211,74 @@ func (tIface *transportZonesClient) List(siteIdParam string, enforcementpointIdP
 			return emptyOutput, bindings.VAPIerrorsToError(errorInOutput)
 		}
 		return output.(model.PolicyTransportZoneListResult), nil
+	} else {
+		methodError, errorInError := typeConverter.ConvertToGolang(methodResult.Error(), tIface.GetErrorBindingType(methodResult.Error().Name()))
+		if errorInError != nil {
+			return emptyOutput, bindings.VAPIerrorsToError(errorInError)
+		}
+		return emptyOutput, methodError.(error)
+	}
+}
+
+func (tIface *transportZonesClient) Patch(siteIdParam string, enforcementpointIdParam string, transportZoneIdParam string, policyTransportZoneParam model.PolicyTransportZone) (model.PolicyTransportZone, error) {
+	typeConverter := tIface.connector.TypeConverter()
+	executionContext := tIface.connector.NewExecutionContext()
+	sv := bindings.NewStructValueBuilder(transportZonesPatchInputType(), typeConverter)
+	sv.AddStructField("SiteId", siteIdParam)
+	sv.AddStructField("EnforcementpointId", enforcementpointIdParam)
+	sv.AddStructField("TransportZoneId", transportZoneIdParam)
+	sv.AddStructField("PolicyTransportZone", policyTransportZoneParam)
+	inputDataValue, inputError := sv.GetStructValue()
+	if inputError != nil {
+		var emptyOutput model.PolicyTransportZone
+		return emptyOutput, bindings.VAPIerrorsToError(inputError)
+	}
+	operationRestMetaData := transportZonesPatchRestMetadata()
+	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
+	tIface.connector.SetConnectionMetadata(connectionMetadata)
+	methodResult := tIface.connector.GetApiProvider().Invoke("com.vmware.nsx_policy.infra.sites.enforcement_points.transport_zones", "patch", inputDataValue, executionContext)
+	var emptyOutput model.PolicyTransportZone
+	if methodResult.IsSuccess() {
+		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), transportZonesPatchOutputType())
+		if errorInOutput != nil {
+			return emptyOutput, bindings.VAPIerrorsToError(errorInOutput)
+		}
+		return output.(model.PolicyTransportZone), nil
+	} else {
+		methodError, errorInError := typeConverter.ConvertToGolang(methodResult.Error(), tIface.GetErrorBindingType(methodResult.Error().Name()))
+		if errorInError != nil {
+			return emptyOutput, bindings.VAPIerrorsToError(errorInError)
+		}
+		return emptyOutput, methodError.(error)
+	}
+}
+
+func (tIface *transportZonesClient) Update(siteIdParam string, enforcementpointIdParam string, transportZoneIdParam string, policyTransportZoneParam model.PolicyTransportZone) (model.PolicyTransportZone, error) {
+	typeConverter := tIface.connector.TypeConverter()
+	executionContext := tIface.connector.NewExecutionContext()
+	sv := bindings.NewStructValueBuilder(transportZonesUpdateInputType(), typeConverter)
+	sv.AddStructField("SiteId", siteIdParam)
+	sv.AddStructField("EnforcementpointId", enforcementpointIdParam)
+	sv.AddStructField("TransportZoneId", transportZoneIdParam)
+	sv.AddStructField("PolicyTransportZone", policyTransportZoneParam)
+	inputDataValue, inputError := sv.GetStructValue()
+	if inputError != nil {
+		var emptyOutput model.PolicyTransportZone
+		return emptyOutput, bindings.VAPIerrorsToError(inputError)
+	}
+	operationRestMetaData := transportZonesUpdateRestMetadata()
+	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
+	connectionMetadata["isStreamingResponse"] = false
+	tIface.connector.SetConnectionMetadata(connectionMetadata)
+	methodResult := tIface.connector.GetApiProvider().Invoke("com.vmware.nsx_policy.infra.sites.enforcement_points.transport_zones", "update", inputDataValue, executionContext)
+	var emptyOutput model.PolicyTransportZone
+	if methodResult.IsSuccess() {
+		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), transportZonesUpdateOutputType())
+		if errorInOutput != nil {
+			return emptyOutput, bindings.VAPIerrorsToError(errorInOutput)
+		}
+		return output.(model.PolicyTransportZone), nil
 	} else {
 		methodError, errorInError := typeConverter.ConvertToGolang(methodResult.Error(), tIface.GetErrorBindingType(methodResult.Error().Name()))
 		if errorInError != nil {

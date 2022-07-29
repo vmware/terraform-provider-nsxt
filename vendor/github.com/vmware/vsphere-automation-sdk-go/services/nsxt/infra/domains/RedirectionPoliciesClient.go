@@ -44,7 +44,7 @@ type RedirectionPoliciesClient interface {
 	// @throws NotFound  Not Found
 	Get(domainIdParam string, redirectionPolicyIdParam string) (model.RedirectionPolicy, error)
 
-	// List all redirection policys across all domains ordered by precedence.
+	// List all redirection policies across all domains ordered by precedence.
 	//
 	// @param cursorParam Opaque cursor to be used for getting next page of records (supplied by current result page) (optional)
 	// @param includeMarkForDeleteObjectsParam Include objects that are marked for deletion in results (optional, default to false)
@@ -61,7 +61,7 @@ type RedirectionPoliciesClient interface {
 	// @throws NotFound  Not Found
 	List(cursorParam *string, includeMarkForDeleteObjectsParam *bool, includeRuleCountParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.RedirectionPolicyListResult, error)
 
-	// List redirection policys for a domain
+	// List redirection policies for a domain
 	//
 	// @param domainIdParam Domain id (required)
 	// @param cursorParam Opaque cursor to be used for getting next page of records (supplied by current result page) (optional)

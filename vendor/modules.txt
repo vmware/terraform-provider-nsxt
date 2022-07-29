@@ -198,7 +198,7 @@ github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client/middleware/r
 github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/server
 github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/server/rpc/msg
 github.com/vmware/vsphere-automation-sdk-go/runtime/security
-# github.com/vmware/vsphere-automation-sdk-go/services/nsxt v0.6.0
+# github.com/vmware/vsphere-automation-sdk-go/services/nsxt v0.9.0
 ## explicit
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra
@@ -223,7 +223,7 @@ github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/nat
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/segments
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt/search
-# github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm v0.4.0
+# github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm v0.6.0
 ## explicit
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra

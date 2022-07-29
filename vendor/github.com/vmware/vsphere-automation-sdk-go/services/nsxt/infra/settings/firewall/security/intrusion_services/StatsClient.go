@@ -23,13 +23,14 @@ type StatsClient interface {
 	// Sets IDS/IPS rule statistics counter to zero. - no enforcement point path specified: Reset of stats will be executed for each enforcement point. - {enforcement_point_path}: Reset of stats will be executed only for the given enforcement point.
 	//
 	// @param categoryParam Aggregation statistic category (optional, default to IDPSDFW)
+	// @param containerClusterPathParam String Path of the Container Cluster entity (optional)
 	// @param enforcementPointPathParam String Path of the enforcement point (optional)
 	// @throws InvalidRequest  Bad Request, Precondition Failed
 	// @throws Unauthorized  Forbidden
 	// @throws ServiceUnavailable  Service Unavailable
 	// @throws InternalServerError  Internal Server Error
 	// @throws NotFound  Not Found
-	Reset(categoryParam *string, enforcementPointPathParam *string) error
+	Reset(categoryParam *string, containerClusterPathParam *string, enforcementPointPathParam *string) error
 }
 
 type statsClient struct {
@@ -57,11 +58,12 @@ func (sIface *statsClient) GetErrorBindingType(errorName string) bindings.Bindin
 	return errors.ERROR_BINDINGS_MAP[errorName]
 }
 
-func (sIface *statsClient) Reset(categoryParam *string, enforcementPointPathParam *string) error {
+func (sIface *statsClient) Reset(categoryParam *string, containerClusterPathParam *string, enforcementPointPathParam *string) error {
 	typeConverter := sIface.connector.TypeConverter()
 	executionContext := sIface.connector.NewExecutionContext()
 	sv := bindings.NewStructValueBuilder(statsResetInputType(), typeConverter)
 	sv.AddStructField("Category", categoryParam)
+	sv.AddStructField("ContainerClusterPath", containerClusterPathParam)
 	sv.AddStructField("EnforcementPointPath", enforcementPointPathParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {

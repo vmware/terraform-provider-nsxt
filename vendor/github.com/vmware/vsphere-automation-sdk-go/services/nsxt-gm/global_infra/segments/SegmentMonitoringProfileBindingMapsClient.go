@@ -21,17 +21,6 @@ const _ = core.SupportedByRuntimeVersion1
 
 type SegmentMonitoringProfileBindingMapsClient interface {
 
-	// API will delete Infra Segment Monitoring Profile Binding Profile.
-	//
-	// @param infraSegmentIdParam Infra Segment ID (required)
-	// @param segmentMonitoringProfileBindingMapIdParam Segment Monitoring Profile Binding Map ID (required)
-	// @throws InvalidRequest  Bad Request, Precondition Failed
-	// @throws Unauthorized  Forbidden
-	// @throws ServiceUnavailable  Service Unavailable
-	// @throws InternalServerError  Internal Server Error
-	// @throws NotFound  Not Found
-	Delete(infraSegmentIdParam string, segmentMonitoringProfileBindingMapIdParam string) error
-
 	// API will get Infra Segment Monitoring Profile Binding Map.
 	//
 	// @param infraSegmentIdParam Infra Segment ID (required)
@@ -60,31 +49,6 @@ type SegmentMonitoringProfileBindingMapsClient interface {
 	// @throws InternalServerError  Internal Server Error
 	// @throws NotFound  Not Found
 	List(infraSegmentIdParam string, cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.SegmentMonitoringProfileBindingMapListResult, error)
-
-	// API will create infra segment monitoring profile binding map.
-	//
-	// @param infraSegmentIdParam Infra Segment ID (required)
-	// @param segmentMonitoringProfileBindingMapIdParam Segment Monitoring Profile Binding Map ID (required)
-	// @param segmentMonitoringProfileBindingMapParam (required)
-	// @throws InvalidRequest  Bad Request, Precondition Failed
-	// @throws Unauthorized  Forbidden
-	// @throws ServiceUnavailable  Service Unavailable
-	// @throws InternalServerError  Internal Server Error
-	// @throws NotFound  Not Found
-	Patch(infraSegmentIdParam string, segmentMonitoringProfileBindingMapIdParam string, segmentMonitoringProfileBindingMapParam model.SegmentMonitoringProfileBindingMap) error
-
-	// API will update Infra Segment Monitoring Profile Binding Map.
-	//
-	// @param infraSegmentIdParam Infra Segment ID (required)
-	// @param segmentMonitoringProfileBindingMapIdParam Segment Monitoring Profile Binding Map ID (required)
-	// @param segmentMonitoringProfileBindingMapParam (required)
-	// @return com.vmware.nsx_global_policy.model.SegmentMonitoringProfileBindingMap
-	// @throws InvalidRequest  Bad Request, Precondition Failed
-	// @throws Unauthorized  Forbidden
-	// @throws ServiceUnavailable  Service Unavailable
-	// @throws InternalServerError  Internal Server Error
-	// @throws NotFound  Not Found
-	Update(infraSegmentIdParam string, segmentMonitoringProfileBindingMapIdParam string, segmentMonitoringProfileBindingMapParam model.SegmentMonitoringProfileBindingMap) (model.SegmentMonitoringProfileBindingMap, error)
 }
 
 type segmentMonitoringProfileBindingMapsClient struct {
@@ -96,11 +60,8 @@ type segmentMonitoringProfileBindingMapsClient struct {
 func NewSegmentMonitoringProfileBindingMapsClient(connector client.Connector) *segmentMonitoringProfileBindingMapsClient {
 	interfaceIdentifier := core.NewInterfaceIdentifier("com.vmware.nsx_global_policy.global_infra.segments.segment_monitoring_profile_binding_maps")
 	methodIdentifiers := map[string]core.MethodIdentifier{
-		"delete": core.NewMethodIdentifier(interfaceIdentifier, "delete"),
-		"get":    core.NewMethodIdentifier(interfaceIdentifier, "get"),
-		"list":   core.NewMethodIdentifier(interfaceIdentifier, "list"),
-		"patch":  core.NewMethodIdentifier(interfaceIdentifier, "patch"),
-		"update": core.NewMethodIdentifier(interfaceIdentifier, "update"),
+		"get":  core.NewMethodIdentifier(interfaceIdentifier, "get"),
+		"list": core.NewMethodIdentifier(interfaceIdentifier, "list"),
 	}
 	interfaceDefinition := core.NewInterfaceDefinition(interfaceIdentifier, methodIdentifiers)
 	errorsBindingMap := make(map[string]bindings.BindingType)
@@ -114,32 +75,6 @@ func (sIface *segmentMonitoringProfileBindingMapsClient) GetErrorBindingType(err
 		return entry
 	}
 	return errors.ERROR_BINDINGS_MAP[errorName]
-}
-
-func (sIface *segmentMonitoringProfileBindingMapsClient) Delete(infraSegmentIdParam string, segmentMonitoringProfileBindingMapIdParam string) error {
-	typeConverter := sIface.connector.TypeConverter()
-	executionContext := sIface.connector.NewExecutionContext()
-	sv := bindings.NewStructValueBuilder(segmentMonitoringProfileBindingMapsDeleteInputType(), typeConverter)
-	sv.AddStructField("InfraSegmentId", infraSegmentIdParam)
-	sv.AddStructField("SegmentMonitoringProfileBindingMapId", segmentMonitoringProfileBindingMapIdParam)
-	inputDataValue, inputError := sv.GetStructValue()
-	if inputError != nil {
-		return bindings.VAPIerrorsToError(inputError)
-	}
-	operationRestMetaData := segmentMonitoringProfileBindingMapsDeleteRestMetadata()
-	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
-	connectionMetadata["isStreamingResponse"] = false
-	sIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := sIface.connector.GetApiProvider().Invoke("com.vmware.nsx_global_policy.global_infra.segments.segment_monitoring_profile_binding_maps", "delete", inputDataValue, executionContext)
-	if methodResult.IsSuccess() {
-		return nil
-	} else {
-		methodError, errorInError := typeConverter.ConvertToGolang(methodResult.Error(), sIface.GetErrorBindingType(methodResult.Error().Name()))
-		if errorInError != nil {
-			return bindings.VAPIerrorsToError(errorInError)
-		}
-		return methodError.(error)
-	}
 }
 
 func (sIface *segmentMonitoringProfileBindingMapsClient) Get(infraSegmentIdParam string, segmentMonitoringProfileBindingMapIdParam string) (model.SegmentMonitoringProfileBindingMap, error) {
@@ -202,66 +137,6 @@ func (sIface *segmentMonitoringProfileBindingMapsClient) List(infraSegmentIdPara
 			return emptyOutput, bindings.VAPIerrorsToError(errorInOutput)
 		}
 		return output.(model.SegmentMonitoringProfileBindingMapListResult), nil
-	} else {
-		methodError, errorInError := typeConverter.ConvertToGolang(methodResult.Error(), sIface.GetErrorBindingType(methodResult.Error().Name()))
-		if errorInError != nil {
-			return emptyOutput, bindings.VAPIerrorsToError(errorInError)
-		}
-		return emptyOutput, methodError.(error)
-	}
-}
-
-func (sIface *segmentMonitoringProfileBindingMapsClient) Patch(infraSegmentIdParam string, segmentMonitoringProfileBindingMapIdParam string, segmentMonitoringProfileBindingMapParam model.SegmentMonitoringProfileBindingMap) error {
-	typeConverter := sIface.connector.TypeConverter()
-	executionContext := sIface.connector.NewExecutionContext()
-	sv := bindings.NewStructValueBuilder(segmentMonitoringProfileBindingMapsPatchInputType(), typeConverter)
-	sv.AddStructField("InfraSegmentId", infraSegmentIdParam)
-	sv.AddStructField("SegmentMonitoringProfileBindingMapId", segmentMonitoringProfileBindingMapIdParam)
-	sv.AddStructField("SegmentMonitoringProfileBindingMap", segmentMonitoringProfileBindingMapParam)
-	inputDataValue, inputError := sv.GetStructValue()
-	if inputError != nil {
-		return bindings.VAPIerrorsToError(inputError)
-	}
-	operationRestMetaData := segmentMonitoringProfileBindingMapsPatchRestMetadata()
-	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
-	connectionMetadata["isStreamingResponse"] = false
-	sIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := sIface.connector.GetApiProvider().Invoke("com.vmware.nsx_global_policy.global_infra.segments.segment_monitoring_profile_binding_maps", "patch", inputDataValue, executionContext)
-	if methodResult.IsSuccess() {
-		return nil
-	} else {
-		methodError, errorInError := typeConverter.ConvertToGolang(methodResult.Error(), sIface.GetErrorBindingType(methodResult.Error().Name()))
-		if errorInError != nil {
-			return bindings.VAPIerrorsToError(errorInError)
-		}
-		return methodError.(error)
-	}
-}
-
-func (sIface *segmentMonitoringProfileBindingMapsClient) Update(infraSegmentIdParam string, segmentMonitoringProfileBindingMapIdParam string, segmentMonitoringProfileBindingMapParam model.SegmentMonitoringProfileBindingMap) (model.SegmentMonitoringProfileBindingMap, error) {
-	typeConverter := sIface.connector.TypeConverter()
-	executionContext := sIface.connector.NewExecutionContext()
-	sv := bindings.NewStructValueBuilder(segmentMonitoringProfileBindingMapsUpdateInputType(), typeConverter)
-	sv.AddStructField("InfraSegmentId", infraSegmentIdParam)
-	sv.AddStructField("SegmentMonitoringProfileBindingMapId", segmentMonitoringProfileBindingMapIdParam)
-	sv.AddStructField("SegmentMonitoringProfileBindingMap", segmentMonitoringProfileBindingMapParam)
-	inputDataValue, inputError := sv.GetStructValue()
-	if inputError != nil {
-		var emptyOutput model.SegmentMonitoringProfileBindingMap
-		return emptyOutput, bindings.VAPIerrorsToError(inputError)
-	}
-	operationRestMetaData := segmentMonitoringProfileBindingMapsUpdateRestMetadata()
-	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
-	connectionMetadata["isStreamingResponse"] = false
-	sIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := sIface.connector.GetApiProvider().Invoke("com.vmware.nsx_global_policy.global_infra.segments.segment_monitoring_profile_binding_maps", "update", inputDataValue, executionContext)
-	var emptyOutput model.SegmentMonitoringProfileBindingMap
-	if methodResult.IsSuccess() {
-		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), segmentMonitoringProfileBindingMapsUpdateOutputType())
-		if errorInOutput != nil {
-			return emptyOutput, bindings.VAPIerrorsToError(errorInOutput)
-		}
-		return output.(model.SegmentMonitoringProfileBindingMap), nil
 	} else {
 		methodError, errorInError := typeConverter.ConvertToGolang(methodResult.Error(), sIface.GetErrorBindingType(methodResult.Error().Name()))
 		if errorInError != nil {

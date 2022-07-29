@@ -23,14 +23,14 @@ type ClusterConfigsClient interface {
 
 	// Read intrusion detection system cluster config
 	//
-	// @param clusterIdParam User entered ID (required)
+	// @param clusterConfigIdParam User entered ID (required)
 	// @return com.vmware.nsx_policy.model.IdsClusterConfig
 	// @throws InvalidRequest  Bad Request, Precondition Failed
 	// @throws Unauthorized  Forbidden
 	// @throws ServiceUnavailable  Service Unavailable
 	// @throws InternalServerError  Internal Server Error
 	// @throws NotFound  Not Found
-	Get(clusterIdParam string) (model.IdsClusterConfig, error)
+	Get(clusterConfigIdParam string) (model.IdsClusterConfig, error)
 
 	// List intrusion detection system cluster configs.
 	//
@@ -50,18 +50,18 @@ type ClusterConfigsClient interface {
 
 	// Patch intrusion detection system on cluster level.
 	//
-	// @param clusterIdParam User entered ID (required)
+	// @param clusterConfigIdParam User entered ID (required)
 	// @param idsClusterConfigParam (required)
 	// @throws InvalidRequest  Bad Request, Precondition Failed
 	// @throws Unauthorized  Forbidden
 	// @throws ServiceUnavailable  Service Unavailable
 	// @throws InternalServerError  Internal Server Error
 	// @throws NotFound  Not Found
-	Patch(clusterIdParam string, idsClusterConfigParam model.IdsClusterConfig) error
+	Patch(clusterConfigIdParam string, idsClusterConfigParam model.IdsClusterConfig) error
 
 	// Update intrusion detection system on cluster level.
 	//
-	// @param clusterIdParam User entered ID (required)
+	// @param clusterConfigIdParam User entered ID (required)
 	// @param idsClusterConfigParam (required)
 	// @return com.vmware.nsx_policy.model.IdsClusterConfig
 	// @throws InvalidRequest  Bad Request, Precondition Failed
@@ -69,7 +69,7 @@ type ClusterConfigsClient interface {
 	// @throws ServiceUnavailable  Service Unavailable
 	// @throws InternalServerError  Internal Server Error
 	// @throws NotFound  Not Found
-	Update(clusterIdParam string, idsClusterConfigParam model.IdsClusterConfig) (model.IdsClusterConfig, error)
+	Update(clusterConfigIdParam string, idsClusterConfigParam model.IdsClusterConfig) (model.IdsClusterConfig, error)
 }
 
 type clusterConfigsClient struct {
@@ -100,11 +100,11 @@ func (cIface *clusterConfigsClient) GetErrorBindingType(errorName string) bindin
 	return errors.ERROR_BINDINGS_MAP[errorName]
 }
 
-func (cIface *clusterConfigsClient) Get(clusterIdParam string) (model.IdsClusterConfig, error) {
+func (cIface *clusterConfigsClient) Get(clusterConfigIdParam string) (model.IdsClusterConfig, error) {
 	typeConverter := cIface.connector.TypeConverter()
 	executionContext := cIface.connector.NewExecutionContext()
 	sv := bindings.NewStructValueBuilder(clusterConfigsGetInputType(), typeConverter)
-	sv.AddStructField("ClusterId", clusterIdParam)
+	sv.AddStructField("ClusterConfigId", clusterConfigIdParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		var emptyOutput model.IdsClusterConfig
@@ -167,11 +167,11 @@ func (cIface *clusterConfigsClient) List(cursorParam *string, includeMarkForDele
 	}
 }
 
-func (cIface *clusterConfigsClient) Patch(clusterIdParam string, idsClusterConfigParam model.IdsClusterConfig) error {
+func (cIface *clusterConfigsClient) Patch(clusterConfigIdParam string, idsClusterConfigParam model.IdsClusterConfig) error {
 	typeConverter := cIface.connector.TypeConverter()
 	executionContext := cIface.connector.NewExecutionContext()
 	sv := bindings.NewStructValueBuilder(clusterConfigsPatchInputType(), typeConverter)
-	sv.AddStructField("ClusterId", clusterIdParam)
+	sv.AddStructField("ClusterConfigId", clusterConfigIdParam)
 	sv.AddStructField("IdsClusterConfig", idsClusterConfigParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
@@ -193,11 +193,11 @@ func (cIface *clusterConfigsClient) Patch(clusterIdParam string, idsClusterConfi
 	}
 }
 
-func (cIface *clusterConfigsClient) Update(clusterIdParam string, idsClusterConfigParam model.IdsClusterConfig) (model.IdsClusterConfig, error) {
+func (cIface *clusterConfigsClient) Update(clusterConfigIdParam string, idsClusterConfigParam model.IdsClusterConfig) (model.IdsClusterConfig, error) {
 	typeConverter := cIface.connector.TypeConverter()
 	executionContext := cIface.connector.NewExecutionContext()
 	sv := bindings.NewStructValueBuilder(clusterConfigsUpdateInputType(), typeConverter)
-	sv.AddStructField("ClusterId", clusterIdParam)
+	sv.AddStructField("ClusterConfigId", clusterConfigIdParam)
 	sv.AddStructField("IdsClusterConfig", idsClusterConfigParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
