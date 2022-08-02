@@ -74,24 +74,26 @@ type TraceflowsClient interface {
 	//
 	// @param traceflowIdParam (required)
 	// @param traceflowConfigParam (required)
+	// @param enforcementPointPathParam Enforcement point path (optional)
 	// @throws InvalidRequest  Bad Request, Precondition Failed
 	// @throws Unauthorized  Forbidden
 	// @throws ServiceUnavailable  Service Unavailable
 	// @throws InternalServerError  Internal Server Error
 	// @throws NotFound  Not Found
-	Patch(traceflowIdParam string, traceflowConfigParam model.TraceflowConfig) error
+	Patch(traceflowIdParam string, traceflowConfigParam model.TraceflowConfig, enforcementPointPathParam *string) error
 
 	// If a traceflow config with the traceflow-id is not already present, create a new traceflow config. If it already exists, update the traceflow config. This is a full replace. This configuration will be cleaned up by the system after two hours of inactivity.
 	//
 	// @param traceflowIdParam (required)
 	// @param traceflowConfigParam (required)
+	// @param enforcementPointPathParam Enforcement point path (optional)
 	// @return com.vmware.nsx_policy.model.TraceflowConfig
 	// @throws InvalidRequest  Bad Request, Precondition Failed
 	// @throws Unauthorized  Forbidden
 	// @throws ServiceUnavailable  Service Unavailable
 	// @throws InternalServerError  Internal Server Error
 	// @throws NotFound  Not Found
-	Update(traceflowIdParam string, traceflowConfigParam model.TraceflowConfig) (model.TraceflowConfig, error)
+	Update(traceflowIdParam string, traceflowConfigParam model.TraceflowConfig, enforcementPointPathParam *string) (model.TraceflowConfig, error)
 }
 
 type traceflowsClient struct {
@@ -248,12 +250,13 @@ func (tIface *traceflowsClient) List(cursorParam *string, includeMarkForDeleteOb
 	}
 }
 
-func (tIface *traceflowsClient) Patch(traceflowIdParam string, traceflowConfigParam model.TraceflowConfig) error {
+func (tIface *traceflowsClient) Patch(traceflowIdParam string, traceflowConfigParam model.TraceflowConfig, enforcementPointPathParam *string) error {
 	typeConverter := tIface.connector.TypeConverter()
 	executionContext := tIface.connector.NewExecutionContext()
 	sv := bindings.NewStructValueBuilder(traceflowsPatchInputType(), typeConverter)
 	sv.AddStructField("TraceflowId", traceflowIdParam)
 	sv.AddStructField("TraceflowConfig", traceflowConfigParam)
+	sv.AddStructField("EnforcementPointPath", enforcementPointPathParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		return bindings.VAPIerrorsToError(inputError)
@@ -274,12 +277,13 @@ func (tIface *traceflowsClient) Patch(traceflowIdParam string, traceflowConfigPa
 	}
 }
 
-func (tIface *traceflowsClient) Update(traceflowIdParam string, traceflowConfigParam model.TraceflowConfig) (model.TraceflowConfig, error) {
+func (tIface *traceflowsClient) Update(traceflowIdParam string, traceflowConfigParam model.TraceflowConfig, enforcementPointPathParam *string) (model.TraceflowConfig, error) {
 	typeConverter := tIface.connector.TypeConverter()
 	executionContext := tIface.connector.NewExecutionContext()
 	sv := bindings.NewStructValueBuilder(traceflowsUpdateInputType(), typeConverter)
 	sv.AddStructField("TraceflowId", traceflowIdParam)
 	sv.AddStructField("TraceflowConfig", traceflowConfigParam)
+	sv.AddStructField("EnforcementPointPath", enforcementPointPathParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		var emptyOutput model.TraceflowConfig

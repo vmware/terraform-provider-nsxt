@@ -21,7 +21,7 @@ const _ = core.SupportedByRuntimeVersion1
 
 type StatusClient interface {
 
-	//
+	// Get Consolidated Status of an intent object (with or without enforcement specific status details). The request is evaluated as follows: - <intent_path>: the request is evaluated on all enforcement points for the given intent without enforcement point specific details. - <intent_path, include_enforced_status>: the request is evaluated on all enforcement points for the given intent with enforcement point specific details.
 	//
 	// @param intentPathParam Policy Path of the intent object (required)
 	// @param includeEnforcedStatusParam Include Enforced Status Flag (optional, default to false)

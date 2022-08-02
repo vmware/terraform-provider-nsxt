@@ -26,6 +26,7 @@ func arpTableListInputType() bindings.StructType {
 	fields["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
 	fields["edge_path"] = bindings.NewOptionalType(bindings.NewStringType())
 	fields["enforcement_point_path"] = bindings.NewOptionalType(bindings.NewStringType())
+	fields["host_transport_node_path"] = bindings.NewOptionalType(bindings.NewStringType())
 	fields["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
 	fields["page_size"] = bindings.NewOptionalType(bindings.NewIntegerType())
 	fields["sort_ascending"] = bindings.NewOptionalType(bindings.NewBooleanType())
@@ -35,6 +36,7 @@ func arpTableListInputType() bindings.StructType {
 	fieldNameMap["cursor"] = "Cursor"
 	fieldNameMap["edge_path"] = "EdgePath"
 	fieldNameMap["enforcement_point_path"] = "EnforcementPointPath"
+	fieldNameMap["host_transport_node_path"] = "HostTransportNodePath"
 	fieldNameMap["included_fields"] = "IncludedFields"
 	fieldNameMap["page_size"] = "PageSize"
 	fieldNameMap["sort_ascending"] = "SortAscending"
@@ -61,6 +63,7 @@ func arpTableListRestMetadata() protocol.OperationRestMetadata {
 	fields["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
 	fields["edge_path"] = bindings.NewOptionalType(bindings.NewStringType())
 	fields["enforcement_point_path"] = bindings.NewOptionalType(bindings.NewStringType())
+	fields["host_transport_node_path"] = bindings.NewOptionalType(bindings.NewStringType())
 	fields["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
 	fields["page_size"] = bindings.NewOptionalType(bindings.NewIntegerType())
 	fields["sort_ascending"] = bindings.NewOptionalType(bindings.NewBooleanType())
@@ -70,6 +73,7 @@ func arpTableListRestMetadata() protocol.OperationRestMetadata {
 	fieldNameMap["cursor"] = "Cursor"
 	fieldNameMap["edge_path"] = "EdgePath"
 	fieldNameMap["enforcement_point_path"] = "EnforcementPointPath"
+	fieldNameMap["host_transport_node_path"] = "HostTransportNodePath"
 	fieldNameMap["included_fields"] = "IncludedFields"
 	fieldNameMap["page_size"] = "PageSize"
 	fieldNameMap["sort_ascending"] = "SortAscending"
@@ -79,6 +83,7 @@ func arpTableListRestMetadata() protocol.OperationRestMetadata {
 	paramsTypeMap["tier1_id"] = bindings.NewStringType()
 	paramsTypeMap["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
 	paramsTypeMap["page_size"] = bindings.NewOptionalType(bindings.NewIntegerType())
+	paramsTypeMap["host_transport_node_path"] = bindings.NewOptionalType(bindings.NewStringType())
 	paramsTypeMap["segment_id"] = bindings.NewStringType()
 	paramsTypeMap["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
 	paramsTypeMap["sort_by"] = bindings.NewOptionalType(bindings.NewStringType())
@@ -88,6 +93,7 @@ func arpTableListRestMetadata() protocol.OperationRestMetadata {
 	pathParams["segment_id"] = "segmentId"
 	pathParams["tier1_id"] = "tier1Id"
 	queryParams["cursor"] = "cursor"
+	queryParams["host_transport_node_path"] = "host_transport_node_path"
 	queryParams["sort_ascending"] = "sort_ascending"
 	queryParams["included_fields"] = "included_fields"
 	queryParams["edge_path"] = "edge_path"

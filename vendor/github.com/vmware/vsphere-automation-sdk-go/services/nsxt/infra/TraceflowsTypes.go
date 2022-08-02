@@ -258,8 +258,10 @@ func traceflowsPatchInputType() bindings.StructType {
 	fieldNameMap := make(map[string]string)
 	fields["traceflow_id"] = bindings.NewStringType()
 	fields["traceflow_config"] = bindings.NewReferenceType(model.TraceflowConfigBindingType)
+	fields["enforcement_point_path"] = bindings.NewOptionalType(bindings.NewStringType())
 	fieldNameMap["traceflow_id"] = "TraceflowId"
 	fieldNameMap["traceflow_config"] = "TraceflowConfig"
+	fieldNameMap["enforcement_point_path"] = "EnforcementPointPath"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -279,12 +281,16 @@ func traceflowsPatchRestMetadata() protocol.OperationRestMetadata {
 	bodyFieldsMap := map[string]string{}
 	fields["traceflow_id"] = bindings.NewStringType()
 	fields["traceflow_config"] = bindings.NewReferenceType(model.TraceflowConfigBindingType)
+	fields["enforcement_point_path"] = bindings.NewOptionalType(bindings.NewStringType())
 	fieldNameMap["traceflow_id"] = "TraceflowId"
 	fieldNameMap["traceflow_config"] = "TraceflowConfig"
+	fieldNameMap["enforcement_point_path"] = "EnforcementPointPath"
+	paramsTypeMap["enforcement_point_path"] = bindings.NewOptionalType(bindings.NewStringType())
 	paramsTypeMap["traceflow_id"] = bindings.NewStringType()
 	paramsTypeMap["traceflow_config"] = bindings.NewReferenceType(model.TraceflowConfigBindingType)
 	paramsTypeMap["traceflowId"] = bindings.NewStringType()
 	pathParams["traceflow_id"] = "traceflowId"
+	queryParams["enforcement_point_path"] = "enforcement_point_path"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -313,8 +319,10 @@ func traceflowsUpdateInputType() bindings.StructType {
 	fieldNameMap := make(map[string]string)
 	fields["traceflow_id"] = bindings.NewStringType()
 	fields["traceflow_config"] = bindings.NewReferenceType(model.TraceflowConfigBindingType)
+	fields["enforcement_point_path"] = bindings.NewOptionalType(bindings.NewStringType())
 	fieldNameMap["traceflow_id"] = "TraceflowId"
 	fieldNameMap["traceflow_config"] = "TraceflowConfig"
+	fieldNameMap["enforcement_point_path"] = "EnforcementPointPath"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -334,12 +342,16 @@ func traceflowsUpdateRestMetadata() protocol.OperationRestMetadata {
 	bodyFieldsMap := map[string]string{}
 	fields["traceflow_id"] = bindings.NewStringType()
 	fields["traceflow_config"] = bindings.NewReferenceType(model.TraceflowConfigBindingType)
+	fields["enforcement_point_path"] = bindings.NewOptionalType(bindings.NewStringType())
 	fieldNameMap["traceflow_id"] = "TraceflowId"
 	fieldNameMap["traceflow_config"] = "TraceflowConfig"
+	fieldNameMap["enforcement_point_path"] = "EnforcementPointPath"
+	paramsTypeMap["enforcement_point_path"] = bindings.NewOptionalType(bindings.NewStringType())
 	paramsTypeMap["traceflow_id"] = bindings.NewStringType()
 	paramsTypeMap["traceflow_config"] = bindings.NewReferenceType(model.TraceflowConfigBindingType)
 	paramsTypeMap["traceflowId"] = bindings.NewStringType()
 	pathParams["traceflow_id"] = "traceflowId"
+	queryParams["enforcement_point_path"] = "enforcement_point_path"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(

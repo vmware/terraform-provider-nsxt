@@ -21,18 +21,6 @@ const _ = core.SupportedByRuntimeVersion1
 
 type BgpClient interface {
 
-	// Deletes the specified overridden BgpRoutingConfig. If the BgpRoutingConfig is not overridden, it won't get deleted.
-	//
-	// @param tier0IdParam (required)
-	// @param localeServiceIdParam (required)
-	// @param overrideParam Locally override the global object (optional, default to false)
-	// @throws InvalidRequest  Bad Request, Precondition Failed
-	// @throws Unauthorized  Forbidden
-	// @throws ServiceUnavailable  Service Unavailable
-	// @throws InternalServerError  Internal Server Error
-	// @throws NotFound  Not Found
-	Delete(tier0IdParam string, localeServiceIdParam string, overrideParam *bool) error
-
 	// Read BGP routing config
 	//
 	// @param tier0IdParam (required)
@@ -82,7 +70,6 @@ type bgpClient struct {
 func NewBgpClient(connector client.Connector) *bgpClient {
 	interfaceIdentifier := core.NewInterfaceIdentifier("com.vmware.nsx_policy.infra.tier_0s.locale_services.bgp")
 	methodIdentifiers := map[string]core.MethodIdentifier{
-		"delete": core.NewMethodIdentifier(interfaceIdentifier, "delete"),
 		"get":    core.NewMethodIdentifier(interfaceIdentifier, "get"),
 		"patch":  core.NewMethodIdentifier(interfaceIdentifier, "patch"),
 		"update": core.NewMethodIdentifier(interfaceIdentifier, "update"),
@@ -99,33 +86,6 @@ func (bIface *bgpClient) GetErrorBindingType(errorName string) bindings.BindingT
 		return entry
 	}
 	return errors.ERROR_BINDINGS_MAP[errorName]
-}
-
-func (bIface *bgpClient) Delete(tier0IdParam string, localeServiceIdParam string, overrideParam *bool) error {
-	typeConverter := bIface.connector.TypeConverter()
-	executionContext := bIface.connector.NewExecutionContext()
-	sv := bindings.NewStructValueBuilder(bgpDeleteInputType(), typeConverter)
-	sv.AddStructField("Tier0Id", tier0IdParam)
-	sv.AddStructField("LocaleServiceId", localeServiceIdParam)
-	sv.AddStructField("Override", overrideParam)
-	inputDataValue, inputError := sv.GetStructValue()
-	if inputError != nil {
-		return bindings.VAPIerrorsToError(inputError)
-	}
-	operationRestMetaData := bgpDeleteRestMetadata()
-	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
-	connectionMetadata["isStreamingResponse"] = false
-	bIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := bIface.connector.GetApiProvider().Invoke("com.vmware.nsx_policy.infra.tier_0s.locale_services.bgp", "delete", inputDataValue, executionContext)
-	if methodResult.IsSuccess() {
-		return nil
-	} else {
-		methodError, errorInError := typeConverter.ConvertToGolang(methodResult.Error(), bIface.GetErrorBindingType(methodResult.Error().Name()))
-		if errorInError != nil {
-			return bindings.VAPIerrorsToError(errorInError)
-		}
-		return methodError.(error)
-	}
 }
 
 func (bIface *bgpClient) Get(tier0IdParam string, localeServiceIdParam string) (model.BgpRoutingConfig, error) {

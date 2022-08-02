@@ -21,7 +21,7 @@ const _ = core.SupportedByRuntimeVersion1
 
 type LbServicesClient interface {
 
-	// Delete the LBService along with all the entities contained by this LBService.
+	// Delete the LBService along with all the entities contained by this LBService. This API is deprecated for the NSX-T Load Balancer, but not for the NSX-T Distributed Load Balancer.
 	//
 	// @param lbServiceIdParam LBService ID (required)
 	// @param forceParam Force delete the resource even if it is being used somewhere (optional, default to false)
@@ -32,7 +32,7 @@ type LbServicesClient interface {
 	// @throws NotFound  Not Found
 	Delete(lbServiceIdParam string, forceParam *bool) error
 
-	// Read an LBService.
+	// Read an LBService. This API is deprecated for the NSX-T Load Balancer, but not for the NSX-T Distributed Load Balancer.
 	//
 	// @param lbServiceIdParam LBService ID (required)
 	// @return com.vmware.nsx_policy.model.LBService
@@ -43,7 +43,7 @@ type LbServicesClient interface {
 	// @throws NotFound  Not Found
 	Get(lbServiceIdParam string) (model.LBService, error)
 
-	// Paginated list of all LBService.
+	// Paginated list of all LBService. This API is deprecated for the NSX-T Load Balancer, but not for the NSX-T Distributed Load Balancer.
 	//
 	// @param cursorParam Opaque cursor to be used for getting next page of records (supplied by current result page) (optional)
 	// @param includeMarkForDeleteObjectsParam Include objects that are marked for deletion in results (optional, default to false)
@@ -59,7 +59,7 @@ type LbServicesClient interface {
 	// @throws NotFound  Not Found
 	List(cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.LBServiceListResult, error)
 
-	// If a LBService with the lb-service-id is not already present, create a new LBService. If it already exists, update the LBService. This is a full replace.
+	// If a LBService with the lb-service-id is not already present, create a new LBService. If it already exists, update the LBService. This is a full replace. This API is deprecated for the NSX-T Load Balancer, but not for the NSX-T Distributed Load Balancer.
 	//
 	// @param lbServiceIdParam LBService ID (required)
 	// @param lbServiceParam (required)
@@ -70,7 +70,7 @@ type LbServicesClient interface {
 	// @throws NotFound  Not Found
 	Patch(lbServiceIdParam string, lbServiceParam model.LBService) error
 
-	// If a LBService with the lb-service-id is not already present, create a new LBService. If it already exists, update the LBService. This is a full replace.
+	// If a LBService with the lb-service-id is not already present, create a new LBService. If it already exists, update the LBService. This is a full replace. This API is deprecated for the NSX-T Load Balancer, but not for the NSX-T Distributed Load Balancer.
 	//
 	// @param lbServiceIdParam LBService ID (required)
 	// @param lbServiceParam (required)

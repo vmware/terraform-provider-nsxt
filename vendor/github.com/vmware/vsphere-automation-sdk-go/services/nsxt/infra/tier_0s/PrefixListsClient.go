@@ -61,7 +61,7 @@ type PrefixListsClient interface {
 	// @throws NotFound  Not Found
 	List(tier0IdParam string, cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.PrefixListResult, error)
 
-	// If prefix list for prefix-list-id is not already present, create a prefix list. If it already exists, update prefix list for prefix-list-id.
+	// If prefix list for prefix-list-id is not already present, create a prefix list. If it already exists, patch prefix list for prefix-list-id. Note: Patching existing prefix-list's \"prefixes\" property will overwrite the existing prefixes. GET and PATCH is the expected set of operations to update or append new entries to the existig prefixes. Patching existing prefixes require order to be preserved to avoid traffic impact. During PATCH operation, reordering of existing prefixes may impact routes and eventually datapath. Order here is crucial and it all depends upon action. If action for every prefix is PERMIT then order may not impact but if there is DENY prefix then change in ordering could lead to traffic impact.
 	//
 	// @param tier0IdParam (required)
 	// @param prefixListIdParam (required)
@@ -73,7 +73,7 @@ type PrefixListsClient interface {
 	// @throws NotFound  Not Found
 	Patch(tier0IdParam string, prefixListIdParam string, prefixListParam model.PrefixList) error
 
-	// If prefix list for prefix-list-id is not already present, create a prefix list. If it already exists, replace the prefix list for prefix-list-id.
+	// If prefix list for prefix-list-id is not already present, create a prefix list. If it already exists, replace the prefix list for prefix-list-id. Note: Updating existing prefixes require order to be preserved to avoid traffic impact. During PATCH operation, reordering of existing prefixes may impact routes and eventually datapath. Order here is crucial and it all depends upon action. If action for every prefix is PERMIT then order may not impact but if there is DENY prefix then change in ordering could lead to traffic impact.
 	//
 	// @param tier0IdParam Tier-0 ID (required)
 	// @param prefixListIdParam Prefix List ID (required)

@@ -27,6 +27,7 @@ type GatewayInterfaceStatisticsClient interface {
 	// @param cursorParam Opaque cursor to be used for getting next page of records (supplied by current result page) (optional)
 	// @param edgePathParam Policy path of edge node (optional)
 	// @param enforcementPointPathParam Enforcement point path (optional)
+	// @param hostTransportNodePathParam Policy path of host transport node (optional)
 	// @param includedFieldsParam Comma separated list of fields that should be included in query result (optional)
 	// @param pageSizeParam Maximum number of results to return in this page (server may return fewer) (optional, default to 1000)
 	// @param sortAscendingParam (optional)
@@ -37,7 +38,7 @@ type GatewayInterfaceStatisticsClient interface {
 	// @throws ServiceUnavailable  Service Unavailable
 	// @throws InternalServerError  Internal Server Error
 	// @throws NotFound  Not Found
-	Get(segmentIdParam string, cursorParam *string, edgePathParam *string, enforcementPointPathParam *string, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.PolicyInterfaceStatistics, error)
+	Get(segmentIdParam string, cursorParam *string, edgePathParam *string, enforcementPointPathParam *string, hostTransportNodePathParam *string, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.PolicyInterfaceStatistics, error)
 }
 
 type gatewayInterfaceStatisticsClient struct {
@@ -65,7 +66,7 @@ func (gIface *gatewayInterfaceStatisticsClient) GetErrorBindingType(errorName st
 	return errors.ERROR_BINDINGS_MAP[errorName]
 }
 
-func (gIface *gatewayInterfaceStatisticsClient) Get(segmentIdParam string, cursorParam *string, edgePathParam *string, enforcementPointPathParam *string, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.PolicyInterfaceStatistics, error) {
+func (gIface *gatewayInterfaceStatisticsClient) Get(segmentIdParam string, cursorParam *string, edgePathParam *string, enforcementPointPathParam *string, hostTransportNodePathParam *string, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.PolicyInterfaceStatistics, error) {
 	typeConverter := gIface.connector.TypeConverter()
 	executionContext := gIface.connector.NewExecutionContext()
 	sv := bindings.NewStructValueBuilder(gatewayInterfaceStatisticsGetInputType(), typeConverter)
@@ -73,6 +74,7 @@ func (gIface *gatewayInterfaceStatisticsClient) Get(segmentIdParam string, curso
 	sv.AddStructField("Cursor", cursorParam)
 	sv.AddStructField("EdgePath", edgePathParam)
 	sv.AddStructField("EnforcementPointPath", enforcementPointPathParam)
+	sv.AddStructField("HostTransportNodePath", hostTransportNodePathParam)
 	sv.AddStructField("IncludedFields", includedFieldsParam)
 	sv.AddStructField("PageSize", pageSizeParam)
 	sv.AddStructField("SortAscending", sortAscendingParam)

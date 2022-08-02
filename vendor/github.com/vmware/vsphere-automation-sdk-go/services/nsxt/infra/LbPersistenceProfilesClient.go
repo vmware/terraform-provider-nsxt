@@ -22,7 +22,7 @@ const _ = core.SupportedByRuntimeVersion1
 
 type LbPersistenceProfilesClient interface {
 
-	// Delete the LBPersistenceProfile along with all the entities contained by this LBPersistenceProfile.
+	// Delete the LBPersistenceProfile along with all the entities contained by this LBPersistenceProfile. This API is deprecated for the NSX-T Load Balancer, but not for the NSX-T Distributed Load Balancer.
 	//
 	// @param lbPersistenceProfileIdParam LBPersistenceProfile ID (required)
 	// @param forceParam Force delete the resource even if it is being used somewhere (optional, default to false)
@@ -33,7 +33,7 @@ type LbPersistenceProfilesClient interface {
 	// @throws NotFound  Not Found
 	Delete(lbPersistenceProfileIdParam string, forceParam *bool) error
 
-	// Read a LBPersistenceProfile.
+	// Read a LBPersistenceProfile. This API is deprecated for the NSX-T Load Balancer, but not for the NSX-T Distributed Load Balancer.
 	//
 	// @param lbPersistenceProfileIdParam LBPersistenceProfile ID (required)
 	// @return com.vmware.nsx_policy.model.LBPersistenceProfile
@@ -45,7 +45,7 @@ type LbPersistenceProfilesClient interface {
 	// @throws NotFound  Not Found
 	Get(lbPersistenceProfileIdParam string) (*data.StructValue, error)
 
-	// Paginated list of all LBPersistenceProfiles for infra.
+	// Paginated list of all LBPersistenceProfiles for infra. This API is deprecated for the NSX-T Load Balancer, but not for the NSX-T Distributed Load Balancer.
 	//
 	// @param cursorParam Opaque cursor to be used for getting next page of records (supplied by current result page) (optional)
 	// @param includeMarkForDeleteObjectsParam Include objects that are marked for deletion in results (optional, default to false)
@@ -61,7 +61,7 @@ type LbPersistenceProfilesClient interface {
 	// @throws NotFound  Not Found
 	List(cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.LBPersistenceProfileListResult, error)
 
-	// If a LBPersistenceProfile with the lb-persistence-profile-id is not already present, create a new LBPersistenceProfile. If it already exists, update the LBPersistenceProfile. This is a full replace.
+	// If a LBPersistenceProfile with the lb-persistence-profile-id is not already present, create a new LBPersistenceProfile. If it already exists, update the LBPersistenceProfile. This is a full replace. This API is deprecated for the NSX-T Load Balancer, but not for the NSX-T Distributed Load Balancer.
 	//
 	// @param lbPersistenceProfileIdParam LBPersistenceProfile ID (required)
 	// @param lbPersistenceProfileParam (required)
@@ -73,7 +73,7 @@ type LbPersistenceProfilesClient interface {
 	// @throws NotFound  Not Found
 	Patch(lbPersistenceProfileIdParam string, lbPersistenceProfileParam *data.StructValue) error
 
-	// If a LBPersistenceProfile with the lb-persistence-profile-id is not already present, create a new LBPersistenceProfile. If it already exists, update the LBPersistenceProfile. This is a full replace.
+	// If a LBPersistenceProfile with the lb-persistence-profile-id is not already present, create a new LBPersistenceProfile. If it already exists, update the LBPersistenceProfile. This is a full replace. This API is deprecated for the NSX-T Load Balancer, but not for the NSX-T Distributed Load Balancer.
 	//
 	// @param lbPersistenceProfileIdParam LBPersistenceProfile ID (required)
 	// @param lbPersistenceProfileParam (required)

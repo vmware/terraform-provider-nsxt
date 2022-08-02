@@ -21,13 +21,14 @@ const _ = core.SupportedByRuntimeVersion1
 
 type GatewayInterfaceArpTableClient interface {
 
-	// Segment ID is the ID of the segment that is connected to the the tier-1
+	// This API is deprecated because it is duplicate. Please use /infra/tier-1s/<tier-1-id>/segments/<segment-id>/arp-table Segment ID is the ID of the segment that is connected to the the tier-1
 	//
 	// @param tier1IdParam (required)
 	// @param segmentIdParam (required)
 	// @param cursorParam Opaque cursor to be used for getting next page of records (supplied by current result page) (optional)
 	// @param edgePathParam Policy path of edge node (optional)
 	// @param enforcementPointPathParam Enforcement point path (optional)
+	// @param hostTransportNodePathParam Policy path of host transport node (optional)
 	// @param includedFieldsParam Comma separated list of fields that should be included in query result (optional)
 	// @param pageSizeParam Maximum number of results to return in this page (server may return fewer) (optional, default to 1000)
 	// @param sortAscendingParam (optional)
@@ -38,7 +39,7 @@ type GatewayInterfaceArpTableClient interface {
 	// @throws ServiceUnavailable  Service Unavailable
 	// @throws InternalServerError  Internal Server Error
 	// @throws NotFound  Not Found
-	List(tier1IdParam string, segmentIdParam string, cursorParam *string, edgePathParam *string, enforcementPointPathParam *string, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.InterfaceArpTable, error)
+	List(tier1IdParam string, segmentIdParam string, cursorParam *string, edgePathParam *string, enforcementPointPathParam *string, hostTransportNodePathParam *string, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.InterfaceArpTable, error)
 }
 
 type gatewayInterfaceArpTableClient struct {
@@ -66,7 +67,7 @@ func (gIface *gatewayInterfaceArpTableClient) GetErrorBindingType(errorName stri
 	return errors.ERROR_BINDINGS_MAP[errorName]
 }
 
-func (gIface *gatewayInterfaceArpTableClient) List(tier1IdParam string, segmentIdParam string, cursorParam *string, edgePathParam *string, enforcementPointPathParam *string, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.InterfaceArpTable, error) {
+func (gIface *gatewayInterfaceArpTableClient) List(tier1IdParam string, segmentIdParam string, cursorParam *string, edgePathParam *string, enforcementPointPathParam *string, hostTransportNodePathParam *string, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.InterfaceArpTable, error) {
 	typeConverter := gIface.connector.TypeConverter()
 	executionContext := gIface.connector.NewExecutionContext()
 	sv := bindings.NewStructValueBuilder(gatewayInterfaceArpTableListInputType(), typeConverter)
@@ -75,6 +76,7 @@ func (gIface *gatewayInterfaceArpTableClient) List(tier1IdParam string, segmentI
 	sv.AddStructField("Cursor", cursorParam)
 	sv.AddStructField("EdgePath", edgePathParam)
 	sv.AddStructField("EnforcementPointPath", enforcementPointPathParam)
+	sv.AddStructField("HostTransportNodePath", hostTransportNodePathParam)
 	sv.AddStructField("IncludedFields", includedFieldsParam)
 	sv.AddStructField("PageSize", pageSizeParam)
 	sv.AddStructField("SortAscending", sortAscendingParam)

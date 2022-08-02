@@ -21,7 +21,7 @@ const _ = core.SupportedByRuntimeVersion1
 
 type IpsecVpnServicesClient interface {
 
-	// Delete IPSec VPN service for a given locale service under Tier-1.
+	// Delete IPSec VPN service for a given locale service under Tier-1. This API is deprecated. Please use DELETE /infra/tier-1s/<tier-1-id>/psec-vpn-services/<service-id> instead. Note: Please note that request is validated and any error messages returned from validation may include the new VPN path instead of the deprecated path. Both new path and old path refer to same resource. Also VPN path returned in the Alarm, GPRR payload may include the new VPN path
 	//
 	// @param tier1IdParam (required)
 	// @param localeServiceIdParam (required)
@@ -33,7 +33,7 @@ type IpsecVpnServicesClient interface {
 	// @throws NotFound  Not Found
 	Delete(tier1IdParam string, localeServiceIdParam string, serviceIdParam string) error
 
-	// Get IPSec VPN service for a given locale service under Tier-1.
+	// Get IPSec VPN service for a given locale service under Tier-1. This API is deprecated. Please use GET /infra/tier-1s/<tier-1-id>/ipsec-vpn-services/<service-id> instead. Note: Please note that request is validated and any error messages returned from validation may include the new VPN path instead of the deprecated path. Both new path and old path refer to same resource.
 	//
 	// @param tier1IdParam (required)
 	// @param localeServiceIdParam (required)
@@ -46,7 +46,7 @@ type IpsecVpnServicesClient interface {
 	// @throws NotFound  Not Found
 	Get(tier1IdParam string, localeServiceIdParam string, serviceIdParam string) (model.IPSecVpnService, error)
 
-	// Get paginated list of all IPSec VPN services for a given locale service under Tier-1.
+	// Get paginated list of all IPSec VPN services for a given locale service under Tier-1. This API is deprecated. Please use GET /infra/tier-1s/<tier-1-id>/ipsec-vpn-services instead. Note: Please note that request is validated and any error messages returned from validation may include the new VPN path instead of the deprecated path. Both new path and old path refer to same resource.
 	//
 	// @param tier1IdParam (required)
 	// @param localeServiceIdParam (required)
@@ -64,7 +64,7 @@ type IpsecVpnServicesClient interface {
 	// @throws NotFound  Not Found
 	List(tier1IdParam string, localeServiceIdParam string, cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.IPSecVpnServiceListResult, error)
 
-	// Create or patch IPSec VPN service for a given locale service under Tier-1.
+	// Create or patch IPSec VPN service for a given locale service under Tier-1. This API is deprecated. Please use PATCH /infra/tier-1s/<tier-1-id>/ipsec-vpn-services/<service-id> instead. Note: Please note that request is validated and any error messages returned from validation may include the new VPN path instead of the deprecated path. Both new path and old path refer to same resource. Also VPN path returned in the Alarm, GPRR payload may include the new VPN path.
 	//
 	// @param tier1IdParam (required)
 	// @param localeServiceIdParam (required)
@@ -77,7 +77,7 @@ type IpsecVpnServicesClient interface {
 	// @throws NotFound  Not Found
 	Patch(tier1IdParam string, localeServiceIdParam string, serviceIdParam string, ipSecVpnServiceParam model.IPSecVpnService) error
 
-	// Create or fully replace IPSec VPN service for a given locale service under Tier-1. Revision is optional for creation and required for update.
+	// Create or fully replace IPSec VPN service for a given locale service under Tier-1. Revision is optional for creation and required for update. This API is deprecated. Please use PUT /infra/tier-1s/<tier-1-id>/ipsec-vpn-services/<service-id> instead. Note: Please note that request is validated and any error messages returned from validation may include the new VPN path instead of the deprecated path. Both new path and old path refer to same resource. Also VPN path returned in the Alarm, GPRR payload may include the new VPN path.
 	//
 	// @param tier1IdParam (required)
 	// @param localeServiceIdParam (required)

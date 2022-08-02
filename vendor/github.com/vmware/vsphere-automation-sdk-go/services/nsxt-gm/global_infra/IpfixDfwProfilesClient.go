@@ -21,17 +21,6 @@ const _ = core.SupportedByRuntimeVersion1
 
 type IpfixDfwProfilesClient interface {
 
-	// API deletes IPFIX DFW Profile. Selected IPFIX Collectors will stop receiving flows.
-	//
-	// @param ipfixDfwProfileIdParam IPFIX DFW Profile ID (required)
-	// @param overrideParam Locally override the global object (optional, default to false)
-	// @throws InvalidRequest  Bad Request, Precondition Failed
-	// @throws Unauthorized  Forbidden
-	// @throws ServiceUnavailable  Service Unavailable
-	// @throws InternalServerError  Internal Server Error
-	// @throws NotFound  Not Found
-	Delete(ipfixDfwProfileIdParam string, overrideParam *bool) error
-
 	// API will return details of IPFIX DFW profile.
 	//
 	// @param ipfixDfwProfileIdParam IPFIX DFW collection id (required)
@@ -58,31 +47,6 @@ type IpfixDfwProfilesClient interface {
 	// @throws InternalServerError  Internal Server Error
 	// @throws NotFound  Not Found
 	List(cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.IPFIXDFWProfileListResult, error)
-
-	// Create a new IPFIX DFW profile if the IPFIX DFW profile with given id does not already exist. If the IPFIX DFW profile with the given id already exists, patch with the existing IPFIX DFW profile.
-	//
-	// @param ipfixDfwProfileIdParam IPFIX DFW Profile ID (required)
-	// @param iPFIXDFWProfileParam (required)
-	// @param overrideParam Locally override the global object (optional, default to false)
-	// @throws InvalidRequest  Bad Request, Precondition Failed
-	// @throws Unauthorized  Forbidden
-	// @throws ServiceUnavailable  Service Unavailable
-	// @throws InternalServerError  Internal Server Error
-	// @throws NotFound  Not Found
-	Patch(ipfixDfwProfileIdParam string, iPFIXDFWProfileParam model.IPFIXDFWProfile, overrideParam *bool) error
-
-	// Create or replace IPFIX DFW profile. Config will start forwarding data to provided IPFIX DFW collector.
-	//
-	// @param ipfixDfwProfileIdParam IPFIX DFW Profile ID (required)
-	// @param iPFIXDFWProfileParam (required)
-	// @param overrideParam Locally override the global object (optional, default to false)
-	// @return com.vmware.nsx_global_policy.model.IPFIXDFWProfile
-	// @throws InvalidRequest  Bad Request, Precondition Failed
-	// @throws Unauthorized  Forbidden
-	// @throws ServiceUnavailable  Service Unavailable
-	// @throws InternalServerError  Internal Server Error
-	// @throws NotFound  Not Found
-	Update(ipfixDfwProfileIdParam string, iPFIXDFWProfileParam model.IPFIXDFWProfile, overrideParam *bool) (model.IPFIXDFWProfile, error)
 }
 
 type ipfixDfwProfilesClient struct {
@@ -94,11 +58,8 @@ type ipfixDfwProfilesClient struct {
 func NewIpfixDfwProfilesClient(connector client.Connector) *ipfixDfwProfilesClient {
 	interfaceIdentifier := core.NewInterfaceIdentifier("com.vmware.nsx_global_policy.global_infra.ipfix_dfw_profiles")
 	methodIdentifiers := map[string]core.MethodIdentifier{
-		"delete": core.NewMethodIdentifier(interfaceIdentifier, "delete"),
-		"get":    core.NewMethodIdentifier(interfaceIdentifier, "get"),
-		"list":   core.NewMethodIdentifier(interfaceIdentifier, "list"),
-		"patch":  core.NewMethodIdentifier(interfaceIdentifier, "patch"),
-		"update": core.NewMethodIdentifier(interfaceIdentifier, "update"),
+		"get":  core.NewMethodIdentifier(interfaceIdentifier, "get"),
+		"list": core.NewMethodIdentifier(interfaceIdentifier, "list"),
 	}
 	interfaceDefinition := core.NewInterfaceDefinition(interfaceIdentifier, methodIdentifiers)
 	errorsBindingMap := make(map[string]bindings.BindingType)
@@ -112,32 +73,6 @@ func (iIface *ipfixDfwProfilesClient) GetErrorBindingType(errorName string) bind
 		return entry
 	}
 	return errors.ERROR_BINDINGS_MAP[errorName]
-}
-
-func (iIface *ipfixDfwProfilesClient) Delete(ipfixDfwProfileIdParam string, overrideParam *bool) error {
-	typeConverter := iIface.connector.TypeConverter()
-	executionContext := iIface.connector.NewExecutionContext()
-	sv := bindings.NewStructValueBuilder(ipfixDfwProfilesDeleteInputType(), typeConverter)
-	sv.AddStructField("IpfixDfwProfileId", ipfixDfwProfileIdParam)
-	sv.AddStructField("Override", overrideParam)
-	inputDataValue, inputError := sv.GetStructValue()
-	if inputError != nil {
-		return bindings.VAPIerrorsToError(inputError)
-	}
-	operationRestMetaData := ipfixDfwProfilesDeleteRestMetadata()
-	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
-	connectionMetadata["isStreamingResponse"] = false
-	iIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := iIface.connector.GetApiProvider().Invoke("com.vmware.nsx_global_policy.global_infra.ipfix_dfw_profiles", "delete", inputDataValue, executionContext)
-	if methodResult.IsSuccess() {
-		return nil
-	} else {
-		methodError, errorInError := typeConverter.ConvertToGolang(methodResult.Error(), iIface.GetErrorBindingType(methodResult.Error().Name()))
-		if errorInError != nil {
-			return bindings.VAPIerrorsToError(errorInError)
-		}
-		return methodError.(error)
-	}
 }
 
 func (iIface *ipfixDfwProfilesClient) Get(ipfixDfwProfileIdParam string) (model.IPFIXDFWProfile, error) {
@@ -198,66 +133,6 @@ func (iIface *ipfixDfwProfilesClient) List(cursorParam *string, includeMarkForDe
 			return emptyOutput, bindings.VAPIerrorsToError(errorInOutput)
 		}
 		return output.(model.IPFIXDFWProfileListResult), nil
-	} else {
-		methodError, errorInError := typeConverter.ConvertToGolang(methodResult.Error(), iIface.GetErrorBindingType(methodResult.Error().Name()))
-		if errorInError != nil {
-			return emptyOutput, bindings.VAPIerrorsToError(errorInError)
-		}
-		return emptyOutput, methodError.(error)
-	}
-}
-
-func (iIface *ipfixDfwProfilesClient) Patch(ipfixDfwProfileIdParam string, iPFIXDFWProfileParam model.IPFIXDFWProfile, overrideParam *bool) error {
-	typeConverter := iIface.connector.TypeConverter()
-	executionContext := iIface.connector.NewExecutionContext()
-	sv := bindings.NewStructValueBuilder(ipfixDfwProfilesPatchInputType(), typeConverter)
-	sv.AddStructField("IpfixDfwProfileId", ipfixDfwProfileIdParam)
-	sv.AddStructField("IPFIXDFWProfile", iPFIXDFWProfileParam)
-	sv.AddStructField("Override", overrideParam)
-	inputDataValue, inputError := sv.GetStructValue()
-	if inputError != nil {
-		return bindings.VAPIerrorsToError(inputError)
-	}
-	operationRestMetaData := ipfixDfwProfilesPatchRestMetadata()
-	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
-	connectionMetadata["isStreamingResponse"] = false
-	iIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := iIface.connector.GetApiProvider().Invoke("com.vmware.nsx_global_policy.global_infra.ipfix_dfw_profiles", "patch", inputDataValue, executionContext)
-	if methodResult.IsSuccess() {
-		return nil
-	} else {
-		methodError, errorInError := typeConverter.ConvertToGolang(methodResult.Error(), iIface.GetErrorBindingType(methodResult.Error().Name()))
-		if errorInError != nil {
-			return bindings.VAPIerrorsToError(errorInError)
-		}
-		return methodError.(error)
-	}
-}
-
-func (iIface *ipfixDfwProfilesClient) Update(ipfixDfwProfileIdParam string, iPFIXDFWProfileParam model.IPFIXDFWProfile, overrideParam *bool) (model.IPFIXDFWProfile, error) {
-	typeConverter := iIface.connector.TypeConverter()
-	executionContext := iIface.connector.NewExecutionContext()
-	sv := bindings.NewStructValueBuilder(ipfixDfwProfilesUpdateInputType(), typeConverter)
-	sv.AddStructField("IpfixDfwProfileId", ipfixDfwProfileIdParam)
-	sv.AddStructField("IPFIXDFWProfile", iPFIXDFWProfileParam)
-	sv.AddStructField("Override", overrideParam)
-	inputDataValue, inputError := sv.GetStructValue()
-	if inputError != nil {
-		var emptyOutput model.IPFIXDFWProfile
-		return emptyOutput, bindings.VAPIerrorsToError(inputError)
-	}
-	operationRestMetaData := ipfixDfwProfilesUpdateRestMetadata()
-	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
-	connectionMetadata["isStreamingResponse"] = false
-	iIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := iIface.connector.GetApiProvider().Invoke("com.vmware.nsx_global_policy.global_infra.ipfix_dfw_profiles", "update", inputDataValue, executionContext)
-	var emptyOutput model.IPFIXDFWProfile
-	if methodResult.IsSuccess() {
-		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), ipfixDfwProfilesUpdateOutputType())
-		if errorInOutput != nil {
-			return emptyOutput, bindings.VAPIerrorsToError(errorInOutput)
-		}
-		return output.(model.IPFIXDFWProfile), nil
 	} else {
 		methodError, errorInError := typeConverter.ConvertToGolang(methodResult.Error(), iIface.GetErrorBindingType(methodResult.Error().Name()))
 		if errorInError != nil {

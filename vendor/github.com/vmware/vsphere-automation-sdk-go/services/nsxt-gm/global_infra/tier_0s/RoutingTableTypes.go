@@ -27,6 +27,9 @@ const RoutingTable_LIST_ROUTE_SOURCE_STATIC = "STATIC"
 // Possible value for ``routeSource`` of method RoutingTable#list.
 const RoutingTable_LIST_ROUTE_SOURCE_CONNECTED = "CONNECTED"
 
+// Possible value for ``routeSource`` of method RoutingTable#list.
+const RoutingTable_LIST_ROUTE_SOURCE_OSPF = "OSPF"
+
 func routingTableListInputType() bindings.StructType {
 	fields := make(map[string]bindings.BindingType)
 	fieldNameMap := make(map[string]string)

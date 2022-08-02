@@ -29,7 +29,7 @@ type RoutingTableClient interface {
 	// @param edgePathParam Policy path of edge node (optional)
 	// @param enforcementPointPathParam Enforcement point path (optional)
 	// @param includedFieldsParam Comma separated list of fields that should be included in query result (optional)
-	// @param networkPrefixParam IPv4 or IPv6 CIDR Block (optional)
+	// @param networkPrefixParam IPAddress or CIDR Block (optional)
 	// @param pageSizeParam Maximum number of results to return in this page (server may return fewer) (optional, default to 1000)
 	// @param routeSourceParam Filter routes based on the source from which route is learned (optional)
 	// @param sortAscendingParam (optional)

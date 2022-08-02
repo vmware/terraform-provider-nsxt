@@ -31,13 +31,14 @@ type StateClient interface {
 	// @param pageSizeParam Maximum number of results to return in this page (server may return fewer) (optional, default to 1000)
 	// @param sortAscendingParam (optional)
 	// @param sortByParam Field by which records are sorted (optional)
+	// @param type_Param Returns specific information based on the value specified. (optional)
 	// @return com.vmware.nsx_global_policy.model.Tier0GatewayState
 	// @throws InvalidRequest  Bad Request, Precondition Failed
 	// @throws Unauthorized  Forbidden
 	// @throws ServiceUnavailable  Service Unavailable
 	// @throws InternalServerError  Internal Server Error
 	// @throws NotFound  Not Found
-	Get(tier0IdParam string, cursorParam *string, enforcementPointPathParam *string, includedFieldsParam *string, interfacePathParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.Tier0GatewayState, error)
+	Get(tier0IdParam string, cursorParam *string, enforcementPointPathParam *string, includedFieldsParam *string, interfacePathParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string, type_Param *string) (model.Tier0GatewayState, error)
 }
 
 type stateClient struct {
@@ -65,7 +66,7 @@ func (sIface *stateClient) GetErrorBindingType(errorName string) bindings.Bindin
 	return errors.ERROR_BINDINGS_MAP[errorName]
 }
 
-func (sIface *stateClient) Get(tier0IdParam string, cursorParam *string, enforcementPointPathParam *string, includedFieldsParam *string, interfacePathParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.Tier0GatewayState, error) {
+func (sIface *stateClient) Get(tier0IdParam string, cursorParam *string, enforcementPointPathParam *string, includedFieldsParam *string, interfacePathParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string, type_Param *string) (model.Tier0GatewayState, error) {
 	typeConverter := sIface.connector.TypeConverter()
 	executionContext := sIface.connector.NewExecutionContext()
 	sv := bindings.NewStructValueBuilder(stateGetInputType(), typeConverter)
@@ -77,6 +78,7 @@ func (sIface *stateClient) Get(tier0IdParam string, cursorParam *string, enforce
 	sv.AddStructField("PageSize", pageSizeParam)
 	sv.AddStructField("SortAscending", sortAscendingParam)
 	sv.AddStructField("SortBy", sortByParam)
+	sv.AddStructField("Type_", type_Param)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
 		var emptyOutput model.Tier0GatewayState

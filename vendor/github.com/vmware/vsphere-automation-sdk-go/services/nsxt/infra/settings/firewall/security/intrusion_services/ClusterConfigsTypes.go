@@ -21,8 +21,8 @@ import (
 func clusterConfigsGetInputType() bindings.StructType {
 	fields := make(map[string]bindings.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["cluster_id"] = bindings.NewStringType()
-	fieldNameMap["cluster_id"] = "ClusterId"
+	fields["cluster_config_id"] = bindings.NewStringType()
+	fieldNameMap["cluster_config_id"] = "ClusterConfigId"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
 }
@@ -40,11 +40,11 @@ func clusterConfigsGetRestMetadata() protocol.OperationRestMetadata {
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["cluster_id"] = bindings.NewStringType()
-	fieldNameMap["cluster_id"] = "ClusterId"
-	paramsTypeMap["cluster_id"] = bindings.NewStringType()
-	paramsTypeMap["clusterId"] = bindings.NewStringType()
-	pathParams["cluster_id"] = "clusterId"
+	fields["cluster_config_id"] = bindings.NewStringType()
+	fieldNameMap["cluster_config_id"] = "ClusterConfigId"
+	paramsTypeMap["cluster_config_id"] = bindings.NewStringType()
+	paramsTypeMap["clusterConfigId"] = bindings.NewStringType()
+	pathParams["cluster_config_id"] = "clusterConfigId"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -59,7 +59,7 @@ func clusterConfigsGetRestMetadata() protocol.OperationRestMetadata {
 		"",
 		"",
 		"GET",
-		"/policy/api/v1/infra/settings/firewall/security/intrusion-services/cluster-configs/{clusterId}",
+		"/policy/api/v1/infra/settings/firewall/security/intrusion-services/cluster-configs/{clusterConfigId}",
 		"",
 		resultHeaders,
 		200,
@@ -150,9 +150,9 @@ func clusterConfigsListRestMetadata() protocol.OperationRestMetadata {
 func clusterConfigsPatchInputType() bindings.StructType {
 	fields := make(map[string]bindings.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["cluster_id"] = bindings.NewStringType()
+	fields["cluster_config_id"] = bindings.NewStringType()
 	fields["ids_cluster_config"] = bindings.NewReferenceType(model.IdsClusterConfigBindingType)
-	fieldNameMap["cluster_id"] = "ClusterId"
+	fieldNameMap["cluster_config_id"] = "ClusterConfigId"
 	fieldNameMap["ids_cluster_config"] = "IdsClusterConfig"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
@@ -171,14 +171,14 @@ func clusterConfigsPatchRestMetadata() protocol.OperationRestMetadata {
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["cluster_id"] = bindings.NewStringType()
+	fields["cluster_config_id"] = bindings.NewStringType()
 	fields["ids_cluster_config"] = bindings.NewReferenceType(model.IdsClusterConfigBindingType)
-	fieldNameMap["cluster_id"] = "ClusterId"
+	fieldNameMap["cluster_config_id"] = "ClusterConfigId"
 	fieldNameMap["ids_cluster_config"] = "IdsClusterConfig"
-	paramsTypeMap["cluster_id"] = bindings.NewStringType()
 	paramsTypeMap["ids_cluster_config"] = bindings.NewReferenceType(model.IdsClusterConfigBindingType)
-	paramsTypeMap["clusterId"] = bindings.NewStringType()
-	pathParams["cluster_id"] = "clusterId"
+	paramsTypeMap["cluster_config_id"] = bindings.NewStringType()
+	paramsTypeMap["clusterConfigId"] = bindings.NewStringType()
+	pathParams["cluster_config_id"] = "clusterConfigId"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -193,7 +193,7 @@ func clusterConfigsPatchRestMetadata() protocol.OperationRestMetadata {
 		"",
 		"ids_cluster_config",
 		"PATCH",
-		"/policy/api/v1/infra/settings/firewall/security/intrusion-services/cluster-configs/{clusterId}",
+		"/policy/api/v1/infra/settings/firewall/security/intrusion-services/cluster-configs/{clusterConfigId}",
 		"",
 		resultHeaders,
 		204,
@@ -205,9 +205,9 @@ func clusterConfigsPatchRestMetadata() protocol.OperationRestMetadata {
 func clusterConfigsUpdateInputType() bindings.StructType {
 	fields := make(map[string]bindings.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["cluster_id"] = bindings.NewStringType()
+	fields["cluster_config_id"] = bindings.NewStringType()
 	fields["ids_cluster_config"] = bindings.NewReferenceType(model.IdsClusterConfigBindingType)
-	fieldNameMap["cluster_id"] = "ClusterId"
+	fieldNameMap["cluster_config_id"] = "ClusterConfigId"
 	fieldNameMap["ids_cluster_config"] = "IdsClusterConfig"
 	var validators = []bindings.Validator{}
 	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
@@ -226,14 +226,14 @@ func clusterConfigsUpdateRestMetadata() protocol.OperationRestMetadata {
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["cluster_id"] = bindings.NewStringType()
+	fields["cluster_config_id"] = bindings.NewStringType()
 	fields["ids_cluster_config"] = bindings.NewReferenceType(model.IdsClusterConfigBindingType)
-	fieldNameMap["cluster_id"] = "ClusterId"
+	fieldNameMap["cluster_config_id"] = "ClusterConfigId"
 	fieldNameMap["ids_cluster_config"] = "IdsClusterConfig"
-	paramsTypeMap["cluster_id"] = bindings.NewStringType()
 	paramsTypeMap["ids_cluster_config"] = bindings.NewReferenceType(model.IdsClusterConfigBindingType)
-	paramsTypeMap["clusterId"] = bindings.NewStringType()
-	pathParams["cluster_id"] = "clusterId"
+	paramsTypeMap["cluster_config_id"] = bindings.NewStringType()
+	paramsTypeMap["clusterConfigId"] = bindings.NewStringType()
+	pathParams["cluster_config_id"] = "clusterConfigId"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
 	return protocol.NewOperationRestMetadata(
@@ -248,7 +248,7 @@ func clusterConfigsUpdateRestMetadata() protocol.OperationRestMetadata {
 		"",
 		"ids_cluster_config",
 		"PUT",
-		"/policy/api/v1/infra/settings/firewall/security/intrusion-services/cluster-configs/{clusterId}",
+		"/policy/api/v1/infra/settings/firewall/security/intrusion-services/cluster-configs/{clusterConfigId}",
 		"",
 		resultHeaders,
 		200,

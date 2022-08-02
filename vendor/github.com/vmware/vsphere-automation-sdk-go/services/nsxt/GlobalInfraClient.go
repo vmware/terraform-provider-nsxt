@@ -44,17 +44,6 @@ type GlobalInfraClient interface {
 	// @throws InternalServerError  Internal Server Error
 	// @throws NotFound  Not Found
 	Patch(infraParam model.Infra, enforceRevisionCheckParam *bool) error
-
-	// Updates only the single infra object. This does not allow hierarchical updates of entities.
-	//
-	// @param infraParam (required)
-	// @return com.vmware.nsx_policy.model.Infra
-	// @throws InvalidRequest  Bad Request, Precondition Failed
-	// @throws Unauthorized  Forbidden
-	// @throws ServiceUnavailable  Service Unavailable
-	// @throws InternalServerError  Internal Server Error
-	// @throws NotFound  Not Found
-	Update(infraParam model.Infra) (model.Infra, error)
 }
 
 type globalInfraClient struct {
@@ -66,9 +55,8 @@ type globalInfraClient struct {
 func NewGlobalInfraClient(connector client.Connector) *globalInfraClient {
 	interfaceIdentifier := core.NewInterfaceIdentifier("com.vmware.nsx_policy.global_infra")
 	methodIdentifiers := map[string]core.MethodIdentifier{
-		"get":    core.NewMethodIdentifier(interfaceIdentifier, "get"),
-		"patch":  core.NewMethodIdentifier(interfaceIdentifier, "patch"),
-		"update": core.NewMethodIdentifier(interfaceIdentifier, "update"),
+		"get":   core.NewMethodIdentifier(interfaceIdentifier, "get"),
+		"patch": core.NewMethodIdentifier(interfaceIdentifier, "patch"),
 	}
 	interfaceDefinition := core.NewInterfaceDefinition(interfaceIdentifier, methodIdentifiers)
 	errorsBindingMap := make(map[string]bindings.BindingType)
@@ -140,36 +128,5 @@ func (gIface *globalInfraClient) Patch(infraParam model.Infra, enforceRevisionCh
 			return bindings.VAPIerrorsToError(errorInError)
 		}
 		return methodError.(error)
-	}
-}
-
-func (gIface *globalInfraClient) Update(infraParam model.Infra) (model.Infra, error) {
-	typeConverter := gIface.connector.TypeConverter()
-	executionContext := gIface.connector.NewExecutionContext()
-	sv := bindings.NewStructValueBuilder(globalInfraUpdateInputType(), typeConverter)
-	sv.AddStructField("Infra", infraParam)
-	inputDataValue, inputError := sv.GetStructValue()
-	if inputError != nil {
-		var emptyOutput model.Infra
-		return emptyOutput, bindings.VAPIerrorsToError(inputError)
-	}
-	operationRestMetaData := globalInfraUpdateRestMetadata()
-	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
-	connectionMetadata["isStreamingResponse"] = false
-	gIface.connector.SetConnectionMetadata(connectionMetadata)
-	methodResult := gIface.connector.GetApiProvider().Invoke("com.vmware.nsx_policy.global_infra", "update", inputDataValue, executionContext)
-	var emptyOutput model.Infra
-	if methodResult.IsSuccess() {
-		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), globalInfraUpdateOutputType())
-		if errorInOutput != nil {
-			return emptyOutput, bindings.VAPIerrorsToError(errorInOutput)
-		}
-		return output.(model.Infra), nil
-	} else {
-		methodError, errorInError := typeConverter.ConvertToGolang(methodResult.Error(), gIface.GetErrorBindingType(methodResult.Error().Name()))
-		if errorInError != nil {
-			return emptyOutput, bindings.VAPIerrorsToError(errorInError)
-		}
-		return emptyOutput, methodError.(error)
 	}
 }
