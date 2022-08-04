@@ -151,13 +151,17 @@ provider "nsxt" {
 
 ```hcl
 provider "nsxt" {
-  host           = "192.168.110.41"
-  username       = "admin"
-  password       = "default"
-  global_manager = true
+  host            = "192.168.110.41"
+  username        = "admin"
+  password        = "default"
+  global_manager  = true
+  max_retries     = 10
+  retry_min_delay = 500
+  retry_max_delay = 1000
 }
 
 ```
+
 
 ## Argument Reference
 
@@ -192,12 +196,15 @@ The following arguments are used to configure the VMware NSX-T Provider:
   Can also be specified with the `NSXT_CA` environment variable.
 * `max_retries` - (Optional) The maximum number of retires before failing an API
   request. Default: `4` Can also be specified with the `NSXT_MAX_RETRIES`
-  environment variable. Not supported yet for policy resources.
+  environment variable. For Global Manager, it is recommended to increase this value
+  since slower realization times tend to delay resolution of some errors.
 * `retry_min_delay` - (Optional) The minimum delay, in milliseconds, between
-  retries. Default: `0`.
+  retries. Default: `0`. For Global Manager, it is recommended to increase this value
+  since slower realization times tend to delay resolution of some errors.
   Can also be specified with the `NSXT_RETRY_MIN_DELAY` environment variable.
 * `retry_max_delay` - (Optional) The maximum delay, in milliseconds, between
-  retries. Default: `500`.
+  retries. Default: `500`. For Global Manager, it is recommended to increase this
+  value since slower realization times tend to delay resolution of some errors.
   Can also be specified with the `NSXT_RETRY_MAX_DELAY` environment variable.
 * `retry_on_status_codes` - (Optional) A list of HTTP status codes to retry on.
   By default, the provider supplies a set of status codes recommended for retry with
