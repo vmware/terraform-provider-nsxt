@@ -32,6 +32,11 @@ var urpfModeValues = []string{
 	model.SegmentAdvancedConfig_URPF_MODE_STRICT,
 }
 
+var replicationModeValues = []string{
+	model.Segment_REPLICATION_MODE_MTEP,
+	model.Segment_REPLICATION_MODE_SOURCE,
+}
+
 func getPolicySegmentDhcpV4ConfigSchema() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
@@ -121,7 +126,7 @@ func getPolicySegmentSubnetSchema() *schema.Resource {
 			"cidr": {
 				Type:         schema.TypeString,
 				Description:  "Gateway IP address in CIDR format",
-				Required:     true,
+				Optional:     true,
 				ValidateFunc: validateIPCidr(),
 			},
 			"network": {
@@ -315,6 +320,13 @@ func getPolicyCommonSegmentSchema(vlanRequired bool, isFixed bool) map[string]*s
 			Elem:        getPolicySegmentSecurityProfilesSchema(),
 			Optional:    true,
 			MaxItems:    1,
+		},
+		"replication_mode": {
+			Type:         schema.TypeString,
+			Description:  "Replication mode - MTEP or SOURCE",
+			Optional:     true,
+			Default:      model.Segment_REPLICATION_MODE_MTEP,
+			ValidateFunc: validation.StringInSlice(replicationModeValues, false),
 		},
 	}
 
@@ -652,6 +664,7 @@ func policySegmentResourceToInfraStruct(id string, d *schema.ResourceData, isVla
 	tags := getPolicyTagsFromSchema(d)
 	domainName := d.Get("domain_name").(string)
 	tzPath := d.Get("transport_zone_path").(string)
+	replicationMode := d.Get("replication_mode").(string)
 	dhcpConfigPath := d.Get("dhcp_config_path").(string)
 	revision := int64(d.Get("revision").(int))
 	resourceType := "Segment"
@@ -677,8 +690,11 @@ func policySegmentResourceToInfraStruct(id string, d *schema.ResourceData, isVla
 	if tzPath != "" {
 		obj.TransportZonePath = &tzPath
 	}
-	if dhcpConfigPath != "" && nsxVersionHigherOrEqual("3.0.0") {
-		obj.DhcpConfigPath = &dhcpConfigPath
+	if nsxVersionHigherOrEqual("3.0.0") {
+		obj.ReplicationMode = &replicationMode
+		if dhcpConfigPath != "" {
+			obj.DhcpConfigPath = &dhcpConfigPath
+		}
 	}
 
 	var vlanIds []string
@@ -715,10 +731,13 @@ func policySegmentResourceToInfraStruct(id string, d *schema.ResourceData, isVla
 			gwAddr := subnetMap["cidr"].(string)
 			network := subnetMap["network"].(string)
 			subnetStruct := model.SegmentSubnet{
-				DhcpRanges:     dhcpRangeList,
-				GatewayAddress: &gwAddr,
-				Network:        &network,
+				DhcpRanges: dhcpRangeList,
+				Network:    &network,
 			}
+			if len(gwAddr) > 0 {
+				subnetStruct.GatewayAddress = &gwAddr
+			}
+
 			config, err := getSegmentSubnetDhcpConfigFromSchema(subnetMap)
 			if err != nil {
 				return model.Infra{}, err
@@ -1300,6 +1319,10 @@ func nsxtPolicySegmentRead(d *schema.ResourceData, m interface{}, isVlan bool, i
 		} else {
 			d.Set("overlay_id", 0)
 		}
+	}
+
+	if nsxVersionHigherOrEqual("3.0.0") {
+		d.Set("replication_mode", obj.ReplicationMode)
 	}
 
 	if obj.AdvancedConfig != nil {
