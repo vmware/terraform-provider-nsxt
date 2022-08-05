@@ -297,6 +297,7 @@ func TestAccResourceNsxtPolicySegment_withDhcp(t *testing.T) {
 	preferredTimes := []string{"3200", "32000"}
 	dnsServersV4 := []string{"2.2.2.2", "3.3.3.3"}
 	dnsServersV6 := []string{"2000::2", "3000::3"}
+	replicationModes := []string{"SOURCE", "MTEP"}
 	tzName := getOverlayTransportZoneName()
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -307,10 +308,11 @@ func TestAccResourceNsxtPolicySegment_withDhcp(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicySegmentWithDhcpTemplate(tzName, name, dnsServersV4[0], dnsServersV6[0], leaseTimes[0], preferredTimes[0]),
+				Config: testAccNsxtPolicySegmentWithDhcpTemplate(tzName, name, dnsServersV4[0], dnsServersV6[0], leaseTimes[0], preferredTimes[0], replicationModes[0]),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySegmentExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "replication_mode", replicationModes[0]),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.0.cidr", "12.12.2.1/24"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.0.dhcp_v6_config.#", "0"),
@@ -334,10 +336,11 @@ func TestAccResourceNsxtPolicySegment_withDhcp(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicySegmentWithDhcpTemplate(tzName, name, dnsServersV4[1], dnsServersV6[1], leaseTimes[1], preferredTimes[1]),
+				Config: testAccNsxtPolicySegmentWithDhcpTemplate(tzName, name, dnsServersV4[1], dnsServersV6[1], leaseTimes[1], preferredTimes[1], replicationModes[1]),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySegmentExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "replication_mode", replicationModes[1]),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.0.cidr", "12.12.2.1/24"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.0.dhcp_v6_config.#", "0"),
@@ -640,7 +643,7 @@ data "nsxt_policy_edge_cluster" "EC" {
 }`, name)
 }
 
-func testAccNsxtPolicySegmentWithDhcpTemplate(tzName string, name string, dnsServerV4 string, dnsServerV6 string, lease string, preferred string) string {
+func testAccNsxtPolicySegmentWithDhcpTemplate(tzName string, name string, dnsServerV4 string, dnsServerV6 string, lease string, preferred string, replicationMode string) string {
 	return testAccNsxtPolicySegmentDeps(tzName) +
 		testAccNsxtPolicyEdgeCluster(getEdgeClusterName()) + fmt.Sprintf(`
 
@@ -652,6 +655,7 @@ resource "nsxt_policy_dhcp_server" "test" {
 resource "nsxt_policy_segment" "test" {
   display_name        = "%s"
   transport_zone_path = data.nsxt_policy_transport_zone.test.path
+  replication_mode    = "%s"
 
   subnet {
     cidr = "12.12.2.1/24"
@@ -696,7 +700,7 @@ resource "nsxt_policy_segment" "test" {
   dhcp_config_path = nsxt_policy_dhcp_server.test.path
 
 }
-`, name, lease, dnsServerV4, lease, preferred, dnsServerV6)
+`, name, replicationMode, lease, dnsServerV4, lease, preferred, dnsServerV6)
 }
 
 func testAccNsxtPolicySegmentNoTransportZoneTemplate(name string, cidr string) string {

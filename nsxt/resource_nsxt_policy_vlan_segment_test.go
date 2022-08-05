@@ -86,6 +86,7 @@ func TestAccResourceNsxtPolicyVlanSegment_updateAdvConfig(t *testing.T) {
 					testAccNsxtPolicyVlanSegmentExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "replication_mode", "SOURCE"),
 					resource.TestCheckResourceAttr(testResourceName, "domain_name", "tftest.org"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "advanced_config.0.connectivity", "OFF"),
@@ -99,6 +100,7 @@ func TestAccResourceNsxtPolicyVlanSegment_updateAdvConfig(t *testing.T) {
 					testAccNsxtPolicyVlanSegmentExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "replication_mode", "MTEP"),
 					resource.TestCheckResourceAttr(testResourceName, "domain_name", "tftest.org"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "advanced_config.0.connectivity", "ON"),
@@ -343,6 +345,7 @@ resource "nsxt_policy_vlan_segment" "test" {
   description         = "Acceptance Test"
   domain_name         = "tftest.org"
   transport_zone_path = data.nsxt_policy_transport_zone.test.path
+  replication_mode    = "SOURCE"
   vlan_ids            = ["101", "102"]
 
   tag {

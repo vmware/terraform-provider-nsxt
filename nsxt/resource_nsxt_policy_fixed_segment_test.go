@@ -142,6 +142,7 @@ func TestAccResourceNsxtPolicyFixedSegment_updateAdvConfig(t *testing.T) {
 					testAccNsxtPolicyFixedSegmentExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "replication_mode", "SOURCE"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.0.cidr", "12.12.2.1/24"),
 					resource.TestCheckResourceAttr(testResourceName, "domain_name", "tftest.org"),
@@ -158,6 +159,7 @@ func TestAccResourceNsxtPolicyFixedSegment_updateAdvConfig(t *testing.T) {
 					testAccNsxtPolicyFixedSegmentExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "replication_mode", "MTEP"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "subnet.0.cidr", "12.12.2.1/24"),
 					resource.TestCheckResourceAttr(testResourceName, "domain_name", "tftest.org"),
@@ -406,11 +408,12 @@ func testAccNsxtPolicyFixedSegmentBasicAdvConfigTemplate(tzName string, name str
 	return testAccNsxtPolicySegmentDeps(tzName) + fmt.Sprintf(`
 
 resource "nsxt_policy_fixed_segment" "test" {
-  display_name = "%s"
-  description  = "Acceptance Test"
-  domain_name  = "tftest.org"
-  overlay_id   = 1011
-  vlan_ids     = ["101", "102"]
+  display_name     = "%s"
+  description      = "Acceptance Test"
+  replication_mode = "SOURCE"
+  domain_name      = "tftest.org"
+  overlay_id       = 1011
+  vlan_ids         = ["101", "102"]
 
   connectivity_path   = nsxt_policy_tier1_gateway.anotherTier1ForSegments.path
 
@@ -435,11 +438,12 @@ func testAccNsxtPolicyFixedSegmentBasicAdvConfigUpdateTemplate(tzName string, na
 	return testAccNsxtPolicySegmentDeps(tzName) + fmt.Sprintf(`
 
 resource "nsxt_policy_fixed_segment" "test" {
-  display_name = "%s"
-  description  = "Acceptance Test"
-  domain_name  = "tftest.org"
-  overlay_id   = 1011
-  vlan_ids     = ["101-104"]
+  display_name     = "%s"
+  description      = "Acceptance Test"
+  replication_mode = "MTEP"
+  domain_name      = "tftest.org"
+  overlay_id       = 1011
+  vlan_ids         = ["101-104"]
 
   connectivity_path   = nsxt_policy_tier1_gateway.anotherTier1ForSegments.path
 
