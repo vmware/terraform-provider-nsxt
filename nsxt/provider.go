@@ -237,6 +237,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_vm":                        dataSourceNsxtPolicyVM(),
 			"nsxt_policy_vms":                       dataSourceNsxtPolicyVMs(),
 			"nsxt_policy_lb_app_profile":            dataSourceNsxtPolicyLBAppProfile(),
+			"nsxt_policy_lb_http_app_profile":       dataSourceNsxtPolicyLBHTTPAppProfile(),
 			"nsxt_policy_lb_client_ssl_profile":     dataSourceNsxtPolicyLBClientSslProfile(),
 			"nsxt_policy_lb_server_ssl_profile":     dataSourceNsxtPolicyLBServerSslProfile(),
 			"nsxt_policy_lb_monitor":                dataSourceNsxtPolicyLBMonitor(),
