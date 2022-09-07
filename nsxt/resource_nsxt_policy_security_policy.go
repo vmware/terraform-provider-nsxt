@@ -73,15 +73,9 @@ func resourceNsxtPolicySecurityPolicyExistsPartial(domainName string) func(id st
 	}
 }
 
-func resourceNsxtPolicySecurityPolicyCreate(d *schema.ResourceData, m interface{}) error {
-	connector := getPolicyConnector(m)
+func policySecurityPolicyBuildAndPatch(d *schema.ResourceData, m interface{}, connector *client.RestConnector, isGlobalManager bool, id string) error {
 
-	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID(d, m, resourceNsxtPolicySecurityPolicyExistsPartial(d.Get("domain").(string)))
-	if err != nil {
-		return err
-	}
-
+	domain := d.Get("domain").(string)
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
 	tags := getPolicyTagsFromSchema(d)
@@ -92,9 +86,11 @@ func resourceNsxtPolicySecurityPolicyCreate(d *schema.ResourceData, m interface{
 	sequenceNumber := int64(d.Get("sequence_number").(int))
 	stateful := d.Get("stateful").(bool)
 	tcpStrict := d.Get("tcp_strict").(bool)
-	rules := getPolicyRulesFromSchema(d, false)
+	revision := int64(d.Get("revision").(int))
+	objType := "SecurityPolicy"
 
 	obj := model.SecurityPolicy{
+		Id:             &id,
 		DisplayName:    &displayName,
 		Description:    &description,
 		Tags:           tags,
@@ -105,20 +101,36 @@ func resourceNsxtPolicySecurityPolicyCreate(d *schema.ResourceData, m interface{
 		SequenceNumber: &sequenceNumber,
 		Stateful:       &stateful,
 		TcpStrict:      &tcpStrict,
-		Rules:          rules,
+		ResourceType:   &objType,
 	}
 	log.Printf("[INFO] Creating Security Policy with ID %s", id)
-	if isPolicyGlobalManager(m) {
-		gmObj, err1 := convertModelBindingType(obj, model.SecurityPolicyBindingType(), gm_model.SecurityPolicyBindingType())
-		if err1 != nil {
-			return err1
-		}
-		client := gm_domains.NewSecurityPoliciesClient(connector)
-		err = client.Patch(d.Get("domain").(string), id, gmObj.(gm_model.SecurityPolicy))
-	} else {
-		client := domains.NewSecurityPoliciesClient(connector)
-		err = client.Patch(d.Get("domain").(string), id, obj)
+
+	if len(d.Id()) > 0 {
+		// This is update flow
+		obj.Revision = &revision
 	}
+
+	policyChildren, err := getUpdatedRuleChildren(d)
+	if err != nil {
+		return err
+	}
+	if len(policyChildren) > 0 {
+		obj.Children = policyChildren
+	}
+
+	return securityPolicyInfraPatch(obj, domain, m)
+}
+
+func resourceNsxtPolicySecurityPolicyCreate(d *schema.ResourceData, m interface{}) error {
+	connector := getPolicyConnector(m)
+
+	// Initialize resource Id and verify this ID is not yet used
+	id, err := getOrGenerateID(d, m, resourceNsxtPolicySecurityPolicyExistsPartial(d.Get("domain").(string)))
+	if err != nil {
+		return err
+	}
+
+	err = policySecurityPolicyBuildAndPatch(d, m, connector, isPolicyGlobalManager(m), id)
 
 	if err != nil {
 		return handleCreateError("Security Policy", id, err)
@@ -185,52 +197,7 @@ func resourceNsxtPolicySecurityPolicyUpdate(d *schema.ResourceData, m interface{
 	if id == "" {
 		return fmt.Errorf("Error obtaining Security Policy id")
 	}
-
-	displayName := d.Get("display_name").(string)
-	description := d.Get("description").(string)
-	tags := getPolicyTagsFromSchema(d)
-	category := d.Get("category").(string)
-	comments := d.Get("comments").(string)
-	locked := d.Get("locked").(bool)
-	scope := getStringListFromSchemaSet(d, "scope")
-	sequenceNumber := int64(d.Get("sequence_number").(int))
-	stateful := d.Get("stateful").(bool)
-	tcpStrict := d.Get("tcp_strict").(bool)
-	rules := getPolicyRulesFromSchema(d, false)
-	revision := int64(d.Get("revision").(int))
-
-	obj := model.SecurityPolicy{
-		DisplayName:    &displayName,
-		Description:    &description,
-		Tags:           tags,
-		Category:       &category,
-		Comments:       &comments,
-		Locked:         &locked,
-		Scope:          scope,
-		SequenceNumber: &sequenceNumber,
-		Stateful:       &stateful,
-		TcpStrict:      &tcpStrict,
-		Revision:       &revision,
-		Rules:          rules,
-	}
-
-	var err error
-	if isPolicyGlobalManager(m) {
-		gmObj, err1 := convertModelBindingType(obj, model.SecurityPolicyBindingType(), gm_model.SecurityPolicyBindingType())
-		if err1 != nil {
-			return err1
-		}
-		gmSecurityPolicy := gmObj.(gm_model.SecurityPolicy)
-		client := gm_domains.NewSecurityPoliciesClient(connector)
-
-		// We need to use PUT, because PATCH will not replace the whole rule list
-		_, err = client.Update(d.Get("domain").(string), id, gmSecurityPolicy)
-	} else {
-		client := domains.NewSecurityPoliciesClient(connector)
-
-		// We need to use PUT, because PATCH will not replace the whole rule list
-		_, err = client.Update(d.Get("domain").(string), id, obj)
-	}
+	err := policySecurityPolicyBuildAndPatch(d, m, connector, isPolicyGlobalManager(m), id)
 	if err != nil {
 		return handleUpdateError("Security Policy", id, err)
 	}
