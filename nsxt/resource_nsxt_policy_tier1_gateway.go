@@ -570,6 +570,7 @@ func resourceNsxtPolicyTier1GatewayRead(d *schema.ResourceData, m interface{}) e
 				cfgMap["edge_cluster_path"] = service.EdgeClusterPath
 				cfgMap["preferred_edge_paths"] = service.PreferredEdgePaths
 				cfgMap["revision"] = service.Revision
+				cfgMap["display_name"] = service.DisplayName
 				services = append(services, cfgMap)
 
 			} else {

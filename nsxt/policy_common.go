@@ -91,6 +91,14 @@ func getComputedDescriptionSchema() *schema.Schema {
 	}
 }
 
+func getComputedDisplayNameSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeString,
+		Description: "Display name for this resource",
+		Computed:    true,
+	}
+}
+
 func getDataSourceStringSchema(description string) *schema.Schema {
 	return &schema.Schema{
 		Type:        schema.TypeString,
