@@ -1,28 +1,23 @@
 ---
 subcategory: "Policy - VPN"
 layout: "nsxt"
-page_title: "NSXT: nsxt_policy_ipsec_vpn_tunnel_profile"
-description: A resource to configure a IPSec VPN Tunnel Profile.
+page_title: "NSXT: nsxt_policy_ipsec_vpn_local_endpoint"
+description: A resource to configure a IPSec VPN Local Endpoint.
 ---
 
-# nsxt_policy_ipsec_vpn_tunnel_profile
+# nsxt_policy_ipsec_vpn_local_endpoint
 
-This resource provides a method for the management of a IPSec VPN Tunnel Profile.
+This resource provides a method for the management of IPSec VPN Local Endpoint.
 
 This resource is applicable to NSX Policy Manager and VMC.
 
 ## Example Usage
 
 ```hcl
-resource "nsxt_policy_ipsec_vpn_tunnel_profile" "test" {
-  display_name          = "test"
-  description           = "Terraform provisioned IPSec VPN Ike Profile"
-  df_policy             = "COPY"
-  encryption_algorithms = ["AES_128"]
-  digest_algorithms     = ["SHA2_256"]
-  dh_groups             = ["GROUP14"]
-  ike_version           = "IKE_V2"
-  sa_life_time          = 7200
+resource "nsxt_policy_ipsec_vpn_local_endpoint" "test" {
+    display_name  = "test"
+    service_path  = "Terraform provisioned IpsecVpnTunnelProfile"
+    local_address = "10.203.1.14"
 }
 ```
 
@@ -32,14 +27,13 @@ The following arguments are supported:
 
 * `display_name` - (Required) Display name of the resource.
 * `description` - (Optional) Description of the resource.
+* `local_address` - (Required) IPV4 Address of local endpoint.
+* `local_id` - (Optional) Local identifier.
+* `certificate_path` - (optional) Policy path referencing site certificate.
+* `trust_ca_paths` - (Optional) List of policy paths referencing certificate authority to verify peer certificates.
+* `trust_crl_paths` - (Optional)  List of policy paths referencing certificate revocation list to peer certificates.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
-* `digest_algorithms` - (Required) Set of algorithms to be used for message digest during IKE negotiation. Default is `SHA2_256`.
-* `dh_groups` - (Required) Diffie-Hellman group to be used if PFS is enabled. Default is GROUP14.
-* `ike_version` - (Optional) Internet Key Exchange(IKE) protocol version to be used, one of `IKE_V1`, `IKE_V2`, `IKE_FLEX`. `IKE_FLEX` will initiate IKE-V2 and respond to both `IKE_V1` and `IKE_V2`.
-* `encryption_algorithms` - (Optional) Set of encryption algorithms to be used during IKE negotiation.
-* `sa_life_time` - (Optional) SA lifetime specifies the expiry time of security association. Default is 3600.
-* `enable_perfect_forward_secrecy` - (Optional) Enable perfect forward secrecy. Default is True.
 
 
 ## Attributes Reference
@@ -57,7 +51,7 @@ An existing object can be [imported][docs-import] into this resource, via the fo
 [docs-import]: https://www.terraform.io/cli/import
 
 ```
-terraform import nsxt_policy_ipsec_vpn_tunnel_profile.test UUID
+terraform import nsxt_policy_ipsec_vpn_local_endpoint.test path
 ```
 
-The above command imports IPSec VPN IKE Profile named `test` with the NSX ID `UUID`.
+The above command imports endpoint named `test` with NSX path `path`.
