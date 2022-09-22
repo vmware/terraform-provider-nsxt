@@ -398,7 +398,7 @@ func setPolicyRulesInSchema(d *schema.ResourceData, rules []model.Rule) error {
 	return d.Set("rule", rulesList)
 }
 
-func getPolicyRulesFromSchema(d *schema.ResourceData, setNsxID bool) []model.Rule {
+func getPolicyRulesFromSchema(d *schema.ResourceData) []model.Rule {
 	rules := d.Get("rule").([]interface{})
 	var ruleList []model.Rule
 	seq := 0
@@ -418,9 +418,11 @@ func getPolicyRulesFromSchema(d *schema.ResourceData, setNsxID bool) []model.Rul
 		sequenceNumber := int64(seq)
 		tagStructs := getPolicyTagsFromSet(data["tag"].(*schema.Set))
 
-		// Use a different random Id each time, otherwise Update requires revision
-		// to be set for existing rules, and NOT be set for new rules
 		id := newUUID()
+		nsxID := data["nsx_id"].(string)
+		if nsxID != "" {
+			id = nsxID
+		}
 
 		resourceType := "Rule"
 		elem := model.Rule{
@@ -444,13 +446,6 @@ func getPolicyRulesFromSchema(d *schema.ResourceData, setNsxID bool) []model.Rul
 			Scope:                getPathListFromMap(data, "scope"),
 			Profiles:             getPathListFromMap(data, "profiles"),
 			SequenceNumber:       &sequenceNumber,
-		}
-
-		if setNsxID {
-			nsxID := data["nsx_id"].(string)
-			if nsxID != "" {
-				elem.Id = &nsxID
-			}
 		}
 
 		ruleList = append(ruleList, elem)

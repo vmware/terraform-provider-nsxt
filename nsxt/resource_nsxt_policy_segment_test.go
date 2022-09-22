@@ -290,6 +290,69 @@ func TestAccResourceNsxtPolicySegment_withProfiles(t *testing.T) {
 	})
 }
 
+var testAccSegmentBridgeProfileName = getAccTestResourceName()
+
+func TestAccResourceNsxtPolicySegment_withBridge(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_segment.test"
+	tzName := getOverlayTransportZoneName()
+	vlanTzName := getVlanTransportZoneName()
+	vlan := "12"
+	vlanUpdated := "20"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			err := testAccNsxtPolicySegmentCheckDestroy(state, name)
+			if err != nil {
+				return err
+			}
+
+			return testAccDataSourceNsxtPolicyBridgeProfileDeleteByName(testAccSegmentBridgeProfileName)
+		},
+		Steps: []resource.TestStep{
+			{
+				PreConfig: func() {
+					if err := testAccDataSourceNsxtPolicyBridgeProfileCreate(testAccSegmentBridgeProfileName); err != nil {
+						panic(err)
+					}
+				},
+				Config: testAccNsxtPolicySegmentWithBridgeTemplate(tzName, vlanTzName, name, vlan),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicySegmentExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "bridge_config.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, "bridge_config.0.profile_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "bridge_config.0.transport_zone_path"),
+					resource.TestCheckResourceAttr(testResourceName, "bridge_config.0.vlan_ids.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "bridge_config.0.vlan_ids.0", vlan),
+				),
+			},
+			{
+				Config: testAccNsxtPolicySegmentWithBridgeTemplate(tzName, vlanTzName, name, vlanUpdated),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicySegmentExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "bridge_config.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, "bridge_config.0.profile_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "bridge_config.0.transport_zone_path"),
+					resource.TestCheckResourceAttr(testResourceName, "bridge_config.0.vlan_ids.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "bridge_config.0.vlan_ids.0", vlanUpdated),
+				),
+			},
+			{
+				Config: testAccNsxtPolicySegmentWithBridgeRemoveAll(tzName, name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicySegmentExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "bridge_config.#", "0"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtPolicySegment_withDhcp(t *testing.T) {
 	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_segment.test"
@@ -562,6 +625,39 @@ resource "nsxt_policy_segment" "test" {
 func testAccNsxtPolicySegmentWithProfilesRemoveAll(tzName string, name string) string {
 	return testAccNsxtPolicySegmentWithProfileDeps(tzName) + fmt.Sprintf(`
 
+resource "nsxt_policy_segment" "test" {
+  display_name        = "%s"
+  transport_zone_path = data.nsxt_policy_transport_zone.test.path
+}
+`, name)
+}
+
+func testAccNsxtPolicySegmentWithBridgeTemplate(tzName string, bridgeTzName string, name string, vlan string) string {
+	return testAccNsxtPolicySegmentDeps(tzName) + fmt.Sprintf(`
+data "nsxt_policy_bridge_profile" "test" {
+  display_name = "%s"
+}
+
+data "nsxt_policy_transport_zone" "bridge" {
+  display_name = "%s"
+}
+
+resource "nsxt_policy_segment" "test" {
+  display_name        = "%s"
+  transport_zone_path = data.nsxt_policy_transport_zone.test.path
+
+  bridge_config {
+    profile_path        = data.nsxt_policy_bridge_profile.test.path
+    transport_zone_path = data.nsxt_policy_transport_zone.bridge.path
+    vlan_ids            = ["%s"]
+  }
+
+}
+`, testAccSegmentBridgeProfileName, bridgeTzName, name, vlan)
+}
+
+func testAccNsxtPolicySegmentWithBridgeRemoveAll(tzName string, name string) string {
+	return testAccNsxtPolicySegmentDeps(tzName) + fmt.Sprintf(`
 resource "nsxt_policy_segment" "test" {
   display_name        = "%s"
   transport_zone_path = data.nsxt_policy_transport_zone.test.path

@@ -235,7 +235,7 @@ func updatePolicyPredefinedSecurityPolicy(id string, d *schema.ResourceData, m i
 	var childRules []*data.StructValue
 	if d.HasChange("rule") {
 		oldRules, _ := d.GetChange("rule")
-		rules := getPolicyRulesFromSchema(d, true)
+		rules := getPolicyRulesFromSchema(d)
 
 		existingRules := make(map[string]bool)
 		for _, rule := range rules {
