@@ -105,6 +105,11 @@ The following arguments are supported:
   * `security_profile_path` - (Optional) Path for segment security profile to be associated with the segment.
 * `qos_profile` - (Optional) QoS profile specification for the segment.
   * `qos_profile_path` - (Optional) Path for qos profile to be associated with the segment.
+* `bridge_config` - (Optional) List of edge bridge configuration for the segment. This setting is not supported on Global Manager.
+  * `profile_path` - (Required) Path for edge bridge profile to be associated with the segment.
+  * `transport_zone_path` - (Required) Path for vlan transport zone for the bridge.
+  * `vlan_ids` - (Required) List of VLAN IDs or ranges.
+  * `uplink_teaming_policy` - (Optional) The name of the switching uplink teaming policy for the bridge endpoint.
 
 ## Attributes Reference
 

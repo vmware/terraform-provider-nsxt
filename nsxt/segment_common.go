@@ -138,6 +138,28 @@ func getPolicySegmentSubnetSchema() *schema.Resource {
 	}
 }
 
+func getPolicySegmentBridgeConfigSchema() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"profile_path": getPolicyPathSchema(true, false, "profile path"),
+			"uplink_teaming_policy": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"vlan_ids": {
+				Type:        schema.TypeList,
+				Description: "VLAN specification for bridge endpoint",
+				Elem: &schema.Schema{
+					Type:         schema.TypeString,
+					ValidateFunc: validateVLANIdOrRange,
+				},
+				Required: true,
+			},
+			"transport_zone_path": getPolicyPathSchema(true, false, "vlan transport zone path"),
+		},
+	}
+}
+
 func getPolicySegmentL2ExtensionConfigurationSchema() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
@@ -327,6 +349,12 @@ func getPolicyCommonSegmentSchema(vlanRequired bool, isFixed bool) map[string]*s
 			Optional:     true,
 			Default:      model.Segment_REPLICATION_MODE_MTEP,
 			ValidateFunc: validation.StringInSlice(replicationModeValues, false),
+		},
+		"bridge_config": {
+			Type:        schema.TypeList,
+			Description: "Bridge configuration",
+			Elem:        getPolicySegmentBridgeConfigSchema(),
+			Optional:    true,
 		},
 	}
 
@@ -808,6 +836,10 @@ func policySegmentResourceToInfraStruct(id string, d *schema.ResourceData, isVla
 		}
 	}
 
+	if !isGlobalManager {
+		setBridgeConfigInStruct(d, &obj)
+	}
+
 	childSegment := model.ChildSegment{
 		Segment:      &obj,
 		ResourceType: "ChildSegment",
@@ -859,6 +891,40 @@ func resourceNsxtPolicySegmentExists(gwPath string, isFixed bool) func(id string
 		}
 
 		return false, logAPIError("Error retrieving Segment", err)
+
+	}
+}
+
+func setBridgeConfigInStruct(d *schema.ResourceData, segment *model.Segment) {
+
+	configs := d.Get("bridge_config").([]interface{})
+	if len(configs) == 0 {
+		return
+	}
+
+	for _, config := range configs {
+		bridgeConfig := config.(map[string]interface{})
+		profilePath := bridgeConfig["profile_path"].(string)
+		policyName := bridgeConfig["uplink_teaming_policy"].(string)
+		tzPath := bridgeConfig["transport_zone_path"].(string)
+		vlanIds := interfaceListToStringList(bridgeConfig["vlan_ids"].([]interface{}))
+
+		profile := model.BridgeProfileConfig{
+			BridgeProfilePath: &profilePath,
+		}
+
+		if len(policyName) > 0 {
+			profile.UplinkTeamingPolicyName = &policyName
+		}
+		if len(tzPath) > 0 {
+			profile.VlanTransportZonePath = &tzPath
+		}
+
+		if len(vlanIds) > 0 {
+			profile.VlanIds = vlanIds
+		}
+
+		segment.BridgeProfiles = append(segment.BridgeProfiles, profile)
 
 	}
 }
@@ -1230,6 +1296,22 @@ func nsxtPolicySegmentProfilesRead(d *schema.ResourceData, m interface{}) error 
 	return nil
 }
 
+func setSegmentBridgeConfigInSchema(d *schema.ResourceData, obj *model.Segment) {
+	var configs []map[string]interface{}
+
+	for _, profile := range obj.BridgeProfiles {
+		config := make(map[string]interface{})
+		config["profile_path"] = profile.BridgeProfilePath
+		config["uplink_teaming_policy"] = profile.UplinkTeamingPolicyName
+		config["vlan_ids"] = profile.VlanIds
+		config["transport_zone_path"] = profile.VlanTransportZonePath
+
+		configs = append(configs, config)
+	}
+
+	d.Set("bridge_config", configs)
+}
+
 func nsxtPolicyLocalManagerGetSegment(connector *client.RestConnector, id string, gwPath string, isFixed bool) (model.Segment, error) {
 	if !isFixed {
 		return infra.NewSegmentsClient(connector).Get(id)
@@ -1384,6 +1466,10 @@ func nsxtPolicySegmentRead(d *schema.ResourceData, m interface{}, isVlan bool, i
 		if err != nil {
 			return err
 		}
+	}
+
+	if !isPolicyGlobalManager(m) {
+		setSegmentBridgeConfigInSchema(d, &obj)
 	}
 
 	return nil
