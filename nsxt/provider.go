@@ -254,6 +254,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_bfd_profile":               dataSourceNsxtPolicyBfdProfile(),
 			"nsxt_policy_intrusion_service_profile": dataSourceNsxtPolicyIntrusionServiceProfile(),
 			"nsxt_policy_lb_service":                dataSourceNsxtPolicyLbService(),
+			"nsxt_policy_gateway_locale_service":    dataSourceNsxtPolicyGatewayLocaleService(),
 			"nsxt_policy_bridge_profile":            dataSourceNsxtPolicyBridgeProfile(),
 		},
 

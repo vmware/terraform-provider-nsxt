@@ -944,6 +944,7 @@ func resourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{}) e
 				cfgMap["edge_cluster_path"] = service.EdgeClusterPath
 				cfgMap["preferred_edge_paths"] = service.PreferredEdgePaths
 				cfgMap["revision"] = service.Revision
+				cfgMap["display_name"] = service.DisplayName
 				redistributionConfigs := getLocaleServiceRedistributionConfig(&service)
 				if d.Get("redistribution_set").(bool) {
 					// redistribution_config is deprecated and should be

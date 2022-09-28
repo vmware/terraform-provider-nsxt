@@ -105,6 +105,7 @@ func getPolicyLocaleServiceSchema(isTier1 bool) *schema.Schema {
 		"redistribution_config": getRedistributionConfigSchema(),
 		"path":                  getPathSchema(),
 		"revision":              getRevisionSchema(),
+		"display_name":          getComputedDisplayNameSchema(),
 	}
 	if isTier1 {
 		delete(elemSchema, "redistribution_config")
