@@ -393,7 +393,6 @@ func setPolicyRulesInSchema(d *schema.ResourceData, rules []model.Rule) error {
 func getPolicyRulesFromSchema(d *schema.ResourceData) []model.Rule {
 	rules := d.Get("rule").([]interface{})
 	var ruleList []model.Rule
-	seq := 0
 	for _, rule := range rules {
 		data := rule.(map[string]interface{})
 		displayName := data["display_name"].(string)
@@ -407,6 +406,7 @@ func getPolicyRulesFromSchema(d *schema.ResourceData) []model.Rule {
 		ipProtocol := data["ip_version"].(string)
 		direction := data["direction"].(string)
 		notes := data["notes"].(string)
+		seq := data["sequence_number"].(int)
 		sequenceNumber := int64(seq)
 		tagStructs := getPolicyTagsFromSet(data["tag"].(*schema.Set))
 
@@ -437,7 +437,10 @@ func getPolicyRulesFromSchema(d *schema.ResourceData) []model.Rule {
 			Services:             getPathListFromMap(data, "services"),
 			Scope:                getPathListFromMap(data, "scope"),
 			Profiles:             getPathListFromMap(data, "profiles"),
-			SequenceNumber:       &sequenceNumber,
+		}
+
+		if sequenceNumber > 0 {
+			elem.SequenceNumber = &sequenceNumber
 		}
 
 		ruleList = append(ruleList, elem)
