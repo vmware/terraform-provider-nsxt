@@ -26,7 +26,7 @@ var accTestPolicyBgpNeighborConfigCreateAttributes = map[string]string{
 
 var accTestPolicyBgpNeighborConfigUpdateAttributes = map[string]string{
 	"display_name":          getAccTestResourceName(),
-	"description":           "terraform created",
+	"description":           "terraform updated",
 	"allow_as_in":           "false",
 	"graceful_restart_mode": "GR_AND_HELPER",
 	"hold_down_time":        "950",
@@ -299,6 +299,30 @@ func TestAccResourceNsxtPolicyBgpNeighbor_subConfigPrefixList(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyBgpNeighbor_importGlobalManager(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_bgp_neighbor.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccOnlyGlobalManager(t); testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyBgpNeighborCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyBgpNeighborGMImportTemplate(),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccNSXPolicyBgpNeighborImporterGetIDs,
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtPolicyBgpNeighbor_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_bgp_neighbor.test"
@@ -334,7 +358,7 @@ func testAccNSXPolicyBgpNeighborImporterGetIDs(s *terraform.State) (string, erro
 	}
 	bgpPath := rs.Primary.Attributes["bgp_path"]
 	if bgpPath == "" {
-		return "", fmt.Errorf("NSX Policy BGP Neighbor bgp_path not set in resources ")
+		return "", fmt.Errorf("NSX Policy BGP Neighbor bgp_path not set in resources")
 	}
 	t0ID, serviceID := resourceNsxtPolicyBgpNeighborParseIDs(bgpPath)
 	return fmt.Sprintf("%s/%s/%s", t0ID, serviceID, resourceID), nil
@@ -440,11 +464,6 @@ resource "nsxt_policy_tier0_gateway_interface" "test" {
   subnets        = ["%s"]
 }
 
-
-data "nsxt_policy_realization_info" "bgp_realization_info" {
-  path = nsxt_policy_tier0_gateway.test.bgp_config.0.path
-}
-
 resource "nsxt_policy_bgp_neighbor" "test" {
   display_name          = "%s"
   description           = "%s"
@@ -516,10 +535,6 @@ resource "nsxt_policy_tier0_gateway" "test" {
   }
 }
 
-data "nsxt_policy_realization_info" "bgp_realization_info" {
-  path = nsxt_policy_tier0_gateway.test.bgp_config.0.path
-}
-
 resource "nsxt_policy_bgp_neighbor" "test" {
   bgp_path         = nsxt_policy_tier0_gateway.test.bgp_config.0.path
   display_name     = "tfbgp"
@@ -541,10 +556,6 @@ resource "nsxt_policy_bgp_neighbor" "test" {
     address_family = "L2VPN_EVPN"
     maximum_routes = 20
   }
-}
-
-data "nsxt_policy_realization_info" "realization_info" {
-  path = nsxt_policy_bgp_neighbor.test.path
 }`, getEdgeClusterName())
 }
 
@@ -725,12 +736,6 @@ resource "nsxt_policy_tier0_gateway_interface" "test" {
   site_path      = data.nsxt_policy_site.test.path
 }
 
-
-data "nsxt_policy_realization_info" "bgp_realization_info" {
-  path      = nsxt_policy_bgp_config.test.path
-  site_path = data.nsxt_policy_site.test.path
-}
-
 resource "nsxt_policy_bgp_neighbor" "test" {
   display_name          = "%s"
   description           = "%s"
@@ -749,10 +754,54 @@ resource "nsxt_policy_bgp_neighbor" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
+}`, subnet, attrMap["display_name"], attrMap["description"], attrMap["allow_as_in"], attrMap["graceful_restart_mode"], attrMap["hold_down_time"], attrMap["keep_alive_time"], attrMap["maximum_hop_limit"], attrMap["neighbor_address"], attrMap["remote_as_num"], attrMap["password"])
 }
 
-data "nsxt_policy_realization_info" "realization_info" {
-  path      = nsxt_policy_bgp_neighbor.test.path
-  site_path = data.nsxt_policy_site.test.path
-}`, subnet, attrMap["display_name"], attrMap["description"], attrMap["allow_as_in"], attrMap["graceful_restart_mode"], attrMap["hold_down_time"], attrMap["keep_alive_time"], attrMap["maximum_hop_limit"], attrMap["neighbor_address"], attrMap["remote_as_num"], attrMap["password"])
+func testAccNsxtPolicyBgpNeighborGMImportTemplate() string {
+	attrMap := accTestPolicyBgpNeighborConfigCreateAttributes
+	return testAccNsxtGlobalPolicyEdgeClusterReadTemplate() + testAccNSXGlobalPolicyTransportZoneReadTemplate(true, false) + fmt.Sprintf(`
+resource "nsxt_policy_vlan_segment" "test" {
+  transport_zone_path = data.nsxt_policy_transport_zone.test.path
+  display_name        = "Acceptance Test"
+  vlan_ids            = [11]
+  subnet {
+      cidr = "10.2.2.2/24"
+  }
+}
+
+resource "nsxt_policy_tier0_gateway" "test" {
+  display_name      = "terraformt0gw"
+  description       = "Acceptance Test"
+  locale_service {
+    edge_cluster_path = data.nsxt_policy_edge_cluster.test.path
+  }
+}
+
+resource "nsxt_policy_bgp_config" "test" {
+  gateway_path    = nsxt_policy_tier0_gateway.test.path
+  site_path       = data.nsxt_policy_site.test.path
+  local_as_num    = "60000"
+  multipath_relax = true
+  route_aggregation {
+    prefix = "12.12.12.0/24"
+  }
+}
+
+resource "nsxt_policy_tier0_gateway_interface" "test" {
+  display_name   = "terraformt0gwintf"
+  type           = "EXTERNAL"
+  description    = "Acceptance Test"
+  gateway_path   = nsxt_policy_tier0_gateway.test.path
+  segment_path   = nsxt_policy_vlan_segment.test.path
+  subnets        = ["12.12.12.1/24"]
+  site_path      = data.nsxt_policy_site.test.path
+}
+
+resource "nsxt_policy_bgp_neighbor" "test" {
+  bgp_path         = nsxt_policy_bgp_config.test.path
+  display_name     = "%s"
+  neighbor_address = "%s"
+  remote_as_num    = "%s"
+  source_addresses = nsxt_policy_tier0_gateway_interface.test.ip_addresses
+}`, attrMap["display_name"], attrMap["neighbor_address"], attrMap["remote_as_num"])
 }
