@@ -704,7 +704,7 @@ resource "nsxt_policy_service" "tcp778" {
 }`
 }
 
-//TODO: add profiles when available
+// TODO: add profiles when available
 func testAccNsxtPolicySecurityPolicyWithDepsCreate(name string) string {
 	return testAccNsxtPolicySecurityPolicyDeps() + fmt.Sprintf(`
 resource "nsxt_policy_security_policy" "test" {

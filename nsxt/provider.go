@@ -256,6 +256,9 @@ func Provider() *schema.Provider {
 			"nsxt_policy_lb_service":                dataSourceNsxtPolicyLbService(),
 			"nsxt_policy_gateway_locale_service":    dataSourceNsxtPolicyGatewayLocaleService(),
 			"nsxt_policy_bridge_profile":            dataSourceNsxtPolicyBridgeProfile(),
+			"nsxt_policy_ipsec_vpn_local_endpoint":  dataSourceNsxtPolicyIPSecVpnLocalEndpoint(),
+			"nsxt_policy_ipsec_vpn_service":         dataSourceNsxtPolicyIPSecVpnService(),
+			"nsxt_policy_l2_vpn_service":            dataSourceNsxtPolicyL2VpnService(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -369,6 +372,11 @@ func Provider() *schema.Provider {
 			"nsxt_policy_ipsec_vpn_ike_profile":            resourceNsxtPolicyIPSecVpnIkeProfile(),
 			"nsxt_policy_ipsec_vpn_tunnel_profile":         resourceNsxtPolicyIPSecVpnTunnelProfile(),
 			"nsxt_policy_ipsec_vpn_dpd_profile":            resourceNsxtPolicyIPSecVpnDpdProfile(),
+			"nsxt_policy_ipsec_vpn_session":                resourceNsxtPolicyIPSecVpnSession(),
+			"nsxt_policy_l2_vpn_session":                   resourceNsxtPolicyL2VPNSession(),
+			"nsxt_policy_ipsec_vpn_service":                resourceNsxtPolicyIPSecVpnService(),
+			"nsxt_policy_l2_vpn_service":                   resourceNsxtPolicyL2VpnService(),
+			"nsxt_policy_ipsec_vpn_local_endpoint":         resourceNsxtPolicyIPSecVpnLocalEndpoint(),
 		},
 
 		ConfigureFunc: providerConfigure,
