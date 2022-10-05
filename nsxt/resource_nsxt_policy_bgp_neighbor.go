@@ -509,14 +509,25 @@ func resourceNsxtPolicyBgpNeighborImport(d *schema.ResourceData, m interface{}) 
 	tier0ID := s[0]
 	serviceID := s[1]
 	neighborID := s[2]
-	connector := getPolicyConnector(m)
-	client := bgp.NewNeighborsClient(connector)
+	var parentPath string
 
-	neighbor, err := client.Get(tier0ID, serviceID, neighborID)
-	if err != nil {
-		return nil, err
+	connector := getPolicyConnector(m)
+	if isPolicyGlobalManager(m) {
+		client := gm_bgp.NewNeighborsClient(connector)
+		neighbor, err := client.Get(tier0ID, serviceID, neighborID)
+		if err != nil {
+			return nil, err
+		}
+		parentPath = *neighbor.ParentPath
+	} else {
+		client := bgp.NewNeighborsClient(connector)
+		neighbor, err := client.Get(tier0ID, serviceID, neighborID)
+		if err != nil {
+			return nil, err
+		}
+		parentPath = *neighbor.ParentPath
 	}
-	d.Set("bgp_path", neighbor.ParentPath)
+	d.Set("bgp_path", parentPath)
 
 	d.SetId(neighborID)
 
