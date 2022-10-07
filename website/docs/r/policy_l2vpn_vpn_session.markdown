@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - Gateways and Routing"
+subcategory: "Policy - VPN"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_l2vpn_vpn_session"
 description: A resource to configure a L2VPN VPN session.
@@ -15,11 +15,10 @@ This resource is applicable to NSX Policy Manager and VMC.
 
 ```hcl
 resource "nsxt_policy_l2_vpn_session" "test" {
-    display_name      = "L2 VPN Session"
-    description       = "Terraform-provisioned L2 VPN Tunnel"
-    service_path      = "/infra/tier-1s/aaa/locale-services/default/l2vpn-services/ccc"
-    transport_tunnels = [nsxt_policy_ipsec_vpn_session.ipsec_vpn_session_for_l2vpn.path]
-}
+  display_name      = "L2 VPN Session"
+  description       = "Terraform-provisioned L2 VPN Tunnel"
+  service_path      = nsxt_policy_ipsec_vpn_service.test.path
+  transport_tunnels = [nsxt_policy_ipsec_vpn_session.ipsec_vpn_session_for_l2vpn.path]
 }
 ```
 

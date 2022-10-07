@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - Gateways and Routing"
+subcategory: "Policy - VPN"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_ipsec_vpn_session"
 description: A resource to configure a IPSec VPN session.
@@ -15,45 +15,45 @@ This resource is applicable to NSX Policy Manager and VMC.
 
 ```hcl
 resource "nsxt_policy_ipsec_vpn_session" "test" {
-    display_name               = "Route-Based VPN Session"
-    description                = "Terraform-provisioned IPsec Route-Based VPN"
-    ike_profile_path           = nsxt_policy_ipsec_vpn_ike_profile.profile_ike_l3vpn.path
-    tunnel_profile_path        = nsxt_policy_ipsec_vpn_tunnel_profile.profile_tunnel_l3vpn.path
-    local_endpoint_path        = data.nsxt_policy_ipsec_vpn_local_endpoint.private_endpoint.path
-    dpd_profile_path           = nsxt_policy_ipsec_vpn_dpd_profile.test.path
-    enabled                    = true
-    service_path               = "/infra/tier-1s/aaa/locale-services/default/ipsec-vpn-services/ccc"
-    vpn_type                   = "RouteBased"
-    authentication_mode        = "PSK"
-    compliance_suite           = "NONE"
-    ip_addresses               = ["169.254.152.2"]
-    prefix_length              = 30
-    peer_address               = "18.18.18.19"
-    peer_id                    = "18.18.18.19"
-    psk                        = "VMware123!"
-    connection_initiation_mode = "INITIATOR"
+  display_name               = "Route-Based VPN Session"
+  description                = "Terraform-provisioned IPsec Route-Based VPN"
+  ike_profile_path           = nsxt_policy_ipsec_vpn_ike_profile.profile_ike_l3vpn.path
+  tunnel_profile_path        = nsxt_policy_ipsec_vpn_tunnel_profile.profile_tunnel_l3vpn.path
+  local_endpoint_path        = data.nsxt_policy_ipsec_vpn_local_endpoint.private_endpoint.path
+  dpd_profile_path           = nsxt_policy_ipsec_vpn_dpd_profile.test.path
+  enabled                    = true
+  service_path               = nsxt_policy_ipsec_vpn_service.test.path
+  vpn_type                   = "RouteBased"
+  authentication_mode        = "PSK"
+  compliance_suite           = "NONE"
+  ip_addresses               = ["169.254.152.2"]
+  prefix_length              = 30
+  peer_address               = "18.18.18.19"
+  peer_id                    = "18.18.18.19"
+  psk                        = "BhvrlXXmH+TxXlFKNaF5mAXnnLja3lSQ"
+  connection_initiation_mode = "INITIATOR"
 }
 
 resource "nsxt_policy_ipsec_vpn_session" "test2" {
-    display_name               = "Policy-Based VPN Session"
-    description                = "Terraform-provisioned IPsec Policy-Based VPN"
-    ike_profile_path           = nsxt_policy_ipsec_vpn_ike_profile.profile_ike_l3vpn.path
-    tunnel_profile_path        = nsxt_policy_ipsec_vpn_tunnel_profile.profile_tunnel_l3vpn.path
-    local_endpoint_path        = data.nsxt_policy_ipsec_vpn_local_endpoint.private_endpoint.path
-    dpd_profile_path           = nsxt_policy_ipsec_vpn_dpd_profile.test.path
-    enabled                    = true
-    service_path               = "/infra/tier-1s/aaa/locale-services/default/ipsec-vpn-services/ccc"
-    vpn_type                   = "PolicyBased"
-    authentication_mode        = "PSK"
-    compliance_suite           = "NONE"
-    peer_address               = "18.18.18.19"
-    peer_id                    = "18.18.18.19"
-    psk                        = "VMware123!"
-    connection_initiation_mode = "INITIATOR"
-    rule {
-        sources             = ["192.168.10.0/24"]
-        destinations        = ["192.169.10.0/24"]
-        action              = "BYPASS"
+  display_name               = "Policy-Based VPN Session"
+  description                = "Terraform-provisioned IPsec Policy-Based VPN"
+  ike_profile_path           = nsxt_policy_ipsec_vpn_ike_profile.profile_ike_l3vpn.path
+  tunnel_profile_path        = nsxt_policy_ipsec_vpn_tunnel_profile.profile_tunnel_l3vpn.path
+  local_endpoint_path        = data.nsxt_policy_ipsec_vpn_local_endpoint.private_endpoint.path
+  dpd_profile_path           = nsxt_policy_ipsec_vpn_dpd_profile.test.path
+  enabled                    = true
+  service_path               = nsxt_policy_ipsec_vpn_service.test.path
+  vpn_type                   = "PolicyBased"
+  authentication_mode        = "PSK"
+  compliance_suite           = "NONE"
+  peer_address               = "18.18.18.19"
+  peer_id                    = "18.18.18.19"
+  psk                        = "BhvrlXXmH+TxXlFKNaF5mAXnnLja3lSQ"
+  connection_initiation_mode = "INITIATOR"
+  rule {
+    sources      = ["192.168.10.0/24"]
+    destinations = ["192.169.10.0/24"]
+    action       = "BYPASS"
   }
 }
 ```
