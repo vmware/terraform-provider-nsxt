@@ -377,6 +377,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_ipsec_vpn_service":                resourceNsxtPolicyIPSecVpnService(),
 			"nsxt_policy_l2_vpn_service":                   resourceNsxtPolicyL2VpnService(),
 			"nsxt_policy_ipsec_vpn_local_endpoint":         resourceNsxtPolicyIPSecVpnLocalEndpoint(),
+			"nsxt_policy_ip_discovery_profile":             resourceNsxtPolicyIPDiscoveryProfile(),
 		},
 
 		ConfigureFunc: providerConfigure,
