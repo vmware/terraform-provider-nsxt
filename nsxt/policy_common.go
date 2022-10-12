@@ -452,7 +452,6 @@ func getPolicyRulesFromSchema(d *schema.ResourceData) []model.Rule {
 		}
 
 		ruleList = append(ruleList, elem)
-		seq = seq + 1
 	}
 
 	return ruleList
