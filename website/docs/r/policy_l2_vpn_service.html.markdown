@@ -15,12 +15,12 @@ This resource is applicable to NSX Policy Manager and VMC.
 
 ```hcl
 resource "nsxt_policy_l2_vpn_service" "test" {
-  display_name          = "l2-vpn-service1"
-  description           = "Terraform provisioned L2 VPN service"
-  locale_service_path   = data.nsxt_policy_gateway_locale_service.test.path
-  enable_hub            = true
-  mode                  = "SERVER"
-  encap_ip_pool         = ["192.168.10.0/24"]
+  display_name        = "l2-vpn-service1"
+  description         = "Terraform provisioned L2 VPN service"
+  locale_service_path = data.nsxt_policy_gateway_locale_service.test.path
+  enable_hub          = true
+  mode                = "SERVER"
+  encap_ip_pool       = ["192.168.10.0/24"]
 }
 ```
 

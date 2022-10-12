@@ -53,7 +53,7 @@ An existing object can be [imported][docs-import] into this resource, via the fo
 [docs-import]: https://www.terraform.io/cli/import
 
 ```
-terraform import nsxt_policy_ipsec_vpn_tunnel_profile.test UUID
+terraform import nsxt_policy_ipsec_vpn_dpd_profile.test UUID
 ```
 
-The above command imports IPSec VPN IKE Profile named `test` with the NSX ID `UUID`.
+The above command imports IPSec VPN DPD Profile named `test` with the NSX ID `UUID`.

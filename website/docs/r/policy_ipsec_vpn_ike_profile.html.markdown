@@ -33,7 +33,7 @@ The following arguments are supported:
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `ike_version` - (Optional) Internet Key Exchange(IKE) protocol version to be used, one of `IKE_V1`, `IKE_V2`, `IKE_FLEX`. `IKE_FLEX` will initiate IKE-V2 and respond to both `IKE_V1` and `IKE_V2`.
-* `encryption_algorithms` - (Optional) Set of encryption algorithms to be used during IKE negotiation.
+* `encryption_algorithms` - (Required) Set of encryption algorithms to be used during IKE negotiation.
 * `digest_algorithms` - (Required) Set of algorithms to be used for message digest during IKE negotiation. Default is `SHA2_256`.
 * `dh_groups` - (Required) Diffie-Hellman group to be used if PFS is enabled. Default is GROUP14.
 
