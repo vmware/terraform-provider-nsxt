@@ -53,7 +53,7 @@ An existing object can be [imported][docs-import] into this resource, via the fo
 [docs-import]: https://www.terraform.io/cli/import
 
 ```
-terraform import nsxt_policy_l2_vpn_service.test UUID
+terraform import nsxt_policy_l2_vpn_service.test PATH
 ```
 
-The above command imports L2 VPN Service named `test` with the NSX ID `UUID`.
+The above command imports L2 VPN Service named `test` that corresponds to NSX L2 VPN session with policy path `PATH`.
