@@ -126,6 +126,43 @@ func TestAccResourceNsxtPolicyL2VpnService_ClientMode(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyL2VpnService_Import(t *testing.T) {
+	resourceName := "nsxt_policy_l2_vpn_service.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyL2VpnServiceCheckDestroy(state, accTestPolicyL2VpnServiceCreateAttributes["display_name"])
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyL2VpnServiceTemplate(true, false),
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccNsxtPolicyL2VpnServiceImporterGetID,
+			},
+		},
+	})
+}
+
+func testAccNsxtPolicyL2VpnServiceImporterGetID(s *terraform.State) (string, error) {
+	resourceName := "nsxt_policy_l2_vpn_service.test"
+	rs, ok := s.RootModule().Resources[resourceName]
+	if !ok {
+		return "", fmt.Errorf("Policy L2VpnService resource %s not found in resources", resourceName)
+	}
+	resourceID := rs.Primary.ID
+	if resourceID == "" {
+		return "", fmt.Errorf("Policy L2VpnService resource ID not set in resources")
+	}
+	localeServicePath := rs.Primary.Attributes["locale_service_path"]
+	return fmt.Sprintf("%s/l2vpn-services/%s", localeServicePath, resourceID), nil
+}
+
 func testAccNsxtPolicyL2VpnServiceExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
