@@ -32,11 +32,11 @@ func getNsxIDSchema() *schema.Schema {
 	}
 }
 
-func getFlexNsxIDSchema() *schema.Schema {
+func getFlexNsxIDSchema(readOnly bool) *schema.Schema {
 	return &schema.Schema{
 		Type:        schema.TypeString,
 		Description: "NSX ID for this resource",
-		Optional:    true,
+		Optional:    !readOnly,
 		Computed:    true,
 	}
 }
@@ -153,9 +153,9 @@ func getPolicyRuleActionSchema(isIds bool) *schema.Schema {
 	}
 }
 
-func getSecurityPolicyAndGatewayRulesSchema(scopeRequired bool, isIds bool) *schema.Schema {
+func getSecurityPolicyAndGatewayRulesSchema(scopeRequired bool, isIds bool, nsxIDReadOnly bool) *schema.Schema {
 	ruleSchema := map[string]*schema.Schema{
-		"nsx_id":       getFlexNsxIDSchema(),
+		"nsx_id":       getFlexNsxIDSchema(nsxIDReadOnly),
 		"display_name": getDisplayNameSchema(),
 		"description":  getDescriptionSchema(),
 		"revision":     getRevisionSchema(),
@@ -287,7 +287,7 @@ func getPolicyGatewayPolicySchema() map[string]*schema.Schema {
 	delete(secPolicy, "scope")
 	secPolicy["category"].ValidateFunc = validation.StringInSlice(gatewayPolicyCategoryValues, false)
 	// GW Policy rules require scope to be set
-	secPolicy["rule"] = getSecurityPolicyAndGatewayRulesSchema(true, false)
+	secPolicy["rule"] = getSecurityPolicyAndGatewayRulesSchema(true, false, true)
 	return secPolicy
 }
 
@@ -346,7 +346,7 @@ func getPolicySecurityPolicySchema(isIds bool) map[string]*schema.Schema {
 			Optional:    true,
 			Computed:    true,
 		},
-		"rule": getSecurityPolicyAndGatewayRulesSchema(false, isIds),
+		"rule": getSecurityPolicyAndGatewayRulesSchema(false, isIds, true),
 	}
 
 	if isIds {
