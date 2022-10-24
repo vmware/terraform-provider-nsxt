@@ -13,7 +13,7 @@ import (
 
 var accTestPolicyIPSecVpnSessionRouteBasedCreateAttributes = map[string]string{
 	"display_name":               getAccTestResourceName(),
-	"description":                "Terraform-provisioned IPsec Route-Based VPN",
+	"description":                "terraform created",
 	"enabled":                    "true",
 	"vpn_type":                   "RouteBased",
 	"authentication_mode":        "PSK",
@@ -22,14 +22,14 @@ var accTestPolicyIPSecVpnSessionRouteBasedCreateAttributes = map[string]string{
 	"prefix_length":              "24",
 	"peer_address":               "18.18.18.22",
 	"peer_id":                    "18.18.18.22",
-	"psk":                        "VMware123!",
-	"connection_initiation_mode": "INITIATOR",
+	"psk":                        "secret1",
+	"connection_initiation_mode": "RESPOND_ONLY",
 }
 
 var accTestPolicyIPSecVpnSessionRouteBasedUpdateAttributes = map[string]string{
 	"display_name":               getAccTestResourceName(),
-	"description":                "Terraform-provisioned IPsec Route-Based VPN",
-	"enabled":                    "true",
+	"description":                "terraform updated",
+	"enabled":                    "false",
 	"vpn_type":                   "RouteBased",
 	"authentication_mode":        "PSK",
 	"compliance_suite":           "NONE",
@@ -37,8 +37,8 @@ var accTestPolicyIPSecVpnSessionRouteBasedUpdateAttributes = map[string]string{
 	"prefix_length":              "24",
 	"peer_address":               "18.18.18.21",
 	"peer_id":                    "18.18.18.21",
-	"psk":                        "VMware123!",
-	"connection_initiation_mode": "INITIATOR",
+	"psk":                        "secret2",
+	"connection_initiation_mode": "ON_DEMAND",
 }
 
 var accTestPolicyIPSecVpnSessionPolicyBasedCreateAttributes = map[string]string{
@@ -59,23 +59,25 @@ var accTestPolicyIPSecVpnSessionPolicyBasedCreateAttributes = map[string]string{
 
 var accTestPolicyIPSecVpnSessionPolicyBasedUpdateAttributes = map[string]string{
 	"display_name":               getAccTestResourceName(),
-	"description":                "Terraform-provisioned IPsec Route-Based VPN",
+	"description":                "terraform updated",
 	"enabled":                    "true",
 	"vpn_type":                   "PolicyBased",
 	"authentication_mode":        "PSK",
 	"compliance_suite":           "NONE",
 	"peer_address":               "18.18.18.22",
 	"peer_id":                    "18.18.18.22",
-	"psk":                        "VMware123!",
+	"psk":                        "secret1",
 	"connection_initiation_mode": "RESPOND_ONLY",
 	"sources":                    "192.172.10.0/24",
 	"destinations":               "192.173.10.0/24",
 	"action":                     "PROTECT",
 }
 
-func TestAccResourceNsxtPolicyIPSecVpnSessionRouteBased_basic(t *testing.T) {
-	testResourceName := "nsxt_policy_ipsec_vpn_session.test"
+var testAccIPSecVpnSessionResourceName = "nsxt_policy_ipsec_vpn_session.test"
 
+func TestAccResourceNsxtPolicyIPSecVpnSessionRouteBased_basic(t *testing.T) {
+
+	testResourceName := testAccIPSecVpnSessionResourceName
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
@@ -137,12 +139,62 @@ func TestAccResourceNsxtPolicyIPSecVpnSessionRouteBased_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 				),
 			},
+			{
+				Config: testAccNsxtPolicyIPSecVpnSessionRouteBasedMinimalistic(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyIPSecVpnSessionExists(accTestPolicyIPSecVpnSessionRouteBasedCreateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyIPSecVpnSessionRouteBasedCreateAttributes["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "description", ""),
+					resource.TestCheckResourceAttrSet(testResourceName, "ike_profile_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "tunnel_profile_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "dpd_profile_path"),
+					resource.TestCheckResourceAttr(testResourceName, "enabled", "true"),
+					resource.TestCheckResourceAttrSet(testResourceName, "service_path"),
+					resource.TestCheckResourceAttr(testResourceName, "vpn_type", accTestPolicyIPSecVpnSessionRouteBasedCreateAttributes["vpn_type"]),
+					resource.TestCheckResourceAttr(testResourceName, "authentication_mode", accTestPolicyIPSecVpnSessionRouteBasedCreateAttributes["authentication_mode"]),
+					resource.TestCheckResourceAttr(testResourceName, "compliance_suite", "NONE"),
+					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.0", accTestPolicyIPSecVpnSessionRouteBasedCreateAttributes["ip_addresses"]),
+					resource.TestCheckResourceAttr(testResourceName, "prefix_length", accTestPolicyIPSecVpnSessionRouteBasedCreateAttributes["prefix_length"]),
+					resource.TestCheckResourceAttr(testResourceName, "peer_address", accTestPolicyIPSecVpnSessionRouteBasedCreateAttributes["peer_address"]),
+					resource.TestCheckResourceAttr(testResourceName, "peer_id", accTestPolicyIPSecVpnSessionRouteBasedCreateAttributes["peer_id"]),
+					resource.TestCheckResourceAttr(testResourceName, "psk", accTestPolicyIPSecVpnSessionRouteBasedCreateAttributes["psk"]),
+					resource.TestCheckResourceAttr(testResourceName, "connection_initiation_mode", "INITIATOR"),
+
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicyIPSecVpnSessionRouteBased_import(t *testing.T) {
+	testResourceName := testAccIPSecVpnSessionResourceName
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyIPSecVpnSessionCheckDestroy(state, accTestPolicyIPSecVpnSessionRouteBasedCreateAttributes["display_name"])
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyIPSecVpnSessionRouteBasedMinimalistic(),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: false,
+				ImportStateIdFunc: testAccNSXPolicyIPSecVpnSessionImporterGetID,
+			},
 		},
 	})
 }
 
 func TestAccResourceNsxtPolicyIPSecVpnSessionPolicyBased_basic(t *testing.T) {
-	testResourceName := "nsxt_policy_ipsec_vpn_session.test"
+	testResourceName := testAccIPSecVpnSessionResourceName
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
@@ -278,6 +330,22 @@ func testAccNsxtPolicyIPSecVpnSessionCheckDestroy(state *terraform.State, displa
 	return nil
 }
 
+func testAccNSXPolicyIPSecVpnSessionImporterGetID(s *terraform.State) (string, error) {
+	rs, ok := s.RootModule().Resources[testAccIPSecVpnSessionResourceName]
+	if !ok {
+		return "", fmt.Errorf("NSX Policy VPN session %s not found in resources", testAccIPSecVpnSessionResourceName)
+	}
+	resourceID := rs.Primary.ID
+	if resourceID == "" {
+		return "", fmt.Errorf("NSX Policy VPN session ID not set in resources ")
+	}
+	servicePath := rs.Primary.Attributes["service_path"]
+	if servicePath == "" {
+		return "", fmt.Errorf("NSX Policy VPN session service_path not set")
+	}
+	return fmt.Sprintf("%s/sessions/%s", servicePath, resourceID), nil
+}
+
 func testAccNsxtPolicyIPSecVpnSessionPreConditionTemplate() string {
 	return fmt.Sprintf(`
 resource "nsxt_policy_ipsec_vpn_ike_profile" "test" {
@@ -321,6 +389,26 @@ resource "nsxt_policy_ipsec_vpn_local_endpoint" "test" {
 `, getAccTestResourceName(), getAccTestResourceName(), getAccTestResourceName(), getAccTestResourceName(), getAccTestResourceName())
 }
 
+func testAccNsxtPolicyIPSecVpnSessionRouteBasedMinimalistic() string {
+	attrMap := accTestPolicyIPSecVpnSessionRouteBasedCreateAttributes
+	return testAccNsxtPolicyEdgeClusterReadTemplate(getEdgeClusterName()) +
+		testAccNsxtPolicyTier0WithEdgeClusterForVPN("test") +
+		testAccNsxtPolicyIPSecVpnSessionPreConditionTemplate() +
+		fmt.Sprintf(`
+resource "nsxt_policy_ipsec_vpn_session" "test" {
+	display_name        = "%s"
+	tunnel_profile_path = nsxt_policy_ipsec_vpn_tunnel_profile.test.path
+	local_endpoint_path = nsxt_policy_ipsec_vpn_local_endpoint.test.path
+	service_path        = nsxt_policy_ipsec_vpn_service.test.path
+	vpn_type            = "%s"
+	peer_address        = "%s"
+	peer_id             = "%s"
+	ip_addresses        = ["%s"]
+	prefix_length       = %s
+	psk                 = "%s"
+}`, attrMap["display_name"], attrMap["vpn_type"], attrMap["peer_address"], attrMap["peer_id"], attrMap["ip_addresses"], attrMap["prefix_length"], attrMap["psk"])
+}
+
 func testAccNsxtPolicyIPSecVpnSessionRouteBasedTemplate(createFlow bool) string {
 	var attrMap map[string]string
 	if createFlow {
@@ -337,8 +425,8 @@ resource "nsxt_policy_ipsec_vpn_session" "test" {
 	description                = "%s"
 	ike_profile_path           = nsxt_policy_ipsec_vpn_ike_profile.test.path
 	tunnel_profile_path        = nsxt_policy_ipsec_vpn_tunnel_profile.test.path
-	dpd_profile_path		   = nsxt_policy_ipsec_vpn_dpd_profile.test.path
-	local_endpoint_path		   = nsxt_policy_ipsec_vpn_local_endpoint.test.path
+	dpd_profile_path           = nsxt_policy_ipsec_vpn_dpd_profile.test.path
+	local_endpoint_path        = nsxt_policy_ipsec_vpn_local_endpoint.test.path
 	enabled                    = "%s"
 	service_path               = nsxt_policy_ipsec_vpn_service.test.path
 	vpn_type                   = "%s"
@@ -352,12 +440,11 @@ resource "nsxt_policy_ipsec_vpn_session" "test" {
 	connection_initiation_mode = "%s"
 
 	tag {
-	scope = "scope1"
-	tag   = "tag1"
-	  }
+	  scope = "scope1"
+	  tag   = "tag1"
+	}
 }`, attrMap["display_name"], attrMap["description"], attrMap["enabled"], attrMap["vpn_type"],
-			attrMap["authentication_mode"], attrMap["compliance_suite"], attrMap["ip_addresses"], attrMap["prefix_length"], attrMap["peer_address"], attrMap["peer_id"],
-			attrMap["psk"], attrMap["connection_initiation_mode"])
+			attrMap["authentication_mode"], attrMap["compliance_suite"], attrMap["ip_addresses"], attrMap["prefix_length"], attrMap["peer_address"], attrMap["peer_id"], attrMap["psk"], attrMap["connection_initiation_mode"])
 }
 
 func testAccNsxtPolicyIPSecVpnSessionPolicyBasedTemplate(createFlow bool) string {

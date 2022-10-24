@@ -96,10 +96,10 @@ In addition to arguments listed above, the following attributes are exported:
 
 An existing object can be [imported][docs-import] into this resource, via the following command:
 
-[docs-import]: /docs/import/index.html
+[docs-import]: https://www.terraform.io/cli/import
 
 ```
-terraform import nsxt_policy_ipsec_vpn_session.test UUID
+terraform import nsxt_policy_ipsec_vpn_session.test PATH
 ```
 
-The above command imports IPSec VPN  session named `test` with the NSX IPSec VPN Ike session ID `UUID`.
+The above command imports IPSec VPN session named `test` that corresponds to NSX IPSec VPN session with policy path `PATH`.
