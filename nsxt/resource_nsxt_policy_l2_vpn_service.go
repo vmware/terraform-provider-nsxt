@@ -6,6 +6,7 @@ package nsxt
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -27,7 +28,7 @@ func resourceNsxtPolicyL2VpnService() *schema.Resource {
 		Update: resourceNsxtPolicyL2VpnServiceUpdate,
 		Delete: resourceNsxtPolicyL2VpnServiceDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			State: resourceNsxtPolicyL2VpnServiceImport,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -90,6 +91,23 @@ func deleteNsxtPolicyL2VpnService(connector *client.RestConnector, gwID string, 
 	}
 	client := t1_locale_service.NewL2vpnServicesClient(connector)
 	return client.Delete(gwID, localeServiceID, id)
+}
+
+func resourceNsxtPolicyL2VpnServiceImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	importID := d.Id()
+	s := strings.Split(importID, "/")
+	err := fmt.Errorf("Expected policy path for the L2 VPN Service, got %s", importID)
+	// The policy path of L2 VPN Service should be like /infra/tier-0s/aaa/locale-services/bbb/l2vpn-services/ccc
+	if len(s) != 8 {
+		return nil, err
+	}
+	d.SetId(s[7])
+	s = strings.Split(importID, "/l2vpn-services/")
+	if len(s) != 2 {
+		return []*schema.ResourceData{d}, err
+	}
+	d.Set("locale_service_path", s[0])
+	return []*schema.ResourceData{d}, nil
 }
 
 func resourceNsxtPolicyL2VpnServiceRead(d *schema.ResourceData, m interface{}) error {

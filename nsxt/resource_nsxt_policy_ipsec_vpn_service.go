@@ -6,6 +6,7 @@ package nsxt
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -30,7 +31,7 @@ func resourceNsxtPolicyIPSecVpnService() *schema.Resource {
 		Update: resourceNsxtPolicyIPSecVpnServiceUpdate,
 		Delete: resourceNsxtPolicyIPSecVpnServiceDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			State: resourceNsxtPolicyIPSecVpnServiceImport,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -94,6 +95,23 @@ func updateNsxtPolicyIPSecVpnService(connector *client.RestConnector, gwID strin
 	client := t1_locale_service.NewIpsecVpnServicesClient(connector)
 	_, err := client.Update(gwID, localeServiceID, id, ipSecVpnService)
 	return err
+}
+
+func resourceNsxtPolicyIPSecVpnServiceImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	importID := d.Id()
+	s := strings.Split(importID, "/")
+	err := fmt.Errorf("Expected policy path for the IPSec VPN Service, got %s", importID)
+	// The policy path of IPSec VPN Service should be like /infra/tier-0s/aaa/locale-services/bbb/ipsec-vpn-services/ccc
+	if len(s) != 8 {
+		return nil, err
+	}
+	d.SetId(s[7])
+	s = strings.Split(importID, "/ipsec-vpn-services/")
+	if len(s) != 2 {
+		return []*schema.ResourceData{d}, err
+	}
+	d.Set("locale_service_path", s[0])
+	return []*schema.ResourceData{d}, nil
 }
 
 func deleteNsxtPolicyIPSecVpnService(connector *client.RestConnector, gwID string, localeServiceID string, isT0 bool, id string) error {
