@@ -58,7 +58,7 @@ func resourceNsxtPolicyIPSecVpnSession() *schema.Resource {
 		Update: resourceNsxtPolicyIPSecVpnSessionUpdate,
 		Delete: resourceNsxtPolicyIPSecVpnSessionDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			State: nsxtVpnSessionImporter,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -70,8 +70,8 @@ func resourceNsxtPolicyIPSecVpnSession() *schema.Resource {
 			"tag":                 getTagsSchema(),
 			"tunnel_profile_path": getPolicyPathSchema(true, false, "Policy path referencing Tunnel profile to be used."),
 			"local_endpoint_path": getPolicyPathSchema(true, false, "Policy path referencing Local endpoint."),
-			"ike_profile_path":    getPolicyPathSchema(false, false, "Policy path referencing Ike profile."),
-			"dpd_profile_path":    getPolicyPathSchema(false, false, "Policy path referencing dpd profile."),
+			"ike_profile_path":    getComputedPolicyPathSchema("Policy path referencing Ike profile."),
+			"dpd_profile_path":    getComputedPolicyPathSchema("Policy path referencing dpd profile."),
 			"vpn_type": {
 				Type:         schema.TypeString,
 				Description:  "A Policy Based VPN requires to define protect rules that match local and peer subnets. IPSec security associations is negotiated for each pair of local and peer subnet. A Route Based VPN is more flexible, more powerful and recommended over policy based VPN. IP Tunnel port is created and all traffic routed via tunnel port is protected. Routes can be configured statically or can be learned through BGP. A route based VPN is must for establishing redundant VPN session to remote site.",
@@ -181,6 +181,10 @@ func getIPSecVPNSessionFromSchema(d *schema.ResourceData) (*data.StructValue, er
 
 	if resourceType == routeBasedIPSecVpnSession {
 		tunnelInterface := interfaceListToStringList(d.Get("ip_addresses").([]interface{}))
+
+		if len(tunnelInterface) == 0 || prefixLengh == 0 {
+			return nil, fmt.Errorf("ip_addresses and prefix_length need to be specified for Route Based VPN session")
+		}
 		var ipSubnets []model.TunnelInterfaceIPSubnet
 		ipSubnet := model.TunnelInterfaceIPSubnet{
 			IpAddresses:  tunnelInterface,
@@ -484,7 +488,6 @@ func resourceNsxtPolicyIPSecVpnSessionRead(d *schema.ResourceData, m interface{}
 	converter.SetMode(bindings.REST)
 
 	id := d.Id()
-	resourceType := d.Get("vpn_type").(string)
 	if id == "" {
 		return fmt.Errorf("Error obtaining IPSecVpnSession ID")
 	}
@@ -510,7 +513,14 @@ func resourceNsxtPolicyIPSecVpnSessionRead(d *schema.ResourceData, m interface{}
 		return handleReadError(d, "VPN Session", id, err1)
 	}
 
-	if resourceType == routeBasedIPSecVpnSession {
+	baseObj, errs := converter.ConvertToGolang(obj, model.IPSecVpnSessionBindingType())
+	if len(errs) > 0 {
+		return fmt.Errorf("Error converting VPN Session %s", errs[0])
+	}
+	baseVPN := baseObj.(model.IPSecVpnSession)
+	resourceType := baseVPN.ResourceType
+
+	if resourceType == model.IPSecVpnSession_RESOURCE_TYPE_ROUTEBASEDIPSECVPNSESSION {
 		interfaceVpn, errs := converter.ConvertToGolang(obj, model.RouteBasedIPSecVpnSessionBindingType())
 		if len(errs) > 0 {
 			return fmt.Errorf("Error converting VPN Session %s", errs[0])
@@ -661,4 +671,24 @@ func resourceNsxtPolicyIPSecVpnSessionDelete(d *schema.ResourceData, m interface
 	}
 
 	return nil
+}
+
+func nsxtVpnSessionImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	importID := d.Id()
+	err := fmt.Errorf("Expected VPN session path, got %s", importID)
+	// Path should be like /infra/tier-1s/aaa/locale-services/default/ipsec-vpn-services/bbb/sessions/ccc
+	s := strings.Split(importID, "/")
+	if len(s) != 10 {
+		return []*schema.ResourceData{d}, err
+	}
+
+	d.SetId(s[9])
+
+	s = strings.Split(importID, "/sessions/")
+	if len(s) != 2 {
+		return []*schema.ResourceData{d}, err
+	}
+	d.Set("service_path", s[0])
+
+	return []*schema.ResourceData{d}, nil
 }

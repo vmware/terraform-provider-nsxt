@@ -30,7 +30,7 @@ func resourceNsxtPolicyL2VPNSession() *schema.Resource {
 		Update: resourceNsxtPolicyL2VPNSessionUpdate,
 		Delete: resourceNsxtPolicyL2VPNSessionDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			State: nsxtVpnSessionImporter,
 		},
 
 		Schema: map[string]*schema.Schema{
