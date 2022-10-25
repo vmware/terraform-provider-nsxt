@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - VPN"
+subcategory: "Beta"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_ipsec_vpn_session"
 description: A resource to configure a IPSec VPN session.
