@@ -20,7 +20,9 @@ func TestAccResourceNsxtPolicyQosProfile_basic(t *testing.T) {
 	peak := "700"
 	updatedPeak := "400"
 
-	resource.ParallelTest(t, resource.TestCase{
+	// There is a NSX bug that messes up dependencies for QoS profiles
+	// until the bug fixed, QoS tests need to avoid parallelization
+	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -101,7 +103,7 @@ func TestAccResourceNsxtPolicyQosProfile_basic(t *testing.T) {
 func TestAccResourceNsxtPolicyQosProfile_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_qos_profile.test"
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {

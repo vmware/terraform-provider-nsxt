@@ -19,7 +19,7 @@ resource "nsxt_policy_ipsec_vpn_dpd_profile" "test" {
   description        = "Terraform provisioned IPSec VPN DPD Profile"
   dpd_probe_mode     = "ON_DEMAND"
   dpd_probe_interval = 120
-  enable             = True
+  enabled            = true
   retry_count        = 8
 }
 ```

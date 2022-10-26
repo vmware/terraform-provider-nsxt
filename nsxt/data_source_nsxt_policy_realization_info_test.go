@@ -118,7 +118,7 @@ func TestAccDataSourceNsxtPolicyRealizationInfo_errorState(t *testing.T) {
 
 func TestAccDataSourceNsxtPolicyRealizationInfo_gmServiceDataSource(t *testing.T) {
 	resourceDataType := "nsxt_policy_service"
-	resourceName := "DNS"
+	resourceName := "ICMPv6-ALL"
 	entityType := ""
 	testResourceName := "data.nsxt_policy_realization_info.realization_info"
 	site := getTestSiteName()
