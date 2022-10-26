@@ -1,4 +1,4 @@
-## 3.2.9 (October 26, 2022)
+## 3.2.9 (October 28, 2022)
 
 BUG FIXES:
 
