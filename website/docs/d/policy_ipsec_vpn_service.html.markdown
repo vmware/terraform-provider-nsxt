@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - VPN"
+subcategory: "Beta"
 layout: "nsxt"
 page_title: "NSXT: policy_ipsec_vpn_service"
 description: Policy IPSec VPN Service.

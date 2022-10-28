@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - VPN"
+subcategory: "Beta"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_l2_vpn_service"
 description: A resource to configure a L2 VPN Service.

@@ -1,20 +1,20 @@
 ---
-subcategory: "Policy - Gateways and Routing"
+subcategory: "Beta"
 layout: "nsxt"
-page_title: "NSXT: policy_local_endpoint"
-description: Policy Local Endpoint data source.
+page_title: "NSXT: policy_ipsec_vpn_local_endpoint"
+description: Policy IPSec VPN Local Endpoint data source.
 ---
 
-# nsxt_policy_local_endpoint
+# nsxt_policy_ipsec_vpn_local_endpoint
 
-This data source provides information about policy local endpoint configured on NSX.
+This data source provides information about IPSec VPN policy local endpoint configured on NSX.
 
-This data source is applicable to NSX Global Manager, NSX Policy Manager and VMC.
+This data source is applicable to NSX Policy Manager and VMC.
 
 ## Example Usage
 
 ```hcl
-data "nsxt_policy_local_endpoint" "test" {
+data "nsxt_policy_ipsec_vpn_local_endpoint" "test" {
   display_name = "local_endpoint1"
 }
 ```
@@ -23,7 +23,7 @@ data "nsxt_policy_local_endpoint" "test" {
 
 * `id` - (Optional) The ID of Local Endpoint to retrieve.
 
-* `display_name` - (Optional) The Display Name prefix of the Local Endpoint to retrieve. With VMC on AWS, the user can either choose the "Private IP1" or "Public IP1" values.
+* `display_name` - (Optional) The Display Name prefix of the Local Endpoint to retrieve.
 
 ## Attributes Reference
 

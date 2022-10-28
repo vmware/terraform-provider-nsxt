@@ -1,3 +1,16 @@
+## 3.2.9 (October 28, 2022)
+
+BUG FIXES:
+
+* `resource/nsxt_policy_lb_virtual_server`: Fix change detection for rules. This solves a bug that resulted in rule change not being applied ([#774](https://github.com/vmware/terraform-provider-nsxt/pull/774))
+* `resource/nsxt_policy_bgp_neighbor`: Fix import functionality on Global Manager ([#796](https://github.com/vmware/terraform-provider-nsxt/pull/796))
+
+IMPROVEMENTS:
+
+* `resource/nsxt_policy_security_policy`, `resource/nsxt_policy_gateway_policy`: Only update rules that have non-empty diff. Previously, all rules would be updated as part of parent policy resource, which would cause rule statistics to reset and unnecessarily increase realization time ([#786](https://github.com/vmware/terraform-provider-nsxt/pull/786))
+* `resource/nsxt_policy_segment`, `resource/nsxt_policy_vlan_segment`: Support Bridge configuration on segments ([#784](https://github.com/vmware/terraform-provider-nsxt/pull/784))
+* `resource/nsxt_policy_segment`, `resource/nsxt_policy_vlan_segment`: Support replication mode on segments ([#779](https://github.com/vmware/terraform-provider-nsxt/pull/779))
+
 ## 3.2.8 (June 20, 2022)
 
 BUG FIXES:
