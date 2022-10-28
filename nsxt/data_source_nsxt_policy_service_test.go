@@ -11,7 +11,7 @@ import (
 )
 
 func TestAccDataSourceNsxtPolicyService_basic(t *testing.T) {
-	serviceName := "DNS"
+	serviceName := "ICMPv6-ALL"
 	testResourceName := "data.nsxt_policy_service.test"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -31,7 +31,7 @@ func TestAccDataSourceNsxtPolicyService_basic(t *testing.T) {
 }
 
 func TestAccDataSourceNsxtPolicyService_byId(t *testing.T) {
-	serviceID := "DNS"
+	serviceID := "ICMPv6-ALL"
 	testResourceName := "data.nsxt_policy_service.test"
 
 	resource.ParallelTest(t, resource.TestCase{

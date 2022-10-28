@@ -82,7 +82,7 @@ func TestAccResourceNsxtPolicyFixedSegment_connectivityPath(t *testing.T) {
 	testResourceName := testAccPolicyFixedSegmentResourceName
 	tzName := getOverlayTransportZoneName()
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
