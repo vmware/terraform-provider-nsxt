@@ -31,6 +31,13 @@ var IPSecVpnSessionAuthenticationMode = []string{
 	model.IPSecVpnSession_AUTHENTICATION_MODE_CERTIFICATE,
 }
 
+var TCPMssClampingDirections = []string{
+	model.TcpMaximumSegmentSizeClamping_DIRECTION_NONE,
+	model.TcpMaximumSegmentSizeClamping_DIRECTION_INBOUND_CONNECTION,
+	model.TcpMaximumSegmentSizeClamping_DIRECTION_OUTBOUND_CONNECTION,
+	model.TcpMaximumSegmentSizeClamping_DIRECTION_BOTH,
+}
+
 var IPSecVpnSessionConnectionInitiationMode = []string{
 	model.IPSecVpnSession_CONNECTION_INITIATION_MODE_INITIATOR,
 	model.IPSecVpnSession_CONNECTION_INITIATION_MODE_RESPOND_ONLY,
@@ -144,7 +151,7 @@ func resourceNsxtPolicyIPSecVpnSession() *schema.Resource {
 				Type:         schema.TypeString,
 				Description:  "The traffic direction apply to the MSS clamping",
 				Optional:     true,
-				ValidateFunc: validation.StringInSlice(L2VpnSessionTCPSegmentClampingDirection, false),
+				ValidateFunc: validation.StringInSlice(TCPMssClampingDirections, false),
 			},
 			"max_segment_size": {
 				Type:         schema.TypeInt,
@@ -299,7 +306,7 @@ func getIPSecVPNRulesSchema() *schema.Schema {
 		Optional:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				"nsx_id": getNsxIDSchema(),
+				"nsx_id": getFlexNsxIDSchema(true),
 				"sources": {
 					Type:        schema.TypeSet,
 					Description: "List of local subnets. Specifying no value is interpreted as 0.0.0.0/0.",
