@@ -38,7 +38,7 @@ var accTestPolicyL2VpnServiceCreateClientModeAttributes = map[string]string{
 func TestAccResourceNsxtPolicyL2VpnService_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_l2_vpn_service.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -98,7 +98,7 @@ func TestAccResourceNsxtPolicyL2VpnService_basic(t *testing.T) {
 func TestAccResourceNsxtPolicyL2VpnService_ClientMode(t *testing.T) {
 	testResourceName := "nsxt_policy_l2_vpn_service.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -129,7 +129,7 @@ func TestAccResourceNsxtPolicyL2VpnService_ClientMode(t *testing.T) {
 func TestAccResourceNsxtPolicyL2VpnService_Import(t *testing.T) {
 	resourceName := "nsxt_policy_l2_vpn_service.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {

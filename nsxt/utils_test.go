@@ -447,7 +447,6 @@ resource "nsxt_policy_tier%s_gateway" "test" {
 }
 
 func testAccNsxtPolicyTier0WithEdgeClusterForVPN(edgeClusterName string) string {
-	// VPN is supported only on Tier-0 with ACTIVE-STANDBY HA mode
 	return fmt.Sprintf(`
 resource "nsxt_policy_tier0_gateway" "test" {
   display_name = "%s"
@@ -457,6 +456,24 @@ resource "nsxt_policy_tier0_gateway" "test" {
   }
   ha_mode = "ACTIVE_STANDBY"
 }`, getAccTestResourceName(), edgeClusterName)
+}
+
+func testAccNsxtPolicyTier1WithEdgeClusterForVPN(edgeClusterName string) string {
+	gatewayName := getAccTestResourceName()
+	return fmt.Sprintf(`
+resource "nsxt_policy_tier0_gateway" "test" {
+	display_name = "%s"
+	description  = "Acceptance Test"
+	ha_mode = "ACTIVE_STANDBY"
+}
+resource "nsxt_policy_tier1_gateway" "test" {
+	description               = "Acceptance Test"
+	display_name              = "%s"
+	locale_service {
+		edge_cluster_path = data.nsxt_policy_edge_cluster.%s.path
+	}
+	tier0_path                = nsxt_policy_tier0_gateway.test.path
+}`, gatewayName, gatewayName, edgeClusterName)
 }
 
 func testAccNsxtPolicyResourceExists(resourceName string, presenceChecker func(string, *client.RestConnector, bool) (bool, error)) resource.TestCheckFunc {

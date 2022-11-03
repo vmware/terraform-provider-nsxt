@@ -36,7 +36,7 @@ var accTestPolicyIPSecVpnServiceUpdateAttributes = map[string]string{
 func TestAccResourceNsxtPolicyIPSecVpnService_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_ipsec_vpn_service.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -103,7 +103,7 @@ func TestAccResourceNsxtPolicyIPSecVpnService_basic(t *testing.T) {
 func TestAccResourceNsxtPolicyIPSecVpnService_Import(t *testing.T) {
 	resourceName := "nsxt_policy_ipsec_vpn_service.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {

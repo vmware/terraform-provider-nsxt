@@ -30,7 +30,7 @@ var testAccPolicyVPNLocalEndpointResourceName = "nsxt_policy_ipsec_vpn_local_end
 func TestAccResourceNsxtPolicyIPSecVpnLocalEndpoint_basic(t *testing.T) {
 	testResourceName := testAccPolicyVPNLocalEndpointResourceName
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -86,7 +86,7 @@ func TestAccResourceNsxtPolicyIPSecVpnLocalEndpoint_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
 	testResourceName := testAccPolicyVPNLocalEndpointResourceName
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
