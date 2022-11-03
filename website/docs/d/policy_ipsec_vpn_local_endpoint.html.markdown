@@ -1,5 +1,5 @@
 ---
-subcategory: "Beta"
+subcategory: "VPN"
 layout: "nsxt"
 page_title: "NSXT: policy_ipsec_vpn_local_endpoint"
 description: Policy IPSec VPN Local Endpoint data source.
