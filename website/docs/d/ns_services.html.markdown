@@ -1,5 +1,5 @@
 ---
-subcategory: "Beta"
+subcategory: "Deprecated"
 layout: "nsxt"
 page_title: "NSXT: ns_services"
 description: A networking and security services data source. This data source builds "display name to id" map representation of the whole table.

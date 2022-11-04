@@ -1,5 +1,5 @@
 ---
-subcategory: "Manager"
+subcategory: "Deprecated"
 layout: "nsxt"
 page_title: "NSXT: nsxt_logical_router_downlink_port"
 description: A resource that can be used to configure logical router downlink port in NSX.

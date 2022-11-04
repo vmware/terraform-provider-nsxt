@@ -21,7 +21,7 @@ func resourceNsxtIPPoolAllocationIPAddress() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: resourceNsxtIPPoolAllocationIPAddressImport,
 		},
-
+		DeprecationMessage: mpObjectResourceDeprecationMessage,
 		Schema: map[string]*schema.Schema{
 			"ip_pool_id": {
 				Type:        schema.TypeString,

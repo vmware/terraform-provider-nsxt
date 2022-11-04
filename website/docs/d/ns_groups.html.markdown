@@ -1,5 +1,5 @@
 ---
-subcategory: "Beta"
+subcategory: "Deprecated"
 layout: "nsxt"
 page_title: "NSXT: ns_groups"
 description: A networking and security groups data source. This data source builds "display name to id" map representation of the whole table.

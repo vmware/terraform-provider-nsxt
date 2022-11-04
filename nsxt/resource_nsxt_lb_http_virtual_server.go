@@ -21,8 +21,7 @@ func resourceNsxtLbHTTPVirtualServer() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
-
-		// TODO: add client/server_tcp_profile_id when available
+		DeprecationMessage: mpObjectResourceDeprecationMessage,
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
 			"description": {

@@ -14,8 +14,8 @@ import (
 
 func dataSourceNsxtFirewallSection() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceNsxtFirewallSectionRead,
-
+		Read:               dataSourceNsxtFirewallSectionRead,
+		DeprecationMessage: mpObjectDataSourceDeprecationMessage,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:        schema.TypeString,

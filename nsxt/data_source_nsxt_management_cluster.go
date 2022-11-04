@@ -12,8 +12,8 @@ import (
 
 func dataSourceNsxtManagementCluster() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceNsxtManagementClusterRead,
-
+		Read:               dataSourceNsxtManagementClusterRead,
+		DeprecationMessage: mpObjectDataSourceDeprecationMessage,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:        schema.TypeString,
