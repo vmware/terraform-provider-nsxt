@@ -1,5 +1,5 @@
 ---
-subcategory: "Beta"
+subcategory: "VPN"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_ipsec_vpn_ike_profile"
 description: A resource to configure a IPSec VPN IKE Profile.
@@ -36,6 +36,7 @@ The following arguments are supported:
 * `encryption_algorithms` - (Required) Set of encryption algorithms to be used during IKE negotiation.
 * `digest_algorithms` - (Required) Set of algorithms to be used for message digest during IKE negotiation. Default is `SHA2_256`.
 * `dh_groups` - (Required) Diffie-Hellman group to be used if PFS is enabled. Default is GROUP14.
+* `sa_life_time` - (Optional) Life time for security association.
 
 
 ## Attributes Reference

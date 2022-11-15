@@ -1,5 +1,5 @@
 ---
-subcategory: "Beta"
+subcategory: "VPN"
 layout: "nsxt"
 page_title: "NSXT: policy_l2_vpn_service"
 description: Policy L2 VPN Service.

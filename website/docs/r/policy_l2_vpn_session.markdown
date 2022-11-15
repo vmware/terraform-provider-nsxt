@@ -1,5 +1,5 @@
 ---
-subcategory: "Beta"
+subcategory: "VPN"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_l2_vpn_session"
 description: A resource to configure a L2VPN VPN session.
