@@ -1,5 +1,5 @@
 ---
-subcategory: "Manager"
+subcategory: "Deprecated"
 layout: "nsxt"
 page_title: "NSXT: nsxt_firewall_section"
 description: A resource that can be used to configure a firewall section on NSX.

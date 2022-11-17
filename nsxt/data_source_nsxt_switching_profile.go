@@ -13,8 +13,8 @@ import (
 
 func dataSourceNsxtSwitchingProfile() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceNsxtSwitchingProfileRead,
-
+		Read:               dataSourceNsxtSwitchingProfileRead,
+		DeprecationMessage: mpObjectDataSourceDeprecationMessage,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:        schema.TypeString,

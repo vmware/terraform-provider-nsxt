@@ -34,7 +34,7 @@ func resourceNsxtNatRule() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: resourceNsxtNatRuleImport,
 		},
-
+		DeprecationMessage: mpObjectResourceDeprecationMessage,
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
 			"description": {

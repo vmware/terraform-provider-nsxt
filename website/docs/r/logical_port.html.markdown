@@ -1,5 +1,5 @@
 ---
-subcategory: "Manager"
+subcategory: "Deprecated"
 layout: "nsxt"
 page_title: "NSXT: nsxt_logical_port"
 description: A resource that can be used to configure a Logical Port in NSX.

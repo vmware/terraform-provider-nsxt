@@ -1,5 +1,5 @@
 ---
-subcategory: "Manager"
+subcategory: "Deprecated"
 layout: "nsxt"
 page_title: "NSXT: nsxt_dhcp_relay_service"
 description: A resource that can be used to configure a DHCP relay service on NSX.

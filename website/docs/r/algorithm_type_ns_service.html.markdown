@@ -1,5 +1,5 @@
 ---
-subcategory: "Manager"
+subcategory: "Deprecated"
 layout: "nsxt"
 page_title: "NSXT: nsxt_algorithm_type_ns_service"
 description: A resource that can be used to configure a networking and security service on NSX.

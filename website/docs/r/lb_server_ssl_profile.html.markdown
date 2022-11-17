@@ -1,5 +1,5 @@
 ---
-subcategory: "Manager"
+subcategory: "Deprecated"
 layout: "nsxt"
 page_title: "NSXT: nsxt_lb_server_ssl_profile"
 description: |-

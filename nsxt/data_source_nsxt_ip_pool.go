@@ -14,8 +14,8 @@ import (
 
 func dataSourceNsxtIPPool() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceNsxtIPPoolRead,
-
+		Read:               dataSourceNsxtIPPoolRead,
+		DeprecationMessage: mpObjectDataSourceDeprecationMessage,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:        schema.TypeString,

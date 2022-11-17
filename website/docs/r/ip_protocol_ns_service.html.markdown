@@ -1,5 +1,5 @@
 ---
-subcategory: "Manager"
+subcategory: "Deprecated"
 layout: "nsxt"
 page_title: "NSXT: nsxt_ip_protocol_ns_service"
 description: A resource that can be used to configure an IP protocol based networking and security service in NSX.

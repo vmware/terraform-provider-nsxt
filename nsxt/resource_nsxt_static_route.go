@@ -24,7 +24,7 @@ func resourceNsxtStaticRoute() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: resourceNsxtStaticRouteImport,
 		},
-
+		DeprecationMessage: mpObjectResourceDeprecationMessage,
 		Schema: map[string]*schema.Schema{
 			"logical_router_id": {
 				Type:        schema.TypeString,

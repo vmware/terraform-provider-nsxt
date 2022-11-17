@@ -11,8 +11,8 @@ import (
 
 func dataSourceNsxtNsGroups() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceNsxtNsGroupsRead,
-
+		Read:               dataSourceNsxtNsGroupsRead,
+		DeprecationMessage: mpObjectDataSourceDeprecationMessage,
 		Schema: map[string]*schema.Schema{
 			"items": {
 				Type:        schema.TypeMap,

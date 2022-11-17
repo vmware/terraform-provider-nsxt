@@ -1,5 +1,5 @@
 ---
-subcategory: "Manager"
+subcategory: "Deprecated"
 layout: "nsxt"
 page_title: "NSXT: nsxt_ether_type_ns_service"
 description: A resource that can be used to configure a layer 2 ethernet networking and security service in NSX.

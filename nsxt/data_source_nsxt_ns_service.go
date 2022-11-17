@@ -13,8 +13,8 @@ import (
 
 func dataSourceNsxtNsService() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceNsxtNsServiceRead,
-
+		Read:               dataSourceNsxtNsServiceRead,
+		DeprecationMessage: mpObjectDataSourceDeprecationMessage,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:        schema.TypeString,

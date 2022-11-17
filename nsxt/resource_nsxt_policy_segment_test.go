@@ -233,7 +233,7 @@ func TestAccResourceNsxtPolicySegment_withProfiles(t *testing.T) {
 	testResourceName := "nsxt_policy_segment.test"
 	tzName := getOverlayTransportZoneName()
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {

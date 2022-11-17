@@ -21,7 +21,7 @@ func resourceNsxtIPBlockSubnet() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
-
+		DeprecationMessage: mpObjectResourceDeprecationMessage,
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
 			"description": {

@@ -1,5 +1,5 @@
 ---
-subcategory: "Manager"
+subcategory: "Deprecated"
 layout: "nsxt"
 page_title: "NSXT: nsxt_vlan_logical_switch"
 description: A resource to configure vlan logical switch in NSX.

@@ -1,5 +1,5 @@
 ---
-subcategory: "Manager"
+subcategory: "Deprecated"
 layout: "nsxt"
 page_title: "NSXT: nsxt_l4_port_set_ns_service"
 description: A resource that can be used to configure a layer 4 networking and security service with ports in NSX.

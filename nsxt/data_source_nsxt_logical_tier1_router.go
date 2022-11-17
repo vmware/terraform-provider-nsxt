@@ -15,8 +15,8 @@ import (
 
 func dataSourceNsxtLogicalTier1Router() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceNsxtLogicalTier1RouterRead,
-
+		Read:               dataSourceNsxtLogicalTier1RouterRead,
+		DeprecationMessage: mpObjectDataSourceDeprecationMessage,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:        schema.TypeString,

@@ -14,8 +14,8 @@ import (
 
 func dataSourceNsxtCertificate() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceNsxtCertificateRead,
-
+		Read:               dataSourceNsxtCertificateRead,
+		DeprecationMessage: mpObjectDataSourceDeprecationMessage,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:        schema.TypeString,

@@ -66,5 +66,8 @@ website-lint-fix:
 	@misspell -w -source=text website/
 	@terrafmt fmt ./website --pattern '*.markdown'
 
+website-list-category:
+	@find . -name *.markdown | xargs grep subcategory | awk  -F '"' '{print $$2}' | sort | uniq
+
 .PHONY: build test testacc vet fmt fmtcheck errcheck test-compile website-lint website-lint-fix tools
 

@@ -21,8 +21,8 @@ func resourceNsxtLbTCPMonitor() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
-
-		Schema: getLbL4MonitorSchema("tcp"),
+		DeprecationMessage: mpObjectResourceDeprecationMessage,
+		Schema:             getLbL4MonitorSchema("tcp"),
 	}
 }
 

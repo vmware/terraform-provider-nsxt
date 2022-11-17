@@ -23,7 +23,7 @@ func resourceNsxtDhcpServerIPPool() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: resourceNsxtDhcpServerIPPoolImport,
 		},
-
+		DeprecationMessage: mpObjectResourceDeprecationMessage,
 		Schema: map[string]*schema.Schema{
 			"display_name": {
 				Type:        schema.TypeString,

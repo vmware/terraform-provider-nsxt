@@ -1,5 +1,5 @@
 ---
-subcategory: "Manager"
+subcategory: "Deprecated"
 layout: "nsxt"
 page_title: "NSXT: nsxt_logical_router_link_port_on_tier0"
 description: A resource that can be used to configure a logical router link port on Tier-0 router on NSX.

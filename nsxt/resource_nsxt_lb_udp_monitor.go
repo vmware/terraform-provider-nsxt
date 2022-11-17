@@ -21,8 +21,8 @@ func resourceNsxtLbUDPMonitor() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
-
-		Schema: getLbL4MonitorSchema("udp"),
+		DeprecationMessage: mpObjectResourceDeprecationMessage,
+		Schema:             getLbL4MonitorSchema("udp"),
 	}
 }
 

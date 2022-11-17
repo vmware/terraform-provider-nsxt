@@ -24,7 +24,7 @@ func resourceNsxtVMTags() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
-
+		DeprecationMessage: mpObjectResourceDeprecationMessage,
 		Schema: map[string]*schema.Schema{
 			"instance_id": {
 				Type:        schema.TypeString,

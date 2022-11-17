@@ -15,8 +15,8 @@ import (
 
 func dataSourceNsxtEdgeCluster() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceNsxtEdgeClusterRead,
-
+		Read:               dataSourceNsxtEdgeClusterRead,
+		DeprecationMessage: mpObjectDataSourceDeprecationMessage,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:        schema.TypeString,
