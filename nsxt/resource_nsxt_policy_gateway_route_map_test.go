@@ -28,7 +28,24 @@ func TestAccResourceNsxtPolicyGatewayRouteMap_basic(t *testing.T) {
 					testAccNsxtPolicyGatewayRouteMapExists(displayName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", displayName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "terraform created"),
-
+					resource.TestCheckResourceAttr(testResourceName, "entry.#", "3"),
+					resource.TestCheckResourceAttr(testResourceName, "entry.0.action", "PERMIT"),
+					resource.TestCheckResourceAttr(testResourceName, "entry.0.set.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "entry.0.set.0.local_preference", "100"),
+					resource.TestCheckResourceAttr(testResourceName, "entry.0.set.0.med", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "entry.0.prefix_list_matches.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "entry.1.action", "DENY"),
+					resource.TestCheckResourceAttr(testResourceName, "entry.1.community_list_match.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "entry.1.community_list_match.0.criteria", "11:22"),
+					resource.TestCheckResourceAttr(testResourceName, "entry.1.set.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "entry.1.set.0.local_preference", "1122"),
+					resource.TestCheckResourceAttr(testResourceName, "entry.1.set.0.as_path_prepend", "100 100"),
+					resource.TestCheckResourceAttr(testResourceName, "entry.1.set.0.community", "11:22"),
+					resource.TestCheckResourceAttr(testResourceName, "entry.1.set.0.prefer_global_v6_next_hop", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "entry.1.set.0.weight", "12"),
+					resource.TestCheckResourceAttr(testResourceName, "entry.1.set.0.med", "120"),
+					resource.TestCheckResourceAttr(testResourceName, "entry.2.action", "DENY"),
+					resource.TestCheckResourceAttr(testResourceName, "entry.2.set.#", "0"),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
@@ -41,7 +58,13 @@ func TestAccResourceNsxtPolicyGatewayRouteMap_basic(t *testing.T) {
 					testAccNsxtPolicyGatewayRouteMapExists(displayName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", displayName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "terraform updated"),
-
+					resource.TestCheckResourceAttr(testResourceName, "entry.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "entry.0.action", "PERMIT"),
+					resource.TestCheckResourceAttr(testResourceName, "entry.0.set.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "entry.0.set.0.local_preference", "100"),
+					resource.TestCheckResourceAttr(testResourceName, "entry.0.set.0.med", "5"),
+					resource.TestCheckResourceAttr(testResourceName, "entry.0.community_list_match.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "entry.0.prefix_list_matches.#", "0"),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
@@ -163,6 +186,10 @@ resource "nsxt_policy_gateway_route_map" "test" {
   entry {
     action              = "PERMIT"
     prefix_list_matches = [nsxt_policy_gateway_prefix_list.test.path]
+
+    set {
+      weight = 12
+    }
   }
 
   entry {
@@ -179,6 +206,14 @@ resource "nsxt_policy_gateway_route_map" "test" {
       med                       = 120
       prefer_global_v6_next_hop = true
       weight                    = 12
+    }
+  }
+  
+  entry {
+    action = "DENY"
+    community_list_match {
+      criteria       = "22:*"
+      match_operator = "MATCH_COMMUNITY_REGEX"
     }
   }
 
@@ -218,6 +253,10 @@ resource "nsxt_policy_gateway_route_map" "test" {
     community_list_match {
       criteria       = "11:*"
       match_operator = "MATCH_LARGE_COMMUNITY_REGEX"
+    }
+    set {
+      weight = 12
+      med    = 5
     }
   }
 
