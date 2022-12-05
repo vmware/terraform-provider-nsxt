@@ -115,11 +115,13 @@ func getPolicyRouteMapEntrySchema() *schema.Resource {
 						"local_preference": {
 							Type:        schema.TypeInt,
 							Optional:    true,
+							Computed:    true,
 							Description: "Local preference indicates the degree of preference for one BGP route over other BGP routes",
 						},
 						"med": {
 							Type:        schema.TypeInt,
 							Optional:    true,
+							Computed:    true,
 							Description: "A lower Multi exit descriminator (MED) is preferred over a higher value",
 						},
 						"prefer_global_v6_next_hop": {
@@ -159,7 +161,7 @@ func resourceNsxtPolicyGatewayRouteMapExists(tier0Id string, id string, connecto
 	return false, logAPIError("Error retrieving resource", err)
 }
 
-func policyGatewayRouteMapBuildEntry(schemaEntry map[string]interface{}) model.RouteMapEntry {
+func policyGatewayRouteMapBuildEntry(d *schema.ResourceData, entryNo int, schemaEntry map[string]interface{}) model.RouteMapEntry {
 
 	action := schemaEntry["action"].(string)
 	obj := model.RouteMapEntry{
@@ -192,14 +194,12 @@ func policyGatewayRouteMapBuildEntry(schemaEntry map[string]interface{}) model.R
 		data := schemaEntry["set"].([]interface{})[0].(map[string]interface{})
 		asPathPrepend := data["as_path_prepend"].(string)
 		community := data["community"].(string)
-		localPreference := int64(data["local_preference"].(int))
-		med := int64(data["med"].(int))
+		localPreferenceValue, lpSet := d.GetOk(fmt.Sprintf("entry.%d.set.0.local_preference", entryNo))
+		medValue, medSet := d.GetOk(fmt.Sprintf("entry.%d.set.0.med", entryNo))
 		globalIPv6 := data["prefer_global_v6_next_hop"].(bool)
 		weight := int64(data["weight"].(int))
 
 		entrySet := model.RouteMapEntrySet{
-			LocalPreference:       &localPreference,
-			Med:                   &med,
 			PreferGlobalV6NextHop: &globalIPv6,
 			Weight:                &weight,
 		}
@@ -209,6 +209,14 @@ func policyGatewayRouteMapBuildEntry(schemaEntry map[string]interface{}) model.R
 		}
 		if len(community) > 0 {
 			entrySet.Community = &community
+		}
+		if lpSet {
+			localPreference := int64(localPreferenceValue.(int))
+			entrySet.LocalPreference = &localPreference
+		}
+		if medSet {
+			med := int64(medValue.(int))
+			entrySet.Med = &med
 		}
 		obj.Set = &entrySet
 	}
@@ -223,8 +231,8 @@ func resourceNsxtPolicyGatewayRouteMapPatch(gwID string, id string, d *schema.Re
 
 	schemaEntries := d.Get("entry").([]interface{})
 	var entries []model.RouteMapEntry
-	for _, entry := range schemaEntries {
-		entries = append(entries, policyGatewayRouteMapBuildEntry(entry.(map[string]interface{})))
+	for entryNo, entry := range schemaEntries {
+		entries = append(entries, policyGatewayRouteMapBuildEntry(d, entryNo, entry.(map[string]interface{})))
 	}
 
 	obj := model.Tier0RouteMap{
