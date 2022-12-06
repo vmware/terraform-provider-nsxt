@@ -10,7 +10,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services/l2vpn_services"
+	t0_l2vpn_services "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services/l2vpn_services"
+	t1_l2vpn_services "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/locale_services/l2vpn_services"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
@@ -97,15 +98,12 @@ func resourceNsxtPolicyL2VPNSessionCreate(d *schema.ResourceData, m interface{})
 	if err != nil {
 		return err
 	}
-	if !isT0 {
-		return fmt.Errorf("VPN is supported only on Tier-0 with ACTIVE-STANDBY HA mode")
-	}
 	transportTunnel := getStringListFromSchemaList(d, "transport_tunnels")
 	id := d.Get("nsx_id").(string)
 	if id == "" {
 		id = newUUID()
 	}
-	_, err = resourceNsxtPolicyL2VpnSessionExists(gwID, localeServiceID, serviceID, id, connector)
+	_, err = resourceNsxtPolicyL2VpnSessionExists(isT0, gwID, localeServiceID, serviceID, id, connector)
 	if err == nil {
 		return fmt.Errorf("L2VpnSession with nsx_id '%s' already exists.'", id)
 	} else if !isNotFoundError(err) {
@@ -147,9 +145,13 @@ func resourceNsxtPolicyL2VPNSessionCreate(d *schema.ResourceData, m interface{})
 		}
 	}
 
-	client := l2vpn_services.NewSessionsClient(connector)
-	err = client.Patch(gwID, localeServiceID, serviceID, id, obj)
-
+	if isT0 {
+		client := t0_l2vpn_services.NewSessionsClient(connector)
+		err = client.Patch(gwID, localeServiceID, serviceID, id, obj)
+	} else {
+		client := t1_l2vpn_services.NewSessionsClient(connector)
+		err = client.Patch(gwID, localeServiceID, serviceID, id, obj)
+	}
 	if err != nil {
 		return handleCreateError("L2VPNSession", id, err)
 	}
@@ -184,18 +186,19 @@ func resourceNsxtPolicyL2VPNSessionRead(d *schema.ResourceData, m interface{}) e
 	if err != nil {
 		return err
 	}
-	if !isT0 {
-		return fmt.Errorf("VPN is supported only on Tier-0 with ACTIVE-STANDBY HA mode")
-	}
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining L2VPNSession ID")
 	}
 
 	var obj model.L2VPNSession
-
-	client := l2vpn_services.NewSessionsClient(connector)
-	obj, err = client.Get(gwID, localeServiceID, serviceID, id)
+	if isT0 {
+		client := t0_l2vpn_services.NewSessionsClient(connector)
+		obj, err = client.Get(gwID, localeServiceID, serviceID, id)
+	} else {
+		client := t1_l2vpn_services.NewSessionsClient(connector)
+		obj, err = client.Get(gwID, localeServiceID, serviceID, id)
+	}
 	if err != nil {
 		return handleReadError(d, "L2VPNSession", id, err)
 	}
@@ -232,9 +235,16 @@ func resourceNsxtPolicyL2VPNSessionRead(d *schema.ResourceData, m interface{}) e
 	return nil
 }
 
-func resourceNsxtPolicyL2VpnSessionExists(tier0ID string, localeServiceID string, serviceID string, sessionID string, connector *client.RestConnector) (bool, error) {
-	client := l2vpn_services.NewSessionsClient(connector)
-	_, err := client.Get(tier0ID, localeServiceID, serviceID, sessionID)
+func resourceNsxtPolicyL2VpnSessionExists(isT0 bool, gwID string, localeServiceID string, serviceID string, sessionID string, connector *client.RestConnector) (bool, error) {
+	var err error
+	if isT0 {
+		client := t0_l2vpn_services.NewSessionsClient(connector)
+		_, err = client.Get(gwID, localeServiceID, serviceID, sessionID)
+	} else {
+		client := t1_l2vpn_services.NewSessionsClient(connector)
+		_, err = client.Get(gwID, localeServiceID, serviceID, sessionID)
+	}
+
 	if err == nil {
 		return true, nil
 	}
@@ -252,9 +262,6 @@ func resourceNsxtPolicyL2VPNSessionUpdate(d *schema.ResourceData, m interface{})
 	isT0, gwID, localeServiceID, serviceID, err := parseL2VPNServicePolicyPath(servicePath)
 	if err != nil {
 		return err
-	}
-	if !isT0 {
-		return fmt.Errorf("VPN is supported only on Tier-0 with ACTIVE-STANDBY HA mode")
 	}
 	transportTunnel := getStringListFromSchemaList(d, "transport_tunnels")
 
@@ -299,9 +306,13 @@ func resourceNsxtPolicyL2VPNSessionUpdate(d *schema.ResourceData, m interface{})
 			obj.TunnelEncapsulation = &l2VpnTunnelEncapsulation
 		}
 	}
-
-	client := l2vpn_services.NewSessionsClient(connector)
-	err = client.Patch(gwID, localeServiceID, serviceID, id, obj)
+	if isT0 {
+		client := t0_l2vpn_services.NewSessionsClient(connector)
+		err = client.Patch(gwID, localeServiceID, serviceID, id, obj)
+	} else {
+		client := t1_l2vpn_services.NewSessionsClient(connector)
+		err = client.Patch(gwID, localeServiceID, serviceID, id, obj)
+	}
 
 	if err != nil {
 		return handleUpdateError("L2VPNSession", id, err)
@@ -318,19 +329,19 @@ func resourceNsxtPolicyL2VPNSessionDelete(d *schema.ResourceData, m interface{})
 	if err != nil {
 		return err
 	}
-	if !isT0 {
-		return fmt.Errorf("VPN is supported only on Tier-0 with ACTIVE-STANDBY HA mode")
-	}
-
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining L2VPNSession ID")
 	}
 
 	connector := getPolicyConnector(m)
-
-	client := l2vpn_services.NewSessionsClient(connector)
-	err = client.Delete(gwID, localeServiceID, serviceID, id)
+	if isT0 {
+		client := t0_l2vpn_services.NewSessionsClient(connector)
+		err = client.Delete(gwID, localeServiceID, serviceID, id)
+	} else {
+		client := t1_l2vpn_services.NewSessionsClient(connector)
+		err = client.Delete(gwID, localeServiceID, serviceID, id)
+	}
 
 	if err != nil {
 		return handleDeleteError("L2VPNSession", id, err)

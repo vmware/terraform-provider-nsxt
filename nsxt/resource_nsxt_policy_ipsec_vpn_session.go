@@ -14,7 +14,8 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services/ipsec_vpn_services"
+	t0_ipsec_vpn_services "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services/ipsec_vpn_services"
+	t1_ipsec_vpn_services "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/locale_services/ipsec_vpn_services"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
@@ -439,9 +440,7 @@ func resourceNsxtPolicyIPSecVpnSessionCreate(d *schema.ResourceData, m interface
 	if err != nil {
 		return err
 	}
-	if !isT0 {
-		return fmt.Errorf("VPN is supported only on Tier-0 with ACTIVE-STANDBY HA mode")
-	}
+
 	id := d.Get("nsx_id").(string)
 	if id == "" {
 		id = newUUID()
@@ -449,35 +448,43 @@ func resourceNsxtPolicyIPSecVpnSessionCreate(d *schema.ResourceData, m interface
 
 	connector := getPolicyConnector(m)
 
-	_, err1 := resourceNsxtPolicyIPSecVpnSessionExists(gwID, localeServiceID, serviceID, id, connector)
-	if err1 == nil {
+	_, err = resourceNsxtPolicyIPSecVpnSessionExists(isT0, gwID, localeServiceID, serviceID, id, connector)
+	if err == nil {
 		return fmt.Errorf("IPSecVpnSession with nsx_id '%s' already exists under IPSecVpnService '%s' of localeService '%s'", id, serviceID, localeServiceID)
-	} else if !isNotFoundError(err1) {
-		return err1
+	} else if !isNotFoundError(err) {
+		return err
 	}
 
-	obj, err2 := getIPSecVPNSessionFromSchema(d)
-	if err2 != nil {
-		return err2
+	obj, err := getIPSecVPNSessionFromSchema(d)
+	if err != nil {
+		return err
 	}
 
-	client := ipsec_vpn_services.NewSessionsClient(connector)
-
-	err3 := client.Patch(gwID, localeServiceID, serviceID, id, obj)
-
-	if err3 != nil {
-		return handleCreateError("IPSecVpnSession", id, err3)
+	if isT0 {
+		client := t0_ipsec_vpn_services.NewSessionsClient(connector)
+		err = client.Patch(gwID, localeServiceID, serviceID, id, obj)
+	} else {
+		client := t1_ipsec_vpn_services.NewSessionsClient(connector)
+		err = client.Patch(gwID, localeServiceID, serviceID, id, obj)
 	}
-
+	if err != nil {
+		return handleCreateError("IPSecVpnSession", id, err)
+	}
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
 	return resourceNsxtPolicyIPSecVpnSessionRead(d, m)
 }
 
-func resourceNsxtPolicyIPSecVpnSessionExists(tier0ID string, localeServiceID string, serviceID string, sessionID string, connector *client.RestConnector) (bool, error) {
-	client := ipsec_vpn_services.NewSessionsClient(connector)
-	_, err := client.Get(tier0ID, localeServiceID, serviceID, sessionID)
+func resourceNsxtPolicyIPSecVpnSessionExists(isT0 bool, gwID string, localeServiceID string, serviceID string, sessionID string, connector *client.RestConnector) (bool, error) {
+	var err error
+	if isT0 {
+		client := t0_ipsec_vpn_services.NewSessionsClient(connector)
+		_, err = client.Get(gwID, localeServiceID, serviceID, sessionID)
+	} else {
+		client := t1_ipsec_vpn_services.NewSessionsClient(connector)
+		_, err = client.Get(gwID, localeServiceID, serviceID, sessionID)
+	}
 	if err == nil {
 		return true, nil
 	}
@@ -504,20 +511,21 @@ func resourceNsxtPolicyIPSecVpnSessionRead(d *schema.ResourceData, m interface{}
 	if err != nil {
 		return err
 	}
-	if !isT0 {
-		return fmt.Errorf("VPN is supported only on Tier-0 with ACTIVE-STANDBY HA mode")
+
+	var obj *data.StructValue
+	if isT0 {
+		client := t0_ipsec_vpn_services.NewSessionsClient(connector)
+		obj, err = client.Get(gwID, localeServiceID, serviceID, id)
+	} else {
+		client := t1_ipsec_vpn_services.NewSessionsClient(connector)
+		obj, err = client.Get(gwID, localeServiceID, serviceID, id)
 	}
-
-	client := ipsec_vpn_services.NewSessionsClient(connector)
-
-	obj, err1 := client.Get(gwID, localeServiceID, serviceID, id)
-
-	if err1 != nil {
-		if isNotFoundError(err1) {
+	if err != nil {
+		if isNotFoundError(err) {
 			d.SetId("")
 			return nil
 		}
-		return handleReadError(d, "VPN Session", id, err1)
+		return handleReadError(d, "VPN Session", id, err)
 	}
 
 	baseObj, errs := converter.ConvertToGolang(obj, model.IPSecVpnSessionBindingType())
@@ -631,21 +639,22 @@ func resourceNsxtPolicyIPSecVpnSessionUpdate(d *schema.ResourceData, m interface
 	if err != nil {
 		return err
 	}
-	if !isT0 {
-		return fmt.Errorf("VPN is supported only on Tier-0 with ACTIVE-STANDBY HA mode")
-	}
 	obj, err := getIPSecVPNSessionFromSchema(d)
 	if err != nil {
 		return err
 	}
 
-	client := ipsec_vpn_services.NewSessionsClient(connector)
-
-	err = client.Patch(gwID, localeServiceID, serviceID, id, obj)
-
+	if isT0 {
+		client := t0_ipsec_vpn_services.NewSessionsClient(connector)
+		err = client.Patch(gwID, localeServiceID, serviceID, id, obj)
+	} else {
+		client := t1_ipsec_vpn_services.NewSessionsClient(connector)
+		err = client.Patch(gwID, localeServiceID, serviceID, id, obj)
+	}
 	if err != nil {
 		return handleUpdateError("IPSecVpnSession", id, err)
 	}
+
 	d.SetId(id)
 	d.Set("nsx_id", id)
 	return resourceNsxtPolicyIPSecVpnSessionRead(d, m)
@@ -663,18 +672,18 @@ func resourceNsxtPolicyIPSecVpnSessionDelete(d *schema.ResourceData, m interface
 	if err != nil {
 		return err
 	}
-	if !isT0 {
-		return fmt.Errorf("VPN is supported only on Tier-0 with ACTIVE-STANDBY HA mode")
-	}
 
 	connector := getPolicyConnector(m)
 
-	var err1 error
-	client := ipsec_vpn_services.NewSessionsClient(connector)
-	err1 = client.Delete(gwID, localeServiceID, serviceID, id)
-
-	if err1 != nil {
-		return handleDeleteError("IPSecVpnSession", id, err1)
+	if isT0 {
+		client := t0_ipsec_vpn_services.NewSessionsClient(connector)
+		err = client.Delete(gwID, localeServiceID, serviceID, id)
+	} else {
+		client := t1_ipsec_vpn_services.NewSessionsClient(connector)
+		err = client.Delete(gwID, localeServiceID, serviceID, id)
+	}
+	if err != nil {
+		return handleDeleteError("IPSecVpnSession", id, err)
 	}
 
 	return nil
