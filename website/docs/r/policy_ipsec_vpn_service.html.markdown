@@ -9,7 +9,7 @@ description: A resource to configure a IPSec VPN Service.
 
 This resource provides a method for the management of a IPSec VPN Service.
 
-This resource is applicable to NSX Policy Manager and VMC.
+This resource is applicable to NSX Policy Manager.
 
 ## Example Usage
 

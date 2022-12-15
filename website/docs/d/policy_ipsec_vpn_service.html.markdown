@@ -5,7 +5,7 @@ page_title: "NSXT: policy_ipsec_vpn_service"
 description: Policy IPSec VPN Service.
 ---
 
-# nsxt_policy_vpn_service
+# nsxt_policy_ipsec_vpn_service
 
 This data source provides information about policy ipsec vpn service configured on NSX.
 
@@ -22,13 +22,12 @@ data "nsxt_policy_ipsec_vpn_service" "test" {
 ## Argument Reference
 
 * `id` - (Optional) The ID of IPSec VPN Service to retrieve.
-
 * `display_name` - (Optional) The Display Name of the IPSec VPN Service.
+* `gateway_path` - (Optional) Gateway Path for this Service.
 
 ## Attributes Reference
 
 In addition to arguments listed above, the following attributes are exported:
 
 * `description` - The description of the resource.
-
 * `path` - The NSX path of the policy resource.

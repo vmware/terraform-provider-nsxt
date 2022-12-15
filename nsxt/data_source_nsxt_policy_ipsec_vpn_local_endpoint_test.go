@@ -15,7 +15,7 @@ func TestAccDataSourceNsxtPolicyIPSecVpnLocalEndpoint(t *testing.T) {
 	name := getAccTestResourceName()
 	testResourceName := "data.nsxt_policy_ipsec_vpn_local_endpoint.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
@@ -36,6 +36,31 @@ func TestAccDataSourceNsxtPolicyIPSecVpnLocalEndpoint(t *testing.T) {
 	})
 }
 
+func TestAccDataSourceNsxtPolicyIPSecVpnLocalEndpoint_withService(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "data.nsxt_policy_ipsec_vpn_local_endpoint.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyLocalManager(t)
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyIPSecVpnLocalEndpointCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyIPSecVpnLocalEndpointDataSourceTemplateWithService(name),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+				),
+			},
+		},
+	})
+}
+
 func testAccNsxtPolicyIPSecVpnLocalEndpointDataSourceTemplate(name string) string {
 	return testAccNsxtPolicyDataSourceIPSecVpnLocalEndpointPreconfig(name) + `
 data "nsxt_policy_ipsec_vpn_local_endpoint" "test" {
@@ -43,17 +68,25 @@ data "nsxt_policy_ipsec_vpn_local_endpoint" "test" {
 }`
 }
 
+func testAccNsxtPolicyIPSecVpnLocalEndpointDataSourceTemplateWithService(name string) string {
+	return testAccNsxtPolicyDataSourceIPSecVpnLocalEndpointPreconfig(name) + `
+data "nsxt_policy_ipsec_vpn_local_endpoint" "test" {
+  display_name = nsxt_policy_ipsec_vpn_local_endpoint.test.display_name
+  service_path = nsxt_policy_ipsec_vpn_service.test.path
+}`
+}
+
 func testAccNsxtPolicyDataSourceIPSecVpnLocalEndpointPreconfig(name string) string {
 	return testAccNsxtPolicyEdgeClusterReadTemplate(getEdgeClusterName()) +
 		testAccNsxtPolicyTier0WithEdgeClusterForVPN("test") + fmt.Sprintf(`
 resource "nsxt_policy_ipsec_vpn_service" "test" {
-	display_name        = "%s"
-	locale_service_path =  one(nsxt_policy_tier0_gateway.test.locale_service).path
+  display_name        = "%s"
+  locale_service_path =  one(nsxt_policy_tier0_gateway.test.locale_service).path
 }
 
 resource "nsxt_policy_ipsec_vpn_local_endpoint" "test" {
-	service_path  = nsxt_policy_ipsec_vpn_service.test.path
-	display_name  = "%s"
-	local_address = "%s"
-  }`, name, name, "20.20.0.10")
+  service_path  = nsxt_policy_ipsec_vpn_service.test.path
+  display_name  = "%s"
+  local_address = "%s"
+}`, name, name, "20.20.0.10")
 }
