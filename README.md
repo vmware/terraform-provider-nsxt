@@ -57,7 +57,7 @@ You can list versions of providers installed in your environment by running “t
 $ ./terraform version
 Terraform v1.2.1
 on linux_amd64
-+ provider registry.terraform.io/vmware/nsxt v3.2.8
++ provider registry.terraform.io/vmware/nsxt v3.3
 ```
 
 # Manual Installation
@@ -166,6 +166,7 @@ to run.
 
 The following versions of NSX are supported:
 
+ * NSX-T 4.0.*
  * NSX-T 3.2.*
  * NSX-T 3.1.*
  * NSX-T 3.0.*

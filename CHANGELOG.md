@@ -1,3 +1,34 @@
+## 3.3.0 (January 16, 2023)
+
+FEATURES:
+
+* **New Data Source**: `nsxt_policy_gateway_locale_service`.
+* **New Data Source**: `nsxt_policy_bridge_profile`.
+* **New Data Source**: `nsxt_policy_ipsec_vpn_local_endpoint`.
+* **New Data Source**: `nsxt_policy_ipsec_vpn_service`.
+* **New Data Source**: `nsxt_policy_l2_vpn_service`.
+
+* **New Resource**: `nsxt_policy_ipsec_vpn_ike_profile`.
+* **New Resource**: `nsxt_policy_ipsec_vpn_tunnel_profile`.
+* **New Resource**: `nsxt_policy_ipsec_vpn_dpd_profile`.
+* **New Resource**: `nsxt_policy_ipsec_vpn_session`.
+* **New Resource**: `nsxt_policy_ipsec_vpn_service`.
+* **New Resource**: `nsxt_policy_ipsec_vpn_local_endpoint`.
+* **New Resource**: `nsxt_policy_l2_vpn_session`.
+* **New Resource**: `nsxt_policy_l2_vpn_service`.
+
+EXPERIMENTAL FEATURES:
+
+* **New Resource**: `nsxt_policy_ip_discovery_profile`.
+
+BUG FIXES:
+
+* `resource/nsxt_policy_gateway_route_map`: Fix issues around `local_preference` and `med` attributes in route map set clause. Those values were assigned incorrect default value when not specified by terraform user ([#818](https://github.com/vmware/terraform-provider-nsxt/pull/818))
+
+DEPRECATIONS:
+
+In this release we deprecate non-policy data sources and resources. Please use corresponding policy resources instead.
+
 ## 3.2.9 (October 28, 2022)
 
 BUG FIXES:
