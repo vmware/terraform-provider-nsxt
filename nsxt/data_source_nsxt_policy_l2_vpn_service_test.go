@@ -15,7 +15,7 @@ func TestAccDataSourceNsxtPolicyL2VpnService_basic(t *testing.T) {
 	name := getAccTestDataSourceName()
 	testResourceName := "data.nsxt_policy_l2_vpn_service.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -24,6 +24,28 @@ func TestAccDataSourceNsxtPolicyL2VpnService_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNsxtPolicyL2VpnServiceReadTemplate(name),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccDataSourceNsxtPolicyL2VpnService_withGateway(t *testing.T) {
+	name := getAccTestDataSourceName()
+	testResourceName := "data.nsxt_policy_l2_vpn_service.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyL2VpnServiceCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyL2VpnServiceReadTemplateWithGateway(name),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -42,5 +64,18 @@ func testAccNsxtPolicyL2VpnServiceReadTemplate(name string) string {
    }`, name) + `
    data "nsxt_policy_l2_vpn_service" "test" {
 	 display_name = nsxt_policy_l2_vpn_service.test.display_name
+   }`
+}
+
+func testAccNsxtPolicyL2VpnServiceReadTemplateWithGateway(name string) string {
+	return testAccNsxtPolicyEdgeClusterReadTemplate(getEdgeClusterName()) +
+		testAccNsxtPolicyTier0WithEdgeClusterForVPN("test") + fmt.Sprintf(`
+   resource "nsxt_policy_l2_vpn_service" "test" {
+	display_name          = "%s"
+	locale_service_path   = one(nsxt_policy_tier0_gateway.test.locale_service).path
+   }`, name) + `
+   data "nsxt_policy_l2_vpn_service" "test" {
+	 display_name = nsxt_policy_l2_vpn_service.test.display_name
+	 gateway_path = nsxt_policy_tier0_gateway.test.path
    }`
 }

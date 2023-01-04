@@ -11,8 +11,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	t0_service "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services/ipsec_vpn_services"
-	t1_service "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/locale_services/ipsec_vpn_services"
+	t0_service "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/ipsec_vpn_services"
+	t0_nested_service "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services/ipsec_vpn_services"
+	t1_service "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/ipsec_vpn_services"
+	t1_nested_service "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/locale_services/ipsec_vpn_services"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
@@ -59,18 +61,87 @@ func resourceNsxtPolicyIPSecVpnLocalEndpoint() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyIPSecVpnLocalEndpointExistsOnService(id string, connector *client.RestConnector, servicePath string) (bool, error) {
+type localEndpointClient struct {
+	isT0            bool
+	gwID            string
+	localeServiceID string
+	serviceID       string
+}
+
+func newLocalEndpointClient(servicePath string) (*localEndpointClient, error) {
 	isT0, gwID, localeServiceID, serviceID, err := parseIPSecVPNServicePolicyPath(servicePath)
+	if err != nil {
+		return nil, err
+	}
+
+	return &localEndpointClient{
+		isT0:            isT0,
+		gwID:            gwID,
+		localeServiceID: localeServiceID,
+		serviceID:       serviceID,
+	}, nil
+}
+
+func (c *localEndpointClient) Get(connector *client.RestConnector, id string) (model.IPSecVpnLocalEndpoint, error) {
+	if c.isT0 {
+		if len(c.localeServiceID) > 0 {
+			client := t0_nested_service.NewLocalEndpointsClient(connector)
+			return client.Get(c.gwID, c.localeServiceID, c.serviceID, id)
+		}
+		client := t0_service.NewLocalEndpointsClient(connector)
+		return client.Get(c.gwID, c.serviceID, id)
+
+	}
+	if len(c.localeServiceID) > 0 {
+		client := t1_nested_service.NewLocalEndpointsClient(connector)
+		return client.Get(c.gwID, c.localeServiceID, c.serviceID, id)
+	}
+	client := t1_service.NewLocalEndpointsClient(connector)
+	return client.Get(c.gwID, c.serviceID, id)
+}
+
+func (c *localEndpointClient) Patch(connector *client.RestConnector, id string, obj model.IPSecVpnLocalEndpoint) error {
+	if c.isT0 {
+		if len(c.localeServiceID) > 0 {
+			client := t0_nested_service.NewLocalEndpointsClient(connector)
+			return client.Patch(c.gwID, c.localeServiceID, c.serviceID, id, obj)
+		}
+		client := t0_service.NewLocalEndpointsClient(connector)
+		return client.Patch(c.gwID, c.serviceID, id, obj)
+
+	}
+	if len(c.localeServiceID) > 0 {
+		client := t1_nested_service.NewLocalEndpointsClient(connector)
+		return client.Patch(c.gwID, c.localeServiceID, c.serviceID, id, obj)
+	}
+	client := t1_service.NewLocalEndpointsClient(connector)
+	return client.Patch(c.gwID, c.serviceID, id, obj)
+}
+
+func (c *localEndpointClient) Delete(connector *client.RestConnector, id string) error {
+	if c.isT0 {
+		if len(c.localeServiceID) > 0 {
+			client := t0_nested_service.NewLocalEndpointsClient(connector)
+			return client.Delete(c.gwID, c.localeServiceID, c.serviceID, id)
+		}
+		client := t0_service.NewLocalEndpointsClient(connector)
+		return client.Delete(c.gwID, c.serviceID, id)
+
+	}
+	if len(c.localeServiceID) > 0 {
+		client := t1_nested_service.NewLocalEndpointsClient(connector)
+		return client.Delete(c.gwID, c.localeServiceID, c.serviceID, id)
+	}
+	client := t1_service.NewLocalEndpointsClient(connector)
+	return client.Delete(c.gwID, c.serviceID, id)
+}
+
+func resourceNsxtPolicyIPSecVpnLocalEndpointExistsOnService(id string, connector *client.RestConnector, servicePath string) (bool, error) {
+	client, err := newLocalEndpointClient(servicePath)
 	if err != nil {
 		return false, err
 	}
-	if isT0 {
-		client := t0_service.NewLocalEndpointsClient(connector)
-		_, err = client.Get(gwID, localeServiceID, serviceID, id)
-	} else {
-		client := t1_service.NewLocalEndpointsClient(connector)
-		_, err = client.Get(gwID, localeServiceID, serviceID, id)
-	}
+	_, err = client.Get(connector, id)
 	if err == nil {
 		return true, nil
 	}
@@ -128,11 +199,6 @@ func resourceNsxtPolicyIPSecVpnLocalEndpointCreate(d *schema.ResourceData, m int
 	connector := getPolicyConnector(m)
 
 	servicePath := d.Get("service_path").(string)
-	isT0, gwID, localeServiceID, serviceID, err := parseIPSecVPNServicePolicyPath(servicePath)
-	if err != nil {
-		return err
-	}
-
 	id, err := getOrGenerateID(d, m, resourceNsxtPolicyIPSecVpnLocalEndpointExists(servicePath))
 	if err != nil {
 		return err
@@ -141,13 +207,11 @@ func resourceNsxtPolicyIPSecVpnLocalEndpointCreate(d *schema.ResourceData, m int
 	obj := ipSecVpnLocalEndpointInitStruct(d)
 
 	log.Printf("[INFO] Creating IPSecVpnLocalEndpoint with ID %s", id)
-	if isT0 {
-		client := t0_service.NewLocalEndpointsClient(connector)
-		err = client.Patch(gwID, localeServiceID, serviceID, id, obj)
-	} else {
-		client := t1_service.NewLocalEndpointsClient(connector)
-		err = client.Patch(gwID, localeServiceID, serviceID, id, obj)
+	client, err := newLocalEndpointClient(servicePath)
+	if err != nil {
+		return handleCreateError("IPSecVpnLocalEndpoint", id, err)
 	}
+	err = client.Patch(connector, id, obj)
 	if err != nil {
 		return handleCreateError("IPSecVpnLocalEndpoint", id, err)
 	}
@@ -167,19 +231,11 @@ func resourceNsxtPolicyIPSecVpnLocalEndpointRead(d *schema.ResourceData, m inter
 	}
 
 	servicePath := d.Get("service_path").(string)
-	isT0, gwID, localeServiceID, serviceID, err := parseIPSecVPNServicePolicyPath(servicePath)
+	client, err := newLocalEndpointClient(servicePath)
 	if err != nil {
-		return err
+		return handleReadError(d, "IPSecVpnLocalEndpoint", id, err)
 	}
-
-	var obj model.IPSecVpnLocalEndpoint
-	if isT0 {
-		client := t0_service.NewLocalEndpointsClient(connector)
-		obj, err = client.Get(gwID, localeServiceID, serviceID, id)
-	} else {
-		client := t1_service.NewLocalEndpointsClient(connector)
-		obj, err = client.Get(gwID, localeServiceID, serviceID, id)
-	}
+	obj, err := client.Get(connector, id)
 	if err != nil {
 		return handleReadError(d, "IPSecVpnLocalEndpoint", id, err)
 	}
@@ -208,24 +264,18 @@ func resourceNsxtPolicyIPSecVpnLocalEndpointUpdate(d *schema.ResourceData, m int
 	}
 
 	servicePath := d.Get("service_path").(string)
-	isT0, gwID, localeServiceID, serviceID, err := parseIPSecVPNServicePolicyPath(servicePath)
+
+	client, err := newLocalEndpointClient(servicePath)
 	if err != nil {
-		return err
+		return handleUpdateError("IPSecVpnLocalEndpoint", id, err)
 	}
 
-	revision := int64(d.Get("revision").(int))
-
 	obj := ipSecVpnLocalEndpointInitStruct(d)
+	revision := int64(d.Get("revision").(int))
 	obj.Revision = &revision
 
 	log.Printf("[INFO] Updating IPSecVpnLocalEndpoint with ID %s", id)
-	if isT0 {
-		client := t0_service.NewLocalEndpointsClient(connector)
-		err = client.Patch(gwID, localeServiceID, serviceID, id, obj)
-	} else {
-		client := t1_service.NewLocalEndpointsClient(connector)
-		err = client.Patch(gwID, localeServiceID, serviceID, id, obj)
-	}
+	err = client.Patch(connector, id, obj)
 	if err != nil {
 		return handleUpdateError("IPSecVpnLocalEndpoint", id, err)
 	}
@@ -240,18 +290,12 @@ func resourceNsxtPolicyIPSecVpnLocalEndpointDelete(d *schema.ResourceData, m int
 	}
 
 	servicePath := d.Get("service_path").(string)
-	isT0, gwID, localeServiceID, serviceID, err := parseIPSecVPNServicePolicyPath(servicePath)
+	client, err := newLocalEndpointClient(servicePath)
 	if err != nil {
-		return err
+		return handleUpdateError("IPSecVpnLocalEndpoint", id, err)
 	}
 	connector := getPolicyConnector(m)
-	if isT0 {
-		client := t0_service.NewLocalEndpointsClient(connector)
-		err = client.Delete(gwID, localeServiceID, serviceID, id)
-	} else {
-		client := t1_service.NewLocalEndpointsClient(connector)
-		err = client.Delete(gwID, localeServiceID, serviceID, id)
-	}
+	err = client.Delete(connector, id)
 
 	if err != nil {
 		return handleDeleteError("IPSecVpnLocalEndpoint", id, err)
@@ -265,11 +309,11 @@ func nsxtVPNServiceResourceImporter(d *schema.ResourceData, m interface{}) ([]*s
 	err := fmt.Errorf("VPN Local Endpoint Path expected, got %s", importID)
 	// path format example: /infra/tier-1s/aaa/locale-services/default/ipsec-vpn-services/bbb/local-endpoints/ccc
 	s := strings.Split(importID, "/")
-	if len(s) < 10 {
+	if len(s) < 8 {
 		return []*schema.ResourceData{d}, err
 	}
 
-	endpointID := s[9]
+	endpointID := s[len(s)-1]
 	d.SetId(endpointID)
 	s = strings.Split(importID, "/local-endpoints/")
 	if len(s) != 2 {

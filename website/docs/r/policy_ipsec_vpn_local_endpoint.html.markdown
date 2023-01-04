@@ -8,7 +8,7 @@ description: A resource to configure a IPSec VPN Local Endpoint.
 
 This resource provides a method for the management of a IPSec VPN Local Endpoint.
 
-This resource is applicable to NSX Policy Manager and VMC.
+This resource is applicable to NSX Policy Manager.
 
 ## Example Usage
 

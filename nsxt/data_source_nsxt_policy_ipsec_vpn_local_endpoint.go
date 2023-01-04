@@ -13,7 +13,7 @@ func dataSourceNsxtPolicyIPSecVpnLocalEndpoint() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"id":           getDataSourceIDSchema(),
-			"nsx_id":       getNsxIDSchema(),
+			"service_path": getPolicyPathSchema(false, false, "Policy path for IPSec VPN service"),
 			"display_name": getDataSourceDisplayNameSchema(),
 			"description":  getDataSourceDescriptionSchema(),
 			"path":         getPathSchema(),
@@ -24,7 +24,12 @@ func dataSourceNsxtPolicyIPSecVpnLocalEndpoint() *schema.Resource {
 func dataSourceNsxtPolicyIPSecVpnLocalEndpointRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
-	_, err := policyDataSourceResourceRead(d, connector, isPolicyGlobalManager(m), "IPSecVpnLocalEndpoint", nil)
+	servicePath := d.Get("service_path").(string)
+	query := make(map[string]string)
+	if len(servicePath) > 0 {
+		query["parent_path"] = servicePath
+	}
+	_, err := policyDataSourceResourceReadWithValidation(d, connector, isPolicyGlobalManager(m), "IPSecVpnLocalEndpoint", query, false)
 	if err != nil {
 		return err
 	}

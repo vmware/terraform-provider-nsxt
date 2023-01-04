@@ -14,8 +14,10 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 
-	t0_ipsec_vpn_services "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services/ipsec_vpn_services"
-	t1_ipsec_vpn_services "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/locale_services/ipsec_vpn_services"
+	t0_ipsec_services "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/ipsec_vpn_services"
+	t0_ipsec_nested_services "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services/ipsec_vpn_services"
+	t1_ipsec_services "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/ipsec_vpn_services"
+	t1_ipsec_nested_services "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/locale_services/ipsec_vpn_services"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
@@ -338,18 +340,100 @@ func getIPSecVPNRulesSchema() *schema.Schema {
 	}
 }
 
+type ipsecSessionClient struct {
+	isT0            bool
+	gwID            string
+	localeServiceID string
+	serviceID       string
+}
+
+func newIpsecSessionClient(servicePath string) (*ipsecSessionClient, error) {
+	isT0, gwID, localeServiceID, serviceID, err := parseIPSecVPNServicePolicyPath(servicePath)
+	if err != nil {
+		return nil, err
+	}
+
+	return &ipsecSessionClient{
+		isT0:            isT0,
+		gwID:            gwID,
+		localeServiceID: localeServiceID,
+		serviceID:       serviceID,
+	}, nil
+}
+
+func (c *ipsecSessionClient) Get(connector *client.RestConnector, id string) (*data.StructValue, error) {
+	if c.isT0 {
+		if len(c.localeServiceID) > 0 {
+			client := t0_ipsec_nested_services.NewSessionsClient(connector)
+			return client.Get(c.gwID, c.localeServiceID, c.serviceID, id)
+		}
+		client := t0_ipsec_services.NewSessionsClient(connector)
+		return client.Get(c.gwID, c.serviceID, id)
+
+	}
+	if len(c.localeServiceID) > 0 {
+		client := t1_ipsec_nested_services.NewSessionsClient(connector)
+		return client.Get(c.gwID, c.localeServiceID, c.serviceID, id)
+	}
+	client := t1_ipsec_services.NewSessionsClient(connector)
+	return client.Get(c.gwID, c.serviceID, id)
+}
+
+func (c *ipsecSessionClient) Patch(connector *client.RestConnector, id string, obj *data.StructValue) error {
+	if c.isT0 {
+		if len(c.localeServiceID) > 0 {
+			client := t0_ipsec_nested_services.NewSessionsClient(connector)
+			return client.Patch(c.gwID, c.localeServiceID, c.serviceID, id, obj)
+		}
+		client := t0_ipsec_services.NewSessionsClient(connector)
+		return client.Patch(c.gwID, c.serviceID, id, obj)
+
+	}
+	if len(c.localeServiceID) > 0 {
+		client := t1_ipsec_nested_services.NewSessionsClient(connector)
+		return client.Patch(c.gwID, c.localeServiceID, c.serviceID, id, obj)
+	}
+	client := t1_ipsec_services.NewSessionsClient(connector)
+	return client.Patch(c.gwID, c.serviceID, id, obj)
+}
+
+func (c *ipsecSessionClient) Delete(connector *client.RestConnector, id string) error {
+	if c.isT0 {
+		if len(c.localeServiceID) > 0 {
+			client := t0_ipsec_nested_services.NewSessionsClient(connector)
+			return client.Delete(c.gwID, c.localeServiceID, c.serviceID, id)
+		}
+		client := t0_ipsec_services.NewSessionsClient(connector)
+		return client.Delete(c.gwID, c.serviceID, id)
+
+	}
+
+	if len(c.localeServiceID) > 0 {
+		client := t1_ipsec_nested_services.NewSessionsClient(connector)
+		return client.Delete(c.gwID, c.localeServiceID, c.serviceID, id)
+	}
+	client := t1_ipsec_services.NewSessionsClient(connector)
+	return client.Delete(c.gwID, c.serviceID, id)
+}
+
 func parseIPSecVPNServicePolicyPath(path string) (bool, string, string, string, error) {
 	segs := strings.Split(path, "/")
 	// Path should be like /infra/tier-1s/aaa/locale-services/default/ipsec-vpn-services/ccc
+	// or /infra/tier-0s/vmc/ipsec-vpn-services/default for VMC
 	segCount := len(segs)
-	if (segCount < 8) || (segs[segCount-2] != "ipsec-vpn-services") {
+	if segCount < 6 || segCount > 8 || (segs[segCount-2] != "ipsec-vpn-services") {
 		// error - this is not a segment path
 		return false, "", "", "", fmt.Errorf("Invalid IPSec VPN service path %s", path)
 	}
 
 	serviceID := segs[segCount-1]
-	localeServiceID := segs[5]
 	gwPath := strings.Join(segs[:4], "/")
+
+	localeServiceID := ""
+	if segCount == 8 {
+		// not VMC
+		localeServiceID = segs[5]
+	}
 
 	isT0, gwID := parseGatewayPolicyPath(gwPath)
 	return isT0, gwID, localeServiceID, serviceID, nil
@@ -436,7 +520,7 @@ func getIPSecVPNRulesFromSchema(d *schema.ResourceData) []model.IPSecVpnRule {
 func resourceNsxtPolicyIPSecVpnSessionCreate(d *schema.ResourceData, m interface{}) error {
 
 	servicePath := d.Get("service_path").(string)
-	isT0, gwID, localeServiceID, serviceID, err := parseIPSecVPNServicePolicyPath(servicePath)
+	client, err := newIpsecSessionClient(servicePath)
 	if err != nil {
 		return err
 	}
@@ -448,9 +532,9 @@ func resourceNsxtPolicyIPSecVpnSessionCreate(d *schema.ResourceData, m interface
 
 	connector := getPolicyConnector(m)
 
-	_, err = resourceNsxtPolicyIPSecVpnSessionExists(isT0, gwID, localeServiceID, serviceID, id, connector)
+	_, err = resourceNsxtPolicyIPSecVpnSessionExists(servicePath, id, connector)
 	if err == nil {
-		return fmt.Errorf("IPSecVpnSession with nsx_id '%s' already exists under IPSecVpnService '%s' of localeService '%s'", id, serviceID, localeServiceID)
+		return fmt.Errorf("IPSecVpnSession with nsx_id '%s' already exists under IPSecVpnService '%s'", id, servicePath)
 	} else if !isNotFoundError(err) {
 		return err
 	}
@@ -460,13 +544,7 @@ func resourceNsxtPolicyIPSecVpnSessionCreate(d *schema.ResourceData, m interface
 		return err
 	}
 
-	if isT0 {
-		client := t0_ipsec_vpn_services.NewSessionsClient(connector)
-		err = client.Patch(gwID, localeServiceID, serviceID, id, obj)
-	} else {
-		client := t1_ipsec_vpn_services.NewSessionsClient(connector)
-		err = client.Patch(gwID, localeServiceID, serviceID, id, obj)
-	}
+	err = client.Patch(connector, id, obj)
 	if err != nil {
 		return handleCreateError("IPSecVpnSession", id, err)
 	}
@@ -476,15 +554,12 @@ func resourceNsxtPolicyIPSecVpnSessionCreate(d *schema.ResourceData, m interface
 	return resourceNsxtPolicyIPSecVpnSessionRead(d, m)
 }
 
-func resourceNsxtPolicyIPSecVpnSessionExists(isT0 bool, gwID string, localeServiceID string, serviceID string, sessionID string, connector *client.RestConnector) (bool, error) {
-	var err error
-	if isT0 {
-		client := t0_ipsec_vpn_services.NewSessionsClient(connector)
-		_, err = client.Get(gwID, localeServiceID, serviceID, sessionID)
-	} else {
-		client := t1_ipsec_vpn_services.NewSessionsClient(connector)
-		_, err = client.Get(gwID, localeServiceID, serviceID, sessionID)
+func resourceNsxtPolicyIPSecVpnSessionExists(servicePath string, sessionID string, connector *client.RestConnector) (bool, error) {
+	client, err := newIpsecSessionClient(servicePath)
+	if err != nil {
+		return false, err
 	}
+	_, err = client.Get(connector, sessionID)
 	if err == nil {
 		return true, nil
 	}
@@ -507,30 +582,23 @@ func resourceNsxtPolicyIPSecVpnSessionRead(d *schema.ResourceData, m interface{}
 	}
 
 	servicePath := d.Get("service_path").(string)
-	isT0, gwID, localeServiceID, serviceID, err := parseIPSecVPNServicePolicyPath(servicePath)
-	if err != nil {
-		return err
-	}
 
-	var obj *data.StructValue
-	if isT0 {
-		client := t0_ipsec_vpn_services.NewSessionsClient(connector)
-		obj, err = client.Get(gwID, localeServiceID, serviceID, id)
-	} else {
-		client := t1_ipsec_vpn_services.NewSessionsClient(connector)
-		obj, err = client.Get(gwID, localeServiceID, serviceID, id)
+	client, err := newIpsecSessionClient(servicePath)
+	if err != nil {
+		return handleReadError(d, "IpsecVpnSession", id, err)
 	}
+	obj, err := client.Get(connector, id)
 	if err != nil {
 		if isNotFoundError(err) {
 			d.SetId("")
 			return nil
 		}
-		return handleReadError(d, "VPN Session", id, err)
+		return handleReadError(d, "IpsecVpnSession", id, err)
 	}
 
 	baseObj, errs := converter.ConvertToGolang(obj, model.IPSecVpnSessionBindingType())
 	if len(errs) > 0 {
-		return fmt.Errorf("Error converting VPN Session %s", errs[0])
+		return fmt.Errorf("Error converting IpsecVpnSession %s", errs[0])
 	}
 	baseVPN := baseObj.(model.IPSecVpnSession)
 	resourceType := baseVPN.ResourceType
@@ -538,7 +606,7 @@ func resourceNsxtPolicyIPSecVpnSessionRead(d *schema.ResourceData, m interface{}
 	if resourceType == model.IPSecVpnSession_RESOURCE_TYPE_ROUTEBASEDIPSECVPNSESSION {
 		interfaceVpn, errs := converter.ConvertToGolang(obj, model.RouteBasedIPSecVpnSessionBindingType())
 		if len(errs) > 0 {
-			return fmt.Errorf("Error converting VPN Session %s", errs[0])
+			return fmt.Errorf("Error converting IpsecVpnSession %s", errs[0])
 		}
 		blockVPN := interfaceVpn.(model.RouteBasedIPSecVpnSession)
 
@@ -592,7 +660,7 @@ func resourceNsxtPolicyIPSecVpnSessionRead(d *schema.ResourceData, m interface{}
 		// Policy based ipsec vpn session
 		interfaceVpn, errs := converter.ConvertToGolang(obj, model.PolicyBasedIPSecVpnSessionBindingType())
 		if len(errs) > 0 {
-			return fmt.Errorf("Error converting VPN Session %s", errs[0])
+			return fmt.Errorf("Error converting IpsecVpnSession %s", errs[0])
 		}
 		blockVPN := interfaceVpn.(model.PolicyBasedIPSecVpnSession)
 
@@ -635,27 +703,20 @@ func resourceNsxtPolicyIPSecVpnSessionUpdate(d *schema.ResourceData, m interface
 	}
 
 	servicePath := d.Get("service_path").(string)
-	isT0, gwID, localeServiceID, serviceID, err := parseIPSecVPNServicePolicyPath(servicePath)
+	client, err := newIpsecSessionClient(servicePath)
 	if err != nil {
-		return err
+		return handleUpdateError("IPSecVpnSession", id, err)
 	}
 	obj, err := getIPSecVPNSessionFromSchema(d)
 	if err != nil {
 		return err
 	}
 
-	if isT0 {
-		client := t0_ipsec_vpn_services.NewSessionsClient(connector)
-		err = client.Patch(gwID, localeServiceID, serviceID, id, obj)
-	} else {
-		client := t1_ipsec_vpn_services.NewSessionsClient(connector)
-		err = client.Patch(gwID, localeServiceID, serviceID, id, obj)
-	}
+	err = client.Patch(connector, id, obj)
 	if err != nil {
 		return handleUpdateError("IPSecVpnSession", id, err)
 	}
 
-	d.SetId(id)
 	d.Set("nsx_id", id)
 	return resourceNsxtPolicyIPSecVpnSessionRead(d, m)
 
@@ -668,20 +729,12 @@ func resourceNsxtPolicyIPSecVpnSessionDelete(d *schema.ResourceData, m interface
 		return fmt.Errorf("Error obtaining IPSecVpnSession ID")
 	}
 	servicePath := d.Get("service_path").(string)
-	isT0, gwID, localeServiceID, serviceID, err := parseIPSecVPNServicePolicyPath(servicePath)
+	client, err := newIpsecSessionClient(servicePath)
 	if err != nil {
-		return err
+		return handleUpdateError("IPSecVpnSession", id, err)
 	}
-
 	connector := getPolicyConnector(m)
-
-	if isT0 {
-		client := t0_ipsec_vpn_services.NewSessionsClient(connector)
-		err = client.Delete(gwID, localeServiceID, serviceID, id)
-	} else {
-		client := t1_ipsec_vpn_services.NewSessionsClient(connector)
-		err = client.Delete(gwID, localeServiceID, serviceID, id)
-	}
+	err = client.Delete(connector, id)
 	if err != nil {
 		return handleDeleteError("IPSecVpnSession", id, err)
 	}
@@ -693,12 +746,13 @@ func nsxtVpnSessionImporter(d *schema.ResourceData, m interface{}) ([]*schema.Re
 	importID := d.Id()
 	err := fmt.Errorf("Expected VPN session path, got %s", importID)
 	// Path should be like /infra/tier-1s/aaa/locale-services/default/ipsec-vpn-services/bbb/sessions/ccc
+	// or /infra/tier-0s/vmc/ipsec-vpn-services/default/sessions/ccc for VMC
 	s := strings.Split(importID, "/")
-	if len(s) != 10 {
+	if len(s) < 8 {
 		return []*schema.ResourceData{d}, err
 	}
 
-	d.SetId(s[9])
+	d.SetId(s[len(s)-1])
 
 	s = strings.Split(importID, "/sessions/")
 	if len(s) != 2 {

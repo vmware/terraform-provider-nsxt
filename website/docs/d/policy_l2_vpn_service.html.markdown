@@ -22,13 +22,12 @@ data "nsxt_policy_l2_vpn_service" "test" {
 ## Argument Reference
 
 * `id` - (Optional) The ID of L2 VPN Service to retrieve.
-
 * `display_name` - (Optional) The Display Name of the L2 VPN Service.
+* `gateway_path` - (Optional) Gateway Path for this Service.
 
 ## Attributes Reference
 
 In addition to arguments listed above, the following attributes are exported:
 
 * `description` - The description of the resource.
-
 * `path` - The NSX path of the policy resource.

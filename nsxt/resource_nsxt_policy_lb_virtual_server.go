@@ -1210,7 +1210,7 @@ func setPolicyLbRulesInSchema(d *schema.ResourceData, rules []model.LBRule) {
 		var httpSslConditionList []interface{}
 		var sslSniConditionList []interface{}
 
-		var conditionCount int = 0
+		var conditionCount int
 		for _, condition := range rule.MatchConditions {
 			conditionCount = conditionCount + 1
 			conditionElem := make(map[string]interface{})

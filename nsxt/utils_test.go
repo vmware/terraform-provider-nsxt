@@ -198,10 +198,10 @@ func testAccNSXCreateCert(t *testing.T, name string, certPem string, certPK stri
 	certList, response, err := nsxClient.NsxComponentAdministrationApi.AddCertificateImport(nsxClient.Context, object)
 
 	if err != nil {
-		t.Fatal(fmt.Sprintf("Error while creating %s certificate. Error: %v", certType, err))
+		t.Fatalf("Error while creating %s certificate. Error: %v", certType, err)
 	}
 	if response.StatusCode != http.StatusCreated {
-		t.Fatal(fmt.Errorf("Error while creating %s certificate. HTTP return code %d", certType, response.StatusCode))
+		t.Fatalf("Error while creating %s certificate. HTTP return code %d", certType, response.StatusCode)
 	}
 	certID := ""
 	for _, cert := range certList.Results {
@@ -220,10 +220,10 @@ func testAccNSXDeleteCert(t *testing.T, id string) {
 	response, err := nsxClient.NsxComponentAdministrationApi.DeleteCertificate(nsxClient.Context, id)
 
 	if err != nil {
-		t.Fatal(fmt.Sprintf("Error while deleting certificate %s. Error: %v", id, err))
+		t.Fatalf("Error while deleting certificate %s. Error: %v", id, err)
 	}
 	if response.StatusCode != http.StatusOK {
-		t.Fatal(fmt.Errorf("Error while deleting certificate %s. HTTP return code %d", id, response.StatusCode))
+		t.Fatalf("Error while deleting certificate %s. HTTP return code %d", id, response.StatusCode)
 	}
 }
 

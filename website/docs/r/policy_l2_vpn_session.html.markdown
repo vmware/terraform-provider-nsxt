@@ -5,7 +5,7 @@ page_title: "NSXT: nsxt_policy_l2_vpn_session"
 description: A resource to configure a L2VPN VPN session.
 ---
 
-# nsxt_policy_l2vpn_vpn_session
+# nsxt_policy_l2vpn_session
 
 This resource provides a method for the management of a L2VPN VPN session.
 
@@ -33,7 +33,7 @@ The following arguments are supported:
 * `service_path` - (Required) The path of the L2 VPN service for the VPN session.
 * `transport_tunnels` - (Required) List of transport tunnels paths for redundancy. L2VPN supports only `AES_GCM_128` encryption algorithm for IPSec tunnel profile.
 * `direction` - (Optional) The traffic direction apply to the MSS clamping. `BOTH` or `NONE`. Must be specified together with `max_segment_size`.
-* `max_segment_size` - (Optional) Maximum amount of data the host will accept in a Tcp segment. Value should be between `108` and `8860`. Must be specified together with `direction`.
+* `max_segment_size` - (Optional) Maximum amount of data the host will accept in a TCP segment. Value should be between `108` and `8860`. Must be specified together with `direction`.
 * `local_address` - (Optional) IP Address of the local tunnel port. This property only applies in `CLIENT` mode.
 * `peer_address` - (Optional) IP Address of the peer tunnel port. This property only applies in `CLIENT` mode.
 * `protocol` - (Optional) Encapsulation protocol used by the tunnel. `GRE` is the only supported value.
@@ -56,4 +56,4 @@ An existing object can be [imported][docs-import] into this resource, via the fo
 terraform import nsxt_policy_l2_vpn_session.test UUID
 ```
 
-The above command imports l2vpn VPN  session named `test` with the NSX L2VPN VPN Ike session ID `UUID`.
+The above command imports L2 VPN session named `test` with the NSX ID `UUID`.
