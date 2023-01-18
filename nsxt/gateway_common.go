@@ -96,7 +96,7 @@ func getPolicyLocaleServiceSchema(isTier1 bool) *schema.Schema {
 			ValidateFunc: validatePolicyPath(),
 		},
 		"preferred_edge_paths": {
-			Type:          schema.TypeSet,
+			Type:          schema.TypeList,
 			Description:   "Paths of specific edge nodes",
 			Optional:      true,
 			Elem:          getElemPolicyPathSchema(),
@@ -300,7 +300,7 @@ func initGatewayLocaleServices(d *schema.ResourceData, connector *client.RestCon
 	for _, service := range services {
 		cfg := service.(map[string]interface{})
 		edgeClusterPath := cfg["edge_cluster_path"].(string)
-		edgeNodes := interface2StringList(cfg["preferred_edge_paths"].(*schema.Set).List())
+		edgeNodes := interfaceListToStringList(cfg["preferred_edge_paths"].([]interface{}))
 		path := cfg["path"].(string)
 
 		var serviceID string
