@@ -111,6 +111,7 @@ func TestAccResourceNsxtPolicyTier1Gateway_globalManagerWithQos(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "route_advertisement_types.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "route_advertisement_rule.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "locale_service.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "locale_service.0.preferred_edge_paths.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "intersite_config.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "intersite_config.0.transit_subnet", testAccGmGatewayIntersiteSubnet),
 					resource.TestCheckResourceAttrSet(testResourceName, "intersite_config.0.primary_site_path"),
@@ -163,6 +164,7 @@ func TestAccResourceNsxtPolicyTier1Gateway_globalManagerNoSubnet(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "route_advertisement_types.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "route_advertisement_rule.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "locale_service.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "locale_service.0.preferred_edge_paths.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "intersite_config.#", "1"),
 					resource.TestCheckResourceAttrSet(testResourceName, "intersite_config.0.transit_subnet"),
 					resource.TestCheckResourceAttrSet(testResourceName, "intersite_config.0.primary_site_path"),
@@ -203,7 +205,7 @@ resource "nsxt_policy_tier1_gateway" "test" {
 
   locale_service {
     edge_cluster_path    = data.nsxt_policy_edge_cluster.ec_site1.path
-    preferred_edge_paths = [data.nsxt_policy_edge_node.en_site1.path]
+    preferred_edge_paths = [data.nsxt_policy_edge_node.en_site2.path, data.nsxt_policy_edge_node.en_site1.path]
   }
 
   intersite_config {
@@ -261,7 +263,7 @@ resource "nsxt_policy_tier1_gateway" "test" {
 
   locale_service {
     edge_cluster_path    = data.nsxt_policy_edge_cluster.ec_site1.path
-    preferred_edge_paths = [data.nsxt_policy_edge_node.en_site1.path]
+    preferred_edge_paths = [data.nsxt_policy_edge_node.en_site1.path, data.nsxt_policy_edge_node.en_site2.path]
   }
 
   intersite_config {

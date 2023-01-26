@@ -156,6 +156,11 @@ data "nsxt_policy_edge_cluster" "ec_site2" {
 data "nsxt_policy_edge_node" "en_site1" {
   edge_cluster_path = data.nsxt_policy_edge_cluster.ec_site1.path
   member_index      = 0
+}
+
+data "nsxt_policy_edge_node" "en_site2" {
+  edge_cluster_path = data.nsxt_policy_edge_cluster.ec_site1.path
+  member_index      = 1
 }`, getTestSiteName(), getTestAnotherSiteName())
 }
 
