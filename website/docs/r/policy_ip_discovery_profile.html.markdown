@@ -30,6 +30,7 @@ resource "nsxt_policy_ip_discovery_profile" "ip_discovery_profile" {
   nd_snooping_enabled      = false
   nd_snooping_limit        = 12
   vmtools_v6_enabled       = false
+  tofu_enabled             = false
 
   tag {
     scope = "color"
@@ -56,6 +57,7 @@ The following arguments are supported:
 * `nd_snooping_enabled` - (Optional) Is ND snooping enabled or not
 * `nd_snooping_limit` - (Optional) Maximum number of ND (Neighbor Discovery Protocol) bindings
 * `vmtools_v6_enabled` - (Optional) Use VMTools to learn the IPv6 addresses which are configured on interfaces of a VM
+* `tofu_enabled` - (Optional) Indicates whether "Trust on First Use(TOFU)" paradigm is enabled
 
 ## Attributes Reference
 

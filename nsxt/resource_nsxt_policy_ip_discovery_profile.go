@@ -96,6 +96,12 @@ func resourceNsxtPolicyIPDiscoveryProfile() *schema.Resource {
 				Optional:    true,
 				Default:     false,
 			},
+			"tofu_enabled": {
+				Type:        schema.TypeBool,
+				Description: "Is TOFU enabled or not",
+				Optional:    true,
+				Default:     true,
+			},
 		},
 	}
 }
@@ -117,6 +123,7 @@ func ipDiscoveryProfileObjFromSchema(d *schema.ResourceData) model.IPDiscoveryPr
 	ndSnoopingEnabled := d.Get("nd_snooping_enabled").(bool)
 	ndSnoopingLimit := int64(d.Get("nd_snooping_limit").(int))
 	vmtoolsV6Enabled := d.Get("vmtools_v6_enabled").(bool)
+	toFuEnabled := d.Get("tofu_enabled").(bool)
 
 	return model.IPDiscoveryProfile{
 		DisplayName:         &displayName,
@@ -142,6 +149,7 @@ func ipDiscoveryProfileObjFromSchema(d *schema.ResourceData) model.IPDiscoveryPr
 			},
 			VmtoolsV6Enabled: &vmtoolsV6Enabled,
 		},
+		TofuEnabled: &toFuEnabled,
 	}
 }
 
@@ -248,6 +256,7 @@ func resourceNsxtPolicyIPDiscoveryProfileRead(d *schema.ResourceData, m interfac
 	d.Set("nd_snooping_enabled", obj.IpV6DiscoveryOptions.NdSnoopingConfig.NdSnoopingEnabled)
 	d.Set("nd_snooping_limit", obj.IpV6DiscoveryOptions.NdSnoopingConfig.NdSnoopingLimit)
 	d.Set("vmtools_v6_enabled", obj.IpV6DiscoveryOptions.VmtoolsV6Enabled)
+	d.Set("tofu_enabled", obj.TofuEnabled)
 
 	return nil
 }
