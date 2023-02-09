@@ -24,6 +24,7 @@ var accTestPolicyIPDiscoveryProfileCreateAttributes = map[string]string{
 	"nd_snooping_enabled":            "true",
 	"nd_snooping_limit":              "8",
 	"vmtools_v6_enabled":             "true",
+	"tofu_enabled":                   "true",
 }
 
 var accTestPolicyIPDiscoveryProfileUpdateAttributes = map[string]string{
@@ -39,6 +40,7 @@ var accTestPolicyIPDiscoveryProfileUpdateAttributes = map[string]string{
 	"nd_snooping_enabled":            "false",
 	"nd_snooping_limit":              "12",
 	"vmtools_v6_enabled":             "false",
+	"tofu_enabled":                   "false",
 }
 
 func TestAccResourceNsxtPolicyIPDiscoveryProfile_basic(t *testing.T) {
@@ -67,6 +69,7 @@ func TestAccResourceNsxtPolicyIPDiscoveryProfile_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "nd_snooping_enabled", accTestPolicyIPDiscoveryProfileCreateAttributes["nd_snooping_enabled"]),
 					resource.TestCheckResourceAttr(testResourceName, "nd_snooping_limit", accTestPolicyIPDiscoveryProfileCreateAttributes["nd_snooping_limit"]),
 					resource.TestCheckResourceAttr(testResourceName, "vmtools_v6_enabled", accTestPolicyIPDiscoveryProfileCreateAttributes["vmtools_v6_enabled"]),
+					resource.TestCheckResourceAttr(testResourceName, "tofu_enabled", accTestPolicyIPDiscoveryProfileCreateAttributes["tofu_enabled"]),
 
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -90,6 +93,7 @@ func TestAccResourceNsxtPolicyIPDiscoveryProfile_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "nd_snooping_enabled", accTestPolicyIPDiscoveryProfileUpdateAttributes["nd_snooping_enabled"]),
 					resource.TestCheckResourceAttr(testResourceName, "nd_snooping_limit", accTestPolicyIPDiscoveryProfileUpdateAttributes["nd_snooping_limit"]),
 					resource.TestCheckResourceAttr(testResourceName, "vmtools_v6_enabled", accTestPolicyIPDiscoveryProfileUpdateAttributes["vmtools_v6_enabled"]),
+					resource.TestCheckResourceAttr(testResourceName, "tofu_enabled", accTestPolicyIPDiscoveryProfileUpdateAttributes["tofu_enabled"]),
 
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -116,6 +120,7 @@ func TestAccResourceNsxtPolicyIPDiscoveryProfile_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "nd_snooping_enabled", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "nd_snooping_limit", "3"),
 					resource.TestCheckResourceAttr(testResourceName, "vmtools_v6_enabled", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "tofu_enabled", "true"),
 				),
 			},
 		},
@@ -214,11 +219,12 @@ resource "nsxt_policy_ip_discovery_profile" "test" {
   nd_snooping_enabled = %s
   nd_snooping_limit = %s
   vmtools_v6_enabled = %s
+  tofu_enabled = %s
   tag {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, attrMap["display_name"], attrMap["description"], attrMap["arp_nd_binding_timeout"], attrMap["duplicate_ip_detection_enabled"], attrMap["arp_binding_limit"], attrMap["arp_snooping_enabled"], attrMap["dhcp_snooping_enabled"], attrMap["vmtools_enabled"], attrMap["dhcp_snooping_v6_enabled"], attrMap["nd_snooping_enabled"], attrMap["nd_snooping_limit"], attrMap["vmtools_v6_enabled"])
+}`, attrMap["display_name"], attrMap["description"], attrMap["arp_nd_binding_timeout"], attrMap["duplicate_ip_detection_enabled"], attrMap["arp_binding_limit"], attrMap["arp_snooping_enabled"], attrMap["dhcp_snooping_enabled"], attrMap["vmtools_enabled"], attrMap["dhcp_snooping_v6_enabled"], attrMap["nd_snooping_enabled"], attrMap["nd_snooping_limit"], attrMap["vmtools_v6_enabled"], attrMap["tofu_enabled"])
 }
 
 func testAccNsxtPolicyIPDiscoveryProfileMinimalistic() string {
