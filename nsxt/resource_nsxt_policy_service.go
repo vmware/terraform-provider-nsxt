@@ -413,7 +413,7 @@ func resourceNsxtPolicyServiceGetEntriesFromSchema(d *schema.ResourceData) ([]*d
 			ResourceType:      model.ServiceEntry_RESOURCE_TYPE_NESTEDSERVICESERVICEENTRY,
 		}
 
-		dataValue, errs := converter.ConvertToVapi(serviceEntry, model.NestedServiceServiceEntryBindingType()) // To define
+		dataValue, errs := converter.ConvertToVapi(serviceEntry, model.NestedServiceServiceEntryBindingType())
 		if errs != nil {
 			return serviceEntries, errs[0]
 		}
