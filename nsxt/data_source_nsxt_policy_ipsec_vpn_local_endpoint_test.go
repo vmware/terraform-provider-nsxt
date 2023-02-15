@@ -8,8 +8,9 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
+
+var dataSourceNsxtPolicyTestAddress = "20.20.0.2"
 
 func TestAccDataSourceNsxtPolicyIPSecVpnLocalEndpoint(t *testing.T) {
 	name := getAccTestResourceName()
@@ -21,14 +22,12 @@ func TestAccDataSourceNsxtPolicyIPSecVpnLocalEndpoint(t *testing.T) {
 			testAccOnlyLocalManager(t)
 		},
 		Providers: testAccProviders,
-		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyIPSecVpnLocalEndpointCheckDestroy(state, name)
-		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNsxtPolicyIPSecVpnLocalEndpointDataSourceTemplate(name),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "local_address", dataSourceNsxtPolicyTestAddress),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 				),
 			},
@@ -46,14 +45,12 @@ func TestAccDataSourceNsxtPolicyIPSecVpnLocalEndpoint_withService(t *testing.T) 
 			testAccOnlyLocalManager(t)
 		},
 		Providers: testAccProviders,
-		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyIPSecVpnLocalEndpointCheckDestroy(state, name)
-		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNsxtPolicyIPSecVpnLocalEndpointDataSourceTemplateWithService(name),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "local_address", dataSourceNsxtPolicyTestAddress),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 				),
 			},
@@ -88,5 +85,5 @@ resource "nsxt_policy_ipsec_vpn_local_endpoint" "test" {
   service_path  = nsxt_policy_ipsec_vpn_service.test.path
   display_name  = "%s"
   local_address = "%s"
-}`, name, name, "20.20.0.10")
+}`, name, name, dataSourceNsxtPolicyTestAddress)
 }
