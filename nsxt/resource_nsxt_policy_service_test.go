@@ -575,6 +575,118 @@ func TestAccResourceNsxtPolicyService_algType(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyService_nestedServiceType(t *testing.T) {
+	name := getAccTestResourceName()
+	updateName := getAccTestResourceName()
+	testResourceName := "nsxt_policy_service.test"
+	testNestedService1Name := "HTTP"
+	testNestedService2Name := "HTTPS"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyServiceCheckDestroy(state, updateName)
+		},
+		Steps: []resource.TestStep{
+			{
+				// Step 0: Create a nested service
+				Config: testAccNsxtPolicyNestedServiceCreateTemplate(name, testNestedService1Name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyServiceExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Nested service"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "algorithm_entry.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "l4_port_set_entry.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "icmp_entry.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "igmp_entry.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "ether_type_entry.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "ip_protocol_entry.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "nested_service_entry.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "nested_service_entry.0.display_name", testNestedService1Name),
+					resource.TestCheckResourceAttr(testResourceName, "nested_service_entry.0.description", "Entry-1"),
+					resource.TestCheckResourceAttr(testResourceName, "nested_service_entry.0.nested_service_path", "/infra/services/"+testNestedService1Name),
+				),
+			},
+			{
+				// Step 1: Add another nested service
+				Config: testAccNsxtPolicyNestedServiceUpdateTemplate(name, testNestedService1Name, testNestedService2Name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyServiceExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Nested service"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "algorithm_entry.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "l4_port_set_entry.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "icmp_entry.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "igmp_entry.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "ether_type_entry.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "ip_protocol_entry.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "nested_service_entry.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "nested_service_entry.0.display_name", testNestedService1Name),
+					resource.TestCheckResourceAttr(testResourceName, "nested_service_entry.0.description", "Entry-1"),
+					resource.TestCheckResourceAttr(testResourceName, "nested_service_entry.0.nested_service_path", "/infra/services/"+testNestedService1Name),
+					resource.TestCheckResourceAttr(testResourceName, "nested_service_entry.1.display_name", testNestedService2Name),
+					resource.TestCheckResourceAttr(testResourceName, "nested_service_entry.1.description", "Entry-2"),
+					resource.TestCheckResourceAttr(testResourceName, "nested_service_entry.1.nested_service_path", "/infra/services/"+testNestedService2Name),
+				),
+			},
+			{
+				// Step 2: Remove nested service 2
+				Config: testAccNsxtPolicyNestedServiceCreateTemplate(name, testNestedService1Name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyServiceExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Nested service"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "algorithm_entry.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "l4_port_set_entry.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "icmp_entry.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "igmp_entry.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "ether_type_entry.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "ip_protocol_entry.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "nested_service_entry.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "nested_service_entry.0.display_name", testNestedService1Name),
+					resource.TestCheckResourceAttr(testResourceName, "nested_service_entry.0.description", "Entry-1"),
+					resource.TestCheckResourceAttr(testResourceName, "nested_service_entry.0.nested_service_path", "/infra/services/"+testNestedService1Name),
+				),
+			},
+			{
+				// Step 3: Mix with other service types
+				Config: testAccNsxtPolicyNestedServiceMixedTemplate(name, testNestedService1Name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyServiceExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Nested service"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "algorithm_entry.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "l4_port_set_entry.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "l4_port_set_entry.0.display_name", "entry-2"),
+					resource.TestCheckResourceAttr(testResourceName, "l4_port_set_entry.0.description", "Entry-2"),
+					resource.TestCheckResourceAttr(testResourceName, "l4_port_set_entry.0.protocol", "TCP"),
+					resource.TestCheckResourceAttr(testResourceName, "icmp_entry.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "igmp_entry.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "ether_type_entry.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "ip_protocol_entry.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "nested_service_entry.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "nested_service_entry.0.display_name", testNestedService1Name),
+					resource.TestCheckResourceAttr(testResourceName, "nested_service_entry.0.description", "Entry-1"),
+					resource.TestCheckResourceAttr(testResourceName, "nested_service_entry.0.nested_service_path", "/infra/services/"+testNestedService1Name),
+				),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtPolicyService_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_service.test"
@@ -920,4 +1032,73 @@ resource "nsxt_policy_service" "test" {
     tag   = "tag1"
   }
 }`, serviceName, serviceName, alg, sourcePorts, destPort)
+}
+
+func testAccNsxtPolicyNestedServiceCreateTemplate(serviceName string, nestedServiceEntryName string) string {
+	return fmt.Sprintf(`
+resource "nsxt_policy_service" "test" {
+  description  = "Nested service"
+  display_name = "%s"
+
+  nested_service_entry {
+    display_name        = "%s"
+    description         = "Entry-1"
+	nested_service_path = "/infra/services/%s"
+  }
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+}`, serviceName, nestedServiceEntryName, nestedServiceEntryName)
+}
+
+func testAccNsxtPolicyNestedServiceUpdateTemplate(serviceName string, nestedServiceEntry1Name string, nestedServiceEntry2Name string) string {
+	return fmt.Sprintf(`resource "nsxt_policy_service" "test" {
+  description  = "Nested service"
+  display_name = "%s"
+
+  nested_service_entry {
+    display_name        = "%s"
+    description         = "Entry-1"
+	nested_service_path	= "/infra/services/%s"
+  }
+
+  nested_service_entry {
+    display_name        = "%s"
+    description         = "Entry-2"
+	nested_service_path = "/infra/services/%s"
+  }
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+}`, serviceName, nestedServiceEntry1Name, nestedServiceEntry1Name, nestedServiceEntry2Name, nestedServiceEntry2Name)
+
+}
+
+func testAccNsxtPolicyNestedServiceMixedTemplate(serviceName string, nestedServiceEntryName string) string {
+	return fmt.Sprintf(`resource "nsxt_policy_service" "test" {
+  description  = "Nested service"
+  display_name = "%s"
+
+  nested_service_entry {
+    display_name        = "%s"
+    description         = "Entry-1"
+	nested_service_path = "/infra/services/%s"
+  }
+
+  l4_port_set_entry {
+    display_name      = "entry-2"
+    description       = "Entry-2"
+    protocol          = "TCP"
+    destination_ports = [ "443" ]
+  }
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+}`, serviceName, nestedServiceEntryName, nestedServiceEntryName)
 }
