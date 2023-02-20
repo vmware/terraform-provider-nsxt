@@ -396,7 +396,7 @@ func resourceNsxtPolicyServiceGetEntriesFromSchema(d *schema.ResourceData) ([]*d
 		entryData := nestedEntry.(map[string]interface{})
 		displayName := entryData["display_name"].(string)
 		description := entryData["description"].(string)
-		nested_service_path := entryData["nested_service_path"].(string)
+		nestedServicePath := entryData["nested_service_path"].(string)
 
 		// Use a different random Id each time
 		id := newUUID()
@@ -405,7 +405,7 @@ func resourceNsxtPolicyServiceGetEntriesFromSchema(d *schema.ResourceData) ([]*d
 			Id:                &id,
 			DisplayName:       &displayName,
 			Description:       &description,
-			NestedServicePath: &nested_service_path,
+			NestedServicePath: &nestedServicePath,
 			ResourceType:      model.ServiceEntry_RESOURCE_TYPE_NESTEDSERVICESERVICEENTRY,
 		}
 
