@@ -191,9 +191,9 @@ func resourceNsxtPolicyService() *schema.Resource {
 				Optional:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"display_name": getOptionalDisplayNameSchema(false),
-						"description":  getDescriptionSchema(),
-						"service_path": getPolicyPathSchema(true, false, "Nested Service Path"),
+						"display_name":        getOptionalDisplayNameSchema(false),
+						"description":         getDescriptionSchema(),
+						"nested_service_path": getPolicyPathSchema(true, false, "Nested Service Path"),
 					},
 				},
 			},
