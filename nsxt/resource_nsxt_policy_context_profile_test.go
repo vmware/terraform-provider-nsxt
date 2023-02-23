@@ -13,11 +13,15 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 )
 
+const (
+	testSystemDomainName = "*-myfiles.sharepoint.com"
+)
+
 func TestAccResourceNsxtPolicyContextProfile_basic(t *testing.T) {
 	name := getAccTestResourceName()
 	updatedName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_context_profile.test"
-	attributes := testAccNsxtPolicyContextProfileAttributeDomainNameTemplate()
+	attributes := testAccNsxtPolicyContextProfileAttributeDomainNameTemplate(testSystemDomainName)
 	updatedAttributes := testAccNsxtPolicyContextProfileAttributeURLCategoryTemplate()
 
 	resource.Test(t, resource.TestCase{
@@ -41,7 +45,7 @@ func TestAccResourceNsxtPolicyContextProfile_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "domain_name.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "url_category.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "domain_name.0.value.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "domain_name.0.value.0", "*-myfiles.sharepoint.com"),
+					resource.TestCheckResourceAttr(testResourceName, "domain_name.0.value.0", testSystemDomainName),
 				),
 			},
 			{
@@ -65,10 +69,44 @@ func TestAccResourceNsxtPolicyContextProfile_basic(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyContextProfile_CustomDomain(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_context_profile.test"
+	fqdn := getAccTestFQDN()
+	attributes := testAccNsxtPolicyContextProfileAttributeDomainNameTemplate(fqdn)
+	dependsOn := testAccNsxtPolicyContextProfileDependsOnTemplate("nsxt_policy_context_profile_custom_attribute.test")
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyContextProfileCheckDestroy(state, testResourceName)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyContextProfileCustomAttributeArgTemplate(accTestPolicyContextProfileCustomAttributeAttributes["key"], fqdn) + testAccNsxtPolicyContextProfileTemplate(name, attributes+dependsOn),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyContextProfileExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "app_id.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "domain_name.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "url_category.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "domain_name.0.value.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "domain_name.0.value.0", fqdn),
+				),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtPolicyContextProfile_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_context_profile.test"
-	attributes := testAccNsxtPolicyContextProfileAttributeDomainNameTemplate()
+	attributes := testAccNsxtPolicyContextProfileAttributeDomainNameTemplate(testSystemDomainName)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
@@ -93,8 +131,8 @@ func TestAccResourceNsxtPolicyContextProfile_multipleAttributes(t *testing.T) {
 	name := getAccTestResourceName()
 	updatedName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_context_profile.test"
-	attributes := testAccNsxtPolicyContextProfileAttributeDomainNameTemplate()
-	updatedAttributes := testAccNsxtPolicyContextProfileAttributeDomainNameTemplate() + testAccNsxtPolicyContextProfileAttributeAppIDTemplate()
+	attributes := testAccNsxtPolicyContextProfileAttributeDomainNameTemplate(testSystemDomainName)
+	updatedAttributes := testAccNsxtPolicyContextProfileAttributeDomainNameTemplate(testSystemDomainName) + testAccNsxtPolicyContextProfileAttributeAppIDTemplate()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
@@ -117,7 +155,7 @@ func TestAccResourceNsxtPolicyContextProfile_multipleAttributes(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "domain_name.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "url_category.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "domain_name.0.value.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "domain_name.0.value.0", "*-myfiles.sharepoint.com"),
+					resource.TestCheckResourceAttr(testResourceName, "domain_name.0.value.0", testSystemDomainName),
 				),
 			},
 			{
@@ -139,7 +177,7 @@ func TestAccResourceNsxtPolicyContextProfile_multipleAttributes(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "app_id.0.value.1", "SSH"),
 					resource.TestCheckResourceAttr(testResourceName, "app_id.0.value.2", "SSL"),
 					resource.TestCheckResourceAttr(testResourceName, "domain_name.0.value.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "domain_name.0.value.0", "*-myfiles.sharepoint.com"),
+					resource.TestCheckResourceAttr(testResourceName, "domain_name.0.value.0", testSystemDomainName),
 				),
 			},
 		},
@@ -153,7 +191,7 @@ func TestAccResourceNsxtPolicyContextProfile_subAttributes(t *testing.T) {
 	attributes := testAccNsxtPolicyContextProfileAttributeAppIDSubAttributesTemplate()
 	updatedAttributes := testAccNsxtPolicyContextProfileAttributeAppIDSubAttributesUpdatedTemplate()
 	attributesNoSub := testAccNsxtPolicyContextProfileAttributeAppIDSslTemplate()
-	attributesDomainName := testAccNsxtPolicyContextProfileAttributeDomainNameTemplate()
+	attributesDomainName := testAccNsxtPolicyContextProfileAttributeDomainNameTemplate(testSystemDomainName)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
@@ -244,7 +282,7 @@ func TestAccResourceNsxtPolicyContextProfile_subAttributes(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "domain_name.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "url_category.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "domain_name.0.value.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "domain_name.0.value.0", "*-myfiles.sharepoint.com"),
+					resource.TestCheckResourceAttr(testResourceName, "domain_name.0.value.0", testSystemDomainName),
 				),
 			},
 		},
@@ -314,11 +352,11 @@ resource "nsxt_policy_context_profile" "test" {
 }`, name, attributes)
 }
 
-func testAccNsxtPolicyContextProfileAttributeDomainNameTemplate() string {
-	return `
+func testAccNsxtPolicyContextProfileAttributeDomainNameTemplate(domain string) string {
+	return fmt.Sprintf(`
 domain_name {
-  value     = ["*-myfiles.sharepoint.com"]
-}`
+  value     = ["%s"]
+}`, domain)
 }
 
 func testAccNsxtPolicyContextProfileAttributeAppIDTemplate() string {
@@ -360,4 +398,9 @@ func testAccNsxtPolicyContextProfileAttributeAppIDSslTemplate() string {
 app_id {
   value     = ["SSL"]
 }`
+}
+
+func testAccNsxtPolicyContextProfileDependsOnTemplate(dependency string) string {
+	return fmt.Sprintf(`
+depends_on = [%s]`, dependency)
 }

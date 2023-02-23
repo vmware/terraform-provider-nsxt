@@ -839,5 +839,5 @@ func testAccNsxtPolicySecurityPolicyWithProfiles(name string, direction string, 
 	profiles := `
 profiles = [nsxt_policy_context_profile.test.path]
 `
-	return testAccNsxtPolicyContextProfileTemplate("security-policy-test-profile", testAccNsxtPolicyContextProfileAttributeDomainNameTemplate()) + testAccNsxtPolicySecurityPolicyWithRule(name, direction, protocol, ruleTag, domainName, profiles)
+	return testAccNsxtPolicyContextProfileTemplate("security-policy-test-profile", testAccNsxtPolicyContextProfileAttributeDomainNameTemplate(testSystemDomainName)) + testAccNsxtPolicySecurityPolicyWithRule(name, direction, protocol, ruleTag, domainName, profiles)
 }
