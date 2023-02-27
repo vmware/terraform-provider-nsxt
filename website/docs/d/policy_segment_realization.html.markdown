@@ -28,7 +28,7 @@ data "nsxt_policy_segment_realization" "s1" {
 
 # usage in vsphere provider
 data "vsphere_network" "net" {
-  name          = data.nsxt_policy_segment_realization.s1.network_name
+  name          = nsxt_policy_segment_realization.s1.network_name
   datacenter_id = data.vsphere_datacenter.datacenter.id
 }
 ```

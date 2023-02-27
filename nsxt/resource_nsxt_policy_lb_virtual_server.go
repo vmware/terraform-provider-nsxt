@@ -1781,8 +1781,8 @@ func resourceNsxtPolicyLBVirtualServerUpdate(d *schema.ResourceData, m interface
 		   rules in resource /    rules in state /    rules in NSX => rules will be changed
 		no rules in resource /    rules in state /    rules in NSX => rules will be deleted
 	*/
-	if d.HasChange("rule") {
-		log.Printf("[INFO] Changes detected in rule section")
+	if !d.HasChange("rule") {
+		log.Printf("[INFO] No changes detected in rule section")
 		existingObj, err := client.Get(id)
 		if err != nil {
 			return handleUpdateError("LBVirtualServer", id, err)
@@ -1792,7 +1792,7 @@ func resourceNsxtPolicyLBVirtualServerUpdate(d *schema.ResourceData, m interface
 			obj.Rules = existingObj.Rules
 		}
 	} else {
-		log.Printf("[INFO] No changes in rule section")
+		log.Printf("[INFO] Changes detected in rule section")
 	}
 
 	if maxNewConnectionRate > 0 {
