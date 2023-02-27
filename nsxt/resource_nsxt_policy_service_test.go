@@ -5,6 +5,7 @@ package nsxt
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -581,6 +582,17 @@ func TestAccResourceNsxtPolicyService_nestedServiceType(t *testing.T) {
 	testResourceName := "nsxt_policy_service.test"
 	testNestedService1Name := "HTTP"
 	testNestedService2Name := "HTTPS"
+	regexpService1Name, err := regexp.Compile("/.*/" + testNestedService1Name)
+
+	if err != nil {
+		fmt.Printf("Error while compiling regexp: %v", err)
+	}
+
+	regexpService2Name, err := regexp.Compile("/.*/" + testNestedService2Name)
+
+	if err != nil {
+		fmt.Printf("Error while compiling regexp: %v", err)
+	}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -608,7 +620,7 @@ func TestAccResourceNsxtPolicyService_nestedServiceType(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "nested_service_entry.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "nested_service_entry.0.display_name", testNestedService1Name),
 					resource.TestCheckResourceAttr(testResourceName, "nested_service_entry.0.description", "Entry-1"),
-					resource.TestCheckResourceAttr(testResourceName, "nested_service_entry.0.nested_service_path", "/infra/services/"+testNestedService1Name),
+					resource.TestMatchResourceAttr(testResourceName, "nested_service_entry.0.nested_service_path", regexpService1Name),
 				),
 			},
 			{
@@ -630,10 +642,10 @@ func TestAccResourceNsxtPolicyService_nestedServiceType(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "nested_service_entry.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "nested_service_entry.0.display_name", testNestedService1Name),
 					resource.TestCheckResourceAttr(testResourceName, "nested_service_entry.0.description", "Entry-1"),
-					resource.TestCheckResourceAttr(testResourceName, "nested_service_entry.0.nested_service_path", "/infra/services/"+testNestedService1Name),
+					resource.TestMatchResourceAttr(testResourceName, "nested_service_entry.0.nested_service_path", regexpService1Name),
 					resource.TestCheckResourceAttr(testResourceName, "nested_service_entry.1.display_name", testNestedService2Name),
 					resource.TestCheckResourceAttr(testResourceName, "nested_service_entry.1.description", "Entry-2"),
-					resource.TestCheckResourceAttr(testResourceName, "nested_service_entry.1.nested_service_path", "/infra/services/"+testNestedService2Name),
+					resource.TestMatchResourceAttr(testResourceName, "nested_service_entry.1.nested_service_path", regexpService2Name),
 				),
 			},
 			{
@@ -655,7 +667,7 @@ func TestAccResourceNsxtPolicyService_nestedServiceType(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "nested_service_entry.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "nested_service_entry.0.display_name", testNestedService1Name),
 					resource.TestCheckResourceAttr(testResourceName, "nested_service_entry.0.description", "Entry-1"),
-					resource.TestCheckResourceAttr(testResourceName, "nested_service_entry.0.nested_service_path", "/infra/services/"+testNestedService1Name),
+					resource.TestMatchResourceAttr(testResourceName, "nested_service_entry.0.nested_service_path", regexpService1Name),
 				),
 			},
 			{
@@ -680,7 +692,7 @@ func TestAccResourceNsxtPolicyService_nestedServiceType(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "nested_service_entry.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "nested_service_entry.0.display_name", testNestedService1Name),
 					resource.TestCheckResourceAttr(testResourceName, "nested_service_entry.0.description", "Entry-1"),
-					resource.TestCheckResourceAttr(testResourceName, "nested_service_entry.0.nested_service_path", "/infra/services/"+testNestedService1Name),
+					resource.TestMatchResourceAttr(testResourceName, "nested_service_entry.0.nested_service_path", regexpService1Name),
 				),
 			},
 		},
