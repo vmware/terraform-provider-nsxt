@@ -29,7 +29,7 @@ func dataSourceNsxtPolicyIPSecVpnServiceRead(d *schema.ResourceData, m interface
 	gwPath := d.Get("gateway_path").(string)
 	query := make(map[string]string)
 	if len(gwPath) > 0 {
-		query["parent_path"] = fmt.Sprintf("%s/*", gwPath)
+		query["parent_path"] = fmt.Sprintf("%s*", gwPath)
 	}
 	_, err := policyDataSourceResourceReadWithValidation(d, connector, isPolicyGlobalManager(m), "IPSecVpnService", query, false)
 	if err != nil {

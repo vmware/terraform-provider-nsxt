@@ -19,7 +19,7 @@ func TestAccDataSourceNsxtPolicyQosProfile_basic(t *testing.T) {
 	name := getAccTestDataSourceName()
 	testResourceName := "data.nsxt_policy_qos_profile.test"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {

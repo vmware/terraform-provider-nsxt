@@ -100,6 +100,34 @@ func (c *localEndpointClient) Get(connector *client.RestConnector, id string) (m
 	return client.Get(c.gwID, c.serviceID, id)
 }
 
+// Note: we don't expect pagination to be relevant here
+func (c *localEndpointClient) List(connector *client.RestConnector) ([]model.IPSecVpnLocalEndpoint, error) {
+	boolFalse := false
+	var cursor string
+	var result model.IPSecVpnLocalEndpointListResult
+	var err error
+	if c.isT0 {
+		if len(c.localeServiceID) > 0 {
+			client := t0_nested_service.NewLocalEndpointsClient(connector)
+			result, err = client.List(c.gwID, c.localeServiceID, c.serviceID, &cursor, &boolFalse, nil, nil, nil, nil)
+		} else {
+			client := t0_service.NewLocalEndpointsClient(connector)
+			result, err = client.List(c.gwID, c.serviceID, &cursor, &boolFalse, nil, nil, nil, nil)
+		}
+
+	} else {
+		if len(c.localeServiceID) > 0 {
+			client := t1_nested_service.NewLocalEndpointsClient(connector)
+			result, err = client.List(c.gwID, c.localeServiceID, c.serviceID, &cursor, &boolFalse, nil, nil, nil, nil)
+		} else {
+			client := t1_service.NewLocalEndpointsClient(connector)
+			result, err = client.List(c.gwID, c.serviceID, &cursor, &boolFalse, nil, nil, nil, nil)
+		}
+	}
+
+	return result.Results, err
+}
+
 func (c *localEndpointClient) Patch(connector *client.RestConnector, id string, obj model.IPSecVpnLocalEndpoint) error {
 	if c.isT0 {
 		if len(c.localeServiceID) > 0 {
