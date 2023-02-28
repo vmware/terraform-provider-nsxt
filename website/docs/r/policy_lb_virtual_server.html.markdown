@@ -52,13 +52,8 @@ resource "nsxt_policy_lb_virtual_server" "test" {
     phase          = "HTTP_REQUEST_REWRITE"
 
     action {
-      http_redirect {
-        redirect_status = "301"
-        redirect_url    = "dummy"
-      }
-      http_redirect {
-        redirect_status = "302"
-        redirect_url    = "other_dummy"
+      http_request_header_delete {
+        header_name = "X-something"
       }
     }
     condition {
