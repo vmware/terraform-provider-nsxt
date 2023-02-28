@@ -141,6 +141,45 @@ func TestAccResourceNsxtPolicySecurityPolicy_basic(t *testing.T) {
 		},
 	})
 }
+func TestAccResourceNsxtPolicySecurityPolicy_EthernetRule(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_security_policy.test"
+	direction1 := "IN"
+	proto1 := "NONE"
+	defaultAction := "ALLOW"
+	tag1 := "abc"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicySecurityPolicyCheckDestroy(state, name, defaultDomain)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicySecurityPolicyWithEthernetRule(name, direction1, proto1, tag1, defaultDomain, ""),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicySecurityPolicyExists(testResourceName, defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "category", "Ethernet"),
+					resource.TestCheckResourceAttr(testResourceName, "domain", defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "comments", ""),
+					resource.TestCheckResourceAttr(testResourceName, "locked", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "scope.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.direction", direction1),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.ip_version", proto1),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.action", defaultAction),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.log_label", tag1),
+					resource.TestCheckResourceAttrSet(testResourceName, "rule.0.rule_id"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.tag.#", "1"),
+				),
+			},
+		},
+	})
+}
 
 func TestAccResourceNsxtPolicySecurityPolicy_withDependencies(t *testing.T) {
 	name := getAccTestResourceName()
@@ -626,6 +665,67 @@ resource "nsxt_policy_security_policy" "test" {
   sequence_number = 3
   stateful        = true
   tcp_strict      = false
+
+  tag {
+    scope = "color"
+    tag   = "orange"
+  }
+
+  rule {
+    display_name = "%s"
+    direction    = "%s"
+    ip_version   = "%s"
+    log_label    = "%s"
+
+    tag {
+      scope = "color"
+      tag   = "blue"
+    }
+    %s
+  }
+}`, name, name, direction, protocol, ruleTag, profiles)
+	}
+	return testAccNsxtGlobalPolicyGroupIPAddressCreateTemplate("group", domainName) + fmt.Sprintf(`
+resource "nsxt_policy_security_policy" "test" {
+  display_name    = "%s"
+  description     = "Acceptance Test"
+  category        = "Application"
+  locked          = false
+  sequence_number = 3
+  stateful        = true
+  tcp_strict      = false
+  domain          = data.nsxt_policy_site.test.id
+
+  tag {
+    scope = "color"
+    tag   = "orange"
+  }
+
+  rule {
+    display_name = "%s"
+    direction    = "%s"
+    ip_version   = "%s"
+    log_label    = "%s"
+    source_groups = [nsxt_policy_group.test.path]
+
+    tag {
+      scope = "color"
+      tag   = "blue"
+    }
+    %s
+  }
+}`, name, name, direction, protocol, ruleTag, profiles)
+}
+
+func testAccNsxtPolicySecurityPolicyWithEthernetRule(name string, direction string, protocol string, ruleTag string, domainName string, profiles string) string {
+	if domainName == defaultDomain {
+		return fmt.Sprintf(`
+resource "nsxt_policy_security_policy" "test" {
+  display_name    = "%s"
+  description     = "Acceptance Test"
+  category        = "Ethernet"
+  locked          = false
+  stateful        = false
 
   tag {
     scope = "color"
