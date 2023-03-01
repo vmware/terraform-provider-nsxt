@@ -184,6 +184,19 @@ func resourceNsxtPolicyService() *schema.Resource {
 					},
 				},
 			},
+
+			"nested_service_entry": {
+				Type:        schema.TypeSet,
+				Description: "Nested service service entry",
+				Optional:    true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"display_name":        getOptionalDisplayNameSchema(false),
+						"description":         getDescriptionSchema(),
+						"nested_service_path": getPolicyPathSchema(true, false, "Nested Service Path"),
+					},
+				},
+			},
 		},
 	}
 }
@@ -377,6 +390,34 @@ func resourceNsxtPolicyServiceGetEntriesFromSchema(d *schema.ResourceData) ([]*d
 		serviceEntries = append(serviceEntries, entryStruct)
 	}
 
+	// Nested Service service entries
+	nestedEntries := d.Get("nested_service_entry").(*schema.Set).List()
+	for _, nestedEntry := range nestedEntries {
+		entryData := nestedEntry.(map[string]interface{})
+		displayName := entryData["display_name"].(string)
+		description := entryData["description"].(string)
+		nestedServicePath := entryData["nested_service_path"].(string)
+
+		// Use a different random Id each time
+		id := newUUID()
+
+		serviceEntry := model.NestedServiceServiceEntry{
+			Id:                &id,
+			DisplayName:       &displayName,
+			Description:       &description,
+			NestedServicePath: &nestedServicePath,
+			ResourceType:      model.ServiceEntry_RESOURCE_TYPE_NESTEDSERVICESERVICEENTRY,
+		}
+
+		dataValue, errs := converter.ConvertToVapi(serviceEntry, model.NestedServiceServiceEntryBindingType())
+		if errs != nil {
+			return serviceEntries, errs[0]
+		}
+		entryStruct := dataValue.(*data.StructValue)
+		serviceEntries = append(serviceEntries, entryStruct)
+
+	}
+
 	return serviceEntries, nil
 }
 
@@ -500,6 +541,7 @@ func resourceNsxtPolicyServiceRead(d *schema.ResourceData, m interface{}) error 
 	var etherEntriesList []map[string]interface{}
 	var ipProtEntriesList []map[string]interface{}
 	var algEntriesList []map[string]interface{}
+	var nestedServiceEntriesList []map[string]interface{}
 
 	for _, entry := range obj.ServiceEntries {
 		elem := make(map[string]interface{})
@@ -588,6 +630,18 @@ func resourceNsxtPolicyServiceRead(d *schema.ResourceData, m interface{}) error 
 			elem["display_name"] = filterServiceEntryDisplayName(*serviceEntry.DisplayName, *serviceEntry.Id)
 			elem["description"] = serviceEntry.Description
 			igmpEntriesList = append(igmpEntriesList, elem)
+		} else if resourceType == model.ServiceEntry_RESOURCE_TYPE_NESTEDSERVICESERVICEENTRY {
+			nestedEntry, errs := converter.ConvertToGolang(entry, model.NestedServiceServiceEntryBindingType())
+			if errs != nil {
+				return errs[0]
+			}
+
+			serviceEntry := nestedEntry.(model.NestedServiceServiceEntry)
+			elem["display_name"] = filterServiceEntryDisplayName(*serviceEntry.DisplayName, *serviceEntry.Id)
+			elem["description"] = serviceEntry.Description
+			elem["nested_service_path"] = serviceEntry.NestedServicePath
+			nestedServiceEntriesList = append(nestedServiceEntriesList, elem)
+
 		} else {
 			return fmt.Errorf("Unrecognized Service Entry Type %s", resourceType)
 		}
@@ -619,6 +673,11 @@ func resourceNsxtPolicyServiceRead(d *schema.ResourceData, m interface{}) error 
 	}
 
 	err = d.Set("algorithm_entry", algEntriesList)
+	if err != nil {
+		return err
+	}
+
+	err = d.Set("nested_service_entry", nestedServiceEntriesList)
 	if err != nil {
 		return err
 	}
