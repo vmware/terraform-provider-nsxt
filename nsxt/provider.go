@@ -43,8 +43,6 @@ type nsxtClients struct {
 	CommonConfig commonProviderConfig
 	// NSX Manager client - based on go-vmware-nsxt SDK
 	NsxtClient *api.APIClient
-	// Config for the above client
-	NsxtClientConfig *api.Configuration
 	// Data for NSX Policy client - based on vsphere-automation-sdk-go SDK
 	// First offering of Policy SDK does not support concurrent
 	// operations in single connector. In order to avoid heavy locks,
@@ -84,11 +82,6 @@ func Provider() *schema.Provider {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("NSXT_REMOTE_AUTH", false),
-			},
-			"session_auth": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("NSXT_SESSION_AUTH", true),
 			},
 			"host": {
 				Type:         schema.TypeString,
@@ -446,8 +439,6 @@ func configureNsxtClient(d *schema.ResourceData, clients *nsxtClients) error {
 
 	caFile := d.Get("ca_file").(string)
 	caString := d.Get("ca").(string)
-	sessionAuth := d.Get("session_auth").(bool)
-	skipSessionAuth := !sessionAuth
 
 	retriesConfig := api.ClientRetriesConfiguration{
 		MaxRetries:      clients.CommonConfig.MaxRetries,
@@ -456,7 +447,7 @@ func configureNsxtClient(d *schema.ResourceData, clients *nsxtClients) error {
 		RetryOnStatuses: clients.CommonConfig.RetryStatusCodes,
 	}
 
-	clients.NsxtClientConfig = &api.Configuration{
+	cfg := api.Configuration{
 		BasePath:             "/api/v1",
 		Host:                 host,
 		Scheme:               "https",
@@ -472,10 +463,9 @@ func configureNsxtClient(d *schema.ResourceData, clients *nsxtClients) error {
 		CAString:             caString,
 		Insecure:             insecure,
 		RetriesConfiguration: retriesConfig,
-		SkipSessionAuth:      skipSessionAuth,
 	}
 
-	nsxClient, err := api.NewAPIClient(clients.NsxtClientConfig)
+	nsxClient, err := api.NewAPIClient(&cfg)
 	if err != nil {
 		return err
 	}
@@ -704,24 +694,6 @@ func (processor bearerAuthHeaderProcessor) Process(req *http.Request) error {
 	return nil
 }
 
-type sessionHeaderProcessor struct {
-	cookie string
-	xsrf   string
-}
-
-func newSessionHeaderProcessor(cookie string, xsrf string) *sessionHeaderProcessor {
-	return &sessionHeaderProcessor{
-		cookie: cookie,
-		xsrf:   xsrf,
-	}
-}
-
-func (processor sessionHeaderProcessor) Process(req *http.Request) error {
-	req.Header.Set("Cookie", processor.cookie)
-	req.Header.Set("X-XSRF-TOKEN", processor.xsrf)
-	return nil
-}
-
 func applyLicense(c *api.APIClient, licenseKey string) error {
 	if c == nil {
 		return fmt.Errorf("API client not configured")
@@ -844,15 +816,6 @@ func getPolicyConnector(clients interface{}) *client.RestConnector {
 	}
 	if len(c.CommonConfig.BearerToken) > 0 {
 		connector.AddRequestProcessor(newBearerAuthHeaderProcessor(c.CommonConfig.BearerToken))
-	}
-	if len(c.NsxtClientConfig.DefaultHeader["Cookie"]) > 0 {
-		cookie := c.NsxtClientConfig.DefaultHeader["Cookie"]
-		xsrf := ""
-		if len(c.NsxtClientConfig.DefaultHeader["X-XSRF-TOKEN"]) > 0 {
-			xsrf = c.NsxtClientConfig.DefaultHeader["X-XSRF-TOKEN"]
-		}
-		connector.AddRequestProcessor(newSessionHeaderProcessor(cookie, xsrf))
-		log.Printf("[INFO]: Session headers configured for policy objects")
 	}
 
 	return connector
