@@ -1055,14 +1055,14 @@ resource "nsxt_policy_service" "test" {
   nested_service_entry {
     display_name        = "%s"
     description         = "Entry-1"
-	nested_service_path = "/infra/services/%s"
+	nested_service_path = "%s"
   }
 
   tag {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, serviceName, nestedServiceEntryName, nestedServiceEntryName)
+}`, serviceName, nestedServiceEntryName, testAccAdjustPolicyInfraConfig("/infra/services/"+nestedServiceEntryName))
 }
 
 func testAccNsxtPolicyNestedServiceUpdateTemplate(serviceName string, nestedServiceEntry1Name string, nestedServiceEntry2Name string) string {
@@ -1073,20 +1073,20 @@ func testAccNsxtPolicyNestedServiceUpdateTemplate(serviceName string, nestedServ
   nested_service_entry {
     display_name        = "%s"
     description         = "Entry-1"
-	nested_service_path	= "/infra/services/%s"
+	nested_service_path	= "%s"
   }
 
   nested_service_entry {
     display_name        = "%s"
     description         = "Entry-2"
-	nested_service_path = "/infra/services/%s"
+	nested_service_path = "%s"
   }
 
   tag {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, serviceName, nestedServiceEntry1Name, nestedServiceEntry1Name, nestedServiceEntry2Name, nestedServiceEntry2Name)
+}`, serviceName, nestedServiceEntry1Name, testAccAdjustPolicyInfraConfig("/infra/services/"+nestedServiceEntry1Name), nestedServiceEntry2Name, testAccAdjustPolicyInfraConfig("/infra/services/"+nestedServiceEntry2Name))
 
 }
 
@@ -1098,7 +1098,7 @@ func testAccNsxtPolicyNestedServiceMixedTemplate(serviceName string, nestedServi
   nested_service_entry {
     display_name        = "%s"
     description         = "Entry-1"
-	nested_service_path = "/infra/services/%s"
+	nested_service_path = "%s"
   }
 
   l4_port_set_entry {
@@ -1112,5 +1112,5 @@ func testAccNsxtPolicyNestedServiceMixedTemplate(serviceName string, nestedServi
     scope = "scope1"
     tag   = "tag1"
   }
-}`, serviceName, nestedServiceEntryName, nestedServiceEntryName)
+}`, serviceName, nestedServiceEntryName, testAccAdjustPolicyInfraConfig("/infra/services/"+nestedServiceEntryName))
 }

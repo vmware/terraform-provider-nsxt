@@ -90,7 +90,7 @@ The service must contain at least 1 entry (of at least one of the types), and po
     * `destination_port` - (Required) a single destination port.
     * `source_ports` - (Optional) Set of source ports/ranges.
     * `algorithm` - (Required) Algorithm, one of `ORACLE_TNS`, `FTP`, `SUN_RPC_TCP`, `SUN_RPC_UDP`, `MS_RPC_TCP`, `MS_RPC_UDP`, `NBNS_BROADCAST`(Deprecated), `NBDG_BROADCAST`(Deprecated), `TFTP`.
-* `nested_service_entry` - (Optional) Feature intruduced since at least NSX-T 3.1, set of Nested service entries. Each with the following attributes:
+* `nested_service_entry` - (Optional) Feature introduced since at least NSX-T 3.1, set of Nested service entries. Each with the following attributes:
     * `display_name` - (Optional) Display name of the service entry.
     * `description` - (Optional) Description of the service entry.
     * `nested_service_path` - (Required) Path of the nested service.
