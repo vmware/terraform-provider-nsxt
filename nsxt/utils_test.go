@@ -52,6 +52,7 @@ const doubleTags string = `
   }`
 
 var randomized = false
+var letterRunes = []rune("abcdefghijklmnopqrstuvwxyz")
 
 func initRand() {
 	if randomized {
@@ -69,6 +70,15 @@ func getAccTestDataSourceName() string {
 func getAccTestResourceName() string {
 	initRand()
 	return fmt.Sprintf("%s-%d", testAccResourceName, rand.Intn(100000))
+}
+
+func getAccTestFQDN() string {
+	initRand()
+	b := make([]rune, 10)
+	for i := range b {
+		b[i] = letterRunes[rand.Intn(len(letterRunes))]
+	}
+	return fmt.Sprintf("test.%s.org", string(b))
 }
 
 func getTier0RouterName() string {

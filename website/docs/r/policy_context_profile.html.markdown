@@ -31,10 +31,29 @@ resource "nsxt_policy_context_profile" "test" {
 
 ```
 
+With a custom attribute:
+
+```hcl
+resource "nsxt_policy_context_profile_custom_attribute" "test1" {
+  key       = "CUSTOM_URL"
+  attribute = "test.some.org"
+}
+
+resource "nsxt_policy_context_profile" "test2" {
+  display_name = "test2"
+  description  = "Terraform provisioned ContextProfile"
+  custom_url {
+    value = ["test.some.org"]
+  }
+  depends_on = [nsxt_policy_context_profile_custom_attribute.test1]
+}
+
+```
+
 ## Argument Reference
 
 The following arguments are supported:
-Note: At least one of `app_id`, `domain_name`, or `url_category` must present.
+Note: At least one of `app_id`, `custom_url`, domain_name`, or `url_category` must present.
 
 * `display_name` - (Required) Display name of the resource.
 * `description` - (Optional) Description of the resource.
@@ -47,6 +66,9 @@ Note: At least one of `app_id`, `domain_name`, or `url_category` must present.
     * `tls_cipher_suite` - (Optional) A list of string indicating values for `tls_cipher_suite`, only applicable to `SSL`.
     * `tls_version` - (Optional) A list of string indicating values for `tls_version`, only applicable to `SSL`.
     * `cifs_smb_version` - (Optional) A list of string indicating values for `cifs_smb_version`, only applicable to `CIFS`.
+* `custom_url` - (Optional) A block to specify custom URL attributes for the context profile. Only one block is allowed.
+  * `description` - (Optional) Description of the attribute.
+  * `value` - (Required) A list of string indicating values for the `custom_url`. Must be a subset of valid values for `custom_url` on NSX.
 * `domain_name` - (Optional) A block to specify domain name (FQDN) attributes for the context profile. Only one block is allowed.
   * `description` - (Optional) Description of the attribute.
   * `value` - (Required) A list of string indicating values for the `domain_name`. Must be a subset of valid values for `domain_name` on NSX.

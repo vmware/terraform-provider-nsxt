@@ -111,9 +111,15 @@ func testAccNsxtPolicyContextProfileCustomAttributeCheckDestroy(state *terraform
 }
 
 func testAccNsxtPolicyContextProfileCustomAttributeTemplate() string {
+	return testAccNsxtPolicyContextProfileCustomAttributeArgTemplate(
+		accTestPolicyContextProfileCustomAttributeAttributes["key"],
+		accTestPolicyContextProfileCustomAttributeAttributes["attribute"])
+}
+
+func testAccNsxtPolicyContextProfileCustomAttributeArgTemplate(key string, attribute string) string {
 	return fmt.Sprintf(`
 resource "nsxt_policy_context_profile_custom_attribute" "test" {
   key = "%s"
   attribute = "%s"
-}`, accTestPolicyContextProfileCustomAttributeAttributes["key"], accTestPolicyContextProfileCustomAttributeAttributes["attribute"])
+}`, key, attribute)
 }

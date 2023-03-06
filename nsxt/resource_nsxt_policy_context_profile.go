@@ -11,20 +11,24 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
 	gm_cont_prof "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/context_profiles"
+	gm_custom_attr "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/context_profiles/custom_attributes"
 	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	cont_prof "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/context_profiles"
+	custom_attr "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/context_profiles/custom_attributes"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
 var attributeKeyMap = map[string]string{
 	"app_id":       model.PolicyAttributes_KEY_APP_ID,
+	"custom_url":   model.PolicyAttributes_KEY_CUSTOM_URL,
 	"domain_name":  model.PolicyAttributes_KEY_DOMAIN_NAME,
 	"url_category": model.PolicyAttributes_KEY_URL_CATEGORY,
 }
 
 var attributeReverseKeyMap = map[string]string{
 	model.PolicyAttributes_KEY_APP_ID:       "app_id",
+	model.PolicyAttributes_KEY_CUSTOM_URL:   "custom_url",
 	model.PolicyAttributes_KEY_DOMAIN_NAME:  "domain_name",
 	model.PolicyAttributes_KEY_URL_CATEGORY: "url_category",
 }
@@ -59,6 +63,7 @@ func resourceNsxtPolicyContextProfile() *schema.Resource {
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
 			"app_id":       getContextProfilePolicyAppIDAttributesSchema(),
+			"custom_url":   getContextProfilePolicyOtherAttributesSchema(),
 			"domain_name":  getContextProfilePolicyOtherAttributesSchema(),
 			"url_category": getContextProfilePolicyOtherAttributesSchema(),
 		},
@@ -346,15 +351,7 @@ func checkAttributesValid(attributes []interface{}, m interface{}, key string) e
 			return err
 		}
 	}
-	var attrClient interface{}
-	connector := getPolicyConnector(m)
-	isPolicyGlobalManager := isPolicyGlobalManager(m)
-	if isPolicyGlobalManager {
-		attrClient = gm_cont_prof.NewAttributesClient(connector)
-	} else {
-		attrClient = cont_prof.NewAttributesClient(connector)
-	}
-	attributeValues, err := listAttributesWithKey(attributeKeyMap[key], attrClient, isPolicyGlobalManager)
+	attributeValues, err := listAttributesWithKey(attributeKeyMap[key], m)
 	if err != nil {
 		return err
 	}
@@ -382,10 +379,19 @@ func validateSubAttributes(attributes []interface{}) error {
 	return nil
 }
 
-func listAttributesWithKey(attributeKey string, attributeClient interface{}, isPolicyGlobalManager bool) ([]string, error) {
+func listAttributesWithKey(attributeKey string, m interface{}) ([]string, error) {
 	// returns a list of attribute values
 	policyAttributes := make([]string, 0)
-	policyContextProfileListResult, err := listContextProfileWithKey(&attributeKey, attributeClient, isPolicyGlobalManager)
+	policyContextProfileListResult, err := listSystemAttributesWithKey(&attributeKey, m)
+	if err != nil {
+		return policyAttributes, err
+	}
+	for _, policyContextProfile := range policyContextProfileListResult.Results {
+		for _, attribute := range policyContextProfile.Attributes {
+			policyAttributes = append(policyAttributes, attribute.Value...)
+		}
+	}
+	policyContextProfileListResult, err = listCustomAttributesWithKey(&attributeKey, m)
 	if err != nil {
 		return policyAttributes, err
 	}
@@ -397,11 +403,12 @@ func listAttributesWithKey(attributeKey string, attributeClient interface{}, isP
 	return policyAttributes, nil
 }
 
-func listContextProfileWithKey(attributeKey *string, attributeClient interface{}, isPolicyGlobalManager bool) (model.PolicyContextProfileListResult, error) {
+func listSystemAttributesWithKey(attributeKey *string, m interface{}) (model.PolicyContextProfileListResult, error) {
 	var policyContextProfileListResult model.PolicyContextProfileListResult
 	includeMarkForDeleteObjectsParam := false
-	if isPolicyGlobalManager {
-		client := attributeClient.(gm_cont_prof.AttributesClient)
+	connector := getPolicyConnector(m)
+	if isPolicyGlobalManager(m) {
+		client := gm_cont_prof.NewAttributesClient(connector)
 		gmPolicyContextProfileListResult, err := client.List(attributeKey, nil, nil, &includeMarkForDeleteObjectsParam, nil, nil, nil, nil)
 		if err != nil {
 			return policyContextProfileListResult, err
@@ -414,7 +421,30 @@ func listContextProfileWithKey(attributeKey *string, attributeClient interface{}
 		return policyContextProfileListResult, err
 	}
 	var err error
-	client := attributeClient.(cont_prof.AttributesClient)
+	client := cont_prof.NewAttributesClient(connector)
+	policyContextProfileListResult, err = client.List(attributeKey, nil, nil, &includeMarkForDeleteObjectsParam, nil, nil, nil, nil)
+	return policyContextProfileListResult, err
+}
+
+func listCustomAttributesWithKey(attributeKey *string, m interface{}) (model.PolicyContextProfileListResult, error) {
+	var policyContextProfileListResult model.PolicyContextProfileListResult
+	includeMarkForDeleteObjectsParam := false
+	connector := getPolicyConnector(m)
+	if isPolicyGlobalManager(m) {
+		client := gm_custom_attr.NewDefaultClient(connector)
+		gmPolicyContextProfileListResult, err := client.List(attributeKey, nil, nil, &includeMarkForDeleteObjectsParam, nil, nil, nil, nil)
+		if err != nil {
+			return policyContextProfileListResult, err
+		}
+		lmPolicyContextProfileListResult, err := convertModelBindingType(gmPolicyContextProfileListResult, gm_model.PolicyContextProfileListResultBindingType(), model.PolicyContextProfileListResultBindingType())
+		if err != nil {
+			return policyContextProfileListResult, err
+		}
+		policyContextProfileListResult = lmPolicyContextProfileListResult.(model.PolicyContextProfileListResult)
+		return policyContextProfileListResult, err
+	}
+	var err error
+	client := custom_attr.NewDefaultClient(connector)
 	policyContextProfileListResult, err = client.List(attributeKey, nil, nil, &includeMarkForDeleteObjectsParam, nil, nil, nil, nil)
 	return policyContextProfileListResult, err
 }
