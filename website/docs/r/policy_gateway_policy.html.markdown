@@ -37,6 +37,9 @@ resource "nsxt_policy_gateway_policy" "test" {
     scope              = [nsxt_policy_tier1_gateway.policygateway.path]
   }
 
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 ```
 
@@ -72,10 +75,15 @@ resource "nsxt_policy_gateway_policy" "test" {
     scope              = [nsxt_policy_tier1_gateway.policygateway.path]
   }
 
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 ```
-## Argument Reference
 
+-> We recommend using `lifecycle` directive as in samples above, in order to avoid dependency issues when updating groups/services simultaneously with the rule.
+
+## Argument Reference
 
 The following arguments are supported:
 

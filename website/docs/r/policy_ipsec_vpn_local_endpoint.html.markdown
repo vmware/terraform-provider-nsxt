@@ -20,7 +20,6 @@ resource "nsxt_policy_ipsec_vpn_local_endpoint" "test" {
   local_address    = "20.20.0.10"
   local_id         = "test"
   certificate_path = data.nsxt_policy_certificate.cert.path
-  trust_ca_paths   = [data.nsxt_policy_certificate.trust_ca.path]
 }
 ```
 

@@ -42,10 +42,14 @@ resource "nsxt_policy_security_policy" "policy1" {
     disabled         = true
     notes            = "Disabled by starfish for debugging"
   }
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 ```
 
-Note: This usage is for Global Manager only
+## Global Manager example
 
 ```hcl
 data "nsxt_policy_site" "paris" {
@@ -80,8 +84,14 @@ resource "nsxt_policy_security_policy" "policy1" {
     disabled         = true
     notes            = "Disabled by starfish for debugging"
   }
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 ```
+
+-> We recommend using `lifecycle` directive as in samples above, in order to avoid dependency issues when updating groups/services simultaneously with the rule.
 
 ## Argument Reference
 
