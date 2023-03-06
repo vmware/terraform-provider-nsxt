@@ -211,7 +211,10 @@ The following arguments are used to configure the VMware NSX-T Provider:
   policy resources: `409, 429, 500, 503, 504`. Can also be specified with the
   `NSXT_RETRY_ON_STATUS_CODES` environment variable.
 * `remote_auth` - (Optional) Would trigger remote authorization instead of basic
-  authorization. This is required for users based on vIDM authentication.
+  authorization. This is required for users based on vIDM authentication for early
+  NSX versions.
+* `session_auth` - (Optional) Creates session to avoid re-authentication for every
+  request. Speeds up terraform execution for vIDM based environments. Defaults to `true`
   The default for this flag is false. Can also be specified with the
   `NSXT_REMOTE_AUTH` environment variable.
 * `tolerate_partial_success` - (Optional) Setting this flag to true would treat
