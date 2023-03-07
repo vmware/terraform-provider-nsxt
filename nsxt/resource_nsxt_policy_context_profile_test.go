@@ -289,6 +289,42 @@ func TestAccResourceNsxtPolicyContextProfile_subAttributes(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyContextProfile_customUrl(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_context_profile.test"
+	fqdn := getAccTestFQDN()
+	attributes := testAccNsxtPolicyContextProfileAttributeCustomURLTemplate("false", fqdn)
+	dependsOn := testAccNsxtPolicyContextProfileDependsOnTemplate("nsxt_policy_context_profile_custom_attribute.test")
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "4.0.0") },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyContextProfileCheckDestroy(state, testResourceName)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyContextProfileCustomAttributeArgTemplate("CUSTOM_URL", fqdn) + testAccNsxtPolicyContextProfileTemplate(name, attributes+dependsOn),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyContextProfileExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "app_id.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "custom_url.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "url_category.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "custom_url.0.value.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "custom_url.0.value.0", fqdn),
+					resource.TestCheckResourceAttr(testResourceName, "custom_url.0.custom_url_partial_match", "false"),
+				),
+			},
+		},
+	})
+}
+
 func testAccNsxtPolicyContextProfileExists(resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 		rs, ok := state.RootModule().Resources[resourceName]
@@ -357,6 +393,14 @@ func testAccNsxtPolicyContextProfileAttributeDomainNameTemplate(domain string) s
 domain_name {
   value     = ["%s"]
 }`, domain)
+}
+
+func testAccNsxtPolicyContextProfileAttributeCustomURLTemplate(partialMatch, url string) string {
+	return fmt.Sprintf(`
+custom_url {
+  custom_url_partial_match = %s
+  value     = ["%s"]
+}`, partialMatch, url)
 }
 
 func testAccNsxtPolicyContextProfileAttributeAppIDTemplate() string {
