@@ -13,7 +13,7 @@ var defaultDomain = "default"
 var defaultSite = "default"
 var securityPolicyCategoryValues = []string{"Ethernet", "Emergency", "Infrastructure", "Environment", "Application"}
 var securityPolicyDirectionValues = []string{model.Rule_DIRECTION_IN, model.Rule_DIRECTION_OUT, model.Rule_DIRECTION_IN_OUT}
-var securityPolicyIPProtocolValues = []string{model.Rule_IP_PROTOCOL_IPV4, model.Rule_IP_PROTOCOL_IPV6, model.Rule_IP_PROTOCOL_IPV4_IPV6}
+var securityPolicyIPProtocolValues = []string{"NONE", model.Rule_IP_PROTOCOL_IPV4, model.Rule_IP_PROTOCOL_IPV6, model.Rule_IP_PROTOCOL_IPV4_IPV6}
 
 // TODO: change last string to sdk constant when available
 var securityPolicyActionValues = []string{model.Rule_ACTION_ALLOW, model.Rule_ACTION_DROP, model.Rule_ACTION_REJECT, "JUMP_TO_APPLICATION"}
@@ -373,7 +373,11 @@ func setPolicyRulesInSchema(d *schema.ResourceData, rules []model.Rule) error {
 		elem["action"] = rule.Action
 		elem["destinations_excluded"] = rule.DestinationsExcluded
 		elem["sources_excluded"] = rule.SourcesExcluded
-		elem["ip_version"] = rule.IpProtocol
+		if rule.IpProtocol == nil {
+			elem["ip_version"] = "NONE"
+		} else {
+			elem["ip_version"] = rule.IpProtocol
+		}
 		elem["direction"] = rule.Direction
 		elem["disabled"] = rule.Disabled
 		elem["revision"] = rule.Revision
@@ -414,7 +418,12 @@ func getPolicyRulesFromSchema(d *schema.ResourceData) []model.Rule {
 		disabled := data["disabled"].(bool)
 		sourcesExcluded := data["sources_excluded"].(bool)
 		destinationsExcluded := data["destinations_excluded"].(bool)
-		ipProtocol := data["ip_version"].(string)
+
+		var ipProtocol *string
+		ipp := data["ip_version"].(string)
+		if ipp != "NONE" {
+			ipProtocol = &ipp
+		}
 		direction := data["direction"].(string)
 		notes := data["notes"].(string)
 		seq := data["sequence_number"].(int)
@@ -441,7 +450,7 @@ func getPolicyRulesFromSchema(d *schema.ResourceData) []model.Rule {
 			Disabled:             &disabled,
 			SourcesExcluded:      &sourcesExcluded,
 			DestinationsExcluded: &destinationsExcluded,
-			IpProtocol:           &ipProtocol,
+			IpProtocol:           ipProtocol,
 			Direction:            &direction,
 			SourceGroups:         getPathListFromMap(data, "source_groups"),
 			DestinationGroups:    getPathListFromMap(data, "destination_groups"),
