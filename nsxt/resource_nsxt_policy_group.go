@@ -51,6 +51,11 @@ var externalMemberTypeValues = []string{
 	model.ExternalIDExpression_MEMBER_TYPE_PHYSICALSERVER,
 }
 
+var groupTypeValues = []string{
+	model.Group_GROUP_TYPE_IPADDRESS,
+	model.Group_GROUP_TYPE_ANTREA,
+}
+
 func resourceNsxtPolicyGroup() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyGroupCreate,
@@ -69,6 +74,12 @@ func resourceNsxtPolicyGroup() *schema.Resource {
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
 			"domain":       getDomainNameSchema(),
+			"group_type": {
+				Type:         schema.TypeString,
+				Description:  "Indicates the group type",
+				ValidateFunc: validation.StringInSlice(groupTypeValues, false),
+				Optional:     true,
+			},
 			"criteria": {
 				Type:        schema.TypeList,
 				Description: "Criteria to determine Group membership",
@@ -833,12 +844,19 @@ func resourceNsxtPolicyGroupCreate(d *schema.ResourceData, m interface{}) error 
 	description := d.Get("description").(string)
 	tags := getPolicyTagsFromSchema(d)
 
+	var groupTypes []string
+	groupType := d.Get("group_type").(string)
+	groupTypes = append(groupTypes, groupType)
 	obj := model.Group{
 		DisplayName:        &displayName,
 		Description:        &description,
 		Tags:               tags,
 		Expression:         expressionData,
 		ExtendedExpression: extendedExpressionList,
+	}
+
+	if groupType != "" && nsxVersionHigherOrEqual("3.2.0") {
+		obj.GroupType = groupTypes
 	}
 
 	if isPolicyGlobalManager(m) {
@@ -898,6 +916,11 @@ func resourceNsxtPolicyGroupRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("path", obj.Path)
 	d.Set("domain", getDomainFromResourcePath(*obj.Path))
 	d.Set("revision", obj.Revision)
+	groupType := ""
+	if len(obj.GroupType) > 0 && nsxVersionHigherOrEqual("3.2.0") {
+		groupType = obj.GroupType[0]
+		d.Set("group_type", groupType)
+	}
 	criteria, conditions, err := fromGroupExpressionData(obj.Expression)
 	log.Printf("[INFO] Found %d criteria, %d conjunctions for group %s", len(criteria), len(conditions), id)
 	if err != nil {
@@ -958,12 +981,19 @@ func resourceNsxtPolicyGroupUpdate(d *schema.ResourceData, m interface{}) error 
 	displayName := d.Get("display_name").(string)
 	tags := getPolicyTagsFromSchema(d)
 
+	var groupTypes []string
+	groupType := d.Get("group_type").(string)
+	groupTypes = append(groupTypes, groupType)
 	obj := model.Group{
 		DisplayName:        &displayName,
 		Description:        &description,
 		Tags:               tags,
 		Expression:         expressionData,
 		ExtendedExpression: extendedExpressionList,
+	}
+
+	if groupType != "" && nsxVersionHigherOrEqual("3.2.0") {
+		obj.GroupType = groupTypes
 	}
 
 	if isPolicyGlobalManager(m) {
