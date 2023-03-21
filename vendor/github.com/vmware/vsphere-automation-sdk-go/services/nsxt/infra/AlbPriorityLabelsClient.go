@@ -9,22 +9,24 @@
 package infra
 
 import (
-	"github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/core"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/lib"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+	vapiStdErrors_ "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
+	vapiBindings_ "github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	vapiCore_ "github.com/vmware/vsphere-automation-sdk-go/runtime/core"
+	vapiProtocolClient_ "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+	nsx_policyModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
-const _ = core.SupportedByRuntimeVersion1
+const _ = vapiCore_.SupportedByRuntimeVersion2
 
 type AlbPriorityLabelsClient interface {
 
-	// Delete the ALBPriorityLabels along with all the entities contained by this ALBPriorityLabels.
+	// Delete the ALBPriorityLabels along with all the entities contained by this ALBPriorityLabels. This is a deprecated API. It is recommennded to use NSX Advanced Load Balancer (Avi) Controller UI or API directly instead of NSX-T ALB Policy UI and API.
+	//
+	// Deprecated: This API element is deprecated.
 	//
 	// @param albPrioritylabelsIdParam ALBPriorityLabels ID (required)
 	// @param forceParam Force delete the resource even if it is being used somewhere (optional, default to false)
+	//
 	// @throws InvalidRequest  Bad Request, Precondition Failed
 	// @throws Unauthorized  Forbidden
 	// @throws ServiceUnavailable  Service Unavailable
@@ -32,18 +34,23 @@ type AlbPriorityLabelsClient interface {
 	// @throws NotFound  Not Found
 	Delete(albPrioritylabelsIdParam string, forceParam *bool) error
 
-	// Read a ALBPriorityLabels.
+	// Read a ALBPriorityLabels. This is a deprecated API. It is recommennded to use NSX Advanced Load Balancer (Avi) Controller UI or API directly instead of NSX-T ALB Policy UI and API.
+	//
+	// Deprecated: This API element is deprecated.
 	//
 	// @param albPrioritylabelsIdParam ALBPriorityLabels ID (required)
 	// @return com.vmware.nsx_policy.model.ALBPriorityLabels
+	//
 	// @throws InvalidRequest  Bad Request, Precondition Failed
 	// @throws Unauthorized  Forbidden
 	// @throws ServiceUnavailable  Service Unavailable
 	// @throws InternalServerError  Internal Server Error
 	// @throws NotFound  Not Found
-	Get(albPrioritylabelsIdParam string) (model.ALBPriorityLabels, error)
+	Get(albPrioritylabelsIdParam string) (nsx_policyModel.ALBPriorityLabels, error)
 
-	// Paginated list of all ALBPriorityLabels for infra.
+	// Paginated list of all ALBPriorityLabels for infra. This is a deprecated API. It is recommennded to use NSX Advanced Load Balancer (Avi) Controller UI or API directly instead of NSX-T ALB Policy UI and API.
+	//
+	// Deprecated: This API element is deprecated.
 	//
 	// @param cursorParam Opaque cursor to be used for getting next page of records (supplied by current result page) (optional)
 	// @param includeMarkForDeleteObjectsParam Include objects that are marked for deletion in results (optional, default to false)
@@ -52,127 +59,140 @@ type AlbPriorityLabelsClient interface {
 	// @param sortAscendingParam (optional)
 	// @param sortByParam Field by which records are sorted (optional)
 	// @return com.vmware.nsx_policy.model.ALBPriorityLabelsApiResponse
+	//
 	// @throws InvalidRequest  Bad Request, Precondition Failed
 	// @throws Unauthorized  Forbidden
 	// @throws ServiceUnavailable  Service Unavailable
 	// @throws InternalServerError  Internal Server Error
 	// @throws NotFound  Not Found
-	List(cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.ALBPriorityLabelsApiResponse, error)
+	List(cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (nsx_policyModel.ALBPriorityLabelsApiResponse, error)
 
-	// If a ALBprioritylabels with the alb-prioritylabels-id is not already present, create a new ALBprioritylabels. If it already exists, update the ALBprioritylabels. This is a full replace.
+	// If a ALBprioritylabels with the alb-prioritylabels-id is not already present, create a new ALBprioritylabels. If it already exists, update the ALBprioritylabels. This is a full replace. This is a deprecated API. It is recommennded to use NSX Advanced Load Balancer (Avi) Controller UI or API directly instead of NSX-T ALB Policy UI and API.
+	//
+	// Deprecated: This API element is deprecated.
 	//
 	// @param albPrioritylabelsIdParam ALBprioritylabels ID (required)
 	// @param aLBPriorityLabelsParam (required)
+	//
 	// @throws InvalidRequest  Bad Request, Precondition Failed
 	// @throws Unauthorized  Forbidden
 	// @throws ServiceUnavailable  Service Unavailable
 	// @throws InternalServerError  Internal Server Error
 	// @throws NotFound  Not Found
-	Patch(albPrioritylabelsIdParam string, aLBPriorityLabelsParam model.ALBPriorityLabels) error
+	Patch(albPrioritylabelsIdParam string, aLBPriorityLabelsParam nsx_policyModel.ALBPriorityLabels) error
 
-	// If a ALBPriorityLabels with the alb-PriorityLabels-id is not already present, create a new ALBPriorityLabels. If it already exists, update the ALBPriorityLabels. This is a full replace.
+	// If a ALBPriorityLabels with the alb-PriorityLabels-id is not already present, create a new ALBPriorityLabels. If it already exists, update the ALBPriorityLabels. This is a full replace. This is a deprecated API. It is recommennded to use NSX Advanced Load Balancer (Avi) Controller UI or API directly instead of NSX-T ALB Policy UI and API.
+	//
+	// Deprecated: This API element is deprecated.
 	//
 	// @param albPrioritylabelsIdParam ALBPriorityLabels ID (required)
 	// @param aLBPriorityLabelsParam (required)
 	// @return com.vmware.nsx_policy.model.ALBPriorityLabels
+	//
 	// @throws InvalidRequest  Bad Request, Precondition Failed
 	// @throws Unauthorized  Forbidden
 	// @throws ServiceUnavailable  Service Unavailable
 	// @throws InternalServerError  Internal Server Error
 	// @throws NotFound  Not Found
-	Update(albPrioritylabelsIdParam string, aLBPriorityLabelsParam model.ALBPriorityLabels) (model.ALBPriorityLabels, error)
+	Update(albPrioritylabelsIdParam string, aLBPriorityLabelsParam nsx_policyModel.ALBPriorityLabels) (nsx_policyModel.ALBPriorityLabels, error)
 }
 
 type albPriorityLabelsClient struct {
-	connector           client.Connector
-	interfaceDefinition core.InterfaceDefinition
-	errorsBindingMap    map[string]bindings.BindingType
+	connector           vapiProtocolClient_.Connector
+	interfaceDefinition vapiCore_.InterfaceDefinition
+	errorsBindingMap    map[string]vapiBindings_.BindingType
 }
 
-func NewAlbPriorityLabelsClient(connector client.Connector) *albPriorityLabelsClient {
-	interfaceIdentifier := core.NewInterfaceIdentifier("com.vmware.nsx_policy.infra.alb_priority_labels")
-	methodIdentifiers := map[string]core.MethodIdentifier{
-		"delete": core.NewMethodIdentifier(interfaceIdentifier, "delete"),
-		"get":    core.NewMethodIdentifier(interfaceIdentifier, "get"),
-		"list":   core.NewMethodIdentifier(interfaceIdentifier, "list"),
-		"patch":  core.NewMethodIdentifier(interfaceIdentifier, "patch"),
-		"update": core.NewMethodIdentifier(interfaceIdentifier, "update"),
+func NewAlbPriorityLabelsClient(connector vapiProtocolClient_.Connector) *albPriorityLabelsClient {
+	interfaceIdentifier := vapiCore_.NewInterfaceIdentifier("com.vmware.nsx_policy.infra.alb_priority_labels")
+	methodIdentifiers := map[string]vapiCore_.MethodIdentifier{
+		"delete": vapiCore_.NewMethodIdentifier(interfaceIdentifier, "delete"),
+		"get":    vapiCore_.NewMethodIdentifier(interfaceIdentifier, "get"),
+		"list":   vapiCore_.NewMethodIdentifier(interfaceIdentifier, "list"),
+		"patch":  vapiCore_.NewMethodIdentifier(interfaceIdentifier, "patch"),
+		"update": vapiCore_.NewMethodIdentifier(interfaceIdentifier, "update"),
 	}
-	interfaceDefinition := core.NewInterfaceDefinition(interfaceIdentifier, methodIdentifiers)
-	errorsBindingMap := make(map[string]bindings.BindingType)
+	interfaceDefinition := vapiCore_.NewInterfaceDefinition(interfaceIdentifier, methodIdentifiers)
+	errorsBindingMap := make(map[string]vapiBindings_.BindingType)
 
 	aIface := albPriorityLabelsClient{interfaceDefinition: interfaceDefinition, errorsBindingMap: errorsBindingMap, connector: connector}
 	return &aIface
 }
 
-func (aIface *albPriorityLabelsClient) GetErrorBindingType(errorName string) bindings.BindingType {
+func (aIface *albPriorityLabelsClient) GetErrorBindingType(errorName string) vapiBindings_.BindingType {
 	if entry, ok := aIface.errorsBindingMap[errorName]; ok {
 		return entry
 	}
-	return errors.ERROR_BINDINGS_MAP[errorName]
+	return vapiStdErrors_.ERROR_BINDINGS_MAP[errorName]
 }
 
 func (aIface *albPriorityLabelsClient) Delete(albPrioritylabelsIdParam string, forceParam *bool) error {
 	typeConverter := aIface.connector.TypeConverter()
 	executionContext := aIface.connector.NewExecutionContext()
-	sv := bindings.NewStructValueBuilder(albPriorityLabelsDeleteInputType(), typeConverter)
+	operationRestMetaData := albPriorityLabelsDeleteRestMetadata()
+	executionContext.SetConnectionMetadata(vapiCore_.RESTMetadataKey, operationRestMetaData)
+	executionContext.SetConnectionMetadata(vapiCore_.ResponseTypeKey, vapiCore_.NewResponseType(true, false))
+
+	sv := vapiBindings_.NewStructValueBuilder(albPriorityLabelsDeleteInputType(), typeConverter)
 	sv.AddStructField("AlbPrioritylabelsId", albPrioritylabelsIdParam)
 	sv.AddStructField("Force", forceParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
-		return bindings.VAPIerrorsToError(inputError)
+		return vapiBindings_.VAPIerrorsToError(inputError)
 	}
-	operationRestMetaData := albPriorityLabelsDeleteRestMetadata()
-	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
-	connectionMetadata["isStreamingResponse"] = false
-	aIface.connector.SetConnectionMetadata(connectionMetadata)
+
 	methodResult := aIface.connector.GetApiProvider().Invoke("com.vmware.nsx_policy.infra.alb_priority_labels", "delete", inputDataValue, executionContext)
 	if methodResult.IsSuccess() {
 		return nil
 	} else {
 		methodError, errorInError := typeConverter.ConvertToGolang(methodResult.Error(), aIface.GetErrorBindingType(methodResult.Error().Name()))
 		if errorInError != nil {
-			return bindings.VAPIerrorsToError(errorInError)
+			return vapiBindings_.VAPIerrorsToError(errorInError)
 		}
 		return methodError.(error)
 	}
 }
 
-func (aIface *albPriorityLabelsClient) Get(albPrioritylabelsIdParam string) (model.ALBPriorityLabels, error) {
+func (aIface *albPriorityLabelsClient) Get(albPrioritylabelsIdParam string) (nsx_policyModel.ALBPriorityLabels, error) {
 	typeConverter := aIface.connector.TypeConverter()
 	executionContext := aIface.connector.NewExecutionContext()
-	sv := bindings.NewStructValueBuilder(albPriorityLabelsGetInputType(), typeConverter)
+	operationRestMetaData := albPriorityLabelsGetRestMetadata()
+	executionContext.SetConnectionMetadata(vapiCore_.RESTMetadataKey, operationRestMetaData)
+	executionContext.SetConnectionMetadata(vapiCore_.ResponseTypeKey, vapiCore_.NewResponseType(true, false))
+
+	sv := vapiBindings_.NewStructValueBuilder(albPriorityLabelsGetInputType(), typeConverter)
 	sv.AddStructField("AlbPrioritylabelsId", albPrioritylabelsIdParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
-		var emptyOutput model.ALBPriorityLabels
-		return emptyOutput, bindings.VAPIerrorsToError(inputError)
+		var emptyOutput nsx_policyModel.ALBPriorityLabels
+		return emptyOutput, vapiBindings_.VAPIerrorsToError(inputError)
 	}
-	operationRestMetaData := albPriorityLabelsGetRestMetadata()
-	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
-	connectionMetadata["isStreamingResponse"] = false
-	aIface.connector.SetConnectionMetadata(connectionMetadata)
+
 	methodResult := aIface.connector.GetApiProvider().Invoke("com.vmware.nsx_policy.infra.alb_priority_labels", "get", inputDataValue, executionContext)
-	var emptyOutput model.ALBPriorityLabels
+	var emptyOutput nsx_policyModel.ALBPriorityLabels
 	if methodResult.IsSuccess() {
-		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), albPriorityLabelsGetOutputType())
+		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), AlbPriorityLabelsGetOutputType())
 		if errorInOutput != nil {
-			return emptyOutput, bindings.VAPIerrorsToError(errorInOutput)
+			return emptyOutput, vapiBindings_.VAPIerrorsToError(errorInOutput)
 		}
-		return output.(model.ALBPriorityLabels), nil
+		return output.(nsx_policyModel.ALBPriorityLabels), nil
 	} else {
 		methodError, errorInError := typeConverter.ConvertToGolang(methodResult.Error(), aIface.GetErrorBindingType(methodResult.Error().Name()))
 		if errorInError != nil {
-			return emptyOutput, bindings.VAPIerrorsToError(errorInError)
+			return emptyOutput, vapiBindings_.VAPIerrorsToError(errorInError)
 		}
 		return emptyOutput, methodError.(error)
 	}
 }
 
-func (aIface *albPriorityLabelsClient) List(cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.ALBPriorityLabelsApiResponse, error) {
+func (aIface *albPriorityLabelsClient) List(cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (nsx_policyModel.ALBPriorityLabelsApiResponse, error) {
 	typeConverter := aIface.connector.TypeConverter()
 	executionContext := aIface.connector.NewExecutionContext()
-	sv := bindings.NewStructValueBuilder(albPriorityLabelsListInputType(), typeConverter)
+	operationRestMetaData := albPriorityLabelsListRestMetadata()
+	executionContext.SetConnectionMetadata(vapiCore_.RESTMetadataKey, operationRestMetaData)
+	executionContext.SetConnectionMetadata(vapiCore_.ResponseTypeKey, vapiCore_.NewResponseType(true, false))
+
+	sv := vapiBindings_.NewStructValueBuilder(albPriorityLabelsListInputType(), typeConverter)
 	sv.AddStructField("Cursor", cursorParam)
 	sv.AddStructField("IncludeMarkForDeleteObjects", includeMarkForDeleteObjectsParam)
 	sv.AddStructField("IncludedFields", includedFieldsParam)
@@ -181,83 +201,82 @@ func (aIface *albPriorityLabelsClient) List(cursorParam *string, includeMarkForD
 	sv.AddStructField("SortBy", sortByParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
-		var emptyOutput model.ALBPriorityLabelsApiResponse
-		return emptyOutput, bindings.VAPIerrorsToError(inputError)
+		var emptyOutput nsx_policyModel.ALBPriorityLabelsApiResponse
+		return emptyOutput, vapiBindings_.VAPIerrorsToError(inputError)
 	}
-	operationRestMetaData := albPriorityLabelsListRestMetadata()
-	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
-	connectionMetadata["isStreamingResponse"] = false
-	aIface.connector.SetConnectionMetadata(connectionMetadata)
+
 	methodResult := aIface.connector.GetApiProvider().Invoke("com.vmware.nsx_policy.infra.alb_priority_labels", "list", inputDataValue, executionContext)
-	var emptyOutput model.ALBPriorityLabelsApiResponse
+	var emptyOutput nsx_policyModel.ALBPriorityLabelsApiResponse
 	if methodResult.IsSuccess() {
-		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), albPriorityLabelsListOutputType())
+		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), AlbPriorityLabelsListOutputType())
 		if errorInOutput != nil {
-			return emptyOutput, bindings.VAPIerrorsToError(errorInOutput)
+			return emptyOutput, vapiBindings_.VAPIerrorsToError(errorInOutput)
 		}
-		return output.(model.ALBPriorityLabelsApiResponse), nil
+		return output.(nsx_policyModel.ALBPriorityLabelsApiResponse), nil
 	} else {
 		methodError, errorInError := typeConverter.ConvertToGolang(methodResult.Error(), aIface.GetErrorBindingType(methodResult.Error().Name()))
 		if errorInError != nil {
-			return emptyOutput, bindings.VAPIerrorsToError(errorInError)
+			return emptyOutput, vapiBindings_.VAPIerrorsToError(errorInError)
 		}
 		return emptyOutput, methodError.(error)
 	}
 }
 
-func (aIface *albPriorityLabelsClient) Patch(albPrioritylabelsIdParam string, aLBPriorityLabelsParam model.ALBPriorityLabels) error {
+func (aIface *albPriorityLabelsClient) Patch(albPrioritylabelsIdParam string, aLBPriorityLabelsParam nsx_policyModel.ALBPriorityLabels) error {
 	typeConverter := aIface.connector.TypeConverter()
 	executionContext := aIface.connector.NewExecutionContext()
-	sv := bindings.NewStructValueBuilder(albPriorityLabelsPatchInputType(), typeConverter)
+	operationRestMetaData := albPriorityLabelsPatchRestMetadata()
+	executionContext.SetConnectionMetadata(vapiCore_.RESTMetadataKey, operationRestMetaData)
+	executionContext.SetConnectionMetadata(vapiCore_.ResponseTypeKey, vapiCore_.NewResponseType(true, false))
+
+	sv := vapiBindings_.NewStructValueBuilder(albPriorityLabelsPatchInputType(), typeConverter)
 	sv.AddStructField("AlbPrioritylabelsId", albPrioritylabelsIdParam)
 	sv.AddStructField("ALBPriorityLabels", aLBPriorityLabelsParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
-		return bindings.VAPIerrorsToError(inputError)
+		return vapiBindings_.VAPIerrorsToError(inputError)
 	}
-	operationRestMetaData := albPriorityLabelsPatchRestMetadata()
-	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
-	connectionMetadata["isStreamingResponse"] = false
-	aIface.connector.SetConnectionMetadata(connectionMetadata)
+
 	methodResult := aIface.connector.GetApiProvider().Invoke("com.vmware.nsx_policy.infra.alb_priority_labels", "patch", inputDataValue, executionContext)
 	if methodResult.IsSuccess() {
 		return nil
 	} else {
 		methodError, errorInError := typeConverter.ConvertToGolang(methodResult.Error(), aIface.GetErrorBindingType(methodResult.Error().Name()))
 		if errorInError != nil {
-			return bindings.VAPIerrorsToError(errorInError)
+			return vapiBindings_.VAPIerrorsToError(errorInError)
 		}
 		return methodError.(error)
 	}
 }
 
-func (aIface *albPriorityLabelsClient) Update(albPrioritylabelsIdParam string, aLBPriorityLabelsParam model.ALBPriorityLabels) (model.ALBPriorityLabels, error) {
+func (aIface *albPriorityLabelsClient) Update(albPrioritylabelsIdParam string, aLBPriorityLabelsParam nsx_policyModel.ALBPriorityLabels) (nsx_policyModel.ALBPriorityLabels, error) {
 	typeConverter := aIface.connector.TypeConverter()
 	executionContext := aIface.connector.NewExecutionContext()
-	sv := bindings.NewStructValueBuilder(albPriorityLabelsUpdateInputType(), typeConverter)
+	operationRestMetaData := albPriorityLabelsUpdateRestMetadata()
+	executionContext.SetConnectionMetadata(vapiCore_.RESTMetadataKey, operationRestMetaData)
+	executionContext.SetConnectionMetadata(vapiCore_.ResponseTypeKey, vapiCore_.NewResponseType(true, false))
+
+	sv := vapiBindings_.NewStructValueBuilder(albPriorityLabelsUpdateInputType(), typeConverter)
 	sv.AddStructField("AlbPrioritylabelsId", albPrioritylabelsIdParam)
 	sv.AddStructField("ALBPriorityLabels", aLBPriorityLabelsParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
-		var emptyOutput model.ALBPriorityLabels
-		return emptyOutput, bindings.VAPIerrorsToError(inputError)
+		var emptyOutput nsx_policyModel.ALBPriorityLabels
+		return emptyOutput, vapiBindings_.VAPIerrorsToError(inputError)
 	}
-	operationRestMetaData := albPriorityLabelsUpdateRestMetadata()
-	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
-	connectionMetadata["isStreamingResponse"] = false
-	aIface.connector.SetConnectionMetadata(connectionMetadata)
+
 	methodResult := aIface.connector.GetApiProvider().Invoke("com.vmware.nsx_policy.infra.alb_priority_labels", "update", inputDataValue, executionContext)
-	var emptyOutput model.ALBPriorityLabels
+	var emptyOutput nsx_policyModel.ALBPriorityLabels
 	if methodResult.IsSuccess() {
-		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), albPriorityLabelsUpdateOutputType())
+		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), AlbPriorityLabelsUpdateOutputType())
 		if errorInOutput != nil {
-			return emptyOutput, bindings.VAPIerrorsToError(errorInOutput)
+			return emptyOutput, vapiBindings_.VAPIerrorsToError(errorInOutput)
 		}
-		return output.(model.ALBPriorityLabels), nil
+		return output.(nsx_policyModel.ALBPriorityLabels), nil
 	} else {
 		methodError, errorInError := typeConverter.ConvertToGolang(methodResult.Error(), aIface.GetErrorBindingType(methodResult.Error().Name()))
 		if errorInError != nil {
-			return emptyOutput, bindings.VAPIerrorsToError(errorInError)
+			return emptyOutput, vapiBindings_.VAPIerrorsToError(errorInError)
 		}
 		return emptyOutput, methodError.(error)
 	}

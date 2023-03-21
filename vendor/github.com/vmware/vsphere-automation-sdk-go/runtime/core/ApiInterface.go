@@ -1,20 +1,17 @@
-/* Copyright © 2019 VMware, Inc. All Rights Reserved.
+/* Copyright © 2019, 2021 VMware, Inc. All Rights Reserved.
    SPDX-License-Identifier: BSD-2-Clause */
 
 package core
 
-import "github.com/vmware/vsphere-automation-sdk-go/runtime/data"
+import (
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
+)
 
-/**
- * The <code>ApiInterface</code> interface provides introspection
- * APIs for a vAPI interface; it is implemented by API providers.
- */
+//ApiInterface responsibility is to convert to native the DataValue and invoke the implementation
+//It also provides methods used by introspection services. Implemented by API providers.
 type ApiInterface interface {
 	Identifier() InterfaceIdentifier
-
 	Definition() InterfaceDefinition
-
 	MethodDefinition(MethodIdentifier) *MethodDefinition
-
 	Invoke(ctx *ExecutionContext, methodId MethodIdentifier, input data.DataValue) MethodResult
 }

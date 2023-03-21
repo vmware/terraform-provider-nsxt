@@ -1,4 +1,4 @@
-/* Copyright © 2019 VMware, Inc. All Rights Reserved.
+/* Copyright © 2019,2021 VMware, Inc. All Rights Reserved.
    SPDX-License-Identifier: BSD-2-Clause */
 
 package bindings
@@ -354,6 +354,7 @@ func (g *GolangToVapiDataValueVisitor) visitMapType(mapType MapType) []error {
 		return []error{l10n.NewRuntimeErrorNoParam("vapi.bindings.typeconverter.value.nil")}
 	}
 	result := data.NewListValue()
+	result.MarkAsMap()
 	m := reflect.ValueOf(inValue)
 	keys := m.MapKeys()
 	for _, key := range keys {

@@ -11,58 +11,58 @@
 package tier_0s
 
 import (
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
+	vapiBindings_ "github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	vapiData_ "github.com/vmware/vsphere-automation-sdk-go/runtime/data"
+	vapiProtocol_ "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol"
+	nsx_global_policyModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"reflect"
 )
 
 // Possible value for ``action`` of method DnsForwarder#create.
 const DnsForwarder_CREATE_ACTION_CACHE = "clear_cache"
 
-func dnsForwarderCreateInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func dnsForwarderCreateInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["tier0_id"] = bindings.NewStringType()
-	fields["action"] = bindings.NewStringType()
-	fields["enforcement_point_path"] = bindings.NewOptionalType(bindings.NewStringType())
+	fields["tier0_id"] = vapiBindings_.NewStringType()
+	fields["action"] = vapiBindings_.NewStringType()
+	fields["enforcement_point_path"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
 	fieldNameMap["tier0_id"] = "Tier0Id"
 	fieldNameMap["action"] = "Action"
 	fieldNameMap["enforcement_point_path"] = "EnforcementPointPath"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func dnsForwarderCreateOutputType() bindings.BindingType {
-	return bindings.NewVoidType()
+func DnsForwarderCreateOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewVoidType()
 }
 
-func dnsForwarderCreateRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func dnsForwarderCreateRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["tier0_id"] = bindings.NewStringType()
-	fields["action"] = bindings.NewStringType()
-	fields["enforcement_point_path"] = bindings.NewOptionalType(bindings.NewStringType())
+	fields["tier0_id"] = vapiBindings_.NewStringType()
+	fields["action"] = vapiBindings_.NewStringType()
+	fields["enforcement_point_path"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
 	fieldNameMap["tier0_id"] = "Tier0Id"
 	fieldNameMap["action"] = "Action"
 	fieldNameMap["enforcement_point_path"] = "EnforcementPointPath"
-	paramsTypeMap["tier0_id"] = bindings.NewStringType()
-	paramsTypeMap["enforcement_point_path"] = bindings.NewOptionalType(bindings.NewStringType())
-	paramsTypeMap["action"] = bindings.NewStringType()
-	paramsTypeMap["tier0Id"] = bindings.NewStringType()
+	paramsTypeMap["tier0_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["action"] = vapiBindings_.NewStringType()
+	paramsTypeMap["enforcement_point_path"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	paramsTypeMap["tier0Id"] = vapiBindings_.NewStringType()
 	pathParams["tier0_id"] = "tier0Id"
 	queryParams["action"] = "action"
 	queryParams["enforcement_point_path"] = "enforcement_point_path"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -83,36 +83,36 @@ func dnsForwarderCreateRestMetadata() protocol.OperationRestMetadata {
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func dnsForwarderDeleteInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func dnsForwarderDeleteInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["tier0_id"] = bindings.NewStringType()
+	fields["tier0_id"] = vapiBindings_.NewStringType()
 	fieldNameMap["tier0_id"] = "Tier0Id"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func dnsForwarderDeleteOutputType() bindings.BindingType {
-	return bindings.NewVoidType()
+func DnsForwarderDeleteOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewVoidType()
 }
 
-func dnsForwarderDeleteRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func dnsForwarderDeleteRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["tier0_id"] = bindings.NewStringType()
+	fields["tier0_id"] = vapiBindings_.NewStringType()
 	fieldNameMap["tier0_id"] = "Tier0Id"
-	paramsTypeMap["tier0_id"] = bindings.NewStringType()
-	paramsTypeMap["tier0Id"] = bindings.NewStringType()
+	paramsTypeMap["tier0_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["tier0Id"] = vapiBindings_.NewStringType()
 	pathParams["tier0_id"] = "tier0Id"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -133,36 +133,36 @@ func dnsForwarderDeleteRestMetadata() protocol.OperationRestMetadata {
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func dnsForwarderGetInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func dnsForwarderGetInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["tier0_id"] = bindings.NewStringType()
+	fields["tier0_id"] = vapiBindings_.NewStringType()
 	fieldNameMap["tier0_id"] = "Tier0Id"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func dnsForwarderGetOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.PolicyDnsForwarderBindingType)
+func DnsForwarderGetOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewReferenceType(nsx_global_policyModel.PolicyDnsForwarderBindingType)
 }
 
-func dnsForwarderGetRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func dnsForwarderGetRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["tier0_id"] = bindings.NewStringType()
+	fields["tier0_id"] = vapiBindings_.NewStringType()
 	fieldNameMap["tier0_id"] = "Tier0Id"
-	paramsTypeMap["tier0_id"] = bindings.NewStringType()
-	paramsTypeMap["tier0Id"] = bindings.NewStringType()
+	paramsTypeMap["tier0_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["tier0Id"] = vapiBindings_.NewStringType()
 	pathParams["tier0_id"] = "tier0Id"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -183,41 +183,41 @@ func dnsForwarderGetRestMetadata() protocol.OperationRestMetadata {
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func dnsForwarderPatchInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func dnsForwarderPatchInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["tier0_id"] = bindings.NewStringType()
-	fields["policy_dns_forwarder"] = bindings.NewReferenceType(model.PolicyDnsForwarderBindingType)
+	fields["tier0_id"] = vapiBindings_.NewStringType()
+	fields["policy_dns_forwarder"] = vapiBindings_.NewReferenceType(nsx_global_policyModel.PolicyDnsForwarderBindingType)
 	fieldNameMap["tier0_id"] = "Tier0Id"
 	fieldNameMap["policy_dns_forwarder"] = "PolicyDnsForwarder"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func dnsForwarderPatchOutputType() bindings.BindingType {
-	return bindings.NewVoidType()
+func DnsForwarderPatchOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewVoidType()
 }
 
-func dnsForwarderPatchRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func dnsForwarderPatchRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["tier0_id"] = bindings.NewStringType()
-	fields["policy_dns_forwarder"] = bindings.NewReferenceType(model.PolicyDnsForwarderBindingType)
+	fields["tier0_id"] = vapiBindings_.NewStringType()
+	fields["policy_dns_forwarder"] = vapiBindings_.NewReferenceType(nsx_global_policyModel.PolicyDnsForwarderBindingType)
 	fieldNameMap["tier0_id"] = "Tier0Id"
 	fieldNameMap["policy_dns_forwarder"] = "PolicyDnsForwarder"
-	paramsTypeMap["tier0_id"] = bindings.NewStringType()
-	paramsTypeMap["policy_dns_forwarder"] = bindings.NewReferenceType(model.PolicyDnsForwarderBindingType)
-	paramsTypeMap["tier0Id"] = bindings.NewStringType()
+	paramsTypeMap["tier0_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["policy_dns_forwarder"] = vapiBindings_.NewReferenceType(nsx_global_policyModel.PolicyDnsForwarderBindingType)
+	paramsTypeMap["tier0Id"] = vapiBindings_.NewStringType()
 	pathParams["tier0_id"] = "tier0Id"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -238,41 +238,41 @@ func dnsForwarderPatchRestMetadata() protocol.OperationRestMetadata {
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func dnsForwarderUpdateInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func dnsForwarderUpdateInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["tier0_id"] = bindings.NewStringType()
-	fields["policy_dns_forwarder"] = bindings.NewReferenceType(model.PolicyDnsForwarderBindingType)
+	fields["tier0_id"] = vapiBindings_.NewStringType()
+	fields["policy_dns_forwarder"] = vapiBindings_.NewReferenceType(nsx_global_policyModel.PolicyDnsForwarderBindingType)
 	fieldNameMap["tier0_id"] = "Tier0Id"
 	fieldNameMap["policy_dns_forwarder"] = "PolicyDnsForwarder"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func dnsForwarderUpdateOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.PolicyDnsForwarderBindingType)
+func DnsForwarderUpdateOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewReferenceType(nsx_global_policyModel.PolicyDnsForwarderBindingType)
 }
 
-func dnsForwarderUpdateRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func dnsForwarderUpdateRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["tier0_id"] = bindings.NewStringType()
-	fields["policy_dns_forwarder"] = bindings.NewReferenceType(model.PolicyDnsForwarderBindingType)
+	fields["tier0_id"] = vapiBindings_.NewStringType()
+	fields["policy_dns_forwarder"] = vapiBindings_.NewReferenceType(nsx_global_policyModel.PolicyDnsForwarderBindingType)
 	fieldNameMap["tier0_id"] = "Tier0Id"
 	fieldNameMap["policy_dns_forwarder"] = "PolicyDnsForwarder"
-	paramsTypeMap["tier0_id"] = bindings.NewStringType()
-	paramsTypeMap["policy_dns_forwarder"] = bindings.NewReferenceType(model.PolicyDnsForwarderBindingType)
-	paramsTypeMap["tier0Id"] = bindings.NewStringType()
+	paramsTypeMap["tier0_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["policy_dns_forwarder"] = vapiBindings_.NewReferenceType(nsx_global_policyModel.PolicyDnsForwarderBindingType)
+	paramsTypeMap["tier0Id"] = vapiBindings_.NewStringType()
 	pathParams["tier0_id"] = "tier0Id"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,

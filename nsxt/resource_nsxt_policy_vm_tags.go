@@ -54,7 +54,7 @@ func resourceNsxtPolicyVMTags() *schema.Resource {
 	}
 }
 
-func listAllPolicyVirtualMachines(connector *client.RestConnector, m interface{}) ([]model.VirtualMachine, error) {
+func listAllPolicyVirtualMachines(connector client.Connector, m interface{}) ([]model.VirtualMachine, error) {
 	client := realized_state.NewVirtualMachinesClient(connector)
 	var results []model.VirtualMachine
 	boolFalse := false
@@ -92,7 +92,7 @@ func listAllPolicyVirtualMachines(connector *client.RestConnector, m interface{}
 	}
 }
 
-func listAllPolicySegmentPorts(connector *client.RestConnector, segmentPath string) ([]model.SegmentPort, error) {
+func listAllPolicySegmentPorts(connector client.Connector, segmentPath string) ([]model.SegmentPort, error) {
 	client := segments.NewPortsClient(connector)
 	segmentID := getPolicyIDFromPath(segmentPath)
 	var results []model.SegmentPort
@@ -144,7 +144,7 @@ func listAllPolicyVifs(m interface{}) ([]model.VirtualNetworkInterface, error) {
 	}
 }
 
-func findNsxtPolicyVMByNamePrefix(connector *client.RestConnector, namePrefix string, m interface{}) ([]model.VirtualMachine, []model.VirtualMachine, error) {
+func findNsxtPolicyVMByNamePrefix(connector client.Connector, namePrefix string, m interface{}) ([]model.VirtualMachine, []model.VirtualMachine, error) {
 	var perfectMatch, prefixMatch []model.VirtualMachine
 
 	allVMs, err := listAllPolicyVirtualMachines(connector, m)
@@ -163,7 +163,7 @@ func findNsxtPolicyVMByNamePrefix(connector *client.RestConnector, namePrefix st
 	return perfectMatch, prefixMatch, nil
 }
 
-func findNsxtPolicyVMByID(connector *client.RestConnector, vmID string, m interface{}) (model.VirtualMachine, error) {
+func findNsxtPolicyVMByID(connector client.Connector, vmID string, m interface{}) (model.VirtualMachine, error) {
 	var virtualMachineStruct model.VirtualMachine
 
 	allVMs, err := listAllPolicyVirtualMachines(connector, m)
@@ -186,7 +186,7 @@ func findNsxtPolicyVMByID(connector *client.RestConnector, vmID string, m interf
 	return virtualMachineStruct, fmt.Errorf("Could not find Virtual Machine with ID: %s", vmID)
 }
 
-func updateNsxtPolicyVMTags(connector *client.RestConnector, externalID string, tags []model.Tag, m interface{}) error {
+func updateNsxtPolicyVMTags(connector client.Connector, externalID string, tags []model.Tag, m interface{}) error {
 	client := enforcement_points.NewVirtualMachinesClient(connector)
 
 	tagUpdate := model.VirtualMachineTagsUpdate{
@@ -212,7 +212,7 @@ func listPolicyVifAttachmentsForVM(m interface{}, externalID string) ([]string, 
 	return vifAttachmentIds, nil
 }
 
-func updateNsxtPolicyVMPortTags(connector *client.RestConnector, externalID string, portTags []interface{}, m interface{}, isDelete bool) error {
+func updateNsxtPolicyVMPortTags(connector client.Connector, externalID string, portTags []interface{}, m interface{}, isDelete bool) error {
 
 	client := segments.NewPortsClient(connector)
 

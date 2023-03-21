@@ -1,11 +1,10 @@
-/* Copyright © 2019, 2020 VMware, Inc. All Rights Reserved.
+/* Copyright © 2019-2021 VMware, Inc. All Rights Reserved.
    SPDX-License-Identifier: BSD-2-Clause */
 
 package rest
 
 import (
 	"encoding/base64"
-	"errors"
 	"fmt"
 	"net/url"
 	"reflect"
@@ -94,7 +93,7 @@ func SerializeRequests(inputValue *data.StructValue, ctx *core.ExecutionContext,
 // SerializeRequestsWithSecCtxSerializers serializes a request into a REST request
 // Return Request with urlPath, inputHeaders and requestBody
 func SerializeRequestsWithSecCtxSerializers(inputValue *data.StructValue, execCtx *core.ExecutionContext,
-	metadata *protocol.OperationRestMetadata, secCtxSerializer SecurityContextSerializer) (*Request, error) {
+	metadata *protocol.OperationRestMetadata, secCtxSerializer protocol.SecurityContextSerializer) (*Request, error) {
 	result, err := SerializeInput(inputValue, metadata)
 	if err != nil {
 		log.Error(err)
@@ -437,27 +436,17 @@ func getOauthCtxHeaders(securityContext core.SecurityContext) (map[string]interf
 	return map[string]interface{}{security.CSP_AUTH_TOKEN_KEY: oauthToken}, nil
 }
 
-func contains(s []string, e string) bool {
-	for _, a := range s {
-		if a == e {
-			return true
-		}
-	}
-	return false
-}
-
-// GetSecurityCtxStrValue returns value of the given key in *string.
+// GetSecurityCtxStrValue returns value of the given security context key in *string.
 // Error will be raised if securityContext is nil or value is not string type
 func GetSecurityCtxStrValue(securityContext core.SecurityContext, propKey string) (*string, error) {
 	if securityContext == nil {
-		err := errors.New("securityContext can't be nil")
-		return nil, err
+		log.Error("SecurityContext should not be nil")
+		return nil, l10n.NewRuntimeErrorNoParam("vapi.data.serializers.rest.nilSecurityContext")
 	}
 
 	securityContextMap := securityContext.GetAllProperties()
-	var propVal interface{}
-	var ok bool
-	if propVal, ok = securityContextMap[propKey]; !ok {
+	propVal, ok := securityContextMap[propKey]
+	if !ok {
 		log.Debugf("%s is not present in the security context", propKey)
 		return nil, nil
 	}
@@ -466,14 +455,15 @@ func GetSecurityCtxStrValue(securityContext core.SecurityContext, propKey string
 		return nil, nil
 	}
 
-	if propValueStr, ok := propVal.(string); ok {
-		return &propValueStr, nil
+	propValueStr, ok := propVal.(string)
+	if !ok {
+		log.Errorf("Invalid type for '%s', expected type string, actual type is %s",
+			propKey, reflect.TypeOf(propVal).String())
+		return nil, l10n.NewRuntimeError(
+			"vapi.data.serializers.rest.invalidPropertyType",
+			map[string]string{"propKey": propKey, "propType": reflect.TypeOf(propVal).String()})
 	}
-
-	err := fmt.Errorf("Invalid type for %s, expected type string, actual type %s",
-		propKey, reflect.TypeOf(propVal).String())
-	log.Error(err)
-	return nil, err
+	return &propValueStr, nil
 }
 
 func getNestedParams(field string, inputValue *data.StructValue, fields map[string]bindings.BindingType) (data.DataValue, error) {

@@ -11,49 +11,49 @@
 package infra
 
 import (
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+	vapiBindings_ "github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	vapiData_ "github.com/vmware/vsphere-automation-sdk-go/runtime/data"
+	vapiProtocol_ "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol"
+	nsx_policyModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"reflect"
 )
 
-func ipfixL2ProfilesDeleteInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func ipfixL2ProfilesDeleteInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["ipfix_l2_profile_id"] = bindings.NewStringType()
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
+	fields["ipfix_l2_profile_id"] = vapiBindings_.NewStringType()
+	fields["override"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
 	fieldNameMap["ipfix_l2_profile_id"] = "IpfixL2ProfileId"
 	fieldNameMap["override"] = "Override"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func ipfixL2ProfilesDeleteOutputType() bindings.BindingType {
-	return bindings.NewVoidType()
+func IpfixL2ProfilesDeleteOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewVoidType()
 }
 
-func ipfixL2ProfilesDeleteRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func ipfixL2ProfilesDeleteRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["ipfix_l2_profile_id"] = bindings.NewStringType()
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
+	fields["ipfix_l2_profile_id"] = vapiBindings_.NewStringType()
+	fields["override"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
 	fieldNameMap["ipfix_l2_profile_id"] = "IpfixL2ProfileId"
 	fieldNameMap["override"] = "Override"
-	paramsTypeMap["ipfix_l2_profile_id"] = bindings.NewStringType()
-	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	paramsTypeMap["ipfixL2ProfileId"] = bindings.NewStringType()
+	paramsTypeMap["ipfix_l2_profile_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["override"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	paramsTypeMap["ipfixL2ProfileId"] = vapiBindings_.NewStringType()
 	pathParams["ipfix_l2_profile_id"] = "ipfixL2ProfileId"
 	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -74,36 +74,36 @@ func ipfixL2ProfilesDeleteRestMetadata() protocol.OperationRestMetadata {
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func ipfixL2ProfilesGetInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func ipfixL2ProfilesGetInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["ipfix_l2_profile_id"] = bindings.NewStringType()
+	fields["ipfix_l2_profile_id"] = vapiBindings_.NewStringType()
 	fieldNameMap["ipfix_l2_profile_id"] = "IpfixL2ProfileId"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func ipfixL2ProfilesGetOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.IPFIXL2ProfileBindingType)
+func IpfixL2ProfilesGetOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewReferenceType(nsx_policyModel.IPFIXL2ProfileBindingType)
 }
 
-func ipfixL2ProfilesGetRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func ipfixL2ProfilesGetRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["ipfix_l2_profile_id"] = bindings.NewStringType()
+	fields["ipfix_l2_profile_id"] = vapiBindings_.NewStringType()
 	fieldNameMap["ipfix_l2_profile_id"] = "IpfixL2ProfileId"
-	paramsTypeMap["ipfix_l2_profile_id"] = bindings.NewStringType()
-	paramsTypeMap["ipfixL2ProfileId"] = bindings.NewStringType()
+	paramsTypeMap["ipfix_l2_profile_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["ipfixL2ProfileId"] = vapiBindings_.NewStringType()
 	pathParams["ipfix_l2_profile_id"] = "ipfixL2ProfileId"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -124,56 +124,56 @@ func ipfixL2ProfilesGetRestMetadata() protocol.OperationRestMetadata {
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func ipfixL2ProfilesListInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func ipfixL2ProfilesListInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
-	fields["include_mark_for_delete_objects"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	fields["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
-	fields["page_size"] = bindings.NewOptionalType(bindings.NewIntegerType())
-	fields["sort_ascending"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	fields["sort_by"] = bindings.NewOptionalType(bindings.NewStringType())
+	fields["cursor"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["include_mark_for_delete_objects"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	fields["included_fields"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["page_size"] = vapiBindings_.NewOptionalType(vapiBindings_.NewIntegerType())
+	fields["sort_ascending"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	fields["sort_by"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
 	fieldNameMap["cursor"] = "Cursor"
 	fieldNameMap["include_mark_for_delete_objects"] = "IncludeMarkForDeleteObjects"
 	fieldNameMap["included_fields"] = "IncludedFields"
 	fieldNameMap["page_size"] = "PageSize"
 	fieldNameMap["sort_ascending"] = "SortAscending"
 	fieldNameMap["sort_by"] = "SortBy"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func ipfixL2ProfilesListOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.IPFIXL2ProfileListResultBindingType)
+func IpfixL2ProfilesListOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewReferenceType(nsx_policyModel.IPFIXL2ProfileListResultBindingType)
 }
 
-func ipfixL2ProfilesListRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func ipfixL2ProfilesListRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
-	fields["include_mark_for_delete_objects"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	fields["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
-	fields["page_size"] = bindings.NewOptionalType(bindings.NewIntegerType())
-	fields["sort_ascending"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	fields["sort_by"] = bindings.NewOptionalType(bindings.NewStringType())
+	fields["cursor"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["include_mark_for_delete_objects"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	fields["included_fields"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["page_size"] = vapiBindings_.NewOptionalType(vapiBindings_.NewIntegerType())
+	fields["sort_ascending"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	fields["sort_by"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
 	fieldNameMap["cursor"] = "Cursor"
 	fieldNameMap["include_mark_for_delete_objects"] = "IncludeMarkForDeleteObjects"
 	fieldNameMap["included_fields"] = "IncludedFields"
 	fieldNameMap["page_size"] = "PageSize"
 	fieldNameMap["sort_ascending"] = "SortAscending"
 	fieldNameMap["sort_by"] = "SortBy"
-	paramsTypeMap["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
-	paramsTypeMap["page_size"] = bindings.NewOptionalType(bindings.NewIntegerType())
-	paramsTypeMap["include_mark_for_delete_objects"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	paramsTypeMap["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
-	paramsTypeMap["sort_by"] = bindings.NewOptionalType(bindings.NewStringType())
-	paramsTypeMap["sort_ascending"] = bindings.NewOptionalType(bindings.NewBooleanType())
+	paramsTypeMap["cursor"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	paramsTypeMap["sort_ascending"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	paramsTypeMap["included_fields"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	paramsTypeMap["sort_by"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	paramsTypeMap["include_mark_for_delete_objects"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	paramsTypeMap["page_size"] = vapiBindings_.NewOptionalType(vapiBindings_.NewIntegerType())
 	queryParams["cursor"] = "cursor"
 	queryParams["sort_ascending"] = "sort_ascending"
 	queryParams["included_fields"] = "included_fields"
@@ -182,7 +182,7 @@ func ipfixL2ProfilesListRestMetadata() protocol.OperationRestMetadata {
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -203,47 +203,47 @@ func ipfixL2ProfilesListRestMetadata() protocol.OperationRestMetadata {
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func ipfixL2ProfilesPatchInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func ipfixL2ProfilesPatchInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["ipfix_l2_profile_id"] = bindings.NewStringType()
-	fields["i_PFIX_l2_profile"] = bindings.NewReferenceType(model.IPFIXL2ProfileBindingType)
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
+	fields["ipfix_l2_profile_id"] = vapiBindings_.NewStringType()
+	fields["i_PFIX_l2_profile"] = vapiBindings_.NewReferenceType(nsx_policyModel.IPFIXL2ProfileBindingType)
+	fields["override"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
 	fieldNameMap["ipfix_l2_profile_id"] = "IpfixL2ProfileId"
 	fieldNameMap["i_PFIX_l2_profile"] = "IPFIXL2Profile"
 	fieldNameMap["override"] = "Override"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func ipfixL2ProfilesPatchOutputType() bindings.BindingType {
-	return bindings.NewVoidType()
+func IpfixL2ProfilesPatchOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewVoidType()
 }
 
-func ipfixL2ProfilesPatchRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func ipfixL2ProfilesPatchRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["ipfix_l2_profile_id"] = bindings.NewStringType()
-	fields["i_PFIX_l2_profile"] = bindings.NewReferenceType(model.IPFIXL2ProfileBindingType)
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
+	fields["ipfix_l2_profile_id"] = vapiBindings_.NewStringType()
+	fields["i_PFIX_l2_profile"] = vapiBindings_.NewReferenceType(nsx_policyModel.IPFIXL2ProfileBindingType)
+	fields["override"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
 	fieldNameMap["ipfix_l2_profile_id"] = "IpfixL2ProfileId"
 	fieldNameMap["i_PFIX_l2_profile"] = "IPFIXL2Profile"
 	fieldNameMap["override"] = "Override"
-	paramsTypeMap["ipfix_l2_profile_id"] = bindings.NewStringType()
-	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	paramsTypeMap["i_PFIX_l2_profile"] = bindings.NewReferenceType(model.IPFIXL2ProfileBindingType)
-	paramsTypeMap["ipfixL2ProfileId"] = bindings.NewStringType()
+	paramsTypeMap["i_PFIX_l2_profile"] = vapiBindings_.NewReferenceType(nsx_policyModel.IPFIXL2ProfileBindingType)
+	paramsTypeMap["ipfix_l2_profile_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["override"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	paramsTypeMap["ipfixL2ProfileId"] = vapiBindings_.NewStringType()
 	pathParams["ipfix_l2_profile_id"] = "ipfixL2ProfileId"
 	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -264,47 +264,47 @@ func ipfixL2ProfilesPatchRestMetadata() protocol.OperationRestMetadata {
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func ipfixL2ProfilesUpdateInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func ipfixL2ProfilesUpdateInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["ipfix_l2_profile_id"] = bindings.NewStringType()
-	fields["i_PFIX_l2_profile"] = bindings.NewReferenceType(model.IPFIXL2ProfileBindingType)
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
+	fields["ipfix_l2_profile_id"] = vapiBindings_.NewStringType()
+	fields["i_PFIX_l2_profile"] = vapiBindings_.NewReferenceType(nsx_policyModel.IPFIXL2ProfileBindingType)
+	fields["override"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
 	fieldNameMap["ipfix_l2_profile_id"] = "IpfixL2ProfileId"
 	fieldNameMap["i_PFIX_l2_profile"] = "IPFIXL2Profile"
 	fieldNameMap["override"] = "Override"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func ipfixL2ProfilesUpdateOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.IPFIXL2ProfileBindingType)
+func IpfixL2ProfilesUpdateOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewReferenceType(nsx_policyModel.IPFIXL2ProfileBindingType)
 }
 
-func ipfixL2ProfilesUpdateRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func ipfixL2ProfilesUpdateRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["ipfix_l2_profile_id"] = bindings.NewStringType()
-	fields["i_PFIX_l2_profile"] = bindings.NewReferenceType(model.IPFIXL2ProfileBindingType)
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
+	fields["ipfix_l2_profile_id"] = vapiBindings_.NewStringType()
+	fields["i_PFIX_l2_profile"] = vapiBindings_.NewReferenceType(nsx_policyModel.IPFIXL2ProfileBindingType)
+	fields["override"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
 	fieldNameMap["ipfix_l2_profile_id"] = "IpfixL2ProfileId"
 	fieldNameMap["i_PFIX_l2_profile"] = "IPFIXL2Profile"
 	fieldNameMap["override"] = "Override"
-	paramsTypeMap["ipfix_l2_profile_id"] = bindings.NewStringType()
-	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	paramsTypeMap["i_PFIX_l2_profile"] = bindings.NewReferenceType(model.IPFIXL2ProfileBindingType)
-	paramsTypeMap["ipfixL2ProfileId"] = bindings.NewStringType()
+	paramsTypeMap["i_PFIX_l2_profile"] = vapiBindings_.NewReferenceType(nsx_policyModel.IPFIXL2ProfileBindingType)
+	paramsTypeMap["ipfix_l2_profile_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["override"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	paramsTypeMap["ipfixL2ProfileId"] = vapiBindings_.NewStringType()
 	pathParams["ipfix_l2_profile_id"] = "ipfixL2ProfileId"
 	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,

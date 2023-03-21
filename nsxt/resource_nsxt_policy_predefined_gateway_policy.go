@@ -87,7 +87,7 @@ func getGatewayPolicyDefaultRulesSchema() *schema.Schema {
 	}
 }
 
-func updateGatewayPolicyDefaultRuleByScope(rule model.Rule, d *schema.ResourceData, connector *client.RestConnector, isGlobalManager bool) *model.Rule {
+func updateGatewayPolicyDefaultRuleByScope(rule model.Rule, d *schema.ResourceData, connector client.Connector, isGlobalManager bool) *model.Rule {
 	defaultRules := d.Get("default_rule").([]interface{})
 
 	for _, obj := range defaultRules {
@@ -213,7 +213,6 @@ func revertGatewayPolicyDefaultRule(rule model.Rule) model.Rule {
 
 func createPolicyChildRule(ruleID string, rule model.Rule, shouldDelete bool) (*data.StructValue, error) {
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 
 	childRule := model.ChildRule{
 		ResourceType:    "ChildRule",
@@ -232,7 +231,6 @@ func createPolicyChildRule(ruleID string, rule model.Rule, shouldDelete bool) (*
 
 func createChildDomainWithGatewayPolicy(domain string, policyID string, policy model.GatewayPolicy) (*data.StructValue, error) {
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 
 	childPolicy := model.ChildGatewayPolicy{
 		Id:            &policyID,

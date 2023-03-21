@@ -11,49 +11,49 @@
 package infra
 
 import (
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+	vapiBindings_ "github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	vapiData_ "github.com/vmware/vsphere-automation-sdk-go/runtime/data"
+	vapiProtocol_ "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol"
+	nsx_policyModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"reflect"
 )
 
-func staticMimeContentsDeleteInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func staticMimeContentsDeleteInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["static_mime_content_id"] = bindings.NewStringType()
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
+	fields["static_mime_content_id"] = vapiBindings_.NewStringType()
+	fields["override"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
 	fieldNameMap["static_mime_content_id"] = "StaticMimeContentId"
 	fieldNameMap["override"] = "Override"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func staticMimeContentsDeleteOutputType() bindings.BindingType {
-	return bindings.NewVoidType()
+func StaticMimeContentsDeleteOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewVoidType()
 }
 
-func staticMimeContentsDeleteRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func staticMimeContentsDeleteRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["static_mime_content_id"] = bindings.NewStringType()
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
+	fields["static_mime_content_id"] = vapiBindings_.NewStringType()
+	fields["override"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
 	fieldNameMap["static_mime_content_id"] = "StaticMimeContentId"
 	fieldNameMap["override"] = "Override"
-	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	paramsTypeMap["static_mime_content_id"] = bindings.NewStringType()
-	paramsTypeMap["staticMimeContentId"] = bindings.NewStringType()
+	paramsTypeMap["override"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	paramsTypeMap["static_mime_content_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["staticMimeContentId"] = vapiBindings_.NewStringType()
 	pathParams["static_mime_content_id"] = "staticMimeContentId"
 	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -74,36 +74,36 @@ func staticMimeContentsDeleteRestMetadata() protocol.OperationRestMetadata {
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func staticMimeContentsGetInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func staticMimeContentsGetInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["static_mime_content_id"] = bindings.NewStringType()
+	fields["static_mime_content_id"] = vapiBindings_.NewStringType()
 	fieldNameMap["static_mime_content_id"] = "StaticMimeContentId"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func staticMimeContentsGetOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.StaticMimeContentBindingType)
+func StaticMimeContentsGetOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewReferenceType(nsx_policyModel.StaticMimeContentBindingType)
 }
 
-func staticMimeContentsGetRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func staticMimeContentsGetRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["static_mime_content_id"] = bindings.NewStringType()
+	fields["static_mime_content_id"] = vapiBindings_.NewStringType()
 	fieldNameMap["static_mime_content_id"] = "StaticMimeContentId"
-	paramsTypeMap["static_mime_content_id"] = bindings.NewStringType()
-	paramsTypeMap["staticMimeContentId"] = bindings.NewStringType()
+	paramsTypeMap["static_mime_content_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["staticMimeContentId"] = vapiBindings_.NewStringType()
 	pathParams["static_mime_content_id"] = "staticMimeContentId"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -124,56 +124,56 @@ func staticMimeContentsGetRestMetadata() protocol.OperationRestMetadata {
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func staticMimeContentsListInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func staticMimeContentsListInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
-	fields["include_mark_for_delete_objects"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	fields["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
-	fields["page_size"] = bindings.NewOptionalType(bindings.NewIntegerType())
-	fields["sort_ascending"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	fields["sort_by"] = bindings.NewOptionalType(bindings.NewStringType())
+	fields["cursor"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["include_mark_for_delete_objects"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	fields["included_fields"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["page_size"] = vapiBindings_.NewOptionalType(vapiBindings_.NewIntegerType())
+	fields["sort_ascending"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	fields["sort_by"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
 	fieldNameMap["cursor"] = "Cursor"
 	fieldNameMap["include_mark_for_delete_objects"] = "IncludeMarkForDeleteObjects"
 	fieldNameMap["included_fields"] = "IncludedFields"
 	fieldNameMap["page_size"] = "PageSize"
 	fieldNameMap["sort_ascending"] = "SortAscending"
 	fieldNameMap["sort_by"] = "SortBy"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func staticMimeContentsListOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.StaticMimeContentListResultBindingType)
+func StaticMimeContentsListOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewReferenceType(nsx_policyModel.StaticMimeContentListResultBindingType)
 }
 
-func staticMimeContentsListRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func staticMimeContentsListRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
-	fields["include_mark_for_delete_objects"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	fields["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
-	fields["page_size"] = bindings.NewOptionalType(bindings.NewIntegerType())
-	fields["sort_ascending"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	fields["sort_by"] = bindings.NewOptionalType(bindings.NewStringType())
+	fields["cursor"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["include_mark_for_delete_objects"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	fields["included_fields"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["page_size"] = vapiBindings_.NewOptionalType(vapiBindings_.NewIntegerType())
+	fields["sort_ascending"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	fields["sort_by"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
 	fieldNameMap["cursor"] = "Cursor"
 	fieldNameMap["include_mark_for_delete_objects"] = "IncludeMarkForDeleteObjects"
 	fieldNameMap["included_fields"] = "IncludedFields"
 	fieldNameMap["page_size"] = "PageSize"
 	fieldNameMap["sort_ascending"] = "SortAscending"
 	fieldNameMap["sort_by"] = "SortBy"
-	paramsTypeMap["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
-	paramsTypeMap["page_size"] = bindings.NewOptionalType(bindings.NewIntegerType())
-	paramsTypeMap["include_mark_for_delete_objects"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	paramsTypeMap["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
-	paramsTypeMap["sort_by"] = bindings.NewOptionalType(bindings.NewStringType())
-	paramsTypeMap["sort_ascending"] = bindings.NewOptionalType(bindings.NewBooleanType())
+	paramsTypeMap["cursor"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	paramsTypeMap["sort_ascending"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	paramsTypeMap["included_fields"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	paramsTypeMap["sort_by"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	paramsTypeMap["include_mark_for_delete_objects"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	paramsTypeMap["page_size"] = vapiBindings_.NewOptionalType(vapiBindings_.NewIntegerType())
 	queryParams["cursor"] = "cursor"
 	queryParams["sort_ascending"] = "sort_ascending"
 	queryParams["included_fields"] = "included_fields"
@@ -182,7 +182,7 @@ func staticMimeContentsListRestMetadata() protocol.OperationRestMetadata {
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -203,47 +203,47 @@ func staticMimeContentsListRestMetadata() protocol.OperationRestMetadata {
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func staticMimeContentsPatchInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func staticMimeContentsPatchInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["static_mime_content_id"] = bindings.NewStringType()
-	fields["static_mime_content"] = bindings.NewReferenceType(model.StaticMimeContentBindingType)
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
+	fields["static_mime_content_id"] = vapiBindings_.NewStringType()
+	fields["static_mime_content"] = vapiBindings_.NewReferenceType(nsx_policyModel.StaticMimeContentBindingType)
+	fields["override"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
 	fieldNameMap["static_mime_content_id"] = "StaticMimeContentId"
 	fieldNameMap["static_mime_content"] = "StaticMimeContent"
 	fieldNameMap["override"] = "Override"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func staticMimeContentsPatchOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.StaticMimeContentBindingType)
+func StaticMimeContentsPatchOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewReferenceType(nsx_policyModel.StaticMimeContentBindingType)
 }
 
-func staticMimeContentsPatchRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func staticMimeContentsPatchRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["static_mime_content_id"] = bindings.NewStringType()
-	fields["static_mime_content"] = bindings.NewReferenceType(model.StaticMimeContentBindingType)
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
+	fields["static_mime_content_id"] = vapiBindings_.NewStringType()
+	fields["static_mime_content"] = vapiBindings_.NewReferenceType(nsx_policyModel.StaticMimeContentBindingType)
+	fields["override"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
 	fieldNameMap["static_mime_content_id"] = "StaticMimeContentId"
 	fieldNameMap["static_mime_content"] = "StaticMimeContent"
 	fieldNameMap["override"] = "Override"
-	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	paramsTypeMap["static_mime_content_id"] = bindings.NewStringType()
-	paramsTypeMap["static_mime_content"] = bindings.NewReferenceType(model.StaticMimeContentBindingType)
-	paramsTypeMap["staticMimeContentId"] = bindings.NewStringType()
+	paramsTypeMap["static_mime_content"] = vapiBindings_.NewReferenceType(nsx_policyModel.StaticMimeContentBindingType)
+	paramsTypeMap["override"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	paramsTypeMap["static_mime_content_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["staticMimeContentId"] = vapiBindings_.NewStringType()
 	pathParams["static_mime_content_id"] = "staticMimeContentId"
 	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -264,47 +264,47 @@ func staticMimeContentsPatchRestMetadata() protocol.OperationRestMetadata {
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func staticMimeContentsUpdateInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func staticMimeContentsUpdateInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["static_mime_content_id"] = bindings.NewStringType()
-	fields["static_mime_content"] = bindings.NewReferenceType(model.StaticMimeContentBindingType)
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
+	fields["static_mime_content_id"] = vapiBindings_.NewStringType()
+	fields["static_mime_content"] = vapiBindings_.NewReferenceType(nsx_policyModel.StaticMimeContentBindingType)
+	fields["override"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
 	fieldNameMap["static_mime_content_id"] = "StaticMimeContentId"
 	fieldNameMap["static_mime_content"] = "StaticMimeContent"
 	fieldNameMap["override"] = "Override"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func staticMimeContentsUpdateOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.StaticMimeContentBindingType)
+func StaticMimeContentsUpdateOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewReferenceType(nsx_policyModel.StaticMimeContentBindingType)
 }
 
-func staticMimeContentsUpdateRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func staticMimeContentsUpdateRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["static_mime_content_id"] = bindings.NewStringType()
-	fields["static_mime_content"] = bindings.NewReferenceType(model.StaticMimeContentBindingType)
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
+	fields["static_mime_content_id"] = vapiBindings_.NewStringType()
+	fields["static_mime_content"] = vapiBindings_.NewReferenceType(nsx_policyModel.StaticMimeContentBindingType)
+	fields["override"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
 	fieldNameMap["static_mime_content_id"] = "StaticMimeContentId"
 	fieldNameMap["static_mime_content"] = "StaticMimeContent"
 	fieldNameMap["override"] = "Override"
-	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	paramsTypeMap["static_mime_content_id"] = bindings.NewStringType()
-	paramsTypeMap["static_mime_content"] = bindings.NewReferenceType(model.StaticMimeContentBindingType)
-	paramsTypeMap["staticMimeContentId"] = bindings.NewStringType()
+	paramsTypeMap["static_mime_content"] = vapiBindings_.NewReferenceType(nsx_policyModel.StaticMimeContentBindingType)
+	paramsTypeMap["override"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	paramsTypeMap["static_mime_content_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["staticMimeContentId"] = vapiBindings_.NewStringType()
 	pathParams["static_mime_content_id"] = "staticMimeContentId"
 	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,

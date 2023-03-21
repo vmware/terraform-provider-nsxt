@@ -11,41 +11,41 @@
 package infra
 
 import (
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+	vapiBindings_ "github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	vapiData_ "github.com/vmware/vsphere-automation-sdk-go/runtime/data"
+	vapiProtocol_ "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol"
+	nsx_policyModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"reflect"
 )
 
-func albAuthTokenUpdateInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func albAuthTokenUpdateInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["a_LB_auth_token"] = bindings.NewReferenceType(model.ALBAuthTokenBindingType)
+	fields["a_LB_auth_token"] = vapiBindings_.NewReferenceType(nsx_policyModel.ALBAuthTokenBindingType)
 	fieldNameMap["a_LB_auth_token"] = "ALBAuthToken"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func albAuthTokenUpdateOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.ALBAuthTokenBindingType)
+func AlbAuthTokenUpdateOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewReferenceType(nsx_policyModel.ALBAuthTokenBindingType)
 }
 
-func albAuthTokenUpdateRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func albAuthTokenUpdateRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["a_LB_auth_token"] = bindings.NewReferenceType(model.ALBAuthTokenBindingType)
+	fields["a_LB_auth_token"] = vapiBindings_.NewReferenceType(nsx_policyModel.ALBAuthTokenBindingType)
 	fieldNameMap["a_LB_auth_token"] = "ALBAuthToken"
-	paramsTypeMap["a_LB_auth_token"] = bindings.NewReferenceType(model.ALBAuthTokenBindingType)
+	paramsTypeMap["a_LB_auth_token"] = vapiBindings_.NewReferenceType(nsx_policyModel.ALBAuthTokenBindingType)
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,

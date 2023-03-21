@@ -11,49 +11,49 @@
 package infra
 
 import (
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+	vapiBindings_ "github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	vapiData_ "github.com/vmware/vsphere-automation-sdk-go/runtime/data"
+	vapiProtocol_ "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol"
+	nsx_policyModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"reflect"
 )
 
-func firewallSchedulersDeleteInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func firewallSchedulersDeleteInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["firewall_scheduler_id"] = bindings.NewStringType()
-	fields["force"] = bindings.NewOptionalType(bindings.NewBooleanType())
+	fields["firewall_scheduler_id"] = vapiBindings_.NewStringType()
+	fields["force"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
 	fieldNameMap["firewall_scheduler_id"] = "FirewallSchedulerId"
 	fieldNameMap["force"] = "Force"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func firewallSchedulersDeleteOutputType() bindings.BindingType {
-	return bindings.NewVoidType()
+func FirewallSchedulersDeleteOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewVoidType()
 }
 
-func firewallSchedulersDeleteRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func firewallSchedulersDeleteRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["firewall_scheduler_id"] = bindings.NewStringType()
-	fields["force"] = bindings.NewOptionalType(bindings.NewBooleanType())
+	fields["firewall_scheduler_id"] = vapiBindings_.NewStringType()
+	fields["force"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
 	fieldNameMap["firewall_scheduler_id"] = "FirewallSchedulerId"
 	fieldNameMap["force"] = "Force"
-	paramsTypeMap["firewall_scheduler_id"] = bindings.NewStringType()
-	paramsTypeMap["force"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	paramsTypeMap["firewallSchedulerId"] = bindings.NewStringType()
+	paramsTypeMap["firewall_scheduler_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["force"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	paramsTypeMap["firewallSchedulerId"] = vapiBindings_.NewStringType()
 	pathParams["firewall_scheduler_id"] = "firewallSchedulerId"
 	queryParams["force"] = "force"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -74,36 +74,36 @@ func firewallSchedulersDeleteRestMetadata() protocol.OperationRestMetadata {
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func firewallSchedulersGetInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func firewallSchedulersGetInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["firewall_scheduler_id"] = bindings.NewStringType()
+	fields["firewall_scheduler_id"] = vapiBindings_.NewStringType()
 	fieldNameMap["firewall_scheduler_id"] = "FirewallSchedulerId"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func firewallSchedulersGetOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.PolicyFirewallSchedulerBindingType)
+func FirewallSchedulersGetOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewReferenceType(nsx_policyModel.PolicyFirewallSchedulerBindingType)
 }
 
-func firewallSchedulersGetRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func firewallSchedulersGetRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["firewall_scheduler_id"] = bindings.NewStringType()
+	fields["firewall_scheduler_id"] = vapiBindings_.NewStringType()
 	fieldNameMap["firewall_scheduler_id"] = "FirewallSchedulerId"
-	paramsTypeMap["firewall_scheduler_id"] = bindings.NewStringType()
-	paramsTypeMap["firewallSchedulerId"] = bindings.NewStringType()
+	paramsTypeMap["firewall_scheduler_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["firewallSchedulerId"] = vapiBindings_.NewStringType()
 	pathParams["firewall_scheduler_id"] = "firewallSchedulerId"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -124,56 +124,56 @@ func firewallSchedulersGetRestMetadata() protocol.OperationRestMetadata {
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func firewallSchedulersListInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func firewallSchedulersListInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
-	fields["include_mark_for_delete_objects"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	fields["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
-	fields["page_size"] = bindings.NewOptionalType(bindings.NewIntegerType())
-	fields["sort_ascending"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	fields["sort_by"] = bindings.NewOptionalType(bindings.NewStringType())
+	fields["cursor"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["include_mark_for_delete_objects"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	fields["included_fields"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["page_size"] = vapiBindings_.NewOptionalType(vapiBindings_.NewIntegerType())
+	fields["sort_ascending"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	fields["sort_by"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
 	fieldNameMap["cursor"] = "Cursor"
 	fieldNameMap["include_mark_for_delete_objects"] = "IncludeMarkForDeleteObjects"
 	fieldNameMap["included_fields"] = "IncludedFields"
 	fieldNameMap["page_size"] = "PageSize"
 	fieldNameMap["sort_ascending"] = "SortAscending"
 	fieldNameMap["sort_by"] = "SortBy"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func firewallSchedulersListOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.PolicyFirewallSchedulerListResultBindingType)
+func FirewallSchedulersListOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewReferenceType(nsx_policyModel.PolicyFirewallSchedulerListResultBindingType)
 }
 
-func firewallSchedulersListRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func firewallSchedulersListRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
-	fields["include_mark_for_delete_objects"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	fields["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
-	fields["page_size"] = bindings.NewOptionalType(bindings.NewIntegerType())
-	fields["sort_ascending"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	fields["sort_by"] = bindings.NewOptionalType(bindings.NewStringType())
+	fields["cursor"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["include_mark_for_delete_objects"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	fields["included_fields"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["page_size"] = vapiBindings_.NewOptionalType(vapiBindings_.NewIntegerType())
+	fields["sort_ascending"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	fields["sort_by"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
 	fieldNameMap["cursor"] = "Cursor"
 	fieldNameMap["include_mark_for_delete_objects"] = "IncludeMarkForDeleteObjects"
 	fieldNameMap["included_fields"] = "IncludedFields"
 	fieldNameMap["page_size"] = "PageSize"
 	fieldNameMap["sort_ascending"] = "SortAscending"
 	fieldNameMap["sort_by"] = "SortBy"
-	paramsTypeMap["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
-	paramsTypeMap["page_size"] = bindings.NewOptionalType(bindings.NewIntegerType())
-	paramsTypeMap["include_mark_for_delete_objects"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	paramsTypeMap["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
-	paramsTypeMap["sort_by"] = bindings.NewOptionalType(bindings.NewStringType())
-	paramsTypeMap["sort_ascending"] = bindings.NewOptionalType(bindings.NewBooleanType())
+	paramsTypeMap["cursor"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	paramsTypeMap["sort_ascending"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	paramsTypeMap["included_fields"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	paramsTypeMap["sort_by"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	paramsTypeMap["include_mark_for_delete_objects"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	paramsTypeMap["page_size"] = vapiBindings_.NewOptionalType(vapiBindings_.NewIntegerType())
 	queryParams["cursor"] = "cursor"
 	queryParams["sort_ascending"] = "sort_ascending"
 	queryParams["included_fields"] = "included_fields"
@@ -182,7 +182,7 @@ func firewallSchedulersListRestMetadata() protocol.OperationRestMetadata {
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -203,41 +203,41 @@ func firewallSchedulersListRestMetadata() protocol.OperationRestMetadata {
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func firewallSchedulersPatchInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func firewallSchedulersPatchInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["firewall_scheduler_id"] = bindings.NewStringType()
-	fields["policy_firewall_scheduler"] = bindings.NewReferenceType(model.PolicyFirewallSchedulerBindingType)
+	fields["firewall_scheduler_id"] = vapiBindings_.NewStringType()
+	fields["policy_firewall_scheduler"] = vapiBindings_.NewReferenceType(nsx_policyModel.PolicyFirewallSchedulerBindingType)
 	fieldNameMap["firewall_scheduler_id"] = "FirewallSchedulerId"
 	fieldNameMap["policy_firewall_scheduler"] = "PolicyFirewallScheduler"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func firewallSchedulersPatchOutputType() bindings.BindingType {
-	return bindings.NewVoidType()
+func FirewallSchedulersPatchOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewVoidType()
 }
 
-func firewallSchedulersPatchRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func firewallSchedulersPatchRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["firewall_scheduler_id"] = bindings.NewStringType()
-	fields["policy_firewall_scheduler"] = bindings.NewReferenceType(model.PolicyFirewallSchedulerBindingType)
+	fields["firewall_scheduler_id"] = vapiBindings_.NewStringType()
+	fields["policy_firewall_scheduler"] = vapiBindings_.NewReferenceType(nsx_policyModel.PolicyFirewallSchedulerBindingType)
 	fieldNameMap["firewall_scheduler_id"] = "FirewallSchedulerId"
 	fieldNameMap["policy_firewall_scheduler"] = "PolicyFirewallScheduler"
-	paramsTypeMap["policy_firewall_scheduler"] = bindings.NewReferenceType(model.PolicyFirewallSchedulerBindingType)
-	paramsTypeMap["firewall_scheduler_id"] = bindings.NewStringType()
-	paramsTypeMap["firewallSchedulerId"] = bindings.NewStringType()
+	paramsTypeMap["firewall_scheduler_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["policy_firewall_scheduler"] = vapiBindings_.NewReferenceType(nsx_policyModel.PolicyFirewallSchedulerBindingType)
+	paramsTypeMap["firewallSchedulerId"] = vapiBindings_.NewStringType()
 	pathParams["firewall_scheduler_id"] = "firewallSchedulerId"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -258,41 +258,41 @@ func firewallSchedulersPatchRestMetadata() protocol.OperationRestMetadata {
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func firewallSchedulersUpdateInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func firewallSchedulersUpdateInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["firewall_scheduler_id"] = bindings.NewStringType()
-	fields["policy_firewall_scheduler"] = bindings.NewReferenceType(model.PolicyFirewallSchedulerBindingType)
+	fields["firewall_scheduler_id"] = vapiBindings_.NewStringType()
+	fields["policy_firewall_scheduler"] = vapiBindings_.NewReferenceType(nsx_policyModel.PolicyFirewallSchedulerBindingType)
 	fieldNameMap["firewall_scheduler_id"] = "FirewallSchedulerId"
 	fieldNameMap["policy_firewall_scheduler"] = "PolicyFirewallScheduler"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func firewallSchedulersUpdateOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.PolicyFirewallSchedulerBindingType)
+func FirewallSchedulersUpdateOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewReferenceType(nsx_policyModel.PolicyFirewallSchedulerBindingType)
 }
 
-func firewallSchedulersUpdateRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func firewallSchedulersUpdateRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["firewall_scheduler_id"] = bindings.NewStringType()
-	fields["policy_firewall_scheduler"] = bindings.NewReferenceType(model.PolicyFirewallSchedulerBindingType)
+	fields["firewall_scheduler_id"] = vapiBindings_.NewStringType()
+	fields["policy_firewall_scheduler"] = vapiBindings_.NewReferenceType(nsx_policyModel.PolicyFirewallSchedulerBindingType)
 	fieldNameMap["firewall_scheduler_id"] = "FirewallSchedulerId"
 	fieldNameMap["policy_firewall_scheduler"] = "PolicyFirewallScheduler"
-	paramsTypeMap["policy_firewall_scheduler"] = bindings.NewReferenceType(model.PolicyFirewallSchedulerBindingType)
-	paramsTypeMap["firewall_scheduler_id"] = bindings.NewStringType()
-	paramsTypeMap["firewallSchedulerId"] = bindings.NewStringType()
+	paramsTypeMap["firewall_scheduler_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["policy_firewall_scheduler"] = vapiBindings_.NewReferenceType(nsx_policyModel.PolicyFirewallSchedulerBindingType)
+	paramsTypeMap["firewallSchedulerId"] = vapiBindings_.NewStringType()
 	pathParams["firewall_scheduler_id"] = "firewallSchedulerId"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,

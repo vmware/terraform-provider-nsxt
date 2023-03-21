@@ -11,57 +11,57 @@
 package locale_services
 
 import (
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
+	vapiBindings_ "github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	vapiData_ "github.com/vmware/vsphere-automation-sdk-go/runtime/data"
+	vapiProtocol_ "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol"
+	nsx_global_policyModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"reflect"
 )
 
-func floodProtectionProfileBindingsDeleteInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func floodProtectionProfileBindingsDeleteInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["tier0_id"] = bindings.NewStringType()
-	fields["locale_services_id"] = bindings.NewStringType()
-	fields["flood_protection_profile_binding_id"] = bindings.NewStringType()
+	fields["tier0_id"] = vapiBindings_.NewStringType()
+	fields["locale_services_id"] = vapiBindings_.NewStringType()
+	fields["flood_protection_profile_binding_id"] = vapiBindings_.NewStringType()
 	fieldNameMap["tier0_id"] = "Tier0Id"
 	fieldNameMap["locale_services_id"] = "LocaleServicesId"
 	fieldNameMap["flood_protection_profile_binding_id"] = "FloodProtectionProfileBindingId"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func floodProtectionProfileBindingsDeleteOutputType() bindings.BindingType {
-	return bindings.NewVoidType()
+func FloodProtectionProfileBindingsDeleteOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewVoidType()
 }
 
-func floodProtectionProfileBindingsDeleteRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func floodProtectionProfileBindingsDeleteRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["tier0_id"] = bindings.NewStringType()
-	fields["locale_services_id"] = bindings.NewStringType()
-	fields["flood_protection_profile_binding_id"] = bindings.NewStringType()
+	fields["tier0_id"] = vapiBindings_.NewStringType()
+	fields["locale_services_id"] = vapiBindings_.NewStringType()
+	fields["flood_protection_profile_binding_id"] = vapiBindings_.NewStringType()
 	fieldNameMap["tier0_id"] = "Tier0Id"
 	fieldNameMap["locale_services_id"] = "LocaleServicesId"
 	fieldNameMap["flood_protection_profile_binding_id"] = "FloodProtectionProfileBindingId"
-	paramsTypeMap["tier0_id"] = bindings.NewStringType()
-	paramsTypeMap["flood_protection_profile_binding_id"] = bindings.NewStringType()
-	paramsTypeMap["locale_services_id"] = bindings.NewStringType()
-	paramsTypeMap["tier0Id"] = bindings.NewStringType()
-	paramsTypeMap["localeServicesId"] = bindings.NewStringType()
-	paramsTypeMap["floodProtectionProfileBindingId"] = bindings.NewStringType()
+	paramsTypeMap["tier0_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["flood_protection_profile_binding_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["locale_services_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["tier0Id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["localeServicesId"] = vapiBindings_.NewStringType()
+	paramsTypeMap["floodProtectionProfileBindingId"] = vapiBindings_.NewStringType()
 	pathParams["locale_services_id"] = "localeServicesId"
 	pathParams["tier0_id"] = "tier0Id"
 	pathParams["flood_protection_profile_binding_id"] = "floodProtectionProfileBindingId"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -82,50 +82,50 @@ func floodProtectionProfileBindingsDeleteRestMetadata() protocol.OperationRestMe
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func floodProtectionProfileBindingsGetInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func floodProtectionProfileBindingsGetInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["tier0_id"] = bindings.NewStringType()
-	fields["locale_services_id"] = bindings.NewStringType()
-	fields["flood_protection_profile_binding_id"] = bindings.NewStringType()
+	fields["tier0_id"] = vapiBindings_.NewStringType()
+	fields["locale_services_id"] = vapiBindings_.NewStringType()
+	fields["flood_protection_profile_binding_id"] = vapiBindings_.NewStringType()
 	fieldNameMap["tier0_id"] = "Tier0Id"
 	fieldNameMap["locale_services_id"] = "LocaleServicesId"
 	fieldNameMap["flood_protection_profile_binding_id"] = "FloodProtectionProfileBindingId"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func floodProtectionProfileBindingsGetOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.FloodProtectionProfileBindingMapBindingType)
+func FloodProtectionProfileBindingsGetOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewReferenceType(nsx_global_policyModel.FloodProtectionProfileBindingMapBindingType)
 }
 
-func floodProtectionProfileBindingsGetRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func floodProtectionProfileBindingsGetRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["tier0_id"] = bindings.NewStringType()
-	fields["locale_services_id"] = bindings.NewStringType()
-	fields["flood_protection_profile_binding_id"] = bindings.NewStringType()
+	fields["tier0_id"] = vapiBindings_.NewStringType()
+	fields["locale_services_id"] = vapiBindings_.NewStringType()
+	fields["flood_protection_profile_binding_id"] = vapiBindings_.NewStringType()
 	fieldNameMap["tier0_id"] = "Tier0Id"
 	fieldNameMap["locale_services_id"] = "LocaleServicesId"
 	fieldNameMap["flood_protection_profile_binding_id"] = "FloodProtectionProfileBindingId"
-	paramsTypeMap["tier0_id"] = bindings.NewStringType()
-	paramsTypeMap["flood_protection_profile_binding_id"] = bindings.NewStringType()
-	paramsTypeMap["locale_services_id"] = bindings.NewStringType()
-	paramsTypeMap["tier0Id"] = bindings.NewStringType()
-	paramsTypeMap["localeServicesId"] = bindings.NewStringType()
-	paramsTypeMap["floodProtectionProfileBindingId"] = bindings.NewStringType()
+	paramsTypeMap["tier0_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["flood_protection_profile_binding_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["locale_services_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["tier0Id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["localeServicesId"] = vapiBindings_.NewStringType()
+	paramsTypeMap["floodProtectionProfileBindingId"] = vapiBindings_.NewStringType()
 	pathParams["locale_services_id"] = "localeServicesId"
 	pathParams["tier0_id"] = "tier0Id"
 	pathParams["flood_protection_profile_binding_id"] = "floodProtectionProfileBindingId"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -146,55 +146,55 @@ func floodProtectionProfileBindingsGetRestMetadata() protocol.OperationRestMetad
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func floodProtectionProfileBindingsPatchInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func floodProtectionProfileBindingsPatchInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["tier0_id"] = bindings.NewStringType()
-	fields["locale_services_id"] = bindings.NewStringType()
-	fields["flood_protection_profile_binding_id"] = bindings.NewStringType()
-	fields["flood_protection_profile_binding_map"] = bindings.NewReferenceType(model.FloodProtectionProfileBindingMapBindingType)
+	fields["tier0_id"] = vapiBindings_.NewStringType()
+	fields["locale_services_id"] = vapiBindings_.NewStringType()
+	fields["flood_protection_profile_binding_id"] = vapiBindings_.NewStringType()
+	fields["flood_protection_profile_binding_map"] = vapiBindings_.NewReferenceType(nsx_global_policyModel.FloodProtectionProfileBindingMapBindingType)
 	fieldNameMap["tier0_id"] = "Tier0Id"
 	fieldNameMap["locale_services_id"] = "LocaleServicesId"
 	fieldNameMap["flood_protection_profile_binding_id"] = "FloodProtectionProfileBindingId"
 	fieldNameMap["flood_protection_profile_binding_map"] = "FloodProtectionProfileBindingMap"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func floodProtectionProfileBindingsPatchOutputType() bindings.BindingType {
-	return bindings.NewVoidType()
+func FloodProtectionProfileBindingsPatchOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewVoidType()
 }
 
-func floodProtectionProfileBindingsPatchRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func floodProtectionProfileBindingsPatchRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["tier0_id"] = bindings.NewStringType()
-	fields["locale_services_id"] = bindings.NewStringType()
-	fields["flood_protection_profile_binding_id"] = bindings.NewStringType()
-	fields["flood_protection_profile_binding_map"] = bindings.NewReferenceType(model.FloodProtectionProfileBindingMapBindingType)
+	fields["tier0_id"] = vapiBindings_.NewStringType()
+	fields["locale_services_id"] = vapiBindings_.NewStringType()
+	fields["flood_protection_profile_binding_id"] = vapiBindings_.NewStringType()
+	fields["flood_protection_profile_binding_map"] = vapiBindings_.NewReferenceType(nsx_global_policyModel.FloodProtectionProfileBindingMapBindingType)
 	fieldNameMap["tier0_id"] = "Tier0Id"
 	fieldNameMap["locale_services_id"] = "LocaleServicesId"
 	fieldNameMap["flood_protection_profile_binding_id"] = "FloodProtectionProfileBindingId"
 	fieldNameMap["flood_protection_profile_binding_map"] = "FloodProtectionProfileBindingMap"
-	paramsTypeMap["tier0_id"] = bindings.NewStringType()
-	paramsTypeMap["flood_protection_profile_binding_map"] = bindings.NewReferenceType(model.FloodProtectionProfileBindingMapBindingType)
-	paramsTypeMap["flood_protection_profile_binding_id"] = bindings.NewStringType()
-	paramsTypeMap["locale_services_id"] = bindings.NewStringType()
-	paramsTypeMap["tier0Id"] = bindings.NewStringType()
-	paramsTypeMap["localeServicesId"] = bindings.NewStringType()
-	paramsTypeMap["floodProtectionProfileBindingId"] = bindings.NewStringType()
+	paramsTypeMap["tier0_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["flood_protection_profile_binding_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["flood_protection_profile_binding_map"] = vapiBindings_.NewReferenceType(nsx_global_policyModel.FloodProtectionProfileBindingMapBindingType)
+	paramsTypeMap["locale_services_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["tier0Id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["localeServicesId"] = vapiBindings_.NewStringType()
+	paramsTypeMap["floodProtectionProfileBindingId"] = vapiBindings_.NewStringType()
 	pathParams["locale_services_id"] = "localeServicesId"
 	pathParams["tier0_id"] = "tier0Id"
 	pathParams["flood_protection_profile_binding_id"] = "floodProtectionProfileBindingId"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -215,55 +215,55 @@ func floodProtectionProfileBindingsPatchRestMetadata() protocol.OperationRestMet
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func floodProtectionProfileBindingsUpdateInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func floodProtectionProfileBindingsUpdateInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["tier0_id"] = bindings.NewStringType()
-	fields["locale_services_id"] = bindings.NewStringType()
-	fields["flood_protection_profile_binding_id"] = bindings.NewStringType()
-	fields["flood_protection_profile_binding_map"] = bindings.NewReferenceType(model.FloodProtectionProfileBindingMapBindingType)
+	fields["tier0_id"] = vapiBindings_.NewStringType()
+	fields["locale_services_id"] = vapiBindings_.NewStringType()
+	fields["flood_protection_profile_binding_id"] = vapiBindings_.NewStringType()
+	fields["flood_protection_profile_binding_map"] = vapiBindings_.NewReferenceType(nsx_global_policyModel.FloodProtectionProfileBindingMapBindingType)
 	fieldNameMap["tier0_id"] = "Tier0Id"
 	fieldNameMap["locale_services_id"] = "LocaleServicesId"
 	fieldNameMap["flood_protection_profile_binding_id"] = "FloodProtectionProfileBindingId"
 	fieldNameMap["flood_protection_profile_binding_map"] = "FloodProtectionProfileBindingMap"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func floodProtectionProfileBindingsUpdateOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.FloodProtectionProfileBindingMapBindingType)
+func FloodProtectionProfileBindingsUpdateOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewReferenceType(nsx_global_policyModel.FloodProtectionProfileBindingMapBindingType)
 }
 
-func floodProtectionProfileBindingsUpdateRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func floodProtectionProfileBindingsUpdateRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["tier0_id"] = bindings.NewStringType()
-	fields["locale_services_id"] = bindings.NewStringType()
-	fields["flood_protection_profile_binding_id"] = bindings.NewStringType()
-	fields["flood_protection_profile_binding_map"] = bindings.NewReferenceType(model.FloodProtectionProfileBindingMapBindingType)
+	fields["tier0_id"] = vapiBindings_.NewStringType()
+	fields["locale_services_id"] = vapiBindings_.NewStringType()
+	fields["flood_protection_profile_binding_id"] = vapiBindings_.NewStringType()
+	fields["flood_protection_profile_binding_map"] = vapiBindings_.NewReferenceType(nsx_global_policyModel.FloodProtectionProfileBindingMapBindingType)
 	fieldNameMap["tier0_id"] = "Tier0Id"
 	fieldNameMap["locale_services_id"] = "LocaleServicesId"
 	fieldNameMap["flood_protection_profile_binding_id"] = "FloodProtectionProfileBindingId"
 	fieldNameMap["flood_protection_profile_binding_map"] = "FloodProtectionProfileBindingMap"
-	paramsTypeMap["tier0_id"] = bindings.NewStringType()
-	paramsTypeMap["flood_protection_profile_binding_map"] = bindings.NewReferenceType(model.FloodProtectionProfileBindingMapBindingType)
-	paramsTypeMap["flood_protection_profile_binding_id"] = bindings.NewStringType()
-	paramsTypeMap["locale_services_id"] = bindings.NewStringType()
-	paramsTypeMap["tier0Id"] = bindings.NewStringType()
-	paramsTypeMap["localeServicesId"] = bindings.NewStringType()
-	paramsTypeMap["floodProtectionProfileBindingId"] = bindings.NewStringType()
+	paramsTypeMap["tier0_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["flood_protection_profile_binding_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["flood_protection_profile_binding_map"] = vapiBindings_.NewReferenceType(nsx_global_policyModel.FloodProtectionProfileBindingMapBindingType)
+	paramsTypeMap["locale_services_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["tier0Id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["localeServicesId"] = vapiBindings_.NewStringType()
+	paramsTypeMap["floodProtectionProfileBindingId"] = vapiBindings_.NewStringType()
 	pathParams["locale_services_id"] = "localeServicesId"
 	pathParams["tier0_id"] = "tier0Id"
 	pathParams["flood_protection_profile_binding_id"] = "floodProtectionProfileBindingId"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,

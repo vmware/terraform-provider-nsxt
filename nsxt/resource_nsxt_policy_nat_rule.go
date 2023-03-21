@@ -135,7 +135,7 @@ func resourceNsxtPolicyNATRule() *schema.Resource {
 	}
 }
 
-func deleteNsxtPolicyNATRule(connector *client.RestConnector, gwID string, isT0 bool, natType string, ruleID string, isGlobalManager bool) error {
+func deleteNsxtPolicyNATRule(connector client.Connector, gwID string, isT0 bool, natType string, ruleID string, isGlobalManager bool) error {
 	if isGlobalManager {
 		if isT0 {
 			client := gm_t0nat.NewNatRulesClient(connector)
@@ -174,7 +174,7 @@ func resourceNsxtPolicyNATRuleDelete(d *schema.ResourceData, m interface{}) erro
 	return nil
 }
 
-func getNsxtPolicyNATRuleByID(connector *client.RestConnector, gwID string, isT0 bool, natType string, ruleID string, isGlobalManager bool) (model.PolicyNatRule, error) {
+func getNsxtPolicyNATRuleByID(connector client.Connector, gwID string, isT0 bool, natType string, ruleID string, isGlobalManager bool) (model.PolicyNatRule, error) {
 	if isGlobalManager {
 		var obj model.PolicyNatRule
 		var gmObj gm_model.PolicyNatRule
@@ -204,7 +204,7 @@ func getNsxtPolicyNATRuleByID(connector *client.RestConnector, gwID string, isT0
 	return client.Get(gwID, natType, ruleID)
 }
 
-func patchNsxtPolicyNATRule(connector *client.RestConnector, gwID string, rule model.PolicyNatRule, isT0 bool, isGlobalManager bool) error {
+func patchNsxtPolicyNATRule(connector client.Connector, gwID string, rule model.PolicyNatRule, isT0 bool, isGlobalManager bool) error {
 	natType := getNatTypeByAction(*rule.Action)
 	_, err := getTranslatedNetworks(rule)
 	if err != nil {

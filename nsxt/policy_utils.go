@@ -19,7 +19,7 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
-func getOrGenerateID(d *schema.ResourceData, m interface{}, presenceChecker func(string, *client.RestConnector, bool) (bool, error)) (string, error) {
+func getOrGenerateID(d *schema.ResourceData, m interface{}, presenceChecker func(string, client.Connector, bool) (bool, error)) (string, error) {
 	connector := getPolicyConnector(m)
 	isGlobalManager := isPolicyGlobalManager(m)
 
@@ -224,7 +224,7 @@ func commaSeparatedStringToStringList(commaString string) []string {
 	return strList
 }
 
-func nsxtPolicyWaitForRealizationStateConf(connector *client.RestConnector, d *schema.ResourceData, realizedEntityPath string) *resource.StateChangeConf {
+func nsxtPolicyWaitForRealizationStateConf(connector client.Connector, d *schema.ResourceData, realizedEntityPath string) *resource.StateChangeConf {
 	client := realized_state.NewRealizedEntitiesClient(connector)
 	pendingStates := []string{"UNKNOWN", "UNREALIZED"}
 	targetStates := []string{"REALIZED", "ERROR"}
@@ -264,7 +264,6 @@ func getGlobalPolicyEnforcementPointPathWithLocation(m interface{}, location str
 
 func convertModelBindingType(obj interface{}, sourceType bindings.BindingType, destType bindings.BindingType) (interface{}, error) {
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 	dataValue, err := converter.ConvertToVapi(obj, sourceType)
 	if err != nil {
 		return nil, err[0]

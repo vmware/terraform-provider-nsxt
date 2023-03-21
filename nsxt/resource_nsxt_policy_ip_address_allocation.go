@@ -52,7 +52,7 @@ func resourceNsxtPolicyIPAddressAllocation() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyIPAddressAllocationExists(poolID string, allocationID string, connector *client.RestConnector) (bool, error) {
+func resourceNsxtPolicyIPAddressAllocationExists(poolID string, allocationID string, connector client.Connector) (bool, error) {
 	client := ip_pools.NewIpAllocationsClient(connector)
 
 	_, err := client.Get(poolID, allocationID)

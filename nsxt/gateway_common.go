@@ -222,7 +222,7 @@ func getGatewayIntersiteConfigSchema() *schema.Schema {
 	}
 }
 
-func listPolicyGatewayLocaleServices(connector *client.RestConnector, gwID string, listLocaleServicesFunc func(*client.RestConnector, string, *string) (model.LocaleServicesListResult, error)) ([]model.LocaleServices, error) {
+func listPolicyGatewayLocaleServices(connector client.Connector, gwID string, listLocaleServicesFunc func(client.Connector, string, *string) (model.LocaleServicesListResult, error)) ([]model.LocaleServices, error) {
 	var results []model.LocaleServices
 	var cursor *string
 	var count int64
@@ -269,7 +269,6 @@ func initChildLocaleService(serviceStruct *model.LocaleServices, markForDelete b
 	}
 
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 	dataValue, err := converter.ConvertToVapi(childService, model.ChildLocaleServicesBindingType())
 
 	if err != nil {
@@ -279,7 +278,7 @@ func initChildLocaleService(serviceStruct *model.LocaleServices, markForDelete b
 	return dataValue.(*data.StructValue), nil
 }
 
-func initGatewayLocaleServices(d *schema.ResourceData, connector *client.RestConnector, isGlobalManager bool, listLocaleServicesFunc func(*client.RestConnector, string, bool) ([]model.LocaleServices, error)) ([]*data.StructValue, error) {
+func initGatewayLocaleServices(d *schema.ResourceData, connector client.Connector, isGlobalManager bool, listLocaleServicesFunc func(client.Connector, string, bool) ([]model.LocaleServices, error)) ([]*data.StructValue, error) {
 	var localeServices []*data.StructValue
 
 	services := d.Get("locale_service").(*schema.Set).List()
@@ -410,7 +409,7 @@ func setPolicyGatewayIntersiteConfigInSchema(d *schema.ResourceData, config *mod
 	return d.Set("intersite_config", result)
 }
 
-func policyInfraPatch(obj model.Infra, isGlobalManager bool, connector *client.RestConnector, enforceRevision bool) error {
+func policyInfraPatch(obj model.Infra, isGlobalManager bool, connector client.Connector, enforceRevision bool) error {
 	if isGlobalManager {
 		infraClient := global_policy.NewGlobalInfraClient(connector)
 		gmObj, err := convertModelBindingType(obj, model.InfraBindingType(), gm_model.InfraBindingType())
@@ -600,7 +599,7 @@ func getLocaleServiceRedistributionConfig(serviceStruct *model.LocaleServices) [
 	return redistributionConfigs
 }
 
-func findTier0LocaleServiceForSite(connector *client.RestConnector, gwID string, sitePath string) (string, error) {
+func findTier0LocaleServiceForSite(connector client.Connector, gwID string, sitePath string) (string, error) {
 	localeServices, err := listPolicyTier0GatewayLocaleServices(connector, gwID, true)
 	if err != nil {
 		return "", err
@@ -644,7 +643,7 @@ func getComputedGatewayIDSchema() *schema.Schema {
 	}
 }
 
-func policyTier0GetLocaleService(gwID string, localeServiceID string, connector *client.RestConnector, isGlobalManager bool) *model.LocaleServices {
+func policyTier0GetLocaleService(gwID string, localeServiceID string, connector client.Connector, isGlobalManager bool) *model.LocaleServices {
 	if isGlobalManager {
 		nsxClient := gm_tier0s.NewLocaleServicesClient(connector)
 		gmObj, err := nsxClient.Get(gwID, localeServiceID)

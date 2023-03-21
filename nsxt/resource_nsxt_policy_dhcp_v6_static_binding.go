@@ -120,7 +120,6 @@ func policyDhcpV6StaticBindingConvertAndPatch(d *schema.ResourceData, segmentPat
 	connector := getPolicyConnector(m)
 
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 
 	isT0, gwID, segmentID := parseSegmentPolicyPath(segmentPath)
 	if isT0 {
@@ -191,7 +190,6 @@ func resourceNsxtPolicyDhcpV6StaticBindingRead(d *schema.ResourceData, m interfa
 
 	var obj model.DhcpV6StaticBindingConfig
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 	var err error
 	var dhcpObj *data.StructValue
 	if isPolicyGlobalManager(m) {

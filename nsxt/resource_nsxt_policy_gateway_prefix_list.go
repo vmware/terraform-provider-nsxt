@@ -217,7 +217,7 @@ func resourceNsxtPolicyGatewayPrefixListRead(d *schema.ResourceData, m interface
 	return nil
 }
 
-func patchNsxtPolicyGatewayPrefixList(connector *client.RestConnector, gwID string, prefixList model.PrefixList, isGlobalManager bool) error {
+func patchNsxtPolicyGatewayPrefixList(connector client.Connector, gwID string, prefixList model.PrefixList, isGlobalManager bool) error {
 	if isGlobalManager {
 		rawObj, err := convertModelBindingType(prefixList, model.PrefixListBindingType(), gm_model.PrefixListBindingType())
 		if err != nil {

@@ -1,4 +1,4 @@
-/* Copyright © 2019-2020 VMware, Inc. All Rights Reserved.
+/* Copyright © 2019-2020, 2022 VMware, Inc. All Rights Reserved.
    SPDX-License-Identifier: BSD-2-Clause */
 
 package bindings
@@ -112,8 +112,6 @@ func (v *DataValueToNativeConverter) visitBoolean(optional bool) []error {
 func (v *DataValueToNativeConverter) visitOptional(bindingType BindingType) []error {
 	if optionalValue, ok := v.inValue.(*data.OptionalValue); ok {
 		v.inValue = optionalValue.Value()
-	} else {
-		log.Debugf("Tolerating absence of optional value")
 	}
 	return v.visitInternal(bindingType, true)
 }
@@ -314,6 +312,10 @@ func (v *DataValueToNativeConverter) visitAnyErrorType() []error {
 	if errorValue, ok := v.inValue.(*data.ErrorValue); ok {
 		v.outValue = errorValue
 		return nil
+	} else if structValue, ok := v.inValue.(*data.StructValue); ok {
+		errorVal := data.NewErrorValue(structValue.Name(), structValue.Fields())
+		v.outValue = errorVal
+		return nil
 	}
 	return v.unexpectedTypeError(data.ERROR.String())
 }
@@ -338,7 +340,7 @@ func (v *DataValueToNativeConverter) visitInternal(bindingType BindingType, opti
 	concreteBindingType := reflect.TypeOf(bindingType)
 
 	// throw error if not optional and inValue is nil
-	if v.inValue == nil &&
+	if isNilDataValue(v.inValue) &&
 		!optional &&
 		concreteBindingType != OpaqueBindingType &&
 		concreteBindingType != VoidBindingType &&
@@ -808,4 +810,12 @@ func zeroPtr(input reflect.Type) interface{} {
 		x := reflect.New(ptrReflectType)
 		return x.Elem().Interface()
 	}
+}
+
+func isNilDataValue(dataValue data.DataValue) bool {
+	if dataValue == nil {
+		return true
+	}
+	val := reflect.ValueOf(dataValue)
+	return val.Kind() == reflect.Ptr && val.IsNil()
 }

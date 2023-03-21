@@ -7,10 +7,10 @@ require (
 	github.com/hashicorp/go-version v1.4.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.14.0
 	github.com/vmware/go-vmware-nsxt v0.0.0-20220328155605-f49a14c1ef5f
-	github.com/vmware/vsphere-automation-sdk-go/lib v0.4.0
-	github.com/vmware/vsphere-automation-sdk-go/runtime v0.4.0
-	github.com/vmware/vsphere-automation-sdk-go/services/nsxt v0.9.0
-	github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm v0.6.0
+	github.com/vmware/vsphere-automation-sdk-go/lib v0.6.0
+	github.com/vmware/vsphere-automation-sdk-go/runtime v0.6.0
+	github.com/vmware/vsphere-automation-sdk-go/services/nsxt v0.10.0
+	github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm v0.7.0
 )
 
 require (
@@ -21,6 +21,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fatih/color v1.7.0 // indirect
 	github.com/gibson042/canonicaljson-go v1.0.3 // indirect
+	github.com/golang-jwt/jwt/v4 v4.3.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-cmp v0.5.7 // indirect
 	github.com/hashicorp/errwrap v1.0.0 // indirect

@@ -171,7 +171,7 @@ func getAdvRulesSchema() *schema.Schema {
 	}
 }
 
-func listGlobalManagerTier1GatewayLocaleServices(connector *client.RestConnector, gwID string, cursor *string) (model.LocaleServicesListResult, error) {
+func listGlobalManagerTier1GatewayLocaleServices(connector client.Connector, gwID string, cursor *string) (model.LocaleServicesListResult, error) {
 	client := gm_tier_1s.NewLocaleServicesClient(connector)
 	markForDelete := false
 	listResponse, err := client.List(gwID, cursor, &markForDelete, nil, nil, nil, nil)
@@ -187,13 +187,13 @@ func listGlobalManagerTier1GatewayLocaleServices(connector *client.RestConnector
 	return convertedResult.(model.LocaleServicesListResult), nil
 }
 
-func listLocalManagerTier1GatewayLocaleServices(connector *client.RestConnector, gwID string, cursor *string) (model.LocaleServicesListResult, error) {
+func listLocalManagerTier1GatewayLocaleServices(connector client.Connector, gwID string, cursor *string) (model.LocaleServicesListResult, error) {
 	client := tier_1s.NewLocaleServicesClient(connector)
 	markForDelete := false
 	return client.List(gwID, cursor, &markForDelete, nil, nil, nil, nil)
 }
 
-func listPolicyTier1GatewayLocaleServices(connector *client.RestConnector, gwID string, isGlobalManager bool) ([]model.LocaleServices, error) {
+func listPolicyTier1GatewayLocaleServices(connector client.Connector, gwID string, isGlobalManager bool) ([]model.LocaleServices, error) {
 
 	if isGlobalManager {
 		return listPolicyGatewayLocaleServices(connector, gwID, listGlobalManagerTier1GatewayLocaleServices)
@@ -202,7 +202,7 @@ func listPolicyTier1GatewayLocaleServices(connector *client.RestConnector, gwID 
 	return listPolicyGatewayLocaleServices(connector, gwID, listLocalManagerTier1GatewayLocaleServices)
 }
 
-func getPolicyTier1GatewayLocaleServiceEntry(gwID string, connector *client.RestConnector) (*model.LocaleServices, error) {
+func getPolicyTier1GatewayLocaleServiceEntry(gwID string, connector client.Connector) (*model.LocaleServices, error) {
 	// Get the locale services of this Tier1 for the edge-cluster id
 	client := tier_1s.NewLocaleServicesClient(connector)
 	obj, err := client.Get(gwID, defaultPolicyLocaleServiceID)
@@ -232,7 +232,7 @@ func getPolicyTier1GatewayLocaleServiceEntry(gwID string, connector *client.Rest
 	return nil, nil
 }
 
-func resourceNsxtPolicyTier1GatewayReadEdgeCluster(d *schema.ResourceData, connector *client.RestConnector) error {
+func resourceNsxtPolicyTier1GatewayReadEdgeCluster(d *schema.ResourceData, connector client.Connector) error {
 	// Get the locale services of this Tier1 for the edge-cluster id
 	obj, err := getPolicyTier1GatewayLocaleServiceEntry(d.Id(), connector)
 	if err != nil || obj == nil {
@@ -247,7 +247,7 @@ func resourceNsxtPolicyTier1GatewayReadEdgeCluster(d *schema.ResourceData, conne
 	return nil
 }
 
-func resourceNsxtPolicyTier1GatewayExists(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
+func resourceNsxtPolicyTier1GatewayExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	var err error
 	if isGlobalManager {
 		client := gm_infra.NewTier1sClient(connector)
@@ -330,7 +330,7 @@ func resourceNsxtPolicyTier1GatewaySetVersionDependentAttrs(d *schema.ResourceDa
 
 }
 
-func initSingleTier1GatewayLocaleService(d *schema.ResourceData, connector *client.RestConnector) (*data.StructValue, error) {
+func initSingleTier1GatewayLocaleService(d *schema.ResourceData, connector client.Connector) (*data.StructValue, error) {
 
 	edgeClusterPath := d.Get("edge_cluster_path").(string)
 	var serviceStruct *model.LocaleServices
@@ -360,11 +360,10 @@ func initSingleTier1GatewayLocaleService(d *schema.ResourceData, connector *clie
 	return initChildLocaleService(serviceStruct, false)
 }
 
-func policyTier1GatewayResourceToInfraStruct(d *schema.ResourceData, connector *client.RestConnector, id string, isGlobalManager bool) (model.Infra, error) {
+func policyTier1GatewayResourceToInfraStruct(d *schema.ResourceData, connector client.Connector, id string, isGlobalManager bool) (model.Infra, error) {
 	var infraChildren, gwChildren []*data.StructValue
 	var infraStruct model.Infra
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
@@ -638,7 +637,6 @@ func resourceNsxtPolicyTier1GatewayDelete(d *schema.ResourceData, m interface{})
 
 	var infraChildren []*data.StructValue
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 	boolTrue := true
 
 	t1Type := "Tier1"

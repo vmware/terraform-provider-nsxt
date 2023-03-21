@@ -67,7 +67,6 @@ func resourceNsxtPolicyIPPoolStaticSubnet() *schema.Resource {
 
 func resourceNsxtPolicyIPPoolStaticSubnetSchemaToStructValue(d *schema.ResourceData, id string) (*data.StructValue, error) {
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
@@ -122,7 +121,6 @@ func resourceNsxtPolicyIPPoolStaticSubnetRead(d *schema.ResourceData, m interfac
 	connector := getPolicyConnector(m)
 	client := ip_pools.NewIpSubnetsClient(connector)
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 
 	poolPath := d.Get("pool_path").(string)
 	poolID := getPolicyIDFromPath(poolPath)

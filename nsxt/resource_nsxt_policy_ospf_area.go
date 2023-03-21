@@ -80,7 +80,7 @@ func resourceNsxtPolicyOspfArea() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyOspfAreaExists(gwID string, localeServiceID string, areaID string, isGlobalManager bool, connector *client.RestConnector) (bool, error) {
+func resourceNsxtPolicyOspfAreaExists(gwID string, localeServiceID string, areaID string, isGlobalManager bool, connector client.Connector) (bool, error) {
 
 	client := ospf.NewAreasClient(connector)
 	_, err := client.Get(gwID, localeServiceID, areaID)

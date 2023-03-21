@@ -11,49 +11,49 @@
 package infra
 
 import (
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+	vapiBindings_ "github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	vapiData_ "github.com/vmware/vsphere-automation-sdk-go/runtime/data"
+	vapiProtocol_ "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol"
+	nsx_policyModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"reflect"
 )
 
-func albDnsPoliciesDeleteInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func albDnsPoliciesDeleteInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["alb_dnspolicy_id"] = bindings.NewStringType()
-	fields["force"] = bindings.NewOptionalType(bindings.NewBooleanType())
+	fields["alb_dnspolicy_id"] = vapiBindings_.NewStringType()
+	fields["force"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
 	fieldNameMap["alb_dnspolicy_id"] = "AlbDnspolicyId"
 	fieldNameMap["force"] = "Force"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func albDnsPoliciesDeleteOutputType() bindings.BindingType {
-	return bindings.NewVoidType()
+func AlbDnsPoliciesDeleteOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewVoidType()
 }
 
-func albDnsPoliciesDeleteRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func albDnsPoliciesDeleteRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["alb_dnspolicy_id"] = bindings.NewStringType()
-	fields["force"] = bindings.NewOptionalType(bindings.NewBooleanType())
+	fields["alb_dnspolicy_id"] = vapiBindings_.NewStringType()
+	fields["force"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
 	fieldNameMap["alb_dnspolicy_id"] = "AlbDnspolicyId"
 	fieldNameMap["force"] = "Force"
-	paramsTypeMap["force"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	paramsTypeMap["alb_dnspolicy_id"] = bindings.NewStringType()
-	paramsTypeMap["albDnspolicyId"] = bindings.NewStringType()
+	paramsTypeMap["alb_dnspolicy_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["force"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	paramsTypeMap["albDnspolicyId"] = vapiBindings_.NewStringType()
 	pathParams["alb_dnspolicy_id"] = "albDnspolicyId"
 	queryParams["force"] = "force"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -74,36 +74,36 @@ func albDnsPoliciesDeleteRestMetadata() protocol.OperationRestMetadata {
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func albDnsPoliciesGetInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func albDnsPoliciesGetInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["alb_dnspolicy_id"] = bindings.NewStringType()
+	fields["alb_dnspolicy_id"] = vapiBindings_.NewStringType()
 	fieldNameMap["alb_dnspolicy_id"] = "AlbDnspolicyId"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func albDnsPoliciesGetOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.ALBDnsPolicyBindingType)
+func AlbDnsPoliciesGetOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewReferenceType(nsx_policyModel.ALBDnsPolicyBindingType)
 }
 
-func albDnsPoliciesGetRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func albDnsPoliciesGetRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["alb_dnspolicy_id"] = bindings.NewStringType()
+	fields["alb_dnspolicy_id"] = vapiBindings_.NewStringType()
 	fieldNameMap["alb_dnspolicy_id"] = "AlbDnspolicyId"
-	paramsTypeMap["alb_dnspolicy_id"] = bindings.NewStringType()
-	paramsTypeMap["albDnspolicyId"] = bindings.NewStringType()
+	paramsTypeMap["alb_dnspolicy_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["albDnspolicyId"] = vapiBindings_.NewStringType()
 	pathParams["alb_dnspolicy_id"] = "albDnspolicyId"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -124,56 +124,56 @@ func albDnsPoliciesGetRestMetadata() protocol.OperationRestMetadata {
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func albDnsPoliciesListInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func albDnsPoliciesListInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
-	fields["include_mark_for_delete_objects"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	fields["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
-	fields["page_size"] = bindings.NewOptionalType(bindings.NewIntegerType())
-	fields["sort_ascending"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	fields["sort_by"] = bindings.NewOptionalType(bindings.NewStringType())
+	fields["cursor"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["include_mark_for_delete_objects"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	fields["included_fields"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["page_size"] = vapiBindings_.NewOptionalType(vapiBindings_.NewIntegerType())
+	fields["sort_ascending"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	fields["sort_by"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
 	fieldNameMap["cursor"] = "Cursor"
 	fieldNameMap["include_mark_for_delete_objects"] = "IncludeMarkForDeleteObjects"
 	fieldNameMap["included_fields"] = "IncludedFields"
 	fieldNameMap["page_size"] = "PageSize"
 	fieldNameMap["sort_ascending"] = "SortAscending"
 	fieldNameMap["sort_by"] = "SortBy"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func albDnsPoliciesListOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.ALBDnsPolicyApiResponseBindingType)
+func AlbDnsPoliciesListOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewReferenceType(nsx_policyModel.ALBDnsPolicyApiResponseBindingType)
 }
 
-func albDnsPoliciesListRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func albDnsPoliciesListRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
-	fields["include_mark_for_delete_objects"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	fields["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
-	fields["page_size"] = bindings.NewOptionalType(bindings.NewIntegerType())
-	fields["sort_ascending"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	fields["sort_by"] = bindings.NewOptionalType(bindings.NewStringType())
+	fields["cursor"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["include_mark_for_delete_objects"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	fields["included_fields"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["page_size"] = vapiBindings_.NewOptionalType(vapiBindings_.NewIntegerType())
+	fields["sort_ascending"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	fields["sort_by"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
 	fieldNameMap["cursor"] = "Cursor"
 	fieldNameMap["include_mark_for_delete_objects"] = "IncludeMarkForDeleteObjects"
 	fieldNameMap["included_fields"] = "IncludedFields"
 	fieldNameMap["page_size"] = "PageSize"
 	fieldNameMap["sort_ascending"] = "SortAscending"
 	fieldNameMap["sort_by"] = "SortBy"
-	paramsTypeMap["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
-	paramsTypeMap["page_size"] = bindings.NewOptionalType(bindings.NewIntegerType())
-	paramsTypeMap["include_mark_for_delete_objects"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	paramsTypeMap["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
-	paramsTypeMap["sort_by"] = bindings.NewOptionalType(bindings.NewStringType())
-	paramsTypeMap["sort_ascending"] = bindings.NewOptionalType(bindings.NewBooleanType())
+	paramsTypeMap["cursor"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	paramsTypeMap["sort_ascending"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	paramsTypeMap["included_fields"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	paramsTypeMap["sort_by"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	paramsTypeMap["include_mark_for_delete_objects"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	paramsTypeMap["page_size"] = vapiBindings_.NewOptionalType(vapiBindings_.NewIntegerType())
 	queryParams["cursor"] = "cursor"
 	queryParams["sort_ascending"] = "sort_ascending"
 	queryParams["included_fields"] = "included_fields"
@@ -182,7 +182,7 @@ func albDnsPoliciesListRestMetadata() protocol.OperationRestMetadata {
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -203,41 +203,41 @@ func albDnsPoliciesListRestMetadata() protocol.OperationRestMetadata {
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func albDnsPoliciesPatchInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func albDnsPoliciesPatchInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["alb_dnspolicy_id"] = bindings.NewStringType()
-	fields["a_LB_dns_policy"] = bindings.NewReferenceType(model.ALBDnsPolicyBindingType)
+	fields["alb_dnspolicy_id"] = vapiBindings_.NewStringType()
+	fields["a_LB_dns_policy"] = vapiBindings_.NewReferenceType(nsx_policyModel.ALBDnsPolicyBindingType)
 	fieldNameMap["alb_dnspolicy_id"] = "AlbDnspolicyId"
 	fieldNameMap["a_LB_dns_policy"] = "ALBDnsPolicy"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func albDnsPoliciesPatchOutputType() bindings.BindingType {
-	return bindings.NewVoidType()
+func AlbDnsPoliciesPatchOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewVoidType()
 }
 
-func albDnsPoliciesPatchRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func albDnsPoliciesPatchRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["alb_dnspolicy_id"] = bindings.NewStringType()
-	fields["a_LB_dns_policy"] = bindings.NewReferenceType(model.ALBDnsPolicyBindingType)
+	fields["alb_dnspolicy_id"] = vapiBindings_.NewStringType()
+	fields["a_LB_dns_policy"] = vapiBindings_.NewReferenceType(nsx_policyModel.ALBDnsPolicyBindingType)
 	fieldNameMap["alb_dnspolicy_id"] = "AlbDnspolicyId"
 	fieldNameMap["a_LB_dns_policy"] = "ALBDnsPolicy"
-	paramsTypeMap["a_LB_dns_policy"] = bindings.NewReferenceType(model.ALBDnsPolicyBindingType)
-	paramsTypeMap["alb_dnspolicy_id"] = bindings.NewStringType()
-	paramsTypeMap["albDnspolicyId"] = bindings.NewStringType()
+	paramsTypeMap["alb_dnspolicy_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["a_LB_dns_policy"] = vapiBindings_.NewReferenceType(nsx_policyModel.ALBDnsPolicyBindingType)
+	paramsTypeMap["albDnspolicyId"] = vapiBindings_.NewStringType()
 	pathParams["alb_dnspolicy_id"] = "albDnspolicyId"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -258,41 +258,41 @@ func albDnsPoliciesPatchRestMetadata() protocol.OperationRestMetadata {
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func albDnsPoliciesUpdateInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func albDnsPoliciesUpdateInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["alb_dnspolicy_id"] = bindings.NewStringType()
-	fields["a_LB_dns_policy"] = bindings.NewReferenceType(model.ALBDnsPolicyBindingType)
+	fields["alb_dnspolicy_id"] = vapiBindings_.NewStringType()
+	fields["a_LB_dns_policy"] = vapiBindings_.NewReferenceType(nsx_policyModel.ALBDnsPolicyBindingType)
 	fieldNameMap["alb_dnspolicy_id"] = "AlbDnspolicyId"
 	fieldNameMap["a_LB_dns_policy"] = "ALBDnsPolicy"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func albDnsPoliciesUpdateOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.ALBDnsPolicyBindingType)
+func AlbDnsPoliciesUpdateOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewReferenceType(nsx_policyModel.ALBDnsPolicyBindingType)
 }
 
-func albDnsPoliciesUpdateRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func albDnsPoliciesUpdateRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["alb_dnspolicy_id"] = bindings.NewStringType()
-	fields["a_LB_dns_policy"] = bindings.NewReferenceType(model.ALBDnsPolicyBindingType)
+	fields["alb_dnspolicy_id"] = vapiBindings_.NewStringType()
+	fields["a_LB_dns_policy"] = vapiBindings_.NewReferenceType(nsx_policyModel.ALBDnsPolicyBindingType)
 	fieldNameMap["alb_dnspolicy_id"] = "AlbDnspolicyId"
 	fieldNameMap["a_LB_dns_policy"] = "ALBDnsPolicy"
-	paramsTypeMap["a_LB_dns_policy"] = bindings.NewReferenceType(model.ALBDnsPolicyBindingType)
-	paramsTypeMap["alb_dnspolicy_id"] = bindings.NewStringType()
-	paramsTypeMap["albDnspolicyId"] = bindings.NewStringType()
+	paramsTypeMap["alb_dnspolicy_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["a_LB_dns_policy"] = vapiBindings_.NewReferenceType(nsx_policyModel.ALBDnsPolicyBindingType)
+	paramsTypeMap["albDnspolicyId"] = vapiBindings_.NewStringType()
 	pathParams["alb_dnspolicy_id"] = "albDnspolicyId"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,

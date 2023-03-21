@@ -79,7 +79,6 @@ func dataSourceNsxtPolicyIPSecVpnLocalEndpointRead(d *schema.ResourceData, m int
 	}
 
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 	dataValue, errors := converter.ConvertToGolang(objInt, model.IPSecVpnLocalEndpointBindingType())
 	if len(errors) > 0 {
 		return fmt.Errorf("Failed to convert type for Local Endpoint: %v", errors[0])

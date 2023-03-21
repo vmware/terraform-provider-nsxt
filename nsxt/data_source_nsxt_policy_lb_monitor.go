@@ -47,7 +47,6 @@ func dataSourceNsxtPolicyLBMonitor() *schema.Resource {
 
 func policyLbMonitorConvert(obj *data.StructValue, requestedType string) (*model.LBMonitorProfile, error) {
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 
 	data, errs := converter.ConvertToGolang(obj, model.LBMonitorProfileBindingType())
 	if errs != nil {

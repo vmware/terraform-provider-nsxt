@@ -1,14 +1,15 @@
-/* Copyright © 2021 VMware, Inc. All Rights Reserved.
+/* Copyright © 2021-2022 VMware, Inc. All Rights Reserved.
    SPDX-License-Identifier: BSD-2-Clause */
 
 // Package retry provides Decorator which can be setup for a retry of
 // operation calls for various reasons.
-// Decorator is set up on RestConnector level as an optional connector option.
+// Decorator is set up in NewConnector, when instantiating a Connector instance,
+// as optional connector option.
 // To set it up provide connector option through WithDecorators function and
 // inside call NewRetryDecorator function:
 //
-//		connector := client.NewRestConnector(url,
-//			httpClient
+//		connector := client.NewConnector(
+//			url,
 //			client.WithDecorators(
 //				retry.NewRetryDecorator(2, retryFunc)))
 //
@@ -33,11 +34,10 @@
 //		return true
 //	}
 //
-//  // retries each request two times in case of 503 response from server
-//	httpClient := http.Client{}
-//	connector := client.NewRestConnector(
+//  // retries each request maximum two times in case of 503 response from server
+//	connector := client.NewConnector(
 //		url,
-//		httpClient,
+//		client.UsingRest(nil),
 //		client.WithDecorators(
 //			retry.NewRetryDecorator(
 //				2,
@@ -46,7 +46,6 @@
 package retry
 
 import (
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/core"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/log"
@@ -68,7 +67,7 @@ type Decorator struct {
 // attempt, and various other options which could be used in retry decorator
 // 's retry function.
 type RetryContext struct {
-	Result      *core.MethodResult
+	Result      core.MethodResult
 	Response    *http.Response
 	Attempt     uint
 	ServiceId   string
@@ -94,8 +93,7 @@ func NewRetryDecorator(max uint, retryFunc RetryFunc) core.APIProviderDecorator 
 // Inside it calls next provider decorated by retry decorator.
 func (d Decorator) Invoke(serviceID string, operationID string,
 	input data.DataValue, ctx *core.ExecutionContext) core.MethodResult {
-	var result *core.MethodResult
-
+	var result core.MethodResult
 	var response *http.Response
 	getResponse := func(resp *http.Response) {
 		response = resp
@@ -103,15 +101,15 @@ func (d Decorator) Invoke(serviceID string, operationID string,
 
 	extendedExecutionContext := ctx.WithResponseAcceptor(getResponse)
 
+	// first attempt is actual invocation so counting retries till maxRetries + 1
 	for attempt := uint(0); attempt < d.maxRetries+1; attempt++ {
 		if attempt > 0 {
 			// we only want to have retry logs after first attempt
-			log.Infof("Retrying operation '%s' in service '%s'; attempt"+
-				": %s'", serviceID, operationID, attempt)
+			log.Infof("Retrying operation '%v' in service '%v'; attempt"+
+				": %v'", serviceID, operationID, attempt)
 		}
 
-		attemptResult := d.next.Invoke(serviceID, operationID, input, extendedExecutionContext)
-		result = &attemptResult
+		result = d.next.Invoke(serviceID, operationID, input, extendedExecutionContext)
 
 		retryContext := RetryContext{
 			Result:      result,
@@ -126,16 +124,8 @@ func (d Decorator) Invoke(serviceID string, operationID string,
 			continue
 		}
 
-		return *result
+		return result
 	}
 
-	if result != nil {
-		// if request fails for whatever reason after final attempt
-		return *result
-	}
-
-	// should not have reached in here, return proper error even though
-	errVal := bindings.CreateErrorValueFromMessageId(bindings.UNSUPPORTED_ERROR_DEF,
-		"vapi.protocol.client.middleware.retry.unexpected", nil)
-	return core.NewMethodResult(nil, errVal)
+	return result
 }

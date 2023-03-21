@@ -144,7 +144,7 @@ func getPolicyAttributeSubAttributeValueSchema(subAttributeKey string) *schema.S
 	}
 }
 
-func resourceNsxtPolicyContextProfileExists(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
+func resourceNsxtPolicyContextProfileExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	var err error
 	if isGlobalManager {
 		client := gm_infra.NewContextProfilesClient(connector)

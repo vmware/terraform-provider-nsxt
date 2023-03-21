@@ -42,7 +42,7 @@ func resourceNsxtPolicyDhcpRelayConfig() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyDhcpRelayConfigExists(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
+func resourceNsxtPolicyDhcpRelayConfigExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	client := infra.NewDhcpRelayConfigsClient(connector)
 
 	_, err := client.Get(id)

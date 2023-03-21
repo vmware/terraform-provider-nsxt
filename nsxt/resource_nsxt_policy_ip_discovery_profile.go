@@ -153,7 +153,7 @@ func ipDiscoveryProfileObjFromSchema(d *schema.ResourceData) model.IPDiscoveryPr
 	}
 }
 
-func resourceNsxtPolicyIPDiscoveryProfileExists(id string, connector *client.RestConnector, isGlobalmodel bool) (bool, error) {
+func resourceNsxtPolicyIPDiscoveryProfileExists(id string, connector client.Connector, isGlobalmodel bool) (bool, error) {
 	var err error
 	if isGlobalmodel {
 		client := gm_infra.NewIpDiscoveryProfilesClient(connector)

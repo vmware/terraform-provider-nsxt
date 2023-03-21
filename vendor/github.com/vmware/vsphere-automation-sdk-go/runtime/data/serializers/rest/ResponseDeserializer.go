@@ -73,7 +73,7 @@ func DeserializeResponse(status int, headers map[string][]string, response strin
 
 	dataVal, err := deserializeResponseToDataValue(status, headers, response, restmetadata)
 	if err != nil {
-		return core.MethodResult{}, err
+		return nil, err
 	}
 
 	if isStatusSuccess(status) {

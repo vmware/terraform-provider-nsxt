@@ -66,7 +66,7 @@ func resourceNsxtPolicyIPSecVpnService() *schema.Resource {
 	}
 }
 
-func getNsxtPolicyIPSecVpnServiceByID(connector *client.RestConnector, gwID string, isT0 bool, localeServiceID string, serviceID string, isGlobalManager bool) (model.IPSecVpnService, error) {
+func getNsxtPolicyIPSecVpnServiceByID(connector client.Connector, gwID string, isT0 bool, localeServiceID string, serviceID string, isGlobalManager bool) (model.IPSecVpnService, error) {
 	if isT0 {
 		client := t0_locale_service.NewIpsecVpnServicesClient(connector)
 		return client.Get(gwID, localeServiceID, serviceID)
@@ -75,7 +75,7 @@ func getNsxtPolicyIPSecVpnServiceByID(connector *client.RestConnector, gwID stri
 	return client.Get(gwID, localeServiceID, serviceID)
 }
 
-func patchNsxtPolicyIPSecVpnService(connector *client.RestConnector, gwID string, localeServiceID string, ipSecVpnService model.IPSecVpnService, isT0 bool) error {
+func patchNsxtPolicyIPSecVpnService(connector client.Connector, gwID string, localeServiceID string, ipSecVpnService model.IPSecVpnService, isT0 bool) error {
 	id := *ipSecVpnService.Id
 	if isT0 {
 		client := t0_locale_service.NewIpsecVpnServicesClient(connector)
@@ -85,7 +85,7 @@ func patchNsxtPolicyIPSecVpnService(connector *client.RestConnector, gwID string
 	return client.Patch(gwID, localeServiceID, id, ipSecVpnService)
 }
 
-func updateNsxtPolicyIPSecVpnService(connector *client.RestConnector, gwID string, localeServiceID string, ipSecVpnService model.IPSecVpnService, isT0 bool) error {
+func updateNsxtPolicyIPSecVpnService(connector client.Connector, gwID string, localeServiceID string, ipSecVpnService model.IPSecVpnService, isT0 bool) error {
 	id := *ipSecVpnService.Id
 	if isT0 {
 		client := t0_locale_service.NewIpsecVpnServicesClient(connector)
@@ -114,7 +114,7 @@ func resourceNsxtPolicyIPSecVpnServiceImport(d *schema.ResourceData, m interface
 	return []*schema.ResourceData{d}, nil
 }
 
-func deleteNsxtPolicyIPSecVpnService(connector *client.RestConnector, gwID string, localeServiceID string, isT0 bool, id string) error {
+func deleteNsxtPolicyIPSecVpnService(connector client.Connector, gwID string, localeServiceID string, isT0 bool, id string) error {
 	if isT0 {
 		client := t0_locale_service.NewIpsecVpnServicesClient(connector)
 		return client.Delete(gwID, localeServiceID, id)

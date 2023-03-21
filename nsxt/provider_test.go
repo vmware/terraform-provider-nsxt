@@ -22,7 +22,7 @@ import (
 
 var testAccProviders map[string]*schema.Provider
 var testAccProvider *schema.Provider
-var testAccConnector *client.RestConnector
+var testAccConnector client.Connector
 
 func init() {
 
@@ -128,7 +128,7 @@ func testAccNSXVersionLessThan(t *testing.T, requiredVersion string) {
 	}
 }
 
-func testAccGetPolicyConnector() (*client.RestConnector, error) {
+func testAccGetPolicyConnector() (client.Connector, error) {
 	if testAccConnector != nil {
 		return testAccConnector, nil
 	}
@@ -160,10 +160,9 @@ func testAccGetPolicyConnector() (*client.RestConnector, error) {
 		Proxy:           http.ProxyFromEnvironment,
 	}
 	httpClient := http.Client{Transport: tr}
-	connector := client.NewRestConnector(host, httpClient)
-	connector.SetSecurityContext(securityCtx)
+	connector := client.NewConnector(host, client.UsingRest(nil), client.WithHttpClient(&httpClient), client.WithSecurityContext(securityCtx))
 
 	testAccConnector = connector
 
-	return connector, nil
+	return testAccConnector, nil
 }

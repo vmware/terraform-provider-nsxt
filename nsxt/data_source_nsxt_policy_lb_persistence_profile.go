@@ -56,7 +56,6 @@ func dataSourceNsxtPolicyLbPersistenceProfileRead(d *schema.ResourceData, m inte
 	connector := getPolicyConnector(m)
 	client := infra.NewLbPersistenceProfilesClient(connector)
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 
 	objID := d.Get("id").(string)
 	objName := d.Get("display_name").(string)

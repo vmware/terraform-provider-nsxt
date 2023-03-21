@@ -141,7 +141,7 @@ func getPolicyRouteMapEntrySchema() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyGatewayRouteMapExists(tier0Id string, id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
+func resourceNsxtPolicyGatewayRouteMapExists(tier0Id string, id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	var err error
 	if isGlobalManager {
 		client := gm_tier0s.NewRouteMapsClient(connector)
@@ -224,7 +224,7 @@ func policyGatewayRouteMapBuildEntry(d *schema.ResourceData, entryNo int, schema
 	return obj
 }
 
-func resourceNsxtPolicyGatewayRouteMapPatch(gwID string, id string, d *schema.ResourceData, isGlobalManager bool, connector *client.RestConnector) error {
+func resourceNsxtPolicyGatewayRouteMapPatch(gwID string, id string, d *schema.ResourceData, isGlobalManager bool, connector client.Connector) error {
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
 	tags := getPolicyTagsFromSchema(d)

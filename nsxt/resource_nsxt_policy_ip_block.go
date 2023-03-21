@@ -40,7 +40,7 @@ func resourceNsxtPolicyIPBlock() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyIPBlockExists(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
+func resourceNsxtPolicyIPBlockExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	client := infra.NewIpBlocksClient(connector)
 
 	_, err := client.Get(id)

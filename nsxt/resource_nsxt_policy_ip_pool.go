@@ -34,7 +34,7 @@ func resourceNsxtPolicyIPPool() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyIPPoolExists(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
+func resourceNsxtPolicyIPPoolExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	client := infra.NewIpPoolsClient(connector)
 
 	_, err := client.Get(id)

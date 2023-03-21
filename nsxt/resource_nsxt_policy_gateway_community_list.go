@@ -46,7 +46,7 @@ func resourceNsxtPolicyGatewayCommunityList() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyGatewayCommunityListExists(tier0Id string, id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
+func resourceNsxtPolicyGatewayCommunityListExists(tier0Id string, id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	var err error
 	if isGlobalManager {
 		client := gm_tier0s.NewCommunityListsClient(connector)

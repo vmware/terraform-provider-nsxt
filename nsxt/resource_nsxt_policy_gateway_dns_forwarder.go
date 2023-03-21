@@ -73,7 +73,7 @@ func resourceNsxtPolicyGatewayDNSForwarder() *schema.Resource {
 	}
 }
 
-func policyGatewayDNSForwarderGet(connector *client.RestConnector, gwID string, isT0 bool, isGlobalManager bool) (model.PolicyDnsForwarder, error) {
+func policyGatewayDNSForwarderGet(connector client.Connector, gwID string, isT0 bool, isGlobalManager bool) (model.PolicyDnsForwarder, error) {
 	var obj model.PolicyDnsForwarder
 	var err error
 	if isGlobalManager {
@@ -131,7 +131,7 @@ func resourceNsxtPolicyGatewayDNSForwarderRead(d *schema.ResourceData, m interfa
 	return nil
 }
 
-func patchNsxtPolicyGatewayDNSForwarder(connector *client.RestConnector, d *schema.ResourceData, gwID string, isT0 bool, isGlobalManager bool) error {
+func patchNsxtPolicyGatewayDNSForwarder(connector client.Connector, d *schema.ResourceData, gwID string, isT0 bool, isGlobalManager bool) error {
 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)

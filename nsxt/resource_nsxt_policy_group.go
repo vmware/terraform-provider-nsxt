@@ -278,7 +278,7 @@ func getExtendedCriteriaSetSchema() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyGroupExistsInDomain(id string, domain string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
+func resourceNsxtPolicyGroupExistsInDomain(id string, domain string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	var err error
 	if isGlobalManager {
 		client := gm_domains.NewGroupsClient(connector)
@@ -299,8 +299,8 @@ func resourceNsxtPolicyGroupExistsInDomain(id string, domain string, connector *
 
 }
 
-func resourceNsxtPolicyGroupExistsInDomainPartial(domain string) func(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
-	return func(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
+func resourceNsxtPolicyGroupExistsInDomainPartial(domain string) func(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
+	return func(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 		return resourceNsxtPolicyGroupExistsInDomain(id, domain, connector, isGlobalManager)
 	}
 }
@@ -398,7 +398,6 @@ func buildGroupConditionData(condition interface{}) (*data.StructValue, error) {
 		ResourceType: model.Condition__TYPE_IDENTIFIER,
 	}
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 	dataValue, errors := converter.ConvertToVapi(conditionModel, model.ConditionBindingType())
 	if errors != nil {
 		return nil, errors[0]
@@ -412,7 +411,6 @@ func buildGroupConjunctionData(conjunction string) (*data.StructValue, error) {
 		ResourceType:        model.ConjunctionOperator__TYPE_IDENTIFIER,
 	}
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 	dataValue, errors := converter.ConvertToVapi(conjunctionStruct, model.ConjunctionOperatorBindingType())
 	if errors != nil {
 		return nil, errors[0]
@@ -431,7 +429,6 @@ func buildGroupIPAddressData(ipaddr interface{}) (*data.StructValue, error) {
 		ResourceType: model.IPAddressExpression__TYPE_IDENTIFIER,
 	}
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 	dataValue, errors := converter.ConvertToVapi(ipaddrStruct, model.IPAddressExpressionBindingType())
 	if errors != nil {
 		return nil, errors[0]
@@ -450,7 +447,6 @@ func buildGroupMacAddressData(ipaddr interface{}) (*data.StructValue, error) {
 		ResourceType: model.MACAddressExpression__TYPE_IDENTIFIER,
 	}
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 	dataValue, errors := converter.ConvertToVapi(addrStruct, model.MACAddressExpressionBindingType())
 	if errors != nil {
 		return nil, errors[0]
@@ -473,7 +469,6 @@ func buildGroupExternalIDExpressionData(externalID interface{}) (*data.StructVal
 	}
 
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 	dataValue, errors := converter.ConvertToVapi(extIDStruct, model.ExternalIDExpressionBindingType())
 	if errors != nil {
 		return nil, errors[0]
@@ -492,7 +487,6 @@ func buildGroupMemberPathData(paths interface{}) (*data.StructValue, error) {
 		ResourceType: model.PathExpression__TYPE_IDENTIFIER,
 	}
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 	dataValue, errors := converter.ConvertToVapi(ipaddrStruct, model.PathExpressionBindingType())
 	if errors != nil {
 		return nil, errors[0]
@@ -518,7 +512,6 @@ func buildNestedGroupExpressionData(expressions []*data.StructValue) (*data.Stru
 		ResourceType: model.NestedExpression__TYPE_IDENTIFIER,
 	}
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 	dataValue, errors := converter.ConvertToVapi(nestedStruct, model.NestedExpressionBindingType())
 	if errors != nil {
 		return nil, errors[0]
@@ -582,7 +575,6 @@ func buildIdentityGroupExpressionListData(identityGroups []interface{}) (*data.S
 	identityGroupExpressionList.IdentityGroups = identityGroupsList
 	identityGroupExpressionList.ResourceType = model.Expression_RESOURCE_TYPE_IDENTITYGROUPEXPRESSION
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 	dataValue, errors := converter.ConvertToVapi(identityGroupExpressionList, model.IdentityGroupExpressionBindingType())
 	if errors != nil {
 		return nil, errors[0]
@@ -628,7 +620,6 @@ func buildGroupExpressionData(criteriaMeta []criteriaMeta, conjunctions []interf
 
 func groupConditionDataToMap(expData *data.StructValue) (map[string]interface{}, error) {
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 	condData, errors := converter.ConvertToGolang(expData, model.ConditionBindingType())
 	if len(errors) > 0 {
 		return nil, errors[0]
@@ -646,7 +637,6 @@ func fromGroupExpressionData(expressions []*data.StructValue) ([]map[string]inte
 	var parsedConjunctions []map[string]interface{}
 	var parsedCriteria []map[string]interface{}
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 
 	for _, expression := range expressions {
 		expData, errs := converter.ConvertToGolang(expression, model.ExpressionBindingType())
@@ -768,7 +758,6 @@ func fromGroupExpressionData(expressions []*data.StructValue) ([]map[string]inte
 func getIdentityGroupsData(expressions []*data.StructValue) ([]map[string]interface{}, error) {
 	var parsedIdentityGroups []map[string]interface{}
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 	for _, expr := range expressions {
 		exprData, errs := converter.ConvertToGolang(expr, model.IdentityGroupExpressionBindingType())
 		if len(errs) > 0 {

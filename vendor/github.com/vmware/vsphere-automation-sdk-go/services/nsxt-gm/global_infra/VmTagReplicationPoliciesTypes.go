@@ -11,43 +11,43 @@
 package global_infra
 
 import (
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
+	vapiBindings_ "github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	vapiData_ "github.com/vmware/vsphere-automation-sdk-go/runtime/data"
+	vapiProtocol_ "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol"
+	nsx_global_policyModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"reflect"
 )
 
-func vmTagReplicationPoliciesDeleteInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func vmTagReplicationPoliciesDeleteInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["id"] = bindings.NewStringType()
+	fields["id"] = vapiBindings_.NewStringType()
 	fieldNameMap["id"] = "Id"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func vmTagReplicationPoliciesDeleteOutputType() bindings.BindingType {
-	return bindings.NewVoidType()
+func VmTagReplicationPoliciesDeleteOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewVoidType()
 }
 
-func vmTagReplicationPoliciesDeleteRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func vmTagReplicationPoliciesDeleteRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["id"] = bindings.NewStringType()
+	fields["id"] = vapiBindings_.NewStringType()
 	fieldNameMap["id"] = "Id"
-	paramsTypeMap["id"] = bindings.NewStringType()
-	paramsTypeMap["id"] = bindings.NewStringType()
+	paramsTypeMap["id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["id"] = vapiBindings_.NewStringType()
 	pathParams["id"] = "id"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -68,36 +68,36 @@ func vmTagReplicationPoliciesDeleteRestMetadata() protocol.OperationRestMetadata
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func vmTagReplicationPoliciesGetInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func vmTagReplicationPoliciesGetInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["id"] = bindings.NewStringType()
+	fields["id"] = vapiBindings_.NewStringType()
 	fieldNameMap["id"] = "Id"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func vmTagReplicationPoliciesGetOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.VMTagReplicationPolicyBindingType)
+func VmTagReplicationPoliciesGetOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewReferenceType(nsx_global_policyModel.VMTagReplicationPolicyBindingType)
 }
 
-func vmTagReplicationPoliciesGetRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func vmTagReplicationPoliciesGetRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["id"] = bindings.NewStringType()
+	fields["id"] = vapiBindings_.NewStringType()
 	fieldNameMap["id"] = "Id"
-	paramsTypeMap["id"] = bindings.NewStringType()
-	paramsTypeMap["id"] = bindings.NewStringType()
+	paramsTypeMap["id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["id"] = vapiBindings_.NewStringType()
 	pathParams["id"] = "id"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -118,56 +118,56 @@ func vmTagReplicationPoliciesGetRestMetadata() protocol.OperationRestMetadata {
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func vmTagReplicationPoliciesListInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func vmTagReplicationPoliciesListInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
-	fields["include_mark_for_delete_objects"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	fields["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
-	fields["page_size"] = bindings.NewOptionalType(bindings.NewIntegerType())
-	fields["sort_ascending"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	fields["sort_by"] = bindings.NewOptionalType(bindings.NewStringType())
+	fields["cursor"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["include_mark_for_delete_objects"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	fields["included_fields"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["page_size"] = vapiBindings_.NewOptionalType(vapiBindings_.NewIntegerType())
+	fields["sort_ascending"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	fields["sort_by"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
 	fieldNameMap["cursor"] = "Cursor"
 	fieldNameMap["include_mark_for_delete_objects"] = "IncludeMarkForDeleteObjects"
 	fieldNameMap["included_fields"] = "IncludedFields"
 	fieldNameMap["page_size"] = "PageSize"
 	fieldNameMap["sort_ascending"] = "SortAscending"
 	fieldNameMap["sort_by"] = "SortBy"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func vmTagReplicationPoliciesListOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.VMTagReplicationPolicyListResultBindingType)
+func VmTagReplicationPoliciesListOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewReferenceType(nsx_global_policyModel.VMTagReplicationPolicyListResultBindingType)
 }
 
-func vmTagReplicationPoliciesListRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func vmTagReplicationPoliciesListRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
-	fields["include_mark_for_delete_objects"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	fields["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
-	fields["page_size"] = bindings.NewOptionalType(bindings.NewIntegerType())
-	fields["sort_ascending"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	fields["sort_by"] = bindings.NewOptionalType(bindings.NewStringType())
+	fields["cursor"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["include_mark_for_delete_objects"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	fields["included_fields"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["page_size"] = vapiBindings_.NewOptionalType(vapiBindings_.NewIntegerType())
+	fields["sort_ascending"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	fields["sort_by"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
 	fieldNameMap["cursor"] = "Cursor"
 	fieldNameMap["include_mark_for_delete_objects"] = "IncludeMarkForDeleteObjects"
 	fieldNameMap["included_fields"] = "IncludedFields"
 	fieldNameMap["page_size"] = "PageSize"
 	fieldNameMap["sort_ascending"] = "SortAscending"
 	fieldNameMap["sort_by"] = "SortBy"
-	paramsTypeMap["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
-	paramsTypeMap["page_size"] = bindings.NewOptionalType(bindings.NewIntegerType())
-	paramsTypeMap["include_mark_for_delete_objects"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	paramsTypeMap["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
-	paramsTypeMap["sort_by"] = bindings.NewOptionalType(bindings.NewStringType())
-	paramsTypeMap["sort_ascending"] = bindings.NewOptionalType(bindings.NewBooleanType())
+	paramsTypeMap["cursor"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	paramsTypeMap["sort_ascending"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	paramsTypeMap["included_fields"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	paramsTypeMap["sort_by"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	paramsTypeMap["include_mark_for_delete_objects"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	paramsTypeMap["page_size"] = vapiBindings_.NewOptionalType(vapiBindings_.NewIntegerType())
 	queryParams["cursor"] = "cursor"
 	queryParams["sort_ascending"] = "sort_ascending"
 	queryParams["included_fields"] = "included_fields"
@@ -176,7 +176,7 @@ func vmTagReplicationPoliciesListRestMetadata() protocol.OperationRestMetadata {
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -197,41 +197,41 @@ func vmTagReplicationPoliciesListRestMetadata() protocol.OperationRestMetadata {
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func vmTagReplicationPoliciesPatchInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func vmTagReplicationPoliciesPatchInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["id"] = bindings.NewStringType()
-	fields["vm_tag_replication_policy"] = bindings.NewReferenceType(model.VMTagReplicationPolicyBindingType)
+	fields["id"] = vapiBindings_.NewStringType()
+	fields["vm_tag_replication_policy"] = vapiBindings_.NewReferenceType(nsx_global_policyModel.VMTagReplicationPolicyBindingType)
 	fieldNameMap["id"] = "Id"
 	fieldNameMap["vm_tag_replication_policy"] = "VmTagReplicationPolicy"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func vmTagReplicationPoliciesPatchOutputType() bindings.BindingType {
-	return bindings.NewVoidType()
+func VmTagReplicationPoliciesPatchOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewVoidType()
 }
 
-func vmTagReplicationPoliciesPatchRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func vmTagReplicationPoliciesPatchRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["id"] = bindings.NewStringType()
-	fields["vm_tag_replication_policy"] = bindings.NewReferenceType(model.VMTagReplicationPolicyBindingType)
+	fields["id"] = vapiBindings_.NewStringType()
+	fields["vm_tag_replication_policy"] = vapiBindings_.NewReferenceType(nsx_global_policyModel.VMTagReplicationPolicyBindingType)
 	fieldNameMap["id"] = "Id"
 	fieldNameMap["vm_tag_replication_policy"] = "VmTagReplicationPolicy"
-	paramsTypeMap["vm_tag_replication_policy"] = bindings.NewReferenceType(model.VMTagReplicationPolicyBindingType)
-	paramsTypeMap["id"] = bindings.NewStringType()
-	paramsTypeMap["id"] = bindings.NewStringType()
+	paramsTypeMap["vm_tag_replication_policy"] = vapiBindings_.NewReferenceType(nsx_global_policyModel.VMTagReplicationPolicyBindingType)
+	paramsTypeMap["id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["id"] = vapiBindings_.NewStringType()
 	pathParams["id"] = "id"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -252,41 +252,41 @@ func vmTagReplicationPoliciesPatchRestMetadata() protocol.OperationRestMetadata 
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func vmTagReplicationPoliciesUpdateInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func vmTagReplicationPoliciesUpdateInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["id"] = bindings.NewStringType()
-	fields["vm_tag_replication_policy"] = bindings.NewReferenceType(model.VMTagReplicationPolicyBindingType)
+	fields["id"] = vapiBindings_.NewStringType()
+	fields["vm_tag_replication_policy"] = vapiBindings_.NewReferenceType(nsx_global_policyModel.VMTagReplicationPolicyBindingType)
 	fieldNameMap["id"] = "Id"
 	fieldNameMap["vm_tag_replication_policy"] = "VmTagReplicationPolicy"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func vmTagReplicationPoliciesUpdateOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.VMTagReplicationPolicyBindingType)
+func VmTagReplicationPoliciesUpdateOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewReferenceType(nsx_global_policyModel.VMTagReplicationPolicyBindingType)
 }
 
-func vmTagReplicationPoliciesUpdateRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func vmTagReplicationPoliciesUpdateRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["id"] = bindings.NewStringType()
-	fields["vm_tag_replication_policy"] = bindings.NewReferenceType(model.VMTagReplicationPolicyBindingType)
+	fields["id"] = vapiBindings_.NewStringType()
+	fields["vm_tag_replication_policy"] = vapiBindings_.NewReferenceType(nsx_global_policyModel.VMTagReplicationPolicyBindingType)
 	fieldNameMap["id"] = "Id"
 	fieldNameMap["vm_tag_replication_policy"] = "VmTagReplicationPolicy"
-	paramsTypeMap["vm_tag_replication_policy"] = bindings.NewReferenceType(model.VMTagReplicationPolicyBindingType)
-	paramsTypeMap["id"] = bindings.NewStringType()
-	paramsTypeMap["id"] = bindings.NewStringType()
+	paramsTypeMap["vm_tag_replication_policy"] = vapiBindings_.NewReferenceType(nsx_global_policyModel.VMTagReplicationPolicyBindingType)
+	paramsTypeMap["id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["id"] = vapiBindings_.NewStringType()
 	pathParams["id"] = "id"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,

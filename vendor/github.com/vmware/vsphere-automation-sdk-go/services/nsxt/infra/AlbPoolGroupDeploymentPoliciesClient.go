@@ -9,22 +9,24 @@
 package infra
 
 import (
-	"github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/core"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/lib"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+	vapiStdErrors_ "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
+	vapiBindings_ "github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	vapiCore_ "github.com/vmware/vsphere-automation-sdk-go/runtime/core"
+	vapiProtocolClient_ "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+	nsx_policyModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
-const _ = core.SupportedByRuntimeVersion1
+const _ = vapiCore_.SupportedByRuntimeVersion2
 
 type AlbPoolGroupDeploymentPoliciesClient interface {
 
-	// Delete the ALBPoolGroupDeploymentPolicy along with all the entities contained by this ALBPoolGroupDeploymentPolicy.
+	// Delete the ALBPoolGroupDeploymentPolicy along with all the entities contained by this ALBPoolGroupDeploymentPolicy. This is a deprecated API. It is recommennded to use NSX Advanced Load Balancer (Avi) Controller UI or API directly instead of NSX-T ALB Policy UI and API.
+	//
+	// Deprecated: This API element is deprecated.
 	//
 	// @param albPoolgroupdeploymentpolicyIdParam ALBPoolGroupDeploymentPolicy ID (required)
 	// @param forceParam Force delete the resource even if it is being used somewhere (optional, default to false)
+	//
 	// @throws InvalidRequest  Bad Request, Precondition Failed
 	// @throws Unauthorized  Forbidden
 	// @throws ServiceUnavailable  Service Unavailable
@@ -32,18 +34,23 @@ type AlbPoolGroupDeploymentPoliciesClient interface {
 	// @throws NotFound  Not Found
 	Delete(albPoolgroupdeploymentpolicyIdParam string, forceParam *bool) error
 
-	// Read a ALBPoolGroupDeploymentPolicy.
+	// Read a ALBPoolGroupDeploymentPolicy. This is a deprecated API. It is recommennded to use NSX Advanced Load Balancer (Avi) Controller UI or API directly instead of NSX-T ALB Policy UI and API.
+	//
+	// Deprecated: This API element is deprecated.
 	//
 	// @param albPoolgroupdeploymentpolicyIdParam ALBPoolGroupDeploymentPolicy ID (required)
 	// @return com.vmware.nsx_policy.model.ALBPoolGroupDeploymentPolicy
+	//
 	// @throws InvalidRequest  Bad Request, Precondition Failed
 	// @throws Unauthorized  Forbidden
 	// @throws ServiceUnavailable  Service Unavailable
 	// @throws InternalServerError  Internal Server Error
 	// @throws NotFound  Not Found
-	Get(albPoolgroupdeploymentpolicyIdParam string) (model.ALBPoolGroupDeploymentPolicy, error)
+	Get(albPoolgroupdeploymentpolicyIdParam string) (nsx_policyModel.ALBPoolGroupDeploymentPolicy, error)
 
-	// Paginated list of all ALBPoolGroupDeploymentPolicy for infra.
+	// Paginated list of all ALBPoolGroupDeploymentPolicy for infra. This is a deprecated API. It is recommennded to use NSX Advanced Load Balancer (Avi) Controller UI or API directly instead of NSX-T ALB Policy UI and API.
+	//
+	// Deprecated: This API element is deprecated.
 	//
 	// @param cursorParam Opaque cursor to be used for getting next page of records (supplied by current result page) (optional)
 	// @param includeMarkForDeleteObjectsParam Include objects that are marked for deletion in results (optional, default to false)
@@ -52,127 +59,140 @@ type AlbPoolGroupDeploymentPoliciesClient interface {
 	// @param sortAscendingParam (optional)
 	// @param sortByParam Field by which records are sorted (optional)
 	// @return com.vmware.nsx_policy.model.ALBPoolGroupDeploymentPolicyApiResponse
+	//
 	// @throws InvalidRequest  Bad Request, Precondition Failed
 	// @throws Unauthorized  Forbidden
 	// @throws ServiceUnavailable  Service Unavailable
 	// @throws InternalServerError  Internal Server Error
 	// @throws NotFound  Not Found
-	List(cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.ALBPoolGroupDeploymentPolicyApiResponse, error)
+	List(cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (nsx_policyModel.ALBPoolGroupDeploymentPolicyApiResponse, error)
 
-	// If a ALBpoolgroupdeploymentpolicy with the alb-poolgroupdeploymentpolicy-id is not already present, create a new ALBpoolgroupdeploymentpolicy. If it already exists, update the ALBpoolgroupdeploymentpolicy. This is a full replace.
+	// If a ALBpoolgroupdeploymentpolicy with the alb-poolgroupdeploymentpolicy-id is not already present, create a new ALBpoolgroupdeploymentpolicy. If it already exists, update the ALBpoolgroupdeploymentpolicy. This is a full replace. This is a deprecated API. It is recommennded to use NSX Advanced Load Balancer (Avi) Controller UI or API directly instead of NSX-T ALB Policy UI and API.
+	//
+	// Deprecated: This API element is deprecated.
 	//
 	// @param albPoolgroupdeploymentpolicyIdParam ALBpoolgroupdeploymentpolicy ID (required)
 	// @param aLBPoolGroupDeploymentPolicyParam (required)
+	//
 	// @throws InvalidRequest  Bad Request, Precondition Failed
 	// @throws Unauthorized  Forbidden
 	// @throws ServiceUnavailable  Service Unavailable
 	// @throws InternalServerError  Internal Server Error
 	// @throws NotFound  Not Found
-	Patch(albPoolgroupdeploymentpolicyIdParam string, aLBPoolGroupDeploymentPolicyParam model.ALBPoolGroupDeploymentPolicy) error
+	Patch(albPoolgroupdeploymentpolicyIdParam string, aLBPoolGroupDeploymentPolicyParam nsx_policyModel.ALBPoolGroupDeploymentPolicy) error
 
-	// If a ALBPoolGroupDeploymentPolicy with the alb-PoolGroupDeploymentPolicy-id is not already present, create a new ALBPoolGroupDeploymentPolicy. If it already exists, update the ALBPoolGroupDeploymentPolicy. This is a full replace.
+	// If a ALBPoolGroupDeploymentPolicy with the alb-PoolGroupDeploymentPolicy-id is not already present, create a new ALBPoolGroupDeploymentPolicy. If it already exists, update the ALBPoolGroupDeploymentPolicy. This is a full replace. This is a deprecated API. It is recommennded to use NSX Advanced Load Balancer (Avi) Controller UI or API directly instead of NSX-T ALB Policy UI and API.
+	//
+	// Deprecated: This API element is deprecated.
 	//
 	// @param albPoolgroupdeploymentpolicyIdParam ALBPoolGroupDeploymentPolicy ID (required)
 	// @param aLBPoolGroupDeploymentPolicyParam (required)
 	// @return com.vmware.nsx_policy.model.ALBPoolGroupDeploymentPolicy
+	//
 	// @throws InvalidRequest  Bad Request, Precondition Failed
 	// @throws Unauthorized  Forbidden
 	// @throws ServiceUnavailable  Service Unavailable
 	// @throws InternalServerError  Internal Server Error
 	// @throws NotFound  Not Found
-	Update(albPoolgroupdeploymentpolicyIdParam string, aLBPoolGroupDeploymentPolicyParam model.ALBPoolGroupDeploymentPolicy) (model.ALBPoolGroupDeploymentPolicy, error)
+	Update(albPoolgroupdeploymentpolicyIdParam string, aLBPoolGroupDeploymentPolicyParam nsx_policyModel.ALBPoolGroupDeploymentPolicy) (nsx_policyModel.ALBPoolGroupDeploymentPolicy, error)
 }
 
 type albPoolGroupDeploymentPoliciesClient struct {
-	connector           client.Connector
-	interfaceDefinition core.InterfaceDefinition
-	errorsBindingMap    map[string]bindings.BindingType
+	connector           vapiProtocolClient_.Connector
+	interfaceDefinition vapiCore_.InterfaceDefinition
+	errorsBindingMap    map[string]vapiBindings_.BindingType
 }
 
-func NewAlbPoolGroupDeploymentPoliciesClient(connector client.Connector) *albPoolGroupDeploymentPoliciesClient {
-	interfaceIdentifier := core.NewInterfaceIdentifier("com.vmware.nsx_policy.infra.alb_pool_group_deployment_policies")
-	methodIdentifiers := map[string]core.MethodIdentifier{
-		"delete": core.NewMethodIdentifier(interfaceIdentifier, "delete"),
-		"get":    core.NewMethodIdentifier(interfaceIdentifier, "get"),
-		"list":   core.NewMethodIdentifier(interfaceIdentifier, "list"),
-		"patch":  core.NewMethodIdentifier(interfaceIdentifier, "patch"),
-		"update": core.NewMethodIdentifier(interfaceIdentifier, "update"),
+func NewAlbPoolGroupDeploymentPoliciesClient(connector vapiProtocolClient_.Connector) *albPoolGroupDeploymentPoliciesClient {
+	interfaceIdentifier := vapiCore_.NewInterfaceIdentifier("com.vmware.nsx_policy.infra.alb_pool_group_deployment_policies")
+	methodIdentifiers := map[string]vapiCore_.MethodIdentifier{
+		"delete": vapiCore_.NewMethodIdentifier(interfaceIdentifier, "delete"),
+		"get":    vapiCore_.NewMethodIdentifier(interfaceIdentifier, "get"),
+		"list":   vapiCore_.NewMethodIdentifier(interfaceIdentifier, "list"),
+		"patch":  vapiCore_.NewMethodIdentifier(interfaceIdentifier, "patch"),
+		"update": vapiCore_.NewMethodIdentifier(interfaceIdentifier, "update"),
 	}
-	interfaceDefinition := core.NewInterfaceDefinition(interfaceIdentifier, methodIdentifiers)
-	errorsBindingMap := make(map[string]bindings.BindingType)
+	interfaceDefinition := vapiCore_.NewInterfaceDefinition(interfaceIdentifier, methodIdentifiers)
+	errorsBindingMap := make(map[string]vapiBindings_.BindingType)
 
 	aIface := albPoolGroupDeploymentPoliciesClient{interfaceDefinition: interfaceDefinition, errorsBindingMap: errorsBindingMap, connector: connector}
 	return &aIface
 }
 
-func (aIface *albPoolGroupDeploymentPoliciesClient) GetErrorBindingType(errorName string) bindings.BindingType {
+func (aIface *albPoolGroupDeploymentPoliciesClient) GetErrorBindingType(errorName string) vapiBindings_.BindingType {
 	if entry, ok := aIface.errorsBindingMap[errorName]; ok {
 		return entry
 	}
-	return errors.ERROR_BINDINGS_MAP[errorName]
+	return vapiStdErrors_.ERROR_BINDINGS_MAP[errorName]
 }
 
 func (aIface *albPoolGroupDeploymentPoliciesClient) Delete(albPoolgroupdeploymentpolicyIdParam string, forceParam *bool) error {
 	typeConverter := aIface.connector.TypeConverter()
 	executionContext := aIface.connector.NewExecutionContext()
-	sv := bindings.NewStructValueBuilder(albPoolGroupDeploymentPoliciesDeleteInputType(), typeConverter)
+	operationRestMetaData := albPoolGroupDeploymentPoliciesDeleteRestMetadata()
+	executionContext.SetConnectionMetadata(vapiCore_.RESTMetadataKey, operationRestMetaData)
+	executionContext.SetConnectionMetadata(vapiCore_.ResponseTypeKey, vapiCore_.NewResponseType(true, false))
+
+	sv := vapiBindings_.NewStructValueBuilder(albPoolGroupDeploymentPoliciesDeleteInputType(), typeConverter)
 	sv.AddStructField("AlbPoolgroupdeploymentpolicyId", albPoolgroupdeploymentpolicyIdParam)
 	sv.AddStructField("Force", forceParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
-		return bindings.VAPIerrorsToError(inputError)
+		return vapiBindings_.VAPIerrorsToError(inputError)
 	}
-	operationRestMetaData := albPoolGroupDeploymentPoliciesDeleteRestMetadata()
-	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
-	connectionMetadata["isStreamingResponse"] = false
-	aIface.connector.SetConnectionMetadata(connectionMetadata)
+
 	methodResult := aIface.connector.GetApiProvider().Invoke("com.vmware.nsx_policy.infra.alb_pool_group_deployment_policies", "delete", inputDataValue, executionContext)
 	if methodResult.IsSuccess() {
 		return nil
 	} else {
 		methodError, errorInError := typeConverter.ConvertToGolang(methodResult.Error(), aIface.GetErrorBindingType(methodResult.Error().Name()))
 		if errorInError != nil {
-			return bindings.VAPIerrorsToError(errorInError)
+			return vapiBindings_.VAPIerrorsToError(errorInError)
 		}
 		return methodError.(error)
 	}
 }
 
-func (aIface *albPoolGroupDeploymentPoliciesClient) Get(albPoolgroupdeploymentpolicyIdParam string) (model.ALBPoolGroupDeploymentPolicy, error) {
+func (aIface *albPoolGroupDeploymentPoliciesClient) Get(albPoolgroupdeploymentpolicyIdParam string) (nsx_policyModel.ALBPoolGroupDeploymentPolicy, error) {
 	typeConverter := aIface.connector.TypeConverter()
 	executionContext := aIface.connector.NewExecutionContext()
-	sv := bindings.NewStructValueBuilder(albPoolGroupDeploymentPoliciesGetInputType(), typeConverter)
+	operationRestMetaData := albPoolGroupDeploymentPoliciesGetRestMetadata()
+	executionContext.SetConnectionMetadata(vapiCore_.RESTMetadataKey, operationRestMetaData)
+	executionContext.SetConnectionMetadata(vapiCore_.ResponseTypeKey, vapiCore_.NewResponseType(true, false))
+
+	sv := vapiBindings_.NewStructValueBuilder(albPoolGroupDeploymentPoliciesGetInputType(), typeConverter)
 	sv.AddStructField("AlbPoolgroupdeploymentpolicyId", albPoolgroupdeploymentpolicyIdParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
-		var emptyOutput model.ALBPoolGroupDeploymentPolicy
-		return emptyOutput, bindings.VAPIerrorsToError(inputError)
+		var emptyOutput nsx_policyModel.ALBPoolGroupDeploymentPolicy
+		return emptyOutput, vapiBindings_.VAPIerrorsToError(inputError)
 	}
-	operationRestMetaData := albPoolGroupDeploymentPoliciesGetRestMetadata()
-	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
-	connectionMetadata["isStreamingResponse"] = false
-	aIface.connector.SetConnectionMetadata(connectionMetadata)
+
 	methodResult := aIface.connector.GetApiProvider().Invoke("com.vmware.nsx_policy.infra.alb_pool_group_deployment_policies", "get", inputDataValue, executionContext)
-	var emptyOutput model.ALBPoolGroupDeploymentPolicy
+	var emptyOutput nsx_policyModel.ALBPoolGroupDeploymentPolicy
 	if methodResult.IsSuccess() {
-		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), albPoolGroupDeploymentPoliciesGetOutputType())
+		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), AlbPoolGroupDeploymentPoliciesGetOutputType())
 		if errorInOutput != nil {
-			return emptyOutput, bindings.VAPIerrorsToError(errorInOutput)
+			return emptyOutput, vapiBindings_.VAPIerrorsToError(errorInOutput)
 		}
-		return output.(model.ALBPoolGroupDeploymentPolicy), nil
+		return output.(nsx_policyModel.ALBPoolGroupDeploymentPolicy), nil
 	} else {
 		methodError, errorInError := typeConverter.ConvertToGolang(methodResult.Error(), aIface.GetErrorBindingType(methodResult.Error().Name()))
 		if errorInError != nil {
-			return emptyOutput, bindings.VAPIerrorsToError(errorInError)
+			return emptyOutput, vapiBindings_.VAPIerrorsToError(errorInError)
 		}
 		return emptyOutput, methodError.(error)
 	}
 }
 
-func (aIface *albPoolGroupDeploymentPoliciesClient) List(cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.ALBPoolGroupDeploymentPolicyApiResponse, error) {
+func (aIface *albPoolGroupDeploymentPoliciesClient) List(cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (nsx_policyModel.ALBPoolGroupDeploymentPolicyApiResponse, error) {
 	typeConverter := aIface.connector.TypeConverter()
 	executionContext := aIface.connector.NewExecutionContext()
-	sv := bindings.NewStructValueBuilder(albPoolGroupDeploymentPoliciesListInputType(), typeConverter)
+	operationRestMetaData := albPoolGroupDeploymentPoliciesListRestMetadata()
+	executionContext.SetConnectionMetadata(vapiCore_.RESTMetadataKey, operationRestMetaData)
+	executionContext.SetConnectionMetadata(vapiCore_.ResponseTypeKey, vapiCore_.NewResponseType(true, false))
+
+	sv := vapiBindings_.NewStructValueBuilder(albPoolGroupDeploymentPoliciesListInputType(), typeConverter)
 	sv.AddStructField("Cursor", cursorParam)
 	sv.AddStructField("IncludeMarkForDeleteObjects", includeMarkForDeleteObjectsParam)
 	sv.AddStructField("IncludedFields", includedFieldsParam)
@@ -181,83 +201,82 @@ func (aIface *albPoolGroupDeploymentPoliciesClient) List(cursorParam *string, in
 	sv.AddStructField("SortBy", sortByParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
-		var emptyOutput model.ALBPoolGroupDeploymentPolicyApiResponse
-		return emptyOutput, bindings.VAPIerrorsToError(inputError)
+		var emptyOutput nsx_policyModel.ALBPoolGroupDeploymentPolicyApiResponse
+		return emptyOutput, vapiBindings_.VAPIerrorsToError(inputError)
 	}
-	operationRestMetaData := albPoolGroupDeploymentPoliciesListRestMetadata()
-	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
-	connectionMetadata["isStreamingResponse"] = false
-	aIface.connector.SetConnectionMetadata(connectionMetadata)
+
 	methodResult := aIface.connector.GetApiProvider().Invoke("com.vmware.nsx_policy.infra.alb_pool_group_deployment_policies", "list", inputDataValue, executionContext)
-	var emptyOutput model.ALBPoolGroupDeploymentPolicyApiResponse
+	var emptyOutput nsx_policyModel.ALBPoolGroupDeploymentPolicyApiResponse
 	if methodResult.IsSuccess() {
-		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), albPoolGroupDeploymentPoliciesListOutputType())
+		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), AlbPoolGroupDeploymentPoliciesListOutputType())
 		if errorInOutput != nil {
-			return emptyOutput, bindings.VAPIerrorsToError(errorInOutput)
+			return emptyOutput, vapiBindings_.VAPIerrorsToError(errorInOutput)
 		}
-		return output.(model.ALBPoolGroupDeploymentPolicyApiResponse), nil
+		return output.(nsx_policyModel.ALBPoolGroupDeploymentPolicyApiResponse), nil
 	} else {
 		methodError, errorInError := typeConverter.ConvertToGolang(methodResult.Error(), aIface.GetErrorBindingType(methodResult.Error().Name()))
 		if errorInError != nil {
-			return emptyOutput, bindings.VAPIerrorsToError(errorInError)
+			return emptyOutput, vapiBindings_.VAPIerrorsToError(errorInError)
 		}
 		return emptyOutput, methodError.(error)
 	}
 }
 
-func (aIface *albPoolGroupDeploymentPoliciesClient) Patch(albPoolgroupdeploymentpolicyIdParam string, aLBPoolGroupDeploymentPolicyParam model.ALBPoolGroupDeploymentPolicy) error {
+func (aIface *albPoolGroupDeploymentPoliciesClient) Patch(albPoolgroupdeploymentpolicyIdParam string, aLBPoolGroupDeploymentPolicyParam nsx_policyModel.ALBPoolGroupDeploymentPolicy) error {
 	typeConverter := aIface.connector.TypeConverter()
 	executionContext := aIface.connector.NewExecutionContext()
-	sv := bindings.NewStructValueBuilder(albPoolGroupDeploymentPoliciesPatchInputType(), typeConverter)
+	operationRestMetaData := albPoolGroupDeploymentPoliciesPatchRestMetadata()
+	executionContext.SetConnectionMetadata(vapiCore_.RESTMetadataKey, operationRestMetaData)
+	executionContext.SetConnectionMetadata(vapiCore_.ResponseTypeKey, vapiCore_.NewResponseType(true, false))
+
+	sv := vapiBindings_.NewStructValueBuilder(albPoolGroupDeploymentPoliciesPatchInputType(), typeConverter)
 	sv.AddStructField("AlbPoolgroupdeploymentpolicyId", albPoolgroupdeploymentpolicyIdParam)
 	sv.AddStructField("ALBPoolGroupDeploymentPolicy", aLBPoolGroupDeploymentPolicyParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
-		return bindings.VAPIerrorsToError(inputError)
+		return vapiBindings_.VAPIerrorsToError(inputError)
 	}
-	operationRestMetaData := albPoolGroupDeploymentPoliciesPatchRestMetadata()
-	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
-	connectionMetadata["isStreamingResponse"] = false
-	aIface.connector.SetConnectionMetadata(connectionMetadata)
+
 	methodResult := aIface.connector.GetApiProvider().Invoke("com.vmware.nsx_policy.infra.alb_pool_group_deployment_policies", "patch", inputDataValue, executionContext)
 	if methodResult.IsSuccess() {
 		return nil
 	} else {
 		methodError, errorInError := typeConverter.ConvertToGolang(methodResult.Error(), aIface.GetErrorBindingType(methodResult.Error().Name()))
 		if errorInError != nil {
-			return bindings.VAPIerrorsToError(errorInError)
+			return vapiBindings_.VAPIerrorsToError(errorInError)
 		}
 		return methodError.(error)
 	}
 }
 
-func (aIface *albPoolGroupDeploymentPoliciesClient) Update(albPoolgroupdeploymentpolicyIdParam string, aLBPoolGroupDeploymentPolicyParam model.ALBPoolGroupDeploymentPolicy) (model.ALBPoolGroupDeploymentPolicy, error) {
+func (aIface *albPoolGroupDeploymentPoliciesClient) Update(albPoolgroupdeploymentpolicyIdParam string, aLBPoolGroupDeploymentPolicyParam nsx_policyModel.ALBPoolGroupDeploymentPolicy) (nsx_policyModel.ALBPoolGroupDeploymentPolicy, error) {
 	typeConverter := aIface.connector.TypeConverter()
 	executionContext := aIface.connector.NewExecutionContext()
-	sv := bindings.NewStructValueBuilder(albPoolGroupDeploymentPoliciesUpdateInputType(), typeConverter)
+	operationRestMetaData := albPoolGroupDeploymentPoliciesUpdateRestMetadata()
+	executionContext.SetConnectionMetadata(vapiCore_.RESTMetadataKey, operationRestMetaData)
+	executionContext.SetConnectionMetadata(vapiCore_.ResponseTypeKey, vapiCore_.NewResponseType(true, false))
+
+	sv := vapiBindings_.NewStructValueBuilder(albPoolGroupDeploymentPoliciesUpdateInputType(), typeConverter)
 	sv.AddStructField("AlbPoolgroupdeploymentpolicyId", albPoolgroupdeploymentpolicyIdParam)
 	sv.AddStructField("ALBPoolGroupDeploymentPolicy", aLBPoolGroupDeploymentPolicyParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
-		var emptyOutput model.ALBPoolGroupDeploymentPolicy
-		return emptyOutput, bindings.VAPIerrorsToError(inputError)
+		var emptyOutput nsx_policyModel.ALBPoolGroupDeploymentPolicy
+		return emptyOutput, vapiBindings_.VAPIerrorsToError(inputError)
 	}
-	operationRestMetaData := albPoolGroupDeploymentPoliciesUpdateRestMetadata()
-	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
-	connectionMetadata["isStreamingResponse"] = false
-	aIface.connector.SetConnectionMetadata(connectionMetadata)
+
 	methodResult := aIface.connector.GetApiProvider().Invoke("com.vmware.nsx_policy.infra.alb_pool_group_deployment_policies", "update", inputDataValue, executionContext)
-	var emptyOutput model.ALBPoolGroupDeploymentPolicy
+	var emptyOutput nsx_policyModel.ALBPoolGroupDeploymentPolicy
 	if methodResult.IsSuccess() {
-		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), albPoolGroupDeploymentPoliciesUpdateOutputType())
+		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), AlbPoolGroupDeploymentPoliciesUpdateOutputType())
 		if errorInOutput != nil {
-			return emptyOutput, bindings.VAPIerrorsToError(errorInOutput)
+			return emptyOutput, vapiBindings_.VAPIerrorsToError(errorInOutput)
 		}
-		return output.(model.ALBPoolGroupDeploymentPolicy), nil
+		return output.(nsx_policyModel.ALBPoolGroupDeploymentPolicy), nil
 	} else {
 		methodError, errorInError := typeConverter.ConvertToGolang(methodResult.Error(), aIface.GetErrorBindingType(methodResult.Error().Name()))
 		if errorInError != nil {
-			return emptyOutput, bindings.VAPIerrorsToError(errorInError)
+			return emptyOutput, vapiBindings_.VAPIerrorsToError(errorInError)
 		}
 		return emptyOutput, methodError.(error)
 	}

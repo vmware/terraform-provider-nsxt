@@ -32,7 +32,7 @@ func dataSourceNsxtPolicyTier1Gateway() *schema.Resource {
 	}
 }
 
-func dataSourceNsxtPolicyTier1GatewayReadAllTier1(connector *client.RestConnector) ([]model.Tier1, error) {
+func dataSourceNsxtPolicyTier1GatewayReadAllTier1(connector client.Connector) ([]model.Tier1, error) {
 	var results []model.Tier1
 	client := infra.NewTier1sClient(connector)
 	boolFalse := false

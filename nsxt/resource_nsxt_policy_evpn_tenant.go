@@ -54,7 +54,7 @@ func resourceNsxtPolicyEvpnTenant() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyEvpnTenantExists(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
+func resourceNsxtPolicyEvpnTenantExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	var err error
 	client := infra.NewEvpnTenantConfigsClient(connector)
 	_, err = client.Get(id)

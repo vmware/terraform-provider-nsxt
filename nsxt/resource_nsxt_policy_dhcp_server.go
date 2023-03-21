@@ -66,7 +66,7 @@ func resourceNsxtPolicyDhcpServer() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyDhcpServerExists(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
+func resourceNsxtPolicyDhcpServerExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 
 	var err error
 	if isGlobalManager {

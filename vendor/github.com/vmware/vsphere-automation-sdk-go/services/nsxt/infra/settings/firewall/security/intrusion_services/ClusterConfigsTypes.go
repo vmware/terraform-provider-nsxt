@@ -11,43 +11,43 @@
 package intrusion_services
 
 import (
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+	vapiBindings_ "github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	vapiData_ "github.com/vmware/vsphere-automation-sdk-go/runtime/data"
+	vapiProtocol_ "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol"
+	nsx_policyModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"reflect"
 )
 
-func clusterConfigsGetInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func clusterConfigsGetInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["cluster_config_id"] = bindings.NewStringType()
+	fields["cluster_config_id"] = vapiBindings_.NewStringType()
 	fieldNameMap["cluster_config_id"] = "ClusterConfigId"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func clusterConfigsGetOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.IdsClusterConfigBindingType)
+func ClusterConfigsGetOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewReferenceType(nsx_policyModel.IdsClusterConfigBindingType)
 }
 
-func clusterConfigsGetRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func clusterConfigsGetRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["cluster_config_id"] = bindings.NewStringType()
+	fields["cluster_config_id"] = vapiBindings_.NewStringType()
 	fieldNameMap["cluster_config_id"] = "ClusterConfigId"
-	paramsTypeMap["cluster_config_id"] = bindings.NewStringType()
-	paramsTypeMap["clusterConfigId"] = bindings.NewStringType()
+	paramsTypeMap["cluster_config_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["clusterConfigId"] = vapiBindings_.NewStringType()
 	pathParams["cluster_config_id"] = "clusterConfigId"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -68,56 +68,56 @@ func clusterConfigsGetRestMetadata() protocol.OperationRestMetadata {
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func clusterConfigsListInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func clusterConfigsListInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
-	fields["include_mark_for_delete_objects"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	fields["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
-	fields["page_size"] = bindings.NewOptionalType(bindings.NewIntegerType())
-	fields["sort_ascending"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	fields["sort_by"] = bindings.NewOptionalType(bindings.NewStringType())
+	fields["cursor"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["include_mark_for_delete_objects"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	fields["included_fields"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["page_size"] = vapiBindings_.NewOptionalType(vapiBindings_.NewIntegerType())
+	fields["sort_ascending"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	fields["sort_by"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
 	fieldNameMap["cursor"] = "Cursor"
 	fieldNameMap["include_mark_for_delete_objects"] = "IncludeMarkForDeleteObjects"
 	fieldNameMap["included_fields"] = "IncludedFields"
 	fieldNameMap["page_size"] = "PageSize"
 	fieldNameMap["sort_ascending"] = "SortAscending"
 	fieldNameMap["sort_by"] = "SortBy"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func clusterConfigsListOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.IdsClusterConfigListResultBindingType)
+func ClusterConfigsListOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewReferenceType(nsx_policyModel.IdsClusterConfigListResultBindingType)
 }
 
-func clusterConfigsListRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func clusterConfigsListRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
-	fields["include_mark_for_delete_objects"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	fields["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
-	fields["page_size"] = bindings.NewOptionalType(bindings.NewIntegerType())
-	fields["sort_ascending"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	fields["sort_by"] = bindings.NewOptionalType(bindings.NewStringType())
+	fields["cursor"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["include_mark_for_delete_objects"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	fields["included_fields"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["page_size"] = vapiBindings_.NewOptionalType(vapiBindings_.NewIntegerType())
+	fields["sort_ascending"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	fields["sort_by"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
 	fieldNameMap["cursor"] = "Cursor"
 	fieldNameMap["include_mark_for_delete_objects"] = "IncludeMarkForDeleteObjects"
 	fieldNameMap["included_fields"] = "IncludedFields"
 	fieldNameMap["page_size"] = "PageSize"
 	fieldNameMap["sort_ascending"] = "SortAscending"
 	fieldNameMap["sort_by"] = "SortBy"
-	paramsTypeMap["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
-	paramsTypeMap["page_size"] = bindings.NewOptionalType(bindings.NewIntegerType())
-	paramsTypeMap["include_mark_for_delete_objects"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	paramsTypeMap["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
-	paramsTypeMap["sort_by"] = bindings.NewOptionalType(bindings.NewStringType())
-	paramsTypeMap["sort_ascending"] = bindings.NewOptionalType(bindings.NewBooleanType())
+	paramsTypeMap["cursor"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	paramsTypeMap["sort_ascending"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	paramsTypeMap["included_fields"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	paramsTypeMap["sort_by"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	paramsTypeMap["include_mark_for_delete_objects"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	paramsTypeMap["page_size"] = vapiBindings_.NewOptionalType(vapiBindings_.NewIntegerType())
 	queryParams["cursor"] = "cursor"
 	queryParams["sort_ascending"] = "sort_ascending"
 	queryParams["included_fields"] = "included_fields"
@@ -126,7 +126,7 @@ func clusterConfigsListRestMetadata() protocol.OperationRestMetadata {
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -147,41 +147,41 @@ func clusterConfigsListRestMetadata() protocol.OperationRestMetadata {
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func clusterConfigsPatchInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func clusterConfigsPatchInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["cluster_config_id"] = bindings.NewStringType()
-	fields["ids_cluster_config"] = bindings.NewReferenceType(model.IdsClusterConfigBindingType)
+	fields["cluster_config_id"] = vapiBindings_.NewStringType()
+	fields["ids_cluster_config"] = vapiBindings_.NewReferenceType(nsx_policyModel.IdsClusterConfigBindingType)
 	fieldNameMap["cluster_config_id"] = "ClusterConfigId"
 	fieldNameMap["ids_cluster_config"] = "IdsClusterConfig"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func clusterConfigsPatchOutputType() bindings.BindingType {
-	return bindings.NewVoidType()
+func ClusterConfigsPatchOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewVoidType()
 }
 
-func clusterConfigsPatchRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func clusterConfigsPatchRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["cluster_config_id"] = bindings.NewStringType()
-	fields["ids_cluster_config"] = bindings.NewReferenceType(model.IdsClusterConfigBindingType)
+	fields["cluster_config_id"] = vapiBindings_.NewStringType()
+	fields["ids_cluster_config"] = vapiBindings_.NewReferenceType(nsx_policyModel.IdsClusterConfigBindingType)
 	fieldNameMap["cluster_config_id"] = "ClusterConfigId"
 	fieldNameMap["ids_cluster_config"] = "IdsClusterConfig"
-	paramsTypeMap["ids_cluster_config"] = bindings.NewReferenceType(model.IdsClusterConfigBindingType)
-	paramsTypeMap["cluster_config_id"] = bindings.NewStringType()
-	paramsTypeMap["clusterConfigId"] = bindings.NewStringType()
+	paramsTypeMap["ids_cluster_config"] = vapiBindings_.NewReferenceType(nsx_policyModel.IdsClusterConfigBindingType)
+	paramsTypeMap["cluster_config_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["clusterConfigId"] = vapiBindings_.NewStringType()
 	pathParams["cluster_config_id"] = "clusterConfigId"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -202,41 +202,41 @@ func clusterConfigsPatchRestMetadata() protocol.OperationRestMetadata {
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func clusterConfigsUpdateInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func clusterConfigsUpdateInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["cluster_config_id"] = bindings.NewStringType()
-	fields["ids_cluster_config"] = bindings.NewReferenceType(model.IdsClusterConfigBindingType)
+	fields["cluster_config_id"] = vapiBindings_.NewStringType()
+	fields["ids_cluster_config"] = vapiBindings_.NewReferenceType(nsx_policyModel.IdsClusterConfigBindingType)
 	fieldNameMap["cluster_config_id"] = "ClusterConfigId"
 	fieldNameMap["ids_cluster_config"] = "IdsClusterConfig"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func clusterConfigsUpdateOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.IdsClusterConfigBindingType)
+func ClusterConfigsUpdateOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewReferenceType(nsx_policyModel.IdsClusterConfigBindingType)
 }
 
-func clusterConfigsUpdateRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func clusterConfigsUpdateRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["cluster_config_id"] = bindings.NewStringType()
-	fields["ids_cluster_config"] = bindings.NewReferenceType(model.IdsClusterConfigBindingType)
+	fields["cluster_config_id"] = vapiBindings_.NewStringType()
+	fields["ids_cluster_config"] = vapiBindings_.NewReferenceType(nsx_policyModel.IdsClusterConfigBindingType)
 	fieldNameMap["cluster_config_id"] = "ClusterConfigId"
 	fieldNameMap["ids_cluster_config"] = "IdsClusterConfig"
-	paramsTypeMap["ids_cluster_config"] = bindings.NewReferenceType(model.IdsClusterConfigBindingType)
-	paramsTypeMap["cluster_config_id"] = bindings.NewStringType()
-	paramsTypeMap["clusterConfigId"] = bindings.NewStringType()
+	paramsTypeMap["ids_cluster_config"] = vapiBindings_.NewReferenceType(nsx_policyModel.IdsClusterConfigBindingType)
+	paramsTypeMap["cluster_config_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["clusterConfigId"] = vapiBindings_.NewStringType()
 	pathParams["cluster_config_id"] = "clusterConfigId"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,

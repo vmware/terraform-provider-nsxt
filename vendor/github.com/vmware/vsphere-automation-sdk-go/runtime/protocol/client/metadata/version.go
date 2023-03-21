@@ -1,3 +1,3 @@
 package metadata
 
-const RuntimeVersion = "0.5.0"
+const RuntimeVersion = "0.6.0"

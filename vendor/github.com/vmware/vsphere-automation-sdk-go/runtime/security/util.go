@@ -1,4 +1,4 @@
-/* Copyright © 2019-2020 VMware, Inc. All Rights Reserved.
+/* Copyright © 2019-2020, 2022 VMware, Inc. All Rights Reserved.
    SPDX-License-Identifier: BSD-2-Clause */
 
 package security
@@ -11,14 +11,13 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
-	"reflect"
-	"strings"
-	"time"
-
 	"github.com/beevik/etree"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/lib"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/log"
+	"reflect"
+	"strings"
+	"time"
 )
 
 // Extracts Security Context from request.
@@ -142,22 +141,29 @@ func Sign(toSign []byte, algorithm crypto.Hash, privateKey *rsa.PrivateKey) ([]b
 	return rsa.SignPKCS1v15(rand.Reader, privateKey, algorithm, hashedData)
 }
 
-// Parse private key from given input string and return rsa private key.
+// ParsePrivateKey parses private key from given input string and returns RSA private key.
 func ParsePrivateKey(pemData string) (*rsa.PrivateKey, error) {
 	block, _ := pem.Decode([]byte(pemData))
 	if block == nil {
 		return nil, errors.New("Error decoding private key")
 	}
-	switch block.Type {
-	case "RSA PRIVATE KEY":
-		rsaKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
-		if err != nil {
-			return nil, err
-		}
-		return rsaKey, nil
-	default:
-		return nil, fmt.Errorf("Unsupported key type %q", block.Type)
+
+	key1, err0 := x509.ParsePKCS1PrivateKey(block.Bytes)
+	if err0 == nil {
+		return key1, nil
 	}
+
+	key2, err1 := x509.ParsePKCS8PrivateKey(block.Bytes)
+	if err1 == nil {
+		switch key2.(type) {
+		case *rsa.PrivateKey:
+			return key2.(*rsa.PrivateKey), nil
+		default:
+			return nil, errors.New("non-supported private key provided")
+		}
+	}
+
+	return nil, fmt.Errorf("private key parse error, got '%s' and '%s'", err0, err1)
 }
 
 // Parses TOKEN to check intrinsic SubjectConfirmation property to detect if token is of type hok or bearer
@@ -188,6 +194,27 @@ func isSamlBearerToken(samlToken string) bool {
 	}
 	if tokenType == SAML_BEARER_TOKEN {
 		return true
+	}
+	return false
+}
+
+func assertInterfaceSliceIsStringSlice(objs []interface{}) ([]string, error) {
+	strs := make([]string, len(objs))
+	for i := range objs {
+		str, ok := objs[i].(string)
+		if !ok {
+			return nil, fmt.Errorf("Assertion failed - '%v' is not a string", objs[i])
+		}
+		strs[i] = str
+	}
+	return strs, nil
+}
+
+func contains(arr []string, s string) bool {
+	for _, v := range arr {
+		if v == s {
+			return true
+		}
 	}
 	return false
 }

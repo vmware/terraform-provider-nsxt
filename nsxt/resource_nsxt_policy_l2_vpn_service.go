@@ -65,7 +65,7 @@ func resourceNsxtPolicyL2VpnService() *schema.Resource {
 	}
 }
 
-func getNsxtPolicyL2VpnServiceByID(connector *client.RestConnector, gwID string, isT0 bool, localeServiceID string, serviceID string, isGlobalManager bool) (model.L2VPNService, error) {
+func getNsxtPolicyL2VpnServiceByID(connector client.Connector, gwID string, isT0 bool, localeServiceID string, serviceID string, isGlobalManager bool) (model.L2VPNService, error) {
 	if isT0 {
 		client := t0_locale_service.NewL2vpnServicesClient(connector)
 		return client.Get(gwID, localeServiceID, serviceID)
@@ -74,7 +74,7 @@ func getNsxtPolicyL2VpnServiceByID(connector *client.RestConnector, gwID string,
 	return client.Get(gwID, localeServiceID, serviceID)
 }
 
-func patchNsxtPolicyL2VpnService(connector *client.RestConnector, gwID string, localeServiceID string, l2VpnService model.L2VPNService, isT0 bool) error {
+func patchNsxtPolicyL2VpnService(connector client.Connector, gwID string, localeServiceID string, l2VpnService model.L2VPNService, isT0 bool) error {
 	id := *l2VpnService.Id
 	if isT0 {
 		client := t0_locale_service.NewL2vpnServicesClient(connector)
@@ -84,7 +84,7 @@ func patchNsxtPolicyL2VpnService(connector *client.RestConnector, gwID string, l
 	return client.Patch(gwID, localeServiceID, id, l2VpnService)
 }
 
-func deleteNsxtPolicyL2VpnService(connector *client.RestConnector, gwID string, localeServiceID string, isT0 bool, id string) error {
+func deleteNsxtPolicyL2VpnService(connector client.Connector, gwID string, localeServiceID string, isT0 bool, id string) error {
 	if isT0 {
 		client := t0_locale_service.NewL2vpnServicesClient(connector)
 		return client.Delete(gwID, localeServiceID, id)

@@ -75,7 +75,7 @@ func resourceNsxtPolicyStaticRoute() *schema.Resource {
 	}
 }
 
-func patchNsxtPolicyStaticRoute(connector *client.RestConnector, gwID string, route model.StaticRoutes, isT0 bool) error {
+func patchNsxtPolicyStaticRoute(connector client.Connector, gwID string, route model.StaticRoutes, isT0 bool) error {
 	if isT0 {
 		routeClient := tier_0s.NewStaticRoutesClient(connector)
 		return routeClient.Patch(gwID, *route.Id, route)
@@ -84,7 +84,7 @@ func patchNsxtPolicyStaticRoute(connector *client.RestConnector, gwID string, ro
 	return routeClient.Patch(gwID, *route.Id, route)
 }
 
-func deleteNsxtPolicyStaticRoute(connector *client.RestConnector, gwID string, isT0 bool, routeID string) error {
+func deleteNsxtPolicyStaticRoute(connector client.Connector, gwID string, isT0 bool, routeID string) error {
 	if isT0 {
 		routeClient := tier_0s.NewStaticRoutesClient(connector)
 		return routeClient.Delete(gwID, routeID)
@@ -93,7 +93,7 @@ func deleteNsxtPolicyStaticRoute(connector *client.RestConnector, gwID string, i
 	return routeClient.Delete(gwID, routeID)
 }
 
-func getNsxtPolicyStaticRouteByID(connector *client.RestConnector, gwID string, isT0 bool, routeID string) (model.StaticRoutes, error) {
+func getNsxtPolicyStaticRouteByID(connector client.Connector, gwID string, isT0 bool, routeID string) (model.StaticRoutes, error) {
 	if isT0 {
 		routeClient := tier_0s.NewStaticRoutesClient(connector)
 		return routeClient.Get(gwID, routeID)

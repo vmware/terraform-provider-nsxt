@@ -70,7 +70,6 @@ func testAccDataSourceNsxtPolicyLBMonitorCreate(name string) error {
 	}
 	client := infra.NewLbMonitorProfilesClient(connector)
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 
 	displayName := name
 	description := name

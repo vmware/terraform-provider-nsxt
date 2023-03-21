@@ -26,7 +26,7 @@ func dataSourceNsxtPolicyService() *schema.Resource {
 	}
 }
 
-func dataSourceNsxtPolicyServiceReadAllServices(connector *client.RestConnector) ([]model.Service, error) {
+func dataSourceNsxtPolicyServiceReadAllServices(connector client.Connector) ([]model.Service, error) {
 	var results []model.Service
 	client := infra.NewServicesClient(connector)
 	boolFalse := false
