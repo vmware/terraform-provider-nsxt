@@ -9,6 +9,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
 func TestAccResourceNsxtPolicyTier1Gateway_basic(t *testing.T) {
@@ -36,6 +37,7 @@ func TestAccResourceNsxtPolicyTier1Gateway_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "enable_standby_relocation", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "force_whitelisting", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "tier0_path", ""),
+					resource.TestCheckResourceAttr(testResourceName, "ha_mode", model.Tier1_HA_MODE_STANDBY),
 					resource.TestCheckResourceAttr(testResourceName, "route_advertisement_types.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "route_advertisement_rule.#", "0"),
 					resource.TestCheckResourceAttrSet(testResourceName, "ipv6_ndra_profile_path"),
@@ -57,6 +59,7 @@ func TestAccResourceNsxtPolicyTier1Gateway_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "enable_standby_relocation", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "force_whitelisting", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "tier0_path", ""),
+					resource.TestCheckResourceAttr(testResourceName, "ha_mode", model.Tier1_HA_MODE_STANDBY),
 					resource.TestCheckResourceAttr(testResourceName, "route_advertisement_types.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "route_advertisement_rule.#", "0"),
 					resource.TestCheckResourceAttrSet(testResourceName, "ipv6_ndra_profile_path"),
@@ -78,6 +81,7 @@ func TestAccResourceNsxtPolicyTier1Gateway_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "enable_standby_relocation", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "force_whitelisting", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "tier0_path", ""),
+					resource.TestCheckResourceAttr(testResourceName, "ha_mode", model.Tier1_HA_MODE_STANDBY),
 					resource.TestCheckResourceAttr(testResourceName, "route_advertisement_types.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "route_advertisement_rule.#", "0"),
 					resource.TestCheckResourceAttrSet(testResourceName, "ipv6_ndra_profile_path"),
@@ -115,6 +119,7 @@ func TestAccResourceNsxtPolicyTier1Gateway_withPoolAllocation(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "enable_standby_relocation", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "force_whitelisting", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "tier0_path", ""),
+					resource.TestCheckResourceAttr(testResourceName, "ha_mode", model.Tier1_HA_MODE_STANDBY),
 					resource.TestCheckResourceAttr(testResourceName, "pool_allocation", "ROUTING"),
 					resource.TestCheckResourceAttr(testResourceName, "route_advertisement_types.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "route_advertisement_rule.#", "0"),
@@ -137,6 +142,7 @@ func TestAccResourceNsxtPolicyTier1Gateway_withPoolAllocation(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "enable_standby_relocation", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "force_whitelisting", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "tier0_path", ""),
+					resource.TestCheckResourceAttr(testResourceName, "ha_mode", model.Tier1_HA_MODE_STANDBY),
 					resource.TestCheckResourceAttr(testResourceName, "pool_allocation", "ROUTING"),
 					resource.TestCheckResourceAttr(testResourceName, "route_advertisement_types.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "route_advertisement_rule.#", "0"),
@@ -160,6 +166,7 @@ func TestAccResourceNsxtPolicyTier1Gateway_withPoolAllocation(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "enable_standby_relocation", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "force_whitelisting", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "tier0_path", ""),
+					resource.TestCheckResourceAttr(testResourceName, "ha_mode", model.Tier1_HA_MODE_STANDBY),
 					resource.TestCheckResourceAttr(testResourceName, "route_advertisement_types.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "route_advertisement_rule.#", "0"),
 					resource.TestCheckResourceAttrSet(testResourceName, "ipv6_ndra_profile_path"),
