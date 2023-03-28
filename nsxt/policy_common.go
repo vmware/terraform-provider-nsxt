@@ -17,7 +17,7 @@ var securityPolicyIPProtocolValues = []string{"NONE", model.Rule_IP_PROTOCOL_IPV
 
 // TODO: change last string to sdk constant when available
 var securityPolicyActionValues = []string{model.Rule_ACTION_ALLOW, model.Rule_ACTION_DROP, model.Rule_ACTION_REJECT, "JUMP_TO_APPLICATION"}
-var gatewayPolicyCategoryValues = []string{"Emergency", "SystemRules", "SharedPreRules", "LocalGatewayRules", "AutoServiceRules", "Default"}
+var gatewayPolicyCategoryWritableValues = []string{"Emergency", "SharedPreRules", "LocalGatewayRules", "Default"}
 var policyFailOverModeValues = []string{model.Tier1_FAILOVER_MODE_PREEMPTIVE, model.Tier1_FAILOVER_MODE_NON_PREEMPTIVE}
 var failOverModeDefaultPolicyT0Value = model.Tier0_FAILOVER_MODE_NON_PREEMPTIVE
 var defaultPolicyLocaleServiceID = "default"
@@ -288,7 +288,7 @@ func getPolicyGatewayPolicySchema() map[string]*schema.Schema {
 	secPolicy := getPolicySecurityPolicySchema(false)
 	// GW Policies don't support scope
 	delete(secPolicy, "scope")
-	secPolicy["category"].ValidateFunc = validation.StringInSlice(gatewayPolicyCategoryValues, false)
+	secPolicy["category"].ValidateFunc = validation.StringInSlice(gatewayPolicyCategoryWritableValues, false)
 	// GW Policy rules require scope to be set
 	secPolicy["rule"] = getSecurityPolicyAndGatewayRulesSchema(true, false, true)
 	return secPolicy
