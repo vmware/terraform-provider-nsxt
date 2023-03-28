@@ -32,10 +32,10 @@ The following arguments are supported:
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
-* `locale_service_path` - (Required) Path of the locale_service associated with the L2 VPN Service.
-* `enable_hub` - (Optional) This property applies only in SERVER mode. If set to true, traffic from any client will be replicated to all other clients. If set to false, traffic received from clients is only replicated to the local VPN endpoint.. Default is `true`.
+* `locale_service_path` - (Required) Path of the locale service associated with the L2 VPN Service.
+* `enable_hub` - (Optional) This property applies only in `SERVER` mode. If set to true, traffic from any client will be replicated to all other clients. If set to false, traffic received from clients is only replicated to the local VPN endpoint. Default is `true`.
 * `mode` - (Optional) Specify an L2VPN service mode as SERVER or CLIENT. Value is one of `SERVER`, `CLIENT`. Default is `SERVER`.
-* `encap_ip_pool` - (Optional) IP Pool to allocate local and peer endpoint IPs. Format is `ipv4-cidr-block`.
+* `encap_ip_pool` - (Optional) IP Pool to allocate local and peer endpoint IPs. Format is ipv4 CIDR block.
 
 
 ## Attributes Reference

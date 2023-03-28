@@ -23,7 +23,7 @@ resource "nsxt_policy_segment" "s1" {
 }
 
 data "nsxt_policy_segment_realization" "s1" {
-  path = data.nsxt_policy_segment.s1.path
+  path = nsxt_policy_segment.s1.path
 }
 
 # usage in vsphere provider
