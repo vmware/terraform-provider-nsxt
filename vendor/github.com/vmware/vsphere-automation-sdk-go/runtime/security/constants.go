@@ -1,4 +1,4 @@
-/* Copyright © 2019-2020 VMware, Inc. All Rights Reserved.
+/* Copyright © 2019-2020, 2022 VMware, Inc. All Rights Reserved.
    SPDX-License-Identifier: BSD-2-Clause */
 
 package security
@@ -40,3 +40,11 @@ const RS512 = "RS512"
 
 const TS_EXPIRES_KEY = "expires"
 const TS_CREATED_KEY = "created"
+
+const CLAIM_GROUP_NAMES = "group_names"
+const CLAIM_SUBJECT = "sub"
+const CLAIM_ISSUER = "iss"
+const CLAIM_ISSUED_AT = "iat"
+const CLAIM_EXPIRES_AT = "exp"
+const CLAIM_NOT_BEFORE = "nbf"
+const CLAIM_AUDIENCE = "aud"

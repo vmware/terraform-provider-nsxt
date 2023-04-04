@@ -190,7 +190,7 @@ func resourceNsxtPolicyBgpNeighborParseIDs(bgpPath string) (string, string) {
 	return t0ID, lsID
 }
 
-func resourceNsxtPolicyBgpNeighborExists(t0ID string, localeServiceID string, neighborID string, isGlobalManager bool, connector *client.RestConnector) (bool, error) {
+func resourceNsxtPolicyBgpNeighborExists(t0ID string, localeServiceID string, neighborID string, isGlobalManager bool, connector client.Connector) (bool, error) {
 
 	var err error
 	if isGlobalManager {

@@ -168,7 +168,6 @@ func resourceNsxtPolicyIPSecVpnSession() *schema.Resource {
 
 func getIPSecVPNSessionFromSchema(d *schema.ResourceData) (*data.StructValue, error) {
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 
 	psk := d.Get("psk").(string)
 	peerID := d.Get("peer_id").(string)
@@ -361,7 +360,7 @@ func newIpsecSessionClient(servicePath string) (*ipsecSessionClient, error) {
 	}, nil
 }
 
-func (c *ipsecSessionClient) Get(connector *client.RestConnector, id string) (*data.StructValue, error) {
+func (c *ipsecSessionClient) Get(connector client.Connector, id string) (*data.StructValue, error) {
 	if c.isT0 {
 		if len(c.localeServiceID) > 0 {
 			client := t0_ipsec_nested_services.NewSessionsClient(connector)
@@ -379,7 +378,7 @@ func (c *ipsecSessionClient) Get(connector *client.RestConnector, id string) (*d
 	return client.Get(c.gwID, c.serviceID, id)
 }
 
-func (c *ipsecSessionClient) Patch(connector *client.RestConnector, id string, obj *data.StructValue) error {
+func (c *ipsecSessionClient) Patch(connector client.Connector, id string, obj *data.StructValue) error {
 	if c.isT0 {
 		if len(c.localeServiceID) > 0 {
 			client := t0_ipsec_nested_services.NewSessionsClient(connector)
@@ -397,7 +396,7 @@ func (c *ipsecSessionClient) Patch(connector *client.RestConnector, id string, o
 	return client.Patch(c.gwID, c.serviceID, id, obj)
 }
 
-func (c *ipsecSessionClient) Delete(connector *client.RestConnector, id string) error {
+func (c *ipsecSessionClient) Delete(connector client.Connector, id string) error {
 	if c.isT0 {
 		if len(c.localeServiceID) > 0 {
 			client := t0_ipsec_nested_services.NewSessionsClient(connector)
@@ -554,7 +553,7 @@ func resourceNsxtPolicyIPSecVpnSessionCreate(d *schema.ResourceData, m interface
 	return resourceNsxtPolicyIPSecVpnSessionRead(d, m)
 }
 
-func resourceNsxtPolicyIPSecVpnSessionExists(servicePath string, sessionID string, connector *client.RestConnector) (bool, error) {
+func resourceNsxtPolicyIPSecVpnSessionExists(servicePath string, sessionID string, connector client.Connector) (bool, error) {
 	client, err := newIpsecSessionClient(servicePath)
 	if err != nil {
 		return false, err
@@ -574,7 +573,6 @@ func resourceNsxtPolicyIPSecVpnSessionExists(servicePath string, sessionID strin
 func resourceNsxtPolicyIPSecVpnSessionRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 
 	id := d.Id()
 	if id == "" {

@@ -28,7 +28,7 @@ func resourceNsxtPolicySecurityPolicy() *schema.Resource {
 	}
 }
 
-func getSecurityPolicyInDomain(id string, domainName string, connector *client.RestConnector, isGlobalManager bool) (model.SecurityPolicy, error) {
+func getSecurityPolicyInDomain(id string, domainName string, connector client.Connector, isGlobalManager bool) (model.SecurityPolicy, error) {
 	if isGlobalManager {
 		client := gm_domains.NewSecurityPoliciesClient(connector)
 		gmObj, err := client.Get(domainName, id)
@@ -46,7 +46,7 @@ func getSecurityPolicyInDomain(id string, domainName string, connector *client.R
 
 }
 
-func resourceNsxtPolicySecurityPolicyExistsInDomain(id string, domainName string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
+func resourceNsxtPolicySecurityPolicyExistsInDomain(id string, domainName string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	var err error
 	if isGlobalManager {
 		client := gm_domains.NewSecurityPoliciesClient(connector)
@@ -67,13 +67,13 @@ func resourceNsxtPolicySecurityPolicyExistsInDomain(id string, domainName string
 	return false, logAPIError("Error retrieving Security Policy", err)
 }
 
-func resourceNsxtPolicySecurityPolicyExistsPartial(domainName string) func(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
-	return func(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
+func resourceNsxtPolicySecurityPolicyExistsPartial(domainName string) func(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
+	return func(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 		return resourceNsxtPolicySecurityPolicyExistsInDomain(id, domainName, connector, isGlobalManager)
 	}
 }
 
-func policySecurityPolicyBuildAndPatch(d *schema.ResourceData, m interface{}, connector *client.RestConnector, isGlobalManager bool, id string) error {
+func policySecurityPolicyBuildAndPatch(d *schema.ResourceData, m interface{}, connector client.Connector, isGlobalManager bool, id string) error {
 
 	domain := d.Get("domain").(string)
 	displayName := d.Get("display_name").(string)

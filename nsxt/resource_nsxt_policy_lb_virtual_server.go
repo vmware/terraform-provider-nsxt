@@ -1042,7 +1042,6 @@ func setPolicyAccessListControlInSchema(d *schema.ResourceData, control *model.L
 
 func setPolicyLbRulesInSchema(d *schema.ResourceData, rules []model.LBRule) {
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 
 	var ruleList []interface{}
 	for _, rule := range rules {
@@ -1561,7 +1560,7 @@ func policyLBVirtualServerVersionDependantSet(d *schema.ResourceData, obj *model
 	}
 }
 
-func resourceNsxtPolicyLBVirtualServerExists(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
+func resourceNsxtPolicyLBVirtualServerExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	client := infra.NewLbVirtualServersClient(connector)
 
 	_, err := client.Get(id)

@@ -491,7 +491,6 @@ func getSegmentSubnetDhcpConfigFromSchema(schemaConfig map[string]interface{}) (
 	}
 
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 
 	if len(dhcpV4Config) > 0 {
 		dhcpConfig := dhcpV4Config[0].(map[string]interface{})
@@ -580,7 +579,6 @@ func getSegmentSubnetDhcpConfigFromSchema(schemaConfig map[string]interface{}) (
 
 func setSegmentSubnetDhcpConfigInSchema(schemaConfig map[string]interface{}, subnetConfig model.SegmentSubnet) error {
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 
 	var resultConfigs []map[string]interface{}
 	resultConfig := make(map[string]interface{})
@@ -658,7 +656,6 @@ func setSegmentSubnetDhcpConfigInSchema(schemaConfig map[string]interface{}, sub
 func nsxtPolicySegmentAddGatewayToInfraStruct(d *schema.ResourceData, dataValue *data.StructValue) (*data.StructValue, error) {
 	var gwChildren []*data.StructValue
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 	gwChildren = append(gwChildren, dataValue)
 	targetType := "Tier1"
 	gwPath := d.Get("connectivity_path").(string)
@@ -846,7 +843,6 @@ func policySegmentResourceToInfraStruct(id string, d *schema.ResourceData, isVla
 	}
 
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 	dataValue, errors := converter.ConvertToVapi(childSegment, model.ChildSegmentBindingType())
 	if errors != nil {
 		return model.Infra{}, fmt.Errorf("Error converting Segment Child: %v", errors[0])
@@ -873,8 +869,8 @@ func policySegmentResourceToInfraStruct(id string, d *schema.ResourceData, isVla
 	return infraStruct, nil
 }
 
-func resourceNsxtPolicySegmentExists(gwPath string, isFixed bool) func(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
-	return func(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
+func resourceNsxtPolicySegmentExists(gwPath string, isFixed bool) func(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
+	return func(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 		var err error
 
 		if isGlobalManager {
@@ -1025,7 +1021,6 @@ func nsxtPolicySegmentDiscoveryProfileSetInStruct(d *schema.ResourceData) (*data
 	}
 
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 	dataValue, errors := converter.ConvertToVapi(childConfig, model.ChildSegmentDiscoveryProfileBindingMapBindingType())
 	if errors != nil {
 		return nil, fmt.Errorf("Error converting child segment discovery map: %v", errors[0])
@@ -1082,7 +1077,6 @@ func nsxtPolicySegmentQosProfileSetInStruct(d *schema.ResourceData) (*data.Struc
 	}
 
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 	dataValue, errors := converter.ConvertToVapi(childConfig, model.ChildSegmentQosProfileBindingMapBindingType())
 	if errors != nil {
 		return nil, fmt.Errorf("Error converting child segment QoS map: %v", errors[0])
@@ -1145,7 +1139,6 @@ func nsxtPolicySegmentSecurityProfileSetInStruct(d *schema.ResourceData) (*data.
 	}
 
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 	dataValue, errors := converter.ConvertToVapi(childConfig, model.ChildSegmentSecurityProfileBindingMapBindingType())
 	if errors != nil {
 		return nil, fmt.Errorf("Error converting child segment security map: %v", errors[0])
@@ -1312,7 +1305,7 @@ func setSegmentBridgeConfigInSchema(d *schema.ResourceData, obj *model.Segment) 
 	d.Set("bridge_config", configs)
 }
 
-func nsxtPolicyLocalManagerGetSegment(connector *client.RestConnector, id string, gwPath string, isFixed bool) (model.Segment, error) {
+func nsxtPolicyLocalManagerGetSegment(connector client.Connector, id string, gwPath string, isFixed bool) (model.Segment, error) {
 	if !isFixed {
 		return infra.NewSegmentsClient(connector).Get(id)
 	}
@@ -1328,7 +1321,7 @@ func nsxtPolicyLocalManagerGetSegment(connector *client.RestConnector, id string
 	return tier_1s.NewSegmentsClient(connector).Get(gwID, id)
 }
 
-func nsxtPolicyGlobalManagerGetSegment(connector *client.RestConnector, id string, gwPath string, isFixed bool) (model.Segment, error) {
+func nsxtPolicyGlobalManagerGetSegment(connector client.Connector, id string, gwPath string, isFixed bool) (model.Segment, error) {
 	var err error
 	var gmObj gm_model.Segment
 
@@ -1583,7 +1576,6 @@ func nsxtPolicySegmentDelete(d *schema.ResourceData, m interface{}, isFixed bool
 
 	var infraChildren []*data.StructValue
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 	boolTrue := true
 
 	objType := "Segment"

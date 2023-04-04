@@ -385,7 +385,6 @@ func testGetObjIDByName(objName string, resourceType string) (string, error) {
 	}
 
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 
 	for _, result := range resultValues {
 		dataValue, errors := converter.ConvertToGolang(result, model.PolicyResourceBindingType())
@@ -486,7 +485,7 @@ resource "nsxt_policy_tier1_gateway" "test" {
 }`, gatewayName, gatewayName, edgeClusterName)
 }
 
-func testAccNsxtPolicyResourceExists(resourceName string, presenceChecker func(string, *client.RestConnector, bool) (bool, error)) resource.TestCheckFunc {
+func testAccNsxtPolicyResourceExists(resourceName string, presenceChecker func(string, client.Connector, bool) (bool, error)) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
@@ -514,7 +513,7 @@ func testAccNsxtPolicyResourceExists(resourceName string, presenceChecker func(s
 	}
 }
 
-func testAccNsxtPolicyResourceCheckDestroy(state *terraform.State, displayName string, resourceType string, presenceChecker func(string, *client.RestConnector, bool) (bool, error)) error {
+func testAccNsxtPolicyResourceCheckDestroy(state *terraform.State, displayName string, resourceType string, presenceChecker func(string, client.Connector, bool) (bool, error)) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
 	for _, rs := range state.RootModule().Resources {
 

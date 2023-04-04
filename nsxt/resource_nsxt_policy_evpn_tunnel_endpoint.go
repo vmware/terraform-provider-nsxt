@@ -81,7 +81,7 @@ func policyEvpnTunnelEndpointPatch(d *schema.ResourceData, m interface{}, gwID s
 	return client.Patch(gwID, localeServiceID, id, obj)
 }
 
-func resourceNsxtPolicyEvpnTunnelEndpointExists(connector *client.RestConnector, gwID string, localeServiceID string, id string) (bool, error) {
+func resourceNsxtPolicyEvpnTunnelEndpointExists(connector client.Connector, gwID string, localeServiceID string, id string) (bool, error) {
 	client := locale_services.NewEvpnTunnelEndpointsClient(connector)
 	_, err := client.Get(gwID, localeServiceID, id)
 

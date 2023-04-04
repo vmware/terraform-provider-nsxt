@@ -8,9 +8,9 @@ import (
 	"net"
 	"net/http"
 
+	"context"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/l10n"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/log"
-	"golang.org/x/net/context"
 )
 
 // Server Wraps http server and provides basic functionality

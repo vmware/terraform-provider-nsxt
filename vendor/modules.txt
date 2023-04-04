@@ -19,6 +19,9 @@ github.com/fatih/color
 # github.com/gibson042/canonicaljson-go v1.0.3
 ## explicit
 github.com/gibson042/canonicaljson-go
+# github.com/golang-jwt/jwt/v4 v4.3.0
+## explicit; go 1.15
+github.com/golang-jwt/jwt/v4
 # github.com/golang/protobuf v1.5.2
 ## explicit; go 1.9
 github.com/golang/protobuf/proto
@@ -209,16 +212,17 @@ github.com/vmware/go-vmware-nsxt/policy
 github.com/vmware/go-vmware-nsxt/supportbundle
 github.com/vmware/go-vmware-nsxt/trust
 github.com/vmware/go-vmware-nsxt/upgrade
-# github.com/vmware/vsphere-automation-sdk-go/lib v0.4.0
-## explicit; go 1.13
+# github.com/vmware/vsphere-automation-sdk-go/lib v0.6.0
+## explicit; go 1.17
 github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std
 github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors
-# github.com/vmware/vsphere-automation-sdk-go/runtime v0.4.0
-## explicit; go 1.13
+# github.com/vmware/vsphere-automation-sdk-go/runtime v0.6.0
+## explicit; go 1.17
 github.com/vmware/vsphere-automation-sdk-go/runtime/bindings
 github.com/vmware/vsphere-automation-sdk-go/runtime/common
 github.com/vmware/vsphere-automation-sdk-go/runtime/core
 github.com/vmware/vsphere-automation-sdk-go/runtime/data
+github.com/vmware/vsphere-automation-sdk-go/runtime/data/serializers
 github.com/vmware/vsphere-automation-sdk-go/runtime/data/serializers/cleanjson
 github.com/vmware/vsphere-automation-sdk-go/runtime/data/serializers/rest
 github.com/vmware/vsphere-automation-sdk-go/runtime/l10n
@@ -230,13 +234,17 @@ github.com/vmware/vsphere-automation-sdk-go/runtime/metadata
 github.com/vmware/vsphere-automation-sdk-go/runtime/metadata/info
 github.com/vmware/vsphere-automation-sdk-go/runtime/protocol
 github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client
+github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client/internal
 github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client/metadata
 github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client/middleware/retry
+github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/http
+github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/http/internal
 github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/server
 github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/server/rpc/msg
+github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/server/tracing
 github.com/vmware/vsphere-automation-sdk-go/runtime/security
-# github.com/vmware/vsphere-automation-sdk-go/services/nsxt v0.9.0
-## explicit; go 1.13
+# github.com/vmware/vsphere-automation-sdk-go/services/nsxt v0.10.0
+## explicit; go 1.17
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/context_profiles
@@ -267,8 +275,8 @@ github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/nat
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/segments
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt/search
-# github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm v0.6.0
-## explicit; go 1.13
+# github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm v0.7.0
+## explicit; go 1.17
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/context_profiles

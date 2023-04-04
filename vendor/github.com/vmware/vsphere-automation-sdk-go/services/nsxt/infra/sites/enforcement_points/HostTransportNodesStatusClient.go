@@ -9,15 +9,14 @@
 package enforcement_points
 
 import (
-	"github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/core"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/lib"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+	vapiStdErrors_ "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
+	vapiBindings_ "github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	vapiCore_ "github.com/vmware/vsphere-automation-sdk-go/runtime/core"
+	vapiProtocolClient_ "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+	nsx_policyModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
-const _ = core.SupportedByRuntimeVersion1
+const _ = vapiCore_.SupportedByRuntimeVersion2
 
 type HostTransportNodesStatusClient interface {
 
@@ -33,43 +32,48 @@ type HostTransportNodesStatusClient interface {
 	// @param sourceParam Data source type. (optional)
 	// @param statusParam Transport node (optional)
 	// @return com.vmware.nsx_policy.model.TransportNodeStatusListResult
+	//
 	// @throws InvalidRequest  Bad Request, Precondition Failed
 	// @throws Unauthorized  Forbidden
 	// @throws ServiceUnavailable  Service Unavailable
 	// @throws InternalServerError  Internal Server Error
 	// @throws NotFound  Not Found
-	Getall(siteIdParam string, enforcementPointIdParam string, cursorParam *string, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string, sourceParam *string, statusParam *string) (model.TransportNodeStatusListResult, error)
+	Getall(siteIdParam string, enforcementPointIdParam string, cursorParam *string, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string, sourceParam *string, statusParam *string) (nsx_policyModel.TransportNodeStatusListResult, error)
 }
 
 type hostTransportNodesStatusClient struct {
-	connector           client.Connector
-	interfaceDefinition core.InterfaceDefinition
-	errorsBindingMap    map[string]bindings.BindingType
+	connector           vapiProtocolClient_.Connector
+	interfaceDefinition vapiCore_.InterfaceDefinition
+	errorsBindingMap    map[string]vapiBindings_.BindingType
 }
 
-func NewHostTransportNodesStatusClient(connector client.Connector) *hostTransportNodesStatusClient {
-	interfaceIdentifier := core.NewInterfaceIdentifier("com.vmware.nsx_policy.infra.sites.enforcement_points.host_transport_nodes_status")
-	methodIdentifiers := map[string]core.MethodIdentifier{
-		"getall": core.NewMethodIdentifier(interfaceIdentifier, "getall"),
+func NewHostTransportNodesStatusClient(connector vapiProtocolClient_.Connector) *hostTransportNodesStatusClient {
+	interfaceIdentifier := vapiCore_.NewInterfaceIdentifier("com.vmware.nsx_policy.infra.sites.enforcement_points.host_transport_nodes_status")
+	methodIdentifiers := map[string]vapiCore_.MethodIdentifier{
+		"getall": vapiCore_.NewMethodIdentifier(interfaceIdentifier, "getall"),
 	}
-	interfaceDefinition := core.NewInterfaceDefinition(interfaceIdentifier, methodIdentifiers)
-	errorsBindingMap := make(map[string]bindings.BindingType)
+	interfaceDefinition := vapiCore_.NewInterfaceDefinition(interfaceIdentifier, methodIdentifiers)
+	errorsBindingMap := make(map[string]vapiBindings_.BindingType)
 
 	hIface := hostTransportNodesStatusClient{interfaceDefinition: interfaceDefinition, errorsBindingMap: errorsBindingMap, connector: connector}
 	return &hIface
 }
 
-func (hIface *hostTransportNodesStatusClient) GetErrorBindingType(errorName string) bindings.BindingType {
+func (hIface *hostTransportNodesStatusClient) GetErrorBindingType(errorName string) vapiBindings_.BindingType {
 	if entry, ok := hIface.errorsBindingMap[errorName]; ok {
 		return entry
 	}
-	return errors.ERROR_BINDINGS_MAP[errorName]
+	return vapiStdErrors_.ERROR_BINDINGS_MAP[errorName]
 }
 
-func (hIface *hostTransportNodesStatusClient) Getall(siteIdParam string, enforcementPointIdParam string, cursorParam *string, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string, sourceParam *string, statusParam *string) (model.TransportNodeStatusListResult, error) {
+func (hIface *hostTransportNodesStatusClient) Getall(siteIdParam string, enforcementPointIdParam string, cursorParam *string, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string, sourceParam *string, statusParam *string) (nsx_policyModel.TransportNodeStatusListResult, error) {
 	typeConverter := hIface.connector.TypeConverter()
 	executionContext := hIface.connector.NewExecutionContext()
-	sv := bindings.NewStructValueBuilder(hostTransportNodesStatusGetallInputType(), typeConverter)
+	operationRestMetaData := hostTransportNodesStatusGetallRestMetadata()
+	executionContext.SetConnectionMetadata(vapiCore_.RESTMetadataKey, operationRestMetaData)
+	executionContext.SetConnectionMetadata(vapiCore_.ResponseTypeKey, vapiCore_.NewResponseType(true, false))
+
+	sv := vapiBindings_.NewStructValueBuilder(hostTransportNodesStatusGetallInputType(), typeConverter)
 	sv.AddStructField("SiteId", siteIdParam)
 	sv.AddStructField("EnforcementPointId", enforcementPointIdParam)
 	sv.AddStructField("Cursor", cursorParam)
@@ -81,25 +85,22 @@ func (hIface *hostTransportNodesStatusClient) Getall(siteIdParam string, enforce
 	sv.AddStructField("Status", statusParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
-		var emptyOutput model.TransportNodeStatusListResult
-		return emptyOutput, bindings.VAPIerrorsToError(inputError)
+		var emptyOutput nsx_policyModel.TransportNodeStatusListResult
+		return emptyOutput, vapiBindings_.VAPIerrorsToError(inputError)
 	}
-	operationRestMetaData := hostTransportNodesStatusGetallRestMetadata()
-	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
-	connectionMetadata["isStreamingResponse"] = false
-	hIface.connector.SetConnectionMetadata(connectionMetadata)
+
 	methodResult := hIface.connector.GetApiProvider().Invoke("com.vmware.nsx_policy.infra.sites.enforcement_points.host_transport_nodes_status", "getall", inputDataValue, executionContext)
-	var emptyOutput model.TransportNodeStatusListResult
+	var emptyOutput nsx_policyModel.TransportNodeStatusListResult
 	if methodResult.IsSuccess() {
-		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), hostTransportNodesStatusGetallOutputType())
+		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), HostTransportNodesStatusGetallOutputType())
 		if errorInOutput != nil {
-			return emptyOutput, bindings.VAPIerrorsToError(errorInOutput)
+			return emptyOutput, vapiBindings_.VAPIerrorsToError(errorInOutput)
 		}
-		return output.(model.TransportNodeStatusListResult), nil
+		return output.(nsx_policyModel.TransportNodeStatusListResult), nil
 	} else {
 		methodError, errorInError := typeConverter.ConvertToGolang(methodResult.Error(), hIface.GetErrorBindingType(methodResult.Error().Name()))
 		if errorInError != nil {
-			return emptyOutput, bindings.VAPIerrorsToError(errorInError)
+			return emptyOutput, vapiBindings_.VAPIerrorsToError(errorInError)
 		}
 		return emptyOutput, methodError.(error)
 	}

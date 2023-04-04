@@ -82,7 +82,7 @@ func newLocalEndpointClient(servicePath string) (*localEndpointClient, error) {
 	}, nil
 }
 
-func (c *localEndpointClient) Get(connector *client.RestConnector, id string) (model.IPSecVpnLocalEndpoint, error) {
+func (c *localEndpointClient) Get(connector client.Connector, id string) (model.IPSecVpnLocalEndpoint, error) {
 	if c.isT0 {
 		if len(c.localeServiceID) > 0 {
 			client := t0_nested_service.NewLocalEndpointsClient(connector)
@@ -101,7 +101,7 @@ func (c *localEndpointClient) Get(connector *client.RestConnector, id string) (m
 }
 
 // Note: we don't expect pagination to be relevant here
-func (c *localEndpointClient) List(connector *client.RestConnector) ([]model.IPSecVpnLocalEndpoint, error) {
+func (c *localEndpointClient) List(connector client.Connector) ([]model.IPSecVpnLocalEndpoint, error) {
 	boolFalse := false
 	var cursor string
 	var result model.IPSecVpnLocalEndpointListResult
@@ -128,7 +128,7 @@ func (c *localEndpointClient) List(connector *client.RestConnector) ([]model.IPS
 	return result.Results, err
 }
 
-func (c *localEndpointClient) Patch(connector *client.RestConnector, id string, obj model.IPSecVpnLocalEndpoint) error {
+func (c *localEndpointClient) Patch(connector client.Connector, id string, obj model.IPSecVpnLocalEndpoint) error {
 	if c.isT0 {
 		if len(c.localeServiceID) > 0 {
 			client := t0_nested_service.NewLocalEndpointsClient(connector)
@@ -146,7 +146,7 @@ func (c *localEndpointClient) Patch(connector *client.RestConnector, id string, 
 	return client.Patch(c.gwID, c.serviceID, id, obj)
 }
 
-func (c *localEndpointClient) Delete(connector *client.RestConnector, id string) error {
+func (c *localEndpointClient) Delete(connector client.Connector, id string) error {
 	if c.isT0 {
 		if len(c.localeServiceID) > 0 {
 			client := t0_nested_service.NewLocalEndpointsClient(connector)
@@ -164,7 +164,7 @@ func (c *localEndpointClient) Delete(connector *client.RestConnector, id string)
 	return client.Delete(c.gwID, c.serviceID, id)
 }
 
-func resourceNsxtPolicyIPSecVpnLocalEndpointExistsOnService(id string, connector *client.RestConnector, servicePath string) (bool, error) {
+func resourceNsxtPolicyIPSecVpnLocalEndpointExistsOnService(id string, connector client.Connector, servicePath string) (bool, error) {
 	client, err := newLocalEndpointClient(servicePath)
 	if err != nil {
 		return false, err
@@ -181,8 +181,8 @@ func resourceNsxtPolicyIPSecVpnLocalEndpointExistsOnService(id string, connector
 	return false, logAPIError("Error retrieving resource", err)
 }
 
-func resourceNsxtPolicyIPSecVpnLocalEndpointExists(servicePath string) func(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
-	return func(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
+func resourceNsxtPolicyIPSecVpnLocalEndpointExists(servicePath string) func(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
+	return func(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 		return resourceNsxtPolicyIPSecVpnLocalEndpointExistsOnService(id, connector, servicePath)
 	}
 }

@@ -59,7 +59,7 @@ func resourceNsxtPolicyContextProfileCustomAttribute() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyContextProfileCustomAttributeExists(id string, connector *client.RestConnector, isGlobalmodel bool) (bool, error) {
+func resourceNsxtPolicyContextProfileCustomAttributeExists(id string, connector client.Connector, isGlobalmodel bool) (bool, error) {
 	var err error
 	var attrList model.PolicyContextProfileListResult
 

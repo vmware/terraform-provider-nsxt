@@ -145,7 +145,6 @@ func getIdsProfileSignatureSchema() *schema.Resource {
 
 func buildIdsProfileCriteriaFilter(name string, values []string) (*data.StructValue, error) {
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 	item := model.IdsProfileFilterCriteria{
 		FilterName:   &name,
 		FilterValue:  values,
@@ -167,7 +166,6 @@ func buildIdsProfileCriteriaOperator() (*data.StructValue, error) {
 	}
 
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 
 	dataValue, errs := converter.ConvertToVapi(operator, model.IdsProfileConjunctionOperatorBindingType())
 	if errs != nil {
@@ -258,7 +256,6 @@ func getIdsProfileCriteriaFromSchema(d *schema.ResourceData) ([]*data.StructValu
 func setIdsProfileCriteriaInSchema(criteriaList []*data.StructValue, d *schema.ResourceData) error {
 	var schemaList []map[string]interface{}
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 	criteriaMap := make(map[string]interface{})
 
 	for i, item := range criteriaList {
@@ -328,7 +325,7 @@ func setIdsProfileSignaturesInSchema(profileList []model.IdsProfileLocalSignatur
 	return d.Set("overridden_signature", schemaList)
 }
 
-func resourceNsxtPolicyIntrusionServiceProfileExists(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
+func resourceNsxtPolicyIntrusionServiceProfileExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	var err error
 	client := services.NewProfilesClient(connector)
 	_, err = client.Get(id)

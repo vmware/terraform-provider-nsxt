@@ -203,7 +203,6 @@ func resourceNsxtPolicyService() *schema.Resource {
 
 func resourceNsxtPolicyServiceGetEntriesFromSchema(d *schema.ResourceData) ([]*data.StructValue, error) {
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 	serviceEntries := []*data.StructValue{}
 
 	// ICMP Type service entries
@@ -421,7 +420,7 @@ func resourceNsxtPolicyServiceGetEntriesFromSchema(d *schema.ResourceData) ([]*d
 	return serviceEntries, nil
 }
 
-func resourceNsxtPolicyServiceExists(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
+func resourceNsxtPolicyServiceExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	var err error
 	if isGlobalManager {
 		client := gm_infra.NewServicesClient(connector)
@@ -534,7 +533,6 @@ func resourceNsxtPolicyServiceRead(d *schema.ResourceData, m interface{}) error 
 
 	// Translate the returned service entries
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 	var icmpEntriesList []map[string]interface{}
 	var l4EntriesList []map[string]interface{}
 	var igmpEntriesList []map[string]interface{}

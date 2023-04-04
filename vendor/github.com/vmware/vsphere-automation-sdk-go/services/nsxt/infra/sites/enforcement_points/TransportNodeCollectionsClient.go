@@ -9,15 +9,14 @@
 package enforcement_points
 
 import (
-	"github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/core"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/lib"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+	vapiStdErrors_ "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
+	vapiBindings_ "github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	vapiCore_ "github.com/vmware/vsphere-automation-sdk-go/runtime/core"
+	vapiProtocolClient_ "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+	nsx_policyModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
-const _ = core.SupportedByRuntimeVersion1
+const _ = vapiCore_.SupportedByRuntimeVersion2
 
 type TransportNodeCollectionsClient interface {
 
@@ -26,6 +25,7 @@ type TransportNodeCollectionsClient interface {
 	// @param siteIdParam (required)
 	// @param enforcementpointIdParam (required)
 	// @param transportNodeCollectionIdParam (required)
+	//
 	// @throws InvalidRequest  Bad Request, Precondition Failed
 	// @throws Unauthorized  Forbidden
 	// @throws ServiceUnavailable  Service Unavailable
@@ -39,12 +39,13 @@ type TransportNodeCollectionsClient interface {
 	// @param enforcementpointIdParam (required)
 	// @param transportNodeCollectionIdParam (required)
 	// @return com.vmware.nsx_policy.model.HostTransportNodeCollection
+	//
 	// @throws InvalidRequest  Bad Request, Precondition Failed
 	// @throws Unauthorized  Forbidden
 	// @throws ServiceUnavailable  Service Unavailable
 	// @throws InternalServerError  Internal Server Error
 	// @throws NotFound  Not Found
-	Get(siteIdParam string, enforcementpointIdParam string, transportNodeCollectionIdParam string) (model.HostTransportNodeCollection, error)
+	Get(siteIdParam string, enforcementpointIdParam string, transportNodeCollectionIdParam string) (nsx_policyModel.HostTransportNodeCollection, error)
 
 	// This API configures a compute collection for security. In the request body, specify a Transport Node Collection with only the ID of the target compute collection meant for security. Specifically, a Transport Node Profile ID should not be specified. This API will define a system-generated security Transport Node Profile and apply it on the compute collection to create the Transport Node Collection.
 	//
@@ -52,12 +53,13 @@ type TransportNodeCollectionsClient interface {
 	// @param enforcementpointIdParam (required)
 	// @param transportNodeCollectionIdParam (required)
 	// @param hostTransportNodeCollectionParam (required)
+	//
 	// @throws InvalidRequest  Bad Request, Precondition Failed
 	// @throws Unauthorized  Forbidden
 	// @throws ServiceUnavailable  Service Unavailable
 	// @throws InternalServerError  Internal Server Error
 	// @throws NotFound  Not Found
-	Installformicroseg(siteIdParam string, enforcementpointIdParam string, transportNodeCollectionIdParam string, hostTransportNodeCollectionParam model.HostTransportNodeCollection) error
+	Installformicroseg(siteIdParam string, enforcementpointIdParam string, transportNodeCollectionIdParam string, hostTransportNodeCollectionParam nsx_policyModel.HostTransportNodeCollection) error
 
 	// Returns all Transport Node collections
 	//
@@ -67,12 +69,13 @@ type TransportNodeCollectionsClient interface {
 	// @param computeCollectionIdParam Compute collection id (optional)
 	// @param vcInstanceUuidParam UUID for VC deployment (optional)
 	// @return com.vmware.nsx_policy.model.HostTransportNodeCollectionListResult
+	//
 	// @throws InvalidRequest  Bad Request, Precondition Failed
 	// @throws Unauthorized  Forbidden
 	// @throws ServiceUnavailable  Service Unavailable
 	// @throws InternalServerError  Internal Server Error
 	// @throws NotFound  Not Found
-	List(siteIdParam string, enforcementpointIdParam string, clusterMoidParam *string, computeCollectionIdParam *string, vcInstanceUuidParam *string) (model.HostTransportNodeCollectionListResult, error)
+	List(siteIdParam string, enforcementpointIdParam string, clusterMoidParam *string, computeCollectionIdParam *string, vcInstanceUuidParam *string) (nsx_policyModel.HostTransportNodeCollectionListResult, error)
 
 	// Attach different transport node profile to compute collection by updating transport node collection.
 	//
@@ -80,18 +83,20 @@ type TransportNodeCollectionsClient interface {
 	// @param enforcementpointIdParam (required)
 	// @param transportNodeCollectionIdParam (required)
 	// @param hostTransportNodeCollectionParam (required)
+	//
 	// @throws InvalidRequest  Bad Request, Precondition Failed
 	// @throws Unauthorized  Forbidden
 	// @throws ServiceUnavailable  Service Unavailable
 	// @throws InternalServerError  Internal Server Error
 	// @throws NotFound  Not Found
-	Patch(siteIdParam string, enforcementpointIdParam string, transportNodeCollectionIdParam string, hostTransportNodeCollectionParam model.HostTransportNodeCollection) error
+	Patch(siteIdParam string, enforcementpointIdParam string, transportNodeCollectionIdParam string, hostTransportNodeCollectionParam nsx_policyModel.HostTransportNodeCollection) error
 
 	// This API uninstalls NSX applied to the Transport Node Collection with the ID corresponding to the one specified in the request.
 	//
 	// @param siteIdParam (required)
 	// @param enforcementpointIdParam (required)
 	// @param transportNodeCollectionIdParam (required)
+	//
 	// @throws InvalidRequest  Bad Request, Precondition Failed
 	// @throws Unauthorized  Forbidden
 	// @throws ServiceUnavailable  Service Unavailable
@@ -104,6 +109,7 @@ type TransportNodeCollectionsClient interface {
 	// @param siteIdParam (required)
 	// @param enforcementpointIdParam (required)
 	// @param transportNodeCollectionIdParam (required)
+	//
 	// @throws InvalidRequest  Bad Request, Precondition Failed
 	// @throws Unauthorized  Forbidden
 	// @throws ServiceUnavailable  Service Unavailable
@@ -118,139 +124,148 @@ type TransportNodeCollectionsClient interface {
 	// @param transportNodeCollectionsIdParam (required)
 	// @param hostTransportNodeCollectionParam (required)
 	// @param applyProfileParam Indicates if the Transport Node Profile (TNP) configuration should be applied during creation (optional, default to true)
+	// @param overrideNsxOwnershipParam Override NSX Ownership (optional, default to false)
 	// @return com.vmware.nsx_policy.model.HostTransportNodeCollection
+	//
 	// @throws InvalidRequest  Bad Request, Precondition Failed
 	// @throws Unauthorized  Forbidden
 	// @throws ServiceUnavailable  Service Unavailable
 	// @throws InternalServerError  Internal Server Error
 	// @throws NotFound  Not Found
-	Update(siteIdParam string, enforcementpointIdParam string, transportNodeCollectionsIdParam string, hostTransportNodeCollectionParam model.HostTransportNodeCollection, applyProfileParam *bool) (model.HostTransportNodeCollection, error)
+	Update(siteIdParam string, enforcementpointIdParam string, transportNodeCollectionsIdParam string, hostTransportNodeCollectionParam nsx_policyModel.HostTransportNodeCollection, applyProfileParam *bool, overrideNsxOwnershipParam *bool) (nsx_policyModel.HostTransportNodeCollection, error)
 }
 
 type transportNodeCollectionsClient struct {
-	connector           client.Connector
-	interfaceDefinition core.InterfaceDefinition
-	errorsBindingMap    map[string]bindings.BindingType
+	connector           vapiProtocolClient_.Connector
+	interfaceDefinition vapiCore_.InterfaceDefinition
+	errorsBindingMap    map[string]vapiBindings_.BindingType
 }
 
-func NewTransportNodeCollectionsClient(connector client.Connector) *transportNodeCollectionsClient {
-	interfaceIdentifier := core.NewInterfaceIdentifier("com.vmware.nsx_policy.infra.sites.enforcement_points.transport_node_collections")
-	methodIdentifiers := map[string]core.MethodIdentifier{
-		"delete":                  core.NewMethodIdentifier(interfaceIdentifier, "delete"),
-		"get":                     core.NewMethodIdentifier(interfaceIdentifier, "get"),
-		"installformicroseg":      core.NewMethodIdentifier(interfaceIdentifier, "installformicroseg"),
-		"list":                    core.NewMethodIdentifier(interfaceIdentifier, "list"),
-		"patch":                   core.NewMethodIdentifier(interfaceIdentifier, "patch"),
-		"removensx":               core.NewMethodIdentifier(interfaceIdentifier, "removensx"),
-		"retryprofilerealization": core.NewMethodIdentifier(interfaceIdentifier, "retryprofilerealization"),
-		"update":                  core.NewMethodIdentifier(interfaceIdentifier, "update"),
+func NewTransportNodeCollectionsClient(connector vapiProtocolClient_.Connector) *transportNodeCollectionsClient {
+	interfaceIdentifier := vapiCore_.NewInterfaceIdentifier("com.vmware.nsx_policy.infra.sites.enforcement_points.transport_node_collections")
+	methodIdentifiers := map[string]vapiCore_.MethodIdentifier{
+		"delete":                  vapiCore_.NewMethodIdentifier(interfaceIdentifier, "delete"),
+		"get":                     vapiCore_.NewMethodIdentifier(interfaceIdentifier, "get"),
+		"installformicroseg":      vapiCore_.NewMethodIdentifier(interfaceIdentifier, "installformicroseg"),
+		"list":                    vapiCore_.NewMethodIdentifier(interfaceIdentifier, "list"),
+		"patch":                   vapiCore_.NewMethodIdentifier(interfaceIdentifier, "patch"),
+		"removensx":               vapiCore_.NewMethodIdentifier(interfaceIdentifier, "removensx"),
+		"retryprofilerealization": vapiCore_.NewMethodIdentifier(interfaceIdentifier, "retryprofilerealization"),
+		"update":                  vapiCore_.NewMethodIdentifier(interfaceIdentifier, "update"),
 	}
-	interfaceDefinition := core.NewInterfaceDefinition(interfaceIdentifier, methodIdentifiers)
-	errorsBindingMap := make(map[string]bindings.BindingType)
+	interfaceDefinition := vapiCore_.NewInterfaceDefinition(interfaceIdentifier, methodIdentifiers)
+	errorsBindingMap := make(map[string]vapiBindings_.BindingType)
 
 	tIface := transportNodeCollectionsClient{interfaceDefinition: interfaceDefinition, errorsBindingMap: errorsBindingMap, connector: connector}
 	return &tIface
 }
 
-func (tIface *transportNodeCollectionsClient) GetErrorBindingType(errorName string) bindings.BindingType {
+func (tIface *transportNodeCollectionsClient) GetErrorBindingType(errorName string) vapiBindings_.BindingType {
 	if entry, ok := tIface.errorsBindingMap[errorName]; ok {
 		return entry
 	}
-	return errors.ERROR_BINDINGS_MAP[errorName]
+	return vapiStdErrors_.ERROR_BINDINGS_MAP[errorName]
 }
 
 func (tIface *transportNodeCollectionsClient) Delete(siteIdParam string, enforcementpointIdParam string, transportNodeCollectionIdParam string) error {
 	typeConverter := tIface.connector.TypeConverter()
 	executionContext := tIface.connector.NewExecutionContext()
-	sv := bindings.NewStructValueBuilder(transportNodeCollectionsDeleteInputType(), typeConverter)
+	operationRestMetaData := transportNodeCollectionsDeleteRestMetadata()
+	executionContext.SetConnectionMetadata(vapiCore_.RESTMetadataKey, operationRestMetaData)
+	executionContext.SetConnectionMetadata(vapiCore_.ResponseTypeKey, vapiCore_.NewResponseType(true, false))
+
+	sv := vapiBindings_.NewStructValueBuilder(transportNodeCollectionsDeleteInputType(), typeConverter)
 	sv.AddStructField("SiteId", siteIdParam)
 	sv.AddStructField("EnforcementpointId", enforcementpointIdParam)
 	sv.AddStructField("TransportNodeCollectionId", transportNodeCollectionIdParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
-		return bindings.VAPIerrorsToError(inputError)
+		return vapiBindings_.VAPIerrorsToError(inputError)
 	}
-	operationRestMetaData := transportNodeCollectionsDeleteRestMetadata()
-	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
-	connectionMetadata["isStreamingResponse"] = false
-	tIface.connector.SetConnectionMetadata(connectionMetadata)
+
 	methodResult := tIface.connector.GetApiProvider().Invoke("com.vmware.nsx_policy.infra.sites.enforcement_points.transport_node_collections", "delete", inputDataValue, executionContext)
 	if methodResult.IsSuccess() {
 		return nil
 	} else {
 		methodError, errorInError := typeConverter.ConvertToGolang(methodResult.Error(), tIface.GetErrorBindingType(methodResult.Error().Name()))
 		if errorInError != nil {
-			return bindings.VAPIerrorsToError(errorInError)
+			return vapiBindings_.VAPIerrorsToError(errorInError)
 		}
 		return methodError.(error)
 	}
 }
 
-func (tIface *transportNodeCollectionsClient) Get(siteIdParam string, enforcementpointIdParam string, transportNodeCollectionIdParam string) (model.HostTransportNodeCollection, error) {
+func (tIface *transportNodeCollectionsClient) Get(siteIdParam string, enforcementpointIdParam string, transportNodeCollectionIdParam string) (nsx_policyModel.HostTransportNodeCollection, error) {
 	typeConverter := tIface.connector.TypeConverter()
 	executionContext := tIface.connector.NewExecutionContext()
-	sv := bindings.NewStructValueBuilder(transportNodeCollectionsGetInputType(), typeConverter)
+	operationRestMetaData := transportNodeCollectionsGetRestMetadata()
+	executionContext.SetConnectionMetadata(vapiCore_.RESTMetadataKey, operationRestMetaData)
+	executionContext.SetConnectionMetadata(vapiCore_.ResponseTypeKey, vapiCore_.NewResponseType(true, false))
+
+	sv := vapiBindings_.NewStructValueBuilder(transportNodeCollectionsGetInputType(), typeConverter)
 	sv.AddStructField("SiteId", siteIdParam)
 	sv.AddStructField("EnforcementpointId", enforcementpointIdParam)
 	sv.AddStructField("TransportNodeCollectionId", transportNodeCollectionIdParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
-		var emptyOutput model.HostTransportNodeCollection
-		return emptyOutput, bindings.VAPIerrorsToError(inputError)
+		var emptyOutput nsx_policyModel.HostTransportNodeCollection
+		return emptyOutput, vapiBindings_.VAPIerrorsToError(inputError)
 	}
-	operationRestMetaData := transportNodeCollectionsGetRestMetadata()
-	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
-	connectionMetadata["isStreamingResponse"] = false
-	tIface.connector.SetConnectionMetadata(connectionMetadata)
+
 	methodResult := tIface.connector.GetApiProvider().Invoke("com.vmware.nsx_policy.infra.sites.enforcement_points.transport_node_collections", "get", inputDataValue, executionContext)
-	var emptyOutput model.HostTransportNodeCollection
+	var emptyOutput nsx_policyModel.HostTransportNodeCollection
 	if methodResult.IsSuccess() {
-		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), transportNodeCollectionsGetOutputType())
+		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), TransportNodeCollectionsGetOutputType())
 		if errorInOutput != nil {
-			return emptyOutput, bindings.VAPIerrorsToError(errorInOutput)
+			return emptyOutput, vapiBindings_.VAPIerrorsToError(errorInOutput)
 		}
-		return output.(model.HostTransportNodeCollection), nil
+		return output.(nsx_policyModel.HostTransportNodeCollection), nil
 	} else {
 		methodError, errorInError := typeConverter.ConvertToGolang(methodResult.Error(), tIface.GetErrorBindingType(methodResult.Error().Name()))
 		if errorInError != nil {
-			return emptyOutput, bindings.VAPIerrorsToError(errorInError)
+			return emptyOutput, vapiBindings_.VAPIerrorsToError(errorInError)
 		}
 		return emptyOutput, methodError.(error)
 	}
 }
 
-func (tIface *transportNodeCollectionsClient) Installformicroseg(siteIdParam string, enforcementpointIdParam string, transportNodeCollectionIdParam string, hostTransportNodeCollectionParam model.HostTransportNodeCollection) error {
+func (tIface *transportNodeCollectionsClient) Installformicroseg(siteIdParam string, enforcementpointIdParam string, transportNodeCollectionIdParam string, hostTransportNodeCollectionParam nsx_policyModel.HostTransportNodeCollection) error {
 	typeConverter := tIface.connector.TypeConverter()
 	executionContext := tIface.connector.NewExecutionContext()
-	sv := bindings.NewStructValueBuilder(transportNodeCollectionsInstallformicrosegInputType(), typeConverter)
+	operationRestMetaData := transportNodeCollectionsInstallformicrosegRestMetadata()
+	executionContext.SetConnectionMetadata(vapiCore_.RESTMetadataKey, operationRestMetaData)
+	executionContext.SetConnectionMetadata(vapiCore_.ResponseTypeKey, vapiCore_.NewResponseType(true, false))
+
+	sv := vapiBindings_.NewStructValueBuilder(transportNodeCollectionsInstallformicrosegInputType(), typeConverter)
 	sv.AddStructField("SiteId", siteIdParam)
 	sv.AddStructField("EnforcementpointId", enforcementpointIdParam)
 	sv.AddStructField("TransportNodeCollectionId", transportNodeCollectionIdParam)
 	sv.AddStructField("HostTransportNodeCollection", hostTransportNodeCollectionParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
-		return bindings.VAPIerrorsToError(inputError)
+		return vapiBindings_.VAPIerrorsToError(inputError)
 	}
-	operationRestMetaData := transportNodeCollectionsInstallformicrosegRestMetadata()
-	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
-	connectionMetadata["isStreamingResponse"] = false
-	tIface.connector.SetConnectionMetadata(connectionMetadata)
+
 	methodResult := tIface.connector.GetApiProvider().Invoke("com.vmware.nsx_policy.infra.sites.enforcement_points.transport_node_collections", "installformicroseg", inputDataValue, executionContext)
 	if methodResult.IsSuccess() {
 		return nil
 	} else {
 		methodError, errorInError := typeConverter.ConvertToGolang(methodResult.Error(), tIface.GetErrorBindingType(methodResult.Error().Name()))
 		if errorInError != nil {
-			return bindings.VAPIerrorsToError(errorInError)
+			return vapiBindings_.VAPIerrorsToError(errorInError)
 		}
 		return methodError.(error)
 	}
 }
 
-func (tIface *transportNodeCollectionsClient) List(siteIdParam string, enforcementpointIdParam string, clusterMoidParam *string, computeCollectionIdParam *string, vcInstanceUuidParam *string) (model.HostTransportNodeCollectionListResult, error) {
+func (tIface *transportNodeCollectionsClient) List(siteIdParam string, enforcementpointIdParam string, clusterMoidParam *string, computeCollectionIdParam *string, vcInstanceUuidParam *string) (nsx_policyModel.HostTransportNodeCollectionListResult, error) {
 	typeConverter := tIface.connector.TypeConverter()
 	executionContext := tIface.connector.NewExecutionContext()
-	sv := bindings.NewStructValueBuilder(transportNodeCollectionsListInputType(), typeConverter)
+	operationRestMetaData := transportNodeCollectionsListRestMetadata()
+	executionContext.SetConnectionMetadata(vapiCore_.RESTMetadataKey, operationRestMetaData)
+	executionContext.SetConnectionMetadata(vapiCore_.ResponseTypeKey, vapiCore_.NewResponseType(true, false))
+
+	sv := vapiBindings_.NewStructValueBuilder(transportNodeCollectionsListInputType(), typeConverter)
 	sv.AddStructField("SiteId", siteIdParam)
 	sv.AddStructField("EnforcementpointId", enforcementpointIdParam)
 	sv.AddStructField("ClusterMoid", clusterMoidParam)
@@ -258,53 +273,51 @@ func (tIface *transportNodeCollectionsClient) List(siteIdParam string, enforceme
 	sv.AddStructField("VcInstanceUuid", vcInstanceUuidParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
-		var emptyOutput model.HostTransportNodeCollectionListResult
-		return emptyOutput, bindings.VAPIerrorsToError(inputError)
+		var emptyOutput nsx_policyModel.HostTransportNodeCollectionListResult
+		return emptyOutput, vapiBindings_.VAPIerrorsToError(inputError)
 	}
-	operationRestMetaData := transportNodeCollectionsListRestMetadata()
-	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
-	connectionMetadata["isStreamingResponse"] = false
-	tIface.connector.SetConnectionMetadata(connectionMetadata)
+
 	methodResult := tIface.connector.GetApiProvider().Invoke("com.vmware.nsx_policy.infra.sites.enforcement_points.transport_node_collections", "list", inputDataValue, executionContext)
-	var emptyOutput model.HostTransportNodeCollectionListResult
+	var emptyOutput nsx_policyModel.HostTransportNodeCollectionListResult
 	if methodResult.IsSuccess() {
-		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), transportNodeCollectionsListOutputType())
+		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), TransportNodeCollectionsListOutputType())
 		if errorInOutput != nil {
-			return emptyOutput, bindings.VAPIerrorsToError(errorInOutput)
+			return emptyOutput, vapiBindings_.VAPIerrorsToError(errorInOutput)
 		}
-		return output.(model.HostTransportNodeCollectionListResult), nil
+		return output.(nsx_policyModel.HostTransportNodeCollectionListResult), nil
 	} else {
 		methodError, errorInError := typeConverter.ConvertToGolang(methodResult.Error(), tIface.GetErrorBindingType(methodResult.Error().Name()))
 		if errorInError != nil {
-			return emptyOutput, bindings.VAPIerrorsToError(errorInError)
+			return emptyOutput, vapiBindings_.VAPIerrorsToError(errorInError)
 		}
 		return emptyOutput, methodError.(error)
 	}
 }
 
-func (tIface *transportNodeCollectionsClient) Patch(siteIdParam string, enforcementpointIdParam string, transportNodeCollectionIdParam string, hostTransportNodeCollectionParam model.HostTransportNodeCollection) error {
+func (tIface *transportNodeCollectionsClient) Patch(siteIdParam string, enforcementpointIdParam string, transportNodeCollectionIdParam string, hostTransportNodeCollectionParam nsx_policyModel.HostTransportNodeCollection) error {
 	typeConverter := tIface.connector.TypeConverter()
 	executionContext := tIface.connector.NewExecutionContext()
-	sv := bindings.NewStructValueBuilder(transportNodeCollectionsPatchInputType(), typeConverter)
+	operationRestMetaData := transportNodeCollectionsPatchRestMetadata()
+	executionContext.SetConnectionMetadata(vapiCore_.RESTMetadataKey, operationRestMetaData)
+	executionContext.SetConnectionMetadata(vapiCore_.ResponseTypeKey, vapiCore_.NewResponseType(true, false))
+
+	sv := vapiBindings_.NewStructValueBuilder(transportNodeCollectionsPatchInputType(), typeConverter)
 	sv.AddStructField("SiteId", siteIdParam)
 	sv.AddStructField("EnforcementpointId", enforcementpointIdParam)
 	sv.AddStructField("TransportNodeCollectionId", transportNodeCollectionIdParam)
 	sv.AddStructField("HostTransportNodeCollection", hostTransportNodeCollectionParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
-		return bindings.VAPIerrorsToError(inputError)
+		return vapiBindings_.VAPIerrorsToError(inputError)
 	}
-	operationRestMetaData := transportNodeCollectionsPatchRestMetadata()
-	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
-	connectionMetadata["isStreamingResponse"] = false
-	tIface.connector.SetConnectionMetadata(connectionMetadata)
+
 	methodResult := tIface.connector.GetApiProvider().Invoke("com.vmware.nsx_policy.infra.sites.enforcement_points.transport_node_collections", "patch", inputDataValue, executionContext)
 	if methodResult.IsSuccess() {
 		return nil
 	} else {
 		methodError, errorInError := typeConverter.ConvertToGolang(methodResult.Error(), tIface.GetErrorBindingType(methodResult.Error().Name()))
 		if errorInError != nil {
-			return bindings.VAPIerrorsToError(errorInError)
+			return vapiBindings_.VAPIerrorsToError(errorInError)
 		}
 		return methodError.(error)
 	}
@@ -313,25 +326,26 @@ func (tIface *transportNodeCollectionsClient) Patch(siteIdParam string, enforcem
 func (tIface *transportNodeCollectionsClient) Removensx(siteIdParam string, enforcementpointIdParam string, transportNodeCollectionIdParam string) error {
 	typeConverter := tIface.connector.TypeConverter()
 	executionContext := tIface.connector.NewExecutionContext()
-	sv := bindings.NewStructValueBuilder(transportNodeCollectionsRemovensxInputType(), typeConverter)
+	operationRestMetaData := transportNodeCollectionsRemovensxRestMetadata()
+	executionContext.SetConnectionMetadata(vapiCore_.RESTMetadataKey, operationRestMetaData)
+	executionContext.SetConnectionMetadata(vapiCore_.ResponseTypeKey, vapiCore_.NewResponseType(true, false))
+
+	sv := vapiBindings_.NewStructValueBuilder(transportNodeCollectionsRemovensxInputType(), typeConverter)
 	sv.AddStructField("SiteId", siteIdParam)
 	sv.AddStructField("EnforcementpointId", enforcementpointIdParam)
 	sv.AddStructField("TransportNodeCollectionId", transportNodeCollectionIdParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
-		return bindings.VAPIerrorsToError(inputError)
+		return vapiBindings_.VAPIerrorsToError(inputError)
 	}
-	operationRestMetaData := transportNodeCollectionsRemovensxRestMetadata()
-	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
-	connectionMetadata["isStreamingResponse"] = false
-	tIface.connector.SetConnectionMetadata(connectionMetadata)
+
 	methodResult := tIface.connector.GetApiProvider().Invoke("com.vmware.nsx_policy.infra.sites.enforcement_points.transport_node_collections", "removensx", inputDataValue, executionContext)
 	if methodResult.IsSuccess() {
 		return nil
 	} else {
 		methodError, errorInError := typeConverter.ConvertToGolang(methodResult.Error(), tIface.GetErrorBindingType(methodResult.Error().Name()))
 		if errorInError != nil {
-			return bindings.VAPIerrorsToError(errorInError)
+			return vapiBindings_.VAPIerrorsToError(errorInError)
 		}
 		return methodError.(error)
 	}
@@ -340,60 +354,63 @@ func (tIface *transportNodeCollectionsClient) Removensx(siteIdParam string, enfo
 func (tIface *transportNodeCollectionsClient) Retryprofilerealization(siteIdParam string, enforcementpointIdParam string, transportNodeCollectionIdParam string) error {
 	typeConverter := tIface.connector.TypeConverter()
 	executionContext := tIface.connector.NewExecutionContext()
-	sv := bindings.NewStructValueBuilder(transportNodeCollectionsRetryprofilerealizationInputType(), typeConverter)
+	operationRestMetaData := transportNodeCollectionsRetryprofilerealizationRestMetadata()
+	executionContext.SetConnectionMetadata(vapiCore_.RESTMetadataKey, operationRestMetaData)
+	executionContext.SetConnectionMetadata(vapiCore_.ResponseTypeKey, vapiCore_.NewResponseType(true, false))
+
+	sv := vapiBindings_.NewStructValueBuilder(transportNodeCollectionsRetryprofilerealizationInputType(), typeConverter)
 	sv.AddStructField("SiteId", siteIdParam)
 	sv.AddStructField("EnforcementpointId", enforcementpointIdParam)
 	sv.AddStructField("TransportNodeCollectionId", transportNodeCollectionIdParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
-		return bindings.VAPIerrorsToError(inputError)
+		return vapiBindings_.VAPIerrorsToError(inputError)
 	}
-	operationRestMetaData := transportNodeCollectionsRetryprofilerealizationRestMetadata()
-	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
-	connectionMetadata["isStreamingResponse"] = false
-	tIface.connector.SetConnectionMetadata(connectionMetadata)
+
 	methodResult := tIface.connector.GetApiProvider().Invoke("com.vmware.nsx_policy.infra.sites.enforcement_points.transport_node_collections", "retryprofilerealization", inputDataValue, executionContext)
 	if methodResult.IsSuccess() {
 		return nil
 	} else {
 		methodError, errorInError := typeConverter.ConvertToGolang(methodResult.Error(), tIface.GetErrorBindingType(methodResult.Error().Name()))
 		if errorInError != nil {
-			return bindings.VAPIerrorsToError(errorInError)
+			return vapiBindings_.VAPIerrorsToError(errorInError)
 		}
 		return methodError.(error)
 	}
 }
 
-func (tIface *transportNodeCollectionsClient) Update(siteIdParam string, enforcementpointIdParam string, transportNodeCollectionsIdParam string, hostTransportNodeCollectionParam model.HostTransportNodeCollection, applyProfileParam *bool) (model.HostTransportNodeCollection, error) {
+func (tIface *transportNodeCollectionsClient) Update(siteIdParam string, enforcementpointIdParam string, transportNodeCollectionsIdParam string, hostTransportNodeCollectionParam nsx_policyModel.HostTransportNodeCollection, applyProfileParam *bool, overrideNsxOwnershipParam *bool) (nsx_policyModel.HostTransportNodeCollection, error) {
 	typeConverter := tIface.connector.TypeConverter()
 	executionContext := tIface.connector.NewExecutionContext()
-	sv := bindings.NewStructValueBuilder(transportNodeCollectionsUpdateInputType(), typeConverter)
+	operationRestMetaData := transportNodeCollectionsUpdateRestMetadata()
+	executionContext.SetConnectionMetadata(vapiCore_.RESTMetadataKey, operationRestMetaData)
+	executionContext.SetConnectionMetadata(vapiCore_.ResponseTypeKey, vapiCore_.NewResponseType(true, false))
+
+	sv := vapiBindings_.NewStructValueBuilder(transportNodeCollectionsUpdateInputType(), typeConverter)
 	sv.AddStructField("SiteId", siteIdParam)
 	sv.AddStructField("EnforcementpointId", enforcementpointIdParam)
 	sv.AddStructField("TransportNodeCollectionsId", transportNodeCollectionsIdParam)
 	sv.AddStructField("HostTransportNodeCollection", hostTransportNodeCollectionParam)
 	sv.AddStructField("ApplyProfile", applyProfileParam)
+	sv.AddStructField("OverrideNsxOwnership", overrideNsxOwnershipParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
-		var emptyOutput model.HostTransportNodeCollection
-		return emptyOutput, bindings.VAPIerrorsToError(inputError)
+		var emptyOutput nsx_policyModel.HostTransportNodeCollection
+		return emptyOutput, vapiBindings_.VAPIerrorsToError(inputError)
 	}
-	operationRestMetaData := transportNodeCollectionsUpdateRestMetadata()
-	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
-	connectionMetadata["isStreamingResponse"] = false
-	tIface.connector.SetConnectionMetadata(connectionMetadata)
+
 	methodResult := tIface.connector.GetApiProvider().Invoke("com.vmware.nsx_policy.infra.sites.enforcement_points.transport_node_collections", "update", inputDataValue, executionContext)
-	var emptyOutput model.HostTransportNodeCollection
+	var emptyOutput nsx_policyModel.HostTransportNodeCollection
 	if methodResult.IsSuccess() {
-		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), transportNodeCollectionsUpdateOutputType())
+		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), TransportNodeCollectionsUpdateOutputType())
 		if errorInOutput != nil {
-			return emptyOutput, bindings.VAPIerrorsToError(errorInOutput)
+			return emptyOutput, vapiBindings_.VAPIerrorsToError(errorInOutput)
 		}
-		return output.(model.HostTransportNodeCollection), nil
+		return output.(nsx_policyModel.HostTransportNodeCollection), nil
 	} else {
 		methodError, errorInError := typeConverter.ConvertToGolang(methodResult.Error(), tIface.GetErrorBindingType(methodResult.Error().Name()))
 		if errorInError != nil {
-			return emptyOutput, bindings.VAPIerrorsToError(errorInError)
+			return emptyOutput, vapiBindings_.VAPIerrorsToError(errorInError)
 		}
 		return emptyOutput, methodError.(error)
 	}

@@ -54,7 +54,7 @@ func resourceNsxtPolicyEvpnConfig() *schema.Resource {
 	}
 }
 
-func policyEvpnConfigGet(connector *client.RestConnector, gwID string) (model.EvpnConfig, error) {
+func policyEvpnConfigGet(connector client.Connector, gwID string) (model.EvpnConfig, error) {
 	client := tier_0s.NewEvpnClient(connector)
 	return client.Get(gwID)
 }
@@ -91,7 +91,7 @@ func resourceNsxtPolicyEvpnConfigRead(d *schema.ResourceData, m interface{}) err
 	return nil
 }
 
-func patchNsxtPolicyEvpnConfig(connector *client.RestConnector, d *schema.ResourceData, gwID string, isGlobalManager bool) error {
+func patchNsxtPolicyEvpnConfig(connector client.Connector, d *schema.ResourceData, gwID string, isGlobalManager bool) error {
 
 	var obj model.EvpnConfig
 	if d != nil {

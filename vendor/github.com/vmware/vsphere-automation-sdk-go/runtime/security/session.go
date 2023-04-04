@@ -1,4 +1,4 @@
-/* Copyright © 2019, 2021 VMware, Inc. All Rights Reserved.
+/* Copyright © 2019, 2021-2022 VMware, Inc. All Rights Reserved.
    SPDX-License-Identifier: BSD-2-Clause */
 
 package security
@@ -101,5 +101,49 @@ func (o *OauthSecurityContext) SetProperty(key string, value interface{}) {
 }
 
 func (o *OauthSecurityContext) MarshalJSON() ([]byte, error) {
+	return json.Marshal(o.properties)
+}
+
+// SAMLSecurityContext represents a security context for SAML tokens.
+type SAMLSecurityContext struct {
+	properties map[string]interface{}
+}
+
+// NewSAMLSecurityContext creates SAML security context to sign request with provided token and private key
+// 	example:
+//		connector := client.NewConnector(
+//		"",
+//		client.WithSecurityContext(NewSAMLSecurityContext(
+//			"myToken",
+//			"myKey",
+//			security.RS256)))
+//		client := NewSampleClient(connector)
+//		client.MyOperation()
+func NewSAMLSecurityContext(token, privateKey, signAlgorithm string) *SAMLSecurityContext {
+	properties := map[string]interface{}{}
+	properties[AUTHENTICATION_SCHEME_ID] = SAML_HOK_SCHEME_ID
+	properties[SAML_TOKEN] = token
+	properties[PRIVATE_KEY] = privateKey
+	properties[SIGNATURE_ALGORITHM] = signAlgorithm
+	return &SAMLSecurityContext{properties: properties}
+}
+
+func (o *SAMLSecurityContext) Property(key string) interface{} {
+	return o.properties[key]
+}
+
+func (o *SAMLSecurityContext) Token() string {
+	return o.properties[ACCESS_TOKEN].(string)
+}
+
+func (o *SAMLSecurityContext) GetAllProperties() map[string]interface{} {
+	return o.properties
+}
+
+func (o *SAMLSecurityContext) SetProperty(key string, value interface{}) {
+	o.properties[key] = value
+}
+
+func (o *SAMLSecurityContext) MarshalJSON() ([]byte, error) {
 	return json.Marshal(o.properties)
 }

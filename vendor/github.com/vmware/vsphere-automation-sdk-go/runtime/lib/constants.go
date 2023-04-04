@@ -1,4 +1,4 @@
-/* Copyright © 2019 VMware, Inc. All Rights Reserved.
+/* Copyright © 2019, 2021 VMware, Inc. All Rights Reserved.
    SPDX-License-Identifier: BSD-2-Clause */
 
 package lib
@@ -62,8 +62,8 @@ const VAPI_HEADER_PREFIX = "vapi-ctx-"
 const VAPI_SESSION_HEADER = "vmware-api-session-id"
 const VAPI_L10N_FORMAT_LOCALE = "format-locale"
 const VAPI_L10N_TIMEZONE = "timezone"
-const VAPI_STREAMING_HEADER_VALUE = "application/vnd.vmware.vapi.stream.json,application/json"
 const VAPI_STREAMING_CONTENT_TYPE = "application/vnd.vmware.vapi.stream.json"
+const VAPI_STREAMING_CLEAN_JSON_CONTENT_TYPE = "application/vnd.vmware.vapi.clean.stream.json"
 
 const REST_METADATA = "rest-metadata"
 
@@ -71,3 +71,7 @@ const REST_METADATA = "rest-metadata"
 const INVALID_JSON = "INVALID_JSON"
 
 var CRLFBytes = []byte("\r\n")
+
+// Tasks related constants
+var TaskInvocationString = "$task"
+var TaskRESTQueryKey = "vmw-task"

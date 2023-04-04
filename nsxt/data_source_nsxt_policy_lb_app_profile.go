@@ -44,7 +44,6 @@ func dataSourceNsxtPolicyLBAppProfile() *schema.Resource {
 
 func policyLbAppProfileConvert(obj *data.StructValue, requestedType string) (*model.LBAppProfile, error) {
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 
 	data, errs := converter.ConvertToGolang(obj, model.LBAppProfileBindingType())
 	if errs != nil {

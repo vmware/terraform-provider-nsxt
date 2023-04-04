@@ -11,64 +11,64 @@
 package edge_clusters
 
 import (
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+	vapiBindings_ "github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	vapiData_ "github.com/vmware/vsphere-automation-sdk-go/runtime/data"
+	vapiProtocol_ "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol"
+	nsx_policyModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"reflect"
 )
 
-func urlCategorizationConfigsDeleteInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func urlCategorizationConfigsDeleteInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["site_id"] = bindings.NewStringType()
-	fields["enforcement_point_id"] = bindings.NewStringType()
-	fields["edge_cluster_id"] = bindings.NewStringType()
-	fields["url_categorization_config_id"] = bindings.NewStringType()
+	fields["site_id"] = vapiBindings_.NewStringType()
+	fields["enforcement_point_id"] = vapiBindings_.NewStringType()
+	fields["edge_cluster_id"] = vapiBindings_.NewStringType()
+	fields["url_categorization_config_id"] = vapiBindings_.NewStringType()
 	fieldNameMap["site_id"] = "SiteId"
 	fieldNameMap["enforcement_point_id"] = "EnforcementPointId"
 	fieldNameMap["edge_cluster_id"] = "EdgeClusterId"
 	fieldNameMap["url_categorization_config_id"] = "UrlCategorizationConfigId"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func urlCategorizationConfigsDeleteOutputType() bindings.BindingType {
-	return bindings.NewVoidType()
+func UrlCategorizationConfigsDeleteOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewVoidType()
 }
 
-func urlCategorizationConfigsDeleteRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func urlCategorizationConfigsDeleteRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["site_id"] = bindings.NewStringType()
-	fields["enforcement_point_id"] = bindings.NewStringType()
-	fields["edge_cluster_id"] = bindings.NewStringType()
-	fields["url_categorization_config_id"] = bindings.NewStringType()
+	fields["site_id"] = vapiBindings_.NewStringType()
+	fields["enforcement_point_id"] = vapiBindings_.NewStringType()
+	fields["edge_cluster_id"] = vapiBindings_.NewStringType()
+	fields["url_categorization_config_id"] = vapiBindings_.NewStringType()
 	fieldNameMap["site_id"] = "SiteId"
 	fieldNameMap["enforcement_point_id"] = "EnforcementPointId"
 	fieldNameMap["edge_cluster_id"] = "EdgeClusterId"
 	fieldNameMap["url_categorization_config_id"] = "UrlCategorizationConfigId"
-	paramsTypeMap["edge_cluster_id"] = bindings.NewStringType()
-	paramsTypeMap["url_categorization_config_id"] = bindings.NewStringType()
-	paramsTypeMap["site_id"] = bindings.NewStringType()
-	paramsTypeMap["enforcement_point_id"] = bindings.NewStringType()
-	paramsTypeMap["siteId"] = bindings.NewStringType()
-	paramsTypeMap["enforcementPointId"] = bindings.NewStringType()
-	paramsTypeMap["edgeClusterId"] = bindings.NewStringType()
-	paramsTypeMap["urlCategorizationConfigId"] = bindings.NewStringType()
+	paramsTypeMap["edge_cluster_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["url_categorization_config_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["site_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["enforcement_point_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["siteId"] = vapiBindings_.NewStringType()
+	paramsTypeMap["enforcementPointId"] = vapiBindings_.NewStringType()
+	paramsTypeMap["edgeClusterId"] = vapiBindings_.NewStringType()
+	paramsTypeMap["urlCategorizationConfigId"] = vapiBindings_.NewStringType()
 	pathParams["site_id"] = "siteId"
 	pathParams["edge_cluster_id"] = "edgeClusterId"
 	pathParams["enforcement_point_id"] = "enforcementPointId"
 	pathParams["url_categorization_config_id"] = "urlCategorizationConfigId"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -89,57 +89,57 @@ func urlCategorizationConfigsDeleteRestMetadata() protocol.OperationRestMetadata
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func urlCategorizationConfigsGetInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func urlCategorizationConfigsGetInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["site_id"] = bindings.NewStringType()
-	fields["enforcement_point_id"] = bindings.NewStringType()
-	fields["edge_cluster_id"] = bindings.NewStringType()
-	fields["url_categorization_config_id"] = bindings.NewStringType()
+	fields["site_id"] = vapiBindings_.NewStringType()
+	fields["enforcement_point_id"] = vapiBindings_.NewStringType()
+	fields["edge_cluster_id"] = vapiBindings_.NewStringType()
+	fields["url_categorization_config_id"] = vapiBindings_.NewStringType()
 	fieldNameMap["site_id"] = "SiteId"
 	fieldNameMap["enforcement_point_id"] = "EnforcementPointId"
 	fieldNameMap["edge_cluster_id"] = "EdgeClusterId"
 	fieldNameMap["url_categorization_config_id"] = "UrlCategorizationConfigId"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func urlCategorizationConfigsGetOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.PolicyUrlCategorizationConfigBindingType)
+func UrlCategorizationConfigsGetOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewReferenceType(nsx_policyModel.PolicyUrlCategorizationConfigBindingType)
 }
 
-func urlCategorizationConfigsGetRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func urlCategorizationConfigsGetRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["site_id"] = bindings.NewStringType()
-	fields["enforcement_point_id"] = bindings.NewStringType()
-	fields["edge_cluster_id"] = bindings.NewStringType()
-	fields["url_categorization_config_id"] = bindings.NewStringType()
+	fields["site_id"] = vapiBindings_.NewStringType()
+	fields["enforcement_point_id"] = vapiBindings_.NewStringType()
+	fields["edge_cluster_id"] = vapiBindings_.NewStringType()
+	fields["url_categorization_config_id"] = vapiBindings_.NewStringType()
 	fieldNameMap["site_id"] = "SiteId"
 	fieldNameMap["enforcement_point_id"] = "EnforcementPointId"
 	fieldNameMap["edge_cluster_id"] = "EdgeClusterId"
 	fieldNameMap["url_categorization_config_id"] = "UrlCategorizationConfigId"
-	paramsTypeMap["edge_cluster_id"] = bindings.NewStringType()
-	paramsTypeMap["url_categorization_config_id"] = bindings.NewStringType()
-	paramsTypeMap["site_id"] = bindings.NewStringType()
-	paramsTypeMap["enforcement_point_id"] = bindings.NewStringType()
-	paramsTypeMap["siteId"] = bindings.NewStringType()
-	paramsTypeMap["enforcementPointId"] = bindings.NewStringType()
-	paramsTypeMap["edgeClusterId"] = bindings.NewStringType()
-	paramsTypeMap["urlCategorizationConfigId"] = bindings.NewStringType()
+	paramsTypeMap["edge_cluster_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["url_categorization_config_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["site_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["enforcement_point_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["siteId"] = vapiBindings_.NewStringType()
+	paramsTypeMap["enforcementPointId"] = vapiBindings_.NewStringType()
+	paramsTypeMap["edgeClusterId"] = vapiBindings_.NewStringType()
+	paramsTypeMap["urlCategorizationConfigId"] = vapiBindings_.NewStringType()
 	pathParams["site_id"] = "siteId"
 	pathParams["edge_cluster_id"] = "edgeClusterId"
 	pathParams["enforcement_point_id"] = "enforcementPointId"
 	pathParams["url_categorization_config_id"] = "urlCategorizationConfigId"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -160,62 +160,62 @@ func urlCategorizationConfigsGetRestMetadata() protocol.OperationRestMetadata {
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func urlCategorizationConfigsPatchInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func urlCategorizationConfigsPatchInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["site_id"] = bindings.NewStringType()
-	fields["enforcement_point_id"] = bindings.NewStringType()
-	fields["edge_cluster_id"] = bindings.NewStringType()
-	fields["url_categorization_config_id"] = bindings.NewStringType()
-	fields["policy_url_categorization_config"] = bindings.NewReferenceType(model.PolicyUrlCategorizationConfigBindingType)
+	fields["site_id"] = vapiBindings_.NewStringType()
+	fields["enforcement_point_id"] = vapiBindings_.NewStringType()
+	fields["edge_cluster_id"] = vapiBindings_.NewStringType()
+	fields["url_categorization_config_id"] = vapiBindings_.NewStringType()
+	fields["policy_url_categorization_config"] = vapiBindings_.NewReferenceType(nsx_policyModel.PolicyUrlCategorizationConfigBindingType)
 	fieldNameMap["site_id"] = "SiteId"
 	fieldNameMap["enforcement_point_id"] = "EnforcementPointId"
 	fieldNameMap["edge_cluster_id"] = "EdgeClusterId"
 	fieldNameMap["url_categorization_config_id"] = "UrlCategorizationConfigId"
 	fieldNameMap["policy_url_categorization_config"] = "PolicyUrlCategorizationConfig"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func urlCategorizationConfigsPatchOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.PolicyUrlCategorizationConfigBindingType)
+func UrlCategorizationConfigsPatchOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewReferenceType(nsx_policyModel.PolicyUrlCategorizationConfigBindingType)
 }
 
-func urlCategorizationConfigsPatchRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func urlCategorizationConfigsPatchRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["site_id"] = bindings.NewStringType()
-	fields["enforcement_point_id"] = bindings.NewStringType()
-	fields["edge_cluster_id"] = bindings.NewStringType()
-	fields["url_categorization_config_id"] = bindings.NewStringType()
-	fields["policy_url_categorization_config"] = bindings.NewReferenceType(model.PolicyUrlCategorizationConfigBindingType)
+	fields["site_id"] = vapiBindings_.NewStringType()
+	fields["enforcement_point_id"] = vapiBindings_.NewStringType()
+	fields["edge_cluster_id"] = vapiBindings_.NewStringType()
+	fields["url_categorization_config_id"] = vapiBindings_.NewStringType()
+	fields["policy_url_categorization_config"] = vapiBindings_.NewReferenceType(nsx_policyModel.PolicyUrlCategorizationConfigBindingType)
 	fieldNameMap["site_id"] = "SiteId"
 	fieldNameMap["enforcement_point_id"] = "EnforcementPointId"
 	fieldNameMap["edge_cluster_id"] = "EdgeClusterId"
 	fieldNameMap["url_categorization_config_id"] = "UrlCategorizationConfigId"
 	fieldNameMap["policy_url_categorization_config"] = "PolicyUrlCategorizationConfig"
-	paramsTypeMap["edge_cluster_id"] = bindings.NewStringType()
-	paramsTypeMap["url_categorization_config_id"] = bindings.NewStringType()
-	paramsTypeMap["policy_url_categorization_config"] = bindings.NewReferenceType(model.PolicyUrlCategorizationConfigBindingType)
-	paramsTypeMap["site_id"] = bindings.NewStringType()
-	paramsTypeMap["enforcement_point_id"] = bindings.NewStringType()
-	paramsTypeMap["siteId"] = bindings.NewStringType()
-	paramsTypeMap["enforcementPointId"] = bindings.NewStringType()
-	paramsTypeMap["edgeClusterId"] = bindings.NewStringType()
-	paramsTypeMap["urlCategorizationConfigId"] = bindings.NewStringType()
+	paramsTypeMap["edge_cluster_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["url_categorization_config_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["site_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["enforcement_point_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["policy_url_categorization_config"] = vapiBindings_.NewReferenceType(nsx_policyModel.PolicyUrlCategorizationConfigBindingType)
+	paramsTypeMap["siteId"] = vapiBindings_.NewStringType()
+	paramsTypeMap["enforcementPointId"] = vapiBindings_.NewStringType()
+	paramsTypeMap["edgeClusterId"] = vapiBindings_.NewStringType()
+	paramsTypeMap["urlCategorizationConfigId"] = vapiBindings_.NewStringType()
 	pathParams["site_id"] = "siteId"
 	pathParams["edge_cluster_id"] = "edgeClusterId"
 	pathParams["enforcement_point_id"] = "enforcementPointId"
 	pathParams["url_categorization_config_id"] = "urlCategorizationConfigId"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -236,62 +236,62 @@ func urlCategorizationConfigsPatchRestMetadata() protocol.OperationRestMetadata 
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func urlCategorizationConfigsUpdateInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func urlCategorizationConfigsUpdateInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["site_id"] = bindings.NewStringType()
-	fields["enforcement_point_id"] = bindings.NewStringType()
-	fields["edge_cluster_id"] = bindings.NewStringType()
-	fields["url_categorization_config_id"] = bindings.NewStringType()
-	fields["policy_url_categorization_config"] = bindings.NewReferenceType(model.PolicyUrlCategorizationConfigBindingType)
+	fields["site_id"] = vapiBindings_.NewStringType()
+	fields["enforcement_point_id"] = vapiBindings_.NewStringType()
+	fields["edge_cluster_id"] = vapiBindings_.NewStringType()
+	fields["url_categorization_config_id"] = vapiBindings_.NewStringType()
+	fields["policy_url_categorization_config"] = vapiBindings_.NewReferenceType(nsx_policyModel.PolicyUrlCategorizationConfigBindingType)
 	fieldNameMap["site_id"] = "SiteId"
 	fieldNameMap["enforcement_point_id"] = "EnforcementPointId"
 	fieldNameMap["edge_cluster_id"] = "EdgeClusterId"
 	fieldNameMap["url_categorization_config_id"] = "UrlCategorizationConfigId"
 	fieldNameMap["policy_url_categorization_config"] = "PolicyUrlCategorizationConfig"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func urlCategorizationConfigsUpdateOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.PolicyUrlCategorizationConfigBindingType)
+func UrlCategorizationConfigsUpdateOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewReferenceType(nsx_policyModel.PolicyUrlCategorizationConfigBindingType)
 }
 
-func urlCategorizationConfigsUpdateRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func urlCategorizationConfigsUpdateRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["site_id"] = bindings.NewStringType()
-	fields["enforcement_point_id"] = bindings.NewStringType()
-	fields["edge_cluster_id"] = bindings.NewStringType()
-	fields["url_categorization_config_id"] = bindings.NewStringType()
-	fields["policy_url_categorization_config"] = bindings.NewReferenceType(model.PolicyUrlCategorizationConfigBindingType)
+	fields["site_id"] = vapiBindings_.NewStringType()
+	fields["enforcement_point_id"] = vapiBindings_.NewStringType()
+	fields["edge_cluster_id"] = vapiBindings_.NewStringType()
+	fields["url_categorization_config_id"] = vapiBindings_.NewStringType()
+	fields["policy_url_categorization_config"] = vapiBindings_.NewReferenceType(nsx_policyModel.PolicyUrlCategorizationConfigBindingType)
 	fieldNameMap["site_id"] = "SiteId"
 	fieldNameMap["enforcement_point_id"] = "EnforcementPointId"
 	fieldNameMap["edge_cluster_id"] = "EdgeClusterId"
 	fieldNameMap["url_categorization_config_id"] = "UrlCategorizationConfigId"
 	fieldNameMap["policy_url_categorization_config"] = "PolicyUrlCategorizationConfig"
-	paramsTypeMap["edge_cluster_id"] = bindings.NewStringType()
-	paramsTypeMap["url_categorization_config_id"] = bindings.NewStringType()
-	paramsTypeMap["policy_url_categorization_config"] = bindings.NewReferenceType(model.PolicyUrlCategorizationConfigBindingType)
-	paramsTypeMap["site_id"] = bindings.NewStringType()
-	paramsTypeMap["enforcement_point_id"] = bindings.NewStringType()
-	paramsTypeMap["siteId"] = bindings.NewStringType()
-	paramsTypeMap["enforcementPointId"] = bindings.NewStringType()
-	paramsTypeMap["edgeClusterId"] = bindings.NewStringType()
-	paramsTypeMap["urlCategorizationConfigId"] = bindings.NewStringType()
+	paramsTypeMap["edge_cluster_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["url_categorization_config_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["site_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["enforcement_point_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["policy_url_categorization_config"] = vapiBindings_.NewReferenceType(nsx_policyModel.PolicyUrlCategorizationConfigBindingType)
+	paramsTypeMap["siteId"] = vapiBindings_.NewStringType()
+	paramsTypeMap["enforcementPointId"] = vapiBindings_.NewStringType()
+	paramsTypeMap["edgeClusterId"] = vapiBindings_.NewStringType()
+	paramsTypeMap["urlCategorizationConfigId"] = vapiBindings_.NewStringType()
 	pathParams["site_id"] = "siteId"
 	pathParams["edge_cluster_id"] = "edgeClusterId"
 	pathParams["enforcement_point_id"] = "enforcementPointId"
 	pathParams["url_categorization_config_id"] = "urlCategorizationConfigId"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,

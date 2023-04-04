@@ -9,22 +9,24 @@
 package infra
 
 import (
-	"github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/core"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/lib"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+	vapiStdErrors_ "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
+	vapiBindings_ "github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	vapiCore_ "github.com/vmware/vsphere-automation-sdk-go/runtime/core"
+	vapiProtocolClient_ "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+	nsx_policyModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
-const _ = core.SupportedByRuntimeVersion1
+const _ = vapiCore_.SupportedByRuntimeVersion2
 
 type AlbTrafficCloneProfilesClient interface {
 
-	// Delete the ALBTrafficCloneProfile along with all the entities contained by this ALBTrafficCloneProfile.
+	// Delete the ALBTrafficCloneProfile along with all the entities contained by this ALBTrafficCloneProfile. This is a deprecated API. It is recommennded to use NSX Advanced Load Balancer (Avi) Controller UI or API directly instead of NSX-T ALB Policy UI and API.
+	//
+	// Deprecated: This API element is deprecated.
 	//
 	// @param albTrafficcloneprofileIdParam ALBTrafficCloneProfile ID (required)
 	// @param forceParam Force delete the resource even if it is being used somewhere (optional, default to false)
+	//
 	// @throws InvalidRequest  Bad Request, Precondition Failed
 	// @throws Unauthorized  Forbidden
 	// @throws ServiceUnavailable  Service Unavailable
@@ -32,18 +34,23 @@ type AlbTrafficCloneProfilesClient interface {
 	// @throws NotFound  Not Found
 	Delete(albTrafficcloneprofileIdParam string, forceParam *bool) error
 
-	// Read a ALBTrafficCloneProfile.
+	// Read a ALBTrafficCloneProfile. This is a deprecated API. It is recommennded to use NSX Advanced Load Balancer (Avi) Controller UI or API directly instead of NSX-T ALB Policy UI and API.
+	//
+	// Deprecated: This API element is deprecated.
 	//
 	// @param albTrafficcloneprofileIdParam ALBTrafficCloneProfile ID (required)
 	// @return com.vmware.nsx_policy.model.ALBTrafficCloneProfile
+	//
 	// @throws InvalidRequest  Bad Request, Precondition Failed
 	// @throws Unauthorized  Forbidden
 	// @throws ServiceUnavailable  Service Unavailable
 	// @throws InternalServerError  Internal Server Error
 	// @throws NotFound  Not Found
-	Get(albTrafficcloneprofileIdParam string) (model.ALBTrafficCloneProfile, error)
+	Get(albTrafficcloneprofileIdParam string) (nsx_policyModel.ALBTrafficCloneProfile, error)
 
-	// Paginated list of all ALBTrafficCloneProfile for infra.
+	// Paginated list of all ALBTrafficCloneProfile for infra. This is a deprecated API. It is recommennded to use NSX Advanced Load Balancer (Avi) Controller UI or API directly instead of NSX-T ALB Policy UI and API.
+	//
+	// Deprecated: This API element is deprecated.
 	//
 	// @param cursorParam Opaque cursor to be used for getting next page of records (supplied by current result page) (optional)
 	// @param includeMarkForDeleteObjectsParam Include objects that are marked for deletion in results (optional, default to false)
@@ -52,127 +59,140 @@ type AlbTrafficCloneProfilesClient interface {
 	// @param sortAscendingParam (optional)
 	// @param sortByParam Field by which records are sorted (optional)
 	// @return com.vmware.nsx_policy.model.ALBTrafficCloneProfileApiResponse
+	//
 	// @throws InvalidRequest  Bad Request, Precondition Failed
 	// @throws Unauthorized  Forbidden
 	// @throws ServiceUnavailable  Service Unavailable
 	// @throws InternalServerError  Internal Server Error
 	// @throws NotFound  Not Found
-	List(cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.ALBTrafficCloneProfileApiResponse, error)
+	List(cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (nsx_policyModel.ALBTrafficCloneProfileApiResponse, error)
 
-	// If a ALBtrafficcloneprofile with the alb-trafficcloneprofile-id is not already present, create a new ALBtrafficcloneprofile. If it already exists, update the ALBtrafficcloneprofile. This is a full replace.
+	// If a ALBtrafficcloneprofile with the alb-trafficcloneprofile-id is not already present, create a new ALBtrafficcloneprofile. If it already exists, update the ALBtrafficcloneprofile. This is a full replace. This is a deprecated API. It is recommennded to use NSX Advanced Load Balancer (Avi) Controller UI or API directly instead of NSX-T ALB Policy UI and API.
+	//
+	// Deprecated: This API element is deprecated.
 	//
 	// @param albTrafficcloneprofileIdParam ALBtrafficcloneprofile ID (required)
 	// @param aLBTrafficCloneProfileParam (required)
+	//
 	// @throws InvalidRequest  Bad Request, Precondition Failed
 	// @throws Unauthorized  Forbidden
 	// @throws ServiceUnavailable  Service Unavailable
 	// @throws InternalServerError  Internal Server Error
 	// @throws NotFound  Not Found
-	Patch(albTrafficcloneprofileIdParam string, aLBTrafficCloneProfileParam model.ALBTrafficCloneProfile) error
+	Patch(albTrafficcloneprofileIdParam string, aLBTrafficCloneProfileParam nsx_policyModel.ALBTrafficCloneProfile) error
 
-	// If a ALBTrafficCloneProfile with the alb-TrafficCloneProfile-id is not already present, create a new ALBTrafficCloneProfile. If it already exists, update the ALBTrafficCloneProfile. This is a full replace.
+	// If a ALBTrafficCloneProfile with the alb-TrafficCloneProfile-id is not already present, create a new ALBTrafficCloneProfile. If it already exists, update the ALBTrafficCloneProfile. This is a full replace. This is a deprecated API. It is recommennded to use NSX Advanced Load Balancer (Avi) Controller UI or API directly instead of NSX-T ALB Policy UI and API.
+	//
+	// Deprecated: This API element is deprecated.
 	//
 	// @param albTrafficcloneprofileIdParam ALBTrafficCloneProfile ID (required)
 	// @param aLBTrafficCloneProfileParam (required)
 	// @return com.vmware.nsx_policy.model.ALBTrafficCloneProfile
+	//
 	// @throws InvalidRequest  Bad Request, Precondition Failed
 	// @throws Unauthorized  Forbidden
 	// @throws ServiceUnavailable  Service Unavailable
 	// @throws InternalServerError  Internal Server Error
 	// @throws NotFound  Not Found
-	Update(albTrafficcloneprofileIdParam string, aLBTrafficCloneProfileParam model.ALBTrafficCloneProfile) (model.ALBTrafficCloneProfile, error)
+	Update(albTrafficcloneprofileIdParam string, aLBTrafficCloneProfileParam nsx_policyModel.ALBTrafficCloneProfile) (nsx_policyModel.ALBTrafficCloneProfile, error)
 }
 
 type albTrafficCloneProfilesClient struct {
-	connector           client.Connector
-	interfaceDefinition core.InterfaceDefinition
-	errorsBindingMap    map[string]bindings.BindingType
+	connector           vapiProtocolClient_.Connector
+	interfaceDefinition vapiCore_.InterfaceDefinition
+	errorsBindingMap    map[string]vapiBindings_.BindingType
 }
 
-func NewAlbTrafficCloneProfilesClient(connector client.Connector) *albTrafficCloneProfilesClient {
-	interfaceIdentifier := core.NewInterfaceIdentifier("com.vmware.nsx_policy.infra.alb_traffic_clone_profiles")
-	methodIdentifiers := map[string]core.MethodIdentifier{
-		"delete": core.NewMethodIdentifier(interfaceIdentifier, "delete"),
-		"get":    core.NewMethodIdentifier(interfaceIdentifier, "get"),
-		"list":   core.NewMethodIdentifier(interfaceIdentifier, "list"),
-		"patch":  core.NewMethodIdentifier(interfaceIdentifier, "patch"),
-		"update": core.NewMethodIdentifier(interfaceIdentifier, "update"),
+func NewAlbTrafficCloneProfilesClient(connector vapiProtocolClient_.Connector) *albTrafficCloneProfilesClient {
+	interfaceIdentifier := vapiCore_.NewInterfaceIdentifier("com.vmware.nsx_policy.infra.alb_traffic_clone_profiles")
+	methodIdentifiers := map[string]vapiCore_.MethodIdentifier{
+		"delete": vapiCore_.NewMethodIdentifier(interfaceIdentifier, "delete"),
+		"get":    vapiCore_.NewMethodIdentifier(interfaceIdentifier, "get"),
+		"list":   vapiCore_.NewMethodIdentifier(interfaceIdentifier, "list"),
+		"patch":  vapiCore_.NewMethodIdentifier(interfaceIdentifier, "patch"),
+		"update": vapiCore_.NewMethodIdentifier(interfaceIdentifier, "update"),
 	}
-	interfaceDefinition := core.NewInterfaceDefinition(interfaceIdentifier, methodIdentifiers)
-	errorsBindingMap := make(map[string]bindings.BindingType)
+	interfaceDefinition := vapiCore_.NewInterfaceDefinition(interfaceIdentifier, methodIdentifiers)
+	errorsBindingMap := make(map[string]vapiBindings_.BindingType)
 
 	aIface := albTrafficCloneProfilesClient{interfaceDefinition: interfaceDefinition, errorsBindingMap: errorsBindingMap, connector: connector}
 	return &aIface
 }
 
-func (aIface *albTrafficCloneProfilesClient) GetErrorBindingType(errorName string) bindings.BindingType {
+func (aIface *albTrafficCloneProfilesClient) GetErrorBindingType(errorName string) vapiBindings_.BindingType {
 	if entry, ok := aIface.errorsBindingMap[errorName]; ok {
 		return entry
 	}
-	return errors.ERROR_BINDINGS_MAP[errorName]
+	return vapiStdErrors_.ERROR_BINDINGS_MAP[errorName]
 }
 
 func (aIface *albTrafficCloneProfilesClient) Delete(albTrafficcloneprofileIdParam string, forceParam *bool) error {
 	typeConverter := aIface.connector.TypeConverter()
 	executionContext := aIface.connector.NewExecutionContext()
-	sv := bindings.NewStructValueBuilder(albTrafficCloneProfilesDeleteInputType(), typeConverter)
+	operationRestMetaData := albTrafficCloneProfilesDeleteRestMetadata()
+	executionContext.SetConnectionMetadata(vapiCore_.RESTMetadataKey, operationRestMetaData)
+	executionContext.SetConnectionMetadata(vapiCore_.ResponseTypeKey, vapiCore_.NewResponseType(true, false))
+
+	sv := vapiBindings_.NewStructValueBuilder(albTrafficCloneProfilesDeleteInputType(), typeConverter)
 	sv.AddStructField("AlbTrafficcloneprofileId", albTrafficcloneprofileIdParam)
 	sv.AddStructField("Force", forceParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
-		return bindings.VAPIerrorsToError(inputError)
+		return vapiBindings_.VAPIerrorsToError(inputError)
 	}
-	operationRestMetaData := albTrafficCloneProfilesDeleteRestMetadata()
-	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
-	connectionMetadata["isStreamingResponse"] = false
-	aIface.connector.SetConnectionMetadata(connectionMetadata)
+
 	methodResult := aIface.connector.GetApiProvider().Invoke("com.vmware.nsx_policy.infra.alb_traffic_clone_profiles", "delete", inputDataValue, executionContext)
 	if methodResult.IsSuccess() {
 		return nil
 	} else {
 		methodError, errorInError := typeConverter.ConvertToGolang(methodResult.Error(), aIface.GetErrorBindingType(methodResult.Error().Name()))
 		if errorInError != nil {
-			return bindings.VAPIerrorsToError(errorInError)
+			return vapiBindings_.VAPIerrorsToError(errorInError)
 		}
 		return methodError.(error)
 	}
 }
 
-func (aIface *albTrafficCloneProfilesClient) Get(albTrafficcloneprofileIdParam string) (model.ALBTrafficCloneProfile, error) {
+func (aIface *albTrafficCloneProfilesClient) Get(albTrafficcloneprofileIdParam string) (nsx_policyModel.ALBTrafficCloneProfile, error) {
 	typeConverter := aIface.connector.TypeConverter()
 	executionContext := aIface.connector.NewExecutionContext()
-	sv := bindings.NewStructValueBuilder(albTrafficCloneProfilesGetInputType(), typeConverter)
+	operationRestMetaData := albTrafficCloneProfilesGetRestMetadata()
+	executionContext.SetConnectionMetadata(vapiCore_.RESTMetadataKey, operationRestMetaData)
+	executionContext.SetConnectionMetadata(vapiCore_.ResponseTypeKey, vapiCore_.NewResponseType(true, false))
+
+	sv := vapiBindings_.NewStructValueBuilder(albTrafficCloneProfilesGetInputType(), typeConverter)
 	sv.AddStructField("AlbTrafficcloneprofileId", albTrafficcloneprofileIdParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
-		var emptyOutput model.ALBTrafficCloneProfile
-		return emptyOutput, bindings.VAPIerrorsToError(inputError)
+		var emptyOutput nsx_policyModel.ALBTrafficCloneProfile
+		return emptyOutput, vapiBindings_.VAPIerrorsToError(inputError)
 	}
-	operationRestMetaData := albTrafficCloneProfilesGetRestMetadata()
-	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
-	connectionMetadata["isStreamingResponse"] = false
-	aIface.connector.SetConnectionMetadata(connectionMetadata)
+
 	methodResult := aIface.connector.GetApiProvider().Invoke("com.vmware.nsx_policy.infra.alb_traffic_clone_profiles", "get", inputDataValue, executionContext)
-	var emptyOutput model.ALBTrafficCloneProfile
+	var emptyOutput nsx_policyModel.ALBTrafficCloneProfile
 	if methodResult.IsSuccess() {
-		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), albTrafficCloneProfilesGetOutputType())
+		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), AlbTrafficCloneProfilesGetOutputType())
 		if errorInOutput != nil {
-			return emptyOutput, bindings.VAPIerrorsToError(errorInOutput)
+			return emptyOutput, vapiBindings_.VAPIerrorsToError(errorInOutput)
 		}
-		return output.(model.ALBTrafficCloneProfile), nil
+		return output.(nsx_policyModel.ALBTrafficCloneProfile), nil
 	} else {
 		methodError, errorInError := typeConverter.ConvertToGolang(methodResult.Error(), aIface.GetErrorBindingType(methodResult.Error().Name()))
 		if errorInError != nil {
-			return emptyOutput, bindings.VAPIerrorsToError(errorInError)
+			return emptyOutput, vapiBindings_.VAPIerrorsToError(errorInError)
 		}
 		return emptyOutput, methodError.(error)
 	}
 }
 
-func (aIface *albTrafficCloneProfilesClient) List(cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.ALBTrafficCloneProfileApiResponse, error) {
+func (aIface *albTrafficCloneProfilesClient) List(cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (nsx_policyModel.ALBTrafficCloneProfileApiResponse, error) {
 	typeConverter := aIface.connector.TypeConverter()
 	executionContext := aIface.connector.NewExecutionContext()
-	sv := bindings.NewStructValueBuilder(albTrafficCloneProfilesListInputType(), typeConverter)
+	operationRestMetaData := albTrafficCloneProfilesListRestMetadata()
+	executionContext.SetConnectionMetadata(vapiCore_.RESTMetadataKey, operationRestMetaData)
+	executionContext.SetConnectionMetadata(vapiCore_.ResponseTypeKey, vapiCore_.NewResponseType(true, false))
+
+	sv := vapiBindings_.NewStructValueBuilder(albTrafficCloneProfilesListInputType(), typeConverter)
 	sv.AddStructField("Cursor", cursorParam)
 	sv.AddStructField("IncludeMarkForDeleteObjects", includeMarkForDeleteObjectsParam)
 	sv.AddStructField("IncludedFields", includedFieldsParam)
@@ -181,83 +201,82 @@ func (aIface *albTrafficCloneProfilesClient) List(cursorParam *string, includeMa
 	sv.AddStructField("SortBy", sortByParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
-		var emptyOutput model.ALBTrafficCloneProfileApiResponse
-		return emptyOutput, bindings.VAPIerrorsToError(inputError)
+		var emptyOutput nsx_policyModel.ALBTrafficCloneProfileApiResponse
+		return emptyOutput, vapiBindings_.VAPIerrorsToError(inputError)
 	}
-	operationRestMetaData := albTrafficCloneProfilesListRestMetadata()
-	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
-	connectionMetadata["isStreamingResponse"] = false
-	aIface.connector.SetConnectionMetadata(connectionMetadata)
+
 	methodResult := aIface.connector.GetApiProvider().Invoke("com.vmware.nsx_policy.infra.alb_traffic_clone_profiles", "list", inputDataValue, executionContext)
-	var emptyOutput model.ALBTrafficCloneProfileApiResponse
+	var emptyOutput nsx_policyModel.ALBTrafficCloneProfileApiResponse
 	if methodResult.IsSuccess() {
-		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), albTrafficCloneProfilesListOutputType())
+		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), AlbTrafficCloneProfilesListOutputType())
 		if errorInOutput != nil {
-			return emptyOutput, bindings.VAPIerrorsToError(errorInOutput)
+			return emptyOutput, vapiBindings_.VAPIerrorsToError(errorInOutput)
 		}
-		return output.(model.ALBTrafficCloneProfileApiResponse), nil
+		return output.(nsx_policyModel.ALBTrafficCloneProfileApiResponse), nil
 	} else {
 		methodError, errorInError := typeConverter.ConvertToGolang(methodResult.Error(), aIface.GetErrorBindingType(methodResult.Error().Name()))
 		if errorInError != nil {
-			return emptyOutput, bindings.VAPIerrorsToError(errorInError)
+			return emptyOutput, vapiBindings_.VAPIerrorsToError(errorInError)
 		}
 		return emptyOutput, methodError.(error)
 	}
 }
 
-func (aIface *albTrafficCloneProfilesClient) Patch(albTrafficcloneprofileIdParam string, aLBTrafficCloneProfileParam model.ALBTrafficCloneProfile) error {
+func (aIface *albTrafficCloneProfilesClient) Patch(albTrafficcloneprofileIdParam string, aLBTrafficCloneProfileParam nsx_policyModel.ALBTrafficCloneProfile) error {
 	typeConverter := aIface.connector.TypeConverter()
 	executionContext := aIface.connector.NewExecutionContext()
-	sv := bindings.NewStructValueBuilder(albTrafficCloneProfilesPatchInputType(), typeConverter)
+	operationRestMetaData := albTrafficCloneProfilesPatchRestMetadata()
+	executionContext.SetConnectionMetadata(vapiCore_.RESTMetadataKey, operationRestMetaData)
+	executionContext.SetConnectionMetadata(vapiCore_.ResponseTypeKey, vapiCore_.NewResponseType(true, false))
+
+	sv := vapiBindings_.NewStructValueBuilder(albTrafficCloneProfilesPatchInputType(), typeConverter)
 	sv.AddStructField("AlbTrafficcloneprofileId", albTrafficcloneprofileIdParam)
 	sv.AddStructField("ALBTrafficCloneProfile", aLBTrafficCloneProfileParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
-		return bindings.VAPIerrorsToError(inputError)
+		return vapiBindings_.VAPIerrorsToError(inputError)
 	}
-	operationRestMetaData := albTrafficCloneProfilesPatchRestMetadata()
-	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
-	connectionMetadata["isStreamingResponse"] = false
-	aIface.connector.SetConnectionMetadata(connectionMetadata)
+
 	methodResult := aIface.connector.GetApiProvider().Invoke("com.vmware.nsx_policy.infra.alb_traffic_clone_profiles", "patch", inputDataValue, executionContext)
 	if methodResult.IsSuccess() {
 		return nil
 	} else {
 		methodError, errorInError := typeConverter.ConvertToGolang(methodResult.Error(), aIface.GetErrorBindingType(methodResult.Error().Name()))
 		if errorInError != nil {
-			return bindings.VAPIerrorsToError(errorInError)
+			return vapiBindings_.VAPIerrorsToError(errorInError)
 		}
 		return methodError.(error)
 	}
 }
 
-func (aIface *albTrafficCloneProfilesClient) Update(albTrafficcloneprofileIdParam string, aLBTrafficCloneProfileParam model.ALBTrafficCloneProfile) (model.ALBTrafficCloneProfile, error) {
+func (aIface *albTrafficCloneProfilesClient) Update(albTrafficcloneprofileIdParam string, aLBTrafficCloneProfileParam nsx_policyModel.ALBTrafficCloneProfile) (nsx_policyModel.ALBTrafficCloneProfile, error) {
 	typeConverter := aIface.connector.TypeConverter()
 	executionContext := aIface.connector.NewExecutionContext()
-	sv := bindings.NewStructValueBuilder(albTrafficCloneProfilesUpdateInputType(), typeConverter)
+	operationRestMetaData := albTrafficCloneProfilesUpdateRestMetadata()
+	executionContext.SetConnectionMetadata(vapiCore_.RESTMetadataKey, operationRestMetaData)
+	executionContext.SetConnectionMetadata(vapiCore_.ResponseTypeKey, vapiCore_.NewResponseType(true, false))
+
+	sv := vapiBindings_.NewStructValueBuilder(albTrafficCloneProfilesUpdateInputType(), typeConverter)
 	sv.AddStructField("AlbTrafficcloneprofileId", albTrafficcloneprofileIdParam)
 	sv.AddStructField("ALBTrafficCloneProfile", aLBTrafficCloneProfileParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
-		var emptyOutput model.ALBTrafficCloneProfile
-		return emptyOutput, bindings.VAPIerrorsToError(inputError)
+		var emptyOutput nsx_policyModel.ALBTrafficCloneProfile
+		return emptyOutput, vapiBindings_.VAPIerrorsToError(inputError)
 	}
-	operationRestMetaData := albTrafficCloneProfilesUpdateRestMetadata()
-	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
-	connectionMetadata["isStreamingResponse"] = false
-	aIface.connector.SetConnectionMetadata(connectionMetadata)
+
 	methodResult := aIface.connector.GetApiProvider().Invoke("com.vmware.nsx_policy.infra.alb_traffic_clone_profiles", "update", inputDataValue, executionContext)
-	var emptyOutput model.ALBTrafficCloneProfile
+	var emptyOutput nsx_policyModel.ALBTrafficCloneProfile
 	if methodResult.IsSuccess() {
-		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), albTrafficCloneProfilesUpdateOutputType())
+		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), AlbTrafficCloneProfilesUpdateOutputType())
 		if errorInOutput != nil {
-			return emptyOutput, bindings.VAPIerrorsToError(errorInOutput)
+			return emptyOutput, vapiBindings_.VAPIerrorsToError(errorInOutput)
 		}
-		return output.(model.ALBTrafficCloneProfile), nil
+		return output.(nsx_policyModel.ALBTrafficCloneProfile), nil
 	} else {
 		methodError, errorInError := typeConverter.ConvertToGolang(methodResult.Error(), aIface.GetErrorBindingType(methodResult.Error().Name()))
 		if errorInError != nil {
-			return emptyOutput, bindings.VAPIerrorsToError(errorInError)
+			return emptyOutput, vapiBindings_.VAPIerrorsToError(errorInError)
 		}
 		return emptyOutput, methodError.(error)
 	}

@@ -70,7 +70,6 @@ func testAccDataSourceNsxtPolicyLBAppProfileCreate(name string) error {
 	}
 	client := infra.NewLbAppProfilesClient(connector)
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 
 	displayName := name
 	description := name

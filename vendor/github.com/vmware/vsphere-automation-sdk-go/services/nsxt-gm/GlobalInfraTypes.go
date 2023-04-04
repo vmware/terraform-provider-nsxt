@@ -11,54 +11,54 @@
 package nsx_global_policy
 
 import (
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
+	vapiBindings_ "github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	vapiData_ "github.com/vmware/vsphere-automation-sdk-go/runtime/data"
+	vapiProtocol_ "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol"
+	nsx_global_policyModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"reflect"
 )
 
-func globalInfraGetInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func globalInfraGetInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["base_path"] = bindings.NewOptionalType(bindings.NewStringType())
-	fields["filter"] = bindings.NewOptionalType(bindings.NewStringType())
-	fields["type_filter"] = bindings.NewOptionalType(bindings.NewStringType())
+	fields["base_path"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["filter"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["type_filter"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
 	fieldNameMap["base_path"] = "BasePath"
 	fieldNameMap["filter"] = "Filter"
 	fieldNameMap["type_filter"] = "TypeFilter"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func globalInfraGetOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.InfraBindingType)
+func GlobalInfraGetOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewReferenceType(nsx_global_policyModel.InfraBindingType)
 }
 
-func globalInfraGetRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func globalInfraGetRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["base_path"] = bindings.NewOptionalType(bindings.NewStringType())
-	fields["filter"] = bindings.NewOptionalType(bindings.NewStringType())
-	fields["type_filter"] = bindings.NewOptionalType(bindings.NewStringType())
+	fields["base_path"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["filter"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["type_filter"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
 	fieldNameMap["base_path"] = "BasePath"
 	fieldNameMap["filter"] = "Filter"
 	fieldNameMap["type_filter"] = "TypeFilter"
-	paramsTypeMap["base_path"] = bindings.NewOptionalType(bindings.NewStringType())
-	paramsTypeMap["filter"] = bindings.NewOptionalType(bindings.NewStringType())
-	paramsTypeMap["type_filter"] = bindings.NewOptionalType(bindings.NewStringType())
+	paramsTypeMap["filter"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	paramsTypeMap["base_path"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	paramsTypeMap["type_filter"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
 	queryParams["filter"] = "filter"
 	queryParams["base_path"] = "base_path"
 	queryParams["type_filter"] = "type_filter"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -79,40 +79,40 @@ func globalInfraGetRestMetadata() protocol.OperationRestMetadata {
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func globalInfraPatchInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func globalInfraPatchInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["infra"] = bindings.NewReferenceType(model.InfraBindingType)
-	fields["enforce_revision_check"] = bindings.NewOptionalType(bindings.NewBooleanType())
+	fields["infra"] = vapiBindings_.NewReferenceType(nsx_global_policyModel.InfraBindingType)
+	fields["enforce_revision_check"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
 	fieldNameMap["infra"] = "Infra"
 	fieldNameMap["enforce_revision_check"] = "EnforceRevisionCheck"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func globalInfraPatchOutputType() bindings.BindingType {
-	return bindings.NewVoidType()
+func GlobalInfraPatchOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewVoidType()
 }
 
-func globalInfraPatchRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func globalInfraPatchRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["infra"] = bindings.NewReferenceType(model.InfraBindingType)
-	fields["enforce_revision_check"] = bindings.NewOptionalType(bindings.NewBooleanType())
+	fields["infra"] = vapiBindings_.NewReferenceType(nsx_global_policyModel.InfraBindingType)
+	fields["enforce_revision_check"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
 	fieldNameMap["infra"] = "Infra"
 	fieldNameMap["enforce_revision_check"] = "EnforceRevisionCheck"
-	paramsTypeMap["enforce_revision_check"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	paramsTypeMap["infra"] = bindings.NewReferenceType(model.InfraBindingType)
+	paramsTypeMap["infra"] = vapiBindings_.NewReferenceType(nsx_global_policyModel.InfraBindingType)
+	paramsTypeMap["enforce_revision_check"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
 	queryParams["enforce_revision_check"] = "enforce_revision_check"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -133,34 +133,34 @@ func globalInfraPatchRestMetadata() protocol.OperationRestMetadata {
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func globalInfraUpdateInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func globalInfraUpdateInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["infra"] = bindings.NewReferenceType(model.InfraBindingType)
+	fields["infra"] = vapiBindings_.NewReferenceType(nsx_global_policyModel.InfraBindingType)
 	fieldNameMap["infra"] = "Infra"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func globalInfraUpdateOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.InfraBindingType)
+func GlobalInfraUpdateOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewReferenceType(nsx_global_policyModel.InfraBindingType)
 }
 
-func globalInfraUpdateRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func globalInfraUpdateRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["infra"] = bindings.NewReferenceType(model.InfraBindingType)
+	fields["infra"] = vapiBindings_.NewReferenceType(nsx_global_policyModel.InfraBindingType)
 	fieldNameMap["infra"] = "Infra"
-	paramsTypeMap["infra"] = bindings.NewReferenceType(model.InfraBindingType)
+	paramsTypeMap["infra"] = vapiBindings_.NewReferenceType(nsx_global_policyModel.InfraBindingType)
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,

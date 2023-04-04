@@ -11,43 +11,43 @@
 package nsx_policy
 
 import (
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+	vapiBindings_ "github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	vapiData_ "github.com/vmware/vsphere-automation-sdk-go/runtime/data"
+	vapiProtocol_ "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol"
+	nsx_policyModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"reflect"
 )
 
-func errorResolverGetInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func errorResolverGetInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["error_id"] = bindings.NewStringType()
+	fields["error_id"] = vapiBindings_.NewStringType()
 	fieldNameMap["error_id"] = "ErrorId"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func errorResolverGetOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.ErrorResolverInfoBindingType)
+func ErrorResolverGetOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewReferenceType(nsx_policyModel.ErrorResolverInfoBindingType)
 }
 
-func errorResolverGetRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func errorResolverGetRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["error_id"] = bindings.NewStringType()
+	fields["error_id"] = vapiBindings_.NewStringType()
 	fieldNameMap["error_id"] = "ErrorId"
-	paramsTypeMap["error_id"] = bindings.NewStringType()
-	paramsTypeMap["errorId"] = bindings.NewStringType()
+	paramsTypeMap["error_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["errorId"] = vapiBindings_.NewStringType()
 	pathParams["error_id"] = "errorId"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -68,21 +68,21 @@ func errorResolverGetRestMetadata() protocol.OperationRestMetadata {
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func errorResolverListInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func errorResolverListInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func errorResolverListOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.ErrorResolverInfoListBindingType)
+func ErrorResolverListOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewReferenceType(nsx_policyModel.ErrorResolverInfoListBindingType)
 }
 
-func errorResolverListRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func errorResolverListRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
@@ -90,7 +90,7 @@ func errorResolverListRestMetadata() protocol.OperationRestMetadata {
 	bodyFieldsMap := map[string]string{}
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -111,34 +111,34 @@ func errorResolverListRestMetadata() protocol.OperationRestMetadata {
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func errorResolverResolveerrorInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func errorResolverResolveerrorInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["error_resolver_metadata_list"] = bindings.NewReferenceType(model.ErrorResolverMetadataListBindingType)
+	fields["error_resolver_metadata_list"] = vapiBindings_.NewReferenceType(nsx_policyModel.ErrorResolverMetadataListBindingType)
 	fieldNameMap["error_resolver_metadata_list"] = "ErrorResolverMetadataList"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func errorResolverResolveerrorOutputType() bindings.BindingType {
-	return bindings.NewVoidType()
+func ErrorResolverResolveerrorOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewVoidType()
 }
 
-func errorResolverResolveerrorRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func errorResolverResolveerrorRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["error_resolver_metadata_list"] = bindings.NewReferenceType(model.ErrorResolverMetadataListBindingType)
+	fields["error_resolver_metadata_list"] = vapiBindings_.NewReferenceType(nsx_policyModel.ErrorResolverMetadataListBindingType)
 	fieldNameMap["error_resolver_metadata_list"] = "ErrorResolverMetadataList"
-	paramsTypeMap["error_resolver_metadata_list"] = bindings.NewReferenceType(model.ErrorResolverMetadataListBindingType)
+	paramsTypeMap["error_resolver_metadata_list"] = vapiBindings_.NewReferenceType(nsx_policyModel.ErrorResolverMetadataListBindingType)
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,

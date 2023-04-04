@@ -802,7 +802,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	return clients, nil
 }
 
-func getPolicyConnector(clients interface{}) *client.RestConnector {
+func getPolicyConnector(clients interface{}) client.Connector {
 	c := clients.(nsxtClients)
 
 	retryFunc := func(retryContext retry.RetryContext) bool {
@@ -835,15 +835,16 @@ func getPolicyConnector(clients interface{}) *client.RestConnector {
 		return true
 	}
 
-	connector := client.NewRestConnector(c.Host, *c.PolicyHTTPClient, client.WithDecorators(retry.NewRetryDecorator(uint(c.CommonConfig.MaxRetries), retryFunc)))
+	connectorOptions := []client.ConnectorOption{client.UsingRest(nil), client.WithHttpClient(c.PolicyHTTPClient), client.WithDecorators(retry.NewRetryDecorator(uint(c.CommonConfig.MaxRetries), retryFunc))}
+	var requestProcessors []core.RequestProcessor
 	if c.PolicySecurityContext != nil {
-		connector.SetSecurityContext(c.PolicySecurityContext)
+		connectorOptions = append(connectorOptions, client.WithSecurityContext(c.PolicySecurityContext))
 	}
 	if c.CommonConfig.RemoteAuth {
-		connector.AddRequestProcessor(newRemoteAuthHeaderProcessor())
+		requestProcessors = append(requestProcessors, newRemoteAuthHeaderProcessor().Process)
 	}
 	if len(c.CommonConfig.BearerToken) > 0 {
-		connector.AddRequestProcessor(newBearerAuthHeaderProcessor(c.CommonConfig.BearerToken))
+		requestProcessors = append(requestProcessors, newBearerAuthHeaderProcessor(c.CommonConfig.BearerToken).Process)
 	}
 	// Session support for policy resources (main rationale - vIDM environment where auth is slow)
 	// Currently session creation is done via old MP sdk.
@@ -855,10 +856,14 @@ func getPolicyConnector(clients interface{}) *client.RestConnector {
 		if len(c.NsxtClientConfig.DefaultHeader["X-XSRF-TOKEN"]) > 0 {
 			xsrf = c.NsxtClientConfig.DefaultHeader["X-XSRF-TOKEN"]
 		}
-		connector.AddRequestProcessor(newSessionHeaderProcessor(cookie, xsrf))
+		requestProcessors = append(requestProcessors, newSessionHeaderProcessor(cookie, xsrf).Process)
 		log.Printf("[INFO]: Session headers configured for policy objects")
 	}
 
+	if len(requestProcessors) > 0 {
+		connectorOptions = append(connectorOptions, client.WithRequestProcessors(requestProcessors...))
+	}
+	connector := client.NewConnector(c.Host, connectorOptions...)
 	return connector
 }
 

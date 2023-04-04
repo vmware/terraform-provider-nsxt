@@ -298,7 +298,7 @@ func getPolicyVRFConfigSchema() *schema.Schema {
 	}
 }
 
-func listGlobalManagerTier0GatewayLocaleServices(connector *client.RestConnector, gwID string, cursor *string) (model.LocaleServicesListResult, error) {
+func listGlobalManagerTier0GatewayLocaleServices(connector client.Connector, gwID string, cursor *string) (model.LocaleServicesListResult, error) {
 	client := gm_tier_0s.NewLocaleServicesClient(connector)
 	markForDelete := false
 	listResponse, err := client.List(gwID, cursor, &markForDelete, nil, nil, nil, nil)
@@ -314,13 +314,13 @@ func listGlobalManagerTier0GatewayLocaleServices(connector *client.RestConnector
 	return convertedResult.(model.LocaleServicesListResult), nil
 }
 
-func listLocalManagerTier0GatewayLocaleServices(connector *client.RestConnector, gwID string, cursor *string) (model.LocaleServicesListResult, error) {
+func listLocalManagerTier0GatewayLocaleServices(connector client.Connector, gwID string, cursor *string) (model.LocaleServicesListResult, error) {
 	client := tier_0s.NewLocaleServicesClient(connector)
 	markForDelete := false
 	return client.List(gwID, cursor, &markForDelete, nil, nil, nil, nil)
 }
 
-func listPolicyTier0GatewayLocaleServices(connector *client.RestConnector, gwID string, isGlobalManager bool) ([]model.LocaleServices, error) {
+func listPolicyTier0GatewayLocaleServices(connector client.Connector, gwID string, isGlobalManager bool) ([]model.LocaleServices, error) {
 
 	if isGlobalManager {
 		return listPolicyGatewayLocaleServices(connector, gwID, listGlobalManagerTier0GatewayLocaleServices)
@@ -329,7 +329,7 @@ func listPolicyTier0GatewayLocaleServices(connector *client.RestConnector, gwID 
 	return listPolicyGatewayLocaleServices(connector, gwID, listLocalManagerTier0GatewayLocaleServices)
 }
 
-func getPolicyTier0GatewayLocaleServiceWithEdgeCluster(gwID string, connector *client.RestConnector) (*model.LocaleServices, error) {
+func getPolicyTier0GatewayLocaleServiceWithEdgeCluster(gwID string, connector client.Connector) (*model.LocaleServices, error) {
 	// Get the locale services of this Tier0 for the edge-cluster id
 	client := tier_0s.NewLocaleServicesClient(connector)
 	obj, err := client.Get(gwID, defaultPolicyLocaleServiceID)
@@ -406,7 +406,7 @@ func initPolicyTier0BGPConfigMap(bgpConfig *model.BgpRoutingConfig) map[string]i
 	return cfgMap
 }
 
-func resourceNsxtPolicyTier0GatewayReadBGPConfig(d *schema.ResourceData, connector *client.RestConnector, localeService model.LocaleServices) error {
+func resourceNsxtPolicyTier0GatewayReadBGPConfig(d *schema.ResourceData, connector client.Connector, localeService model.LocaleServices) error {
 	var bgpConfigs []map[string]interface{}
 	client := locale_services.NewBgpClient(connector)
 
@@ -505,7 +505,7 @@ func setPolicyVRFConfigInSchema(d *schema.ResourceData, config *model.Tier0VrfCo
 	return d.Set("vrf_config", vrfConfigs)
 }
 
-func resourceNsxtPolicyTier0GatewayExists(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
+func resourceNsxtPolicyTier0GatewayExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	var err error
 	if isGlobalManager {
 		client := gm_infra.NewTier0sClient(connector)
@@ -526,7 +526,7 @@ func resourceNsxtPolicyTier0GatewayExists(id string, connector *client.RestConne
 	return false, logAPIError("Error retrieving Tier0", err)
 }
 
-func resourceNsxtPolicyTier0GatewayIsVrf(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
+func resourceNsxtPolicyTier0GatewayIsVrf(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	if isGlobalManager {
 		client := gm_infra.NewTier0sClient(connector)
 		obj, err := client.Get(id)
@@ -636,7 +636,7 @@ func resourceNsxtPolicyTier0GatewayBGPConfigSchemaToStruct(cfg interface{}, isVr
 	return routeStruct
 }
 
-func initSingleTier0GatewayLocaleService(d *schema.ResourceData, children []*data.StructValue, connector *client.RestConnector) (*data.StructValue, error) {
+func initSingleTier0GatewayLocaleService(d *schema.ResourceData, children []*data.StructValue, connector client.Connector) (*data.StructValue, error) {
 
 	edgeClusterPath := d.Get("edge_cluster_path").(string)
 	var serviceStruct *model.LocaleServices
@@ -690,7 +690,6 @@ func verifyPolicyTier0GatewayConfig(d *schema.ResourceData, isGlobalManager bool
 
 func initPolicyTier0ChildBgpConfig(config *model.BgpRoutingConfig) (*data.StructValue, error) {
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 	childConfig := model.ChildBgpRoutingConfig{
 		ResourceType:     "ChildBgpRoutingConfig",
 		BgpRoutingConfig: config,
@@ -703,11 +702,10 @@ func initPolicyTier0ChildBgpConfig(config *model.BgpRoutingConfig) (*data.Struct
 	return dataValue.(*data.StructValue), nil
 }
 
-func policyTier0GatewayResourceToInfraStruct(d *schema.ResourceData, connector *client.RestConnector, isGlobalManager bool, id string) (model.Infra, error) {
+func policyTier0GatewayResourceToInfraStruct(d *schema.ResourceData, connector client.Connector, isGlobalManager bool, id string) (model.Infra, error) {
 	var infraChildren, gwChildren, lsChildren []*data.StructValue
 	var infraStruct model.Infra
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
@@ -1030,7 +1028,6 @@ func resourceNsxtPolicyTier0GatewayUpdate(d *schema.ResourceData, m interface{})
 func resourceNsxtPolicyTier0GatewayDelete(d *schema.ResourceData, m interface{}) error {
 	var infraChildren []*data.StructValue
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 	boolTrue := true
 	id := d.Id()
 	if id == "" {

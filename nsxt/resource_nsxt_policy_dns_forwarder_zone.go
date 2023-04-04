@@ -54,7 +54,7 @@ func resourceNsxtPolicyDNSForwarderZone() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyDNSForwarderZoneExists(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
+func resourceNsxtPolicyDNSForwarderZoneExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	var err error
 	if isGlobalManager {
 		client := gm_infra.NewDnsForwarderZonesClient(connector)

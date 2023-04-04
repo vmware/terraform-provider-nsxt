@@ -1,4 +1,4 @@
-/* Copyright © 2019-2020 VMware, Inc. All Rights Reserved.
+/* Copyright © 2019-2021 VMware, Inc. All Rights Reserved.
    SPDX-License-Identifier: BSD-2-Clause */
 
 package cleanjson
@@ -7,9 +7,11 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/lib"
 	"reflect"
+	"strconv"
 	"strings"
 
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
@@ -161,7 +163,51 @@ type ListValueSerializer struct {
 	listValue *data.ListValue
 }
 
-func (lvs *ListValueSerializer) MarshalJSON() ([]byte, error) {
+// getKeyValuePair is used when encoding a map represented as a list of StructValues.
+// It takes as a parameter a StructValue, which should be a single map entry,
+// and extracts from it the key and the value.
+func getKeyValuePair(mapEntry *data.StructValue) (string, interface{}, error) {
+	fields := mapEntry.Fields()
+	var keyStr string
+
+	switch reflect.TypeOf(fields[lib.MAP_KEY_FIELD]) {
+	case data.IntegerValuePtr:
+		keyDataValue, _ := fields[lib.MAP_KEY_FIELD].(*data.IntegerValue)
+		keyStr = strconv.FormatInt(keyDataValue.Value(), 10)
+	case data.StringValuePtr:
+		keyDataValue, _ := fields[lib.MAP_KEY_FIELD].(*data.StringValue)
+		keyStr = keyDataValue.Value()
+	default:
+		return "", nil, errors.New("invalid type of key field in map dataValue representation")
+	}
+
+	value, err := getSerializer(fields[lib.MAP_VALUE_FIELD])
+	if err != nil {
+		return "", nil, err
+	}
+
+	return keyStr, value, nil
+}
+
+func (lvs *ListValueSerializer) marshalJSONMap() ([]byte, error) {
+	var items = make(map[string]interface{})
+
+	for _, element := range lvs.listValue.List() {
+
+		mapEntry, ok := element.(*data.StructValue)
+		if !ok {
+			return nil, errors.New("invalid map entry in ListValue")
+		}
+		key, value, err := getKeyValuePair(mapEntry)
+		if err != nil {
+			return nil, err
+		}
+		items[key] = value
+	}
+	return json.Marshal(items)
+}
+
+func (lvs *ListValueSerializer) marshalJSONList() ([]byte, error) {
 	result := make([]interface{}, 0)
 	for _, element := range lvs.listValue.List() {
 
@@ -173,6 +219,14 @@ func (lvs *ListValueSerializer) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal(result)
 }
+
+func (lvs *ListValueSerializer) MarshalJSON() ([]byte, error) {
+	if lvs.listValue.IsMap() {
+		return lvs.marshalJSONMap()
+	}
+	return lvs.marshalJSONList()
+}
+
 func NewListValueSerializer(value *data.ListValue) *ListValueSerializer {
 	return &ListValueSerializer{listValue: value}
 }

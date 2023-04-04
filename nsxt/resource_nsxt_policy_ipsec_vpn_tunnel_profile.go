@@ -110,7 +110,7 @@ func resourceNsxtPolicyIPSecVpnTunnelProfile() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyIPSecVpnTunnelProfileExists(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
+func resourceNsxtPolicyIPSecVpnTunnelProfileExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	client := infra.NewIpsecVpnTunnelProfilesClient(connector)
 	_, err := client.Get(id)
 	if err == nil {

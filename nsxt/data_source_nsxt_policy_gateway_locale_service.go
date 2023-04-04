@@ -45,7 +45,6 @@ func dataSourceNsxtPolicyGatewayLocaleServiceRead(d *schema.ResourceData, m inte
 	}
 
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 	dataValue, errors := converter.ConvertToGolang(obj, model.LocaleServicesBindingType())
 	if len(errors) > 0 {
 		return errors[0]

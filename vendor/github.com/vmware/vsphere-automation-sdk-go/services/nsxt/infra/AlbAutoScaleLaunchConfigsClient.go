@@ -9,22 +9,24 @@
 package infra
 
 import (
-	"github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/core"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/lib"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+	vapiStdErrors_ "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
+	vapiBindings_ "github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	vapiCore_ "github.com/vmware/vsphere-automation-sdk-go/runtime/core"
+	vapiProtocolClient_ "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+	nsx_policyModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
-const _ = core.SupportedByRuntimeVersion1
+const _ = vapiCore_.SupportedByRuntimeVersion2
 
 type AlbAutoScaleLaunchConfigsClient interface {
 
-	// Delete the ALBAutoScaleLaunchConfig along with all the entities contained by this ALBAutoScaleLaunchConfig.
+	// Delete the ALBAutoScaleLaunchConfig along with all the entities contained by this ALBAutoScaleLaunchConfig. This is a deprecated API. It is recommennded to use NSX Advanced Load Balancer (Avi) Controller UI or API directly instead of NSX-T ALB Policy UI and API.
+	//
+	// Deprecated: This API element is deprecated.
 	//
 	// @param albAutoscalelaunchconfigIdParam ALBAutoScaleLaunchConfig ID (required)
 	// @param forceParam Force delete the resource even if it is being used somewhere (optional, default to false)
+	//
 	// @throws InvalidRequest  Bad Request, Precondition Failed
 	// @throws Unauthorized  Forbidden
 	// @throws ServiceUnavailable  Service Unavailable
@@ -32,18 +34,23 @@ type AlbAutoScaleLaunchConfigsClient interface {
 	// @throws NotFound  Not Found
 	Delete(albAutoscalelaunchconfigIdParam string, forceParam *bool) error
 
-	// Read a ALBAutoScaleLaunchConfig.
+	// Read a ALBAutoScaleLaunchConfig. This is a deprecated API. It is recommennded to use NSX Advanced Load Balancer (Avi) Controller UI or API directly instead of NSX-T ALB Policy UI and API.
+	//
+	// Deprecated: This API element is deprecated.
 	//
 	// @param albAutoscalelaunchconfigIdParam ALBAutoScaleLaunchConfig ID (required)
 	// @return com.vmware.nsx_policy.model.ALBAutoScaleLaunchConfig
+	//
 	// @throws InvalidRequest  Bad Request, Precondition Failed
 	// @throws Unauthorized  Forbidden
 	// @throws ServiceUnavailable  Service Unavailable
 	// @throws InternalServerError  Internal Server Error
 	// @throws NotFound  Not Found
-	Get(albAutoscalelaunchconfigIdParam string) (model.ALBAutoScaleLaunchConfig, error)
+	Get(albAutoscalelaunchconfigIdParam string) (nsx_policyModel.ALBAutoScaleLaunchConfig, error)
 
-	// Paginated list of all ALBAutoScaleLaunchConfig for infra.
+	// Paginated list of all ALBAutoScaleLaunchConfig for infra. This is a deprecated API. It is recommennded to use NSX Advanced Load Balancer (Avi) Controller UI or API directly instead of NSX-T ALB Policy UI and API.
+	//
+	// Deprecated: This API element is deprecated.
 	//
 	// @param cursorParam Opaque cursor to be used for getting next page of records (supplied by current result page) (optional)
 	// @param includeMarkForDeleteObjectsParam Include objects that are marked for deletion in results (optional, default to false)
@@ -52,127 +59,140 @@ type AlbAutoScaleLaunchConfigsClient interface {
 	// @param sortAscendingParam (optional)
 	// @param sortByParam Field by which records are sorted (optional)
 	// @return com.vmware.nsx_policy.model.ALBAutoScaleLaunchConfigApiResponse
+	//
 	// @throws InvalidRequest  Bad Request, Precondition Failed
 	// @throws Unauthorized  Forbidden
 	// @throws ServiceUnavailable  Service Unavailable
 	// @throws InternalServerError  Internal Server Error
 	// @throws NotFound  Not Found
-	List(cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.ALBAutoScaleLaunchConfigApiResponse, error)
+	List(cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (nsx_policyModel.ALBAutoScaleLaunchConfigApiResponse, error)
 
-	// If a ALBautoscalelaunchconfig with the alb-autoscalelaunchconfig-id is not already present, create a new ALBautoscalelaunchconfig. If it already exists, update the ALBautoscalelaunchconfig. This is a full replace.
+	// If a ALBautoscalelaunchconfig with the alb-autoscalelaunchconfig-id is not already present, create a new ALBautoscalelaunchconfig. If it already exists, update the ALBautoscalelaunchconfig. This is a full replace. This is a deprecated API. It is recommennded to use NSX Advanced Load Balancer (Avi) Controller UI or API directly instead of NSX-T ALB Policy UI and API.
+	//
+	// Deprecated: This API element is deprecated.
 	//
 	// @param albAutoscalelaunchconfigIdParam ALBautoscalelaunchconfig ID (required)
 	// @param aLBAutoScaleLaunchConfigParam (required)
+	//
 	// @throws InvalidRequest  Bad Request, Precondition Failed
 	// @throws Unauthorized  Forbidden
 	// @throws ServiceUnavailable  Service Unavailable
 	// @throws InternalServerError  Internal Server Error
 	// @throws NotFound  Not Found
-	Patch(albAutoscalelaunchconfigIdParam string, aLBAutoScaleLaunchConfigParam model.ALBAutoScaleLaunchConfig) error
+	Patch(albAutoscalelaunchconfigIdParam string, aLBAutoScaleLaunchConfigParam nsx_policyModel.ALBAutoScaleLaunchConfig) error
 
-	// If a ALBAutoScaleLaunchConfig with the alb-AutoScaleLaunchConfig-id is not already present, create a new ALBAutoScaleLaunchConfig. If it already exists, update the ALBAutoScaleLaunchConfig. This is a full replace.
+	// If a ALBAutoScaleLaunchConfig with the alb-AutoScaleLaunchConfig-id is not already present, create a new ALBAutoScaleLaunchConfig. If it already exists, update the ALBAutoScaleLaunchConfig. This is a full replace. This is a deprecated API. It is recommennded to use NSX Advanced Load Balancer (Avi) Controller UI or API directly instead of NSX-T ALB Policy UI and API.
+	//
+	// Deprecated: This API element is deprecated.
 	//
 	// @param albAutoscalelaunchconfigIdParam ALBAutoScaleLaunchConfig ID (required)
 	// @param aLBAutoScaleLaunchConfigParam (required)
 	// @return com.vmware.nsx_policy.model.ALBAutoScaleLaunchConfig
+	//
 	// @throws InvalidRequest  Bad Request, Precondition Failed
 	// @throws Unauthorized  Forbidden
 	// @throws ServiceUnavailable  Service Unavailable
 	// @throws InternalServerError  Internal Server Error
 	// @throws NotFound  Not Found
-	Update(albAutoscalelaunchconfigIdParam string, aLBAutoScaleLaunchConfigParam model.ALBAutoScaleLaunchConfig) (model.ALBAutoScaleLaunchConfig, error)
+	Update(albAutoscalelaunchconfigIdParam string, aLBAutoScaleLaunchConfigParam nsx_policyModel.ALBAutoScaleLaunchConfig) (nsx_policyModel.ALBAutoScaleLaunchConfig, error)
 }
 
 type albAutoScaleLaunchConfigsClient struct {
-	connector           client.Connector
-	interfaceDefinition core.InterfaceDefinition
-	errorsBindingMap    map[string]bindings.BindingType
+	connector           vapiProtocolClient_.Connector
+	interfaceDefinition vapiCore_.InterfaceDefinition
+	errorsBindingMap    map[string]vapiBindings_.BindingType
 }
 
-func NewAlbAutoScaleLaunchConfigsClient(connector client.Connector) *albAutoScaleLaunchConfigsClient {
-	interfaceIdentifier := core.NewInterfaceIdentifier("com.vmware.nsx_policy.infra.alb_auto_scale_launch_configs")
-	methodIdentifiers := map[string]core.MethodIdentifier{
-		"delete": core.NewMethodIdentifier(interfaceIdentifier, "delete"),
-		"get":    core.NewMethodIdentifier(interfaceIdentifier, "get"),
-		"list":   core.NewMethodIdentifier(interfaceIdentifier, "list"),
-		"patch":  core.NewMethodIdentifier(interfaceIdentifier, "patch"),
-		"update": core.NewMethodIdentifier(interfaceIdentifier, "update"),
+func NewAlbAutoScaleLaunchConfigsClient(connector vapiProtocolClient_.Connector) *albAutoScaleLaunchConfigsClient {
+	interfaceIdentifier := vapiCore_.NewInterfaceIdentifier("com.vmware.nsx_policy.infra.alb_auto_scale_launch_configs")
+	methodIdentifiers := map[string]vapiCore_.MethodIdentifier{
+		"delete": vapiCore_.NewMethodIdentifier(interfaceIdentifier, "delete"),
+		"get":    vapiCore_.NewMethodIdentifier(interfaceIdentifier, "get"),
+		"list":   vapiCore_.NewMethodIdentifier(interfaceIdentifier, "list"),
+		"patch":  vapiCore_.NewMethodIdentifier(interfaceIdentifier, "patch"),
+		"update": vapiCore_.NewMethodIdentifier(interfaceIdentifier, "update"),
 	}
-	interfaceDefinition := core.NewInterfaceDefinition(interfaceIdentifier, methodIdentifiers)
-	errorsBindingMap := make(map[string]bindings.BindingType)
+	interfaceDefinition := vapiCore_.NewInterfaceDefinition(interfaceIdentifier, methodIdentifiers)
+	errorsBindingMap := make(map[string]vapiBindings_.BindingType)
 
 	aIface := albAutoScaleLaunchConfigsClient{interfaceDefinition: interfaceDefinition, errorsBindingMap: errorsBindingMap, connector: connector}
 	return &aIface
 }
 
-func (aIface *albAutoScaleLaunchConfigsClient) GetErrorBindingType(errorName string) bindings.BindingType {
+func (aIface *albAutoScaleLaunchConfigsClient) GetErrorBindingType(errorName string) vapiBindings_.BindingType {
 	if entry, ok := aIface.errorsBindingMap[errorName]; ok {
 		return entry
 	}
-	return errors.ERROR_BINDINGS_MAP[errorName]
+	return vapiStdErrors_.ERROR_BINDINGS_MAP[errorName]
 }
 
 func (aIface *albAutoScaleLaunchConfigsClient) Delete(albAutoscalelaunchconfigIdParam string, forceParam *bool) error {
 	typeConverter := aIface.connector.TypeConverter()
 	executionContext := aIface.connector.NewExecutionContext()
-	sv := bindings.NewStructValueBuilder(albAutoScaleLaunchConfigsDeleteInputType(), typeConverter)
+	operationRestMetaData := albAutoScaleLaunchConfigsDeleteRestMetadata()
+	executionContext.SetConnectionMetadata(vapiCore_.RESTMetadataKey, operationRestMetaData)
+	executionContext.SetConnectionMetadata(vapiCore_.ResponseTypeKey, vapiCore_.NewResponseType(true, false))
+
+	sv := vapiBindings_.NewStructValueBuilder(albAutoScaleLaunchConfigsDeleteInputType(), typeConverter)
 	sv.AddStructField("AlbAutoscalelaunchconfigId", albAutoscalelaunchconfigIdParam)
 	sv.AddStructField("Force", forceParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
-		return bindings.VAPIerrorsToError(inputError)
+		return vapiBindings_.VAPIerrorsToError(inputError)
 	}
-	operationRestMetaData := albAutoScaleLaunchConfigsDeleteRestMetadata()
-	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
-	connectionMetadata["isStreamingResponse"] = false
-	aIface.connector.SetConnectionMetadata(connectionMetadata)
+
 	methodResult := aIface.connector.GetApiProvider().Invoke("com.vmware.nsx_policy.infra.alb_auto_scale_launch_configs", "delete", inputDataValue, executionContext)
 	if methodResult.IsSuccess() {
 		return nil
 	} else {
 		methodError, errorInError := typeConverter.ConvertToGolang(methodResult.Error(), aIface.GetErrorBindingType(methodResult.Error().Name()))
 		if errorInError != nil {
-			return bindings.VAPIerrorsToError(errorInError)
+			return vapiBindings_.VAPIerrorsToError(errorInError)
 		}
 		return methodError.(error)
 	}
 }
 
-func (aIface *albAutoScaleLaunchConfigsClient) Get(albAutoscalelaunchconfigIdParam string) (model.ALBAutoScaleLaunchConfig, error) {
+func (aIface *albAutoScaleLaunchConfigsClient) Get(albAutoscalelaunchconfigIdParam string) (nsx_policyModel.ALBAutoScaleLaunchConfig, error) {
 	typeConverter := aIface.connector.TypeConverter()
 	executionContext := aIface.connector.NewExecutionContext()
-	sv := bindings.NewStructValueBuilder(albAutoScaleLaunchConfigsGetInputType(), typeConverter)
+	operationRestMetaData := albAutoScaleLaunchConfigsGetRestMetadata()
+	executionContext.SetConnectionMetadata(vapiCore_.RESTMetadataKey, operationRestMetaData)
+	executionContext.SetConnectionMetadata(vapiCore_.ResponseTypeKey, vapiCore_.NewResponseType(true, false))
+
+	sv := vapiBindings_.NewStructValueBuilder(albAutoScaleLaunchConfigsGetInputType(), typeConverter)
 	sv.AddStructField("AlbAutoscalelaunchconfigId", albAutoscalelaunchconfigIdParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
-		var emptyOutput model.ALBAutoScaleLaunchConfig
-		return emptyOutput, bindings.VAPIerrorsToError(inputError)
+		var emptyOutput nsx_policyModel.ALBAutoScaleLaunchConfig
+		return emptyOutput, vapiBindings_.VAPIerrorsToError(inputError)
 	}
-	operationRestMetaData := albAutoScaleLaunchConfigsGetRestMetadata()
-	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
-	connectionMetadata["isStreamingResponse"] = false
-	aIface.connector.SetConnectionMetadata(connectionMetadata)
+
 	methodResult := aIface.connector.GetApiProvider().Invoke("com.vmware.nsx_policy.infra.alb_auto_scale_launch_configs", "get", inputDataValue, executionContext)
-	var emptyOutput model.ALBAutoScaleLaunchConfig
+	var emptyOutput nsx_policyModel.ALBAutoScaleLaunchConfig
 	if methodResult.IsSuccess() {
-		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), albAutoScaleLaunchConfigsGetOutputType())
+		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), AlbAutoScaleLaunchConfigsGetOutputType())
 		if errorInOutput != nil {
-			return emptyOutput, bindings.VAPIerrorsToError(errorInOutput)
+			return emptyOutput, vapiBindings_.VAPIerrorsToError(errorInOutput)
 		}
-		return output.(model.ALBAutoScaleLaunchConfig), nil
+		return output.(nsx_policyModel.ALBAutoScaleLaunchConfig), nil
 	} else {
 		methodError, errorInError := typeConverter.ConvertToGolang(methodResult.Error(), aIface.GetErrorBindingType(methodResult.Error().Name()))
 		if errorInError != nil {
-			return emptyOutput, bindings.VAPIerrorsToError(errorInError)
+			return emptyOutput, vapiBindings_.VAPIerrorsToError(errorInError)
 		}
 		return emptyOutput, methodError.(error)
 	}
 }
 
-func (aIface *albAutoScaleLaunchConfigsClient) List(cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (model.ALBAutoScaleLaunchConfigApiResponse, error) {
+func (aIface *albAutoScaleLaunchConfigsClient) List(cursorParam *string, includeMarkForDeleteObjectsParam *bool, includedFieldsParam *string, pageSizeParam *int64, sortAscendingParam *bool, sortByParam *string) (nsx_policyModel.ALBAutoScaleLaunchConfigApiResponse, error) {
 	typeConverter := aIface.connector.TypeConverter()
 	executionContext := aIface.connector.NewExecutionContext()
-	sv := bindings.NewStructValueBuilder(albAutoScaleLaunchConfigsListInputType(), typeConverter)
+	operationRestMetaData := albAutoScaleLaunchConfigsListRestMetadata()
+	executionContext.SetConnectionMetadata(vapiCore_.RESTMetadataKey, operationRestMetaData)
+	executionContext.SetConnectionMetadata(vapiCore_.ResponseTypeKey, vapiCore_.NewResponseType(true, false))
+
+	sv := vapiBindings_.NewStructValueBuilder(albAutoScaleLaunchConfigsListInputType(), typeConverter)
 	sv.AddStructField("Cursor", cursorParam)
 	sv.AddStructField("IncludeMarkForDeleteObjects", includeMarkForDeleteObjectsParam)
 	sv.AddStructField("IncludedFields", includedFieldsParam)
@@ -181,83 +201,82 @@ func (aIface *albAutoScaleLaunchConfigsClient) List(cursorParam *string, include
 	sv.AddStructField("SortBy", sortByParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
-		var emptyOutput model.ALBAutoScaleLaunchConfigApiResponse
-		return emptyOutput, bindings.VAPIerrorsToError(inputError)
+		var emptyOutput nsx_policyModel.ALBAutoScaleLaunchConfigApiResponse
+		return emptyOutput, vapiBindings_.VAPIerrorsToError(inputError)
 	}
-	operationRestMetaData := albAutoScaleLaunchConfigsListRestMetadata()
-	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
-	connectionMetadata["isStreamingResponse"] = false
-	aIface.connector.SetConnectionMetadata(connectionMetadata)
+
 	methodResult := aIface.connector.GetApiProvider().Invoke("com.vmware.nsx_policy.infra.alb_auto_scale_launch_configs", "list", inputDataValue, executionContext)
-	var emptyOutput model.ALBAutoScaleLaunchConfigApiResponse
+	var emptyOutput nsx_policyModel.ALBAutoScaleLaunchConfigApiResponse
 	if methodResult.IsSuccess() {
-		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), albAutoScaleLaunchConfigsListOutputType())
+		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), AlbAutoScaleLaunchConfigsListOutputType())
 		if errorInOutput != nil {
-			return emptyOutput, bindings.VAPIerrorsToError(errorInOutput)
+			return emptyOutput, vapiBindings_.VAPIerrorsToError(errorInOutput)
 		}
-		return output.(model.ALBAutoScaleLaunchConfigApiResponse), nil
+		return output.(nsx_policyModel.ALBAutoScaleLaunchConfigApiResponse), nil
 	} else {
 		methodError, errorInError := typeConverter.ConvertToGolang(methodResult.Error(), aIface.GetErrorBindingType(methodResult.Error().Name()))
 		if errorInError != nil {
-			return emptyOutput, bindings.VAPIerrorsToError(errorInError)
+			return emptyOutput, vapiBindings_.VAPIerrorsToError(errorInError)
 		}
 		return emptyOutput, methodError.(error)
 	}
 }
 
-func (aIface *albAutoScaleLaunchConfigsClient) Patch(albAutoscalelaunchconfigIdParam string, aLBAutoScaleLaunchConfigParam model.ALBAutoScaleLaunchConfig) error {
+func (aIface *albAutoScaleLaunchConfigsClient) Patch(albAutoscalelaunchconfigIdParam string, aLBAutoScaleLaunchConfigParam nsx_policyModel.ALBAutoScaleLaunchConfig) error {
 	typeConverter := aIface.connector.TypeConverter()
 	executionContext := aIface.connector.NewExecutionContext()
-	sv := bindings.NewStructValueBuilder(albAutoScaleLaunchConfigsPatchInputType(), typeConverter)
+	operationRestMetaData := albAutoScaleLaunchConfigsPatchRestMetadata()
+	executionContext.SetConnectionMetadata(vapiCore_.RESTMetadataKey, operationRestMetaData)
+	executionContext.SetConnectionMetadata(vapiCore_.ResponseTypeKey, vapiCore_.NewResponseType(true, false))
+
+	sv := vapiBindings_.NewStructValueBuilder(albAutoScaleLaunchConfigsPatchInputType(), typeConverter)
 	sv.AddStructField("AlbAutoscalelaunchconfigId", albAutoscalelaunchconfigIdParam)
 	sv.AddStructField("ALBAutoScaleLaunchConfig", aLBAutoScaleLaunchConfigParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
-		return bindings.VAPIerrorsToError(inputError)
+		return vapiBindings_.VAPIerrorsToError(inputError)
 	}
-	operationRestMetaData := albAutoScaleLaunchConfigsPatchRestMetadata()
-	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
-	connectionMetadata["isStreamingResponse"] = false
-	aIface.connector.SetConnectionMetadata(connectionMetadata)
+
 	methodResult := aIface.connector.GetApiProvider().Invoke("com.vmware.nsx_policy.infra.alb_auto_scale_launch_configs", "patch", inputDataValue, executionContext)
 	if methodResult.IsSuccess() {
 		return nil
 	} else {
 		methodError, errorInError := typeConverter.ConvertToGolang(methodResult.Error(), aIface.GetErrorBindingType(methodResult.Error().Name()))
 		if errorInError != nil {
-			return bindings.VAPIerrorsToError(errorInError)
+			return vapiBindings_.VAPIerrorsToError(errorInError)
 		}
 		return methodError.(error)
 	}
 }
 
-func (aIface *albAutoScaleLaunchConfigsClient) Update(albAutoscalelaunchconfigIdParam string, aLBAutoScaleLaunchConfigParam model.ALBAutoScaleLaunchConfig) (model.ALBAutoScaleLaunchConfig, error) {
+func (aIface *albAutoScaleLaunchConfigsClient) Update(albAutoscalelaunchconfigIdParam string, aLBAutoScaleLaunchConfigParam nsx_policyModel.ALBAutoScaleLaunchConfig) (nsx_policyModel.ALBAutoScaleLaunchConfig, error) {
 	typeConverter := aIface.connector.TypeConverter()
 	executionContext := aIface.connector.NewExecutionContext()
-	sv := bindings.NewStructValueBuilder(albAutoScaleLaunchConfigsUpdateInputType(), typeConverter)
+	operationRestMetaData := albAutoScaleLaunchConfigsUpdateRestMetadata()
+	executionContext.SetConnectionMetadata(vapiCore_.RESTMetadataKey, operationRestMetaData)
+	executionContext.SetConnectionMetadata(vapiCore_.ResponseTypeKey, vapiCore_.NewResponseType(true, false))
+
+	sv := vapiBindings_.NewStructValueBuilder(albAutoScaleLaunchConfigsUpdateInputType(), typeConverter)
 	sv.AddStructField("AlbAutoscalelaunchconfigId", albAutoscalelaunchconfigIdParam)
 	sv.AddStructField("ALBAutoScaleLaunchConfig", aLBAutoScaleLaunchConfigParam)
 	inputDataValue, inputError := sv.GetStructValue()
 	if inputError != nil {
-		var emptyOutput model.ALBAutoScaleLaunchConfig
-		return emptyOutput, bindings.VAPIerrorsToError(inputError)
+		var emptyOutput nsx_policyModel.ALBAutoScaleLaunchConfig
+		return emptyOutput, vapiBindings_.VAPIerrorsToError(inputError)
 	}
-	operationRestMetaData := albAutoScaleLaunchConfigsUpdateRestMetadata()
-	connectionMetadata := map[string]interface{}{lib.REST_METADATA: operationRestMetaData}
-	connectionMetadata["isStreamingResponse"] = false
-	aIface.connector.SetConnectionMetadata(connectionMetadata)
+
 	methodResult := aIface.connector.GetApiProvider().Invoke("com.vmware.nsx_policy.infra.alb_auto_scale_launch_configs", "update", inputDataValue, executionContext)
-	var emptyOutput model.ALBAutoScaleLaunchConfig
+	var emptyOutput nsx_policyModel.ALBAutoScaleLaunchConfig
 	if methodResult.IsSuccess() {
-		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), albAutoScaleLaunchConfigsUpdateOutputType())
+		output, errorInOutput := typeConverter.ConvertToGolang(methodResult.Output(), AlbAutoScaleLaunchConfigsUpdateOutputType())
 		if errorInOutput != nil {
-			return emptyOutput, bindings.VAPIerrorsToError(errorInOutput)
+			return emptyOutput, vapiBindings_.VAPIerrorsToError(errorInOutput)
 		}
-		return output.(model.ALBAutoScaleLaunchConfig), nil
+		return output.(nsx_policyModel.ALBAutoScaleLaunchConfig), nil
 	} else {
 		methodError, errorInError := typeConverter.ConvertToGolang(methodResult.Error(), aIface.GetErrorBindingType(methodResult.Error().Name()))
 		if errorInError != nil {
-			return emptyOutput, bindings.VAPIerrorsToError(errorInError)
+			return emptyOutput, vapiBindings_.VAPIerrorsToError(errorInError)
 		}
 		return emptyOutput, methodError.(error)
 	}

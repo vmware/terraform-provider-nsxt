@@ -80,7 +80,6 @@ func dataSourceNsxtPolicyTransportZoneRead(d *schema.ResourceData, m interface{}
 			return err
 		}
 		converter := bindings.NewTypeConverter()
-		converter.SetMode(bindings.REST)
 		dataValue, errors := converter.ConvertToGolang(obj, gm_model.PolicyTransportZoneBindingType())
 		if len(errors) > 0 {
 			return errors[0]

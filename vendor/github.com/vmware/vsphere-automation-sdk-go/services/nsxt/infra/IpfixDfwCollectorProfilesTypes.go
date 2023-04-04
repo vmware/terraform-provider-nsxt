@@ -11,49 +11,49 @@
 package infra
 
 import (
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+	vapiBindings_ "github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	vapiData_ "github.com/vmware/vsphere-automation-sdk-go/runtime/data"
+	vapiProtocol_ "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol"
+	nsx_policyModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"reflect"
 )
 
-func ipfixDfwCollectorProfilesDeleteInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func ipfixDfwCollectorProfilesDeleteInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["ipfix_dfw_collector_profile_id"] = bindings.NewStringType()
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
+	fields["ipfix_dfw_collector_profile_id"] = vapiBindings_.NewStringType()
+	fields["override"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
 	fieldNameMap["ipfix_dfw_collector_profile_id"] = "IpfixDfwCollectorProfileId"
 	fieldNameMap["override"] = "Override"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func ipfixDfwCollectorProfilesDeleteOutputType() bindings.BindingType {
-	return bindings.NewVoidType()
+func IpfixDfwCollectorProfilesDeleteOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewVoidType()
 }
 
-func ipfixDfwCollectorProfilesDeleteRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func ipfixDfwCollectorProfilesDeleteRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["ipfix_dfw_collector_profile_id"] = bindings.NewStringType()
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
+	fields["ipfix_dfw_collector_profile_id"] = vapiBindings_.NewStringType()
+	fields["override"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
 	fieldNameMap["ipfix_dfw_collector_profile_id"] = "IpfixDfwCollectorProfileId"
 	fieldNameMap["override"] = "Override"
-	paramsTypeMap["ipfix_dfw_collector_profile_id"] = bindings.NewStringType()
-	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	paramsTypeMap["ipfixDfwCollectorProfileId"] = bindings.NewStringType()
+	paramsTypeMap["ipfix_dfw_collector_profile_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["override"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	paramsTypeMap["ipfixDfwCollectorProfileId"] = vapiBindings_.NewStringType()
 	pathParams["ipfix_dfw_collector_profile_id"] = "ipfixDfwCollectorProfileId"
 	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -74,36 +74,36 @@ func ipfixDfwCollectorProfilesDeleteRestMetadata() protocol.OperationRestMetadat
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func ipfixDfwCollectorProfilesGetInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func ipfixDfwCollectorProfilesGetInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["ipfix_dfw_collector_profile_id"] = bindings.NewStringType()
+	fields["ipfix_dfw_collector_profile_id"] = vapiBindings_.NewStringType()
 	fieldNameMap["ipfix_dfw_collector_profile_id"] = "IpfixDfwCollectorProfileId"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func ipfixDfwCollectorProfilesGetOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.IPFIXDFWCollectorProfileBindingType)
+func IpfixDfwCollectorProfilesGetOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewReferenceType(nsx_policyModel.IPFIXDFWCollectorProfileBindingType)
 }
 
-func ipfixDfwCollectorProfilesGetRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func ipfixDfwCollectorProfilesGetRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["ipfix_dfw_collector_profile_id"] = bindings.NewStringType()
+	fields["ipfix_dfw_collector_profile_id"] = vapiBindings_.NewStringType()
 	fieldNameMap["ipfix_dfw_collector_profile_id"] = "IpfixDfwCollectorProfileId"
-	paramsTypeMap["ipfix_dfw_collector_profile_id"] = bindings.NewStringType()
-	paramsTypeMap["ipfixDfwCollectorProfileId"] = bindings.NewStringType()
+	paramsTypeMap["ipfix_dfw_collector_profile_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["ipfixDfwCollectorProfileId"] = vapiBindings_.NewStringType()
 	pathParams["ipfix_dfw_collector_profile_id"] = "ipfixDfwCollectorProfileId"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -124,56 +124,56 @@ func ipfixDfwCollectorProfilesGetRestMetadata() protocol.OperationRestMetadata {
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func ipfixDfwCollectorProfilesListInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func ipfixDfwCollectorProfilesListInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
-	fields["include_mark_for_delete_objects"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	fields["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
-	fields["page_size"] = bindings.NewOptionalType(bindings.NewIntegerType())
-	fields["sort_ascending"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	fields["sort_by"] = bindings.NewOptionalType(bindings.NewStringType())
+	fields["cursor"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["include_mark_for_delete_objects"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	fields["included_fields"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["page_size"] = vapiBindings_.NewOptionalType(vapiBindings_.NewIntegerType())
+	fields["sort_ascending"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	fields["sort_by"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
 	fieldNameMap["cursor"] = "Cursor"
 	fieldNameMap["include_mark_for_delete_objects"] = "IncludeMarkForDeleteObjects"
 	fieldNameMap["included_fields"] = "IncludedFields"
 	fieldNameMap["page_size"] = "PageSize"
 	fieldNameMap["sort_ascending"] = "SortAscending"
 	fieldNameMap["sort_by"] = "SortBy"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func ipfixDfwCollectorProfilesListOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.IPFIXDFWCollectorProfileListResultBindingType)
+func IpfixDfwCollectorProfilesListOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewReferenceType(nsx_policyModel.IPFIXDFWCollectorProfileListResultBindingType)
 }
 
-func ipfixDfwCollectorProfilesListRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func ipfixDfwCollectorProfilesListRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
-	fields["include_mark_for_delete_objects"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	fields["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
-	fields["page_size"] = bindings.NewOptionalType(bindings.NewIntegerType())
-	fields["sort_ascending"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	fields["sort_by"] = bindings.NewOptionalType(bindings.NewStringType())
+	fields["cursor"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["include_mark_for_delete_objects"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	fields["included_fields"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["page_size"] = vapiBindings_.NewOptionalType(vapiBindings_.NewIntegerType())
+	fields["sort_ascending"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	fields["sort_by"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
 	fieldNameMap["cursor"] = "Cursor"
 	fieldNameMap["include_mark_for_delete_objects"] = "IncludeMarkForDeleteObjects"
 	fieldNameMap["included_fields"] = "IncludedFields"
 	fieldNameMap["page_size"] = "PageSize"
 	fieldNameMap["sort_ascending"] = "SortAscending"
 	fieldNameMap["sort_by"] = "SortBy"
-	paramsTypeMap["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
-	paramsTypeMap["page_size"] = bindings.NewOptionalType(bindings.NewIntegerType())
-	paramsTypeMap["include_mark_for_delete_objects"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	paramsTypeMap["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
-	paramsTypeMap["sort_by"] = bindings.NewOptionalType(bindings.NewStringType())
-	paramsTypeMap["sort_ascending"] = bindings.NewOptionalType(bindings.NewBooleanType())
+	paramsTypeMap["cursor"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	paramsTypeMap["sort_ascending"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	paramsTypeMap["included_fields"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	paramsTypeMap["sort_by"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	paramsTypeMap["include_mark_for_delete_objects"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	paramsTypeMap["page_size"] = vapiBindings_.NewOptionalType(vapiBindings_.NewIntegerType())
 	queryParams["cursor"] = "cursor"
 	queryParams["sort_ascending"] = "sort_ascending"
 	queryParams["included_fields"] = "included_fields"
@@ -182,7 +182,7 @@ func ipfixDfwCollectorProfilesListRestMetadata() protocol.OperationRestMetadata 
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -203,47 +203,47 @@ func ipfixDfwCollectorProfilesListRestMetadata() protocol.OperationRestMetadata 
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func ipfixDfwCollectorProfilesPatchInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func ipfixDfwCollectorProfilesPatchInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["ipfix_dfw_collector_profile_id"] = bindings.NewStringType()
-	fields["i_PFIXDFW_collector_profile"] = bindings.NewReferenceType(model.IPFIXDFWCollectorProfileBindingType)
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
+	fields["ipfix_dfw_collector_profile_id"] = vapiBindings_.NewStringType()
+	fields["i_PFIXDFW_collector_profile"] = vapiBindings_.NewReferenceType(nsx_policyModel.IPFIXDFWCollectorProfileBindingType)
+	fields["override"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
 	fieldNameMap["ipfix_dfw_collector_profile_id"] = "IpfixDfwCollectorProfileId"
 	fieldNameMap["i_PFIXDFW_collector_profile"] = "IPFIXDFWCollectorProfile"
 	fieldNameMap["override"] = "Override"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func ipfixDfwCollectorProfilesPatchOutputType() bindings.BindingType {
-	return bindings.NewVoidType()
+func IpfixDfwCollectorProfilesPatchOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewVoidType()
 }
 
-func ipfixDfwCollectorProfilesPatchRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func ipfixDfwCollectorProfilesPatchRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["ipfix_dfw_collector_profile_id"] = bindings.NewStringType()
-	fields["i_PFIXDFW_collector_profile"] = bindings.NewReferenceType(model.IPFIXDFWCollectorProfileBindingType)
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
+	fields["ipfix_dfw_collector_profile_id"] = vapiBindings_.NewStringType()
+	fields["i_PFIXDFW_collector_profile"] = vapiBindings_.NewReferenceType(nsx_policyModel.IPFIXDFWCollectorProfileBindingType)
+	fields["override"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
 	fieldNameMap["ipfix_dfw_collector_profile_id"] = "IpfixDfwCollectorProfileId"
 	fieldNameMap["i_PFIXDFW_collector_profile"] = "IPFIXDFWCollectorProfile"
 	fieldNameMap["override"] = "Override"
-	paramsTypeMap["ipfix_dfw_collector_profile_id"] = bindings.NewStringType()
-	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	paramsTypeMap["i_PFIXDFW_collector_profile"] = bindings.NewReferenceType(model.IPFIXDFWCollectorProfileBindingType)
-	paramsTypeMap["ipfixDfwCollectorProfileId"] = bindings.NewStringType()
+	paramsTypeMap["ipfix_dfw_collector_profile_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["i_PFIXDFW_collector_profile"] = vapiBindings_.NewReferenceType(nsx_policyModel.IPFIXDFWCollectorProfileBindingType)
+	paramsTypeMap["override"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	paramsTypeMap["ipfixDfwCollectorProfileId"] = vapiBindings_.NewStringType()
 	pathParams["ipfix_dfw_collector_profile_id"] = "ipfixDfwCollectorProfileId"
 	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -264,47 +264,47 @@ func ipfixDfwCollectorProfilesPatchRestMetadata() protocol.OperationRestMetadata
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func ipfixDfwCollectorProfilesUpdateInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func ipfixDfwCollectorProfilesUpdateInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["ipfix_dfw_collector_profile_id"] = bindings.NewStringType()
-	fields["i_PFIXDFW_collector_profile"] = bindings.NewReferenceType(model.IPFIXDFWCollectorProfileBindingType)
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
+	fields["ipfix_dfw_collector_profile_id"] = vapiBindings_.NewStringType()
+	fields["i_PFIXDFW_collector_profile"] = vapiBindings_.NewReferenceType(nsx_policyModel.IPFIXDFWCollectorProfileBindingType)
+	fields["override"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
 	fieldNameMap["ipfix_dfw_collector_profile_id"] = "IpfixDfwCollectorProfileId"
 	fieldNameMap["i_PFIXDFW_collector_profile"] = "IPFIXDFWCollectorProfile"
 	fieldNameMap["override"] = "Override"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func ipfixDfwCollectorProfilesUpdateOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.IPFIXDFWCollectorProfileBindingType)
+func IpfixDfwCollectorProfilesUpdateOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewReferenceType(nsx_policyModel.IPFIXDFWCollectorProfileBindingType)
 }
 
-func ipfixDfwCollectorProfilesUpdateRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func ipfixDfwCollectorProfilesUpdateRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["ipfix_dfw_collector_profile_id"] = bindings.NewStringType()
-	fields["i_PFIXDFW_collector_profile"] = bindings.NewReferenceType(model.IPFIXDFWCollectorProfileBindingType)
-	fields["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
+	fields["ipfix_dfw_collector_profile_id"] = vapiBindings_.NewStringType()
+	fields["i_PFIXDFW_collector_profile"] = vapiBindings_.NewReferenceType(nsx_policyModel.IPFIXDFWCollectorProfileBindingType)
+	fields["override"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
 	fieldNameMap["ipfix_dfw_collector_profile_id"] = "IpfixDfwCollectorProfileId"
 	fieldNameMap["i_PFIXDFW_collector_profile"] = "IPFIXDFWCollectorProfile"
 	fieldNameMap["override"] = "Override"
-	paramsTypeMap["ipfix_dfw_collector_profile_id"] = bindings.NewStringType()
-	paramsTypeMap["override"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	paramsTypeMap["i_PFIXDFW_collector_profile"] = bindings.NewReferenceType(model.IPFIXDFWCollectorProfileBindingType)
-	paramsTypeMap["ipfixDfwCollectorProfileId"] = bindings.NewStringType()
+	paramsTypeMap["ipfix_dfw_collector_profile_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["i_PFIXDFW_collector_profile"] = vapiBindings_.NewReferenceType(nsx_policyModel.IPFIXDFWCollectorProfileBindingType)
+	paramsTypeMap["override"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	paramsTypeMap["ipfixDfwCollectorProfileId"] = vapiBindings_.NewStringType()
 	pathParams["ipfix_dfw_collector_profile_id"] = "ipfixDfwCollectorProfileId"
 	queryParams["override"] = "override"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,

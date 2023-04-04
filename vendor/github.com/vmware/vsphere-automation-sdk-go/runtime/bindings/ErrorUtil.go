@@ -1,4 +1,4 @@
-/* Copyright © 2019-2020 VMware, Inc. All Rights Reserved.
+/* Copyright © 2019-2022 VMware, Inc. All Rights Reserved.
    SPDX-License-Identifier: BSD-2-Clause */
 
 package bindings
@@ -244,4 +244,23 @@ func CreateErrorValueFromErrorValueAndMessages(errorDef data.ErrorDefinition, ca
 	errorValue.SetField(ERROR_TYPE_FIELD_NAME, data.NewOptionalValue(data.NewStringValue(ERROR_TYPE_MAP[errorDef.Name()])))
 	return errorValue
 
+}
+
+func GetVAPIError(err error) *data.ErrorValue {
+	if err == nil {
+		return nil
+	}
+	var errorValue *data.ErrorValue
+	if vapiError, isVapiError := err.(Structure); isVapiError {
+		dataVal, err := vapiError.GetDataValue__()
+		if dataVal != nil && err == nil {
+			errorValue = dataVal.(*data.ErrorValue)
+		}
+	}
+	if errorValue == nil {
+		args := map[string]string{"err": err.Error()}
+		errorValue = CreateErrorValueFromMessageId(INTERNAL_SERVER_ERROR_DEF,
+			"vapi.bindings.error.internal", args)
+	}
+	return errorValue
 }

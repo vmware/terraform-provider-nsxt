@@ -48,7 +48,7 @@ func resourceNsxtPolicyDomain() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyDomainExists(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
+func resourceNsxtPolicyDomainExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	var err error
 	if isGlobalManager {
 		client := gm_infra.NewDomainsClient(connector)
@@ -70,7 +70,6 @@ func resourceNsxtPolicyDomainExists(id string, connector *client.RestConnector, 
 
 func createChildDomainDeploymentMap(m interface{}, domainID string, location string) (*data.StructValue, error) {
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 
 	mapID := domainID + "-" + location
 	path := getGlobalPolicyEnforcementPointPathWithLocation(m, location)
@@ -186,7 +185,6 @@ func resourceNsxtPolicyDomainCreate(d *schema.ResourceData, m interface{}) error
 	}
 
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 	dataValue, errors := converter.ConvertToVapi(childDomain, model.ChildDomainBindingType())
 	if errors != nil {
 		return fmt.Errorf("Error converting Domain Child: %v", errors[0])
@@ -286,7 +284,6 @@ func resourceNsxtPolicyDomainUpdate(d *schema.ResourceData, m interface{}) error
 	}
 
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 	dataValue, errors := converter.ConvertToVapi(childDomain, model.ChildDomainBindingType())
 	if errors != nil {
 		return fmt.Errorf("Error converting Domain Child: %v", errors[0])

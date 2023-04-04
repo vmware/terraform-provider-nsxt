@@ -1,4 +1,4 @@
-/* Copyright © 2019 VMware, Inc. All Rights Reserved.
+/* Copyright © 2019, 2021 VMware, Inc. All Rights Reserved.
    SPDX-License-Identifier: BSD-2-Clause */
 
 package msg
@@ -81,8 +81,8 @@ func NewJsonRpc20Error(code int64, data interface{}) *JsonRpc20Error {
 	return &JsonRpc20Error{code: code, data: data, message: message}
 }
 
-func NewJsonRpcErrorParseError(data interface{}) *JsonRpc20Error {
-	return NewJsonRpc20Error(JSONRPC_PARSE_ERROR, data)
+func NewJsonRpcErrorParseError(error error) *JsonRpc20Error {
+	return NewJsonRpc20Error(JSONRPC_PARSE_ERROR, error)
 }
 
 func NewJsonRpcErrorInvalidRequest(data interface{}) *JsonRpc20Error {

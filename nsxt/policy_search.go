@@ -27,7 +27,6 @@ func policyDataSourceResourceFilterAndSet(d *schema.ResourceData, resultValues [
 	objName := d.Get("display_name").(string)
 	objID := d.Get("id").(string)
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 
 	for _, result := range resultValues {
 		dataValue, errors := converter.ConvertToGolang(result, model.PolicyResourceBindingType())
@@ -80,11 +79,11 @@ func policyDataSourceResourceFilterAndSet(d *schema.ResourceData, resultValues [
 	return obj.StructValue, nil
 }
 
-func policyDataSourceResourceRead(d *schema.ResourceData, connector *client.RestConnector, isGlobalManager bool, resourceType string, additionalQuery map[string]string) (*data.StructValue, error) {
+func policyDataSourceResourceRead(d *schema.ResourceData, connector client.Connector, isGlobalManager bool, resourceType string, additionalQuery map[string]string) (*data.StructValue, error) {
 	return policyDataSourceResourceReadWithValidation(d, connector, isGlobalManager, resourceType, additionalQuery, true)
 }
 
-func policyDataSourceResourceReadWithValidation(d *schema.ResourceData, connector *client.RestConnector, isGlobalManager bool, resourceType string, additionalQuery map[string]string, paramsValidation bool) (*data.StructValue, error) {
+func policyDataSourceResourceReadWithValidation(d *schema.ResourceData, connector client.Connector, isGlobalManager bool, resourceType string, additionalQuery map[string]string, paramsValidation bool) (*data.StructValue, error) {
 	objName := d.Get("display_name").(string)
 	objID := d.Get("id").(string)
 	var err error
@@ -111,7 +110,7 @@ func policyDataSourceResourceReadWithValidation(d *schema.ResourceData, connecto
 	return policyDataSourceResourceFilterAndSet(d, resultValues, resourceType)
 }
 
-func listPolicyResourcesByNameAndType(connector *client.RestConnector, isGlobalManager bool, displayName string, resourceType string, additionalQuery *string) ([]*data.StructValue, error) {
+func listPolicyResourcesByNameAndType(connector client.Connector, isGlobalManager bool, displayName string, resourceType string, additionalQuery *string) ([]*data.StructValue, error) {
 	query := fmt.Sprintf("resource_type:%s AND display_name:%s* AND marked_for_delete:false", resourceType, displayName)
 	if isGlobalManager {
 		return searchGMPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
@@ -133,7 +132,7 @@ func escapeSpecialCharacters(str string) string {
 	return str
 }
 
-func listPolicyResourcesByID(connector *client.RestConnector, isGlobalManager bool, resourceID *string, additionalQuery *string) ([]*data.StructValue, error) {
+func listPolicyResourcesByID(connector client.Connector, isGlobalManager bool, resourceID *string, additionalQuery *string) ([]*data.StructValue, error) {
 	query := fmt.Sprintf("id:%s AND marked_for_delete:false", escapeSpecialCharacters(*resourceID))
 	if isGlobalManager {
 		return searchGMPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
@@ -141,7 +140,7 @@ func listPolicyResourcesByID(connector *client.RestConnector, isGlobalManager bo
 	return searchLMPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
 }
 
-func listPolicyResourcesByNsxID(connector *client.RestConnector, isGlobalManager bool, resourceID *string, additionalQuery *string) ([]*data.StructValue, error) {
+func listPolicyResourcesByNsxID(connector client.Connector, isGlobalManager bool, resourceID *string, additionalQuery *string) ([]*data.StructValue, error) {
 	query := fmt.Sprintf("nsx_id:%s AND marked_for_delete:false", escapeSpecialCharacters(*resourceID))
 	if isGlobalManager {
 		return searchGMPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
@@ -156,7 +155,7 @@ func buildPolicyResourcesQuery(query *string, additionalQuery *string) *string {
 	return query
 }
 
-func searchGMPolicyResources(connector *client.RestConnector, query string) ([]*data.StructValue, error) {
+func searchGMPolicyResources(connector client.Connector, query string) ([]*data.StructValue, error) {
 	client := search.NewQueryClient(connector)
 	var results []*data.StructValue
 	var cursor *string
@@ -182,7 +181,7 @@ func searchGMPolicyResources(connector *client.RestConnector, query string) ([]*
 	}
 }
 
-func searchLMPolicyResources(connector *client.RestConnector, query string) ([]*data.StructValue, error) {
+func searchLMPolicyResources(connector client.Connector, query string) ([]*data.StructValue, error) {
 	client := lm_search.NewQueryClient(connector)
 	var results []*data.StructValue
 	var cursor *string

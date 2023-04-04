@@ -11,50 +11,50 @@
 package segments
 
 import (
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+	vapiBindings_ "github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	vapiData_ "github.com/vmware/vsphere-automation-sdk-go/runtime/data"
+	vapiProtocol_ "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol"
+	nsx_policyModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"reflect"
 )
 
-func dhcpStaticBindingConfigsDeleteInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func dhcpStaticBindingConfigsDeleteInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["segment_id"] = bindings.NewStringType()
-	fields["binding_id"] = bindings.NewStringType()
+	fields["segment_id"] = vapiBindings_.NewStringType()
+	fields["binding_id"] = vapiBindings_.NewStringType()
 	fieldNameMap["segment_id"] = "SegmentId"
 	fieldNameMap["binding_id"] = "BindingId"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func dhcpStaticBindingConfigsDeleteOutputType() bindings.BindingType {
-	return bindings.NewVoidType()
+func DhcpStaticBindingConfigsDeleteOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewVoidType()
 }
 
-func dhcpStaticBindingConfigsDeleteRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func dhcpStaticBindingConfigsDeleteRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["segment_id"] = bindings.NewStringType()
-	fields["binding_id"] = bindings.NewStringType()
+	fields["segment_id"] = vapiBindings_.NewStringType()
+	fields["binding_id"] = vapiBindings_.NewStringType()
 	fieldNameMap["segment_id"] = "SegmentId"
 	fieldNameMap["binding_id"] = "BindingId"
-	paramsTypeMap["segment_id"] = bindings.NewStringType()
-	paramsTypeMap["binding_id"] = bindings.NewStringType()
-	paramsTypeMap["segmentId"] = bindings.NewStringType()
-	paramsTypeMap["bindingId"] = bindings.NewStringType()
+	paramsTypeMap["segment_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["binding_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["segmentId"] = vapiBindings_.NewStringType()
+	paramsTypeMap["bindingId"] = vapiBindings_.NewStringType()
 	pathParams["segment_id"] = "segmentId"
 	pathParams["binding_id"] = "bindingId"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -75,43 +75,43 @@ func dhcpStaticBindingConfigsDeleteRestMetadata() protocol.OperationRestMetadata
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func dhcpStaticBindingConfigsGetInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func dhcpStaticBindingConfigsGetInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["segment_id"] = bindings.NewStringType()
-	fields["binding_id"] = bindings.NewStringType()
+	fields["segment_id"] = vapiBindings_.NewStringType()
+	fields["binding_id"] = vapiBindings_.NewStringType()
 	fieldNameMap["segment_id"] = "SegmentId"
 	fieldNameMap["binding_id"] = "BindingId"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func dhcpStaticBindingConfigsGetOutputType() bindings.BindingType {
-	return bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.DhcpStaticBindingConfigBindingType)}, bindings.REST)
+func DhcpStaticBindingConfigsGetOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewDynamicStructType([]vapiBindings_.ReferenceType{vapiBindings_.NewReferenceType(nsx_policyModel.DhcpStaticBindingConfigBindingType)})
 }
 
-func dhcpStaticBindingConfigsGetRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func dhcpStaticBindingConfigsGetRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["segment_id"] = bindings.NewStringType()
-	fields["binding_id"] = bindings.NewStringType()
+	fields["segment_id"] = vapiBindings_.NewStringType()
+	fields["binding_id"] = vapiBindings_.NewStringType()
 	fieldNameMap["segment_id"] = "SegmentId"
 	fieldNameMap["binding_id"] = "BindingId"
-	paramsTypeMap["segment_id"] = bindings.NewStringType()
-	paramsTypeMap["binding_id"] = bindings.NewStringType()
-	paramsTypeMap["segmentId"] = bindings.NewStringType()
-	paramsTypeMap["bindingId"] = bindings.NewStringType()
+	paramsTypeMap["segment_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["binding_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["segmentId"] = vapiBindings_.NewStringType()
+	paramsTypeMap["bindingId"] = vapiBindings_.NewStringType()
 	pathParams["segment_id"] = "segmentId"
 	pathParams["binding_id"] = "bindingId"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -132,16 +132,16 @@ func dhcpStaticBindingConfigsGetRestMetadata() protocol.OperationRestMetadata {
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func dhcpStaticBindingConfigsListInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func dhcpStaticBindingConfigsListInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["segment_id"] = bindings.NewStringType()
-	fields["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
-	fields["include_mark_for_delete_objects"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	fields["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
-	fields["page_size"] = bindings.NewOptionalType(bindings.NewIntegerType())
-	fields["sort_ascending"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	fields["sort_by"] = bindings.NewOptionalType(bindings.NewStringType())
+	fields["segment_id"] = vapiBindings_.NewStringType()
+	fields["cursor"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["include_mark_for_delete_objects"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	fields["included_fields"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["page_size"] = vapiBindings_.NewOptionalType(vapiBindings_.NewIntegerType())
+	fields["sort_ascending"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	fields["sort_by"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
 	fieldNameMap["segment_id"] = "SegmentId"
 	fieldNameMap["cursor"] = "Cursor"
 	fieldNameMap["include_mark_for_delete_objects"] = "IncludeMarkForDeleteObjects"
@@ -149,30 +149,30 @@ func dhcpStaticBindingConfigsListInputType() bindings.StructType {
 	fieldNameMap["page_size"] = "PageSize"
 	fieldNameMap["sort_ascending"] = "SortAscending"
 	fieldNameMap["sort_by"] = "SortBy"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func dhcpStaticBindingConfigsListOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.DhcpStaticBindingConfigListResultBindingType)
+func DhcpStaticBindingConfigsListOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewReferenceType(nsx_policyModel.DhcpStaticBindingConfigListResultBindingType)
 }
 
-func dhcpStaticBindingConfigsListRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func dhcpStaticBindingConfigsListRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["segment_id"] = bindings.NewStringType()
-	fields["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
-	fields["include_mark_for_delete_objects"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	fields["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
-	fields["page_size"] = bindings.NewOptionalType(bindings.NewIntegerType())
-	fields["sort_ascending"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	fields["sort_by"] = bindings.NewOptionalType(bindings.NewStringType())
+	fields["segment_id"] = vapiBindings_.NewStringType()
+	fields["cursor"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["include_mark_for_delete_objects"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	fields["included_fields"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["page_size"] = vapiBindings_.NewOptionalType(vapiBindings_.NewIntegerType())
+	fields["sort_ascending"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	fields["sort_by"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
 	fieldNameMap["segment_id"] = "SegmentId"
 	fieldNameMap["cursor"] = "Cursor"
 	fieldNameMap["include_mark_for_delete_objects"] = "IncludeMarkForDeleteObjects"
@@ -180,14 +180,14 @@ func dhcpStaticBindingConfigsListRestMetadata() protocol.OperationRestMetadata {
 	fieldNameMap["page_size"] = "PageSize"
 	fieldNameMap["sort_ascending"] = "SortAscending"
 	fieldNameMap["sort_by"] = "SortBy"
-	paramsTypeMap["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
-	paramsTypeMap["page_size"] = bindings.NewOptionalType(bindings.NewIntegerType())
-	paramsTypeMap["include_mark_for_delete_objects"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	paramsTypeMap["segment_id"] = bindings.NewStringType()
-	paramsTypeMap["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
-	paramsTypeMap["sort_by"] = bindings.NewOptionalType(bindings.NewStringType())
-	paramsTypeMap["sort_ascending"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	paramsTypeMap["segmentId"] = bindings.NewStringType()
+	paramsTypeMap["cursor"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	paramsTypeMap["sort_ascending"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	paramsTypeMap["included_fields"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	paramsTypeMap["sort_by"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	paramsTypeMap["segment_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["include_mark_for_delete_objects"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	paramsTypeMap["page_size"] = vapiBindings_.NewOptionalType(vapiBindings_.NewIntegerType())
+	paramsTypeMap["segmentId"] = vapiBindings_.NewStringType()
 	pathParams["segment_id"] = "segmentId"
 	queryParams["cursor"] = "cursor"
 	queryParams["sort_ascending"] = "sort_ascending"
@@ -197,7 +197,7 @@ func dhcpStaticBindingConfigsListRestMetadata() protocol.OperationRestMetadata {
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -218,48 +218,48 @@ func dhcpStaticBindingConfigsListRestMetadata() protocol.OperationRestMetadata {
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func dhcpStaticBindingConfigsPatchInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func dhcpStaticBindingConfigsPatchInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["segment_id"] = bindings.NewStringType()
-	fields["binding_id"] = bindings.NewStringType()
-	fields["dhcp_static_binding_config"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.DhcpStaticBindingConfigBindingType)}, bindings.REST)
+	fields["segment_id"] = vapiBindings_.NewStringType()
+	fields["binding_id"] = vapiBindings_.NewStringType()
+	fields["dhcp_static_binding_config"] = vapiBindings_.NewDynamicStructType([]vapiBindings_.ReferenceType{vapiBindings_.NewReferenceType(nsx_policyModel.DhcpStaticBindingConfigBindingType)})
 	fieldNameMap["segment_id"] = "SegmentId"
 	fieldNameMap["binding_id"] = "BindingId"
 	fieldNameMap["dhcp_static_binding_config"] = "DhcpStaticBindingConfig"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func dhcpStaticBindingConfigsPatchOutputType() bindings.BindingType {
-	return bindings.NewVoidType()
+func DhcpStaticBindingConfigsPatchOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewVoidType()
 }
 
-func dhcpStaticBindingConfigsPatchRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func dhcpStaticBindingConfigsPatchRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["segment_id"] = bindings.NewStringType()
-	fields["binding_id"] = bindings.NewStringType()
-	fields["dhcp_static_binding_config"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.DhcpStaticBindingConfigBindingType)}, bindings.REST)
+	fields["segment_id"] = vapiBindings_.NewStringType()
+	fields["binding_id"] = vapiBindings_.NewStringType()
+	fields["dhcp_static_binding_config"] = vapiBindings_.NewDynamicStructType([]vapiBindings_.ReferenceType{vapiBindings_.NewReferenceType(nsx_policyModel.DhcpStaticBindingConfigBindingType)})
 	fieldNameMap["segment_id"] = "SegmentId"
 	fieldNameMap["binding_id"] = "BindingId"
 	fieldNameMap["dhcp_static_binding_config"] = "DhcpStaticBindingConfig"
-	paramsTypeMap["dhcp_static_binding_config"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.DhcpStaticBindingConfigBindingType)}, bindings.REST)
-	paramsTypeMap["segment_id"] = bindings.NewStringType()
-	paramsTypeMap["binding_id"] = bindings.NewStringType()
-	paramsTypeMap["segmentId"] = bindings.NewStringType()
-	paramsTypeMap["bindingId"] = bindings.NewStringType()
+	paramsTypeMap["dhcp_static_binding_config"] = vapiBindings_.NewDynamicStructType([]vapiBindings_.ReferenceType{vapiBindings_.NewReferenceType(nsx_policyModel.DhcpStaticBindingConfigBindingType)})
+	paramsTypeMap["segment_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["binding_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["segmentId"] = vapiBindings_.NewStringType()
+	paramsTypeMap["bindingId"] = vapiBindings_.NewStringType()
 	pathParams["segment_id"] = "segmentId"
 	pathParams["binding_id"] = "bindingId"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -280,48 +280,48 @@ func dhcpStaticBindingConfigsPatchRestMetadata() protocol.OperationRestMetadata 
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func dhcpStaticBindingConfigsUpdateInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func dhcpStaticBindingConfigsUpdateInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["segment_id"] = bindings.NewStringType()
-	fields["binding_id"] = bindings.NewStringType()
-	fields["dhcp_static_binding_config"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.DhcpStaticBindingConfigBindingType)}, bindings.REST)
+	fields["segment_id"] = vapiBindings_.NewStringType()
+	fields["binding_id"] = vapiBindings_.NewStringType()
+	fields["dhcp_static_binding_config"] = vapiBindings_.NewDynamicStructType([]vapiBindings_.ReferenceType{vapiBindings_.NewReferenceType(nsx_policyModel.DhcpStaticBindingConfigBindingType)})
 	fieldNameMap["segment_id"] = "SegmentId"
 	fieldNameMap["binding_id"] = "BindingId"
 	fieldNameMap["dhcp_static_binding_config"] = "DhcpStaticBindingConfig"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func dhcpStaticBindingConfigsUpdateOutputType() bindings.BindingType {
-	return bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.DhcpStaticBindingConfigBindingType)}, bindings.REST)
+func DhcpStaticBindingConfigsUpdateOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewDynamicStructType([]vapiBindings_.ReferenceType{vapiBindings_.NewReferenceType(nsx_policyModel.DhcpStaticBindingConfigBindingType)})
 }
 
-func dhcpStaticBindingConfigsUpdateRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func dhcpStaticBindingConfigsUpdateRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["segment_id"] = bindings.NewStringType()
-	fields["binding_id"] = bindings.NewStringType()
-	fields["dhcp_static_binding_config"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.DhcpStaticBindingConfigBindingType)}, bindings.REST)
+	fields["segment_id"] = vapiBindings_.NewStringType()
+	fields["binding_id"] = vapiBindings_.NewStringType()
+	fields["dhcp_static_binding_config"] = vapiBindings_.NewDynamicStructType([]vapiBindings_.ReferenceType{vapiBindings_.NewReferenceType(nsx_policyModel.DhcpStaticBindingConfigBindingType)})
 	fieldNameMap["segment_id"] = "SegmentId"
 	fieldNameMap["binding_id"] = "BindingId"
 	fieldNameMap["dhcp_static_binding_config"] = "DhcpStaticBindingConfig"
-	paramsTypeMap["dhcp_static_binding_config"] = bindings.NewDynamicStructType([]bindings.ReferenceType{bindings.NewReferenceType(model.DhcpStaticBindingConfigBindingType)}, bindings.REST)
-	paramsTypeMap["segment_id"] = bindings.NewStringType()
-	paramsTypeMap["binding_id"] = bindings.NewStringType()
-	paramsTypeMap["segmentId"] = bindings.NewStringType()
-	paramsTypeMap["bindingId"] = bindings.NewStringType()
+	paramsTypeMap["dhcp_static_binding_config"] = vapiBindings_.NewDynamicStructType([]vapiBindings_.ReferenceType{vapiBindings_.NewReferenceType(nsx_policyModel.DhcpStaticBindingConfigBindingType)})
+	paramsTypeMap["segment_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["binding_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["segmentId"] = vapiBindings_.NewStringType()
+	paramsTypeMap["bindingId"] = vapiBindings_.NewStringType()
 	pathParams["segment_id"] = "segmentId"
 	pathParams["binding_id"] = "bindingId"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,

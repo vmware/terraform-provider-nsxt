@@ -178,7 +178,6 @@ func revertSecurityPolicyDefaultRule(rule model.Rule) model.Rule {
 
 func createChildDomainWithSecurityPolicy(domain string, policyID string, policy model.SecurityPolicy) (*data.StructValue, error) {
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 
 	childPolicy := model.ChildSecurityPolicy{
 		ResourceType:   "ChildSecurityPolicy",

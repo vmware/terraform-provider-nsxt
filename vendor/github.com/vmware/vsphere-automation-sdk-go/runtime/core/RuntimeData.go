@@ -5,12 +5,12 @@ package core
 
 import "net/http"
 
-// RequestProcessor defines contract function for accessing and modifying a
-// request object
+// RequestProcessor defines contract function for accessing and modifying
+// http request object
 type RequestProcessor func(*http.Request) error
 
 // ResponseAcceptor defines contract function for accessing and getting
-// information from response object
+// information from http response object
 type ResponseAcceptor func(*http.Response)
 
 // RuntimeData holds custom runtime information
@@ -30,11 +30,17 @@ func NewRuntimeData(requestProcessors []RequestProcessor,
 // GetRequestProcessors returns slice of request processing functions
 // executed right before making request to the server
 func (r *RuntimeData) GetRequestProcessors() []RequestProcessor {
+	if r == nil {
+		return nil
+	}
 	return r.requestProcessors
 }
 
 // GetResponseAcceptors returns slice of response accepting functions
 // executed right after a response from the server
 func (r *RuntimeData) GetResponseAcceptors() []ResponseAcceptor {
+	if r == nil {
+		return nil
+	}
 	return r.responseAcceptors
 }

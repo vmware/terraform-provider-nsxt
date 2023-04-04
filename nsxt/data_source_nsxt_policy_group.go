@@ -27,7 +27,7 @@ func dataSourceNsxtPolicyGroup() *schema.Resource {
 	}
 }
 
-func listPolicyGroups(domain string, connector *client.RestConnector) ([]model.Group, error) {
+func listPolicyGroups(domain string, connector client.Connector) ([]model.Group, error) {
 	// Local Manager only
 	client := domains.NewGroupsClient(connector)
 

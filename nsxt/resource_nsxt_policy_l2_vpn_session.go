@@ -235,7 +235,7 @@ func resourceNsxtPolicyL2VPNSessionRead(d *schema.ResourceData, m interface{}) e
 	return nil
 }
 
-func resourceNsxtPolicyL2VpnSessionExists(isT0 bool, gwID string, localeServiceID string, serviceID string, sessionID string, connector *client.RestConnector) (bool, error) {
+func resourceNsxtPolicyL2VpnSessionExists(isT0 bool, gwID string, localeServiceID string, serviceID string, sessionID string, connector client.Connector) (bool, error) {
 	var err error
 	if isT0 {
 		client := t0_l2vpn_services.NewSessionsClient(connector)

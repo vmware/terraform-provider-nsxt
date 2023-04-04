@@ -1,10 +1,12 @@
-/* Copyright © 2019-2021 VMware, Inc. All Rights Reserved.
+/* Copyright © 2019-2022 VMware, Inc. All Rights Reserved.
    SPDX-License-Identifier: BSD-2-Clause */
 
 package runtime
 
 var RuntimeProperties_EN = []byte(
 	`vapi.connection=Could not connect to '{host}'
+
+vapi.authentication.metadata.required=AuthenticationFilter has no authentication metadata for this method.
 
 vapi.bindings.typeconverter.unexpected.runtime.value=Expected a value of type '{expectedType}', but received a value of type '{actualType}'
 vapi.bindings.typeconverter.invalid.type=Unexpected binding type '{bindingType}'
@@ -24,6 +26,8 @@ vapi.bindings.input.param.invalid=Invalid value for parameter '{paramName}'
 
 vapi.bindings.stub.rest_metadata.unavailable=REST metadata not available for invocation
 vapi.bindings.stub.rest_metadata.type.mismatch=Connection metadata type invalid
+
+vapi.bindings.error.internal=Internal server error occurred: {err}
 
 vapi.data.opaque.definition.null.value=Expected non-nil value got nil value
 vapi.data.validate.mismatch=Type mismatch - expected an object of type '{expectedType}', but got '{actualType}'
@@ -73,8 +77,11 @@ vapi.security.authentication.certificate.invalid=Unable to verify server certifi
 
 vapi.security.authorization.exception=Exception in invoking authorization handler {msg}
 vapi.security.authorization.invalid=Unable to authorize user
-vapi.security.authorization.invalid_with_error=Unable to authorize user. Error occured: {err}
-vapi.security.authorization.internal_server_error=Internal server error occured on authorization: {err}
+vapi.security.authorization.user.missing=Could not find user identity (see server log for details)
+vapi.security.authorization.privilege.error=Could not retrieve privilege information (see server log for details)
+vapi.security.authorization.permission.error=Could not validate permission (see server log for details)
+vapi.security.authorization.permission.denied=Permission to perform this operation was denied
+vapi.security.authorization.handler.error=Error occurred in one of the custom authorization modules (see server log for details)
 
 vapi.security.sso.digest.invalid=Invalid digest.
 vapi.security.sso.hash.invalid=Invalid hash algorithm.
@@ -110,16 +117,24 @@ vapi.protocol.server.rest.response.error_not_structure=Response error is not a s
 vapi.protocol.server.rest.response.result_failed=Method execution failed, do not set response header
 vapi.protocol.server.rest.response.unsupport_http_status=Http status '{httpStatus}' not supported
 vapi.protocol.server.rest.response.body_parse_error=Error when parsing response body
+vapi.protocol.server.rest.response.type_not_acceptable=Produced response type can't be processed by the client.
 vapi.protocol.server.rest.error.not_supported=Http status '{errorName}' not supported
+vapi.protocol.server.response.stream_type_not_acceptable=Request is not acceptable. This API produces stream response and the client has indicated it can only process mono responses.
+vapi.protocol.server.response.mono_type_not_acceptable=Request is not acceptable. This API produces mono response and the client has indicated it can only process stream responses.
+vapi.protocol.server.response.non_task_not_acceptable=Request not acceptable. API expects task request, however synchronous request was initiated by client.
 vapi.protocol.client.request.not_structure=Input request is not a structure type
-vapi.protocol.client.response.error=Error reading server response
 vapi.protocol.client.request.error=Error completing client request '{errMsg}'
-vapi.protocol.client.response.unmarshall.error=Error unmarshalling server response: {responseBody}
+vapi.protocol.client.response.error=Error handling server response: {errMsg}
+vapi.protocol.client.response.error.invalidFrame=Invalid frame received
+vapi.protocol.client.response.error.invalidResponse=Invalid response received
+vapi.protocol.client.response.error.missingContentType=Missing Content-Type header in response. vAPI does not how to interpret returned response.
+vapi.protocol.client.response.error.unknownContentType=Unknown content type: 
 vapi.protocol.client.middleware.retry.unexpected=Unexpected error occurred on request retry functionality
 
 vapi.server.timedout = Request Timed out: {errMsg}
 vapi.server.unavailable = Service not available: {errMsg}
-vapi.server.response.error = Error reading server response: {errMsg}
+
+vapi.task.not_found=Task with id {taskId} not found
 
 #unused by golang
 vapi.bindings.skeleton.task.invalidstate=Service did not set the task state
@@ -157,6 +172,8 @@ vapi.data.optional.validate=The given OptionalValue does not match the OptionalD
 vapi.data.serializers.python.unsupported.python.type=Unsupported python type '%s' provided for field '%s' in a dynamic structure
 vapi.data.serializers.invalid.type=Unsupported python type '%s' provided
 vapi.data.serializers.security_context.unsupported=Security Context with scheme %s is not supported for this operation
+vapi.data.serializers.rest.nilSecurityContext=SecurityContext should not be nil
+vapi.data.serializers.rest.invalidPropertyType=Invalid type for '{propKey}', expected type string, actual type is {propType}
 vapi.data.serializers.rest.marshall.error=Error serializing REST requests
 vapi.data.serializers.rest.deserialize.not_a_json=content type is not application/json it is {contentType} instead
 vapi.data.structref.already.resolved=Structure reference of type %s is already resolved

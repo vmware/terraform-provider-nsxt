@@ -63,7 +63,7 @@ func resourceNsxtPolicyQosProfile() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyQosProfileExists(id string, connector *client.RestConnector, isGlobalmodel bool) (bool, error) {
+func resourceNsxtPolicyQosProfileExists(id string, connector client.Connector, isGlobalmodel bool) (bool, error) {
 	var err error
 	if isGlobalmodel {
 		client := gm_infra.NewQosProfilesClient(connector)
@@ -104,7 +104,6 @@ func getPolicyQosRateShaperFromSchema(d *schema.ResourceData, index int) *data.S
 			PeakBandwidth:    &peakBW,
 		}
 		converter := bindings.NewTypeConverter()
-		converter.SetMode(bindings.REST)
 		dataValue, _ := converter.ConvertToVapi(shaper, model.IngressRateLimiterBindingType())
 		return dataValue.(*data.StructValue)
 	}
@@ -118,7 +117,6 @@ func setPolicyQosRateShaperInSchema(d *schema.ResourceData, shaperConf []*data.S
 	resourceType := rateLimiterResourceTypes[index]
 	var shapers []map[string]interface{}
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 	for _, dataShaper := range shaperConf {
 		dataValue, _ := converter.ConvertToGolang(dataShaper, model.IngressRateLimiterBindingType())
 		shaper := dataValue.(model.IngressRateLimiter)

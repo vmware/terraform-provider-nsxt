@@ -1,4 +1,4 @@
-/* Copyright © 2020 VMware, Inc. All Rights Reserved.
+/* Copyright © 2020-2021 VMware, Inc. All Rights Reserved.
    SPDX-License-Identifier: BSD-2-Clause */
 
 package rest
@@ -7,18 +7,11 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol"
 
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/core"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/security"
 )
-
-// SecurityContextSerializer is implemented by concrete
-// context serializers, such as UserPwdSecContextSerializer, SessionSecContextSerializer
-// and OauthSecContextSerializer. Clients can also implement a custom serializer
-// with special serialization requirements.
-type SecurityContextSerializer interface {
-	Serialize(core.SecurityContext) (map[string]interface{}, error)
-}
 
 type UserPwdSecContextSerializer struct {
 }
@@ -40,7 +33,7 @@ func (u *UserPwdSecContextSerializer) Serialize(ctx core.SecurityContext) (map[s
 	}
 
 	if username == nil || password == nil {
-		err := errors.New("Username and password are required for UserPwdSecContextSerializer")
+		err := errors.New("username and password are required for UserPwdSecContextSerializer")
 		return nil, err
 	}
 
@@ -48,6 +41,8 @@ func (u *UserPwdSecContextSerializer) Serialize(ctx core.SecurityContext) (map[s
 	base64EncodedVal := base64.StdEncoding.EncodeToString([]byte(credentialString))
 	return map[string]interface{}{"Authorization": "Basic " + base64EncodedVal}, nil
 }
+
+var _ protocol.SecurityContextSerializer = NewUserPwdSecContextSerializer()
 
 type SessionSecContextSerializer struct {
 }
@@ -71,6 +66,8 @@ func (s *SessionSecContextSerializer) Serialize(ctx core.SecurityContext) (map[s
 	return map[string]interface{}{security.SESSION_ID_KEY: *sessionID}, nil
 }
 
+var _ protocol.SecurityContextSerializer = NewSessionSecContextSerializer()
+
 type OauthSecContextSerializer struct {
 }
 
@@ -92,3 +89,5 @@ func (o *OauthSecContextSerializer) Serialize(ctx core.SecurityContext) (map[str
 
 	return map[string]interface{}{security.CSP_AUTH_TOKEN_KEY: *oauthToken}, nil
 }
+
+var _ protocol.SecurityContextSerializer = NewOauthSecContextSerializer()

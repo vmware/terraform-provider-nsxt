@@ -30,7 +30,7 @@ func resourceNsxtPolicyGatewayPolicy() *schema.Resource {
 	}
 }
 
-func getGatewayPolicyInDomain(id string, domainName string, connector *client.RestConnector, isGlobalManager bool) (model.GatewayPolicy, error) {
+func getGatewayPolicyInDomain(id string, domainName string, connector client.Connector, isGlobalManager bool) (model.GatewayPolicy, error) {
 	if isGlobalManager {
 		client := gm_domains.NewGatewayPoliciesClient(connector)
 		gmObj, err := client.Get(domainName, id)
@@ -48,7 +48,7 @@ func getGatewayPolicyInDomain(id string, domainName string, connector *client.Re
 
 }
 
-func resourceNsxtPolicyGatewayPolicyExistsInDomain(id string, domainName string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
+func resourceNsxtPolicyGatewayPolicyExistsInDomain(id string, domainName string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	_, err := getGatewayPolicyInDomain(id, domainName, connector, isGlobalManager)
 
 	if err == nil {
@@ -62,8 +62,8 @@ func resourceNsxtPolicyGatewayPolicyExistsInDomain(id string, domainName string,
 	return false, logAPIError("Error retrieving Gateway Policy", err)
 }
 
-func resourceNsxtPolicyGatewayPolicyExistsPartial(domainName string) func(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
-	return func(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
+func resourceNsxtPolicyGatewayPolicyExistsPartial(domainName string) func(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
+	return func(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 		return resourceNsxtPolicyGatewayPolicyExistsInDomain(id, domainName, connector, isGlobalManager)
 	}
 }
@@ -126,7 +126,7 @@ func getUpdatedRuleChildren(d *schema.ResourceData) ([]*data.StructValue, error)
 
 }
 
-func policyGatewayPolicyBuildAndPatch(d *schema.ResourceData, m interface{}, connector *client.RestConnector, isGlobalManager bool, id string) error {
+func policyGatewayPolicyBuildAndPatch(d *schema.ResourceData, m interface{}, connector client.Connector, isGlobalManager bool, id string) error {
 
 	domain := d.Get("domain").(string)
 	displayName := d.Get("display_name").(string)

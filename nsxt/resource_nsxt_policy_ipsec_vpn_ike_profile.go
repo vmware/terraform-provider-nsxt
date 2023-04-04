@@ -102,7 +102,7 @@ func resourceNsxtPolicyIPSecVpnIkeProfile() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyIPSecVpnIkeProfileExists(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
+func resourceNsxtPolicyIPSecVpnIkeProfileExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	client := infra.NewIpsecVpnIkeProfilesClient(connector)
 	_, err := client.Get(id)
 	if err == nil {

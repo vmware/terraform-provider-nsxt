@@ -60,7 +60,7 @@ func resourceNsxtPolicyStaticRouteBfdPeer() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyStaticRouteBfdPeerExists(gwID string, id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
+func resourceNsxtPolicyStaticRouteBfdPeerExists(gwID string, id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	var err error
 	if isGlobalManager {
 		client := gm_static_routes.NewBfdPeersClient(connector)
@@ -119,9 +119,9 @@ func policyStaticRouteBfdPeerPatch(d *schema.ResourceData, m interface{}, gwID s
 	return client.Patch(gwID, id, obj)
 }
 
-func resourceNsxtPolicyStaticRouteBfdPeerExistsOnGateway(gwID string) func(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
+func resourceNsxtPolicyStaticRouteBfdPeerExistsOnGateway(gwID string) func(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 
-	return func(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
+	return func(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 		return resourceNsxtPolicyStaticRouteBfdPeerExists(id, gwID, connector, isGlobalManager)
 	}
 }

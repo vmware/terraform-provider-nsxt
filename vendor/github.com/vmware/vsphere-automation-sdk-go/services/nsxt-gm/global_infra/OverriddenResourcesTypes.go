@@ -11,48 +11,48 @@
 package global_infra
 
 import (
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
+	vapiBindings_ "github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	vapiData_ "github.com/vmware/vsphere-automation-sdk-go/runtime/data"
+	vapiProtocol_ "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol"
+	nsx_global_policyModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"reflect"
 )
 
-func overriddenResourcesListInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func overriddenResourcesListInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["intent_path"] = bindings.NewOptionalType(bindings.NewStringType())
-	fields["site_path"] = bindings.NewOptionalType(bindings.NewStringType())
+	fields["intent_path"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["site_path"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
 	fieldNameMap["intent_path"] = "IntentPath"
 	fieldNameMap["site_path"] = "SitePath"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func overriddenResourcesListOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.OverriddenResourceListResultBindingType)
+func OverriddenResourcesListOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewReferenceType(nsx_global_policyModel.OverriddenResourceListResultBindingType)
 }
 
-func overriddenResourcesListRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func overriddenResourcesListRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["intent_path"] = bindings.NewOptionalType(bindings.NewStringType())
-	fields["site_path"] = bindings.NewOptionalType(bindings.NewStringType())
+	fields["intent_path"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["site_path"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
 	fieldNameMap["intent_path"] = "IntentPath"
 	fieldNameMap["site_path"] = "SitePath"
-	paramsTypeMap["site_path"] = bindings.NewOptionalType(bindings.NewStringType())
-	paramsTypeMap["intent_path"] = bindings.NewOptionalType(bindings.NewStringType())
+	paramsTypeMap["site_path"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	paramsTypeMap["intent_path"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
 	queryParams["site_path"] = "site_path"
 	queryParams["intent_path"] = "intent_path"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,

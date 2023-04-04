@@ -273,7 +273,6 @@ func setPolicyPoolMemberGroupInSchema(d *schema.ResourceData, groupMember *model
 
 func getPolicyPoolSnatFromSchema(d *schema.ResourceData) (*data.StructValue, error) {
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 
 	snats := d.Get("snat").([]interface{})
 	for _, snat := range snats {
@@ -357,7 +356,6 @@ func setPolicyPoolSnatInSchema(d *schema.ResourceData, snat *data.StructValue) e
 	}
 
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 	var snatList []map[string]interface{}
 	elem := make(map[string]interface{})
 
@@ -402,7 +400,7 @@ func setPolicyPoolSnatInSchema(d *schema.ResourceData, snat *data.StructValue) e
 	return nil
 }
 
-func resourceNsxtPolicyLBPoolExists(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
+func resourceNsxtPolicyLBPoolExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	client := infra.NewLbPoolsClient(connector)
 
 	_, err := client.Get(id)

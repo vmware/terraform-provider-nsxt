@@ -11,10 +11,10 @@
 package domains
 
 import (
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+	vapiBindings_ "github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	vapiData_ "github.com/vmware/vsphere-automation-sdk-go/runtime/data"
+	vapiProtocol_ "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol"
+	nsx_policyModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"reflect"
 )
 
@@ -30,43 +30,43 @@ const IntrusionServiceGatewayPolicies_REVISE_OPERATION_AFTER = "insert_after"
 // Possible value for ``operation`` of method IntrusionServiceGatewayPolicies#revise.
 const IntrusionServiceGatewayPolicies_REVISE_OPERATION_BEFORE = "insert_before"
 
-func intrusionServiceGatewayPoliciesDeleteInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func intrusionServiceGatewayPoliciesDeleteInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["domain_id"] = bindings.NewStringType()
-	fields["policy_id"] = bindings.NewStringType()
+	fields["domain_id"] = vapiBindings_.NewStringType()
+	fields["policy_id"] = vapiBindings_.NewStringType()
 	fieldNameMap["domain_id"] = "DomainId"
 	fieldNameMap["policy_id"] = "PolicyId"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func intrusionServiceGatewayPoliciesDeleteOutputType() bindings.BindingType {
-	return bindings.NewVoidType()
+func IntrusionServiceGatewayPoliciesDeleteOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewVoidType()
 }
 
-func intrusionServiceGatewayPoliciesDeleteRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func intrusionServiceGatewayPoliciesDeleteRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["domain_id"] = bindings.NewStringType()
-	fields["policy_id"] = bindings.NewStringType()
+	fields["domain_id"] = vapiBindings_.NewStringType()
+	fields["policy_id"] = vapiBindings_.NewStringType()
 	fieldNameMap["domain_id"] = "DomainId"
 	fieldNameMap["policy_id"] = "PolicyId"
-	paramsTypeMap["domain_id"] = bindings.NewStringType()
-	paramsTypeMap["policy_id"] = bindings.NewStringType()
-	paramsTypeMap["domainId"] = bindings.NewStringType()
-	paramsTypeMap["policyId"] = bindings.NewStringType()
+	paramsTypeMap["domain_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["policy_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["domainId"] = vapiBindings_.NewStringType()
+	paramsTypeMap["policyId"] = vapiBindings_.NewStringType()
 	pathParams["policy_id"] = "policyId"
 	pathParams["domain_id"] = "domainId"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -87,43 +87,43 @@ func intrusionServiceGatewayPoliciesDeleteRestMetadata() protocol.OperationRestM
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func intrusionServiceGatewayPoliciesGetInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func intrusionServiceGatewayPoliciesGetInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["domain_id"] = bindings.NewStringType()
-	fields["policy_id"] = bindings.NewStringType()
+	fields["domain_id"] = vapiBindings_.NewStringType()
+	fields["policy_id"] = vapiBindings_.NewStringType()
 	fieldNameMap["domain_id"] = "DomainId"
 	fieldNameMap["policy_id"] = "PolicyId"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func intrusionServiceGatewayPoliciesGetOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.IdsGatewayPolicyBindingType)
+func IntrusionServiceGatewayPoliciesGetOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewReferenceType(nsx_policyModel.IdsGatewayPolicyBindingType)
 }
 
-func intrusionServiceGatewayPoliciesGetRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func intrusionServiceGatewayPoliciesGetRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["domain_id"] = bindings.NewStringType()
-	fields["policy_id"] = bindings.NewStringType()
+	fields["domain_id"] = vapiBindings_.NewStringType()
+	fields["policy_id"] = vapiBindings_.NewStringType()
 	fieldNameMap["domain_id"] = "DomainId"
 	fieldNameMap["policy_id"] = "PolicyId"
-	paramsTypeMap["domain_id"] = bindings.NewStringType()
-	paramsTypeMap["policy_id"] = bindings.NewStringType()
-	paramsTypeMap["domainId"] = bindings.NewStringType()
-	paramsTypeMap["policyId"] = bindings.NewStringType()
+	paramsTypeMap["domain_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["policy_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["domainId"] = vapiBindings_.NewStringType()
+	paramsTypeMap["policyId"] = vapiBindings_.NewStringType()
 	pathParams["policy_id"] = "policyId"
 	pathParams["domain_id"] = "domainId"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -144,17 +144,17 @@ func intrusionServiceGatewayPoliciesGetRestMetadata() protocol.OperationRestMeta
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func intrusionServiceGatewayPoliciesListInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func intrusionServiceGatewayPoliciesListInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["domain_id"] = bindings.NewStringType()
-	fields["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
-	fields["include_mark_for_delete_objects"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	fields["include_rule_count"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	fields["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
-	fields["page_size"] = bindings.NewOptionalType(bindings.NewIntegerType())
-	fields["sort_ascending"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	fields["sort_by"] = bindings.NewOptionalType(bindings.NewStringType())
+	fields["domain_id"] = vapiBindings_.NewStringType()
+	fields["cursor"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["include_mark_for_delete_objects"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	fields["include_rule_count"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	fields["included_fields"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["page_size"] = vapiBindings_.NewOptionalType(vapiBindings_.NewIntegerType())
+	fields["sort_ascending"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	fields["sort_by"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
 	fieldNameMap["domain_id"] = "DomainId"
 	fieldNameMap["cursor"] = "Cursor"
 	fieldNameMap["include_mark_for_delete_objects"] = "IncludeMarkForDeleteObjects"
@@ -163,31 +163,31 @@ func intrusionServiceGatewayPoliciesListInputType() bindings.StructType {
 	fieldNameMap["page_size"] = "PageSize"
 	fieldNameMap["sort_ascending"] = "SortAscending"
 	fieldNameMap["sort_by"] = "SortBy"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func intrusionServiceGatewayPoliciesListOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.IdsGatewayPolicyListResultBindingType)
+func IntrusionServiceGatewayPoliciesListOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewReferenceType(nsx_policyModel.IdsGatewayPolicyListResultBindingType)
 }
 
-func intrusionServiceGatewayPoliciesListRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func intrusionServiceGatewayPoliciesListRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["domain_id"] = bindings.NewStringType()
-	fields["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
-	fields["include_mark_for_delete_objects"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	fields["include_rule_count"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	fields["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
-	fields["page_size"] = bindings.NewOptionalType(bindings.NewIntegerType())
-	fields["sort_ascending"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	fields["sort_by"] = bindings.NewOptionalType(bindings.NewStringType())
+	fields["domain_id"] = vapiBindings_.NewStringType()
+	fields["cursor"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["include_mark_for_delete_objects"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	fields["include_rule_count"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	fields["included_fields"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["page_size"] = vapiBindings_.NewOptionalType(vapiBindings_.NewIntegerType())
+	fields["sort_ascending"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	fields["sort_by"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
 	fieldNameMap["domain_id"] = "DomainId"
 	fieldNameMap["cursor"] = "Cursor"
 	fieldNameMap["include_mark_for_delete_objects"] = "IncludeMarkForDeleteObjects"
@@ -196,15 +196,15 @@ func intrusionServiceGatewayPoliciesListRestMetadata() protocol.OperationRestMet
 	fieldNameMap["page_size"] = "PageSize"
 	fieldNameMap["sort_ascending"] = "SortAscending"
 	fieldNameMap["sort_by"] = "SortBy"
-	paramsTypeMap["domain_id"] = bindings.NewStringType()
-	paramsTypeMap["include_rule_count"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	paramsTypeMap["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
-	paramsTypeMap["page_size"] = bindings.NewOptionalType(bindings.NewIntegerType())
-	paramsTypeMap["include_mark_for_delete_objects"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	paramsTypeMap["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
-	paramsTypeMap["sort_by"] = bindings.NewOptionalType(bindings.NewStringType())
-	paramsTypeMap["sort_ascending"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	paramsTypeMap["domainId"] = bindings.NewStringType()
+	paramsTypeMap["domain_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["cursor"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	paramsTypeMap["include_rule_count"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	paramsTypeMap["sort_ascending"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	paramsTypeMap["included_fields"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	paramsTypeMap["sort_by"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	paramsTypeMap["include_mark_for_delete_objects"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	paramsTypeMap["page_size"] = vapiBindings_.NewOptionalType(vapiBindings_.NewIntegerType())
+	paramsTypeMap["domainId"] = vapiBindings_.NewStringType()
 	pathParams["domain_id"] = "domainId"
 	queryParams["cursor"] = "cursor"
 	queryParams["include_rule_count"] = "include_rule_count"
@@ -215,7 +215,7 @@ func intrusionServiceGatewayPoliciesListRestMetadata() protocol.OperationRestMet
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -236,48 +236,48 @@ func intrusionServiceGatewayPoliciesListRestMetadata() protocol.OperationRestMet
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func intrusionServiceGatewayPoliciesPatchInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func intrusionServiceGatewayPoliciesPatchInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["domain_id"] = bindings.NewStringType()
-	fields["policy_id"] = bindings.NewStringType()
-	fields["ids_gateway_policy"] = bindings.NewReferenceType(model.IdsGatewayPolicyBindingType)
+	fields["domain_id"] = vapiBindings_.NewStringType()
+	fields["policy_id"] = vapiBindings_.NewStringType()
+	fields["ids_gateway_policy"] = vapiBindings_.NewReferenceType(nsx_policyModel.IdsGatewayPolicyBindingType)
 	fieldNameMap["domain_id"] = "DomainId"
 	fieldNameMap["policy_id"] = "PolicyId"
 	fieldNameMap["ids_gateway_policy"] = "IdsGatewayPolicy"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func intrusionServiceGatewayPoliciesPatchOutputType() bindings.BindingType {
-	return bindings.NewVoidType()
+func IntrusionServiceGatewayPoliciesPatchOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewVoidType()
 }
 
-func intrusionServiceGatewayPoliciesPatchRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func intrusionServiceGatewayPoliciesPatchRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["domain_id"] = bindings.NewStringType()
-	fields["policy_id"] = bindings.NewStringType()
-	fields["ids_gateway_policy"] = bindings.NewReferenceType(model.IdsGatewayPolicyBindingType)
+	fields["domain_id"] = vapiBindings_.NewStringType()
+	fields["policy_id"] = vapiBindings_.NewStringType()
+	fields["ids_gateway_policy"] = vapiBindings_.NewReferenceType(nsx_policyModel.IdsGatewayPolicyBindingType)
 	fieldNameMap["domain_id"] = "DomainId"
 	fieldNameMap["policy_id"] = "PolicyId"
 	fieldNameMap["ids_gateway_policy"] = "IdsGatewayPolicy"
-	paramsTypeMap["domain_id"] = bindings.NewStringType()
-	paramsTypeMap["policy_id"] = bindings.NewStringType()
-	paramsTypeMap["ids_gateway_policy"] = bindings.NewReferenceType(model.IdsGatewayPolicyBindingType)
-	paramsTypeMap["domainId"] = bindings.NewStringType()
-	paramsTypeMap["policyId"] = bindings.NewStringType()
+	paramsTypeMap["domain_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["policy_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["ids_gateway_policy"] = vapiBindings_.NewReferenceType(nsx_policyModel.IdsGatewayPolicyBindingType)
+	paramsTypeMap["domainId"] = vapiBindings_.NewStringType()
+	paramsTypeMap["policyId"] = vapiBindings_.NewStringType()
 	pathParams["policy_id"] = "policyId"
 	pathParams["domain_id"] = "domainId"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -298,60 +298,60 @@ func intrusionServiceGatewayPoliciesPatchRestMetadata() protocol.OperationRestMe
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func intrusionServiceGatewayPoliciesReviseInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func intrusionServiceGatewayPoliciesReviseInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["domain_id"] = bindings.NewStringType()
-	fields["policy_id"] = bindings.NewStringType()
-	fields["ids_gateway_policy"] = bindings.NewReferenceType(model.IdsGatewayPolicyBindingType)
-	fields["anchor_path"] = bindings.NewOptionalType(bindings.NewStringType())
-	fields["operation"] = bindings.NewOptionalType(bindings.NewStringType())
+	fields["domain_id"] = vapiBindings_.NewStringType()
+	fields["policy_id"] = vapiBindings_.NewStringType()
+	fields["ids_gateway_policy"] = vapiBindings_.NewReferenceType(nsx_policyModel.IdsGatewayPolicyBindingType)
+	fields["anchor_path"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["operation"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
 	fieldNameMap["domain_id"] = "DomainId"
 	fieldNameMap["policy_id"] = "PolicyId"
 	fieldNameMap["ids_gateway_policy"] = "IdsGatewayPolicy"
 	fieldNameMap["anchor_path"] = "AnchorPath"
 	fieldNameMap["operation"] = "Operation"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func intrusionServiceGatewayPoliciesReviseOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.IdsGatewayPolicyBindingType)
+func IntrusionServiceGatewayPoliciesReviseOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewReferenceType(nsx_policyModel.IdsGatewayPolicyBindingType)
 }
 
-func intrusionServiceGatewayPoliciesReviseRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func intrusionServiceGatewayPoliciesReviseRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["domain_id"] = bindings.NewStringType()
-	fields["policy_id"] = bindings.NewStringType()
-	fields["ids_gateway_policy"] = bindings.NewReferenceType(model.IdsGatewayPolicyBindingType)
-	fields["anchor_path"] = bindings.NewOptionalType(bindings.NewStringType())
-	fields["operation"] = bindings.NewOptionalType(bindings.NewStringType())
+	fields["domain_id"] = vapiBindings_.NewStringType()
+	fields["policy_id"] = vapiBindings_.NewStringType()
+	fields["ids_gateway_policy"] = vapiBindings_.NewReferenceType(nsx_policyModel.IdsGatewayPolicyBindingType)
+	fields["anchor_path"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["operation"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
 	fieldNameMap["domain_id"] = "DomainId"
 	fieldNameMap["policy_id"] = "PolicyId"
 	fieldNameMap["ids_gateway_policy"] = "IdsGatewayPolicy"
 	fieldNameMap["anchor_path"] = "AnchorPath"
 	fieldNameMap["operation"] = "Operation"
-	paramsTypeMap["domain_id"] = bindings.NewStringType()
-	paramsTypeMap["policy_id"] = bindings.NewStringType()
-	paramsTypeMap["ids_gateway_policy"] = bindings.NewReferenceType(model.IdsGatewayPolicyBindingType)
-	paramsTypeMap["anchor_path"] = bindings.NewOptionalType(bindings.NewStringType())
-	paramsTypeMap["operation"] = bindings.NewOptionalType(bindings.NewStringType())
-	paramsTypeMap["domainId"] = bindings.NewStringType()
-	paramsTypeMap["policyId"] = bindings.NewStringType()
+	paramsTypeMap["domain_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["policy_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["ids_gateway_policy"] = vapiBindings_.NewReferenceType(nsx_policyModel.IdsGatewayPolicyBindingType)
+	paramsTypeMap["anchor_path"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	paramsTypeMap["operation"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	paramsTypeMap["domainId"] = vapiBindings_.NewStringType()
+	paramsTypeMap["policyId"] = vapiBindings_.NewStringType()
 	pathParams["policy_id"] = "policyId"
 	pathParams["domain_id"] = "domainId"
 	queryParams["anchor_path"] = "anchor_path"
 	queryParams["operation"] = "operation"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -372,48 +372,48 @@ func intrusionServiceGatewayPoliciesReviseRestMetadata() protocol.OperationRestM
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func intrusionServiceGatewayPoliciesUpdateInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func intrusionServiceGatewayPoliciesUpdateInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["domain_id"] = bindings.NewStringType()
-	fields["policy_id"] = bindings.NewStringType()
-	fields["ids_gateway_policy"] = bindings.NewReferenceType(model.IdsGatewayPolicyBindingType)
+	fields["domain_id"] = vapiBindings_.NewStringType()
+	fields["policy_id"] = vapiBindings_.NewStringType()
+	fields["ids_gateway_policy"] = vapiBindings_.NewReferenceType(nsx_policyModel.IdsGatewayPolicyBindingType)
 	fieldNameMap["domain_id"] = "DomainId"
 	fieldNameMap["policy_id"] = "PolicyId"
 	fieldNameMap["ids_gateway_policy"] = "IdsGatewayPolicy"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func intrusionServiceGatewayPoliciesUpdateOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.IdsGatewayPolicyBindingType)
+func IntrusionServiceGatewayPoliciesUpdateOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewReferenceType(nsx_policyModel.IdsGatewayPolicyBindingType)
 }
 
-func intrusionServiceGatewayPoliciesUpdateRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func intrusionServiceGatewayPoliciesUpdateRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["domain_id"] = bindings.NewStringType()
-	fields["policy_id"] = bindings.NewStringType()
-	fields["ids_gateway_policy"] = bindings.NewReferenceType(model.IdsGatewayPolicyBindingType)
+	fields["domain_id"] = vapiBindings_.NewStringType()
+	fields["policy_id"] = vapiBindings_.NewStringType()
+	fields["ids_gateway_policy"] = vapiBindings_.NewReferenceType(nsx_policyModel.IdsGatewayPolicyBindingType)
 	fieldNameMap["domain_id"] = "DomainId"
 	fieldNameMap["policy_id"] = "PolicyId"
 	fieldNameMap["ids_gateway_policy"] = "IdsGatewayPolicy"
-	paramsTypeMap["domain_id"] = bindings.NewStringType()
-	paramsTypeMap["policy_id"] = bindings.NewStringType()
-	paramsTypeMap["ids_gateway_policy"] = bindings.NewReferenceType(model.IdsGatewayPolicyBindingType)
-	paramsTypeMap["domainId"] = bindings.NewStringType()
-	paramsTypeMap["policyId"] = bindings.NewStringType()
+	paramsTypeMap["domain_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["policy_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["ids_gateway_policy"] = vapiBindings_.NewReferenceType(nsx_policyModel.IdsGatewayPolicyBindingType)
+	paramsTypeMap["domainId"] = vapiBindings_.NewStringType()
+	paramsTypeMap["policyId"] = vapiBindings_.NewStringType()
 	pathParams["policy_id"] = "policyId"
 	pathParams["domain_id"] = "domainId"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,

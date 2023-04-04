@@ -43,7 +43,7 @@ func getIdsProfilesSchema() *schema.Schema {
 	}
 }
 
-func resourceNsxtPolicyIntrusionServicePolicyExistsInDomain(id string, domainName string, connector *client.RestConnector) (bool, error) {
+func resourceNsxtPolicyIntrusionServicePolicyExistsInDomain(id string, domainName string, connector client.Connector) (bool, error) {
 	client := domains.NewIntrusionServicePoliciesClient(connector)
 	_, err := client.Get(domainName, id)
 
@@ -152,15 +152,14 @@ func getPolicyIdsRulesFromSchema(d *schema.ResourceData) []model.IdsRule {
 	return ruleList
 }
 
-func resourceNsxtPolicyIntrusionServicePolicyExistsPartial(domainName string) func(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
-	return func(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
+func resourceNsxtPolicyIntrusionServicePolicyExistsPartial(domainName string) func(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
+	return func(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 		return resourceNsxtPolicyIntrusionServicePolicyExistsInDomain(id, domainName, connector)
 	}
 }
 
 func createPolicyChildIdsRule(ruleID string, rule model.IdsRule, shouldDelete bool) (*data.StructValue, error) {
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 
 	childRule := model.ChildIdsRule{
 		ResourceType:    "ChildIdsRule",
@@ -179,7 +178,6 @@ func createPolicyChildIdsRule(ruleID string, rule model.IdsRule, shouldDelete bo
 
 func createChildDomainWithIdsSecurityPolicy(domain string, policyID string, policy model.IdsSecurityPolicy) (*data.StructValue, error) {
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 
 	childPolicy := model.ChildIdsSecurityPolicy{
 		Id:                &policyID,

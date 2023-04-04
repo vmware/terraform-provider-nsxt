@@ -44,7 +44,7 @@ func dataSourceNsxtPolicySecurityPolicy() *schema.Resource {
 }
 
 // Local Manager Only
-func listSecurityPolicies(domain string, connector *client.RestConnector) ([]model.SecurityPolicy, error) {
+func listSecurityPolicies(domain string, connector client.Connector) ([]model.SecurityPolicy, error) {
 	client := domains.NewSecurityPoliciesClient(connector)
 
 	var results []model.SecurityPolicy
@@ -89,7 +89,6 @@ func dataSourceNsxtPolicySecurityPolicyRead(d *schema.ResourceData, m interface{
 		}
 
 		converter := bindings.NewTypeConverter()
-		converter.SetMode(bindings.REST)
 		dataValue, errors := converter.ConvertToGolang(obj, gm_model.SecurityPolicyBindingType())
 		if len(errors) > 0 {
 			return errors[0]

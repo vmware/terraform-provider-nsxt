@@ -1,4 +1,4 @@
-/* Copyright © 2019 VMware, Inc. All Rights Reserved.
+/* Copyright © 2019, 2022 VMware, Inc. All Rights Reserved.
    SPDX-License-Identifier: BSD-2-Clause */
 
 package security
@@ -13,7 +13,7 @@ import (
 
 var algorithmMap = map[string]crypto.Hash{RS256: crypto.SHA256, RS384: crypto.SHA384, RS512: crypto.SHA512}
 
-// Used to verify the authenticity of the request
+// JSONSsoVerifier Used to verify the authenticity of the request
 // message by verifying the digest present in the security context block.
 type JSONSsoVerifier struct {
 }

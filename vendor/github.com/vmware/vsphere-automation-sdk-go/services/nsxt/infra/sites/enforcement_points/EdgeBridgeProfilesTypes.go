@@ -11,57 +11,57 @@
 package enforcement_points
 
 import (
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+	vapiBindings_ "github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	vapiData_ "github.com/vmware/vsphere-automation-sdk-go/runtime/data"
+	vapiProtocol_ "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol"
+	nsx_policyModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"reflect"
 )
 
-func edgeBridgeProfilesDeleteInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func edgeBridgeProfilesDeleteInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["site_id"] = bindings.NewStringType()
-	fields["enforcement_point_id"] = bindings.NewStringType()
-	fields["profile_id"] = bindings.NewStringType()
+	fields["site_id"] = vapiBindings_.NewStringType()
+	fields["enforcement_point_id"] = vapiBindings_.NewStringType()
+	fields["profile_id"] = vapiBindings_.NewStringType()
 	fieldNameMap["site_id"] = "SiteId"
 	fieldNameMap["enforcement_point_id"] = "EnforcementPointId"
 	fieldNameMap["profile_id"] = "ProfileId"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func edgeBridgeProfilesDeleteOutputType() bindings.BindingType {
-	return bindings.NewVoidType()
+func EdgeBridgeProfilesDeleteOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewVoidType()
 }
 
-func edgeBridgeProfilesDeleteRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func edgeBridgeProfilesDeleteRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["site_id"] = bindings.NewStringType()
-	fields["enforcement_point_id"] = bindings.NewStringType()
-	fields["profile_id"] = bindings.NewStringType()
+	fields["site_id"] = vapiBindings_.NewStringType()
+	fields["enforcement_point_id"] = vapiBindings_.NewStringType()
+	fields["profile_id"] = vapiBindings_.NewStringType()
 	fieldNameMap["site_id"] = "SiteId"
 	fieldNameMap["enforcement_point_id"] = "EnforcementPointId"
 	fieldNameMap["profile_id"] = "ProfileId"
-	paramsTypeMap["profile_id"] = bindings.NewStringType()
-	paramsTypeMap["site_id"] = bindings.NewStringType()
-	paramsTypeMap["enforcement_point_id"] = bindings.NewStringType()
-	paramsTypeMap["siteId"] = bindings.NewStringType()
-	paramsTypeMap["enforcementPointId"] = bindings.NewStringType()
-	paramsTypeMap["profileId"] = bindings.NewStringType()
+	paramsTypeMap["profile_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["site_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["enforcement_point_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["siteId"] = vapiBindings_.NewStringType()
+	paramsTypeMap["enforcementPointId"] = vapiBindings_.NewStringType()
+	paramsTypeMap["profileId"] = vapiBindings_.NewStringType()
 	pathParams["profile_id"] = "profileId"
 	pathParams["site_id"] = "siteId"
 	pathParams["enforcement_point_id"] = "enforcementPointId"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -82,50 +82,50 @@ func edgeBridgeProfilesDeleteRestMetadata() protocol.OperationRestMetadata {
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func edgeBridgeProfilesGetInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func edgeBridgeProfilesGetInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["site_id"] = bindings.NewStringType()
-	fields["enforcement_point_id"] = bindings.NewStringType()
-	fields["profile_id"] = bindings.NewStringType()
+	fields["site_id"] = vapiBindings_.NewStringType()
+	fields["enforcement_point_id"] = vapiBindings_.NewStringType()
+	fields["profile_id"] = vapiBindings_.NewStringType()
 	fieldNameMap["site_id"] = "SiteId"
 	fieldNameMap["enforcement_point_id"] = "EnforcementPointId"
 	fieldNameMap["profile_id"] = "ProfileId"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func edgeBridgeProfilesGetOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.L2BridgeEndpointProfileBindingType)
+func EdgeBridgeProfilesGetOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewReferenceType(nsx_policyModel.L2BridgeEndpointProfileBindingType)
 }
 
-func edgeBridgeProfilesGetRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func edgeBridgeProfilesGetRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["site_id"] = bindings.NewStringType()
-	fields["enforcement_point_id"] = bindings.NewStringType()
-	fields["profile_id"] = bindings.NewStringType()
+	fields["site_id"] = vapiBindings_.NewStringType()
+	fields["enforcement_point_id"] = vapiBindings_.NewStringType()
+	fields["profile_id"] = vapiBindings_.NewStringType()
 	fieldNameMap["site_id"] = "SiteId"
 	fieldNameMap["enforcement_point_id"] = "EnforcementPointId"
 	fieldNameMap["profile_id"] = "ProfileId"
-	paramsTypeMap["profile_id"] = bindings.NewStringType()
-	paramsTypeMap["site_id"] = bindings.NewStringType()
-	paramsTypeMap["enforcement_point_id"] = bindings.NewStringType()
-	paramsTypeMap["siteId"] = bindings.NewStringType()
-	paramsTypeMap["enforcementPointId"] = bindings.NewStringType()
-	paramsTypeMap["profileId"] = bindings.NewStringType()
+	paramsTypeMap["profile_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["site_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["enforcement_point_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["siteId"] = vapiBindings_.NewStringType()
+	paramsTypeMap["enforcementPointId"] = vapiBindings_.NewStringType()
+	paramsTypeMap["profileId"] = vapiBindings_.NewStringType()
 	pathParams["profile_id"] = "profileId"
 	pathParams["site_id"] = "siteId"
 	pathParams["enforcement_point_id"] = "enforcementPointId"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -146,16 +146,16 @@ func edgeBridgeProfilesGetRestMetadata() protocol.OperationRestMetadata {
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func edgeBridgeProfilesListInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func edgeBridgeProfilesListInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["site_id"] = bindings.NewStringType()
-	fields["enforcement_point_id"] = bindings.NewStringType()
-	fields["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
-	fields["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
-	fields["page_size"] = bindings.NewOptionalType(bindings.NewIntegerType())
-	fields["sort_ascending"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	fields["sort_by"] = bindings.NewOptionalType(bindings.NewStringType())
+	fields["site_id"] = vapiBindings_.NewStringType()
+	fields["enforcement_point_id"] = vapiBindings_.NewStringType()
+	fields["cursor"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["included_fields"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["page_size"] = vapiBindings_.NewOptionalType(vapiBindings_.NewIntegerType())
+	fields["sort_ascending"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	fields["sort_by"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
 	fieldNameMap["site_id"] = "SiteId"
 	fieldNameMap["enforcement_point_id"] = "EnforcementPointId"
 	fieldNameMap["cursor"] = "Cursor"
@@ -163,30 +163,30 @@ func edgeBridgeProfilesListInputType() bindings.StructType {
 	fieldNameMap["page_size"] = "PageSize"
 	fieldNameMap["sort_ascending"] = "SortAscending"
 	fieldNameMap["sort_by"] = "SortBy"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func edgeBridgeProfilesListOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.L2BridgeEndpointProfileListResultBindingType)
+func EdgeBridgeProfilesListOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewReferenceType(nsx_policyModel.L2BridgeEndpointProfileListResultBindingType)
 }
 
-func edgeBridgeProfilesListRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func edgeBridgeProfilesListRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["site_id"] = bindings.NewStringType()
-	fields["enforcement_point_id"] = bindings.NewStringType()
-	fields["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
-	fields["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
-	fields["page_size"] = bindings.NewOptionalType(bindings.NewIntegerType())
-	fields["sort_ascending"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	fields["sort_by"] = bindings.NewOptionalType(bindings.NewStringType())
+	fields["site_id"] = vapiBindings_.NewStringType()
+	fields["enforcement_point_id"] = vapiBindings_.NewStringType()
+	fields["cursor"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["included_fields"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["page_size"] = vapiBindings_.NewOptionalType(vapiBindings_.NewIntegerType())
+	fields["sort_ascending"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	fields["sort_by"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
 	fieldNameMap["site_id"] = "SiteId"
 	fieldNameMap["enforcement_point_id"] = "EnforcementPointId"
 	fieldNameMap["cursor"] = "Cursor"
@@ -194,15 +194,15 @@ func edgeBridgeProfilesListRestMetadata() protocol.OperationRestMetadata {
 	fieldNameMap["page_size"] = "PageSize"
 	fieldNameMap["sort_ascending"] = "SortAscending"
 	fieldNameMap["sort_by"] = "SortBy"
-	paramsTypeMap["site_id"] = bindings.NewStringType()
-	paramsTypeMap["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
-	paramsTypeMap["page_size"] = bindings.NewOptionalType(bindings.NewIntegerType())
-	paramsTypeMap["enforcement_point_id"] = bindings.NewStringType()
-	paramsTypeMap["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
-	paramsTypeMap["sort_by"] = bindings.NewOptionalType(bindings.NewStringType())
-	paramsTypeMap["sort_ascending"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	paramsTypeMap["siteId"] = bindings.NewStringType()
-	paramsTypeMap["enforcementPointId"] = bindings.NewStringType()
+	paramsTypeMap["cursor"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	paramsTypeMap["sort_ascending"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	paramsTypeMap["included_fields"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	paramsTypeMap["site_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["enforcement_point_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["sort_by"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	paramsTypeMap["page_size"] = vapiBindings_.NewOptionalType(vapiBindings_.NewIntegerType())
+	paramsTypeMap["siteId"] = vapiBindings_.NewStringType()
+	paramsTypeMap["enforcementPointId"] = vapiBindings_.NewStringType()
 	pathParams["site_id"] = "siteId"
 	pathParams["enforcement_point_id"] = "enforcementPointId"
 	queryParams["cursor"] = "cursor"
@@ -212,7 +212,7 @@ func edgeBridgeProfilesListRestMetadata() protocol.OperationRestMetadata {
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -233,55 +233,55 @@ func edgeBridgeProfilesListRestMetadata() protocol.OperationRestMetadata {
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func edgeBridgeProfilesPatchInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func edgeBridgeProfilesPatchInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["site_id"] = bindings.NewStringType()
-	fields["enforcement_point_id"] = bindings.NewStringType()
-	fields["profile_id"] = bindings.NewStringType()
-	fields["l2_bridge_endpoint_profile"] = bindings.NewReferenceType(model.L2BridgeEndpointProfileBindingType)
+	fields["site_id"] = vapiBindings_.NewStringType()
+	fields["enforcement_point_id"] = vapiBindings_.NewStringType()
+	fields["profile_id"] = vapiBindings_.NewStringType()
+	fields["l2_bridge_endpoint_profile"] = vapiBindings_.NewReferenceType(nsx_policyModel.L2BridgeEndpointProfileBindingType)
 	fieldNameMap["site_id"] = "SiteId"
 	fieldNameMap["enforcement_point_id"] = "EnforcementPointId"
 	fieldNameMap["profile_id"] = "ProfileId"
 	fieldNameMap["l2_bridge_endpoint_profile"] = "L2BridgeEndpointProfile"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func edgeBridgeProfilesPatchOutputType() bindings.BindingType {
-	return bindings.NewVoidType()
+func EdgeBridgeProfilesPatchOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewVoidType()
 }
 
-func edgeBridgeProfilesPatchRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func edgeBridgeProfilesPatchRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["site_id"] = bindings.NewStringType()
-	fields["enforcement_point_id"] = bindings.NewStringType()
-	fields["profile_id"] = bindings.NewStringType()
-	fields["l2_bridge_endpoint_profile"] = bindings.NewReferenceType(model.L2BridgeEndpointProfileBindingType)
+	fields["site_id"] = vapiBindings_.NewStringType()
+	fields["enforcement_point_id"] = vapiBindings_.NewStringType()
+	fields["profile_id"] = vapiBindings_.NewStringType()
+	fields["l2_bridge_endpoint_profile"] = vapiBindings_.NewReferenceType(nsx_policyModel.L2BridgeEndpointProfileBindingType)
 	fieldNameMap["site_id"] = "SiteId"
 	fieldNameMap["enforcement_point_id"] = "EnforcementPointId"
 	fieldNameMap["profile_id"] = "ProfileId"
 	fieldNameMap["l2_bridge_endpoint_profile"] = "L2BridgeEndpointProfile"
-	paramsTypeMap["l2_bridge_endpoint_profile"] = bindings.NewReferenceType(model.L2BridgeEndpointProfileBindingType)
-	paramsTypeMap["profile_id"] = bindings.NewStringType()
-	paramsTypeMap["site_id"] = bindings.NewStringType()
-	paramsTypeMap["enforcement_point_id"] = bindings.NewStringType()
-	paramsTypeMap["siteId"] = bindings.NewStringType()
-	paramsTypeMap["enforcementPointId"] = bindings.NewStringType()
-	paramsTypeMap["profileId"] = bindings.NewStringType()
+	paramsTypeMap["profile_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["site_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["enforcement_point_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["l2_bridge_endpoint_profile"] = vapiBindings_.NewReferenceType(nsx_policyModel.L2BridgeEndpointProfileBindingType)
+	paramsTypeMap["siteId"] = vapiBindings_.NewStringType()
+	paramsTypeMap["enforcementPointId"] = vapiBindings_.NewStringType()
+	paramsTypeMap["profileId"] = vapiBindings_.NewStringType()
 	pathParams["profile_id"] = "profileId"
 	pathParams["site_id"] = "siteId"
 	pathParams["enforcement_point_id"] = "enforcementPointId"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -302,55 +302,55 @@ func edgeBridgeProfilesPatchRestMetadata() protocol.OperationRestMetadata {
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func edgeBridgeProfilesUpdateInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func edgeBridgeProfilesUpdateInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["site_id"] = bindings.NewStringType()
-	fields["enforcement_point_id"] = bindings.NewStringType()
-	fields["profile_id"] = bindings.NewStringType()
-	fields["l2_bridge_endpoint_profile"] = bindings.NewReferenceType(model.L2BridgeEndpointProfileBindingType)
+	fields["site_id"] = vapiBindings_.NewStringType()
+	fields["enforcement_point_id"] = vapiBindings_.NewStringType()
+	fields["profile_id"] = vapiBindings_.NewStringType()
+	fields["l2_bridge_endpoint_profile"] = vapiBindings_.NewReferenceType(nsx_policyModel.L2BridgeEndpointProfileBindingType)
 	fieldNameMap["site_id"] = "SiteId"
 	fieldNameMap["enforcement_point_id"] = "EnforcementPointId"
 	fieldNameMap["profile_id"] = "ProfileId"
 	fieldNameMap["l2_bridge_endpoint_profile"] = "L2BridgeEndpointProfile"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func edgeBridgeProfilesUpdateOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.L2BridgeEndpointProfileBindingType)
+func EdgeBridgeProfilesUpdateOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewReferenceType(nsx_policyModel.L2BridgeEndpointProfileBindingType)
 }
 
-func edgeBridgeProfilesUpdateRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func edgeBridgeProfilesUpdateRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["site_id"] = bindings.NewStringType()
-	fields["enforcement_point_id"] = bindings.NewStringType()
-	fields["profile_id"] = bindings.NewStringType()
-	fields["l2_bridge_endpoint_profile"] = bindings.NewReferenceType(model.L2BridgeEndpointProfileBindingType)
+	fields["site_id"] = vapiBindings_.NewStringType()
+	fields["enforcement_point_id"] = vapiBindings_.NewStringType()
+	fields["profile_id"] = vapiBindings_.NewStringType()
+	fields["l2_bridge_endpoint_profile"] = vapiBindings_.NewReferenceType(nsx_policyModel.L2BridgeEndpointProfileBindingType)
 	fieldNameMap["site_id"] = "SiteId"
 	fieldNameMap["enforcement_point_id"] = "EnforcementPointId"
 	fieldNameMap["profile_id"] = "ProfileId"
 	fieldNameMap["l2_bridge_endpoint_profile"] = "L2BridgeEndpointProfile"
-	paramsTypeMap["l2_bridge_endpoint_profile"] = bindings.NewReferenceType(model.L2BridgeEndpointProfileBindingType)
-	paramsTypeMap["profile_id"] = bindings.NewStringType()
-	paramsTypeMap["site_id"] = bindings.NewStringType()
-	paramsTypeMap["enforcement_point_id"] = bindings.NewStringType()
-	paramsTypeMap["siteId"] = bindings.NewStringType()
-	paramsTypeMap["enforcementPointId"] = bindings.NewStringType()
-	paramsTypeMap["profileId"] = bindings.NewStringType()
+	paramsTypeMap["profile_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["site_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["enforcement_point_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["l2_bridge_endpoint_profile"] = vapiBindings_.NewReferenceType(nsx_policyModel.L2BridgeEndpointProfileBindingType)
+	paramsTypeMap["siteId"] = vapiBindings_.NewStringType()
+	paramsTypeMap["enforcementPointId"] = vapiBindings_.NewStringType()
+	paramsTypeMap["profileId"] = vapiBindings_.NewStringType()
 	pathParams["profile_id"] = "profileId"
 	pathParams["site_id"] = "siteId"
 	pathParams["enforcement_point_id"] = "enforcementPointId"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,

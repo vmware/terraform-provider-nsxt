@@ -74,7 +74,7 @@ func resourceNsxtPolicyLBService() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyLBServiceExists(id string, connector *client.RestConnector, isGlobalManager bool) (bool, error) {
+func resourceNsxtPolicyLBServiceExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	client := infra.NewLbServicesClient(connector)
 
 	_, err := client.Get(id)

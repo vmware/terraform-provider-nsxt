@@ -58,7 +58,6 @@ func resourceNsxtPolicyIPPoolBlockSubnet() *schema.Resource {
 
 func resourceNsxtPolicyIPPoolBlockSubnetSchemaToStructValue(d *schema.ResourceData, id string) (*data.StructValue, error) {
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
@@ -91,7 +90,6 @@ func resourceNsxtPolicyIPPoolBlockSubnetRead(d *schema.ResourceData, m interface
 	connector := getPolicyConnector(m)
 	client := ip_pools.NewIpSubnetsClient(connector)
 	converter := bindings.NewTypeConverter()
-	converter.SetMode(bindings.REST)
 
 	poolPath := d.Get("pool_path").(string)
 	poolID := getPolicyIDFromPath(poolPath)
@@ -216,7 +214,7 @@ func resourceNsxtPolicyIPPoolBlockSubnetDelete(d *schema.ResourceData, m interfa
 }
 
 // NOTE: This will not be needed when IPAM is handled by NSXT Policy
-func resourceNsxtPolicyIPPoolBlockSubnetVerifyDelete(d *schema.ResourceData, connector *client.RestConnector) error {
+func resourceNsxtPolicyIPPoolBlockSubnetVerifyDelete(d *schema.ResourceData, connector client.Connector) error {
 
 	client := realized_state.NewRealizedEntitiesClient(connector)
 

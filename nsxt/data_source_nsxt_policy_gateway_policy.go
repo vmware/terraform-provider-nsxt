@@ -38,7 +38,7 @@ func dataSourceNsxtPolicyGatewayPolicy() *schema.Resource {
 }
 
 // Local Manager Only
-func listGatewayPolicies(domain string, connector *client.RestConnector) ([]model.GatewayPolicy, error) {
+func listGatewayPolicies(domain string, connector client.Connector) ([]model.GatewayPolicy, error) {
 	client := domains.NewGatewayPoliciesClient(connector)
 
 	var results []model.GatewayPolicy
@@ -81,7 +81,6 @@ func dataSourceNsxtPolicyGatewayPolicyRead(d *schema.ResourceData, m interface{}
 		}
 
 		converter := bindings.NewTypeConverter()
-		converter.SetMode(bindings.REST)
 		dataValue, errors := converter.ConvertToGolang(obj, gm_model.GatewayPolicyBindingType())
 		if len(errors) > 0 {
 			return errors[0]

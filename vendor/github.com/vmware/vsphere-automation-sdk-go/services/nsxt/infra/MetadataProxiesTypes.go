@@ -11,43 +11,43 @@
 package infra
 
 import (
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+	vapiBindings_ "github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	vapiData_ "github.com/vmware/vsphere-automation-sdk-go/runtime/data"
+	vapiProtocol_ "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol"
+	nsx_policyModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"reflect"
 )
 
-func metadataProxiesDeleteInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func metadataProxiesDeleteInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["metadata_proxy_id"] = bindings.NewStringType()
+	fields["metadata_proxy_id"] = vapiBindings_.NewStringType()
 	fieldNameMap["metadata_proxy_id"] = "MetadataProxyId"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func metadataProxiesDeleteOutputType() bindings.BindingType {
-	return bindings.NewVoidType()
+func MetadataProxiesDeleteOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewVoidType()
 }
 
-func metadataProxiesDeleteRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func metadataProxiesDeleteRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["metadata_proxy_id"] = bindings.NewStringType()
+	fields["metadata_proxy_id"] = vapiBindings_.NewStringType()
 	fieldNameMap["metadata_proxy_id"] = "MetadataProxyId"
-	paramsTypeMap["metadata_proxy_id"] = bindings.NewStringType()
-	paramsTypeMap["metadataProxyId"] = bindings.NewStringType()
+	paramsTypeMap["metadata_proxy_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["metadataProxyId"] = vapiBindings_.NewStringType()
 	pathParams["metadata_proxy_id"] = "metadataProxyId"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -68,36 +68,36 @@ func metadataProxiesDeleteRestMetadata() protocol.OperationRestMetadata {
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func metadataProxiesGetInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func metadataProxiesGetInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["metadata_proxy_id"] = bindings.NewStringType()
+	fields["metadata_proxy_id"] = vapiBindings_.NewStringType()
 	fieldNameMap["metadata_proxy_id"] = "MetadataProxyId"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func metadataProxiesGetOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.MetadataProxyConfigBindingType)
+func MetadataProxiesGetOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewReferenceType(nsx_policyModel.MetadataProxyConfigBindingType)
 }
 
-func metadataProxiesGetRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func metadataProxiesGetRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["metadata_proxy_id"] = bindings.NewStringType()
+	fields["metadata_proxy_id"] = vapiBindings_.NewStringType()
 	fieldNameMap["metadata_proxy_id"] = "MetadataProxyId"
-	paramsTypeMap["metadata_proxy_id"] = bindings.NewStringType()
-	paramsTypeMap["metadataProxyId"] = bindings.NewStringType()
+	paramsTypeMap["metadata_proxy_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["metadataProxyId"] = vapiBindings_.NewStringType()
 	pathParams["metadata_proxy_id"] = "metadataProxyId"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -118,56 +118,56 @@ func metadataProxiesGetRestMetadata() protocol.OperationRestMetadata {
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func metadataProxiesListInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func metadataProxiesListInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
-	fields["include_mark_for_delete_objects"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	fields["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
-	fields["page_size"] = bindings.NewOptionalType(bindings.NewIntegerType())
-	fields["sort_ascending"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	fields["sort_by"] = bindings.NewOptionalType(bindings.NewStringType())
+	fields["cursor"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["include_mark_for_delete_objects"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	fields["included_fields"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["page_size"] = vapiBindings_.NewOptionalType(vapiBindings_.NewIntegerType())
+	fields["sort_ascending"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	fields["sort_by"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
 	fieldNameMap["cursor"] = "Cursor"
 	fieldNameMap["include_mark_for_delete_objects"] = "IncludeMarkForDeleteObjects"
 	fieldNameMap["included_fields"] = "IncludedFields"
 	fieldNameMap["page_size"] = "PageSize"
 	fieldNameMap["sort_ascending"] = "SortAscending"
 	fieldNameMap["sort_by"] = "SortBy"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func metadataProxiesListOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.MetadataProxyConfigListResultBindingType)
+func MetadataProxiesListOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewReferenceType(nsx_policyModel.MetadataProxyConfigListResultBindingType)
 }
 
-func metadataProxiesListRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func metadataProxiesListRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
-	fields["include_mark_for_delete_objects"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	fields["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
-	fields["page_size"] = bindings.NewOptionalType(bindings.NewIntegerType())
-	fields["sort_ascending"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	fields["sort_by"] = bindings.NewOptionalType(bindings.NewStringType())
+	fields["cursor"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["include_mark_for_delete_objects"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	fields["included_fields"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["page_size"] = vapiBindings_.NewOptionalType(vapiBindings_.NewIntegerType())
+	fields["sort_ascending"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	fields["sort_by"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
 	fieldNameMap["cursor"] = "Cursor"
 	fieldNameMap["include_mark_for_delete_objects"] = "IncludeMarkForDeleteObjects"
 	fieldNameMap["included_fields"] = "IncludedFields"
 	fieldNameMap["page_size"] = "PageSize"
 	fieldNameMap["sort_ascending"] = "SortAscending"
 	fieldNameMap["sort_by"] = "SortBy"
-	paramsTypeMap["included_fields"] = bindings.NewOptionalType(bindings.NewStringType())
-	paramsTypeMap["page_size"] = bindings.NewOptionalType(bindings.NewIntegerType())
-	paramsTypeMap["include_mark_for_delete_objects"] = bindings.NewOptionalType(bindings.NewBooleanType())
-	paramsTypeMap["cursor"] = bindings.NewOptionalType(bindings.NewStringType())
-	paramsTypeMap["sort_by"] = bindings.NewOptionalType(bindings.NewStringType())
-	paramsTypeMap["sort_ascending"] = bindings.NewOptionalType(bindings.NewBooleanType())
+	paramsTypeMap["cursor"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	paramsTypeMap["sort_ascending"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	paramsTypeMap["included_fields"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	paramsTypeMap["sort_by"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	paramsTypeMap["include_mark_for_delete_objects"] = vapiBindings_.NewOptionalType(vapiBindings_.NewBooleanType())
+	paramsTypeMap["page_size"] = vapiBindings_.NewOptionalType(vapiBindings_.NewIntegerType())
 	queryParams["cursor"] = "cursor"
 	queryParams["sort_ascending"] = "sort_ascending"
 	queryParams["included_fields"] = "included_fields"
@@ -176,7 +176,7 @@ func metadataProxiesListRestMetadata() protocol.OperationRestMetadata {
 	queryParams["page_size"] = "page_size"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -197,41 +197,41 @@ func metadataProxiesListRestMetadata() protocol.OperationRestMetadata {
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func metadataProxiesPatchInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func metadataProxiesPatchInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["metadata_proxy_id"] = bindings.NewStringType()
-	fields["metadata_proxy_config"] = bindings.NewReferenceType(model.MetadataProxyConfigBindingType)
+	fields["metadata_proxy_id"] = vapiBindings_.NewStringType()
+	fields["metadata_proxy_config"] = vapiBindings_.NewReferenceType(nsx_policyModel.MetadataProxyConfigBindingType)
 	fieldNameMap["metadata_proxy_id"] = "MetadataProxyId"
 	fieldNameMap["metadata_proxy_config"] = "MetadataProxyConfig"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func metadataProxiesPatchOutputType() bindings.BindingType {
-	return bindings.NewVoidType()
+func MetadataProxiesPatchOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewVoidType()
 }
 
-func metadataProxiesPatchRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func metadataProxiesPatchRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["metadata_proxy_id"] = bindings.NewStringType()
-	fields["metadata_proxy_config"] = bindings.NewReferenceType(model.MetadataProxyConfigBindingType)
+	fields["metadata_proxy_id"] = vapiBindings_.NewStringType()
+	fields["metadata_proxy_config"] = vapiBindings_.NewReferenceType(nsx_policyModel.MetadataProxyConfigBindingType)
 	fieldNameMap["metadata_proxy_id"] = "MetadataProxyId"
 	fieldNameMap["metadata_proxy_config"] = "MetadataProxyConfig"
-	paramsTypeMap["metadata_proxy_id"] = bindings.NewStringType()
-	paramsTypeMap["metadata_proxy_config"] = bindings.NewReferenceType(model.MetadataProxyConfigBindingType)
-	paramsTypeMap["metadataProxyId"] = bindings.NewStringType()
+	paramsTypeMap["metadata_proxy_config"] = vapiBindings_.NewReferenceType(nsx_policyModel.MetadataProxyConfigBindingType)
+	paramsTypeMap["metadata_proxy_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["metadataProxyId"] = vapiBindings_.NewStringType()
 	pathParams["metadata_proxy_id"] = "metadataProxyId"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
@@ -252,41 +252,41 @@ func metadataProxiesPatchRestMetadata() protocol.OperationRestMetadata {
 		map[string]int{"com.vmware.vapi.std.errors.invalid_request": 400, "com.vmware.vapi.std.errors.unauthorized": 403, "com.vmware.vapi.std.errors.service_unavailable": 503, "com.vmware.vapi.std.errors.internal_server_error": 500, "com.vmware.vapi.std.errors.not_found": 404})
 }
 
-func metadataProxiesUpdateInputType() bindings.StructType {
-	fields := make(map[string]bindings.BindingType)
+func metadataProxiesUpdateInputType() vapiBindings_.StructType {
+	fields := make(map[string]vapiBindings_.BindingType)
 	fieldNameMap := make(map[string]string)
-	fields["metadata_proxy_id"] = bindings.NewStringType()
-	fields["metadata_proxy_config"] = bindings.NewReferenceType(model.MetadataProxyConfigBindingType)
+	fields["metadata_proxy_id"] = vapiBindings_.NewStringType()
+	fields["metadata_proxy_config"] = vapiBindings_.NewReferenceType(nsx_policyModel.MetadataProxyConfigBindingType)
 	fieldNameMap["metadata_proxy_id"] = "MetadataProxyId"
 	fieldNameMap["metadata_proxy_config"] = "MetadataProxyConfig"
-	var validators = []bindings.Validator{}
-	return bindings.NewStructType("operation-input", fields, reflect.TypeOf(data.StructValue{}), fieldNameMap, validators)
+	var validators = []vapiBindings_.Validator{}
+	return vapiBindings_.NewStructType("operation-input", fields, reflect.TypeOf(vapiData_.StructValue{}), fieldNameMap, validators)
 }
 
-func metadataProxiesUpdateOutputType() bindings.BindingType {
-	return bindings.NewReferenceType(model.MetadataProxyConfigBindingType)
+func MetadataProxiesUpdateOutputType() vapiBindings_.BindingType {
+	return vapiBindings_.NewReferenceType(nsx_policyModel.MetadataProxyConfigBindingType)
 }
 
-func metadataProxiesUpdateRestMetadata() protocol.OperationRestMetadata {
-	fields := map[string]bindings.BindingType{}
+func metadataProxiesUpdateRestMetadata() vapiProtocol_.OperationRestMetadata {
+	fields := map[string]vapiBindings_.BindingType{}
 	fieldNameMap := map[string]string{}
-	paramsTypeMap := map[string]bindings.BindingType{}
+	paramsTypeMap := map[string]vapiBindings_.BindingType{}
 	pathParams := map[string]string{}
 	queryParams := map[string]string{}
 	headerParams := map[string]string{}
 	dispatchHeaderParams := map[string]string{}
 	bodyFieldsMap := map[string]string{}
-	fields["metadata_proxy_id"] = bindings.NewStringType()
-	fields["metadata_proxy_config"] = bindings.NewReferenceType(model.MetadataProxyConfigBindingType)
+	fields["metadata_proxy_id"] = vapiBindings_.NewStringType()
+	fields["metadata_proxy_config"] = vapiBindings_.NewReferenceType(nsx_policyModel.MetadataProxyConfigBindingType)
 	fieldNameMap["metadata_proxy_id"] = "MetadataProxyId"
 	fieldNameMap["metadata_proxy_config"] = "MetadataProxyConfig"
-	paramsTypeMap["metadata_proxy_id"] = bindings.NewStringType()
-	paramsTypeMap["metadata_proxy_config"] = bindings.NewReferenceType(model.MetadataProxyConfigBindingType)
-	paramsTypeMap["metadataProxyId"] = bindings.NewStringType()
+	paramsTypeMap["metadata_proxy_config"] = vapiBindings_.NewReferenceType(nsx_policyModel.MetadataProxyConfigBindingType)
+	paramsTypeMap["metadata_proxy_id"] = vapiBindings_.NewStringType()
+	paramsTypeMap["metadataProxyId"] = vapiBindings_.NewStringType()
 	pathParams["metadata_proxy_id"] = "metadataProxyId"
 	resultHeaders := map[string]string{}
 	errorHeaders := map[string]map[string]string{}
-	return protocol.NewOperationRestMetadata(
+	return vapiProtocol_.NewOperationRestMetadata(
 		fields,
 		fieldNameMap,
 		paramsTypeMap,
