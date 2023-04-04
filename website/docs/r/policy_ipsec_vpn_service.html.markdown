@@ -37,13 +37,13 @@ The following arguments are supported:
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
-* `locale_service_path` - (Required) Path of the locale_service associated with the IPSec VPN Service.
+* `locale_service_path` - (Required) Path of the gateway locale service associated with the IPSec VPN Service.
 * `enabled` - (Optional) Whether this IPSec VPN Service is enabled. Default is `true`.
 * `ha_sync` - (Optional) Enable/Disable IPSec VPN service HA state sync. Default is `true`.
 * `ike_log_level` - (Optional) Set of algorithms to be used for message digest during IKE negotiation. Value is one of `DEBUG`, `INFO`, `WARN`, `ERROR` and `EMERGENCY`. Default is `INFO`. 
-* `bypass_rule` - (Optional) Set the bypass rules for this IPSec VPN Service. `sources` and `destinations` are list of `ipv4-cidr-block`, `Action` value must be set to `BYPASS` or `PROTECT`.
-  * `sources` - (Required) List of source subnets. Subnet format is `ipv4-cidr`.
-  * `destinations` - (Required) List of distination subnets. Subnet format is `ipv4-cidr`.
+* `bypass_rule` - (Optional) Set the bypass rules for this IPSec VPN Service.
+  * `sources` - (Required) List of source subnets. Subnet format is ipv4 CIDR.
+  * `destinations` - (Required) List of distination subnets. Subnet format is ipv4 CIDR.
   * `action` - (Required) `PROTECT` or `BYPASS`.
 
 ## Attributes Reference

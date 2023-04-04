@@ -38,7 +38,7 @@ func resourceNsxtPolicyL2VpnService() *schema.Resource {
 			"description":         getDescriptionSchema(),
 			"revision":            getRevisionSchema(),
 			"tag":                 getTagsSchema(),
-			"locale_service_path": getPolicyPathSchema(true, false, "Polciy path for the locale service."),
+			"locale_service_path": getPolicyPathSchema(true, false, "Policy path for the locale service."),
 			"enable_hub": {
 				Type:        schema.TypeBool,
 				Description: "This property applies only in SERVER mode. If set to true, traffic from any client will be replicated to all other clients. If set to false, traffic received from clients is only replicated to the local VPN endpoint.",
