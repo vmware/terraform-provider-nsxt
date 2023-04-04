@@ -305,7 +305,7 @@ func getIPSecVPNSessionFromSchema(d *schema.ResourceData) (*data.StructValue, er
 func getIPSecVPNRulesSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:        schema.TypeList,
-		Description: "For policy-based IPsec VPNs, a security policy specifies as its action the VPN tunnel to be used for transit traffic that meets the policy’s match criteria.",
+		Description: "For policy-based IPsec VPNs, a security policy specifies as its action the VPN tunnel to be used for transit traffic that meets the policy match criteria",
 		Optional:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
@@ -317,16 +317,16 @@ func getIPSecVPNRulesSchema() *schema.Schema {
 						Type:         schema.TypeString,
 						ValidateFunc: validateCidr(),
 					},
-					Required: true,
+					Optional: true,
 				},
 				"destinations": {
 					Type:        schema.TypeSet,
-					Description: "List of remote subnets used in policy-based L3Vpn.",
+					Description: "List of remote subnets",
 					Elem: &schema.Schema{
 						Type:         schema.TypeString,
 						ValidateFunc: validateCidr(),
 					},
-					Required: true,
+					Optional: true,
 				},
 				"action": {
 					Type:         schema.TypeString,
@@ -475,28 +475,27 @@ func getIPSecVPNRulesFromSchema(d *schema.ResourceData) []model.IPSecVpnRule {
 			sourceRanges := interface2StringList(data["sources"].(*schema.Set).List())
 			destinationRanges := interface2StringList(data["destinations"].(*schema.Set).List())
 
-			/// Source Subnets
-
-			SourceIPSecVpnSubnetList := make([]model.IPSecVpnSubnet, 0)
+			// Source Subnets
+			sourceIPSecVpnSubnetList := make([]model.IPSecVpnSubnet, 0)
 			if len(sourceRanges) > 0 {
 				for _, element := range sourceRanges {
 					subnet := element
-					IPSecVpnSubnet := model.IPSecVpnSubnet{
+					ipSecVpnSubnet := model.IPSecVpnSubnet{
 						Subnet: &subnet,
 					}
-					SourceIPSecVpnSubnetList = append(SourceIPSecVpnSubnetList, IPSecVpnSubnet)
+					sourceIPSecVpnSubnetList = append(sourceIPSecVpnSubnetList, ipSecVpnSubnet)
 				}
 			}
 
-			/// Destination Subnets
-			DestinationIPSecVpnSubnetList := make([]model.IPSecVpnSubnet, 0)
+			// Destination Subnets
+			destinationIPSecVpnSubnetList := make([]model.IPSecVpnSubnet, 0)
 			if len(destinationRanges) > 0 {
 				for _, element := range destinationRanges {
 					subnet := element
-					IPSecVpnSubnet := model.IPSecVpnSubnet{
+					ipSecVpnSubnet := model.IPSecVpnSubnet{
 						Subnet: &subnet,
 					}
-					DestinationIPSecVpnSubnetList = append(DestinationIPSecVpnSubnetList, IPSecVpnSubnet)
+					destinationIPSecVpnSubnetList = append(destinationIPSecVpnSubnetList, ipSecVpnSubnet)
 				}
 			}
 			ruleID := data["nsx_id"].(string)
@@ -505,8 +504,8 @@ func getIPSecVPNRulesFromSchema(d *schema.ResourceData) []model.IPSecVpnRule {
 			}
 			elem := model.IPSecVpnRule{
 				Action:       &action,
-				Sources:      SourceIPSecVpnSubnetList,
-				Destinations: DestinationIPSecVpnSubnetList,
+				Sources:      sourceIPSecVpnSubnetList,
+				Destinations: destinationIPSecVpnSubnetList,
 				UniqueId:     &ruleID,
 				Id:           &ruleID,
 			}
@@ -679,6 +678,8 @@ func resourceNsxtPolicyIPSecVpnSessionRead(d *schema.ResourceData, m interface{}
 		d.Set("local_endpoint_path", blockVPN.LocalEndpointPath)
 		d.Set("dpd_profile_path", blockVPN.DpdProfilePath)
 		d.Set("tunnel_profile_path", blockVPN.TunnelProfilePath)
+		d.Set("peer_address", blockVPN.PeerAddress)
+		d.Set("peer_id", blockVPN.PeerId)
 		if blockVPN.Rules != nil {
 			setRuleInSchema(d, blockVPN.Rules)
 		}
