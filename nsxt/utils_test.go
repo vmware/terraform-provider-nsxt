@@ -455,21 +455,22 @@ resource "nsxt_policy_tier%s_gateway" "test" {
 }`, tier, tier, edgeClusterName, haMode)
 }
 
-func testAccNsxtPolicyTier0WithEdgeClusterForVPN(edgeClusterName string) string {
-	return fmt.Sprintf(`
+var testAccNsxtPolicyVPNGatewayHelperName = getAccTestResourceName()
+
+func testAccNsxtPolicyTier0WithEdgeClusterForVPN() string {
+	return testAccNsxtPolicyEdgeClusterReadTemplate(getEdgeClusterName()) + fmt.Sprintf(`
 resource "nsxt_policy_tier0_gateway" "test" {
   display_name = "%s"
   description  = "Acceptance Test"
   locale_service {
-    edge_cluster_path = data.nsxt_policy_edge_cluster.%s.path
+    edge_cluster_path = data.nsxt_policy_edge_cluster.test.path
   }
   ha_mode = "ACTIVE_STANDBY"
-}`, getAccTestResourceName(), edgeClusterName)
+}`, testAccNsxtPolicyVPNGatewayHelperName)
 }
 
-func testAccNsxtPolicyTier1WithEdgeClusterForVPN(edgeClusterName string) string {
-	gatewayName := getAccTestResourceName()
-	return fmt.Sprintf(`
+func testAccNsxtPolicyTier1WithEdgeClusterForVPN() string {
+	return testAccNsxtPolicyEdgeClusterReadTemplate(getEdgeClusterName()) + fmt.Sprintf(`
 resource "nsxt_policy_tier0_gateway" "test" {
 	display_name = "%s"
 	description  = "Acceptance Test"
@@ -479,10 +480,17 @@ resource "nsxt_policy_tier1_gateway" "test" {
 	description               = "Acceptance Test"
 	display_name              = "%s"
 	locale_service {
-		edge_cluster_path = data.nsxt_policy_edge_cluster.%s.path
+		edge_cluster_path = data.nsxt_policy_edge_cluster.test.path
 	}
 	tier0_path                = nsxt_policy_tier0_gateway.test.path
-}`, gatewayName, gatewayName, edgeClusterName)
+}`, testAccNsxtPolicyVPNGatewayHelperName, testAccNsxtPolicyVPNGatewayHelperName)
+}
+
+func testAccNsxtPolicyGatewayTemplate(isT0 bool) string {
+	if isT0 {
+		return testAccNsxtPolicyTier0WithEdgeClusterForVPN()
+	}
+	return testAccNsxtPolicyTier1WithEdgeClusterForVPN()
 }
 
 func testAccNsxtPolicyResourceExists(resourceName string, presenceChecker func(string, client.Connector, bool) (bool, error)) resource.TestCheckFunc {

@@ -91,6 +91,9 @@ func TestAccResourceNsxtPolicyL2VpnService_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 				),
 			},
+			{
+				Config: testAccNsxtPolicyGatewayTemplate(true),
+			},
 		},
 	})
 }
@@ -121,6 +124,9 @@ func TestAccResourceNsxtPolicyL2VpnService_ClientMode(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 				),
+			},
+			{
+				Config: testAccNsxtPolicyGatewayTemplate(true),
 			},
 		},
 	})
@@ -228,15 +234,14 @@ func testAccNsxtPolicyL2VpnServiceTemplate(createFlow bool, clientMode bool) str
 			attrMap = accTestPolicyL2VpnServiceUpdateAttributes
 		}
 	}
-	return testAccNsxtPolicyEdgeClusterReadTemplate(getEdgeClusterName()) +
-		testAccNsxtPolicyTier0WithEdgeClusterForVPN("test") + fmt.Sprintf(`
+	return testAccNsxtPolicyTier0WithEdgeClusterForVPN() + fmt.Sprintf(`
 	  resource "nsxt_policy_l2_vpn_service" "test" {
-		display_name                   = "%s"
-		description                    = "%s"
-		locale_service_path   		   = one(nsxt_policy_tier0_gateway.test.locale_service).path
-		enable_hub                     = "%s"
-		mode               			   = "%s"
-		encap_ip_pool 				   = ["%s"]
+		display_name         = "%s"
+		description          = "%s"
+		locale_service_path  = one(nsxt_policy_tier0_gateway.test.locale_service).path
+		enable_hub           = "%s"
+		mode                 = "%s"
+		encap_ip_pool 	     = ["%s"]
 		tag {
 		  scope = "scope1"
 		  tag   = "tag1"
@@ -245,8 +250,7 @@ func testAccNsxtPolicyL2VpnServiceTemplate(createFlow bool, clientMode bool) str
 }
 
 func testAccNsxtPolicyL2VpnServiceMinimalistic() string {
-	return testAccNsxtPolicyEdgeClusterReadTemplate(getEdgeClusterName()) +
-		testAccNsxtPolicyTier0WithEdgeClusterForVPN("test") + fmt.Sprintf(`
+	return testAccNsxtPolicyTier0WithEdgeClusterForVPN() + fmt.Sprintf(`
 	  resource "nsxt_policy_l2_vpn_service" "test" {
 		display_name          = "%s"
 		locale_service_path   = one(nsxt_policy_tier0_gateway.test.locale_service).path
