@@ -11,7 +11,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s"
 	t0_locale_service "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s"
 	t1_locale_service "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/locale_services"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
@@ -32,13 +34,21 @@ func resourceNsxtPolicyL2VpnService() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"nsx_id":              getNsxIDSchema(),
-			"path":                getPathSchema(),
-			"display_name":        getDisplayNameSchema(),
-			"description":         getDescriptionSchema(),
-			"revision":            getRevisionSchema(),
-			"tag":                 getTagsSchema(),
-			"locale_service_path": getPolicyPathSchema(true, false, "Policy path for the locale service."),
+			"nsx_id":       getNsxIDSchema(),
+			"path":         getPathSchema(),
+			"display_name": getDisplayNameSchema(),
+			"description":  getDescriptionSchema(),
+			"revision":     getRevisionSchema(),
+			"tag":          getTagsSchema(),
+			"gateway_path": getPolicyPathSchema(false, true, "Policy path for the gateway."),
+			"locale_service_path": {
+				Type:         schema.TypeString,
+				Description:  "Polciy path for the locale service.",
+				Optional:     true,
+				ForceNew:     true,
+				Deprecated:   "Use gateway_path instead.",
+				ValidateFunc: validatePolicyPath(),
+			},
 			"enable_hub": {
 				Type:        schema.TypeBool,
 				Description: "This property applies only in SERVER mode. If set to true, traffic from any client will be replicated to all other clients. If set to false, traffic received from clients is only replicated to the local VPN endpoint.",
@@ -66,6 +76,14 @@ func resourceNsxtPolicyL2VpnService() *schema.Resource {
 }
 
 func getNsxtPolicyL2VpnServiceByID(connector client.Connector, gwID string, isT0 bool, localeServiceID string, serviceID string, isGlobalManager bool) (model.L2VPNService, error) {
+	if localeServiceID == "" {
+		if isT0 {
+			client := tier_0s.NewL2vpnServicesClient(connector)
+			return client.Get(gwID, serviceID)
+		}
+		client := tier_1s.NewL2vpnServicesClient(connector)
+		return client.Get(gwID, serviceID)
+	}
 	if isT0 {
 		client := t0_locale_service.NewL2vpnServicesClient(connector)
 		return client.Get(gwID, localeServiceID, serviceID)
@@ -76,15 +94,32 @@ func getNsxtPolicyL2VpnServiceByID(connector client.Connector, gwID string, isT0
 
 func patchNsxtPolicyL2VpnService(connector client.Connector, gwID string, localeServiceID string, l2VpnService model.L2VPNService, isT0 bool) error {
 	id := *l2VpnService.Id
+	if localeServiceID == "" {
+		if isT0 {
+			client := tier_0s.NewL2vpnServicesClient(connector)
+			return client.Patch(gwID, id, l2VpnService)
+		}
+		client := tier_1s.NewL2vpnServicesClient(connector)
+		return client.Patch(gwID, id, l2VpnService)
+	}
 	if isT0 {
 		client := t0_locale_service.NewL2vpnServicesClient(connector)
 		return client.Patch(gwID, localeServiceID, id, l2VpnService)
 	}
 	client := t1_locale_service.NewL2vpnServicesClient(connector)
 	return client.Patch(gwID, localeServiceID, id, l2VpnService)
+
 }
 
 func deleteNsxtPolicyL2VpnService(connector client.Connector, gwID string, localeServiceID string, isT0 bool, id string) error {
+	if localeServiceID == "" {
+		if isT0 {
+			client := tier_0s.NewL2vpnServicesClient(connector)
+			return client.Delete(gwID, id)
+		}
+		client := tier_1s.NewL2vpnServicesClient(connector)
+		return client.Delete(gwID, id)
+	}
 	if isT0 {
 		client := t0_locale_service.NewL2vpnServicesClient(connector)
 		return client.Delete(gwID, localeServiceID, id)
@@ -98,15 +133,21 @@ func resourceNsxtPolicyL2VpnServiceImport(d *schema.ResourceData, m interface{})
 	s := strings.Split(importID, "/")
 	err := fmt.Errorf("Expected policy path for the L2 VPN Service, got %s", importID)
 	// The policy path of L2 VPN Service should be like /infra/tier-0s/aaa/locale-services/bbb/l2vpn-services/ccc
-	if len(s) != 8 {
+	// or /infra/tier-0s/aaa/l2vpn-services/bbb
+	if len(s) != 8 && len(s) != 6 {
 		return nil, err
 	}
-	d.SetId(s[7])
+	useLocaleService := (len(s) == 8)
+	d.SetId(s[len(s)-1])
 	s = strings.Split(importID, "/l2vpn-services/")
 	if len(s) != 2 {
 		return []*schema.ResourceData{d}, err
 	}
-	d.Set("locale_service_path", s[0])
+	if useLocaleService {
+		d.Set("locale_service_path", s[0])
+	} else {
+		d.Set("gateway_path", s[0])
+	}
 	return []*schema.ResourceData{d}, nil
 }
 
@@ -117,10 +158,16 @@ func resourceNsxtPolicyL2VpnServiceRead(d *schema.ResourceData, m interface{}) e
 	if id == "" {
 		return fmt.Errorf("Error obtaining L2VpnService ID")
 	}
-	localeServicePath := d.Get("locale_service_path").(string)
-	isT0, gwID, localeServiceID, err := parseLocaleServicePolicyPath(localeServicePath)
+	gatewayPath, localeServicePath, err := getLocaleServiceAndGatewayPath(d)
 	if err != nil {
+		return nil
+	}
+	isT0, gwID, localeServiceID, err := parseLocaleServicePolicyPath(localeServicePath)
+	if err != nil && gatewayPath == "" {
 		return err
+	}
+	if localeServiceID == "" {
+		isT0, gwID = parseGatewayPolicyPath(gatewayPath)
 	}
 	obj, err := getNsxtPolicyL2VpnServiceByID(connector, gwID, isT0, localeServiceID, id, isPolicyGlobalManager(m))
 	if err != nil {
@@ -143,10 +190,16 @@ func resourceNsxtPolicyL2VpnServiceRead(d *schema.ResourceData, m interface{}) e
 
 func resourceNsxtPolicyL2VpnServiceCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	localeServicePath := d.Get("locale_service_path").(string)
-	isT0, gwID, localeServiceID, err := parseLocaleServicePolicyPath(localeServicePath)
+	gatewayPath, localeServicePath, err := getLocaleServiceAndGatewayPath(d)
 	if err != nil {
+		return nil
+	}
+	isT0, gwID, localeServiceID, err := parseLocaleServicePolicyPath(localeServicePath)
+	if err != nil && gatewayPath == "" {
 		return err
+	}
+	if localeServiceID == "" {
+		isT0, gwID = parseGatewayPolicyPath(gatewayPath)
 	}
 	isGlobalManager := isPolicyGlobalManager(m)
 	id := d.Get("nsx_id").(string)
@@ -201,10 +254,16 @@ func resourceNsxtPolicyL2VpnServiceUpdate(d *schema.ResourceData, m interface{})
 	if id == "" {
 		return fmt.Errorf("Error obtaining L2 VPN Service ID")
 	}
-	localeServicePath := d.Get("locale_service_path").(string)
-	isT0, gwID, localeServiceID, err := parseLocaleServicePolicyPath(localeServicePath)
+	gatewayPath, localeServicePath, err := getLocaleServiceAndGatewayPath(d)
 	if err != nil {
+		return nil
+	}
+	isT0, gwID, localeServiceID, err := parseLocaleServicePolicyPath(localeServicePath)
+	if err != nil && gatewayPath == "" {
 		return err
+	}
+	if localeServiceID == "" {
+		isT0, gwID = parseGatewayPolicyPath(gatewayPath)
 	}
 
 	displayName := d.Get("display_name").(string)
@@ -249,10 +308,16 @@ func resourceNsxtPolicyL2VpnServiceDelete(d *schema.ResourceData, m interface{})
 		return fmt.Errorf("Error obtaining L2 VPN Service ID")
 	}
 
-	localeServicePath := d.Get("locale_service_path").(string)
-	isT0, gwID, localeServiceID, err := parseLocaleServicePolicyPath(localeServicePath)
+	gatewayPath, localeServicePath, err := getLocaleServiceAndGatewayPath(d)
 	if err != nil {
+		return nil
+	}
+	isT0, gwID, localeServiceID, err := parseLocaleServicePolicyPath(localeServicePath)
+	if err != nil && gatewayPath == "" {
 		return err
+	}
+	if localeServiceID == "" {
+		isT0, gwID = parseGatewayPolicyPath(gatewayPath)
 	}
 
 	err = deleteNsxtPolicyL2VpnService(getPolicyConnector(m), gwID, localeServiceID, isT0, id)

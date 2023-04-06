@@ -10,8 +10,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	t0_l2vpn_services "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services/l2vpn_services"
-	t1_l2vpn_services "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/locale_services/l2vpn_services"
+	t0_l2vpn_services "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/l2vpn_services"
+	t0_l2vpn_nested_services "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services/l2vpn_services"
+	t1_l2vpn_services "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/l2vpn_services"
+	t1_l2vpn_nested_services "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/locale_services/l2vpn_services"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
@@ -60,13 +62,14 @@ func resourceNsxtPolicyL2VPNSession() *schema.Resource {
 				Type:         schema.TypeString,
 				Description:  "The traffic direction apply to the MSS clamping",
 				Optional:     true,
+				Default:      model.L2TcpMaxSegmentSizeClamping_DIRECTION_BOTH,
 				ValidateFunc: validation.StringInSlice(L2VpnSessionTCPSegmentClampingDirection, false),
 			},
 			"max_segment_size": {
-				Type:         schema.TypeInt,
-				Description:  "Maximum amount of data the host will accept in a Tcp segment.",
-				Optional:     true,
-				ValidateFunc: validation.IntBetween(108, 8860),
+				Type:        schema.TypeInt,
+				Description: "Maximum amount of data the host will accept in a Tcp segment.",
+				Optional:    true,
+				Computed:    true,
 			},
 			"local_address": {
 				Type:         schema.TypeString,
@@ -127,8 +130,10 @@ func resourceNsxtPolicyL2VPNSessionCreate(d *schema.ResourceData, m interface{})
 		maxSegmentSize := int64(d.Get("max_segment_size").(int))
 		if direction != "" {
 			l2TcpMSSClamping := model.L2TcpMaxSegmentSizeClamping{
-				Direction:      &direction,
-				MaxSegmentSize: &maxSegmentSize,
+				Direction: &direction,
+			}
+			if maxSegmentSize > 0 {
+				l2TcpMSSClamping.MaxSegmentSize = &maxSegmentSize
 			}
 			obj.TcpMssClamping = &l2TcpMSSClamping
 		}
@@ -146,11 +151,21 @@ func resourceNsxtPolicyL2VPNSessionCreate(d *schema.ResourceData, m interface{})
 	}
 
 	if isT0 {
-		client := t0_l2vpn_services.NewSessionsClient(connector)
-		err = client.Patch(gwID, localeServiceID, serviceID, id, obj)
+		if localeServiceID == "" {
+			client := t0_l2vpn_services.NewSessionsClient(connector)
+			err = client.Patch(gwID, serviceID, id, obj)
+		} else {
+			client := t0_l2vpn_nested_services.NewSessionsClient(connector)
+			err = client.Patch(gwID, localeServiceID, serviceID, id, obj)
+		}
 	} else {
-		client := t1_l2vpn_services.NewSessionsClient(connector)
-		err = client.Patch(gwID, localeServiceID, serviceID, id, obj)
+		if localeServiceID == "" {
+			client := t1_l2vpn_services.NewSessionsClient(connector)
+			err = client.Patch(gwID, serviceID, id, obj)
+		} else {
+			client := t1_l2vpn_nested_services.NewSessionsClient(connector)
+			err = client.Patch(gwID, localeServiceID, serviceID, id, obj)
+		}
 	}
 	if err != nil {
 		return handleCreateError("L2VPNSession", id, err)
@@ -164,16 +179,21 @@ func resourceNsxtPolicyL2VPNSessionCreate(d *schema.ResourceData, m interface{})
 
 func parseL2VPNServicePolicyPath(path string) (bool, string, string, string, error) {
 	segs := strings.Split(path, "/")
-	// Path should be like /infra/tier-1s/aaa/l2vpn-services/default/ipsec-vpn-services/ccc
+	// Path should be like /infra/tier-1s/aaa/locale-services/bbb/l2vpn-services/ccc
+	// or /infra/tier-0s/aaa/l2vpn-services/bbb
 	segCount := len(segs)
-	if (segCount < 8) || (segs[segCount-2] != "l2vpn-services") {
+	if segCount < 6 || segCount > 8 || (segs[segCount-2] != "l2vpn-services") {
 		// error - this is not a segment path
 		return false, "", "", "", fmt.Errorf("Invalid L2 VPN service path %s", path)
 	}
 
 	serviceID := segs[segCount-1]
-	localeServiceID := segs[5]
 	gwPath := strings.Join(segs[:4], "/")
+
+	localeServiceID := ""
+	if segCount == 8 {
+		localeServiceID = segs[5]
+	}
 
 	isT0, gwID := parseGatewayPolicyPath(gwPath)
 	return isT0, gwID, localeServiceID, serviceID, nil
@@ -193,11 +213,21 @@ func resourceNsxtPolicyL2VPNSessionRead(d *schema.ResourceData, m interface{}) e
 
 	var obj model.L2VPNSession
 	if isT0 {
-		client := t0_l2vpn_services.NewSessionsClient(connector)
-		obj, err = client.Get(gwID, localeServiceID, serviceID, id)
+		if localeServiceID == "" {
+			client := t0_l2vpn_services.NewSessionsClient(connector)
+			obj, err = client.Get(gwID, serviceID, id)
+		} else {
+			client := t0_l2vpn_nested_services.NewSessionsClient(connector)
+			obj, err = client.Get(gwID, localeServiceID, serviceID, id)
+		}
 	} else {
-		client := t1_l2vpn_services.NewSessionsClient(connector)
-		obj, err = client.Get(gwID, localeServiceID, serviceID, id)
+		if localeServiceID == "" {
+			client := t1_l2vpn_services.NewSessionsClient(connector)
+			obj, err = client.Get(gwID, serviceID, id)
+		} else {
+			client := t1_l2vpn_nested_services.NewSessionsClient(connector)
+			obj, err = client.Get(gwID, localeServiceID, serviceID, id)
+		}
 	}
 	if err != nil {
 		return handleReadError(d, "L2VPNSession", id, err)
@@ -238,11 +268,21 @@ func resourceNsxtPolicyL2VPNSessionRead(d *schema.ResourceData, m interface{}) e
 func resourceNsxtPolicyL2VpnSessionExists(isT0 bool, gwID string, localeServiceID string, serviceID string, sessionID string, connector client.Connector) (bool, error) {
 	var err error
 	if isT0 {
-		client := t0_l2vpn_services.NewSessionsClient(connector)
-		_, err = client.Get(gwID, localeServiceID, serviceID, sessionID)
+		if localeServiceID == "" {
+			client := t0_l2vpn_services.NewSessionsClient(connector)
+			_, err = client.Get(gwID, serviceID, sessionID)
+		} else {
+			client := t0_l2vpn_nested_services.NewSessionsClient(connector)
+			_, err = client.Get(gwID, localeServiceID, serviceID, sessionID)
+		}
 	} else {
-		client := t1_l2vpn_services.NewSessionsClient(connector)
-		_, err = client.Get(gwID, localeServiceID, serviceID, sessionID)
+		if localeServiceID == "" {
+			client := t1_l2vpn_services.NewSessionsClient(connector)
+			_, err = client.Get(gwID, serviceID, sessionID)
+		} else {
+			client := t1_l2vpn_nested_services.NewSessionsClient(connector)
+			_, err = client.Get(gwID, localeServiceID, serviceID, sessionID)
+		}
 	}
 
 	if err == nil {
@@ -289,8 +329,10 @@ func resourceNsxtPolicyL2VPNSessionUpdate(d *schema.ResourceData, m interface{})
 		maxSegmentSize := int64(d.Get("max_segment_size").(int))
 		if direction != "" {
 			l2TcpMSSClamping := model.L2TcpMaxSegmentSizeClamping{
-				Direction:      &direction,
-				MaxSegmentSize: &maxSegmentSize,
+				Direction: &direction,
+			}
+			if maxSegmentSize > 0 {
+				l2TcpMSSClamping.MaxSegmentSize = &maxSegmentSize
 			}
 			obj.TcpMssClamping = &l2TcpMSSClamping
 		}
@@ -307,11 +349,21 @@ func resourceNsxtPolicyL2VPNSessionUpdate(d *schema.ResourceData, m interface{})
 		}
 	}
 	if isT0 {
-		client := t0_l2vpn_services.NewSessionsClient(connector)
-		err = client.Patch(gwID, localeServiceID, serviceID, id, obj)
+		if localeServiceID == "" {
+			client := t0_l2vpn_services.NewSessionsClient(connector)
+			err = client.Patch(gwID, serviceID, id, obj)
+		} else {
+			client := t0_l2vpn_nested_services.NewSessionsClient(connector)
+			err = client.Patch(gwID, localeServiceID, serviceID, id, obj)
+		}
 	} else {
-		client := t1_l2vpn_services.NewSessionsClient(connector)
-		err = client.Patch(gwID, localeServiceID, serviceID, id, obj)
+		if localeServiceID == "" {
+			client := t1_l2vpn_services.NewSessionsClient(connector)
+			err = client.Patch(gwID, serviceID, id, obj)
+		} else {
+			client := t1_l2vpn_nested_services.NewSessionsClient(connector)
+			err = client.Patch(gwID, localeServiceID, serviceID, id, obj)
+		}
 	}
 
 	if err != nil {
@@ -336,11 +388,21 @@ func resourceNsxtPolicyL2VPNSessionDelete(d *schema.ResourceData, m interface{})
 
 	connector := getPolicyConnector(m)
 	if isT0 {
-		client := t0_l2vpn_services.NewSessionsClient(connector)
-		err = client.Delete(gwID, localeServiceID, serviceID, id)
+		if localeServiceID == "" {
+			client := t0_l2vpn_services.NewSessionsClient(connector)
+			err = client.Delete(gwID, serviceID, id)
+		} else {
+			client := t0_l2vpn_nested_services.NewSessionsClient(connector)
+			err = client.Delete(gwID, localeServiceID, serviceID, id)
+		}
 	} else {
-		client := t1_l2vpn_services.NewSessionsClient(connector)
-		err = client.Delete(gwID, localeServiceID, serviceID, id)
+		if localeServiceID == "" {
+			client := t1_l2vpn_services.NewSessionsClient(connector)
+			err = client.Delete(gwID, serviceID, id)
+		} else {
+			client := t1_l2vpn_nested_services.NewSessionsClient(connector)
+			err = client.Delete(gwID, localeServiceID, serviceID, id)
+		}
 	}
 
 	if err != nil {

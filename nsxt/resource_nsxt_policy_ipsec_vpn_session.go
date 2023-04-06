@@ -157,10 +157,10 @@ func resourceNsxtPolicyIPSecVpnSession() *schema.Resource {
 				ValidateFunc: validation.StringInSlice(TCPMssClampingDirections, false),
 			},
 			"max_segment_size": {
-				Type:         schema.TypeInt,
-				Description:  "Maximum amount of data the host will accept in a Tcp segment.",
-				Optional:     true,
-				ValidateFunc: validation.IntBetween(108, 8860),
+				Type:        schema.TypeInt,
+				Description: "Maximum amount of data the host will accept in a Tcp segment.",
+				Optional:    true,
+				Computed:    true,
 			},
 		},
 	}
@@ -226,8 +226,10 @@ func getIPSecVPNSessionFromSchema(d *schema.ResourceData) (*data.StructValue, er
 		if nsxVersionHigherOrEqual("3.2.0") {
 			if direction != "" {
 				tcpMSSClamping := model.TcpMaximumSegmentSizeClamping{
-					Direction:      &direction,
-					MaxSegmentSize: &mss,
+					Direction: &direction,
+				}
+				if mss > 0 {
+					tcpMSSClamping.MaxSegmentSize = &mss
 				}
 				routeObj.TcpMssClamping = &tcpMSSClamping
 			}
@@ -272,8 +274,10 @@ func getIPSecVPNSessionFromSchema(d *schema.ResourceData) (*data.StructValue, er
 		if nsxVersionHigherOrEqual("3.2.0") {
 			if direction != "" {
 				tcpMSSClamping := model.TcpMaximumSegmentSizeClamping{
-					Direction:      &direction,
-					MaxSegmentSize: &mss,
+					Direction: &direction,
+				}
+				if mss > 0 {
+					tcpMSSClamping.MaxSegmentSize = &mss
 				}
 				policyObj.TcpMssClamping = &tcpMSSClamping
 			}
@@ -418,7 +422,7 @@ func (c *ipsecSessionClient) Delete(connector client.Connector, id string) error
 func parseIPSecVPNServicePolicyPath(path string) (bool, string, string, string, error) {
 	segs := strings.Split(path, "/")
 	// Path should be like /infra/tier-1s/aaa/locale-services/default/ipsec-vpn-services/ccc
-	// or /infra/tier-0s/vmc/ipsec-vpn-services/default for VMC
+	// or /infra/tier-0s/aaa/ipsec-vpn-services/bbb
 	segCount := len(segs)
 	if segCount < 6 || segCount > 8 || (segs[segCount-2] != "ipsec-vpn-services") {
 		// error - this is not a segment path
@@ -430,7 +434,6 @@ func parseIPSecVPNServicePolicyPath(path string) (bool, string, string, string, 
 
 	localeServiceID := ""
 	if segCount == 8 {
-		// not VMC
 		localeServiceID = segs[5]
 	}
 

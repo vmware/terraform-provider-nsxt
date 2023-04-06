@@ -5,6 +5,7 @@ package nsxt
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
@@ -36,42 +37,17 @@ func dataSourceNsxtPolicyIPSecVpnLocalEndpointRead(d *schema.ResourceData, m int
 	servicePath := d.Get("service_path").(string)
 	query := make(map[string]string)
 	if len(servicePath) > 0 {
-		// In newer NSX versions, NSX removes locale service from the parent path when search API is concerned
-		objID := d.Get("id").(string)
-		objName := d.Get("display_name").(string)
-		client, err := newLocalEndpointClient(servicePath)
-		if err != nil {
-			return err
+		s := strings.Split(servicePath, "/")
+		if len(s) != 8 && len(s) != 6 {
+			// The policy path of IPSec VPN Service should be like /infra/tier-0s/aaa/locale-services/bbb/ipsec-vpn-services/ccc
+			// or /infra/tier-0s/aaa/ipsec-vpn-services/bbb
+			return fmt.Errorf("Invalid IPSec Vpn Service path: %s", servicePath)
 		}
-		if objID != "" {
-			obj, err := client.Get(connector, objID)
-			if err != nil {
-				return fmt.Errorf("Failed to locate Local Endpoint %s/%s: %v", servicePath, objID, err)
-			}
-			d.SetId(*obj.Id)
-			d.Set("display_name", obj.DisplayName)
-			d.Set("description", obj.Description)
-			d.Set("path", obj.Path)
-			d.Set("local_address", obj.LocalAddress)
-			return nil
+		if len(s) == 8 {
+			// search API does not recognized the locale-services part in the VPN service path
+			servicePath = strings.Join(append(s[:4], s[6:]...), "/")
 		}
-
-		objList, err := client.List(connector)
-		if err != nil {
-			return fmt.Errorf("Failed to list local endpoints: %v", err)
-		}
-
-		for _, obj := range objList {
-			if *obj.DisplayName == objName {
-				d.SetId(*obj.Id)
-				d.Set("display_name", obj.DisplayName)
-				d.Set("description", obj.Description)
-				d.Set("path", obj.Path)
-				d.Set("local_address", obj.LocalAddress)
-				return nil
-			}
-		}
-		return fmt.Errorf("Failed to locate Local Endpoint under %s named %s", servicePath, objName)
+		query["parent_path"] = fmt.Sprintf("%s*", servicePath)
 	}
 	objInt, err := policyDataSourceResourceReadWithValidation(d, connector, isPolicyGlobalManager(m), "IPSecVpnLocalEndpoint", query, false)
 	if err != nil {
