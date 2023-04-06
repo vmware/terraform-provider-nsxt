@@ -16,6 +16,8 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
+var gatewayPolicyCategoryValues = []string{"Emergency", "SystemRules", "SharedPreRules", "LocalGatewayRules", "AutoServiceRules", "Default"}
+
 func dataSourceNsxtPolicyGatewayPolicy() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceNsxtPolicyGatewayPolicyRead,

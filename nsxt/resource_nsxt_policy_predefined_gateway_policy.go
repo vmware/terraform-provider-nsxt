@@ -296,6 +296,10 @@ func updatePolicyPredefinedGatewayPolicy(id string, d *schema.ResourceData, m in
 		return err
 	}
 
+	if predefinedPolicy.Category != nil && *predefinedPolicy.Category == "SystemRules" {
+		return fmt.Errorf("System policy can not be modified")
+	}
+
 	if d.HasChange("description") {
 		description := d.Get("description").(string)
 		predefinedPolicy.Description = &description
