@@ -16,6 +16,7 @@ func TestAccDataSourceNsxtPolicyVM_basic(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccOnlyLocalManager(t)
 			testAccEnvDefined(t, "NSXT_TEST_VM_ID")
 			testAccEnvDefined(t, "NSXT_TEST_VM_NAME")
 		},

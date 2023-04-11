@@ -18,6 +18,7 @@ func TestAccDataSourceNsxtPolicyVMs_basic(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccOnlyLocalManager(t)
 			testAccEnvDefined(t, "NSXT_TEST_VM_NAME")
 		},
 		Providers: testAccProviders,
@@ -47,6 +48,28 @@ func TestAccDataSourceNsxtPolicyVMs_basic(t *testing.T) {
 	})
 }
 
+func TestAccDataSourceNsxtPolicyVMs_filter(t *testing.T) {
+	testResourceName := "data.nsxt_policy_vms.test"
+	checkResourceName := "nsxt_policy_group.check"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyLocalManager(t)
+		},
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyVMsTemplateFilter(),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(testResourceName, "id"),
+					resource.TestCheckResourceAttrSet(checkResourceName, "display_name"),
+				),
+			},
+		},
+	})
+}
+
 func testAccNsxtPolicyVMsTemplate(valueType string) string {
 	return fmt.Sprintf(`
 data "nsxt_policy_vms" "test" {
@@ -60,4 +83,16 @@ data "nsxt_policy_vm" "check" {
 resource "nsxt_policy_group" "check" {
   display_name = data.nsxt_policy_vms.test.items["%s"]
 }`, valueType, getTestVMName(), getTestVMName())
+}
+
+func testAccNsxtPolicyVMsTemplateFilter() string {
+	return fmt.Sprintf(`
+data "nsxt_policy_vms" "test" {
+  state    = "running"
+  guest_os = "ubuntu"
+}
+
+resource "nsxt_policy_group" "check" {
+  display_name = length(data.nsxt_policy_vms.test.items)
+}`)
 }

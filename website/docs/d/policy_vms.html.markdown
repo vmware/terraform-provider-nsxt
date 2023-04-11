@@ -15,6 +15,8 @@ This data source is applicable to NSX Policy Manager and VMC.
 
 ```hcl
 data "nsxt_policy_vms" "all" {
+  state      = "running"
+  guest_os   = "ubuntu"
   value_type = "bios_id"
 }
 
@@ -31,6 +33,8 @@ resource "nsxt_policy_vm_tags" "test" {
 ## Argument Reference
 
 * `value_tupe` - (Optional) Type of VM ID the user is interested in. Possible values are `bios_id`, `external_id`, `instance_id`. Default is `bios_id`.
+* `state` - (Optional) Filter results by power state of the machine.
+* `guest_os` - (Optional) Filter results by operating system of the machine. The match is case insensitive and prefix-based.
 
 ## Attributes Reference
 
