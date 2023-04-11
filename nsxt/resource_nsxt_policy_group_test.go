@@ -83,6 +83,55 @@ func TestAccResourceNsxtPolicyGroup_AddressCriteria(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyGroup_GroupTypeIPAddressCriteria(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_group.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccNSXVersion(t, "3.2.0")
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyGroupCheckDestroy(state, name, defaultDomain)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyGroupIPAddressCreateTemplate(name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "domain", defaultDomain),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.0.ipaddress_expression.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.0.ipaddress_expression.0.ip_addresses.#", "2"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyGroupIPAddressUpdateTemplate(name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "domain", defaultDomain),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "conjunction.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.0.ipaddress_expression.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.0.ipaddress_expression.0.ip_addresses.#", "2"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtGlobalPolicyGroup_singleIPAddressCriteria(t *testing.T) {
 	name := getAccTestResourceName()
 	updatedName := getAccTestResourceName()
@@ -1345,6 +1394,58 @@ func testAccNsxtPolicyGroupIdentityGroupUpdateDeleteAD(name string) string {
 resource "nsxt_policy_group" "test" {
   display_name = "%s"
   description  = "Acceptance Test"
+}
+`, name)
+}
+
+func testAccNsxtPolicyGroupIPAddressCreateTemplate(name string) string {
+	return fmt.Sprintf(`
+resource "nsxt_policy_group" "test" {
+  display_name = "%s"
+  description  = "Acceptance Test"
+  group_type   = "IPAddress"
+
+  criteria {
+    ipaddress_expression {
+	  ip_addresses = ["111.1.1.1", "222.2.2.2"]
+	}
+  }
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+
+  tag {
+    scope = "scope2"
+    tag   = "tag2"
+  }
+}
+`, name)
+}
+
+func testAccNsxtPolicyGroupIPAddressUpdateTemplate(name string) string {
+	return fmt.Sprintf(`
+resource "nsxt_policy_group" "test" {
+  display_name = "%s"
+  description  = "Acceptance Test"
+  group_type   = "IPAddress"
+
+  criteria {
+    ipaddress_expression {
+	  ip_addresses = ["111.2.1.1", "232.2.2.2"]
+	}
+  }
+
+  conjunction {
+	operator = "OR"
+  }
+
+  criteria {
+    ipaddress_expression {
+	  ip_addresses = ["111.1.1.3", "222.2.2.4"]
+	}
+  }
 }
 `, name)
 }
