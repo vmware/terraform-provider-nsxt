@@ -74,8 +74,7 @@ data "nsxt_policy_ipsec_vpn_local_endpoint" "test" {
 }
 
 func testAccNsxtPolicyDataSourceIPSecVpnLocalEndpointPreconfig(name string) string {
-	return testAccNsxtPolicyEdgeClusterReadTemplate(getEdgeClusterName()) +
-		testAccNsxtPolicyTier0WithEdgeClusterForVPN("test") + fmt.Sprintf(`
+	return testAccNsxtPolicyTier0WithEdgeClusterForVPN() + fmt.Sprintf(`
 resource "nsxt_policy_ipsec_vpn_service" "test" {
   display_name        = "%s"
   locale_service_path =  one(nsxt_policy_tier0_gateway.test.locale_service).path

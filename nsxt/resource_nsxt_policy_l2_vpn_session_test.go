@@ -101,6 +101,9 @@ func TestAccResourceNsxtPolicyL2VpnSession_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
 				),
 			},
+			{
+				Config: testAccNsxtPolicyGatewayTemplate(true),
+			},
 		},
 	})
 }
@@ -177,6 +180,9 @@ func TestAccResourceNsxtPolicyL2VpnSession_tier1(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 				),
+			},
+			{
+				Config: testAccNsxtPolicyGatewayTemplate(false),
 			},
 		},
 	})
@@ -341,8 +347,7 @@ resource "nsxt_policy_ipsec_vpn_session" "test" {
 }
 
 func testAccNsxtPolicyL2VpnSessionTestTemplate(createFlow bool, isT0 bool) string {
-	return testAccNsxtPolicyEdgeClusterReadTemplate(getEdgeClusterName()) +
-		gatewayTemplate(isT0) +
+	return testAccNsxtPolicyGatewayTemplate(isT0) +
 		testAccNsxtPolicyL2VpnSessionPreConditionTemplate(isT0) +
 		testAccNsxtPolicyL2VpnSessionTemplate(createFlow)
 }
@@ -377,8 +382,7 @@ resource "nsxt_policy_l2_vpn_session" "test" {
 
 func testAccNsxtPolicyL2VpnSessionMinimalistic() string {
 	attrMap := accTestPolicyL2VpnSessionCreateAttributes
-	return testAccNsxtPolicyEdgeClusterReadTemplate(getEdgeClusterName()) +
-		testAccNsxtPolicyTier0WithEdgeClusterForVPN("test") +
+	return testAccNsxtPolicyTier0WithEdgeClusterForVPN() +
 		testAccNsxtPolicyL2VpnSessionPreConditionTemplate(true) + fmt.Sprintf(`
 resource "nsxt_policy_l2_vpn_session" "test" {
 	display_name      = "%s"

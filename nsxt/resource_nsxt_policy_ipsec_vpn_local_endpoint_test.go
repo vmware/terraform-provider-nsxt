@@ -78,6 +78,9 @@ func TestAccResourceNsxtPolicyIPSecVpnLocalEndpoint_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
 				),
 			},
+			{
+				Config: testAccNsxtPolicyGatewayTemplate(true),
+			},
 		},
 	})
 }
