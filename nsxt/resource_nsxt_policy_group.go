@@ -109,7 +109,7 @@ func getIPAddressExpressionSchema() *schema.Resource {
 			"ip_addresses": {
 				Type:        schema.TypeSet,
 				Required:    true,
-				Description: "List of; single IP addresses, IP address ranges or Subnets. Cannot mix IPv4 and IPv6 in a single list",
+				Description: "List of single IP addresses, IP address ranges or Subnets. Cannot mix IPv4 and IPv6 in a single list",
 				Elem: &schema.Schema{
 					Type:         schema.TypeString,
 					ValidateFunc: validateCidrOrIPOrRange(),
