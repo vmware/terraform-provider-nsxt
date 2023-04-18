@@ -67,6 +67,7 @@ Note: At least one of `app_id`, `custom_url`, domain_name`, or `url_category` mu
     * `tls_version` - (Optional) A list of string indicating values for `tls_version`, only applicable to `SSL`.
     * `cifs_smb_version` - (Optional) A list of string indicating values for `cifs_smb_version`, only applicable to `CIFS`.
 * `custom_url` - (Optional) A block to specify custom URL attributes for the context profile. Only one block is allowed.
+  * `custom_url_partial_match` - True value for this flag will be treated as a partial match for custom url.  Attribute is supported with NSX version 4.0.0 and above.
   * `description` - (Optional) Description of the attribute.
   * `value` - (Required) A list of string indicating values for the `custom_url`. Must be a subset of valid values for `custom_url` on NSX.
 * `domain_name` - (Optional) A block to specify domain name (FQDN) attributes for the context profile. Only one block is allowed.
