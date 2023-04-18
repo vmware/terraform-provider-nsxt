@@ -111,6 +111,7 @@ The following arguments are supported:
 * `intersite_config` - (Optional) This clause is relevant for Global Manager only.
   * `transit_subnet` - (Optional) IPv4 subnet for inter-site transit segment connecting service routers across sites for stretched gateway. For IPv6 link local subnet is auto configured.
   * `primary_site_path` - (Optional) Primary egress site for gateway.
+* `ha_mode` - (Optional) High-availability Mode for Tier-1. Valid values are `ACTIVE_ACTIVE` and `ACTIVE_STANDBY`.  `ACTIVE_ACTIVE` is supported with NSX version 4.0.0 and above.
 
 
 ## Attributes Reference
