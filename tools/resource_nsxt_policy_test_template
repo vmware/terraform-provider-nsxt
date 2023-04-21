@@ -156,8 +156,7 @@ func testAccNsxtPolicy<!RESOURCE!>Template(createFlow bool) string {
 resource "nsxt_policy_<!resource_lower!>" "test" {
   display_name = "%s"
   description  = "%s"
-  <!TEST_ATTRS!>
-
+<!TEST_ATTRS!>
   tag {
     scope = "scope1"
     tag   = "tag1"
