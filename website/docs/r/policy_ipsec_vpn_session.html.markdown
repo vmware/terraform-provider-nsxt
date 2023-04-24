@@ -83,8 +83,8 @@ The following arguments are supported:
   * `sources` - (Optional) List of source subnets. Subnet format is ipv4 CIDR.
   * `destinations` - (Optional) List of distination subnets. Subnet format is ipv4 CIDR.
   * `action` - (Optional) `PROTECT` or `BYPASS`. Default is `PROTECT`.
-* `direction` - (Optional) The traffic direction apply to the MSS clamping. Value is one of `NONE`, `INBOUND_CONNECTION`, `OUTBOUND_CONNECTION` AND `BOTH`. Must be specified together with `max_segment_size`.
-* `max_segment_size` - (Optional) Maximum amount of data the host will accept in a TCP segment. Value is an int between `108` and `8860`. Must be specified together with `direction`.
+* `direction` - (Optional) The traffic direction apply to the MSS clamping. Value is one of `NONE`, `INBOUND_CONNECTION`, `OUTBOUND_CONNECTION` AND `BOTH`.
+* `max_segment_size` - (Optional) Maximum amount of data the host will accept in a TCP segment. Value is an int between `108` and `8860`. If not specified then the value would be the automatic calculated MSS value.
 
 ## Attributes Reference
 

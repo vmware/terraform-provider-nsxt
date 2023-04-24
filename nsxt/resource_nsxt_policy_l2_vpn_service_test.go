@@ -46,7 +46,7 @@ func TestAccResourceNsxtPolicyL2VpnService_basic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyL2VpnServiceMinimalistic(),
+				Config: testAccNsxtPolicyL2VpnServiceMinimalistic(false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyL2VpnServiceExists(accTestPolicyL2VpnServiceCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
@@ -58,7 +58,7 @@ func TestAccResourceNsxtPolicyL2VpnService_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyL2VpnServiceTemplate(true, false),
+				Config: testAccNsxtPolicyL2VpnServiceTemplate(true, false, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyL2VpnServiceExists(accTestPolicyL2VpnServiceCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyL2VpnServiceCreateAttributes["display_name"]),
@@ -75,7 +75,7 @@ func TestAccResourceNsxtPolicyL2VpnService_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyL2VpnServiceTemplate(false, false),
+				Config: testAccNsxtPolicyL2VpnServiceTemplate(false, false, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyL2VpnServiceExists(accTestPolicyL2VpnServiceUpdateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyL2VpnServiceUpdateAttributes["display_name"]),
@@ -98,6 +98,114 @@ func TestAccResourceNsxtPolicyL2VpnService_basic(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyL2VpnService_updateFromlocaleServicePathToGatewayPath(t *testing.T) {
+	testResourceName := "nsxt_policy_l2_vpn_service.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t); testAccNSXVersion(t, "3.2.0") },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyL2VpnServiceCheckDestroy(state, accTestPolicyL2VpnServiceUpdateAttributes["display_name"])
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyL2VpnServiceTemplate(true, false, false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyL2VpnServiceExists(accTestPolicyL2VpnServiceCreateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyL2VpnServiceCreateAttributes["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyL2VpnServiceCreateAttributes["description"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "locale_service_path"),
+					resource.TestCheckResourceAttr(testResourceName, "enable_hub", accTestPolicyL2VpnServiceCreateAttributes["enable_hub"]),
+					resource.TestCheckResourceAttr(testResourceName, "mode", accTestPolicyL2VpnServiceCreateAttributes["mode"]),
+					resource.TestCheckResourceAttr(testResourceName, "encap_ip_pool.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "encap_ip_pool.0", accTestPolicyL2VpnServiceCreateAttributes["encap_ip_pool"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyL2VpnServiceTemplate(true, false, true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyL2VpnServiceExists(accTestPolicyL2VpnServiceCreateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyL2VpnServiceCreateAttributes["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyL2VpnServiceCreateAttributes["description"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "gateway_path"),
+					resource.TestCheckResourceAttr(testResourceName, "enable_hub", accTestPolicyL2VpnServiceCreateAttributes["enable_hub"]),
+					resource.TestCheckResourceAttr(testResourceName, "mode", accTestPolicyL2VpnServiceCreateAttributes["mode"]),
+					resource.TestCheckResourceAttr(testResourceName, "encap_ip_pool.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "encap_ip_pool.0", accTestPolicyL2VpnServiceCreateAttributes["encap_ip_pool"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicyL2VpnService_withGateway(t *testing.T) {
+	testResourceName := "nsxt_policy_l2_vpn_service.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t); testAccNSXVersion(t, "3.2.0") },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyL2VpnServiceCheckDestroy(state, accTestPolicyL2VpnServiceUpdateAttributes["display_name"])
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyL2VpnServiceMinimalistic(true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyL2VpnServiceExists(accTestPolicyL2VpnServiceCreateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "description", ""),
+					resource.TestCheckResourceAttrSet(testResourceName, "gateway_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyL2VpnServiceTemplate(true, false, true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyL2VpnServiceExists(accTestPolicyL2VpnServiceCreateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyL2VpnServiceCreateAttributes["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyL2VpnServiceCreateAttributes["description"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "gateway_path"),
+					resource.TestCheckResourceAttr(testResourceName, "enable_hub", accTestPolicyL2VpnServiceCreateAttributes["enable_hub"]),
+					resource.TestCheckResourceAttr(testResourceName, "mode", accTestPolicyL2VpnServiceCreateAttributes["mode"]),
+					resource.TestCheckResourceAttr(testResourceName, "encap_ip_pool.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "encap_ip_pool.0", accTestPolicyL2VpnServiceCreateAttributes["encap_ip_pool"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyL2VpnServiceTemplate(false, false, true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyL2VpnServiceExists(accTestPolicyL2VpnServiceUpdateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyL2VpnServiceUpdateAttributes["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyL2VpnServiceUpdateAttributes["description"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "gateway_path"),
+					resource.TestCheckResourceAttr(testResourceName, "enable_hub", accTestPolicyL2VpnServiceUpdateAttributes["enable_hub"]),
+					resource.TestCheckResourceAttr(testResourceName, "mode", accTestPolicyL2VpnServiceUpdateAttributes["mode"]),
+					resource.TestCheckResourceAttr(testResourceName, "encap_ip_pool.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "encap_ip_pool.0", accTestPolicyL2VpnServiceUpdateAttributes["encap_ip_pool"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtPolicyL2VpnService_ClientMode(t *testing.T) {
 	testResourceName := "nsxt_policy_l2_vpn_service.test"
 
@@ -109,7 +217,7 @@ func TestAccResourceNsxtPolicyL2VpnService_ClientMode(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyL2VpnServiceTemplate(false, true),
+				Config: testAccNsxtPolicyL2VpnServiceTemplate(false, true, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyL2VpnServiceExists(accTestPolicyL2VpnServiceCreateClientModeAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyL2VpnServiceCreateClientModeAttributes["display_name"]),
@@ -132,6 +240,37 @@ func TestAccResourceNsxtPolicyL2VpnService_ClientMode(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyL2VpnService_ClientMode_withGateway(t *testing.T) {
+	testResourceName := "nsxt_policy_l2_vpn_service.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t); testAccNSXVersion(t, "3.2.0") },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyL2VpnServiceCheckDestroy(state, accTestPolicyL2VpnServiceCreateClientModeAttributes["display_name"])
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyL2VpnServiceTemplate(false, true, true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyL2VpnServiceExists(accTestPolicyL2VpnServiceCreateClientModeAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyL2VpnServiceCreateClientModeAttributes["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyL2VpnServiceCreateClientModeAttributes["description"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "gateway_path"),
+					resource.TestCheckResourceAttr(testResourceName, "enable_hub", accTestPolicyL2VpnServiceCreateClientModeAttributes["enable_hub"]),
+					resource.TestCheckResourceAttr(testResourceName, "mode", accTestPolicyL2VpnServiceCreateClientModeAttributes["mode"]),
+					resource.TestCheckResourceAttr(testResourceName, "encap_ip_pool.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "encap_ip_pool.0", accTestPolicyL2VpnServiceCreateClientModeAttributes["encap_ip_pool"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtPolicyL2VpnService_Import(t *testing.T) {
 	resourceName := "nsxt_policy_l2_vpn_service.test"
 
@@ -143,7 +282,7 @@ func TestAccResourceNsxtPolicyL2VpnService_Import(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyL2VpnServiceTemplate(true, false),
+				Config: testAccNsxtPolicyL2VpnServiceTemplate(true, false, false),
 			},
 			{
 				ResourceName:      resourceName,
@@ -166,7 +305,14 @@ func testAccNsxtPolicyL2VpnServiceImporterGetID(s *terraform.State) (string, err
 		return "", fmt.Errorf("Policy L2VpnService resource ID not set in resources")
 	}
 	localeServicePath := rs.Primary.Attributes["locale_service_path"]
-	return fmt.Sprintf("%s/l2vpn-services/%s", localeServicePath, resourceID), nil
+	gatewayPath := rs.Primary.Attributes["gateway_path"]
+	if gatewayPath == "" && localeServicePath == "" {
+		return "", fmt.Errorf("At least one of gateway path and locale service path should be provided for VPN resources")
+	}
+	if localeServicePath != "" {
+		return fmt.Sprintf("%s/l2vpn-services/%s", localeServicePath, resourceID), nil
+	}
+	return fmt.Sprintf("%s/l2vpn-services/%s", gatewayPath, resourceID), nil
 }
 
 func testAccNsxtPolicyL2VpnServiceExists(displayName string, resourceName string) resource.TestCheckFunc {
@@ -185,10 +331,16 @@ func testAccNsxtPolicyL2VpnServiceExists(displayName string, resourceName string
 		}
 
 		localeServicePath := rs.Primary.Attributes["locale_service_path"]
+		gatewayPath := rs.Primary.Attributes["gateway_path"]
+		if gatewayPath == "" && localeServicePath == "" {
+			return fmt.Errorf("At least one of gateway path and locale service path should be provided for VPN resources")
+		}
 		isT0, gwID, localeServiceID, err := parseLocaleServicePolicyPath(localeServicePath)
-
-		if err != nil {
-			return nil
+		if localeServiceID == "" {
+			isT0, gwID = parseGatewayPolicyPath(gatewayPath)
+		}
+		if err != nil && gatewayPath == "" {
+			return fmt.Errorf("Invalid locale service path %s", localeServicePath)
 		}
 		_, err1 := getNsxtPolicyL2VpnServiceByID(connector, gwID, isT0, localeServiceID, resourceID, testAccIsGlobalManager())
 		if err1 != nil {
@@ -209,9 +361,12 @@ func testAccNsxtPolicyL2VpnServiceCheckDestroy(state *terraform.State, displayNa
 
 		resourceID := rs.Primary.Attributes["id"]
 		localeServicePath := rs.Primary.Attributes["locale_service_path"]
+		gatewayPath := rs.Primary.Attributes["gateway_path"]
 		isT0, gwID, localeServiceID, err := parseLocaleServicePolicyPath(localeServicePath)
-
-		if err != nil {
+		if localeServiceID == "" {
+			isT0, gwID = parseGatewayPolicyPath(gatewayPath)
+		}
+		if err != nil && gatewayPath == "" {
 			return nil
 		}
 
@@ -223,7 +378,7 @@ func testAccNsxtPolicyL2VpnServiceCheckDestroy(state *terraform.State, displayNa
 	return nil
 }
 
-func testAccNsxtPolicyL2VpnServiceTemplate(createFlow bool, clientMode bool) string {
+func testAccNsxtPolicyL2VpnServiceTemplate(createFlow bool, clientMode bool, useGatewayPath bool) string {
 	var attrMap map[string]string
 	if clientMode {
 		attrMap = accTestPolicyL2VpnServiceCreateClientModeAttributes
@@ -234,25 +389,27 @@ func testAccNsxtPolicyL2VpnServiceTemplate(createFlow bool, clientMode bool) str
 			attrMap = accTestPolicyL2VpnServiceUpdateAttributes
 		}
 	}
+	gatewayOrLocaleServicePath := getGatewayOrLocaleServicePath(useGatewayPath, true)
 	return testAccNsxtPolicyTier0WithEdgeClusterForVPN() + fmt.Sprintf(`
 	  resource "nsxt_policy_l2_vpn_service" "test" {
-		display_name         = "%s"
-		description          = "%s"
-		locale_service_path  = one(nsxt_policy_tier0_gateway.test.locale_service).path
-		enable_hub           = "%s"
-		mode                 = "%s"
-		encap_ip_pool 	     = ["%s"]
+		display_name                   = "%s"
+		description                    = "%s"
+		%s
+		enable_hub                     = "%s"
+		mode               			   = "%s"
+		encap_ip_pool 				   = ["%s"]
 		tag {
 		  scope = "scope1"
 		  tag   = "tag1"
 		}
-	  }`, attrMap["display_name"], attrMap["description"], attrMap["enable_hub"], attrMap["mode"], attrMap["encap_ip_pool"])
+	  }`, attrMap["display_name"], attrMap["description"], gatewayOrLocaleServicePath, attrMap["enable_hub"], attrMap["mode"], attrMap["encap_ip_pool"])
 }
 
-func testAccNsxtPolicyL2VpnServiceMinimalistic() string {
+func testAccNsxtPolicyL2VpnServiceMinimalistic(useGatewayPath bool) string {
+	gatewayOrLocaleServicePath := getGatewayOrLocaleServicePath(useGatewayPath, true)
 	return testAccNsxtPolicyTier0WithEdgeClusterForVPN() + fmt.Sprintf(`
 	  resource "nsxt_policy_l2_vpn_service" "test" {
 		display_name          = "%s"
-		locale_service_path   = one(nsxt_policy_tier0_gateway.test.locale_service).path
-	  }`, accTestPolicyL2VpnServiceUpdateAttributes["display_name"])
+		%s
+	  }`, accTestPolicyL2VpnServiceUpdateAttributes["display_name"], gatewayOrLocaleServicePath)
 }

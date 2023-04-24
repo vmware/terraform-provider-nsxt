@@ -39,14 +39,14 @@ func TestAccResourceNsxtPolicyL2VpnSession_basic(t *testing.T) {
 	testResourceName := testAccL2VpnSessionResourceName
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t); testAccNSXVersionLessThan(t, "3.2.0") },
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t); testAccNSXVersion(t, "3.2.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyL2VpnSessionCheckDestroy(state, accTestPolicyL2VpnSessionCreateAttributes["display_name"])
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyL2VpnSessionTestTemplate(true, true),
+				Config: testAccNsxtPolicyL2VpnSessionTestTemplate(true, true, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyL2VpnSessionExists(accTestPolicyL2VpnSessionCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyL2VpnSessionCreateAttributes["display_name"]),
@@ -66,7 +66,7 @@ func TestAccResourceNsxtPolicyL2VpnSession_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyL2VpnSessionTestTemplate(false, true),
+				Config: testAccNsxtPolicyL2VpnSessionTestTemplate(false, true, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyL2VpnSessionExists(accTestPolicyL2VpnSessionUpdateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyL2VpnSessionUpdateAttributes["display_name"]),
@@ -86,7 +86,7 @@ func TestAccResourceNsxtPolicyL2VpnSession_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyL2VpnSessionMinimalistic(),
+				Config: testAccNsxtPolicyL2VpnSessionMinimalistic(false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyL2VpnSessionExists(accTestPolicyL2VpnSessionCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyL2VpnSessionCreateAttributes["display_name"]),
@@ -112,14 +112,14 @@ func TestAccResourceNsxtPolicyL2VpnSession_import(t *testing.T) {
 	testResourceName := testAccL2VpnSessionResourceName
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t); testAccNSXVersionLessThan(t, "3.2.0") },
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t); testAccNSXVersion(t, "3.2.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyL2VpnSessionCheckDestroy(state, accTestPolicyL2VpnSessionCreateAttributes["display_name"])
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyL2VpnSessionMinimalistic(),
+				Config: testAccNsxtPolicyL2VpnSessionMinimalistic(false),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -135,14 +135,14 @@ func TestAccResourceNsxtPolicyL2VpnSession_tier1(t *testing.T) {
 	testResourceName := testAccL2VpnSessionResourceName
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t); testAccNSXVersionLessThan(t, "3.2.0") },
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t); testAccNSXVersion(t, "3.2.0") },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyL2VpnSessionCheckDestroy(state, accTestPolicyL2VpnSessionCreateAttributes["display_name"])
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyL2VpnSessionTestTemplate(true, false),
+				Config: testAccNsxtPolicyL2VpnSessionTestTemplate(true, false, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyL2VpnSessionExists(accTestPolicyL2VpnSessionCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyL2VpnSessionCreateAttributes["display_name"]),
@@ -162,7 +162,7 @@ func TestAccResourceNsxtPolicyL2VpnSession_tier1(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyL2VpnSessionTestTemplate(false, false),
+				Config: testAccNsxtPolicyL2VpnSessionTestTemplate(false, false, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyL2VpnSessionExists(accTestPolicyL2VpnSessionUpdateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyL2VpnSessionUpdateAttributes["display_name"]),
@@ -263,13 +263,14 @@ func testAccNsxtPolicyL2VpnSessionCheckDestroy(state *terraform.State, displayNa
 	return nil
 }
 
-func testAccNsxtPolicyL2VpnSessionPreConditionTemplate(isT0 bool) string {
+func testAccNsxtPolicyL2VpnSessionPreConditionTemplate(isT0 bool, useGatewayPath bool) string {
+	gatewayOrLocaleServicePath := getGatewayOrLocaleServicePath(useGatewayPath, isT0)
 	var vpnServiceTemplate string
 	if isT0 {
 		vpnServiceTemplate = fmt.Sprintf(`
 resource "nsxt_policy_l2_vpn_service" "test_l2_svc" {
 	display_name          = "%s"
-	locale_service_path   = one(nsxt_policy_tier0_gateway.test.locale_service).path
+	%s
 	enable_hub            = true
 	mode                  = "SERVER"
 	encap_ip_pool         = ["192.168.10.0/24"]
@@ -277,23 +278,23 @@ resource "nsxt_policy_l2_vpn_service" "test_l2_svc" {
 
 resource "nsxt_policy_ipsec_vpn_service" "test_ipsec_svc" {
 	display_name          = "%s"
-	locale_service_path   = one(nsxt_policy_tier0_gateway.test.locale_service).path
+	%s
 }
-`, l2VpnResourceName, l2VpnResourceName)
+`, l2VpnResourceName, gatewayOrLocaleServicePath, l2VpnResourceName, gatewayOrLocaleServicePath)
 	} else {
 		vpnServiceTemplate = fmt.Sprintf(`
 resource "nsxt_policy_l2_vpn_service" "test_l2_svc" {
 	display_name          = "%s"
-	locale_service_path   = one(nsxt_policy_tier1_gateway.test.locale_service).path
+	%s
 	enable_hub            = true
 	mode                  = "SERVER"
 	encap_ip_pool         = ["192.168.10.0/24"]
 }
 resource "nsxt_policy_ipsec_vpn_service" "test_ipsec_svc" {
 	display_name          = "%s"
-	locale_service_path   = one(nsxt_policy_tier1_gateway.test.locale_service).path
+	%s
 }
-`, l2VpnResourceName, l2VpnResourceName)
+`, l2VpnResourceName, gatewayOrLocaleServicePath, l2VpnResourceName, gatewayOrLocaleServicePath)
 	}
 	return vpnServiceTemplate + fmt.Sprintf(`
 resource "nsxt_policy_ipsec_vpn_ike_profile" "test" {
@@ -346,9 +347,9 @@ resource "nsxt_policy_ipsec_vpn_session" "test" {
 `, l2VpnResourceName, l2VpnResourceName, l2VpnResourceName, l2VpnResourceName, l2VpnResourceName)
 }
 
-func testAccNsxtPolicyL2VpnSessionTestTemplate(createFlow bool, isT0 bool) string {
+func testAccNsxtPolicyL2VpnSessionTestTemplate(createFlow bool, isT0 bool, useGatewayPath bool) string {
 	return testAccNsxtPolicyGatewayTemplate(isT0) +
-		testAccNsxtPolicyL2VpnSessionPreConditionTemplate(isT0) +
+		testAccNsxtPolicyL2VpnSessionPreConditionTemplate(isT0, useGatewayPath) +
 		testAccNsxtPolicyL2VpnSessionTemplate(createFlow)
 }
 
@@ -380,10 +381,10 @@ resource "nsxt_policy_l2_vpn_session" "test" {
 `, attrMap["display_name"], attrMap["description"], attrMap["direction"], attrMap["max_segment_size"], attrMap["local_address"], attrMap["peer_address"], attrMap["protocol"])
 }
 
-func testAccNsxtPolicyL2VpnSessionMinimalistic() string {
+func testAccNsxtPolicyL2VpnSessionMinimalistic(useGatewayPath bool) string {
 	attrMap := accTestPolicyL2VpnSessionCreateAttributes
 	return testAccNsxtPolicyTier0WithEdgeClusterForVPN() +
-		testAccNsxtPolicyL2VpnSessionPreConditionTemplate(true) + fmt.Sprintf(`
+		testAccNsxtPolicyL2VpnSessionPreConditionTemplate(true, useGatewayPath) + fmt.Sprintf(`
 resource "nsxt_policy_l2_vpn_session" "test" {
 	display_name      = "%s"
 	service_path      = nsxt_policy_l2_vpn_service.test_l2_svc.path
