@@ -24,8 +24,8 @@ resource "nsxt_policy_segment_security_profile" "test" {
   dhcp_server_block_enabled    = false
   dhcp_server_block_v6_enabled = true
   non_ip_traffic_block_enabled = true
-  ra_guard_enabled = true
-  rate_limits_enabled = true
+  ra_guard_enabled             = true
+  rate_limits_enabled          = true
 
   rate_limit {
     rx_broadcast = 1800

@@ -146,7 +146,7 @@ func resourceNsxtPolicySegmentSecurityProfilePatch(d *schema.ResourceData, m int
 	dhcpClientBlockV6Enabled := d.Get("dhcp_client_block_v6_enabled").(bool)
 	dhcpServerBlockEnabled := d.Get("dhcp_server_block_enabled").(bool)
 	dhcpServerBlockV6Enabled := d.Get("dhcp_server_block_v6_enabled").(bool)
-	nonIpTrafficBlockEnabled := d.Get("non_ip_traffic_block_enabled").(bool)
+	nonIPTrafficBlockEnabled := d.Get("non_ip_traffic_block_enabled").(bool)
 	raGuardEnabled := d.Get("ra_guard_enabled").(bool)
 	rateLimitsList := d.Get("rate_limit").([]interface{})
 	var rateLimits *model.TrafficRateLimits
@@ -177,7 +177,7 @@ func resourceNsxtPolicySegmentSecurityProfilePatch(d *schema.ResourceData, m int
 		DhcpClientBlockV6Enabled: &dhcpClientBlockV6Enabled,
 		DhcpServerBlockEnabled:   &dhcpServerBlockEnabled,
 		DhcpServerBlockV6Enabled: &dhcpServerBlockV6Enabled,
-		NonIpTrafficBlockEnabled: &nonIpTrafficBlockEnabled,
+		NonIpTrafficBlockEnabled: &nonIPTrafficBlockEnabled,
 		RaGuardEnabled:           &raGuardEnabled,
 		RateLimits:               rateLimits,
 		RateLimitsEnabled:        &rateLimitsEnabled,
