@@ -11,7 +11,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s"
 	t0_locale_service "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s"
 	t1_locale_service "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/locale_services"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
@@ -35,13 +37,21 @@ func resourceNsxtPolicyIPSecVpnService() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"nsx_id":              getNsxIDSchema(),
-			"path":                getPathSchema(),
-			"display_name":        getDisplayNameSchema(),
-			"description":         getDescriptionSchema(),
-			"revision":            getRevisionSchema(),
-			"tag":                 getTagsSchema(),
-			"locale_service_path": getPolicyPathSchema(true, false, "Polciy path for the locale service."),
+			"nsx_id":       getNsxIDSchema(),
+			"path":         getPathSchema(),
+			"display_name": getDisplayNameSchema(),
+			"description":  getDescriptionSchema(),
+			"revision":     getRevisionSchema(),
+			"tag":          getTagsSchema(),
+			"gateway_path": getPolicyPathSchema(false, true, "Policy path for the gateway."),
+			"locale_service_path": {
+				Type:         schema.TypeString,
+				Description:  "Polciy path for the locale service.",
+				Optional:     true,
+				ForceNew:     true,
+				Deprecated:   "Use gateway_path instead.",
+				ValidateFunc: validatePolicyPath(),
+			},
 			"enabled": {
 				Type:        schema.TypeBool,
 				Description: "Enable/Disable IPSec VPN service.",
@@ -67,6 +77,14 @@ func resourceNsxtPolicyIPSecVpnService() *schema.Resource {
 }
 
 func getNsxtPolicyIPSecVpnServiceByID(connector client.Connector, gwID string, isT0 bool, localeServiceID string, serviceID string, isGlobalManager bool) (model.IPSecVpnService, error) {
+	if localeServiceID == "" {
+		if isT0 {
+			client := tier_0s.NewIpsecVpnServicesClient(connector)
+			return client.Get(gwID, serviceID)
+		}
+		client := tier_1s.NewIpsecVpnServicesClient(connector)
+		return client.Get(gwID, serviceID)
+	}
 	if isT0 {
 		client := t0_locale_service.NewIpsecVpnServicesClient(connector)
 		return client.Get(gwID, localeServiceID, serviceID)
@@ -77,6 +95,14 @@ func getNsxtPolicyIPSecVpnServiceByID(connector client.Connector, gwID string, i
 
 func patchNsxtPolicyIPSecVpnService(connector client.Connector, gwID string, localeServiceID string, ipSecVpnService model.IPSecVpnService, isT0 bool) error {
 	id := *ipSecVpnService.Id
+	if localeServiceID == "" {
+		if isT0 {
+			client := tier_0s.NewIpsecVpnServicesClient(connector)
+			return client.Patch(gwID, id, ipSecVpnService)
+		}
+		client := tier_1s.NewIpsecVpnServicesClient(connector)
+		return client.Patch(gwID, id, ipSecVpnService)
+	}
 	if isT0 {
 		client := t0_locale_service.NewIpsecVpnServicesClient(connector)
 		return client.Patch(gwID, localeServiceID, id, ipSecVpnService)
@@ -87,6 +113,16 @@ func patchNsxtPolicyIPSecVpnService(connector client.Connector, gwID string, loc
 
 func updateNsxtPolicyIPSecVpnService(connector client.Connector, gwID string, localeServiceID string, ipSecVpnService model.IPSecVpnService, isT0 bool) error {
 	id := *ipSecVpnService.Id
+	if localeServiceID == "" {
+		if isT0 {
+			client := tier_0s.NewIpsecVpnServicesClient(connector)
+			_, err := client.Update(gwID, id, ipSecVpnService)
+			return err
+		}
+		client := tier_1s.NewIpsecVpnServicesClient(connector)
+		_, err := client.Update(gwID, id, ipSecVpnService)
+		return err
+	}
 	if isT0 {
 		client := t0_locale_service.NewIpsecVpnServicesClient(connector)
 		_, err := client.Update(gwID, localeServiceID, id, ipSecVpnService)
@@ -102,19 +138,33 @@ func resourceNsxtPolicyIPSecVpnServiceImport(d *schema.ResourceData, m interface
 	s := strings.Split(importID, "/")
 	err := fmt.Errorf("Expected policy path for the IPSec VPN Service, got %s", importID)
 	// The policy path of IPSec VPN Service should be like /infra/tier-0s/aaa/locale-services/bbb/ipsec-vpn-services/ccc
-	if len(s) != 8 {
+	// or /infra/tier-0s/aaa/ipsec-vpn-services/bbb
+	if len(s) != 8 && len(s) != 6 {
 		return nil, err
 	}
-	d.SetId(s[7])
+	useLocaleService := len(s) == 8
+	d.SetId(s[len(s)-1])
 	s = strings.Split(importID, "/ipsec-vpn-services/")
 	if len(s) != 2 {
 		return []*schema.ResourceData{d}, err
 	}
-	d.Set("locale_service_path", s[0])
+	if useLocaleService {
+		d.Set("locale_service_path", s[0])
+	} else {
+		d.Set("gateway_path", s[0])
+	}
 	return []*schema.ResourceData{d}, nil
 }
 
 func deleteNsxtPolicyIPSecVpnService(connector client.Connector, gwID string, localeServiceID string, isT0 bool, id string) error {
+	if localeServiceID == "" {
+		if isT0 {
+			client := tier_0s.NewIpsecVpnServicesClient(connector)
+			return client.Delete(gwID, id)
+		}
+		client := tier_1s.NewIpsecVpnServicesClient(connector)
+		return client.Delete(gwID, id)
+	}
 	if isT0 {
 		client := t0_locale_service.NewIpsecVpnServicesClient(connector)
 		return client.Delete(gwID, localeServiceID, id)
@@ -196,6 +246,15 @@ func getIPSecVPNBypassRulesFromSchema(d *schema.ResourceData) []model.IPSecVpnRu
 	return nil
 }
 
+func getLocaleServiceAndGatewayPath(d *schema.ResourceData) (string, string, error) {
+	gatewayPath := d.Get("gateway_path").(string)
+	localeServicePath := d.Get("locale_service_path").(string)
+	if gatewayPath == "" && localeServicePath == "" {
+		return "", "", fmt.Errorf("At least one of gateway path and locale service path should be provided for VPN resources")
+	}
+	return gatewayPath, localeServicePath, nil
+}
+
 func resourceNsxtPolicyIPSecVpnServiceRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
@@ -203,10 +262,16 @@ func resourceNsxtPolicyIPSecVpnServiceRead(d *schema.ResourceData, m interface{}
 	if id == "" {
 		return fmt.Errorf("Error obtaining IPSecVpnService ID")
 	}
-	localeServicePath := d.Get("locale_service_path").(string)
-	isT0, gwID, localeServiceID, err := parseLocaleServicePolicyPath(localeServicePath)
+	gatewayPath, localeServicePath, err := getLocaleServiceAndGatewayPath(d)
 	if err != nil {
+		return nil
+	}
+	isT0, gwID, localeServiceID, err := parseLocaleServicePolicyPath(localeServicePath)
+	if err != nil && gatewayPath == "" {
 		return err
+	}
+	if localeServiceID == "" {
+		isT0, gwID = parseGatewayPolicyPath(gatewayPath)
 	}
 	obj, err := getNsxtPolicyIPSecVpnServiceByID(connector, gwID, isT0, localeServiceID, id, isPolicyGlobalManager(m))
 	if err != nil {
@@ -229,10 +294,16 @@ func resourceNsxtPolicyIPSecVpnServiceRead(d *schema.ResourceData, m interface{}
 
 func resourceNsxtPolicyIPSecVpnServiceCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	localeServicePath := d.Get("locale_service_path").(string)
-	isT0, gwID, localeServiceID, err := parseLocaleServicePolicyPath(localeServicePath)
+	gatewayPath, localeServicePath, err := getLocaleServiceAndGatewayPath(d)
 	if err != nil {
+		return nil
+	}
+	isT0, gwID, localeServiceID, err := parseLocaleServicePolicyPath(localeServicePath)
+	if err != nil && gatewayPath == "" {
 		return err
+	}
+	if localeServiceID == "" {
+		isT0, gwID = parseGatewayPolicyPath(gatewayPath)
 	}
 	isGlobalManager := isPolicyGlobalManager(m)
 	id := d.Get("nsx_id").(string)
@@ -285,10 +356,16 @@ func resourceNsxtPolicyIPSecVpnServiceUpdate(d *schema.ResourceData, m interface
 	if id == "" {
 		return fmt.Errorf("Error obtaining IPSec VPN Service ID")
 	}
-	localeServicePath := d.Get("locale_service_path").(string)
-	isT0, gwID, localeServiceID, err := parseLocaleServicePolicyPath(localeServicePath)
+	gatewayPath, localeServicePath, err := getLocaleServiceAndGatewayPath(d)
 	if err != nil {
+		return nil
+	}
+	isT0, gwID, localeServiceID, err := parseLocaleServicePolicyPath(localeServicePath)
+	if err != nil && gatewayPath == "" {
 		return err
+	}
+	if localeServiceID == "" {
+		isT0, gwID = parseGatewayPolicyPath(gatewayPath)
 	}
 
 	displayName := d.Get("display_name").(string)
@@ -329,10 +406,16 @@ func resourceNsxtPolicyIPSecVpnServiceDelete(d *schema.ResourceData, m interface
 		return fmt.Errorf("Error obtaining IPSec VPN Service ID")
 	}
 
-	localeServicePath := d.Get("locale_service_path").(string)
-	isT0, gwID, localeServiceID, err := parseLocaleServicePolicyPath(localeServicePath)
+	gatewayPath, localeServicePath, err := getLocaleServiceAndGatewayPath(d)
 	if err != nil {
+		return nil
+	}
+	isT0, gwID, localeServiceID, err := parseLocaleServicePolicyPath(localeServicePath)
+	if err != nil && gatewayPath == "" {
 		return err
+	}
+	if localeServiceID == "" {
+		isT0, gwID = parseGatewayPolicyPath(gatewayPath)
 	}
 
 	err = deleteNsxtPolicyIPSecVpnService(getPolicyConnector(m), gwID, localeServiceID, isT0, id)

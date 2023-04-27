@@ -63,7 +63,7 @@ func resourceNsxtPolicyContextProfile() *schema.Resource {
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
 			"app_id":       getContextProfilePolicyAppIDAttributesSchema(),
-			"custom_url":   getContextProfilePolicyOtherAttributesSchema(),
+			"custom_url":   getContextProfilePolicyCustomURLAttributesSchema(),
 			"domain_name":  getContextProfilePolicyOtherAttributesSchema(),
 			"url_category": getContextProfilePolicyOtherAttributesSchema(),
 		},
@@ -91,6 +91,32 @@ func getContextProfilePolicyAppIDAttributesSchema() *schema.Schema {
 					},
 				},
 				"sub_attribute": getPolicyAttributeSubAttributeSchema(),
+			},
+		},
+	}
+}
+
+func getContextProfilePolicyCustomURLAttributesSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:     schema.TypeSet,
+		Optional: true,
+		MaxItems: 1,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"description": getDescriptionSchema(),
+				"value": {
+					Type:        schema.TypeSet,
+					Description: "Values for attribute key",
+					Required:    true,
+					Elem: &schema.Schema{
+						Type: schema.TypeString,
+					},
+				},
+				"custom_url_partial_match": {
+					Type:        schema.TypeBool,
+					Description: "True value for this flag will be treated as a partial match for custom url",
+					Optional:    true,
+				},
 			},
 		},
 	}
@@ -473,6 +499,11 @@ func constructAttributesModelList(rawAttributes []interface{}, key string) ([]mo
 			Value:         values,
 			SubAttributes: subAttributesList,
 		}
+
+		if key == "custom_url" {
+			partialMatch := attributeMap["custom_url_partial_match"].(bool)
+			attributeStruct.CustomUrlPartialMatch = &partialMatch
+		}
 		res = append(res, attributeStruct)
 	}
 	return res, nil
@@ -514,6 +545,8 @@ func fillAttributesInSchema(d *schema.ResourceData, policyAttributes []model.Pol
 				elem["sub_attribute"] = fillSubAttributesInSchema(policyAttribute.SubAttributes)
 			}
 			elem["is_alg_type"] = policyAttribute.IsALGType
+		} else if *policyAttribute.Key == model.PolicyAttributes_KEY_CUSTOM_URL && nsxVersionHigherOrEqual("4.0.0") {
+			elem["custom_url_partial_match"] = policyAttribute.CustomUrlPartialMatch
 		}
 		attributes[key] = append(attributes[key], elem)
 	}

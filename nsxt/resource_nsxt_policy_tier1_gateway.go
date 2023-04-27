@@ -43,6 +43,10 @@ var poolAllocationValues = []string{
 	model.Tier1_POOL_ALLOCATION_LB_XLARGE,
 }
 
+var t1HaModeValues = []string{
+	model.Tier1_HA_MODE_ACTIVE,
+	model.Tier1_HA_MODE_STANDBY}
+
 func resourceNsxtPolicyTier1Gateway() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyTier1GatewayCreate,
@@ -118,6 +122,13 @@ func resourceNsxtPolicyTier1Gateway() *schema.Resource {
 			"ingress_qos_profile_path": getPolicyPathSchema(false, false, "Policy path to gateway QoS profile in ingress direction"),
 			"egress_qos_profile_path":  getPolicyPathSchema(false, false, "Policy path to gateway QoS profile in egress direction"),
 			"intersite_config":         getGatewayIntersiteConfigSchema(),
+			"ha_mode": {
+				Type:         schema.TypeString,
+				Description:  "High-availability Mode for Tier-1",
+				ValidateFunc: validation.StringInSlice(t1HaModeValues, false),
+				Optional:     true,
+				Default:      model.Tier1_HA_MODE_STANDBY,
+			},
 		},
 	}
 }
@@ -378,7 +389,12 @@ func policyTier1GatewayResourceToInfraStruct(d *schema.ResourceData, connector c
 	routeAdvertisementRules := getAdvRulesFromSchema(d)
 	ipv6ProfilePaths := getIpv6ProfilePathsFromSchema(d)
 	dhcpPath := d.Get("dhcp_config_path").(string)
+	haMode := d.Get("ha_mode").(string)
 	revision := int64(d.Get("revision").(int))
+
+	if haMode == model.Tier1_HA_MODE_ACTIVE && nsxVersionLower("4.0.0") {
+		return infraStruct, fmt.Errorf("ACTIVE_ACTIVE HA mode is not supported in NSX versions lower than 4.0.0. Use ACTIVE_BACKUP instead")
+	}
 
 	t1Type := "Tier1"
 	obj := model.Tier1{
@@ -396,6 +412,10 @@ func policyTier1GatewayResourceToInfraStruct(d *schema.ResourceData, connector c
 		RouteAdvertisementRules: routeAdvertisementRules,
 		Ipv6ProfilePaths:        ipv6ProfilePaths,
 		ResourceType:            &t1Type,
+	}
+
+	if nsxVersionHigherOrEqual("3.2.0") {
+		obj.HaMode = &haMode
 	}
 
 	if dhcpPath != "" {
@@ -528,6 +548,9 @@ func resourceNsxtPolicyTier1GatewayRead(d *schema.ResourceData, m interface{}) e
 	d.Set("enable_firewall", !(*obj.DisableFirewall))
 	d.Set("enable_standby_relocation", obj.EnableStandbyRelocation)
 	d.Set("force_whitelisting", obj.ForceWhitelisting)
+	if nsxVersionHigherOrEqual("3.2.0") {
+		d.Set("ha_mode", obj.HaMode)
+	}
 	if obj.Tier0Path != nil {
 		d.Set("tier0_path", *obj.Tier0Path)
 	}
