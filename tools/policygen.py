@@ -4,14 +4,13 @@
 #  Copyright (c) 2017 VMware, Inc. All Rights Reserved.
 #  SPDX-License-Identifier: MPL-2.0
 
-# Generating Data Sources:
-# 1. Run the following command: python policygen.py <resources struct name> data
-# 2. The generated files end up in your current directory; move them to the proper directory.
-# 3. Add the data source to provider.go in the DataSourcesMap.
-# 4. If needed, format the generated go files with: go fmt
+# Generating Resources:
+# 1. Run the following command: python policygen.py <resources struct name>
+# 2. Format generated go files with: go fmt
+# 3. The generated files end up in your current directory; move them to the proper directory.
+# 4. Add the resource to provider.go.
 # 5. Make sure go is happy with the format by running golint and go vet on the source files.
 # 6. Run the generated test(s) to ensure they pass.
-# 7. Add the doc file to nsxt.erb
 
 import sys
 import re
@@ -64,6 +63,9 @@ TEST_UPDATE_VALUES_MAP = {"string": '"test-update"',
 
 TYPECAST_MAP = {"int64": "int", "int32": "int"}
 
+# Metadata will contain all attributes of the given object, including nested ones
+# Parent attribute will have `object_type` key set to indicate model type of the child object
+# Child attributes will have `parent` key set
 metadata = {}
 
 def to_lower_separated(name):
@@ -127,12 +129,14 @@ def build_schema_attr(attr):
 
     result = ""
     is_array = False
+    is_object = False
     attr['const_needed'] = False
+    attr['object_type'] = ""
     attr_type = attr['type']
     # Computed and required attributes are not ref. At the moment we can't
     # distinguish between them and assume required, since this will necessarily
     # error out in test.
-    # TODO: parse yaml for this purpose
+    # TODO: parse spec json for this purpose
 
     optional = not attr['required']
     if attr['list'] and attr_type in TYPE_MAP:
@@ -144,18 +148,19 @@ def build_schema_attr(attr):
         is_array = True
 
     if attr_type not in TYPE_MAP:
-        # TODO: support sub-structs
-        print("Skipping attribute %s due to mysterious type %s" % (attr['name'], attr_type))
-        return result
+        load_resource_metadata(attr_type, attr['name'])
+        attr['object_type'] = attr_type
+        is_object = True
+        is_array = True
 
     result += "\"%s\": {\n" % attr['schema_name']
 
     if is_array:
-        result += "Type:        schema.TypeSet,\n"
+        result += "Type:        schema.TypeList,\n"
     else:
         result += "Type:        %s,\n" % TYPE_MAP[attr_type]
 
-    #TODO: concatenate multi-string comment, and remove enum speces
+    #TODO: concatenate multi-string comment, and remove enum specs
     #if attr['description']:
     #    result += "Description: \"%s\"," % attr['description']
 
@@ -170,10 +175,16 @@ def build_schema_attr(attr):
         validation = "ValidateFunc: validation.StringInSlice(%s, false),\n" % get_const_values_name(attr['name'])
 
     if is_array:
-        result += "Elem: &schema.Schema{\n"
-        result += "Type:        %s,\n" % TYPE_MAP[attr_type]
-        if validation:
-            result += validation
+        if is_object:
+            result += "Elem: &schema.Resource{\n"
+            result += "Schema: map[string]*schema.Schema{\n"
+            result += build_schema_attrs(attr['name'])
+            result +=  "},\n"
+        else:
+            result += "Elem: &schema.Schema{\n"
+            result += "Type:        %s,\n" % TYPE_MAP[attr_type]
+            if validation:
+                result += validation
         result +=  "},\n"
     elif validation:
         result += validation
@@ -188,12 +199,53 @@ def build_schema_attr(attr):
     return result
 
 def build_get_attr_from_schema(attr):
+    if attr['object_type'] != "":
+        # sub-clause
+        nameBase = lowercase_first(attr['name'])
+        result = '%sList := d.Get("%s").(%s)\n' % (
+                nameBase,
+                attr['schema_name'],
+                '[]interface{}')
+        if attr["list"]:
+            result += 'var %s []model.%s\n' % (nameBase, attr['object_type'])
+        else:
+            result += 'var %s *model.%s\n' % (nameBase, attr['object_type'])
+
+        result += 'for _, item := range %sList {\n' % nameBase
+        result += 'data := item.(map[string]interface{})\n'
+        for childAttr in metadata['attrs']:
+            if childAttr['parent'] == attr['name']:
+                result += build_get_attr_from_schema(childAttr)
+
+        result += 'obj := model.%s{\n' % attr['object_type']
+        result += build_set_attrs_in_obj(attr['name'])
+        result += '}\n'
+        if attr["list"]:
+            result += '%s = append(%s, obj)\n}\n' % (nameBase, nameBase)
+        else:
+            result += '%s = &obj\nbreak}\n' % nameBase
+
+        return result
+
     if 'helper' in attr:
         # helper function name already computed - this is the case for arrays
         return '%s := get%s(d, "%s")\n' % (
             lowercase_first(attr['name']),
             attr['helper'],
             attr['schema_name'])
+
+    if attr['parent'] != "":
+        if attr['type'] in TYPECAST_MAP:
+            # type casting is needed
+            return '%s := %s(data["%s"].(%s))\n' % (
+                     lowercase_first(attr['name']),
+                     attr['type'],
+                     attr['schema_name'],
+                     TYPECAST_MAP[attr['type']])
+        return '%s := data["%s"].(%s)\n' % (
+                     lowercase_first(attr['name']),
+                     attr['schema_name'],
+                     attr['type'])
 
     if attr['type'] in TYPECAST_MAP:
         # type casting is needed
@@ -208,18 +260,13 @@ def build_get_attr_from_schema(attr):
                  attr['type'])
 
 
-
-
-def load_resource_metadata():
+def load_resource_metadata(resource, parent=""):
 
     with open(STRUCTS_FILE, 'r') as f:
         lines = f.readlines()
 
-    metadata["constants"] = {}
-    metadata["attrs"] = []
     stage = ""
     description = ""
-    resource = metadata['resource']
     for line in lines:
         # load constants for this resource
         if line.startswith("const %s" % resource):
@@ -250,7 +297,7 @@ def load_resource_metadata():
                 continue
 
             if line.strip().startswith('//'):
-                description += line
+                description += line.replace('//', '').strip()
                 continue
 
             if FIRST_COMMON_ATTR in line:
@@ -271,42 +318,49 @@ def load_resource_metadata():
                 full_type = full_type[2:]
 
             schema_name = to_lower_separated(attr)
-            if is_list and full_type not in TYPE_MAP:
+            if full_type not in TYPE_MAP:
                 if schema_name.endswith('es'):
-                    schema_name = schema_name[:2]
+                    schema_name = schema_name[:-2]
                 if schema_name.endswith('s'):
-                    schema_name = schema_name[:1]
+                    schema_name = schema_name[:-1]
 
             metadata["attrs"].append({'name': attr,
+                                      'parent': parent,
                                       'description': description,
                                       'type': full_type,
                                       'list': is_list,
                                       'ref': is_ref,
                                       'schema_name': schema_name,
                                       'required': not is_ref and not is_list})
+            metadata["name_map"][attr] = schema_name
             description = ""
 
 
-def build_schema_attrs():
+def build_schema_attrs(parent=""):
     result = ""
     for attr in metadata['attrs']:
-        result += build_schema_attr(attr)
+        if attr['parent'] == parent:
+            result += build_schema_attr(attr)
 
     return result
 
 
-def build_get_attrs_from_schema():
+def build_get_attrs_from_schema(parent=""):
     result = ""
     for attr in metadata['attrs']:
+        if parent != attr['parent']:
+            continue
         result += build_get_attr_from_schema(attr)
 
     return result
 
 
-def build_set_attrs_in_obj():
+def build_set_attrs_in_obj(parent=""):
     result = ""
     for attr in metadata['attrs']:
-        if attr['list']:
+        if attr['parent'] != parent:
+            continue
+        if attr['list'] or attr['object_type'] != "":
             result += "%s: %s,\n" % (attr['name'], lowercase_first(attr['name']))
         else:
             result += "%s: &%s,\n" % (attr['name'], lowercase_first(attr['name']))
@@ -314,21 +368,49 @@ def build_set_attrs_in_obj():
     return result
 
 
-def build_set_obj_attrs_in_schema():
+def build_set_obj_attrs_in_schema(parent=""):
     result = ""
     for attr in metadata['attrs']:
-        result += 'd.Set("%s", obj.%s)\n'% (attr['schema_name'], attr['name'])
+        if attr['parent'] != parent:
+            continue
+        if attr['object_type'] != "":
+            nameBase = lowercase_first(attr['name'])
+            result += 'var %sList []map[string]interface{}\n' % nameBase
+            if attr['list']:
+                result += 'for _, item := range obj.%s {\n' % attr['name']
+            else:
+                result += 'item := obj.%s\n' % attr['name']
+            result += 'data := make(map[string]interface{})\n'
+            result += build_set_obj_attrs_in_schema(attr['name'])
+            result += '%sList = append(%sList, data)\n' % (nameBase, nameBase)
+            if attr['list']:
+                result += '}\n'
+            result += 'd.Set("%s", %sList)\n'% (attr['schema_name'], nameBase)
+            return result
+
+        if attr['parent']:
+            result += 'data["%s"] = item.%s\n'% (attr['schema_name'], attr['name'])
+        else:
+            result += 'd.Set("%s", obj.%s)\n'% (attr['schema_name'], attr['name'])
 
     return result
 
 
-def build_test_attrs(required_only=False):
+def build_test_attrs(required_only=False, parent="", indent="  "):
 
     result = ""
     for attr in metadata['attrs']:
         if required_only and not attr['required']:
             continue
-        result += "%s = " % attr['schema_name']
+        if parent != attr['parent']:
+            continue
+        if attr['object_type'] != "":
+            result += "\n%s%s {\n" % (indent, attr['schema_name'])
+            result += build_test_attrs(required_only, attr['name'], indent + "  ")
+            result += "%s}\n\n" % indent
+            continue
+
+        result += "%s%s = " % (indent, attr['schema_name'])
         if attr['list']:
             result += '['
         if attr['type'] == 'string':
@@ -364,10 +446,17 @@ def build_check_test_attrs(is_create=True):
 
     result = ""
     for attr in metadata['attrs']:
+        attrStr = attr['schema_name']
+        if attr['parent']:
+            parentSchemaName = metadata['name_map'][attr['parent']]
+            attrStr = "%s.0.%s" % (parentSchemaName, attr['schema_name'])
+        if attr['object_type']:
+            result += 'resource.TestCheckResourceAttr(testResourceName, "%s.#", "1"),\n' % attrStr
+            continue
         if attr['list']:
-            result += 'resource.TestCheckResourceAttr(testResourceName, "%s.0", ' % attr['schema_name']
+            result += 'resource.TestCheckResourceAttr(testResourceName, "%s.0", ' % attrStr
         else:
-            result += 'resource.TestCheckResourceAttr(testResourceName, "%s", ' % attr['schema_name']
+            result += 'resource.TestCheckResourceAttr(testResourceName, "%s", ' % attrStr
         result += 'accTestPolicy%s%sAttributes["%s"]),\n' % (metadata['resource'], "Create" if is_create else "Update", attr['schema_name'])
 
     return result
@@ -376,6 +465,8 @@ def build_check_test_attrs(is_create=True):
 def build_doc_attrs():
     doc_attrs = ""
     for attr in metadata['attrs']:
+        if attr['object_type'] or attr['parent']:
+            continue
         optional = attr['ref'] or attr['list']
         if attr['const_needed']:
             value = get_value_for_const(attr)
@@ -392,12 +483,16 @@ def build_doc_attrs():
     return doc_attrs
 
 
-def build_doc_attrs_reference():
+def build_doc_attrs_reference(parent="", indent=""):
     result = ""
 
     for attr in metadata['attrs']:
-        result += "* `%s` - (%s)\n" % (attr['schema_name'],
-                                   "Required" if attr['required'] else "Optional")
+        if attr['parent'] != parent:
+            continue
+        result += "%s* `%s` - (%s) %s\n" % (indent, attr['schema_name'],
+                                   "Required" if attr['required'] else "Optional", attr['description'])
+        if attr['object_type']:
+            result += build_doc_attrs_reference(attr['name'], indent + "  ")
     return result
 
 
@@ -406,6 +501,8 @@ def build_test_attrs_sprintf(required_only=False):
 
     for attr in metadata['attrs']:
         if required_only and not attr['required']:
+            continue
+        if attr['object_type']:
             continue
         result += ', attrMap["%s"]' % attr['schema_name']
     return result
@@ -473,10 +570,13 @@ def main():
         resource_lower = resource_lower[len("policy_"):]
     metadata['resource_lower'] = resource_lower
     metadata['resource-lower'] = resource_lower.replace('_','-')
+    metadata["constants"] = {}
+    metadata["attrs"] = []
+    metadata["name_map"] = {}
     print("Building resource from %s" % resource)
 
     print("Loading metadata..")
-    load_resource_metadata()
+    load_resource_metadata(resource)
     generate_replace_targets()
 
     spec = {}
