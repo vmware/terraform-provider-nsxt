@@ -86,7 +86,7 @@ resource "nsxt_policy_group" "check" {
 }
 
 func testAccNsxtPolicyVMsTemplateFilter() string {
-	return fmt.Sprintf(`
+	return `
 data "nsxt_policy_vms" "test" {
   state    = "running"
   guest_os = "ubuntu"
@@ -94,5 +94,5 @@ data "nsxt_policy_vms" "test" {
 
 resource "nsxt_policy_group" "check" {
   display_name = length(data.nsxt_policy_vms.test.items)
-}`)
+}`
 }
