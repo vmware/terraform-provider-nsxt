@@ -546,11 +546,25 @@ func getComputedPolicyPathSchema(description string) *schema.Schema {
 	}
 }
 
-func getElemPolicyPathSchema() *schema.Schema {
-	return &schema.Schema{
+func getElemPolicyPathSchemaWithFlags(isOptional, isComputed, isRequired bool) *schema.Schema {
+	s := schema.Schema{
 		Type:         schema.TypeString,
 		ValidateFunc: validatePolicyPath(),
 	}
+	if isOptional {
+		s.Optional = true
+	}
+	if isComputed {
+		s.Computed = true
+	}
+	if isRequired {
+		s.Required = true
+	}
+	return &s
+}
+
+func getElemPolicyPathSchema() *schema.Schema {
+	return getElemPolicyPathSchemaWithFlags(false, false, false)
 }
 
 func getAllocationRangeListSchema(required bool, description string) *schema.Schema {

@@ -76,13 +76,17 @@ func getAccTestResourceName() string {
 	return fmt.Sprintf("%s-%d", testAccResourceName, rand.Intn(100000))
 }
 
-func getAccTestFQDN() string {
+func getAccTestRandomString(length int) string {
 	initRand()
-	b := make([]rune, 10)
+	b := make([]rune, length)
 	for i := range b {
-		b[i] = letterRunes[rand.Intn(len(letterRunes))]
+		b[i] = letterRunes[rand.Intn(length)]
 	}
-	return fmt.Sprintf("test.%s.org", string(b))
+	return string(b)
+}
+
+func getAccTestFQDN() string {
+	return fmt.Sprintf("test.%s.org", getAccTestRandomString(10))
 }
 
 func getTier0RouterName() string {

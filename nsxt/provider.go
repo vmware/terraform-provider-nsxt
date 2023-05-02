@@ -393,6 +393,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_segment_security_profile":         resourceNsxtPolicySegmentSecurityProfile(),
 			"nsxt_policy_spoof_guard_profile":              resourceNsxtPolicySpoofGuardProfile(),
 			"nsxt_policy_gateway_qos_profile":              resourceNsxtPolicyGatewayQosProfile(),
+			"nsxt_policy_project":                          resourceNsxtPolicyProject(),
 		},
 
 		ConfigureFunc: providerConfigure,
@@ -683,6 +684,21 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 	return nil
 }
 
+type customHeaderProcessor struct {
+	customHeaders *map[string]string
+}
+
+func (processor customHeaderProcessor) Process(req *http.Request) error {
+	for header, value := range *processor.customHeaders {
+		req.Header.Set(header, value)
+	}
+	return nil
+}
+
+func newCustomHeaderProcessor(customHeaders *map[string]string) *customHeaderProcessor {
+	return &customHeaderProcessor{customHeaders: customHeaders}
+}
+
 type remoteAuthHeaderProcessor struct {
 }
 
@@ -810,6 +826,10 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 }
 
 func getPolicyConnector(clients interface{}) client.Connector {
+	return getPolicyConnectorWithHeaders(clients, nil)
+}
+
+func getPolicyConnectorWithHeaders(clients interface{}, customHeaders *map[string]string) client.Connector {
 	c := clients.(nsxtClients)
 
 	retryFunc := func(retryContext retry.RetryContext) bool {
@@ -853,6 +873,10 @@ func getPolicyConnector(clients interface{}) client.Connector {
 	if len(c.CommonConfig.BearerToken) > 0 {
 		requestProcessors = append(requestProcessors, newBearerAuthHeaderProcessor(c.CommonConfig.BearerToken).Process)
 	}
+	if customHeaders != nil {
+		requestProcessors = append(requestProcessors, newCustomHeaderProcessor(customHeaders).Process)
+	}
+
 	// Session support for policy resources (main rationale - vIDM environment where auth is slow)
 	// Currently session creation is done via old MP sdk.
 	// TODO - when MP resources are removed, switch to official SDK to initiate session/create API
