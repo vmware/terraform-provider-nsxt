@@ -9,7 +9,7 @@ description: A resource to configure a Dhcp Relay.
 
 This resource provides a method for the management of a Dhcp Relay.
 
-This resource is applicable to NSX Policy Manager.
+This resource is applicable to NSX Policy Manager and NSX Global Manager.
  
 ## Example Usage
 

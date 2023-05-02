@@ -9,7 +9,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 )
 
 var accTestPolicyDhcpRelayConfigCreateAttributes = map[string]string{
@@ -29,7 +28,7 @@ func TestAccResourceNsxtPolicyDhcpRelayConfig_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_dhcp_relay.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyDhcpRelayConfigCheckDestroy(state, accTestPolicyDhcpRelayConfigUpdateAttributes["display_name"])
@@ -83,7 +82,7 @@ func TestAccResourceNsxtPolicyDhcpRelayConfig_importBasic(t *testing.T) {
 	testResourceName := "nsxt_policy_dhcp_relay.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyDhcpRelayConfigCheckDestroy(state, name)
@@ -105,7 +104,6 @@ func testAccNsxtPolicyDhcpRelayConfigExists(resourceName string) resource.TestCh
 	return func(state *terraform.State) error {
 
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-		nsxClient := infra.NewDhcpRelayConfigsClient(connector)
 
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
@@ -117,9 +115,12 @@ func testAccNsxtPolicyDhcpRelayConfigExists(resourceName string) resource.TestCh
 			return fmt.Errorf("Policy DhcpRelayConfig resource ID not set in resources")
 		}
 
-		_, err := nsxClient.Get(resourceID)
+		exists, err := resourceNsxtPolicyDhcpRelayConfigExists(resourceID, connector, testAccIsGlobalManager())
 		if err != nil {
-			return fmt.Errorf("Error while retrieving policy DhcpRelayConfig ID %s. Error: %v", resourceID, err)
+			return err
+		}
+		if !exists {
+			return fmt.Errorf("Error while retrieving policy DhcpServer ID %s. Error: %v", resourceID, err)
 		}
 
 		return nil
@@ -128,7 +129,6 @@ func testAccNsxtPolicyDhcpRelayConfigExists(resourceName string) resource.TestCh
 
 func testAccNsxtPolicyDhcpRelayConfigCheckDestroy(state *terraform.State, displayName string) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-	nsxClient := infra.NewDhcpRelayConfigsClient(connector)
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_policy_dhcp_relay" {
@@ -136,8 +136,12 @@ func testAccNsxtPolicyDhcpRelayConfigCheckDestroy(state *terraform.State, displa
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		_, err := nsxClient.Get(resourceID)
+		exists, err := resourceNsxtPolicyDhcpRelayConfigExists(resourceID, connector, testAccIsGlobalManager())
 		if err == nil {
+			return err
+		}
+
+		if exists {
 			return fmt.Errorf("Policy DhcpRelayConfig %s still exists", displayName)
 		}
 	}
