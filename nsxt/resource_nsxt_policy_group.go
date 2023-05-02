@@ -21,23 +21,50 @@ import (
 
 var conditionKeyValues = []string{
 	model.Condition_KEY_TAG,
-	model.Condition_KEY_COMPUTERNAME,
+	model.Condition_KEY_NAME,
 	model.Condition_KEY_OSNAME,
-	model.Condition_KEY_NAME}
+	model.Condition_KEY_COMPUTERNAME,
+	model.Condition_KEY_NODETYPE,
+	model.Condition_KEY_GROUPTYPE,
+	model.Condition_KEY_ALL,
+	model.Condition_KEY_IPADDRESS,
+	model.Condition_KEY_PODCIDR,
+}
+
 var conditionMemberTypeValues = []string{
 	model.Condition_MEMBER_TYPE_IPSET,
+	model.Condition_MEMBER_TYPE_VIRTUALMACHINE,
 	model.Condition_MEMBER_TYPE_LOGICALPORT,
 	model.Condition_MEMBER_TYPE_LOGICALSWITCH,
 	model.Condition_MEMBER_TYPE_SEGMENT,
 	model.Condition_MEMBER_TYPE_SEGMENTPORT,
-	model.Condition_MEMBER_TYPE_VIRTUALMACHINE,
+	model.Condition_MEMBER_TYPE_POD,
+	model.Condition_MEMBER_TYPE_SERVICE,
+	model.Condition_MEMBER_TYPE_NAMESPACE,
+	model.Condition_MEMBER_TYPE_TRANSPORTNODE,
+	model.Condition_MEMBER_TYPE_GROUP,
+	model.Condition_MEMBER_TYPE_DVPG,
+	model.Condition_MEMBER_TYPE_DVPORT,
+	model.Condition_MEMBER_TYPE_IPADDRESS,
+	model.Condition_MEMBER_TYPE_KUBERNETESCLUSTER,
+	model.Condition_MEMBER_TYPE_KUBERNETESNAMESPACE,
+	model.Condition_MEMBER_TYPE_ANTREAEGRESS,
+	model.Condition_MEMBER_TYPE_ANTREAIPPOOL,
+	model.Condition_MEMBER_TYPE_KUBERNETESINGRESS,
+	model.Condition_MEMBER_TYPE_KUBERNETESGATEWAY,
+	model.Condition_MEMBER_TYPE_KUBERNETESSERVICE,
+	model.Condition_MEMBER_TYPE_KUBERNETESNODE,
 }
+
 var conditionOperatorValues = []string{
-	model.Condition_OPERATOR_CONTAINS,
-	model.Condition_OPERATOR_ENDSWITH,
 	model.Condition_OPERATOR_EQUALS,
-	model.Condition_OPERATOR_NOTEQUALS,
+	model.Condition_OPERATOR_CONTAINS,
 	model.Condition_OPERATOR_STARTSWITH,
+	model.Condition_OPERATOR_ENDSWITH,
+	model.Condition_OPERATOR_NOTEQUALS,
+	model.Condition_OPERATOR_NOTIN,
+	model.Condition_OPERATOR_MATCHES,
+	model.Condition_OPERATOR_IN,
 }
 var conjunctionOperatorValues = []string{
 	model.ConjunctionOperator_CONJUNCTION_OPERATOR_OR,
@@ -323,9 +350,6 @@ func validateNestedGroupConditions(conditions []interface{}) (string, error) {
 		condMemberType := condMap["member_type"].(string)
 		if memberType != "" && condMemberType != memberType {
 			return "", fmt.Errorf("Nested conditions must all use the same member_type, but found '%v' with '%v'", condMemberType, memberType)
-		}
-		if condMemberType != model.Condition_MEMBER_TYPE_VIRTUALMACHINE && condMap["key"] != model.Condition_KEY_TAG {
-			return "", fmt.Errorf("Only Tag can be used for the key of '%v'", condMemberType)
 		}
 		memberType = condMemberType
 	}
@@ -933,14 +957,13 @@ func resourceNsxtPolicyGroupRead(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return err
 	}
+	var extendedCriteria []map[string]interface{}
 	if len(identityGroups) > 0 {
 		identityGroupsMap := make(map[string]interface{})
 		identityGroupsMap["identity_group"] = identityGroups
-
-		var extendedCriteria []map[string]interface{}
 		extendedCriteria = append(extendedCriteria, identityGroupsMap)
-		d.Set("extended_criteria", extendedCriteria)
 	}
+	d.Set("extended_criteria", extendedCriteria)
 
 	return nil
 }
