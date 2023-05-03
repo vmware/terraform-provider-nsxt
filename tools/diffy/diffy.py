@@ -80,6 +80,7 @@ def print_ident(text, level):
 class color:
     PURPLE = '\033[95m'
     BLUE = '\033[94m'
+    GREEN = '\033[92m'
     END = '\033[0m'
 
 def main():
@@ -106,6 +107,12 @@ def main():
                 analyze_obj(ref_to_def(target_map[obj][attr]["$ref"]), level + 1)
             if "items" in target_map[obj][attr] and "$ref" in target_map[obj][attr]["items"]:
                 analyze_obj(ref_to_def(target_map[obj][attr]["items"]["$ref"]), level + 1)
+            if "enum" in target_map[obj][attr] and attr in baseline_map[obj]:
+                target_set = set(target_map[obj][attr]["enum"])
+                baseline_set = set(baseline_map[obj][attr]["enum"])
+                diff = target_set - baseline_set
+                if diff:
+                    print_ident(color.GREEN + "new enum values for attribute %s: %s" % (attr, diff) + color.END, level + 1)
 
         for attr in baseline_map[obj]:
             if obj not in target_map:
