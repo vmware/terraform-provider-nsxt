@@ -12,6 +12,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/vmware/go-vmware-nsxt/trust"
@@ -87,6 +89,15 @@ func getTier0RouterName() string {
 		name = tier0RouterDefaultName
 	}
 	return name
+}
+
+func getTier0RouterPath(connector client.Connector) string {
+	// Retrieve Tier0 path
+	routerName := getTier0RouterName()
+	t0client := infra.NewTier0sClient(connector)
+	tier0, _ := t0client.Get(routerName)
+
+	return *tier0.Path
 }
 
 func getEdgeClusterName() string {
