@@ -33,7 +33,7 @@ func TestAccResourceNsxtPolicyGroup_basicImport(t *testing.T) {
 	})
 }
 
-func TestAccResourceNsxtPolicyGroup_AddressCriteria(t *testing.T) {
+func TestAccResourceNsxtPolicyGroup_addressCriteria(t *testing.T) {
 	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_group.test"
 
@@ -83,9 +83,10 @@ func TestAccResourceNsxtPolicyGroup_AddressCriteria(t *testing.T) {
 	})
 }
 
-func TestAccResourceNsxtPolicyGroup_GroupTypeIPAddressCriteria(t *testing.T) {
+func TestAccResourceNsxtPolicyGroup_groupTypeIPAddressCriteria(t *testing.T) {
 	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_group.test"
+	testResourceName2 := "nsxt_policy_group.test-2"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -101,6 +102,7 @@ func TestAccResourceNsxtPolicyGroup_GroupTypeIPAddressCriteria(t *testing.T) {
 				Config: testAccNsxtPolicyGroupIPAddressCreateTemplate(name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
+					testAccNsxtPolicyGroupExists(testResourceName2, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttr(testResourceName, "domain", defaultDomain),
@@ -110,6 +112,8 @@ func TestAccResourceNsxtPolicyGroup_GroupTypeIPAddressCriteria(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "criteria.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "criteria.0.ipaddress_expression.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "criteria.0.ipaddress_expression.0.ip_addresses.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName2, "criteria.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName2, "criteria.0.condition.#", "2"),
 				),
 			},
 			{
@@ -1421,7 +1425,25 @@ resource "nsxt_policy_group" "test" {
     tag   = "tag2"
   }
 }
-`, name)
+
+resource "nsxt_policy_group" "test-2" {
+  display_name = "%s"
+
+  criteria {
+    condition {
+      key         = "GroupType"
+      member_type = "Group"
+      operator    = "EQUALS"
+      value       = "IPAddress"
+    }
+    condition {
+      key         = "Tag"
+      member_type = "Group"
+      operator    = "EQUALS"
+      value       = "orange"
+    }
+  }
+}`, name, getAccTestResourceName())
 }
 
 func testAccNsxtPolicyGroupIPAddressUpdateTemplate(name string) string {
