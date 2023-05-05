@@ -935,7 +935,7 @@ func resourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{}) e
 		shouldSetLS = true
 	}
 	if len(localeServices) > 0 {
-		for _, service := range localeServices {
+		for i, service := range localeServices {
 			if shouldSetLS {
 				cfgMap := make(map[string]interface{})
 				cfgMap["path"] = service.Path
@@ -943,7 +943,7 @@ func resourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{}) e
 				cfgMap["preferred_edge_paths"] = service.PreferredEdgePaths
 				cfgMap["revision"] = service.Revision
 				cfgMap["display_name"] = service.DisplayName
-				redistributionConfigs := getLocaleServiceRedistributionConfig(&service)
+				redistributionConfigs := getLocaleServiceRedistributionConfig(&localeServices[i])
 				if d.Get("redistribution_set").(bool) {
 					// redistribution_config is deprecated and should be
 					// assigned only if actively set by customer
@@ -961,7 +961,7 @@ func resourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{}) e
 						return handleReadError(d, "BGP Configuration for T0", id, err)
 					}
 
-					redistributionConfigs := getLocaleServiceRedistributionConfig(&service)
+					redistributionConfigs := getLocaleServiceRedistributionConfig(&localeServices[i])
 					if d.Get("redistribution_set").(bool) {
 						d.Set("redistribution_config", redistributionConfigs)
 					} else {
