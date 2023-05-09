@@ -4,6 +4,8 @@ issues:
   exclude:
      - SA4004
      - SA1019
+     - G402
+     - G404
      - GetOkExists
 
 run:
@@ -12,25 +14,19 @@ run:
 linters:
   disable-all: true
   enable:
-    - deadcode
-    - errcheck
-    # - gofmt
-    - goimports
-    - revive
-    - gosimple
-    - govet
-    - ineffassign
-    # - interfacer
-    - nakedret
     - misspell
-    - staticcheck
-    - structcheck
-    - typecheck
+    - gofmt
     - unused
-    - unconvert
-    - varcheck
+    - staticcheck
+    - gosec
+    - goimports
     - vet
-    - vetshadow
+    - revive
+    - misspell
+    - gosimple
+    - staticcheck
+    - ineffassign
+    - unused
 
 linters-settings:
   errcheck:
