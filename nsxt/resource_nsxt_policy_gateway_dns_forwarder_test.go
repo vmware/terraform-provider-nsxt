@@ -24,6 +24,7 @@ var accTestPolicyGatewayDNSForwarderCreateAttributes = map[string]string{
 	"listener_ip":  "10.2.2.12",
 	"enabled":      "true",
 	"log_level":    model.PolicyDnsForwarder_LOG_LEVEL_FATAL,
+	"cache_size":   "2048",
 }
 
 var accTestPolicyGatewayDNSForwarderUpdateAttributes = map[string]string{
@@ -32,6 +33,7 @@ var accTestPolicyGatewayDNSForwarderUpdateAttributes = map[string]string{
 	"listener_ip":  "10.2.2.15",
 	"enabled":      "false",
 	"log_level":    model.PolicyDnsForwarder_LOG_LEVEL_DEBUG,
+	"cache_size":   "4096",
 }
 
 func TestAccResourceNsxtPolicyGatewayDNSForwarder_tier0(t *testing.T) {
@@ -62,6 +64,7 @@ func testAccResourceNsxtPolicyGatewayDNSForwarder(t *testing.T, isT0 bool) {
 					resource.TestCheckResourceAttr(resourceName, "log_level", accTestPolicyGatewayDNSForwarderCreateAttributes["log_level"]),
 					resource.TestCheckResourceAttrSet(resourceName, "default_forwarder_zone_path"),
 					resource.TestCheckResourceAttr(resourceName, "conditional_forwarder_zone_paths.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "cache_size", accTestPolicyGatewayDNSForwarderCreateAttributes["cache_size"]),
 					resource.TestCheckResourceAttr(resourceName, "tag.#", "1"),
 					resource.TestCheckResourceAttrSet(resourceName, "path"),
 					resource.TestCheckResourceAttrSet(resourceName, "gateway_path"),
@@ -79,6 +82,7 @@ func testAccResourceNsxtPolicyGatewayDNSForwarder(t *testing.T, isT0 bool) {
 					resource.TestCheckResourceAttr(resourceName, "log_level", accTestPolicyGatewayDNSForwarderUpdateAttributes["log_level"]),
 					resource.TestCheckResourceAttrSet(resourceName, "default_forwarder_zone_path"),
 					resource.TestCheckResourceAttr(resourceName, "conditional_forwarder_zone_paths.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "cache_size", accTestPolicyGatewayDNSForwarderUpdateAttributes["cache_size"]),
 					resource.TestCheckResourceAttr(resourceName, "tag.#", "1"),
 					resource.TestCheckResourceAttrSet(resourceName, "path"),
 					resource.TestCheckResourceAttrSet(resourceName, "gateway_path"),
@@ -202,6 +206,7 @@ resource "nsxt_policy_gateway_dns_forwarder" "test" {
   listener_ip  = "%s"
   enabled      = %s
   log_level    = "%s"
+  cache_size   = %s
 
   default_forwarder_zone_path      = nsxt_policy_dns_forwarder_zone.default.path
   conditional_forwarder_zone_paths = [nsxt_policy_dns_forwarder_zone.fqdn.path]
@@ -211,7 +216,7 @@ resource "nsxt_policy_gateway_dns_forwarder" "test" {
     tag   = "tag1"
   }
 }
-`, attrMap["display_name"], attrMap["description"], whyDoesGoNeedToBeSoComplicated[isT0], attrMap["listener_ip"], attrMap["enabled"], attrMap["log_level"])
+`, attrMap["display_name"], attrMap["description"], whyDoesGoNeedToBeSoComplicated[isT0], attrMap["listener_ip"], attrMap["enabled"], attrMap["log_level"], attrMap["cache_size"])
 }
 
 func testAccNsxtPolicyGatewayDNSForwarderMinimalistic(isT0 bool) string {
