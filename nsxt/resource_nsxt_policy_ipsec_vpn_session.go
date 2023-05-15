@@ -78,7 +78,7 @@ func resourceNsxtPolicyIPSecVpnSession() *schema.Resource {
 			"description":         getDescriptionSchema(),
 			"revision":            getRevisionSchema(),
 			"tag":                 getTagsSchema(),
-			"tunnel_profile_path": getPolicyPathSchema(true, false, "Policy path referencing Tunnel profile to be used."),
+			"tunnel_profile_path": getComputedPolicyPathSchema("Policy path referencing tunnel profile."),
 			"local_endpoint_path": getPolicyPathSchema(true, false, "Policy path referencing Local endpoint."),
 			"ike_profile_path":    getComputedPolicyPathSchema("Policy path referencing Ike profile."),
 			"dpd_profile_path":    getComputedPolicyPathSchema("Policy path referencing dpd profile."),
