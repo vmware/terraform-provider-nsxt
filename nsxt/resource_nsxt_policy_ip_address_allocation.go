@@ -17,16 +17,10 @@ import (
 )
 
 func resourceNsxtPolicyIPAddressAllocation() *schema.Resource {
-	displayNameSchema := getDisplayNameSchema()
-	displayNameSchema.ForceNew = true
-	descriptionSchema := getDescriptionSchema()
-	descriptionSchema.ForceNew = true
-	tagSchema := getTagsSchema()
-	tagSchema.ForceNew = true
-
 	return &schema.Resource{
 		Create: resourceNsxtPolicyIPAddressAllocationCreate,
 		Read:   resourceNsxtPolicyIPAddressAllocationRead,
+		Update: resourceNsxtPolicyIPAddressAllocationUpdate,
 		Delete: resourceNsxtPolicyIPAddressAllocationDelete,
 		Importer: &schema.ResourceImporter{
 			State: resourceNsxtPolicyIPAddressAllocationImport,
@@ -35,10 +29,10 @@ func resourceNsxtPolicyIPAddressAllocation() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"nsx_id":       getNsxIDSchema(),
 			"path":         getPathSchema(),
-			"display_name": displayNameSchema,
-			"description":  descriptionSchema,
+			"display_name": getDisplayNameSchema(),
+			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
-			"tag":          tagSchema,
+			"tag":          getTagsSchema(),
 			"pool_path":    getPolicyPathSchema(true, true, "The path of the IP Pool for this allocation"),
 			"allocation_ip": {
 				Type:         schema.TypeString,
@@ -168,6 +162,40 @@ func resourceNsxtPolicyIPAddressAllocationRead(d *schema.ResourceData, m interfa
 	}
 
 	return nil
+}
+
+func resourceNsxtPolicyIPAddressAllocationUpdate(d *schema.ResourceData, m interface{}) error {
+	connector := getPolicyConnector(m)
+	client := ip_pools.NewIpAllocationsClient(connector)
+
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
+
+	id := d.Id()
+	if id == "" {
+		return fmt.Errorf("Error obtaining Group ID")
+	}
+
+	displayName := d.Get("display_name").(string)
+	description := d.Get("description").(string)
+	tags := getPolicyTagsFromSchema(d)
+	poolID := getPolicyIDFromPath(d.Get("pool_path").(string))
+
+	obj := model.IpAddressAllocation{
+		DisplayName: &displayName,
+		Description: &description,
+		Tags:        tags,
+	}
+
+	// Update the resource using PATCH
+	log.Printf("[INFO] Updating IPAddressAllocation with ID %s", id)
+	err := client.Patch(poolID, id, obj)
+	if err != nil {
+		return handleUpdateError("IPAddressAllocation", id, err)
+	}
+
+	return resourceNsxtPolicyIPAddressAllocationRead(d, m)
 }
 
 func resourceNsxtPolicyIPAddressAllocationDelete(d *schema.ResourceData, m interface{}) error {
