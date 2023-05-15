@@ -25,6 +25,7 @@ resource "nsxt_policy_gateway_dns_forwarder" "test" {
   listener_ip  = "122.30.0.13"
   enabled      = true
   log_level    = "DEBUG"
+  cache_size   = 2048
 
   default_forwarder_zone_path      = nsxt_policy_forwarder_zone.default.path
   conditional_forwarder_zone_paths = [nsxt_policy_forwarder_zone.oranges.path, nsxt_policy_forwarder_zone.apples.path]
@@ -44,6 +45,7 @@ The following arguments are supported:
 * `conditional_forwarder_zone_paths` - (Optional) List of conditional (FQDN) Zone Paths (Maximum 5 zones).
 * `enabled` - (Optional) Flag to indicate whether this DNS Forwarder is enabled. Defaults to `true`.
 * `log_level` - (Optional) Log Level for related messages, one of `DEBUG`, `INFO`, `WARNING`, `ERROR`, `FATAL`. Defaults to `INFO`.
+* `cache_size` - (Optional) Cache size in KB.
 
 ## Attributes Reference
 

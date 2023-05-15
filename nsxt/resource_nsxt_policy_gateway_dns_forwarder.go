@@ -69,6 +69,12 @@ func resourceNsxtPolicyGatewayDNSForwarder() *schema.Resource {
 				ValidateFunc: validation.StringInSlice(gatewayDNSForwarderLogLevelTypeValues, false),
 				Default:      model.PolicyDnsForwarder_LOG_LEVEL_INFO,
 			},
+			"cache_size": {
+				Type:        schema.TypeInt,
+				Description: "Cache size in KB",
+				Optional:    true,
+				Default:     1024,
+			},
 		},
 	}
 }
@@ -127,6 +133,7 @@ func resourceNsxtPolicyGatewayDNSForwarderRead(d *schema.ResourceData, m interfa
 	d.Set("conditional_forwarder_zone_paths", obj.ConditionalForwarderZonePaths)
 	d.Set("enabled", obj.Enabled)
 	d.Set("log_level", obj.LogLevel)
+	d.Set("cache_size", obj.CacheSize)
 
 	return nil
 }
@@ -141,6 +148,7 @@ func patchNsxtPolicyGatewayDNSForwarder(connector client.Connector, d *schema.Re
 	conditionalZonePaths := getStringListFromSchemaList(d, "conditional_forwarder_zone_paths")
 	enabled := d.Get("enabled").(bool)
 	logLevel := d.Get("log_level").(string)
+	cacheSize := int64(d.Get("cache_size").(int))
 
 	obj := model.PolicyDnsForwarder{
 		DisplayName:              &displayName,
@@ -154,6 +162,10 @@ func patchNsxtPolicyGatewayDNSForwarder(connector client.Connector, d *schema.Re
 
 	if len(conditionalZonePaths) > 0 {
 		obj.ConditionalForwarderZonePaths = conditionalZonePaths
+	}
+
+	if nsxVersionHigherOrEqual("3.2.0") {
+		obj.CacheSize = &cacheSize
 	}
 
 	if isGlobalManager {
