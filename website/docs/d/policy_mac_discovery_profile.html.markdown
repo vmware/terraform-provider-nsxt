@@ -1,8 +1,8 @@
 ---
-subcategory: "Policy - Segments"
+subcategory: "Segments"
 layout: "nsxt"
 page_title: "NSXT: policy_mac_discovery_profile"
-description: Policy MacDiscoveryProfile data source.
+description: Policy MAC Discovery Profile data source.
 ---
 
 # nsxt_policy_mac_discovery_profile

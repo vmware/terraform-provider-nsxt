@@ -1,8 +1,8 @@
 ---
-subcategory: "Policy - EVPN"
+subcategory: "EVPN"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_evpn_tenant"
-description: A resource to configure EVPN Tenant in NSX Policy manager.
+description: A resource to configure EVPN Tenant on NSX Policy manager.
 ---
 
 # nsxt_policy_evpn_tenant

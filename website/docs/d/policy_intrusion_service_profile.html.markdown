@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - Firewall"
+subcategory: "Firewall"
 layout: "nsxt"
 page_title: "NSXT: policy_intrusion_service_profile"
 description: Policy Intrusion Service Profile data source.

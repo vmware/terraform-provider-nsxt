@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - Firewall"
+subcategory: "Firewall"
 layout: "nsxt"
 page_title: "NSXT: policy_gateway_policy"
 description: A policy Gateway Policy data source.

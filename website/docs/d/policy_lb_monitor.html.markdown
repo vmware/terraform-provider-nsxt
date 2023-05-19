@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - Load Balancer"
+subcategory: "Load Balancer"
 layout: "nsxt"
 page_title: "NSXT: policy_lb_monitor"
 description: Policy Load Balancer Monitor data source.

@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - Segments"
+subcategory: "Segments"
 layout: "nsxt"
 page_title: "NSXT: policy_segment"
 description: Policy Segment data source.

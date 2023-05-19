@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - Segments"
+subcategory: "Segments"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_segment_security_profile"
 description: A resource to configure a Segment Security Profile.

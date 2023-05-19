@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - Realization"
+subcategory: "Realization"
 layout: "nsxt"
 page_title: "NSXT: policy_segment_realization"
 description: State of segment realization on hypervisors.

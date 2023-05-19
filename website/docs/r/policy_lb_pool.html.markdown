@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - Load Balancer"
+subcategory: "Load Balancer"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_lb_pool"
 description: A resource to configure Load Balancer Pool.

@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - Grouping and Tagging"
+subcategory: "Grouping and Tagging"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_domain"
 description: A resource to configure a Global manager domain.

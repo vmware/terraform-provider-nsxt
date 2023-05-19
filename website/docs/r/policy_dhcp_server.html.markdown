@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - DHCP"
+subcategory: "DHCP"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_dhcp_server"
 description: A resource to configure a DHCP Servers in NSX-T.

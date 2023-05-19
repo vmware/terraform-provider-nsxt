@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - Gateways and Routing"
+subcategory: "Gateways and Routing"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_tier0_gateway_ha_vip_config"
 description: A resource to configure HA Vip config on Tier-0 gateway in NSX Policy manager.

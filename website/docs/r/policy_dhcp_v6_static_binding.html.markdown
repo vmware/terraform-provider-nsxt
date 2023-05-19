@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - DHCP"
+subcategory: "DHCP"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_dhcp_v6_static_binding"
 description: A resource to configure IPv6 DHCP Static Binding.

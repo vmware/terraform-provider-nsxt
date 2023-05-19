@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - Segments"
+subcategory: "Segments"
 layout: "nsxt"
 page_title: "NSXT: policy_vni_pool"
 description: Policy VNI Pool Config data source.

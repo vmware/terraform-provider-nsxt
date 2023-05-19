@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - Gateways and Routing"
+subcategory: "Gateways and Routing"
 layout: "nsxt"
 page_title: "NSXT: policy_gateway_locale_service"
 description: A policy gateway locale service data source.

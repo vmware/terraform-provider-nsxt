@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - DNS"
+subcategory: "DNS"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_dns_forwarder_zone"
 description: A resource to configure DNS Forwarder Zone.

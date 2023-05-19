@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - Segments"
+subcategory: "Segments"
 layout: "nsxt"
 page_title: "NSXT: policy_bridge_profile"
 description: Policy Bridge Profile data source.

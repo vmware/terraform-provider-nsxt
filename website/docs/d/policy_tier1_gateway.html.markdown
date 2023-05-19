@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - Gateways and Routing"
+subcategory: "Gateways and Routing"
 layout: "nsxt"
 page_title: "NSXT: policy_tier1_gateway"
 description: A policy Tier-1 gateway data source.

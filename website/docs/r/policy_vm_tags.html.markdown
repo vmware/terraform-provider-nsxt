@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - Grouping and Tagging"
+subcategory: "Grouping and Tagging"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_vm_tags"
 description: A resource to configure tags for a Virtual Machine in NSX Policy.

@@ -1,5 +1,5 @@
 ---
-subcategory: "Beta"
+subcategory: "Grouping and Tagging"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_vms"
 description: A Discovered Policy Virtual Machines data source.

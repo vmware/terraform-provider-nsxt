@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - Firewall"
+subcategory: "Firewall"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_security_policy"
 description: A resource to configure a Security Group and its rules.

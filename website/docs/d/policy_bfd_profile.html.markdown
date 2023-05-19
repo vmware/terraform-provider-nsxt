@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - Gateways and Routing"
+subcategory: "Gateways and Routing"
 layout: "nsxt"
 page_title: "NSXT: policy_bfd_profile"
 description: Policy BFD Profile data source.

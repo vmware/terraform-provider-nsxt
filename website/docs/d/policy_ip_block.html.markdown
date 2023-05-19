@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - IPAM"
+subcategory: "IPAM"
 layout: "nsxt"
 page_title: "NSXT: policy_ip_block"
 description: Policy IP Block data source.

@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - EVPN"
+subcategory: "EVPN"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_evpn_tunnel_endpoint"
 description: A resource to configure EVPN Tunnel Endpoint in NSX Policy manager.

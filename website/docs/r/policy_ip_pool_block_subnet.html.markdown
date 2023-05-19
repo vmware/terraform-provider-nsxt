@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - IPAM"
+subcategory: "IPAM"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_ip_pool_block_subnet"
 description: A resource to configure IP Pool Block Subnets in NSX Policy.

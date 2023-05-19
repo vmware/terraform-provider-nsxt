@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - IPAM"
+subcategory: "IPAM"
 layout: "nsxt"
 page_title: "NSXT: policy_ip_pool"
 description: Policy IP Pool Config data source.

@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - Segments"
+subcategory: "Segments"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_ip_discovery_profile"
 description: A resource to configure an IP discovery profile.

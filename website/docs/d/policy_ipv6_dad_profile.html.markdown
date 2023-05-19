@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - Gateways and Routing"
+subcategory: "Gateways and Routing"
 layout: "nsxt"
 page_title: "NSXT: policy_ipv6_dad_profile"
 description: Policy IPv6 DAD Profile data source.

@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - Segments"
+subcategory: "Segments"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_vlan_segment"
 description: A resource to configure a VLAN backed network Segment.

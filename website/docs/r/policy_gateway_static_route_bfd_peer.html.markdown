@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - Gateways and Routing"
+subcategory: "Gateways and Routing"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_static_route_bfd_peer"
 description: A resource to configure Static Route BFD Peer on Tier0 Gateway.

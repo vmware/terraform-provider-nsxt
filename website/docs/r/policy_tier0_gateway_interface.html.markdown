@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - Gateways and Routing"
+subcategory: "Gateways and Routing"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_tier0_gateway_interface"
 description: A resource to configure an Interface on Tier-0 gateway on NSX Policy manager.
