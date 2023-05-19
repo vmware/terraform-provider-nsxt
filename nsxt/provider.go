@@ -854,7 +854,7 @@ func getPolicyConnector(clients interface{}) client.Connector {
 	// Currently session creation is done via old MP sdk.
 	// TODO - when MP resources are removed, switch to official SDK to initiate session/create API
 	// TODO - re-trigger session/create when token is expired
-	if len(c.NsxtClientConfig.DefaultHeader["Cookie"]) > 0 {
+	if c.NsxtClientConfig != nil && len(c.NsxtClientConfig.DefaultHeader["Cookie"]) > 0 {
 		cookie := c.NsxtClientConfig.DefaultHeader["Cookie"]
 		xsrf := ""
 		if len(c.NsxtClientConfig.DefaultHeader["X-XSRF-TOKEN"]) > 0 {
