@@ -10,13 +10,14 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	nsx_policy "github.com/vmware/vsphere-automation-sdk-go/services/nsxt"
+	global_policy "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm"
 	gm_tier0s "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s"
+	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
-	global_policy "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm"
-	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
+	nsx_policy "github.com/vmware/terraform-provider-nsxt/api"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 var nsxtPolicyTier0GatewayRedistributionRuleTypes = []string{
@@ -222,14 +223,14 @@ func getGatewayIntersiteConfigSchema() *schema.Schema {
 	}
 }
 
-func listPolicyGatewayLocaleServices(connector client.Connector, gwID string, listLocaleServicesFunc func(client.Connector, string, *string) (model.LocaleServicesListResult, error)) ([]model.LocaleServices, error) {
+func listPolicyGatewayLocaleServices(context utl.SessionContext, connector client.Connector, gwID string, listLocaleServicesFunc func(utl.SessionContext, client.Connector, string, *string) (model.LocaleServicesListResult, error)) ([]model.LocaleServices, error) {
 	var results []model.LocaleServices
 	var cursor *string
 	var count int64
 	total := int64(0)
 
 	for {
-		listResponse, err := listLocaleServicesFunc(connector, gwID, cursor)
+		listResponse, err := listLocaleServicesFunc(context, connector, gwID, cursor)
 		if err != nil {
 			return results, err
 		}
@@ -278,7 +279,7 @@ func initChildLocaleService(serviceStruct *model.LocaleServices, markForDelete b
 	return dataValue.(*data.StructValue), nil
 }
 
-func initGatewayLocaleServices(d *schema.ResourceData, connector client.Connector, isGlobalManager bool, listLocaleServicesFunc func(client.Connector, string, bool) ([]model.LocaleServices, error)) ([]*data.StructValue, error) {
+func initGatewayLocaleServices(context utl.SessionContext, d *schema.ResourceData, connector client.Connector, listLocaleServicesFunc func(utl.SessionContext, client.Connector, string) ([]model.LocaleServices, error)) ([]*data.StructValue, error) {
 	var localeServices []*data.StructValue
 
 	services := d.Get("locale_service").(*schema.Set).List()
@@ -286,7 +287,7 @@ func initGatewayLocaleServices(d *schema.ResourceData, connector client.Connecto
 	existingServices := make(map[string]model.LocaleServices)
 	if len(d.Id()) > 0 {
 		// This is an update - we might need to delete locale services
-		existingServiceObjects, errList := listLocaleServicesFunc(connector, d.Id(), isGlobalManager)
+		existingServiceObjects, errList := listLocaleServicesFunc(context, connector, d.Id())
 		if errList != nil {
 			return nil, errList
 		}
@@ -409,8 +410,8 @@ func setPolicyGatewayIntersiteConfigInSchema(d *schema.ResourceData, config *mod
 	return d.Set("intersite_config", result)
 }
 
-func policyInfraPatch(obj model.Infra, isGlobalManager bool, connector client.Connector, enforceRevision bool) error {
-	if isGlobalManager {
+func policyInfraPatch(context utl.SessionContext, obj model.Infra, connector client.Connector, enforceRevision bool) error {
+	if context.ClientType == utl.Global {
 		infraClient := global_policy.NewGlobalInfraClient(connector)
 		gmObj, err := convertModelBindingType(obj, model.InfraBindingType(), gm_model.InfraBindingType())
 		if err != nil {
@@ -420,7 +421,7 @@ func policyInfraPatch(obj model.Infra, isGlobalManager bool, connector client.Co
 		return infraClient.Patch(gmObj.(gm_model.Infra), &enforceRevision)
 	}
 
-	infraClient := nsx_policy.NewInfraClient(connector)
+	infraClient := nsx_policy.NewInfraClient(context, connector)
 	return infraClient.Patch(obj, &enforceRevision)
 }
 
@@ -599,8 +600,8 @@ func getLocaleServiceRedistributionConfig(serviceStruct *model.LocaleServices) [
 	return redistributionConfigs
 }
 
-func findTier0LocaleServiceForSite(connector client.Connector, gwID string, sitePath string) (string, error) {
-	localeServices, err := listPolicyTier0GatewayLocaleServices(connector, gwID, true)
+func findTier0LocaleServiceForSite(context utl.SessionContext, connector client.Connector, gwID string, sitePath string) (string, error) {
+	localeServices, err := listPolicyTier0GatewayLocaleServices(context, connector, gwID)
 	if err != nil {
 		return "", err
 	}

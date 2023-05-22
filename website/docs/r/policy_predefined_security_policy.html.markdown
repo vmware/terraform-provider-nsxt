@@ -57,6 +57,54 @@ resource "nsxt_policy_predefined_security_policy" "test" {
 }
 ```
 
+## Example Usage - Multi-Tenancy
+
+```hcl
+data "nsxt_policy_project" "demoproj" {
+  display_name = "demoproj"
+}
+
+data "nsxt_policy_security_policy" "default_l3" {
+  is_default = true
+  category   = "Application"
+}
+
+resource "nsxt_policy_predefined_security_policy" "test" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
+  path = data.nsxt_policy_security_policy.default_l3.path
+
+  tag {
+    scope = "color"
+    tag   = "orange"
+  }
+
+  rule {
+    display_name       = "allow_icmp"
+    destination_groups = [nsxt_policy_group.cats.path, nsxt_policy_group.dogs.path]
+    action             = "ALLOW"
+    services           = [nsxt_policy_service.icmp.path]
+    logged             = true
+  }
+
+  rule {
+    display_name     = "allow_udp"
+    source_groups    = [nsxt_policy_group.fish.path]
+    sources_excluded = true
+    scope            = [nsxt_policy_group.aquarium.path]
+    action           = "ALLOW"
+    services         = [nsxt_policy_service.udp.path]
+    logged           = true
+    disabled         = true
+  }
+
+  default_rule {
+    action = "DROP"
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -64,6 +112,8 @@ The following arguments are supported:
 * `path` - (Required) Policy path for the predefined Security Policy to modify.
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this Security Policy.
+* `context` - (Optional) The context which the object belongs to
+  * `project_id` - The ID of the project which the object belongs to
 * `rule` (Optional) A repeatable block to specify rules for the Security Policy. This setting is applicable to non-Default policies only. Each rule includes the following fields:
   * `display_name` - (Required) Display name of the resource.
   * `description` - (Optional) Description of the resource.

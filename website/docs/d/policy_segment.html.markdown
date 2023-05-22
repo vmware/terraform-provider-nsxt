@@ -18,10 +18,27 @@ data "nsxt_policy_segment" "test" {
 }
 ```
 
+## Example Usage - Multi-Tenancy
+
+```hcl
+data "nsxt_policy_project" "demoproj" {
+  display_name = "demoproj"
+}
+
+data "nsxt_policy_segment" "demoseg" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
+  display_name = "demoseg"
+}
+```
+
 ## Argument Reference
 
 * `id` - (Optional) The ID of Segment to retrieve. If ID is specified, no additional argument should be configured.
 * `display_name` - (Optional) The Display Name prefix of the Segment to retrieve.
+* `context` - (Optional) The context which the object belongs to
+    * `project_id` - The ID of the project which the object belongs to
 
 ## Attributes Reference
 

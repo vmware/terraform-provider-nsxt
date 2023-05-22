@@ -28,7 +28,6 @@ resource "nsxt_policy_context_profile" "test" {
     }
   }
 }
-
 ```
 
 With a custom attribute:
@@ -50,6 +49,33 @@ resource "nsxt_policy_context_profile" "test2" {
 
 ```
 
+## Example Usage - Multi-Tenancy
+
+```hcl
+data "nsxt_policy_project" "demoproj" {
+  display_name = "demoproj"
+}
+
+resource "nsxt_policy_context_profile" "test" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
+  display_name = "test"
+  description  = "Terraform provisioned ContextProfile"
+  domain_name {
+    description = "test-domain-name-attribute"
+    value       = ["*-myfiles.sharepoint.com"]
+  }
+  app_id {
+    description = "test-app-id-attribute"
+    value       = ["SSL"]
+    sub_attribute {
+      tls_version = ["SSL_V3"]
+    }
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -59,6 +85,8 @@ Note: At least one of `app_id`, `custom_url`, domain_name`, or `url_category` mu
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
+* `context` - (Optional) The context which the object belongs to
+  * `project_id` - The ID of the project which the object belongs to
 * `app_id` - (Optional) A block to specify app id attributes for the context profile. Only one block is allowed.
   * `description` - (Optional) Description of the attribute.
   * `value` - (Required) A list of string indicating values for the `app_id`. Must be a subset of valid values for `app_id` on NSX.

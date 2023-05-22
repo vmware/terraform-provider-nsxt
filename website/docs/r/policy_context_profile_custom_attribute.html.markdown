@@ -20,6 +20,22 @@ resource "nsxt_policy_context_profile_custom_attribute" "test" {
 
 ```
 
+## Example Usage - Multi-Tenancy
+
+```hcl
+data "nsxt_policy_project" "demoproj" {
+  display_name = "demoproj"
+}
+
+resource "nsxt_policy_context_profile_custom_attribute" "test" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
+  key       = "DOMAIN_NAME"
+  attribute = "test.somesite.com"
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -27,6 +43,8 @@ Note: `key`, `attribute` must be present.
 
 * `key` - (Required) Policy Custom Attribute Key. Valid values are "DOMAIN_NAME" and "CUSTOM_URL"
 * `attribute` - (Required) FQDN or URL to be used as custom attribute.
+* `context` - (Optional) The context which the object belongs to
+    * `project_id` - The ID of the project which the object belongs to
 
 ## Importing
 

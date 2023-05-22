@@ -207,7 +207,7 @@ func testAccNsxtPolicyStaticRouteExists(resourceName string) resource.TestCheckF
 
 		gwPath := rs.Primary.Attributes["gateway_path"]
 		isT0, gwID := parseGatewayPolicyPath(gwPath)
-		_, err := getNsxtPolicyStaticRouteByID(connector, gwID, isT0, resourceID)
+		_, err := getNsxtPolicyStaticRouteByID(testAccGetSessionContext(), connector, gwID, isT0, resourceID)
 		if err != nil {
 			return fmt.Errorf("Error while retrieving policy Static Route ID %s. Error: %v", resourceID, err)
 		}
@@ -227,7 +227,7 @@ func testAccNsxtPolicyStaticRouteCheckDestroy(state *terraform.State, displayNam
 		resourceID := rs.Primary.Attributes["id"]
 		gwPath := rs.Primary.Attributes["gateway_path"]
 		isT0, gwID := parseGatewayPolicyPath(gwPath)
-		_, err := getNsxtPolicyStaticRouteByID(connector, gwID, isT0, resourceID)
+		_, err := getNsxtPolicyStaticRouteByID(testAccGetSessionContext(), connector, gwID, isT0, resourceID)
 		if err == nil {
 			return fmt.Errorf("Policy Static Route %s still exists", displayName)
 		}

@@ -13,10 +13,10 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	gm_domains "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/domains"
-	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/domains"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	"github.com/vmware/terraform-provider-nsxt/api/infra/domains"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 var conditionKeyValues = []string{
@@ -100,6 +100,7 @@ func resourceNsxtPolicyGroup() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
+			"context":      getContextSchema(),
 			"domain":       getDomainNameSchema(),
 			"group_type": {
 				Type:         schema.TypeString,
@@ -316,15 +317,9 @@ func getExtendedCriteriaSetSchema() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyGroupExistsInDomain(id string, domain string, connector client.Connector, isGlobalManager bool) (bool, error) {
-	var err error
-	if isGlobalManager {
-		client := gm_domains.NewGroupsClient(connector)
-		_, err = client.Get(domain, id)
-	} else {
-		client := domains.NewGroupsClient(connector)
-		_, err = client.Get(domain, id)
-	}
+func resourceNsxtPolicyGroupExistsInDomain(sessionContext utl.SessionContext, id string, domain string, connector client.Connector) (bool, error) {
+	client := domains.NewGroupsClient(sessionContext, connector)
+	_, err := client.Get(domain, id)
 	if err == nil {
 		return true, nil
 	}
@@ -337,9 +332,9 @@ func resourceNsxtPolicyGroupExistsInDomain(id string, domain string, connector c
 
 }
 
-func resourceNsxtPolicyGroupExistsInDomainPartial(domain string) func(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
-	return func(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
-		return resourceNsxtPolicyGroupExistsInDomain(id, domain, connector, isGlobalManager)
+func resourceNsxtPolicyGroupExistsInDomainPartial(domain string) func(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
+	return func(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
+		return resourceNsxtPolicyGroupExistsInDomain(sessionContext, id, domain, connector)
 	}
 }
 
@@ -837,7 +832,7 @@ func resourceNsxtPolicyGroupCreate(d *schema.ResourceData, m interface{}) error 
 	connector := getPolicyConnector(m)
 
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID(d, m, resourceNsxtPolicyGroupExistsInDomainPartial(d.Get("domain").(string)))
+	id, err := getOrGenerateID2(d, m, resourceNsxtPolicyGroupExistsInDomainPartial(d.Get("domain").(string)))
 	if err != nil {
 		return err
 	}
@@ -883,17 +878,9 @@ func resourceNsxtPolicyGroupCreate(d *schema.ResourceData, m interface{}) error 
 		obj.GroupType = groupTypes
 	}
 
-	if isPolicyGlobalManager(m) {
-		gmObj, err1 := convertModelBindingType(obj, model.GroupBindingType(), gm_model.GroupBindingType())
-		if err1 != nil {
-			return err1
-		}
-		client := gm_domains.NewGroupsClient(connector)
-		err = client.Patch(d.Get("domain").(string), id, gmObj.(gm_model.Group))
-	} else {
-		client := domains.NewGroupsClient(connector)
-		err = client.Patch(d.Get("domain").(string), id, obj)
-	}
+	client := domains.NewGroupsClient(getSessionContext(d, m), connector)
+	err = client.Patch(d.Get("domain").(string), id, obj)
+
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating Group with ID %s", id)
 	if err != nil {
@@ -913,25 +900,10 @@ func resourceNsxtPolicyGroupRead(d *schema.ResourceData, m interface{}) error {
 	if id == "" {
 		return fmt.Errorf("Error obtaining Group ID")
 	}
-	var obj model.Group
-	if isPolicyGlobalManager(m) {
-		client := gm_domains.NewGroupsClient(connector)
-		gmObj, err := client.Get(domainName, id)
-		if err != nil {
-			return handleReadError(d, "Group", id, err)
-		}
-		rawObj, err := convertModelBindingType(gmObj, gm_model.GroupBindingType(), model.GroupBindingType())
-		if err != nil {
-			return err
-		}
-		obj = rawObj.(model.Group)
-	} else {
-		var err error
-		client := domains.NewGroupsClient(connector)
-		obj, err = client.Get(domainName, id)
-		if err != nil {
-			return handleReadError(d, "Group", id, err)
-		}
+	client := domains.NewGroupsClient(getSessionContext(d, m), connector)
+	obj, err := client.Get(domainName, id)
+	if err != nil {
+		return handleReadError(d, "Group", id, err)
 	}
 	d.Set("display_name", obj.DisplayName)
 	d.Set("description", obj.Description)
@@ -1019,22 +991,10 @@ func resourceNsxtPolicyGroupUpdate(d *schema.ResourceData, m interface{}) error 
 		obj.GroupType = groupTypes
 	}
 
-	if isPolicyGlobalManager(m) {
-		gmObj, err1 := convertModelBindingType(obj, model.GroupBindingType(), gm_model.GroupBindingType())
-		if err1 != nil {
-			return err1
-		}
-		gmGroup := gmObj.(gm_model.Group)
-		client := gm_domains.NewGroupsClient(connector)
+	client := domains.NewGroupsClient(getSessionContext(d, m), connector)
 
-		// Update the resource using PATCH
-		err = client.Patch(d.Get("domain").(string), id, gmGroup)
-	} else {
-		client := domains.NewGroupsClient(connector)
-
-		// Update the resource using PATCH
-		err = client.Patch(d.Get("domain").(string), id, obj)
-	}
+	// Update the resource using PATCH
+	err = client.Patch(d.Get("domain").(string), id, obj)
 	if err != nil {
 		return handleUpdateError("Group", id, err)
 	}
@@ -1053,11 +1013,7 @@ func resourceNsxtPolicyGroupDelete(d *schema.ResourceData, m interface{}) error 
 	failIfSubtreeExists := false
 
 	doDelete := func() error {
-		if isPolicyGlobalManager(m) {
-			client := gm_domains.NewGroupsClient(connector)
-			return client.Delete(d.Get("domain").(string), id, &failIfSubtreeExists, &forceDelete)
-		}
-		client := domains.NewGroupsClient(connector)
+		client := domains.NewGroupsClient(getSessionContext(d, m), connector)
 		return client.Delete(d.Get("domain").(string), id, &failIfSubtreeExists, &forceDelete)
 	}
 

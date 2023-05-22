@@ -11,11 +11,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
-	gm_segments "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/segments"
-	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/segments"
-	t1_segments "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/segments"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	"github.com/vmware/terraform-provider-nsxt/api/infra/segments"
+	t1_segments "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s/segments"
 )
 
 func resourceNsxtPolicyDhcpV6StaticBinding() *schema.Resource {
@@ -125,16 +124,10 @@ func policyDhcpV6StaticBindingConvertAndPatch(d *schema.ResourceData, segmentPat
 	if isT0 {
 		return fmt.Errorf("This resource is not applicable to segment %s", segmentPath)
 	}
-	if isPolicyGlobalManager(m) {
-		if gwID != "" {
-			return fmt.Errorf("This resource is not applicable to segment on Global Manager %s", segmentPath)
-		}
-		convObj, convErrs := converter.ConvertToVapi(obj, gm_model.DhcpV6StaticBindingConfigBindingType())
-		if convErrs != nil {
-			return convErrs[0]
-		}
-		client := gm_segments.NewDhcpStaticBindingConfigsClient(connector)
-		return client.Patch(segmentID, id, convObj.(*data.StructValue))
+	context := getSessionContext(d, m)
+
+	if isPolicyGlobalManager(m) && gwID != "" {
+		return fmt.Errorf("This resource is not applicable to segment on Global Manager %s", segmentPath)
 	}
 	convObj, convErrs := converter.ConvertToVapi(obj, model.DhcpV6StaticBindingConfigBindingType())
 	if convErrs != nil {
@@ -142,12 +135,12 @@ func policyDhcpV6StaticBindingConvertAndPatch(d *schema.ResourceData, segmentPat
 	}
 	if gwID == "" {
 		// infra segment
-		client := segments.NewDhcpStaticBindingConfigsClient(connector)
+		client := segments.NewDhcpStaticBindingConfigsClient(context, connector)
 		return client.Patch(segmentID, id, convObj.(*data.StructValue))
 	}
 
 	// fixed segment
-	client := t1_segments.NewDhcpStaticBindingConfigsClient(connector)
+	client := t1_segments.NewDhcpStaticBindingConfigsClient(context, connector)
 	return client.Patch(gwID, segmentID, id, convObj.(*data.StructValue))
 }
 
@@ -156,7 +149,7 @@ func resourceNsxtPolicyDhcpV6StaticBindingCreate(d *schema.ResourceData, m inter
 	segmentPath := d.Get("segment_path").(string)
 	segmentID := getPolicyIDFromPath(segmentPath)
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID(d, m, resourceNsxtPolicyDhcpStaticBindingExists(segmentID))
+	id, err := getOrGenerateID2(d, m, resourceNsxtPolicyDhcpStaticBindingExists(segmentID))
 	if err != nil {
 		return err
 	}
@@ -192,20 +185,16 @@ func resourceNsxtPolicyDhcpV6StaticBindingRead(d *schema.ResourceData, m interfa
 	converter := bindings.NewTypeConverter()
 	var err error
 	var dhcpObj *data.StructValue
-	if isPolicyGlobalManager(m) {
-		client := gm_segments.NewDhcpStaticBindingConfigsClient(connector)
-		dhcpObj, err = client.Get(segmentID, id)
+	context := getSessionContext(d, m)
 
+	if gwID == "" {
+		// infra segment
+		client := segments.NewDhcpStaticBindingConfigsClient(context, connector)
+		dhcpObj, err = client.Get(segmentID, id)
 	} else {
-		if gwID == "" {
-			// infra segment
-			client := segments.NewDhcpStaticBindingConfigsClient(connector)
-			dhcpObj, err = client.Get(segmentID, id)
-		} else {
-			// fixed segment
-			client := t1_segments.NewDhcpStaticBindingConfigsClient(connector)
-			dhcpObj, err = client.Get(gwID, segmentID, id)
-		}
+		// fixed segment
+		client := t1_segments.NewDhcpStaticBindingConfigsClient(context, connector)
+		dhcpObj, err = client.Get(gwID, segmentID, id)
 	}
 	if err != nil {
 		return handleReadError(d, "DhcpV6 Static Binding Config", id, err)

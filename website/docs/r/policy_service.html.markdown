@@ -48,8 +48,34 @@ resource "nsxt_policy_service" "service_l4port" {
     tag   = "pink"
   }
 }
+```
 
+## Example Usage - Multi-Tenancy
 
+```hcl
+data "nsxt_policy_project" "demoproj" {
+  display_name = "demoproj"
+}
+
+resource "nsxt_policy_service" "service_l4port" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
+  description  = "L4 ports service provisioned by Terraform"
+  display_name = "S1"
+
+  l4_port_set_entry {
+    display_name      = "TCP80"
+    description       = "TCP port 80 entry"
+    protocol          = "TCP"
+    destination_ports = ["80"]
+  }
+
+  tag {
+    scope = "color"
+    tag   = "pink"
+  }
+}
 ```
 
 ## Argument Reference
@@ -60,6 +86,8 @@ The following arguments are supported:
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the policy resource.
+* `context` - (Optional) The context which the object belongs to
+  * `project_id` - The ID of the project which the object belongs to
 The service must contain at least 1 entry (of at least one of the types), and possibly more.
 * `icmp_entry` - (Optional) Set of ICMP type service entries. Each with the following attributes:
     * `display_name` - (Optional) Display name of the service entry.

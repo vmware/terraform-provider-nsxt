@@ -20,6 +20,8 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	tf_api "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 // Default names or prefixed of NSX backend existing objects used in the acceptance tests.
@@ -175,6 +177,20 @@ func testAccEnvDefined(t *testing.T, envVar string) {
 
 func testAccIsGlobalManager() bool {
 	return os.Getenv("NSXT_GLOBAL_MANAGER") == "true" || os.Getenv("NSXT_GLOBAL_MANAGER") == "1"
+}
+
+func testAccGetSessionContext() tf_api.SessionContext {
+	return tf_api.SessionContext{ProjectID: os.Getenv("NSXT_PROJECT_ID"), ClientType: testAccIsGlobalManager2()}
+}
+
+func testAccIsGlobalManager2() tf_api.ClientType {
+	if os.Getenv("NSXT_PROJECT_ID") != "" {
+		return tf_api.Multitenancy
+	}
+	if os.Getenv("NSXT_GLOBAL_MANAGER") == "true" || os.Getenv("NSXT_GLOBAL_MANAGER") == "1" {
+		return tf_api.Global
+	}
+	return tf_api.Local
 }
 
 func testAccOnlyGlobalManager(t *testing.T) {
@@ -390,7 +406,7 @@ func testGetObjIDByName(objName string, resourceType string) (string, error) {
 		return "", fmt.Errorf("Error during test client initialization: %v", err1)
 	}
 
-	resultValues, err2 := listPolicyResourcesByNameAndType(connector, testAccIsGlobalManager(), objName, resourceType, nil)
+	resultValues, err2 := listPolicyResourcesByNameAndType(connector, testAccGetSessionContext(), objName, resourceType, nil)
 	if err2 != nil {
 		return "", err2
 	}
@@ -504,7 +520,7 @@ func testAccNsxtPolicyGatewayTemplate(isT0 bool) string {
 	return testAccNsxtPolicyTier1WithEdgeClusterForVPN()
 }
 
-func testAccNsxtPolicyResourceExists(resourceName string, presenceChecker func(string, client.Connector, bool) (bool, error)) resource.TestCheckFunc {
+func testAccNsxtPolicyResourceExists(context tf_api.SessionContext, resourceName string, presenceChecker func(tf_api.SessionContext, string, client.Connector) (bool, error)) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
@@ -519,7 +535,7 @@ func testAccNsxtPolicyResourceExists(resourceName string, presenceChecker func(s
 			return fmt.Errorf("Policy resource ID not set in resources")
 		}
 
-		exists, err := presenceChecker(resourceID, connector, testAccIsGlobalManager())
+		exists, err := presenceChecker(context, resourceID, connector)
 		if err != nil {
 			return err
 		}
@@ -532,7 +548,7 @@ func testAccNsxtPolicyResourceExists(resourceName string, presenceChecker func(s
 	}
 }
 
-func testAccNsxtPolicyResourceCheckDestroy(state *terraform.State, displayName string, resourceType string, presenceChecker func(string, client.Connector, bool) (bool, error)) error {
+func testAccNsxtPolicyResourceCheckDestroy(context tf_api.SessionContext, state *terraform.State, displayName string, resourceType string, presenceChecker func(tf_api.SessionContext, string, client.Connector) (bool, error)) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
 	for _, rs := range state.RootModule().Resources {
 
@@ -541,7 +557,7 @@ func testAccNsxtPolicyResourceCheckDestroy(state *terraform.State, displayName s
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		exists, err := presenceChecker(resourceID, connector, testAccIsGlobalManager())
+		exists, err := presenceChecker(context, resourceID, connector)
 		if err != nil {
 			return err
 		}

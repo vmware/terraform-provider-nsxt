@@ -122,7 +122,7 @@ func testAccNSXPolicyVMTagsCheckExists(resourceName string) resource.TestCheckFu
 			return fmt.Errorf("NSX Policy VM Tags resource ID not set in resources ")
 		}
 
-		_, err := findNsxtPolicyVMByID(connector, resourceID, testAccProvider.Meta())
+		_, err := findNsxtPolicyVMByID(testAccGetSessionContext(), connector, resourceID, testAccProvider.Meta())
 		if err != nil {
 			return fmt.Errorf("Failed to find VM %s", resourceID)
 		}
@@ -140,7 +140,7 @@ func testAccNSXPolicyVMTagsCheckDestroy(state *terraform.State) error {
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		vm, err := findNsxtPolicyVMByID(connector, resourceID, testAccProvider.Meta())
+		vm, err := findNsxtPolicyVMByID(testAccGetSessionContext(), connector, resourceID, testAccProvider.Meta())
 		if err != nil {
 			return fmt.Errorf("Failed to find VM %s", resourceID)
 		}

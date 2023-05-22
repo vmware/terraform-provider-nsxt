@@ -21,6 +21,23 @@ resource "nsxt_policy_spoof_guard_profile" "test" {
 }
 ```
 
+## Example Usage - Multi-Tenancy
+
+```hcl
+data "nsxt_policy_project" "demoproj" {
+  display_name = "demoproj"
+}
+
+resource "nsxt_policy_spoof_guard_profile" "test" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
+  display_name              = "test"
+  description               = "Terraform provisioned SpoofGuardProfile"
+  address_binding_allowlist = true
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -29,6 +46,8 @@ The following arguments are supported:
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
+* `context` - (Optional) The context which the object belongs to
+    * `project_id` - The ID of the project which the object belongs to
 * `address_binding_allowlist` - (Optional) If true, enable the SpoofGuard, which only allows IPs listed in address bindings.
 
 

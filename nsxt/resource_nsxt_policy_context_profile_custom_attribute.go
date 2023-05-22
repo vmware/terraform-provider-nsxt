@@ -12,10 +12,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/context_profiles/custom_attributes"
-	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
-	infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/context_profiles/custom_attributes"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	infra "github.com/vmware/terraform-provider-nsxt/api/infra/context_profiles/custom_attributes"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 var customAttributeKeys = []string{
@@ -42,6 +42,7 @@ func resourceNsxtPolicyContextProfileCustomAttribute() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
+			"context": getContextSchema(),
 			"key": {
 				Type:         schema.TypeString,
 				Description:  "Key for attribute",
@@ -59,29 +60,16 @@ func resourceNsxtPolicyContextProfileCustomAttribute() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyContextProfileCustomAttributeExists(id string, connector client.Connector, isGlobalmodel bool) (bool, error) {
+func resourceNsxtPolicyContextProfileCustomAttributeExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
 	var err error
 	var attrList model.PolicyContextProfileListResult
 
 	key, attribute := splitCustomAttributeID(id)
 	source := model.PolicyCustomAttributes_ATTRIBUTE_SOURCE_CUSTOM
-	if isGlobalmodel {
-		var gmAttrList gm_model.PolicyContextProfileListResult
-		client := gm_infra.NewDefaultClient(connector)
-		gmAttrList, err = client.List(&key, &source, nil, nil, nil, nil, nil, nil)
-
-		al, err1 := convertModelBindingType(gmAttrList, gm_model.PolicyContextProfileListResultBindingType(), model.PolicyContextProfileListResultBindingType())
-		if err1 != nil {
-			return false, err1
-		}
-
-		attrList = al.(model.PolicyContextProfileListResult)
-	} else {
-		client := infra.NewDefaultClient(connector)
-		attrList, err = client.List(&key, &source, nil, nil, nil, nil, nil, nil)
-		if err != nil {
-			return false, err
-		}
+	client := infra.NewDefaultClient(sessionContext, connector)
+	attrList, err = client.List(&key, &source, nil, nil, nil, nil, nil, nil)
+	if err != nil {
+		return false, err
 	}
 
 	if *attrList.ResultCount == 0 {
@@ -115,7 +103,7 @@ func resourceNsxtPolicyContextProfileCustomAttributeRead(d *schema.ResourceData,
 	log.Printf("[INFO] Reading ContextProfileCustomAttribute with ID %s", d.Id())
 
 	connector := getPolicyConnector(m)
-	exists, err := resourceNsxtPolicyContextProfileCustomAttributeExists(id, connector, isPolicyGlobalManager(m))
+	exists, err := resourceNsxtPolicyContextProfileCustomAttributeExists(getSessionContext(d, m), id, connector)
 	if err != nil {
 		return err
 	}
@@ -144,18 +132,8 @@ func resourceNsxtPolicyContextProfileCustomAttributeCreate(d *schema.ResourceDat
 	}
 
 	// PATCH the resource
-	if isPolicyGlobalManager(m) {
-		gmObj, err1 := convertModelBindingType(obj, model.PolicyCustomAttributesBindingType(), gm_model.PolicyCustomAttributesBindingType())
-		if err1 != nil {
-			return err1
-		}
-
-		client := gm_infra.NewDefaultClient(connector)
-		err = client.Create(gmObj.(gm_model.PolicyCustomAttributes), "add")
-	} else {
-		client := infra.NewDefaultClient(connector)
-		err = client.Create(obj, "add")
-	}
+	client := infra.NewDefaultClient(getSessionContext(d, m), connector)
+	err = client.Create(obj, "add")
 	if err != nil {
 		return handleCreateError("ContextProfileCustomAttribute", attribute, err)
 	}
@@ -187,18 +165,8 @@ func resourceNsxtPolicyContextProfileCustomAttributeDelete(d *schema.ResourceDat
 	}
 
 	// PATCH the resource
-	if isPolicyGlobalManager(m) {
-		gmObj, err1 := convertModelBindingType(obj, model.PolicyCustomAttributesBindingType(), gm_model.PolicyCustomAttributesBindingType())
-		if err1 != nil {
-			return err1
-		}
-
-		client := gm_infra.NewDefaultClient(connector)
-		err = client.Create(gmObj.(gm_model.PolicyCustomAttributes), "remove")
-	} else {
-		client := infra.NewDefaultClient(connector)
-		err = client.Create(obj, "remove")
-	}
+	client := infra.NewDefaultClient(getSessionContext(d, m), connector)
+	err = client.Create(obj, "remove")
 
 	if err != nil {
 		return handleDeleteError("ContextProfileCustomAttribute", attribute, err)

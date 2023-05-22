@@ -91,6 +91,51 @@ resource "nsxt_policy_security_policy" "policy1" {
 }
 ```
 
+## Example Usage - Multi-Tenancy
+
+```hcl
+data "nsxt_policy_project" "demoproj" {
+  display_name = "demoproj"
+}
+
+resource "nsxt_policy_security_policy" "policy1" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
+  display_name = "policy1"
+  description  = "Terraform provisioned Security Policy"
+  category     = "Application"
+  locked       = false
+  stateful     = true
+  tcp_strict   = false
+  scope        = [nsxt_policy_group.pets.path]
+
+  rule {
+    display_name       = "block_icmp"
+    destination_groups = [nsxt_policy_group.cats.path, nsxt_policy_group.dogs.path]
+    action             = "DROP"
+    services           = [nsxt_policy_service.icmp.path]
+    logged             = true
+  }
+
+  rule {
+    display_name     = "allow_udp"
+    source_groups    = [nsxt_policy_group.fish.path]
+    sources_excluded = true
+    scope            = [nsxt_policy_group.aquarium.path]
+    action           = "ALLOW"
+    services         = [nsxt_policy_service.udp.path]
+    logged           = true
+    disabled         = true
+    notes            = "Disabled by starfish for debugging"
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+```
+
 -> We recommend using `lifecycle` directive as in samples above, in order to avoid dependency issues when updating groups/services simultaneously with the rule.
 
 ## Argument Reference
@@ -102,6 +147,8 @@ The following arguments are supported:
 * `domain` - (Optional) The domain to use for the resource. This domain must already exist. For VMware Cloud on AWS use `cgw`. For Global Manager, please use site id for this field. If not specified, this field is default to `default`.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this policy.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
+* `context` - (Optional) The context which the object belongs to
+  * `project_id` - The ID of the project which the object belongs to
 * `category` - (Required) Category of this policy. For local manager must be one of `Ethernet`, `Emergency`, `Infrastructure`, `Environment`, `Application`. For global manager must be one of: `Infrastructure`, `Environment`, `Application`.
 * `comments` - (Optional) Comments for security policy lock/unlock.
 * `locked` - (Optional) Indicates whether a security policy should be locked. If locked by a user, no other user would be able to modify this policy.

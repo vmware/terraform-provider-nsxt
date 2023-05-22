@@ -75,7 +75,7 @@ func dataSourceNsxtPolicyTransportZoneRead(d *schema.ResourceData, m interface{}
 		if isDefault {
 			query["is_default"] = "true"
 		}
-		obj, err := policyDataSourceResourceReadWithValidation(d, getPolicyConnector(m), true, "PolicyTransportZone", query, false)
+		obj, err := policyDataSourceResourceReadWithValidation(d, getPolicyConnector(m), getSessionContext(d, m), "PolicyTransportZone", query, false)
 		if err != nil {
 			return err
 		}

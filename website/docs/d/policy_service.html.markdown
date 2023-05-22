@@ -17,10 +17,27 @@ data "nsxt_policy_service" "dns_service" {
 }
 ```
 
+## Example Usage - Multi-Tenancy
+
+```hcl
+data "nsxt_policy_project" "demoproj" {
+  display_name = "demoproj"
+}
+
+data "nsxt_policy_service" "demodnssvc" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
+  display_name = "demodnssvc"
+}
+```
+
 ## Argument Reference
 
 * `id` - (Optional) The ID of service to retrieve.
 * `display_name` - (Optional) The Display Name prefix of the service to retrieve.
+* `context` - (Optional) The context which the object belongs to
+    * `project_id` - The ID of the project which the object belongs to
 
 ## Attributes Reference
 

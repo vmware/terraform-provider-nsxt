@@ -13,10 +13,10 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
-	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 func resourceNsxtPolicyService() *schema.Resource {
@@ -36,6 +36,7 @@ func resourceNsxtPolicyService() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
+			"context":      getContextSchema(),
 
 			"icmp_entry": {
 				Type:        schema.TypeSet,
@@ -420,15 +421,9 @@ func resourceNsxtPolicyServiceGetEntriesFromSchema(d *schema.ResourceData) ([]*d
 	return serviceEntries, nil
 }
 
-func resourceNsxtPolicyServiceExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
-	var err error
-	if isGlobalManager {
-		client := gm_infra.NewServicesClient(connector)
-		_, err = client.Get(id)
-	} else {
-		client := infra.NewServicesClient(connector)
-		_, err = client.Get(id)
-	}
+func resourceNsxtPolicyServiceExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
+	client := infra.NewServicesClient(sessionContext, connector)
+	_, err := client.Get(id)
 
 	if err == nil {
 		return true, nil
@@ -452,7 +447,7 @@ func resourceNsxtPolicyServiceCreate(d *schema.ResourceData, m interface{}) erro
 	connector := getPolicyConnector(m)
 
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID(d, m, resourceNsxtPolicyServiceExists)
+	id, err := getOrGenerateID2(d, m, resourceNsxtPolicyServiceExists)
 	if err != nil {
 		return err
 	}
@@ -475,17 +470,8 @@ func resourceNsxtPolicyServiceCreate(d *schema.ResourceData, m interface{}) erro
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating service with ID %s", id)
 
-	if isPolicyGlobalManager(m) {
-		gmObj, convErr := convertModelBindingType(obj, model.ServiceBindingType(), gm_model.ServiceBindingType())
-		if convErr != nil {
-			return convErr
-		}
-		client := gm_infra.NewServicesClient(connector)
-		err = client.Patch(id, gmObj.(gm_model.Service))
-	} else {
-		client := infra.NewServicesClient(connector)
-		err = client.Patch(id, obj)
-	}
+	client := infra.NewServicesClient(getSessionContext(d, m), connector)
+	err = client.Patch(id, obj)
 	if err != nil {
 		return handleCreateError("Service", id, err)
 	}
@@ -503,25 +489,10 @@ func resourceNsxtPolicyServiceRead(d *schema.ResourceData, m interface{}) error 
 		return fmt.Errorf("Error obtaining service id")
 	}
 
-	var obj model.Service
-	if isPolicyGlobalManager(m) {
-		client := gm_infra.NewServicesClient(connector)
-		gmObj, err := client.Get(id)
-		if err != nil {
-			return handleReadError(d, "Service", id, err)
-		}
-		lmObj, err := convertModelBindingType(gmObj, gm_model.ServiceBindingType(), model.ServiceBindingType())
-		if err != nil {
-			return err
-		}
-		obj = lmObj.(model.Service)
-	} else {
-		client := infra.NewServicesClient(connector)
-		var err error
-		obj, err = client.Get(id)
-		if err != nil {
-			return handleReadError(d, "Service", id, err)
-		}
+	client := infra.NewServicesClient(getSessionContext(d, m), connector)
+	obj, err := client.Get(id)
+	if err != nil {
+		return handleReadError(d, "Service", id, err)
 	}
 
 	d.Set("display_name", obj.DisplayName)
@@ -645,7 +616,7 @@ func resourceNsxtPolicyServiceRead(d *schema.ResourceData, m interface{}) error 
 		}
 	}
 
-	err := d.Set("icmp_entry", icmpEntriesList)
+	err = d.Set("icmp_entry", icmpEntriesList)
 	if err != nil {
 		return err
 	}
@@ -709,19 +680,8 @@ func resourceNsxtPolicyServiceUpdate(d *schema.ResourceData, m interface{}) erro
 	}
 
 	// Update the resource using Update to totally replace the list of entries
-	var err error
-	if isPolicyGlobalManager(m) {
-
-		gmObj, convErr := convertModelBindingType(obj, model.ServiceBindingType(), gm_model.ServiceBindingType())
-		if convErr != nil {
-			return convErr
-		}
-		client := gm_infra.NewServicesClient(connector)
-		_, err = client.Update(id, gmObj.(gm_model.Service))
-	} else {
-		client := infra.NewServicesClient(connector)
-		_, err = client.Update(id, obj)
-	}
+	client := infra.NewServicesClient(getSessionContext(d, m), connector)
+	_, err := client.Update(id, obj)
 
 	if err != nil {
 		return handleUpdateError("Service", id, err)
@@ -738,11 +698,7 @@ func resourceNsxtPolicyServiceDelete(d *schema.ResourceData, m interface{}) erro
 	connector := getPolicyConnector(m)
 
 	doDelete := func() error {
-		if isPolicyGlobalManager(m) {
-			client := gm_infra.NewServicesClient(connector)
-			return client.Delete(id)
-		}
-		client := infra.NewServicesClient(connector)
+		client := infra.NewServicesClient(getSessionContext(d, m), connector)
 		return client.Delete(id)
 	}
 

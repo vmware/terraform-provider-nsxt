@@ -164,7 +164,7 @@ func testAccNsxtPolicyDhcpV6StaticBindingExists(displayName string, resourceName
 			return fmt.Errorf("Policy DhcpV6StaticBinding resource ID not set in resources")
 		}
 
-		exists, err := resourceNsxtPolicyDhcpStaticBindingExistsOnSegment(resourceID, segmentPath, connector, testAccIsGlobalManager())
+		exists, err := resourceNsxtPolicyDhcpStaticBindingExistsOnSegment(testAccGetSessionContext(), resourceID, segmentPath, connector)
 		if err != nil {
 			return err
 		}
@@ -186,7 +186,7 @@ func testAccNsxtPolicyDhcpV6StaticBindingCheckDestroy(state *terraform.State, di
 
 		resourceID := rs.Primary.Attributes["id"]
 		segmentPath := rs.Primary.Attributes["segment_path"]
-		exists, err := resourceNsxtPolicyDhcpStaticBindingExistsOnSegment(resourceID, segmentPath, connector, testAccIsGlobalManager())
+		exists, err := resourceNsxtPolicyDhcpStaticBindingExistsOnSegment(testAccGetSessionContext(), resourceID, segmentPath, connector)
 		if err == nil {
 			return err
 		}

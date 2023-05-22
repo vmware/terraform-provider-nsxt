@@ -13,10 +13,10 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	gm_domains "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/domains"
-	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/domains"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	"github.com/vmware/terraform-provider-nsxt/api/infra/domains"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 func resourceNsxtPolicyPredefinedGatewayPolicy() *schema.Resource {
@@ -41,6 +41,7 @@ func getPolicyPredefinedGatewayPolicySchema() map[string]*schema.Schema {
 		"rule":         getSecurityPolicyAndGatewayRulesSchema(true, false, false),
 		"default_rule": getGatewayPolicyDefaultRulesSchema(),
 		"revision":     getRevisionSchema(),
+		"context":      getContextSchema(),
 	}
 }
 
@@ -261,7 +262,7 @@ func createChildDomainWithGatewayPolicy(domain string, policyID string, policy m
 	return dataValue.(*data.StructValue), nil
 }
 
-func gatewayPolicyInfraPatch(policy model.GatewayPolicy, domain string, m interface{}) error {
+func gatewayPolicyInfraPatch(context utl.SessionContext, policy model.GatewayPolicy, domain string, m interface{}) error {
 	childDomain, err := createChildDomainWithGatewayPolicy(domain, *policy.Id, policy)
 	if err != nil {
 		return fmt.Errorf("Failed to create H-API for Predefined Gateway Policy: %s", err)
@@ -276,7 +277,7 @@ func gatewayPolicyInfraPatch(policy model.GatewayPolicy, domain string, m interf
 		ResourceType: &infraType,
 	}
 
-	return policyInfraPatch(infraObj, isPolicyGlobalManager(m), getPolicyConnector(m), false)
+	return policyInfraPatch(context, infraObj, getPolicyConnector(m), false)
 
 }
 
@@ -291,7 +292,7 @@ func updatePolicyPredefinedGatewayPolicy(id string, d *schema.ResourceData, m in
 		return fmt.Errorf("Failed to extract domain from Gateway Policy path %s", path)
 	}
 
-	predefinedPolicy, err := getGatewayPolicyInDomain(id, domain, connector, isPolicyGlobalManager(m))
+	predefinedPolicy, err := getGatewayPolicyInDomain(getSessionContext(d, m), id, domain, connector)
 	if err != nil {
 		return err
 	}
@@ -374,7 +375,7 @@ func updatePolicyPredefinedGatewayPolicy(id string, d *schema.ResourceData, m in
 		predefinedPolicy.Children = childRules
 	}
 
-	err = gatewayPolicyInfraPatch(predefinedPolicy, domain, m)
+	err = gatewayPolicyInfraPatch(getSessionContext(d, m), predefinedPolicy, domain, m)
 	if err != nil {
 		return handleUpdateError("Predefined Gateway Policy", id, err)
 	}
@@ -411,25 +412,10 @@ func resourceNsxtPolicyPredefinedGatewayPolicyRead(d *schema.ResourceData, m int
 	path := d.Get("path").(string)
 	domain := getDomainFromResourcePath(path)
 
-	var obj model.GatewayPolicy
-	if isPolicyGlobalManager(m) {
-		client := gm_domains.NewGatewayPoliciesClient(connector)
-		gmObj, err := client.Get(domain, id)
-		if err != nil {
-			return handleReadError(d, "Predefined Gateway Policy", id, err)
-		}
-		rawObj, err := convertModelBindingType(gmObj, gm_model.GatewayPolicyBindingType(), model.GatewayPolicyBindingType())
-		if err != nil {
-			return err
-		}
-		obj = rawObj.(model.GatewayPolicy)
-	} else {
-		var err error
-		client := domains.NewGatewayPoliciesClient(connector)
-		obj, err = client.Get(domain, id)
-		if err != nil {
-			return handleReadError(d, "Predefined Gateway Policy", id, err)
-		}
+	client := domains.NewGatewayPoliciesClient(getSessionContext(d, m), connector)
+	obj, err := client.Get(domain, id)
+	if err != nil {
+		return handleReadError(d, "Predefined Gateway Policy", id, err)
 	}
 
 	d.Set("description", obj.Description)
@@ -448,7 +434,7 @@ func resourceNsxtPolicyPredefinedGatewayPolicyRead(d *schema.ResourceData, m int
 		}
 	}
 
-	err := setPolicyRulesInSchema(d, rules)
+	err = setPolicyRulesInSchema(d, rules)
 	if err != nil {
 		return err
 	}
@@ -478,7 +464,7 @@ func resourceNsxtPolicyPredefinedGatewayPolicyDelete(d *schema.ResourceData, m i
 	path := d.Get("path").(string)
 	domain := getDomainFromResourcePath(path)
 
-	predefinedPolicy, err := getGatewayPolicyInDomain(id, domain, getPolicyConnector(m), isPolicyGlobalManager(m))
+	predefinedPolicy, err := getGatewayPolicyInDomain(getSessionContext(d, m), id, domain, getPolicyConnector(m))
 	if err != nil {
 		return err
 	}
@@ -488,7 +474,7 @@ func resourceNsxtPolicyPredefinedGatewayPolicyDelete(d *schema.ResourceData, m i
 		return fmt.Errorf("Failed to revert Predefined Gateway Policy %s: %s", id, err)
 	}
 
-	err = gatewayPolicyInfraPatch(revertedPolicy, domain, m)
+	err = gatewayPolicyInfraPatch(getSessionContext(d, m), revertedPolicy, domain, m)
 	if err != nil {
 		return handleUpdateError("Predefined Gateway Policy", id, err)
 	}

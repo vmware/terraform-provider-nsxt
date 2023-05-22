@@ -431,11 +431,13 @@ func TestAccResourceNsxtPolicySegment_withDhcp(t *testing.T) {
 // TODO: add tests for l2_extension; requires L2 VPN Session
 
 func testAccNsxtPolicySegmentExists(resourceName string) resource.TestCheckFunc {
-	return testAccNsxtPolicyResourceExists(resourceName, resourceNsxtPolicySegmentExists("", false))
+	context := testAccGetSessionContext()
+	return testAccNsxtPolicyResourceExists(context, resourceName, resourceNsxtPolicySegmentExists(context, "", false))
 }
 
 func testAccNsxtPolicySegmentCheckDestroy(state *terraform.State, displayName string) error {
-	return testAccNsxtPolicyResourceCheckDestroy(state, displayName, "nsxt_policy_segment", resourceNsxtPolicySegmentExists("", false))
+	context := testAccGetSessionContext()
+	return testAccNsxtPolicyResourceCheckDestroy(context, state, displayName, "nsxt_policy_segment", resourceNsxtPolicySegmentExists(context, "", false))
 }
 
 func testAccNsxtPolicySegmentDeps(tzName string) string {

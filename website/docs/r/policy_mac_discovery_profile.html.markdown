@@ -26,6 +26,28 @@ resource "nsxt_policy_mac_discovery_profile" "test" {
 }
 ```
 
+## Example Usage - Multi-Tenancy
+
+```hcl
+data "nsxt_policy_project" "demoproj" {
+  display_name = "demoproj"
+}
+
+resource "nsxt_policy_mac_discovery_profile" "test" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
+  display_name                     = "test"
+  description                      = "Terraform provisioned"
+  mac_change_enabled               = true
+  mac_learning_enabled             = true
+  mac_limit                        = 4096
+  mac_limit_policy                 = "ALLOW"
+  remote_overlay_mac_limit         = 2048
+  unknown_unicast_flooding_enabled = true
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -34,6 +56,8 @@ The following arguments are supported:
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
+* `context` - (Optional) The context which the object belongs to
+    * `project_id` - The ID of the project which the object belongs to
 * `mac_change_enabled` - (Optional) MAC address change feature.
 * `mac_learning_enabled` - (Optional) MAC learning feature.
 * `mac_limit` - (Optional) The maximum number of MAC addresses that can be learned on this port.

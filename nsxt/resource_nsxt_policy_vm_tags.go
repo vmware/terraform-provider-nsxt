@@ -11,10 +11,12 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/realized_state"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/realized_state/enforcement_points"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/segments"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	realizedstate "github.com/vmware/terraform-provider-nsxt/api/infra/realized_state"
+	"github.com/vmware/terraform-provider-nsxt/api/infra/segments"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 var (
@@ -50,12 +52,13 @@ func resourceNsxtPolicyVMTags() *schema.Resource {
 					},
 				},
 			},
+			"context": getContextSchema(),
 		},
 	}
 }
 
-func listAllPolicyVirtualMachines(connector client.Connector, m interface{}) ([]model.VirtualMachine, error) {
-	client := realized_state.NewVirtualMachinesClient(connector)
+func listAllPolicyVirtualMachines(context utl.SessionContext, connector client.Connector, m interface{}) ([]model.VirtualMachine, error) {
+	client := realizedstate.NewVirtualMachinesClient(context, connector)
 	var results []model.VirtualMachine
 	boolFalse := false
 	var cursor *string
@@ -92,8 +95,8 @@ func listAllPolicyVirtualMachines(connector client.Connector, m interface{}) ([]
 	}
 }
 
-func listAllPolicySegmentPorts(connector client.Connector, segmentPath string) ([]model.SegmentPort, error) {
-	client := segments.NewPortsClient(connector)
+func listAllPolicySegmentPorts(context utl.SessionContext, connector client.Connector, segmentPath string) ([]model.SegmentPort, error) {
+	client := segments.NewPortsClient(context, connector)
 	segmentID := getPolicyIDFromPath(segmentPath)
 	var results []model.SegmentPort
 	boolFalse := false
@@ -144,10 +147,10 @@ func listAllPolicyVifs(m interface{}) ([]model.VirtualNetworkInterface, error) {
 	}
 }
 
-func findNsxtPolicyVMByNamePrefix(connector client.Connector, namePrefix string, m interface{}) ([]model.VirtualMachine, []model.VirtualMachine, error) {
+func findNsxtPolicyVMByNamePrefix(context utl.SessionContext, connector client.Connector, namePrefix string, m interface{}) ([]model.VirtualMachine, []model.VirtualMachine, error) {
 	var perfectMatch, prefixMatch []model.VirtualMachine
 
-	allVMs, err := listAllPolicyVirtualMachines(connector, m)
+	allVMs, err := listAllPolicyVirtualMachines(context, connector, m)
 	if err != nil {
 		log.Printf("[INFO] Error reading Virtual Machines when looking for name: %s", namePrefix)
 		return perfectMatch, prefixMatch, err
@@ -163,10 +166,10 @@ func findNsxtPolicyVMByNamePrefix(connector client.Connector, namePrefix string,
 	return perfectMatch, prefixMatch, nil
 }
 
-func findNsxtPolicyVMByID(connector client.Connector, vmID string, m interface{}) (model.VirtualMachine, error) {
+func findNsxtPolicyVMByID(context utl.SessionContext, connector client.Connector, vmID string, m interface{}) (model.VirtualMachine, error) {
 	var virtualMachineStruct model.VirtualMachine
 
-	allVMs, err := listAllPolicyVirtualMachines(connector, m)
+	allVMs, err := listAllPolicyVirtualMachines(context, connector, m)
 	if err != nil {
 		log.Printf("[INFO] Error reading Virtual Machines when looking for ID: %s", vmID)
 		return virtualMachineStruct, err
@@ -212,9 +215,9 @@ func listPolicyVifAttachmentsForVM(m interface{}, externalID string) ([]string, 
 	return vifAttachmentIds, nil
 }
 
-func updateNsxtPolicyVMPortTags(connector client.Connector, externalID string, portTags []interface{}, m interface{}, isDelete bool) error {
+func updateNsxtPolicyVMPortTags(context utl.SessionContext, connector client.Connector, externalID string, portTags []interface{}, m interface{}, isDelete bool) error {
 
-	client := segments.NewPortsClient(connector)
+	client := segments.NewPortsClient(context, connector)
 
 	vifAttachmentIds, err := listPolicyVifAttachmentsForVM(m, externalID)
 	if err != nil {
@@ -229,7 +232,7 @@ func updateNsxtPolicyVMPortTags(connector client.Connector, externalID string, p
 			tags = getPolicyTagsFromSet(data["tag"].(*schema.Set))
 		}
 
-		ports, portsErr := listAllPolicySegmentPorts(connector, segmentPath)
+		ports, portsErr := listAllPolicySegmentPorts(context, connector, segmentPath)
 		if portsErr != nil {
 			return portsErr
 		}
@@ -263,6 +266,7 @@ func setPolicyVMPortTagsInSchema(d *schema.ResourceData, m interface{}, external
 	if err != nil {
 		return err
 	}
+	context := getSessionContext(d, m)
 
 	portTags := d.Get("port").([]interface{})
 	var actualPortTags []map[string]interface{}
@@ -270,7 +274,7 @@ func setPolicyVMPortTagsInSchema(d *schema.ResourceData, m interface{}, external
 		data := portTag.(map[string]interface{})
 		segmentPath := data["segment_path"].(string)
 
-		ports, portsErr := listAllPolicySegmentPorts(connector, segmentPath)
+		ports, portsErr := listAllPolicySegmentPorts(context, connector, segmentPath)
 		if portsErr != nil {
 			return portsErr
 		}
@@ -303,7 +307,7 @@ func resourceNsxtPolicyVMTagsRead(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("Error obtaining Virtual Machine ID")
 	}
 
-	vm, err := findNsxtPolicyVMByID(connector, vmID, m)
+	vm, err := findNsxtPolicyVMByID(getSessionContext(d, m), connector, vmID, m)
 	if err != nil {
 		d.SetId("")
 		log.Printf("[ERROR] Cannot find VM with ID %s, skip reading VM tag", vmID)
@@ -323,8 +327,9 @@ func resourceNsxtPolicyVMTagsRead(d *schema.ResourceData, m interface{}) error {
 func resourceNsxtPolicyVMTagsCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	instanceID := d.Get("instance_id").(string)
+	context := getSessionContext(d, m)
 
-	vm, err := findNsxtPolicyVMByID(connector, instanceID, m)
+	vm, err := findNsxtPolicyVMByID(context, connector, instanceID, m)
 	if err != nil {
 		if len(d.Id()) == 0 {
 			// This is create flow
@@ -347,7 +352,7 @@ func resourceNsxtPolicyVMTagsCreate(d *schema.ResourceData, m interface{}) error
 	}
 
 	portTags := d.Get("port").([]interface{})
-	err = updateNsxtPolicyVMPortTags(connector, *vm.ExternalId, portTags, m, false)
+	err = updateNsxtPolicyVMPortTags(context, connector, *vm.ExternalId, portTags, m, false)
 	if err != nil {
 		return handleCreateError("Segment Port Tag", *vm.ExternalId, err)
 	}
@@ -365,8 +370,9 @@ func resourceNsxtPolicyVMTagsUpdate(d *schema.ResourceData, m interface{}) error
 func resourceNsxtPolicyVMTagsDelete(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	instanceID := d.Get("instance_id").(string)
+	context := getSessionContext(d, m)
 
-	vm, err := findNsxtPolicyVMByID(connector, instanceID, m)
+	vm, err := findNsxtPolicyVMByID(context, connector, instanceID, m)
 
 	if err != nil {
 		d.SetId("")
@@ -382,7 +388,7 @@ func resourceNsxtPolicyVMTagsDelete(d *schema.ResourceData, m interface{}) error
 	}
 
 	portTags := d.Get("port").([]interface{})
-	err = updateNsxtPolicyVMPortTags(connector, *vm.ExternalId, portTags, m, true)
+	err = updateNsxtPolicyVMPortTags(context, connector, *vm.ExternalId, portTags, m, true)
 	if err != nil {
 		return handleDeleteError("Segment Port Tag", *vm.ExternalId, err)
 	}

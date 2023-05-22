@@ -32,6 +32,30 @@ resource "nsxt_policy_gateway_dns_forwarder" "test" {
 }
 ```
 
+## Example Usage - Multi-Tenancy
+
+```hcl
+data "nsxt_policy_project" "demoproj" {
+  display_name = "demoproj"
+}
+
+resource "nsxt_policy_gateway_dns_forwarder" "test" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
+  display_name = "test"
+  description  = "Terraform provisioned Zone"
+  gateway_path = nsxt_policy_tier1_gateway.test.path
+  listener_ip  = "122.30.0.13"
+  enabled      = true
+  log_level    = "DEBUG"
+  cache_size   = 2048
+
+  default_forwarder_zone_path      = nsxt_policy_forwarder_zone.default.path
+  conditional_forwarder_zone_paths = [nsxt_policy_forwarder_zone.oranges.path, nsxt_policy_forwarder_zone.apples.path]
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -41,6 +65,8 @@ The following arguments are supported:
 * `listener_ip` - (Required) IP address on which the DNS Forwarder listens.
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
+* `context` - (Optional) The context which the object belongs to
+    * `project_id` - The ID of the project which the object belongs to
 * `default_forwarder_zone_path` - (Required) Path of Default Forwarder Zone.
 * `conditional_forwarder_zone_paths` - (Optional) List of conditional (FQDN) Zone Paths (Maximum 5 zones).
 * `enabled` - (Optional) Flag to indicate whether this DNS Forwarder is enabled. Defaults to `true`.

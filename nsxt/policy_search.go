@@ -4,6 +4,7 @@
 package nsxt
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -14,6 +15,8 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/search"
 	lm_search "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/search"
+
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 type policySearchDataValue struct {
@@ -79,11 +82,11 @@ func policyDataSourceResourceFilterAndSet(d *schema.ResourceData, resultValues [
 	return obj.StructValue, nil
 }
 
-func policyDataSourceResourceRead(d *schema.ResourceData, connector client.Connector, isGlobalManager bool, resourceType string, additionalQuery map[string]string) (*data.StructValue, error) {
-	return policyDataSourceResourceReadWithValidation(d, connector, isGlobalManager, resourceType, additionalQuery, true)
+func policyDataSourceResourceRead(d *schema.ResourceData, connector client.Connector, context utl.SessionContext, resourceType string, additionalQuery map[string]string) (*data.StructValue, error) {
+	return policyDataSourceResourceReadWithValidation(d, connector, context, resourceType, additionalQuery, true)
 }
 
-func policyDataSourceResourceReadWithValidation(d *schema.ResourceData, connector client.Connector, isGlobalManager bool, resourceType string, additionalQuery map[string]string, paramsValidation bool) (*data.StructValue, error) {
+func policyDataSourceResourceReadWithValidation(d *schema.ResourceData, connector client.Connector, context utl.SessionContext, resourceType string, additionalQuery map[string]string, paramsValidation bool) (*data.StructValue, error) {
 	objName := d.Get("display_name").(string)
 	objID := d.Get("id").(string)
 	var err error
@@ -96,12 +99,12 @@ func policyDataSourceResourceReadWithValidation(d *schema.ResourceData, connecto
 		if resourceType == "PolicyEdgeNode" {
 			// Edge Node is a special case where id != nsx_id
 			// TODO: consider switching all searches to nsx id
-			resultValues, err = listPolicyResourcesByNsxID(connector, isGlobalManager, &objID, &additionalQueryString)
+			resultValues, err = listPolicyResourcesByNsxID(connector, context, &objID, &additionalQueryString)
 		} else {
-			resultValues, err = listPolicyResourcesByID(connector, isGlobalManager, &objID, &additionalQueryString)
+			resultValues, err = listPolicyResourcesByID(connector, context, &objID, &additionalQueryString)
 		}
 	} else {
-		resultValues, err = listPolicyResourcesByNameAndType(connector, isGlobalManager, objName, resourceType, &additionalQueryString)
+		resultValues, err = listPolicyResourcesByNameAndType(connector, context, objName, resourceType, &additionalQueryString)
 	}
 	if err != nil {
 		return nil, err
@@ -110,12 +113,18 @@ func policyDataSourceResourceReadWithValidation(d *schema.ResourceData, connecto
 	return policyDataSourceResourceFilterAndSet(d, resultValues, resourceType)
 }
 
-func listPolicyResourcesByNameAndType(connector client.Connector, isGlobalManager bool, displayName string, resourceType string, additionalQuery *string) ([]*data.StructValue, error) {
+func listPolicyResourcesByNameAndType(connector client.Connector, context utl.SessionContext, displayName string, resourceType string, additionalQuery *string) ([]*data.StructValue, error) {
 	query := fmt.Sprintf("resource_type:%s AND display_name:%s* AND marked_for_delete:false", resourceType, displayName)
-	if isGlobalManager {
+	switch context.ClientType {
+	case utl.Local:
+		return searchLMPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
+	case utl.Global:
 		return searchGMPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
+	case utl.Multitenancy:
+		return searchMultitenancyPolicyResources(connector, utl.DefaultOrgID, context.ProjectID, *buildPolicyResourcesQuery(&query, additionalQuery))
 	}
-	return searchLMPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
+
+	return nil, errors.New("invalid ClientType %d")
 }
 
 func escapeSpecialCharacters(str string) string {
@@ -132,20 +141,31 @@ func escapeSpecialCharacters(str string) string {
 	return str
 }
 
-func listPolicyResourcesByID(connector client.Connector, isGlobalManager bool, resourceID *string, additionalQuery *string) ([]*data.StructValue, error) {
+func listPolicyResourcesByID(connector client.Connector, context utl.SessionContext, resourceID *string, additionalQuery *string) ([]*data.StructValue, error) {
 	query := fmt.Sprintf("id:%s AND marked_for_delete:false", escapeSpecialCharacters(*resourceID))
-	if isGlobalManager {
+	switch context.ClientType {
+	case utl.Local:
+		return searchLMPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
+	case utl.Global:
 		return searchGMPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
+	case utl.Multitenancy:
+		return searchMultitenancyPolicyResources(connector, utl.DefaultOrgID, context.ProjectID, *buildPolicyResourcesQuery(&query, additionalQuery))
 	}
-	return searchLMPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
+
+	return nil, errors.New("invalid ClientType %d")
 }
 
-func listPolicyResourcesByNsxID(connector client.Connector, isGlobalManager bool, resourceID *string, additionalQuery *string) ([]*data.StructValue, error) {
+func listPolicyResourcesByNsxID(connector client.Connector, context utl.SessionContext, resourceID *string, additionalQuery *string) ([]*data.StructValue, error) {
 	query := fmt.Sprintf("nsx_id:%s AND marked_for_delete:false", escapeSpecialCharacters(*resourceID))
-	if isGlobalManager {
+	switch context.ClientType {
+	case utl.Local:
+		return searchLMPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
+	case utl.Global:
 		return searchGMPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
+	case utl.Multitenancy:
+		return searchMultitenancyPolicyResources(connector, utl.DefaultOrgID, context.ProjectID, *buildPolicyResourcesQuery(&query, additionalQuery))
 	}
-	return searchLMPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
+	return nil, errors.New("invalid ClientType %d")
 }
 
 func buildPolicyResourcesQuery(query *string, additionalQuery *string) *string {
@@ -189,6 +209,31 @@ func searchLMPolicyResources(connector client.Connector, query string) ([]*data.
 
 	// Make sure global objects are not found (path needs to start with infra)
 	query = query + " AND path:\\/infra*"
+
+	for {
+		searchResponse, err := client.List(query, cursor, nil, nil, nil, nil)
+		if err != nil {
+			return results, err
+		}
+		results = append(results, searchResponse.Results...)
+		if total == 0 {
+			// first response
+			total = int(*searchResponse.ResultCount)
+		}
+		cursor = searchResponse.Cursor
+		if len(results) >= total {
+			return results, nil
+		}
+	}
+}
+
+func searchMultitenancyPolicyResources(connector client.Connector, org string, project string, query string) ([]*data.StructValue, error) {
+	client := lm_search.NewQueryClient(connector)
+	var results []*data.StructValue
+	var cursor *string
+	total := 0
+
+	query = query + fmt.Sprintf(" AND path:\\/orgs\\/%s\\/projects\\/%s*", org, project)
 
 	for {
 		searchResponse, err := client.List(query, cursor, nil, nil, nil, nil)

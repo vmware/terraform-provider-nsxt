@@ -25,6 +25,25 @@ resource "nsxt_policy_dhcp_server" "test" {
 }
 ```
 
+## Example Usage - Multi-Tenancy
+
+```hcl
+data "nsxt_policy_project" "demoproj" {
+  display_name = "demoproj"
+}
+
+resource "nsxt_policy_dhcp_server" "test" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
+  display_name      = "test"
+  description       = "Terraform provisioned DhcpServerConfig"
+  edge_cluster_path = data.nsxt_policy_edge_cluster.ec1.path
+  lease_time        = 200
+  server_addresses  = ["110.64.0.1/16", "2001::1234:abcd:ffff:c0a8:101/64"]
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -33,6 +52,8 @@ The following arguments are supported:
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
+* `context` - (Optional) The context which the object belongs to
+    * `project_id` - The ID of the project which the object belongs to
 * `edge_cluster_path` - (Optional) The Policy path to the edge cluster for this DHCP Server.
 * `lease_time` - (Optional) IP address lease time in seconds. Valid values from `60` to `4294967295`. Default is `86400`.
 * `preferred_edge_paths` - (Optional) Policy paths to edge nodes. The first edge node is assigned as active edge, and second one as standby edge.

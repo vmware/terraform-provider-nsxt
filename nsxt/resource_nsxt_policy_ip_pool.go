@@ -9,8 +9,10 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 func resourceNsxtPolicyIPPool() *schema.Resource {
@@ -30,12 +32,13 @@ func resourceNsxtPolicyIPPool() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
+			"context":      getContextSchema(),
 		},
 	}
 }
 
-func resourceNsxtPolicyIPPoolExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
-	client := infra.NewIpPoolsClient(connector)
+func resourceNsxtPolicyIPPoolExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
+	client := infra.NewIpPoolsClient(sessionContext, connector)
 
 	_, err := client.Get(id)
 	if err == nil {
@@ -51,7 +54,7 @@ func resourceNsxtPolicyIPPoolExists(id string, connector client.Connector, isGlo
 
 func resourceNsxtPolicyIPPoolRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewIpPoolsClient(connector)
+	client := infra.NewIpPoolsClient(getSessionContext(d, m), connector)
 
 	id := d.Id()
 	if id == "" {
@@ -80,9 +83,9 @@ func resourceNsxtPolicyIPPoolRead(d *schema.ResourceData, m interface{}) error {
 
 func resourceNsxtPolicyIPPoolCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewIpPoolsClient(connector)
+	client := infra.NewIpPoolsClient(getSessionContext(d, m), connector)
 
-	id, err := getOrGenerateID(d, m, resourceNsxtPolicyIPPoolExists)
+	id, err := getOrGenerateID2(d, m, resourceNsxtPolicyIPPoolExists)
 	if err != nil {
 		return err
 	}
@@ -111,7 +114,7 @@ func resourceNsxtPolicyIPPoolCreate(d *schema.ResourceData, m interface{}) error
 
 func resourceNsxtPolicyIPPoolUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewIpPoolsClient(connector)
+	client := infra.NewIpPoolsClient(getSessionContext(d, m), connector)
 
 	id := d.Id()
 	if id == "" {
@@ -142,7 +145,7 @@ func resourceNsxtPolicyIPPoolUpdate(d *schema.ResourceData, m interface{}) error
 
 func resourceNsxtPolicyIPPoolDelete(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewIpPoolsClient(connector)
+	client := infra.NewIpPoolsClient(getSessionContext(d, m), connector)
 
 	id := d.Id()
 	if id == "" {

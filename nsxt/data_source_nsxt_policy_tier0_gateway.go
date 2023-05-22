@@ -35,7 +35,7 @@ func dataSourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{})
 	connector := getPolicyConnector(m)
 
 	if isPolicyGlobalManager(m) {
-		_, err := policyDataSourceResourceRead(d, connector, true, "Tier0", nil)
+		_, err := policyDataSourceResourceRead(d, connector, getSessionContext(d, m), "Tier0", nil)
 		if err != nil {
 			return err
 		}
@@ -100,7 +100,7 @@ func dataSourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{})
 	d.Set("description", obj.Description)
 	d.Set("path", obj.Path)
 
-	localeServices, err := listPolicyTier0GatewayLocaleServices(connector, *obj.Id, false)
+	localeServices, err := listPolicyTier0GatewayLocaleServices(getSessionContext(d, m), connector, *obj.Id)
 	if err != nil {
 		return fmt.Errorf("Failed to read locale services for '%s'", objName)
 	}

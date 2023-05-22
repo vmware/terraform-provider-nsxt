@@ -13,6 +13,8 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/domains"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	tf_api "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 // TODO: revisit with new SDK if constant is available
@@ -27,7 +29,7 @@ func resourceNsxtPolicyIntrusionServicePolicy() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: nsxtDomainResourceImporter,
 		},
-		Schema: getPolicySecurityPolicySchema(true),
+		Schema: getPolicySecurityPolicySchema(true, false),
 	}
 }
 
@@ -282,10 +284,10 @@ func updateIdsSecurityPolicy(id string, d *schema.ResourceData, m interface{}) e
 		obj.Children = childRules
 	}
 
-	return idsPolicyInfraPatch(obj, domain, m)
+	return idsPolicyInfraPatch(getSessionContext(d, m), obj, domain, m)
 }
 
-func idsPolicyInfraPatch(policy model.IdsSecurityPolicy, domain string, m interface{}) error {
+func idsPolicyInfraPatch(context tf_api.SessionContext, policy model.IdsSecurityPolicy, domain string, m interface{}) error {
 	childDomain, err := createChildDomainWithIdsSecurityPolicy(domain, *policy.Id, policy)
 	if err != nil {
 		return fmt.Errorf("Failed to create H-API for Ids Policy: %s", err)
@@ -300,7 +302,7 @@ func idsPolicyInfraPatch(policy model.IdsSecurityPolicy, domain string, m interf
 		ResourceType: &infraType,
 	}
 
-	return policyInfraPatch(infraObj, isPolicyGlobalManager(m), getPolicyConnector(m), false)
+	return policyInfraPatch(context, infraObj, getPolicyConnector(m), false)
 
 }
 

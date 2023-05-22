@@ -12,8 +12,10 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/domains"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	"github.com/vmware/terraform-provider-nsxt/api/infra/domains"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 var gatewayPolicyCategoryValues = []string{"Emergency", "SystemRules", "SharedPreRules", "LocalGatewayRules", "AutoServiceRules", "Default"}
@@ -28,6 +30,7 @@ func dataSourceNsxtPolicyGatewayPolicy() *schema.Resource {
 			"description":  getDataSourceDescriptionSchema(),
 			"path":         getPathSchema(),
 			"domain":       getDataSourceDomainNameSchema(),
+			"context":      getContextSchema(),
 			"category": {
 				Type:         schema.TypeString,
 				Description:  "Category",
@@ -40,8 +43,8 @@ func dataSourceNsxtPolicyGatewayPolicy() *schema.Resource {
 }
 
 // Local Manager Only
-func listGatewayPolicies(domain string, connector client.Connector) ([]model.GatewayPolicy, error) {
-	client := domains.NewGatewayPoliciesClient(connector)
+func listGatewayPolicies(context utl.SessionContext, domain string, connector client.Connector) ([]model.GatewayPolicy, error) {
+	client := domains.NewGatewayPoliciesClient(context, connector)
 
 	var results []model.GatewayPolicy
 	boolFalse := false
@@ -71,13 +74,14 @@ func dataSourceNsxtPolicyGatewayPolicyRead(d *schema.ResourceData, m interface{}
 
 	category := d.Get("category").(string)
 	domain := d.Get("domain").(string)
+	context := getSessionContext(d, m)
 	if isPolicyGlobalManager(m) {
 		query := make(map[string]string)
 		query["parent_path"] = "*/" + domain
 		if category != "" {
 			query["category"] = category
 		}
-		obj, err := policyDataSourceResourceReadWithValidation(d, connector, true, "GatewayPolicy", query, false)
+		obj, err := policyDataSourceResourceReadWithValidation(d, connector, context, "GatewayPolicy", query, false)
 		if err != nil {
 			return err
 		}
@@ -99,7 +103,7 @@ func dataSourceNsxtPolicyGatewayPolicyRead(d *schema.ResourceData, m interface{}
 	var obj model.GatewayPolicy
 	if objID != "" {
 		// Get by id
-		client := domains.NewGatewayPoliciesClient(connector)
+		client := domains.NewGatewayPoliciesClient(context, connector)
 		objGet, err := client.Get(domain, objID)
 		if isNotFoundError(err) {
 			return fmt.Errorf("Gateway Policy with ID %s was not found", objID)
@@ -112,7 +116,7 @@ func dataSourceNsxtPolicyGatewayPolicyRead(d *schema.ResourceData, m interface{}
 	} else if objName == "" && category == "" {
 		return fmt.Errorf("Gateway Policy id, display name or category must be specified")
 	} else {
-		objList, err := listGatewayPolicies(domain, connector)
+		objList, err := listGatewayPolicies(context, domain, connector)
 		if err != nil {
 			return fmt.Errorf("Error while reading Gateway Policies: %v", err)
 		}

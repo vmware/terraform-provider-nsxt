@@ -12,10 +12,10 @@ import (
 
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
-	gm_domains "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/domains"
-	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/domains"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	"github.com/vmware/terraform-provider-nsxt/api/infra/domains"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 func resourceNsxtPolicyPredefinedSecurityPolicy() *schema.Resource {
@@ -38,7 +38,8 @@ func getSecurityPolicyDefaultRulesSchema() *schema.Schema {
 		MaxItems:    1,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				"nsx_id": getComputedNsxIDSchema(),
+				"nsx_id":  getComputedNsxIDSchema(),
+				"context": getContextSchema(),
 				"scope": {
 					Type:        schema.TypeString,
 					Description: "Scope for this rule",
@@ -84,6 +85,7 @@ func getPolicyPredefinedSecurityPolicySchema() map[string]*schema.Schema {
 		"rule":         getSecurityPolicyAndGatewayRulesSchema(false, false, false),
 		"default_rule": getSecurityPolicyDefaultRulesSchema(),
 		"revision":     getRevisionSchema(),
+		"context":      getContextSchema(),
 	}
 }
 
@@ -217,7 +219,7 @@ func updatePolicyPredefinedSecurityPolicy(id string, d *schema.ResourceData, m i
 		return fmt.Errorf("Failed to extract domain from Security Policy path %s", path)
 	}
 
-	predefinedPolicy, err := getSecurityPolicyInDomain(id, domain, connector, isPolicyGlobalManager(m))
+	predefinedPolicy, err := getSecurityPolicyInDomain(getSessionContext(d, m), id, domain, connector)
 	if err != nil {
 		return err
 	}
@@ -296,7 +298,7 @@ func updatePolicyPredefinedSecurityPolicy(id string, d *schema.ResourceData, m i
 		predefinedPolicy.Children = childRules
 	}
 
-	err = securityPolicyInfraPatch(predefinedPolicy, domain, m)
+	err = securityPolicyInfraPatch(getSessionContext(d, m), predefinedPolicy, domain, m)
 	if err != nil {
 		return handleUpdateError("Predefined Security Policy", id, err)
 	}
@@ -333,25 +335,10 @@ func resourceNsxtPolicyPredefinedSecurityPolicyRead(d *schema.ResourceData, m in
 	path := d.Get("path").(string)
 	domain := getDomainFromResourcePath(path)
 
-	var obj model.SecurityPolicy
-	if isPolicyGlobalManager(m) {
-		client := gm_domains.NewSecurityPoliciesClient(connector)
-		gmObj, err := client.Get(domain, id)
-		if err != nil {
-			return handleReadError(d, "Predefined Security Policy", id, err)
-		}
-		rawObj, err := convertModelBindingType(gmObj, gm_model.SecurityPolicyBindingType(), model.SecurityPolicyBindingType())
-		if err != nil {
-			return err
-		}
-		obj = rawObj.(model.SecurityPolicy)
-	} else {
-		var err error
-		client := domains.NewSecurityPoliciesClient(connector)
-		obj, err = client.Get(domain, id)
-		if err != nil {
-			return handleReadError(d, "Predefined Security Policy", id, err)
-		}
+	client := domains.NewSecurityPoliciesClient(getSessionContext(d, m), connector)
+	obj, err := client.Get(domain, id)
+	if err != nil {
+		return handleReadError(d, "Predefined Security Policy", id, err)
 	}
 
 	d.Set("description", obj.Description)
@@ -370,7 +357,7 @@ func resourceNsxtPolicyPredefinedSecurityPolicyRead(d *schema.ResourceData, m in
 		}
 	}
 
-	err := setPolicyRulesInSchema(d, rules)
+	err = setPolicyRulesInSchema(d, rules)
 	if err != nil {
 		return err
 	}
@@ -399,8 +386,9 @@ func resourceNsxtPolicyPredefinedSecurityPolicyDelete(d *schema.ResourceData, m 
 
 	path := d.Get("path").(string)
 	domain := getDomainFromResourcePath(path)
+	context := getSessionContext(d, m)
 
-	predefinedPolicy, err := getSecurityPolicyInDomain(id, domain, getPolicyConnector(m), isPolicyGlobalManager(m))
+	predefinedPolicy, err := getSecurityPolicyInDomain(context, id, domain, getPolicyConnector(m))
 	if err != nil {
 		return err
 	}
@@ -410,14 +398,14 @@ func resourceNsxtPolicyPredefinedSecurityPolicyDelete(d *schema.ResourceData, m 
 		return fmt.Errorf("Failed to revert Predefined Security Policy %s: %s", id, err)
 	}
 
-	err = securityPolicyInfraPatch(revertedPolicy, domain, m)
+	err = securityPolicyInfraPatch(context, revertedPolicy, domain, m)
 	if err != nil {
 		return handleUpdateError("Predefined Security Policy", id, err)
 	}
 	return nil
 }
 
-func securityPolicyInfraPatch(policy model.SecurityPolicy, domain string, m interface{}) error {
+func securityPolicyInfraPatch(context utl.SessionContext, policy model.SecurityPolicy, domain string, m interface{}) error {
 	childDomain, err := createChildDomainWithSecurityPolicy(domain, *policy.Id, policy)
 	if err != nil {
 		return fmt.Errorf("Failed to create H-API for Predefined Security Policy: %s", err)
@@ -432,6 +420,6 @@ func securityPolicyInfraPatch(policy model.SecurityPolicy, domain string, m inte
 		ResourceType: &infraType,
 	}
 
-	return policyInfraPatch(infraObj, isPolicyGlobalManager(m), getPolicyConnector(m), false)
+	return policyInfraPatch(context, infraObj, getPolicyConnector(m), false)
 
 }

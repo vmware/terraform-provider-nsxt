@@ -10,10 +10,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	gm_realized_state "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/realized_state"
-	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/realized_state"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	realizedstate "github.com/vmware/terraform-provider-nsxt/api/infra/realized_state"
 )
 
 func dataSourceNsxtPolicyRealizationInfo() *schema.Resource {
@@ -28,6 +27,7 @@ func dataSourceNsxtPolicyRealizationInfo() *schema.Resource {
 				Required:     true,
 				ValidateFunc: validatePolicyPath(),
 			},
+			"context": getContextSchema(),
 			"entity_type": {
 				Type:        schema.TypeString,
 				Description: "The entity type of the realized resource",
@@ -104,19 +104,8 @@ func dataSourceNsxtPolicyRealizationInfoRead(d *schema.ResourceData, m interface
 
 			var realizationError error
 			var realizationResult model.GenericPolicyRealizedResourceListResult
-			if isPolicyGlobalManager(m) {
-				client := gm_realized_state.NewRealizedEntitiesClient(connector)
-				var gmResults gm_model.GenericPolicyRealizedResourceListResult
-				gmResults, realizationError = client.List(path, &objSitePath)
-				if realizationError == nil {
-					var lmResults interface{}
-					lmResults, realizationError = convertModelBindingType(gmResults, gm_model.GenericPolicyRealizedResourceListResultBindingType(), model.GenericPolicyRealizedResourceListResultBindingType())
-					realizationResult = lmResults.(model.GenericPolicyRealizedResourceListResult)
-				}
-			} else {
-				client := realized_state.NewRealizedEntitiesClient(connector)
-				realizationResult, realizationError = client.List(path, nil)
-			}
+			client := realizedstate.NewRealizedEntitiesClient(getSessionContext(d, m), connector)
+			realizationResult, realizationError = client.List(path, nil)
 			state := "UNKNOWN"
 			if realizationError == nil {
 				// Find the right entry

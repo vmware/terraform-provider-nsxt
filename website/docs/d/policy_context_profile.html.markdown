@@ -19,10 +19,27 @@ data "nsxt_policy_context_profile" "diameter" {
 }
 ```
 
+## Example Usage - Multi-Tenancy
+
+```hcl
+data "nsxt_policy_project" "demoproj" {
+  display_name = "demoproj"
+}
+
+data "nsxt_policy_context_profile" "demoprof" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
+  display_name = "demoprof"
+}
+```
+
 ## Argument Reference
 
 * `id` - (Optional) The ID of Profile to retrieve.
 * `display_name` - (Optional) The Display Name prefix of the Profile to retrieve.
+* `context` - (Optional) The context which the object belongs to
+  * `project_id` - The ID of the project which the object belongs to
 
 ## Attributes Reference
 

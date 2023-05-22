@@ -13,11 +13,11 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	gm_segments "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/segments"
-	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/segments"
-	t1_segments "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/segments"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	"github.com/vmware/terraform-provider-nsxt/api/infra/segments"
+	t1_segments "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s/segments"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 func resourceNsxtPolicyDhcpV4StaticBinding() *schema.Resource {
@@ -68,24 +68,19 @@ func resourceNsxtPolicyDhcpV4StaticBinding() *schema.Resource {
 	}
 }
 
-func getPolicyDchpStaticBindingOnSegment(id string, segmentPath string, connector client.Connector, isGlobalManager bool) (*data.StructValue, error) {
+func getPolicyDchpStaticBindingOnSegment(context utl.SessionContext, id string, segmentPath string, connector client.Connector) (*data.StructValue, error) {
 	_, gwID, segmentID := parseSegmentPolicyPath(segmentPath)
-	if isGlobalManager {
-		client := gm_segments.NewDhcpStaticBindingConfigsClient(connector)
-		return client.Get(segmentID, id)
-	}
-	if gwID == "" {
-		// infra segment
-		client := segments.NewDhcpStaticBindingConfigsClient(connector)
+	if context.ClientType == utl.Global || gwID == "" {
+		client := segments.NewDhcpStaticBindingConfigsClient(context, connector)
 		return client.Get(segmentID, id)
 	}
 
-	client := t1_segments.NewDhcpStaticBindingConfigsClient(connector)
+	client := t1_segments.NewDhcpStaticBindingConfigsClient(context, connector)
 	return client.Get(gwID, segmentID, id)
 }
 
-func resourceNsxtPolicyDhcpStaticBindingExistsOnSegment(id string, segmentPath string, connector client.Connector, isGlobalManager bool) (bool, error) {
-	_, err := getPolicyDchpStaticBindingOnSegment(id, segmentPath, connector, isGlobalManager)
+func resourceNsxtPolicyDhcpStaticBindingExistsOnSegment(context utl.SessionContext, id string, segmentPath string, connector client.Connector) (bool, error) {
+	_, err := getPolicyDchpStaticBindingOnSegment(context, id, segmentPath, connector)
 	if err == nil {
 		return true, nil
 	}
@@ -97,9 +92,9 @@ func resourceNsxtPolicyDhcpStaticBindingExistsOnSegment(id string, segmentPath s
 	return false, logAPIError("Error retrieving resource", err)
 }
 
-func resourceNsxtPolicyDhcpStaticBindingExists(segmentPath string) func(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
-	return func(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
-		return resourceNsxtPolicyDhcpStaticBindingExistsOnSegment(id, segmentPath, connector, isGlobalManager)
+func resourceNsxtPolicyDhcpStaticBindingExists(segmentPath string) func(context utl.SessionContext, id string, connector client.Connector) (bool, error) {
+	return func(context utl.SessionContext, id string, connector client.Connector) (bool, error) {
+		return resourceNsxtPolicyDhcpStaticBindingExistsOnSegment(context, id, segmentPath, connector)
 	}
 }
 
@@ -132,6 +127,7 @@ func policyDhcpV4StaticBindingConvertAndPatch(d *schema.ResourceData, segmentPat
 	}
 
 	connector := getPolicyConnector(m)
+	context := getSessionContext(d, m)
 
 	converter := bindings.NewTypeConverter()
 
@@ -140,16 +136,8 @@ func policyDhcpV4StaticBindingConvertAndPatch(d *schema.ResourceData, segmentPat
 		return fmt.Errorf("This resource is not applicable to segment %s", segmentPath)
 	}
 
-	if isPolicyGlobalManager(m) {
-		if gwID != "" {
-			return fmt.Errorf("This resource is not applicable to segment on Global Manager %s", segmentPath)
-		}
-		convObj, convErrs := converter.ConvertToVapi(obj, gm_model.DhcpV4StaticBindingConfigBindingType())
-		if convErrs != nil {
-			return convErrs[0]
-		}
-		client := gm_segments.NewDhcpStaticBindingConfigsClient(connector)
-		return client.Patch(segmentID, id, convObj.(*data.StructValue))
+	if context.ClientType == utl.Global && gwID != "" {
+		return fmt.Errorf("This resource is not applicable to segment on Global Manager %s", segmentPath)
 	}
 
 	convObj, convErrs := converter.ConvertToVapi(obj, model.DhcpV4StaticBindingConfigBindingType())
@@ -159,12 +147,12 @@ func policyDhcpV4StaticBindingConvertAndPatch(d *schema.ResourceData, segmentPat
 
 	if gwID == "" {
 		// infra segment
-		client := segments.NewDhcpStaticBindingConfigsClient(connector)
+		client := segments.NewDhcpStaticBindingConfigsClient(context, connector)
 		return client.Patch(segmentID, id, convObj.(*data.StructValue))
 	}
 
 	// fixed segment
-	client := t1_segments.NewDhcpStaticBindingConfigsClient(connector)
+	client := t1_segments.NewDhcpStaticBindingConfigsClient(context, connector)
 	return client.Patch(gwID, segmentID, id, convObj.(*data.StructValue))
 }
 
@@ -195,7 +183,7 @@ func resourceNsxtPolicyDhcpV4StaticBindingCreate(d *schema.ResourceData, m inter
 
 	segmentPath := d.Get("segment_path").(string)
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID(d, m, resourceNsxtPolicyDhcpStaticBindingExists(segmentPath))
+	id, err := getOrGenerateID2(d, m, resourceNsxtPolicyDhcpStaticBindingExists(segmentPath))
 	if err != nil {
 		return err
 	}
@@ -231,24 +219,22 @@ func resourceNsxtPolicyDhcpV4StaticBindingRead(d *schema.ResourceData, m interfa
 	if isT0 {
 		return fmt.Errorf("This resource is not applicable to segment %s", segmentPath)
 	}
-	if isPolicyGlobalManager(m) {
-		if gwID != "" {
-			return fmt.Errorf("This resource is not applicable to segment on Global Manager %s", segmentPath)
-		}
-		client := gm_segments.NewDhcpStaticBindingConfigsClient(connector)
-		dhcpObj, err = client.Get(segmentID, id)
 
-	} else {
-		if gwID == "" {
-			// infra segment
-			client := segments.NewDhcpStaticBindingConfigsClient(connector)
-			dhcpObj, err = client.Get(segmentID, id)
-		} else {
-			// fixed segment
-			client := t1_segments.NewDhcpStaticBindingConfigsClient(connector)
-			dhcpObj, err = client.Get(gwID, segmentID, id)
-		}
+	context := getSessionContext(d, m)
+	if context.ClientType == utl.Global && gwID != "" {
+		return fmt.Errorf("This resource is not applicable to segment on Global Manager %s", segmentPath)
 	}
+
+	if gwID == "" {
+		// infra segment
+		client := segments.NewDhcpStaticBindingConfigsClient(context, connector)
+		dhcpObj, err = client.Get(segmentID, id)
+	} else {
+		// fixed segment
+		client := t1_segments.NewDhcpStaticBindingConfigsClient(context, connector)
+		dhcpObj, err = client.Get(gwID, segmentID, id)
+	}
+
 	if err != nil {
 		return handleReadError(d, "DhcpV4 Static Binding Config", id, err)
 	}
@@ -314,20 +300,16 @@ func resourceNsxtPolicyDhcpStaticBindingDelete(d *schema.ResourceData, m interfa
 	_, gwID, segmentID := parseSegmentPolicyPath(segmentPath)
 
 	connector := getPolicyConnector(m)
+	context := getSessionContext(d, m)
 	var err error
-	if isPolicyGlobalManager(m) {
-		client := gm_segments.NewDhcpStaticBindingConfigsClient(connector)
+	if gwID == "" {
+		// infra segment
+		client := segments.NewDhcpStaticBindingConfigsClient(context, connector)
 		err = client.Delete(segmentID, id)
 	} else {
-		if gwID == "" {
-			// infra segment
-			client := segments.NewDhcpStaticBindingConfigsClient(connector)
-			err = client.Delete(segmentID, id)
-		} else {
-			// fixed segment
-			client := t1_segments.NewDhcpStaticBindingConfigsClient(connector)
-			err = client.Delete(gwID, segmentID, id)
-		}
+		// fixed segment
+		client := t1_segments.NewDhcpStaticBindingConfigsClient(context, connector)
+		err = client.Delete(gwID, segmentID, id)
 	}
 
 	if err != nil {

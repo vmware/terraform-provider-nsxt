@@ -10,10 +10,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
-	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 var macDiscoveryProfileMacLimitPolicyValues = []string{
@@ -38,6 +38,7 @@ func resourceNsxtPolicyMacDiscoveryProfile() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
+			"context":      getContextSchema(),
 			"mac_change_enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -73,15 +74,10 @@ func resourceNsxtPolicyMacDiscoveryProfile() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyMacDiscoveryProfileExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
+func resourceNsxtPolicyMacDiscoveryProfileExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
 	var err error
-	if isGlobalManager {
-		client := gm_infra.NewMacDiscoveryProfilesClient(connector)
-		_, err = client.Get(id)
-	} else {
-		client := infra.NewMacDiscoveryProfilesClient(connector)
-		_, err = client.Get(id)
-	}
+	client := infra.NewMacDiscoveryProfilesClient(sessionContext, connector)
+	_, err = client.Get(id)
 	if err == nil {
 		return true, nil
 	}
@@ -97,7 +93,7 @@ func resourceNsxtPolicyMacDiscoveryProfileCreate(d *schema.ResourceData, m inter
 	connector := getPolicyConnector(m)
 
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID(d, m, resourceNsxtPolicyMacDiscoveryProfileExists)
+	id, err := getOrGenerateID2(d, m, resourceNsxtPolicyMacDiscoveryProfileExists)
 	if err != nil {
 		return err
 	}
@@ -127,17 +123,8 @@ func resourceNsxtPolicyMacDiscoveryProfileCreate(d *schema.ResourceData, m inter
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating MacDiscoveryProfile with ID %s", id)
 	boolFalse := false
-	if isPolicyGlobalManager(m) {
-		gmObj, convErr := convertModelBindingType(obj, model.MacDiscoveryProfileBindingType(), gm_model.MacDiscoveryProfileBindingType())
-		if convErr != nil {
-			return convErr
-		}
-		client := gm_infra.NewMacDiscoveryProfilesClient(connector)
-		err = client.Patch(id, gmObj.(gm_model.MacDiscoveryProfile), &boolFalse)
-	} else {
-		client := infra.NewMacDiscoveryProfilesClient(connector)
-		err = client.Patch(id, obj, &boolFalse)
-	}
+	client := infra.NewMacDiscoveryProfilesClient(getSessionContext(d, m), connector)
+	err = client.Patch(id, obj, &boolFalse)
 	if err != nil {
 		return handleCreateError("MacDiscoveryProfile", id, err)
 	}
@@ -156,26 +143,10 @@ func resourceNsxtPolicyMacDiscoveryProfileRead(d *schema.ResourceData, m interfa
 		return fmt.Errorf("Error obtaining MacDiscoveryProfile ID")
 	}
 
-	var obj model.MacDiscoveryProfile
-	if isPolicyGlobalManager(m) {
-		client := gm_infra.NewMacDiscoveryProfilesClient(connector)
-		gmObj, err := client.Get(id)
-		if err != nil {
-			return handleReadError(d, "MacDiscoveryProfile", id, err)
-		}
-
-		lmObj, err := convertModelBindingType(gmObj, gm_model.MacDiscoveryProfileBindingType(), model.MacDiscoveryProfileBindingType())
-		if err != nil {
-			return err
-		}
-		obj = lmObj.(model.MacDiscoveryProfile)
-	} else {
-		client := infra.NewMacDiscoveryProfilesClient(connector)
-		var err error
-		obj, err = client.Get(id)
-		if err != nil {
-			return handleReadError(d, "MacDiscoveryProfile", id, err)
-		}
+	client := infra.NewMacDiscoveryProfilesClient(getSessionContext(d, m), connector)
+	obj, err := client.Get(id)
+	if err != nil {
+		return handleReadError(d, "MacDiscoveryProfile", id, err)
 	}
 
 	d.Set("display_name", obj.DisplayName)
@@ -230,19 +201,9 @@ func resourceNsxtPolicyMacDiscoveryProfileUpdate(d *schema.ResourceData, m inter
 	}
 
 	// Update the resource using PATCH
-	var err error
 	boolFalse := false
-	if isPolicyGlobalManager(m) {
-		gmObj, convErr := convertModelBindingType(obj, model.MacDiscoveryProfileBindingType(), gm_model.MacDiscoveryProfileBindingType())
-		if convErr != nil {
-			return convErr
-		}
-		client := gm_infra.NewMacDiscoveryProfilesClient(connector)
-		_, err = client.Update(id, gmObj.(gm_model.MacDiscoveryProfile), &boolFalse)
-	} else {
-		client := infra.NewMacDiscoveryProfilesClient(connector)
-		_, err = client.Update(id, obj, &boolFalse)
-	}
+	client := infra.NewMacDiscoveryProfilesClient(getSessionContext(d, m), connector)
+	_, err := client.Update(id, obj, &boolFalse)
 	if err != nil {
 		return handleUpdateError("MacDiscoveryProfile", id, err)
 	}
@@ -257,15 +218,9 @@ func resourceNsxtPolicyMacDiscoveryProfileDelete(d *schema.ResourceData, m inter
 	}
 
 	connector := getPolicyConnector(m)
-	var err error
 	boolFalse := false
-	if isPolicyGlobalManager(m) {
-		client := gm_infra.NewMacDiscoveryProfilesClient(connector)
-		err = client.Delete(id, &boolFalse)
-	} else {
-		client := infra.NewMacDiscoveryProfilesClient(connector)
-		err = client.Delete(id, &boolFalse)
-	}
+	client := infra.NewMacDiscoveryProfilesClient(getSessionContext(d, m), connector)
+	err := client.Delete(id, &boolFalse)
 
 	if err != nil {
 		return handleDeleteError("MacDiscoveryProfile", id, err)

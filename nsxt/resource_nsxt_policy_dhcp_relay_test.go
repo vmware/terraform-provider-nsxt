@@ -115,7 +115,7 @@ func testAccNsxtPolicyDhcpRelayConfigExists(resourceName string) resource.TestCh
 			return fmt.Errorf("Policy DhcpRelayConfig resource ID not set in resources")
 		}
 
-		exists, err := resourceNsxtPolicyDhcpRelayConfigExists(resourceID, connector, testAccIsGlobalManager())
+		exists, err := resourceNsxtPolicyDhcpRelayConfigExists(testAccGetSessionContext(), resourceID, connector)
 		if err != nil {
 			return err
 		}
@@ -136,7 +136,7 @@ func testAccNsxtPolicyDhcpRelayConfigCheckDestroy(state *terraform.State, displa
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		exists, err := resourceNsxtPolicyDhcpRelayConfigExists(resourceID, connector, testAccIsGlobalManager())
+		exists, err := resourceNsxtPolicyDhcpRelayConfigExists(testAccGetSessionContext(), resourceID, connector)
 		if err == nil {
 			return err
 		}

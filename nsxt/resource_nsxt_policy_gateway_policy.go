@@ -10,10 +10,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	gm_domains "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/domains"
-	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/domains"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	"github.com/vmware/terraform-provider-nsxt/api/infra/domains"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 func resourceNsxtPolicyGatewayPolicy() *schema.Resource {
@@ -30,26 +30,14 @@ func resourceNsxtPolicyGatewayPolicy() *schema.Resource {
 	}
 }
 
-func getGatewayPolicyInDomain(id string, domainName string, connector client.Connector, isGlobalManager bool) (model.GatewayPolicy, error) {
-	if isGlobalManager {
-		client := gm_domains.NewGatewayPoliciesClient(connector)
-		gmObj, err := client.Get(domainName, id)
-		if err != nil {
-			return model.GatewayPolicy{}, err
-		}
-		rawObj, convErr := convertModelBindingType(gmObj, gm_model.GatewayPolicyBindingType(), model.GatewayPolicyBindingType())
-		if convErr != nil {
-			return model.GatewayPolicy{}, convErr
-		}
-		return rawObj.(model.GatewayPolicy), nil
-	}
-	client := domains.NewGatewayPoliciesClient(connector)
+func getGatewayPolicyInDomain(sessionContext utl.SessionContext, id string, domainName string, connector client.Connector) (model.GatewayPolicy, error) {
+	client := domains.NewGatewayPoliciesClient(sessionContext, connector)
 	return client.Get(domainName, id)
 
 }
 
-func resourceNsxtPolicyGatewayPolicyExistsInDomain(id string, domainName string, connector client.Connector, isGlobalManager bool) (bool, error) {
-	_, err := getGatewayPolicyInDomain(id, domainName, connector, isGlobalManager)
+func resourceNsxtPolicyGatewayPolicyExistsInDomain(sessionContext utl.SessionContext, id string, domainName string, connector client.Connector) (bool, error) {
+	_, err := getGatewayPolicyInDomain(sessionContext, id, domainName, connector)
 
 	if err == nil {
 		return true, nil
@@ -62,9 +50,9 @@ func resourceNsxtPolicyGatewayPolicyExistsInDomain(id string, domainName string,
 	return false, logAPIError("Error retrieving Gateway Policy", err)
 }
 
-func resourceNsxtPolicyGatewayPolicyExistsPartial(domainName string) func(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
-	return func(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
-		return resourceNsxtPolicyGatewayPolicyExistsInDomain(id, domainName, connector, isGlobalManager)
+func resourceNsxtPolicyGatewayPolicyExistsPartial(domainName string) func(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
+	return func(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
+		return resourceNsxtPolicyGatewayPolicyExistsInDomain(sessionContext, id, domainName, connector)
 	}
 }
 
@@ -171,14 +159,14 @@ func policyGatewayPolicyBuildAndPatch(d *schema.ResourceData, m interface{}, con
 		obj.Children = policyChildren
 	}
 
-	return gatewayPolicyInfraPatch(obj, domain, m)
+	return gatewayPolicyInfraPatch(getSessionContext(d, m), obj, domain, m)
 }
 
 func resourceNsxtPolicyGatewayPolicyCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID(d, m, resourceNsxtPolicyGatewayPolicyExistsPartial(d.Get("domain").(string)))
+	id, err := getOrGenerateID2(d, m, resourceNsxtPolicyGatewayPolicyExistsPartial(d.Get("domain").(string)))
 	if err != nil {
 		return err
 	}
@@ -202,7 +190,7 @@ func resourceNsxtPolicyGatewayPolicyRead(d *schema.ResourceData, m interface{}) 
 		return fmt.Errorf("Error obtaining Gateway Policy ID")
 	}
 
-	obj, err := getGatewayPolicyInDomain(id, d.Get("domain").(string), connector, isPolicyGlobalManager(m))
+	obj, err := getGatewayPolicyInDomain(getSessionContext(d, m), id, d.Get("domain").(string), connector)
 	if err != nil {
 		return handleReadError(d, "Gateway Policy", id, err)
 	}
@@ -249,14 +237,8 @@ func resourceNsxtPolicyGatewayPolicyDelete(d *schema.ResourceData, m interface{}
 	}
 
 	connector := getPolicyConnector(m)
-	var err error
-	if isPolicyGlobalManager(m) {
-		client := gm_domains.NewGatewayPoliciesClient(connector)
-		err = client.Delete(d.Get("domain").(string), id)
-	} else {
-		client := domains.NewGatewayPoliciesClient(connector)
-		err = client.Delete(d.Get("domain").(string), id)
-	}
+	client := domains.NewGatewayPoliciesClient(getSessionContext(d, m), connector)
+	err := client.Delete(d.Get("domain").(string), id)
 	if err != nil {
 		return handleDeleteError("Gateway Policy", id, err)
 	}

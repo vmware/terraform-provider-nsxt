@@ -141,6 +141,7 @@ func resourceNsxtPolicyBgpConfigToStruct(d *schema.ResourceData, isVRF bool) (*m
 func resourceNsxtPolicyBgpConfigCreate(d *schema.ResourceData, m interface{}) error {
 	// This is not a create operation on NSX, since BGP config us auto created
 	connector := getPolicyConnector(m)
+	context := getSessionContext(d, m)
 
 	gwPath := d.Get("gateway_path").(string)
 	isT0, gwID := parseGatewayPolicyPath(gwPath)
@@ -160,7 +161,7 @@ func resourceNsxtPolicyBgpConfigCreate(d *schema.ResourceData, m interface{}) er
 
 	var localeServiceID string
 	if isPolicyGlobalManager(m) {
-		serviceID, err1 := findTier0LocaleServiceForSite(connector, gwID, sitePath)
+		serviceID, err1 := findTier0LocaleServiceForSite(context, connector, gwID, sitePath)
 		if err1 != nil {
 			return handleCreateError("BgpRoutingConfig", gwID, err1)
 		}
@@ -176,7 +177,7 @@ func resourceNsxtPolicyBgpConfigCreate(d *schema.ResourceData, m interface{}) er
 		client := gm_locale_services.NewBgpClient(connector)
 		err = client.Patch(gwID, serviceID, gmRoutingConfig, nil)
 	} else {
-		localeService, err1 := getPolicyTier0GatewayLocaleServiceWithEdgeCluster(gwID, connector)
+		localeService, err1 := getPolicyTier0GatewayLocaleServiceWithEdgeCluster(context, gwID, connector)
 		if err1 != nil {
 			return fmt.Errorf("Tier0 Gateway path with configured edge cluster expected, got %s", gwPath)
 		}

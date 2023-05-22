@@ -43,6 +43,43 @@ resource "nsxt_policy_fixed_segment" "segment1" {
 }
 ```
 
+## Example Usage - Multi-Tenancy
+
+```hcl
+data "nsxt_policy_project" "demoproj" {
+  display_name = "demoproj"
+}
+
+resource "nsxt_policy_fixed_segment" "segment1" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
+  display_name      = "segment1"
+  description       = "Terraform provisioned Segment"
+  connectivity_path = nsxt_policy_tier1_gateway.mygateway.path
+
+  subnet {
+    cidr        = "12.12.2.1/24"
+    dhcp_ranges = ["12.12.2.100-12.12.2.160"]
+
+    dhcp_v4_config {
+      server_address = "12.12.2.2/24"
+      lease_time     = 36000
+
+      dhcp_option_121 {
+        network  = "6.6.6.0/24"
+        next_hop = "1.1.1.21"
+      }
+
+      dhcp_generic_option {
+        code   = "119"
+        values = ["abc"]
+      }
+    }
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -52,6 +89,8 @@ The following arguments are supported:
 * `tag` - (Optional) A list of scope + tag pairs to associate with this policy.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `connectivity_path` - (Required) Policy path to the connecting Tier-0 or Tier-1.
+* `context` - (Optional) The context which the object belongs to
+  * `project_id` - The ID of the project which the object belongs to
 * `domain_name`- (Optional) DNS domain names.
 * `overlay_id` - (Optional) Overlay connectivity ID for this Segment.
 * `vlan_ids` - (Optional) List of VLAN IDs or ranges. Specifying vlan ids can be useful for overlay segments, f.e. for EVPN.
