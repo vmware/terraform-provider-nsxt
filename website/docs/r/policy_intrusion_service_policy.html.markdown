@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - Firewall"
+subcategory: "Firewall"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_intrusion_service_policy"
 description: A resource to configure Intrusion Service Policy and its rules.

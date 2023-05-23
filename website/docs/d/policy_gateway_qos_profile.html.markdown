@@ -1,13 +1,13 @@
 ---
-subcategory: "Policy - Gateways and Routing"
+subcategory: "Gateways and Routing"
 layout: "nsxt"
 page_title: "NSXT: policy_gateway_qos_profile"
-description: Policy GatewayQosProfile data source.
+description: Policy Gateway QoS Profile data source.
 ---
 
 # nsxt_policy_gateway_qos_profile
 
-This data source provides information about policy GatewayQosProfile configured on NSX.
+This data source provides information about policy Gateway Quality of Service Profile configured on NSX.
 
 This data source is applicable to NSX Global Manager, and NSX Policy Manager.
 
@@ -23,7 +23,7 @@ data "nsxt_policy_gateway_qos_profile" "test" {
 
 * `id` - (Optional) The ID of GatewayQosProfile to retrieve.
 
-* `display_name` - (Optional) The Display Name prefix of the GatewayQosProfile to retrieve.
+* `display_name` - (Optional) The Display Name prefix of the Gateway QoS Profile to retrieve.
 
 ## Attributes Reference
 

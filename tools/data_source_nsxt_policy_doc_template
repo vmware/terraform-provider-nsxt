@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - FIXME"
+subcategory: "FIXME"
 layout: "nsxt"
 page_title: "NSXT: policy_<!resource_lower!>"
 description: Policy <!RESOURCE!> data source.

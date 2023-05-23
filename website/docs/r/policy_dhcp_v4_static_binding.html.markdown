@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - DHCP"
+subcategory: "DHCP"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_dhcp_v4_static_binding"
 description: A resource to configure IPv4 DHCP Static Binding.

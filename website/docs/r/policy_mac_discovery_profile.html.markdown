@@ -1,5 +1,5 @@
 ---
-subcategory: "Beta"
+subcategory: "Segments"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_mac_discovery_profile"
 description: A resource to configure a MAC Discovery Profile.

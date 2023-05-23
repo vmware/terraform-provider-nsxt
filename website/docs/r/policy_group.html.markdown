@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - Grouping and Tagging"
+subcategory: "Grouping and Tagging"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_group"
 description: A resource to configure a Group and its members.

@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - Firewall"
+subcategory: "Firewall"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_context_profile_custom_attribute"
 description: A resource to configure a Context Profile FQDN or URL Custom attribute.

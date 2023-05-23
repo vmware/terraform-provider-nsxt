@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - Fabric"
+subcategory: "Fabric"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_transport_zone"
 description: A Policy Transport Zone data source.

@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - Gateways and Routing"
+subcategory: "Gateways and Routing"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_bgp_config"
 description: A resource to configure BGP Settings of Tier0 Gateway.

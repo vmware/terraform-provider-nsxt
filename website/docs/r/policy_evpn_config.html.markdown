@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - EVPN"
+subcategory: "EVPN"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_evpn_config"
 description: A resource to configure EVPN Settings of Tier0 Gateway.
@@ -56,4 +56,4 @@ terraform import nsxt_policy_evpn_config.config1 gwPath
 
 The above command imports EVPN Config named `config1` for NSX Policy Tier0 Gateway with full Policy Path `gwPath`.
 
-~> **NOTE:** Note that import parameter here is non-standard here. Please make sure you use full policy path for the gateway, such as `/infra/tier-0s/mygateway`
+~> **NOTE:** Note that import parameter is non-standard here. Please make sure you use full policy path for the gateway, such as `/infra/tier-0s/mygateway`

@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - Realization"
+subcategory: "Realization"
 layout: "nsxt"
 page_title: "NSXT: policy_realization_info"
 description: A policy resource realization information.

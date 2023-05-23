@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - Gateways and Routing"
+subcategory: "Gateways and Routing"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_ospf_config"
 description: A resource to configure OSPF Settings of Tier0 Gateway on NSX Policy Manager.

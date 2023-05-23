@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - Load Balancer"
+subcategory: "Load Balancer"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_lb_service"
 description: A resource to configure a Load Balancer Service.

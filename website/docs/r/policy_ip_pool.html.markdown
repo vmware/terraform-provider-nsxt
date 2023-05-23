@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - IPAM"
+subcategory: "IPAM"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_ip_pool"
 description: A resource to configure IP Pools in NSX Policy.

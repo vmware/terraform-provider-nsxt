@@ -1,8 +1,8 @@
 ---
-subcategory: "Policy - Segments"
+subcategory: "Segments"
 layout: "nsxt"
 page_title: "NSXT: policy_qos_profile"
-description: Policy QosProfile data source.
+description: Policy QoS Profile data source.
 ---
 
 # nsxt_policy_qos_profile

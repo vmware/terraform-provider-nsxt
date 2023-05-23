@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - Grouping and Tagging"
+subcategory: "Grouping and Tagging"
 layout: "nsxt"
 page_title: "NSXT: policy_group"
 description: Policy Group data source.

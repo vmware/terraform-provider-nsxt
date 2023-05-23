@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - Certificates"
+subcategory: "Certificates"
 layout: "nsxt"
 page_title: "NSXT: policy_certificate"
 description: Policy Certificate data source.

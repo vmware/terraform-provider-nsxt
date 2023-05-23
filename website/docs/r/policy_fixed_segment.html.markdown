@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - Segments"
+subcategory: "Segments"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_fixed_segment"
 description: A resource to configure a network Segment on specific Tier1 Gateway.
@@ -8,7 +8,7 @@ description: A resource to configure a network Segment on specific Tier1 Gateway
 # nsxt_policy_fixed_segment
 
 This resource provides a method for the management of Fixed Segments (attached to
-specifice Tier-1 Gateway)
+specific Tier-1 Gateway)
 
 This resource is applicable to VMC. For NSX Global Manager and NSX Policy Manager, it
 is recommended to use nsxt_policy_segment resource instead.

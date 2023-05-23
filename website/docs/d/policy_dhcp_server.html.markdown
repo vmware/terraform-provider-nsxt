@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - DHCP"
+subcategory: "DHCP"
 layout: "nsxt"
 page_title: "NSXT: policy_dhcp_server"
 description: A policy DHCP server data source.

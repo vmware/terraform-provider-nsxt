@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - Firewall"
+subcategory: "Firewall"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_predefined_gateway_policy"
 description: A resource to update Predefined Gateway Security Policies.

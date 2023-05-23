@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - Fabric"
+subcategory: "Fabric"
 layout: "nsxt"
 page_title: "NSXT: policy_edge node"
 description: A policy Edge Node data source.

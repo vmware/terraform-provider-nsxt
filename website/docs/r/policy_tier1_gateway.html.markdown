@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - Gateways and Routing"
+subcategory: "Gateways and Routing"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_tier1_gateway"
 description: A resource to configure a Tier-1 gateway on NSX Policy manager.

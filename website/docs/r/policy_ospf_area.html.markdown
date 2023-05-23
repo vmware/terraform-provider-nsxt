@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - OSPF"
+subcategory: "OSPF"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_ospf_area"
 description: A resource to configure a OSPF Area.

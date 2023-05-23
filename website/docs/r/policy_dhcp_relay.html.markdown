@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - DHCP"
+subcategory: "DHCP"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_dhcp_relay"
 description: A resource to configure a Dhcp Relay.

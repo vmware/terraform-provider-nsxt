@@ -35,6 +35,7 @@ The following arguments are supported:
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `digest_algorithms` - (Required) Set of algorithms to be used for message digest during IKE negotiation. Default is `SHA2_256`.
 * `dh_groups` - (Required) Diffie-Hellman group to be used if PFS is enabled. Default is GROUP14.
+* `df_policy` - (Optional) Defragmentation policy, one of `COPY` or `CLEAR`. `COPY` copies the defragmentation bit from the inner IP packet into the outer packet. `CLEAR` ignores the defragmentation bit present in the inner packet. Default is `COPY`.
 * `encryption_algorithms` - (Optional) Set of encryption algorithms to be used during IKE negotiation.
 * `sa_life_time` - (Optional) SA lifetime specifies the expiry time of security association. Default is 3600.
 * `enable_perfect_forward_secrecy` - (Optional) Enable perfect forward secrecy. Default is True.
