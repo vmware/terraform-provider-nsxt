@@ -20,7 +20,6 @@ data "nsxt_ns_group" "ns_group_1" {
 ## Argument Reference
 
 * `id` - (Optional) The ID of NS group to retrieve
-
 * `display_name` - (Optional) The Display Name of the NS group to retrieve.
 
 ## Attributes Reference

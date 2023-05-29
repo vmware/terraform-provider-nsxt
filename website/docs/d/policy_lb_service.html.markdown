@@ -22,7 +22,6 @@ data "nsxt_policy_lb_service" "test" {
 ## Argument Reference
 
 * `id` - (Optional) The ID of Service to retrieve.
-
 * `display_name` - (Optional) The Display Name prefix of the Service to retrieve.
 
 ## Attributes Reference
@@ -30,5 +29,4 @@ data "nsxt_policy_lb_service" "test" {
 In addition to arguments listed above, the following attributes are exported:
 
 * `description` - The description of the resource.
-
 * `path` - The NSX path of the policy resource.

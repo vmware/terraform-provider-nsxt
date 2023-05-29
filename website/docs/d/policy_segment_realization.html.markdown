@@ -19,7 +19,7 @@ This data source is applicable to NSX Policy Manager.
 ```hcl
 resource "nsxt_policy_segment" "s1" {
   display_name        = "segment1"
-  transport_zone_path = data.nsxt_transport_zone.tz1.path
+  transport_zone_path = data.nsxt_policy_transport_zone.tz1.path
 }
 
 data "nsxt_policy_segment_realization" "s1" {

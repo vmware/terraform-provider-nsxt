@@ -22,7 +22,6 @@ data "nsxt_certificate" "CA" {
 ## Argument Reference
 
 * `id` - (Optional) The ID of Certificate to retrieve.
-
 * `display_name` - (Optional) The Display Name of the Certificate to retrieve.
 
 ## Attributes Reference

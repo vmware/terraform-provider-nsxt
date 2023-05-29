@@ -20,7 +20,6 @@ data "nsxt_edge_cluster" "edge_cluster1" {
 ## Argument Reference
 
 * `id` - (Optional) The ID of Edge Cluster to retrieve.
-
 * `display_name` - (Optional) The Display Name prefix of the Edge Cluster to retrieve.
 
 ## Attributes Reference
@@ -28,7 +27,5 @@ data "nsxt_edge_cluster" "edge_cluster1" {
 In addition to arguments listed above, the following attributes are exported:
 
 * `description` - The description of the edge cluster.
-
 * `deployment_type` - This field could show deployment_type of members. It would return UNKNOWN if there is no members, and return VIRTUAL_MACHINE|PHYSICAL_MACHINE if all Edge members are VIRTUAL_MACHINE|PHYSICAL_MACHINE.
-
 * `member_node_type` - An Edge cluster is homogeneous collection of NSX transport nodes used for north/south connectivity between NSX logical networking and physical networking. Hence all transport nodes of the cluster must be of same type. This field shows the type of transport node,

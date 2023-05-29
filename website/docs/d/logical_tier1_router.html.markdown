@@ -20,7 +20,6 @@ data "nsxt_logical_tier1_router" "tier1_router" {
 ## Argument Reference
 
 * `id` - (Optional) The ID of Logical Router to retrieve.
-
 * `display_name` - (Optional) The Display Name prefix of Logical Router to retrieve.
 
 ## Attributes Reference
@@ -28,5 +27,4 @@ data "nsxt_logical_tier1_router" "tier1_router" {
 In addition to arguments listed above, the following attributes are exported:
 
 * `description` - The description of the Logical Router.
-
 * `edge_cluster_id` - The id of the Edge cluster where this Logical Router is placed.

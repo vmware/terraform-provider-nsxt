@@ -22,7 +22,6 @@ data "nsxt_policy_dhcp_server" "test" {
 ## Argument Reference
 
 * `id` - (Optional) The ID of DHCP Server to retrieve. If ID is specified, no additional argument should be configured.
-
 * `display_name` - (Optional) The Display Name prefix of DHCP server to retrieve.
 
 ## Attributes Reference
@@ -30,5 +29,4 @@ data "nsxt_policy_dhcp_server" "test" {
 In addition to arguments listed above, the following attributes are exported:
 
 * `description` - The description of the resource.
-
 * `path` - The NSX path of the policy resource.

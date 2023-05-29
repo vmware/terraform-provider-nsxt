@@ -20,7 +20,6 @@ data "nsxt_policy_service" "dns_service" {
 ## Argument Reference
 
 * `id` - (Optional) The ID of service to retrieve.
-
 * `display_name` - (Optional) The Display Name prefix of the service to retrieve.
 
 ## Attributes Reference
@@ -28,5 +27,4 @@ data "nsxt_policy_service" "dns_service" {
 In addition to arguments listed above, the following attributes are exported:
 
 * `description` - The description of the resource.
-
 * `path` - The NSX path of the policy resource.

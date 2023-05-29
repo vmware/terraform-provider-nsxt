@@ -22,9 +22,7 @@ data "nsxt_policy_group" "test" {
 ## Argument Reference
 
 * `id` - (Optional) The ID of Group to retrieve.
-
 * `display_name` - (Optional) The Display Name prefix of the Group to retrieve.
-
 * `domain` - (Optional) The domain this Group belongs to. For VMware Cloud on AWS use `cgw`. For Global Manager, please use site id for this field. If not specified, this field is default to `default`. 
 
 ## Attributes Reference
@@ -32,5 +30,4 @@ data "nsxt_policy_group" "test" {
 In addition to arguments listed above, the following attributes are exported:
 
 * `description` - The description of the resource.
-
 * `path` - The NSX path of the policy resource.
