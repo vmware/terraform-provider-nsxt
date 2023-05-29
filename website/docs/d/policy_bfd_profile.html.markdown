@@ -21,7 +21,6 @@ data "nsxt_policy_bfd_profile" "test" {
 ## Argument Reference
 
 * `id` - (Optional) The ID of Profile to retrieve. If ID is specified, no additional argument should be configured.
-
 * `display_name` - (Optional) The Display Name prefix of the Profile to retrieve.
 
 ## Attributes Reference
@@ -29,5 +28,4 @@ data "nsxt_policy_bfd_profile" "test" {
 In addition to arguments listed above, the following attributes are exported:
 
 * `description` - The description of the resource.
-
 * `path` - The NSX path of the policy resource.

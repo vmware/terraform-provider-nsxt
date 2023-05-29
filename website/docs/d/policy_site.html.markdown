@@ -22,7 +22,6 @@ data "nsxt_policy_site" "paris" {
 ## Argument Reference
 
 * `id` - (Optional) The ID of Site to retrieve.
-
 * `display_name` - (Optional) The Display Name prefix of the Site to retrieve.
 
 
@@ -31,5 +30,4 @@ data "nsxt_policy_site" "paris" {
 In addition to arguments listed above, the following attributes are exported:
 
 * `description` - The description of the resource.
-
 * `path` - The NSX path of the policy resource. This attribute can serve as `site_path` field of `nsxt_policy_transport_zone` data source.

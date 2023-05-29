@@ -21,7 +21,6 @@ data "nsxt_policy_segment" "test" {
 ## Argument Reference
 
 * `id` - (Optional) The ID of Segment to retrieve. If ID is specified, no additional argument should be configured.
-
 * `display_name` - (Optional) The Display Name prefix of the Segment to retrieve.
 
 ## Attributes Reference
@@ -29,5 +28,4 @@ data "nsxt_policy_segment" "test" {
 In addition to arguments listed above, the following attributes are exported:
 
 * `description` - The description of the resource.
-
 * `path` - The NSX path of the policy resource.

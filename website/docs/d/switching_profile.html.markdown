@@ -20,7 +20,6 @@ data "nsxt_switching_profile" "qos_profile" {
 ## Argument Reference
 
 * `id` - (Optional) The ID of Switching Profile to retrieve.
-
 * `display_name` - (Optional) The Display Name of the Switching Profile to retrieve.
 
 ## Attributes Reference
@@ -28,5 +27,4 @@ data "nsxt_switching_profile" "qos_profile" {
 In addition to arguments listed above, the following attributes are exported:
 
 * `resource_type` - The resource type representing the specific type of this switching profile.
-
 * `description` - The description of the switching profile.

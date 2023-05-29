@@ -18,5 +18,4 @@ data "nsxt_management_cluster" "cluster" {}
 ## Attributes Reference
 
 * `id` - Unique identifier of this cluster.
-
 * `node_sha256_thumbprint` - SHA256 of certificate thumbprint of this manager node.

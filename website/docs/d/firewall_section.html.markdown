@@ -20,7 +20,6 @@ data "nsxt_firewall_section" "block_all" {
 ## Argument Reference
 
 * `id` - (Optional) The ID of resource to retrieve
-
 * `display_name` - (Optional) The Display Name of resource to retrieve.
 
 ## Attributes Reference

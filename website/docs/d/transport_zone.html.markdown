@@ -20,7 +20,6 @@ data "nsxt_transport_zone" "overlay_transport_zone" {
 ## Argument Reference
 
 * `id` - (Optional) The ID of Transport Zone to retrieve.
-
 * `display_name` - (Optional) The Display Name prefix of the Transport Zone to retrieve.
 
 ## Attributes Reference
@@ -28,7 +27,5 @@ data "nsxt_transport_zone" "overlay_transport_zone" {
 In addition to arguments listed above, the following attributes are exported:
 
 * `description` - The description of the Transport Zone.
-
 * `host_switch_name` - The name of the N-VDS (host switch) on all Transport Nodes in this Transport Zone that will be used to run NSX network traffic.
-
 * `transport_type` - The transport type of this transport zone (OVERLAY or VLAN).

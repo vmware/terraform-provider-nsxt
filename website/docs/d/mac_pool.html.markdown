@@ -20,7 +20,6 @@ data "nsxt_mac_pool" "mac_pool" {
 ## Argument Reference
 
 * `id` - (Optional) The ID of MAC pool to retrieve
-
 * `display_name` - (Optional) The Display Name of the MAC pool to retrieve.
 
 ## Attributes Reference

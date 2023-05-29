@@ -20,7 +20,6 @@ data "nsxt_ip_pool" "ip_pool" {
 ## Argument Reference
 
 * `id` - (Optional) The ID of IP pool to retrieve
-
 * `display_name` - (Optional) The Display Name of the IP pool to retrieve.
 
 ## Attributes Reference

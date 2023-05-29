@@ -20,7 +20,6 @@ data "nsxt_ns_service" "ns_service_dns" {
 ## Argument Reference
 
 * `id` - (Optional) The ID of NS service to retrieve
-
 * `display_name` - (Optional) The Display Name of the NS service to retrieve.
 
 ## Attributes Reference

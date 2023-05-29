@@ -27,11 +27,8 @@ data "nsxt_policy_edge_node" "node1" {
 ## Argument Reference
 
 * `edge_cluster_path` - (Required) The path of edge cluster where to which this node belongs.
-
 * `id` - (Optional) The ID of the edge node to retrieve.
-
 * `display_name` - (Optional) The Display Name prefix of the edge node to retrieve.
-
 * `member_index` - (Optional) Member index of the node in edge cluster.
 
 ## Attributes Reference
@@ -39,5 +36,4 @@ data "nsxt_policy_edge_node" "node1" {
 In addition to arguments listed above, the following attributes are exported:
 
 * `description` - The description of the resource.
-
 * `path` - The NSX path of the policy resource.
