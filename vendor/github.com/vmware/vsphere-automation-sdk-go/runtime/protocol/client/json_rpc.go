@@ -1,4 +1,4 @@
-/* Copyright © 2019-2021 VMware, Inc. All Rights Reserved.
+/* Copyright © 2019-2021, 2023 VMware, Inc. All Rights Reserved.
    SPDX-License-Identifier: BSD-2-Clause */
 
 package client
@@ -36,5 +36,5 @@ func (j *JsonRpcConnector) SetApplicationContext(context *core.ApplicationContex
 // Deprecated: application context should be specified when instantiating Connector instance
 // Use WithSecurityContext ConnectorOption helper method
 func (j *JsonRpcConnector) SetSecurityContext(context core.SecurityContext) {
-	j.connector.securityContext = context
+	j.connector.SetSecurityContext(context)
 }

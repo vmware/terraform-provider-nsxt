@@ -1,9 +1,11 @@
-/* Copyright © 2019, 2021 VMware, Inc. All Rights Reserved.
+/* Copyright © 2019, 2021, 2023 VMware, Inc. All Rights Reserved.
    SPDX-License-Identifier: BSD-2-Clause */
 
 package client
 
 import (
+	"sync"
+
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/common"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/core"
@@ -26,10 +28,12 @@ type connector struct {
 	protocol           core.APIProvider
 	provider           core.APIProvider
 	decorators         []core.APIProviderDecorator
-	securityContext    core.SecurityContext
 	appContext         *core.ApplicationContext
 	connectionMetadata map[string]interface{}
 	typeConverter      *bindings.TypeConverter
+	// mu guards the SecurityContext
+	mu              sync.Mutex
+	securityContext core.SecurityContext
 }
 
 // NewConnector instantiates connector object, used by vAPI bindings for client-server communication.
@@ -81,7 +85,17 @@ func (c *connector) ApplicationContext() *core.ApplicationContext {
 
 // SecurityContext gets connector's security context
 func (c *connector) SecurityContext() core.SecurityContext {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	return c.securityContext
+}
+
+// SetSecurityContext replaces the connector's security context.
+// Useful when credentials change, e.g. session expires or password is changed.
+func (c *connector) SetSecurityContext(context core.SecurityContext) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.securityContext = context
 }
 
 // GetApiProvider gets current connector's provider. By default this is the connector
@@ -104,7 +118,7 @@ func (c *connector) NewExecutionContext() *core.ExecutionContext {
 	// use application context copy for thread safety
 	appContextCopy := c.appContext.Copy()
 	common.InsertOperationId(appContextCopy)
-	executionCtx := core.NewExecutionContext(appContextCopy, c.securityContext)
+	executionCtx := core.NewExecutionContext(appContextCopy, c.SecurityContext())
 	// Set default accepted response type.
 	executionCtx.SetConnectionMetadata(core.ResponseTypeKey, core.OnlyMonoResponse)
 	return executionCtx

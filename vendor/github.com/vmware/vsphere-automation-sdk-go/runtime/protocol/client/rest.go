@@ -1,4 +1,4 @@
-/* Copyright © 2019-2021 VMware, Inc. All Rights Reserved.
+/* Copyright © 2019-2021, 2023 VMware, Inc. All Rights Reserved.
    SPDX-License-Identifier: BSD-2-Clause */
 
 package client
@@ -125,5 +125,5 @@ func (r *RestConnector) SetApplicationContext(context *core.ApplicationContext) 
 // Deprecated: application context should be specified when instantiating Connector instance
 // Use WithSecurityContext ConnectorOption helper method
 func (r *RestConnector) SetSecurityContext(context core.SecurityContext) {
-	r.connector.securityContext = context
+	r.connector.SetSecurityContext(context)
 }
