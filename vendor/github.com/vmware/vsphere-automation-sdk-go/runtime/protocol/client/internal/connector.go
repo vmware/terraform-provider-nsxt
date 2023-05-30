@@ -1,4 +1,4 @@
-/* Copyright © 2021 VMware, Inc. All Rights Reserved.
+/* Copyright © 2021, 2023 VMware, Inc. All Rights Reserved.
    SPDX-License-Identifier: BSD-2-Clause */
 
 package internal
@@ -13,6 +13,7 @@ type Connector interface {
 	Address() string
 	ApplicationContext() *core.ApplicationContext
 	SecurityContext() core.SecurityContext
+	SetSecurityContext(core.SecurityContext)
 	NewExecutionContext() *core.ExecutionContext
 	GetApiProvider() core.APIProvider
 	TypeConverter() *bindings.TypeConverter

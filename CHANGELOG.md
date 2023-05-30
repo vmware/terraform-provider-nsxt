@@ -1,3 +1,41 @@
+
+## 3.3.1 (May 30, 2023)
+
+FEATURES:
+
+* **New Data Source**: `nsxt_policy_segment`.
+
+* **New Resource**: `nsxt_policy_ip_discovery_profile`.
+* **New Resource**: `nsxt_policy_gateway_qos_profile`.
+* **New Resource**: `nsxt_policy_segment_security_profile`.
+* **New Resource**: `nsxt_policy_spoof_guard_profile`.
+* **New Resource**: `nsxt_policy_context_profile_custom_attribute`.
+
+IMPROVEMENTS:
+* `resource/nsxt_policy_ip_address_allocation`: Avoid recreation of resource if descriptive properties like `display_name` are updated ([#892](https://github.com/vmware/terraform-provider-nsxt/pull/892))
+* `resource/nsxt_policy_gateway_dns_forwarder`: Add `cache_size` property ([#889](https://github.com/vmware/terraform-provider-nsxt/pull/889))
+* `resource/nsxt_policy_dhcp_relay`: Add Global Manager support ([#883](https://github.com/vmware/terraform-provider-nsxt/pull/883))
+* `resource/nsxt_policy_group`: Align enumeration values for `key`, `member_type`, `operator` with latest NSX spec. This would allow to configure values that were previously blocked by provider validation ([#882](https://github.com/vmware/terraform-provider-nsxt/pull/882))
+* `resource/nsxt_policy_group`: Add `group_type` property ([#857](https://github.com/vmware/terraform-provider-nsxt/pull/857))
+* `resource/nsxt_policy_gateway_policy`: Disallow creating policy in Read-Only category ([#860](https://github.com/vmware/terraform-provider-nsxt/pull/860))
+* `resource/nsxt_policy_tier1_gateway`: Add `ha_mode` property ([#856](https://github.com/vmware/terraform-provider-nsxt/pull/856))
+* `resource/nsxt_policy_context_profile`: Add support for custom URLs ([#840](https://github.com/vmware/terraform-provider-nsxt/pull/840))
+* `resource/nsxt_policy_context_profile`: Add `custom_url_partial_match` property ([#850](https://github.com/vmware/terraform-provider-nsxt/pull/850))
+* `resource/nsxt_policy_service`: Add support for nested service ([#836](https://github.com/vmware/terraform-provider-nsxt/pull/836))
+* `resource/nsxt_policy_ip_discovery_profile`: Add support for `tofu_enabled` property ([#834](https://github.com/vmware/terraform-provider-nsxt/pull/834))
+* `data/nsxt_policy_vms`: Add ability to filter Virtual Machines by `state` and `guest_os` ([#869](https://github.com/vmware/terraform-provider-nsxt/pull/869))
+* Switch to new set of API for VPN objects (old set of API are deprecated on NSX). With new APIs, VPN objects are located directly under a gateway rather than under locale service as before. Deprecated API are still supported. ([#866](https://github.com/vmware/terraform-provider-nsxt/pull/866))
+* Support session authentication for policy object. This support significantly improves performance for vIDM environments. This setting is controlled by `session_auth` provider property, and is enabled by default ([#846](https://github.com/vmware/terraform-provider-nsxt/pull/846))
+
+BUG FIXES:
+
+* `resource/nsxt_policy_ipsec_vpn_session`: Allow configuring `compliance_suite` ([#891](https://github.com/vmware/terraform-provider-nsxt/pull/891))
+* `resource/nsxt_policy_ipsec_vpn_session`: Fix import for Policy-Based session ([#864](https://github.com/vmware/terraform-provider-nsxt/pull/864))
+* `resource/nsxt_policy_security_policy`: Fix configuration of `Ethernet` category ([#844](https://github.com/vmware/terraform-provider-nsxt/pull/844))
+* `resource/nsxt_policy_lb_virtual_server`: Fix a bug in detecting rule changes ([#843](https://github.com/vmware/terraform-provider-nsxt/pull/843))
+* `resource/nsxt_policy_tier0_gateway`, `resource/nsxt_policy_tier1_gateway`: Ensure ordered list in `preferred_edge_paths` setting. This allows changing order of edge nodes ([#829](https://github.com/vmware/terraform-provider-nsxt/pull/829))
+
+
 ## 3.3.0 (January 16, 2023)
 
 FEATURES:
