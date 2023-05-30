@@ -10,17 +10,29 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
 )
 
 func TestAccResourceNsxtPolicyService_icmp(t *testing.T) {
+	testAccResourceNsxtPolicyServiceIcmp(t, false, func() {
+		testAccPreCheck(t)
+	})
+}
+
+func TestAccResourceNsxtPolicyService_icmp_multitenancy(t *testing.T) {
+	testAccResourceNsxtPolicyServiceIcmp(t, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+	})
+}
+
+func testAccResourceNsxtPolicyServiceIcmp(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestResourceName()
 	updateName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_service.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyServiceCheckDestroy(state, name)
@@ -28,7 +40,7 @@ func TestAccResourceNsxtPolicyService_icmp(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Step 0: Single ICMP entry
-				Config: testAccNsxtPolicyIcmpTypeServiceCreateTypeCodeTemplate(name, "3", "1", "ICMPv4"),
+				Config: testAccNsxtPolicyIcmpTypeServiceCreateTypeCodeTemplate(name, "3", "1", "ICMPv4", withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyServiceExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -51,7 +63,7 @@ func TestAccResourceNsxtPolicyService_icmp(t *testing.T) {
 			},
 			{
 				// Step 1: Update service & entry
-				Config: testAccNsxtPolicyIcmpTypeServiceCreateTypeOnlyTemplate(updateName, "34", "ICMPv4"),
+				Config: testAccNsxtPolicyIcmpTypeServiceCreateTypeOnlyTemplate(updateName, "34", "ICMPv4", withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyServiceExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updateName),
@@ -74,7 +86,7 @@ func TestAccResourceNsxtPolicyService_icmp(t *testing.T) {
 			},
 			{
 				// Step 2: Update service & entry for ICMPv6
-				Config: testAccNsxtPolicyIcmpTypeServiceCreateTypeOnlyTemplate(name, "3", "ICMPv6"),
+				Config: testAccNsxtPolicyIcmpTypeServiceCreateTypeOnlyTemplate(name, "3", "ICMPv6", withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyServiceExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -97,7 +109,7 @@ func TestAccResourceNsxtPolicyService_icmp(t *testing.T) {
 			},
 			{
 				// Step 3: Update service & entry with no type & code
-				Config: testAccNsxtPolicyIcmpTypeServiceCreateNoTypeCodeTemplate(name, "ICMPv4"),
+				Config: testAccNsxtPolicyIcmpTypeServiceCreateNoTypeCodeTemplate(name, "ICMPv4", withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyServiceExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -120,7 +132,7 @@ func TestAccResourceNsxtPolicyService_icmp(t *testing.T) {
 			},
 			{
 				// Step 4: Add another ICMP service entry
-				Config: testAccNsxtPolicyIcmpTypeServiceCreate2Template(name, "3", "1", "ICMPv4"),
+				Config: testAccNsxtPolicyIcmpTypeServiceCreate2Template(name, "3", "1", "ICMPv4", withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyServiceExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -711,7 +723,7 @@ func TestAccResourceNsxtPolicyService_importBasic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyIcmpTypeServiceCreateNoTypeCodeTemplate(name, "ICMPv4"),
+				Config: testAccNsxtPolicyIcmpTypeServiceCreateNoTypeCodeTemplate(name, "ICMPv4", false),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -737,14 +749,8 @@ func testAccNsxtPolicyServiceExists(resourceName string) resource.TestCheckFunc 
 			return fmt.Errorf("Policy service resource ID not set in resources")
 		}
 
-		var err error
-		if testAccIsGlobalManager() {
-			nsxClient := gm_infra.NewServicesClient(connector)
-			_, err = nsxClient.Get(resourceID)
-		} else {
-			nsxClient := infra.NewServicesClient(connector)
-			_, err = nsxClient.Get(resourceID)
-		}
+		nsxClient := infra.NewServicesClient(testAccGetSessionContext(), connector)
+		_, err := nsxClient.Get(resourceID)
 		if err != nil {
 			return fmt.Errorf("Error while retrieving policy service ID %s. Error: %v", resourceID, err)
 		}
@@ -755,7 +761,6 @@ func testAccNsxtPolicyServiceExists(resourceName string) resource.TestCheckFunc 
 
 func testAccNsxtPolicyServiceCheckDestroy(state *terraform.State, displayName string) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-	var err error
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_policy_service" {
@@ -763,13 +768,8 @@ func testAccNsxtPolicyServiceCheckDestroy(state *terraform.State, displayName st
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		if testAccIsGlobalManager() {
-			nsxClient := gm_infra.NewServicesClient(connector)
-			_, err = nsxClient.Get(resourceID)
-		} else {
-			nsxClient := infra.NewServicesClient(connector)
-			_, err = nsxClient.Get(resourceID)
-		}
+		nsxClient := infra.NewServicesClient(testAccGetSessionContext(), connector)
+		_, err := nsxClient.Get(resourceID)
 		if err == nil {
 			return fmt.Errorf("Policy service %s still exists", displayName)
 		}
@@ -777,9 +777,15 @@ func testAccNsxtPolicyServiceCheckDestroy(state *terraform.State, displayName st
 	return nil
 }
 
-func testAccNsxtPolicyIcmpTypeServiceCreateTypeCodeTemplate(name string, icmpType string, icmpCode string, protocol string) string {
+func testAccNsxtPolicyIcmpTypeServiceCreateTypeCodeTemplate(name string, icmpType string, icmpCode string, protocol string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
+
 	return fmt.Sprintf(`
 resource "nsxt_policy_service" "test" {
+%s
   display_name = "%s"
   description  = "Acceptance Test"
 
@@ -795,12 +801,17 @@ resource "nsxt_policy_service" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, name, name, icmpType, icmpCode, protocol)
+}`, context, name, name, icmpType, icmpCode, protocol)
 }
 
-func testAccNsxtPolicyIcmpTypeServiceCreateTypeOnlyTemplate(name string, icmpType string, protocol string) string {
+func testAccNsxtPolicyIcmpTypeServiceCreateTypeOnlyTemplate(name string, icmpType string, protocol string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_service" "test" {
+%s
   display_name = "%s"
   description  = "Acceptance Test"
 
@@ -815,12 +826,17 @@ resource "nsxt_policy_service" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, name, name, icmpType, protocol)
+}`, context, name, name, icmpType, protocol)
 }
 
-func testAccNsxtPolicyIcmpTypeServiceCreateNoTypeCodeTemplate(name string, protocol string) string {
+func testAccNsxtPolicyIcmpTypeServiceCreateNoTypeCodeTemplate(name string, protocol string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_service" "test" {
+%s
   display_name = "%s"
   description  = "Acceptance Test"
 
@@ -834,7 +850,7 @@ resource "nsxt_policy_service" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, name, name, protocol)
+}`, context, name, name, protocol)
 }
 
 func testAccNsxtPolicyIcmpTypeServiceCreateNoDisplayNameTemplate(name string, icmpType string, icmpCode string, protocol string) string {
@@ -857,9 +873,14 @@ resource "nsxt_policy_service" "test" {
 }`, name, icmpType, icmpCode, protocol)
 }
 
-func testAccNsxtPolicyIcmpTypeServiceCreate2Template(name string, icmpType string, icmpCode string, protocol string) string {
+func testAccNsxtPolicyIcmpTypeServiceCreate2Template(name string, icmpType string, icmpCode string, protocol string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_service" "test" {
+%s
   display_name = "%s"
   description  = "Updated Acceptance Test"
 
@@ -887,7 +908,7 @@ resource "nsxt_policy_service" "test" {
     tag   = "tag2"
   }
 
-}`, name, name, icmpType, icmpCode, protocol)
+}`, context, name, name, icmpType, icmpCode, protocol)
 }
 
 func testAccNsxtPolicyL4PortSetTypeServiceCreateTemplate(serviceName string, protocol string, port string) string {

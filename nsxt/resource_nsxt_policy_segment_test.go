@@ -119,7 +119,7 @@ func TestAccResourceNsxtPolicySegment_connectivityPath(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicySegmentDeps(tzName),
+				Config: testAccNsxtPolicySegmentDeps(tzName, false),
 			},
 		},
 	})
@@ -176,23 +176,34 @@ func TestAccResourceNsxtPolicySegment_updateAdvConfig(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicySegment_noTransportZone(t *testing.T) {
+	testAccResourceNsxtPolicySegmentNoTransportZone(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyGlobalManager(t)
+	})
+}
+
+func TestAccResourceNsxtPolicySegment_noTransportZone_multitenancy(t *testing.T) {
+	testAccResourceNsxtPolicySegmentNoTransportZone(t, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+	})
+}
+
+func testAccResourceNsxtPolicySegmentNoTransportZone(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_segment.test"
 	cidr := "4003::1/64"
 	updatedCidr := "4004::1/64"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccOnlyGlobalManager(t)
-			testAccPreCheck(t)
-		},
+		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicySegmentCheckDestroy(state, name)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicySegmentNoTransportZoneTemplate(name, cidr),
+				Config: testAccNsxtPolicySegmentNoTransportZoneTemplate(name, cidr, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySegmentExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -207,7 +218,7 @@ func TestAccResourceNsxtPolicySegment_noTransportZone(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicySegmentNoTransportZoneTemplate(name, updatedCidr),
+				Config: testAccNsxtPolicySegmentNoTransportZoneTemplate(name, updatedCidr, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySegmentExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -440,10 +451,15 @@ func testAccNsxtPolicySegmentCheckDestroy(state *terraform.State, displayName st
 	return testAccNsxtPolicyResourceCheckDestroy(context, state, displayName, "nsxt_policy_segment", resourceNsxtPolicySegmentExists(context, "", false))
 }
 
-func testAccNsxtPolicySegmentDeps(tzName string) string {
+func testAccNsxtPolicySegmentDeps(tzName string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return testAccNSXPolicyTransportZoneReadTemplate(tzName, false, true) + fmt.Sprintf(`
 
 resource "nsxt_policy_tier1_gateway" "tier1ForSegments" {
+%s
   display_name              = "%s"
   description               = "Acceptance Test"
   default_rule_logging      = "true"
@@ -456,6 +472,7 @@ resource "nsxt_policy_tier1_gateway" "tier1ForSegments" {
 }
 
 resource "nsxt_policy_tier1_gateway" "anotherTier1ForSegments" {
+%s
   display_name              = "%s"
   description               = "Another Tier1"
   default_rule_logging      = "true"
@@ -465,11 +482,11 @@ resource "nsxt_policy_tier1_gateway" "anotherTier1ForSegments" {
   failover_mode             = "NON_PREEMPTIVE"
   pool_allocation           = "ROUTING"
   route_advertisement_types = ["TIER1_STATIC_ROUTES", "TIER1_CONNECTED"]
-}`, testPolicySegmentHelper1Name, testPolicySegmentHelper2Name)
+}`, context, testPolicySegmentHelper1Name, context, testPolicySegmentHelper2Name)
 }
 
 func testAccNsxtPolicySegmentImportTemplate(tzName string, name string) string {
-	return testAccNsxtPolicySegmentDeps(tzName) + fmt.Sprintf(`
+	return testAccNsxtPolicySegmentDeps(tzName, false) + fmt.Sprintf(`
 resource "nsxt_policy_segment" "test" {
   display_name        = "%s"
   description         = "Acceptance Test"
@@ -484,7 +501,7 @@ resource "nsxt_policy_segment" "test" {
 }
 
 func testAccNsxtPolicySegmentBasicTemplate(tzName string, name string) string {
-	return testAccNsxtPolicySegmentDeps(tzName) + fmt.Sprintf(`
+	return testAccNsxtPolicySegmentDeps(tzName, false) + fmt.Sprintf(`
 
 resource "nsxt_policy_segment" "test" {
   display_name        = "%s"
@@ -507,7 +524,7 @@ resource "nsxt_policy_segment" "test" {
 }
 
 func testAccNsxtPolicySegmentBasicUpdateTemplate(tzName string, name string) string {
-	return testAccNsxtPolicySegmentDeps(tzName) + fmt.Sprintf(`
+	return testAccNsxtPolicySegmentDeps(tzName, false) + fmt.Sprintf(`
 
 resource "nsxt_policy_segment" "test" {
   display_name        = "%s"
@@ -534,7 +551,7 @@ resource "nsxt_policy_segment" "test" {
 }
 
 func testAccNsxtPolicySegmentUpdateConnectivityTemplate(tzName string, name string) string {
-	return testAccNsxtPolicySegmentDeps(tzName) + fmt.Sprintf(`
+	return testAccNsxtPolicySegmentDeps(tzName, false) + fmt.Sprintf(`
 
 resource "nsxt_policy_segment" "test" {
   display_name        = "%s"
@@ -635,7 +652,7 @@ resource "nsxt_policy_segment" "test" {
 }
 
 func testAccNsxtPolicySegmentWithBridgeTemplate(tzName string, bridgeTzName string, name string, vlan string) string {
-	return testAccNsxtPolicySegmentDeps(tzName) + fmt.Sprintf(`
+	return testAccNsxtPolicySegmentDeps(tzName, false) + fmt.Sprintf(`
 data "nsxt_policy_bridge_profile" "test" {
   display_name = "%s"
 }
@@ -659,7 +676,7 @@ resource "nsxt_policy_segment" "test" {
 }
 
 func testAccNsxtPolicySegmentWithBridgeRemoveAll(tzName string, name string) string {
-	return testAccNsxtPolicySegmentDeps(tzName) + fmt.Sprintf(`
+	return testAccNsxtPolicySegmentDeps(tzName, false) + fmt.Sprintf(`
 resource "nsxt_policy_segment" "test" {
   display_name        = "%s"
   transport_zone_path = data.nsxt_policy_transport_zone.test.path
@@ -668,7 +685,7 @@ resource "nsxt_policy_segment" "test" {
 }
 
 func testAccNsxtPolicySegmentBasicAdvConfigTemplate(tzName string, name string) string {
-	return testAccNsxtPolicySegmentDeps(tzName) + fmt.Sprintf(`
+	return testAccNsxtPolicySegmentDeps(tzName, false) + fmt.Sprintf(`
 
 resource "nsxt_policy_segment" "test" {
   display_name = "%s"
@@ -698,7 +715,7 @@ resource "nsxt_policy_segment" "test" {
 }
 
 func testAccNsxtPolicySegmentBasicAdvConfigUpdateTemplate(tzName string, name string) string {
-	return testAccNsxtPolicySegmentDeps(tzName) + fmt.Sprintf(`
+	return testAccNsxtPolicySegmentDeps(tzName, false) + fmt.Sprintf(`
 
 resource "nsxt_policy_segment" "test" {
   display_name = "%s"
@@ -742,7 +759,7 @@ data "nsxt_policy_edge_cluster" "EC" {
 }
 
 func testAccNsxtPolicySegmentWithDhcpTemplate(tzName string, name string, dnsServerV4 string, dnsServerV6 string, lease string, preferred string, replicationMode string) string {
-	return testAccNsxtPolicySegmentDeps(tzName) +
+	return testAccNsxtPolicySegmentDeps(tzName, false) +
 		testAccNsxtPolicyEdgeCluster(getEdgeClusterName()) + fmt.Sprintf(`
 
 resource "nsxt_policy_dhcp_server" "test" {
@@ -801,15 +818,21 @@ resource "nsxt_policy_segment" "test" {
 `, name, replicationMode, lease, dnsServerV4, lease, preferred, dnsServerV6)
 }
 
-func testAccNsxtPolicySegmentNoTransportZoneTemplate(name string, cidr string) string {
+func testAccNsxtPolicySegmentNoTransportZoneTemplate(name string, cidr string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 
 resource "nsxt_policy_tier1_gateway" "tier1ForSegments" {
+%s
   display_name              = "terraform-segment-test"
   failover_mode             = "NON_PREEMPTIVE"
 }
 
 resource "nsxt_policy_segment" "test" {
+%s
   display_name        = "%s"
   description         = "Acceptance Test"
   domain_name         = "tftest.org"
@@ -820,5 +843,5 @@ resource "nsxt_policy_segment" "test" {
      cidr = "%s"
   }
 }
-`, name, cidr)
+`, context, context, name, cidr)
 }

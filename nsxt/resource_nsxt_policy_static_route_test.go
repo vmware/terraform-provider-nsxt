@@ -71,20 +71,34 @@ func TestAccResourceNsxtPolicyStaticRoute_basicT0(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyStaticRoute_basicT1(t *testing.T) {
+	testAccResourceNsxtPolicyStaticRouteBasicT1(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyLocalManager(t)
+	})
+}
+
+func TestAccResourceNsxtPolicyStaticRoute_basicT1_multitenancy(t *testing.T) {
+	testAccResourceNsxtPolicyStaticRouteBasicT1(t, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+	})
+}
+
+func testAccResourceNsxtPolicyStaticRouteBasicT1(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestResourceName()
 	updateName := getAccTestResourceName()
 	network := "14.1.1.0/24"
 	updateNetwork := "15.1.1.0/24"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
+		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyStaticRouteCheckDestroy(state, updateName)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyStaticRouteTier1CreateTemplate(name, network),
+				Config: testAccNsxtPolicyStaticRouteTier1CreateTemplate(name, network, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyStaticRouteExists(testAccResourcePolicyStaticRouteName),
 					resource.TestCheckResourceAttr(testAccResourcePolicyStaticRouteName, "display_name", name),
@@ -97,7 +111,7 @@ func TestAccResourceNsxtPolicyStaticRoute_basicT1(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyStaticRouteTier1CreateTemplate(updateName, updateNetwork),
+				Config: testAccNsxtPolicyStaticRouteTier1CreateTemplate(updateName, updateNetwork, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyStaticRouteExists(testAccResourcePolicyStaticRouteName),
 					resource.TestCheckResourceAttr(testAccResourcePolicyStaticRouteName, "display_name", updateName),
@@ -110,7 +124,7 @@ func TestAccResourceNsxtPolicyStaticRoute_basicT1(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyStaticRouteMultipleHopsTier1CreateTemplate(updateName, updateNetwork),
+				Config: testAccNsxtPolicyStaticRouteMultipleHopsTier1CreateTemplate(updateName, updateNetwork, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyStaticRouteExists(testAccResourcePolicyStaticRouteName),
 					resource.TestCheckResourceAttr(testAccResourcePolicyStaticRouteName, "display_name", updateName),
@@ -162,7 +176,7 @@ func TestAccResourceNsxtPolicyStaticRoute_basicT1Import(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyStaticRouteTier1CreateTemplate(name, network),
+				Config: testAccNsxtPolicyStaticRouteTier1CreateTemplate(name, network, false),
 			},
 			{
 				ResourceName:      testAccResourcePolicyStaticRouteName,
@@ -299,15 +313,21 @@ resource "nsxt_policy_static_route" "test" {
 `, name, network)
 }
 
-func testAccNsxtPolicyStaticRouteTier1CreateTemplate(name string, network string) string {
+func testAccNsxtPolicyStaticRouteTier1CreateTemplate(name string, network string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_tier1_gateway" "t1test" {
+%s
   display_name              = "%s"
   description               = "Acceptance Test"
 
 }
 
 resource "nsxt_policy_static_route" "test" {
+%s
   display_name        = "%s"
   description         = "Acceptance Test"
   gateway_path        = "${nsxt_policy_tier1_gateway.t1test.path}"
@@ -325,18 +345,25 @@ resource "nsxt_policy_static_route" "test" {
     tag   = "tag2"
   }
 }
-`, testAccResourcePolicyStaticRouteGatewayName, name, network)
+`, context, testAccResourcePolicyStaticRouteGatewayName, context, name, network)
 }
 
-func testAccNsxtPolicyStaticRouteMultipleHopsTier1CreateTemplate(name string, network string) string {
+func testAccNsxtPolicyStaticRouteMultipleHopsTier1CreateTemplate(name string, network string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
+
 	return fmt.Sprintf(`
 resource "nsxt_policy_tier1_gateway" "t1test" {
+%s
   display_name              = "%s"
   description               = "Acceptance Test"
 
 }
 
 resource "nsxt_policy_static_route" "test" {
+%s
   display_name        = "%s"
   description         = "Acceptance Test"
   gateway_path        = "${nsxt_policy_tier1_gateway.t1test.path}"
@@ -360,5 +387,5 @@ resource "nsxt_policy_static_route" "test" {
     tag   = "tag2"
   }
 }
-`, testAccResourcePolicyStaticRouteGatewayName, name, network)
+`, context, testAccResourcePolicyStaticRouteGatewayName, context, name, network)
 }

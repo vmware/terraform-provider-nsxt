@@ -9,18 +9,30 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
-	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
 )
 
 func TestAccDataSourceNsxtPolicyIpv6NdraProfile_basic(t *testing.T) {
+	testAccDataSourceNsxtPolicyIpv6NdraProfileBasic(t, false, func() {
+		testAccPreCheck(t)
+	})
+}
+
+func TestAccDataSourceNsxtPolicyIpv6NdraProfile_multitenancy(t *testing.T) {
+	testAccDataSourceNsxtPolicyIpv6NdraProfileBasic(t, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+	})
+}
+
+func testAccDataSourceNsxtPolicyIpv6NdraProfileBasic(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestDataSourceName()
 	testResourceName := "data.nsxt_policy_ipv6_ndra_profile.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccDataSourceNsxtPolicyIpv6NdraProfileDeleteByName(name)
@@ -32,7 +44,7 @@ func TestAccDataSourceNsxtPolicyIpv6NdraProfile_basic(t *testing.T) {
 						panic(err)
 					}
 				},
-				Config: testAccNsxtPolicyIpv6NdraProfileReadTemplate(name),
+				Config: testAccNsxtPolicyIpv6NdraProfileReadTemplate(name, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", name),
@@ -63,17 +75,8 @@ func testAccDataSourceNsxtPolicyIpv6NdraProfileCreate(name string) error {
 	// Generate a random ID for the resource
 	id := newUUID()
 
-	if testAccIsGlobalManager() {
-		gmObj, convErr := convertModelBindingType(obj, model.Ipv6NdraProfileBindingType(), gm_model.Ipv6NdraProfileBindingType())
-		if convErr != nil {
-			return convErr
-		}
-		client := gm_infra.NewIpv6NdraProfilesClient(connector)
-		err = client.Patch(id, gmObj.(gm_model.Ipv6NdraProfile), nil)
-	} else {
-		client := infra.NewIpv6NdraProfilesClient(connector)
-		err = client.Patch(id, obj, nil)
-	}
+	client := infra.NewIpv6NdraProfilesClient(testAccGetSessionContext(), connector)
+	err = client.Patch(id, obj, nil)
 	if err != nil {
 		return handleCreateError("Ipv6NdraProfile", id, err)
 	}
@@ -86,40 +89,33 @@ func testAccDataSourceNsxtPolicyIpv6NdraProfileDeleteByName(name string) error {
 		return fmt.Errorf("Error during test client initialization: %v", err)
 	}
 	// Find the object by name and delete it
-	if testAccIsGlobalManager() {
-		objID, err := testGetObjIDByName(name, "Ipv6NdraProfile")
-		if err == nil {
-			client := gm_infra.NewIpv6NdraProfilesClient(connector)
-			err := client.Delete(objID, nil)
+	client := infra.NewIpv6NdraProfilesClient(testAccGetSessionContext(), connector)
+
+	// Find the object by name
+	objList, err := client.List(nil, nil, nil, nil, nil, nil)
+	if err != nil {
+		return handleListError("Ipv6NdraProfile", err)
+	}
+	for _, objInList := range objList.Results {
+		if *objInList.DisplayName == name {
+			err := client.Delete(*objInList.Id, nil)
 			if err != nil {
-				return handleDeleteError("Ipv6NdraProfile", objID, err)
+				return fmt.Errorf("Error during Ipv6NdraProfile deletion: %v", err)
 			}
 			return nil
-		}
-	} else {
-		client := infra.NewIpv6NdraProfilesClient(connector)
-
-		// Find the object by name
-		objList, err := client.List(nil, nil, nil, nil, nil, nil)
-		if err != nil {
-			return handleListError("Ipv6NdraProfile", err)
-		}
-		for _, objInList := range objList.Results {
-			if *objInList.DisplayName == name {
-				err := client.Delete(*objInList.Id, nil)
-				if err != nil {
-					return fmt.Errorf("Error during Ipv6NdraProfile deletion: %v", err)
-				}
-				return nil
-			}
 		}
 	}
 	return fmt.Errorf("Error while deleting Ipv6NdraProfile '%s': resource not found", name)
 }
 
-func testAccNsxtPolicyIpv6NdraProfileReadTemplate(name string) string {
+func testAccNsxtPolicyIpv6NdraProfileReadTemplate(name string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 data "nsxt_policy_ipv6_ndra_profile" "test" {
+%s
   display_name = "%s"
-}`, name)
+}`, context, name)
 }

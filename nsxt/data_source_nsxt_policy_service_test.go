@@ -91,6 +91,29 @@ func TestAccDataSourceNsxtPolicyService_spaces(t *testing.T) {
 	})
 }
 
+func TestAccDataSourceNsxtPolicyService_multitenancy(t *testing.T) {
+	serviceName := getAccTestResourceName()
+	testResourceName := "data.nsxt_policy_service.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyMultitenancy(t)
+		},
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyServiceMultitenancyTemplate(serviceName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(testResourceName, "display_name", serviceName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+				),
+			},
+		},
+	})
+}
+
 func testAccNsxtPolicyServiceReadTemplate(name string) string {
 	return fmt.Sprintf(`
 data "nsxt_policy_service" "test" {
@@ -103,4 +126,32 @@ func testAccNsxtPolicyServiceReadIDTemplate(id string) string {
 data "nsxt_policy_service" "test" {
   id = "%s"
 }`, id)
+}
+
+func testAccNsxtPolicyServiceMultitenancyTemplate(name string) string {
+	context := testAccNsxtPolicyMultitenancyContext()
+	return fmt.Sprintf(`
+resource "nsxt_policy_service" "test" {
+%s
+  display_name = "%s"
+  description  = "Acceptance Test"
+
+  icmp_entry {
+	display_name = "%s"
+	description  = "Entry"
+	icmp_type    = "3"
+	icmp_code    = "1"
+	protocol     = "ICMPv4"
+  }
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+}
+
+data "nsxt_policy_service" "test" {
+%s
+  display_name = nsxt_policy_service.test.display_name
+}`, context, name, name, context)
 }

@@ -6,8 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	gm_domains "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/domains"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/domains"
+	"github.com/vmware/terraform-provider-nsxt/api/infra/domains"
 )
 
 func TestAccResourceNsxtPolicyGroup_basicImport(t *testing.T) {
@@ -34,18 +33,31 @@ func TestAccResourceNsxtPolicyGroup_basicImport(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyGroup_addressCriteria(t *testing.T) {
+	testAccResourceNsxtPolicyGroupAddressCriteria(t, false, func() {
+		testAccPreCheck(t)
+	})
+}
+
+func TestAccResourceNsxtPolicyGroup_addressCriteria_multitenancy(t *testing.T) {
+	testAccResourceNsxtPolicyGroupAddressCriteria(t, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+	})
+}
+
+func testAccResourceNsxtPolicyGroupAddressCriteria(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_group.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyGroupCheckDestroy(state, name, defaultDomain)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyGroupAddressCreateTemplate(name),
+				Config: testAccNsxtPolicyGroupAddressCreateTemplate(name, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -63,7 +75,7 @@ func TestAccResourceNsxtPolicyGroup_addressCriteria(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyGroupAddressUpdateTemplate(name),
+				Config: testAccNsxtPolicyGroupAddressUpdateTemplate(name, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -638,22 +650,8 @@ func testAccNsxtPolicyGroupExists(resourceName string, domainName string) resour
 			return fmt.Errorf("Policy Group resource ID not set in resources")
 		}
 
-		var err error
-		if isPolicyGlobalManager(testAccProvider.Meta()) {
-			domainID := domainName
-			if domainName != "default" {
-				// get the non default domain id
-				domainID, err = testGetObjIDByName(domainName, "Domain")
-				if err != nil {
-					return fmt.Errorf("Error while retrieving policy domain %s. Error: %v", domainName, err)
-				}
-			}
-			nsxClient := gm_domains.NewGroupsClient(connector)
-			_, err = nsxClient.Get(domainID, resourceID)
-		} else {
-			nsxClient := domains.NewGroupsClient(connector)
-			_, err = nsxClient.Get(domainName, resourceID)
-		}
+		nsxClient := domains.NewGroupsClient(testAccGetSessionContext(), connector)
+		_, err := nsxClient.Get(domainName, resourceID)
 		if err != nil {
 			return fmt.Errorf("Error while retrieving policy Group ID %s domain %s. Error: %v", resourceID, domainName, err)
 		}
@@ -702,9 +700,14 @@ resource "nsxt_policy_group" "test" {
 `, name)
 }
 
-func testAccNsxtPolicyGroupAddressCreateTemplate(name string) string {
+func testAccNsxtPolicyGroupAddressCreateTemplate(name string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_group" "test" {
+%s
   display_name = "%s"
   description  = "Acceptance Test"
 
@@ -734,12 +737,17 @@ resource "nsxt_policy_group" "test" {
     tag   = "tag2"
   }
 }
-`, name)
+`, context, name)
 }
 
-func testAccNsxtPolicyGroupAddressUpdateTemplate(name string) string {
+func testAccNsxtPolicyGroupAddressUpdateTemplate(name string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_group" "test" {
+%s
   display_name = "%s"
   description  = "Acceptance Test"
 
@@ -749,7 +757,7 @@ resource "nsxt_policy_group" "test" {
     }
   }
 }
-`, name)
+`, context, name)
 }
 
 func testAccNsxtGlobalPolicyGroupIPAddressCreateTemplate(name string, siteName string) string {

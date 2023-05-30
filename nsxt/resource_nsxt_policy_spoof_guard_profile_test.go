@@ -24,17 +24,30 @@ var accTestPolicySpoofGuardProfileUpdateAttributes = map[string]string{
 }
 
 func TestAccResourceNsxtPolicySpoofGuardProfile_basic(t *testing.T) {
+	testAccResourceNsxtPolicySpoofGuardProfileBasic(t, false, func() {
+		testAccPreCheck(t)
+	})
+}
+
+func TestAccResourceNsxtPolicySpoofGuardProfile_multitenancy(t *testing.T) {
+	testAccResourceNsxtPolicySpoofGuardProfileBasic(t, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+	})
+}
+
+func testAccResourceNsxtPolicySpoofGuardProfileBasic(t *testing.T, withContext bool, preCheck func()) {
 	testResourceName := "nsxt_policy_spoof_guard_profile.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicySpoofGuardProfileCheckDestroy(state, accTestPolicySpoofGuardProfileUpdateAttributes["display_name"])
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicySpoofGuardProfileTemplate(true),
+				Config: testAccNsxtPolicySpoofGuardProfileTemplate(true, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySpoofGuardProfileExists(accTestPolicySpoofGuardProfileCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicySpoofGuardProfileCreateAttributes["display_name"]),
@@ -48,7 +61,7 @@ func TestAccResourceNsxtPolicySpoofGuardProfile_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicySpoofGuardProfileTemplate(false),
+				Config: testAccNsxtPolicySpoofGuardProfileTemplate(false, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySpoofGuardProfileExists(accTestPolicySpoofGuardProfileUpdateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicySpoofGuardProfileUpdateAttributes["display_name"]),
@@ -62,7 +75,7 @@ func TestAccResourceNsxtPolicySpoofGuardProfile_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicySpoofGuardProfileMinimalistic(),
+				Config: testAccNsxtPolicySpoofGuardProfileMinimalistic(withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySpoofGuardProfileExists(accTestPolicySpoofGuardProfileCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
@@ -88,7 +101,7 @@ func TestAccResourceNsxtPolicySpoofGuardProfile_importBasic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicySpoofGuardProfileMinimalistic(),
+				Config: testAccNsxtPolicySpoofGuardProfileMinimalistic(false),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -147,15 +160,20 @@ func testAccNsxtPolicySpoofGuardProfileCheckDestroy(state *terraform.State, disp
 	return nil
 }
 
-func testAccNsxtPolicySpoofGuardProfileTemplate(createFlow bool) string {
+func testAccNsxtPolicySpoofGuardProfileTemplate(createFlow, withContext bool) string {
 	var attrMap map[string]string
 	if createFlow {
 		attrMap = accTestPolicySpoofGuardProfileCreateAttributes
 	} else {
 		attrMap = accTestPolicySpoofGuardProfileUpdateAttributes
 	}
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_spoof_guard_profile" "test" {
+%s
   display_name = "%s"
   description  = "%s"
 
@@ -165,13 +183,18 @@ resource "nsxt_policy_spoof_guard_profile" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, attrMap["display_name"], attrMap["description"], attrMap["address_binding_allowlist"])
+}`, context, attrMap["display_name"], attrMap["description"], attrMap["address_binding_allowlist"])
 }
 
-func testAccNsxtPolicySpoofGuardProfileMinimalistic() string {
+func testAccNsxtPolicySpoofGuardProfileMinimalistic(withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_spoof_guard_profile" "test" {
+%s
   display_name = "%s"
 
-}`, accTestPolicySpoofGuardProfileUpdateAttributes["display_name"])
+}`, context, accTestPolicySpoofGuardProfileUpdateAttributes["display_name"])
 }

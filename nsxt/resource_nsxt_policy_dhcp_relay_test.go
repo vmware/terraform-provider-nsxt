@@ -23,19 +23,32 @@ var accTestPolicyDhcpRelayConfigUpdateAttributes = map[string]string{
 	"server_addresses": "[\"4.1.1.23\"]",
 }
 
-// NOTE: Realization is not tested here. Relay config is only realized when segment uses it.
 func TestAccResourceNsxtPolicyDhcpRelayConfig_basic(t *testing.T) {
+	testAccResourceNsxtPolicyDhcpRelayConfigBasic(t, false, func() {
+		testAccPreCheck(t)
+	})
+}
+
+func TestAccResourceNsxtPolicyDhcpRelayConfig_multitenancy(t *testing.T) {
+	testAccResourceNsxtPolicyDhcpRelayConfigBasic(t, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+	})
+}
+
+// NOTE: Realization is not tested here. Relay config is only realized when segment uses it.
+func testAccResourceNsxtPolicyDhcpRelayConfigBasic(t *testing.T, withContext bool, preCheck func()) {
 	testResourceName := "nsxt_policy_dhcp_relay.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyDhcpRelayConfigCheckDestroy(state, accTestPolicyDhcpRelayConfigUpdateAttributes["display_name"])
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyDhcpRelayConfigTemplate(true),
+				Config: testAccNsxtPolicyDhcpRelayConfigTemplate(true, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyDhcpRelayConfigExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyDhcpRelayConfigCreateAttributes["display_name"]),
@@ -49,7 +62,7 @@ func TestAccResourceNsxtPolicyDhcpRelayConfig_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyDhcpRelayConfigTemplate(false),
+				Config: testAccNsxtPolicyDhcpRelayConfigTemplate(false, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyDhcpRelayConfigExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyDhcpRelayConfigUpdateAttributes["display_name"]),
@@ -63,7 +76,7 @@ func TestAccResourceNsxtPolicyDhcpRelayConfig_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyDhcpRelayConfigMinimalistic(),
+				Config: testAccNsxtPolicyDhcpRelayConfigMinimalistic(withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyDhcpRelayConfigExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
@@ -89,7 +102,7 @@ func TestAccResourceNsxtPolicyDhcpRelayConfig_importBasic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyDhcpRelayConfigMinimalistic(),
+				Config: testAccNsxtPolicyDhcpRelayConfigMinimalistic(false),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -148,15 +161,20 @@ func testAccNsxtPolicyDhcpRelayConfigCheckDestroy(state *terraform.State, displa
 	return nil
 }
 
-func testAccNsxtPolicyDhcpRelayConfigTemplate(createFlow bool) string {
+func testAccNsxtPolicyDhcpRelayConfigTemplate(createFlow bool, withContext bool) string {
 	var attrMap map[string]string
 	if createFlow {
 		attrMap = accTestPolicyDhcpRelayConfigCreateAttributes
 	} else {
 		attrMap = accTestPolicyDhcpRelayConfigUpdateAttributes
 	}
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_dhcp_relay" "test" {
+%s
   display_name      = "%s"
   description      = "%s"
   server_addresses = %s
@@ -166,13 +184,18 @@ resource "nsxt_policy_dhcp_relay" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, attrMap["display_name"], attrMap["description"], attrMap["server_addresses"])
+}`, context, attrMap["display_name"], attrMap["description"], attrMap["server_addresses"])
 }
 
-func testAccNsxtPolicyDhcpRelayConfigMinimalistic() string {
+func testAccNsxtPolicyDhcpRelayConfigMinimalistic(withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_dhcp_relay" "test" {
+%s
   display_name     = "%s"
   server_addresses = %s
-}`, accTestPolicyDhcpRelayConfigUpdateAttributes["display_name"], accTestPolicyDhcpRelayConfigUpdateAttributes["server_addresses"])
+}`, context, accTestPolicyDhcpRelayConfigUpdateAttributes["display_name"], accTestPolicyDhcpRelayConfigUpdateAttributes["server_addresses"])
 }

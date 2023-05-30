@@ -179,6 +179,10 @@ func testAccIsGlobalManager() bool {
 	return os.Getenv("NSXT_GLOBAL_MANAGER") == "true" || os.Getenv("NSXT_GLOBAL_MANAGER") == "1"
 }
 
+func testAccIsMultitenancy() bool {
+	return os.Getenv("NSXT_PROJECT_ID") != ""
+}
+
 func testAccGetSessionContext() tf_api.SessionContext {
 	return tf_api.SessionContext{ProjectID: os.Getenv("NSXT_PROJECT_ID"), ClientType: testAccIsGlobalManager2()}
 }
@@ -200,8 +204,15 @@ func testAccOnlyGlobalManager(t *testing.T) {
 }
 
 func testAccOnlyLocalManager(t *testing.T) {
-	if testAccIsGlobalManager() {
+	if testAccIsGlobalManager() || testAccIsMultitenancy() {
 		t.Skipf("This test requires a local manager environment")
+	}
+}
+
+func testAccOnlyMultitenancy(t *testing.T) {
+	testAccNSXVersion(t, "4.1.0")
+	if !testAccIsMultitenancy() {
+		t.Skipf("This test requires a multitenancy environment")
 	}
 }
 
@@ -444,14 +455,14 @@ func testAccAdjustPolicyInfraConfig(config string) string {
 }
 
 func testAccNsxtPolicyTier0WithEdgeClusterTemplate(edgeClusterName string, standby bool) string {
-	return testAccNsxtPolicyGatewayWithEdgeClusterTemplate(edgeClusterName, true, standby)
+	return testAccNsxtPolicyGatewayWithEdgeClusterTemplate(edgeClusterName, true, standby, false)
 }
 
-func testAccNsxtPolicyTier1WithEdgeClusterTemplate(edgeClusterName string, standby bool) string {
-	return testAccNsxtPolicyGatewayWithEdgeClusterTemplate(edgeClusterName, false, standby)
+func testAccNsxtPolicyTier1WithEdgeClusterTemplate(edgeClusterName string, standby, withContext bool) string {
+	return testAccNsxtPolicyGatewayWithEdgeClusterTemplate(edgeClusterName, false, standby, withContext)
 }
 
-func testAccNsxtPolicyGatewayWithEdgeClusterTemplate(edgeClusterName string, tier0 bool, standby bool) string {
+func testAccNsxtPolicyGatewayWithEdgeClusterTemplate(edgeClusterName string, tier0, standby, withContext bool) string {
 	var tier string
 	if tier0 {
 		tier = "0"
@@ -473,13 +484,18 @@ resource "nsxt_policy_tier%s_gateway" "test" {
   %s
 }`, tier, tier, edgeClusterName, haMode)
 	}
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_tier%s_gateway" "test" {
+%s
   display_name      = "terraform-t%s-gw"
   description       = "Acceptance Test"
   edge_cluster_path = data.nsxt_policy_edge_cluster.%s.path
   %s
-}`, tier, tier, edgeClusterName, haMode)
+}`, tier, context, tier, edgeClusterName, haMode)
 }
 
 var testAccNsxtPolicyVPNGatewayHelperName = getAccTestResourceName()
@@ -566,4 +582,16 @@ func testAccNsxtPolicyResourceCheckDestroy(context tf_api.SessionContext, state 
 		}
 	}
 	return nil
+}
+
+func testAccNsxtPolicyMultitenancyContext() string {
+	projectID := os.Getenv("NSXT_PROJECT_ID")
+	if projectID != "" {
+		return fmt.Sprintf(`
+  context {
+    project_id = "%s"
+  }
+`, projectID)
+	}
+	return ""
 }

@@ -49,6 +49,19 @@ func TestAccResourceNsxtPolicyNATRule_minimalT0(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyNATRule_basicT1(t *testing.T) {
+	testAccResourceNsxtPolicyNATRuleBasicT1(t, false, func() {
+		testAccPreCheck(t)
+	})
+}
+
+func TestAccResourceNsxtPolicyNATRule_basicT1_multitenancy(t *testing.T) {
+	testAccResourceNsxtPolicyNATRuleBasicT1(t, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+	})
+}
+
+func testAccResourceNsxtPolicyNATRuleBasicT1(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestResourceName()
 	updateName := getAccTestResourceName()
 	snet := "22.1.1.2"
@@ -57,14 +70,14 @@ func TestAccResourceNsxtPolicyNATRule_basicT1(t *testing.T) {
 	action := model.PolicyNatRule_ACTION_DNAT
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyNATRuleCheckDestroy(state, name, false)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyNATRuleTier1CreateTemplate(name, action, testAccResourcePolicyNATRuleSourceNet, testAccResourcePolicyNATRuleDestNet, testAccResourcePolicyNATRuleTransNet),
+				Config: testAccNsxtPolicyNATRuleTier1CreateTemplate(name, action, testAccResourcePolicyNATRuleSourceNet, testAccResourcePolicyNATRuleDestNet, testAccResourcePolicyNATRuleTransNet, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyNATRuleExists(testAccResourcePolicyNATRuleName, false),
 					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "display_name", name),
@@ -84,7 +97,7 @@ func TestAccResourceNsxtPolicyNATRule_basicT1(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyNATRuleTier1CreateTemplate(updateName, action, snet, dnet, tnet),
+				Config: testAccNsxtPolicyNATRuleTier1CreateTemplate(updateName, action, snet, dnet, tnet, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyNATRuleExists(testAccResourcePolicyNATRuleName, false),
 					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "display_name", updateName),
@@ -104,7 +117,7 @@ func TestAccResourceNsxtPolicyNATRule_basicT1(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyNATRuleTier1UpdateMultipleSourceNetworksTemplate(name, action, testAccResourcePolicyNATRuleSourceNet, snet, dnet, tnet),
+				Config: testAccNsxtPolicyNATRuleTier1UpdateMultipleSourceNetworksTemplate(name, action, testAccResourcePolicyNATRuleSourceNet, snet, dnet, tnet, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyNATRuleExists(testAccResourcePolicyNATRuleName, false),
 					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "display_name", name),
@@ -196,7 +209,7 @@ func TestAccResourceNsxtPolicyNATRule_basicT1Import(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyNATRuleTier1CreateTemplate(name, action, testAccResourcePolicyNATRuleSourceNet, testAccResourcePolicyNATRuleDestNet, testAccResourcePolicyNATRuleTransNet),
+				Config: testAccNsxtPolicyNATRuleTier1CreateTemplate(name, action, testAccResourcePolicyNATRuleSourceNet, testAccResourcePolicyNATRuleDestNet, testAccResourcePolicyNATRuleTransNet, false),
 			},
 			{
 				ResourceName:      testAccResourcePolicyNATRuleName,
@@ -225,7 +238,7 @@ func TestAccResourceNsxtPolicyNATRule_nat64T1(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyNATRuleTier1CreateTemplate(name, action, snet, dnet, tnet),
+				Config: testAccNsxtPolicyNATRuleTier1CreateTemplate(name, action, snet, dnet, tnet, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyNATRuleExists(testAccResourcePolicyNATRuleName, true),
 					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "display_name", name),
@@ -245,7 +258,7 @@ func TestAccResourceNsxtPolicyNATRule_nat64T1(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyNATRuleTier1CreateTemplate(updateName, action, snet, dnet, tnet1),
+				Config: testAccNsxtPolicyNATRuleTier1CreateTemplate(updateName, action, snet, dnet, tnet1, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyNATRuleExists(testAccResourcePolicyNATRuleName, true),
 					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "display_name", updateName),
@@ -405,14 +418,19 @@ resource "nsxt_policy_nat_rule" "test" {
 `, name, model.PolicyNatRule_ACTION_REFLEXIVE, sourceNet, translatedNet)
 }
 
-func testAccNsxtPolicyNATRuleTier1CreateTemplate(name string, action string, sourceNet string, destNet string, translatedNet string) string {
+func testAccNsxtPolicyNATRuleTier1CreateTemplate(name string, action string, sourceNet string, destNet string, translatedNet string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return testAccNsxtPolicyEdgeClusterReadTemplate(getEdgeClusterName()) +
-		testAccNsxtPolicyTier1WithEdgeClusterTemplate("test", false) + fmt.Sprintf(`
+		testAccNsxtPolicyTier1WithEdgeClusterTemplate("test", false, withContext) + fmt.Sprintf(`
 data "nsxt_policy_service" "test" {
   display_name = "DNS-UDP"
 }
 
 resource "nsxt_policy_nat_rule" "test" {
+%s
   display_name         = "%s"
   description          = "Acceptance Test"
   gateway_path         = nsxt_policy_tier1_gateway.test.path
@@ -434,13 +452,18 @@ resource "nsxt_policy_nat_rule" "test" {
     tag   = "tag2"
   }
 }
-`, name, action, sourceNet, destNet, translatedNet, model.PolicyNatRule_FIREWALL_MATCH_BYPASS)
+`, context, name, action, sourceNet, destNet, translatedNet, model.PolicyNatRule_FIREWALL_MATCH_BYPASS)
 }
 
-func testAccNsxtPolicyNATRuleTier1UpdateMultipleSourceNetworksTemplate(name string, action string, sourceNet1 string, sourceNet2 string, destNet string, translatedNet string) string {
+func testAccNsxtPolicyNATRuleTier1UpdateMultipleSourceNetworksTemplate(name string, action string, sourceNet1 string, sourceNet2 string, destNet string, translatedNet string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return testAccNsxtPolicyEdgeClusterReadTemplate(getEdgeClusterName()) +
-		testAccNsxtPolicyTier1WithEdgeClusterTemplate("test", false) + fmt.Sprintf(`
+		testAccNsxtPolicyTier1WithEdgeClusterTemplate("test", false, withContext) + fmt.Sprintf(`
 resource "nsxt_policy_nat_rule" "test" {
+%s
   display_name         = "%s"
   description          = "Acceptance Test"
   gateway_path         = nsxt_policy_tier1_gateway.test.path
@@ -461,7 +484,7 @@ resource "nsxt_policy_nat_rule" "test" {
     tag   = "tag2"
   }
 }
-`, name, action, sourceNet1, sourceNet2, destNet, translatedNet, model.PolicyNatRule_FIREWALL_MATCH_MATCH_EXTERNAL_ADDRESS)
+`, context, name, action, sourceNet1, sourceNet2, destNet, translatedNet, model.PolicyNatRule_FIREWALL_MATCH_MATCH_EXTERNAL_ADDRESS)
 }
 
 func testAccNsxtPolicyNATRuleTier0CreateTemplate(name string, action string, sourceNet string, translatedNet string) string {
@@ -528,7 +551,7 @@ resource "nsxt_policy_nat_rule" "test" {
 
 func testAccNsxPolicyNatRuleNoTranslatedNetworkTemplate(name string, action string, sourceNet string, destNet string) string {
 	return testAccNsxtPolicyEdgeClusterReadTemplate(getEdgeClusterName()) +
-		testAccNsxtPolicyTier1WithEdgeClusterTemplate("test", false) + fmt.Sprintf(`
+		testAccNsxtPolicyTier1WithEdgeClusterTemplate("test", false, false) + fmt.Sprintf(`
 	resource "nsxt_policy_nat_rule" "test" {
 	  display_name         = "%s"
 	  description          = "Acceptance Test"

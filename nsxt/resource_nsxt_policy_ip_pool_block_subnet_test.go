@@ -9,7 +9,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/ip_pools"
+
+	ippools "github.com/vmware/terraform-provider-nsxt/api/infra/ip_pools"
 )
 
 // TODO: remove extra test step config once IP Blocks don't need a delay to delete
@@ -41,27 +42,41 @@ func TestAccResourceNsxtPolicyIPPoolBlockSubnet_minimal(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXPolicyIPPoolBlockSubnetIPBlockTemplate(),
+				Config: testAccNSXPolicyIPPoolBlockSubnetIPBlockTemplate(false),
 			},
 		},
 	})
 }
 
 func TestAccResourceNsxtPolicyIPPoolBlockSubnet_basic(t *testing.T) {
+	testAccResourceNsxtPolicyIPPoolBlockSubnetBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyLocalManager(t)
+	})
+}
+
+func TestAccResourceNsxtPolicyIPPoolBlockSubnet_multitenancy(t *testing.T) {
+	testAccResourceNsxtPolicyIPPoolBlockSubnetBasic(t, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+	})
+}
+
+func testAccResourceNsxtPolicyIPPoolBlockSubnetBasic(t *testing.T, withContext bool, preCheck func()) {
 	poolName := getAccTestResourceName()
 	name := getAccTestResourceName()
 	updatedName := fmt.Sprintf("%s-updated", name)
 	testResourceName := "nsxt_policy_ip_pool_block_subnet.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
+		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXPolicyIPPoolBlockSubnetCheckDestroy(state)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXPolicyIPPoolBlockSubnetCreateTemplate(poolName, name),
+				Config: testAccNSXPolicyIPPoolBlockSubnetCreateTemplate(poolName, name, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXPolicyIPPoolBlockSubnetCheckExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
@@ -77,7 +92,7 @@ func TestAccResourceNsxtPolicyIPPoolBlockSubnet_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXPolicyIPPoolBlockSubnetUpdateTemplate(poolName, updatedName),
+				Config: testAccNSXPolicyIPPoolBlockSubnetUpdateTemplate(poolName, updatedName, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXPolicyIPPoolBlockSubnetCheckExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
@@ -93,7 +108,7 @@ func TestAccResourceNsxtPolicyIPPoolBlockSubnet_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXPolicyIPPoolBlockSubnetIPBlockTemplate(),
+				Config: testAccNSXPolicyIPPoolBlockSubnetIPBlockTemplate(withContext),
 			},
 		},
 	})
@@ -112,7 +127,7 @@ func TestAccResourceNsxtPolicyIPPoolBlockSubnet_import_basic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXPolicyIPPoolBlockSubnetCreateTemplate(poolName, name),
+				Config: testAccNSXPolicyIPPoolBlockSubnetCreateTemplate(poolName, name, false),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -121,7 +136,7 @@ func TestAccResourceNsxtPolicyIPPoolBlockSubnet_import_basic(t *testing.T) {
 				ImportStateIdFunc: testAccNSXPolicyIPPoolBlockSubnetImporterGetID,
 			},
 			{
-				Config: testAccNSXPolicyIPPoolBlockSubnetIPBlockTemplate(),
+				Config: testAccNSXPolicyIPPoolBlockSubnetIPBlockTemplate(false),
 			},
 		},
 	})
@@ -148,7 +163,7 @@ func testAccNSXPolicyIPPoolBlockSubnetCheckExists(resourceName string) resource.
 
 	return func(state *terraform.State) error {
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-		client := ip_pools.NewIpSubnetsClient(connector)
+		client := ippools.NewIpSubnetsClient(testAccGetSessionContext(), connector)
 
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
@@ -172,7 +187,7 @@ func testAccNSXPolicyIPPoolBlockSubnetCheckExists(resourceName string) resource.
 
 func testAccNSXPolicyIPPoolBlockSubnetCheckDestroy(state *terraform.State) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-	client := ip_pools.NewIpSubnetsClient(connector)
+	client := ippools.NewIpSubnetsClient(testAccGetSessionContext(), connector)
 
 	for _, rs := range state.RootModule().Resources {
 		if rs.Type != "nsxt_policy_ip_pool_block_subnet" {
@@ -190,16 +205,22 @@ func testAccNSXPolicyIPPoolBlockSubnetCheckDestroy(state *terraform.State) error
 	return nil
 }
 
-func testAccNSXPolicyIPPoolBlockSubnetIPBlockTemplate() string {
-	return `
+func testAccNSXPolicyIPPoolBlockSubnetIPBlockTemplate(withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
+
+	return fmt.Sprintf(`
 resource "nsxt_policy_ip_block" "block1" {
+%s
   display_name = "tfblock2"
   cidr         = "11.11.12.0/24"
-}`
+}`, context)
 }
 
 func testAccNSXPolicyIPPoolBlockSubnetCreateMinimalTemplate(poolName string, name string) string {
-	return testAccNSXPolicyIPPoolBlockSubnetIPBlockTemplate() + fmt.Sprintf(`
+	return testAccNSXPolicyIPPoolBlockSubnetIPBlockTemplate(false) + fmt.Sprintf(`
 resource "nsxt_policy_ip_pool" "pool1" {
   display_name = "%s"
 }
@@ -212,13 +233,20 @@ resource "nsxt_policy_ip_pool_block_subnet" "test" {
 }`, poolName, name)
 }
 
-func testAccNSXPolicyIPPoolBlockSubnetCreateTemplate(poolName string, name string) string {
-	return testAccNSXPolicyIPPoolBlockSubnetIPBlockTemplate() + fmt.Sprintf(`
+func testAccNSXPolicyIPPoolBlockSubnetCreateTemplate(poolName string, name string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
+
+	return testAccNSXPolicyIPPoolBlockSubnetIPBlockTemplate(withContext) + fmt.Sprintf(`
 resource "nsxt_policy_ip_pool" "pool1" {
+%s
   display_name = "%s"
 }
 
 resource "nsxt_policy_ip_pool_block_subnet" "test" {
+%s
   display_name        = "%s"
   description         = "Acceptance Test"
   size                = 4
@@ -229,16 +257,22 @@ resource "nsxt_policy_ip_pool_block_subnet" "test" {
     scope = "scope2"
     tag   = "tag2"
   }
-}`, poolName, name)
+}`, context, poolName, context, name)
 }
 
-func testAccNSXPolicyIPPoolBlockSubnetUpdateTemplate(poolName string, name string) string {
-	return testAccNSXPolicyIPPoolBlockSubnetIPBlockTemplate() + fmt.Sprintf(`
+func testAccNSXPolicyIPPoolBlockSubnetUpdateTemplate(poolName string, name string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
+	return testAccNSXPolicyIPPoolBlockSubnetIPBlockTemplate(withContext) + fmt.Sprintf(`
 resource "nsxt_policy_ip_pool" "pool1" {
+%s
   display_name = "%s"
 }
 
 resource "nsxt_policy_ip_pool_block_subnet" "test" {
+%s
   display_name        = "%s"
   description         = "Acceptance Test"
   size                = 4
@@ -253,5 +287,5 @@ resource "nsxt_policy_ip_pool_block_subnet" "test" {
     scope = "scope2"
     tag   = "tag2"
   }
-}`, poolName, name)
+}`, context, poolName, context, name)
 }

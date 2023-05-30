@@ -13,20 +13,33 @@ import (
 )
 
 func TestAccResourceNsxtPolicyTier1Gateway_basic(t *testing.T) {
+	testAccResourceNsxtPolicyTier1GatewayBasic(t, false, func() {
+		testAccPreCheck(t)
+	})
+}
+
+func TestAccResourceNsxtPolicyTier1Gateway_multitenancy(t *testing.T) {
+	testAccResourceNsxtPolicyTier1GatewayBasic(t, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+	})
+}
+
+func testAccResourceNsxtPolicyTier1GatewayBasic(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestResourceName()
 	updateName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_tier1_gateway.test"
 	failoverMode := "NON_PREEMPTIVE"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTier1CheckDestroy(state, name)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyTier1CreateTemplate(name, failoverMode, false),
+				Config: testAccNsxtPolicyTier1CreateTemplate(name, failoverMode, false, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTier1Exists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -47,7 +60,7 @@ func TestAccResourceNsxtPolicyTier1Gateway_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyTier1UpdateTemplate(updateName, failoverMode, false),
+				Config: testAccNsxtPolicyTier1UpdateTemplate(updateName, failoverMode, false, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTier1Exists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updateName),
@@ -69,7 +82,7 @@ func TestAccResourceNsxtPolicyTier1Gateway_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyTier1Update2Template(updateName, failoverMode, false),
+				Config: testAccNsxtPolicyTier1Update2Template(updateName, failoverMode, false, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTier1Exists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updateName),
@@ -108,7 +121,7 @@ func TestAccResourceNsxtPolicyTier1Gateway_withPoolAllocation(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyTier1CreateTemplate(name, failoverMode, true),
+				Config: testAccNsxtPolicyTier1CreateTemplate(name, failoverMode, true, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTier1Exists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -130,7 +143,7 @@ func TestAccResourceNsxtPolicyTier1Gateway_withPoolAllocation(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyTier1UpdateTemplate(updateName, failoverMode, true),
+				Config: testAccNsxtPolicyTier1UpdateTemplate(updateName, failoverMode, true, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTier1Exists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updateName),
@@ -154,7 +167,7 @@ func TestAccResourceNsxtPolicyTier1Gateway_withPoolAllocation(t *testing.T) {
 			},
 			{
 				// ForceNew due to pool allocation change
-				Config: testAccNsxtPolicyTier1Update2Template(updateName, failoverMode, true),
+				Config: testAccNsxtPolicyTier1Update2Template(updateName, failoverMode, true, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTier1Exists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updateName),
@@ -418,7 +431,7 @@ func TestAccResourceNsxtPolicyTier1Gateway_withTier0(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyTier1UpdateTemplate(updateName, failoverMode, false),
+				Config: testAccNsxtPolicyTier1UpdateTemplate(updateName, failoverMode, false, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTier1Exists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updateName),
@@ -503,14 +516,19 @@ data "nsxt_policy_realization_info" "realization_info" {
 }`, getEdgeClusterName(), name)
 }
 
-func testAccNsxtPolicyTier1CreateTemplate(name string, failoverMode string, withPoolAllocation bool) string {
+func testAccNsxtPolicyTier1CreateTemplate(name string, failoverMode string, withPoolAllocation, withContext bool) string {
 	poolAllocation := ""
 	if withPoolAllocation {
 		poolAllocation = `pool_allocation = "ROUTING"`
 	}
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 
 	config := fmt.Sprintf(`
 resource "nsxt_policy_tier1_gateway" "test" {
+%s
   display_name              = "%s"
   description               = "Acceptance Test"
   failover_mode             = "%s"
@@ -532,17 +550,22 @@ resource "nsxt_policy_tier1_gateway" "test" {
     scope = "scope2"
     tag   = "tag2"
   }
-}`, name, failoverMode, poolAllocation)
+}`, context, name, failoverMode, poolAllocation)
 	return testAccAdjustPolicyInfraConfig(config)
 }
 
-func testAccNsxtPolicyTier1UpdateTemplate(name string, failoverMode string, withPoolAllocation bool) string {
+func testAccNsxtPolicyTier1UpdateTemplate(name string, failoverMode string, withPoolAllocation, withContext bool) string {
 	poolAllocation := ""
 	if withPoolAllocation {
 		poolAllocation = `pool_allocation = "ROUTING"`
 	}
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	config := fmt.Sprintf(`
 resource "nsxt_policy_tier1_gateway" "test" {
+%s
   display_name              = "%s"
   description               = "Acceptance Test Update"
   failover_mode             = "%s"
@@ -559,17 +582,22 @@ resource "nsxt_policy_tier1_gateway" "test" {
     scope = "scope3"
     tag   = "tag3"
   }
-}`, name, failoverMode, poolAllocation)
+}`, context, name, failoverMode, poolAllocation)
 	return testAccAdjustPolicyInfraConfig(config)
 }
 
-func testAccNsxtPolicyTier1Update2Template(name string, failoverMode string, withPoolAllocation bool) string {
+func testAccNsxtPolicyTier1Update2Template(name string, failoverMode string, withPoolAllocation, withContext bool) string {
 	poolAllocation := ""
 	if withPoolAllocation {
 		poolAllocation = `pool_allocation = "LB_SMALL"`
 	}
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	config := fmt.Sprintf(`
 resource "nsxt_policy_tier1_gateway" "test" {
+%s
   display_name              = "%s"
   description               = "Acceptance Test Update"
   failover_mode             = "%s"
@@ -586,7 +614,7 @@ resource "nsxt_policy_tier1_gateway" "test" {
     scope = "scope3"
     tag   = "tag3"
   }
-}`, name, failoverMode, poolAllocation)
+}`, context, name, failoverMode, poolAllocation)
 
 	return testAccAdjustPolicyInfraConfig(config)
 }

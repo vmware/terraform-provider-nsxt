@@ -10,18 +10,30 @@ import (
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
-	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
 )
 
 func TestAccDataSourceNsxtPolicySegment_basic(t *testing.T) {
+	testAccDataSourceNsxtPolicySegmentBasic(t, false, func() {
+		testAccPreCheck(t)
+	})
+}
+
+func TestAccDataSourceNsxtPolicySegment_multitenancy(t *testing.T) {
+	testAccDataSourceNsxtPolicySegmentBasic(t, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+	})
+}
+
+func testAccDataSourceNsxtPolicySegmentBasic(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestDataSourceName()
 	testResourceName := "data.nsxt_policy_segment.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccDataSourceNsxtPolicySegmentDeleteByName(name)
@@ -33,7 +45,7 @@ func TestAccDataSourceNsxtPolicySegment_basic(t *testing.T) {
 						panic(err)
 					}
 				},
-				Config: testAccNsxtPolicySegmentReadTemplate(name),
+				Config: testAccNsxtPolicySegmentReadTemplate(name, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", name),
@@ -61,19 +73,8 @@ func testAccDataSourceNsxtPolicySegmentCreate(name string) error {
 	uuid, _ := uuid.NewRandom()
 	id := uuid.String()
 
-	if testAccIsGlobalManager() {
-		gmObj, convErr := convertModelBindingType(obj, model.SegmentBindingType(), gm_model.SegmentBindingType())
-		if convErr != nil {
-			return convErr
-		}
-
-		client := gm_infra.NewSegmentsClient(connector)
-		err = client.Patch(id, gmObj.(gm_model.Segment))
-
-	} else {
-		client := infra.NewSegmentsClient(connector)
-		err = client.Patch(id, obj)
-	}
+	client := infra.NewSegmentsClient(testAccGetSessionContext(), connector)
+	err = client.Patch(id, obj)
 	if err != nil {
 		return fmt.Errorf("Error during Segment creation: %v", err)
 	}
@@ -91,22 +92,23 @@ func testAccDataSourceNsxtPolicySegmentDeleteByName(name string) error {
 	if err != nil {
 		return nil
 	}
-	if testAccIsGlobalManager() {
-		client := gm_infra.NewSegmentsClient(connector)
-		err = client.Delete(objID)
-	} else {
-		client := infra.NewSegmentsClient(connector)
-		err = client.Delete(objID)
-	}
+	client := infra.NewSegmentsClient(testAccGetSessionContext(), connector)
+	err = client.Delete(objID)
+
 	if err != nil {
 		return fmt.Errorf("Error during Segment deletion: %v", err)
 	}
 	return nil
 }
 
-func testAccNsxtPolicySegmentReadTemplate(name string) string {
+func testAccNsxtPolicySegmentReadTemplate(name string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 data "nsxt_policy_segment" "test" {
+%s
   display_name = "%s"
-}`, name)
+}`, context, name)
 }

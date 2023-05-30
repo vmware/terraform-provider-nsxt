@@ -35,20 +35,33 @@ func TestAccResourceNsxtPolicyFixedSegment_basicImport(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyFixedSegment_basicUpdate(t *testing.T) {
+	testAccResourceNsxtPolicyFixedSegmentBasicUpdate(t, false, func() {
+		testAccPreCheck(t)
+	})
+}
+
+func TestAccResourceNsxtPolicyFixedSegment_multitenancy(t *testing.T) {
+	testAccResourceNsxtPolicyFixedSegmentBasicUpdate(t, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+	})
+}
+
+func testAccResourceNsxtPolicyFixedSegmentBasicUpdate(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestResourceName()
 	updatedName := getAccTestResourceName()
 	testResourceName := testAccPolicyFixedSegmentResourceName
 	tzName := getOverlayTransportZoneName()
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyFixedSegmentCheckDestroy(state, updatedName)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyFixedSegmentBasicTemplate(tzName, name),
+				Config: testAccNsxtPolicyFixedSegmentBasicTemplate(tzName, name, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyFixedSegmentExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -61,7 +74,7 @@ func TestAccResourceNsxtPolicyFixedSegment_basicUpdate(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyFixedSegmentBasicUpdateTemplate(tzName, updatedName),
+				Config: testAccNsxtPolicyFixedSegmentBasicUpdateTemplate(tzName, updatedName, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyFixedSegmentExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -90,7 +103,7 @@ func TestAccResourceNsxtPolicyFixedSegment_connectivityPath(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyFixedSegmentBasicTemplate(tzName, name),
+				Config: testAccNsxtPolicyFixedSegmentBasicTemplate(tzName, name, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyFixedSegmentExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -118,7 +131,7 @@ func TestAccResourceNsxtPolicyFixedSegment_connectivityPath(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicySegmentDeps(tzName),
+				Config: testAccNsxtPolicySegmentDeps(tzName, false),
 			},
 		},
 	})
@@ -319,7 +332,7 @@ func testAccNSXPolicyFixedSegmentImporterGetID(s *terraform.State) (string, erro
 }
 
 func testAccNsxtPolicyFixedSegmentImportTemplate(tzName string, name string) string {
-	return testAccNsxtPolicySegmentDeps(tzName) + fmt.Sprintf(`
+	return testAccNsxtPolicySegmentDeps(tzName, false) + fmt.Sprintf(`
 resource "nsxt_policy_fixed_segment" "test" {
   display_name        = "%s"
   description         = "Acceptance Test"
@@ -332,10 +345,15 @@ resource "nsxt_policy_fixed_segment" "test" {
 `, name)
 }
 
-func testAccNsxtPolicyFixedSegmentBasicTemplate(tzName string, name string) string {
-	return testAccNsxtPolicySegmentDeps(tzName) + fmt.Sprintf(`
+func testAccNsxtPolicyFixedSegmentBasicTemplate(tzName string, name string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
+	return testAccNsxtPolicySegmentDeps(tzName, withContext) + fmt.Sprintf(`
 
 resource "nsxt_policy_fixed_segment" "test" {
+%s
   display_name        = "%s"
   description         = "Acceptance Test"
   domain_name         = "tftest.org"
@@ -351,13 +369,17 @@ resource "nsxt_policy_fixed_segment" "test" {
     tag   = "orange"
   }
 }
-`, name)
+`, context, name)
 }
 
-func testAccNsxtPolicyFixedSegmentBasicUpdateTemplate(tzName string, name string) string {
-	return testAccNsxtPolicySegmentDeps(tzName) + fmt.Sprintf(`
-
+func testAccNsxtPolicyFixedSegmentBasicUpdateTemplate(tzName string, name string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
+	return testAccNsxtPolicySegmentDeps(tzName, withContext) + fmt.Sprintf(`
 resource "nsxt_policy_fixed_segment" "test" {
+%s
   display_name        = "%s"
   description         = "Acceptance Test2"
   domain_name         = "tftest2.org"
@@ -377,11 +399,11 @@ resource "nsxt_policy_fixed_segment" "test" {
     tag   = "orange"
   }
 }
-`, name)
+`, context, name)
 }
 
 func testAccNsxtPolicyFixedSegmentUpdateConnectivityTemplate(tzName string, name string) string {
-	return testAccNsxtPolicySegmentDeps(tzName) + fmt.Sprintf(`
+	return testAccNsxtPolicySegmentDeps(tzName, false) + fmt.Sprintf(`
 
 resource "nsxt_policy_fixed_segment" "test" {
   display_name        = "%s"
@@ -407,7 +429,7 @@ resource "nsxt_policy_fixed_segment" "test" {
 }
 
 func testAccNsxtPolicyFixedSegmentBasicAdvConfigTemplate(tzName string, name string) string {
-	return testAccNsxtPolicySegmentDeps(tzName) + fmt.Sprintf(`
+	return testAccNsxtPolicySegmentDeps(tzName, false) + fmt.Sprintf(`
 
 resource "nsxt_policy_fixed_segment" "test" {
   display_name     = "%s"
@@ -437,7 +459,7 @@ resource "nsxt_policy_fixed_segment" "test" {
 }
 
 func testAccNsxtPolicyFixedSegmentBasicAdvConfigUpdateTemplate(tzName string, name string) string {
-	return testAccNsxtPolicySegmentDeps(tzName) + fmt.Sprintf(`
+	return testAccNsxtPolicySegmentDeps(tzName, false) + fmt.Sprintf(`
 
 resource "nsxt_policy_fixed_segment" "test" {
   display_name     = "%s"
@@ -467,7 +489,7 @@ resource "nsxt_policy_fixed_segment" "test" {
 }
 
 func testAccNsxtPolicyFixedSegmentWithDhcpTemplate(tzName string, name string, dnsServerV4 string, dnsServerV6 string, lease string, preferred string) string {
-	return testAccNsxtPolicySegmentDeps(tzName) +
+	return testAccNsxtPolicySegmentDeps(tzName, false) +
 		testAccNsxtPolicyEdgeCluster(getEdgeClusterName()) + fmt.Sprintf(`
 
 resource "nsxt_policy_dhcp_server" "test" {

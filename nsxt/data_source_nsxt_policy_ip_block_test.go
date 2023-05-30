@@ -9,16 +9,32 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
 )
 
 func TestAccDataSourceNsxtPolicyIpBlock_basic(t *testing.T) {
+	testAccDataSourceNsxtPolicyIPBlockBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyLocalManager(t)
+		testAccNSXVersion(t, "3.0.0")
+	})
+}
+
+func TestAccDataSourceNsxtPolicyIpBlock_multitenancy(t *testing.T) {
+	testAccDataSourceNsxtPolicyIPBlockBasic(t, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+	})
+}
+
+func testAccDataSourceNsxtPolicyIPBlockBasic(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestDataSourceName()
 	testResourceName := "data.nsxt_policy_ip_block.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccDataSourceNsxtPolicyIPBlockDeleteByName(name)
@@ -30,7 +46,7 @@ func TestAccDataSourceNsxtPolicyIpBlock_basic(t *testing.T) {
 						panic(err)
 					}
 				},
-				Config: testAccNsxtPolicyIPBlockReadTemplate(name),
+				Config: testAccNsxtPolicyIPBlockReadTemplate(name, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", name),
@@ -46,7 +62,7 @@ func testAccDataSourceNsxtPolicyIPBlockCreate(name string) error {
 	if err != nil {
 		return fmt.Errorf("Error during test client initialization: %v", err)
 	}
-	client := infra.NewIpBlocksClient(connector)
+	client := infra.NewIpBlocksClient(testAccGetSessionContext(), connector)
 
 	displayName := name
 	description := name
@@ -72,7 +88,7 @@ func testAccDataSourceNsxtPolicyIPBlockDeleteByName(name string) error {
 	if err != nil {
 		return fmt.Errorf("Error during test client initialization: %v", err)
 	}
-	client := infra.NewIpBlocksClient(connector)
+	client := infra.NewIpBlocksClient(testAccGetSessionContext(), connector)
 
 	// Find the object by name
 	objList, err := client.List(nil, nil, nil, nil, nil, nil)
@@ -91,9 +107,14 @@ func testAccDataSourceNsxtPolicyIPBlockDeleteByName(name string) error {
 	return fmt.Errorf("Error while deleting IpBlock '%s': resource not found", name)
 }
 
-func testAccNsxtPolicyIPBlockReadTemplate(name string) string {
+func testAccNsxtPolicyIPBlockReadTemplate(name string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 data "nsxt_policy_ip_block" "test" {
+%s
   display_name = "%s"
-}`, name)
+}`, context, name)
 }

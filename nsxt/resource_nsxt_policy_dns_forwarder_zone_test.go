@@ -28,17 +28,30 @@ var accTestPolicyDNSForwarderZoneUpdateAttributes = map[string]string{
 }
 
 func TestAccResourceNsxtPolicyDNSForwarderZone_basic(t *testing.T) {
+	testAccResourceNsxtPolicyDNSForwarderZoneBasic(t, false, func() {
+		testAccPreCheck(t)
+	})
+}
+
+func TestAccResourceNsxtPolicyDNSForwarderZone_multitenancy(t *testing.T) {
+	testAccResourceNsxtPolicyDNSForwarderZoneBasic(t, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+	})
+}
+
+func testAccResourceNsxtPolicyDNSForwarderZoneBasic(t *testing.T, withContext bool, preCheck func()) {
 	testResourceName := "nsxt_policy_dns_forwarder_zone.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyDNSForwarderZoneCheckDestroy(state, accTestPolicyDNSForwarderZoneUpdateAttributes["display_name"])
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyDNSForwarderZoneTemplate(true),
+				Config: testAccNsxtPolicyDNSForwarderZoneTemplate(true, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyDNSForwarderZoneExists(accTestPolicyDNSForwarderZoneCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyDNSForwarderZoneCreateAttributes["display_name"]),
@@ -56,7 +69,7 @@ func TestAccResourceNsxtPolicyDNSForwarderZone_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyDNSForwarderZoneTemplate(false),
+				Config: testAccNsxtPolicyDNSForwarderZoneTemplate(false, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyDNSForwarderZoneExists(accTestPolicyDNSForwarderZoneUpdateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyDNSForwarderZoneUpdateAttributes["display_name"]),
@@ -74,7 +87,7 @@ func TestAccResourceNsxtPolicyDNSForwarderZone_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyDNSForwarderZoneMinimalistic(),
+				Config: testAccNsxtPolicyDNSForwarderZoneMinimalistic(withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyDNSForwarderZoneExists(accTestPolicyDNSForwarderZoneCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
@@ -102,7 +115,7 @@ func TestAccResourceNsxtPolicyDNSForwarderZone_importBasic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyDNSForwarderZoneMinimalistic(),
+				Config: testAccNsxtPolicyDNSForwarderZoneMinimalistic(false),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -161,15 +174,20 @@ func testAccNsxtPolicyDNSForwarderZoneCheckDestroy(state *terraform.State, displ
 	return nil
 }
 
-func testAccNsxtPolicyDNSForwarderZoneTemplate(createFlow bool) string {
+func testAccNsxtPolicyDNSForwarderZoneTemplate(createFlow, withContext bool) string {
 	var attrMap map[string]string
 	if createFlow {
 		attrMap = accTestPolicyDNSForwarderZoneCreateAttributes
 	} else {
 		attrMap = accTestPolicyDNSForwarderZoneUpdateAttributes
 	}
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_dns_forwarder_zone" "test" {
+%s
   display_name     = "%s"
   description      = "%s"
   dns_domain_names = ["%s"]
@@ -180,14 +198,19 @@ resource "nsxt_policy_dns_forwarder_zone" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, attrMap["display_name"], attrMap["description"], attrMap["dns_domain_names"], attrMap["source_ip"], attrMap["upstream_servers"])
+}`, context, attrMap["display_name"], attrMap["description"], attrMap["dns_domain_names"], attrMap["source_ip"], attrMap["upstream_servers"])
 }
 
-func testAccNsxtPolicyDNSForwarderZoneMinimalistic() string {
+func testAccNsxtPolicyDNSForwarderZoneMinimalistic(withContext bool) string {
 	attrMap := accTestPolicyDNSForwarderZoneUpdateAttributes
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_dns_forwarder_zone" "test" {
+%s
   display_name     = "%s"
   upstream_servers = ["%s"]
-}`, attrMap["display_name"], attrMap["upstream_servers"])
+}`, context, attrMap["display_name"], attrMap["upstream_servers"])
 }

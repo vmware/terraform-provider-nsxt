@@ -30,9 +30,44 @@ func TestAccDataSourceNsxtPolicySegmentSecurityProfile_basic(t *testing.T) {
 	})
 }
 
+func TestAccDataSourceNsxtPolicySegmentSecurityProfile_multitenancy(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "data.nsxt_policy_segment_security_profile.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyMultitenancy(t)
+		},
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicySegmentSecurityProfileMultitenancyTemplate(name),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+				),
+			},
+		},
+	})
+}
+
 func testAccNsxtPolicySegmentSecurityProfileReadTemplate(name string) string {
 	return fmt.Sprintf(`
 data "nsxt_policy_segment_security_profile" "test" {
   display_name = "%s"
 }`, name)
+}
+
+func testAccNsxtPolicySegmentSecurityProfileMultitenancyTemplate(name string) string {
+	context := testAccNsxtPolicyMultitenancyContext()
+	return fmt.Sprintf(`
+resource "nsxt_policy_segment_security_profile" "test" {
+%s
+  display_name = "%s"
+}
+data "nsxt_policy_segment_security_profile" "test" {
+%s
+  display_name = nsxt_policy_segment_security_profile.test.display_name
+}`, context, name, context)
 }

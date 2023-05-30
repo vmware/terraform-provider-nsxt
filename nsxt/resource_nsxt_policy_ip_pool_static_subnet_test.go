@@ -9,7 +9,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/ip_pools"
+
+	ippools "github.com/vmware/terraform-provider-nsxt/api/infra/ip_pools"
 )
 
 func TestAccResourceNsxtPolicyIPPoolStaticSubnet_minimal(t *testing.T) {
@@ -45,19 +46,33 @@ func TestAccResourceNsxtPolicyIPPoolStaticSubnet_minimal(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyIPPoolStaticSubnet_basic(t *testing.T) {
+	testAccResourceNsxtPolicyIPPoolStaticSubnetBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyLocalManager(t)
+	})
+}
+
+func TestAccResourceNsxtPolicyIPPoolStaticSubnet_multitenancy(t *testing.T) {
+	testAccResourceNsxtPolicyIPPoolStaticSubnetBasic(t, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+	})
+}
+
+func testAccResourceNsxtPolicyIPPoolStaticSubnetBasic(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestResourceName()
 	updatedName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_ip_pool_static_subnet.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
+		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXPolicyIPPoolStaticSubnetCheckDestroy(state)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXPolicyIPPoolStaticSubnetCreateTemplate(name),
+				Config: testAccNSXPolicyIPPoolStaticSubnetCreateTemplate(name, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXPolicyIPPoolStaticSubnetCheckExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
@@ -74,7 +89,7 @@ func TestAccResourceNsxtPolicyIPPoolStaticSubnet_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXPolicyIPPoolStaticSubnet3AllocationsTemplate(updatedName),
+				Config: testAccNSXPolicyIPPoolStaticSubnet3AllocationsTemplate(updatedName, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXPolicyIPPoolStaticSubnetCheckExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
@@ -91,7 +106,7 @@ func TestAccResourceNsxtPolicyIPPoolStaticSubnet_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXPolicyIPPoolStaticSubnet2AllocationsTemplate(updatedName),
+				Config: testAccNSXPolicyIPPoolStaticSubnet2AllocationsTemplate(updatedName, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXPolicyIPPoolStaticSubnetCheckExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
@@ -123,7 +138,7 @@ func TestAccResourceNsxtPolicyIPPoolStaticSubnet_import_basic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXPolicyIPPoolStaticSubnetCreateTemplate(name),
+				Config: testAccNSXPolicyIPPoolStaticSubnetCreateTemplate(name, false),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -155,7 +170,7 @@ func testAccNSXPolicyIPPoolStaticSubnetImporterGetID(s *terraform.State) (string
 func testAccNSXPolicyIPPoolStaticSubnetCheckExists(resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-		client := ip_pools.NewIpSubnetsClient(connector)
+		client := ippools.NewIpSubnetsClient(testAccGetSessionContext(), connector)
 
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
@@ -179,7 +194,7 @@ func testAccNSXPolicyIPPoolStaticSubnetCheckExists(resourceName string) resource
 
 func testAccNSXPolicyIPPoolStaticSubnetCheckDestroy(state *terraform.State) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-	client := ip_pools.NewIpSubnetsClient(connector)
+	client := ippools.NewIpSubnetsClient(testAccGetSessionContext(), connector)
 
 	for _, rs := range state.RootModule().Resources {
 		if rs.Type != "nsxt_policy_ip_pool_static_subnet" {
@@ -214,13 +229,19 @@ resource "nsxt_policy_ip_pool_static_subnet" "test" {
 }`, name)
 }
 
-func testAccNSXPolicyIPPoolStaticSubnetCreateTemplate(name string) string {
+func testAccNSXPolicyIPPoolStaticSubnetCreateTemplate(name string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_ip_pool" "pool1" {
+%s
   display_name = "tf-pool-static-subnet"
 }
 
 resource "nsxt_policy_ip_pool_static_subnet" "test" {
+%s
   display_name = "%s"
   description  = "Acceptance Test"
   pool_path    = "${nsxt_policy_ip_pool.pool1.path}"
@@ -233,16 +254,22 @@ resource "nsxt_policy_ip_pool_static_subnet" "test" {
     scope = "scope2"
     tag   = "tag2"
   }
-}`, name)
+}`, context, context, name)
 }
 
-func testAccNSXPolicyIPPoolStaticSubnet3AllocationsTemplate(name string) string {
+func testAccNSXPolicyIPPoolStaticSubnet3AllocationsTemplate(name string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_ip_pool" "pool1" {
+%s
   display_name = "tf-pool-static-subnet"
 }
 
 resource "nsxt_policy_ip_pool_static_subnet" "test" {
+%s
   display_name    = "%s"
   description     = "Acceptance Test"
   pool_path       = "${nsxt_policy_ip_pool.pool1.path}"
@@ -270,16 +297,22 @@ resource "nsxt_policy_ip_pool_static_subnet" "test" {
     scope = "scope2"
     tag   = "tag2"
   }
-}`, name)
+}`, context, context, name)
 }
 
-func testAccNSXPolicyIPPoolStaticSubnet2AllocationsTemplate(name string) string {
+func testAccNSXPolicyIPPoolStaticSubnet2AllocationsTemplate(name string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_ip_pool" "pool1" {
+%s
   display_name = "tf-pool-static-subnet"
 }
 
 resource "nsxt_policy_ip_pool_static_subnet" "test" {
+%s
   display_name    = "%s"
   description     = "Acceptance Test"
   pool_path       = "${nsxt_policy_ip_pool.pool1.path}"
@@ -303,5 +336,5 @@ resource "nsxt_policy_ip_pool_static_subnet" "test" {
     scope = "scope2"
     tag   = "tag2"
   }
-}`, name)
+}`, context, context, name)
 }

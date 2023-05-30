@@ -37,24 +37,37 @@ var accTestPolicyGatewayDNSForwarderUpdateAttributes = map[string]string{
 }
 
 func TestAccResourceNsxtPolicyGatewayDNSForwarder_tier0(t *testing.T) {
-	testAccResourceNsxtPolicyGatewayDNSForwarder(t, true)
+	testAccResourceNsxtPolicyGatewayDNSForwarder(t, true, false, func() {
+		testAccPreCheck(t)
+		testAccNSXVersion(t, "3.0.0")
+	})
 }
 
 func TestAccResourceNsxtPolicyGatewayDNSForwarder_tier1(t *testing.T) {
-	testAccResourceNsxtPolicyGatewayDNSForwarder(t, false)
+	testAccResourceNsxtPolicyGatewayDNSForwarder(t, false, false, func() {
+		testAccPreCheck(t)
+		testAccNSXVersion(t, "3.0.0")
+	})
 }
 
-func testAccResourceNsxtPolicyGatewayDNSForwarder(t *testing.T, isT0 bool) {
+func TestAccResourceNsxtPolicyGatewayDNSForwarder_tier1_multitenancy(t *testing.T) {
+	testAccResourceNsxtPolicyGatewayDNSForwarder(t, false, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+	})
+}
+
+func testAccResourceNsxtPolicyGatewayDNSForwarder(t *testing.T, isT0 bool, withContext bool, preCheck func()) {
 	resourceName := testAccResourcePolicyGatewayDNSForwarderName
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyGatewayDNSForwarderCheckDestroy(state, accTestPolicyGatewayDNSForwarderUpdateAttributes["display_name"])
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyGatewayDNSForwarderTemplate(isT0, true),
+				Config: testAccNsxtPolicyGatewayDNSForwarderTemplate(isT0, true, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyGatewayDNSForwarderExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "display_name", accTestPolicyGatewayDNSForwarderCreateAttributes["display_name"]),
@@ -72,7 +85,7 @@ func testAccResourceNsxtPolicyGatewayDNSForwarder(t *testing.T, isT0 bool) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyGatewayDNSForwarderTemplate(isT0, false),
+				Config: testAccNsxtPolicyGatewayDNSForwarderTemplate(isT0, false, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyGatewayDNSForwarderExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "display_name", accTestPolicyGatewayDNSForwarderUpdateAttributes["display_name"]),
@@ -174,23 +187,29 @@ func testAccNsxtPolicyGatewayDNSForwarderCheckDestroy(state *terraform.State, di
 	return nil
 }
 
-func testAccNsxtPolicyGatewayDNSForwarderPrerequisites(names [2]string, isT0 bool) string {
+func testAccNsxtPolicyGatewayDNSForwarderPrerequisites(names [2]string, isT0 bool, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return testAccNsxtPolicyEdgeClusterReadTemplate(getEdgeClusterName()) +
-		testAccNsxtPolicyGatewayWithEdgeClusterTemplate("test", isT0, true) +
+		testAccNsxtPolicyGatewayWithEdgeClusterTemplate("test", isT0, true, withContext) +
 		fmt.Sprintf(`
 resource "nsxt_policy_dns_forwarder_zone" "default" {
+%s
   display_name     = "%s"
   upstream_servers = ["1.1.1.1"]
 }
 
 resource "nsxt_policy_dns_forwarder_zone" "fqdn" {
+%s
   display_name     = "%s"
   upstream_servers = ["2.1.1.1"]
   dns_domain_names = ["conditional.domain.org"]
-}`, names[0], names[1])
+}`, context, names[0], context, names[1])
 }
 
-func testAccNsxtPolicyGatewayDNSForwarderTemplate(isT0 bool, createFlow bool) string {
+func testAccNsxtPolicyGatewayDNSForwarderTemplate(isT0 bool, createFlow bool, withContext bool) string {
 	whyDoesGoNeedToBeSoComplicated := map[bool]int8{false: 1, true: 0}
 	var attrMap map[string]string
 	if createFlow {
@@ -198,8 +217,13 @@ func testAccNsxtPolicyGatewayDNSForwarderTemplate(isT0 bool, createFlow bool) st
 	} else {
 		attrMap = accTestPolicyGatewayDNSForwarderUpdateAttributes
 	}
-	return testAccNsxtPolicyGatewayDNSForwarderPrerequisites(testAccPolicyDNSForwarderHelperNames, isT0) + fmt.Sprintf(`
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
+	return testAccNsxtPolicyGatewayDNSForwarderPrerequisites(testAccPolicyDNSForwarderHelperNames, isT0, withContext) + fmt.Sprintf(`
 resource "nsxt_policy_gateway_dns_forwarder" "test" {
+%s
   display_name = "%s"
   description  = "%s"
   gateway_path = nsxt_policy_tier%d_gateway.test.path
@@ -216,12 +240,12 @@ resource "nsxt_policy_gateway_dns_forwarder" "test" {
     tag   = "tag1"
   }
 }
-`, attrMap["display_name"], attrMap["description"], whyDoesGoNeedToBeSoComplicated[isT0], attrMap["listener_ip"], attrMap["enabled"], attrMap["log_level"], attrMap["cache_size"])
+`, context, attrMap["display_name"], attrMap["description"], whyDoesGoNeedToBeSoComplicated[isT0], attrMap["listener_ip"], attrMap["enabled"], attrMap["log_level"], attrMap["cache_size"])
 }
 
 func testAccNsxtPolicyGatewayDNSForwarderMinimalistic(isT0 bool) string {
 	whyDoesGoNeedToBeSoComplicated := map[bool]int8{false: 1, true: 0}
-	return testAccNsxtPolicyGatewayDNSForwarderPrerequisites(testAccPolicyDNSForwarderHelperNames, isT0) + fmt.Sprintf(`
+	return testAccNsxtPolicyGatewayDNSForwarderPrerequisites(testAccPolicyDNSForwarderHelperNames, isT0, false) + fmt.Sprintf(`
 resource "nsxt_policy_gateway_dns_forwarder" "test" {
   display_name = "%s"
   gateway_path = nsxt_policy_tier%d_gateway.test.path

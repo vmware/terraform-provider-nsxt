@@ -12,6 +12,19 @@ import (
 )
 
 func TestAccResourceNsxtPolicyQosProfile_basic(t *testing.T) {
+	testAccResourceNsxtPolicyQosProfileBasic(t, false, func() {
+		testAccPreCheck(t)
+	})
+}
+
+func TestAccResourceNsxtPolicyQosProfile_multitenancy(t *testing.T) {
+	testAccResourceNsxtPolicyQosProfileBasic(t, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+	})
+}
+
+func testAccResourceNsxtPolicyQosProfileBasic(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestResourceName()
 	updatedName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_qos_profile.test"
@@ -23,14 +36,14 @@ func TestAccResourceNsxtPolicyQosProfile_basic(t *testing.T) {
 	// There is a NSX bug that messes up dependencies for QoS profiles
 	// until the bug fixed, QoS tests need to avoid parallelization
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXQosSwitchingProfileCheckDestroy(state, updatedName)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXPolicyQosProfileBasicTemplate(name, cos, peak, "ingress"),
+				Config: testAccNSXPolicyQosProfileBasicTemplate(name, cos, peak, "ingress", withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXPolicyQosProfileExists(name, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -50,7 +63,7 @@ func TestAccResourceNsxtPolicyQosProfile_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXPolicyQosProfileBasicTemplate(updatedName, updatedCos, updatedPeak, "egress"),
+				Config: testAccNSXPolicyQosProfileBasicTemplate(updatedName, updatedCos, updatedPeak, "egress", withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXPolicyQosProfileExists(updatedName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -70,7 +83,7 @@ func TestAccResourceNsxtPolicyQosProfile_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXPolicyQosProfileUpdateTemplate(updatedName, updatedCos, updatedPeak, "egress"),
+				Config: testAccNSXPolicyQosProfileUpdateTemplate(updatedName, updatedCos, updatedPeak, "egress", withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXPolicyQosProfileExists(updatedName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -88,7 +101,7 @@ func TestAccResourceNsxtPolicyQosProfile_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXPolicyQosProfileEmptyTemplate(updatedName),
+				Config: testAccNSXPolicyQosProfileEmptyTemplate(updatedName, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXPolicyQosProfileExists(updatedName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "egress_rate_shaper.#", "0"),
@@ -169,9 +182,14 @@ func testAccNSXPolicyQosProfileCheckDestroy(state *terraform.State, displayName 
 	return nil
 }
 
-func testAccNSXPolicyQosProfileBasicTemplate(name string, cos string, peak string, direction string) string {
+func testAccNSXPolicyQosProfileBasicTemplate(name string, cos string, peak string, direction string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_qos_profile" "test" {
+%s
   display_name     = "%s"
   description      = "test description"
   class_of_service = %s
@@ -195,12 +213,17 @@ resource "nsxt_policy_qos_profile" "test" {
     tag   = "tag1"
   }
 }
-`, name, cos, direction, peak, peak)
+`, context, name, cos, direction, peak, peak)
 }
 
-func testAccNSXPolicyQosProfileUpdateTemplate(name string, cos string, peak string, direction string) string {
+func testAccNSXPolicyQosProfileUpdateTemplate(name string, cos string, peak string, direction string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_qos_profile" "test" {
+%s
   display_name     = "%s"
   description      = "test description"
   class_of_service = %s
@@ -221,15 +244,20 @@ resource "nsxt_policy_qos_profile" "test" {
     tag   = "tag2"
   }
 }
-`, name, cos, peak)
+`, context, name, cos, peak)
 }
 
-func testAccNSXPolicyQosProfileEmptyTemplate(name string) string {
+func testAccNSXPolicyQosProfileEmptyTemplate(name string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_qos_profile" "test" {
+%s
   display_name     = "%s"
 }
-`, name)
+`, context, name)
 }
 
 func testAccNSXPolicyQosProfileCreateTemplateTrivial(name string) string {

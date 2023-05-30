@@ -10,15 +10,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func testAccDataSourceNsxtPolicySegmentRealization(t *testing.T, vlan bool) {
+func testAccDataSourceNsxtPolicySegmentRealization(t *testing.T, vlan bool, withContext bool, preCheck func()) {
 	testResourceName := "data.nsxt_policy_segment_realization.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicySegmentRealizationTemplate(vlan),
+				Config: testAccNsxtPolicySegmentRealizationTemplate(vlan, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(testResourceName, "state", "success"),
 					resource.TestCheckResourceAttr(testResourceName, "network_name", "terra-test"),
@@ -30,21 +30,44 @@ func testAccDataSourceNsxtPolicySegmentRealization(t *testing.T, vlan bool) {
 }
 
 func TestAccDataSourceNsxtPolicySegmentRealization_basic(t *testing.T) {
-	testAccDataSourceNsxtPolicySegmentRealization(t, false)
+	testAccDataSourceNsxtPolicySegmentRealization(t, false, false, func() {
+		testAccOnlyLocalManager(t)
+		testAccPreCheck(t)
+		testAccNSXVersion(t, "3.0.0")
+	})
 }
 
 func TestAccDataSourceNsxtPolicySegmentRealization_vlan(t *testing.T) {
-	testAccDataSourceNsxtPolicySegmentRealization(t, true)
+	testAccDataSourceNsxtPolicySegmentRealization(t, true, false, func() {
+		testAccOnlyLocalManager(t)
+		testAccPreCheck(t)
+		testAccNSXVersion(t, "3.0.0")
+	})
 }
 
-func testAccNsxtPolicySegmentRealizationTemplate(vlan bool) string {
+func TestAccDataSourceNsxtPolicySegmentRealization_multitenancy(t *testing.T) {
+	testAccDataSourceNsxtPolicySegmentRealization(t, false, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+	})
+}
+
+func testAccNsxtPolicySegmentRealizationTemplate(vlan, withContext bool) string {
 	resource := "nsxt_policy_segment"
 	tz := getOverlayTransportZoneName()
 	extra := ""
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	if vlan {
 		resource = "nsxt_policy_vlan_segment"
 		tz = getVlanTransportZoneName()
 		extra = "vlan_ids = [12]"
+	}
+	tzSpec := ""
+	if !withContext {
+		tzSpec = "transport_zone_path = data.nsxt_policy_transport_zone.test.path"
 	}
 	return fmt.Sprintf(`
 data "nsxt_policy_transport_zone" "test" {
@@ -52,12 +75,14 @@ data "nsxt_policy_transport_zone" "test" {
 }
 
 resource "%s" "test" {
+%s
   display_name        = "terra-test"
-  transport_zone_path = data.nsxt_policy_transport_zone.test.path
+  %s
   %s
 }
 
 data "nsxt_policy_segment_realization" "test" {
+%s
   path = %s.test.path
-}`, tz, resource, extra, resource)
+}`, tz, resource, context, tzSpec, extra, context, resource)
 }

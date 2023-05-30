@@ -54,6 +54,50 @@ func TestAccResourceNsxtPolicyPredefinedGatewayPolicy_basic(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyPredefinedGatewayPolicy_multitenancy(t *testing.T) {
+	testResourceName := "nsxt_policy_predefined_gateway_policy.test"
+	testGatewayResourceName := "nsxt_policy_tier1_gateway.test"
+	description1 := "test 1"
+	description2 := "test 2"
+	tags := `tag {
+            scope = "color"
+            tag   = "orange"
+        }`
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancy(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyPredefinedGatewayPolicyMultitenancy(description1, tags),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyGatewayPolicyExists(testResourceName, defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "description", description1),
+					resource.TestCheckResourceAttr(testResourceName, "rule.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyPredefinedGatewayPolicyMultitenancy(description2, ""),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyGatewayPolicyExists(testResourceName, defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "description", description2),
+					resource.TestCheckResourceAttr(testResourceName, "rule.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyPredefinedGatewayPolicyPrerequisitesMultitenancy(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyTier1Exists(testGatewayResourceName),
+				),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtPolicyPredefinedGatewayPolicy_defaultRule(t *testing.T) {
 	testResourceName := "nsxt_policy_predefined_gateway_policy.test"
 	testGatewayResourceName := "nsxt_policy_tier0_gateway.test"
@@ -127,6 +171,24 @@ data "nsxt_policy_gateway_policy" "test" {
 }`, t0EdgeCluster)
 }
 
+func testAccNsxtPolicyPredefinedGatewayPolicyPrerequisitesMultitenancy() string {
+	t1EdgeCluster := `edge_cluster_path = data.nsxt_policy_edge_cluster.test.path`
+	context := testAccNsxtPolicyMultitenancyContext()
+	return testAccNsxtPolicyEdgeClusterReadTemplate(getEdgeClusterName()) + fmt.Sprintf(`
+
+resource "nsxt_policy_tier1_gateway" "test" {
+%s
+  display_name      = "predefined-gw-policy-test"
+  %s
+}
+
+data "nsxt_policy_gateway_policy" "test" {
+%s
+  category     = "Default"
+  display_name = "Policy_Default_Infra-tier1-${nsxt_policy_tier1_gateway.test.nsx_id}"
+}`, context, t1EdgeCluster, context)
+}
+
 func testAccNsxtPolicyPredefinedGatewayPolicyBasic(description string, tags string) string {
 	return testAccNsxtPolicyPredefinedGatewayPolicyPrerequisites() + fmt.Sprintf(`
 
@@ -135,6 +197,17 @@ resource "nsxt_policy_predefined_gateway_policy" "test" {
   description = "%s"
   %s
 }`, description, tags)
+}
+
+func testAccNsxtPolicyPredefinedGatewayPolicyMultitenancy(description string, tags string) string {
+	return testAccNsxtPolicyPredefinedGatewayPolicyPrerequisitesMultitenancy() + fmt.Sprintf(`
+
+resource "nsxt_policy_predefined_gateway_policy" "test" {
+%s
+  path        = data.nsxt_policy_gateway_policy.test.path
+  description = "%s"
+  %s
+}`, testAccNsxtPolicyMultitenancyContext(), description, tags)
 }
 
 func testAccNsxtPolicyPredefinedGatewayPolicyDefaultRule(description string, action string, label string, tags string) string {

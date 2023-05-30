@@ -18,17 +18,30 @@ var accTestPolicyContextProfileCustomAttributeAttributes = map[string]string{
 }
 
 func TestAccResourceNsxtPolicyContextProfileCustomAttribute_basic(t *testing.T) {
+	testAccResourceNsxtPolicyContextProfileCustomAttributeBasic(t, false, func() {
+		testAccPreCheck(t)
+	})
+}
+
+func TestAccResourceNsxtPolicyContextProfileCustomAttribute_multitenancy(t *testing.T) {
+	testAccResourceNsxtPolicyContextProfileCustomAttributeBasic(t, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+	})
+}
+
+func testAccResourceNsxtPolicyContextProfileCustomAttributeBasic(t *testing.T, withContext bool, preCheck func()) {
 	testResourceName := "nsxt_policy_context_profile_custom_attribute.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyContextProfileCustomAttributeCheckDestroy(state, accTestPolicyContextProfileCustomAttributeAttributes["attribute"])
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyContextProfileCustomAttributeTemplate(),
+				Config: testAccNsxtPolicyContextProfileCustomAttributeTemplate(withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyContextProfileCustomAttributeExists(accTestPolicyContextProfileCustomAttributeAttributes["attribute"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "key", accTestPolicyContextProfileCustomAttributeAttributes["key"]),
@@ -51,7 +64,7 @@ func TestAccResourceNsxtPolicyContextProfileCustomAttribute_importBasic(t *testi
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyContextProfileCustomAttributeTemplate(),
+				Config: testAccNsxtPolicyContextProfileCustomAttributeTemplate(false),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -110,16 +123,23 @@ func testAccNsxtPolicyContextProfileCustomAttributeCheckDestroy(state *terraform
 	return nil
 }
 
-func testAccNsxtPolicyContextProfileCustomAttributeTemplate() string {
+func testAccNsxtPolicyContextProfileCustomAttributeTemplate(withContext bool) string {
 	return testAccNsxtPolicyContextProfileCustomAttributeArgTemplate(
 		accTestPolicyContextProfileCustomAttributeAttributes["key"],
-		accTestPolicyContextProfileCustomAttributeAttributes["attribute"])
+		accTestPolicyContextProfileCustomAttributeAttributes["attribute"],
+		withContext)
 }
 
-func testAccNsxtPolicyContextProfileCustomAttributeArgTemplate(key string, attribute string) string {
+func testAccNsxtPolicyContextProfileCustomAttributeArgTemplate(key string, attribute string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
+
 	return fmt.Sprintf(`
 resource "nsxt_policy_context_profile_custom_attribute" "test" {
+%s
   key = "%s"
   attribute = "%s"
-}`, key, attribute)
+}`, context, key, attribute)
 }
