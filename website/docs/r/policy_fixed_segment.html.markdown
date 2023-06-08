@@ -149,7 +149,12 @@ An existing segment can be [imported][docs-import] into this resource, via the f
 ```
 terraform import nsxt_policy_fixed_segment.segment1 GW-ID/ID
 ```
-
 The above command imports the segment named `segment1` with the NSX Segment ID `ID` on Tier-1 Gateway GW-ID.
+
+```
+terraform import nsxt_policy_fixed_segment.segment1 POLICY_PATH
+```
+The above command imports the segment named `segment1` with the NSX Segment policy path `POLICY_PATH`.
+Note: for multitenancy projects only the later form is usable.
 
 ~> **NOTE:** Please make sure `advanced_config` clause is present in configuration if you with to include it in import, otherwise it will be ignored with NSX 3.2 onwards. This is due to a platform change in handling advanced config in the API.

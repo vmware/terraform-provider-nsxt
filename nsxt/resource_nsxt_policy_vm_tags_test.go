@@ -124,6 +124,31 @@ func TestAccResourceNsxtPolicyVMTags_import_basic(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyVMTags_import_basic_multitenancy(t *testing.T) {
+	vmID := getTestVMID()
+	testResourceName := "nsxt_policy_vm_tags.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccEnvDefined(t, "NSXT_TEST_VM_ID"); testAccOnlyMultitenancy(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXPolicyVMTagsCheckDestroy(state)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXPolicyVMTagsCreateTemplate(vmID, true),
+			},
+			{
+				ResourceName:            testResourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"instance_id"},
+				ImportStateIdFunc:       testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
+			},
+		},
+	})
+}
+
 func testAccNSXPolicyVMTagsCheckExists(resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))

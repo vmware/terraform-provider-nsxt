@@ -72,5 +72,10 @@ An existing object can be [imported][docs-import] into this resource, via the fo
 ```
 terraform import nsxt_policy_dns_forwarder_zone.test UUID
 ```
-
 The above command imports PolicyDnsForwarderZone named `test` with the NSX Dns Forwarder Zone ID `UUID`.
+
+```
+terraform import nsxt_policy_dns_forwarder_zone.test POLICY_PATH
+```
+The above command imports PolicyDnsForwarderZone named `test` with the NSX Dns Forwarder Zone policy path `POLICY_PATH`.
+Note: for multitenancy projects only the later form is usable.

@@ -4,6 +4,7 @@
 package nsxt
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -401,10 +402,23 @@ func resourceNsxtPolicyNATRuleUpdate(d *schema.ResourceData, m interface{}) erro
 func resourceNsxtPolicyNATRuleImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	importID := d.Id()
 	s := strings.Split(importID, "/")
+	rd, err := nsxtPolicyPathResourceImporterHelper(d, m)
+	if err == nil {
+		d.Set("gateway_path", importID[0:strings.Index(importID, "/nat/")])
+		natType := importID[strings.Index(importID, "/nat/")+5 : strings.Index(importID, "/nat-rules/")]
+		if natType == model.PolicyNat_NAT_TYPE_USER {
+			// Value will be overwritten by resourceNsxtPolicyNATRuleRead()
+			d.Set("action", model.PolicyNatRule_ACTION_DNAT)
+		} else {
+			d.Set("action", model.PolicyNatRule_ACTION_NAT64)
+		}
+		return rd, nil
+	} else if !errors.Is(err, ErrNotAPolicyPath) {
+		return rd, err
+	}
 	if len(s) < 2 || len(s) > 3 {
 		return nil, fmt.Errorf("Please provide <gateway-id>/<nat-rule-id>/[nat-type] as an input")
 	}
-
 	if len(s) == 3 {
 		// take care of NAT64 nat-type via action
 		if s[2] == model.PolicyNat_NAT_TYPE_NAT64 {

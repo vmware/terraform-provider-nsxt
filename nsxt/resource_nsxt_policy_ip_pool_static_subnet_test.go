@@ -150,6 +150,30 @@ func TestAccResourceNsxtPolicyIPPoolStaticSubnet_import_basic(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyIPPoolStaticSubnet_import_basic_multitenancy(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_ip_pool_static_subnet.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancy(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXPolicyIPPoolStaticSubnetCheckDestroy(state)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXPolicyIPPoolStaticSubnetCreateTemplate(name, true),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
+			},
+		},
+	})
+}
+
 func testAccNSXPolicyIPPoolStaticSubnetImporterGetID(s *terraform.State) (string, error) {
 	rs, ok := s.RootModule().Resources["nsxt_policy_ip_pool_static_subnet.test"]
 	if !ok {

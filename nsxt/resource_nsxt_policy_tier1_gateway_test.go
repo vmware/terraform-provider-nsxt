@@ -455,12 +455,37 @@ func TestAccResourceNsxtPolicyTier1Gateway_importBasic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyTier1ImportTemplate(name, failoverMode),
+				Config: testAccNsxtPolicyTier1ImportTemplate(name, failoverMode, false),
 			},
 			{
 				ResourceName:      testResourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicyTier1Gateway_importBasic_multitenancy(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_tier1_gateway.test"
+	failoverMode := "PREEMPTIVE"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancy(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyTier1CheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyTier1ImportTemplate(name, failoverMode, true),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
 			},
 		},
 	})
@@ -619,9 +644,14 @@ resource "nsxt_policy_tier1_gateway" "test" {
 	return testAccAdjustPolicyInfraConfig(config)
 }
 
-func testAccNsxtPolicyTier1ImportTemplate(name string, failoverMode string) string {
+func testAccNsxtPolicyTier1ImportTemplate(name string, failoverMode string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_tier1_gateway" "test" {
+%s
   display_name              = "%s"
   description               = "Acceptance Test"
   failover_mode             = "%s"
@@ -644,8 +674,9 @@ resource "nsxt_policy_tier1_gateway" "test" {
 }
 
 data "nsxt_policy_realization_info" "realization_info" {
+%s
   path = nsxt_policy_tier1_gateway.test.path
-}`, name, failoverMode)
+}`, context, name, failoverMode, context)
 }
 
 func testAccNsxtPolicyTier1CreateWithEcTemplate(name string, edgeClusterName string) string {

@@ -337,6 +337,31 @@ func TestAccResourceNsxtPolicyTier1GatewayInterface_importBasic(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyTier1GatewayInterface_importBasic_multitenancy(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_tier1_gateway_interface.test"
+	subnet := "1.1.12.2/24"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancy(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyTier1InterfaceCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyTier1InterfaceThinTemplate(name, subnet, true),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
+			},
+		},
+	})
+}
+
 func testAccNsxtPolicyTier1InterfaceExists(resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 

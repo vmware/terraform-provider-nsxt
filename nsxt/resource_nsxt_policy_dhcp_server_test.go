@@ -121,6 +121,30 @@ func TestAccResourceNsxtPolicyDhcpServer_importBasic(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyDhcpServer_importBasic_multitenancy(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_dhcp_server.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancy(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyDhcpServerCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyDhcpServerMinimalistic(true),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
+			},
+		},
+	})
+}
+
 func testAccNsxtPolicyDhcpServerExists(resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 

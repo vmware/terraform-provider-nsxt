@@ -68,5 +68,10 @@ An existing object can be [imported][docs-import] into this resource, via the fo
 ```
 terraform import nsxt_policy_spoof_guard_profile.test UUID
 ```
-
 The above command imports SpoofGuard Profile named `test` with the NSX ID `UUID`.
+
+```
+terraform import nsxt_policy_spoof_guard_profile.test POLICY_PATH
+```
+The above command imports SpoofGuard Profile named `test` with policy path `POLICY_PATH`.
+Note: for multitenancy projects only the later form is usable.

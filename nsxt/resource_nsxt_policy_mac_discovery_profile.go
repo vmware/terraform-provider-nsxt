@@ -28,7 +28,7 @@ func resourceNsxtPolicyMacDiscoveryProfile() *schema.Resource {
 		Update: resourceNsxtPolicyMacDiscoveryProfileUpdate,
 		Delete: resourceNsxtPolicyMacDiscoveryProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			State: nsxtPolicyPathResourceImporter,
 		},
 
 		Schema: map[string]*schema.Schema{

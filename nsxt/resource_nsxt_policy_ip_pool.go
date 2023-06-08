@@ -22,7 +22,7 @@ func resourceNsxtPolicyIPPool() *schema.Resource {
 		Update: resourceNsxtPolicyIPPoolUpdate,
 		Delete: resourceNsxtPolicyIPPoolDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			State: nsxtPolicyPathResourceImporter,
 		},
 
 		Schema: map[string]*schema.Schema{

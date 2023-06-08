@@ -22,13 +22,36 @@ func TestAccResourceNsxtPolicyFixedSegment_basicImport(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyFixedSegmentImportTemplate(tzName, name),
+				Config: testAccNsxtPolicyFixedSegmentImportTemplate(tzName, name, false),
 			},
 			{
 				ResourceName:      testAccPolicyFixedSegmentResourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
 				ImportStateIdFunc: testAccNSXPolicyFixedSegmentImporterGetID,
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicyFixedSegment_basicImport_multitenancy(t *testing.T) {
+	name := getAccTestResourceName()
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancy(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyFixedSegmentCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyFixedSegmentImportTemplate("", name, true),
+			},
+			{
+				ResourceName:      testAccPolicyFixedSegmentResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testAccPolicyFixedSegmentResourceName),
 			},
 		},
 	})
@@ -331,9 +354,14 @@ func testAccNSXPolicyFixedSegmentImporterGetID(s *terraform.State) (string, erro
 	return fmt.Sprintf("%s/%s", gwID, resourceID), nil
 }
 
-func testAccNsxtPolicyFixedSegmentImportTemplate(tzName string, name string) string {
-	return testAccNsxtPolicySegmentDeps(tzName, false) + fmt.Sprintf(`
+func testAccNsxtPolicyFixedSegmentImportTemplate(tzName string, name string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
+	return testAccNsxtPolicySegmentDeps(tzName, withContext) + fmt.Sprintf(`
 resource "nsxt_policy_fixed_segment" "test" {
+%s
   display_name        = "%s"
   description         = "Acceptance Test"
   connectivity_path   = nsxt_policy_tier1_gateway.tier1ForSegments.path
@@ -342,7 +370,7 @@ resource "nsxt_policy_fixed_segment" "test" {
      cidr = "12.12.2.1/24"
   }
 }
-`, name)
+`, context, name)
 }
 
 func testAccNsxtPolicyFixedSegmentBasicTemplate(tzName string, name string, withContext bool) string {

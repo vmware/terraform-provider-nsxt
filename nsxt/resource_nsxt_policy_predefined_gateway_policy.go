@@ -4,6 +4,7 @@
 package nsxt
 
 import (
+	"errors"
 	"fmt"
 	"log"
 
@@ -483,6 +484,13 @@ func resourceNsxtPolicyPredefinedGatewayPolicyDelete(d *schema.ResourceData, m i
 
 func nsxtPredefinedPolicyImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	importPath := d.Id()
+	rd, err := nsxtPolicyPathResourceImporterHelper(d, m)
+	if err == nil {
+		d.Set("path", importPath)
+		return rd, nil
+	} else if !errors.Is(err, ErrNotAPolicyPath) {
+		return rd, err
+	}
 	d.Set("path", importPath)
 	id := getPolicyIDFromPath(importPath)
 	d.SetId(id)

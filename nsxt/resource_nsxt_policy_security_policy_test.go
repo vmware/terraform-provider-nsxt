@@ -443,6 +443,31 @@ func TestAccResourceNsxtPolicySecurityPolicy_importBasic(t *testing.T) {
 		},
 	})
 }
+
+func TestAccResourceNsxtPolicySecurityPolicy_importBasic_multitenancy(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_security_policy.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicySecurityPolicyCheckDestroy(state, name, defaultDomain)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicySecurityPolicyBasic(name, "import", defaultDomain, true),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtGlobalPolicySecurityPolicy_withSite(t *testing.T) {
 	name := getAccTestResourceName()
 	updatedName := getAccTestResourceName()

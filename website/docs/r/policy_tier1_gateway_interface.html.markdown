@@ -94,5 +94,11 @@ An existing policy Tier-1 Gateway Interface can be [imported][docs-import] into 
 ```
 terraform import nsxt_policy_tier1_gateway_interface.interface1 GW-ID/LOCALE-SERVICE-ID/ID
 ```
-
 The above command imports the policy Tier-1 gateway interface named `interface1` with the NSX Policy ID `ID` on Tier1 Gateway `GW-ID`, under locale service `LOCALE-SERVICE-ID`.
+
+```
+terraform import nsxt_policy_tier1_gateway_interface.interface1 POLICY_PATH
+```
+The above command imports the policy Tier-1 gateway interface named `interface1` with policy path `POLICY_PATH`.
+Note: for multitenancy projects only the later form is usable.
+

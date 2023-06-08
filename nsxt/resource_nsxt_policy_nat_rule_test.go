@@ -221,6 +221,30 @@ func TestAccResourceNsxtPolicyNATRule_basicT1Import(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyNATRule_basicT1Import_multitenancy(t *testing.T) {
+	name := getAccTestResourceName()
+	action := model.PolicyNatRule_ACTION_DNAT
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancy(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyNATRuleCheckDestroy(state, name, false)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyNATRuleTier1CreateTemplate(name, action, testAccResourcePolicyNATRuleSourceNet, testAccResourcePolicyNATRuleDestNet, testAccResourcePolicyNATRuleTransNet, true),
+			},
+			{
+				ResourceName:      testAccResourcePolicyNATRuleName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testAccResourcePolicyNATRuleName),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtPolicyNATRule_nat64T1(t *testing.T) {
 	name := getAccTestResourceName()
 	updateName := getAccTestResourceName()

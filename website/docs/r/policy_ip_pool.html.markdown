@@ -82,5 +82,10 @@ An existing IP Pool can be [imported][docs-import] into this resource, via the f
 ```
 terraform import nsxt_policy_ip_pool.pool1 ID
 ```
-
 The above would import NSX IP Pool as a resource named `pool1` with the NSX ID `ID`, where `ID` is NSX ID of the IP Pool.
+
+```
+terraform import nsxt_policy_ip_pool.pool1 POLICY_PATH
+```
+The above would import NSX IP Pool as a resource named `pool1` with policy path `POLICY_PATH`.
+Note: for multitenancy projects only the later form is usable.

@@ -113,6 +113,30 @@ func TestAccResourceNsxtPolicyDhcpRelayConfig_importBasic(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyDhcpRelayConfig_importBasic_multitenancy(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_dhcp_relay.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancy(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyDhcpRelayConfigCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyDhcpRelayConfigMinimalistic(true),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
+			},
+		},
+	})
+}
+
 func testAccNsxtPolicyDhcpRelayConfigExists(resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 

@@ -163,7 +163,12 @@ An existing policy Tier-1 gateway can be [imported][docs-import] into this resou
 ```
 terraform import nsxt_policy_tier1_gateway.tier1_gw ID
 ```
-
 The above command imports the policy Tier-1 gateway named `tier1_gw` with the NSX Policy ID `ID`.
+
+```
+terraform import nsxt_policy_tier1_gateway.tier1_gw POLICY_PATH
+```
+The above command imports the policy Tier-1 gateway named `tier1_gw` with policy path `POLICY_PATH`.
+Note: for multitenancy projects only the later form is usable.
 
 ~> **NOTE:** When importing Gateway, `edge_cluster_path` will be assigned rather than `locale_service`. In order to switch to `locale_service` configuration, additional apply will be required.

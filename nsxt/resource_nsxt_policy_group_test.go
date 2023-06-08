@@ -21,12 +21,36 @@ func TestAccResourceNsxtPolicyGroup_basicImport(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyGroupIPAddressImportTemplate(name),
+				Config: testAccNsxtPolicyGroupIPAddressImportTemplate(name, false),
 			},
 			{
 				ResourceName:      testResourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicyGroup_basicImport_multitenancy(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_group.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancy(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyGroupCheckDestroy(state, name, defaultDomain)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyGroupIPAddressImportTemplate(name, true),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
 			},
 		},
 	})
@@ -691,13 +715,18 @@ func testAccNsxtPolicyGroupCheckDestroy(state *terraform.State, displayName stri
 	return nil
 }
 
-func testAccNsxtPolicyGroupIPAddressImportTemplate(name string) string {
+func testAccNsxtPolicyGroupIPAddressImportTemplate(name string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_group" "test" {
+%s
   display_name = "%s"
   description  = "Acceptance Test"
 }
-`, name)
+`, context, name)
 }
 
 func testAccNsxtPolicyGroupAddressCreateTemplate(name string, withContext bool) string {

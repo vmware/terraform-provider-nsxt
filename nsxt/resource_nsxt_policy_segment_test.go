@@ -24,12 +24,36 @@ func TestAccResourceNsxtPolicySegment_basicImport(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicySegmentImportTemplate(tzName, name),
+				Config: testAccNsxtPolicySegmentImportTemplate(tzName, name, false),
 			},
 			{
 				ResourceName:      testResourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicySegment_basicImport_multitenancy(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_segment.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancy(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicySegmentCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicySegmentImportTemplate("", name, true),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
 			},
 		},
 	})
@@ -456,7 +480,7 @@ func testAccNsxtPolicySegmentDeps(tzName string, withContext bool) string {
 	if withContext {
 		context = testAccNsxtPolicyMultitenancyContext()
 	}
-	return testAccNSXPolicyTransportZoneReadTemplate(tzName, false, true) + fmt.Sprintf(`
+	s := fmt.Sprintf(`
 
 resource "nsxt_policy_tier1_gateway" "tier1ForSegments" {
 %s
@@ -483,21 +507,35 @@ resource "nsxt_policy_tier1_gateway" "anotherTier1ForSegments" {
   pool_allocation           = "ROUTING"
   route_advertisement_types = ["TIER1_STATIC_ROUTES", "TIER1_CONNECTED"]
 }`, context, testPolicySegmentHelper1Name, context, testPolicySegmentHelper2Name)
+
+	if tzName == "" {
+		return s
+	}
+	return testAccNSXPolicyTransportZoneReadTemplate(tzName, false, true) + s
 }
 
-func testAccNsxtPolicySegmentImportTemplate(tzName string, name string) string {
-	return testAccNsxtPolicySegmentDeps(tzName, false) + fmt.Sprintf(`
+func testAccNsxtPolicySegmentImportTemplate(tzName string, name string, withContext bool) string {
+	context := ""
+	tzSetting := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	} else {
+		tzSetting = "transport_zone_path = data.nsxt_policy_transport_zone.test.path"
+	}
+
+	return testAccNsxtPolicySegmentDeps(tzName, withContext) + fmt.Sprintf(`
 resource "nsxt_policy_segment" "test" {
+%s
   display_name        = "%s"
   description         = "Acceptance Test"
   connectivity_path   = nsxt_policy_tier1_gateway.tier1ForSegments.path
-  transport_zone_path = data.nsxt_policy_transport_zone.test.path
+  %s
 
   subnet {
      cidr = "12.12.2.1/24"
   }
 }
-`, name)
+`, context, name, tzSetting)
 }
 
 func testAccNsxtPolicySegmentBasicTemplate(tzName string, name string) string {

@@ -14,7 +14,7 @@ func resourceNsxtPolicySegment() *schema.Resource {
 		Update: resourceNsxtPolicySegmentUpdate,
 		Delete: resourceNsxtPolicySegmentDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			State: nsxtPolicyPathResourceImporter,
 		},
 
 		Schema: getPolicyCommonSegmentSchema(false, false),

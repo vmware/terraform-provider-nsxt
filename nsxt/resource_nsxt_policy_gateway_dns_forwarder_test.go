@@ -123,7 +123,28 @@ func testAccResourceNsxtPolicyGatewayDNSForwarderImport(t *testing.T, isT0 bool)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyGatewayDNSForwarderMinimalistic(isT0),
+				Config: testAccNsxtPolicyGatewayDNSForwarderMinimalistic(isT0, false),
+			},
+			{
+				ResourceName:      testAccResourcePolicyGatewayDNSForwarderName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccNSXPolicyGatewayDNSForwarderImporterGetID,
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicyGatewayDNSForwarder_importTier1_multitenancy(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancy(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyGatewayDNSForwarderCheckDestroy(state, accTestPolicyGatewayDNSForwarderCreateAttributes["display_name"])
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyGatewayDNSForwarderMinimalistic(false, true),
 			},
 			{
 				ResourceName:      testAccResourcePolicyGatewayDNSForwarderName,
@@ -243,15 +264,20 @@ resource "nsxt_policy_gateway_dns_forwarder" "test" {
 `, context, attrMap["display_name"], attrMap["description"], whyDoesGoNeedToBeSoComplicated[isT0], attrMap["listener_ip"], attrMap["enabled"], attrMap["log_level"], attrMap["cache_size"])
 }
 
-func testAccNsxtPolicyGatewayDNSForwarderMinimalistic(isT0 bool) string {
+func testAccNsxtPolicyGatewayDNSForwarderMinimalistic(isT0, withContext bool) string {
 	whyDoesGoNeedToBeSoComplicated := map[bool]int8{false: 1, true: 0}
-	return testAccNsxtPolicyGatewayDNSForwarderPrerequisites(testAccPolicyDNSForwarderHelperNames, isT0, false) + fmt.Sprintf(`
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
+	return testAccNsxtPolicyGatewayDNSForwarderPrerequisites(testAccPolicyDNSForwarderHelperNames, isT0, withContext) + fmt.Sprintf(`
 resource "nsxt_policy_gateway_dns_forwarder" "test" {
+%s
   display_name = "%s"
   gateway_path = nsxt_policy_tier%d_gateway.test.path
   listener_ip  = "78.2.1.12"
 
   default_forwarder_zone_path      = nsxt_policy_dns_forwarder_zone.default.path
 }
-`, accTestPolicyGatewayDNSForwarderCreateAttributes["display_name"], whyDoesGoNeedToBeSoComplicated[isT0])
+`, context, accTestPolicyGatewayDNSForwarderCreateAttributes["display_name"], whyDoesGoNeedToBeSoComplicated[isT0])
 }

@@ -124,12 +124,35 @@ func TestAccResourceNsxtPolicyQosProfile_importBasic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXPolicyQosProfileCreateTemplateTrivial(name),
+				Config: testAccNSXPolicyQosProfileCreateTemplateTrivial(name, false),
 			},
 			{
 				ResourceName:      testResourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicyQosProfile_importBasic_multitenancy(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_qos_profile.test"
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancy(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXPolicyQosProfileCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXPolicyQosProfileCreateTemplateTrivial(name, true),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
 			},
 		},
 	})
@@ -260,9 +283,14 @@ resource "nsxt_policy_qos_profile" "test" {
 `, context, name)
 }
 
-func testAccNSXPolicyQosProfileCreateTemplateTrivial(name string) string {
+func testAccNSXPolicyQosProfileCreateTemplateTrivial(name string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_qos_profile" "test" {
+%s
   display_name = "%s"
   description  = "test description"
   dscp_trusted = false
@@ -274,5 +302,5 @@ resource "nsxt_policy_qos_profile" "test" {
     average_bw_mbps = 111
   }
 }
-`, name)
+`, context, name)
 }

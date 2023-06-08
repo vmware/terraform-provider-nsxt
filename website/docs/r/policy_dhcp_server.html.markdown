@@ -77,5 +77,10 @@ An existing DHCP Server can be [imported][docs-import] into this resource, via t
 ```
 terraform import nsxt_policy_dhcp_server.dhcp1 ID
 ```
+The above command imports a DHCP Server named `dhcp1` with the NSX DHCP Server ID `ID`.
 
-The above command imports a DHCP Server named `dhcp1` with the NSX DHCP Server  ID `ID`.
+```
+terraform import nsxt_policy_dhcp_server.dhcp1 POLICY_PATH
+```
+The above command imports a DHCP Server named `dhcp1` with the NSX DHCP Server policy path `POLICY_PATH`.
+Note: for multitenancy projects only the later form is usable.

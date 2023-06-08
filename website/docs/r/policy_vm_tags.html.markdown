@@ -92,6 +92,12 @@ An existing VM Tags collection can be [imported][docs-import] into this resource
 ```
 terraform import nsxt_policy_vm_tags.vm1_tags ID
 ```
-
 The above would import NSX Virtual Machine tags as a resource named `vm1_tags` with the NSX ID `ID`, where ID is external ID of the Virtual Machine.
+
+```
+terraform import nsxt_policy_vm_tags.vm1_tags POLICY_PATH
+```
+The above would import NSX Virtual Machine tags as a resource named `vm1_tags` with policy path `POLICY_PATH`.
+Note: for multitenancy projects only the later form is usable.
+
 Note that import of port tags is not supported.

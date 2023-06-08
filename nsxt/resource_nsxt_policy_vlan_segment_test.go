@@ -20,12 +20,36 @@ func TestAccResourceNsxtPolicyVlanSegment_basicImport(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyVlanSegmentImportTemplate(name),
+				Config: testAccNsxtPolicyVlanSegmentImportTemplate(name, false),
 			},
 			{
 				ResourceName:      testResourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicyVlanSegment_basicImport_multitenancy(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_vlan_segment.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancy(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicySegmentCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyVlanSegmentImportTemplate(name, true),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
 			},
 		},
 	})
@@ -300,15 +324,27 @@ func testAccNsxtPolicyVlanSegmentDeps() string {
 	return testAccNSXPolicyTransportZoneReadTemplate(getVlanTransportZoneName(), true, true)
 }
 
-func testAccNsxtPolicyVlanSegmentImportTemplate(name string) string {
-	return testAccNsxtPolicyVlanSegmentDeps() + fmt.Sprintf(`
+func testAccNsxtPolicyVlanSegmentImportTemplate(name string, withContext bool) string {
+	context := ""
+	tzSetting := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	} else {
+		tzSetting = "transport_zone_path = data.nsxt_policy_transport_zone.test.path"
+	}
+	s := fmt.Sprintf(`
 resource "nsxt_policy_vlan_segment" "test" {
+%s
   display_name        = "%s"
   description         = "Acceptance Test"
   vlan_ids            = ["101"]
-  transport_zone_path = data.nsxt_policy_transport_zone.test.path
+  %s
 }
-`, name)
+`, context, name, tzSetting)
+	if withContext {
+		return s
+	}
+	return testAccNsxtPolicyVlanSegmentDeps() + s
 }
 
 func testAccNsxtPolicyVlanSegmentBasicTemplate(name string, withContext bool) string {

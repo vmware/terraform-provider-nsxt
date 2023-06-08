@@ -142,6 +142,34 @@ func TestAccResourceNsxtPolicyIPPoolBlockSubnet_import_basic(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyIPPoolBlockSubnet_importBasic_multitenancy(t *testing.T) {
+	poolName := getAccTestResourceName()
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_ip_pool_block_subnet.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancy(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXPolicyIPPoolBlockSubnetCheckDestroy(state)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXPolicyIPPoolBlockSubnetCreateTemplate(poolName, name, true),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
+			},
+			{
+				Config: testAccNSXPolicyIPPoolBlockSubnetIPBlockTemplate(false),
+			},
+		},
+	})
+}
+
 func testAccNSXPolicyIPPoolBlockSubnetImporterGetID(s *terraform.State) (string, error) {
 	rs, ok := s.RootModule().Resources["nsxt_policy_ip_pool_block_subnet.test"]
 	if !ok {

@@ -68,5 +68,10 @@ An existing object can be [imported][docs-import] into this resource, via the fo
 ```
 terraform import nsxt_policy_dhcp_relay.test ID
 ```
-
 The above command imports Dhcp Relay named `test` with the NSX Dhcp Relay ID `ID`.
+
+```
+terraform import nsxt_policy_dhcp_relay.test POLICY_PATH
+```
+The above command imports Dhcp Relay named `test` with the NSX Dhcp Relay policy path `POLICY_PATH`.
+Note: for multitenancy projects only the later form is usable.

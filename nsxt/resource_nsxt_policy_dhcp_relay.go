@@ -22,7 +22,7 @@ func resourceNsxtPolicyDhcpRelayConfig() *schema.Resource {
 		Update: resourceNsxtPolicyDhcpRelayConfigUpdate,
 		Delete: resourceNsxtPolicyDhcpRelayConfigDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			State: nsxtPolicyPathResourceImporter,
 		},
 
 		Schema: map[string]*schema.Schema{

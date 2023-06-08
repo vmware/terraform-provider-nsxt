@@ -94,5 +94,10 @@ An existing Block can be [imported][docs-import] into this resource, via the fol
 ```
 terraform import nsxt_policy_ip_pool_block_subnet.block_subnet1 pool-id/subnet-id
 ```
-
 The above would import NSX Block Subnet as a resource named `block_subnet1` with the NSX ID `subnet-id` in the IP Pool `pool-id`, where `subnet-id` is NSX ID of Block Subnet and `pool-id` is the IP Pool ID the Subnet is in.
+
+```
+terraform import nsxt_policy_ip_pool_block_subnet.block_subnet1 POLICY_PATH
+```
+The above would import NSX Block Subnet as a resource named `block_subnet1` with policy path `POLICY_PATH`.
+Note: for multitenancy projects only the later form is usable.
