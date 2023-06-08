@@ -119,7 +119,7 @@ The following arguments are supported:
   * `sources_excluded` - (Optional) A boolean value indicating negation of source groups.
   * `direction` - (Optional) Traffic direction, one of `IN`, `OUT` or `IN_OUT`. Default is `IN_OUT`.
   * `disabled` - (Optional) Flag to disable this rule. Default is false.
-  * `ip_version` - (Optional) Version of IP protocol, one of `NONE`, IPV4`, `IPV6`, `IPV4_IPV6`. Default is `IPV4_IPV6`. For `Ethernet` category rules, use `NONE` value.
+  * `ip_version` - (Optional) Version of IP protocol, one of `NONE`, `IPV4`, `IPV6`, `IPV4_IPV6`. Default is `IPV4_IPV6`. For `Ethernet` category rules, use `NONE` value.
   * `logged` - (Optional) Flag to enable packet logging. Default is false.
   * `notes` - (Optional) Additional notes on changes.
   * `profiles` - (Optional) Set of profile paths relevant for this rule.
