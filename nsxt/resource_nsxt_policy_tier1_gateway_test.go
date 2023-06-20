@@ -277,6 +277,8 @@ func TestAccResourceNsxtPolicyTier1Gateway_withId(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "id", id),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "ha_mode", "NONE"),
+					resource.TestCheckResourceAttr(testResourceName, "type", "ISOLATED"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "tier0_path", ""),
 					resource.TestCheckResourceAttr(realizationResourceName, "state", "REALIZED"),
@@ -289,6 +291,8 @@ func TestAccResourceNsxtPolicyTier1Gateway_withId(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updateName),
 					resource.TestCheckResourceAttr(testResourceName, "id", id),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "ha_mode", "NONE"),
+					resource.TestCheckResourceAttr(testResourceName, "type", "ISOLATED"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "tier0_path", ""),
 					resource.TestCheckResourceAttr(realizationResourceName, "state", "REALIZED"),
@@ -658,6 +662,7 @@ resource "nsxt_policy_tier1_gateway" "test" {
   description   = "Acceptance Test"
   tier0_path    = data.nsxt_policy_tier0_gateway.T0.path
   failover_mode = "%s"
+  type          = "ROUTED"
 
   tag {
     scope = "scope1"
@@ -682,6 +687,8 @@ resource "nsxt_policy_tier1_gateway" "test" {
   nsx_id       = "%s"
   display_name = "%s"
   description  = "Acceptance Test"
+  ha_mode      = "NONE"
+  type         = "ISOLATED"
 
   tag {
     scope = "scope1"
