@@ -41,12 +41,44 @@ resource "nsxt_policy_vm_tags" "vm1_tags" {
 }
 ```
 
+## Example Usage - Multi-Tenancy
+
+```hcl
+data "nsxt_policy_project" "demoproj" {
+  display_name = "demoproj"
+}
+
+resource "nsxt_policy_vm_tags" "vm1_tags" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
+  instance_id = vsphere_virtual_machine.vm1.id
+
+  tag {
+    scope = "color"
+    tag   = "blue"
+  }
+
+  port {
+    segment_path = nsxt_policy_segment.seg1.path
+    tag {
+      tag {
+        scope = "color"
+        tag   = "green"
+      }
+    }
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
 
 * `instance_id` - (Required) ID of the Virtual Machine. Can be the instance UUID or BIOS UUID.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this Virtual Machine.
+* `context` - (Optional) The context which the object belongs to
+  * `project_id` - The ID of the project which the object belongs to
 * `port` - (Optional) Option to tag segment port auto-created for the VM on specified segment.
   * `segment_path` - (Required) Segment where the port is to be tagged.
   * `tag` - (Optional) A list of scope + tag pairs to associate with this segment port.

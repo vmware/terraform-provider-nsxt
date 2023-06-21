@@ -39,6 +39,41 @@ resource "nsxt_policy_ip_discovery_profile" "ip_discovery_profile" {
 }
 ```
 
+## Example Usage - Multi-Tenancy
+
+```hcl
+data "nsxt_policy_project" "demoproj" {
+  display_name = "demoproj"
+}
+
+resource "nsxt_policy_ip_discovery_profile" "ip_discovery_profile" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
+  description  = "ip discovery profile provisioned by Terraform"
+  display_name = "ip_discovery_profile1"
+
+  arp_nd_binding_timeout         = 20
+  duplicate_ip_detection_enabled = false
+
+  arp_binding_limit     = 140
+  arp_snooping_enabled  = false
+  dhcp_snooping_enabled = false
+  vmtools_enabled       = false
+
+  dhcp_snooping_v6_enabled = false
+  nd_snooping_enabled      = false
+  nd_snooping_limit        = 12
+  vmtools_v6_enabled       = false
+  tofu_enabled             = false
+
+  tag {
+    scope = "color"
+    tag   = "red"
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -47,6 +82,8 @@ The following arguments are supported:
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this policy.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
+* `context` - (Optional) The context which the object belongs to
+    * `project_id` - The ID of the project which the object belongs to
 * `arp_nd_binding_timeout` - (Optional) ARP and ND cache timeout (in minutes)
 * `duplicate_ip_detection_enabled` - (Optional) Duplicate IP detection
 * `arp_binding_limit` - (Optional) Maximum number of ARP bindings

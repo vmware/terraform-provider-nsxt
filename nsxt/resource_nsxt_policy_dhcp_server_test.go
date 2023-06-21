@@ -122,7 +122,7 @@ func testAccNsxtPolicyDhcpServerExists(resourceName string) resource.TestCheckFu
 			return fmt.Errorf("Policy DhcpServer resource ID not set in resources")
 		}
 
-		exists, err := resourceNsxtPolicyDhcpServerExists(resourceID, connector, testAccIsGlobalManager())
+		exists, err := resourceNsxtPolicyDhcpServerExists(testAccGetSessionContext(), resourceID, connector)
 		if err != nil {
 			return err
 		}
@@ -143,7 +143,7 @@ func testAccNsxtPolicyDhcpServerCheckDestroy(state *terraform.State, displayName
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		exists, err := resourceNsxtPolicyDhcpServerExists(resourceID, connector, testAccIsGlobalManager())
+		exists, err := resourceNsxtPolicyDhcpServerExists(testAccGetSessionContext(), resourceID, connector)
 		if err == nil {
 			return err
 		}

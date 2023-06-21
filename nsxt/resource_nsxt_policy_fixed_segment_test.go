@@ -261,7 +261,8 @@ func testAccNsxtPolicyFixedSegmentExists(resourceName string) resource.TestCheck
 			return fmt.Errorf("Policy resource ID not set in resources")
 		}
 		gwPath := rs.Primary.Attributes["connectivity_path"]
-		exists, err := resourceNsxtPolicySegmentExists(gwPath, true)(resourceID, connector, testAccIsGlobalManager())
+		context := testAccGetSessionContext()
+		exists, err := resourceNsxtPolicySegmentExists(context, gwPath, true)(context, resourceID, connector)
 		if err != nil {
 			return err
 		}
@@ -287,7 +288,8 @@ func testAccNsxtPolicyFixedSegmentCheckDestroy(state *terraform.State, displayNa
 			return fmt.Errorf("Policy resource ID not set in resources")
 		}
 		gwPath := rs.Primary.Attributes["connectivity_path"]
-		exists, err := resourceNsxtPolicySegmentExists(gwPath, true)(resourceID, connector, testAccIsGlobalManager())
+		context := testAccGetSessionContext()
+		exists, err := resourceNsxtPolicySegmentExists(context, gwPath, true)(context, resourceID, connector)
 		if err == nil {
 			return err
 		}

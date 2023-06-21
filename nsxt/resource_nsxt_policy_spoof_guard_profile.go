@@ -9,10 +9,10 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
-	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 func resourceNsxtPolicySpoofGuardProfile() *schema.Resource {
@@ -32,6 +32,7 @@ func resourceNsxtPolicySpoofGuardProfile() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
+			"context":      getContextSchema(),
 			"address_binding_allowlist": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -40,15 +41,9 @@ func resourceNsxtPolicySpoofGuardProfile() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicySpoofGuardProfileExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
-	var err error
-	if isGlobalManager {
-		client := gm_infra.NewSpoofguardProfilesClient(connector)
-		_, err = client.Get(id)
-	} else {
-		client := infra.NewSpoofguardProfilesClient(connector)
-		_, err = client.Get(id)
-	}
+func resourceNsxtPolicySpoofGuardProfileExists(context utl.SessionContext, id string, connector client.Connector) (bool, error) {
+	client := infra.NewSpoofguardProfilesClient(context, connector)
+	_, err := client.Get(id)
 	if err == nil {
 		return true, nil
 	}
@@ -76,23 +71,14 @@ func resourceNsxtPolicySpoofGuardProfilePatch(d *schema.ResourceData, m interfac
 	}
 
 	log.Printf("[INFO] Patching SpoofGuardProfile with ID %s", id)
-	if isPolicyGlobalManager(m) {
-		gmObj, convErr := convertModelBindingType(obj, model.SpoofGuardProfileBindingType(), gm_model.SpoofGuardProfileBindingType())
-		if convErr != nil {
-			return convErr
-		}
-		client := gm_infra.NewSpoofguardProfilesClient(connector)
-		return client.Patch(id, gmObj.(gm_model.SpoofGuardProfile), nil)
-	}
-
-	client := infra.NewSpoofguardProfilesClient(connector)
+	client := infra.NewSpoofguardProfilesClient(getSessionContext(d, m), connector)
 	return client.Patch(id, obj, nil)
 }
 
 func resourceNsxtPolicySpoofGuardProfileCreate(d *schema.ResourceData, m interface{}) error {
 
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID(d, m, resourceNsxtPolicySpoofGuardProfileExists)
+	id, err := getOrGenerateID2(d, m, resourceNsxtPolicySpoofGuardProfileExists)
 	if err != nil {
 		return err
 	}
@@ -116,26 +102,10 @@ func resourceNsxtPolicySpoofGuardProfileRead(d *schema.ResourceData, m interface
 		return fmt.Errorf("Error obtaining SpoofGuardProfile ID")
 	}
 
-	var obj model.SpoofGuardProfile
-	if isPolicyGlobalManager(m) {
-		client := gm_infra.NewSpoofguardProfilesClient(connector)
-		gmObj, err := client.Get(id)
-		if err != nil {
-			return handleReadError(d, "SpoofGuardProfile", id, err)
-		}
-
-		lmObj, err := convertModelBindingType(gmObj, gm_model.SpoofGuardProfileBindingType(), model.SpoofGuardProfileBindingType())
-		if err != nil {
-			return err
-		}
-		obj = lmObj.(model.SpoofGuardProfile)
-	} else {
-		client := infra.NewSpoofguardProfilesClient(connector)
-		var err error
-		obj, err = client.Get(id)
-		if err != nil {
-			return handleReadError(d, "SpoofGuardProfile", id, err)
-		}
+	client := infra.NewSpoofguardProfilesClient(getSessionContext(d, m), connector)
+	obj, err := client.Get(id)
+	if err != nil {
+		return handleReadError(d, "SpoofGuardProfile", id, err)
 	}
 
 	d.Set("display_name", obj.DisplayName)
@@ -172,14 +142,8 @@ func resourceNsxtPolicySpoofGuardProfileDelete(d *schema.ResourceData, m interfa
 	}
 
 	connector := getPolicyConnector(m)
-	var err error
-	if isPolicyGlobalManager(m) {
-		client := gm_infra.NewSpoofguardProfilesClient(connector)
-		err = client.Delete(id, nil)
-	} else {
-		client := infra.NewSpoofguardProfilesClient(connector)
-		err = client.Delete(id, nil)
-	}
+	client := infra.NewSpoofguardProfilesClient(getSessionContext(d, m), connector)
+	err := client.Delete(id, nil)
 
 	if err != nil {
 		return handleDeleteError("SpoofGuardProfile", id, err)

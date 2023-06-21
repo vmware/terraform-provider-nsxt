@@ -10,10 +10,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
-	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 func resourceNsxtPolicySegmentSecurityProfile() *schema.Resource {
@@ -33,6 +33,7 @@ func resourceNsxtPolicySegmentSecurityProfile() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
+			"context":      getContextSchema(),
 			"bpdu_filter_allow": {
 				Type: schema.TypeSet,
 				Elem: &schema.Schema{
@@ -114,15 +115,9 @@ func resourceNsxtPolicySegmentSecurityProfile() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicySegmentSecurityProfileExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
-	var err error
-	if isGlobalManager {
-		client := gm_infra.NewSegmentSecurityProfilesClient(connector)
-		_, err = client.Get(id)
-	} else {
-		client := infra.NewSegmentSecurityProfilesClient(connector)
-		_, err = client.Get(id)
-	}
+func resourceNsxtPolicySegmentSecurityProfileExists(context utl.SessionContext, id string, connector client.Connector) (bool, error) {
+	client := infra.NewSegmentSecurityProfilesClient(context, connector)
+	_, err := client.Get(id)
 	if err == nil {
 		return true, nil
 	}
@@ -184,23 +179,14 @@ func resourceNsxtPolicySegmentSecurityProfilePatch(d *schema.ResourceData, m int
 	}
 
 	log.Printf("[INFO] Sending SegmentSecurityProfile with ID %s", id)
-	if isPolicyGlobalManager(m) {
-		gmObj, convErr := convertModelBindingType(obj, model.SegmentSecurityProfileBindingType(), gm_model.SegmentSecurityProfileBindingType())
-		if convErr != nil {
-			return convErr
-		}
-		client := gm_infra.NewSegmentSecurityProfilesClient(connector)
-		return client.Patch(id, gmObj.(gm_model.SegmentSecurityProfile), nil)
-	}
-
-	client := infra.NewSegmentSecurityProfilesClient(connector)
+	client := infra.NewSegmentSecurityProfilesClient(getSessionContext(d, m), connector)
 	return client.Patch(id, obj, nil)
 }
 
 func resourceNsxtPolicySegmentSecurityProfileCreate(d *schema.ResourceData, m interface{}) error {
 
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID(d, m, resourceNsxtPolicySegmentSecurityProfileExists)
+	id, err := getOrGenerateID2(d, m, resourceNsxtPolicySegmentSecurityProfileExists)
 	if err != nil {
 		return err
 	}
@@ -224,26 +210,10 @@ func resourceNsxtPolicySegmentSecurityProfileRead(d *schema.ResourceData, m inte
 		return fmt.Errorf("Error obtaining SegmentSecurityProfile ID")
 	}
 
-	var obj model.SegmentSecurityProfile
-	if isPolicyGlobalManager(m) {
-		client := gm_infra.NewSegmentSecurityProfilesClient(connector)
-		gmObj, err := client.Get(id)
-		if err != nil {
-			return handleReadError(d, "SegmentSecurityProfile", id, err)
-		}
-
-		lmObj, err := convertModelBindingType(gmObj, gm_model.SegmentSecurityProfileBindingType(), model.SegmentSecurityProfileBindingType())
-		if err != nil {
-			return err
-		}
-		obj = lmObj.(model.SegmentSecurityProfile)
-	} else {
-		client := infra.NewSegmentSecurityProfilesClient(connector)
-		var err error
-		obj, err = client.Get(id)
-		if err != nil {
-			return handleReadError(d, "SegmentSecurityProfile", id, err)
-		}
+	client := infra.NewSegmentSecurityProfilesClient(getSessionContext(d, m), connector)
+	obj, err := client.Get(id)
+	if err != nil {
+		return handleReadError(d, "SegmentSecurityProfile", id, err)
 	}
 
 	d.Set("display_name", obj.DisplayName)
@@ -300,14 +270,8 @@ func resourceNsxtPolicySegmentSecurityProfileDelete(d *schema.ResourceData, m in
 	}
 
 	connector := getPolicyConnector(m)
-	var err error
-	if isPolicyGlobalManager(m) {
-		client := gm_infra.NewSegmentSecurityProfilesClient(connector)
-		err = client.Delete(id, nil)
-	} else {
-		client := infra.NewSegmentSecurityProfilesClient(connector)
-		err = client.Delete(id, nil)
-	}
+	client := infra.NewSegmentSecurityProfilesClient(getSessionContext(d, m), connector)
+	err := client.Delete(id, nil)
 
 	if err != nil {
 		return handleDeleteError("SegmentSecurityProfile", id, err)

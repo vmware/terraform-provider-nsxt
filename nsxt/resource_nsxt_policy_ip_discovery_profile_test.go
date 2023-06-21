@@ -165,7 +165,7 @@ func testAccNsxtPolicyIPDiscoveryProfileExists(displayName string, resourceName 
 			return fmt.Errorf("Policy IPDiscoveryProfile resource ID not set in resources")
 		}
 
-		exists, err := resourceNsxtPolicyIPDiscoveryProfileExists(resourceID, connector, testAccIsGlobalManager())
+		exists, err := resourceNsxtPolicyIPDiscoveryProfileExists(testAccGetSessionContext(), resourceID, connector)
 		if err != nil {
 			return err
 		}
@@ -186,7 +186,7 @@ func testAccNsxtPolicyIPDiscoveryProfileCheckDestroy(state *terraform.State, dis
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		exists, err := resourceNsxtPolicyIPDiscoveryProfileExists(resourceID, connector, testAccIsGlobalManager())
+		exists, err := resourceNsxtPolicyIPDiscoveryProfileExists(testAccGetSessionContext(), resourceID, connector)
 		if err == nil {
 			return err
 		}

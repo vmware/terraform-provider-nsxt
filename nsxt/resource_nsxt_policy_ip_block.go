@@ -9,8 +9,10 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 func resourceNsxtPolicyIPBlock() *schema.Resource {
@@ -30,6 +32,7 @@ func resourceNsxtPolicyIPBlock() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
+			"context":      getContextSchema(),
 			"cidr": {
 				Type:         schema.TypeString,
 				Description:  "Network address and the prefix length which will be associated with a layer-2 broadcast domain",
@@ -40,8 +43,8 @@ func resourceNsxtPolicyIPBlock() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyIPBlockExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
-	client := infra.NewIpBlocksClient(connector)
+func resourceNsxtPolicyIPBlockExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
+	client := infra.NewIpBlocksClient(sessionContext, connector)
 
 	_, err := client.Get(id)
 	if err == nil {
@@ -57,7 +60,7 @@ func resourceNsxtPolicyIPBlockExists(id string, connector client.Connector, isGl
 
 func resourceNsxtPolicyIPBlockRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewIpBlocksClient(connector)
+	client := infra.NewIpBlocksClient(getSessionContext(d, m), connector)
 
 	id := d.Id()
 	if id == "" {
@@ -82,9 +85,9 @@ func resourceNsxtPolicyIPBlockRead(d *schema.ResourceData, m interface{}) error 
 
 func resourceNsxtPolicyIPBlockCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewIpBlocksClient(connector)
+	client := infra.NewIpBlocksClient(getSessionContext(d, m), connector)
 
-	id, err := getOrGenerateID(d, m, resourceNsxtPolicyIPBlockExists)
+	id, err := getOrGenerateID2(d, m, resourceNsxtPolicyIPBlockExists)
 	if err != nil {
 		return err
 	}
@@ -115,7 +118,7 @@ func resourceNsxtPolicyIPBlockCreate(d *schema.ResourceData, m interface{}) erro
 
 func resourceNsxtPolicyIPBlockUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewIpBlocksClient(connector)
+	client := infra.NewIpBlocksClient(getSessionContext(d, m), connector)
 
 	id := d.Id()
 	if id == "" {
@@ -153,7 +156,7 @@ func resourceNsxtPolicyIPBlockDelete(d *schema.ResourceData, m interface{}) erro
 	}
 
 	connector := getPolicyConnector(m)
-	client := infra.NewIpBlocksClient(connector)
+	client := infra.NewIpBlocksClient(getSessionContext(d, m), connector)
 	err := client.Delete(id)
 	if err != nil {
 		return handleDeleteError("IP Block", id, err)

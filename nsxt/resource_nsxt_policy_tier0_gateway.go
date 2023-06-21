@@ -15,6 +15,8 @@ import (
 	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
 	gm_tier_0s "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s"
 	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
+
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services"
@@ -298,7 +300,7 @@ func getPolicyVRFConfigSchema() *schema.Schema {
 	}
 }
 
-func listGlobalManagerTier0GatewayLocaleServices(connector client.Connector, gwID string, cursor *string) (model.LocaleServicesListResult, error) {
+func listGlobalManagerTier0GatewayLocaleServices(context utl.SessionContext, connector client.Connector, gwID string, cursor *string) (model.LocaleServicesListResult, error) {
 	client := gm_tier_0s.NewLocaleServicesClient(connector)
 	markForDelete := false
 	listResponse, err := client.List(gwID, cursor, &markForDelete, nil, nil, nil, nil)
@@ -314,22 +316,22 @@ func listGlobalManagerTier0GatewayLocaleServices(connector client.Connector, gwI
 	return convertedResult.(model.LocaleServicesListResult), nil
 }
 
-func listLocalManagerTier0GatewayLocaleServices(connector client.Connector, gwID string, cursor *string) (model.LocaleServicesListResult, error) {
+func listLocalManagerTier0GatewayLocaleServices(context utl.SessionContext, connector client.Connector, gwID string, cursor *string) (model.LocaleServicesListResult, error) {
 	client := tier_0s.NewLocaleServicesClient(connector)
 	markForDelete := false
 	return client.List(gwID, cursor, &markForDelete, nil, nil, nil, nil)
 }
 
-func listPolicyTier0GatewayLocaleServices(connector client.Connector, gwID string, isGlobalManager bool) ([]model.LocaleServices, error) {
+func listPolicyTier0GatewayLocaleServices(context utl.SessionContext, connector client.Connector, gwID string) ([]model.LocaleServices, error) {
 
-	if isGlobalManager {
-		return listPolicyGatewayLocaleServices(connector, gwID, listGlobalManagerTier0GatewayLocaleServices)
+	if context.ClientType == utl.Global {
+		return listPolicyGatewayLocaleServices(context, connector, gwID, listGlobalManagerTier0GatewayLocaleServices)
 	}
 
-	return listPolicyGatewayLocaleServices(connector, gwID, listLocalManagerTier0GatewayLocaleServices)
+	return listPolicyGatewayLocaleServices(context, connector, gwID, listLocalManagerTier0GatewayLocaleServices)
 }
 
-func getPolicyTier0GatewayLocaleServiceWithEdgeCluster(gwID string, connector client.Connector) (*model.LocaleServices, error) {
+func getPolicyTier0GatewayLocaleServiceWithEdgeCluster(context utl.SessionContext, gwID string, connector client.Connector) (*model.LocaleServices, error) {
 	// Get the locale services of this Tier0 for the edge-cluster id
 	client := tier_0s.NewLocaleServicesClient(connector)
 	obj, err := client.Get(gwID, defaultPolicyLocaleServiceID)
@@ -339,7 +341,7 @@ func getPolicyTier0GatewayLocaleServiceWithEdgeCluster(gwID string, connector cl
 
 	// No locale-service with the default ID
 	// List all the locale services
-	objList, errList := listPolicyTier0GatewayLocaleServices(connector, gwID, false)
+	objList, errList := listPolicyTier0GatewayLocaleServices(context, connector, gwID)
 	if errList != nil {
 		if isNotFoundError(errList) {
 			return nil, nil
@@ -636,14 +638,14 @@ func resourceNsxtPolicyTier0GatewayBGPConfigSchemaToStruct(cfg interface{}, isVr
 	return routeStruct
 }
 
-func initSingleTier0GatewayLocaleService(d *schema.ResourceData, children []*data.StructValue, connector client.Connector) (*data.StructValue, error) {
+func initSingleTier0GatewayLocaleService(context utl.SessionContext, d *schema.ResourceData, children []*data.StructValue, connector client.Connector) (*data.StructValue, error) {
 
 	edgeClusterPath := d.Get("edge_cluster_path").(string)
 	var serviceStruct *model.LocaleServices
 	var err error
 	if len(d.Id()) > 0 {
 		// This is an update flow - fetch existing locale service to reuse if needed
-		serviceStruct, err = getPolicyTier0GatewayLocaleServiceWithEdgeCluster(d.Id(), connector)
+		serviceStruct, err = getPolicyTier0GatewayLocaleServiceWithEdgeCluster(context, d.Id(), connector)
 		if err != nil {
 			return nil, err
 		}
@@ -702,10 +704,11 @@ func initPolicyTier0ChildBgpConfig(config *model.BgpRoutingConfig) (*data.Struct
 	return dataValue.(*data.StructValue), nil
 }
 
-func policyTier0GatewayResourceToInfraStruct(d *schema.ResourceData, connector client.Connector, isGlobalManager bool, id string) (model.Infra, error) {
+func policyTier0GatewayResourceToInfraStruct(context utl.SessionContext, d *schema.ResourceData, connector client.Connector, id string) (model.Infra, error) {
 	var infraChildren, gwChildren, lsChildren []*data.StructValue
 	var infraStruct model.Infra
 	converter := bindings.NewTypeConverter()
+	isGlobalManager := context.ClientType == utl.Global
 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
@@ -781,7 +784,7 @@ func policyTier0GatewayResourceToInfraStruct(d *schema.ResourceData, connector c
 	// The user can either define locale_service (GL or LM) or edge_cluster_path (LM only)
 	if d.HasChange("locale_service") {
 		// Update locale services only if configuration changed
-		localeServices, err := initGatewayLocaleServices(d, connector, isGlobalManager, listPolicyTier0GatewayLocaleServices)
+		localeServices, err := initGatewayLocaleServices(context, d, connector, listPolicyTier0GatewayLocaleServices)
 		if err != nil {
 			return infraStruct, err
 		}
@@ -802,7 +805,7 @@ func policyTier0GatewayResourceToInfraStruct(d *schema.ResourceData, connector c
 			}
 
 			var err error
-			dataValue, err := initSingleTier0GatewayLocaleService(d, lsChildren, connector)
+			dataValue, err := initSingleTier0GatewayLocaleService(context, d, lsChildren, connector)
 			if err != nil {
 				return infraStruct, err
 			}
@@ -833,8 +836,8 @@ func policyTier0GatewayResourceToInfraStruct(d *schema.ResourceData, connector c
 func resourceNsxtPolicyTier0GatewayCreate(d *schema.ResourceData, m interface{}) error {
 
 	connector := getPolicyConnector(m)
-	isGlobalManager := isPolicyGlobalManager(m)
-
+	context := getSessionContext(d, m)
+	isGlobalManager := context.ClientType == utl.Global
 	err := verifyPolicyTier0GatewayConfig(d, isGlobalManager)
 	if err != nil {
 		return err
@@ -846,14 +849,14 @@ func resourceNsxtPolicyTier0GatewayCreate(d *schema.ResourceData, m interface{})
 		return err
 	}
 
-	obj, err := policyTier0GatewayResourceToInfraStruct(d, connector, isGlobalManager, id)
+	obj, err := policyTier0GatewayResourceToInfraStruct(getSessionContext(d, m), d, connector, id)
 	if err != nil {
 		return err
 	}
 
 	log.Printf("[INFO] Using H-API to create Tier0 with ID %s", id)
 
-	err = policyInfraPatch(obj, isGlobalManager, getPolicyConnector(m), false)
+	err = policyInfraPatch(getSessionContext(d, m), obj, getPolicyConnector(m), false)
 	if err != nil {
 		return handleCreateError("Tier0", id, err)
 	}
@@ -923,7 +926,7 @@ func resourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{}) e
 		d.Set("dhcp_config_path", dhcpPaths[0])
 	}
 	// Get the edge cluster Id or locale services
-	localeServices, err := listPolicyTier0GatewayLocaleServices(connector, id, isGlobalManager)
+	localeServices, err := listPolicyTier0GatewayLocaleServices(getSessionContext(d, m), connector, id)
 	if err != nil {
 		return handleReadError(d, "Locale Service for T0", id, err)
 	}
@@ -1010,14 +1013,14 @@ func resourceNsxtPolicyTier0GatewayUpdate(d *schema.ResourceData, m interface{})
 		return fmt.Errorf("Error obtaining Tier0 ID")
 	}
 
-	obj, err := policyTier0GatewayResourceToInfraStruct(d, connector, isGlobalManager, id)
+	obj, err := policyTier0GatewayResourceToInfraStruct(getSessionContext(d, m), d, connector, id)
 	if err != nil {
 		return handleUpdateError("Tier0", id, err)
 	}
 
 	log.Printf("[INFO] Using H-API to update Tier0 with ID %s", id)
 
-	err = policyInfraPatch(obj, isGlobalManager, connector, true)
+	err = policyInfraPatch(getSessionContext(d, m), obj, connector, true)
 	if err != nil {
 		return handleUpdateError("Tier0", id, err)
 	}
@@ -1058,7 +1061,7 @@ func resourceNsxtPolicyTier0GatewayDelete(d *schema.ResourceData, m interface{})
 	}
 
 	log.Printf("[DEBUG] Using H-API to delete Tier0 with ID %s", id)
-	err := policyInfraPatch(obj, isPolicyGlobalManager(m), getPolicyConnector(m), false)
+	err := policyInfraPatch(getSessionContext(d, m), obj, getPolicyConnector(m), false)
 	if err != nil {
 		return handleDeleteError("Tier0", id, err)
 	}

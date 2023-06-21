@@ -458,11 +458,11 @@ func TestAccResourceNsxtPolicyTier1Gateway_importBasic(t *testing.T) {
 }
 
 func testAccNsxtPolicyTier1Exists(resourceName string) resource.TestCheckFunc {
-	return testAccNsxtPolicyResourceExists(resourceName, resourceNsxtPolicyTier1GatewayExists)
+	return testAccNsxtPolicyResourceExists(testAccGetSessionContext(), resourceName, resourceNsxtPolicyTier1GatewayExists)
 }
 
 func testAccNsxtPolicyTier1CheckDestroy(state *terraform.State, displayName string) error {
-	return testAccNsxtPolicyResourceCheckDestroy(state, displayName, "nsxt_policy_tier1_gateway", resourceNsxtPolicyTier1GatewayExists)
+	return testAccNsxtPolicyResourceCheckDestroy(testAccGetSessionContext(), state, displayName, "nsxt_policy_tier1_gateway", resourceNsxtPolicyTier1GatewayExists)
 }
 
 func testAccNsxtPolicyTier1CreateDHCPTemplate() string {

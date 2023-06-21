@@ -128,7 +128,7 @@ func testAccNsxtPolicyDNSForwarderZoneExists(displayName string, resourceName st
 			return fmt.Errorf("Policy PolicyDNSForwarderZone resource ID not set in resources")
 		}
 
-		exists, err := resourceNsxtPolicyDNSForwarderZoneExists(resourceID, connector, testAccIsGlobalManager())
+		exists, err := resourceNsxtPolicyDNSForwarderZoneExists(testAccGetSessionContext(), resourceID, connector)
 		if err != nil {
 			return err
 		}
@@ -149,7 +149,7 @@ func testAccNsxtPolicyDNSForwarderZoneCheckDestroy(state *terraform.State, displ
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		exists, err := resourceNsxtPolicyDNSForwarderZoneExists(resourceID, connector, testAccIsGlobalManager())
+		exists, err := resourceNsxtPolicyDNSForwarderZoneExists(testAccGetSessionContext(), resourceID, connector)
 		if err == nil {
 			return err
 		}

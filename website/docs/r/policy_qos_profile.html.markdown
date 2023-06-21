@@ -49,6 +49,51 @@ resource "nsxt_policy_qos_profile" "qos_profile" {
 }
 ```
 
+## Example Usage - Multi-Tenancy
+
+```hcl
+data "nsxt_policy_project" "demoproj" {
+  display_name = "demoproj"
+}
+
+resource "nsxt_policy_qos_profile" "qos_profile" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
+  description      = "qos profile provisioned by Terraform"
+  display_name     = "qos_profile1"
+  class_of_service = "5"
+  dscp_trusted     = "true"
+  dscp_priority    = "53"
+
+  ingress_rate_shaper {
+    enabled         = "true"
+    peak_bw_mbps    = "800"
+    burst_size      = "200"
+    average_bw_mbps = "100"
+  }
+
+  egress_rate_shaper {
+    enabled         = "true"
+    peak_bw_mbps    = "800"
+    burst_size      = "200"
+    average_bw_mbps = "100"
+  }
+
+  ingress_broadcast_rate_shaper {
+    enabled         = "true"
+    average_bw_kbps = "111"
+    burst_size      = "222"
+    peak_bw_kbps    = "500"
+  }
+
+  tag {
+    scope = "color"
+    tag   = "red"
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -57,6 +102,8 @@ The following arguments are supported:
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this policy.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
+* `context` - (Optional) The context which the object belongs to
+  * `project_id` - The ID of the project which the object belongs to
 * `class_of_service` - (Optional) Class of service.
 * `dscp_trusted` - (Optional) Trust mode for DSCP (False by default)
 * `dscp_priority` - (Optional) DSCP Priority (0-63)

@@ -682,7 +682,7 @@ func testAccNsxtPolicyGroupCheckDestroy(state *terraform.State, displayName stri
 				return fmt.Errorf("Error while retrieving policy domain %s. Error: %v", domainName, errDomain)
 			}
 		}
-		exists, err := resourceNsxtPolicyGroupExistsInDomain(resourceID, domainID, connector, isPolicyGlobalManager)
+		exists, err := resourceNsxtPolicyGroupExistsInDomain(testAccGetSessionContext(), resourceID, domainID, connector)
 		if err != nil {
 			return err
 		}

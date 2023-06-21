@@ -20,11 +20,29 @@ data "nsxt_policy_gateway_locale_service" "test" {
 }
 ```
 
+## Example Usage - Multi-Tenancy
+
+```hcl
+data "nsxt_policy_project" "demoproj" {
+  display_name = "demoproj"
+}
+
+data "nsxt_policy_gateway_locale_service" "demoserv" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
+  gateway_path = data.nsxt_policy_tier1_gateway.path
+  display_name = "demoserv"
+}
+```
+
 ## Argument Reference
 
 * `gateway_path` - (Required) Path for the gateway.
 * `id` - (Optional) The ID of locale service gateway to retrieve.
 * `display_name` - (Optional) The Display Name or prefix of locale service to retrieve.
+* `context` - (Optional) The context which the object belongs to
+    * `project_id` - The ID of the project which the object belongs to
 
 ## Attributes Reference
 

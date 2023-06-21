@@ -114,7 +114,7 @@ func testAccNsxtPolicySpoofGuardProfileExists(displayName string, resourceName s
 			return fmt.Errorf("Policy SpoofGuardProfile resource ID not set in resources")
 		}
 
-		exists, err := resourceNsxtPolicySpoofGuardProfileExists(resourceID, connector, testAccIsGlobalManager())
+		exists, err := resourceNsxtPolicySpoofGuardProfileExists(testAccGetSessionContext(), resourceID, connector)
 		if err != nil {
 			return err
 		}
@@ -135,7 +135,7 @@ func testAccNsxtPolicySpoofGuardProfileCheckDestroy(state *terraform.State, disp
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		exists, err := resourceNsxtPolicySpoofGuardProfileExists(resourceID, connector, testAccIsGlobalManager())
+		exists, err := resourceNsxtPolicySpoofGuardProfileExists(testAccGetSessionContext(), resourceID, connector)
 		if err == nil {
 			return err
 		}

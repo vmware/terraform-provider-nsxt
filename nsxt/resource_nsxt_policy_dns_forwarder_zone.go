@@ -10,10 +10,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
-	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	infra "github.com/vmware/terraform-provider-nsxt/api/infra"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 func resourceNsxtPolicyDNSForwarderZone() *schema.Resource {
@@ -33,6 +33,7 @@ func resourceNsxtPolicyDNSForwarderZone() *schema.Resource {
 			"description":      getDescriptionSchema(),
 			"revision":         getRevisionSchema(),
 			"tag":              getTagsSchema(),
+			"context":          getContextSchema(),
 			"dns_domain_names": getDomainNamesSchema(),
 			"source_ip": {
 				Type:         schema.TypeString,
@@ -54,15 +55,9 @@ func resourceNsxtPolicyDNSForwarderZone() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyDNSForwarderZoneExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
-	var err error
-	if isGlobalManager {
-		client := gm_infra.NewDnsForwarderZonesClient(connector)
-		_, err = client.Get(id)
-	} else {
-		client := infra.NewDnsForwarderZonesClient(connector)
-		_, err = client.Get(id)
-	}
+func resourceNsxtPolicyDNSForwarderZoneExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
+	client := infra.NewDnsForwarderZonesClient(sessionContext, connector)
+	_, err := client.Get(id)
 	if err == nil {
 		return true, nil
 	}
@@ -74,7 +69,7 @@ func resourceNsxtPolicyDNSForwarderZoneExists(id string, connector client.Connec
 	return false, logAPIError("Error retrieving resource", err)
 }
 
-func policyDNSForwarderZonePatch(id string, d *schema.ResourceData, connector client.Connector, isGlobalManager bool) error {
+func policyDNSForwarderZonePatch(id string, d *schema.ResourceData, m interface{}, connector client.Connector) error {
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
 	tags := getPolicyTagsFromSchema(d)
@@ -98,16 +93,7 @@ func policyDNSForwarderZonePatch(id string, d *schema.ResourceData, connector cl
 	}
 
 	// Create the resource using PATCH
-	if isGlobalManager {
-		gmObj, convErr := convertModelBindingType(obj, model.PolicyDnsForwarderZoneBindingType(), gm_model.PolicyDnsForwarderZoneBindingType())
-		if convErr != nil {
-			return convErr
-		}
-		client := gm_infra.NewDnsForwarderZonesClient(connector)
-		return client.Patch(id, gmObj.(gm_model.PolicyDnsForwarderZone))
-	}
-
-	client := infra.NewDnsForwarderZonesClient(connector)
+	client := infra.NewDnsForwarderZonesClient(getSessionContext(d, m), connector)
 	return client.Patch(id, obj)
 }
 
@@ -115,13 +101,13 @@ func resourceNsxtPolicyDNSForwarderZoneCreate(d *schema.ResourceData, m interfac
 	connector := getPolicyConnector(m)
 
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID(d, m, resourceNsxtPolicyDNSForwarderZoneExists)
+	id, err := getOrGenerateID2(d, m, resourceNsxtPolicyDNSForwarderZoneExists)
 	if err != nil {
 		return err
 	}
 
 	log.Printf("[INFO] Creating Dns Forwarder Zone with ID %s", id)
-	err = policyDNSForwarderZonePatch(id, d, connector, isPolicyGlobalManager(m))
+	err = policyDNSForwarderZonePatch(id, d, m, connector)
 
 	if err != nil {
 		return handleCreateError("Dns Forwarder Zone", id, err)
@@ -141,26 +127,10 @@ func resourceNsxtPolicyDNSForwarderZoneRead(d *schema.ResourceData, m interface{
 		return fmt.Errorf("Error obtaining Dns Forwarder Zone ID")
 	}
 
-	var obj model.PolicyDnsForwarderZone
-	if isPolicyGlobalManager(m) {
-		client := gm_infra.NewDnsForwarderZonesClient(connector)
-		gmObj, err := client.Get(id)
-		if err != nil {
-			return handleReadError(d, "Dns Forwarder Zone", id, err)
-		}
-
-		lmObj, err := convertModelBindingType(gmObj, gm_model.PolicyDnsForwarderZoneBindingType(), model.PolicyDnsForwarderZoneBindingType())
-		if err != nil {
-			return err
-		}
-		obj = lmObj.(model.PolicyDnsForwarderZone)
-	} else {
-		client := infra.NewDnsForwarderZonesClient(connector)
-		var err error
-		obj, err = client.Get(id)
-		if err != nil {
-			return handleReadError(d, "Dns Forwarder Zone", id, err)
-		}
+	client := infra.NewDnsForwarderZonesClient(getSessionContext(d, m), connector)
+	obj, err := client.Get(id)
+	if err != nil {
+		return handleReadError(d, "Dns Forwarder Zone", id, err)
 	}
 
 	d.Set("display_name", obj.DisplayName)
@@ -186,7 +156,7 @@ func resourceNsxtPolicyDNSForwarderZoneUpdate(d *schema.ResourceData, m interfac
 	}
 
 	log.Printf("[INFO] Updating Dns Forwarder Zone with ID %s", id)
-	err := policyDNSForwarderZonePatch(id, d, connector, isPolicyGlobalManager(m))
+	err := policyDNSForwarderZonePatch(id, d, m, connector)
 	if err != nil {
 		return handleUpdateError("Dns Forwarder Zone", id, err)
 	}
@@ -201,14 +171,8 @@ func resourceNsxtPolicyDNSForwarderZoneDelete(d *schema.ResourceData, m interfac
 	}
 
 	connector := getPolicyConnector(m)
-	var err error
-	if isPolicyGlobalManager(m) {
-		client := gm_infra.NewDnsForwarderZonesClient(connector)
-		err = client.Delete(id)
-	} else {
-		client := infra.NewDnsForwarderZonesClient(connector)
-		err = client.Delete(id)
-	}
+	client := infra.NewDnsForwarderZonesClient(getSessionContext(d, m), connector)
+	err := client.Delete(id)
 
 	if err != nil {
 		return handleDeleteError("Dns Forwarder Zone", id, err)

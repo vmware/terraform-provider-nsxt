@@ -4,12 +4,7 @@
 package nsxt
 
 import (
-	"fmt"
-	"strings"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
 func dataSourceNsxtPolicyIpv6NdraProfile() *schema.Resource {
@@ -21,70 +16,15 @@ func dataSourceNsxtPolicyIpv6NdraProfile() *schema.Resource {
 			"display_name": getDataSourceDisplayNameSchema(),
 			"description":  getDataSourceDescriptionSchema(),
 			"path":         getPathSchema(),
+			"context":      getContextSchema(),
 		},
 	}
 }
 
 func dataSourceNsxtPolicyIpv6NdraProfileRead(d *schema.ResourceData, m interface{}) error {
-	if isPolicyGlobalManager(m) {
-		_, err := policyDataSourceResourceRead(d, getPolicyConnector(m), true, "Ipv6NdraProfile", nil)
-		if err != nil {
-			return err
-		}
-		return nil
+	_, err := policyDataSourceResourceRead(d, getPolicyConnector(m), getSessionContext(d, m), "Ipv6NdraProfile", nil)
+	if err != nil {
+		return err
 	}
-
-	connector := getPolicyConnector(m)
-	client := infra.NewIpv6NdraProfilesClient(connector)
-
-	objID := d.Get("id").(string)
-	objName := d.Get("display_name").(string)
-	var obj model.Ipv6NdraProfile
-	if objID != "" {
-		// Get by id
-		objGet, err := client.Get(objID)
-		if err != nil {
-			return handleDataSourceReadError(d, "IPv6NdraProfile", objID, err)
-		}
-		obj = objGet
-	} else if objName == "" {
-		return fmt.Errorf("Error obtaining Ipv6NdraProfile ID or name during read")
-	} else {
-		// Get by full name/prefix
-		includeMarkForDeleteObjectsParam := false
-		objList, err := client.List(nil, &includeMarkForDeleteObjectsParam, nil, nil, nil, nil)
-		if err != nil {
-			return handleListError("IPv6NdraProfile", err)
-		}
-		// go over the list to find the correct one (prefer a perfect match. If not - prefix match)
-		var perfectMatch []model.Ipv6NdraProfile
-		var prefixMatch []model.Ipv6NdraProfile
-		for _, objInList := range objList.Results {
-			if strings.HasPrefix(*objInList.DisplayName, objName) {
-				prefixMatch = append(prefixMatch, objInList)
-			}
-			if *objInList.DisplayName == objName {
-				perfectMatch = append(perfectMatch, objInList)
-			}
-		}
-		if len(perfectMatch) > 0 {
-			if len(perfectMatch) > 1 {
-				return fmt.Errorf("Found multiple Ipv6NdraProfiles with name '%s'", objName)
-			}
-			obj = perfectMatch[0]
-		} else if len(prefixMatch) > 0 {
-			if len(prefixMatch) > 1 {
-				return fmt.Errorf("Found multiple Ipv6NdraProfiles with name starting with '%s'", objName)
-			}
-			obj = prefixMatch[0]
-		} else {
-			return fmt.Errorf("Ipv6NdraProfile with name '%s' was not found", objName)
-		}
-	}
-
-	d.SetId(*obj.Id)
-	d.Set("display_name", obj.DisplayName)
-	d.Set("description", obj.Description)
-	d.Set("path", obj.Path)
 	return nil
 }

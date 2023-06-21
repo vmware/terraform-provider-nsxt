@@ -276,6 +276,17 @@ github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/locale_s
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/nat
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/segments
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs
+github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects
+github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra
+github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/context_profiles/custom_attributes
+github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/domains
+github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/ip_pools
+github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/realized_state
+github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/segments
+github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/tier_1s
+github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/tier_1s/locale_services
+github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/tier_1s/nat
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt/search
 # github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm v0.8.0
 ## explicit; go 1.17

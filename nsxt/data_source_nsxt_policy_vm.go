@@ -46,8 +46,9 @@ func dataSourceNsxtPolicyVMIDRead(d *schema.ResourceData, m interface{}) error {
 
 	// TODO: test with KVM based VM
 	objID := getNsxtPolicyVMIDFromSchema(d)
+	context := getSessionContext(d, m)
 	if objID != "" {
-		vmObj, err := findNsxtPolicyVMByID(connector, objID, m)
+		vmObj, err := findNsxtPolicyVMByID(context, connector, objID, m)
 		if err != nil {
 			return fmt.Errorf("Error while reading Virtual Machine %s: %v", objID, err)
 		}
@@ -55,7 +56,7 @@ func dataSourceNsxtPolicyVMIDRead(d *schema.ResourceData, m interface{}) error {
 	} else {
 		displayName := d.Get("display_name").(string)
 
-		perfectMatch, prefixMatch, err := findNsxtPolicyVMByNamePrefix(connector, displayName, m)
+		perfectMatch, prefixMatch, err := findNsxtPolicyVMByNamePrefix(context, connector, displayName, m)
 		if err != nil {
 			return err
 		}

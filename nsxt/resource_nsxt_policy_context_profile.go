@@ -9,14 +9,15 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
 	gm_cont_prof "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/context_profiles"
 	gm_custom_attr "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/context_profiles/custom_attributes"
 	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	cont_prof "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/context_profiles"
 	custom_attr "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/context_profiles/custom_attributes"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 var attributeKeyMap = map[string]string{
@@ -62,6 +63,7 @@ func resourceNsxtPolicyContextProfile() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
+			"context":      getContextSchema(),
 			"app_id":       getContextProfilePolicyAppIDAttributesSchema(),
 			"custom_url":   getContextProfilePolicyCustomURLAttributesSchema(),
 			"domain_name":  getContextProfilePolicyOtherAttributesSchema(),
@@ -170,15 +172,9 @@ func getPolicyAttributeSubAttributeValueSchema(subAttributeKey string) *schema.S
 	}
 }
 
-func resourceNsxtPolicyContextProfileExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
-	var err error
-	if isGlobalManager {
-		client := gm_infra.NewContextProfilesClient(connector)
-		_, err = client.Get(id)
-	} else {
-		client := infra.NewContextProfilesClient(connector)
-		_, err = client.Get(id)
-	}
+func resourceNsxtPolicyContextProfileExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
+	client := infra.NewContextProfilesClient(sessionContext, connector)
+	_, err := client.Get(id)
 
 	if err == nil {
 		return true, nil
@@ -195,7 +191,7 @@ func resourceNsxtPolicyContextProfileCreate(d *schema.ResourceData, m interface{
 	connector := getPolicyConnector(m)
 
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID(d, m, resourceNsxtPolicyContextProfileExists)
+	id, err := getOrGenerateID2(d, m, resourceNsxtPolicyContextProfileExists)
 	if err != nil {
 		return err
 	}
@@ -232,17 +228,8 @@ func resourceNsxtPolicyContextProfileCreate(d *schema.ResourceData, m interface{
 
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating ContextProfile with ID %s", id)
-	if isPolicyGlobalManager(m) {
-		client := gm_infra.NewContextProfilesClient(connector)
-		gmObj, err1 := convertModelBindingType(obj, model.PolicyContextProfileBindingType(), gm_model.PolicyContextProfileBindingType())
-		if err1 != nil {
-			return err1
-		}
-		err = client.Patch(id, gmObj.(gm_model.PolicyContextProfile), nil)
-	} else {
-		client := infra.NewContextProfilesClient(connector)
-		err = client.Patch(id, obj, nil)
-	}
+	client := infra.NewContextProfilesClient(getSessionContext(d, m), connector)
+	err = client.Patch(id, obj, nil)
 	if err != nil {
 		return handleCreateError("ContextProfile", id, err)
 	}
@@ -260,25 +247,10 @@ func resourceNsxtPolicyContextProfileRead(d *schema.ResourceData, m interface{})
 		return fmt.Errorf("Error obtaining ContextProfile ID")
 	}
 
-	var obj model.PolicyContextProfile
-	if isPolicyGlobalManager(m) {
-		client := gm_infra.NewContextProfilesClient(connector)
-		gmObj, err := client.Get(id)
-		if err != nil {
-			return handleReadError(d, "ContextProfile", id, err)
-		}
-		rawObj, err := convertModelBindingType(gmObj, gm_model.PolicyContextProfileBindingType(), model.PolicyContextProfileBindingType())
-		if err != nil {
-			return err
-		}
-		obj = rawObj.(model.PolicyContextProfile)
-	} else {
-		var err error
-		client := infra.NewContextProfilesClient(connector)
-		obj, err = client.Get(id)
-		if err != nil {
-			return handleReadError(d, "ContextProfile", id, err)
-		}
+	client := infra.NewContextProfilesClient(getSessionContext(d, m), connector)
+	obj, err := client.Get(id)
+	if err != nil {
+		return handleReadError(d, "ContextProfile", id, err)
 	}
 
 	d.Set("display_name", obj.DisplayName)
@@ -326,18 +298,8 @@ func resourceNsxtPolicyContextProfileUpdate(d *schema.ResourceData, m interface{
 	}
 
 	// Update the resource using PATCH
-	if isPolicyGlobalManager(m) {
-		rawObj, err1 := convertModelBindingType(obj, model.PolicyContextProfileBindingType(), gm_model.PolicyContextProfileBindingType())
-		if err1 != nil {
-			return err1
-		}
-		gmObj := rawObj.(gm_model.PolicyContextProfile)
-		client := gm_infra.NewContextProfilesClient(connector)
-		err = client.Patch(id, gmObj, nil)
-	} else {
-		client := infra.NewContextProfilesClient(connector)
-		err = client.Patch(id, obj, nil)
-	}
+	client := infra.NewContextProfilesClient(getSessionContext(d, m), connector)
+	err = client.Patch(id, obj, nil)
 
 	if err != nil {
 		return handleUpdateError("ContextProfile", id, err)
@@ -355,13 +317,8 @@ func resourceNsxtPolicyContextProfileDelete(d *schema.ResourceData, m interface{
 	connector := getPolicyConnector(m)
 	var err error
 	force := true
-	if isPolicyGlobalManager(m) {
-		client := gm_infra.NewContextProfilesClient(connector)
-		err = client.Delete(id, &force, nil)
-	} else {
-		client := infra.NewContextProfilesClient(connector)
-		err = client.Delete(id, &force, nil)
-	}
+	client := infra.NewContextProfilesClient(getSessionContext(d, m), connector)
+	err = client.Delete(id, &force, nil)
 	if err != nil {
 		return handleDeleteError("ContextProfile", id, err)
 	}

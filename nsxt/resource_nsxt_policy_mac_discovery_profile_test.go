@@ -134,7 +134,7 @@ func testAccNsxtPolicyMacDiscoveryProfileExists(displayName string, resourceName
 			return fmt.Errorf("Policy MacDiscoveryProfile resource ID not set in resources")
 		}
 
-		exists, err := resourceNsxtPolicyMacDiscoveryProfileExists(resourceID, connector, testAccIsGlobalManager())
+		exists, err := resourceNsxtPolicyMacDiscoveryProfileExists(testAccGetSessionContext(), resourceID, connector)
 		if err != nil {
 			return err
 		}
@@ -155,7 +155,7 @@ func testAccNsxtPolicyMacDiscoveryProfileCheckDestroy(state *terraform.State, di
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		exists, err := resourceNsxtPolicyMacDiscoveryProfileExists(resourceID, connector, testAccIsGlobalManager())
+		exists, err := resourceNsxtPolicyMacDiscoveryProfileExists(testAccGetSessionContext(), resourceID, connector)
 		if err == nil {
 			return err
 		}

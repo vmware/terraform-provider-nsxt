@@ -11,14 +11,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
-	gm_t0nat "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s/nat"
-	gm_t1nat "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_1s/nat"
-	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
-	t0nat "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/nat"
-	t1nat "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/nat"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
+	t0nat "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s/nat"
+	t1nat "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s/nat"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 var policyNATRuleActionTypeValues = []string{
@@ -52,6 +50,7 @@ func resourceNsxtPolicyNATRule() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
+			"context":      getContextSchema(),
 			"gateway_path": getPolicyGatewayPathSchema(),
 			"action": {
 				Type:         schema.TypeString,
@@ -135,20 +134,12 @@ func resourceNsxtPolicyNATRule() *schema.Resource {
 	}
 }
 
-func deleteNsxtPolicyNATRule(connector client.Connector, gwID string, isT0 bool, natType string, ruleID string, isGlobalManager bool) error {
-	if isGlobalManager {
-		if isT0 {
-			client := gm_t0nat.NewNatRulesClient(connector)
-			return client.Delete(gwID, natType, ruleID)
-		}
-		client := gm_t1nat.NewNatRulesClient(connector)
-		return client.Delete(gwID, natType, ruleID)
-	}
+func deleteNsxtPolicyNATRule(sessionContext utl.SessionContext, connector client.Connector, gwID string, isT0 bool, natType string, ruleID string) error {
 	if isT0 {
-		client := t0nat.NewNatRulesClient(connector)
+		client := t0nat.NewNatRulesClient(sessionContext, connector)
 		return client.Delete(gwID, natType, ruleID)
 	}
-	client := t1nat.NewNatRulesClient(connector)
+	client := t1nat.NewNatRulesClient(sessionContext, connector)
 	return client.Delete(gwID, natType, ruleID)
 }
 
@@ -166,7 +157,7 @@ func resourceNsxtPolicyNATRuleDelete(d *schema.ResourceData, m interface{}) erro
 
 	action := d.Get("action").(string)
 	natType := getNatTypeByAction(action)
-	err := deleteNsxtPolicyNATRule(getPolicyConnector(m), gwID, isT0, natType, id, isPolicyGlobalManager(m))
+	err := deleteNsxtPolicyNATRule(getSessionContext(d, m), getPolicyConnector(m), gwID, isT0, natType, id)
 	if err != nil {
 		return handleDeleteError("NAT Rule", id, err)
 	}
@@ -174,59 +165,26 @@ func resourceNsxtPolicyNATRuleDelete(d *schema.ResourceData, m interface{}) erro
 	return nil
 }
 
-func getNsxtPolicyNATRuleByID(connector client.Connector, gwID string, isT0 bool, natType string, ruleID string, isGlobalManager bool) (model.PolicyNatRule, error) {
-	if isGlobalManager {
-		var obj model.PolicyNatRule
-		var gmObj gm_model.PolicyNatRule
-		var rawObj interface{}
-		var err error
-		if isT0 {
-			client := gm_t0nat.NewNatRulesClient(connector)
-			gmObj, err = client.Get(gwID, natType, ruleID)
-		} else {
-			client := gm_t1nat.NewNatRulesClient(connector)
-			gmObj, err = client.Get(gwID, natType, ruleID)
-		}
-		if err != nil {
-			return obj, err
-		}
-		rawObj, err = convertModelBindingType(gmObj, gm_model.PolicyNatRuleBindingType(), model.PolicyNatRuleBindingType())
-		if err != nil {
-			return obj, err
-		}
-		return rawObj.(model.PolicyNatRule), err
-	}
+func getNsxtPolicyNATRuleByID(sessionContext utl.SessionContext, connector client.Connector, gwID string, isT0 bool, natType string, ruleID string) (model.PolicyNatRule, error) {
 	if isT0 {
-		client := t0nat.NewNatRulesClient(connector)
+		client := t0nat.NewNatRulesClient(sessionContext, connector)
 		return client.Get(gwID, natType, ruleID)
 	}
-	client := t1nat.NewNatRulesClient(connector)
+	client := t1nat.NewNatRulesClient(sessionContext, connector)
 	return client.Get(gwID, natType, ruleID)
 }
 
-func patchNsxtPolicyNATRule(connector client.Connector, gwID string, rule model.PolicyNatRule, isT0 bool, isGlobalManager bool) error {
+func patchNsxtPolicyNATRule(sessionContext utl.SessionContext, connector client.Connector, gwID string, rule model.PolicyNatRule, isT0 bool) error {
 	natType := getNatTypeByAction(*rule.Action)
 	_, err := getTranslatedNetworks(rule)
 	if err != nil {
 		return err
 	}
-	if isGlobalManager {
-		rawObj, err := convertModelBindingType(rule, model.PolicyNatRuleBindingType(), gm_model.PolicyNatRuleBindingType())
-		if err != nil {
-			return err
-		}
-		if isT0 {
-			client := gm_t0nat.NewNatRulesClient(connector)
-			return client.Patch(gwID, natType, *rule.Id, rawObj.(gm_model.PolicyNatRule))
-		}
-		client := gm_t1nat.NewNatRulesClient(connector)
-		return client.Patch(gwID, natType, *rule.Id, rawObj.(gm_model.PolicyNatRule))
-	}
 	if isT0 {
-		client := t0nat.NewNatRulesClient(connector)
+		client := t0nat.NewNatRulesClient(sessionContext, connector)
 		return client.Patch(gwID, natType, *rule.Id, rule)
 	}
-	client := t1nat.NewNatRulesClient(connector)
+	client := t1nat.NewNatRulesClient(sessionContext, connector)
 	return client.Patch(gwID, natType, *rule.Id, rule)
 }
 
@@ -267,7 +225,7 @@ func resourceNsxtPolicyNATRuleRead(d *schema.ResourceData, m interface{}) error 
 
 	action := d.Get("action").(string)
 	natType := getNatTypeByAction(action)
-	obj, err := getNsxtPolicyNATRuleByID(connector, gwID, isT0, natType, id, isPolicyGlobalManager(m))
+	obj, err := getNsxtPolicyNATRuleByID(getSessionContext(d, m), connector, gwID, isT0, natType, id)
 	if err != nil {
 		return handleReadError(d, "NAT Rule", id, err)
 	}
@@ -311,13 +269,12 @@ func resourceNsxtPolicyNATRuleCreate(d *schema.ResourceData, m interface{}) erro
 	if gwID == "" {
 		return fmt.Errorf("gateway_path is not valid")
 	}
-	isGlobalManager := isPolicyGlobalManager(m)
 
 	id := d.Get("nsx_id").(string)
 	if id == "" {
 		id = newUUID()
 	} else {
-		_, err := getNsxtPolicyNATRuleByID(connector, gwID, isT0, natType, id, isGlobalManager)
+		_, err := getNsxtPolicyNATRuleByID(getSessionContext(d, m), connector, gwID, isT0, natType, id)
 		if err == nil {
 			return fmt.Errorf("NAT Rule with nsx_id '%s' already exists", id)
 		} else if !isNotFoundError(err) {
@@ -365,7 +322,7 @@ func resourceNsxtPolicyNATRuleCreate(d *schema.ResourceData, m interface{}) erro
 
 	log.Printf("[INFO] Creating NAT Rule with ID %s", id)
 
-	err := patchNsxtPolicyNATRule(connector, gwID, ruleStruct, isT0, isGlobalManager)
+	err := patchNsxtPolicyNATRule(getSessionContext(d, m), connector, gwID, ruleStruct, isT0)
 	if err != nil {
 		return handleCreateError("NAT Rule", id, err)
 	}
@@ -430,7 +387,7 @@ func resourceNsxtPolicyNATRuleUpdate(d *schema.ResourceData, m interface{}) erro
 	}
 
 	log.Printf("[INFO] Updating NAT Rule with ID %s", id)
-	err := patchNsxtPolicyNATRule(connector, gwID, ruleStruct, isT0, isPolicyGlobalManager(m))
+	err := patchNsxtPolicyNATRule(getSessionContext(d, m), connector, gwID, ruleStruct, isT0)
 	if err != nil {
 		return handleUpdateError("NAT Rule", id, err)
 	}
@@ -457,38 +414,20 @@ func resourceNsxtPolicyNATRuleImport(d *schema.ResourceData, m interface{}) ([]*
 
 	gwID := s[0]
 	connector := getPolicyConnector(m)
-	if isPolicyGlobalManager(m) {
-		t0Client := gm_infra.NewTier0sClient(connector)
-		t0gw, err := t0Client.Get(gwID)
-		if err != nil {
-			if !isNotFoundError(err) {
-				return nil, err
-			}
-			t1Client := gm_infra.NewTier1sClient(connector)
-			t1gw, err := t1Client.Get(gwID)
-			if err != nil {
-				return nil, err
-			}
-			d.Set("gateway_path", t1gw.Path)
-		} else {
-			d.Set("gateway_path", t0gw.Path)
+	t0Client := infra.NewTier0sClient(getSessionContext(d, m), connector)
+	t0gw, err := t0Client.Get(gwID)
+	if err != nil {
+		if !isNotFoundError(err) {
+			return nil, err
 		}
+		t1Client := infra.NewTier1sClient(getSessionContext(d, m), connector)
+		t1gw, err := t1Client.Get(gwID)
+		if err != nil {
+			return nil, err
+		}
+		d.Set("gateway_path", t1gw.Path)
 	} else {
-		t0Client := infra.NewTier0sClient(connector)
-		t0gw, err := t0Client.Get(gwID)
-		if err != nil {
-			if !isNotFoundError(err) {
-				return nil, err
-			}
-			t1Client := infra.NewTier1sClient(connector)
-			t1gw, err := t1Client.Get(gwID)
-			if err != nil {
-				return nil, err
-			}
-			d.Set("gateway_path", t1gw.Path)
-		} else {
-			d.Set("gateway_path", t0gw.Path)
-		}
+		d.Set("gateway_path", t0gw.Path)
 	}
 	d.SetId(s[1])
 

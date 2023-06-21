@@ -38,6 +38,27 @@ resource "nsxt_policy_tier1_gateway_interface" "if1" {
 }
 ```
 
+## Example Usage - Multi-Tenancy
+
+```hcl
+data "nsxt_policy_project" "demoproj" {
+  display_name = "demoproj"
+}
+
+resource "nsxt_policy_tier1_gateway_interface" "if1" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
+  display_name           = "segment1_interface"
+  description            = "connection to segment1"
+  gateway_path           = data.nsxt_policy_tier1_gateway.gw1.path
+  segment_path           = nsxt_policy_vlan_segment.segment1.path
+  subnets                = ["12.12.2.13/24"]
+  mtu                    = 1500
+  ipv6_ndra_profile_path = data.nsxt_policy_ipv6_ndra_profile.slaac.path
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -46,6 +67,8 @@ The following arguments are supported:
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the policy resource.
+* `context` - (Optional) The context which the object belongs to
+    * `project_id` - The ID of the project which the object belongs to
 * `gateway_path` - (Required) Policy path for the Tier-1 Gateway.
 * `segment_path` - (Required) Policy path for segment to be connected with this Tier1 Gateway.
 * `subnets` - (Required) list of Ip Addresses/Prefixes in CIDR format, to be associated with this interface.

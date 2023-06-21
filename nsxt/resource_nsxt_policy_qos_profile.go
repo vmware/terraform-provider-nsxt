@@ -12,10 +12,10 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
-	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 var rateLimiterResourceTypes = []string{model.QosBaseRateLimiter_RESOURCE_TYPE_INGRESSRATELIMITER, model.QosBaseRateLimiter_RESOURCE_TYPE_INGRESSBROADCASTRATELIMITER, model.QosBaseRateLimiter_RESOURCE_TYPE_EGRESSRATELIMITER}
@@ -37,6 +37,7 @@ func resourceNsxtPolicyQosProfile() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
+			"context":      getContextSchema(),
 			"class_of_service": {
 				Type:         schema.TypeInt,
 				Description:  "Class of service",
@@ -63,15 +64,9 @@ func resourceNsxtPolicyQosProfile() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyQosProfileExists(id string, connector client.Connector, isGlobalmodel bool) (bool, error) {
-	var err error
-	if isGlobalmodel {
-		client := gm_infra.NewQosProfilesClient(connector)
-		_, err = client.Get(id)
-	} else {
-		client := infra.NewQosProfilesClient(connector)
-		_, err = client.Get(id)
-	}
+func resourceNsxtPolicyQosProfileExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
+	client := infra.NewQosProfilesClient(sessionContext, connector)
+	_, err := client.Get(id)
 	if err == nil {
 		return true, nil
 	}
@@ -140,7 +135,7 @@ func resourceNsxtPolicyQosProfileCreate(d *schema.ResourceData, m interface{}) e
 	connector := getPolicyConnector(m)
 
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID(d, m, resourceNsxtPolicyQosProfileExists)
+	id, err := getOrGenerateID2(d, m, resourceNsxtPolicyQosProfileExists)
 	if err != nil {
 		return err
 	}
@@ -179,18 +174,8 @@ func resourceNsxtPolicyQosProfileCreate(d *schema.ResourceData, m interface{}) e
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating QosProfile with ID %s", id)
 	boolFalse := false
-	if isPolicyGlobalManager(m) {
-		gmObj, err1 := convertModelBindingType(obj, model.QosProfileBindingType(), gm_model.QosProfileBindingType())
-		if err1 != nil {
-			return err1
-		}
-
-		client := gm_infra.NewQosProfilesClient(connector)
-		err = client.Patch(id, gmObj.(gm_model.QosProfile), &boolFalse)
-	} else {
-		client := infra.NewQosProfilesClient(connector)
-		err = client.Patch(id, obj, &boolFalse)
-	}
+	client := infra.NewQosProfilesClient(getSessionContext(d, m), connector)
+	err = client.Patch(id, obj, &boolFalse)
 	if err != nil {
 		return handleCreateError("QosProfile", id, err)
 	}
@@ -209,26 +194,10 @@ func resourceNsxtPolicyQosProfileRead(d *schema.ResourceData, m interface{}) err
 		return fmt.Errorf("Error obtaining QosProfile ID")
 	}
 
-	var obj model.QosProfile
-	if isPolicyGlobalManager(m) {
-		client := gm_infra.NewQosProfilesClient(connector)
-		gmObj, err := client.Get(id)
-		if err != nil {
-			return handleReadError(d, "QosProfile", id, err)
-		}
-		rawObj, err := convertModelBindingType(gmObj, gm_model.QosProfileBindingType(), model.QosProfileBindingType())
-		if err != nil {
-			return err
-		}
-		obj = rawObj.(model.QosProfile)
-
-	} else {
-		var err error
-		client := infra.NewQosProfilesClient(connector)
-		obj, err = client.Get(id)
-		if err != nil {
-			return handleReadError(d, "QosProfile", id, err)
-		}
+	client := infra.NewQosProfilesClient(getSessionContext(d, m), connector)
+	obj, err := client.Get(id)
+	if err != nil {
+		return handleReadError(d, "QosProfile", id, err)
 	}
 
 	d.Set("display_name", obj.DisplayName)
@@ -253,7 +222,7 @@ func resourceNsxtPolicyQosProfileRead(d *schema.ResourceData, m interface{}) err
 
 func resourceNsxtPolicyQosProfileUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewQosProfilesClient(connector)
+	client := infra.NewQosProfilesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -298,19 +267,7 @@ func resourceNsxtPolicyQosProfileUpdate(d *schema.ResourceData, m interface{}) e
 	// Create the resource using PATCH
 	log.Printf("[INFO] Updating QosProfile with ID %s", id)
 	boolFalse := false
-	var err error
-	if isPolicyGlobalManager(m) {
-		gmObj, err1 := convertModelBindingType(obj, model.QosProfileBindingType(), gm_model.QosProfileBindingType())
-		if err1 != nil {
-			return err1
-		}
-
-		client := gm_infra.NewQosProfilesClient(connector)
-		err = client.Patch(id, gmObj.(gm_model.QosProfile), &boolFalse)
-	} else {
-		client := infra.NewQosProfilesClient(connector)
-		err = client.Patch(id, obj, &boolFalse)
-	}
+	err := client.Patch(id, obj, &boolFalse)
 	if err != nil {
 		return handleUpdateError("QosProfile", id, err)
 	}
@@ -324,16 +281,10 @@ func resourceNsxtPolicyQosProfileDelete(d *schema.ResourceData, m interface{}) e
 		return fmt.Errorf("Error obtaining QosProfile ID")
 	}
 
-	var err error
 	connector := getPolicyConnector(m)
 	boolFalse := false
-	if isPolicyGlobalManager(m) {
-		client := gm_infra.NewQosProfilesClient(connector)
-		err = client.Delete(id, &boolFalse)
-	} else {
-		client := infra.NewQosProfilesClient(connector)
-		err = client.Delete(id, &boolFalse)
-	}
+	client := infra.NewQosProfilesClient(getSessionContext(d, m), connector)
+	err := client.Delete(id, &boolFalse)
 
 	if err != nil {
 		return handleDeleteError("QosProfile", id, err)

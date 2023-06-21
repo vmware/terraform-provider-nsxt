@@ -14,10 +14,12 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/ip_pools"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/realized_state"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
+	ippools "github.com/vmware/terraform-provider-nsxt/api/infra/ip_pools"
+	realizedstate "github.com/vmware/terraform-provider-nsxt/api/infra/realized_state"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 func resourceNsxtPolicyIPPoolBlockSubnet() *schema.Resource {
@@ -37,6 +39,7 @@ func resourceNsxtPolicyIPPoolBlockSubnet() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
+			"context":      getContextSchema(),
 			"auto_assign_gateway": {
 				Type:        schema.TypeBool,
 				Description: "If true, the first IP in the range will be reserved for gateway",
@@ -88,7 +91,7 @@ func resourceNsxtPolicyIPPoolBlockSubnetSchemaToStructValue(d *schema.ResourceDa
 
 func resourceNsxtPolicyIPPoolBlockSubnetRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := ip_pools.NewIpSubnetsClient(connector)
+	client := ippools.NewIpSubnetsClient(getSessionContext(d, m), connector)
 	converter := bindings.NewTypeConverter()
 
 	poolPath := d.Get("pool_path").(string)
@@ -131,7 +134,7 @@ func resourceNsxtPolicyIPPoolBlockSubnetRead(d *schema.ResourceData, m interface
 
 func resourceNsxtPolicyIPPoolBlockSubnetCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := ip_pools.NewIpSubnetsClient(connector)
+	client := ippools.NewIpSubnetsClient(getSessionContext(d, m), connector)
 
 	poolPath := d.Get("pool_path").(string)
 	poolID := getPolicyIDFromPath(poolPath)
@@ -166,7 +169,7 @@ func resourceNsxtPolicyIPPoolBlockSubnetCreate(d *schema.ResourceData, m interfa
 
 func resourceNsxtPolicyIPPoolBlockSubnetUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := ip_pools.NewIpSubnetsClient(connector)
+	client := ippools.NewIpSubnetsClient(getSessionContext(d, m), connector)
 
 	poolPath := d.Get("pool_path").(string)
 	poolID := getPolicyIDFromPath(poolPath)
@@ -194,7 +197,7 @@ func resourceNsxtPolicyIPPoolBlockSubnetUpdate(d *schema.ResourceData, m interfa
 
 func resourceNsxtPolicyIPPoolBlockSubnetDelete(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := ip_pools.NewIpSubnetsClient(connector)
+	client := ippools.NewIpSubnetsClient(getSessionContext(d, m), connector)
 
 	poolPath := d.Get("pool_path").(string)
 	poolID := getPolicyIDFromPath(poolPath)
@@ -210,13 +213,13 @@ func resourceNsxtPolicyIPPoolBlockSubnetDelete(d *schema.ResourceData, m interfa
 		return handleDeleteError("Block Subnet", id, err)
 	}
 
-	return resourceNsxtPolicyIPPoolBlockSubnetVerifyDelete(d, connector)
+	return resourceNsxtPolicyIPPoolBlockSubnetVerifyDelete(getSessionContext(d, m), d, connector)
 }
 
 // NOTE: This will not be needed when IPAM is handled by NSXT Policy
-func resourceNsxtPolicyIPPoolBlockSubnetVerifyDelete(d *schema.ResourceData, connector client.Connector) error {
+func resourceNsxtPolicyIPPoolBlockSubnetVerifyDelete(sessionContext utl.SessionContext, d *schema.ResourceData, connector client.Connector) error {
 
-	client := realized_state.NewRealizedEntitiesClient(connector)
+	client := realizedstate.NewRealizedEntitiesClient(sessionContext, connector)
 
 	path := d.Get("path").(string)
 	// Wait for realization state to disappear (not_found) - this means
@@ -260,7 +263,7 @@ func resourceNsxtPolicyIPPoolSubnetImport(d *schema.ResourceData, m interface{})
 
 	poolID := s[0]
 	connector := getPolicyConnector(m)
-	client := infra.NewIpPoolsClient(connector)
+	client := infra.NewIpPoolsClient(getSessionContext(d, m), connector)
 
 	pool, err := client.Get(poolID)
 	if err != nil {

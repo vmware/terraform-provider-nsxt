@@ -27,7 +27,7 @@ func dataSourceNsxtPolicyIntrusionServiceProfileRead(d *schema.ResourceData, m i
 		return localManagerOnlyError()
 	}
 
-	_, err := policyDataSourceResourceRead(d, connector, isPolicyGlobalManager(m), "IdsProfile", nil)
+	_, err := policyDataSourceResourceRead(d, connector, getSessionContext(d, m), "IdsProfile", nil)
 	if err != nil {
 		return err
 	}

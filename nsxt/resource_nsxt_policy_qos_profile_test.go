@@ -136,7 +136,7 @@ func testAccNSXPolicyQosProfileExists(displayName string, resourceName string) r
 			return fmt.Errorf("Policy QosProfile resource ID not set in resources")
 		}
 
-		exists, err := resourceNsxtPolicyQosProfileExists(resourceID, connector, testAccIsGlobalManager())
+		exists, err := resourceNsxtPolicyQosProfileExists(testAccGetSessionContext(), resourceID, connector)
 		if err != nil {
 			return err
 		}
@@ -157,7 +157,7 @@ func testAccNSXPolicyQosProfileCheckDestroy(state *terraform.State, displayName 
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		exists, err := resourceNsxtPolicyQosProfileExists(resourceID, connector, testAccIsGlobalManager())
+		exists, err := resourceNsxtPolicyQosProfileExists(testAccGetSessionContext(), resourceID, connector)
 		if err == nil {
 			return err
 		}

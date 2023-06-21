@@ -10,10 +10,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
-	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 func resourceNsxtPolicyIPDiscoveryProfile() *schema.Resource {
@@ -33,6 +33,7 @@ func resourceNsxtPolicyIPDiscoveryProfile() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
+			"context":      getContextSchema(),
 			"arp_nd_binding_timeout": {
 				Type:         schema.TypeInt,
 				Description:  "ARP and ND cache timeout (in minutes)",
@@ -153,15 +154,9 @@ func ipDiscoveryProfileObjFromSchema(d *schema.ResourceData) model.IPDiscoveryPr
 	}
 }
 
-func resourceNsxtPolicyIPDiscoveryProfileExists(id string, connector client.Connector, isGlobalmodel bool) (bool, error) {
-	var err error
-	if isGlobalmodel {
-		client := gm_infra.NewIpDiscoveryProfilesClient(connector)
-		_, err = client.Get(id)
-	} else {
-		client := infra.NewIpDiscoveryProfilesClient(connector)
-		_, err = client.Get(id)
-	}
+func resourceNsxtPolicyIPDiscoveryProfileExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
+	client := infra.NewIpDiscoveryProfilesClient(sessionContext, connector)
+	_, err := client.Get(id)
 	if err == nil {
 		return true, nil
 	}
@@ -177,7 +172,7 @@ func resourceNsxtPolicyIPDiscoveryProfileCreate(d *schema.ResourceData, m interf
 	connector := getPolicyConnector(m)
 
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID(d, m, resourceNsxtPolicyIPDiscoveryProfileExists)
+	id, err := getOrGenerateID2(d, m, resourceNsxtPolicyIPDiscoveryProfileExists)
 	if err != nil {
 		return err
 	}
@@ -187,18 +182,8 @@ func resourceNsxtPolicyIPDiscoveryProfileCreate(d *schema.ResourceData, m interf
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating IPDiscoveryProfile with ID %s", id)
 	boolFalse := false
-	if isPolicyGlobalManager(m) {
-		gmObj, err1 := convertModelBindingType(obj, model.IPDiscoveryProfileBindingType(), gm_model.IPDiscoveryProfileBindingType())
-		if err1 != nil {
-			return err1
-		}
-
-		client := gm_infra.NewIpDiscoveryProfilesClient(connector)
-		err = client.Patch(id, gmObj.(gm_model.IPDiscoveryProfile), &boolFalse)
-	} else {
-		client := infra.NewIpDiscoveryProfilesClient(connector)
-		err = client.Patch(id, obj, &boolFalse)
-	}
+	client := infra.NewIpDiscoveryProfilesClient(getSessionContext(d, m), connector)
+	err = client.Patch(id, obj, &boolFalse)
 	if err != nil {
 		return handleCreateError("IPDiscoveryProfile", id, err)
 	}
@@ -217,26 +202,10 @@ func resourceNsxtPolicyIPDiscoveryProfileRead(d *schema.ResourceData, m interfac
 		return fmt.Errorf("Error obtaining IPDiscoveryProfile ID")
 	}
 
-	var obj model.IPDiscoveryProfile
-	if isPolicyGlobalManager(m) {
-		client := gm_infra.NewIpDiscoveryProfilesClient(connector)
-		gmObj, err := client.Get(id)
-		if err != nil {
-			return handleReadError(d, "IPDiscoveryProfile", id, err)
-		}
-		rawObj, err := convertModelBindingType(gmObj, gm_model.IPDiscoveryProfileBindingType(), model.IPDiscoveryProfileBindingType())
-		if err != nil {
-			return err
-		}
-		obj = rawObj.(model.IPDiscoveryProfile)
-
-	} else {
-		var err error
-		client := infra.NewIpDiscoveryProfilesClient(connector)
-		obj, err = client.Get(id)
-		if err != nil {
-			return handleReadError(d, "IPDiscoveryProfile", id, err)
-		}
+	client := infra.NewIpDiscoveryProfilesClient(getSessionContext(d, m), connector)
+	obj, err := client.Get(id)
+	if err != nil {
+		return handleReadError(d, "IPDiscoveryProfile", id, err)
 	}
 
 	d.Set("display_name", obj.DisplayName)
@@ -263,7 +232,7 @@ func resourceNsxtPolicyIPDiscoveryProfileRead(d *schema.ResourceData, m interfac
 
 func resourceNsxtPolicyIPDiscoveryProfileUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewIpDiscoveryProfilesClient(connector)
+	client := infra.NewIpDiscoveryProfilesClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -279,19 +248,7 @@ func resourceNsxtPolicyIPDiscoveryProfileUpdate(d *schema.ResourceData, m interf
 	// Create the resource using PATCH
 	log.Printf("[INFO] Updating IPDiscoveryProfile with ID %s", id)
 	boolFalse := false
-	var err error
-	if isPolicyGlobalManager(m) {
-		gmObj, err1 := convertModelBindingType(obj, model.IPDiscoveryProfileBindingType(), gm_model.IPDiscoveryProfileBindingType())
-		if err1 != nil {
-			return err1
-		}
-
-		client := gm_infra.NewIpDiscoveryProfilesClient(connector)
-		err = client.Patch(id, gmObj.(gm_model.IPDiscoveryProfile), &boolFalse)
-	} else {
-		client := infra.NewIpDiscoveryProfilesClient(connector)
-		err = client.Patch(id, obj, &boolFalse)
-	}
+	err := client.Patch(id, obj, &boolFalse)
 	if err != nil {
 		return handleUpdateError("IPDiscoveryProfile", id, err)
 	}
@@ -308,13 +265,9 @@ func resourceNsxtPolicyIPDiscoveryProfileDelete(d *schema.ResourceData, m interf
 	var err error
 	connector := getPolicyConnector(m)
 	boolFalse := false
-	if isPolicyGlobalManager(m) {
-		client := gm_infra.NewIpDiscoveryProfilesClient(connector)
-		err = client.Delete(id, &boolFalse)
-	} else {
-		client := infra.NewIpDiscoveryProfilesClient(connector)
-		err = client.Delete(id, &boolFalse)
-	}
+
+	client := infra.NewIpDiscoveryProfilesClient(getSessionContext(d, m), connector)
+	err = client.Delete(id, &boolFalse)
 
 	if err != nil {
 		return handleDeleteError("IPDiscoveryProfile", id, err)

@@ -49,7 +49,7 @@ func dataSourceNsxtPolicyEdgeClusterRead(d *schema.ResourceData, m interface{}) 
 		query := make(map[string]string)
 		globalPolicyEnforcementPointPath := getGlobalPolicyEnforcementPointPath(m, &objSitePath)
 		query["parent_path"] = globalPolicyEnforcementPointPath
-		_, err := policyDataSourceResourceReadWithValidation(d, getPolicyConnector(m), true, "PolicyEdgeCluster", query, false)
+		_, err := policyDataSourceResourceReadWithValidation(d, getPolicyConnector(m), getSessionContext(d, m), "PolicyEdgeCluster", query, false)
 		if err != nil {
 			return err
 		}

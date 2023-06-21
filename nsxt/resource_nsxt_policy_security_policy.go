@@ -9,10 +9,10 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	gm_domains "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/domains"
-	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/domains"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	"github.com/vmware/terraform-provider-nsxt/api/infra/domains"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 func resourceNsxtPolicySecurityPolicy() *schema.Resource {
@@ -24,37 +24,19 @@ func resourceNsxtPolicySecurityPolicy() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: nsxtDomainResourceImporter,
 		},
-		Schema: getPolicySecurityPolicySchema(false),
+		Schema: getPolicySecurityPolicySchema(false, true),
 	}
 }
 
-func getSecurityPolicyInDomain(id string, domainName string, connector client.Connector, isGlobalManager bool) (model.SecurityPolicy, error) {
-	if isGlobalManager {
-		client := gm_domains.NewSecurityPoliciesClient(connector)
-		gmObj, err := client.Get(domainName, id)
-		if err != nil {
-			return model.SecurityPolicy{}, err
-		}
-		rawObj, convErr := convertModelBindingType(gmObj, gm_model.SecurityPolicyBindingType(), model.SecurityPolicyBindingType())
-		if convErr != nil {
-			return model.SecurityPolicy{}, convErr
-		}
-		return rawObj.(model.SecurityPolicy), nil
-	}
-	client := domains.NewSecurityPoliciesClient(connector)
+func getSecurityPolicyInDomain(sessionContext utl.SessionContext, id string, domainName string, connector client.Connector) (model.SecurityPolicy, error) {
+	client := domains.NewSecurityPoliciesClient(sessionContext, connector)
 	return client.Get(domainName, id)
 
 }
 
-func resourceNsxtPolicySecurityPolicyExistsInDomain(id string, domainName string, connector client.Connector, isGlobalManager bool) (bool, error) {
-	var err error
-	if isGlobalManager {
-		client := gm_domains.NewSecurityPoliciesClient(connector)
-		_, err = client.Get(domainName, id)
-	} else {
-		client := domains.NewSecurityPoliciesClient(connector)
-		_, err = client.Get(domainName, id)
-	}
+func resourceNsxtPolicySecurityPolicyExistsInDomain(sessionContext utl.SessionContext, id string, domainName string, connector client.Connector) (bool, error) {
+	client := domains.NewSecurityPoliciesClient(sessionContext, connector)
+	_, err := client.Get(domainName, id)
 
 	if err == nil {
 		return true, nil
@@ -67,9 +49,9 @@ func resourceNsxtPolicySecurityPolicyExistsInDomain(id string, domainName string
 	return false, logAPIError("Error retrieving Security Policy", err)
 }
 
-func resourceNsxtPolicySecurityPolicyExistsPartial(domainName string) func(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
-	return func(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
-		return resourceNsxtPolicySecurityPolicyExistsInDomain(id, domainName, connector, isGlobalManager)
+func resourceNsxtPolicySecurityPolicyExistsPartial(domainName string) func(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
+	return func(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
+		return resourceNsxtPolicySecurityPolicyExistsInDomain(sessionContext, id, domainName, connector)
 	}
 }
 
@@ -118,14 +100,14 @@ func policySecurityPolicyBuildAndPatch(d *schema.ResourceData, m interface{}, co
 		obj.Children = policyChildren
 	}
 
-	return securityPolicyInfraPatch(obj, domain, m)
+	return securityPolicyInfraPatch(getSessionContext(d, m), obj, domain, m)
 }
 
 func resourceNsxtPolicySecurityPolicyCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID(d, m, resourceNsxtPolicySecurityPolicyExistsPartial(d.Get("domain").(string)))
+	id, err := getOrGenerateID2(d, m, resourceNsxtPolicySecurityPolicyExistsPartial(d.Get("domain").(string)))
 	if err != nil {
 		return err
 	}
@@ -149,25 +131,10 @@ func resourceNsxtPolicySecurityPolicyRead(d *schema.ResourceData, m interface{})
 	if id == "" {
 		return fmt.Errorf("Error obtaining Security Policy id")
 	}
-	var obj model.SecurityPolicy
-	if isPolicyGlobalManager(m) {
-		client := gm_domains.NewSecurityPoliciesClient(connector)
-		gmObj, err := client.Get(domainName, id)
-		if err != nil {
-			return handleReadError(d, "SecurityPolicy", id, err)
-		}
-		rawObj, err := convertModelBindingType(gmObj, gm_model.SecurityPolicyBindingType(), model.SecurityPolicyBindingType())
-		if err != nil {
-			return err
-		}
-		obj = rawObj.(model.SecurityPolicy)
-	} else {
-		var err error
-		client := domains.NewSecurityPoliciesClient(connector)
-		obj, err = client.Get(domainName, id)
-		if err != nil {
-			return handleReadError(d, "SecurityPolicy", id, err)
-		}
+	client := domains.NewSecurityPoliciesClient(getSessionContext(d, m), connector)
+	obj, err := client.Get(domainName, id)
+	if err != nil {
+		return handleReadError(d, "SecurityPolicy", id, err)
 	}
 	d.Set("display_name", obj.DisplayName)
 	d.Set("description", obj.Description)
@@ -212,15 +179,9 @@ func resourceNsxtPolicySecurityPolicyDelete(d *schema.ResourceData, m interface{
 	}
 
 	connector := getPolicyConnector(m)
-	var err error
 
-	if isPolicyGlobalManager(m) {
-		client := gm_domains.NewSecurityPoliciesClient(connector)
-		err = client.Delete(d.Get("domain").(string), id)
-	} else {
-		client := domains.NewSecurityPoliciesClient(connector)
-		err = client.Delete(d.Get("domain").(string), id)
-	}
+	client := domains.NewSecurityPoliciesClient(getSessionContext(d, m), connector)
+	err := client.Delete(d.Get("domain").(string), id)
 
 	if err != nil {
 		return handleDeleteError("Security Policy", id, err)

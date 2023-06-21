@@ -164,7 +164,7 @@ func testAccNsxtPolicySegmentSecurityProfileExists(displayName string, resourceN
 			return fmt.Errorf("Policy SegmentSecurityProfile resource ID not set in resources")
 		}
 
-		exists, err := resourceNsxtPolicySegmentSecurityProfileExists(resourceID, connector, testAccIsGlobalManager())
+		exists, err := resourceNsxtPolicySegmentSecurityProfileExists(testAccGetSessionContext(), resourceID, connector)
 		if err != nil {
 			return err
 		}
@@ -185,7 +185,7 @@ func testAccNsxtPolicySegmentSecurityProfileCheckDestroy(state *terraform.State,
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		exists, err := resourceNsxtPolicySegmentSecurityProfileExists(resourceID, connector, testAccIsGlobalManager())
+		exists, err := resourceNsxtPolicySegmentSecurityProfileExists(testAccGetSessionContext(), resourceID, connector)
 		if err == nil {
 			return err
 		}

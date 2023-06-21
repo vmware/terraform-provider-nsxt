@@ -153,6 +153,38 @@ resource "nsxt_policy_group" "group1" {
 }
 ```
 
+## Example Usage - Multi-Tenancy
+
+```hcl
+data "nsxt_policy_project" "demoproj" {
+  display_name = "demoproj"
+}
+
+resource "nsxt_policy_group" "group1" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
+
+  display_name = "tf-group1"
+  description  = "Terraform provisioned Group"
+
+  criteria {
+    condition {
+      key         = "Name"
+      member_type = "VirtualMachine"
+      operator    = "STARTSWITH"
+      value       = "public"
+    }
+    condition {
+      key         = "OSName"
+      member_type = "VirtualMachine"
+      operator    = "CONTAINS"
+      value       = "Ubuntu"
+    }
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -162,6 +194,8 @@ The following arguments are supported:
 * `domain` - (Optional) The domain to use for the Group. This domain must already exist. For VMware Cloud on AWS use `cgw`. For Global Manager, please use site id for this field. If not specified, this field is default to `default`. 
 * `tag` - (Optional) A list of scope + tag pairs to associate with this Group.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the group resource.
+* `context` - (Optional) The context which the object belongs to
+  * `project_id` - The ID of the project which the object belongs to
 * `criteria` - (Optional) A repeatable block to specify criteria for members of this Group. If more than 1 criteria block is specified, it must be separated by a `conjunction`. In a `criteria` block the following membership selection expressions can be used:
   * `ipaddress_expression` - (Optional) An expression block to specify individual IP Addresses, ranges of IP Addresses or subnets for this Group.
       * `ip_addresses` - (Required) This list can consist of a single IP address, IP address range or a subnet. Its type can be of either IPv4 or IPv6. Both IPv4 and IPv6 addresses within one expression is not allowed.

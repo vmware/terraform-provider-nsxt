@@ -483,7 +483,7 @@ func testAccNSXPolicyTier0InterfaceImporterGetID(s *terraform.State) (string, er
 	localeServiceID := defaultPolicyLocaleServiceID
 	if testAccIsGlobalManager() {
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-		localeServices, err := listPolicyTier0GatewayLocaleServices(connector, gwID, true)
+		localeServices, err := listPolicyTier0GatewayLocaleServices(testAccGetSessionContext(), connector, gwID)
 		if err != nil {
 			return "", err
 		}

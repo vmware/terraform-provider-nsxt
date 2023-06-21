@@ -8,8 +8,9 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
 )
 
 func dataSourceNsxtPolicyIPBlock() *schema.Resource {
@@ -21,13 +22,14 @@ func dataSourceNsxtPolicyIPBlock() *schema.Resource {
 			"display_name": getDataSourceDisplayNameSchema(),
 			"description":  getDataSourceDescriptionSchema(),
 			"path":         getPathSchema(),
+			"context":      getContextSchema(),
 		},
 	}
 }
 
 func dataSourceNsxtPolicyIPBlockRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewIpBlocksClient(connector)
+	client := infra.NewIpBlocksClient(getSessionContext(d, m), connector)
 
 	objID := d.Get("id").(string)
 	objName := d.Get("display_name").(string)

@@ -10,12 +10,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	gm_tier_0s "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s"
-	gm_tier_1s "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_1s"
-	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	tier0s "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s"
+	tier1s "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 var gatewayDNSForwarderLogLevelTypeValues = []string{
@@ -42,6 +41,7 @@ func resourceNsxtPolicyGatewayDNSForwarder() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
+			"context":      getContextSchema(),
 			"gateway_path": getPolicyPathSchema(true, true, "Policy path for the Gateway"),
 			"listener_ip": {
 				Type:         schema.TypeString,
@@ -79,32 +79,12 @@ func resourceNsxtPolicyGatewayDNSForwarder() *schema.Resource {
 	}
 }
 
-func policyGatewayDNSForwarderGet(connector client.Connector, gwID string, isT0 bool, isGlobalManager bool) (model.PolicyDnsForwarder, error) {
-	var obj model.PolicyDnsForwarder
-	var err error
-	if isGlobalManager {
-		var gmObj gm_model.PolicyDnsForwarder
-		if isT0 {
-			client := gm_tier_0s.NewDnsForwarderClient(connector)
-			gmObj, err = client.Get(gwID)
-		} else {
-			client := gm_tier_1s.NewDnsForwarderClient(connector)
-			gmObj, err = client.Get(gwID)
-		}
-		if err != nil {
-			return obj, err
-		}
-		rawObj, convErr := convertModelBindingType(gmObj, gm_model.PolicyDnsForwarderBindingType(), model.PolicyDnsForwarderBindingType())
-		if convErr != nil {
-			return obj, convErr
-		}
-		return rawObj.(model.PolicyDnsForwarder), nil
-	}
+func policyGatewayDNSForwarderGet(sessionContext utl.SessionContext, connector client.Connector, gwID string, isT0 bool) (model.PolicyDnsForwarder, error) {
 	if isT0 {
-		client := tier_0s.NewDnsForwarderClient(connector)
+		client := tier0s.NewDnsForwarderClient(sessionContext, connector)
 		return client.Get(gwID)
 	}
-	client := tier_1s.NewDnsForwarderClient(connector)
+	client := tier1s.NewDnsForwarderClient(sessionContext, connector)
 	return client.Get(gwID)
 }
 
@@ -117,7 +97,7 @@ func resourceNsxtPolicyGatewayDNSForwarderRead(d *schema.ResourceData, m interfa
 		return fmt.Errorf("gateway_path is not valid")
 	}
 
-	obj, err := policyGatewayDNSForwarderGet(connector, gwID, isT0, isPolicyGlobalManager(m))
+	obj, err := policyGatewayDNSForwarderGet(getSessionContext(d, m), connector, gwID, isT0)
 
 	if err != nil {
 		return handleReadError(d, "Gateway Dns Forwarder", gwID, err)
@@ -138,7 +118,7 @@ func resourceNsxtPolicyGatewayDNSForwarderRead(d *schema.ResourceData, m interfa
 	return nil
 }
 
-func patchNsxtPolicyGatewayDNSForwarder(connector client.Connector, d *schema.ResourceData, gwID string, isT0 bool, isGlobalManager bool) error {
+func patchNsxtPolicyGatewayDNSForwarder(sessionContext utl.SessionContext, connector client.Connector, d *schema.ResourceData, gwID string, isT0 bool) error {
 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
@@ -168,25 +148,11 @@ func patchNsxtPolicyGatewayDNSForwarder(connector client.Connector, d *schema.Re
 		obj.CacheSize = &cacheSize
 	}
 
-	if isGlobalManager {
-		rawObj, err := convertModelBindingType(obj, model.PolicyDnsForwarderBindingType(), gm_model.PolicyDnsForwarderBindingType())
-		if err != nil {
-			return err
-		}
-		if isT0 {
-			client := gm_tier_0s.NewDnsForwarderClient(connector)
-			return client.Patch(gwID, rawObj.(gm_model.PolicyDnsForwarder))
-		}
-
-		client := gm_tier_1s.NewDnsForwarderClient(connector)
-		return client.Patch(gwID, rawObj.(gm_model.PolicyDnsForwarder))
-
-	}
 	if isT0 {
-		client := tier_0s.NewDnsForwarderClient(connector)
+		client := tier0s.NewDnsForwarderClient(sessionContext, connector)
 		return client.Patch(gwID, obj)
 	}
-	client := tier_1s.NewDnsForwarderClient(connector)
+	client := tier1s.NewDnsForwarderClient(sessionContext, connector)
 	return client.Patch(gwID, obj)
 }
 
@@ -198,26 +164,16 @@ func resourceNsxtPolicyGatewayDNSForwarderCreate(d *schema.ResourceData, m inter
 	if gwID == "" {
 		return fmt.Errorf("gateway_path is not valid")
 	}
-	isGlobalManager := isPolicyGlobalManager(m)
 
 	// Verify DNS forwarder is not yet defined for this Gateway
 	var err error
-	if isGlobalManager {
-		if isT0 {
-			client := gm_tier_0s.NewDnsForwarderClient(connector)
-			_, err = client.Get(gwID)
-		} else {
-			client := gm_tier_1s.NewDnsForwarderClient(connector)
-			_, err = client.Get(gwID)
-		}
+	sessionContext := getSessionContext(d, m)
+	if isT0 {
+		client := tier0s.NewDnsForwarderClient(sessionContext, connector)
+		_, err = client.Get(gwID)
 	} else {
-		if isT0 {
-			client := tier_0s.NewDnsForwarderClient(connector)
-			_, err = client.Get(gwID)
-		} else {
-			client := tier_1s.NewDnsForwarderClient(connector)
-			_, err = client.Get(gwID)
-		}
+		client := tier1s.NewDnsForwarderClient(sessionContext, connector)
+		_, err = client.Get(gwID)
 	}
 	if err == nil {
 		return fmt.Errorf("Gateway Dns Forwarder already exists for Gateway '%s'", gwID)
@@ -227,7 +183,7 @@ func resourceNsxtPolicyGatewayDNSForwarderCreate(d *schema.ResourceData, m inter
 
 	log.Printf("[INFO] Creating Dns Forwarder for Gateway %s", gwID)
 
-	err = patchNsxtPolicyGatewayDNSForwarder(connector, d, gwID, isT0, isGlobalManager)
+	err = patchNsxtPolicyGatewayDNSForwarder(sessionContext, connector, d, gwID, isT0)
 	if err != nil {
 		return handleCreateError("Gateway Dns Forwarder", gwID, err)
 	}
@@ -246,7 +202,7 @@ func resourceNsxtPolicyGatewayDNSForwarderUpdate(d *schema.ResourceData, m inter
 	}
 
 	log.Printf("[INFO] Updating Gateway Dns Forwarder with ID %s", gwID)
-	err := patchNsxtPolicyGatewayDNSForwarder(connector, d, gwID, isT0, isPolicyGlobalManager(m))
+	err := patchNsxtPolicyGatewayDNSForwarder(getSessionContext(d, m), connector, d, gwID, isT0)
 	if err != nil {
 		return handleUpdateError("Gateway Dns Forwarder", gwID, err)
 	}
@@ -256,7 +212,6 @@ func resourceNsxtPolicyGatewayDNSForwarderUpdate(d *schema.ResourceData, m inter
 
 func resourceNsxtPolicyGatewayDNSForwarderDelete(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	isGlobalManager := isPolicyGlobalManager(m)
 
 	gwPolicyPath := d.Get("gateway_path").(string)
 	isT0, gwID := parseGatewayPolicyPath(gwPolicyPath)
@@ -265,22 +220,13 @@ func resourceNsxtPolicyGatewayDNSForwarderDelete(d *schema.ResourceData, m inter
 	}
 
 	var err error
-	if isGlobalManager {
-		if isT0 {
-			client := gm_tier_0s.NewDnsForwarderClient(connector)
-			err = client.Delete(gwID)
-		} else {
-			client := gm_tier_1s.NewDnsForwarderClient(connector)
-			err = client.Delete(gwID)
-		}
+	sessionContext := getSessionContext(d, m)
+	if isT0 {
+		client := tier0s.NewDnsForwarderClient(sessionContext, connector)
+		err = client.Delete(gwID)
 	} else {
-		if isT0 {
-			client := tier_0s.NewDnsForwarderClient(connector)
-			err = client.Delete(gwID)
-		} else {
-			client := tier_1s.NewDnsForwarderClient(connector)
-			err = client.Delete(gwID)
-		}
+		client := tier1s.NewDnsForwarderClient(sessionContext, connector)
+		err = client.Delete(gwID)
 	}
 	if err != nil {
 		return handleDeleteError("Gateway Dns Forwarder", gwID, err)

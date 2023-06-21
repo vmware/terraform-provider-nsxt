@@ -20,12 +20,29 @@ data "nsxt_policy_gateway_policy" "predefined" {
 }
 ```
 
+## Example Usage - Multi-Tenancy
+
+```hcl
+data "nsxt_policy_project" "demoproj" {
+  display_name = "demoproj"
+}
+
+data "nsxt_policy_gateway_policy" "demopolicy" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
+  display_name = "default"
+}
+```
+
 ## Argument Reference
 
 * `id` - (Optional) The ID of the gateway policy to retrieve.
 * `domain` - (Optional) The domain of the policy, defaults to `default`. Needs to be specified in VMC environment.
 * `category` - (Optional) Category of the policy to retrieve. May be useful to retrieve default policy.
 * `display_name` - (Optional) The Display Name prefix of the policy to retrieve.
+* `context` - (Optional) The context which the object belongs to
+    * `project_id` - The ID of the project which the object belongs to
 
 ## Attributes Reference
 

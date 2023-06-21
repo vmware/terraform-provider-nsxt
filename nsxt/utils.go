@@ -662,3 +662,22 @@ func handlePagination(lister func(*paginationInfo) error) (int64, error) {
 
 	return total, nil
 }
+
+func getContextSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeList,
+		Description: "Resource context",
+		Optional:    true,
+		MaxItems:    1,
+		ForceNew:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"project_id": {
+					Type:        schema.TypeString,
+					Description: "Id of the project which the resource belongs to.",
+					Required:    true,
+				},
+			},
+		},
+	}
+}

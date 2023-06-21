@@ -19,10 +19,27 @@ data "nsxt_policy_tier1_gateway" "tier1_router" {
 }
 ```
 
+## Example Usage - Multi-Tenancy
+
+```hcl
+data "nsxt_policy_project" "demoproj" {
+  display_name = "demoproj"
+}
+
+data "nsxt_policy_tier1_gateway" "demotier1" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
+  display_name = "demotier1"
+}
+```
+
 ## Argument Reference
 
 * `id` - (Optional) The ID of Tier-1 gateway to retrieve.
 * `display_name` - (Optional) The Display Name prefix of the Tier-1 gateway to retrieve.
+* `context` - (Optional) The context which the object belongs to
+    * `project_id` - The ID of the project which the object belongs to
 
 ## Attributes Reference
 

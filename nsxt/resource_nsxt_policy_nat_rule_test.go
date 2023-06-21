@@ -360,7 +360,7 @@ func testAccNsxtPolicyNATRuleExists(resourceName string, isNat bool) resource.Te
 			natType = model.PolicyNat_NAT_TYPE_NAT64
 		}
 		isT0, gwID := parseGatewayPolicyPath(gwPath)
-		_, err := getNsxtPolicyNATRuleByID(connector, gwID, isT0, natType, resourceID, testAccIsGlobalManager())
+		_, err := getNsxtPolicyNATRuleByID(testAccGetSessionContext(), connector, gwID, isT0, natType, resourceID)
 		if err != nil {
 			return fmt.Errorf("Error while retrieving policy NAT Rule ID %s. Error: %v", resourceID, err)
 		}
@@ -384,7 +384,7 @@ func testAccNsxtPolicyNATRuleCheckDestroy(state *terraform.State, displayName st
 		if isNat {
 			natType = model.PolicyNat_NAT_TYPE_NAT64
 		}
-		_, err := getNsxtPolicyNATRuleByID(connector, gwID, isT0, natType, resourceID, testAccIsGlobalManager())
+		_, err := getNsxtPolicyNATRuleByID(testAccGetSessionContext(), connector, gwID, isT0, natType, resourceID)
 		if err == nil {
 			return fmt.Errorf("Policy NAT Rule %s still exists", displayName)
 		}

@@ -246,6 +246,7 @@ func resourceNsxtPolicyTier0GatewayInterfaceCreate(d *schema.ResourceData, m int
 	}
 
 	localeServiceID := ""
+	context := getSessionContext(d, m)
 	if isPolicyGlobalManager(m) {
 		enablePIM := d.Get("enable_pim").(bool)
 		if enablePIM {
@@ -254,7 +255,7 @@ func resourceNsxtPolicyTier0GatewayInterfaceCreate(d *schema.ResourceData, m int
 		if objSitePath == "" {
 			return attributeRequiredGlobalManagerError("site_path", "nsxt_policy_tier0_gateway_interface")
 		}
-		localeServices, err := listPolicyTier0GatewayLocaleServices(connector, tier0ID, true)
+		localeServices, err := listPolicyTier0GatewayLocaleServices(context, connector, tier0ID)
 		if err != nil {
 			return err
 		}
@@ -266,7 +267,7 @@ func resourceNsxtPolicyTier0GatewayInterfaceCreate(d *schema.ResourceData, m int
 		if objSitePath != "" {
 			return globalManagerOnlyError()
 		}
-		localeService, err := getPolicyTier0GatewayLocaleServiceWithEdgeCluster(tier0ID, connector)
+		localeService, err := getPolicyTier0GatewayLocaleServiceWithEdgeCluster(context, tier0ID, connector)
 		if err != nil {
 			return err
 		}

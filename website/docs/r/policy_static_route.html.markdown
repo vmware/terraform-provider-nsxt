@@ -36,6 +36,38 @@ resource "nsxt_policy_static_route" "route1" {
 }
 ```
 
+## Example Usage - Multi-Tenancy
+
+```hcl
+data "nsxt_policy_project" "demoproj" {
+  display_name = "demoproj"
+}
+
+resource "nsxt_policy_static_route" "route1" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
+  display_name = "sroute"
+  gateway_path = nsxt_policy_tier1_gateway.tier1_gw.path
+  network      = "13.1.1.0/24"
+
+  next_hop {
+    admin_distance = "2"
+    ip_address     = "11.10.10.1"
+  }
+
+  next_hop {
+    admin_distance = "4"
+    ip_address     = "12.10.10.1"
+  }
+
+  tag {
+    scope = "color"
+    tag   = "blue"
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -44,6 +76,8 @@ The following arguments are supported:
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this Tier-0 gateway.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the policy resource.
+* `context` - (Optional) The context which the object belongs to
+  * `project_id` - The ID of the project which the object belongs to
 * `network` - (Required) The network address in CIDR format for the route.
 * `gateway_path` (Required) The NSX Policy path to the Tier0 or Tier1 Gateway for this Static Route.
 * `next_hop` - (Required) One or more next hops for the static route.

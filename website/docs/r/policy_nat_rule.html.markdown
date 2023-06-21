@@ -31,6 +31,33 @@ resource "nsxt_policy_nat_rule" "dnat1" {
 }
 ```
 
+## Example Usage - Multi-Tenancy
+
+```hcl
+data "nsxt_policy_project" "demoproj" {
+  display_name = "demoproj"
+}
+
+resource "nsxt_policy_nat_rule" "dnat1" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
+  display_name         = "dnat_rule1"
+  action               = "DNAT"
+  source_networks      = ["9.1.1.1", "9.2.1.1"]
+  destination_networks = ["11.1.1.1"]
+  translated_networks  = ["10.1.1.1"]
+  gateway_path         = nsxt_policy_tier1_gateway.t1gateway.path
+  logging              = false
+  firewall_match       = "MATCH_INTERNAL_ADDRESS"
+
+  tag {
+    scope = "color"
+    tag   = "blue"
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -39,6 +66,8 @@ The following arguments are supported:
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this NAT Rule.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the policy resource.
+* `context` - (Optional) The context which the object belongs to
+    * `project_id` - The ID of the project which the object belongs to
 * `gateway_path` - (Required) The NSX Policy path to the Tier0 or Tier1 Gateway for this NAT Rule.
 * `action` - (Required) The action for the NAT Rule. One of `SNAT`, `DNAT`, `REFLEXIVE`, `NO_SNAT`, `NO_DNAT`, `NAT64`.
 * `destination_networks` - (Optional) A list of destination network IP addresses or CIDR.
