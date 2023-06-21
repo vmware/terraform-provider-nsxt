@@ -1,0 +1,999 @@
+###################
+### API implementations:
+# - api_packages:
+### API client package path
+#   - client:
+### API model path
+#     model:
+### API type (Local/Global/Multitenancy)
+#     type:
+### List results Model path
+#     list_result_model:
+### Name of model within model path package (should be same in all implementations)
+#   model_name:
+### Used to create client name, variable names etc.
+#   obj_name:
+### List of methods which are supported by API
+#   supported_method:
+### Variable name (for cases when variable isn't compliant with ${obj_name}Param template
+#   var_name:
+### List API results type (for cases when results struct isn't compliant with ${model_name}ListResult template
+#   list_result_name:
+### Prefix for model type in API code
+#   model_prefix:
+### Model value is passed as pointer (true/false, defaults to false)
+#   model_pass_ptr:
+### File name for API wrapper output
+#   file_name:
+- api_packages:
+  - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra
+    model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+    type: Local
+  - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra
+    model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
+    type: Global
+  - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra
+    model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+    type: Multitenancy
+  model_name: IPDiscoveryProfile
+  obj_name: IpDiscoveryProfile
+  supported_method:
+    - New
+    - Get
+    - Patch
+    - Update
+    - Delete
+    - List
+#- api_packages:
+#  - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s
+#    model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+#    type: Local
+#  - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s
+#    model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
+#    type: Global
+#  model_name: CommunityList
+#  obj_name: CommunityList
+#  supported_method:
+#    - New
+#    - Get
+#    - Patch
+#    - Update
+#    - Delete
+#    - List
+#- api_packages:
+#    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services
+#      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+#      type: Local
+#    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s/locale_services
+#      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
+#      type: Global
+#  model_name: Tier0Interface
+#  obj_name: Interface
+#  var_name: tier0InterfaceParam
+#  supported_method:
+#    - New
+#    - Get
+#    - Patch
+#    - Update
+#    - Delete
+#    - List
+#- api_packages:
+#    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services
+#      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+#      type: Local
+#    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s/locale_services
+#      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
+#      type: Global
+#  model_name: BgpRoutingConfig
+#  obj_name: BgpRoutingConfig
+#  client_name: BgpClient
+#  supported_method:
+#    - New
+#    - Get
+#    - Patch
+#    - Update
+#- api_packages:
+#    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services/bgp
+#      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+#      type: Local
+#    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s/locale_services/bgp
+#      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
+#      type: Global
+#  model_name: BgpNeighborConfig
+#  obj_name: BgpNeighborConfig
+#  client_name: NeighborsClient
+#  supported_method:
+#    - New
+#    - Get
+#    - Patch
+#    - Update
+#    - Delete
+#    - List
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
+      type: Global
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Multitenancy
+  model_name: PolicyContextProfile
+  obj_name: ContextProfile
+  var_name: policyContextProfileParam
+  supported_method:
+    - New
+    - Get
+    - Patch
+    - Update
+    - Delete
+    - List
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/context_profiles/custom_attributes
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/context_profiles/custom_attributes
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
+      type: Global
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/context_profiles/custom_attributes
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Multitenancy
+  client_name: DefaultClient
+  model_name: PolicyCustomAttributes
+  obj_name: ContextProfileCustomAttribute
+  var_name: policyCustomAttributesParam
+  list_result_name: PolicyContextProfileListResult
+  supported_method:
+    - New
+    - Create
+    - List
+    - Patch
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
+      type: Global
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Multitenancy
+  model_name: DhcpRelayConfig
+  obj_name: DhcpRelayConfig
+  supported_method:
+    - New
+    - Get
+    - Patch
+    - Update
+    - Delete
+    - List
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
+      type: Global
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Multitenancy
+  model_name: DhcpServerConfig
+  obj_name: DhcpServerConfig
+  supported_method:
+    - New
+    - Get
+    - Patch
+    - Update
+    - Delete
+    - List
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
+      type: Global
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Multitenancy
+  model_name: PolicyDnsForwarderZone
+  obj_name: DnsForwarderZone
+  var_name: policyDnsForwarderZoneParam
+  supported_method:
+    - New
+    - Get
+    - Patch
+    - Update
+    - Delete
+    - List
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
+      type: Global
+  model_name: PolicyDnsForwarder
+  obj_name: DnsForwarder
+  client_name: DnsForwarderClient
+  var_name: policyDnsForwarderParam
+  supported_method:
+    - New
+    - Get
+    - Patch
+    - Update
+    - Delete
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_1s
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
+      type: Global
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/tier_1s
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Multitenancy
+  model_name: PolicyDnsForwarder
+  obj_name: DnsForwarder
+  client_name: DnsForwarderClient
+  var_name: policyDnsForwarderParam
+  supported_method:
+    - New
+    - Get
+    - Patch
+    - Update
+    - Delete
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/domains
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/domains
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
+      type: Global
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/domains
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Multitenancy
+  model_name: GatewayPolicy
+  obj_name: GatewayPolicy
+  client_name: GatewayPoliciesClient
+  supported_method:
+    - New
+    - Get
+    - Patch
+    - Update
+    - Delete
+    - List
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
+      type: Global
+  model_name: Tier0
+  obj_name: Tier0
+  supported_method:
+    - New
+    - Get
+    - Patch
+    - Update
+    - Delete
+    - List
+#- api_packages:
+#    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s
+#      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+#      type: Local
+#    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s
+#      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
+#      type: Global
+#  model_name: PrefixList
+#  obj_name: PrefixList
+#  list_result_name: PrefixListResult
+#  supported_method:
+#    - New
+#    - Get
+#    - Patch
+#    - Update
+#    - Delete
+#    - List
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
+      type: Global
+  model_name: LocaleServices
+  obj_name: LocaleService
+  var_name: localeServicesParam
+  supported_method:
+    - New
+    - Get
+    - Patch
+    - Update
+    - Delete
+    - List
+#- api_packages:
+#    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s
+#      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+#      type: Local
+#    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s
+#      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
+#      type: Global
+#  model_name: Tier0RouteMap
+#  obj_name: RouteMap
+#  var_name: tier0RouteMapParam
+#  supported_method:
+#    - New
+#    - Get
+#    - Patch
+#    - Update
+#    - Delete
+#    - List
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/domains
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/domains
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
+      type: Global
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/domains
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Multitenancy
+  model_name: Group
+  obj_name: Group
+  supported_method:
+    - New
+    - Get
+    - Patch
+    - Update
+    - Delete
+    - List
+#- api_packages:
+#    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/domains
+#      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+#      type: Local
+#  model_name: IdsSecurityPolicy
+#  obj_name: IntrusionServicePolicy
+#  client_name: IntrusionServicePoliciesClient
+#  supported_method:
+#    - New
+#    - Get
+#    - Patch
+#    - Update
+#    - Delete
+#    - List
+#- api_packages:
+#    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/settings/firewall/security/intrusion_services
+#      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+#      type: Local
+#  model_name: IdsProfile
+#  obj_name: Profile
+#  supported_method:
+#    - New
+#    - Get
+#    - Patch
+#    - Update
+#    - Delete
+#    - List
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Multitenancy
+  model_name: IpAddressPool
+  obj_name: IpPool
+  supported_method:
+    - New
+    - Get
+    - Patch
+    - Update
+    - Delete
+    - List
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/ip_pools
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/ip_pools
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Multitenancy
+  model_name: IpAddressAllocation
+  obj_name: IpAllocation
+  supported_method:
+    - New
+    - Get
+    - Patch
+    - Update
+    - Delete
+    - List
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Multitenancy
+  model_name: IpAddressBlock
+  obj_name: IpBlock
+  supported_method:
+    - New
+    - Get
+    - Patch
+    - Update
+    - Delete
+    - List
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/realized_state
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/realized_state
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
+      type: Global
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/realized_state
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Multitenancy
+  model_name: RealizedEntity
+  obj_name: RealizedEntity
+  client_name: RealizedEntitiesClient
+  list_result_name: GenericPolicyRealizedResourceListResult
+  supported_method:
+    - New
+    - List
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/ip_pools
+      model: github.com/vmware/vsphere-automation-sdk-go/runtime/data
+      list_result_model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/ip_pools
+      model: github.com/vmware/vsphere-automation-sdk-go/runtime/data
+      list_result_model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Multitenancy
+  model_name: StructValue
+  obj_name: IpSubnets
+  client_name: IpSubnetsClient
+  list_result_name: IpAddressPoolSubnetListResult
+  model_prefix: vapiData_
+  model_pass_ptr: true
+  file_name: IpSubnetsClient
+  supported_method:
+    - New
+    - Get
+    - Delete
+    - Patch
+    - Update
+    - List
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/segments
+      model: github.com/vmware/vsphere-automation-sdk-go/runtime/data
+      list_result_model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/segments
+      model: github.com/vmware/vsphere-automation-sdk-go/runtime/data
+      list_result_model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
+      type: Global
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/segments
+      model: github.com/vmware/vsphere-automation-sdk-go/runtime/data
+      list_result_model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Multitenancy
+  model_name: StructValue
+  obj_name: DhcpStaticBindingConfig
+  client_name: DhcpStaticBindingConfigsClient
+  list_result_name: DhcpStaticBindingConfigListResult
+  model_prefix: vapiData_
+  model_pass_ptr: true
+  file_name: DhcpStaticBindingConfig
+  supported_method:
+    - New
+    - Get
+    - Delete
+    - Patch
+    - Update
+    - List
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
+      type: Global
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Multitenancy
+  model_name: MacDiscoveryProfile
+  obj_name: MacDiscoveryProfile
+  supported_method:
+    - New
+    - Get
+    - Patch
+    - Update
+    - Delete
+    - List
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
+      type: Global
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Multitenancy
+  model_name: Tier1
+  obj_name: Tier1
+  supported_method:
+    - New
+    - Get
+    - Patch
+    - Update
+    - Delete
+    - List
+
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/nat
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s/nat
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
+      type: Global
+  model_name: PolicyNatRule
+  obj_name: NatRule
+  var_name: policyNatRuleParam
+  supported_method:
+    - New
+    - Get
+    - Patch
+    - Update
+    - Delete
+    - List
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/nat
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_1s/nat
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
+      type: Global
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/tier_1s/nat
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Multitenancy
+  model_name: PolicyNatRule
+  obj_name: NatRule
+  var_name: policyNatRuleParam
+  supported_method:
+    - New
+    - Get
+    - Patch
+    - Update
+    - Delete
+    - List
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/domains
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/domains
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
+      type: Global
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/domains
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Multitenancy
+  model_name: SecurityPolicy
+  obj_name: SecurityPolicy
+  client_name: SecurityPoliciesClient
+  supported_method:
+    - New
+    - Get
+    - Patch
+    - Update
+    - Delete
+    - List
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
+      type: Global
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Multitenancy
+  model_name: QosProfile
+  obj_name: QosProfile
+  supported_method:
+    - New
+    - Get
+    - Patch
+    - Update
+    - Delete
+    - List
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
+      type: Global
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Multitenancy
+  model_name: Service
+  obj_name: Service
+  supported_method:
+    - New
+    - Get
+    - Patch
+    - Update
+    - Delete
+    - List
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
+      type: Global
+  model_name: StaticRoutes
+  obj_name: StaticRoute
+  var_name: staticRoutesParam
+  supported_method:
+    - New
+    - Get
+    - Patch
+    - Update
+    - Delete
+    - List
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_1s
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
+      type: Global
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/tier_1s
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Multitenancy
+  model_name: StaticRoutes
+  obj_name: StaticRoute
+  var_name: staticRoutesParam
+  supported_method:
+    - New
+    - Get
+    - Patch
+    - Update
+    - Delete
+    - List
+#- api_packages:
+#    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/static_routes
+#      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+#      type: Local
+#    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s/static_routes
+#      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
+#      type: Global
+#  model_name: StaticRouteBfdPeer
+#  obj_name: BfdPeer
+#  var_name: staticRouteBfdPeerParam
+#  supported_method:
+#    - New
+#    - Get
+#    - Patch
+#    - Update
+#    - Delete
+#    - List
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
+      type: Global
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Multitenancy
+  model_name: GatewayQosProfile
+  obj_name: GatewayQosProfile
+  supported_method:
+    - New
+    - Get
+    - Patch
+    - Update
+    - Delete
+    - List
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
+      type: Global
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Multitenancy
+  model_name: Ipv6DadProfile
+  obj_name: Ipv6DadProfile
+  supported_method:
+    - New
+    - Get
+    - Patch
+    - Update
+    - Delete
+    - List
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
+      type: Global
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Multitenancy
+  model_name: Ipv6NdraProfile
+  obj_name: Ipv6NdraProfile
+  supported_method:
+    - New
+    - Get
+    - Patch
+    - Update
+    - Delete
+    - List
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
+      type: Global
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Multitenancy
+  model_name: Segment
+  obj_name: Segment
+  supported_method:
+    - New
+    - Get
+    - Patch
+    - Update
+    - Delete
+    - List
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/segments
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/segments
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
+      type: Global
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/segments
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Multitenancy
+  model_name: SegmentConfigurationState
+  obj_name: State
+  client_name: StateClient
+  supported_method:
+    - New
+    - Get
+    - List
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
+      type: Global
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Multitenancy
+  model_name: SegmentSecurityProfile
+  obj_name: SegmentSecurityProfile
+  supported_method:
+    - New
+    - Get
+    - Patch
+    - Update
+    - Delete
+    - List
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
+      type: Global
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Multitenancy
+  model_name: SpoofGuardProfile
+  obj_name: SpoofguardProfile
+  var_name: spoofGuardProfileParam
+  supported_method:
+    - New
+    - Get
+    - Patch
+    - Delete
+    - List
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_1s
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
+      type: Global
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/tier_1s
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Multitenancy
+  model_name: LocaleServices
+  obj_name: LocaleService
+  var_name: localeServicesParam
+  supported_method:
+    - New
+    - Get
+    - Patch
+    - Update
+    - Delete
+    - List
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/realized_state
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/realized_state
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Multitenancy
+  model_name: VirtualMachine
+  obj_name: VirtualMachine
+  supported_method:
+    - New
+    - List
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/segments
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/segments
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
+      type: Global
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/segments
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Multitenancy
+  model_name: SegmentPort
+  obj_name: Port
+  var_name: segmentPortParam
+  supported_method:
+    - New
+    - List
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/segments
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/segments
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Multitenancy
+  model_name: SegmentPort
+  obj_name: Port
+  var_name: segmentPortParam
+  supported_method:
+    - New
+    - Get
+    - Patch
+    - Update
+    - Delete
+    - List
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/locale_services
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_1s/locale_services
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
+      type: Global
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/tier_1s/locale_services
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Multitenancy
+  model_name: Tier1Interface
+  obj_name: Interface
+  var_name: tier1InterfaceParam
+  supported_method:
+    - New
+    - Get
+    - Patch
+    - Update
+    - Delete
+    - List
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_1s
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
+      type: Global
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/tier_1s
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Multitenancy
+  model_name: Segment
+  obj_name: Segment
+  supported_method:
+    - New
+    - Get
+    - Patch
+    - Update
+    - Delete
+    - List
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/segments
+      model: github.com/vmware/vsphere-automation-sdk-go/runtime/data
+      list_result_model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+  model_name: StructValue
+  obj_name: DhcpStaticBindingConfig
+  client_name: DhcpStaticBindingConfigsClient
+  list_result_name: DhcpStaticBindingConfigListResult
+  model_prefix: vapiData_
+  model_pass_ptr: true
+  file_name: DhcpStaticBindingConfig
+  supported_method:
+    - New
+    - Get
+    - Delete
+    - Patch
+    - Update
+    - List
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Multitenancy
+  model_name: Infra
+  obj_name: Infra
+  client_name: InfraClient
+  supported_method:
+    - New
+    - Get
+    - Patch
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/segments
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/segments
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Multitenancy
+  model_name: SegmentDiscoveryProfileBindingMap
+  obj_name: SegmentDiscoveryProfileBindingMap
+  supported_method:
+    - New
+    - Get
+    - Delete
+    - Patch
+    - Update
+    - List
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/segments
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/segments
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Multitenancy
+  model_name: SegmentQosProfileBindingMap
+  obj_name: SegmentQosProfileBindingMap
+  supported_method:
+    - New
+    - Get
+    - Delete
+    - Patch
+    - Update
+    - List
+
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/segments
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/segments
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Multitenancy
+  model_name: SegmentSecurityProfileBindingMap
+  obj_name: SegmentSecurityProfileBindingMap
+  supported_method:
+    - New
+    - Get
+    - Delete
+    - Patch
+    - Update
+    - List

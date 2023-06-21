@@ -55,6 +55,49 @@ resource "nsxt_policy_vlan_segment" "vlansegment1" {
 }
 ```
 
+## Example Usage - Multi-Tenancy
+
+```hcl
+data "nsxt_policy_project" "demoproj" {
+  display_name = "demoproj"
+}
+
+resource "nsxt_policy_vlan_segment" "vlansegment1" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
+  display_name        = "vlansegment1"
+  description         = "Terraform provisioned VLAN Segment"
+  transport_zone_path = data.nsxt_policy_transport_zone.vlantz.path
+  domain_name         = "tftest2.org"
+  vlan_ids            = ["101", "102"]
+
+  subnet {
+    cidr        = "12.12.2.1/24"
+    dhcp_ranges = ["12.12.2.100-12.12.2.160"]
+
+    dhcp_v4_config {
+      server_address = "12.12.2.2/24"
+      lease_time     = 36000
+
+      dhcp_option_121 {
+        network  = "6.6.6.0/24"
+        next_hop = "1.1.1.21"
+      }
+
+      dhcp_generic_option {
+        code   = "119"
+        values = ["abc"]
+      }
+    }
+  }
+
+  advanced_config {
+    connectivity = "ON"
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:

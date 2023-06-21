@@ -41,11 +41,50 @@ resource "nsxt_policy_ip_pool_static_subnet" "static_subnet1" {
 }
 ```
 
+## Example Usage - Multi-Tenancy
+
+```hcl
+data "nsxt_policy_project" "demoproj" {
+  display_name = "demoproj"
+}
+
+resource "nsxt_policy_ip_pool_static_subnet" "static_subnet1" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
+  display_name = "static-subnet1"
+  pool_path    = nsxt_policy_ip_pool.pool1.path
+  cidr         = "12.12.12.0/24"
+  gateway      = "12.12.12.1"
+
+  allocation_range {
+    start = "12.12.12.10"
+    end   = "12.12.12.20"
+  }
+  allocation_range {
+    start = "12.12.12.100"
+    end   = "12.12.12.120"
+  }
+
+  tag {
+    scope = "color"
+    tag   = "blue"
+  }
+
+  tag {
+    scope = "env"
+    tag   = "test"
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
 
 * `display_name` - (Required) The display name for the Static Subnet.
+* `context` - (Optional) The context which the object belongs to
+  * `project_id` - The ID of the project which the object belongs to
 * `pool_path` - (Required) The Policy path to the IP Pool for this Static Subnet.
 * `cidr` - (Required) The network CIDR
 * `allocation_range` - (Required) One or more IP allocation ranges for the Subnet.

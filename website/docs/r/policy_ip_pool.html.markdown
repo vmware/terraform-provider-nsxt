@@ -29,6 +29,31 @@ resource "nsxt_policy_ip_pool" "pool1" {
 }
 ```
 
+## Example Usage - Multi-Tenancy
+
+```hcl
+data "nsxt_policy_project" "demoproj" {
+  display_name = "demoproj"
+}
+
+resource "nsxt_policy_ip_pool" "pool1" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
+  display_name = "ip-pool1"
+
+  tag {
+    scope = "color"
+    tag   = "blue"
+  }
+
+  tag {
+    scope = "env"
+    tag   = "test"
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -37,6 +62,8 @@ The following arguments are supported:
 * `description` - (Optional) Description of the resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this IP Pool.
+* `context` - (Optional) The context which the object belongs to
+    * `project_id` - The ID of the project which the object belongs to
 
 ## Attributes Reference
 

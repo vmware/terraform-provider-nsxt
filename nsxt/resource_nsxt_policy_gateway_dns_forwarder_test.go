@@ -146,7 +146,7 @@ func testAccNsxtPolicyGatewayDNSForwarderExists(resourceName string) resource.Te
 		gwPath := rs.Primary.Attributes["gateway_path"]
 		isT0, gwID := parseGatewayPolicyPath(gwPath)
 
-		_, err := policyGatewayDNSForwarderGet(connector, gwID, isT0, testAccIsGlobalManager())
+		_, err := policyGatewayDNSForwarderGet(testAccGetSessionContext(), connector, gwID, isT0)
 		if err != nil {
 			return fmt.Errorf("Policy Gateway DNS Forwarder resource does not exist on %s", gwPath)
 		}
@@ -166,7 +166,7 @@ func testAccNsxtPolicyGatewayDNSForwarderCheckDestroy(state *terraform.State, di
 		gwPath := rs.Primary.Attributes["gateway_path"]
 		isT0, gwID := parseGatewayPolicyPath(gwPath)
 
-		_, err := policyGatewayDNSForwarderGet(connector, gwID, isT0, testAccIsGlobalManager())
+		_, err := policyGatewayDNSForwarderGet(testAccGetSessionContext(), connector, gwID, isT0)
 		if err == nil {
 			return fmt.Errorf("Policy Gateway DNS Forwarder %s still exists", displayName)
 		}

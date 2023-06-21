@@ -33,6 +33,35 @@ resource "nsxt_policy_ip_pool_block_subnet" "block_subnet1" {
 }
 ```
 
+## Example Usage - Multi-Tenancy
+
+```hcl
+data "nsxt_policy_project" "demoproj" {
+  display_name = "demoproj"
+}
+
+resource "nsxt_policy_ip_pool_block_subnet" "block_subnet1" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
+  display_name        = "block-subnet1"
+  pool_path           = nsxt_policy_ip_pool.pool1.path
+  block_path          = nsxt_policy_ip_block.block1.path
+  size                = 8
+  auto_assign_gateway = false
+
+  tag {
+    scope = "color"
+    tag   = "blue"
+  }
+
+  tag {
+    scope = "env"
+    tag   = "test"
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -41,6 +70,8 @@ The following arguments are supported:
 * `pool_path` - (Required) The Policy path to the IP Pool for this Block Subnet.
 * `block_path` - (Required) The Policy path to the IP Block for this Block Subnet.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
+* `context` - (Optional) The context which the object belongs to
+    * `project_id` - The ID of the project which the object belongs to
 * `size` - (Required) The size of this Block Subnet. Must be a power of 2
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this Block Subnet.

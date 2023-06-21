@@ -76,6 +76,36 @@ resource "nsxt_policy_tier1_gateway" "tier1_gw" {
 }
 ```
 
+## Example Usage - Multi-Tenancy
+
+```hcl
+data "nsxt_policy_project" "demoproj" {
+  display_name = "demoproj"
+}
+
+resource "nsxt_policy_tier1_gateway" "tier1_gw" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
+  description               = "Tier-1 provisioned by Terraform"
+  display_name              = "Tier1-gw1"
+  nsx_id                    = "predefined_id"
+  edge_cluster_path         = data.nsxt_policy_edge_cluster.EC.path
+  failover_mode             = "PREEMPTIVE"
+  default_rule_logging      = "false"
+  enable_firewall           = "true"
+  enable_standby_relocation = "false"
+  tier0_path                = data.nsxt_policy_tier0_gateway.T0.path
+  route_advertisement_types = ["TIER1_STATIC_ROUTES", "TIER1_CONNECTED"]
+  pool_allocation           = "ROUTING"
+
+  tag {
+    scope = "color"
+    tag   = "blue"
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -84,6 +114,8 @@ The following arguments are supported:
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this Tier-1 gateway.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the policy resource.
+* `context` - (Optional) The context which the object belongs to
+  * `project_id` - The ID of the project which the object belongs to
 * `edge_cluster_path` - (Optional) The path of the edge cluster where the Tier-1 is placed.For advanced configuration, use `locale_service` clause instead. 
 * `locale_service` - (Optional) This argument is required on NSX Global Manager. Multiple locale services can be specified for multiple locations.
   * `edge_cluster_path` - (Required) The path of the edge cluster where the Tier-0 is placed.

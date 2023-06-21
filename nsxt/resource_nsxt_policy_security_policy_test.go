@@ -581,8 +581,7 @@ func testAccNsxtPolicySecurityPolicyExists(resourceName string, domainName strin
 			return fmt.Errorf("Policy SecurityPolicy resource ID not set in resources")
 		}
 
-		isPolicyGlobalManager := isPolicyGlobalManager(testAccProvider.Meta())
-		exists, err := resourceNsxtPolicySecurityPolicyExistsInDomain(resourceID, domainName, connector, isPolicyGlobalManager)
+		exists, err := resourceNsxtPolicySecurityPolicyExistsInDomain(testAccGetSessionContext(), resourceID, domainName, connector)
 		if err != nil {
 			return err
 		}
@@ -595,7 +594,6 @@ func testAccNsxtPolicySecurityPolicyExists(resourceName string, domainName strin
 
 func testAccNsxtPolicySecurityPolicyCheckDestroy(state *terraform.State, displayName string, domainName string) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-	isPolicyGlobalManager := isPolicyGlobalManager(testAccProvider.Meta())
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_policy_security_policy" {
@@ -603,7 +601,7 @@ func testAccNsxtPolicySecurityPolicyCheckDestroy(state *terraform.State, display
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		exists, err := resourceNsxtPolicySecurityPolicyExistsInDomain(resourceID, domainName, connector, isPolicyGlobalManager)
+		exists, err := resourceNsxtPolicySecurityPolicyExistsInDomain(testAccGetSessionContext(), resourceID, domainName, connector)
 		if err != nil {
 			return err
 		}

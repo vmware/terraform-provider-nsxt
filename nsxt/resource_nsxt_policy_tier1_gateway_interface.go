@@ -10,13 +10,13 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
 	gm_tier1s "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_1s"
 	gm_locale_services "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_1s/locale_services"
 	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/locale_services"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
+	localeservices "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s/locale_services"
 )
 
 func resourceNsxtPolicyTier1GatewayInterface() *schema.Resource {
@@ -36,6 +36,7 @@ func resourceNsxtPolicyTier1GatewayInterface() *schema.Resource {
 			"description":            getDescriptionSchema(),
 			"revision":               getRevisionSchema(),
 			"tag":                    getTagsSchema(),
+			"context":                getContextSchema(),
 			"gateway_path":           getPolicyPathSchema(true, true, "Policy path for tier1 gateway"),
 			"segment_path":           getPolicyPathSchema(true, true, "Policy path for connected segment"),
 			"subnets":                getGatewayInterfaceSubnetsSchema(),
@@ -85,11 +86,12 @@ func resourceNsxtPolicyTier1GatewayInterfaceCreate(d *schema.ResourceData, m int
 	sitePath := d.Get("site_path").(string)
 	tier1ID := getPolicyIDFromPath(tier1Path)
 	localeServiceID := ""
+	context := getSessionContext(d, m)
 	if isPolicyGlobalManager(m) {
 		if sitePath == "" {
 			return attributeRequiredGlobalManagerError("site_path", "nsxt_policy_tier1_gateway_interface")
 		}
-		localeServices, err := listPolicyTier1GatewayLocaleServices(connector, tier1ID, true)
+		localeServices, err := listPolicyTier1GatewayLocaleServices(context, connector, tier1ID)
 		if err != nil {
 			return err
 		}
@@ -102,7 +104,7 @@ func resourceNsxtPolicyTier1GatewayInterfaceCreate(d *schema.ResourceData, m int
 		if sitePath != "" {
 			return globalManagerOnlyError()
 		}
-		localeService, err := getPolicyTier1GatewayLocaleServiceEntry(tier1ID, connector)
+		localeService, err := getPolicyTier1GatewayLocaleServiceEntry(context, tier1ID, connector)
 		if err != nil {
 			return err
 		}
@@ -116,13 +118,8 @@ func resourceNsxtPolicyTier1GatewayInterfaceCreate(d *schema.ResourceData, m int
 		id = newUUID()
 	} else {
 		var err error
-		if isPolicyGlobalManager(m) {
-			client := gm_locale_services.NewInterfacesClient(connector)
-			_, err = client.Get(tier1ID, localeServiceID, id)
-		} else {
-			client := locale_services.NewInterfacesClient(connector)
-			_, err = client.Get(tier1ID, localeServiceID, id)
-		}
+		client := localeservices.NewInterfacesClient(getSessionContext(d, m), connector)
+		_, err = client.Get(tier1ID, localeServiceID, id)
 
 		if err == nil {
 			return fmt.Errorf("Interface with ID '%s' already exists on Tier1 Gateway %s", id, tier1ID)
@@ -162,18 +159,8 @@ func resourceNsxtPolicyTier1GatewayInterfaceCreate(d *schema.ResourceData, m int
 
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating tier1 interface with ID %s", id)
-	var err error
-	if isPolicyGlobalManager(m) {
-		gmObj, convErr := convertModelBindingType(obj, model.Tier1InterfaceBindingType(), gm_model.Tier1InterfaceBindingType())
-		if convErr != nil {
-			return convErr
-		}
-		client := gm_locale_services.NewInterfacesClient(connector)
-		err = client.Patch(tier1ID, localeServiceID, id, gmObj.(gm_model.Tier1Interface))
-	} else {
-		client := locale_services.NewInterfacesClient(connector)
-		err = client.Patch(tier1ID, localeServiceID, id, obj)
-	}
+	client := localeservices.NewInterfacesClient(getSessionContext(d, m), connector)
+	err := client.Patch(tier1ID, localeServiceID, id, obj)
 
 	if err != nil {
 		return handleCreateError("Tier1 Interface", id, err)
@@ -217,7 +204,7 @@ func resourceNsxtPolicyTier1GatewayInterfaceRead(d *schema.ResourceData, m inter
 		d.Set("site_path", sitePath)
 	} else {
 		var err error
-		client := locale_services.NewInterfacesClient(connector)
+		client := localeservices.NewInterfacesClient(getSessionContext(d, m), connector)
 		obj, err = client.Get(tier1ID, localeServiceID, id)
 		if err != nil {
 			return handleReadError(d, "Tier1 Interface", id, err)
@@ -296,17 +283,8 @@ func resourceNsxtPolicyTier1GatewayInterfaceUpdate(d *schema.ResourceData, m int
 		obj.UrpfMode = &urpfMode
 	}
 	var err error
-	if isPolicyGlobalManager(m) {
-		gmObj, err1 := convertModelBindingType(obj, model.Tier1InterfaceBindingType(), gm_model.Tier1InterfaceBindingType())
-		if err1 != nil {
-			return err1
-		}
-		client := gm_locale_services.NewInterfacesClient(connector)
-		_, err = client.Update(tier1ID, localeServiceID, id, gmObj.(gm_model.Tier1Interface))
-	} else {
-		client := locale_services.NewInterfacesClient(connector)
-		_, err = client.Update(tier1ID, localeServiceID, id, obj)
-	}
+	client := localeservices.NewInterfacesClient(getSessionContext(d, m), connector)
+	_, err = client.Update(tier1ID, localeServiceID, id, obj)
 	if err != nil {
 		return handleUpdateError("Tier1 Interface", id, err)
 	}
@@ -326,13 +304,8 @@ func resourceNsxtPolicyTier1GatewayInterfaceDelete(d *schema.ResourceData, m int
 	}
 
 	var err error
-	if isPolicyGlobalManager(m) {
-		client := gm_locale_services.NewInterfacesClient(connector)
-		err = client.Delete(tier1ID, localeServiceID, id)
-	} else {
-		client := locale_services.NewInterfacesClient(connector)
-		err = client.Delete(tier1ID, localeServiceID, id)
-	}
+	client := localeservices.NewInterfacesClient(getSessionContext(d, m), connector)
+	err = client.Delete(tier1ID, localeServiceID, id)
 	if err != nil {
 		return handleDeleteError("Tier1 Interface", id, err)
 	}
@@ -350,24 +323,11 @@ func resourceNsxtPolicyTier1GatewayInterfaceImport(d *schema.ResourceData, m int
 	gwID := s[0]
 	connector := getPolicyConnector(m)
 	var tier1GW model.Tier1
-	if isPolicyGlobalManager(m) {
-		client := gm_infra.NewTier1sClient(connector)
-		gmObj, err := client.Get(gwID)
-		if err != nil {
-			return nil, err
-		}
-		lmObj, err := convertModelBindingType(gmObj, gm_model.Tier1BindingType(), model.Tier1BindingType())
-		if err != nil {
-			return nil, err
-		}
-		tier1GW = lmObj.(model.Tier1)
-	} else {
-		var err error
-		client := infra.NewTier1sClient(connector)
-		tier1GW, err = client.Get(gwID)
-		if err != nil {
-			return nil, err
-		}
+	var err error
+	client := infra.NewTier1sClient(getSessionContext(d, m), connector)
+	tier1GW, err = client.Get(gwID)
+	if err != nil {
+		return nil, err
 	}
 	d.Set("gateway_path", tier1GW.Path)
 	d.Set("locale_service_id", s[1])

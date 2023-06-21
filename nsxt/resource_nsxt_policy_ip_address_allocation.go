@@ -11,9 +11,11 @@ import (
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/ip_pools"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
+	ippools "github.com/vmware/terraform-provider-nsxt/api/infra/ip_pools"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 func resourceNsxtPolicyIPAddressAllocation() *schema.Resource {
@@ -33,6 +35,7 @@ func resourceNsxtPolicyIPAddressAllocation() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
+			"context":      getContextSchema(),
 			"pool_path":    getPolicyPathSchema(true, true, "The path of the IP Pool for this allocation"),
 			"allocation_ip": {
 				Type:         schema.TypeString,
@@ -46,8 +49,8 @@ func resourceNsxtPolicyIPAddressAllocation() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyIPAddressAllocationExists(poolID string, allocationID string, connector client.Connector) (bool, error) {
-	client := ip_pools.NewIpAllocationsClient(connector)
+func resourceNsxtPolicyIPAddressAllocationExists(sessionContext utl.SessionContext, poolID string, allocationID string, connector client.Connector) (bool, error) {
+	client := ippools.NewIpAllocationsClient(sessionContext, connector)
 
 	_, err := client.Get(poolID, allocationID)
 	if err == nil {
@@ -63,7 +66,8 @@ func resourceNsxtPolicyIPAddressAllocationExists(poolID string, allocationID str
 
 func resourceNsxtPolicyIPAddressAllocationCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := ip_pools.NewIpAllocationsClient(connector)
+	sessionContext := getSessionContext(d, m)
+	client := ippools.NewIpAllocationsClient(sessionContext, connector)
 
 	if client == nil {
 		return policyResourceNotSupportedError()
@@ -77,7 +81,7 @@ func resourceNsxtPolicyIPAddressAllocationCreate(d *schema.ResourceData, m inter
 		id = uuid.String()
 	}
 
-	exists, err := resourceNsxtPolicyIPAddressAllocationExists(poolID, id, connector)
+	exists, err := resourceNsxtPolicyIPAddressAllocationExists(sessionContext, poolID, id, connector)
 	if err != nil {
 		return err
 	}
@@ -115,7 +119,7 @@ func resourceNsxtPolicyIPAddressAllocationCreate(d *schema.ResourceData, m inter
 
 func resourceNsxtPolicyIPAddressAllocationRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := ip_pools.NewIpAllocationsClient(connector)
+	client := ippools.NewIpAllocationsClient(getSessionContext(d, m), connector)
 
 	if client == nil {
 		return policyResourceNotSupportedError()
@@ -166,7 +170,7 @@ func resourceNsxtPolicyIPAddressAllocationRead(d *schema.ResourceData, m interfa
 
 func resourceNsxtPolicyIPAddressAllocationUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := ip_pools.NewIpAllocationsClient(connector)
+	client := ippools.NewIpAllocationsClient(getSessionContext(d, m), connector)
 
 	if client == nil {
 		return policyResourceNotSupportedError()
@@ -200,7 +204,7 @@ func resourceNsxtPolicyIPAddressAllocationUpdate(d *schema.ResourceData, m inter
 
 func resourceNsxtPolicyIPAddressAllocationDelete(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := ip_pools.NewIpAllocationsClient(connector)
+	client := ippools.NewIpAllocationsClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -229,7 +233,7 @@ func resourceNsxtPolicyIPAddressAllocationImport(d *schema.ResourceData, m inter
 
 	poolID := s[0]
 	connector := getPolicyConnector(m)
-	client := infra.NewIpPoolsClient(connector)
+	client := infra.NewIpPoolsClient(getSessionContext(d, m), connector)
 
 	pool, err := client.Get(poolID)
 	if err != nil {

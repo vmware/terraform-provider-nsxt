@@ -71,3 +71,11 @@ website-list-category:
 
 .PHONY: build test testacc vet fmt fmtcheck errcheck test-compile website-lint website-lint-fix tools
 
+api-wrapper:
+	@echo "==> Generating API wrappers..."
+	/usr/bin/python3 $(CURDIR)/tools/api-wrapper-generator.py \
+		--api_list $(CURDIR)/api/api_list.yaml \
+		--api_template $(CURDIR)/api/api_templates.yaml \
+		--api_file_template $(CURDIR)/api/api_file_template.yaml \
+		--utl_file_template $(CURDIR)/api/utl_file_template.yaml \
+		--out_dir $(CURDIR)/api

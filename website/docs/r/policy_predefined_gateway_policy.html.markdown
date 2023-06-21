@@ -71,6 +71,37 @@ resource "nsxt_policy_predefined_gateway_policy" "test" {
 }
 ```
 
+## Example Usage - Multi-Tenancy
+
+```hcl
+data "nsxt_policy_project" "demoproj" {
+  display_name = "demoproj"
+}
+
+data "nsxt_policy_gateway_policy" "default" {
+  category = "Default"
+}
+
+resource "nsxt_policy_predefined_gateway_policy" "test" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
+  path = data.nsxt_policy_gateway_policy.default.path
+
+  tag {
+    scope = "color"
+    tag   = "orange"
+  }
+
+  default_rule {
+    scope     = nsxt_policy_tier0_gateway.main.path
+    logged    = true
+    log_label = "orange default"
+    action    = "ALLOW"
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -78,6 +109,8 @@ The following arguments are supported:
 * `path` - (Required) Policy path for the predefined Gateway Policy to modify.
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this Gateway Policy.
+* `context` - (Optional) The context which the object belongs to
+  * `project_id` - The ID of the project which the object belongs to
 * `rule` (Optional) A repeatable block to specify rules for the Gateway Policy. This setting is not applicable to policy belonging to `DEFAULT` category. Each rule includes the following fields:
   * `display_name` - (Required) Display name of the resource.
   * `description` - (Optional) Description of the resource.

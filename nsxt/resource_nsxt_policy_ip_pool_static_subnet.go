@@ -8,9 +8,9 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	ippools "github.com/vmware/terraform-provider-nsxt/api/infra/ip_pools"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/ip_pools"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
@@ -31,6 +31,7 @@ func resourceNsxtPolicyIPPoolStaticSubnet() *schema.Resource {
 			"description":      getDescriptionSchema(),
 			"revision":         getRevisionSchema(),
 			"tag":              getTagsSchema(),
+			"context":          getContextSchema(),
 			"pool_path":        getPolicyPathSchema(true, true, "Policy path to the IP Pool for this Subnet"),
 			"allocation_range": getAllocationRangeListSchema(true, "A collection of IPv4 or IPv6 IP ranges"),
 			"cidr": {
@@ -119,7 +120,7 @@ func resourceNsxtPolicyIPPoolStaticSubnetSchemaToStructValue(d *schema.ResourceD
 
 func resourceNsxtPolicyIPPoolStaticSubnetRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := ip_pools.NewIpSubnetsClient(connector)
+	client := ippools.NewIpSubnetsClient(getSessionContext(d, m), connector)
 	converter := bindings.NewTypeConverter()
 
 	poolPath := d.Get("pool_path").(string)
@@ -172,7 +173,7 @@ func resourceNsxtPolicyIPPoolStaticSubnetRead(d *schema.ResourceData, m interfac
 
 func resourceNsxtPolicyIPPoolStaticSubnetCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := ip_pools.NewIpSubnetsClient(connector)
+	client := ippools.NewIpSubnetsClient(getSessionContext(d, m), connector)
 
 	poolPath := d.Get("pool_path").(string)
 	poolID := getPolicyIDFromPath(poolPath)
@@ -207,7 +208,7 @@ func resourceNsxtPolicyIPPoolStaticSubnetCreate(d *schema.ResourceData, m interf
 
 func resourceNsxtPolicyIPPoolStaticSubnetUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := ip_pools.NewIpSubnetsClient(connector)
+	client := ippools.NewIpSubnetsClient(getSessionContext(d, m), connector)
 
 	poolPath := d.Get("pool_path").(string)
 	poolID := getPolicyIDFromPath(poolPath)
@@ -235,7 +236,7 @@ func resourceNsxtPolicyIPPoolStaticSubnetUpdate(d *schema.ResourceData, m interf
 
 func resourceNsxtPolicyIPPoolStaticSubnetDelete(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := ip_pools.NewIpSubnetsClient(connector)
+	client := ippools.NewIpSubnetsClient(getSessionContext(d, m), connector)
 
 	poolPath := d.Get("pool_path").(string)
 	poolID := getPolicyIDFromPath(poolPath)

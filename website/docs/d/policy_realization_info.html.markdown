@@ -43,6 +43,27 @@ data "nsxt_policy_realization_info" "info" {
 }
 ```
 
+## Example Usage - Multi-Tenancy
+
+```hcl
+data "nsxt_policy_project" "demoproj" {
+  display_name = "demoproj"
+}
+
+data "nsxt_policy_tier1_gateway" "tier1_gw" {
+  display_name = "tier1_gw"
+}
+
+data "nsxt_policy_realization_info" "info" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
+  path        = data.nsxt_policy_tier1_gateway.tier1_gw.path
+  entity_type = "RealizedLogicalRouter"
+  timeout     = 60
+}
+```
+
 ## Argument Reference
 
 * `path` - (Required) The policy path of the resource.
@@ -50,6 +71,8 @@ data "nsxt_policy_realization_info" "info" {
 * `site_path` - (Optional) The path of the site which the resource belongs to, this configuration is required for global manager only. `path` field of the existing `nsxt_policy_site` can be used here.
 * `delay` - (Optional) Delay (in seconds) before realization polling is started. Default is set to 1.
 * `timeout` - (Optional) Timeout (in seconds) for realization polling. Default is set to 1200.
+* `context` - (Optional) The context which the object belongs to
+    * `project_id` - The ID of the project which the object belongs to
 
 ## Attributes Reference
 

@@ -24,6 +24,8 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client/middleware/retry"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/security"
+
+	tf_api "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 var defaultRetryOnStatusCodes = []int{400, 409, 429, 500, 503, 504}
@@ -886,4 +888,30 @@ func getCommonProviderConfig(clients interface{}) commonProviderConfig {
 
 func getGlobalPolicyEnforcementPointPath(m interface{}, sitePath *string) string {
 	return fmt.Sprintf("%s/enforcement-points/%s", *sitePath, getPolicyEnforcementPoint(m))
+}
+
+func getProjectIDFromSchema(d *schema.ResourceData) string {
+	ctxPtr := d.Get("context")
+	if ctxPtr != nil {
+		contexts := ctxPtr.([]interface{})
+		for _, context := range contexts {
+			data := context.(map[string]interface{})
+
+			return data["project_id"].(string)
+		}
+	}
+	return ""
+}
+
+func getSessionContext(d *schema.ResourceData, m interface{}) tf_api.SessionContext {
+	var clientType tf_api.ClientType
+	projectID := getProjectIDFromSchema(d)
+	if projectID != "" {
+		clientType = tf_api.Multitenancy
+	} else if isPolicyGlobalManager(m) {
+		clientType = tf_api.Global
+	} else {
+		clientType = tf_api.Local
+	}
+	return tf_api.SessionContext{ProjectID: projectID, ClientType: clientType}
 }

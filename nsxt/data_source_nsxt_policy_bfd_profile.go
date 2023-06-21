@@ -23,7 +23,7 @@ func dataSourceNsxtPolicyBfdProfile() *schema.Resource {
 func dataSourceNsxtPolicyBfdProfileRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
-	_, err := policyDataSourceResourceRead(d, connector, isPolicyGlobalManager(m), "BfdProfile", nil)
+	_, err := policyDataSourceResourceRead(d, connector, getSessionContext(d, m), "BfdProfile", nil)
 	if err != nil {
 		return err
 	}

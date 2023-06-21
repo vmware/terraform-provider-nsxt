@@ -33,9 +33,39 @@ data "vsphere_network" "net" {
 }
 ```
 
+## Example Usage - Multi-Tenancy
+
+```hcl
+data "nsxt_policy_project" "demoproj" {
+  display_name = "demoproj"
+}
+
+resource "nsxt_policy_segment" "s1" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
+  display_name = "segment1"
+}
+
+data "nsxt_policy_segment_realization" "s1" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
+  path = nsxt_policy_segment.s1.path
+}
+
+# usage in vsphere provider
+data "vsphere_network" "net" {
+  name          = nsxt_policy_segment_realization.s1.network_name
+  datacenter_id = data.vsphere_datacenter.datacenter.id
+}
+```
+
 ## Argument Reference
 
 * `path` - (Required) The policy path of the segment.
+* `context` - (Optional) The context which the object belongs to
+    * `project_id` - The ID of the project which the object belongs to
 
 ## Attributes Reference
 

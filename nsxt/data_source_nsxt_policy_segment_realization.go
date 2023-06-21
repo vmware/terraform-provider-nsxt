@@ -10,9 +10,10 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/segments"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
+	"github.com/vmware/terraform-provider-nsxt/api/infra/segments"
 )
 
 func dataSourceNsxtPolicySegmentRealization() *schema.Resource {
@@ -20,7 +21,8 @@ func dataSourceNsxtPolicySegmentRealization() *schema.Resource {
 		Read: dataSourceNsxtPolicySegmentRealizationRead,
 
 		Schema: map[string]*schema.Schema{
-			"id": getDataSourceIDSchema(),
+			"id":      getDataSourceIDSchema(),
+			"context": getContextSchema(),
 			"path": {
 				Type:         schema.TypeString,
 				Description:  "The path for the policy segment",
@@ -44,6 +46,7 @@ func dataSourceNsxtPolicySegmentRealization() *schema.Resource {
 func dataSourceNsxtPolicySegmentRealizationRead(d *schema.ResourceData, m interface{}) error {
 	// Read the realization info by the path, and wait till it is valid
 	connector := getPolicyConnector(m)
+	context := getSessionContext(d, m)
 	commonProviderConfig := getCommonProviderConfig(m)
 
 	// Get the realization info of this resource
@@ -58,7 +61,7 @@ func dataSourceNsxtPolicySegmentRealizationRead(d *schema.ResourceData, m interf
 	// verifying segment realization on hypervisor
 	segmentID := getPolicyIDFromPath(path)
 	enforcementPointPath := getPolicyEnforcementPointPath(m)
-	client := segments.NewStateClient(connector)
+	client := segments.NewStateClient(context, connector)
 	pendingStates := []string{model.SegmentConfigurationState_STATE_PENDING,
 		model.SegmentConfigurationState_STATE_IN_PROGRESS,
 		model.SegmentConfigurationState_STATE_IN_SYNC,
@@ -100,7 +103,7 @@ func dataSourceNsxtPolicySegmentRealizationRead(d *schema.ResourceData, m interf
 	// We need to fetch network name to use in vpshere provider. However, state API does not
 	// return it in details yet. For now, we'll use segment display name, since its always
 	// translates to network name
-	segClient := infra.NewSegmentsClient(connector)
+	segClient := infra.NewSegmentsClient(context, connector)
 	obj, err := segClient.Get(segmentID)
 	if err != nil {
 		return handleReadError(d, "Segment", segmentID, err)

@@ -11,8 +11,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
 	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
 )
 
 func TestAccDataSourceNsxtPolicyTier1Gateway_basic(t *testing.T) {
@@ -68,7 +69,7 @@ func testAccDataSourceNsxtPolicyTier1GatewayCreate(routerName string) error {
 		err = client.Patch(id, gmObj.(gm_model.Tier1))
 
 	} else {
-		client := infra.NewTier1sClient(connector)
+		client := infra.NewTier1sClient(testAccGetSessionContext(), connector)
 		err = client.Patch(id, obj)
 	}
 	if err != nil {
@@ -95,7 +96,7 @@ func testAccDataSourceNsxtPolicyTier1GatewayDeleteByName(routerName string) erro
 			return nil
 		}
 	} else {
-		client := infra.NewTier1sClient(connector)
+		client := infra.NewTier1sClient(testAccGetSessionContext(), connector)
 
 		// Find the object by name
 		objList, err := client.List(nil, nil, nil, nil, nil, nil)

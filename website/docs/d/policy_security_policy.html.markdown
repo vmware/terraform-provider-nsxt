@@ -21,6 +21,23 @@ data "nsxt_policy_security_policy" "predefined" {
 }
 ```
 
+## Example Usage - Multi-Tenancy
+
+```hcl
+data "nsxt_policy_project" "demoproj" {
+  display_name = "demoproj"
+}
+
+data "nsxt_policy_security_policy" "predefined" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
+
+  is_default = true
+  category   = "Application"
+}
+```
+
 ## Argument Reference
 
 * `id` - (Optional) The ID of Security Policy to retrieve.
@@ -28,6 +45,8 @@ data "nsxt_policy_security_policy" "predefined" {
 * `domain` - (Optional) The domain of the policy, defaults to `default`. Needs to be specified in VMC environment.
 * `category` - (Optional) Category of the policy to retrieve.
 * `display_name` - (Optional) The Display Name of the policy to retrieve.
+* `context` - (Optional) The context which the object belongs to
+    * `project_id` - The ID of the project which the object belongs to
 
 ## Attributes Reference
 

@@ -9,10 +9,10 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
-	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 func resourceNsxtPolicyDhcpRelayConfig() *schema.Resource {
@@ -32,6 +32,7 @@ func resourceNsxtPolicyDhcpRelayConfig() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
+			"context":      getContextSchema(),
 			"server_addresses": {
 				Type:     schema.TypeList,
 				Required: true,
@@ -44,16 +45,10 @@ func resourceNsxtPolicyDhcpRelayConfig() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyDhcpRelayConfigExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
-	var err error
-	if isGlobalManager {
-		client := gm_infra.NewDhcpRelayConfigsClient(connector)
-		_, err = client.Get(id)
-	} else {
-		client := infra.NewDhcpRelayConfigsClient(connector)
-		_, err = client.Get(id)
-	}
+func resourceNsxtPolicyDhcpRelayConfigExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
+	client := infra.NewDhcpRelayConfigsClient(sessionContext, connector)
 
+	_, err := client.Get(id)
 	if err == nil {
 		return true, nil
 	}
@@ -67,9 +62,14 @@ func resourceNsxtPolicyDhcpRelayConfigExists(id string, connector client.Connect
 
 func resourceNsxtPolicyDhcpRelayConfigCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
+	client := infra.NewDhcpRelayConfigsClient(getSessionContext(d, m), connector)
+
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID(d, m, resourceNsxtPolicyDhcpRelayConfigExists)
+	id, err := getOrGenerateID2(d, m, resourceNsxtPolicyDhcpRelayConfigExists)
 	if err != nil {
 		return err
 	}
@@ -88,18 +88,7 @@ func resourceNsxtPolicyDhcpRelayConfigCreate(d *schema.ResourceData, m interface
 
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating DhcpRelayConfig with ID %s", id)
-	if isPolicyGlobalManager(m) {
-		gmObj, err1 := convertModelBindingType(obj, model.DhcpRelayConfigBindingType(), gm_model.DhcpRelayConfigBindingType())
-		if err1 != nil {
-			return err1
-		}
-
-		client := gm_infra.NewDhcpRelayConfigsClient(connector)
-		err = client.Patch(id, gmObj.(gm_model.DhcpRelayConfig))
-	} else {
-		client := infra.NewDhcpRelayConfigsClient(connector)
-		err = client.Patch(id, obj)
-	}
+	err = client.Patch(id, obj)
 	if err != nil {
 		return handleCreateError("DhcpRelayConfig", id, err)
 	}
@@ -112,7 +101,7 @@ func resourceNsxtPolicyDhcpRelayConfigCreate(d *schema.ResourceData, m interface
 
 func resourceNsxtPolicyDhcpRelayConfigRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewDhcpRelayConfigsClient(connector)
+	client := infra.NewDhcpRelayConfigsClient(getSessionContext(d, m), connector)
 
 	if client == nil {
 		return policyResourceNotSupportedError()
@@ -122,25 +111,10 @@ func resourceNsxtPolicyDhcpRelayConfigRead(d *schema.ResourceData, m interface{}
 	if id == "" {
 		return fmt.Errorf("Error obtaining DhcpRelayConfig ID")
 	}
-	var obj model.DhcpRelayConfig
-	if isPolicyGlobalManager(m) {
-		client := gm_infra.NewDhcpRelayConfigsClient(connector)
-		gmObj, err1 := client.Get(id)
-		if err1 != nil {
-			return handleReadError(d, "DhcpRelayConfig", id, err1)
-		}
-		rawObj, err := convertModelBindingType(gmObj, gm_model.DhcpRelayConfigBindingType(), model.DhcpRelayConfigBindingType())
-		if err != nil {
-			return err
-		}
-		obj = rawObj.(model.DhcpRelayConfig)
-	} else {
-		var err error
-		client := infra.NewDhcpRelayConfigsClient(connector)
-		obj, err = client.Get(id)
-		if err != nil {
-			return handleReadError(d, "DhcpRelayConfig", id, err)
-		}
+
+	obj, err := client.Get(id)
+	if err != nil {
+		return handleReadError(d, "DhcpRelayConfig", id, err)
 	}
 
 	d.Set("display_name", obj.DisplayName)
@@ -157,7 +131,7 @@ func resourceNsxtPolicyDhcpRelayConfigRead(d *schema.ResourceData, m interface{}
 
 func resourceNsxtPolicyDhcpRelayConfigUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewDhcpRelayConfigsClient(connector)
+	client := infra.NewDhcpRelayConfigsClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -183,19 +157,7 @@ func resourceNsxtPolicyDhcpRelayConfigUpdate(d *schema.ResourceData, m interface
 		Revision:        &revision,
 	}
 
-	var err error
-	if isPolicyGlobalManager(m) {
-		gmObj, err1 := convertModelBindingType(obj, model.DhcpRelayConfigBindingType(), gm_model.DhcpRelayConfigBindingType())
-		if err1 != nil {
-			return err1
-		}
-
-		client := gm_infra.NewDhcpRelayConfigsClient(connector)
-		_, err = client.Update(id, gmObj.(gm_model.DhcpRelayConfig))
-	} else {
-		client := infra.NewDhcpRelayConfigsClient(connector)
-		_, err = client.Update(id, obj)
-	}
+	_, err := client.Update(id, obj)
 	if err != nil {
 		return handleUpdateError("DhcpRelayConfig", id, err)
 	}
@@ -210,20 +172,12 @@ func resourceNsxtPolicyDhcpRelayConfigDelete(d *schema.ResourceData, m interface
 	}
 
 	connector := getPolicyConnector(m)
-	client := infra.NewDhcpRelayConfigsClient(connector)
+	client := infra.NewDhcpRelayConfigsClient(getSessionContext(d, m), connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
 
-	var err error
-	if isPolicyGlobalManager(m) {
-		client := gm_infra.NewDhcpRelayConfigsClient(connector)
-		err = client.Delete(id)
-	} else {
-		client := infra.NewDhcpRelayConfigsClient(connector)
-		err = client.Delete(id)
-	}
-
+	err := client.Delete(id)
 	if err != nil {
 		return handleDeleteError("DhcpRelayConfig", id, err)
 	}

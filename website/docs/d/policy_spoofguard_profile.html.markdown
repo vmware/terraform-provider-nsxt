@@ -19,10 +19,27 @@ data "nsxt_policy_spoofguard_profile" "test" {
 }
 ```
 
+## Example Usage - Multi-Tenancy
+
+```hcl
+data "nsxt_policy_project" "demoproj" {
+  display_name = "demoproj"
+}
+
+data "nsxt_policy_spoofguard_profile" "demosgprof" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
+  display_name = "demosgprof"
+}
+```
+
 ## Argument Reference
 
 * `id` - (Optional) The ID of SpoofGuardProfile to retrieve.
 * `display_name` - (Optional) The Display Name prefix of the SpoofGuardProfile to retrieve.
+* `context` - (Optional) The context which the object belongs to
+    * `project_id` - The ID of the project which the object belongs to
 
 ## Attributes Reference
 

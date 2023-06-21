@@ -17,7 +17,29 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/realized_state"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
+
+func getOrGenerateID2(d *schema.ResourceData, m interface{}, presenceChecker func(utl.SessionContext, string, client.Connector) (bool, error)) (string, error) {
+	connector := getPolicyConnector(m)
+
+	id := d.Get("nsx_id").(string)
+	if id == "" {
+		return newUUID(), nil
+	}
+
+	exists, err := presenceChecker(getSessionContext(d, m), id, connector)
+	if err != nil {
+		return "", err
+	}
+
+	if exists {
+		return "", fmt.Errorf("Resource with id %s already exists", id)
+	}
+
+	return id, nil
+}
 
 func getOrGenerateID(d *schema.ResourceData, m interface{}, presenceChecker func(string, client.Connector, bool) (bool, error)) (string, error) {
 	connector := getPolicyConnector(m)
@@ -164,8 +186,8 @@ func isPolicyPath(policyPath string) bool {
 		return false
 	} else if pathSegs[0] != "" || pathSegs[len(pathSegs)-1] == "" {
 		return false
-	} else if !strings.Contains(pathSegs[1], "infra") {
-		// must be infra or global-infra as of now
+	} else if !strings.Contains(pathSegs[1], "infra") && pathSegs[1] != "orgs" {
+		// must be infra, global-infra or orgs as of now
 		return false
 	}
 	return true

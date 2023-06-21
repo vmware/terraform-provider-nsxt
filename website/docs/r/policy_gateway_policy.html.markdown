@@ -81,6 +81,45 @@ resource "nsxt_policy_gateway_policy" "test" {
 }
 ```
 
+## Example Usage - Multi-Tenancy
+
+```hcl
+data "nsxt_policy_project" "demoproj" {
+  display_name = "demoproj"
+}
+
+resource "nsxt_policy_gateway_policy" "test" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
+  display_name    = "tf-gw-policy"
+  description     = "Terraform provisioned Gateway Policy"
+  category        = "LocalGatewayRules"
+  locked          = false
+  sequence_number = 3
+  stateful        = true
+  tcp_strict      = false
+
+  tag {
+    scope = "color"
+    tag   = "orange"
+  }
+
+  rule {
+    display_name       = "rule1"
+    destination_groups = [nsxt_policy_group.group1.path, nsxt_policy_group.group2.path]
+    disabled           = true
+    action             = "DROP"
+    logged             = true
+    scope              = [nsxt_policy_tier1_gateway.policygateway.path]
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+```
+
 -> We recommend using `lifecycle` directive as in samples above, in order to avoid dependency issues when updating groups/services simultaneously with the rule.
 
 ## Argument Reference
@@ -93,6 +132,8 @@ The following arguments are supported:
 * `domain` - (Optional) The domain to use for the Gateway Policy. This domain must already exist. For VMware Cloud on AWS use `cgw`.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this Gateway Policy.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the Gateway Policy resource.
+* `context` - (Optional) The context which the object belongs to
+  * `project_id` - The ID of the project which the object belongs to
 * `comments` - (Optional) Comments for this Gateway Policy including lock/unlock comments.
 * `locked` - (Optional) A boolean value indicating if the policy is locked. If locked, no other users can update the resource.
 * `sequence_number` - (Optional) An int value used to resolve conflicts between security policies across domains

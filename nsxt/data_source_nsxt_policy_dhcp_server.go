@@ -16,6 +16,7 @@ func dataSourceNsxtPolicyDhcpServer() *schema.Resource {
 			"display_name": getDataSourceExtendedDisplayNameSchema(),
 			"description":  getDataSourceDescriptionSchema(),
 			"path":         getPathSchema(),
+			"context":      getContextSchema(),
 		},
 	}
 }
@@ -23,7 +24,7 @@ func dataSourceNsxtPolicyDhcpServer() *schema.Resource {
 func dataSourceNsxtPolicyDhcpServerRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
-	_, err := policyDataSourceResourceRead(d, connector, isPolicyGlobalManager(m), "DhcpServerConfig", nil)
+	_, err := policyDataSourceResourceRead(d, connector, getSessionContext(d, m), "DhcpServerConfig", nil)
 	if err != nil {
 		return err
 	}

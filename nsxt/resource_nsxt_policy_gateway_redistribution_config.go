@@ -8,10 +8,9 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	gm_tier0s "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s"
-	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	tier0s "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s"
 )
 
 func resourceNsxtPolicyGatewayRedistributionConfig() *schema.Resource {
@@ -86,17 +85,7 @@ func policyGatewayRedistributionConfigPatch(d *schema.ResourceData, m interface{
 	}
 
 	doPatch := func() error {
-		if isPolicyGlobalManager(m) {
-			// Use patch to only update the relevant fields
-			rawObj, errConv := convertModelBindingType(serviceStruct, model.LocaleServicesBindingType(), gm_model.LocaleServicesBindingType())
-			if errConv != nil {
-				return errConv
-			}
-			client := gm_tier0s.NewLocaleServicesClient(connector)
-			return client.Patch(gwID, localeServiceID, rawObj.(gm_model.LocaleServices))
-
-		}
-		client := tier_0s.NewLocaleServicesClient(connector)
+		client := tier0s.NewLocaleServicesClient(getSessionContext(d, m), connector)
 		return client.Patch(gwID, localeServiceID, serviceStruct)
 	}
 	// since redistribution config is not a separate API endpoint, but sub-clause of Tier0,
@@ -115,11 +104,12 @@ func resourceNsxtPolicyGatewayRedistributionConfigCreate(d *schema.ResourceData,
 	}
 
 	localeServiceID := ""
+	context := getSessionContext(d, m)
 	if isPolicyGlobalManager(m) {
 		if sitePath == "" {
 			return attributeRequiredGlobalManagerError("site_path", "nsxt_policy_gateway_redistribution_config")
 		}
-		localeServices, err := listPolicyTier0GatewayLocaleServices(connector, gwID, true)
+		localeServices, err := listPolicyTier0GatewayLocaleServices(context, connector, gwID)
 		if err != nil {
 			return err
 		}
@@ -131,7 +121,7 @@ func resourceNsxtPolicyGatewayRedistributionConfigCreate(d *schema.ResourceData,
 		if sitePath != "" {
 			return globalManagerOnlyError()
 		}
-		localeService, err := getPolicyTier0GatewayLocaleServiceWithEdgeCluster(gwID, connector)
+		localeService, err := getPolicyTier0GatewayLocaleServiceWithEdgeCluster(context, gwID, connector)
 		if err != nil {
 			return err
 		}
@@ -164,25 +154,10 @@ func resourceNsxtPolicyGatewayRedistributionConfigRead(d *schema.ResourceData, m
 		return fmt.Errorf("Error obtaining Tier0 Gateway id or Locale Service id")
 	}
 
-	var obj model.LocaleServices
-	if isPolicyGlobalManager(m) {
-		client := gm_tier0s.NewLocaleServicesClient(connector)
-		gmObj, err1 := client.Get(gwID, localeServiceID)
-		if err1 != nil {
-			return handleReadError(d, "Tier0 Redistribution Config", id, err1)
-		}
-		lmObj, err2 := convertModelBindingType(gmObj, model.LocaleServicesBindingType(), model.LocaleServicesBindingType())
-		if err2 != nil {
-			return err2
-		}
-		obj = lmObj.(model.LocaleServices)
-	} else {
-		var err error
-		client := tier_0s.NewLocaleServicesClient(connector)
-		obj, err = client.Get(gwID, localeServiceID)
-		if err != nil {
-			return handleReadError(d, "Tier0 Redistribution Config", id, err)
-		}
+	client := tier0s.NewLocaleServicesClient(getSessionContext(d, m), connector)
+	obj, err := client.Get(gwID, localeServiceID)
+	if err != nil {
+		return handleReadError(d, "Tier0 Redistribution Config", id, err)
 	}
 
 	config := obj.RouteRedistributionConfig
@@ -230,17 +205,7 @@ func resourceNsxtPolicyGatewayRedistributionConfigDelete(d *schema.ResourceData,
 
 	// Update the locale service with empty Redistribution config using get/post
 	doUpdate := func() error {
-		if isPolicyGlobalManager(m) {
-			client := gm_tier0s.NewLocaleServicesClient(connector)
-			gmObj, err := client.Get(gwID, localeServiceID)
-			if err != nil {
-				return err
-			}
-			gmObj.RouteRedistributionConfig = nil
-			_, err = client.Update(gwID, localeServiceID, gmObj)
-			return err
-		}
-		client := tier_0s.NewLocaleServicesClient(connector)
+		client := tier0s.NewLocaleServicesClient(getSessionContext(d, m), connector)
 		obj, err := client.Get(gwID, localeServiceID)
 		if err != nil {
 			return err
@@ -270,18 +235,10 @@ func resourceNsxtPolicyGatewayRedistributionConfigImport(d *schema.ResourceData,
 	gwID := s[0]
 	localeServiceID := s[1]
 	connector := getPolicyConnector(m)
-	if isPolicyGlobalManager(m) {
-		client := gm_tier0s.NewLocaleServicesClient(connector)
-		obj, err := client.Get(gwID, localeServiceID)
-		if err != nil || obj.RouteRedistributionConfig == nil {
-			return nil, fmt.Errorf("Failed to retrieve redistribution config for locale service %s on gateway %s", localeServiceID, gwID)
-		}
-	} else {
-		client := tier_0s.NewLocaleServicesClient(connector)
-		obj, err := client.Get(gwID, localeServiceID)
-		if err != nil || obj.RouteRedistributionConfig == nil {
-			return nil, fmt.Errorf("Failed to retrieve redistribution config for locale service %s on gateway %s", localeServiceID, gwID)
-		}
+	client := tier0s.NewLocaleServicesClient(getSessionContext(d, m), connector)
+	obj, err := client.Get(gwID, localeServiceID)
+	if err != nil || obj.RouteRedistributionConfig == nil {
+		return nil, fmt.Errorf("Failed to retrieve redistribution config for locale service %s on gateway %s", localeServiceID, gwID)
 	}
 
 	d.Set("gateway_id", gwID)

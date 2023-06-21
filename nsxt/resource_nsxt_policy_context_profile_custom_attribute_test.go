@@ -77,7 +77,7 @@ func testAccNsxtPolicyContextProfileCustomAttributeExists(displayName string, re
 			return fmt.Errorf("Policy ContextProfileCustomAttribute resource ID not set in resources")
 		}
 
-		exists, err := resourceNsxtPolicyContextProfileCustomAttributeExists(resourceID, connector, testAccIsGlobalManager())
+		exists, err := resourceNsxtPolicyContextProfileCustomAttributeExists(testAccGetSessionContext(), resourceID, connector)
 		if err != nil {
 			return err
 		}
@@ -98,7 +98,7 @@ func testAccNsxtPolicyContextProfileCustomAttributeCheckDestroy(state *terraform
 		}
 
 		resourceID := makeCustomAttributeID(model.PolicyCustomAttributes_KEY_DOMAIN_NAME, rs.Primary.Attributes["attribute"])
-		exists, err := resourceNsxtPolicyContextProfileCustomAttributeExists(resourceID, connector, testAccIsGlobalManager())
+		exists, err := resourceNsxtPolicyContextProfileCustomAttributeExists(testAccGetSessionContext(), resourceID, connector)
 		if err == nil {
 			return err
 		}

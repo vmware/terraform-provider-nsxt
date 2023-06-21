@@ -9,11 +9,11 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/domains"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	"github.com/vmware/terraform-provider-nsxt/api/infra/domains"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 func dataSourceNsxtPolicySecurityPolicy() *schema.Resource {
@@ -25,6 +25,7 @@ func dataSourceNsxtPolicySecurityPolicy() *schema.Resource {
 			"display_name": getDataSourceDisplayNameSchema(),
 			"description":  getDataSourceDescriptionSchema(),
 			"path":         getPathSchema(),
+			"context":      getContextSchema(),
 			"domain":       getDataSourceDomainNameSchema(),
 			"is_default": {
 				Type:        schema.TypeBool,
@@ -44,8 +45,8 @@ func dataSourceNsxtPolicySecurityPolicy() *schema.Resource {
 }
 
 // Local Manager Only
-func listSecurityPolicies(domain string, connector client.Connector) ([]model.SecurityPolicy, error) {
-	client := domains.NewSecurityPoliciesClient(connector)
+func listSecurityPolicies(context utl.SessionContext, domain string, connector client.Connector) ([]model.SecurityPolicy, error) {
+	client := domains.NewSecurityPoliciesClient(context, connector)
 
 	var results []model.SecurityPolicy
 	boolFalse := false
@@ -76,37 +77,15 @@ func dataSourceNsxtPolicySecurityPolicyRead(d *schema.ResourceData, m interface{
 	category := d.Get("category").(string)
 	domain := d.Get("domain").(string)
 	isDefault := d.Get("is_default").(bool)
-	if isPolicyGlobalManager(m) {
-		query := make(map[string]string)
-		query["parent_path"] = "*/" + domain
-		if category != "" {
-			query["category"] = category
-		}
-		query["is_default"] = fmt.Sprintf("%v", isDefault)
-		obj, err := policyDataSourceResourceReadWithValidation(d, connector, true, "SecurityPolicy", query, false)
-		if err != nil {
-			return err
-		}
-
-		converter := bindings.NewTypeConverter()
-		dataValue, errors := converter.ConvertToGolang(obj, gm_model.SecurityPolicyBindingType())
-		if len(errors) > 0 {
-			return errors[0]
-		}
-
-		policy := dataValue.(gm_model.SecurityPolicy)
-		d.Set("category", policy.Category)
-		d.Set("is_default", policy.IsDefault)
-		return nil
-	}
 
 	objID := d.Get("id").(string)
 	objName := d.Get("display_name").(string)
 
 	var obj model.SecurityPolicy
+	context := getSessionContext(d, m)
 	if objID != "" {
 		// Get by id
-		client := domains.NewSecurityPoliciesClient(connector)
+		client := domains.NewSecurityPoliciesClient(context, connector)
 		objGet, err := client.Get(domain, objID)
 		if isNotFoundError(err) {
 			return fmt.Errorf("Security Policy with ID %s was not found", objID)
@@ -119,7 +98,7 @@ func dataSourceNsxtPolicySecurityPolicyRead(d *schema.ResourceData, m interface{
 	} else if objName == "" && category == "" {
 		return fmt.Errorf("Security Policy id, display name or category must be specified")
 	} else {
-		objList, err := listSecurityPolicies(domain, connector)
+		objList, err := listSecurityPolicies(context, domain, connector)
 		if err != nil {
 			return fmt.Errorf("Error while reading Security Policies: %v", err)
 		}
