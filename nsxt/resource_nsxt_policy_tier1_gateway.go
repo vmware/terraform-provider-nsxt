@@ -500,9 +500,9 @@ func resourceNsxtPolicyTier1GatewayCreate(d *schema.ResourceData, m interface{})
 	if err != nil {
 		return err
 	}
-  
+
 	obj, err := policyTier1GatewayResourceToInfraStruct(getSessionContext(d, m), d, connector, id)
-  
+
 	if err != nil {
 		return err
 	}
