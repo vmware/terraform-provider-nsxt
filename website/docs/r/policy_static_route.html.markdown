@@ -101,5 +101,10 @@ An existing policy Static Route can be [imported][docs-import] into this resourc
 ```
 terraform import nsxt_policy_static_route.route1 GWID/ID
 ```
-
 The above command imports the policy Static Route named `route1` for the NSX Tier0 or Tier1 Gateway `GWID` with the NSX Policy ID `ID`.
+
+```
+terraform import nsxt_policy_static_route.route1 POLICY_PATH
+```
+The above command imports the policy Static Route named `route1` with policy path `POLICY_PATH`.
+Note: for multitenancy projects only the later form is usable.

@@ -44,17 +44,30 @@ var accTestPolicyIPDiscoveryProfileUpdateAttributes = map[string]string{
 }
 
 func TestAccResourceNsxtPolicyIPDiscoveryProfile_basic(t *testing.T) {
+	testAccResourceNsxtPolicyIPDiscoveryProfileBasic(t, false, func() {
+		testAccPreCheck(t)
+	})
+}
+
+func TestAccResourceNsxtPolicyIPDiscoveryProfile_multitenancy(t *testing.T) {
+	testAccResourceNsxtPolicyIPDiscoveryProfileBasic(t, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+	})
+}
+
+func testAccResourceNsxtPolicyIPDiscoveryProfileBasic(t *testing.T, withContext bool, preCheck func()) {
 	testResourceName := "nsxt_policy_ip_discovery_profile.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyIPDiscoveryProfileCheckDestroy(state, accTestPolicyIPDiscoveryProfileUpdateAttributes["display_name"])
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyIPDiscoveryProfileTemplate(true),
+				Config: testAccNsxtPolicyIPDiscoveryProfileTemplate(true, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyIPDiscoveryProfileExists(accTestPolicyIPDiscoveryProfileCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyIPDiscoveryProfileCreateAttributes["display_name"]),
@@ -78,7 +91,7 @@ func TestAccResourceNsxtPolicyIPDiscoveryProfile_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyIPDiscoveryProfileTemplate(false),
+				Config: testAccNsxtPolicyIPDiscoveryProfileTemplate(false, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyIPDiscoveryProfileExists(accTestPolicyIPDiscoveryProfileUpdateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyIPDiscoveryProfileUpdateAttributes["display_name"]),
@@ -102,7 +115,7 @@ func TestAccResourceNsxtPolicyIPDiscoveryProfile_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyIPDiscoveryProfileMinimalistic(),
+				Config: testAccNsxtPolicyIPDiscoveryProfileMinimalistic(withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyIPDiscoveryProfileExists(accTestPolicyIPDiscoveryProfileCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
@@ -139,12 +152,36 @@ func TestAccResourceNsxtPolicyIPDiscoveryProfile_importBasic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyIPDiscoveryProfileMinimalistic(),
+				Config: testAccNsxtPolicyIPDiscoveryProfileMinimalistic(false),
 			},
 			{
 				ResourceName:      testResourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicyIPDiscoveryProfile_importBasic_multitenancy(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_ip_discovery_profile.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancy(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyIPDiscoveryProfileCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyIPDiscoveryProfileMinimalistic(true),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
 			},
 		},
 	})
@@ -198,15 +235,20 @@ func testAccNsxtPolicyIPDiscoveryProfileCheckDestroy(state *terraform.State, dis
 	return nil
 }
 
-func testAccNsxtPolicyIPDiscoveryProfileTemplate(createFlow bool) string {
+func testAccNsxtPolicyIPDiscoveryProfileTemplate(createFlow, withContext bool) string {
 	var attrMap map[string]string
 	if createFlow {
 		attrMap = accTestPolicyIPDiscoveryProfileCreateAttributes
 	} else {
 		attrMap = accTestPolicyIPDiscoveryProfileUpdateAttributes
 	}
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_ip_discovery_profile" "test" {
+%s
   display_name = "%s"
   description  = "%s"
   arp_nd_binding_timeout = %s
@@ -224,9 +266,17 @@ resource "nsxt_policy_ip_discovery_profile" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, attrMap["display_name"], attrMap["description"], attrMap["arp_nd_binding_timeout"], attrMap["duplicate_ip_detection_enabled"], attrMap["arp_binding_limit"], attrMap["arp_snooping_enabled"], attrMap["dhcp_snooping_enabled"], attrMap["vmtools_enabled"], attrMap["dhcp_snooping_v6_enabled"], attrMap["nd_snooping_enabled"], attrMap["nd_snooping_limit"], attrMap["vmtools_v6_enabled"], attrMap["tofu_enabled"])
+}`, context, attrMap["display_name"], attrMap["description"], attrMap["arp_nd_binding_timeout"], attrMap["duplicate_ip_detection_enabled"], attrMap["arp_binding_limit"], attrMap["arp_snooping_enabled"], attrMap["dhcp_snooping_enabled"], attrMap["vmtools_enabled"], attrMap["dhcp_snooping_v6_enabled"], attrMap["nd_snooping_enabled"], attrMap["nd_snooping_limit"], attrMap["vmtools_v6_enabled"], attrMap["tofu_enabled"])
 }
 
-func testAccNsxtPolicyIPDiscoveryProfileMinimalistic() string {
-	return fmt.Sprintf(`resource "nsxt_policy_ip_discovery_profile" "test" {  display_name = "%s"}`, accTestPolicyIPDiscoveryProfileUpdateAttributes["display_name"])
+func testAccNsxtPolicyIPDiscoveryProfileMinimalistic(withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
+	return fmt.Sprintf(`
+resource "nsxt_policy_ip_discovery_profile" "test" {
+%s
+  display_name = "%s"
+}`, context, accTestPolicyIPDiscoveryProfileUpdateAttributes["display_name"])
 }

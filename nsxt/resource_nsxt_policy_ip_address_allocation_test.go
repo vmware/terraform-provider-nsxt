@@ -9,7 +9,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/ip_pools"
+
+	ippools "github.com/vmware/terraform-provider-nsxt/api/infra/ip_pools"
 )
 
 var accTestPolicyIPAddressAllocationCreateAttributes = map[string]string{
@@ -28,17 +29,31 @@ var accTestPolicyIPAddressAllocationPoolName = getAccTestResourceName()
 var accTestPolicyIPAddressAllocationSubnetName = getAccTestResourceName()
 
 func TestAccResourceNsxtPolicyIPAddressAllocation_basic(t *testing.T) {
+	testAccResourceNsxtPolicyIPAddressAllocationBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyLocalManager(t)
+	})
+}
+
+func TestAccResourceNsxtPolicyIPAddressAllocation_multitenancy(t *testing.T) {
+	testAccResourceNsxtPolicyIPAddressAllocationBasic(t, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+	})
+}
+
+func testAccResourceNsxtPolicyIPAddressAllocationBasic(t *testing.T, withContext bool, preCheck func()) {
 	testResourceName := "nsxt_policy_ip_address_allocation.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
+		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyIPAddressAllocationCheckDestroy(state, accTestPolicyIPAddressAllocationUpdateAttributes["display_name"])
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyIPAddressAllocationTemplate(true),
+				Config: testAccNsxtPolicyIPAddressAllocationTemplate(true, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyIPAddressAllocationExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyIPAddressAllocationCreateAttributes["display_name"]),
@@ -52,10 +67,10 @@ func TestAccResourceNsxtPolicyIPAddressAllocation_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyIPAddressAllocationDependenciesTemplate(),
+				Config: testAccNsxtPolicyIPAddressAllocationDependenciesTemplate(withContext),
 			},
 			{
-				Config: testAccNsxtPolicyIPAddressAllocationTemplate(false),
+				Config: testAccNsxtPolicyIPAddressAllocationTemplate(false, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyIPAddressAllocationExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyIPAddressAllocationUpdateAttributes["display_name"]),
@@ -69,7 +84,7 @@ func TestAccResourceNsxtPolicyIPAddressAllocation_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyIPAddressAllocationDependenciesTemplate(),
+				Config: testAccNsxtPolicyIPAddressAllocationDependenciesTemplate(withContext),
 			},
 		},
 	})
@@ -100,7 +115,7 @@ func TestAccResourceNsxtPolicyIPAddressAllocation_anyIPBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyIPAddressAllocationDependenciesTemplate(),
+				Config: testAccNsxtPolicyIPAddressAllocationDependenciesTemplate(false),
 			},
 			{
 				Config: testAccNsxtPolicyIPAddressAllocationAnyFreeIPTemplate(false),
@@ -117,7 +132,7 @@ func TestAccResourceNsxtPolicyIPAddressAllocation_anyIPBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyIPAddressAllocationDependenciesTemplate(),
+				Config: testAccNsxtPolicyIPAddressAllocationDependenciesTemplate(false),
 			},
 		},
 	})
@@ -135,7 +150,7 @@ func TestAccResourceNsxtPolicyIPAddressAllocation_importBasic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyIPAddressAllocationTemplate(true),
+				Config: testAccNsxtPolicyIPAddressAllocationTemplate(true, false),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -144,7 +159,7 @@ func TestAccResourceNsxtPolicyIPAddressAllocation_importBasic(t *testing.T) {
 				ImportStateIdFunc: testAccNSXPolicyIPAddressAllocationImporterGetID,
 			},
 			{
-				Config: testAccNsxtPolicyIPAddressAllocationDependenciesTemplate(),
+				Config: testAccNsxtPolicyIPAddressAllocationDependenciesTemplate(false),
 			},
 		},
 	})
@@ -171,7 +186,7 @@ func testAccNsxtPolicyIPAddressAllocationExists(resourceName string) resource.Te
 	return func(state *terraform.State) error {
 
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-		nsxClient := ip_pools.NewIpAllocationsClient(connector)
+		nsxClient := ippools.NewIpAllocationsClient(testAccGetSessionContext(), connector)
 
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
@@ -200,7 +215,7 @@ func testAccNsxtPolicyIPAddressAllocationExists(resourceName string) resource.Te
 
 func testAccNsxtPolicyIPAddressAllocationCheckDestroy(state *terraform.State, displayName string) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-	nsxClient := ip_pools.NewIpAllocationsClient(connector)
+	nsxClient := ippools.NewIpAllocationsClient(testAccGetSessionContext(), connector)
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_policy_ip_address_allocation" {
@@ -222,16 +237,20 @@ func testAccNsxtPolicyIPAddressAllocationCheckDestroy(state *terraform.State, di
 	return nil
 }
 
-func testAccNsxtPolicyIPAddressAllocationTemplate(createFlow bool) string {
+func testAccNsxtPolicyIPAddressAllocationTemplate(createFlow, withContext bool) string {
 	var attrMap map[string]string
 	if createFlow {
 		attrMap = accTestPolicyIPAddressAllocationCreateAttributes
 	} else {
 		attrMap = accTestPolicyIPAddressAllocationUpdateAttributes
 	}
-	return testAccNsxtPolicyIPAddressAllocationDependenciesTemplate() + fmt.Sprintf(`
-
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
+	return testAccNsxtPolicyIPAddressAllocationDependenciesTemplate(withContext) + fmt.Sprintf(`
 resource "nsxt_policy_ip_address_allocation" "test" {
+%s
   display_name  = "%s"
   description   = "%s"
   allocation_ip = "%s"
@@ -244,8 +263,9 @@ resource "nsxt_policy_ip_address_allocation" "test" {
 }
 
 data "nsxt_policy_realization_info" "realization_info" {
+%s
   path = nsxt_policy_ip_address_allocation.test.path
-}`, attrMap["display_name"], attrMap["description"], attrMap["allocation_ip"])
+}`, context, attrMap["display_name"], attrMap["description"], attrMap["allocation_ip"], context)
 }
 
 func testAccNsxtPolicyIPAddressAllocationAnyFreeIPTemplate(createFlow bool) string {
@@ -255,7 +275,7 @@ func testAccNsxtPolicyIPAddressAllocationAnyFreeIPTemplate(createFlow bool) stri
 	} else {
 		attrMap = accTestPolicyIPAddressAllocationUpdateAttributes
 	}
-	return testAccNsxtPolicyIPAddressAllocationDependenciesTemplate() + fmt.Sprintf(`
+	return testAccNsxtPolicyIPAddressAllocationDependenciesTemplate(false) + fmt.Sprintf(`
 
 resource "nsxt_policy_ip_address_allocation" "test" {
   display_name = "%s"
@@ -274,13 +294,19 @@ data "nsxt_policy_realization_info" "realization_info" {
 }`, attrMap["display_name"], attrMap["description"])
 }
 
-func testAccNsxtPolicyIPAddressAllocationDependenciesTemplate() string {
+func testAccNsxtPolicyIPAddressAllocationDependenciesTemplate(withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_ip_pool" "test" {
+%s
   display_name = "%s"
 }
 
 resource "nsxt_policy_ip_pool_static_subnet" "test" {
+%s
   display_name = "%s"
   pool_path    = nsxt_policy_ip_pool.test.path
   cidr         = "12.12.12.0/24"
@@ -288,5 +314,5 @@ resource "nsxt_policy_ip_pool_static_subnet" "test" {
     start = "12.12.12.10"
     end   = "12.12.12.20"
   }
-}`, accTestPolicyIPAddressAllocationPoolName, accTestPolicyIPAddressAllocationSubnetName)
+}`, context, accTestPolicyIPAddressAllocationPoolName, context, accTestPolicyIPAddressAllocationSubnetName)
 }

@@ -23,7 +23,7 @@ func resourceNsxtPolicyIPDiscoveryProfile() *schema.Resource {
 		Update: resourceNsxtPolicyIPDiscoveryProfileUpdate,
 		Delete: resourceNsxtPolicyIPDiscoveryProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			State: nsxtPolicyPathResourceImporter,
 		},
 
 		Schema: map[string]*schema.Schema{

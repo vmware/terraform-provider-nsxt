@@ -4,6 +4,7 @@
 package nsxt
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -42,6 +43,13 @@ func resourceNsxtPolicyFixedSegmentDelete(d *schema.ResourceData, m interface{})
 
 func nsxtGatewayResourceImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	importID := d.Id()
+	rd, err := nsxtPolicyPathResourceImporterHelper(d, m)
+	if err == nil {
+		d.Set("connectivity_path", importID[0:strings.Index(importID, "/segments/")])
+		return rd, nil
+	} else if !errors.Is(err, ErrNotAPolicyPath) {
+		return rd, err
+	}
 	importGW := ""
 	s := strings.Split(importID, "/")
 	if len(s) < 2 {

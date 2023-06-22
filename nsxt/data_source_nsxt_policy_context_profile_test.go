@@ -53,9 +53,58 @@ func TestAccDataSourceNsxtPolicyContextProfile_prefix(t *testing.T) {
 	})
 }
 
+func TestAccDataSourceNsxtPolicyContextProfile_multitenancy(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "data.nsxt_policy_context_profile.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyMultitenancy(t)
+		},
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyContextProfileMultitenancyTemplate(name),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttrSet(testResourceName, "description"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+				),
+			},
+		},
+	})
+}
+
 func testAccNsxtPolicyContextProfileReadTemplate(name string) string {
 	return fmt.Sprintf(`
 data "nsxt_policy_context_profile" "test" {
   display_name = "%s"
 }`, name)
+}
+
+func testAccNsxtPolicyContextProfileMultitenancyTemplate(name string) string {
+	context := testAccNsxtPolicyMultitenancyContext()
+	return fmt.Sprintf(`
+resource "nsxt_policy_context_profile" "test" {
+%s
+  display_name = "%s"
+  description  = "Terraform provisioned ContextProfile"
+  domain_name {
+    description = "test-domain-name-attribute"
+    value       = ["*-myfiles.sharepoint.com"]
+  }
+  app_id {
+    description = "test-app-id-attribute"
+    value       = ["SSL"]
+    sub_attribute {
+      tls_version = ["SSL_V3"]
+    }
+  }
+}
+
+data "nsxt_policy_context_profile" "test" {
+%s
+  display_name = nsxt_policy_context_profile.test.display_name
+}`, context, name, context)
 }

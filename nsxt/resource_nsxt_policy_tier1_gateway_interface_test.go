@@ -10,13 +10,26 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	gm_locale_services "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_1s/locale_services"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/locale_services"
+
+	localeservices "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s/locale_services"
 )
 
 var nsxtPolicyTier1GatewayName = "test"
 
 func TestAccResourceNsxtPolicyTier1GatewayInterface_basic(t *testing.T) {
+	testAccResourceNsxtPolicyTier1GatewayInterfaceBasic(t, false, func() {
+		testAccPreCheck(t)
+	})
+}
+
+func TestAccResourceNsxtPolicyTier1GatewayInterface_multitenancy(t *testing.T) {
+	testAccResourceNsxtPolicyTier1GatewayInterfaceBasic(t, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+	})
+}
+
+func testAccResourceNsxtPolicyTier1GatewayInterfaceBasic(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestResourceName()
 	updatedName := getAccTestResourceName()
 	mtu := "1500"
@@ -26,14 +39,14 @@ func TestAccResourceNsxtPolicyTier1GatewayInterface_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_tier1_gateway_interface.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTier1InterfaceCheckDestroy(state, name)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyTier1InterfaceTemplate(name, subnet, mtu),
+				Config: testAccNsxtPolicyTier1InterfaceTemplate(name, subnet, mtu, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTier1InterfaceExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -51,7 +64,7 @@ func TestAccResourceNsxtPolicyTier1GatewayInterface_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyTier1InterfaceTemplate(updatedName, updatedSubnet, updatedMtu),
+				Config: testAccNsxtPolicyTier1InterfaceTemplate(updatedName, updatedSubnet, updatedMtu, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTier1InterfaceExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -69,7 +82,7 @@ func TestAccResourceNsxtPolicyTier1GatewayInterface_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyTier1InterfaceThinTemplate(name, subnet),
+				Config: testAccNsxtPolicyTier1InterfaceThinTemplate(name, subnet, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTier1InterfaceExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
@@ -164,7 +177,7 @@ func TestAccResourceNsxtPolicyTier1GatewayInterface_withSite(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyTier1InterfaceTemplate(name, subnet, mtu),
+				Config: testAccNsxtPolicyTier1InterfaceTemplate(name, subnet, mtu, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTier1InterfaceExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -183,7 +196,7 @@ func TestAccResourceNsxtPolicyTier1GatewayInterface_withSite(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyTier1InterfaceTemplate(updatedName, updatedSubnet, updatedMtu),
+				Config: testAccNsxtPolicyTier1InterfaceTemplate(updatedName, updatedSubnet, updatedMtu, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTier1InterfaceExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -202,7 +215,7 @@ func TestAccResourceNsxtPolicyTier1GatewayInterface_withSite(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyTier1InterfaceThinTemplate(name, subnet),
+				Config: testAccNsxtPolicyTier1InterfaceThinTemplate(name, subnet, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyTier1InterfaceExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
@@ -312,13 +325,38 @@ func TestAccResourceNsxtPolicyTier1GatewayInterface_importBasic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyTier1InterfaceThinTemplate(name, subnet),
+				Config: testAccNsxtPolicyTier1InterfaceThinTemplate(name, subnet, false),
 			},
 			{
 				ResourceName:      testResourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
 				ImportStateIdFunc: testAccNSXPolicyTier1InterfaceImporterGetID,
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicyTier1GatewayInterface_importBasic_multitenancy(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_tier1_gateway_interface.test"
+	subnet := "1.1.12.2/24"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancy(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyTier1InterfaceCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyTier1InterfaceThinTemplate(name, subnet, true),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
 			},
 		},
 	})
@@ -342,14 +380,8 @@ func testAccNsxtPolicyTier1InterfaceExists(resourceName string) resource.TestChe
 			return fmt.Errorf("Policy Tier1 Interface resource ID not set in resources")
 		}
 
-		var err error
-		if testAccIsGlobalManager() {
-			nsxClient := gm_locale_services.NewInterfacesClient(connector)
-			_, err = nsxClient.Get(gwID, localeServiceID, resourceID)
-		} else {
-			nsxClient := locale_services.NewInterfacesClient(connector)
-			_, err = nsxClient.Get(gwID, localeServiceID, resourceID)
-		}
+		nsxClient := localeservices.NewInterfacesClient(testAccGetSessionContext(), connector)
+		_, err := nsxClient.Get(gwID, localeServiceID, resourceID)
 
 		if err != nil {
 			return fmt.Errorf("Error while retrieving policy Tier1 Interface ID %s. Error: %v", resourceID, err)
@@ -361,14 +393,7 @@ func testAccNsxtPolicyTier1InterfaceExists(resourceName string) resource.TestChe
 
 func testAccNsxtPolicyTier1InterfaceCheckDestroy(state *terraform.State, displayName string) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-	var nsxClient interface{}
-	var err error
-	if testAccIsGlobalManager() {
-		nsxClient = gm_locale_services.NewInterfacesClient(connector)
-
-	} else {
-		nsxClient = locale_services.NewInterfacesClient(connector)
-	}
+	client := localeservices.NewInterfacesClient(testAccGetSessionContext(), connector)
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_policy_tier1_gateway_interface" {
@@ -378,26 +403,28 @@ func testAccNsxtPolicyTier1InterfaceCheckDestroy(state *terraform.State, display
 		resourceID := rs.Primary.Attributes["id"]
 		localeServicesID := rs.Primary.Attributes["locale_service_id"]
 		gwID := getPolicyIDFromPath(rs.Primary.Attributes["gateway_path"])
-		if testAccIsGlobalManager() {
-			_, err = nsxClient.(gm_locale_services.InterfacesClient).Get(gwID, localeServicesID, resourceID)
-		} else {
-			_, err = nsxClient.(locale_services.InterfacesClient).Get(gwID, localeServicesID, resourceID)
-		}
+		_, err := client.Get(gwID, localeServicesID, resourceID)
 		if err == nil {
-			return fmt.Errorf("Policy Tier1 Interface %s still exists", displayName)
+			return fmt.Errorf("policy Tier1 Interface %s still exists", displayName)
 		}
 	}
 	return nil
 }
 
-func testAccNsxtPolicyTier1InterfaceTemplate(name string, subnet string, mtu string) string {
+func testAccNsxtPolicyTier1InterfaceTemplate(name string, subnet string, mtu string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return testAccNsxtPolicyGatewayInterfaceDeps("11") + fmt.Sprintf(`
 resource "nsxt_policy_tier1_gateway" "test" {
+%s
   display_name      = "%s"
   %s
 }
 
 resource "nsxt_policy_tier1_gateway_interface" "test" {
+%s
   display_name = "%s"
   description  = "Acceptance Test"
   mtu          = %s
@@ -410,24 +437,30 @@ resource "nsxt_policy_tier1_gateway_interface" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, nsxtPolicyTier1GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, mtu, subnet, testAccNsxtPolicyTier0InterfaceSiteTemplate()) +
+}`, context, nsxtPolicyTier1GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), context, name, mtu, subnet, testAccNsxtPolicyTier0InterfaceSiteTemplate()) +
 		testAccNextPolicyTier1InterfaceRealizationTemplate()
 }
 
-func testAccNsxtPolicyTier1InterfaceThinTemplate(name string, subnet string) string {
+func testAccNsxtPolicyTier1InterfaceThinTemplate(name string, subnet string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return testAccNsxtPolicyGatewayInterfaceDeps("11") + fmt.Sprintf(`
 resource "nsxt_policy_tier1_gateway" "test" {
+%s
   display_name      = "%s"
   %s
 }
 
 resource "nsxt_policy_tier1_gateway_interface" "test" {
+%s
   display_name = "%s"
   gateway_path = nsxt_policy_tier1_gateway.test.path
   segment_path = nsxt_policy_vlan_segment.test.path
   subnets      = ["%s"]
   %s
-}`, nsxtPolicyTier1GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, subnet, testAccNsxtPolicyTier0InterfaceSiteTemplate()) +
+}`, context, nsxtPolicyTier1GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), context, name, subnet, testAccNsxtPolicyTier0InterfaceSiteTemplate()) +
 		testAccNextPolicyTier1InterfaceRealizationTemplate()
 }
 

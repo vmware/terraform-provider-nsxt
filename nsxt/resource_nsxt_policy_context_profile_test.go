@@ -9,8 +9,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
 )
 
 const (
@@ -18,6 +17,20 @@ const (
 )
 
 func TestAccResourceNsxtPolicyContextProfile_basic(t *testing.T) {
+	testAccResourceNsxtPolicyContextProfileBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccNSXVersion(t, "3.0.0")
+	})
+}
+
+func TestAccResourceNsxtPolicyContextProfile_multitenancy(t *testing.T) {
+	testAccResourceNsxtPolicyContextProfileBasic(t, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+	})
+}
+
+func testAccResourceNsxtPolicyContextProfileBasic(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestResourceName()
 	updatedName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_context_profile.test"
@@ -25,14 +38,14 @@ func TestAccResourceNsxtPolicyContextProfile_basic(t *testing.T) {
 	updatedAttributes := testAccNsxtPolicyContextProfileAttributeURLCategoryTemplate()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyContextProfileCheckDestroy(state, testResourceName)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyContextProfileTemplate(name, attributes),
+				Config: testAccNsxtPolicyContextProfileTemplate(name, attributes, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyContextProfileExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -49,7 +62,7 @@ func TestAccResourceNsxtPolicyContextProfile_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyContextProfileTemplate(updatedName, updatedAttributes),
+				Config: testAccNsxtPolicyContextProfileTemplate(updatedName, updatedAttributes, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyContextProfileExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -83,7 +96,7 @@ func TestAccResourceNsxtPolicyContextProfile_CustomDomain(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyContextProfileCustomAttributeArgTemplate(accTestPolicyContextProfileCustomAttributeAttributes["key"], fqdn) + testAccNsxtPolicyContextProfileTemplate(name, attributes+dependsOn),
+				Config: testAccNsxtPolicyContextProfileCustomAttributeArgTemplate(accTestPolicyContextProfileCustomAttributeAttributes["key"], fqdn, false) + testAccNsxtPolicyContextProfileTemplate(name, attributes+dependsOn, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyContextProfileExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -116,12 +129,37 @@ func TestAccResourceNsxtPolicyContextProfile_importBasic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyContextProfileTemplate(name, attributes),
+				Config: testAccNsxtPolicyContextProfileTemplate(name, attributes, false),
 			},
 			{
 				ResourceName:      testResourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicyContextProfile_importBasic_multitenancy(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_context_profile.test"
+	attributes := testAccNsxtPolicyContextProfileAttributeDomainNameTemplate(testSystemDomainName)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancy(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyContextProfileCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyContextProfileTemplate(name, attributes, true),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
 			},
 		},
 	})
@@ -142,7 +180,7 @@ func TestAccResourceNsxtPolicyContextProfile_multipleAttributes(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyContextProfileTemplate(name, attributes),
+				Config: testAccNsxtPolicyContextProfileTemplate(name, attributes, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyContextProfileExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -159,7 +197,7 @@ func TestAccResourceNsxtPolicyContextProfile_multipleAttributes(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyContextProfileTemplate(updatedName, updatedAttributes),
+				Config: testAccNsxtPolicyContextProfileTemplate(updatedName, updatedAttributes, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyContextProfileExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -201,7 +239,7 @@ func TestAccResourceNsxtPolicyContextProfile_subAttributes(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyContextProfileTemplate(name, attributes),
+				Config: testAccNsxtPolicyContextProfileTemplate(name, attributes, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyContextProfileExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -226,7 +264,7 @@ func TestAccResourceNsxtPolicyContextProfile_subAttributes(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyContextProfileTemplate(updatedName, updatedAttributes),
+				Config: testAccNsxtPolicyContextProfileTemplate(updatedName, updatedAttributes, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyContextProfileExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -250,7 +288,7 @@ func TestAccResourceNsxtPolicyContextProfile_subAttributes(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyContextProfileTemplate(updatedName, attributesNoSub),
+				Config: testAccNsxtPolicyContextProfileTemplate(updatedName, attributesNoSub, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyContextProfileExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -269,7 +307,7 @@ func TestAccResourceNsxtPolicyContextProfile_subAttributes(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyContextProfileTemplate(updatedName, attributesDomainName),
+				Config: testAccNsxtPolicyContextProfileTemplate(updatedName, attributesDomainName, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyContextProfileExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -304,7 +342,7 @@ func TestAccResourceNsxtPolicyContextProfile_customUrl(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyContextProfileCustomAttributeArgTemplate("CUSTOM_URL", fqdn) + testAccNsxtPolicyContextProfileTemplate(name, attributes+dependsOn),
+				Config: testAccNsxtPolicyContextProfileCustomAttributeArgTemplate("CUSTOM_URL", fqdn, false) + testAccNsxtPolicyContextProfileTemplate(name, attributes+dependsOn, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyContextProfileExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -349,13 +387,9 @@ func testAccNsxtPolicyContextProfileExists(resourceName string) resource.TestChe
 func nsxtPolicyContextProfileExists(resourceID string) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
 	var err error
-	if testAccIsGlobalManager() {
-		nsxClient := gm_infra.NewContextProfilesClient(connector)
-		_, err = nsxClient.Get(resourceID)
-	} else {
-		nsxClient := infra.NewContextProfilesClient(connector)
-		_, err = nsxClient.Get(resourceID)
-	}
+	nsxClient := infra.NewContextProfilesClient(testAccGetSessionContext(), connector)
+	_, err = nsxClient.Get(resourceID)
+
 	return err
 }
 
@@ -375,9 +409,14 @@ func testAccNsxtPolicyContextProfileCheckDestroy(state *terraform.State, display
 	return nil
 }
 
-func testAccNsxtPolicyContextProfileTemplate(name string, attributes string) string {
+func testAccNsxtPolicyContextProfileTemplate(name string, attributes string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_context_profile" "test" {
+%s
   display_name = "%s"
   description  = "Acceptance Test"
   tag {
@@ -385,7 +424,7 @@ resource "nsxt_policy_context_profile" "test" {
     tag   = "orange"
   }
 %s
-}`, name, attributes)
+}`, context, name, attributes)
 }
 
 func testAccNsxtPolicyContextProfileAttributeDomainNameTemplate(domain string) string {

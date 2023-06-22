@@ -83,5 +83,10 @@ An existing object can be [imported][docs-import] into this resource, via the fo
 ```
 terraform import nsxt_policy_mac_discovery_profile.test UUID
 ```
-
 The above command imports MAC Discovery Profile named `test` with ID `UUID`.
+
+```
+terraform import nsxt_policy_mac_discovery_profile.test POLICY_PATH
+```
+The above command imports MAC Discovery Profile named `test` with policy path `POLICY_PATH`.
+Note: for multitenancy projects only the later form is usable.

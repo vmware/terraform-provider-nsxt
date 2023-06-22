@@ -9,7 +9,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
+
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
 )
 
 func TestAccResourceNsxtPolicyIPPool_minimal(t *testing.T) {
@@ -36,19 +37,33 @@ func TestAccResourceNsxtPolicyIPPool_minimal(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyIPPool_basic(t *testing.T) {
+	testAccResourceNsxtPolicyIPPoolBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyLocalManager(t)
+	})
+}
+
+func TestAccResourceNsxtPolicyIPPool_multitenancy(t *testing.T) {
+	testAccResourceNsxtPolicyIPPoolBasic(t, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+	})
+}
+
+func testAccResourceNsxtPolicyIPPoolBasic(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestResourceName()
 	updatedName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_ip_pool.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
+		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXPolicyIPPoolCheckDestroy(state)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXPolicyIPPoolCreateTemplate(name),
+				Config: testAccNSXPolicyIPPoolCreateTemplate(name, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXPolicyIPPoolCheckExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
@@ -57,7 +72,7 @@ func TestAccResourceNsxtPolicyIPPool_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXPolicyIPPoolUpdateTemplate(updatedName),
+				Config: testAccNSXPolicyIPPoolUpdateTemplate(updatedName, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXPolicyIPPoolCheckExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
@@ -81,7 +96,7 @@ func TestAccResourceNsxtPolicyIPPool_import_basic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXPolicyIPPoolCreateTemplate(name),
+				Config: testAccNSXPolicyIPPoolCreateTemplate(name, false),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -92,10 +107,34 @@ func TestAccResourceNsxtPolicyIPPool_import_basic(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyIPPool_importBasic_multitenancy(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_ip_pool.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancy(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXPolicyIPPoolCheckDestroy(state)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXPolicyIPPoolCreateTemplate(name, true),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
+			},
+		},
+	})
+}
+
 func testAccNSXPolicyIPPoolCheckExists(resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-		client := infra.NewIpPoolsClient(connector)
+		client := infra.NewIpPoolsClient(testAccGetSessionContext(), connector)
 
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
@@ -118,7 +157,7 @@ func testAccNSXPolicyIPPoolCheckExists(resourceName string) resource.TestCheckFu
 
 func testAccNSXPolicyIPPoolCheckDestroy(state *terraform.State) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
-	client := infra.NewIpPoolsClient(connector)
+	client := infra.NewIpPoolsClient(testAccGetSessionContext(), connector)
 
 	for _, rs := range state.RootModule().Resources {
 		if rs.Type != "nsxt_policy_ip_pool" {
@@ -142,9 +181,14 @@ resource "nsxt_policy_ip_pool" "test" {
 }`, name)
 }
 
-func testAccNSXPolicyIPPoolCreateTemplate(name string) string {
+func testAccNSXPolicyIPPoolCreateTemplate(name string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_ip_pool" "test" {
+%s
   display_name = "%s"
   description  = "Acceptance Test"
 
@@ -152,12 +196,17 @@ resource "nsxt_policy_ip_pool" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, name)
+}`, context, name)
 }
 
-func testAccNSXPolicyIPPoolUpdateTemplate(name string) string {
+func testAccNSXPolicyIPPoolUpdateTemplate(name string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_ip_pool" "test" {
+%s
   display_name = "%s"
   description  = "Acceptance Test"
 
@@ -170,5 +219,5 @@ resource "nsxt_policy_ip_pool" "test" {
     scope = "scope2"
     tag   = "tag2"
   }
-}`, name)
+}`, context, name)
 }

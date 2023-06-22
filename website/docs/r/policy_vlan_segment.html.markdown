@@ -174,8 +174,13 @@ An existing segment can be [imported][docs-import] into this resource, via the f
 ```
 terraform import nsxt_policy_vlan_segment.segment1 ID
 ```
-
 The above command imports the VLAN backed segment  named `segment1` with the NSX Segment ID `ID`.
+
+```
+terraform import nsxt_policy_vlan_segment.segment1 POLICY_PATH
+```
+The above command imports the VLAN backed segment  named `segment1` with policy path `POLICY_PATH`.
+Note: for multitenancy projects only the later form is usable.
 
 ~> **NOTE:** Only flexible (infra) segments can be imported. Segments that are fixed under certain gateway are not supported.
 

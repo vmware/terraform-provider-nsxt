@@ -11,6 +11,21 @@ import (
 )
 
 func TestAccResourceNsxtPolicyPredefinedSecurityPolicy_basic(t *testing.T) {
+	testAccResourceNsxtPolicyPredefinedSecurityPolicyBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyLocalManager(t)
+		testAccNSXVersion(t, "3.0.0")
+	})
+}
+
+func TestAccResourceNsxtPolicyPredefinedSecurityPolicy_multitenancy(t *testing.T) {
+	testAccResourceNsxtPolicyPredefinedSecurityPolicyBasic(t, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+	})
+}
+
+func testAccResourceNsxtPolicyPredefinedSecurityPolicyBasic(t *testing.T, withContext bool, preCheck func()) {
 	testResourceName := "nsxt_policy_predefined_security_policy.test"
 	description1 := "test 1"
 	description2 := "test 2"
@@ -21,11 +36,11 @@ func TestAccResourceNsxtPolicyPredefinedSecurityPolicy_basic(t *testing.T) {
 
 	// NOTE: These tests cannot be parallel, as they modify same default policy
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyPredefinedSecurityPolicyBasic(description1, tags),
+				Config: testAccNsxtPolicyPredefinedSecurityPolicyBasic(description1, tags, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySecurityPolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "description", description1),
@@ -35,7 +50,7 @@ func TestAccResourceNsxtPolicyPredefinedSecurityPolicy_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyPredefinedSecurityPolicyBasic(description2, ""),
+				Config: testAccNsxtPolicyPredefinedSecurityPolicyBasic(description2, "", withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySecurityPolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "description", description2),
@@ -151,39 +166,51 @@ func TestAccResourceNsxtPolicyPredefinedSecurityPolicy_rules(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyPredefinedSecurityPolicyPrerequisites(),
+				Config: testAccNsxtPolicyPredefinedSecurityPolicyPrerequisites(false),
 			},
 		},
 	})
 }
 
-func testAccNsxtPolicyPredefinedSecurityPolicyPrerequisites() string {
-	return `
+func testAccNsxtPolicyPredefinedSecurityPolicyPrerequisites(withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
+	return fmt.Sprintf(`
 resource "nsxt_policy_group" "group1" {
+%s
   display_name = "predefined-policy-test1"
 }
 
 resource "nsxt_policy_group" "group2" {
+%s
   display_name = "predefined-policy-test2"
 }
 
 data "nsxt_policy_security_policy" "test" {
+%s
   is_default = true
   category   = "Application"
-}`
+}`, context, context, context)
 }
 
-func testAccNsxtPolicyPredefinedSecurityPolicyBasic(description string, tags string) string {
-	return testAccNsxtPolicyPredefinedSecurityPolicyPrerequisites() + fmt.Sprintf(`
+func testAccNsxtPolicyPredefinedSecurityPolicyBasic(description string, tags string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
+	return testAccNsxtPolicyPredefinedSecurityPolicyPrerequisites(withContext) + fmt.Sprintf(`
 resource "nsxt_policy_predefined_security_policy" "test" {
+%s
   path        = data.nsxt_policy_security_policy.test.path
   description = "%s"
   %s
-}`, description, tags)
+}`, context, description, tags)
 }
 
 func testAccNsxtPolicyPredefinedSecurityPolicyDefaultRule(description string, action string, label string, tags string) string {
-	return testAccNsxtPolicyPredefinedSecurityPolicyPrerequisites() + fmt.Sprintf(`
+	return testAccNsxtPolicyPredefinedSecurityPolicyPrerequisites(false) + fmt.Sprintf(`
 resource "nsxt_policy_predefined_security_policy" "test" {
   path = data.nsxt_policy_security_policy.test.path
   default_rule {
@@ -197,7 +224,7 @@ resource "nsxt_policy_predefined_security_policy" "test" {
 }
 
 func testAccNsxtPolicyPredefinedSecurityPolicyWithRules() string {
-	return testAccNsxtPolicyPredefinedSecurityPolicyPrerequisites() + `
+	return testAccNsxtPolicyPredefinedSecurityPolicyPrerequisites(false) + `
 resource "nsxt_policy_predefined_security_policy" "test" {
   path = data.nsxt_policy_security_policy.test.path
 
@@ -212,7 +239,7 @@ resource "nsxt_policy_predefined_security_policy" "test" {
 }
 
 func testAccNsxtPolicyPredefinedSecurityPolicyWithRulesUpdate1() string {
-	return testAccNsxtPolicyPredefinedSecurityPolicyPrerequisites() + `
+	return testAccNsxtPolicyPredefinedSecurityPolicyPrerequisites(false) + `
 resource "nsxt_policy_predefined_security_policy" "test" {
   path = data.nsxt_policy_security_policy.test.path
 
@@ -233,7 +260,7 @@ resource "nsxt_policy_predefined_security_policy" "test" {
 }
 
 func testAccNsxtPolicyPredefinedSecurityPolicyWithRulesUpdate2() string {
-	return testAccNsxtPolicyPredefinedSecurityPolicyPrerequisites() + `
+	return testAccNsxtPolicyPredefinedSecurityPolicyPrerequisites(false) + `
 resource "nsxt_policy_predefined_security_policy" "test" {
   path = data.nsxt_policy_security_policy.test.path
 

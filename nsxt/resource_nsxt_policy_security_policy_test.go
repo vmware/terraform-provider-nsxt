@@ -12,6 +12,19 @@ import (
 )
 
 func TestAccResourceNsxtPolicySecurityPolicy_basic(t *testing.T) {
+	testAccResourceNsxtPolicySecurityPolicyBasic(t, false, func() {
+		testAccPreCheck(t)
+	})
+}
+
+func TestAccResourceNsxtPolicySecurityPolicy_multitenancy(t *testing.T) {
+	testAccResourceNsxtPolicySecurityPolicyBasic(t, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+	})
+}
+
+func testAccResourceNsxtPolicySecurityPolicyBasic(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestResourceName()
 	updatedName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_security_policy.test"
@@ -26,14 +39,14 @@ func TestAccResourceNsxtPolicySecurityPolicy_basic(t *testing.T) {
 	tag2 := "def"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicySecurityPolicyCheckDestroy(state, updatedName, defaultDomain)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicySecurityPolicyBasic(name, comments1, defaultDomain),
+				Config: testAccNsxtPolicySecurityPolicyBasic(name, comments1, defaultDomain, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySecurityPolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -51,7 +64,7 @@ func TestAccResourceNsxtPolicySecurityPolicy_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicySecurityPolicyBasic(updatedName, comments2, defaultDomain),
+				Config: testAccNsxtPolicySecurityPolicyBasic(updatedName, comments2, defaultDomain, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySecurityPolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -68,7 +81,7 @@ func TestAccResourceNsxtPolicySecurityPolicy_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicySecurityPolicyWithRule(updatedName, direction1, proto1, tag1, defaultDomain, ""),
+				Config: testAccNsxtPolicySecurityPolicyWithRule(updatedName, direction1, proto1, tag1, defaultDomain, "", withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySecurityPolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -92,7 +105,7 @@ func TestAccResourceNsxtPolicySecurityPolicy_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicySecurityPolicyWithRule(updatedName, direction2, proto2, tag2, defaultDomain, ""),
+				Config: testAccNsxtPolicySecurityPolicyWithRule(updatedName, direction2, proto2, tag2, defaultDomain, "", withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySecurityPolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -115,7 +128,7 @@ func TestAccResourceNsxtPolicySecurityPolicy_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicySecurityPolicyWithProfiles(updatedName, direction2, proto2, tag2, defaultDomain),
+				Config: testAccNsxtPolicySecurityPolicyWithProfiles(updatedName, direction2, proto2, tag2, defaultDomain, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySecurityPolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -420,7 +433,7 @@ func TestAccResourceNsxtPolicySecurityPolicy_importBasic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicySecurityPolicyBasic(name, "import", defaultDomain),
+				Config: testAccNsxtPolicySecurityPolicyBasic(name, "import", defaultDomain, false),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -430,6 +443,31 @@ func TestAccResourceNsxtPolicySecurityPolicy_importBasic(t *testing.T) {
 		},
 	})
 }
+
+func TestAccResourceNsxtPolicySecurityPolicy_importBasic_multitenancy(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_security_policy.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicySecurityPolicyCheckDestroy(state, name, defaultDomain)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicySecurityPolicyBasic(name, "import", defaultDomain, true),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtGlobalPolicySecurityPolicy_withSite(t *testing.T) {
 	name := getAccTestResourceName()
 	updatedName := getAccTestResourceName()
@@ -456,7 +494,7 @@ func TestAccResourceNsxtGlobalPolicySecurityPolicy_withSite(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicySecurityPolicyBasic(name, comments1, domain),
+				Config: testAccNsxtPolicySecurityPolicyBasic(name, comments1, domain, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySecurityPolicyExists(testResourceName, domain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -474,7 +512,7 @@ func TestAccResourceNsxtGlobalPolicySecurityPolicy_withSite(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicySecurityPolicyBasic(updatedName, comments2, domain),
+				Config: testAccNsxtPolicySecurityPolicyBasic(updatedName, comments2, domain, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySecurityPolicyExists(testResourceName, domain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -491,7 +529,7 @@ func TestAccResourceNsxtGlobalPolicySecurityPolicy_withSite(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicySecurityPolicyWithRule(updatedName, direction1, proto1, tag1, domain, ""),
+				Config: testAccNsxtPolicySecurityPolicyWithRule(updatedName, direction1, proto1, tag1, domain, "", false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySecurityPolicyExists(testResourceName, domain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -515,7 +553,7 @@ func TestAccResourceNsxtGlobalPolicySecurityPolicy_withSite(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicySecurityPolicyWithRule(updatedName, direction2, proto2, tag2, domain, ""),
+				Config: testAccNsxtPolicySecurityPolicyWithRule(updatedName, direction2, proto2, tag2, domain, "", false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySecurityPolicyExists(testResourceName, domain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -539,7 +577,7 @@ func TestAccResourceNsxtGlobalPolicySecurityPolicy_withSite(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicySecurityPolicyWithProfiles(updatedName, direction2, proto2, tag2, domain),
+				Config: testAccNsxtPolicySecurityPolicyWithProfiles(updatedName, direction2, proto2, tag2, domain, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySecurityPolicyExists(testResourceName, domain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -612,10 +650,15 @@ func testAccNsxtPolicySecurityPolicyCheckDestroy(state *terraform.State, display
 	return nil
 }
 
-func testAccNsxtPolicySecurityPolicyBasic(name string, comments string, domainName string) string {
+func testAccNsxtPolicySecurityPolicyBasic(name string, comments string, domainName string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	if domainName == defaultDomain {
 		return fmt.Sprintf(`
 resource "nsxt_policy_security_policy" "test" {
+%s
   display_name    = "%s"
   description     = "Acceptance Test"
   category        = "Application"
@@ -630,10 +673,11 @@ resource "nsxt_policy_security_policy" "test" {
     tag   = "orange"
   }
 
-}`, name, comments)
+}`, context, name, comments)
 	}
 	return testAccNsxtGlobalPolicySite(domainName) + fmt.Sprintf(`
 resource "nsxt_policy_security_policy" "test" {
+%s
   display_name    = "%s"
   description     = "Acceptance Test"
   category        = "Application"
@@ -649,13 +693,18 @@ resource "nsxt_policy_security_policy" "test" {
     tag   = "orange"
   }
 
-}`, name, comments)
+}`, context, name, comments)
 }
 
-func testAccNsxtPolicySecurityPolicyWithRule(name string, direction string, protocol string, ruleTag string, domainName string, profiles string) string {
+func testAccNsxtPolicySecurityPolicyWithRule(name string, direction string, protocol string, ruleTag string, domainName string, profiles string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	if domainName == defaultDomain {
 		return fmt.Sprintf(`
 resource "nsxt_policy_security_policy" "test" {
+%s
   display_name    = "%s"
   description     = "Acceptance Test"
   category        = "Application"
@@ -681,10 +730,11 @@ resource "nsxt_policy_security_policy" "test" {
     }
     %s
   }
-}`, name, name, direction, protocol, ruleTag, profiles)
+}`, context, name, name, direction, protocol, ruleTag, profiles)
 	}
 	return testAccNsxtGlobalPolicyGroupIPAddressCreateTemplate("group", domainName) + fmt.Sprintf(`
 resource "nsxt_policy_security_policy" "test" {
+%s
   display_name    = "%s"
   description     = "Acceptance Test"
   category        = "Application"
@@ -712,7 +762,7 @@ resource "nsxt_policy_security_policy" "test" {
     }
     %s
   }
-}`, name, name, direction, protocol, ruleTag, profiles)
+}`, context, name, name, direction, protocol, ruleTag, profiles)
 }
 
 func testAccNsxtPolicySecurityPolicyWithEthernetRule(name string, direction string, protocol string, ruleTag string, domainName string, profiles string) string {
@@ -933,9 +983,9 @@ func testAccNsxtPolicySecurityPolicyWithIPCidrRange(name string, destIP string, 
 }`, name, destIP, destCidr, destIPRange, sourceIP, sourceCidr, sourceIPRange)
 }
 
-func testAccNsxtPolicySecurityPolicyWithProfiles(name string, direction string, protocol string, ruleTag string, domainName string) string {
+func testAccNsxtPolicySecurityPolicyWithProfiles(name string, direction string, protocol string, ruleTag string, domainName string, withContext bool) string {
 	profiles := `
 profiles = [nsxt_policy_context_profile.test.path]
 `
-	return testAccNsxtPolicyContextProfileTemplate("security-policy-test-profile", testAccNsxtPolicyContextProfileAttributeDomainNameTemplate(testSystemDomainName)) + testAccNsxtPolicySecurityPolicyWithRule(name, direction, protocol, ruleTag, domainName, profiles)
+	return testAccNsxtPolicyContextProfileTemplate("security-policy-test-profile", testAccNsxtPolicyContextProfileAttributeDomainNameTemplate(testSystemDomainName), withContext) + testAccNsxtPolicySecurityPolicyWithRule(name, direction, protocol, ruleTag, domainName, profiles, withContext)
 }

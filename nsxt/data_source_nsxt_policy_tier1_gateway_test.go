@@ -9,19 +9,30 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
-	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
 	"github.com/vmware/terraform-provider-nsxt/api/infra"
 )
 
 func TestAccDataSourceNsxtPolicyTier1Gateway_basic(t *testing.T) {
+	testAccDataSourceNsxtPolicyTier1GatewayBasic(t, false, func() {
+		testAccPreCheck(t)
+	})
+}
+
+func TestAccDataSourceNsxtPolicyTier1Gateway_multitenancy(t *testing.T) {
+	testAccDataSourceNsxtPolicyTier1GatewayBasic(t, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+	})
+}
+
+func testAccDataSourceNsxtPolicyTier1GatewayBasic(t *testing.T, withContext bool, preCheck func()) {
 	routerName := getAccTestDataSourceName()
 	testResourceName := "data.nsxt_policy_tier1_gateway.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccDataSourceNsxtPolicyTier1GatewayDeleteByName(routerName)
@@ -33,7 +44,7 @@ func TestAccDataSourceNsxtPolicyTier1Gateway_basic(t *testing.T) {
 						panic(err)
 					}
 				},
-				Config: testAccNsxtPolicyTier1ReadTemplate(routerName),
+				Config: testAccNsxtPolicyTier1ReadTemplate(routerName, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(testResourceName, "display_name", routerName),
 					resource.TestCheckResourceAttr(testResourceName, "description", routerName),
@@ -59,19 +70,9 @@ func testAccDataSourceNsxtPolicyTier1GatewayCreate(routerName string) error {
 
 	// Generate a random ID for the resource
 	id := newUUID()
-	if testAccIsGlobalManager() {
-		gmObj, convErr := convertModelBindingType(obj, model.Tier1BindingType(), gm_model.Tier1BindingType())
-		if convErr != nil {
-			return convErr
-		}
+	client := infra.NewTier1sClient(testAccGetSessionContext(), connector)
+	err = client.Patch(id, obj)
 
-		client := gm_infra.NewTier1sClient(connector)
-		err = client.Patch(id, gmObj.(gm_model.Tier1))
-
-	} else {
-		client := infra.NewTier1sClient(testAccGetSessionContext(), connector)
-		err = client.Patch(id, obj)
-	}
 	if err != nil {
 		return handleCreateError("Tier1", id, err)
 	}
@@ -85,40 +86,33 @@ func testAccDataSourceNsxtPolicyTier1GatewayDeleteByName(routerName string) erro
 	}
 
 	// Find the object by name
-	if testAccIsGlobalManager() {
-		objID, err := testGetObjIDByName(routerName, "Tier1")
-		if err == nil {
-			client := gm_infra.NewTier1sClient(connector)
-			err := client.Delete(objID)
+	client := infra.NewTier1sClient(testAccGetSessionContext(), connector)
+
+	// Find the object by name
+	objList, err := client.List(nil, nil, nil, nil, nil, nil)
+	if err != nil {
+		return handleListError("Tier1", err)
+	}
+	for _, objInList := range objList.Results {
+		if *objInList.DisplayName == routerName {
+			err := client.Delete(*objInList.Id)
 			if err != nil {
-				return handleDeleteError("Tier1", objID, err)
+				return handleDeleteError("Tier1", *objInList.Id, err)
 			}
 			return nil
-		}
-	} else {
-		client := infra.NewTier1sClient(testAccGetSessionContext(), connector)
-
-		// Find the object by name
-		objList, err := client.List(nil, nil, nil, nil, nil, nil)
-		if err != nil {
-			return handleListError("Tier1", err)
-		}
-		for _, objInList := range objList.Results {
-			if *objInList.DisplayName == routerName {
-				err := client.Delete(*objInList.Id)
-				if err != nil {
-					return handleDeleteError("Tier1", *objInList.Id, err)
-				}
-				return nil
-			}
 		}
 	}
 	return fmt.Errorf("Error while deleting Tier1 '%s': resource not found", routerName)
 }
 
-func testAccNsxtPolicyTier1ReadTemplate(name string) string {
+func testAccNsxtPolicyTier1ReadTemplate(name string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 data "nsxt_policy_tier1_gateway" "test" {
+%s
   display_name = "%s"
-}`, name)
+}`, context, name)
 }

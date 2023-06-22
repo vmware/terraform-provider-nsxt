@@ -11,15 +11,19 @@ import (
 )
 
 func TestAccDataSourceNsxtPolicyGatewayLocaleService_default(t *testing.T) {
+	testAccDataSourceNsxtPolicyGatewayLocaleServiceDefault(t, false, func() { testAccPreCheck(t); testAccOnlyLocalManager(t) })
+}
+
+func testAccDataSourceNsxtPolicyGatewayLocaleServiceDefault(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestDataSourceName()
 	testResourceName := "data.nsxt_policy_gateway_locale_service.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t) },
+		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyGatewayLocaleServiceTemplate(name),
+				Config: testAccNsxtPolicyGatewayLocaleServiceTemplate(name, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(testResourceName, "display_name", "default"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -77,21 +81,34 @@ func TestAccDataSourceNsxtPolicyGatewayLocaleService_globalManager(t *testing.T)
 	})
 }
 
-func testAccNsxtPolicyGatewayLocaleServiceTemplate(name string) string {
+func TestAccDataSourceNsxtPolicyGatewayLocaleService_multitenancy(t *testing.T) {
+	testAccDataSourceNsxtPolicyGatewayLocaleServiceDefault(t, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+	})
+}
+
+func testAccNsxtPolicyGatewayLocaleServiceTemplate(name string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 data "nsxt_policy_edge_cluster" "test" {
   display_name = "%s"
 }
 
-resource "nsxt_policy_tier0_gateway" "test" {
+resource "nsxt_policy_tier1_gateway" "test" {
+%s
   display_name      = "%s"
   edge_cluster_path = data.nsxt_policy_edge_cluster.test.path
 }
 
 data "nsxt_policy_gateway_locale_service" "test" {
-  gateway_path = nsxt_policy_tier0_gateway.test.path
+%s
+  gateway_path = nsxt_policy_tier1_gateway.test.path
   id           = "default"
-}`, getEdgeClusterName(), name)
+}`, getEdgeClusterName(), context, name, context)
 }
 
 func testAccNsxtPolicyGatewayLocaleServiceSingleTemplate(name string) string {

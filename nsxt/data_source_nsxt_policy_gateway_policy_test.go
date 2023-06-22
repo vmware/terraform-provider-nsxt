@@ -12,6 +12,17 @@ import (
 )
 
 func TestAccDataSourceNsxtPolicyGatewayPolicy_basic(t *testing.T) {
+	testAccDataSourceNsxtPolicyGatewayPolicyBasic(t, false, func() { testAccPreCheck(t) })
+}
+
+func TestAccDataSourceNsxtPolicyGatewayPolicy_multitenancy(t *testing.T) {
+	testAccDataSourceNsxtPolicyGatewayPolicyBasic(t, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+	})
+}
+
+func testAccDataSourceNsxtPolicyGatewayPolicyBasic(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestDataSourceName()
 	category := "LocalGatewayRules"
 	testResourceName := "data.nsxt_policy_gateway_policy.test"
@@ -19,11 +30,11 @@ func TestAccDataSourceNsxtPolicyGatewayPolicy_basic(t *testing.T) {
 	withDomain := `domain = "default"`
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyGatewayPolicyTemplate(name, category, ""),
+				Config: testAccNsxtPolicyGatewayPolicyTemplate(name, category, "", withContext),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", name),
@@ -32,7 +43,7 @@ func TestAccDataSourceNsxtPolicyGatewayPolicy_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyGatewayPolicyTemplate(name, category, withCategory),
+				Config: testAccNsxtPolicyGatewayPolicyTemplate(name, category, withCategory, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", name),
@@ -41,7 +52,7 @@ func TestAccDataSourceNsxtPolicyGatewayPolicy_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyGatewayPolicyTemplate(name, category, withDomain),
+				Config: testAccNsxtPolicyGatewayPolicyTemplate(name, category, withDomain, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", name),
@@ -53,16 +64,23 @@ func TestAccDataSourceNsxtPolicyGatewayPolicy_basic(t *testing.T) {
 	})
 }
 
-func testAccNsxtPolicyGatewayPolicyTemplate(name string, category string, extra string) string {
+func testAccNsxtPolicyGatewayPolicyTemplate(name string, category string, extra string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
+
 	return fmt.Sprintf(`
 resource "nsxt_policy_gateway_policy" "test" {
+%s
   display_name = "%s"
   description  = "%s"
   category     = "%s"
 }
 
 data "nsxt_policy_gateway_policy" "test" {
+%s
   display_name = nsxt_policy_gateway_policy.test.display_name
   %s
-}`, name, name, category, extra)
+}`, context, name, name, category, context, extra)
 }

@@ -11,15 +11,26 @@ import (
 )
 
 func TestAccDataSourceNsxtPolicyDhcpServer_basic(t *testing.T) {
+	testAccDataSourceNsxtPolicyDhcpServerBasic(t, false, func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") })
+}
+
+func TestAccDataSourceNsxtPolicyDhcpServer_multitenancy(t *testing.T) {
+	testAccDataSourceNsxtPolicyDhcpServerBasic(t, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+	})
+}
+
+func testAccDataSourceNsxtPolicyDhcpServerBasic(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestDataSourceName()
 	testResourceName := "data.nsxt_policy_dhcp_server.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyDhcpServerReadTemplate(name),
+				Config: testAccNsxtPolicyDhcpServerReadTemplate(name, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "test"),
@@ -30,14 +41,20 @@ func TestAccDataSourceNsxtPolicyDhcpServer_basic(t *testing.T) {
 	})
 }
 
-func testAccNsxtPolicyDhcpServerReadTemplate(name string) string {
+func testAccNsxtPolicyDhcpServerReadTemplate(name string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_dhcp_server" "test" {
+%s
   display_name = "%s"
   description  = "test"
 }
 
 data "nsxt_policy_dhcp_server" "test" {
+%s
   id = nsxt_policy_dhcp_server.test.nsx_id
-}`, name)
+}`, context, name, context)
 }

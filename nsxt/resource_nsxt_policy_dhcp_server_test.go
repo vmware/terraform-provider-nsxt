@@ -24,17 +24,31 @@ var accTestPolicyDhcpServerUpdateAttributes = map[string]string{
 }
 
 func TestAccResourceNsxtPolicyDhcpServer_basic(t *testing.T) {
+	testAccResourceNsxtPolicyDhcpServerBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccNSXVersion(t, "3.0.0")
+	})
+}
+
+func TestAccResourceNsxtPolicyDhcpServer_multitenancy(t *testing.T) {
+	testAccResourceNsxtPolicyDhcpServerBasic(t, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+	})
+}
+
+func testAccResourceNsxtPolicyDhcpServerBasic(t *testing.T, withContext bool, preCheck func()) {
 	testResourceName := "nsxt_policy_dhcp_server.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyDhcpServerCheckDestroy(state, accTestPolicyDhcpServerUpdateAttributes["display_name"])
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyDhcpServerCreateTemplate(),
+				Config: testAccNsxtPolicyDhcpServerCreateTemplate(withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyDhcpServerExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyDhcpServerCreateAttributes["display_name"]),
@@ -51,7 +65,7 @@ func TestAccResourceNsxtPolicyDhcpServer_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyDhcpServerUpdateTemplate(),
+				Config: testAccNsxtPolicyDhcpServerUpdateTemplate(withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyDhcpServerExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyDhcpServerUpdateAttributes["display_name"]),
@@ -68,7 +82,7 @@ func TestAccResourceNsxtPolicyDhcpServer_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyDhcpServerMinimalistic(),
+				Config: testAccNsxtPolicyDhcpServerMinimalistic(withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyDhcpServerExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
@@ -96,12 +110,36 @@ func TestAccResourceNsxtPolicyDhcpServer_importBasic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyDhcpServerMinimalistic(),
+				Config: testAccNsxtPolicyDhcpServerMinimalistic(false),
 			},
 			{
 				ResourceName:      testResourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicyDhcpServer_importBasic_multitenancy(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_dhcp_server.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancy(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyDhcpServerCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyDhcpServerMinimalistic(true),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
 			},
 		},
 	})
@@ -155,12 +193,17 @@ func testAccNsxtPolicyDhcpServerCheckDestroy(state *terraform.State, displayName
 	return nil
 }
 
-func testAccNsxtPolicyDhcpServerCreateTemplate() string {
+func testAccNsxtPolicyDhcpServerCreateTemplate(withContext bool) string {
 	attrMap := accTestPolicyDhcpServerCreateAttributes
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 
 	return testAccNsxtPolicyGatewayFabricDeps(false) + fmt.Sprintf(`
 
 resource "nsxt_policy_dhcp_server" "test" {
+%s
   display_name = "%s"
   description  = "%s"
   edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
@@ -172,14 +215,19 @@ resource "nsxt_policy_dhcp_server" "test" {
     tag   = "tag1"
   }
 }
-`, attrMap["display_name"], attrMap["description"], attrMap["lease_time"])
+`, context, attrMap["display_name"], attrMap["description"], attrMap["lease_time"])
 }
 
-func testAccNsxtPolicyDhcpServerUpdateTemplate() string {
+func testAccNsxtPolicyDhcpServerUpdateTemplate(withContext bool) string {
 	attrMap := accTestPolicyDhcpServerUpdateAttributes
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 
 	return testAccNsxtPolicyGatewayFabricDeps(false) + fmt.Sprintf(`
 resource "nsxt_policy_dhcp_server" "test" {
+%s
   display_name = "%s"
   description  = "%s"
   edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
@@ -191,14 +239,19 @@ resource "nsxt_policy_dhcp_server" "test" {
     tag   = "tag1"
   }
 }
-`, attrMap["display_name"], attrMap["description"], attrMap["lease_time"])
+`, context, attrMap["display_name"], attrMap["description"], attrMap["lease_time"])
 }
 
-func testAccNsxtPolicyDhcpServerMinimalistic() string {
+func testAccNsxtPolicyDhcpServerMinimalistic(withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_dhcp_server" "test" {
+%s
   display_name = "%s"
   server_addresses = ["110.64.0.1/16"]
 }
-`, accTestPolicyDhcpServerUpdateAttributes["display_name"])
+`, context, accTestPolicyDhcpServerUpdateAttributes["display_name"])
 }

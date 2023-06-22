@@ -238,6 +238,11 @@ func resourceNsxtPolicyGatewayDNSForwarderDelete(d *schema.ResourceData, m inter
 func resourceNsxtPolicyGatewayDNSForwarderImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	gwPath := d.Id()
 
+	rd, err := nsxtPolicyPathResourceImporterHelper(d, m)
+	if err != nil {
+		return rd, err
+	}
+
 	d.Set("gateway_path", gwPath)
 	_, gwID := parseGatewayPolicyPath(gwPath)
 	d.SetId(gwID)

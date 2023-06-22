@@ -11,16 +11,31 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
 	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
 )
 
 func TestAccDataSourceNsxtPolicyGatewayQosProfile_basic(t *testing.T) {
+	testAccDataSourceNsxtPolicyGatewayQosProfileBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccNSXVersion(t, "3.0.0")
+	})
+}
+
+func TestAccDataSourceNsxtPolicyGatewayQosProfile_multitenancy(t *testing.T) {
+	testAccDataSourceNsxtPolicyGatewayQosProfileBasic(t, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+	})
+}
+
+func testAccDataSourceNsxtPolicyGatewayQosProfileBasic(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestDataSourceName()
 	testResourceName := "data.nsxt_policy_gateway_qos_profile.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccNSXVersion(t, "3.0.0") },
+		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccDataSourceNsxtPolicyGatewayQosProfileDeleteByName(name)
@@ -32,7 +47,7 @@ func TestAccDataSourceNsxtPolicyGatewayQosProfile_basic(t *testing.T) {
 						panic(err)
 					}
 				},
-				Config: testAccNsxtPolicyGatewayQosProfileReadTemplate(name),
+				Config: testAccNsxtPolicyGatewayQosProfileReadTemplate(name, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", name),
@@ -67,7 +82,7 @@ func testAccDataSourceNsxtPolicyGatewayQosProfileCreate(name string) error {
 		client := gm_infra.NewGatewayQosProfilesClient(connector)
 		err = client.Patch(id, gmObj.(gm_model.GatewayQosProfile), nil)
 	} else {
-		client := infra.NewGatewayQosProfilesClient(connector)
+		client := infra.NewGatewayQosProfilesClient(testAccGetSessionContext(), connector)
 		err = client.Patch(id, obj, nil)
 	}
 
@@ -95,7 +110,7 @@ func testAccDataSourceNsxtPolicyGatewayQosProfileDeleteByName(name string) error
 			return nil
 		}
 	} else {
-		client := infra.NewGatewayQosProfilesClient(connector)
+		client := infra.NewGatewayQosProfilesClient(testAccGetSessionContext(), connector)
 		// Find the object by name
 		objList, err := client.List(nil, nil, nil, nil, nil, nil)
 		if err != nil {
@@ -114,9 +129,14 @@ func testAccDataSourceNsxtPolicyGatewayQosProfileDeleteByName(name string) error
 	return fmt.Errorf("Error while deleting GatewayQosProfile '%s': resource not found", name)
 }
 
-func testAccNsxtPolicyGatewayQosProfileReadTemplate(name string) string {
+func testAccNsxtPolicyGatewayQosProfileReadTemplate(name string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 data "nsxt_policy_gateway_qos_profile" "test" {
+%s
   display_name = "%s"
-}`, name)
+}`, context, name)
 }

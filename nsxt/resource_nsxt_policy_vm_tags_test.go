@@ -12,18 +12,34 @@ import (
 )
 
 func TestAccResourceNsxtPolicyVMTags_basic(t *testing.T) {
+	testAccResourceNsxtPolicyVMTagsBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyLocalManager(t)
+		testAccEnvDefined(t, "NSXT_TEST_VM_ID")
+	})
+}
+
+func TestAccResourceNsxtPolicyVMTags_multitenancy(t *testing.T) {
+	testAccResourceNsxtPolicyVMTagsBasic(t, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+		testAccEnvDefined(t, "NSXT_TEST_VM_ID")
+	})
+}
+
+func testAccResourceNsxtPolicyVMTagsBasic(t *testing.T, withContext bool, preCheck func()) {
 	vmID := getTestVMID()
 	testResourceName := "nsxt_policy_vm_tags.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccEnvDefined(t, "NSXT_TEST_VM_ID") },
+		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXPolicyVMTagsCheckDestroy(state)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXPolicyVMTagsCreateTemplate(vmID),
+				Config: testAccNSXPolicyVMTagsCreateTemplate(vmID, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXPolicyVMTagsCheckExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
@@ -31,7 +47,7 @@ func TestAccResourceNsxtPolicyVMTags_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNSXPolicyVMTagsUpdateTemplate(vmID),
+				Config: testAccNSXPolicyVMTagsUpdateTemplate(vmID, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXPolicyVMTagsCheckExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
@@ -96,13 +112,38 @@ func TestAccResourceNsxtPolicyVMTags_import_basic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXPolicyVMTagsCreateTemplate(vmID),
+				Config: testAccNSXPolicyVMTagsCreateTemplate(vmID, false),
 			},
 			{
 				ResourceName:            testResourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"instance_id"},
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicyVMTags_import_basic_multitenancy(t *testing.T) {
+	vmID := getTestVMID()
+	testResourceName := "nsxt_policy_vm_tags.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccEnvDefined(t, "NSXT_TEST_VM_ID"); testAccOnlyMultitenancy(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXPolicyVMTagsCheckDestroy(state)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXPolicyVMTagsCreateTemplate(vmID, true),
+			},
+			{
+				ResourceName:            testResourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"instance_id"},
+				ImportStateIdFunc:       testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
 			},
 		},
 	})
@@ -152,21 +193,31 @@ func testAccNSXPolicyVMTagsCheckDestroy(state *terraform.State) error {
 	return nil
 }
 
-func testAccNSXPolicyVMTagsCreateTemplate(instanceID string) string {
+func testAccNSXPolicyVMTagsCreateTemplate(instanceID string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_vm_tags" "test" {
+%s
   instance_id = "%s"
 
   tag {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, instanceID)
+}`, context, instanceID)
 }
 
-func testAccNSXPolicyVMTagsUpdateTemplate(instanceID string) string {
+func testAccNSXPolicyVMTagsUpdateTemplate(instanceID string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_vm_tags" "test" {
+%s
   instance_id = "%s"
 
   tag {
@@ -178,7 +229,7 @@ resource "nsxt_policy_vm_tags" "test" {
     scope = "scope2"
     tag   = "tag2"
   }
-}`, instanceID)
+}`, context, instanceID)
 }
 
 func testAccNSXPolicyVMPortTagsCreateTemplate(instanceID string) string {

@@ -4,6 +4,7 @@
 package nsxt
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -257,6 +258,13 @@ func resourceNsxtPolicyIPPoolBlockSubnetVerifyDelete(sessionContext utl.SessionC
 func resourceNsxtPolicyIPPoolSubnetImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	importID := d.Id()
 	s := strings.Split(importID, "/")
+	rd, err := nsxtPolicyPathResourceImporterHelper(d, m)
+	if err == nil {
+		d.Set("pool_path", importID[0:strings.Index(importID, "/ip-subnets/")])
+		return rd, nil
+	} else if !errors.Is(err, ErrNotAPolicyPath) {
+		return rd, err
+	}
 	if len(s) != 2 {
 		return nil, fmt.Errorf("Please provide <ip-pool-id>/<subnet-id> as an input")
 	}

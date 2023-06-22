@@ -53,7 +53,7 @@ func resourceNsxtPolicyTier1Gateway() *schema.Resource {
 		Update: resourceNsxtPolicyTier1GatewayUpdate,
 		Delete: resourceNsxtPolicyTier1GatewayDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			State: nsxtPolicyPathResourceImporter,
 		},
 
 		Schema: map[string]*schema.Schema{

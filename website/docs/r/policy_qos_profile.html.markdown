@@ -140,5 +140,10 @@ An existing profile can be [imported][docs-import] into this resource, via the f
 ```
 terraform import nsxt_policy_qos_profile.qos_profile ID
 ```
-
 The above command imports the qos profile named `qos_profile` with the NSX ID `ID`.
+
+```
+terraform import nsxt_policy_qos_profile.qos_profile POLICY_PATH
+```
+The above command imports the qos profile named `qos_profile` with policy path `POLICY_PATH`.
+Note: for multitenancy projects only the later form is usable.

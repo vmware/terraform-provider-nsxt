@@ -141,5 +141,11 @@ An existing service can be [imported][docs-import] into this resource, via the f
 ```
 terraform import nsxt_policy_service.service_icmp ID
 ```
-
 The above service imports the service named `service_icmp` with the NSX ID `ID`.
+
+```
+terraform import nsxt_policy_service.service_icmp POLICY_PATH
+```
+The above service imports the service named `service_icmp` with policy path `POLICY_PATH`.
+Note: for multitenancy projects only the later form is usable.
+

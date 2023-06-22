@@ -53,7 +53,7 @@ func resourceNsxtPolicyContextProfile() *schema.Resource {
 		Update: resourceNsxtPolicyContextProfileUpdate,
 		Delete: resourceNsxtPolicyContextProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			State: nsxtPolicyPathResourceImporter,
 		},
 
 		Schema: map[string]*schema.Schema{

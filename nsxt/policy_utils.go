@@ -4,6 +4,7 @@
 package nsxt
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -12,7 +13,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
+	sdkerrors "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/realized_state"
@@ -20,6 +21,10 @@ import (
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
+
+// ErrNotAPolicyPath - Define an ignorable error for  policy path importer - to indicate that the given path is not a
+// policy path and may be processed as an id - which is handy for legacy import method
+var ErrNotAPolicyPath = errors.New("specified import identifier is not a policy path")
 
 func getOrGenerateID2(d *schema.ResourceData, m interface{}, presenceChecker func(utl.SessionContext, string, client.Connector) (bool, error)) (string, error) {
 	connector := getPolicyConnector(m)
@@ -168,6 +173,17 @@ func nsxtDomainResourceImporter(d *schema.ResourceData, m interface{}) ([]*schem
 	importDomain := defaultDomain
 	importID := d.Id()
 	s := strings.Split(importID, "/")
+	rd, err := nsxtPolicyPathResourceImporterHelper(d, m)
+	if err == nil {
+		for i, seg := range s {
+			if seg == "domains" {
+				d.Set("domain", s[i+1])
+			}
+		}
+		return rd, nil
+	} else if !errors.Is(err, ErrNotAPolicyPath) {
+		return rd, err
+	}
 	if len(s) == 2 {
 		importDomain = s[0]
 		d.SetId(s[1])
@@ -178,6 +194,40 @@ func nsxtDomainResourceImporter(d *schema.ResourceData, m interface{}) ([]*schem
 	d.Set("domain", importDomain)
 
 	return []*schema.ResourceData{d}, nil
+}
+
+func nsxtPolicyPathResourceImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	rd, err := nsxtPolicyPathResourceImporterHelper(d, m)
+	if errors.Is(err, ErrNotAPolicyPath) {
+		return rd, nil
+	} else if err != nil {
+		return rd, err
+	}
+	return rd, nil
+}
+
+func nsxtPolicyPathResourceImporterHelper(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	importID := d.Id()
+	if isPolicyPath(importID) {
+		pathSegs := strings.Split(importID, "/")
+		if strings.Contains(pathSegs[1], "infra") {
+			d.SetId(pathSegs[len(pathSegs)-1])
+		} else if pathSegs[1] == "orgs" && pathSegs[3] == "projects" {
+			if len(pathSegs) < 5 {
+				return nil, fmt.Errorf("invalid policy multitenancy path %s", importID)
+			}
+			// pathSegs[2] should contain the organization. Once we support multiple organization, it should be
+			// assigned into the context as well
+			contexts := make([]interface{}, 1)
+			ctxMap := make(map[string]interface{})
+			ctxMap["project_id"] = pathSegs[4]
+			contexts[0] = ctxMap
+			d.Set("context", contexts)
+			d.SetId(pathSegs[len(pathSegs)-1])
+		}
+		return []*schema.ResourceData{d}, nil
+	}
+	return []*schema.ResourceData{d}, ErrNotAPolicyPath
 }
 
 func isPolicyPath(policyPath string) bool {
@@ -311,7 +361,7 @@ func retryUponPreconditionFailed(readAndUpdate func() error, maxRetryAttempts in
 			return nil
 		}
 
-		if _, ok := err.(errors.InvalidRequest); !ok {
+		if _, ok := err.(sdkerrors.InvalidRequest); !ok {
 			// other type of error
 			return err
 		}

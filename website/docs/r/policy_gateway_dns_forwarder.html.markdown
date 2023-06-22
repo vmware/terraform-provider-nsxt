@@ -90,5 +90,4 @@ An existing object can be [imported][docs-import] into this resource, via the fo
 ```
 terraform import nsxt_policy_gateway_dns_forwarder.test GATEWAY-PATH
 ```
-
 The above command imports Dns Forwarder named `test` for NSX Gateway `GATEWAY-PATH`. Note that in order to support both Tier0 and Tier1 Gateways, a full Gateway path is expected here, rather than the usual ID.

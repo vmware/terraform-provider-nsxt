@@ -4,6 +4,7 @@
 package nsxt
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"strconv"
@@ -316,6 +317,19 @@ func resourceNsxtPolicyTier1GatewayInterfaceDelete(d *schema.ResourceData, m int
 func resourceNsxtPolicyTier1GatewayInterfaceImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	importID := d.Id()
 	s := strings.Split(importID, "/")
+	rd, err := nsxtPolicyPathResourceImporterHelper(d, m)
+	if err == nil {
+		d.Set("gateway_path", importID[0:strings.Index(importID, "/locale-services/")])
+		for i, e := range s {
+			if e == "locale-services" {
+				d.Set("locale_service_id", s[i+1])
+				break
+			}
+		}
+		return rd, nil
+	} else if !errors.Is(err, ErrNotAPolicyPath) {
+		return rd, err
+	}
 	if len(s) != 3 {
 		return nil, fmt.Errorf("Please provide <gateway-id>/<locale-service-id>/<interface-id> as an input")
 	}
@@ -323,7 +337,6 @@ func resourceNsxtPolicyTier1GatewayInterfaceImport(d *schema.ResourceData, m int
 	gwID := s[0]
 	connector := getPolicyConnector(m)
 	var tier1GW model.Tier1
-	var err error
 	client := infra.NewTier1sClient(getSessionContext(d, m), connector)
 	tier1GW, err = client.Get(gwID)
 	if err != nil {
@@ -335,5 +348,4 @@ func resourceNsxtPolicyTier1GatewayInterfaceImport(d *schema.ResourceData, m int
 	d.SetId(s[2])
 
 	return []*schema.ResourceData{d}, nil
-
 }

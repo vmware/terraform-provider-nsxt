@@ -4,6 +4,7 @@
 package nsxt
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -318,6 +319,13 @@ func resourceNsxtPolicyStaticRouteDelete(d *schema.ResourceData, m interface{}) 
 func resourceNsxtPolicyStaticRouteImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	importID := d.Id()
 	s := strings.Split(importID, "/")
+	rd, err := nsxtPolicyPathResourceImporterHelper(d, m)
+	if err == nil {
+		d.Set("gateway_path", importID[0:strings.Index(importID, "/static-routes")])
+		return rd, nil
+	} else if !errors.Is(err, ErrNotAPolicyPath) {
+		return rd, err
+	}
 	if len(s) != 2 {
 		return nil, fmt.Errorf("Please provide <gateway-id>/<static-route-id> as an input")
 	}

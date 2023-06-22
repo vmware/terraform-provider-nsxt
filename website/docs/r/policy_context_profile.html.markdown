@@ -124,5 +124,10 @@ An existing Context Profile can be [imported][docs-import] into this resource, v
 ```
 terraform import nsxt_policy_context_profile.test UUID
 ```
-
 The above command imports Context Profile named `test` with the NSX Context Profile ID `UUID`.
+
+```
+terraform import nsxt_policy_context_profile.test POLICY_PATH
+```
+The above command imports Context Profile named `test` with the NSX Context Profile policy path `POLICY_PATH`.
+Note: for multitenancy projects only the later form is usable.

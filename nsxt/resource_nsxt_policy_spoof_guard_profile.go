@@ -22,7 +22,7 @@ func resourceNsxtPolicySpoofGuardProfile() *schema.Resource {
 		Update: resourceNsxtPolicySpoofGuardProfileUpdate,
 		Delete: resourceNsxtPolicySpoofGuardProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			State: nsxtPolicyPathResourceImporter,
 		},
 
 		Schema: map[string]*schema.Schema{

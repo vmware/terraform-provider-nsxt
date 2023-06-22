@@ -20,7 +20,7 @@ func TestAccResourceNsxtPolicyVlanSegment_basicImport(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyVlanSegmentImportTemplate(name),
+				Config: testAccNsxtPolicyVlanSegmentImportTemplate(name, false),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -31,20 +31,57 @@ func TestAccResourceNsxtPolicyVlanSegment_basicImport(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyVlanSegment_basicImport_multitenancy(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_vlan_segment.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancy(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicySegmentCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyVlanSegmentImportTemplate(name, true),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtPolicyVlanSegment_basicUpdate(t *testing.T) {
+	testAccResourceNsxtPolicyVlanSegmentBasicUpdate(t, false, func() {
+		testAccPreCheck(t)
+	})
+}
+
+func TestAccResourceNsxtPolicyVlanSegment_multitenancy(t *testing.T) {
+	testAccResourceNsxtPolicyVlanSegmentBasicUpdate(t, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+	})
+}
+
+func testAccResourceNsxtPolicyVlanSegmentBasicUpdate(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestResourceName()
 	updatedName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_vlan_segment.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyVlanSegmentCheckDestroy(state, updatedName)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyVlanSegmentBasicTemplate(name),
+				Config: testAccNsxtPolicyVlanSegmentBasicTemplate(name, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyVlanSegmentExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -55,7 +92,7 @@ func TestAccResourceNsxtPolicyVlanSegment_basicUpdate(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyVlanSegmentBasicUpdateTemplate(updatedName),
+				Config: testAccNsxtPolicyVlanSegmentBasicUpdateTemplate(updatedName, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyVlanSegmentExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -287,21 +324,38 @@ func testAccNsxtPolicyVlanSegmentDeps() string {
 	return testAccNSXPolicyTransportZoneReadTemplate(getVlanTransportZoneName(), true, true)
 }
 
-func testAccNsxtPolicyVlanSegmentImportTemplate(name string) string {
-	return testAccNsxtPolicyVlanSegmentDeps() + fmt.Sprintf(`
+func testAccNsxtPolicyVlanSegmentImportTemplate(name string, withContext bool) string {
+	context := ""
+	tzSetting := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	} else {
+		tzSetting = "transport_zone_path = data.nsxt_policy_transport_zone.test.path"
+	}
+	s := fmt.Sprintf(`
 resource "nsxt_policy_vlan_segment" "test" {
+%s
   display_name        = "%s"
   description         = "Acceptance Test"
   vlan_ids            = ["101"]
-  transport_zone_path = data.nsxt_policy_transport_zone.test.path
+  %s
 }
-`, name)
+`, context, name, tzSetting)
+	if withContext {
+		return s
+	}
+	return testAccNsxtPolicyVlanSegmentDeps() + s
 }
 
-func testAccNsxtPolicyVlanSegmentBasicTemplate(name string) string {
+func testAccNsxtPolicyVlanSegmentBasicTemplate(name string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return testAccNsxtPolicyVlanSegmentDeps() + fmt.Sprintf(`
 
 resource "nsxt_policy_vlan_segment" "test" {
+%s
   display_name        = "%s"
   description         = "Acceptance Test"
   transport_zone_path = data.nsxt_policy_transport_zone.test.path
@@ -313,13 +367,18 @@ resource "nsxt_policy_vlan_segment" "test" {
     tag   = "orange"
   }
 }
-`, name)
+`, context, name)
 }
 
-func testAccNsxtPolicyVlanSegmentBasicUpdateTemplate(name string) string {
+func testAccNsxtPolicyVlanSegmentBasicUpdateTemplate(name string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return testAccNsxtPolicyVlanSegmentDeps() + fmt.Sprintf(`
 
 resource "nsxt_policy_vlan_segment" "test" {
+%s
   display_name        = "%s"
   description         = "Acceptance Test2"
   transport_zone_path = data.nsxt_policy_transport_zone.test.path
@@ -335,7 +394,7 @@ resource "nsxt_policy_vlan_segment" "test" {
     tag   = "orange"
   }
 }
-`, name)
+`, context, name)
 }
 
 func testAccNsxtPolicyVlanSegmentBasicAdvConfigTemplate(name string) string {

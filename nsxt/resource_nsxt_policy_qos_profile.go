@@ -27,7 +27,7 @@ func resourceNsxtPolicyQosProfile() *schema.Resource {
 		Update: resourceNsxtPolicyQosProfileUpdate,
 		Delete: resourceNsxtPolicyQosProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			State: nsxtPolicyPathResourceImporter,
 		},
 
 		Schema: map[string]*schema.Schema{

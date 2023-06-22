@@ -155,8 +155,7 @@ An existing Gateway Policy can be [imported][docs-import] into this resource, vi
 [docs-import]: https://www.terraform.io/cli/import
 
 ```
-terraform import nsxt_policy_gateway_policy.default policy-path
+terraform import nsxt_policy_gateway_policy.default POLICY_PATH
 ```
-
-The above command imports the policy Gateway Policy named `default` with the NSX Path `policy-path`.
+The above command imports the policy Gateway Policy named `default` with policy path `POLICY_PATH`.
 The import command is recommended in case the NSX policy in question already has rules configured, and you wish to reconfigure the policy from scratch. If your terraform configuration copies existing rules, like in VMC example above, import step can be skipped.
