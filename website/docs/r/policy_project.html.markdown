@@ -9,7 +9,7 @@ description: A resource to configure a Project.
 
 This resource provides a method for the management of a Project.
 
-This resource is applicable to NSX Global Manager, NSX Policy Manager and VMC.
+This resource is applicable to NSX Policy Manager.
 
 ## Example Usage
 
@@ -17,7 +17,6 @@ This resource is applicable to NSX Global Manager, NSX Policy Manager and VMC.
 resource "nsxt_policy_project" "test" {
   display_name        = "test"
   description         = "Terraform provisioned Project"
-  _default            = true
   short_id            = "test"
   tier0_gateway_paths = ["/infra/tier-0s/test"]
 
@@ -32,7 +31,6 @@ The following arguments are supported:
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
-* `_default` - (Optional) The server will populate this field when returing the resource. Ignored on PUT and POST.true - the project is a default project. Default projects are non-editable, system create ones.
 * `short_id` - (Optional) Defaults to id if id is less than equal to 8 characters or defaults to random generated id if not set.
 * `site_info` - (Optional) Information related to sites applicable for given Project. For on-prem deployment, only 1 is allowed.
   * `edge_cluster_paths` - (Optional) The edge cluster on which the networking elements for the Org will be created.
