@@ -490,7 +490,7 @@ func configureNsxtClient(d *schema.ResourceData, clients *nsxtClients) error {
 
 	clients.NsxtClient = nsxClient
 
-	return initNSXVersion(nsxClient)
+	return nil
 }
 
 type jwtToken struct {
@@ -681,7 +681,7 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 		// Special treatment for VMC since MP API is not available there
 		initNSXVersionVMC(*clients)
 	}
-	return nil
+	return initNSXVersion(getPolicyConnector(*clients))
 }
 
 type customHeaderProcessor struct {

@@ -11,6 +11,7 @@ require (
 	github.com/vmware/vsphere-automation-sdk-go/runtime v0.7.0
 	github.com/vmware/vsphere-automation-sdk-go/services/nsxt v0.11.0
 	github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm v0.8.0
+	github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp v0.5.0
 )
 
 require (

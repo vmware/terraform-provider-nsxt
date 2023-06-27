@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"hash/crc32"
 	"log"
-	"net/http"
 
 	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -16,7 +15,8 @@ import (
 	api "github.com/vmware/go-vmware-nsxt"
 	"github.com/vmware/go-vmware-nsxt/common"
 	"github.com/vmware/go-vmware-nsxt/manager"
-
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/node"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/search"
 )
 
@@ -531,20 +531,20 @@ func makeResourceReference(resourceType string, resourceID string) *common.Resou
 	}
 }
 
-func getNSXVersion(nsxClient *api.APIClient) (string, error) {
-	nodeProperties, resp, err := nsxClient.NsxComponentAdministrationApi.ReadNodeProperties(nsxClient.Context)
-
-	if err != nil || resp.StatusCode == http.StatusNotFound {
+func getNSXVersion(connector client.Connector) (string, error) {
+	client := node.NewVersionClient(connector)
+	version, err := client.Get()
+	if err != nil {
 		return "", fmt.Errorf("Failed to retrieve NSX version (%s). Please check connectivity and authentication settings of the provider", err)
 
 	}
-	log.Printf("[DEBUG] NSX version is %s", nodeProperties.NodeVersion)
-	return nodeProperties.NodeVersion, nil
+	log.Printf("[DEBUG] NSX version is %s", *version.NodeVersion)
+	return *version.NodeVersion, nil
 }
 
-func initNSXVersion(nsxClient *api.APIClient) error {
+func initNSXVersion(connector client.Connector) error {
 	var err error
-	nsxVersion, err = getNSXVersion(nsxClient)
+	nsxVersion, err = getNSXVersion(connector)
 	return err
 }
 
