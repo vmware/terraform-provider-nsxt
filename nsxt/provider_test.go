@@ -90,13 +90,13 @@ func testAccGetClient() (*api.APIClient, error) {
 
 func testAccNSXVersion(t *testing.T, requiredVersion string) {
 	if nsxVersion == "" {
-		client, err := testAccGetClient()
+		connector, err := testAccGetPolicyConnector()
 		if err != nil {
-			t.Skipf("Skipping non-NSX provider. No NSX client")
+			t.Errorf("Failed to get policy connector")
 			return
 		}
 
-		err = initNSXVersion(client)
+		err = initNSXVersion(connector)
 		if err != nil {
 			t.Errorf("Failed to retrieve NSX version")
 			return
@@ -110,13 +110,13 @@ func testAccNSXVersion(t *testing.T, requiredVersion string) {
 
 func testAccNSXVersionLessThan(t *testing.T, requiredVersion string) {
 	if nsxVersion == "" {
-		client, err := testAccGetClient()
+		connector, err := testAccGetPolicyConnector()
 		if err != nil {
-			t.Skipf("Skipping non-NSX provider. No NSX client")
+			t.Errorf("Failed to get policy connector")
 			return
 		}
 
-		err = initNSXVersion(client)
+		err = initNSXVersion(connector)
 		if err != nil {
 			t.Errorf("Failed to retrieve NSX version")
 			return
