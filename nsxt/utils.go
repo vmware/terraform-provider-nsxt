@@ -676,6 +676,7 @@ func getContextSchema() *schema.Schema {
 					Type:        schema.TypeString,
 					Description: "Id of the project which the resource belongs to.",
 					Required:    true,
+					ForceNew:    true,
 				},
 			},
 		},
