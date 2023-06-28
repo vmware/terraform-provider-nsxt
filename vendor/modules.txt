@@ -279,6 +279,7 @@ github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra
+github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/context_profiles
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/context_profiles/custom_attributes
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/domains
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/ip_pools

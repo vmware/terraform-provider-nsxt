@@ -9,14 +9,11 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	gm_cont_prof "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/context_profiles"
-	gm_custom_attr "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/context_profiles/custom_attributes"
-	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
-	cont_prof "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/context_profiles"
-	custom_attr "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/context_profiles/custom_attributes"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
 	"github.com/vmware/terraform-provider-nsxt/api/infra"
+	cont_prof "github.com/vmware/terraform-provider-nsxt/api/infra/context_profiles"
+	custom_attr "github.com/vmware/terraform-provider-nsxt/api/infra/context_profiles/custom_attributes"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
@@ -189,7 +186,7 @@ func resourceNsxtPolicyContextProfileExists(sessionContext utl.SessionContext, i
 
 func resourceNsxtPolicyContextProfileCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-
+	context := getSessionContext(d, m)
 	// Initialize resource Id and verify this ID is not yet used
 	id, err := getOrGenerateID2(d, m, resourceNsxtPolicyContextProfileExists)
 	if err != nil {
@@ -202,7 +199,7 @@ func resourceNsxtPolicyContextProfileCreate(d *schema.ResourceData, m interface{
 	for key := range attributeKeyMap {
 		attributes := d.Get(key).(*schema.Set).List()
 		if len(attributes) > 0 {
-			err = checkAttributesValid(attributes, m, key)
+			err = checkAttributesValid(context, attributes, m, key)
 			if err != nil {
 				return err
 			}
@@ -228,7 +225,7 @@ func resourceNsxtPolicyContextProfileCreate(d *schema.ResourceData, m interface{
 
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating ContextProfile with ID %s", id)
-	client := infra.NewContextProfilesClient(getSessionContext(d, m), connector)
+	client := infra.NewContextProfilesClient(context, connector)
 	err = client.Patch(id, obj, nil)
 	if err != nil {
 		return handleCreateError("ContextProfile", id, err)
@@ -266,6 +263,7 @@ func resourceNsxtPolicyContextProfileRead(d *schema.ResourceData, m interface{})
 
 func resourceNsxtPolicyContextProfileUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
+	context := getSessionContext(d, m)
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining ContextProfile ID")
@@ -278,7 +276,7 @@ func resourceNsxtPolicyContextProfileUpdate(d *schema.ResourceData, m interface{
 	var err error
 	for key := range attributeKeyMap {
 		attributes := d.Get(key).(*schema.Set).List()
-		err := checkAttributesValid(attributes, m, key)
+		err := checkAttributesValid(context, attributes, m, key)
 		if err != nil {
 			return err
 		}
@@ -298,7 +296,7 @@ func resourceNsxtPolicyContextProfileUpdate(d *schema.ResourceData, m interface{
 	}
 
 	// Update the resource using PATCH
-	client := infra.NewContextProfilesClient(getSessionContext(d, m), connector)
+	client := infra.NewContextProfilesClient(context, connector)
 	err = client.Patch(id, obj, nil)
 
 	if err != nil {
@@ -326,7 +324,7 @@ func resourceNsxtPolicyContextProfileDelete(d *schema.ResourceData, m interface{
 	return nil
 }
 
-func checkAttributesValid(attributes []interface{}, m interface{}, key string) error {
+func checkAttributesValid(context utl.SessionContext, attributes []interface{}, m interface{}, key string) error {
 
 	if key == "app_id" {
 		err := validateSubAttributes(attributes)
@@ -334,7 +332,7 @@ func checkAttributesValid(attributes []interface{}, m interface{}, key string) e
 			return err
 		}
 	}
-	attributeValues, err := listAttributesWithKey(attributeKeyMap[key], m)
+	attributeValues, err := listAttributesWithKey(context, attributeKeyMap[key], m)
 	if err != nil {
 		return err
 	}
@@ -362,10 +360,10 @@ func validateSubAttributes(attributes []interface{}) error {
 	return nil
 }
 
-func listAttributesWithKey(attributeKey string, m interface{}) ([]string, error) {
+func listAttributesWithKey(context utl.SessionContext, attributeKey string, m interface{}) ([]string, error) {
 	// returns a list of attribute values
 	policyAttributes := make([]string, 0)
-	policyContextProfileListResult, err := listSystemAttributesWithKey(&attributeKey, m)
+	policyContextProfileListResult, err := listSystemAttributesWithKey(context, &attributeKey, m)
 	if err != nil {
 		return policyAttributes, err
 	}
@@ -374,7 +372,7 @@ func listAttributesWithKey(attributeKey string, m interface{}) ([]string, error)
 			policyAttributes = append(policyAttributes, attribute.Value...)
 		}
 	}
-	policyContextProfileListResult, err = listCustomAttributesWithKey(&attributeKey, m)
+	policyContextProfileListResult, err = listCustomAttributesWithKey(context, &attributeKey, m)
 	if err != nil {
 		return policyAttributes, err
 	}
@@ -386,49 +384,19 @@ func listAttributesWithKey(attributeKey string, m interface{}) ([]string, error)
 	return policyAttributes, nil
 }
 
-func listSystemAttributesWithKey(attributeKey *string, m interface{}) (model.PolicyContextProfileListResult, error) {
-	var policyContextProfileListResult model.PolicyContextProfileListResult
+func listSystemAttributesWithKey(context utl.SessionContext, attributeKey *string, m interface{}) (model.PolicyContextProfileListResult, error) {
 	includeMarkForDeleteObjectsParam := false
 	connector := getPolicyConnector(m)
-	if isPolicyGlobalManager(m) {
-		client := gm_cont_prof.NewAttributesClient(connector)
-		gmPolicyContextProfileListResult, err := client.List(attributeKey, nil, nil, &includeMarkForDeleteObjectsParam, nil, nil, nil, nil)
-		if err != nil {
-			return policyContextProfileListResult, err
-		}
-		lmPolicyContextProfileListResult, err := convertModelBindingType(gmPolicyContextProfileListResult, gm_model.PolicyContextProfileListResultBindingType(), model.PolicyContextProfileListResultBindingType())
-		if err != nil {
-			return policyContextProfileListResult, err
-		}
-		policyContextProfileListResult = lmPolicyContextProfileListResult.(model.PolicyContextProfileListResult)
-		return policyContextProfileListResult, err
-	}
-	var err error
-	client := cont_prof.NewAttributesClient(connector)
-	policyContextProfileListResult, err = client.List(attributeKey, nil, nil, &includeMarkForDeleteObjectsParam, nil, nil, nil, nil)
+	client := cont_prof.NewAttributesClient(context, connector)
+	policyContextProfileListResult, err := client.List(attributeKey, nil, nil, &includeMarkForDeleteObjectsParam, nil, nil, nil, nil)
 	return policyContextProfileListResult, err
 }
 
-func listCustomAttributesWithKey(attributeKey *string, m interface{}) (model.PolicyContextProfileListResult, error) {
-	var policyContextProfileListResult model.PolicyContextProfileListResult
+func listCustomAttributesWithKey(context utl.SessionContext, attributeKey *string, m interface{}) (model.PolicyContextProfileListResult, error) {
 	includeMarkForDeleteObjectsParam := false
 	connector := getPolicyConnector(m)
-	if isPolicyGlobalManager(m) {
-		client := gm_custom_attr.NewDefaultClient(connector)
-		gmPolicyContextProfileListResult, err := client.List(attributeKey, nil, nil, &includeMarkForDeleteObjectsParam, nil, nil, nil, nil)
-		if err != nil {
-			return policyContextProfileListResult, err
-		}
-		lmPolicyContextProfileListResult, err := convertModelBindingType(gmPolicyContextProfileListResult, gm_model.PolicyContextProfileListResultBindingType(), model.PolicyContextProfileListResultBindingType())
-		if err != nil {
-			return policyContextProfileListResult, err
-		}
-		policyContextProfileListResult = lmPolicyContextProfileListResult.(model.PolicyContextProfileListResult)
-		return policyContextProfileListResult, err
-	}
-	var err error
-	client := custom_attr.NewDefaultClient(connector)
-	policyContextProfileListResult, err = client.List(attributeKey, nil, nil, &includeMarkForDeleteObjectsParam, nil, nil, nil, nil)
+	client := custom_attr.NewDefaultClient(context, connector)
+	policyContextProfileListResult, err := client.List(attributeKey, nil, nil, &includeMarkForDeleteObjectsParam, nil, nil, nil, nil)
 	return policyContextProfileListResult, err
 }
 
