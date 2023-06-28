@@ -920,6 +920,14 @@
       model: github.com/vmware/vsphere-automation-sdk-go/runtime/data
       list_result_model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
       type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_1s/segments
+      model: github.com/vmware/vsphere-automation-sdk-go/runtime/data
+      list_result_model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
+      type: Global
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/tier_1s/segments
+      model: github.com/vmware/vsphere-automation-sdk-go/runtime/data
+      list_result_model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Multitenancy
   model_name: StructValue
   obj_name: DhcpStaticBindingConfig
   client_name: DhcpStaticBindingConfigsClient

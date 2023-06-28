@@ -25,6 +25,27 @@ resource "nsxt_policy_dhcp_v6_static_binding" "test" {
 }
 ```
 
+## Example Usage - Multi-Tenancy
+
+```hcl
+data "nsxt_policy_project" "demoproj" {
+  display_name = "demoproj"
+}
+
+resource "nsxt_policy_dhcp_v6_static_binding" "test" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
+  segment_path   = nsxt_policy_segment.test.path
+  display_name   = "test"
+  description    = "Terraform provisioned static binding"
+  ip_addresses   = ["1002::1"]
+  lease_time     = 6400
+  preferred_time = 3600
+  mac_address    = "10:ff:22:11:cc:02"
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -34,6 +55,8 @@ The following arguments are supported:
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
+* `context` - (Optional) The context which the object belongs to
+    * `project_id` - The ID of the project which the object belongs to
 * `ip_addresses` - (Optional) List of IPv6 addresses.
 * `mac_address` - (Required) MAC address of the host.
 * `lease_time` - (Optional) Lease time, in seconds. Defaults to 86400.
@@ -59,6 +82,11 @@ An existing object can be [imported][docs-import] into this resource, via the fo
 ```
 terraform import nsxt_policy_dhcp_v6_static_binding.test [GW-ID]/SEG-ID/ID
 ```
-
 The above command imports DHCP V6 Static Binding named `test` with the NSX ID `ID` under segment SEG-ID.
 For fixed segments (VMC), `GW-ID` needs to be specified. Otherwise, `GW-ID` should be omitted.
+
+```
+terraform import nsxt_policy_dhcp_v6_static_binding.test POLICY_PATH
+```
+The above command imports DHCP V6 Static Binding named `test` with the NSX policy path `POLICY_PATH`.
+Note: for multitenancy projects only the later form is usable.
