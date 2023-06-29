@@ -44,71 +44,6 @@
     - Update
     - Delete
     - List
-#- api_packages:
-#  - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s
-#    model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
-#    type: Local
-#  - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s
-#    model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
-#    type: Global
-#  model_name: CommunityList
-#  obj_name: CommunityList
-#  supported_method:
-#    - New
-#    - Get
-#    - Patch
-#    - Update
-#    - Delete
-#    - List
-#- api_packages:
-#    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services
-#      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
-#      type: Local
-#    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s/locale_services
-#      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
-#      type: Global
-#  model_name: Tier0Interface
-#  obj_name: Interface
-#  var_name: tier0InterfaceParam
-#  supported_method:
-#    - New
-#    - Get
-#    - Patch
-#    - Update
-#    - Delete
-#    - List
-#- api_packages:
-#    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services
-#      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
-#      type: Local
-#    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s/locale_services
-#      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
-#      type: Global
-#  model_name: BgpRoutingConfig
-#  obj_name: BgpRoutingConfig
-#  client_name: BgpClient
-#  supported_method:
-#    - New
-#    - Get
-#    - Patch
-#    - Update
-#- api_packages:
-#    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services/bgp
-#      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
-#      type: Local
-#    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s/locale_services/bgp
-#      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
-#      type: Global
-#  model_name: BgpNeighborConfig
-#  obj_name: BgpNeighborConfig
-#  client_name: NeighborsClient
-#  supported_method:
-#    - New
-#    - Get
-#    - Patch
-#    - Update
-#    - Delete
-#    - List
 - api_packages:
     - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra
       model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
@@ -280,23 +215,6 @@
     - Update
     - Delete
     - List
-#- api_packages:
-#    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s
-#      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
-#      type: Local
-#    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s
-#      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
-#      type: Global
-#  model_name: PrefixList
-#  obj_name: PrefixList
-#  list_result_name: PrefixListResult
-#  supported_method:
-#    - New
-#    - Get
-#    - Patch
-#    - Update
-#    - Delete
-#    - List
 - api_packages:
     - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s
       model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
@@ -314,23 +232,6 @@
     - Update
     - Delete
     - List
-#- api_packages:
-#    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s
-#      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
-#      type: Local
-#    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s
-#      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
-#      type: Global
-#  model_name: Tier0RouteMap
-#  obj_name: RouteMap
-#  var_name: tier0RouteMapParam
-#  supported_method:
-#    - New
-#    - Get
-#    - Patch
-#    - Update
-#    - Delete
-#    - List
 - api_packages:
     - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/domains
       model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
@@ -350,33 +251,6 @@
     - Update
     - Delete
     - List
-#- api_packages:
-#    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/domains
-#      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
-#      type: Local
-#  model_name: IdsSecurityPolicy
-#  obj_name: IntrusionServicePolicy
-#  client_name: IntrusionServicePoliciesClient
-#  supported_method:
-#    - New
-#    - Get
-#    - Patch
-#    - Update
-#    - Delete
-#    - List
-#- api_packages:
-#    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/settings/firewall/security/intrusion_services
-#      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
-#      type: Local
-#  model_name: IdsProfile
-#  obj_name: Profile
-#  supported_method:
-#    - New
-#    - Get
-#    - Patch
-#    - Update
-#    - Delete
-#    - List
 - api_packages:
     - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra
       model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
@@ -663,23 +537,6 @@
     - Update
     - Delete
     - List
-#- api_packages:
-#    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/static_routes
-#      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
-#      type: Local
-#    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s/static_routes
-#      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
-#      type: Global
-#  model_name: StaticRouteBfdPeer
-#  obj_name: BfdPeer
-#  var_name: staticRouteBfdPeerParam
-#  supported_method:
-#    - New
-#    - Get
-#    - Patch
-#    - Update
-#    - Delete
-#    - List
 - api_packages:
     - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra
       model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
@@ -980,7 +837,6 @@
     - Patch
     - Update
     - List
-
 - api_packages:
     - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/segments
       model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
@@ -996,4 +852,20 @@
     - Delete
     - Patch
     - Update
+    - List
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/context_profiles
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/context_profiles
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
+      type: Global
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/context_profiles
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Multitenancy
+  model_name: Attribute
+  obj_name: Attribute
+  list_result_name: PolicyContextProfileListResult
+  supported_method:
+    - New
     - List
