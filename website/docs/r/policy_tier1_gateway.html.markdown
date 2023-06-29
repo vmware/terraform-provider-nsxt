@@ -51,6 +51,7 @@ resource "nsxt_policy_tier1_gateway" "tier1_gw" {
 ```
 
 ## Global manager example usage
+
 ```hcl
 resource "nsxt_policy_tier1_gateway" "tier1_gw" {
   description  = "Tier-1 provisioned by Terraform"
@@ -90,12 +91,12 @@ resource "nsxt_policy_tier1_gateway" "tier1_gw" {
   description               = "Tier-1 provisioned by Terraform"
   display_name              = "Tier1-gw1"
   nsx_id                    = "predefined_id"
-  edge_cluster_path         = data.nsxt_policy_edge_cluster.EC.path
+  edge_cluster_path         = data.nsxt_policy_project.demoproj.site_info.0.edge_cluster_paths.0
   failover_mode             = "PREEMPTIVE"
   default_rule_logging      = "false"
   enable_firewall           = "true"
   enable_standby_relocation = "false"
-  tier0_path                = data.nsxt_policy_tier0_gateway.T0.path
+  tier0_path                = data.nsxt_policy_project.demoproj.tier0_gateway_paths.0
   route_advertisement_types = ["TIER1_STATIC_ROUTES", "TIER1_CONNECTED"]
   pool_allocation           = "ROUTING"
 

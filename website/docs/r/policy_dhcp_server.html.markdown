@@ -38,7 +38,7 @@ resource "nsxt_policy_dhcp_server" "test" {
   }
   display_name      = "test"
   description       = "Terraform provisioned DhcpServerConfig"
-  edge_cluster_path = data.nsxt_policy_edge_cluster.ec1.path
+  edge_cluster_path = data.nsxt_policy_project.demoproj.site_info.0.edge_cluster_paths.0
   lease_time        = 200
   server_addresses  = ["110.64.0.1/16", "2001::1234:abcd:ffff:c0a8:101/64"]
 }
