@@ -44,7 +44,15 @@ var poolAllocationValues = []string{
 
 var t1HaModeValues = []string{
 	model.Tier1_HA_MODE_ACTIVE,
-	model.Tier1_HA_MODE_STANDBY}
+	model.Tier1_HA_MODE_STANDBY,
+	"NONE",
+}
+
+var t1TypeValues = []string{
+	model.Tier1_TYPE_ROUTED,
+	model.Tier1_TYPE_ISOLATED,
+	model.Tier1_TYPE_NATTED,
+}
 
 func resourceNsxtPolicyTier1Gateway() *schema.Resource {
 	return &schema.Resource{
@@ -105,6 +113,7 @@ func resourceNsxtPolicyTier1Gateway() *schema.Resource {
 					ValidateFunc: validation.StringInSlice(advertismentTypeValues, false),
 				},
 				Optional: true,
+				Computed: true,
 			},
 			"route_advertisement_rule": getAdvRulesSchema(),
 			"ipv6_ndra_profile_path":   getIPv6NDRAPathSchema(),
@@ -127,6 +136,12 @@ func resourceNsxtPolicyTier1Gateway() *schema.Resource {
 				ValidateFunc: validation.StringInSlice(t1HaModeValues, false),
 				Optional:     true,
 				Default:      model.Tier1_HA_MODE_STANDBY,
+			},
+			"type": {
+				Type:         schema.TypeString,
+				Description:  "Tier-1 Type",
+				ValidateFunc: validation.StringInSlice(t1TypeValues, false),
+				Optional:     true,
 			},
 			"context": getContextSchema(),
 		},
@@ -364,6 +379,7 @@ func policyTier1GatewayResourceToInfraStruct(context utl.SessionContext, d *sche
 	ipv6ProfilePaths := getIpv6ProfilePathsFromSchema(d)
 	dhcpPath := d.Get("dhcp_config_path").(string)
 	haMode := d.Get("ha_mode").(string)
+	connectivityType := d.Get("type").(string)
 	revision := int64(d.Get("revision").(int))
 
 	if haMode == model.Tier1_HA_MODE_ACTIVE && nsxVersionLower("4.0.0") {
@@ -389,7 +405,12 @@ func policyTier1GatewayResourceToInfraStruct(context utl.SessionContext, d *sche
 	}
 
 	if nsxVersionHigherOrEqual("3.2.0") {
-		obj.HaMode = &haMode
+		if haMode != "NONE" {
+			obj.HaMode = &haMode
+		}
+	}
+	if len(connectivityType) > 0 {
+		obj.Type_ = &connectivityType
 	}
 
 	if dhcpPath != "" {
@@ -453,6 +474,19 @@ func policyTier1GatewayResourceToInfraStruct(context utl.SessionContext, d *sche
 	return infraStruct, nil
 }
 
+func validateTier1Type(d *schema.ResourceData) error {
+	connectivityType := d.Get("type").(string)
+	tier0Path := d.Get("tier0_path").(string)
+
+	if connectivityType == model.Tier1_TYPE_ROUTED || connectivityType == model.Tier1_TYPE_NATTED {
+		if len(tier0Path) == 0 {
+			return fmt.Errorf("tier0_path needs to be specified for gateway type %v", connectivityType)
+		}
+	}
+
+	return nil
+}
+
 func resourceNsxtPolicyTier1GatewayCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
@@ -462,7 +496,13 @@ func resourceNsxtPolicyTier1GatewayCreate(d *schema.ResourceData, m interface{})
 		return err
 	}
 
+	err = validateTier1Type(d)
+	if err != nil {
+		return err
+	}
+
 	obj, err := policyTier1GatewayResourceToInfraStruct(getSessionContext(d, m), d, connector, id)
+
 	if err != nil {
 		return err
 	}
@@ -507,10 +547,15 @@ func resourceNsxtPolicyTier1GatewayRead(d *schema.ResourceData, m interface{}) e
 	d.Set("enable_standby_relocation", obj.EnableStandbyRelocation)
 	d.Set("force_whitelisting", obj.ForceWhitelisting)
 	if nsxVersionHigherOrEqual("3.2.0") {
-		d.Set("ha_mode", obj.HaMode)
+		if obj.HaMode == nil {
+			d.Set("ha_mode", "NONE")
+		} else {
+			d.Set("ha_mode", obj.HaMode)
+		}
 	}
-	if obj.Tier0Path != nil {
-		d.Set("tier0_path", *obj.Tier0Path)
+	d.Set("tier0_path", obj.Tier0Path)
+	if obj.Type_ != nil {
+		d.Set("type", obj.Type_)
 	}
 	d.Set("route_advertisement_types", obj.RouteAdvertisementTypes)
 	d.Set("revision", obj.Revision)

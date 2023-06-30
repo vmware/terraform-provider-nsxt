@@ -65,7 +65,6 @@ func TestAccResourceNsxtPolicyTier1Gateway_globalManager(t *testing.T) {
 					testAccNsxtPolicyTier1Exists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", defaultTestResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "tier0_path", ""),
-					resource.TestCheckResourceAttr(testResourceName, "route_advertisement_types.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "route_advertisement_rule.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "locale_service.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "intersite_config.#", "1"),
