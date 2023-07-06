@@ -5,7 +5,7 @@ page_title: "NSXT: policy_project"
 description: Policy Project data source.
 ---
 
-# nsxt_policy_segment
+# nsxt_policy_project
 
 This data source provides information about policy Project configured on NSX.
 This data source is applicable to NSX Policy Manager and VMC.
