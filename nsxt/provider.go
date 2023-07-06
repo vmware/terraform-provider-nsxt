@@ -412,6 +412,7 @@ func Provider() *schema.Provider {
 			"nsxt_compute_manager":                         resourceNsxtComputeManager(),
 			"nsxt_manager_cluster":                         resourceNsxtManagerCluster(),
 			"nsxt_uplink_host_switch_profile":              resourceNsxtUplinkHostSwitchProfile(),
+			"nsxt_transport_node":                          resourceNsxtTransportNode(),
 		},
 
 		ConfigureFunc: providerConfigure,
