@@ -4,6 +4,7 @@
 package nsxt
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -37,6 +38,7 @@ func resourceNsxtPolicyDhcpV4StaticBinding() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
+			"context":      getContextSchema(),
 			"segment_path": getPolicyPathSchema(true, true, "segment path"),
 			"gateway_address": {
 				Type:         schema.TypeString,
@@ -324,6 +326,13 @@ func nsxtSegmentResourceImporter(d *schema.ResourceData, m interface{}) ([]*sche
 	importSegment := ""
 	importGW := ""
 	s := strings.Split(importID, "/")
+	rd, err := nsxtPolicyPathResourceImporterHelper(d, m)
+	if err == nil {
+		d.Set("segment_path", importID[0:strings.Index(importID, "/dhcp-static-binding-configs/")])
+		return rd, nil
+	} else if !errors.Is(err, ErrNotAPolicyPath) {
+		return rd, err
+	}
 	if len(s) < 2 {
 		return []*schema.ResourceData{d}, fmt.Errorf("Import format [gatewayID]/segmentID/bindingID expected, got %s", importID)
 	}

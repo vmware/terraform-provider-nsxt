@@ -7,8 +7,11 @@ import (
 
 	model0 "github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	vapiProtocolClient_ "github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+	client1 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_1s/segments"
+	lrmodel1 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	client0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/segments"
 	lrmodel0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+	client2 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/tier_1s/segments"
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
@@ -22,6 +25,12 @@ func NewDhcpStaticBindingConfigsClient(sessionContext utl.SessionContext, connec
 
 	case utl.Local:
 		client = client0.NewDhcpStaticBindingConfigsClient(connector)
+
+	case utl.Global:
+		client = client1.NewDhcpStaticBindingConfigsClient(connector)
+
+	case utl.Multitenancy:
+		client = client2.NewDhcpStaticBindingConfigsClient(connector)
 
 	default:
 		return nil
@@ -42,6 +51,20 @@ func (c StructValueClientContext) Get(tier1IdParam string, segmentIdParam string
 			return obj, err
 		}
 
+	case utl.Global:
+		client := c.Client.(client1.DhcpStaticBindingConfigsClient)
+		obj, err = client.Get(tier1IdParam, segmentIdParam, bindingIdParam)
+		if err != nil {
+			return obj, err
+		}
+
+	case utl.Multitenancy:
+		client := c.Client.(client2.DhcpStaticBindingConfigsClient)
+		obj, err = client.Get(utl.DefaultOrgID, c.ProjectID, tier1IdParam, segmentIdParam, bindingIdParam)
+		if err != nil {
+			return obj, err
+		}
+
 	default:
 		return obj, errors.New("invalid infrastructure for model")
 	}
@@ -57,6 +80,14 @@ func (c StructValueClientContext) Delete(tier1IdParam string, segmentIdParam str
 		client := c.Client.(client0.DhcpStaticBindingConfigsClient)
 		err = client.Delete(tier1IdParam, segmentIdParam, bindingIdParam)
 
+	case utl.Global:
+		client := c.Client.(client1.DhcpStaticBindingConfigsClient)
+		err = client.Delete(tier1IdParam, segmentIdParam, bindingIdParam)
+
+	case utl.Multitenancy:
+		client := c.Client.(client2.DhcpStaticBindingConfigsClient)
+		err = client.Delete(utl.DefaultOrgID, c.ProjectID, tier1IdParam, segmentIdParam, bindingIdParam)
+
 	default:
 		err = errors.New("invalid infrastructure for model")
 	}
@@ -71,6 +102,14 @@ func (c StructValueClientContext) Patch(tier1IdParam string, segmentIdParam stri
 	case utl.Local:
 		client := c.Client.(client0.DhcpStaticBindingConfigsClient)
 		err = client.Patch(tier1IdParam, segmentIdParam, bindingIdParam, dhcpStaticBindingConfigParam)
+
+	case utl.Global:
+		client := c.Client.(client1.DhcpStaticBindingConfigsClient)
+		err = client.Patch(tier1IdParam, segmentIdParam, bindingIdParam, dhcpStaticBindingConfigParam)
+
+	case utl.Multitenancy:
+		client := c.Client.(client2.DhcpStaticBindingConfigsClient)
+		err = client.Patch(utl.DefaultOrgID, c.ProjectID, tier1IdParam, segmentIdParam, bindingIdParam, dhcpStaticBindingConfigParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -88,6 +127,14 @@ func (c StructValueClientContext) Update(tier1IdParam string, segmentIdParam str
 		client := c.Client.(client0.DhcpStaticBindingConfigsClient)
 		obj, err = client.Update(tier1IdParam, segmentIdParam, bindingIdParam, dhcpStaticBindingConfigParam)
 
+	case utl.Global:
+		client := c.Client.(client1.DhcpStaticBindingConfigsClient)
+		obj, err = client.Update(tier1IdParam, segmentIdParam, bindingIdParam, dhcpStaticBindingConfigParam)
+
+	case utl.Multitenancy:
+		client := c.Client.(client2.DhcpStaticBindingConfigsClient)
+		obj, err = client.Update(utl.DefaultOrgID, c.ProjectID, tier1IdParam, segmentIdParam, bindingIdParam, dhcpStaticBindingConfigParam)
+
 	default:
 		err = errors.New("invalid infrastructure for model")
 	}
@@ -103,6 +150,22 @@ func (c StructValueClientContext) List(tier1IdParam string, segmentIdParam strin
 	case utl.Local:
 		client := c.Client.(client0.DhcpStaticBindingConfigsClient)
 		obj, err = client.List(tier1IdParam, segmentIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+
+	case utl.Global:
+		client := c.Client.(client1.DhcpStaticBindingConfigsClient)
+		gmObj, err := client.List(tier1IdParam, segmentIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+		if err != nil {
+			return obj, err
+		}
+		obj1, err1 := utl.ConvertModelBindingType(gmObj, lrmodel1.DhcpStaticBindingConfigListResultBindingType(), lrmodel0.DhcpStaticBindingConfigListResultBindingType())
+		if err1 != nil {
+			return obj, err1
+		}
+		obj = obj1.(lrmodel0.DhcpStaticBindingConfigListResult)
+
+	case utl.Multitenancy:
+		client := c.Client.(client2.DhcpStaticBindingConfigsClient)
+		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, tier1IdParam, segmentIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

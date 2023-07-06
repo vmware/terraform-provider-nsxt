@@ -1596,10 +1596,12 @@ func parseSegmentPolicyPath(path string) (bool, string, string) {
 	if len(segs) == 4 {
 		// This is an infra segment
 		return false, "", segmentID
+	} else if segs[1] == "orgs" && segs[3] == "projects" && len(segs) == 8 {
+		return false, "", segmentID
 	}
 
 	// This is a fixed segment
-	gwPath := strings.Join(segs[:4], "/")
+	gwPath := path[0:strings.Index(path, "/segments/")]
 
 	isT0, gwID := parseGatewayPolicyPath(gwPath)
 	return isT0, gwID, segmentID
