@@ -177,3 +177,7 @@ func handleDeleteError(resourceType string, resourceID string, err error) error 
 	msg := fmt.Sprintf("Failed to delete %s %s", resourceType, resourceID)
 	return logAPIError(msg, err)
 }
+
+func handleMultitenancyTier0Error() error {
+	return fmt.Errorf("context use not supported with Tier0 gateways")
+}
