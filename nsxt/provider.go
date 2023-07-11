@@ -680,6 +680,7 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 	if (len(vmcAccessToken) > 0) || (vmcAuthMode == "Basic") {
 		// Special treatment for VMC since MP API is not available there
 		initNSXVersionVMC(*clients)
+		return nil
 	}
 	return initNSXVersion(getPolicyConnector(*clients))
 }
