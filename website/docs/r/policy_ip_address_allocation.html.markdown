@@ -13,6 +13,26 @@ This resource is applicable to NSX Policy Manager.
 ## Example Usage
 
 ```hcl
+resource "nsxt_policy_ip_pool" "pool1" {
+  context {
+    project_id = data.nsxt_policy_project.tenant1.id
+  }
+  display_name = "ip_pool"
+  description  = "Created by Terraform"
+}
+
+resource "nsxt_policy_ip_pool_static_subnet" "static_subnet1" {
+  display_name = "static-subnet1"
+  pool_path    = nsxt_policy_ip_pool.pool1.path
+  cidr         = "12.12.12.0/24"
+  gateway      = "12.12.12.1"
+
+  allocation_range {
+    start = "12.12.12.10"
+    end   = "12.12.12.20"
+  }
+}
+
 resource "nsxt_policy_ip_address_allocation" "test" {
   display_name  = "test"
   description   = "Terraform provisioned IpAddressAllocation"
@@ -28,6 +48,29 @@ data "nsxt_policy_project" "demoproj" {
   display_name = "demoproj"
 }
 
+resource "nsxt_policy_ip_pool" "pool1" {
+  context {
+    project_id = data.nsxt_policy_project.tenant1.id
+  }
+  display_name = "ip_pool"
+  description  = "Created by Terraform"
+}
+
+resource "nsxt_policy_ip_pool_static_subnet" "static_subnet1" {
+  context {
+    project_id = data.nsxt_policy_project.tenant1.id
+  }
+
+  display_name = "static-subnet1"
+  pool_path    = nsxt_policy_ip_pool.pool1.path
+  cidr         = "12.12.12.0/24"
+  gateway      = "12.12.12.1"
+
+  allocation_range {
+    start = "12.12.12.10"
+    end   = "12.12.12.20"
+  }
+}
 resource "nsxt_policy_ip_address_allocation" "test" {
   context {
     project_id = data.nsxt_policy_project.demoproj.id
