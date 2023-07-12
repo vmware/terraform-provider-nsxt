@@ -97,7 +97,12 @@ func resourceNsxtPolicyGatewayDNSForwarderRead(d *schema.ResourceData, m interfa
 		return fmt.Errorf("gateway_path is not valid")
 	}
 
-	obj, err := policyGatewayDNSForwarderGet(getSessionContext(d, m), connector, gwID, isT0)
+	context := getSessionContext(d, m)
+	if isT0 && context.ClientType == utl.Multitenancy {
+		return handleMultitenancyTier0Error()
+	}
+
+	obj, err := policyGatewayDNSForwarderGet(context, connector, gwID, isT0)
 
 	if err != nil {
 		return handleReadError(d, "Gateway Dns Forwarder", gwID, err)
@@ -167,12 +172,17 @@ func resourceNsxtPolicyGatewayDNSForwarderCreate(d *schema.ResourceData, m inter
 
 	// Verify DNS forwarder is not yet defined for this Gateway
 	var err error
-	sessionContext := getSessionContext(d, m)
+	context := getSessionContext(d, m)
+
+	if isT0 && context.ClientType == utl.Multitenancy {
+		return handleMultitenancyTier0Error()
+	}
+
 	if isT0 {
-		client := tier0s.NewDnsForwarderClient(sessionContext, connector)
+		client := tier0s.NewDnsForwarderClient(context, connector)
 		_, err = client.Get(gwID)
 	} else {
-		client := tier1s.NewDnsForwarderClient(sessionContext, connector)
+		client := tier1s.NewDnsForwarderClient(context, connector)
 		_, err = client.Get(gwID)
 	}
 	if err == nil {
@@ -183,7 +193,7 @@ func resourceNsxtPolicyGatewayDNSForwarderCreate(d *schema.ResourceData, m inter
 
 	log.Printf("[INFO] Creating Dns Forwarder for Gateway %s", gwID)
 
-	err = patchNsxtPolicyGatewayDNSForwarder(sessionContext, connector, d, gwID, isT0)
+	err = patchNsxtPolicyGatewayDNSForwarder(context, connector, d, gwID, isT0)
 	if err != nil {
 		return handleCreateError("Gateway Dns Forwarder", gwID, err)
 	}
@@ -201,8 +211,12 @@ func resourceNsxtPolicyGatewayDNSForwarderUpdate(d *schema.ResourceData, m inter
 		return fmt.Errorf("gateway_path is not valid")
 	}
 
+	context := getSessionContext(d, m)
+	if isT0 && context.ClientType == utl.Multitenancy {
+		return handleMultitenancyTier0Error()
+	}
 	log.Printf("[INFO] Updating Gateway Dns Forwarder with ID %s", gwID)
-	err := patchNsxtPolicyGatewayDNSForwarder(getSessionContext(d, m), connector, d, gwID, isT0)
+	err := patchNsxtPolicyGatewayDNSForwarder(context, connector, d, gwID, isT0)
 	if err != nil {
 		return handleUpdateError("Gateway Dns Forwarder", gwID, err)
 	}
@@ -220,12 +234,16 @@ func resourceNsxtPolicyGatewayDNSForwarderDelete(d *schema.ResourceData, m inter
 	}
 
 	var err error
-	sessionContext := getSessionContext(d, m)
+	context := getSessionContext(d, m)
+	if isT0 && context.ClientType == utl.Multitenancy {
+		return handleMultitenancyTier0Error()
+	}
+
 	if isT0 {
-		client := tier0s.NewDnsForwarderClient(sessionContext, connector)
+		client := tier0s.NewDnsForwarderClient(context, connector)
 		err = client.Delete(gwID)
 	} else {
-		client := tier1s.NewDnsForwarderClient(sessionContext, connector)
+		client := tier1s.NewDnsForwarderClient(context, connector)
 		err = client.Delete(gwID)
 	}
 	if err != nil {
