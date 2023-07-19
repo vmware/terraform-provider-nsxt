@@ -23,7 +23,7 @@ func resourceNsxtPolicySegmentSecurityProfile() *schema.Resource {
 		Update: resourceNsxtPolicySegmentSecurityProfileUpdate,
 		Delete: resourceNsxtPolicySegmentSecurityProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			State: nsxtPolicyPathResourceImporter,
 		},
 
 		Schema: map[string]*schema.Schema{

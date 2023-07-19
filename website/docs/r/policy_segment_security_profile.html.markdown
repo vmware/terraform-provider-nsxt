@@ -107,3 +107,10 @@ terraform import nsxt_policy_segment_security_profile.test UUID
 ```
 
 The above command imports Segment Security Profile named `test` with the NSX ID `UUID`.
+
+```
+terraform import nsxt_policy_segment_security_profile.test POLICY_PATH
+```
+
+The above command imports Segment Security Profile named `test` with the policy path `POLICY_PATH`.
+Note: for multitenancy projects only the later form is usable.

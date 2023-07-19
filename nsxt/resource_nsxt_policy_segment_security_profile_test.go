@@ -48,17 +48,30 @@ var accTestPolicySegmentSecurityProfileUpdateAttributes = map[string]string{
 }
 
 func TestAccResourceNsxtPolicySegmentSecurityProfile_basic(t *testing.T) {
+	testAccResourceNsxtPolicySegmentSecurityProfileBasic(t, false, func() {
+		testAccPreCheck(t)
+	})
+}
+
+func TestAccResourceNsxtPolicySegmentSecurityProfile_multitenancy(t *testing.T) {
+	testAccResourceNsxtPolicySegmentSecurityProfileBasic(t, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+	})
+}
+
+func testAccResourceNsxtPolicySegmentSecurityProfileBasic(t *testing.T, withContext bool, preCheck func()) {
 	testResourceName := "nsxt_policy_segment_security_profile.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicySegmentSecurityProfileCheckDestroy(state, accTestPolicySegmentSecurityProfileUpdateAttributes["display_name"])
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicySegmentSecurityProfileTemplate(true),
+				Config: testAccNsxtPolicySegmentSecurityProfileTemplate(true, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySegmentSecurityProfileExists(accTestPolicySegmentSecurityProfileCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicySegmentSecurityProfileCreateAttributes["display_name"]),
@@ -85,7 +98,7 @@ func TestAccResourceNsxtPolicySegmentSecurityProfile_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicySegmentSecurityProfileTemplate(false),
+				Config: testAccNsxtPolicySegmentSecurityProfileTemplate(false, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySegmentSecurityProfileExists(accTestPolicySegmentSecurityProfileUpdateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicySegmentSecurityProfileUpdateAttributes["display_name"]),
@@ -112,7 +125,7 @@ func TestAccResourceNsxtPolicySegmentSecurityProfile_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicySegmentSecurityProfileMinimalistic(),
+				Config: testAccNsxtPolicySegmentSecurityProfileMinimalistic(withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySegmentSecurityProfileExists(accTestPolicySegmentSecurityProfileCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
@@ -138,12 +151,36 @@ func TestAccResourceNsxtPolicySegmentSecurityProfile_importBasic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicySegmentSecurityProfileMinimalistic(),
+				Config: testAccNsxtPolicySegmentSecurityProfileMinimalistic(false),
 			},
 			{
 				ResourceName:      testResourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicySegmentSecurityProfile_importBasic_multitenancy(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_segment_security_profile.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicySegmentSecurityProfileCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicySegmentSecurityProfileMinimalistic(true),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
 			},
 		},
 	})
@@ -197,15 +234,20 @@ func testAccNsxtPolicySegmentSecurityProfileCheckDestroy(state *terraform.State,
 	return nil
 }
 
-func testAccNsxtPolicySegmentSecurityProfileTemplate(createFlow bool) string {
+func testAccNsxtPolicySegmentSecurityProfileTemplate(createFlow, withContext bool) string {
 	var attrMap map[string]string
 	if createFlow {
 		attrMap = accTestPolicySegmentSecurityProfileCreateAttributes
 	} else {
 		attrMap = accTestPolicySegmentSecurityProfileUpdateAttributes
 	}
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_segment_security_profile" "test" {
+%s
   display_name = "%s"
   description  = "%s"
   bpdu_filter_allow = ["%s"]
@@ -229,12 +271,17 @@ resource "nsxt_policy_segment_security_profile" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, attrMap["display_name"], attrMap["description"], attrMap["bpdu_filter_allow"], attrMap["bpdu_filter_enable"], attrMap["dhcp_client_block_enabled"], attrMap["dhcp_client_block_v6_enabled"], attrMap["dhcp_server_block_enabled"], attrMap["dhcp_server_block_v6_enabled"], attrMap["non_ip_traffic_block_enabled"], attrMap["ra_guard_enabled"], attrMap["rate_limits_enabled"], attrMap["rx_broadcast"], attrMap["rx_multicast"], attrMap["tx_broadcast"], attrMap["tx_multicast"])
+}`, context, attrMap["display_name"], attrMap["description"], attrMap["bpdu_filter_allow"], attrMap["bpdu_filter_enable"], attrMap["dhcp_client_block_enabled"], attrMap["dhcp_client_block_v6_enabled"], attrMap["dhcp_server_block_enabled"], attrMap["dhcp_server_block_v6_enabled"], attrMap["non_ip_traffic_block_enabled"], attrMap["ra_guard_enabled"], attrMap["rate_limits_enabled"], attrMap["rx_broadcast"], attrMap["rx_multicast"], attrMap["tx_broadcast"], attrMap["tx_multicast"])
 }
 
-func testAccNsxtPolicySegmentSecurityProfileMinimalistic() string {
+func testAccNsxtPolicySegmentSecurityProfileMinimalistic(withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_segment_security_profile" "test" {
+%s
   display_name = "%s"
-}`, accTestPolicySegmentSecurityProfileUpdateAttributes["display_name"])
+}`, context, accTestPolicySegmentSecurityProfileUpdateAttributes["display_name"])
 }
