@@ -312,6 +312,7 @@ func getPolicyCommonSegmentSchema(vlanRequired bool, isFixed bool) map[string]*s
 			Description:  "Policy path to the transport zone",
 			Optional:     true,
 			ForceNew:     true,
+			Computed:     true,
 			ValidateFunc: validatePolicyPath(),
 		},
 		"vlan_ids": {
