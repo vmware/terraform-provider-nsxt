@@ -148,9 +148,8 @@ func policyDhcpV6StaticBindingConvertAndPatch(d *schema.ResourceData, segmentPat
 func resourceNsxtPolicyDhcpV6StaticBindingCreate(d *schema.ResourceData, m interface{}) error {
 
 	segmentPath := d.Get("segment_path").(string)
-	segmentID := getPolicyIDFromPath(segmentPath)
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID2(d, m, resourceNsxtPolicyDhcpStaticBindingExists(segmentID))
+	id, err := getOrGenerateID2(d, m, resourceNsxtPolicyDhcpStaticBindingExists(segmentPath))
 	if err != nil {
 		return err
 	}
