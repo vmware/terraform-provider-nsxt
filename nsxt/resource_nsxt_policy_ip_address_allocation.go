@@ -4,6 +4,7 @@
 package nsxt
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -227,6 +228,14 @@ func resourceNsxtPolicyIPAddressAllocationDelete(d *schema.ResourceData, m inter
 func resourceNsxtPolicyIPAddressAllocationImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	importID := d.Id()
 	s := strings.Split(importID, "/")
+	rd, err := nsxtPolicyPathResourceImporterHelper(d, m)
+	if err == nil {
+		d.Set("pool_path", importID[0:strings.Index(importID, "/ip-allocations/")])
+		return rd, nil
+	} else if !errors.Is(err, ErrNotAPolicyPath) {
+		return rd, err
+	}
+
 	if len(s) != 2 {
 		return nil, fmt.Errorf("Please provide <ip-pool-id>/<allocation-id> as an input")
 	}
