@@ -40,6 +40,8 @@ type commonProviderConfig struct {
 	MinRetryInterval       int
 	MaxRetryInterval       int
 	RetryStatusCodes       []int
+	Username               string
+	Password               string
 }
 
 type nsxtClients struct {
@@ -400,6 +402,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_project":                          resourceNsxtPolicyProject(),
 			"nsxt_edge_cluster":                            resourceNsxtEdgeCluster(),
 			"nsxt_compute_manager":                         resourceNsxtComputeManager(),
+			"nsxt_manager_cluster":                         resourceNsxtManagerCluster(),
 		},
 
 		ConfigureFunc: providerConfigure,
@@ -625,43 +628,16 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 		host = fmt.Sprintf("https://%s", host)
 	}
 
-	securityCtx := core.NewSecurityContextImpl()
 	securityContextNeeded := true
 	if clientAuthDefined && !clients.CommonConfig.RemoteAuth {
 		securityContextNeeded = false
 	}
-
 	if securityContextNeeded {
-		if len(vmcAccessToken) > 0 {
-			if vmcAuthHost == "" {
-				return fmt.Errorf("vmc auth host must be provided if auth token is provided")
-			}
-
-			apiToken, err := getAPIToken(vmcAuthHost, vmcAccessToken)
-			if err != nil {
-				return err
-			}
-
-			if vmcAuthMode == "Bearer" {
-				clients.CommonConfig.BearerToken = apiToken
-			} else {
-
-				securityCtx.SetProperty(security.AUTHENTICATION_SCHEME_ID, security.OAUTH_SCHEME_ID)
-				securityCtx.SetProperty(security.ACCESS_TOKEN, apiToken)
-			}
-		} else {
-			if username == "" {
-				return fmt.Errorf("username must be provided")
-			}
-
-			if password == "" {
-				return fmt.Errorf("password must be provided")
-			}
-
-			securityCtx.SetProperty(security.AUTHENTICATION_SCHEME_ID, security.USER_PASSWORD_SCHEME_ID)
-			securityCtx.SetProperty(security.USER_KEY, username)
-			securityCtx.SetProperty(security.PASSWORD_KEY, password)
+		securityCtx, err := getConfiguredSecurityContext(clients, vmcAccessToken, vmcAuthHost, vmcAuthMode, username, password)
+		if err != nil {
+			return err
 		}
+		clients.PolicySecurityContext = securityCtx
 	}
 
 	tlsConfig, err := getConnectorTLSConfig(d)
@@ -676,9 +652,6 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 
 	httpClient := http.Client{Transport: tr}
 	clients.PolicyHTTPClient = &httpClient
-	if securityContextNeeded {
-		clients.PolicySecurityContext = securityCtx
-	}
 	clients.Host = host
 	clients.PolicyEnforcementPoint = policyEnforcementPoint
 	clients.PolicyGlobalManager = policyGlobalManager
@@ -689,6 +662,41 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 		return nil
 	}
 	return initNSXVersion(getPolicyConnector(*clients))
+}
+
+func getConfiguredSecurityContext(clients *nsxtClients, vmcAccessToken string, vmcAuthHost string, vmcAuthMode string, username string, password string) (*core.SecurityContextImpl, error) {
+	securityCtx := core.NewSecurityContextImpl()
+	if len(vmcAccessToken) > 0 {
+		if vmcAuthHost == "" {
+			return nil, fmt.Errorf("vmc auth host must be provided if auth token is provided")
+		}
+
+		apiToken, err := getAPIToken(vmcAuthHost, vmcAccessToken)
+		if err != nil {
+			return nil, err
+		}
+
+		if vmcAuthMode == "Bearer" {
+			clients.CommonConfig.BearerToken = apiToken
+		} else {
+
+			securityCtx.SetProperty(security.AUTHENTICATION_SCHEME_ID, security.OAUTH_SCHEME_ID)
+			securityCtx.SetProperty(security.ACCESS_TOKEN, apiToken)
+		}
+	} else {
+		if username == "" {
+			return nil, fmt.Errorf("username must be provided")
+		}
+
+		if password == "" {
+			return nil, fmt.Errorf("password must be provided")
+		}
+
+		securityCtx.SetProperty(security.AUTHENTICATION_SCHEME_ID, security.USER_PASSWORD_SCHEME_ID)
+		securityCtx.SetProperty(security.USER_KEY, username)
+		securityCtx.SetProperty(security.PASSWORD_KEY, password)
+	}
+	return securityCtx, nil
 }
 
 type customHeaderProcessor struct {
@@ -820,6 +828,8 @@ func initCommonConfig(d *schema.ResourceData) commonProviderConfig {
 	maxRetries := d.Get("max_retries").(int)
 	retryMinDelay := d.Get("retry_min_delay").(int)
 	retryMaxDelay := d.Get("retry_max_delay").(int)
+	username := d.Get("username").(string)
+	password := d.Get("password").(string)
 
 	statuses := d.Get("retry_on_status_codes").([]interface{})
 	retryStatuses := make([]int, 0, len(statuses))
@@ -839,6 +849,8 @@ func initCommonConfig(d *schema.ResourceData) commonProviderConfig {
 		MinRetryInterval:       retryMinDelay,
 		MaxRetryInterval:       retryMaxDelay,
 		RetryStatusCodes:       retryStatuses,
+		Username:               username,
+		Password:               password,
 	}
 }
 
