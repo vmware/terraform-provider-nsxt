@@ -84,7 +84,7 @@ The following arguments are supported:
 
 * `display_name` - (Required) The display name for the Static Subnet.
 * `context` - (Optional) The context which the object belongs to
-  * `project_id` - The ID of the project which the object belongs to
+  * `project_id` - (Required) The ID of the project which the object belongs to
 * `pool_path` - (Required) The Policy path to the IP Pool for this Static Subnet.
 * `cidr` - (Required) The network CIDR
 * `allocation_range` - (Required) One or more IP allocation ranges for the Subnet.

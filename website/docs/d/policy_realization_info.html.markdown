@@ -72,7 +72,7 @@ data "nsxt_policy_realization_info" "info" {
 * `delay` - (Optional) Delay (in seconds) before realization polling is started. Default is set to 1.
 * `timeout` - (Optional) Timeout (in seconds) for realization polling. Default is set to 1200.
 * `context` - (Optional) The context which the object belongs to
-    * `project_id` - The ID of the project which the object belongs to
+    * `project_id` - (Required) The ID of the project which the object belongs to
 
 ## Attributes Reference
 

@@ -86,7 +86,7 @@ Note: At least one of `app_id`, `custom_url`, domain_name`, or `url_category` mu
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `context` - (Optional) The context which the object belongs to
-  * `project_id` - The ID of the project which the object belongs to
+  * `project_id` - (Required) The ID of the project which the object belongs to
 * `app_id` - (Optional) A block to specify app id attributes for the context profile. Only one block is allowed.
   * `description` - (Optional) Description of the attribute.
   * `value` - (Required) A list of string indicating values for the `app_id`. Must be a subset of valid values for `app_id` on NSX.
@@ -95,7 +95,7 @@ Note: At least one of `app_id`, `custom_url`, domain_name`, or `url_category` mu
     * `tls_version` - (Optional) A list of string indicating values for `tls_version`, only applicable to `SSL`.
     * `cifs_smb_version` - (Optional) A list of string indicating values for `cifs_smb_version`, only applicable to `CIFS`.
 * `custom_url` - (Optional) A block to specify custom URL attributes for the context profile. Only one block is allowed.
-  * `custom_url_partial_match` - True value for this flag will be treated as a partial match for custom url.  Attribute is supported with NSX version 4.0.0 and above.
+  * `custom_url_partial_match` - (Optional) True value for this flag will be treated as a partial match for custom url.  Attribute is supported with NSX version 4.0.0 and above.
   * `description` - (Optional) Description of the attribute.
   * `value` - (Required) A list of string indicating values for the `custom_url`. Must be a subset of valid values for `custom_url` on NSX.
 * `domain_name` - (Optional) A block to specify domain name (FQDN) attributes for the context profile. Only one block is allowed.

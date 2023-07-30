@@ -110,7 +110,7 @@ The following arguments are supported:
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this Gateway Policy.
 * `context` - (Optional) The context which the object belongs to
-  * `project_id` - The ID of the project which the object belongs to
+  * `project_id` - (Required) The ID of the project which the object belongs to
 * `rule` (Optional) A repeatable block to specify rules for the Gateway Policy. This setting is not applicable to policy belonging to `DEFAULT` category. Each rule includes the following fields:
   * `display_name` - (Required) Display name of the resource.
   * `description` - (Optional) Description of the resource.

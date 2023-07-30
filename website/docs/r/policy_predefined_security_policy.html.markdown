@@ -113,7 +113,7 @@ The following arguments are supported:
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this Security Policy.
 * `context` - (Optional) The context which the object belongs to
-  * `project_id` - The ID of the project which the object belongs to
+  * `project_id` - (Required) The ID of the project which the object belongs to
 * `rule` (Optional) A repeatable block to specify rules for the Security Policy. This setting is applicable to non-Default policies only. Each rule includes the following fields:
   * `display_name` - (Required) Display name of the resource.
   * `description` - (Optional) Description of the resource.

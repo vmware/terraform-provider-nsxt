@@ -103,7 +103,7 @@ The following arguments are supported:
 * `tag` - (Optional) A list of scope + tag pairs to associate with this policy.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `context` - (Optional) The context which the object belongs to
-  * `project_id` - The ID of the project which the object belongs to
+  * `project_id` - (Required) The ID of the project which the object belongs to
 * `class_of_service` - (Optional) Class of service.
 * `dscp_trusted` - (Optional) Trust mode for DSCP (False by default)
 * `dscp_priority` - (Optional) DSCP Priority (0-63)

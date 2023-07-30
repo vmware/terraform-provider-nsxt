@@ -39,7 +39,7 @@ data "nsxt_policy_ip_block" "demoblock" {
 * `id` - (Optional) The ID of IP Block to retrieve.
 * `display_name` - (Optional) The Display Name prefix of the IP Block to retrieve.
 * `context` - (Optional) The context which the object belongs to
-    * `project_id` - The ID of the project which the object belongs to
+    * `project_id` - (Required) The ID of the project which the object belongs to
 
 ## Attributes Reference
 
