@@ -1,4 +1,4 @@
-/* Copyright © 2020 VMware, Inc. All Rights Reserved.
+/* Copyright © 2023 VMware, Inc. All Rights Reserved.
    SPDX-License-Identifier: MPL-2.0 */
 
 package nsxt
@@ -29,7 +29,10 @@ func TestAccResourceNsxtPolicyVniPool_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_vni_pool.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccOnlyLocalManager(t)
+			testAccPreCheck(t)
+		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyVniPoolCheckDestroy(state, accTestPolicyVniPoolUpdateAttributes["display_name"])
@@ -73,7 +76,10 @@ func TestAccResourceNsxtPolicyVniPool_importBasic(t *testing.T) {
 	testResourceName := "nsxt_policy_vni_pool.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccOnlyLocalManager(t)
+			testAccPreCheck(t)
+		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyVniPoolCheckDestroy(state, accTestPolicyVniPoolUpdateAttributes["display_name"])
