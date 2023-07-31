@@ -72,6 +72,9 @@ func resourceNsxtPolicyDhcpV4StaticBinding() *schema.Resource {
 
 func getPolicyDchpStaticBindingOnSegment(context utl.SessionContext, id string, segmentPath string, connector client.Connector) (*data.StructValue, error) {
 	_, gwID, segmentID := parseSegmentPolicyPath(segmentPath)
+	if segmentID == "" {
+		return nil, fmt.Errorf("Invalid Segment Path %s", segmentPath)
+	}
 	if context.ClientType == utl.Global || gwID == "" {
 		client := segments.NewDhcpStaticBindingConfigsClient(context, connector)
 		return client.Get(segmentID, id)
