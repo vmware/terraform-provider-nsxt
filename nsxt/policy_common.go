@@ -409,6 +409,26 @@ func setPolicyRulesInSchema(d *schema.ResourceData, rules []model.Rule) error {
 	return d.Set("rule", rulesList)
 }
 
+func validatePolicyRuleSequence(d *schema.ResourceData) error {
+	rules := d.Get("rule").([]interface{})
+	latestNum := int64(0)
+	for _, rule := range rules {
+		data := rule.(map[string]interface{})
+		sequenceNumber := int64(data["sequence_number"].(int))
+		if sequenceNumber > 0 && sequenceNumber <= latestNum {
+			return fmt.Errorf("when sequence_number is specified in a rule, it must be consistent with rule order. To avoid confusion, it is recommended to either specify sequence numbers in all rules, or none")
+		}
+
+		if sequenceNumber == 0 {
+			// Sequence number is unspecified, leave space for this rule to validate potential next rules
+			latestNum++
+		} else {
+			latestNum = sequenceNumber
+		}
+	}
+	return nil
+}
+
 func getPolicyRulesFromSchema(d *schema.ResourceData) []model.Rule {
 	rules := d.Get("rule").([]interface{})
 	var ruleList []model.Rule

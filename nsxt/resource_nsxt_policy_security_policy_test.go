@@ -226,6 +226,7 @@ func TestAccResourceNsxtPolicySecurityPolicy_withDependencies(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.display_name", "rule1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.sequence_number", "20"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.direction", defaultDirection),
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.ip_version", defaultProtocol),
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.action", defaultAction),
@@ -236,6 +237,7 @@ func TestAccResourceNsxtPolicySecurityPolicy_withDependencies(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.services.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.1.display_name", "rule2"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.1.direction", defaultDirection),
+					resource.TestCheckResourceAttr(testResourceName, "rule.1.sequence_number", "30"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.1.ip_version", defaultProtocol),
 					resource.TestCheckResourceAttr(testResourceName, "rule.1.action", defaultAction),
 					resource.TestCheckResourceAttr(testResourceName, "rule.1.source_groups.#", "2"),
@@ -872,6 +874,7 @@ resource "nsxt_policy_security_policy" "test" {
 
   rule {
     display_name          = "rule1"
+    sequence_number       = 20
     source_groups         = [nsxt_policy_group.group1.path]
     destination_groups    = [nsxt_policy_group.group2.path]
     sources_excluded      = true
@@ -881,6 +884,7 @@ resource "nsxt_policy_security_policy" "test" {
 
   rule {
     display_name          = "rule2"
+    sequence_number       = 30
     source_groups         = [nsxt_policy_group.group1.path, nsxt_policy_group.group2.path]
     sources_excluded      = false
     destinations_excluded = false

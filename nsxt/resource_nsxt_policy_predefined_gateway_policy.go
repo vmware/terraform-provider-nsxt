@@ -314,6 +314,10 @@ func updatePolicyPredefinedGatewayPolicy(id string, d *schema.ResourceData, m in
 	var childRules []*data.StructValue
 	if d.HasChange("rule") {
 		oldRules, _ := d.GetChange("rule")
+		err1 := validatePolicyRuleSequence(d)
+		if err1 != nil {
+			return err1
+		}
 		rules := getPolicyRulesFromSchema(d)
 
 		existingRules := make(map[string]bool)

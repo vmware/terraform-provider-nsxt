@@ -174,6 +174,7 @@ The following arguments are supported:
   * `services` - (Optional) Set of service paths to match.
   * `log_label` - (Optional) Additional information (string) which will be propagated to the rule syslog.
   * `tag` - (Optional) A list of scope + tag pairs to associate with this Rule.
+  * `sequence_number` - (Optional) It is recommended not to specify sequence number for rules, and rely on NSX to auto-assign them. If you choose to specify sequence numbers, you must make sure the numbers are consistent with order of the rules in configuration. To avoid confusion, either specify sequence numbers in all rules, or none at all.
 
 
 ## Attributes Reference
