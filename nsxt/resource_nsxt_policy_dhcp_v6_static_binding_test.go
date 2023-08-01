@@ -271,6 +271,7 @@ func testAccNsxtPolicyDhcpV6StaticBindingTemplate(isFixed, createFlow, withConte
 
 resource "nsxt_policy_dhcp_v6_static_binding" "test" {
 %s
+  nsx_id          = "terraform-test"
   segment_path    = %s.test.path
   display_name    = "%s"
   description     = "%s"
