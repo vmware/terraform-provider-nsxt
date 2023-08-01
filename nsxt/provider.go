@@ -394,6 +394,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_spoof_guard_profile":              resourceNsxtPolicySpoofGuardProfile(),
 			"nsxt_policy_gateway_qos_profile":              resourceNsxtPolicyGatewayQosProfile(),
 			"nsxt_policy_project":                          resourceNsxtPolicyProject(),
+			"nsxt_edge_cluster":                            resourceNsxtEdgeCluster(),
 		},
 
 		ConfigureFunc: providerConfigure,

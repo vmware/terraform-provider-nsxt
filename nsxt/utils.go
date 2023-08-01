@@ -16,6 +16,7 @@ import (
 	"github.com/vmware/go-vmware-nsxt/common"
 	"github.com/vmware/go-vmware-nsxt/manager"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+	mp_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/node"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/search"
 )
@@ -681,4 +682,42 @@ func getContextSchema() *schema.Schema {
 			},
 		},
 	}
+}
+
+func getCustomizedMPTagsFromSchema(d *schema.ResourceData, schemaName string) []mp_model.Tag {
+	tags := d.Get(schemaName).(*schema.Set).List()
+	tagList := make([]mp_model.Tag, 0)
+	for _, tag := range tags {
+		data := tag.(map[string]interface{})
+		scope := data["scope"].(string)
+		tag := data["tag"].(string)
+		elem := mp_model.Tag{
+			Scope: &scope,
+			Tag:   &tag}
+
+		tagList = append(tagList, elem)
+	}
+	return tagList
+}
+
+func setCustomizedMPTagsInSchema(d *schema.ResourceData, tags []mp_model.Tag, schemaName string) {
+	var tagList []map[string]string
+	for _, tag := range tags {
+		elem := make(map[string]string)
+		elem["scope"] = *tag.Scope
+		elem["tag"] = *tag.Tag
+		tagList = append(tagList, elem)
+	}
+	err := d.Set(schemaName, tagList)
+	if err != nil {
+		log.Printf("[WARNING] Failed to set tag in schema: %v", err)
+	}
+}
+
+func getMPTagsFromSchema(d *schema.ResourceData) []mp_model.Tag {
+	return getCustomizedMPTagsFromSchema(d, "tag")
+}
+
+func setMPTagsInSchema(d *schema.ResourceData, tags []mp_model.Tag) {
+	setCustomizedMPTagsInSchema(d, tags, "tag")
 }
