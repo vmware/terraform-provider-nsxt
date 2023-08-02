@@ -68,7 +68,7 @@ The following arguments are supported:
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `context` - (Optional) The context which the object belongs to
-  * `project_id` - The ID of the project which the object belongs to
+  * `project_id` - (Required) The ID of the project which the object belongs to
 * `ip_address` - (Required) The IPv4 address must belong to the subnet, if any, configured on Segment.
 * `mac_address` - (Required) MAC address of the host.
 * `gateway_address` - (Optional) Gateway IPv4 Address. When not specified, gateway address is auto-assigned from segment configuration.

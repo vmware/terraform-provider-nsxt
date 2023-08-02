@@ -87,7 +87,7 @@ The following arguments are supported:
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the policy resource.
 * `context` - (Optional) The context which the object belongs to
-  * `project_id` - The ID of the project which the object belongs to
+  * `project_id` - (Required) The ID of the project which the object belongs to
 The service must contain at least 1 entry (of at least one of the types), and possibly more.
 * `icmp_entry` - (Optional) Set of ICMP type service entries. Each with the following attributes:
     * `display_name` - (Optional) Display name of the service entry.

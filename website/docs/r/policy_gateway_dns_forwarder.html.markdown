@@ -66,7 +66,7 @@ The following arguments are supported:
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `context` - (Optional) The context which the object belongs to
-    * `project_id` - The ID of the project which the object belongs to
+    * `project_id` - (Required) The ID of the project which the object belongs to
 * `default_forwarder_zone_path` - (Required) Path of Default Forwarder Zone.
 * `conditional_forwarder_zone_paths` - (Optional) List of conditional (FQDN) Zone Paths (Maximum 5 zones).
 * `enabled` - (Optional) Flag to indicate whether this DNS Forwarder is enabled. Defaults to `true`.

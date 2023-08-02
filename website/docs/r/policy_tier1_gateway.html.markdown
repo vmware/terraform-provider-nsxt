@@ -116,7 +116,7 @@ The following arguments are supported:
 * `tag` - (Optional) A list of scope + tag pairs to associate with this Tier-1 gateway.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the policy resource.
 * `context` - (Optional) The context which the object belongs to
-  * `project_id` - The ID of the project which the object belongs to
+  * `project_id` - (Required) The ID of the project which the object belongs to
 * `edge_cluster_path` - (Optional) The path of the edge cluster where the Tier-1 is placed.For advanced configuration, use `locale_service` clause instead. 
 * `locale_service` - (Optional) This argument is required on NSX Global Manager. Multiple locale services can be specified for multiple locations.
   * `edge_cluster_path` - (Required) The path of the edge cluster where the Tier-0 is placed.
