@@ -196,6 +196,15 @@ func nsxtDomainResourceImporter(d *schema.ResourceData, m interface{}) ([]*schem
 	return []*schema.ResourceData{d}, nil
 }
 
+func getParameterFromPolicyPath(startDelimiter, endDelimiter, policyPath string) (string, error) {
+	startIndex := strings.Index(policyPath, startDelimiter)
+	endIndex := strings.Index(policyPath, endDelimiter)
+	if startIndex < 0 || endIndex < 0 || (startIndex+len(startDelimiter)) > endIndex {
+		return "", fmt.Errorf("failed to parse policy path %s, delimited by '%s' and '%s'", policyPath, startDelimiter, endDelimiter)
+	}
+	return policyPath[startIndex+len(startDelimiter) : endIndex], nil
+}
+
 func nsxtPolicyPathResourceImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	rd, err := nsxtPolicyPathResourceImporterHelper(d, m)
 	if errors.Is(err, ErrNotAPolicyPath) {
