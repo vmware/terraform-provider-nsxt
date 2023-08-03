@@ -376,6 +376,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_evpn_tenant":                      resourceNsxtPolicyEvpnTenant(),
 			"nsxt_policy_evpn_config":                      resourceNsxtPolicyEvpnConfig(),
 			"nsxt_policy_evpn_tunnel_endpoint":             resourceNsxtPolicyEvpnTunnelEndpoint(),
+			"nsxt_policy_vni_pool":                         resourceNsxtPolicyVniPool(),
 			"nsxt_policy_qos_profile":                      resourceNsxtPolicyQosProfile(),
 			"nsxt_policy_ospf_config":                      resourceNsxtPolicyOspfConfig(),
 			"nsxt_policy_ospf_area":                        resourceNsxtPolicyOspfArea(),
