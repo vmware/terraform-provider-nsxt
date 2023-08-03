@@ -319,7 +319,11 @@ func resourceNsxtPolicyTier1GatewayInterfaceImport(d *schema.ResourceData, m int
 	s := strings.Split(importID, "/")
 	rd, err := nsxtPolicyPathResourceImporterHelper(d, m)
 	if err == nil {
-		d.Set("gateway_path", importID[0:strings.Index(importID, "/locale-services/")])
+		gwPath, err := getParameterFromPolicyPath("", "/locale-services/", importID)
+		if err != nil {
+			return nil, err
+		}
+		d.Set("gateway_path", gwPath)
 		for i, e := range s {
 			if e == "locale-services" {
 				d.Set("locale_service_id", s[i+1])

@@ -230,7 +230,11 @@ func resourceNsxtPolicyIPAddressAllocationImport(d *schema.ResourceData, m inter
 	s := strings.Split(importID, "/")
 	rd, err := nsxtPolicyPathResourceImporterHelper(d, m)
 	if err == nil {
-		d.Set("pool_path", importID[0:strings.Index(importID, "/ip-allocations/")])
+		poolPath, err := getParameterFromPolicyPath("", "/ip-allocations/", importID)
+		if err != nil {
+			return nil, err
+		}
+		d.Set("pool_path", poolPath)
 		return rd, nil
 	} else if !errors.Is(err, ErrNotAPolicyPath) {
 		return rd, err

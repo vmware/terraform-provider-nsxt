@@ -331,7 +331,11 @@ func nsxtSegmentResourceImporter(d *schema.ResourceData, m interface{}) ([]*sche
 	s := strings.Split(importID, "/")
 	rd, err := nsxtPolicyPathResourceImporterHelper(d, m)
 	if err == nil {
-		d.Set("segment_path", importID[0:strings.Index(importID, "/dhcp-static-binding-configs/")])
+		segmentPath, err := getParameterFromPolicyPath("", "/dhcp-static-binding-configs/", importID)
+		if err != nil {
+			return nil, err
+		}
+		d.Set("segment_path", segmentPath)
 		return rd, nil
 	} else if !errors.Is(err, ErrNotAPolicyPath) {
 		return rd, err

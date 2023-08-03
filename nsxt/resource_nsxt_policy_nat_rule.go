@@ -422,8 +422,15 @@ func resourceNsxtPolicyNATRuleImport(d *schema.ResourceData, m interface{}) ([]*
 	s := strings.Split(importID, "/")
 	rd, err := nsxtPolicyPathResourceImporterHelper(d, m)
 	if err == nil {
-		d.Set("gateway_path", importID[0:strings.Index(importID, "/nat/")])
-		natType := importID[strings.Index(importID, "/nat/")+5 : strings.Index(importID, "/nat-rules/")]
+		gwPath, err := getParameterFromPolicyPath("", "/nat/", importID)
+		if err != nil {
+			return nil, err
+		}
+		d.Set("gateway_path", gwPath)
+		natType, err := getParameterFromPolicyPath("/nat/", "/nat-rules/", importID)
+		if err != nil {
+			return nil, err
+		}
 		if natType == model.PolicyNat_NAT_TYPE_USER {
 			// Value will be overwritten by resourceNsxtPolicyNATRuleRead()
 			d.Set("action", model.PolicyNatRule_ACTION_DNAT)

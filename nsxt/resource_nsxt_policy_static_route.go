@@ -337,7 +337,11 @@ func resourceNsxtPolicyStaticRouteImport(d *schema.ResourceData, m interface{}) 
 	s := strings.Split(importID, "/")
 	rd, err := nsxtPolicyPathResourceImporterHelper(d, m)
 	if err == nil {
-		d.Set("gateway_path", importID[0:strings.Index(importID, "/static-routes")])
+		gwPath, err := getParameterFromPolicyPath("", "/static-routes", importID)
+		if err != nil {
+			return nil, err
+		}
+		d.Set("gateway_path", gwPath)
 		return rd, nil
 	} else if !errors.Is(err, ErrNotAPolicyPath) {
 		return rd, err

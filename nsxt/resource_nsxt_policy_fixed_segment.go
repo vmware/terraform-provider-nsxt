@@ -45,7 +45,11 @@ func nsxtGatewayResourceImporter(d *schema.ResourceData, m interface{}) ([]*sche
 	importID := d.Id()
 	rd, err := nsxtPolicyPathResourceImporterHelper(d, m)
 	if err == nil {
-		d.Set("connectivity_path", importID[0:strings.Index(importID, "/segments/")])
+		connectivityPath, err := getParameterFromPolicyPath("", "/segments/", importID)
+		if err != nil {
+			return nil, err
+		}
+		d.Set("connectivity_path", connectivityPath)
 		return rd, nil
 	} else if !errors.Is(err, ErrNotAPolicyPath) {
 		return rd, err
