@@ -15,7 +15,9 @@ import (
 )
 
 var testAccResourcePolicyGWPrefixListName = "nsxt_policy_gateway_prefix_list.test"
+var testAccDataSourcePolicyGWPrefixListName = "data.nsxt_policy_gateway_prefix_list.test"
 
+// NOTE - to save test suite running time, this test also covers the data source
 func TestAccResourceNsxtPolicyGatewayPrefixList_basic(t *testing.T) {
 	name := getAccTestResourceName()
 	action := model.PrefixEntry_ACTION_DENY
@@ -47,6 +49,8 @@ func TestAccResourceNsxtPolicyGatewayPrefixList_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testAccResourcePolicyGWPrefixListName, "gateway_path"),
 					resource.TestCheckResourceAttrSet(testAccResourcePolicyGWPrefixListName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testAccResourcePolicyGWPrefixListName, "revision"),
+					resource.TestCheckResourceAttr(testAccDataSourcePolicyGWPrefixListName, "display_name", name),
+					resource.TestCheckResourceAttr(testAccDataSourcePolicyGWPrefixListName, "description", "test"),
 				),
 			},
 			{
@@ -69,6 +73,8 @@ func TestAccResourceNsxtPolicyGatewayPrefixList_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testAccResourcePolicyGWPrefixListName, "gateway_path"),
 					resource.TestCheckResourceAttrSet(testAccResourcePolicyGWPrefixListName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testAccResourcePolicyGWPrefixListName, "revision"),
+					resource.TestCheckResourceAttr(testAccDataSourcePolicyGWPrefixListName, "display_name", name),
+					resource.TestCheckResourceAttr(testAccDataSourcePolicyGWPrefixListName, "description", "updated"),
 				),
 			},
 		},
@@ -201,7 +207,14 @@ resource "nsxt_policy_gateway_prefix_list" "test" {
     tag   = "tag1"
   }
 }
-`, name, action, ge, le, network)
+
+data "nsxt_policy_gateway_prefix_list" "test" {
+  display_name = "%s"
+
+  gateway_path = nsxt_policy_tier0_gateway.test.path
+  depends_on = [nsxt_policy_gateway_prefix_list.test]
+}
+`, name, action, ge, le, network, name)
 }
 
 func testAccNsxtPolicyGWPrefixListUpdateTemplate(name string, action string, ge string, le string, network string) string {
@@ -233,5 +246,11 @@ resource "nsxt_policy_gateway_prefix_list" "test" {
     tag   = "tag2"
   }
 }
-`, name, action, ge, le, network, action)
+
+data "nsxt_policy_gateway_prefix_list" "test" {
+  display_name = "%s"
+
+  depends_on = [nsxt_policy_gateway_prefix_list.test]
+}
+`, name, action, ge, le, network, action, name)
 }
