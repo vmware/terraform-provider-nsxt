@@ -223,6 +223,28 @@ func testAccTestFabric(t *testing.T) {
 	}
 }
 
+func getTestVCUsername() string {
+	return os.Getenv("NSXT_TEST_VC_USERNAME")
+}
+
+func getTestVCPassword() string {
+	return os.Getenv("NSXT_TEST_VC_PASSWORD")
+}
+
+func getTestVCIPAddress() string {
+	return os.Getenv("NSXT_TEST_VC_IPADDRESS")
+}
+
+func getTestVCThumbprint() string {
+	return os.Getenv("NSXT_TEST_VC_THUMBPRINT")
+}
+
+func testAccTestVCCredentials(t *testing.T) {
+	if getTestVCUsername() == "" || getTestVCPassword() == "" || getTestVCIPAddress() == "" || getTestVCThumbprint() == "" {
+		t.Skipf("This test requires a vCenter configuration environment")
+	}
+}
+
 func testAccOnlyMultitenancy(t *testing.T) {
 	testAccNSXVersion(t, "4.1.0")
 	if !testAccIsMultitenancy() {
