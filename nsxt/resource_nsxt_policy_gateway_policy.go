@@ -64,6 +64,10 @@ func getUpdatedRuleChildren(d *schema.ResourceData) ([]*data.StructValue, error)
 	}
 
 	oldRules, newRules := d.GetChange("rule")
+	err1 := validatePolicyRuleSequence(d)
+	if err1 != nil {
+		return policyChildren, err1
+	}
 	rules := getPolicyRulesFromSchema(d)
 	newRulesCount := len(newRules.([]interface{}))
 	oldRulesCount := len(oldRules.([]interface{}))
