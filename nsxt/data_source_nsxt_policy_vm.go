@@ -26,6 +26,7 @@ func dataSourceNsxtPolicyVM() *schema.Resource {
 			"external_id":  getDataSourceStringSchema("External ID of the Virtual Machine"),
 			"bios_id":      getDataSourceStringSchema("BIOS UUID of the Virtual Machine"),
 			"instance_id":  getDataSourceStringSchema("Instance UUID of the Virtual Machine"),
+			"context":      getContextSchema(),
 		},
 	}
 }
