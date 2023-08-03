@@ -24,6 +24,7 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client/middleware/retry"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/security"
+	"golang.org/x/exp/slices"
 
 	tf_api "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
@@ -765,12 +766,46 @@ func applyLicense(c *api.APIClient, licenseKey string) error {
 	return nil
 }
 
+func removeLicense(c *api.APIClient, licenseKey string) error {
+	if c == nil {
+		return fmt.Errorf("API client not configured")
+	}
+
+	license := licensing.License{LicenseKey: licenseKey}
+	resp, err := c.LicensingApi.DeleteLicenseKeyDelete(c.Context, license)
+	if err != nil {
+		return fmt.Errorf("error during license delete: %v", err)
+	}
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("unexpected status returned during license delete: %v", resp.StatusCode)
+	}
+
+	return nil
+}
+
 // license keys are applied on terraform plan and are not removed
 func configureLicenses(d *schema.ResourceData, clients *nsxtClients) error {
-	for _, licKey := range d.Get("license_keys").([]interface{}) {
-		err := applyLicense(clients.NsxtClient, licKey.(string))
-		if err != nil {
-			return fmt.Errorf("Error applying license key: %s. %s", licKey, err.Error())
+	o, n := d.GetChange("license_keys")
+	oldKeys := interfaceListToStringList(o.([]interface{}))
+	newKeys := interfaceListToStringList(n.([]interface{}))
+
+	// Check for new licenses
+	for _, licKey := range newKeys {
+		if !slices.Contains(oldKeys, licKey) {
+			err := applyLicense(clients.NsxtClient, licKey)
+			if err != nil {
+				return fmt.Errorf("error applying license key: %s. %s", licKey, err.Error())
+			}
+		}
+	}
+
+	// Remove old licenses
+	for _, licKey := range oldKeys {
+		if !slices.Contains(newKeys, licKey) {
+			err := removeLicense(clients.NsxtClient, licKey)
+			if err != nil {
+				return fmt.Errorf("error deleting license key: %s. %s", licKey, err.Error())
+			}
 		}
 	}
 	return nil
