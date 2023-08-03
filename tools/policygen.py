@@ -15,6 +15,7 @@
 import sys
 import re
 import os
+import json
 
 PACKAGE_NAME = "nsxt"
 
@@ -27,6 +28,7 @@ except Exception:
     exit(2)
 
 BASE_SDK_PATH = "%s/src/github.com/vmware/vsphere-automation-sdk-go/services/nsxt" % GO_PATH
+NSX_SPEC_PATH = "nsx_policy_vapi.json"
 STRUCTS_FILE = "%s/model/ModelPackageTypes.go" % BASE_SDK_PATH
 TEMPLATE_RESOURCE_FILE = "resource_nsxt_policy_template"
 TEMPLATE_RESOURCE_TEST_FILE = "resource_nsxt_policy_test_template"
@@ -194,6 +196,9 @@ def build_schema_attr(attr):
     else:
         result += "Required:    true,\n"
 
+    if attr['default']:
+        result += "Default:     %s,\n" % attr['default']
+
     result += "},\n"
 
     return result
@@ -267,6 +272,8 @@ def load_resource_metadata(resource, parent=""):
 
     stage = ""
     description = ""
+    # Load nsx json spec in order to complete data missing from SDK
+    spec = load_json_spec(resource)
     for line in lines:
         # load constants for this resource
         if line.startswith("const %s" % resource):
@@ -324,6 +331,17 @@ def load_resource_metadata(resource, parent=""):
                 if schema_name.endswith('s'):
                     schema_name = schema_name[:-1]
 
+            default = ""
+            deprecated = False
+            if schema_name in spec:
+                default = spec[schema_name].get('default')
+                if spec[schema_name].get('x-deprecated'):
+                    deprecated = True
+
+            if deprecated:
+                print("Skipping deprecated attribute %s" % attr)
+                continue
+
             metadata["attrs"].append({'name': attr,
                                       'parent': parent,
                                       'description': description,
@@ -331,6 +349,7 @@ def load_resource_metadata(resource, parent=""):
                                       'list': is_list,
                                       'ref': is_ref,
                                       'schema_name': schema_name,
+                                      'default': default,
                                       'required': not is_ref and not is_list})
             metadata["name_map"][attr] = schema_name
             description = ""
@@ -550,6 +569,27 @@ def replace_templates(line):
     result = result.replace("PolicyPolicy", "Policy")
     return result
 
+def load_json_spec(resource):
+
+    with open(NSX_SPEC_PATH, 'r') as f:
+        spec = json.load(f)
+
+        defs = spec["definitions"]
+        if resource not in defs:
+            return {}
+
+        if "allOf" not in defs[resource]:
+            if "properties" in defs[resource]:
+                # no inheritance
+                return defs[resource]["properties"]
+            return {}
+        if len(defs[resource]["allOf"]) == 2:
+            # object inheritance
+            if "properties" not in defs[resource]["allOf"][1]:
+                return {}
+            return defs[resource]["allOf"][1]["properties"]
+
+        return {}
 
 def main():
 
@@ -599,6 +639,8 @@ def main():
             for line in lines:
                 f.write(replace_templates(line))
 
+    print("Formatting..")
+    os.system("go fmt")
     print("Done.")
 
 main()
