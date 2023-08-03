@@ -113,5 +113,10 @@ An existing IP Allocation can be [imported][docs-import] into this resource, via
 ```
 terraform import nsxt_policy_ip_address_allocation.test POOL-ID/ID
 ```
-
 The above command imports IpAddressAllocation named `test` with the NSX IpAddressAllocation ID `ID` in IP Pool `POOL-ID`.
+
+```
+terraform import nsxt_policy_ip_address_allocation.test POLICY_PATH
+```
+The above command imports IpAddressAllocation named `test` with the NSX policy path `POLICY_PATH`.
+Note: for multitenancy projects only the later form is usable.
