@@ -11,19 +11,31 @@ import (
 )
 
 func TestAccDataSourceNsxtPolicyVM_basic(t *testing.T) {
+	testAccDataSourceNsxtPolicyVMBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyLocalManager(t)
+		testAccEnvDefined(t, "NSXT_TEST_VM_ID")
+		testAccEnvDefined(t, "NSXT_TEST_VM_NAME")
+	})
+}
+
+func TestAccDataSourceNsxtPolicyVM_multitenancy(t *testing.T) {
+	testAccDataSourceNsxtPolicyVMBasic(t, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+		testAccEnvDefined(t, "NSXT_TEST_VM_ID")
+		testAccEnvDefined(t, "NSXT_TEST_VM_NAME")
+	})
+}
+func testAccDataSourceNsxtPolicyVMBasic(t *testing.T, withContext bool, preCheck func()) {
 	testResourceName := "data.nsxt_policy_vm.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-			testAccOnlyLocalManager(t)
-			testAccEnvDefined(t, "NSXT_TEST_VM_ID")
-			testAccEnvDefined(t, "NSXT_TEST_VM_NAME")
-		},
+		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyVMReadByNameTemplate(),
+				Config: testAccNsxtPolicyVMReadByNameTemplate(withContext),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(testResourceName, "display_name"),
 					resource.TestCheckResourceAttrSet(testResourceName, "id"),
@@ -33,7 +45,7 @@ func TestAccDataSourceNsxtPolicyVM_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyVMReadByIDTemplate(),
+				Config: testAccNsxtPolicyVMReadByIDTemplate(withContext),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(testResourceName, "display_name"),
 					resource.TestCheckResourceAttrSet(testResourceName, "id"),
@@ -46,16 +58,26 @@ func TestAccDataSourceNsxtPolicyVM_basic(t *testing.T) {
 	})
 }
 
-func testAccNsxtPolicyVMReadByNameTemplate() string {
+func testAccNsxtPolicyVMReadByNameTemplate(withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 data "nsxt_policy_vm" "test" {
+%s
   display_name = "%s"
-}`, getTestVMName())
+}`, context, getTestVMName())
 }
 
-func testAccNsxtPolicyVMReadByIDTemplate() string {
+func testAccNsxtPolicyVMReadByIDTemplate(withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 data "nsxt_policy_vm" "test" {
+%s
   external_id = "%s"
-}`, getTestVMID())
+}`, context, getTestVMID())
 }

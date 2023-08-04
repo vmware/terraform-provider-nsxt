@@ -19,12 +19,29 @@ data "nsxt_policy_vm" "nsxt_vm1" {
 }
 ```
 
+## Example Usage - Multi-Tenancy
+
+```hcl
+data "nsxt_policy_project" "demoproj" {
+  display_name = "demoproj"
+}
+
+data "nsxt_policy_vm" "nsxt_vm1" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
+  display_name = "nsxt-virtualmachine1"
+}
+```
+
 ## Argument Reference
 
 * `display_name` - (Optional) The Display Name prefix of the Virtual Machine to retrieve.
 * `external_id` - (Optional) The external ID of the Virtual Machine.
 * `bios_id` - (Optional) The BIOS UUID of the Virtual Machine.
 * `instance_id` - (Optional) The instance UUID of the Virtual Machine.
+* `context` - (Optional) The context which the object belongs to
+    * `project_id` - The ID of the project which the object belongs to
 
 ## Attributes Reference
 
