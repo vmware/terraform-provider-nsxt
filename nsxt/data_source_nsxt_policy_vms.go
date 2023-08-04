@@ -58,6 +58,7 @@ func dataSourceNsxtPolicyVMs() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
+			"context": getContextSchema(),
 		},
 	}
 }
