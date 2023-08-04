@@ -90,7 +90,7 @@ The following arguments are supported:
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `connectivity_path` - (Required) Policy path to the connecting Tier-0 or Tier-1.
 * `context` - (Optional) The context which the object belongs to
-  * `project_id` - The ID of the project which the object belongs to
+  * `project_id` - (Required) The ID of the project which the object belongs to
 * `domain_name`- (Optional) DNS domain names.
 * `overlay_id` - (Optional) Overlay connectivity ID for this Segment.
 * `vlan_ids` - (Optional) List of VLAN IDs or ranges. Specifying vlan ids can be useful for overlay segments, f.e. for EVPN.

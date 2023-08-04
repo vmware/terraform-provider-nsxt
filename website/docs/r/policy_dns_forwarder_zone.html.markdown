@@ -49,7 +49,7 @@ The following arguments are supported:
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `context` - (Optional) The context which the object belongs to
-    * `project_id` - The ID of the project which the object belongs to
+    * `project_id` - (Required) The ID of the project which the object belongs to
 * `upstream_servers` - (Required) List of server IP addresses for this Forwarder Zone.
 * `dns_domain_names` - (Optional) For conditional (FQDN) zones, a list of maximum 5 domains. For Default Forwarder Zone, this attribute should not be specified.
 * `source_ip` - (Optional) The source IP address used by the DNS Forwarder zone.

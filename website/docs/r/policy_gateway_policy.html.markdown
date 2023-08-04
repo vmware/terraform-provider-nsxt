@@ -133,7 +133,7 @@ The following arguments are supported:
 * `tag` - (Optional) A list of scope + tag pairs to associate with this Gateway Policy.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the Gateway Policy resource.
 * `context` - (Optional) The context which the object belongs to
-  * `project_id` - The ID of the project which the object belongs to
+  * `project_id` - (Required) The ID of the project which the object belongs to
 * `comments` - (Optional) Comments for this Gateway Policy including lock/unlock comments.
 * `locked` - (Optional) A boolean value indicating if the policy is locked. If locked, no other users can update the resource.
 * `sequence_number` - (Optional) An int value used to resolve conflicts between security policies across domains

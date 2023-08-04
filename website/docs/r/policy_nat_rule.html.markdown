@@ -67,7 +67,7 @@ The following arguments are supported:
 * `tag` - (Optional) A list of scope + tag pairs to associate with this NAT Rule.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the policy resource.
 * `context` - (Optional) The context which the object belongs to
-    * `project_id` - The ID of the project which the object belongs to
+    * `project_id` - (Required) The ID of the project which the object belongs to
 * `gateway_path` - (Required) The NSX Policy path to the Tier0 or Tier1 Gateway for this NAT Rule.
 * `action` - (Required) The action for the NAT Rule. One of `SNAT`, `DNAT`, `REFLEXIVE`, `NO_SNAT`, `NO_DNAT`, `NAT64`.
 * `destination_networks` - (Optional) A list of destination network IP addresses or CIDR.

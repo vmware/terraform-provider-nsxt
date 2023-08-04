@@ -39,7 +39,7 @@ data "nsxt_policy_dhcp_server" "demodhcp" {
 * `id` - (Optional) The ID of DHCP Server to retrieve. If ID is specified, no additional argument should be configured.
 * `display_name` - (Optional) The Display Name prefix of DHCP server to retrieve.
 * `context` - (Optional) The context which the object belongs to
-    * `project_id` - The ID of the project which the object belongs to
+    * `project_id` - (Required) The ID of the project which the object belongs to
 
 ## Attributes Reference
 
