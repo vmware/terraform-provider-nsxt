@@ -111,6 +111,14 @@ func getDataSourceStringSchema(description string) *schema.Schema {
 	}
 }
 
+func getRequiredStringSchema(description string) *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeString,
+		Description: description,
+		Required:    true,
+	}
+}
+
 func getDomainNameSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:        schema.TypeString,
