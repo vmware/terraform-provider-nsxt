@@ -11,34 +11,46 @@ import (
 )
 
 func TestAccDataSourceNsxtPolicyVMs_basic(t *testing.T) {
+	testAccDataSourceNsxtPolicyVMsBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyLocalManager(t)
+		testAccEnvDefined(t, "NSXT_TEST_VM_NAME")
+	})
+}
+
+func TestAccDataSourceNsxtPolicyVMs_multitenancy(t *testing.T) {
+	testAccDataSourceNsxtPolicyVMsBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+		testAccEnvDefined(t, "NSXT_TEST_VM_NAME")
+	})
+}
+
+func testAccDataSourceNsxtPolicyVMsBasic(t *testing.T, withContext bool, preCheck func()) {
 	testResourceName := "data.nsxt_policy_vms.test"
 	checkDataSourceName := "data.nsxt_policy_vm.check"
 	checkResourceName := "nsxt_policy_group.check"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-			testAccOnlyLocalManager(t)
-			testAccEnvDefined(t, "NSXT_TEST_VM_NAME")
-		},
+		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyVMsTemplate("bios_id"),
+				Config: testAccNsxtPolicyVMsTemplate("bios_id", withContext),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(testResourceName, "id"),
 					resource.TestCheckResourceAttrPair(checkResourceName, "display_name", checkDataSourceName, "bios_id"),
 				),
 			},
 			{
-				Config: testAccNsxtPolicyVMsTemplate("external_id"),
+				Config: testAccNsxtPolicyVMsTemplate("external_id", withContext),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(testResourceName, "id"),
 					resource.TestCheckResourceAttrPair(checkResourceName, "display_name", checkDataSourceName, "external_id"),
 				),
 			},
 			{
-				Config: testAccNsxtPolicyVMsTemplate("instance_id"),
+				Config: testAccNsxtPolicyVMsTemplate("instance_id", withContext),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(testResourceName, "id"),
 					resource.TestCheckResourceAttrPair(checkResourceName, "display_name", checkDataSourceName, "instance_id"),
@@ -70,19 +82,26 @@ func TestAccDataSourceNsxtPolicyVMs_filter(t *testing.T) {
 	})
 }
 
-func testAccNsxtPolicyVMsTemplate(valueType string) string {
+func testAccNsxtPolicyVMsTemplate(valueType string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 data "nsxt_policy_vms" "test" {
+%s
   value_type = "%s"
 }
 
 data "nsxt_policy_vm" "check" {
+%s
   display_name = "%s"
 }
 
 resource "nsxt_policy_group" "check" {
+%s
   display_name = data.nsxt_policy_vms.test.items["%s"]
-}`, valueType, getTestVMName(), getTestVMName())
+}`, context, valueType, context, getTestVMName(), context, getTestVMName())
 }
 
 func testAccNsxtPolicyVMsTemplateFilter() string {
