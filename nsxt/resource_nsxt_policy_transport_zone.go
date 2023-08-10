@@ -38,7 +38,7 @@ func resourceNsxtPolicyTransportZone() *schema.Resource {
 				Type:        schema.TypeBool,
 				Description: "Indicates whether the transport zone is default",
 				Optional:    true,
-				Computed:    true,
+				Default:     false,
 			},
 			"transport_type": {
 				Type:         schema.TypeString,
@@ -60,7 +60,7 @@ func resourceNsxtPolicyTransportZone() *schema.Resource {
 				Description: "ID of the site this Transport Zone belongs to",
 				Optional:    true,
 				ForceNew:    true,
-				Computed:    true,
+				Default:     defaultSite,
 			},
 			"enforcement_point_id": {
 				Type:        schema.TypeString,
@@ -110,7 +110,7 @@ func policyTransportZonePatch(siteID, epID, tzID string, d *schema.ResourceData,
 
 	if len(uplinkTeamingNames) > 0 && transportType != model.PolicyTransportZone_TZ_TYPE_VLAN_BACKED {
 		// uplink_teaming_policy_names only valid for VLAN_BACKED TZ
-		return fmt.Errorf("Cannot use uplink_teaming_policy_names with transport_type %s", transportType)
+		return fmt.Errorf("cannot use uplink_teaming_policy_names with transport_type %s", transportType)
 	}
 
 	obj := model.PolicyTransportZone{
@@ -131,12 +131,13 @@ func policyTransportZonePatch(siteID, epID, tzID string, d *schema.ResourceData,
 func policyTransportZoneIDTuple(d *schema.ResourceData, m interface{}) (id, siteID, epID string, err error) {
 	id = d.Id()
 	if id == "" {
-		err = fmt.Errorf("Error obtaining PolicyTransportZone ID")
+		err = fmt.Errorf("error obtaining TransportZone ID")
 		return
 	}
 	siteID = d.Get("site_id").(string)
 	if siteID == "" {
-		siteID = defaultSite
+		err = fmt.Errorf("error obtaining Site ID")
+		return
 	}
 	epID = d.Get("enforcement_point_id").(string)
 	if epID == "" {
@@ -153,9 +154,6 @@ func resourceNsxtPolicyTransportZoneCreate(d *schema.ResourceData, m interface{}
 		id = newUUID()
 	}
 	siteID := d.Get("site_id").(string)
-	if siteID == "" {
-		siteID = defaultSite
-	}
 	epID := d.Get("enforcement_point_id").(string)
 	if epID == "" {
 		epID = getPolicyEnforcementPoint(m)
@@ -169,10 +167,10 @@ func resourceNsxtPolicyTransportZoneCreate(d *schema.ResourceData, m interface{}
 	}
 
 	// Create the resource using PATCH
-	log.Printf("[INFO] Creating PolicyTransportZone with ID %s under site %s enforcement point %s", id, siteID, epID)
+	log.Printf("[INFO] Creating TransportZone with ID %s under site %s enforcement point %s", id, siteID, epID)
 	err = policyTransportZonePatch(siteID, epID, id, d, m)
 	if err != nil {
-		return handleCreateError("PolicyTransportZone", id, err)
+		return handleCreateError("TransportZone", id, err)
 	}
 
 	d.SetId(id)
@@ -192,7 +190,7 @@ func resourceNsxtPolicyTransportZoneRead(d *schema.ResourceData, m interface{}) 
 
 	obj, err := tzClient.Get(siteID, epID, id)
 	if err != nil {
-		return handleReadError(d, "PolicyTransportZone", id, err)
+		return handleReadError(d, "TransportZone", id, err)
 	}
 
 	d.Set("site_id", siteID)
@@ -205,7 +203,7 @@ func resourceNsxtPolicyTransportZoneRead(d *schema.ResourceData, m interface{}) 
 	d.Set("revision", obj.Revision)
 	d.Set("is_default", obj.IsDefault)
 	d.Set("transport_type", obj.TzType)
-	d.Set("UplinkTeamingPolicyNames", obj.UplinkTeamingPolicyNames)
+	d.Set("uplink_teaming_policy_names", obj.UplinkTeamingPolicyNames)
 
 	return nil
 }
@@ -216,10 +214,10 @@ func resourceNsxtPolicyTransportZoneUpdate(d *schema.ResourceData, m interface{}
 		return err
 	}
 
-	log.Printf("[INFO] Updateing PolicyTransportZone with ID %s", id)
+	log.Printf("[INFO] Updateing TransportZone with ID %s", id)
 	err = policyTransportZonePatch(siteID, epID, id, d, m)
 	if err != nil {
-		return handleUpdateError("PolicyTransportZone", id, err)
+		return handleUpdateError("TransportZone", id, err)
 	}
 
 	return resourceNsxtPolicyTransportZoneRead(d, m)
@@ -234,9 +232,10 @@ func resourceNsxtPolicyTransportZoneDelete(d *schema.ResourceData, m interface{}
 		return err
 	}
 
+	log.Printf("[INFO] Deleting TransportZone with ID %s", id)
 	err = tzClient.Delete(siteID, epID, id)
 	if err != nil {
-		return handleDeleteError("PolicyTransportZone", id, err)
+		return handleDeleteError("TransportZone", id, err)
 	}
 
 	return nil
@@ -270,7 +269,7 @@ func resourceNsxtPolicyTransportZoneImporter(d *schema.ResourceData, m interface
 	} else if len(s) == 3 {
 		siteID, epID, id = s[0], s[1], s[2]
 	} else {
-		return nil, fmt.Errorf("Please provide either transport-zone-id or <site-id>/<enforcement-point-id>/<transport-zone-id> as an input")
+		return nil, fmt.Errorf("please provide either transport-zone-id or <site-id>/<enforcement-point-id>/<transport-zone-id> as an input")
 	}
 
 	connector := getPolicyConnector(m)
