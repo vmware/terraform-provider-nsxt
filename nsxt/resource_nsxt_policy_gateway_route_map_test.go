@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
+// NOTE - to save test suite running time, this test also covers the data source
 func TestAccResourceNsxtPolicyGatewayRouteMap_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_gateway_route_map.test"
 	displayName := getAccTestResourceName()
@@ -221,7 +222,14 @@ resource "nsxt_policy_gateway_route_map" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, displayName, displayName)
+}
+
+data "nsxt_policy_gateway_route_map" "test" {
+  gateway_path = nsxt_policy_tier0_gateway.test.path
+  display_name = "%s"
+
+  depends_on = [nsxt_policy_gateway_route_map.test]
+}`, displayName, displayName, displayName)
 }
 
 func testAccNsxtPolicyGatewayRouteMapUpdateTemplate(displayName string) string {
@@ -264,7 +272,13 @@ resource "nsxt_policy_gateway_route_map" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, displayName, displayName)
+}
+
+data "nsxt_policy_gateway_route_map" "test" {
+  display_name = "%s"
+
+  depends_on = [nsxt_policy_gateway_route_map.test]
+}`, displayName, displayName, displayName)
 }
 
 func testAccNsxtPolicyGatewayRouteMapMinimalistic(displayName string) string {

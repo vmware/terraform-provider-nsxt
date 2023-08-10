@@ -271,6 +271,8 @@ func Provider() *schema.Provider {
 			"nsxt_policy_l2_vpn_service":            dataSourceNsxtPolicyL2VpnService(),
 			"nsxt_policy_segment":                   dataSourceNsxtPolicySegment(),
 			"nsxt_policy_project":                   dataSourceNsxtPolicyProject(),
+			"nsxt_policy_gateway_prefix_list":       dataSourceNsxtPolicyGatewayPrefixList(),
+			"nsxt_policy_gateway_route_map":         dataSourceNsxtPolicyGatewayRouteMap(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
