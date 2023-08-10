@@ -19,6 +19,7 @@ var policyTransportZoneTransportTypes = [](string){
 	lm_model.PolicyTransportZone_TZ_TYPE_OVERLAY_STANDARD,
 	lm_model.PolicyTransportZone_TZ_TYPE_OVERLAY_ENS,
 	lm_model.PolicyTransportZone_TZ_TYPE_VLAN_BACKED,
+	lm_model.PolicyTransportZone_TZ_TYPE_OVERLAY_BACKED,
 	lm_model.PolicyTransportZone_TZ_TYPE_UNKNOWN,
 }
 
