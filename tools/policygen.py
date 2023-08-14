@@ -127,6 +127,19 @@ def get_value_for_const(attr, num=1):
             if num == 0:
                 return value
 
+            
+def convert_value_to_hcl(attr_type, attr_value):
+    if attr_type == "string":
+        return "\"%s\"" % attr_value
+
+    if attr_type == "bool":
+        if attr_value:
+            return "true"
+        return "false"
+
+    # int and other
+    return attr_value
+
 def build_schema_attr(attr):
 
     result = ""
@@ -197,7 +210,7 @@ def build_schema_attr(attr):
         result += "Required:    true,\n"
 
     if attr['default']:
-        result += "Default:     %s,\n" % attr['default']
+        result += "Default:     %s,\n" % convert_value_to_hcl(attr['type'], attr['default'])
 
     result += "},\n"
 
