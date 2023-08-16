@@ -4,7 +4,6 @@
 package nsxt
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -16,6 +15,8 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/sites/enforcement_points"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
+
+var defaultInfraSitePath = "/infra/sites/default"
 
 func resourceNsxtPolicyTransportZone() *schema.Resource {
 	return &schema.Resource{
@@ -55,12 +56,13 @@ func resourceNsxtPolicyTransportZone() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
-			"site_id": {
-				Type:        schema.TypeString,
-				Description: "ID of the site this Transport Zone belongs to",
-				Optional:    true,
-				ForceNew:    true,
-				Default:     defaultSite,
+			"site_path": {
+				Type:         schema.TypeString,
+				Description:  "Path to the site this Transport Zone belongs to",
+				Optional:     true,
+				ForceNew:     true,
+				Default:      defaultInfraSitePath,
+				ValidateFunc: validatePolicyPath(),
 			},
 			"enforcement_point_id": {
 				Type:        schema.TypeString,
@@ -96,6 +98,18 @@ func resourceNsxtPolicyTransportZoneExists(siteID, epID, tzID string, connector 
 	}
 
 	return false, logAPIError("Error retrieving resource", err)
+}
+
+func getSitePathFromChildResourcePath(childPath string) (string, error) {
+	startIndex := strings.Index(childPath, "enforcement-points")
+	if startIndex <= 0 {
+		return "", fmt.Errorf("failed to find site path from path %s", childPath)
+	}
+	sitePath := childPath[:startIndex-1]
+	if !isPolicyPath(sitePath) {
+		return "", fmt.Errorf("site path %s is invalid", sitePath)
+	}
+	return sitePath, nil
 }
 
 func policyTransportZonePatch(siteID, epID, tzID string, d *schema.ResourceData, m interface{}) error {
@@ -134,9 +148,10 @@ func policyTransportZoneIDTuple(d *schema.ResourceData, m interface{}) (id, site
 		err = fmt.Errorf("error obtaining TransportZone ID")
 		return
 	}
-	siteID = d.Get("site_id").(string)
+	sitePath := d.Get("site_path").(string)
+	siteID = getResourceIDFromResourcePath(sitePath, "sites")
 	if siteID == "" {
-		err = fmt.Errorf("error obtaining Site ID")
+		err = fmt.Errorf("error obtaining Site ID from site path %s", sitePath)
 		return
 	}
 	epID = d.Get("enforcement_point_id").(string)
@@ -153,7 +168,11 @@ func resourceNsxtPolicyTransportZoneCreate(d *schema.ResourceData, m interface{}
 	if id == "" {
 		id = newUUID()
 	}
-	siteID := d.Get("site_id").(string)
+	sitePath := d.Get("site_path").(string)
+	siteID := getResourceIDFromResourcePath(sitePath, "sites")
+	if siteID == "" {
+		return fmt.Errorf("error obtaining Site ID from site path %s", sitePath)
+	}
 	epID := d.Get("enforcement_point_id").(string)
 	if epID == "" {
 		epID = getPolicyEnforcementPoint(m)
@@ -192,8 +211,12 @@ func resourceNsxtPolicyTransportZoneRead(d *schema.ResourceData, m interface{}) 
 	if err != nil {
 		return handleReadError(d, "TransportZone", id, err)
 	}
+	sitePath, err := getSitePathFromChildResourcePath(*obj.ParentPath)
+	if err != nil {
+		return handleReadError(d, "TransportZone", id, err)
+	}
 
-	d.Set("site_id", siteID)
+	d.Set("site_path", sitePath)
 	d.Set("enforcement_point_id", epID)
 	d.Set("display_name", obj.DisplayName)
 	d.Set("description", obj.Description)
@@ -243,46 +266,20 @@ func resourceNsxtPolicyTransportZoneDelete(d *schema.ResourceData, m interface{}
 
 func resourceNsxtPolicyTransportZoneImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	importID := d.Id()
-	s := strings.Split(importID, "/")
 	rd, err := nsxtPolicyPathResourceImporterHelper(d, m)
-	if err == nil {
-		epID, err := getParameterFromPolicyPath("/enforcement-points/", "/transport-zones/", importID)
-		if err != nil {
-			return nil, err
-		}
-		d.Set("enforcement_point_id", epID)
-		siteID, err := getParameterFromPolicyPath("/sites/", "/enforcement-points/", importID)
-		if err != nil {
-			return nil, err
-		}
-		d.Set("site_id", siteID)
-		return rd, nil
-	} else if !errors.Is(err, ErrNotAPolicyPath) {
+	if err != nil {
 		return rd, err
 	}
 
-	var siteID, epID, id string
-	if len(s) == 0 {
-		siteID = defaultSite
-		epID = getPolicyEnforcementPoint(m)
-		id = s[0]
-	} else if len(s) == 3 {
-		siteID, epID, id = s[0], s[1], s[2]
-	} else {
-		return nil, fmt.Errorf("please provide either transport-zone-id or <site-id>/<enforcement-point-id>/<transport-zone-id> as an input")
-	}
-
-	connector := getPolicyConnector(m)
-	exists, err := resourceNsxtPolicyTransportZoneExists(siteID, epID, id, connector)
+	epID, err := getParameterFromPolicyPath("/enforcement-points/", "/transport-zones/", importID)
 	if err != nil {
 		return nil, err
 	}
-	if !exists {
-		return nil, fmt.Errorf("PolicyTransportZone %s/%s/%s not found", siteID, epID, id)
-	}
-	d.Set("site_id", siteID)
 	d.Set("enforcement_point_id", epID)
-	d.SetId(id)
-
-	return []*schema.ResourceData{d}, nil
+	sitePath, err := getSitePathFromChildResourcePath(importID)
+	if err != nil {
+		return rd, err
+	}
+	d.Set("site_path", sitePath)
+	return rd, nil
 }
