@@ -42,8 +42,8 @@ data "nsxt_policy_transport_zone" "overlay_transport_zone" {
 
 * `id` - (Optional) The ID of Transport Zone to retrieve.
 * `display_name` - (Optional) The Display Name prefix of the Transport Zone to retrieve.
-* `transport_type` - (Optional) Transport type of requested Transport Zone, one of `OVERLAY_STANDARD`, `OVERLAY_ENS`, `VLAN_BACKED` and `UNKNOWN`.
-* `is_default` - (Optional) May be set together with `transport_type` in order to retrieve default Transport Zone for for this transport type.
+* `transport_type` - (Optional) Transport type of requested Transport Zone, one of `OVERLAY_STANDARD`, `OVERLAY_ENS`, `OVERLAY_BACKED`, `VLAN_BACKED` and `UNKNOWN`.
+* `is_default` - (Optional) May be set together with `transport_type` in order to retrieve default Transport Zone for this transport type.
 * `site_path` - (Optional) The path of the site which the Transport Zone belongs to, this configuration is required for global manager only. `path` field of the existing `nsxt_policy_site` can be used here.
 
 ## Attributes Reference
