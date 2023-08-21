@@ -8,7 +8,7 @@ default: build
 
 tools:
 	GO111MODULE=on go install -mod=mod github.com/client9/misspell/cmd/misspell
-	GO111MODULE=on go install -mod=mod github.com/golangci/golangci-lint/cmd/golangci-lint
+	GO111MODULE=on go install -mod=mod github.com/golangci/golangci-lint/cmd/golangci-lint@v1.45
 	GO111MODULE=on go install -mod=mod github.com/katbyte/terrafmt
 
 build: fmtcheck
