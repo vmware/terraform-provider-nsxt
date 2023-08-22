@@ -275,6 +275,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_project":                   dataSourceNsxtPolicyProject(),
 			"nsxt_policy_gateway_prefix_list":       dataSourceNsxtPolicyGatewayPrefixList(),
 			"nsxt_policy_gateway_route_map":         dataSourceNsxtPolicyGatewayRouteMap(),
+			"nsxt_uplink_host_switch_profile":       dataSourceNsxtUplinkHostSwitchProfile(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -403,6 +404,7 @@ func Provider() *schema.Provider {
 			"nsxt_edge_cluster":                            resourceNsxtEdgeCluster(),
 			"nsxt_compute_manager":                         resourceNsxtComputeManager(),
 			"nsxt_manager_cluster":                         resourceNsxtManagerCluster(),
+			"nsxt_uplink_host_switch_profile":              resourceNsxtUplinkHostSwitchProfile(),
 		},
 
 		ConfigureFunc: providerConfigure,
