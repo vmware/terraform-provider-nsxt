@@ -7,7 +7,7 @@ description: A resource to configure Policy Transport Zone.
 
 # nsxt_policy_transport_zone
 
-This resource provides a method for the management of Policy based Transport Zones (TZ). A Transport Zone defines the scope to which a network can extend in NSX. For example an overlay based Transport Zone is associated with both hypervisors and logical switches and defines which hypervisors will be able to serve the defined logical switch. Virtual machines on the hypervisor associated with a Transport Zone can be attached to logical switches in that same Transport Zone.
+This resource provides a method for the management of Policy based Transport Zones (TZ). A Transport Zone defines the scope to which a network can extend in NSX. For example an overlay based Transport Zone is associated with both hypervisors and segments and defines which hypervisors will be able to serve the defined segment. Virtual machines on the hypervisor associated with a Transport Zone can be attached to segments in that same Transport Zone.
 
 This data source is applicable to NSX Policy Manager.
 
@@ -28,7 +28,7 @@ resource "nsxt_policy_transport_zone" "vlan_transport_zone" {
   is_default                  = true
   uplink_teaming_policy_names = ["teaming-1"]
   site_path                   = "/infra/sites/default"
-  enforcement_point_id        = "default"
+  enforcement_point           = "default"
 
   tag {
     scope = "app"
@@ -47,7 +47,7 @@ resource "nsxt_policy_transport_zone" "vlan_transport_zone" {
 * `is_default` - (Optional) Set this Transport Zone as the default zone of given `transport_type`. Default value is `false`. When setting a Transport Zone with `is_default`: `true`, no existing Transport Zone of same `transport_type` should be set as default.
 * `uplink_teaming_policy_names` - (Optional) The names of switching uplink teaming policies that all transport nodes in this transport zone support. Uplinkin teaming policies are only valid for `VLAN_BACKED` transport zones. 
 * `site_path` - (Optional) The path of the site which the Transport Zone belongs to. `path` field of the existing `nsxt_policy_site` can be used here.
-* `enforcement_point_id` - (Optional) The ID of enforcement point under given `site_path` to manage the Transport Zone.
+* `enforcement_point` - (Optional) The ID of enforcement point under given `site_path` to manage the Transport Zone.
 
 ## Attributes Reference
 

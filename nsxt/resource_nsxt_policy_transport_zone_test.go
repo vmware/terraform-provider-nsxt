@@ -51,7 +51,7 @@ func TestAccResourceNsxtPolicyTransportZone_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttrSet(testResourceName, "is_default"),
-					resource.TestCheckResourceAttrSet(testResourceName, "enforcement_point_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "enforcement_point"),
 					resource.TestCheckResourceAttrSet(testResourceName, "site_path"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 				),
@@ -68,7 +68,7 @@ func TestAccResourceNsxtPolicyTransportZone_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttrSet(testResourceName, "is_default"),
-					resource.TestCheckResourceAttrSet(testResourceName, "enforcement_point_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "enforcement_point"),
 					resource.TestCheckResourceAttrSet(testResourceName, "site_path"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
 				),
@@ -133,7 +133,7 @@ func testAccNsxtPolicyTransportZoneExists(displayName string, resourceName strin
 		if tzID == "" {
 			return fmt.Errorf("PolicyTransportZone resource ID not set in resources")
 		}
-		epID := rs.Primary.Attributes["enforcement_point_id"]
+		epID := rs.Primary.Attributes["enforcement_point"]
 		sitePath := rs.Primary.Attributes["site_path"]
 		siteID := getPolicyIDFromPath(sitePath)
 		exists, err := resourceNsxtPolicyTransportZoneExists(siteID, epID, tzID, connector)
@@ -157,7 +157,7 @@ func testAccNsxtPolicyTransportZoneCheckDestroy(state *terraform.State, displayN
 		}
 
 		tzID := rs.Primary.Attributes["id"]
-		epID := rs.Primary.Attributes["enforcement_point_id"]
+		epID := rs.Primary.Attributes["enforcement_point"]
 		sitePath := rs.Primary.Attributes["site_path"]
 		siteID := getPolicyIDFromPath(sitePath)
 		exists, err := resourceNsxtPolicyTransportZoneExists(siteID, epID, tzID, connector)

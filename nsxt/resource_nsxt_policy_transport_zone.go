@@ -64,7 +64,7 @@ func resourceNsxtPolicyTransportZone() *schema.Resource {
 				Default:      defaultInfraSitePath,
 				ValidateFunc: validatePolicyPath(),
 			},
-			"enforcement_point_id": {
+			"enforcement_point": {
 				Type:        schema.TypeString,
 				Description: "ID of the enforcement point this Transport Zone belongs to",
 				Optional:    true,
@@ -154,7 +154,7 @@ func policyTransportZoneIDTuple(d *schema.ResourceData, m interface{}) (id, site
 		err = fmt.Errorf("error obtaining Site ID from site path %s", sitePath)
 		return
 	}
-	epID = d.Get("enforcement_point_id").(string)
+	epID = d.Get("enforcement_point").(string)
 	if epID == "" {
 		epID = getPolicyEnforcementPoint(m)
 	}
@@ -173,7 +173,7 @@ func resourceNsxtPolicyTransportZoneCreate(d *schema.ResourceData, m interface{}
 	if siteID == "" {
 		return fmt.Errorf("error obtaining Site ID from site path %s", sitePath)
 	}
-	epID := d.Get("enforcement_point_id").(string)
+	epID := d.Get("enforcement_point").(string)
 	if epID == "" {
 		epID = getPolicyEnforcementPoint(m)
 	}
@@ -217,7 +217,7 @@ func resourceNsxtPolicyTransportZoneRead(d *schema.ResourceData, m interface{}) 
 	}
 
 	d.Set("site_path", sitePath)
-	d.Set("enforcement_point_id", epID)
+	d.Set("enforcement_point", epID)
 	d.Set("display_name", obj.DisplayName)
 	d.Set("description", obj.Description)
 	setPolicyTagsInSchema(d, obj.Tags)
@@ -275,7 +275,7 @@ func resourceNsxtPolicyTransportZoneImporter(d *schema.ResourceData, m interface
 	if err != nil {
 		return nil, err
 	}
-	d.Set("enforcement_point_id", epID)
+	d.Set("enforcement_point", epID)
 	sitePath, err := getSitePathFromChildResourcePath(importID)
 	if err != nil {
 		return rd, err
