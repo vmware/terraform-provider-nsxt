@@ -212,6 +212,12 @@ func Provider() *schema.Provider {
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("NSXT_CA", nil),
 			},
+			"on_demand_connection": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Avoid initializing NSX connection on startup",
+				DefaultFunc: schema.EnvDefaultFunc("NSXT_ON_DEMAND_CONNECTION", false),
+			},
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
@@ -412,12 +418,18 @@ func Provider() *schema.Provider {
 }
 
 func configureNsxtClient(d *schema.ResourceData, clients *nsxtClients) error {
+	onDemandConn := d.Get("on_demand_connection").(bool)
 	clientAuthCertFile := d.Get("client_auth_cert_file").(string)
 	clientAuthKeyFile := d.Get("client_auth_key_file").(string)
 	clientAuthCert := d.Get("client_auth_cert").(string)
 	clientAuthKey := d.Get("client_auth_key").(string)
 	vmcToken := d.Get("vmc_token").(string)
 	vmcAuthMode := d.Get("vmc_auth_mode").(string)
+
+	if onDemandConn {
+		// On demand connection option is not supported with old SDK
+		return nil
+	}
 
 	if (len(vmcToken) > 0) || (vmcAuthMode == "Basic") {
 		// VMC can operate without token with basic auth, however MP API is not
@@ -610,6 +622,7 @@ func getConnectorTLSConfig(d *schema.ResourceData) (*tls.Config, error) {
 }
 
 func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) error {
+	onDemandConn := d.Get("on_demand_connection").(bool)
 	host := d.Get("host").(string)
 	username := d.Get("username").(string)
 	password := d.Get("password").(string)
@@ -621,6 +634,19 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 	policyEnforcementPoint := d.Get("enforcement_point").(string)
 	policyGlobalManager := d.Get("global_manager").(bool)
 	vmcAuthMode := d.Get("vmc_auth_mode").(string)
+
+	isVMC := false
+	if (len(vmcAccessToken) > 0) || (vmcAuthMode == "Basic") {
+		isVMC = true
+		if onDemandConn {
+			return fmt.Errorf("on demand connection option is not supported with VMC")
+		}
+	}
+
+	if d.HasChange("license_keys") && onDemandConn {
+		// TODO - remove this constraint when license is rewritten with new SDK
+		return fmt.Errorf("on demand connection option is not supported with license feature")
+	}
 
 	if host == "" {
 		return fmt.Errorf("host must be provided")
@@ -658,7 +684,12 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 	clients.PolicyEnforcementPoint = policyEnforcementPoint
 	clients.PolicyGlobalManager = policyGlobalManager
 
-	if (len(vmcAccessToken) > 0) || (vmcAuthMode == "Basic") {
+	if onDemandConn {
+		// version init will happen on demand
+		return nil
+	}
+
+	if isVMC {
 		// Special treatment for VMC since MP API is not available there
 		initNSXVersionVMC(*clients)
 		return nil
@@ -950,6 +981,11 @@ func getPolicyConnectorWithHeaders(clients interface{}, customHeaders *map[strin
 		connectorOptions = append(connectorOptions, client.WithRequestProcessors(requestProcessors...))
 	}
 	connector := client.NewConnector(c.Host, connectorOptions...)
+
+	// Init NSX version if not done yet
+	if nsxVersion == "" {
+		initNSXVersion(connector)
+	}
 	return connector
 }
 

@@ -236,7 +236,12 @@ The following arguments are used to configure the VMware NSX-T Provider:
 * `global_manager` - (Optional) True if this is a global manager endpoint.
   False by default.
 * `license_keys` - (Optional) List of NSX-T license keys. License keys are applied
-  during plan and will not be deleted if they are removed from the configuration.
+  during plan or apply commands.
+* `on_demand_connection` - (Optional) Avoid verification on NSX connectivity on provider
+  startup. Instead, initialize the connection on demand. This setting can not be turned on
+  for VMC environments, and is not supported with deprecated NSX manager resources and
+  data sources. Note - this setting is useful when NSX manager is not yet available at 
+  time of provider evaluation, and not recommended to be turned on otherwise.
 
 ## NSX Logical Networking
 
