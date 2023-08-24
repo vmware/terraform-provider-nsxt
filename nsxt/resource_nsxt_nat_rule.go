@@ -5,23 +5,21 @@ package nsxt
 
 import (
 	"fmt"
-	"log"
-	"net/http"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/vmware/go-vmware-nsxt/manager"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/logical_routers/nat"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 )
 
 var natRuleActionValues = []string{
-	model.PolicyNatRule_ACTION_SNAT,
-	model.PolicyNatRule_ACTION_DNAT,
-	model.PolicyNatRule_ACTION_REFLEXIVE,
-	model.PolicyNatRule_ACTION_NO_SNAT,
-	model.PolicyNatRule_ACTION_NO_DNAT,
-	model.PolicyNatRule_ACTION_NAT64,
+	model.NatRule_ACTION_SNAT,
+	model.NatRule_ACTION_DNAT,
+	model.NatRule_ACTION_REFLEXIVE,
+	model.NatRule_ACTION_NO_SNAT,
+	model.NatRule_ACTION_NO_DNAT,
+	model.NatRule_ACTION_NAT64,
 	"NO_NAT", // NSX < 3.0.0 only
 }
 
@@ -111,10 +109,8 @@ func resourceNsxtNatRule() *schema.Resource {
 }
 
 func resourceNsxtNatRuleCreate(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(nsxtClients).NsxtClient
-	if nsxClient == nil {
-		return resourceNotSupportedError()
-	}
+	connector := getPolicyConnector(m)
+	client := nat.NewRulesClient(connector)
 
 	logicalRouterID := d.Get("logical_router_id").(string)
 	if logicalRouterID == "" {
@@ -123,7 +119,7 @@ func resourceNsxtNatRuleCreate(d *schema.ResourceData, m interface{}) error {
 
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
-	tags := getTagsFromSchema(d)
+	tags := getMPTagsFromSchema(d)
 	action := d.Get("action").(string)
 	if action == "NO_NAT" && nsxVersionHigherOrEqual("3.0.0") {
 		return fmt.Errorf("NO_NAT action is not supported in NSX versions 3.0.0 and greater. Use NO_SNAT and NO_DNAT instead")
@@ -134,45 +130,43 @@ func resourceNsxtNatRuleCreate(d *schema.ResourceData, m interface{}) error {
 	//match_service := d.Get("match_service").(*NsServiceElement)
 	matchSourceNetwork := d.Get("match_source_network").(string)
 	natPass := d.Get("nat_pass").(bool)
+	firewallMatch := model.NatRule_FIREWALL_MATCH_MATCH_INTERNAL_ADDRESS
+	if natPass {
+		firewallMatch = model.NatRule_FIREWALL_MATCH_BYPASS
+	}
 	rulePriority := int64(d.Get("rule_priority").(int))
 	translatedNetwork := d.Get("translated_network").(string)
 	translatedPorts := d.Get("translated_ports").(string)
-	natRule := manager.NatRule{
-		Description:             description,
-		DisplayName:             displayName,
+	natRule := model.NatRule{
+		Description:             &description,
+		DisplayName:             &displayName,
 		Tags:                    tags,
-		Action:                  action,
-		Enabled:                 enabled,
-		Logging:                 logging,
-		LogicalRouterId:         logicalRouterID,
-		MatchDestinationNetwork: matchDestinationNetwork,
+		Action:                  &action,
+		Enabled:                 &enabled,
+		Logging:                 &logging,
+		LogicalRouterId:         &logicalRouterID,
+		MatchDestinationNetwork: &matchDestinationNetwork,
 		//MatchService: match_service,
-		MatchSourceNetwork: matchSourceNetwork,
-		NatPass:            natPass,
-		RulePriority:       rulePriority,
-		TranslatedNetwork:  translatedNetwork,
-		TranslatedPorts:    translatedPorts,
+		MatchSourceNetwork: &matchSourceNetwork,
+		RulePriority:       &rulePriority,
+		TranslatedNetwork:  &translatedNetwork,
+		TranslatedPorts:    &translatedPorts,
+		FirewallMatch:      &firewallMatch,
 	}
 
-	natRule, resp, err := nsxClient.LogicalRoutingAndServicesApi.AddNatRule(nsxClient.Context, logicalRouterID, natRule)
+	natRule, err := client.Create(logicalRouterID, natRule)
 
 	if err != nil {
 		return fmt.Errorf("Error during NatRule create: %v", err)
 	}
 
-	if resp.StatusCode != http.StatusCreated {
-		return fmt.Errorf("Unexpected status returned during NatRule create: %v", resp.StatusCode)
-	}
-	d.SetId(natRule.Id)
-
+	d.SetId(*natRule.Id)
 	return resourceNsxtNatRuleRead(d, m)
 }
 
 func resourceNsxtNatRuleRead(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(nsxtClients).NsxtClient
-	if nsxClient == nil {
-		return resourceNotSupportedError()
-	}
+	connector := getPolicyConnector(m)
+	client := nat.NewRulesClient(connector)
 
 	id := d.Id()
 	if id == "" {
@@ -184,22 +178,25 @@ func resourceNsxtNatRuleRead(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("Error obtaining logical object id")
 	}
 
-	natRule, resp, err := nsxClient.LogicalRoutingAndServicesApi.GetNatRule(nsxClient.Context, logicalRouterID, id)
-	if resp != nil && (resp.StatusCode == http.StatusBadRequest || resp.StatusCode == http.StatusNotFound) {
-		// Due to platform bug, 400 response is returned when NAT rule is not found
-		// In this case terraform should not error out
-		log.Printf("[DEBUG] NatRule %s not found", id)
-		d.SetId("")
-		return nil
-	}
+	natRule, err := client.Get(logicalRouterID, id)
+
 	if err != nil {
 		return fmt.Errorf("Error during NatRule read: %v", err)
+	}
+
+	var natPass bool
+	if *natRule.FirewallMatch == model.NatRule_FIREWALL_MATCH_MATCH_INTERNAL_ADDRESS {
+		natPass = false
+	} else if *natRule.FirewallMatch == model.NatRule_FIREWALL_MATCH_BYPASS {
+		natPass = true
+	} else {
+		return fmt.Errorf("could not determine nat_pass value from firewall_match attribute value %s", *natRule.FirewallMatch)
 	}
 
 	d.Set("revision", natRule.Revision)
 	d.Set("description", natRule.Description)
 	d.Set("display_name", natRule.DisplayName)
-	setTagsInSchema(d, natRule.Tags)
+	setMPTagsInSchema(d, natRule.Tags)
 	d.Set("action", natRule.Action)
 	d.Set("enabled", natRule.Enabled)
 	d.Set("logging", natRule.Logging)
@@ -207,19 +204,16 @@ func resourceNsxtNatRuleRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("match_destination_network", natRule.MatchDestinationNetwork)
 	//d.Set("match_service", natRule.MatchService)
 	d.Set("match_source_network", natRule.MatchSourceNetwork)
-	d.Set("nat_pass", natRule.NatPass)
+	d.Set("nat_pass", natPass)
 	d.Set("rule_priority", natRule.RulePriority)
 	d.Set("translated_network", natRule.TranslatedNetwork)
 	d.Set("translated_ports", natRule.TranslatedPorts)
-
 	return nil
 }
 
 func resourceNsxtNatRuleUpdate(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(nsxtClients).NsxtClient
-	if nsxClient == nil {
-		return resourceNotSupportedError()
-	}
+	connector := getPolicyConnector(m)
+	client := nat.NewRulesClient(connector)
 
 	id := d.Id()
 	if id == "" {
@@ -234,7 +228,7 @@ func resourceNsxtNatRuleUpdate(d *schema.ResourceData, m interface{}) error {
 	revision := int64(d.Get("revision").(int))
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
-	tags := getTagsFromSchema(d)
+	tags := getMPTagsFromSchema(d)
 	action := d.Get("action").(string)
 	if action == "NO_NAT" && nsxVersionHigherOrEqual("3.0.0") {
 		return fmt.Errorf("NO_NAT action is not supported in NSX versions 3.0.0 and greater. Use NO_SNAT and NO_DNAT instead")
@@ -245,30 +239,34 @@ func resourceNsxtNatRuleUpdate(d *schema.ResourceData, m interface{}) error {
 	//match_service := d.Get("match_service").(*NsServiceElement)
 	matchSourceNetwork := d.Get("match_source_network").(string)
 	natPass := d.Get("nat_pass").(bool)
+	firewallMatch := model.NatRule_FIREWALL_MATCH_MATCH_INTERNAL_ADDRESS
+	if natPass {
+		firewallMatch = model.NatRule_FIREWALL_MATCH_BYPASS
+	}
 	rulePriority := int64(d.Get("rule_priority").(int))
 	translatedNetwork := d.Get("translated_network").(string)
 	translatedPorts := d.Get("translated_ports").(string)
-	natRule := manager.NatRule{
-		Revision:                revision,
-		Description:             description,
-		DisplayName:             displayName,
+	natRule := model.NatRule{
+		Revision:                &revision,
+		Description:             &description,
+		DisplayName:             &displayName,
 		Tags:                    tags,
-		Action:                  action,
-		Enabled:                 enabled,
-		Logging:                 logging,
-		LogicalRouterId:         logicalRouterID,
-		MatchDestinationNetwork: matchDestinationNetwork,
+		Action:                  &action,
+		Enabled:                 &enabled,
+		Logging:                 &logging,
+		LogicalRouterId:         &logicalRouterID,
+		MatchDestinationNetwork: &matchDestinationNetwork,
 		//MatchService: match_service,
-		MatchSourceNetwork: matchSourceNetwork,
-		NatPass:            natPass,
-		RulePriority:       rulePriority,
-		TranslatedNetwork:  translatedNetwork,
-		TranslatedPorts:    translatedPorts,
+		MatchSourceNetwork: &matchSourceNetwork,
+		RulePriority:       &rulePriority,
+		TranslatedNetwork:  &translatedNetwork,
+		TranslatedPorts:    &translatedPorts,
+		FirewallMatch:      &firewallMatch,
 	}
 
-	_, resp, err := nsxClient.LogicalRoutingAndServicesApi.UpdateNatRule(nsxClient.Context, logicalRouterID, id, natRule)
+	_, err := client.Update(logicalRouterID, id, natRule)
 
-	if err != nil || resp.StatusCode == http.StatusNotFound {
+	if err != nil {
 		return fmt.Errorf("Error during NatRule update: %v", err)
 	}
 
@@ -276,10 +274,8 @@ func resourceNsxtNatRuleUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceNsxtNatRuleDelete(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(nsxtClients).NsxtClient
-	if nsxClient == nil {
-		return resourceNotSupportedError()
-	}
+	connector := getPolicyConnector(m)
+	client := nat.NewRulesClient(connector)
 
 	id := d.Id()
 	if id == "" {
@@ -290,15 +286,11 @@ func resourceNsxtNatRuleDelete(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("Error obtaining logical object id")
 	}
 
-	resp, err := nsxClient.LogicalRoutingAndServicesApi.DeleteNatRule(nsxClient.Context, logicalRouterID, id)
+	err := client.Delete(logicalRouterID, id)
 	if err != nil {
 		return fmt.Errorf("Error during NatRule delete: %v", err)
 	}
 
-	if resp.StatusCode == http.StatusNotFound {
-		log.Printf("[DEBUG] NatRule %s not found", id)
-		d.SetId("")
-	}
 	return nil
 }
 
