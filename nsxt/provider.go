@@ -294,6 +294,7 @@ func Provider() *schema.Provider {
 			"nsxt_uplink_host_switch_profile":       dataSourceNsxtUplinkHostSwitchProfile(),
 			"nsxt_compute_manager":                  dataSourceNsxtComputeManager(),
 			"nsxt_transport_node_realization":       dataSourceNsxtTransportNodeRealization(),
+			"nsxt_failure_domain":                   dataSourceNsxtFailureDomain(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -425,6 +426,7 @@ func Provider() *schema.Provider {
 			"nsxt_manager_cluster":                         resourceNsxtManagerCluster(),
 			"nsxt_uplink_host_switch_profile":              resourceNsxtUplinkHostSwitchProfile(),
 			"nsxt_transport_node":                          resourceNsxtTransportNode(),
+			"nsxt_failure_domain":                          resourceNsxtFailureDomain(),
 		},
 
 		ConfigureFunc: providerConfigure,
