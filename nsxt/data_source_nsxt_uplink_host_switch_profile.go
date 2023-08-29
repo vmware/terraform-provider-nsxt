@@ -16,7 +16,6 @@ func dataSourceNsxtUplinkHostSwitchProfile() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"id":           getDataSourceIDSchema(),
-			"gateway_path": getPolicyPathSchema(false, false, "Gateway path"),
 			"path":         getPathSchema(),
 			"display_name": getDisplayNameSchema(),
 			"description":  getDescriptionSchema(),
@@ -27,13 +26,7 @@ func dataSourceNsxtUplinkHostSwitchProfile() *schema.Resource {
 func dataSourceNsxtUplinkHostSwitchProfileRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
-	gwPath := d.Get("gateway_path").(string)
-	query := make(map[string]string)
-	if len(gwPath) > 0 {
-		query["parent_path"] = fmt.Sprintf("%s*", gwPath)
-	}
-
-	_, err := policyDataSourceResourceReadWithValidation(d, connector, getSessionContext(d, m), infra.HostSwitchProfiles_LIST_HOSTSWITCH_PROFILE_TYPE_POLICYUPLINKHOSTSWITCHPROFILE, query, false)
+	_, err := policyDataSourceResourceReadWithValidation(d, connector, getSessionContext(d, m), infra.HostSwitchProfiles_LIST_HOSTSWITCH_PROFILE_TYPE_POLICYUPLINKHOSTSWITCHPROFILE, nil, false)
 	if err == nil {
 		return nil
 	}
