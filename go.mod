@@ -12,7 +12,7 @@ require (
 	github.com/vmware/vsphere-automation-sdk-go/services/nsxt v0.11.0
 	github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm v0.8.0
 	github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp v0.5.0
-	golang.org/x/exp v0.0.0-20230713183714-613f0c0eb8a1
+	golang.org/x/exp v0.0.0-20230801115018-d63ba01acd4b
 )
 
 require (
