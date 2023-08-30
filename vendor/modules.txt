@@ -314,6 +314,7 @@ github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/search
 ## explicit; go 1.17
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/fabric
+github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/logical_routers/nat
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model
 github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/node
 # github.com/zclconf/go-cty v1.10.0
