@@ -195,6 +195,11 @@ func resourceNsxtUplinkHostSwitchProfile() *schema.Resource {
 				Default:      1700,
 				ValidateFunc: validation.IntAtLeast(1280),
 			},
+			"realized_id": {
+				Type:        schema.TypeString,
+				Description: "Computed ID of the realized object",
+				Computed:    true,
+			},
 		},
 	}
 }
@@ -323,6 +328,7 @@ func resourceNsxtUplinkHostSwitchProfileRead(d *schema.ResourceData, m interface
 	d.Set("nsx_id", id)
 	d.Set("path", uplinkHostSwitchProfile.Path)
 	d.Set("revision", uplinkHostSwitchProfile.Revision)
+	d.Set("realized_id", uplinkHostSwitchProfile.RealizationId)
 	setUplinkHostSwitchProfileSchema(d, uplinkHostSwitchProfile)
 	return nil
 }
