@@ -192,7 +192,6 @@ func resourceNsxtUplinkHostSwitchProfile() *schema.Resource {
 				Type:         schema.TypeInt,
 				Description:  "Maximum Transmission Unit used for uplinks",
 				Optional:     true,
-				Default:      1700,
 				ValidateFunc: validation.IntAtLeast(1280),
 			},
 			"realized_id": {
@@ -263,7 +262,11 @@ func setUplinkHostSwitchProfileSchema(d *schema.ResourceData, profile model.Poli
 
 	d.Set("overlay_encap", profile.OverlayEncap)
 	d.Set("transport_vlan", profile.TransportVlan)
-	d.Set("mtu", profile.Mtu)
+
+	// Set MTU only when has a value
+	if profile.Mtu != nil {
+		d.Set("mtu", profile.Mtu)
+	}
 }
 
 func resourceNsxtUplinkHostSwitchProfileExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
@@ -410,12 +413,14 @@ func uplinkHostSwitchProfileSchemaToModel(d *schema.ResourceData) model.PolicyUp
 		Description:   &description,
 		Tags:          tags,
 		ResourceType:  model.PolicyBaseHostSwitchProfile_RESOURCE_TYPE_POLICYUPLINKHOSTSWITCHPROFILE,
-		Mtu:           &mtu,
 		OverlayEncap:  &overlayEncap,
 		TransportVlan: &transportVlan,
 		Lags:          lags,
 		NamedTeamings: namedTeamings,
 		Teaming:       &teaming,
+	}
+	if mtu != 0 {
+		uplinkHostSwitchProfile.Mtu = &mtu
 	}
 	return uplinkHostSwitchProfile
 }
