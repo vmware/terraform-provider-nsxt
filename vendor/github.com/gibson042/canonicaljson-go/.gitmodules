@@ -1,3 +1,0 @@
-[submodule "canonicaljson-spec"]
-	path = canonicaljson-spec
-	url = git@github.com:gibson042/canonicaljson-spec.git
