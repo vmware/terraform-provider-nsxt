@@ -243,7 +243,7 @@ func resourceNsxtPolicyTransportZoneUpdate(d *schema.ResourceData, m interface{}
 		return err
 	}
 
-	log.Printf("[INFO] Updateing TransportZone with ID %s", id)
+	log.Printf("[INFO] Updating TransportZone with ID %s", id)
 	err = policyTransportZonePatch(siteID, epID, id, d, m)
 	if err != nil {
 		return handleUpdateError("TransportZone", id, err)
