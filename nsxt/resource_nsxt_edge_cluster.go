@@ -154,12 +154,10 @@ func getEdgeClusterMembersFromSchema(d *schema.ResourceData) []model.EdgeCluster
 		data := member.(map[string]interface{})
 		description := data["description"].(string)
 		displayName := data["display_name"].(string)
-		memberIndex := data["member_index"].(int64)
 		transportNodeID := data["transport_node_id"].(string)
 		elem := model.EdgeClusterMember{
 			Description:     &description,
 			DisplayName:     &displayName,
-			MemberIndex:     &memberIndex,
 			TransportNodeId: &transportNodeID,
 		}
 		members = append(members, elem)

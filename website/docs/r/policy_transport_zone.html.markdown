@@ -55,6 +55,7 @@ In addition to arguments listed above, the following attributes are exported:
 
 * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
 * `path` - The NSX path of the policy resource.
+* `realized_id` - Realized ID for the transport zone. For reference in fabric resources (such as `transport_node`), `realized_id` should be used rather than `id`.
 
 ## Importing
 

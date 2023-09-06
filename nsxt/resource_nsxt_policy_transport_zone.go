@@ -71,6 +71,11 @@ func resourceNsxtPolicyTransportZone() *schema.Resource {
 				ForceNew:    true,
 				Computed:    true,
 			},
+			"realized_id": {
+				Type:        schema.TypeString,
+				Description: "Computed ID of the realized object",
+				Computed:    true,
+			},
 		},
 	}
 }
@@ -227,6 +232,7 @@ func resourceNsxtPolicyTransportZoneRead(d *schema.ResourceData, m interface{}) 
 	d.Set("is_default", obj.IsDefault)
 	d.Set("transport_type", obj.TzType)
 	d.Set("uplink_teaming_policy_names", obj.UplinkTeamingPolicyNames)
+	d.Set("realized_id", obj.RealizationId)
 
 	return nil
 }
