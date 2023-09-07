@@ -171,7 +171,7 @@ func TestAccResourceNsxtUplinkHostSwitchProfile_basic(t *testing.T) {
 					resource.TestCheckNoResourceAttr(testResourceName, "lag.#"),
 					resource.TestCheckNoResourceAttr(testResourceName, "named_teaming.#"),
 					resource.TestCheckNoResourceAttr(testResourceName, "teaming.0.standby.#"),
-					resource.TestCheckResourceAttr(testResourceName, "mtu", "1700"),
+					resource.TestCheckResourceAttr(testResourceName, "mtu", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "overlay_encap", "GENEVE"),
 					resource.TestCheckResourceAttr(testResourceName, "transport_vlan", "0"),
 				),
