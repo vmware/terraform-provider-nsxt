@@ -114,6 +114,10 @@ func getEdgeClusterName() string {
 	return name
 }
 
+func getComputeManagerName() string {
+	return os.Getenv("NSXT_TEST_COMPUTE_MANAGER")
+}
+
 func getVlanTransportZoneName() string {
 	name := os.Getenv("NSXT_TEST_VLAN_TRANSPORT_ZONE")
 	if name == "" {
