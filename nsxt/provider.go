@@ -19,17 +19,24 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	api "github.com/vmware/go-vmware-nsxt"
-	"github.com/vmware/go-vmware-nsxt/licensing"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/core"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client/middleware/retry"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/security"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 	"golang.org/x/exp/slices"
 
 	tf_api "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 var defaultRetryOnStatusCodes = []int{400, 409, 429, 500, 503, 504}
+
+// Struct to keep track of changes in schema List
+type listDiff struct {
+	added   []interface{}
+	removed []interface{}
+}
 
 // Provider configuration that is shared for policy and MP
 type commonProviderConfig struct {
@@ -42,6 +49,7 @@ type commonProviderConfig struct {
 	RetryStatusCodes       []int
 	Username               string
 	Password               string
+	LicenseDiff            listDiff
 }
 
 type nsxtClients struct {
@@ -645,11 +653,6 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 		}
 	}
 
-	if d.HasChange("license_keys") && onDemandConn {
-		// TODO - remove this constraint when license is rewritten with new SDK
-		return fmt.Errorf("on demand connection option is not supported with license feature")
-	}
-
 	if host == "" {
 		return fmt.Errorf("host must be provided")
 	}
@@ -689,6 +692,11 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 	if onDemandConn {
 		// version init will happen on demand
 		return nil
+	}
+
+	err = configureLicenses(getPolicyConnector(*clients), clients.CommonConfig.LicenseDiff)
+	if err != nil {
+		return err
 	}
 
 	if isVMC {
@@ -795,63 +803,63 @@ func (processor sessionHeaderProcessor) Process(req *http.Request) error {
 	return nil
 }
 
-func applyLicense(c *api.APIClient, licenseKey string) error {
-	if c == nil {
-		return fmt.Errorf("API client not configured")
-	}
-
-	license := licensing.License{LicenseKey: licenseKey}
-	_, resp, err := c.LicensingApi.CreateLicense(c.Context, license)
+func applyLicense(connector client.Connector, licenseKey string) error {
+	client := nsx.NewLicensesClient(connector)
+	license := model.License{LicenseKey: &licenseKey}
+	_, err := client.Create(license)
 	if err != nil {
 		return fmt.Errorf("Error during license create: %v", err)
 	}
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("Unexpected status returned during license create: %v", resp.StatusCode)
-	}
 
 	return nil
 }
 
-func removeLicense(c *api.APIClient, licenseKey string) error {
-	if c == nil {
-		return fmt.Errorf("API client not configured")
-	}
-
-	license := licensing.License{LicenseKey: licenseKey}
-	resp, err := c.LicensingApi.DeleteLicenseKeyDelete(c.Context, license)
+func removeLicense(connector client.Connector, licenseKey string) error {
+	client := nsx.NewLicensesClient(connector)
+	err := client.Delete(licenseKey)
 	if err != nil {
 		return fmt.Errorf("error during license delete: %v", err)
 	}
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("unexpected status returned during license delete: %v", resp.StatusCode)
-	}
 
 	return nil
 }
 
-// license keys are applied on terraform plan and are not removed
-func configureLicenses(d *schema.ResourceData, clients *nsxtClients) error {
-	o, n := d.GetChange("license_keys")
-	oldKeys := interfaceListToStringList(o.([]interface{}))
-	newKeys := interfaceListToStringList(n.([]interface{}))
-
-	// Check for new licenses
-	for _, licKey := range newKeys {
-		if !slices.Contains(oldKeys, licKey) {
-			err := applyLicense(clients.NsxtClient, licKey)
-			if err != nil {
-				return fmt.Errorf("error applying license key: %s. %s", licKey, err.Error())
-			}
+func getListDiffFromSchema(d *schema.ResourceData, attribute string) listDiff {
+	var diff listDiff
+	o, n := d.GetChange(attribute)
+	oldValues := interfaceListToStringList(o.([]interface{}))
+	newValues := interfaceListToStringList(n.([]interface{}))
+	// Check for new
+	for _, value := range newValues {
+		if !slices.Contains(oldValues, value) {
+			diff.added = append(diff.added, value)
 		}
 	}
 
 	// Remove old licenses
-	for _, licKey := range oldKeys {
-		if !slices.Contains(newKeys, licKey) {
-			err := removeLicense(clients.NsxtClient, licKey)
-			if err != nil {
-				return fmt.Errorf("error deleting license key: %s. %s", licKey, err.Error())
-			}
+	for _, value := range oldValues {
+		if !slices.Contains(newValues, value) {
+			diff.removed = append(diff.removed, value)
+		}
+	}
+	return diff
+}
+
+// license keys are applied on terraform plan and are not removed
+func configureLicenses(connector client.Connector, diff listDiff) error {
+	// Apply new licenses
+	for _, license := range diff.added {
+		err := applyLicense(connector, license.(string))
+		if err != nil {
+			return fmt.Errorf("error applying license key: %s. %s", license, err.Error())
+		}
+	}
+
+	// Remove old licenses
+	for _, license := range diff.removed {
+		err := removeLicense(connector, license.(string))
+		if err != nil {
+			return fmt.Errorf("error deleting license key: %s. %s", license, err.Error())
 		}
 	}
 	return nil
@@ -877,6 +885,7 @@ func initCommonConfig(d *schema.ResourceData) commonProviderConfig {
 		retryStatuses = append(retryStatuses, defaultRetryOnStatusCodes...)
 	}
 
+	licDiff := getListDiffFromSchema(d, "license_keys")
 	return commonProviderConfig{
 		RemoteAuth:             remoteAuth,
 		ToleratePartialSuccess: toleratePartialSuccess,
@@ -886,6 +895,7 @@ func initCommonConfig(d *schema.ResourceData) commonProviderConfig {
 		RetryStatusCodes:       retryStatuses,
 		Username:               username,
 		Password:               password,
+		LicenseDiff:            licDiff,
 	}
 }
 
@@ -901,11 +911,6 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	}
 
 	err = configurePolicyConnectorData(d, &clients)
-	if err != nil {
-		return nil, err
-	}
-
-	err = configureLicenses(d, &clients)
 	if err != nil {
 		return nil, err
 	}
@@ -983,10 +988,14 @@ func getPolicyConnectorWithHeaders(clients interface{}, customHeaders *map[strin
 		connectorOptions = append(connectorOptions, client.WithRequestProcessors(requestProcessors...))
 	}
 	connector := client.NewConnector(c.Host, connectorOptions...)
-
-	// Init NSX version if not done yet
+	// Init NSX version on demand if not done yet
+	// This is also our indication to apply licenses, in case of delayed connection
 	if nsxVersion == "" {
 		initNSXVersion(connector)
+		err := configureLicenses(connector, c.CommonConfig.LicenseDiff)
+		if err != nil {
+			log.Printf("[ERROR]: Failed to apply NSX licenses")
+		}
 	}
 	return connector
 }
