@@ -51,7 +51,7 @@ func resourceNsxtPolicyGatewayDNSForwarder() *schema.Resource {
 			},
 			"default_forwarder_zone_path": getPolicyPathSchema(true, false, "Zone to which DNS requests are forwarded by default"),
 			"conditional_forwarder_zone_paths": {
-				Type:        schema.TypeList,
+				Type:        schema.TypeSet,
 				Description: "List of conditional (FQDN) forwarder zone paths",
 				Optional:    true,
 				MaxItems:    5,
@@ -130,7 +130,7 @@ func patchNsxtPolicyGatewayDNSForwarder(sessionContext utl.SessionContext, conne
 	tags := getPolicyTagsFromSchema(d)
 	listenerIP := d.Get("listener_ip").(string)
 	defaultZonePath := d.Get("default_forwarder_zone_path").(string)
-	conditionalZonePaths := getStringListFromSchemaList(d, "conditional_forwarder_zone_paths")
+	conditionalZonePaths := getStringListFromSchemaSet(d, "conditional_forwarder_zone_paths")
 	enabled := d.Get("enabled").(bool)
 	logLevel := d.Get("log_level").(string)
 	cacheSize := int64(d.Get("cache_size").(int))
