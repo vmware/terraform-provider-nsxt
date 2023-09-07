@@ -12,6 +12,8 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"net/http/httputil"
+	"os"
 	"regexp"
 	"strings"
 	"time"
@@ -771,6 +773,22 @@ func (processor remoteAuthHeaderProcessor) Process(req *http.Request) error {
 	return nil
 }
 
+type logRequestProcessor struct {
+}
+
+func newLogRequestProcessor() *logRequestProcessor {
+	return &logRequestProcessor{}
+}
+
+func (processor logRequestProcessor) Process(req *http.Request) error {
+	reqDump, err := httputil.DumpRequestOut(req, true)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Printf("Issuing request towards NSX:\n%s", reqDump)
+	return nil
+}
+
 type bearerAuthHeaderProcessor struct {
 	Token string
 }
@@ -982,6 +1000,10 @@ func getPolicyConnectorWithHeaders(clients interface{}, customHeaders *map[strin
 		}
 		requestProcessors = append(requestProcessors, newSessionHeaderProcessor(cookie, xsrf).Process)
 		log.Printf("[INFO]: Session headers configured for policy objects")
+	}
+
+	if os.Getenv("TF_LOG_PROVIDER") != "" {
+		requestProcessors = append(requestProcessors, newLogRequestProcessor().Process)
 	}
 
 	if len(requestProcessors) > 0 {
