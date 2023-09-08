@@ -55,7 +55,7 @@ func resourceNsxtPolicySecurityPolicyExistsPartial(domainName string) func(sessi
 	}
 }
 
-func policySecurityPolicyBuildAndPatch(d *schema.ResourceData, m interface{}, connector client.Connector, isGlobalManager bool, id string) error {
+func policySecurityPolicyBuildAndPatch(d *schema.ResourceData, m interface{}, connector client.Connector, isGlobalManager bool, id string, createFlow bool) error {
 
 	domain := d.Get("domain").(string)
 	displayName := d.Get("display_name").(string)
@@ -87,9 +87,14 @@ func policySecurityPolicyBuildAndPatch(d *schema.ResourceData, m interface{}, co
 	}
 	log.Printf("[INFO] Creating Security Policy with ID %s", id)
 
-	if len(d.Id()) > 0 {
+	if !createFlow {
 		// This is update flow
 		obj.Revision = &revision
+	}
+
+	err := validatePolicyRuleSequence(d)
+	if err != nil {
+		return err
 	}
 
 	policyChildren, err := getUpdatedRuleChildren(d)
@@ -100,6 +105,7 @@ func policySecurityPolicyBuildAndPatch(d *schema.ResourceData, m interface{}, co
 		obj.Children = policyChildren
 	}
 
+	log.Printf("[INFO] Using selective H-API for policy with ID %s", id)
 	return securityPolicyInfraPatch(getSessionContext(d, m), obj, domain, m)
 }
 
@@ -112,7 +118,7 @@ func resourceNsxtPolicySecurityPolicyCreate(d *schema.ResourceData, m interface{
 		return err
 	}
 
-	err = policySecurityPolicyBuildAndPatch(d, m, connector, isPolicyGlobalManager(m), id)
+	err = policySecurityPolicyBuildAndPatch(d, m, connector, isPolicyGlobalManager(m), id, true)
 
 	if err != nil {
 		return handleCreateError("Security Policy", id, err)
@@ -164,7 +170,7 @@ func resourceNsxtPolicySecurityPolicyUpdate(d *schema.ResourceData, m interface{
 	if id == "" {
 		return fmt.Errorf("Error obtaining Security Policy id")
 	}
-	err := policySecurityPolicyBuildAndPatch(d, m, connector, isPolicyGlobalManager(m), id)
+	err := policySecurityPolicyBuildAndPatch(d, m, connector, isPolicyGlobalManager(m), id, false)
 	if err != nil {
 		return handleUpdateError("Security Policy", id, err)
 	}

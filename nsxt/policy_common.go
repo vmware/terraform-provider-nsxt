@@ -440,6 +440,7 @@ func validatePolicyRuleSequence(d *schema.ResourceData) error {
 func getPolicyRulesFromSchema(d *schema.ResourceData) []model.Rule {
 	rules := d.Get("rule").([]interface{})
 	var ruleList []model.Rule
+	lastSequence := int64(0)
 	for _, rule := range rules {
 		data := rule.(map[string]interface{})
 		displayName := data["display_name"].(string)
@@ -469,6 +470,11 @@ func getPolicyRulesFromSchema(d *schema.ResourceData) []model.Rule {
 		}
 
 		resourceType := "Rule"
+		if sequenceNumber == 0 {
+			sequenceNumber = lastSequence + 1
+		}
+		lastSequence = sequenceNumber
+
 		elem := model.Rule{
 			ResourceType:         &resourceType,
 			Id:                   &id,
@@ -489,10 +495,7 @@ func getPolicyRulesFromSchema(d *schema.ResourceData) []model.Rule {
 			Services:             getPathListFromMap(data, "services"),
 			Scope:                getPathListFromMap(data, "scope"),
 			Profiles:             getPathListFromMap(data, "profiles"),
-		}
-
-		if sequenceNumber > 0 {
-			elem.SequenceNumber = &sequenceNumber
+			SequenceNumber:       &sequenceNumber,
 		}
 
 		ruleList = append(ruleList, elem)
