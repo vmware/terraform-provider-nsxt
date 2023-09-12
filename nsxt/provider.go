@@ -293,6 +293,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_gateway_route_map":         dataSourceNsxtPolicyGatewayRouteMap(),
 			"nsxt_uplink_host_switch_profile":       dataSourceNsxtUplinkHostSwitchProfile(),
 			"nsxt_compute_manager":                  dataSourceNsxtComputeManager(),
+			"nsxt_transport_node_realization":       dataSourceNsxtTransportNodeRealization(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
