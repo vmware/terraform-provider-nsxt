@@ -9,7 +9,7 @@ description: A resource to configure Policy Transport Zone.
 
 This resource provides a method for the management of Policy based Transport Zones (TZ). A Transport Zone defines the scope to which a network can extend in NSX. For example an overlay based Transport Zone is associated with both hypervisors and segments and defines which hypervisors will be able to serve the defined segment. Virtual machines on the hypervisor associated with a Transport Zone can be attached to segments in that same Transport Zone.
 
-This data source is applicable to NSX Policy Manager.
+This resource is applicable to NSX Policy Manager.
 
 ## Example Usage
 
