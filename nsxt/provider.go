@@ -791,6 +791,21 @@ func (processor logRequestProcessor) Process(req *http.Request) error {
 	return nil
 }
 
+type logResponseAcceptor struct {
+}
+
+func newLogResponseAcceptor() *logResponseAcceptor {
+	return &logResponseAcceptor{}
+}
+
+func (processor logResponseAcceptor) Accept(req *http.Response) {
+	dumpResponse, err := httputil.DumpResponse(req, true)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Printf("Received NSX response:\n%s", dumpResponse)
+}
+
 type bearerAuthHeaderProcessor struct {
 	Token string
 }
@@ -977,6 +992,8 @@ func getPolicyConnectorWithHeaders(clients interface{}, customHeaders *map[strin
 
 	connectorOptions := []client.ConnectorOption{client.UsingRest(nil), client.WithHttpClient(c.PolicyHTTPClient), client.WithDecorators(retry.NewRetryDecorator(uint(c.CommonConfig.MaxRetries), retryFunc))}
 	var requestProcessors []core.RequestProcessor
+	var responseAcceptors []core.ResponseAcceptor
+
 	if c.PolicySecurityContext != nil {
 		connectorOptions = append(connectorOptions, client.WithSecurityContext(c.PolicySecurityContext))
 	}
@@ -1004,12 +1021,16 @@ func getPolicyConnectorWithHeaders(clients interface{}, customHeaders *map[strin
 		log.Printf("[INFO]: Session headers configured for policy objects")
 	}
 
-	if os.Getenv("TF_LOG_PROVIDER") != "" {
+	if os.Getenv("TF_LOG_PROVIDER_NSX_HTTP") != "" {
 		requestProcessors = append(requestProcessors, newLogRequestProcessor().Process)
+		responseAcceptors = append(responseAcceptors, newLogResponseAcceptor().Accept)
 	}
 
 	if len(requestProcessors) > 0 {
 		connectorOptions = append(connectorOptions, client.WithRequestProcessors(requestProcessors...))
+	}
+	if len(responseAcceptors) > 0 {
+		connectorOptions = append(connectorOptions, client.WithResponseAcceptors(responseAcceptors...))
 	}
 	connector := client.NewConnector(c.Host, connectorOptions...)
 	// Init NSX version on demand if not done yet
