@@ -28,7 +28,7 @@ resource "nsxt_transport_node" "test" {
     }
     host_switch_profile_id = [nsxt_uplink_host_switch_profile.hsw_profile1.id]
     is_migrate_pnics       = false
-    pnics {
+    pnic {
       device_name = "fp-eth0"
       uplink_name = "uplink1"
     }
@@ -91,7 +91,7 @@ The following arguments are supported:
         * `mac` - (Required) MAC address.
         * `static_ip_pool_id` - (Optional) IP assignment specification for Static IP Pool.
   * `is_migrate_pnics` - (Optional) Migrate any pnics which are in use.
-  * `pnics` - (Optional) Physical NICs connected to the host switch.
+  * `pnic` - (Optional) Physical NICs connected to the host switch.
     * `device_name` - (Required) Device name or key.
     * `uplink_name` - (Required) Uplink name for this Pnic.
   * `portgroup_transport_zone_id` - (Optional) Transport Zone ID representing the DVS used in NSX on DVPG.
