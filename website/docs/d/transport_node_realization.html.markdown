@@ -27,7 +27,7 @@ resource "nsxt_transport_node" "test" {
     }
     host_switch_profile_id = [nsxt_uplink_host_switch_profile.hsw_profile1.id]
     is_migrate_pnics       = false
-    pnics {
+    pnic {
       device_name = "fp-eth0"
       uplink_name = "uplink1"
     }

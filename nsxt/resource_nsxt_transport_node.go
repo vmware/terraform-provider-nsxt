@@ -626,7 +626,7 @@ func getStandardHostSwitchSchema() *schema.Schema {
 					Description: "Migrate any pnics which are in use",
 					Optional:    true,
 				},
-				"pnics": {
+				"pnic": {
 					Type:        schema.TypeList,
 					Optional:    true,
 					Description: "Physical NICs connected to the host switch",
@@ -1378,7 +1378,7 @@ func getHostSwitchSpecFromSchema(d *schema.ResourceData) (*data.StructValue, err
 		iPAssignmentSpec, err := getIPAssignmentFromSchema(swData["ip_assignment"])
 		isMigratePNics := swData["is_migrate_pnics"].(bool)
 		var pNics []model.Pnic
-		for _, p := range swData["pnics"].([]interface{}) {
+		for _, p := range swData["pnic"].([]interface{}) {
 			data := p.(map[string]interface{})
 			deviceName := data["device_name"].(string)
 			uplinkName := data["uplink_name"].(string)
@@ -1797,7 +1797,7 @@ func setHostSwitchSpecInSchema(d *schema.ResourceData, spec *data.StructValue) e
 				e["uplink_name"] = pnic.UplinkName
 				pnics = append(pnics, e)
 			}
-			elem["pnics"] = pnics
+			elem["pnic"] = pnics
 			elem["portgroup_transport_zone_id"] = sw.PortgroupTransportZoneId
 			var tnpSubConfig []map[string]interface{}
 			for _, tnpsc := range sw.TransportNodeProfileSubConfigs {
