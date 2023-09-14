@@ -698,17 +698,21 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 		return nil
 	}
 
-	err = configureLicenses(getPolicyConnector(*clients), clients.CommonConfig.LicenseDiff)
-	if err != nil {
-		return err
+	if !isVMC {
+		err = configureLicenses(getPolicyConnectorForInit(*clients), clients.CommonConfig.LicenseDiff)
+		if err != nil {
+			return err
+		}
 	}
 
-	if isVMC {
-		// Special treatment for VMC since MP API is not available there
+	err = initNSXVersion(getPolicyConnectorForInit(*clients))
+	if err != nil && isVMC {
+		// In case version API does not work for VMC, we workaround by testing version-specific APIs
+		// TODO - remove this when /node/version API works for all auth methods on VMC
 		initNSXVersionVMC(*clients)
 		return nil
 	}
-	return initNSXVersion(getPolicyConnector(*clients))
+	return err
 }
 
 func getConfiguredSecurityContext(clients *nsxtClients, vmcAccessToken string, vmcAuthHost string, vmcAuthMode string, username string, password string) (*core.SecurityContextImpl, error) {
@@ -723,10 +727,10 @@ func getConfiguredSecurityContext(clients *nsxtClients, vmcAccessToken string, v
 			return nil, err
 		}
 
-		if vmcAuthMode == "Bearer" {
-			clients.CommonConfig.BearerToken = apiToken
-		} else {
-
+		// We'll be sending Bearer token anyway even with scp-auth-token auth
+		// For now, node API is not working on VMC without Bearer token present
+		clients.CommonConfig.BearerToken = apiToken
+		if vmcAuthMode != "Bearer" {
 			securityCtx.SetProperty(security.AUTHENTICATION_SCHEME_ID, security.OAUTH_SCHEME_ID)
 			securityCtx.SetProperty(security.ACCESS_TOKEN, apiToken)
 		}
@@ -939,10 +943,14 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 }
 
 func getPolicyConnector(clients interface{}) client.Connector {
-	return getPolicyConnectorWithHeaders(clients, nil)
+	return getPolicyConnectorWithHeaders(clients, nil, false)
 }
 
-func getPolicyConnectorWithHeaders(clients interface{}, customHeaders *map[string]string) client.Connector {
+func getPolicyConnectorForInit(clients interface{}) client.Connector {
+	return getPolicyConnectorWithHeaders(clients, nil, true)
+}
+
+func getPolicyConnectorWithHeaders(clients interface{}, customHeaders *map[string]string, initFlow bool) client.Connector {
 	c := clients.(nsxtClients)
 
 	retryFunc := func(retryContext retry.RetryContext) bool {
@@ -1014,7 +1022,7 @@ func getPolicyConnectorWithHeaders(clients interface{}, customHeaders *map[strin
 	connector := client.NewConnector(c.Host, connectorOptions...)
 	// Init NSX version on demand if not done yet
 	// This is also our indication to apply licenses, in case of delayed connection
-	if nsxVersion == "" {
+	if nsxVersion == "" && !initFlow {
 		initNSXVersion(connector)
 		err := configureLicenses(connector, c.CommonConfig.LicenseDiff)
 		if err != nil {
