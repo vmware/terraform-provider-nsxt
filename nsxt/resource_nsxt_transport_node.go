@@ -494,8 +494,8 @@ func getEdgeNodeSchema() *schema.Schema {
 	return getNodeSchema(s, false)
 }
 
-func getHostNodeSchema() *schema.Schema {
-	s := map[string]*schema.Schema{
+func getHostNodeSchemaAddlElements() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
 		"host_credential": {
 			Type:        schema.TypeList,
 			MaxItems:    1,
@@ -540,6 +540,10 @@ func getHostNodeSchema() *schema.Schema {
 			Description: "Install location of Windows Server on baremetal being managed by NSX",
 		},
 	}
+}
+
+func getHostNodeSchema() *schema.Schema {
+	s := getHostNodeSchemaAddlElements()
 	return getNodeSchema(s, false)
 }
 
