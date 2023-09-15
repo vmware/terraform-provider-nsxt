@@ -952,38 +952,40 @@ func testAccNsxtPolicySecurityPolicyWithIPCidrRange(name string, destIP string, 
 			destination_groups    = ["%s"]
 			services              = [nsxt_policy_service.icmp.path]
 			action                = "ALLOW"
-		  }
+		}
 
-		  rule {
+		rule {
 			display_name          = "rule3"
 			source_groups         = [nsxt_policy_group.group1.path]
 			destination_groups    = ["%s"]
 			services              = [nsxt_policy_service.icmp.path]
 			action                = "ALLOW"
-		  }
-		  rule {
+			sequence_number       = 50
+		}
+		rule {
 			display_name          = "rule4"
 			source_groups         = ["%s"]
 			destination_groups    = [nsxt_policy_group.group2.path]
 			services              = [nsxt_policy_service.icmp.path]
 			action                = "ALLOW"
-		  }
+		}
   
-		  rule {
+		rule {
 			  display_name          = "rule5"
 			  source_groups         = ["%s"]			
 			  destination_groups    = [nsxt_policy_group.group2.path]
 			  services              = [nsxt_policy_service.icmp.path]
 			  action                = "ALLOW"
-			}
+			  sequence_number       = 105
+                }
   
-			rule {
+		rule {
 			  display_name          = "rule6"
 			  source_groups         = ["%s"]
 			  destination_groups    = [nsxt_policy_group.group2.path]
 			  services              = [nsxt_policy_service.icmp.path]
 			  action                = "ALLOW"
-			}
+		}
 }`, name, destIP, destCidr, destIPRange, sourceIP, sourceCidr, sourceIPRange)
 }
 

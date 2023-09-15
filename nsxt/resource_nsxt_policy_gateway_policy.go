@@ -64,16 +64,19 @@ func getUpdatedRuleChildren(d *schema.ResourceData) ([]*data.StructValue, error)
 	}
 
 	oldRules, newRules := d.GetChange("rule")
-	err1 := validatePolicyRuleSequence(d)
-	if err1 != nil {
-		return policyChildren, err1
-	}
 	rules := getPolicyRulesFromSchema(d)
 	newRulesCount := len(newRules.([]interface{}))
 	oldRulesCount := len(oldRules.([]interface{}))
 	for ruleNo := 0; ruleNo < newRulesCount; ruleNo++ {
 		ruleIndicator := fmt.Sprintf("rule.%d", ruleNo)
-		if d.HasChange(ruleIndicator) {
+		autoAssignedSequence := false
+		originalSequence := d.Get(fmt.Sprintf("%s.sequence_number", ruleIndicator)).(int)
+		if originalSequence == 0 {
+			autoAssignedSequence = true
+		}
+		if d.HasChange(ruleIndicator) || autoAssignedSequence {
+			// If the provider assigned sequence number to this rule, we need to update it even
+			// though terraform sees no diff
 			rule := rules[ruleNo]
 			// New or updated rule
 			ruleID := newUUID()
