@@ -11,6 +11,7 @@ This resource provides a method for creating an NSXT cluster with several nodes
 This resource is supported with NSX 4.1.0 onwards.
 The main node for the cluster is the host in terraform nsxt provider config,
 user will need to specify the nodes that will join the cluster in the resource config.
+Only one instance of nsxt_manager_cluster resource is supported.
 
 ## Example Usage
 
