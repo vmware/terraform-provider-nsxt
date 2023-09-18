@@ -114,6 +114,14 @@ func getEdgeClusterName() string {
 	return name
 }
 
+func getComputeCollectionName() string {
+	name := os.Getenv("NSXT_TEST_COMPUTE_COLLECTION")
+	if name == "" {
+		name = edgeClusterDefaultName
+	}
+	return name
+}
+
 func getComputeManagerName() string {
 	return os.Getenv("NSXT_TEST_COMPUTE_MANAGER")
 }
