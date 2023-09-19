@@ -56,7 +56,7 @@ func resourceNsxtFailureDomainRead(d *schema.ResourceData, m interface{}) error 
 	client := nsx.NewFailureDomainsClient(connector)
 	obj, err := client.Get(id)
 	if err != nil {
-		return fmt.Errorf("error during FailureDomain read: %v", err)
+		return handleReadError(d, "FailureDomain", id, err)
 	}
 
 	d.Set("display_name", obj.DisplayName)
@@ -67,7 +67,7 @@ func resourceNsxtFailureDomainRead(d *schema.ResourceData, m interface{}) error 
 	preferPtr := obj.PreferredActiveEdgeServices
 	preferStr := "no_preference"
 	if preferPtr != nil {
-		if *preferPtr == true {
+		if *preferPtr {
 			preferStr = "active"
 		} else {
 			preferStr = "standby"
@@ -106,15 +106,12 @@ func resourceNsxtFailureDomainCreate(d *schema.ResourceData, m interface{}) erro
 	client := nsx.NewFailureDomainsClient(connector)
 
 	failureDomain := failureDomainSchemaToModel(d)
+	displayName := d.Get("display_name").(string)
+	log.Printf("[INFO] Creating Failure Domain %s", displayName)
 	obj, err := client.Create(failureDomain)
 	if err != nil {
-		id := ""
-		if obj.Id != nil {
-			id = *obj.Id
-		}
-		return handleCreateError("Failure Domain", id, err)
+		return handleCreateError("Failure Domain", displayName, err)
 	}
-	log.Printf("[INFO] FailureDomain with ID %s created", *obj.Id)
 	d.SetId(*obj.Id)
 
 	return resourceNsxtFailureDomainRead(d, m)
@@ -135,7 +132,7 @@ func resourceNsxtFailureDomainUpdate(d *schema.ResourceData, m interface{}) erro
 
 	_, err := client.Update(id, failureDomain)
 	if err != nil {
-		return handleCreateError("FailureDomain", id, err)
+		return handleUpdateError("FailureDomain", id, err)
 	}
 
 	return resourceNsxtFailureDomainRead(d, m)

@@ -240,8 +240,7 @@ func resourceNsxtComputeManagerCreate(d *schema.ResourceData, m interface{}) err
 	setAsOidcProvider := d.Get("set_as_oidc_provider").(bool)
 	credential, err := getCredentialValues(d)
 	if err != nil {
-		// id isn't known yet
-		handleCreateError("ComputeManager", "", err)
+		return handleCreateError("ComputeManager", displayName, err)
 	}
 
 	obj := model.ComputeManager{
@@ -259,16 +258,11 @@ func resourceNsxtComputeManagerCreate(d *schema.ResourceData, m interface{}) err
 		SetAsOidcProvider:     &setAsOidcProvider,
 	}
 
+	log.Printf("[INFO] Creating Compute Manager %s", displayName)
 	obj, err = client.Create(obj)
 	if err != nil {
-		id := ""
-		if obj.Id != nil {
-			id = *obj.Id
-		}
-		return handleCreateError("Compute Manager", id, err)
+		return handleCreateError("Compute Manager", displayName, err)
 	}
-
-	log.Printf("[INFO] Creating Compute Manager with ID %s", *obj.Id)
 
 	d.SetId(*obj.Id)
 	return resourceNsxtComputeManagerRead(d, m)
@@ -381,7 +375,7 @@ func resourceNsxtComputeManagerRead(d *schema.ResourceData, m interface{}) error
 
 	obj, err := client.Get(id)
 	if err != nil {
-		return fmt.Errorf("error during Compute Manager read: %v", err)
+		return handleReadError(d, "ComputeManager", id, err)
 	}
 
 	d.Set("revision", obj.Revision)
@@ -488,8 +482,7 @@ func resourceNsxtComputeManagerUpdate(d *schema.ResourceData, m interface{}) err
 	setAsOidcProvider := d.Get("set_as_oidc_provider").(bool)
 	credential, err := getCredentialValues(d)
 	if err != nil {
-		// id isn't known yet
-		handleCreateError("ComputeManager", "", err)
+		return handleUpdateError("ComputeManager", id, err)
 	}
 
 	obj := model.ComputeManager{
@@ -509,7 +502,7 @@ func resourceNsxtComputeManagerUpdate(d *schema.ResourceData, m interface{}) err
 
 	_, err = client.Update(id, obj)
 	if err != nil {
-		return fmt.Errorf("error during Compute Manager %s update: %v", id, err)
+		return handleUpdateError("ComputeManager", id, err)
 	}
 
 	return resourceNsxtComputeManagerRead(d, m)
@@ -527,7 +520,7 @@ func resourceNsxtComputeManagerDelete(d *schema.ResourceData, m interface{}) err
 
 	err := client.Delete(id)
 	if err != nil {
-		return fmt.Errorf("error during Compute Manager delete: %v", err)
+		return handleDeleteError("ComputeManager", id, err)
 	}
 	return nil
 }

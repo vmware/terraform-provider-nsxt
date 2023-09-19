@@ -153,13 +153,13 @@ func resourceNsxtManagerClusterCreate(d *schema.ResourceData, m interface{}) err
 	}
 	clusterID, certSha256Thumbprint, hostIP, err := getClusterInfoFromHostNode(d, m)
 	if err != nil {
-		return err
+		return handleCreateError("ManagerCluster", "", err)
 	}
 
 	for _, guestNode := range nodes {
 		err := joinNodeToCluster(clusterID, certSha256Thumbprint, guestNode, hostIP, d, m)
 		if err != nil {
-			return fmt.Errorf("Failed to join node %s: %s", guestNode.ID, err)
+			return handleCreateError("ManagerCluster", hostIP, fmt.Errorf("failed to join node %s: %s", guestNode.ID, err))
 		}
 	}
 	d.SetId(clusterID)
@@ -315,18 +315,19 @@ func getHostCredential(m interface{}) (string, string) {
 }
 
 func resourceNsxtManagerClusterRead(d *schema.ResourceData, m interface{}) error {
+	id := d.Id()
 	connector := getPolicyConnector(m)
 	client := nsx.NewClusterClient(connector)
 	clusterConfig, err := client.Get()
 	if err != nil {
-		return fmt.Errorf("Failed to read Nsxt Manager Cluster: %s", err)
+		return handleReadError(d, "ManagerCluster", id, err)
 	}
 	nodeInfo := clusterConfig.Nodes
 	var nodes []NsxClusterNode
 	hostIP, err := getHostIPFromClusterConfig(m, clusterConfig)
 	isIPv4 := (net.ParseIP(hostIP)).To4() != nil
 	if err != nil {
-		return err
+		return handleReadError(d, "ManagerCluster", id, err)
 	}
 	for _, node := range nodeInfo {
 		ip := getIPFromNodeInfo(node, isIPv4)
@@ -368,12 +369,13 @@ func getIPFromNodeInfo(node nsxModel.ClusterNodeInfo, isIPv4 bool) string {
 }
 
 func resourceNsxtManagerClusterUpdate(d *schema.ResourceData, m interface{}) error {
+	id := d.Id()
 	connector := getPolicyConnector(m)
 	client := nsx.NewClusterClient(connector)
 
 	clusterID, certSha256Thumbprint, hostIP, err := getClusterInfoFromHostNode(d, m)
 	if err != nil {
-		return err
+		return handleUpdateError("ManagerCluster", id, err)
 	}
 	oldNodes, newNodes := d.GetChange("node")
 	oldNodesIPs := getClusterNodesIPs(oldNodes)
@@ -388,7 +390,7 @@ func resourceNsxtManagerClusterUpdate(d *schema.ResourceData, m interface{}) err
 			ignoreRepositoryIPCheckParam := "false"
 			_, err := client.Removenode(id, &force, &gracefulShutdown, &ignoreRepositoryIPCheckParam)
 			if err != nil {
-				return err
+				return handleUpdateError("ManagerCluster", id, err)
 			}
 		}
 	}
@@ -406,7 +408,7 @@ func resourceNsxtManagerClusterUpdate(d *schema.ResourceData, m interface{}) err
 			}
 			err = joinNodeToCluster(clusterID, certSha256Thumbprint, nodeObj, hostIP, d, m)
 			if err != nil {
-				return err
+				return handleUpdateError("ManagerCluster", id, err)
 			}
 		}
 	}
@@ -434,7 +436,7 @@ func resourceNsxtManagerClusterDelete(d *schema.ResourceData, m interface{}) err
 		guestNodeID := node.ID
 		_, err := client.Removenode(guestNodeID, &force, &gracefulShutdown, &ignoreRepositoryIPCheckParam)
 		if err != nil {
-			return fmt.Errorf("Failed to remove node %s from cluster: %s", guestNodeID, err)
+			return handleDeleteError("ManagerCluster", guestNodeID, err)
 		}
 	}
 	return nil

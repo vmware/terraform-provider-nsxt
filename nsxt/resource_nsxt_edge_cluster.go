@@ -117,16 +117,11 @@ func resourceNsxtEdgeClusterCreate(d *schema.ResourceData, m interface{}) error 
 		Members:                members,
 	}
 
+	log.Printf("[INFO] Creating Edge Cluster with name %s", displayName)
 	obj, err := client.Create(obj)
 	if err != nil {
-		id := ""
-		if obj.Id != nil {
-			id = *obj.Id
-		}
-		return handleCreateError("Edge Cluster", id, err)
+		return handleCreateError("Edge Cluster", displayName, err)
 	}
-
-	log.Printf("[INFO] Creating Edge Cluster with ID %s", *obj.Id)
 
 	d.SetId(*obj.Id)
 	return resourceNsxtEdgeClusterRead(d, m)
@@ -175,7 +170,7 @@ func resourceNsxtEdgeClusterRead(d *schema.ResourceData, m interface{}) error {
 	client := nsx.NewEdgeClustersClient(connector)
 	obj, err := client.Get(id)
 	if err != nil {
-		return fmt.Errorf("error during Edge Cluster read: %v", err)
+		return handleReadError(d, "EdgeCluster", id, err)
 	}
 
 	d.Set("revision", obj.Revision)
@@ -253,7 +248,7 @@ func resourceNsxtEdgeClusterUpdate(d *schema.ResourceData, m interface{}) error 
 
 	_, err := client.Update(id, obj)
 	if err != nil {
-		return fmt.Errorf("error during Edge Cluster %s update: %v", id, err)
+		return handleUpdateError("EdgeCluster", id, err)
 	}
 
 	return resourceNsxtEdgeClusterRead(d, m)
@@ -271,7 +266,7 @@ func resourceNsxtEdgeClusterDelete(d *schema.ResourceData, m interface{}) error 
 
 	err := client.Delete(id)
 	if err != nil {
-		return fmt.Errorf("error during Edge Cluster delete: %v", err)
+		return handleDeleteError("EdgeCluster", id, err)
 	}
 	return nil
 }
