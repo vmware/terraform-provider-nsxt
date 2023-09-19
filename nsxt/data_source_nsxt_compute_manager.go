@@ -18,7 +18,7 @@ func dataSourceNsxtComputeManager() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"id":           getDataSourceIDSchema(),
-			"display_name": getDisplayNameSchema(),
+			"display_name": getDataSourceExtendedDisplayNameSchema(),
 			"description":  getDescriptionSchema(),
 			"server": {
 				Type:        schema.TypeString,
@@ -45,8 +45,6 @@ func dataSourceNsxtComputeManagerRead(d *schema.ResourceData, m interface{}) err
 			return fmt.Errorf("failed to read ComputeManager %s: %v", objID, err)
 		}
 		obj = objGet
-	} else if objName == "" {
-		return fmt.Errorf("error obtaining Compute Manager ID or name during read")
 	} else {
 		// Get by full name/prefix
 		objList, err := client.List(nil, nil, nil, nil, nil, nil, nil)
@@ -57,6 +55,11 @@ func dataSourceNsxtComputeManagerRead(d *schema.ResourceData, m interface{}) err
 		var perfectMatch []model.ComputeManager
 		var prefixMatch []model.ComputeManager
 		for _, objInList := range objList.Results {
+			if len(objName) == 0 {
+				// We want to grab single compute manager
+				perfectMatch = append(perfectMatch, objInList)
+				continue
+			}
 			if strings.HasPrefix(*objInList.DisplayName, objName) {
 				prefixMatch = append(prefixMatch, objInList)
 			}
@@ -66,16 +69,16 @@ func dataSourceNsxtComputeManagerRead(d *schema.ResourceData, m interface{}) err
 		}
 		if len(perfectMatch) > 0 {
 			if len(perfectMatch) > 1 {
-				return fmt.Errorf("found multiple Compute Managers with name '%s'", objName)
+				return fmt.Errorf("found multiple Compute Managers matching the criteria")
 			}
 			obj = perfectMatch[0]
 		} else if len(prefixMatch) > 0 {
 			if len(prefixMatch) > 1 {
-				return fmt.Errorf("found multiple Compute Managers with name starting with '%s'", objName)
+				return fmt.Errorf("found multiple Compute Managers matching the criteria")
 			}
 			obj = prefixMatch[0]
 		} else {
-			return fmt.Errorf("Compute Manager with name '%s' was not found", objName)
+			return fmt.Errorf("No Compute Manager matches the criteria")
 		}
 	}
 
