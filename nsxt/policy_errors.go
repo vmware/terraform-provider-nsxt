@@ -16,10 +16,6 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
-func isEmptyAPIError(apiError model.ApiError) bool {
-	return (apiError.ErrorCode == nil && apiError.ErrorMessage == nil)
-}
-
 func printAPIError(apiError model.ApiError) string {
 	if apiError.ErrorMessage != nil && apiError.ErrorCode != nil {
 		return fmt.Sprintf("%s (code %v)", *apiError.ErrorMessage, *apiError.ErrorCode)
@@ -81,18 +77,23 @@ func logVapiErrorData(message string, vapiMessages []std.LocalizableMessage, vap
 		return fmt.Errorf("%s (no additional details provided)", message)
 	}
 
+	// ApiError type is identical in all three relevant SDKs - policy, MP and GM
 	var typeConverter = bindings.NewTypeConverter()
 	data, err := typeConverter.ConvertToGolang(apiErrorDataValue, model.ApiErrorBindingType())
 
 	// As of today, we cannot trust converter to return error in case target type doesn't
 	// match the actual error. This issue is being looked into on VAPI level.
 	// For now, we check both conversion error and actual contents of converted struct
-	if err != nil || isEmptyAPIError(data.(model.ApiError)) {
+	if err != nil {
 		// This is likely not an error coming from NSX
 		return logRawVapiErrorData(message, vapiType, apiErrorDataValue)
 	}
 
-	apiError := data.(model.ApiError)
+	apiError, ok := data.(model.ApiError)
+	if !ok {
+		// This is likely not an error coming from NSX
+		return logRawVapiErrorData(message, vapiType, apiErrorDataValue)
+	}
 
 	details := fmt.Sprintf(" %s: %s", message, printAPIError(apiError))
 
@@ -138,8 +139,8 @@ func isNotFoundError(err error) bool {
 	return false
 }
 
-func handleCreateError(resourceType string, resourceID string, err error) error {
-	msg := fmt.Sprintf("Failed to create %s %s", resourceType, resourceID)
+func handleCreateError(resourceType string, resource string, err error) error {
+	msg := fmt.Sprintf("Failed to create %s %s", resourceType, resource)
 	return logAPIError(msg, err)
 }
 
@@ -153,8 +154,8 @@ func handleListError(resourceType string, err error) error {
 	return logAPIError(msg, err)
 }
 
-func handleReadError(d *schema.ResourceData, resourceType string, resourceID string, err error) error {
-	msg := fmt.Sprintf("Failed to read %s %s", resourceType, resourceID)
+func handleReadError(d *schema.ResourceData, resourceType string, resource string, err error) error {
+	msg := fmt.Sprintf("Failed to read %s %s", resourceType, resource)
 	if isNotFoundError(err) {
 		d.SetId("")
 		log.Print(msg)

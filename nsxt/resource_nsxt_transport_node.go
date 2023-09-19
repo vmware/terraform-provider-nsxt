@@ -909,12 +909,13 @@ func resourceNsxtTransportNodeCreate(d *schema.ResourceData, m interface{}) erro
 	if err != nil {
 		return err
 	}
+
+	log.Printf("[INFO] Creating Transport Node with name %s", *obj.DisplayName)
+
 	obj1, err := client.Create(*obj)
 	if err != nil {
-		return fmt.Errorf("failed to create Transport Node: %v", err)
+		return handleCreateError("TransportNode", *obj.DisplayName, err)
 	}
-
-	log.Printf("[INFO] Creating Transport Node with ID %s", *obj1.Id)
 
 	d.SetId(*obj1.Id)
 	return resourceNsxtTransportNodeRead(d, m)
@@ -1481,15 +1482,6 @@ func getTransportZoneEndpointsFromSchema(endpointList []interface{}) []model.Tra
 	return tzEPList
 }
 
-func getHostSwitchData(data map[string]interface{}) (string, map[string]interface{}) {
-	for _, hswType := range []string{"standard_host_switch", "preconfigured_host_switch"} {
-		if data[hswType] != nil && len(data[hswType].([]interface{})) > 0 {
-			return hswType, data[hswType].([]interface{})[0].(map[string]interface{})
-		}
-	}
-	return "", nil
-}
-
 func getUplinksFromSchema(uplinksList []interface{}) []model.VdsUplink {
 	var uplinks []model.VdsUplink
 	for _, ul := range uplinksList {
@@ -1550,7 +1542,7 @@ func resourceNsxtTransportNodeRead(d *schema.ResourceData, m interface{}) error 
 	client := nsx.NewTransportNodesClient(connector)
 	obj, err := client.Get(id)
 	if err != nil {
-		return fmt.Errorf("error during Transport Node read: %v", err)
+		return handleReadError(d, "TransportNode", id, err)
 	}
 
 	d.Set("revision", obj.Revision)
@@ -1560,11 +1552,11 @@ func resourceNsxtTransportNodeRead(d *schema.ResourceData, m interface{}) error 
 	d.Set("failure_domain", obj.FailureDomainId)
 	err = setHostSwitchSpecInSchema(d, obj.HostSwitchSpec)
 	if err != nil {
-		return err
+		return handleReadError(d, "TransportNode", id, err)
 	}
 	err = setNodeDeploymentInfoInSchema(d, obj.NodeDeploymentInfo)
 	if err != nil {
-		return err
+		return handleReadError(d, "TransportNode", id, err)
 	}
 
 	if obj.RemoteTunnelEndpoint != nil {
@@ -1572,7 +1564,7 @@ func resourceNsxtTransportNodeRead(d *schema.ResourceData, m interface{}) error 
 		rtep["host_switch_name"] = obj.RemoteTunnelEndpoint.HostSwitchName
 		rtep["ip_assignment"], err = setIPAssignmentInSchema(obj.RemoteTunnelEndpoint.IpAssignmentSpec)
 		if err != nil {
-			return err
+			return handleReadError(d, "TransportNode", id, err)
 		}
 		rtep["named_teaming_policy"] = obj.RemoteTunnelEndpoint.NamedTeamingPolicy
 		rtep["rtep_vlan"] = obj.RemoteTunnelEndpoint.RtepVlan
@@ -1959,14 +1951,14 @@ func resourceNsxtTransportNodeUpdate(d *schema.ResourceData, m interface{}) erro
 
 	obj, err := getTransportNodeFromSchema(d)
 	if err != nil {
-		return err
+		return handleUpdateError("TransportNode", id, err)
 	}
 	revision := int64(d.Get("revision").(int))
 	*obj.Revision = revision
 
 	_, err = client.Update(id, *obj, nil, nil, nil, nil, nil, nil, nil)
 	if err != nil {
-		return fmt.Errorf("error during Tranport Node %s update: %v", id, err)
+		return handleUpdateError("TransportNode", id, err)
 	}
 
 	return resourceNsxtTransportNodeRead(d, m)
@@ -1984,7 +1976,7 @@ func resourceNsxtTransportNodeDelete(d *schema.ResourceData, m interface{}) erro
 
 	err := client.Delete(id, nil, nil)
 	if err != nil {
-		return fmt.Errorf("error during Transport Node delete: %v", err)
+		return handleDeleteError("TransportNode", id, err)
 	}
 	return nil
 }
