@@ -99,6 +99,7 @@ func resourceNsxtTransportNode() *schema.Resource {
 			"failure_domain": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "Id of the failure domain",
 			},
 			// host_switch_spec
@@ -146,6 +147,7 @@ func getNodeSchema(addlAttributes map[string]*schema.Schema, addExactlyOneOf boo
 		"external_id": {
 			Type:        schema.TypeString,
 			Optional:    true,
+			Computed:    true,
 			Description: "ID of the Node",
 		},
 		"fqdn": {
@@ -157,6 +159,7 @@ func getNodeSchema(addlAttributes map[string]*schema.Schema, addExactlyOneOf boo
 		"ip_addresses": {
 			Type:        schema.TypeList,
 			Optional:    true,
+			Computed:    true,
 			Description: "IP Addresses of the Node, version 4 or 6",
 			Elem: &schema.Schema{
 				Type: schema.TypeString,
@@ -267,6 +270,7 @@ func getEdgeNodeDeploymentConfigSchema() *schema.Schema {
 								Type:        schema.TypeList,
 								MaxItems:    2,
 								Optional:    true,
+								Computed:    true,
 								Description: "Default gateway for the node",
 								Elem: &schema.Schema{
 									Type:         schema.TypeString,
@@ -320,6 +324,7 @@ func getEdgeNodeDeploymentConfigSchema() *schema.Schema {
 								MaxItems:    1,
 								Description: "Resource reservation settings",
 								Optional:    true,
+								Computed:    true,
 								Elem: &schema.Resource{
 									Schema: map[string]*schema.Schema{
 										"cpu_reservation_in_mhz": {
@@ -604,6 +609,7 @@ func getStandardHostSwitchSchema() *schema.Schema {
 					Type:        schema.TypeString,
 					Description: "The host switch id. This ID will be used to reference a host switch",
 					Optional:    true,
+					Computed:    true,
 				},
 				"host_switch_mode": {
 					Type:         schema.TypeString,
@@ -724,6 +730,7 @@ func getTransportZoneEndpointSchema() *schema.Schema {
 				"transport_zone_profile_id": {
 					Type:        schema.TypeList,
 					Optional:    true,
+					Computed:    true,
 					Description: "Identifiers of the transport zone profiles associated with this transport zone endpoint on this transport node",
 					Elem: &schema.Schema{
 						Type: schema.TypeString,
@@ -783,7 +790,8 @@ func getIPAssignmentSchema() *schema.Schema {
 				"assigned_by_dhcp": {
 					Type:        schema.TypeBool,
 					Optional:    true,
-					Description: "Enables DHCP assignment. Should be set to true",
+					Default:     false,
+					Description: "Enables DHCP assignment",
 				},
 				"static_ip": {
 					Type:        schema.TypeList,
@@ -1954,7 +1962,7 @@ func resourceNsxtTransportNodeUpdate(d *schema.ResourceData, m interface{}) erro
 		return handleUpdateError("TransportNode", id, err)
 	}
 	revision := int64(d.Get("revision").(int))
-	*obj.Revision = revision
+	obj.Revision = &revision
 
 	_, err = client.Update(id, *obj, nil, nil, nil, nil, nil, nil, nil)
 	if err != nil {
