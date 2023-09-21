@@ -20,7 +20,7 @@ func TestAccResourceNsxtLogicalTier1Router_basic(t *testing.T) {
 	edgeClusterName := getEdgeClusterName()
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestDeprecated(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLogicalTier1RouterCheckDestroy(state, updateName)
@@ -69,7 +69,7 @@ func TestAccResourceNsxtLogicalTier1Router_importBasic(t *testing.T) {
 	edgeClusterName := getEdgeClusterName()
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestDeprecated(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLogicalTier1RouterCheckDestroy(state, name)

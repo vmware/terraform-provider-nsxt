@@ -44,7 +44,7 @@ func testAccResourceNsxtLbL4MonitorBasic(t *testing.T, protocol string) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
-			testAccTestMP(t)
+			testAccTestDeprecated(t)
 			testAccPreCheck(t)
 			testAccNSXVersion(t, "2.3.0")
 		},
@@ -95,7 +95,7 @@ func testAccResourceNsxtLbL4MonitorImport(t *testing.T, protocol string) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
-			testAccTestMP(t)
+			testAccTestDeprecated(t)
 			testAccPreCheck(t)
 			testAccNSXVersion(t, "2.3.0")
 		},

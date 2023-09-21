@@ -20,7 +20,7 @@ func TestAccResourceNsxtNatRule_snat(t *testing.T) {
 	edgeClusterName := getEdgeClusterName()
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestDeprecated(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXNATRuleCheckDestroy(state, updateRuleName)
@@ -71,7 +71,7 @@ func TestAccResourceNsxtNatRule_snatImport(t *testing.T) {
 	edgeClusterName := getEdgeClusterName()
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestDeprecated(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXNATRuleCheckDestroy(state, ruleName)
@@ -95,7 +95,7 @@ func TestAccResourceNsxtNatRule_dnat(t *testing.T) {
 	edgeClusterName := getEdgeClusterName()
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestDeprecated(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXNATRuleCheckDestroy(state, ruleName)
@@ -142,7 +142,7 @@ func TestAccResourceNsxtNatRule_dnatImport(t *testing.T) {
 	edgeClusterName := getEdgeClusterName()
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestDeprecated(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXNATRuleCheckDestroy(state, ruleName)
@@ -168,7 +168,7 @@ func TestAccResourceNsxtNatRule_noNnat(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
-			testAccTestMP(t)
+			testAccTestDeprecated(t)
 			testAccPreCheck(t)
 			testAccNSXVersionLessThan(t, "3.0.0")
 		},

@@ -17,7 +17,6 @@ func TestAccDataSourceNsxtComputeManager_basic(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
-			testAccTestMP(t)
 			testAccPreCheck(t)
 			testAccEnvDefined(t, "NSXT_TEST_COMPUTE_MANAGER")
 		},
