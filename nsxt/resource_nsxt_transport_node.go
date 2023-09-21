@@ -21,7 +21,7 @@ var ipAssignmentTypes = []string{
 	"assigned_by_dhcp",
 	"static_ip_list",
 	"static_ip_mac",
-	"static_ip_pool_id",
+	"static_ip_pool",
 }
 
 var hostSwitchModeValues = []string{
@@ -612,7 +612,7 @@ func getStandardHostSwitchSchema() *schema.Schema {
 					Optional:     true,
 					ValidateFunc: validation.StringInSlice(hostSwitchModeValues, false),
 				},
-				"host_switch_profile_id": getHostSwitchProfileIDsSchema(),
+				"host_switch_profile": getHostSwitchProfileIDsSchema(),
 				"host_switch_type": {
 					Type:         schema.TypeString,
 					Description:  "Type of HostSwitch",
@@ -645,7 +645,7 @@ func getStandardHostSwitchSchema() *schema.Schema {
 						},
 					},
 				},
-				"portgroup_transport_zone_id": {
+				"portgroup_transport_zone": {
 					Type:        schema.TypeString,
 					Optional:    true,
 					Description: "Transport Zone ID representing the DVS used in NSX on DVPG",
@@ -669,9 +669,9 @@ func getStandardHostSwitchSchema() *schema.Schema {
 											Optional:    true,
 											Description: "The host switch id. This ID will be used to reference a host switch",
 										},
-										"host_switch_profile_id": getHostSwitchProfileIDsSchema(),
-										"ip_assignment":          getIPAssignmentSchema(),
-										"uplink":                 getUplinksSchema(),
+										"host_switch_profile": getHostSwitchProfileIDsSchema(),
+										"ip_assignment":       getIPAssignmentSchema(),
+										"uplink":              getUplinksSchema(),
 									},
 								},
 							},
@@ -716,12 +716,12 @@ func getTransportZoneEndpointSchema() *schema.Schema {
 		Description: "Transport zone endpoints",
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				"transport_zone_id": {
+				"transport_zone": {
 					Type:        schema.TypeString,
 					Required:    true,
 					Description: "Unique ID identifying the transport zone for this endpoint",
 				},
-				"transport_zone_profile_id": {
+				"transport_zone_profile": {
 					Type:        schema.TypeList,
 					Optional:    true,
 					Description: "Identifiers of the transport zone profiles associated with this transport zone endpoint on this transport node",
@@ -861,7 +861,7 @@ func getIPAssignmentSchema() *schema.Schema {
 						},
 					},
 				},
-				"static_ip_pool_id": {
+				"static_ip_pool": {
 					Type:        schema.TypeString,
 					Optional:    true,
 					Description: "IP assignment specification for Static IP Pool",
@@ -1303,7 +1303,7 @@ func getIPAssignmentFromSchema(ipAssignmentList interface{}) (*data.StructValue,
 				break
 			}
 
-		case "static_ip_pool_id":
+		case "static_ip_pool":
 			staticIPPoolID := iaData.(string)
 			elem := model.StaticIpPoolSpec{
 				IpPoolId:     &staticIPPoolID,
@@ -1374,7 +1374,7 @@ func getHostSwitchSpecFromSchema(d *schema.ResourceData) (*data.StructValue, err
 		cpuConfig := getCPUConfigFromSchema(swData["cpu_config"].([]interface{}))
 		hostSwitchID := swData["host_switch_id"].(string)
 		hostSwitchMode := swData["host_switch_mode"].(string)
-		hostSwitchProfileIDs := getHostSwitchProfileIDsFromSchema(swData["host_switch_profile_id"].([]interface{}))
+		hostSwitchProfileIDs := getHostSwitchProfileIDsFromSchema(swData["host_switch_profile"].([]interface{}))
 		hostSwitchType := swData["host_switch_type"].(string)
 		iPAssignmentSpec, err := getIPAssignmentFromSchema(swData["ip_assignment"])
 		isMigratePNics := swData["is_migrate_pnics"].(bool)
@@ -1392,7 +1392,7 @@ func getHostSwitchSpecFromSchema(d *schema.ResourceData) (*data.StructValue, err
 		if err != nil {
 			return nil, fmt.Errorf("error parsing HostSwitchSpec schema %v", err)
 		}
-		portGroupTZID := swData["portgroup_transport_zone_id"].(string)
+		portGroupTZID := swData["portgroup_transport_zone"].(string)
 		transportNodeSubProfileCfg := getTransportNodeSubProfileCfg(swData["transport_node_profile_sub_configs"])
 		transportZoneEndpoints := getTransportZoneEndpointsFromSchema(swData["transport_zone_endpoint"].([]interface{}))
 		uplinks := getUplinksFromSchema(swData["uplink"].([]interface{}))
@@ -1462,10 +1462,10 @@ func getTransportZoneEndpointsFromSchema(endpointList []interface{}) []model.Tra
 	var tzEPList []model.TransportZoneEndPoint
 	for _, endpoint := range endpointList {
 		data := endpoint.(map[string]interface{})
-		transportZoneID := data["transport_zone_id"].(string)
+		transportZoneID := data["transport_zone"].(string)
 		var transportZoneProfileIDs []model.TransportZoneProfileTypeIdEntry
-		if data["transport_zone_profile_ids"] != nil {
-			for _, tzpID := range data["transport_zone_profile_ids"].([]interface{}) {
+		if data["transport_zone_profile"] != nil {
+			for _, tzpID := range data["transport_zone_profile"].([]interface{}) {
 				profileID := tzpID.(string)
 				resourceType := model.TransportZoneProfileTypeIdEntry_RESOURCE_TYPE_BFDHEALTHMONITORINGPROFILE
 				elem := model.TransportZoneProfileTypeIdEntry{
@@ -1515,7 +1515,7 @@ func getTransportNodeSubProfileCfg(iface interface{}) []model.TransportNodeProfi
 		for _, cfgOpt := range data["host_switch_config_option"].([]interface{}) {
 			opt := cfgOpt.(map[string]interface{})
 			swID := opt["host_switch_id"].(string)
-			profileIDs := getHostSwitchProfileIDsFromSchema(opt["host_switch_profile_id"].([]interface{}))
+			profileIDs := getHostSwitchProfileIDsFromSchema(opt["host_switch_profile"].([]interface{}))
 			iPAssignmentSpec, _ := getIPAssignmentFromSchema(opt["ip_assignment"].([]interface{}))
 			uplinks := getUplinksFromSchema(opt["uplink"].([]interface{}))
 			swCfgOpt = &model.HostSwitchConfigOption{
@@ -1777,7 +1777,7 @@ func setHostSwitchSpecInSchema(d *schema.ResourceData, spec *data.StructValue) e
 			elem["cpu_config"] = cpuConfig
 			elem["host_switch_id"] = sw.HostSwitchId
 			elem["host_switch_mode"] = sw.HostSwitchMode
-			elem["host_switch_profile_id"] = setHostSwitchProfileIDsInSchema(sw.HostSwitchProfileIds)
+			elem["host_switch_profile"] = setHostSwitchProfileIDsInSchema(sw.HostSwitchProfileIds)
 			elem["host_switch_type"] = sw.HostSwitchType
 			var err error
 			elem["ip_assignment"], err = setIPAssignmentInSchema(sw.IpAssignmentSpec)
@@ -1793,14 +1793,14 @@ func setHostSwitchSpecInSchema(d *schema.ResourceData, spec *data.StructValue) e
 				pnics = append(pnics, e)
 			}
 			elem["pnic"] = pnics
-			elem["portgroup_transport_zone_id"] = sw.PortgroupTransportZoneId
+			elem["portgroup_transport_zone"] = sw.PortgroupTransportZoneId
 			var tnpSubConfig []map[string]interface{}
 			for _, tnpsc := range sw.TransportNodeProfileSubConfigs {
 				e := make(map[string]interface{})
 				var hsCfgOpts []map[string]interface{}
 				hsCfgOpt := make(map[string]interface{})
 				hsCfgOpt["host_switch_id"] = tnpsc.HostSwitchConfigOption.HostSwitchId
-				hsCfgOpt["host_switch_profile_id"] = setHostSwitchProfileIDsInSchema(tnpsc.HostSwitchConfigOption.HostSwitchProfileIds)
+				hsCfgOpt["host_switch_profile"] = setHostSwitchProfileIDsInSchema(tnpsc.HostSwitchConfigOption.HostSwitchProfileIds)
 				hsCfgOpt["ip_assignment"], err = setIPAssignmentInSchema(tnpsc.HostSwitchConfigOption.IpAssignmentSpec)
 				if err != nil {
 					return err
@@ -1856,12 +1856,12 @@ func setTransportZoneEndpointInSchema(endpoints []model.TransportZoneEndPoint) i
 	var endpointList []map[string]interface{}
 	for _, endpoint := range endpoints {
 		e := make(map[string]interface{})
-		e["transport_zone_id"] = endpoint.TransportZoneId
+		e["transport_zone"] = endpoint.TransportZoneId
 		var tzpIDs []string
 		for _, tzpID := range endpoint.TransportZoneProfileIds {
 			tzpIDs = append(tzpIDs, *tzpID.ProfileId)
 		}
-		e["transport_zone_profile_id"] = tzpIDs
+		e["transport_zone_profile"] = tzpIDs
 		endpointList = append(endpointList, e)
 	}
 	return endpointList
@@ -1930,7 +1930,7 @@ func setIPAssignmentInSchema(spec *data.StructValue) (interface{}, error) {
 			return nil, errs[0]
 		}
 		ipAsEntry := entry.(model.StaticIpPoolSpec)
-		elem["static_ip_pool_id"] = ipAsEntry.IpPoolId
+		elem["static_ip_pool"] = ipAsEntry.IpPoolId
 	}
 	return []interface{}{elem}, nil
 }

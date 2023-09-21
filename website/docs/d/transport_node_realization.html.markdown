@@ -19,14 +19,14 @@ resource "nsxt_transport_node" "test" {
     host_switch_mode = "STANDARD"
     host_switch_type = "NVDS"
     ip_assignment {
-      static_ip_pool_id = data.nsxt_ip_pool.ipp1.id
+      static_ip_pool = data.nsxt_ip_pool.ipp1.id
     }
     transport_zone_endpoint {
-      transport_zone_id         = data.nsxt_transport_zone.tz1.id
-      transport_zone_profile_id = ["52035bb3-ab02-4a08-9884-18631312e50a"]
+      transport_zone         = data.nsxt_transport_zone.tz1.id
+      transport_zone_profile = ["52035bb3-ab02-4a08-9884-18631312e50a"]
     }
-    host_switch_profile_id = [nsxt_uplink_host_switch_profile.hsw_profile1.id]
-    is_migrate_pnics       = false
+    host_switch_profile = [nsxt_uplink_host_switch_profile.hsw_profile1.id]
+    is_migrate_pnics    = false
     pnic {
       device_name = "fp-eth0"
       uplink_name = "uplink1"
