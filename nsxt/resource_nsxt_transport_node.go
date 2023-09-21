@@ -1406,10 +1406,13 @@ func getHostSwitchSpecFromSchema(d *schema.ResourceData) (*data.StructValue, err
 			IpAssignmentSpec:               iPAssignmentSpec,
 			IsMigratePnics:                 &isMigratePNics,
 			Pnics:                          pNics,
-			PortgroupTransportZoneId:       &portGroupTZID,
 			TransportNodeProfileSubConfigs: transportNodeSubProfileCfg,
 			TransportZoneEndpoints:         transportZoneEndpoints,
 			Uplinks:                        uplinks,
+		}
+		if portGroupTZID != "" {
+			hsw.PortgroupTransportZoneId = &portGroupTZID
+
 		}
 
 		hostSwitchSpec := model.StandardHostSwitchSpec{
