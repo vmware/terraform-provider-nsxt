@@ -796,7 +796,14 @@ func (processor logRequestProcessor) Process(req *http.Request) error {
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Printf("Issuing request towards NSX:\n%s", reqDump)
+
+	// Replace sensitive information in HTTP headers
+	authHeaderRegexp := regexp.MustCompile("(?i)Authorization:.*")
+	cspHeaderRegexp := regexp.MustCompile("(?i)Csp-Auth-Token:.*")
+	replaced := authHeaderRegexp.ReplaceAllString(string(reqDump), "<Omitted Authorization header>")
+	replaced = cspHeaderRegexp.ReplaceAllString(replaced, "<Omitted Csp-Auth-Token header>")
+
+	log.Printf("Issuing request towards NSX:\n%s", replaced)
 	return nil
 }
 
