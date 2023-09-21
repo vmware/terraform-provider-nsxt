@@ -5,7 +5,7 @@ page_title: "NSXT: compute_manager"
 description: A Compute Manager data source.
 ---
 
-# nsxt_mac_pool
+# nsxt_compute_manager
 
 This data source provides information about a Compute Manager configured on NSX.
 
@@ -26,5 +26,5 @@ data "nsxt_compute_manager" "test_vcenter" {
 
 In addition to arguments listed above, the following attributes are exported:
 
-* `description` - The description of the MAC pool.
+* `description` - The description of the Compute Manager.
 * `server` - IP address or hostname of compute manager.

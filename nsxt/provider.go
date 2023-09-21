@@ -295,6 +295,7 @@ func Provider() *schema.Provider {
 			"nsxt_compute_manager":                  dataSourceNsxtComputeManager(),
 			"nsxt_transport_node_realization":       dataSourceNsxtTransportNodeRealization(),
 			"nsxt_failure_domain":                   dataSourceNsxtFailureDomain(),
+			"nsxt_compute_collection":               dataSourceNsxtComputeCollection(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
