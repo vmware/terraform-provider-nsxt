@@ -1,5 +1,5 @@
 ---
-subcategory: "Fabric"
+subcategory: "Beta"
 layout: "nsxt"
 page_title: "NSXT: failure_domain"
 description: Failure Domain data source.

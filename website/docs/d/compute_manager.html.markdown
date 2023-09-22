@@ -1,5 +1,5 @@
 ---
-subcategory: "Fabric"
+subcategory: "Beta"
 layout: "nsxt"
 page_title: "NSXT: compute_manager"
 description: A Compute Manager data source.

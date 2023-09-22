@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - Multi Tenancy"
+subcategory: "Multitenancy"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_project"
 description: A resource to configure a Project.
