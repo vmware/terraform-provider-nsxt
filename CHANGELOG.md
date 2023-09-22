@@ -1,3 +1,25 @@
+## 3.3.2 (September 22, 2023)
+
+IMPROVEMENTS:
+* Support on-demand connection init in the provider. This behavior is controlled with `on_demand_connection` flag and is useful is NSX manager is not available at the time of plan/apply ([#948](https://github.com/vmware/terraform-provider-nsxt/pull/948))
+* `resource/nsxt_policy_tier1_gateway`: Support `type` argument. This argument helps with auto-configuring route advertisements and provides the user experience that is consistent with UI on VMC ([#909](https://github.com/vmware/terraform-provider-nsxt/pull/909))
+* Improve debug logging by dumping NSX API requests and responses when `TF_LOG_PROVIDER_NSX_HTTP` env variable is set ([#963](https://github.com/vmware/terraform-provider-nsxt/pull/963))
+
+BUG FIXES:
+* `resource/nsxt_policy_security_policy`, `resource/nsxt_policy_gateway_policy`, `resource/nsxt_policy_ids_policy`: Fix rule ordering issue by auto-assigning `sequence_number`. ([#967](https://github.com/vmware/terraform-provider-nsxt/pull/967))
+* `resource/nsxt_policy_group`: Fix `group_type` assignment on VMC by using `node/version` API to determine underlying NSX version ([#970](https://github.com/vmware/terraform-provider-nsxt/pull/970))
+* `resource/nsxt_nat_rule`: Ensure compatibility with NSX 4.1.0 and above by replacing removed 'nat_pass' property with 'firewall_match' ([#950](https://github.com/vmware/terraform-provider-nsxt/pull/950))
+
+EXPERIMENTAL FEATURES:
+* `data/nsxt_policy_gateway_prefix_list`
+* `data/nsxt_policy_gateway_route_map`
+* `data/nsxt_policy_project`
+
+* `resource/nsxt_policy_vni_pool`
+* `resource/nsxt_policy_project`
+
+* Multitenancy support in selected resources, controlled by `context` argument
+* Fabric resources and data sources (detailed list coming with next feature release)
 
 ## 3.3.1 (May 30, 2023)
 

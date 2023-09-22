@@ -1,5 +1,5 @@
 ---
-subcategory: "Fabric"
+subcategory: "Beta"
 layout: "nsxt"
 page_title: "NSXT: nsxt_uplink_host_switch_profile"
 description: A resource to configure a uplink host switch profile in NSX Policy.
