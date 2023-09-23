@@ -59,10 +59,10 @@ The following arguments are supported:
         * `static_ip_mac` - (Optional) IP and MAC assignment specification for Static IP List.
             * `default_gateway` - (Required) Gateway IP.
             * `subnet_mask` - (Required) Subnet mask.
-            * `ip_mac_pair` - (Required) List of IPs and MACs for transport node host switch virtual tunnel endpoints.
-                * `ip` - (Required) IP address.
-                * `mac` - (Required) MAC address.
-                * `static_ip_pool` - (Optional) IP assignment specification for Static IP Pool.
+        * `ip_mac_pair` - (Required) List of IPs and MACs for transport node host switch virtual tunnel endpoints.
+            * `ip` - (Required) IP address.
+            * `mac` - (Required) MAC address.
+            * `static_ip_pool` - (Optional) IP assignment specification for Static IP Pool.
     * `is_migrate_pnics` - (Optional) Migrate any pnics which are in use.
     * `pnic` - (Optional) Physical NICs connected to the host switch.
         * `device_name` - (Required) Device name or key.
@@ -81,10 +81,10 @@ The following arguments are supported:
                 * `static_ip_mac` - (Optional) IP and MAC assignment specification for Static IP List.
                     * `default_gateway` - (Required) Gateway IP.
                     * `subnet_mask` - (Required) Subnet mask.
-                    * `ip_mac_pair` - (Required) List of IPs and MACs for transport node host switch virtual tunnel endpoints.
-                        * `ip` - (Required) IP address.
-                        * `mac` - (Required) MAC address.
-                        * `static_ip_pool` - (Optional) IP assignment specification for Static IP Pool.
+                * `ip_mac_pair` - (Required) List of IPs and MACs for transport node host switch virtual tunnel endpoints.
+                    * `ip` - (Required) IP address.
+                    * `mac` - (Required) MAC address.
+                    * `static_ip_pool` - (Optional) IP assignment specification for Static IP Pool.
             * `uplink` - (Optional) Uplink/LAG of VMware vSphere Distributed Switch connected to the HostSwitch.
                 * `uplink_name` - (Required) Uplink name from UplinkHostSwitch profile.
                 * `vds_lag_name` - (Optional) Link Aggregation Group (LAG) name of Virtual Distributed Switch.
