@@ -20,7 +20,7 @@ func TestAccResourceNsxtVMTags_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccTestMP(t)
+			testAccTestDeprecated(t)
 			testAccEnvDefined(t, "NSXT_TEST_VM_ID")
 			testAccOnlyLocalManager(t)
 		},
@@ -59,7 +59,7 @@ func TestAccResourceNsxtVMTags_import_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccTestMP(t)
+			testAccTestDeprecated(t)
 			testAccEnvDefined(t, "NSXT_TEST_VM_ID")
 			testAccOnlyLocalManager(t)
 		},

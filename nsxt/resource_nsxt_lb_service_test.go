@@ -17,7 +17,7 @@ func TestAccResourceNsxtLbService_basic(t *testing.T) {
 	testResourceName := "nsxt_lb_service.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestDeprecated(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLbServiceCheckDestroy(state, name)
@@ -60,7 +60,7 @@ func TestAccResourceNsxtLbService_withServers(t *testing.T) {
 	updatedLogLevel := "INFO"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestDeprecated(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLbServiceCheckDestroy(state, name)
@@ -99,7 +99,7 @@ func TestAccResourceNsxtLbService_importBasic(t *testing.T) {
 	testResourceName := "nsxt_lb_service.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestDeprecated(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLbServiceCheckDestroy(state, name)

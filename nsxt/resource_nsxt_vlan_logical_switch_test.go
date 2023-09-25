@@ -23,7 +23,7 @@ func TestAccResourceNsxtVlanLogicalSwitch_basic(t *testing.T) {
 	updatedvlan := "2"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccTestMP(t); testAccOnlyLocalManager(t) },
+		PreCheck:  func() { testAccPreCheck(t); testAccTestDeprecated(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLogicalSwitchCheckDestroy(state, updateSwitchName, "nsxt_vlan_logical_switch")
@@ -64,7 +64,7 @@ func TestAccResourceNsxtVlanLogicalSwitch_withProfiles(t *testing.T) {
 	profileType := "SwitchSecuritySwitchingProfile"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccTestMP(t); testAccOnlyLocalManager(t) },
+		PreCheck:  func() { testAccPreCheck(t); testAccTestDeprecated(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			// Verify that the LS was deleted
@@ -114,7 +114,7 @@ func TestAccResourceNsxtVlanLogicalSwitch_withMacPool(t *testing.T) {
 	novlan := "0"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccTestMP(t); testAccOnlyLocalManager(t) },
+		PreCheck:  func() { testAccPreCheck(t); testAccTestDeprecated(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLogicalSwitchCheckDestroy(state, switchName, "nsxt_vlan_logical_switch")
@@ -147,7 +147,7 @@ func TestAccResourceNsxtVlanLogicalSwitch_importBasic(t *testing.T) {
 	transportZoneName := getVlanTransportZoneName()
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccTestMP(t); testAccOnlyLocalManager(t) },
+		PreCheck:  func() { testAccPreCheck(t); testAccTestDeprecated(t); testAccOnlyLocalManager(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLogicalSwitchCheckDestroy(state, switchName, "nsxt_vlan_logical_switch")

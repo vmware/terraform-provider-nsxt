@@ -20,7 +20,7 @@ func TestAccResourceNsxtNSGroup_basic(t *testing.T) {
 	testResourceName := "nsxt_ns_group.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestDeprecated(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXNSGroupCheckDestroy(state, updateGrpName)
@@ -56,7 +56,7 @@ func TestAccResourceNsxtNSGroup_nested(t *testing.T) {
 	testResourceName := "nsxt_ns_group.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestDeprecated(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXNSGroupCheckDestroy(state, updateGrpName)
@@ -90,7 +90,7 @@ func TestAccResourceNsxtNSGroup_withCriteria(t *testing.T) {
 	transportZoneName := getOverlayTransportZoneName()
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestDeprecated(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXNSGroupCheckDestroy(state, grpName)
@@ -125,7 +125,7 @@ func TestAccResourceNsxtNSGroup_importBasic(t *testing.T) {
 	testResourceName := "nsxt_ns_group.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestDeprecated(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXNSGroupCheckDestroy(state, grpName)
@@ -148,7 +148,7 @@ func TestAccResourceNsxtNSGroup_importWithCriteria(t *testing.T) {
 	testResourceName := "nsxt_ns_group.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestDeprecated(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXNSGroupCheckDestroy(state, grpName)

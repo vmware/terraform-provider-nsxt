@@ -21,7 +21,7 @@ func TestAccResourceNsxtLbHttpRequestRewriteRule_basic(t *testing.T) {
 	updatedMatchType := "ENDS_WITH"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestDeprecated(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLbHTTPRequestRewriteRuleCheckDestroy(state, name)
@@ -175,7 +175,7 @@ func TestAccResourceNsxtLbHttpRequestRewriteRule_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
 	resourceName := "nsxt_lb_http_request_rewrite_rule.test"
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestDeprecated(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXLbHTTPRequestRewriteRuleCheckDestroy(state, name)

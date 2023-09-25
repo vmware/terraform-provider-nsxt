@@ -15,7 +15,7 @@ func TestAccDataSourceNsxtComputeCollection_basic(t *testing.T) {
 	testResourceName := "data.nsxt_compute_collection.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{

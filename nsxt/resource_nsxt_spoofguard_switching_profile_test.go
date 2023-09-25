@@ -18,7 +18,7 @@ func TestAccResourceNsxtSpoofGuardSwitchingProfile_basic(t *testing.T) {
 	testResourceName := "nsxt_spoofguard_switching_profile.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestDeprecated(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXSpoofguardSwitchingProfileCheckDestroy(state, updatedName)
@@ -59,7 +59,7 @@ func TestAccResourceNsxtSpoofGuardSwitchingProfile_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
 	testResourceName := "nsxt_spoofguard_switching_profile.test"
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestDeprecated(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXSpoofguardSwitchingProfileCheckDestroy(state, name)
