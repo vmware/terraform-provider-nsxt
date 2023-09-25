@@ -23,7 +23,7 @@ func TestAccResourceNsxtLogicalRouterCentralizedServicePort_basic(t *testing.T) 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
-			testAccTestMP(t)
+			testAccTestDeprecated(t)
 			testAccPreCheck(t)
 			testAccNSXVersion(t, "2.3.0")
 		},
@@ -73,7 +73,7 @@ func TestAccResourceNsxtLogicalRouterCentralizedServicePort_onTier0(t *testing.T
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
-			testAccTestMP(t)
+			testAccTestDeprecated(t)
 			testAccPreCheck(t)
 			testAccNSXVersion(t, "2.3.0")
 		},
@@ -122,7 +122,7 @@ func TestAccResourceNsxtLogicalRouterCentralizedServicePort_importBasic(t *testi
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
-			testAccTestMP(t)
+			testAccTestDeprecated(t)
 			testAccPreCheck(t)
 			testAccNSXVersion(t, "2.3.0")
 		},
@@ -152,7 +152,7 @@ func TestAccResourceNsxtLogicalRouterCentralizedServicePort_onTier1(t *testing.T
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
-			testAccTestMP(t)
+			testAccTestDeprecated(t)
 			testAccPreCheck(t)
 			testAccNSXVersion(t, "2.3.0")
 		},

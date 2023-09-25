@@ -24,7 +24,7 @@ func TestAccResourceNsxtLbCookiePersistenceProfile_basic(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
-			testAccTestMP(t)
+			testAccTestDeprecated(t)
 			testAccPreCheck(t)
 			testAccNSXVersion(t, "2.3.0")
 		},
@@ -78,7 +78,7 @@ func TestAccResourceNsxtLbCookiePersistenceProfile_insertMode(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
-			testAccTestMP(t)
+			testAccTestDeprecated(t)
 			testAccPreCheck(t)
 			testAccNSXVersion(t, "2.3.0")
 		},
@@ -137,7 +137,7 @@ func TestAccResourceNsxtLbCookiePersistenceProfile_importBasic(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
-			testAccTestMP(t)
+			testAccTestDeprecated(t)
 			testAccPreCheck(t)
 			testAccNSXVersion(t, "2.3.0")
 		},

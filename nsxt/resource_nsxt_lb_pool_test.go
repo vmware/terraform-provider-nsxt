@@ -26,7 +26,7 @@ func TestAccResourceNsxtLbPool_basic(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
-			testAccTestMP(t)
+			testAccTestDeprecated(t)
 			testAccPreCheck(t)
 			testAccNSXVersion(t, "2.3.0")
 		},
@@ -72,7 +72,7 @@ func TestAccResourceNsxtLbPool_withMonitors(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
-			testAccTestMP(t)
+			testAccTestDeprecated(t)
 			testAccPreCheck(t)
 			testAccNSXVersion(t, "2.3.0")
 		},
@@ -124,7 +124,7 @@ func TestAccResourceNsxtLbPool_withIpSnat(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
-			testAccTestMP(t)
+			testAccTestDeprecated(t)
 			testAccPreCheck(t)
 			testAccNSXVersion(t, "2.3.0")
 		},
@@ -179,7 +179,7 @@ func TestAccResourceNsxtLbPool_withMember(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
-			testAccTestMP(t)
+			testAccTestDeprecated(t)
 			testAccPreCheck(t)
 			testAccNSXVersion(t, "2.3.0")
 		},
@@ -233,7 +233,7 @@ func TestAccResourceNsxtLbPool_withMemberGroup(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
-			testAccTestMP(t)
+			testAccTestDeprecated(t)
 			testAccPreCheck(t)
 			testAccNSXVersion(t, "2.3.0")
 		},
@@ -288,7 +288,7 @@ func TestAccResourceNsxtLbPool_importBasic(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
-			testAccTestMP(t)
+			testAccTestDeprecated(t)
 			testAccPreCheck(t)
 			testAccNSXVersion(t, "2.3.0")
 		},

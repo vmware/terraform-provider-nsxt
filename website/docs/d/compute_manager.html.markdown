@@ -1,5 +1,5 @@
 ---
-subcategory: "Fabric"
+subcategory: "Beta"
 layout: "nsxt"
 page_title: "NSXT: compute_manager"
 description: A Compute Manager data source.
@@ -8,6 +8,7 @@ description: A Compute Manager data source.
 # nsxt_compute_manager
 
 This data source provides information about a Compute Manager configured on NSX.
+When only single Compute Manager is present on NSX, no need to specify any filter in the data source (see example below)
 
 ## Example Usage
 

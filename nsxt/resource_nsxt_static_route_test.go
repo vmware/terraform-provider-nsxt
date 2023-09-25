@@ -30,7 +30,7 @@ func testAccResourceNsxtStaticRoute(t *testing.T, tier string) {
 	transportZoneName := getOverlayTransportZoneName()
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestDeprecated(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXStaticRouteCheckDestroy(state, updateName)
@@ -81,7 +81,7 @@ func testAccResourceNsxtStaticRouteImport(t *testing.T, tier string) {
 	transportZoneName := getOverlayTransportZoneName()
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestDeprecated(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXStaticRouteCheckDestroy(state, name)

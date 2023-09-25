@@ -295,6 +295,7 @@ func Provider() *schema.Provider {
 			"nsxt_compute_manager":                  dataSourceNsxtComputeManager(),
 			"nsxt_transport_node_realization":       dataSourceNsxtTransportNodeRealization(),
 			"nsxt_failure_domain":                   dataSourceNsxtFailureDomain(),
+			"nsxt_compute_collection":               dataSourceNsxtComputeCollection(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -428,6 +429,7 @@ func Provider() *schema.Provider {
 			"nsxt_transport_node":                          resourceNsxtTransportNode(),
 			"nsxt_failure_domain":                          resourceNsxtFailureDomain(),
 			"nsxt_cluster_virtual_ip":                      resourceNsxtClusterVirualIP(),
+			"nsxt_policy_host_transport_node_profile":      resourceNsxtPolicyHostTransportNodeProfile(),
 		},
 
 		ConfigureFunc: providerConfigure,
@@ -794,7 +796,14 @@ func (processor logRequestProcessor) Process(req *http.Request) error {
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Printf("Issuing request towards NSX:\n%s", reqDump)
+
+	// Replace sensitive information in HTTP headers
+	authHeaderRegexp := regexp.MustCompile("(?i)Authorization:.*")
+	cspHeaderRegexp := regexp.MustCompile("(?i)Csp-Auth-Token:.*")
+	replaced := authHeaderRegexp.ReplaceAllString(string(reqDump), "<Omitted Authorization header>")
+	replaced = cspHeaderRegexp.ReplaceAllString(replaced, "<Omitted Csp-Auth-Token header>")
+
+	log.Printf("Issuing request towards NSX:\n%s", replaced)
 	return nil
 }
 

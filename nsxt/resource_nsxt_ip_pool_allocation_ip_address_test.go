@@ -25,7 +25,7 @@ func TestAccResourceNsxtIPPoolAllocationIPAddress_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
-			testAccTestMP(t)
+			testAccTestDeprecated(t)
 			testAccPreCheck(t)
 			testAccEnvDefined(t, "NSXT_TEST_IP_POOL")
 		},
@@ -51,7 +51,7 @@ func TestAccResourceNsxtIPPoolAllocationIPAddress_import(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccTestMP(t)
+			testAccTestDeprecated(t)
 			testAccEnvDefined(t, "NSXT_TEST_IP_POOL")
 			testAccOnlyLocalManager(t)
 		},

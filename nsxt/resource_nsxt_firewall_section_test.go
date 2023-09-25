@@ -21,7 +21,7 @@ func TestAccResourceNsxtFirewallSection_basic(t *testing.T) {
 	tos := ""
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestDeprecated(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXFirewallSectionCheckDestroy(state, updateSectionName)
@@ -75,7 +75,7 @@ target_id   = "${nsxt_ns_group.grp2.id}"
 }`
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestDeprecated(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXFirewallSectionCheckDestroy(state, sectionName)
@@ -121,7 +121,7 @@ func TestAccResourceNsxtFirewallSection_withRules(t *testing.T) {
 	ruleTos := ""
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestDeprecated(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXFirewallSectionCheckDestroy(state, sectionName)
@@ -170,7 +170,7 @@ func TestAccResourceNsxtFirewallSection_withRulesAndTags(t *testing.T) {
 	tos := ""
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestDeprecated(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXFirewallSectionCheckDestroy(state, sectionName)
@@ -233,7 +233,7 @@ applied_to {
 }`
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestDeprecated(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXFirewallSectionCheckDestroy(state, sectionName)
@@ -277,7 +277,7 @@ func TestAccResourceNsxtFirewallSection_ordered(t *testing.T) {
 	testResourceNames := [4]string{"nsxt_firewall_section.test1", "nsxt_firewall_section.test2", "nsxt_firewall_section.test3", "nsxt_firewall_section.test4"}
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestDeprecated(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			for i := 0; i <= 3; i++ {
@@ -336,7 +336,7 @@ func TestAccResourceNsxtFirewallSection_edge(t *testing.T) {
 		PreCheck: func() {
 			testAccOnlyLocalManager(t)
 			testAccPreCheck(t)
-			testAccTestMP(t)
+			testAccTestDeprecated(t)
 			testAccNSXVersion(t, "2.4.0")
 		},
 		Providers: testAccProviders,
@@ -383,7 +383,7 @@ func TestAccResourceNsxtFirewallSection_importBasic(t *testing.T) {
 	tos := string("")
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestDeprecated(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXFirewallSectionCheckDestroy(state, sectionName)
@@ -409,7 +409,7 @@ func TestAccResourceNsxtFirewallSection_importWithRules(t *testing.T) {
 	tos := string("")
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestDeprecated(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXFirewallSectionCheckDestroy(state, sectionName)
@@ -437,7 +437,7 @@ target_id = "${nsxt_ns_group.grp1.id}"
 }`
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestMP(t); testAccPreCheck(t) },
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestDeprecated(t); testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXFirewallSectionCheckDestroy(state, sectionName)

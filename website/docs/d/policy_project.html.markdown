@@ -1,5 +1,5 @@
 ---
-subcategory: "Policy - Multi Tenancy"
+subcategory: "Multitenancy"
 layout: "nsxt"
 page_title: "NSXT: policy_project"
 description: Policy Project data source.
