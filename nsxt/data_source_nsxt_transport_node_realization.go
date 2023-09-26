@@ -75,7 +75,7 @@ func dataSourceNsxtTransportNodeRealizationRead(d *schema.ResourceData, m interf
 		Refresh: func() (interface{}, string, error) {
 			state, err := client.Get(id)
 			if err != nil {
-				return state, model.TransportNodeState_STATE_ERROR, logAPIError("Error while waiting for realization of transport node", err)
+				return state, model.TransportNodeState_STATE_ERROR, logAPIError("Error while waiting for realization of Transport Node", err)
 			}
 
 			log.Printf("[DEBUG] Current realization state for Transport Node %s is %s", id, *state.State)
