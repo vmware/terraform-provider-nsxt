@@ -11,8 +11,8 @@ import (
 )
 
 func TestAccDataSourceNsxtComputeManager_basic(t *testing.T) {
-	ComputeManagerName := getComputeManagerName()
-	testResourceName := "data.nsxt_edge_cluster.test"
+	computeManagerName := getComputeManagerName()
+	testResourceName := "data.nsxt_compute_manager.test"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -23,11 +23,32 @@ func TestAccDataSourceNsxtComputeManager_basic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXComputeManagerReadTemplate(ComputeManagerName),
+				Config: testAccNSXComputeManagerReadTemplate(computeManagerName),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(testResourceName, "display_name", ComputeManagerName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", computeManagerName),
 					resource.TestCheckResourceAttrSet(testResourceName, "id"),
-					resource.TestCheckResourceAttrSet(testResourceName, "description"),
+					resource.TestCheckResourceAttrSet(testResourceName, "server"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccDataSourceNsxtComputeManager_single(t *testing.T) {
+	testResourceName := "data.nsxt_compute_manager.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccOnlyLocalManager(t)
+			testAccPreCheck(t)
+		},
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXComputeManagerSingleReadTemplate(),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(testResourceName, "display_name"),
+					resource.TestCheckResourceAttrSet(testResourceName, "id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "server"),
 				),
 			},
@@ -40,4 +61,10 @@ func testAccNSXComputeManagerReadTemplate(name string) string {
 data "nsxt_compute_manager" "test" {
   display_name = "%s"
 }`, name)
+}
+
+func testAccNSXComputeManagerSingleReadTemplate() string {
+	return `
+data "nsxt_compute_manager" "test" {
+}`
 }
