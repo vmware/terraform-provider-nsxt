@@ -1,11 +1,11 @@
 ---
 subcategory: "Beta"
 layout: "nsxt"
-page_title: "NSXT: nsxt_uplink_host_switch_profile"
-description: A host switch profile data source.
+page_title: "NSXT: nsxt_policy_uplink_host_switch_profile"
+description: An uplink host switch profile data source.
 ---
 
-# nsxt_uplink_host_switch_profile
+# nsxt_policy_uplink_host_switch_profile
 
 This data source provides information about uplink host switch profile configured on NSX.
 This data source is applicable to NSX Policy Manager.
@@ -13,7 +13,7 @@ This data source is applicable to NSX Policy Manager.
 ## Example Usage
 
 ```hcl
-data "nsxt_uplink_host_switch_profile" "uplink_host_switch_profile" {
+data "nsxt_policy_uplink_host_switch_profile" "uplink_host_switch_profile" {
   display_name = "uplink_host_switch_profile1"
 }
 ```

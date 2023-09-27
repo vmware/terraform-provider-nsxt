@@ -1,11 +1,11 @@
 ---
 subcategory: "Beta"
 layout: "nsxt"
-page_title: "NSXT: nsxt_uplink_host_switch_profile"
+page_title: "NSXT: nsxt_policy_uplink_host_switch_profile"
 description: A resource to configure a uplink host switch profile in NSX Policy.
 ---
 
-# nsxt_uplink_host_switch_profile
+# nsxt_policy_uplink_host_switch_profile
 
 This resource provides a method for the management of a uplink host switch profile which can be used within NSX Policy.
 
@@ -14,7 +14,7 @@ This resource is applicable to NSX Policy Manager.
 ## Example Usage
 
 ```hcl
-resource "nsxt_uplink_host_switch_profile" "uplink_host_switch_profile" {
+resource "nsxt_policy_uplink_host_switch_profile" "uplink_host_switch_profile" {
   description  = "Uplink host switch profile provisioned by Terraform"
   display_name = "uplink_host_switch_profile"
 
