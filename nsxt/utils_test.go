@@ -27,7 +27,8 @@ import (
 // Default names or prefixed of NSX backend existing objects used in the acceptance tests.
 // Those defaults can be overridden using environment parameters
 const tier0RouterDefaultName string = "PLR-1 LogicalRouterTier0"
-const edgeClusterDefaultName string = "edgecluster1"
+const edgeClusterDefaultName string = "EDGECLUSTER1"
+const computeCollectionDefaultName string = "Cluster-1"
 const vlanTransportZoneName string = "transportzone2"
 const overlayTransportZoneNamePrefix string = "1-transportzone"
 const macPoolDefaultName string = "DefaultMacPool"
@@ -117,7 +118,7 @@ func getEdgeClusterName() string {
 func getComputeCollectionName() string {
 	name := os.Getenv("NSXT_TEST_COMPUTE_COLLECTION")
 	if name == "" {
-		name = edgeClusterDefaultName
+		name = computeCollectionDefaultName
 	}
 	return name
 }

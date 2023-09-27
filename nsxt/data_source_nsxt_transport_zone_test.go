@@ -15,7 +15,12 @@ func TestAccDataSourceNsxtTransportZone_basic(t *testing.T) {
 	testResourceName := "data.nsxt_transport_zone.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestDeprecated(t); testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccOnlyLocalManager(t)
+			testAccTestDeprecated(t)
+			testAccPreCheck(t)
+			testAccNSXVersion(t, "4.0.0")
+		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
