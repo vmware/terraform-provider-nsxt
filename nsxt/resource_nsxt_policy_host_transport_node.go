@@ -79,7 +79,7 @@ func getFabricHostNodeSchema() *schema.Schema {
 			},
 		},
 	}
-	maps.Copy(elemSchema, getHostNodeSchemaAddlElements())
+	maps.Copy(elemSchema, getSharedHostNodeSchemaAttrs())
 	s := schema.Schema{
 		Type:     schema.TypeList,
 		MaxItems: 1,
@@ -265,7 +265,7 @@ func resourceNsxtPolicyHostTransportNodeUpdate(d *schema.ResourceData, m interfa
 		return err
 	}
 
-	log.Printf("[INFO] Updateing HostTransportNode with ID %s", id)
+	log.Printf("[INFO] Updating HostTransportNode with ID %s", id)
 	err = policyHostTransportNodePatch(siteID, epID, id, d, m)
 	if err != nil {
 		return handleUpdateError("HostTransportNode", id, err)

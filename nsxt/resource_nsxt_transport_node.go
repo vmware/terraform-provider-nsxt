@@ -494,7 +494,7 @@ func getEdgeNodeSchema() *schema.Schema {
 	return getNodeSchema(s, false)
 }
 
-func getHostNodeSchemaAddlElements() map[string]*schema.Schema {
+func getSharedHostNodeSchemaAttrs() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"host_credential": {
 			Type:        schema.TypeList,
@@ -543,7 +543,7 @@ func getHostNodeSchemaAddlElements() map[string]*schema.Schema {
 }
 
 func getHostNodeSchema() *schema.Schema {
-	s := getHostNodeSchemaAddlElements()
+	s := getSharedHostNodeSchemaAttrs()
 	return getNodeSchema(s, false)
 }
 

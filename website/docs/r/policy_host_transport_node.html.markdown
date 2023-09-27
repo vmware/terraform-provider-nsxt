@@ -35,14 +35,14 @@ resource "nsxt_policy_host_transport_node" "test" {
   standard_host_switch {
     host_switch_mode    = "STANDARD"
     host_switch_type    = "NVDS"
-    host_switch_profile = ["/infra/host-switch-profiles/2812c1e9-00e6-471a-9678-873c101d8f85"]
+    host_switch_profile = [data.nsxt_uplink_host_switch_profile.hsw_profile1.path]
 
     ip_assignment {
       assigned_by_dhcp = true
     }
 
     transport_zone_endpoint {
-      transport_zone = "/infra/sites/default/enforcement-points/default/transport-zones/1b3a2f36-bfd1-443e-a0f6-4de01abc963e"
+      transport_zone = data.nsxt_transport_zone.tz1.path
     }
 
     pnic {
@@ -84,7 +84,7 @@ The following arguments are supported:
     * `numa_node_index` - (Required) Unique index of the Non Uniform Memory Access (NUMA) node.
   * `host_switch_id` - (Optional) The host switch id. This ID will be used to reference a host switch.
   * `host_switch_mode` - (Optional) Operational mode of a HostSwitch. Accepted values - 'STANDARD', 'ENS', 'ENS_INTERRUPT' or 'LEGACY'. The default value is 'STANDARD'.
-  * `host_switch_profile` - (Optional) Identifiers of host switch profiles to be associated with this host switch.
+  * `host_switch_profile` - (Optional) Policy path of host switch profiles to be associated with this host switch.
   * `host_switch_type` - (Optional) Type of HostSwitch. Accepted values - 'NVDS' or 'VDS'. The default value is 'NVDS'.
   * `ip_assignment` - (Required) - Specification for IPs to be used with host switch virtual tunnel endpoints. Should contain exatly one of the below:
     * `assigned_by_dhcp` - (Optional) Enables DHCP assignment.
@@ -98,7 +98,7 @@ The following arguments are supported:
       * `ip_mac_pair` - (Required) List of IPs and MACs for transport node host switch virtual tunnel endpoints.
         * `ip` - (Required) IP address.
         * `mac` - (Required) MAC address.
-        * `static_ip_pool` - (Optional) IP assignment specification for Static IP Pool.
+        * `static_ip_pool` - (Optional) Policy path of Static IP Pool used for IP assignment specification.
   * `is_migrate_pnics` - (Optional) Migrate any pnics which are in use.
   * `pnic` - (Optional) Physical NICs connected to the host switch.
     * `device_name` - (Required) Device name or key.
