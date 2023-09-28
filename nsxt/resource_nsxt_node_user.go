@@ -38,7 +38,7 @@ func resourceNsxtUsers() *schema.Resource {
 			},
 			"password": {
 				Type:        schema.TypeString,
-				Description: "Old password for the user",
+				Description: "Password for the user",
 				Sensitive:   true,
 				Optional:    true,
 			},
