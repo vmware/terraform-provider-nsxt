@@ -40,7 +40,6 @@ func resourceNsxtPolicyUserManagementRoleBinding() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"nsx_id":       getNsxIDSchema(),
 			"display_name": getDataSourceDisplayNameSchema(),
 			"description":  getDataSourceDescriptionSchema(),
 			"revision":     getRevisionSchema(),
@@ -243,7 +242,6 @@ func resourceNsxtPolicyUserManagementRoleBindingCreate(d *schema.ResourceData, m
 
 	id := *rbObj.Id
 	d.SetId(id)
-	d.Set("nsx_id", id)
 
 	return resourceNsxtPolicyUserManagementRoleBindingRead(d, m)
 }
@@ -266,7 +264,6 @@ func resourceNsxtPolicyUserManagementRoleBindingRead(d *schema.ResourceData, m i
 	d.Set("display_name", obj.DisplayName)
 	d.Set("description", obj.Description)
 	setPolicyTagsInSchema(d, obj.Tags)
-	d.Set("nsx_id", id)
 	d.Set("revision", obj.Revision)
 	d.Set("name", obj.Name)
 	d.Set("identity_source_id", obj.IdentitySourceId)
