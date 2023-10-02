@@ -398,7 +398,7 @@ func resourceNsxtComputeManagerRead(d *schema.ResourceData, m interface{}) error
 
 func setCredentialValuesInSchema(d *schema.ResourceData, credential *data.StructValue) error {
 	converter := bindings.NewTypeConverter()
-	elem := make(map[string]interface{})
+	parentElem := getElemOrEmptyMapFromSchema(d, "credential")
 
 	base, errs := converter.ConvertToGolang(credential, model.LoginCredentialBindingType())
 	if errs != nil {
@@ -407,7 +407,8 @@ func setCredentialValuesInSchema(d *schema.ResourceData, credential *data.Struct
 	credType := base.(model.LoginCredential).CredentialType
 
 	switch credType {
-	case "saml_login":
+	case model.SamlTokenLoginCredential__TYPE_IDENTIFIER:
+		elem := getElemOrEmptyMapFromMap(parentElem, "saml_login")
 		entry, errs := converter.ConvertToGolang(credential, model.SamlTokenLoginCredentialBindingType())
 		if errs != nil {
 			return errs[0]
@@ -415,8 +416,10 @@ func setCredentialValuesInSchema(d *schema.ResourceData, credential *data.Struct
 		credEntry := entry.(model.SamlTokenLoginCredential)
 		elem["thumbprint"] = credEntry.Thumbprint
 		elem["token"] = credEntry.Token
+		parentElem["saml_login"] = []interface{}{elem}
 
-	case "session_login":
+	case model.SessionLoginCredential__TYPE_IDENTIFIER:
+		elem := getElemOrEmptyMapFromMap(parentElem, "session_login")
 		entry, errs := converter.ConvertToGolang(credential, model.SessionLoginCredentialBindingType())
 		if errs != nil {
 			return errs[0]
@@ -424,18 +427,28 @@ func setCredentialValuesInSchema(d *schema.ResourceData, credential *data.Struct
 		credEntry := entry.(model.SessionLoginCredential)
 		elem["session_id"] = credEntry.SessionId
 		elem["thumbprint"] = credEntry.Thumbprint
+		parentElem["session_login"] = []interface{}{elem}
 
-	case "username_password_login":
+	case model.UsernamePasswordLoginCredential__TYPE_IDENTIFIER:
+		elem := getElemOrEmptyMapFromMap(parentElem, "username_password_login")
 		entry, errs := converter.ConvertToGolang(credential, model.UsernamePasswordLoginCredentialBindingType())
 		if errs != nil {
 			return errs[0]
 		}
 		credEntry := entry.(model.UsernamePasswordLoginCredential)
-		elem["username"] = credEntry.Username
+		// Normally NSX won't return credEntry.Username
+		if credEntry.Username != nil {
+			elem["username"] = credEntry.Username
+		}
+		// Normally NSX won't return credEntry.Password
+		if credEntry.Password != nil {
+			elem["password"] = credEntry.Password
+		}
 		elem["thumbprint"] = credEntry.Thumbprint
-		elem["password"] = credEntry.Password
+		parentElem["username_password_login"] = []interface{}{elem}
 
-	case "verifiable_asymmetric_login":
+	case model.VerifiableAsymmetricLoginCredential__TYPE_IDENTIFIER:
+		elem := getElemOrEmptyMapFromMap(parentElem, "verifiable_asymmetric_login")
 		entry, errs := converter.ConvertToGolang(credential, model.VerifiableAsymmetricLoginCredentialBindingType())
 		if errs != nil {
 			return errs[0]
@@ -444,12 +457,13 @@ func setCredentialValuesInSchema(d *schema.ResourceData, credential *data.Struct
 		elem["asymmetric_credential"] = credEntry.AsymmetricCredential
 		elem["credential_key"] = credEntry.CredentialKey
 		elem["credential_verifier"] = credEntry.CredentialVerifier
+		parentElem["verifiable_asymmetric_login"] = []interface{}{elem}
 
 	default:
 		return errors.New("no valid credential found")
 	}
 
-	d.Set("credential", elem)
+	d.Set("credential", []interface{}{parentElem})
 	return nil
 }
 
