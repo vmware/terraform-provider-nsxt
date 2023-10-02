@@ -272,8 +272,8 @@ func testAccNSXGlobalManagerSitePrecheck(t *testing.T) {
 }
 
 func testAccTestDeprecated(t *testing.T) {
-	if os.Getenv("NSXT_TEST_MP") != "true" && os.Getenv("NSXT_TEST_MP") != "1" {
-		t.Skipf("To run MP test suite, please enable NSXT_TEST_MP in your environment.")
+	if os.Getenv("NSXT_TEST_DEPRECATED") != "true" && os.Getenv("NSXT_TEST_DEPRECATED") != "1" {
+		t.Skipf("To run deprecated test suite, please enable NSXT_TEST_DEPRECATED in your environment.")
 	}
 }
 
