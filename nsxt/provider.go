@@ -432,6 +432,7 @@ func Provider() *schema.Provider {
 			"nsxt_cluster_virtual_ip":                      resourceNsxtClusterVirualIP(),
 			"nsxt_policy_host_transport_node_profile":      resourceNsxtPolicyHostTransportNodeProfile(),
 			"nsxt_policy_host_transport_node":              resourceNsxtPolicyHostTransportNode(),
+			"nsxt_edge_high_availability_profile":          resourceNsxtEdgeHighAvailabilityProfile(),
 		},
 
 		ConfigureFunc: providerConfigure,
