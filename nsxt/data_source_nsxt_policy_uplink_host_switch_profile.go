@@ -31,5 +31,5 @@ func dataSourceNsxtUplinkHostSwitchProfileRead(d *schema.ResourceData, m interfa
 		return nil
 	}
 
-	return fmt.Errorf("UplinkHostSwitchProfile with name '%s' was not found", d.Get("display_name").(string))
+	return fmt.Errorf("PolicyUplinkHostSwitchProfile with name '%s' was not found", d.Get("display_name").(string))
 }

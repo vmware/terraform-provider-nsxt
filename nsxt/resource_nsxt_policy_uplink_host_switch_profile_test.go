@@ -59,8 +59,8 @@ var accTestUplinkHostSwitchProfileUpdateAttributes = map[string]string{
 	"named_teaming_policy":         "FAILOVER_ORDER",
 }
 
-func TestAccResourceNsxtUplinkHostSwitchProfile_basic(t *testing.T) {
-	testResourceName := "nsxt_uplink_host_switch_profile.test"
+func TestAccResourceNsxtPolicyUplinkHostSwitchProfile_basic(t *testing.T) {
+	testResourceName := "nsxt_policy_uplink_host_switch_profile.test"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -180,8 +180,8 @@ func TestAccResourceNsxtUplinkHostSwitchProfile_basic(t *testing.T) {
 	})
 }
 
-func TestAccResourceNsxtUplinkHostSwitchProfile_importBasic(t *testing.T) {
-	testResourceName := "nsxt_uplink_host_switch_profile.test"
+func TestAccResourceNsxtPolicyUplinkHostSwitchProfile_importBasic(t *testing.T) {
+	testResourceName := "nsxt_policy_uplink_host_switch_profile.test"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -261,7 +261,7 @@ func testAccNsxtUplinkHostSwitchProfileTemplate(createFlow bool) string {
 		attrMap = accTestUplinkHostSwitchProfileUpdateAttributes
 	}
 	return fmt.Sprintf(`
-resource "nsxt_uplink_host_switch_profile" "test" {
+resource "nsxt_policy_uplink_host_switch_profile" "test" {
   display_name = "%s"
   description  = "%s"
 
@@ -305,15 +305,15 @@ resource "nsxt_uplink_host_switch_profile" "test" {
   }
 }
 
-data "nsxt_uplink_host_switch_profile" "test" {
+data "nsxt_policy_uplink_host_switch_profile" "test" {
   display_name = "%s"
-  depends_on = [nsxt_uplink_host_switch_profile.test]
+  depends_on = [nsxt_policy_uplink_host_switch_profile.test]
 }`, attrMap["display_name"], attrMap["description"], attrMap["mtu"], attrMap["transport_vlan"], attrMap["overlay_encap"], attrMap["lag_name"], attrMap["lag_load_balance_algorithm"], attrMap["lag_mode"], attrMap["lag_number_of_uplinks"], attrMap["lag_timeout_type"], attrMap["teaming_al_uplink_name"], attrMap["teaming_al_uplink_type"], attrMap["teaming_sl_uplink_name"], attrMap["teaming_sl_uplink_type"], attrMap["teaming_policy"], attrMap["named_teaming_al_uplink_name"], attrMap["named_teaming_al_uplink_type"], attrMap["named_teaming_sl_uplink_name"], attrMap["named_teaming_sl_uplink_type"], attrMap["named_teaming_policy"], attrMap["named_teaming_name"], attrMap["display_name"])
 }
 
 func testAccNsxtUplinkHostSwitchProfileMinimalistic() string {
 	return fmt.Sprintf(`
-resource "nsxt_uplink_host_switch_profile" "test" {
+resource "nsxt_policy_uplink_host_switch_profile" "test" {
   display_name = "%s"
   teaming {
     active {
