@@ -147,10 +147,10 @@ func policyTransportZonePatch(siteID, epID, tzID string, d *schema.ResourceData,
 	return err
 }
 
-func policyTransportZoneIDTuple(d *schema.ResourceData, m interface{}) (id, siteID, epID string, err error) {
+func policyIDSiteEPTuple(d *schema.ResourceData, m interface{}) (id, siteID, epID string, err error) {
 	id = d.Id()
 	if id == "" {
-		err = fmt.Errorf("error obtaining TransportZone ID")
+		err = fmt.Errorf("error obtaining Resource ID")
 		return
 	}
 	sitePath := d.Get("site_path").(string)
@@ -207,7 +207,7 @@ func resourceNsxtPolicyTransportZoneRead(d *schema.ResourceData, m interface{}) 
 	connector := getPolicyConnector(m)
 	tzClient := enforcement_points.NewTransportZonesClient(connector)
 
-	id, siteID, epID, err := policyTransportZoneIDTuple(d, m)
+	id, siteID, epID, err := policyIDSiteEPTuple(d, m)
 	if err != nil {
 		return err
 	}
@@ -238,7 +238,7 @@ func resourceNsxtPolicyTransportZoneRead(d *schema.ResourceData, m interface{}) 
 }
 
 func resourceNsxtPolicyTransportZoneUpdate(d *schema.ResourceData, m interface{}) error {
-	id, siteID, epID, err := policyTransportZoneIDTuple(d, m)
+	id, siteID, epID, err := policyIDSiteEPTuple(d, m)
 	if err != nil {
 		return err
 	}
@@ -256,7 +256,7 @@ func resourceNsxtPolicyTransportZoneDelete(d *schema.ResourceData, m interface{}
 	connector := getPolicyConnector(m)
 	tzClient := enforcement_points.NewTransportZonesClient(connector)
 
-	id, siteID, epID, err := policyTransportZoneIDTuple(d, m)
+	id, siteID, epID, err := policyIDSiteEPTuple(d, m)
 	if err != nil {
 		return err
 	}
