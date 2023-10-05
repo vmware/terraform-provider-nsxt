@@ -97,12 +97,12 @@ func validateUsername() schema.SchemaValidateFunc {
 
 		r := regexp.MustCompile("^[a-zA-Z][a-zA-Z0-9@-_.\\-]*$")
 		if ok := r.MatchString(v); !ok {
-			es = append(es, fmt.Errorf("must be a valid username matching: ^[a-zA-Z][a-zA-Z0-9@-_.\\-]*$"))
+			es = append(es, fmt.Errorf("username %s is invalid", v))
 			return
 		}
 
 		if len(v) < 1 || len(v) > 32 {
-			es = append(es, fmt.Errorf("expected length of %s to be in the range (%d - %d), got %s", k, 1, 32, v))
+			es = append(es, fmt.Errorf("expected length of %s to be in the range (%d - %d), got %d", k, 1, 32, len(v)))
 			return
 		}
 		return

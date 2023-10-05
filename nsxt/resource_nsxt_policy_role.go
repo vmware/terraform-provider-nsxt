@@ -99,14 +99,10 @@ func getFeaturePermissionFromSchema(d *schema.ResourceData) []nsxModel.FeaturePe
 	for _, feature := range features {
 		data := feature.(map[string]interface{})
 		featureID := data["feature"].(string)
-		featureDescription := data["feature_description"].(string)
-		featureName := data["feature_name"].(string)
 		permission := data["permission"].(string)
 		featurePermissions = append(featurePermissions, nsxModel.FeaturePermission{
-			Feature:            &featureID,
-			FeatureDescription: &featureDescription,
-			FeatureName:        &featureName,
-			Permission:         &permission,
+			Feature:    &featureID,
+			Permission: &permission,
 		})
 	}
 
@@ -140,7 +136,7 @@ func setFeaturePermissionInSchema(d *schema.ResourceData, permissions []nsxModel
 	}
 }
 
-func policyUserManagementRolePatch(id string, d *schema.ResourceData, m interface{}) error {
+func policyUserManagementRoleUpdate(id string, d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
 	displayName := d.Get("display_name").(string)
@@ -148,6 +144,7 @@ func policyUserManagementRolePatch(id string, d *schema.ResourceData, m interfac
 	tags := getPolicyTagsFromSchema(d)
 	role := d.Get("role").(string)
 	features := getFeaturePermissionFromSchema(d)
+	revision := int64(d.Get("revision").(int))
 
 	// Validate feature set first
 	validateObj := nsxModel.FeaturePermissionArray{
@@ -176,6 +173,7 @@ func policyUserManagementRolePatch(id string, d *schema.ResourceData, m interfac
 		Tags:        tags,
 		Role:        &role,
 		Features:    features,
+		Revision:    &revision,
 	}
 	_, err = roleClient.Update(id, obj)
 	return err
@@ -195,7 +193,7 @@ func resourceNsxtPolicyUserManagementRoleCreate(d *schema.ResourceData, m interf
 
 	// Create the resource using PUT
 	log.Printf("[INFO] Creating RoleWithFeatures with ID %s", id)
-	err = policyUserManagementRolePatch(id, d, m)
+	err = policyUserManagementRoleUpdate(id, d, m)
 	if err != nil {
 		return handleCreateError("RoleWithFeatures", id, err)
 	}
@@ -238,7 +236,7 @@ func resourceNsxtPolicyUserManagementRoleUpdate(d *schema.ResourceData, m interf
 	}
 
 	log.Printf("[INFO] Updateing RoleWithFeatures with ID %s", id)
-	err := policyUserManagementRolePatch(id, d, m)
+	err := policyUserManagementRoleUpdate(id, d, m)
 	if err != nil {
 		return handleUpdateError("RoleWithFeatures", id, err)
 	}
