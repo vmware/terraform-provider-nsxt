@@ -114,7 +114,7 @@ func policyDataSourceResourceReadWithValidation(d *schema.ResourceData, connecto
 }
 
 func listPolicyResourcesByNameAndType(connector client.Connector, context utl.SessionContext, displayName string, resourceType string, additionalQuery *string) ([]*data.StructValue, error) {
-	query := fmt.Sprintf("resource_type:%s AND display_name:%s* AND marked_for_delete:false", resourceType, displayName)
+	query := fmt.Sprintf("resource_type:%s AND display_name:%s* AND marked_for_delete:false", resourceType, escapeSpecialCharacters(displayName))
 	switch context.ClientType {
 	case utl.Local:
 		return searchLMPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
@@ -129,7 +129,7 @@ func listPolicyResourcesByNameAndType(connector client.Connector, context utl.Se
 
 func escapeSpecialCharacters(str string) string {
 	// we replace special characters that can be encountered in object IDs
-	specials := "()[]"
+	specials := "()[]+-=&|><!{}^~*?:"
 	if !strings.ContainsAny(str, specials) {
 		return str
 	}

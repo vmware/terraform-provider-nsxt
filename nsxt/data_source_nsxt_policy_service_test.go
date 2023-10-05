@@ -91,6 +91,26 @@ func TestAccDataSourceNsxtPolicyService_spaces(t *testing.T) {
 	})
 }
 
+func TestAccDataSourceNsxtPolicyService_specialChars(t *testing.T) {
+	serviceName := "IKE (Key Exchange)"
+	testResourceName := "data.nsxt_policy_service.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyServiceReadTemplate(serviceName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(testResourceName, "display_name", serviceName),
+					resource.TestCheckResourceAttr(testResourceName, "description", serviceName),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccDataSourceNsxtPolicyService_multitenancy(t *testing.T) {
 	serviceName := getAccTestResourceName()
 	testResourceName := "data.nsxt_policy_service.test"
