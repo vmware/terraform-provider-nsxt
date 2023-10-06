@@ -236,7 +236,8 @@ The following arguments are used to configure the VMware NSX-T Provider:
 * `global_manager` - (Optional) True if this is a global manager endpoint.
   False by default.
 * `license_keys` - (Optional) List of NSX-T license keys. License keys are applied
-  during plan or apply commands.
+  during plan or apply commands. Note that the provider will not remove license keys if
+  those are removed from provider config - please clean up licenses manually.
 * `on_demand_connection` - (Optional) Avoid verification on NSX connectivity on provider
   startup. Instead, initialize the connection on demand. This setting can not be turned on
   for VMC environments, and is not supported with deprecated NSX manager resources and
@@ -247,17 +248,13 @@ The following arguments are used to configure the VMware NSX-T Provider:
 
 This release of the NSX-T Terraform Provider extends to cover NSX-T declarative
 API called Policy. This API aims to simplify the consumption of logical objects
-and offer additional capabilities.The NSX-T Terraform Providerextends withadditional
-resources and data sources covering layer 2, layer 3, firewall (distributed and
-centralized), tags, load balancerand IP allocation (DHCP, IP pools, IP blocks etc...).
-This typically allowsto expose new capabilities such as vRFlite on the Tier-0 which
-are only made available from the Policy API. While you can still build topologies from
-the imperative API and existing config files will continue to work, the recommendation
+and offer additional capabilities.The NSX-T Terraform Provider covers most of NSX
+functionality.
+While you can still build topologies from the imperative API and existing config files
+will continue to work, the recommendation
 is to build logical topologies from the declarative API(Policy Objects).The resources
-and data sources using the policy API have _policy_ in their name. All these resources
-and data sources are fully documented on the NSX-T Terraform Provider
-page:•https://www.terraform.io/docs/providers/nsxt/index.html For more details on the
-NSX-T Policy API usage, please look at NSX-T documentation.
+and data sources using the policy API have _policy_ in their name.
+For more details on the NSX-T Policy API usage, please refer to NSX-T documentation.
 
 The existing data sources and resources are still available to consume but using
 the new Policy based data sources and resources are recommended.
