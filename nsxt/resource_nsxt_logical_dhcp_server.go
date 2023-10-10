@@ -85,6 +85,7 @@ func getDhcpOptions121Schema() *schema.Schema {
 		Type:        schema.TypeList,
 		Description: "DHCP classless static routes",
 		Optional:    true,
+		Computed:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"network": {
