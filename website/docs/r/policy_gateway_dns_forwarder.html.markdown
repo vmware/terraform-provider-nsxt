@@ -27,8 +27,8 @@ resource "nsxt_policy_gateway_dns_forwarder" "test" {
   log_level    = "DEBUG"
   cache_size   = 2048
 
-  default_forwarder_zone_path      = nsxt_policy_forwarder_zone.default.path
-  conditional_forwarder_zone_paths = [nsxt_policy_forwarder_zone.oranges.path, nsxt_policy_forwarder_zone.apples.path]
+  default_forwarder_zone_path      = nsxt_policy_dns_forwarder_zone.default.path
+  conditional_forwarder_zone_paths = [nsxt_policy_dns_forwarder_zone.oranges.path, nsxt_policy_dns_forwarder_zone.apples.path]
 }
 ```
 
@@ -51,8 +51,8 @@ resource "nsxt_policy_gateway_dns_forwarder" "test" {
   log_level    = "DEBUG"
   cache_size   = 2048
 
-  default_forwarder_zone_path      = nsxt_policy_forwarder_zone.default.path
-  conditional_forwarder_zone_paths = [nsxt_policy_forwarder_zone.oranges.path, nsxt_policy_forwarder_zone.apples.path]
+  default_forwarder_zone_path      = nsxt_policy_dns_forwarder_zone.default.path
+  conditional_forwarder_zone_paths = [nsxt_policy_dns_forwarder_zone.oranges.path, nsxt_policy_dns_forwarder_zone.apples.path]
 }
 ```
 
