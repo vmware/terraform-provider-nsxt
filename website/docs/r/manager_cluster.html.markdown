@@ -34,13 +34,19 @@ resource "nsxt_manager_cluster" "test" {
 
 The following arguments are supported:
 
-* `node` - (Required) IP Address of the node that will join the cluster of the host node.
-  * `id` - (Computed) Uuid of the cluster node.
+* `node` - (Required) Specification of the node that will join the cluster of the host node.
   * `ip_address` - (Required) Ip address of the node.
   * `username` - (Required) The username for login to the node.
   * `password` - (Required) The password for login to the node.
-  * `fqdn`  - (Computed) Fqdn of the node.
-  * `status` - (Computed) Status of the node, value will be one of `JOINING`, `JOINED`, `REMOVING` and `REMOVED`.
+
+## Argument Reference
+
+In addition to arguments listed above, the following attributes are exported:
+
+* `node`
+  * `id` - Uuid of the cluster node.
+  * `fqdn`  - FQDN of the node.
+  * `status` - Status of the node, value will be one of `JOINING`, `JOINED`, `REMOVING` and `REMOVED`.
 
 ## Importing
 
