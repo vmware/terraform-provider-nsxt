@@ -391,3 +391,14 @@ func getElemOrEmptyMapFromSchema(d *schema.ResourceData, key string) map[string]
 	}
 	return make(map[string]interface{})
 }
+
+func getElemOrEmptyMapFromMap(d map[string]interface{}, key string) map[string]interface{} {
+	e := d[key]
+	if e != nil {
+		elems := e.([]interface{})
+		if len(elems) > 0 {
+			return elems[0].(map[string]interface{})
+		}
+	}
+	return make(map[string]interface{})
+}
