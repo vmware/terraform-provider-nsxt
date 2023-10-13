@@ -380,3 +380,14 @@ func retryUponPreconditionFailed(readAndUpdate func() error, maxRetryAttempts in
 
 	return err
 }
+
+func getElemOrEmptyMapFromSchema(d *schema.ResourceData, key string) map[string]interface{} {
+	e := d.Get(key)
+	if e != nil {
+		elems := e.([]interface{})
+		if len(elems) > 0 {
+			return elems[0].(map[string]interface{})
+		}
+	}
+	return make(map[string]interface{})
+}

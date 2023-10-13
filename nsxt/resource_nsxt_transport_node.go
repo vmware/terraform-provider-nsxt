@@ -1596,42 +1596,48 @@ func setNodeDeploymentInfoInSchema(d *schema.ResourceData, info *data.StructValu
 		return errs[0]
 	}
 	node := base.(model.Node)
-	elem := make(map[string]interface{})
+	var elem map[string]interface{}
 
-	// Set base object attributes
-	elem["external_id"] = node.ExternalId
-	elem["fqdn"] = node.Fqdn
-	elem["id"] = node.Id
-	elem["ip_addresses"] = node.IpAddresses
 	nodeType := node.ResourceType
 
 	switch nodeType {
 	case model.Node__TYPE_IDENTIFIER:
-		d.Set("node", []map[string]interface{}{elem})
-
+		elem = getElemOrEmptyMapFromSchema(d, "node")
+		d.Set("node", []interface{}{elem})
 	case model.EdgeNode__TYPE_IDENTIFIER:
+		elem = getElemOrEmptyMapFromSchema(d, "edge_node")
+
 		base, errs := converter.ConvertToGolang(info, model.EdgeNodeBindingType())
 		if errs != nil {
 			return errs[0]
 		}
 		node := base.(model.EdgeNode)
-		depCfg, err := setEdgeDeploymentConfigInSchema(node.DeploymentConfig)
+
+		var depCfg map[string]interface{}
+		if elem["deployment_config"] != nil && elem["deployment_config"].([]interface{}) != nil {
+			depCfg = elem["deployment_config"].([]interface{})[0].(map[string]interface{})
+		} else {
+			depCfg = make(map[string]interface{})
+		}
+		err := setEdgeDeploymentConfigInSchema(depCfg, node.DeploymentConfig)
+		elem["deployment_config"] = []interface{}{depCfg}
+
 		if err != nil {
 			return err
 		}
-		elem["deployment_config"] = depCfg
 		elem["node_settings"] = setEdgeNodeSettingsInSchema(node.NodeSettings)
-
-		d.Set("edge_node", []map[string]interface{}{elem})
+		d.Set("edge_node", []interface{}{elem})
 
 	case model.HostNode__TYPE_IDENTIFIER:
+		elem = getElemOrEmptyMapFromSchema(d, "host_node")
+
 		base, errs := converter.ConvertToGolang(info, model.HostNodeBindingType())
 		if errs != nil {
 			return errs[0]
 		}
 		node := base.(model.HostNode)
 		hostCredential := make(map[string]interface{})
-		hostCredential["password"] = node.HostCredential.Password
+		// Note: password attribute is sensitive and is not returned by NSX
 		hostCredential["thumbprint"] = node.HostCredential.Thumbprint
 		hostCredential["username"] = node.HostCredential.Username
 		elem["host_credential"] = []map[string]interface{}{hostCredential}
@@ -1639,25 +1645,41 @@ func setNodeDeploymentInfoInSchema(d *schema.ResourceData, info *data.StructValu
 		elem["os_type"] = node.OsType
 		elem["os_version"] = node.OsVersion
 		elem["windows_install_location"] = node.WindowsInstallLocation
-
-		d.Set("host_node", []map[string]interface{}{elem})
+		d.Set("host_node", []interface{}{elem})
 
 	case "PublicCloudGatewayNode":
 		// Awkwardly, no const for PublicCloudGatewayNode in SDK
+		elem = getElemOrEmptyMapFromSchema(d, "public_cloud_gateway_node")
+
 		base, errs := converter.ConvertToGolang(info, model.PublicCloudGatewayNodeBindingType())
 		if errs != nil {
 			return errs[0]
 		}
 		node := base.(model.PublicCloudGatewayNode)
-		depCfg, err := setEdgeDeploymentConfigInSchema(node.DeploymentConfig)
+
+		var depCfg map[string]interface{}
+		if elem["deployment_config"] != nil {
+			depCfgList := elem["deployment_config"].([]interface{})
+			depCfg = depCfgList[0].(map[string]interface{})
+		} else {
+			depCfg = make(map[string]interface{})
+		}
+		err := setEdgeDeploymentConfigInSchema(depCfg, node.DeploymentConfig)
+		elem["deployment_config"] = []interface{}{depCfg}
+
 		if err != nil {
 			return err
 		}
-		elem["deployment_config"] = depCfg
 		elem["node_settings"] = setEdgeNodeSettingsInSchema(node.NodeSettings)
-
-		d.Set("public_cloud_gateway_node", []map[string]interface{}{elem})
+		d.Set("public_cloud_gateway_node", []interface{}{elem})
 	}
+
+	// Set base object attributes
+	elem["external_id"] = node.ExternalId
+	elem["fqdn"] = node.Fqdn
+	elem["id"] = node.Id
+	elem["ip_addresses"] = node.IpAddresses
+
 	return nil
 }
 
@@ -1692,24 +1714,28 @@ func setEdgeNodeSettingsInSchema(nodeSettings *model.EdgeNodeSettings) interface
 	return []map[string]interface{}{elem}
 }
 
-func setEdgeDeploymentConfigInSchema(deploymentConfig *model.EdgeNodeDeploymentConfig) (interface{}, error) {
+func setEdgeDeploymentConfigInSchema(elem map[string]interface{}, deploymentConfig *model.EdgeNodeDeploymentConfig) error {
 	var err error
 
-	elem := make(map[string]interface{})
 	elem["form_factor"] = deploymentConfig.FormFactor
-	nodeUserSettings := make(map[string]interface{})
-	nodeUserSettings["audit_password"] = deploymentConfig.NodeUserSettings.AuditPassword
-	nodeUserSettings["audit_username"] = deploymentConfig.NodeUserSettings.AuditUsername
-	nodeUserSettings["cli_password"] = deploymentConfig.NodeUserSettings.CliPassword
+	var nodeUserSettings map[string]interface{}
+	if elem["node_user_settings"] != nil {
+		nodeUserSettings = elem["node_user_settings"].([]interface{})[0].(map[string]interface{})
+	} else {
+		nodeUserSettings = make(map[string]interface{})
+	}
+	// Note: password attributes is sensitive and is not returned by NSX
+	if deploymentConfig.NodeUserSettings.AuditUsername != nil {
+		nodeUserSettings["audit_username"] = deploymentConfig.NodeUserSettings.AuditUsername
+	}
 	nodeUserSettings["cli_username"] = deploymentConfig.NodeUserSettings.CliUsername
-	nodeUserSettings["root_password"] = deploymentConfig.NodeUserSettings.RootPassword
-	elem["node_user_settings"] = []map[string]interface{}{nodeUserSettings}
+	elem["node_user_settings"] = []interface{}{nodeUserSettings}
 
 	elem["vm_deployment_config"], err = setVMDeploymentConfigInSchema(deploymentConfig.VmDeploymentConfig)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return []map[string]interface{}{elem}, nil
+	return nil
 }
 
 func setVMDeploymentConfigInSchema(config *data.StructValue) (interface{}, error) {
@@ -1749,15 +1775,21 @@ func setVMDeploymentConfigInSchema(config *data.StructValue) (interface{}, error
 	elem["management_port_subnet"] = mpSubnets
 
 	reservationInfo := make(map[string]interface{})
-	reservationInfo["cpu_reservation_in_mhz"] = vSphereCfg.ReservationInfo.CpuReservation.ReservationInMhz
-	reservationInfo["cpu_reservation_in_shares"] = vSphereCfg.ReservationInfo.CpuReservation.ReservationInShares
-	reservationInfo["memory_reservation_percentage"] = vSphereCfg.ReservationInfo.MemoryReservation.ReservationPercentage
-	elem["reservation_info"] = []map[string]interface{}{reservationInfo}
+	if vSphereCfg.ReservationInfo.CpuReservation.ReservationInMhz != nil {
+		reservationInfo["cpu_reservation_in_mhz"] = vSphereCfg.ReservationInfo.CpuReservation.ReservationInMhz
+	}
+	if vSphereCfg.ReservationInfo.CpuReservation.ReservationInShares != nil {
+		reservationInfo["cpu_reservation_in_shares"] = vSphereCfg.ReservationInfo.CpuReservation.ReservationInShares
+	}
+	if vSphereCfg.ReservationInfo.MemoryReservation.ReservationPercentage != nil {
+		reservationInfo["memory_reservation_percentage"] = vSphereCfg.ReservationInfo.MemoryReservation.ReservationPercentage
+	}
+	elem["reservation_info"] = []interface{}{reservationInfo}
 
 	elem["storage_id"] = vSphereCfg.StorageId
 	elem["vc_id"] = vSphereCfg.VcId
 
-	return []map[string]interface{}{elem}, nil
+	return []interface{}{elem}, nil
 }
 
 func setHostSwitchSpecInSchema(d *schema.ResourceData, spec *data.StructValue) error {
