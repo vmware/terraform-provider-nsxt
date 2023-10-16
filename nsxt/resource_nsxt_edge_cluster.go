@@ -8,9 +8,17 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 )
+
+var failureDomainAllocationOptions = []string{
+	"enable",
+	"disable",
+}
 
 func resourceNsxtEdgeCluster() *schema.Resource {
 	return &schema.Resource{
@@ -95,6 +103,12 @@ func resourceNsxtEdgeCluster() *schema.Resource {
 					},
 				},
 			},
+			"failure_domain_allocation": {
+				Type:         schema.TypeString,
+				Description:  "Flag to enable/disable failure domain based allocation",
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice(failureDomainAllocationOptions, false),
+			},
 		},
 	}
 }
@@ -107,14 +121,16 @@ func resourceNsxtEdgeClusterCreate(d *schema.ResourceData, m interface{}) error 
 	displayName := d.Get("display_name").(string)
 	tags := getMPTagsFromSchema(d)
 	clusterProfileBindings := getClusterProfileBindingsFromSchema(d)
-
 	members := getEdgeClusterMembersFromSchema(d)
+	allocationRules := getAllocationRulesFromSchema(d)
+
 	obj := model.EdgeCluster{
 		Description:            &description,
 		DisplayName:            &displayName,
 		Tags:                   tags,
 		ClusterProfileBindings: clusterProfileBindings,
 		Members:                members,
+		AllocationRules:        allocationRules,
 	}
 
 	log.Printf("[INFO] Creating Edge Cluster with name %s", displayName)
@@ -160,6 +176,27 @@ func getEdgeClusterMembersFromSchema(d *schema.ResourceData) []model.EdgeCluster
 	return members
 }
 
+func getAllocationRulesFromSchema(d *schema.ResourceData) []model.AllocationRule {
+	failureDomainAllocation := d.Get("failure_domain_allocation").(string)
+	if failureDomainAllocation != "" {
+		enableFailureDomain := true
+		if failureDomainAllocation == "disable" {
+			enableFailureDomain = false
+		}
+		failureDomain := model.AllocationBasedOnFailureDomain{
+			ActionType: model.AllocationRuleAction_ACTION_TYPE_ALLOCATIONBASEDONFAILUREDOMAIN,
+			Enabled:    &enableFailureDomain,
+		}
+		converter := bindings.NewTypeConverter()
+		failureDomainValue, errs := converter.ConvertToVapi(failureDomain, model.AllocationBasedOnFailureDomainBindingType())
+		if errs != nil {
+			return nil
+		}
+		return []model.AllocationRule{{Action: failureDomainValue.(*data.StructValue)}}
+	}
+	return nil
+}
+
 func resourceNsxtEdgeClusterRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	id := d.Id()
@@ -183,6 +220,7 @@ func resourceNsxtEdgeClusterRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("member_node_type", obj.MemberNodeType)
 	setMemberListInSchema(d, obj.Members)
 	setNodeRtepIPsInSchema(d, obj.NodeRtepIps)
+	setFailureDomainAllocationInSchema(d, obj.AllocationRules)
 	return nil
 }
 
@@ -207,6 +245,27 @@ func setNodeRtepIPsInSchema(d *schema.ResourceData, nodeRtepIPs []model.NodeRtep
 		expressionList = append(expressionList, elem)
 	}
 	return d.Set("node_rtep_ips", expressionList)
+}
+
+func setFailureDomainAllocationInSchema(d *schema.ResourceData, allocationRules []model.AllocationRule) error {
+	converter := bindings.NewTypeConverter()
+	for _, allocationRule := range allocationRules {
+		structValue := allocationRule.Action
+		actionInterface, errs := converter.ConvertToGolang(structValue, model.AllocationBasedOnFailureDomainBindingType())
+		if errs != nil {
+			continue
+		}
+		action := actionInterface.(model.AllocationBasedOnFailureDomain)
+		if action.Enabled != nil {
+			if *action.Enabled {
+				d.Set("failure_domain_allocation", "enable")
+			} else {
+				d.Set("failure_domain_allocation", "disable")
+			}
+			break
+		}
+	}
+	return nil
 }
 
 func setMemberListInSchema(d *schema.ResourceData, members []model.EdgeClusterMember) error {
@@ -237,6 +296,8 @@ func resourceNsxtEdgeClusterUpdate(d *schema.ResourceData, m interface{}) error 
 	tags := getMPTagsFromSchema(d)
 	members := getEdgeClusterMembersFromSchema(d)
 	clusterProfileBindings := getClusterProfileBindingsFromSchema(d)
+	allocationRules := getAllocationRulesFromSchema(d)
+
 	obj := model.EdgeCluster{
 		Revision:               &revision,
 		Description:            &description,
@@ -244,6 +305,7 @@ func resourceNsxtEdgeClusterUpdate(d *schema.ResourceData, m interface{}) error 
 		Tags:                   tags,
 		ClusterProfileBindings: clusterProfileBindings,
 		Members:                members,
+		AllocationRules:        allocationRules,
 	}
 
 	_, err := client.Update(id, obj)

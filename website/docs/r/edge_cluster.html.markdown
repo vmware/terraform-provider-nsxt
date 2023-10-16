@@ -31,6 +31,7 @@ The following arguments are supported:
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `edge_ha_profile_id` - (Optional) Edge high availability cluster profile ID.
+* `failure_domain_allocation` - (Optional) Flag to enable failure domain based allocation. Enable placement algorithm to consider failure domain of edge transport nodes and place active and standby contexts in different failure domains. Supported values are `enable` and `disable`. 
 * `member` - (Optional) Edge cluster members
   * `description` - (Optional) Description of this resource.
   * `display_name` - (Optional) The display name of this resource. Defaults to ID if not set.
