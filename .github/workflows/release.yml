@@ -4,6 +4,10 @@ on:
   push:
     tags:
       - 'v*'
+
+permissions:
+  contents: write
+
 jobs:
   goreleaser:
     runs-on: ubuntu-latest
@@ -33,10 +37,10 @@ jobs:
           PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
       -
         name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v2.5.0
+        uses: goreleaser/goreleaser-action@v5
         with:
           version: latest
-          args: release --rm-dist --release-header .goreleaser.tmpl
+          args: release --clean --release-header-tmpl .goreleaser.tmpl
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
