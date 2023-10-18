@@ -102,71 +102,28 @@ func getClusterNodesFromSchema(d *schema.ResourceData) []NsxClusterNode {
 	return clusterNodes
 }
 
-func setNodesInSchema(d *schema.ResourceData, nodes []NsxClusterNode) error {
-	// Retrieve node credential from schema and set them in the nodeList element
-	// This is because the nodes are obtained using cluster client, and does not
-	// contain any information about credential
-	nodeIPToCredentialMap := getIPtoCredentialMap(d)
-
-	var nodeList []map[string]interface{}
-	for _, node := range nodes {
-		_, nodeInSchema := nodeIPToCredentialMap[node.IPAddress]
-		elem := make(map[string]interface{})
-		elem["id"] = node.ID
-		elem["ip_address"] = node.IPAddress
-		// If node is not in schema but in cluster node list,
-		// it means the node needs to be removed.
-		// In this case we don't need its credential because
-		// remove api does not require node credential
-		if nodeInSchema {
-			elem["username"] = nodeIPToCredentialMap[node.IPAddress][0]
-			elem["password"] = nodeIPToCredentialMap[node.IPAddress][1]
-		}
-		elem["fqdn"] = node.Fqdn
-		elem["status"] = node.Status
-		nodeList = append(nodeList, elem)
-	}
-	return d.Set("node", nodeList)
-}
-
-func getIPtoCredentialMap(d *schema.ResourceData) map[string][]string {
-	// returns a map, whose key is IP address of a node,
-	// value is a slice of [node_login_username, node_login_password]
-	nodes := d.Get("node").([]interface{})
-	var idToCredentialMap = map[string][]string{}
-	for _, node := range nodes {
-		data := node.(map[string]interface{})
-		ipAddress := data["ip_address"].(string)
-		userName := data["username"].(string)
-		password := data["password"].(string)
-		cred := []string{userName, password}
-		idToCredentialMap[ipAddress] = cred
-	}
-	return idToCredentialMap
-}
-
 func resourceNsxtManagerClusterCreate(d *schema.ResourceData, m interface{}) error {
 	// Call Joincluster function on nodes that are not in the cluster
 	nodes := getClusterNodesFromSchema(d)
 	if len(nodes) == 0 {
 		return fmt.Errorf("At least a manager appliance must be provided to form a cluster")
 	}
-	clusterID, certSha256Thumbprint, hostIP, err := getClusterInfoFromHostNode(d, m)
+	clusterID, certSha256Thumbprint, hostIPs, err := getClusterInfoFromHostNode(d, m)
 	if err != nil {
 		return handleCreateError("ManagerCluster", "", err)
 	}
 
 	for _, guestNode := range nodes {
-		err := joinNodeToCluster(clusterID, certSha256Thumbprint, guestNode, hostIP, d, m)
+		err := joinNodeToCluster(clusterID, certSha256Thumbprint, guestNode, hostIPs, d, m)
 		if err != nil {
-			return handleCreateError("ManagerCluster", hostIP, fmt.Errorf("failed to join node %s: %s", guestNode.ID, err))
+			return handleCreateError("ManagerCluster", clusterID, fmt.Errorf("failed to join node %s: %s", guestNode.ID, err))
 		}
 	}
 	d.SetId(clusterID)
 	return resourceNsxtManagerClusterRead(d, m)
 }
 
-func getClusterInfoFromHostNode(d *schema.ResourceData, m interface{}) (string, string, string, error) {
+func getClusterInfoFromHostNode(d *schema.ResourceData, m interface{}) (string, string, []string, error) {
 	// function return values are:
 	// clusterID, certSha256Thumbprint, hostIP, error
 	connector := getPolicyConnector(m)
@@ -175,17 +132,19 @@ func getClusterInfoFromHostNode(d *schema.ResourceData, m interface{}) (string, 
 	min := c.CommonConfig.MinRetryInterval
 	max := c.CommonConfig.MaxRetryInterval
 	maxRetries := c.CommonConfig.MaxRetries
-	hostIP := ""
+	hostIPs := []string{}
 	for i := 0; i < maxRetries; i++ {
 		clusterConfig, err := client.Get()
 		if err != nil {
-			return "", "", "", handleReadError(d, "Cluster Config", "", err)
+			return "", "", hostIPs, err
 		}
-		if hostIP == "" {
-			hostIP, err = getHostIPFromClusterConfig(m, clusterConfig)
+		if len(hostIPs) == 0 {
+			hostIPs, err = resolveHostIPs(m)
 			if err != nil {
-				return "", "", "", err
+				return "", "", hostIPs, err
 			}
+
+			log.Printf("[DEBUG]: Host resolved to IP addresses %v", hostIPs)
 		}
 		clusterID := *clusterConfig.ClusterId
 		nodes := clusterConfig.Nodes
@@ -193,57 +152,37 @@ func getClusterInfoFromHostNode(d *schema.ResourceData, m interface{}) (string, 
 		apiListenAddr := node.ApiListenAddr
 		if apiListenAddr != nil {
 			certSha256Thumbprint := *apiListenAddr.CertificateSha256Thumbprint
-			return clusterID, certSha256Thumbprint, hostIP, nil
+			return clusterID, certSha256Thumbprint, hostIPs, nil
 		}
 		interval := (rand.Intn(max-min) + min)
 		time.Sleep(time.Duration(interval) * time.Millisecond)
 		log.Printf("[DEBUG]: Waited %d ms before retrying getting API Listen Address, attempt %d", interval, i+1)
 	}
-	return "", "", "", fmt.Errorf("Failed to read ClusterConfig info from host node after %d attempts", maxRetries)
+	return "", "", hostIPs, fmt.Errorf("Failed to read ClusterConfig after %d attempts", maxRetries)
 }
 
-func getHostIPFromClusterConfig(client interface{}, clusterConfig nsxModel.ClusterConfig) (string, error) {
+func resolveHostIPs(client interface{}) ([]string, error) {
 	c := client.(nsxtClients)
 	host := c.Host
 	host = strings.TrimPrefix(host, "https://")
-	// Check if host is ip address or fqdn, if it's ip address then we are all set,
-	// if it's fqdn, we loop through clusterconfig, find the node with same fqdn and
-	// return its ip address
+	// Check if host is ip address or fqdn, if it's ip address then we are all set
+	// Otherwise we resolve the host
 	ip := net.ParseIP(host)
-	isIPAddress := ip != nil
-	if isIPAddress {
-		return host, nil
+	if ip != nil {
+		return []string{host}, nil
 	}
-	nodes := clusterConfig.Nodes
-	for _, node := range nodes {
-		fqdn := *node.Fqdn
-		if fqdn == host {
-			if node.ApiListenAddr != nil {
-				// return ipv4 address if it has one, if it doesn't return ipv6 address
-				addr := node.ApiListenAddr
-				if *addr.IpAddress != "" {
-					return *addr.IpAddress, nil
-				}
-				return *addr.Ipv6Address, nil
-			}
-			v4, v6 := getHTTPSIPFromNodeEntity(node.Entities)
-			if v4 != "" {
-				return v4, nil
-			}
-			return v6, nil
-		}
-	}
-	return "", fmt.Errorf("Failed to get host ip from cluster config")
-}
 
-func getHTTPSIPFromNodeEntity(entities []nsxModel.NodeEntityInfo) (string, string) {
-	// returns the ipv4 and ipv6 address of a node's https port 443
-	for _, entity := range entities {
-		if *entity.Port == 443 {
-			return *entity.IpAddress, *entity.Ipv6Address
-		}
+	ips, err := net.LookupIP(host)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to resolve host ip from %s: %v", host, err)
 	}
-	return "", ""
+
+	var result []string
+	for _, ip := range ips {
+		result = append(result, ip.String())
+	}
+
+	return result, nil
 }
 
 func getNewNsxtClient(node NsxClusterNode, d *schema.ResourceData, clients interface{}) (interface{}, error) {
@@ -282,7 +221,7 @@ func configureNewClient(newClient *nsxtClients, oldClient *nsxtClients, host str
 	return nil
 }
 
-func joinNodeToCluster(clusterID string, certSha256Thumbprint string, guestNode NsxClusterNode, masterNodeIP string, d *schema.ResourceData, m interface{}) error {
+func joinNodeToCluster(clusterID string, certSha256Thumbprint string, guestNode NsxClusterNode, hostIPs []string, d *schema.ResourceData, m interface{}) error {
 	c, err := getNewNsxtClient(guestNode, d, m)
 	if err != nil {
 		return err
@@ -292,10 +231,14 @@ func joinNodeToCluster(clusterID string, certSha256Thumbprint string, guestNode 
 	connector := getPolicyConnector(newNsxClients)
 	client := nsx.NewClusterClient(connector)
 	username, password := getHostCredential(m)
+	hostIP := getMatchingIPVersion(guestNode.IPAddress, hostIPs)
+	if hostIP == "" {
+		return fmt.Errorf("[ERROR] Failed to find matching IP version for the host in IP list %v", hostIPs)
+	}
 	joinClusterParams := nsxModel.JoinClusterParameters{
 		CertificateSha256Thumbprint: &certSha256Thumbprint,
 		ClusterId:                   &clusterID,
-		IpAddress:                   &masterNodeIP,
+		IpAddress:                   &hostIP,
 		Username:                    &username,
 		Password:                    &password,
 	}
@@ -314,6 +257,43 @@ func getHostCredential(m interface{}) (string, string) {
 	return username, password
 }
 
+func getMatchingIPVersion(ip string, hostIPs []string) string {
+	needIPv4 := (net.ParseIP(ip)).To4() != nil
+
+	for _, hostIP := range hostIPs {
+		isIPv4 := (net.ParseIP(hostIP)).To4() != nil
+		if needIPv4 == isIPv4 {
+			// we return hostIP if either node ip is v4 and current host is v4,
+			// or node ip is v4 and current resolved host is v6
+			return hostIP
+		}
+	}
+
+	return ""
+}
+
+func isMatchingNode(node nsxModel.ClusterNodeInfo, address string) bool {
+	addr := net.ParseIP(address)
+	for _, entity := range node.Entities {
+		if entity.Port != nil {
+			if entity.IpAddress != nil {
+				nodeAddr := net.ParseIP(*entity.IpAddress)
+				if nodeAddr.Equal(addr) {
+					return true
+				}
+			}
+			if entity.Ipv6Address != nil {
+				nodeAddr := net.ParseIP(*entity.Ipv6Address)
+				if nodeAddr.Equal(addr) {
+					return true
+				}
+			}
+		}
+	}
+
+	return false
+}
+
 func resourceNsxtManagerClusterRead(d *schema.ResourceData, m interface{}) error {
 	id := d.Id()
 	connector := getPolicyConnector(m)
@@ -322,50 +302,30 @@ func resourceNsxtManagerClusterRead(d *schema.ResourceData, m interface{}) error
 	if err != nil {
 		return handleReadError(d, "ManagerCluster", id, err)
 	}
-	nodeInfo := clusterConfig.Nodes
-	var nodes []NsxClusterNode
-	hostIP, err := getHostIPFromClusterConfig(m, clusterConfig)
-	isIPv4 := (net.ParseIP(hostIP)).To4() != nil
-	if err != nil {
-		return handleReadError(d, "ManagerCluster", id, err)
-	}
-	for _, node := range nodeInfo {
-		ip := getIPFromNodeInfo(node, isIPv4)
-		fqdn := *node.Fqdn
-		status := *node.Status
-		if ip != hostIP {
-			id := *node.NodeUuid
-			clusterNode := NsxClusterNode{
-				ID:        id,
-				IPAddress: ip,
-				Fqdn:      fqdn,
-				Status:    status,
+	nsxNodes := clusterConfig.Nodes
+	var resultNodes []map[string]interface{}
+	schemaNodes := getClusterNodesFromSchema(d)
+	// Complete schema nodes with computed fields
+	for _, schemaNode := range schemaNodes {
+		for _, nsxNode := range nsxNodes {
+			if isMatchingNode(nsxNode, schemaNode.IPAddress) {
+				resultNode := make(map[string]interface{})
+				resultNode["id"] = nsxNode.NodeUuid
+				resultNode["fqdn"] = nsxNode.Fqdn
+				resultNode["status"] = nsxNode.Status
+				resultNode["ip_address"] = schemaNode.IPAddress
+				resultNode["username"] = schemaNode.UserName
+				resultNode["password"] = schemaNode.Password
+
+				resultNodes = append(resultNodes, resultNode)
 			}
-			nodes = append(nodes, clusterNode)
 		}
 
 	}
+
 	d.Set("revision", clusterConfig.Revision)
-	setNodesInSchema(d, nodes)
+	d.Set("node", resultNodes)
 	return nil
-}
-
-func getIPFromNodeInfo(node nsxModel.ClusterNodeInfo, isIPv4 bool) string {
-	// After join node into cluster, apiListen address may take some time to become available
-	// if it's not available, we retrieve node ip from nodeEntityInfo
-	var ip *string
-	nodeEntities := node.Entities
-	for _, entity := range nodeEntities {
-		if *entity.Port == 443 {
-			if isIPv4 {
-				ip = entity.IpAddress
-			} else {
-				ip = entity.Ipv6Address
-			}
-			break
-		}
-	}
-	return *ip
 }
 
 func resourceNsxtManagerClusterUpdate(d *schema.ResourceData, m interface{}) error {
@@ -373,7 +333,7 @@ func resourceNsxtManagerClusterUpdate(d *schema.ResourceData, m interface{}) err
 	connector := getPolicyConnector(m)
 	client := nsx.NewClusterClient(connector)
 
-	clusterID, certSha256Thumbprint, hostIP, err := getClusterInfoFromHostNode(d, m)
+	clusterID, certSha256Thumbprint, hostIPs, err := getClusterInfoFromHostNode(d, m)
 	if err != nil {
 		return handleUpdateError("ManagerCluster", id, err)
 	}
@@ -406,7 +366,7 @@ func resourceNsxtManagerClusterUpdate(d *schema.ResourceData, m interface{}) err
 				UserName:  userName,
 				Password:  password,
 			}
-			err = joinNodeToCluster(clusterID, certSha256Thumbprint, nodeObj, hostIP, d, m)
+			err = joinNodeToCluster(clusterID, certSha256Thumbprint, nodeObj, hostIPs, d, m)
 			if err != nil {
 				return handleUpdateError("ManagerCluster", id, err)
 			}
