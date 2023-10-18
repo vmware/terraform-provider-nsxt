@@ -13,11 +13,18 @@ import (
 
 	"golang.org/x/exp/slices"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx"
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 )
+
+const nodeConnectivityInitialDelay int = 20
+const nodeConnectivityInterval int = 16
+const nodeConnectivityTimeout int = 1800
 
 func resourceNsxtManagerCluster() *schema.Resource {
 	return &schema.Resource{
@@ -28,6 +35,40 @@ func resourceNsxtManagerCluster() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"revision": getRevisionSchema(),
+			"api_probing": {
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Description: "Settings that control initial node connection",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enabled": {
+							Type:        schema.TypeBool,
+							Description: "Whether API probing for NSX nodes is enabled",
+							Optional:    true,
+							Default:     true,
+						},
+						"delay": {
+							Type:        schema.TypeInt,
+							Description: "Initial delay in seconds before probing connection",
+							Optional:    true,
+							Default:     nodeConnectivityInitialDelay,
+						},
+						"interval": {
+							Type:        schema.TypeInt,
+							Description: "Connection probing interval in seconds",
+							Optional:    true,
+							Default:     nodeConnectivityInterval,
+						},
+						"timeout": {
+							Type:        schema.TypeInt,
+							Description: "Timeout for connection probing in seconds",
+							Optional:    true,
+							Default:     nodeConnectivityTimeout,
+						},
+					},
+				},
+				Optional: true,
+			},
 			"node": {
 				Type:        schema.TypeList,
 				Description: "Nodes in the cluster",
@@ -82,6 +123,76 @@ type NsxClusterNode struct {
 	Status    string
 }
 
+func getNodeConnectivityStateConf(connector client.Connector, delay int, interval int, timeout int) *resource.StateChangeConf {
+
+	return &resource.StateChangeConf{
+		Pending: []string{"notyet"},
+		Target:  []string{"success"},
+		Refresh: func() (interface{}, string, error) {
+			siteClient := infra.NewSitesClient(connector)
+			// We use default site API to probe NSX manager API endpoint readiness,
+			// since it may take a while to auto-generate default site after API is responsive
+			resp, err := siteClient.Get("default")
+			if err != nil {
+				log.Printf("[DEBUG]: NSX API endpoint not ready: %v", err)
+				return nil, "notyet", nil
+			}
+
+			log.Printf("[INFO]: NSX API endpoint ready")
+			return resp, "success", nil
+		},
+		Delay:        time.Duration(delay) * time.Second,
+		Timeout:      time.Duration(timeout) * time.Second,
+		PollInterval: time.Duration(interval) * time.Second,
+	}
+}
+
+func waitForNodeStatus(d *schema.ResourceData, m interface{}, nodes []NsxClusterNode) error {
+
+	delay := nodeConnectivityInitialDelay
+	interval := nodeConnectivityInterval
+	timeout := nodeConnectivityTimeout
+	probingEnabled := true
+	probing := d.Get("api_probing").([]interface{})
+	for _, item := range probing {
+		entry := item.(map[string]interface{})
+		probingEnabled = entry["enabled"].(bool)
+		delay = entry["delay"].(int)
+		interval = entry["interval"].(int)
+		timeout = entry["timeout"].(int)
+		break
+	}
+
+	// Wait for main mode
+	if !probingEnabled {
+		log.Printf("[DEBUG]: API probing for NSX is disabled")
+		return nil
+	}
+	connector := getPolicyConnectorForInit(m, false)
+	stateConf := getNodeConnectivityStateConf(connector, delay, interval, timeout)
+	_, err := stateConf.WaitForState()
+	if err != nil {
+		return fmt.Errorf("Failed to connect to main NSX manager endpoint")
+	}
+
+	// Wait for joining nodes
+	for _, node := range nodes {
+		c, err := getNewNsxtClient(node, d, m)
+		if err != nil {
+			return err
+		}
+		newNsxClients := c.(nsxtClients)
+		nodeConnector := getPolicyConnectorForInit(newNsxClients, false)
+		nodeConf := getNodeConnectivityStateConf(nodeConnector, 0, interval, timeout)
+		_, err = nodeConf.WaitForState()
+		if err != nil {
+			return fmt.Errorf("Failed to connect to NSX node endpoint %s", node.IPAddress)
+		}
+	}
+
+	return nil
+}
+
 func getClusterNodesFromSchema(d *schema.ResourceData) []NsxClusterNode {
 	nodes := d.Get("node").([]interface{})
 	var clusterNodes []NsxClusterNode
@@ -107,6 +218,11 @@ func resourceNsxtManagerClusterCreate(d *schema.ResourceData, m interface{}) err
 	nodes := getClusterNodesFromSchema(d)
 	if len(nodes) == 0 {
 		return fmt.Errorf("At least a manager appliance must be provided to form a cluster")
+	}
+
+	err := waitForNodeStatus(d, m, nodes)
+	if err != nil {
+		return fmt.Errorf("Failed to establish connection to NSX API: %v", err)
 	}
 	clusterID, certSha256Thumbprint, hostIPs, err := getClusterInfoFromHostNode(d, m)
 	if err != nil {
@@ -329,6 +445,10 @@ func resourceNsxtManagerClusterRead(d *schema.ResourceData, m interface{}) error
 }
 
 func resourceNsxtManagerClusterUpdate(d *schema.ResourceData, m interface{}) error {
+	if !d.HasChange("node") {
+		// CHanges to attributes other than "node" should be ignored
+		return nil
+	}
 	id := d.Id()
 	connector := getPolicyConnector(m)
 	client := nsx.NewClusterClient(connector)
