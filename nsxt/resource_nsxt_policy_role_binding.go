@@ -94,7 +94,7 @@ func resourceNsxtPolicyUserManagementRoleBinding() *schema.Resource {
 										Required:    true,
 										ValidateFunc: validation.StringMatch(
 											regexp.MustCompile(
-												"^[_a-z0-9-]+$"),
+												`^[_a-z0-9-]+$`),
 											"Must be a valid role identifier matching: ^[_a-z0-9-]+$"),
 									},
 									"role_display_name": {
