@@ -49,6 +49,7 @@ func testAccDataSourceNsxtPolicyIPPoolBasic(t *testing.T, withContext bool, preC
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", name),
+					resource.TestCheckResourceAttrSet(testResourceName, "realized_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 				),
 			},

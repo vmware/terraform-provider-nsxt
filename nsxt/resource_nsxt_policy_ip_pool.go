@@ -33,6 +33,11 @@ func resourceNsxtPolicyIPPool() *schema.Resource {
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
 			"context":      getContextSchema(),
+			"realized_id": {
+				Type:        schema.TypeString,
+				Description: "The ID of the realized resource",
+				Computed:    true,
+			},
 		},
 	}
 }
@@ -77,6 +82,7 @@ func resourceNsxtPolicyIPPoolRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("nsx_id", pool.Id)
 	d.Set("path", pool.Path)
 	d.Set("revision", pool.Revision)
+	d.Set("realized_id", pool.RealizationId)
 
 	return nil
 }
