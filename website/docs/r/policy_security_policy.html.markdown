@@ -174,7 +174,7 @@ The following arguments are supported:
   * `services` - (Optional) Set of service paths to match.
   * `log_label` - (Optional) Additional information (string) which will be propagated to the rule syslog.
   * `tag` - (Optional) A list of scope + tag pairs to associate with this Rule.
-  * `sequence_number` - (Optional) It is recommended not to specify sequence number for rules, and rely on NSX to auto-assign them. If you choose to specify sequence numbers, you must make sure the numbers are consistent with order of the rules in configuration. To avoid confusion, either specify sequence numbers in all rules, or none at all.
+  * `sequence_number` - (Optional) It is recommended not to specify sequence number for rules, and rely on provider to auto-assign them. If you choose to specify sequence numbers, you must make sure the numbers are consistent with order of the rules in configuration. Please note that sequence numbers should start with 1 and not 0. To avoid confusion, either specify sequence numbers in all rules, or none at all.
 
 
 ## Attributes Reference
@@ -187,7 +187,7 @@ In addition to arguments listed above, the following attributes are exported:
 * `rule`:
   * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
   * `path` - The NSX path of the policy resource.
-  * `sequence_number` - Sequence number of the this rule, is defined by order of rules in the list.
+  * `sequence_number` - Sequence number for the rule.
   * `rule_id` - Unique positive number that is assigned by the system and is useful for debugging.
 
 ## Importing
