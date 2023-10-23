@@ -546,3 +546,17 @@ func validatePolicyBGPCommunity(i interface{}, k string) (s []string, es []error
 
 	return
 }
+
+// validateLdapOrLdapsURL( is a SchemaValidateFunc which tests if the url is of type string and a valid LDAP or LDAPs
+func validateLdapOrLdapsURL() schema.SchemaValidateFunc {
+	return func(i interface{}, k string) (s []string, es []error) {
+		_, ok := i.(string)
+		if !ok {
+			es = append(es, fmt.Errorf("expected type of %s to be string", k))
+			return
+		}
+
+		s, es = validation.IsURLWithScheme([]string{"ldap", "ldaps"})(i, k)
+		return
+	}
+}
