@@ -2,6 +2,7 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -423,8 +424,9 @@ func validatePolicyRuleSequence(d *schema.ResourceData) error {
 	for _, rule := range rules {
 		data := rule.(map[string]interface{})
 		sequenceNumber := int64(data["sequence_number"].(int))
+		displayName := data["display_name"].(string)
 		if sequenceNumber > 0 && sequenceNumber <= latestNum {
-			return fmt.Errorf("when sequence_number is specified in a rule, it must be consistent with rule order. To avoid confusion, it is recommended to either specify sequence numbers in all rules, or none")
+			return fmt.Errorf("when sequence_number is specified in a rule, it must be consistent with rule order. To avoid confusion, it is recommended to either specify sequence numbers in all rules, or none. Error detected with rule %s: %v <= %v", displayName, sequenceNumber, latestNum)
 		}
 
 		if sequenceNumber == 0 {
@@ -470,7 +472,13 @@ func getPolicyRulesFromSchema(d *schema.ResourceData) []model.Rule {
 		}
 
 		resourceType := "Rule"
-		if sequenceNumber == 0 {
+		if sequenceNumber == 0 || sequenceNumber <= lastSequence {
+			// We overwrite sequence number in case its not specified,
+			// or out of order, which might be due to provider upgrade
+			// or bad user configuration
+			if sequenceNumber <= lastSequence {
+				log.Printf("[WARNING] Sequence_number %v for rule %s is out of order - overriding with sequence number %v", sequenceNumber, displayName, lastSequence+1)
+			}
 			sequenceNumber = lastSequence + 1
 		}
 		lastSequence = sequenceNumber

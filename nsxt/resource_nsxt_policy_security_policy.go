@@ -87,14 +87,13 @@ func policySecurityPolicyBuildAndPatch(d *schema.ResourceData, m interface{}, co
 	}
 	log.Printf("[INFO] Creating Security Policy with ID %s", id)
 
-	if !createFlow {
+	if createFlow {
+		if err := validatePolicyRuleSequence(d); err != nil {
+			return err
+		}
+	} else {
 		// This is update flow
 		obj.Revision = &revision
-	}
-
-	err := validatePolicyRuleSequence(d)
-	if err != nil {
-		return err
 	}
 
 	policyChildren, err := getUpdatedRuleChildren(d)
