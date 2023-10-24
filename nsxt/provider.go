@@ -706,13 +706,13 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 	}
 
 	if !isVMC {
-		err = configureLicenses(getPolicyConnectorForInit(*clients), clients.CommonConfig.LicenseKeys)
+		err = configureLicenses(getPolicyConnectorForInit(*clients, true), clients.CommonConfig.LicenseKeys)
 		if err != nil {
 			return err
 		}
 	}
 
-	err = initNSXVersion(getPolicyConnectorForInit(*clients))
+	err = initNSXVersion(getPolicyConnectorForInit(*clients, true))
 	if err != nil && isVMC {
 		// In case version API does not work for VMC, we workaround by testing version-specific APIs
 		// TODO - remove this when /node/version API works for all auth methods on VMC
@@ -975,14 +975,14 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 }
 
 func getPolicyConnector(clients interface{}) client.Connector {
-	return getPolicyConnectorWithHeaders(clients, nil, false)
+	return getPolicyConnectorWithHeaders(clients, nil, false, true)
 }
 
-func getPolicyConnectorForInit(clients interface{}) client.Connector {
-	return getPolicyConnectorWithHeaders(clients, nil, true)
+func getPolicyConnectorForInit(clients interface{}, withRetry bool) client.Connector {
+	return getPolicyConnectorWithHeaders(clients, nil, true, withRetry)
 }
 
-func getPolicyConnectorWithHeaders(clients interface{}, customHeaders *map[string]string, initFlow bool) client.Connector {
+func getPolicyConnectorWithHeaders(clients interface{}, customHeaders *map[string]string, initFlow bool, withRetry bool) client.Connector {
 	c := clients.(nsxtClients)
 
 	retryFunc := func(retryContext retry.RetryContext) bool {
@@ -1015,9 +1015,13 @@ func getPolicyConnectorWithHeaders(clients interface{}, customHeaders *map[strin
 		return true
 	}
 
-	connectorOptions := []client.ConnectorOption{client.UsingRest(nil), client.WithHttpClient(c.PolicyHTTPClient), client.WithDecorators(retry.NewRetryDecorator(uint(c.CommonConfig.MaxRetries), retryFunc))}
+	connectorOptions := []client.ConnectorOption{client.UsingRest(nil), client.WithHttpClient(c.PolicyHTTPClient)}
 	var requestProcessors []core.RequestProcessor
 	var responseAcceptors []core.ResponseAcceptor
+
+	if withRetry {
+		connectorOptions = append(connectorOptions, client.WithDecorators(retry.NewRetryDecorator(uint(c.CommonConfig.MaxRetries), retryFunc)))
+	}
 
 	if c.PolicySecurityContext != nil {
 		connectorOptions = append(connectorOptions, client.WithSecurityContext(c.PolicySecurityContext))
