@@ -34,12 +34,6 @@ import (
 
 var defaultRetryOnStatusCodes = []int{400, 409, 429, 500, 503, 504}
 
-// Struct to keep track of changes in schema List
-type listDiff struct {
-	added   []interface{}
-	removed []interface{}
-}
-
 // Provider configuration that is shared for policy and MP
 type commonProviderConfig struct {
 	RemoteAuth             bool
@@ -51,7 +45,7 @@ type commonProviderConfig struct {
 	RetryStatusCodes       []int
 	Username               string
 	Password               string
-	LicenseDiff            listDiff
+	LicenseKeys            []string
 }
 
 type nsxtClients struct {
@@ -712,7 +706,7 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 	}
 
 	if !isVMC {
-		err = configureLicenses(getPolicyConnectorForInit(*clients, true), clients.CommonConfig.LicenseDiff)
+		err = configureLicenses(getPolicyConnectorForInit(*clients, true), clients.CommonConfig.LicenseKeys)
 		if err != nil {
 			return err
 		}
@@ -806,8 +800,8 @@ func (processor logRequestProcessor) Process(req *http.Request) error {
 	}
 
 	// Replace sensitive information in HTTP headers
-	authHeaderRegexp := regexp.MustCompile("(?i)Authorization:.*")
-	cspHeaderRegexp := regexp.MustCompile("(?i)Csp-Auth-Token:.*")
+	authHeaderRegexp := regexp.MustCompile(`(?i)Authorization:.*`)
+	cspHeaderRegexp := regexp.MustCompile(`(?i)Csp-Auth-Token:.*`)
 	replaced := authHeaderRegexp.ReplaceAllString(string(reqDump), "<Omitted Authorization header>")
 	replaced = cspHeaderRegexp.ReplaceAllString(replaced, "<Omitted Csp-Auth-Token header>")
 
@@ -862,6 +856,26 @@ func (processor sessionHeaderProcessor) Process(req *http.Request) error {
 	return nil
 }
 
+func getLicenses(connector client.Connector) ([]string, error) {
+	var licenseList []string
+	client := nsx.NewLicensesClient(connector)
+	list, err := client.List()
+	if err != nil {
+		return licenseList, fmt.Errorf("Error during license create: %v", err)
+	}
+
+	defaultLicenseMarkers := []string{"NSX for vShield Endpoint"}
+	for _, item := range list.Results {
+		// Ignore default licenses
+		if item.Description != nil && slices.Contains(defaultLicenseMarkers, *item.Description) {
+			continue
+		}
+		licenseList = append(licenseList, *item.LicenseKey)
+	}
+
+	return licenseList, nil
+}
+
 func applyLicense(connector client.Connector, licenseKey string) error {
 	client := nsx.NewLicensesClient(connector)
 	license := model.License{LicenseKey: &licenseKey}
@@ -883,44 +897,27 @@ func removeLicense(connector client.Connector, licenseKey string) error {
 	return nil
 }
 
-func getListDiffFromSchema(d *schema.ResourceData, attribute string) listDiff {
-	var diff listDiff
-	o, n := d.GetChange(attribute)
-	oldValues := interfaceListToStringList(o.([]interface{}))
-	newValues := interfaceListToStringList(n.([]interface{}))
-	// Check for new
-	for _, value := range newValues {
-		if !slices.Contains(oldValues, value) {
-			diff.added = append(diff.added, value)
-		}
-	}
-
-	// Remove old licenses
-	for _, value := range oldValues {
-		if !slices.Contains(newValues, value) {
-			diff.removed = append(diff.removed, value)
-		}
-	}
-	return diff
-}
-
 // license keys are applied on terraform plan and are not removed
-func configureLicenses(connector client.Connector, diff listDiff) error {
+func configureLicenses(connector client.Connector, intentLicenses []string) error {
+	if len(intentLicenses) == 0 {
+		// Since we never remove licenses, nothing to do here
+		return nil
+	}
+	existingLicenses, err := getLicenses(connector)
+	if err != nil {
+		return err
+	}
 	// Apply new licenses
-	for _, license := range diff.added {
-		err := applyLicense(connector, license.(string))
+	for _, license := range intentLicenses {
+		if slices.Contains(existingLicenses, license) {
+			continue
+		}
+		err := applyLicense(connector, license)
 		if err != nil {
 			return fmt.Errorf("error applying license key: %s. %s", license, err.Error())
 		}
 	}
 
-	// Remove old licenses
-	for _, license := range diff.removed {
-		err := removeLicense(connector, license.(string))
-		if err != nil {
-			return fmt.Errorf("error deleting license key: %s. %s", license, err.Error())
-		}
-	}
 	return nil
 }
 
@@ -944,7 +941,7 @@ func initCommonConfig(d *schema.ResourceData) commonProviderConfig {
 		retryStatuses = append(retryStatuses, defaultRetryOnStatusCodes...)
 	}
 
-	licDiff := getListDiffFromSchema(d, "license_keys")
+	licenses := interfaceListToStringList(d.Get("license_keys").([]interface{}))
 	return commonProviderConfig{
 		RemoteAuth:             remoteAuth,
 		ToleratePartialSuccess: toleratePartialSuccess,
@@ -954,7 +951,7 @@ func initCommonConfig(d *schema.ResourceData) commonProviderConfig {
 		RetryStatusCodes:       retryStatuses,
 		Username:               username,
 		Password:               password,
-		LicenseDiff:            licDiff,
+		LicenseKeys:            licenses,
 	}
 }
 
@@ -1069,7 +1066,7 @@ func getPolicyConnectorWithHeaders(clients interface{}, customHeaders *map[strin
 	// This is also our indication to apply licenses, in case of delayed connection
 	if nsxVersion == "" && !initFlow {
 		initNSXVersion(connector)
-		err := configureLicenses(connector, c.CommonConfig.LicenseDiff)
+		err := configureLicenses(connector, c.CommonConfig.LicenseKeys)
 		if err != nil {
 			log.Printf("[ERROR]: Failed to apply NSX licenses")
 		}
