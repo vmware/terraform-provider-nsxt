@@ -24,7 +24,7 @@ resource "nsxt_policy_host_transport_node_profile" "test" {
     transport_zone_endpoint {
       transport_zone = data.nsxt_transport_zone.tz1.id
     }
-    host_switch_profile = [nsxt_uplink_host_switch_profile.hsw_profile1.path]
+    host_switch_profile = [nsxt_policy_uplink_host_switch_profile.hsw_profile1.path]
     is_migrate_pnics    = false
     pnic {
       device_name = "fp-eth0"

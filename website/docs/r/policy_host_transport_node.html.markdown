@@ -35,7 +35,7 @@ resource "nsxt_policy_host_transport_node" "test" {
   standard_host_switch {
     host_switch_mode    = "STANDARD"
     host_switch_type    = "NVDS"
-    host_switch_profile = [data.nsxt_uplink_host_switch_profile.hsw_profile1.path]
+    host_switch_profile = [data.nsxt_policy_uplink_host_switch_profile.hsw_profile1.path]
 
     ip_assignment {
       assigned_by_dhcp = true

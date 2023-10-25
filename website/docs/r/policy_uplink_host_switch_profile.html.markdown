@@ -118,13 +118,13 @@ An existing object can be [imported][docs-import] into this resource, via the fo
 [docs-import]: https://www.terraform.io/cli/import
 
 ```
-terraform import nsxt_uplink_host_switch_profile.uplink_host_switch_profile UUID
+terraform import nsxt_policy_uplink_host_switch_profile.uplink_host_switch_profile UUID
 ```
 
 The above command imports UplinkHostSwitchProfile named `uplink_host_switch_profile` with the NSX ID `UUID`.
 
 
 ```
-terraform import nsxt_uplink_host_switch_profile.uplink_host_switch_profile POLICY_PATH
+terraform import nsxt_policy_uplink_host_switch_profile.uplink_host_switch_profile POLICY_PATH
 ```
 The above command imports the uplink host switch profile named `uplink_host_switch_profile` with policy path `POLICY_PATH`.
