@@ -85,7 +85,7 @@ In addition to arguments listed above, the following attributes are exported:
 * `rule`:
   * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
   * `path` - The NSX policy path for this rule.
-  * `sequence_number` - Sequence number of the this rule, is defined by order of rules in the list.
+  * `sequence_number` - Sequence number for this rule, as defined by order of rules in the list.
   * `rule_id` - Unique positive number that is assigned by the system and is useful for debugging.
 
 ## Importing
