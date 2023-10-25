@@ -1,17 +1,26 @@
 ---
 layout: "nsxt"
-page_title: "VMware NSX-T Terraform Provider support for Multi-tenancy"
+page_title: "VMware NSX Terraform Provider support for Multi-tenancy"
 description: |-
-  The VMware NSX-T Terraform Provider support for Multi-tenancy
+  The VMware NSX Terraform Provider support for Multi-tenancy
 ---
 
-NSX-T Terraform Provider offers support for NSX-T [multi-tenancy feature](https://docs.vmware.com/en/VMware-NSX/4.1/administration/GUID-52180BC5-A1AB-4BC2-B1CE-666292505317.html).
+# NSX Provider for NSX Multi-tenancy
 
-# NSX-T Project Creation and Reference
+NSX Terraform Provider offers support for NSX [multi-tenancy feature](https://docs.vmware.com/en/VMware-NSX/4.1/administration/GUID-52180BC5-A1AB-4BC2-B1CE-666292505317.html).
 
-NSX-T Project objects can be created and referenced with the `nsxt_policy_project` [resource](../r/policy_project.html.markdown) and [data source](../d/policy_project.html.markdown).
+## NSX Multi-Tenancy
+NSX introduced a new construct called Project in order to offer tenancy by isolating security and networking objects across tenants in a single NSX deployment.
 
-For example, an NSX-T multi-tenancy Project could be created as below:
+Project allows multiple users to work on the platform in parallel, isolating configurations and defining scope for security (distributed security configured in a Project only applies to VMs connected to networks from that Project)
+
+NSX also introduced NSX VPCs, offering a second level of tenancy and cloud consumption. Currently the Terraform Provider does not yet support NSX VPCs.
+
+## NSX Project Creation and Reference
+
+NSX Project objects can be created and referenced with the `nsxt_policy_project` [resource](../r/policy_project.html.markdown) and [data source](../d/policy_project.html.markdown).
+
+For example, an NSX multi-tenancy Project could be created as below:
 
 ```hcl
 resource "nsxt_policy_project" "test" {
@@ -34,7 +43,7 @@ resource "nsxt_policy_ip_discovery_profile" "ip_discovery_profile" {
   context {
     project_id = data.nsxt_policy_project.demoproj.id
   }
-  description  = "ip discovery profile provisioned by Terraform"
+  description  = "ip discovery profile for demo project"
   display_name = "ip_discovery_profile1"
 
   arp_nd_binding_timeout         = 20
@@ -69,56 +78,56 @@ terraform import nsxt_policy_tier1_gateway.tier1_gw /orgs/default/projects/demop
 
 # Supported data sources
 
-* [nsxt_policy_gateway_locale_service](../d/policy_gateway_locale_service.html.markdown)
-* [nsxt_policy_ip_pool](../d/policy_ip_pool.html.markdown)
-* [nsxt_policy_segment](../d/policy_segment.html.markdown)
-* [nsxt_policy_context_profile](../d/policy_context_profile.html.markdown)
-* [nsxt_policy_ip_discovery_profile](../d/policy_ip_discovery_profile.html.markdown)
-* [nsxt_policy_ipv6_dad_profile](../d/policy_ipv6_dad_profile.html.markdown)
-* [nsxt_policy_tier1_gateway](../d/policy_tier1_gateway.html.markdown)
-* [nsxt_policy_spoofguard_profile](../d/policy_spoofguard_profile.html.markdown)
-* [nsxt_policy_group](../d/policy_group.html.markdown)
-* [nsxt_policy_mac_discovery_profile](../d/policy_mac_discovery_profile.html.markdown)
-* [nsxt_policy_gateway_qos_profile](../d/policy_gateway_qos_profile.html.markdown)
-* [nsxt_policy_ip_block](../d/policy_ip_block.html.markdown)
-* [nsxt_policy_gateway_policy](../d/policy_gateway_policy.html.markdown)
-* [nsxt_policy_dhcp_server](../d/policy_dhcp_server.html.markdown)
-* [nsxt_policy_realization_info](../d/policy_realization_info.html.markdown)
-* [nsxt_policy_segment_security_profile](../d/policy_segment_security_profile.html.markdown)
-* [nsxt_policy_segment_realization](../d/policy_segment_realization.html.markdown)
-* [nsxt_policy_qos_profile](../d/policy_qos_profile.html.markdown)
-* [nsxt_policy_ipv6_ndra_profile](../d/policy_ipv6_ndra_profile.html.markdown)
-* [nsxt_policy_service](../d/policy_service.html.markdown)
-* [nsxt_policy_security_policy](../d/policy_security_policy.html.markdown)
+* [nsxt_policy_gateway_locale_service](../data-sources/policy_gateway_locale_service.html.markdown)
+* [nsxt_policy_ip_pool](../data-sources/policy_ip_pool.html.markdown)
+* [nsxt_policy_segment](../data-sources/policy_segment.html.markdown)
+* [nsxt_policy_context_profile](../data-sources/policy_context_profile.html.markdown)
+* [nsxt_policy_ip_discovery_profile](../data-sources/policy_ip_discovery_profile.html.markdown)
+* [nsxt_policy_ipv6_dad_profile](../data-sources/policy_ipv6_dad_profile.html.markdown)
+* [nsxt_policy_tier1_gateway](../data-sources/policy_tier1_gateway.html.markdown)
+* [nsxt_policy_spoofguard_profile](../data-sources/policy_spoofguard_profile.html.markdown)
+* [nsxt_policy_group](../data-sources/policy_group.html.markdown)
+* [nsxt_policy_mac_discovery_profile](../data-sources/policy_mac_discovery_profile.html.markdown)
+* [nsxt_policy_gateway_qos_profile](../data-sources/policy_gateway_qos_profile.html.markdown)
+* [nsxt_policy_ip_block](../data-sources/policy_ip_block.html.markdown)
+* [nsxt_policy_gateway_policy](../data-sources/policy_gateway_policy.html.markdown)
+* [nsxt_policy_dhcp_server](../data-sources/policy_dhcp_server.html.markdown)
+* [nsxt_policy_realization_info](../data-sources/policy_realization_info.html.markdown)
+* [nsxt_policy_segment_security_profile](../data-sources/policy_segment_security_profile.html.markdown)
+* [nsxt_policy_segment_realization](../data-sources/policy_segment_realization.html.markdown)
+* [nsxt_policy_qos_profile](../data-sources/policy_qos_profile.html.markdown)
+* [nsxt_policy_ipv6_ndra_profile](../data-sources/policy_ipv6_ndra_profile.html.markdown)
+* [nsxt_policy_service](../data-sources/policy_service.html.markdown)
+* [nsxt_policy_security_policy](../data-sources/policy_security_policy.html.markdown)
 
 # Supported resources
 
-* [nsxt_policy_nat_rule](../r/policy_nat_rule.html.markdown)
-* [nsxt_policy_dns_forwarder_zone](../r/policy_dns_forwarder_zone.html.markdown)
-* [nsxt_policy_predefined_security_policy](../r/policy_predefined_security_policy.html.markdown)
-* [nsxt_policy_static_route](../r/policy_static_route.html.markdown)
-* [nsxt_policy_ip_pool](../r/policy_ip_pool.html.markdown)
-* [nsxt_policy_segment](../r/policy_segment.html.markdown)
-* [nsxt_policy_context_profile](../r/policy_context_profile.html.markdown)
-* [nsxt_policy_ip_discovery_profile](../r/policy_ip_discovery_profile.html.markdown)
-* [nsxt_policy_ip_pool_static_subnet](../r/policy_ip_pool_static_subnet.html.markdown)
-* [nsxt_policy_predefined_gateway_policy](../r/policy_predefined_gateway_policy.html.markdown)
-* [nsxt_policy_fixed_segment](../r/policy_fixed_segment.html.markdown)
-* [nsxt_policy_tier1_gateway](../r/policy_tier1_gateway.html.markdown)
-* [nsxt_policy_tier1_gateway_interface](../r/policy_tier1_gateway_interface.html.markdown)
-* [nsxt_policy_group](../r/policy_group.html.markdown)
-* [nsxt_policy_mac_discovery_profile](../r/policy_mac_discovery_profile.html.markdown)
-* [nsxt_policy_ip_block](../r/policy_ip_block.html.markdown)
-* [nsxt_policy_gateway_dns_forwarder](../r/policy_gateway_dns_forwarder.html.markdown)
-* [nsxt_policy_gateway_policy](../r/policy_gateway_policy.html.markdown)
-* [nsxt_policy_dhcp_server](../r/policy_dhcp_server.html.markdown)
-* [nsxt_policy_ip_address_allocation](../r/policy_ip_address_allocation.html.markdown)
-* [nsxt_policy_segment_security_profile](../r/policy_segment_security_profile.html.markdown)
-* [nsxt_policy_context_profile_custom_attribute](../r/policy_context_profile_custom_attribute.html.markdown)
-* [nsxt_policy_vm_tags](../r/policy_vm_tags.html.markdown)
-* [nsxt_policy_dhcp_relay](../r/policy_dhcp_relay.html.markdown)
-* [nsxt_policy_spoof_guard_profile](../r/policy_spoof_guard_profile.html.markdown)
-* [nsxt_policy_qos_profile](../r/policy_qos_profile.html.markdown)
-* [nsxt_policy_service](../r/policy_service.html.markdown)
-* [nsxt_policy_ip_pool_block_subnet](../r/policy_ip_pool_block_subnet.html.markdown)
-* [nsxt_policy_security_policy](../r/policy_security_policy.html.markdown)
+* [nsxt_policy_nat_rule](../resources/policy_nat_rule.html.markdown)
+* [nsxt_policy_dns_forwarder_zone](../resources/policy_dns_forwarder_zone.html.markdown)
+* [nsxt_policy_predefined_security_policy](../resources/policy_predefined_security_policy.html.markdown)
+* [nsxt_policy_static_route](../resources/policy_static_route.html.markdown)
+* [nsxt_policy_ip_pool](../resources/policy_ip_pool.html.markdown)
+* [nsxt_policy_segment](../resources/policy_segment.html.markdown)
+* [nsxt_policy_context_profile](../resources/policy_context_profile.html.markdown)
+* [nsxt_policy_ip_discovery_profile](../resources/policy_ip_discovery_profile.html.markdown)
+* [nsxt_policy_ip_pool_static_subnet](../resources/policy_ip_pool_static_subnet.html.markdown)
+* [nsxt_policy_predefined_gateway_policy](../resources/policy_predefined_gateway_policy.html.markdown)
+* [nsxt_policy_fixed_segment](../resources/policy_fixed_segment.html.markdown)
+* [nsxt_policy_tier1_gateway](../resources/policy_tier1_gateway.html.markdown)
+* [nsxt_policy_tier1_gateway_interface](../resources/policy_tier1_gateway_interface.html.markdown)
+* [nsxt_policy_group](../resources/policy_group.html.markdown)
+* [nsxt_policy_mac_discovery_profile](../resources/policy_mac_discovery_profile.html.markdown)
+* [nsxt_policy_ip_block](../resources/policy_ip_block.html.markdown)
+* [nsxt_policy_gateway_dns_forwarder](../resources/policy_gateway_dns_forwarder.html.markdown)
+* [nsxt_policy_gateway_policy](../resources/policy_gateway_policy.html.markdown)
+* [nsxt_policy_dhcp_server](../resources/policy_dhcp_server.html.markdown)
+* [nsxt_policy_ip_address_allocation](../resources/policy_ip_address_allocation.html.markdown)
+* [nsxt_policy_segment_security_profile](../resources/policy_segment_security_profile.html.markdown)
+* [nsxt_policy_context_profile_custom_attribute](../resources/policy_context_profile_custom_attribute.html.markdown)
+* [nsxt_policy_vm_tags](../resources/policy_vm_tags.html.markdown)
+* [nsxt_policy_dhcp_relay](../resources/policy_dhcp_relay.html.markdown)
+* [nsxt_policy_spoof_guard_profile](../resources/policy_spoof_guard_profile.html.markdown)
+* [nsxt_policy_qos_profile](../resources/policy_qos_profile.html.markdown)
+* [nsxt_policy_service](../resources/policy_service.html.markdown)
+* [nsxt_policy_ip_pool_block_subnet](../resources/policy_ip_pool_block_subnet.html.markdown)
+* [nsxt_policy_security_policy](../resources/policy_security_policy.html.markdown)
