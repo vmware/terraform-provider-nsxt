@@ -1,5 +1,5 @@
 ---
-subcategory: "Realization"
+subcategory: "Beta"
 layout: "nsxt"
 page_title: "NSXT: compute_manager_realization"
 description: Compute manager resource realization information.
@@ -49,4 +49,4 @@ data "nsxt_compute_manager_realization" "test" {
 In addition to arguments listed above, the following attributes are exported:
 
 * `state` - The realization state of the resource. Transitional states are: "pending", "in_progress", "in_sync", "unknown". Target states are: "success", "failed", "partial_success", "orphaned", "error".
-* `registration_status` - Overall registration status of desired configuration. Transitional statuses are "CONNECTING", "REGISTERING". Target statuses are: "REGISTERED", "UNREGISTERED", "REGISTERED_WITH_ERRORS" 
+* `registration_status` - Overall registration status of desired configuration. Transitional statuses are "CONNECTING", "REGISTERING". Target statuses are: "REGISTERED", "UNREGISTERED", "REGISTERED_WITH_ERRORS"
