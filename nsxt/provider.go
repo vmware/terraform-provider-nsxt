@@ -451,6 +451,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_lb_passive_monitor_profile":       resourceNsxtPolicyLBPassiveMonitorProfile(),
 			"nsxt_policy_lb_tcp_monitor_profile":           resourceNsxtPolicyLBTcpMonitorProfile(),
 			"nsxt_policy_lb_udp_monitor_profile":           resourceNsxtPolicyLBUdpMonitorProfile(),
+			"nsxt_policy_ods_runbook_invocation":           resourceNsxtPolicyODSRunbookInvocation(),
 		},
 
 		ConfigureFunc: providerConfigure,
