@@ -493,6 +493,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_gateway_flood_protection_profile_binding":     resourceNsxtPolicyGatewayFloodProtectionProfileBinding(),
 			"nsxt_policy_compute_sub_cluster":                          resourceNsxtPolicyComputeSubCluster(),
 			"nsxt_policy_tier0_inter_vrf_routing":                      resourceNsxtPolicyTier0InterVRFRouting(),
+			"nsxt_policy_ods_runbook_invocation":                       resourceNsxtPolicyODSRunbookInvocation(),
 		},
 
 		ConfigureFunc: providerConfigure,
