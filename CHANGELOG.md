@@ -1,3 +1,44 @@
+## 3.4.0 (October 26, 2023)
+
+FEATURES:
+* Multitenancy support. Supported resources and data sources can now be created within a context of a project. In order to specify a project, use `context` block within resource or data source, and specify `project_id` within. For the full list of supported resources, please refer to [Multitenancy Guide](https://registry.terraform.io/providers/vmware/nsxt/latest/docs/guides/multitenancy).
+As part of multitenancy support, project resource and data source are offered, as listed below.
+
+* `data/nsxt_policy_project`
+
+* `resource/nsxt_policy_project`
+
+BUG FIXES:
+* `resource/nsxt_policy_security_policy`, `resource/nsxt_policy_gateway_policy`: Validate correctness of sequence numbers only on policy creation, and skip this check on update, but rather auto-correct sequence numbers if needed. This is in order to avoid erroring out in case of incorrect sequence numbers that got assigned in previous provider version ([#1001](https://github.com/vmware/terraform-provider-nsxt/pull/1001))
+* Escape all special characters in data sources, as required by search API. This fixes and issue with search by `display_name` that was not working as expected in case it contained some special characters ([#993](https://github.com/vmware/terraform-provider-nsxt/pull/993))
+
+EXPERIMENTAL FEATURES:
+Fabric support is offered as Beta with this release:
+
+* `data/nsxt_compute_collection`
+* `data/nsxt_compute_manager`
+* `data/nsxt_failure_domain`
+* `data/nsxt_policy_uplink_host_switch_profile`
+* `data/nsxt_transport_node_realization`
+* `data/nsxt_compute_manager_realization`
+
+* `resource/nsxt_cluster_virtual_ip`
+* `resource/nsxt_compute_manager`
+* `resource/nsxt_edge_cluster`
+* `resource/nsxt_failure_domain`
+* `resource/nsxt_manager_cluster`
+* `resource/nsxt_policy_host_transport_node_profile`
+* `resource/nsxt_policy_transport_zone`
+* `resource/nsxt_transport_node`
+* `resource/nsxt_policy_uplink_host_switch_profile`
+* `resource/nsxt_policy_host_transport_node_collection`
+* `resource/nsxt_edge_high_availability_profile`
+* `resource/nsxt_policy_host_transport_node`
+* `resource/nsxt_node_user`
+* `resource/nsxt_policy_user_management_role_binding`
+* `resource/nsxt_policy_user_management_role`
+* `resource/nsxt_policy_transport_zone`
+
 ## 3.3.2 (September 22, 2023)
 
 IMPROVEMENTS:
@@ -6,7 +47,7 @@ IMPROVEMENTS:
 * Improve debug logging by dumping NSX API requests and responses when `TF_LOG_PROVIDER_NSX_HTTP` env variable is set ([#963](https://github.com/vmware/terraform-provider-nsxt/pull/963))
 
 BUG FIXES:
-* `resource/nsxt_policy_security_policy`, `resource/nsxt_policy_gateway_policy`, `resource/nsxt_policy_ids_policy`: Fix rule ordering issue by auto-assigning `sequence_number`. ([#967](https://github.com/vmware/terraform-provider-nsxt/pull/967))
+* `resource/nsxt_policy_security_policy`, `resource/nsxt_policy_gateway_policy`: Fix rule ordering issue by auto-assigning `sequence_number`. ([#967](https://github.com/vmware/terraform-provider-nsxt/pull/967))
 * `resource/nsxt_policy_group`: Fix `group_type` assignment on VMC by using `node/version` API to determine underlying NSX version ([#970](https://github.com/vmware/terraform-provider-nsxt/pull/970))
 * `resource/nsxt_nat_rule`: Ensure compatibility with NSX 4.1.0 and above by replacing removed 'nat_pass' property with 'firewall_match' ([#950](https://github.com/vmware/terraform-provider-nsxt/pull/950))
 
