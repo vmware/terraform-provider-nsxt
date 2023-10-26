@@ -5,10 +5,13 @@ package nsxt
 
 import (
 	"fmt"
-	"strings"
+
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
@@ -33,82 +36,70 @@ func dataSourceNsxtPolicyTier0Gateway() *schema.Resource {
 
 func dataSourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
+	obj, err := policyDataSourceResourceRead(d, connector, getSessionContext(d, m), "Tier0", nil)
+	if err != nil {
+		return err
+	}
 
+	// Single edge cluster is not informative for global manager
 	if isPolicyGlobalManager(m) {
-		_, err := policyDataSourceResourceRead(d, connector, getSessionContext(d, m), "Tier0", nil)
-		if err != nil {
-			return err
-		}
-
-		// Single edge cluster is not informative for global manager
 		d.Set("edge_cluster_path", "")
+	} else {
+		converter := bindings.NewTypeConverter()
+		dataValue, errors := converter.ConvertToGolang(obj, model.Tier0BindingType())
+		if len(errors) > 0 {
+			return errors[0]
+		}
+		gw := dataValue.(model.Tier0)
+		err := resourceNsxtPolicyTier0GatewayReadEdgeCluster(getSessionContext(d, m), d, connector)
+		if err != nil {
+			return fmt.Errorf("failed to get Tier0 %s locale-services: %v", *gw.Id, err)
+		}
+	}
+	return nil
+}
+
+func getPolicyTier0GatewayLocaleServiceEntry(context utl.SessionContext, gwID string, connector client.Connector) (*model.LocaleServices, error) {
+	// Get the locale services of this Tier1 for the edge-cluster id
+	client := tier_0s.NewLocaleServicesClient(connector)
+	obj, err := client.Get(gwID, defaultPolicyLocaleServiceID)
+	if err == nil {
+		return &obj, nil
+	}
+
+	// No locale-service with the default ID
+	// List all the locale services
+	objList, errList := listPolicyTier0GatewayLocaleServices(context, connector, gwID)
+	if errList != nil {
+		return nil, fmt.Errorf("Error while reading Tier1 %v locale-services: %v", gwID, err)
+	}
+	for _, objInList := range objList {
+		// Find the one with the edge cluster path
+		if objInList.EdgeClusterPath != nil {
+			return &objInList, nil
+		}
+	}
+	// No locale service with edge cluster path found.
+	// Return any of the locale services (To avoid creating a new one)
+	for _, objInList := range objList {
+		return &objInList, nil
+	}
+
+	// No locale service with edge cluster path found
+	return nil, nil
+}
+
+func resourceNsxtPolicyTier0GatewayReadEdgeCluster(context utl.SessionContext, d *schema.ResourceData, connector client.Connector) error {
+	// Get the locale services of this Tier1 for the edge-cluster id
+	obj, err := getPolicyTier0GatewayLocaleServiceEntry(context, d.Id(), connector)
+	if err != nil || obj == nil {
+		// No locale-service found
 		return nil
 	}
-
-	objID := d.Get("id").(string)
-	objName := d.Get("display_name").(string)
-	client := infra.NewTier0sClient(connector)
-	var obj model.Tier0
-	if objID != "" {
-		// Get by id
-		objGet, err := client.Get(objID)
-		if isNotFoundError(err) {
-			return fmt.Errorf("Tier0 with ID %s was not found", objID)
-		}
-
-		if err != nil {
-			return fmt.Errorf("Error while reading Tier0 %s: %v", objID, err)
-		}
-		obj = objGet
-	} else if objName == "" {
-		return fmt.Errorf("Error obtaining Tier0 ID or name during read")
-	} else {
-		// Get by full name/prefix
-		includeMarkForDeleteObjectsParam := false
-		objList, err := client.List(nil, &includeMarkForDeleteObjectsParam, nil, nil, nil, nil)
-		if err != nil {
-			return fmt.Errorf("Error while reading Tier0s: %v", err)
-		}
-		// go over the list to find the correct one (prefer a perfect match. If not - prefix match)
-		var perfectMatch []model.Tier0
-		var prefixMatch []model.Tier0
-		for _, objInList := range objList.Results {
-			if strings.HasPrefix(*objInList.DisplayName, objName) {
-				prefixMatch = append(prefixMatch, objInList)
-			}
-			if *objInList.DisplayName == objName {
-				perfectMatch = append(perfectMatch, objInList)
-			}
-		}
-		if len(perfectMatch) > 0 {
-			if len(perfectMatch) > 1 {
-				return fmt.Errorf("Found multiple Tier0s with name '%s'", objName)
-			}
-			obj = perfectMatch[0]
-		} else if len(prefixMatch) > 0 {
-			if len(prefixMatch) > 1 {
-				return fmt.Errorf("Found multiple Tier0s with name starting with '%s'", objName)
-			}
-			obj = prefixMatch[0]
-		} else {
-			return fmt.Errorf("Tier0 with name '%s' was not found", objName)
-		}
+	if obj.EdgeClusterPath != nil {
+		d.Set("edge_cluster_path", obj.EdgeClusterPath)
+		return nil
 	}
-
-	d.SetId(*obj.Id)
-	d.Set("display_name", obj.DisplayName)
-	d.Set("description", obj.Description)
-	d.Set("path", obj.Path)
-
-	localeServices, err := listPolicyTier0GatewayLocaleServices(getSessionContext(d, m), connector, *obj.Id)
-	if err != nil {
-		return fmt.Errorf("Failed to read locale services for '%s'", objName)
-	}
-	for _, service := range localeServices {
-		if service.EdgeClusterPath != nil {
-			d.Set("edge_cluster_path", service.EdgeClusterPath)
-			break
-		}
-	}
+	// No edge cluster found
 	return nil
 }
