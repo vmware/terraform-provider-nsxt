@@ -40,7 +40,7 @@ jobs:
         uses: goreleaser/goreleaser-action@v5
         with:
           version: latest
-          args: release --clean --release-header-tmpl .goreleaser.tmpl
+          args: release --clean --timeout 60m --release-header-tmpl .goreleaser.tmpl
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
