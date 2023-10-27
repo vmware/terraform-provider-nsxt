@@ -1,4 +1,4 @@
-## 3.4.0 (October 26, 2023)
+## 3.4.0 (October 27, 2023)
 
 FEATURES:
 * Multitenancy support. Supported resources and data sources can now be created within a context of a project. In order to specify a project, use `context` block within resource or data source, and specify `project_id` within. For the full list of supported resources, please refer to [Multitenancy Guide](https://registry.terraform.io/providers/vmware/nsxt/latest/docs/guides/multitenancy).
@@ -9,7 +9,7 @@ As part of multitenancy support, project resource and data source are offered, a
 * `resource/nsxt_policy_project`
 
 BUG FIXES:
-* `resource/nsxt_policy_security_policy`, `resource/nsxt_policy_gateway_policy`: Validate correctness of sequence numbers only on policy creation, and skip this check on update, but rather auto-correct sequence numbers if needed. This is in order to avoid erroring out in case of incorrect sequence numbers that got assigned in previous provider version ([#1001](https://github.com/vmware/terraform-provider-nsxt/pull/1001))
+* `resource/nsxt_policy_security_policy`, `resource/nsxt_policy_gateway_policy`: Validate correctness of sequence numbers only on policy creation, and skip this check on update, but rather auto-correct sequence numbers if needed. This is in order to avoid erroring out in case of incorrect sequence numbers that got assigned with previous provider version ([#1001](https://github.com/vmware/terraform-provider-nsxt/pull/1001))
 * Escape all special characters in data sources, as required by search API. This fixes and issue with search by `display_name` that was not working as expected in case it contained some special characters ([#993](https://github.com/vmware/terraform-provider-nsxt/pull/993))
 
 EXPERIMENTAL FEATURES:

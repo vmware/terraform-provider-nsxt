@@ -886,16 +886,6 @@ func applyLicense(connector client.Connector, licenseKey string) error {
 	return nil
 }
 
-func removeLicense(connector client.Connector, licenseKey string) error {
-	client := nsx.NewLicensesClient(connector)
-	err := client.Delete(licenseKey)
-	if err != nil {
-		return fmt.Errorf("error during license delete: %v", err)
-	}
-
-	return nil
-}
-
 // license keys are applied on terraform plan and are not removed
 func configureLicenses(connector client.Connector, intentLicenses []string) error {
 	if len(intentLicenses) == 0 {
