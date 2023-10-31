@@ -127,6 +127,10 @@ func getComputeManagerName() string {
 	return os.Getenv("NSXT_TEST_COMPUTE_MANAGER")
 }
 
+func getHostTransportNodeName() string {
+	return os.Getenv("NSXT_TEST_HOST_TRANSPORT_NODE")
+}
+
 func getVlanTransportZoneName() string {
 	name := os.Getenv("NSXT_TEST_VLAN_TRANSPORT_ZONE")
 	if name == "" {
