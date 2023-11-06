@@ -15,7 +15,7 @@ This resource provides a method for the management of LDAP identity sources.
 resource "nsxt_policy_ldap_identity_source" "test" {
   display_name = "Airius LDAP"
   description  = "Airius LDAP Identity Source"
-  type         = "ActiveDirectoryIdentitySource"
+  type         = "ActiveDirectory"
   domain_name  = "airius.com"
   base_dn      = "DC=airius, DC=com"
 
@@ -40,8 +40,8 @@ The following arguments are supported:
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `type` - (Required) Indicates the type of the LDAP identity source. Valid options:
-  * `ActiveDirectoryIdentitySource` - This is an Active Directory identity source.
-  * `OpenLdapIdentitySource` - This is an OpenLDAP identity source.
+  * `ActiveDirectory` - This is an Active Directory identity source.
+  * `OpenLdap` - This is an OpenLDAP identity source.
 * `domain_name` - (Required) Authentication domain name. This is the name of the authentication domain. When users log into NSX using an identity of the form "user@domain", NSX uses the domain portion to determine which LDAP identity source to use.
 * `base_dn` - (Required) DN of subtree for user and group searches.
 * `alternative_domain_names` - (Optional) Additional domains to be directed to this identity source. After parsing the "user@domain", the domain portion is used to select the LDAP identity source to use. Additional domains listed here will also be directed to this LDAP identity source. In Active Directory these are sometimes referred to as Alternative UPN Suffixes.

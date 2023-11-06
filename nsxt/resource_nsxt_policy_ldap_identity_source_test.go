@@ -9,7 +9,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
 var accTestPolicyLdapIdentitySourceCreateAttributes = map[string]string{
@@ -24,7 +23,7 @@ var accTestPolicyLdapIdentitySourceUpdateAttributes = map[string]string{
 
 func TestAccResourceNsxtPolicyLdapIdentitySource_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_ldap_identity_source.test"
-	ldapType := nsxModel.LdapIdentitySource_RESOURCE_TYPE_ACTIVEDIRECTORYIDENTITYSOURCE
+	ldapType := activeDirectoryType
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -92,7 +91,7 @@ func TestAccResourceNsxtPolicyLdapIdentitySource_basic(t *testing.T) {
 
 func TestAccResourceNsxtPolicyLdapIdentitySource_import_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_ldap_identity_source.test"
-	ldapType := nsxModel.LdapIdentitySource_RESOURCE_TYPE_ACTIVEDIRECTORYIDENTITYSOURCE
+	ldapType := activeDirectoryType
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {

@@ -17,10 +17,12 @@ import (
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
-var ldapServerTypes = [](string){
-	nsxModel.LdapIdentitySource_RESOURCE_TYPE_ACTIVEDIRECTORYIDENTITYSOURCE,
-	nsxModel.LdapIdentitySource_RESOURCE_TYPE_OPENLDAPIDENTITYSOURCE,
-}
+const (
+	activeDirectoryType = "ActiveDirectory"
+	openLdapType        = "OpenLdap"
+)
+
+var ldapServerTypes = []string{activeDirectoryType, openLdapType}
 
 func resourceNsxtPolicyLdapIdentitySource() *schema.Resource {
 	return &schema.Resource{
@@ -43,6 +45,7 @@ func resourceNsxtPolicyLdapIdentitySource() *schema.Resource {
 				Description:  "Indicates the type of LDAP server",
 				Required:     true,
 				ValidateFunc: validation.StringInSlice(ldapServerTypes, false),
+				ForceNew:     true,
 			},
 			"domain_name": {
 				Type:        schema.TypeString,
@@ -202,23 +205,39 @@ func resourceNsxtPolicyLdapIdentitySourceProbeAndUpdate(d *schema.ResourceData, 
 	altDomainNames := getStringListFromSchemaList(d, "alternative_domain_names")
 	ldapServers := getLdapServersFromSchema(d)
 
-	var structValue *data.StructValue
-	obj := nsxModel.LdapIdentitySource{
-		DisplayName:            &displayName,
-		Description:            &description,
-		Revision:               &revision,
-		Tags:                   tags,
-		DomainName:             &domainName,
-		BaseDn:                 &baseDn,
-		AlternativeDomainNames: altDomainNames,
-		LdapServers:            ldapServers,
-		ResourceType:           serverType,
+	var dataValue data.DataValue
+	var errs []error
+	if serverType == activeDirectoryType {
+		obj := nsxModel.ActiveDirectoryIdentitySource{
+			DisplayName:            &displayName,
+			Description:            &description,
+			Revision:               &revision,
+			Tags:                   tags,
+			DomainName:             &domainName,
+			BaseDn:                 &baseDn,
+			AlternativeDomainNames: altDomainNames,
+			LdapServers:            ldapServers,
+			ResourceType:           nsxModel.LdapIdentitySource_RESOURCE_TYPE_ACTIVEDIRECTORYIDENTITYSOURCE,
+		}
+		dataValue, errs = converter.ConvertToVapi(obj, nsxModel.ActiveDirectoryIdentitySourceBindingType())
+	} else if serverType == openLdapType {
+		obj := nsxModel.OpenLdapIdentitySource{
+			DisplayName:            &displayName,
+			Description:            &description,
+			Revision:               &revision,
+			Tags:                   tags,
+			DomainName:             &domainName,
+			BaseDn:                 &baseDn,
+			AlternativeDomainNames: altDomainNames,
+			LdapServers:            ldapServers,
+			ResourceType:           nsxModel.LdapIdentitySource_RESOURCE_TYPE_OPENLDAPIDENTITYSOURCE,
+		}
+		dataValue, errs = converter.ConvertToVapi(obj, nsxModel.OpenLdapIdentitySourceBindingType())
 	}
-	dataValue, errs := converter.ConvertToVapi(obj, nsxModel.LdapIdentitySourceBindingType())
 	if errs != nil {
 		return errs[0]
 	}
-	structValue = dataValue.(*data.StructValue)
+	structValue := dataValue.(*data.StructValue)
 
 	log.Printf("[INFO] Probing LDAP Identity Source with ID %s", id)
 	probeResult, err := ldapClient.Probeidentitysource(structValue)
@@ -284,8 +303,12 @@ func resourceNsxtPolicyLdapIdentitySourceRead(d *schema.ResourceData, m interfac
 
 	ldapObj := obj.(nsxModel.LdapIdentitySource)
 	resourceType := ldapObj.ResourceType
-	if resourceType != nsxModel.LdapIdentitySource_RESOURCE_TYPE_ACTIVEDIRECTORYIDENTITYSOURCE &&
-		resourceType != nsxModel.LdapIdentitySource_RESOURCE_TYPE_OPENLDAPIDENTITYSOURCE {
+	var dServerType string
+	if resourceType == nsxModel.LdapIdentitySource_RESOURCE_TYPE_ACTIVEDIRECTORYIDENTITYSOURCE {
+		dServerType = activeDirectoryType
+	} else if resourceType == nsxModel.LdapIdentitySource_RESOURCE_TYPE_OPENLDAPIDENTITYSOURCE {
+		dServerType = openLdapType
+	} else {
 		return fmt.Errorf("unrecognized LdapIdentitySource Resource Type %s", resourceType)
 	}
 
@@ -296,7 +319,7 @@ func resourceNsxtPolicyLdapIdentitySourceRead(d *schema.ResourceData, m interfac
 	d.Set("description", ldapObj.Description)
 	d.Set("revision", ldapObj.Revision)
 	setPolicyTagsInSchema(d, ldapObj.Tags)
-	d.Set("type", resourceType)
+	d.Set("type", dServerType)
 	d.Set("domain_name", ldapObj.DomainName)
 	d.Set("base_dn", ldapObj.BaseDn)
 	d.Set("alternative_domain_names", ldapObj.AlternativeDomainNames)
