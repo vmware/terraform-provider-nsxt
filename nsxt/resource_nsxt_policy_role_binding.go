@@ -71,38 +71,44 @@ func resourceNsxtPolicyUserManagementRoleBinding() *schema.Resource {
 				Optional:     true,
 				ValidateFunc: validation.StringInSlice(roleBindingIdentitySourceTypes, false),
 			},
-			"roles_for_path": {
-				Type:        schema.TypeList,
-				Description: "List of roles that are associated with the user, limiting them to a path",
-				Required:    true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"path": {
-							Type:        schema.TypeString,
-							Description: "Path of the entity in parent hierarchy.",
-							Required:    true,
-						},
-						"role": {
-							Type:        schema.TypeList,
-							Description: "Applicable roles",
-							Required:    true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"role": {
-										Type:        schema.TypeString,
-										Description: "Short identifier for the role",
-										Required:    true,
-										ValidateFunc: validation.StringMatch(
-											regexp.MustCompile(
-												`^[_a-z0-9-]+$`),
-											"Must be a valid role identifier matching: ^[_a-z0-9-]+$"),
-									},
-									"role_display_name": {
-										Type:        schema.TypeString,
-										Description: "Display name for role",
-										Computed:    true,
-									},
-								},
+			"roles_for_path": getRolesForPathSchema(false),
+		},
+	}
+}
+
+// getRolesForPathSchema return schema for RolesForPath, which is shared between role bindings and PI
+func getRolesForPathSchema(forceNew bool) *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeList,
+		Description: "List of roles that are associated with the user, limiting them to a path",
+		Required:    true,
+		ForceNew:    forceNew,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"path": {
+					Type:        schema.TypeString,
+					Description: "Path of the entity in parent hierarchy.",
+					Required:    true,
+				},
+				"role": {
+					Type:        schema.TypeList,
+					Description: "Applicable roles",
+					Required:    true,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"role": {
+								Type:        schema.TypeString,
+								Description: "Short identifier for the role",
+								Required:    true,
+								ValidateFunc: validation.StringMatch(
+									regexp.MustCompile(
+										`^[_a-z0-9-]+$`),
+									"Must be a valid role identifier matching: ^[_a-z0-9-]+$"),
+							},
+							"role_display_name": {
+								Type:        schema.TypeString,
+								Description: "Display name for role",
+								Computed:    true,
 							},
 						},
 					},
@@ -155,15 +161,8 @@ func setRolesForPathInSchema(d *schema.ResourceData, nsxRolesForPathList []nsxMo
 	}
 }
 
-func getRoleBindingObject(d *schema.ResourceData) *nsxModel.RoleBinding {
+func getRolesForPathList(d *schema.ResourceData) []nsxModel.RolesForPath {
 	boolTrue := true
-	displayName := d.Get("display_name").(string)
-	description := d.Get("description").(string)
-	tags := getPolicyTagsFromSchema(d)
-	name := d.Get("name").(string)
-	identitySrcID := d.Get("identity_source_id").(string)
-	identitySrcType := d.Get("identity_source_type").(string)
-	roleBindingType := d.Get("type").(string)
 	rolesPerPathMap := getRolesForPathFromSchema(d)
 	nsxRolesForPaths := make([]nsxModel.RolesForPath, 0)
 
@@ -206,6 +205,19 @@ func getRoleBindingObject(d *schema.ResourceData) *nsxModel.RoleBinding {
 			})
 		}
 	}
+	return nsxRolesForPaths
+}
+
+func getRoleBindingObject(d *schema.ResourceData) *nsxModel.RoleBinding {
+	boolTrue := true
+	displayName := d.Get("display_name").(string)
+	description := d.Get("description").(string)
+	tags := getPolicyTagsFromSchema(d)
+	name := d.Get("name").(string)
+	identitySrcID := d.Get("identity_source_id").(string)
+	identitySrcType := d.Get("identity_source_type").(string)
+	roleBindingType := d.Get("type").(string)
+	nsxRolesForPaths := getRolesForPathList(d)
 
 	obj := nsxModel.RoleBinding{
 		DisplayName:        &displayName,
