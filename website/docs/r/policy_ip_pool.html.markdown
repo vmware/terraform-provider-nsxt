@@ -72,6 +72,7 @@ In addition to arguments listed above, the following attributes are exported:
 * `id` - ID of the IP Pool.
 * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
 * `path` - The NSX path of the resource.
+* `realized_id` - The id of realized pool object. This id should be used in `nsxt_transport_node` resource.
 
 ## Importing
 

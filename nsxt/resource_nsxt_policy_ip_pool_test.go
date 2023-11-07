@@ -30,6 +30,7 @@ func TestAccResourceNsxtPolicyIPPool_minimal(t *testing.T) {
 					testAccNSXPolicyIPPoolCheckExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttrSet(testResourceName, "realized_id"),
 				),
 			},
 		},
@@ -69,6 +70,7 @@ func testAccResourceNsxtPolicyIPPoolBasic(t *testing.T, withContext bool, preChe
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttrSet(testResourceName, "realized_id"),
 				),
 			},
 			{
@@ -78,6 +80,7 @@ func testAccResourceNsxtPolicyIPPoolBasic(t *testing.T, withContext bool, preChe
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttrSet(testResourceName, "realized_id"),
 				),
 			},
 		},
