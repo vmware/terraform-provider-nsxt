@@ -13,10 +13,11 @@ import (
 )
 
 var accTestPrincipleIdentityCreateAttributes = map[string]string{
-	"name":      getAccTestResourceName(),
-	"node_id":   "node-2",
-	"role_path": "/orgs/default",
-	"role":      "org_admin",
+	"is_protected": "false",
+	"name":         getAccTestResourceName(),
+	"node_id":      "node-2",
+	"role_path":    "/orgs/default",
+	"role":         "org_admin",
 }
 
 func TestAccResourceNsxtPrincipleIdentity_basic(t *testing.T) {
@@ -40,6 +41,7 @@ func TestAccResourceNsxtPrincipleIdentity_basic(t *testing.T) {
 				Config: testAccNsxtPrincipleIdentityCreate(certPem),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPrincipleIdentityExists(accTestPrincipleIdentityCreateAttributes["name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "is_protected", accTestPrincipleIdentityCreateAttributes["is_protected"]),
 					resource.TestCheckResourceAttr(testResourceName, "name", accTestPrincipleIdentityCreateAttributes["name"]),
 					resource.TestCheckResourceAttr(testResourceName, "node_id", accTestPrincipleIdentityCreateAttributes["node_id"]),
 					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.#", "1"),
@@ -143,6 +145,7 @@ resource "nsxt_principle_identity" "test" {
     certificate_pem = <<-EOT
 %s
     EOT
+    is_protected    = %s
     name            = "%s"
     node_id         = "%s"
 
@@ -153,5 +156,5 @@ resource "nsxt_principle_identity" "test" {
             role = "%s"
         }
     }
-}`, certPem, attrMap["name"], attrMap["node_id"], attrMap["role_path"], attrMap["role"])
+}`, certPem, attrMap["is_protected"], attrMap["name"], attrMap["node_id"], attrMap["role_path"], attrMap["role"])
 }

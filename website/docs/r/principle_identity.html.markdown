@@ -31,6 +31,7 @@ resource "nsxt_principle_identity" "test" {
 The following arguments are supported:
 
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
+* `is_protected` - (optional) Indicates whether the entities created by this principal should be protected.
 * `name` - (Required) Name of the principal.
 * `node_id` - (Required) Unique node-id of a principal. This is used primarily in the case where a cluster of nodes is used to make calls to the NSX Manager and the same `name` is used so that the nodes can access and modify the same data while still accessing NSX through their individual secret (certificate or JWT). In all other cases this can be any string.
 * `certificate_pem` - (Required) PEM encoding of the certificate to be associated with this principle identity.

@@ -25,6 +25,13 @@ func resourceNsxtPrincipleIdentity() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"tag": getTagsSchemaForceNew(),
+			"is_protected": {
+				Type:        schema.TypeBool,
+				Description: "Indicates whether the entities created by this principal should be protected",
+				Optional:    true,
+				Default:     true,
+				ForceNew:    true,
+			},
 			"name": {
 				Type:         schema.TypeString,
 				Description:  "Name of the principal",
@@ -111,6 +118,7 @@ func resourceNsxtPrincipleIdentityCreate(d *schema.ResourceData, m interface{}) 
 	client := principal_identities.NewWithCertificateClient(connector)
 
 	tags := getMPTagsFromSchema(d)
+	isProtected := d.Get("is_protected").(bool)
 	name := d.Get("name").(string)
 	nodeID := d.Get("node_id").(string)
 	certificatePem := d.Get("certificate_pem").(string)
@@ -118,6 +126,7 @@ func resourceNsxtPrincipleIdentityCreate(d *schema.ResourceData, m interface{}) 
 
 	piObj := mpModel.PrincipalIdentityWithCertificate{
 		Tags:           tags,
+		IsProtected:    &isProtected,
 		Name:           &name,
 		NodeId:         &nodeID,
 		CertificatePem: &certificatePem,
@@ -146,6 +155,7 @@ func resourceNsxtPrincipleIdentityRead(d *schema.ResourceData, m interface{}) er
 	}
 
 	setMPTagsInSchema(d, piObj.Tags)
+	d.Set("is_protected", piObj.IsProtected)
 	d.Set("name", piObj.Name)
 	d.Set("node_id", piObj.NodeId)
 	d.Set("certificate_id", piObj.CertificateId)
