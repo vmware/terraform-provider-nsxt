@@ -282,12 +282,6 @@ func getEdgeNodeDeploymentConfigSchema() *schema.Schema {
 								Optional:    true,
 								Description: "Host identifier in the specified vcenter server",
 							},
-							"ipv4_assignment_enabled": {
-								Type:        schema.TypeBool,
-								Description: "This flag represents whether IPv4 configuration is enabled or not",
-								Optional:    true,
-								Default:     true,
-							},
 							"management_network_id": {
 								Type:        schema.TypeString,
 								Required:    true,
@@ -994,7 +988,6 @@ func getEdgeNodeDeploymentConfigFromSchema(cfg interface{}) (*model.EdgeNodeDepl
 			dataNetworkIds := interface2StringList(vdc["data_network_ids"].([]interface{}))
 			defaultGatewayAddresses := interface2StringList(vdc["default_gateway_address"].([]interface{}))
 			hostID := vdc["host_id"].(string)
-			ipv4AssignmentEnabled := vdc["ipv4_assignment_enabled"].(bool)
 			managementNetworkID := vdc["management_network_id"].(string)
 			var managemenPortSubnets []model.IPSubnet
 			for _, ipsi := range vdc["management_port_subnet"].([]interface{}) {
@@ -1030,7 +1023,6 @@ func getEdgeNodeDeploymentConfigFromSchema(cfg interface{}) (*model.EdgeNodeDepl
 				ComputeId:             &computeID,
 				DataNetworkIds:        dataNetworkIds,
 				HostId:                &hostID,
-				Ipv4AssignmentEnabled: &ipv4AssignmentEnabled,
 				ManagementNetworkId:   &managementNetworkID,
 				ManagementPortSubnets: managemenPortSubnets,
 				ReservationInfo:       reservationInfo,
@@ -1204,18 +1196,22 @@ func getEdgeNodeSettingsFromSchema(s interface{}) (*model.EdgeNodeSettings, erro
 				Server:   &server,
 			})
 		}
-		return &model.EdgeNodeSettings{
+		obj := &model.EdgeNodeSettings{
 			AdvancedConfiguration: advCfg,
 			AllowSshRootLogin:     &allowSSHRootLogin,
 			DnsServers:            dnsServers,
 			EnableSsh:             &enableSSH,
-			EnableUptMode:         &enableUptMode,
 			Hostname:              &hostName,
 			NtpServers:            ntpServers,
 			SearchDomains:         searchDomains,
 			SyslogServers:         syslogServers,
-		}, nil
+		}
+		if nsxVersionHigherOrEqual("4.0.0") {
+			obj.EnableUptMode = &enableUptMode
+		}
+		return obj, nil
 	}
+
 	return nil, nil
 }
 
@@ -1762,7 +1758,6 @@ func setVMDeploymentConfigInSchema(config *data.StructValue) (interface{}, error
 	elem["data_network_ids"] = vSphereCfg.DataNetworkIds
 	elem["default_gateway_address"] = vSphereCfg.DefaultGatewayAddresses
 	elem["host_id"] = vSphereCfg.HostId
-	elem["ipv4_assignment_enabled"] = vSphereCfg.Ipv4AssignmentEnabled
 	elem["management_network_id"] = vSphereCfg.ManagementNetworkId
 
 	var mpSubnets []map[string]interface{}
