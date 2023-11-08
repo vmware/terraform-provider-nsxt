@@ -49,7 +49,6 @@ The following arguments are supported:
     * `remote_user` - This is a user which is external to NSX. 
     * `remote_group` - This is a group of users which is external to NSX.
     * `local_user` - This is a user local to NSX. These are linux users. Note: Role bindings for local users are owned by NSX. Creation and deletion is not allowed for local users' binding. For updates, import existing bindings first.
-    * `principal_identity` - This is a principal identity user.
 * `identity_source_type` - (Optional) Identity source type. Applicable only to `remote_user` and `remote_group` user types. Valid options are: `VIDM`, `LDAP`, `OIDC`, `CSP`. Defaults to `VIDM` when applicable.
 * `identity_source_id` - (Optional) The ID of the external identity source that holds the referenced external entity. Currently, only external `LDAP` and `OIDC` servers are allowed.
 * `roles_for_path` - (Required) A list of The roles that are associated with the user, limiting them to a path. In case the path is '/', the roles apply everywhere.

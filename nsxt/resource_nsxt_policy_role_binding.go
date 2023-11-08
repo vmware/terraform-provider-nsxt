@@ -14,12 +14,10 @@ import (
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
-// Only support local user at the moment
 var roleBindingUserTypes = [](string){
 	nsxModel.RoleBinding_TYPE_LOCAL_USER,
 	nsxModel.RoleBinding_TYPE_REMOTE_USER,
 	nsxModel.RoleBinding_TYPE_REMOTE_GROUP,
-	nsxModel.RoleBinding_TYPE_PRINCIPAL_IDENTITY,
 }
 
 var roleBindingIdentitySourceTypes = [](string){
