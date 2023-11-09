@@ -164,7 +164,6 @@ The following arguments are supported:
       * `data_network_ids` - (Required) List of portgroups, logical switch identifiers or segment paths for datapath connectivity.
       * `default_gateway_address` - (Optional) Default gateway for the node.
       * `host_id` - (Optional) Host identifier in the specified vcenter server.
-      * `ipv4_assignment_enabled` - (Optional) This flag represents whether IPv4 configuration is enabled or not. Defaults to true.
       * `management_network_id` - (Required) Portgroup, logical switch identifier or segment path for management network connectivity.
       * `management_port_subnet` - (Optional) Port subnets for management port. IPv4, IPv6 and Dual Stack Address is supported.
         * `ip_addresses` - (Required) List of IP addresses.
@@ -206,7 +205,6 @@ The following arguments are supported:
       * `data_network_ids` - (Required) List of portgroups, logical switch identifiers or segment paths for datapath connectivity.
       * `default_gateway_address` - (Optional) Default gateway for the node.
       * `host_id` - (Optional) Host identifier in the specified vcenter server.
-      * `ipv4_assignment_enabled` - (Optional) This flag represents whether IPv4 configuration is enabled or not. Defaults to true.
       * `management_network_id` - (Required) Portgroup, logical switch identifier or segment path for management network connectivity.
       * `management_port_subnet` - (Optional) Port subnets for management port. IPv4, IPv6 and Dual Stack Address is supported.
         * `ip_addresses` - (Required) List of IP addresses.
