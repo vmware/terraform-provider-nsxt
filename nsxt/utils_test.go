@@ -222,6 +222,10 @@ func getTestLdapBaseDN() string {
 	return os.Getenv("NSXT_TEST_LDAP_BASE_DN")
 }
 
+func getTestManagerClusterNode() string {
+	return os.Getenv("NSXT_TEST_MANAGER_CLUSTER_NODE")
+}
+
 func testAccEnvDefined(t *testing.T, envVar string) {
 	if len(os.Getenv(envVar)) == 0 {
 		t.Skipf("This test requires %s environment variable to be set", envVar)

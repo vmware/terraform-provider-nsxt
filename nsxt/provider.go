@@ -292,6 +292,7 @@ func Provider() *schema.Provider {
 			"nsxt_compute_collection":                dataSourceNsxtComputeCollection(),
 			"nsxt_compute_manager_realization":       dataSourceNsxtComputeManagerRealization(),
 			"nsxt_policy_host_transport_node":        dataSourceNsxtPolicyHostTransportNode(),
+			"nsxt_manager_cluster_node":              dataSourceNsxtManagerClusterNode(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
