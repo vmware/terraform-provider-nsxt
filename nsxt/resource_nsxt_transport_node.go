@@ -552,7 +552,6 @@ func getPublicCloudGatewayNodeSchema() *schema.Schema {
 func getPreconfiguredHostSwitchSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:        schema.TypeList,
-		MaxItems:    1,
 		Optional:    true,
 		Description: "Preconfigured host switch",
 		Elem: &schema.Resource{
@@ -576,7 +575,6 @@ func getPreconfiguredHostSwitchSchema() *schema.Schema {
 func getStandardHostSwitchSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:        schema.TypeList,
-		MaxItems:    1,
 		Optional:    true,
 		Description: "Standard host switch specification",
 		ExactlyOneOf: []string{
