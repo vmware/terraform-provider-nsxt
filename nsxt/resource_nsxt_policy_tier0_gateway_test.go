@@ -129,6 +129,35 @@ func TestAccResourceNsxtPolicyTier0Gateway_withSubnets(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyTier0Gateway_withVrfSubnets(t *testing.T) {
+	// Also set vrf_transit_subnet. Needs NSX 4.1.0 or above.
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_tier0_gateway.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "4.1.0") },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyTier0CheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyTier0SubnetsWithVrfTemplate(name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyTier0Exists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+					resource.TestCheckResourceAttr(realizationResourceName, "state", "REALIZED"),
+					resource.TestCheckResourceAttr(testResourceName, "internal_transit_subnets.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "transit_subnets.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "vrf_transit_subnets.#", "1"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtPolicyTier0Gateway_withDHCP(t *testing.T) {
 	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_tier0_gateway.test"
@@ -677,6 +706,32 @@ resource "nsxt_policy_tier0_gateway" "test" {
   ipv6_dad_profile_path     = "/infra/ipv6-dad-profiles/default"
   internal_transit_subnets  = ["102.64.0.0/16"]
   transit_subnets           = ["101.64.0.0/16"]
+
+  tag {
+    scope = "scope3"
+    tag   = "tag3"
+  }
+}
+
+data "nsxt_policy_realization_info" "realization_info" {
+  path = nsxt_policy_tier0_gateway.test.path
+}`, name)
+}
+
+func testAccNsxtPolicyTier0SubnetsWithVrfTemplate(name string) string {
+	return fmt.Sprintf(`
+resource "nsxt_policy_tier0_gateway" "test" {
+  display_name              = "%s"
+  description               = "Acceptance Test"
+  failover_mode             = "NON_PREEMPTIVE"
+  default_rule_logging      = "false"
+  enable_firewall           = "true"
+  force_whitelisting        = "true"
+  ha_mode                   = "ACTIVE_STANDBY"
+  ipv6_dad_profile_path     = "/infra/ipv6-dad-profiles/default"
+  internal_transit_subnets  = ["102.64.0.0/16"]
+  transit_subnets           = ["101.64.0.0/16"]
+  vrf_transit_subnets       = ["103.64.0.0/28"]
 
   tag {
     scope = "scope3"
