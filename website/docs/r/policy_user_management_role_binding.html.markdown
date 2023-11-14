@@ -19,20 +19,13 @@ resource "nsxt_policy_user_management_role_binding" "test" {
   identity_source_type = "LDAP"
 
   roles_for_path {
-    path = "/"
-    role {
-      role = "auditor"
-    }
+    path  = "/"
+    roles = ["auditor"]
   }
 
   roles_for_path {
-    path = "/orgs/default"
-    role {
-      role = "org_admin"
-    }
-    role {
-      role = "vpc_admin"
-    }
+    path  = "/orgs/default"
+    roles = ["org_admin", "vpc_admin"]
   }
 }
 ```
@@ -53,7 +46,7 @@ The following arguments are supported:
 * `identity_source_id` - (Optional) The ID of the external identity source that holds the referenced external entity. Currently, only external `LDAP` and `OIDC` servers are allowed.
 * `roles_for_path` - (Required) A list of The roles that are associated with the user, limiting them to a path. In case the path is '/', the roles apply everywhere.
     * `path` - (Required) Path of the entity in parent hierarchy.
-    * `role` - (Required) A list of identifiers for the roles to associate with the given user limited to a path.
+    * `roles` - (Required) A list of identifiers for the roles to associate with the given user limited to a path.
 
 ## Attributes Reference
 

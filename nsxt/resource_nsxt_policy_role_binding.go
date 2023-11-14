@@ -6,7 +6,6 @@ package nsxt
 import (
 	"fmt"
 	"log"
-	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -88,27 +87,12 @@ func getRolesForPathSchema(forceNew bool) *schema.Schema {
 					Description: "Path of the entity in parent hierarchy.",
 					Required:    true,
 				},
-				"role": {
-					Type:        schema.TypeList,
+				"roles": {
+					Type:        schema.TypeSet,
 					Description: "Applicable roles",
 					Required:    true,
-					Elem: &schema.Resource{
-						Schema: map[string]*schema.Schema{
-							"role": {
-								Type:        schema.TypeString,
-								Description: "Short identifier for the role",
-								Required:    true,
-								ValidateFunc: validation.StringMatch(
-									regexp.MustCompile(
-										`^[_a-z0-9-]+$`),
-									"Must be a valid role identifier matching: ^[_a-z0-9-]+$"),
-							},
-							"role_display_name": {
-								Type:        schema.TypeString,
-								Description: "Display name for role",
-								Computed:    true,
-							},
-						},
+					Elem: &schema.Schema{
+						Type: schema.TypeString,
 					},
 				},
 			},
@@ -125,12 +109,10 @@ func getRolesForPathFromSchema(d *schema.ResourceData) rolesForPath {
 	for _, rolesPerPathInput := range rolesForPathInput {
 		data := rolesPerPathInput.(map[string]interface{})
 		path := data["path"].(string)
-		roles := data["role"].([]interface{})
+		roles := interface2StringList(data["roles"].(*schema.Set).List())
 		rolesPerPathMap := make(rolesPerPath)
 		for _, role := range roles {
-			roleData := role.(map[string]interface{})
-			roleInput := roleData["role"].(string)
-			rolesPerPathMap[roleInput] = true
+			rolesPerPathMap[role] = true
 		}
 		rolesForPathMap[path] = rolesPerPathMap
 	}
@@ -143,14 +125,11 @@ func setRolesForPathInSchema(d *schema.ResourceData, nsxRolesForPathList []nsxMo
 	for _, nsxRolesForPath := range nsxRolesForPathList {
 		elem := make(map[string]interface{})
 		elem["path"] = nsxRolesForPath.Path
-		var roles []map[string]interface{}
+		roles := make([]string, 0, len(nsxRolesForPath.Roles))
 		for _, nsxRole := range nsxRolesForPath.Roles {
-			rElem := make(map[string]interface{})
-			rElem["role"] = nsxRole.Role
-			rElem["role_display_name"] = nsxRole.RoleDisplayName
-			roles = append(roles, rElem)
+			roles = append(roles, *nsxRole.Role)
 		}
-		elem["role"] = roles
+		elem["roles"] = roles
 		rolesForPathList = append(rolesForPathList, elem)
 	}
 	err := d.Set("roles_for_path", rolesForPathList)
@@ -190,16 +169,14 @@ func getRolesForPathList(d *schema.ResourceData) []nsxModel.RolesForPath {
 				continue
 			}
 			// Add one role in the list to make NSX happy
-			roles := data["role"].([]interface{})
+			roles := interface2StringList(data["roles"].(*schema.Set).List())
 			if len(roles) == 0 {
 				continue
 			}
-			roleData := roles[0].(map[string]interface{})
-			roleID := roleData["role"].(string)
 			nsxRolesForPaths = append(nsxRolesForPaths, nsxModel.RolesForPath{
 				Path:       &path,
 				DeletePath: &boolTrue,
-				Roles:      []nsxModel.Role{{Role: &roleID}},
+				Roles:      []nsxModel.Role{{Role: &roles[0]}},
 			})
 		}
 	}

@@ -17,11 +17,8 @@ resource "nsxt_principle_identity" "test" {
   node_id         = "node-2"
   certificate_pem = trimspace(file("cert.pem"))
   roles_for_path {
-    path = "/orgs/default"
-
-    role {
-      role = "org_admin"
-    }
+    path  = "/orgs/default"
+    roles = ["org_admin"]
   }
 }
 ```
@@ -37,7 +34,7 @@ The following arguments are supported:
 * `certificate_pem` - (Required) PEM encoding of the certificate to be associated with this principle identity.
 * `roles_for_path` - (Required) A list of The roles that are associated with the user, limiting them to a path. In case the path is '/', the roles apply everywhere.
     * `path` - (Required) Path of the entity in parent hierarchy.
-    * `role` - (Required) A list of identifiers for the roles to associate with the given user limited to a path.
+    * `roles` - (Required) A list of identifiers for the roles to associate with the given user limited to a path.
 
 Once a Principle Identity is created, it can't be modified. Modification of above arguments will cause the current PI on NSX to be deleted and recreated. Certificate updates is also handled in the same way. 
 

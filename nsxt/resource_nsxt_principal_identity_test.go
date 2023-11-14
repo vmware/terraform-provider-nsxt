@@ -46,8 +46,8 @@ func TestAccResourceNsxtPrincipleIdentity_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "node_id", accTestPrincipleIdentityCreateAttributes["node_id"]),
 					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.0.path", accTestPrincipleIdentityCreateAttributes["role_path"]),
-					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.0.role.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.0.role.0.role", accTestPrincipleIdentityCreateAttributes["role"]),
+					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.0.roles.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.0.roles.0", accTestPrincipleIdentityCreateAttributes["role"]),
 
 					resource.TestCheckResourceAttrSet(testResourceName, "certificate_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "certificate_pem"),
@@ -150,11 +150,8 @@ resource "nsxt_principle_identity" "test" {
     node_id         = "%s"
 
     roles_for_path {
-        path = "%s"
-
-        role {
-            role = "%s"
-        }
+        path  = "%s"
+        roles = ["%s"]
     }
 }`, certPem, attrMap["is_protected"], attrMap["name"], attrMap["node_id"], attrMap["role_path"], attrMap["role"])
 }
