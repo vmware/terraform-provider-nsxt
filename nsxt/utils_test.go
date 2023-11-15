@@ -194,6 +194,26 @@ func getTestLdapUser() string {
 	return os.Getenv("NSXT_TEST_LDAP_USER")
 }
 
+func getTestLdapPassword() string {
+	return os.Getenv("NSXT_TEST_LDAP_PASSWORD")
+}
+
+func getTestLdapURL() string {
+	return os.Getenv("NSXT_TEST_LDAP_URL")
+}
+
+func getTestLdapCert() string {
+	return os.Getenv("NSXT_TEST_LDAP_CERT")
+}
+
+func getTestLdapDomain() string {
+	return os.Getenv("NSXT_TEST_LDAP_DOMAIN")
+}
+
+func getTestLdapBaseDN() string {
+	return os.Getenv("NSXT_TEST_LDAP_BASE_DN")
+}
+
 func testAccEnvDefined(t *testing.T, envVar string) {
 	if len(os.Getenv(envVar)) == 0 {
 		t.Skipf("This test requires %s environment variable to be set", envVar)

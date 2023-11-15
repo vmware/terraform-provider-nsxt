@@ -420,6 +420,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_transport_zone":                   resourceNsxtPolicyTransportZone(),
 			"nsxt_policy_user_management_role":             resourceNsxtPolicyUserManagementRole(),
 			"nsxt_policy_user_management_role_binding":     resourceNsxtPolicyUserManagementRoleBinding(),
+			"nsxt_policy_ldap_identity_source":             resourceNsxtPolicyLdapIdentitySource(),
 			"nsxt_edge_cluster":                            resourceNsxtEdgeCluster(),
 			"nsxt_compute_manager":                         resourceNsxtComputeManager(),
 			"nsxt_manager_cluster":                         resourceNsxtManagerCluster(),
