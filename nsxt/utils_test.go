@@ -4,7 +4,15 @@
 package nsxt
 
 import (
+	"bytes"
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	cryptorand "crypto/rand"
+	"crypto/x509"
+	"crypto/x509/pkix"
+	"encoding/pem"
 	"fmt"
+	"math/big"
 	"math/rand"
 	"net/http"
 	"os"
@@ -690,4 +698,46 @@ func testAccResourceNsxtPolicyImportIDRetriever(resourceID string) func(*terrafo
 		}
 		return path, nil
 	}
+}
+
+func testAccGenerateTLSKeyPair() (string, string, error) {
+	// Ref: https://go.dev/src/crypto/tls/generate_cert.go
+	var publicPem, privatePem string
+	priv, err := ecdsa.GenerateKey(elliptic.P384(), cryptorand.Reader)
+	if err != nil {
+		return publicPem, privatePem, err
+	}
+	template := x509.Certificate{
+		SerialNumber: big.NewInt(1),
+		Subject: pkix.Name{
+			Organization: []string{"Acme Co"},
+		},
+		NotBefore: time.Now(),
+		NotAfter:  time.Now().Add(time.Hour * 24 * 180),
+
+		KeyUsage:              x509.KeyUsageDigitalSignature,
+		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
+		BasicConstraintsValid: true,
+	}
+
+	derBytes, err := x509.CreateCertificate(cryptorand.Reader, &template, &template, &priv.PublicKey, priv)
+	if err != nil {
+		return publicPem, privatePem, err
+	}
+	buf := &bytes.Buffer{}
+
+	if err := pem.Encode(buf, &pem.Block{Type: "CERTIFICATE", Bytes: derBytes}); err != nil {
+		return publicPem, privatePem, err
+	}
+	publicPem = buf.String()
+	buf.Reset()
+	privBytes, err := x509.MarshalPKCS8PrivateKey(priv)
+	if err != nil {
+		return publicPem, privatePem, err
+	}
+	if err := pem.Encode(buf, &pem.Block{Type: "PRIVATE KEY", Bytes: privBytes}); err != nil {
+		return publicPem, privatePem, err
+	}
+	privatePem = buf.String()
+	return publicPem, privatePem, nil
 }

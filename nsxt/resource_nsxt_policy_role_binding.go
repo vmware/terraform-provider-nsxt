@@ -6,7 +6,6 @@ package nsxt
 import (
 	"fmt"
 	"log"
-	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -14,12 +13,10 @@ import (
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
-// Only support local user at the moment
 var roleBindingUserTypes = [](string){
 	nsxModel.RoleBinding_TYPE_LOCAL_USER,
 	nsxModel.RoleBinding_TYPE_REMOTE_USER,
 	nsxModel.RoleBinding_TYPE_REMOTE_GROUP,
-	nsxModel.RoleBinding_TYPE_PRINCIPAL_IDENTITY,
 }
 
 var roleBindingIdentitySourceTypes = [](string){
@@ -71,40 +68,31 @@ func resourceNsxtPolicyUserManagementRoleBinding() *schema.Resource {
 				Optional:     true,
 				ValidateFunc: validation.StringInSlice(roleBindingIdentitySourceTypes, false),
 			},
-			"roles_for_path": {
-				Type:        schema.TypeList,
-				Description: "List of roles that are associated with the user, limiting them to a path",
-				Required:    true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"path": {
-							Type:        schema.TypeString,
-							Description: "Path of the entity in parent hierarchy.",
-							Required:    true,
-						},
-						"role": {
-							Type:        schema.TypeList,
-							Description: "Applicable roles",
-							Required:    true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"role": {
-										Type:        schema.TypeString,
-										Description: "Short identifier for the role",
-										Required:    true,
-										ValidateFunc: validation.StringMatch(
-											regexp.MustCompile(
-												`^[_a-z0-9-]+$`),
-											"Must be a valid role identifier matching: ^[_a-z0-9-]+$"),
-									},
-									"role_display_name": {
-										Type:        schema.TypeString,
-										Description: "Display name for role",
-										Computed:    true,
-									},
-								},
-							},
-						},
+			"roles_for_path": getRolesForPathSchema(false),
+		},
+	}
+}
+
+// getRolesForPathSchema return schema for RolesForPath, which is shared between role bindings and PI
+func getRolesForPathSchema(forceNew bool) *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeList,
+		Description: "List of roles that are associated with the user, limiting them to a path",
+		Required:    true,
+		ForceNew:    forceNew,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"path": {
+					Type:        schema.TypeString,
+					Description: "Path of the entity in parent hierarchy.",
+					Required:    true,
+				},
+				"roles": {
+					Type:        schema.TypeSet,
+					Description: "Applicable roles",
+					Required:    true,
+					Elem: &schema.Schema{
+						Type: schema.TypeString,
 					},
 				},
 			},
@@ -121,12 +109,10 @@ func getRolesForPathFromSchema(d *schema.ResourceData) rolesForPath {
 	for _, rolesPerPathInput := range rolesForPathInput {
 		data := rolesPerPathInput.(map[string]interface{})
 		path := data["path"].(string)
-		roles := data["role"].([]interface{})
+		roles := interface2StringList(data["roles"].(*schema.Set).List())
 		rolesPerPathMap := make(rolesPerPath)
 		for _, role := range roles {
-			roleData := role.(map[string]interface{})
-			roleInput := roleData["role"].(string)
-			rolesPerPathMap[roleInput] = true
+			rolesPerPathMap[role] = true
 		}
 		rolesForPathMap[path] = rolesPerPathMap
 	}
@@ -139,14 +125,11 @@ func setRolesForPathInSchema(d *schema.ResourceData, nsxRolesForPathList []nsxMo
 	for _, nsxRolesForPath := range nsxRolesForPathList {
 		elem := make(map[string]interface{})
 		elem["path"] = nsxRolesForPath.Path
-		var roles []map[string]interface{}
+		roles := make([]string, 0, len(nsxRolesForPath.Roles))
 		for _, nsxRole := range nsxRolesForPath.Roles {
-			rElem := make(map[string]interface{})
-			rElem["role"] = nsxRole.Role
-			rElem["role_display_name"] = nsxRole.RoleDisplayName
-			roles = append(roles, rElem)
+			roles = append(roles, *nsxRole.Role)
 		}
-		elem["role"] = roles
+		elem["roles"] = roles
 		rolesForPathList = append(rolesForPathList, elem)
 	}
 	err := d.Set("roles_for_path", rolesForPathList)
@@ -155,15 +138,8 @@ func setRolesForPathInSchema(d *schema.ResourceData, nsxRolesForPathList []nsxMo
 	}
 }
 
-func getRoleBindingObject(d *schema.ResourceData) *nsxModel.RoleBinding {
+func getRolesForPathList(d *schema.ResourceData) []nsxModel.RolesForPath {
 	boolTrue := true
-	displayName := d.Get("display_name").(string)
-	description := d.Get("description").(string)
-	tags := getPolicyTagsFromSchema(d)
-	name := d.Get("name").(string)
-	identitySrcID := d.Get("identity_source_id").(string)
-	identitySrcType := d.Get("identity_source_type").(string)
-	roleBindingType := d.Get("type").(string)
 	rolesPerPathMap := getRolesForPathFromSchema(d)
 	nsxRolesForPaths := make([]nsxModel.RolesForPath, 0)
 
@@ -193,19 +169,30 @@ func getRoleBindingObject(d *schema.ResourceData) *nsxModel.RoleBinding {
 				continue
 			}
 			// Add one role in the list to make NSX happy
-			roles := data["role"].([]interface{})
+			roles := interface2StringList(data["roles"].(*schema.Set).List())
 			if len(roles) == 0 {
 				continue
 			}
-			roleData := roles[0].(map[string]interface{})
-			roleID := roleData["role"].(string)
 			nsxRolesForPaths = append(nsxRolesForPaths, nsxModel.RolesForPath{
 				Path:       &path,
 				DeletePath: &boolTrue,
-				Roles:      []nsxModel.Role{{Role: &roleID}},
+				Roles:      []nsxModel.Role{{Role: &roles[0]}},
 			})
 		}
 	}
+	return nsxRolesForPaths
+}
+
+func getRoleBindingObject(d *schema.ResourceData) *nsxModel.RoleBinding {
+	boolTrue := true
+	displayName := d.Get("display_name").(string)
+	description := d.Get("description").(string)
+	tags := getPolicyTagsFromSchema(d)
+	name := d.Get("name").(string)
+	identitySrcID := d.Get("identity_source_id").(string)
+	identitySrcType := d.Get("identity_source_type").(string)
+	roleBindingType := d.Get("type").(string)
+	nsxRolesForPaths := getRolesForPathList(d)
 
 	obj := nsxModel.RoleBinding{
 		DisplayName:        &displayName,

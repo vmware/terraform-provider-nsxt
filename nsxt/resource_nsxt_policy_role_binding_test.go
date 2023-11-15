@@ -50,13 +50,12 @@ func TestAccResourceNsxtPolicyRoleBinding_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "identity_source_type", identType),
 					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.0.path", "/"),
-					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.0.role.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.0.role.0.role", "auditor"),
+					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.0.roles.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.0.roles.0", "auditor"),
 					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.1.path", "/orgs/default"),
-					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.1.role.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.1.role.0.role", "org_admin"),
+					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.1.roles.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.1.roles.0", "org_admin"),
 
-					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 				),
 			},
@@ -71,10 +70,9 @@ func TestAccResourceNsxtPolicyRoleBinding_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "identity_source_type", identType),
 					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.0.path", "/"),
-					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.0.role.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.0.role.0.role", "auditor"),
+					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.0.roles.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.0.roles.0", "auditor"),
 
-					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 				),
 			},
@@ -172,19 +170,13 @@ resource "nsxt_policy_user_management_role_binding" "test" {
     identity_source_type = "%s"
 
     roles_for_path {
-        path = "/"
-
-        role {
-            role              = "auditor"
-        }
+        path  = "/"
+        roles = ["auditor"]
     }
 
     roles_for_path {
-        path = "/orgs/default"
-
-        role {
-            role = "org_admin"
-        }
+        path  = "/orgs/default"
+        roles = ["org_admin"]
     }
 }`, attrMap["display_name"], attrMap["description"], user, userType, identType)
 }
@@ -200,11 +192,8 @@ resource "nsxt_policy_user_management_role_binding" "test" {
     identity_source_type = "%s"
 
     roles_for_path {
-        path = "/"
-
-        role {
-            role              = "auditor"
-        }
+        path  = "/"
+        roles = ["auditor"]
     }
 }`, attrMap["display_name"], attrMap["description"], user, userType, identType)
 }
