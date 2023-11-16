@@ -139,6 +139,10 @@ func getHostTransportNodeName() string {
 	return os.Getenv("NSXT_TEST_HOST_TRANSPORT_NODE")
 }
 
+func getHostTransportNodeProfileName() string {
+	return os.Getenv("NSXT_TEST_HOST_TRANSPORT_NODE_PROFILE")
+}
+
 func getVlanTransportZoneName() string {
 	name := os.Getenv("NSXT_TEST_VLAN_TRANSPORT_ZONE")
 	if name == "" {
