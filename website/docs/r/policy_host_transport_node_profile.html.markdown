@@ -5,7 +5,7 @@ page_title: "NSXT: nsxt_policy_host_transport_node_profile"
 description: A resource to configure a Policy Host Transport Node Profile.
 ---
 
-# nsxt_transport_node
+# nsxt_policy_host_transport_node_profile
 
 This resource provides a method for the management of a Policy Host Transport Node Profile.
 This resource is supported with NSX 4.1.0 onwards.
@@ -22,7 +22,7 @@ resource "nsxt_policy_host_transport_node_profile" "test" {
       assigned_by_dhcp = true
     }
     transport_zone_endpoint {
-      transport_zone = data.nsxt_transport_zone.tz1.id
+      transport_zone = nsxt_policy_transport_zone.tz_overlay.path
     }
     host_switch_profile = [nsxt_policy_uplink_host_switch_profile.hsw_profile1.path]
     is_migrate_pnics    = false
