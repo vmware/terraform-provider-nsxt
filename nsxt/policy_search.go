@@ -129,7 +129,7 @@ func listPolicyResourcesByNameAndType(connector client.Connector, context utl.Se
 
 func escapeSpecialCharacters(str string) string {
 	// we replace special characters that can be encountered in object IDs
-	specials := "()[]+-=&|><!{}^~*?:"
+	specials := "()[]+-=&|><!{}^~*?:/"
 	if !strings.ContainsAny(str, specials) {
 		return str
 	}
