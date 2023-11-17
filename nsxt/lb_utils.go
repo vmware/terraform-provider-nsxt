@@ -13,6 +13,7 @@ import (
 	"github.com/vmware/go-vmware-nsxt/loadbalancer"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
 // Helpers for common LB monitor schema settings
@@ -267,6 +268,123 @@ func resourceNsxtPolicyLBAppProfileDelete(d *schema.ResourceData, m interface{})
 	if err != nil {
 		return handleDeleteError("LBAppProfile", id, err)
 	}
-
 	return nil
+}
+
+func resourceNsxtPolicyLBMonitorProfileExistsWrapper(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
+	client := infra.NewLbMonitorProfilesClient(connector)
+	_, err := client.Get(id)
+	if err == nil {
+		return true, nil
+	}
+
+	if isNotFoundError(err) {
+		return false, nil
+	}
+	msg := fmt.Sprintf("Error retrieving resource LBMonitorProfile")
+	return false, logAPIError(msg, err)
+}
+
+func resourceNsxtPolicyLBMonitorProfileDelete(d *schema.ResourceData, m interface{}) error {
+	id := d.Id()
+	if id == "" {
+		return fmt.Errorf("Error obtaining LBMonitorProfile ID")
+	}
+	connector := getPolicyConnector(m)
+	forceParam := true
+	client := infra.NewLbMonitorProfilesClient(connector)
+	err := client.Delete(id, &forceParam)
+	if err != nil {
+		return handleDeleteError("LBMonitorProfile", id, err)
+	}
+	return nil
+}
+
+func getLbServerSslSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:     schema.TypeList,
+		MaxItems: 1,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"certificate_chain_depth": {
+					Type:        schema.TypeInt,
+					Optional:    true,
+					Description: "Authentication depth is used to set the verification depth in the server certificates chain. format: int64",
+				},
+				"client_certificate_path": getPolicyPathSchema(false, false, "Client certificate path"),
+				"server_auth": {
+					Type:         schema.TypeString,
+					Optional:     true,
+					ValidateFunc: validation.StringInSlice(lBServerSslProfileBindingServerAuthValues, false),
+					Description:  "Server authentication mode.",
+				},
+				"server_auth_ca_paths": {
+					Type: schema.TypeList,
+					Elem: &schema.Schema{
+						Type: schema.TypeString,
+					},
+					Optional:    true,
+					Description: "If server auth type is REQUIRED, server certificate must be signed by one of the trusted Certificate Authorities (CAs), also referred to as root CAs, whose self signed certificates are specified.",
+				},
+				"server_auth_crl_paths": {
+					Type: schema.TypeList,
+					Elem: &schema.Schema{
+						Type: schema.TypeString,
+					},
+					Optional:    true,
+					Description: "A Certificate Revocation List (CRL) can be specified in the server-side SSL profile binding to disallow compromised server certificates.",
+				},
+				"ssl_profile_path": getPolicyPathSchema(false, false, "SSL profile path"),
+			},
+		},
+		Optional: true,
+	}
+}
+
+func getLbServerSslFromSchema(d *schema.ResourceData) *model.LBServerSslProfileBinding {
+	serverSslList := d.Get("server_ssl").([]interface{})
+	var serverSsl *model.LBServerSslProfileBinding
+	for _, item := range serverSslList {
+		data := item.(map[string]interface{})
+		certificateChainDepth := int64(data["certificate_chain_depth"].(int))
+		clientCertificatePath := data["client_certificate_path"].(string)
+		serverAuth := data["server_auth"].(string)
+		serverAuthCaPathsList := data["server_auth_ca_paths"].([]interface{})
+		serverAuthCrlPathsList := data["server_auth_crl_paths"].([]interface{})
+		var serverAuthCaPaths []string
+		for _, path := range serverAuthCaPathsList {
+			serverAuthCaPaths = append(serverAuthCaPaths, path.(string))
+		}
+		var serverAuthCrlPaths []string
+		for _, path := range serverAuthCrlPathsList {
+			serverAuthCrlPaths = append(serverAuthCrlPaths, path.(string))
+		}
+		sslProfilePath := data["ssl_profile_path"].(string)
+		obj := model.LBServerSslProfileBinding{
+			CertificateChainDepth: &certificateChainDepth,
+			ClientCertificatePath: &clientCertificatePath,
+			ServerAuth:            &serverAuth,
+			ServerAuthCaPaths:     serverAuthCaPaths,
+			ServerAuthCrlPaths:    serverAuthCrlPaths,
+			SslProfilePath:        &sslProfilePath,
+		}
+		serverSsl = &obj
+	}
+	return serverSsl
+}
+
+func setLbServerSslInSchema(d *schema.ResourceData, lBServerSsl model.LBServerSslProfileBinding) {
+	var serverSslList []map[string]interface{}
+	elem := make(map[string]interface{})
+	elem["certificate_chain_depth"] = lBServerSsl.CertificateChainDepth
+	elem["client_certificate_path"] = lBServerSsl.ClientCertificatePath
+	elem["server_auth"] = lBServerSsl.ServerAuth
+	elem["ssl_profile_path"] = lBServerSsl.SslProfilePath
+	elem["server_auth_ca_paths"] = lBServerSsl.ServerAuthCaPaths
+	elem["server_auth_crl_paths"] = lBServerSsl.ServerAuthCrlPaths
+	serverSslList = append(serverSslList, elem)
+	err := d.Set("server_ssl", serverSslList)
+	if err != nil {
+		log.Printf("[WARNING] Failed to set server_ssl in schema: %v", err)
+	}
 }

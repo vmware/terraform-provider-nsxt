@@ -442,6 +442,12 @@ func Provider() *schema.Provider {
 			"nsxt_policy_security_policy_rule":             resourceNsxtPolicySecurityPolicyRule(),
 			"nsxt_policy_parent_security_policy":           resourceNsxtPolicyParentSecurityPolicy(),
 			"nsxt_policy_firewall_exclude_list_member":     resourceNsxtPolicyFirewallExcludeListMember(),
+			"nsxt_policy_lb_http_monitor_profile":          resourceNsxtPolicyLBHttpMonitorProfile(),
+			"nsxt_policy_lb_https_monitor_profile":         resourceNsxtPolicyLBHttpsMonitorProfile(),
+			"nsxt_policy_lb_icmp_monitor_profile":          resourceNsxtPolicyLBIcmpMonitorProfile(),
+			"nsxt_policy_lb_passive_monitor_profile":       resourceNsxtPolicyLBPassiveMonitorProfile(),
+			"nsxt_policy_lb_tcp_monitor_profile":           resourceNsxtPolicyLBTcpMonitorProfile(),
+			"nsxt_policy_lb_udp_monitor_profile":           resourceNsxtPolicyLBUdpMonitorProfile(),
 		},
 
 		ConfigureFunc: providerConfigure,

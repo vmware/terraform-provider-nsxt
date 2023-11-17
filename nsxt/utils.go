@@ -54,7 +54,26 @@ func interface2Int32List(configured []interface{}) []int32 {
 	return vs
 }
 
+func interface2Int64List(configured []interface{}) []int64 {
+	vs := make([]int64, 0, len(configured))
+	for _, v := range configured {
+		val, ok := v.(int)
+		if ok {
+			vs = append(vs, int64(val))
+		}
+	}
+	return vs
+}
+
 func int32List2Interface(list []int32) []interface{} {
+	vs := make([]interface{}, 0, len(list))
+	for _, v := range list {
+		vs = append(vs, int(v))
+	}
+	return vs
+}
+
+func int64List2Interface(list []int64) []interface{} {
 	vs := make([]interface{}, 0, len(list))
 	for _, v := range list {
 		vs = append(vs, int(v))
