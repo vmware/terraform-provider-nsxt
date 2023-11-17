@@ -92,7 +92,8 @@ func TestAccDataSourceNsxtPolicyService_spaces(t *testing.T) {
 }
 
 func TestAccDataSourceNsxtPolicyService_specialChars(t *testing.T) {
-	serviceName := "IKE (Key Exchange)"
+	serviceName1 := "IKE (Key Exchange)"
+	serviceName2 := "EdgeSync service/ADAM"
 	testResourceName := "data.nsxt_policy_service.test"
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -100,10 +101,18 @@ func TestAccDataSourceNsxtPolicyService_specialChars(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyServiceReadTemplate(serviceName),
+				Config: testAccNsxtPolicyServiceReadTemplate(serviceName1),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(testResourceName, "display_name", serviceName),
-					resource.TestCheckResourceAttr(testResourceName, "description", serviceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", serviceName1),
+					resource.TestCheckResourceAttr(testResourceName, "description", serviceName1),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyServiceReadTemplate(serviceName2),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(testResourceName, "display_name", serviceName2),
+					resource.TestCheckResourceAttr(testResourceName, "description", serviceName2),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 				),
 			},
