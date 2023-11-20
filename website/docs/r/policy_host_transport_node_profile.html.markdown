@@ -5,7 +5,7 @@ page_title: "NSXT: nsxt_policy_host_transport_node_profile"
 description: A resource to configure a Policy Host Transport Node Profile.
 ---
 
-# nsxt_transport_node
+# nsxt_policy_host_transport_node_profile
 
 This resource provides a method for the management of a Policy Host Transport Node Profile.
 This resource is supported with NSX 4.1.0 onwards.
@@ -22,7 +22,7 @@ resource "nsxt_policy_host_transport_node_profile" "test" {
       assigned_by_dhcp = true
     }
     transport_zone_endpoint {
-      transport_zone = data.nsxt_transport_zone.tz1.id
+      transport_zone = data.nsxt_policy_transport_zone.tz1.path
     }
     host_switch_profile = [nsxt_policy_uplink_host_switch_profile.hsw_profile1.path]
     is_migrate_pnics    = false
@@ -62,7 +62,7 @@ The following arguments are supported:
         * `ip_mac_pair` - (Required) List of IPs and MACs for transport node host switch virtual tunnel endpoints.
             * `ip` - (Required) IP address.
             * `mac` - (Required) MAC address.
-            * `static_ip_pool` - (Optional) IP assignment specification for Static IP Pool.
+        * `static_ip_pool` - (Optional) IP assignment specification for Static IP Pool.
     * `is_migrate_pnics` - (Optional) Migrate any pnics which are in use.
     * `pnic` - (Optional) Physical NICs connected to the host switch.
         * `device_name` - (Required) Device name or key.
@@ -84,7 +84,7 @@ The following arguments are supported:
                 * `ip_mac_pair` - (Required) List of IPs and MACs for transport node host switch virtual tunnel endpoints.
                     * `ip` - (Required) IP address.
                     * `mac` - (Required) MAC address.
-                    * `static_ip_pool` - (Optional) IP assignment specification for Static IP Pool.
+                * `static_ip_pool` - (Optional) IP assignment specification for Static IP Pool.
             * `uplink` - (Optional) Uplink/LAG of VMware vSphere Distributed Switch connected to the HostSwitch.
                 * `uplink_name` - (Required) Uplink name from UplinkHostSwitch profile.
                 * `vds_lag_name` - (Optional) Link Aggregation Group (LAG) name of Virtual Distributed Switch.
