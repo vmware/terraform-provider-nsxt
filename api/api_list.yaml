@@ -898,3 +898,18 @@
     - Patch
     - Update
     - List
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/settings/firewall/security
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/settings/firewall/security
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
+      type: Global
+  model_name: PolicyExcludeList
+  obj_name: PolicyExcludeList
+  client_name: ExcludeListClient
+  supported_method:
+    - New
+    - Get
+    - Patch
+    - Update

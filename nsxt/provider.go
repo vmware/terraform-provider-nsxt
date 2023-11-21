@@ -441,6 +441,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_lb_http_application_profile":      resourceNsxtPolicyLBHttpApplicationProfile(),
 			"nsxt_policy_security_policy_rule":             resourceNsxtPolicySecurityPolicyRule(),
 			"nsxt_policy_parent_security_policy":           resourceNsxtPolicyParentSecurityPolicy(),
+			"nsxt_policy_firewall_exclude_list_member":     resourceNsxtPolicyFirewallExcludeListMember(),
 		},
 
 		ConfigureFunc: providerConfigure,
