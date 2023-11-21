@@ -877,3 +877,30 @@
   supported_method:
     - New
     - List
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra
+      model: github.com/vmware/vsphere-automation-sdk-go/runtime/data
+      list_result_model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra
+      model: github.com/vmware/vsphere-automation-sdk-go/runtime/data
+      list_result_model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
+      type: Global
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra
+      model: github.com/vmware/vsphere-automation-sdk-go/runtime/data
+      list_result_model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Multitenancy
+  model_name: StructValue
+  obj_name: FloodProtectionProfiles
+  client_name: FloodProtectionProfilesClient
+  list_result_name: FloodProtectionProfileListResult
+  model_prefix: vapiData_
+  model_pass_ptr: true
+  file_name: FloodProtectionProfilesClient
+  supported_method:
+    - New
+    - Get
+    - Delete
+    - Patch
+    - Update
+    - List
