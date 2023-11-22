@@ -58,10 +58,12 @@ resource "nsxt_policy_tier1_gateway" "tier1_gw" {
   display_name = "Tier1-gw1"
 
   locale_service {
+    nsx_id            = "paris"
     edge_cluster_path = data.nsxt_policy_edge_cluster.paris.path
   }
 
   locale_service {
+    nsx_id               = "london"
     edge_cluster_path    = data.nsxt_policy_edge_cluster.london.path
     preferred_edge_paths = [data.nsxt_policy_egde_node.edge1.path]
   }
@@ -119,6 +121,7 @@ The following arguments are supported:
   * `project_id` - (Required) The ID of the project which the object belongs to
 * `edge_cluster_path` - (Optional) The path of the edge cluster where the Tier-1 is placed.For advanced configuration, use `locale_service` clause instead. 
 * `locale_service` - (Optional) This argument is required on NSX Global Manager. Multiple locale services can be specified for multiple locations.
+  * `nsx_id` - (Optional) NSX id for the locale service. It is recommended to specify this attribute in order to avoid unnecessary recreation of this object. Should be unique within the gateway.
   * `edge_cluster_path` - (Required) The path of the edge cluster where the Tier-0 is placed.
   * `preferred_edge_paths` - (Optional) Policy paths to edge nodes. Specified edge is used as preferred edge cluster member when failover mode is set to `PREEMPTIVE`.
   * `display_name` - (Optional) Display name for the locale service.

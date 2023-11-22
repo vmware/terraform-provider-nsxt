@@ -947,12 +947,14 @@ func resourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{}) e
 		return handleReadError(d, "Locale Service for T0", id, err)
 	}
 	var services []map[string]interface{}
-	_, shouldSetLS := d.GetOk("locale_service")
+	intentServices, shouldSetLS := d.GetOk("locale_service")
 	// decide if we should set locale_service or edge_cluser_path
 	// for GM, it is always locale_service; for LM, config dependent
 	if isGlobalManager {
 		shouldSetLS = true
 	}
+	// map of nsx IDs that was provided in locale_services in intent
+	nsxIDMap := getAttrKeyMapFromSchemaSet(intentServices, "nsx_id")
 	if len(localeServices) > 0 {
 		for i, service := range localeServices {
 			if shouldSetLS {
@@ -962,6 +964,14 @@ func resourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{}) e
 				cfgMap["preferred_edge_paths"] = service.PreferredEdgePaths
 				cfgMap["revision"] = service.Revision
 				cfgMap["display_name"] = service.DisplayName
+				// to avoid diff and recreation of locale service, we set nsx_id only
+				// if user specified it in the intent.
+				// this workaround is necessary due to lack of proper support for computed
+				// values in TypeSet
+				// TODO: refactor this post upgrade to plugin framework
+				if _, ok := nsxIDMap[*service.Id]; ok {
+					cfgMap["nsx_id"] = service.Id
+				}
 				redistributionConfigs := getLocaleServiceRedistributionConfig(&localeServices[i])
 				if d.Get("redistribution_set").(bool) {
 					// redistribution_config is deprecated and should be

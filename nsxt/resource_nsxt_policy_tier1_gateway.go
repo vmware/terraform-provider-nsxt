@@ -582,10 +582,12 @@ func resourceNsxtPolicyTier1GatewayRead(d *schema.ResourceData, m interface{}) e
 		return handleReadError(d, "Locale Service for T1", id, err)
 	}
 	var services []map[string]interface{}
-	_, shouldSetLS := d.GetOk("locale_service")
+	intentServices, shouldSetLS := d.GetOk("locale_service")
 	if context.ClientType == utl.Global {
 		shouldSetLS = true
 	}
+	// map of nsx IDs that was provided in locale_services in intent
+	nsxIDMap := getAttrKeyMapFromSchemaSet(intentServices, "nsx_id")
 
 	if len(localeServices) > 0 {
 		for _, service := range localeServices {
@@ -596,6 +598,14 @@ func resourceNsxtPolicyTier1GatewayRead(d *schema.ResourceData, m interface{}) e
 				cfgMap["preferred_edge_paths"] = service.PreferredEdgePaths
 				cfgMap["revision"] = service.Revision
 				cfgMap["display_name"] = service.DisplayName
+				// to avoid diff and recreation of locale service, we set nsx_id only
+				// if user specified it in the intent.
+				// this workaround is necessary due to lack of proper support for computed
+				// values in TypeSet
+				// TODO: refactor this post upgrade to plugin framework
+				if _, ok := nsxIDMap[*service.Id]; ok {
+					cfgMap["nsx_id"] = service.Id
+				}
 				services = append(services, cfgMap)
 
 			} else {

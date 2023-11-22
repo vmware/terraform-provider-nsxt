@@ -90,6 +90,7 @@ func getPolicyLocaleServiceSchema(isTier1 bool) *schema.Schema {
 	}
 
 	elemSchema := map[string]*schema.Schema{
+		"nsx_id": getNsxIDSchema(),
 		"edge_cluster_path": {
 			Type:         schema.TypeString,
 			Description:  "The path of the edge cluster connected to this gateway",
@@ -297,15 +298,25 @@ func initGatewayLocaleServices(context utl.SessionContext, d *schema.ResourceDat
 		}
 	}
 	lsType := "LocaleServices"
+	idMap := make(map[string]bool)
 	for _, service := range services {
 		cfg := service.(map[string]interface{})
 		edgeClusterPath := cfg["edge_cluster_path"].(string)
 		edgeNodes := interfaceListToStringList(cfg["preferred_edge_paths"].([]interface{}))
 		path := cfg["path"].(string)
+		nsxID := cfg["nsx_id"].(string)
+		// validate unique ids are provided for services
+		if len(nsxID) > 0 {
+			if _, ok := idMap[nsxID]; ok {
+				return nil, fmt.Errorf("Duplicate nsx_id for locale_service %s - please specify unique id", nsxID)
+			}
+			idMap[nsxID] = true
+		}
 
 		var serviceID string
-		if path != "" {
-			serviceID = getPolicyIDFromPath(path)
+		if nsxID != "" {
+			log.Printf("[DEBUG] Updating locale service %s", path)
+			serviceID = nsxID
 		} else {
 			serviceID = newUUID()
 			log.Printf("[DEBUG] Preparing to create locale service %s for gateway %s", serviceID, d.Id())

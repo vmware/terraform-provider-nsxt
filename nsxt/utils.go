@@ -70,6 +70,24 @@ func getStringListFromSchemaList(d *schema.ResourceData, schemaAttrName string) 
 	return interface2StringList(d.Get(schemaAttrName).([]interface{}))
 }
 
+// helper to construct a map based on curtain attribute in schema set
+// this helper is only relevant for Sets of nested objects (not scalars), and attrName
+// is the object attribute value of which would appear as key in the returned map object.
+// this is useful when Read function needs to make a decision based on intent provided
+// by user in a nested schema
+func getAttrKeyMapFromSchemaSet(schemaSet interface{}, attrName string) map[string]bool {
+
+	keyMap := make(map[string]bool)
+	for _, item := range schemaSet.(*schema.Set).List() {
+		mapItem := item.(map[string]interface{})
+		if value, ok := mapItem[attrName]; ok {
+			keyMap[value.(string)] = true
+		}
+	}
+
+	return keyMap
+}
+
 func intList2int64List(configured []interface{}) []int64 {
 	vs := make([]int64, 0, len(configured))
 	for _, v := range configured {
