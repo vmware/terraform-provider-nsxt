@@ -41,15 +41,22 @@ func resourceNsxtPolicyLBPool() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"nsx_id":              getNsxIDSchema(),
-			"path":                getPathSchema(),
-			"display_name":        getDisplayNameSchema(),
-			"description":         getDescriptionSchema(),
-			"revision":            getRevisionSchema(),
-			"tag":                 getTagsSchema(),
-			"member":              getPoolMembersSchema(),
-			"member_group":        getPolicyPoolMemberGroupSchema(),
-			"active_monitor_path": getPolicyPathSchema(false, false, "Active healthcheck is disabled by default and can be enabled using this setting"),
+			"nsx_id":       getNsxIDSchema(),
+			"path":         getPathSchema(),
+			"display_name": getDisplayNameSchema(),
+			"description":  getDescriptionSchema(),
+			"revision":     getRevisionSchema(),
+			"tag":          getTagsSchema(),
+			"member":       getPoolMembersSchema(),
+			"member_group": getPolicyPoolMemberGroupSchema(),
+			"active_monitor_paths": {
+				Type:          schema.TypeList,
+				Description:   "Used by the load balancer to initiate new connections to the servers to check their health. Active healthchecks are deactivated by default and can be activated using this setting",
+				Elem:          getPolicyPathSchemaSimple(),
+				Optional:      true,
+				ConflictsWith: []string{"active_monitor_path"},
+			},
+			"active_monitor_path": getPolicyPathSchemaExtended(false, false, "Active healthcheck is disabled by default and can be enabled using this setting", "This attribute is deprecated, please use active_monitor_paths", []string{"active_monitor_paths"}),
 			"algorithm": {
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice(lbPoolAlgorithmValues, false),
@@ -432,8 +439,11 @@ func resourceNsxtPolicyLBPoolCreate(d *schema.ResourceData, m interface{}) error
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
 	tags := getPolicyTagsFromSchema(d)
-	activeMonitorPath := d.Get("active_monitor_path").(string)
-	activeMonitorPaths := []string{activeMonitorPath}
+	activeMonitorPaths := interfaceListToStringList(d.Get("active_monitor_paths").([]interface{}))
+	if activeMonitorPaths == nil && d.Get("active_monitor_path") != "" {
+		activeMonitorPath := d.Get("active_monitor_path").(string)
+		activeMonitorPaths = []string{activeMonitorPath}
+	}
 	algorithm := d.Get("algorithm").(string)
 	memberGroup := getPolicyPoolMemberGroupFromSchema(d)
 	members := getPolicyPoolMembersFromSchema(d)
@@ -491,17 +501,22 @@ func resourceNsxtPolicyLBPoolRead(d *schema.ResourceData, m interface{}) error {
 		return handleReadError(d, "LBPool", id, err)
 	}
 
+	if _, ok := d.GetOk("active_monitor_path"); ok {
+		// deprecated value was set
+		if obj.ActiveMonitorPaths != nil {
+			d.Set("active_monitor_path", obj.ActiveMonitorPaths[0])
+		}
+	} else {
+		// resource uses lists attribute (non-deprecated) or attribute
+		// not specified. In this case set non-deprecated attr in state
+		d.Set("active_monitor_paths", obj.ActiveMonitorPaths)
+	}
 	d.Set("display_name", obj.DisplayName)
 	d.Set("description", obj.Description)
 	setPolicyTagsInSchema(d, obj.Tags)
 	d.Set("nsx_id", id)
 	d.Set("path", obj.Path)
 	d.Set("revision", obj.Revision)
-	if obj.ActiveMonitorPaths != nil {
-		d.Set("active_monitor_path", obj.ActiveMonitorPaths[0])
-	} else {
-		d.Set("active_monitor_path", "")
-	}
 	d.Set("algorithm", obj.Algorithm)
 	err = setPolicyPoolMemberGroupInSchema(d, obj.MemberGroup)
 	if err != nil {
@@ -550,8 +565,11 @@ func resourceNsxtPolicyLBPoolUpdate(d *schema.ResourceData, m interface{}) error
 	displayName := d.Get("display_name").(string)
 	tags := getPolicyTagsFromSchema(d)
 
-	activeMonitorPath := d.Get("active_monitor_path").(string)
-	activeMonitorPaths := []string{activeMonitorPath}
+	activeMonitorPaths := interfaceListToStringList(d.Get("active_monitor_paths").([]interface{}))
+	if activeMonitorPaths == nil && d.Get("active_monitor_path") != "" {
+		activeMonitorPath := d.Get("active_monitor_path").(string)
+		activeMonitorPaths = []string{activeMonitorPath}
+	}
 	algorithm := d.Get("algorithm").(string)
 	memberGroup := getPolicyPoolMemberGroupFromSchema(d)
 	members := getPolicyPoolMembersFromSchema(d)
