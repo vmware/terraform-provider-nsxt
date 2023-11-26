@@ -135,7 +135,7 @@ func resourceNsxtPolicyTier1Gateway() *schema.Resource {
 				Description:  "High-availability Mode for Tier-1",
 				ValidateFunc: validation.StringInSlice(t1HaModeValues, false),
 				Optional:     true,
-				Default:      model.Tier1_HA_MODE_STANDBY,
+				Computed:     true,
 			},
 			"type": {
 				Type:         schema.TypeString,
@@ -405,7 +405,7 @@ func policyTier1GatewayResourceToInfraStruct(context utl.SessionContext, d *sche
 	}
 
 	if nsxVersionHigherOrEqual("3.2.0") {
-		if haMode != "NONE" {
+		if haMode != "NONE" && haMode != "" {
 			obj.HaMode = &haMode
 		}
 	}
