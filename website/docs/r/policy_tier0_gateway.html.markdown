@@ -24,6 +24,7 @@ resource "nsxt_policy_tier0_gateway" "tier0_gw" {
   ha_mode                  = "ACTIVE_STANDBY"
   internal_transit_subnets = ["102.64.0.0/16"]
   transit_subnets          = ["101.64.0.0/16"]
+  vrf_transit_subnets      = ["100.64.0.0/16"]
   edge_cluster_path        = data.nsxt_policy_edge_cluster.EC.path
   rd_admin_address         = "192.168.0.2"
 
@@ -133,6 +134,7 @@ The following arguments are supported:
 * `ha_mode` - (Optional) High-availability Mode for Tier-0. Valid values are `ACTIVE_ACTIVE` and `ACTIVE_STANDBY`.
 * `internal_transit_subnets` - (Optional) Internal transit subnets in CIDR format. At most 1 CIDR.
 * `transit_subnets` - (Optional) Transit subnets in CIDR format.
+* `vrf_transit_subnets` - (Optional) VRF transit subnets in CIDR format. Maximum 1 item allowed in the list.
 * `dhcp_config_path` - (Optional) Policy path to DHCP server or relay configuration to use for this gateway.
 * `rd_admin_address` - (Optional) Route distinguisher administrator address. If using EVPN service, then this attribute should be defined if auto generation of route distinguisher on VRF configuration is needed.
 * `bgp_config` - (Optional) The BGP configuration for the Tier-0 gateway. When enabled a valid `edge_cluster_path` must be set on the Tier-0 gateway. This clause is not applicable for Global Manager - use `nsxt_policy_bgp_config` resource instead.

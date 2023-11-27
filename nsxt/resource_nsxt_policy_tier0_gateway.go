@@ -109,6 +109,16 @@ func resourceNsxtPolicyTier0Gateway() *schema.Resource {
 				Computed: true,
 				ForceNew: true, // Modification of transit subnet not allowed after Tier-0 deployment
 			},
+			"vrf_transit_subnets": {
+				Type:        schema.TypeList,
+				Description: "VRF transit subnets in CIDR format",
+				Elem: &schema.Schema{
+					Type:         schema.TypeString,
+					ValidateFunc: validateCidr(),
+				},
+				Optional: true,
+				Computed: true,
+			},
 			"ipv6_ndra_profile_path": getIPv6NDRAPathSchema(),
 			"ipv6_dad_profile_path":  getIPv6DadPathSchema(),
 			"edge_cluster_path":      getPolicyEdgeClusterPathSchema(),
@@ -721,6 +731,7 @@ func policyTier0GatewayResourceToInfraStruct(context utl.SessionContext, d *sche
 	revision := int64(d.Get("revision").(int))
 	internalSubnets := interfaceListToStringList(d.Get("internal_transit_subnets").([]interface{}))
 	transitSubnets := interfaceListToStringList(d.Get("transit_subnets").([]interface{}))
+	vrfTransitSubnets := interfaceListToStringList(d.Get("vrf_transit_subnets").([]interface{}))
 	ipv6ProfilePaths := getIpv6ProfilePathsFromSchema(d)
 	vrfConfig := getPolicyVRFConfigFromSchema(d)
 	dhcpPath := d.Get("dhcp_config_path").(string)
@@ -750,6 +761,10 @@ func policyTier0GatewayResourceToInfraStruct(context utl.SessionContext, d *sche
 
 	if nsxVersionHigherOrEqual("3.0.0") {
 		t0Struct.RdAdminField = rdAdminField
+	}
+
+	if nsxVersionHigherOrEqual("4.1.0") {
+		t0Struct.VrfTransitSubnets = vrfTransitSubnets
 	}
 
 	if len(d.Id()) > 0 {
@@ -912,6 +927,7 @@ func resourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{}) e
 	d.Set("force_whitelisting", obj.ForceWhitelisting)
 	d.Set("internal_transit_subnets", obj.InternalTransitSubnets)
 	d.Set("transit_subnets", obj.TransitSubnets)
+	d.Set("vrf_transit_subnets", obj.VrfTransitSubnets)
 	d.Set("revision", obj.Revision)
 	if nsxVersionHigherOrEqual("3.0.0") {
 		d.Set("rd_admin_address", obj.RdAdminField)
