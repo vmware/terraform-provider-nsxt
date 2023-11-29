@@ -9,10 +9,10 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/sites/enforcement_points"
 	model2 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-	"golang.org/x/exp/maps"
 )
 
 func resourceNsxtPolicyHostTransportNode() *schema.Resource {
@@ -45,7 +45,7 @@ func resourceNsxtPolicyHostTransportNode() *schema.Resource {
 				Description: "ID of the enforcement point this Host Transport Node belongs to",
 				Optional:    true,
 				ForceNew:    true,
-				Computed:    true,
+				Default:     "default",
 			},
 			"discovered_node_id": {
 				Type:          schema.TypeString,
@@ -55,40 +55,62 @@ func resourceNsxtPolicyHostTransportNode() *schema.Resource {
 			},
 			"node_deployment_info": getFabricHostNodeSchema(),
 			// host_switch_spec
-			"standard_host_switch":      getStandardHostSwitchSchema(),
-			"preconfigured_host_switch": getPreconfiguredHostSwitchSchema(),
+			"standard_host_switch": getStandardHostSwitchSchema(nodeTypeHost),
 		},
 	}
 }
 
 func getFabricHostNodeSchema() *schema.Schema {
-	elemSchema := map[string]*schema.Schema{
-		"fqdn": {
-			Type:        schema.TypeString,
-			Computed:    true,
-			Description: "Fully qualified domain name of the fabric node",
-		},
-		"ip_addresses": {
-			Type:        schema.TypeList,
-			Optional:    true,
-			Computed:    true,
-			Description: "IP Addresses of the Node, version 4 or 6",
-			Elem: &schema.Schema{
-				Type:         schema.TypeString,
-				ValidateFunc: validateSingleIP(),
-			},
-		},
-	}
-	maps.Copy(elemSchema, getSharedHostNodeSchemaAttrs())
-	s := schema.Schema{
+	return &schema.Schema{
 		Type:     schema.TypeList,
 		MaxItems: 1,
 		Optional: true,
 		Elem: &schema.Resource{
-			Schema: elemSchema,
+			Schema: map[string]*schema.Schema{
+				"fqdn": {
+					Type:        schema.TypeString,
+					Computed:    true,
+					Description: "Fully qualified domain name of the fabric node",
+				},
+				"ip_addresses": {
+					Type:        schema.TypeList,
+					Optional:    true,
+					Computed:    true,
+					Description: "IP Addresses of the Node, version 4 or 6",
+					Elem: &schema.Schema{
+						Type:         schema.TypeString,
+						ValidateFunc: validateSingleIP(),
+					},
+				},
+				"host_credential": {
+					Type:        schema.TypeList,
+					MaxItems:    1,
+					Description: "Host login credentials",
+					Optional:    true,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"password": {
+								Type:        schema.TypeString,
+								Sensitive:   true,
+								Required:    true,
+								Description: "The authentication password of the host node",
+							},
+							"thumbprint": {
+								Type:        schema.TypeString,
+								Optional:    true,
+								Description: "ESXi thumbprint or SSH key fingerprint of the host node",
+							},
+							"username": {
+								Type:        schema.TypeString,
+								Required:    true,
+								Description: "The username of the account on the host node",
+							},
+						},
+					},
+				},
+			},
 		},
 	}
-	return &s
 }
 
 func resourceNsxtPolicyHostTransportNodeRead(d *schema.ResourceData, m interface{}) error {
@@ -118,7 +140,7 @@ func resourceNsxtPolicyHostTransportNodeRead(d *schema.ResourceData, m interface
 	d.Set("path", obj.Path)
 	d.Set("revision", obj.Revision)
 
-	err = setHostSwitchSpecInSchema(d, obj.HostSwitchSpec)
+	err = setHostSwitchSpecInSchema(d, obj.HostSwitchSpec, nodeTypeHost)
 	if err != nil {
 		return err
 	}
@@ -127,10 +149,6 @@ func resourceNsxtPolicyHostTransportNodeRead(d *schema.ResourceData, m interface
 	elem := make(map[string]interface{})
 	elem["fqdn"] = fabricHostNode.Fqdn
 	elem["ip_addresses"] = fabricHostNode.IpAddresses
-
-	elem["os_type"] = fabricHostNode.OsType
-	elem["os_version"] = fabricHostNode.OsVersion
-	elem["windows_install_location"] = fabricHostNode.WindowsInstallLocation
 
 	d.Set("node_deployment_info", []map[string]interface{}{elem})
 
@@ -179,16 +197,12 @@ func getFabricHostNodeFromSchema(d *schema.ResourceData) *model2.FabricHostNode 
 				Username:   &username,
 			}
 		}
-		osType := nodeInfo["os_type"].(string)
-		osVersion := nodeInfo["os_version"].(string)
-		windowsInstallLocation := nodeInfo["windows_install_location"].(string)
+		osType := model.HostNode_OS_TYPE_ESXI
 
 		fabricHostNode := model2.FabricHostNode{
-			IpAddresses:            ipAddresses,
-			HostCredential:         hostCredential,
-			OsType:                 &osType,
-			OsVersion:              &osVersion,
-			WindowsInstallLocation: &windowsInstallLocation,
+			IpAddresses:    ipAddresses,
+			HostCredential: hostCredential,
+			OsType:         &osType,
 		}
 		return &fabricHostNode
 	}
@@ -204,7 +218,7 @@ func policyHostTransportNodePatch(siteID, epID, htnID string, d *schema.Resource
 	tags := getPolicyTagsFromSchema(d)
 	discoveredNodeID := d.Get("discovered_node_id").(string)
 	nodeDeploymentInfo := getFabricHostNodeFromSchema(d)
-	hostSwitchSpec, err := getHostSwitchSpecFromSchema(d)
+	hostSwitchSpec, err := getHostSwitchSpecFromSchema(d, nodeTypeHost)
 	revision := int64(d.Get("revision").(int))
 	if err != nil {
 		return fmt.Errorf("failed to create hostSwitchSpec of HostTransportNode: %v", err)

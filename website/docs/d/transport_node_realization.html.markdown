@@ -16,43 +16,38 @@ resource "nsxt_transport_node" "test" {
   description  = "Terraform-deployed edge node"
   display_name = "tf_edge_node"
   standard_host_switch {
-    host_switch_mode = "STANDARD"
-    host_switch_type = "NVDS"
     ip_assignment {
       static_ip_pool = data.nsxt_ip_pool.ipp1.id
     }
     transport_zone_endpoint {
-      transport_zone         = data.nsxt_transport_zone.tz1.id
-      transport_zone_profile = ["52035bb3-ab02-4a08-9884-18631312e50a"]
+      transport_zone          = data.nsxt_transport_zone.tz1.id
+      transport_zone_profiles = ["52035bb3-ab02-4a08-9884-18631312e50a"]
     }
     host_switch_profile = [nsxt_policy_uplink_host_switch_profile.hsw_profile1.id]
-    is_migrate_pnics    = false
     pnic {
       device_name = "fp-eth0"
       uplink_name = "uplink1"
     }
   }
-  edge_node {
-    deployment_config {
-      form_factor = "SMALL"
-      node_user_settings {
-        cli_password  = "some_cli_password"
-        root_password = "some_other_password"
-      }
-      vm_deployment_config {
-        management_network_id = data.vsphere_network.network1.id
-        data_network_ids      = [data.vsphere_network.network1.id]
-        compute_id            = data.vsphere_compute_cluster.compute_cluster1.id
-        storage_id            = data.vsphere_datastore.datastore1.id
-        vc_id                 = nsxt_compute_manager.vc1.id
-        host_id               = data.vsphere_host.host1.id
-      }
+  deployment_config {
+    form_factor = "SMALL"
+    node_user_settings {
+      cli_password  = "some_cli_password"
+      root_password = "some_other_password"
     }
-    node_settings {
-      hostname             = "tf_edge_node"
-      allow_ssh_root_login = true
-      enable_ssh           = true
+    vm_deployment_config {
+      management_network_id = data.vsphere_network.network1.id
+      data_network_ids      = [data.vsphere_network.network1.id]
+      compute_id            = data.vsphere_compute_cluster.compute_cluster1.id
+      storage_id            = data.vsphere_datastore.datastore1.id
+      vc_id                 = nsxt_compute_manager.vc1.id
+      host_id               = data.vsphere_host.host1.id
     }
+  }
+  node_settings {
+    hostname             = "tf_edge_node"
+    allow_ssh_root_login = true
+    enable_ssh           = true
   }
 }
 
