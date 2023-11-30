@@ -48,6 +48,7 @@ func resourceNsxtPolicyProject() *schema.Resource {
 					},
 				},
 				Optional: true,
+				Computed: true,
 			},
 			"tier0_gateway_paths": {
 				Type:     schema.TypeList,

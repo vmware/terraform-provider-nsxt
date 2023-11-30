@@ -25,6 +25,26 @@ var accTestPolicyProjectUpdateAttributes = map[string]string{
 	"short_id":     shortID,
 }
 
+func getExpectedSiteInfoCount(t *testing.T) string {
+	if nsxVersion == "" {
+		connector, err := testAccGetPolicyConnector()
+		if err != nil {
+			t.Errorf("Failed to get policy connector")
+			return "0"
+		}
+
+		err = initNSXVersion(connector)
+		if err != nil {
+			t.Errorf("Failed to retrieve NSX version")
+			return "0"
+		}
+	}
+	if nsxVersionHigherOrEqual("4.1.1") {
+		return "1"
+	}
+	return "0"
+}
+
 func TestAccResourceNsxtPolicyProject_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_project.test"
 
@@ -47,7 +67,7 @@ func TestAccResourceNsxtPolicyProject_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyProjectCreateAttributes["description"]),
 					resource.TestCheckResourceAttr(testResourceName, "short_id", accTestPolicyProjectCreateAttributes["short_id"]),
 					//TODO: add site info validation
-					resource.TestCheckResourceAttr(testResourceName, "site_info.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "site_info.#", getExpectedSiteInfoCount(t)),
 					resource.TestCheckResourceAttr(testResourceName, "tier0_gateway_paths.#", "1"),
 
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
@@ -63,7 +83,7 @@ func TestAccResourceNsxtPolicyProject_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyProjectUpdateAttributes["display_name"]),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyProjectUpdateAttributes["description"]),
 					resource.TestCheckResourceAttr(testResourceName, "short_id", accTestPolicyProjectCreateAttributes["short_id"]),
-					resource.TestCheckResourceAttr(testResourceName, "site_info.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "site_info.#", getExpectedSiteInfoCount(t)),
 					resource.TestCheckResourceAttr(testResourceName, "tier0_gateway_paths.#", "1"),
 
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
@@ -79,7 +99,7 @@ func TestAccResourceNsxtPolicyProject_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyProjectUpdateAttributes["display_name"]),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyProjectUpdateAttributes["description"]),
 					resource.TestCheckResourceAttr(testResourceName, "short_id", accTestPolicyProjectCreateAttributes["short_id"]),
-					resource.TestCheckResourceAttr(testResourceName, "site_info.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "site_info.#", getExpectedSiteInfoCount(t)),
 					resource.TestCheckResourceAttr(testResourceName, "tier0_gateway_paths.#", "0"),
 
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
