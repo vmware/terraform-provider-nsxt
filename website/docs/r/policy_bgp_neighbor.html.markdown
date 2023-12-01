@@ -106,3 +106,5 @@ terraform import nsxt_policy_bgp_neighbor.test T0_ID/LOCALE_SERVICE_ID/NEIGHBOR_
 ```
 
 The above command imports BGP Neighbor named `test` with the NSX BGP Neighbor ID `NEIGHBOR_ID` from the Tier-0 `T0_ID` and Locale Service `LOCALE_SERVICE_ID`.
+
+~> **NOTE:** BGP neigbor password configured on NSX will not be returned by NSX for security reasons, and hence not imported to terraform state.
