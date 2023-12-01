@@ -290,11 +290,14 @@ func resourceNsxtPolicyBgpNeighborResourceDataToStruct(d *schema.ResourceData, i
 		KeepAliveTime:       &keepAliveTime,
 		MaximumHopLimit:     &maximumHopLimit,
 		NeighborAddress:     &neighborAddress,
-		Password:            &password,
 		RemoteAsNum:         &remoteAsNum,
 		RouteFiltering:      rFilters,
 		SourceAddresses:     sourceAddresses,
 		Id:                  &id,
+	}
+
+	if d.HasChange("password") {
+		neighborStruct.Password = &password
 	}
 
 	return neighborStruct, nil
