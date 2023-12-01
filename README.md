@@ -166,6 +166,7 @@ to run.
 
 The following versions of NSX are supported:
 
+ * NSX-T 4.1.*
  * NSX-T 4.0.*
  * NSX-T 3.2.*
  * NSX-T 3.1.*
