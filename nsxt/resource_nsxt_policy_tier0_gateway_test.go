@@ -841,8 +841,13 @@ resource "nsxt_policy_tier0_gateway_interface" "parent-loopback" {
 
 func testAccNsxtPolicyTier0CreateWithRedistribution(name string) string {
 	return fmt.Sprintf(`
+data "nsxt_policy_edge_cluster" "EC" {
+  display_name = "%s"
+}
+
 resource "nsxt_policy_tier0_gateway" "test" {
   display_name = "%s"
+  edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
   redistribution_config {
     enabled  = false
     ospf_enabled = false
@@ -855,13 +860,18 @@ resource "nsxt_policy_tier0_gateway" "test" {
 
 data "nsxt_policy_realization_info" "realization_info" {
   path = nsxt_policy_tier0_gateway.test.path
-}`, name)
+}`, getEdgeClusterName(), name)
 }
 
 func testAccNsxtPolicyTier0UpdateWithRedistribution(name string) string {
 	return fmt.Sprintf(`
+data "nsxt_policy_edge_cluster" "EC" {
+  display_name = "%s"
+}
+
 resource "nsxt_policy_tier0_gateway" "test" {
   display_name = "%s"
+  edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
   redistribution_config {
     enabled  = false
     ospf_enabled = false
@@ -877,7 +887,7 @@ resource "nsxt_policy_tier0_gateway" "test" {
 
 data "nsxt_policy_realization_info" "realization_info" {
   path = nsxt_policy_tier0_gateway.test.path
-}`, name)
+}`, getEdgeClusterName(), name)
 }
 
 func testAccNsxtPolicyTier0Update2WithRedistribution(name string) string {
