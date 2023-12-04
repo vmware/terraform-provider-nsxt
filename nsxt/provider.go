@@ -437,6 +437,7 @@ func Provider() *schema.Provider {
 			"nsxt_edge_high_availability_profile":          resourceNsxtEdgeHighAvailabilityProfile(),
 			"nsxt_policy_host_transport_node_collection":   resourceNsxtPolicyHostTransportNodeCollection(),
 			"nsxt_policy_lb_client_ssl_profile":            resourceNsxtPolicyLBClientSslProfile(),
+			"nsxt_policy_lb_http_application_profile":      resourceNsxtPolicyLBHttpApplicationProfile(),
 		},
 
 		ConfigureFunc: providerConfigure,
