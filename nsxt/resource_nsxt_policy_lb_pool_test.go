@@ -18,6 +18,7 @@ var accTestPolicyLBPoolCreateAttributes = map[string]string{
 	"algorithm":               "IP_HASH",
 	"min_active_members":      "2",
 	"tcp_multiplexing_number": "2",
+	"active_monitor_path":     "/infra/lb-monitor-profiles/default-icmp-lb-monitor",
 }
 
 var accTestPolicyLBPoolUpdateAttributes = map[string]string{
@@ -26,6 +27,7 @@ var accTestPolicyLBPoolUpdateAttributes = map[string]string{
 	"algorithm":               "WEIGHTED_ROUND_ROBIN",
 	"min_active_members":      "5",
 	"tcp_multiplexing_number": "5",
+	"active_monitor_paths":    "/infra/lb-monitor-profiles/default-http-lb-monitor",
 }
 
 func TestAccResourceNsxtPolicyLBPool_basic(t *testing.T) {
@@ -58,6 +60,8 @@ func TestAccResourceNsxtPolicyLBPool_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "member.1.ip_address", "5.5.5.3"),
 					resource.TestCheckResourceAttr(testResourceName, "min_active_members", accTestPolicyLBPoolCreateAttributes["min_active_members"]),
 					resource.TestCheckResourceAttr(testResourceName, "tcp_multiplexing_number", accTestPolicyLBPoolCreateAttributes["tcp_multiplexing_number"]),
+					// In the 1st step we use the deprecated string attribute
+					resource.TestCheckResourceAttr(testResourceName, "active_monitor_path", "/infra/lb-monitor-profiles/default-icmp-lb-monitor"),
 
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -82,6 +86,10 @@ func TestAccResourceNsxtPolicyLBPool_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "member.0.weight", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "min_active_members", accTestPolicyLBPoolUpdateAttributes["min_active_members"]),
 					resource.TestCheckResourceAttr(testResourceName, "tcp_multiplexing_number", accTestPolicyLBPoolUpdateAttributes["tcp_multiplexing_number"]),
+					// In the 2nd step we switch to the current list attribute
+					resource.TestCheckResourceAttr(testResourceName, "active_monitor_paths.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "active_monitor_paths.0", "/infra/lb-monitor-profiles/default-http-lb-monitor"),
+					resource.TestCheckResourceAttr(testResourceName, "active_monitor_path", ""),
 
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -105,6 +113,9 @@ func TestAccResourceNsxtPolicyLBPool_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "member_group.0.port", "888"),
 					resource.TestCheckResourceAttr(testResourceName, "min_active_members", accTestPolicyLBPoolUpdateAttributes["min_active_members"]),
 					resource.TestCheckResourceAttr(testResourceName, "tcp_multiplexing_number", accTestPolicyLBPoolUpdateAttributes["tcp_multiplexing_number"]),
+					// This step clears active_monitor_paths
+					resource.TestCheckResourceAttr(testResourceName, "active_monitor_paths.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "active_monitor_path", ""),
 
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -295,6 +306,15 @@ func testAccNsxtPolicyLBPoolMemberTemplate(createFlow bool) string {
 `
 	}
 
+	monitorPaths := ""
+	// Use either current or deprecated attribute for active monitors
+	if attrMap["active_monitor_paths"] != "" {
+		monitorPaths = fmt.Sprintf("active_monitor_paths = [\"%s\"]", attrMap["active_monitor_paths"])
+	} else {
+		if attrMap["active_monitor_path"] != "" {
+			monitorPaths = fmt.Sprintf("active_monitor_path = \"%s\"", attrMap["active_monitor_path"])
+		}
+	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_lb_pool" "test" {
   display_name = "%s"
@@ -303,6 +323,7 @@ resource "nsxt_policy_lb_pool" "test" {
   %s
   min_active_members = %s
   tcp_multiplexing_number = %s
+  %s
 
   tag {
     scope = "scope1"
@@ -312,7 +333,7 @@ resource "nsxt_policy_lb_pool" "test" {
 
 data "nsxt_policy_realization_info" "realization_info" {
   path = nsxt_policy_lb_pool.test.path
-}`, attrMap["display_name"], attrMap["description"], attrMap["algorithm"], members, attrMap["min_active_members"], attrMap["tcp_multiplexing_number"])
+}`, attrMap["display_name"], attrMap["description"], attrMap["algorithm"], members, attrMap["min_active_members"], attrMap["tcp_multiplexing_number"], monitorPaths)
 }
 
 func testAccNsxtPolicyLBPoolGroupTemplate() string {

@@ -564,15 +564,27 @@ func parseLocaleServicePolicyPath(path string) (bool, string, string, error) {
 	return isT0, gwID, localeServiceID, nil
 }
 
-func getPolicyPathSchema(isRequired bool, forceNew bool, description string) *schema.Schema {
+func getPolicyPathSchemaSimple() *schema.Schema {
 	return &schema.Schema{
 		Type:         schema.TypeString,
-		Description:  description,
-		Optional:     !isRequired,
-		Required:     isRequired,
-		ForceNew:     forceNew,
 		ValidateFunc: validatePolicyPath(),
 	}
+}
+
+func getPolicyPathSchema(isRequired bool, forceNew bool, description string) *schema.Schema {
+	attrSchema := getPolicyPathSchemaSimple()
+	attrSchema.Description = description
+	attrSchema.ForceNew = forceNew
+	attrSchema.Required = isRequired
+	attrSchema.Optional = !isRequired
+	return attrSchema
+}
+
+func getPolicyPathSchemaExtended(isRequired bool, forceNew bool, description string, deprecation string, conflictsWith []string) *schema.Schema {
+	attrSchema := getPolicyPathSchema(isRequired, forceNew, description)
+	attrSchema.Deprecated = deprecation
+	attrSchema.ConflictsWith = conflictsWith
+	return attrSchema
 }
 
 func getComputedPolicyPathSchema(description string) *schema.Schema {
