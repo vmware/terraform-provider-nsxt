@@ -702,6 +702,27 @@ func getContextSchema() *schema.Schema {
 	}
 }
 
+func getComputedContextSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeList,
+		Description: "Resource context",
+		Optional:    true,
+		Computed:    true,
+		MaxItems:    1,
+		ForceNew:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"project_id": {
+					Type:        schema.TypeString,
+					Description: "Id of the project which the resource belongs to.",
+					Required:    true,
+					ForceNew:    true,
+				},
+			},
+		},
+	}
+}
+
 func getCustomizedMPTagsFromSchema(d *schema.ResourceData, schemaName string) []mp_model.Tag {
 	tags := d.Get(schemaName).(*schema.Set).List()
 	tagList := make([]mp_model.Tag, 0)

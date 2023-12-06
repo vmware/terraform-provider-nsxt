@@ -155,8 +155,27 @@ func setPathListInMap(data map[string]interface{}, attrName string, pathList []s
 	}
 }
 
+func getPathListFromSchema(d *schema.ResourceData, schemaAttrName string) []string {
+	pathList := interface2StringList(d.Get(schemaAttrName).(*schema.Set).List())
+	if len(pathList) == 0 {
+		// Convert empty value to "ANY"
+		pathList = append(pathList, "ANY")
+	}
+	return pathList
+}
+
+func setPathListInSchema(d *schema.ResourceData, attrName string, pathList []string) {
+	if !(len(pathList) == 1 && pathList[0] == "ANY") {
+		d.Set(attrName, pathList)
+	}
+}
+
 func getDomainFromResourcePath(rPath string) string {
 	return getResourceIDFromResourcePath(rPath, "domains")
+}
+
+func getProjectIDFromResourcePath(rPath string) string {
+	return getResourceIDFromResourcePath(rPath, "projects")
 }
 
 func getResourceIDFromResourcePath(rPath string, rType string) string {
