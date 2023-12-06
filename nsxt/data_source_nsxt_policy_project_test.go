@@ -31,7 +31,7 @@ func TestAccDataSourceNsxtPolicyProject_basic(t *testing.T) {
 			{
 				PreConfig: func() {
 					if err := testAccDataSourceNsxtPolicyProjectCreate(name); err != nil {
-						panic(err)
+						t.Error(err)
 					}
 				},
 				Config: testAccNsxtPolicyProjectReadTemplate(name),

@@ -29,7 +29,7 @@ func TestAccDataSourceNsxtPolicyLBMonitor_basic(t *testing.T) {
 			{
 				PreConfig: func() {
 					if err := testAccDataSourceNsxtPolicyLBMonitorCreate(name); err != nil {
-						panic(err)
+						t.Error(err)
 					}
 				},
 				Config: testAccNsxtPolicyLBMonitorReadTemplate(name),

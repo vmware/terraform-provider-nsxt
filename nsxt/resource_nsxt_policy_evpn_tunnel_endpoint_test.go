@@ -35,7 +35,7 @@ func TestAccResourceNsxtPolicyEvpnTunnelEndpoint_basic(t *testing.T) {
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			if err := testAccDataSourceNsxtPolicyVniPoolConfigDelete(); err != nil {
-				panic(err)
+				t.Error(err)
 			}
 			return testAccNsxtPolicyEvpnTunnelEndpointCheckDestroy(state, accTestPolicyEvpnTunnelEndpointUpdateAttributes["display_name"])
 		},
@@ -43,7 +43,7 @@ func TestAccResourceNsxtPolicyEvpnTunnelEndpoint_basic(t *testing.T) {
 			{
 				PreConfig: func() {
 					if err := testAccDataSourceNsxtPolicyVniPoolConfigCreate(); err != nil {
-						panic(err)
+						t.Error(err)
 					}
 				},
 				Config: testAccNsxtPolicyEvpnTunnelEndpointBasic(true),
@@ -88,7 +88,7 @@ func TestAccResourceNsxtPolicyEvpnTunnelEndpoint_importBasic(t *testing.T) {
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			if err := testAccDataSourceNsxtPolicyVniPoolConfigDelete(); err != nil {
-				panic(err)
+				t.Error(err)
 			}
 			return testAccNsxtPolicyEvpnTunnelEndpointCheckDestroy(state, name)
 		},
@@ -96,7 +96,7 @@ func TestAccResourceNsxtPolicyEvpnTunnelEndpoint_importBasic(t *testing.T) {
 			{
 				PreConfig: func() {
 					if err := testAccDataSourceNsxtPolicyVniPoolConfigCreate(); err != nil {
-						panic(err)
+						t.Error(err)
 					}
 				},
 				Config: testAccNsxtPolicyEvpnTunnelEndpointBasic(false),

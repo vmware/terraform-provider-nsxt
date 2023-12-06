@@ -30,7 +30,7 @@ func TestAccDataSourceNsxtPolicyBfdProfile_basic(t *testing.T) {
 			{
 				PreConfig: func() {
 					if err := testAccDataSourceNsxtPolicyBfdProfileCreate(name); err != nil {
-						panic(err)
+						t.Error(err)
 					}
 				},
 				Config: testAccNsxtPolicyBfdProfileReadTemplate(name),

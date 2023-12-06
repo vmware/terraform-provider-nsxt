@@ -29,7 +29,7 @@ func TestAccDataSourceNsxtPolicyVniPoolConfig_basic(t *testing.T) {
 			{
 				PreConfig: func() {
 					if err := testAccDataSourceNsxtPolicyVniPoolConfigCreate(); err != nil {
-						panic(err)
+						t.Error(err)
 					}
 				},
 				Config: testAccNsxtPolicyVniPoolConfigReadTemplate(),

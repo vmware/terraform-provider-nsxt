@@ -28,7 +28,7 @@ func TestAccDataSourceNsxtPolicyBridgeProfile_basic(t *testing.T) {
 			{
 				PreConfig: func() {
 					if err := testAccDataSourceNsxtPolicyBridgeProfileCreate(name); err != nil {
-						panic(err)
+						t.Error(err)
 					}
 				},
 				Config: testAccNsxtPolicyBridgeProfileReadTemplate(name),

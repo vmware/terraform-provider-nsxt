@@ -41,7 +41,7 @@ func testAccDataSourceNsxtPolicyIpv6DadProfileBasic(t *testing.T, withContext bo
 			{
 				PreConfig: func() {
 					if err := testAccDataSourceNsxtPolicyIpv6DadProfileCreate(name); err != nil {
-						panic(err)
+						t.Error(err)
 					}
 				},
 				Config: testAccNsxtPolicyIpv6DadProfileReadTemplate(name, withContext),

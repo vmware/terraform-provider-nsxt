@@ -42,7 +42,7 @@ func testAccDataSourceNsxtPolicyIPPoolBasic(t *testing.T, withContext bool, preC
 			{
 				PreConfig: func() {
 					if err := testAccDataSourceNsxtPolicyIPPoolCreate(name); err != nil {
-						panic(err)
+						t.Error(err)
 					}
 				},
 				Config: testAccNsxtPolicyIPPoolReadTemplate(name, withContext),

@@ -131,7 +131,7 @@ func TestAccResourceNsxtLogicalSwitch_withProfiles(t *testing.T) {
 				PreConfig: func() {
 					// Create a custom switching profile
 					if err := testAccDataSourceNsxtSwitchingProfileCreate(customProfileName, profileType); err != nil {
-						panic(err)
+						t.Error(err)
 					}
 				},
 				// Create a logical switch to use the custom switching profile

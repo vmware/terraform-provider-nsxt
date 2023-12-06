@@ -29,7 +29,7 @@ func TestAccResourceNsxtPolicyEvpnTenant_basic(t *testing.T) {
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			if err := testAccDataSourceNsxtPolicyVniPoolConfigDelete(); err != nil {
-				panic(err)
+				t.Error(err)
 			}
 			return testAccNsxtPolicyEvpnTenantCheckDestroy(state, accTestPolicyEvpnTenantUpdateAttributes["display_name"])
 		},
@@ -37,7 +37,7 @@ func TestAccResourceNsxtPolicyEvpnTenant_basic(t *testing.T) {
 			{
 				PreConfig: func() {
 					if err := testAccDataSourceNsxtPolicyVniPoolConfigCreate(); err != nil {
-						panic(err)
+						t.Error(err)
 					}
 				},
 				Config: testAccNsxtPolicyEvpnTenantCreate(),
@@ -83,7 +83,7 @@ func TestAccResourceNsxtPolicyEvpnTenant_importBasic(t *testing.T) {
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			if err := testAccDataSourceNsxtPolicyVniPoolConfigDelete(); err != nil {
-				panic(err)
+				t.Error(err)
 			}
 			return testAccNsxtPolicyEvpnTenantCheckDestroy(state, accTestPolicyEvpnTenantUpdateAttributes["display_name"])
 		},
@@ -91,7 +91,7 @@ func TestAccResourceNsxtPolicyEvpnTenant_importBasic(t *testing.T) {
 			{
 				PreConfig: func() {
 					if err := testAccDataSourceNsxtPolicyVniPoolConfigCreate(); err != nil {
-						panic(err)
+						t.Error(err)
 					}
 				},
 				Config: testAccNsxtPolicyEvpnTenantUpdate(),

@@ -27,7 +27,7 @@ func TestAccDataSourceNsxtNsService_basic(t *testing.T) {
 			{
 				PreConfig: func() {
 					if err := testAccDataSourceNsxtNsServiceCreate(serviceName); err != nil {
-						panic(err)
+						t.Error(err)
 					}
 				},
 				Config: testAccNSXNsServiceReadTemplate(serviceName),

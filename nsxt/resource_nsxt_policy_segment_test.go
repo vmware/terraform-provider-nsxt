@@ -283,7 +283,7 @@ func TestAccResourceNsxtPolicySegment_withProfiles(t *testing.T) {
 			{
 				PreConfig: func() {
 					if err := testAccDataSourceNsxtPolicyQosProfileCreate(testAccSegmentQosProfileName); err != nil {
-						panic(err)
+						t.Error(err)
 					}
 				},
 				Config: testAccNsxtPolicySegmentWithProfilesTemplate(tzName, name),
@@ -350,7 +350,7 @@ func TestAccResourceNsxtPolicySegment_withBridge(t *testing.T) {
 			{
 				PreConfig: func() {
 					if err := testAccDataSourceNsxtPolicyBridgeProfileCreate(testAccSegmentBridgeProfileName); err != nil {
-						panic(err)
+						t.Error(err)
 					}
 				},
 				Config: testAccNsxtPolicySegmentWithBridgeTemplate(tzName, vlanTzName, name, vlan),
