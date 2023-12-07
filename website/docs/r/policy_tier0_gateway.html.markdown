@@ -92,10 +92,12 @@ resource "nsxt_policy_tier0_gateway" "tier0_gw" {
   failover_mode = "PREEMPTIVE"
 
   locale_service {
+    nsx_id            = "paris"
     edge_cluster_path = data.nsxt_policy_edge_cluster.paris.path
   }
 
   locale_service {
+    nsx_id               = "london"
     edge_cluster_path    = data.nsxt_policy_edge_cluster.london.path
     preferred_edge_paths = [data.nsxt_policy_edge_node.edge1.path]
   }
@@ -122,6 +124,7 @@ The following arguments are supported:
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the policy resource.
 * `edge_cluster_path` - (Optional) The path of the edge cluster where the Tier-0 is placed.For advanced configuration and on Global Manager, use `locale_service` clause instead. Note that for some configurations (such as BGP) setting edge cluster is required.
 * `locale_service` - (Optional) This is required on NSX Global Manager. Multiple locale services can be specified for multiple locations.
+  * `nsx_id` - (Optional) NSX id for the locale service. It is recommended to specify this attribute in order to avoid unnecessary recreation of this object. Should be unique within the gateway.
   * `edge_cluster_path` - (Required) The path of the edge cluster where the Tier-0 is placed.
   * `preferred_edge_paths` - (Optional) Policy paths to edge nodes. Specified edge is used as preferred edge cluster member when failover mode is set to `PREEMPTIVE`.
   * `display_name` - (Optional) Display name for the locale service.

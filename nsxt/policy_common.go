@@ -36,6 +36,15 @@ func getNsxIDSchema() *schema.Schema {
 	}
 }
 
+func getNestedNsxIDSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeString,
+		Description: "NSX ID for this resource",
+		Optional:    true,
+		ForceNew:    true,
+	}
+}
+
 func getFlexNsxIDSchema(readOnly bool) *schema.Schema {
 	return &schema.Schema{
 		Type:        schema.TypeString,

@@ -5,6 +5,7 @@ package nsxt
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -57,6 +58,57 @@ func TestAccResourceNsxtPolicyTier0Gateway_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "rd_admin_address", ""),
 					resource.TestCheckResourceAttrSet(testResourceName, "ipv6_ndra_profile_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "ipv6_dad_profile_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+				),
+			},
+		},
+	})
+}
+
+// This test requires at least 2 edge nodes per cluster
+func TestAccResourceNsxtPolicyTier0Gateway_localeService(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_tier0_gateway.test"
+	regexpPath, err := regexp.Compile("/.*/" + name)
+	if err != nil {
+		t.Errorf("Error while compiling regexp: %v", err)
+		return
+	}
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccNSXVersion(t, "3.0.0")
+			testAccEnvDefined(t, "NSXT_TEST_ADVANCED_TOPOLOGY")
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyTier0CheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyTier0CreateWithLocaleTemplate(name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyTier0Exists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "ha_mode", "ACTIVE_STANDBY"),
+					resource.TestCheckResourceAttr(testResourceName, "locale_service.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "locale_service.0.nsx_id", name),
+					resource.TestMatchResourceAttr(testResourceName, "locale_service.0.path", regexpPath),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyTier0UpdateWithLocaleTemplate(name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyTier0Exists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "ha_mode", "ACTIVE_STANDBY"),
+					resource.TestCheckResourceAttr(testResourceName, "locale_service.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "locale_service.0.nsx_id", name),
+					resource.TestMatchResourceAttr(testResourceName, "locale_service.0.path", regexpPath),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 				),
@@ -691,6 +743,50 @@ resource "nsxt_policy_tier0_gateway" "test" {
     tag   = "tag2"
   }
 }`, id, name, testAccNsxtPolicyTier0EdgeClusterTemplate())
+}
+
+func testAccNsxtPolicyTier0CreateWithLocaleTemplate(name string) string {
+	config := testAccNsxtPolicyGatewayFabricDeps(true) + fmt.Sprintf(`
+data "nsxt_policy_edge_node" "node1" {
+    edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
+    member_index      = 0
+}
+
+resource "nsxt_policy_tier0_gateway" "test" {
+  display_name              = "%s"
+  failover_mode             = "PREEMPTIVE"
+  ha_mode                   = "ACTIVE_STANDBY"
+
+  locale_service {
+    nsx_id = "%s"
+    edge_cluster_path    = data.nsxt_policy_edge_cluster.EC.path
+    preferred_edge_paths = [data.nsxt_policy_edge_node.node1.path]
+  }
+}`, name, name)
+
+	return testAccAdjustPolicyInfraConfig(config)
+}
+
+func testAccNsxtPolicyTier0UpdateWithLocaleTemplate(name string) string {
+	config := testAccNsxtPolicyGatewayFabricDeps(true) + fmt.Sprintf(`
+data "nsxt_policy_edge_node" "node1" {
+    edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
+    member_index      = 1
+}
+
+resource "nsxt_policy_tier0_gateway" "test" {
+  display_name              = "%s"
+  failover_mode             = "PREEMPTIVE"
+  ha_mode                   = "ACTIVE_STANDBY"
+
+  locale_service {
+    nsx_id = "%s"
+    edge_cluster_path    = data.nsxt_policy_edge_cluster.EC.path
+    preferred_edge_paths = [data.nsxt_policy_edge_node.node1.path]
+  }
+}`, name, name)
+
+	return testAccAdjustPolicyInfraConfig(config)
 }
 
 func testAccNsxtPolicyTier0SubnetsTemplate(name string) string {
