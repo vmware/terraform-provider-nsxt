@@ -17,9 +17,6 @@ This resource is applicable to NSX Global Manager, NSX Policy Manager and VMC.
 
 ```hcl
 resource "nsxt_policy_segment" "segment1" {
-  context {
-    project_id = data.nsxt_policy_project.demoproj.id
-  }
   display_name        = "segment1"
   description         = "Terraform provisioned Segment"
   transport_zone_path = data.nsxt_policy_transport_zone.tz1.path
