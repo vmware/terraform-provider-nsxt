@@ -866,7 +866,7 @@ resource "nsxt_policy_bgp_config" "test" {
 	  ecmp         = true
 }`
 	}
-	return testAccNsxtPolicyGatewayInterfaceDeps("11, 12") + fmt.Sprintf(`
+	return testAccNsxtPolicyGatewayInterfaceDeps("11, 12", false) + fmt.Sprintf(`
 resource "nsxt_policy_tier0_gateway" "parent" {
   nsx_id            = "vrf-parent"
   display_name      = "parent"
@@ -914,7 +914,7 @@ data "nsxt_policy_realization_info" "realization_info" {
 }
 
 func testAccNsxtPolicyTier0WithVRFTearDown() string {
-	return testAccNsxtPolicyGatewayInterfaceDeps("11, 12") + `
+	return testAccNsxtPolicyGatewayInterfaceDeps("11, 12", false) + `
 data "nsxt_policy_edge_node" "EN" {
   edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
   member_index      = 0

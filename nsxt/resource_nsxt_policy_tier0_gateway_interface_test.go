@@ -611,16 +611,21 @@ data "nsxt_policy_transport_zone" "test" {
 }`, getEdgeClusterName(), tzName)
 }
 
-func testAccNsxtPolicyGatewayInterfaceDeps(vlans string) string {
+func testAccNsxtPolicyGatewayInterfaceDeps(vlans string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return testAccNsxtPolicyGatewayFabricDeps(true) + fmt.Sprintf(`
 resource "nsxt_policy_vlan_segment" "test" {
+%s
   transport_zone_path = data.nsxt_policy_transport_zone.test.path
   display_name        = "interface_test"
   vlan_ids            = [%s]
   subnet {
       cidr = "10.2.2.2/24"
   }
-}`, vlans)
+}`, context, vlans)
 }
 
 func testAccNsxtPolicyTier0EdgeClusterTemplate() string {
@@ -662,7 +667,7 @@ data "nsxt_policy_realization_info" "realization_info" {
 }
 
 func testAccNsxtPolicyTier0InterfaceServiceTemplate(name string, subnet string, mtu string) string {
-	return testAccNsxtPolicyGatewayInterfaceDeps("11") + fmt.Sprintf(`
+	return testAccNsxtPolicyGatewayInterfaceDeps("11", false) + fmt.Sprintf(`
 
 resource "nsxt_policy_tier0_gateway" "test" {
   display_name      = "%s"
@@ -689,7 +694,7 @@ resource "nsxt_policy_tier0_gateway_interface" "test" {
 }
 
 func testAccNsxtPolicyTier0InterfaceThinTemplate(name string, subnet string) string {
-	return testAccNsxtPolicyGatewayInterfaceDeps("11") + fmt.Sprintf(`
+	return testAccNsxtPolicyGatewayInterfaceDeps("11", false) + fmt.Sprintf(`
 resource "nsxt_policy_tier0_gateway" "test" {
   display_name      = "%s"
   ha_mode           = "ACTIVE_STANDBY"
@@ -708,7 +713,7 @@ resource "nsxt_policy_tier0_gateway_interface" "test" {
 }
 
 func testAccNsxtPolicyTier0InterfaceTemplateWithID(name string, subnet string) string {
-	return testAccNsxtPolicyGatewayInterfaceDeps("11") + fmt.Sprintf(`
+	return testAccNsxtPolicyGatewayInterfaceDeps("11", false) + fmt.Sprintf(`
 resource "nsxt_policy_tier0_gateway" "test" {
   display_name      = "%s"
   ha_mode           = "ACTIVE_STANDBY"
@@ -729,7 +734,7 @@ resource "nsxt_policy_tier0_gateway_interface" "test" {
 }
 
 func testAccNsxtPolicyTier0InterfaceTemplateWithV6(name string, subnet string) string {
-	return testAccNsxtPolicyGatewayInterfaceDeps("11") + fmt.Sprintf(`
+	return testAccNsxtPolicyGatewayInterfaceDeps("11", false) + fmt.Sprintf(`
 data "nsxt_policy_ipv6_ndra_profile" "default" {
   display_name = "default"
 }
@@ -780,7 +785,7 @@ func testAccNsxtPolicyTier0InterfaceExternalTemplate(name string, subnet string,
     }`
 		ospfDeps = testAccNsxtPolicyTier0InterfaceOspfDeps()
 	}
-	return testAccNsxtPolicyGatewayInterfaceDeps("11") + ospfDeps + fmt.Sprintf(`
+	return testAccNsxtPolicyGatewayInterfaceDeps("11", false) + ospfDeps + fmt.Sprintf(`
 data "nsxt_policy_edge_node" "EN" {
   edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
   member_index      = 0

@@ -416,7 +416,7 @@ func testAccNsxtPolicyTier1InterfaceTemplate(name string, subnet string, mtu str
 	if withContext {
 		context = testAccNsxtPolicyMultitenancyContext()
 	}
-	return testAccNsxtPolicyGatewayInterfaceDeps("11") + fmt.Sprintf(`
+	return testAccNsxtPolicyGatewayInterfaceDeps("11", withContext) + fmt.Sprintf(`
 resource "nsxt_policy_tier1_gateway" "test" {
 %s
   display_name      = "%s"
@@ -446,7 +446,7 @@ func testAccNsxtPolicyTier1InterfaceThinTemplate(name string, subnet string, wit
 	if withContext {
 		context = testAccNsxtPolicyMultitenancyContext()
 	}
-	return testAccNsxtPolicyGatewayInterfaceDeps("11") + fmt.Sprintf(`
+	return testAccNsxtPolicyGatewayInterfaceDeps("11", withContext) + fmt.Sprintf(`
 resource "nsxt_policy_tier1_gateway" "test" {
 %s
   display_name      = "%s"
@@ -465,7 +465,7 @@ resource "nsxt_policy_tier1_gateway_interface" "test" {
 }
 
 func testAccNsxtPolicyTier1InterfaceTemplateWithID(name string, subnet string) string {
-	return testAccNsxtPolicyGatewayInterfaceDeps("11") + fmt.Sprintf(`
+	return testAccNsxtPolicyGatewayInterfaceDeps("11", false) + fmt.Sprintf(`
 resource "nsxt_policy_tier1_gateway" "test" {
   display_name      = "%s"
   %s
@@ -489,7 +489,7 @@ func testAccNextPolicyTier1InterfaceRealizationTemplate() string {
 }
 
 func testAccNsxtPolicyTier1InterfaceTemplateWithIPv6(name string, subnet string) string {
-	return testAccNsxtPolicyGatewayInterfaceDeps("11") + fmt.Sprintf(`
+	return testAccNsxtPolicyGatewayInterfaceDeps("11", false) + fmt.Sprintf(`
 data "nsxt_policy_ipv6_ndra_profile" "default" {
   display_name = "default"
 }
