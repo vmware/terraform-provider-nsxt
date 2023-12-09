@@ -29,7 +29,7 @@ func TestAccDataSourceNsxtPolicyLBAppProfile_basic(t *testing.T) {
 			{
 				PreConfig: func() {
 					if err := testAccDataSourceNsxtPolicyLBAppProfileCreate(name); err != nil {
-						panic(err)
+						t.Error(err)
 					}
 				},
 				Config: testAccNsxtPolicyLBAppProfileReadTemplate(name),

@@ -28,7 +28,7 @@ func TestAccDataSourceNsxtSwitchingProfile_basic(t *testing.T) {
 			{
 				PreConfig: func() {
 					if err := testAccDataSourceNsxtSwitchingProfileCreate(profileName, profileType); err != nil {
-						panic(err)
+						t.Error(err)
 					}
 				},
 				Config: testAccNSXSwitchingProfileReadTemplate(profileName),

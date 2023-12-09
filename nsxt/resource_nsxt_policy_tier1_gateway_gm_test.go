@@ -99,7 +99,7 @@ func TestAccResourceNsxtPolicyTier1Gateway_globalManagerWithQos(t *testing.T) {
 			{
 				PreConfig: func() {
 					if err := testAccDataSourceNsxtPolicyGatewayQosProfileCreate(profileName); err != nil {
-						panic(err)
+						t.Error(err)
 					}
 				},
 				Config: testAccNsxtPolicyTier1GMCreateWithQosTemplate(true, profileName),

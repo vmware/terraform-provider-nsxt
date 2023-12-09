@@ -24,7 +24,7 @@ func TestAccResourceNsxtPolicyEvpnConfig_inline(t *testing.T) {
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			if err := testAccDataSourceNsxtPolicyVniPoolConfigDelete(); err != nil {
-				panic(err)
+				t.Error(err)
 			}
 			return testAccNsxtPolicyEvpnConfigCheckDestroy(state, displayName)
 		},
@@ -32,7 +32,7 @@ func TestAccResourceNsxtPolicyEvpnConfig_inline(t *testing.T) {
 			{
 				PreConfig: func() {
 					if err := testAccDataSourceNsxtPolicyVniPoolConfigCreate(); err != nil {
-						panic(err)
+						t.Error(err)
 					}
 				},
 				Config: testAccNsxtPolicyEvpnConfigInline(displayName, description, true),
@@ -80,7 +80,7 @@ func TestAccResourceNsxtPolicyEvpnConfig_routeServer(t *testing.T) {
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			if err := testAccDataSourceNsxtPolicyVniPoolConfigDelete(); err != nil {
-				panic(err)
+				t.Error(err)
 			}
 			return testAccNsxtPolicyEvpnConfigCheckDestroy(state, displayName)
 		},
@@ -88,7 +88,7 @@ func TestAccResourceNsxtPolicyEvpnConfig_routeServer(t *testing.T) {
 			{
 				PreConfig: func() {
 					if err := testAccDataSourceNsxtPolicyVniPoolConfigCreate(); err != nil {
-						panic(err)
+						t.Error(err)
 					}
 				},
 				Config: testAccNsxtPolicyEvpnConfigRouteServer(displayName, description),
@@ -134,7 +134,7 @@ func TestAccResourceNsxtPolicyEvpnConfig_importBasic(t *testing.T) {
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			if err := testAccDataSourceNsxtPolicyVniPoolConfigDelete(); err != nil {
-				panic(err)
+				t.Error(err)
 			}
 			return testAccNsxtPolicyEvpnConfigCheckDestroy(state, name)
 		},
@@ -142,7 +142,7 @@ func TestAccResourceNsxtPolicyEvpnConfig_importBasic(t *testing.T) {
 			{
 				PreConfig: func() {
 					if err := testAccDataSourceNsxtPolicyVniPoolConfigCreate(); err != nil {
-						panic(err)
+						t.Error(err)
 					}
 				},
 				Config: testAccNsxtPolicyEvpnConfigInline(name, "", false),

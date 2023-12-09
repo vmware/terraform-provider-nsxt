@@ -43,7 +43,7 @@ func testAccDataSourceNsxtPolicyIPBlockBasic(t *testing.T, withContext bool, pre
 			{
 				PreConfig: func() {
 					if err := testAccDataSourceNsxtPolicyIPBlockCreate(name); err != nil {
-						panic(err)
+						t.Error(err)
 					}
 				},
 				Config: testAccNsxtPolicyIPBlockReadTemplate(name, withContext),

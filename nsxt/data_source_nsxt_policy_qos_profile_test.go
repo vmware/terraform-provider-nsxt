@@ -41,7 +41,7 @@ func testAccDataSourceNsxtPolicyQosProfileBasic(t *testing.T, withContext bool, 
 			{
 				PreConfig: func() {
 					if err := testAccDataSourceNsxtPolicyQosProfileCreate(name); err != nil {
-						panic(err)
+						t.Error(err)
 					}
 				},
 				Config: testAccNsxtPolicyQosProfileReadTemplate(name, withContext),

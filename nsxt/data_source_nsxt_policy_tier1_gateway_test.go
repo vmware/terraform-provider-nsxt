@@ -41,7 +41,7 @@ func testAccDataSourceNsxtPolicyTier1GatewayBasic(t *testing.T, withContext bool
 			{
 				PreConfig: func() {
 					if err := testAccDataSourceNsxtPolicyTier1GatewayCreate(routerName); err != nil {
-						panic(err)
+						t.Error(err)
 					}
 				},
 				Config: testAccNsxtPolicyTier1ReadTemplate(routerName, withContext),

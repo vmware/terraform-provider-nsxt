@@ -42,7 +42,7 @@ func testAccDataSourceNsxtPolicySegmentBasic(t *testing.T, withContext bool, pre
 			{
 				PreConfig: func() {
 					if err := testAccDataSourceNsxtPolicySegmentCreate(name); err != nil {
-						panic(err)
+						t.Error(err)
 					}
 				},
 				Config: testAccNsxtPolicySegmentReadTemplate(name, withContext),

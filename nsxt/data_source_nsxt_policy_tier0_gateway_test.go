@@ -30,7 +30,7 @@ func TestAccDataSourceNsxtPolicyTier0Gateway_basic(t *testing.T) {
 			{
 				PreConfig: func() {
 					if err := testAccDataSourceNsxtPolicyTier0GatewayCreate(name); err != nil {
-						panic(err)
+						t.Error(err)
 					}
 				},
 				Config: testAccNsxtPolicyTier0GatewayReadTemplate(name),

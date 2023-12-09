@@ -332,7 +332,7 @@ func TestAccResourceNsxtPolicyTier1Gateway_withQos(t *testing.T) {
 			{
 				PreConfig: func() {
 					if err := testAccDataSourceNsxtPolicyGatewayQosProfileCreate(profileName); err != nil {
-						panic(err)
+						t.Error(err)
 					}
 				},
 				Config: testAccNsxtPolicyTier1TemplateWithQos(name, profileName),
@@ -421,7 +421,7 @@ func TestAccResourceNsxtPolicyTier1Gateway_withTier0(t *testing.T) {
 			{
 				PreConfig: func() {
 					if err := testAccDataSourceNsxtPolicyTier0GatewayCreate(tier0Name); err != nil {
-						panic(err)
+						t.Error(err)
 					}
 				},
 				Config: testAccNsxtPolicyTier1CreateWithTier0Template(name, tier0Name, failoverMode),

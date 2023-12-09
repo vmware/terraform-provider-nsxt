@@ -41,7 +41,7 @@ func testAccDataSourceNsxtPolicyIpv6NdraProfileBasic(t *testing.T, withContext b
 			{
 				PreConfig: func() {
 					if err := testAccDataSourceNsxtPolicyIpv6NdraProfileCreate(name); err != nil {
-						panic(err)
+						t.Error(err)
 					}
 				},
 				Config: testAccNsxtPolicyIpv6NdraProfileReadTemplate(name, withContext),

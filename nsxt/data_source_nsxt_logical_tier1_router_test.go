@@ -27,7 +27,7 @@ func TestAccDataSourceNsxtLogicalTier1Router_basic(t *testing.T) {
 			{
 				PreConfig: func() {
 					if err := testAccDataSourceNsxtTier1RouterCreate(routerName); err != nil {
-						panic(err)
+						t.Error(err)
 					}
 				},
 				Config: testAccNSXTier1RouterReadTemplate(routerName),

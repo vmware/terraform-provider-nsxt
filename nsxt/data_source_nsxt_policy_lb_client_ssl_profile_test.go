@@ -27,7 +27,7 @@ func TestAccDataSourceNsxtPolicyLBClientSslProfile_basic(t *testing.T) {
 			{
 				PreConfig: func() {
 					if err := testAccDataSourceNsxtPolicyLBClientSslProfileCreate(name); err != nil {
-						panic(err)
+						t.Error(err)
 					}
 				},
 				Config: testAccNsxtPolicyLBClientSslProfileReadTemplate(name),

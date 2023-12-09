@@ -27,7 +27,7 @@ func TestAccDataSourceNsxtFirewallSection_basic(t *testing.T) {
 			{
 				PreConfig: func() {
 					if err := testAccDataSourceNsxtFirewallSectionCreate(name); err != nil {
-						panic(err)
+						t.Error(err)
 					}
 				},
 				Config: testAccNSXFirewallSectionReadTemplate(name),

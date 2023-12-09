@@ -27,7 +27,7 @@ func TestAccDataSourceNsxtNsGroup_basic(t *testing.T) {
 			{
 				PreConfig: func() {
 					if err := testAccDataSourceNsxtNsGroupCreate(groupName); err != nil {
-						panic(err)
+						t.Error(err)
 					}
 				},
 				Config: testAccNSXNsGroupReadTemplate(groupName),

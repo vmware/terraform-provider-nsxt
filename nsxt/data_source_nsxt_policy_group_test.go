@@ -42,7 +42,7 @@ func testAccDataSourceNsxtPolicyGroupBasic(t *testing.T, withContext bool, preCh
 			{
 				PreConfig: func() {
 					if err := testAccDataSourceNsxtPolicyGroupCreate(domain, name); err != nil {
-						panic(err)
+						t.Error(err)
 					}
 				},
 				Config: testAccNsxtPolicyGroupReadTemplate(domain, name, withContext),
@@ -76,7 +76,7 @@ func TestAccDataSourceNsxtPolicyGroup_withSite(t *testing.T) {
 			{
 				PreConfig: func() {
 					if err := testAccDataSourceNsxtPolicyGroupCreate(domain, name); err != nil {
-						panic(err)
+						t.Error(err)
 					}
 				},
 				Config: testAccNsxtPolicyGroupReadTemplate(domain, name, false),

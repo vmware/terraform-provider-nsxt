@@ -41,7 +41,7 @@ func testAccDataSourceNsxtPolicyRealizationInfoTier1DataSource(t *testing.T, wit
 			{
 				PreConfig: func() {
 					if err := testAccDataSourceNsxtPolicyTier1GatewayCreate(resourceName); err != nil {
-						panic(err)
+						t.Error(err)
 					}
 				},
 				Config: testAccNsxtPolicyRealizationInfoReadDataSourceTemplate(resourceDataType, resourceName, entityType, withContext),
@@ -86,7 +86,7 @@ func testAccDataSourceNsxtPolicyRealizationInfoTier1DataSourceEntity(t *testing.
 			{
 				PreConfig: func() {
 					if err := testAccDataSourceNsxtPolicyTier1GatewayCreate(resourceName); err != nil {
-						panic(err)
+						t.Error(err)
 					}
 				},
 				Config: testAccNsxtPolicyRealizationInfoReadDataSourceTemplate(resourceDataType, resourceName, entityType, withContext),
