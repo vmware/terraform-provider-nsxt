@@ -261,7 +261,15 @@ resource "nsxt_policy_gateway_dns_forwarder" "test" {
     tag   = "tag1"
   }
 }
-`, context, attrMap["display_name"], attrMap["description"], whyDoesGoNeedToBeSoComplicated[isT0], attrMap["listener_ip"], attrMap["enabled"], attrMap["log_level"], attrMap["cache_size"])
+
+data "nsxt_policy_gateway_dns_forwarder" "test" {
+%s
+  display_name = "%s"
+
+  gateway_path = nsxt_policy_tier%d_gateway.test.path
+  depends_on = [nsxt_policy_gateway_dns_forwarder.test]
+}
+`, context, attrMap["display_name"], attrMap["description"], whyDoesGoNeedToBeSoComplicated[isT0], attrMap["listener_ip"], attrMap["enabled"], attrMap["log_level"], attrMap["cache_size"], context, attrMap["display_name"], whyDoesGoNeedToBeSoComplicated[isT0])
 }
 
 func testAccNsxtPolicyGatewayDNSForwarderMinimalistic(isT0, withContext bool) string {
