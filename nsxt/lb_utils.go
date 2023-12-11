@@ -11,6 +11,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/go-vmware-nsxt/loadbalancer"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 )
 
 // Helpers for common LB monitor schema settings
@@ -235,5 +237,36 @@ func resourceNsxtLbMonitorDelete(d *schema.ResourceData, m interface{}) error {
 		log.Printf("[DEBUG] LbMonitor %s not found", id)
 		d.SetId("")
 	}
+	return nil
+}
+
+func resourceNsxtPolicyLBAppProfileExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
+	client := infra.NewLbAppProfilesClient(connector)
+	_, err := client.Get(id)
+	if err == nil {
+		return true, nil
+	}
+
+	if isNotFoundError(err) {
+		return false, nil
+	}
+	msg := fmt.Sprintf("Error retrieving resource LBAppProfile")
+	return false, logAPIError(msg, err)
+}
+
+func resourceNsxtPolicyLBAppProfileDelete(d *schema.ResourceData, m interface{}) error {
+	id := d.Id()
+	if id == "" {
+		return fmt.Errorf("Error obtaining LBAppProfile ID")
+	}
+
+	connector := getPolicyConnector(m)
+	forceParam := true
+	client := infra.NewLbAppProfilesClient(connector)
+	err := client.Delete(id, &forceParam)
+	if err != nil {
+		return handleDeleteError("LBAppProfile", id, err)
+	}
+
 	return nil
 }
