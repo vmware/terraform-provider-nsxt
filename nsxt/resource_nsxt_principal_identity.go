@@ -122,7 +122,7 @@ func resourceNsxtPrincipleIdentityCreate(d *schema.ResourceData, m interface{}) 
 	name := d.Get("name").(string)
 	nodeID := d.Get("node_id").(string)
 	certificatePem := d.Get("certificate_pem").(string)
-	rolesForPaths := convertToMPRolesForPath(getRolesForPathList(d))
+	rolesForPaths := convertToMPRolesForPath(getRolesForPathList(d, rolesForPath{}))
 
 	piObj := mpModel.PrincipalIdentityWithCertificate{
 		Tags:           tags,

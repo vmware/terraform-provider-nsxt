@@ -171,12 +171,12 @@ resource "nsxt_policy_user_management_role_binding" "test" {
 
     roles_for_path {
         path  = "/"
-        roles = ["auditor"]
+        roles = ["auditor", "security_engineer"]
     }
 
     roles_for_path {
         path  = "/orgs/default"
-        roles = ["org_admin"]
+        roles = ["org_admin", "network_engineer"]
     }
 }`, attrMap["display_name"], attrMap["description"], user, userType, identType)
 }
