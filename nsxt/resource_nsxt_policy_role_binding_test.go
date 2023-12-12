@@ -40,7 +40,7 @@ func TestAccResourceNsxtPolicyRoleBinding_basic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyRoleBindingCreate(getTestLdapUser(), userType, identType),
+				Config: testAccNsxtPolicyRoleBindingCreate(getTestLdapUser(), userType, identType, "false", ""),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyRoleBindingExists(accTestPolicyRoleBindingCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyRoleBindingCreateAttributes["display_name"]),
@@ -51,7 +51,7 @@ func TestAccResourceNsxtPolicyRoleBinding_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.0.path", "/"),
 					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.0.roles.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.0.roles.0", "auditor"),
+					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.0.roles.0", "network_engineer"),
 					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.1.path", "/orgs/default"),
 					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.1.roles.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.1.roles.0", "org_admin"),
@@ -60,7 +60,7 @@ func TestAccResourceNsxtPolicyRoleBinding_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyRoleBindingUpdate(getTestLdapUser(), userType, identType),
+				Config: testAccNsxtPolicyRoleBindingUpdate(getTestLdapUser(), userType, identType, "false", ""),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyRoleBindingExists(accTestPolicyRoleBindingUpdateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyRoleBindingUpdateAttributes["display_name"]),
@@ -71,7 +71,61 @@ func TestAccResourceNsxtPolicyRoleBinding_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.0.path", "/"),
 					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.0.roles.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.0.roles.0", "auditor"),
+					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.0.roles.0", "security_engineer"),
+
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicyRoleBinding_local_user(t *testing.T) {
+	testResourceName := "nsxt_policy_user_management_role_binding.test"
+	userType := nsxModel.RoleBinding_TYPE_LOCAL_USER
+	testUsername := "terraform-" + getAccTestRandomString(10)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyLocalManager(t)
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyRoleBindingCheckDestroy(state, accTestPolicyRoleUpdateAttributes["display_name"])
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyRoleBindingLocalOverwrite(testUsername),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyRoleBindingExists(accTestPolicyRoleBindingCreateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyRoleBindingCreateAttributes["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyRoleBindingCreateAttributes["description"]),
+					resource.TestCheckResourceAttr(testResourceName, "name", testUsername),
+					resource.TestCheckResourceAttr(testResourceName, "type", userType),
+					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.0.path", "/"),
+					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.0.roles.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.0.roles.0", "network_engineer"),
+					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.1.path", "/orgs/default"),
+					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.1.roles.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.1.roles.0", "org_admin"),
+
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyRoleBindingLocalUpdate(testUsername),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyRoleBindingExists(accTestPolicyRoleBindingUpdateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyRoleBindingUpdateAttributes["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyRoleBindingUpdateAttributes["description"]),
+					resource.TestCheckResourceAttr(testResourceName, "name", testUsername),
+					resource.TestCheckResourceAttr(testResourceName, "type", userType),
+					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.0.path", "/"),
+					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.0.roles.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.0.roles.0", "security_engineer"),
 
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 				),
@@ -97,7 +151,7 @@ func TestAccResourceNsxtPolicyRoleBinding_import_basic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyRoleBindingCreate(getTestLdapUser(), userType, identType),
+				Config: testAccNsxtPolicyRoleBindingCreate(getTestLdapUser(), userType, identType, "false", ""),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -159,41 +213,80 @@ func testAccNsxtPolicyRoleBindingCheckDestroy(state *terraform.State, displayNam
 	return nil
 }
 
-func testAccNsxtPolicyRoleBindingCreate(user, userType, identType string) string {
+func testAccNsxtPolicyRoleBindingLocalOverwrite(user string) string {
+	return fmt.Sprintf("%s\n%s", testAccNodeUserCreate(user),
+		testAccNsxtPolicyRoleBindingCreate(
+			user,
+			nsxModel.RoleBinding_TYPE_LOCAL_USER,
+			"",
+			"true",
+			"nsxt_node_user.test"))
+}
+
+func testAccNsxtPolicyRoleBindingLocalUpdate(user string) string {
+	return fmt.Sprintf("%s\n%s", testAccNodeUserCreate(user),
+		testAccNsxtPolicyRoleBindingUpdate(
+			user,
+			nsxModel.RoleBinding_TYPE_LOCAL_USER,
+			"",
+			"true",
+			"nsxt_node_user.test"))
+}
+
+func testAccNsxtPolicyRoleBindingCreate(user, userType, identType, overwrite, dependsOn string) string {
 	attrMap := accTestPolicyRoleBindingCreateAttributes
+	var identLine, dependsOnLine string
+	if len(identType) > 0 {
+		identLine = fmt.Sprintf("identity_source_type = \"%s\"", identType)
+	}
+	if len(dependsOn) > 0 {
+		dependsOnLine = fmt.Sprintf("depends_on = [%s]", dependsOn)
+	}
+
 	return fmt.Sprintf(`
 resource "nsxt_policy_user_management_role_binding" "test" {
     display_name         = "%s"
     description          = "%s"
     name                 = "%s"
     type                 = "%s"
-    identity_source_type = "%s"
+    overwrite_local_user = %s
+    %s
+    %s
 
     roles_for_path {
         path  = "/"
-        roles = ["auditor", "security_engineer"]
+        roles = ["network_engineer"]
     }
 
     roles_for_path {
         path  = "/orgs/default"
-        roles = ["org_admin", "network_engineer"]
+        roles = ["org_admin"]
     }
-}`, attrMap["display_name"], attrMap["description"], user, userType, identType)
+}`, attrMap["display_name"], attrMap["description"], user, userType, overwrite, identLine, dependsOnLine)
 }
 
-func testAccNsxtPolicyRoleBindingUpdate(user, userType, identType string) string {
+func testAccNsxtPolicyRoleBindingUpdate(user, userType, identType, overwrite, dependsOn string) string {
 	attrMap := accTestPolicyRoleBindingUpdateAttributes
+	var identLine, dependsOnLine string
+	if len(identType) > 0 {
+		identLine = fmt.Sprintf("identity_source_type = \"%s\"", identType)
+	}
+	if len(dependsOn) > 0 {
+		dependsOnLine = fmt.Sprintf("depends_on = [%s]", dependsOn)
+	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_user_management_role_binding" "test" {
     display_name         = "%s"
     description          = "%s"
     name                 = "%s"
     type                 = "%s"
-    identity_source_type = "%s"
+    overwrite_local_user = %s
+    %s
+    %s
 
     roles_for_path {
         path  = "/"
-        roles = ["auditor"]
+        roles = ["security_engineer"]
     }
-}`, attrMap["display_name"], attrMap["description"], user, userType, identType)
+}`, attrMap["display_name"], attrMap["description"], user, userType, overwrite, identLine, dependsOnLine)
 }

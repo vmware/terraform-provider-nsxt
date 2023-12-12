@@ -6,6 +6,7 @@ package nsxt
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -85,7 +86,7 @@ func resourceNsxtPolicyUserManagementRoleBinding() *schema.Resource {
 // getRolesForPathSchema return schema for RolesForPath, which is shared between role bindings and PI
 func getRolesForPathSchema(forceNew bool) *schema.Schema {
 	return &schema.Schema{
-		Type:        schema.TypeList,
+		Type:        schema.TypeSet,
 		Description: "List of roles that are associated with the user, limiting them to a path",
 		Required:    true,
 		ForceNew:    forceNew,
@@ -123,7 +124,7 @@ func (r rolesPerPath) getAnyRole() *string {
 
 func getRolesForPathFromSchema(d *schema.ResourceData) rolesForPath {
 	rolesForPathMap := make(rolesForPath)
-	rolesForPathInput := d.Get("roles_for_path").([]interface{})
+	rolesForPathInput := d.Get("roles_for_path").(*schema.Set).List()
 	for _, rolesPerPathInput := range rolesForPathInput {
 		data := rolesPerPathInput.(map[string]interface{})
 		path := data["path"].(string)
@@ -142,7 +143,7 @@ func setRolesForPathInSchema(d *schema.ResourceData, nsxRolesForPathList []nsxMo
 	var rolesForPathList []map[string]interface{}
 	for _, nsxRolesForPath := range nsxRolesForPathList {
 		elem := make(map[string]interface{})
-		elem["path"] = nsxRolesForPath.Path
+		elem["path"] = *nsxRolesForPath.Path
 		roles := make([]string, 0, len(nsxRolesForPath.Roles))
 		for _, nsxRole := range nsxRolesForPath.Roles {
 			roles = append(roles, *nsxRole.Role)
@@ -196,7 +197,7 @@ func getRolesForPathList(d *schema.ResourceData, rolesToRemove rolesForPath) []n
 	// Handle deletion of entire paths on change
 	if d.HasChange("roles_for_path") {
 		o, _ := d.GetChange("roles_for_path")
-		oldRoles := o.([]interface{})
+		oldRoles := o.(*schema.Set).List()
 		for _, oldRole := range oldRoles {
 			data := oldRole.(map[string]interface{})
 			path := data["path"].(string)
@@ -307,8 +308,9 @@ func revertRoleBinding(d *schema.ResourceData, m interface{}) error {
 		if path == defaultRolePath {
 			continue
 		}
+		rPath := strings.Clone(path)
 		nsxRolesForPaths = append(nsxRolesForPaths, nsxModel.RolesForPath{
-			Path:       &path,
+			Path:       &rPath,
 			DeletePath: &boolTrue,
 			Roles:      []nsxModel.Role{{Role: roleMap.getAnyRole()}},
 		})

@@ -47,7 +47,7 @@ The following arguments are supported:
 * `roles_for_path` - (Required) A list of The roles that are associated with the user, limiting them to a path. In case the path is '/', the roles apply everywhere.
     * `path` - (Required) Path of the entity in parent hierarchy.
     * `roles` - (Required) A list of identifiers for the roles to associate with the given user limited to a path.
-* `overwrite_local_user` - (Optional) Flag to allow overwriting existing role bindings for local user with terraform definition. On deletion, the user's role will be reverted to auditor only. Any exising configuration will be lost.
+* `overwrite_local_user` - (Optional) Flag to allow overwriting existing role bindings for local user with terraform definition. On deletion, the user's role will be reverted to auditor only. Any existing configuration will be lost.
 
 ## Attributes Reference
 
