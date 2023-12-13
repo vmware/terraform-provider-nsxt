@@ -14,7 +14,7 @@ This resource is supported with NSX 3.0.0 onwards.
 ## Example Usage
 
 ```hcl
-data "nsxt_failure_domain" "failure_domain" {
+resource "nsxt_failure_domain" "failure_domain" {
   display_name            = "failuredomain1"
   description             = "failuredomain"
   preferred_edge_services = "active"
@@ -31,6 +31,7 @@ The following arguments are supported:
 
 * `display_name` - (Required) Display name of the resource.
 * `description` - (Optional) Description of the resource.
+* `tag` - (Optional) A list of scope + tag pairs to associate with this failure domain.
 * `preferred_edge_services` - Set preference for failure domain. Set preference for edge transport node failure domain which will be considered while doing auto placement of logical router, DHCP and MDProxy on edge node. `active`: For preemptive failover mode, active edge cluster member allocation prefers this failure domain. `standby`: For preemptive failover mode, standby edge cluster member allocation prefers this failure domain. Default will be `no_preference`. It means no explicit preference.
 
 ## Attributes Reference

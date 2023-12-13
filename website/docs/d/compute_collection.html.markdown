@@ -5,7 +5,7 @@ page_title: "NSXT: compute_collection"
 description: A Compute Collection data source.
 ---
 
-# nsxt_mac_pool
+# nsxt_compute_collection
 
 This data source provides information about a Compute Collection configured on NSX.
 
