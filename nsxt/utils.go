@@ -692,10 +692,11 @@ func getContextSchema() *schema.Schema {
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"project_id": {
-					Type:        schema.TypeString,
-					Description: "Id of the project which the resource belongs to.",
-					Required:    true,
-					ForceNew:    true,
+					Type:         schema.TypeString,
+					Description:  "Id of the project which the resource belongs to.",
+					Required:     true,
+					ForceNew:     true,
+					ValidateFunc: validation.StringIsNotEmpty,
 				},
 			},
 		},
