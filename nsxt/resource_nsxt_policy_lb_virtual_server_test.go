@@ -707,6 +707,7 @@ func testAccNsxtPolicyLBVirtualServerTemplate(createFlow bool) string {
 	return fmt.Sprintf(`
 data "nsxt_policy_lb_app_profile" "default_tcp"{
   type = "TCP"
+  display_name = "default-tcp-lb-app-profile"
 }
 
 data "nsxt_policy_lb_persistence_profile" "default" {
@@ -752,6 +753,7 @@ func testAccNsxtPolicyLBVirtualServerMinimalistic() string {
 	return fmt.Sprintf(`
 data "nsxt_policy_lb_app_profile" "default_http"{
     type = "HTTP"
+	display_name = "default-http-lb-app-profile"
 }
 
 resource "nsxt_policy_lb_pool" "pool" {
@@ -791,6 +793,7 @@ data "nsxt_policy_certificate" "test" {
 }
 data "nsxt_policy_lb_app_profile" "default_tcp"{
     type = "TCP"
+	display_name = "default-tcp-lb-app-profile"
 }
 
 data "nsxt_policy_lb_client_ssl_profile" "default" {
@@ -831,6 +834,7 @@ func testAccNsxtPolicyLBVirtualServerWithAccessList(createFlow bool) string {
 	return fmt.Sprintf(`
 data "nsxt_policy_lb_app_profile" "default_tcp"{
   type = "TCP"
+  display_name = "default-tcp-lb-app-profile"
 }
 
 data "nsxt_policy_lb_persistence_profile" "default" {
@@ -877,6 +881,7 @@ func testAccNsxtPolicyLBVirtualServerWithRules(createFlow bool) string {
 	return fmt.Sprintf(`
 data "nsxt_policy_lb_app_profile" "default_http"{
   type = "HTTP"
+  display_name = "default-http-lb-app-profile"
 }
 
 data "nsxt_policy_lb_persistence_profile" "default" {
