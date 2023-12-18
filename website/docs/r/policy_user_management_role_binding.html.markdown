@@ -41,12 +41,13 @@ The following arguments are supported:
 * `type` - (Required) Indicates the type of the user. Valid options:
     * `remote_user` - This is a user which is external to NSX. 
     * `remote_group` - This is a group of users which is external to NSX.
-    * `local_user` - This is a user local to NSX. These are linux users. Note: Role bindings for local users are owned by NSX. Creation and deletion is not allowed for local users' binding. For updates, import existing bindings first.
+    * `local_user` - This is a user local to NSX. These are linux users. Note: Role bindings for local users are owned by NSX. Creation and deletion is not allowed for local users' binding. For updates, import existing bindings first. Alternatively, set `overwrite_local_user` to overwrite current role bindings with the one defined in terraform.
 * `identity_source_type` - (Optional) Identity source type. Applicable only to `remote_user` and `remote_group` user types. Valid options are: `VIDM`, `LDAP`, `OIDC`, `CSP`. Defaults to `VIDM` when applicable.
 * `identity_source_id` - (Optional) The ID of the external identity source that holds the referenced external entity. Currently, only external `LDAP` and `OIDC` servers are allowed.
 * `roles_for_path` - (Required) A list of The roles that are associated with the user, limiting them to a path. In case the path is '/', the roles apply everywhere.
     * `path` - (Required) Path of the entity in parent hierarchy.
     * `roles` - (Required) A list of identifiers for the roles to associate with the given user limited to a path.
+* `overwrite_local_user` - (Optional) Flag to allow overwriting existing role bindings for local user with terraform definition. On deletion, the user's role will be reverted to auditor only. Any existing configuration will be lost.
 
 ## Attributes Reference
 
@@ -56,6 +57,25 @@ In addition to arguments listed above, the following attributes are exported:
 * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
 * `user_id` - Local user's numeric id. Only applicable to `local_user`.
 
+# Build-in NSX roles
+
+`roles_for_path.roles` accepts user created roles as well as roles native to NSX. For reference, the following is a list of native roles as of NSX 4.1.2
+- `network_engineer`: Network Admin
+- `support_bundle_collector`: Support Bundle Collector
+- `security_op`: Security Operator
+- `lb_auditor`: LB Operator
+- `netx_partner_admin`: NETX Partner Admin
+- `project_admin`: Project Admin
+- `auditor`: Auditor
+- `network_op`: Network Operator
+- `enterprise_admin`: Enterprise Admin
+- `lb_admin`: LB Admin
+- `gi_partner_admin`: GI Partner Admin
+- `vpn_admin`: VPN Admin
+- `vpc_admin`: VPC Admin
+- `security_engineer`: Security Admin
+
+The permission matrix for above roles is available on [NSX documentation](https://docs.vmware.com/en/VMware-NSX/4.1/administration/GUID-26C44DE8-1854-4B06-B6DA-A2FD426CDF44.html)
 
 ## Importing
 

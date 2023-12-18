@@ -44,6 +44,25 @@ In addition to arguments listed above, the following attributes are exported:
 
 * `certificate_id` - NSX certificate ID of the imported `certificate_pem`.
 
+# Build-in NSX roles
+
+`roles_for_path.roles` accepts user created roles as well as roles native to NSX. For reference, the following is a list of native roles as of NSX 4.1.2
+- `network_engineer`: Network Admin
+- `support_bundle_collector`: Support Bundle Collector
+- `security_op`: Security Operator
+- `lb_auditor`: LB Operator
+- `netx_partner_admin`: NETX Partner Admin
+- `project_admin`: Project Admin
+- `auditor`: Auditor
+- `network_op`: Network Operator
+- `enterprise_admin`: Enterprise Admin
+- `lb_admin`: LB Admin
+- `gi_partner_admin`: GI Partner Admin
+- `vpn_admin`: VPN Admin
+- `vpc_admin`: VPC Admin
+- `security_engineer`: Security Admin
+
+The permission matrix for above roles is available on [NSX documentation](https://docs.vmware.com/en/VMware-NSX/4.1/administration/GUID-26C44DE8-1854-4B06-B6DA-A2FD426CDF44.html)
 
 ## Importing
 
