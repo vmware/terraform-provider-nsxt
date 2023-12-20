@@ -9,6 +9,8 @@ description: A resource to configure principle identities.
 
 This resource provides a method for the management of Principle Identities.
 
+~> **NOTE:** This resource requires NSX version 4.1.0 or higher.
+
 ## Example Usage
 
 ```hcl
