@@ -9,6 +9,8 @@ description: A resource to configure user management Role Bindings.
 
 This resource provides a method for the management of Role Bindings of users.
 
+~> **NOTE:** This resource requires NSX version 4.0.0 or higher.
+
 ## Example Usage
 
 ```hcl

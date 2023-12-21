@@ -9,6 +9,7 @@ description: A resource to configure Node Users.
 
 This resource provides a method for the management of NSX node users. These node user accounts can log in to the NSX web-based user interface or access API.
 
+~> **NOTE:** This resource requires NSX version 4.1.0 or higher.
 
 ## Example Usage
 

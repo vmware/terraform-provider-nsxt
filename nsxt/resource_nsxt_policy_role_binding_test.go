@@ -89,6 +89,7 @@ func TestAccResourceNsxtPolicyRoleBinding_local_user(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
+			testAccNSXVersion(t, "4.0.0")
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -144,6 +145,7 @@ func TestAccResourceNsxtPolicyRoleBinding_import_basic(t *testing.T) {
 			testAccPreCheck(t)
 			testAccEnvDefined(t, "NSXT_TEST_LDAP_USER")
 			testAccOnlyLocalManager(t)
+			testAccNSXVersion(t, "4.0.0")
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
