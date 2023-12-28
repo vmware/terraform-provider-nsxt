@@ -247,6 +247,10 @@ func nsxtSecurityPolicyRuleImporter(d *schema.ResourceData, m interface{}) ([]*s
 	if err != nil {
 		return rd, err
 	}
-	d.Set("policy_path", importID[:strings.Index(importID, "rule")-1])
+	ruleIdx := strings.Index(importID, "rule")
+	if ruleIdx <= 0 {
+		return nil, fmt.Errorf("invalid path of Security Policy Rule to import")
+	}
+	d.Set("policy_path", importID[:ruleIdx-1])
 	return []*schema.ResourceData{d}, nil
 }

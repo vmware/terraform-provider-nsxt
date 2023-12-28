@@ -40,8 +40,6 @@ resource "nsxt_policy_security_policy_rule" "rule1" {
   action             = "DROP"
   services           = [nsxt_policy_service.icmp.path]
   logged             = true
-
-  depends_on = [nsxt_policy_parent_security_policy.policy1]
 }
 ```
 
@@ -75,8 +73,6 @@ resource "nsxt_policy_security_policy_rule" "rule1" {
   action             = "DROP"
   services           = [nsxt_policy_service.icmp.path]
   logged             = true
-
-  depends_on = [nsxt_policy_parent_security_policy.policy1]
 }
 ```
 
@@ -113,8 +109,6 @@ resource "nsxt_policy_security_policy_rule" "rule1" {
   action             = "DROP"
   services           = [nsxt_policy_service.icmp.path]
   logged             = true
-
-  depends_on = [nsxt_policy_parent_security_policy.policy1]
 }
 ```
 
