@@ -439,6 +439,8 @@ func Provider() *schema.Provider {
 			"nsxt_policy_host_transport_node_collection":   resourceNsxtPolicyHostTransportNodeCollection(),
 			"nsxt_policy_lb_client_ssl_profile":            resourceNsxtPolicyLBClientSslProfile(),
 			"nsxt_policy_lb_http_application_profile":      resourceNsxtPolicyLBHttpApplicationProfile(),
+			"nsxt_policy_security_policy_rule":             resourceNsxtPolicySecurityPolicyRule(),
+			"nsxt_policy_parent_security_policy":           resourceNsxtPolicyParentSecurityPolicy(),
 		},
 
 		ConfigureFunc: providerConfigure,

@@ -877,3 +877,24 @@
   supported_method:
     - New
     - List
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/domains/security_policies
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/domains/security_policies
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
+      type: Global
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/domains/security_policies
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Multitenancy
+  model_name: Rule
+  obj_name: Rule
+  client_name: RulesClient
+  list_result_name: RuleListResult
+  supported_method:
+    - New
+    - Get
+    - Delete
+    - Patch
+    - Update
+    - List

@@ -175,17 +175,24 @@ func getPolicyRuleActionSchema(isIds bool) *schema.Schema {
 }
 
 func getSecurityPolicyAndGatewayRulesSchema(scopeRequired bool, isIds bool, nsxIDReadOnly bool) *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeList,
+		Description: "List of rules in the section",
+		Optional:    true,
+		MaxItems:    1000,
+		Elem: &schema.Resource{
+			Schema: getSecurityPolicyAndGatewayRuleSchema(scopeRequired, isIds, nsxIDReadOnly, false),
+		},
+	}
+}
+
+func getSecurityPolicyAndGatewayRuleSchema(scopeRequired bool, isIds bool, nsxIDReadOnly bool, separated bool) map[string]*schema.Schema {
 	ruleSchema := map[string]*schema.Schema{
 		"nsx_id":       getFlexNsxIDSchema(nsxIDReadOnly),
 		"display_name": getDisplayNameSchema(),
 		"description":  getDescriptionSchema(),
+		"path":         getPathSchema(),
 		"revision":     getRevisionSchema(),
-		"sequence_number": {
-			Type:        schema.TypeInt,
-			Description: "Sequence number of the this rule",
-			Optional:    true,
-			Computed:    true,
-		},
 		"destination_groups": {
 			Type:        schema.TypeSet,
 			Description: "List of destination groups",
@@ -291,19 +298,29 @@ func getSecurityPolicyAndGatewayRulesSchema(scopeRequired bool, isIds bool, nsxI
 	if isIds {
 		ruleSchema["ids_profiles"] = getIdsProfilesSchema()
 	}
-	return &schema.Schema{
-		Type:        schema.TypeList,
-		Description: "List of rules in the section",
-		Optional:    true,
-		MaxItems:    1000,
-		Elem: &schema.Resource{
-			Schema: ruleSchema,
-		},
+	if separated {
+		ruleSchema["policy_path"] = getPolicyPathSchema(true, true, "Security Policy path")
+		ruleSchema["sequence_number"] = &schema.Schema{
+			Type:        schema.TypeInt,
+			Description: "Sequence number of the this rule",
+			Required:    true,
+		}
+		// Using computed context here, because context is required for consistency and
+		// if it's not provided it can be derived from policy_path.
+		ruleSchema["context"] = getComputedContextSchema()
+	} else {
+		ruleSchema["sequence_number"] = &schema.Schema{
+			Type:        schema.TypeInt,
+			Description: "Sequence number of the this rule",
+			Optional:    true,
+			Computed:    true,
+		}
 	}
+	return ruleSchema
 }
 
 func getPolicyGatewayPolicySchema() map[string]*schema.Schema {
-	secPolicy := getPolicySecurityPolicySchema(false, true)
+	secPolicy := getPolicySecurityPolicySchema(false, true, true)
 	// GW Policies don't support scope
 	delete(secPolicy, "scope")
 	secPolicy["category"].ValidateFunc = validation.StringInSlice(gatewayPolicyCategoryWritableValues, false)
@@ -312,7 +329,7 @@ func getPolicyGatewayPolicySchema() map[string]*schema.Schema {
 	return secPolicy
 }
 
-func getPolicySecurityPolicySchema(isIds bool, withContext bool) map[string]*schema.Schema {
+func getPolicySecurityPolicySchema(isIds, withContext, withRule bool) map[string]*schema.Schema {
 	result := map[string]*schema.Schema{
 		"nsx_id":       getNsxIDSchema(),
 		"path":         getPathSchema(),
@@ -380,6 +397,10 @@ func getPolicySecurityPolicySchema(isIds bool, withContext bool) map[string]*sch
 	if !withContext {
 		delete(result, "context")
 	}
+
+	if !withRule {
+		delete(result, "rule")
+	}
 	return result
 }
 
@@ -389,6 +410,7 @@ func setPolicyRulesInSchema(d *schema.ResourceData, rules []model.Rule) error {
 		elem := make(map[string]interface{})
 		elem["display_name"] = rule.DisplayName
 		elem["description"] = rule.Description
+		elem["path"] = rule.Path
 		elem["notes"] = rule.Notes
 		elem["logged"] = rule.Logged
 		elem["log_label"] = rule.Tag
