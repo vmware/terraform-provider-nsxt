@@ -629,12 +629,11 @@ func resourceNsxtPolicyTier0GatewayBGPConfigSchemaToStruct(cfg interface{}, isVr
 		Revision:          &revision,
 	}
 
+	if len(localAsNum) > 0 {
+		routeStruct.LocalAsNum = &localAsNum
+	}
+
 	if isVrf {
-		// backend complains if the below config appears on VRF gateway.
-		// We print a warning if property differs from default
-		if localAsNum != "" {
-			log.Printf("[WARNING] BGP setting local_as_num is not applicable for VRF gateway %s, and will be ignored", gwID)
-		}
 		if (restartMode != model.BgpGracefulRestartConfig_MODE_HELPER_ONLY) || (restartTimer != int64(policyBGPGracefulRestartStaleRouteTimerDefault)) || (staleTimer != int64(policyBGPGracefulRestartStaleRouteTimerDefault)) {
 			log.Printf("[WARNING] BGP graceful restart settings are not applicable for VRF gateway %s, and will be ignored", gwID)
 		}
