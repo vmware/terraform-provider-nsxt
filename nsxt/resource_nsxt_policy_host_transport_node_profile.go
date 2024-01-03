@@ -29,8 +29,7 @@ func resourceNsxtPolicyHostTransportNodeProfile() *schema.Resource {
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
 			// host_switch_spec
-			"standard_host_switch":      getStandardHostSwitchSchema(),
-			"preconfigured_host_switch": getPreconfiguredHostSwitchSchema(),
+			"standard_host_switch": getStandardHostSwitchSchema(nodeTypeHost),
 			"ignore_overridden_hosts": {
 				Type:        schema.TypeBool,
 				Default:     false,
@@ -70,7 +69,7 @@ func resourceNsxtPolicyHostTransportNodeProfileCreate(d *schema.ResourceData, m 
 	tags := getPolicyTagsFromSchema(d)
 	ignoreOverridenHosts := d.Get("ignore_overridden_hosts").(bool)
 
-	hostSwitchSpec, err := getHostSwitchSpecFromSchema(d)
+	hostSwitchSpec, err := getHostSwitchSpecFromSchema(d, nodeTypeHost)
 	if err != nil {
 		return err
 	}
@@ -114,7 +113,7 @@ func resourceNsxtPolicyHostTransportNodeProfileRead(d *schema.ResourceData, m in
 	d.Set("path", obj.Path)
 	d.Set("revision", obj.Revision)
 
-	err = setHostSwitchSpecInSchema(d, obj.HostSwitchSpec)
+	err = setHostSwitchSpecInSchema(d, obj.HostSwitchSpec, nodeTypeHost)
 	if err != nil {
 		return err
 	}
@@ -138,7 +137,7 @@ func resourceNsxtPolicyHostTransportNodeProfileUpdate(d *schema.ResourceData, m 
 	tags := getPolicyTagsFromSchema(d)
 	ignoreOverridenHosts := d.Get("ignore_overridden_hosts").(bool)
 
-	hostSwitchSpec, err := getHostSwitchSpecFromSchema(d)
+	hostSwitchSpec, err := getHostSwitchSpecFromSchema(d, nodeTypeHost)
 	if err != nil {
 		return err
 	}
