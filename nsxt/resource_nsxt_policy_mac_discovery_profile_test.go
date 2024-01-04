@@ -8,34 +8,18 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-var accTestPolicyMacDiscoveryProfileCreateAttributes = map[string]string{
-	"display_name":                     getAccTestResourceName(),
-	"description":                      "terraform created",
-	"mac_change_enabled":               "true",
-	"mac_learning_enabled":             "true",
-	"mac_limit":                        "2",
-	"mac_limit_policy":                 "ALLOW",
-	"remote_overlay_mac_limit":         "2048",
-	"unknown_unicast_flooding_enabled": "true",
-}
-
-var accTestPolicyMacDiscoveryProfileUpdateAttributes = map[string]string{
-	"display_name":                     getAccTestResourceName(),
-	"description":                      "terraform updated",
-	"mac_change_enabled":               "false",
-	"mac_learning_enabled":             "false",
-	"mac_limit":                        "5",
-	"mac_limit_policy":                 "DROP",
-	"remote_overlay_mac_limit":         "4096",
-	"unknown_unicast_flooding_enabled": "false",
-}
+// TODO - include display name in metadata
+var createDisplayName = getAccTestResourceName()
+var updateDisplayName = getAccTestResourceName()
 
 func TestAccResourceNsxtPolicyMacDiscoveryProfile_basic(t *testing.T) {
 	testAccResourceNsxtPolicyMacDiscoveryProfileBasic(t, false, func() {
 		testAccPreCheck(t)
+		testAccNSXVersion(t, "3.0.0")
 	})
 }
 
@@ -46,6 +30,55 @@ func TestAccResourceNsxtPolicyMacDiscoveryProfile_multitenancy(t *testing.T) {
 	})
 }
 
+func getMacDiscoveryProfileTestCheckFunc(testResourceName string, create bool) []resource.TestCheckFunc {
+	displayName := createDisplayName
+	if !create {
+		displayName = updateDisplayName
+	}
+	result := []resource.TestCheckFunc{testAccNsxtPolicyMacDiscoveryProfileExists(displayName, testResourceName),
+		resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+		resource.TestCheckResourceAttrSet(testResourceName, "path"),
+		resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+		resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+	}
+	for key, item := range macDiscoveryProfileMetadata {
+		if item.introducedInVersion != "" && nsxVersionLower(item.introducedInVersion) {
+			continue
+		}
+
+		value := item.testData.createValue
+		if !create {
+			value = item.testData.updateValue
+		}
+		result = append(result, resource.TestCheckResourceAttr(testResourceName, key, value.(string)))
+	}
+
+	return result
+}
+
+func getMacDiscoveryProfileTestConfigAttributes(create bool) string {
+	result := ""
+	schemaDef := resourceNsxtPolicyMacDiscoveryProfile().Schema
+	for key, item := range macDiscoveryProfileMetadata {
+		if item.introducedInVersion != "" && nsxVersionLower(item.introducedInVersion) {
+			continue
+		}
+
+		value := item.testData.createValue
+		if !create {
+			value = item.testData.updateValue
+		}
+
+		if schemaDef[key].Type == schema.TypeString {
+			result += fmt.Sprintf("\n %s = \"%s\"", key, value.(string))
+		} else {
+			result += fmt.Sprintf("\n %s = %s", key, value.(string))
+		}
+	}
+
+	return result
+}
+
 func testAccResourceNsxtPolicyMacDiscoveryProfileBasic(t *testing.T, withContext bool, preCheck func()) {
 	testResourceName := "nsxt_policy_mac_discovery_profile.test"
 
@@ -53,51 +86,21 @@ func testAccResourceNsxtPolicyMacDiscoveryProfileBasic(t *testing.T, withContext
 		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyMacDiscoveryProfileCheckDestroy(state, accTestPolicyMacDiscoveryProfileUpdateAttributes["display_name"])
+			return testAccNsxtPolicyMacDiscoveryProfileCheckDestroy(state, updateDisplayName)
 		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNsxtPolicyMacDiscoveryProfileTemplate(true, withContext),
-				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyMacDiscoveryProfileExists(accTestPolicyMacDiscoveryProfileCreateAttributes["display_name"], testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyMacDiscoveryProfileCreateAttributes["display_name"]),
-					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyMacDiscoveryProfileCreateAttributes["description"]),
-					resource.TestCheckResourceAttr(testResourceName, "mac_change_enabled", accTestPolicyMacDiscoveryProfileCreateAttributes["mac_change_enabled"]),
-					resource.TestCheckResourceAttr(testResourceName, "mac_learning_enabled", accTestPolicyMacDiscoveryProfileCreateAttributes["mac_learning_enabled"]),
-					resource.TestCheckResourceAttr(testResourceName, "mac_limit", accTestPolicyMacDiscoveryProfileCreateAttributes["mac_limit"]),
-					resource.TestCheckResourceAttr(testResourceName, "mac_limit_policy", accTestPolicyMacDiscoveryProfileCreateAttributes["mac_limit_policy"]),
-					resource.TestCheckResourceAttr(testResourceName, "remote_overlay_mac_limit", accTestPolicyMacDiscoveryProfileCreateAttributes["remote_overlay_mac_limit"]),
-					resource.TestCheckResourceAttr(testResourceName, "unknown_unicast_flooding_enabled", accTestPolicyMacDiscoveryProfileCreateAttributes["unknown_unicast_flooding_enabled"]),
-
-					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
-					resource.TestCheckResourceAttrSet(testResourceName, "path"),
-					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
-					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
-				),
+				Check:  resource.ComposeTestCheckFunc(getMacDiscoveryProfileTestCheckFunc(testResourceName, true)...),
 			},
 			{
 				Config: testAccNsxtPolicyMacDiscoveryProfileTemplate(false, withContext),
-				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyMacDiscoveryProfileExists(accTestPolicyMacDiscoveryProfileUpdateAttributes["display_name"], testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyMacDiscoveryProfileUpdateAttributes["display_name"]),
-					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyMacDiscoveryProfileUpdateAttributes["description"]),
-					resource.TestCheckResourceAttr(testResourceName, "mac_change_enabled", accTestPolicyMacDiscoveryProfileUpdateAttributes["mac_change_enabled"]),
-					resource.TestCheckResourceAttr(testResourceName, "mac_learning_enabled", accTestPolicyMacDiscoveryProfileUpdateAttributes["mac_learning_enabled"]),
-					resource.TestCheckResourceAttr(testResourceName, "mac_limit", accTestPolicyMacDiscoveryProfileUpdateAttributes["mac_limit"]),
-					resource.TestCheckResourceAttr(testResourceName, "mac_limit_policy", accTestPolicyMacDiscoveryProfileUpdateAttributes["mac_limit_policy"]),
-					resource.TestCheckResourceAttr(testResourceName, "remote_overlay_mac_limit", accTestPolicyMacDiscoveryProfileUpdateAttributes["remote_overlay_mac_limit"]),
-					resource.TestCheckResourceAttr(testResourceName, "unknown_unicast_flooding_enabled", accTestPolicyMacDiscoveryProfileUpdateAttributes["unknown_unicast_flooding_enabled"]),
-
-					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
-					resource.TestCheckResourceAttrSet(testResourceName, "path"),
-					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
-					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
-				),
+				Check:  resource.ComposeTestCheckFunc(getMacDiscoveryProfileTestCheckFunc(testResourceName, false)...),
 			},
 			{
 				Config: testAccNsxtPolicyMacDiscoveryProfileMinimalistic(withContext),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyMacDiscoveryProfileExists(accTestPolicyMacDiscoveryProfileCreateAttributes["display_name"], testResourceName),
+					testAccNsxtPolicyMacDiscoveryProfileExists(createDisplayName, testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -205,11 +208,9 @@ func testAccNsxtPolicyMacDiscoveryProfileCheckDestroy(state *terraform.State, di
 }
 
 func testAccNsxtPolicyMacDiscoveryProfileTemplate(createFlow, withContext bool) string {
-	var attrMap map[string]string
-	if createFlow {
-		attrMap = accTestPolicyMacDiscoveryProfileCreateAttributes
-	} else {
-		attrMap = accTestPolicyMacDiscoveryProfileUpdateAttributes
+	displayName := createDisplayName
+	if !createFlow {
+		displayName = updateDisplayName
 	}
 	context := ""
 	if withContext {
@@ -219,18 +220,12 @@ func testAccNsxtPolicyMacDiscoveryProfileTemplate(createFlow, withContext bool) 
 resource "nsxt_policy_mac_discovery_profile" "test" {
 %s
   display_name = "%s"
-  description  = "%s"
-  mac_change_enabled = %s
-  mac_learning_enabled = %s
-  mac_limit = %s
-  mac_limit_policy = "%s"
-  remote_overlay_mac_limit = %s
-  unknown_unicast_flooding_enabled = %s
+  %s
   tag {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, context, attrMap["display_name"], attrMap["description"], attrMap["mac_change_enabled"], attrMap["mac_learning_enabled"], attrMap["mac_limit"], attrMap["mac_limit_policy"], attrMap["remote_overlay_mac_limit"], attrMap["unknown_unicast_flooding_enabled"])
+}`, context, displayName, getMacDiscoveryProfileTestConfigAttributes(createFlow))
 }
 
 func testAccNsxtPolicyMacDiscoveryProfileMinimalistic(withContext bool) string {
@@ -242,5 +237,5 @@ func testAccNsxtPolicyMacDiscoveryProfileMinimalistic(withContext bool) string {
 resource "nsxt_policy_mac_discovery_profile" "test" {
 %s
   display_name = "%s"
-}`, context, accTestPolicyMacDiscoveryProfileUpdateAttributes["display_name"])
+}`, context, updateDisplayName)
 }
