@@ -6,6 +6,7 @@ package nsxt
 import (
 	"fmt"
 	"log"
+	"reflect"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -19,6 +20,64 @@ import (
 var macDiscoveryProfileMacLimitPolicyValues = []string{
 	model.MacDiscoveryProfile_MAC_LIMIT_POLICY_ALLOW,
 	model.MacDiscoveryProfile_MAC_LIMIT_POLICY_DROP,
+}
+
+type testdata struct {
+	createValue interface{}
+	updateValue interface{}
+}
+
+type metadata struct {
+	readOnly            bool
+	sdkFieldName        string
+	introducedInVersion string
+	testData            testdata
+}
+
+var macDiscoveryProfileMetadata = map[string]*metadata{
+	"mac_change_enabled": {
+		sdkFieldName: "MacChangeEnabled",
+		testData: testdata{
+			createValue: "true",
+			updateValue: "false",
+		},
+	},
+	"mac_learning_enabled": {
+		sdkFieldName: "MacLearningEnabled",
+		testData: testdata{
+			createValue: "true",
+			updateValue: "false",
+		},
+	},
+	"mac_limit": {
+		sdkFieldName: "MacLimit",
+		testData: testdata{
+			createValue: "20",
+			updateValue: "50",
+		},
+	},
+	"mac_limit_policy": {
+		sdkFieldName: "MacLimitPolicy",
+		testData: testdata{
+			createValue: "ALLOW",
+			updateValue: "DROP",
+		},
+	},
+	"remote_overlay_mac_limit": {
+		sdkFieldName: "RemoteOverlayMacLimit",
+		testData: testdata{
+			createValue: "2048",
+			updateValue: "4096",
+		},
+	},
+	"unknown_unicast_flooding_enabled": {
+		sdkFieldName:        "UnknownUnicastFloodingEnabled",
+		introducedInVersion: "4.0.0",
+		testData: testdata{
+			createValue: "true",
+			updateValue: "false",
+		},
+	},
 }
 
 func resourceNsxtPolicyMacDiscoveryProfile() *schema.Resource {
@@ -98,26 +157,57 @@ func resourceNsxtPolicyMacDiscoveryProfileCreate(d *schema.ResourceData, m inter
 		return err
 	}
 
+	tags := getPolicyTagsFromSchema(d)
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	tags := getPolicyTagsFromSchema(d)
-	macChangeEnabled := d.Get("mac_change_enabled").(bool)
-	macLearningEnabled := d.Get("mac_learning_enabled").(bool)
-	macLimit := int64(d.Get("mac_limit").(int))
-	macLimitPolicy := d.Get("mac_limit_policy").(string)
-	remoteOverlayMacLimit := int64(d.Get("remote_overlay_mac_limit").(int))
-	unknownUnicastFloodingEnabled := d.Get("unknown_unicast_flooding_enabled").(bool)
+	/*
+		macChangeEnabled := d.Get("mac_change_enabled").(bool)
+		macLearningEnabled := d.Get("mac_learning_enabled").(bool)
+		macLimit := int64(d.Get("mac_limit").(int))
+		macLimitPolicy := d.Get("mac_limit_policy").(string)
+		remoteOverlayMacLimit := int64(d.Get("remote_overlay_mac_limit").(int))
+		unknownUnicastFloodingEnabled := d.Get("unknown_unicast_flooding_enabled").(bool)
+	*/
 
 	obj := model.MacDiscoveryProfile{
-		DisplayName:                   &displayName,
-		Description:                   &description,
-		Tags:                          tags,
-		MacChangeEnabled:              &macChangeEnabled,
-		MacLearningEnabled:            &macLearningEnabled,
-		MacLimit:                      &macLimit,
-		MacLimitPolicy:                &macLimitPolicy,
-		RemoteOverlayMacLimit:         &remoteOverlayMacLimit,
-		UnknownUnicastFloodingEnabled: &unknownUnicastFloodingEnabled,
+		Tags:        tags,
+		DisplayName: &displayName,
+		Description: &description,
+		/*
+			MacChangeEnabled:              &macChangeEnabled,
+			MacLearningEnabled:            &macLearningEnabled,
+			MacLimit:                      &macLimit,
+			MacLimitPolicy:                &macLimitPolicy,
+			RemoteOverlayMacLimit:         &remoteOverlayMacLimit,
+			UnknownUnicastFloodingEnabled: &unknownUnicastFloodingEnabled,
+		*/
+	}
+
+	schemaDef := resourceNsxtPolicyMacDiscoveryProfile().Schema
+	elem := reflect.ValueOf(&obj).Elem()
+	for key, item := range macDiscoveryProfileMetadata {
+		if item.readOnly {
+			continue
+		}
+		if item.introducedInVersion != "" && nsxVersionLower(item.introducedInVersion) {
+			continue
+		}
+		itemType := schemaDef[key].Type
+		if itemType == schema.TypeString {
+			value := d.Get(key).(string)
+			log.Printf("[INFO] assigning string %v to %s", value, key)
+			elem.FieldByName(item.sdkFieldName).Set(reflect.ValueOf(&value))
+		}
+		if itemType == schema.TypeBool {
+			value := d.Get(key).(bool)
+			log.Printf("[INFO] assigning bool %v to %s", value, key)
+			elem.FieldByName(item.sdkFieldName).Set(reflect.ValueOf(&value))
+		}
+		if itemType == schema.TypeInt {
+			value := int64(d.Get(key).(int))
+			log.Printf("[INFO] assigning int %v to %s", value, key)
+			elem.FieldByName(item.sdkFieldName).Set(reflect.ValueOf(&value))
+		}
 	}
 
 	// Create the resource using PATCH
@@ -149,19 +239,28 @@ func resourceNsxtPolicyMacDiscoveryProfileRead(d *schema.ResourceData, m interfa
 		return handleReadError(d, "MacDiscoveryProfile", id, err)
 	}
 
-	d.Set("display_name", obj.DisplayName)
-	d.Set("description", obj.Description)
 	setPolicyTagsInSchema(d, obj.Tags)
 	d.Set("nsx_id", id)
-	d.Set("path", obj.Path)
+	d.Set("display_name", obj.DisplayName)
+	d.Set("description", obj.Description)
 	d.Set("revision", obj.Revision)
+	d.Set("path", obj.Path)
 
-	d.Set("mac_change_enabled", obj.MacChangeEnabled)
-	d.Set("mac_learning_enabled", obj.MacLearningEnabled)
-	d.Set("mac_limit", obj.MacLimit)
-	d.Set("mac_limit_policy", obj.MacLimitPolicy)
-	d.Set("remote_overlay_mac_limit", obj.RemoteOverlayMacLimit)
-	d.Set("unknown_unicast_flooding_enabled", obj.UnknownUnicastFloodingEnabled)
+	elem := reflect.ValueOf(&obj).Elem()
+	for key, item := range macDiscoveryProfileMetadata {
+		d.Set(key, elem.FieldByName(item.sdkFieldName).Interface())
+	}
+	/*
+		d.Set("display_name", obj.DisplayName)
+		d.Set("description", obj.Description)
+
+		d.Set("mac_change_enabled", obj.MacChangeEnabled)
+		d.Set("mac_learning_enabled", obj.MacLearningEnabled)
+		d.Set("mac_limit", obj.MacLimit)
+		d.Set("mac_limit_policy", obj.MacLimitPolicy)
+		d.Set("remote_overlay_mac_limit", obj.RemoteOverlayMacLimit)
+		d.Set("unknown_unicast_flooding_enabled", obj.UnknownUnicastFloodingEnabled)
+	*/
 
 	return nil
 }
