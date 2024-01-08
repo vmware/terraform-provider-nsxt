@@ -11,6 +11,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
@@ -18,6 +19,8 @@ import (
 	ippools "github.com/vmware/terraform-provider-nsxt/api/infra/ip_pools"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
+
+var addressRealizationTimeoutDefault = int(1200)
 
 func resourceNsxtPolicyIPAddressAllocation() *schema.Resource {
 	return &schema.Resource{
@@ -45,6 +48,13 @@ func resourceNsxtPolicyIPAddressAllocation() *schema.Resource {
 				ValidateFunc: validateSingleIP(),
 				Computed:     true,
 				ForceNew:     true,
+			},
+			"timeout": {
+				Type:         schema.TypeInt,
+				Description:  "Realization timeout in seconds",
+				Optional:     true,
+				Default:      addressRealizationTimeoutDefault,
+				ValidateFunc: validation.IntAtLeast(1),
 			},
 		},
 	}
@@ -149,9 +159,10 @@ func resourceNsxtPolicyIPAddressAllocationRead(d *schema.ResourceData, m interfa
 	d.Set("allocation_ip", obj.AllocationIp)
 
 	if d.Get("allocation_ip").(string) == "" {
+		timeout := d.Get("timeout").(int)
 		log.Printf("[DEBUG] Waiting for realization of IP Address for IP Allocation with ID %s", id)
 
-		stateConf := nsxtPolicyWaitForRealizationStateConf(connector, d, d.Get("path").(string))
+		stateConf := nsxtPolicyWaitForRealizationStateConf(connector, d, d.Get("path").(string), timeout)
 		entity, err := stateConf.WaitForState()
 		if err != nil {
 			return err
@@ -228,6 +239,9 @@ func resourceNsxtPolicyIPAddressAllocationDelete(d *schema.ResourceData, m inter
 func resourceNsxtPolicyIPAddressAllocationImport(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	importID := d.Id()
 	s := strings.Split(importID, "/")
+
+	d.Set("timeout", addressRealizationTimeoutDefault)
+
 	rd, err := nsxtPolicyPathResourceImporterHelper(d, m)
 	if err == nil {
 		poolPath, err := getParameterFromPolicyPath("", "/ip-allocations/", importID)
@@ -253,7 +267,6 @@ func resourceNsxtPolicyIPAddressAllocationImport(d *schema.ResourceData, m inter
 		return nil, err
 	}
 	d.Set("pool_path", pool.Path)
-
 	d.SetId(s[1])
 
 	return []*schema.ResourceData{d}, nil

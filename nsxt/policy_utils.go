@@ -324,7 +324,7 @@ func commaSeparatedStringToStringList(commaString string) []string {
 	return strList
 }
 
-func nsxtPolicyWaitForRealizationStateConf(connector client.Connector, d *schema.ResourceData, realizedEntityPath string) *resource.StateChangeConf {
+func nsxtPolicyWaitForRealizationStateConf(connector client.Connector, d *schema.ResourceData, realizedEntityPath string, timeout int) *resource.StateChangeConf {
 	client := realized_state.NewRealizedEntitiesClient(connector)
 	pendingStates := []string{"UNKNOWN", "UNREALIZED"}
 	targetStates := []string{"REALIZED", "ERROR"}
@@ -346,7 +346,7 @@ func nsxtPolicyWaitForRealizationStateConf(connector client.Connector, d *schema
 			}
 			return nil, "", realizationError
 		},
-		Timeout:    d.Timeout(schema.TimeoutCreate),
+		Timeout:    time.Duration(timeout) * time.Second,
 		MinTimeout: 1 * time.Second,
 		Delay:      1 * time.Second,
 	}
