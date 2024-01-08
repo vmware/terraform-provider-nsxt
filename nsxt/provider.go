@@ -716,13 +716,13 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 	}
 
 	if !isVMC {
-		err = configureLicenses(getPolicyConnectorForInit(*clients, true), clients.CommonConfig.LicenseKeys)
+		err = configureLicenses(getStandalonePolicyConnector(*clients, true), clients.CommonConfig.LicenseKeys)
 		if err != nil {
 			return err
 		}
 	}
 
-	err = initNSXVersion(getPolicyConnectorForInit(*clients, true))
+	err = initNSXVersion(getStandalonePolicyConnector(*clients, true))
 	if err != nil && isVMC {
 		// In case version API does not work for VMC, we workaround by testing version-specific APIs
 		// TODO - remove this when /node/version API works for all auth methods on VMC
@@ -974,15 +974,19 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	return clients, nil
 }
 
+// Standard policy connection that initializes global connection settings on demand
 func getPolicyConnector(clients interface{}) client.Connector {
 	return getPolicyConnectorWithHeaders(clients, nil, false, true)
 }
 
-func getPolicyConnectorForInit(clients interface{}, withRetry bool) client.Connector {
+// Standalone policy connector, possibly for different endpoint,
+// for the purpose of special tasks (such as joining manager cluster node)
+// Does not initialize global connection settings
+func getStandalonePolicyConnector(clients interface{}, withRetry bool) client.Connector {
 	return getPolicyConnectorWithHeaders(clients, nil, true, withRetry)
 }
 
-func getPolicyConnectorWithHeaders(clients interface{}, customHeaders *map[string]string, initFlow bool, withRetry bool) client.Connector {
+func getPolicyConnectorWithHeaders(clients interface{}, customHeaders *map[string]string, standaloneFlow bool, withRetry bool) client.Connector {
 	c := clients.(nsxtClients)
 
 	retryFunc := func(retryContext retry.RetryContext) bool {
@@ -1064,7 +1068,8 @@ func getPolicyConnectorWithHeaders(clients interface{}, customHeaders *map[strin
 	connector := client.NewConnector(c.Host, connectorOptions...)
 	// Init NSX version on demand if not done yet
 	// This is also our indication to apply licenses, in case of delayed connection
-	if nsxVersion == "" && !initFlow {
+	// This step is skipped if the connector is for special purpose, or for different endpoint
+	if nsxVersion == "" && !standaloneFlow {
 		initNSXVersion(connector)
 		err := configureLicenses(connector, c.CommonConfig.LicenseKeys)
 		if err != nil {
