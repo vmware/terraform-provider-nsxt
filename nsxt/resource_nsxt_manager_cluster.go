@@ -324,7 +324,7 @@ func getNewNsxtClient(node NsxClusterNode, d *schema.ResourceData, clients inter
 
 func configureNewClient(newClient *nsxtClients, oldClient *nsxtClients, host string, username string, password string) error {
 	newClient.Host = host
-	securityCtx, err := getConfiguredSecurityContext(newClient, "", "", "", username, password)
+	securityCtx, err := getConfiguredSecurityContext(newClient, &vmcAuthInfo{}, username, password)
 	if err != nil {
 		return fmt.Errorf("Failed to configure new client with host %s: %s", host, err)
 	}

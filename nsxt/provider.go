@@ -158,13 +158,30 @@ func Provider() *schema.Provider {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "URL for VMC authorization service (CSP)",
-				DefaultFunc: schema.EnvDefaultFunc("NSXT_VMC_AUTH_HOST", "console.cloud.vmware.com/csp/gateway/am/api/auth/api-tokens/authorize"),
+				DefaultFunc: schema.EnvDefaultFunc("NSXT_VMC_AUTH_HOST", nil),
 			},
 			"vmc_token": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Long-living API token for VMC authorization",
-				DefaultFunc: schema.EnvDefaultFunc("NSXT_VMC_TOKEN", nil),
+				Type:          schema.TypeString,
+				Optional:      true,
+				Description:   "Long-living API token for VMC authorization",
+				DefaultFunc:   schema.EnvDefaultFunc("NSXT_VMC_TOKEN", nil),
+				ConflictsWith: []string{"vmc_client_id", "vmc_client_secret"},
+			},
+			"vmc_client_id": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				Description:   "ID of OAuth App associated with the VMC organization",
+				DefaultFunc:   schema.EnvDefaultFunc("NSXT_VMC_CLIENT_ID", nil),
+				ConflictsWith: []string{"vmc_token"},
+				RequiredWith:  []string{"vmc_client_secret"},
+			},
+			"vmc_client_secret": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				Description:   "Secret of OAuth App associated with the VMC organization",
+				DefaultFunc:   schema.EnvDefaultFunc("NSXT_VMC_CLIENT_SECRET", nil),
+				ConflictsWith: []string{"vmc_token"},
+				RequiredWith:  []string{"vmc_client_id"},
 			},
 			"vmc_auth_mode": {
 				Type:         schema.TypeString,
@@ -189,7 +206,7 @@ func Provider() *schema.Provider {
 				Type:          schema.TypeList,
 				Optional:      true,
 				Description:   "license keys",
-				ConflictsWith: []string{"vmc_token"},
+				ConflictsWith: []string{"vmc_token", "vmc_client_id", "vmc_client_secret"},
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 					ValidateFunc: validation.StringMatch(
@@ -456,13 +473,29 @@ func Provider() *schema.Provider {
 	}
 }
 
+func isVMCCredentialSet(d *schema.ResourceData) bool {
+	// Refresh token
+	vmcToken := d.Get("vmc_token").(string)
+	if len(vmcToken) > 0 {
+		return true
+	}
+
+	// Oauth app
+	vmcClientID := d.Get("vmc_client_id").(string)
+	vmcClientSecret := d.Get("vmc_client_secret").(string)
+	if len(vmcClientSecret) > 0 && len(vmcClientID) > 0 {
+		return true
+	}
+
+	return false
+}
+
 func configureNsxtClient(d *schema.ResourceData, clients *nsxtClients) error {
 	onDemandConn := d.Get("on_demand_connection").(bool)
 	clientAuthCertFile := d.Get("client_auth_cert_file").(string)
 	clientAuthKeyFile := d.Get("client_auth_key_file").(string)
 	clientAuthCert := d.Get("client_auth_cert").(string)
 	clientAuthKey := d.Get("client_auth_key").(string)
-	vmcToken := d.Get("vmc_token").(string)
 	vmcAuthMode := d.Get("vmc_auth_mode").(string)
 
 	if onDemandConn {
@@ -470,7 +503,7 @@ func configureNsxtClient(d *schema.ResourceData, clients *nsxtClients) error {
 		return nil
 	}
 
-	if (len(vmcToken) > 0) || (vmcAuthMode == "Basic") {
+	if (vmcAuthMode == "Basic") || isVMCCredentialSet(d) {
 		// VMC can operate without token with basic auth, however MP API is not
 		// available for cloud admin user
 		return nil
@@ -564,21 +597,65 @@ type jwtToken struct {
 	RefreshToken string `json:"refresh_token"`
 }
 
-func getAPIToken(vmcAuthHost string, vmcAccessToken string) (string, error) {
+type vmcAuthInfo struct {
+	authHost     string
+	authMode     string
+	accessToken  string
+	clientID     string
+	clientSecret string
+}
 
-	payload := strings.NewReader("refresh_token=" + vmcAccessToken)
-	req, _ := http.NewRequest("POST", "https://"+vmcAuthHost, payload)
+func getVmcAuthInfo(d *schema.ResourceData) *vmcAuthInfo {
+	vmcInfo := vmcAuthInfo{
+		authHost:     d.Get("vmc_auth_host").(string),
+		authMode:     d.Get("vmc_auth_mode").(string),
+		accessToken:  d.Get("vmc_token").(string),
+		clientID:     d.Get("vmc_client_id").(string),
+		clientSecret: d.Get("vmc_client_secret").(string),
+	}
+	if len(vmcInfo.authHost) > 0 {
+		return &vmcInfo
+	}
+
+	// Fill in default auth host + url based on auth method
+	if len(vmcInfo.accessToken) > 0 {
+		vmcInfo.authHost = "console.cloud.vmware.com/csp/gateway/am/api/auth/api-tokens/authorize"
+	} else if len(vmcInfo.clientSecret) > 0 && len(vmcInfo.clientID) > 0 {
+		vmcInfo.authHost = "console.cloud.vmware.com/csp/gateway/am/api/auth/authorize"
+	}
+	return &vmcInfo
+}
+
+func (v *vmcAuthInfo) IsZero() bool {
+	return len(v.accessToken) == 0 && len(v.clientID) == 0 && len(v.clientSecret) == 0
+}
+
+func (v *vmcAuthInfo) getAPIToken() (string, error) {
+	var req *http.Request
+
+	// Access token
+	if len(v.accessToken) > 0 {
+		payload := strings.NewReader("refresh_token=" + v.accessToken)
+		req, _ = http.NewRequest("POST", "https://"+v.authHost, payload)
+	}
+	// Oauth app
+	if len(v.clientSecret) > 0 && len(v.clientID) > 0 {
+		payload := strings.NewReader("grant_type=client_credentials")
+		req, _ = http.NewRequest("POST", "https://"+v.authHost, payload)
+		req.SetBasicAuth(v.clientID, v.clientSecret)
+	}
+	if req == nil {
+		return "", fmt.Errorf("invalid VMC auth input")
+	}
 
 	req.Header.Add("content-type", "application/x-www-form-urlencoded")
 	res, err := http.DefaultClient.Do(req)
-
 	if err != nil {
 		return "", err
 	}
-
 	if res.StatusCode != 200 {
 		b, _ := ioutil.ReadAll(res.Body)
-		return "", fmt.Errorf("Unexpected status code %d trying to get auth token. %s", res.StatusCode, string(b))
+		return "", fmt.Errorf("unexpected status code %d trying to get auth token. %s", res.StatusCode, string(b))
 	}
 
 	defer res.Body.Close()
@@ -665,17 +742,15 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 	host := d.Get("host").(string)
 	username := d.Get("username").(string)
 	password := d.Get("password").(string)
-	vmcAccessToken := d.Get("vmc_token").(string)
-	vmcAuthHost := d.Get("vmc_auth_host").(string)
 	clientAuthCertFile := d.Get("client_auth_cert_file").(string)
 	clientAuthCert := d.Get("client_auth_cert").(string)
 	clientAuthDefined := (len(clientAuthCertFile) > 0) || (len(clientAuthCert) > 0)
 	policyEnforcementPoint := d.Get("enforcement_point").(string)
 	policyGlobalManager := d.Get("global_manager").(bool)
-	vmcAuthMode := d.Get("vmc_auth_mode").(string)
+	vmcInfo := getVmcAuthInfo(d)
 
 	isVMC := false
-	if (len(vmcAccessToken) > 0) || (vmcAuthMode == "Basic") {
+	if (vmcInfo.authMode == "Basic") || isVMCCredentialSet(d) {
 		isVMC = true
 		if onDemandConn {
 			return fmt.Errorf("on demand connection option is not supported with VMC")
@@ -695,7 +770,7 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 		securityContextNeeded = false
 	}
 	if securityContextNeeded {
-		securityCtx, err := getConfiguredSecurityContext(clients, vmcAccessToken, vmcAuthHost, vmcAuthMode, username, password)
+		securityCtx, err := getConfiguredSecurityContext(clients, vmcInfo, username, password)
 		if err != nil {
 			return err
 		}
@@ -740,26 +815,9 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 	return err
 }
 
-func getConfiguredSecurityContext(clients *nsxtClients, vmcAccessToken string, vmcAuthHost string, vmcAuthMode string, username string, password string) (*core.SecurityContextImpl, error) {
+func getConfiguredSecurityContext(clients *nsxtClients, vmcInfo *vmcAuthInfo, username string, password string) (*core.SecurityContextImpl, error) {
 	securityCtx := core.NewSecurityContextImpl()
-	if len(vmcAccessToken) > 0 {
-		if vmcAuthHost == "" {
-			return nil, fmt.Errorf("vmc auth host must be provided if auth token is provided")
-		}
-
-		apiToken, err := getAPIToken(vmcAuthHost, vmcAccessToken)
-		if err != nil {
-			return nil, err
-		}
-
-		// We'll be sending Bearer token anyway even with scp-auth-token auth
-		// For now, node API is not working on VMC without Bearer token present
-		clients.CommonConfig.BearerToken = apiToken
-		if vmcAuthMode != "Bearer" {
-			securityCtx.SetProperty(security.AUTHENTICATION_SCHEME_ID, security.OAUTH_SCHEME_ID)
-			securityCtx.SetProperty(security.ACCESS_TOKEN, apiToken)
-		}
-	} else {
+	if vmcInfo == nil || vmcInfo.IsZero() {
 		if username == "" {
 			return nil, fmt.Errorf("username must be provided")
 		}
@@ -771,6 +829,19 @@ func getConfiguredSecurityContext(clients *nsxtClients, vmcAccessToken string, v
 		securityCtx.SetProperty(security.AUTHENTICATION_SCHEME_ID, security.USER_PASSWORD_SCHEME_ID)
 		securityCtx.SetProperty(security.USER_KEY, username)
 		securityCtx.SetProperty(security.PASSWORD_KEY, password)
+	} else {
+		apiToken, err := vmcInfo.getAPIToken()
+		if err != nil {
+			return nil, err
+		}
+
+		// We'll be sending Bearer token anyway even with scp-auth-token auth
+		// For now, node API is not working on VMC without Bearer token present
+		clients.CommonConfig.BearerToken = apiToken
+		if vmcInfo.authMode != "Bearer" {
+			securityCtx.SetProperty(security.AUTHENTICATION_SCHEME_ID, security.OAUTH_SCHEME_ID)
+			securityCtx.SetProperty(security.ACCESS_TOKEN, apiToken)
+		}
 	}
 	return securityCtx, nil
 }
