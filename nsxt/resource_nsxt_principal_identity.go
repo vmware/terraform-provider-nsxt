@@ -14,11 +14,11 @@ import (
 	policyModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
-func resourceNsxtPrincipleIdentity() *schema.Resource {
+func resourceNsxtPrincipalIdentity() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNsxtPrincipleIdentityCreate,
-		Read:   resourceNsxtPrincipleIdentityRead,
-		Delete: resourceNsxtPrincipleIdentityDelete,
+		Create: resourceNsxtPrincipalIdentityCreate,
+		Read:   resourceNsxtPrincipalIdentityRead,
+		Delete: resourceNsxtPrincipalIdentityDelete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -113,7 +113,7 @@ func convertToPolicyRolesForPath(mpRolesForPath []mpModel.RolesForPath) []policy
 	return pRolesForPath
 }
 
-func resourceNsxtPrincipleIdentityCreate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtPrincipalIdentityCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	client := principal_identities.NewWithCertificateClient(connector)
 
@@ -139,10 +139,10 @@ func resourceNsxtPrincipleIdentityCreate(d *schema.ResourceData, m interface{}) 
 	}
 	d.SetId(*pi.Id)
 
-	return resourceNsxtPrincipleIdentityRead(d, m)
+	return resourceNsxtPrincipalIdentityRead(d, m)
 }
 
-func resourceNsxtPrincipleIdentityRead(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtPrincipalIdentityRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	client := trust_management.NewPrincipalIdentitiesClient(connector)
 	id := d.Id()
@@ -163,7 +163,7 @@ func resourceNsxtPrincipleIdentityRead(d *schema.ResourceData, m interface{}) er
 	return nil
 }
 
-func resourceNsxtPrincipleIdentityDelete(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtPrincipalIdentityDelete(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	piClient := trust_management.NewPrincipalIdentitiesClient(connector)
 	id := d.Id()
