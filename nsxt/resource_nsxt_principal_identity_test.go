@@ -12,7 +12,7 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/trust_management"
 )
 
-var accTestPrincipleIdentityCreateAttributes = map[string]string{
+var accTestPrincipalIdentityCreateAttributes = map[string]string{
 	"is_protected": "false",
 	"name":         getAccTestResourceName(),
 	"node_id":      "node-2",
@@ -20,8 +20,8 @@ var accTestPrincipleIdentityCreateAttributes = map[string]string{
 	"role":         "org_admin",
 }
 
-func TestAccResourceNsxtPrincipleIdentity_basic(t *testing.T) {
-	testResourceName := "nsxt_principle_identity.test"
+func TestAccResourceNsxtPrincipalIdentity_basic(t *testing.T) {
+	testResourceName := "nsxt_principal_identity.test"
 	certPem, _, err := testAccGenerateTLSKeyPair()
 	if err != nil {
 		t.Fatal(err)
@@ -35,20 +35,20 @@ func TestAccResourceNsxtPrincipleIdentity_basic(t *testing.T) {
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPrincipleIdentityCheckDestroy(state, accTestPrincipleIdentityCreateAttributes["name"])
+			return testAccNsxtPrincipalIdentityCheckDestroy(state, accTestPrincipalIdentityCreateAttributes["name"])
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPrincipleIdentityCreate(certPem),
+				Config: testAccNsxtPrincipalIdentityCreate(certPem),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPrincipleIdentityExists(accTestPrincipleIdentityCreateAttributes["name"], testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "is_protected", accTestPrincipleIdentityCreateAttributes["is_protected"]),
-					resource.TestCheckResourceAttr(testResourceName, "name", accTestPrincipleIdentityCreateAttributes["name"]),
-					resource.TestCheckResourceAttr(testResourceName, "node_id", accTestPrincipleIdentityCreateAttributes["node_id"]),
+					testAccNsxtPrincipalIdentityExists(accTestPrincipalIdentityCreateAttributes["name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "is_protected", accTestPrincipalIdentityCreateAttributes["is_protected"]),
+					resource.TestCheckResourceAttr(testResourceName, "name", accTestPrincipalIdentityCreateAttributes["name"]),
+					resource.TestCheckResourceAttr(testResourceName, "node_id", accTestPrincipalIdentityCreateAttributes["node_id"]),
 					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.0.path", accTestPrincipleIdentityCreateAttributes["role_path"]),
+					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.0.path", accTestPrincipalIdentityCreateAttributes["role_path"]),
 					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.0.roles.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.0.roles.0", accTestPrincipleIdentityCreateAttributes["role"]),
+					resource.TestCheckResourceAttr(testResourceName, "roles_for_path.0.roles.0", accTestPrincipalIdentityCreateAttributes["role"]),
 
 					resource.TestCheckResourceAttrSet(testResourceName, "certificate_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "certificate_pem"),
@@ -58,8 +58,8 @@ func TestAccResourceNsxtPrincipleIdentity_basic(t *testing.T) {
 	})
 }
 
-func TestAccResourceNsxtPrincipleIdentity_import_basic(t *testing.T) {
-	testResourceName := "nsxt_principle_identity.test"
+func TestAccResourceNsxtPrincipalIdentity_import_basic(t *testing.T) {
+	testResourceName := "nsxt_principal_identity.test"
 	certPem, _, err := testAccGenerateTLSKeyPair()
 	if err != nil {
 		t.Fatal(err)
@@ -73,11 +73,11 @@ func TestAccResourceNsxtPrincipleIdentity_import_basic(t *testing.T) {
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPrincipleIdentityCheckDestroy(state, accTestPrincipleIdentityCreateAttributes["name"])
+			return testAccNsxtPrincipalIdentityCheckDestroy(state, accTestPrincipalIdentityCreateAttributes["name"])
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPrincipleIdentityCreate(certPem),
+				Config: testAccNsxtPrincipalIdentityCreate(certPem),
 			},
 			{
 				ResourceName:            testResourceName,
@@ -89,25 +89,25 @@ func TestAccResourceNsxtPrincipleIdentity_import_basic(t *testing.T) {
 	})
 }
 
-func testAccNsxtPrincipleIdentityExists(name string, resourceName string) resource.TestCheckFunc {
+func testAccNsxtPrincipalIdentityExists(name string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
 
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
-			return fmt.Errorf("PrincipleIdentity resource %s not found in resources", resourceName)
+			return fmt.Errorf("PrincipalIdentity resource %s not found in resources", resourceName)
 		}
 
 		piID := rs.Primary.Attributes["id"]
 		if piID == "" {
-			return fmt.Errorf("PrincipleIdentity resource ID not set in resources")
+			return fmt.Errorf("PrincipalIdentity resource ID not set in resources")
 		}
 		tmClient := trust_management.NewPrincipalIdentitiesClient(connector)
 		_, err := tmClient.Get(piID)
 		if err != nil {
 			if isNotFoundError(err) {
-				return fmt.Errorf("PrincipleIdentity %s does not exist", name)
+				return fmt.Errorf("PrincipalIdentity %s does not exist", name)
 			}
 		}
 
@@ -115,17 +115,17 @@ func testAccNsxtPrincipleIdentityExists(name string, resourceName string) resour
 	}
 }
 
-func testAccNsxtPrincipleIdentityCheckDestroy(state *terraform.State, name string) error {
+func testAccNsxtPrincipalIdentityCheckDestroy(state *terraform.State, name string) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
 	for _, rs := range state.RootModule().Resources {
 
-		if rs.Type != "nsxt_principle_identity" {
+		if rs.Type != "nsxt_principal_identity" {
 			continue
 		}
 
 		piID := rs.Primary.Attributes["id"]
 		if piID == "" {
-			return fmt.Errorf("PrincipleIdentity resource ID not set in resources")
+			return fmt.Errorf("PrincipalIdentity resource ID not set in resources")
 		}
 		tmClient := trust_management.NewPrincipalIdentitiesClient(connector)
 		_, err := tmClient.Get(piID)
@@ -135,15 +135,15 @@ func testAccNsxtPrincipleIdentityCheckDestroy(state *terraform.State, name strin
 			}
 			return err
 		}
-		return fmt.Errorf("PrincipleIdentity %s still exists", name)
+		return fmt.Errorf("PrincipalIdentity %s still exists", name)
 	}
 	return nil
 }
 
-func testAccNsxtPrincipleIdentityCreate(certPem string) string {
-	attrMap := accTestPrincipleIdentityCreateAttributes
+func testAccNsxtPrincipalIdentityCreate(certPem string) string {
+	attrMap := accTestPrincipalIdentityCreateAttributes
 	return fmt.Sprintf(`
-resource "nsxt_principle_identity" "test" {
+resource "nsxt_principal_identity" "test" {
     certificate_pem = <<-EOT
 %s
     EOT

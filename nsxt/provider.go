@@ -429,7 +429,7 @@ func Provider() *schema.Provider {
 			"nsxt_manager_cluster":                         resourceNsxtManagerCluster(),
 			"nsxt_policy_uplink_host_switch_profile":       resourceNsxtUplinkHostSwitchProfile(),
 			"nsxt_node_user":                               resourceNsxtUsers(),
-			"nsxt_principle_identity":                      resourceNsxtPrincipleIdentity(),
+			"nsxt_principal_identity":                      resourceNsxtPrincipalIdentity(),
 			"nsxt_edge_transport_node":                     resourceNsxtEdgeTransportNode(),
 			"nsxt_failure_domain":                          resourceNsxtFailureDomain(),
 			"nsxt_cluster_virtual_ip":                      resourceNsxtClusterVirualIP(),
