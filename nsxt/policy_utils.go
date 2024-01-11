@@ -421,3 +421,38 @@ func getElemOrEmptyMapFromMap(d map[string]interface{}, key string) map[string]i
 	}
 	return make(map[string]interface{})
 }
+
+func setPolicyLbHTTPHeaderInSchema(d *schema.ResourceData, attrName string, headers []model.LbHttpRequestHeader) {
+	var headerList []map[string]string
+	for _, header := range headers {
+		elem := make(map[string]string)
+		elem["name"] = *header.HeaderName
+		elem["value"] = *header.HeaderValue
+		headerList = append(headerList, elem)
+	}
+	d.Set(attrName, headerList)
+}
+
+func getPolicyLbHTTPHeaderFromSchema(d *schema.ResourceData, attrName string) []model.LbHttpRequestHeader {
+	headers := d.Get(attrName).(*schema.Set).List()
+	var headerList []model.LbHttpRequestHeader
+	for _, header := range headers {
+		data := header.(map[string]interface{})
+		name := data["name"].(string)
+		value := data["value"].(string)
+		elem := model.LbHttpRequestHeader{
+			HeaderName:  &name,
+			HeaderValue: &value}
+
+		headerList = append(headerList, elem)
+	}
+	return headerList
+}
+
+func getPolicyLbMonitorPortSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeInt,
+		Description: "If the monitor port is specified, it would override pool member port setting for healthcheck. A port range is not supported",
+		Optional:    true,
+	}
+}
