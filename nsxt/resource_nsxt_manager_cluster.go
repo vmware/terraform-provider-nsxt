@@ -168,7 +168,7 @@ func waitForNodeStatus(d *schema.ResourceData, m interface{}, nodes []NsxCluster
 		log.Printf("[DEBUG]: API probing for NSX is disabled")
 		return nil
 	}
-	connector := getPolicyConnectorForInit(m, false)
+	connector := getStandalonePolicyConnector(m, false)
 	stateConf := getNodeConnectivityStateConf(connector, delay, interval, timeout)
 	_, err := stateConf.WaitForState()
 	if err != nil {
@@ -182,7 +182,7 @@ func waitForNodeStatus(d *schema.ResourceData, m interface{}, nodes []NsxCluster
 			return err
 		}
 		newNsxClients := c.(nsxtClients)
-		nodeConnector := getPolicyConnectorForInit(newNsxClients, false)
+		nodeConnector := getStandalonePolicyConnector(newNsxClients, false)
 		nodeConf := getNodeConnectivityStateConf(nodeConnector, 0, interval, timeout)
 		_, err = nodeConf.WaitForState()
 		if err != nil {
@@ -330,10 +330,6 @@ func configureNewClient(newClient *nsxtClients, oldClient *nsxtClients, host str
 	}
 	newClient.PolicySecurityContext = securityCtx
 	newClient.PolicyHTTPClient = oldClient.PolicyHTTPClient
-	err = initNSXVersion(getPolicyConnector(*newClient))
-	if err != nil {
-		return fmt.Errorf("Failed to configure new client with host %s: %s", host, err)
-	}
 	return nil
 }
 
@@ -344,7 +340,7 @@ func joinNodeToCluster(clusterID string, certSha256Thumbprint string, guestNode 
 	}
 	log.Printf("[INFO] Cluster %s. Joining node %s", clusterID, guestNode.IPAddress)
 	newNsxClients := c.(nsxtClients)
-	connector := getPolicyConnector(newNsxClients)
+	connector := getStandalonePolicyConnector(newNsxClients, true)
 	client := nsx.NewClusterClient(connector)
 	username, password := getHostCredential(m)
 	hostIP := getMatchingIPVersion(guestNode.IPAddress, hostIPs)
