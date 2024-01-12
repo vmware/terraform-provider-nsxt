@@ -20,8 +20,9 @@ resource "nsxt_policy_intrusion_service_profile" "profile1" {
   severities   = ["HIGH", "CRITICAL"]
 
   criteria {
-    attack_types      = ["trojan-activity", "successful-admin"]
-    products_affected = ["Linux"]
+    attack_types      = ["trojan-activity", "successful-admin", "attempted-admin", "attempted-user"]
+    attack_targets    = ["Web_Server", "SQL_Server", "Email_Server", "Client_and_Server", "Server"]
+    products_affected = ["Windows_XP_Vista_7_8_10_Server_32_64_Bit", "Web_Server_Applications", "Linux"]
   }
 
   overridden_signature {
@@ -47,9 +48,9 @@ The following arguments are supported:
 * `severities` - (Required) List of profile severities, supported values are `LOW`, `MEDIUM`, `HIGH`, 'CRITICAL`.
 * `criteria` - (Required) Filtering criteria for the IDS Profile.
   * `attack_types` - (Optional) List of supported attack types.
-  * `attack_targets` - (Optional) List of supported attack targets.
+  * `attack_targets` - (Optional) List of supported attack targets. Please refer to example above to ensure correct formatting - in some versions, UI shows a different format than NSX expects.
   * `cvss` - (Optional) List of CVSS (Common Vulnerability Scoring System) ranges. Supported values are `NONE`, `LOW`, `MEDIUM`, `HIGH`, `CRITICAL`.
-  * `products_affected` - (Optional) List of supported products that are affected.
+  * `products_affected` - (Optional) List of supported products that are affected. Please refer to example above to ensure correct formatting - in some versions, UI shows a different format than NSX expects.
 * `overridden_signature` - (Optional) List of signatures that has been overridden this profile.
   * `signature_id` - (Required) Id for the existing signature that profile wishes to override.
   * `action` - (Optional) Overridden action, one of `ALERT`, `DROP`, `REJECT`. Default is `ALERT`.
