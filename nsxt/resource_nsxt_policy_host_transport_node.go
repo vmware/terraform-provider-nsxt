@@ -97,7 +97,7 @@ func getFabricHostNodeSchema() *schema.Schema {
 							},
 							"thumbprint": {
 								Type:        schema.TypeString,
-								Optional:    true,
+								Required:    true,
 								Description: "ESXi thumbprint or SSH key fingerprint of the host node",
 							},
 							"username": {
