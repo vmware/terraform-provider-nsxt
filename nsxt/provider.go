@@ -33,6 +33,7 @@ import (
 )
 
 var defaultRetryOnStatusCodes = []int{400, 409, 429, 500, 503, 504}
+var defaultVmcAuthHost = "console.cloud.vmware.com/csp/gateway/am/api/auth/api-tokens/authorize"
 
 // Provider configuration that is shared for policy and MP
 type commonProviderConfig struct {
@@ -159,6 +160,13 @@ func Provider() *schema.Provider {
 				Optional:    true,
 				Description: "URL for VMC authorization service (CSP)",
 				DefaultFunc: schema.EnvDefaultFunc("NSXT_VMC_AUTH_HOST", nil),
+				Deprecated:  "Use vmc_csp_url instead",
+			},
+			"vmc_csp_url": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "VMC Cloud Service Provider URL.",
+				DefaultFunc: schema.EnvDefaultFunc("NSXT_VMC_CSP_URL", "console.cloud.vmware.com"),
 			},
 			"vmc_token": {
 				Type:          schema.TypeString,
@@ -598,7 +606,7 @@ type jwtToken struct {
 }
 
 type vmcAuthInfo struct {
-	authHost     string
+	authUrl      string
 	authMode     string
 	accessToken  string
 	clientID     string
@@ -607,26 +615,33 @@ type vmcAuthInfo struct {
 
 func getVmcAuthInfo(d *schema.ResourceData) *vmcAuthInfo {
 	vmcInfo := vmcAuthInfo{
-		authHost:     d.Get("vmc_auth_host").(string),
 		authMode:     d.Get("vmc_auth_mode").(string),
 		accessToken:  d.Get("vmc_token").(string),
 		clientID:     d.Get("vmc_client_id").(string),
 		clientSecret: d.Get("vmc_client_secret").(string),
 	}
-	if len(vmcInfo.authHost) > 0 {
+
+	authHost := d.Get("vmc_auth_host").(string)
+	cspUrl := d.Get("vmc_csp_url").(string)
+	// For backward compatibility, use vmc_auth_host only when it's non-default value
+	if len(authHost) > 0 && authHost != defaultVmcAuthHost {
+		vmcInfo.authUrl = authHost
 		return &vmcInfo
 	}
 
-	// Fill in default auth host + url based on auth method
+	// Fill in csp host + auth url based on auth method
 	if len(vmcInfo.accessToken) > 0 {
-		vmcInfo.authHost = "console.cloud.vmware.com/csp/gateway/am/api/auth/api-tokens/authorize"
+		vmcInfo.authUrl = cspUrl + "/csp/gateway/am/api/auth/api-tokens/authorize"
 	} else if len(vmcInfo.clientSecret) > 0 && len(vmcInfo.clientID) > 0 {
-		vmcInfo.authHost = "console.cloud.vmware.com/csp/gateway/am/api/auth/authorize"
+		vmcInfo.authUrl = cspUrl + "/csp/gateway/am/api/auth/authorize"
 	}
 	return &vmcInfo
 }
 
 func (v *vmcAuthInfo) IsZero() bool {
+	if len(v.authUrl) == 0 {
+		return true
+	}
 	return len(v.accessToken) == 0 && len(v.clientID) == 0 && len(v.clientSecret) == 0
 }
 
@@ -636,12 +651,12 @@ func (v *vmcAuthInfo) getAPIToken() (string, error) {
 	// Access token
 	if len(v.accessToken) > 0 {
 		payload := strings.NewReader("refresh_token=" + v.accessToken)
-		req, _ = http.NewRequest("POST", "https://"+v.authHost, payload)
+		req, _ = http.NewRequest("POST", "https://"+v.authUrl, payload)
 	}
 	// Oauth app
 	if len(v.clientSecret) > 0 && len(v.clientID) > 0 {
 		payload := strings.NewReader("grant_type=client_credentials")
-		req, _ = http.NewRequest("POST", "https://"+v.authHost, payload)
+		req, _ = http.NewRequest("POST", "https://"+v.authUrl, payload)
 		req.SetBasicAuth(v.clientID, v.clientSecret)
 	}
 	if req == nil {
