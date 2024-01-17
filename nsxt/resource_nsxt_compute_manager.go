@@ -478,6 +478,7 @@ func resourceNsxtComputeManagerUpdate(d *schema.ResourceData, m interface{}) err
 
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
+	revision := int64(d.Get("revision").(int))
 	tags := getMPTagsFromSchema(d)
 	var accessLevelForOidc *string
 	alfo := d.Get("access_level_for_oidc").(string)
@@ -512,6 +513,7 @@ func resourceNsxtComputeManagerUpdate(d *schema.ResourceData, m interface{}) err
 		ReverseProxyHttpsPort: reverseProxyHTTPSPort,
 		Server:                &server,
 		SetAsOidcProvider:     &setAsOidcProvider,
+		Revision:              &revision,
 	}
 
 	_, err = client.Update(id, obj)
