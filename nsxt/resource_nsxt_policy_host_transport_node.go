@@ -9,7 +9,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/sites/enforcement_points"
 	model2 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
@@ -48,67 +47,12 @@ func resourceNsxtPolicyHostTransportNode() *schema.Resource {
 				Default:     "default",
 			},
 			"discovered_node_id": {
-				Type:          schema.TypeString,
-				Optional:      true,
-				Description:   "Discovered node id to create Host Transport Node",
-				ConflictsWith: []string{"node_deployment_info"},
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Discovered node id to create Host Transport Node",
 			},
-			"node_deployment_info": getFabricHostNodeSchema(),
 			// host_switch_spec
 			"standard_host_switch": getStandardHostSwitchSchema(nodeTypeHost),
-		},
-	}
-}
-
-func getFabricHostNodeSchema() *schema.Schema {
-	return &schema.Schema{
-		Type:     schema.TypeList,
-		MaxItems: 1,
-		Optional: true,
-		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{
-				"fqdn": {
-					Type:        schema.TypeString,
-					Computed:    true,
-					Description: "Fully qualified domain name of the fabric node",
-				},
-				"ip_addresses": {
-					Type:        schema.TypeList,
-					Optional:    true,
-					Computed:    true,
-					Description: "IP Addresses of the Node, version 4 or 6",
-					Elem: &schema.Schema{
-						Type:         schema.TypeString,
-						ValidateFunc: validateSingleIP(),
-					},
-				},
-				"host_credential": {
-					Type:        schema.TypeList,
-					MaxItems:    1,
-					Description: "Host login credentials",
-					Optional:    true,
-					Elem: &schema.Resource{
-						Schema: map[string]*schema.Schema{
-							"password": {
-								Type:        schema.TypeString,
-								Sensitive:   true,
-								Required:    true,
-								Description: "The authentication password of the host node",
-							},
-							"thumbprint": {
-								Type:        schema.TypeString,
-								Required:    true,
-								Description: "ESXi thumbprint or SSH key fingerprint of the host node",
-							},
-							"username": {
-								Type:        schema.TypeString,
-								Required:    true,
-								Description: "The username of the account on the host node",
-							},
-						},
-					},
-				},
-			},
 		},
 	}
 }
@@ -145,13 +89,6 @@ func resourceNsxtPolicyHostTransportNodeRead(d *schema.ResourceData, m interface
 		return err
 	}
 
-	fabricHostNode := obj.NodeDeploymentInfo
-	elem := make(map[string]interface{})
-	elem["fqdn"] = fabricHostNode.Fqdn
-	elem["ip_addresses"] = fabricHostNode.IpAddresses
-
-	d.Set("node_deployment_info", []map[string]interface{}{elem})
-
 	return nil
 }
 
@@ -180,35 +117,6 @@ func resourceNsxtPolicyHostTransportNodeExists(siteID, epID, tzID string, connec
 	return false, logAPIError("Error retrieving resource", err)
 }
 
-func getFabricHostNodeFromSchema(d *schema.ResourceData) *model2.FabricHostNode {
-	for _, ni := range d.Get("node_deployment_info").([]interface{}) {
-		nodeInfo := ni.(map[string]interface{})
-		ipAddresses := interfaceListToStringList(nodeInfo["ip_addresses"].([]interface{}))
-
-		var hostCredential *model2.HostNodeLoginCredential
-		for _, hci := range nodeInfo["host_credential"].([]interface{}) {
-			hc := hci.(map[string]interface{})
-			password := hc["password"].(string)
-			thumbprint := hc["thumbprint"].(string)
-			username := hc["username"].(string)
-			hostCredential = &model2.HostNodeLoginCredential{
-				Password:   &password,
-				Thumbprint: &thumbprint,
-				Username:   &username,
-			}
-		}
-		osType := model.HostNode_OS_TYPE_ESXI
-
-		fabricHostNode := model2.FabricHostNode{
-			IpAddresses:    ipAddresses,
-			HostCredential: hostCredential,
-			OsType:         &osType,
-		}
-		return &fabricHostNode
-	}
-	return nil
-}
-
 func policyHostTransportNodePatch(siteID, epID, htnID string, d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	htnClient := enforcement_points.NewHostTransportNodesClient(connector)
@@ -217,7 +125,6 @@ func policyHostTransportNodePatch(siteID, epID, htnID string, d *schema.Resource
 	displayName := d.Get("display_name").(string)
 	tags := getPolicyTagsFromSchema(d)
 	discoveredNodeID := d.Get("discovered_node_id").(string)
-	nodeDeploymentInfo := getFabricHostNodeFromSchema(d)
 	hostSwitchSpec, err := getHostSwitchSpecFromSchema(d, nodeTypeHost)
 	revision := int64(d.Get("revision").(int))
 	if err != nil {
@@ -229,7 +136,6 @@ func policyHostTransportNodePatch(siteID, epID, htnID string, d *schema.Resource
 		DisplayName:               &displayName,
 		Tags:                      tags,
 		HostSwitchSpec:            hostSwitchSpec,
-		NodeDeploymentInfo:        nodeDeploymentInfo,
 		DiscoveredNodeIdForCreate: &discoveredNodeID,
 		Revision:                  &revision,
 	}
