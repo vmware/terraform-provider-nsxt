@@ -14,33 +14,30 @@ This resource is supported with NSX 4.1.0 onwards.
 
 ```hcl
 resource "nsxt_policy_host_transport_node" "test" {
-  description  = "Terraform-deployed host transport node"
-  display_name = "tf_host_transport_node"
-
-  node_deployment_info {
-    ip_addresses = ["10.168.186.150"]
-
-    host_credential {
-      username   = "user1"
-      password   = "password1"
-      thumbprint = "thumbprint1"
-    }
-  }
+  description        = "Terraform-deployed host transport node"
+  display_name       = "tf_host_transport_node"
+  discovered_node_id = data.nsxt_discover_node.dn.id
 
   standard_host_switch {
-    host_switch_profile = [data.nsxt_policy_uplink_host_switch_profile.hsw_profile1.path]
+    host_switch_id      = "50 0b 31 a4 b8 af 35 df-40 56 b6 f9 aa d3 ee 12"
+    host_switch_profile = [data.nsxt_policy_uplink_host_switch_profile.uplink_host_switch_profile.path]
 
     ip_assignment {
       assigned_by_dhcp = true
     }
 
     transport_zone_endpoint {
-      transport_zone = data.nsxt_transport_zone.tz1.path
+      transport_zone = data.nsxt_policy_transport_zone.overlay_transport_zone.path
     }
 
-    pnic {
-      device_name = "fp-eth0"
-      uplink_name = "uplink1"
+    uplink {
+      uplink_name     = "uplink-1"
+      vds_uplink_name = "uplink1"
+    }
+
+    uplink {
+      uplink_name     = "uplink-2"
+      vds_uplink_name = "uplink2"
     }
   }
 
@@ -60,14 +57,7 @@ The following arguments are supported:
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `site_path` - (Optional) The path of the site which the Host Transport Node belongs to. `path` field of the existing `nsxt_policy_site` can be used here. Defaults to default site path.
 * `enforcement_point` - (Optional) The ID of enforcement point under given `site_path` to manage the Host Transport Node. Defaults to default enforcement point.
-* `discovered_node_id` - (Optional)  Discovered node id to create Host Transport Node. Specify discovered node id to create Host Transport Node for Discovered Node. This field is required during Host Transport Node create from vCenter server managing the ESXi type HostNode.
-* `node_deployment_info` - (Optional)
-  * `fqdn` - (Optional) Fully qualified domain name of the fabric node.
-  * `ip_addresses` - (Required) IP Addresses of the Node, version 4 or 6.
-  * `host_credential` - (Optional) Host login credentials.
-      * `password` - (Required) The authentication password of the host node.
-      * `thumbprint` - (Required) ESXi thumbprint or SSH key fingerprint of the host node.
-      * `username` - (Required) The username of the account on the host node.
+* `discovered_node_id` - (Required)  Discovered node id to create Host Transport Node. Specify discovered node id to create Host Transport Node for Discovered Node. This field is required during Host Transport Node create from vCenter server managing the ESXi type HostNode.
 * `standard_host_switch` - (Required) Standard host switch specification.
   * `host_switch_id` - (Optional) The host switch id. This ID will be used to reference a host switch.
   * `host_switch_mode` - (Optional) Operational mode of a HostSwitch. Accepted values - 'STANDARD', 'ENS', 'ENS_INTERRUPT' or 'LEGACY'. The default value is 'STANDARD'.
