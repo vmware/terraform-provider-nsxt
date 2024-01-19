@@ -317,6 +317,7 @@ func Provider() *schema.Provider {
 			"nsxt_edge_upgrade_group":                        dataSourceNsxtEdgeUpgradeGroup(),
 			"nsxt_host_upgrade_group":                        dataSourceNsxtHostUpgradeGroup(),
 			"nsxt_policy_gateway_interface_realization_info": dataSourceNsxtPolicyGatewayInterfaceRealizationInfo(),
+			"nsxt_upgrade_postcheck":                         dataSourceNsxtUpgradePostCheck(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -471,6 +472,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_lb_tcp_monitor_profile":           resourceNsxtPolicyLBTcpMonitorProfile(),
 			"nsxt_policy_lb_udp_monitor_profile":           resourceNsxtPolicyLBUdpMonitorProfile(),
 			"nsxt_policy_tier0_gateway_gre_tunnel":         resourceNsxtPolicyTier0GatewayGRETunnel(),
+			"nsxt_upgrade_run":                             resourceNsxtUpgradeRun(),
 		},
 
 		ConfigureFunc: providerConfigure,
@@ -1060,6 +1062,10 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 // Standard policy connection that initializes global connection settings on demand
 func getPolicyConnector(clients interface{}) client.Connector {
 	return getPolicyConnectorWithHeaders(clients, nil, false, true)
+}
+
+func getPolicyConnectorWithoutRetry(clients interface{}) client.Connector {
+	return getPolicyConnectorWithHeaders(clients, nil, false, false)
 }
 
 // Standalone policy connector, possibly for different endpoint,

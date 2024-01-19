@@ -142,6 +142,20 @@ func isNotFoundError(err error) bool {
 	return false
 }
 
+func isServiceUnavailableError(err error) bool {
+	if _, ok := err.(errors.ServiceUnavailable); ok {
+		return true
+	}
+	return false
+}
+
+func isTimeoutError(err error) bool {
+	if _, ok := err.(errors.TimedOut); ok {
+		return true
+	}
+	return false
+}
+
 func handleCreateError(resourceType string, resource string, err error) error {
 	msg := fmt.Sprintf("Failed to create %s %s", resourceType, resource)
 	return logAPIError(msg, err)
