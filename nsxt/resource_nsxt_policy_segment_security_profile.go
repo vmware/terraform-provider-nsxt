@@ -6,6 +6,7 @@ package nsxt
 import (
 	"fmt"
 	"log"
+	"reflect"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -15,6 +16,113 @@ import (
 	"github.com/vmware/terraform-provider-nsxt/api/infra"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
+
+var segmentSecurityProfileMetadata = map[string]*metadata{
+	"bpdu_filter_allow": {
+		skip: true,
+	},
+	"bpdu_filter_enable": {
+		schemaType:   "bool",
+		sdkFieldName: "BpduFilterEnable",
+		testData: testdata{
+			createValue: "true",
+			updateValue: "false",
+		},
+	},
+	"dhcp_client_block_enabled": {
+		schemaType:   "bool",
+		sdkFieldName: "DhcpClientBlockEnabled",
+		testData: testdata{
+			createValue: "true",
+			updateValue: "false",
+		},
+	},
+	"dhcp_server_block_enabled": {
+		schemaType:   "bool",
+		sdkFieldName: "DhcpServerBlockEnabled",
+		testData: testdata{
+			createValue: "true",
+			updateValue: "false",
+		},
+	},
+	"dhcp_client_block_v6_enabled": {
+		schemaType:   "bool",
+		sdkFieldName: "DhcpClientBlockV6Enabled",
+		testData: testdata{
+			createValue: "true",
+			updateValue: "false",
+		},
+	},
+	"dhcp_server_block_v6_enabled": {
+		schemaType:   "bool",
+		sdkFieldName: "DhcpServerBlockV6Enabled",
+		testData: testdata{
+			createValue: "true",
+			updateValue: "false",
+		},
+	},
+	"non_ip_traffic_block_enabled": {
+		schemaType:   "bool",
+		sdkFieldName: "NonIpTrafficBlockEnabled",
+		testData: testdata{
+			createValue: "true",
+			updateValue: "false",
+		},
+	},
+	"ra_guard_enabled": {
+		schemaType:   "bool",
+		sdkFieldName: "RaGuardEnabled",
+		testData: testdata{
+			createValue: "true",
+			updateValue: "false",
+		},
+	},
+	"rate_limits_enabled": {
+		schemaType:   "bool",
+		sdkFieldName: "RateLimitsEnabled",
+		testData: testdata{
+			createValue: "true",
+			updateValue: "false",
+		},
+	},
+	"rate_limit": {
+		schemaType:   "struct",
+		sdkFieldName: "RateLimits",
+		reflectType:  reflect.TypeOf(model.TrafficRateLimits{}),
+	},
+	"rate_limit.rx_broadcast": {
+		schemaType:   "int",
+		sdkFieldName: "RxBroadcast",
+		testData: testdata{
+			createValue: "100",
+			updateValue: "1000",
+		},
+	},
+	"rate_limit.tx_broadcast": {
+		schemaType:   "int",
+		sdkFieldName: "TxBroadcast",
+		testData: testdata{
+			createValue: "100",
+			updateValue: "1000",
+		},
+	},
+	"rate_limit.rx_multicast": {
+		schemaType:   "int",
+		sdkFieldName: "RxMulticast",
+		testData: testdata{
+			createValue: "100",
+			updateValue: "1000",
+		},
+	},
+	"rate_limit.tx_multicast": {
+		schemaType:   "int",
+		sdkFieldName: "TxMulticast",
+		testData: testdata{
+			createValue: "100",
+			updateValue: "1000",
+		},
+	},
+}
 
 func resourceNsxtPolicySegmentSecurityProfile() *schema.Resource {
 	return &schema.Resource{
@@ -136,47 +244,53 @@ func resourceNsxtPolicySegmentSecurityProfilePatch(d *schema.ResourceData, m int
 	description := d.Get("description").(string)
 	tags := getPolicyTagsFromSchema(d)
 	bpduFilterAllow := getStringListFromSchemaSet(d, "bpdu_filter_allow")
-	bpduFilterEnable := d.Get("bpdu_filter_enable").(bool)
-	dhcpClientBlockEnabled := d.Get("dhcp_client_block_enabled").(bool)
-	dhcpClientBlockV6Enabled := d.Get("dhcp_client_block_v6_enabled").(bool)
-	dhcpServerBlockEnabled := d.Get("dhcp_server_block_enabled").(bool)
-	dhcpServerBlockV6Enabled := d.Get("dhcp_server_block_v6_enabled").(bool)
-	nonIPTrafficBlockEnabled := d.Get("non_ip_traffic_block_enabled").(bool)
-	raGuardEnabled := d.Get("ra_guard_enabled").(bool)
-	rateLimitsList := d.Get("rate_limit").([]interface{})
-	var rateLimits *model.TrafficRateLimits
-	for _, item := range rateLimitsList {
-		data := item.(map[string]interface{})
-		rxBroadcast := int64(data["rx_broadcast"].(int))
-		rxMulticast := int64(data["rx_multicast"].(int))
-		txBroadcast := int64(data["tx_broadcast"].(int))
-		txMulticast := int64(data["tx_multicast"].(int))
-		obj := model.TrafficRateLimits{
-			RxBroadcast: &rxBroadcast,
-			RxMulticast: &rxMulticast,
-			TxBroadcast: &txBroadcast,
-			TxMulticast: &txMulticast,
+	/*
+		bpduFilterEnable := d.Get("bpdu_filter_enable").(bool)
+		dhcpClientBlockEnabled := d.Get("dhcp_client_block_enabled").(bool)
+		dhcpClientBlockV6Enabled := d.Get("dhcp_client_block_v6_enabled").(bool)
+		dhcpServerBlockEnabled := d.Get("dhcp_server_block_enabled").(bool)
+		dhcpServerBlockV6Enabled := d.Get("dhcp_server_block_v6_enabled").(bool)
+		nonIPTrafficBlockEnabled := d.Get("non_ip_traffic_block_enabled").(bool)
+		raGuardEnabled := d.Get("ra_guard_enabled").(bool)
+		rateLimitsList := d.Get("rate_limit").([]interface{})
+		var rateLimits *model.TrafficRateLimits
+		for _, item := range rateLimitsList {
+			data := item.(map[string]interface{})
+			rxBroadcast := int64(data["rx_broadcast"].(int))
+			rxMulticast := int64(data["rx_multicast"].(int))
+			txBroadcast := int64(data["tx_broadcast"].(int))
+			txMulticast := int64(data["tx_multicast"].(int))
+			obj := model.TrafficRateLimits{
+				RxBroadcast: &rxBroadcast,
+				RxMulticast: &rxMulticast,
+				TxBroadcast: &txBroadcast,
+				TxMulticast: &txMulticast,
+			}
+			rateLimits = &obj
+			break
 		}
-		rateLimits = &obj
-		break
-	}
-	rateLimitsEnabled := d.Get("rate_limits_enabled").(bool)
+		rateLimitsEnabled := d.Get("rate_limits_enabled").(bool)
+	*/
 
 	obj := model.SegmentSecurityProfile{
-		DisplayName:              &displayName,
-		Description:              &description,
-		Tags:                     tags,
-		BpduFilterAllow:          bpduFilterAllow,
-		BpduFilterEnable:         &bpduFilterEnable,
-		DhcpClientBlockEnabled:   &dhcpClientBlockEnabled,
-		DhcpClientBlockV6Enabled: &dhcpClientBlockV6Enabled,
-		DhcpServerBlockEnabled:   &dhcpServerBlockEnabled,
-		DhcpServerBlockV6Enabled: &dhcpServerBlockV6Enabled,
-		NonIpTrafficBlockEnabled: &nonIPTrafficBlockEnabled,
-		RaGuardEnabled:           &raGuardEnabled,
-		RateLimits:               rateLimits,
-		RateLimitsEnabled:        &rateLimitsEnabled,
+		DisplayName:     &displayName,
+		Description:     &description,
+		Tags:            tags,
+		BpduFilterAllow: bpduFilterAllow,
+		/*
+			BpduFilterEnable:         &bpduFilterEnable,
+			DhcpClientBlockEnabled:   &dhcpClientBlockEnabled,
+			DhcpClientBlockV6Enabled: &dhcpClientBlockV6Enabled,
+			DhcpServerBlockEnabled:   &dhcpServerBlockEnabled,
+			DhcpServerBlockV6Enabled: &dhcpServerBlockV6Enabled,
+			NonIpTrafficBlockEnabled: &nonIPTrafficBlockEnabled,
+			RaGuardEnabled:           &raGuardEnabled,
+			RateLimits:               rateLimits,
+			RateLimitsEnabled:        &rateLimitsEnabled,
+		*/
 	}
+	elem := reflect.ValueOf(&obj).Elem()
+	schemaToStruct(elem, d, segmentSecurityProfileMetadata, "", nil)
 
 	log.Printf("[INFO] Sending SegmentSecurityProfile with ID %s", id)
 	client := infra.NewSegmentSecurityProfilesClient(getSessionContext(d, m), connector)
@@ -216,6 +330,9 @@ func resourceNsxtPolicySegmentSecurityProfileRead(d *schema.ResourceData, m inte
 		return handleReadError(d, "SegmentSecurityProfile", id, err)
 	}
 
+	elem := reflect.ValueOf(&obj).Elem()
+	structToSchema(elem, d, segmentSecurityProfileMetadata, "", nil)
+
 	d.Set("display_name", obj.DisplayName)
 	d.Set("description", obj.Description)
 	setPolicyTagsInSchema(d, obj.Tags)
@@ -223,27 +340,29 @@ func resourceNsxtPolicySegmentSecurityProfileRead(d *schema.ResourceData, m inte
 	d.Set("path", obj.Path)
 	d.Set("revision", obj.Revision)
 
-	d.Set("bpdu_filter_allow", obj.BpduFilterAllow)
-	d.Set("bpdu_filter_enable", obj.BpduFilterEnable)
-	d.Set("dhcp_client_block_enabled", obj.DhcpClientBlockEnabled)
-	d.Set("dhcp_client_block_v6_enabled", obj.DhcpClientBlockV6Enabled)
-	d.Set("dhcp_server_block_enabled", obj.DhcpServerBlockEnabled)
-	d.Set("dhcp_server_block_v6_enabled", obj.DhcpServerBlockV6Enabled)
-	d.Set("non_ip_traffic_block_enabled", obj.NonIpTrafficBlockEnabled)
-	d.Set("ra_guard_enabled", obj.RaGuardEnabled)
-	d.Set("rate_limits_enabled", obj.RateLimitsEnabled)
+	/*
+		d.Set("bpdu_filter_allow", obj.BpduFilterAllow)
+		d.Set("bpdu_filter_enable", obj.BpduFilterEnable)
+		d.Set("dhcp_client_block_enabled", obj.DhcpClientBlockEnabled)
+		d.Set("dhcp_client_block_v6_enabled", obj.DhcpClientBlockV6Enabled)
+		d.Set("dhcp_server_block_enabled", obj.DhcpServerBlockEnabled)
+		d.Set("dhcp_server_block_v6_enabled", obj.DhcpServerBlockV6Enabled)
+		d.Set("non_ip_traffic_block_enabled", obj.NonIpTrafficBlockEnabled)
+		d.Set("ra_guard_enabled", obj.RaGuardEnabled)
+		d.Set("rate_limits_enabled", obj.RateLimitsEnabled)
 
-	var rateLimitsList []map[string]interface{}
-	if obj.RateLimits != nil {
-		item := obj.RateLimits
-		data := make(map[string]interface{})
-		data["rx_broadcast"] = item.RxBroadcast
-		data["rx_multicast"] = item.RxMulticast
-		data["tx_broadcast"] = item.TxBroadcast
-		data["tx_multicast"] = item.TxMulticast
-		rateLimitsList = append(rateLimitsList, data)
-	}
-	d.Set("rate_limit", rateLimitsList)
+		var rateLimitsList []map[string]interface{}
+		if obj.RateLimits != nil {
+			item := obj.RateLimits
+			data := make(map[string]interface{})
+			data["rx_broadcast"] = item.RxBroadcast
+			data["rx_multicast"] = item.RxMulticast
+			data["tx_broadcast"] = item.TxBroadcast
+			data["tx_multicast"] = item.TxMulticast
+			rateLimitsList = append(rateLimitsList, data)
+		}
+		d.Set("rate_limit", rateLimitsList)
+	*/
 
 	return nil
 }
