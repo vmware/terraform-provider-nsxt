@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"reflect"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -28,14 +29,18 @@ type testdata struct {
 }
 
 type metadata struct {
+	schemaType          string
 	readOnly            bool
 	sdkFieldName        string
 	introducedInVersion string
+	skip                bool
+	reflectType         reflect.Type
 	testData            testdata
 }
 
 var macDiscoveryProfileMetadata = map[string]*metadata{
 	"mac_change_enabled": {
+		schemaType:   "bool",
 		sdkFieldName: "MacChangeEnabled",
 		testData: testdata{
 			createValue: "true",
@@ -43,6 +48,7 @@ var macDiscoveryProfileMetadata = map[string]*metadata{
 		},
 	},
 	"mac_learning_enabled": {
+		schemaType:   "bool",
 		sdkFieldName: "MacLearningEnabled",
 		testData: testdata{
 			createValue: "true",
@@ -50,6 +56,7 @@ var macDiscoveryProfileMetadata = map[string]*metadata{
 		},
 	},
 	"mac_limit": {
+		schemaType:   "int",
 		sdkFieldName: "MacLimit",
 		testData: testdata{
 			createValue: "20",
@@ -57,6 +64,7 @@ var macDiscoveryProfileMetadata = map[string]*metadata{
 		},
 	},
 	"mac_limit_policy": {
+		schemaType:   "string",
 		sdkFieldName: "MacLimitPolicy",
 		testData: testdata{
 			createValue: "ALLOW",
@@ -64,6 +72,7 @@ var macDiscoveryProfileMetadata = map[string]*metadata{
 		},
 	},
 	"remote_overlay_mac_limit": {
+		schemaType:   "int",
 		sdkFieldName: "RemoteOverlayMacLimit",
 		testData: testdata{
 			createValue: "2048",
@@ -71,6 +80,7 @@ var macDiscoveryProfileMetadata = map[string]*metadata{
 		},
 	},
 	"unknown_unicast_flooding_enabled": {
+		schemaType:          "bool",
 		sdkFieldName:        "UnknownUnicastFloodingEnabled",
 		introducedInVersion: "4.0.0",
 		testData: testdata{
@@ -148,6 +158,121 @@ func resourceNsxtPolicyMacDiscoveryProfileExists(sessionContext utl.SessionConte
 	return false, logAPIError("Error retrieving resource", err)
 }
 
+func structToSchema(elem reflect.Value, d *schema.ResourceData, metadata map[string]*metadata, parent string, parentMap map[string]interface{}) {
+	for key, item := range metadata {
+		if len(parent) > 0 && !strings.HasPrefix(key, parent+".") {
+			continue
+		}
+		if item.skip {
+			continue
+		}
+
+		log.Printf("[INFO] inspecting key %s", key)
+		if len(parent) > 0 {
+			key = key[len(parent)+1:]
+			log.Printf("[INFO] parent %s key %s", parent, key)
+		} else if strings.Contains(key, ".") {
+			continue
+		}
+		if item.schemaType == "struct" {
+			nestedObj := elem.FieldByName(item.sdkFieldName)
+			nestedSchema := make(map[string]interface{})
+			structToSchema(nestedObj.Elem(), d, metadata, key, nestedSchema)
+			log.Printf("[INFO] assigning struct %v to %s", nestedObj, key)
+			// TODO - get the schema from nested type if parent in present
+			var nestedSlice []map[string]interface{}
+			nestedSlice = append(nestedSlice, nestedSchema)
+			if len(parent) > 0 {
+				parentMap[key] = nestedSlice
+			} else {
+				d.Set(key, nestedSlice)
+			}
+		} else {
+			if len(parent) > 0 {
+				log.Printf("[INFO] assigning nested value %v to %s", elem.FieldByName(item.sdkFieldName).Interface(), key)
+				parentMap[key] = elem.FieldByName(item.sdkFieldName).Interface()
+			} else {
+				log.Printf("[INFO] assigning value %v to %s", elem.FieldByName(item.sdkFieldName).Interface(), key)
+				d.Set(key, elem.FieldByName(item.sdkFieldName).Interface())
+			}
+		}
+	}
+}
+
+func schemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[string]*metadata, parent string, parentMap map[string]interface{}) {
+	for key, item := range metadata {
+		if len(parent) > 0 && !strings.HasPrefix(key, parent+".") {
+			continue
+		}
+		if item.readOnly || item.skip {
+			continue
+		}
+		if item.introducedInVersion != "" && nsxVersionLower(item.introducedInVersion) {
+			continue
+		}
+
+		log.Printf("[INFO] inspecting key %s", key)
+		if len(parent) > 0 {
+			key = key[len(parent)+1:]
+			log.Printf("[INFO] parent %s key %s", parent, key)
+		} else if strings.Contains(key, ".") {
+			continue
+		}
+		if item.schemaType == "string" {
+			var value string
+			if len(parent) > 0 {
+				value = parentMap[key].(string)
+			} else {
+				value = d.Get(key).(string)
+			}
+			log.Printf("[INFO] assigning string %v to %s", value, key)
+			elem.FieldByName(item.sdkFieldName).Set(reflect.ValueOf(&value))
+		}
+		if item.schemaType == "bool" {
+			var value bool
+			if len(parent) > 0 {
+				value = parentMap[key].(bool)
+			} else {
+				value = d.Get(key).(bool)
+			}
+			log.Printf("[INFO] assigning bool %v to %s", value, key)
+			elem.FieldByName(item.sdkFieldName).Set(reflect.ValueOf(&value))
+		}
+		if item.schemaType == "int" {
+			var value int64
+			if len(parent) > 0 {
+				value = int64(parentMap[key].(int))
+			} else {
+				value = int64(d.Get(key).(int))
+			}
+			log.Printf("[INFO] assigning int %v to %s", value, key)
+			elem.FieldByName(item.sdkFieldName).Set(reflect.ValueOf(&value))
+		}
+		if item.schemaType == "struct" {
+			/*
+				TODO - get reflect Type from sdk
+				structType := bindingType.(bindings.StructType)
+				fieldType := structType.Field(key)
+			*/
+			nestedObj := reflect.New(item.reflectType)
+			/*
+				slice := reflect.MakeSlice(reflect.TypeOf(nestedObj), 1, 1)
+			*/
+			nestedSchemaList := d.Get(key).([]interface{})
+			if len(nestedSchemaList) == 0 {
+				continue
+			}
+			nestedSchema := nestedSchemaList[0].(map[string]interface{})
+
+			schemaToStruct(nestedObj.Elem(), d, metadata, key, nestedSchema)
+			//elem.FieldByName(item.sdkFieldName).Set(reflect.ValueOf(nestedObj))
+			log.Printf("[INFO] assigning struct %v to %s", nestedObj, key)
+			elem.FieldByName(item.sdkFieldName).Set(nestedObj)
+			// TODO - get the schema from nested type if parent in present
+		}
+	}
+}
+
 func resourceNsxtPolicyMacDiscoveryProfileCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
@@ -183,32 +308,8 @@ func resourceNsxtPolicyMacDiscoveryProfileCreate(d *schema.ResourceData, m inter
 		*/
 	}
 
-	schemaDef := resourceNsxtPolicyMacDiscoveryProfile().Schema
 	elem := reflect.ValueOf(&obj).Elem()
-	for key, item := range macDiscoveryProfileMetadata {
-		if item.readOnly {
-			continue
-		}
-		if item.introducedInVersion != "" && nsxVersionLower(item.introducedInVersion) {
-			continue
-		}
-		itemType := schemaDef[key].Type
-		if itemType == schema.TypeString {
-			value := d.Get(key).(string)
-			log.Printf("[INFO] assigning string %v to %s", value, key)
-			elem.FieldByName(item.sdkFieldName).Set(reflect.ValueOf(&value))
-		}
-		if itemType == schema.TypeBool {
-			value := d.Get(key).(bool)
-			log.Printf("[INFO] assigning bool %v to %s", value, key)
-			elem.FieldByName(item.sdkFieldName).Set(reflect.ValueOf(&value))
-		}
-		if itemType == schema.TypeInt {
-			value := int64(d.Get(key).(int))
-			log.Printf("[INFO] assigning int %v to %s", value, key)
-			elem.FieldByName(item.sdkFieldName).Set(reflect.ValueOf(&value))
-		}
-	}
+	schemaToStruct(elem, d, macDiscoveryProfileMetadata, "", nil)
 
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating MacDiscoveryProfile with ID %s", id)
@@ -247,9 +348,12 @@ func resourceNsxtPolicyMacDiscoveryProfileRead(d *schema.ResourceData, m interfa
 	d.Set("path", obj.Path)
 
 	elem := reflect.ValueOf(&obj).Elem()
-	for key, item := range macDiscoveryProfileMetadata {
-		d.Set(key, elem.FieldByName(item.sdkFieldName).Interface())
-	}
+	/*
+		for key, item := range macDiscoveryProfileMetadata {
+			d.Set(key, elem.FieldByName(item.sdkFieldName).Interface())
+		}
+	*/
+	structToSchema(elem, d, macDiscoveryProfileMetadata, "", nil)
 	/*
 		d.Set("display_name", obj.DisplayName)
 		d.Set("description", obj.Description)
@@ -278,26 +382,25 @@ func resourceNsxtPolicyMacDiscoveryProfileUpdate(d *schema.ResourceData, m inter
 	displayName := d.Get("display_name").(string)
 	tags := getPolicyTagsFromSchema(d)
 
-	macChangeEnabled := d.Get("mac_change_enabled").(bool)
-	macLearningEnabled := d.Get("mac_learning_enabled").(bool)
-	macLimit := int64(d.Get("mac_limit").(int))
-	macLimitPolicy := d.Get("mac_limit_policy").(string)
-	remoteOverlayMacLimit := int64(d.Get("remote_overlay_mac_limit").(int))
-	unknownUnicastFloodingEnabled := d.Get("unknown_unicast_flooding_enabled").(bool)
+	/*
+		macChangeEnabled := d.Get("mac_change_enabled").(bool)
+		macLearningEnabled := d.Get("mac_learning_enabled").(bool)
+		macLimit := int64(d.Get("mac_limit").(int))
+		macLimitPolicy := d.Get("mac_limit_policy").(string)
+		remoteOverlayMacLimit := int64(d.Get("remote_overlay_mac_limit").(int))
+		unknownUnicastFloodingEnabled := d.Get("unknown_unicast_flooding_enabled").(bool)
+	*/
 	revision := int64(d.Get("revision").(int))
 
 	obj := model.MacDiscoveryProfile{
-		DisplayName:                   &displayName,
-		Description:                   &description,
-		Tags:                          tags,
-		MacChangeEnabled:              &macChangeEnabled,
-		MacLearningEnabled:            &macLearningEnabled,
-		MacLimit:                      &macLimit,
-		MacLimitPolicy:                &macLimitPolicy,
-		RemoteOverlayMacLimit:         &remoteOverlayMacLimit,
-		UnknownUnicastFloodingEnabled: &unknownUnicastFloodingEnabled,
-		Revision:                      &revision,
+		DisplayName: &displayName,
+		Description: &description,
+		Tags:        tags,
+		Revision:    &revision,
 	}
+
+	elem := reflect.ValueOf(&obj).Elem()
+	schemaToStruct(elem, d, macDiscoveryProfileMetadata, "", nil)
 
 	// Update the resource using PATCH
 	boolFalse := false
