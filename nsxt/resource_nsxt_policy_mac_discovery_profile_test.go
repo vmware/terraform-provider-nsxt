@@ -26,6 +26,7 @@ func TestAccResourceNsxtPolicyMacDiscoveryProfile_basic(t *testing.T) {
 func TestAccResourceNsxtPolicyMacDiscoveryProfile_multitenancy(t *testing.T) {
 	testAccResourceNsxtPolicyMacDiscoveryProfileBasic(t, true, func() {
 		testAccPreCheck(t)
+		testAccNSXVersion(t, "3.0.0")
 		testAccOnlyMultitenancy(t)
 	})
 }
