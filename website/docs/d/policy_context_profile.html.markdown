@@ -39,7 +39,7 @@ data "nsxt_policy_context_profile" "demoprof" {
 * `id` - (Optional) The ID of Profile to retrieve.
 * `display_name` - (Optional) The Display Name prefix of the Profile to retrieve.
 * `context` - (Optional) The context which the object belongs to
-  * `project_id` - (Required) The ID of the project which the object belongs to
+    * `project_id` - (Required) The ID of the project which the object belongs to
 
 ## Attributes Reference
 
