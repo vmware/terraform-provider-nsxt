@@ -314,6 +314,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_host_transport_node_profile": dataSourceNsxtPolicyHostTransportNodeProfile(),
 			"nsxt_transport_node":                     dataSourceNsxtEdgeTransportNode(),
 			"nsxt_discover_node":                      dataSourceNsxtDiscoverNode(),
+			"nsxt_policy_ods_pre_defined_runbook":     dataSourceNsxtPolicyODSPreDefinedRunbook(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
