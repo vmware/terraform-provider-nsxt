@@ -221,15 +221,15 @@ The following arguments are used to configure the VMware NSX-T Provider:
   partially successful realization as valid state and not fail apply.
 * `vmc_token` - (Optional) Long-lived API token for authenticating with VMware
   Cloud Services APIs. This token will be used to short-lived token that is
-  needed to communicate with NSX Manager in VMC environment. In conflict with 
-  `vmc_client_id` and `vmc_client_secret`.
+  needed to communicate with NSX Manager in VMC environment. Can not be specified 
+  together with `vmc_client_id` and `vmc_client_secret`.
   Note that only subset of policy resources are supported with VMC environment.
 * `vmc_client_id`- (Optional) ID of OAuth App associated with the VMC organization. 
   The combination with `vmc_client_secret` is used to authenticate when calling 
-  VMware Cloud Services APIs. In conflict with `vmc_token`.
+  VMware Cloud Services APIs. Can not be specified together with `vmc_token`.
 * `vmc_client_secret` - (Optional) Secret of OAuth App associated with the VMC 
   organization. The combination with `vmc_client_id` is used to authenticate when 
-  calling VMware Cloud Services APIs. In conflict with `vmc_token`.
+  calling VMware Cloud Services APIs. Can not be specified together with `vmc_token`.
   Note that only subset of policy resources are supported with VMC environment.
 * `vmc_auth_host` - (Optional) URL for VMC authorization service that is used
   to obtain short-lived token for NSX manager access. Defaults to VMC
