@@ -59,18 +59,18 @@ func (c StructValueClientContext) Get(ipPoolIdParam string, ipSubnetIdParam stri
 	return obj, err
 }
 
-func (c StructValueClientContext) Delete(ipPoolIdParam string, ipSubnetIdParam string) error {
+func (c StructValueClientContext) Delete(ipPoolIdParam string, ipSubnetIdParam string, ignoreIpAllocationsParam *bool) error {
 	var err error
 
 	switch c.ClientType {
 
 	case utl.Local:
 		client := c.Client.(client0.IpSubnetsClient)
-		err = client.Delete(ipPoolIdParam, ipSubnetIdParam)
+		err = client.Delete(ipPoolIdParam, ipSubnetIdParam, ignoreIpAllocationsParam)
 
 	case utl.Multitenancy:
 		client := c.Client.(client1.IpSubnetsClient)
-		err = client.Delete(utl.DefaultOrgID, c.ProjectID, ipPoolIdParam, ipSubnetIdParam)
+		err = client.Delete(utl.DefaultOrgID, c.ProjectID, ipPoolIdParam, ipSubnetIdParam, ignoreIpAllocationsParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

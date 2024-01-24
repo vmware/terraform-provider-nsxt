@@ -36,7 +36,7 @@ func dataSourceNsxtPolicyIPBlockRead(d *schema.ResourceData, m interface{}) erro
 	var obj model.IpAddressBlock
 	if objID != "" {
 		// Get by id
-		objGet, err := client.Get(objID)
+		objGet, err := client.Get(objID, nil)
 		if err != nil {
 			return handleDataSourceReadError(d, "IpAddressBlock", objID, err)
 		}

@@ -247,7 +247,7 @@ func resourceNsxtPolicyIPPoolStaticSubnetDelete(d *schema.ResourceData, m interf
 	}
 
 	log.Printf("[INFO] Deleting Static Subnet with ID %s", id)
-	err := client.Delete(poolID, id)
+	err := client.Delete(poolID, id, nil)
 	if err != nil {
 		return handleDeleteError("Static Subnet", id, err)
 	}

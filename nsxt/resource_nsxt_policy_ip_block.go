@@ -46,7 +46,7 @@ func resourceNsxtPolicyIPBlock() *schema.Resource {
 func resourceNsxtPolicyIPBlockExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
 	client := infra.NewIpBlocksClient(sessionContext, connector)
 
-	_, err := client.Get(id)
+	_, err := client.Get(id, nil)
 	if err == nil {
 		return true, nil
 	}
@@ -67,7 +67,7 @@ func resourceNsxtPolicyIPBlockRead(d *schema.ResourceData, m interface{}) error 
 		return fmt.Errorf("Error obtaining IP Block ID")
 	}
 
-	block, err := client.Get(id)
+	block, err := client.Get(id, nil)
 	if err != nil {
 		return handleReadError(d, "IP Block", id, err)
 	}

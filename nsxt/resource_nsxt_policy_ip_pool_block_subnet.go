@@ -209,7 +209,7 @@ func resourceNsxtPolicyIPPoolBlockSubnetDelete(d *schema.ResourceData, m interfa
 	}
 
 	log.Printf("[INFO] Deleting Block Subnet with ID %s", id)
-	err := client.Delete(poolID, id)
+	err := client.Delete(poolID, id, nil)
 	if err != nil {
 		return handleDeleteError("Block Subnet", id, err)
 	}
