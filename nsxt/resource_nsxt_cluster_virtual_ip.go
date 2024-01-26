@@ -5,6 +5,7 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -63,25 +64,27 @@ func resourceNsxtClusterVirualIPCreate(d *schema.ResourceData, m interface{}) er
 	if id == "" {
 		id = newUUID()
 	}
-	d.SetId(id)
 	err := setClusterVirtualIP(d, m)
 	if err != nil {
-		return err
+		return handleCreateError("ClusterVirtualIP", id, err)
 	}
+	d.SetId(id)
 	return resourceNsxtClusterVirualIPRead(d, m)
 }
 
 func resourceNsxtClusterVirualIPRead(d *schema.ResourceData, m interface{}) error {
+	id := d.Id()
+	if id == "" {
+		return fmt.Errorf("Error obtaining ClusterVirtualIP ID")
+	}
 	connector := getPolicyConnector(m)
 	client := cluster.NewApiVirtualIpClient(connector)
 
 	obj, err := client.Get()
 	if err != nil {
-		return err
+		return handleReadError(d, "ClusterVirtualIP", id, err)
 	}
 
-	// For some reason the Get() function of ApiVirtulIPClient will only return ip address information
-	// so skip setting force here
 	d.Set("ip_address", obj.IpAddress)
 	d.Set("ipv6_address", obj.Ip6Address)
 
@@ -102,29 +105,37 @@ func setClusterVirtualIP(d *schema.ResourceData, m interface{}) error {
 	}
 	_, err := client.Setvirtualip(&forceStr, &ipv6Address, &ipAddress)
 	if err != nil {
-		return fmt.Errorf("Failed to set cluster virtual ip: %s", err)
+		log.Printf("[WARNING] Failed to set virtual ip: %v", err)
+		return err
 	}
 	return nil
 }
 
 func resourceNsxtClusterVirualIPUpdate(d *schema.ResourceData, m interface{}) error {
+	id := d.Id()
 	err := setClusterVirtualIP(d, m)
 	if err != nil {
-		return err
+		return handleUpdateError("ClusterVirtualIP", id, err)
 	}
 	return resourceNsxtClusterVirualIPRead(d, m)
 }
 
 func resourceNsxtClusterVirualIPDelete(d *schema.ResourceData, m interface{}) error {
+	id := d.Id()
+	if id == "" {
+		return fmt.Errorf("Error obtaining ClusterVirtualIP ID")
+	}
 	connector := getPolicyConnector(m)
 	client := cluster.NewApiVirtualIpClient(connector)
 	_, err := client.Clearvirtualip()
 	if err != nil {
-		return fmt.Errorf("Failed to clear cluster virtual IPv4 address: %s", err)
+		log.Printf("[WARNING] Failed to clear virtual ip: %v", err)
+		return handleDeleteError("ClusterVirtualIP", id, err)
 	}
 	_, err = client.Clearvirtualip6()
 	if err != nil {
-		return fmt.Errorf("Failed to clear cluster virtual IPv6 address: %s", err)
+		log.Printf("[WARNING] Failed to clear virtual ipv6 ip: %v", err)
+		return handleDeleteError("ClusterVirtualIP", id, err)
 	}
 	return nil
 }
