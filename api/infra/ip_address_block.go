@@ -32,7 +32,7 @@ func NewIpBlocksClient(sessionContext utl.SessionContext, connector vapiProtocol
 	return &IpAddressBlockClientContext{Client: client, ClientType: sessionContext.ClientType, ProjectID: sessionContext.ProjectID}
 }
 
-func (c IpAddressBlockClientContext) Get(ipBlockIdParam string) (model0.IpAddressBlock, error) {
+func (c IpAddressBlockClientContext) Get(ipBlockIdParam string, ignoreIpblockUsageParam *bool) (model0.IpAddressBlock, error) {
 	var obj model0.IpAddressBlock
 	var err error
 
@@ -40,14 +40,14 @@ func (c IpAddressBlockClientContext) Get(ipBlockIdParam string) (model0.IpAddres
 
 	case utl.Local:
 		client := c.Client.(client0.IpBlocksClient)
-		obj, err = client.Get(ipBlockIdParam)
+		obj, err = client.Get(ipBlockIdParam, ignoreIpblockUsageParam)
 		if err != nil {
 			return obj, err
 		}
 
 	case utl.Multitenancy:
 		client := c.Client.(client1.IpBlocksClient)
-		obj, err = client.Get(utl.DefaultOrgID, c.ProjectID, ipBlockIdParam)
+		obj, err = client.Get(utl.DefaultOrgID, c.ProjectID, ipBlockIdParam, ignoreIpblockUsageParam)
 		if err != nil {
 			return obj, err
 		}

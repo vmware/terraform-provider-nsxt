@@ -62,7 +62,7 @@ func resourceNsxtPolicyProject() *schema.Resource {
 func resourceNsxtPolicyProjectExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	var err error
 	client := infra.NewProjectsClient(connector)
-	_, err = client.Get(defaultOrgID, id)
+	_, err = client.Get(defaultOrgID, id, nil)
 
 	if err == nil {
 		return true, nil
@@ -146,7 +146,7 @@ func resourceNsxtPolicyProjectRead(d *schema.ResourceData, m interface{}) error 
 	var obj model.Project
 	client := infra.NewProjectsClient(connector)
 	var err error
-	obj, err = client.Get(defaultOrgID, id)
+	obj, err = client.Get(defaultOrgID, id, nil)
 	if err != nil {
 		return handleReadError(d, "Project", id, err)
 	}
@@ -197,7 +197,7 @@ func resourceNsxtPolicyProjectDelete(d *schema.ResourceData, m interface{}) erro
 	connector := getPolicyConnector(m)
 	var err error
 	client := infra.NewProjectsClient(connector)
-	err = client.Delete(defaultOrgID, id)
+	err = client.Delete(defaultOrgID, id, nil)
 
 	if err != nil {
 		return handleDeleteError("Project", id, err)

@@ -158,7 +158,7 @@ func testAccNSXPolicyIPBlockCheckExists(resourceName string) resource.TestCheckF
 			return fmt.Errorf("NSX Policy IP Block resource ID not set in resources ")
 		}
 
-		_, err := client.Get(resourceID)
+		_, err := client.Get(resourceID, nil)
 		if err != nil {
 			return fmt.Errorf("Error while retrieving policy IP Block ID %s. Error: %v", resourceID, err)
 		}
@@ -177,7 +177,7 @@ func testAccNSXPolicyIPBlockCheckDestroy(state *terraform.State) error {
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		_, err := client.Get(resourceID)
+		_, err := client.Get(resourceID, nil)
 		if err == nil {
 			return fmt.Errorf("Policy IP Block %s still exists", resourceID)
 		}

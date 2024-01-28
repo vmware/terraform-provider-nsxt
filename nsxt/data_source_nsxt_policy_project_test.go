@@ -87,7 +87,7 @@ func testAccDataSourceNsxtPolicyProjectDeleteByName(name string) error {
 	}
 	for _, objInList := range objList.Results {
 		if *objInList.DisplayName == name {
-			err := client.Delete(defaultOrgID, *objInList.Id)
+			err := client.Delete(defaultOrgID, *objInList.Id, nil)
 			if err != nil {
 				return handleDeleteError("Project", *objInList.Id, err)
 			}

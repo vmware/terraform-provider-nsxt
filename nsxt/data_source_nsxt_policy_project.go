@@ -70,7 +70,7 @@ func dataSourceNsxtPolicyProjectRead(d *schema.ResourceData, m interface{}) erro
 	var obj model.Project
 	if objID != "" {
 		// Get by id
-		objGet, err := client.Get(defaultOrgID, objID)
+		objGet, err := client.Get(defaultOrgID, objID, nil)
 		if err != nil {
 			return handleDataSourceReadError(d, "Project", objID, err)
 		}
