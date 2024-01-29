@@ -44,6 +44,7 @@ The following arguments are supported:
     * `transport_node_profile_sub_config_name` - (Required) Name of the TransportNodeProfile sub configuration to be used.
   * `sub_cluster_id` - (Required) sub-cluster ID.
 * `transport_node_profile_path` - (Optional) Transport Node Profile Path.
+* `remove_nsx_on_destroy` - (Optional) Upon deletion, uninstall NSX from Transport Node Collection member hosts. Default is false. 
 
 ## Attributes Reference
 
@@ -61,3 +62,4 @@ An existing policy Host Transport Node Collection can be [imported][docs-import]
 terraform import nsxt_policy_host_transport_node_collection.test POLICY_PATH
 ```
 The above command imports Policy Host Transport Node Collection named test with NSX policy path POLICY_PATH.
+Note: `remove_nsx_on_destroy` will be set to default value upon import. To enforce the intent value, reapply the plan.
