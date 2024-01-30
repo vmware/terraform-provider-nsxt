@@ -140,14 +140,19 @@ func getIpv6ProfilePathsFromSchema(d *schema.ResourceData) []string {
 func setIpv6ProfilePathsInSchema(d *schema.ResourceData, paths []string) error {
 	for _, path := range paths {
 		tokens := strings.Split(path, "/")
-		// First token is empty, second is infra or global-infra, third is profile type
+		// First token is empty, second is infra, global-infra or orgs, third is profile type
 		if len(tokens) < 4 {
 			return fmt.Errorf("Unexpected ipv6 profile path: %s", path)
 		}
-		if tokens[2] == "ipv6-ndra-profiles" {
+		tokenOffset := 2
+		if tokens[1] == "orgs" && tokens[3] == "projects" {
+			// It's a multitenancy environment
+			tokenOffset = 6
+		}
+		if tokens[tokenOffset] == "ipv6-ndra-profiles" {
 			d.Set("ipv6_ndra_profile_path", path)
 		}
-		if tokens[2] == "ipv6-dad-profiles" {
+		if tokens[tokenOffset] == "ipv6-dad-profiles" {
 			d.Set("ipv6_dad_profile_path", path)
 		}
 	}
