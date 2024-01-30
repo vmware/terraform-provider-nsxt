@@ -316,7 +316,8 @@ resource "nsxt_policy_ip_address_allocation" "test" {
 }
 
 data "nsxt_policy_realization_info" "realization_info" {
-  path = nsxt_policy_ip_address_allocation.test.path
+  timeout = 6000
+  path    = nsxt_policy_ip_address_allocation.test.path
 }`, attrMap["display_name"], attrMap["description"])
 }
 
