@@ -913,3 +913,38 @@
     - Get
     - Patch
     - Update
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/domains
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/domains
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Multitenancy
+  model_name: IdsSecurityPolicy
+  obj_name: IdsSecurityPolicy
+  client_name: IntrusionServicePoliciesClient
+  supported_method:
+    - New
+    - Get
+    - Delete
+    - List
+    - Patch
+    - Update
+
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/settings/firewall/security/intrusion_services
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/settings/firewall/security/intrusion_services
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Multitenancy
+  model_name: IdsProfile
+  obj_name: IdsProfile
+  client_name: ProfilesClient
+  supported_method:
+    - New
+    - Get
+    - Delete
+    - List
+    - Patch
+    - Update

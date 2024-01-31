@@ -15,6 +15,21 @@ import (
 var policyDefaultIdsProfilePath = "/infra/settings/firewall/security/intrusion-services/profiles/DefaultIDSProfile"
 
 func TestAccResourceNsxtPolicyIntrusionServicePolicy_basic(t *testing.T) {
+	testAccResourceNsxtPolicyIntrusionServicePolicyBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyLocalManager(t)
+		testAccNSXVersion(t, "3.1.0")
+	})
+}
+
+func TestAccResourceNsxtPolicyIntrusionServicePolicy_multitenancy(t *testing.T) {
+	testAccResourceNsxtPolicyIntrusionServicePolicyBasic(t, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+	})
+}
+
+func testAccResourceNsxtPolicyIntrusionServicePolicyBasic(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestResourceName()
 	updatedName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_intrusion_service_policy.test"
@@ -29,14 +44,14 @@ func TestAccResourceNsxtPolicyIntrusionServicePolicy_basic(t *testing.T) {
 	tag2 := "def"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t); testAccNSXVersion(t, "3.1.0") },
+		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyIntrusionServicePolicyCheckDestroy(state, updatedName, defaultDomain)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyIntrusionServicePolicyBasic(name, comments1, defaultDomain),
+				Config: testAccNsxtPolicyIntrusionServicePolicyBasic(name, comments1, defaultDomain, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyIntrusionServicePolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -51,7 +66,7 @@ func TestAccResourceNsxtPolicyIntrusionServicePolicy_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyIntrusionServicePolicyBasic(updatedName, comments2, defaultDomain),
+				Config: testAccNsxtPolicyIntrusionServicePolicyBasic(updatedName, comments2, defaultDomain, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyIntrusionServicePolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -65,7 +80,7 @@ func TestAccResourceNsxtPolicyIntrusionServicePolicy_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyIntrusionServicePolicyWithRule(updatedName, direction1, proto1, tag1, defaultDomain),
+				Config: testAccNsxtPolicyIntrusionServicePolicyWithRule(updatedName, direction1, proto1, tag1, defaultDomain, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyIntrusionServicePolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -86,7 +101,7 @@ func TestAccResourceNsxtPolicyIntrusionServicePolicy_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyIntrusionServicePolicyWithRule(updatedName, direction2, proto2, tag2, defaultDomain),
+				Config: testAccNsxtPolicyIntrusionServicePolicyWithRule(updatedName, direction2, proto2, tag2, defaultDomain, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyIntrusionServicePolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -188,24 +203,41 @@ func TestAccResourceNsxtPolicyIntrusionServicePolicy_withDependencies(t *testing
 		},
 	})
 }
+
 func TestAccResourceNsxtPolicyIntrusionServicePolicy_importBasic(t *testing.T) {
+	testAccResourceNsxtPolicyIntrusionServicePolicyImportBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyLocalManager(t)
+		testAccNSXVersion(t, "3.1.0")
+	})
+}
+
+func TestAccResourceNsxtPolicyIntrusionServicePolicy_importBasic_multitenancy(t *testing.T) {
+	testAccResourceNsxtPolicyIntrusionServicePolicyImportBasic(t, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+	})
+}
+
+func testAccResourceNsxtPolicyIntrusionServicePolicyImportBasic(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_intrusion_service_policy.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t); testAccNSXVersion(t, "3.1.0") },
+		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyIntrusionServicePolicyCheckDestroy(state, name, defaultDomain)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyIntrusionServicePolicyBasic(name, "import", defaultDomain),
+				Config: testAccNsxtPolicyIntrusionServicePolicyBasic(name, "import", defaultDomain, withContext),
 			},
 			{
 				ResourceName:      testResourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
 			},
 		},
 	})
@@ -226,7 +258,7 @@ func testAccNsxtPolicyIntrusionServicePolicyExists(resourceName string, domainNa
 			return fmt.Errorf("Policy resource ID not set in resources")
 		}
 
-		exists, err := resourceNsxtPolicyIntrusionServicePolicyExistsInDomain(resourceID, domainName, connector)
+		exists, err := resourceNsxtPolicyIntrusionServicePolicyExistsInDomain(testAccGetSessionContext(), resourceID, domainName, connector)
 		if err != nil {
 			return err
 		}
@@ -246,7 +278,7 @@ func testAccNsxtPolicyIntrusionServicePolicyCheckDestroy(state *terraform.State,
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		exists, err := resourceNsxtPolicyIntrusionServicePolicyExistsInDomain(resourceID, domainName, connector)
+		exists, err := resourceNsxtPolicyIntrusionServicePolicyExistsInDomain(testAccGetSessionContext(), resourceID, domainName, connector)
 		if err != nil {
 			return err
 		}
@@ -258,10 +290,15 @@ func testAccNsxtPolicyIntrusionServicePolicyCheckDestroy(state *terraform.State,
 }
 
 // This resource is not supported on GM yet, non-default domain here is for future use
-func testAccNsxtPolicyIntrusionServicePolicyBasic(name string, comments string, domainName string) string {
+func testAccNsxtPolicyIntrusionServicePolicyBasic(name string, comments string, domainName string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	if domainName == defaultDomain {
 		return fmt.Sprintf(`
 resource "nsxt_policy_intrusion_service_policy" "test" {
+%s
   display_name    = "%s"
   description     = "Acceptance Test"
   comments        = "%s"
@@ -274,10 +311,11 @@ resource "nsxt_policy_intrusion_service_policy" "test" {
     tag   = "orange"
   }
 
-}`, name, comments)
+}`, context, name, comments)
 	}
 	return testAccNsxtGlobalPolicySite(domainName) + fmt.Sprintf(`
 resource "nsxt_policy_intrusion_service_policy" "test" {
+%s
   display_name    = "%s"
   description     = "Acceptance Test"
   comments        = "%s"
@@ -291,13 +329,23 @@ resource "nsxt_policy_intrusion_service_policy" "test" {
     tag   = "orange"
   }
 
-}`, name, comments)
+}`, context, name, comments)
 }
 
-func testAccNsxtPolicyIntrusionServicePolicyWithRule(name string, direction string, protocol string, ruleTag string, domainName string) string {
+func testAccNsxtPolicyIntrusionServicePolicyWithRule(name string, direction string, protocol string, ruleTag string, domainName string, withContext bool) string {
+	context := ""
+	profile := ""
+	profilePath := fmt.Sprintf("\"%s\"", policyDefaultIdsProfilePath)
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+		profile = testAccNsxtPolicyIntrusionServiceProfileMinimalistic(name, withContext)
+		profilePath = "nsxt_policy_intrusion_service_profile.test.path"
+	}
 	if domainName == defaultDomain {
 		return fmt.Sprintf(`
+%s
 resource "nsxt_policy_intrusion_service_policy" "test" {
+%s
   display_name    = "%s"
   description     = "Acceptance Test"
   locked          = false
@@ -314,17 +362,18 @@ resource "nsxt_policy_intrusion_service_policy" "test" {
     direction    = "%s"
     ip_version   = "%s"
     log_label    = "%s"
-    ids_profiles = ["%s"]
+    ids_profiles = [%s]
 
     tag {
       scope = "color"
       tag   = "blue"
     }
   }
-}`, name, name, direction, protocol, ruleTag, policyDefaultIdsProfilePath)
+}`, profile, context, name, name, direction, protocol, ruleTag, profilePath)
 	}
 	return testAccNsxtGlobalPolicyGroupIPAddressCreateTemplate("group", domainName) + fmt.Sprintf(`
 resource "nsxt_policy_intrusion_service_policy" "test" {
+%s
   display_name    = "%s"
   description     = "Acceptance Test"
   locked          = false
@@ -350,7 +399,7 @@ resource "nsxt_policy_intrusion_service_policy" "test" {
       tag   = "blue"
     }
   }
-}`, name, name, direction, protocol, ruleTag, policyDefaultIdsProfilePath)
+}`, context, name, name, direction, protocol, ruleTag, policyDefaultIdsProfilePath)
 }
 
 func testAccNsxtPolicyIntrusionServicePolicyDeps() string {

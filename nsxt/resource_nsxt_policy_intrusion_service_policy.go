@@ -11,10 +11,10 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/domains"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
-	tf_api "github.com/vmware/terraform-provider-nsxt/api/utl"
+	"github.com/vmware/terraform-provider-nsxt/api/infra/domains"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 // TODO: revisit with new SDK if constant is available
@@ -29,7 +29,7 @@ func resourceNsxtPolicyIntrusionServicePolicy() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: nsxtDomainResourceImporter,
 		},
-		Schema: getPolicySecurityPolicySchema(true, false, true),
+		Schema: getPolicySecurityPolicySchema(true, true, true),
 	}
 }
 
@@ -45,8 +45,8 @@ func getIdsProfilesSchema() *schema.Schema {
 	}
 }
 
-func resourceNsxtPolicyIntrusionServicePolicyExistsInDomain(id string, domainName string, connector client.Connector) (bool, error) {
-	client := domains.NewIntrusionServicePoliciesClient(connector)
+func resourceNsxtPolicyIntrusionServicePolicyExistsInDomain(sessionContext utl.SessionContext, id string, domainName string, connector client.Connector) (bool, error) {
+	client := domains.NewIntrusionServicePoliciesClient(sessionContext, connector)
 	_, err := client.Get(domainName, id)
 
 	if err == nil {
@@ -154,9 +154,9 @@ func getPolicyIdsRulesFromSchema(d *schema.ResourceData) []model.IdsRule {
 	return ruleList
 }
 
-func resourceNsxtPolicyIntrusionServicePolicyExistsPartial(domainName string) func(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
-	return func(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
-		return resourceNsxtPolicyIntrusionServicePolicyExistsInDomain(id, domainName, connector)
+func resourceNsxtPolicyIntrusionServicePolicyExistsPartial(sessionContext utl.SessionContext, domainName string) func(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
+	return func(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
+		return resourceNsxtPolicyIntrusionServicePolicyExistsInDomain(sessionContext, id, domainName, connector)
 	}
 }
 
@@ -287,7 +287,7 @@ func updateIdsSecurityPolicy(id string, d *schema.ResourceData, m interface{}) e
 	return idsPolicyInfraPatch(getSessionContext(d, m), obj, domain, m)
 }
 
-func idsPolicyInfraPatch(context tf_api.SessionContext, policy model.IdsSecurityPolicy, domain string, m interface{}) error {
+func idsPolicyInfraPatch(context utl.SessionContext, policy model.IdsSecurityPolicy, domain string, m interface{}) error {
 	childDomain, err := createChildDomainWithIdsSecurityPolicy(domain, *policy.Id, policy)
 	if err != nil {
 		return fmt.Errorf("Failed to create H-API for Ids Policy: %s", err)
@@ -309,7 +309,7 @@ func idsPolicyInfraPatch(context tf_api.SessionContext, policy model.IdsSecurity
 func resourceNsxtPolicyIntrusionServicePolicyCreate(d *schema.ResourceData, m interface{}) error {
 
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID(d, m, resourceNsxtPolicyIntrusionServicePolicyExistsPartial(d.Get("domain").(string)))
+	id, err := getOrGenerateID2(d, m, resourceNsxtPolicyIntrusionServicePolicyExistsPartial(getSessionContext(d, m), d.Get("domain").(string)))
 	if err != nil {
 		return err
 	}
@@ -334,7 +334,7 @@ func resourceNsxtPolicyIntrusionServicePolicyRead(d *schema.ResourceData, m inte
 	if id == "" {
 		return fmt.Errorf("Error obtaining Intrusion Service Policy id")
 	}
-	client := domains.NewIntrusionServicePoliciesClient(connector)
+	client := domains.NewIntrusionServicePoliciesClient(getSessionContext(d, m), connector)
 	obj, err := client.Get(domainName, id)
 	if err != nil {
 		return handleReadError(d, "Intrusion Service Policy", id, err)
@@ -378,7 +378,7 @@ func resourceNsxtPolicyIntrusionServicePolicyDelete(d *schema.ResourceData, m in
 
 	connector := getPolicyConnector(m)
 
-	client := domains.NewIntrusionServicePoliciesClient(connector)
+	client := domains.NewIntrusionServicePoliciesClient(getSessionContext(d, m), connector)
 	err := client.Delete(d.Get("domain").(string), id)
 
 	if err != nil {

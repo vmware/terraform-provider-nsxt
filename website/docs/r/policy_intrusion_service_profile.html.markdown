@@ -37,6 +37,39 @@ resource "nsxt_policy_intrusion_service_profile" "profile1" {
 }
 ```
 
+## Example Usage - Multi-Tenancy
+
+```hcl
+data "nsxt_policy_project" "demoproj" {
+  display_name = "demoproj"
+}
+
+resource "nsxt_policy_intrusion_service_profile" "profile1" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
+  display_name = "test"
+  description  = "Terraform provisioned Profile"
+  severities   = ["HIGH", "CRITICAL"]
+
+  criteria {
+    attack_types      = ["trojan-activity", "successful-admin", "attempted-admin", "attempted-user"]
+    attack_targets    = ["Web_Server", "SQL_Server", "Email_Server", "Client_and_Server", "Server"]
+    products_affected = ["Windows_XP_Vista_7_8_10_Server_32_64_Bit", "Web_Server_Applications", "Linux"]
+  }
+
+  overridden_signature {
+    signature_id = "2026323"
+    action       = "REJECT"
+  }
+
+  overridden_signature {
+    signature_id = "2026324"
+    action       = "REJECT"
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -45,6 +78,8 @@ The following arguments are supported:
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this profile.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
+* `context` - (Optional) The context which the object belongs to
+  * `project_id` - (Required) The ID of the project which the object belongs to
 * `severities` - (Required) List of profile severities, supported values are `LOW`, `MEDIUM`, `HIGH`, 'CRITICAL`.
 * `criteria` - (Required) Filtering criteria for the IDS Profile.
   * `attack_types` - (Optional) List of supported attack types.
@@ -74,5 +109,10 @@ An existing profile can be [imported][docs-import] into this resource, via the f
 ```
 terraform import nsxt_policy_intrusion_service_profile.profile1 ID
 ```
-
 The above command imports the profile named `profile1` with the NSX Policy ID `ID`.
+
+```
+terraform import nsxt_policy_intrusion_service_profile.profile1 POLICY_PATH
+```
+The above command imports the profile named `profile1` with the NSX policy path `POLICY_PATH`.
+Note: for multitenancy projects only the later form is usable.

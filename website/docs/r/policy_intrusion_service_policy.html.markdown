@@ -43,6 +43,45 @@ resource "nsxt_policy_intrusion_service_policy" "policy1" {
 }
 ```
 
+## Example Usage - Multi-Tenancy
+
+```hcl
+data "nsxt_policy_project" "demoproj" {
+  display_name = "demoproj"
+}
+
+resource "nsxt_policy_intrusion_service_policy" "policy1" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
+  display_name = "policy1"
+  description  = "Terraform provisioned Policy"
+  locked       = false
+  stateful     = true
+
+  rule {
+    display_name       = "rule1"
+    destination_groups = [nsxt_policy_group.cats.path, nsxt_policy_group.dogs.path]
+    action             = "DETECT"
+    services           = [nsxt_policy_service.icmp.path]
+    logged             = true
+    ids_profiles       = [data.nsxt_policy_intrusion_service_profile.default.path]
+  }
+
+  rule {
+    display_name     = "rule2"
+    source_groups    = [nsxt_policy_group.fish.path]
+    sources_excluded = true
+    action           = "DETECT_PREVENT"
+    services         = [nsxt_policy_service.udp.path]
+    logged           = true
+    disabled         = true
+    notes            = "Disabled till Sunday"
+    ids_profiles     = [data.nsxt_policy_intrusion_service_profile.someprofile.path]
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -52,6 +91,8 @@ The following arguments are supported:
 * `domain` - (Optional) The domain to use for the resource. This domain must already exist. For VMware Cloud on AWS use `cgw`. If not specified, this field is default to `default`.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this policy.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
+* `context` - (Optional) The context which the object belongs to
+  * `project_id` - (Required) The ID of the project which the object belongs to
 * `comments` - (Optional) Comments for IDS policy lock/unlock.
 * `locked` - (Optional) Indicates whether the policy should be locked. If locked by a user, no other user would be able to modify this policy.
 * `sequence_number` - (Optional) This field is used to resolve conflicts between IDS policies across domains.
@@ -97,5 +138,10 @@ An existing policy can be [imported][docs-import] into this resource, via the fo
 ```
 terraform import nsxt_policy_intrusion_service_policy.policy1 domain/ID
 ```
-
 The above command imports the policy named `policy1` under NSX domain `domain` with the NSX Policy ID `ID`.
+
+```
+terraform import nsxt_policy_intrusion_service_policy.policy1 POLICY_PATH
+```
+The above command imports the policy named `policy1` under NSX domain `domain` with the NSX policy path `POLICY_PATH`.
+Note: for multitenancy projects only the later form is usable.
