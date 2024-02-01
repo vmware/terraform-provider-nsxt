@@ -17,109 +17,221 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
-var segmentSecurityProfileMetadata = map[string]*metadata{
+var segmentSecurityProfileSchema = map[string]*extendedSchema{
+	"nsx_id":       getExtendedSchema(getNsxIDSchema()),
+	"path":         getExtendedSchema(getPathSchema()),
+	"display_name": getExtendedSchema(getDisplayNameSchema()),
+	"description":  getExtendedSchema(getDescriptionSchema()),
+	"revision":     getExtendedSchema(getRevisionSchema()),
+	"tag":          getExtendedSchema(getTagsSchema()),
+	"context":      getExtendedSchema(getContextSchema(false, false)),
 	"bpdu_filter_allow": {
-		skip: true,
+		s: schema.Schema{
+			Type: schema.TypeSet,
+			Elem: &schema.Schema{
+				Type:         schema.TypeString,
+				ValidateFunc: validation.IsMACAddress,
+			},
+			Optional: true,
+		},
+		m: metadata{
+			skip: true,
+		},
 	},
 	"bpdu_filter_enable": {
-		schemaType:   "bool",
-		sdkFieldName: "BpduFilterEnable",
-		testData: testdata{
-			createValue: "true",
-			updateValue: "false",
+		s: schema.Schema{
+			Type:     schema.TypeBool,
+			Optional: true,
+			Default:  true,
+		},
+		m: metadata{
+			schemaType:   "bool",
+			sdkFieldName: "BpduFilterEnable",
+			testData: testdata{
+				createValue: "true",
+				updateValue: "false",
+			},
 		},
 	},
 	"dhcp_client_block_enabled": {
-		schemaType:   "bool",
-		sdkFieldName: "DhcpClientBlockEnabled",
-		testData: testdata{
-			createValue: "true",
-			updateValue: "false",
+		s: schema.Schema{
+			Type:     schema.TypeBool,
+			Optional: true,
+			Default:  false,
+		},
+		m: metadata{
+			schemaType:   "bool",
+			sdkFieldName: "DhcpClientBlockEnabled",
+			testData: testdata{
+				createValue: "true",
+				updateValue: "false",
+			},
 		},
 	},
 	"dhcp_server_block_enabled": {
-		schemaType:   "bool",
-		sdkFieldName: "DhcpServerBlockEnabled",
-		testData: testdata{
-			createValue: "true",
-			updateValue: "false",
+		s: schema.Schema{
+			Type:     schema.TypeBool,
+			Optional: true,
+			Default:  true,
+		},
+		m: metadata{
+			schemaType:   "bool",
+			sdkFieldName: "DhcpServerBlockEnabled",
+			testData: testdata{
+				createValue: "true",
+				updateValue: "false",
+			},
 		},
 	},
 	"dhcp_client_block_v6_enabled": {
-		schemaType:   "bool",
-		sdkFieldName: "DhcpClientBlockV6Enabled",
-		testData: testdata{
-			createValue: "true",
-			updateValue: "false",
+		s: schema.Schema{
+			Type:     schema.TypeBool,
+			Optional: true,
+			Default:  false,
+		},
+		m: metadata{
+			schemaType:   "bool",
+			sdkFieldName: "DhcpClientBlockV6Enabled",
+			testData: testdata{
+				createValue: "true",
+				updateValue: "false",
+			},
 		},
 	},
 	"dhcp_server_block_v6_enabled": {
-		schemaType:   "bool",
-		sdkFieldName: "DhcpServerBlockV6Enabled",
-		testData: testdata{
-			createValue: "true",
-			updateValue: "false",
+		s: schema.Schema{
+			Type:     schema.TypeBool,
+			Optional: true,
+			Default:  true,
+		},
+		m: metadata{
+			schemaType:   "bool",
+			sdkFieldName: "DhcpServerBlockV6Enabled",
+			testData: testdata{
+				createValue: "true",
+				updateValue: "false",
+			},
 		},
 	},
 	"non_ip_traffic_block_enabled": {
-		schemaType:   "bool",
-		sdkFieldName: "NonIpTrafficBlockEnabled",
-		testData: testdata{
-			createValue: "true",
-			updateValue: "false",
+		s: schema.Schema{
+			Type:     schema.TypeBool,
+			Optional: true,
+			Default:  false,
+		},
+		m: metadata{
+			schemaType:   "bool",
+			sdkFieldName: "NonIpTrafficBlockEnabled",
+			testData: testdata{
+				createValue: "true",
+				updateValue: "false",
+			},
 		},
 	},
 	"ra_guard_enabled": {
-		schemaType:   "bool",
-		sdkFieldName: "RaGuardEnabled",
-		testData: testdata{
-			createValue: "true",
-			updateValue: "false",
+		s: schema.Schema{
+			Type:     schema.TypeBool,
+			Optional: true,
+			Default:  false,
+		},
+		m: metadata{
+			schemaType:   "bool",
+			sdkFieldName: "RaGuardEnabled",
+			testData: testdata{
+				createValue: "true",
+				updateValue: "false",
+			},
 		},
 	},
 	"rate_limits_enabled": {
-		schemaType:   "bool",
-		sdkFieldName: "RateLimitsEnabled",
-		testData: testdata{
-			createValue: "true",
-			updateValue: "false",
+		s: schema.Schema{
+			Type:     schema.TypeBool,
+			Optional: true,
+			Default:  false,
+		},
+		m: metadata{
+			schemaType:   "bool",
+			sdkFieldName: "RateLimitsEnabled",
+			testData: testdata{
+				createValue: "true",
+				updateValue: "false",
+			},
 		},
 	},
 	"rate_limit": {
-		schemaType:   "struct",
-		sdkFieldName: "RateLimits",
-		reflectType:  reflect.TypeOf(model.TrafficRateLimits{}),
-	},
-	"rate_limit.rx_broadcast": {
-		schemaType:   "int",
-		sdkFieldName: "RxBroadcast",
-		testData: testdata{
-			createValue: "100",
-			updateValue: "1000",
+		s: schema.Schema{
+			Type: schema.TypeList,
+			Elem: &extendedResource{
+				Schema: map[string]*extendedSchema{
+					"rx_broadcast": {
+						s: schema.Schema{
+							Type:     schema.TypeInt,
+							Optional: true,
+							Default:  0,
+						},
+						m: metadata{
+							schemaType:   "int",
+							sdkFieldName: "RxBroadcast",
+							testData: testdata{
+								createValue: "100",
+								updateValue: "1000",
+							},
+						},
+					},
+					"rx_multicast": {
+						s: schema.Schema{
+							Type:     schema.TypeInt,
+							Optional: true,
+							Default:  0,
+						},
+						m: metadata{
+							schemaType:   "int",
+							sdkFieldName: "RxMulticast",
+							testData: testdata{
+								createValue: "100",
+								updateValue: "1000",
+							},
+						},
+					},
+					"tx_broadcast": {
+						s: schema.Schema{
+							Type:     schema.TypeInt,
+							Optional: true,
+							Default:  0,
+						},
+						m: metadata{
+							schemaType:   "int",
+							sdkFieldName: "TxBroadcast",
+							testData: testdata{
+								createValue: "100",
+								updateValue: "1000",
+							},
+						},
+					},
+					"tx_multicast": {
+						s: schema.Schema{
+							Type:     schema.TypeInt,
+							Optional: true,
+							Default:  0,
+						},
+						m: metadata{
+							schemaType:   "int",
+							sdkFieldName: "TxMulticast",
+							testData: testdata{
+								createValue: "100",
+								updateValue: "1000",
+							},
+						},
+					},
+				},
+			},
+			Optional: true,
+			Computed: true,
 		},
-	},
-	"rate_limit.tx_broadcast": {
-		schemaType:   "int",
-		sdkFieldName: "TxBroadcast",
-		testData: testdata{
-			createValue: "100",
-			updateValue: "1000",
-		},
-	},
-	"rate_limit.rx_multicast": {
-		schemaType:   "int",
-		sdkFieldName: "RxMulticast",
-		testData: testdata{
-			createValue: "100",
-			updateValue: "1000",
-		},
-	},
-	"rate_limit.tx_multicast": {
-		schemaType:   "int",
-		sdkFieldName: "TxMulticast",
-		testData: testdata{
-			createValue: "100",
-			updateValue: "1000",
+		m: metadata{
+			schemaType:   "struct",
+			sdkFieldName: "RateLimits",
+			reflectType:  reflect.TypeOf(model.TrafficRateLimits{}),
 		},
 	},
 }
@@ -133,93 +245,7 @@ func resourceNsxtPolicySegmentSecurityProfile() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: nsxtPolicyPathResourceImporter,
 		},
-
-		Schema: map[string]*schema.Schema{
-			"nsx_id":       getNsxIDSchema(),
-			"path":         getPathSchema(),
-			"display_name": getDisplayNameSchema(),
-			"description":  getDescriptionSchema(),
-			"revision":     getRevisionSchema(),
-			"tag":          getTagsSchema(),
-			"context":      getContextSchema(false, false),
-			"bpdu_filter_allow": {
-				Type: schema.TypeSet,
-				Elem: &schema.Schema{
-					Type:         schema.TypeString,
-					ValidateFunc: validation.IsMACAddress,
-				},
-				Optional: true,
-			},
-			"bpdu_filter_enable": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  true,
-			},
-			"dhcp_client_block_enabled": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
-			},
-			"dhcp_client_block_v6_enabled": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
-			},
-			"dhcp_server_block_enabled": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  true,
-			},
-			"dhcp_server_block_v6_enabled": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  true,
-			},
-			"non_ip_traffic_block_enabled": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
-			},
-			"ra_guard_enabled": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
-			},
-			"rate_limit": {
-				Type: schema.TypeList,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"rx_broadcast": {
-							Type:     schema.TypeInt,
-							Optional: true,
-							Default:  0,
-						},
-						"rx_multicast": {
-							Type:     schema.TypeInt,
-							Optional: true,
-							Default:  0,
-						},
-						"tx_broadcast": {
-							Type:     schema.TypeInt,
-							Optional: true,
-							Default:  0,
-						},
-						"tx_multicast": {
-							Type:     schema.TypeInt,
-							Optional: true,
-							Default:  0,
-						},
-					},
-				},
-				Optional: true,
-				Computed: true,
-			},
-			"rate_limits_enabled": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
-			},
-		},
+		Schema: getSchemaFromExtendedSchema(segmentSecurityProfileSchema),
 	}
 }
 
@@ -243,54 +269,18 @@ func resourceNsxtPolicySegmentSecurityProfilePatch(d *schema.ResourceData, m int
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
 	tags := getPolicyTagsFromSchema(d)
+	// example of attribute that we prefer to handle manually in the code
+	// it is marked with `skip` in metadata
 	bpduFilterAllow := getStringListFromSchemaSet(d, "bpdu_filter_allow")
-	/*
-		bpduFilterEnable := d.Get("bpdu_filter_enable").(bool)
-		dhcpClientBlockEnabled := d.Get("dhcp_client_block_enabled").(bool)
-		dhcpClientBlockV6Enabled := d.Get("dhcp_client_block_v6_enabled").(bool)
-		dhcpServerBlockEnabled := d.Get("dhcp_server_block_enabled").(bool)
-		dhcpServerBlockV6Enabled := d.Get("dhcp_server_block_v6_enabled").(bool)
-		nonIPTrafficBlockEnabled := d.Get("non_ip_traffic_block_enabled").(bool)
-		raGuardEnabled := d.Get("ra_guard_enabled").(bool)
-		rateLimitsList := d.Get("rate_limit").([]interface{})
-		var rateLimits *model.TrafficRateLimits
-		for _, item := range rateLimitsList {
-			data := item.(map[string]interface{})
-			rxBroadcast := int64(data["rx_broadcast"].(int))
-			rxMulticast := int64(data["rx_multicast"].(int))
-			txBroadcast := int64(data["tx_broadcast"].(int))
-			txMulticast := int64(data["tx_multicast"].(int))
-			obj := model.TrafficRateLimits{
-				RxBroadcast: &rxBroadcast,
-				RxMulticast: &rxMulticast,
-				TxBroadcast: &txBroadcast,
-				TxMulticast: &txMulticast,
-			}
-			rateLimits = &obj
-			break
-		}
-		rateLimitsEnabled := d.Get("rate_limits_enabled").(bool)
-	*/
 
 	obj := model.SegmentSecurityProfile{
 		DisplayName:     &displayName,
 		Description:     &description,
 		Tags:            tags,
 		BpduFilterAllow: bpduFilterAllow,
-		/*
-			BpduFilterEnable:         &bpduFilterEnable,
-			DhcpClientBlockEnabled:   &dhcpClientBlockEnabled,
-			DhcpClientBlockV6Enabled: &dhcpClientBlockV6Enabled,
-			DhcpServerBlockEnabled:   &dhcpServerBlockEnabled,
-			DhcpServerBlockV6Enabled: &dhcpServerBlockV6Enabled,
-			NonIpTrafficBlockEnabled: &nonIPTrafficBlockEnabled,
-			RaGuardEnabled:           &raGuardEnabled,
-			RateLimits:               rateLimits,
-			RateLimitsEnabled:        &rateLimitsEnabled,
-		*/
 	}
 	elem := reflect.ValueOf(&obj).Elem()
-	schemaToStruct(elem, d, segmentSecurityProfileMetadata, "", nil)
+	schemaToStruct(elem, d, segmentSecurityProfileSchema, "", nil)
 
 	log.Printf("[INFO] Sending SegmentSecurityProfile with ID %s", id)
 	client := infra.NewSegmentSecurityProfilesClient(getSessionContext(d, m), connector)
@@ -331,7 +321,7 @@ func resourceNsxtPolicySegmentSecurityProfileRead(d *schema.ResourceData, m inte
 	}
 
 	elem := reflect.ValueOf(&obj).Elem()
-	structToSchema(elem, d, segmentSecurityProfileMetadata, "", nil)
+	structToSchema(elem, d, segmentSecurityProfileSchema, "", nil)
 
 	d.Set("display_name", obj.DisplayName)
 	d.Set("description", obj.Description)
@@ -339,30 +329,6 @@ func resourceNsxtPolicySegmentSecurityProfileRead(d *schema.ResourceData, m inte
 	d.Set("nsx_id", id)
 	d.Set("path", obj.Path)
 	d.Set("revision", obj.Revision)
-
-	/*
-		d.Set("bpdu_filter_allow", obj.BpduFilterAllow)
-		d.Set("bpdu_filter_enable", obj.BpduFilterEnable)
-		d.Set("dhcp_client_block_enabled", obj.DhcpClientBlockEnabled)
-		d.Set("dhcp_client_block_v6_enabled", obj.DhcpClientBlockV6Enabled)
-		d.Set("dhcp_server_block_enabled", obj.DhcpServerBlockEnabled)
-		d.Set("dhcp_server_block_v6_enabled", obj.DhcpServerBlockV6Enabled)
-		d.Set("non_ip_traffic_block_enabled", obj.NonIpTrafficBlockEnabled)
-		d.Set("ra_guard_enabled", obj.RaGuardEnabled)
-		d.Set("rate_limits_enabled", obj.RateLimitsEnabled)
-
-		var rateLimitsList []map[string]interface{}
-		if obj.RateLimits != nil {
-			item := obj.RateLimits
-			data := make(map[string]interface{})
-			data["rx_broadcast"] = item.RxBroadcast
-			data["rx_multicast"] = item.RxMulticast
-			data["tx_broadcast"] = item.TxBroadcast
-			data["tx_multicast"] = item.TxMulticast
-			rateLimitsList = append(rateLimitsList, data)
-		}
-		d.Set("rate_limit", rateLimitsList)
-	*/
 
 	return nil
 }

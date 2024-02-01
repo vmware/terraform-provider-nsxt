@@ -5,6 +5,7 @@ package nsxt
 
 import (
 	"fmt"
+	"log"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -42,14 +43,17 @@ func getMacDiscoveryProfileTestCheckFunc(testResourceName string, create bool) [
 		resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 		resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 	}
-	for key, item := range macDiscoveryProfileMetadata {
-		if item.introducedInVersion != "" && nsxVersionLower(item.introducedInVersion) {
+	for key, item := range macDiscoveryProfileSchema {
+		if item.m.skip {
+			continue
+		}
+		if item.m.introducedInVersion != "" && nsxVersionLower(item.m.introducedInVersion) {
 			continue
 		}
 
-		value := item.testData.createValue
+		value := item.m.testData.createValue
 		if !create {
-			value = item.testData.updateValue
+			value = item.m.testData.updateValue
 		}
 		result = append(result, resource.TestCheckResourceAttr(testResourceName, key, value.(string)))
 	}
@@ -60,14 +64,18 @@ func getMacDiscoveryProfileTestCheckFunc(testResourceName string, create bool) [
 func getMacDiscoveryProfileTestConfigAttributes(create bool) string {
 	result := ""
 	schemaDef := resourceNsxtPolicyMacDiscoveryProfile().Schema
-	for key, item := range macDiscoveryProfileMetadata {
-		if item.introducedInVersion != "" && nsxVersionLower(item.introducedInVersion) {
+	for key, item := range macDiscoveryProfileSchema {
+		if item.m.skip {
+			continue
+		}
+		log.Printf("[INFO] inspecting schema test key %s", key)
+		if item.m.introducedInVersion != "" && nsxVersionLower(item.m.introducedInVersion) {
 			continue
 		}
 
-		value := item.testData.createValue
+		value := item.m.testData.createValue
 		if !create {
-			value = item.testData.updateValue
+			value = item.m.testData.updateValue
 		}
 
 		if schemaDef[key].Type == schema.TypeString {
