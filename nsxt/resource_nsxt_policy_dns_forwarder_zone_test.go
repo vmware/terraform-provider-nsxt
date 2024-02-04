@@ -138,7 +138,7 @@ func TestAccResourceNsxtPolicyDNSForwarderZone_importBasic_multitenancy(t *testi
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyDNSForwarderZoneMinimalistic(false),
+				Config: testAccNsxtPolicyDNSForwarderZoneMinimalistic(true),
 			},
 			{
 				ResourceName:      testResourceName,

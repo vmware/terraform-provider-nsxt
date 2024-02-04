@@ -74,7 +74,10 @@ func testAccResourceNsxtPolicyFixedSegmentBasicUpdate(t *testing.T, withContext 
 	name := getAccTestResourceName()
 	updatedName := getAccTestResourceName()
 	testResourceName := testAccPolicyFixedSegmentResourceName
-	tzName := getOverlayTransportZoneName()
+	tzName := ""
+	if !withContext {
+		tzName = getOverlayTransportZoneName()
+	}
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  preCheck,

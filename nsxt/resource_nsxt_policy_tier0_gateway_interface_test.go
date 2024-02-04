@@ -613,19 +613,23 @@ data "nsxt_policy_transport_zone" "test" {
 
 func testAccNsxtPolicyGatewayInterfaceDeps(vlans string, withContext bool) string {
 	context := ""
+	tzSpec := "transport_zone_path = data.nsxt_policy_transport_zone.test.path"
+	defsSpec := testAccNsxtPolicyGatewayFabricDeps(true)
 	if withContext {
 		context = testAccNsxtPolicyMultitenancyContext()
+		tzSpec = ""
+		defsSpec, _ = testAccNsxtPolicyProjectSpec()
 	}
-	return testAccNsxtPolicyGatewayFabricDeps(true) + fmt.Sprintf(`
+	return defsSpec + fmt.Sprintf(`
 resource "nsxt_policy_vlan_segment" "test" {
 %s
-  transport_zone_path = data.nsxt_policy_transport_zone.test.path
+  %s
   display_name        = "interface_test"
   vlan_ids            = [%s]
   subnet {
       cidr = "10.2.2.2/24"
   }
-}`, context, vlans)
+}`, context, tzSpec, vlans)
 }
 
 func testAccNsxtPolicyTier0EdgeClusterTemplate() string {

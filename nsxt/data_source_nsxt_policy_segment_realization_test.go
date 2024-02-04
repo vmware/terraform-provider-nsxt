@@ -66,14 +66,17 @@ func testAccNsxtPolicySegmentRealizationTemplate(vlan, withContext bool) string 
 		extra = "vlan_ids = [12]"
 	}
 	tzSpec := ""
+	tzDatasource := ""
 	if !withContext {
 		tzSpec = "transport_zone_path = data.nsxt_policy_transport_zone.test.path"
-	}
-	return fmt.Sprintf(`
+		tzDatasource = fmt.Sprintf(`
 data "nsxt_policy_transport_zone" "test" {
   display_name = "%s"
 }
-
+`, tz)
+	}
+	return fmt.Sprintf(`
+%s
 resource "%s" "test" {
 %s
   display_name        = "terra-test"
@@ -84,5 +87,5 @@ resource "%s" "test" {
 data "nsxt_policy_segment_realization" "test" {
 %s
   path = %s.test.path
-}`, tz, resource, context, tzSpec, extra, context, resource)
+}`, tzDatasource, resource, context, tzSpec, extra, context, resource)
 }

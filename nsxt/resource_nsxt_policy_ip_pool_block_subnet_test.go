@@ -164,7 +164,7 @@ func TestAccResourceNsxtPolicyIPPoolBlockSubnet_importBasic_multitenancy(t *test
 				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
 			},
 			{
-				Config: testAccNSXPolicyIPPoolBlockSubnetIPBlockTemplate(false),
+				Config: testAccNSXPolicyIPPoolBlockSubnetIPBlockTemplate(true),
 			},
 		},
 	})
