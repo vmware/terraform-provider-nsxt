@@ -114,6 +114,7 @@ func dataSourceNsxtPolicyEdgeNodeRead(d *schema.ResourceData, m interface{}) err
 	}
 
 	d.SetId(*obj.Id)
+	d.Set("member_index", obj.MemberIndex)
 	d.Set("display_name", obj.DisplayName)
 	d.Set("description", obj.Description)
 	d.Set("path", obj.Path)
