@@ -5,6 +5,7 @@ package nsxt
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -196,17 +197,20 @@ func testAccNsxtPolicyDhcpServerCheckDestroy(state *terraform.State, displayName
 func testAccNsxtPolicyDhcpServerCreateTemplate(withContext bool) string {
 	attrMap := accTestPolicyDhcpServerCreateAttributes
 	context := ""
+	defsSpec := testAccNsxtPolicyGatewayFabricDeps(false)
+	edgeClusterSpec := "data.nsxt_policy_edge_cluster.EC.path"
 	if withContext {
 		context = testAccNsxtPolicyMultitenancyContext()
+		defsSpec, edgeClusterSpec = testAccNsxtPolicyProjectSpec()
 	}
 
-	return testAccNsxtPolicyGatewayFabricDeps(false) + fmt.Sprintf(`
+	return defsSpec + fmt.Sprintf(`
 
 resource "nsxt_policy_dhcp_server" "test" {
 %s
   display_name = "%s"
   description  = "%s"
-  edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
+  edge_cluster_path = %s
   lease_time = %s
   server_addresses = ["110.64.0.1/16"]
 
@@ -215,22 +219,33 @@ resource "nsxt_policy_dhcp_server" "test" {
     tag   = "tag1"
   }
 }
-`, context, attrMap["display_name"], attrMap["description"], attrMap["lease_time"])
+`, context, attrMap["display_name"], attrMap["description"], edgeClusterSpec, attrMap["lease_time"])
+}
+
+func testAccNsxtPolicyProjectSpec() (string, string) {
+	return fmt.Sprintf(`
+data "nsxt_policy_project" "test" {
+  id = "%s"
+}
+`, os.Getenv("NSXT_PROJECT_ID")), "data.nsxt_policy_project.test.site_info.0.edge_cluster_paths.0"
 }
 
 func testAccNsxtPolicyDhcpServerUpdateTemplate(withContext bool) string {
 	attrMap := accTestPolicyDhcpServerUpdateAttributes
+	defsSpec := testAccNsxtPolicyGatewayFabricDeps(false)
+	edgeClusterSpec := "data.nsxt_policy_edge_cluster.EC.path"
 	context := ""
 	if withContext {
 		context = testAccNsxtPolicyMultitenancyContext()
+		defsSpec, edgeClusterSpec = testAccNsxtPolicyProjectSpec()
 	}
 
-	return testAccNsxtPolicyGatewayFabricDeps(false) + fmt.Sprintf(`
+	return defsSpec + fmt.Sprintf(`
 resource "nsxt_policy_dhcp_server" "test" {
 %s
   display_name = "%s"
   description  = "%s"
-  edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
+  edge_cluster_path = %s
   lease_time = %s
   server_addresses = ["2001::1234:abcd:ffff:c0a8:101/64", "110.64.0.1/16"]
 
@@ -239,7 +254,7 @@ resource "nsxt_policy_dhcp_server" "test" {
     tag   = "tag1"
   }
 }
-`, context, attrMap["display_name"], attrMap["description"], attrMap["lease_time"])
+`, context, attrMap["display_name"], attrMap["description"], edgeClusterSpec, attrMap["lease_time"])
 }
 
 func testAccNsxtPolicyDhcpServerMinimalistic(withContext bool) string {

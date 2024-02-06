@@ -265,11 +265,14 @@ func testAccNsxtPolicyDhcpStaticBindingPrerequisites(isFixed, isIpv6, withContex
 	}
 	context := ""
 	tzSpec := "transport_zone_path = data.nsxt_policy_transport_zone.test.path"
+	defsSpec := testAccNsxtPolicyGatewayFabricDeps(false)
+	edgeClusterSpec := "data.nsxt_policy_edge_cluster.EC.path"
 	if withContext {
 		context = testAccNsxtPolicyMultitenancyContext()
 		tzSpec = ""
+		defsSpec, edgeClusterSpec = testAccNsxtPolicyProjectSpec()
 	}
-	return testAccNsxtPolicyGatewayFabricDeps(false) + fmt.Sprintf(`
+	return defsSpec + fmt.Sprintf(`
 resource "nsxt_policy_tier1_gateway" "test" {
 %s
   display_name = "%s"
@@ -278,7 +281,7 @@ resource "nsxt_policy_tier1_gateway" "test" {
 resource "nsxt_policy_dhcp_server" "test" {
 %s
   display_name      = "%s"
-  edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
+  edge_cluster_path = %s
 }
 
 resource "%s" "test" {
@@ -293,7 +296,7 @@ resource "%s" "test" {
         server_address = "%s"
     }
   }
-}`, context, helperName, context, helperName, segmentResource, context, helperName, tzSpec, cidr, version, address)
+}`, context, helperName, context, helperName, edgeClusterSpec, segmentResource, context, helperName, tzSpec, cidr, version, address)
 }
 
 func testAccNsxtPolicyGetSegmentResourceName(isFixed bool) string {

@@ -349,16 +349,20 @@ resource "nsxt_policy_vlan_segment" "test" {
 
 func testAccNsxtPolicyVlanSegmentBasicTemplate(name string, withContext bool) string {
 	context := ""
+	deps := testAccNsxtPolicyVlanSegmentDeps()
+	tzSpec := "transport_zone_path = data.nsxt_policy_transport_zone.test.path"
 	if withContext {
 		context = testAccNsxtPolicyMultitenancyContext()
+		deps = ""
+		tzSpec = ""
 	}
-	return testAccNsxtPolicyVlanSegmentDeps() + fmt.Sprintf(`
+	return deps + fmt.Sprintf(`
 
 resource "nsxt_policy_vlan_segment" "test" {
 %s
   display_name        = "%s"
   description         = "Acceptance Test"
-  transport_zone_path = data.nsxt_policy_transport_zone.test.path
+  %s
   domain_name         = "tftest.org"
   vlan_ids            = ["101"]
 
@@ -367,21 +371,25 @@ resource "nsxt_policy_vlan_segment" "test" {
     tag   = "orange"
   }
 }
-`, context, name)
+`, context, name, tzSpec)
 }
 
 func testAccNsxtPolicyVlanSegmentBasicUpdateTemplate(name string, withContext bool) string {
 	context := ""
+	deps := testAccNsxtPolicyVlanSegmentDeps()
+	tzSpec := "transport_zone_path = data.nsxt_policy_transport_zone.test.path"
 	if withContext {
 		context = testAccNsxtPolicyMultitenancyContext()
+		deps = ""
+		tzSpec = ""
 	}
-	return testAccNsxtPolicyVlanSegmentDeps() + fmt.Sprintf(`
+	return deps + fmt.Sprintf(`
 
 resource "nsxt_policy_vlan_segment" "test" {
 %s
   display_name        = "%s"
   description         = "Acceptance Test2"
-  transport_zone_path = data.nsxt_policy_transport_zone.test.path
+  %s
   domain_name         = "tftest2.org"
   vlan_ids            = ["101", "104-110"]
 
@@ -394,7 +402,7 @@ resource "nsxt_policy_vlan_segment" "test" {
     tag   = "orange"
   }
 }
-`, context, name)
+`, context, name, tzSpec)
 }
 
 func testAccNsxtPolicyVlanSegmentBasicAdvConfigTemplate(name string) string {

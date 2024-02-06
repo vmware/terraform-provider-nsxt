@@ -413,8 +413,11 @@ func testAccNsxtPolicyTier1InterfaceCheckDestroy(state *terraform.State, display
 
 func testAccNsxtPolicyTier1InterfaceTemplate(name string, subnet string, mtu string, withContext bool) string {
 	context := ""
+	ecTemplate := testAccNsxtPolicyTier0EdgeClusterTemplate()
 	if withContext {
 		context = testAccNsxtPolicyMultitenancyContext()
+		_, ecSpec := testAccNsxtPolicyProjectSpec()
+		ecTemplate = fmt.Sprintf("edge_cluster_path = %s", ecSpec)
 	}
 	return testAccNsxtPolicyGatewayInterfaceDeps("11", withContext) + fmt.Sprintf(`
 resource "nsxt_policy_tier1_gateway" "test" {
@@ -437,14 +440,17 @@ resource "nsxt_policy_tier1_gateway_interface" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, context, nsxtPolicyTier1GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), context, name, mtu, subnet, testAccNsxtPolicyTier0InterfaceSiteTemplate()) +
+}`, context, nsxtPolicyTier1GatewayName, ecTemplate, context, name, mtu, subnet, testAccNsxtPolicyTier0InterfaceSiteTemplate()) +
 		testAccNextPolicyTier1InterfaceRealizationTemplate()
 }
 
 func testAccNsxtPolicyTier1InterfaceThinTemplate(name string, subnet string, withContext bool) string {
 	context := ""
+	ecTemplate := testAccNsxtPolicyTier0EdgeClusterTemplate()
 	if withContext {
 		context = testAccNsxtPolicyMultitenancyContext()
+		_, ecSpec := testAccNsxtPolicyProjectSpec()
+		ecTemplate = fmt.Sprintf("edge_cluster_path = %s", ecSpec)
 	}
 	return testAccNsxtPolicyGatewayInterfaceDeps("11", withContext) + fmt.Sprintf(`
 resource "nsxt_policy_tier1_gateway" "test" {
@@ -460,7 +466,7 @@ resource "nsxt_policy_tier1_gateway_interface" "test" {
   segment_path = nsxt_policy_vlan_segment.test.path
   subnets      = ["%s"]
   %s
-}`, context, nsxtPolicyTier1GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), context, name, subnet, testAccNsxtPolicyTier0InterfaceSiteTemplate()) +
+}`, context, nsxtPolicyTier1GatewayName, ecTemplate, context, name, subnet, testAccNsxtPolicyTier0InterfaceSiteTemplate()) +
 		testAccNextPolicyTier1InterfaceRealizationTemplate()
 }
 
