@@ -101,6 +101,11 @@ func resourceNsxtPolicyBgpConfigToStruct(d *schema.ResourceData, isVRF bool) (*m
 		Ecmp:              &ecmp,
 		Enabled:           &enabled,
 		RouteAggregations: aggregationStructs,
+		Tags:              tags,
+	}
+
+	if len(localAsNum) > 0 {
+		routeStruct.LocalAsNum = &localAsNum
 	}
 
 	// For BGP on VRF, only limited attributes can be set
@@ -126,11 +131,7 @@ func resourceNsxtPolicyBgpConfigToStruct(d *schema.ResourceData, isVRF bool) (*m
 			Timer: &restartTimerStruct,
 		}
 
-		routeStruct.Tags = tags
 		routeStruct.InterSrIbgp = &interSrIbgp
-		if len(localAsNum) > 0 {
-			routeStruct.LocalAsNum = &localAsNum
-		}
 		routeStruct.MultipathRelax = &multipathRelax
 		routeStruct.GracefulRestartConfig = &restartConfigStruct
 	}
