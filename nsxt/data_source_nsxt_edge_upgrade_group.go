@@ -6,7 +6,6 @@ package nsxt
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
@@ -16,9 +15,6 @@ import (
 var (
 	edgeUpgradeGroup = "EDGE"
 	hostUpgradeGroup = "HOST"
-
-	timeoutUUGCreat  = 1 * time.Minute
-	intervalUUGCreat = 5 * time.Second
 )
 
 func dataSourceNsxtEdgeUpgradeGroup() *schema.Resource {
@@ -45,11 +41,6 @@ func dataSourceNsxtEdgeUpgradeGroupRead(d *schema.ResourceData, m interface{}) e
 func upgradeGroupRead(d *schema.ResourceData, m interface{}, groupType string) error {
 	connector := getPolicyConnector(m)
 	client := upgrade.NewUpgradeUnitGroupsClient(connector)
-
-	err := waitUpgradeGroupCreate(client, groupType)
-	if err != nil {
-		return fmt.Errorf("unable to fetch UpgradeUnitGroup: %v", err)
-	}
 
 	objID := d.Get("id").(string)
 	objName := d.Get("display_name").(string)
@@ -110,38 +101,4 @@ func upgradeGroupRead(d *schema.ResourceData, m interface{}, groupType string) e
 	d.Set("description", obj.Description)
 
 	return nil
-}
-
-func waitUpgradeGroupCreate(client upgrade.UpgradeUnitGroupsClient, groupType string) error {
-
-	resultChan := make(chan error, 1)
-
-	poll := func(resultChan chan error) {
-		preLen := 0
-		for {
-			objList, err := client.List(&groupType, nil, nil, nil, nil, nil, nil, nil)
-			if err != nil && !isNotFoundError(err) {
-				resultChan <- err
-				return
-			}
-			if err == nil && len(objList.Results) > 0 {
-				if preLen == 0 {
-					preLen = len(objList.Results)
-				} else if preLen == len(objList.Results) {
-					resultChan <- nil
-					return
-				}
-			}
-			time.Sleep(intervalUUGCreat)
-		}
-	}
-
-	go poll(resultChan)
-
-	select {
-	case res := <-resultChan:
-		return res
-	case <-time.After(timeoutUUGCreat):
-		return fmt.Errorf("timeout reached")
-	}
 }
