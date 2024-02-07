@@ -12,8 +12,10 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	services "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/settings/firewall/security/intrusion_services"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+
+	services "github.com/vmware/terraform-provider-nsxt/api/infra/settings/firewall/security/intrusion_services"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 var idsProfileSeverityValues = []string{
@@ -44,7 +46,7 @@ func resourceNsxtPolicyIntrusionServiceProfile() *schema.Resource {
 		Update: resourceNsxtPolicyIntrusionServiceProfileUpdate,
 		Delete: resourceNsxtPolicyIntrusionServiceProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			State: nsxtPolicyPathResourceImporter,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -54,6 +56,7 @@ func resourceNsxtPolicyIntrusionServiceProfile() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
+			"context":      getContextSchema(),
 			"criteria": {
 				Type:        schema.TypeList,
 				Description: "Filtering criteria for the IDS Profile",
@@ -325,9 +328,9 @@ func setIdsProfileSignaturesInSchema(profileList []model.IdsProfileLocalSignatur
 	return d.Set("overridden_signature", schemaList)
 }
 
-func resourceNsxtPolicyIntrusionServiceProfileExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
+func resourceNsxtPolicyIntrusionServiceProfileExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
 	var err error
-	client := services.NewProfilesClient(connector)
+	client := services.NewProfilesClient(sessionContext, connector)
 	_, err = client.Get(id)
 	if err == nil {
 		return true, nil
@@ -344,7 +347,7 @@ func resourceNsxtPolicyIntrusionServiceProfileCreate(d *schema.ResourceData, m i
 	connector := getPolicyConnector(m)
 
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID(d, m, resourceNsxtPolicyIntrusionServiceProfileExists)
+	id, err := getOrGenerateID2(d, m, resourceNsxtPolicyIntrusionServiceProfileExists)
 	if err != nil {
 		return err
 	}
@@ -370,7 +373,7 @@ func resourceNsxtPolicyIntrusionServiceProfileCreate(d *schema.ResourceData, m i
 
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating Intrusion Service Profile with ID %s", id)
-	client := services.NewProfilesClient(connector)
+	client := services.NewProfilesClient(getSessionContext(d, m), connector)
 	err = client.Patch(id, obj)
 	if err != nil {
 		return handleCreateError("Ids Profile", id, err)
@@ -390,7 +393,7 @@ func resourceNsxtPolicyIntrusionServiceProfileRead(d *schema.ResourceData, m int
 		return fmt.Errorf("Error obtaining Ids Profile ID")
 	}
 
-	client := services.NewProfilesClient(connector)
+	client := services.NewProfilesClient(getSessionContext(d, m), connector)
 	obj, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "Ids Profile", id, err)
@@ -446,7 +449,7 @@ func resourceNsxtPolicyIntrusionServiceProfileUpdate(d *schema.ResourceData, m i
 
 	// Create the resource using PATCH
 	log.Printf("[INFO] Update Intrusion Service Profile with ID %s", id)
-	client := services.NewProfilesClient(connector)
+	client := services.NewProfilesClient(getSessionContext(d, m), connector)
 	err = client.Patch(id, obj)
 	if err != nil {
 		return handleUpdateError("Ids Profile", id, err)
@@ -466,7 +469,7 @@ func resourceNsxtPolicyIntrusionServiceProfileDelete(d *schema.ResourceData, m i
 
 	connector := getPolicyConnector(m)
 	var err error
-	client := services.NewProfilesClient(connector)
+	client := services.NewProfilesClient(getSessionContext(d, m), connector)
 	err = client.Delete(id)
 
 	if err != nil {

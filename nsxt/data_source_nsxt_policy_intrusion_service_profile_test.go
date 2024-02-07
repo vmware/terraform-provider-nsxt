@@ -23,7 +23,7 @@ func TestAccDataSourceNsxtPolicyIntrusionServiceProfile_default(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyIntrusionServiceProfileReadTemplate(name),
+				Config: testAccNsxtPolicyIntrusionServiceProfileReadTemplate(fmt.Sprintf("\"%s\"", name), false),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
@@ -34,9 +34,49 @@ func TestAccDataSourceNsxtPolicyIntrusionServiceProfile_default(t *testing.T) {
 	})
 }
 
-func testAccNsxtPolicyIntrusionServiceProfileReadTemplate(name string) string {
+func TestAccDataSourceNsxtPolicyIntrusionServiceProfile_basic(t *testing.T) {
+	testAccDataSourceNsxtPolicyIntrusionServiceProfileBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyLocalManager(t)
+		testAccNSXVersion(t, "3.0.0")
+	})
+}
+
+func TestAccDataSourceNsxtPolicyIntrusionServiceProfile_multitenancy(t *testing.T) {
+	testAccDataSourceNsxtPolicyIntrusionServiceProfileBasic(t, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+	})
+}
+
+func testAccDataSourceNsxtPolicyIntrusionServiceProfileBasic(t *testing.T, withContext bool, preCheck func()) {
+	name := getAccTestResourceName()
+	testResourceName := "data.nsxt_policy_intrusion_service_profile.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  preCheck,
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyIntrusionServiceProfileMinimalistic(name, withContext) + testAccNsxtPolicyIntrusionServiceProfileReadTemplate("nsxt_policy_intrusion_service_profile.test.display_name", withContext),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "description", ""),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+				),
+			},
+		},
+	})
+}
+
+func testAccNsxtPolicyIntrusionServiceProfileReadTemplate(name string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 data "nsxt_policy_intrusion_service_profile" "test" {
-  display_name = "%s"
-}`, name)
+%s
+  display_name = %s
+}`, context, name)
 }

@@ -12,19 +12,34 @@ import (
 )
 
 func TestAccResourceNsxtPolicyIntrusionServiceProfile_basic(t *testing.T) {
+	testAccResourceNsxtPolicyIntrusionServiceProfileBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyLocalManager(t)
+		testAccNSXVersion(t, "3.1.0")
+	})
+}
+
+func TestAccResourceNsxtPolicyIntrusionServiceProfile_multitenancy(t *testing.T) {
+	testAccResourceNsxtPolicyIntrusionServiceProfileBasic(t, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+	})
+}
+
+func testAccResourceNsxtPolicyIntrusionServiceProfileBasic(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestResourceName()
 	updatedName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_intrusion_service_profile.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t); testAccNSXVersion(t, "3.1.0") },
+		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyIntrusionServiceProfileCheckDestroy(state, updatedName)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyIntrusionServiceProfileCreate(name),
+				Config: testAccNsxtPolicyIntrusionServiceProfileCreate(name, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyIntrusionServiceProfileExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -43,7 +58,7 @@ func TestAccResourceNsxtPolicyIntrusionServiceProfile_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyIntrusionServiceProfileUpdate(updatedName),
+				Config: testAccNsxtPolicyIntrusionServiceProfileUpdate(updatedName, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyIntrusionServiceProfileExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -59,7 +74,7 @@ func TestAccResourceNsxtPolicyIntrusionServiceProfile_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyIntrusionServiceProfileMinimalistic(updatedName),
+				Config: testAccNsxtPolicyIntrusionServiceProfileMinimalistic(updatedName, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyIntrusionServiceProfileExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -78,23 +93,39 @@ func TestAccResourceNsxtPolicyIntrusionServiceProfile_basic(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyIntrusionServiceProfile_importBasic(t *testing.T) {
+	testAccResourceNsxtPolicyIntrusionServiceProfileImportBasic(t, false, func() {
+		testAccPreCheck(t)
+		testAccOnlyLocalManager(t)
+		testAccNSXVersion(t, "3.1.0")
+	})
+}
+
+func TestAccResourceNsxtPolicyIntrusionServiceProfile_importBasic_multitenancy(t *testing.T) {
+	testAccResourceNsxtPolicyIntrusionServiceProfileImportBasic(t, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+	})
+}
+
+func testAccResourceNsxtPolicyIntrusionServiceProfileImportBasic(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_intrusion_service_profile.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyLocalManager(t); testAccNSXVersion(t, "3.1.0") },
+		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyIntrusionServiceProfileCheckDestroy(state, name)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyIntrusionServiceProfileMinimalistic(name),
+				Config: testAccNsxtPolicyIntrusionServiceProfileMinimalistic(name, withContext),
 			},
 			{
 				ResourceName:      testResourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
 			},
 		},
 	})
@@ -115,7 +146,7 @@ func testAccNsxtPolicyIntrusionServiceProfileExists(resourceName string) resourc
 			return fmt.Errorf("Policy resource ID not set in resources")
 		}
 
-		exists, err := resourceNsxtPolicyIntrusionServiceProfileExists(resourceID, connector, false)
+		exists, err := resourceNsxtPolicyIntrusionServiceProfileExists(testAccGetSessionContext(), resourceID, connector)
 		if err != nil {
 			return err
 		}
@@ -135,7 +166,7 @@ func testAccNsxtPolicyIntrusionServiceProfileCheckDestroy(state *terraform.State
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		exists, err := resourceNsxtPolicyIntrusionServiceProfileExists(resourceID, connector, false)
+		exists, err := resourceNsxtPolicyIntrusionServiceProfileExists(testAccGetSessionContext(), resourceID, connector)
 		if err != nil {
 			return err
 		}
@@ -146,9 +177,14 @@ func testAccNsxtPolicyIntrusionServiceProfileCheckDestroy(state *terraform.State
 	return nil
 }
 
-func testAccNsxtPolicyIntrusionServiceProfileCreate(name string) string {
+func testAccNsxtPolicyIntrusionServiceProfileCreate(name string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_intrusion_service_profile" "test" {
+%s
   display_name = "%s"
   description  = "Acceptance Test"
   severities   = ["HIGH", "CRITICAL"]
@@ -168,12 +204,17 @@ resource "nsxt_policy_intrusion_service_profile" "test" {
     scope = "color"
     tag   = "orange"
   }
-}`, name)
+}`, context, name)
 }
 
-func testAccNsxtPolicyIntrusionServiceProfileUpdate(name string) string {
+func testAccNsxtPolicyIntrusionServiceProfileUpdate(name string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_intrusion_service_profile" "test" {
+%s
   display_name = "%s"
   description  = "Acceptance Test"
   severities   = ["HIGH", "CRITICAL", "LOW"]
@@ -200,12 +241,17 @@ resource "nsxt_policy_intrusion_service_profile" "test" {
     scope = "color"
     tag   = "orange"
   }
-}`, name)
+}`, context, name)
 }
 
-func testAccNsxtPolicyIntrusionServiceProfileMinimalistic(name string) string {
+func testAccNsxtPolicyIntrusionServiceProfileMinimalistic(name string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_intrusion_service_profile" "test" {
+%s
   display_name = "%s"
   severities   = ["HIGH", "CRITICAL"]
 
@@ -213,5 +259,5 @@ resource "nsxt_policy_intrusion_service_profile" "test" {
     products_affected = ["Linux"]
   }
 
-}`, name)
+}`, context, name)
 }

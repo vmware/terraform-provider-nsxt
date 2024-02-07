@@ -18,10 +18,27 @@ data "nsxt_policy_intrusion_service_profile" "test" {
 }
 ```
 
+## Example Usage - Multi-Tenancy
+
+```hcl
+data "nsxt_policy_project" "demoproj" {
+  display_name = "demoproj"
+}
+
+data "nsxt_policy_intrusion_service_profile" "test" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
+  display_name = "DefaultIDSProfile"
+}
+```
+
 ## Argument Reference
 
 * `id` - (Optional) The ID of Profile to retrieve. If ID is specified, no additional argument should be configured.
 * `display_name` - (Optional) The Display Name prefix of the Profile to retrieve.
+* `context` - (Optional) The context which the object belongs to
+    * `project_id` - (Required) The ID of the project which the object belongs to
 
 ## Attributes Reference
 
