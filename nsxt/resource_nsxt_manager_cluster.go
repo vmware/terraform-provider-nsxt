@@ -232,7 +232,7 @@ func resourceNsxtManagerClusterCreate(d *schema.ResourceData, m interface{}) err
 	for _, guestNode := range nodes {
 		err := joinNodeToCluster(clusterID, certSha256Thumbprint, guestNode, hostIPs, d, m)
 		if err != nil {
-			return handleCreateError("ManagerCluster", clusterID, fmt.Errorf("failed to join node %s: %s", guestNode.ID, err))
+			return handleCreateError("ManagerCluster", clusterID, err)
 		}
 	}
 	d.SetId(clusterID)
@@ -356,7 +356,7 @@ func joinNodeToCluster(clusterID string, certSha256Thumbprint string, guestNode 
 	}
 	_, err = client.Joincluster(joinClusterParams)
 	if err != nil {
-		return fmt.Errorf("Failed to join node to cluster: %s, node ip address: %s", err, guestNode.IPAddress)
+		return logAPIError(fmt.Sprintf("Failed to join node to cluster: %s, node ip address: %s", clusterID, guestNode.IPAddress), err)
 	}
 	log.Printf("[INFO] Cluster %s. Completed join node %s", clusterID, guestNode.IPAddress)
 	return nil
