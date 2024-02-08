@@ -25,9 +25,9 @@ resource "nsxt_cluster_virtual_ip" "test" {
 
 The following arguments are supported:
 
-* `force` - (Optional) A flag to determine if need to ignore duplicate address detection and DNS lookup validation check. Value can be `true` or `false`. Default value is `false`.
+* `force` - (Optional) A flag to determine if need to ignore duplicate address detection and DNS lookup validation check. Value can be `true` or `false`. Default value is `false`. This argument is supported for NSX 4.0.0 and above.
 * `ip_address` - (Optional) Virtual IP Address of the cluster. Must be in the same subnet as the manager nodes. Default value is `0.0.0.0`.
-* `ipv6_address` - (Optional) Virtual IPv6 Address of the cluster. To set ipv6 virtual IP address, IPv6 interface needs to be configured on manager nodes. Default value is `::`.
+* `ipv6_address` - (Optional) Virtual IPv6 Address of the cluster. To set ipv6 virtual IP address, IPv6 interface needs to be configured on manager nodes. Default value is `::`. This argument is supported for NSX 4.0.0 and above.
 
 ## Importing
 

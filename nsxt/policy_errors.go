@@ -127,6 +127,9 @@ func logAPIError(message string, err error) error {
 	if vapiError, ok := err.(errors.ServiceUnavailable); ok {
 		return logVapiErrorData(message, vapiError.Messages, vapiError.ErrorType, vapiError.Data)
 	}
+	if vapiError, ok := err.(errors.ConcurrentChange); ok {
+		return logVapiErrorData(message, vapiError.Messages, vapiError.ErrorType, vapiError.Data)
+	}
 
 	return err
 }
