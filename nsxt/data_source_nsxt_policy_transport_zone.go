@@ -15,7 +15,7 @@ import (
 	lm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
-var policyTransportZoneTransportTypes = [](string){
+var policyTransportZoneTransportTypes = []string{
 	lm_model.PolicyTransportZone_TZ_TYPE_OVERLAY_STANDARD,
 	lm_model.PolicyTransportZone_TZ_TYPE_OVERLAY_ENS,
 	lm_model.PolicyTransportZone_TZ_TYPE_VLAN_BACKED,
@@ -108,7 +108,7 @@ func dataSourceNsxtPolicyTransportZoneRead(d *schema.ResourceData, m interface{}
 		}
 		obj = objGet
 	} else if objName == "" && !(isDefault && transportType != "") {
-		return fmt.Errorf("Please specify id, display_name or is_default and transport_type in order to identify Transport Zone")
+		return fmt.Errorf("please specify id, display_name or is_default and transport_type in order to identify Transport Zone")
 	} else {
 		// Get by full name/prefix
 		includeMarkForDeleteObjectsParam := false
