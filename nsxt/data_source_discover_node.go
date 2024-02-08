@@ -55,16 +55,18 @@ func dataSourceNsxtDiscoverNodeRead(d *schema.ResourceData, m interface{}) error
 	} else {
 		// Get by IP address
 		objList, err := discoverNodeClient.List(nil, nil, nil, nil, nil, nil, &ipAddress, nil, nil, nil, nil, nil, nil, nil)
-		if isNotFoundError(err) {
-			return fmt.Errorf("Discover Node with IP %s was not found", ipAddress)
-		}
 		if err != nil {
 			return fmt.Errorf("Error while reading Discover Node: %v", err)
+		}
+		if len(objList.Results) == 0 {
+			return fmt.Errorf("Discover Node with IP %s was not found", ipAddress)
 		}
 		obj = objList.Results[0]
 	}
 
 	d.SetId(*obj.ExternalId)
-	d.Set("ip_address", obj.IpAddresses[0])
+	if len(obj.IpAddresses) > 0 {
+		d.Set("ip_address", obj.IpAddresses[0])
+	}
 	return nil
 }
