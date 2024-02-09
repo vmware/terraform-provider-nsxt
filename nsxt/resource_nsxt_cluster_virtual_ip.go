@@ -103,7 +103,13 @@ func setClusterVirtualIP(d *schema.ResourceData, m interface{}) error {
 	} else {
 		forceStr = nsxModel.ClusterVirtualIpProperties_FORCE_FALSE
 	}
-	_, err := client.Setvirtualip(&forceStr, &ipv6Address, &ipAddress)
+	var err error
+	if nsxVersionHigherOrEqual("4.0.0") {
+		_, err = client.Setvirtualip(&forceStr, &ipv6Address, &ipAddress)
+	} else {
+		// IPv6 not supported
+		_, err = client.Setvirtualip(nil, nil, &ipAddress)
+	}
 	if err != nil {
 		log.Printf("[WARNING] Failed to set virtual ip: %v", err)
 		return err
@@ -132,10 +138,12 @@ func resourceNsxtClusterVirualIPDelete(d *schema.ResourceData, m interface{}) er
 		log.Printf("[WARNING] Failed to clear virtual ip: %v", err)
 		return handleDeleteError("ClusterVirtualIP", id, err)
 	}
-	_, err = client.Clearvirtualip6()
-	if err != nil {
-		log.Printf("[WARNING] Failed to clear virtual ipv6 ip: %v", err)
-		return handleDeleteError("ClusterVirtualIP", id, err)
+	if nsxVersionHigherOrEqual("4.0.0") {
+		_, err = client.Clearvirtualip6()
+		if err != nil {
+			log.Printf("[WARNING] Failed to clear virtual ipv6 ip: %v", err)
+			return handleDeleteError("ClusterVirtualIP", id, err)
+		}
 	}
 	return nil
 }
