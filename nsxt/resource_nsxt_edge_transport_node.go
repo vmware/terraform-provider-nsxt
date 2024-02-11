@@ -1232,14 +1232,18 @@ func resourceNsxtEdgeTransportNodeRead(d *schema.ResourceData, m interface{}) er
 	}
 	node := base.(model.EdgeNode)
 
-	err = setEdgeDeploymentConfigInSchema(d, node.DeploymentConfig)
-	if err != nil {
-		return handleReadError(d, "TransportNode", id, err)
+	if node.DeploymentConfig != nil {
+		err = setEdgeDeploymentConfigInSchema(d, node.DeploymentConfig)
+		if err != nil {
+			return handleReadError(d, "TransportNode", id, err)
+		}
 	}
 
-	err = setEdgeNodeSettingsInSchema(d, node.NodeSettings)
-	if err != nil {
-		return handleReadError(d, "TransportNode", id, err)
+	if node.NodeSettings != nil {
+		err = setEdgeNodeSettingsInSchema(d, node.NodeSettings)
+		if err != nil {
+			return handleReadError(d, "TransportNode", id, err)
+		}
 	}
 
 	// Set base object attributes
