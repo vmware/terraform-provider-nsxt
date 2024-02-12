@@ -57,6 +57,7 @@ In addition to arguments listed above, the following attributes are exported:
 
 An existing policy Host Transport Node Collection can be [imported][docs-import] into this resource, via the following command:
 
+```
 terraform import nsxt_policy_host_transport_node_collection.test POLICY_PATH
-
+```
 The above command imports Policy Host Transport Node Collection named test with NSX policy path POLICY_PATH.

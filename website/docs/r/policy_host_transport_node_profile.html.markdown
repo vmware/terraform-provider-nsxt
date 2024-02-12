@@ -87,7 +87,10 @@ In addition to arguments listed above, the following attributes are exported:
 * `id` - ID of the resource.
 * `revision` - Indicates current revision number of the object as seen by NSX-T API server. This attribute can be useful for debugging.
 
-[docs-import]: https://www.terraform.io/cli/import
+
+## Importing
+
+An existing policy Host Transport Node profile can be [imported][docs-import] into this resource, via the following command:
 
 ```
 terraform import nsxt_policy_host_transport_node_profile.test POLICY_PATH
