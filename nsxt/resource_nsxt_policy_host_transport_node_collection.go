@@ -115,7 +115,7 @@ func resourceNsxtPolicyHostTransportNodeCollectionExists(siteID, epID, id string
 	return false, logAPIError("Error retrieving resource", err)
 }
 
-func policyHostTransportNodeCollectionUpdate(siteID, epID, id string, applyProfileParam bool, d *schema.ResourceData, m interface{}) error {
+func policyHostTransportNodeCollectionUpdate(siteID, epID, id string, isCreate bool, d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
 	displayName := d.Get("display_name").(string)
@@ -154,8 +154,12 @@ func policyHostTransportNodeCollectionUpdate(siteID, epID, id string, applyProfi
 		SubClusterConfig:       subClusterConfigs,
 	}
 
+	if !isCreate {
+		revision := int64(d.Get("revision").(int))
+		obj.Revision = &revision
+	}
 	client := enforcement_points.NewTransportNodeCollectionsClient(connector)
-	_, err := client.Update(siteID, epID, id, obj, &applyProfileParam, nil)
+	_, err := client.Update(siteID, epID, id, obj, &isCreate, nil)
 
 	return err
 }
