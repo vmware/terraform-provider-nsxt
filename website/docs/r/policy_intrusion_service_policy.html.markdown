@@ -72,6 +72,7 @@ resource "nsxt_policy_intrusion_service_policy" "policy1" {
     display_name     = "rule2"
     source_groups    = [nsxt_policy_group.fish.path]
     sources_excluded = true
+    scope            = [nsxt_policy_group.aquarium.path]
     action           = "DETECT_PREVENT"
     services         = [nsxt_policy_service.udp.path]
     logged           = true
@@ -105,6 +106,7 @@ The following arguments are supported:
   * `source_groups` - (Optional) Set of group paths that serve as source for this rule.
   * `destinations_excluded` - (Optional) A boolean value indicating negation of destination groups.
   * `sources_excluded` - (Optional) A boolean value indicating negation of source groups.
+  * `scope` - (Optional) Set of policy object paths where the rule is applied.
   * `direction` - (Optional) Traffic direction, one of `IN`, `OUT` or `IN_OUT`. Default is `IN_OUT`.
   * `disabled` - (Optional) Flag to disable this rule. Default is false.
   * `ip_version` - (Optional) Version of IP protocol, one of `IPV4`, `IPV6`, `IPV4_IPV6`. Default is `IPV4_IPV6`.
