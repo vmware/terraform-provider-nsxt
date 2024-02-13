@@ -15,12 +15,12 @@ This resource is applicable to NSX Policy Manager.
 
 ```hcl
 resource "nsxt_policy_ipsec_vpn_service" "test" {
-  display_name        = "ipsec-vpn-service1"
-  description         = "Terraform provisioned IPSec VPN service"
-  locale_service_path = data.nsxt_policy_gateway_locale_service.test.path
-  enabled             = true
-  ha_sync             = true
-  ike_log_level       = "INFO"
+  display_name  = "ipsec-vpn-service1"
+  description   = "Terraform provisioned IPSec VPN service"
+  gateway_path  = data.nsxt_policy_tier0_gateway.gw1.path
+  enabled       = true
+  ha_sync       = true
+  ike_log_level = "INFO"
   bypass_rule {
     sources      = ["192.168.10.0/24"]
     destinations = ["192.169.10.0/24"]

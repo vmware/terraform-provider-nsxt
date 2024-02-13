@@ -14,6 +14,7 @@ When only single Compute Manager is present on NSX, no need to specify any filte
 
 ```hcl
 data "nsxt_compute_manager" "test_vcenter" {
+  display_name = "some-compute-mgr"
 }
 ```
 
