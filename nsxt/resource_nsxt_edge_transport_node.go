@@ -558,9 +558,10 @@ func getTransportZoneEndpointSchema() *schema.Schema {
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"transport_zone": {
-					Type:        schema.TypeString,
-					Required:    true,
-					Description: "Unique ID identifying the transport zone for this endpoint",
+					Type:         schema.TypeString,
+					Required:     true,
+					Description:  "Unique ID identifying the transport zone for this endpoint",
+					ValidateFunc: validation.StringIsNotWhiteSpace,
 				},
 				"transport_zone_profiles": {
 					Type:        schema.TypeList,
@@ -584,9 +585,10 @@ func getUplinksSchema() *schema.Schema {
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"uplink_name": {
-					Type:        schema.TypeString,
-					Required:    true,
-					Description: "Uplink name from UplinkHostSwitch profile",
+					Type:         schema.TypeString,
+					Required:     true,
+					Description:  "Uplink name from UplinkHostSwitch profile",
+					ValidateFunc: validation.StringIsNotWhiteSpace,
 				},
 				"vds_lag_name": {
 					Type:        schema.TypeString,
@@ -1403,7 +1405,10 @@ func setHostSwitchSpecInSchema(d *schema.ResourceData, spec *data.StructValue, n
 		for _, sw := range swEntry.HostSwitches {
 			elem := make(map[string]interface{})
 			elem["host_switch_id"] = sw.HostSwitchId
-			elem["host_switch_profile"] = setHostSwitchProfileIDsInSchema(sw.HostSwitchProfileIds)
+			profiles := setHostSwitchProfileIDsInSchema(sw.HostSwitchProfileIds)
+			if len(profiles) > 0 {
+				elem["host_switch_profile"] = profiles
+			}
 			var err error
 			elem["ip_assignment"], err = setIPAssignmentInSchema(sw.IpAssignmentSpec)
 			if err != nil {
@@ -1427,7 +1432,10 @@ func setHostSwitchSpecInSchema(d *schema.ResourceData, spec *data.StructValue, n
 					var hsCfgOpts []map[string]interface{}
 					hsCfgOpt := make(map[string]interface{})
 					hsCfgOpt["host_switch_id"] = tnpsc.HostSwitchConfigOption.HostSwitchId
-					hsCfgOpt["host_switch_profile"] = setHostSwitchProfileIDsInSchema(tnpsc.HostSwitchConfigOption.HostSwitchProfileIds)
+					profiles := setHostSwitchProfileIDsInSchema(tnpsc.HostSwitchConfigOption.HostSwitchProfileIds)
+					if len(profiles) > 0 {
+						hsCfgOpt["host_switch_profile"] = profiles
+					}
 					hsCfgOpt["ip_assignment"], err = setIPAssignmentInSchema(tnpsc.HostSwitchConfigOption.IpAssignmentSpec)
 					if err != nil {
 						return err
@@ -1523,7 +1531,7 @@ func setIPAssignmentInSchema(spec *data.StructValue) (interface{}, error) {
 	return []interface{}{elem}, nil
 }
 
-func setHostSwitchProfileIDsInSchema(hspIDs []model.HostSwitchProfileTypeIdEntry) interface{} {
+func setHostSwitchProfileIDsInSchema(hspIDs []model.HostSwitchProfileTypeIdEntry) []interface{} {
 	var hostSwitchProfileIDs []interface{}
 	for _, hspID := range hspIDs {
 		hostSwitchProfileIDs = append(hostSwitchProfileIDs, hspID.Value)
