@@ -269,7 +269,7 @@ func TestAccResourceNsxtGlobalPolicyGroup_externalIDCriteria(t *testing.T) {
 func TestAccResourceNsxtGlobalPolicyGroup_withDomain(t *testing.T) {
 	name := "test-nsx-global-policy-group-domain"
 	testResourceName := "nsxt_policy_group.test"
-	domainName := "new-domain"
+	domainName := getAccTestResourceName()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {

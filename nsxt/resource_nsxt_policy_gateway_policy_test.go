@@ -386,7 +386,7 @@ func TestAccResourceNsxtGlobalPolicyGatewayPolicy_withSite(t *testing.T) {
 func TestAccResourceNsxtGlobalPolicyGatewayPolicy_withDomain(t *testing.T) {
 	name := "terraform-test"
 	siteName := getTestSiteName()
-	domainName := "new-domain"
+	domainName := getAccTestResourceName()
 	testResourceName := "nsxt_policy_gateway_policy.test"
 	comments := "Acceptance test create"
 
