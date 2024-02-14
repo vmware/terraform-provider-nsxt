@@ -6,13 +6,18 @@ package nsxt
 import (
 	"fmt"
 	"log"
+	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/fabric/compute_collections"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/sites/enforcement_points"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
+
+const removeOnDestroyDefault = false
 
 func resourceNsxtPolicyHostTransportNodeCollection() *schema.Resource {
 	return &schema.Resource{
@@ -88,6 +93,12 @@ func resourceNsxtPolicyHostTransportNodeCollection() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Transport Node Profile Path",
+			},
+			"remove_nsx_on_destroy": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Indicate whether NSX service should be removed from hypervisors during resource deletion",
+				Default:     removeOnDestroyDefault,
 			},
 		},
 	}
@@ -263,6 +274,30 @@ func resourceNsxtPolicyHostTransportNodeCollectionUpdate(d *schema.ResourceData,
 	return resourceNsxtPolicyHostTransportNodeCollectionRead(d, m)
 }
 
+func getComputeCollectionMemberStateConf(connector client.Connector, id string) *resource.StateChangeConf {
+	return &resource.StateChangeConf{
+		Pending: []string{"notyet"},
+		Target:  []string{"success", "failed"},
+		Refresh: func() (interface{}, string, error) {
+			client := compute_collections.NewMemberStatusClient(connector)
+			statuses, err := client.List(id)
+			if err != nil {
+				log.Printf("[DEBUG]: NSX Failed to retrieve compute collection member statuses: %v", err)
+				return nil, "failed", err
+			}
+
+			// When NSX bits are successfully, no member statuses will remain in the results list
+			if len(statuses.Results) > 0 {
+				return nil, "notyet", nil
+			}
+			return "success", "success", nil
+		},
+		Delay:        time.Duration(5) * time.Second,
+		Timeout:      time.Duration(1200) * time.Second,
+		PollInterval: time.Duration(5) * time.Second,
+	}
+}
+
 func resourceNsxtPolicyHostTransportNodeCollectionDelete(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	client := enforcement_points.NewTransportNodeCollectionsClient(connector)
@@ -271,6 +306,22 @@ func resourceNsxtPolicyHostTransportNodeCollectionDelete(d *schema.ResourceData,
 		return err
 	}
 
+	removeNsxOnDestroy := d.Get("remove_nsx_on_destroy").(bool)
+	if removeNsxOnDestroy {
+		log.Printf("[INFO] Removing NSX from hosts associated with HostTransportNodeCollection with ID %s", id)
+		err = client.Removensx(siteID, epID, id)
+		if err != nil {
+			return handleDeleteError("HostTransportNodeCollection", id, err)
+		}
+
+		// Busy-wait until removal is complete
+		ccID := d.Get("compute_collection_id").(string)
+		stateConf := getComputeCollectionMemberStateConf(connector, ccID)
+		_, err := stateConf.WaitForState()
+		if err != nil {
+			return fmt.Errorf("failed to remove NSX bits from hosts: %v", err)
+		}
+	}
 	log.Printf("[INFO] Deleting HostTransportNodeCollection with ID %s", id)
 	err = client.Delete(siteID, epID, id)
 	if err != nil {
@@ -297,5 +348,7 @@ func resourceNsxtPolicyHostTransportNodeCollectionImporter(d *schema.ResourceDat
 		return rd, err
 	}
 	d.Set("site_path", sitePath)
+	d.Set("remove_nsx_on_destroy", removeOnDestroyDefault)
+
 	return rd, nil
 }
