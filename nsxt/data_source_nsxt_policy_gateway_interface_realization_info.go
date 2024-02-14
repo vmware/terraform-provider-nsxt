@@ -38,14 +38,14 @@ func dataSourceNsxtPolicyGatewayInterfaceRealizationInfo() *schema.Resource {
 				Type:         schema.TypeInt,
 				Description:  "Realization timeout in seconds",
 				Optional:     true,
-				Default:      1200,
+				Default:      600,
 				ValidateFunc: validation.IntAtLeast(1),
 			},
 			"delay": {
 				Type:         schema.TypeInt,
 				Description:  "Initial delay to start realization checks in seconds",
 				Optional:     true,
-				Default:      1,
+				Default:      5,
 				ValidateFunc: validation.IntAtLeast(0),
 			},
 			"state": {
@@ -116,6 +116,14 @@ func dataSourceNsxtPolicyGatewayInterfaceRealizationInfoRead(d *schema.ResourceD
 						}
 					}
 				}
+			}
+
+			if id == "" && displayName == "" && len(result.Results) > 0 {
+				// If neither ID nor displayName is provided and there is no entity contains IpAddresses,
+				// return the first one.
+				obj := result.Results[0]
+				setGatewayInterfaceRealizationInfoInSchema(obj, d)
+				return result, *obj.State, nil
 			}
 
 			if len(perfectMatch) > 1 {
