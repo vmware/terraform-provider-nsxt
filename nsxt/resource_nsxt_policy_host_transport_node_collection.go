@@ -17,7 +17,7 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
-const removeOnDestroyDefault = false
+const removeOnDestroyDefault = true
 
 func resourceNsxtPolicyHostTransportNodeCollection() *schema.Resource {
 	return &schema.Resource{

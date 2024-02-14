@@ -6,6 +6,10 @@ package nsxt
 import (
 	"fmt"
 	"log"
+	"time"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/sites/enforcement_points/host_transport_nodes"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
@@ -53,6 +57,12 @@ func resourceNsxtPolicyHostTransportNode() *schema.Resource {
 			},
 			// host_switch_spec
 			"standard_host_switch": getStandardHostSwitchSchema(nodeTypeHost),
+			"remove_nsx_on_destroy": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Indicate whether NSX service should be removed from hypervisor during resource deletion",
+				Default:     removeOnDestroyDefault,
+			},
 		},
 	}
 }
@@ -194,6 +204,31 @@ func resourceNsxtPolicyHostTransportNodeUpdate(d *schema.ResourceData, m interfa
 	return resourceNsxtPolicyHostTransportNodeRead(d, m)
 }
 
+func getHostTransportNodeStateConf(connector client.Connector, id, siteID, epID string) *resource.StateChangeConf {
+	return &resource.StateChangeConf{
+		Pending: []string{"notyet"},
+		Target:  []string{"success", "failed"},
+		Refresh: func() (interface{}, string, error) {
+			client := host_transport_nodes.NewStateClient(connector)
+			_, err := client.Get(siteID, epID, id)
+
+			if isNotFoundError(err) {
+				return "success", "success", nil
+			}
+
+			if err != nil {
+				log.Printf("[DEBUG]: NSX Failed to retrieve HostTransportNode state: %v", err)
+				return nil, "failed", err
+			}
+
+			return nil, "notyet", nil
+		},
+		Delay:        time.Duration(5) * time.Second,
+		Timeout:      time.Duration(1200) * time.Second,
+		PollInterval: time.Duration(5) * time.Second,
+	}
+}
+
 func resourceNsxtPolicyHostTransportNodeDelete(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	htnClient := enforcement_points.NewHostTransportNodesClient(connector)
@@ -203,10 +238,23 @@ func resourceNsxtPolicyHostTransportNodeDelete(d *schema.ResourceData, m interfa
 		return err
 	}
 
+	removeNsxOnDestroy := d.Get("remove_nsx_on_destroy").(bool)
+
 	log.Printf("[INFO] Deleting HostTransportNode with ID %s", id)
-	err = htnClient.Delete(siteID, epID, id, nil, nil)
+	err = htnClient.Delete(siteID, epID, id, nil, &removeNsxOnDestroy)
 	if err != nil {
 		return handleDeleteError("HostTransportNode", id, err)
+	}
+
+	if removeNsxOnDestroy {
+		log.Printf("[INFO] Removing NSX from host HostTransportNode with ID %s", id)
+
+		// Busy-wait until removal is complete
+		stateConf := getHostTransportNodeStateConf(connector, id, siteID, epID)
+		_, err := stateConf.WaitForState()
+		if err != nil {
+			return fmt.Errorf("failed to remove NSX bits from hosts: %v", err)
+		}
 	}
 
 	return nil
@@ -229,5 +277,7 @@ func resourceNsxtPolicyHostTransportNodeImporter(d *schema.ResourceData, m inter
 		return rd, err
 	}
 	d.Set("site_path", sitePath)
+	d.Set("remove_nsx_on_destroy", removeOnDestroyDefault)
+
 	return rd, nil
 }

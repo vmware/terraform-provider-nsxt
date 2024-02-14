@@ -99,6 +99,7 @@ The following arguments are supported:
   * `vmk_install_migration` - (Optional) The vmknic and logical switch mappings.
       * `destination_network` - (Required) The network id to which the ESX vmk interface will be migrated.
       * `device_name` - (Required) ESX vmk interface name.
+* `remove_nsx_on_destroy` - (Optional) Upon deletion, uninstall NSX from Transport Node. Default is true.
 
 ## Attributes Reference
 
