@@ -10,6 +10,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/sites/enforcement_points/edge_clusters"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
@@ -47,10 +48,17 @@ func dataSourceNsxtPolicyEdgeNodeRead(d *schema.ResourceData, m interface{}) err
 		if memberIndexSet {
 			query["member_index"] = strconv.Itoa(memberIndex.(int))
 		}
-		_, err := policyDataSourceResourceReadWithValidation(d, getPolicyConnector(m), getSessionContext(d, m), "PolicyEdgeNode", query, false)
+		obj, err := policyDataSourceResourceReadWithValidation(d, getPolicyConnector(m), getSessionContext(d, m), "PolicyEdgeNode", query, false)
 		if err != nil {
 			return err
 		}
+		converter := bindings.NewTypeConverter()
+		dataValue, errors := converter.ConvertToGolang(obj, model.PolicyEdgeNodeBindingType())
+		if len(errors) > 0 {
+			return errors[0]
+		}
+		policyEdgeNode := dataValue.(model.PolicyEdgeNode)
+		d.Set("member_index", policyEdgeNode.MemberIndex)
 		return nil
 	}
 
