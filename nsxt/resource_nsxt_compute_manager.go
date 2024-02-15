@@ -197,7 +197,7 @@ func resourceNsxtComputeManager() *schema.Resource {
 				Type:         schema.TypeInt,
 				Description:  "Proxy https port of compute manager",
 				Optional:     true,
-				ValidateFunc: validateSinglePort(),
+				ValidateFunc: validation.IntBetween(0, 65535),
 				Default:      443,
 			},
 			"server": {
