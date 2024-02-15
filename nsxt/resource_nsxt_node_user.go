@@ -175,7 +175,10 @@ func resourceNsxtNodeUserUpdate(d *schema.ResourceData, m interface{}) error {
 	if id == "" {
 		return fmt.Errorf("error obtaining logical object id")
 	}
-	password := d.Get("password").(string)
+	oldPwd, pwd := d.GetChange("password")
+	password := pwd.(string)
+	oldPassword := oldPwd.(string)
+
 	active := d.Get("active").(bool)
 	status := d.Get("status").(string)
 
@@ -207,6 +210,13 @@ func resourceNsxtNodeUserUpdate(d *schema.ResourceData, m interface{}) error {
 		PasswordChangeWarning:   &passwordChangeWarning,
 		Username:                &username,
 	}
+
+	// If password is changed, handle password change.
+	if password != oldPassword {
+		userProp.Password = &password
+		userProp.OldPassword = &oldPassword
+	}
+
 	_, err := client.Update(id, userProp)
 	if err != nil {
 		return handleUpdateError("User", id, err)
