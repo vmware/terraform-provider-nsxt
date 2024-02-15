@@ -85,3 +85,7 @@ resource "nsxt_policy_group" "test" {
 ## VM tagging and port tagging is not working on big environments
 
 Due to [NSX issue](https://kb.vmware.com/s/article/89437), `vif` API is not working as expected with > 1K objects. Please upgrade your NSX to more recent version.
+
+## I cannot import a segment
+
+The provider offers two types of segments: `nsxt_policy_segment` and `nsxt_policy_fixed_segment`. Those represent separate segment types in NSX: `nsxt_policy_fixed_segment` is always connected to a gateway (policy path of this segment contains the gateway path), and is mostly used in VMC. If your segment import fails, make sure you're trying to import the correct type of segment.
