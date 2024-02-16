@@ -96,6 +96,7 @@ func getRolesForPathSchema(forceNew bool) *schema.Schema {
 					Type:        schema.TypeString,
 					Description: "Path of the entity in parent hierarchy.",
 					Required:    true,
+					ForceNew:    forceNew,
 				},
 				"roles": {
 					Type:        schema.TypeSet,
@@ -104,6 +105,7 @@ func getRolesForPathSchema(forceNew bool) *schema.Schema {
 					Elem: &schema.Schema{
 						Type: schema.TypeString,
 					},
+					ForceNew: forceNew,
 				},
 			},
 		},
