@@ -10,8 +10,9 @@ description: A resource to configure a network Segment on specific Tier1 Gateway
 This resource provides a method for the management of Fixed Segments (attached to
 specific Tier-1 Gateway)
 
-This resource is applicable to VMC. For NSX Global Manager and NSX Policy Manager, it
-is recommended to use nsxt_policy_segment resource instead.
+This resource is applicable to VMC. Please use this resource for HCX-created segments.
+For NSX Global Manager and NSX Policy Manager, it is recommended to use `nsxt_policy_segment` 
+resource instead.
 
 ## Example Usage
 
