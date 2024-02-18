@@ -60,7 +60,23 @@ func TestAccResourceNsxtNodeUser_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNodeUserUpdate(testUsername),
+				Config: testAccNodeUserUpdate(testUsername, accTestNodeUserCreateAttributes["password"]),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNodeUserExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "full_name", accTestNodeUserUpdateAttributes["full_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "active", accTestNodeUserUpdateAttributes["active"]),
+					resource.TestCheckResourceAttr(testResourceName, "password_change_frequency", accTestNodeUserUpdateAttributes["password_change_frequency"]),
+					resource.TestCheckResourceAttr(testResourceName, "password_change_warning", accTestNodeUserUpdateAttributes["password_change_warning"]),
+					resource.TestCheckResourceAttr(testResourceName, "username", testUsername),
+					resource.TestCheckResourceAttr(testResourceName, "status", nsxModel.NodeUserProperties_STATUS_NOT_ACTIVATED),
+					resource.TestCheckResourceAttrSet(testResourceName, "password_reset_required"),
+					resource.TestCheckResourceAttrSet(testResourceName, "last_password_change"),
+					resource.TestCheckResourceAttrSet(testResourceName, "user_id"),
+				),
+			},
+			{
+				// Test password change
+				Config: testAccNodeUserUpdate(testUsername, accTestNodeUserUpdateAttributes["password"]),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNodeUserExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "full_name", accTestNodeUserUpdateAttributes["full_name"]),
@@ -181,14 +197,15 @@ resource "nsxt_node_user" "test" {
 }`, attrMap["active"], attrMap["full_name"], attrMap["password"], username, attrMap["password_change_frequency"], attrMap["password_change_warning"])
 }
 
-func testAccNodeUserUpdate(username string) string {
+func testAccNodeUserUpdate(username, password string) string {
 	attrMap := accTestNodeUserUpdateAttributes
 	return fmt.Sprintf(`
 resource "nsxt_node_user" "test" {
   active = %s
   full_name = "%s"
+  password = "%s"
   username = "%s"
   password_change_frequency = %s
   password_change_warning = %s
-}`, attrMap["active"], attrMap["full_name"], username, attrMap["password_change_frequency"], attrMap["password_change_warning"])
+}`, attrMap["active"], attrMap["full_name"], password, username, attrMap["password_change_frequency"], attrMap["password_change_warning"])
 }
