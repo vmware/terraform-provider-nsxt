@@ -319,6 +319,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_gateway_interface_realization": dataSourceNsxtPolicyGatewayInterfaceRealization(),
 			"nsxt_upgrade_postcheck":                    dataSourceNsxtUpgradePostCheck(),
 			"nsxt_upgrade_prepare_ready":                dataSourceNsxtUpgradePrepareReady(),
+			"nsxt_policy_vtep_ha_host_switch_profile":   dataSourceNsxtVtepHAHostSwitchProfile(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -476,6 +477,7 @@ func Provider() *schema.Provider {
 			"nsxt_upgrade_run":                             resourceNsxtUpgradeRun(),
 			"nsxt_upgrade_prepare":                         resourceNsxtUpgradePrepare(),
 			"nsxt_upgrade_precheck_acknowledge":            resourceNsxtUpgradePrecheckAcknowledge(),
+			"nsxt_policy_vtep_ha_host_switch_profile":      resourceNsxtVtepHAHostSwitchProfile(),
 		},
 
 		ConfigureFunc: providerConfigure,
