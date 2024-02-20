@@ -1414,7 +1414,6 @@ func setHostSwitchSpecInSchema(d *schema.ResourceData, spec *data.StructValue, n
 			if err != nil {
 				return err
 			}
-			elem["is_migrate_pnics"] = sw.IsMigratePnics
 			var pnics []map[string]interface{}
 			for _, pnic := range sw.Pnics {
 				e := make(map[string]interface{})
@@ -1424,6 +1423,7 @@ func setHostSwitchSpecInSchema(d *schema.ResourceData, spec *data.StructValue, n
 			}
 			elem["pnic"] = pnics
 			if nodeType == nodeTypeHost {
+				elem["is_migrate_pnics"] = sw.IsMigratePnics
 				elem["host_switch_mode"] = sw.HostSwitchMode
 				elem["uplink"] = setUplinksFromSchema(sw.Uplinks)
 				var tnpSubConfig []map[string]interface{}
