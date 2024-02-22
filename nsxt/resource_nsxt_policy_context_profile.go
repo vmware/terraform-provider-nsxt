@@ -334,7 +334,7 @@ func checkAttributesValid(context utl.SessionContext, attributes []interface{}, 
 	}
 	attributeValues, err := listAttributesWithKey(context, attributeKeyMap[key], m)
 	if err != nil {
-		return err
+		return logAPIError("Error listing attributes", err)
 	}
 	for _, attribute := range attributes {
 		attributeMap := attribute.(map[string]interface{})
