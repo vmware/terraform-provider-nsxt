@@ -1222,9 +1222,11 @@ func resourceNsxtEdgeTransportNodeRead(d *schema.ResourceData, m interface{}) er
 	setMPTagsInSchema(d, obj.Tags)
 	d.Set("failure_domain", obj.FailureDomainId)
 
-	err = setHostSwitchSpecInSchema(d, obj.HostSwitchSpec, nodeTypeEdge)
-	if err != nil {
-		return handleReadError(d, "TransportNode", id, err)
+	if obj.HostSwitchSpec != nil {
+		err = setHostSwitchSpecInSchema(d, obj.HostSwitchSpec, nodeTypeEdge)
+		if err != nil {
+			return handleReadError(d, "TransportNode", id, err)
+		}
 	}
 
 	converter := bindings.NewTypeConverter()
