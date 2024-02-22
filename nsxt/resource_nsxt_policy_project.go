@@ -44,7 +44,7 @@ func resourceNsxtPolicyProject() *schema.Resource {
 							Elem:     getElemPolicyPathSchemaWithFlags(false, false, false),
 							Optional: true,
 						},
-						"site_path": getElemPolicyPathSchemaWithFlags(true, false, false),
+						"site_path": getElemPolicyPathSchemaWithFlags(true, true, false),
 					},
 				},
 				Optional: true,
