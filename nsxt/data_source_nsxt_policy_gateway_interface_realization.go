@@ -16,9 +16,9 @@ import (
 	realizedstate "github.com/vmware/terraform-provider-nsxt/api/infra/realized_state"
 )
 
-func dataSourceNsxtPolicyGatewayInterfaceRealizationInfo() *schema.Resource {
+func dataSourceNsxtPolicyGatewayInterfaceRealization() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceNsxtPolicyGatewayInterfaceRealizationInfoRead,
+		Read: dataSourceNsxtPolicyGatewayInterfaceRealizationRead,
 
 		Schema: map[string]*schema.Schema{
 			"id":      getDataSourceIDSchema(),
@@ -70,7 +70,7 @@ func dataSourceNsxtPolicyGatewayInterfaceRealizationInfo() *schema.Resource {
 	}
 }
 
-func dataSourceNsxtPolicyGatewayInterfaceRealizationInfoRead(d *schema.ResourceData, m interface{}) error {
+func dataSourceNsxtPolicyGatewayInterfaceRealizationRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	client := realizedstate.NewRealizedEntitiesClient(getSessionContext(d, m), connector)
 
@@ -98,7 +98,7 @@ func dataSourceNsxtPolicyGatewayInterfaceRealizationInfoRead(d *schema.ResourceD
 					if objInList.State == nil {
 						return result, "UNKNOWN", nil
 					}
-					setGatewayInterfaceRealizationInfoInSchema(objInList, d)
+					setGatewayInterfaceRealizationInSchema(objInList, d)
 					return result, *objInList.State, nil
 				} else if displayName != "" && objInList.DisplayName != nil {
 					if displayName == *objInList.DisplayName {
@@ -111,7 +111,7 @@ func dataSourceNsxtPolicyGatewayInterfaceRealizationInfoRead(d *schema.ResourceD
 					// it is the most common case.
 					for _, ext := range objInList.ExtendedAttributes {
 						if ext.Key != nil && *ext.Key == "IpAddresses" {
-							setGatewayInterfaceRealizationInfoInSchema(objInList, d)
+							setGatewayInterfaceRealizationInSchema(objInList, d)
 							return result, *objInList.State, nil
 						}
 					}
@@ -122,7 +122,7 @@ func dataSourceNsxtPolicyGatewayInterfaceRealizationInfoRead(d *schema.ResourceD
 				// If neither ID nor displayName is provided and there is no entity contains IpAddresses,
 				// return the first one.
 				obj := result.Results[0]
-				setGatewayInterfaceRealizationInfoInSchema(obj, d)
+				setGatewayInterfaceRealizationInSchema(obj, d)
 				return result, *obj.State, nil
 			}
 
@@ -133,7 +133,7 @@ func dataSourceNsxtPolicyGatewayInterfaceRealizationInfoRead(d *schema.ResourceD
 				if perfectMatch[0].State == nil {
 					return result, "UNKNOWN", nil
 				}
-				setGatewayInterfaceRealizationInfoInSchema(perfectMatch[0], d)
+				setGatewayInterfaceRealizationInSchema(perfectMatch[0], d)
 				return result, *perfectMatch[0].State, nil
 			}
 
@@ -144,7 +144,7 @@ func dataSourceNsxtPolicyGatewayInterfaceRealizationInfoRead(d *schema.ResourceD
 				if containsMatch[0].State == nil {
 					return result, "UNKNOWN", nil
 				}
-				setGatewayInterfaceRealizationInfoInSchema(containsMatch[0], d)
+				setGatewayInterfaceRealizationInSchema(containsMatch[0], d)
 				return result, *containsMatch[0].State, nil
 			}
 
@@ -161,7 +161,7 @@ func dataSourceNsxtPolicyGatewayInterfaceRealizationInfoRead(d *schema.ResourceD
 	return nil
 }
 
-func setGatewayInterfaceRealizationInfoInSchema(realizedResource model.GenericPolicyRealizedResource, d *schema.ResourceData) {
+func setGatewayInterfaceRealizationInSchema(realizedResource model.GenericPolicyRealizedResource, d *schema.ResourceData) {
 	for _, ext := range realizedResource.ExtendedAttributes {
 		if *ext.Key == "IpAddresses" && len(ext.Values) > 0 {
 			d.Set("ip_address", ext.Values)
