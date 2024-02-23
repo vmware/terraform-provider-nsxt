@@ -659,21 +659,21 @@ func testAccNsxtPolicyTier0InterfaceSiteTemplate() string {
 func testAccNsxtPolicyTier0InterfaceRealizationTemplate() string {
 	if testAccIsGlobalManager() {
 		return `
-data "nsxt_policy_realization_info" "realization_info" {
+data "nsxt_policy_realization" "realization_info" {
   path = nsxt_policy_tier0_gateway_interface.test.path
   site_path = data.nsxt_policy_site.test.path
 }
 
-data "nsxt_policy_gateway_interface_realization_info" "gw_realization_info" {
+data "nsxt_policy_gateway_interface_realization" "gw_realization_info" {
   gateway_path = nsxt_policy_tier0_gateway_interface.test.path
 }`
 	}
 	return `
-data "nsxt_policy_realization_info" "realization_info" {
+data "nsxt_policy_realization" "realization" {
   path = nsxt_policy_tier0_gateway_interface.test.path
 }
 
-data "nsxt_policy_gateway_interface_realization_info" "gw_realization_info" {
+data "nsxt_policy_gateway_interface_realization" "gw_realization" {
   gateway_path = nsxt_policy_tier0_gateway_interface.test.path
 }`
 }

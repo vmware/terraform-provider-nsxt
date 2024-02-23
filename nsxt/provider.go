@@ -316,7 +316,7 @@ func Provider() *schema.Provider {
 			"nsxt_discover_node":                             dataSourceNsxtDiscoverNode(),
 			"nsxt_edge_upgrade_group":                        dataSourceNsxtEdgeUpgradeGroup(),
 			"nsxt_host_upgrade_group":                        dataSourceNsxtHostUpgradeGroup(),
-			"nsxt_policy_gateway_interface_realization_info": dataSourceNsxtPolicyGatewayInterfaceRealizationInfo(),
+			"nsxt_policy_gateway_interface_realization": dataSourceNsxtPolicyGatewayInterfaceRealization(),
 			"nsxt_upgrade_postcheck":                         dataSourceNsxtUpgradePostCheck(),
 			"nsxt_upgrade_prepare_ready":                     dataSourceNsxtUpgradePrepareReady(),
 		},
