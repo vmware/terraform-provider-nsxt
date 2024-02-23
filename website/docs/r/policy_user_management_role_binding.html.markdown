@@ -31,7 +31,34 @@ resource "nsxt_policy_user_management_role_binding" "test" {
   }
 }
 ```
+As nsxt_policy_user_management_role_binding instances apply to nsxt_node_user and nsxt_policy_user_management_role resources, when they are created in the same Terraform configuration
+users need to specify resource dependencies using the `depends_on` clause as in the following example:
 
+```
+resource "nsxt_node_user" "node_user" {
+  active                    = true
+  full_name                 = "John Doe"
+  password                  = "Str0ng_Pwd!Wins$"
+  username                  = "johndoe123"
+  password_change_frequency = 90
+  password_change_warning   = 30
+}
+
+resource "nsxt_policy_user_management_role_binding" "user_management_role_binding" {
+  display_name         = "johndoe123"
+  name                 = "johndoe123"
+  type                 = "local_user"
+  roles_for_path {
+    path  = "/"
+    roles = ["auditor"]
+  }
+  overwrite_local_user = true
+
+  depends_on = [
+    nsxt_node_user.node_user
+  ]
+}
+```
 ## Argument Reference
 
 The following arguments are supported:
