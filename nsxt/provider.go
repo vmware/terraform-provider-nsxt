@@ -318,6 +318,7 @@ func Provider() *schema.Provider {
 			"nsxt_host_upgrade_group":                        dataSourceNsxtHostUpgradeGroup(),
 			"nsxt_policy_gateway_interface_realization_info": dataSourceNsxtPolicyGatewayInterfaceRealizationInfo(),
 			"nsxt_upgrade_postcheck":                         dataSourceNsxtUpgradePostCheck(),
+			"nsxt_upgrade_prepare_ready":                     dataSourceNsxtUpgradePrepareReady(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -473,6 +474,8 @@ func Provider() *schema.Provider {
 			"nsxt_policy_lb_udp_monitor_profile":           resourceNsxtPolicyLBUdpMonitorProfile(),
 			"nsxt_policy_tier0_gateway_gre_tunnel":         resourceNsxtPolicyTier0GatewayGRETunnel(),
 			"nsxt_upgrade_run":                             resourceNsxtUpgradeRun(),
+			"nsxt_upgrade_prepare":                         resourceNsxtUpgradePrepare(),
+			"nsxt_upgrade_precheck_acknowledge":            resourceNsxtUpgradePrecheckAcknowledge(),
 		},
 
 		ConfigureFunc: providerConfigure,
