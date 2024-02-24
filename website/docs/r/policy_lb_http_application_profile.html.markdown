@@ -1,5 +1,5 @@
 ---
-subcategory: "Load Balancer"
+subcategory: "Beta"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_lb_http_application_profile"
 description: A resource to configure a LBHttpApplicationProfile.

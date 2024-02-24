@@ -1,7 +1,7 @@
 ---
-subcategory: "Realization"
+subcategory: "Beta"
 layout: "nsxt"
-page_title: "NSXT: policy_gateway_interface_realization_info"
+page_title: "NSXT: policy_gateway_interface_realization"
 description: A gateway interface realization information.
 ---
 
@@ -18,7 +18,7 @@ data "nsxt_policy_tier1_gateway" "tier1_gw" {
   display_name = "tier1_gw"
 }
 
-data "nsxt_policy_gateway_interface_realization_info" "info" {
+data "nsxt_policy_gateway_interface_realization" "info" {
   gateway_path = data.nsxt_policy_tier1_gateway.tier1_gw.path
   display_name = "pepsi-it_t1-t1_lrp"
   timeout      = 60
@@ -36,7 +36,7 @@ data "nsxt_policy_tier1_gateway" "tier1_gw" {
   display_name = "tier1_gw"
 }
 
-data "nsxt_policy_gateway_interface_realization_info" "info" {
+data "nsxt_policy_gateway_interface_realization" "info" {
   context {
     project_id = data.nsxt_policy_project.demoproj.id
   }

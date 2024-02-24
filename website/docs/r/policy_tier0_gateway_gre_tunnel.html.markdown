@@ -1,5 +1,5 @@
 ---
-subcategory: "Gateways and Routing"
+subcategory: "Beta"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_tier0_gateway_gre_tunnel"
 description: A resource to configure a GRE tunnel on Tier-0 gateway on NSX Policy manager.

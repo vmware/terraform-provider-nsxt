@@ -1,5 +1,5 @@
 ---
-subcategory: "Firewall"
+subcategory: "Beta"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_parent_security_policy"
 description: A resource to configure a Security Policy without rules.
