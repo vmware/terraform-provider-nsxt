@@ -1,5 +1,5 @@
 ---
-subcategory: "Beta"
+subcategory: "User Management"
 layout: "nsxt"
 page_title: "NSXT: nsxt_principal_identity"
 description: A resource to configure principal identities.

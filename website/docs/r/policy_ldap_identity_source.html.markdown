@@ -1,5 +1,5 @@
 ---
-subcategory: "Beta"
+subcategory: "User Management"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_ldap_identity_source"
 description: A resource to configure LDAP identity sources.

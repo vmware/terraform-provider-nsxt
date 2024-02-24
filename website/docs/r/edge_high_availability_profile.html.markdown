@@ -1,5 +1,5 @@
 ---
-subcategory: "Beta"
+subcategory: "Fabric"
 layout: "nsxt"
 page_title: "NSXT: nsxt_edge_high_availability_profile"
 description: A resource to configure an Edge High Availability Profile.
