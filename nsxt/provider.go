@@ -481,6 +481,7 @@ func Provider() *schema.Provider {
 			"nsxt_upgrade_precheck_acknowledge":            resourceNsxtUpgradePrecheckAcknowledge(),
 			"nsxt_policy_vtep_ha_host_switch_profile":      resourceNsxtVtepHAHostSwitchProfile(),
 			"nsxt_policy_site":                             resourceNsxtPolicySite(),
+			"nsxt_policy_global_manager":                   resourceNsxtPolicyGlobalManager(),
 		},
 
 		ConfigureFunc: providerConfigure,
