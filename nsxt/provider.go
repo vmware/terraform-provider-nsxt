@@ -1067,10 +1067,6 @@ func getPolicyConnector(clients interface{}) client.Connector {
 	return getPolicyConnectorWithHeaders(clients, nil, false, true)
 }
 
-func getPolicyConnectorWithoutRetry(clients interface{}) client.Connector {
-	return getPolicyConnectorWithHeaders(clients, nil, false, false)
-}
-
 // Standalone policy connector, possibly for different endpoint,
 // for the purpose of special tasks (such as joining manager cluster node)
 // Does not initialize global connection settings

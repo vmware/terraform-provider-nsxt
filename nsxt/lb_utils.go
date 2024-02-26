@@ -251,7 +251,7 @@ func resourceNsxtPolicyLBAppProfileExists(id string, connector client.Connector,
 	if isNotFoundError(err) {
 		return false, nil
 	}
-	msg := fmt.Sprintf("Error retrieving resource LBAppProfile")
+	msg := "Error retrieving resource LBAppProfile"
 	return false, logAPIError(msg, err)
 }
 
@@ -281,7 +281,7 @@ func resourceNsxtPolicyLBMonitorProfileExistsWrapper(id string, connector client
 	if isNotFoundError(err) {
 		return false, nil
 	}
-	msg := fmt.Sprintf("Error retrieving resource LBMonitorProfile")
+	msg := "Error retrieving resource LBMonitorProfile"
 	return false, logAPIError(msg, err)
 }
 
