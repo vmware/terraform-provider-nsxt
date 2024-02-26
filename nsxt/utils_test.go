@@ -195,12 +195,6 @@ func getTestAnotherSiteName() string {
 	return os.Getenv("NSXT_TEST_ANOTHER_SITE_NAME")
 }
 
-func getTestAdvancedTopology() string {
-	// Non-basic testing topology available
-	// For now this is used by tests that have minimum 2 edge nodes per cluster
-	return os.Getenv("NSXT_TEST_ADVANCED_TOPOLOGY")
-}
-
 func getTestCertificateName(isClient bool) string {
 	if isClient {
 		return os.Getenv("NSXT_TEST_CLIENT_CERTIFICATE_NAME")

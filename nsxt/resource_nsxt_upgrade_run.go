@@ -625,7 +625,7 @@ func runUpgrade(upgradeClientSet *upgradeClientSet, partialUpgradeMap map[string
 		if err != nil {
 			return err
 		}
-		log.Printf(completeLog)
+		log.Print(completeLog)
 	}
 	return nil
 }
