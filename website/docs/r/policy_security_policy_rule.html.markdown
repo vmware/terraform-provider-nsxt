@@ -1,5 +1,5 @@
 ---
-subcategory: "Firewall"
+subcategory: "Beta"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_security_policy_rule"
 description: A resource to configure a Security Policy Rule.

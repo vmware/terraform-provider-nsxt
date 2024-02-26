@@ -1,3 +1,64 @@
+## 3.5.0 (February 26, 2024)
+
+IMPROVEMENTS:
+* Multitenancy support for IDS/IPS resources ([#1096](https://github.com/vmware/terraform-provider-nsxt/pull/1096))
+* Support OAuth on VMC ([#1080](https://github.com/vmware/terraform-provider-nsxt/pull/1080))
+* `resource/nsxt_policy_tier0_gateway`: support vrf_transit_subnets attribute ([#1026](https://github.com/vmware/terraform-provider-nsxt/pull/1026))
+
+BUG FIXES:
+* `resource/nsxt_policy_tier0_gateway`, `resource/nsxt_policy_tier1_gateway`: Fix assignment of ipv6 profiles with multitenancy ([#1093](https://github.com/vmware/terraform-provider-nsxt/pull/1093))
+* `data/nsxt_certificate`: Fix an issue when certificate fails to be found by supporting pagination ([#1075](https://github.com/vmware/terraform-provider-nsxt/pull/1075))
+* `resource/nsxt_policy_bgp_config`: Support local_as_num for VRF gateways ([#1074](https://github.com/vmware/terraform-provider-nsxt/pull/1074))
+* `resource/nsxt_policy_bgp_neighbor`: Clear password only if password was changed by user, this is to avoid resetting the password following import of the resource ([#1046](https://github.com/vmware/terraform-provider-nsxt/pull/1046))
+* `resource/nsxt_policy_tier1_gateway`: Respect ha_mode value when NSX auto-assigns it, to avoid non-empty diffs in the provider ([#1042](https://github.com/vmware/terraform-provider-nsxt/pull/1042))
+* `resource/nsxt_policy_tier0_gateway`, `resource/nsxt_policy_tier1_gateway`: Allow locking gateway locale_service by specifying nsx_id. This fixes the issue of dependant interfacing being deleted after applying a change in locale service ([#1040](https://github.com/vmware/terraform-provider-nsxt/pull/1040))
+* `resource/nsxt_policy_lb_pool`: Allow to specify multiple active monitor paths by adding new attribute and deprecating the old one ([#1039](https://github.com/vmware/terraform-provider-nsxt/pull/1039))
+* `data/nsxt_policy_tier0_gateway`, `data/nsxt_policy_edge_cluster`: Fix issue that prevented tenant user to accessing these data sources ([#1015](https://github.com/vmware/terraform-provider-nsxt/pull/1015))
+
+EXPERIMENTAL FEATURES:
+Upgrade support is offered as Beta with this release. Please note that upgrade feature requires a separate terraform config and state.
+Additional Fabric objects are also offered as Beta in this release.
+Additional Beta features include separate security policy rule resource, policy LB profiles and GRE tunnel.
+
+* `data/nsxt_upgrade_postcheck`
+* `data/nsxt_upgrade_prepare_ready`
+* `data/nsxt_edge_upgrade_group`
+* `data/nsxt_host_upgrade_group`
+
+* `data/nsxt_compute_collection`
+* `data/nsxt_manager_cluster_node`
+* `data/nsxt_discover_node`
+* `data/nsxt_edge_transport_node` (renamed from `nsxt_transport_node`)
+
+* `data/nsxt_policy_gateway_dns_forwarder`
+* `data/nsxt_policy_gateway_interface_realization`
+
+* `resource/nsxt_upgrade_prepare`
+* `resource/nsxt_upgrade_run`
+* `resource/nsxt_upgrade_precheck_acknowledge`
+
+* `resource/nsxt_policy_tier0_gateway_gre_tunnel`
+
+* `resource/nsxt_policy_parent_security_policy`
+* `resource/nsxt_policy_security_policy_rule`
+
+* `resource/nsxt_policy_lb_client_ssl_profile`
+* `resource/nsxt_policy_lb_http_application_profile`
+* `resource/nsxt_policy_lb_http_monitor_profile`
+* `resource/nsxt_policy_lb_https_monitor_profile`
+* `resource/nsxt_policy_lb_icmp_monitor_profile`
+* `resource/nsxt_policy_lb_passive_monitor_profile`
+* `resource/nsxt_policy_lb_tcp_monitor_profile`
+* `resource/nsxt_policy_lb_udp_monitor_profile`
+
+* `resource/nsxt_edge_transport_node` (renamed from `nsxt_transport_node`)
+
+* `resource/nsxt_node_user`
+* `resource/nsxt_principal_identity`
+* `resource/nsxt_policy_user_management_role_binding`
+* `resource/nsxt_policy_user_management_role`
+* `resource/policy_ldap_identity_source`
+
 ## 3.4.0 (October 27, 2023)
 
 FEATURES:
