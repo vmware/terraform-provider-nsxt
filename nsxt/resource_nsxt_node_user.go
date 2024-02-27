@@ -37,10 +37,11 @@ func resourceNsxtUsers() *schema.Resource {
 				Computed:    true,
 			},
 			"password": {
-				Type:        schema.TypeString,
-				Description: "Password for the user",
-				Sensitive:   true,
-				Optional:    true,
+				Type:         schema.TypeString,
+				Description:  "Password for the user",
+				Sensitive:    true,
+				Optional:     true,
+				ValidateFunc: validation.StringIsNotWhiteSpace,
 			},
 			"password_change_frequency": {
 				Type:         schema.TypeInt,
