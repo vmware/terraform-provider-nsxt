@@ -976,3 +976,94 @@
     - Patch
     - Update
     - List
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/domains/groups
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/domains/groups
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
+      type: Global
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/domains/groups
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Multitenancy
+  model_name: PolicyFirewallFloodProtectionProfileBindingMap
+  obj_name: PolicyFirewallFloodProtectionProfileBindingMap
+  client_name: FirewallFloodProtectionProfileBindingMapsClient
+  list_result_name: PolicyFirewallFloodProtectionProfileBindingMapListResult
+  supported_method:
+    - New
+    - Get
+    - Delete
+    - Patch
+    - Update
+    - List
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
+      type: Global
+  model_name: FloodProtectionProfileBindingMap
+  obj_name: FloodProtectionProfileBindingMap
+  client_name: FloodProtectionProfileBindingsClient
+  supported_method:
+    - New
+    - Get
+    - Delete
+    - Patch
+    - Update
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s/locale_services
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
+      type: Global
+  model_name: FloodProtectionProfileBindingMap
+  obj_name: FloodProtectionProfileBindingMap
+  client_name: FloodProtectionProfileBindingsClient
+  supported_method:
+    - New
+    - Get
+    - Delete
+    - Patch
+    - Update
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_1s
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
+      type: Global
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/tier_1s
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Multitenancy
+  model_name: FloodProtectionProfileBindingMap
+  obj_name: FloodProtectionProfileBindingMap
+  client_name: FloodProtectionProfileBindingsClient
+  supported_method:
+    - New
+    - Get
+    - Delete
+    - Patch
+    - Update
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/locale_services
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_1s/locale_services
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model
+      type: Global
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/tier_1s/locale_services
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Multitenancy
+  model_name: FloodProtectionProfileBindingMap
+  obj_name: FloodProtectionProfileBindingMap
+  client_name: FloodProtectionProfileBindingsClient
+  supported_method:
+    - New
+    - Get
+    - Delete
+    - Patch
+    - Update
