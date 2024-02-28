@@ -37,7 +37,7 @@ var accTestUplinkHostSwitchProfileCreateAttributes = map[string]string{
 
 var accTestUplinkHostSwitchProfileUpdateAttributes = map[string]string{
 	"display_name":                 getAccTestResourceName(),
-	"description":                  "terraform created",
+	"description":                  "terraform updated",
 	"mtu":                          "1500",
 	"overlay_encap":                "VXLAN",
 	"transport_vlan":               "1",
