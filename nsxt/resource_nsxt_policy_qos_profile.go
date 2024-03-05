@@ -269,6 +269,7 @@ func resourceNsxtPolicyQosProfileUpdate(d *schema.ResourceData, m interface{}) e
 	boolFalse := false
 	err := client.Patch(id, obj, &boolFalse)
 	if err != nil {
+		d.Partial(true)
 		return handleUpdateError("QosProfile", id, err)
 	}
 
