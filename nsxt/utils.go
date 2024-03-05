@@ -16,6 +16,7 @@ import (
 	"github.com/vmware/go-vmware-nsxt/common"
 	"github.com/vmware/go-vmware-nsxt/manager"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	mp_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/node"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/search"
@@ -779,4 +780,42 @@ func getMPTagsFromSchema(d *schema.ResourceData) []mp_model.Tag {
 
 func setMPTagsInSchema(d *schema.ResourceData, tags []mp_model.Tag) {
 	setCustomizedMPTagsInSchema(d, tags, "tag")
+}
+
+func getCustomizedGMTagsFromSchema(d *schema.ResourceData, schemaName string) []gm_model.Tag {
+	tags := d.Get(schemaName).(*schema.Set).List()
+	tagList := make([]gm_model.Tag, 0)
+	for _, tag := range tags {
+		data := tag.(map[string]interface{})
+		scope := data["scope"].(string)
+		tag := data["tag"].(string)
+		elem := gm_model.Tag{
+			Scope: &scope,
+			Tag:   &tag}
+
+		tagList = append(tagList, elem)
+	}
+	return tagList
+}
+
+func setCustomizedGMTagsInSchema(d *schema.ResourceData, tags []gm_model.Tag, schemaName string) {
+	var tagList []map[string]string
+	for _, tag := range tags {
+		elem := make(map[string]string)
+		elem["scope"] = *tag.Scope
+		elem["tag"] = *tag.Tag
+		tagList = append(tagList, elem)
+	}
+	err := d.Set(schemaName, tagList)
+	if err != nil {
+		log.Printf("[WARNING] Failed to set tag in schema: %v", err)
+	}
+}
+
+func getGMTagsFromSchema(d *schema.ResourceData) []gm_model.Tag {
+	return getCustomizedGMTagsFromSchema(d, "tag")
+}
+
+func setGMTagsInSchema(d *schema.ResourceData, tags []gm_model.Tag) {
+	setCustomizedGMTagsInSchema(d, tags, "tag")
 }
