@@ -11,10 +11,15 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 )
 
-func dataSourceNsxtDiscoverNode() *schema.Resource {
+func dataSourceNsxtDiscoveredNode() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceNsxtDiscoverNodeRead,
+		Read: dataSourceNsxtDiscoveredNodeRead,
 		Schema: map[string]*schema.Schema{
+			"compute_manager_state": {
+				Type:        schema.TypeString,
+				Description: "State of compute manager realization",
+				Optional:    true,
+			},
 			"id": {
 				Type:        schema.TypeString,
 				Description: "External id of the discovered node, ex. a mo-ref from VC",
@@ -32,9 +37,9 @@ func dataSourceNsxtDiscoverNode() *schema.Resource {
 	}
 }
 
-func dataSourceNsxtDiscoverNodeRead(d *schema.ResourceData, m interface{}) error {
+func dataSourceNsxtDiscoveredNodeRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	discoverNodeClient := fabric.NewDiscoveredNodesClient(connector)
+	discoveredNodeClient := fabric.NewDiscoveredNodesClient(connector)
 
 	objID := d.Get("id").(string)
 	ipAddress := d.Get("ip_address").(string)
@@ -42,24 +47,24 @@ func dataSourceNsxtDiscoverNodeRead(d *schema.ResourceData, m interface{}) error
 	var obj model.DiscoveredNode
 	if objID != "" {
 		// Get by ID
-		objGet, err := discoverNodeClient.Get(objID)
+		objGet, err := discoveredNodeClient.Get(objID)
 		if isNotFoundError(err) {
-			return fmt.Errorf("Discover Node %s was not found", objID)
+			return fmt.Errorf("Discovered Node %s was not found", objID)
 		}
 		if err != nil {
-			return fmt.Errorf("Error while reading Discover Node %s: %v", objID, err)
+			return fmt.Errorf("Error while reading Discovered Node %s: %v", objID, err)
 		}
 		obj = objGet
 	} else if ipAddress == "" {
-		return fmt.Errorf("Error obtaining Discover Node external ID or IP address during read")
+		return fmt.Errorf("Error obtaining Discovered Node external ID or IP address during read")
 	} else {
 		// Get by IP address
-		objList, err := discoverNodeClient.List(nil, nil, nil, nil, nil, nil, &ipAddress, nil, nil, nil, nil, nil, nil, nil)
+		objList, err := discoveredNodeClient.List(nil, nil, nil, nil, nil, nil, &ipAddress, nil, nil, nil, nil, nil, nil, nil)
 		if err != nil {
-			return fmt.Errorf("Error while reading Discover Node: %v", err)
+			return fmt.Errorf("Error while reading Discovered Node: %v", err)
 		}
 		if len(objList.Results) == 0 {
-			return fmt.Errorf("Discover Node with IP %s was not found", ipAddress)
+			return fmt.Errorf("Discovered Node with IP %s was not found", ipAddress)
 		}
 		obj = objList.Results[0]
 	}

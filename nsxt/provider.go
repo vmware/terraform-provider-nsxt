@@ -313,7 +313,7 @@ func Provider() *schema.Provider {
 			"nsxt_manager_cluster_node":                 dataSourceNsxtManagerClusterNode(),
 			"nsxt_policy_host_transport_node_profile":   dataSourceNsxtPolicyHostTransportNodeProfile(),
 			"nsxt_transport_node":                       dataSourceNsxtEdgeTransportNode(),
-			"nsxt_discover_node":                        dataSourceNsxtDiscoverNode(),
+			"nsxt_discovered_node":                      dataSourceNsxtDiscoveredNode(),
 			"nsxt_edge_upgrade_group":                   dataSourceNsxtEdgeUpgradeGroup(),
 			"nsxt_host_upgrade_group":                   dataSourceNsxtHostUpgradeGroup(),
 			"nsxt_policy_gateway_interface_realization": dataSourceNsxtPolicyGatewayInterfaceRealization(),
