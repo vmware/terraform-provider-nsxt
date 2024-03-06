@@ -1214,12 +1214,14 @@ func nsxtPolicySegmentQosProfileRead(d *schema.ResourceData, m interface{}) erro
 	var configList []map[string]interface{}
 
 	for _, obj := range results.Results {
-		config["qos_profile_path"] = obj.QosProfilePath
-		config["binding_map_path"] = obj.Path
-		config["revision"] = obj.Revision
-		configList = append(configList, config)
-		d.Set("qos_profile", configList)
-		return nil
+		if obj.QosProfilePath != nil && (len(*obj.QosProfilePath) > 0) {
+			config["qos_profile_path"] = obj.QosProfilePath
+			config["binding_map_path"] = obj.Path
+			config["revision"] = obj.Revision
+			configList = append(configList, config)
+			d.Set("qos_profile", configList)
+			return nil
+		}
 	}
 
 	return nil
