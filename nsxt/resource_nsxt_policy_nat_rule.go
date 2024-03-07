@@ -34,6 +34,11 @@ var policyNATRuleFirewallMatchTypeValues = []string{
 	model.PolicyNatRule_FIREWALL_MATCH_BYPASS,
 }
 
+var policyNATRulePolicyBasedVpnModeTypeValues = []string{
+	model.PolicyNatRule_POLICY_BASED_VPN_MODE_BYPASS,
+	model.PolicyNatRule_POLICY_BASED_VPN_MODE_MATCH,
+}
+
 func resourceNsxtPolicyNATRule() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyNATRuleCreate,
@@ -130,6 +135,13 @@ func resourceNsxtPolicyNATRule() *schema.Resource {
 				Optional:    true,
 				Computed:    true,
 				Elem:        getElemPolicyPathSchema(),
+			},
+			"policy_based_vpn_mode": {
+				Type:         schema.TypeString,
+				Description:  "Policy based vpn mode match flag. DNAT only",
+				Optional:     true,
+				Default:      model.PolicyNatRule_POLICY_BASED_VPN_MODE_BYPASS,
+				ValidateFunc: validation.StringInSlice(policyNATRulePolicyBasedVpnModeTypeValues, false),
 			},
 		},
 	}
@@ -263,6 +275,7 @@ func resourceNsxtPolicyNATRuleRead(d *schema.ResourceData, m interface{}) error 
 	}
 	d.Set("translated_ports", obj.TranslatedPorts)
 	d.Set("scope", obj.Scope)
+	d.Set("policy_based_vpn_mode", obj.PolicyBasedVpnMode)
 
 	d.SetId(id)
 
@@ -305,6 +318,7 @@ func resourceNsxtPolicyNATRuleCreate(d *schema.ResourceData, m interface{}) erro
 	priority := int64(d.Get("rule_priority").(int))
 	service := d.Get("service").(string)
 	ports := d.Get("translated_ports").(string)
+	pbvmMatch := d.Get("policy_based_vpn_mode").(string)
 	dNets := stringListToCommaSeparatedString(interfaceListToStringList(d.Get("destination_networks").([]interface{})))
 	sNets := stringListToCommaSeparatedString(interfaceListToStringList(d.Get("source_networks").([]interface{})))
 	tNets := stringListToCommaSeparatedString(interfaceListToStringList(d.Get("translated_networks").([]interface{})))
@@ -333,6 +347,9 @@ func resourceNsxtPolicyNATRuleCreate(d *schema.ResourceData, m interface{}) erro
 	}
 	if ports != "" {
 		ruleStruct.TranslatedPorts = &ports
+	}
+	if pbvmMatch != "" {
+		ruleStruct.PolicyBasedVpnMode = &pbvmMatch
 	}
 
 	log.Printf("[INFO] Creating NAT Rule with ID %s", id)
@@ -403,6 +420,10 @@ func resourceNsxtPolicyNATRuleUpdate(d *schema.ResourceData, m interface{}) erro
 	tPorts := d.Get("translated_ports").(string)
 	if tPorts != "" {
 		ruleStruct.TranslatedPorts = &tPorts
+	}
+	pbvmMatch := d.Get("policy_based_vpn_mode").(string)
+	if pbvmMatch != "" {
+		ruleStruct.PolicyBasedVpnMode = &pbvmMatch
 	}
 
 	log.Printf("[INFO] Updating NAT Rule with ID %s", id)

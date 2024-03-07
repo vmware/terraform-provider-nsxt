@@ -92,6 +92,7 @@ func testAccResourceNsxtPolicyNATRuleBasicT1(t *testing.T, withContext bool, pre
 					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "action", action),
 					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "logging", "false"),
 					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "firewall_match", model.PolicyNatRule_FIREWALL_MATCH_BYPASS),
+					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "policy_based_vpn_mode", model.PolicyNatRule_POLICY_BASED_VPN_MODE_BYPASS),
 					resource.TestCheckResourceAttrSet(testAccResourcePolicyNATRuleName, "path"),
 					resource.TestCheckResourceAttrSet(testAccResourcePolicyNATRuleName, "revision"),
 				),
@@ -112,6 +113,7 @@ func testAccResourceNsxtPolicyNATRuleBasicT1(t *testing.T, withContext bool, pre
 					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "action", action),
 					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "logging", "false"),
 					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "firewall_match", model.PolicyNatRule_FIREWALL_MATCH_BYPASS),
+					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "policy_based_vpn_mode", model.PolicyNatRule_POLICY_BASED_VPN_MODE_BYPASS),
 					resource.TestCheckResourceAttrSet(testAccResourcePolicyNATRuleName, "path"),
 					resource.TestCheckResourceAttrSet(testAccResourcePolicyNATRuleName, "revision"),
 				),
@@ -131,6 +133,7 @@ func testAccResourceNsxtPolicyNATRuleBasicT1(t *testing.T, withContext bool, pre
 					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "action", action),
 					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "logging", "false"),
 					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "firewall_match", model.PolicyNatRule_FIREWALL_MATCH_MATCH_EXTERNAL_ADDRESS),
+					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "policy_based_vpn_mode", model.PolicyNatRule_POLICY_BASED_VPN_MODE_MATCH),
 					resource.TestCheckResourceAttrSet(testAccResourcePolicyNATRuleName, "path"),
 					resource.TestCheckResourceAttrSet(testAccResourcePolicyNATRuleName, "revision"),
 				),
@@ -169,6 +172,7 @@ func TestAccResourceNsxtPolicyNATRule_basicT0(t *testing.T) {
 					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "action", action),
 					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "logging", "false"),
 					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "firewall_match", model.PolicyNatRule_FIREWALL_MATCH_MATCH_EXTERNAL_ADDRESS),
+					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "policy_based_vpn_mode", model.PolicyNatRule_POLICY_BASED_VPN_MODE_BYPASS),
 					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "scope.#", "2"),
 					resource.TestCheckResourceAttrSet(testAccResourcePolicyNATRuleName, "path"),
 					resource.TestCheckResourceAttrSet(testAccResourcePolicyNATRuleName, "revision"),
@@ -188,6 +192,7 @@ func TestAccResourceNsxtPolicyNATRule_basicT0(t *testing.T) {
 					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "action", action),
 					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "logging", "false"),
 					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "firewall_match", model.PolicyNatRule_FIREWALL_MATCH_MATCH_EXTERNAL_ADDRESS),
+					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "policy_based_vpn_mode", model.PolicyNatRule_POLICY_BASED_VPN_MODE_BYPASS),
 					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "scope.#", "2"),
 					resource.TestCheckResourceAttrSet(testAccResourcePolicyNATRuleName, "path"),
 					resource.TestCheckResourceAttrSet(testAccResourcePolicyNATRuleName, "revision"),
@@ -277,6 +282,7 @@ func TestAccResourceNsxtPolicyNATRule_nat64T1(t *testing.T) {
 					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "action", action),
 					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "logging", "false"),
 					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "firewall_match", model.PolicyNatRule_FIREWALL_MATCH_BYPASS),
+					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "policy_based_vpn_mode", model.PolicyNatRule_POLICY_BASED_VPN_MODE_BYPASS),
 					resource.TestCheckResourceAttrSet(testAccResourcePolicyNATRuleName, "path"),
 					resource.TestCheckResourceAttrSet(testAccResourcePolicyNATRuleName, "revision"),
 				),
@@ -297,6 +303,7 @@ func TestAccResourceNsxtPolicyNATRule_nat64T1(t *testing.T) {
 					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "action", action),
 					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "logging", "false"),
 					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "firewall_match", model.PolicyNatRule_FIREWALL_MATCH_BYPASS),
+					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "policy_based_vpn_mode", model.PolicyNatRule_POLICY_BASED_VPN_MODE_BYPASS),
 					resource.TestCheckResourceAttrSet(testAccResourcePolicyNATRuleName, "path"),
 					resource.TestCheckResourceAttrSet(testAccResourcePolicyNATRuleName, "revision"),
 				),
@@ -334,6 +341,7 @@ func TestAccResourceNsxtPolicyNATRuleNoSnatWithoutTNet(t *testing.T) {
 					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "action", action),
 					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "logging", "false"),
 					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "firewall_match", model.PolicyNatRule_FIREWALL_MATCH_MATCH_EXTERNAL_ADDRESS),
+					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "policy_based_vpn_mode", model.PolicyNatRule_POLICY_BASED_VPN_MODE_BYPASS),
 					resource.TestCheckResourceAttrSet(testAccResourcePolicyNATRuleName, "path"),
 					resource.TestCheckResourceAttrSet(testAccResourcePolicyNATRuleName, "revision"),
 				),
@@ -352,6 +360,7 @@ func TestAccResourceNsxtPolicyNATRuleNoSnatWithoutTNet(t *testing.T) {
 					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "action", action),
 					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "logging", "false"),
 					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "firewall_match", model.PolicyNatRule_FIREWALL_MATCH_MATCH_EXTERNAL_ADDRESS),
+					resource.TestCheckResourceAttr(testAccResourcePolicyNATRuleName, "policy_based_vpn_mode", model.PolicyNatRule_POLICY_BASED_VPN_MODE_BYPASS),
 					resource.TestCheckResourceAttrSet(testAccResourcePolicyNATRuleName, "path"),
 					resource.TestCheckResourceAttrSet(testAccResourcePolicyNATRuleName, "revision"),
 				),
@@ -455,16 +464,17 @@ data "nsxt_policy_service" "test" {
 
 resource "nsxt_policy_nat_rule" "test" {
 %s
-  display_name         = "%s"
-  description          = "Acceptance Test"
-  gateway_path         = nsxt_policy_tier1_gateway.test.path
-  action               = "%s"
-  source_networks      = ["%s"]
-  destination_networks = ["%s"]
-  translated_networks  = ["%s"]
-  logging              = false
-  firewall_match       = "%s"
-  service              = data.nsxt_policy_service.test.path 
+  display_name          = "%s"
+  description           = "Acceptance Test"
+  gateway_path          = nsxt_policy_tier1_gateway.test.path
+  action                = "%s"
+  source_networks       = ["%s"]
+  destination_networks  = ["%s"]
+  translated_networks   = ["%s"]
+  logging               = false
+  firewall_match        = "%s"
+  service               = data.nsxt_policy_service.test.path 
+  policy_based_vpn_mode = "%s"
 
   tag {
     scope = "scope1"
@@ -476,7 +486,7 @@ resource "nsxt_policy_nat_rule" "test" {
     tag   = "tag2"
   }
 }
-`, context, name, action, sourceNet, destNet, translatedNet, model.PolicyNatRule_FIREWALL_MATCH_BYPASS)
+`, context, name, action, sourceNet, destNet, translatedNet, model.PolicyNatRule_FIREWALL_MATCH_BYPASS, model.PolicyNatRule_POLICY_BASED_VPN_MODE_BYPASS)
 }
 
 func testAccNsxtPolicyNATRuleTier1UpdateMultipleSourceNetworksTemplate(name string, action string, sourceNet1 string, sourceNet2 string, destNet string, translatedNet string, withContext bool) string {
@@ -488,15 +498,16 @@ func testAccNsxtPolicyNATRuleTier1UpdateMultipleSourceNetworksTemplate(name stri
 		testAccNsxtPolicyTier1WithEdgeClusterTemplate("test", false, withContext) + fmt.Sprintf(`
 resource "nsxt_policy_nat_rule" "test" {
 %s
-  display_name         = "%s"
-  description          = "Acceptance Test"
-  gateway_path         = nsxt_policy_tier1_gateway.test.path
-  action               = "%s"
-  source_networks      = ["%s", "%s"]
-  destination_networks = ["%s"]
-  translated_networks  = ["%s"]
-  logging              = false
-  firewall_match       = "%s"
+  display_name          = "%s"
+  description           = "Acceptance Test"
+  gateway_path          = nsxt_policy_tier1_gateway.test.path
+  action                = "%s"
+  source_networks       = ["%s", "%s"]
+  destination_networks  = ["%s"]
+  translated_networks   = ["%s"]
+  logging               = false
+  firewall_match        = "%s"
+  policy_based_vpn_mode = "%s"
 
   tag {
     scope = "scope1"
@@ -508,7 +519,7 @@ resource "nsxt_policy_nat_rule" "test" {
     tag   = "tag2"
   }
 }
-`, context, name, action, sourceNet1, sourceNet2, destNet, translatedNet, model.PolicyNatRule_FIREWALL_MATCH_MATCH_EXTERNAL_ADDRESS)
+`, context, name, action, sourceNet1, sourceNet2, destNet, translatedNet, model.PolicyNatRule_FIREWALL_MATCH_MATCH_EXTERNAL_ADDRESS, model.PolicyNatRule_POLICY_BASED_VPN_MODE_MATCH)
 }
 
 func testAccNsxtPolicyNATRuleTier0CreateTemplate(name string, action string, sourceNet string, translatedNet string) string {
@@ -549,15 +560,16 @@ resource "nsxt_policy_tier0_gateway_interface" "test" {
 }
 
 resource "nsxt_policy_nat_rule" "test" {
-  display_name         = "%s"
-  description          = "Acceptance Test"
-  gateway_path         = nsxt_policy_tier0_gateway.test.path
-  action               = "%s"
-  source_networks      = ["%s"]
-  translated_networks  = ["%s"]
-  logging              = false
-  firewall_match       = "%s"
-  scope                = [nsxt_policy_tier0_gateway_interface.test[1].path, nsxt_policy_tier0_gateway_interface.test[0].path]
+  display_name          = "%s"
+  description           = "Acceptance Test"
+  gateway_path          = nsxt_policy_tier0_gateway.test.path
+  action                = "%s"
+  source_networks       = ["%s"]
+  translated_networks   = ["%s"]
+  logging               = false
+  firewall_match        = "%s"
+  scope                 = [nsxt_policy_tier0_gateway_interface.test[1].path, nsxt_policy_tier0_gateway_interface.test[0].path]
+  policy_based_vpn_mode = "%s"
 
   tag {
     scope = "scope1"
@@ -570,21 +582,22 @@ resource "nsxt_policy_nat_rule" "test" {
   }
 }
 
-`, interfaceSite, name, action, sourceNet, translatedNet, model.PolicyNatRule_FIREWALL_MATCH_MATCH_EXTERNAL_ADDRESS)
+`, interfaceSite, name, action, sourceNet, translatedNet, model.PolicyNatRule_FIREWALL_MATCH_MATCH_EXTERNAL_ADDRESS, model.PolicyNatRule_POLICY_BASED_VPN_MODE_BYPASS)
 }
 
 func testAccNsxPolicyNatRuleNoTranslatedNetworkTemplate(name string, action string, sourceNet string, destNet string) string {
 	return testAccNsxtPolicyEdgeClusterReadTemplate(getEdgeClusterName()) +
 		testAccNsxtPolicyTier1WithEdgeClusterTemplate("test", false, false) + fmt.Sprintf(`
 	resource "nsxt_policy_nat_rule" "test" {
-	  display_name         = "%s"
-	  description          = "Acceptance Test"
-	  gateway_path         = nsxt_policy_tier1_gateway.test.path
-	  action               = "%s"
-	  source_networks      = ["%s"]
-	  destination_networks = ["%s"]
-	  logging              = false
-	  firewall_match       = "%s"
+	  display_name          = "%s"
+	  description           = "Acceptance Test"
+	  gateway_path          = nsxt_policy_tier1_gateway.test.path
+	  action                = "%s"
+	  source_networks       = ["%s"]
+	  destination_networks  = ["%s"]
+	  logging               = false
+	  firewall_match        = "%s"
+	  policy_based_vpn_mode = "%s"
 	
 	  tag {
 		scope = "scope1"
@@ -596,5 +609,5 @@ func testAccNsxPolicyNatRuleNoTranslatedNetworkTemplate(name string, action stri
 		tag   = "tag2"
 	  }
 	}
-	`, name, action, sourceNet, destNet, model.PolicyNatRule_FIREWALL_MATCH_MATCH_EXTERNAL_ADDRESS)
+	`, name, action, sourceNet, destNet, model.PolicyNatRule_FIREWALL_MATCH_MATCH_EXTERNAL_ADDRESS, model.PolicyNatRule_POLICY_BASED_VPN_MODE_BYPASS)
 }
