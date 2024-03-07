@@ -480,6 +480,25 @@ func getStandardHostSwitchSchema(nodeType string) *schema.Schema {
 	if nodeType == nodeTypeHost {
 		elemSchema := s.Elem.(*schema.Resource).Schema
 		maps.Copy(elemSchema, map[string]*schema.Schema{
+			"cpu_config": {
+				Type:        schema.TypeList,
+				Description: "Enhanced Networking Stack enabled HostSwitch CPU configuration",
+				Optional:    true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"num_lcores": {
+							Type:        schema.TypeInt,
+							Required:    true,
+							Description: "Number of Logical cpu cores (Lcores) to be placed on a specified NUMA node",
+						},
+						"numa_node_index": {
+							Type:        schema.TypeInt,
+							Required:    true,
+							Description: "Unique index of the Non Uniform Memory Access (NUMA) node",
+						},
+					},
+				},
+			},
 			"host_switch_mode": {
 				Type:         schema.TypeString,
 				Description:  "Operational mode of a HostSwitch",
@@ -936,6 +955,21 @@ func getEdgeNodeSettingsFromSchema(s interface{}) (*model.EdgeNodeSettings, erro
 	return nil, nil
 }
 
+func getCPUConfigFromSchema(cpuConfigList []interface{}) []model.CpuCoreConfigForEnhancedNetworkingStackSwitch {
+	var cpuConfig []model.CpuCoreConfigForEnhancedNetworkingStackSwitch
+	for _, cc := range cpuConfigList {
+		data := cc.(map[string]interface{})
+		numLCores := int64(data["num_lcores"].(int))
+		numaNodeIndex := int64(data["numa_node_index"].(int))
+		elem := model.CpuCoreConfigForEnhancedNetworkingStackSwitch{
+			NumLcores:     &numLCores,
+			NumaNodeIndex: &numaNodeIndex,
+		}
+		cpuConfig = append(cpuConfig, elem)
+	}
+	return cpuConfig
+}
+
 func getHostSwitchProfileIDsFromSchema(hswProfileList []interface{}) []model.HostSwitchProfileTypeIdEntry {
 	var hswProfiles []model.HostSwitchProfileTypeIdEntry
 	for _, hswp := range hswProfileList {
@@ -1064,7 +1098,9 @@ func getHostSwitchSpecFromSchema(d *schema.ResourceData, nodeType string) (*data
 		var hostSwitchMode, hostSwitchType string
 		var isMigratePNics bool
 		var uplinks []model.VdsUplink
+		var cpuConfig []model.CpuCoreConfigForEnhancedNetworkingStackSwitch
 		if nodeType == nodeTypeHost {
+			cpuConfig = getCPUConfigFromSchema(swData["cpu_config"].([]interface{}))
 			hostSwitchMode = swData["host_switch_mode"].(string)
 			hostSwitchType = model.StandardHostSwitch_HOST_SWITCH_TYPE_VDS
 			isMigratePNics = swData["is_migrate_pnics"].(bool)
@@ -1105,6 +1141,7 @@ func getHostSwitchSpecFromSchema(d *schema.ResourceData, nodeType string) (*data
 			TransportZoneEndpoints: transportZoneEndpoints,
 		}
 		if nodeType == nodeTypeHost {
+			hsw.CpuConfig = cpuConfig
 			hsw.IsMigratePnics = &isMigratePNics
 			hsw.TransportNodeProfileSubConfigs = transportNodeSubProfileCfg
 			hsw.Uplinks = uplinks
@@ -1425,6 +1462,14 @@ func setHostSwitchSpecInSchema(d *schema.ResourceData, spec *data.StructValue, n
 			}
 			elem["pnic"] = pnics
 			if nodeType == nodeTypeHost {
+				var cpuConfig []map[string]interface{}
+				for _, c := range sw.CpuConfig {
+					e := make(map[string]interface{})
+					e["num_lcores"] = c.NumLcores
+					e["numa_node_index"] = c.NumaNodeIndex
+					cpuConfig = append(cpuConfig, e)
+				}
+				elem["cpu_config"] = cpuConfig
 				elem["is_migrate_pnics"] = sw.IsMigratePnics
 				elem["host_switch_mode"] = sw.HostSwitchMode
 				elem["uplink"] = setUplinksFromSchema(sw.Uplinks)
