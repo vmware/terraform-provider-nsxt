@@ -138,7 +138,7 @@ func resourceNsxtPolicyNATRule() *schema.Resource {
 			},
 			"policy_based_vpn_mode": {
 				Type:         schema.TypeString,
-				Description:  "Policy based vpn mode match flag. DNAT only",
+				Description:  "Policy based vpn mode match flag. DNAT and NO_DNAT only",
 				Optional:     true,
 				Default:      model.PolicyNatRule_POLICY_BASED_VPN_MODE_BYPASS,
 				ValidateFunc: validation.StringInSlice(policyNATRulePolicyBasedVpnModeTypeValues, false),
