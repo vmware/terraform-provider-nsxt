@@ -15,7 +15,7 @@ This resource is applicable to NSX Policy Manager.
 
 ```hcl
 resource "nsxt_policy_vtep_ha_host_switch_profile" "vtep_ha_host_switch_profile" {
-  description  = "Uplink host switch profile provisioned by Terraform"
+  description  = "VTEP host switch profile provisioned by Terraform"
   display_name = "vtep_ha_host_switch_profile"
 
   auto_recovery              = true
@@ -65,7 +65,7 @@ An existing object can be [imported][docs-import] into this resource, via the fo
 terraform import nsxt_policy_vtep_ha_host_switch_profile.vtep_ha_host_switch_profile UUID
 ```
 
-The above command imports UplinkHostSwitchProfile named `vtep_ha_host_switch_profile` with the NSX ID `UUID`.
+The above command imports VTEP HA host switch profile named `vtep_ha_host_switch_profile` with the NSX ID `UUID`.
 
 ```
 terraform import nsxt_policy_vtep_ha_host_switch_profile.vtep_ha_host_switch_profile POLICY_PATH
