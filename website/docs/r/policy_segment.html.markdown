@@ -123,6 +123,7 @@ The following arguments are supported:
   * `transport_zone_path` - (Required) Path for vlan transport zone for the bridge.
   * `vlan_ids` - (Required) List of VLAN IDs or ranges.
   * `uplink_teaming_policy` - (Optional) The name of the switching uplink teaming policy for the bridge endpoint.
+* `metadata_proxy_paths` - (Optional) Metadata Proxy Configuration Paths.
 
 ## Attributes Reference
 

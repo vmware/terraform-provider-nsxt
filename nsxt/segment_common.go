@@ -359,6 +359,15 @@ func getPolicyCommonSegmentSchema(vlanRequired bool, isFixed bool) map[string]*s
 			Elem:        getPolicySegmentBridgeConfigSchema(),
 			Optional:    true,
 		},
+		"metadata_proxy_paths": {
+			Type:        schema.TypeList,
+			Optional:    true,
+			Description: "Metadata Proxy Configuration Paths",
+			Elem: &schema.Schema{
+				Type:         schema.TypeString,
+				ValidateFunc: validatePolicyPath(),
+			},
+		},
 	}
 
 	if isFixed {
