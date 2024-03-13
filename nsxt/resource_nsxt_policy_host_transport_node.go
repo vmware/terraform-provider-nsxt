@@ -89,6 +89,9 @@ func resourceNsxtPolicyHostTransportNodeRead(d *schema.ResourceData, m interface
 	d.Set("enforcement_point", epID)
 	d.Set("display_name", obj.DisplayName)
 	d.Set("description", obj.Description)
+	if obj.NodeDeploymentInfo != nil {
+		d.Set("discovered_node_id", obj.NodeDeploymentInfo.DiscoveredNodeId)
+	}
 	setPolicyTagsInSchema(d, obj.Tags)
 	d.Set("nsx_id", id)
 	d.Set("path", obj.Path)
