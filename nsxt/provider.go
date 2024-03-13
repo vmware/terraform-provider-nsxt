@@ -125,19 +125,19 @@ func Provider() *schema.Provider {
 				Type:        schema.TypeInt,
 				Optional:    true,
 				Description: "Maximum number of HTTP client retries",
-				DefaultFunc: schema.EnvDefaultFunc("NSXT_MAX_RETRIES", 4),
+				DefaultFunc: schema.EnvDefaultFunc("NSXT_MAX_RETRIES", 8),
 			},
 			"retry_min_delay": {
 				Type:        schema.TypeInt,
 				Optional:    true,
 				Description: "Minimum delay in milliseconds between retries of a request",
-				DefaultFunc: schema.EnvDefaultFunc("NSXT_RETRY_MIN_DELAY", 0),
+				DefaultFunc: schema.EnvDefaultFunc("NSXT_RETRY_MIN_DELAY", 500),
 			},
 			"retry_max_delay": {
 				Type:        schema.TypeInt,
 				Optional:    true,
 				Description: "Maximum delay in milliseconds between retries of a request",
-				DefaultFunc: schema.EnvDefaultFunc("NSXT_RETRY_MAX_DELAY", 500),
+				DefaultFunc: schema.EnvDefaultFunc("NSXT_RETRY_MAX_DELAY", 1000),
 			},
 			"retry_on_status_codes": {
 				Type:        schema.TypeList,
