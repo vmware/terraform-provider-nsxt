@@ -452,7 +452,7 @@ func testAccNsxtPolicyNATRuleTier1CreateTemplate(name string, action string, sou
 	}
 	policyBasedVpnModeType := ""
 	if action == model.PolicyNatRule_ACTION_DNAT || action == model.PolicyNatRule_ACTION_NO_DNAT {
-		policyBasedVpnMode = fmt.Sprintf(`policy_based_vpn_mode = "%s"`, model.PolicyNatRule_POLICY_BASED_VPN_MODE_BYPASS)
+		policyBasedVpnModeType = fmt.Sprintf(`policy_based_vpn_mode = "%s"`, model.PolicyNatRule_POLICY_BASED_VPN_MODE_BYPASS)
 	}
 	return testAccNsxtPolicyEdgeClusterReadTemplate(getEdgeClusterName()) +
 		testAccNsxtPolicyTier1WithEdgeClusterTemplate("test", false, withContext) + fmt.Sprintf(`
