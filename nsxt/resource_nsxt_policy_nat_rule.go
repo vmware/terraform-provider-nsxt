@@ -237,7 +237,7 @@ func policyBasedVpnModeNeeded(action string) bool {
 func getPolicyBasedVpnMode(rule model.PolicyNatRule) (*string, error) {
 	pbvmMatch := rule.PolicyBasedVpnMode
 	action := rule.Action
-	if pbvmMatch != nil && ! policyBasedVpnModeNeeded(*action) {
+	if pbvmMatch != nil && !policyBasedVpnModeNeeded(*action) {
 		return pbvmMatch, fmt.Errorf("Invalid NAT rule action %s for policy based vpn mode %s. policy based vpn mode supported only on DNAT/NO_DNAT rule.", *action, *pbvmMatch)
 	}
 	return pbvmMatch, nil
