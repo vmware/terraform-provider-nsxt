@@ -450,6 +450,10 @@ func testAccNsxtPolicyNATRuleTier1CreateTemplate(name string, action string, sou
 	if withContext {
 		context = testAccNsxtPolicyMultitenancyContext()
 	}
+	policyBasedVpnModeType := ""
+	if action == model.PolicyNatRule_ACTION_DNAT || action == model.PolicyNatRule_ACTION_NO_DNAT {
+		policyBasedVpnMode = fmt.Sprintf(`policy_based_vpn_mode = "%s"`, model.PolicyNatRule_POLICY_BASED_VPN_MODE_BYPASS)
+	}
 	return testAccNsxtPolicyEdgeClusterReadTemplate(getEdgeClusterName()) +
 		testAccNsxtPolicyTier1WithEdgeClusterTemplate("test", false, withContext) + fmt.Sprintf(`
 data "nsxt_policy_service" "test" {
@@ -468,7 +472,7 @@ resource "nsxt_policy_nat_rule" "test" {
   logging               = false
   firewall_match        = "%s"
   service               = data.nsxt_policy_service.test.path 
-  policy_based_vpn_mode = "%s"
+  %s
 
   tag {
     scope = "scope1"
@@ -480,7 +484,7 @@ resource "nsxt_policy_nat_rule" "test" {
     tag   = "tag2"
   }
 }
-`, context, name, action, sourceNet, destNet, translatedNet, model.PolicyNatRule_FIREWALL_MATCH_BYPASS, model.PolicyNatRule_POLICY_BASED_VPN_MODE_BYPASS)
+`, context, name, action, sourceNet, destNet, translatedNet, model.PolicyNatRule_FIREWALL_MATCH_BYPASS, policyBasedVpnModeType)
 }
 
 func testAccNsxtPolicyNATRuleTier1UpdateMultipleSourceNetworksTemplate(name string, action string, sourceNet1 string, sourceNet2 string, destNet string, translatedNet string, withContext bool) string {
