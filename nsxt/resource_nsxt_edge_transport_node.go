@@ -7,13 +7,17 @@ import (
 	"fmt"
 	"log"
 	"reflect"
+	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/transport_nodes"
 	"golang.org/x/exp/maps"
 )
 
@@ -1610,6 +1614,32 @@ func resourceNsxtEdgeTransportNodeUpdate(d *schema.ResourceData, m interface{}) 
 	return resourceNsxtEdgeTransportNodeRead(d, m)
 }
 
+func getTransportNodeStateConf(connector client.Connector, id string) *resource.StateChangeConf {
+	return &resource.StateChangeConf{
+		Pending: []string{"notyet"},
+		Target:  []string{"success", "failed"},
+		Refresh: func() (interface{}, string, error) {
+			client := transport_nodes.NewStateClient(connector)
+
+			_, err := client.Get(id)
+
+			if isNotFoundError(err) {
+				return "success", "success", nil
+			}
+
+			if err != nil {
+				log.Printf("[DEBUG]: NSX Failed to retrieve TransportNode state: %v", err)
+				return nil, "failed", err
+			}
+
+			return nil, "notyet", nil
+		},
+		Delay:        time.Duration(5) * time.Second,
+		Timeout:      time.Duration(1200) * time.Second,
+		PollInterval: time.Duration(5) * time.Second,
+	}
+}
+
 func resourceNsxtEdgeTransportNodeDelete(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
@@ -1624,5 +1654,12 @@ func resourceNsxtEdgeTransportNodeDelete(d *schema.ResourceData, m interface{}) 
 	if err != nil {
 		return handleDeleteError("TransportNode", id, err)
 	}
+
+	stateConf := getTransportNodeStateConf(connector, id)
+	_, err = stateConf.WaitForState()
+	if err != nil {
+		return fmt.Errorf("failed to get deletion status for %s: %v", id, err)
+	}
+
 	return nil
 }
