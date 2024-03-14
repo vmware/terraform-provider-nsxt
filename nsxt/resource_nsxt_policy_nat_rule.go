@@ -140,7 +140,6 @@ func resourceNsxtPolicyNATRule() *schema.Resource {
 				Type:         schema.TypeString,
 				Description:  "Policy based vpn mode match flag. DNAT and NO_DNAT only",
 				Optional:     true,
-				Default:      model.PolicyNatRule_POLICY_BASED_VPN_MODE_BYPASS,
 				ValidateFunc: validation.StringInSlice(policyNATRulePolicyBasedVpnModeTypeValues, false),
 			},
 		},
@@ -197,6 +196,11 @@ func patchNsxtPolicyNATRule(sessionContext utl.SessionContext, connector client.
 	if err != nil {
 		return err
 	}
+	_, err = getPolicyBasedVpnMode(rule)
+	if err != nil {
+		return err
+	}
+
 	if isT0 {
 		client := t0nat.NewNatRulesClient(sessionContext, connector)
 		return client.Patch(gwID, natType, *rule.Id, rule)
@@ -224,6 +228,19 @@ func getTranslatedNetworks(rule model.PolicyNatRule) (*string, error) {
 		return tNets, fmt.Errorf("Translated Network must be specified for action type: %s", *action)
 	}
 	return tNets, nil
+}
+
+func policyBasedVpnModeNeeded(action string) bool {
+	return action == model.PolicyNatRule_ACTION_DNAT || action == model.PolicyNatRule_ACTION_NO_DNAT
+}
+
+func getPolicyBasedVpnMode(rule model.PolicyNatRule) (*string, error) {
+	pbvmMatch := rule.PolicyBasedVpnMode
+	action := rule.Action
+	if pbvmMatch != nil && ! policyBasedVpnModeNeeded(*action) {
+		return pbvmMatch, fmt.Errorf("Invalid NAT rule action %s for policy based vpn mode %s. policy based vpn mode supported only on DNAT/NO_DNAT rule.", *action, *pbvmMatch)
+	}
+	return pbvmMatch, nil
 }
 
 func resourceNsxtPolicyNATRuleRead(d *schema.ResourceData, m interface{}) error {
@@ -276,7 +293,6 @@ func resourceNsxtPolicyNATRuleRead(d *schema.ResourceData, m interface{}) error 
 	d.Set("translated_ports", obj.TranslatedPorts)
 	d.Set("scope", obj.Scope)
 	d.Set("policy_based_vpn_mode", obj.PolicyBasedVpnMode)
-
 	d.SetId(id)
 
 	return nil
