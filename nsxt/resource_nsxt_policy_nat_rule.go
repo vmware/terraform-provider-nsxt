@@ -196,9 +196,11 @@ func patchNsxtPolicyNATRule(sessionContext utl.SessionContext, connector client.
 	if err != nil {
 		return err
 	}
-	_, err = getPolicyBasedVpnMode(rule)
-	if err != nil {
-		return err
+	if nsxVersionHigherOrEqual("4.0.0") {
+		_, err = getPolicyBasedVpnMode(rule)
+		if err != nil {
+			return err
+		}
 	}
 
 	if isT0 {
@@ -292,7 +294,9 @@ func resourceNsxtPolicyNATRuleRead(d *schema.ResourceData, m interface{}) error 
 	}
 	d.Set("translated_ports", obj.TranslatedPorts)
 	d.Set("scope", obj.Scope)
-	d.Set("policy_based_vpn_mode", obj.PolicyBasedVpnMode)
+	if nsxVersionHigherOrEqual("4.0.0") {
+		d.Set("policy_based_vpn_mode", obj.PolicyBasedVpnMode)
+	}
 	d.SetId(id)
 
 	return nil
@@ -364,7 +368,7 @@ func resourceNsxtPolicyNATRuleCreate(d *schema.ResourceData, m interface{}) erro
 	if ports != "" {
 		ruleStruct.TranslatedPorts = &ports
 	}
-	if pbvmMatch != "" {
+	if pbvmMatch != "" && nsxVersionHigherOrEqual("4.0.0") {
 		ruleStruct.PolicyBasedVpnMode = &pbvmMatch
 	}
 
@@ -438,7 +442,7 @@ func resourceNsxtPolicyNATRuleUpdate(d *schema.ResourceData, m interface{}) erro
 		ruleStruct.TranslatedPorts = &tPorts
 	}
 	pbvmMatch := d.Get("policy_based_vpn_mode").(string)
-	if pbvmMatch != "" {
+	if pbvmMatch != "" && nsxVersionHigherOrEqual("4.0.0") {
 		ruleStruct.PolicyBasedVpnMode = &pbvmMatch
 	}
 
