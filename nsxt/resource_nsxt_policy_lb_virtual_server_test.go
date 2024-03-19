@@ -285,7 +285,7 @@ func TestAccResourceNsxtPolicyLBVirtualServer_withRules(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 
-					resource.TestCheckResourceAttr(testResourceName, "rule.#", "13"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.#", "14"),
 
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.display_name", "connection_drop_test"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.action.#", "1"),
@@ -409,10 +409,10 @@ func TestAccResourceNsxtPolicyLBVirtualServer_withRules(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.session_reused", "IGNORE"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.used_protocol", "SSL_V2"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.used_protocol", "SSL_V3"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.used_ssl_cipher", "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.session_reused", "IGNORE"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.used_protocol", "SSL_V2"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.used_protocol", "SSL_V3"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.client_certificate_issuer_dn.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.client_certificate_issuer_dn.0.issuer_dn", "something"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.client_certificate_issuer_dn.0.match_type", "REGEX"),
@@ -422,26 +422,31 @@ func TestAccResourceNsxtPolicyLBVirtualServer_withRules(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.client_supported_ssl_ciphers.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.client_supported_ssl_ciphers.0", "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.client_supported_ssl_ciphers.1", "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.11.condition.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.11.condition.0.http_ssl.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.11.condition.0.http_ssl.0.session_reused", "IGNORE"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.11.condition.0.http_ssl.0.used_protocol", "SSL_V3"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.11.condition.0.http_ssl.0.used_ssl_cipher", "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"),
 
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.display_name", "variable_persistence_on_test"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.phase", "HTTP_FORWARDING"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.action.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.action.0.variable_persistence_on.#", "1"),
-					resource.TestCheckResourceAttrSet(testResourceName, "rule.11.action.0.variable_persistence_on.0.persistence_profile_path"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.action.0.variable_persistence_on.0.variable_hash_enabled", "false"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.action.0.variable_persistence_on.0.variable_name", "my_name"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.condition.#", "0"),
-
-					resource.TestCheckResourceAttr(testResourceName, "rule.12.display_name", "jwt_auth_test"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.12.phase", "HTTP_ACCESS"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.12.display_name", "variable_persistence_on_test"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.12.phase", "HTTP_FORWARDING"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.12.action.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.12.action.0.jwt_auth.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.12.action.0.jwt_auth.0.key.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.12.action.0.jwt_auth.0.key.0.public_key_content", "xxx"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.12.action.0.jwt_auth.0.pass_jwt_to_pool", "true"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.12.action.0.jwt_auth.0.realm", "realm"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.12.action.0.jwt_auth.0.tokens.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.12.action.0.jwt_auth.0.tokens.0", "a"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.12.action.0.variable_persistence_on.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, "rule.12.action.0.variable_persistence_on.0.persistence_profile_path"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.12.action.0.variable_persistence_on.0.variable_hash_enabled", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.12.action.0.variable_persistence_on.0.variable_name", "my_name"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.12.condition.#", "0"),
+
+					resource.TestCheckResourceAttr(testResourceName, "rule.13.display_name", "jwt_auth_test"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.13.phase", "HTTP_ACCESS"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.13.action.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.13.action.0.jwt_auth.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.13.action.0.jwt_auth.0.key.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.13.action.0.jwt_auth.0.key.0.public_key_content", "xxx"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.13.action.0.jwt_auth.0.pass_jwt_to_pool", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.13.action.0.jwt_auth.0.realm", "realm"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.13.action.0.jwt_auth.0.tokens.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.13.action.0.jwt_auth.0.tokens.0", "a"),
 				),
 			},
 			{
@@ -457,7 +462,7 @@ func TestAccResourceNsxtPolicyLBVirtualServer_withRules(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 
-					resource.TestCheckResourceAttr(testResourceName, "rule.#", "13"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.#", "14"),
 
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.display_name", "connection_drop_test"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.action.#", "1"),
@@ -582,10 +587,10 @@ func TestAccResourceNsxtPolicyLBVirtualServer_withRules(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.session_reused", "IGNORE"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.used_protocol", "SSL_V2"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.used_protocol", "SSL_V3"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.used_ssl_cipher", "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.session_reused", "IGNORE"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.used_protocol", "SSL_V2"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.used_protocol", "SSL_V3"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.client_certificate_issuer_dn.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.client_certificate_issuer_dn.0.issuer_dn", "something"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.client_certificate_issuer_dn.0.match_type", "REGEX"),
@@ -596,25 +601,25 @@ func TestAccResourceNsxtPolicyLBVirtualServer_withRules(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.client_supported_ssl_ciphers.0", "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.client_supported_ssl_ciphers.1", "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"),
 
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.display_name", "variable_persistence_on_test"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.phase", "HTTP_FORWARDING"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.action.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.action.0.variable_persistence_on.#", "1"),
-					resource.TestCheckResourceAttrSet(testResourceName, "rule.11.action.0.variable_persistence_on.0.persistence_profile_path"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.action.0.variable_persistence_on.0.variable_hash_enabled", "false"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.action.0.variable_persistence_on.0.variable_name", "my_name"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.condition.#", "0"),
-
-					resource.TestCheckResourceAttr(testResourceName, "rule.12.display_name", "jwt_auth_test"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.12.phase", "HTTP_ACCESS"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.12.display_name", "variable_persistence_on_test"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.12.phase", "HTTP_FORWARDING"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.12.action.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.12.action.0.jwt_auth.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.12.action.0.jwt_auth.0.key.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.12.action.0.jwt_auth.0.key.0.public_key_content", "xxx"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.12.action.0.jwt_auth.0.pass_jwt_to_pool", "true"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.12.action.0.jwt_auth.0.realm", "realm"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.12.action.0.jwt_auth.0.tokens.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.12.action.0.jwt_auth.0.tokens.0", "a"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.12.action.0.variable_persistence_on.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, "rule.12.action.0.variable_persistence_on.0.persistence_profile_path"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.12.action.0.variable_persistence_on.0.variable_hash_enabled", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.12.action.0.variable_persistence_on.0.variable_name", "my_name"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.12.condition.#", "0"),
+
+					resource.TestCheckResourceAttr(testResourceName, "rule.13.display_name", "jwt_auth_test"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.13.phase", "HTTP_ACCESS"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.13.action.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.13.action.0.jwt_auth.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.13.action.0.jwt_auth.0.key.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.13.action.0.jwt_auth.0.key.0.public_key_content", "xxx"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.13.action.0.jwt_auth.0.pass_jwt_to_pool", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.13.action.0.jwt_auth.0.realm", "realm"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.13.action.0.jwt_auth.0.tokens.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.13.action.0.jwt_auth.0.tokens.0", "a"),
 				),
 			},
 			{
@@ -1097,7 +1102,7 @@ resource "nsxt_policy_lb_virtual_server" "test" {
 	condition {
 	  http_ssl {
 	    session_reused = "IGNORE"
-	    used_protocol = "SSL_V2"
+	    used_protocol = "SSL_V3"
 	    used_ssl_cipher = "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"	
 	    client_certificate_issuer_dn {
 		  issuer_dn = "something"
@@ -1108,6 +1113,22 @@ resource "nsxt_policy_lb_virtual_server" "test" {
 		  match_type = "REGEX"
 	    }
 	    client_supported_ssl_ciphers = [ "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384" ]
+	  }
+	}
+  }
+  rule {
+	display_name = "variable_persistence_learn_minimal_test"
+	phase = "HTTP_RESPONSE_REWRITE"
+	action {
+	  variable_persistence_learn {
+            persistence_profile_path = data.nsxt_policy_lb_persistence_profile.generic.path
+	    variable_name = "my_name"
+	  }  
+	}
+	condition {
+	  http_ssl {
+	    used_protocol = "SSL_V3"
+	    used_ssl_cipher = "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"	
 	  }
 	}
   }
