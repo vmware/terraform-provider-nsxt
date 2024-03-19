@@ -224,7 +224,7 @@ func getHostTransportNodeStateConf(connector client.Connector, id, siteID, epID 
 				return nil, "failed", err
 			}
 
-			return nil, "notyet", nil
+			return "notyet", "notyet", nil
 		},
 		Delay:        time.Duration(5) * time.Second,
 		Timeout:      time.Duration(1200) * time.Second,

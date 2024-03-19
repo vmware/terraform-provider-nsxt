@@ -135,7 +135,7 @@ func getNodeConnectivityStateConf(connector client.Connector, delay int, interva
 			resp, err := siteClient.Get("default")
 			if err != nil {
 				log.Printf("[DEBUG]: NSX API endpoint not ready: %v", err)
-				return nil, "notyet", nil
+				return "notyet", "notyet", nil
 			}
 
 			log.Printf("[INFO]: NSX API endpoint ready")

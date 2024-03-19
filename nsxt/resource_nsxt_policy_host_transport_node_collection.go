@@ -288,7 +288,7 @@ func getComputeCollectionMemberStateConf(connector client.Connector, id string) 
 
 			// When NSX bits are successfully, no member statuses will remain in the results list
 			if len(statuses.Results) > 0 {
-				return nil, "notyet", nil
+				return "notyet", "notyet", nil
 			}
 			return "success", "success", nil
 		},
