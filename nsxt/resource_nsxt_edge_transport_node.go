@@ -1632,7 +1632,7 @@ func getTransportNodeStateConf(connector client.Connector, id string) *resource.
 				return nil, "failed", err
 			}
 
-			return nil, "notyet", nil
+			return "notyet", "notyet", nil
 		},
 		Delay:        time.Duration(5) * time.Second,
 		Timeout:      time.Duration(1200) * time.Second,
