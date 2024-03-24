@@ -23,7 +23,7 @@ import (
 
 var ipAssignmentTypes = []string{
 	"assigned_by_dhcp",
-	"static_ip_list",
+	"static_ip",
 	"static_ip_pool",
 }
 
