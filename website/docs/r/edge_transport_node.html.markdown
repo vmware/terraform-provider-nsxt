@@ -93,7 +93,8 @@ The following arguments are supported:
     * `cli_username` - (Optional) CLI "admin" username. Defaults to "admin".
     * `root_password` - (Required) Node root user password.
   * `vm_deployment_config` - (Required) The vSphere deployment configuration determines where to deploy the edge node.
-    * `compute_folder_id` - (Optional) Cluster identifier or resourcepool identifier for specified vcenter server.
+    * `compute_folder_id` - (Optional) Compute folder identifier in the specified vcenter server.
+    * `compute_id` - (Required) Cluster identifier or resourcepool identifier for specified vcenter server.
     * `data_network_ids` - (Required) List of portgroups, logical switch identifiers or segment paths for datapath connectivity.
     * `default_gateway_address` - (Optional) Default gateway for the node.
     * `host_id` - (Optional) Host identifier in the specified vcenter server.
