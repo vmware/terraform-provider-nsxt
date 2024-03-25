@@ -44,9 +44,8 @@ FIRST_COMMON_ATTR = "Links []ResourceLink"
 LAST_COMMON_ATTR = "Overridden *bool"
 
 TYPE_MAP = {"string": "schema.TypeString",
-            "int32": "schema.TypeInt",
-            "int64": "schema.TypeInt",
-            "bool": "schema.TypeBool"}
+            "integer": "schema.TypeInt",
+            "boolean": "schema.TypeBool"}
 
 DEFAULT_VALUES_MAP = {"string": '"test"',
                       "int32": 2,
@@ -69,12 +68,14 @@ TYPECAST_MAP = {"int64": "int", "int32": "int"}
 # Parent attribute will have `object_type` key set to indicate model type of the child object
 # Child attributes will have `parent` key set
 metadata = {}
+api_spec = {}
 
 def to_lower_separated(name):
     tmp = re.sub(r'([A-Z])', r'_\1', name).lower()
     for abbr in DONT_SPLIT_US:
         split_abbr = re.sub(r'([A-Z])', r'_\1', abbr).lower()
         tmp = tmp.replace(split_abbr[1:], abbr.lower())
+
     return tmp[1:]
 
 def lowercase_first(name):
@@ -90,14 +91,6 @@ def to_upper_separated(name):
         tmp = tmp.replace(split_abbr[1:], abbr)
 
     return tmp
-
-def is_list_complex_attr(attr):
-    if attr['type'].startswith('[]'):
-        # this is a list.
-        if attr['type'][2:] not in TYPE_MAP:
-            # complex type: needs to be in a single form
-            return True
-    return False
 
 def get_const_values_name(attr_name):
     return "%s%sValues" % (lowercase_first(metadata['resource']), attr_name)
@@ -148,21 +141,21 @@ def build_schema_attr(attr):
     attr['const_needed'] = False
     attr['object_type'] = ""
     attr_type = attr['type']
+    print(attr_type)
     # Computed and required attributes are not ref. At the moment we can't
     # distinguish between them and assume required, since this will necessarily
     # error out in test.
     # TODO: parse spec json for this purpose
 
     optional = not attr['required']
-    if attr['list'] and attr_type in TYPE_MAP:
+    if attr['list'] and attr_type != 'object':
         # Handle arrays. By default, arrays are translated to sets
         # assuming in most cases order is not significant. When order is
         # significant, these should be changed to lists
-        # TODO: add both with choice comment
         attr['helper'] = "%sListFromSchemaSet" % name_to_upper(attr_type)
         is_array = True
 
-    if attr_type not in TYPE_MAP:
+    if attr_type == 'object':
         load_resource_metadata(attr_type, attr['name'])
         attr['object_type'] = attr_type
         is_object = True
@@ -173,7 +166,7 @@ def build_schema_attr(attr):
     if is_array:
         result += "Type:        schema.TypeList,\n"
     else:
-        result += "Type:        %s,\n" % TYPE_MAP[attr_type]
+        result += "Type:        %s,\n" % attr_type
 
     #TODO: concatenate multi-string comment, and remove enum specs
     #if attr['description']:
@@ -197,7 +190,7 @@ def build_schema_attr(attr):
             result +=  "},\n"
         else:
             result += "Elem: &schema.Schema{\n"
-            result += "Type:        %s,\n" % TYPE_MAP[attr_type]
+            result += "Type:        %s,\n" % attr_type
             if validation:
                 result += validation
         result +=  "},\n"
@@ -278,94 +271,70 @@ def build_get_attr_from_schema(attr):
                  attr['type'])
 
 
-def load_resource_metadata(resource, parent=""):
+def build_enum_var_name(resource, attr, value):
+    return "model.%s_%s_%s" % (resource, to_upper_separated(attr), to_upper_separated(value))
 
-    with open(STRUCTS_FILE, 'r') as f:
-        lines = f.readlines()
+def standartize(v):
+    if isinstance(v, unicode):
+        return v.encode('ascii','ignore')
+    return v
+
+def load_resource_metadata(resource, parent=""):
 
     stage = ""
     description = ""
-    # Load nsx json spec in order to complete data missing from SDK
-    spec = load_json_spec(resource)
-    for line in lines:
-        # load constants for this resource
-        if line.startswith("const %s" % resource):
-            tokens = line.split()
-            const = tokens[1]
-            value = tokens[3]
-            metadata["constants"][const] = value
-            continue
+    api_spec = load_json_spec(resource)
+    for attr, attr_spec in api_spec.items():
+        schema_name = standartize(attr)
+        sdk_name = name_to_upper(schema_name)
+        attr_type = standartize(attr_spec.get('type'))
+        if 'enum' in attr_spec:
+            for enum_value in attr_spec['enum']:
+                enum_value = standartize(enum_value)
+                var_name = build_enum_var_name(resource, schema_name, enum_value)
+                metadata['constants'][var_name] = enum_value
 
-        if line.startswith("type %s struct" % resource):
-            stage = "attrs"
-            continue
-
-        if stage == "skip":
-            if LAST_COMMON_ATTR in line:
-                stage = "attrs"
-                continue
-
-            if line.startswith("}"):
-                # end of type struct
-                stage = ""
-                continue
-
-        if stage == "attrs":
-            if line.startswith("}"):
-                # end of type struct
-                stage = ""
-                continue
-
-            if line.strip().startswith('//'):
-                description += line.replace('//', '').strip()
-                continue
-
-            if FIRST_COMMON_ATTR in line:
-                stage = "skip"
-                continue
-
-            tokens = line.split()
-            attr = tokens[0]
-            full_type = tokens[1]
-            is_ref = False
-            is_list = False
-            if full_type.startswith("*"):
-                is_ref = True
-                full_type = full_type[1:]
-
-            if full_type.startswith("[]"):
-                is_list = True
-                full_type = full_type[2:]
-
-            schema_name = to_lower_separated(attr)
-            if full_type not in TYPE_MAP:
+        print(schema_name)
+        print(attr_type)
+        if attr_type not in TYPE_MAP:
                 if schema_name.endswith('es'):
                     schema_name = schema_name[:-2]
                 if schema_name.endswith('s'):
                     schema_name = schema_name[:-1]
 
-            default = ""
-            deprecated = False
-            if schema_name in spec:
-                default = spec[schema_name].get('default')
-                if spec[schema_name].get('x-deprecated'):
-                    deprecated = True
+        default = standartize(attr_spec.get('default'))
+        if attr_spec.get('x-deprecated'):
+            print("Skipping deprecated attribute %s" % schema_name)
+            continue
 
-            if deprecated:
-                print("Skipping deprecated attribute %s" % attr)
-                continue
+        full_type = TYPE_MAP.get(attr_type)
+        is_ref = False
+        is_list = False
+        if attr_type == 'None':
+            if '$ref' in attr_spec:
+                print("REF")
+                is_ref = True
+                full_type = attr_spec['$ref'].split('/')[:1]
 
-            metadata["attrs"].append({'name': attr,
-                                      'parent': parent,
-                                      'description': description,
-                                      'type': full_type,
-                                      'list': is_list,
-                                      'ref': is_ref,
-                                      'schema_name': schema_name,
-                                      'default': default,
-                                      'required': not is_ref and not is_list})
-            metadata["name_map"][attr] = schema_name
-            description = ""
+        if attr_type == 'array':
+            is_list = True
+            items = attr_spec.get('items')
+            if '$ref' in items:
+                full_type = standartize(items['$ref'].split('/')[:1])
+            if 'type' in items:
+                full_type = standartize(items['type'])
+
+        metadata['attrs'].append({'name': sdk_name,
+                                  'parent': parent,
+                                  'description': standartize(attr_spec.get('description')),
+                                  'type': full_type,
+                                  'list': is_list,
+                                  'ref': is_ref,
+                                  'schema_name': schema_name,
+                                  'default': default,
+                                  'required': False})
+        metadata["name_map"][sdk_name] = schema_name
+        print(metadata)
 
 
 def build_schema_attrs(parent=""):

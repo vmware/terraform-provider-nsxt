@@ -598,6 +598,7 @@ func getPolicyLbRuleHTTPSslConditionSchema() *schema.Schema {
 					Type:         schema.TypeString,
 					Optional:     true,
 					ValidateFunc: validation.StringInSlice(lbHTTPSslConditionSessionReusedValues, false),
+					Default:      model.LBHttpSslCondition_SESSION_REUSED_IGNORE,
 				},
 				"used_protocol": {
 					Type:         schema.TypeString,
@@ -1306,22 +1307,26 @@ func setPolicyLbRulesInSchema(d *schema.ResourceData, rules []model.LBRule) {
 				conditionElem["used_ssl_cipher"] = specificType.(model.LBHttpSslCondition).UsedSslCipher
 
 				issuerDn := specificType.(model.LBHttpSslCondition).ClientCertificateIssuerDn
-				var issuerDnList []interface{}
-				issuerElem := make(map[string]interface{})
-				issuerElem["case_sensitive"] = issuerDn.CaseSensitive
-				issuerElem["issuer_dn"] = issuerDn.IssuerDn
-				issuerElem["match_type"] = issuerDn.MatchType
-				issuerDnList = append(issuerDnList, issuerElem)
-				conditionElem["client_certificate_issuer_dn"] = schema.NewSet(resourceKeyValueHash, issuerDnList)
+				if issuerDn != nil {
+					var issuerDnList []interface{}
+					issuerElem := make(map[string]interface{})
+					issuerElem["case_sensitive"] = issuerDn.CaseSensitive
+					issuerElem["issuer_dn"] = issuerDn.IssuerDn
+					issuerElem["match_type"] = issuerDn.MatchType
+					issuerDnList = append(issuerDnList, issuerElem)
+					conditionElem["client_certificate_issuer_dn"] = schema.NewSet(resourceKeyValueHash, issuerDnList)
+				}
 
 				subjectDn := specificType.(model.LBHttpSslCondition).ClientCertificateSubjectDn
-				var subjectDnList []interface{}
-				subjectElem := make(map[string]interface{})
-				subjectElem["case_sensitive"] = subjectDn.CaseSensitive
-				subjectElem["subject_dn"] = subjectDn.SubjectDn
-				subjectElem["match_type"] = subjectDn.MatchType
-				subjectDnList = append(subjectDnList, subjectElem)
-				conditionElem["client_certificate_subject_dn"] = schema.NewSet(resourceKeyValueHash, subjectDnList)
+				if subjectDn != nil {
+					var subjectDnList []interface{}
+					subjectElem := make(map[string]interface{})
+					subjectElem["case_sensitive"] = subjectDn.CaseSensitive
+					subjectElem["subject_dn"] = subjectDn.SubjectDn
+					subjectElem["match_type"] = subjectDn.MatchType
+					subjectDnList = append(subjectDnList, subjectElem)
+					conditionElem["client_certificate_subject_dn"] = schema.NewSet(resourceKeyValueHash, subjectDnList)
+				}
 
 				var sslCiphers []interface{}
 				for _, v := range specificType.(model.LBHttpSslCondition).ClientSupportedSslCiphers {
