@@ -482,6 +482,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_vtep_ha_host_switch_profile":      resourceNsxtVtepHAHostSwitchProfile(),
 			"nsxt_policy_site":                             resourceNsxtPolicySite(),
 			"nsxt_policy_global_manager":                   resourceNsxtPolicyGlobalManager(),
+			"nsxt_policy_metadata_proxy":                   resourceNsxtPolicyMetadataProxy(),
 		},
 
 		ConfigureFunc: providerConfigure,
