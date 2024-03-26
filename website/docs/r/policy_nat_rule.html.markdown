@@ -82,7 +82,7 @@ The following arguments are supported:
 * `translated_networks` - (Optional) A list of translated network IP addresses or CIDR.
 * `translated_ports` - (Optional) Port number or port range. For use with `DNAT` action only.
 * `scope` - (Optional) A list of paths to interfaces and/or labels where the NAT Rule is enforced.
-* `policy_based_vpn_mode` - (Optional) Policy based VPN mode. One of `BYPASS`, `MATCH`. Defaults to `BYPASS`. For use with `DNAT` or `NO_DNAT` actions only.
+* `policy_based_vpn_mode` - (Optional) Policy based VPN mode. One of `BYPASS`, `MATCH`. For use with `DNAT` or `NO_DNAT` actions only. Defaults to `BYPASS` for these actions. This argument is supported for NSX 4.0.0 and above.
 
 ## Attributes Reference
 
