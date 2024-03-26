@@ -117,34 +117,6 @@ func resourceNsxtEdgeTransportNode() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
-
-			"remote_tunnel_endpoint": {
-				Type:        schema.TypeList,
-				Description: "Configuration for a remote tunnel endpoint",
-				MaxItems:    1,
-				Optional:    true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"host_switch_name": {
-							Type:        schema.TypeString,
-							Description: "The host switch name to be used for the remote tunnel endpoint",
-							Required:    true,
-						},
-						"ip_assignment": getIPAssignmentSchema(),
-						"named_teaming_policy": {
-							Type:        schema.TypeString,
-							Description: "The named teaming policy to be used by the remote tunnel endpoint",
-							Optional:    true,
-						},
-						"rtep_vlan": {
-							Type:         schema.TypeInt,
-							Description:  "VLAN id for remote tunnel endpoint",
-							Required:     true,
-							ValidateFunc: validation.IntBetween(0, 4094),
-						},
-					},
-				},
-			},
 		},
 	}
 }
@@ -745,18 +717,13 @@ func getTransportNodeFromSchema(d *schema.ResourceData) (*model.TransportNode, e
 	}
 	nodeDeploymentInfo := dataValue.(*data.StructValue)
 
-	remoteTunnelEndpoint, err := getRemoteTunnelEndpointFromSchema(d)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create Transport Node: %v", err)
-	}
 	obj := model.TransportNode{
-		Description:          &description,
-		DisplayName:          &displayName,
-		Tags:                 tags,
-		FailureDomainId:      &failureDomain,
-		HostSwitchSpec:       hostSwitchSpec,
-		NodeDeploymentInfo:   nodeDeploymentInfo,
-		RemoteTunnelEndpoint: remoteTunnelEndpoint,
+		Description:        &description,
+		DisplayName:        &displayName,
+		Tags:               tags,
+		FailureDomainId:    &failureDomain,
+		HostSwitchSpec:     hostSwitchSpec,
+		NodeDeploymentInfo: nodeDeploymentInfo,
 	}
 
 	return &obj, nil
@@ -780,27 +747,6 @@ func resourceNsxtEdgeTransportNodeCreate(d *schema.ResourceData, m interface{}) 
 
 	d.SetId(*obj1.Id)
 	return resourceNsxtEdgeTransportNodeRead(d, m)
-}
-
-func getRemoteTunnelEndpointFromSchema(d *schema.ResourceData) (*model.TransportNodeRemoteTunnelEndpointConfig, error) {
-	for _, r := range d.Get("remote_tunnel_endpoint").([]interface{}) {
-		rte := r.(map[string]interface{})
-		hostSwitchName := rte["host_switch_name"].(string)
-		ipAssignment, err := getIPAssignmentFromSchema(rte["ip_assignment"].([]interface{}))
-		if err != nil {
-			return nil, err
-		}
-		namedTeamingPolicy := rte["named_teaming_policy"].(string)
-		rtepVlan := int64(rte["rtep_vlan"].(int))
-
-		return &model.TransportNodeRemoteTunnelEndpointConfig{
-			HostSwitchName:     &hostSwitchName,
-			IpAssignmentSpec:   ipAssignment,
-			NamedTeamingPolicy: &namedTeamingPolicy,
-			RtepVlan:           &rtepVlan,
-		}, nil
-	}
-	return nil, nil
 }
 
 func getEdgeNodeDeploymentConfigFromSchema(cfg interface{}) (*model.EdgeNodeDeploymentConfig, error) {
@@ -1310,18 +1256,6 @@ func resourceNsxtEdgeTransportNodeRead(d *schema.ResourceData, m interface{}) er
 
 	if err != nil {
 		return handleReadError(d, "TransportNode", id, err)
-	}
-
-	if obj.RemoteTunnelEndpoint != nil {
-		rtep := make(map[string]interface{})
-		rtep["host_switch_name"] = obj.RemoteTunnelEndpoint.HostSwitchName
-		rtep["ip_assignment"], err = setIPAssignmentInSchema(obj.RemoteTunnelEndpoint.IpAssignmentSpec)
-		if err != nil {
-			return handleReadError(d, "TransportNode", id, err)
-		}
-		rtep["named_teaming_policy"] = obj.RemoteTunnelEndpoint.NamedTeamingPolicy
-		rtep["rtep_vlan"] = obj.RemoteTunnelEndpoint.RtepVlan
-		d.Set("remote_tunnel_endpoint", []map[string]interface{}{rtep})
 	}
 
 	return nil
