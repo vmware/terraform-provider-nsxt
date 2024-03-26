@@ -871,7 +871,6 @@ func getEdgeNodeDeploymentConfigFromSchema(cfg interface{}) (*model.EdgeNodeDepl
 			cfg := model.VsphereDeploymentConfig{
 				ComputeId:             &computeID,
 				DataNetworkIds:        dataNetworkIds,
-				HostId:                &hostID,
 				ManagementNetworkId:   &managementNetworkID,
 				ManagementPortSubnets: managemenPortSubnets,
 				ReservationInfo:       reservationInfo,
@@ -882,7 +881,9 @@ func getEdgeNodeDeploymentConfigFromSchema(cfg interface{}) (*model.EdgeNodeDepl
 			if len(defaultGatewayAddresses) > 0 {
 				cfg.DefaultGatewayAddresses = defaultGatewayAddresses
 			}
-
+			if hostID != "" {
+				cfg.HostId = &hostID
+			}
 			// Passing an empty folder here confuses vSphere while creating the Edge VM
 			if computeFolderID != "" {
 				cfg.ComputeFolderId = &computeFolderID
