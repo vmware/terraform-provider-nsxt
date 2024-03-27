@@ -574,7 +574,7 @@ func getNSXVersion(connector client.Connector) (string, error) {
 	client := node.NewVersionClient(connector)
 	version, err := client.Get()
 	if err != nil {
-		return "", fmt.Errorf("Failed to retrieve NSX version (%s). Please check connectivity and authentication settings of the provider", err)
+		return "", logAPIError("Failed to retrieve NSX version, please check connectivity and authentication settings of the provider", err)
 
 	}
 	log.Printf("[DEBUG] NSX version is %s", *version.NodeVersion)
