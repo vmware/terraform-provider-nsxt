@@ -5,15 +5,15 @@ package nsxt
 
 import (
 	"fmt"
-	"net/http"
+	"net"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx"
 )
 
 func dataSourceNsxtManagementCluster() *schema.Resource {
 	return &schema.Resource{
-		Read:               dataSourceNsxtManagementClusterRead,
-		DeprecationMessage: mpObjectDataSourceDeprecationMessage,
+		Read: dataSourceNsxtManagementClusterRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:        schema.TypeString,
@@ -30,42 +30,31 @@ func dataSourceNsxtManagementCluster() *schema.Resource {
 }
 
 func dataSourceNsxtManagementClusterRead(d *schema.ResourceData, m interface{}) error {
-	nsxClient := m.(nsxtClients).NsxtClient
-	if nsxClient == nil {
-		return dataSourceNotSupportedError()
+	connector := getPolicyConnector(m)
+	client := nsx.NewClusterClient(connector)
+
+	hostIP, err := net.LookupIP(m.(nsxtClients).Host[len("https://"):])
+	if err != nil {
+		return fmt.Errorf("error while resolving client hostname %s: %v", m.(nsxtClients).Host[len("https://"):], err)
 	}
 
-	clusterObj, resp, err := nsxClient.NsxComponentAdministrationApi.ReadClusterConfig(nsxClient.Context)
+	clusterObj, err := client.Get()
 	if err != nil {
-		return fmt.Errorf("Error while reading cluster configuration: %v", err)
+		return fmt.Errorf("error while reading cluster configuration: %v", err)
 	}
-	if resp != nil && resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("Unexpected Response while reading cluster configuration. Status Code: %d", resp.StatusCode)
-	}
-
-	nodeList, resp, err := nsxClient.NsxComponentAdministrationApi.ListClusterNodeConfigs(nsxClient.Context, nil)
-	if err != nil {
-		return fmt.Errorf("Error while reading cluster node configuration: %v", err)
-	}
-	if resp != nil && resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("Unexpected Response while reading cluster node configuration. Status Code: %d", resp.StatusCode)
-	}
-	for _, nodeConfig := range nodeList.Results {
-		if nodeConfig.ManagerRole != nil && nodeConfig.ManagerRole.ApiListenAddr != nil && nodeConfig.ManagerRole.ApiListenAddr.IpAddress == m.(nsxtClients).Host[len("https://"):] {
-			if nodeConfig.ManagerRole.ApiListenAddr.CertificateSha256Thumbprint == "" {
-				return fmt.Errorf("Manager node thumbprint not found while reading cluster node configuration")
+	for _, nodeConfig := range clusterObj.Nodes {
+		if nodeConfig.ApiListenAddr != nil && *nodeConfig.ApiListenAddr.IpAddress == hostIP[0].String() {
+			if *nodeConfig.ApiListenAddr.CertificateSha256Thumbprint == "" {
+				return fmt.Errorf("manager node thumbprint not found while reading cluster node configuration for node %s", *nodeConfig.ApiListenAddr.IpAddress)
 			}
-			d.Set("node_sha256_thumbprint", nodeConfig.ManagerRole.ApiListenAddr.CertificateSha256Thumbprint)
+			d.Set("node_sha256_thumbprint", nodeConfig.ApiListenAddr.CertificateSha256Thumbprint)
 		}
 	}
 
-	if clusterObj.ClusterId == "" {
-		return fmt.Errorf("Cluster id not found")
-	}
 	if d.Get("node_sha256_thumbprint").(string) == "" {
-		return fmt.Errorf("Cluster node sha256 thumbprint not found")
+		return fmt.Errorf("cluster node sha256 thumbprint not found for node %s", m.(nsxtClients).Host[len("https://"):])
 	}
+	d.SetId(*clusterObj.ClusterId)
 
-	d.SetId(clusterObj.ClusterId)
 	return nil
 }
