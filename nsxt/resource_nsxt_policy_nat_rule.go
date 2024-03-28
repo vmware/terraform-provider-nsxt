@@ -34,6 +34,11 @@ var policyNATRuleFirewallMatchTypeValues = []string{
 	model.PolicyNatRule_FIREWALL_MATCH_BYPASS,
 }
 
+var policyNATRulePolicyBasedVpnModeTypeValues = []string{
+	model.PolicyNatRule_POLICY_BASED_VPN_MODE_BYPASS,
+	model.PolicyNatRule_POLICY_BASED_VPN_MODE_MATCH,
+}
+
 func resourceNsxtPolicyNATRule() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyNATRuleCreate,
@@ -131,6 +136,13 @@ func resourceNsxtPolicyNATRule() *schema.Resource {
 				Computed:    true,
 				Elem:        getElemPolicyPathSchema(),
 			},
+			"policy_based_vpn_mode": {
+				Type:         schema.TypeString,
+				Description:  "Policy based vpn mode match flag. DNAT and NO_DNAT only",
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.StringInSlice(policyNATRulePolicyBasedVpnModeTypeValues, false),
+			},
 		},
 	}
 }
@@ -185,6 +197,13 @@ func patchNsxtPolicyNATRule(sessionContext utl.SessionContext, connector client.
 	if err != nil {
 		return err
 	}
+	if nsxVersionHigherOrEqual("4.0.0") {
+		_, err = getPolicyBasedVpnMode(rule)
+		if err != nil {
+			return err
+		}
+	}
+
 	if isT0 {
 		client := t0nat.NewNatRulesClient(sessionContext, connector)
 		return client.Patch(gwID, natType, *rule.Id, rule)
@@ -212,6 +231,19 @@ func getTranslatedNetworks(rule model.PolicyNatRule) (*string, error) {
 		return tNets, fmt.Errorf("Translated Network must be specified for action type: %s", *action)
 	}
 	return tNets, nil
+}
+
+func policyBasedVpnModeNeeded(action string) bool {
+	return action == model.PolicyNatRule_ACTION_DNAT || action == model.PolicyNatRule_ACTION_NO_DNAT
+}
+
+func getPolicyBasedVpnMode(rule model.PolicyNatRule) (*string, error) {
+	pbvmMatch := rule.PolicyBasedVpnMode
+	action := rule.Action
+	if pbvmMatch != nil && !policyBasedVpnModeNeeded(*action) {
+		return pbvmMatch, fmt.Errorf("Invalid NAT rule action %s for policy based vpn mode %s. policy based vpn mode supported only on DNAT/NO_DNAT rule", *action, *pbvmMatch)
+	}
+	return pbvmMatch, nil
 }
 
 func resourceNsxtPolicyNATRuleRead(d *schema.ResourceData, m interface{}) error {
@@ -263,7 +295,9 @@ func resourceNsxtPolicyNATRuleRead(d *schema.ResourceData, m interface{}) error 
 	}
 	d.Set("translated_ports", obj.TranslatedPorts)
 	d.Set("scope", obj.Scope)
-
+	if nsxVersionHigherOrEqual("4.0.0") {
+		d.Set("policy_based_vpn_mode", obj.PolicyBasedVpnMode)
+	}
 	d.SetId(id)
 
 	return nil
@@ -305,6 +339,7 @@ func resourceNsxtPolicyNATRuleCreate(d *schema.ResourceData, m interface{}) erro
 	priority := int64(d.Get("rule_priority").(int))
 	service := d.Get("service").(string)
 	ports := d.Get("translated_ports").(string)
+	pbvmMatch := d.Get("policy_based_vpn_mode").(string)
 	dNets := stringListToCommaSeparatedString(interfaceListToStringList(d.Get("destination_networks").([]interface{})))
 	sNets := stringListToCommaSeparatedString(interfaceListToStringList(d.Get("source_networks").([]interface{})))
 	tNets := stringListToCommaSeparatedString(interfaceListToStringList(d.Get("translated_networks").([]interface{})))
@@ -333,6 +368,9 @@ func resourceNsxtPolicyNATRuleCreate(d *schema.ResourceData, m interface{}) erro
 	}
 	if ports != "" {
 		ruleStruct.TranslatedPorts = &ports
+	}
+	if pbvmMatch != "" && nsxVersionHigherOrEqual("4.0.0") {
+		ruleStruct.PolicyBasedVpnMode = &pbvmMatch
 	}
 
 	log.Printf("[INFO] Creating NAT Rule with ID %s", id)
@@ -403,6 +441,10 @@ func resourceNsxtPolicyNATRuleUpdate(d *schema.ResourceData, m interface{}) erro
 	tPorts := d.Get("translated_ports").(string)
 	if tPorts != "" {
 		ruleStruct.TranslatedPorts = &tPorts
+	}
+	pbvmMatch := d.Get("policy_based_vpn_mode").(string)
+	if pbvmMatch != "" && nsxVersionHigherOrEqual("4.0.0") {
+		ruleStruct.PolicyBasedVpnMode = &pbvmMatch
 	}
 
 	log.Printf("[INFO] Updating NAT Rule with ID %s", id)

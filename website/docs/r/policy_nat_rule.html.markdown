@@ -15,14 +15,15 @@ This resource is applicable to NSX Global Manager, NSX Policy Manager and VMC.
 
 ```hcl
 resource "nsxt_policy_nat_rule" "dnat1" {
-  display_name         = "dnat_rule1"
-  action               = "DNAT"
-  source_networks      = ["9.1.1.1", "9.2.1.1"]
-  destination_networks = ["11.1.1.1"]
-  translated_networks  = ["10.1.1.1"]
-  gateway_path         = nsxt_policy_tier1_gateway.t1gateway.path
-  logging              = false
-  firewall_match       = "MATCH_INTERNAL_ADDRESS"
+  display_name          = "dnat_rule1"
+  action                = "DNAT"
+  source_networks       = ["9.1.1.1", "9.2.1.1"]
+  destination_networks  = ["11.1.1.1"]
+  translated_networks   = ["10.1.1.1"]
+  gateway_path          = nsxt_policy_tier1_gateway.t1gateway.path
+  logging               = false
+  firewall_match        = "MATCH_INTERNAL_ADDRESS"
+  policy_based_vpn_mode = "BYPASS"
 
   tag {
     scope = "color"
@@ -42,14 +43,15 @@ resource "nsxt_policy_nat_rule" "dnat1" {
   context {
     project_id = data.nsxt_policy_project.demoproj.id
   }
-  display_name         = "dnat_rule1"
-  action               = "DNAT"
-  source_networks      = ["9.1.1.1", "9.2.1.1"]
-  destination_networks = ["11.1.1.1"]
-  translated_networks  = ["10.1.1.1"]
-  gateway_path         = nsxt_policy_tier1_gateway.t1gateway.path
-  logging              = false
-  firewall_match       = "MATCH_INTERNAL_ADDRESS"
+  display_name          = "dnat_rule1"
+  action                = "DNAT"
+  source_networks       = ["9.1.1.1", "9.2.1.1"]
+  destination_networks  = ["11.1.1.1"]
+  translated_networks   = ["10.1.1.1"]
+  gateway_path          = nsxt_policy_tier1_gateway.t1gateway.path
+  logging               = false
+  firewall_match        = "MATCH_INTERNAL_ADDRESS"
+  policy_based_vpn_mode = "BYPASS"
 
   tag {
     scope = "color"
@@ -80,6 +82,7 @@ The following arguments are supported:
 * `translated_networks` - (Optional) A list of translated network IP addresses or CIDR.
 * `translated_ports` - (Optional) Port number or port range. For use with `DNAT` action only.
 * `scope` - (Optional) A list of paths to interfaces and/or labels where the NAT Rule is enforced.
+* `policy_based_vpn_mode` - (Optional) Policy based VPN mode. One of `BYPASS`, `MATCH`. For use with `DNAT` and `NO_DNAT` actions only. Defaults to `BYPASS` when applicable. This argument is supported for NSX 4.0.0 and above.
 
 ## Attributes Reference
 
