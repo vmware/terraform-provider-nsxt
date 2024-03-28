@@ -456,6 +456,12 @@ func getStandardHostSwitchSchema(nodeType string) *schema.Schema {
 					Optional:    true,
 					Computed:    true,
 				},
+				"host_switch_name": {
+					Type:        schema.TypeString,
+					Description: "Host switch name. This name will be used to reference a host switch",
+					Optional:    true,
+					Computed:    true,
+				},
 				"host_switch_profile": getHostSwitchProfileIDsSchema(),
 				"ip_assignment":       getIPAssignmentSchema(),
 				"pnic": {
@@ -1100,6 +1106,7 @@ func getHostSwitchSpecFromSchema(d *schema.ResourceData, nodeType string) (*data
 		swData := swEntry.(map[string]interface{})
 
 		hostSwitchID := swData["host_switch_id"].(string)
+		hostSwitchName := swData["host_switch_name"].(string)
 		var hostSwitchMode, hostSwitchType string
 		var isMigratePNics bool
 		var uplinks []model.VdsUplink
@@ -1144,6 +1151,9 @@ func getHostSwitchSpecFromSchema(d *schema.ResourceData, nodeType string) (*data
 			IpAssignmentSpec:       iPAssignmentSpec,
 			Pnics:                  pNics,
 			TransportZoneEndpoints: transportZoneEndpoints,
+		}
+		if hostSwitchName != "" {
+			hsw.HostSwitchName = &hostSwitchName
 		}
 		if nodeType == nodeTypeHost {
 			hsw.CpuConfig = cpuConfig
@@ -1449,6 +1459,7 @@ func setHostSwitchSpecInSchema(d *schema.ResourceData, spec *data.StructValue, n
 		for _, sw := range swEntry.HostSwitches {
 			elem := make(map[string]interface{})
 			elem["host_switch_id"] = sw.HostSwitchId
+			elem["host_switch_name"] = sw.HostSwitchName
 			profiles := setHostSwitchProfileIDsInSchema(sw.HostSwitchProfileIds)
 			if len(profiles) > 0 {
 				elem["host_switch_profile"] = profiles
