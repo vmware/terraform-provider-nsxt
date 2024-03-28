@@ -435,7 +435,7 @@ func getStandardHostSwitchSchema(nodeType string) *schema.Schema {
 					Computed:    true,
 				},
 				"host_switch_profile": getHostSwitchProfileIDsSchema(),
-				"ip_assignment":       getIPAssignmentSchema(),
+				"ip_assignment":       getIPAssignmentSchema(true),
 				"pnic": {
 					Type:        schema.TypeList,
 					Optional:    true,
@@ -513,7 +513,7 @@ func getStandardHostSwitchSchema(nodeType string) *schema.Schema {
 										Description: "The host switch id. This ID will be used to reference a host switch",
 									},
 									"host_switch_profile": getHostSwitchProfileIDsSchema(),
-									"ip_assignment":       getIPAssignmentSchema(),
+									"ip_assignment":       getIPAssignmentSchema(false),
 									"uplink":              getUplinksSchema(),
 								},
 							},
@@ -617,12 +617,13 @@ func getHostSwitchProfileIDsSchema() *schema.Schema {
 	}
 }
 
-func getIPAssignmentSchema() *schema.Schema {
+func getIPAssignmentSchema(required bool) *schema.Schema {
 	return &schema.Schema{
 		Type:        schema.TypeList,
 		Description: "Specification for IPs to be used with host switch virtual tunnel endpoints",
 		MaxItems:    1,
-		Required:    true,
+		Required:    required,
+		Optional:    !required,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"assigned_by_dhcp": {
@@ -1085,7 +1086,7 @@ func getHostSwitchSpecFromSchema(d *schema.ResourceData, nodeType string) (*data
 		}
 		var transportNodeSubProfileCfg []model.TransportNodeProfileSubConfig
 		if nodeType == nodeTypeHost {
-			transportNodeSubProfileCfg = getTransportNodeSubProfileCfg(swData["transport_node_profile_sub_configs"])
+			transportNodeSubProfileCfg = getTransportNodeSubProfileCfg(swData["transport_node_profile_sub_config"])
 		}
 		transportZoneEndpoints := getTransportZoneEndpointsFromSchema(swData["transport_zone_endpoint"].([]interface{}))
 
@@ -1426,7 +1427,6 @@ func setHostSwitchSpecInSchema(d *schema.ResourceData, spec *data.StructValue, n
 				var tnpSubConfig []map[string]interface{}
 				for _, tnpsc := range sw.TransportNodeProfileSubConfigs {
 					e := make(map[string]interface{})
-					var hsCfgOpts []map[string]interface{}
 					hsCfgOpt := make(map[string]interface{})
 					hsCfgOpt["host_switch_id"] = tnpsc.HostSwitchConfigOption.HostSwitchId
 					profiles := setHostSwitchProfileIDsInSchema(tnpsc.HostSwitchConfigOption.HostSwitchProfileIds)
@@ -1438,8 +1438,9 @@ func setHostSwitchSpecInSchema(d *schema.ResourceData, spec *data.StructValue, n
 						return err
 					}
 					hsCfgOpt["uplink"] = setUplinksFromSchema(tnpsc.HostSwitchConfigOption.Uplinks)
-					e["host_switch_config_option"] = hsCfgOpts
+					e["host_switch_config_option"] = []interface{}{hsCfgOpt}
 					e["name"] = tnpsc.Name
+					tnpSubConfig = append(tnpSubConfig, e)
 				}
 				elem["transport_node_profile_sub_config"] = tnpSubConfig
 

@@ -34,7 +34,7 @@ func resourceNsxtEdgeTransportNodeRTEP() *schema.Resource {
 				Description: "The host switch name to be used for the remote tunnel endpoint",
 				Required:    true,
 			},
-			"ip_assignment": getIPAssignmentSchema(),
+			"ip_assignment": getIPAssignmentSchema(true),
 			"named_teaming_policy": {
 				Type:        schema.TypeString,
 				Description: "The named teaming policy to be used by the remote tunnel endpoint",
