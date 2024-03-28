@@ -483,6 +483,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_site":                             resourceNsxtPolicySite(),
 			"nsxt_policy_global_manager":                   resourceNsxtPolicyGlobalManager(),
 			"nsxt_policy_metadata_proxy":                   resourceNsxtPolicyMetadataProxy(),
+			"nsxt_edge_transport_node_rtep":                resourceNsxtEdgeTransportNodeRTEP(),
 		},
 
 		ConfigureFunc: providerConfigure,
