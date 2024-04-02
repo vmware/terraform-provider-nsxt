@@ -74,10 +74,12 @@ func resourceNsxtEdgeTransportNodeRTEPCreate(d *schema.ResourceData, m interface
 	}
 
 	rtep := model.TransportNodeRemoteTunnelEndpointConfig{
-		HostSwitchName:     &hostSwitchName,
-		IpAssignmentSpec:   ipAssignment,
-		NamedTeamingPolicy: &namedTeamingPolicy,
-		RtepVlan:           &rtepVlan,
+		HostSwitchName:   &hostSwitchName,
+		IpAssignmentSpec: ipAssignment,
+		RtepVlan:         &rtepVlan,
+	}
+	if namedTeamingPolicy != "" {
+		rtep.NamedTeamingPolicy = &namedTeamingPolicy
 	}
 	obj.RemoteTunnelEndpoint = &rtep
 	_, err = client.Update(id, obj, nil, nil, nil, nil, nil, nil, nil)
