@@ -126,17 +126,6 @@ The following arguments are supported:
     * `port` - (Optional) Syslog server port. Defaults to 514.
     * `protocol` - (Optional) Syslog protocol. Accepted values - 'TCP', 'UDP', 'TLS', 'LI', 'LI_TLS'. The default value is 'UDP'.
     * `server` - (Required) Server IP or fqdn.
-* `remote_tunnel_endpoint` - (Optional) Configuration for a remote tunnel endpoint.
-  * `host_switch_name` - (Required) The host switch name to be used for the remote tunnel endpoint.
-  * `ip_assignment` - (Required) - Specification for IPs to be used with host switch virtual tunnel endpoints. Should contain exatly one of the below:
-    * `assigned_by_dhcp` - (Optional) Enables DHCP assignment.
-    * `static_ip` - (Optional) IP assignment specification for Static IP List.
-      * `ip_addresses` - (Required) List of IPs for transport node host switch virtual tunnel endpoints.
-      * `subnet_mask` - (Required) Subnet mask.
-      * `default_gateway` - (Required) Gateway IP.
-    * `static_ip_pool` - (Optional) IP assignment specification for Static IP Pool.
-  * `named_teaming_policy` - (Optional) The named teaming policy to be used by the remote tunnel endpoint.
-  * `rtep_vlan` - (Required) VLAN id for remote tunnel endpoint.
 
 ## Attributes Reference
 

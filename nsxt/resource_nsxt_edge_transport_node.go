@@ -117,34 +117,6 @@ func resourceNsxtEdgeTransportNode() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
-
-			"remote_tunnel_endpoint": {
-				Type:        schema.TypeList,
-				Description: "Configuration for a remote tunnel endpoint",
-				MaxItems:    1,
-				Optional:    true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"host_switch_name": {
-							Type:        schema.TypeString,
-							Description: "The host switch name to be used for the remote tunnel endpoint",
-							Required:    true,
-						},
-						"ip_assignment": getIPAssignmentSchema(),
-						"named_teaming_policy": {
-							Type:        schema.TypeString,
-							Description: "The named teaming policy to be used by the remote tunnel endpoint",
-							Optional:    true,
-						},
-						"rtep_vlan": {
-							Type:         schema.TypeInt,
-							Description:  "VLAN id for remote tunnel endpoint",
-							Required:     true,
-							ValidateFunc: validation.IntBetween(0, 4094),
-						},
-					},
-				},
-			},
 		},
 	}
 }
@@ -463,7 +435,7 @@ func getStandardHostSwitchSchema(nodeType string) *schema.Schema {
 					Computed:    true,
 				},
 				"host_switch_profile": getHostSwitchProfileIDsSchema(),
-				"ip_assignment":       getIPAssignmentSchema(),
+				"ip_assignment":       getIPAssignmentSchema(true),
 				"pnic": {
 					Type:        schema.TypeList,
 					Optional:    true,
@@ -541,7 +513,7 @@ func getStandardHostSwitchSchema(nodeType string) *schema.Schema {
 										Description: "The host switch id. This ID will be used to reference a host switch",
 									},
 									"host_switch_profile": getHostSwitchProfileIDsSchema(),
-									"ip_assignment":       getIPAssignmentSchema(),
+									"ip_assignment":       getIPAssignmentSchema(false),
 									"uplink":              getUplinksSchema(),
 								},
 							},
@@ -645,12 +617,13 @@ func getHostSwitchProfileIDsSchema() *schema.Schema {
 	}
 }
 
-func getIPAssignmentSchema() *schema.Schema {
+func getIPAssignmentSchema(required bool) *schema.Schema {
 	return &schema.Schema{
 		Type:        schema.TypeList,
 		Description: "Specification for IPs to be used with host switch virtual tunnel endpoints",
 		MaxItems:    1,
-		Required:    true,
+		Required:    required,
+		Optional:    !required,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"assigned_by_dhcp": {
@@ -745,18 +718,13 @@ func getTransportNodeFromSchema(d *schema.ResourceData) (*model.TransportNode, e
 	}
 	nodeDeploymentInfo := dataValue.(*data.StructValue)
 
-	remoteTunnelEndpoint, err := getRemoteTunnelEndpointFromSchema(d)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create Transport Node: %v", err)
-	}
 	obj := model.TransportNode{
-		Description:          &description,
-		DisplayName:          &displayName,
-		Tags:                 tags,
-		FailureDomainId:      &failureDomain,
-		HostSwitchSpec:       hostSwitchSpec,
-		NodeDeploymentInfo:   nodeDeploymentInfo,
-		RemoteTunnelEndpoint: remoteTunnelEndpoint,
+		Description:        &description,
+		DisplayName:        &displayName,
+		Tags:               tags,
+		FailureDomainId:    &failureDomain,
+		HostSwitchSpec:     hostSwitchSpec,
+		NodeDeploymentInfo: nodeDeploymentInfo,
 	}
 
 	return &obj, nil
@@ -780,27 +748,6 @@ func resourceNsxtEdgeTransportNodeCreate(d *schema.ResourceData, m interface{}) 
 
 	d.SetId(*obj1.Id)
 	return resourceNsxtEdgeTransportNodeRead(d, m)
-}
-
-func getRemoteTunnelEndpointFromSchema(d *schema.ResourceData) (*model.TransportNodeRemoteTunnelEndpointConfig, error) {
-	for _, r := range d.Get("remote_tunnel_endpoint").([]interface{}) {
-		rte := r.(map[string]interface{})
-		hostSwitchName := rte["host_switch_name"].(string)
-		ipAssignment, err := getIPAssignmentFromSchema(rte["ip_assignment"].([]interface{}))
-		if err != nil {
-			return nil, err
-		}
-		namedTeamingPolicy := rte["named_teaming_policy"].(string)
-		rtepVlan := int64(rte["rtep_vlan"].(int))
-
-		return &model.TransportNodeRemoteTunnelEndpointConfig{
-			HostSwitchName:     &hostSwitchName,
-			IpAssignmentSpec:   ipAssignment,
-			NamedTeamingPolicy: &namedTeamingPolicy,
-			RtepVlan:           &rtepVlan,
-		}, nil
-	}
-	return nil, nil
 }
 
 func getEdgeNodeDeploymentConfigFromSchema(cfg interface{}) (*model.EdgeNodeDeploymentConfig, error) {
@@ -1139,7 +1086,7 @@ func getHostSwitchSpecFromSchema(d *schema.ResourceData, nodeType string) (*data
 		}
 		var transportNodeSubProfileCfg []model.TransportNodeProfileSubConfig
 		if nodeType == nodeTypeHost {
-			transportNodeSubProfileCfg = getTransportNodeSubProfileCfg(swData["transport_node_profile_sub_configs"])
+			transportNodeSubProfileCfg = getTransportNodeSubProfileCfg(swData["transport_node_profile_sub_config"])
 		}
 		transportZoneEndpoints := getTransportZoneEndpointsFromSchema(swData["transport_zone_endpoint"].([]interface{}))
 
@@ -1312,18 +1259,6 @@ func resourceNsxtEdgeTransportNodeRead(d *schema.ResourceData, m interface{}) er
 		return handleReadError(d, "TransportNode", id, err)
 	}
 
-	if obj.RemoteTunnelEndpoint != nil {
-		rtep := make(map[string]interface{})
-		rtep["host_switch_name"] = obj.RemoteTunnelEndpoint.HostSwitchName
-		rtep["ip_assignment"], err = setIPAssignmentInSchema(obj.RemoteTunnelEndpoint.IpAssignmentSpec)
-		if err != nil {
-			return handleReadError(d, "TransportNode", id, err)
-		}
-		rtep["named_teaming_policy"] = obj.RemoteTunnelEndpoint.NamedTeamingPolicy
-		rtep["rtep_vlan"] = obj.RemoteTunnelEndpoint.RtepVlan
-		d.Set("remote_tunnel_endpoint", []map[string]interface{}{rtep})
-	}
-
 	return nil
 }
 
@@ -1492,7 +1427,6 @@ func setHostSwitchSpecInSchema(d *schema.ResourceData, spec *data.StructValue, n
 				var tnpSubConfig []map[string]interface{}
 				for _, tnpsc := range sw.TransportNodeProfileSubConfigs {
 					e := make(map[string]interface{})
-					var hsCfgOpts []map[string]interface{}
 					hsCfgOpt := make(map[string]interface{})
 					hsCfgOpt["host_switch_id"] = tnpsc.HostSwitchConfigOption.HostSwitchId
 					profiles := setHostSwitchProfileIDsInSchema(tnpsc.HostSwitchConfigOption.HostSwitchProfileIds)
@@ -1504,8 +1438,9 @@ func setHostSwitchSpecInSchema(d *schema.ResourceData, spec *data.StructValue, n
 						return err
 					}
 					hsCfgOpt["uplink"] = setUplinksFromSchema(tnpsc.HostSwitchConfigOption.Uplinks)
-					e["host_switch_config_option"] = hsCfgOpts
+					e["host_switch_config_option"] = []interface{}{hsCfgOpt}
 					e["name"] = tnpsc.Name
+					tnpSubConfig = append(tnpSubConfig, e)
 				}
 				elem["transport_node_profile_sub_config"] = tnpSubConfig
 
