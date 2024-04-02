@@ -1392,6 +1392,12 @@ func setHostSwitchSpecInSchema(d *schema.ResourceData, spec *data.StructValue, n
 		}
 		swEntry := entry.(model.StandardHostSwitchSpec)
 		for _, sw := range swEntry.HostSwitches {
+
+			// TODO - remove this when SDK is updated with NSX 4.1.2
+			if sw.IpAssignmentSpec == nil {
+				return fmt.Errorf("Ipv6 assignments are not supported yet")
+			}
+
 			elem := make(map[string]interface{})
 			elem["host_switch_id"] = sw.HostSwitchId
 			elem["host_switch_name"] = sw.HostSwitchName
