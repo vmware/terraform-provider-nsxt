@@ -47,40 +47,6 @@ func dataSourceNsxtPolicyHostTransportNodeCollectionRealization() *schema.Resour
 				Description: "Application state of transport node profile on compute collection",
 				Computed:    true,
 			},
-			"aggregate_progress_percentage": {
-				Type:        schema.TypeInt,
-				Description: "Aggregate percentage of compute collection deployment",
-				Computed:    true,
-			},
-			"cluster_level_error": {
-				Type:        schema.TypeString,
-				Description: "Errors which needs cluster level to resolution",
-				Optional:    true,
-				Computed:    true,
-			},
-			"validation_errors": {
-				Type:        schema.TypeList,
-				Description: "Errors while applying transport node profile on discovered node",
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"discovered_node_id": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"error_message": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-					},
-				},
-				Optional: true,
-				Computed: true,
-			},
-			"vlcm_transition_error": {
-				Type:        schema.TypeString,
-				Description: "Errors while enabling vLCM on the compute collection",
-				Computed:    true,
-			},
 		},
 	}
 }
@@ -118,11 +84,10 @@ func dataSourceNsxtPolicyHostTransportNodeCollectionRealizationRead(d *schema.Re
 			return handleListError("HostTransportNodeCollection", err)
 		}
 
-		if len(objList.Results) == 0 {
-			return fmt.Errorf("HostTransportNodeCollection was not found on %s/%s", objSitePath, objPolicyEnforcementPoint)
+		if len(objList.Results) != 1 {
+			return fmt.Errorf("Single HostTransportNodeCollection was not identified on %s/%s", objSitePath, objPolicyEnforcementPoint)
 		}
-		d.SetId(*objList.Results[0].Id)
-		d.Set("state", targetStates[3])
+		objID = *objList.Results[0].Id
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -131,25 +96,17 @@ func dataSourceNsxtPolicyHostTransportNodeCollectionRealizationRead(d *schema.Re
 		Refresh: func() (interface{}, string, error) {
 			state, err := client.Get(objSitePath, getPolicyEnforcementPoint(m), objID)
 			if err != nil {
-				return state, model.ConfigurationState_STATE_ERROR, logAPIError("Error while waiting for realization of Transport Node Collection", err)
+				return state, model.TransportNodeCollectionState_STATE_IN_PROGRESS, logAPIError("Error while waiting for realization of Transport Node Collection", err)
 			}
 
 			log.Printf("[DEBUG] Current realization state for Transport Node Collection %s is %s", objID, *state.State)
 
+			if *state.State != model.TransportNodeCollectionState_STATE_SUCCESS && *state.State != model.TransportNodeCollectionState_STATE_IN_PROGRESS {
+				return state, *state.State, getErrorFromState(&state)
+			}
+
 			d.SetId(objID)
 			d.Set("state", state.State)
-			d.Set("aggregate_progress_percentage", state.AggregateProgressPercentage)
-			d.Set("cluster_level_error", state.ClusterLevelError)
-			var validationErrorsList []map[string]interface{}
-			for _, item := range state.ValidationErrors {
-				data := make(map[string]interface{})
-				data["discovered_node_id"] = item.DiscoveredNodeId
-				data["error_message"] = item.ErrorMessage
-				validationErrorsList = append(validationErrorsList, data)
-			}
-			d.Set("validation_errors", validationErrorsList)
-			d.Set("vlcm_transition_error", state.VlcmTransitionError)
-
 			return state, *state.State, nil
 		},
 		Timeout:    time.Duration(timeout) * time.Second,
@@ -158,7 +115,22 @@ func dataSourceNsxtPolicyHostTransportNodeCollectionRealizationRead(d *schema.Re
 	}
 	_, err := stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("failed to get realization information for %s: %v", objID, err)
+		return err
 	}
 	return nil
+}
+
+func getErrorFromState(state *model.TransportNodeCollectionState) error {
+	var result string
+	if state.ClusterLevelError != nil {
+		result += fmt.Sprintf("cluster level error: %v\n", *state.ClusterLevelError)
+	}
+	for _, item := range state.ValidationErrors {
+		result += fmt.Sprintf("validation error for node %s: %v\n", *item.DiscoveredNodeId, *item.ErrorMessage)
+	}
+	if state.VlcmTransitionError != nil {
+		result += fmt.Sprintf("VCLM transition error: %v\n", *state.VlcmTransitionError)
+	}
+
+	return fmt.Errorf(result)
 }
