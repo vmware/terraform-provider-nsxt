@@ -107,7 +107,6 @@ func resourceNsxtEdgeTransportNode() *schema.Resource {
 				Computed:    true,
 				Description: "Fully qualified domain name of the fabric node",
 			},
-			"id": getNsxIDSchema(),
 			"ip_addresses": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -690,7 +689,6 @@ func getTransportNodeFromSchema(d *schema.ResourceData) (*model.TransportNode, e
 
 	externalID := d.Get("external_id").(string)
 	fqdn := d.Get("fqdn").(string)
-	id := d.Get("id").(string)
 	ipAddresses := interfaceListToStringList(d.Get("ip_addresses").([]interface{}))
 
 	deploymentConfig, err := getEdgeNodeDeploymentConfigFromSchema(d.Get("deployment_config"))
@@ -704,7 +702,6 @@ func getTransportNodeFromSchema(d *schema.ResourceData) (*model.TransportNode, e
 	node := model.EdgeNode{
 		ExternalId:       &externalID,
 		Fqdn:             &fqdn,
-		Id:               &id,
 		IpAddresses:      ipAddresses,
 		DeploymentConfig: deploymentConfig,
 		NodeSettings:     nodeSettings,
@@ -1252,7 +1249,6 @@ func resourceNsxtEdgeTransportNodeRead(d *schema.ResourceData, m interface{}) er
 	// Set base object attributes
 	d.Set("external_id", node.ExternalId)
 	d.Set("fqdn", node.Fqdn)
-	d.Set("id", node.Id)
 	d.Set("ip_addresses", node.IpAddresses)
 
 	if err != nil {
