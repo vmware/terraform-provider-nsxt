@@ -307,7 +307,7 @@ resource "nsxt_policy_ip_address_allocation" "test" {
   display_name = "%s"
   description  = "%s"
   pool_path    = nsxt_policy_ip_pool.test.path
-  depends_on   = [nsxt_policy_ip_pool_static_subnet.test]
+  depends_on   = [data.nsxt_policy_realization_info.subnet_realization]
 
   tag {
     scope = "scope1"
@@ -340,5 +340,8 @@ resource "nsxt_policy_ip_pool_static_subnet" "test" {
     start = "12.12.12.10"
     end   = "12.12.12.20"
   }
+}
+data "nsxt_policy_realization_info" "subnet_realization" {
+  path = nsxt_policy_ip_pool_static_subnet.test.path
 }`, context, accTestPolicyIPAddressAllocationPoolName, context, accTestPolicyIPAddressAllocationSubnetName)
 }
