@@ -90,10 +90,9 @@ func TestAccResourceNsxtPolicyMetadataProxy_importBasic(t *testing.T) {
 				Config: testAccNsxtPolicyMetadataProxyTemplate(true),
 			},
 			{
-				ResourceName:            testResourceName,
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"secret"}, // Secret isn't returned by NSX as it's a secret...
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
