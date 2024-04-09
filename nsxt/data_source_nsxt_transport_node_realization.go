@@ -79,6 +79,9 @@ func dataSourceNsxtTransportNodeRealizationRead(d *schema.ResourceData, m interf
 			}
 
 			log.Printf("[DEBUG] Current realization state for Transport Node %s is %s", id, *state.State)
+			if *state.State == model.TransportNodeState_STATE_FAILED || *state.State == model.TransportNodeState_STATE_ERROR {
+				return state, *state.State, fmt.Errorf("transport node %s failed to realize with state %v: %v", id, state, state.FailureMessage)
+			}
 
 			d.Set("state", state.State)
 			return state, *state.State, nil
@@ -89,7 +92,7 @@ func dataSourceNsxtTransportNodeRealizationRead(d *schema.ResourceData, m interf
 	}
 	_, err := stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("failed to get realization information for %s: %v", id, err)
+		return err
 	}
 
 	return nil

@@ -105,6 +105,9 @@ func dataSourceNsxtComputeManagerRealizationWait(d *schema.ResourceData, connect
 			}
 
 			log.Printf("[DEBUG] Current realization state for Compute Manager %s is %s", id, *state.State)
+			if *state.State == model.ConfigurationState_STATE_ERROR || *state.State == model.ConfigurationState_STATE_FAILED {
+				return state, *state.State, fmt.Errorf("compute manager %s failed to realize with state %v", id, *state.State)
+			}
 
 			d.Set("state", state.State)
 			return state, *state.State, nil
@@ -115,7 +118,7 @@ func dataSourceNsxtComputeManagerRealizationWait(d *schema.ResourceData, connect
 	}
 	_, err := stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("failed to get realization information for %s: %v", id, err)
+		return err
 	}
 	return nil
 }
