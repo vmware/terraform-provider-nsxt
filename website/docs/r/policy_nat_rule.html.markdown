@@ -72,13 +72,13 @@ The following arguments are supported:
     * `project_id` - (Required) The ID of the project which the object belongs to
 * `gateway_path` - (Required) The NSX Policy path to the Tier0 or Tier1 Gateway for this NAT Rule.
 * `action` - (Required) The action for the NAT Rule. One of `SNAT`, `DNAT`, `REFLEXIVE`, `NO_SNAT`, `NO_DNAT`, `NAT64`.
-* `destination_networks` - (Optional) A list of destination network IP addresses or CIDR.
+* `destination_networks` - (Optional) A list of destination network IP addresses or CIDR. If unspecified, the value will be `ANY`.
 * `enabled` - (Optional) Enable/disable the Rule. Defaults to `true`.
 * `firewall_match` - (Optional) Firewall match flag. One of `MATCH_EXTERNAL_ADDRESS`, `MATCH_INTERNAL_ADDRESS`, `BYPASS`.
 * `logging` - (Optional) Enable/disable rule logging. Defaults to `false`.
 * `rule_priority` - (Optional) The priority of the rule. Valid values between 0 to 2147483647. Defaults to `100`.
 * `service` - (Optional) Policy path of Service on which the NAT rule will be applied.
-* `source_networks` - (Optional) A list of source network IP addresses or CIDR.
+* `source_networks` - (Optional) A list of source network IP addresses or CIDR. If unspecified, the value will be `ANY`.
 * `translated_networks` - (Optional) A list of translated network IP addresses or CIDR.
 * `translated_ports` - (Optional) Port number or port range. For use with `DNAT` action only.
 * `scope` - (Optional) A list of paths to interfaces and/or labels where the NAT Rule is enforced.
