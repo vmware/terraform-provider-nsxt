@@ -11,12 +11,17 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/upgrade"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/upgrade/plan"
+	"golang.org/x/exp/slices"
 )
+
+const hostUpgradeUnitDefaultGroup = "Group 1 for ESXI"
 
 // Order matters
 var upgradeComponentList = []string{
@@ -232,7 +237,8 @@ func getUpgradeGroupSchema(isHostGroup bool) *schema.Schema {
 		"id": {
 			Type:        schema.TypeString,
 			Description: "ID of upgrade unit group",
-			Required:    true,
+			Required:    !isHostGroup,
+			Optional:    isHostGroup,
 		},
 		"enabled": {
 			Type:        schema.TypeBool,
@@ -255,6 +261,11 @@ func getUpgradeGroupSchema(isHostGroup bool) *schema.Schema {
 	}
 
 	if isHostGroup {
+		elemSchema["display_name"] = &schema.Schema{
+			Type:        schema.TypeString,
+			Description: "Name of upgrade unit group",
+			Optional:    true,
+		}
 		elemSchema["upgrade_mode"] = &schema.Schema{
 			Type:         schema.TypeString,
 			Description:  "Upgrade mode",
@@ -278,6 +289,15 @@ func getUpgradeGroupSchema(isHostGroup bool) *schema.Schema {
 			Description: "Rebootless upgrade",
 			Optional:    true,
 			Default:     true,
+		}
+		elemSchema["hosts"] = &schema.Schema{
+			Type:        schema.TypeList,
+			Description: "Hosts to be included in the upgrade group",
+			Optional:    true,
+			Computed:    true,
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
+			},
 		}
 	}
 
@@ -340,7 +360,7 @@ func upgradeRunCreateOrUpdate(d *schema.ResourceData, m interface{}) error {
 	upgradeClientSet := newUpgradeClientSet(connector, d)
 
 	log.Printf("[INFO] Updating UpgradeUnitGroup and UpgradePlanSetting.")
-	err := prepareUpgrade(upgradeClientSet, d)
+	err := prepareUpgrade(upgradeClientSet, d, m)
 	if err != nil {
 		return handleCreateError("NsxtUpgradeRun", id, err)
 	}
@@ -358,7 +378,7 @@ func upgradeRunCreateOrUpdate(d *schema.ResourceData, m interface{}) error {
 	return resourceNsxtUpgradeRunRead(d, m)
 }
 
-func prepareUpgrade(upgradeClientSet *upgradeClientSet, d *schema.ResourceData) error {
+func prepareUpgrade(upgradeClientSet *upgradeClientSet, d *schema.ResourceData, m interface{}) error {
 	for i := range upgradeComponentList {
 		component := upgradeComponentList[i]
 		// Customize MP upgrade is not allowed
@@ -395,7 +415,7 @@ func prepareUpgrade(upgradeClientSet *upgradeClientSet, d *schema.ResourceData) 
 			return err
 		}
 
-		err = updateUpgradeUnitGroups(upgradeClientSet, d, component)
+		err = updateUpgradeUnitGroups(upgradeClientSet, d, m, component)
 		if err != nil {
 			return err
 		}
@@ -490,7 +510,7 @@ func waitUpgradeForStatus(upgradeClientSet *upgradeClientSet, component *string,
 	return nil
 }
 
-func updateUpgradeUnitGroups(upgradeClientSet *upgradeClientSet, d *schema.ResourceData, component string) error {
+func updateUpgradeUnitGroups(upgradeClientSet *upgradeClientSet, d *schema.ResourceData, m interface{}, component string) error {
 	isBefore := false
 	getReorderAfterReq := func(id string) model.ReorderRequest {
 		return model.ReorderRequest{
@@ -503,9 +523,79 @@ func updateUpgradeUnitGroups(upgradeClientSet *upgradeClientSet, d *schema.Resou
 	for _, groupI := range d.Get(componentToGroupKey[component]).([]interface{}) {
 		group := groupI.(map[string]interface{})
 		groupID := group["id"].(string)
-		groupGet, err := upgradeClientSet.GroupClient.Get(groupID, nil)
-		if err != nil {
-			return err
+		var groupGet *model.UpgradeUnitGroup
+		var err error
+		isCreate := false
+		if groupID == "" {
+			groupName := group["display_name"].(string)
+			if groupName == "" {
+				return fmt.Errorf("couldn't find upgrade unit group without id or display_name")
+			}
+			// This is a custom group, try to find it by name
+			groupList, err := upgradeClientSet.GroupClient.List(nil, nil, nil, nil, nil, nil, nil, nil)
+			if err != nil {
+				return err
+			}
+			for i, group := range groupList.Results {
+				if *group.DisplayName == groupName {
+					if groupGet == nil {
+						groupID = *group.Id
+						groupGet = &groupList.Results[i]
+					} else {
+						return fmt.Errorf("upgrade group name %s is not unique", groupName)
+					}
+				}
+			}
+			if groupGet == nil {
+				// This is a new custom group, create an upgrade unit list
+				isCreate = true
+				var groupMembers []model.UpgradeUnit
+				if group["hosts"] != nil {
+					for _, h := range group["hosts"].([]interface{}) {
+						hostID := h.(string)
+						groupMembers = append(groupMembers, model.UpgradeUnit{Id: &hostID})
+					}
+				}
+				typeHost := "HOST"
+				groupGet = &model.UpgradeUnitGroup{DisplayName: &groupName, UpgradeUnits: groupMembers, Type_: &typeHost}
+			} else {
+				// This custom group might be updated, compare the upgrade unit lists
+				nsxUnits := getUnitIDsFromUnits(groupGet.UpgradeUnits)
+
+				// Find and remove upgrade units which have been removed from the list. This is done by assigning the
+				// upgrade unit to its default group
+				var schemaUnits []string
+				if group["hosts"] != nil {
+					schemaUnits = interface2StringList(group["hosts"].([]interface{}))
+				}
+				for _, nsxUnit := range nsxUnits {
+					if !slices.Contains(schemaUnits, nsxUnit) {
+						groupID, err := getHostDefaultUpgradeGroup(m, nsxUnit)
+						if isNotFoundError(err) {
+							return fmt.Errorf("couldn't find default group for host %s as default group was not found", nsxUnit)
+						} else if err != nil {
+							return handleUpdateError("Host Upgrade Group", nsxUnit, err)
+						}
+						err = addHostToGroup(m, groupID, nsxUnit, false)
+						if err != nil {
+							return handleUpdateError("Host Upgrade Group", nsxUnit, err)
+						}
+					}
+				}
+				// Replace the upgrade unit list
+				var groupMembers []model.UpgradeUnit
+				for _, h := range group["hosts"].([]interface{}) {
+					hostID := h.(string)
+					groupMembers = append(groupMembers, model.UpgradeUnit{Id: &hostID})
+				}
+				groupGet.UpgradeUnits = groupMembers
+			}
+		} else {
+			group, err := upgradeClientSet.GroupClient.Get(groupID, nil)
+			if err != nil {
+				return err
+			}
+			groupGet = &group
 		}
 
 		enabled := group["enabled"].(bool)
@@ -551,11 +641,14 @@ func updateUpgradeUnitGroups(upgradeClientSet *upgradeClientSet, d *schema.Resou
 			groupGet.ExtendedConfiguration = extendConfig
 		}
 
-		_, err = upgradeClientSet.GroupClient.Update(groupID, groupGet)
+		if isCreate {
+			_, err = upgradeClientSet.GroupClient.Create(*groupGet)
+		} else {
+			_, err = upgradeClientSet.GroupClient.Update(groupID, *groupGet)
+		}
 		if err != nil {
 			return err
 		}
-
 		if preUpgradeGroupID != "" {
 			err = upgradeClientSet.GroupClient.Reorder(groupID, getReorderAfterReq(preUpgradeGroupID))
 			if err != nil {
@@ -721,4 +814,76 @@ func resourceNsxtUpgradeRunUpdate(d *schema.ResourceData, m interface{}) error {
 
 func resourceNsxtUpgradeRunDelete(d *schema.ResourceData, m interface{}) error {
 	return nil
+}
+
+func getHostDefaultUpgradeGroup(m interface{}, hostID string) (string, error) {
+	connector := getPolicyConnector(m)
+	hostClient := nsx.NewTransportNodesClient(connector)
+	host, err := hostClient.Get(hostID)
+	if err != nil {
+		return "", err
+	}
+	converter := bindings.NewTypeConverter()
+	base, errs := converter.ConvertToGolang(host.NodeDeploymentInfo, model.HostNodeBindingType())
+	if errs != nil {
+		return "", errs[0]
+	}
+	node := base.(model.HostNode)
+
+	if node.ComputeCollectionId != nil {
+		return *node.ComputeCollectionId, nil
+	}
+
+	// This host is not a part of a compute cluster:
+	// it should be assigned to the 'Group 1 for ESXI' group (this value is hardcoded in NSX)
+	groupClient := upgrade.NewUpgradeUnitGroupsClient(connector)
+	componentType := "HOST"
+	hostGroups, err := groupClient.List(&componentType, nil, nil, nil, nil, nil, nil, nil)
+	if err != nil {
+		return "", err
+	}
+	if hostGroups.Results != nil {
+		for _, group := range hostGroups.Results {
+			if group.DisplayName != nil && *group.DisplayName == hostUpgradeUnitDefaultGroup {
+				return *group.Id, nil
+			}
+		}
+	}
+
+	return "", errors.NotFound{}
+}
+
+func addHostToGroup(m interface{}, groupID, hostID string, isCreate bool) error {
+	connector := getPolicyConnector(m)
+	client := upgrade.NewUpgradeUnitGroupsClient(connector)
+
+	doUpdate := func() error {
+		group, err := client.Get(groupID, nil)
+		if err != nil {
+			return err
+		}
+
+		hostIDs := getUnitIDsFromUnits(group.UpgradeUnits)
+		if slices.Contains(hostIDs, hostID) {
+			// Host is already within the group
+			return nil
+		}
+		group.UpgradeUnits = append(group.UpgradeUnits, model.UpgradeUnit{Id: &hostID})
+		_, err = client.Update(groupID, group)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+	commonProviderConfig := getCommonProviderConfig(m)
+	return retryUponPreconditionFailed(doUpdate, commonProviderConfig.MaxRetries)
+}
+
+func getUnitIDsFromUnits(units []model.UpgradeUnit) []string {
+	var unitIDs []string
+
+	for _, unit := range units {
+		unitIDs = append(unitIDs, *unit.Id)
+	}
+	return unitIDs
 }
