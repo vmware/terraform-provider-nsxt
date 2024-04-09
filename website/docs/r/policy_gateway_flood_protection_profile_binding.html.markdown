@@ -19,11 +19,11 @@ data "nsxt_policy_tier0_gateway" "test" {
 }
 
 resource "nsxt_policy_gateway_flood_protection_profile_binding" "test" {
-  display_name      = "test"
-  description       = "test"
-  profile_path      = nsxt_policy_gateway_flood_protection_profile.test.path
-  parent_path       = data.nsxt_policy_tier0_gateway.test.path
-  
+  display_name = "test"
+  description  = "test"
+  profile_path = nsxt_policy_gateway_flood_protection_profile.test.path
+  parent_path  = data.nsxt_policy_tier0_gateway.test.path
+
   tag {
     scope = "scope1"
     tag   = "tag1"
