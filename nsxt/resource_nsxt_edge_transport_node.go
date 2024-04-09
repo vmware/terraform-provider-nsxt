@@ -1435,9 +1435,11 @@ func setHostSwitchSpecInSchema(d *schema.ResourceData, spec *data.StructValue, n
 					if len(profiles) > 0 {
 						hsCfgOpt["host_switch_profile"] = profiles
 					}
-					hsCfgOpt["ip_assignment"], err = setIPAssignmentInSchema(tnpsc.HostSwitchConfigOption.IpAssignmentSpec)
-					if err != nil {
-						return err
+					if tnpsc.HostSwitchConfigOption.IpAssignmentSpec != nil {
+						hsCfgOpt["ip_assignment"], err = setIPAssignmentInSchema(tnpsc.HostSwitchConfigOption.IpAssignmentSpec)
+						if err != nil {
+							return err
+						}
 					}
 					hsCfgOpt["uplink"] = setUplinksFromSchema(tnpsc.HostSwitchConfigOption.Uplinks)
 					e["host_switch_config_option"] = []interface{}{hsCfgOpt}
