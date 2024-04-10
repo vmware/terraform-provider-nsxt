@@ -102,7 +102,7 @@ func testAccNSXEdgeClusterCheckDestroy(state *terraform.State, displayName strin
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
 
 	// This addresses the fact that object is retrieved even though it had been deleted
-	time.Sleep(1 * time.Second)
+	time.Sleep(10 * time.Second)
 
 	for _, rs := range state.RootModule().Resources {
 		if rs.Type != "nsxt_edge_cluster" {
