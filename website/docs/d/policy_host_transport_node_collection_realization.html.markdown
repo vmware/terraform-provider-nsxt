@@ -1,5 +1,5 @@
 ---
-subcategory: "Fabric"
+subcategory: "Beta"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_host_transport_node_collection_realization"
 description: Host transport node collection realization information.
@@ -32,8 +32,4 @@ data "nsxt_policy_host_transport_node_collection_realization" "test" {
 In addition to arguments listed above, the following attributes are exported:
 
 * `state` - Application state of transport node profile on compute collection. Transitional state is "in_progress".
-* `aggregate_progress_percentage` - Aggregate percentage of compute collection deployment.
-* `cluster_level_error` - Errors which needs cluster level to resolution.
-* `validation_errors` - Errors while applying transport node profile on discovered node.
-* `vlcm_transition_error` - Errors while enabling vLCM on the compute collection.
 

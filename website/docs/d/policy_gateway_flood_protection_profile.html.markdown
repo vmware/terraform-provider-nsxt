@@ -1,5 +1,5 @@
 ---
-subcategory: "Security"
+subcategory: "Beta"
 layout: "nsxt"
 page_title: "NSXT: policy_gateway_flood_protection_profile"
 description: Policy Gateway Flood Protection Profile data source.
