@@ -1,5 +1,5 @@
 ---
-subcategory: "Fabric"
+subcategory: "Beta"
 layout: "nsxt"
 page_title: "NSXT: policy_site"
 description: Policy Site data source.

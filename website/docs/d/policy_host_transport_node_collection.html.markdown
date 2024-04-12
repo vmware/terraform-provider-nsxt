@@ -1,5 +1,5 @@
 ---
-subcategory: "Fabric"
+subcategory: "Beta"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_host_transport_node_collection"
 description: A host transport node collection data source.
