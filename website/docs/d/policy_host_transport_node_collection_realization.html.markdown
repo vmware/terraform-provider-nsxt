@@ -8,25 +8,24 @@ description: Host transport node collection realization information.
 # nsxt_policy_host_transport_node_collection_realization
 
 This data source provides information about the realization of host transport
-node collection configured on NSX. This data source will wait until realization is
-determined as either success or error. It is recommended to use this data source
-if further configuration depends on host transport node collection realization.
+node collection configured on NSX. This data source will fail if transport node collection
+fails to realize. It is recommended to use this data source if further configuration
+depends on host transport node collection realization.
 This data source is applicable to NSX Policy Manager.
 
 ## Example Usage
 
 ```hcl
 data "nsxt_policy_host_transport_node_collection_realization" "test" {
-  id = data.nsxt_policy_host_transport_node_collection.id
+  path = data.nsxt_policy_host_transport_node_collection.path
 }
 ```
 
 ## Argument Reference
 
-* `id` - (Optional) The ID of host transport node collection to retrieve information.
+* `path` - (Optional) Policy path of Transport Node Collection.
 * `delay` - (Optional) Delay (in seconds) before realization polling is started. Default is set to 1.
 * `timeout` - (Optional) Timeout (in seconds) for realization polling. Default is set to 1200.
-* `site_path` - (Optional) The path of the site which the Transport Node Collection belongs to. `path` field of the existing `nsxt_policy_site` can be used here.
 
 ## Attributes Reference
 

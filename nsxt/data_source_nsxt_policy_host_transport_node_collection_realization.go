@@ -11,7 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/sites/enforcement_points"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/sites/enforcement_points/transport_node_collections"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
@@ -21,7 +20,12 @@ func dataSourceNsxtPolicyHostTransportNodeCollectionRealization() *schema.Resour
 		Read: dataSourceNsxtPolicyHostTransportNodeCollectionRealizationRead,
 
 		Schema: map[string]*schema.Schema{
-			"id": getDataSourceIDSchema(),
+			"path": {
+				Type:         schema.TypeString,
+				Description:  "Path of this Transport Node Collection",
+				Optional:     true,
+				ValidateFunc: validatePolicyPath(),
+			},
 			"timeout": {
 				Type:         schema.TypeInt,
 				Description:  "Realization timeout in seconds",
@@ -35,12 +39,6 @@ func dataSourceNsxtPolicyHostTransportNodeCollectionRealization() *schema.Resour
 				Optional:     true,
 				Default:      1,
 				ValidateFunc: validation.IntAtLeast(0),
-			},
-			"site_path": {
-				Type:         schema.TypeString,
-				Description:  "Path of the site this Transport Node Collection belongs to",
-				Optional:     true,
-				ValidateFunc: validatePolicyPath(),
 			},
 			"state": {
 				Type:        schema.TypeString,
@@ -58,11 +56,9 @@ func dataSourceNsxtPolicyHostTransportNodeCollectionRealizationRead(d *schema.Re
 	connector := getPolicyConnector(m)
 	client := transport_node_collections.NewStateClient(connector)
 
-	objID := d.Get("id").(string)
+	path := d.Get("path").(string)
 	delay := d.Get("delay").(int)
 	timeout := d.Get("timeout").(int)
-	objSitePath := d.Get("site_path").(string)
-	objPolicyEnforcementPoint := getPolicyEnforcementPoint(m)
 
 	pendingStates := []string{model.TransportNodeCollectionState_STATE_IN_PROGRESS}
 	targetStates := []string{
@@ -72,31 +68,25 @@ func dataSourceNsxtPolicyHostTransportNodeCollectionRealizationRead(d *schema.Re
 		model.TransportNodeCollectionState_STATE_SUCCESS,
 	}
 
-	// For local manager, if site path is not provided, use default site
-	if objSitePath == "" {
-		objSitePath = defaultSite
+	site, err := getParameterFromPolicyPath("/sites/", "/enforcement-points/", path)
+	if err != nil {
+		return fmt.Errorf("Invalid transport node collection path %s", path)
 	}
-	if objID == "" {
-		// Find the host transport node collection if exists
-		tncClient := enforcement_points.NewTransportNodeCollectionsClient(connector)
-		objList, err := tncClient.List(objSitePath, objPolicyEnforcementPoint, nil, nil, nil)
-		if err != nil {
-			return handleListError("HostTransportNodeCollection", err)
-		}
 
-		if len(objList.Results) != 1 {
-			return fmt.Errorf("Single HostTransportNodeCollection was not identified on %s/%s", objSitePath, objPolicyEnforcementPoint)
-		}
-		objID = *objList.Results[0].Id
+	ep, err1 := getParameterFromPolicyPath("/enforcement-points/", "/transport-node-collections/", path)
+	if err1 != nil {
+		return fmt.Errorf("Invalid transport node collection path %s", path)
 	}
+
+	objID := getPolicyIDFromPath(path)
 
 	stateConf := &resource.StateChangeConf{
 		Pending: pendingStates,
 		Target:  targetStates,
 		Refresh: func() (interface{}, string, error) {
-			state, err := client.Get(objSitePath, getPolicyEnforcementPoint(m), objID)
+			state, err := client.Get(site, ep, objID)
 			if err != nil {
-				return state, model.TransportNodeCollectionState_STATE_IN_PROGRESS, logAPIError("Error while waiting for realization of Transport Node Collection", err)
+				return state, model.TransportNodeCollectionState_STATE_IN_PROGRESS, logAPIError("Error getting collection state", err)
 			}
 
 			log.Printf("[DEBUG] Current realization state for Transport Node Collection %s is %s", objID, *state.State)
@@ -113,7 +103,7 @@ func dataSourceNsxtPolicyHostTransportNodeCollectionRealizationRead(d *schema.Re
 		MinTimeout: 1 * time.Second,
 		Delay:      time.Duration(delay) * time.Second,
 	}
-	_, err := stateConf.WaitForState()
+	_, err = stateConf.WaitForState()
 	if err != nil {
 		return err
 	}
@@ -121,7 +111,7 @@ func dataSourceNsxtPolicyHostTransportNodeCollectionRealizationRead(d *schema.Re
 }
 
 func getErrorFromState(state *model.TransportNodeCollectionState) error {
-	var result string
+	result := fmt.Sprintf("state: %s\n", *state.State)
 	if state.ClusterLevelError != nil {
 		result += fmt.Sprintf("cluster level error: %v\n", *state.ClusterLevelError)
 	}
