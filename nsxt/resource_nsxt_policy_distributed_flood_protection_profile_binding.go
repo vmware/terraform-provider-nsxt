@@ -6,9 +6,7 @@ package nsxt
 import (
 	"fmt"
 	"strings"
-	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/terraform-provider-nsxt/api/infra/domains/groups"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
@@ -77,31 +75,8 @@ func resourceNsxtPolicyDistributedFloodProtectionProfileBindingPatch(d *schema.R
 	domain := getDomainFromResourcePath(groupPath)
 
 	if !isCreate {
-		// Regular API doesn't support UPDATE operation, response example below:
-		// Cannot create an object with path=[/infra/domains/default/groups/testgroup/firewall-flood-protection-profile-binding-maps/994019f3-aba0-4592-96ff-f00326e13976] as it already exists. (code 500127)
-		// Instead of using H-API to increase complexity, we choose to delete and then create the resource for UPDATE.
-		err := bindingClient.Delete(domain, groupID, id)
-		if err != nil {
-			return err
-		}
-		stateConf := &resource.StateChangeConf{
-			Pending: []string{"exist"},
-			Target:  []string{"deleted"},
-			Refresh: func() (interface{}, string, error) {
-				state, err := bindingClient.Get(domain, groupID, id)
-				if isNotFoundError(err) {
-					return state, "deleted", nil
-				}
-				return state, "exist", nil
-			},
-			Timeout:      30 * time.Second,
-			PollInterval: 200 * time.Millisecond,
-			Delay:        200 * time.Millisecond,
-		}
-		_, err = stateConf.WaitForState()
-		if err != nil {
-			return fmt.Errorf("failed to update GatewayFloodProtectionProfileBinding %s: %v", id, err)
-		}
+		revision := int64(d.Get("revision").(int))
+		obj.Revision = &revision
 	}
 	return bindingClient.Patch(domain, groupID, id, obj)
 }
