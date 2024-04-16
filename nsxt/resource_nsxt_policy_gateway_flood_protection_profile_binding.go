@@ -72,7 +72,7 @@ func extractGatewayIDLocaleServiceID(parentPath string) (string, string, string,
 	return tier0ID, tier1ID, localeServiceID, nil
 }
 
-func resourceNsxtPolicyGatewayFloodProtectionProfileBindingPatch(d *schema.ResourceData, m interface{}, parentPath string, id string) error {
+func resourceNsxtPolicyGatewayFloodProtectionProfileBindingPatch(d *schema.ResourceData, m interface{}, parentPath string, id string, isCreate bool) error {
 	connector := getPolicyConnector(m)
 
 	displayName := d.Get("display_name").(string)
@@ -84,6 +84,11 @@ func resourceNsxtPolicyGatewayFloodProtectionProfileBindingPatch(d *schema.Resou
 		Description: &description,
 		Tags:        tags,
 		ProfilePath: &profilePath,
+	}
+
+	if !isCreate {
+		revision := int64(d.Get("revision").(int))
+		obj.Revision = &revision
 	}
 
 	tier0ID, tier1ID, localeServiceID, err := extractGatewayIDLocaleServiceID(parentPath)
@@ -169,7 +174,7 @@ func resourceNsxtPolicyGatewayFloodProtectionProfileBindingCreate(d *schema.Reso
 		return fmt.Errorf("Resource with id %s already exists", id)
 	}
 
-	err = resourceNsxtPolicyGatewayFloodProtectionProfileBindingPatch(d, m, parentPath, id)
+	err = resourceNsxtPolicyGatewayFloodProtectionProfileBindingPatch(d, m, parentPath, id, true)
 	if err != nil {
 		return handleCreateError("GatewayFloodProtectionProfile", id, err)
 	}
@@ -220,7 +225,7 @@ func resourceNsxtPolicyGatewayFloodProtectionProfileBindingUpdate(d *schema.Reso
 
 	parentPath := d.Get("parent_path").(string)
 
-	err := resourceNsxtPolicyGatewayFloodProtectionProfileBindingPatch(d, m, parentPath, id)
+	err := resourceNsxtPolicyGatewayFloodProtectionProfileBindingPatch(d, m, parentPath, id, false)
 	if err != nil {
 		return handleUpdateError("GatewayFloodProtectionProfileBinding", id, err)
 	}

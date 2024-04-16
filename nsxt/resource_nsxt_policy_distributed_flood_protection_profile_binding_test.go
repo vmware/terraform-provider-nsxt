@@ -45,7 +45,7 @@ func testAccResourceNsxtPolicyDistributedFloodProtectionProfileBindingBasic(t *t
 	name := getAccTestResourceName()
 	updatedName := fmt.Sprintf("%s-updated", name)
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
