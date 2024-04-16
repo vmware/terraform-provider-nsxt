@@ -8,7 +8,6 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
@@ -32,11 +31,10 @@ func resourceNsxtPolicyGatewayFloodProtectionProfile() *schema.Resource {
 func getGatewayFloodProtectionProfile() map[string]*schema.Schema {
 	baseProfile := getFloodProtectionProfile()
 	baseProfile["nat_active_conn_limit"] = &schema.Schema{
-		Type:         schema.TypeInt,
-		Description:  "Maximum limit of active NAT connections",
-		Optional:     true,
-		ValidateFunc: validation.IntBetween(1, 4294967295),
-		Default:      4294967295,
+		Type:        schema.TypeInt,
+		Description: "Maximum limit of active NAT connections",
+		Optional:    true,
+		Computed:    true,
 	}
 	return baseProfile
 }
