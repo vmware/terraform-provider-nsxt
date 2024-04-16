@@ -1,5 +1,5 @@
 ---
-subcategory: "Security"
+subcategory: "Beta"
 layout: "nsxt"
 page_title: "NSXT: policy_gateway_flood_protection_profile_binding"
 description: A resource to configure Policy Gateway Flood Protection Profile BindingMap on NSX Policy manager.
@@ -39,6 +39,9 @@ data "nsxt_policy_project" "demoproj" {
 }
 
 data "nsxt_policy_tier1_gateway" "test" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
   display_name = "tier1_gw"
 }
 

@@ -1,5 +1,5 @@
 ---
-subcategory: "Security"
+subcategory: "Beta"
 layout: "nsxt"
 page_title: "NSXT: policy_distributed_flood_protection_profile_binding"
 description: A resource to configure Policy Distributed Flood Protection Profile BindingMap on NSX Policy manager.

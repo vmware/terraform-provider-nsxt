@@ -1,3 +1,38 @@
+## 3.6.0 (April 16, 2024)
+
+IMPROVEMENTS:
+* Improve error messaging on NSX connection initiation ([#1164](https://github.com/vmware/terraform-provider-nsxt/pull/1164))
+* `resource/nsxt_policy_nat_rule`: Support `policy_based_vpn_mode` attribute ([#1143](https://github.com/vmware/terraform-provider-nsxt/pull/1143))
+
+BUG FIXES:
+* `resource/nsxt_policy_lb_virtual_server`: Fix crash while configuring SSL conditions ([#1156](https://github.com/vmware/terraform-provider-nsxt/pull/1156))
+* `resource/nsxt_policy_segment`, `resource/nsxt_policy_vlan_segment`, `resource/nsxt_policy_fixed_segment`: Fix segment import issues related to QoS profile ([#1139](https://github.com/vmware/terraform-provider-nsxt/pull/1139))
+* `resource/nsxt_policy_qos_profile`: Fix incorrect state update after failed apply ([#1138](https://github.com/vmware/terraform-provider-nsxt/pull/1138))
+
+IMPROVEMENTS AND BUG FIXES ON EXPERIMENTAL FEATURES:
+* `resource/nsxt_edge_transport_node`: fix IP assignment; communicate lack of ipv6 support with appropriate error messaging; split out RTEP config into dedicated resource; allow to configure host switch name; fix timing issues on edge deletion
+* `resource/nsxt_policy_host_transport_node`: add `cpu_config` attribute; make sure discovered node ID is assigned
+* `data/nsxt_discover_node`: renamed to `data/nsxt_discovered_node`; `compute_manager_state` attribute added
+
+EXPERIMENTAL FEATURES:
+* `data/nsxt_policy_vtep_ha_host_switch_profile`
+* `data/nsxt_policy_host_transport_node_collection`
+* `data/nsxt_policy_host_transport_node_collection_realization`
+* `data/nsxt_policy_distributed_flood_protection_profile`
+* `data/nsxt_policy_gateway_flood_protection_profile`
+
+* `resource/nsxt_policy_compute_sub_cluster`
+* `resource/nsxt_policy_tier0_inter_vrf_routing`
+* `resource/nsxt_edge_transport_node_rtep`
+* `resource/nsxt_policy_metadata_proxy`
+* `resource/nsxt_policy_vtep_ha_host_switch_profile`
+* `resource/nsxt_policy_global_manager`
+* `resource/nsxt_policy_site`
+* `resource/nsxt_policy_distributed_flood_protection_profile`
+* `resource/nsxt_policy_distributed_flood_protection_profile_binding`
+* `resource/nsxt_policy_gateway_flood_protection_profile`
+* `resource/nsxt_policy_gateway_flood_protection_profile_binding`
+
 ## 3.5.0 (February 26, 2024)
 
 IMPROVEMENTS:
