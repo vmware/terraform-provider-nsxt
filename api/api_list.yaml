@@ -800,6 +800,20 @@
     - Update
     - List
 - api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/segments
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/tier_1s/segments
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Multitenancy
+  model_name: SegmentPort
+  obj_name: Port
+  var_name: segmentPortParam
+  supported_method:
+    - New
+    - List
+    - Update
+- api_packages:
     - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt
       model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
       type: Local

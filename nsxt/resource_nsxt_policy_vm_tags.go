@@ -10,13 +10,14 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/realized_state/enforcement_points"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-
 	realizedstate "github.com/vmware/terraform-provider-nsxt/api/infra/realized_state"
 	"github.com/vmware/terraform-provider-nsxt/api/infra/segments"
+	t1_segments "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s/segments"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/realized_state/enforcement_points"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/realized_state/virtual_machines"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
 var (
@@ -64,13 +65,12 @@ func listAllPolicyVirtualMachines(context utl.SessionContext, connector client.C
 	var cursor *string
 	total := 0
 
-	enforcementPointPath := getPolicyEnforcementPointPath(m)
 	for {
 		// NOTE: Search API doesn't filter by realized state resources
 		// NOTE: Contrary to the spec, this API does not populate cursor and result count
 		// parameters, respects cursor input. Therefore we determine end of VM list by
 		// looking for empty result.
-		vms, err := client.List(cursor, &enforcementPointPath, &boolFalse, nil, nil, &boolFalse, nil)
+		vms, err := client.List(cursor, nil, &boolFalse, nil, nil, &boolFalse, nil)
 		if err != nil {
 			return results, err
 		}
@@ -96,24 +96,37 @@ func listAllPolicyVirtualMachines(context utl.SessionContext, connector client.C
 }
 
 func listAllPolicySegmentPorts(context utl.SessionContext, connector client.Connector, segmentPath string) ([]model.SegmentPort, error) {
-	client := segments.NewPortsClient(context, connector)
-	segmentID := getPolicyIDFromPath(segmentPath)
+
 	var results []model.SegmentPort
+	isT0, gwID, segmentID := parseSegmentPolicyPath(segmentPath)
+	if isT0 || len(segmentID) == 0 {
+		return results, fmt.Errorf("invalid segment path %s", segmentPath)
+	}
 	boolFalse := false
 	var cursor *string
 	total := 0
+	var err error
+	var ports model.SegmentPortListResult
 
 	for {
-		vms, err := client.List(segmentID, cursor, &boolFalse, nil, nil, &boolFalse, nil)
+		if len(gwID) == 0 {
+			client := segments.NewPortsClient(context, connector)
+			ports, err = client.List(segmentID, cursor, &boolFalse, nil, nil, &boolFalse, nil)
+		} else {
+			// fixed segments
+			client := t1_segments.NewPortsClient(context, connector)
+			ports, err = client.List(gwID, segmentID, cursor, &boolFalse, nil, nil, &boolFalse, nil)
+
+		}
 		if err != nil {
 			return results, err
 		}
-		results = append(results, vms.Results...)
-		if total == 0 && vms.ResultCount != nil {
+		results = append(results, ports.Results...)
+		if total == 0 && ports.ResultCount != nil {
 			// first response
-			total = int(*vms.ResultCount)
+			total = int(*ports.ResultCount)
 		}
-		cursor = vms.Cursor
+		cursor = ports.Cursor
 		if len(results) >= total {
 			log.Printf("[DEBUG] Found %d ports for segment %s", len(results), segmentID)
 			return results, nil
@@ -190,12 +203,16 @@ func findNsxtPolicyVMByID(context utl.SessionContext, connector client.Connector
 }
 
 func updateNsxtPolicyVMTags(connector client.Connector, externalID string, tags []model.Tag, m interface{}) error {
-	client := enforcement_points.NewVirtualMachinesClient(connector)
-
 	tagUpdate := model.VirtualMachineTagsUpdate{
 		Tags:             tags,
 		VirtualMachineId: &externalID,
 	}
+	if nsxVersionHigherOrEqual("4.1.1") {
+		client := virtual_machines.NewTagsClient(connector)
+		return client.Create(externalID, tagUpdate, nil, nil, nil, nil, nil, nil, nil)
+	}
+	client := enforcement_points.NewVirtualMachinesClient(connector)
+
 	return client.Updatetags(getPolicyEnforcementPoint(m), tagUpdate)
 }
 
@@ -217,8 +234,6 @@ func listPolicyVifAttachmentsForVM(m interface{}, externalID string) ([]string, 
 
 func updateNsxtPolicyVMPortTags(context utl.SessionContext, connector client.Connector, externalID string, portTags []interface{}, m interface{}, isDelete bool) error {
 
-	client := segments.NewPortsClient(context, connector)
-
 	vifAttachmentIds, err := listPolicyVifAttachmentsForVM(m, externalID)
 	if err != nil {
 		return err
@@ -226,8 +241,8 @@ func updateNsxtPolicyVMPortTags(context utl.SessionContext, connector client.Con
 
 	for _, portTag := range portTags {
 		data := portTag.(map[string]interface{})
-		segmentPath := data["segment_path"].(string)
 		var tags []model.Tag
+		segmentPath := data["segment_path"].(string)
 		if !isDelete {
 			tags = getPolicyTagsFromSet(data["tag"].(*schema.Set))
 		}
@@ -236,6 +251,7 @@ func updateNsxtPolicyVMPortTags(context utl.SessionContext, connector client.Con
 		if portsErr != nil {
 			return portsErr
 		}
+		_, gwID, segmentID := parseSegmentPolicyPath(segmentPath)
 		for _, port := range ports {
 			if port.Attachment == nil || port.Attachment.Id == nil {
 				continue
@@ -245,8 +261,14 @@ func updateNsxtPolicyVMPortTags(context utl.SessionContext, connector client.Con
 				if attachment == *port.Attachment.Id {
 					port.Tags = tags
 					log.Printf("[DEBUG] Updating port %s with %d tags", *port.Path, len(tags))
-					segmentID := getPolicyIDFromPath(segmentPath)
-					_, err = client.Update(segmentID, *port.Id, port)
+					if len(gwID) == 0 {
+						client := segments.NewPortsClient(context, connector)
+						_, err = client.Update(segmentID, *port.Id, port)
+					} else {
+						// fixed segment
+						client := t1_segments.NewPortsClient(context, connector)
+						_, err = client.Update(gwID, segmentID, *port.Id, port)
+					}
 					if err != nil {
 						return err
 					}
