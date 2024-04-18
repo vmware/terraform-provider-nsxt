@@ -15,9 +15,20 @@ import (
 
 // Validations for Port objects
 
-func isSinglePort(v string) bool {
-	i, err := strconv.ParseUint(v, 10, 32)
-	if err != nil {
+func isSinglePort(vi interface{}) bool {
+	var i uint64
+	switch vi := vi.(type) {
+	case int:
+		i = uint64(vi)
+	case string:
+		var err error
+		i, err = strconv.ParseUint(vi, 10, 32)
+		if err != nil {
+			return false
+		}
+	case uint64:
+		i = vi
+	default:
 		return false
 	}
 	if i > 65536 {
@@ -51,10 +62,9 @@ func validatePortRange() schema.SchemaValidateFunc {
 
 func validateSinglePort() schema.SchemaValidateFunc {
 	return func(v interface{}, k string) (ws []string, errors []error) {
-		value := v.(string)
-		if !isSinglePort(value) {
+		if !isSinglePort(v) {
 			errors = append(errors, fmt.Errorf(
-				"expected %q to be a single port number. Got %s", k, value))
+				"expected %q to be a single port number. Got %v", k, v))
 		}
 		return
 	}
