@@ -70,7 +70,8 @@ func listAllPolicyVirtualMachines(context utl.SessionContext, connector client.C
 		// NOTE: Contrary to the spec, this API does not populate cursor and result count
 		// parameters, respects cursor input. Therefore we determine end of VM list by
 		// looking for empty result.
-		vms, err := client.List(cursor, nil, &boolFalse, nil, nil, &boolFalse, nil)
+		sortBy := "external_id"
+		vms, err := client.List(cursor, nil, &boolFalse, nil, nil, &boolFalse, &sortBy)
 		if err != nil {
 			return results, err
 		}
