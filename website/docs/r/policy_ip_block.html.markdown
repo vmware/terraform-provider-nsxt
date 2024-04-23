@@ -17,6 +17,7 @@ This resource is applicable to NSX Policy Manager.
 resource "nsxt_policy_ip_block" "block1" {
   display_name = "ip-block1"
   cidr         = "192.168.1.0/24"
+  visibility   = "PRIVATE"
 
   tag {
     scope = "color"
@@ -43,6 +44,7 @@ resource "nsxt_policy_ip_block" "block1" {
   }
   display_name = "ip-block1"
   cidr         = "192.168.1.0/24"
+  visibility   = "PRIVATE"
 
   tag {
     scope = "color"
@@ -63,6 +65,7 @@ The following arguments are supported:
 * `display_name` - (Required) The display name for the IP Block.
 * `description` - (Optional) Description of the resource.
 * `cidr` - (Required) Network address and the prefix length which will be associated with a layer-2 broadcast domain.
+* `visibility` - (Optional) Visibility of the IP Block. Valid options are `PRIVATE`, `EXTERNAL` or unset. Visibility cannot be changed once the block is associated with other resources.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this IP Block.
 * `context` - (Optional) The context which the object belongs to
