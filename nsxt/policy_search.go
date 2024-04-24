@@ -127,6 +127,16 @@ func listPolicyResourcesByNameAndType(connector client.Connector, context utl.Se
 	return nil, errors.New("invalid ClientType %d")
 }
 
+func listInventoryResourcesByNameAndType(connector client.Connector, context utl.SessionContext, displayName string, resourceType string, additionalQuery *string) ([]*data.StructValue, error) {
+	query := fmt.Sprintf("resource_type:%s AND display_name:%s*", resourceType, escapeSpecialCharacters(displayName))
+	return searchLM(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
+}
+
+func listInventoryResourcesByAnyFieldAndType(connector client.Connector, context utl.SessionContext, anyField string, resourceType string, additionalQuery *string) ([]*data.StructValue, error) {
+	query := fmt.Sprintf("resource_type:%s AND %s", resourceType, escapeSpecialCharacters(anyField))
+	return searchLM(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
+}
+
 func escapeSpecialCharacters(str string) string {
 	// we replace special characters that can be encountered in object IDs
 	specials := "()[]+-=&|><!{}^~*?:/"
@@ -201,14 +211,11 @@ func searchGMPolicyResources(connector client.Connector, query string) ([]*data.
 	}
 }
 
-func searchLMPolicyResources(connector client.Connector, query string) ([]*data.StructValue, error) {
+func searchLM(connector client.Connector, query string) ([]*data.StructValue, error) {
 	client := lm_search.NewQueryClient(connector)
 	var results []*data.StructValue
 	var cursor *string
 	total := 0
-
-	// Make sure global objects are not found (path needs to start with infra)
-	query = query + " AND path:\\/infra*"
 
 	for {
 		searchResponse, err := client.List(query, cursor, nil, nil, nil, nil)
@@ -227,27 +234,14 @@ func searchLMPolicyResources(connector client.Connector, query string) ([]*data.
 	}
 }
 
+func searchLMPolicyResources(connector client.Connector, query string) ([]*data.StructValue, error) {
+	// Make sure global objects are not found (path needs to start with infra)
+	query = query + " AND path:\\/infra*"
+
+	return searchLM(connector, query)
+}
+
 func searchMultitenancyPolicyResources(connector client.Connector, org string, project string, query string) ([]*data.StructValue, error) {
-	client := lm_search.NewQueryClient(connector)
-	var results []*data.StructValue
-	var cursor *string
-	total := 0
-
 	query = query + fmt.Sprintf(" AND path:\\/orgs\\/%s\\/projects\\/%s*", org, project)
-
-	for {
-		searchResponse, err := client.List(query, cursor, nil, nil, nil, nil)
-		if err != nil {
-			return results, err
-		}
-		results = append(results, searchResponse.Results...)
-		if total == 0 {
-			// first response
-			total = int(*searchResponse.ResultCount)
-		}
-		cursor = searchResponse.Cursor
-		if len(results) >= total {
-			return results, nil
-		}
-	}
+	return searchLM(connector, query)
 }

@@ -14,6 +14,8 @@ import (
 	"github.com/vmware/terraform-provider-nsxt/api/infra/segments"
 	t1_segments "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s/segments"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/realized_state/enforcement_points"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/realized_state/virtual_machines"
@@ -162,11 +164,24 @@ func listAllPolicyVifs(m interface{}) ([]model.VirtualNetworkInterface, error) {
 }
 
 func findNsxtPolicyVMByNamePrefix(context utl.SessionContext, connector client.Connector, namePrefix string, m interface{}) ([]model.VirtualMachine, []model.VirtualMachine, error) {
-	var perfectMatch, prefixMatch []model.VirtualMachine
+	var perfectMatch, prefixMatch, allVMs []model.VirtualMachine
+	var err error
 
-	allVMs, err := listAllPolicyVirtualMachines(context, connector, m)
+	if nsxVersionHigherOrEqual("4.1.2") {
+		// Search API works for inventory objects for 4.1.2 and above
+		resourceType := "VirtualMachine"
+		resultValues, err1 := listInventoryResourcesByNameAndType(connector, context, namePrefix, resourceType, nil)
+		if err1 != nil {
+			log.Printf("[INFO] Error searching for Virtual Machine with name: %s", namePrefix)
+			return perfectMatch, prefixMatch, err1
+		}
+		allVMs, err = convertSearchResultToVMList(resultValues)
+
+	} else {
+		allVMs, err = listAllPolicyVirtualMachines(context, connector, m)
+	}
 	if err != nil {
-		log.Printf("[INFO] Error reading Virtual Machines when looking for name: %s", namePrefix)
+		log.Printf("[INFO] Error reading Virtual Machine with name: %s", namePrefix)
 		return perfectMatch, prefixMatch, err
 	}
 
@@ -180,16 +195,45 @@ func findNsxtPolicyVMByNamePrefix(context utl.SessionContext, connector client.C
 	return perfectMatch, prefixMatch, nil
 }
 
+func convertSearchResultToVMList(searchResults []*data.StructValue) ([]model.VirtualMachine, error) {
+	var vms []model.VirtualMachine
+	converter := bindings.NewTypeConverter()
+
+	for _, item := range searchResults {
+		dataValue, errors := converter.ConvertToGolang(item, model.VirtualMachineBindingType())
+		if len(errors) > 0 {
+			return vms, errors[0]
+		}
+		vm := dataValue.(model.VirtualMachine)
+		vms = append(vms, vm)
+	}
+	return vms, nil
+}
+
 func findNsxtPolicyVMByID(context utl.SessionContext, connector client.Connector, vmID string, m interface{}) (model.VirtualMachine, error) {
 	var virtualMachineStruct model.VirtualMachine
+	var vms []model.VirtualMachine
+	var err error
 
-	allVMs, err := listAllPolicyVirtualMachines(context, connector, m)
+	if nsxVersionHigherOrEqual("4.1.2") {
+		// Search API works for inventory objects for 4.1.2 and above
+		resourceType := "VirtualMachine"
+		resultValues, err1 := listInventoryResourcesByAnyFieldAndType(connector, context, vmID, resourceType, nil)
+		if err1 != nil {
+			log.Printf("[INFO] Error searching for Virtual Machine with id: %s", vmID)
+			return virtualMachineStruct, err1
+		}
+
+		vms, err = convertSearchResultToVMList(resultValues)
+	} else {
+		vms, err = listAllPolicyVirtualMachines(context, connector, m)
+	}
 	if err != nil {
 		log.Printf("[INFO] Error reading Virtual Machines when looking for ID: %s", vmID)
 		return virtualMachineStruct, err
 	}
 
-	for _, vmResult := range allVMs {
+	for _, vmResult := range vms {
 		if (vmResult.ExternalId != nil) && *vmResult.ExternalId == vmID {
 			return vmResult, nil
 		}

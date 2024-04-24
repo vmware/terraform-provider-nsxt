@@ -45,7 +45,6 @@ func dataSourceNsxtPolicyVMIDRead(d *schema.ResourceData, m interface{}) error {
 	var vmModel model.VirtualMachine
 	connector := getPolicyConnector(m)
 
-	// TODO: test with KVM based VM
 	objID := getNsxtPolicyVMIDFromSchema(d)
 	context := getSessionContext(d, m)
 	if objID != "" {
