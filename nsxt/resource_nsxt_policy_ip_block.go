@@ -8,12 +8,18 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
 	"github.com/vmware/terraform-provider-nsxt/api/infra"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
+
+var visibilityTypes = []string{
+	model.IpAddressBlock_VISIBILITY_EXTERNAL,
+	model.IpAddressBlock_VISIBILITY_PRIVATE,
+}
 
 func resourceNsxtPolicyIPBlock() *schema.Resource {
 	return &schema.Resource{
@@ -38,6 +44,12 @@ func resourceNsxtPolicyIPBlock() *schema.Resource {
 				Description:  "Network address and the prefix length which will be associated with a layer-2 broadcast domain",
 				Required:     true,
 				ValidateFunc: validateCidr(),
+			},
+			"visibility": {
+				Type:         schema.TypeString,
+				Description:  "Visibility of the Ip Block. Cannot be updated once associated with other resources.",
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice(visibilityTypes, false),
 			},
 		},
 	}
@@ -79,6 +91,7 @@ func resourceNsxtPolicyIPBlockRead(d *schema.ResourceData, m interface{}) error 
 	d.Set("path", block.Path)
 	d.Set("revision", block.Revision)
 	d.Set("cidr", block.Cidr)
+	d.Set("visibility", block.Visibility)
 
 	return nil
 }
@@ -95,6 +108,7 @@ func resourceNsxtPolicyIPBlockCreate(d *schema.ResourceData, m interface{}) erro
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
 	cidr := d.Get("cidr").(string)
+	visibility := d.Get("visibility").(string)
 	tags := getPolicyTagsFromSchema(d)
 
 	obj := model.IpAddressBlock{
@@ -103,7 +117,9 @@ func resourceNsxtPolicyIPBlockCreate(d *schema.ResourceData, m interface{}) erro
 		Cidr:        &cidr,
 		Tags:        tags,
 	}
-
+	if nsxVersionHigherOrEqual("4.2.0") && len(visibility) > 0 {
+		obj.Visibility = &visibility
+	}
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating IP Block with ID %s", id)
 	err = client.Patch(id, obj)
@@ -129,6 +145,7 @@ func resourceNsxtPolicyIPBlockUpdate(d *schema.ResourceData, m interface{}) erro
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
 	cidr := d.Get("cidr").(string)
+	visibility := d.Get("visibility").(string)
 	revision := int64(d.Get("revision").(int))
 	tags := getPolicyTagsFromSchema(d)
 
@@ -139,6 +156,9 @@ func resourceNsxtPolicyIPBlockUpdate(d *schema.ResourceData, m interface{}) erro
 		Cidr:        &cidr,
 		Tags:        tags,
 		Revision:    &revision,
+	}
+	if nsxVersionHigherOrEqual("4.2.0") && len(visibility) > 0 {
+		obj.Visibility = &visibility
 	}
 
 	_, err := client.Update(id, obj)

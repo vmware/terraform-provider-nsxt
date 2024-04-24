@@ -26,7 +26,7 @@ func TestAccResourceNsxtPolicyIPBlock_minimal(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXPolicyIPBlockCreateMinimalTemplate(name, cidr, false),
+				Config: testAccNSXPolicyIPBlockCreateMinimalTemplate(name, cidr, false, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXPolicyIPBlockCheckExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -42,20 +42,28 @@ func TestAccResourceNsxtPolicyIPBlock_minimal(t *testing.T) {
 }
 
 func TestAccResourceNsxtPolicyIPBlock_basic(t *testing.T) {
-	testAccResourceNsxtPolicyIPBlockBasic(t, false, func() {
+	testAccResourceNsxtPolicyIPBlockBasic(t, false, false, func() {
 		testAccPreCheck(t)
 		testAccOnlyLocalManager(t)
 	})
 }
 
+func TestAccResourceNsxtPolicyIPBlock_visibility(t *testing.T) {
+	testAccResourceNsxtPolicyIPBlockBasic(t, false, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyLocalManager(t)
+		testAccNSXVersion(t, "4.2.0")
+	})
+}
+
 func TestAccResourceNsxtPolicyIPBlock_multitenancy(t *testing.T) {
-	testAccResourceNsxtPolicyIPBlockBasic(t, true, func() {
+	testAccResourceNsxtPolicyIPBlockBasic(t, true, false, func() {
 		testAccPreCheck(t)
 		testAccOnlyMultitenancy(t)
 	})
 }
 
-func testAccResourceNsxtPolicyIPBlockBasic(t *testing.T, withContext bool, preCheck func()) {
+func testAccResourceNsxtPolicyIPBlockBasic(t *testing.T, withContext bool, withVisibility bool, preCheck func()) {
 	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_ip_block.test"
 	cidr := "192.168.1.0/24"
@@ -69,7 +77,7 @@ func testAccResourceNsxtPolicyIPBlockBasic(t *testing.T, withContext bool, preCh
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXPolicyIPBlockCreateMinimalTemplate(name, cidr, withContext),
+				Config: testAccNSXPolicyIPBlockCreateMinimalTemplate(name, cidr, withContext, withVisibility),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXPolicyIPBlockCheckExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -78,10 +86,11 @@ func testAccResourceNsxtPolicyIPBlockBasic(t *testing.T, withContext bool, preCh
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					testAccNSXPolicyIPBlockVisibility(testResourceName, withVisibility, "EXTERNAL"),
 				),
 			},
 			{
-				Config: testAccNSXPolicyIPBlockUpdateTemplate(name, cidr2, withContext),
+				Config: testAccNSXPolicyIPBlockUpdateTemplate(name, cidr2, withContext, withVisibility),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNSXPolicyIPBlockCheckExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -90,6 +99,7 @@ func testAccResourceNsxtPolicyIPBlockBasic(t *testing.T, withContext bool, preCh
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					testAccNSXPolicyIPBlockVisibility(testResourceName, withVisibility, "PRIVATE"),
 				),
 			},
 		},
@@ -108,7 +118,30 @@ func TestAccResourceNsxtPolicyIPBlock_importBasic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXPolicyIPBlockCreateMinimalTemplate(name, "192.191.1.0/24", false),
+				Config: testAccNSXPolicyIPBlockCreateMinimalTemplate(name, "192.191.1.0/24", false, false),
+			},
+			{
+				ResourceName:      testResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicyIPBlock_importVisibility(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_ip_block.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t); testAccNSXVersion(t, "4.2.0") },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXPolicyIPBlockCheckDestroy(state)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNSXPolicyIPBlockCreateMinimalTemplate(name, "192.191.1.0/24", false, true),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -131,7 +164,7 @@ func TestAccResourceNsxtPolicyIPBlock_importBasic_multitenancy(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXPolicyIPBlockCreateMinimalTemplate(name, "192.191.1.0/24", true),
+				Config: testAccNSXPolicyIPBlockCreateMinimalTemplate(name, "192.191.1.0/24", true, false),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -167,6 +200,15 @@ func testAccNSXPolicyIPBlockCheckExists(resourceName string) resource.TestCheckF
 	}
 }
 
+func testAccNSXPolicyIPBlockVisibility(resourceName string, withVisibility bool, expected string) resource.TestCheckFunc {
+	if !withVisibility {
+		return func(state *terraform.State) error {
+			return nil
+		}
+	}
+	return resource.TestCheckResourceAttr(resourceName, "visibility", expected)
+}
+
 func testAccNSXPolicyIPBlockCheckDestroy(state *terraform.State) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
 	client := infra.NewIpBlocksClient(testAccGetSessionContext(), connector)
@@ -185,29 +227,43 @@ func testAccNSXPolicyIPBlockCheckDestroy(state *terraform.State) error {
 	return nil
 }
 
-func testAccNSXPolicyIPBlockCreateMinimalTemplate(displayName string, cidr string, withContext bool) string {
+func testAccNSXPolicyIPBlockCreateMinimalTemplate(displayName string, cidr string, withContext, withVisibility bool) string {
 	context := ""
 	if withContext {
 		context = testAccNsxtPolicyMultitenancyContext()
 	}
+
+	visibility := ""
+	if withVisibility {
+		visibility = "  visibility   = \"EXTERNAL\""
+	}
+
 	return fmt.Sprintf(`
 resource "nsxt_policy_ip_block" "test" {
 %s
   display_name = "%s"
   cidr         = "%s"
-}`, context, displayName, cidr)
+%s
+}`, context, displayName, cidr, visibility)
 }
 
-func testAccNSXPolicyIPBlockUpdateTemplate(displayName string, cidr string, withContext bool) string {
+func testAccNSXPolicyIPBlockUpdateTemplate(displayName string, cidr string, withContext, withVisibility bool) string {
 	context := ""
 	if withContext {
 		context = testAccNsxtPolicyMultitenancyContext()
 	}
+
+	visibility := ""
+	if withVisibility {
+		visibility = "  visibility   = \"PRIVATE\""
+	}
+
 	return fmt.Sprintf(`
 resource "nsxt_policy_ip_block" "test" {
 %s
   display_name = "%s"
   cidr         = "%s"
+%s
 
   tag {
     scope = "scope1"
@@ -218,5 +274,5 @@ resource "nsxt_policy_ip_block" "test" {
     scope = "scope2"
     tag   = "tag2"
   }
-}`, context, displayName, cidr)
+}`, context, displayName, cidr, visibility)
 }
