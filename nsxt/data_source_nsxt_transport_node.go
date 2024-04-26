@@ -13,9 +13,9 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 )
 
-func dataSourceNsxtEdgeTransportNode() *schema.Resource {
+func dataSourceNsxtTransportNode() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceNsxtEdgeTransportNodeRead,
+		Read: dataSourceNsxtTransportNodeRead,
 
 		Schema: map[string]*schema.Schema{
 			"id":           getDataSourceIDSchema(),
@@ -25,7 +25,7 @@ func dataSourceNsxtEdgeTransportNode() *schema.Resource {
 	}
 }
 
-func dataSourceNsxtEdgeTransportNodeRead(d *schema.ResourceData, m interface{}) error {
+func dataSourceNsxtTransportNodeRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	client := nsx.NewTransportNodesClient(connector)
 
