@@ -909,12 +909,14 @@ func getPolicyClientSSLBindingFromSchema(d *schema.ResourceData) *model.LBClient
 		crlList := interface2StringList(data["crl_paths"].([]interface{}))
 		certPath := data["default_certificate_path"].(string)
 		profilePath := data["ssl_profile_path"].(string)
+		sniList := interface2StringList(data["sni_paths"].([]interface{}))
 		profileBinding := model.LBClientSslProfileBinding{
 			CertificateChainDepth:  &chainDepth,
 			ClientAuth:             &clientAuth,
 			ClientAuthCaPaths:      caList,
 			ClientAuthCrlPaths:     crlList,
 			DefaultCertificatePath: &certPath,
+			SniCertificatePaths:    sniList,
 			SslProfilePath:         &profilePath,
 		}
 
@@ -936,6 +938,7 @@ func setPolicyClientSSLBindingInSchema(d *schema.ResourceData, binding *model.LB
 		}
 		elem["ca_paths"] = binding.ClientAuthCaPaths
 		elem["crl_paths"] = binding.ClientAuthCrlPaths
+		elem["sni_paths"] = binding.SniCertificatePaths
 		elem["default_certificate_path"] = binding.DefaultCertificatePath
 		if binding.SslProfilePath != nil {
 			elem["ssl_profile_path"] = *binding.SslProfilePath
