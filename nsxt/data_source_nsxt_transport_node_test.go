@@ -10,9 +10,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccDataSourceNsxtEdgeTransportNode_basic(t *testing.T) {
+func TestAccDataSourceNsxtTransportNode_basic(t *testing.T) {
 	htnName := getEdgeTransportNodeName()
-	testResourceName := "data.nsxt_edge_transport_node.test"
+	testResourceName := "data.nsxt_transport_node.test"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -23,7 +23,7 @@ func TestAccDataSourceNsxtEdgeTransportNode_basic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXEdgeTransportNodeReadTemplate(htnName),
+				Config: testAccNSXTransportNodeReadTemplate(htnName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(testResourceName, "display_name", htnName),
 					resource.TestCheckResourceAttrSet(testResourceName, "id"),
@@ -33,9 +33,9 @@ func TestAccDataSourceNsxtEdgeTransportNode_basic(t *testing.T) {
 	})
 }
 
-func testAccNSXEdgeTransportNodeReadTemplate(name string) string {
+func testAccNSXTransportNodeReadTemplate(name string) string {
 	return fmt.Sprintf(`
-data "nsxt_edge_transport_node" "test" {
+data "nsxt_transport_node" "test" {
   display_name = "%s"
 }`, name)
 }
