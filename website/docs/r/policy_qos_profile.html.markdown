@@ -17,29 +17,29 @@ This resource is applicable to NSX Global Manager, NSX Policy Manager and VMC.
 resource "nsxt_policy_qos_profile" "qos_profile" {
   description      = "qos profile provisioned by Terraform"
   display_name     = "qos_profile1"
-  class_of_service = "5"
-  dscp_trusted     = "true"
-  dscp_priority    = "53"
+  class_of_service = 5
+  dscp_trusted     = true
+  dscp_priority    = 53
 
   ingress_rate_shaper {
-    enabled         = "true"
-    peak_bw_mbps    = "800"
-    burst_size      = "200"
-    average_bw_mbps = "100"
+    enabled         = true
+    peak_bw_mbps    = 800
+    burst_size      = 200
+    average_bw_mbps = 100
   }
 
   egress_rate_shaper {
-    enabled         = "true"
-    peak_bw_mbps    = "800"
-    burst_size      = "200"
-    average_bw_mbps = "100"
+    enabled         = true
+    peak_bw_mbps    = 800
+    burst_size      = 200
+    average_bw_mbps = 100
   }
 
   ingress_broadcast_rate_shaper {
-    enabled         = "true"
-    average_bw_kbps = "111"
-    burst_size      = "222"
-    peak_bw_kbps    = "500"
+    enabled         = true
+    average_bw_kbps = 111
+    burst_size      = 222
+    peak_bw_kbps    = 500
   }
 
   tag {
@@ -62,29 +62,29 @@ resource "nsxt_policy_qos_profile" "qos_profile" {
   }
   description      = "qos profile provisioned by Terraform"
   display_name     = "qos_profile1"
-  class_of_service = "5"
-  dscp_trusted     = "true"
-  dscp_priority    = "53"
+  class_of_service = 5
+  dscp_trusted     = true
+  dscp_priority    = 53
 
   ingress_rate_shaper {
-    enabled         = "true"
-    peak_bw_mbps    = "800"
-    burst_size      = "200"
-    average_bw_mbps = "100"
+    enabled         = true
+    peak_bw_mbps    = 800
+    burst_size      = 200
+    average_bw_mbps = 100
   }
 
   egress_rate_shaper {
-    enabled         = "true"
-    peak_bw_mbps    = "800"
-    burst_size      = "200"
-    average_bw_mbps = "100"
+    enabled         = true
+    peak_bw_mbps    = 800
+    burst_size      = 200
+    average_bw_mbps = 100
   }
 
   ingress_broadcast_rate_shaper {
-    enabled         = "true"
-    average_bw_kbps = "111"
-    burst_size      = "222"
-    peak_bw_kbps    = "500"
+    enabled         = true
+    average_bw_kbps = 111
+    burst_size      = 222
+    peak_bw_kbps    = 500
   }
 
   tag {

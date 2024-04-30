@@ -16,7 +16,7 @@ This resource is supported with NSX 4.1.0 onwards.
 resource "nsxt_policy_host_transport_node" "test" {
   description        = "Terraform-deployed host transport node"
   display_name       = "tf_host_transport_node"
-  discovered_node_id = data.nsxt_discover_node.dn.id
+  discovered_node_id = data.nsxt_discovered_node.dn.id
 
   standard_host_switch {
     host_switch_id      = "50 0b 31 a4 b8 af 35 df-40 56 b6 f9 aa d3 ee 12"

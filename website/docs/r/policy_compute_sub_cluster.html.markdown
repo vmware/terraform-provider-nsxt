@@ -16,7 +16,7 @@ This resource is supported with NSX 3.2.2 onwards.
 resource "nsxt_policy_compute_sub_cluster" "test" {
   display_name          = "subcluster1"
   compute_collection_id = data.nsxt_compute_collection.cc1.id
-  discovered_node_ids   = data.nsxt_discover_node.dn.id
+  discovered_node_ids   = [data.nsxt_discovered_node.dn.id]
 }
 ```
 
