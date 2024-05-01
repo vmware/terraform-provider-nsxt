@@ -65,7 +65,7 @@ func parentSecurityPolicyModelToSchema(d *schema.ResourceData, m interface{}) (*
 	client := domains.NewSecurityPoliciesClient(getSessionContext(d, m), connector)
 	obj, err := client.Get(domainName, id)
 	if err != nil {
-		return nil, handleReadError(d, "SecurityPolicy", id, err)
+		return nil, err
 	}
 	d.Set("display_name", obj.DisplayName)
 	d.Set("description", obj.Description)

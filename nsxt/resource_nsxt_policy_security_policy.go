@@ -137,7 +137,7 @@ func resourceNsxtPolicySecurityPolicyGeneralCreate(d *schema.ResourceData, m int
 func resourceNsxtPolicySecurityPolicyGeneralRead(d *schema.ResourceData, m interface{}, withRule bool) error {
 	obj, err := parentSecurityPolicyModelToSchema(d, m)
 	if err != nil {
-		return err
+		return handleReadError(d, "SecurityPolicy", d.Id(), err)
 	}
 	if withRule {
 		return setPolicyRulesInSchema(d, obj.Rules)
