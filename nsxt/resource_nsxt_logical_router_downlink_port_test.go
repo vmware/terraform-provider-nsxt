@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -69,7 +71,7 @@ func TestAccResourceNsxtLogicalRouterDownlinkPort_withRelay(t *testing.T) {
 	resourceType := "DhcpRelayService"
 	// this is needed to init the version
 	testAccNSXVersion(t, "2.2.0")
-	if nsxVersionLower("2.5.0") {
+	if util.NsxVersionLower("2.5.0") {
 		resourceType = "LogicalService"
 	}
 

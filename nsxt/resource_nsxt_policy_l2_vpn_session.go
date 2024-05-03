@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
@@ -125,7 +127,7 @@ func resourceNsxtPolicyL2VPNSessionCreate(d *schema.ResourceData, m interface{})
 		TransportTunnels: transportTunnel,
 	}
 
-	if nsxVersionHigherOrEqual("3.2.0") {
+	if util.NsxVersionHigherOrEqual("3.2.0") {
 		direction := d.Get("direction").(string)
 		maxSegmentSize := int64(d.Get("max_segment_size").(int))
 		if direction != "" {
@@ -244,7 +246,7 @@ func resourceNsxtPolicyL2VPNSessionRead(d *schema.ResourceData, m interface{}) e
 	if len(obj.TransportTunnels) > 0 {
 		d.Set("transport_tunnels", obj.TransportTunnels)
 	}
-	if nsxVersionHigherOrEqual("3.2.0") {
+	if util.NsxVersionHigherOrEqual("3.2.0") {
 		if obj.TcpMssClamping != nil {
 			direction := obj.TcpMssClamping.Direction
 			mss := obj.TcpMssClamping.MaxSegmentSize
@@ -324,7 +326,7 @@ func resourceNsxtPolicyL2VPNSessionUpdate(d *schema.ResourceData, m interface{})
 		Revision:         &revision,
 		Enabled:          &enabled,
 	}
-	if nsxVersionHigherOrEqual("3.2.0") {
+	if util.NsxVersionHigherOrEqual("3.2.0") {
 		direction := d.Get("direction").(string)
 		maxSegmentSize := int64(d.Get("max_segment_size").(int))
 		if direction != "" {

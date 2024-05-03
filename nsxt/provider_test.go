@@ -12,6 +12,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	api "github.com/vmware/go-vmware-nsxt"
@@ -89,7 +91,7 @@ func testAccGetClient() (*api.APIClient, error) {
 }
 
 func testAccNSXVersion(t *testing.T, requiredVersion string) {
-	if nsxVersion == "" {
+	if util.NsxVersion == "" {
 		connector, err := testAccGetPolicyConnector()
 		if err != nil {
 			t.Errorf("Failed to get policy connector")
@@ -103,13 +105,13 @@ func testAccNSXVersion(t *testing.T, requiredVersion string) {
 		}
 	}
 
-	if nsxVersionLower(requiredVersion) {
-		t.Skipf("This test can only run in NSX %s or above (Current version %s)", requiredVersion, nsxVersion)
+	if util.NsxVersionLower(requiredVersion) {
+		t.Skipf("This test can only run in NSX %s or above (Current version %s)", requiredVersion, util.NsxVersion)
 	}
 }
 
 func testAccNSXVersionLessThan(t *testing.T, requiredVersion string) {
-	if nsxVersion == "" {
+	if util.NsxVersion == "" {
 		connector, err := testAccGetPolicyConnector()
 		if err != nil {
 			t.Errorf("Failed to get policy connector")
@@ -123,8 +125,8 @@ func testAccNSXVersionLessThan(t *testing.T, requiredVersion string) {
 		}
 	}
 
-	if nsxVersionHigherOrEqual(requiredVersion) {
-		t.Skipf("This test can only run in NSX below %s (Current version %s)", requiredVersion, nsxVersion)
+	if util.NsxVersionHigherOrEqual(requiredVersion) {
+		t.Skipf("This test can only run in NSX below %s (Current version %s)", requiredVersion, util.NsxVersion)
 	}
 }
 

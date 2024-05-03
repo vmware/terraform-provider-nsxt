@@ -8,25 +8,26 @@ import (
 	"log"
 	"reflect"
 
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
+	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-
-	"github.com/vmware/terraform-provider-nsxt/api/infra"
-	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
-var segmentSecurityProfileSchema = map[string]*extendedSchema{
-	"nsx_id":       getExtendedSchema(getNsxIDSchema()),
-	"path":         getExtendedSchema(getPathSchema()),
-	"display_name": getExtendedSchema(getDisplayNameSchema()),
-	"description":  getExtendedSchema(getDescriptionSchema()),
-	"revision":     getExtendedSchema(getRevisionSchema()),
-	"tag":          getExtendedSchema(getTagsSchema()),
-	"context":      getExtendedSchema(getContextSchema(false, false)),
+var segmentSecurityProfileSchema = map[string]*metadata.ExtendedSchema{
+	"nsx_id":       metadata.GetExtendedSchema(getNsxIDSchema()),
+	"path":         metadata.GetExtendedSchema(getPathSchema()),
+	"display_name": metadata.GetExtendedSchema(getDisplayNameSchema()),
+	"description":  metadata.GetExtendedSchema(getDescriptionSchema()),
+	"revision":     metadata.GetExtendedSchema(getRevisionSchema()),
+	"tag":          metadata.GetExtendedSchema(getTagsSchema()),
+	"context":      metadata.GetExtendedSchema(getContextSchema(false, false)),
 	"bpdu_filter_allow": {
-		s: schema.Schema{
+		Schema: schema.Schema{
 			Type: schema.TypeSet,
 			Elem: &schema.Schema{
 				Type:         schema.TypeString,
@@ -34,192 +35,192 @@ var segmentSecurityProfileSchema = map[string]*extendedSchema{
 			},
 			Optional: true,
 		},
-		m: metadata{
-			skip: true,
+		Metadata: metadata.Metadata{
+			Skip: true,
 		},
 	},
 	"bpdu_filter_enable": {
-		s: schema.Schema{
+		Schema: schema.Schema{
 			Type:     schema.TypeBool,
 			Optional: true,
 			Default:  true,
 		},
-		m: metadata{
-			schemaType:   "bool",
-			sdkFieldName: "BpduFilterEnable",
-			testData: testdata{
-				createValue: "true",
-				updateValue: "false",
+		Metadata: metadata.Metadata{
+			SchemaType:   "bool",
+			SdkFieldName: "BpduFilterEnable",
+			TestData: metadata.Testdata{
+				CreateValue: "true",
+				UpdateValue: "false",
 			},
 		},
 	},
 	"dhcp_client_block_enabled": {
-		s: schema.Schema{
+		Schema: schema.Schema{
 			Type:     schema.TypeBool,
 			Optional: true,
 			Default:  false,
 		},
-		m: metadata{
-			schemaType:   "bool",
-			sdkFieldName: "DhcpClientBlockEnabled",
-			testData: testdata{
-				createValue: "true",
-				updateValue: "false",
+		Metadata: metadata.Metadata{
+			SchemaType:   "bool",
+			SdkFieldName: "DhcpClientBlockEnabled",
+			TestData: metadata.Testdata{
+				CreateValue: "true",
+				UpdateValue: "false",
 			},
 		},
 	},
 	"dhcp_server_block_enabled": {
-		s: schema.Schema{
+		Schema: schema.Schema{
 			Type:     schema.TypeBool,
 			Optional: true,
 			Default:  true,
 		},
-		m: metadata{
-			schemaType:   "bool",
-			sdkFieldName: "DhcpServerBlockEnabled",
-			testData: testdata{
-				createValue: "true",
-				updateValue: "false",
+		Metadata: metadata.Metadata{
+			SchemaType:   "bool",
+			SdkFieldName: "DhcpServerBlockEnabled",
+			TestData: metadata.Testdata{
+				CreateValue: "true",
+				UpdateValue: "false",
 			},
 		},
 	},
 	"dhcp_client_block_v6_enabled": {
-		s: schema.Schema{
+		Schema: schema.Schema{
 			Type:     schema.TypeBool,
 			Optional: true,
 			Default:  false,
 		},
-		m: metadata{
-			schemaType:   "bool",
-			sdkFieldName: "DhcpClientBlockV6Enabled",
-			testData: testdata{
-				createValue: "true",
-				updateValue: "false",
+		Metadata: metadata.Metadata{
+			SchemaType:   "bool",
+			SdkFieldName: "DhcpClientBlockV6Enabled",
+			TestData: metadata.Testdata{
+				CreateValue: "true",
+				UpdateValue: "false",
 			},
 		},
 	},
 	"dhcp_server_block_v6_enabled": {
-		s: schema.Schema{
+		Schema: schema.Schema{
 			Type:     schema.TypeBool,
 			Optional: true,
 			Default:  true,
 		},
-		m: metadata{
-			schemaType:   "bool",
-			sdkFieldName: "DhcpServerBlockV6Enabled",
-			testData: testdata{
-				createValue: "true",
-				updateValue: "false",
+		Metadata: metadata.Metadata{
+			SchemaType:   "bool",
+			SdkFieldName: "DhcpServerBlockV6Enabled",
+			TestData: metadata.Testdata{
+				CreateValue: "true",
+				UpdateValue: "false",
 			},
 		},
 	},
 	"non_ip_traffic_block_enabled": {
-		s: schema.Schema{
+		Schema: schema.Schema{
 			Type:     schema.TypeBool,
 			Optional: true,
 			Default:  false,
 		},
-		m: metadata{
-			schemaType:   "bool",
-			sdkFieldName: "NonIpTrafficBlockEnabled",
-			testData: testdata{
-				createValue: "true",
-				updateValue: "false",
+		Metadata: metadata.Metadata{
+			SchemaType:   "bool",
+			SdkFieldName: "NonIpTrafficBlockEnabled",
+			TestData: metadata.Testdata{
+				CreateValue: "true",
+				UpdateValue: "false",
 			},
 		},
 	},
 	"ra_guard_enabled": {
-		s: schema.Schema{
+		Schema: schema.Schema{
 			Type:     schema.TypeBool,
 			Optional: true,
 			Default:  false,
 		},
-		m: metadata{
-			schemaType:   "bool",
-			sdkFieldName: "RaGuardEnabled",
-			testData: testdata{
-				createValue: "true",
-				updateValue: "false",
+		Metadata: metadata.Metadata{
+			SchemaType:   "bool",
+			SdkFieldName: "RaGuardEnabled",
+			TestData: metadata.Testdata{
+				CreateValue: "true",
+				UpdateValue: "false",
 			},
 		},
 	},
 	"rate_limits_enabled": {
-		s: schema.Schema{
+		Schema: schema.Schema{
 			Type:     schema.TypeBool,
 			Optional: true,
 			Default:  false,
 		},
-		m: metadata{
-			schemaType:   "bool",
-			sdkFieldName: "RateLimitsEnabled",
-			testData: testdata{
-				createValue: "true",
-				updateValue: "false",
+		Metadata: metadata.Metadata{
+			SchemaType:   "bool",
+			SdkFieldName: "RateLimitsEnabled",
+			TestData: metadata.Testdata{
+				CreateValue: "true",
+				UpdateValue: "false",
 			},
 		},
 	},
 	"rate_limit": {
-		s: schema.Schema{
+		Schema: schema.Schema{
 			Type: schema.TypeList,
-			Elem: &extendedResource{
-				Schema: map[string]*extendedSchema{
+			Elem: &metadata.ExtendedResource{
+				Schema: map[string]*metadata.ExtendedSchema{
 					"rx_broadcast": {
-						s: schema.Schema{
+						Schema: schema.Schema{
 							Type:     schema.TypeInt,
 							Optional: true,
 							Default:  0,
 						},
-						m: metadata{
-							schemaType:   "int",
-							sdkFieldName: "RxBroadcast",
-							testData: testdata{
-								createValue: "100",
-								updateValue: "1000",
+						Metadata: metadata.Metadata{
+							SchemaType:   "int",
+							SdkFieldName: "RxBroadcast",
+							TestData: metadata.Testdata{
+								CreateValue: "100",
+								UpdateValue: "1000",
 							},
 						},
 					},
 					"rx_multicast": {
-						s: schema.Schema{
+						Schema: schema.Schema{
 							Type:     schema.TypeInt,
 							Optional: true,
 							Default:  0,
 						},
-						m: metadata{
-							schemaType:   "int",
-							sdkFieldName: "RxMulticast",
-							testData: testdata{
-								createValue: "100",
-								updateValue: "1000",
+						Metadata: metadata.Metadata{
+							SchemaType:   "int",
+							SdkFieldName: "RxMulticast",
+							TestData: metadata.Testdata{
+								CreateValue: "100",
+								UpdateValue: "1000",
 							},
 						},
 					},
 					"tx_broadcast": {
-						s: schema.Schema{
+						Schema: schema.Schema{
 							Type:     schema.TypeInt,
 							Optional: true,
 							Default:  0,
 						},
-						m: metadata{
-							schemaType:   "int",
-							sdkFieldName: "TxBroadcast",
-							testData: testdata{
-								createValue: "100",
-								updateValue: "1000",
+						Metadata: metadata.Metadata{
+							SchemaType:   "int",
+							SdkFieldName: "TxBroadcast",
+							TestData: metadata.Testdata{
+								CreateValue: "100",
+								UpdateValue: "1000",
 							},
 						},
 					},
 					"tx_multicast": {
-						s: schema.Schema{
+						Schema: schema.Schema{
 							Type:     schema.TypeInt,
 							Optional: true,
 							Default:  0,
 						},
-						m: metadata{
-							schemaType:   "int",
-							sdkFieldName: "TxMulticast",
-							testData: testdata{
-								createValue: "100",
-								updateValue: "1000",
+						Metadata: metadata.Metadata{
+							SchemaType:   "int",
+							SdkFieldName: "TxMulticast",
+							TestData: metadata.Testdata{
+								CreateValue: "100",
+								UpdateValue: "1000",
 							},
 						},
 					},
@@ -228,10 +229,10 @@ var segmentSecurityProfileSchema = map[string]*extendedSchema{
 			Optional: true,
 			Computed: true,
 		},
-		m: metadata{
-			schemaType:   "struct",
-			sdkFieldName: "RateLimits",
-			reflectType:  reflect.TypeOf(model.TrafficRateLimits{}),
+		Metadata: metadata.Metadata{
+			SchemaType:   "struct",
+			SdkFieldName: "RateLimits",
+			ReflectType:  reflect.TypeOf(model.TrafficRateLimits{}),
 		},
 	},
 }
@@ -245,7 +246,8 @@ func resourceNsxtPolicySegmentSecurityProfile() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: nsxtPolicyPathResourceImporter,
 		},
-		Schema: getSchemaFromExtendedSchema(segmentSecurityProfileSchema),
+
+		Schema: metadata.GetSchemaFromExtendedSchema(segmentSecurityProfileSchema),
 	}
 }
 
@@ -280,7 +282,7 @@ func resourceNsxtPolicySegmentSecurityProfilePatch(d *schema.ResourceData, m int
 		BpduFilterAllow: bpduFilterAllow,
 	}
 	elem := reflect.ValueOf(&obj).Elem()
-	schemaToStruct(elem, d, segmentSecurityProfileSchema, "", nil)
+	metadata.SchemaToStruct(elem, d, segmentSecurityProfileSchema, "", nil)
 
 	log.Printf("[INFO] Sending SegmentSecurityProfile with ID %s", id)
 	client := infra.NewSegmentSecurityProfilesClient(getSessionContext(d, m), connector)
@@ -321,7 +323,7 @@ func resourceNsxtPolicySegmentSecurityProfileRead(d *schema.ResourceData, m inte
 	}
 
 	elem := reflect.ValueOf(&obj).Elem()
-	structToSchema(elem, d, segmentSecurityProfileSchema, "", nil)
+	metadata.StructToSchema(elem, d, segmentSecurityProfileSchema, "", nil)
 
 	d.Set("display_name", obj.DisplayName)
 	d.Set("description", obj.Description)

@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
@@ -1561,7 +1563,7 @@ func getPolicyLbRulesFromSchema(d *schema.ResourceData) []model.LBRule {
 }
 
 func policyLBVirtualServerVersionDependantSet(d *schema.ResourceData, obj *model.LBVirtualServer) {
-	if nsxVersionHigherOrEqual("3.0.0") {
+	if util.NsxVersionHigherOrEqual("3.0.0") {
 		logSignificantOnly := d.Get("log_significant_event_only").(bool)
 		obj.LogSignificantEventOnly = &logSignificantOnly
 		obj.AccessListControl = getPolicyAccessListControlFromSchema(d)

@@ -8,6 +8,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/go-vmware-nsxt/manager"
@@ -379,7 +381,7 @@ func resourceNsxtFirewallSectionUpdate(d *schema.ResourceData, m interface{}) er
 
 	var resp *http.Response
 	var err error
-	if len(rules) == 0 || nsxVersionLower("2.2.0") {
+	if len(rules) == 0 || util.NsxVersionLower("2.2.0") {
 		// Due to an NSX bug, the empty update should also be called to update ToS & tags fields
 		section := *firewallSection.GetFirewallSection()
 		// Update the section ignoring the rules

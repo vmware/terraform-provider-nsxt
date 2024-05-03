@@ -8,6 +8,8 @@ import (
 	"log"
 	"strings"
 
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
@@ -243,13 +245,13 @@ func resourceNsxtPolicyBgpNeighborResourceDataToStruct(d *schema.ResourceData, i
 
 	var rFilters []model.BgpRouteFiltering
 	routeFiltering := d.Get("route_filtering").([]interface{})
-	if len(routeFiltering) > 1 && nsxVersionLower("3.0.0") {
+	if len(routeFiltering) > 1 && util.NsxVersionLower("3.0.0") {
 		return neighborStruct, fmt.Errorf("Only 1 element for 'route_filtering' is supported with NSX-T versions up to 3.0.0")
 	}
 	for _, filter := range routeFiltering {
 		data := filter.(map[string]interface{})
 		addrFamily := data["address_family"].(string)
-		if addrFamily == model.BgpRouteFiltering_ADDRESS_FAMILY_L2VPN_EVPN && nsxVersionLower("3.0.0") {
+		if addrFamily == model.BgpRouteFiltering_ADDRESS_FAMILY_L2VPN_EVPN && util.NsxVersionLower("3.0.0") {
 			return neighborStruct, fmt.Errorf("'%s' is not supported for 'address_family' with NSX-T versions less than 3.0.0", model.BgpRouteFiltering_ADDRESS_FAMILY_L2VPN_EVPN)
 		}
 		enabled := data["enabled"].(bool)
@@ -271,7 +273,7 @@ func resourceNsxtPolicyBgpNeighborResourceDataToStruct(d *schema.ResourceData, i
 			filterStruct.OutRouteFilters = outFilters
 		}
 
-		if nsxVersionHigherOrEqual("3.0.0") && data["maximum_routes"] != 0 {
+		if util.NsxVersionHigherOrEqual("3.0.0") && data["maximum_routes"] != 0 {
 			maxRoutes := int64(data["maximum_routes"].(int))
 			filterStruct.MaximumRoutes = &maxRoutes
 		}
@@ -448,7 +450,7 @@ func resourceNsxtPolicyBgpNeighborRead(d *schema.ResourceData, m interface{}) er
 		}
 		rf["in_route_filter"] = inFilter
 		rf["out_route_filter"] = outFilter
-		if nsxVersionHigherOrEqual("3.0.0") && filter.MaximumRoutes != nil {
+		if util.NsxVersionHigherOrEqual("3.0.0") && filter.MaximumRoutes != nil {
 			rf["maximum_routes"] = int(*filter.MaximumRoutes)
 		}
 		rFilters = append(rFilters, rf)

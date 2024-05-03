@@ -15,6 +15,7 @@ import (
 
 	"github.com/vmware/terraform-provider-nsxt/api/infra"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
+	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
 )
 
 var macDiscoveryProfileMacLimitPolicyValues = []string{
@@ -22,170 +23,103 @@ var macDiscoveryProfileMacLimitPolicyValues = []string{
 	model.MacDiscoveryProfile_MAC_LIMIT_POLICY_DROP,
 }
 
-type testdata struct {
-	createValue interface{}
-	updateValue interface{}
-}
-
-type metadata struct {
-	// we need a separate schema type, in addition to terraform SDK type,
-	// in order to distinguish between single subclause and a list of entries
-	schemaType   string
-	readOnly     bool
-	sdkFieldName string
-	// This attribute is parent path for the object
-	isParentPath        bool
-	introducedInVersion string
-	// skip handling of this attribute - it will be done manually
-	skip        bool
-	reflectType reflect.Type
-	testData    testdata
-}
-
-type extendedSchema struct {
-	s schema.Schema
-	m metadata
-}
-
-type extendedResource struct {
-	Schema map[string]*extendedSchema
-}
-
-// a helper to convert terraform sdk schema to extended schema
-func getExtendedSchema(sch *schema.Schema) *extendedSchema {
-	shallowCopy := *sch
-	return &extendedSchema{
-		s: shallowCopy,
-		m: metadata{
-			skip: true,
-		},
-	}
-}
-
-// get terraform sdk schema from extended schema definition
-func getSchemaFromExtendedSchema(ext map[string]*extendedSchema) map[string]*schema.Schema {
-	result := make(map[string]*schema.Schema)
-
-	for key, value := range ext {
-		log.Printf("[INFO] inspecting schema key %s, value %v", key, value)
-		shallowCopy := value.s
-		if (value.s.Type == schema.TypeList) || (value.s.Type == schema.TypeSet) {
-			elem, ok := shallowCopy.Elem.(*extendedSchema)
-			if ok {
-				shallowCopy.Elem = elem.s
-			} else {
-				elem, ok := shallowCopy.Elem.(*extendedResource)
-				if ok {
-					shallowCopy.Elem = &schema.Resource{
-						Schema: getSchemaFromExtendedSchema(elem.Schema),
-					}
-				}
-			}
-		}
-		// TODO: deepcopy needed?
-		result[key] = &shallowCopy
-	}
-
-	return result
-}
-
-var macDiscoveryProfileSchema = map[string]*extendedSchema{
-	"nsx_id":       getExtendedSchema(getNsxIDSchema()),
-	"path":         getExtendedSchema(getPathSchema()),
-	"display_name": getExtendedSchema(getDisplayNameSchema()),
-	"description":  getExtendedSchema(getDescriptionSchema()),
-	"revision":     getExtendedSchema(getRevisionSchema()),
-	"tag":          getExtendedSchema(getTagsSchema()),
-	"context":      getExtendedSchema(getContextSchema(false, false)),
+var macDiscoveryProfileSchema = map[string]*metadata.ExtendedSchema{
+	"nsx_id":       metadata.GetExtendedSchema(getNsxIDSchema()),
+	"path":         metadata.GetExtendedSchema(getPathSchema()),
+	"display_name": metadata.GetExtendedSchema(getDisplayNameSchema()),
+	"description":  metadata.GetExtendedSchema(getDescriptionSchema()),
+	"revision":     metadata.GetExtendedSchema(getRevisionSchema()),
+	"tag":          metadata.GetExtendedSchema(getTagsSchema()),
+	"context":      metadata.GetExtendedSchema(getContextSchema(false, false)),
 	"mac_change_enabled": {
-		s: schema.Schema{
+		Schema: schema.Schema{
 			Type:     schema.TypeBool,
 			Optional: true,
 			Default:  false,
 		},
-		m: metadata{
-			schemaType:   "bool",
-			sdkFieldName: "MacChangeEnabled",
-			testData: testdata{
-				createValue: "true",
-				updateValue: "false",
+		Metadata: metadata.Metadata{
+			SchemaType:   "bool",
+			SdkFieldName: "MacChangeEnabled",
+			TestData: metadata.Testdata{
+				CreateValue: "true",
+				UpdateValue: "false",
 			},
 		},
 	},
 	"mac_learning_enabled": {
-		s: schema.Schema{
+		Schema: schema.Schema{
 			Type:     schema.TypeBool,
 			Optional: true,
 		},
-		m: metadata{
-			schemaType:   "bool",
-			sdkFieldName: "MacLearningEnabled",
-			testData: testdata{
-				createValue: "true",
-				updateValue: "false",
+		Metadata: metadata.Metadata{
+			SchemaType:   "bool",
+			SdkFieldName: "MacLearningEnabled",
+			TestData: metadata.Testdata{
+				CreateValue: "true",
+				UpdateValue: "false",
 			},
 		},
 	},
 	"mac_limit": {
-		s: schema.Schema{
+		Schema: schema.Schema{
 			Type:         schema.TypeInt,
 			Optional:     true,
 			ValidateFunc: validation.IntBetween(0, 4096),
 			Default:      4096,
 		},
-		m: metadata{
-			schemaType:   "int",
-			sdkFieldName: "MacLimit",
-			testData: testdata{
-				createValue: "20",
-				updateValue: "50",
+		Metadata: metadata.Metadata{
+			SchemaType:   "int",
+			SdkFieldName: "MacLimit",
+			TestData: metadata.Testdata{
+				CreateValue: "20",
+				UpdateValue: "50",
 			},
 		},
 	},
 	"mac_limit_policy": {
-		s: schema.Schema{
+		Schema: schema.Schema{
 			Type:         schema.TypeString,
 			ValidateFunc: validation.StringInSlice(macDiscoveryProfileMacLimitPolicyValues, false),
 			Optional:     true,
 			Default:      "ALLOW",
 		},
-		m: metadata{
-			schemaType:   "string",
-			sdkFieldName: "MacLimitPolicy",
-			testData: testdata{
-				createValue: "ALLOW",
-				updateValue: "DROP",
+		Metadata: metadata.Metadata{
+			SchemaType:   "string",
+			SdkFieldName: "MacLimitPolicy",
+			TestData: metadata.Testdata{
+				CreateValue: "ALLOW",
+				UpdateValue: "DROP",
 			},
 		},
 	},
 	"remote_overlay_mac_limit": {
-		s: schema.Schema{
+		Schema: schema.Schema{
 			Type:         schema.TypeInt,
 			Optional:     true,
 			ValidateFunc: validation.IntBetween(2048, 8192),
 			Default:      2048,
 		},
-		m: metadata{
-			schemaType:   "int",
-			sdkFieldName: "RemoteOverlayMacLimit",
-			testData: testdata{
-				createValue: "2048",
-				updateValue: "4096",
+		Metadata: metadata.Metadata{
+			SchemaType:   "int",
+			SdkFieldName: "RemoteOverlayMacLimit",
+			TestData: metadata.Testdata{
+				CreateValue: "2048",
+				UpdateValue: "4096",
 			},
 		},
 	},
 	"unknown_unicast_flooding_enabled": {
-		s: schema.Schema{
+		Schema: schema.Schema{
 			Type:     schema.TypeBool,
 			Optional: true,
 		},
-		m: metadata{
-			schemaType:          "bool",
-			sdkFieldName:        "UnknownUnicastFloodingEnabled",
-			introducedInVersion: "4.0.0",
-			testData: testdata{
-				createValue: "true",
-				updateValue: "false",
+		Metadata: metadata.Metadata{
+			SchemaType:          "bool",
+			SdkFieldName:        "UnknownUnicastFloodingEnabled",
+			IntroducedInVersion: "4.0.0",
+			TestData: metadata.Testdata{
+				CreateValue: "true",
+				UpdateValue: "false",
 			},
 		},
 	},
@@ -200,7 +134,8 @@ func resourceNsxtPolicyMacDiscoveryProfile() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: nsxtPolicyPathResourceImporter,
 		},
-		Schema: getSchemaFromExtendedSchema(macDiscoveryProfileSchema),
+
+		Schema: metadata.GetSchemaFromExtendedSchema(macDiscoveryProfileSchema),
 	}
 }
 
@@ -217,112 +152,6 @@ func resourceNsxtPolicyMacDiscoveryProfileExists(sessionContext utl.SessionConte
 	}
 
 	return false, logAPIError("Error retrieving resource", err)
-}
-
-// convert NSX model struct to terraform schema
-// currently supports nested subtype and trivial types
-// TODO - support a list of structs
-func structToSchema(elem reflect.Value, d *schema.ResourceData, metadata map[string]*extendedSchema, parent string, parentMap map[string]interface{}) {
-	for key, item := range metadata {
-		if item.m.skip {
-			continue
-		}
-
-		log.Printf("[INFO] inspecting key %s", key)
-		if len(parent) > 0 {
-			log.Printf("[INFO] parent %s key %s", parent, key)
-		}
-		if item.m.schemaType == "struct" {
-			nestedObj := elem.FieldByName(item.m.sdkFieldName)
-			nestedSchema := make(map[string]interface{})
-			childElem := item.s.Elem.(*extendedResource)
-			structToSchema(nestedObj.Elem(), d, childElem.Schema, key, nestedSchema)
-			log.Printf("[INFO] assigning struct %v to %s", nestedObj, key)
-			// TODO - get the schema from nested type if parent in present
-			var nestedSlice []map[string]interface{}
-			nestedSlice = append(nestedSlice, nestedSchema)
-			if len(parent) > 0 {
-				parentMap[key] = nestedSlice
-			} else {
-				d.Set(key, nestedSlice)
-			}
-		} else {
-			if len(parent) > 0 {
-				log.Printf("[INFO] assigning nested value %v to %s", elem.FieldByName(item.m.sdkFieldName).Interface(), key)
-				parentMap[key] = elem.FieldByName(item.m.sdkFieldName).Interface()
-			} else {
-				log.Printf("[INFO] assigning value %v to %s", elem.FieldByName(item.m.sdkFieldName).Interface(), key)
-				d.Set(key, elem.FieldByName(item.m.sdkFieldName).Interface())
-			}
-		}
-	}
-}
-
-// convert terraform schema to NSX model struct
-// currently supports nested subtype and trivial types
-// TODO - support a list of structs
-func schemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[string]*extendedSchema, parent string, parentMap map[string]interface{}) {
-	for key, item := range metadata {
-		if item.m.readOnly || item.m.skip {
-			continue
-		}
-		if item.m.introducedInVersion != "" && nsxVersionLower(item.m.introducedInVersion) {
-			continue
-		}
-
-		log.Printf("[INFO] inspecting key %s", key)
-		if len(parent) > 0 {
-			log.Printf("[INFO] parent %s key %s", parent, key)
-		}
-		if item.m.schemaType == "string" {
-			var value string
-			if len(parent) > 0 {
-				value = parentMap[key].(string)
-			} else {
-				value = d.Get(key).(string)
-			}
-			log.Printf("[INFO] assigning string %v to %s", value, key)
-			elem.FieldByName(item.m.sdkFieldName).Set(reflect.ValueOf(&value))
-		}
-		if item.m.schemaType == "bool" {
-			var value bool
-			if len(parent) > 0 {
-				value = parentMap[key].(bool)
-			} else {
-				value = d.Get(key).(bool)
-			}
-			log.Printf("[INFO] assigning bool %v to %s", value, key)
-			elem.FieldByName(item.m.sdkFieldName).Set(reflect.ValueOf(&value))
-		}
-		if item.m.schemaType == "int" {
-			var value int64
-			if len(parent) > 0 {
-				value = int64(parentMap[key].(int))
-			} else {
-				value = int64(d.Get(key).(int))
-			}
-			log.Printf("[INFO] assigning int %v to %s", value, key)
-			elem.FieldByName(item.m.sdkFieldName).Set(reflect.ValueOf(&value))
-		}
-		if item.m.schemaType == "struct" {
-			nestedObj := reflect.New(item.m.reflectType)
-			/*
-				// Helper for list of structs
-				slice := reflect.MakeSlice(reflect.TypeOf(nestedObj), 1, 1)
-			*/
-			nestedSchemaList := d.Get(key).([]interface{})
-			if len(nestedSchemaList) == 0 {
-				continue
-			}
-			nestedSchema := nestedSchemaList[0].(map[string]interface{})
-
-			childElem := item.s.Elem.(*extendedResource)
-			schemaToStruct(nestedObj.Elem(), d, childElem.Schema, key, nestedSchema)
-			log.Printf("[INFO] assigning struct %v to %s", nestedObj, key)
-			elem.FieldByName(item.m.sdkFieldName).Set(nestedObj)
-			// TODO - get the schema from nested type if parent in present
-		}
-	}
 }
 
 func resourceNsxtPolicyMacDiscoveryProfileCreate(d *schema.ResourceData, m interface{}) error {
@@ -346,7 +175,7 @@ func resourceNsxtPolicyMacDiscoveryProfileCreate(d *schema.ResourceData, m inter
 	}
 
 	elem := reflect.ValueOf(&obj).Elem()
-	schemaToStruct(elem, d, macDiscoveryProfileSchema, "", nil)
+	metadata.SchemaToStruct(elem, d, macDiscoveryProfileSchema, "", nil)
 
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating MacDiscoveryProfile with ID %s", id)
@@ -385,7 +214,7 @@ func resourceNsxtPolicyMacDiscoveryProfileRead(d *schema.ResourceData, m interfa
 	d.Set("path", obj.Path)
 
 	elem := reflect.ValueOf(&obj).Elem()
-	structToSchema(elem, d, macDiscoveryProfileSchema, "", nil)
+	metadata.StructToSchema(elem, d, macDiscoveryProfileSchema, "", nil)
 
 	return nil
 }
@@ -413,7 +242,7 @@ func resourceNsxtPolicyMacDiscoveryProfileUpdate(d *schema.ResourceData, m inter
 	}
 
 	elem := reflect.ValueOf(&obj).Elem()
-	schemaToStruct(elem, d, macDiscoveryProfileSchema, "", nil)
+	metadata.SchemaToStruct(elem, d, macDiscoveryProfileSchema, "", nil)
 
 	// Update the resource using PATCH
 	boolFalse := false

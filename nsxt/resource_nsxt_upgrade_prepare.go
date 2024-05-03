@@ -9,6 +9,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
@@ -248,10 +250,10 @@ func uploadPrecheckAndUpgradeBundle(d *schema.ResourceData, m interface{}) error
 }
 
 func precheckBundleCompatibilityCheck(precheckBundleURL string) bool {
-	if nsxVersionLower("4.1.1") && len(precheckBundleURL) > 0 {
+	if util.NsxVersionLower("4.1.1") && len(precheckBundleURL) > 0 {
 		return false
 	}
-	if nsxVersionHigherOrEqual("4.1.1") && len(precheckBundleURL) == 0 {
+	if util.NsxVersionHigherOrEqual("4.1.1") && len(precheckBundleURL) == 0 {
 		return false
 	}
 	return true
@@ -299,7 +301,7 @@ func uploadUpgradeBundle(d *schema.ResourceData, m interface{}, bundleType strin
 	bundleFetchRequest := nsxModel.UpgradeBundleFetchRequest{
 		Url: &url,
 	}
-	if nsxVersionHigherOrEqual("4.1.1") {
+	if util.NsxVersionHigherOrEqual("4.1.1") {
 		bundleFetchRequest.BundleType = &bundleType
 		bundleFetchRequest.Password = &password
 		bundleFetchRequest.Username = &userName
