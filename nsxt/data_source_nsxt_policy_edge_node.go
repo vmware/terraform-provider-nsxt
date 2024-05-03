@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
@@ -42,7 +44,7 @@ func dataSourceNsxtPolicyEdgeNodeRead(d *schema.ResourceData, m interface{}) err
 	// for bool types, but in this case it works and GetOk doesn't
 	memberIndex, memberIndexSet := d.GetOkExists("member_index")
 
-	if isPolicyGlobalManager(m) || nsxVersionHigherOrEqual("3.2.0") {
+	if isPolicyGlobalManager(m) || util.NsxVersionHigherOrEqual("3.2.0") {
 		query := make(map[string]string)
 		query["parent_path"] = edgeClusterPath
 		if memberIndexSet {

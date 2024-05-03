@@ -7,13 +7,14 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-
-	"github.com/vmware/terraform-provider-nsxt/api/infra"
-	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 var visibilityTypes = []string{
@@ -117,7 +118,7 @@ func resourceNsxtPolicyIPBlockCreate(d *schema.ResourceData, m interface{}) erro
 		Cidr:        &cidr,
 		Tags:        tags,
 	}
-	if nsxVersionHigherOrEqual("4.2.0") && len(visibility) > 0 {
+	if util.NsxVersionHigherOrEqual("4.2.0") && len(visibility) > 0 {
 		obj.Visibility = &visibility
 	}
 	// Create the resource using PATCH
@@ -157,7 +158,7 @@ func resourceNsxtPolicyIPBlockUpdate(d *schema.ResourceData, m interface{}) erro
 		Tags:        tags,
 		Revision:    &revision,
 	}
-	if nsxVersionHigherOrEqual("4.2.0") && len(visibility) > 0 {
+	if util.NsxVersionHigherOrEqual("4.2.0") && len(visibility) > 0 {
 		obj.Visibility = &visibility
 	}
 

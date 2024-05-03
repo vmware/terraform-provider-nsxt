@@ -19,6 +19,9 @@ import (
 	"strings"
 	"time"
 
+	tf_api "github.com/vmware/terraform-provider-nsxt/api/utl"
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	api "github.com/vmware/go-vmware-nsxt"
@@ -29,8 +32,6 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 	"golang.org/x/exp/slices"
-
-	tf_api "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 var defaultRetryOnStatusCodes = []int{400, 409, 429, 500, 503, 504}
@@ -1182,7 +1183,7 @@ func getPolicyConnectorWithHeaders(clients interface{}, customHeaders *map[strin
 	// Init NSX version on demand if not done yet
 	// This is also our indication to apply licenses, in case of delayed connection
 	// This step is skipped if the connector is for special purpose, or for different endpoint
-	if nsxVersion == "" && !standaloneFlow {
+	if util.NsxVersion == "" && !standaloneFlow {
 		initNSXVersion(connector)
 		err := configureLicenses(connector, c.CommonConfig.LicenseKeys)
 		if err != nil {

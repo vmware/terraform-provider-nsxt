@@ -9,6 +9,8 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -896,7 +898,7 @@ func getEdgeNodeSettingsFromSchema(s interface{}) (*model.EdgeNodeSettings, erro
 			SearchDomains:         searchDomains,
 			SyslogServers:         syslogServers,
 		}
-		if nsxVersionHigherOrEqual("4.0.0") {
+		if util.NsxVersionHigherOrEqual("4.0.0") {
 			obj.EnableUptMode = &enableUptMode
 		}
 		return obj, nil

@@ -8,6 +8,8 @@ import (
 	"log"
 	"strings"
 
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
@@ -144,7 +146,7 @@ func getGatewayInterfaceOspfSchema() *schema.Schema {
 }
 
 func gatewayInterfaceVersionDepenantSet(d *schema.ResourceData, m interface{}, obj *model.Tier0Interface) error {
-	if nsxVersionLower("3.0.0") {
+	if util.NsxVersionLower("3.0.0") {
 		return nil
 	}
 	interfaceType := d.Get("type").(string)

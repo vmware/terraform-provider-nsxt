@@ -9,7 +9,8 @@ import (
 	"hash/crc32"
 	"log"
 
-	"github.com/hashicorp/go-version"
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	api "github.com/vmware/go-vmware-nsxt"
@@ -23,7 +24,6 @@ import (
 )
 
 var adminStateValues = []string{"UP", "DOWN"}
-var nsxVersion = ""
 
 func interface2StringList(configured []interface{}) []string {
 	vs := make([]string, 0, len(configured))
@@ -583,7 +583,7 @@ func getNSXVersion(connector client.Connector) (string, error) {
 
 func initNSXVersion(connector client.Connector) error {
 	var err error
-	nsxVersion, err = getNSXVersion(connector)
+	util.NsxVersion, err = getNSXVersion(connector)
 	return err
 }
 
@@ -591,7 +591,7 @@ func initNSXVersionVMC(clients interface{}) {
 	// TODO: find a ireliable way to retrieve NSX version on VMC
 	// For now, we need to determine whether the deployment is 3.0.0 and up, or below
 	// For this purpose, we fire indicator search API (introduced in 3.0.0)
-	nsxVersion = "3.0.0"
+	util.NsxVersion = "3.0.0"
 
 	connector := getPolicyConnector(clients)
 	client := search.NewQueryClient(connector)
@@ -607,34 +607,12 @@ func initNSXVersionVMC(clients interface{}) {
 	if isNotFoundError(err) {
 		// search API not supported
 		log.Printf("[INFO] Assuming NSX version < 3.0.0 in VMC environment")
-		nsxVersion = "2.5.0"
+		util.NsxVersion = "2.5.0"
 		return
 	}
 
 	// Connectivity error - alert the user
 	log.Printf("[ERROR] Failed to determine NSX version in VMC environment: %s", err)
-}
-
-func nsxVersionLower(ver string) bool {
-
-	requestedVersion, err1 := version.NewVersion(ver)
-	currentVersion, err2 := version.NewVersion(nsxVersion)
-	if err1 != nil || err2 != nil {
-		log.Printf("[ERROR] Failed perform version check for version %s", ver)
-		return true
-	}
-	return currentVersion.LessThan(requestedVersion)
-}
-
-func nsxVersionHigherOrEqual(ver string) bool {
-
-	requestedVersion, err1 := version.NewVersion(ver)
-	currentVersion, err2 := version.NewVersion(nsxVersion)
-	if err1 != nil || err2 != nil {
-		log.Printf("[ERROR] Failed perform version check for version %s", ver)
-		return false
-	}
-	return currentVersion.Compare(requestedVersion) >= 0
 }
 
 func resourceNotSupportedError() error {

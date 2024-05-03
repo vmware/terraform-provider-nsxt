@@ -7,6 +7,9 @@ import (
 	"fmt"
 	"log"
 
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
@@ -15,8 +18,6 @@ import (
 	gm_infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
 	gm_tier_0s "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_0s"
 	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
-
-	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services"
@@ -438,7 +439,7 @@ func resourceNsxtPolicyTier0GatewayReadBGPConfig(d *schema.ResourceData, connect
 
 func getPolicyVRFConfigFromSchema(d *schema.ResourceData) *model.Tier0VrfConfig {
 
-	if nsxVersionLower("3.0.0") {
+	if util.NsxVersionLower("3.0.0") {
 		// VRF Lite is supported from 3.0.0 onwards
 		return nil
 	}
@@ -758,11 +759,11 @@ func policyTier0GatewayResourceToInfraStruct(context utl.SessionContext, d *sche
 		VrfConfig:              vrfConfig,
 	}
 
-	if nsxVersionHigherOrEqual("3.0.0") {
+	if util.NsxVersionHigherOrEqual("3.0.0") {
 		t0Struct.RdAdminField = rdAdminField
 	}
 
-	if nsxVersionHigherOrEqual("4.1.0") {
+	if util.NsxVersionHigherOrEqual("4.1.0") {
 		t0Struct.VrfTransitSubnets = vrfTransitSubnets
 	}
 
@@ -928,7 +929,7 @@ func resourceNsxtPolicyTier0GatewayRead(d *schema.ResourceData, m interface{}) e
 	d.Set("transit_subnets", obj.TransitSubnets)
 	d.Set("vrf_transit_subnets", obj.VrfTransitSubnets)
 	d.Set("revision", obj.Revision)
-	if nsxVersionHigherOrEqual("3.0.0") {
+	if util.NsxVersionHigherOrEqual("3.0.0") {
 		d.Set("rd_admin_address", obj.RdAdminField)
 	}
 	vrfErr := setPolicyVRFConfigInSchema(d, obj.VrfConfig)

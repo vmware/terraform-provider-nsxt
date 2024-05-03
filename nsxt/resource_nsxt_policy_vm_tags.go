@@ -9,11 +9,13 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	realizedstate "github.com/vmware/terraform-provider-nsxt/api/infra/realized_state"
 	"github.com/vmware/terraform-provider-nsxt/api/infra/segments"
 	t1_segments "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s/segments"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
@@ -167,7 +169,7 @@ func findNsxtPolicyVMByNamePrefix(context utl.SessionContext, connector client.C
 	var perfectMatch, prefixMatch, allVMs []model.VirtualMachine
 	var err error
 
-	if nsxVersionHigherOrEqual("4.1.2") {
+	if util.NsxVersionHigherOrEqual("4.1.2") {
 		// Search API works for inventory objects for 4.1.2 and above
 		resourceType := "VirtualMachine"
 		resultValues, err1 := listInventoryResourcesByNameAndType(connector, context, namePrefix, resourceType, nil)
@@ -215,7 +217,7 @@ func findNsxtPolicyVMByID(context utl.SessionContext, connector client.Connector
 	var vms []model.VirtualMachine
 	var err error
 
-	if nsxVersionHigherOrEqual("4.1.2") {
+	if util.NsxVersionHigherOrEqual("4.1.2") {
 		// Search API works for inventory objects for 4.1.2 and above
 		resourceType := "VirtualMachine"
 		resultValues, err1 := listInventoryResourcesByAnyFieldAndType(connector, context, vmID, resourceType, nil)
@@ -252,7 +254,7 @@ func updateNsxtPolicyVMTags(connector client.Connector, externalID string, tags 
 		Tags:             tags,
 		VirtualMachineId: &externalID,
 	}
-	if nsxVersionHigherOrEqual("4.1.1") {
+	if util.NsxVersionHigherOrEqual("4.1.1") {
 		client := virtual_machines.NewTagsClient(connector)
 		return client.Create(externalID, tagUpdate, nil, nil, nil, nil, nil, nil, nil)
 	}
