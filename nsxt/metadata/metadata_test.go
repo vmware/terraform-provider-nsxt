@@ -9,10 +9,13 @@ import (
 )
 
 type testStruct struct {
-	StringField *string
-	BoolField   *bool
-	IntField    *int64
-	StructField *testNestedStruct
+	StringField    *string
+	BoolField      *bool
+	IntField       *int64
+	StringFieldNil *string
+	BoolFieldNil   *bool
+	IntFieldNil    *int64
+	StructField    *testNestedStruct
 }
 
 type testNestedStruct struct {
@@ -30,6 +33,18 @@ var testSchema = map[string]*schema.Schema{
 	},
 	"int_field": {
 		Type: schema.TypeInt,
+	},
+	"string_field_nil": {
+		Type:     schema.TypeString,
+		Optional: true,
+	},
+	"bool_field_nil": {
+		Type:     schema.TypeBool,
+		Optional: true,
+	},
+	"int_field_nil": {
+		Type:     schema.TypeInt,
+		Optional: true,
 	},
 	"struct_field": {
 		Type:     schema.TypeList,
@@ -50,55 +65,58 @@ var testSchema = map[string]*schema.Schema{
 	},
 }
 
-func basicStringSchema() *ExtendedSchema {
+func basicStringSchema(sdkName string) *ExtendedSchema {
 	return &ExtendedSchema{
 		Schema: schema.Schema{
 			Type: schema.TypeString,
 		},
 		Metadata: Metadata{
 			SchemaType:   "string",
-			SdkFieldName: "StringField",
+			SdkFieldName: sdkName,
 		},
 	}
 }
 
-func basicBoolSchema() *ExtendedSchema {
+func basicBoolSchema(sdkName string) *ExtendedSchema {
 	return &ExtendedSchema{
 		Schema: schema.Schema{
 			Type: schema.TypeBool,
 		},
 		Metadata: Metadata{
 			SchemaType:   "bool",
-			SdkFieldName: "BoolField",
+			SdkFieldName: sdkName,
 		},
 	}
 }
 
-func basicIntSchema() *ExtendedSchema {
+func basicIntSchema(sdkName string) *ExtendedSchema {
 	return &ExtendedSchema{
 		Schema: schema.Schema{
 			Type: schema.TypeInt,
 		},
 		Metadata: Metadata{
 			SchemaType:   "int",
-			SdkFieldName: "IntField",
+			SdkFieldName: sdkName,
 		},
 	}
 }
 
 var testExtendedSchema = map[string]*ExtendedSchema{
-	"string_field": basicStringSchema(),
-	"bool_field":   basicBoolSchema(),
-	"int_field":    basicIntSchema(),
+	"string_field":     basicStringSchema("StringField"),
+	"bool_field":       basicBoolSchema("BoolField"),
+	"int_field":        basicIntSchema("IntField"),
+	"string_field_nil": basicStringSchema("StringFieldNil"),
+	"bool_field_nil":   basicBoolSchema("BoolFieldNil"),
+	"int_field_nil":    basicIntSchema("IntFieldNil"),
 	"struct_field": {
 		Schema: schema.Schema{
 			Type:     schema.TypeList,
 			MaxItems: 1,
 			Elem: &ExtendedResource{
 				Schema: map[string]*ExtendedSchema{
-					"string_field": basicStringSchema(),
-					"bool_field":   basicBoolSchema(),
-					"int_field":    basicIntSchema(),
+					"string_field": basicStringSchema("StringField"),
+					"bool_field":   basicBoolSchema("BoolField"),
+					"int_field":    basicIntSchema("IntField"),
 				},
 			},
 		},
@@ -129,9 +147,21 @@ func TestStructToSchema(t *testing.T) {
 
 	elem := reflect.ValueOf(&obj).Elem()
 	StructToSchema(elem, d, testExtendedSchema, "", nil)
+
+	// Base types
 	assert.Equal(t, "test_string", d.Get("string_field").(string))
 	assert.Equal(t, true, d.Get("bool_field").(bool))
 	assert.Equal(t, 123, d.Get("int_field").(int))
+
+	// Zero values
+	_, ok := d.GetOk("string_field_nil")
+	assert.False(t, ok)
+	_, ok = d.GetOk("bool_field_nil")
+	assert.False(t, ok)
+	_, ok = d.GetOk("int_field_nil")
+	assert.False(t, ok)
+
+	// Nested struct
 	nestedObj := d.Get("struct_field").([]interface{})[0].(map[string]interface{})
 	assert.Equal(t, "test_string", nestedObj["string_field"].(string))
 	assert.Equal(t, true, nestedObj["bool_field"].(bool))
@@ -156,9 +186,18 @@ func TestSchemaToStruct(t *testing.T) {
 	obj := testStruct{}
 	elem := reflect.ValueOf(&obj).Elem()
 	SchemaToStruct(elem, d, testExtendedSchema, "", nil)
+
+	// Base types
 	assert.Equal(t, "test_string", *obj.StringField)
 	assert.Equal(t, true, *obj.BoolField)
 	assert.Equal(t, int64(100), *obj.IntField)
+
+	// Zero values
+	assert.Nil(t, obj.StringFieldNil)
+	assert.Nil(t, obj.BoolFieldNil)
+	assert.Nil(t, obj.IntFieldNil)
+
+	// Nested struct
 	assert.Equal(t, "nested_string", *obj.StructField.StringField)
 	assert.Equal(t, true, *obj.StructField.BoolField)
 	assert.Equal(t, int64(1), *obj.StructField.IntField)

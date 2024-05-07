@@ -130,6 +130,13 @@ func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[str
 		if item.Metadata.IntroducedInVersion != "" && util.NsxVersionLower(item.Metadata.IntroducedInVersion) {
 			continue
 		}
+		if len(parent) == 0 {
+			_, ok := d.GetOk(key)
+			if !ok {
+				log.Printf("[INFO] Skipping key %s with unset value", key)
+				continue
+			}
+		}
 
 		log.Printf("[INFO] inspecting key %s with type %s", key, item.Metadata.SchemaType)
 		if len(parent) > 0 {
@@ -178,7 +185,6 @@ func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[str
 			nestedSchema := nestedSchemaList[0].(map[string]interface{})
 
 			childElem := item.Schema.Elem.(*ExtendedResource)
-			log.Printf("[INFO] calling recur %s", key)
 			SchemaToStruct(nestedObj.Elem(), d, childElem.Schema, key, nestedSchema)
 			log.Printf("[INFO] assigning struct %v to %s", nestedObj, key)
 			elem.FieldByName(item.Metadata.SdkFieldName).Set(nestedObj)
