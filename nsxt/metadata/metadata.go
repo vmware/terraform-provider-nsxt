@@ -59,7 +59,7 @@ func GetSchemaFromExtendedSchema(ext map[string]*ExtendedSchema) map[string]*sch
 		if (value.Schema.Type == schema.TypeList) || (value.Schema.Type == schema.TypeSet) {
 			elem, ok := shallowCopy.Elem.(*ExtendedSchema)
 			if ok {
-				shallowCopy.Elem = elem.Schema
+				shallowCopy.Elem = &elem.Schema
 			} else {
 				elem, ok := shallowCopy.Elem.(*ExtendedResource)
 				if ok {
@@ -78,7 +78,6 @@ func GetSchemaFromExtendedSchema(ext map[string]*ExtendedSchema) map[string]*sch
 
 // StructToSchema converts NSX model struct to terraform schema
 // currently supports nested subtype and trivial types
-// TODO - support a list of structs
 func StructToSchema(elem reflect.Value, d *schema.ResourceData, metadata map[string]*ExtendedSchema, parent string, parentMap map[string]interface{}) {
 	for key, item := range metadata {
 		if item.Metadata.Skip {
@@ -98,14 +97,39 @@ func StructToSchema(elem reflect.Value, d *schema.ResourceData, metadata map[str
 			nestedSchema := make(map[string]interface{})
 			childElem := item.Schema.Elem.(*ExtendedResource)
 			StructToSchema(nestedObj.Elem(), d, childElem.Schema, key, nestedSchema)
-			log.Printf("[INFO] assigning struct %v to %s", nestedObj, key)
-			// TODO - get the schema from nested type if parent in present
+			log.Printf("[INFO] assigning struct %+v to %s", nestedObj, key)
 			var nestedSlice []map[string]interface{}
 			nestedSlice = append(nestedSlice, nestedSchema)
 			if len(parent) > 0 {
 				parentMap[key] = nestedSlice
 			} else {
 				d.Set(key, nestedSlice)
+			}
+		} else if item.Metadata.SchemaType == "list" || item.Metadata.SchemaType == "set" {
+			if _, ok := item.Schema.Elem.(*ExtendedSchema); ok {
+				// List of string, bool, int
+				nestedSlice := elem.FieldByName(item.Metadata.SdkFieldName)
+				log.Printf("[INFO] assigning slice %v to %s", nestedSlice.Interface(), key)
+				if len(parent) > 0 {
+					parentMap[key] = nestedSlice.Interface()
+				} else {
+					d.Set(key, nestedSlice.Interface())
+				}
+			} else if childElem, ok := item.Schema.Elem.(*ExtendedResource); ok {
+				// List of struct
+				sliceElem := elem.FieldByName(item.Metadata.SdkFieldName)
+				var nestedSlice []map[string]interface{}
+				for i := 0; i < sliceElem.Len(); i++ {
+					nestedSchema := make(map[string]interface{})
+					StructToSchema(sliceElem.Index(i), d, childElem.Schema, key, nestedSchema)
+					nestedSlice = append(nestedSlice, nestedSchema)
+					log.Printf("[INFO] appending slice item %+v to %s", nestedSchema, key)
+				}
+				if len(parent) > 0 {
+					parentMap[key] = nestedSlice
+				} else {
+					d.Set(key, nestedSlice)
+				}
 			}
 		} else {
 			if len(parent) > 0 {
@@ -121,7 +145,6 @@ func StructToSchema(elem reflect.Value, d *schema.ResourceData, metadata map[str
 
 // SchemaToStruct converts terraform schema to NSX model struct
 // currently supports nested subtype and trivial types
-// TODO - support a list of structs
 func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[string]*ExtendedSchema, parent string, parentMap map[string]interface{}) {
 	for key, item := range metadata {
 		if item.Metadata.ReadOnly || item.Metadata.Skip {
@@ -174,21 +197,67 @@ func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[str
 		}
 		if item.Metadata.SchemaType == "struct" {
 			nestedObj := reflect.New(item.Metadata.ReflectType)
-			/*
-				// Helper for list of structs
-				slice := reflect.MakeSlice(reflect.TypeOf(nestedObj), 1, 1)
-			*/
-			nestedSchemaList := d.Get(key).([]interface{})
-			if len(nestedSchemaList) == 0 {
+			var itemList []interface{}
+			if len(parent) > 0 {
+				itemList = parentMap[key].([]interface{})
+			} else {
+				itemList = d.Get(key).([]interface{})
+			}
+			if len(itemList) == 0 {
 				continue
 			}
-			nestedSchema := nestedSchemaList[0].(map[string]interface{})
+			nestedSchema := itemList[0].(map[string]interface{})
 
 			childElem := item.Schema.Elem.(*ExtendedResource)
 			SchemaToStruct(nestedObj.Elem(), d, childElem.Schema, key, nestedSchema)
 			log.Printf("[INFO] assigning struct %v to %s", nestedObj, key)
 			elem.FieldByName(item.Metadata.SdkFieldName).Set(nestedObj)
-			// TODO - get the schema from nested type if parent in present
+		}
+		if item.Metadata.SchemaType == "list" || item.Metadata.SchemaType == "set" {
+			var itemList []interface{}
+			if len(parent) > 0 {
+				itemList = parentMap[key].([]interface{})
+			} else {
+				itemList = d.Get(key).([]interface{})
+			}
+			if len(itemList) == 0 {
+				continue
+			}
+
+			// List of string, bool, int
+			if childElem, ok := item.Schema.Elem.(*ExtendedSchema); ok {
+				sliceElem := elem.FieldByName(item.Metadata.SdkFieldName)
+				switch childElem.Metadata.SchemaType {
+				case "string":
+					sliceElem.Set(
+						reflect.MakeSlice(reflect.TypeOf([]string{}), len(itemList), len(itemList)))
+				case "bool":
+					sliceElem.Set(
+						reflect.MakeSlice(reflect.TypeOf([]bool{}), len(itemList), len(itemList)))
+				case "int":
+					sliceElem.Set(
+						reflect.MakeSlice(reflect.TypeOf([]int64{}), len(itemList), len(itemList)))
+				}
+
+				for i, v := range itemList {
+					sliceElem.Index(i).Set(reflect.ValueOf(v))
+					log.Printf("[INFO] appending %v to %s", v, key)
+				}
+			}
+
+			// List of struct
+			if childElem, ok := item.Schema.Elem.(*ExtendedResource); ok {
+				sliceElem := elem.FieldByName(item.Metadata.SdkFieldName)
+				sliceElem.Set(
+					reflect.MakeSlice(reflect.SliceOf(item.Metadata.ReflectType), len(itemList), len(itemList)))
+				for i, childItem := range itemList {
+					nestedObj := reflect.New(item.Metadata.ReflectType)
+					nestedSchema := childItem.(map[string]interface{})
+					SchemaToStruct(nestedObj.Elem(), d, childElem.Schema, key, nestedSchema)
+					sliceElem.Index(i).Set(nestedObj.Elem())
+					log.Printf("[INFO] appending %+v to %s", nestedObj.Elem(), key)
+				}
+			}
 		}
 	}
 }
