@@ -89,6 +89,10 @@ func StructToSchema(elem reflect.Value, d *schema.ResourceData, metadata map[str
 		if len(parent) > 0 {
 			log.Printf("[INFO] parent %s key %s", parent, key)
 		}
+		if elem.FieldByName(item.Metadata.SdkFieldName).IsNil() {
+			log.Printf("[INFO] skip key %s with nil value", key)
+			continue
+		}
 		if item.Metadata.SchemaType == "struct" {
 			nestedObj := elem.FieldByName(item.Metadata.SdkFieldName)
 			nestedSchema := make(map[string]interface{})
@@ -105,10 +109,10 @@ func StructToSchema(elem reflect.Value, d *schema.ResourceData, metadata map[str
 			}
 		} else {
 			if len(parent) > 0 {
-				log.Printf("[INFO] assigning nested value %v to %s", elem.FieldByName(item.Metadata.SdkFieldName).Interface(), key)
+				log.Printf("[INFO] assigning nested value %+v to %s", elem.FieldByName(item.Metadata.SdkFieldName).Interface(), key)
 				parentMap[key] = elem.FieldByName(item.Metadata.SdkFieldName).Interface()
 			} else {
-				log.Printf("[INFO] assigning value %v to %s", elem.FieldByName(item.Metadata.SdkFieldName).Interface(), key)
+				log.Printf("[INFO] assigning value %+v to %s", elem.FieldByName(item.Metadata.SdkFieldName).Interface(), key)
 				d.Set(key, elem.FieldByName(item.Metadata.SdkFieldName).Interface())
 			}
 		}
@@ -127,7 +131,7 @@ func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[str
 			continue
 		}
 
-		log.Printf("[INFO] inspecting key %s", key)
+		log.Printf("[INFO] inspecting key %s with type %s", key, item.Metadata.SchemaType)
 		if len(parent) > 0 {
 			log.Printf("[INFO] parent %s key %s", parent, key)
 		}
@@ -174,6 +178,7 @@ func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[str
 			nestedSchema := nestedSchemaList[0].(map[string]interface{})
 
 			childElem := item.Schema.Elem.(*ExtendedResource)
+			log.Printf("[INFO] calling recur %s", key)
 			SchemaToStruct(nestedObj.Elem(), d, childElem.Schema, key, nestedSchema)
 			log.Printf("[INFO] assigning struct %v to %s", nestedObj, key)
 			elem.FieldByName(item.Metadata.SdkFieldName).Set(nestedObj)
