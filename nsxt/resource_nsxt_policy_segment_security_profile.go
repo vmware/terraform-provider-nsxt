@@ -336,7 +336,7 @@ func resourceNsxtPolicySegmentSecurityProfileRead(d *schema.ResourceData, m inte
 }
 
 func resourceNsxtPolicySegmentSecurityProfileUpdate(d *schema.ResourceData, m interface{}) error {
-
+	log.Printf("[INFO] updating SegmentSecurityProfile")
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining SegmentSecurityProfile ID")
