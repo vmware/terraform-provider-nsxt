@@ -382,15 +382,12 @@ func getEdgeNodeSettingsSchema() *schema.Schema {
 								Default:      model.SyslogConfiguration_LOG_LEVEL_INFO,
 								ValidateFunc: validation.StringInSlice(syslogLogLevelValues, false),
 							},
-							"name": {
-								Type:        schema.TypeString,
-								Description: "Display name of the syslog server",
-								Optional:    true,
-							},
 							"port": {
-								Type:         schema.TypeInt,
-								Optional:     true,
-								Default:      514,
+								Type:     schema.TypeString,
+								Optional: true,
+								Default:  "514",
+								// Spec defines port-or-range format here, however range
+								// is not accepted by NSX
 								ValidateFunc: validateSinglePort(),
 								Description:  "Syslog server port",
 							},
@@ -879,13 +876,11 @@ func getEdgeNodeSettingsFromSchema(s interface{}) (*model.EdgeNodeSettings, erro
 		for _, sli := range setting["syslog_server"].([]interface{}) {
 			syslogServer := sli.(map[string]interface{})
 			logLevel := syslogServer["log_level"].(string)
-			name := syslogServer["name"].(string)
-			port := fmt.Sprintf("%d", syslogServer["port"].(int))
+			port := syslogServer["port"].(string)
 			protocol := syslogServer["protocol"].(string)
 			server := syslogServer["server"].(string)
 			syslogServers = append(syslogServers, model.SyslogConfiguration{
 				LogLevel: &logLevel,
-				Name:     &name,
 				Port:     &port,
 				Protocol: &protocol,
 				Server:   &server,
@@ -1279,7 +1274,6 @@ func setEdgeNodeSettingsInSchema(d *schema.ResourceData, nodeSettings *model.Edg
 	for _, syslogServer := range nodeSettings.SyslogServers {
 		e := make(map[string]interface{})
 		e["log_level"] = syslogServer.LogLevel
-		e["name"] = syslogServer.Name
 		e["port"] = syslogServer.Port
 		e["protocol"] = syslogServer.Protocol
 		e["server"] = syslogServer.Server
