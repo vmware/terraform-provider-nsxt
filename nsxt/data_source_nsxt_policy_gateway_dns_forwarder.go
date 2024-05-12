@@ -19,7 +19,7 @@ func dataSourceNsxtPolicyGatewayDNSForwarder() *schema.Resource {
 			"description":  getDataSourceDescriptionSchema(),
 			"path":         getPathSchema(),
 			"gateway_path": getPolicyPathSchema(false, false, "Gateway path"),
-			"context":      getContextSchema(),
+			"context":      getContextSchema(false, false),
 		},
 	}
 }

@@ -37,7 +37,7 @@ func resourceNsxtPolicyQosProfile() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
-			"context":      getContextSchema(),
+			"context":      getContextSchema(false, false),
 			"class_of_service": {
 				Type:         schema.TypeInt,
 				Description:  "Class of service",

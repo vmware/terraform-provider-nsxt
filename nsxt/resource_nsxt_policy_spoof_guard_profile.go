@@ -32,7 +32,7 @@ func resourceNsxtPolicySpoofGuardProfile() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
-			"context":      getContextSchema(),
+			"context":      getContextSchema(false, false),
 			"address_binding_allowlist": {
 				Type:     schema.TypeBool,
 				Optional: true,

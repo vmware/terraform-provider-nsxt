@@ -17,7 +17,7 @@ func dataSourceNsxtPolicyGroup() *schema.Resource {
 			"description":  getDataSourceDescriptionSchema(),
 			"path":         getPathSchema(),
 			"domain":       getDomainNameSchema(),
-			"context":      getContextSchema(),
+			"context":      getContextSchema(false, false),
 		},
 	}
 }

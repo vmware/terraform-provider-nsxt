@@ -38,7 +38,7 @@ func resourceNsxtPolicyMacDiscoveryProfile() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
-			"context":      getContextSchema(),
+			"context":      getContextSchema(false, false),
 			"mac_change_enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,

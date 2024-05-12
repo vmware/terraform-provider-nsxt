@@ -30,7 +30,7 @@ func resourceNsxtPolicyDistributedFloodProtectionProfileBinding() *schema.Resour
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
-			"context":      getContextSchema(),
+			"context":      getContextSchema(false, false),
 			"profile_path": {
 				Type:         schema.TypeString,
 				Description:  "The path of the flood protection profile",

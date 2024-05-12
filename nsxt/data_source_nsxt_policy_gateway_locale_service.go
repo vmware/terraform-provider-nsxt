@@ -28,7 +28,7 @@ func dataSourceNsxtPolicyGatewayLocaleService() *schema.Resource {
 				Optional:    true,
 				Computed:    true,
 			},
-			"context": getContextSchema(),
+			"context": getContextSchema(false, false),
 		},
 	}
 }

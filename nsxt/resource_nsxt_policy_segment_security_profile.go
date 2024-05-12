@@ -33,7 +33,7 @@ func resourceNsxtPolicySegmentSecurityProfile() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
-			"context":      getContextSchema(),
+			"context":      getContextSchema(false, false),
 			"bpdu_filter_allow": {
 				Type: schema.TypeSet,
 				Elem: &schema.Schema{
