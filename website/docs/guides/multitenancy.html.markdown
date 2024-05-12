@@ -18,7 +18,7 @@ NSX also introduced NSX VPCs, offering a second level of tenancy and cloud consu
 
 ## NSX Project Creation and Reference
 
-NSX Project objects can be created and referenced with the `nsxt_policy_project` [resource](../r/policy_project.html.markdown) and [data source](../d/policy_project.html.markdown).
+NSX Project objects can be created and referenced with the `nsxt_policy_project` [resource](../resources/policy_project.html.markdown) and [data source](../data-sources/policy_project.html.markdown).
 
 For example, an NSX multi-tenancy Project could be created as below:
 
