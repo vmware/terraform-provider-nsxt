@@ -26,9 +26,9 @@ var accTestPolicyLBClientSslProfileUpdateAttributes = map[string]string{
 	"display_name":          getAccTestResourceName(),
 	"description":           "terraform updated",
 	"cipher_group_label":    "CUSTOM",
-	"ciphers":               "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA",
+	"ciphers":               "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256",
 	"prefer_server_ciphers": "false",
-	"protocols":             "TLS_V1_1",
+	"protocols":             "TLS_V1_2",
 	"session_cache_enabled": "false",
 	"session_cache_timeout": "5",
 }
