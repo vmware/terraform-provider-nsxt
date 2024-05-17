@@ -463,6 +463,84 @@ func TestAccResourceNsxtPolicySegment_withDhcp(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicySegment_withIgnoreTags(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_segment.test"
+	tzName := getOverlayTransportZoneName()
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicySegmentCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicySegmentIgnoreTagsCreateTemplate(tzName, name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicySegmentExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "3"),
+					resource.TestCheckResourceAttr(testResourceName, "ignore_tags.#", "0"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicySegmentIgnoreTagsUpdate1Template(tzName, name),
+				// This is an "pretend" update of ignored tag on backend
+				// Where backend changes are simulated with terraform update
+				// The fake backend changes are still present in intent at this point,
+				// Thus terraform will detect non-empty plan
+				// Next step will delete those tags from intent, and we expect them to
+				// remain in the ignored_tags section
+				ExpectNonEmptyPlan: true,
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicySegmentExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "ignore_tags.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "ignore_tags.0.scopes.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "ignore_tags.0.detected.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "ignore_tags.0.detected.0.scope", "color"),
+					resource.TestCheckResourceAttr(testResourceName, "ignore_tags.0.detected.0.tag", "orange"),
+					resource.TestCheckResourceAttr(testResourceName, "ignore_tags.0.detected.1.scope", "size"),
+					resource.TestCheckResourceAttr(testResourceName, "ignore_tags.0.detected.1.tag", "small"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicySegmentIgnoreTagsUpdate2Template(tzName, name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicySegmentExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.0.scope", "rack"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.0.tag", "5"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.1.scope", "shape"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.1.tag", "triangle"),
+					resource.TestCheckResourceAttr(testResourceName, "ignore_tags.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "ignore_tags.0.scopes.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "ignore_tags.0.detected.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "ignore_tags.0.detected.0.scope", "color"),
+					resource.TestCheckResourceAttr(testResourceName, "ignore_tags.0.detected.0.tag", "orange"),
+					resource.TestCheckResourceAttr(testResourceName, "ignore_tags.0.detected.1.scope", "size"),
+					resource.TestCheckResourceAttr(testResourceName, "ignore_tags.0.detected.1.tag", "small"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicySegmentIgnoreTagsUpdate3Template(tzName, name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicySegmentExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "2"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.0.scope", "color"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.0.tag", "blue"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.1.scope", "rack"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.1.tag", "7"),
+					resource.TestCheckResourceAttr(testResourceName, "ignore_tags.#", "0"),
+				),
+			},
+		},
+	})
+}
+
 // TODO: add tests for l2_extension; requires L2 VPN Session
 
 func testAccNsxtPolicySegmentExists(resourceName string) resource.TestCheckFunc {
@@ -556,6 +634,128 @@ resource "nsxt_policy_segment" "test" {
   tag {
     scope = "color"
     tag   = "orange"
+  }
+}
+`, name)
+}
+
+func testAccNsxtPolicySegmentIgnoreTagsCreateTemplate(tzName string, name string) string {
+	return testAccNsxtPolicySegmentDeps(tzName, false) + fmt.Sprintf(`
+
+resource "nsxt_policy_segment" "test" {
+  display_name        = "%s"
+  overlay_id          = 1011
+  transport_zone_path = data.nsxt_policy_transport_zone.test.path
+  connectivity_path   = nsxt_policy_tier1_gateway.tier1ForSegments.path
+
+  subnet {
+     cidr = "12.12.2.1/24"
+  }
+
+  tag {
+    scope = "color"
+    tag   = "orange"
+  }
+
+  tag {
+    scope = "shape"
+    tag   = "triangle"
+  }
+
+  tag {
+    scope = "size"
+    tag   = "small"
+  }
+}
+`, name)
+}
+
+func testAccNsxtPolicySegmentIgnoreTagsUpdate1Template(tzName string, name string) string {
+	return testAccNsxtPolicySegmentDeps(tzName, false) + fmt.Sprintf(`
+
+resource "nsxt_policy_segment" "test" {
+  display_name        = "%s"
+  overlay_id          = 1011
+  transport_zone_path = data.nsxt_policy_transport_zone.test.path
+  connectivity_path   = nsxt_policy_tier1_gateway.tier1ForSegments.path
+
+  subnet {
+     cidr = "12.12.2.1/24"
+  }
+
+  tag {
+    scope = "color"
+    tag   = "orange"
+  }
+
+  tag {
+    scope = "shape"
+    tag   = "triangle"
+  }
+
+  tag {
+    scope = "size"
+    tag   = "small"
+  }
+
+  ignore_tags {
+    scopes = ["color", "size"]
+  }
+}
+`, name)
+}
+
+func testAccNsxtPolicySegmentIgnoreTagsUpdate2Template(tzName string, name string) string {
+	return testAccNsxtPolicySegmentDeps(tzName, false) + fmt.Sprintf(`
+
+resource "nsxt_policy_segment" "test" {
+  display_name        = "%s"
+  overlay_id          = 1011
+  transport_zone_path = data.nsxt_policy_transport_zone.test.path
+  connectivity_path   = nsxt_policy_tier1_gateway.tier1ForSegments.path
+
+  subnet {
+     cidr = "12.12.2.1/24"
+  }
+
+  tag {
+    scope = "rack"
+    tag   = "5"
+  }
+
+  tag {
+    scope = "shape"
+    tag   = "triangle"
+  }
+
+  ignore_tags {
+    scopes = ["color", "size"]
+  }
+}
+`, name)
+}
+
+func testAccNsxtPolicySegmentIgnoreTagsUpdate3Template(tzName string, name string) string {
+	return testAccNsxtPolicySegmentDeps(tzName, false) + fmt.Sprintf(`
+
+resource "nsxt_policy_segment" "test" {
+  display_name        = "%s"
+  overlay_id          = 1011
+  transport_zone_path = data.nsxt_policy_transport_zone.test.path
+  connectivity_path   = nsxt_policy_tier1_gateway.tier1ForSegments.path
+
+  subnet {
+     cidr = "12.12.2.1/24"
+  }
+
+  tag {
+    scope = "color"
+    tag   = "blue"
+  }
+ 
+  tag {
+    scope = "rack"
+    tag   = "7"
   }
 }
 `, name)

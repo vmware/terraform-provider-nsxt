@@ -395,6 +395,43 @@ func getPolicySecurityPolicySchema(isIds, withContext, withRule bool) map[string
 	return result
 }
 
+func getIgnoreTagsSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:     schema.TypeList,
+		Optional: true,
+		MaxItems: 1,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"scopes": {
+					Type:        schema.TypeList,
+					Description: "List of scopes to ignore",
+					Required:    true,
+					Elem: &schema.Schema{
+						Type: schema.TypeString,
+					},
+				},
+				"detected": {
+					Type:        schema.TypeSet,
+					Description: "Tags matching scopes to ignore",
+					Computed:    true,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"scope": {
+								Type:     schema.TypeString,
+								Computed: true,
+							},
+							"tag": {
+								Type:     schema.TypeString,
+								Computed: true,
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
 func setPolicyRulesInSchema(d *schema.ResourceData, rules []model.Rule) error {
 	var rulesList []map[string]interface{}
 	for _, rule := range rules {

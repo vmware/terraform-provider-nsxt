@@ -99,8 +99,24 @@ func initPolicyTagsSet(tags []model.Tag) []map[string]interface{} {
 	return tagList
 }
 
+func getIgnoredTagsFromSchema(d *schema.ResourceData) []model.Tag {
+	tags, defined := d.GetOk("ignore_tags")
+	if !defined {
+		return nil
+	}
+
+	tagMaps := tags.([]interface{})
+	if len(tagMaps) == 0 {
+		return nil
+	}
+	tagMap := tagMaps[0].(map[string]interface{})
+	discoveredTags := tagMap["detected"].(*schema.Set)
+	return getPolicyTagsFromSet(discoveredTags)
+}
+
 func getCustomizedPolicyTagsFromSchema(d *schema.ResourceData, schemaName string) []model.Tag {
 	tags := d.Get(schemaName).(*schema.Set).List()
+	ignoredTags := getIgnoredTagsFromSchema(d)
 	tagList := make([]model.Tag, 0)
 	for _, tag := range tags {
 		data := tag.(map[string]interface{})
@@ -112,20 +128,66 @@ func getCustomizedPolicyTagsFromSchema(d *schema.ResourceData, schemaName string
 
 		tagList = append(tagList, elem)
 	}
+	if len(ignoredTags) > 0 {
+		tagList = append(tagList, ignoredTags...)
+	}
 	return tagList
+}
+
+func setIgnoredTagsInSchema(d *schema.ResourceData, scopesToIgnore []string, tags []map[string]interface{}) {
+
+	elem := make(map[string]interface{})
+	elem["scopes"] = scopesToIgnore
+	elem["detected"] = tags
+
+	d.Set("ignore_tags", []map[string]interface{}{elem})
+}
+
+func getTagScopesToIgnore(d *schema.ResourceData) []string {
+
+	tags, defined := d.GetOk("ignore_tags")
+	if !defined {
+		return nil
+	}
+	tagMaps := tags.([]interface{})
+	if len(tagMaps) == 0 {
+		return nil
+	}
+	tagMap := tagMaps[0].(map[string]interface{})
+	return interface2StringList(tagMap["scopes"].([]interface{}))
+}
+
+// TODO - replace with slices.Contains when go is upgraded everywhere
+func shouldIgnoreScope(scope string, scopesToIgnore []string) bool {
+	for _, scopeToIgnore := range scopesToIgnore {
+		if scope == scopeToIgnore {
+			return true
+		}
+	}
+	return false
 }
 
 func setCustomizedPolicyTagsInSchema(d *schema.ResourceData, tags []model.Tag, schemaName string) {
 	var tagList []map[string]interface{}
+	var ignoredTagList []map[string]interface{}
+	scopesToIgnore := getTagScopesToIgnore(d)
 	for _, tag := range tags {
 		elem := make(map[string]interface{})
 		elem["scope"] = tag.Scope
 		elem["tag"] = tag.Tag
-		tagList = append(tagList, elem)
+		if tag.Scope != nil && shouldIgnoreScope(*tag.Scope, scopesToIgnore) {
+			ignoredTagList = append(ignoredTagList, elem)
+		} else {
+			tagList = append(tagList, elem)
+		}
 	}
 	err := d.Set(schemaName, tagList)
 	if err != nil {
 		log.Printf("[WARNING] Failed to set tag in schema: %v", err)
+	}
+
+	if len(scopesToIgnore) > 0 {
+		setIgnoredTagsInSchema(d, scopesToIgnore, ignoredTagList)
 	}
 }
 

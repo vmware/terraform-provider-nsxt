@@ -105,6 +105,7 @@ The following arguments are supported:
 * `display_name` - (Required) Display name of the resource.
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this policy.
+* `ignore_tags` - (Optional) A list of tag scopes that provider should ignore, more specifically, it should not detect drift when tags with such scope are present on NSX, and it should not overwrite them when applying its own tags. This feature is useful for external network with VCD scenario.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `domain_name`- (Optional) DNS domain names.
 * `transport_zone_path` - (Optional) Policy path to the VLAN backed transport zone. This property is required for NSX Local Manager, and should not be specified for NSX Global Manager, where NSX will automatically assign default transport zone on each site.
