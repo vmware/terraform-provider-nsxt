@@ -568,9 +568,13 @@ func updateUpgradeUnitGroups(upgradeClientSet *upgradeClientSet, d *schema.Resou
 				if group["hosts"] != nil {
 					schemaUnits = interface2StringList(group["hosts"].([]interface{}))
 				}
+				getHostDefaultUpgradeGroup, err := getHostDefaultUpgradeGroupGetter(m)
+				if err != nil {
+					return fmt.Errorf("failed to retrieve host upgrade groups, error is %v", err)
+				}
 				for _, nsxUnit := range nsxUnits {
 					if !slices.Contains(schemaUnits, nsxUnit) {
-						groupID, err := getHostDefaultUpgradeGroup(m, nsxUnit)
+						groupID, err := getHostDefaultUpgradeGroup(nsxUnit)
 						if isNotFoundError(err) {
 							return fmt.Errorf("couldn't find default group for host %s as default group was not found", nsxUnit)
 						} else if err != nil {
@@ -816,41 +820,43 @@ func resourceNsxtUpgradeRunDelete(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func getHostDefaultUpgradeGroup(m interface{}, hostID string) (string, error) {
+func getHostDefaultUpgradeGroupGetter(m interface{}) (func(string) (string, error), error) {
 	connector := getPolicyConnector(m)
 	hostClient := nsx.NewTransportNodesClient(connector)
-	host, err := hostClient.Get(hostID)
-	if err != nil {
-		return "", err
-	}
-	converter := bindings.NewTypeConverter()
-	base, errs := converter.ConvertToGolang(host.NodeDeploymentInfo, model.HostNodeBindingType())
-	if errs != nil {
-		return "", errs[0]
-	}
-	node := base.(model.HostNode)
-
-	if node.ComputeCollectionId != nil {
-		return *node.ComputeCollectionId, nil
-	}
-
-	// This host is not a part of a compute cluster:
-	// it should be assigned to the 'Group 1 for ESXI' group (this value is hardcoded in NSX)
 	groupClient := upgrade.NewUpgradeUnitGroupsClient(connector)
 	componentType := "HOST"
 	hostGroups, err := groupClient.List(&componentType, nil, nil, nil, nil, nil, nil, nil)
 	if err != nil {
-		return "", err
-	}
-	if hostGroups.Results != nil {
-		for _, group := range hostGroups.Results {
-			if group.DisplayName != nil && *group.DisplayName == hostUpgradeUnitDefaultGroup {
-				return *group.Id, nil
-			}
-		}
+		return nil, err
 	}
 
-	return "", errors.NotFound{}
+	return func(hostID string) (string, error) {
+		host, err := hostClient.Get(hostID)
+		if err != nil {
+			return "", err
+		}
+		converter := bindings.NewTypeConverter()
+		base, errs := converter.ConvertToGolang(host.NodeDeploymentInfo, model.HostNodeBindingType())
+		if errs != nil {
+			return "", errs[0]
+		}
+		node := base.(model.HostNode)
+
+		if node.ComputeCollectionId != nil {
+			return *node.ComputeCollectionId, nil
+		}
+		// This host is not a part of a compute cluster:
+		// it should be assigned to the 'Group 1 for ESXI' group (this value is hardcoded in NSX)
+		if hostGroups.Results != nil {
+			for _, group := range hostGroups.Results {
+				if group.DisplayName != nil && *group.DisplayName == hostUpgradeUnitDefaultGroup {
+					return *group.Id, nil
+				}
+			}
+		}
+
+		return "", errors.NotFound{}
+	}, nil
 }
 
 func addHostToGroup(m interface{}, groupID, hostID string, isCreate bool) error {
