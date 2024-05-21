@@ -18,7 +18,13 @@ type testStruct struct {
 	IntFieldNil      *int64
 	StructField      *testNestedStruct
 	StringListField  []string
+	BoolListField    []bool
+	IntListField     []int64
 	StructList       []testNestedStruct
+	StringSetField   []string
+	BoolSetField     []bool
+	IntSetField      []int64
+	StructSet        []testNestedStruct
 	DeepNestedStruct *testDeepNestedStruct
 }
 
@@ -31,6 +37,7 @@ type testNestedStruct struct {
 type testDeepNestedStruct struct {
 	StringField *string
 	BoolList    []bool
+	IntSet      []int64
 	StructList  []testNestedStruct
 }
 
@@ -79,8 +86,54 @@ var testSchema = map[string]*schema.Schema{
 			Type: schema.TypeString,
 		},
 	},
+	"bool_list": {
+		Type: schema.TypeList,
+		Elem: &schema.Schema{
+			Type: schema.TypeBool,
+		},
+	},
+	"int_list": {
+		Type: schema.TypeList,
+		Elem: &schema.Schema{
+			Type: schema.TypeInt,
+		},
+	},
 	"struct_list": {
 		Type: schema.TypeList,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"string_field": {
+					Type: schema.TypeString,
+				},
+				"bool_field": {
+					Type: schema.TypeBool,
+				},
+				"int_field": {
+					Type: schema.TypeInt,
+				},
+			},
+		},
+	},
+	"string_set": {
+		Type: schema.TypeSet,
+		Elem: &schema.Schema{
+			Type: schema.TypeString,
+		},
+	},
+	"bool_set": {
+		Type: schema.TypeSet,
+		Elem: &schema.Schema{
+			Type: schema.TypeBool,
+		},
+	},
+	"int_set": {
+		Type: schema.TypeSet,
+		Elem: &schema.Schema{
+			Type: schema.TypeInt,
+		},
+	},
+	"struct_set": {
+		Type: schema.TypeSet,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"string_field": {
@@ -107,6 +160,12 @@ var testSchema = map[string]*schema.Schema{
 					Type: schema.TypeList,
 					Elem: &schema.Schema{
 						Type: schema.TypeBool,
+					},
+				},
+				"int_set": {
+					Type: schema.TypeSet,
+					Elem: &schema.Schema{
+						Type: schema.TypeInt,
 					},
 				},
 				"struct_list": {
@@ -169,10 +228,17 @@ func basicIntSchema(sdkName string, optional bool) *ExtendedSchema {
 	}
 }
 
-func basicStructSchema() schema.Schema {
+func basicStructSchema(t string) schema.Schema {
+	schemaType := schema.TypeList
+	maxItems := 0
+	if t == "set" {
+		schemaType = schema.TypeSet
+	} else if t == "struct" {
+		maxItems = 1
+	}
 	return schema.Schema{
-		Type:     schema.TypeList,
-		MaxItems: 1,
+		Type:     schemaType,
+		MaxItems: maxItems,
 		Elem: &ExtendedResource{
 			Schema: map[string]*ExtendedSchema{
 				"string_field": basicStringSchema("StringField", false),
@@ -200,8 +266,18 @@ func mixedStructSchema() schema.Schema {
 						SdkFieldName: "BoolList",
 					},
 				},
+				"int_set": {
+					Schema: schema.Schema{
+						Type: schema.TypeSet,
+						Elem: basicIntSchema("IntSet", false),
+					},
+					Metadata: Metadata{
+						SchemaType:   "set",
+						SdkFieldName: "IntSet",
+					},
+				},
 				"struct_list": {
-					Schema: basicStructSchema(),
+					Schema: basicStructSchema("list"),
 					Metadata: Metadata{
 						SchemaType:   "list",
 						SdkFieldName: "StructList",
@@ -221,7 +297,7 @@ var testExtendedSchema = map[string]*ExtendedSchema{
 	"bool_field_nil":   basicBoolSchema("BoolFieldNil", true),
 	"int_field_nil":    basicIntSchema("IntFieldNil", true),
 	"struct_field": {
-		Schema: basicStructSchema(),
+		Schema: basicStructSchema("struct"),
 		Metadata: Metadata{
 			SchemaType:   "struct",
 			SdkFieldName: "StructField",
@@ -238,11 +314,69 @@ var testExtendedSchema = map[string]*ExtendedSchema{
 			SdkFieldName: "StringListField",
 		},
 	},
+	"bool_list": {
+		Schema: schema.Schema{
+			Type: schema.TypeList,
+			Elem: basicBoolSchema("BoolListField", false),
+		},
+		Metadata: Metadata{
+			SchemaType:   "list",
+			SdkFieldName: "BoolListField",
+		},
+	},
+	"int_list": {
+		Schema: schema.Schema{
+			Type: schema.TypeList,
+			Elem: basicIntSchema("IntListField", false),
+		},
+		Metadata: Metadata{
+			SchemaType:   "list",
+			SdkFieldName: "IntListField",
+		},
+	},
 	"struct_list": {
-		Schema: basicStructSchema(),
+		Schema: basicStructSchema("list"),
 		Metadata: Metadata{
 			SchemaType:   "list",
 			SdkFieldName: "StructList",
+			ReflectType:  reflect.TypeOf(testNestedStruct{}),
+		},
+	},
+	"string_set": {
+		Schema: schema.Schema{
+			Type: schema.TypeSet,
+			Elem: basicStringSchema("StringSetField", false),
+		},
+		Metadata: Metadata{
+			SchemaType:   "set",
+			SdkFieldName: "StringSetField",
+		},
+	},
+	"bool_set": {
+		Schema: schema.Schema{
+			Type: schema.TypeSet,
+			Elem: basicBoolSchema("BoolSetField", false),
+		},
+		Metadata: Metadata{
+			SchemaType:   "set",
+			SdkFieldName: "BoolSetField",
+		},
+	},
+	"int_set": {
+		Schema: schema.Schema{
+			Type: schema.TypeSet,
+			Elem: basicIntSchema("IntSetField", false),
+		},
+		Metadata: Metadata{
+			SchemaType:   "set",
+			SdkFieldName: "IntSetField",
+		},
+	},
+	"struct_set": {
+		Schema: basicStructSchema("set"),
+		Metadata: Metadata{
+			SchemaType:   "set",
+			SdkFieldName: "StructSet",
 			ReflectType:  reflect.TypeOf(testNestedStruct{}),
 		},
 	},
@@ -285,11 +419,11 @@ func assertSchemaEqual(t *testing.T, expected, actual map[string]*schema.Schema)
 
 func TestStructToSchema(t *testing.T) {
 	testStr := "test_string"
-	nestStr1, nestStr2 := "nest_str1", "nest_str2"
+	nestStr1, nestStr2, nestStr3 := "nest_str1", "nest_str2", "nest_str3"
 	testBool := true
 	nestBool1, nestBool2 := true, false
 	testInt := int64(123)
-	nestInt1, nestInt2 := int64(123), int64(456)
+	nestInt1, nestInt2, nestInt3 := int64(123), int64(456), int64(789)
 	obj := testStruct{
 		StringField: &testStr,
 		BoolField:   &testBool,
@@ -300,6 +434,11 @@ func TestStructToSchema(t *testing.T) {
 			IntField:    &testInt,
 		},
 		StringListField: []string{"string_1", "string_2"},
+		BoolListField:   []bool{true, false},
+		IntListField:    []int64{123, 456},
+		StringSetField:  []string{"string_3"},
+		BoolSetField:    []bool{true},
+		IntSetField:     []int64{789},
 		StructList: []testNestedStruct{
 			{
 				StringField: &nestStr1,
@@ -312,9 +451,17 @@ func TestStructToSchema(t *testing.T) {
 				IntField:    &nestInt2,
 			},
 		},
+		StructSet: []testNestedStruct{
+			{
+				StringField: &nestStr3,
+				BoolField:   &nestBool2,
+				IntField:    &nestInt3,
+			},
+		},
 		DeepNestedStruct: &testDeepNestedStruct{
 			StringField: &nestStr2,
 			BoolList:    []bool{false, true},
+			IntSet:      []int64{135},
 			StructList: []testNestedStruct{
 				{
 					StringField: &nestStr1,
@@ -355,6 +502,19 @@ func TestStructToSchema(t *testing.T) {
 	t.Run("Base list", func(t *testing.T) {
 		stringSlice := d.Get("string_list").([]interface{})
 		assert.Equal(t, []interface{}{"string_1", "string_2"}, stringSlice)
+		boolSlice := d.Get("bool_list").([]interface{})
+		assert.Equal(t, []interface{}{true, false}, boolSlice)
+		intSlice := d.Get("int_list").([]interface{})
+		assert.Equal(t, []interface{}{123, 456}, intSlice)
+	})
+
+	t.Run("Base set", func(t *testing.T) {
+		stringSlice := d.Get("string_set").(*schema.Set).List()
+		assert.Equal(t, []interface{}{"string_3"}, stringSlice)
+		boolSlice := d.Get("bool_set").(*schema.Set).List()
+		assert.Equal(t, []interface{}{true}, boolSlice)
+		intSlice := d.Get("int_set").(*schema.Set).List()
+		assert.Equal(t, []interface{}{789}, intSlice)
 	})
 
 	t.Run("Struct list", func(t *testing.T) {
@@ -372,10 +532,21 @@ func TestStructToSchema(t *testing.T) {
 		}, structSlice[1].(map[string]interface{}))
 	})
 
+	t.Run("Struct set", func(t *testing.T) {
+		structSlice := d.Get("struct_set").(*schema.Set).List()
+		assert.Equal(t, 1, len(structSlice))
+		assert.Equal(t, map[string]interface{}{
+			"string_field": nestStr3,
+			"bool_field":   nestBool2,
+			"int_field":    789,
+		}, structSlice[0].(map[string]interface{}))
+	})
+
 	t.Run("Deep nested struct", func(t *testing.T) {
 		deepNestedObj := d.Get("deep_nested_struct").([]interface{})[0].(map[string]interface{})
 		assert.Equal(t, nestStr2, deepNestedObj["string_field"].(string))
 		assert.Equal(t, []interface{}{false, true}, deepNestedObj["bool_list"].([]interface{}))
+		assert.Equal(t, []interface{}{135}, deepNestedObj["int_set"].(*schema.Set).List())
 		nestedStructList := deepNestedObj["struct_list"].([]interface{})
 		assert.Equal(t, 1, len(nestedStructList))
 		assert.Equal(t, map[string]interface{}{
@@ -400,6 +571,11 @@ func TestSchemaToStruct(t *testing.T) {
 				},
 			},
 			"string_list": []interface{}{"string_1", "string_2"},
+			"bool_list":   []interface{}{true, false},
+			"int_list":    []interface{}{123, 456},
+			"string_set":  []interface{}{"string_3"},
+			"bool_set":    []interface{}{true},
+			"int_set":     []interface{}{789},
 			"struct_list": []interface{}{
 				map[string]interface{}{
 					"string_field": "nested_string_1",
@@ -412,10 +588,18 @@ func TestSchemaToStruct(t *testing.T) {
 					"int_field":    2,
 				},
 			},
+			"struct_set": []interface{}{
+				map[string]interface{}{
+					"string_field": "nested_string_3",
+					"bool_field":   false,
+					"int_field":    3,
+				},
+			},
 			"deep_nested_struct": []interface{}{
 				map[string]interface{}{
 					"string_field": "nested_string_1",
 					"bool_list":    []interface{}{true, false},
+					"int_set":      []interface{}{135},
 					"struct_list": []interface{}{
 						map[string]interface{}{
 							"string_field": "nested_string_2",
@@ -431,9 +615,9 @@ func TestSchemaToStruct(t *testing.T) {
 	elem := reflect.ValueOf(&obj).Elem()
 	SchemaToStruct(elem, d, testExtendedSchema, "", nil)
 
-	nestStr1, nestStr2 := "nested_string_1", "nested_string_2"
-	trueVal := true
-	intVal1, intVal2 := int64(1), int64(2)
+	nestStr1, nestStr2, nestStr3 := "nested_string_1", "nested_string_2", "nested_string_3"
+	trueVal, falseVal := true, false
+	intVal1, intVal2, intVal3 := int64(1), int64(2), int64(3)
 
 	t.Run("Base types", func(t *testing.T) {
 		assert.Equal(t, "test_string", *obj.StringField)
@@ -455,6 +639,14 @@ func TestSchemaToStruct(t *testing.T) {
 
 	t.Run("Base list", func(t *testing.T) {
 		assert.Equal(t, []string{"string_1", "string_2"}, obj.StringListField)
+		assert.Equal(t, []bool{true, false}, obj.BoolListField)
+		assert.Equal(t, []int64{123, 456}, obj.IntListField)
+	})
+
+	t.Run("Base set", func(t *testing.T) {
+		assert.Equal(t, []string{"string_3"}, obj.StringSetField)
+		assert.Equal(t, []bool{true}, obj.BoolSetField)
+		assert.Equal(t, []int64{789}, obj.IntSetField)
 	})
 
 	t.Run("Struct list", func(t *testing.T) {
@@ -471,10 +663,20 @@ func TestSchemaToStruct(t *testing.T) {
 		}, obj.StructList[1])
 	})
 
+	t.Run("Struct set", func(t *testing.T) {
+		assert.Equal(t, 1, len(obj.StringSetField))
+		assert.EqualValues(t, testNestedStruct{
+			StringField: &nestStr3,
+			BoolField:   &falseVal,
+			IntField:    &intVal3,
+		}, obj.StructSet[0])
+	})
+
 	t.Run("Deep nested struct", func(t *testing.T) {
 		assert.EqualValues(t, &testDeepNestedStruct{
 			StringField: &nestStr1,
 			BoolList:    []bool{true, false},
+			IntSet:      []int64{135},
 			StructList: []testNestedStruct{{
 				StringField: &nestStr2,
 				BoolField:   &trueVal,

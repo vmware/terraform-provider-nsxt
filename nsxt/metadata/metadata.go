@@ -147,10 +147,16 @@ func StructToSchema(elem reflect.Value, d *schema.ResourceData, metadata map[str
 // currently supports nested subtype and trivial types
 func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[string]*ExtendedSchema, parent string, parentMap map[string]interface{}) {
 	for key, item := range metadata {
-		if item.Metadata.ReadOnly || item.Metadata.Skip {
+		if item.Metadata.ReadOnly {
+			log.Printf("[INFO] skip key %s as read only", key)
+			continue
+		}
+		if item.Metadata.Skip {
+			log.Printf("[INFO] skip key %s", key)
 			continue
 		}
 		if item.Metadata.IntroducedInVersion != "" && util.NsxVersionLower(item.Metadata.IntroducedInVersion) {
+			log.Printf("[INFO] skip key %s as NSX does not have support", key)
 			continue
 		}
 
@@ -208,11 +214,20 @@ func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[str
 		}
 		if item.Metadata.SchemaType == "list" || item.Metadata.SchemaType == "set" {
 			var itemList []interface{}
-			if len(parent) > 0 {
-				itemList = parentMap[key].([]interface{})
+			if item.Metadata.SchemaType == "list" {
+				if len(parent) > 0 {
+					itemList = parentMap[key].([]interface{})
+				} else {
+					itemList = d.Get(key).([]interface{})
+				}
 			} else {
-				itemList = d.Get(key).([]interface{})
+				if len(parent) > 0 {
+					itemList = parentMap[key].(*schema.Set).List()
+				} else {
+					itemList = d.Get(key).(*schema.Set).List()
+				}
 			}
+
 			if len(itemList) == 0 {
 				continue
 			}
@@ -233,7 +248,11 @@ func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[str
 				}
 
 				for i, v := range itemList {
-					sliceElem.Index(i).Set(reflect.ValueOf(v))
+					if childElem.Metadata.SchemaType == "int" {
+						sliceElem.Index(i).Set(reflect.ValueOf(v).Convert(reflect.TypeOf(int64(0))))
+					} else {
+						sliceElem.Index(i).Set(reflect.ValueOf(v))
+					}
 					log.Printf("[INFO] appending %v to %s", v, key)
 				}
 			}
