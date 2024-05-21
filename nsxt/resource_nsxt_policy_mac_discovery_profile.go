@@ -81,14 +81,14 @@ var macDiscoveryProfileSchema = map[string]*metadata.ExtendedSchema{
 			Type:         schema.TypeString,
 			ValidateFunc: validation.StringInSlice(macDiscoveryProfileMacLimitPolicyValues, false),
 			Optional:     true,
-			Default:      "ALLOW",
+			Default:      model.MacDiscoveryProfile_MAC_LIMIT_POLICY_ALLOW,
 		},
 		Metadata: metadata.Metadata{
 			SchemaType:   "string",
 			SdkFieldName: "MacLimitPolicy",
 			TestData: metadata.Testdata{
-				CreateValue: "ALLOW",
-				UpdateValue: "DROP",
+				CreateValue: model.MacDiscoveryProfile_MAC_LIMIT_POLICY_ALLOW,
+				UpdateValue: model.MacDiscoveryProfile_MAC_LIMIT_POLICY_DROP,
 			},
 		},
 	},
@@ -114,9 +114,8 @@ var macDiscoveryProfileSchema = map[string]*metadata.ExtendedSchema{
 			Optional: true,
 		},
 		Metadata: metadata.Metadata{
-			SchemaType:          "bool",
-			SdkFieldName:        "UnknownUnicastFloodingEnabled",
-			IntroducedInVersion: "4.0.0",
+			SchemaType:   "bool",
+			SdkFieldName: "UnknownUnicastFloodingEnabled",
 			TestData: metadata.Testdata{
 				CreateValue: "true",
 				UpdateValue: "false",
