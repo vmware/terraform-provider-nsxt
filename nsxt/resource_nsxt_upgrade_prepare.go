@@ -117,6 +117,11 @@ func resourceNsxtUpgradePrepare() *schema.Resource {
 				},
 				Computed: true,
 			},
+			"target_version": {
+				Type:        schema.TypeString,
+				Description: "Target system version",
+				Computed:    true,
+			},
 		},
 	}
 }
@@ -153,32 +158,37 @@ func prepareForUpgrade(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func precheckNeeded(m interface{}) (bool, error) {
+func getSummaryInfo(m interface{}) (string, bool, error) {
 	connector := getPolicyConnector(m)
 	summaryClient := upgrade.NewSummaryClient(connector)
 	summary, err := summaryClient.Get()
 	if err != nil {
-		return false, err
+		return "", false, err
+	}
+	var targetVersion string
+	if summary.TargetVersion != nil {
+		targetVersion = *summary.TargetVersion
 	}
 	if summary.UpgradeCoordinatorUpdated == nil || !(*summary.UpgradeCoordinatorUpdated) {
 		log.Printf("Upgrade coordinated is not upgraded, skip running precheck")
-		return false, nil
+		return targetVersion, false, nil
 	}
 	if summary.UpgradeStatus == nil || (*summary.UpgradeStatus) != nsxModel.UpgradeSummary_UPGRADE_STATUS_NOT_STARTED {
 		log.Printf("Upgrade process has started, skip running precheck")
-		return false, nil
+		return targetVersion, false, nil
 	}
-	return true, nil
+	return targetVersion, true, nil
 }
 
 func resourceNsxtUpgradePrepareRead(d *schema.ResourceData, m interface{}) error {
 	id := d.Id()
 	var err error
 	// Execute precheck in Read function if upload bundle has been uploaded and upgrade not started
-	precheckNeeded, err := precheckNeeded(m)
+	targetVersion, precheckNeeded, err := getSummaryInfo(m)
 	if err != nil {
 		return logAPIError("Failed to get previous precheck result", err)
 	}
+	d.Set("target_version", targetVersion)
 	if precheckNeeded {
 		previousAcknowledgedPrecheckIDs, err := getAcknowledgedPrecheckIDs(m)
 		if err != nil {
@@ -363,9 +373,9 @@ func getPrecheckErrors(m interface{}, typeParam *string) ([]nsxModel.UpgradeChec
 	return resultList.Results, nil
 }
 
-func setFailedPrechecksInSchema(d *schema.ResourceData, precheckErros []nsxModel.UpgradeCheckFailure) error {
+func setFailedPrechecksInSchema(d *schema.ResourceData, precheckErrors []nsxModel.UpgradeCheckFailure) error {
 	var failedPrechecksList []map[string]interface{}
-	for _, precheckError := range precheckErros {
+	for _, precheckError := range precheckErrors {
 		elem := make(map[string]interface{})
 		elem["id"] = precheckError.Id
 		elem["message"] = precheckError.Message.Message
