@@ -3,6 +3,7 @@ GOFMT_FILES?=$$(find . -name '*.go' |grep -v vendor)
 WEBSITE_REPO=github.com/hashicorp/terraform-website
 PKG_NAME=nsxt
 GIT_COMMIT=$$(git rev-list -1 HEAD)
+GOPATH=$$(go env GOPATH)
 
 default: build
 
@@ -13,6 +14,9 @@ tools:
 
 build: fmtcheck
 	go install -ldflags "-X github.com/vmware/terraform-provider-nsxt/nsxt.GitCommit=$(GIT_COMMIT)"
+
+build-coverage:
+	go build -cover -ldflags "-X github.com/vmware/terraform-provider-nsxt/nsxt.GitCommit=$(GIT_COMMIT)" -o $(GOPATH)/bin
 
 test: fmtcheck
 	go test -i $(TEST) || exit 1
