@@ -13,13 +13,11 @@ func dataSourceNsxtPolicyVPC() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceNsxtPolicyVPCRead,
 		Schema: map[string]*schema.Schema{
-			"id":                   getDataSourceIDSchema(),
-			"display_name":         getDataSourceDisplayNameSchema(),
-			"description":          getDataSourceDescriptionSchema(),
-			"path":                 getPathSchema(),
-			"context":              getContextSchema(true, false),
-			"site_info":            getSiteInfoSchema(),
-			"default_gateway_path": getPathSchema(),
+			"id":           getDataSourceIDSchema(),
+			"display_name": getDataSourceDisplayNameSchema(),
+			"description":  getDataSourceDescriptionSchema(),
+			"path":         getPathSchema(),
+			"context":      getContextSchema(true, false),
 			"short_id": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -41,17 +39,7 @@ func dataSourceNsxtPolicyVPCRead(d *schema.ResourceData, m interface{}) error {
 	}
 	vpc := dataValue.(model.Vpc)
 
-	d.Set("default_gateway_path", vpc.DefaultGatewayPath)
 	d.Set("short_id", vpc.ShortId)
-
-	var siteInfosList []map[string]interface{}
-	for _, item := range vpc.SiteInfos {
-		data := make(map[string]interface{})
-		data["edge_cluster_paths"] = item.EdgeClusterPaths
-		data["site_path"] = item.SitePath
-		siteInfosList = append(siteInfosList, data)
-	}
-	d.Set("site_info", siteInfosList)
 
 	return nil
 }

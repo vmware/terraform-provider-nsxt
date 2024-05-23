@@ -39,7 +39,3 @@ In addition to arguments listed above, the following attributes are exported:
 * `description` - The description of the resource.
 * `path` - The NSX path of the policy resource.
 * `short_id` - Defaults to id if id is less than equal to 8 characters or defaults to random generated id if not set.
-* `site_info` - Information related to sites applicable for given Project.
-    * `edge_cluster_paths` - PolicyPath of the edge cluster or label.
-    * `site_path` - This represents the path of the site which is managed by Global Manager. For the local manager, if set, this needs to point to 'default'.
-* `default_gateway_path` - PolicyPath of Tier0 or Tier0 VRF gateway or label path referencing to Tier0 or Tier0 VRF.
