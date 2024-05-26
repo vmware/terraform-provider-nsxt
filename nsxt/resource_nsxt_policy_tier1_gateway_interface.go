@@ -37,7 +37,7 @@ func resourceNsxtPolicyTier1GatewayInterface() *schema.Resource {
 			"description":            getDescriptionSchema(),
 			"revision":               getRevisionSchema(),
 			"tag":                    getTagsSchema(),
-			"context":                getContextSchema(),
+			"context":                getContextSchema(false, false),
 			"gateway_path":           getPolicyPathSchema(true, true, "Policy path for tier1 gateway"),
 			"segment_path":           getPolicyPathSchema(true, true, "Policy path for connected segment"),
 			"subnets":                getGatewayInterfaceSubnetsSchema(),

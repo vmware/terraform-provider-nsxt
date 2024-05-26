@@ -33,7 +33,7 @@ func resourceNsxtPolicyIPDiscoveryProfile() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
-			"context":      getContextSchema(),
+			"context":      getContextSchema(false, false),
 			"arp_nd_binding_timeout": {
 				Type:         schema.TypeInt,
 				Description:  "ARP and ND cache timeout (in minutes)",

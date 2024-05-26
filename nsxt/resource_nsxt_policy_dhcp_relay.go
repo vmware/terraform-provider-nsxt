@@ -32,7 +32,7 @@ func resourceNsxtPolicyDhcpRelayConfig() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
-			"context":      getContextSchema(),
+			"context":      getContextSchema(false, false),
 			"server_addresses": {
 				Type:     schema.TypeList,
 				Required: true,

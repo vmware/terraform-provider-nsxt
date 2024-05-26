@@ -32,7 +32,7 @@ func resourceNsxtPolicyIPPool() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
-			"context":      getContextSchema(),
+			"context":      getContextSchema(false, false),
 			"realized_id": {
 				Type:        schema.TypeString,
 				Description: "The ID of the realized resource",

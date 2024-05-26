@@ -325,6 +325,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_distributed_flood_protection_profile":       dataSourceNsxtPolicyDistributedFloodProtectionProfile(),
 			"nsxt_policy_gateway_flood_protection_profile":           dataSourceNsxtPolicyGatewayFloodProtectionProfile(),
 			"nsxt_manager_info":                                      dataSourceNsxtManagerInfo(),
+			"nsxt_policy_vpc":                                        dataSourceNsxtPolicyVPC(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{

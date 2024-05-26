@@ -100,7 +100,7 @@ func resourceNsxtPolicyGroup() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
-			"context":      getContextSchema(),
+			"context":      getContextSchema(false, false),
 			"domain":       getDomainNameSchema(),
 			"group_type": {
 				Type:         schema.TypeString,

@@ -36,7 +36,7 @@ func resourceNsxtPolicyService() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
-			"context":      getContextSchema(),
+			"context":      getContextSchema(false, false),
 
 			"icmp_entry": {
 				Type:        schema.TypeSet,

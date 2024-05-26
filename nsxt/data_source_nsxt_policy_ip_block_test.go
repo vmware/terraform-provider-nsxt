@@ -42,7 +42,7 @@ func testAccDataSourceNsxtPolicyIPBlockBasic(t *testing.T, withContext bool, pre
 		Steps: []resource.TestStep{
 			{
 				PreConfig: func() {
-					if err := testAccDataSourceNsxtPolicyIPBlockCreate(name); err != nil {
+					if err := testAccDataSourceNsxtPolicyIPBlockCreate(name, newUUID(), "4001::/64", false); err != nil {
 						t.Error(err)
 					}
 				},
@@ -57,7 +57,7 @@ func testAccDataSourceNsxtPolicyIPBlockBasic(t *testing.T, withContext bool, pre
 	})
 }
 
-func testAccDataSourceNsxtPolicyIPBlockCreate(name string) error {
+func testAccDataSourceNsxtPolicyIPBlockCreate(name, id, cidr string, isPrivate bool) error {
 	connector, err := testAccGetPolicyConnector()
 	if err != nil {
 		return fmt.Errorf("Error during test client initialization: %v", err)
@@ -66,15 +66,15 @@ func testAccDataSourceNsxtPolicyIPBlockCreate(name string) error {
 
 	displayName := name
 	description := name
-	cidr := "4001::/64"
 	obj := model.IpAddressBlock{
 		Description: &description,
 		DisplayName: &displayName,
 		Cidr:        &cidr,
 	}
-
-	// Generate a random ID for the resource
-	id := newUUID()
+	if isPrivate {
+		visibility := model.IpAddressBlock_VISIBILITY_PRIVATE
+		obj.Visibility = &visibility
+	}
 
 	err = client.Patch(id, obj)
 	if err != nil {

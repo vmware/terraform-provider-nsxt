@@ -60,7 +60,7 @@ func resourceNsxtPolicyContextProfile() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
-			"context":      getContextSchema(),
+			"context":      getContextSchema(false, false),
 			"app_id":       getContextProfilePolicyAppIDAttributesSchema(),
 			"custom_url":   getContextProfilePolicyCustomURLAttributesSchema(),
 			"domain_name":  getContextProfilePolicyOtherAttributesSchema(),
