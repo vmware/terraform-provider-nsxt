@@ -322,6 +322,13 @@ func testAccOnlyMultitenancy(t *testing.T) {
 	}
 }
 
+func testAccOnlyVPC(t *testing.T) {
+	testAccNSXVersion(t, "4.1.2")
+	if !testAccIsVPC() {
+		t.Skipf("This test requires a VPC environment")
+	}
+}
+
 func testAccNSXGlobalManagerSitePrecheck(t *testing.T) {
 	if testAccIsGlobalManager() && getTestSiteName() == "" {
 		str := fmt.Sprintf("%s must be set for this acceptance test", "NSXT_TEST_SITE_NAME")

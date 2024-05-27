@@ -24,7 +24,7 @@ func resourceNsxtPolicySecurityPolicy() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: nsxtDomainResourceImporter,
 		},
-		Schema: getPolicySecurityPolicySchema(false, true, true),
+		Schema: getPolicySecurityPolicySchema(false, true, true, true),
 	}
 }
 
@@ -61,9 +61,12 @@ func resourceNsxtPolicySecurityPolicyExistsPartial(domainName string) func(sessi
 	}
 }
 
-func policySecurityPolicyBuildAndPatch(d *schema.ResourceData, m interface{}, id string, createFlow, withRule bool) error {
+func policySecurityPolicyBuildAndPatch(d *schema.ResourceData, m interface{}, id string, createFlow, withRule, withDomain bool) error {
 	obj := parentSecurityPolicySchemaToModel(d, id)
-	domain := d.Get("domain").(string)
+	domain := ""
+	if withDomain {
+		domain = d.Get("domain").(string)
+	}
 	revision := int64(d.Get("revision").(int))
 	log.Printf("[INFO] Creating Security Policy with ID %s", id)
 
@@ -92,15 +95,15 @@ func policySecurityPolicyBuildAndPatch(d *schema.ResourceData, m interface{}, id
 }
 
 func resourceNsxtPolicySecurityPolicyCreate(d *schema.ResourceData, m interface{}) error {
-	return resourceNsxtPolicySecurityPolicyGeneralCreate(d, m, true)
+	return resourceNsxtPolicySecurityPolicyGeneralCreate(d, m, true, true)
 }
 
 func resourceNsxtPolicySecurityPolicyRead(d *schema.ResourceData, m interface{}) error {
-	return resourceNsxtPolicySecurityPolicyGeneralRead(d, m, true)
+	return resourceNsxtPolicySecurityPolicyGeneralRead(d, m, true, true)
 }
 
 func resourceNsxtPolicySecurityPolicyUpdate(d *schema.ResourceData, m interface{}) error {
-	return resourceNsxtPolicySecurityPolicyGeneralUpdate(d, m, true)
+	return resourceNsxtPolicySecurityPolicyGeneralUpdate(d, m, true, true)
 }
 
 func resourceNsxtPolicySecurityPolicyDelete(d *schema.ResourceData, m interface{}) error {
@@ -124,14 +127,18 @@ func resourceNsxtPolicySecurityPolicyDelete(d *schema.ResourceData, m interface{
 	return nil
 }
 
-func resourceNsxtPolicySecurityPolicyGeneralCreate(d *schema.ResourceData, m interface{}, withRule bool) error {
+func resourceNsxtPolicySecurityPolicyGeneralCreate(d *schema.ResourceData, m interface{}, withRule, withDomain bool) error {
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID2(d, m, resourceNsxtPolicySecurityPolicyExistsPartial(d.Get("domain").(string)))
+	domain := ""
+	if withDomain {
+		domain = d.Get("domain").(string)
+	}
+	id, err := getOrGenerateID2(d, m, resourceNsxtPolicySecurityPolicyExistsPartial(domain))
 	if err != nil {
 		return err
 	}
 
-	err = policySecurityPolicyBuildAndPatch(d, m, id, true, withRule)
+	err = policySecurityPolicyBuildAndPatch(d, m, id, true, withRule, withDomain)
 
 	if err != nil {
 		return handleCreateError("Security Policy", id, err)
@@ -140,11 +147,11 @@ func resourceNsxtPolicySecurityPolicyGeneralCreate(d *schema.ResourceData, m int
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
-	return resourceNsxtPolicySecurityPolicyGeneralRead(d, m, withRule)
+	return resourceNsxtPolicySecurityPolicyGeneralRead(d, m, withRule, withDomain)
 }
 
-func resourceNsxtPolicySecurityPolicyGeneralRead(d *schema.ResourceData, m interface{}, withRule bool) error {
-	obj, err := parentSecurityPolicyModelToSchema(d, m)
+func resourceNsxtPolicySecurityPolicyGeneralRead(d *schema.ResourceData, m interface{}, withRule, withDomain bool) error {
+	obj, err := parentSecurityPolicyModelToSchema(d, m, withDomain)
 	if err != nil {
 		return handleReadError(d, "SecurityPolicy", d.Id(), err)
 	}
@@ -154,15 +161,15 @@ func resourceNsxtPolicySecurityPolicyGeneralRead(d *schema.ResourceData, m inter
 	return nil
 }
 
-func resourceNsxtPolicySecurityPolicyGeneralUpdate(d *schema.ResourceData, m interface{}, withRule bool) error {
+func resourceNsxtPolicySecurityPolicyGeneralUpdate(d *schema.ResourceData, m interface{}, withRule, withDomain bool) error {
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining Security Policy id")
 	}
-	err := policySecurityPolicyBuildAndPatch(d, m, id, false, withRule)
+	err := policySecurityPolicyBuildAndPatch(d, m, id, false, withRule, withDomain)
 	if err != nil {
 		return handleUpdateError("Security Policy", id, err)
 	}
 
-	return resourceNsxtPolicySecurityPolicyGeneralRead(d, m, withRule)
+	return resourceNsxtPolicySecurityPolicyGeneralRead(d, m, withRule, withDomain)
 }

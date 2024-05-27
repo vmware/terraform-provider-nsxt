@@ -311,7 +311,7 @@ func getSecurityPolicyAndGatewayRuleSchema(scopeRequired bool, isIds bool, nsxID
 }
 
 func getPolicyGatewayPolicySchema() map[string]*schema.Schema {
-	secPolicy := getPolicySecurityPolicySchema(false, true, true)
+	secPolicy := getPolicySecurityPolicySchema(false, true, true, true)
 	// GW Policies don't support scope
 	delete(secPolicy, "scope")
 	secPolicy["category"].ValidateFunc = validation.StringInSlice(gatewayPolicyCategoryWritableValues, false)
@@ -320,7 +320,7 @@ func getPolicyGatewayPolicySchema() map[string]*schema.Schema {
 	return secPolicy
 }
 
-func getPolicySecurityPolicySchema(isIds, withContext, withRule bool) map[string]*schema.Schema {
+func getPolicySecurityPolicySchema(isIds, withContext, withRule, withDomain bool) map[string]*schema.Schema {
 	result := map[string]*schema.Schema{
 		"nsx_id":       getNsxIDSchema(),
 		"path":         getPathSchema(),
@@ -328,7 +328,7 @@ func getPolicySecurityPolicySchema(isIds, withContext, withRule bool) map[string
 		"description":  getDescriptionSchema(),
 		"revision":     getRevisionSchema(),
 		"tag":          getTagsSchema(),
-		"context":      getContextSchema(false, false, false),
+		"context":      getContextSchema(!withDomain, false, !withDomain),
 		"domain":       getDomainNameSchema(),
 		"category": {
 			Type:         schema.TypeString,
@@ -391,6 +391,9 @@ func getPolicySecurityPolicySchema(isIds, withContext, withRule bool) map[string
 
 	if !withRule {
 		delete(result, "rule")
+	}
+	if !withDomain {
+		delete(result, "domain")
 	}
 	return result
 }

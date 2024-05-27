@@ -1,0 +1,55 @@
+/* Copyright © 2024 Broadcom, Inc. All Rights Reserved.
+   SPDX-License-Identifier: MPL-2.0 */
+
+package nsxt
+
+import (
+	"fmt"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/vmware/terraform-provider-nsxt/api/infra/domains"
+)
+
+func resourceNsxtVPCSecurityPolicy() *schema.Resource {
+	return &schema.Resource{
+		Create: resourceNsxtVPCSecurityPolicyCreate,
+		Read:   resourceNsxtVPCSecurityPolicyRead,
+		Update: resourceNsxtVPCSecurityPolicyUpdate,
+		Delete: resourceNsxtVPCSecurityPolicyDelete,
+		Importer: &schema.ResourceImporter{
+			State: nsxtPolicyPathResourceImporter,
+		},
+		Schema: getPolicySecurityPolicySchema(false, true, true, false),
+	}
+}
+
+func resourceNsxtVPCSecurityPolicyCreate(d *schema.ResourceData, m interface{}) error {
+	return resourceNsxtPolicySecurityPolicyGeneralCreate(d, m, true, false)
+}
+
+func resourceNsxtVPCSecurityPolicyRead(d *schema.ResourceData, m interface{}) error {
+	return resourceNsxtPolicySecurityPolicyGeneralRead(d, m, true, false)
+}
+
+func resourceNsxtVPCSecurityPolicyUpdate(d *schema.ResourceData, m interface{}) error {
+	return resourceNsxtPolicySecurityPolicyGeneralUpdate(d, m, true, false)
+}
+
+func resourceNsxtVPCSecurityPolicyDelete(d *schema.ResourceData, m interface{}) error {
+	id := d.Id()
+	if id == "" {
+		return fmt.Errorf("Error obtaining VPC Security Policy id")
+	}
+
+	connector := getPolicyConnector(m)
+
+	client := domains.NewSecurityPoliciesClient(getSessionContext(d, m), connector)
+	err := client.Delete("", id)
+
+	if err != nil {
+		return handleDeleteError("Security Policy", id, err)
+	}
+
+	return nil
+}

@@ -27,7 +27,8 @@ func TestAccResourceNsxtPolicySecurityPolicy_multitenancy(t *testing.T) {
 func testAccResourceNsxtPolicySecurityPolicyBasic(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestResourceName()
 	updatedName := getAccTestResourceName()
-	testResourceName := "nsxt_policy_security_policy.test"
+	resourceName := "nsxt_policy_security_policy"
+	testResourceName := fmt.Sprintf("%s.test", resourceName)
 	comments1 := "Acceptance test create"
 	comments2 := "Acceptance test update"
 	direction1 := "IN"
@@ -46,7 +47,7 @@ func testAccResourceNsxtPolicySecurityPolicyBasic(t *testing.T, withContext bool
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicySecurityPolicyBasic(name, comments1, defaultDomain, withContext),
+				Config: testAccNsxtPolicySecurityPolicyBasic(resourceName, name, comments1, defaultDomain, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySecurityPolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -64,7 +65,7 @@ func testAccResourceNsxtPolicySecurityPolicyBasic(t *testing.T, withContext bool
 				),
 			},
 			{
-				Config: testAccNsxtPolicySecurityPolicyBasic(updatedName, comments2, defaultDomain, withContext),
+				Config: testAccNsxtPolicySecurityPolicyBasic(resourceName, updatedName, comments2, defaultDomain, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySecurityPolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -81,7 +82,7 @@ func testAccResourceNsxtPolicySecurityPolicyBasic(t *testing.T, withContext bool
 				),
 			},
 			{
-				Config: testAccNsxtPolicySecurityPolicyWithRule(updatedName, direction1, proto1, tag1, defaultDomain, "", withContext),
+				Config: testAccNsxtPolicySecurityPolicyWithRule(resourceName, updatedName, direction1, proto1, tag1, defaultDomain, "", withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySecurityPolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -105,7 +106,7 @@ func testAccResourceNsxtPolicySecurityPolicyBasic(t *testing.T, withContext bool
 				),
 			},
 			{
-				Config: testAccNsxtPolicySecurityPolicyWithRule(updatedName, direction2, proto2, tag2, defaultDomain, "", withContext),
+				Config: testAccNsxtPolicySecurityPolicyWithRule(resourceName, updatedName, direction2, proto2, tag2, defaultDomain, "", withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySecurityPolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -128,7 +129,7 @@ func testAccResourceNsxtPolicySecurityPolicyBasic(t *testing.T, withContext bool
 				),
 			},
 			{
-				Config: testAccNsxtPolicySecurityPolicyWithProfiles(updatedName, direction2, proto2, tag2, defaultDomain, withContext),
+				Config: testAccNsxtPolicySecurityPolicyWithProfiles(resourceName, updatedName, direction2, proto2, tag2, defaultDomain, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySecurityPolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -425,7 +426,8 @@ func TestAccResourceNsxtPolicySecurityPolicy_withIPCidrRange(t *testing.T) {
 
 func TestAccResourceNsxtPolicySecurityPolicy_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
-	testResourceName := "nsxt_policy_security_policy.test"
+	resourceName := "nsxt_policy_security_policy"
+	testResourceName := fmt.Sprintf("%s.test", resourceName)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -435,7 +437,7 @@ func TestAccResourceNsxtPolicySecurityPolicy_importBasic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicySecurityPolicyBasic(name, "import", defaultDomain, false),
+				Config: testAccNsxtPolicySecurityPolicyBasic(resourceName, name, "import", defaultDomain, false),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -448,7 +450,8 @@ func TestAccResourceNsxtPolicySecurityPolicy_importBasic(t *testing.T) {
 
 func TestAccResourceNsxtPolicySecurityPolicy_importBasic_multitenancy(t *testing.T) {
 	name := getAccTestResourceName()
-	testResourceName := "nsxt_policy_security_policy.test"
+	resourceName := "nsxt_policy_security_policy"
+	testResourceName := fmt.Sprintf("%s.test", resourceName)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -458,7 +461,7 @@ func TestAccResourceNsxtPolicySecurityPolicy_importBasic_multitenancy(t *testing
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicySecurityPolicyBasic(name, "import", defaultDomain, true),
+				Config: testAccNsxtPolicySecurityPolicyBasic(resourceName, name, "import", defaultDomain, true),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -473,7 +476,8 @@ func TestAccResourceNsxtPolicySecurityPolicy_importBasic_multitenancy(t *testing
 func TestAccResourceNsxtGlobalPolicySecurityPolicy_withSite(t *testing.T) {
 	name := getAccTestResourceName()
 	updatedName := getAccTestResourceName()
-	testResourceName := "nsxt_policy_security_policy.test"
+	resourceName := "nsxt_policy_security_policy"
+	testResourceName := fmt.Sprintf("%s.test", resourceName)
 	comments1 := "Acceptance test create"
 	comments2 := "Acceptance test update"
 	direction1 := "IN"
@@ -496,7 +500,7 @@ func TestAccResourceNsxtGlobalPolicySecurityPolicy_withSite(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicySecurityPolicyBasic(name, comments1, domain, false),
+				Config: testAccNsxtPolicySecurityPolicyBasic(resourceName, name, comments1, domain, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySecurityPolicyExists(testResourceName, domain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -514,7 +518,7 @@ func TestAccResourceNsxtGlobalPolicySecurityPolicy_withSite(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicySecurityPolicyBasic(updatedName, comments2, domain, false),
+				Config: testAccNsxtPolicySecurityPolicyBasic(resourceName, updatedName, comments2, domain, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySecurityPolicyExists(testResourceName, domain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -531,7 +535,7 @@ func TestAccResourceNsxtGlobalPolicySecurityPolicy_withSite(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicySecurityPolicyWithRule(updatedName, direction1, proto1, tag1, domain, "", false),
+				Config: testAccNsxtPolicySecurityPolicyWithRule(resourceName, updatedName, direction1, proto1, tag1, domain, "", false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySecurityPolicyExists(testResourceName, domain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -555,7 +559,7 @@ func TestAccResourceNsxtGlobalPolicySecurityPolicy_withSite(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicySecurityPolicyWithRule(updatedName, direction2, proto2, tag2, domain, "", false),
+				Config: testAccNsxtPolicySecurityPolicyWithRule(resourceName, updatedName, direction2, proto2, tag2, domain, "", false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySecurityPolicyExists(testResourceName, domain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -579,7 +583,7 @@ func TestAccResourceNsxtGlobalPolicySecurityPolicy_withSite(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicySecurityPolicyWithProfiles(updatedName, direction2, proto2, tag2, domain, false),
+				Config: testAccNsxtPolicySecurityPolicyWithProfiles(resourceName, updatedName, direction2, proto2, tag2, domain, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySecurityPolicyExists(testResourceName, domain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -652,14 +656,14 @@ func testAccNsxtPolicySecurityPolicyCheckDestroy(state *terraform.State, display
 	return nil
 }
 
-func testAccNsxtPolicySecurityPolicyBasic(name string, comments string, domainName string, withContext bool) string {
+func testAccNsxtPolicySecurityPolicyBasic(resourceName, name, comments, domainName string, withContext bool) string {
 	context := ""
 	if withContext {
 		context = testAccNsxtPolicyMultitenancyContext()
 	}
 	if domainName == defaultDomain {
 		return fmt.Sprintf(`
-resource "nsxt_policy_security_policy" "test" {
+resource "%s" "test" {
 %s
   display_name    = "%s"
   description     = "Acceptance Test"
@@ -675,10 +679,10 @@ resource "nsxt_policy_security_policy" "test" {
     tag   = "orange"
   }
 
-}`, context, name, comments)
+}`, resourceName, context, name, comments)
 	}
 	return testAccNsxtGlobalPolicySite(domainName) + fmt.Sprintf(`
-resource "nsxt_policy_security_policy" "test" {
+resource "%s" "test" {
 %s
   display_name    = "%s"
   description     = "Acceptance Test"
@@ -695,17 +699,17 @@ resource "nsxt_policy_security_policy" "test" {
     tag   = "orange"
   }
 
-}`, context, name, comments)
+}`, resourceName, context, name, comments)
 }
 
-func testAccNsxtPolicySecurityPolicyWithRule(name string, direction string, protocol string, ruleTag string, domainName string, profiles string, withContext bool) string {
+func testAccNsxtPolicySecurityPolicyWithRule(resourceName, name, direction, protocol, ruleTag, domainName, profiles string, withContext bool) string {
 	context := ""
 	if withContext {
 		context = testAccNsxtPolicyMultitenancyContext()
 	}
 	if domainName == defaultDomain {
 		return fmt.Sprintf(`
-resource "nsxt_policy_security_policy" "test" {
+resource "%s" "test" {
 %s
   display_name    = "%s"
   description     = "Acceptance Test"
@@ -732,10 +736,10 @@ resource "nsxt_policy_security_policy" "test" {
     }
     %s
   }
-}`, context, name, name, direction, protocol, ruleTag, profiles)
+}`, resourceName, context, name, name, direction, protocol, ruleTag, profiles)
 	}
 	return testAccNsxtGlobalPolicyGroupIPAddressCreateTemplate("group", domainName) + fmt.Sprintf(`
-resource "nsxt_policy_security_policy" "test" {
+resource "%s" "test" {
 %s
   display_name    = "%s"
   description     = "Acceptance Test"
@@ -764,7 +768,7 @@ resource "nsxt_policy_security_policy" "test" {
     }
     %s
   }
-}`, context, name, name, direction, protocol, ruleTag, profiles)
+}`, resourceName, context, name, name, direction, protocol, ruleTag, profiles)
 }
 
 func testAccNsxtPolicySecurityPolicyWithEthernetRule(name string, direction string, protocol string, ruleTag string, domainName string, profiles string) string {
@@ -989,9 +993,9 @@ func testAccNsxtPolicySecurityPolicyWithIPCidrRange(name string, destIP string, 
 }`, name, destIP, destCidr, destIPRange, sourceIP, sourceCidr, sourceIPRange)
 }
 
-func testAccNsxtPolicySecurityPolicyWithProfiles(name string, direction string, protocol string, ruleTag string, domainName string, withContext bool) string {
+func testAccNsxtPolicySecurityPolicyWithProfiles(resourceName, name, direction, protocol, ruleTag, domainName string, withContext bool) string {
 	profiles := `
 profiles = [nsxt_policy_context_profile.test.path]
 `
-	return testAccNsxtPolicyContextProfileTemplate("security-policy-test-profile", testAccNsxtPolicyContextProfileAttributeDomainNameTemplate(testSystemDomainName), withContext) + testAccNsxtPolicySecurityPolicyWithRule(name, direction, protocol, ruleTag, domainName, profiles, withContext)
+	return testAccNsxtPolicyContextProfileTemplate("security-policy-test-profile", testAccNsxtPolicyContextProfileAttributeDomainNameTemplate(testSystemDomainName), withContext) + testAccNsxtPolicySecurityPolicyWithRule(resourceName, name, direction, protocol, ruleTag, domainName, profiles, withContext)
 }

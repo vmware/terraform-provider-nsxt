@@ -436,6 +436,11 @@ func policyInfraPatch(context utl.SessionContext, obj model.Infra, connector cli
 		}
 
 		return infraClient.Patch(gmObj.(gm_model.Infra), &enforceRevision)
+	} else if context.ClientType == utl.VPC {
+		context = utl.SessionContext{
+			ClientType: utl.Multitenancy,
+			ProjectID:  context.ProjectID,
+		}
 	}
 
 	infraClient := nsx_policy.NewInfraClient(context, connector)
