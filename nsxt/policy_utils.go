@@ -188,6 +188,55 @@ func getResourceIDFromResourcePath(rPath string, rType string) string {
 	return ""
 }
 
+func parseStandardPolicyPath(path string) ([]string, error) {
+	var parents []string
+	segments := strings.Split(path, "/")
+	if len(segments) < 3 {
+		return nil, fmt.Errorf("invalid policy path %s", path)
+	}
+	if segments[0] != "" {
+		return nil, fmt.Errorf("policy path is expected to start with /")
+	}
+	// starting with *infra index
+	idx := 1
+	infraPath := true
+	if segments[1] == "orgs" {
+		if len(segments) < 5 {
+			return nil, fmt.Errorf("invalid multitenant policy path %s", path)
+		}
+
+		// append org and project
+		parents = append(parents, segments[2])
+		parents = append(parents, segments[4])
+		idx = 5
+
+		if len(segments) > 6 && segments[5] == "vpcs" {
+			parents = append(parents, segments[6])
+			idx = 7
+			// vpc paths do not contain infra
+			infraPath = false
+		}
+	}
+	if len(segments) <= idx {
+			return nil, fmt.Errorf("unexpected policy path %s", path)
+	}
+	if infraPath {
+		// continue after infra marker
+		if segments[idx] != "infra" && segments[idx] != "global-infra" {
+			return nil, fmt.Errorf("policy path %s is expected to contain *infra marker", path)
+		}
+		idx += 1
+	}
+
+	for i, seg := range segments[idx:] {
+		// in standard policy path, odd segments are object ids
+		if i % 2 == 1 {
+			parents = append(parents, seg)
+		}
+	}
+	return parents, nil
+}
+
 func nsxtDomainResourceImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	importDomain := defaultDomain
 	importID := d.Id()
