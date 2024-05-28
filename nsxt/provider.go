@@ -13,6 +13,7 @@ import (
 	"math/rand"
 	"net/http"
 	"net/http/httputil"
+	"net/url"
 	"os"
 	"regexp"
 	"strings"
@@ -555,6 +556,12 @@ func configureNsxtClient(d *schema.ResourceData, clients *nsxtClients) error {
 	insecure := d.Get("allow_unverified_ssl").(bool)
 	username := d.Get("username").(string)
 	password := d.Get("password").(string)
+
+	// The correct place to escape special chars would be inside the SDK
+	// However since the SDK is deprecated, we implement escaping here
+	// TODO implement this functionality with new mp-sdk
+	username = url.QueryEscape(username)
+	password = url.QueryEscape(password)
 
 	if needCreds {
 		if username == "" {
