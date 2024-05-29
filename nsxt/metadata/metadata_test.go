@@ -685,3 +685,32 @@ func TestSchemaToStruct(t *testing.T) {
 		}, obj.DeepNestedStruct)
 	})
 }
+
+func TestSchemaToStructEmptySlice(t *testing.T) {
+	d := schema.TestResourceDataRaw(
+		t, testSchema, map[string]interface{}{
+			"bool_list":   []interface{}{},
+			"int_set":     []interface{}{},
+			"struct_list": []interface{}{},
+		})
+
+	obj := testDeepNestedStruct{}
+	elem := reflect.ValueOf(&obj).Elem()
+	testSch := mixedStructSchema().Elem.(*ExtendedResource).Schema
+	SchemaToStruct(elem, d, testSch, "", nil)
+
+	t.Run("Empty bool list", func(t *testing.T) {
+		assert.NotNil(t, obj.BoolList)
+		assert.Equal(t, 0, len(obj.BoolList))
+	})
+
+	t.Run("Empty int set", func(t *testing.T) {
+		assert.NotNil(t, obj.IntSet)
+		assert.Equal(t, 0, len(obj.IntSet))
+	})
+
+	t.Run("Struct list", func(t *testing.T) {
+		assert.NotNil(t, obj.StructList)
+		assert.Equal(t, 0, len(obj.StructList))
+	})
+}
