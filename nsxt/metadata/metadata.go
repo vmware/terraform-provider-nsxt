@@ -1,13 +1,18 @@
 package metadata
 
 import (
+	"fmt"
 	"log"
+	"os"
 	"reflect"
 
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
+
+// package level logger to include log.Lshortfile context
+var logger = log.New(os.Stderr, "", log.LstdFlags|log.Lshortfile)
 
 type Metadata struct {
 	// we need a separate schema type, in addition to terraform SDK type,
@@ -54,7 +59,7 @@ func GetSchemaFromExtendedSchema(ext map[string]*ExtendedSchema) map[string]*sch
 	result := make(map[string]*schema.Schema)
 
 	for key, value := range ext {
-		log.Printf("[INFO] inspecting schema key %s, value %v", key, value)
+		logger.Printf("[TRACE] inspecting schema key %s, value %v", key, value)
 		shallowCopy := value.Schema
 		if (value.Schema.Type == schema.TypeList) || (value.Schema.Type == schema.TypeSet) {
 			elem, ok := shallowCopy.Elem.(*ExtendedSchema)
@@ -79,17 +84,18 @@ func GetSchemaFromExtendedSchema(ext map[string]*ExtendedSchema) map[string]*sch
 // StructToSchema converts NSX model struct to terraform schema
 // currently supports nested subtype and trivial types
 func StructToSchema(elem reflect.Value, d *schema.ResourceData, metadata map[string]*ExtendedSchema, parent string, parentMap map[string]interface{}) {
+	ctx := fmt.Sprintf("[from %s]", elem.Type())
 	for key, item := range metadata {
 		if item.Metadata.Skip {
 			continue
 		}
 
-		log.Printf("[INFO] inspecting key %s", key)
+		logger.Printf("[TRACE] %s inspecting key %s", ctx, key)
 		if len(parent) > 0 {
-			log.Printf("[INFO] parent %s key %s", parent, key)
+			logger.Printf("[TRACE] %s parent %s key %s", ctx, parent, key)
 		}
 		if elem.FieldByName(item.Metadata.SdkFieldName).IsNil() {
-			log.Printf("[INFO] skip key %s with nil value", key)
+			logger.Printf("[TRACE] %s skip key %s with nil value", ctx, key)
 			continue
 		}
 		if item.Metadata.SchemaType == "struct" {
@@ -97,7 +103,7 @@ func StructToSchema(elem reflect.Value, d *schema.ResourceData, metadata map[str
 			nestedSchema := make(map[string]interface{})
 			childElem := item.Schema.Elem.(*ExtendedResource)
 			StructToSchema(nestedObj.Elem(), d, childElem.Schema, key, nestedSchema)
-			log.Printf("[INFO] assigning struct %+v to %s", nestedObj, key)
+			logger.Printf("[TRACE] %s assigning struct %+v to %s", ctx, nestedObj, key)
 			var nestedSlice []map[string]interface{}
 			nestedSlice = append(nestedSlice, nestedSchema)
 			if len(parent) > 0 {
@@ -109,7 +115,7 @@ func StructToSchema(elem reflect.Value, d *schema.ResourceData, metadata map[str
 			if _, ok := item.Schema.Elem.(*ExtendedSchema); ok {
 				// List of string, bool, int
 				nestedSlice := elem.FieldByName(item.Metadata.SdkFieldName)
-				log.Printf("[INFO] assigning slice %v to %s", nestedSlice.Interface(), key)
+				logger.Printf("[TRACE] %s assigning slice %v to %s", ctx, nestedSlice.Interface(), key)
 				if len(parent) > 0 {
 					parentMap[key] = nestedSlice.Interface()
 				} else {
@@ -123,7 +129,7 @@ func StructToSchema(elem reflect.Value, d *schema.ResourceData, metadata map[str
 					nestedSchema := make(map[string]interface{})
 					StructToSchema(sliceElem.Index(i), d, childElem.Schema, key, nestedSchema)
 					nestedSlice = append(nestedSlice, nestedSchema)
-					log.Printf("[INFO] appending slice item %+v to %s", nestedSchema, key)
+					logger.Printf("[TRACE] %s appending slice item %+v to %s", ctx, nestedSchema, key)
 				}
 				if len(parent) > 0 {
 					parentMap[key] = nestedSlice
@@ -133,10 +139,12 @@ func StructToSchema(elem reflect.Value, d *schema.ResourceData, metadata map[str
 			}
 		} else {
 			if len(parent) > 0 {
-				log.Printf("[INFO] assigning nested value %+v to %s", elem.FieldByName(item.Metadata.SdkFieldName).Interface(), key)
+				logger.Printf("[TRACE] %s assigning nested value %+v to %s",
+					ctx, elem.FieldByName(item.Metadata.SdkFieldName).Interface(), key)
 				parentMap[key] = elem.FieldByName(item.Metadata.SdkFieldName).Interface()
 			} else {
-				log.Printf("[INFO] assigning value %+v to %s", elem.FieldByName(item.Metadata.SdkFieldName).Interface(), key)
+				logger.Printf("[TRACE] %s assigning value %+v to %s",
+					ctx, elem.FieldByName(item.Metadata.SdkFieldName).Interface(), key)
 				d.Set(key, elem.FieldByName(item.Metadata.SdkFieldName).Interface())
 			}
 		}
@@ -146,23 +154,24 @@ func StructToSchema(elem reflect.Value, d *schema.ResourceData, metadata map[str
 // SchemaToStruct converts terraform schema to NSX model struct
 // currently supports nested subtype and trivial types
 func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[string]*ExtendedSchema, parent string, parentMap map[string]interface{}) {
+	ctx := fmt.Sprintf("[to %s]", elem.Type())
 	for key, item := range metadata {
 		if item.Metadata.ReadOnly {
-			log.Printf("[INFO] skip key %s as read only", key)
+			logger.Printf("[TRACE] %s skip key %s as read only", ctx, key)
 			continue
 		}
 		if item.Metadata.Skip {
-			log.Printf("[INFO] skip key %s", key)
+			logger.Printf("[TRACE] %s skip key %s", ctx, key)
 			continue
 		}
 		if item.Metadata.IntroducedInVersion != "" && util.NsxVersionLower(item.Metadata.IntroducedInVersion) {
-			log.Printf("[INFO] skip key %s as NSX does not have support", key)
+			logger.Printf("[TRACE] %s skip key %s as NSX does not have support", ctx, key)
 			continue
 		}
 
-		log.Printf("[INFO] inspecting key %s with type %s", key, item.Metadata.SchemaType)
+		logger.Printf("[TRACE] %s inspecting key %s with type %s", ctx, key, item.Metadata.SchemaType)
 		if len(parent) > 0 {
-			log.Printf("[INFO] parent %s key %s", parent, key)
+			logger.Printf("[TRACE] %s parent %s key %s", ctx, parent, key)
 		}
 		if item.Metadata.SchemaType == "string" {
 			var value string
@@ -171,7 +180,7 @@ func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[str
 			} else {
 				value = d.Get(key).(string)
 			}
-			log.Printf("[INFO] assigning string %v to %s", value, key)
+			logger.Printf("[TRACE] %s assigning string %v to %s", ctx, value, key)
 			elem.FieldByName(item.Metadata.SdkFieldName).Set(reflect.ValueOf(&value))
 		}
 		if item.Metadata.SchemaType == "bool" {
@@ -181,7 +190,7 @@ func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[str
 			} else {
 				value = d.Get(key).(bool)
 			}
-			log.Printf("[INFO] assigning bool %v to %s", value, key)
+			logger.Printf("[TRACE] %s assigning bool %v to %s", ctx, value, key)
 			elem.FieldByName(item.Metadata.SdkFieldName).Set(reflect.ValueOf(&value))
 		}
 		if item.Metadata.SchemaType == "int" {
@@ -191,7 +200,7 @@ func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[str
 			} else {
 				value = int64(d.Get(key).(int))
 			}
-			log.Printf("[INFO] assigning int %v to %s", value, key)
+			logger.Printf("[TRACE] %s assigning int %v to %s", ctx, value, key)
 			elem.FieldByName(item.Metadata.SdkFieldName).Set(reflect.ValueOf(&value))
 		}
 		if item.Metadata.SchemaType == "struct" {
@@ -209,7 +218,7 @@ func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[str
 
 			childElem := item.Schema.Elem.(*ExtendedResource)
 			SchemaToStruct(nestedObj.Elem(), d, childElem.Schema, key, nestedSchema)
-			log.Printf("[INFO] assigning struct %v to %s", nestedObj, key)
+			logger.Printf("[TRACE] %s assigning struct %v to %s", ctx, nestedObj, key)
 			elem.FieldByName(item.Metadata.SdkFieldName).Set(nestedObj)
 		}
 		if item.Metadata.SchemaType == "list" || item.Metadata.SchemaType == "set" {
@@ -253,7 +262,7 @@ func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[str
 					} else {
 						sliceElem.Index(i).Set(reflect.ValueOf(v))
 					}
-					log.Printf("[INFO] appending %v to %s", v, key)
+					logger.Printf("[TRACE] %s appending %v to %s", ctx, v, key)
 				}
 			}
 
@@ -267,7 +276,7 @@ func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[str
 					nestedSchema := childItem.(map[string]interface{})
 					SchemaToStruct(nestedObj.Elem(), d, childElem.Schema, key, nestedSchema)
 					sliceElem.Index(i).Set(nestedObj.Elem())
-					log.Printf("[INFO] appending %+v to %s", nestedObj.Elem(), key)
+					logger.Printf("[TRACE] %s appending %+v to %s", ctx, nestedObj.Elem(), key)
 				}
 			}
 		}
