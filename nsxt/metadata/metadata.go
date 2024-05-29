@@ -237,10 +237,6 @@ func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[str
 				}
 			}
 
-			if len(itemList) == 0 {
-				continue
-			}
-
 			// List of string, bool, int
 			if childElem, ok := item.Schema.Elem.(*ExtendedSchema); ok {
 				sliceElem := elem.FieldByName(item.Metadata.SdkFieldName)
