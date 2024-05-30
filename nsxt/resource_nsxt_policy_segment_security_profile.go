@@ -282,7 +282,9 @@ func resourceNsxtPolicySegmentSecurityProfilePatch(d *schema.ResourceData, m int
 		BpduFilterAllow: bpduFilterAllow,
 	}
 	elem := reflect.ValueOf(&obj).Elem()
-	metadata.SchemaToStruct(elem, d, segmentSecurityProfileSchema, "", nil)
+	if err := metadata.SchemaToStruct(elem, d, segmentSecurityProfileSchema, "", nil); err != nil {
+		return err
+	}
 
 	log.Printf("[INFO] Sending SegmentSecurityProfile with ID %s", id)
 	client := infra.NewSegmentSecurityProfilesClient(getSessionContext(d, m), connector)
@@ -323,7 +325,9 @@ func resourceNsxtPolicySegmentSecurityProfileRead(d *schema.ResourceData, m inte
 	}
 
 	elem := reflect.ValueOf(&obj).Elem()
-	metadata.StructToSchema(elem, d, segmentSecurityProfileSchema, "", nil)
+	if err := metadata.StructToSchema(elem, d, segmentSecurityProfileSchema, "", nil); err != nil {
+		return err
+	}
 
 	d.Set("display_name", obj.DisplayName)
 	d.Set("description", obj.Description)
