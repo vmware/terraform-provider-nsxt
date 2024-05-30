@@ -174,7 +174,9 @@ func resourceNsxtPolicyMacDiscoveryProfileCreate(d *schema.ResourceData, m inter
 	}
 
 	elem := reflect.ValueOf(&obj).Elem()
-	metadata.SchemaToStruct(elem, d, macDiscoveryProfileSchema, "", nil)
+	if err := metadata.SchemaToStruct(elem, d, macDiscoveryProfileSchema, "", nil); err != nil {
+		return err
+	}
 
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating MacDiscoveryProfile with ID %s", id)
@@ -213,9 +215,7 @@ func resourceNsxtPolicyMacDiscoveryProfileRead(d *schema.ResourceData, m interfa
 	d.Set("path", obj.Path)
 
 	elem := reflect.ValueOf(&obj).Elem()
-	metadata.StructToSchema(elem, d, macDiscoveryProfileSchema, "", nil)
-
-	return nil
+	return metadata.StructToSchema(elem, d, macDiscoveryProfileSchema, "", nil)
 }
 
 func resourceNsxtPolicyMacDiscoveryProfileUpdate(d *schema.ResourceData, m interface{}) error {
@@ -241,7 +241,9 @@ func resourceNsxtPolicyMacDiscoveryProfileUpdate(d *schema.ResourceData, m inter
 	}
 
 	elem := reflect.ValueOf(&obj).Elem()
-	metadata.SchemaToStruct(elem, d, macDiscoveryProfileSchema, "", nil)
+	if err := metadata.SchemaToStruct(elem, d, macDiscoveryProfileSchema, "", nil); err != nil {
+		return err
+	}
 
 	// Update the resource using PATCH
 	boolFalse := false

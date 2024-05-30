@@ -81,10 +81,25 @@ func GetSchemaFromExtendedSchema(ext map[string]*ExtendedSchema) map[string]*sch
 	return result
 }
 
+func getContextString(prefix, parent string, elemType reflect.Type) string {
+	ctx := elemType.String()
+	if len(parent) > 0 {
+		ctx = fmt.Sprintf("%s->%s", parent, elemType.Name())
+	}
+	return fmt.Sprintf("[%s %s]", prefix, ctx)
+}
+
 // StructToSchema converts NSX model struct to terraform schema
 // currently supports nested subtype and trivial types
-func StructToSchema(elem reflect.Value, d *schema.ResourceData, metadata map[string]*ExtendedSchema, parent string, parentMap map[string]interface{}) {
-	ctx := fmt.Sprintf("[from %s]", elem.Type())
+func StructToSchema(elem reflect.Value, d *schema.ResourceData, metadata map[string]*ExtendedSchema, parent string, parentMap map[string]interface{}) (err error) {
+	ctx := getContextString("from", parent, elem.Type())
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("%s recovered from panic: %v", ctx, r)
+			logger.Printf("[ERROR] %v", err)
+		}
+	}()
+
 	for key, item := range metadata {
 		if item.Metadata.Skip {
 			continue
@@ -94,6 +109,14 @@ func StructToSchema(elem reflect.Value, d *schema.ResourceData, metadata map[str
 		if len(parent) > 0 {
 			logger.Printf("[TRACE] %s parent %s key %s", ctx, parent, key)
 		}
+		if !elem.FieldByName(item.Metadata.SdkFieldName).IsValid() {
+			// FieldByName can't find the field by name
+			logger.Printf("[ERROR] %s skip key %s as %s not found in struct",
+				ctx, key, item.Metadata.SdkFieldName)
+			err = fmt.Errorf("%s key %s not found in %s",
+				ctx, key, item.Metadata.SdkFieldName)
+			return
+		}
 		if elem.FieldByName(item.Metadata.SdkFieldName).IsNil() {
 			logger.Printf("[TRACE] %s skip key %s with nil value", ctx, key)
 			continue
@@ -102,7 +125,9 @@ func StructToSchema(elem reflect.Value, d *schema.ResourceData, metadata map[str
 			nestedObj := elem.FieldByName(item.Metadata.SdkFieldName)
 			nestedSchema := make(map[string]interface{})
 			childElem := item.Schema.Elem.(*ExtendedResource)
-			StructToSchema(nestedObj.Elem(), d, childElem.Schema, key, nestedSchema)
+			if err = StructToSchema(nestedObj.Elem(), d, childElem.Schema, key, nestedSchema); err != nil {
+				return
+			}
 			logger.Printf("[TRACE] %s assigning struct %+v to %s", ctx, nestedObj, key)
 			var nestedSlice []map[string]interface{}
 			nestedSlice = append(nestedSlice, nestedSchema)
@@ -127,7 +152,9 @@ func StructToSchema(elem reflect.Value, d *schema.ResourceData, metadata map[str
 				var nestedSlice []map[string]interface{}
 				for i := 0; i < sliceElem.Len(); i++ {
 					nestedSchema := make(map[string]interface{})
-					StructToSchema(sliceElem.Index(i), d, childElem.Schema, key, nestedSchema)
+					if err = StructToSchema(sliceElem.Index(i), d, childElem.Schema, key, nestedSchema); err != nil {
+						return
+					}
 					nestedSlice = append(nestedSlice, nestedSchema)
 					logger.Printf("[TRACE] %s appending slice item %+v to %s", ctx, nestedSchema, key)
 				}
@@ -149,12 +176,21 @@ func StructToSchema(elem reflect.Value, d *schema.ResourceData, metadata map[str
 			}
 		}
 	}
+
+	return
 }
 
 // SchemaToStruct converts terraform schema to NSX model struct
 // currently supports nested subtype and trivial types
-func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[string]*ExtendedSchema, parent string, parentMap map[string]interface{}) {
-	ctx := fmt.Sprintf("[to %s]", elem.Type())
+func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[string]*ExtendedSchema, parent string, parentMap map[string]interface{}) (err error) {
+	ctx := getContextString("to", parent, elem.Type())
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("%s recovered from panic: %v", ctx, r)
+			logger.Printf("[ERROR] %v", err)
+		}
+	}()
+
 	for key, item := range metadata {
 		if item.Metadata.ReadOnly {
 			logger.Printf("[TRACE] %s skip key %s as read only", ctx, key)
@@ -167,6 +203,14 @@ func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[str
 		if item.Metadata.IntroducedInVersion != "" && util.NsxVersionLower(item.Metadata.IntroducedInVersion) {
 			logger.Printf("[TRACE] %s skip key %s as NSX does not have support", ctx, key)
 			continue
+		}
+		if !elem.FieldByName(item.Metadata.SdkFieldName).IsValid() {
+			// FieldByName can't find the field by name
+			logger.Printf("[WARN] %s skip key %s as %s not found in struct",
+				ctx, key, item.Metadata.SdkFieldName)
+			err = fmt.Errorf("%s key %s not found in %s",
+				ctx, key, item.Metadata.SdkFieldName)
+			return
 		}
 
 		logger.Printf("[TRACE] %s inspecting key %s with type %s", ctx, key, item.Metadata.SchemaType)
@@ -217,7 +261,9 @@ func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[str
 			nestedSchema := itemList[0].(map[string]interface{})
 
 			childElem := item.Schema.Elem.(*ExtendedResource)
-			SchemaToStruct(nestedObj.Elem(), d, childElem.Schema, key, nestedSchema)
+			if err = SchemaToStruct(nestedObj.Elem(), d, childElem.Schema, key, nestedSchema); err != nil {
+				return
+			}
 			logger.Printf("[TRACE] %s assigning struct %v to %s", ctx, nestedObj, key)
 			elem.FieldByName(item.Metadata.SdkFieldName).Set(nestedObj)
 		}
@@ -270,11 +316,15 @@ func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[str
 				for i, childItem := range itemList {
 					nestedObj := reflect.New(item.Metadata.ReflectType)
 					nestedSchema := childItem.(map[string]interface{})
-					SchemaToStruct(nestedObj.Elem(), d, childElem.Schema, key, nestedSchema)
+					if err = SchemaToStruct(nestedObj.Elem(), d, childElem.Schema, key, nestedSchema); err != nil {
+						return
+					}
 					sliceElem.Index(i).Set(nestedObj.Elem())
 					logger.Printf("[TRACE] %s appending %+v to %s", ctx, nestedObj.Elem(), key)
 				}
 			}
 		}
 	}
+
+	return
 }

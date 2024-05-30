@@ -475,7 +475,8 @@ func TestStructToSchema(t *testing.T) {
 		t, testSchema, map[string]interface{}{})
 
 	elem := reflect.ValueOf(&obj).Elem()
-	StructToSchema(elem, d, testExtendedSchema, "", nil)
+	err := StructToSchema(elem, d, testExtendedSchema, "", nil)
+	assert.NoError(t, err, "unexpected error calling StructToSchema")
 
 	t.Run("Base types", func(t *testing.T) {
 		assert.Equal(t, "test_string", d.Get("string_field").(string))
@@ -613,7 +614,8 @@ func TestSchemaToStruct(t *testing.T) {
 
 	obj := testStruct{}
 	elem := reflect.ValueOf(&obj).Elem()
-	SchemaToStruct(elem, d, testExtendedSchema, "", nil)
+	err := SchemaToStruct(elem, d, testExtendedSchema, "", nil)
+	assert.NoError(t, err, "unexpected error calling SchemaToStruct")
 
 	nestStr1, nestStr2, nestStr3 := "nested_string_1", "nested_string_2", "nested_string_3"
 	trueVal, falseVal := true, false
@@ -697,7 +699,8 @@ func TestSchemaToStructEmptySlice(t *testing.T) {
 	obj := testDeepNestedStruct{}
 	elem := reflect.ValueOf(&obj).Elem()
 	testSch := mixedStructSchema().Elem.(*ExtendedResource).Schema
-	SchemaToStruct(elem, d, testSch, "", nil)
+	err := SchemaToStruct(elem, d, testSch, "", nil)
+	assert.NoError(t, err, "unexpected error calling SchemaToStruct")
 
 	t.Run("Empty bool list", func(t *testing.T) {
 		assert.NotNil(t, obj.BoolList)
