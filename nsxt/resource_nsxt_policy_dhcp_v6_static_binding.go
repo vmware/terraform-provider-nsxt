@@ -34,7 +34,7 @@ func resourceNsxtPolicyDhcpV6StaticBinding() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
-			"context":      getContextSchema(false, false),
+			"context":      getContextSchema(false, false, false),
 			"segment_path": getPolicyPathSchema(true, true, "segment path"),
 			"dns_nameservers": {
 				Type:        schema.TypeList,

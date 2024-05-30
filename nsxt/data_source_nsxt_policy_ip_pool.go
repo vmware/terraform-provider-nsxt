@@ -19,7 +19,7 @@ func dataSourceNsxtPolicyIPPool() *schema.Resource {
 			"display_name": getDataSourceDisplayNameSchema(),
 			"description":  getDataSourceDescriptionSchema(),
 			"path":         getPathSchema(),
-			"context":      getContextSchema(false, false),
+			"context":      getContextSchema(false, false, false),
 			"realized_id": {
 				Type:        schema.TypeString,
 				Description: "The ID of the realized resource",

@@ -42,7 +42,7 @@ func resourceNsxtPolicyGatewayDNSForwarder() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
-			"context":      getContextSchema(false, false),
+			"context":      getContextSchema(false, false, false),
 			"gateway_path": getPolicyPathSchema(true, true, "Policy path for the Gateway"),
 			"listener_ip": {
 				Type:         schema.TypeString,

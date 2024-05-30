@@ -27,7 +27,7 @@ func dataSourceNsxtPolicyRealizationInfo() *schema.Resource {
 				Required:     true,
 				ValidateFunc: validatePolicyPath(),
 			},
-			"context": getContextSchema(false, false),
+			"context": getContextSchema(false, false, false),
 			"entity_type": {
 				Type:        schema.TypeString,
 				Description: "The entity type of the realized resource",

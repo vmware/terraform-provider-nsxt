@@ -56,7 +56,7 @@ func resourceNsxtPolicyIntrusionServiceProfile() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
-			"context":      getContextSchema(false, false),
+			"context":      getContextSchema(false, false, false),
 			"criteria": {
 				Type:        schema.TypeList,
 				Description: "Filtering criteria for the IDS Profile",

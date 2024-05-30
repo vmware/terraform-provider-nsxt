@@ -25,7 +25,7 @@ var segmentSecurityProfileSchema = map[string]*metadata.ExtendedSchema{
 	"description":  metadata.GetExtendedSchema(getDescriptionSchema()),
 	"revision":     metadata.GetExtendedSchema(getRevisionSchema()),
 	"tag":          metadata.GetExtendedSchema(getTagsSchema()),
-	"context":      metadata.GetExtendedSchema(getContextSchema(false, false)),
+	"context":      metadata.GetExtendedSchema(getContextSchema(false, false, false)),
 	"bpdu_filter_allow": {
 		Schema: schema.Schema{
 			Type: schema.TypeSet,

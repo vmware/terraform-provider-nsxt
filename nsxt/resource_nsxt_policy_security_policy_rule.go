@@ -62,7 +62,7 @@ func resourceNsxtPolicySecurityPolicyRuleCreate(d *schema.ResourceData, m interf
 }
 
 func setSecurityPolicyRuleContext(d *schema.ResourceData, projectID string) error {
-	providedProjectID := getProjectIDFromSchema(d)
+	providedProjectID, _ := getContextDataFromSchema(d)
 	if providedProjectID == "" {
 		contexts := make([]interface{}, 1)
 		ctxMap := make(map[string]interface{})

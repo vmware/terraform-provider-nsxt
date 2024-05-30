@@ -144,7 +144,7 @@ func resourceNsxtPolicyTier1Gateway() *schema.Resource {
 				ValidateFunc: validation.StringInSlice(t1TypeValues, false),
 				Optional:     true,
 			},
-			"context": getContextSchema(false, false),
+			"context": getContextSchema(false, false, false),
 		},
 	}
 }

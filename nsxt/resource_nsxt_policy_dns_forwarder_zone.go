@@ -33,7 +33,7 @@ func resourceNsxtPolicyDNSForwarderZone() *schema.Resource {
 			"description":      getDescriptionSchema(),
 			"revision":         getRevisionSchema(),
 			"tag":              getTagsSchema(),
-			"context":          getContextSchema(false, false),
+			"context":          getContextSchema(false, false, false),
 			"dns_domain_names": getDomainNamesSchema(),
 			"source_ip": {
 				Type:         schema.TypeString,
