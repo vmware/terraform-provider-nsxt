@@ -30,7 +30,7 @@ func dataSourceNsxtPolicyGatewayPolicy() *schema.Resource {
 			"description":  getDataSourceDescriptionSchema(),
 			"path":         getPathSchema(),
 			"domain":       getDataSourceDomainNameSchema(),
-			"context":      getContextSchema(false, false),
+			"context":      getContextSchema(false, false, false),
 			"category": {
 				Type:         schema.TypeString,
 				Description:  "Category",

@@ -39,7 +39,7 @@ func resourceNsxtPolicyIPBlock() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
-			"context":      getContextSchema(false, false),
+			"context":      getContextSchema(false, false, false),
 			"cidr": {
 				Type:         schema.TypeString,
 				Description:  "Network address and the prefix length which will be associated with a layer-2 broadcast domain",

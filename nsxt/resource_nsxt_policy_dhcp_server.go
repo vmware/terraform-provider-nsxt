@@ -33,7 +33,7 @@ func resourceNsxtPolicyDhcpServer() *schema.Resource {
 			"description":       getDescriptionSchema(),
 			"revision":          getRevisionSchema(),
 			"tag":               getTagsSchema(),
-			"context":           getContextSchema(false, false),
+			"context":           getContextSchema(false, false, false),
 			"edge_cluster_path": getPolicyPathSchema(false, false, "Edge Cluster path"),
 			"lease_time": {
 				Type:         schema.TypeInt,

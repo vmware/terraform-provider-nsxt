@@ -37,7 +37,7 @@ func resourceNsxtPolicyStaticRoute() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
-			"context":      getContextSchema(false, false),
+			"context":      getContextSchema(false, false, false),
 			"gateway_path": getPolicyGatewayPathSchema(),
 			"network": {
 				Type:         schema.TypeString,

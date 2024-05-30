@@ -40,7 +40,7 @@ func resourceNsxtPolicyIPPoolBlockSubnet() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
-			"context":      getContextSchema(false, false),
+			"context":      getContextSchema(false, false, false),
 			"auto_assign_gateway": {
 				Type:        schema.TypeBool,
 				Description: "If true, the first IP in the range will be reserved for gateway",
