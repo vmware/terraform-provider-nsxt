@@ -6,7 +6,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
+	"github.com/vmware/terraform-provider-nsxt/api/infra/segments"
 	tier1s "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -17,10 +21,6 @@ import (
 	gm_segments "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/segments"
 	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-
-	"github.com/vmware/terraform-provider-nsxt/api/infra"
-	"github.com/vmware/terraform-provider-nsxt/api/infra/segments"
-	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 var connectivityValues = []string{
@@ -267,7 +267,7 @@ func getPolicyCommonSegmentSchema(vlanRequired bool, isFixed bool) map[string]*s
 		"revision":     getRevisionSchema(),
 		"tag":          getTagsSchema(),
 		"ignore_tags":  getIgnoreTagsSchema(),
-		"context":      getContextSchema(),
+		"context":      getContextSchema(false, false),
 		"advanced_config": {
 			Type:        schema.TypeList,
 			Description: "Advanced segment configuration",
@@ -492,7 +492,7 @@ func getDhcpOptsFromMap(dhcpConfig map[string]interface{}) *model.DhcpV4Options 
 }
 
 func getSegmentSubnetDhcpConfigFromSchema(schemaConfig map[string]interface{}) (*data.StructValue, error) {
-	if nsxVersionLower("3.0.0") {
+	if util.NsxVersionLower("3.0.0") {
 		return nil, nil
 	}
 
@@ -728,7 +728,7 @@ func policySegmentResourceToInfraStruct(context utl.SessionContext, id string, d
 	if tzPath != "" {
 		obj.TransportZonePath = &tzPath
 	}
-	if nsxVersionHigherOrEqual("3.0.0") {
+	if util.NsxVersionHigherOrEqual("3.0.0") {
 		obj.ReplicationMode = &replicationMode
 		if dhcpConfigPath != "" {
 			obj.DhcpConfigPath = &dhcpConfigPath
@@ -808,7 +808,7 @@ func policySegmentResourceToInfraStruct(context utl.SessionContext, id string, d
 			advConfigStruct.Connectivity = &connectivity
 		}
 
-		if nsxVersionHigherOrEqual("3.0.0") {
+		if util.NsxVersionHigherOrEqual("3.0.0") {
 			teamingPolicy := advConfigMap["uplink_teaming_policy"].(string)
 			if teamingPolicy != "" {
 				advConfigStruct.UplinkTeamingPolicyName = &teamingPolicy
@@ -819,7 +819,7 @@ func policySegmentResourceToInfraStruct(context utl.SessionContext, id string, d
 				advConfigStruct.AddressPoolPaths = append(advConfigStruct.AddressPoolPaths, poolPath)
 			}
 
-			if nsxVersionHigherOrEqual("3.1.0") {
+			if util.NsxVersionHigherOrEqual("3.1.0") {
 				urpfMode := advConfigMap["urpf_mode"].(string)
 				advConfigStruct.UrpfMode = &urpfMode
 			}
@@ -1371,7 +1371,7 @@ func nsxtPolicySegmentRead(d *schema.ResourceData, m interface{}, isVlan bool, i
 		}
 	}
 
-	if nsxVersionHigherOrEqual("3.0.0") {
+	if util.NsxVersionHigherOrEqual("3.0.0") {
 		d.Set("replication_mode", obj.ReplicationMode)
 	}
 
@@ -1390,7 +1390,7 @@ func nsxtPolicySegmentRead(d *schema.ResourceData, m interface{}, isVlan bool, i
 		if obj.AdvancedConfig.UrpfMode != nil {
 			advConfig["urpf_mode"] = *obj.AdvancedConfig.UrpfMode
 		} else {
-			if nsxVersionLower("3.1.0") {
+			if util.NsxVersionLower("3.1.0") {
 				// set to default in early versions
 				advConfig["urpf_mode"] = model.SegmentAdvancedConfig_URPF_MODE_STRICT
 			}

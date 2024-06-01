@@ -42,7 +42,7 @@ func resourceNsxtPolicyContextProfileCustomAttribute() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"context": getContextSchema(),
+			"context": getContextSchema(false, false),
 			"key": {
 				Type:         schema.TypeString,
 				Description:  "Key for attribute",

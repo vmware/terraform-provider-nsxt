@@ -8,15 +8,16 @@ import (
 	"log"
 	"strings"
 
+	"github.com/vmware/terraform-provider-nsxt/api/infra/domains"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-
-	"github.com/vmware/terraform-provider-nsxt/api/infra/domains"
-	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 var conditionKeyValues = []string{
@@ -100,7 +101,7 @@ func resourceNsxtPolicyGroup() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
-			"context":      getContextSchema(),
+			"context":      getContextSchema(false, false),
 			"domain":       getDomainNameSchema(),
 			"group_type": {
 				Type:         schema.TypeString,
@@ -874,7 +875,7 @@ func resourceNsxtPolicyGroupCreate(d *schema.ResourceData, m interface{}) error 
 		ExtendedExpression: extendedExpressionList,
 	}
 
-	if groupType != "" && nsxVersionHigherOrEqual("3.2.0") {
+	if groupType != "" && util.NsxVersionHigherOrEqual("3.2.0") {
 		obj.GroupType = groupTypes
 	}
 
@@ -913,7 +914,7 @@ func resourceNsxtPolicyGroupRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("domain", getDomainFromResourcePath(*obj.Path))
 	d.Set("revision", obj.Revision)
 	groupType := ""
-	if len(obj.GroupType) > 0 && nsxVersionHigherOrEqual("3.2.0") {
+	if len(obj.GroupType) > 0 && util.NsxVersionHigherOrEqual("3.2.0") {
 		groupType = obj.GroupType[0]
 		d.Set("group_type", groupType)
 	}
@@ -987,7 +988,7 @@ func resourceNsxtPolicyGroupUpdate(d *schema.ResourceData, m interface{}) error 
 		ExtendedExpression: extendedExpressionList,
 	}
 
-	if groupType != "" && nsxVersionHigherOrEqual("3.2.0") {
+	if groupType != "" && util.NsxVersionHigherOrEqual("3.2.0") {
 		obj.GroupType = groupTypes
 	}
 

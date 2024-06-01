@@ -162,7 +162,7 @@ func getPolicyInterVRFRoutingFromSchema(d *schema.ResourceData) model.PolicyInte
 			}
 			var outFilter []string
 			if brlMap["out_filter"] != nil {
-				inFilter = interface2StringList(brlMap["out_filter"].([]interface{}))
+				outFilter = interface2StringList(brlMap["out_filter"].([]interface{}))
 			}
 			bgpRouteLeaking = append(bgpRouteLeaking, model.BgpRouteLeaking{
 				AddressFamily: &addressFamily,

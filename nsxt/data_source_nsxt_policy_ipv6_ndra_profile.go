@@ -16,7 +16,7 @@ func dataSourceNsxtPolicyIpv6NdraProfile() *schema.Resource {
 			"display_name": getDataSourceDisplayNameSchema(),
 			"description":  getDataSourceDescriptionSchema(),
 			"path":         getPathSchema(),
-			"context":      getContextSchema(),
+			"context":      getContextSchema(false, false),
 		},
 	}
 }

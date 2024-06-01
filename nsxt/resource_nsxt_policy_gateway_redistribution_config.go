@@ -7,10 +7,11 @@ import (
 	"fmt"
 	"strings"
 
+	tier0s "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s"
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-
-	tier0s "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s"
 )
 
 func resourceNsxtPolicyGatewayRedistributionConfig() *schema.Resource {
@@ -71,7 +72,7 @@ func policyGatewayRedistributionConfigPatch(d *schema.ResourceData, m interface{
 		BgpEnabled: &bgpEnabled,
 	}
 
-	if nsxVersionHigherOrEqual("3.1.0") {
+	if util.NsxVersionHigherOrEqual("3.1.0") {
 		redistributionStruct.OspfEnabled = &ospfEnabled
 	}
 

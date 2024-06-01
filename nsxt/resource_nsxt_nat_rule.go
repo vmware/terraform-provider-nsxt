@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/logical_routers/nat"
@@ -121,7 +123,7 @@ func resourceNsxtNatRuleCreate(d *schema.ResourceData, m interface{}) error {
 	displayName := d.Get("display_name").(string)
 	tags := getMPTagsFromSchema(d)
 	action := d.Get("action").(string)
-	if action == "NO_NAT" && nsxVersionHigherOrEqual("3.0.0") {
+	if action == "NO_NAT" && util.NsxVersionHigherOrEqual("3.0.0") {
 		return fmt.Errorf("NO_NAT action is not supported in NSX versions 3.0.0 and greater. Use NO_SNAT and NO_DNAT instead")
 	}
 	enabled := d.Get("enabled").(bool)
@@ -230,7 +232,7 @@ func resourceNsxtNatRuleUpdate(d *schema.ResourceData, m interface{}) error {
 	displayName := d.Get("display_name").(string)
 	tags := getMPTagsFromSchema(d)
 	action := d.Get("action").(string)
-	if action == "NO_NAT" && nsxVersionHigherOrEqual("3.0.0") {
+	if action == "NO_NAT" && util.NsxVersionHigherOrEqual("3.0.0") {
 		return fmt.Errorf("NO_NAT action is not supported in NSX versions 3.0.0 and greater. Use NO_SNAT and NO_DNAT instead")
 	}
 	enabled := d.Get("enabled").(bool)

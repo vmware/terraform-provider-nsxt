@@ -27,25 +27,7 @@ func dataSourceNsxtPolicyProject() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"site_info": {
-				Type: schema.TypeList,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"edge_cluster_paths": {
-							Type: schema.TypeList,
-							Elem: &schema.Schema{
-								Type: schema.TypeString,
-							},
-							Optional: true,
-						},
-						"site_path": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-					},
-				},
-				Optional: true,
-			},
+			"site_info": getSiteInfoSchema(),
 			"tier0_gateway_paths": {
 				Type: schema.TypeList,
 				Elem: &schema.Schema{
@@ -57,6 +39,27 @@ func dataSourceNsxtPolicyProject() *schema.Resource {
 	}
 }
 
+func getSiteInfoSchema() *schema.Schema {
+	return &schema.Schema{
+		Type: schema.TypeList,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"edge_cluster_paths": {
+					Type: schema.TypeList,
+					Elem: &schema.Schema{
+						Type: schema.TypeString,
+					},
+					Optional: true,
+				},
+				"site_path": {
+					Type:     schema.TypeString,
+					Optional: true,
+				},
+			},
+		},
+		Optional: true,
+	}
+}
 func dataSourceNsxtPolicyProjectRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	client := infra.NewProjectsClient(connector)

@@ -39,7 +39,7 @@ func resourceNsxtPolicyIPAddressAllocation() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
-			"context":      getContextSchema(),
+			"context":      getContextSchema(false, false),
 			"pool_path":    getPolicyPathSchema(true, true, "The path of the IP Pool for this allocation"),
 			"allocation_ip": {
 				Type:         schema.TypeString,

@@ -7,16 +7,17 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
+	tier1s "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-
-	"github.com/vmware/terraform-provider-nsxt/api/infra"
-	tier1s "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s"
-	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 var advertismentTypeValues = []string{
@@ -143,7 +144,7 @@ func resourceNsxtPolicyTier1Gateway() *schema.Resource {
 				ValidateFunc: validation.StringInSlice(t1TypeValues, false),
 				Optional:     true,
 			},
-			"context": getContextSchema(),
+			"context": getContextSchema(false, false),
 		},
 	}
 }
@@ -318,7 +319,7 @@ func resourceNsxtPolicyTier1GatewaySetQos(d *schema.ResourceData, obj *model.Tie
 }
 
 func resourceNsxtPolicyTier1GatewaySetVersionDependentAttrs(d *schema.ResourceData, obj *model.Tier1) {
-	if nsxVersionLower("3.0.0") {
+	if util.NsxVersionLower("3.0.0") {
 		return
 	}
 
@@ -382,7 +383,7 @@ func policyTier1GatewayResourceToInfraStruct(context utl.SessionContext, d *sche
 	connectivityType := d.Get("type").(string)
 	revision := int64(d.Get("revision").(int))
 
-	if haMode == model.Tier1_HA_MODE_ACTIVE && nsxVersionLower("4.0.0") {
+	if haMode == model.Tier1_HA_MODE_ACTIVE && util.NsxVersionLower("4.0.0") {
 		return infraStruct, fmt.Errorf("ACTIVE_ACTIVE HA mode is not supported in NSX versions lower than 4.0.0. Use ACTIVE_BACKUP instead")
 	}
 
@@ -404,7 +405,7 @@ func policyTier1GatewayResourceToInfraStruct(context utl.SessionContext, d *sche
 		ResourceType:            &t1Type,
 	}
 
-	if nsxVersionHigherOrEqual("3.2.0") {
+	if util.NsxVersionHigherOrEqual("3.2.0") {
 		if haMode != "NONE" && haMode != "" {
 			obj.HaMode = &haMode
 		}
@@ -546,7 +547,7 @@ func resourceNsxtPolicyTier1GatewayRead(d *schema.ResourceData, m interface{}) e
 	d.Set("enable_firewall", !(*obj.DisableFirewall))
 	d.Set("enable_standby_relocation", obj.EnableStandbyRelocation)
 	d.Set("force_whitelisting", obj.ForceWhitelisting)
-	if nsxVersionHigherOrEqual("3.2.0") {
+	if util.NsxVersionHigherOrEqual("3.2.0") {
 		if obj.HaMode == nil {
 			d.Set("ha_mode", "NONE")
 		} else {

@@ -5,6 +5,10 @@ import (
 	"log"
 	"strings"
 
+	nsx_policy "github.com/vmware/terraform-provider-nsxt/api"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
@@ -15,9 +19,6 @@ import (
 	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-
-	nsx_policy "github.com/vmware/terraform-provider-nsxt/api"
-	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 var nsxtPolicyTier0GatewayRedistributionRuleTypes = []string{
@@ -534,7 +535,7 @@ func setLocaleServiceRedistributionRulesConfig(rulesConfig []interface{}, config
 			rule.RouteMapPath = &routeMapPath
 		}
 
-		if nsxVersionHigherOrEqual("3.1.0") {
+		if util.NsxVersionHigherOrEqual("3.1.0") {
 			if bgp {
 				rule.Destinations = append(rule.Destinations, model.Tier0RouteRedistributionRule_DESTINATIONS_BGP)
 			}
@@ -565,7 +566,7 @@ func setLocaleServiceRedistributionConfig(redistributionConfigs []interface{}, s
 		BgpEnabled: &bgpEnabled,
 	}
 
-	if nsxVersionHigherOrEqual("3.1.0") {
+	if util.NsxVersionHigherOrEqual("3.1.0") {
 		redistributionStruct.OspfEnabled = &ospfEnabled
 	}
 
@@ -580,7 +581,7 @@ func getLocaleServiceRedistributionRuleConfig(config *model.Tier0RouteRedistribu
 		rule["name"] = ruleConfig.Name
 		rule["route_map_path"] = ruleConfig.RouteMapPath
 		rule["types"] = ruleConfig.RouteRedistributionTypes
-		if nsxVersionHigherOrEqual("3.1.0") {
+		if util.NsxVersionHigherOrEqual("3.1.0") {
 			bgp := false
 			ospf := false
 			for _, destination := range ruleConfig.Destinations {

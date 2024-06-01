@@ -10,14 +10,15 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/vmware/terraform-provider-nsxt/api/infra"
+	localeservices "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s/locale_services"
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	gm_tier1s "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_1s"
 	gm_locale_services "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra/tier_1s/locale_services"
 	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-
-	"github.com/vmware/terraform-provider-nsxt/api/infra"
-	localeservices "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s/locale_services"
 )
 
 func resourceNsxtPolicyTier1GatewayInterface() *schema.Resource {
@@ -37,7 +38,7 @@ func resourceNsxtPolicyTier1GatewayInterface() *schema.Resource {
 			"description":            getDescriptionSchema(),
 			"revision":               getRevisionSchema(),
 			"tag":                    getTagsSchema(),
-			"context":                getContextSchema(),
+			"context":                getContextSchema(false, false),
 			"gateway_path":           getPolicyPathSchema(true, true, "Policy path for tier1 gateway"),
 			"segment_path":           getPolicyPathSchema(true, true, "Policy path for connected segment"),
 			"subnets":                getGatewayInterfaceSubnetsSchema(),
@@ -153,7 +154,7 @@ func resourceNsxtPolicyTier1GatewayInterfaceCreate(d *schema.ResourceData, m int
 		obj.Mtu = &mtu
 	}
 
-	if nsxVersionHigherOrEqual("3.0.0") {
+	if util.NsxVersionHigherOrEqual("3.0.0") {
 		urpfMode := d.Get("urpf_mode").(string)
 		obj.UrpfMode = &urpfMode
 	}
@@ -279,7 +280,7 @@ func resourceNsxtPolicyTier1GatewayInterfaceUpdate(d *schema.ResourceData, m int
 		obj.Mtu = &mtu
 	}
 
-	if nsxVersionHigherOrEqual("3.0.0") {
+	if util.NsxVersionHigherOrEqual("3.0.0") {
 		urpfMode := d.Get("urpf_mode").(string)
 		obj.UrpfMode = &urpfMode
 	}

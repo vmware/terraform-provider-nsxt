@@ -13,10 +13,14 @@ import (
 	"math/rand"
 	"net/http"
 	"net/http/httputil"
+	"net/url"
 	"os"
 	"regexp"
 	"strings"
 	"time"
+
+	tf_api "github.com/vmware/terraform-provider-nsxt/api/utl"
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -28,8 +32,6 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 	"golang.org/x/exp/slices"
-
-	tf_api "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 var defaultRetryOnStatusCodes = []int{400, 409, 429, 500, 503, 504}
@@ -325,6 +327,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_distributed_flood_protection_profile":       dataSourceNsxtPolicyDistributedFloodProtectionProfile(),
 			"nsxt_policy_gateway_flood_protection_profile":           dataSourceNsxtPolicyGatewayFloodProtectionProfile(),
 			"nsxt_manager_info":                                      dataSourceNsxtManagerInfo(),
+			"nsxt_policy_vpc":                                        dataSourceNsxtPolicyVPC(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -554,6 +557,12 @@ func configureNsxtClient(d *schema.ResourceData, clients *nsxtClients) error {
 	insecure := d.Get("allow_unverified_ssl").(bool)
 	username := d.Get("username").(string)
 	password := d.Get("password").(string)
+
+	// The correct place to escape special chars would be inside the SDK
+	// However since the SDK is deprecated, we implement escaping here
+	// TODO implement this functionality with new mp-sdk
+	username = url.QueryEscape(username)
+	password = url.QueryEscape(password)
 
 	if needCreds {
 		if username == "" {
@@ -1174,7 +1183,7 @@ func getPolicyConnectorWithHeaders(clients interface{}, customHeaders *map[strin
 	// Init NSX version on demand if not done yet
 	// This is also our indication to apply licenses, in case of delayed connection
 	// This step is skipped if the connector is for special purpose, or for different endpoint
-	if nsxVersion == "" && !standaloneFlow {
+	if util.NsxVersion == "" && !standaloneFlow {
 		initNSXVersion(connector)
 		err := configureLicenses(connector, c.CommonConfig.LicenseKeys)
 		if err != nil {

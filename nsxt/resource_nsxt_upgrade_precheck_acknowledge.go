@@ -51,6 +51,12 @@ func resourceNsxtUpgradePrecheckAcknowledge() *schema.Resource {
 				},
 				Computed: true,
 			},
+			"target_version": {
+				Type:        schema.TypeString,
+				Description: "Target system version",
+				Required:    true,
+				ForceNew:    true,
+			},
 		},
 	}
 }

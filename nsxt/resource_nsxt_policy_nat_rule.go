@@ -9,15 +9,16 @@ import (
 	"log"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-
 	"github.com/vmware/terraform-provider-nsxt/api/infra"
 	t0nat "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s/nat"
 	t1nat "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s/nat"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
 var policyNATRuleActionTypeValues = []string{
@@ -56,7 +57,7 @@ func resourceNsxtPolicyNATRule() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
-			"context":      getContextSchema(),
+			"context":      getContextSchema(false, false),
 			"gateway_path": getPolicyGatewayPathSchema(),
 			"action": {
 				Type:         schema.TypeString,
@@ -197,7 +198,7 @@ func patchNsxtPolicyNATRule(sessionContext utl.SessionContext, connector client.
 	if err != nil {
 		return err
 	}
-	if nsxVersionHigherOrEqual("4.0.0") {
+	if util.NsxVersionHigherOrEqual("4.0.0") {
 		_, err = getPolicyBasedVpnMode(rule)
 		if err != nil {
 			return err
@@ -295,7 +296,7 @@ func resourceNsxtPolicyNATRuleRead(d *schema.ResourceData, m interface{}) error 
 	}
 	d.Set("translated_ports", obj.TranslatedPorts)
 	d.Set("scope", obj.Scope)
-	if nsxVersionHigherOrEqual("4.0.0") {
+	if util.NsxVersionHigherOrEqual("4.0.0") {
 		d.Set("policy_based_vpn_mode", obj.PolicyBasedVpnMode)
 	}
 	d.SetId(id)
@@ -369,7 +370,7 @@ func resourceNsxtPolicyNATRuleCreate(d *schema.ResourceData, m interface{}) erro
 	if ports != "" {
 		ruleStruct.TranslatedPorts = &ports
 	}
-	if pbvmMatch != "" && nsxVersionHigherOrEqual("4.0.0") {
+	if pbvmMatch != "" && util.NsxVersionHigherOrEqual("4.0.0") {
 		ruleStruct.PolicyBasedVpnMode = &pbvmMatch
 	}
 
@@ -443,7 +444,7 @@ func resourceNsxtPolicyNATRuleUpdate(d *schema.ResourceData, m interface{}) erro
 		ruleStruct.TranslatedPorts = &tPorts
 	}
 	pbvmMatch := d.Get("policy_based_vpn_mode").(string)
-	if pbvmMatch != "" && nsxVersionHigherOrEqual("4.0.0") {
+	if pbvmMatch != "" && util.NsxVersionHigherOrEqual("4.0.0") {
 		ruleStruct.PolicyBasedVpnMode = &pbvmMatch
 	}
 

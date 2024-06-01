@@ -8,12 +8,13 @@ import (
 	"log"
 	"strings"
 
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
-
 	t0_ipsec_services "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/ipsec_vpn_services"
 	t0_ipsec_nested_services "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_0s/locale_services/ipsec_vpn_services"
 	t1_ipsec_services "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/tier_1s/ipsec_vpn_services"
@@ -223,7 +224,7 @@ func getIPSecVPNSessionFromSchema(d *schema.ResourceData) (*data.StructValue, er
 			Psk:                      &psk,
 			Tags:                     tags,
 		}
-		if nsxVersionHigherOrEqual("3.2.0") {
+		if util.NsxVersionHigherOrEqual("3.2.0") {
 			if direction != "" {
 				tcpMSSClamping := model.TcpMaximumSegmentSizeClamping{
 					Direction: &direction,
@@ -271,7 +272,7 @@ func getIPSecVPNSessionFromSchema(d *schema.ResourceData) (*data.StructValue, er
 			Psk:                      &psk,
 			Tags:                     tags,
 		}
-		if nsxVersionHigherOrEqual("3.2.0") {
+		if util.NsxVersionHigherOrEqual("3.2.0") {
 			if direction != "" {
 				tcpMSSClamping := model.TcpMaximumSegmentSizeClamping{
 					Direction: &direction,
@@ -627,7 +628,7 @@ func resourceNsxtPolicyIPSecVpnSessionRead(d *schema.ResourceData, m interface{}
 		d.Set("tunnel_profile_path", blockVPN.TunnelProfilePath)
 		d.Set("peer_address", blockVPN.PeerAddress)
 		d.Set("peer_id", blockVPN.PeerId)
-		if nsxVersionHigherOrEqual("3.2.0") {
+		if util.NsxVersionHigherOrEqual("3.2.0") {
 			if blockVPN.TcpMssClamping != nil {
 				direction := blockVPN.TcpMssClamping.Direction
 				mss := blockVPN.TcpMssClamping.MaxSegmentSize
@@ -684,7 +685,7 @@ func resourceNsxtPolicyIPSecVpnSessionRead(d *schema.ResourceData, m interface{}
 		if blockVPN.Rules != nil {
 			setRuleInSchema(d, blockVPN.Rules)
 		}
-		if nsxVersionHigherOrEqual("3.2.0") {
+		if util.NsxVersionHigherOrEqual("3.2.0") {
 			if blockVPN.TcpMssClamping != nil {
 				direction := blockVPN.TcpMssClamping.Direction
 				mss := blockVPN.TcpMssClamping.MaxSegmentSize

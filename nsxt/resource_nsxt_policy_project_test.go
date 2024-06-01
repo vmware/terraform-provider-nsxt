@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -26,7 +28,7 @@ var accTestPolicyProjectUpdateAttributes = map[string]string{
 }
 
 func getExpectedSiteInfoCount(t *testing.T) string {
-	if nsxVersion == "" {
+	if util.NsxVersion == "" {
 		connector, err := testAccGetPolicyConnector()
 		if err != nil {
 			t.Errorf("Failed to get policy connector")
@@ -39,7 +41,7 @@ func getExpectedSiteInfoCount(t *testing.T) string {
 			return "0"
 		}
 	}
-	if nsxVersionHigherOrEqual("4.1.1") {
+	if util.NsxVersionHigherOrEqual("4.1.1") {
 		return "1"
 	}
 	return "0"

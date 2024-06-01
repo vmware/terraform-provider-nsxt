@@ -14,7 +14,8 @@ for NSXT upgrade.
 
 ```hcl
 resource "nsxt_upgrade_precheck_acknowledge" "test" {
-  precheck_ids = ["backupOperationCheck", "pUBCheck"]
+  precheck_ids   = ["backupOperationCheck", "pUBCheck"]
+  target_version = nsxt_upgrade_prepare.test.target_version
 }
 ```
 
@@ -23,6 +24,10 @@ resource "nsxt_upgrade_precheck_acknowledge" "test" {
 The following arguments are supported:
 
 * `precheck_ids` - (Required) List of ids of failed prechecks user wants to acknowledge.
+* `target_version` - (Required) Target system version
+
+## Attributes Reference
+
 * `precheck_warnings` - (Computed) State of all precheck warnings.
   * `id` - ID of the precheck warning.
   * `message` - Message of the precheck warning.

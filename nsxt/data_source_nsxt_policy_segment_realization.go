@@ -22,7 +22,7 @@ func dataSourceNsxtPolicySegmentRealization() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"id":      getDataSourceIDSchema(),
-			"context": getContextSchema(),
+			"context": getContextSchema(false, false),
 			"path": {
 				Type:         schema.TypeString,
 				Description:  "The path for the policy segment",

@@ -7,14 +7,15 @@ import (
 	"fmt"
 	"log"
 
+	tier0s "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s"
+	tier1s "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s"
+	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
-
-	tier0s "github.com/vmware/terraform-provider-nsxt/api/infra/tier_0s"
-	tier1s "github.com/vmware/terraform-provider-nsxt/api/infra/tier_1s"
-	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 var gatewayDNSForwarderLogLevelTypeValues = []string{
@@ -41,7 +42,7 @@ func resourceNsxtPolicyGatewayDNSForwarder() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
-			"context":      getContextSchema(),
+			"context":      getContextSchema(false, false),
 			"gateway_path": getPolicyPathSchema(true, true, "Policy path for the Gateway"),
 			"listener_ip": {
 				Type:         schema.TypeString,
@@ -149,7 +150,7 @@ func patchNsxtPolicyGatewayDNSForwarder(sessionContext utl.SessionContext, conne
 		obj.ConditionalForwarderZonePaths = conditionalZonePaths
 	}
 
-	if nsxVersionHigherOrEqual("3.2.0") {
+	if util.NsxVersionHigherOrEqual("3.2.0") {
 		obj.CacheSize = &cacheSize
 	}
 

@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
@@ -110,7 +112,7 @@ func resourceNsxtPolicyLBServiceCreate(d *schema.ResourceData, m interface{}) er
 	enabled := d.Get("enabled").(bool)
 	errorLogLevel := d.Get("error_log_level").(string)
 	size := d.Get("size").(string)
-	if size == "XLARGE" && nsxVersionLower("3.0.0") {
+	if size == "XLARGE" && util.NsxVersionLower("3.0.0") {
 		return fmt.Errorf("XLARGE size is not supported before NSX version 3.0.0")
 	}
 
@@ -191,7 +193,7 @@ func resourceNsxtPolicyLBServiceUpdate(d *schema.ResourceData, m interface{}) er
 	enabled := d.Get("enabled").(bool)
 	errorLogLevel := d.Get("error_log_level").(string)
 	size := d.Get("size").(string)
-	if size == "XLARGE" && nsxVersionLower("3.0.0") {
+	if size == "XLARGE" && util.NsxVersionLower("3.0.0") {
 		return fmt.Errorf("XLARGE size is not supported before NSX version 3.0.0")
 	}
 

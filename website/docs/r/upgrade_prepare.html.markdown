@@ -42,7 +42,7 @@ The following arguments are supported:
 * `uc_upgrade_timeout` - (Optional) Timeout for upgrading upgrade coordinator in seconds. Default is `1800`.
 * `precheck_timeout` - (Optional) Timeout for executing pre-upgrade checks in seconds. Default is `3600`.
 
-## Argument Reference
+## Attributes Reference
 
 In addition to arguments listed above, the following attributes are exported:
 
@@ -54,6 +54,7 @@ In addition to arguments listed above, the following attributes are exported:
   * `needs_resolve` - Boolean value identifies if resolution is required for the precheck.
   * `acked` - Boolean value which identifies if precheck has been acknowledged.
   * `resolution_status` - The resolution status of precheck failure.
+* `target_version` - Target system version
 
 ## Importing
 

@@ -42,7 +42,7 @@ func getPolicyPredefinedGatewayPolicySchema() map[string]*schema.Schema {
 		"rule":         getSecurityPolicyAndGatewayRulesSchema(true, false, false),
 		"default_rule": getGatewayPolicyDefaultRulesSchema(),
 		"revision":     getRevisionSchema(),
-		"context":      getContextSchema(),
+		"context":      getContextSchema(false, false),
 	}
 }
 

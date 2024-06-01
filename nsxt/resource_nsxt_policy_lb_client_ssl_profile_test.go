@@ -15,7 +15,7 @@ var accTestPolicyLBClientSslProfileCreateAttributes = map[string]string{
 	"display_name":          getAccTestResourceName(),
 	"description":           "terraform created",
 	"cipher_group_label":    "CUSTOM",
-	"ciphers":               "TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA",
+	"ciphers":               "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA",
 	"prefer_server_ciphers": "true",
 	"protocols":             "TLS_V1_2",
 	"session_cache_enabled": "true",
