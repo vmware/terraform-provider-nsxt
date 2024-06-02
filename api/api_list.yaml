@@ -191,6 +191,9 @@
     - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/domains
       model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
       type: Multitenancy
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/vpcs
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: VPC
   model_name: GatewayPolicy
   obj_name: GatewayPolicy
   client_name: GatewayPoliciesClient

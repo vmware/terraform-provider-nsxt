@@ -27,7 +27,8 @@ func TestAccResourceNsxtPolicyGatewayPolicy_multitenancy(t *testing.T) {
 func testAccResourceNsxtPolicyGatewayPolicyBasic(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestResourceName()
 	updatedName := getAccTestResourceName()
-	testResourceName := "nsxt_policy_gateway_policy.test"
+	resourceName := "nsxt_policy_gateway_policy"
+	testResourceName := fmt.Sprintf("%s.test", resourceName)
 	comments1 := "Acceptance test create"
 	comments2 := "Acceptance test update"
 	direction1 := "IN"
@@ -46,7 +47,7 @@ func testAccResourceNsxtPolicyGatewayPolicyBasic(t *testing.T, withContext bool,
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyGatewayPolicyBasic(name, comments1, withContext),
+				Config: testAccNsxtPolicyGatewayPolicyBasic(resourceName, name, comments1, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyGatewayPolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -63,7 +64,7 @@ func testAccResourceNsxtPolicyGatewayPolicyBasic(t *testing.T, withContext bool,
 				),
 			},
 			{
-				Config: testAccNsxtPolicyGatewayPolicyBasic(updatedName, comments2, withContext),
+				Config: testAccNsxtPolicyGatewayPolicyBasic(resourceName, updatedName, comments2, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyGatewayPolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -79,7 +80,7 @@ func testAccResourceNsxtPolicyGatewayPolicyBasic(t *testing.T, withContext bool,
 				),
 			},
 			{
-				Config: testAccNsxtPolicyGatewayPolicyWithRule(updatedName, direction1, proto1, tag1, withContext),
+				Config: testAccNsxtPolicyGatewayPolicyWithRule(resourceName, updatedName, direction1, proto1, tag1, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyGatewayPolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -102,7 +103,7 @@ func testAccResourceNsxtPolicyGatewayPolicyBasic(t *testing.T, withContext bool,
 				),
 			},
 			{
-				Config: testAccNsxtPolicyGatewayPolicyWithRule(updatedName, direction2, proto2, tag2, withContext),
+				Config: testAccNsxtPolicyGatewayPolicyWithRule(resourceName, updatedName, direction2, proto2, tag2, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyGatewayPolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -208,7 +209,8 @@ func TestAccResourceNsxtPolicyGatewayPolicy_withDependencies(t *testing.T) {
 }
 func TestAccResourceNsxtPolicyGatewayPolicy_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
-	testResourceName := "nsxt_policy_gateway_policy.test"
+	resourceName := "nsxt_policy_gateway_policy"
+	testResourceName := fmt.Sprintf("%s.test", resourceName)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -218,7 +220,7 @@ func TestAccResourceNsxtPolicyGatewayPolicy_importBasic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyGatewayPolicyBasic(name, "import", false),
+				Config: testAccNsxtPolicyGatewayPolicyBasic(resourceName, name, "import", false),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -231,7 +233,8 @@ func TestAccResourceNsxtPolicyGatewayPolicy_importBasic(t *testing.T) {
 
 func TestAccResourceNsxtPolicyGatewayPolicy_importBasic_multitenancy(t *testing.T) {
 	name := getAccTestResourceName()
-	testResourceName := "nsxt_policy_gateway_policy.test"
+	resourceName := "nsxt_policy_gateway_policy"
+	testResourceName := fmt.Sprintf("%s.test", resourceName)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancy(t) },
@@ -241,7 +244,7 @@ func TestAccResourceNsxtPolicyGatewayPolicy_importBasic_multitenancy(t *testing.
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyGatewayPolicyBasic(name, "import", true),
+				Config: testAccNsxtPolicyGatewayPolicyBasic(resourceName, name, "import", true),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -623,13 +626,13 @@ resource "nsxt_policy_gateway_policy" "test" {
 }`, name, comments)
 }
 
-func testAccNsxtPolicyGatewayPolicyBasic(name string, comments string, withContext bool) string {
+func testAccNsxtPolicyGatewayPolicyBasic(resourceName, name, comments string, withContext bool) string {
 	context := ""
 	if withContext {
 		context = testAccNsxtPolicyMultitenancyContext()
 	}
 	return fmt.Sprintf(`
-resource "nsxt_policy_gateway_policy" "test" {
+resource "%s" "test" {
 %s
   display_name    = "%s"
   description     = "Acceptance Test"
@@ -645,10 +648,10 @@ resource "nsxt_policy_gateway_policy" "test" {
     tag   = "orange"
   }
 
-}`, context, name, comments)
+}`, resourceName, context, name, comments)
 }
 
-func testAccNsxtPolicyGatewayPolicyWithRule(name string, direction string, protocol string, ruleTag string, withContext bool) string {
+func testAccNsxtPolicyGatewayPolicyWithRule(resourceName, name, direction, protocol, ruleTag string, withContext bool) string {
 	context := ""
 	if withContext {
 		context = testAccNsxtPolicyMultitenancyContext()
@@ -660,7 +663,7 @@ resource "nsxt_policy_tier1_gateway" "gwt1test" {
   description       = "Acceptance Test"
 }
 
-resource "nsxt_policy_gateway_policy" "test" {
+resource "%s" "test" {
 %s
   display_name    = "%s"
   description     = "Acceptance Test"
@@ -687,7 +690,7 @@ resource "nsxt_policy_gateway_policy" "test" {
       tag   = "blue"
     }
   }
-}`, context, context, name, name, direction, protocol, ruleTag)
+}`, context, resourceName, context, name, name, direction, protocol, ruleTag)
 }
 
 // TODO: add  profiles when available

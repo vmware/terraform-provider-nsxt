@@ -11,6 +11,7 @@ import (
 	client0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/domains"
 	model0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	client2 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/domains"
+	client3 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/vpcs"
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
@@ -30,6 +31,9 @@ func NewGatewayPoliciesClient(sessionContext utl.SessionContext, connector vapiP
 
 	case utl.Multitenancy:
 		client = client2.NewGatewayPoliciesClient(connector)
+
+	case utl.VPC:
+		client = client3.NewGatewayPoliciesClient(connector)
 
 	default:
 		return nil
@@ -67,6 +71,13 @@ func (c GatewayPolicyClientContext) Get(domainIdParam string, gatewayPolicyIdPar
 			return obj, err
 		}
 
+	case utl.VPC:
+		client := c.Client.(client3.GatewayPoliciesClient)
+		obj, err = client.Get(utl.DefaultOrgID, c.ProjectID, c.VPCID, gatewayPolicyIdParam)
+		if err != nil {
+			return obj, err
+		}
+
 	default:
 		return obj, errors.New("invalid infrastructure for model")
 	}
@@ -93,6 +104,10 @@ func (c GatewayPolicyClientContext) Patch(domainIdParam string, gatewayPolicyIdP
 	case utl.Multitenancy:
 		client := c.Client.(client2.GatewayPoliciesClient)
 		err = client.Patch(utl.DefaultOrgID, c.ProjectID, domainIdParam, gatewayPolicyIdParam, gatewayPolicyParam)
+
+	case utl.VPC:
+		client := c.Client.(client3.GatewayPoliciesClient)
+		err = client.Patch(utl.DefaultOrgID, c.ProjectID, c.VPCID, gatewayPolicyIdParam, gatewayPolicyParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -130,6 +145,10 @@ func (c GatewayPolicyClientContext) Update(domainIdParam string, gatewayPolicyId
 		client := c.Client.(client2.GatewayPoliciesClient)
 		obj, err = client.Update(utl.DefaultOrgID, c.ProjectID, domainIdParam, gatewayPolicyIdParam, gatewayPolicyParam)
 
+	case utl.VPC:
+		client := c.Client.(client3.GatewayPoliciesClient)
+		obj, err = client.Update(utl.DefaultOrgID, c.ProjectID, c.VPCID, gatewayPolicyIdParam, gatewayPolicyParam)
+
 	default:
 		err = errors.New("invalid infrastructure for model")
 	}
@@ -152,6 +171,10 @@ func (c GatewayPolicyClientContext) Delete(domainIdParam string, gatewayPolicyId
 	case utl.Multitenancy:
 		client := c.Client.(client2.GatewayPoliciesClient)
 		err = client.Delete(utl.DefaultOrgID, c.ProjectID, domainIdParam, gatewayPolicyIdParam)
+
+	case utl.VPC:
+		client := c.Client.(client3.GatewayPoliciesClient)
+		err = client.Delete(utl.DefaultOrgID, c.ProjectID, c.VPCID, gatewayPolicyIdParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -184,6 +207,10 @@ func (c GatewayPolicyClientContext) List(domainIdParam string, cursorParam *stri
 	case utl.Multitenancy:
 		client := c.Client.(client2.GatewayPoliciesClient)
 		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, domainIdParam, cursorParam, includeMarkForDeleteObjectsParam, includeRuleCountParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
+
+	case utl.VPC:
+		client := c.Client.(client3.GatewayPoliciesClient)
+		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, c.VPCID, cursorParam, includeMarkForDeleteObjectsParam, includeRuleCountParam, includedFieldsParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")

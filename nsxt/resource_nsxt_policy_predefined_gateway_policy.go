@@ -10,6 +10,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	nsxt "github.com/vmware/vsphere-automation-sdk-go/services/nsxt"
 
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
@@ -264,6 +265,21 @@ func createChildDomainWithGatewayPolicy(domain string, policyID string, policy m
 }
 
 func gatewayPolicyInfraPatch(context utl.SessionContext, policy model.GatewayPolicy, domain string, m interface{}) error {
+	connector := getPolicyConnector(m)
+	if context.ClientType == utl.VPC {
+		childVPC, err := createChildVPCWithGatewayPolicy(context, *policy.Id, policy)
+		if err != nil {
+			return fmt.Errorf("failed to create H-API for VPC Gateway Policy: %s", err)
+		}
+
+		orgRoot := model.OrgRoot{
+			ResourceType: strPtr("OrgRoot"),
+			Children:     []*data.StructValue{childVPC},
+		}
+
+		client := nsxt.NewOrgRootClient(connector)
+		return client.Patch(orgRoot, nil)
+	}
 	childDomain, err := createChildDomainWithGatewayPolicy(domain, *policy.Id, policy)
 	if err != nil {
 		return fmt.Errorf("Failed to create H-API for Predefined Gateway Policy: %s", err)
@@ -293,7 +309,7 @@ func updatePolicyPredefinedGatewayPolicy(id string, d *schema.ResourceData, m in
 		return fmt.Errorf("Failed to extract domain from Gateway Policy path %s", path)
 	}
 
-	predefinedPolicy, err := getGatewayPolicyInDomain(getSessionContext(d, m), id, domain, connector)
+	predefinedPolicy, err := getGatewayPolicy(getSessionContext(d, m), id, domain, connector)
 	if err != nil {
 		return err
 	}
@@ -468,7 +484,7 @@ func resourceNsxtPolicyPredefinedGatewayPolicyDelete(d *schema.ResourceData, m i
 	path := d.Get("path").(string)
 	domain := getDomainFromResourcePath(path)
 
-	predefinedPolicy, err := getGatewayPolicyInDomain(getSessionContext(d, m), id, domain, getPolicyConnector(m))
+	predefinedPolicy, err := getGatewayPolicy(getSessionContext(d, m), id, domain, getPolicyConnector(m))
 	if err != nil {
 		return err
 	}
