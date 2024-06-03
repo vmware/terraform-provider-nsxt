@@ -64,6 +64,9 @@ func resourceNsxtPolicyVMTags() *schema.Resource {
 
 func listAllPolicyVirtualMachines(context utl.SessionContext, connector client.Connector, m interface{}) ([]model.VirtualMachine, error) {
 	client := realizedstate.NewVirtualMachinesClient(context, connector)
+	if client == nil {
+		return nil, policyResourceNotSupportedError()
+	}
 	var results []model.VirtualMachine
 	boolFalse := false
 	var cursor *string
@@ -116,10 +119,16 @@ func listAllPolicySegmentPorts(context utl.SessionContext, connector client.Conn
 	for {
 		if len(gwID) == 0 {
 			client := segments.NewPortsClient(context, connector)
+			if client == nil {
+				return nil, policyResourceNotSupportedError()
+			}
 			ports, err = client.List(segmentID, cursor, &boolFalse, nil, nil, &boolFalse, nil)
 		} else {
 			// fixed segments
 			client := t1_segments.NewPortsClient(context, connector)
+			if client == nil {
+				return nil, policyResourceNotSupportedError()
+			}
 			ports, err = client.List(gwID, segmentID, cursor, &boolFalse, nil, nil, &boolFalse, nil)
 
 		}
@@ -310,10 +319,16 @@ func updateNsxtPolicyVMPortTags(context utl.SessionContext, connector client.Con
 					log.Printf("[DEBUG] Updating port %s with %d tags", *port.Path, len(tags))
 					if len(gwID) == 0 {
 						client := segments.NewPortsClient(context, connector)
+						if client == nil {
+							return policyResourceNotSupportedError()
+						}
 						_, err = client.Update(segmentID, *port.Id, port)
 					} else {
 						// fixed segment
 						client := t1_segments.NewPortsClient(context, connector)
+						if client == nil {
+							return policyResourceNotSupportedError()
+						}
 						_, err = client.Update(gwID, segmentID, *port.Id, port)
 					}
 					if err != nil {

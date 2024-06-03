@@ -172,6 +172,9 @@ func getPolicyAttributeSubAttributeValueSchema(subAttributeKey string) *schema.S
 
 func resourceNsxtPolicyContextProfileExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
 	client := infra.NewContextProfilesClient(sessionContext, connector)
+	if client == nil {
+		return false, policyResourceNotSupportedError()
+	}
 	_, err := client.Get(id)
 
 	if err == nil {
@@ -227,6 +230,9 @@ func resourceNsxtPolicyContextProfileCreate(d *schema.ResourceData, m interface{
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating ContextProfile with ID %s", id)
 	client := infra.NewContextProfilesClient(context, connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	err = client.Patch(id, obj, nil)
 	if err != nil {
 		return handleCreateError("ContextProfile", id, err)
@@ -246,6 +252,9 @@ func resourceNsxtPolicyContextProfileRead(d *schema.ResourceData, m interface{})
 	}
 
 	client := infra.NewContextProfilesClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	obj, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "ContextProfile", id, err)
@@ -298,6 +307,9 @@ func resourceNsxtPolicyContextProfileUpdate(d *schema.ResourceData, m interface{
 
 	// Update the resource using PATCH
 	client := infra.NewContextProfilesClient(context, connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	err = client.Patch(id, obj, nil)
 
 	if err != nil {
@@ -317,6 +329,9 @@ func resourceNsxtPolicyContextProfileDelete(d *schema.ResourceData, m interface{
 	var err error
 	force := true
 	client := infra.NewContextProfilesClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	err = client.Delete(id, &force, nil)
 	if err != nil {
 		return handleDeleteError("ContextProfile", id, err)
@@ -388,7 +403,11 @@ func listAttributesWithKey(context utl.SessionContext, attributeKey string, m in
 func listSystemAttributesWithKey(context utl.SessionContext, attributeKey *string, m interface{}) (model.PolicyContextProfileListResult, error) {
 	includeMarkForDeleteObjectsParam := false
 	connector := getPolicyConnector(m)
+	var policyContextProfileListResult model.PolicyContextProfileListResult
 	client := cont_prof.NewAttributesClient(context, connector)
+	if client == nil {
+		return policyContextProfileListResult, policyResourceNotSupportedError()
+	}
 	policyContextProfileListResult, err := client.List(attributeKey, nil, nil, &includeMarkForDeleteObjectsParam, nil, nil, nil, nil)
 	return policyContextProfileListResult, err
 }
@@ -396,7 +415,11 @@ func listSystemAttributesWithKey(context utl.SessionContext, attributeKey *strin
 func listCustomAttributesWithKey(context utl.SessionContext, attributeKey *string, m interface{}) (model.PolicyContextProfileListResult, error) {
 	includeMarkForDeleteObjectsParam := false
 	connector := getPolicyConnector(m)
+	var policyContextProfileListResult model.PolicyContextProfileListResult
 	client := custom_attr.NewDefaultClient(context, connector)
+	if client == nil {
+		return policyContextProfileListResult, policyResourceNotSupportedError()
+	}
 	policyContextProfileListResult, err := client.List(attributeKey, nil, nil, &includeMarkForDeleteObjectsParam, nil, nil, nil, nil)
 	return policyContextProfileListResult, err
 }

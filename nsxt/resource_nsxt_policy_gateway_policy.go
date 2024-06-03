@@ -32,6 +32,9 @@ func resourceNsxtPolicyGatewayPolicy() *schema.Resource {
 
 func getGatewayPolicyInDomain(sessionContext utl.SessionContext, id string, domainName string, connector client.Connector) (model.GatewayPolicy, error) {
 	client := domains.NewGatewayPoliciesClient(sessionContext, connector)
+	if client == nil {
+		return model.GatewayPolicy{}, policyResourceNotSupportedError()
+	}
 	return client.Get(domainName, id)
 
 }
@@ -245,6 +248,9 @@ func resourceNsxtPolicyGatewayPolicyDelete(d *schema.ResourceData, m interface{}
 
 	connector := getPolicyConnector(m)
 	client := domains.NewGatewayPoliciesClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	err := client.Delete(d.Get("domain").(string), id)
 	if err != nil {
 		return handleDeleteError("Gateway Policy", id, err)

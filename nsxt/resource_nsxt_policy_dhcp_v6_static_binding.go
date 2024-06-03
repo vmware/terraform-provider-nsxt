@@ -137,11 +137,17 @@ func policyDhcpV6StaticBindingConvertAndPatch(d *schema.ResourceData, segmentPat
 	if gwID == "" {
 		// infra segment
 		client := segments.NewDhcpStaticBindingConfigsClient(context, connector)
+		if client == nil {
+			return policyResourceNotSupportedError()
+		}
 		return client.Patch(segmentID, id, convObj.(*data.StructValue))
 	}
 
 	// fixed segment
 	client := t1_segments.NewDhcpStaticBindingConfigsClient(context, connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	return client.Patch(gwID, segmentID, id, convObj.(*data.StructValue))
 }
 
@@ -190,10 +196,16 @@ func resourceNsxtPolicyDhcpV6StaticBindingRead(d *schema.ResourceData, m interfa
 	if gwID == "" {
 		// infra segment
 		client := segments.NewDhcpStaticBindingConfigsClient(context, connector)
+		if client == nil {
+			return policyResourceNotSupportedError()
+		}
 		dhcpObj, err = client.Get(segmentID, id)
 	} else {
 		// fixed segment
 		client := t1_segments.NewDhcpStaticBindingConfigsClient(context, connector)
+		if client == nil {
+			return policyResourceNotSupportedError()
+		}
 		dhcpObj, err = client.Get(gwID, segmentID, id)
 	}
 	if err != nil {

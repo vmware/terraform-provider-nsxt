@@ -423,6 +423,9 @@ func resourceNsxtPolicyServiceGetEntriesFromSchema(d *schema.ResourceData) ([]*d
 
 func resourceNsxtPolicyServiceExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
 	client := infra.NewServicesClient(sessionContext, connector)
+	if client == nil {
+		return false, policyResourceNotSupportedError()
+	}
 	_, err := client.Get(id)
 
 	if err == nil {
@@ -471,6 +474,9 @@ func resourceNsxtPolicyServiceCreate(d *schema.ResourceData, m interface{}) erro
 	log.Printf("[INFO] Creating service with ID %s", id)
 
 	client := infra.NewServicesClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	err = client.Patch(id, obj)
 	if err != nil {
 		return handleCreateError("Service", id, err)
@@ -490,6 +496,9 @@ func resourceNsxtPolicyServiceRead(d *schema.ResourceData, m interface{}) error 
 	}
 
 	client := infra.NewServicesClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	obj, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "Service", id, err)
@@ -681,6 +690,9 @@ func resourceNsxtPolicyServiceUpdate(d *schema.ResourceData, m interface{}) erro
 
 	// Update the resource using Update to totally replace the list of entries
 	client := infra.NewServicesClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	_, err := client.Update(id, obj)
 
 	if err != nil {
@@ -699,6 +711,9 @@ func resourceNsxtPolicyServiceDelete(d *schema.ResourceData, m interface{}) erro
 
 	doDelete := func() error {
 		client := infra.NewServicesClient(getSessionContext(d, m), connector)
+		if client == nil {
+			return policyResourceNotSupportedError()
+		}
 		return client.Delete(id)
 	}
 

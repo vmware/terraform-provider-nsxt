@@ -72,6 +72,9 @@ func testAccDataSourceNsxtPolicyQosProfileCreate(name string) error {
 	id := newUUID()
 
 	client := infra.NewQosProfilesClient(testAccGetSessionContext(), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	err = client.Patch(id, obj, nil)
 
 	if err != nil {
@@ -88,6 +91,9 @@ func testAccDataSourceNsxtPolicyQosProfileDeleteByName(name string) error {
 
 	// Find the object by name and delete it
 	client := infra.NewQosProfilesClient(testAccGetSessionContext(), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	objList, err := client.List(nil, nil, nil, nil, nil)
 	if err != nil {
 		return handleListError("QosProfile", err)

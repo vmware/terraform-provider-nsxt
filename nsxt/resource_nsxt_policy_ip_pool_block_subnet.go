@@ -93,6 +93,9 @@ func resourceNsxtPolicyIPPoolBlockSubnetSchemaToStructValue(d *schema.ResourceDa
 func resourceNsxtPolicyIPPoolBlockSubnetRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	client := ippools.NewIpSubnetsClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	converter := bindings.NewTypeConverter()
 
 	poolPath := d.Get("pool_path").(string)
@@ -136,6 +139,9 @@ func resourceNsxtPolicyIPPoolBlockSubnetRead(d *schema.ResourceData, m interface
 func resourceNsxtPolicyIPPoolBlockSubnetCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	client := ippools.NewIpSubnetsClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 
 	poolPath := d.Get("pool_path").(string)
 	poolID := getPolicyIDFromPath(poolPath)
@@ -171,6 +177,9 @@ func resourceNsxtPolicyIPPoolBlockSubnetCreate(d *schema.ResourceData, m interfa
 func resourceNsxtPolicyIPPoolBlockSubnetUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	client := ippools.NewIpSubnetsClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 
 	poolPath := d.Get("pool_path").(string)
 	poolID := getPolicyIDFromPath(poolPath)
@@ -199,6 +208,9 @@ func resourceNsxtPolicyIPPoolBlockSubnetUpdate(d *schema.ResourceData, m interfa
 func resourceNsxtPolicyIPPoolBlockSubnetDelete(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	client := ippools.NewIpSubnetsClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 
 	poolPath := d.Get("pool_path").(string)
 	poolID := getPolicyIDFromPath(poolPath)
@@ -221,6 +233,9 @@ func resourceNsxtPolicyIPPoolBlockSubnetDelete(d *schema.ResourceData, m interfa
 func resourceNsxtPolicyIPPoolBlockSubnetVerifyDelete(sessionContext utl.SessionContext, d *schema.ResourceData, connector client.Connector) error {
 
 	client := realizedstate.NewRealizedEntitiesClient(sessionContext, connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 
 	path := d.Get("path").(string)
 	// Wait for realization state to disappear (not_found) - this means
@@ -276,6 +291,9 @@ func resourceNsxtPolicyIPPoolSubnetImport(d *schema.ResourceData, m interface{})
 	poolID := s[0]
 	connector := getPolicyConnector(m)
 	client := infra.NewIpPoolsClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return nil, policyResourceNotSupportedError()
+	}
 
 	pool, err := client.Get(poolID)
 	if err != nil {

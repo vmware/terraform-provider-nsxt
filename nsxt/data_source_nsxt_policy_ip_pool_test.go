@@ -63,6 +63,9 @@ func testAccDataSourceNsxtPolicyIPPoolCreate(name string) error {
 		return fmt.Errorf("Error during test client initialization: %v", err)
 	}
 	client := infra.NewIpPoolsClient(testAccGetSessionContext(), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 
 	displayName := name
 	description := name
@@ -87,6 +90,9 @@ func testAccDataSourceNsxtPolicyIPPoolDeleteByName(name string) error {
 		return fmt.Errorf("Error during test client initialization: %v", err)
 	}
 	client := infra.NewIpPoolsClient(testAccGetSessionContext(), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 
 	// Find the object by name
 	objList, err := client.List(nil, nil, nil, nil, nil, nil)

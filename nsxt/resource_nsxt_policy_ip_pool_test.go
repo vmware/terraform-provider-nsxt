@@ -138,6 +138,9 @@ func testAccNSXPolicyIPPoolCheckExists(resourceName string) resource.TestCheckFu
 	return func(state *terraform.State) error {
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
 		client := infra.NewIpPoolsClient(testAccGetSessionContext(), connector)
+		if client == nil {
+			return policyResourceNotSupportedError()
+		}
 
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
@@ -161,6 +164,9 @@ func testAccNSXPolicyIPPoolCheckExists(resourceName string) resource.TestCheckFu
 func testAccNSXPolicyIPPoolCheckDestroy(state *terraform.State) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
 	client := infra.NewIpPoolsClient(testAccGetSessionContext(), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 
 	for _, rs := range state.RootModule().Resources {
 		if rs.Type != "nsxt_policy_ip_pool" {

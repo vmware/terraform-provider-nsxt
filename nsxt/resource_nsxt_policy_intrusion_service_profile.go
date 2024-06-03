@@ -331,6 +331,9 @@ func setIdsProfileSignaturesInSchema(profileList []model.IdsProfileLocalSignatur
 func resourceNsxtPolicyIntrusionServiceProfileExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
 	var err error
 	client := services.NewProfilesClient(sessionContext, connector)
+	if client == nil {
+		return false, policyResourceNotSupportedError()
+	}
 	_, err = client.Get(id)
 	if err == nil {
 		return true, nil
@@ -374,6 +377,9 @@ func resourceNsxtPolicyIntrusionServiceProfileCreate(d *schema.ResourceData, m i
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating Intrusion Service Profile with ID %s", id)
 	client := services.NewProfilesClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	err = client.Patch(id, obj)
 	if err != nil {
 		return handleCreateError("Ids Profile", id, err)
@@ -394,6 +400,9 @@ func resourceNsxtPolicyIntrusionServiceProfileRead(d *schema.ResourceData, m int
 	}
 
 	client := services.NewProfilesClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	obj, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "Ids Profile", id, err)
@@ -450,6 +459,9 @@ func resourceNsxtPolicyIntrusionServiceProfileUpdate(d *schema.ResourceData, m i
 	// Create the resource using PATCH
 	log.Printf("[INFO] Update Intrusion Service Profile with ID %s", id)
 	client := services.NewProfilesClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	err = client.Patch(id, obj)
 	if err != nil {
 		return handleUpdateError("Ids Profile", id, err)
@@ -470,6 +482,9 @@ func resourceNsxtPolicyIntrusionServiceProfileDelete(d *schema.ResourceData, m i
 	connector := getPolicyConnector(m)
 	var err error
 	client := services.NewProfilesClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	err = client.Delete(id)
 
 	if err != nil {

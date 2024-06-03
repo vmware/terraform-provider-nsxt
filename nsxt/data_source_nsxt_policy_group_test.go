@@ -108,6 +108,9 @@ func testAccDataSourceNsxtPolicyGroupCreate(domain string, name string) error {
 	id := newUUID()
 
 	client := domains.NewGroupsClient(testAccGetSessionContext(), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	err = client.Patch(domain, id, obj)
 
 	if err != nil {
@@ -124,6 +127,9 @@ func testAccDataSourceNsxtPolicyGroupDeleteByName(domain string, name string) er
 
 	// Find the object by name and delete it
 	client := domains.NewGroupsClient(testAccGetSessionContext(), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	objList, err := client.List(domain, nil, nil, nil, nil, nil, nil, nil)
 	if err != nil {
 		return handleListError("Group", err)

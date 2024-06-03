@@ -87,6 +87,9 @@ func getDistributedFloodProtectionProfile() map[string]*schema.Schema {
 func resourceNsxtPolicyFloodProtectionProfileExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
 
 	client := infra.NewFloodProtectionProfilesClient(sessionContext, connector)
+	if client == nil {
+		return false, policyResourceNotSupportedError()
+	}
 	_, err := client.Get(id)
 	if err == nil {
 		return true, nil
@@ -142,6 +145,9 @@ func resourceNsxtPolicyDistributedFloodProtectionProfilePatch(d *schema.Resource
 
 	log.Printf("[INFO] Patching DistributedFloodProtectionProfile with ID %s", id)
 	client := infra.NewFloodProtectionProfilesClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	return client.Patch(id, profileStruct, nil)
 }
 
@@ -174,6 +180,9 @@ func resourceNsxtPolicyDistributedFloodProtectionProfileRead(d *schema.ResourceD
 	}
 
 	client := infra.NewFloodProtectionProfilesClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	dpffData, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "FloodProtectionProfile", id, err)
@@ -225,6 +234,9 @@ func resourceNsxtPolicyFloodProtectionProfileDelete(d *schema.ResourceData, m in
 
 	connector := getPolicyConnector(m)
 	client := infra.NewFloodProtectionProfilesClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	err := client.Delete(id, nil)
 	if err != nil {
 		return handleDeleteError("FloodProtectionProfile", id, err)

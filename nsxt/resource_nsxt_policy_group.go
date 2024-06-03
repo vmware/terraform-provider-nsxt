@@ -320,6 +320,9 @@ func getExtendedCriteriaSetSchema() *schema.Resource {
 
 func resourceNsxtPolicyGroupExistsInDomain(sessionContext utl.SessionContext, id string, domain string, connector client.Connector) (bool, error) {
 	client := domains.NewGroupsClient(sessionContext, connector)
+	if client == nil {
+		return false, policyResourceNotSupportedError()
+	}
 	_, err := client.Get(domain, id)
 	if err == nil {
 		return true, nil
@@ -880,6 +883,9 @@ func resourceNsxtPolicyGroupCreate(d *schema.ResourceData, m interface{}) error 
 	}
 
 	client := domains.NewGroupsClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	err = client.Patch(d.Get("domain").(string), id, obj)
 
 	// Create the resource using PATCH
@@ -902,6 +908,9 @@ func resourceNsxtPolicyGroupRead(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("Error obtaining Group ID")
 	}
 	client := domains.NewGroupsClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	obj, err := client.Get(domainName, id)
 	if err != nil {
 		return handleReadError(d, "Group", id, err)
@@ -993,6 +1002,9 @@ func resourceNsxtPolicyGroupUpdate(d *schema.ResourceData, m interface{}) error 
 	}
 
 	client := domains.NewGroupsClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 
 	// Update the resource using PATCH
 	err = client.Patch(d.Get("domain").(string), id, obj)
@@ -1015,6 +1027,9 @@ func resourceNsxtPolicyGroupDelete(d *schema.ResourceData, m interface{}) error 
 
 	doDelete := func() error {
 		client := domains.NewGroupsClient(getSessionContext(d, m), connector)
+		if client == nil {
+			return policyResourceNotSupportedError()
+		}
 		return client.Delete(d.Get("domain").(string), id, &failIfSubtreeExists, &forceDelete)
 	}
 

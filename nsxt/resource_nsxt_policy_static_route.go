@@ -82,27 +82,45 @@ func resourceNsxtPolicyStaticRoute() *schema.Resource {
 func patchNsxtPolicyStaticRoute(sessionContext utl.SessionContext, connector client.Connector, gwID string, route model.StaticRoutes, isT0 bool) error {
 	if isT0 {
 		routeClient := tier0s.NewStaticRoutesClient(sessionContext, connector)
+		if routeClient == nil {
+			return policyResourceNotSupportedError()
+		}
 		return routeClient.Patch(gwID, *route.Id, route)
 	}
 	routeClient := tier1s.NewStaticRoutesClient(sessionContext, connector)
+	if routeClient == nil {
+		return policyResourceNotSupportedError()
+	}
 	return routeClient.Patch(gwID, *route.Id, route)
 }
 
 func deleteNsxtPolicyStaticRoute(sessionContext utl.SessionContext, connector client.Connector, gwID string, isT0 bool, routeID string) error {
 	if isT0 {
 		routeClient := tier0s.NewStaticRoutesClient(sessionContext, connector)
+		if routeClient == nil {
+			return policyResourceNotSupportedError()
+		}
 		return routeClient.Delete(gwID, routeID)
 	}
 	routeClient := tier1s.NewStaticRoutesClient(sessionContext, connector)
+	if routeClient == nil {
+		return policyResourceNotSupportedError()
+	}
 	return routeClient.Delete(gwID, routeID)
 }
 
 func getNsxtPolicyStaticRouteByID(sessionContext utl.SessionContext, connector client.Connector, gwID string, isT0 bool, routeID string) (model.StaticRoutes, error) {
 	if isT0 {
 		routeClient := tier0s.NewStaticRoutesClient(sessionContext, connector)
+		if routeClient == nil {
+			return model.StaticRoutes{}, policyResourceNotSupportedError()
+		}
 		return routeClient.Get(gwID, routeID)
 	}
 	routeClient := tier1s.NewStaticRoutesClient(sessionContext, connector)
+	if routeClient == nil {
+		return model.StaticRoutes{}, policyResourceNotSupportedError()
+	}
 	return routeClient.Get(gwID, routeID)
 }
 
@@ -353,12 +371,18 @@ func resourceNsxtPolicyStaticRouteImport(d *schema.ResourceData, m interface{}) 
 	gwID := s[0]
 	connector := getPolicyConnector(m)
 	t0Client := infra.NewTier0sClient(getSessionContext(d, m), connector)
+	if t0Client == nil {
+		return nil, policyResourceNotSupportedError()
+	}
 	t0gw, err := t0Client.Get(gwID)
 	if err != nil {
 		if !isNotFoundError(err) {
 			return nil, err
 		}
 		t1Client := infra.NewTier1sClient(getSessionContext(d, m), connector)
+		if t1Client == nil {
+			return nil, policyResourceNotSupportedError()
+		}
 		t1gw, err := t1Client.Get(gwID)
 		if err != nil {
 			return nil, err

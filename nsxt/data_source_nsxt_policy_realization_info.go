@@ -105,6 +105,9 @@ func dataSourceNsxtPolicyRealizationInfoRead(d *schema.ResourceData, m interface
 			var realizationError error
 			var realizationResult model.GenericPolicyRealizedResourceListResult
 			client := realizedstate.NewRealizedEntitiesClient(getSessionContext(d, m), connector)
+			if client == nil {
+				return nil, "ERROR", policyResourceNotSupportedError()
+			}
 			realizationResult, realizationError = client.List(path, nil)
 			state := "UNKNOWN"
 			if realizationError == nil {

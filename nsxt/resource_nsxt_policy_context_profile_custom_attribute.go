@@ -67,6 +67,9 @@ func resourceNsxtPolicyContextProfileCustomAttributeExists(sessionContext utl.Se
 	key, attribute := splitCustomAttributeID(id)
 	source := model.PolicyCustomAttributes_ATTRIBUTE_SOURCE_CUSTOM
 	client := infra.NewDefaultClient(sessionContext, connector)
+	if client == nil {
+		return false, policyResourceNotSupportedError()
+	}
 	attrList, err = client.List(&key, &source, nil, nil, nil, nil, nil, nil)
 	if err != nil {
 		return false, err
@@ -133,6 +136,9 @@ func resourceNsxtPolicyContextProfileCustomAttributeCreate(d *schema.ResourceDat
 
 	// PATCH the resource
 	client := infra.NewDefaultClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	err = client.Create(obj, "add")
 	if err != nil {
 		return handleCreateError("ContextProfileCustomAttribute", attribute, err)
@@ -166,6 +172,9 @@ func resourceNsxtPolicyContextProfileCustomAttributeDelete(d *schema.ResourceDat
 
 	// PATCH the resource
 	client := infra.NewDefaultClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	err = client.Create(obj, "remove")
 
 	if err != nil {

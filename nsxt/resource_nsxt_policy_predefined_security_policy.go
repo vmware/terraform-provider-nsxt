@@ -336,6 +336,9 @@ func resourceNsxtPolicyPredefinedSecurityPolicyRead(d *schema.ResourceData, m in
 	domain := getDomainFromResourcePath(path)
 
 	client := domains.NewSecurityPoliciesClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	obj, err := client.Get(domain, id)
 	if err != nil {
 		return handleReadError(d, "Predefined Security Policy", id, err)

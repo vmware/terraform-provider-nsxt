@@ -74,6 +74,9 @@ func testAccDataSourceNsxtPolicySegmentCreate(name string) error {
 	id := uuid.String()
 
 	client := infra.NewSegmentsClient(testAccGetSessionContext(), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	err = client.Patch(id, obj)
 	if err != nil {
 		return fmt.Errorf("Error during Segment creation: %v", err)
@@ -93,6 +96,9 @@ func testAccDataSourceNsxtPolicySegmentDeleteByName(name string) error {
 		return nil
 	}
 	client := infra.NewSegmentsClient(testAccGetSessionContext(), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	err = client.Delete(objID)
 
 	if err != nil {

@@ -1172,6 +1172,9 @@ func nsxtPolicySegmentDiscoveryProfileRead(d *schema.ResourceData, m interface{}
 		results = lmResults.(model.SegmentDiscoveryProfileBindingMapListResult)
 	} else {
 		client := segments.NewSegmentDiscoveryProfileBindingMapsClient(getSessionContext(d, m), connector)
+		if client == nil {
+			return policyResourceNotSupportedError()
+		}
 		var err error
 		results, err = client.List(segmentID, nil, nil, nil, nil, nil, nil)
 		if err != nil {
@@ -1213,6 +1216,9 @@ func nsxtPolicySegmentQosProfileRead(d *schema.ResourceData, m interface{}) erro
 		results = lmResults.(model.SegmentQosProfileBindingMapListResult)
 	} else {
 		client := segments.NewSegmentQosProfileBindingMapsClient(getSessionContext(d, m), connector)
+		if client == nil {
+			return policyResourceNotSupportedError()
+		}
 		var err error
 		results, err = client.List(segmentID, nil, nil, nil, nil, nil)
 		if err != nil {
@@ -1255,6 +1261,9 @@ func nsxtPolicySegmentSecurityProfileRead(d *schema.ResourceData, m interface{})
 		results = lmResults.(model.SegmentSecurityProfileBindingMapListResult)
 	} else {
 		client := segments.NewSegmentSecurityProfileBindingMapsClient(getSessionContext(d, m), connector)
+		if client == nil {
+			return policyResourceNotSupportedError()
+		}
 		var err error
 		results, err = client.List(segmentID, nil, nil, nil, nil, nil)
 		if err != nil {
@@ -1316,7 +1325,11 @@ func setSegmentBridgeConfigInSchema(d *schema.ResourceData, obj *model.Segment) 
 
 func nsxtPolicyGetSegment(context utl.SessionContext, connector client.Connector, id string, gwPath string, isFixed bool) (model.Segment, error) {
 	if !isFixed {
-		return infra.NewSegmentsClient(context, connector).Get(id)
+		client := infra.NewSegmentsClient(context, connector)
+		if client == nil {
+			return model.Segment{}, policyResourceNotSupportedError()
+		}
+		return client.Get(id)
 	}
 
 	isT0, gwID := parseGatewayPolicyPath(gwPath)
@@ -1327,7 +1340,11 @@ func nsxtPolicyGetSegment(context utl.SessionContext, connector client.Connector
 		return model.Segment{}, fmt.Errorf("Tier-0 fixed segments are not supported")
 	}
 
-	return tier1s.NewSegmentsClient(context, connector).Get(gwID, id)
+	client := tier1s.NewSegmentsClient(context, connector)
+	if client == nil {
+		return model.Segment{}, policyResourceNotSupportedError()
+	}
+	return client.Get(gwID, id)
 }
 
 func nsxtPolicySegmentRead(d *schema.ResourceData, m interface{}, isVlan bool, isFixed bool) error {
@@ -1522,6 +1539,9 @@ func nsxtPolicySegmentDelete(d *schema.ResourceData, m interface{}, isFixed bool
 				ports = gmPorts
 			} else {
 				portsClient := segments.NewPortsClient(getSessionContext(d, m), connector)
+				if portsClient == nil {
+					return nil, "error", policyResourceNotSupportedError()
+				}
 				lmPorts, err := portsClient.List(id, nil, nil, nil, nil, nil, nil)
 				if err != nil {
 					return lmPorts, "error", logAPIError("Error listing segment ports", err)

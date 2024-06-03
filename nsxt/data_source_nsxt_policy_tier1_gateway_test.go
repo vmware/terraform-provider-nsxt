@@ -71,6 +71,9 @@ func testAccDataSourceNsxtPolicyTier1GatewayCreate(routerName string) error {
 	// Generate a random ID for the resource
 	id := newUUID()
 	client := infra.NewTier1sClient(testAccGetSessionContext(), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	err = client.Patch(id, obj)
 
 	if err != nil {
@@ -87,6 +90,9 @@ func testAccDataSourceNsxtPolicyTier1GatewayDeleteByName(routerName string) erro
 
 	// Find the object by name
 	client := infra.NewTier1sClient(testAccGetSessionContext(), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 
 	// Find the object by name
 	objList, err := client.List(nil, nil, nil, nil, nil, nil)

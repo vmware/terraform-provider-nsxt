@@ -30,12 +30,18 @@ func resourceNsxtPolicySecurityPolicy() *schema.Resource {
 
 func getSecurityPolicyInDomain(sessionContext utl.SessionContext, id string, domainName string, connector client.Connector) (model.SecurityPolicy, error) {
 	client := domains.NewSecurityPoliciesClient(sessionContext, connector)
+	if client == nil {
+		return model.SecurityPolicy{}, policyResourceNotSupportedError()
+	}
 	return client.Get(domainName, id)
 
 }
 
 func resourceNsxtPolicySecurityPolicyExistsInDomain(sessionContext utl.SessionContext, id string, domainName string, connector client.Connector) (bool, error) {
 	client := domains.NewSecurityPoliciesClient(sessionContext, connector)
+	if client == nil {
+		return false, policyResourceNotSupportedError()
+	}
 	_, err := client.Get(domainName, id)
 
 	if err == nil {
@@ -106,6 +112,9 @@ func resourceNsxtPolicySecurityPolicyDelete(d *schema.ResourceData, m interface{
 	connector := getPolicyConnector(m)
 
 	client := domains.NewSecurityPoliciesClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	err := client.Delete(d.Get("domain").(string), id)
 
 	if err != nil {

@@ -49,6 +49,9 @@ func resourceNsxtPolicySecurityPolicyRuleCreate(d *schema.ResourceData, m interf
 
 	log.Printf("[INFO] Creating Security Policy Rule with ID %s under policy %s", id, policyPath)
 	client := securitypolicies.NewRulesClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	rule := securityPolicyRuleSchemaToModel(d, id)
 	err = client.Patch(domain, policyID, id, rule)
 	if err != nil {
@@ -129,6 +132,9 @@ func resourceNsxtPolicySecurityPolicyRuleExistsPartial(policyPath string) func(s
 
 func resourceNsxtPolicySecurityPolicyRuleExists(sessionContext utl.SessionContext, id string, policyPath string, connector client.Connector) (bool, error) {
 	client := securitypolicies.NewRulesClient(sessionContext, connector)
+	if client == nil {
+		return false, policyResourceNotSupportedError()
+	}
 
 	domain := getDomainFromResourcePath(policyPath)
 	policyID := getPolicyIDFromPath(policyPath)
@@ -162,6 +168,9 @@ func resourceNsxtPolicySecurityPolicyRuleRead(d *schema.ResourceData, m interfac
 	}
 
 	client := securitypolicies.NewRulesClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	rule, err := client.Get(domain, policyID, id)
 	if err != nil {
 		return handleReadError(d, "SecurityPolicyRule", fmt.Sprintf("%s/%s", policyPath, id), err)
@@ -215,6 +224,9 @@ func resourceNsxtPolicySecurityPolicyRuleUpdate(d *schema.ResourceData, m interf
 	policyID := getPolicyIDFromPath(policyPath)
 
 	client := securitypolicies.NewRulesClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	rule := securityPolicyRuleSchemaToModel(d, id)
 	err := client.Patch(domain, policyID, id, rule)
 	if err != nil {
@@ -238,6 +250,9 @@ func resourceNsxtPolicySecurityPolicyRuleDelete(d *schema.ResourceData, m interf
 	policyID := getPolicyIDFromPath(policyPath)
 
 	client := securitypolicies.NewRulesClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	return client.Delete(domain, policyID, id)
 }
 

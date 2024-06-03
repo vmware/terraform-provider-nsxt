@@ -180,6 +180,9 @@ func testAccNSXPolicyIPBlockCheckExists(resourceName string) resource.TestCheckF
 	return func(state *terraform.State) error {
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
 		client := infra.NewIpBlocksClient(testAccGetSessionContext(), connector)
+		if client == nil {
+			return policyResourceNotSupportedError()
+		}
 
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
@@ -212,6 +215,9 @@ func testAccNSXPolicyIPBlockVisibility(resourceName string, withVisibility bool,
 func testAccNSXPolicyIPBlockCheckDestroy(state *terraform.State) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
 	client := infra.NewIpBlocksClient(testAccGetSessionContext(), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 
 	for _, rs := range state.RootModule().Resources {
 		if rs.Type != "nsxt_policy_ip_block" {

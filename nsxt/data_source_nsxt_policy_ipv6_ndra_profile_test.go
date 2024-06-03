@@ -76,6 +76,9 @@ func testAccDataSourceNsxtPolicyIpv6NdraProfileCreate(name string) error {
 	id := newUUID()
 
 	client := infra.NewIpv6NdraProfilesClient(testAccGetSessionContext(), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	err = client.Patch(id, obj, nil)
 	if err != nil {
 		return handleCreateError("Ipv6NdraProfile", id, err)
@@ -90,6 +93,9 @@ func testAccDataSourceNsxtPolicyIpv6NdraProfileDeleteByName(name string) error {
 	}
 	// Find the object by name and delete it
 	client := infra.NewIpv6NdraProfilesClient(testAccGetSessionContext(), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 
 	// Find the object by name
 	objList, err := client.List(nil, nil, nil, nil, nil, nil)

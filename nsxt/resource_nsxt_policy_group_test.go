@@ -675,6 +675,9 @@ func testAccNsxtPolicyGroupExists(resourceName string, domainName string) resour
 		}
 
 		nsxClient := domains.NewGroupsClient(testAccGetSessionContext(), connector)
+		if nsxClient == nil {
+			return policyResourceNotSupportedError()
+		}
 		_, err := nsxClient.Get(domainName, resourceID)
 		if err != nil {
 			return fmt.Errorf("Error while retrieving policy Group ID %s domain %s. Error: %v", resourceID, domainName, err)

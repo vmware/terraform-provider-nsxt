@@ -774,6 +774,9 @@ func testAccNsxtPolicyServiceExists(resourceName string) resource.TestCheckFunc 
 		}
 
 		nsxClient := infra.NewServicesClient(testAccGetSessionContext(), connector)
+		if nsxClient == nil {
+			return policyResourceNotSupportedError()
+		}
 		_, err := nsxClient.Get(resourceID)
 		if err != nil {
 			return fmt.Errorf("Error while retrieving policy service ID %s. Error: %v", resourceID, err)
@@ -793,6 +796,9 @@ func testAccNsxtPolicyServiceCheckDestroy(state *terraform.State, displayName st
 
 		resourceID := rs.Primary.Attributes["id"]
 		nsxClient := infra.NewServicesClient(testAccGetSessionContext(), connector)
+		if nsxClient == nil {
+			return policyResourceNotSupportedError()
+		}
 		_, err := nsxClient.Get(resourceID)
 		if err == nil {
 			return fmt.Errorf("Policy service %s still exists", displayName)

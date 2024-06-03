@@ -381,6 +381,9 @@ func testAccNsxtPolicyTier1InterfaceExists(resourceName string) resource.TestChe
 		}
 
 		nsxClient := localeservices.NewInterfacesClient(testAccGetSessionContext(), connector)
+		if nsxClient == nil {
+			return policyResourceNotSupportedError()
+		}
 		_, err := nsxClient.Get(gwID, localeServiceID, resourceID)
 
 		if err != nil {
@@ -394,6 +397,9 @@ func testAccNsxtPolicyTier1InterfaceExists(resourceName string) resource.TestChe
 func testAccNsxtPolicyTier1InterfaceCheckDestroy(state *terraform.State, displayName string) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
 	client := localeservices.NewInterfacesClient(testAccGetSessionContext(), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	for _, rs := range state.RootModule().Resources {
 
 		if rs.Type != "nsxt_policy_tier1_gateway_interface" {

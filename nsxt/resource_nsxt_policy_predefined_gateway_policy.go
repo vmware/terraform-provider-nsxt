@@ -414,6 +414,9 @@ func resourceNsxtPolicyPredefinedGatewayPolicyRead(d *schema.ResourceData, m int
 	domain := getDomainFromResourcePath(path)
 
 	client := domains.NewGatewayPoliciesClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	obj, err := client.Get(domain, id)
 	if err != nil {
 		return handleReadError(d, "Predefined Gateway Policy", id, err)

@@ -77,10 +77,16 @@ func getPolicyDchpStaticBindingOnSegment(context utl.SessionContext, id string, 
 	}
 	if context.ClientType == utl.Global || gwID == "" {
 		client := segments.NewDhcpStaticBindingConfigsClient(context, connector)
+		if client == nil {
+			return nil, policyResourceNotSupportedError()
+		}
 		return client.Get(segmentID, id)
 	}
 
 	client := t1_segments.NewDhcpStaticBindingConfigsClient(context, connector)
+	if client == nil {
+		return nil, policyResourceNotSupportedError()
+	}
 	return client.Get(gwID, segmentID, id)
 }
 
@@ -153,11 +159,17 @@ func policyDhcpV4StaticBindingConvertAndPatch(d *schema.ResourceData, segmentPat
 	if gwID == "" {
 		// infra segment
 		client := segments.NewDhcpStaticBindingConfigsClient(context, connector)
+		if client == nil {
+			return policyResourceNotSupportedError()
+		}
 		return client.Patch(segmentID, id, convObj.(*data.StructValue))
 	}
 
 	// fixed segment
 	client := t1_segments.NewDhcpStaticBindingConfigsClient(context, connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	return client.Patch(gwID, segmentID, id, convObj.(*data.StructValue))
 }
 
@@ -233,10 +245,16 @@ func resourceNsxtPolicyDhcpV4StaticBindingRead(d *schema.ResourceData, m interfa
 	if gwID == "" {
 		// infra segment
 		client := segments.NewDhcpStaticBindingConfigsClient(context, connector)
+		if client == nil {
+			return policyResourceNotSupportedError()
+		}
 		dhcpObj, err = client.Get(segmentID, id)
 	} else {
 		// fixed segment
 		client := t1_segments.NewDhcpStaticBindingConfigsClient(context, connector)
+		if client == nil {
+			return policyResourceNotSupportedError()
+		}
 		dhcpObj, err = client.Get(gwID, segmentID, id)
 	}
 
@@ -310,10 +328,16 @@ func resourceNsxtPolicyDhcpStaticBindingDelete(d *schema.ResourceData, m interfa
 	if gwID == "" {
 		// infra segment
 		client := segments.NewDhcpStaticBindingConfigsClient(context, connector)
+		if client == nil {
+			return policyResourceNotSupportedError()
+		}
 		err = client.Delete(segmentID, id)
 	} else {
 		// fixed segment
 		client := t1_segments.NewDhcpStaticBindingConfigsClient(context, connector)
+		if client == nil {
+			return policyResourceNotSupportedError()
+		}
 		err = client.Delete(gwID, segmentID, id)
 	}
 
