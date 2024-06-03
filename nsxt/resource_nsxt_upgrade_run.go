@@ -15,6 +15,7 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/fabric"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/upgrade"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/upgrade/plan"
@@ -519,6 +520,13 @@ func updateUpgradeUnitGroups(upgradeClientSet *upgradeClientSet, d *schema.Resou
 		}
 	}
 
+	groupList, err := upgradeClientSet.GroupClient.List(nil, nil, nil, nil, nil, nil, nil, nil)
+	if err != nil {
+		return err
+	}
+	groupIDMap := make(map[string]bool)
+	groupNameMap := make(map[string]bool)
+
 	preUpgradeGroupID := ""
 	for _, groupI := range d.Get(componentToGroupKey[component]).([]interface{}) {
 		group := groupI.(map[string]interface{})
@@ -531,11 +539,8 @@ func updateUpgradeUnitGroups(upgradeClientSet *upgradeClientSet, d *schema.Resou
 			if groupName == "" {
 				return fmt.Errorf("couldn't find upgrade unit group without id or display_name")
 			}
+			groupNameMap[groupName] = true
 			// This is a custom group, try to find it by name
-			groupList, err := upgradeClientSet.GroupClient.List(nil, nil, nil, nil, nil, nil, nil, nil)
-			if err != nil {
-				return err
-			}
 			for i, group := range groupList.Results {
 				if *group.DisplayName == groupName {
 					if groupGet == nil {
@@ -568,7 +573,7 @@ func updateUpgradeUnitGroups(upgradeClientSet *upgradeClientSet, d *schema.Resou
 				if group["hosts"] != nil {
 					schemaUnits = interface2StringList(group["hosts"].([]interface{}))
 				}
-				getHostDefaultUpgradeGroup, err := getHostDefaultUpgradeGroupGetter(m)
+				getHostDefaultUpgradeGroup, err := getHostDefaultUpgradeGroupGetter(m, groupList)
 				if err != nil {
 					return fmt.Errorf("failed to retrieve host upgrade groups, error is %v", err)
 				}
@@ -595,6 +600,7 @@ func updateUpgradeUnitGroups(upgradeClientSet *upgradeClientSet, d *schema.Resou
 				groupGet.UpgradeUnits = groupMembers
 			}
 		} else {
+			groupIDMap[groupID] = true
 			group, err := upgradeClientSet.GroupClient.Get(groupID, nil)
 			if err != nil {
 				return err
@@ -661,7 +667,35 @@ func updateUpgradeUnitGroups(upgradeClientSet *upgradeClientSet, d *schema.Resou
 		}
 		preUpgradeGroupID = groupID
 	}
+
+	// After group update is complete, check for empty custom host groups which aren't defined in the schema, and have no members - these can be deleted.
+	componentType := "HOST"
+	groupList, err = upgradeClientSet.GroupClient.List(&componentType, nil, nil, nil, nil, nil, nil, nil)
+	if err != nil {
+		return err
+	}
+	for _, group := range groupList.Results {
+		// Non-empty groups cannot be deleted anyway so skip
+		if *group.UpgradeUnitCount == 0 {
+			if !groupIDMap[*group.Id] && !groupNameMap[*group.DisplayName] && !isPredefinedGroup(m, group) {
+				err = upgradeClientSet.GroupClient.Delete(*group.Id)
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
 	return nil
+}
+
+func isPredefinedGroup(m interface{}, group model.UpgradeUnitGroup) bool {
+	if group.DisplayName != nil && *group.DisplayName == hostUpgradeUnitDefaultGroup && *group.Type_ == "HOST" {
+		return true
+	}
+	connector := getPolicyConnector(m)
+	client := fabric.NewComputeCollectionsClient(connector)
+	_, err := client.Get(*group.Id)
+	return !isNotFoundError(err)
 }
 
 func updateComponentUpgradePlanSetting(settingClient plan.SettingsClient, d *schema.ResourceData, component string) error {
@@ -820,15 +854,9 @@ func resourceNsxtUpgradeRunDelete(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func getHostDefaultUpgradeGroupGetter(m interface{}) (func(string) (string, error), error) {
+func getHostDefaultUpgradeGroupGetter(m interface{}, groupList model.UpgradeUnitGroupListResult) (func(string) (string, error), error) {
 	connector := getPolicyConnector(m)
 	hostClient := nsx.NewTransportNodesClient(connector)
-	groupClient := upgrade.NewUpgradeUnitGroupsClient(connector)
-	componentType := "HOST"
-	hostGroups, err := groupClient.List(&componentType, nil, nil, nil, nil, nil, nil, nil)
-	if err != nil {
-		return nil, err
-	}
 
 	return func(hostID string) (string, error) {
 		host, err := hostClient.Get(hostID)
@@ -847,9 +875,9 @@ func getHostDefaultUpgradeGroupGetter(m interface{}) (func(string) (string, erro
 		}
 		// This host is not a part of a compute cluster:
 		// it should be assigned to the 'Group 1 for ESXI' group (this value is hardcoded in NSX)
-		if hostGroups.Results != nil {
-			for _, group := range hostGroups.Results {
-				if group.DisplayName != nil && *group.DisplayName == hostUpgradeUnitDefaultGroup {
+		if groupList.Results != nil {
+			for _, group := range groupList.Results {
+				if group.DisplayName != nil && *group.DisplayName == hostUpgradeUnitDefaultGroup && *group.Type_ == "HOST" {
 					return *group.Id, nil
 				}
 			}
