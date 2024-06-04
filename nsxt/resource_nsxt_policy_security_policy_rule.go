@@ -43,7 +43,7 @@ func resourceNsxtPolicySecurityPolicyRuleCreate(d *schema.ResourceData, m interf
 		return err
 	}
 
-	if err := setSecurityPolicyRuleContext(d, projectID); err != nil {
+	if err := setSecurityPolicyRuleContext(d, m, projectID); err != nil {
 		return handleCreateError("SecurityPolicyRule", fmt.Sprintf("%s/%s", policyPath, id), err)
 	}
 
@@ -61,8 +61,8 @@ func resourceNsxtPolicySecurityPolicyRuleCreate(d *schema.ResourceData, m interf
 	return resourceNsxtPolicySecurityPolicyRuleRead(d, m)
 }
 
-func setSecurityPolicyRuleContext(d *schema.ResourceData, projectID string) error {
-	providedProjectID, _ := getContextDataFromSchema(d)
+func setSecurityPolicyRuleContext(d *schema.ResourceData, m interface{}, projectID string) error {
+	providedProjectID, _ := getContextDataFromSchema(d, m)
 	if providedProjectID == "" {
 		contexts := make([]interface{}, 1)
 		ctxMap := make(map[string]interface{})
@@ -157,7 +157,7 @@ func resourceNsxtPolicySecurityPolicyRuleRead(d *schema.ResourceData, m interfac
 	domain := getDomainFromResourcePath(policyPath)
 	policyID := getPolicyIDFromPath(policyPath)
 
-	if err := setSecurityPolicyRuleContext(d, projectID); err != nil {
+	if err := setSecurityPolicyRuleContext(d, m, projectID); err != nil {
 		return handleReadError(d, "SecurityPolicyRule", fmt.Sprintf("%s/%s", policyPath, id), err)
 	}
 

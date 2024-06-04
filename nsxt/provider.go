@@ -68,6 +68,8 @@ type nsxtClients struct {
 	Host                   string
 	PolicyEnforcementPoint string
 	PolicyGlobalManager    bool
+	ProjectID              string
+	VPCID                  string
 }
 
 // Provider for VMWare NSX-T
@@ -241,6 +243,7 @@ func Provider() *schema.Provider {
 				Description: "Avoid initializing NSX connection on startup",
 				DefaultFunc: schema.EnvDefaultFunc("NSXT_ON_DEMAND_CONNECTION", false),
 			},
+			"context": getContextSchema(false, false, true),
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
@@ -782,6 +785,7 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 	clientAuthDefined := (len(clientAuthCertFile) > 0) || (len(clientAuthCert) > 0)
 	policyEnforcementPoint := d.Get("enforcement_point").(string)
 	policyGlobalManager := d.Get("global_manager").(bool)
+	projectID, vpcID := getContextDataFromSchema(d, *clients)
 	vmcInfo := getVmcAuthInfo(d)
 
 	isVMC := false
@@ -827,6 +831,8 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 	clients.Host = host
 	clients.PolicyEnforcementPoint = policyEnforcementPoint
 	clients.PolicyGlobalManager = policyGlobalManager
+	clients.ProjectID = projectID
+	clients.VPCID = vpcID
 
 	if onDemandConn {
 		// version init will happen on demand
@@ -1209,7 +1215,7 @@ func getGlobalPolicyEnforcementPointPath(m interface{}, sitePath *string) string
 	return fmt.Sprintf("%s/enforcement-points/%s", *sitePath, getPolicyEnforcementPoint(m))
 }
 
-func getContextDataFromSchema(d *schema.ResourceData) (string, string) {
+func getContextDataFromSchema(d *schema.ResourceData, m interface{}) (string, string) {
 	ctxPtr := d.Get("context")
 	if ctxPtr != nil {
 		contexts := ctxPtr.([]interface{})
@@ -1223,12 +1229,12 @@ func getContextDataFromSchema(d *schema.ResourceData) (string, string) {
 			return data["project_id"].(string), vpcID
 		}
 	}
-	return "", ""
+	return m.(nsxtClients).ProjectID, m.(nsxtClients).VPCID
 }
 
 func getSessionContext(d *schema.ResourceData, m interface{}) tf_api.SessionContext {
 	var clientType tf_api.ClientType
-	projectID, vpcID := getContextDataFromSchema(d)
+	projectID, vpcID := getContextDataFromSchema(d, m)
 	if projectID != "" {
 		clientType = tf_api.Multitenancy
 		if vpcID != "" {
