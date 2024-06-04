@@ -266,6 +266,7 @@ func getPolicyCommonSegmentSchema(vlanRequired bool, isFixed bool) map[string]*s
 		"description":  getDescriptionSchema(),
 		"revision":     getRevisionSchema(),
 		"tag":          getTagsSchema(),
+		"ignore_tags":  getIgnoreTagsSchema(),
 		"context":      getContextSchema(false, false),
 		"advanced_config": {
 			Type:        schema.TypeList,
