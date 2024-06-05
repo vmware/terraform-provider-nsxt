@@ -92,7 +92,9 @@ func resourceNsxtPolicyIPBlockRead(d *schema.ResourceData, m interface{}) error 
 	d.Set("path", block.Path)
 	d.Set("revision", block.Revision)
 	d.Set("cidr", block.Cidr)
-	d.Set("visibility", block.Visibility)
+	if util.NsxVersionHigherOrEqual("4.2.0") {
+		d.Set("visibility", block.Visibility)
+	}
 
 	return nil
 }
