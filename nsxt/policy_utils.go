@@ -227,9 +227,11 @@ func getPathListFromSchema(d *schema.ResourceData, schemaAttrName string) []stri
 }
 
 func setPathListInSchema(d *schema.ResourceData, attrName string, pathList []string) {
-	if !(len(pathList) == 1 && pathList[0] == "ANY") {
-		d.Set(attrName, pathList)
+	if len(pathList) == 1 && pathList[0] == "ANY" {
+		d.Set(attrName, nil)
+		return
 	}
+	d.Set(attrName, pathList)
 }
 
 func getDomainFromResourcePath(rPath string) string {
