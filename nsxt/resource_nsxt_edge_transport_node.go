@@ -305,23 +305,7 @@ func getEdgeNodeSettingsSchema() *schema.Schema {
 		Required:    true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
-				"advanced_configuration": {
-					Type:        schema.TypeList,
-					Optional:    true,
-					Description: "Advanced configuration",
-					Elem: &schema.Resource{
-						Schema: map[string]*schema.Schema{
-							"key": {
-								Type:     schema.TypeString,
-								Required: true,
-							},
-							"value": {
-								Type:     schema.TypeString,
-								Required: true,
-							},
-						},
-					},
-				},
+				"advanced_configuration": getKeyValuePairListSchema(),
 				"allow_ssh_root_login": {
 					Type:        schema.TypeBool,
 					Default:     false,
@@ -860,13 +844,7 @@ func getEdgeNodeSettingsFromSchema(s interface{}) (*model.EdgeNodeSettings, erro
 	settings := s.([]interface{})
 	for _, settingIf := range settings {
 		setting := settingIf.(map[string]interface{})
-		var advCfg []model.KeyValuePair
-		for _, aci := range setting["advanced_configuration"].([]interface{}) {
-			ac := aci.(map[string]interface{})
-			key := ac["key"].(string)
-			val := ac["value"].(string)
-			advCfg = append(advCfg, model.KeyValuePair{Key: &key, Value: &val})
-		}
+		advCfg := getKeyValuePairListFromSchema(setting["advanced_configuration"])
 		allowSSHRootLogin := setting["allow_ssh_root_login"].(bool)
 		dnsServers := interface2StringList(setting["dns_servers"].([]interface{}))
 		enableSSH := setting["enable_ssh"].(bool)
@@ -1257,14 +1235,7 @@ func resourceNsxtEdgeTransportNodeRead(d *schema.ResourceData, m interface{}) er
 
 func setEdgeNodeSettingsInSchema(d *schema.ResourceData, nodeSettings *model.EdgeNodeSettings) error {
 	elem := getElemOrEmptyMapFromSchema(d, "node_settings")
-	var advCfg []map[string]interface{}
-	for _, kv := range nodeSettings.AdvancedConfiguration {
-		e := make(map[string]interface{})
-		e["key"] = kv.Key
-		e["value"] = kv.Value
-		advCfg = append(advCfg, e)
-	}
-	elem["advanced_configuration"] = advCfg
+	elem["advanced_configuration"] = setKeyValueListForSchema(nodeSettings.AdvancedConfiguration)
 	elem["allow_ssh_root_login"] = nodeSettings.AllowSshRootLogin
 	elem["dns_servers"] = nodeSettings.DnsServers
 	elem["enable_ssh"] = nodeSettings.EnableSsh

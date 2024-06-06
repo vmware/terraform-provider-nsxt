@@ -778,3 +778,47 @@ func getGMTagsFromSchema(d *schema.ResourceData) []gm_model.Tag {
 func setGMTagsInSchema(d *schema.ResourceData, tags []gm_model.Tag) {
 	setCustomizedGMTagsInSchema(d, tags, "tag")
 }
+
+func getKeyValuePairListSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeList,
+		Optional:    true,
+		Description: "Advanced configuration",
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"key": {
+					Type:     schema.TypeString,
+					Required: true,
+				},
+				"value": {
+					Type:     schema.TypeString,
+					Required: true,
+				},
+			},
+		},
+	}
+}
+
+func getKeyValuePairListFromSchema(kvIList interface{}) []mp_model.KeyValuePair {
+	var kvList []mp_model.KeyValuePair
+	if kvIList != nil {
+		for _, kv := range kvIList.([]interface{}) {
+			kvMap := kv.(map[string]interface{})
+			key := kvMap["key"].(string)
+			val := kvMap["value"].(string)
+			kvList = append(kvList, mp_model.KeyValuePair{Key: &key, Value: &val})
+		}
+	}
+	return kvList
+}
+
+func setKeyValueListForSchema(kvList []mp_model.KeyValuePair) interface{} {
+	var kvIList []interface{}
+	for _, ec := range kvList {
+		kvMap := make(map[string]interface{})
+		kvMap["key"] = ec.Key
+		kvMap["value"] = ec.Value
+		kvIList = append(kvIList, kvMap)
+	}
+	return kvIList
+}
