@@ -16,6 +16,12 @@ import (
 // package level logger to include log.Lshortfile context
 var logger = log.New(os.Stderr, "", log.LstdFlags|log.Lshortfile)
 
+const (
+	PolymorphicTypeStatic  = "static"
+	PolymorphicTypeFlat    = "flat"
+	PolymorphicTypeWrapped = "wrapped"
+)
+
 type Metadata struct {
 	// we need a separate schema type, in addition to terraform SDK type,
 	// in order to distinguish between single subclause and a list of entries
@@ -24,8 +30,9 @@ type Metadata struct {
 	SdkFieldName string
 	// This attribute is parent path for the object
 	IsParentPath bool
-	// This attribute is polymorphic
-	IsPolymorphic bool
+	// The type of polymorphic relation between SDK and TF schema
+	// Empty for non-polymorphic fields
+	PolymorphicType string
 	// SDK vapi binding type for converting polymorphic structs
 	BindingType vapiBindings_.BindingType
 	// Map from schema key of polymorphic attr to this SDK resource type
@@ -154,10 +161,12 @@ func StructToSchema(elem reflect.Value, d *schema.ResourceData, metadata map[str
 			logger.Printf("[TRACE] %s skip key %s with nil value", ctx, key)
 			continue
 		}
-		if item.Metadata.IsPolymorphic {
+		if len(item.Metadata.PolymorphicType) > 0 {
 			childElem := elem.FieldByName(item.Metadata.SdkFieldName)
 			var nestedVal interface{}
-			nestedVal, err = polyStructToSchema(ctx, childElem, item)
+			if item.Metadata.PolymorphicType == PolymorphicTypeWrapped {
+				nestedVal, err = polyStructToWrappedSchema(ctx, childElem, item)
+			}
 			if err != nil {
 				return
 			}
@@ -266,7 +275,7 @@ func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[str
 		if len(parent) > 0 {
 			logger.Printf("[TRACE] %s parent %s key %s", ctx, parent, key)
 		}
-		if item.Metadata.IsPolymorphic {
+		if len(item.Metadata.PolymorphicType) > 0 {
 			var itemList []interface{}
 			if item.Metadata.SchemaType == "list" || item.Metadata.SchemaType == "struct" {
 				if len(parent) > 0 {
@@ -281,7 +290,10 @@ func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[str
 					itemList = d.Get(key).(*schema.Set).List()
 				}
 			}
-			if err = polySchemaToStruct(ctx, elem, itemList, item); err != nil {
+			if item.Metadata.PolymorphicType == PolymorphicTypeWrapped {
+				err = polyWrappedSchemaToStruct(ctx, elem, itemList, item)
+			}
+			if err != nil {
 				return
 			}
 			continue
@@ -398,8 +410,8 @@ func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[str
 	return
 }
 
-func polyStructToSchema(ctx string, elem reflect.Value, item *ExtendedSchema) (ret []map[string]interface{}, err error) {
-	if !item.Metadata.IsPolymorphic {
+func polyStructToWrappedSchema(ctx string, elem reflect.Value, item *ExtendedSchema) (ret []map[string]interface{}, err error) {
+	if item.Metadata.PolymorphicType != PolymorphicTypeWrapped {
 		err = fmt.Errorf("%s polyStructToSchema called on non-polymorphic attr", ctx)
 		logger.Printf("[ERROR] %v", err)
 		return
@@ -491,8 +503,8 @@ func polyStructToSchema(ctx string, elem reflect.Value, item *ExtendedSchema) (r
 	return
 }
 
-func polySchemaToStruct(ctx string, elem reflect.Value, dataList []interface{}, item *ExtendedSchema) (err error) {
-	if !item.Metadata.IsPolymorphic {
+func polyWrappedSchemaToStruct(ctx string, elem reflect.Value, dataList []interface{}, item *ExtendedSchema) (err error) {
+	if item.Metadata.PolymorphicType != PolymorphicTypeWrapped {
 		err = fmt.Errorf("%s polySchemaToStruct called on non-polymorphic attr", ctx)
 		logger.Printf("[ERROR] %v", err)
 		return

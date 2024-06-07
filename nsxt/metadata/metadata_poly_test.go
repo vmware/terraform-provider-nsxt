@@ -205,9 +205,9 @@ func testPolyStructExtSchema(t, sdkName string) map[string]*ExtendedSchema {
 				},
 			},
 			Metadata: Metadata{
-				SchemaType:    t,
-				SdkFieldName:  sdkName,
-				IsPolymorphic: true,
+				SchemaType:      t,
+				SdkFieldName:    sdkName,
+				PolymorphicType: PolymorphicTypeWrapped,
 				ResourceTypeMap: map[string]string{
 					"cat":    "FakeCat",
 					"coffee": "FakeCoffee",
