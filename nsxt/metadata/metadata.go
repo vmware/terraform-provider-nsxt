@@ -64,8 +64,8 @@ type Testdata struct {
 }
 
 type TypeIdentifier struct {
-	SdkName  string
-	JsonName string
+	SdkName      string
+	APIFieldName string
 }
 
 // GetSdkName returns the SDK field type identifier
@@ -77,11 +77,11 @@ func (t TypeIdentifier) GetSdkName() string {
 	return "ResourceType"
 }
 
-// GetJsonName returns the API JSON type identifier
+// GetAPIFieldName returns the API JSON type identifier
 // Defaults to resource_type
-func (t TypeIdentifier) GetJsonName() string {
-	if t.JsonName != "" {
-		return t.JsonName
+func (t TypeIdentifier) GetAPIFieldName() string {
+	if t.APIFieldName != "" {
+		return t.APIFieldName
 	}
 	return "resource_type"
 }
@@ -413,14 +413,14 @@ func getItemListForSchemaToStruct(d *schema.ResourceData, schemaType, key, paren
 
 // getResourceTypeFromStructValue returns resource type from SDK object based on identifier
 func getResourceTypeFromStructValue(ctx string, value data.StructValue, identifier TypeIdentifier) (string, error) {
-	if !value.HasField(identifier.GetJsonName()) {
+	if !value.HasField(identifier.GetAPIFieldName()) {
 		err := fmt.Errorf(
 			"%s failed to get resource type", ctx)
 		logger.Printf("[ERROR] %v", err)
 		return "", err
 	}
 	var rTypeData data.DataValue
-	rTypeData, err := value.Field(identifier.GetJsonName())
+	rTypeData, err := value.Field(identifier.GetAPIFieldName())
 	if err != nil {
 		return "", err
 	}
@@ -432,7 +432,7 @@ func getResourceTypeFromStructValue(ctx string, value data.StructValue, identifi
 	}
 
 	err = fmt.Errorf("%s failed to convert resource type %s",
-		ctx, identifier.GetJsonName())
+		ctx, identifier.GetAPIFieldName())
 	logger.Printf("[ERROR] %v", err)
 	return "", err
 }

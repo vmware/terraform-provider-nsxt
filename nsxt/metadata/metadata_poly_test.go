@@ -11,9 +11,9 @@ import (
 )
 
 type testCatStruct struct {
-	Age   *int64
-	Name  *string
-	Type_ *string
+	Age  *int64
+	Name *string
+	Type *string
 }
 
 func testCatStructBindingType() vapiBindings_.BindingType {
@@ -24,7 +24,7 @@ func testCatStructBindingType() vapiBindings_.BindingType {
 	fields["name"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
 	fieldNameMap["name"] = "Name"
 	fields["type"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
-	fieldNameMap["type"] = "Type_"
+	fieldNameMap["type"] = "Type"
 	var validators = []vapiBindings_.Validator{}
 	return vapiBindings_.NewStructType("com.vmware.nsx.fake.cat", fields,
 		reflect.TypeOf(testCatStruct{}), fieldNameMap, validators)
@@ -35,9 +35,9 @@ func TestCatStructBinding(t *testing.T) {
 	name := "John"
 	rType := "FakeCat"
 	obj := testCatStruct{
-		Age:   &age,
-		Name:  &name,
-		Type_: &rType,
+		Age:  &age,
+		Name: &name,
+		Type: &rType,
 	}
 	converter := vapiBindings_.NewTypeConverter()
 	dv, err := converter.ConvertToVapi(obj, testCatStructBindingType())
@@ -50,7 +50,7 @@ func TestCatStructBinding(t *testing.T) {
 type testCoffeeStruct struct {
 	IsDecaf *bool
 	Name    *string
-	Type_   *string
+	Type    *string
 }
 
 func testCoffeeStructBindingType() vapiBindings_.BindingType {
@@ -61,7 +61,7 @@ func testCoffeeStructBindingType() vapiBindings_.BindingType {
 	fields["name"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
 	fieldNameMap["name"] = "Name"
 	fields["type"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
-	fieldNameMap["type"] = "Type_"
+	fieldNameMap["type"] = "Type"
 	var validators = []vapiBindings_.Validator{}
 	return vapiBindings_.NewStructType("com.vmware.nsx.fake.coffee", fields,
 		reflect.TypeOf(testCoffeeStruct{}), fieldNameMap, validators)
@@ -74,7 +74,7 @@ func TestCoffeeStructBinding(t *testing.T) {
 	obj := testCoffeeStruct{
 		IsDecaf: &decaf,
 		Name:    &name,
-		Type_:   &rType,
+		Type:    &rType,
 	}
 	converter := vapiBindings_.NewTypeConverter()
 	dv, err := converter.ConvertToVapi(obj, testCoffeeStructBindingType())
@@ -145,8 +145,8 @@ func testPolyStructWrappedSchema(t string) map[string]*schema.Schema {
 
 func testPolyStructWrappedExtSchema(t, sdkName string) map[string]*ExtendedSchema {
 	typeIdentier := TypeIdentifier{
-		SdkName:  "Type_",
-		JsonName: "type",
+		SdkName:      "Type",
+		APIFieldName: "type",
 	}
 
 	schemaType := schema.TypeList
@@ -224,9 +224,9 @@ func TestPolyStructToWrappedSchema(t *testing.T) {
 		rType := "FakeCat"
 		age := int64(1)
 		catObj := testCatStruct{
-			Age:   &age,
-			Name:  &name,
-			Type_: &rType,
+			Age:  &age,
+			Name: &name,
+			Type: &rType,
 		}
 		obj := testPolyStruct{}
 		converter := vapiBindings_.NewTypeConverter()
@@ -256,7 +256,7 @@ func TestPolyStructToWrappedSchema(t *testing.T) {
 		coffeeObj := testCoffeeStruct{
 			IsDecaf: &isDecaf,
 			Name:    &name,
-			Type_:   &rType,
+			Type:    &rType,
 		}
 		obj := testPolyStruct{}
 		converter := vapiBindings_.NewTypeConverter()
@@ -287,14 +287,14 @@ func TestPolyStructToWrappedSchema(t *testing.T) {
 		isDecaf := false
 		age := int64(2)
 		catObj := testCatStruct{
-			Age:   &age,
-			Name:  &catName,
-			Type_: &catResType,
+			Age:  &age,
+			Name: &catName,
+			Type: &catResType,
 		}
 		coffeeObj := testCoffeeStruct{
 			IsDecaf: &isDecaf,
 			Name:    &coffeeName,
-			Type_:   &coffeeResType,
+			Type:    &coffeeResType,
 		}
 		obj := testPolyListStruct{
 			PolyList: make([]*data.StructValue, 2),
@@ -339,14 +339,14 @@ func TestPolyStructToWrappedSchema(t *testing.T) {
 		isDecaf := false
 		age := int64(2)
 		catObj := testCatStruct{
-			Age:   &age,
-			Name:  &catName,
-			Type_: &catResType,
+			Age:  &age,
+			Name: &catName,
+			Type: &catResType,
 		}
 		coffeeObj := testCoffeeStruct{
 			IsDecaf: &isDecaf,
 			Name:    &coffeeName,
-			Type_:   &coffeeResType,
+			Type:    &coffeeResType,
 		}
 		obj := testPolyListStruct{
 			PolyList: make([]*data.StructValue, 2),
@@ -412,7 +412,7 @@ func TestWrappedSchemaToPolyStruct(t *testing.T) {
 		assert.Nil(t, errors, "unexpected error calling ConvertToGolang")
 		assert.Equal(t, "matcha", *obs.(testCatStruct).Name)
 		assert.Equal(t, int64(1), *obs.(testCatStruct).Age)
-		assert.Equal(t, "FakeCat", *obs.(testCatStruct).Type_)
+		assert.Equal(t, "FakeCat", *obs.(testCatStruct).Type)
 	})
 
 	t.Run("coffee struct", func(t *testing.T) {
@@ -440,7 +440,7 @@ func TestWrappedSchemaToPolyStruct(t *testing.T) {
 		assert.Nil(t, errors, "unexpected error calling ConvertToGolang")
 		assert.Equal(t, "latte", *obs.(testCoffeeStruct).Name)
 		assert.Equal(t, true, *obs.(testCoffeeStruct).IsDecaf)
-		assert.Equal(t, "FakeCoffee", *obs.(testCoffeeStruct).Type_)
+		assert.Equal(t, "FakeCoffee", *obs.(testCoffeeStruct).Type)
 	})
 
 	t.Run("mixed list", func(t *testing.T) {
@@ -477,12 +477,12 @@ func TestWrappedSchemaToPolyStruct(t *testing.T) {
 		assert.Nil(t, errors, "unexpected error calling ConvertToGolang")
 		assert.Equal(t, "latte", *coffee.(testCoffeeStruct).Name)
 		assert.Equal(t, true, *coffee.(testCoffeeStruct).IsDecaf)
-		assert.Equal(t, "FakeCoffee", *coffee.(testCoffeeStruct).Type_)
+		assert.Equal(t, "FakeCoffee", *coffee.(testCoffeeStruct).Type)
 		cat, errors := converter.ConvertToGolang(obj.PolyList[1], testCatStructBindingType())
 		assert.Nil(t, errors, "unexpected error calling ConvertToGolang")
 		assert.Equal(t, "matcha", *cat.(testCatStruct).Name)
 		assert.Equal(t, int64(1), *cat.(testCatStruct).Age)
-		assert.Equal(t, "FakeCat", *cat.(testCatStruct).Type_)
+		assert.Equal(t, "FakeCat", *cat.(testCatStruct).Type)
 	})
 
 	t.Run("mixed set", func(t *testing.T) {
@@ -521,13 +521,13 @@ func TestWrappedSchemaToPolyStruct(t *testing.T) {
 				assert.Nil(t, errors, "unexpected error calling ConvertToGolang")
 				assert.Equal(t, "oolong", *cat.(testCatStruct).Name)
 				assert.Equal(t, int64(2), *cat.(testCatStruct).Age)
-				assert.Equal(t, "FakeCat", *cat.(testCatStruct).Type_)
+				assert.Equal(t, "FakeCat", *cat.(testCatStruct).Type)
 			} else {
 				coffee, errors := converter.ConvertToGolang(item, testCoffeeStructBindingType())
 				assert.Nil(t, errors, "unexpected error calling ConvertToGolang")
 				assert.Equal(t, "mocha", *coffee.(testCoffeeStruct).Name)
 				assert.Equal(t, false, *coffee.(testCoffeeStruct).IsDecaf)
-				assert.Equal(t, "FakeCoffee", *coffee.(testCoffeeStruct).Type_)
+				assert.Equal(t, "FakeCoffee", *coffee.(testCoffeeStruct).Type)
 			}
 		}
 	})
@@ -566,8 +566,8 @@ func testPolyStructFlatSchema() map[string]*schema.Schema {
 
 func testPolyStructFlatExtSchema(sdkName string) map[string]*ExtendedSchema {
 	typeIdentifier := TypeIdentifier{
-		SdkName:  "Type_",
-		JsonName: "type",
+		SdkName:      "Type",
+		APIFieldName: "type",
 	}
 
 	return map[string]*ExtendedSchema{
@@ -623,14 +623,14 @@ func TestPolyStructToFlatSchema(t *testing.T) {
 		isDecaf := false
 		age := int64(2)
 		catObj := testCatStruct{
-			Age:   &age,
-			Name:  &catName,
-			Type_: &catResType,
+			Age:  &age,
+			Name: &catName,
+			Type: &catResType,
 		}
 		coffeeObj := testCoffeeStruct{
 			IsDecaf: &isDecaf,
 			Name:    &coffeeName,
-			Type_:   &coffeeResType,
+			Type:    &coffeeResType,
 		}
 		obj := testPolyListStruct{
 			PolyList: make([]*data.StructValue, 2),
@@ -694,13 +694,13 @@ func TestFlatSchemaToPolyStruct(t *testing.T) {
 				assert.Nil(t, errors, "unexpected error calling ConvertToGolang")
 				assert.Equal(t, "oolong", *cat.(testCatStruct).Name)
 				assert.Equal(t, int64(2), *cat.(testCatStruct).Age)
-				assert.Equal(t, "FakeCat", *cat.(testCatStruct).Type_)
+				assert.Equal(t, "FakeCat", *cat.(testCatStruct).Type)
 			} else {
 				coffee, errors := converter.ConvertToGolang(item, testCoffeeStructBindingType())
 				assert.Nil(t, errors, "unexpected error calling ConvertToGolang")
 				assert.Equal(t, "mocha", *coffee.(testCoffeeStruct).Name)
 				assert.Equal(t, true, *coffee.(testCoffeeStruct).IsDecaf)
-				assert.Equal(t, "FakeCoffee", *coffee.(testCoffeeStruct).Type_)
+				assert.Equal(t, "FakeCoffee", *coffee.(testCoffeeStruct).Type)
 			}
 		}
 	})
