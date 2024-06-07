@@ -29,7 +29,9 @@ type Metadata struct {
 	// SDK vapi binding type for converting polymorphic structs
 	BindingType vapiBindings_.BindingType
 	// Map from schema key of polymorphic attr to this SDK resource type
-	ResourceTypeMap     map[string]string
+	ResourceTypeMap map[string]string
+	// Type identifier name for both SDK and JSON (StructValue field name)
+	TypeIdentifier      TypeIdentifier
 	IntroducedInVersion string
 	// skip handling of this attribute - it will be done manually
 	Skip        bool
@@ -49,6 +51,29 @@ type ExtendedResource struct {
 type Testdata struct {
 	CreateValue interface{}
 	UpdateValue interface{}
+}
+
+type TypeIdentifier struct {
+	SdkName  string
+	JsonName string
+}
+
+// GetSdkName returns the SDK field type identifier
+// Defaults to ResourceType
+func (t TypeIdentifier) GetSdkName() string {
+	if t.SdkName != "" {
+		return t.SdkName
+	}
+	return "ResourceType"
+}
+
+// GetJsonName returns the API JSON type identifier
+// Defaults to resource_type
+func (t TypeIdentifier) GetJsonName() string {
+	if t.JsonName != "" {
+		return t.JsonName
+	}
+	return "resource_type"
 }
 
 // GetExtendedSchema is a helper to convert terraform sdk schema to extended schema
@@ -406,14 +431,14 @@ func polyStructToSchema(ctx string, elem reflect.Value, item *ExtendedSchema) (r
 		var childExtSch *ExtendedSchema
 
 		// Get resource type from SDK object
-		if !childElem.HasField("resource_type") {
+		if !childElem.HasField(item.Metadata.TypeIdentifier.GetJsonName()) {
 			err = fmt.Errorf("%s polyStructToSchema failed to get resource type for %s",
 				ctx, item.Metadata.SdkFieldName)
 			logger.Printf("[ERROR] %v", err)
 			return
 		}
 		var rTypeData data.DataValue
-		rTypeData, err = childElem.Field("resource_type")
+		rTypeData, err = childElem.Field(item.Metadata.TypeIdentifier.GetJsonName())
 		if err != nil {
 			return
 		}
@@ -507,7 +532,7 @@ func polySchemaToStruct(ctx string, elem reflect.Value, dataList []interface{}, 
 				return
 			}
 			// set resource type based on mapping
-			nestedObj.Elem().FieldByName("ResourceType").Set(reflect.ValueOf(&rType))
+			nestedObj.Elem().FieldByName(item.Metadata.TypeIdentifier.GetSdkName()).Set(reflect.ValueOf(&rType))
 
 			dataValue, errors := converter.ConvertToVapi(nestedObj.Interface(), childMeta.Metadata.BindingType)
 			if errors != nil {
