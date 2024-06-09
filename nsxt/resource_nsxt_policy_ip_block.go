@@ -73,7 +73,11 @@ func resourceNsxtPolicyIPBlockExists(sessionContext utl.SessionContext, id strin
 
 func resourceNsxtPolicyIPBlockRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewIpBlocksClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := infra.NewIpBlocksClient(context, connector)
 
 	id := d.Id()
 	if id == "" {
@@ -99,7 +103,11 @@ func resourceNsxtPolicyIPBlockRead(d *schema.ResourceData, m interface{}) error 
 
 func resourceNsxtPolicyIPBlockCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewIpBlocksClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := infra.NewIpBlocksClient(context, connector)
 
 	id, err := getOrGenerateID2(d, m, resourceNsxtPolicyIPBlockExists)
 	if err != nil {
@@ -135,7 +143,11 @@ func resourceNsxtPolicyIPBlockCreate(d *schema.ResourceData, m interface{}) erro
 
 func resourceNsxtPolicyIPBlockUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewIpBlocksClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := infra.NewIpBlocksClient(context, connector)
 
 	id := d.Id()
 	if id == "" {
@@ -162,7 +174,7 @@ func resourceNsxtPolicyIPBlockUpdate(d *schema.ResourceData, m interface{}) erro
 		obj.Visibility = &visibility
 	}
 
-	_, err := client.Update(id, obj)
+	_, err = client.Update(id, obj)
 	if err != nil {
 		return handleUpdateError("IP Block", id, err)
 	}
@@ -177,8 +189,12 @@ func resourceNsxtPolicyIPBlockDelete(d *schema.ResourceData, m interface{}) erro
 	}
 
 	connector := getPolicyConnector(m)
-	client := infra.NewIpBlocksClient(getSessionContext(d, m), connector)
-	err := client.Delete(id)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := infra.NewIpBlocksClient(context, connector)
+	err = client.Delete(id)
 	if err != nil {
 		return handleDeleteError("IP Block", id, err)
 	}

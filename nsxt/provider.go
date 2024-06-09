@@ -785,7 +785,10 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 	clientAuthDefined := (len(clientAuthCertFile) > 0) || (len(clientAuthCert) > 0)
 	policyEnforcementPoint := d.Get("enforcement_point").(string)
 	policyGlobalManager := d.Get("global_manager").(bool)
-	projectID, vpcID := getContextDataFromSchema(d, *clients)
+	projectID, vpcID, err := getContextDataFromSchema(d, *clients)
+	if err != nil {
+		return err
+	}
 	vmcInfo := getVmcAuthInfo(d)
 
 	isVMC := false
@@ -1215,9 +1218,12 @@ func getGlobalPolicyEnforcementPointPath(m interface{}, sitePath *string) string
 	return fmt.Sprintf("%s/enforcement-points/%s", *sitePath, getPolicyEnforcementPoint(m))
 }
 
-func getContextDataFromSchema(d *schema.ResourceData, m interface{}) (string, string) {
+func getContextDataFromSchema(d *schema.ResourceData, m interface{}) (string, string, error) {
 	ctxPtr := d.Get("context")
 	if ctxPtr != nil {
+		if m.(nsxtClients).ProjectID != "" || m.(nsxtClients).VPCID != "" {
+			return "", "", fmt.Errorf("cannot specify context in both provider level and object level")
+		}
 		contexts := ctxPtr.([]interface{})
 		for _, context := range contexts {
 			data := context.(map[string]interface{})
@@ -1226,15 +1232,18 @@ func getContextDataFromSchema(d *schema.ResourceData, m interface{}) (string, st
 				vpcID = data["vpc_id"].(string)
 			}
 
-			return data["project_id"].(string), vpcID
+			return data["project_id"].(string), vpcID, nil
 		}
 	}
-	return m.(nsxtClients).ProjectID, m.(nsxtClients).VPCID
+	return m.(nsxtClients).ProjectID, m.(nsxtClients).VPCID, nil
 }
 
-func getSessionContext(d *schema.ResourceData, m interface{}) tf_api.SessionContext {
+func getSessionContext(d *schema.ResourceData, m interface{}) (tf_api.SessionContext, error) {
 	var clientType tf_api.ClientType
-	projectID, vpcID := getContextDataFromSchema(d, m)
+	projectID, vpcID, err := getContextDataFromSchema(d, m)
+	if err != nil {
+		return tf_api.SessionContext{}, err
+	}
 	if projectID != "" {
 		clientType = tf_api.Multitenancy
 		if vpcID != "" {
@@ -1245,5 +1254,5 @@ func getSessionContext(d *schema.ResourceData, m interface{}) tf_api.SessionCont
 	} else {
 		clientType = tf_api.Local
 	}
-	return tf_api.SessionContext{ProjectID: projectID, VPCID: vpcID, ClientType: clientType}
+	return tf_api.SessionContext{ProjectID: projectID, VPCID: vpcID, ClientType: clientType}, nil
 }

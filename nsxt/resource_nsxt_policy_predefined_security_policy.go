@@ -219,7 +219,11 @@ func updatePolicyPredefinedSecurityPolicy(id string, d *schema.ResourceData, m i
 		return fmt.Errorf("Failed to extract domain from Security Policy path %s", path)
 	}
 
-	predefinedPolicy, err := getSecurityPolicyInDomain(getSessionContext(d, m), id, domain, connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	predefinedPolicy, err := getSecurityPolicyInDomain(context, id, domain, connector)
 	if err != nil {
 		return err
 	}
@@ -298,7 +302,10 @@ func updatePolicyPredefinedSecurityPolicy(id string, d *schema.ResourceData, m i
 		predefinedPolicy.Children = childRules
 	}
 
-	err = securityPolicyInfraPatch(getSessionContext(d, m), predefinedPolicy, domain, m)
+	if err != nil {
+		return err
+	}
+	err = securityPolicyInfraPatch(context, predefinedPolicy, domain, m)
 	if err != nil {
 		return handleUpdateError("Predefined Security Policy", id, err)
 	}
@@ -335,7 +342,11 @@ func resourceNsxtPolicyPredefinedSecurityPolicyRead(d *schema.ResourceData, m in
 	path := d.Get("path").(string)
 	domain := getDomainFromResourcePath(path)
 
-	client := domains.NewSecurityPoliciesClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := domains.NewSecurityPoliciesClient(context, connector)
 	obj, err := client.Get(domain, id)
 	if err != nil {
 		return handleReadError(d, "Predefined Security Policy", id, err)
@@ -386,7 +397,10 @@ func resourceNsxtPolicyPredefinedSecurityPolicyDelete(d *schema.ResourceData, m 
 
 	path := d.Get("path").(string)
 	domain := getDomainFromResourcePath(path)
-	context := getSessionContext(d, m)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
 
 	predefinedPolicy, err := getSecurityPolicyInDomain(context, id, domain, getPolicyConnector(m))
 	if err != nil {

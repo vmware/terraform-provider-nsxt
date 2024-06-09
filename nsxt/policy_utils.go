@@ -34,7 +34,11 @@ func getOrGenerateID2(d *schema.ResourceData, m interface{}, presenceChecker fun
 		return newUUID(), nil
 	}
 
-	exists, err := presenceChecker(getSessionContext(d, m), id, connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return "", err
+	}
+	exists, err := presenceChecker(context, id, connector)
 	if err != nil {
 		return "", err
 	}

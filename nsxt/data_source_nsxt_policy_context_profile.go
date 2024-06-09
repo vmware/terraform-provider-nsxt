@@ -22,7 +22,11 @@ func dataSourceNsxtPolicyContextProfile() *schema.Resource {
 }
 
 func dataSourceNsxtPolicyContextProfileRead(d *schema.ResourceData, m interface{}) error {
-	_, err := policyDataSourceResourceRead(d, getPolicyConnector(m), getSessionContext(d, m), "PolicyContextProfile", nil)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	_, err = policyDataSourceResourceRead(d, getPolicyConnector(m), context, "PolicyContextProfile", nil)
 	if err != nil {
 		return err
 	}

@@ -287,7 +287,11 @@ func resourceNsxtPolicySegmentSecurityProfilePatch(d *schema.ResourceData, m int
 	}
 
 	log.Printf("[INFO] Sending SegmentSecurityProfile with ID %s", id)
-	client := infra.NewSegmentSecurityProfilesClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := infra.NewSegmentSecurityProfilesClient(context, connector)
 	return client.Patch(id, obj, nil)
 }
 
@@ -318,7 +322,11 @@ func resourceNsxtPolicySegmentSecurityProfileRead(d *schema.ResourceData, m inte
 		return fmt.Errorf("Error obtaining SegmentSecurityProfile ID")
 	}
 
-	client := infra.NewSegmentSecurityProfilesClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := infra.NewSegmentSecurityProfilesClient(context, connector)
 	obj, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "SegmentSecurityProfile", id, err)
@@ -361,8 +369,12 @@ func resourceNsxtPolicySegmentSecurityProfileDelete(d *schema.ResourceData, m in
 	}
 
 	connector := getPolicyConnector(m)
-	client := infra.NewSegmentSecurityProfilesClient(getSessionContext(d, m), connector)
-	err := client.Delete(id, nil)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := infra.NewSegmentSecurityProfilesClient(context, connector)
+	err = client.Delete(id, nil)
 
 	if err != nil {
 		return handleDeleteError("SegmentSecurityProfile", id, err)

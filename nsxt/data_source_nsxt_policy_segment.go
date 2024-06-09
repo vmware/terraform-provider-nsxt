@@ -24,7 +24,11 @@ func dataSourceNsxtPolicySegment() *schema.Resource {
 func dataSourceNsxtPolicySegmentRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
-	_, err := policyDataSourceResourceRead(d, connector, getSessionContext(d, m), "Segment", nil)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	_, err = policyDataSourceResourceRead(d, connector, context, "Segment", nil)
 	if err != nil {
 		return err
 	}

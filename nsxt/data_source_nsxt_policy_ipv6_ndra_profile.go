@@ -22,7 +22,11 @@ func dataSourceNsxtPolicyIpv6NdraProfile() *schema.Resource {
 }
 
 func dataSourceNsxtPolicyIpv6NdraProfileRead(d *schema.ResourceData, m interface{}) error {
-	_, err := policyDataSourceResourceRead(d, getPolicyConnector(m), getSessionContext(d, m), "Ipv6NdraProfile", nil)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	_, err = policyDataSourceResourceRead(d, getPolicyConnector(m), context, "Ipv6NdraProfile", nil)
 	if err != nil {
 		return err
 	}

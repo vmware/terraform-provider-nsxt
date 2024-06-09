@@ -26,7 +26,11 @@ func dataSourceNsxtPolicyGroupRead(d *schema.ResourceData, m interface{}) error 
 	domain := d.Get("domain").(string)
 	query := make(map[string]string)
 	query["parent_path"] = "*/" + domain
-	_, err := policyDataSourceResourceRead(d, getPolicyConnector(m), getSessionContext(d, m), "Group", query)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	_, err = policyDataSourceResourceRead(d, getPolicyConnector(m), context, "Group", query)
 	if err != nil {
 		return err
 	}

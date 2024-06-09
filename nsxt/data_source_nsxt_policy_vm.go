@@ -46,7 +46,10 @@ func dataSourceNsxtPolicyVMIDRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
 	objID := getNsxtPolicyVMIDFromSchema(d)
-	context := getSessionContext(d, m)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
 	if objID != "" {
 		vmObj, err := findNsxtPolicyVMByID(context, connector, objID, m)
 		if err != nil {

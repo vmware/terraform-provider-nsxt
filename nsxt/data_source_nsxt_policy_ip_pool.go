@@ -30,7 +30,11 @@ func dataSourceNsxtPolicyIPPool() *schema.Resource {
 }
 
 func dataSourceNsxtPolicyIPPoolRead(d *schema.ResourceData, m interface{}) error {
-	obj, err := policyDataSourceResourceRead(d, getPolicyConnector(m), getSessionContext(d, m), "IpAddressPool", nil)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	obj, err := policyDataSourceResourceRead(d, getPolicyConnector(m), context, "IpAddressPool", nil)
 	if err != nil {
 		return err
 	}

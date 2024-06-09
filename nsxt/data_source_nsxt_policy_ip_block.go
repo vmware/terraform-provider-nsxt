@@ -29,7 +29,11 @@ func dataSourceNsxtPolicyIPBlock() *schema.Resource {
 
 func dataSourceNsxtPolicyIPBlockRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
-	client := infra.NewIpBlocksClient(getSessionContext(d, m), connector)
+	context, err := getSessionContext(d, m)
+	if err != nil {
+		return err
+	}
+	client := infra.NewIpBlocksClient(context, connector)
 
 	objID := d.Get("id").(string)
 	objName := d.Get("display_name").(string)
