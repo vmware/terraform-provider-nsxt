@@ -83,7 +83,7 @@ func TestAccDataSourceNsxtPolicyContextProfile_multitenancyProvider(t *testing.T
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccOnlyMultitenancy(t)
+			testAccOnlyMultitenancyProvider(t)
 		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
@@ -111,7 +111,7 @@ func testAccNsxtPolicyContextProfileMultitenancyTemplate(name string, withContex
 	if withContext {
 		context = testAccNsxtPolicyMultitenancyContext()
 	}
-	return fmt.Sprintf(`
+	s := fmt.Sprintf(`
 resource "nsxt_policy_context_profile" "test" {
 %s
   display_name = "%s"
@@ -133,4 +133,5 @@ data "nsxt_policy_context_profile" "test" {
 %s
   display_name = nsxt_policy_context_profile.test.display_name
 }`, context, name, context)
+	return s
 }

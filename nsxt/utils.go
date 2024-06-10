@@ -681,10 +681,6 @@ func handlePagination(lister func(*paginationInfo) error) (int64, error) {
 }
 
 func getContextSchema(isRequired, isComputed, isVPC bool) *schema.Schema {
-	return getContextExtendedSchema(isRequired, isComputed, isVPC, false)
-}
-
-func getContextExtendedSchema(isRequired, isComputed, isVPC, isProvider bool) *schema.Schema {
 	elemSchema := map[string]*schema.Schema{
 		"project_id": {
 			Type:         schema.TypeString,
@@ -702,10 +698,6 @@ func getContextExtendedSchema(isRequired, isComputed, isVPC, isProvider bool) *s
 			ForceNew:     true,
 			ValidateFunc: validation.StringIsNotWhiteSpace,
 		}
-	}
-	if isProvider {
-		elemSchema["project_id"].DefaultFunc = schema.EnvDefaultFunc("NSXT_PROVIDER_PROJECT_ID", false)
-		elemSchema["vpc_id"].DefaultFunc = schema.EnvDefaultFunc("NSXT_PROVIDER_VPC_ID", false)
 	}
 	return &schema.Schema{
 		Type:        schema.TypeList,

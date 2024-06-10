@@ -243,7 +243,18 @@ func Provider() *schema.Provider {
 				Description: "Avoid initializing NSX connection on startup",
 				DefaultFunc: schema.EnvDefaultFunc("NSXT_ON_DEMAND_CONNECTION", false),
 			},
-			"context": getContextSchema(false, false, true),
+			"project_id": {
+				Type:        schema.TypeString,
+				Description: "Id of the project which the plan executes in its context.",
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("NSXT_PROVIDER_PROJECT_ID", ""),
+			},
+			"vpc_id": {
+				Type:        schema.TypeString,
+				Description: "Id of the VPC which the plan executes in its context.",
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("NSXT_PROVIDER_VPC_ID", ""),
+			},
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
@@ -785,10 +796,8 @@ func configurePolicyConnectorData(d *schema.ResourceData, clients *nsxtClients) 
 	clientAuthDefined := (len(clientAuthCertFile) > 0) || (len(clientAuthCert) > 0)
 	policyEnforcementPoint := d.Get("enforcement_point").(string)
 	policyGlobalManager := d.Get("global_manager").(bool)
-	projectID, vpcID, err := getContextDataFromSchema(d, *clients)
-	if err != nil {
-		return err
-	}
+	projectID := d.Get("project_id").(string)
+	vpcID := d.Get("vpc_id").(string)
 	vmcInfo := getVmcAuthInfo(d)
 
 	isVMC := false
@@ -1221,10 +1230,10 @@ func getGlobalPolicyEnforcementPointPath(m interface{}, sitePath *string) string
 func getContextDataFromSchema(d *schema.ResourceData, m interface{}) (string, string, error) {
 	ctxPtr := d.Get("context")
 	if ctxPtr != nil {
-		if m.(nsxtClients).ProjectID != "" || m.(nsxtClients).VPCID != "" {
+		contexts := ctxPtr.([]interface{})
+		if (m.(nsxtClients).ProjectID != "" || m.(nsxtClients).VPCID != "") && len(contexts) > 0 {
 			return "", "", fmt.Errorf("cannot specify context in both provider level and object level")
 		}
-		contexts := ctxPtr.([]interface{})
 		for _, context := range contexts {
 			data := context.(map[string]interface{})
 			vpcID := ""
