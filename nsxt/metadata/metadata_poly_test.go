@@ -92,7 +92,7 @@ type testPolyListStruct struct {
 	PolyList []*data.StructValue
 }
 
-func testPolyStructWrappedSchema(t string) map[string]*schema.Schema {
+func testPolyStructNestedSchema(t string) map[string]*schema.Schema {
 	schemaType := schema.TypeList
 	maxItems := 0
 	if t == "set" {
@@ -143,7 +143,7 @@ func testPolyStructWrappedSchema(t string) map[string]*schema.Schema {
 	}
 }
 
-func testPolyStructWrappedExtSchema(t, sdkName string) map[string]*ExtendedSchema {
+func testPolyStructNestedExtSchema(t, sdkName string) map[string]*ExtendedSchema {
 	typeIdentier := TypeIdentifier{
 		SdkName:      "Type",
 		APIFieldName: "type",
@@ -207,7 +207,7 @@ func testPolyStructWrappedExtSchema(t, sdkName string) map[string]*ExtendedSchem
 			Metadata: Metadata{
 				SchemaType:      t,
 				SdkFieldName:    sdkName,
-				PolymorphicType: PolymorphicTypeWrapped,
+				PolymorphicType: PolymorphicTypeNested,
 				ResourceTypeMap: map[string]string{
 					"cat":    "FakeCat",
 					"coffee": "FakeCoffee",
@@ -218,7 +218,7 @@ func testPolyStructWrappedExtSchema(t, sdkName string) map[string]*ExtendedSchem
 	}
 }
 
-func TestPolyStructToWrappedSchema(t *testing.T) {
+func TestPolyStructToNestedSchema(t *testing.T) {
 	t.Run("cat struct", func(t *testing.T) {
 		name := "matcha"
 		rType := "FakeCat"
@@ -234,10 +234,10 @@ func TestPolyStructToWrappedSchema(t *testing.T) {
 		assert.Nil(t, errors, "unexpected error calling ConvertToGolang")
 		obj.PolyStruct = dv.(*data.StructValue)
 		d := schema.TestResourceDataRaw(
-			t, testPolyStructWrappedSchema("struct"), map[string]interface{}{})
+			t, testPolyStructNestedSchema("struct"), map[string]interface{}{})
 
 		elem := reflect.ValueOf(&obj).Elem()
-		err := StructToSchema(elem, d, testPolyStructWrappedExtSchema("struct", "PolyStruct"), "", nil)
+		err := StructToSchema(elem, d, testPolyStructNestedExtSchema("struct", "PolyStruct"), "", nil)
 		assert.NoError(t, err, "unexpected error calling StructToSchema")
 		assert.Len(t, d.Get("poly_struct"), 1)
 		polyData := d.Get("poly_struct").([]interface{})[0].(map[string]interface{})
@@ -264,10 +264,10 @@ func TestPolyStructToWrappedSchema(t *testing.T) {
 		assert.Nil(t, errors, "unexpected error calling ConvertToGolang")
 		obj.PolyStruct = dv.(*data.StructValue)
 		d := schema.TestResourceDataRaw(
-			t, testPolyStructWrappedSchema("struct"), map[string]interface{}{})
+			t, testPolyStructNestedSchema("struct"), map[string]interface{}{})
 
 		elem := reflect.ValueOf(&obj).Elem()
-		err := StructToSchema(elem, d, testPolyStructWrappedExtSchema("struct", "PolyStruct"), "", nil)
+		err := StructToSchema(elem, d, testPolyStructNestedExtSchema("struct", "PolyStruct"), "", nil)
 		assert.NoError(t, err, "unexpected error calling StructToSchema")
 		assert.Len(t, d.Get("poly_struct"), 1)
 		polyData := d.Get("poly_struct").([]interface{})[0].(map[string]interface{})
@@ -307,10 +307,10 @@ func TestPolyStructToWrappedSchema(t *testing.T) {
 		assert.Nil(t, errors, "unexpected error calling ConvertToGolang")
 		obj.PolyList[1] = dv.(*data.StructValue)
 		d := schema.TestResourceDataRaw(
-			t, testPolyStructWrappedSchema("struct"), map[string]interface{}{})
+			t, testPolyStructNestedSchema("struct"), map[string]interface{}{})
 
 		elem := reflect.ValueOf(&obj).Elem()
-		err := StructToSchema(elem, d, testPolyStructWrappedExtSchema("list", "PolyList"), "", nil)
+		err := StructToSchema(elem, d, testPolyStructNestedExtSchema("list", "PolyList"), "", nil)
 		assert.NoError(t, err, "unexpected error calling StructToSchema")
 		assert.Len(t, d.Get("poly_struct"), 2)
 		// idx 0: coffee
@@ -359,10 +359,10 @@ func TestPolyStructToWrappedSchema(t *testing.T) {
 		assert.Nil(t, errors, "unexpected error calling ConvertToGolang")
 		obj.PolyList[0] = dv.(*data.StructValue)
 		d := schema.TestResourceDataRaw(
-			t, testPolyStructWrappedSchema("struct"), map[string]interface{}{})
+			t, testPolyStructNestedSchema("struct"), map[string]interface{}{})
 
 		elem := reflect.ValueOf(&obj).Elem()
-		err := StructToSchema(elem, d, testPolyStructWrappedExtSchema("set", "PolyList"), "", nil)
+		err := StructToSchema(elem, d, testPolyStructNestedExtSchema("set", "PolyList"), "", nil)
 		assert.NoError(t, err, "unexpected error calling StructToSchema")
 		assert.Len(t, d.Get("poly_struct"), 2)
 		for _, v := range d.Get("poly_struct").([]interface{}) {
@@ -386,10 +386,10 @@ func TestPolyStructToWrappedSchema(t *testing.T) {
 	})
 }
 
-func TestWrappedSchemaToPolyStruct(t *testing.T) {
+func TestNestedSchemaToPolyStruct(t *testing.T) {
 	t.Run("cat struct", func(t *testing.T) {
 		d := schema.TestResourceDataRaw(
-			t, testPolyStructWrappedSchema("struct"), map[string]interface{}{
+			t, testPolyStructNestedSchema("struct"), map[string]interface{}{
 				"poly_struct": []interface{}{
 					map[string]interface{}{
 						"cat": []interface{}{
@@ -404,7 +404,7 @@ func TestWrappedSchemaToPolyStruct(t *testing.T) {
 
 		obj := testPolyStruct{}
 		elem := reflect.ValueOf(&obj).Elem()
-		err := SchemaToStruct(elem, d, testPolyStructWrappedExtSchema("struct", "PolyStruct"), "", nil)
+		err := SchemaToStruct(elem, d, testPolyStructNestedExtSchema("struct", "PolyStruct"), "", nil)
 		assert.NoError(t, err, "unexpected error calling SchemaToStruct")
 
 		converter := vapiBindings_.NewTypeConverter()
@@ -417,7 +417,7 @@ func TestWrappedSchemaToPolyStruct(t *testing.T) {
 
 	t.Run("coffee struct", func(t *testing.T) {
 		d := schema.TestResourceDataRaw(
-			t, testPolyStructWrappedSchema("struct"), map[string]interface{}{
+			t, testPolyStructNestedSchema("struct"), map[string]interface{}{
 				"poly_struct": []interface{}{
 					map[string]interface{}{
 						"coffee": []interface{}{
@@ -432,7 +432,7 @@ func TestWrappedSchemaToPolyStruct(t *testing.T) {
 
 		obj := testPolyStruct{}
 		elem := reflect.ValueOf(&obj).Elem()
-		err := SchemaToStruct(elem, d, testPolyStructWrappedExtSchema("struct", "PolyStruct"), "", nil)
+		err := SchemaToStruct(elem, d, testPolyStructNestedExtSchema("struct", "PolyStruct"), "", nil)
 		assert.NoError(t, err, "unexpected error calling SchemaToStruct")
 
 		converter := vapiBindings_.NewTypeConverter()
@@ -445,7 +445,7 @@ func TestWrappedSchemaToPolyStruct(t *testing.T) {
 
 	t.Run("mixed list", func(t *testing.T) {
 		d := schema.TestResourceDataRaw(
-			t, testPolyStructWrappedSchema("list"), map[string]interface{}{
+			t, testPolyStructNestedSchema("list"), map[string]interface{}{
 				"poly_struct": []interface{}{
 					map[string]interface{}{
 						"coffee": []interface{}{
@@ -468,7 +468,7 @@ func TestWrappedSchemaToPolyStruct(t *testing.T) {
 
 		obj := testPolyListStruct{}
 		elem := reflect.ValueOf(&obj).Elem()
-		err := SchemaToStruct(elem, d, testPolyStructWrappedExtSchema("list", "PolyList"), "", nil)
+		err := SchemaToStruct(elem, d, testPolyStructNestedExtSchema("list", "PolyList"), "", nil)
 		assert.NoError(t, err, "unexpected error calling SchemaToStruct")
 
 		converter := vapiBindings_.NewTypeConverter()
@@ -487,7 +487,7 @@ func TestWrappedSchemaToPolyStruct(t *testing.T) {
 
 	t.Run("mixed set", func(t *testing.T) {
 		d := schema.TestResourceDataRaw(
-			t, testPolyStructWrappedSchema("set"), map[string]interface{}{
+			t, testPolyStructNestedSchema("set"), map[string]interface{}{
 				"poly_struct": []interface{}{
 					map[string]interface{}{
 						"cat": []interface{}{
@@ -510,7 +510,7 @@ func TestWrappedSchemaToPolyStruct(t *testing.T) {
 
 		obj := testPolyListStruct{}
 		elem := reflect.ValueOf(&obj).Elem()
-		err := SchemaToStruct(elem, d, testPolyStructWrappedExtSchema("set", "PolyList"), "", nil)
+		err := SchemaToStruct(elem, d, testPolyStructNestedExtSchema("set", "PolyList"), "", nil)
 		assert.NoError(t, err, "unexpected error calling SchemaToStruct")
 
 		converter := vapiBindings_.NewTypeConverter()
@@ -533,7 +533,7 @@ func TestWrappedSchemaToPolyStruct(t *testing.T) {
 	})
 }
 
-func testPolyStructFlatSchema() map[string]*schema.Schema {
+func testPolyStructFlattenSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"cat": {
 			Type: schema.TypeList,
@@ -564,7 +564,7 @@ func testPolyStructFlatSchema() map[string]*schema.Schema {
 	}
 }
 
-func testPolyStructFlatExtSchema(sdkName string) map[string]*ExtendedSchema {
+func testPolyStructFlattenExtSchema(sdkName string) map[string]*ExtendedSchema {
 	typeIdentifier := TypeIdentifier{
 		SdkName:      "Type",
 		APIFieldName: "type",
@@ -586,7 +586,7 @@ func testPolyStructFlatExtSchema(sdkName string) map[string]*ExtendedSchema {
 				ReflectType:     reflect.TypeOf(testCatStruct{}),
 				BindingType:     testCatStructBindingType(),
 				TypeIdentifier:  typeIdentifier,
-				PolymorphicType: PolymorphicTypeFlat,
+				PolymorphicType: PolymorphicTypeFlatten,
 				ResourceType:    "FakeCat",
 				SdkFieldName:    sdkName,
 			},
@@ -606,7 +606,7 @@ func testPolyStructFlatExtSchema(sdkName string) map[string]*ExtendedSchema {
 				ReflectType:     reflect.TypeOf(testCoffeeStruct{}),
 				BindingType:     testCoffeeStructBindingType(),
 				TypeIdentifier:  typeIdentifier,
-				PolymorphicType: PolymorphicTypeFlat,
+				PolymorphicType: PolymorphicTypeFlatten,
 				ResourceType:    "FakeCoffee",
 				SdkFieldName:    sdkName,
 			},
@@ -614,7 +614,7 @@ func testPolyStructFlatExtSchema(sdkName string) map[string]*ExtendedSchema {
 	}
 }
 
-func TestPolyStructToFlatSchema(t *testing.T) {
+func TestPolyStructToFlattenSchema(t *testing.T) {
 	t.Run("mixed list", func(t *testing.T) {
 		catName := "oolong"
 		coffeeName := "mocha"
@@ -643,10 +643,10 @@ func TestPolyStructToFlatSchema(t *testing.T) {
 		assert.Nil(t, errors, "unexpected error calling ConvertToGolang")
 		obj.PolyList[1] = dv.(*data.StructValue)
 		d := schema.TestResourceDataRaw(
-			t, testPolyStructFlatSchema(), map[string]interface{}{})
+			t, testPolyStructFlattenSchema(), map[string]interface{}{})
 
 		elem := reflect.ValueOf(&obj).Elem()
-		err := StructToSchema(elem, d, testPolyStructFlatExtSchema("PolyList"), "", nil)
+		err := StructToSchema(elem, d, testPolyStructFlattenExtSchema("PolyList"), "", nil)
 		assert.NoError(t, err, "unexpected error calling StructToSchema")
 
 		assert.Len(t, d.Get("coffee"), 1)
@@ -663,10 +663,10 @@ func TestPolyStructToFlatSchema(t *testing.T) {
 	})
 }
 
-func TestFlatSchemaToPolyStruct(t *testing.T) {
+func TestFlattenSchemaToPolyStruct(t *testing.T) {
 	t.Run("mixed list", func(t *testing.T) {
 		d := schema.TestResourceDataRaw(
-			t, testPolyStructFlatSchema(), map[string]interface{}{
+			t, testPolyStructFlattenSchema(), map[string]interface{}{
 				"coffee": []interface{}{
 					map[string]interface{}{
 						"name":     "mocha",
@@ -683,7 +683,7 @@ func TestFlatSchemaToPolyStruct(t *testing.T) {
 
 		obj := testPolyListStruct{}
 		elem := reflect.ValueOf(&obj).Elem()
-		err := SchemaToStruct(elem, d, testPolyStructFlatExtSchema("PolyList"), "", nil)
+		err := SchemaToStruct(elem, d, testPolyStructFlattenExtSchema("PolyList"), "", nil)
 		assert.NoError(t, err, "unexpected error calling SchemaToStruct")
 
 		converter := vapiBindings_.NewTypeConverter()

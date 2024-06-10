@@ -17,8 +17,8 @@ import (
 var logger = log.New(os.Stderr, "", log.LstdFlags|log.Lshortfile)
 
 const (
-	PolymorphicTypeFlat    = "flat"
-	PolymorphicTypeWrapped = "wrapped"
+	PolymorphicTypeFlatten = "flatten"
+	PolymorphicTypeNested  = "nested"
 )
 
 type Metadata struct {
@@ -35,10 +35,10 @@ type Metadata struct {
 	// SDK vapi binding type for converting polymorphic structs
 	BindingType vapiBindings_.BindingType
 	// SDK resource type to match and filter for a schema key
-	// Only applicable to PolymorphicTypeFlat schema
+	// Only applicable to PolymorphicTypeFlatten schema
 	ResourceType string
 	// Map from schema key of polymorphic attr to this SDK resource type
-	// Only applicable to PolymorphicTypeWrapped schema
+	// Only applicable to PolymorphicTypeNested schema
 	ResourceTypeMap map[string]string
 	// Type identifier name for both SDK and JSON (StructValue field name)
 	TypeIdentifier      TypeIdentifier
@@ -168,10 +168,10 @@ func StructToSchema(elem reflect.Value, d *schema.ResourceData, metadata map[str
 			childElem := elem.FieldByName(item.Metadata.SdkFieldName)
 			var nestedVal interface{}
 			switch item.Metadata.PolymorphicType {
-			case PolymorphicTypeWrapped:
-				nestedVal, err = polyStructToWrappedSchema(ctx, childElem, item)
-			case PolymorphicTypeFlat:
-				nestedVal, err = polyStructToFlatSchema(ctx, childElem, key, item)
+			case PolymorphicTypeNested:
+				nestedVal, err = polyStructToNestedSchema(ctx, childElem, item)
+			case PolymorphicTypeFlatten:
+				nestedVal, err = polyStructToFlattenSchema(ctx, childElem, key, item)
 			default:
 				err = fmt.Errorf("%s unknown polymorphic type %s", ctx,
 					item.Metadata.PolymorphicType)
@@ -287,10 +287,10 @@ func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[str
 		if len(item.Metadata.PolymorphicType) > 0 {
 			itemList := getItemListForSchemaToStruct(d, item.Metadata.SchemaType, key, parent, parentMap)
 			switch item.Metadata.PolymorphicType {
-			case PolymorphicTypeWrapped:
-				err = polyWrappedSchemaToStruct(ctx, elem, itemList, item)
-			case PolymorphicTypeFlat:
-				err = polyFlatSchemaToStruct(ctx, elem, key, itemList, item)
+			case PolymorphicTypeNested:
+				err = polyNestedSchemaToStruct(ctx, elem, itemList, item)
+			case PolymorphicTypeFlatten:
+				err = polyFlattenSchemaToStruct(ctx, elem, key, itemList, item)
 			default:
 				err = fmt.Errorf("%s unknown polymorphic type %s", ctx,
 					item.Metadata.PolymorphicType)
@@ -437,9 +437,9 @@ func getResourceTypeFromStructValue(ctx string, value data.StructValue, identifi
 	return "", err
 }
 
-func polyStructToWrappedSchema(ctx string, elem reflect.Value, item *ExtendedSchema) (ret []map[string]interface{}, err error) {
-	if item.Metadata.PolymorphicType != PolymorphicTypeWrapped {
-		err = fmt.Errorf("%s polyStructToWrappedSchema called on non-wrapped polymorphic attr", ctx)
+func polyStructToNestedSchema(ctx string, elem reflect.Value, item *ExtendedSchema) (ret []map[string]interface{}, err error) {
+	if item.Metadata.PolymorphicType != PolymorphicTypeNested {
+		err = fmt.Errorf("%s polyStructToNestedSchema called on non-wrapped polymorphic attr", ctx)
 		logger.Printf("[ERROR] %v", err)
 		return
 	}
@@ -508,9 +508,9 @@ func polyStructToWrappedSchema(ctx string, elem reflect.Value, item *ExtendedSch
 	return
 }
 
-func polyWrappedSchemaToStruct(ctx string, elem reflect.Value, dataList []interface{}, item *ExtendedSchema) (err error) {
-	if item.Metadata.PolymorphicType != PolymorphicTypeWrapped {
-		err = fmt.Errorf("%s polyWrappedSchemaToStruct called on non-wrapped polymorphic attr", ctx)
+func polyNestedSchemaToStruct(ctx string, elem reflect.Value, dataList []interface{}, item *ExtendedSchema) (err error) {
+	if item.Metadata.PolymorphicType != PolymorphicTypeNested {
+		err = fmt.Errorf("%s polyNestedSchemaToStruct called on non-wrapped polymorphic attr", ctx)
 		logger.Printf("[ERROR] %v", err)
 		return
 	}
@@ -584,9 +584,9 @@ func polyWrappedSchemaToStruct(ctx string, elem reflect.Value, dataList []interf
 	return
 }
 
-func polyStructToFlatSchema(ctx string, elem reflect.Value, key string, item *ExtendedSchema) (ret []map[string]interface{}, err error) {
-	if item.Metadata.PolymorphicType != PolymorphicTypeFlat {
-		err = fmt.Errorf("%s polyStructToFlatSchema called on non-flat polymorphic attr", ctx)
+func polyStructToFlattenSchema(ctx string, elem reflect.Value, key string, item *ExtendedSchema) (ret []map[string]interface{}, err error) {
+	if item.Metadata.PolymorphicType != PolymorphicTypeFlatten {
+		err = fmt.Errorf("%s polyStructToFlattenSchema called on non-flat polymorphic attr", ctx)
 		logger.Printf("[ERROR] %v", err)
 		return
 	}
@@ -629,9 +629,9 @@ func polyStructToFlatSchema(ctx string, elem reflect.Value, key string, item *Ex
 	return
 }
 
-func polyFlatSchemaToStruct(ctx string, elem reflect.Value, key string, dataList []interface{}, item *ExtendedSchema) (err error) {
-	if item.Metadata.PolymorphicType != PolymorphicTypeFlat {
-		err = fmt.Errorf("%s polyFlatSchemaToStruct called on non-flat polymorphic attr", ctx)
+func polyFlattenSchemaToStruct(ctx string, elem reflect.Value, key string, dataList []interface{}, item *ExtendedSchema) (err error) {
+	if item.Metadata.PolymorphicType != PolymorphicTypeFlatten {
+		err = fmt.Errorf("%s polyFlattenSchemaToStruct called on non-flat polymorphic attr", ctx)
 		logger.Printf("[ERROR] %v", err)
 		return
 	}
