@@ -243,6 +243,10 @@ func testAccIsMultitenancy() bool {
 	return os.Getenv("NSXT_PROJECT_ID") != ""
 }
 
+func testAccIsMultitenancyProvider() bool {
+	return os.Getenv("NSXT_PROVIDER_PROJECT_ID") != ""
+}
+
 func testAccIsVPC() bool {
 	return os.Getenv("NSXT_VPC_PROJECT_ID") != "" && os.Getenv("NSXT_VPC_ID") != ""
 }
@@ -319,6 +323,13 @@ func testAccOnlyMultitenancy(t *testing.T) {
 	testAccNSXVersion(t, "4.1.0")
 	if !testAccIsMultitenancy() {
 		t.Skipf("This test requires a multitenancy environment")
+	}
+}
+
+func testAccOnlyMultitenancyProvider(t *testing.T) {
+	testAccNSXVersion(t, "4.1.0")
+	if !testAccIsMultitenancyProvider() {
+		t.Skipf("This test requires a multitenancy environment with provider configuration")
 	}
 }
 
