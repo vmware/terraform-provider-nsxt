@@ -437,10 +437,25 @@ func getResourceTypeFromStructValue(ctx string, value data.StructValue, identifi
 	return "", err
 }
 
-func polyStructToNestedSchema(ctx string, elem reflect.Value, item *ExtendedSchema) (ret []map[string]interface{}, err error) {
-	if item.Metadata.PolymorphicType != PolymorphicTypeNested {
-		err = fmt.Errorf("%s polyStructToNestedSchema called on non-wrapped polymorphic attr", ctx)
+func polyMetadataSanityCheck(ctx string, item *ExtendedSchema, polyType string) error {
+	if item.Metadata.PolymorphicType != polyType {
+		err := fmt.Errorf("%s unexpected polymorphic attr", ctx)
 		logger.Printf("[ERROR] %v", err)
+		return err
+	}
+
+	_, ok := item.Schema.Elem.(*ExtendedResource)
+	if !ok {
+		err := fmt.Errorf("%s polymorphic attr has non-ExtendedResource element", ctx)
+		logger.Printf("[ERROR] %v", err)
+		return err
+	}
+
+	return nil
+}
+
+func polyStructToNestedSchema(ctx string, elem reflect.Value, item *ExtendedSchema) (ret []map[string]interface{}, err error) {
+	if err = polyMetadataSanityCheck(ctx, item, PolymorphicTypeNested); err != nil {
 		return
 	}
 
@@ -509,19 +524,11 @@ func polyStructToNestedSchema(ctx string, elem reflect.Value, item *ExtendedSche
 }
 
 func polyNestedSchemaToStruct(ctx string, elem reflect.Value, dataList []interface{}, item *ExtendedSchema) (err error) {
-	if item.Metadata.PolymorphicType != PolymorphicTypeNested {
-		err = fmt.Errorf("%s polyNestedSchemaToStruct called on non-wrapped polymorphic attr", ctx)
-		logger.Printf("[ERROR] %v", err)
+	if err = polyMetadataSanityCheck(ctx, item, PolymorphicTypeNested); err != nil {
 		return
 	}
 
-	childElem, ok := item.Schema.Elem.(*ExtendedResource)
-	if !ok {
-		err = fmt.Errorf("%s polymorphic attr has non-ExtendedResource element", ctx)
-		logger.Printf("[ERROR] %v", err)
-		return
-	}
-
+	childElem := item.Schema.Elem.(*ExtendedResource)
 	converter := vapiBindings_.NewTypeConverter()
 	dv := make([]*data.StructValue, len(dataList))
 	for i, dataElem := range dataList {
@@ -585,23 +592,31 @@ func polyNestedSchemaToStruct(ctx string, elem reflect.Value, dataList []interfa
 }
 
 func polyStructToFlattenSchema(ctx string, elem reflect.Value, key string, item *ExtendedSchema) (ret []map[string]interface{}, err error) {
-	if item.Metadata.PolymorphicType != PolymorphicTypeFlatten {
-		err = fmt.Errorf("%s polyStructToFlattenSchema called on non-flat polymorphic attr", ctx)
-		logger.Printf("[ERROR] %v", err)
+	if err = polyMetadataSanityCheck(ctx, item, PolymorphicTypeFlatten); err != nil {
 		return
 	}
 
-	_, ok := item.Schema.Elem.(*ExtendedResource)
-	if !ok {
-		err = fmt.Errorf("%s polymorphic attr has non-ExtendedResource element", ctx)
+	elemSlice := elem
+	if item.Metadata.SchemaType == "struct" {
+		if elem.IsNil() {
+			return
+		}
+		// convert to slice to share logic with list and set
+		elemSlice = reflect.MakeSlice(reflect.SliceOf(elem.Type()), 1, 1)
+		elemSlice.Index(0).Set(elem)
+	} else if item.Metadata.SchemaType != "list" && item.Metadata.SchemaType != "set" {
+		err = fmt.Errorf("%s unsupported polymorphic schema type %s", ctx, item.Metadata.SchemaType)
 		logger.Printf("[ERROR] %v", err)
+		return
+	}
+	if elemSlice.Len() == 0 {
 		return
 	}
 
 	converter := vapiBindings_.NewTypeConverter()
 	sliceValue := make([]map[string]interface{}, 0)
-	for i := 0; i < elem.Len(); i++ {
-		childValue := elem.Index(i).Elem().Interface().(data.StructValue)
+	for i := 0; i < elemSlice.Len(); i++ {
+		childValue := elemSlice.Index(i).Elem().Interface().(data.StructValue)
 		nestedSchema := make(map[string]interface{})
 		var rType string
 
@@ -630,19 +645,11 @@ func polyStructToFlattenSchema(ctx string, elem reflect.Value, key string, item 
 }
 
 func polyFlattenSchemaToStruct(ctx string, elem reflect.Value, key string, dataList []interface{}, item *ExtendedSchema) (err error) {
-	if item.Metadata.PolymorphicType != PolymorphicTypeFlatten {
-		err = fmt.Errorf("%s polyFlattenSchemaToStruct called on non-flat polymorphic attr", ctx)
-		logger.Printf("[ERROR] %v", err)
+	if err = polyMetadataSanityCheck(ctx, item, PolymorphicTypeFlatten); err != nil {
 		return
 	}
 
-	childElem, ok := item.Schema.Elem.(*ExtendedResource)
-	if !ok {
-		err = fmt.Errorf("%s polymorphic attr has non-ExtendedResource element", ctx)
-		logger.Printf("[ERROR] %v", err)
-		return
-	}
-
+	childElem := item.Schema.Elem.(*ExtendedResource)
 	converter := vapiBindings_.NewTypeConverter()
 	rSlice := reflect.MakeSlice(reflect.SliceOf(reflect.TypeOf(&data.StructValue{})), len(dataList), len(dataList))
 	for i, dataElem := range dataList {
@@ -667,11 +674,29 @@ func polyFlattenSchemaToStruct(ctx string, elem reflect.Value, key string, dataL
 			ctx, nestedObj.Interface(), item.Metadata.SdkFieldName)
 	}
 
-	sliceElem := elem.FieldByName(item.Metadata.SdkFieldName)
-	if sliceElem.IsZero() {
-		sliceElem.Set(rSlice)
+	if item.Metadata.SchemaType == "struct" {
+		if rSlice.Len() == 0 {
+			return
+		}
+		structElem := elem.FieldByName(item.Metadata.SdkFieldName)
+		if !structElem.IsZero() {
+			err = fmt.Errorf("%s %s is alreay set", ctx, item.Metadata.SdkFieldName)
+			logger.Printf("[ERROR] %v", err)
+			return
+		}
+		structElem.Set(rSlice.Index(0))
+	} else if item.Metadata.SchemaType == "list" || item.Metadata.SchemaType == "set" {
+		sliceElem := elem.FieldByName(item.Metadata.SdkFieldName)
+		if sliceElem.IsZero() {
+			sliceElem.Set(rSlice)
+		} else {
+			sliceElem.Set(reflect.AppendSlice(sliceElem, rSlice))
+		}
 	} else {
-		sliceElem.Set(reflect.AppendSlice(sliceElem, rSlice))
+		err = fmt.Errorf("%s unsupported polymorphic schema type %s", ctx, item.Metadata.SchemaType)
+		logger.Printf("[ERROR] %v", err)
+		return
 	}
+
 	return
 }
