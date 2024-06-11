@@ -62,6 +62,9 @@ func resourceNsxtPolicyIPAddressAllocation() *schema.Resource {
 
 func resourceNsxtPolicyIPAddressAllocationExists(sessionContext utl.SessionContext, poolID string, allocationID string, connector client.Connector) (bool, error) {
 	client := ippools.NewIpAllocationsClient(sessionContext, connector)
+	if client == nil {
+		return false, policyResourceNotSupportedError()
+	}
 
 	_, err := client.Get(poolID, allocationID)
 	if err == nil {
@@ -79,6 +82,9 @@ func resourceNsxtPolicyIPAddressAllocationCreate(d *schema.ResourceData, m inter
 	connector := getPolicyConnector(m)
 	sessionContext := getSessionContext(d, m)
 	client := ippools.NewIpAllocationsClient(sessionContext, connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 
 	if client == nil {
 		return policyResourceNotSupportedError()
@@ -131,6 +137,9 @@ func resourceNsxtPolicyIPAddressAllocationCreate(d *schema.ResourceData, m inter
 func resourceNsxtPolicyIPAddressAllocationRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	client := ippools.NewIpAllocationsClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 
 	if client == nil {
 		return policyResourceNotSupportedError()
@@ -183,6 +192,9 @@ func resourceNsxtPolicyIPAddressAllocationRead(d *schema.ResourceData, m interfa
 func resourceNsxtPolicyIPAddressAllocationUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	client := ippools.NewIpAllocationsClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 
 	if client == nil {
 		return policyResourceNotSupportedError()
@@ -261,6 +273,9 @@ func resourceNsxtPolicyIPAddressAllocationImport(d *schema.ResourceData, m inter
 	poolID := s[0]
 	connector := getPolicyConnector(m)
 	client := infra.NewIpPoolsClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return nil, policyResourceNotSupportedError()
+	}
 
 	pool, err := client.Get(poolID)
 	if err != nil {

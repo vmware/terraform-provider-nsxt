@@ -83,6 +83,9 @@ func testAccDataSourceNsxtPolicyGatewayQosProfileCreate(name string) error {
 		err = client.Patch(id, gmObj.(gm_model.GatewayQosProfile), nil)
 	} else {
 		client := infra.NewGatewayQosProfilesClient(testAccGetSessionContext(), connector)
+		if client == nil {
+			return policyResourceNotSupportedError()
+		}
 		err = client.Patch(id, obj, nil)
 	}
 
@@ -111,6 +114,9 @@ func testAccDataSourceNsxtPolicyGatewayQosProfileDeleteByName(name string) error
 		}
 	} else {
 		client := infra.NewGatewayQosProfilesClient(testAccGetSessionContext(), connector)
+		if client == nil {
+			return policyResourceNotSupportedError()
+		}
 		// Find the object by name
 		objList, err := client.List(nil, nil, nil, nil, nil, nil)
 		if err != nil {

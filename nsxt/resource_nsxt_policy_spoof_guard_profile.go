@@ -43,6 +43,9 @@ func resourceNsxtPolicySpoofGuardProfile() *schema.Resource {
 
 func resourceNsxtPolicySpoofGuardProfileExists(context utl.SessionContext, id string, connector client.Connector) (bool, error) {
 	client := infra.NewSpoofguardProfilesClient(context, connector)
+	if client == nil {
+		return false, policyResourceNotSupportedError()
+	}
 	_, err := client.Get(id)
 	if err == nil {
 		return true, nil
@@ -72,6 +75,9 @@ func resourceNsxtPolicySpoofGuardProfilePatch(d *schema.ResourceData, m interfac
 
 	log.Printf("[INFO] Patching SpoofGuardProfile with ID %s", id)
 	client := infra.NewSpoofguardProfilesClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	return client.Patch(id, obj, nil)
 }
 
@@ -103,6 +109,9 @@ func resourceNsxtPolicySpoofGuardProfileRead(d *schema.ResourceData, m interface
 	}
 
 	client := infra.NewSpoofguardProfilesClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	obj, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "SpoofGuardProfile", id, err)
@@ -143,6 +152,9 @@ func resourceNsxtPolicySpoofGuardProfileDelete(d *schema.ResourceData, m interfa
 
 	connector := getPolicyConnector(m)
 	client := infra.NewSpoofguardProfilesClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	err := client.Delete(id, nil)
 
 	if err != nil {

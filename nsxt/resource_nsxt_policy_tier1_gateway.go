@@ -200,6 +200,9 @@ func getAdvRulesSchema() *schema.Schema {
 
 func listTier1GatewayLocaleServices(context utl.SessionContext, connector client.Connector, gwID string, cursor *string) (model.LocaleServicesListResult, error) {
 	client := tier1s.NewLocaleServicesClient(context, connector)
+	if client == nil {
+		return model.LocaleServicesListResult{}, policyResourceNotSupportedError()
+	}
 	markForDelete := false
 	return client.List(gwID, cursor, &markForDelete, nil, nil, nil, nil)
 }
@@ -212,6 +215,9 @@ func listPolicyTier1GatewayLocaleServices(context utl.SessionContext, connector 
 func getPolicyTier1GatewayLocaleServiceEntry(context utl.SessionContext, gwID string, connector client.Connector) (*model.LocaleServices, error) {
 	// Get the locale services of this Tier1 for the edge-cluster id
 	client := tier1s.NewLocaleServicesClient(context, connector)
+	if client == nil {
+		return nil, policyResourceNotSupportedError()
+	}
 	obj, err := client.Get(gwID, defaultPolicyLocaleServiceID)
 	if err == nil {
 		return &obj, nil
@@ -256,6 +262,9 @@ func resourceNsxtPolicyTier1GatewayReadEdgeCluster(context utl.SessionContext, d
 
 func resourceNsxtPolicyTier1GatewayExists(context utl.SessionContext, id string, connector client.Connector) (bool, error) {
 	client := infra.NewTier1sClient(context, connector)
+	if client == nil {
+		return false, policyResourceNotSupportedError()
+	}
 	_, err := client.Get(id)
 
 	if err == nil {
@@ -531,6 +540,9 @@ func resourceNsxtPolicyTier1GatewayRead(d *schema.ResourceData, m interface{}) e
 
 	context := getSessionContext(d, m)
 	client := infra.NewTier1sClient(context, connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	obj, err := client.Get(id)
 
 	if err != nil {

@@ -63,6 +63,9 @@ func testAccDataSourceNsxtPolicyIPBlockCreate(name, id, cidr string, isPrivate b
 		return fmt.Errorf("Error during test client initialization: %v", err)
 	}
 	client := infra.NewIpBlocksClient(testAccGetSessionContext(), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 
 	displayName := name
 	description := name
@@ -89,6 +92,9 @@ func testAccDataSourceNsxtPolicyIPBlockDeleteByName(name string) error {
 		return fmt.Errorf("Error during test client initialization: %v", err)
 	}
 	client := infra.NewIpBlocksClient(testAccGetSessionContext(), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 
 	// Find the object by name
 	objList, err := client.List(nil, nil, nil, nil, nil, nil)

@@ -58,6 +58,9 @@ func resourceNsxtPolicyIPBlock() *schema.Resource {
 
 func resourceNsxtPolicyIPBlockExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
 	client := infra.NewIpBlocksClient(sessionContext, connector)
+	if client == nil {
+		return false, policyResourceNotSupportedError()
+	}
 
 	_, err := client.Get(id, nil)
 	if err == nil {
@@ -74,6 +77,9 @@ func resourceNsxtPolicyIPBlockExists(sessionContext utl.SessionContext, id strin
 func resourceNsxtPolicyIPBlockRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	client := infra.NewIpBlocksClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 
 	id := d.Id()
 	if id == "" {
@@ -102,6 +108,9 @@ func resourceNsxtPolicyIPBlockRead(d *schema.ResourceData, m interface{}) error 
 func resourceNsxtPolicyIPBlockCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	client := infra.NewIpBlocksClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 
 	id, err := getOrGenerateID2(d, m, resourceNsxtPolicyIPBlockExists)
 	if err != nil {
@@ -138,6 +147,9 @@ func resourceNsxtPolicyIPBlockCreate(d *schema.ResourceData, m interface{}) erro
 func resourceNsxtPolicyIPBlockUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	client := infra.NewIpBlocksClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 
 	id := d.Id()
 	if id == "" {
@@ -180,6 +192,9 @@ func resourceNsxtPolicyIPBlockDelete(d *schema.ResourceData, m interface{}) erro
 
 	connector := getPolicyConnector(m)
 	client := infra.NewIpBlocksClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	err := client.Delete(id)
 	if err != nil {
 		return handleDeleteError("IP Block", id, err)

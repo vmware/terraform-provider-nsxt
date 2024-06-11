@@ -388,6 +388,9 @@ func nsxtPolicyContextProfileExists(resourceID string) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
 	var err error
 	nsxClient := infra.NewContextProfilesClient(testAccGetSessionContext(), connector)
+	if nsxClient == nil {
+		return policyResourceNotSupportedError()
+	}
 	_, err = nsxClient.Get(resourceID)
 
 	return err

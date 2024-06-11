@@ -98,9 +98,15 @@ func resourceNsxtPolicyGatewayFloodProtectionProfileBindingPatch(d *schema.Resou
 	if tier0ID != "" {
 		if localeServiceID == "" {
 			bindingClient := tier0s.NewFloodProtectionProfileBindingsClient(getSessionContext(d, m), connector)
+			if bindingClient == nil {
+				return policyResourceNotSupportedError()
+			}
 			err = bindingClient.Patch(tier0ID, id, obj)
 		} else {
 			bindingClient := t0localeservices.NewFloodProtectionProfileBindingsClient(getSessionContext(d, m), connector)
+			if bindingClient == nil {
+				return policyResourceNotSupportedError()
+			}
 			err = bindingClient.Patch(tier0ID, localeServiceID, id, obj)
 		}
 		if err != nil {
@@ -109,9 +115,15 @@ func resourceNsxtPolicyGatewayFloodProtectionProfileBindingPatch(d *schema.Resou
 	} else if tier1ID != "" {
 		if localeServiceID == "" {
 			bindingClient := tier1s.NewFloodProtectionProfileBindingsClient(getSessionContext(d, m), connector)
+			if bindingClient == nil {
+				return policyResourceNotSupportedError()
+			}
 			err = bindingClient.Patch(tier1ID, id, obj)
 		} else {
 			bindingClient := t1localeservices.NewFloodProtectionProfileBindingsClient(getSessionContext(d, m), connector)
+			if bindingClient == nil {
+				return policyResourceNotSupportedError()
+			}
 			err = bindingClient.Patch(tier1ID, localeServiceID, id, obj)
 		}
 	}
@@ -128,17 +140,29 @@ func resourceNsxtPolicyGatewayFloodProtectionProfileBindingGet(sessionContext ut
 	if tier0ID != "" {
 		if localeServiceID == "" {
 			bindingClient := tier0s.NewFloodProtectionProfileBindingsClient(sessionContext, connector)
+			if bindingClient == nil {
+				return binding, policyResourceNotSupportedError()
+			}
 			binding, err = bindingClient.Get(tier0ID, id)
 		} else {
 			bindingClient := t0localeservices.NewFloodProtectionProfileBindingsClient(sessionContext, connector)
+			if bindingClient == nil {
+				return binding, policyResourceNotSupportedError()
+			}
 			binding, err = bindingClient.Get(tier0ID, localeServiceID, id)
 		}
 	} else if tier1ID != "" {
 		if localeServiceID == "" {
 			bindingClient := tier1s.NewFloodProtectionProfileBindingsClient(sessionContext, connector)
+			if bindingClient == nil {
+				return binding, policyResourceNotSupportedError()
+			}
 			binding, err = bindingClient.Get(tier1ID, id)
 		} else {
 			bindingClient := t1localeservices.NewFloodProtectionProfileBindingsClient(sessionContext, connector)
+			if bindingClient == nil {
+				return binding, policyResourceNotSupportedError()
+			}
 			binding, err = bindingClient.Get(tier1ID, localeServiceID, id)
 		}
 	}
@@ -250,9 +274,15 @@ func resourceNsxtPolicyGatewayFloodProtectionProfileBindingDelete(d *schema.Reso
 	if tier0ID != "" {
 		if localeServiceID == "" {
 			bindingClient := tier0s.NewFloodProtectionProfileBindingsClient(getSessionContext(d, m), connector)
+			if bindingClient == nil {
+				return policyResourceNotSupportedError()
+			}
 			err = bindingClient.Delete(tier0ID, id)
 		} else {
 			bindingClient := t0localeservices.NewFloodProtectionProfileBindingsClient(getSessionContext(d, m), connector)
+			if bindingClient == nil {
+				return policyResourceNotSupportedError()
+			}
 			err = bindingClient.Delete(tier0ID, localeServiceID, id)
 		}
 		if err != nil {
@@ -261,9 +291,15 @@ func resourceNsxtPolicyGatewayFloodProtectionProfileBindingDelete(d *schema.Reso
 	} else if tier1ID != "" {
 		if localeServiceID == "" {
 			bindingClient := tier1s.NewFloodProtectionProfileBindingsClient(getSessionContext(d, m), connector)
+			if bindingClient == nil {
+				return policyResourceNotSupportedError()
+			}
 			err = bindingClient.Delete(tier1ID, id)
 		} else {
 			bindingClient := t1localeservices.NewFloodProtectionProfileBindingsClient(getSessionContext(d, m), connector)
+			if bindingClient == nil {
+				return policyResourceNotSupportedError()
+			}
 			err = bindingClient.Delete(tier1ID, localeServiceID, id)
 		}
 	}

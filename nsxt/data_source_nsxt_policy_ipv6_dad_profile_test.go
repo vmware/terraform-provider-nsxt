@@ -71,6 +71,9 @@ func testAccDataSourceNsxtPolicyIpv6DadProfileCreate(name string) error {
 	// Generate a random ID for the resource
 	id := newUUID()
 	client := infra.NewIpv6DadProfilesClient(testAccGetSessionContext(), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	err = client.Patch(id, obj, nil)
 
 	if err != nil {
@@ -86,6 +89,9 @@ func testAccDataSourceNsxtPolicyIpv6DadProfileDeleteByName(name string) error {
 	}
 	// Find the object by name and delete it
 	client := infra.NewIpv6DadProfilesClient(testAccGetSessionContext(), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 
 	// Find the object by name
 	objList, err := client.List(nil, nil, nil, nil, nil, nil)

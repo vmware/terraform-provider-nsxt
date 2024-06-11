@@ -156,6 +156,9 @@ func ipDiscoveryProfileObjFromSchema(d *schema.ResourceData) model.IPDiscoveryPr
 
 func resourceNsxtPolicyIPDiscoveryProfileExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
 	client := infra.NewIpDiscoveryProfilesClient(sessionContext, connector)
+	if client == nil {
+		return false, policyResourceNotSupportedError()
+	}
 	_, err := client.Get(id)
 	if err == nil {
 		return true, nil
@@ -183,6 +186,9 @@ func resourceNsxtPolicyIPDiscoveryProfileCreate(d *schema.ResourceData, m interf
 	log.Printf("[INFO] Creating IPDiscoveryProfile with ID %s", id)
 	boolFalse := false
 	client := infra.NewIpDiscoveryProfilesClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	err = client.Patch(id, obj, &boolFalse)
 	if err != nil {
 		return handleCreateError("IPDiscoveryProfile", id, err)
@@ -203,6 +209,9 @@ func resourceNsxtPolicyIPDiscoveryProfileRead(d *schema.ResourceData, m interfac
 	}
 
 	client := infra.NewIpDiscoveryProfilesClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	obj, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "IPDiscoveryProfile", id, err)
@@ -233,6 +242,9 @@ func resourceNsxtPolicyIPDiscoveryProfileRead(d *schema.ResourceData, m interfac
 func resourceNsxtPolicyIPDiscoveryProfileUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	client := infra.NewIpDiscoveryProfilesClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -267,6 +279,9 @@ func resourceNsxtPolicyIPDiscoveryProfileDelete(d *schema.ResourceData, m interf
 	boolFalse := false
 
 	client := infra.NewIpDiscoveryProfilesClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	err = client.Delete(id, &boolFalse)
 
 	if err != nil {

@@ -73,6 +73,9 @@ func dataSourceNsxtPolicyGatewayInterfaceRealization() *schema.Resource {
 func dataSourceNsxtPolicyGatewayInterfaceRealizationRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	client := realizedstate.NewRealizedEntitiesClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 
 	id := d.Get("id").(string)
 	gatewayPath := d.Get("gateway_path").(string)

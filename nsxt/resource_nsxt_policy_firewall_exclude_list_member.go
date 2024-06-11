@@ -45,6 +45,9 @@ func memberInList(member string, members []string) int {
 func resourceNsxtPolicyFirewallExcludeListMemberExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
 
 	client := security.NewExcludeListClient(sessionContext, connector)
+	if client == nil {
+		return false, policyResourceNotSupportedError()
+	}
 	obj, err := client.Get()
 	if isNotFoundError(err) {
 		return false, nil
@@ -66,6 +69,9 @@ func resourceNsxtPolicyFirewallExcludeListMemberCreate(d *schema.ResourceData, m
 		var obj model.PolicyExcludeList
 
 		client := security.NewExcludeListClient(getSessionContext(d, m), connector)
+		if client == nil {
+			return policyResourceNotSupportedError()
+		}
 		obj, err := client.Get()
 		if isNotFoundError(err) {
 			obj = model.PolicyExcludeList{
@@ -101,6 +107,9 @@ func resourceNsxtPolicyFirewallExcludeListMemberRead(d *schema.ResourceData, m i
 	member := d.Id()
 
 	client := security.NewExcludeListClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	obj, err := client.Get()
 	if err != nil {
 		return handleReadError(d, "PolicyFirewallExcludeListMember", member, err)
@@ -120,6 +129,9 @@ func resourceNsxtPolicyFirewallExcludeListMemberDelete(d *schema.ResourceData, m
 		var obj model.PolicyExcludeList
 
 		client := security.NewExcludeListClient(getSessionContext(d, m), connector)
+		if client == nil {
+			return policyResourceNotSupportedError()
+		}
 		obj, err := client.Get()
 		if isNotFoundError(err) {
 			return nil

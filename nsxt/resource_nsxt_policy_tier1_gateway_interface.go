@@ -121,6 +121,9 @@ func resourceNsxtPolicyTier1GatewayInterfaceCreate(d *schema.ResourceData, m int
 	} else {
 		var err error
 		client := localeservices.NewInterfacesClient(getSessionContext(d, m), connector)
+		if client == nil {
+			return policyResourceNotSupportedError()
+		}
 		_, err = client.Get(tier1ID, localeServiceID, id)
 
 		if err == nil {
@@ -162,6 +165,9 @@ func resourceNsxtPolicyTier1GatewayInterfaceCreate(d *schema.ResourceData, m int
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating tier1 interface with ID %s", id)
 	client := localeservices.NewInterfacesClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	err := client.Patch(tier1ID, localeServiceID, id, obj)
 
 	if err != nil {
@@ -207,6 +213,9 @@ func resourceNsxtPolicyTier1GatewayInterfaceRead(d *schema.ResourceData, m inter
 	} else {
 		var err error
 		client := localeservices.NewInterfacesClient(getSessionContext(d, m), connector)
+		if client == nil {
+			return policyResourceNotSupportedError()
+		}
 		obj, err = client.Get(tier1ID, localeServiceID, id)
 		if err != nil {
 			return handleReadError(d, "Tier1 Interface", id, err)
@@ -286,6 +295,9 @@ func resourceNsxtPolicyTier1GatewayInterfaceUpdate(d *schema.ResourceData, m int
 	}
 	var err error
 	client := localeservices.NewInterfacesClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	_, err = client.Update(tier1ID, localeServiceID, id, obj)
 	if err != nil {
 		return handleUpdateError("Tier1 Interface", id, err)
@@ -307,6 +319,9 @@ func resourceNsxtPolicyTier1GatewayInterfaceDelete(d *schema.ResourceData, m int
 
 	var err error
 	client := localeservices.NewInterfacesClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	err = client.Delete(tier1ID, localeServiceID, id)
 	if err != nil {
 		return handleDeleteError("Tier1 Interface", id, err)
@@ -343,6 +358,9 @@ func resourceNsxtPolicyTier1GatewayInterfaceImport(d *schema.ResourceData, m int
 	connector := getPolicyConnector(m)
 	var tier1GW model.Tier1
 	client := infra.NewTier1sClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return nil, policyResourceNotSupportedError()
+	}
 	tier1GW, err = client.Get(gwID)
 	if err != nil {
 		return nil, err

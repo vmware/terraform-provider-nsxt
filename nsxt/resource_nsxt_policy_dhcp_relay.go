@@ -47,6 +47,9 @@ func resourceNsxtPolicyDhcpRelayConfig() *schema.Resource {
 
 func resourceNsxtPolicyDhcpRelayConfigExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
 	client := infra.NewDhcpRelayConfigsClient(sessionContext, connector)
+	if client == nil {
+		return false, policyResourceNotSupportedError()
+	}
 
 	_, err := client.Get(id)
 	if err == nil {
@@ -63,7 +66,6 @@ func resourceNsxtPolicyDhcpRelayConfigExists(sessionContext utl.SessionContext, 
 func resourceNsxtPolicyDhcpRelayConfigCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	client := infra.NewDhcpRelayConfigsClient(getSessionContext(d, m), connector)
-
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -102,7 +104,6 @@ func resourceNsxtPolicyDhcpRelayConfigCreate(d *schema.ResourceData, m interface
 func resourceNsxtPolicyDhcpRelayConfigRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	client := infra.NewDhcpRelayConfigsClient(getSessionContext(d, m), connector)
-
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}

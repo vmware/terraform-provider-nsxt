@@ -141,6 +141,9 @@ func resourceNsxtPolicyMacDiscoveryProfile() *schema.Resource {
 func resourceNsxtPolicyMacDiscoveryProfileExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
 	var err error
 	client := infra.NewMacDiscoveryProfilesClient(sessionContext, connector)
+	if client == nil {
+		return false, policyResourceNotSupportedError()
+	}
 	_, err = client.Get(id)
 	if err == nil {
 		return true, nil
@@ -182,6 +185,9 @@ func resourceNsxtPolicyMacDiscoveryProfileCreate(d *schema.ResourceData, m inter
 	log.Printf("[INFO] Creating MacDiscoveryProfile with ID %s", id)
 	boolFalse := false
 	client := infra.NewMacDiscoveryProfilesClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	err = client.Patch(id, obj, &boolFalse)
 	if err != nil {
 		return handleCreateError("MacDiscoveryProfile", id, err)
@@ -202,6 +208,9 @@ func resourceNsxtPolicyMacDiscoveryProfileRead(d *schema.ResourceData, m interfa
 	}
 
 	client := infra.NewMacDiscoveryProfilesClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	obj, err := client.Get(id)
 	if err != nil {
 		return handleReadError(d, "MacDiscoveryProfile", id, err)
@@ -248,6 +257,9 @@ func resourceNsxtPolicyMacDiscoveryProfileUpdate(d *schema.ResourceData, m inter
 	// Update the resource using PATCH
 	boolFalse := false
 	client := infra.NewMacDiscoveryProfilesClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	_, err := client.Update(id, obj, &boolFalse)
 	if err != nil {
 		return handleUpdateError("MacDiscoveryProfile", id, err)
@@ -265,6 +277,9 @@ func resourceNsxtPolicyMacDiscoveryProfileDelete(d *schema.ResourceData, m inter
 	connector := getPolicyConnector(m)
 	boolFalse := false
 	client := infra.NewMacDiscoveryProfilesClient(getSessionContext(d, m), connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	err := client.Delete(id, &boolFalse)
 
 	if err != nil {

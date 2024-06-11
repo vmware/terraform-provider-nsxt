@@ -45,6 +45,9 @@ func dataSourceNsxtPolicyGatewayPolicy() *schema.Resource {
 // Local Manager Only
 func listGatewayPolicies(context utl.SessionContext, domain string, connector client.Connector) ([]model.GatewayPolicy, error) {
 	client := domains.NewGatewayPoliciesClient(context, connector)
+	if client == nil {
+		return nil, policyResourceNotSupportedError()
+	}
 
 	var results []model.GatewayPolicy
 	boolFalse := false
@@ -104,6 +107,9 @@ func dataSourceNsxtPolicyGatewayPolicyRead(d *schema.ResourceData, m interface{}
 	if objID != "" {
 		// Get by id
 		client := domains.NewGatewayPoliciesClient(context, connector)
+		if client == nil {
+			return policyResourceNotSupportedError()
+		}
 		objGet, err := client.Get(domain, objID)
 		if isNotFoundError(err) {
 			return fmt.Errorf("Gateway Policy with ID %s was not found", objID)

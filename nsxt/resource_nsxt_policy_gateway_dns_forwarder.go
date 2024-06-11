@@ -81,11 +81,19 @@ func resourceNsxtPolicyGatewayDNSForwarder() *schema.Resource {
 }
 
 func policyGatewayDNSForwarderGet(sessionContext utl.SessionContext, connector client.Connector, gwID string, isT0 bool) (model.PolicyDnsForwarder, error) {
+	var emptyFwdr model.PolicyDnsForwarder
 	if isT0 {
 		client := tier0s.NewDnsForwarderClient(sessionContext, connector)
+		if client == nil {
+			return emptyFwdr, policyResourceNotSupportedError()
+		}
+
 		return client.Get(gwID)
 	}
 	client := tier1s.NewDnsForwarderClient(sessionContext, connector)
+	if client == nil {
+		return emptyFwdr, policyResourceNotSupportedError()
+	}
 	return client.Get(gwID)
 }
 
@@ -156,9 +164,15 @@ func patchNsxtPolicyGatewayDNSForwarder(sessionContext utl.SessionContext, conne
 
 	if isT0 {
 		client := tier0s.NewDnsForwarderClient(sessionContext, connector)
+		if client == nil {
+			return policyResourceNotSupportedError()
+		}
 		return client.Patch(gwID, obj)
 	}
 	client := tier1s.NewDnsForwarderClient(sessionContext, connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	return client.Patch(gwID, obj)
 }
 
@@ -181,9 +195,15 @@ func resourceNsxtPolicyGatewayDNSForwarderCreate(d *schema.ResourceData, m inter
 
 	if isT0 {
 		client := tier0s.NewDnsForwarderClient(context, connector)
+		if client == nil {
+			return policyResourceNotSupportedError()
+		}
 		_, err = client.Get(gwID)
 	} else {
 		client := tier1s.NewDnsForwarderClient(context, connector)
+		if client == nil {
+			return policyResourceNotSupportedError()
+		}
 		_, err = client.Get(gwID)
 	}
 	if err == nil {
@@ -242,9 +262,15 @@ func resourceNsxtPolicyGatewayDNSForwarderDelete(d *schema.ResourceData, m inter
 
 	if isT0 {
 		client := tier0s.NewDnsForwarderClient(context, connector)
+		if client == nil {
+			return policyResourceNotSupportedError()
+		}
 		err = client.Delete(gwID)
 	} else {
 		client := tier1s.NewDnsForwarderClient(context, connector)
+		if client == nil {
+			return policyResourceNotSupportedError()
+		}
 		err = client.Delete(gwID)
 	}
 	if err != nil {

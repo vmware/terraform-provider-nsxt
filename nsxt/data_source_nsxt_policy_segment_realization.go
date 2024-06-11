@@ -62,6 +62,9 @@ func dataSourceNsxtPolicySegmentRealizationRead(d *schema.ResourceData, m interf
 	segmentID := getPolicyIDFromPath(path)
 	enforcementPointPath := getPolicyEnforcementPointPath(m)
 	client := segments.NewStateClient(context, connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	pendingStates := []string{model.SegmentConfigurationState_STATE_PENDING,
 		model.SegmentConfigurationState_STATE_IN_PROGRESS,
 		model.SegmentConfigurationState_STATE_IN_SYNC,
@@ -104,6 +107,9 @@ func dataSourceNsxtPolicySegmentRealizationRead(d *schema.ResourceData, m interf
 	// return it in details yet. For now, we'll use segment display name, since its always
 	// translates to network name
 	segClient := infra.NewSegmentsClient(context, connector)
+	if client == nil {
+		return policyResourceNotSupportedError()
+	}
 	obj, err := segClient.Get(segmentID)
 	if err != nil {
 		return handleReadError(d, "Segment", segmentID, err)

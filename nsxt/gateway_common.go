@@ -439,6 +439,9 @@ func policyInfraPatch(context utl.SessionContext, obj model.Infra, connector cli
 	}
 
 	infraClient := nsx_policy.NewInfraClient(context, connector)
+	if infraClient == nil {
+		return policyResourceNotSupportedError()
+	}
 	return infraClient.Patch(obj, &enforceRevision)
 }
 
