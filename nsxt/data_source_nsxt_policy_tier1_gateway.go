@@ -26,7 +26,7 @@ func dataSourceNsxtPolicyTier1Gateway() *schema.Resource {
 				Optional:    true,
 				Computed:    true,
 			},
-			"context": getContextSchema(false, false),
+			"context": getContextSchema(false, false, false),
 		},
 	}
 }

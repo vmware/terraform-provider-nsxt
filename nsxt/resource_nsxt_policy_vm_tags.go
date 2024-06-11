@@ -57,7 +57,7 @@ func resourceNsxtPolicyVMTags() *schema.Resource {
 					},
 				},
 			},
-			"context": getContextSchema(false, false),
+			"context": getContextSchema(false, false, false),
 		},
 	}
 }

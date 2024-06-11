@@ -22,7 +22,7 @@ func dataSourceNsxtPolicyGatewayInterfaceRealization() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"id":      getDataSourceIDSchema(),
-			"context": getContextSchema(false, false),
+			"context": getContextSchema(false, false, false),
 			"gateway_path": {
 				Type:         schema.TypeString,
 				Description:  "The path for the gateway",

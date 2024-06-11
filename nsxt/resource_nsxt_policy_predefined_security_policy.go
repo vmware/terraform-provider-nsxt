@@ -39,7 +39,7 @@ func getSecurityPolicyDefaultRulesSchema() *schema.Schema {
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"nsx_id":  getComputedNsxIDSchema(),
-				"context": getContextSchema(false, false),
+				"context": getContextSchema(false, false, false),
 				"scope": {
 					Type:        schema.TypeString,
 					Description: "Scope for this rule",
@@ -85,7 +85,7 @@ func getPolicyPredefinedSecurityPolicySchema() map[string]*schema.Schema {
 		"rule":         getSecurityPolicyAndGatewayRulesSchema(false, false, false),
 		"default_rule": getSecurityPolicyDefaultRulesSchema(),
 		"revision":     getRevisionSchema(),
-		"context":      getContextSchema(false, false),
+		"context":      getContextSchema(false, false, false),
 	}
 }
 

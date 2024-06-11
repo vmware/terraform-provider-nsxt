@@ -17,7 +17,7 @@ func dataSourceNsxtPolicyVPC() *schema.Resource {
 			"display_name": getDataSourceDisplayNameSchema(),
 			"description":  getDataSourceDescriptionSchema(),
 			"path":         getPathSchema(),
-			"context":      getContextSchema(true, false),
+			"context":      getContextSchema(true, false, false),
 			"short_id": {
 				Type:     schema.TypeString,
 				Optional: true,

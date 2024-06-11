@@ -243,15 +243,29 @@ func testAccIsMultitenancy() bool {
 	return os.Getenv("NSXT_PROJECT_ID") != ""
 }
 
+func testAccIsVPC() bool {
+	return os.Getenv("NSXT_VPC_PROJECT_ID") != "" && os.Getenv("NSXT_VPC_ID") != ""
+}
+
 func testAccIsFabric() bool {
 	return os.Getenv("NSXT_TEST_FABRIC") != ""
 }
 
 func testAccGetSessionContext() tf_api.SessionContext {
-	return tf_api.SessionContext{ProjectID: os.Getenv("NSXT_PROJECT_ID"), ClientType: testAccIsGlobalManager2()}
+	clientType := testAccIsGlobalManager2()
+	projectID := os.Getenv("NSXT_PROJECT_ID")
+	vpcID := ""
+	if clientType == tf_api.VPC {
+		projectID = os.Getenv("NSXT_VPC_PROJECT_ID")
+		vpcID = os.Getenv("NSXT_VPC_ID")
+	}
+	return tf_api.SessionContext{ProjectID: projectID, ClientType: clientType, VPCID: vpcID}
 }
 
 func testAccIsGlobalManager2() tf_api.ClientType {
+	if testAccIsVPC() {
+		return tf_api.VPC
+	}
 	if os.Getenv("NSXT_PROJECT_ID") != "" {
 		return tf_api.Multitenancy
 	}
@@ -677,6 +691,16 @@ func testAccNsxtPolicyResourceCheckDestroy(context tf_api.SessionContext, state 
 }
 
 func testAccNsxtPolicyMultitenancyContext() string {
+	if testAccIsVPC() {
+		projectID := os.Getenv("NSXT_VPC_PROJECT_ID")
+		vpcID := os.Getenv("NSXT_VPC_ID")
+		return fmt.Sprintf(`
+  context {
+    project_id = "%s"
+    vpc_id     = "%s"
+  }
+`, projectID, vpcID)
+	}
 	projectID := os.Getenv("NSXT_PROJECT_ID")
 	if projectID != "" {
 		return fmt.Sprintf(`

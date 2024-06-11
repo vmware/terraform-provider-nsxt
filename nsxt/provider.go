@@ -1209,28 +1209,35 @@ func getGlobalPolicyEnforcementPointPath(m interface{}, sitePath *string) string
 	return fmt.Sprintf("%s/enforcement-points/%s", *sitePath, getPolicyEnforcementPoint(m))
 }
 
-func getProjectIDFromSchema(d *schema.ResourceData) string {
+func getContextDataFromSchema(d *schema.ResourceData) (string, string) {
 	ctxPtr := d.Get("context")
 	if ctxPtr != nil {
 		contexts := ctxPtr.([]interface{})
 		for _, context := range contexts {
 			data := context.(map[string]interface{})
+			vpcID := ""
+			if data["vpc_id"] != nil {
+				vpcID = data["vpc_id"].(string)
+			}
 
-			return data["project_id"].(string)
+			return data["project_id"].(string), vpcID
 		}
 	}
-	return ""
+	return "", ""
 }
 
 func getSessionContext(d *schema.ResourceData, m interface{}) tf_api.SessionContext {
 	var clientType tf_api.ClientType
-	projectID := getProjectIDFromSchema(d)
+	projectID, vpcID := getContextDataFromSchema(d)
 	if projectID != "" {
 		clientType = tf_api.Multitenancy
+		if vpcID != "" {
+			clientType = tf_api.VPC
+		}
 	} else if isPolicyGlobalManager(m) {
 		clientType = tf_api.Global
 	} else {
 		clientType = tf_api.Local
 	}
-	return tf_api.SessionContext{ProjectID: projectID, ClientType: clientType}
+	return tf_api.SessionContext{ProjectID: projectID, VPCID: vpcID, ClientType: clientType}
 }

@@ -39,7 +39,7 @@ func getFloodProtectionProfile() map[string]*schema.Schema {
 		"description":  getDescriptionSchema(),
 		"revision":     getRevisionSchema(),
 		"tag":          getTagsSchema(),
-		"context":      getContextSchema(false, false),
+		"context":      getContextSchema(false, false, false),
 		"icmp_active_flow_limit": {
 			Type:         schema.TypeInt,
 			Description:  "Active ICMP connections limit",

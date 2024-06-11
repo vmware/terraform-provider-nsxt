@@ -57,7 +57,7 @@ func resourceNsxtPolicyNATRule() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
-			"context":      getContextSchema(false, false),
+			"context":      getContextSchema(false, false, false),
 			"gateway_path": getPolicyGatewayPathSchema(),
 			"action": {
 				Type:         schema.TypeString,

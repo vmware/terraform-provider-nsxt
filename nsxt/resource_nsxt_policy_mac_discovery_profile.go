@@ -30,7 +30,7 @@ var macDiscoveryProfileSchema = map[string]*metadata.ExtendedSchema{
 	"description":  metadata.GetExtendedSchema(getDescriptionSchema()),
 	"revision":     metadata.GetExtendedSchema(getRevisionSchema()),
 	"tag":          metadata.GetExtendedSchema(getTagsSchema()),
-	"context":      metadata.GetExtendedSchema(getContextSchema(false, false)),
+	"context":      metadata.GetExtendedSchema(getContextSchema(false, false, false)),
 	"mac_change_enabled": {
 		Schema: schema.Schema{
 			Type:     schema.TypeBool,
