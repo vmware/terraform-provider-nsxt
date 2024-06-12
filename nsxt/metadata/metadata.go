@@ -9,10 +9,17 @@ import (
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	vapiBindings_ "github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 )
 
 // package level logger to include log.Lshortfile context
 var logger = log.New(os.Stderr, "", log.LstdFlags|log.Lshortfile)
+
+const (
+	PolymorphicTypeFlatten = "flatten"
+	PolymorphicTypeNested  = "nested"
+)
 
 type Metadata struct {
 	// we need a separate schema type, in addition to terraform SDK type,
@@ -21,7 +28,20 @@ type Metadata struct {
 	ReadOnly     bool
 	SdkFieldName string
 	// This attribute is parent path for the object
-	IsParentPath        bool
+	IsParentPath bool
+	// The type of polymorphic relation between SDK and TF schema
+	// Empty for non-polymorphic fields
+	PolymorphicType string
+	// SDK vapi binding type for converting polymorphic structs
+	BindingType vapiBindings_.BindingType
+	// SDK resource type to match and filter for a schema key
+	// Only applicable to PolymorphicTypeFlatten schema
+	ResourceType string
+	// Map from schema key of polymorphic attr to this SDK resource type
+	// Only applicable to PolymorphicTypeNested schema
+	ResourceTypeMap map[string]string
+	// Type identifier name for both SDK and JSON (StructValue field name)
+	TypeIdentifier      TypeIdentifier
 	IntroducedInVersion string
 	// skip handling of this attribute - it will be done manually
 	Skip        bool
@@ -41,6 +61,29 @@ type ExtendedResource struct {
 type Testdata struct {
 	CreateValue interface{}
 	UpdateValue interface{}
+}
+
+type TypeIdentifier struct {
+	SdkName      string
+	APIFieldName string
+}
+
+// GetSdkName returns the SDK field type identifier
+// Defaults to ResourceType
+func (t TypeIdentifier) GetSdkName() string {
+	if t.SdkName != "" {
+		return t.SdkName
+	}
+	return "ResourceType"
+}
+
+// GetAPIFieldName returns the API JSON type identifier
+// Defaults to resource_type
+func (t TypeIdentifier) GetAPIFieldName() string {
+	if t.APIFieldName != "" {
+		return t.APIFieldName
+	}
+	return "resource_type"
 }
 
 // GetExtendedSchema is a helper to convert terraform sdk schema to extended schema
@@ -119,6 +162,30 @@ func StructToSchema(elem reflect.Value, d *schema.ResourceData, metadata map[str
 		}
 		if elem.FieldByName(item.Metadata.SdkFieldName).IsNil() {
 			logger.Printf("[TRACE] %s skip key %s with nil value", ctx, key)
+			continue
+		}
+		if len(item.Metadata.PolymorphicType) > 0 {
+			childElem := elem.FieldByName(item.Metadata.SdkFieldName)
+			var nestedVal interface{}
+			switch item.Metadata.PolymorphicType {
+			case PolymorphicTypeNested:
+				nestedVal, err = polyStructToNestedSchema(ctx, childElem, item)
+			case PolymorphicTypeFlatten:
+				nestedVal, err = polyStructToFlattenSchema(ctx, childElem, key, item)
+			default:
+				err = fmt.Errorf("%s unknown polymorphic type %s", ctx,
+					item.Metadata.PolymorphicType)
+			}
+			if err != nil {
+				return
+			}
+
+			if len(parent) > 0 {
+				parentMap[key] = nestedVal
+			} else {
+				d.Set(key, nestedVal)
+			}
+			logger.Printf("[TRACE] %s adding polymorphic slice %+v to key %s", ctx, nestedVal, key)
 			continue
 		}
 		if item.Metadata.SchemaType == "struct" {
@@ -217,6 +284,22 @@ func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[str
 		if len(parent) > 0 {
 			logger.Printf("[TRACE] %s parent %s key %s", ctx, parent, key)
 		}
+		if len(item.Metadata.PolymorphicType) > 0 {
+			itemList := getItemListForSchemaToStruct(d, item.Metadata.SchemaType, key, parent, parentMap)
+			switch item.Metadata.PolymorphicType {
+			case PolymorphicTypeNested:
+				err = polyNestedSchemaToStruct(ctx, elem, itemList, item)
+			case PolymorphicTypeFlatten:
+				err = polyFlattenSchemaToStruct(ctx, elem, key, itemList, item)
+			default:
+				err = fmt.Errorf("%s unknown polymorphic type %s", ctx,
+					item.Metadata.PolymorphicType)
+			}
+			if err != nil {
+				return
+			}
+			continue
+		}
 		if item.Metadata.SchemaType == "string" {
 			var value string
 			if len(parent) > 0 {
@@ -249,12 +332,7 @@ func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[str
 		}
 		if item.Metadata.SchemaType == "struct" {
 			nestedObj := reflect.New(item.Metadata.ReflectType)
-			var itemList []interface{}
-			if len(parent) > 0 {
-				itemList = parentMap[key].([]interface{})
-			} else {
-				itemList = d.Get(key).([]interface{})
-			}
+			itemList := getItemListForSchemaToStruct(d, item.Metadata.SchemaType, key, parent, parentMap)
 			if len(itemList) == 0 {
 				continue
 			}
@@ -268,21 +346,7 @@ func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[str
 			elem.FieldByName(item.Metadata.SdkFieldName).Set(nestedObj)
 		}
 		if item.Metadata.SchemaType == "list" || item.Metadata.SchemaType == "set" {
-			var itemList []interface{}
-			if item.Metadata.SchemaType == "list" {
-				if len(parent) > 0 {
-					itemList = parentMap[key].([]interface{})
-				} else {
-					itemList = d.Get(key).([]interface{})
-				}
-			} else {
-				if len(parent) > 0 {
-					itemList = parentMap[key].(*schema.Set).List()
-				} else {
-					itemList = d.Get(key).(*schema.Set).List()
-				}
-			}
-
+			itemList := getItemListForSchemaToStruct(d, item.Metadata.SchemaType, key, parent, parentMap)
 			// List of string, bool, int
 			if childElem, ok := item.Schema.Elem.(*ExtendedSchema); ok {
 				sliceElem := elem.FieldByName(item.Metadata.SdkFieldName)
@@ -324,6 +388,314 @@ func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[str
 				}
 			}
 		}
+	}
+
+	return
+}
+
+func getItemListForSchemaToStruct(d *schema.ResourceData, schemaType, key, parent string, parentMap map[string]interface{}) []interface{} {
+	var itemList []interface{}
+	if schemaType == "list" || schemaType == "struct" {
+		if len(parent) > 0 {
+			itemList = parentMap[key].([]interface{})
+		} else {
+			itemList = d.Get(key).([]interface{})
+		}
+	} else if schemaType == "set" {
+		if len(parent) > 0 {
+			itemList = parentMap[key].(*schema.Set).List()
+		} else {
+			itemList = d.Get(key).(*schema.Set).List()
+		}
+	}
+	return itemList
+}
+
+// getResourceTypeFromStructValue returns resource type from SDK object based on identifier
+func getResourceTypeFromStructValue(ctx string, value data.StructValue, identifier TypeIdentifier) (string, error) {
+	if !value.HasField(identifier.GetAPIFieldName()) {
+		err := fmt.Errorf(
+			"%s failed to get resource type", ctx)
+		logger.Printf("[ERROR] %v", err)
+		return "", err
+	}
+	var rTypeData data.DataValue
+	rTypeData, err := value.Field(identifier.GetAPIFieldName())
+	if err != nil {
+		return "", err
+	}
+	if strVal, ok := rTypeData.(*data.StringValue); ok {
+		return strVal.Value(), nil
+	}
+	if opVal, ok := rTypeData.(*data.OptionalValue); ok {
+		return opVal.String()
+	}
+
+	err = fmt.Errorf("%s failed to convert resource type %s",
+		ctx, identifier.GetAPIFieldName())
+	logger.Printf("[ERROR] %v", err)
+	return "", err
+}
+
+func polyMetadataSanityCheck(ctx string, item *ExtendedSchema, polyType string) error {
+	if item.Metadata.PolymorphicType != polyType {
+		err := fmt.Errorf("%s unexpected polymorphic attr", ctx)
+		logger.Printf("[ERROR] %v", err)
+		return err
+	}
+
+	_, ok := item.Schema.Elem.(*ExtendedResource)
+	if !ok {
+		err := fmt.Errorf("%s polymorphic attr has non-ExtendedResource element", ctx)
+		logger.Printf("[ERROR] %v", err)
+		return err
+	}
+
+	return nil
+}
+
+func polyStructToNestedSchema(ctx string, elem reflect.Value, item *ExtendedSchema) (ret []map[string]interface{}, err error) {
+	if err = polyMetadataSanityCheck(ctx, item, PolymorphicTypeNested); err != nil {
+		return
+	}
+
+	elemSlice := elem
+	if item.Metadata.SchemaType == "struct" {
+		if elem.IsNil() {
+			return
+		}
+		// convert to slice to share logic with list and set
+		elemSlice = reflect.MakeSlice(reflect.SliceOf(elem.Type()), 1, 1)
+		elemSlice.Index(0).Set(elem)
+	} else if item.Metadata.SchemaType != "list" && item.Metadata.SchemaType != "set" {
+		err = fmt.Errorf("%s unsupported polymorphic schema type %s", ctx, item.Metadata.SchemaType)
+		logger.Printf("[ERROR] %v", err)
+		return
+	}
+	if elemSlice.Len() == 0 {
+		return
+	}
+
+	converter := vapiBindings_.NewTypeConverter()
+	sliceValue := make([]map[string]interface{}, elemSlice.Len())
+	for i := 0; i < elemSlice.Len(); i++ {
+		childElem := elemSlice.Index(i).Elem().Interface().(data.StructValue)
+		nestedSchema := make(map[string]interface{})
+		var key, rType string
+		var childExtSch *ExtendedSchema
+		rType, err = getResourceTypeFromStructValue(ctx, childElem, item.Metadata.TypeIdentifier)
+		if err != nil {
+			return
+		}
+
+		// Get metadata for the corresponding type
+		for k, v := range item.Metadata.ResourceTypeMap {
+			if v == rType {
+				key = k
+				childExtSch = item.Schema.Elem.(*ExtendedResource).Schema[k]
+				break
+			}
+		}
+		if len(key) == 0 || childExtSch == nil {
+			err = fmt.Errorf("%s polyStructToSchema failed to get schema meta of type %s for %s",
+				ctx, rType, item.Metadata.SdkFieldName)
+			logger.Printf("[ERROR] %v", err)
+			return
+		}
+
+		// Convert to concrete struct
+		dv, errors := converter.ConvertToGolang(&childElem, childExtSch.Metadata.BindingType)
+		if errors != nil {
+			err = errors[0]
+			logger.Printf("[ERROR] %v", err)
+			return
+		}
+
+		if err = StructToSchema(reflect.ValueOf(dv), nil, childExtSch.Schema.Elem.(*ExtendedResource).Schema, key, nestedSchema); err != nil {
+			return
+		}
+		sliceValue[i] = make(map[string]interface{})
+		sliceValue[i][key] = []interface{}{nestedSchema}
+		logger.Printf("[TRACE] %s adding %+v of key %s", ctx, dv, key)
+	}
+
+	ret = sliceValue
+	return
+}
+
+func polyNestedSchemaToStruct(ctx string, elem reflect.Value, dataList []interface{}, item *ExtendedSchema) (err error) {
+	if err = polyMetadataSanityCheck(ctx, item, PolymorphicTypeNested); err != nil {
+		return
+	}
+
+	childElem := item.Schema.Elem.(*ExtendedResource)
+	converter := vapiBindings_.NewTypeConverter()
+	dv := make([]*data.StructValue, len(dataList))
+	for i, dataElem := range dataList {
+		dataMap := dataElem.(map[string]interface{})
+		for k, v := range dataMap {
+			if len(v.([]interface{})) == 0 {
+				continue
+			}
+			rType, ok := item.Metadata.ResourceTypeMap[k]
+			if !ok {
+				err = fmt.Errorf("%s polymorphic attr has key %s not found in resource type map", ctx, k)
+				logger.Printf("[ERROR] %v", err)
+				return
+			}
+			if _, ok := childElem.Schema[k]; !ok {
+				err = fmt.Errorf("%s polymorphic attr has key %s not found in metadata", ctx, k)
+				logger.Printf("[ERROR] %v", err)
+				return
+			}
+
+			childMeta := childElem.Schema[k]
+			nestedObj := reflect.New(childMeta.Metadata.ReflectType)
+			nestedSchema := v.([]interface{})[0].(map[string]interface{})
+			if err = SchemaToStruct(nestedObj.Elem(), nil, childMeta.Schema.Elem.(*ExtendedResource).Schema, k, nestedSchema); err != nil {
+				return
+			}
+			// set resource type based on mapping
+			nestedObj.Elem().FieldByName(item.Metadata.TypeIdentifier.GetSdkName()).Set(reflect.ValueOf(&rType))
+
+			dataValue, errors := converter.ConvertToVapi(nestedObj.Interface(), childMeta.Metadata.BindingType)
+			if errors != nil {
+				err = errors[0]
+				logger.Printf("[ERROR] %v", err)
+				return
+			}
+			dv[i] = dataValue.(*data.StructValue)
+			logger.Printf("[TRACE] %s adding polymorphic value %+v to %s",
+				ctx, nestedObj.Interface(), item.Metadata.SdkFieldName)
+
+			// there should be only one non-empty entry in the map
+			break
+		}
+	}
+
+	if item.Metadata.SchemaType == "struct" {
+		elem.FieldByName(item.Metadata.SdkFieldName).Set(reflect.ValueOf(dv[0]))
+	} else if item.Metadata.SchemaType == "list" || item.Metadata.SchemaType == "set" {
+		sliceElem := elem.FieldByName(item.Metadata.SdkFieldName)
+		sliceElem.Set(
+			reflect.MakeSlice(reflect.SliceOf(reflect.TypeOf(&data.StructValue{})), len(dv), len(dv)))
+		for i, v := range dv {
+			sliceElem.Index(i).Set(reflect.ValueOf(v))
+		}
+	} else {
+		err = fmt.Errorf("%s unsupported polymorphic schema type %s", ctx, item.Metadata.SchemaType)
+		logger.Printf("[ERROR] %v", err)
+		return
+	}
+
+	return
+}
+
+func polyStructToFlattenSchema(ctx string, elem reflect.Value, key string, item *ExtendedSchema) (ret []map[string]interface{}, err error) {
+	if err = polyMetadataSanityCheck(ctx, item, PolymorphicTypeFlatten); err != nil {
+		return
+	}
+
+	elemSlice := elem
+	if item.Metadata.SchemaType == "struct" {
+		if elem.IsNil() {
+			return
+		}
+		// convert to slice to share logic with list and set
+		elemSlice = reflect.MakeSlice(reflect.SliceOf(elem.Type()), 1, 1)
+		elemSlice.Index(0).Set(elem)
+	} else if item.Metadata.SchemaType != "list" && item.Metadata.SchemaType != "set" {
+		err = fmt.Errorf("%s unsupported polymorphic schema type %s", ctx, item.Metadata.SchemaType)
+		logger.Printf("[ERROR] %v", err)
+		return
+	}
+	if elemSlice.Len() == 0 {
+		return
+	}
+
+	converter := vapiBindings_.NewTypeConverter()
+	sliceValue := make([]map[string]interface{}, 0)
+	for i := 0; i < elemSlice.Len(); i++ {
+		childValue := elemSlice.Index(i).Elem().Interface().(data.StructValue)
+		nestedSchema := make(map[string]interface{})
+		var rType string
+
+		rType, err = getResourceTypeFromStructValue(ctx, childValue, item.Metadata.TypeIdentifier)
+		if err != nil {
+			return
+		}
+		if rType != item.Metadata.ResourceType {
+			continue
+		}
+
+		dv, errors := converter.ConvertToGolang(&childValue, item.Metadata.BindingType)
+		if errors != nil {
+			err = errors[0]
+			logger.Printf("[ERROR] %v", err)
+			return
+		}
+		if err = StructToSchema(reflect.ValueOf(dv), nil, item.Schema.Elem.(*ExtendedResource).Schema, key, nestedSchema); err != nil {
+			return
+		}
+		sliceValue = append(sliceValue, nestedSchema)
+	}
+
+	ret = sliceValue
+	return
+}
+
+func polyFlattenSchemaToStruct(ctx string, elem reflect.Value, key string, dataList []interface{}, item *ExtendedSchema) (err error) {
+	if err = polyMetadataSanityCheck(ctx, item, PolymorphicTypeFlatten); err != nil {
+		return
+	}
+
+	childElem := item.Schema.Elem.(*ExtendedResource)
+	converter := vapiBindings_.NewTypeConverter()
+	rSlice := reflect.MakeSlice(reflect.SliceOf(reflect.TypeOf(&data.StructValue{})), len(dataList), len(dataList))
+	for i, dataElem := range dataList {
+		nestedObj := reflect.New(item.Metadata.ReflectType)
+		nestedSchema := dataElem.(map[string]interface{})
+		if err = SchemaToStruct(nestedObj.Elem(), nil, childElem.Schema, key, nestedSchema); err != nil {
+			return
+		}
+
+		// set resource type
+		nestedObj.Elem().FieldByName(item.Metadata.TypeIdentifier.GetSdkName()).Set(reflect.ValueOf(
+			&item.Metadata.ResourceType))
+
+		dataValue, errors := converter.ConvertToVapi(nestedObj.Interface(), item.Metadata.BindingType)
+		if errors != nil {
+			err = errors[0]
+			logger.Printf("[ERROR] %v", err)
+			return
+		}
+		rSlice.Index(i).Set(reflect.ValueOf(dataValue.(*data.StructValue)))
+		logger.Printf("[TRACE] %s adding polymorphic value %+v to %s",
+			ctx, nestedObj.Interface(), item.Metadata.SdkFieldName)
+	}
+
+	if item.Metadata.SchemaType == "struct" {
+		if rSlice.Len() == 0 {
+			return
+		}
+		structElem := elem.FieldByName(item.Metadata.SdkFieldName)
+		if !structElem.IsZero() {
+			err = fmt.Errorf("%s %s is alreay set", ctx, item.Metadata.SdkFieldName)
+			logger.Printf("[ERROR] %v", err)
+			return
+		}
+		structElem.Set(rSlice.Index(0))
+	} else if item.Metadata.SchemaType == "list" || item.Metadata.SchemaType == "set" {
+		sliceElem := elem.FieldByName(item.Metadata.SdkFieldName)
+		if sliceElem.IsZero() {
+			sliceElem.Set(rSlice)
+		} else {
+			sliceElem.Set(reflect.AppendSlice(sliceElem, rSlice))
+		}
+	} else {
+		err = fmt.Errorf("%s unsupported polymorphic schema type %s", ctx, item.Metadata.SchemaType)
+		logger.Printf("[ERROR] %v", err)
+		return
 	}
 
 	return
