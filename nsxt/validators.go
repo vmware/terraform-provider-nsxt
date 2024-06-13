@@ -73,8 +73,8 @@ func isIPRange(v string) bool {
 	if len(s) != 2 {
 		return false
 	}
-	ip1 := net.ParseIP(s[0])
-	ip2 := net.ParseIP(s[1])
+	ip1 := net.ParseIP(strings.TrimSpace(s[0]))
+	ip2 := net.ParseIP(strings.TrimSpace(s[1]))
 	if ip1 == nil || ip2 == nil {
 		return false
 	}
@@ -82,11 +82,13 @@ func isIPRange(v string) bool {
 }
 
 func isSingleIP(v string) bool {
+	v = strings.TrimSpace(v)
 	ip := net.ParseIP(v)
 	return ip != nil
 }
 
 func isCidr(v string, allowMaxPrefix bool, isIP bool) bool {
+	v = strings.TrimSpace(v)
 	_, ipnet, err := net.ParseCIDR(v)
 	if err != nil {
 		return false
@@ -137,6 +139,26 @@ func validateCidrOrIPOrRange() schema.SchemaValidateFunc {
 		if !isCidr(v, true, false) && !isSingleIP(v) && !isIPRange(v) {
 			es = append(es, fmt.Errorf(
 				"expected %s to contain a valid CIDR or IP or Range, got: %s", k, v))
+		}
+		return
+	}
+}
+
+func validateCidrOrIPOrRangeList() schema.SchemaValidateFunc {
+	return func(i interface{}, k string) (s []string, es []error) {
+		v, ok := i.(string)
+		if !ok {
+			es = append(es, fmt.Errorf("expected type of %s to be string", k))
+			return
+		}
+
+		tokens := strings.Split(v, ",")
+		for _, t := range tokens {
+			if !isCidr(t, true, false) && !isSingleIP(t) && !isIPRange(t) {
+				es = append(es, fmt.Errorf(
+					"expected %s to contain a list of valid CIDRs or IPs or Ranges, got: %s", k, t))
+				return
+			}
 		}
 		return
 	}
