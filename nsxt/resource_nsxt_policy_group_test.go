@@ -11,7 +11,8 @@ import (
 
 func TestAccResourceNsxtPolicyGroup_basicImport(t *testing.T) {
 	name := getAccTestResourceName()
-	testResourceName := "nsxt_policy_group.test"
+	resourceName := "nsxt_policy_group"
+	testResourceName := fmt.Sprintf("%s.test", resourceName)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -21,7 +22,7 @@ func TestAccResourceNsxtPolicyGroup_basicImport(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyGroupIPAddressImportTemplate(name, false),
+				Config: testAccNsxtPolicyGroupIPAddressImportTemplate(name, resourceName, false),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -34,7 +35,8 @@ func TestAccResourceNsxtPolicyGroup_basicImport(t *testing.T) {
 
 func TestAccResourceNsxtPolicyGroup_basicImport_multitenancy(t *testing.T) {
 	name := getAccTestResourceName()
-	testResourceName := "nsxt_policy_group.test"
+	resourceName := "nsxt_policy_group"
+	testResourceName := fmt.Sprintf("%s.test", resourceName)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t); testAccOnlyMultitenancy(t) },
@@ -44,7 +46,7 @@ func TestAccResourceNsxtPolicyGroup_basicImport_multitenancy(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyGroupIPAddressImportTemplate(name, true),
+				Config: testAccNsxtPolicyGroupIPAddressImportTemplate(name, resourceName, true),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -71,7 +73,8 @@ func TestAccResourceNsxtPolicyGroup_addressCriteria_multitenancy(t *testing.T) {
 
 func testAccResourceNsxtPolicyGroupAddressCriteria(t *testing.T, withContext bool, preCheck func()) {
 	name := getAccTestResourceName()
-	testResourceName := "nsxt_policy_group.test"
+	resourceName := "nsxt_policy_group"
+	testResourceName := fmt.Sprintf("%s.test", resourceName)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  preCheck,
@@ -81,7 +84,7 @@ func testAccResourceNsxtPolicyGroupAddressCriteria(t *testing.T, withContext boo
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyGroupAddressCreateTemplate(name, withContext),
+				Config: testAccNsxtPolicyGroupAddressCreateTemplate(name, resourceName, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -99,7 +102,7 @@ func testAccResourceNsxtPolicyGroupAddressCriteria(t *testing.T, withContext boo
 				),
 			},
 			{
-				Config: testAccNsxtPolicyGroupAddressUpdateTemplate(name, withContext),
+				Config: testAccNsxtPolicyGroupAddressUpdateTemplate(name, resourceName, withContext),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -718,27 +721,27 @@ func testAccNsxtPolicyGroupCheckDestroy(state *terraform.State, displayName stri
 	return nil
 }
 
-func testAccNsxtPolicyGroupIPAddressImportTemplate(name string, withContext bool) string {
+func testAccNsxtPolicyGroupIPAddressImportTemplate(name string, resourceName string, withContext bool) string {
 	context := ""
 	if withContext {
 		context = testAccNsxtPolicyMultitenancyContext()
 	}
 	return fmt.Sprintf(`
-resource "nsxt_policy_group" "test" {
+resource "%s" "test" {
 %s
   display_name = "%s"
   description  = "Acceptance Test"
 }
-`, context, name)
+`, resourceName, context, name)
 }
 
-func testAccNsxtPolicyGroupAddressCreateTemplate(name string, withContext bool) string {
+func testAccNsxtPolicyGroupAddressCreateTemplate(name, resourceName string, withContext bool) string {
 	context := ""
 	if withContext {
 		context = testAccNsxtPolicyMultitenancyContext()
 	}
 	return fmt.Sprintf(`
-resource "nsxt_policy_group" "test" {
+resource "%s" "test" {
 %s
   display_name = "%s"
   description  = "Acceptance Test"
@@ -769,16 +772,16 @@ resource "nsxt_policy_group" "test" {
     tag   = "tag2"
   }
 }
-`, context, name)
+`, resourceName, context, name)
 }
 
-func testAccNsxtPolicyGroupAddressUpdateTemplate(name string, withContext bool) string {
+func testAccNsxtPolicyGroupAddressUpdateTemplate(name, resourceName string, withContext bool) string {
 	context := ""
 	if withContext {
 		context = testAccNsxtPolicyMultitenancyContext()
 	}
 	return fmt.Sprintf(`
-resource "nsxt_policy_group" "test" {
+resource "%s" "test" {
 %s
   display_name = "%s"
   description  = "Acceptance Test"
@@ -789,7 +792,7 @@ resource "nsxt_policy_group" "test" {
     }
   }
 }
-`, context, name)
+`, resourceName, context, name)
 }
 
 func testAccNsxtGlobalPolicyGroupIPAddressCreateTemplate(name string, siteName string) string {
@@ -1049,7 +1052,7 @@ resource "nsxt_policy_group" "test" {
 
   criteria {
     ipaddress_expression {
-	  ip_addresses = ["111.1.1.1", "222.2.2.2"]
+	  ip_addresses = ["111.1.1.1-111.1.1.10", "222.2.2.0/24"]
 	}
   }
 
@@ -1059,7 +1062,7 @@ resource "nsxt_policy_group" "test" {
 
   criteria {
     ipaddress_expression {
-	  ip_addresses = ["111.1.1.4", "222.2.2.4"]
+	  ip_addresses = ["111.1.2.4", "222.2.3.4"]
 	}
   }
 

@@ -94,42 +94,50 @@ func resourceNsxtPolicyGroup() *schema.Resource {
 			State: nsxtDomainResourceImporter,
 		},
 
-		Schema: map[string]*schema.Schema{
-			"nsx_id":       getNsxIDSchema(),
-			"path":         getPathSchema(),
-			"display_name": getDisplayNameSchema(),
-			"description":  getDescriptionSchema(),
-			"revision":     getRevisionSchema(),
-			"tag":          getTagsSchema(),
-			"context":      getContextSchema(false, false, false),
-			"domain":       getDomainNameSchema(),
-			"group_type": {
-				Type:         schema.TypeString,
-				Description:  "Indicates the group type",
-				ValidateFunc: validation.StringInSlice(groupTypeValues, false),
-				Optional:     true,
-			},
-			"criteria": {
-				Type:        schema.TypeList,
-				Description: "Criteria to determine Group membership",
-				Elem:        getCriteriaSetSchema(),
-				Optional:    true,
-			},
-			"conjunction": {
-				Type:        schema.TypeList,
-				Description: "A conjunction applied to 2 sets of criteria.",
-				Elem:        getConjunctionSchema(),
-				Optional:    true,
-			},
-			"extended_criteria": {
-				Type:        schema.TypeList,
-				Description: "Extended criteria to determine group membership. extended_criteria is implicitly \"AND\" with criteria",
-				Elem:        getExtendedCriteriaSetSchema(),
-				Optional:    true,
-				MaxItems:    1,
-			},
+		Schema: getPolicyGroupSchema(true),
+	}
+}
+
+func getPolicyGroupSchema(withDomain bool) map[string]*schema.Schema {
+	s := map[string]*schema.Schema{
+		"nsx_id":       getNsxIDSchema(),
+		"path":         getPathSchema(),
+		"display_name": getDisplayNameSchema(),
+		"description":  getDescriptionSchema(),
+		"revision":     getRevisionSchema(),
+		"tag":          getTagsSchema(),
+		"context":      getContextSchema(false, false, !withDomain),
+		"group_type": {
+			Type:         schema.TypeString,
+			Description:  "Indicates the group type",
+			ValidateFunc: validation.StringInSlice(groupTypeValues, false),
+			Optional:     true,
+		},
+		"criteria": {
+			Type:        schema.TypeList,
+			Description: "Criteria to determine Group membership",
+			Elem:        getCriteriaSetSchema(),
+			Optional:    true,
+		},
+		"conjunction": {
+			Type:        schema.TypeList,
+			Description: "A conjunction applied to 2 sets of criteria.",
+			Elem:        getConjunctionSchema(),
+			Optional:    true,
+		},
+		"extended_criteria": {
+			Type:        schema.TypeList,
+			Description: "Extended criteria to determine group membership. extended_criteria is implicitly \"AND\" with criteria",
+			Elem:        getExtendedCriteriaSetSchema(),
+			Optional:    true,
+			MaxItems:    1,
 		},
 	}
+
+	if withDomain {
+		s["domain"] = getDomainNameSchema()
+	}
+	return s
 }
 
 func getIPAddressExpressionSchema() *schema.Resource {
@@ -833,10 +841,18 @@ func validateGroupCriteriaAndConjunctions(criteriaSets []interface{}, conjunctio
 }
 
 func resourceNsxtPolicyGroupCreate(d *schema.ResourceData, m interface{}) error {
+	return resourceNsxtPolicyGroupGeneralCreate(d, m, true)
+}
+
+func resourceNsxtPolicyGroupGeneralCreate(d *schema.ResourceData, m interface{}, withDomain bool) error {
 	connector := getPolicyConnector(m)
 
+	domainName := ""
+	if withDomain {
+		domainName = d.Get("domain").(string)
+	}
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID2(d, m, resourceNsxtPolicyGroupExistsInDomainPartial(d.Get("domain").(string)))
+	id, err := getOrGenerateID2(d, m, resourceNsxtPolicyGroupExistsInDomainPartial(domainName))
 	if err != nil {
 		return err
 	}
@@ -886,7 +902,7 @@ func resourceNsxtPolicyGroupCreate(d *schema.ResourceData, m interface{}) error 
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
-	err = client.Patch(d.Get("domain").(string), id, obj)
+	err = client.Patch(domainName, id, obj)
 
 	// Create the resource using PATCH
 	log.Printf("[INFO] Creating Group with ID %s", id)
@@ -897,13 +913,20 @@ func resourceNsxtPolicyGroupCreate(d *schema.ResourceData, m interface{}) error 
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
-	return resourceNsxtPolicyGroupRead(d, m)
+	return resourceNsxtPolicyGroupGeneralRead(d, m, withDomain)
 }
 
 func resourceNsxtPolicyGroupRead(d *schema.ResourceData, m interface{}) error {
+	return resourceNsxtPolicyGroupGeneralRead(d, m, true)
+}
+
+func resourceNsxtPolicyGroupGeneralRead(d *schema.ResourceData, m interface{}, withDomain bool) error {
 	connector := getPolicyConnector(m)
 	id := d.Id()
-	domainName := d.Get("domain").(string)
+	domainName := ""
+	if withDomain {
+		domainName = d.Get("domain").(string)
+	}
 	if id == "" {
 		return fmt.Errorf("Error obtaining Group ID")
 	}
@@ -920,7 +943,9 @@ func resourceNsxtPolicyGroupRead(d *schema.ResourceData, m interface{}) error {
 	setPolicyTagsInSchema(d, obj.Tags)
 	d.Set("nsx_id", id)
 	d.Set("path", obj.Path)
-	d.Set("domain", getDomainFromResourcePath(*obj.Path))
+	if withDomain {
+		d.Set("domain", getDomainFromResourcePath(*obj.Path))
+	}
 	d.Set("revision", obj.Revision)
 	groupType := ""
 	if len(obj.GroupType) > 0 && util.NsxVersionHigherOrEqual("3.2.0") {
@@ -951,6 +976,10 @@ func resourceNsxtPolicyGroupRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceNsxtPolicyGroupUpdate(d *schema.ResourceData, m interface{}) error {
+	return resourceNsxtPolicyGroupGeneralUpdate(d, m, true)
+}
+
+func resourceNsxtPolicyGroupGeneralUpdate(d *schema.ResourceData, m interface{}, withDomain bool) error {
 	connector := getPolicyConnector(m)
 
 	id := d.Id()
@@ -1007,15 +1036,23 @@ func resourceNsxtPolicyGroupUpdate(d *schema.ResourceData, m interface{}) error 
 	}
 
 	// Update the resource using PATCH
-	err = client.Patch(d.Get("domain").(string), id, obj)
+	domainName := ""
+	if withDomain {
+		domainName = d.Get("domain").(string)
+	}
+	err = client.Patch(domainName, id, obj)
 	if err != nil {
 		return handleUpdateError("Group", id, err)
 	}
 
-	return resourceNsxtPolicyGroupRead(d, m)
+	return resourceNsxtPolicyGroupGeneralRead(d, m, withDomain)
 }
 
 func resourceNsxtPolicyGroupDelete(d *schema.ResourceData, m interface{}) error {
+	return resourceNsxtPolicyGroupGeneralDelete(d, m, true)
+}
+
+func resourceNsxtPolicyGroupGeneralDelete(d *schema.ResourceData, m interface{}, withDomain bool) error {
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining Group ID")
@@ -1030,7 +1067,11 @@ func resourceNsxtPolicyGroupDelete(d *schema.ResourceData, m interface{}) error 
 		if client == nil {
 			return policyResourceNotSupportedError()
 		}
-		return client.Delete(d.Get("domain").(string), id, &failIfSubtreeExists, &forceDelete)
+		domainName := ""
+		if withDomain {
+			domainName = d.Get("domain").(string)
+		}
+		return client.Delete(domainName, id, &failIfSubtreeExists, &forceDelete)
 	}
 
 	err := doDelete()

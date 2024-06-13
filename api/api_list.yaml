@@ -5,8 +5,10 @@
 #   - client:
 ### API model path
 #     model:
-### API type (Local/Global/Multitenancy)
+### API type (Local/Global/Multitenancy/VPC)
 #     type:
+### Attributes to be ignored while implementing a method
+#     ignore_params:
 ### List results Model path
 #     list_result_model:
 ### Name of model within model path package (should be same in all implementations)
@@ -242,6 +244,13 @@
     - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/domains
       model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
       type: Multitenancy
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/vpcs
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: VPC
+      ignore_params:
+        Delete:
+        - failIfSubtreeExistsParam
+        - forceParam
   model_name: Group
   obj_name: Group
   supported_method:

@@ -71,6 +71,12 @@ def new_func_call_setup(api, subs_dict):
     return '%s(%s)' % (g[0], ', '.join(arg_list))
 
 
+def find_api_package_attributes(api, type):
+    for a in api['api_packages']:
+        if type == a['type']:
+            return a
+
+
 def api_func_call_setup(api, subs_dict):
     g = parse_api_call(subs_dict['func_def'])
     arg_list = get_arglist(g[2])
@@ -79,6 +85,11 @@ def api_func_call_setup(api, subs_dict):
     elif subs_dict['type'] == "VPC":
         arg_list = ['utl.DefaultOrgID', 'c.ProjectID', 'c.VPCID'] + arg_list
         arg_list.remove('domainIdParam')
+        attrs = find_api_package_attributes(api, subs_dict['type'])
+        x = attrs.get('ignore_params', {})
+        for n in attrs.get('ignore_params', {}).get(g[1], []):
+            arg_list.remove(n)
+
     return '%s(%s)' % (g[1], ', '.join(arg_list))
 
 

@@ -11,6 +11,7 @@ import (
 	client0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/domains"
 	model0 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	client2 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/domains"
+	client3 "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/vpcs"
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
@@ -30,6 +31,9 @@ func NewGroupsClient(sessionContext utl.SessionContext, connector vapiProtocolCl
 
 	case utl.Multitenancy:
 		client = client2.NewGroupsClient(connector)
+
+	case utl.VPC:
+		client = client3.NewGroupsClient(connector)
 
 	default:
 		return nil
@@ -67,6 +71,13 @@ func (c GroupClientContext) Get(domainIdParam string, groupIdParam string) (mode
 			return obj, err
 		}
 
+	case utl.VPC:
+		client := c.Client.(client3.GroupsClient)
+		obj, err = client.Get(utl.DefaultOrgID, c.ProjectID, c.VPCID, groupIdParam)
+		if err != nil {
+			return obj, err
+		}
+
 	default:
 		return obj, errors.New("invalid infrastructure for model")
 	}
@@ -93,6 +104,10 @@ func (c GroupClientContext) Patch(domainIdParam string, groupIdParam string, gro
 	case utl.Multitenancy:
 		client := c.Client.(client2.GroupsClient)
 		err = client.Patch(utl.DefaultOrgID, c.ProjectID, domainIdParam, groupIdParam, groupParam)
+
+	case utl.VPC:
+		client := c.Client.(client3.GroupsClient)
+		err = client.Patch(utl.DefaultOrgID, c.ProjectID, c.VPCID, groupIdParam, groupParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -130,6 +145,10 @@ func (c GroupClientContext) Update(domainIdParam string, groupIdParam string, gr
 		client := c.Client.(client2.GroupsClient)
 		obj, err = client.Update(utl.DefaultOrgID, c.ProjectID, domainIdParam, groupIdParam, groupParam)
 
+	case utl.VPC:
+		client := c.Client.(client3.GroupsClient)
+		obj, err = client.Update(utl.DefaultOrgID, c.ProjectID, c.VPCID, groupIdParam, groupParam)
+
 	default:
 		err = errors.New("invalid infrastructure for model")
 	}
@@ -152,6 +171,10 @@ func (c GroupClientContext) Delete(domainIdParam string, groupIdParam string, fa
 	case utl.Multitenancy:
 		client := c.Client.(client2.GroupsClient)
 		err = client.Delete(utl.DefaultOrgID, c.ProjectID, domainIdParam, groupIdParam, failIfSubtreeExistsParam, forceParam)
+
+	case utl.VPC:
+		client := c.Client.(client3.GroupsClient)
+		err = client.Delete(utl.DefaultOrgID, c.ProjectID, c.VPCID, groupIdParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
@@ -184,6 +207,10 @@ func (c GroupClientContext) List(domainIdParam string, cursorParam *string, incl
 	case utl.Multitenancy:
 		client := c.Client.(client2.GroupsClient)
 		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, domainIdParam, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, memberTypesParam, pageSizeParam, sortAscendingParam, sortByParam)
+
+	case utl.VPC:
+		client := c.Client.(client3.GroupsClient)
+		obj, err = client.List(utl.DefaultOrgID, c.ProjectID, c.VPCID, cursorParam, includeMarkForDeleteObjectsParam, includedFieldsParam, memberTypesParam, pageSizeParam, sortAscendingParam, sortByParam)
 
 	default:
 		err = errors.New("invalid infrastructure for model")
