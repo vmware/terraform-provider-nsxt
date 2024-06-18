@@ -29,7 +29,7 @@ func resourceNsxtPolicyIntrusionServicePolicy() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: nsxtDomainResourceImporter,
 		},
-		Schema: getPolicySecurityPolicySchema(true, true, true),
+		Schema: getPolicySecurityPolicySchema(true, true, true, true),
 	}
 }
 

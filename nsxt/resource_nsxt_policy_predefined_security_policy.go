@@ -12,6 +12,7 @@ import (
 
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
+	nsxt "github.com/vmware/vsphere-automation-sdk-go/services/nsxt"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
 	"github.com/vmware/terraform-provider-nsxt/api/infra/domains"
@@ -176,6 +177,60 @@ func revertSecurityPolicyDefaultRule(rule model.Rule) model.Rule {
 	rule.Tag = &logLabel
 
 	return rule
+}
+
+func strPtr(s string) *string {
+	v := s
+	return &v
+}
+
+func createChildVPCWithSecurityPolicy(context utl.SessionContext, policyID string, policy model.SecurityPolicy) (*data.StructValue, error) {
+	converter := bindings.NewTypeConverter()
+
+	childPolicy := model.ChildSecurityPolicy{
+		ResourceType:   "ChildSecurityPolicy",
+		SecurityPolicy: &policy,
+	}
+
+	dataValue, errors := converter.ConvertToVapi(childPolicy, model.ChildSecurityPolicyBindingType())
+	if len(errors) > 0 {
+		return nil, errors[0]
+	}
+
+	childVPC := model.ChildResourceReference{
+		Id:           &context.VPCID,
+		ResourceType: "ChildResourceReference",
+		TargetType:   strPtr("Vpc"),
+		Children:     []*data.StructValue{dataValue.(*data.StructValue)},
+	}
+
+	dataValue, errors = converter.ConvertToVapi(childVPC, model.ChildResourceReferenceBindingType())
+	if len(errors) > 0 {
+		return nil, errors[0]
+	}
+	childProject := model.ChildResourceReference{
+		Id:           &context.ProjectID,
+		ResourceType: "ChildResourceReference",
+		TargetType:   strPtr("Project"),
+		Children:     []*data.StructValue{dataValue.(*data.StructValue)},
+	}
+	dataValue, errors = converter.ConvertToVapi(childProject, model.ChildResourceReferenceBindingType())
+	if len(errors) > 0 {
+		return nil, errors[0]
+	}
+
+	childOrg := model.ChildResourceReference{
+		Id:           strPtr(defaultOrgID),
+		ResourceType: "ChildResourceReference",
+		TargetType:   strPtr("Org"),
+		Children:     []*data.StructValue{dataValue.(*data.StructValue)},
+	}
+	dataValue, errors = converter.ConvertToVapi(childOrg, model.ChildResourceReferenceBindingType())
+	if len(errors) > 0 {
+		return nil, errors[0]
+	}
+
+	return dataValue.(*data.StructValue), nil
 }
 
 func createChildDomainWithSecurityPolicy(domain string, policyID string, policy model.SecurityPolicy) (*data.StructValue, error) {
@@ -409,20 +464,29 @@ func resourceNsxtPolicyPredefinedSecurityPolicyDelete(d *schema.ResourceData, m 
 }
 
 func securityPolicyInfraPatch(context utl.SessionContext, policy model.SecurityPolicy, domain string, m interface{}) error {
+	connector := getPolicyConnector(m)
+	if context.ClientType == utl.VPC {
+		childVPC, err := createChildVPCWithSecurityPolicy(context, *policy.Id, policy)
+		if err != nil {
+			return fmt.Errorf("Failed to create H-API for VPC Security Policy: %s", err)
+		}
+		orgRoot := model.OrgRoot{
+			ResourceType: strPtr("OrgRoot"),
+			Children:     []*data.StructValue{childVPC},
+		}
+
+		client := nsxt.NewOrgRootClient(connector)
+		return client.Patch(orgRoot, nil)
+	}
+
 	childDomain, err := createChildDomainWithSecurityPolicy(domain, *policy.Id, policy)
 	if err != nil {
 		return fmt.Errorf("Failed to create H-API for Predefined Security Policy: %s", err)
 	}
-
-	var infraChildren []*data.StructValue
-	infraChildren = append(infraChildren, childDomain)
-
-	infraType := "Infra"
 	infraObj := model.Infra{
-		Children:     infraChildren,
-		ResourceType: &infraType,
+		Children:     []*data.StructValue{childDomain},
+		ResourceType: strPtr("Infra"),
 	}
 
-	return policyInfraPatch(context, infraObj, getPolicyConnector(m), false)
-
+	return policyInfraPatch(context, infraObj, connector, false)
 }

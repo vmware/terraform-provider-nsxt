@@ -21,7 +21,7 @@ func resourceNsxtPolicyParentSecurityPolicy() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: nsxtDomainResourceImporter,
 		},
-		Schema: getPolicySecurityPolicySchema(false, true, false),
+		Schema: getPolicySecurityPolicySchema(false, true, false, true),
 	}
 }
 
@@ -55,10 +55,13 @@ func parentSecurityPolicySchemaToModel(d *schema.ResourceData, id string) model.
 	}
 }
 
-func parentSecurityPolicyModelToSchema(d *schema.ResourceData, m interface{}) (*model.SecurityPolicy, error) {
+func parentSecurityPolicyModelToSchema(d *schema.ResourceData, m interface{}, withDomain bool) (*model.SecurityPolicy, error) {
 	connector := getPolicyConnector(m)
 	id := d.Id()
-	domainName := d.Get("domain").(string)
+	domainName := ""
+	if withDomain {
+		domainName = d.Get("domain").(string)
+	}
 	if id == "" {
 		return nil, fmt.Errorf("Error obtaining Security Policy id")
 	}
@@ -75,7 +78,9 @@ func parentSecurityPolicyModelToSchema(d *schema.ResourceData, m interface{}) (*
 	setPolicyTagsInSchema(d, obj.Tags)
 	d.Set("nsx_id", id)
 	d.Set("path", obj.Path)
-	d.Set("domain", getDomainFromResourcePath(*obj.Path))
+	if withDomain {
+		d.Set("domain", getDomainFromResourcePath(*obj.Path))
+	}
 	d.Set("category", obj.Category)
 	d.Set("comments", obj.Comments)
 	d.Set("locked", obj.Locked)
@@ -92,15 +97,15 @@ func parentSecurityPolicyModelToSchema(d *schema.ResourceData, m interface{}) (*
 }
 
 func resourceNsxtPolicyParentSecurityPolicyCreate(d *schema.ResourceData, m interface{}) error {
-	return resourceNsxtPolicySecurityPolicyGeneralCreate(d, m, false)
+	return resourceNsxtPolicySecurityPolicyGeneralCreate(d, m, false, true)
 }
 
 func resourceNsxtPolicyParentSecurityPolicyRead(d *schema.ResourceData, m interface{}) error {
-	return resourceNsxtPolicySecurityPolicyGeneralRead(d, m, false)
+	return resourceNsxtPolicySecurityPolicyGeneralRead(d, m, false, true)
 }
 
 func resourceNsxtPolicyParentSecurityPolicyUpdate(d *schema.ResourceData, m interface{}) error {
-	return resourceNsxtPolicySecurityPolicyGeneralUpdate(d, m, false)
+	return resourceNsxtPolicySecurityPolicyGeneralUpdate(d, m, false, true)
 }
 
 func resourceNsxtPolicyParentSecurityPolicyDelete(d *schema.ResourceData, m interface{}) error {
