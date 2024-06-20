@@ -26,11 +26,11 @@ func resourceNsxtPolicyGatewayPolicy() *schema.Resource {
 			State: nsxtDomainResourceImporter,
 		},
 
-		Schema: getPolicyGatewayPolicySchema(),
+		Schema: getPolicyGatewayPolicySchema(true),
 	}
 }
 
-func getGatewayPolicyInDomain(sessionContext utl.SessionContext, id string, domainName string, connector client.Connector) (model.GatewayPolicy, error) {
+func getGatewayPolicy(sessionContext utl.SessionContext, id string, domainName string, connector client.Connector) (model.GatewayPolicy, error) {
 	client := domains.NewGatewayPoliciesClient(sessionContext, connector)
 	if client == nil {
 		return model.GatewayPolicy{}, policyResourceNotSupportedError()
@@ -40,7 +40,7 @@ func getGatewayPolicyInDomain(sessionContext utl.SessionContext, id string, doma
 }
 
 func resourceNsxtPolicyGatewayPolicyExistsInDomain(sessionContext utl.SessionContext, id string, domainName string, connector client.Connector) (bool, error) {
-	_, err := getGatewayPolicyInDomain(sessionContext, id, domainName, connector)
+	_, err := getGatewayPolicy(sessionContext, id, domainName, connector)
 
 	if err == nil {
 		return true, nil
@@ -124,9 +124,12 @@ func getUpdatedRuleChildren(d *schema.ResourceData) ([]*data.StructValue, error)
 
 }
 
-func policyGatewayPolicyBuildAndPatch(d *schema.ResourceData, m interface{}, connector client.Connector, isGlobalManager bool, id string) error {
+func policyGatewayPolicyBuildAndPatch(d *schema.ResourceData, m interface{}, connector client.Connector, isGlobalManager bool, id string, withDomain bool) error {
 
-	domain := d.Get("domain").(string)
+	domain := ""
+	if withDomain {
+		domain = d.Get("domain").(string)
+	}
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
 	tags := getPolicyTagsFromSchema(d)
@@ -181,7 +184,7 @@ func resourceNsxtPolicyGatewayPolicyCreate(d *schema.ResourceData, m interface{}
 		return err
 	}
 
-	err = policyGatewayPolicyBuildAndPatch(d, m, connector, isPolicyGlobalManager(m), id)
+	err = policyGatewayPolicyBuildAndPatch(d, m, connector, isPolicyGlobalManager(m), id, true)
 	if err != nil {
 		return handleCreateError("Gateway Policy", id, err)
 	}
@@ -200,7 +203,7 @@ func resourceNsxtPolicyGatewayPolicyRead(d *schema.ResourceData, m interface{}) 
 		return fmt.Errorf("Error obtaining Gateway Policy ID")
 	}
 
-	obj, err := getGatewayPolicyInDomain(getSessionContext(d, m), id, d.Get("domain").(string), connector)
+	obj, err := getGatewayPolicy(getSessionContext(d, m), id, d.Get("domain").(string), connector)
 	if err != nil {
 		return handleReadError(d, "Gateway Policy", id, err)
 	}
@@ -232,7 +235,7 @@ func resourceNsxtPolicyGatewayPolicyUpdate(d *schema.ResourceData, m interface{}
 		return fmt.Errorf("Error obtaining Gateway Policy ID")
 	}
 
-	err := policyGatewayPolicyBuildAndPatch(d, m, connector, isPolicyGlobalManager(m), id)
+	err := policyGatewayPolicyBuildAndPatch(d, m, connector, isPolicyGlobalManager(m), id, true)
 	if err != nil {
 		return handleUpdateError("Gateway Policy", id, err)
 	}

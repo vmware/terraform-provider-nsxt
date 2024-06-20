@@ -310,13 +310,13 @@ func getSecurityPolicyAndGatewayRuleSchema(scopeRequired bool, isIds bool, nsxID
 	return ruleSchema
 }
 
-func getPolicyGatewayPolicySchema() map[string]*schema.Schema {
-	secPolicy := getPolicySecurityPolicySchema(false, true, true, true)
+func getPolicyGatewayPolicySchema(withDomain bool) map[string]*schema.Schema {
+	secPolicy := getPolicySecurityPolicySchema(false, true, true, withDomain)
 	// GW Policies don't support scope
 	delete(secPolicy, "scope")
 	secPolicy["category"].ValidateFunc = validation.StringInSlice(gatewayPolicyCategoryWritableValues, false)
 	// GW Policy rules require scope to be set
-	secPolicy["rule"] = getSecurityPolicyAndGatewayRulesSchema(true, false, true)
+	secPolicy["rule"] = getSecurityPolicyAndGatewayRulesSchema(withDomain, false, true)
 	return secPolicy
 }
 

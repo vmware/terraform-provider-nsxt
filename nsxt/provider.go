@@ -498,6 +498,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_tier0_inter_vrf_routing":                      resourceNsxtPolicyTier0InterVRFRouting(),
 			"nsxt_vpc_security_policy":                                 resourceNsxtVPCSecurityPolicy(),
 			"nsxt_vpc_group":                                           resourceNsxtVPCGroup(),
+			"nsxt_vpc_gateway_policy":                                  resourceNsxtVPCGatewayPolicy(),
 		},
 
 		ConfigureFunc: providerConfigure,
