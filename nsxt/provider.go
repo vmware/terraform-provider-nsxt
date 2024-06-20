@@ -497,6 +497,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_compute_sub_cluster":                          resourceNsxtPolicyComputeSubCluster(),
 			"nsxt_policy_tier0_inter_vrf_routing":                      resourceNsxtPolicyTier0InterVRFRouting(),
 			"nsxt_vpc_security_policy":                                 resourceNsxtVPCSecurityPolicy(),
+			"nsxt_vpc_group":                                           resourceNsxtVPCGroup(),
 		},
 
 		ConfigureFunc: providerConfigure,
