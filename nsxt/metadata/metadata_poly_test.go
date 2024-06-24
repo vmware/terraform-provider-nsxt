@@ -781,7 +781,7 @@ func TestFlattenSchemaToPolyStruct(t *testing.T) {
 		obj := testPolyStruct{}
 		elem := reflect.ValueOf(&obj).Elem()
 		err := SchemaToStruct(elem, d, testPolyStructFlattenExtSchema("struct", "PolyStruct"), "", nil)
-		assert.ErrorContainsf(t, err, "is alreay set", "expected error raised if same sdk is set twice")
+		assert.ErrorContainsf(t, err, "is already set", "expected error raised if same sdk is set twice")
 	})
 
 	t.Run("mixed list", func(t *testing.T) {

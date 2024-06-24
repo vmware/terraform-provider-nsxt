@@ -155,9 +155,9 @@ func StructToSchema(elem reflect.Value, d *schema.ResourceData, metadata map[str
 		if !elem.FieldByName(item.Metadata.SdkFieldName).IsValid() {
 			// FieldByName can't find the field by name
 			logger.Printf("[ERROR] %s skip key %s as %s not found in struct",
-				ctx, key, item.Metadata.SdkFieldName)
+				ctx, key, elem.Type())
 			err = fmt.Errorf("%s key %s not found in %s",
-				ctx, key, item.Metadata.SdkFieldName)
+				ctx, key, elem.Type())
 			return
 		}
 		if elem.FieldByName(item.Metadata.SdkFieldName).IsNil() {
@@ -274,9 +274,9 @@ func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[str
 		if !elem.FieldByName(item.Metadata.SdkFieldName).IsValid() {
 			// FieldByName can't find the field by name
 			logger.Printf("[WARN] %s skip key %s as %s not found in struct",
-				ctx, key, item.Metadata.SdkFieldName)
+				ctx, key, elem.Type())
 			err = fmt.Errorf("%s key %s not found in %s",
-				ctx, key, item.Metadata.SdkFieldName)
+				ctx, key, elem.Type())
 			return
 		}
 
@@ -680,7 +680,7 @@ func polyFlattenSchemaToStruct(ctx string, elem reflect.Value, key string, dataL
 		}
 		structElem := elem.FieldByName(item.Metadata.SdkFieldName)
 		if !structElem.IsZero() {
-			err = fmt.Errorf("%s %s is alreay set", ctx, item.Metadata.SdkFieldName)
+			err = fmt.Errorf("%s %s is already set", ctx, item.Metadata.SdkFieldName)
 			logger.Printf("[ERROR] %v", err)
 			return
 		}
