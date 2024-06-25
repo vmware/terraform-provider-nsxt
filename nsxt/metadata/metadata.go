@@ -46,6 +46,7 @@ type Metadata struct {
 	// skip handling of this attribute - it will be done manually
 	Skip        bool
 	ReflectType reflect.Type
+	OmitIfEmpty bool
 	TestData    Testdata
 }
 
@@ -268,7 +269,7 @@ func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[str
 			continue
 		}
 		if item.Metadata.IntroducedInVersion != "" && util.NsxVersionLower(item.Metadata.IntroducedInVersion) {
-			logger.Printf("[TRACE] %s skip key %s as NSX does not have support", ctx, key)
+			logger.Printf("[TRACE] %s skip key %s as NSX version is lower than %v", ctx, key, item.Metadata.IntroducedInVersion)
 			continue
 		}
 		if !elem.FieldByName(item.Metadata.SdkFieldName).IsValid() {
@@ -306,6 +307,10 @@ func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[str
 				value = parentMap[key].(string)
 			} else {
 				value = d.Get(key).(string)
+			}
+			if item.Metadata.OmitIfEmpty && value == "" {
+				logger.Printf("[TRACE] %s skip key %s since its empty and OmitIfEmpty is true", ctx, key)
+				continue
 			}
 			logger.Printf("[TRACE] %s assigning string %v to %s", ctx, value, key)
 			elem.FieldByName(item.Metadata.SdkFieldName).Set(reflect.ValueOf(&value))
