@@ -499,6 +499,8 @@ func Provider() *schema.Provider {
 			"nsxt_vpc_security_policy":                                 resourceNsxtVPCSecurityPolicy(),
 			"nsxt_vpc_group":                                           resourceNsxtVPCGroup(),
 			"nsxt_vpc_gateway_policy":                                  resourceNsxtVPCGatewayPolicy(),
+			"nsxt_vpc_nat_rule":                                        resourceNsxtPolicyVpcNatRule(),
+			"nsxt_vpc_ip_address_allocation":                           resourceNsxtVpcIpAddressAllocation(),
 		},
 
 		ConfigureFunc: providerConfigure,
