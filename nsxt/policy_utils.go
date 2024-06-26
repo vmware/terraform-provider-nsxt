@@ -407,6 +407,20 @@ func nsxtPolicyPathResourceImporterHelper(d *schema.ResourceData, m interface{})
 	return []*schema.ResourceData{d}, ErrNotAPolicyPath
 }
 
+func nsxtParentPathResourceImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	importID := d.Id()
+	if isPolicyPath(importID) {
+		pathSegs := strings.Split(importID, "/")
+		segCount := len(pathSegs)
+		d.SetId(pathSegs[segCount-1])
+		// to get parent path size, remove last two tokens (id and separator) plus two slashes
+		truncateSize := len(pathSegs[segCount-1]) + len(pathSegs[segCount-2]) + 2
+		d.Set("parent_path", importID[:len(importID)-truncateSize])
+		return []*schema.ResourceData{d}, nil
+	}
+	return []*schema.ResourceData{d}, ErrNotAPolicyPath
+}
+
 func isPolicyPath(policyPath string) bool {
 	pathSegs := strings.Split(policyPath, "/")
 	if len(pathSegs) < 4 {
