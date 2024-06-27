@@ -8,6 +8,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/upgrade"
+	"golang.org/x/exp/slices"
 )
 
 func dataSourceNsxtUpgradePrepareReady() *schema.Resource {
@@ -23,6 +25,24 @@ func dataSourceNsxtUpgradePrepareReady() *schema.Resource {
 			},
 		},
 	}
+}
+
+func getPrechecksText(m interface{}, precheckIDs []string) (string, error) {
+	precheckText := ""
+	connector := getPolicyConnector(m)
+	client := upgrade.NewUpgradeChecksInfoClient(connector)
+	checkInfoResults, err := client.List(nil, nil, nil, nil, nil, nil)
+	if err != nil {
+		return "", err
+	}
+	for _, checkInfo := range checkInfoResults.Results {
+		for _, ci := range checkInfo.PreUpgradeChecksInfo {
+			if slices.Contains(precheckIDs, *ci.Id) {
+				precheckText += fmt.Sprintf("  Component: %s, code: %s, description: %s\n", *checkInfo.ComponentType, *ci.Id, *ci.Description)
+			}
+		}
+	}
+	return precheckText, nil
 }
 
 func dataSourceNsxtUpgradePrepareReadyRead(d *schema.ResourceData, m interface{}) error {
@@ -44,10 +64,18 @@ func dataSourceNsxtUpgradePrepareReadyRead(d *schema.ResourceData, m interface{}
 	}
 	var errMessage string
 	if len(precheckFailureIDs) > 0 {
-		errMessage += fmt.Sprintf("There are failures in precheck: %s, please check their status from nsxt_upgrade_prepare resource and address these failures on NSX", precheckFailureIDs)
+		preCheckText, err := getPrechecksText(m, precheckFailureIDs)
+		if err != nil {
+			errMessage += fmt.Sprintf("Error while reading precheck failures text: %v", err)
+		}
+		errMessage += fmt.Sprintf("There are failures in prechecks:\n%s\nPlease check their status from nsxt_upgrade_prepare resource and address these failures on NSX", preCheckText)
 	}
 	if len(unacknowledgedWarningIDs) > 0 {
-		errMessage += fmt.Sprintf("\nThere are unacknowledged warnings in precheck: %s, please address these errors from NSX or using nsxt_upgrade_precheck_acknowledge resource", unacknowledgedWarningIDs)
+		preCheckText, err := getPrechecksText(m, unacknowledgedWarningIDs)
+		if err != nil {
+			errMessage += fmt.Sprintf("Error while reading precheck failures text: %v", err)
+		}
+		errMessage += fmt.Sprintf("\nThere are unacknowledged warnings in prechecks:\n%s\nPlease address these errors from NSX or using nsxt_upgrade_precheck_acknowledge resource", preCheckText)
 	}
 	if len(errMessage) > 0 {
 		return fmt.Errorf(errMessage)
