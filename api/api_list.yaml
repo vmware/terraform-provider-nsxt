@@ -1095,3 +1095,35 @@
     - Delete
     - Patch
     - Update
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Multitenancy
+  model_name: Share
+  obj_name: Share
+  client_name: SharesClient
+  supported_method:
+    - New
+    - Get
+    - Delete
+    - Patch
+    - Update
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/shares
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra/shares
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Multitenancy
+  model_name: SharedResource
+  obj_name: ShareResource
+  client_name: ResourcesClient
+  supported_method:
+    - New
+    - Get
+    - Delete
+    - Patch
+    - Update
