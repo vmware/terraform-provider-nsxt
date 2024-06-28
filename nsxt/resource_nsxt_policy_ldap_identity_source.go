@@ -10,6 +10,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
@@ -209,7 +210,6 @@ func resourceNsxtPolicyLdapIdentitySourceProbeAndUpdate(d *schema.ResourceData, 
 	var errs []error
 	if serverType == activeDirectoryType {
 		obj := nsxModel.ActiveDirectoryIdentitySource{
-			DisplayName:            &displayName,
 			Description:            &description,
 			Revision:               &revision,
 			Tags:                   tags,
@@ -219,10 +219,12 @@ func resourceNsxtPolicyLdapIdentitySourceProbeAndUpdate(d *schema.ResourceData, 
 			LdapServers:            ldapServers,
 			ResourceType:           nsxModel.LdapIdentitySource_RESOURCE_TYPE_ACTIVEDIRECTORYIDENTITYSOURCE,
 		}
+		if util.NsxVersionLower("4.2.1") {
+			obj.DisplayName = &displayName
+		}
 		dataValue, errs = converter.ConvertToVapi(obj, nsxModel.ActiveDirectoryIdentitySourceBindingType())
 	} else if serverType == openLdapType {
 		obj := nsxModel.OpenLdapIdentitySource{
-			DisplayName:            &displayName,
 			Description:            &description,
 			Revision:               &revision,
 			Tags:                   tags,
@@ -231,6 +233,9 @@ func resourceNsxtPolicyLdapIdentitySourceProbeAndUpdate(d *schema.ResourceData, 
 			AlternativeDomainNames: altDomainNames,
 			LdapServers:            ldapServers,
 			ResourceType:           nsxModel.LdapIdentitySource_RESOURCE_TYPE_OPENLDAPIDENTITYSOURCE,
+		}
+		if util.NsxVersionLower("4.2.1") {
+			obj.DisplayName = &displayName
 		}
 		dataValue, errs = converter.ConvertToVapi(obj, nsxModel.OpenLdapIdentitySourceBindingType())
 	}
@@ -315,7 +320,9 @@ func resourceNsxtPolicyLdapIdentitySourceRead(d *schema.ResourceData, m interfac
 	passwordMap := getLdapServerPasswordMap(d)
 
 	d.Set("nsx_id", id)
-	d.Set("display_name", ldapObj.DisplayName)
+	if util.NsxVersionLower("4.2.1") {
+		d.Set("display_name", ldapObj.DisplayName)
+	}
 	d.Set("description", ldapObj.Description)
 	d.Set("revision", ldapObj.Revision)
 	setPolicyTagsInSchema(d, ldapObj.Tags)
