@@ -382,6 +382,18 @@ func nsxtPolicyPathResourceImporter(d *schema.ResourceData, m interface{}) ([]*s
 	return rd, nil
 }
 
+func nsxtVPCPathResourceImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	rd, err := nsxtPolicyPathResourceImporterHelper(d, m)
+	if err != nil {
+		return rd, err
+	}
+	projectID, vpcID := getContextDataFromSchema(d)
+	if projectID == "" || vpcID == "" {
+		return rd, fmt.Errorf("imported resource policy path should have both project_id and vpc_id fields")
+	}
+	return rd, nil
+}
+
 func nsxtPolicyPathResourceImporterHelper(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	importID := d.Id()
 	if isPolicyPath(importID) {
