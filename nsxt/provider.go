@@ -512,6 +512,8 @@ func Provider() *schema.Provider {
 			"nsxt_vpc_nat_rule":                                        resourceNsxtPolicyVpcNatRule(),
 			"nsxt_vpc_ip_address_allocation":                           resourceNsxtVpcIpAddressAllocation(),
 			"nsxt_policy_transit_gateway_attachment":                   resourceNsxtPolicyTransitGatewayAttachment(),
+			"nsxt_vpc_ip_address_allocation":                           resourceNsxtVpcIPAddressAllocation(),
+			"nsxt_vpc_subnet":                                          resourceNsxtVpcSubnet(),
 		},
 
 		ConfigureFunc: providerConfigure,

@@ -31,7 +31,7 @@ var vpcSubnetSchema = map[string]*metadata.ExtendedSchema{
 	"description":  metadata.GetExtendedSchema(getDescriptionSchema()),
 	"revision":     metadata.GetExtendedSchema(getRevisionSchema()),
 	"tag":          metadata.GetExtendedSchema(getTagsSchema()),
-	"context":      metadata.GetExtendedSchema(getContextSchema(false, false, true)),
+	"context":      metadata.GetExtendedSchema(getContextSchema(true, false, true)),
 	"advanced_config": {
 		Schema: schema.Schema{
 			Type:     schema.TypeList,
@@ -78,10 +78,12 @@ var vpcSubnetSchema = map[string]*metadata.ExtendedSchema{
 		Schema: schema.Schema{
 			Type:     schema.TypeInt,
 			Optional: true,
+			Computed: true,
 		},
 		Metadata: metadata.Metadata{
 			SchemaType:   "int",
 			SdkFieldName: "Ipv4SubnetSize",
+			OmitIfEmpty:  true,
 		},
 	},
 	"ip_addresses": {
@@ -113,6 +115,7 @@ var vpcSubnetSchema = map[string]*metadata.ExtendedSchema{
 		Schema: schema.Schema{
 			Type:     schema.TypeList,
 			MaxItems: 1,
+			Computed: true,
 			Elem: &metadata.ExtendedResource{
 				Schema: map[string]*metadata.ExtendedSchema{
 					"dhcp_relay_config_path": {
@@ -158,6 +161,7 @@ var vpcSubnetSchema = map[string]*metadata.ExtendedSchema{
 						Schema: schema.Schema{
 							Type:     schema.TypeBool,
 							Optional: true,
+							Computed: true,
 						},
 						Metadata: metadata.Metadata{
 							SchemaType:   "bool",
@@ -209,13 +213,13 @@ func resourceNsxtVpcSubnet() *schema.Resource {
 		Update: resourceNsxtVpcSubnetUpdate,
 		Delete: resourceNsxtVpcSubnetDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtParentPathResourceImporter,
+			State: nsxtVPCPathResourceImporter,
 		},
 		Schema: metadata.GetSchemaFromExtendedSchema(vpcSubnetSchema),
 	}
 }
 
-func resourceNsxtVpcSubnetExists(sessionContext utl.SessionContext, parentPath string, id string, connector client.Connector) (bool, error) {
+func resourceNsxtVpcSubnetExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
 	var err error
 	parents := getVpcParentsFromContext(sessionContext)
 	client := clientLayer.NewSubnetsClient(connector)
@@ -234,7 +238,7 @@ func resourceNsxtVpcSubnetExists(sessionContext utl.SessionContext, parentPath s
 func resourceNsxtVpcSubnetCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
-	id, err := getOrGenerateIDWithParent(d, m, resourceNsxtVpcSubnetExists)
+	id, err := getOrGenerateID2(d, m, resourceNsxtVpcSubnetExists)
 	if err != nil {
 		return err
 	}
