@@ -628,9 +628,9 @@ func TestSchemaToStruct(t *testing.T) {
 	})
 
 	t.Run("Zero values", func(t *testing.T) {
-		assert.Equal(t, "", *obj.StringFieldNil)
-		assert.Equal(t, false, *obj.BoolFieldNil)
-		assert.Equal(t, int64(0), *obj.IntFieldNil)
+		assert.Equal(t, (*string)(nil), obj.StringFieldNil)
+		assert.Equal(t, (*bool)(nil), obj.BoolFieldNil)
+		assert.Equal(t, (*int64)(nil), obj.IntFieldNil)
 	})
 
 	t.Run("Nested struct", func(t *testing.T) {
