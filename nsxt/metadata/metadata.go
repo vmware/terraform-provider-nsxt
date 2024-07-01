@@ -306,7 +306,12 @@ func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[str
 			if len(parent) > 0 {
 				value = parentMap[key].(string)
 			} else {
-				value = d.Get(key).(string)
+				v, exists := d.GetOk(key)
+				if !exists {
+					logger.Printf("[TRACE] %s skip key %s as no values is assigned", ctx, key)
+					continue
+				}
+				value = v.(string)
 			}
 			if item.Metadata.OmitIfEmpty && value == "" {
 				logger.Printf("[TRACE] %s skip key %s since its empty and OmitIfEmpty is true", ctx, key)
@@ -320,7 +325,12 @@ func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[str
 			if len(parent) > 0 {
 				value = parentMap[key].(bool)
 			} else {
-				value = d.Get(key).(bool)
+				v, exists := d.GetOk(key)
+				if !exists {
+					logger.Printf("[TRACE] %s skip key %s as no values is assigned", ctx, key)
+					continue
+				}
+				value = v.(bool)
 			}
 			logger.Printf("[TRACE] %s assigning bool %v to %s", ctx, value, key)
 			elem.FieldByName(item.Metadata.SdkFieldName).Set(reflect.ValueOf(&value))
@@ -330,7 +340,12 @@ func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[str
 			if len(parent) > 0 {
 				value = int64(parentMap[key].(int))
 			} else {
-				value = int64(d.Get(key).(int))
+				v, exists := d.GetOk(key)
+				if !exists {
+					logger.Printf("[TRACE] %s skip key %s as no values is assigned", ctx, key)
+					continue
+				}
+				value = int64(v.(int))
 			}
 			logger.Printf("[TRACE] %s assigning int %v to %s", ctx, value, key)
 			elem.FieldByName(item.Metadata.SdkFieldName).Set(reflect.ValueOf(&value))
