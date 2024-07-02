@@ -1,13 +1,13 @@
 ---
 subcategory: "Multitenancy"
 layout: "nsxt"
-page_title: "NSXT: policy_vpc"
-description: Policy VPC data source.
+page_title: "NSXT: vpc"
+description: VPC data source.
 ---
 
-# nsxt_policy_vpc
+# nsxt_vpc
 
-This data source provides information about policy VPC configured on NSX.
+This data source provides information about VPC configured on NSX.
 This data source is applicable to NSX Policy Manager.
 
 ## Example Usage
@@ -17,7 +17,7 @@ data "nsxt_policy_project" "demoproj" {
   display_name = "demoproj"
 }
 
-data "nsxt_policy_vpc" "test" {
+data "nsxt_vpc" "test" {
   context {
     project_id = data.nsxt_policy_project.demoproj.id
   }
