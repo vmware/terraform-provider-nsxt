@@ -5,7 +5,7 @@ page_title: "NSXT: transport_node"
 description: An Transport Node data source.
 ---
 
-# nsxt_edge_transport_node
+# nsxt_transport_node
 
 This data source provides information about Transport Node configured on NSX.
 
