@@ -120,11 +120,11 @@ func listPolicyResourcesByNameAndType(connector client.Connector, context utl.Se
 		return searchLMPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
 	case utl.Global:
 		return searchGMPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
-	case utl.Multitenancy:
-		return searchMultitenancyPolicyResources(connector, utl.DefaultOrgID, context.ProjectID, *buildPolicyResourcesQuery(&query, additionalQuery))
+	case utl.Multitenancy, utl.VPC:
+		return searchMultitenancyResources(connector, context, *buildPolicyResourcesQuery(&query, additionalQuery))
 	}
 
-	return nil, errors.New("invalid ClientType %d")
+	return nil, errors.New("invalid ClientType")
 }
 
 func listInventoryResourcesByNameAndType(connector client.Connector, context utl.SessionContext, displayName string, resourceType string, additionalQuery *string) ([]*data.StructValue, error) {
@@ -158,11 +158,11 @@ func listPolicyResourcesByID(connector client.Connector, context utl.SessionCont
 		return searchLMPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
 	case utl.Global:
 		return searchGMPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
-	case utl.Multitenancy:
-		return searchMultitenancyPolicyResources(connector, utl.DefaultOrgID, context.ProjectID, *buildPolicyResourcesQuery(&query, additionalQuery))
+	case utl.Multitenancy, utl.VPC:
+		return searchMultitenancyResources(connector, context, *buildPolicyResourcesQuery(&query, additionalQuery))
 	}
 
-	return nil, errors.New("invalid ClientType %d")
+	return nil, errors.New("invalid ClientType")
 }
 
 func listPolicyResourcesByNsxID(connector client.Connector, context utl.SessionContext, resourceID *string, additionalQuery *string) ([]*data.StructValue, error) {
@@ -172,10 +172,10 @@ func listPolicyResourcesByNsxID(connector client.Connector, context utl.SessionC
 		return searchLMPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
 	case utl.Global:
 		return searchGMPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
-	case utl.Multitenancy:
-		return searchMultitenancyPolicyResources(connector, utl.DefaultOrgID, context.ProjectID, *buildPolicyResourcesQuery(&query, additionalQuery))
+	case utl.Multitenancy, utl.VPC:
+		return searchMultitenancyResources(connector, context, *buildPolicyResourcesQuery(&query, additionalQuery))
 	}
-	return nil, errors.New("invalid ClientType %d")
+	return nil, errors.New("invalid ClientType")
 }
 
 func buildPolicyResourcesQuery(query *string, additionalQuery *string) *string {
@@ -241,7 +241,11 @@ func searchLMPolicyResources(connector client.Connector, query string) ([]*data.
 	return searchLM(connector, query)
 }
 
-func searchMultitenancyPolicyResources(connector client.Connector, org string, project string, query string) ([]*data.StructValue, error) {
-	query = query + fmt.Sprintf(" AND path:\\/orgs\\/%s\\/projects\\/%s*", org, project)
+func searchMultitenancyResources(connector client.Connector, context utl.SessionContext, query string) ([]*data.StructValue, error) {
+	if len(context.VPCID) > 0 {
+		query = query + fmt.Sprintf(" AND path:\\/orgs\\/%s\\/projects\\/%s\\/vpcs\\/%s*", utl.DefaultOrgID, context.ProjectID, context.VPCID)
+	} else {
+		query = query + fmt.Sprintf(" AND path:\\/orgs\\/%s\\/projects\\/%s*", utl.DefaultOrgID, context.ProjectID)
+	}
 	return searchLM(connector, query)
 }
