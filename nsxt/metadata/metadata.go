@@ -303,12 +303,18 @@ func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[str
 		}
 		if item.Metadata.SchemaType == "string" {
 			var value string
-			if len(parent) > 0 {
+			exists := false
+			if len(parent) > 0 && parentMap[key] != nil {
 				value = parentMap[key].(string)
+				exists = true
 			} else {
-				value = d.Get(key).(string)
+				var v interface{}
+				v, exists = d.GetOk(key)
+				if exists {
+					value = v.(string)
+				}
 			}
-			if item.Metadata.OmitIfEmpty && value == "" {
+			if item.Metadata.OmitIfEmpty && !exists {
 				logger.Printf("[TRACE] %s skip key %s since its empty and OmitIfEmpty is true", ctx, key)
 				continue
 			}
@@ -317,20 +323,40 @@ func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[str
 		}
 		if item.Metadata.SchemaType == "bool" {
 			var value bool
-			if len(parent) > 0 {
+			exists := false
+			if len(parent) > 0 && parentMap[key] != nil {
 				value = parentMap[key].(bool)
+				exists = true
 			} else {
-				value = d.Get(key).(bool)
+				var v interface{}
+				v, exists = d.GetOk(key)
+				if exists {
+					value = v.(bool)
+				}
+			}
+			if item.Metadata.OmitIfEmpty && !exists {
+				logger.Printf("[TRACE] %s skip key %s since its empty and OmitIfEmpty is true", ctx, key)
+				continue
 			}
 			logger.Printf("[TRACE] %s assigning bool %v to %s", ctx, value, key)
 			elem.FieldByName(item.Metadata.SdkFieldName).Set(reflect.ValueOf(&value))
 		}
 		if item.Metadata.SchemaType == "int" {
 			var value int64
-			if len(parent) > 0 {
+			exists := false
+			if len(parent) > 0 && parentMap[key] != nil {
 				value = int64(parentMap[key].(int))
+				exists = true
 			} else {
-				value = int64(d.Get(key).(int))
+				var v interface{}
+				v, exists = d.GetOk(key)
+				if exists {
+					value = int64(v.(int))
+				}
+			}
+			if item.Metadata.OmitIfEmpty && value == 0 && !exists {
+				logger.Printf("[TRACE] %s skip key %s since its empty and OmitIfEmpty is true", ctx, key)
+				continue
 			}
 			logger.Printf("[TRACE] %s assigning int %v to %s", ctx, value, key)
 			elem.FieldByName(item.Metadata.SdkFieldName).Set(reflect.ValueOf(&value))
