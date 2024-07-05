@@ -9,9 +9,9 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
-func dataSourceNsxtPolicyVPC() *schema.Resource {
+func dataSourceNsxtVPC() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceNsxtPolicyVPCRead,
+		Read: dataSourceNsxtVPCRead,
 		Schema: map[string]*schema.Schema{
 			"id":           getDataSourceIDSchema(),
 			"display_name": getDataSourceDisplayNameSchema(),
@@ -26,7 +26,7 @@ func dataSourceNsxtPolicyVPC() *schema.Resource {
 	}
 }
 
-func dataSourceNsxtPolicyVPCRead(d *schema.ResourceData, m interface{}) error {
+func dataSourceNsxtVPCRead(d *schema.ResourceData, m interface{}) error {
 	obj, err := policyDataSourceResourceRead(d, getPolicyConnector(m), getSessionContext(d, m), "Vpc", nil)
 	if err != nil {
 		return err

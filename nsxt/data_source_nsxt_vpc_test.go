@@ -14,9 +14,9 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects"
 )
 
-func TestAccDataSourceNsxtPolicyVPC_basic_multitenancy(t *testing.T) {
+func TestAccDataSourceNsxtVPC_basic_multitenancy(t *testing.T) {
 	name := getAccTestDataSourceName()
-	testResourceName := "data.nsxt_policy_vpc.test"
+	testResourceName := "data.nsxt_vpc.test"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -26,16 +26,16 @@ func TestAccDataSourceNsxtPolicyVPC_basic_multitenancy(t *testing.T) {
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccDataSourceNsxtPolicyVPCDeleteByName(name)
+			return testAccDataSourceNsxtVPCDeleteByName(name)
 		},
 		Steps: []resource.TestStep{
 			{
 				PreConfig: func() {
-					if err := testAccDataSourceNsxtPolicyVPCCreate(name); err != nil {
+					if err := testAccDataSourceNsxtVPCCreate(name); err != nil {
 						t.Error(err)
 					}
 				},
-				Config: testAccNsxtPolicyVPCReadTemplate(name),
+				Config: testAccNsxtVPCReadTemplate(name),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", name),
@@ -47,7 +47,7 @@ func TestAccDataSourceNsxtPolicyVPC_basic_multitenancy(t *testing.T) {
 	})
 }
 
-func testAccDataSourceNsxtPolicyVPCCreate(name string) error {
+func testAccDataSourceNsxtVPCCreate(name string) error {
 
 	connector, err := testAccGetPolicyConnector()
 	if err != nil {
@@ -87,7 +87,7 @@ func testAccDataSourceNsxtPolicyVPCCreate(name string) error {
 	return nil
 }
 
-func testAccDataSourceNsxtPolicyVPCDeleteByName(name string) error {
+func testAccDataSourceNsxtVPCDeleteByName(name string) error {
 	connector, err := testAccGetPolicyConnector()
 	if err != nil {
 		return fmt.Errorf("error during test client initialization: %v", err)
@@ -113,14 +113,14 @@ func testAccDataSourceNsxtPolicyVPCDeleteByName(name string) error {
 	return fmt.Errorf("error while deleting VPC '%s': resource not found", name)
 }
 
-func testAccNsxtPolicyVPCReadTemplate(name string) string {
+func testAccNsxtVPCReadTemplate(name string) string {
 	context := testAccNsxtPolicyMultitenancyContext()
 	return fmt.Sprintf(`
 data "nsxt_policy_ip_block" "test" {
 %s
   display_name = "%s"
 }
-data "nsxt_policy_vpc" "test" {
+data "nsxt_vpc" "test" {
 %s
   display_name = "%s"
 }`, context, name, context, name)
