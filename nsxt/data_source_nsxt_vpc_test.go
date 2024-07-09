@@ -14,7 +14,7 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects"
 )
 
-func TestAccDataSourceNsxtVPC_basic_multitenancy(t *testing.T) {
+func TestAccDataSourceNsxtVPC_basic(t *testing.T) {
 	name := getAccTestDataSourceName()
 	testResourceName := "data.nsxt_vpc.test"
 
