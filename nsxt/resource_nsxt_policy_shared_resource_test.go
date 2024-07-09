@@ -29,7 +29,7 @@ func TestAccResourceNsxtPolicySharedResource_basic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
-			testAccNSXVersion(t, "4.1.0")
+			testAccNSXVersion(t, "4.1.1")
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
@@ -72,7 +72,7 @@ func TestAccResourceNsxtPolicySharedResource_importBasic(t *testing.T) {
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccOnlyLocalManager(t)
-			testAccNSXVersion(t, "4.1.0")
+			testAccNSXVersion(t, "4.1.1")
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {

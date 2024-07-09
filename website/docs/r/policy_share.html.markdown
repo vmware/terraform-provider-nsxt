@@ -9,6 +9,7 @@ description: A resource to configure a Share.
 
 This resource provides a method for the management of a Share.
 This resource is applicable to NSX Policy Manager.
+This resource is supported with NSX 4.1.1 onwards.
 
 ## Example Usage
 

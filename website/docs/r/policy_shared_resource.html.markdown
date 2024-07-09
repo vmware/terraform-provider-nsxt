@@ -9,6 +9,7 @@ description: A resource to configure a Shared Resource.
 
 This resource provides a method for the management of a Shared Resource.
 This resource is applicable to NSX Policy Manager.
+This resource is supported with NSX 4.1.1 onwards.
 
 ## Example Usage
 
