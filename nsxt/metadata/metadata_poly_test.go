@@ -144,7 +144,7 @@ func testPolyStructNestedSchema(t string) map[string]*schema.Schema {
 }
 
 func testPolyStructNestedExtSchema(t, sdkName string) map[string]*ExtendedSchema {
-	typeIdentier := TypeIdentifier{
+	typeIdentifier := TypeIdentifier{
 		SdkName:      "Type",
 		APIFieldName: "type",
 	}
@@ -170,8 +170,8 @@ func testPolyStructNestedExtSchema(t, sdkName string) map[string]*ExtendedSchema
 								ConflictsWith: []string{"coffee"},
 								Elem: &ExtendedResource{
 									Schema: map[string]*ExtendedSchema{
-										"name": basicStringSchema("Name", false),
-										"age":  basicIntSchema("Age", false),
+										"name": basicStringSchema("Name", false, false),
+										"age":  basicIntSchema("Age", false, false),
 									},
 								},
 							},
@@ -179,7 +179,7 @@ func testPolyStructNestedExtSchema(t, sdkName string) map[string]*ExtendedSchema
 								SchemaType:     "struct",
 								ReflectType:    reflect.TypeOf(testCatStruct{}),
 								BindingType:    testCatStructBindingType(),
-								TypeIdentifier: typeIdentier,
+								TypeIdentifier: typeIdentifier,
 							},
 						},
 						"coffee": {
@@ -189,8 +189,8 @@ func testPolyStructNestedExtSchema(t, sdkName string) map[string]*ExtendedSchema
 								ConflictsWith: []string{"cat"},
 								Elem: &ExtendedResource{
 									Schema: map[string]*ExtendedSchema{
-										"name":     basicStringSchema("Name", false),
-										"is_decaf": basicBoolSchema("IsDecaf", false),
+										"name":     basicStringSchema("Name", false, false),
+										"is_decaf": basicBoolSchema("IsDecaf", false, false),
 									},
 								},
 							},
@@ -198,7 +198,7 @@ func testPolyStructNestedExtSchema(t, sdkName string) map[string]*ExtendedSchema
 								SchemaType:     "struct",
 								ReflectType:    reflect.TypeOf(testCoffeeStruct{}),
 								BindingType:    testCoffeeStructBindingType(),
-								TypeIdentifier: typeIdentier,
+								TypeIdentifier: typeIdentifier,
 							},
 						},
 					},
@@ -212,7 +212,7 @@ func testPolyStructNestedExtSchema(t, sdkName string) map[string]*ExtendedSchema
 					"cat":    "FakeCat",
 					"coffee": "FakeCoffee",
 				},
-				TypeIdentifier: typeIdentier,
+				TypeIdentifier: typeIdentifier,
 			},
 		},
 	}
@@ -592,8 +592,8 @@ func testPolyStructFlattenExtSchema(t, sdkName string) map[string]*ExtendedSchem
 				MaxItems: maxItems,
 				Elem: &ExtendedResource{
 					Schema: map[string]*ExtendedSchema{
-						"name": basicStringSchema("Name", false),
-						"age":  basicIntSchema("Age", false),
+						"name": basicStringSchema("Name", false, false),
+						"age":  basicIntSchema("Age", false, false),
 					},
 				},
 			},
@@ -613,8 +613,8 @@ func testPolyStructFlattenExtSchema(t, sdkName string) map[string]*ExtendedSchem
 				MaxItems: maxItems,
 				Elem: &ExtendedResource{
 					Schema: map[string]*ExtendedSchema{
-						"name":     basicStringSchema("Name", false),
-						"is_decaf": basicBoolSchema("IsDecaf", false),
+						"name":     basicStringSchema("Name", false, false),
+						"is_decaf": basicBoolSchema("IsDecaf", false, false),
 					},
 				},
 			},

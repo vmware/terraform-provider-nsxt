@@ -16,6 +16,9 @@ type testStruct struct {
 	StringFieldNil   *string
 	BoolFieldNil     *bool
 	IntFieldNil      *int64
+	StringFieldOIE   *string
+	BoolFieldOIE     *bool
+	IntFieldOIE      *int64
 	StructField      *testNestedStruct
 	StringListField  []string
 	BoolListField    []bool
@@ -60,6 +63,18 @@ var testSchema = map[string]*schema.Schema{
 		Optional: true,
 	},
 	"int_field_nil": {
+		Type:     schema.TypeInt,
+		Optional: true,
+	},
+	"string_field_oie": {
+		Type:     schema.TypeString,
+		Optional: true,
+	},
+	"bool_field_oie": {
+		Type:     schema.TypeBool,
+		Optional: true,
+	},
+	"int_field_oie": {
 		Type:     schema.TypeInt,
 		Optional: true,
 	},
@@ -189,7 +204,7 @@ var testSchema = map[string]*schema.Schema{
 	},
 }
 
-func basicStringSchema(sdkName string, optional bool) *ExtendedSchema {
+func basicStringSchema(sdkName string, optional, omitIfEmpty bool) *ExtendedSchema {
 	return &ExtendedSchema{
 		Schema: schema.Schema{
 			Type:     schema.TypeString,
@@ -198,11 +213,12 @@ func basicStringSchema(sdkName string, optional bool) *ExtendedSchema {
 		Metadata: Metadata{
 			SchemaType:   "string",
 			SdkFieldName: sdkName,
+			OmitIfEmpty:  omitIfEmpty,
 		},
 	}
 }
 
-func basicBoolSchema(sdkName string, optional bool) *ExtendedSchema {
+func basicBoolSchema(sdkName string, optional, omitIfEmpty bool) *ExtendedSchema {
 	return &ExtendedSchema{
 		Schema: schema.Schema{
 			Type:     schema.TypeBool,
@@ -215,7 +231,7 @@ func basicBoolSchema(sdkName string, optional bool) *ExtendedSchema {
 	}
 }
 
-func basicIntSchema(sdkName string, optional bool) *ExtendedSchema {
+func basicIntSchema(sdkName string, optional, omitIfEmpty bool) *ExtendedSchema {
 	return &ExtendedSchema{
 		Schema: schema.Schema{
 			Type:     schema.TypeInt,
@@ -241,9 +257,9 @@ func basicStructSchema(t string) schema.Schema {
 		MaxItems: maxItems,
 		Elem: &ExtendedResource{
 			Schema: map[string]*ExtendedSchema{
-				"string_field": basicStringSchema("StringField", false),
-				"bool_field":   basicBoolSchema("BoolField", false),
-				"int_field":    basicIntSchema("IntField", false),
+				"string_field": basicStringSchema("StringField", false, false),
+				"bool_field":   basicBoolSchema("BoolField", false, false),
+				"int_field":    basicIntSchema("IntField", false, false),
 			},
 		},
 	}
@@ -255,11 +271,11 @@ func mixedStructSchema() schema.Schema {
 		MaxItems: 1,
 		Elem: &ExtendedResource{
 			Schema: map[string]*ExtendedSchema{
-				"string_field": basicStringSchema("StringField", false),
+				"string_field": basicStringSchema("StringField", false, false),
 				"bool_list": {
 					Schema: schema.Schema{
 						Type: schema.TypeList,
-						Elem: basicBoolSchema("BoolList", false),
+						Elem: basicBoolSchema("BoolList", false, false),
 					},
 					Metadata: Metadata{
 						SchemaType:   "list",
@@ -269,7 +285,7 @@ func mixedStructSchema() schema.Schema {
 				"int_set": {
 					Schema: schema.Schema{
 						Type: schema.TypeSet,
-						Elem: basicIntSchema("IntSet", false),
+						Elem: basicIntSchema("IntSet", false, false),
 					},
 					Metadata: Metadata{
 						SchemaType:   "set",
@@ -290,12 +306,15 @@ func mixedStructSchema() schema.Schema {
 }
 
 var testExtendedSchema = map[string]*ExtendedSchema{
-	"string_field":     basicStringSchema("StringField", false),
-	"bool_field":       basicBoolSchema("BoolField", false),
-	"int_field":        basicIntSchema("IntField", false),
-	"string_field_nil": basicStringSchema("StringFieldNil", true),
-	"bool_field_nil":   basicBoolSchema("BoolFieldNil", true),
-	"int_field_nil":    basicIntSchema("IntFieldNil", true),
+	"string_field":     basicStringSchema("StringField", false, false),
+	"bool_field":       basicBoolSchema("BoolField", false, false),
+	"int_field":        basicIntSchema("IntField", false, false),
+	"string_field_nil": basicStringSchema("StringFieldNil", true, false),
+	"bool_field_nil":   basicBoolSchema("BoolFieldNil", true, false),
+	"int_field_nil":    basicIntSchema("IntFieldNil", true, false),
+	"string_field_oie": basicStringSchema("StringFieldNil", true, true),
+	"bool_field_oie":   basicBoolSchema("BoolFieldNil", true, true),
+	"int_field_oie":    basicIntSchema("IntFieldNil", true, true),
 	"struct_field": {
 		Schema: basicStructSchema("struct"),
 		Metadata: Metadata{
@@ -307,7 +326,7 @@ var testExtendedSchema = map[string]*ExtendedSchema{
 	"string_list": {
 		Schema: schema.Schema{
 			Type: schema.TypeList,
-			Elem: basicStringSchema("StringListField", false),
+			Elem: basicStringSchema("StringListField", false, false),
 		},
 		Metadata: Metadata{
 			SchemaType:   "list",
@@ -317,7 +336,7 @@ var testExtendedSchema = map[string]*ExtendedSchema{
 	"bool_list": {
 		Schema: schema.Schema{
 			Type: schema.TypeList,
-			Elem: basicBoolSchema("BoolListField", false),
+			Elem: basicBoolSchema("BoolListField", false, false),
 		},
 		Metadata: Metadata{
 			SchemaType:   "list",
@@ -327,7 +346,7 @@ var testExtendedSchema = map[string]*ExtendedSchema{
 	"int_list": {
 		Schema: schema.Schema{
 			Type: schema.TypeList,
-			Elem: basicIntSchema("IntListField", false),
+			Elem: basicIntSchema("IntListField", false, false),
 		},
 		Metadata: Metadata{
 			SchemaType:   "list",
@@ -345,7 +364,7 @@ var testExtendedSchema = map[string]*ExtendedSchema{
 	"string_set": {
 		Schema: schema.Schema{
 			Type: schema.TypeSet,
-			Elem: basicStringSchema("StringSetField", false),
+			Elem: basicStringSchema("StringSetField", false, false),
 		},
 		Metadata: Metadata{
 			SchemaType:   "set",
@@ -355,7 +374,7 @@ var testExtendedSchema = map[string]*ExtendedSchema{
 	"bool_set": {
 		Schema: schema.Schema{
 			Type: schema.TypeSet,
-			Elem: basicBoolSchema("BoolSetField", false),
+			Elem: basicBoolSchema("BoolSetField", false, false),
 		},
 		Metadata: Metadata{
 			SchemaType:   "set",
@@ -365,7 +384,7 @@ var testExtendedSchema = map[string]*ExtendedSchema{
 	"int_set": {
 		Schema: schema.Schema{
 			Type: schema.TypeSet,
-			Elem: basicIntSchema("IntSetField", false),
+			Elem: basicIntSchema("IntSetField", false, false),
 		},
 		Metadata: Metadata{
 			SchemaType:   "set",
@@ -490,6 +509,15 @@ func TestStructToSchema(t *testing.T) {
 		_, ok = d.GetOk("bool_field_nil")
 		assert.False(t, ok)
 		_, ok = d.GetOk("int_field_nil")
+		assert.False(t, ok)
+	})
+
+	t.Run("Zero values OIE", func(t *testing.T) {
+		_, ok := d.GetOk("string_field_oie")
+		assert.False(t, ok)
+		_, ok = d.GetOk("bool_field_oie")
+		assert.False(t, ok)
+		_, ok = d.GetOk("int_field_oie")
 		assert.False(t, ok)
 	})
 
@@ -631,6 +659,12 @@ func TestSchemaToStruct(t *testing.T) {
 		assert.Equal(t, "", *obj.StringFieldNil)
 		assert.Equal(t, false, *obj.BoolFieldNil)
 		assert.Equal(t, int64(0), *obj.IntFieldNil)
+	})
+
+	t.Run("Zero values OIE", func(t *testing.T) {
+		assert.Equal(t, (*string)(nil), obj.StringFieldOIE)
+		assert.Equal(t, (*bool)(nil), obj.BoolFieldOIE)
+		assert.Equal(t, (*int64)(nil), obj.IntFieldOIE)
 	})
 
 	t.Run("Nested struct", func(t *testing.T) {
