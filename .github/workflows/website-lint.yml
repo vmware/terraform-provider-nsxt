@@ -1,25 +1,16 @@
 name: website-lint
-
 on:
-  push:
-    branches: [ "master" ]
   pull_request:
-    branches: [ "master" ]
-
 jobs:
-
-  build:
+  test:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-
     - name: Set up Go
       uses: actions/setup-go@v3
       with:
         go-version: 1.19
-
     - name: Install tools
       run: make tools
-
     - name: Website Lint
       run: make website-lint
