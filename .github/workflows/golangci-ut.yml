@@ -1,14 +1,8 @@
 name: golangci-ut
 on:
-  push:
-    branches: [ "master" ]
   pull_request:
-    branches: [ "master" ]
-  workflow_dispatch:
-
 jobs:
-  golangci:
-    name: Unit test
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/setup-go@v5
