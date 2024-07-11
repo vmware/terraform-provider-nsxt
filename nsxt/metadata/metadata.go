@@ -286,6 +286,7 @@ func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[str
 			logger.Printf("[TRACE] %s parent %s key %s", ctx, parent, key)
 		}
 		if len(item.Metadata.PolymorphicType) > 0 {
+			logger.Printf("[TRACE] %s inspecting polymorphic key %s", ctx, key)
 			itemList := getItemListForSchemaToStruct(d, item.Metadata.SchemaType, key, parent, parentMap)
 			switch item.Metadata.PolymorphicType {
 			case PolymorphicTypeNested:
@@ -365,6 +366,12 @@ func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[str
 			nestedObj := reflect.New(item.Metadata.ReflectType)
 			itemList := getItemListForSchemaToStruct(d, item.Metadata.SchemaType, key, parent, parentMap)
 			if len(itemList) == 0 {
+				logger.Printf("[TRACE] Item list empty")
+				continue
+			}
+			if itemList[0] == nil {
+				// apparently this can happen when empty clause is specified
+				logger.Printf("[TRACE] Item list contains empty value")
 				continue
 			}
 			nestedSchema := itemList[0].(map[string]interface{})
