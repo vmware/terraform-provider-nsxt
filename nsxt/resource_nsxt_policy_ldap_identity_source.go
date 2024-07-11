@@ -35,11 +35,15 @@ func resourceNsxtPolicyLdapIdentitySource() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"nsx_id":       getNsxIDSchema(),
-			"display_name": getDataSourceDisplayNameSchema(),
-			"description":  getDataSourceDescriptionSchema(),
-			"revision":     getRevisionSchema(),
-			"tag":          getTagsSchema(),
+			"nsx_id": {
+				Type:        schema.TypeString,
+				Description: "NSX ID for this resource",
+				Required:    true,
+				ForceNew:    true,
+			},
+			"description": getDescriptionSchema(),
+			"revision":    getRevisionSchema(),
+			"tag":         getTagsSchema(),
 			"type": {
 				Type:         schema.TypeString,
 				Description:  "Indicates the type of LDAP server",
@@ -196,7 +200,6 @@ func resourceNsxtPolicyLdapIdentitySourceProbeAndUpdate(d *schema.ResourceData, 
 	converter := bindings.NewTypeConverter()
 	serverType := d.Get("type").(string)
 
-	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
 	revision := int64(d.Get("revision").(int))
 	tags := getPolicyTagsFromSchema(d)
@@ -209,7 +212,6 @@ func resourceNsxtPolicyLdapIdentitySourceProbeAndUpdate(d *schema.ResourceData, 
 	var errs []error
 	if serverType == activeDirectoryType {
 		obj := nsxModel.ActiveDirectoryIdentitySource{
-			DisplayName:            &displayName,
 			Description:            &description,
 			Revision:               &revision,
 			Tags:                   tags,
@@ -222,7 +224,6 @@ func resourceNsxtPolicyLdapIdentitySourceProbeAndUpdate(d *schema.ResourceData, 
 		dataValue, errs = converter.ConvertToVapi(obj, nsxModel.ActiveDirectoryIdentitySourceBindingType())
 	} else if serverType == openLdapType {
 		obj := nsxModel.OpenLdapIdentitySource{
-			DisplayName:            &displayName,
 			Description:            &description,
 			Revision:               &revision,
 			Tags:                   tags,
@@ -315,7 +316,6 @@ func resourceNsxtPolicyLdapIdentitySourceRead(d *schema.ResourceData, m interfac
 	passwordMap := getLdapServerPasswordMap(d)
 
 	d.Set("nsx_id", id)
-	d.Set("display_name", ldapObj.DisplayName)
 	d.Set("description", ldapObj.Description)
 	d.Set("revision", ldapObj.Revision)
 	setPolicyTagsInSchema(d, ldapObj.Tags)
