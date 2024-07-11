@@ -2,6 +2,14 @@ module github.com/vmware/terraform-provider-nsxt
 
 go 1.19
 
+replace (
+	github.com/vmware/vsphere-automation-sdk-go/lib => github.com/zhengxiexie/vsphere-automation-sdk-go/lib v0.7.3-0.20240628090521-3ad1af047210
+	github.com/vmware/vsphere-automation-sdk-go/runtime => github.com/zhengxiexie/vsphere-automation-sdk-go/runtime v0.7.3-0.20240628090521-3ad1af047210
+	github.com/vmware/vsphere-automation-sdk-go/services/nsxt => github.com/zhengxiexie/vsphere-automation-sdk-go/services/nsxt v0.12.3-0.20240628090521-3ad1af047210
+	github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm => github.com/zhengxiexie/vsphere-automation-sdk-go/services/nsxt-gm v0.0.0-20240628090521-3ad1af047210
+	github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp => github.com/zhengxiexie/vsphere-automation-sdk-go/services/nsxt-mp v0.6.3-0.20240628090521-3ad1af047210
+)
+
 require (
 	github.com/google/uuid v1.3.0
 	github.com/hashicorp/go-version v1.6.0
@@ -9,7 +17,7 @@ require (
 	github.com/stretchr/testify v1.7.2
 	github.com/vmware/go-vmware-nsxt v0.0.0-20220328155605-f49a14c1ef5f
 	github.com/vmware/vsphere-automation-sdk-go/lib v0.7.0
-	github.com/vmware/vsphere-automation-sdk-go/runtime v0.7.0
+	github.com/vmware/vsphere-automation-sdk-go/runtime v0.7.1-0.20240611083326-25a4e1834c4d
 	github.com/vmware/vsphere-automation-sdk-go/services/nsxt v0.12.0
 	github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm v0.9.0
 	github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp v0.6.0
