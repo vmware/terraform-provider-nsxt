@@ -12,13 +12,13 @@ import (
 )
 
 var accTestPolicyLdapIdentitySourceCreateAttributes = map[string]string{
-	"display_name": getAccTestResourceName(),
-	"description":  "terraform created",
+	"nsx_id":      getAccTestResourceName(),
+	"description": "terraform created",
 }
 
 var accTestPolicyLdapIdentitySourceUpdateAttributes = map[string]string{
-	"display_name": getAccTestResourceName(),
-	"description":  "terraform updated",
+	"nsx_id":      getAccTestResourceName(),
+	"description": "terraform updated",
 }
 
 func TestAccResourceNsxtPolicyLdapIdentitySource_basic(t *testing.T) {
@@ -38,7 +38,7 @@ func TestAccResourceNsxtPolicyLdapIdentitySource_basic(t *testing.T) {
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyLdapIdentitySourceCheckDestroy(state, accTestPolicyLdapIdentitySourceUpdateAttributes["display_name"])
+			return testAccNsxtPolicyLdapIdentitySourceCheckDestroy(state, accTestPolicyLdapIdentitySourceUpdateAttributes["nsx_id"])
 		},
 		Steps: []resource.TestStep{
 			{
@@ -46,8 +46,7 @@ func TestAccResourceNsxtPolicyLdapIdentitySource_basic(t *testing.T) {
 					ldapType, getTestLdapDomain(), getTestLdapBaseDN(), getTestLdapUser(), getTestLdapPassword(),
 					getTestLdapURL(), getTestLdapCert()),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyLdapIdentitySourceExists(accTestPolicyLdapIdentitySourceCreateAttributes["display_name"], testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyLdapIdentitySourceCreateAttributes["display_name"]),
+					testAccNsxtPolicyLdapIdentitySourceExists(accTestPolicyLdapIdentitySourceCreateAttributes["nsx_id"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyLdapIdentitySourceCreateAttributes["description"]),
 					resource.TestCheckResourceAttr(testResourceName, "type", ldapType),
 					resource.TestCheckResourceAttr(testResourceName, "domain_name", getTestLdapDomain()),
@@ -59,7 +58,7 @@ func TestAccResourceNsxtPolicyLdapIdentitySource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "ldap_server.0.certificates.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 
-					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttr(testResourceName, "nsx_id", accTestPolicyLdapIdentitySourceCreateAttributes["nsx_id"]),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 				),
 			},
@@ -68,8 +67,7 @@ func TestAccResourceNsxtPolicyLdapIdentitySource_basic(t *testing.T) {
 					ldapType, getTestLdapDomain(), getTestLdapBaseDN(), getTestLdapUser(), getTestLdapPassword(),
 					getTestLdapURL(), getTestLdapCert()),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyLdapIdentitySourceExists(accTestPolicyLdapIdentitySourceUpdateAttributes["display_name"], testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyLdapIdentitySourceUpdateAttributes["display_name"]),
+					testAccNsxtPolicyLdapIdentitySourceExists(accTestPolicyLdapIdentitySourceUpdateAttributes["nsx_id"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyLdapIdentitySourceUpdateAttributes["description"]),
 					resource.TestCheckResourceAttr(testResourceName, "type", ldapType),
 					resource.TestCheckResourceAttr(testResourceName, "domain_name", getTestLdapDomain()),
@@ -81,7 +79,6 @@ func TestAccResourceNsxtPolicyLdapIdentitySource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "ldap_server.0.certificates.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
 
-					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 				),
 			},
@@ -106,7 +103,7 @@ func TestAccResourceNsxtPolicyLdapIdentitySource_import_basic(t *testing.T) {
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyLdapIdentitySourceCheckDestroy(state, accTestPolicyLdapIdentitySourceCreateAttributes["display_name"])
+			return testAccNsxtPolicyLdapIdentitySourceCheckDestroy(state, accTestPolicyLdapIdentitySourceCreateAttributes["nsx_id"])
 		},
 		Steps: []resource.TestStep{
 			{
@@ -175,7 +172,7 @@ func testAccNsxtPolicyLdapIdentitySourceCreate(serverType, domainName, baseDn, b
 	attrMap := accTestPolicyLdapIdentitySourceCreateAttributes
 	return fmt.Sprintf(`
 resource "nsxt_policy_ldap_identity_source" "test" {
-    display_name = "%s"
+    nsx_id       = "%s"
     description  = "%s"
     type         = "%s"
     domain_name  = "%s"
@@ -197,14 +194,14 @@ resource "nsxt_policy_ldap_identity_source" "test" {
         scope = "scope1"
         tag = "tag1"
     }
-}`, attrMap["display_name"], attrMap["description"], serverType, domainName, baseDn, bindUser, bindPwd, url, cert)
+}`, attrMap["nsx_id"], attrMap["description"], serverType, domainName, baseDn, bindUser, bindPwd, url, cert)
 }
 
 func testAccNsxtPolicyLdapIdentitySourceUpdate(serverType, domainName, baseDn, bindUser, bindPwd, url, cert string) string {
 	attrMap := accTestPolicyLdapIdentitySourceUpdateAttributes
 	return fmt.Sprintf(`
 resource "nsxt_policy_ldap_identity_source" "test" {
-    display_name = "%s"
+    nsx_id       = "%s"
     description  = "%s"
     type         = "%s"
     domain_name  = "%s"
@@ -221,5 +218,5 @@ resource "nsxt_policy_ldap_identity_source" "test" {
             ,
         ]
     }
-}`, attrMap["display_name"], attrMap["description"], serverType, domainName, baseDn, bindUser, bindPwd, url, cert)
+}`, attrMap["nsx_id"], attrMap["description"], serverType, domainName, baseDn, bindUser, bindPwd, url, cert)
 }
