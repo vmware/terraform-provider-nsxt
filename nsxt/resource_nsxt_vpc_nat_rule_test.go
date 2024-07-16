@@ -162,7 +162,7 @@ func TestAccResourceNsxtVpcNatRule_importBasic(t *testing.T) {
 	testResourceName := "nsxt_vpc_nat_rule.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck:  func() { testAccPreCheck(t); testAccOnlyVPC(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtVpcNatRuleCheckDestroy(state, name)
