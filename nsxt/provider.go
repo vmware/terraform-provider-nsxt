@@ -328,6 +328,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_gateway_flood_protection_profile":           dataSourceNsxtPolicyGatewayFloodProtectionProfile(),
 			"nsxt_manager_info":                                      dataSourceNsxtManagerInfo(),
 			"nsxt_policy_vpc":                                        dataSourceNsxtPolicyVPC(),
+			"nsxt_vpc_nat":                                           dataSourceNsxtVpcNat(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -501,6 +502,8 @@ func Provider() *schema.Provider {
 			"nsxt_vpc_gateway_policy":                                  resourceNsxtVPCGatewayPolicy(),
 			"nsxt_policy_share":                                        resourceNsxtPolicyShare(),
 			"nsxt_policy_shared_resource":                              resourceNsxtPolicySharedResource(),
+			"nsxt_vpc_nat_rule":                                        resourceNsxtPolicyVpcNatRule(),
+			"nsxt_vpc_ip_address_allocation":                           resourceNsxtVpcIPAddressAllocation(),
 		},
 
 		ConfigureFunc: providerConfigure,
