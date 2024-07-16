@@ -504,6 +504,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_shared_resource":                              resourceNsxtPolicySharedResource(),
 			"nsxt_vpc_nat_rule":                                        resourceNsxtPolicyVpcNatRule(),
 			"nsxt_vpc_ip_address_allocation":                           resourceNsxtVpcIPAddressAllocation(),
+			"nsxt_vpc_subnet":                                          resourceNsxtVpcSubnet(),
 		},
 
 		ConfigureFunc: providerConfigure,
