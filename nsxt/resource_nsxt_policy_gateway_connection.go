@@ -9,12 +9,10 @@ import (
 	"reflect"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
+	clientLayer "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
-	clientLayer "github.com/vmware/terraform-provider-nsxt/api/infra"
-	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
 )
 
@@ -25,12 +23,11 @@ var gatewayConnectionSchema = map[string]*metadata.ExtendedSchema{
 	"description":  metadata.GetExtendedSchema(getDescriptionSchema()),
 	"revision":     metadata.GetExtendedSchema(getRevisionSchema()),
 	"tag":          metadata.GetExtendedSchema(getTagsSchema()),
-	"context":      metadata.GetExtendedSchema(getContextSchema(false, false, false)),
-	"context":      metadata.GetExtendedSchema(getContextSchema(false, false, false)),
 	"advertise_outbound_route_filter": {
 		Schema: schema.Schema{
-			Type:     schema.TypeString,
-			Optional: true,
+			Type:         schema.TypeString,
+			ValidateFunc: validatePolicyPath(),
+			Optional:     true,
 		},
 		Metadata: metadata.Metadata{
 			SchemaType:   "string",
@@ -76,10 +73,10 @@ func resourceNsxtPolicyGatewayConnection() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyGatewayConnectionExists(sessionContext utl.SessionContext, parentPath string, id string, connector client.Connector) (bool, error) {
+func resourceNsxtPolicyGatewayConnectionExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	var err error
 
-	client := clientLayer.NewGatewayConnectionsClient(sessionContext, connector)
+	client := clientLayer.NewGatewayConnectionsClient(connector)
 	_, err = client.Get(id)
 	if err == nil {
 		return true, nil
@@ -95,7 +92,7 @@ func resourceNsxtPolicyGatewayConnectionExists(sessionContext utl.SessionContext
 func resourceNsxtPolicyGatewayConnectionCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
-	id, err := getOrGenerateIDWithParent(d, m, resourceNsxtPolicyGatewayConnectionExists)
+	id, err := getOrGenerateID(d, m, resourceNsxtPolicyGatewayConnectionExists)
 	if err != nil {
 		return err
 	}
@@ -117,7 +114,7 @@ func resourceNsxtPolicyGatewayConnectionCreate(d *schema.ResourceData, m interfa
 
 	log.Printf("[INFO] Creating GatewayConnection with ID %s", id)
 
-	client := clientLayer.NewGatewayConnectionsClient(getSessionContext(d, m), connector)
+	client := clientLayer.NewGatewayConnectionsClient(connector)
 	err = client.Patch(id, obj)
 	if err != nil {
 		return handleCreateError("GatewayConnection", id, err)
@@ -136,7 +133,7 @@ func resourceNsxtPolicyGatewayConnectionRead(d *schema.ResourceData, m interface
 		return fmt.Errorf("Error obtaining GatewayConnection ID")
 	}
 
-	client := clientLayer.NewGatewayConnectionsClient(getSessionContext(d, m), connector)
+	client := clientLayer.NewGatewayConnectionsClient(connector)
 
 	obj, err := client.Get(id)
 	if err != nil {
@@ -152,8 +149,6 @@ func resourceNsxtPolicyGatewayConnectionRead(d *schema.ResourceData, m interface
 
 	elem := reflect.ValueOf(&obj).Elem()
 	return metadata.StructToSchema(elem, d, gatewayConnectionSchema, "", nil)
-
-	return nil
 }
 
 func resourceNsxtPolicyGatewayConnectionUpdate(d *schema.ResourceData, m interface{}) error {
@@ -182,7 +177,7 @@ func resourceNsxtPolicyGatewayConnectionUpdate(d *schema.ResourceData, m interfa
 	if err := metadata.SchemaToStruct(elem, d, gatewayConnectionSchema, "", nil); err != nil {
 		return err
 	}
-	client := clientLayer.NewGatewayConnectionsClient(getSessionContext(d, m), connector)
+	client := clientLayer.NewGatewayConnectionsClient(connector)
 	_, err := client.Update(id, obj)
 	if err != nil {
 		return handleUpdateError("GatewayConnection", id, err)
@@ -199,7 +194,7 @@ func resourceNsxtPolicyGatewayConnectionDelete(d *schema.ResourceData, m interfa
 
 	connector := getPolicyConnector(m)
 
-	client := clientLayer.NewGatewayConnectionsClient(getSessionContext(d, m), connector)
+	client := clientLayer.NewGatewayConnectionsClient(connector)
 	err := client.Delete(id)
 
 	if err != nil {

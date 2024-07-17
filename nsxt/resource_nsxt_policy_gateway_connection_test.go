@@ -12,26 +12,25 @@ import (
 )
 
 var accTestPolicyGatewayConnectionCreateAttributes = map[string]string{
-	"display_name":                    getAccTestResourceName(),
-	"description":                     "terraform created",
-	"advertise_outbound_route_filter": "test-create",
-	"tier0_path":                      "test-create",
-	"aggregate_routes":                "test-create",
+	"display_name":     getAccTestResourceName(),
+	"description":      "terraform created",
+	"aggregate_routes": "192.168.240.0/24",
 }
 
 var accTestPolicyGatewayConnectionUpdateAttributes = map[string]string{
-	"display_name":                    getAccTestResourceName(),
-	"description":                     "terraform updated",
-	"advertise_outbound_route_filter": "test-update",
-	"tier0_path":                      "test-update",
-	"aggregate_routes":                "test-update",
+	"display_name":     getAccTestResourceName(),
+	"description":      "terraform updated",
+	"aggregate_routes": "192.168.241.0/24",
 }
 
 func TestAccResourceNsxtPolicyGatewayConnection_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_gateway_connection.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyVPC(t)
+		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyGatewayConnectionCheckDestroy(state, accTestPolicyGatewayConnectionUpdateAttributes["display_name"])
@@ -43,9 +42,8 @@ func TestAccResourceNsxtPolicyGatewayConnection_basic(t *testing.T) {
 					testAccNsxtPolicyGatewayConnectionExists(accTestPolicyGatewayConnectionCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyGatewayConnectionCreateAttributes["display_name"]),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyGatewayConnectionCreateAttributes["description"]),
-					resource.TestCheckResourceAttr(testResourceName, "advertise_outbound_route_filter", accTestPolicyGatewayConnectionCreateAttributes["advertise_outbound_route_filter"]),
-					resource.TestCheckResourceAttr(testResourceName, "tier0_path", accTestPolicyGatewayConnectionCreateAttributes["tier0_path"]),
 					resource.TestCheckResourceAttr(testResourceName, "aggregate_routes.0", accTestPolicyGatewayConnectionCreateAttributes["aggregate_routes"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "tier0_path"),
 
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -59,9 +57,8 @@ func TestAccResourceNsxtPolicyGatewayConnection_basic(t *testing.T) {
 					testAccNsxtPolicyGatewayConnectionExists(accTestPolicyGatewayConnectionUpdateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyGatewayConnectionUpdateAttributes["display_name"]),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyGatewayConnectionUpdateAttributes["description"]),
-					resource.TestCheckResourceAttr(testResourceName, "advertise_outbound_route_filter", accTestPolicyGatewayConnectionUpdateAttributes["advertise_outbound_route_filter"]),
-					resource.TestCheckResourceAttr(testResourceName, "tier0_path", accTestPolicyGatewayConnectionUpdateAttributes["tier0_path"]),
 					resource.TestCheckResourceAttr(testResourceName, "aggregate_routes.0", accTestPolicyGatewayConnectionUpdateAttributes["aggregate_routes"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "tier0_path"),
 
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -89,7 +86,10 @@ func TestAccResourceNsxtPolicyGatewayConnection_importBasic(t *testing.T) {
 	testResourceName := "nsxt_policy_gateway_connection.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyVPC(t)
+		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyGatewayConnectionCheckDestroy(state, name)
@@ -163,18 +163,26 @@ func testAccNsxtPolicyGatewayConnectionTemplate(createFlow bool) string {
 		attrMap = accTestPolicyGatewayConnectionUpdateAttributes
 	}
 	return fmt.Sprintf(`
+data "nsxt_policy_edge_cluster" "EC" {
+  display_name = "%s"
+}
+
+resource "nsxt_policy_tier0_gateway" "test" {
+  display_name      = "terraformt0gw"
+  edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
+}
+
 resource "nsxt_policy_gateway_connection" "test" {
   display_name = "%s"
   description  = "%s"
-  advertise_outbound_route_filter = %s
-  tier0_path = %s
-  aggregate_routes = [%s]
+  tier0_path = nsxt_policy_tier0_gateway.test.path
+  aggregate_routes = ["%s"]
 
   tag {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, attrMap["display_name"], attrMap["description"], attrMap["advertise_outbound_route_filter"], attrMap["tier0_path"], attrMap["aggregate_routes"])
+}`, getEdgeClusterName(), attrMap["display_name"], attrMap["description"], attrMap["aggregate_routes"])
 }
 
 func testAccNsxtPolicyGatewayConnectionMinimalistic() string {
