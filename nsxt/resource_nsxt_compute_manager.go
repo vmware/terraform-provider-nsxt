@@ -209,7 +209,7 @@ func resourceNsxtComputeManager() *schema.Resource {
 				Type:        schema.TypeBool,
 				Description: "Specifies whether compute manager has been set as OIDC provider",
 				Optional:    true,
-				Default:     false,
+				Computed:    true, // default varies based on NSX version
 			},
 		},
 	}
