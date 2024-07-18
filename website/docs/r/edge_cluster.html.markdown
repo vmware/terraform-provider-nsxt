@@ -1,5 +1,5 @@
 ---
-subcategory: "Beta"
+subcategory: "Fabric"
 layout: "nsxt"
 page_title: "NSXT: nsxt_edge_cluster"
 description: A resource to configure an Edge Cluster.

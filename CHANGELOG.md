@@ -1,3 +1,56 @@
+## 3.6.2 (July 23, 2024)
+
+FABRIC SUPPORT:
+The following objects are promoted from Beta with this release:
+
+* `data/nsxt_compute_collection`
+* `data/nsxt_compute_manager`
+* `data/nsxt_discovered_node`
+* `data/nsxt_failure_domain`
+* `data/nsxt_policy_host_transport_node`
+* `data/nsxt_policy_host_transport_node_collection`
+* `data/nsxt_policy_host_transport_node_profile`
+* `data/nsxt_policy_uplink_host_switch_profile`
+* `data/nsxt_policy_vtep_ha_host_switch_profile`
+* `data/nsxt_transport_node`
+
+* `resource/nsxt_cluster_virtual_ip`
+* `resource/nsxt_compute_manager`
+* `resource/nsxt_edge_cluster`
+* `resource/nsxt_edge_high_availability_profile`
+* `resource/nsxt_edge_transport_node`
+* `resource/nsxt_failure_domain`
+* `resource/nsxt_manager_cluster`
+* `resource/nsxt_policy_compute_sub_cluster`
+* `resource/nsxt_policy_host_transport_node`
+* `resource/nsxt_policy_host_transport_node_collection`
+* `resource/nsxt_policy_host_transport_node_profile`
+* `resource/nsxt_policy_transport_zone`
+* `resource/nsxt_policy_uplink_host_switch_profile`
+* `resource/nsxt_policy_vtep_ha_host_switch_profile`
+
+USER MANAGEMENT SUPPORT:
+The following objects are promoted from Beta with this release:
+
+* `resource/nsxt_node_user`
+* `resource/nsxt_policy_ldap_identity_source`
+* `resource/nsxt_policy_user_management_role`
+* `resource/nsxt_policy_user_management_role_binding`
+* `resource/nsxt_principal_identity`
+
+FEATURES:
+* `resource/nsxt_policy_parent_security_policy`, `resource/nsxt_policy_security_policy_rule`: With this release, resources that allow configuring security policy rules separately is promoted from `Beta`. Note that you have to use `nsxt_policy_parent_security_policy` as parent resource for the separate rule resource.
+
+BUG FIXES:
+* Ensure correct encoding of password when requesting NSX session token. This fixes a bug of intermittent 403 errors in the provider when NSX password contains certain special characters ([#1216](https://github.com/vmware/terraform-provider-nsxt/pull/1216))
+* `resource/nsxt_policy_lb_virtual_server`: Fix SNI path assignment ([#1197](https://github.com/vmware/terraform-provider-nsxt/pull/1197))
+* `data/nsxt_policy_vm`, `data/nsxt_policy_vms`, `resource/nsxt_policy_vm_tags`: Fix failure to find certain VMs due to inconsistent pagination ([#1194](https://github.com/vmware/terraform-provider-nsxt/pull/1194))
+
+BUG FIXES ON EXPERIMENTAL FEATURES:
+* `resource/nsxt_edge_transport_node`: Fix syslog configuration ([#1206](https://github.com/vmware/terraform-provider-nsxt/pull/1206))
+* `resource/nsxt_policy_ldap_identity_source`: Remove `display_name` property as nsx mandates it is equal to `nsx_id`, which is now defined as `Required` ([#1254](https://github.com/vmware/terraform-provider-nsxt/pull/1254))
+* `resource/nsxt_compute_manager`: Remove default from `set_as_oidc_provider` property and set is as `Computed`, since the default depends on NSX version ([#1261](https://github.com/vmware/terraform-provider-nsxt/pull/1261))
+
 ## 3.6.1 (May 2, 2024)
 
 BUG FIXES:
@@ -13,6 +66,7 @@ IMPROVEMENTS:
 
 BUG FIXES ON EXPERIMENTAL FEATURES:
 * `resource/nsxt_edge_transport_node`: fix crash when syslog port is specified ([#1190](https://github.com/vmware/terraform-provider-nsxt/pull/1190))
+=======
 
 ## 3.6.0 (April 16, 2024)
 

@@ -1,5 +1,5 @@
 ---
-subcategory: "Beta"
+subcategory: "Fabric"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_transport_zone"
 description: A resource to configure Policy Transport Zone.
