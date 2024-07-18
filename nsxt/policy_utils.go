@@ -325,10 +325,9 @@ func parseStandardPolicyPath(path string) ([]string, error) {
 	}
 	if infraPath {
 		// continue after infra marker
-		if segments[idx] != "infra" && segments[idx] != "global-infra" {
-			return nil, fmt.Errorf("policy path %s is expected to contain *infra marker", path)
+		if segments[idx] == "infra" || segments[idx] == "global-infra" {
+			idx++
 		}
-		idx++
 	}
 
 	for i, seg := range segments[idx:] {

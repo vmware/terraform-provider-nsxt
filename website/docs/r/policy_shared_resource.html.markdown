@@ -14,7 +14,7 @@ This resource is supported with NSX 4.1.1 onwards.
 ## Example Usage
 
 ```hcl
-resource "nsxt_policy_shraed_resource" "test" {
+resource "nsxt_policy_shared_resource" "test" {
   display_name = "test"
   description  = "Terraform provisioned Shared Resource"
 

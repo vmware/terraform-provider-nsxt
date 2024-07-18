@@ -1,5 +1,5 @@
 ---
-subcategory: "FIXME"
+subcategory: "Beta"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_transit_gateway_attachment"
 description: A resource to configure a TransitGatewayAttachment.
@@ -15,10 +15,9 @@ This resource is applicable to NSX Global Manager, NSX Policy Manager and VMC.
 
 ```hcl
 resource "nsxt_policy_transit_gateway_attachment" "test" {
-    display_name      = "test"
-    description       = "Terraform provisioned TransitGatewayAttachment"
-    connection_path = FILL VALUE FOR schema.TypeString
-
+  display_name    = "test"
+  description     = "Terraform provisioned TransitGatewayAttachment"
+  connection_path = nsxt_policy_vpc_connectivity_profile.test.path
 }
 ```
 
@@ -26,13 +25,12 @@ resource "nsxt_policy_transit_gateway_attachment" "test" {
 
 The following arguments are supported:
 
+* `parent_path` - (Required) The path of the parent to bind with the profile. This is a policy path of a transit gateway.
 * `display_name` - (Required) Display name of the resource.
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `connection_path` - (Optional) Policy path of connectivity profile.
-
-
 
 ## Attributes Reference
 
@@ -49,7 +47,7 @@ An existing object can be [imported][docs-import] into this resource, via the fo
 [docs-import]: https://www.terraform.io/cli/import
 
 ```
-terraform import nsxt_policy_transit_gateway_attachment.test UUID
+terraform import nsxt_policy_transit_gateway_attachment.test PATH
 ```
 
-The above command imports TransitGatewayAttachment named `test` with the NSX ID `UUID`.
+The above command imports TransitGatewayAttachment named `test` with the policy path `PATH`.

@@ -9,11 +9,10 @@ import (
 	"reflect"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
+	clientLayer "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/transit_gateways"
 
-	clientLayer "github.com/vmware/terraform-provider-nsxt/api/infra/orgs/projects/transit_gateways"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
 )
@@ -36,6 +35,7 @@ var transitGatewayAttachmentSchema = map[string]*metadata.ExtendedSchema{
 		Metadata: metadata.Metadata{
 			SchemaType:   "string",
 			SdkFieldName: "ConnectionPath",
+			OmitIfEmpty:  true,
 		},
 	},
 }
@@ -59,7 +59,7 @@ func resourceNsxtPolicyTransitGatewayAttachmentExists(sessionContext utl.Session
 	if pathErr != nil {
 		return false, pathErr
 	}
-	client := clientLayer.NewAttachmentsClient(sessionContext, connector)
+	client := clientLayer.NewAttachmentsClient(connector)
 	_, err = client.Get(parents[0], parents[1], parents[2], id)
 	if err == nil {
 		return true, nil
@@ -102,7 +102,7 @@ func resourceNsxtPolicyTransitGatewayAttachmentCreate(d *schema.ResourceData, m 
 
 	log.Printf("[INFO] Creating TransitGatewayAttachment with ID %s", id)
 
-	client := clientLayer.NewAttachmentsClient(getSessionContext(d, m), connector)
+	client := clientLayer.NewAttachmentsClient(connector)
 	err = client.Patch(parents[0], parents[1], parents[2], id, obj)
 	if err != nil {
 		return handleCreateError("TransitGatewayAttachment", id, err)
@@ -121,7 +121,7 @@ func resourceNsxtPolicyTransitGatewayAttachmentRead(d *schema.ResourceData, m in
 		return fmt.Errorf("Error obtaining TransitGatewayAttachment ID")
 	}
 
-	client := clientLayer.NewAttachmentsClient(getSessionContext(d, m), connector)
+	client := clientLayer.NewAttachmentsClient(connector)
 	parentPath := d.Get("parent_path").(string)
 	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 3)
 	if pathErr != nil {
@@ -174,7 +174,7 @@ func resourceNsxtPolicyTransitGatewayAttachmentUpdate(d *schema.ResourceData, m 
 	if err := metadata.SchemaToStruct(elem, d, transitGatewayAttachmentSchema, "", nil); err != nil {
 		return err
 	}
-	client := clientLayer.NewAttachmentsClient(getSessionContext(d, m), connector)
+	client := clientLayer.NewAttachmentsClient(connector)
 	_, err := client.Update(parents[0], parents[1], parents[2], id, obj)
 	if err != nil {
 		return handleUpdateError("TransitGatewayAttachment", id, err)
@@ -196,7 +196,7 @@ func resourceNsxtPolicyTransitGatewayAttachmentDelete(d *schema.ResourceData, m 
 		return pathErr
 	}
 
-	client := clientLayer.NewAttachmentsClient(getSessionContext(d, m), connector)
+	client := clientLayer.NewAttachmentsClient(connector)
 	err := client.Delete(parents[0], parents[1], parents[2], id)
 
 	if err != nil {
