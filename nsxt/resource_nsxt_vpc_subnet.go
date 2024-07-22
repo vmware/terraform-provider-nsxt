@@ -89,13 +89,18 @@ var vpcSubnetSchema = map[string]*metadata.ExtendedSchema{
 	"ip_addresses": {
 		Schema: schema.Schema{
 			Type: schema.TypeList,
-			Elem: &schema.Schema{
-				Type: schema.TypeString,
+			Elem: &metadata.ExtendedSchema{
+				Schema: schema.Schema{
+					Type: schema.TypeString,
+				},
+				Metadata: metadata.Metadata{
+					SchemaType: "string",
+				},
 			},
 			Optional: true,
 		},
 		Metadata: metadata.Metadata{
-			SchemaType:   "array",
+			SchemaType:   "list",
 			SdkFieldName: "IpAddresses",
 		},
 	},
@@ -120,8 +125,9 @@ var vpcSubnetSchema = map[string]*metadata.ExtendedSchema{
 				Schema: map[string]*metadata.ExtendedSchema{
 					"dhcp_relay_config_path": {
 						Schema: schema.Schema{
-							Type:     schema.TypeString,
-							Optional: true,
+							Type:         schema.TypeString,
+							ValidateFunc: validatePolicyPath(),
+							Optional:     true,
 						},
 						Metadata: metadata.Metadata{
 							SchemaType:   "string",
@@ -137,13 +143,18 @@ var vpcSubnetSchema = map[string]*metadata.ExtendedSchema{
 									"dns_server_ips": {
 										Schema: schema.Schema{
 											Type: schema.TypeList,
-											Elem: &schema.Schema{
-												Type: schema.TypeString,
+											Elem: &metadata.ExtendedSchema{
+												Schema: schema.Schema{
+													Type: schema.TypeString,
+												},
+												Metadata: metadata.Metadata{
+													SchemaType: "string",
+												},
 											},
 											Optional: true,
 										},
 										Metadata: metadata.Metadata{
-											SchemaType:   "array",
+											SchemaType:   "list",
 											SdkFieldName: "DnsServerIps",
 										},
 									},
