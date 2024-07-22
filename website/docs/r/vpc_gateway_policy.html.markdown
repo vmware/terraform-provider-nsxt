@@ -13,8 +13,6 @@ This resource is applicable to NSX Policy Manager.
 
 ## Example Usage
 
-## Example Usage
-
 ```hcl
 data "nsxt_policy_project" "demoproj" {
   display_name = "demoproj"
