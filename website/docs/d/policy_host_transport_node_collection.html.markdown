@@ -1,5 +1,5 @@
 ---
-subcategory: "Beta"
+subcategory: "Fabric"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_host_transport_node_collection"
 description: A host transport node collection data source.
@@ -23,7 +23,7 @@ data "nsxt_policy_host_transport_node_collection" "host_transport_node_collectio
 
 * `id` - (Optional) The ID of host transport node collection to retrieve.
 * `display_name` - (Optional) The Display Name prefix of the host transport node collection to retrieve.
-* `site_path` - (Optional) The path of the site which the Transport Node Collection belongs to. `path` field of the existing `nsxt_policy_site` can be used here.
+* `site_path` - (Optional) The path of the site which the Transport Node Collection belongs to.
 
 ## Attributes Reference
 

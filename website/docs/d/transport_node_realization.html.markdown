@@ -1,5 +1,5 @@
 ---
-subcategory: "Beta"
+subcategory: "Realization"
 layout: "nsxt"
 page_title: "NSXT: transport_node_realization"
 description: Transport node resource realization information.
@@ -23,7 +23,7 @@ resource "nsxt_transport_node" "test" {
       transport_zone          = data.nsxt_transport_zone.tz1.id
       transport_zone_profiles = ["52035bb3-ab02-4a08-9884-18631312e50a"]
     }
-    host_switch_profile = [nsxt_policy_uplink_host_switch_profile.hsw_profile1.id]
+    host_switch_profile = [nsxt_policy_uplink_host_switch_profile.hsw_profile1.path]
     pnic {
       device_name = "fp-eth0"
       uplink_name = "uplink1"

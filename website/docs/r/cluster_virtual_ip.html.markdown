@@ -1,5 +1,5 @@
 ---
-subcategory: "Beta"
+subcategory: "Fabric"
 layout: "nsxt"
 page_title: "NSXT: nsxt_cluster_virtual_ip"
 description: A resource to configure virtual IP of NSXT cluster.
