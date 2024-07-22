@@ -108,7 +108,7 @@ func getPolicyGroupSchema(withDomain bool) map[string]*schema.Schema {
 		"description":  getDescriptionSchema(),
 		"revision":     getRevisionSchema(),
 		"tag":          getTagsSchema(),
-		"context":      getContextSchema(false, false, !withDomain),
+		"context":      getContextSchema(!withDomain, false, !withDomain),
 		"group_type": {
 			Type:         schema.TypeString,
 			Description:  "Indicates the group type",
