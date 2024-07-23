@@ -63,26 +63,29 @@ func getPathSchema() *schema.Schema {
 
 func getDisplayNameSchema() *schema.Schema {
 	return &schema.Schema{
-		Type:        schema.TypeString,
-		Description: "Display name for this resource",
-		Required:    true,
+		Type:         schema.TypeString,
+		Description:  "Display name for this resource",
+		Required:     true,
+		ValidateFunc: validation.StringLenBetween(1, 255),
 	}
 }
 
 func getOptionalDisplayNameSchema(isComputed bool) *schema.Schema {
 	return &schema.Schema{
-		Type:        schema.TypeString,
-		Description: "Display name for this resource",
-		Optional:    true,
-		Computed:    isComputed,
+		Type:         schema.TypeString,
+		Description:  "Display name for this resource",
+		Optional:     true,
+		Computed:     isComputed,
+		ValidateFunc: validation.StringLenBetween(0, 255),
 	}
 }
 
 func getDescriptionSchema() *schema.Schema {
 	return &schema.Schema{
-		Type:        schema.TypeString,
-		Description: "Description for this resource",
-		Optional:    true,
+		Type:         schema.TypeString,
+		Description:  "Description for this resource",
+		Optional:     true,
+		ValidateFunc: validation.StringLenBetween(0, 1024),
 	}
 }
 
