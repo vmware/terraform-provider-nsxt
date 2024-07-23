@@ -14,12 +14,29 @@ This resource is applicable to NSX Policy Manager.
 ## Example Usage
 
 ```hcl
+data "nsxt_policy_project" "demoproj" {
+  display_name = "demoproj"
+}
+
+data "nsxt_policy_vpc" "demovpc" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
+  display_name = "vpc1"
+}
+
+
 resource "nsxt_vpc_subnet" "test" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+    vpc_id     = data.nsxt_policy_vpc.demovpc.id
+  }
+
   display_name     = "test-subnet"
   description      = "Test VPC subnet"
   ipv4_subnet_size = 64
-  ip_addresses     = ["192.168.240.10-192.168.240.14"]
-  access_mode      = "Private"
+  ip_addresses     = ["192.168.240.0/24"]
+  access_mode      = "Isolated"
 
 }
 ```
