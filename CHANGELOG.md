@@ -51,6 +51,15 @@ BUG FIXES ON EXPERIMENTAL FEATURES:
 * `resource/nsxt_policy_ldap_identity_source`: Remove `display_name` property as nsx mandates it is equal to `nsx_id`, which is now defined as `Required` ([#1254](https://github.com/vmware/terraform-provider-nsxt/pull/1254))
 * `resource/nsxt_compute_manager`: Remove default from `set_as_oidc_provider` property and set is as `Computed`, since the default depends on NSX version ([#1261](https://github.com/vmware/terraform-provider-nsxt/pull/1261))
 
+NOTE:
+Due to change in release process, several improvements available 3.6.1 and not present in 3.6.2 release:
+* `data/nsxt_policy_vm`, `data/nsxt_policy_vms`, `resource/nsxt_policy_vm_tags`: Improve performance by using search API for NSX 4.1.2 and above ([#1196](https://github.com/vmware/terraform-provider-nsxt/pull/1196))
+* `resource/nsxt_policy_ip_block`: Add `visibility` attribute for NSX 4.2.0 onwards ([#1195](https://github.com/vmware/terraform-provider-nsxt/pull/1195))
+* `resource/nsxt_policy_vm_tags`: Add support for fixed segments in VM interface tagging ([#1187](https://github.com/vmware/terraform-provider-nsxt/pull/1187))
+* `data/nsxt_policy_vm`, `data/nsxt_policy_vms`, `resource/nsxt_policy_vm_tags`: Allow non-admin user to pull VMs and modify VM tags, by using a new API available with NSX 4.1.1 onwards ([#1187](https://github.com/vmware/terraform-provider-nsxt/pull/1187))
+
+If your code relies on those improvements, please specify 3.6.1 provider version in your terraform configuration. All features will be aligned with next release. We apologize for the inconveniece.
+
 ## 3.6.0 (April 16, 2024)
 
 IMPROVEMENTS:
