@@ -20,7 +20,7 @@ data "nsxt_policy_project" "demoproj" {
   display_name = "demoproj"
 }
 
-data "nsxt_policy_vpc" "demovpc" {
+data "nsxt_vpc" "demovpc" {
   context {
     project_id = data.nsxt_policy_project.demoproj.id
   }
@@ -30,7 +30,7 @@ data "nsxt_policy_vpc" "demovpc" {
 resource "nsxt_vpc_gateway_policy" "test" {
   context {
     project_id = data.nsxt_policy_project.demoproj.id
-    vpc_id     = data.nsxt_policy_vpc.demovpc.id
+    vpc_id     = data.nsxt_vpc.demovpc.id
   }
   display_name    = "tf-gw-policy"
   description     = "Terraform provisioned Gateway Policy"
