@@ -242,7 +242,8 @@ data "nsxt_vpc_nat" "test" {
 
 resource "nsxt_vpc_ip_address_allocation" "test" {
   %s
-  display_name = "%s"
+  allocation_size = 1
+  display_name    = "%s"
 }
 `, testAccNsxtPolicyMultitenancyContext(), testAccNsxtPolicyMultitenancyContext(), accTestVpcNatIPAllocationTestName)
 }
@@ -261,7 +262,7 @@ resource "nsxt_vpc_nat_rule" "test" {
   description         = "%s"
   translated_network  = "%s"
   logging             = %s
-  destination_network = nsxt_vpc_ip_address_allocation.test.allocation_ip
+  destination_network = nsxt_vpc_ip_address_allocation.test.allocation_ips
   action              = "%s"
   firewall_match      = "%s"
   source_network      = "%s"
@@ -280,7 +281,7 @@ func testAccNsxtVpcNatRuleMinimalistic() string {
 resource "nsxt_vpc_nat_rule" "test" {
   parent_path         = data.nsxt_vpc_nat.test.path
   display_name        = "%s"
-  destination_network = nsxt_vpc_ip_address_allocation.test.allocation_ip
+  destination_network = nsxt_vpc_ip_address_allocation.test.allocation_ips
   translated_network  = "%s"
   action              = "%s"
 }`, accTestVpcNatRuleUpdateAttributes["display_name"], accTestVpcNatRuleUpdateAttributes["translated_network"], accTestVpcNatRuleUpdateAttributes["action"])
@@ -291,7 +292,7 @@ func testAccNsxtVpcNatRuleSnatTemplate(name string) string {
 resource "nsxt_vpc_nat_rule" "test" {
   parent_path         = data.nsxt_vpc_nat.test.path
   display_name        = "%s"
-  translated_network  = nsxt_vpc_ip_address_allocation.test.allocation_ip
+  translated_network  = nsxt_vpc_ip_address_allocation.test.allocation_ips
   action              = "SNAT"
 }`, name)
 }
@@ -302,7 +303,7 @@ resource "nsxt_vpc_nat_rule" "test" {
   parent_path         = data.nsxt_vpc_nat.test.path
   display_name        = "%s"
   source_network      = "%s"
-  translated_network  = nsxt_vpc_ip_address_allocation.test.allocation_ip
+  translated_network  = nsxt_vpc_ip_address_allocation.test.allocation_ips
   action              = "REFLEXIVE"
 }`, name, sourceIP)
 }

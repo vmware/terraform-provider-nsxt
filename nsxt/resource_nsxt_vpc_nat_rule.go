@@ -40,13 +40,13 @@ var policyVpcNatRuleSchema = map[string]*metadata.ExtendedSchema{
 	"parent_path":  metadata.GetExtendedSchema(getPolicyPathSchema(true, true, "Policy path of the parent")),
 	"translated_network": {
 		Schema: schema.Schema{
-			Type:     schema.TypeString,
-			Optional: true,
+			Type:         schema.TypeString,
+			ValidateFunc: validateCidrOrIPOrRangeList(),
+			Optional:     true,
 		},
 		Metadata: metadata.Metadata{
 			SchemaType:   "string",
 			SdkFieldName: "TranslatedNetwork",
-			OmitIfEmpty:  true,
 		},
 	},
 	"logging": {
@@ -61,13 +61,13 @@ var policyVpcNatRuleSchema = map[string]*metadata.ExtendedSchema{
 	},
 	"destination_network": {
 		Schema: schema.Schema{
-			Type:     schema.TypeString,
-			Optional: true,
+			Type:         schema.TypeString,
+			ValidateFunc: validateCidrOrIPOrRangeList(),
+			Optional:     true,
 		},
 		Metadata: metadata.Metadata{
 			SchemaType:   "string",
 			SdkFieldName: "DestinationNetwork",
-			OmitIfEmpty:  true,
 		},
 	},
 	"action": {
@@ -95,8 +95,9 @@ var policyVpcNatRuleSchema = map[string]*metadata.ExtendedSchema{
 	},
 	"source_network": {
 		Schema: schema.Schema{
-			Type:     schema.TypeString,
-			Optional: true,
+			Type:         schema.TypeString,
+			ValidateFunc: validateCidrOrIPOrRangeList(),
+			Optional:     true,
 		},
 		Metadata: metadata.Metadata{
 			SchemaType:   "string",

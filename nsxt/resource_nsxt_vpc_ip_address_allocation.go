@@ -18,17 +18,17 @@ import (
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
 )
 
-var vpcIPAddressAllocationIPAddressTypeValues = []string{
+var vpcIpAddressAllocationIpAddressTypeValues = []string{
 	model.VpcIpAddressAllocation_IP_ADDRESS_TYPE_IPV4,
 	model.VpcIpAddressAllocation_IP_ADDRESS_TYPE_IPV6,
 }
 
-var vpcIPAddressAllocationIPAddressBlockVisibilityValues = []string{
+var vpcIpAddressAllocationIpAddressBlockVisibilityValues = []string{
 	model.VpcIpAddressAllocation_IP_ADDRESS_BLOCK_VISIBILITY_EXTERNAL,
 	model.VpcIpAddressAllocation_IP_ADDRESS_BLOCK_VISIBILITY_PRIVATE,
 }
 
-var vpcIPAddressAllocationSchema = map[string]*metadata.ExtendedSchema{
+var vpcIpAddressAllocationSchema = map[string]*metadata.ExtendedSchema{
 	"nsx_id":       metadata.GetExtendedSchema(getNsxIDSchema()),
 	"path":         metadata.GetExtendedSchema(getPathSchema()),
 	"display_name": metadata.GetExtendedSchema(getDisplayNameSchema()),
@@ -36,10 +36,34 @@ var vpcIPAddressAllocationSchema = map[string]*metadata.ExtendedSchema{
 	"revision":     metadata.GetExtendedSchema(getRevisionSchema()),
 	"tag":          metadata.GetExtendedSchema(getTagsSchema()),
 	"context":      metadata.GetExtendedSchema(getContextSchema(true, false, true)),
+	"allocation_ips": {
+		Schema: schema.Schema{
+			Type:         schema.TypeString,
+			ValidateFunc: validateCidrOrIPOrRange(),
+			Optional:     true,
+			Computed:     true,
+		},
+		Metadata: metadata.Metadata{
+			SchemaType:   "string",
+			SdkFieldName: "AllocationIps",
+			OmitIfEmpty:  true,
+		},
+	},
+	"allocation_size": {
+		Schema: schema.Schema{
+			Type:     schema.TypeInt,
+			Optional: true,
+			Computed: true,
+		},
+		Metadata: metadata.Metadata{
+			SchemaType:   "int",
+			SdkFieldName: "AllocationSize",
+		},
+	},
 	"ip_address_type": {
 		Schema: schema.Schema{
 			Type:         schema.TypeString,
-			ValidateFunc: validation.StringInSlice(vpcIPAddressAllocationIPAddressTypeValues, false),
+			ValidateFunc: validation.StringInSlice(vpcIpAddressAllocationIpAddressTypeValues, false),
 			Optional:     true,
 			Default:      model.VpcIpAddressAllocation_IP_ADDRESS_TYPE_IPV4,
 		},
@@ -48,22 +72,10 @@ var vpcIPAddressAllocationSchema = map[string]*metadata.ExtendedSchema{
 			SdkFieldName: "IpAddressType",
 		},
 	},
-	"allocation_ip": {
-		Schema: schema.Schema{
-			Type:     schema.TypeString,
-			Optional: true,
-			Computed: true,
-		},
-		Metadata: metadata.Metadata{
-			SchemaType:   "string",
-			SdkFieldName: "AllocationIp",
-			OmitIfEmpty:  true,
-		},
-	},
 	"ip_address_block_visibility": {
 		Schema: schema.Schema{
 			Type:         schema.TypeString,
-			ValidateFunc: validation.StringInSlice(vpcIPAddressAllocationIPAddressBlockVisibilityValues, false),
+			ValidateFunc: validation.StringInSlice(vpcIpAddressAllocationIpAddressBlockVisibilityValues, false),
 			Optional:     true,
 			Default:      model.VpcIpAddressAllocation_IP_ADDRESS_BLOCK_VISIBILITY_EXTERNAL,
 		},
@@ -72,22 +84,33 @@ var vpcIPAddressAllocationSchema = map[string]*metadata.ExtendedSchema{
 			SdkFieldName: "IpAddressBlockVisibility",
 		},
 	},
+	"ip_block": {
+		Schema: schema.Schema{
+			Type:         schema.TypeString,
+			Optional:     true,
+			ValidateFunc: validatePolicyPath(),
+		},
+		Metadata: metadata.Metadata{
+			SchemaType:   "string",
+			SdkFieldName: "IpBlock",
+		},
+	},
 }
 
-func resourceNsxtVpcIPAddressAllocation() *schema.Resource {
+func resourceNsxtVpcIpAddressAllocation() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNsxtVpcIPAddressAllocationCreate,
-		Read:   resourceNsxtVpcIPAddressAllocationRead,
-		Update: resourceNsxtVpcIPAddressAllocationUpdate,
-		Delete: resourceNsxtVpcIPAddressAllocationDelete,
+		Create: resourceNsxtVpcIpAddressAllocationCreate,
+		Read:   resourceNsxtVpcIpAddressAllocationRead,
+		Update: resourceNsxtVpcIpAddressAllocationUpdate,
+		Delete: resourceNsxtVpcIpAddressAllocationDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathResourceImporter,
+			State: nsxtVPCPathResourceImporter,
 		},
-		Schema: metadata.GetSchemaFromExtendedSchema(vpcIPAddressAllocationSchema),
+		Schema: metadata.GetSchemaFromExtendedSchema(vpcIpAddressAllocationSchema),
 	}
 }
 
-func resourceNsxtVpcIPAddressAllocationExists(sessionContext utl.SessionContext, parentPath string, id string, connector client.Connector) (bool, error) {
+func resourceNsxtVpcIpAddressAllocationExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
 	var err error
 	parents := getVpcParentsFromContext(sessionContext)
 	client := clientLayer.NewIpAddressAllocationsClient(connector)
@@ -103,10 +126,10 @@ func resourceNsxtVpcIPAddressAllocationExists(sessionContext utl.SessionContext,
 	return false, logAPIError("Error retrieving resource", err)
 }
 
-func resourceNsxtVpcIPAddressAllocationCreate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtVpcIpAddressAllocationCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
-	id, err := getOrGenerateIDWithParent(d, m, resourceNsxtVpcIPAddressAllocationExists)
+	id, err := getOrGenerateID2(d, m, resourceNsxtVpcIpAddressAllocationExists)
 	if err != nil {
 		return err
 	}
@@ -123,7 +146,7 @@ func resourceNsxtVpcIPAddressAllocationCreate(d *schema.ResourceData, m interfac
 	}
 
 	elem := reflect.ValueOf(&obj).Elem()
-	if err := metadata.SchemaToStruct(elem, d, vpcIPAddressAllocationSchema, "", nil); err != nil {
+	if err := metadata.SchemaToStruct(elem, d, vpcIpAddressAllocationSchema, "", nil); err != nil {
 		return err
 	}
 
@@ -137,10 +160,10 @@ func resourceNsxtVpcIPAddressAllocationCreate(d *schema.ResourceData, m interfac
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
-	return resourceNsxtVpcIPAddressAllocationRead(d, m)
+	return resourceNsxtVpcIpAddressAllocationRead(d, m)
 }
 
-func resourceNsxtVpcIPAddressAllocationRead(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtVpcIpAddressAllocationRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
 	id := d.Id()
@@ -163,10 +186,10 @@ func resourceNsxtVpcIPAddressAllocationRead(d *schema.ResourceData, m interface{
 	d.Set("path", obj.Path)
 
 	elem := reflect.ValueOf(&obj).Elem()
-	return metadata.StructToSchema(elem, d, vpcIPAddressAllocationSchema, "", nil)
+	return metadata.StructToSchema(elem, d, vpcIpAddressAllocationSchema, "", nil)
 }
 
-func resourceNsxtVpcIPAddressAllocationUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtVpcIpAddressAllocationUpdate(d *schema.ResourceData, m interface{}) error {
 
 	connector := getPolicyConnector(m)
 
@@ -190,7 +213,7 @@ func resourceNsxtVpcIPAddressAllocationUpdate(d *schema.ResourceData, m interfac
 	}
 
 	elem := reflect.ValueOf(&obj).Elem()
-	if err := metadata.SchemaToStruct(elem, d, vpcIPAddressAllocationSchema, "", nil); err != nil {
+	if err := metadata.SchemaToStruct(elem, d, vpcIpAddressAllocationSchema, "", nil); err != nil {
 		return err
 	}
 	client := clientLayer.NewIpAddressAllocationsClient(connector)
@@ -199,10 +222,10 @@ func resourceNsxtVpcIPAddressAllocationUpdate(d *schema.ResourceData, m interfac
 		return handleUpdateError("VpcIpAddressAllocation", id, err)
 	}
 
-	return resourceNsxtVpcIPAddressAllocationRead(d, m)
+	return resourceNsxtVpcIpAddressAllocationRead(d, m)
 }
 
-func resourceNsxtVpcIPAddressAllocationDelete(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtVpcIpAddressAllocationDelete(d *schema.ResourceData, m interface{}) error {
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining VpcIpAddressAllocation ID")

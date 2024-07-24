@@ -510,7 +510,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_gateway_connection":                           resourceNsxtPolicyGatewayConnection(),
 			"nsxt_vpc":                                                 resourceNsxtVpc(),
 			"nsxt_vpc_nat_rule":                                        resourceNsxtPolicyVpcNatRule(),
-			"nsxt_vpc_ip_address_allocation":                           resourceNsxtVpcIPAddressAllocation(),
+			"nsxt_vpc_ip_address_allocation":                           resourceNsxtVpcIpAddressAllocation(),
 		},
 
 		ConfigureFunc: providerConfigure,
