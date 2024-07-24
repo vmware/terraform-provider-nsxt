@@ -409,10 +409,10 @@ func TestAccResourceNsxtPolicyLBVirtualServer_withRules(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.session_reused", "IGNORE"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.used_protocol", "SSL_V3"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.used_protocol", "TLS_V1_2"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.used_ssl_cipher", "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.session_reused", "IGNORE"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.used_protocol", "SSL_V3"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.used_protocol", "TLS_V1_2"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.client_certificate_issuer_dn.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.client_certificate_issuer_dn.0.issuer_dn", "something"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.client_certificate_issuer_dn.0.match_type", "REGEX"),
@@ -425,7 +425,7 @@ func TestAccResourceNsxtPolicyLBVirtualServer_withRules(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "rule.11.condition.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.11.condition.0.http_ssl.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.11.condition.0.http_ssl.0.session_reused", "IGNORE"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.11.condition.0.http_ssl.0.used_protocol", "SSL_V3"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.11.condition.0.http_ssl.0.used_protocol", "TLS_V1_2"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.11.condition.0.http_ssl.0.used_ssl_cipher", "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"),
 
 					resource.TestCheckResourceAttr(testResourceName, "rule.12.display_name", "variable_persistence_on_test"),
@@ -587,10 +587,10 @@ func TestAccResourceNsxtPolicyLBVirtualServer_withRules(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.session_reused", "IGNORE"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.used_protocol", "SSL_V3"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.used_protocol", "TLS_V1_2"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.used_ssl_cipher", "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.session_reused", "IGNORE"),
-					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.used_protocol", "SSL_V3"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.used_protocol", "TLS_V1_2"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.client_certificate_issuer_dn.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.client_certificate_issuer_dn.0.issuer_dn", "something"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.10.condition.0.http_ssl.0.client_certificate_issuer_dn.0.match_type", "REGEX"),
@@ -1102,7 +1102,7 @@ resource "nsxt_policy_lb_virtual_server" "test" {
 	condition {
 	  http_ssl {
 	    session_reused = "IGNORE"
-	    used_protocol = "SSL_V3"
+	    used_protocol = "TLS_V1_2"
 	    used_ssl_cipher = "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"	
 	    client_certificate_issuer_dn {
 		  issuer_dn = "something"
@@ -1127,7 +1127,7 @@ resource "nsxt_policy_lb_virtual_server" "test" {
 	}
 	condition {
 	  http_ssl {
-	    used_protocol = "SSL_V3"
+	    used_protocol = "TLS_V1_2"
 	    used_ssl_cipher = "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"	
 	  }
 	}
