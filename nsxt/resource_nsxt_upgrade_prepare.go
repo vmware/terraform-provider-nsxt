@@ -417,6 +417,9 @@ func waitForBundleUpload(m interface{}, bundleID string, timeout int) error {
 			}
 
 			log.Printf("[DEBUG] Current status for uploading bundle %s is %s", bundleID, *state.Status)
+			if *state.Status == nsxModel.UpgradeBundleUploadStatus_STATUS_FAILED {
+				return state, nsxModel.UpgradeBundleUploadStatus_STATUS_FAILED, fmt.Errorf(*state.DetailedStatus)
+			}
 
 			return state, *state.Status, nil
 		},
