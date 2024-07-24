@@ -494,6 +494,10 @@ func waitUpgradeForStatus(upgradeClientSet *upgradeClientSet, component *string,
 				return status, model.ComponentUpgradeStatus_STATUS_FAILED, err
 			}
 			log.Printf("[DEBUG] Current upgrade status: %s", status.Status)
+			// Status retrieval was successful but upgrade has failed - report an error
+			if status.Status == model.ComponentUpgradeStatus_STATUS_FAILED {
+				return status, status.Status, fmt.Errorf("N/A")
+			}
 			return status, status.Status, nil
 		},
 		Timeout:      time.Duration(upgradeClientSet.Timeout) * time.Second,
