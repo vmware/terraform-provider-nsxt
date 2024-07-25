@@ -262,6 +262,11 @@ func testAccGetSessionContext() tf_api.SessionContext {
 	return tf_api.SessionContext{ProjectID: projectID, ClientType: clientType, VPCID: vpcID}
 }
 
+func testAccGetProjectContext() tf_api.SessionContext {
+	projectID := os.Getenv("NSXT_PROJECT_ID")
+	return tf_api.SessionContext{ProjectID: projectID, ClientType: tf_api.Multitenancy}
+}
+
 func testAccIsGlobalManager2() tf_api.ClientType {
 	if testAccIsVPC() {
 		return tf_api.VPC
@@ -717,6 +722,15 @@ func testAccNsxtPolicyMultitenancyContext() string {
 `, projectID)
 	}
 	return ""
+}
+
+func testAccNsxtProjectContext() string {
+	projectID := os.Getenv("NSXT_PROJECT_ID")
+	return fmt.Sprintf(`
+  context {
+    project_id = "%s"
+  }
+`, projectID)
 }
 
 func testAccResourceNsxtPolicyImportIDRetriever(resourceID string) func(*terraform.State) (string, error) {

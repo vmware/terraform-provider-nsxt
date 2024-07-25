@@ -55,7 +55,7 @@ func testAccDataSourceNsxtVPCCreate(name string) error {
 	}
 
 	ipBlockID := newUUID()
-	err = testAccDataSourceNsxtPolicyIPBlockCreate(name, ipBlockID, "192.168.240.0/24", true)
+	err = testAccDataSourceNsxtPolicyIPBlockCreate(testAccGetProjectContext(), name, ipBlockID, "192.168.240.0/24", true)
 	if err != nil {
 		return err
 	}
@@ -107,14 +107,15 @@ func testAccDataSourceNsxtVPCDeleteByName(name string) error {
 			if err != nil {
 				return handleDeleteError("VPC", *objInList.Id, err)
 			}
-			return testAccDataSourceNsxtPolicyIPBlockDeleteByName(name)
+			return testAccDataSourceNsxtPolicyIPBlockDeleteByName(testAccGetProjectContext(), name)
 		}
 	}
 	return fmt.Errorf("error while deleting VPC '%s': resource not found", name)
 }
 
 func testAccNsxtVPCReadTemplate(name string) string {
-	context := testAccNsxtPolicyMultitenancyContext()
+	// We just need the project context as VPC is not under VPC, but the VPC itself
+	context := testAccNsxtProjectContext()
 	return fmt.Sprintf(`
 data "nsxt_policy_ip_block" "test" {
 %s
