@@ -36,6 +36,7 @@ The following arguments are supported:
   * `edge_cluster_paths` - (Optional) The edge cluster on which the networking elements for the Org will be created.
   * `site_path` - (Optional) This represents the path of the site which is managed by Global Manager. For the local manager, if set, this needs to point to 'default'.
 * `tier0_gateway_paths` - (Optional) The tier 0 has to be pre-created before Project is created. The tier 0 typically provides connectivity to external world. List of sites for Project has to be subset of sites where the tier 0 spans.
+* `external_ipv4_blocks` - (Optional) PolicyPath of public ip block
 
 
 ## Attributes Reference

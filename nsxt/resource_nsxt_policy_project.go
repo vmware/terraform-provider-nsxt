@@ -55,6 +55,11 @@ func resourceNsxtPolicyProject() *schema.Resource {
 				Elem:     getElemPolicyPathSchema(),
 				Optional: true,
 			},
+			"external_ipv4_blocks": {
+				Type:     schema.TypeList,
+				Elem:     getElemPolicyPathSchema(),
+				Optional: true,
+			},
 		},
 	}
 }
@@ -96,13 +101,15 @@ func resourceNsxtPolicyProjectPatch(connector client.Connector, d *schema.Resour
 		siteInfos = append(siteInfos, obj)
 	}
 	tier0s := getStringListFromSchemaList(d, "tier0_gateway_paths")
+	externalIPV4Blocks := getStringListFromSchemaList(d, "external_ipv4_blocks")
 
 	obj := model.Project{
-		DisplayName: &displayName,
-		Description: &description,
-		Tags:        tags,
-		SiteInfos:   siteInfos,
-		Tier0s:      tier0s,
+		DisplayName:        &displayName,
+		Description:        &description,
+		Tags:               tags,
+		SiteInfos:          siteInfos,
+		Tier0s:             tier0s,
+		ExternalIpv4Blocks: externalIPV4Blocks,
 	}
 
 	if shortID != "" {
@@ -168,6 +175,7 @@ func resourceNsxtPolicyProjectRead(d *schema.ResourceData, m interface{}) error 
 	}
 	d.Set("site_info", siteInfosList)
 	d.Set("tier0_gateway_paths", obj.Tier0s)
+	d.Set("external_ipv4_blocks", obj.ExternalIpv4Blocks)
 
 	return nil
 }

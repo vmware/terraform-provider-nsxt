@@ -125,6 +125,39 @@ func TestAccResourceNsxtPolicyProject_basic(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyProject_withIPBlock(t *testing.T) {
+	testResourceName := "nsxt_policy_project.test"
+	resourceName := getAccTestResourceName()
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyLocalManager(t)
+			testAccNSXVersion(t, "4.1.2")
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyProjectCheckDestroy(state, resourceName)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyProjectTemplateWithIPBlock(resourceName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyProjectExists(accTestPolicyProjectCreateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", resourceName),
+					//TODO: add site info validation
+					resource.TestCheckResourceAttr(testResourceName, "tier0_gateway_paths.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "external_ipv4_blocks.#", "1"),
+
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtPolicyProject_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_project.test"
@@ -228,6 +261,27 @@ resource "nsxt_policy_project" "test" {
     tag   = "tag1"
   }
 }`, getTier0RouterName(), attrMap["display_name"], attrMap["description"], shortIDSpec, t0GW)
+}
+
+func testAccNsxtPolicyProjectTemplateWithIPBlock(displayName string) string {
+	return fmt.Sprintf(`
+data "nsxt_policy_tier0_gateway" "test" {
+  display_name = "%s"
+}
+resource "nsxt_policy_ip_block" "block1" {
+  display_name = "ip-block1"
+  cidr         = "10.100.100.0/23"
+  visibility   = "EXTERNAL"
+}
+resource "nsxt_policy_project" "test" {
+  display_name = "%s"
+  tier0_gateway_paths = [data.nsxt_policy_tier0_gateway.test.path]
+  external_ipv4_blocks = [nsxt_policy_ip_block.block1.path]
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+}`, getTier0RouterName(), displayName)
 }
 
 func testAccNsxtPolicyProjectMinimalistic() string {
