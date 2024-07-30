@@ -86,10 +86,6 @@ func resourceNsxtPolicyIPAddressAllocationCreate(d *schema.ResourceData, m inter
 		return policyResourceNotSupportedError()
 	}
 
-	if client == nil {
-		return policyResourceNotSupportedError()
-	}
-
 	poolID := getPolicyIDFromPath(d.Get("pool_path").(string))
 
 	id := d.Get("nsx_id").(string)
@@ -141,10 +137,6 @@ func resourceNsxtPolicyIPAddressAllocationRead(d *schema.ResourceData, m interfa
 		return policyResourceNotSupportedError()
 	}
 
-	if client == nil {
-		return policyResourceNotSupportedError()
-	}
-
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining IPAddressAllocation ID")
@@ -192,10 +184,6 @@ func resourceNsxtPolicyIPAddressAllocationRead(d *schema.ResourceData, m interfa
 func resourceNsxtPolicyIPAddressAllocationUpdate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	client := ippools.NewIpAllocationsClient(getSessionContext(d, m), connector)
-	if client == nil {
-		return policyResourceNotSupportedError()
-	}
-
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
