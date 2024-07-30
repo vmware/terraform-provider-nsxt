@@ -25,7 +25,7 @@ func TestAccResourceNsxtVPCGroup_basicImport(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyGroupIPAddressImportTemplate(name, resourceName, true),
+				Config: testAccNsxtVPCGroupAddressCreateTemplate(name),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -53,7 +53,7 @@ func TestAccResourceNsxtVPCGroup_addressCriteria(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtVPCGroupAddressCreateTemplate(name, resourceName, true),
+				Config: testAccNsxtVPCGroupAddressCreateTemplate(name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -69,7 +69,7 @@ func TestAccResourceNsxtVPCGroup_addressCriteria(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtVPCGroupAddressUpdateTemplate(name, resourceName, true),
+				Config: testAccNsxtVPCGroupAddressUpdateTemplate(name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -112,13 +112,10 @@ func testAccNsxtVPCGroupCheckDestroy(state *terraform.State, displayName string)
 	return nil
 }
 
-func testAccNsxtVPCGroupAddressCreateTemplate(name, resourceName string, withContext bool) string {
-	context := ""
-	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
-	}
+func testAccNsxtVPCGroupAddressCreateTemplate(name string) string {
+	context := testAccNsxtPolicyMultitenancyContext()
 	return fmt.Sprintf(`
-resource "%s" "test" {
+resource "nsxt_vpc_group" "test" {
 %s
   display_name = "%s"
   description  = "Acceptance Test"
@@ -149,16 +146,20 @@ resource "%s" "test" {
     tag   = "tag2"
   }
 }
-`, resourceName, context, name)
+
+data "nsxt_vpc_group" "test" {
+%s
+  display_name = "%s"
+
+  depends_on = [nsxt_vpc_group.test]
+}
+`, context, name, context, name)
 }
 
-func testAccNsxtVPCGroupAddressUpdateTemplate(name, resourceName string, withContext bool) string {
-	context := ""
-	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
-	}
+func testAccNsxtVPCGroupAddressUpdateTemplate(name string) string {
+	context := testAccNsxtPolicyMultitenancyContext()
 	return fmt.Sprintf(`
-resource "%s" "test" {
+resource "nsxt_vpc_group" "test" {
 %s
   display_name = "%s"
   description  = "Acceptance Test"
@@ -169,5 +170,5 @@ resource "%s" "test" {
     }
   }
 }
-`, resourceName, context, name)
+`, context, name)
 }
