@@ -55,6 +55,8 @@ var conditionMemberTypeValues = []string{
 	model.Condition_MEMBER_TYPE_KUBERNETESGATEWAY,
 	model.Condition_MEMBER_TYPE_KUBERNETESSERVICE,
 	model.Condition_MEMBER_TYPE_KUBERNETESNODE,
+	model.Condition_MEMBER_TYPE_VPCSUBNETPORT,
+	model.Condition_MEMBER_TYPE_VPCSUBNET,
 }
 
 var conditionOperatorValues = []string{
