@@ -14,10 +14,21 @@ This data source is applicable to NSX Policy Manager.
 ## Example Usage
 
 ```hcl
+data "nsxt_policy_project" "demoproj" {
+  display_name = "demoproj"
+}
+
+data "nsxt_vpc" "demovpc" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
+  display_name = "vpc1"
+}
+
 data "nsxt_vpc_group" "test" {
   context {
-    project_id = "dev"
-    vpc_id     = "test"
+    project_id = data.nsxt_policy_project.demoproj.id
+    vpc_id     = data.nsxt_vpc.demovpc.id
   }
   display_name = "group1"
 }
