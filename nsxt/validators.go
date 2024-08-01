@@ -423,6 +423,22 @@ func validatePolicyPath() schema.SchemaValidateFunc {
 	}
 }
 
+func validateID() schema.SchemaValidateFunc {
+	return func(i interface{}, k string) (s []string, es []error) {
+		v, ok := i.(string)
+		if !ok {
+			es = append(es, fmt.Errorf("expected type of %s to be string", k))
+			return
+		}
+
+		if !isValidID(v) {
+			es = append(es, fmt.Errorf("invalid ID atrribute: %s", v))
+		}
+
+		return
+	}
+}
+
 func validateVLANId(i interface{}, k string) (s []string, es []error) {
 	var vlan int
 	vlan, ok := i.(int)

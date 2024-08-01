@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"regexp"
 	"strings"
 	"time"
 
@@ -445,6 +446,14 @@ func isPolicyPath(policyPath string) bool {
 		return false
 	}
 	return true
+}
+
+func isValidID(id string) bool {
+	v, err := regexp.MatchString("^[0-9a-zA-Z_\\-]+$", id)
+	if err != nil {
+		return false
+	}
+	return v
 }
 
 func getPolicyIDFromPath(path string) string {
