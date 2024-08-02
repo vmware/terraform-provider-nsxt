@@ -23,15 +23,41 @@ var gatewayConnectionSchema = map[string]*metadata.ExtendedSchema{
 	"description":  metadata.GetExtendedSchema(getDescriptionSchema()),
 	"revision":     metadata.GetExtendedSchema(getRevisionSchema()),
 	"tag":          metadata.GetExtendedSchema(getTagsSchema()),
-	"advertise_outbound_route_filter": {
+	"advertise_outbound_route_filters": {
 		Schema: schema.Schema{
-			Type:         schema.TypeString,
-			ValidateFunc: validatePolicyPath(),
-			Optional:     true,
+			Type: schema.TypeList,
+			Elem: &metadata.ExtendedSchema{
+				Schema: schema.Schema{
+					Type:         schema.TypeString,
+					ValidateFunc: validatePolicyPath(),
+				},
+				Metadata: metadata.Metadata{
+					SchemaType: "string",
+				},
+			},
+			Optional: true,
 		},
 		Metadata: metadata.Metadata{
-			SchemaType:   "string",
-			SdkFieldName: "AdvertiseOutboundRouteFilter",
+			SchemaType:   "list",
+			SdkFieldName: "AdvertiseOutboundRouteFilters",
+		},
+	},
+	"aggregate_routes": {
+		Schema: schema.Schema{
+			Type: schema.TypeList,
+			Elem: &metadata.ExtendedSchema{
+				Schema: schema.Schema{
+					Type: schema.TypeString,
+				},
+				Metadata: metadata.Metadata{
+					SchemaType: "string",
+				},
+			},
+			Optional: true,
+		},
+		Metadata: metadata.Metadata{
+			SchemaType:   "list",
+			SdkFieldName: "AggregateRoutes",
 		},
 	},
 	"tier0_path": {
@@ -43,19 +69,6 @@ var gatewayConnectionSchema = map[string]*metadata.ExtendedSchema{
 		Metadata: metadata.Metadata{
 			SchemaType:   "string",
 			SdkFieldName: "Tier0Path",
-		},
-	},
-	"aggregate_routes": {
-		Schema: schema.Schema{
-			Type: schema.TypeList,
-			Elem: &schema.Schema{
-				Type: schema.TypeString,
-			},
-			Optional: true,
-		},
-		Metadata: metadata.Metadata{
-			SchemaType:   "array",
-			SdkFieldName: "AggregateRoutes",
 		},
 	},
 }
