@@ -37,12 +37,11 @@ func TestAccResourceNsxtVPCSecurityPolicy_basic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicySecurityPolicyBasic(resourceName, name, comments1, defaultDomain, true),
+				Config: testAccNsxtPolicySecurityPolicyBasic(resourceName, name, comments1, defaultDomain, true, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySecurityPolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
-					resource.TestCheckResourceAttr(testResourceName, "category", "Application"),
 					resource.TestCheckResourceAttr(testResourceName, "comments", comments1),
 					resource.TestCheckResourceAttr(testResourceName, "locked", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "scope.#", "0"),
@@ -54,12 +53,11 @@ func TestAccResourceNsxtVPCSecurityPolicy_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicySecurityPolicyBasic(resourceName, updatedName, comments2, defaultDomain, true),
+				Config: testAccNsxtPolicySecurityPolicyBasic(resourceName, updatedName, comments2, defaultDomain, true, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySecurityPolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
-					resource.TestCheckResourceAttr(testResourceName, "category", "Application"),
 					resource.TestCheckResourceAttr(testResourceName, "comments", comments2),
 					resource.TestCheckResourceAttr(testResourceName, "locked", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "scope.#", "0"),
@@ -70,12 +68,11 @@ func TestAccResourceNsxtVPCSecurityPolicy_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicySecurityPolicyWithRule(resourceName, updatedName, direction1, proto1, tag1, defaultDomain, "", true),
+				Config: testAccNsxtPolicySecurityPolicyWithRule(resourceName, updatedName, direction1, proto1, tag1, defaultDomain, "", true, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySecurityPolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
-					resource.TestCheckResourceAttr(testResourceName, "category", "Application"),
 					resource.TestCheckResourceAttr(testResourceName, "comments", ""),
 					resource.TestCheckResourceAttr(testResourceName, "locked", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "scope.#", "0"),
@@ -93,12 +90,11 @@ func TestAccResourceNsxtVPCSecurityPolicy_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicySecurityPolicyWithRule(resourceName, updatedName, direction2, proto2, tag2, defaultDomain, "", true),
+				Config: testAccNsxtPolicySecurityPolicyWithRule(resourceName, updatedName, direction2, proto2, tag2, defaultDomain, "", true, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySecurityPolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
-					resource.TestCheckResourceAttr(testResourceName, "category", "Application"),
 					resource.TestCheckResourceAttr(testResourceName, "comments", ""),
 					resource.TestCheckResourceAttr(testResourceName, "locked", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "scope.#", "0"),
@@ -125,7 +121,6 @@ func TestAccResourceNsxtVPCSecurityPolicy_basic(t *testing.T) {
 			//		testAccNsxtPolicySecurityPolicyExists(testResourceName, defaultDomain),
 			//		resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
 			//		resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
-			//		resource.TestCheckResourceAttr(testResourceName, "category", "Application"),
 			//		resource.TestCheckResourceAttr(testResourceName, "comments", ""),
 			//		resource.TestCheckResourceAttr(testResourceName, "locked", "false"),
 			//		resource.TestCheckResourceAttr(testResourceName, "scope.#", "0"),
@@ -181,7 +176,7 @@ func TestAccResourceNsxtVPCSecurityPolicy_importBasic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicySecurityPolicyBasic("nsxt_vpc_security_policy", name, "import", defaultDomain, true),
+				Config: testAccNsxtPolicySecurityPolicyBasic("nsxt_vpc_security_policy", name, "import", defaultDomain, true, false),
 			},
 			{
 				ResourceName:      testResourceName,
