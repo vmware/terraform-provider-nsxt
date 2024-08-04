@@ -37,12 +37,11 @@ func TestAccResourceNsxtVPCGatewayPolicy_basic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyGatewayPolicyBasic(resourceName, name, comments1, true),
+				Config: testAccNsxtPolicyGatewayPolicyBasic(resourceName, name, comments1, true, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyGatewayPolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
-					resource.TestCheckResourceAttr(testResourceName, "category", "LocalGatewayRules"),
 					resource.TestCheckResourceAttr(testResourceName, "comments", comments1),
 					resource.TestCheckResourceAttr(testResourceName, "locked", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "sequence_number", "3"),
@@ -53,12 +52,11 @@ func TestAccResourceNsxtVPCGatewayPolicy_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyGatewayPolicyBasic(resourceName, updatedName, comments2, true),
+				Config: testAccNsxtPolicyGatewayPolicyBasic(resourceName, updatedName, comments2, true, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyGatewayPolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
-					resource.TestCheckResourceAttr(testResourceName, "category", "LocalGatewayRules"),
 					resource.TestCheckResourceAttr(testResourceName, "comments", comments2),
 					resource.TestCheckResourceAttr(testResourceName, "locked", "true"),
 					resource.TestCheckResourceAttr(testResourceName, "sequence_number", "3"),
@@ -73,7 +71,6 @@ func TestAccResourceNsxtVPCGatewayPolicy_basic(t *testing.T) {
 					testAccNsxtPolicyGatewayPolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
-					resource.TestCheckResourceAttr(testResourceName, "category", "LocalGatewayRules"),
 					resource.TestCheckResourceAttr(testResourceName, "comments", ""),
 					resource.TestCheckResourceAttr(testResourceName, "locked", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "sequence_number", "3"),
@@ -95,7 +92,6 @@ func TestAccResourceNsxtVPCGatewayPolicy_basic(t *testing.T) {
 					testAccNsxtPolicyGatewayPolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
-					resource.TestCheckResourceAttr(testResourceName, "category", "LocalGatewayRules"),
 					resource.TestCheckResourceAttr(testResourceName, "comments", ""),
 					resource.TestCheckResourceAttr(testResourceName, "locked", "false"),
 					resource.TestCheckResourceAttr(testResourceName, "sequence_number", "3"),
@@ -130,7 +126,7 @@ func TestAccResourceNsxtVPCGatewayPolicy_importBasic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyGatewayPolicyBasic(resourceName, name, "import", true),
+				Config: testAccNsxtPolicyGatewayPolicyBasic(resourceName, name, "import", true, false),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -152,7 +148,6 @@ resource "%s" "test" {
 %s
   display_name    = "%s"
   description     = "Acceptance Test"
-  category        = "LocalGatewayRules"
   locked          = false
   sequence_number = 3
   stateful        = true
