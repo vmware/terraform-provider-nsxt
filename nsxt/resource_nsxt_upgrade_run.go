@@ -16,6 +16,8 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/upgrade"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/upgrade/plan"
+
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
 // Order matters
@@ -351,6 +353,13 @@ func upgradeRunCreateOrUpdate(d *schema.ResourceData, m interface{}) error {
 	if id == "" {
 		id = newUUID()
 	}
+
+	// Validate that upgrade_prepare_id is actually from the nsxt_upgrade_prepare_ready data source
+	upgradePrepareReadyID := d.Get("upgrade_prepare_ready_id").(string)
+	if !util.VerifyVerifiableID(upgradePrepareReadyID, "nsxt_upgrade_prepare_ready") {
+		return fmt.Errorf("value for upgrade_prepare_ready_id is invalid: %s", upgradePrepareReadyID)
+	}
+
 	connector := getPolicyConnectorWithHeaders(m, nil, false, false)
 	upgradeClientSet := newUpgradeClientSet(connector, d)
 

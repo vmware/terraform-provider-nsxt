@@ -131,10 +131,7 @@ func resourceNsxtUpgradePrepare() *schema.Resource {
 }
 
 func resourceNsxtUpgradePrepareCreate(d *schema.ResourceData, m interface{}) error {
-	id := d.Id()
-	if id == "" {
-		id = newUUID()
-	}
+	id := util.GetVerifiableID(newUUID(), "nsxt_upgrade_prepare")
 	err := prepareForUpgrade(d, m)
 	if err != nil {
 		return handleCreateError("NsxtUpgradePrepare", id, err)

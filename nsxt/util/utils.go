@@ -1,7 +1,10 @@
 package util
 
 import (
+	"fmt"
+	"hash/fnv"
 	"log"
+	"strings"
 
 	"github.com/hashicorp/go-version"
 )
@@ -28,4 +31,24 @@ func NsxVersionHigherOrEqual(ver string) bool {
 		return false
 	}
 	return currentVersion.Compare(requestedVersion) >= 0
+}
+
+func hash(s string) uint32 {
+	h := fnv.New32a()
+	h.Write([]byte(s))
+	return h.Sum32()
+}
+
+func GetVerifiableID(id, extra string) string {
+	h := hash(id + extra)
+	return fmt.Sprintf("%s:%x", id, h)
+}
+
+func VerifyVerifiableID(id, extra string) bool {
+	s := strings.Split(id, ":")
+	if len(s) != 2 {
+		return false
+	}
+	h := hash(s[0] + extra)
+	return s[1] == fmt.Sprintf("%x", h)
 }
