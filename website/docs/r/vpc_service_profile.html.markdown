@@ -14,7 +14,15 @@ This resource is applicable to NSX Policy Manager.
 ## Example Usage
 
 ```hcl
+data "nsxt_policy_project" "demoproj" {
+  display_name = "demoproj"
+}
+
 resource "nsxt_vpc_service_profile" "vpc1_service_profile" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
+
   display_name = "vpc1"
   description  = "Terraform provisioned Vpc Service Profile"
 
@@ -49,6 +57,8 @@ The following arguments are supported:
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
+* `context` - (Required) The context which the object belongs to
+  * `project_id` - (Required) The ID of the project which the object belongs to
 * `mac_discovery_profile` - (Optional) Policy path for Mac Discovery Profile
 * `spoof_guard_profile` - (Optional) Policy path for Spoof Guard Profile
 * `ip_discovery_profile` - (Optional) Policy path for IP Discovery Profile
