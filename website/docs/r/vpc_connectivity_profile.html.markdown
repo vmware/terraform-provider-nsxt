@@ -1,7 +1,7 @@
 ---
 subcategory: "VPC"
 layout: "nsxt"
-page_title: "NSXT: nsxt_policy_connectivity_profile"
+page_title: "NSXT: nsxt_vpc_connectivity_profile"
 description: A resource to configure Connectivity Profile for VPC.
 ---
 
@@ -14,7 +14,7 @@ This resource is applicable to NSX Policy Manager.
 ## Example Usage
 
 ```hcl
-resource "nsxt_policy_connectivity_profile" "test" {
+resource "nsxt_vpc_connectivity_profile" "test" {
   context {
     project_id = "dev"
   }
@@ -68,7 +68,7 @@ An existing object can be [imported][docs-import] into this resource, via the fo
 [docs-import]: https://www.terraform.io/cli/import
 
 ```
-terraform import nsxt_policy_connectivity_profile.test PATH
+terraform import nsxt_vpc_connectivity_profile.test PATH
 ```
 
 The above command imports VpcConnectivityProfile named `test` with the NSX policy path `PATH`.
