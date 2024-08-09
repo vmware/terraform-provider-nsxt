@@ -5,6 +5,7 @@ package nsxt
 
 import (
 	"fmt"
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	nsxModel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
@@ -46,6 +47,11 @@ func getPrechecksText(m interface{}, precheckIDs []string) (string, error) {
 }
 
 func dataSourceNsxtUpgradePrepareReadyRead(d *schema.ResourceData, m interface{}) error {
+	// Validate that upgrade_prepare_id is actually from the nsxt_upgrade_prepare resource
+	upgradePrepareID := d.Get("upgrade_prepare_id").(string)
+	if !util.VerifyVerifiableID(upgradePrepareID, "nsxt_upgrade_prepare") {
+		return fmt.Errorf("value for upgrade_prepare_id is invalid: %s", upgradePrepareID)
+	}
 	precheckErrors, err := getPrecheckErrors(m, nil)
 	if err != nil {
 		return fmt.Errorf("Error while reading precheck failures: %v", err)
@@ -80,10 +86,7 @@ func dataSourceNsxtUpgradePrepareReadyRead(d *schema.ResourceData, m interface{}
 	if len(errMessage) > 0 {
 		return fmt.Errorf(errMessage)
 	}
-	objID := d.Get("id").(string)
-	if objID == "" {
-		objID = newUUID()
-	}
+	objID := util.GetVerifiableID(newUUID(), "nsxt_upgrade_prepare_ready")
 	d.SetId(objID)
 
 	return nil
