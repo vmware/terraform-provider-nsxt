@@ -1,5 +1,5 @@
 ---
-subcategory: "Multitenancy"
+subcategory: "VPC"
 layout: "nsxt"
 page_title: "NSXT: vpc"
 description: VPC data source.

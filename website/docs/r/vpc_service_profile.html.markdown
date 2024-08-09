@@ -1,11 +1,11 @@
 ---
 subcategory: "VPC"
 layout: "nsxt"
-page_title: "NSXT: nsxt_policy_service_profile"
+page_title: "NSXT: nsxt_vpc_service_profile"
 description: A resource to configure a VPC Service Profile.
 ---
 
-# nsxt_policy_service_profile
+# nsxt_vpc_service_profile
 
 This resource provides a method for the management of a VPC Service Profile.
 
@@ -14,7 +14,15 @@ This resource is applicable to NSX Policy Manager.
 ## Example Usage
 
 ```hcl
-resource "nsxt_policy_service_profile" "vpc1_service_profile" {
+data "nsxt_policy_project" "demoproj" {
+  display_name = "demoproj"
+}
+
+resource "nsxt_vpc_service_profile" "vpc1_service_profile" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
+
   display_name = "vpc1"
   description  = "Terraform provisioned Vpc Service Profile"
 
@@ -49,6 +57,8 @@ The following arguments are supported:
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
+* `context` - (Required) The context which the object belongs to
+  * `project_id` - (Required) The ID of the project which the object belongs to
 * `mac_discovery_profile` - (Optional) Policy path for Mac Discovery Profile
 * `spoof_guard_profile` - (Optional) Policy path for Spoof Guard Profile
 * `ip_discovery_profile` - (Optional) Policy path for IP Discovery Profile
@@ -85,7 +95,7 @@ An existing object can be [imported][docs-import] into this resource, via the fo
 [docs-import]: https://www.terraform.io/cli/import
 
 ```
-terraform import nsxt_policy_service_profile.test UUID
+terraform import nsxt_vpc_service_profile.test PATH
 ```
 
-The above command imports VpcServiceProfile named `test` with the NSX ID `UUID`.
+The above command imports VPC Service Profile named `test` with the NSX policy path `PATH`.

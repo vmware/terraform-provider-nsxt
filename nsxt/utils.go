@@ -687,7 +687,7 @@ func getContextSchema(isRequired, isComputed, isVPC bool) *schema.Schema {
 			Description:  "Id of the project which the resource belongs to.",
 			Required:     true,
 			ForceNew:     true,
-			ValidateFunc: validation.StringIsNotWhiteSpace,
+			ValidateFunc: validateID(),
 		},
 	}
 	if isVPC {
@@ -696,7 +696,7 @@ func getContextSchema(isRequired, isComputed, isVPC bool) *schema.Schema {
 			Description:  "Id of the VPC which the resource belongs to.",
 			Required:     true,
 			ForceNew:     true,
-			ValidateFunc: validation.StringIsNotWhiteSpace,
+			ValidateFunc: validateID(),
 		}
 	}
 	return &schema.Schema{

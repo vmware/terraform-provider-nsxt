@@ -6,6 +6,7 @@ package nsxt
 import (
 	"fmt"
 	"net"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -191,6 +192,25 @@ func validateSingleIP() schema.SchemaValidateFunc {
 		if !isSingleIP(v) {
 			es = append(es, fmt.Errorf(
 				"expected %s to contain a valid IP, got: %s", k, v))
+		}
+		return
+	}
+}
+
+func validateSingleIPOrHostName() schema.SchemaValidateFunc {
+	return func(i interface{}, k string) (s []string, es []error) {
+		v, ok := i.(string)
+		if !ok {
+			es = append(es, fmt.Errorf("expected type of %s to be string", k))
+			return
+		}
+
+		if !isSingleIP(v) {
+			match, _ := regexp.MatchString(`^[a-zA-Z0-9\.\-]+$`, v)
+			if !match {
+				es = append(es, fmt.Errorf(
+					"expected %s to contain a valid IP or hostname, got: %s", k, v))
+			}
 		}
 		return
 	}
@@ -417,6 +437,22 @@ func validatePolicyPath() schema.SchemaValidateFunc {
 
 		if !isPolicyPath(v) {
 			es = append(es, fmt.Errorf("Invalid policy path: %s", v))
+		}
+
+		return
+	}
+}
+
+func validateID() schema.SchemaValidateFunc {
+	return func(i interface{}, k string) (s []string, es []error) {
+		v, ok := i.(string)
+		if !ok {
+			es = append(es, fmt.Errorf("expected type of %s to be string", k))
+			return
+		}
+
+		if !isValidID(v) {
+			es = append(es, fmt.Errorf("invalid ID atrribute: %s", v))
 		}
 
 		return
