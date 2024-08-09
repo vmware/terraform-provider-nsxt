@@ -20,20 +20,20 @@ func resourceNsxtVPCSecurityPolicy() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: nsxtVPCPathResourceImporter,
 		},
-		Schema: getPolicySecurityPolicySchema(false, true, true, false),
+		Schema: getPolicySecurityPolicySchema(false, true, true, true),
 	}
 }
 
 func resourceNsxtVPCSecurityPolicyCreate(d *schema.ResourceData, m interface{}) error {
-	return resourceNsxtPolicySecurityPolicyGeneralCreate(d, m, true, false)
+	return resourceNsxtPolicySecurityPolicyGeneralCreate(d, m, true, true)
 }
 
 func resourceNsxtVPCSecurityPolicyRead(d *schema.ResourceData, m interface{}) error {
-	return resourceNsxtPolicySecurityPolicyGeneralRead(d, m, true, false)
+	return resourceNsxtPolicySecurityPolicyGeneralRead(d, m, true, true)
 }
 
 func resourceNsxtVPCSecurityPolicyUpdate(d *schema.ResourceData, m interface{}) error {
-	return resourceNsxtPolicySecurityPolicyGeneralUpdate(d, m, true, false)
+	return resourceNsxtPolicySecurityPolicyGeneralUpdate(d, m, true, true)
 }
 
 func resourceNsxtVPCSecurityPolicyDelete(d *schema.ResourceData, m interface{}) error {
