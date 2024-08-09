@@ -506,6 +506,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_share":                                        resourceNsxtPolicyShare(),
 			"nsxt_policy_shared_resource":                              resourceNsxtPolicySharedResource(),
 			"nsxt_policy_gateway_connection":                           resourceNsxtPolicyGatewayConnection(),
+			"nsxt_vpc":                                                 resourceNsxtVpc(),
 		},
 
 		ConfigureFunc: providerConfigure,

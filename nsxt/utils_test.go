@@ -747,10 +747,6 @@ func testAccResourceNsxtPolicyImportIDRetriever(resourceID string) func(*terrafo
 		if !ok {
 			return "", fmt.Errorf("NSX Policy %s resource not found in resources", resourceID)
 		}
-		resourceID := rs.Primary.ID
-		if resourceID == "" {
-			return "", fmt.Errorf("NSX Policy %s resource ID not set in resources", resourceID)
-		}
 		path := rs.Primary.Attributes["path"]
 		if path == "" {
 			return "", fmt.Errorf("NSX Policy %s path not set in resources ", resourceID)
