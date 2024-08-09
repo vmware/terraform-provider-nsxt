@@ -751,3 +751,19 @@ func TestSchemaToStructEmptySlice(t *testing.T) {
 		assert.Equal(t, 0, len(obj.StructList))
 	})
 }
+
+func TestSchemaToStructNilStruct(t *testing.T) {
+	d := schema.TestResourceDataRaw(
+		t, testSchema, map[string]interface{}{
+			"struct_field": []interface{}{nil},
+		})
+
+	obj := testStruct{}
+	elem := reflect.ValueOf(&obj).Elem()
+	err := SchemaToStruct(elem, d, testExtendedSchema, "", nil)
+	assert.NoError(t, err, "unexpected error calling SchemaToStruct")
+
+	t.Run("Struct field with Nil", func(t *testing.T) {
+		assert.Nil(t, obj.StructField)
+	})
+}

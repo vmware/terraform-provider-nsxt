@@ -365,6 +365,12 @@ func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[str
 			nestedObj := reflect.New(item.Metadata.ReflectType)
 			itemList := getItemListForSchemaToStruct(d, item.Metadata.SchemaType, key, parent, parentMap)
 			if len(itemList) == 0 {
+				logger.Printf("[TRACE] Item list empty")
+				continue
+			}
+			if itemList[0] == nil {
+				// empty clause is specified
+				logger.Printf("[TRACE] Item list contains empty value")
 				continue
 			}
 			nestedSchema := itemList[0].(map[string]interface{})
@@ -394,6 +400,9 @@ func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[str
 				}
 
 				for i, v := range itemList {
+					if v == nil {
+						continue
+					}
 					if childElem.Metadata.SchemaType == "int" {
 						sliceElem.Index(i).Set(reflect.ValueOf(v).Convert(reflect.TypeOf(int64(0))))
 					} else {
@@ -409,6 +418,9 @@ func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[str
 				sliceElem.Set(
 					reflect.MakeSlice(reflect.SliceOf(item.Metadata.ReflectType), len(itemList), len(itemList)))
 				for i, childItem := range itemList {
+					if childItem == nil {
+						continue
+					}
 					nestedObj := reflect.New(item.Metadata.ReflectType)
 					nestedSchema := childItem.(map[string]interface{})
 					if err = SchemaToStruct(nestedObj.Elem(), d, childElem.Schema, key, nestedSchema); err != nil {
