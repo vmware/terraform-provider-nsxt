@@ -86,7 +86,10 @@ func resourceNsxtTransitGatewayCreate(d *schema.ResourceData, m interface{}) err
 	parents := getVpcParentsFromContext(getSessionContext(d, m))
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	tags := getPolicyTagsFromSchema(d)
+	tags, tagErr := getValidatedTagsFromSchema(d)
+	if tagErr != nil {
+		return tagErr
+	}
 
 	obj := model.TransitGateway{
 		DisplayName: &displayName,
@@ -150,7 +153,10 @@ func resourceNsxtTransitGatewayUpdate(d *schema.ResourceData, m interface{}) err
 	parents := getVpcParentsFromContext(getSessionContext(d, m))
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
-	tags := getPolicyTagsFromSchema(d)
+	tags, tagErr := getValidatedTagsFromSchema(d)
+	if tagErr != nil {
+		return tagErr
+	}
 
 	revision := int64(d.Get("revision").(int))
 

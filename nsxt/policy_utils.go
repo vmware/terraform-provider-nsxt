@@ -143,7 +143,7 @@ func getIgnoredTagsFromSchema(d *schema.ResourceData) []model.Tag {
 	return getPolicyTagsFromSet(discoveredTags)
 }
 
-func getCustomizedPolicyTagsFromSchema(d *schema.ResourceData, schemaName string) []model.Tag {
+func getCustomizedPolicyTagsFromSchema(d *schema.ResourceData, schemaName string) ([]model.Tag, error) {
 	tags := d.Get(schemaName).(*schema.Set).List()
 	ignoredTags := getIgnoredTagsFromSchema(d)
 	tagList := make([]model.Tag, 0)
@@ -151,6 +151,11 @@ func getCustomizedPolicyTagsFromSchema(d *schema.ResourceData, schemaName string
 		data := tag.(map[string]interface{})
 		tagScope := data["scope"].(string)
 		tagTag := data["tag"].(string)
+
+		if len(tagScope)+len(tagTag) == 0 {
+			return tagList, fmt.Errorf("tag value or scope value needs to be specified")
+
+		}
 		elem := model.Tag{
 			Scope: &tagScope,
 			Tag:   &tagTag}
@@ -160,7 +165,7 @@ func getCustomizedPolicyTagsFromSchema(d *schema.ResourceData, schemaName string
 	if len(ignoredTags) > 0 {
 		tagList = append(tagList, ignoredTags...)
 	}
-	return tagList
+	return tagList, nil
 }
 
 func setIgnoredTagsInSchema(d *schema.ResourceData, scopesToIgnore []string, tags []map[string]interface{}) {
@@ -221,6 +226,11 @@ func setCustomizedPolicyTagsInSchema(d *schema.ResourceData, tags []model.Tag, s
 }
 
 func getPolicyTagsFromSchema(d *schema.ResourceData) []model.Tag {
+	tags, _ := getCustomizedPolicyTagsFromSchema(d, "tag")
+	return tags
+}
+
+func getValidatedTagsFromSchema(d *schema.ResourceData) ([]model.Tag, error) {
 	return getCustomizedPolicyTagsFromSchema(d, "tag")
 }
 

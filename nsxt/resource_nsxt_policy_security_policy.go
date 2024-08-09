@@ -62,7 +62,10 @@ func resourceNsxtPolicySecurityPolicyExistsPartial(domainName string) func(sessi
 }
 
 func policySecurityPolicyBuildAndPatch(d *schema.ResourceData, m interface{}, id string, createFlow, withRule, withDomain bool) error {
-	obj := parentSecurityPolicySchemaToModel(d, id)
+	obj, structErr := parentSecurityPolicySchemaToModel(d, id)
+	if structErr != nil {
+		return structErr
+	}
 	domain := ""
 	if withDomain {
 		domain = d.Get("domain").(string)
