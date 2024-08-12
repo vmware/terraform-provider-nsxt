@@ -41,16 +41,6 @@ var vpcServiceProfileSchema = map[string]*metadata.ExtendedSchema{
 	"revision":     metadata.GetExtendedSchema(getRevisionSchema()),
 	"tag":          metadata.GetExtendedSchema(getTagsSchema()),
 	"context":      metadata.GetExtendedSchema(getContextSchema(true, false, false)),
-	"is_default": {
-		Schema: schema.Schema{
-			Type:     schema.TypeBool,
-			Optional: true,
-		},
-		Metadata: metadata.Metadata{
-			SchemaType:   "bool",
-			SdkFieldName: "IsDefault",
-		},
-	},
 	"mac_discovery_profile": {
 		Schema: schema.Schema{
 			Type:         schema.TypeString,
