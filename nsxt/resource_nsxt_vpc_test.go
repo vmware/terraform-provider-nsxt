@@ -58,10 +58,12 @@ func TestAccResourceNsxtVpc_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "ip_address_type", model.Vpc_IP_ADDRESS_TYPE_IPV4),
 					resource.TestCheckResourceAttr(testResourceName, "vpc_dns_forwarder.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "short_id", accTestVpcCreateAttributes["short_id"]),
-					resource.TestCheckResourceAttr(testResourceName, "load_balancer_vpc_endpoint.#", "0"),
-					// resource.TestCheckResourceAttr(testResourceName, "load_balancer_vpc_endpoint.0.enabled", accTestVpcCreateAttributes["enabled"]),
+					resource.TestCheckResourceAttr(testResourceName, "load_balancer_vpc_endpoint.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "load_balancer_vpc_endpoint.0.enabled", accTestVpcCreateAttributes["enabled"]),
 					resource.TestCheckResourceAttr(testResourceName, "vpc_dns_forwarder.0.enabled", accTestVpcCreateAttributes["enabled"]),
 					resource.TestCheckResourceAttr(testResourceName, "vpc_dns_forwarder.0.listener_ip", accTestVpcCreateAttributes["listener_ip"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "vpc_service_profile"),
+					resource.TestCheckResourceAttrSet(testResourceName, "vpc_connectivity_profile"),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
@@ -78,11 +80,12 @@ func TestAccResourceNsxtVpc_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "ip_address_type", model.Vpc_IP_ADDRESS_TYPE_IPV4),
 					resource.TestCheckResourceAttr(testResourceName, "vpc_dns_forwarder.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "short_id", accTestVpcUpdateAttributes["short_id"]),
-					resource.TestCheckResourceAttr(testResourceName, "load_balancer_vpc_endpoint.#", "0"),
-					// TODO - enable when NSX is fixed
-					// resource.TestCheckResourceAttr(testResourceName, "load_balancer_vpc_endpoint.0.enabled", accTestVpcUpdateAttributes["enabled"]),
+					resource.TestCheckResourceAttr(testResourceName, "load_balancer_vpc_endpoint.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "load_balancer_vpc_endpoint.0.enabled", accTestVpcUpdateAttributes["enabled"]),
 					resource.TestCheckResourceAttr(testResourceName, "vpc_dns_forwarder.0.enabled", accTestVpcUpdateAttributes["enabled"]),
 					resource.TestCheckResourceAttr(testResourceName, "vpc_dns_forwarder.0.listener_ip", accTestVpcUpdateAttributes["listener_ip"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "vpc_service_profile"),
+					resource.TestCheckResourceAttrSet(testResourceName, "vpc_connectivity_profile"),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
@@ -93,6 +96,9 @@ func TestAccResourceNsxtVpc_basic(t *testing.T) {
 				Config: testAccNsxtVpcMinimalistic(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtVpcExists(accTestVpcCreateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttrSet(testResourceName, "vpc_service_profile"),
+					resource.TestCheckResourceAttrSet(testResourceName, "vpc_connectivity_profile"),
+					resource.TestCheckResourceAttr(testResourceName, "load_balancer_vpc_endpoint.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -176,6 +182,29 @@ func testAccNsxtVpcCheckDestroy(state *terraform.State, displayName string) erro
 	return nil
 }
 
+var testAccNsxtVpcHelper = getAccTestResourceName()
+
+func testAccNsxtVpcPrerequisites() string {
+	return testAccNsxtVpcConnectivityProfilePrerequisite() + fmt.Sprintf(`
+resource "nsxt_vpc_service_profile" "test" {
+  %s
+  display_name = "%s"
+  dhcp_config {
+    mode = "DHCP_IP_ALLOCATION_BY_PORT"
+  }
+}
+
+resource "nsxt_vpc_connectivity_profile" "test" {
+  %s
+  display_name = "%s"
+
+  transit_gateway_path = nsxt_transit_gateway.test.path
+  service_gateway {
+    enable = false
+  }
+}`, testAccNsxtProjectContext(), testAccNsxtVpcHelper, testAccNsxtProjectContext(), testAccNsxtVpcHelper)
+}
+
 func testAccNsxtVpcTemplate(createFlow bool) string {
 	var attrMap map[string]string
 	if createFlow {
@@ -183,7 +212,7 @@ func testAccNsxtVpcTemplate(createFlow bool) string {
 	} else {
 		attrMap = accTestVpcUpdateAttributes
 	}
-	return fmt.Sprintf(`
+	return testAccNsxtVpcPrerequisites() + fmt.Sprintf(`
 resource "nsxt_vpc" "test" {
   %s
 
@@ -192,28 +221,34 @@ resource "nsxt_vpc" "test" {
   private_ips  = ["%s"]
   short_id     = "%s"
 
+  vpc_service_profile      = nsxt_vpc_service_profile.test.path
+  vpc_connectivity_profile = nsxt_vpc_connectivity_profile.test.path
+
   vpc_dns_forwarder {
     enabled = %s
     listener_ip = "%s"
   }
 
-  subnet_profiles {
-    # TODO
+  load_balancer_vpc_endpoint {
+    enabled = %s
   }
 
   tag {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, testAccNsxtProjectContext(), attrMap["display_name"], attrMap["description"], attrMap["private_ips"], attrMap["short_id"], attrMap["enabled"], attrMap["listener_ip"])
+}`, testAccNsxtProjectContext(), attrMap["display_name"], attrMap["description"], attrMap["private_ips"], attrMap["short_id"], attrMap["enabled"], attrMap["listener_ip"], attrMap["enabled"])
 }
 
 func testAccNsxtVpcMinimalistic() string {
-	return fmt.Sprintf(`
+	return testAccNsxtVpcPrerequisites() + fmt.Sprintf(`
 resource "nsxt_vpc" "test" {
   %s
 
   display_name = "%s"
   short_id     = "%s"
+  # TODO - remove when default profiles are supported
+  vpc_service_profile      = nsxt_vpc_service_profile.test.path
+  vpc_connectivity_profile = nsxt_vpc_connectivity_profile.test.path
 }`, testAccNsxtProjectContext(), accTestVpcUpdateAttributes["display_name"], accTestVpcUpdateAttributes["short_id"])
 }
