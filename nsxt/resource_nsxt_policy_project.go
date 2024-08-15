@@ -8,6 +8,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs"
@@ -55,6 +56,21 @@ func resourceNsxtPolicyProject() *schema.Resource {
 				Elem:     getElemPolicyPathSchema(),
 				Optional: true,
 			},
+			"activate_default_dfw_rules": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+			},
+			"external_ipv4_blocks": {
+				Type:     schema.TypeList,
+				Elem:     getElemPolicyPathSchema(),
+				Optional: true,
+			},
+			"tgw_external_connections": {
+				Type:     schema.TypeList,
+				Elem:     getElemPolicyPathSchema(),
+				Optional: true,
+			},
 		},
 	}
 }
@@ -96,6 +112,9 @@ func resourceNsxtPolicyProjectPatch(connector client.Connector, d *schema.Resour
 		siteInfos = append(siteInfos, obj)
 	}
 	tier0s := getStringListFromSchemaList(d, "tier0_gateway_paths")
+	activateDefaultDFWRules := d.Get("activate_default_dfw_rules").(bool)
+	extIpv4BlocksList := getStringListFromSchemaList(d, "external_ipv4_blocks")
+	tgwConnectionsList := getStringListFromSchemaList(d, "tgw_external_connections")
 
 	obj := model.Project{
 		DisplayName: &displayName,
@@ -103,6 +122,18 @@ func resourceNsxtPolicyProjectPatch(connector client.Connector, d *schema.Resour
 		Tags:        tags,
 		SiteInfos:   siteInfos,
 		Tier0s:      tier0s,
+	}
+
+	if util.NsxVersionHigherOrEqual("4.2.0") {
+		obj.ActivateDefaultDfwRules = &activateDefaultDFWRules
+	}
+
+	if util.NsxVersionHigherOrEqual("4.1.1") {
+		obj.ExternalIpv4Blocks = extIpv4BlocksList
+	}
+
+	if util.NsxVersionHigherOrEqual("9.0.0") {
+		obj.TgwExternalConnections = tgwConnectionsList
 	}
 
 	if shortID != "" {
@@ -140,7 +171,7 @@ func resourceNsxtPolicyProjectRead(d *schema.ResourceData, m interface{}) error 
 
 	id := d.Id()
 	if id == "" {
-		return fmt.Errorf("Error obtaining Project ID")
+		return fmt.Errorf("error obtaining Project ID")
 	}
 
 	var obj model.Project
@@ -168,7 +199,15 @@ func resourceNsxtPolicyProjectRead(d *schema.ResourceData, m interface{}) error 
 	}
 	d.Set("site_info", siteInfosList)
 	d.Set("tier0_gateway_paths", obj.Tier0s)
-
+	if util.NsxVersionHigherOrEqual("4.2.0") {
+		d.Set("activate_default_dfw_rules", obj.ActivateDefaultDfwRules)
+	}
+	if util.NsxVersionHigherOrEqual("4.1.1") {
+		d.Set("external_ipv4_blocks", obj.ExternalIpv4Blocks)
+	}
+	if util.NsxVersionHigherOrEqual("9.0.0") {
+		d.Set("tgw_external_connections", obj.TgwExternalConnections)
+	}
 	return nil
 }
 
@@ -176,7 +215,7 @@ func resourceNsxtPolicyProjectUpdate(d *schema.ResourceData, m interface{}) erro
 
 	id := d.Id()
 	if id == "" {
-		return fmt.Errorf("Error obtaining Project ID")
+		return fmt.Errorf("error obtaining Project ID")
 	}
 
 	connector := getPolicyConnector(m)
@@ -191,7 +230,7 @@ func resourceNsxtPolicyProjectUpdate(d *schema.ResourceData, m interface{}) erro
 func resourceNsxtPolicyProjectDelete(d *schema.ResourceData, m interface{}) error {
 	id := d.Id()
 	if id == "" {
-		return fmt.Errorf("Error obtaining Project ID")
+		return fmt.Errorf("error obtaining Project ID")
 	}
 
 	connector := getPolicyConnector(m)
