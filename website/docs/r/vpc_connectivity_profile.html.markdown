@@ -41,7 +41,7 @@ The following arguments are supported:
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `transit_gateway_path` - (Required) Transit Gateway path.
-* `project_ip_blocks` - (Optional) Policy path of Project IP block
+* `private_tgw_ip_blocks` - (Optional) Policy path of Private IP block
 * `external_ip_blocks` - (Optional) Policy path of External IP block
 * `service_gateway` - (Optional) Service Gateway configuration
   * `nat_config` - (Optional) NAT configuration

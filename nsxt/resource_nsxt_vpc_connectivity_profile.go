@@ -36,7 +36,7 @@ var vpcConnectivityProfileSchema = map[string]*metadata.ExtendedSchema{
 			SdkFieldName: "TransitGatewayPath",
 		},
 	},
-	"project_ip_blocks": {
+	"private_tgw_ip_blocks": {
 		Schema: schema.Schema{
 			Type: schema.TypeList,
 			Elem: &metadata.ExtendedSchema{
@@ -52,7 +52,7 @@ var vpcConnectivityProfileSchema = map[string]*metadata.ExtendedSchema{
 		},
 		Metadata: metadata.Metadata{
 			SchemaType:   "list",
-			SdkFieldName: "ProjectIpBlocks",
+			SdkFieldName: "PrivateTgwIpBlocks",
 		},
 	},
 	"external_ip_blocks": {
