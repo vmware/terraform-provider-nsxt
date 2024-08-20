@@ -68,6 +68,7 @@ var policyVpcNatRuleSchema = map[string]*metadata.ExtendedSchema{
 		Metadata: metadata.Metadata{
 			SchemaType:   "string",
 			SdkFieldName: "DestinationNetwork",
+			OmitIfEmpty:  true,
 		},
 	},
 	"action": {
