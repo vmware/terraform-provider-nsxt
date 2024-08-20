@@ -3,11 +3,11 @@ module github.com/vmware/terraform-provider-nsxt
 go 1.19
 
 replace (
-	github.com/vmware/vsphere-automation-sdk-go/lib => github.com/annakhm/vsphere-automation-sdk-go/lib v0.0.0-20240731202712-7a16e3b620c0
-	github.com/vmware/vsphere-automation-sdk-go/runtime => github.com/annakhm/vsphere-automation-sdk-go/runtime v0.0.0-20240731202712-7a16e3b620c0
-	github.com/vmware/vsphere-automation-sdk-go/services/nsxt => github.com/annakhm/vsphere-automation-sdk-go/services/nsxt v0.0.0-20240731202712-7a16e3b620c0
-	github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm => github.com/annakhm/vsphere-automation-sdk-go/services/nsxt-gm v0.0.0-20240731202712-7a16e3b620c0
-	github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp => github.com/annakhm/vsphere-automation-sdk-go/services/nsxt-mp v0.0.0-20240731202712-7a16e3b620c0
+	github.com/vmware/vsphere-automation-sdk-go/lib => github.com/annakhm/vsphere-automation-sdk-go/lib v0.0.0-20240814000345-a7d05abf8e8a
+	github.com/vmware/vsphere-automation-sdk-go/runtime => github.com/annakhm/vsphere-automation-sdk-go/runtime v0.0.0-20240813234819-2d81f2fb5899
+	github.com/vmware/vsphere-automation-sdk-go/services/nsxt => github.com/annakhm/vsphere-automation-sdk-go/services/nsxt v0.0.0-20240814000345-a7d05abf8e8a
+	github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm => github.com/annakhm/vsphere-automation-sdk-go/services/nsxt-gm v0.0.0-20240814000345-a7d05abf8e8a
+	github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp => github.com/annakhm/vsphere-automation-sdk-go/services/nsxt-mp v0.0.0-20240814000345-a7d05abf8e8a
 )
 
 require (
