@@ -12,7 +12,7 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3
         with:
-          version: v1.50
+          version: v1.56.1
           args: --issues-exit-code=1
           only-new-issues: true
           skip-pkg-cache: true
