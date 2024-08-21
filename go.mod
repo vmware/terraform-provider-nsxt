@@ -2,8 +2,6 @@ module github.com/vmware/terraform-provider-nsxt
 
 go 1.22
 
-toolchain go1.22.6
-
 require (
 	github.com/google/uuid v1.3.0
 	github.com/hashicorp/go-version v1.6.0
