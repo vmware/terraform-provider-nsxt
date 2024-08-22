@@ -81,7 +81,7 @@ resource "nsxt_lb_http_virtual_server" "lb_virtual_server" {
     certificate_chain_depth = 2
     client_auth             = true
     ca_ids                  = [data.nsxt_certificate.ca.id]
-    crl_ids                 = [data.nsxt_certificate.crl.id]
+    crl_ids                 = ["fa27d79e-13cd-4dd1-a088-4f2fb2cc91f9"]
     sni_certificate_ids     = [data.nsxt_certificate.sni.id]
   }
 
@@ -91,7 +91,7 @@ resource "nsxt_lb_http_virtual_server" "lb_virtual_server" {
     certificate_chain_depth = 2
     server_auth             = true
     ca_ids                  = [data.nsxt_certificate.server_ca.id]
-    crl_ids                 = [data.nsxt_certificate.crl.id]
+    crl_ids                 = ["fa27d79e-13cd-4dd1-a088-4f2fb2cc91f9"]
   }
 
   tag {
