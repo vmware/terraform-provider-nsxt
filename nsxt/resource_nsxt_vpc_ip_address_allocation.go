@@ -26,6 +26,7 @@ var vpcIpAddressAllocationIpAddressTypeValues = []string{
 var vpcIpAddressAllocationIpAddressBlockVisibilityValues = []string{
 	model.VpcIpAddressAllocation_IP_ADDRESS_BLOCK_VISIBILITY_EXTERNAL,
 	model.VpcIpAddressAllocation_IP_ADDRESS_BLOCK_VISIBILITY_PRIVATE,
+	model.VpcIpAddressAllocation_IP_ADDRESS_BLOCK_VISIBILITY_PRIVATE_TGW,
 }
 
 var vpcIpAddressAllocationSchema = map[string]*metadata.ExtendedSchema{
@@ -58,6 +59,7 @@ var vpcIpAddressAllocationSchema = map[string]*metadata.ExtendedSchema{
 		Metadata: metadata.Metadata{
 			SchemaType:   "int",
 			SdkFieldName: "AllocationSize",
+			OmitIfEmpty:  true,
 		},
 	},
 	"ip_address_type": {
