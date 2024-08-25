@@ -710,7 +710,8 @@ func updateComponentUpgradePlanSetting(settingClient plan.SettingsClient, d *sch
 
 func runUpgrade(upgradeClientSet *upgradeClientSet, partialUpgradeMap map[string]bool) error {
 	partialUpgradeExist := false
-	for i := range upgradeComponentList {
+	prevComponent := ""
+	for _, component := range upgradeComponentList {
 		// After one component upgrade is completed, although the status of our next component is NOT_STARTED,
 		// there is a period that overall status is still IN_PROGRESS, which will prevent us to start the upgrade of next component.
 		// Wait here for the overall status become stable. Because there is potential upgrade triggered before, we wait here also
@@ -720,11 +721,16 @@ func runUpgrade(upgradeClientSet *upgradeClientSet, partialUpgradeMap map[string
 			return err
 		}
 
-		component := upgradeComponentList[i]
-
-		if component == mpUpgradeGroup && partialUpgradeExist {
-			log.Printf("[INFO] Some UpgradeUnitGroups haven't been upgraded. MP upgrade is skipped")
-			continue
+		if partialUpgradeExist {
+			// Check that previous component has completed, on partial upgrade. If so, it's OK to resume the upgrade
+			status, err := getUpgradeStatus(upgradeClientSet.StatusClient, &prevComponent)
+			if err != nil {
+				return err
+			}
+			if status.Status != model.ComponentUpgradeStatus_STATUS_SUCCESS {
+				log.Printf("[INFO] Some UpgradeUnitGroups of component %s haven't been upgraded. %s is skipped", prevComponent, component)
+				continue
+			}
 		}
 		pendingStatus := []string{model.ComponentUpgradeStatus_STATUS_IN_PROGRESS}
 		targetStatus := []string{model.ComponentUpgradeStatus_STATUS_SUCCESS}
@@ -734,6 +740,7 @@ func runUpgrade(upgradeClientSet *upgradeClientSet, partialUpgradeMap map[string
 			pendingStatus = append(pendingStatus, model.ComponentUpgradeStatus_STATUS_PAUSING)
 			targetStatus = append(targetStatus, model.ComponentUpgradeStatus_STATUS_PAUSED)
 			partialUpgradeExist = true
+			prevComponent = component
 			completeLog = fmt.Sprintf("[INFO] %s upgrade is partially completed.", component)
 		}
 		upgradeClientSet.PlanClient.Upgrade(&component)
