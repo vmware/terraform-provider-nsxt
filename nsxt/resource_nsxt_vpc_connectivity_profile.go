@@ -167,7 +167,6 @@ var vpcConnectivityProfileSchema = map[string]*metadata.ExtendedSchema{
 						Schema: schema.Schema{
 							Type:     schema.TypeBool,
 							Optional: true,
-							Default:  true,
 						},
 						Metadata: metadata.Metadata{
 							SchemaType:   "bool",
