@@ -1,11 +1,11 @@
 ---
 subcategory: "VPC"
 layout: "nsxt"
-page_title: "NSXT: nsxt_policy_vpc"
-description: A resource to configure a VPC.
+page_title: "NSXT: nsxt_vpc"
+description: A resource to configure a VPC under Project.
 ---
 
-# nsxt_policy_vpc
+# nsxt_vpc
 
 This resource provides a method for the management of a VPC.
 
@@ -14,7 +14,7 @@ This resource is applicable to NSX Policy Manager.
 ## Example Usage
 
 ```hcl
-resource "nsxt_policy_vpc" "test" {
+resource "nsxt_vpc" "test" {
   context {
     project_id = "test_proj"
   }
@@ -82,7 +82,7 @@ An existing object can be [imported][docs-import] into this resource, via the fo
 [docs-import]: https://www.terraform.io/cli/import
 
 ```
-terraform import nsxt_policy_vpc.test PATH
+terraform import nsxt_vpc.test PATH
 ```
 
-The above command imports Vpc named `test` with the NSX path `PATH`.
+The above command imports VOC named `test` with the NSX path `PATH`.
