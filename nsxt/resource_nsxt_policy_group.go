@@ -322,7 +322,7 @@ func getExtendedCriteriaSetSchema() *schema.Resource {
 				Type:        schema.TypeSet,
 				Description: "Identity Group expression",
 				Elem:        getIdentityGroupSchema(),
-				Optional:    true,
+				Required:    true,
 			},
 		},
 	}
@@ -375,6 +375,9 @@ type criteriaMeta struct {
 func validateGroupCriteriaSets(criteriaSets []interface{}) ([]criteriaMeta, error) {
 	var criteria []criteriaMeta
 	for _, criteriaBlock := range criteriaSets {
+		if criteriaBlock == nil {
+			return nil, fmt.Errorf("found empty criteria block in configuration")
+		}
 		seenExp := ""
 		criteriaMap := criteriaBlock.(map[string]interface{})
 		for expName, expVal := range criteriaMap {
@@ -858,10 +861,8 @@ func resourceNsxtPolicyGroupGeneralCreate(d *schema.ResourceData, m interface{},
 	if err != nil {
 		return err
 	}
-
 	criteriaSets := d.Get("criteria").([]interface{})
 	conjunctions := d.Get("conjunction").([]interface{})
-
 	criteriaMeta, err := validateGroupCriteriaAndConjunctions(criteriaSets, conjunctions)
 	if err != nil {
 		return err
