@@ -32,7 +32,6 @@ resource "nsxt_vpc_security_policy" "policy1" {
   }
   display_name = "policy1"
   description  = "Terraform provisioned Security Policy"
-  category     = "Application"
   locked       = false
   stateful     = true
   tcp_strict   = false
@@ -77,7 +76,6 @@ The following arguments are supported:
 * `context` - (Required) The context which the object belongs to
   * `project_id` - (Required) The ID of the project which the object belongs to
   * `vpc_id` - (Required) The ID of the VPC which the object belongs to
-* `category` - (Required) Category of this policy. For local manager must be one of `Ethernet`, `Emergency`, `Infrastructure`, `Environment`, `Application`. For global manager must be one of: `Infrastructure`, `Environment`, `Application`.
 * `comments` - (Optional) Comments for security policy lock/unlock.
 * `locked` - (Optional) Indicates whether a security policy should be locked. If locked by a user, no other user would be able to modify this policy.
 * `scope` - (Optional) The list of policy object paths where the rules in this policy will get applied.
@@ -87,14 +85,14 @@ The following arguments are supported:
 * `rule` - (Optional) A repeatable block to specify rules for the Security Policy. Each rule includes the following fields:
   * `display_name` - (Required) Display name of the resource.
   * `description` - (Optional) Description of the resource.
-  * `action` - (Optional) Rule action, one of `ALLOW`, `DROP`, `REJECT` and `JUMP_TO_APPLICATION`. Default is `ALLOW`. `JUMP_TO_APPLICATION` is only applicable in `Environment` category.
+  * `action` - (Optional) Rule action, one of `ALLOW`, `DROP` and `REJECT`. Default is `ALLOW`..
   * `destination_groups` - (Optional) Set of group paths that serve as the destination for this rule. IPs, IP ranges, or CIDRs may also be used starting in NSX-T 3.0. An empty set can be used to specify "Any".
   * `source_groups` - (Optional) Set of group paths that serve as the source for this rule. IPs, IP ranges, or CIDRs may also be used starting in NSX-T 3.0. An empty set can be used to specify "Any".
   * `destinations_excluded` - (Optional) A boolean value indicating negation of destination groups.
   * `sources_excluded` - (Optional) A boolean value indicating negation of source groups.
   * `direction` - (Optional) Traffic direction, one of `IN`, `OUT` or `IN_OUT`. Default is `IN_OUT`.
   * `disabled` - (Optional) Flag to disable this rule. Default is false.
-  * `ip_version` - (Optional) Version of IP protocol, one of `NONE`, `IPV4`, `IPV6`, `IPV4_IPV6`. Default is `IPV4_IPV6`. For `Ethernet` category rules, use `NONE` value.
+  * `ip_version` - (Optional) Version of IP protocol, one of `NONE`, `IPV4`, `IPV6`, `IPV4_IPV6`. Default is `IPV4_IPV6`.
   * `logged` - (Optional) Flag to enable packet logging. Default is false.
   * `notes` - (Optional) Additional notes on changes.
   * `profiles` - (Optional) Set of profile paths relevant for this rule.

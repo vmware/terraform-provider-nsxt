@@ -24,7 +24,7 @@ func resourceNsxtPolicySecurityPolicy() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: nsxtDomainResourceImporter,
 		},
-		Schema: getPolicySecurityPolicySchema(false, true, true, true),
+		Schema: getPolicySecurityPolicySchema(false, true, true, false),
 	}
 }
 
@@ -61,13 +61,13 @@ func resourceNsxtPolicySecurityPolicyExistsPartial(domainName string) func(sessi
 	}
 }
 
-func policySecurityPolicyBuildAndPatch(d *schema.ResourceData, m interface{}, id string, createFlow, withRule, withDomain bool) error {
+func policySecurityPolicyBuildAndPatch(d *schema.ResourceData, m interface{}, id string, createFlow, withRule, isVPC bool) error {
 	obj, structErr := parentSecurityPolicySchemaToModel(d, id)
 	if structErr != nil {
 		return structErr
 	}
 	domain := ""
-	if withDomain {
+	if !isVPC {
 		domain = d.Get("domain").(string)
 	}
 	revision := int64(d.Get("revision").(int))
@@ -98,15 +98,15 @@ func policySecurityPolicyBuildAndPatch(d *schema.ResourceData, m interface{}, id
 }
 
 func resourceNsxtPolicySecurityPolicyCreate(d *schema.ResourceData, m interface{}) error {
-	return resourceNsxtPolicySecurityPolicyGeneralCreate(d, m, true, true)
+	return resourceNsxtPolicySecurityPolicyGeneralCreate(d, m, true, false)
 }
 
 func resourceNsxtPolicySecurityPolicyRead(d *schema.ResourceData, m interface{}) error {
-	return resourceNsxtPolicySecurityPolicyGeneralRead(d, m, true, true)
+	return resourceNsxtPolicySecurityPolicyGeneralRead(d, m, true, false)
 }
 
 func resourceNsxtPolicySecurityPolicyUpdate(d *schema.ResourceData, m interface{}) error {
-	return resourceNsxtPolicySecurityPolicyGeneralUpdate(d, m, true, true)
+	return resourceNsxtPolicySecurityPolicyGeneralUpdate(d, m, true, false)
 }
 
 func resourceNsxtPolicySecurityPolicyDelete(d *schema.ResourceData, m interface{}) error {
@@ -130,10 +130,10 @@ func resourceNsxtPolicySecurityPolicyDelete(d *schema.ResourceData, m interface{
 	return nil
 }
 
-func resourceNsxtPolicySecurityPolicyGeneralCreate(d *schema.ResourceData, m interface{}, withRule, withDomain bool) error {
+func resourceNsxtPolicySecurityPolicyGeneralCreate(d *schema.ResourceData, m interface{}, withRule, isVPC bool) error {
 	// Initialize resource Id and verify this ID is not yet used
 	domain := ""
-	if withDomain {
+	if !isVPC {
 		domain = d.Get("domain").(string)
 	}
 	id, err := getOrGenerateID2(d, m, resourceNsxtPolicySecurityPolicyExistsPartial(domain))
@@ -141,7 +141,7 @@ func resourceNsxtPolicySecurityPolicyGeneralCreate(d *schema.ResourceData, m int
 		return err
 	}
 
-	err = policySecurityPolicyBuildAndPatch(d, m, id, true, withRule, withDomain)
+	err = policySecurityPolicyBuildAndPatch(d, m, id, true, withRule, isVPC)
 
 	if err != nil {
 		return handleCreateError("Security Policy", id, err)
@@ -150,11 +150,11 @@ func resourceNsxtPolicySecurityPolicyGeneralCreate(d *schema.ResourceData, m int
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
-	return resourceNsxtPolicySecurityPolicyGeneralRead(d, m, withRule, withDomain)
+	return resourceNsxtPolicySecurityPolicyGeneralRead(d, m, withRule, isVPC)
 }
 
-func resourceNsxtPolicySecurityPolicyGeneralRead(d *schema.ResourceData, m interface{}, withRule, withDomain bool) error {
-	obj, err := parentSecurityPolicyModelToSchema(d, m, withDomain)
+func resourceNsxtPolicySecurityPolicyGeneralRead(d *schema.ResourceData, m interface{}, withRule, isVPC bool) error {
+	obj, err := parentSecurityPolicyModelToSchema(d, m, isVPC)
 	if err != nil {
 		return handleReadError(d, "SecurityPolicy", d.Id(), err)
 	}
@@ -164,15 +164,15 @@ func resourceNsxtPolicySecurityPolicyGeneralRead(d *schema.ResourceData, m inter
 	return nil
 }
 
-func resourceNsxtPolicySecurityPolicyGeneralUpdate(d *schema.ResourceData, m interface{}, withRule, withDomain bool) error {
+func resourceNsxtPolicySecurityPolicyGeneralUpdate(d *schema.ResourceData, m interface{}, withRule, isVPC bool) error {
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining Security Policy id")
 	}
-	err := policySecurityPolicyBuildAndPatch(d, m, id, false, withRule, withDomain)
+	err := policySecurityPolicyBuildAndPatch(d, m, id, false, withRule, isVPC)
 	if err != nil {
 		return handleUpdateError("Security Policy", id, err)
 	}
 
-	return resourceNsxtPolicySecurityPolicyGeneralRead(d, m, withRule, withDomain)
+	return resourceNsxtPolicySecurityPolicyGeneralRead(d, m, withRule, isVPC)
 }

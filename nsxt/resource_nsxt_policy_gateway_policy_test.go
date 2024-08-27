@@ -47,7 +47,7 @@ func testAccResourceNsxtPolicyGatewayPolicyBasic(t *testing.T, withContext bool,
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyGatewayPolicyBasic(resourceName, name, comments1, withContext),
+				Config: testAccNsxtPolicyGatewayPolicyBasic(resourceName, name, comments1, withContext, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyGatewayPolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
@@ -64,7 +64,7 @@ func testAccResourceNsxtPolicyGatewayPolicyBasic(t *testing.T, withContext bool,
 				),
 			},
 			{
-				Config: testAccNsxtPolicyGatewayPolicyBasic(resourceName, updatedName, comments2, withContext),
+				Config: testAccNsxtPolicyGatewayPolicyBasic(resourceName, updatedName, comments2, withContext, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyGatewayPolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -220,7 +220,7 @@ func TestAccResourceNsxtPolicyGatewayPolicy_importBasic(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyGatewayPolicyBasic(resourceName, name, "import", false),
+				Config: testAccNsxtPolicyGatewayPolicyBasic(resourceName, name, "import", false, true),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -244,7 +244,7 @@ func TestAccResourceNsxtPolicyGatewayPolicy_importBasic_multitenancy(t *testing.
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyGatewayPolicyBasic(resourceName, name, "import", true),
+				Config: testAccNsxtPolicyGatewayPolicyBasic(resourceName, name, "import", true, true),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -626,17 +626,23 @@ resource "nsxt_policy_gateway_policy" "test" {
 }`, name, comments)
 }
 
-func testAccNsxtPolicyGatewayPolicyBasic(resourceName, name, comments string, withContext bool) string {
+func testAccNsxtPolicyGatewayPolicyBasic(resourceName, name, comments string, withContext, withCategory bool) string {
 	context := ""
 	if withContext {
 		context = testAccNsxtPolicyMultitenancyContext()
+	}
+	category := ""
+	if withCategory {
+		category = `
+  category        = "LocalGatewayRules"
+`
 	}
 	return fmt.Sprintf(`
 resource "%s" "test" {
 %s
   display_name    = "%s"
   description     = "Acceptance Test"
-  category        = "LocalGatewayRules"
+%s
   comments        = "%s"
   locked          = true
   sequence_number = 3
@@ -648,7 +654,7 @@ resource "%s" "test" {
     tag   = "orange"
   }
 
-}`, resourceName, context, name, comments)
+}`, resourceName, context, name, category, comments)
 }
 
 func testAccNsxtPolicyGatewayPolicyWithRule(resourceName, name, direction, protocol, ruleTag string, withContext bool) string {

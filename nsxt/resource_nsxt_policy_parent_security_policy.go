@@ -21,7 +21,7 @@ func resourceNsxtPolicyParentSecurityPolicy() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: nsxtDomainResourceImporter,
 		},
-		Schema: getPolicySecurityPolicySchema(false, true, false, true),
+		Schema: getPolicySecurityPolicySchema(false, true, false, false),
 	}
 }
 
@@ -32,7 +32,11 @@ func parentSecurityPolicySchemaToModel(d *schema.ResourceData, id string) (model
 	if tagErr != nil {
 		return model.SecurityPolicy{}, tagErr
 	}
-	category := d.Get("category").(string)
+	cat, ok := d.GetOk("category")
+	category := ""
+	if ok {
+		category = cat.(string)
+	}
 	comments := d.Get("comments").(string)
 	locked := d.Get("locked").(bool)
 
@@ -42,12 +46,11 @@ func parentSecurityPolicySchemaToModel(d *schema.ResourceData, id string) (model
 	tcpStrict := d.Get("tcp_strict").(bool)
 	objType := "SecurityPolicy"
 
-	return model.SecurityPolicy{
+	obj := model.SecurityPolicy{
 		Id:             &id,
 		DisplayName:    &displayName,
 		Description:    &description,
 		Tags:           tags,
-		Category:       &category,
 		Comments:       &comments,
 		Locked:         &locked,
 		Scope:          scope,
@@ -55,14 +58,18 @@ func parentSecurityPolicySchemaToModel(d *schema.ResourceData, id string) (model
 		Stateful:       &stateful,
 		TcpStrict:      &tcpStrict,
 		ResourceType:   &objType,
-	}, nil
+	}
+	if category != "" {
+		obj.Category = &category
+	}
+	return obj, nil
 }
 
-func parentSecurityPolicyModelToSchema(d *schema.ResourceData, m interface{}, withDomain bool) (*model.SecurityPolicy, error) {
+func parentSecurityPolicyModelToSchema(d *schema.ResourceData, m interface{}, isVPC bool) (*model.SecurityPolicy, error) {
 	connector := getPolicyConnector(m)
 	id := d.Id()
 	domainName := ""
-	if withDomain {
+	if !isVPC {
 		domainName = d.Get("domain").(string)
 	}
 	if id == "" {
@@ -81,10 +88,10 @@ func parentSecurityPolicyModelToSchema(d *schema.ResourceData, m interface{}, wi
 	setPolicyTagsInSchema(d, obj.Tags)
 	d.Set("nsx_id", id)
 	d.Set("path", obj.Path)
-	if withDomain {
+	if !isVPC {
 		d.Set("domain", getDomainFromResourcePath(*obj.Path))
+		d.Set("category", obj.Category)
 	}
-	d.Set("category", obj.Category)
 	d.Set("comments", obj.Comments)
 	d.Set("locked", obj.Locked)
 	if len(obj.Scope) == 1 && obj.Scope[0] == "ANY" {
@@ -100,15 +107,15 @@ func parentSecurityPolicyModelToSchema(d *schema.ResourceData, m interface{}, wi
 }
 
 func resourceNsxtPolicyParentSecurityPolicyCreate(d *schema.ResourceData, m interface{}) error {
-	return resourceNsxtPolicySecurityPolicyGeneralCreate(d, m, false, true)
+	return resourceNsxtPolicySecurityPolicyGeneralCreate(d, m, false, false)
 }
 
 func resourceNsxtPolicyParentSecurityPolicyRead(d *schema.ResourceData, m interface{}) error {
-	return resourceNsxtPolicySecurityPolicyGeneralRead(d, m, false, true)
+	return resourceNsxtPolicySecurityPolicyGeneralRead(d, m, false, false)
 }
 
 func resourceNsxtPolicyParentSecurityPolicyUpdate(d *schema.ResourceData, m interface{}) error {
-	return resourceNsxtPolicySecurityPolicyGeneralUpdate(d, m, false, true)
+	return resourceNsxtPolicySecurityPolicyGeneralUpdate(d, m, false, false)
 }
 
 func resourceNsxtPolicyParentSecurityPolicyDelete(d *schema.ResourceData, m interface{}) error {
