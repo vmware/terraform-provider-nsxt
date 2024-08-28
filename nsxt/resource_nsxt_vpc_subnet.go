@@ -76,9 +76,11 @@ var vpcSubnetSchema = map[string]*metadata.ExtendedSchema{
 	},
 	"ipv4_subnet_size": {
 		Schema: schema.Schema{
-			Type:     schema.TypeInt,
-			Optional: true,
-			Computed: true,
+			Type:          schema.TypeInt,
+			Optional:      true,
+			Computed:      true,
+			ForceNew:      true,
+			ConflictsWith: []string{"ip_addresses"},
 		},
 		Metadata: metadata.Metadata{
 			SchemaType:   "int",
@@ -98,6 +100,7 @@ var vpcSubnetSchema = map[string]*metadata.ExtendedSchema{
 				},
 			},
 			Optional: true,
+			Computed: true,
 		},
 		Metadata: metadata.Metadata{
 			SchemaType:   "list",
@@ -110,6 +113,7 @@ var vpcSubnetSchema = map[string]*metadata.ExtendedSchema{
 			ValidateFunc: validation.StringInSlice(vpcSubnetAccessModeValues, false),
 			Optional:     true,
 			Default:      model.VpcSubnet_ACCESS_MODE_PRIVATE,
+			ForceNew:     true,
 		},
 		Metadata: metadata.Metadata{
 			SchemaType:   "string",
