@@ -40,12 +40,12 @@ var transitGatewayAttachmentSchema = map[string]*metadata.ExtendedSchema{
 	},
 }
 
-func resourceNsxtPolicyTransitGatewayAttachment() *schema.Resource {
+func resourceNsxtTransitGatewayAttachment() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNsxtPolicyTransitGatewayAttachmentCreate,
-		Read:   resourceNsxtPolicyTransitGatewayAttachmentRead,
-		Update: resourceNsxtPolicyTransitGatewayAttachmentUpdate,
-		Delete: resourceNsxtPolicyTransitGatewayAttachmentDelete,
+		Create: resourceNsxtTransitGatewayAttachmentCreate,
+		Read:   resourceNsxtTransitGatewayAttachmentRead,
+		Update: resourceNsxtTransitGatewayAttachmentUpdate,
+		Delete: resourceNsxtTransitGatewayAttachmentDelete,
 		Importer: &schema.ResourceImporter{
 			State: nsxtParentPathResourceImporter,
 		},
@@ -53,7 +53,7 @@ func resourceNsxtPolicyTransitGatewayAttachment() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyTransitGatewayAttachmentExists(sessionContext utl.SessionContext, parentPath string, id string, connector client.Connector) (bool, error) {
+func resourceNsxtTransitGatewayAttachmentExists(sessionContext utl.SessionContext, parentPath string, id string, connector client.Connector) (bool, error) {
 	var err error
 	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 3)
 	if pathErr != nil {
@@ -72,10 +72,10 @@ func resourceNsxtPolicyTransitGatewayAttachmentExists(sessionContext utl.Session
 	return false, logAPIError("Error retrieving resource", err)
 }
 
-func resourceNsxtPolicyTransitGatewayAttachmentCreate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtTransitGatewayAttachmentCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
-	id, err := getOrGenerateIDWithParent(d, m, resourceNsxtPolicyTransitGatewayAttachmentExists)
+	id, err := getOrGenerateIDWithParent(d, m, resourceNsxtTransitGatewayAttachmentExists)
 	if err != nil {
 		return err
 	}
@@ -110,10 +110,10 @@ func resourceNsxtPolicyTransitGatewayAttachmentCreate(d *schema.ResourceData, m 
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
-	return resourceNsxtPolicyTransitGatewayAttachmentRead(d, m)
+	return resourceNsxtTransitGatewayAttachmentRead(d, m)
 }
 
-func resourceNsxtPolicyTransitGatewayAttachmentRead(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtTransitGatewayAttachmentRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
 	id := d.Id()
@@ -143,7 +143,7 @@ func resourceNsxtPolicyTransitGatewayAttachmentRead(d *schema.ResourceData, m in
 	return metadata.StructToSchema(elem, d, transitGatewayAttachmentSchema, "", nil)
 }
 
-func resourceNsxtPolicyTransitGatewayAttachmentUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtTransitGatewayAttachmentUpdate(d *schema.ResourceData, m interface{}) error {
 
 	connector := getPolicyConnector(m)
 
@@ -180,10 +180,10 @@ func resourceNsxtPolicyTransitGatewayAttachmentUpdate(d *schema.ResourceData, m 
 		return handleUpdateError("TransitGatewayAttachment", id, err)
 	}
 
-	return resourceNsxtPolicyTransitGatewayAttachmentRead(d, m)
+	return resourceNsxtTransitGatewayAttachmentRead(d, m)
 }
 
-func resourceNsxtPolicyTransitGatewayAttachmentDelete(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtTransitGatewayAttachmentDelete(d *schema.ResourceData, m interface{}) error {
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining TransitGatewayAttachment ID")

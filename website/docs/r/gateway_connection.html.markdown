@@ -1,13 +1,13 @@
 ---
 subcategory: "Beta"
 layout: "nsxt"
-page_title: "NSXT: nsxt_policy_gateway_connection"
-description: A resource to configure a GatewayConnection.
+page_title: "NSXT: nsxt_gateway_connection"
+description: A resource to configure a Gateway Connection.
 ---
 
-# nsxt_policy_gateway_connection
+# nsxt_gateway_connection
 
-This resource provides a method for the management of a GatewayConnection.
+This resource provides a method for the management of a Gateway Connection.
 
 This resource is applicable to NSX Policy Manager.
 
@@ -18,12 +18,11 @@ data "nsxt_policy_tier0_gateway" "test" {
   display_name = "test-t0gw"
 }
 
-resource "nsxt_policy_gateway_connection" "test" {
+resource "nsxt_gateway_connection" "test" {
   display_name     = "test"
-  description      = "Terraform provisioned GatewayConnection"
+  description      = "Terraform provisioned Gateway Connection"
   tier0_path       = data.nsxt_policy_tier0_gateway.test.path
   aggregate_routes = ["192.168.240.0/24"]
-
 }
 ```
 
@@ -57,7 +56,7 @@ An existing object can be [imported][docs-import] into this resource, via the fo
 [docs-import]: https://www.terraform.io/cli/import
 
 ```
-terraform import nsxt_policy_gateway_connection.test PATH
+terraform import nsxt_gateway_connection.test PATH
 ```
 
 The above command imports GatewayConnection named `test` with the policy path `PATH`.

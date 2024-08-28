@@ -13,32 +13,32 @@ import (
 
 var dependantEntityName = getAccTestResourceName()
 
-var accTestPolicyTransitGatewayAttachmentCreateAttributes = map[string]string{
+var accTestTransitGatewayAttachmentCreateAttributes = map[string]string{
 	"display_name": getAccTestResourceName(),
 	"description":  "terraform created",
 }
 
-var accTestPolicyTransitGatewayAttachmentUpdateAttributes = map[string]string{
+var accTestTransitGatewayAttachmentUpdateAttributes = map[string]string{
 	"display_name": getAccTestResourceName(),
 	"description":  "terraform updated",
 }
 
-func TestAccResourceNsxtPolicyTransitGatewayAttachment_basic(t *testing.T) {
-	testResourceName := "nsxt_policy_transit_gateway_attachment.test"
+func TestAccResourceNsxtTransitGatewayAttachment_basic(t *testing.T) {
+	testResourceName := "nsxt_transit_gateway_attachment.test"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyTransitGatewayAttachmentCheckDestroy(state, accTestPolicyTransitGatewayAttachmentUpdateAttributes["display_name"])
+			return testAccNsxtTransitGatewayAttachmentCheckDestroy(state, accTestTransitGatewayAttachmentUpdateAttributes["display_name"])
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyTransitGatewayAttachmentTemplate(true),
+				Config: testAccNsxtTransitGatewayAttachmentTemplate(true),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyTransitGatewayAttachmentExists(accTestPolicyTransitGatewayAttachmentCreateAttributes["display_name"], testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyTransitGatewayAttachmentCreateAttributes["display_name"]),
-					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyTransitGatewayAttachmentCreateAttributes["description"]),
+					testAccNsxtTransitGatewayAttachmentExists(accTestTransitGatewayAttachmentCreateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestTransitGatewayAttachmentCreateAttributes["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "description", accTestTransitGatewayAttachmentCreateAttributes["description"]),
 
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -47,11 +47,11 @@ func TestAccResourceNsxtPolicyTransitGatewayAttachment_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicyTransitGatewayAttachmentTemplate(false),
+				Config: testAccNsxtTransitGatewayAttachmentTemplate(false),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyTransitGatewayAttachmentExists(accTestPolicyTransitGatewayAttachmentUpdateAttributes["display_name"], testResourceName),
-					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyTransitGatewayAttachmentUpdateAttributes["display_name"]),
-					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyTransitGatewayAttachmentUpdateAttributes["description"]),
+					testAccNsxtTransitGatewayAttachmentExists(accTestTransitGatewayAttachmentUpdateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestTransitGatewayAttachmentUpdateAttributes["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "description", accTestTransitGatewayAttachmentUpdateAttributes["description"]),
 
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -63,19 +63,19 @@ func TestAccResourceNsxtPolicyTransitGatewayAttachment_basic(t *testing.T) {
 	})
 }
 
-func TestAccResourceNsxtPolicyTransitGatewayAttachment_importBasic(t *testing.T) {
+func TestAccResourceNsxtTransitGatewayAttachment_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
-	testResourceName := "nsxt_policy_transit_gateway_attachment.test"
+	testResourceName := "nsxt_transit_gateway_attachment.test"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyTransitGatewayAttachmentCheckDestroy(state, name)
+			return testAccNsxtTransitGatewayAttachmentCheckDestroy(state, name)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtPolicyTransitGatewayAttachmentTemplate(true),
+				Config: testAccNsxtTransitGatewayAttachmentTemplate(true),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -87,7 +87,7 @@ func TestAccResourceNsxtPolicyTransitGatewayAttachment_importBasic(t *testing.T)
 	})
 }
 
-func testAccNsxtPolicyTransitGatewayAttachmentExists(displayName string, resourceName string) resource.TestCheckFunc {
+func testAccNsxtTransitGatewayAttachmentExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
@@ -103,7 +103,7 @@ func testAccNsxtPolicyTransitGatewayAttachmentExists(displayName string, resourc
 		}
 
 		parentPath := rs.Primary.Attributes["parent_path"]
-		exists, err := resourceNsxtPolicyTransitGatewayAttachmentExists(testAccGetSessionContext(), parentPath, resourceID, connector)
+		exists, err := resourceNsxtTransitGatewayAttachmentExists(testAccGetSessionContext(), parentPath, resourceID, connector)
 		if err != nil {
 			return err
 		}
@@ -115,17 +115,17 @@ func testAccNsxtPolicyTransitGatewayAttachmentExists(displayName string, resourc
 	}
 }
 
-func testAccNsxtPolicyTransitGatewayAttachmentCheckDestroy(state *terraform.State, displayName string) error {
+func testAccNsxtTransitGatewayAttachmentCheckDestroy(state *terraform.State, displayName string) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
 	for _, rs := range state.RootModule().Resources {
 
-		if rs.Type != "nsxt_policy_transit_gateway_attachment" {
+		if rs.Type != "nsxt_transit_gateway_attachment" {
 			continue
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
 		parentPath := rs.Primary.Attributes["parent_path"]
-		exists, err := resourceNsxtPolicyTransitGatewayAttachmentExists(testAccGetSessionContext(), parentPath, resourceID, connector)
+		exists, err := resourceNsxtTransitGatewayAttachmentExists(testAccGetSessionContext(), parentPath, resourceID, connector)
 		if err == nil {
 			return err
 		}
@@ -137,12 +137,12 @@ func testAccNsxtPolicyTransitGatewayAttachmentCheckDestroy(state *terraform.Stat
 	return nil
 }
 
-func testAccNsxtPolicyTransitGatewayAttachmentTemplate(createFlow bool) string {
+func testAccNsxtTransitGatewayAttachmentTemplate(createFlow bool) string {
 	var attrMap map[string]string
 	if createFlow {
-		attrMap = accTestPolicyTransitGatewayAttachmentCreateAttributes
+		attrMap = accTestTransitGatewayAttachmentCreateAttributes
 	} else {
-		attrMap = accTestPolicyTransitGatewayAttachmentUpdateAttributes
+		attrMap = accTestTransitGatewayAttachmentUpdateAttributes
 	}
 	return fmt.Sprintf(`
 data "nsxt_policy_edge_cluster" "test" {
@@ -163,7 +163,7 @@ resource "nsxt_policy_gateway_connection" "test" {
 resource "nsxt_policy_project" "test" {
   display_name      = "%s"
   tier0_gateway_paths = [nsxt_policy_tier0_gateway.test.path]
-  tgw_external_connections = [nsxt_policy_gateway_connection.test.path]
+  tgw_external_connections = [nsxt_gateway_connection.test.path]
 }
 
 resource "nsxt_transit_gateway" "test" {
@@ -174,9 +174,9 @@ resource "nsxt_transit_gateway" "test" {
   transit_subnets = ["192.168.7.0/24"]
 }
 
-resource "nsxt_policy_transit_gateway_attachment" "test" {
+resource "nsxt_transit_gateway_attachment" "test" {
   parent_path  = nsxt_transit_gateway.test.path
-  connection_path = nsxt_policy_gateway_connection.test.path
+  connection_path = nsxt_gateway_connection.test.path
   display_name = "%s"
   description  = "%s"
 

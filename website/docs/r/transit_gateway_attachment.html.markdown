@@ -1,23 +1,24 @@
 ---
 subcategory: "Beta"
 layout: "nsxt"
-page_title: "NSXT: nsxt_policy_transit_gateway_attachment"
-description: A resource to configure a TransitGatewayAttachment.
+page_title: "NSXT: nsxt_transit_gateway_attachment"
+description: A resource to configure a Transit Gateway Attachment.
 ---
 
-# nsxt_policy_transit_gateway_attachment
+# nsxt_transit_gateway_attachment
 
-This resource provides a method for the management of a TransitGatewayAttachment.
+This resource provides a method for the management of a Transit Gateway Attachment.
 
-This resource is applicable to NSX Global Manager, NSX Policy Manager and VMC.
+This resource is applicable to NSX Policy Manager.
 
 ## Example Usage
 
 ```hcl
-resource "nsxt_policy_transit_gateway_attachment" "test" {
+resource "nsxt_transit_gateway_attachment" "test" {
+  parent_path     = nsxt_transit_gateway.test.path
   display_name    = "test"
-  description     = "Terraform provisioned TransitGatewayAttachment"
-  connection_path = nsxt_policy_vpc_connectivity_profile.test.path
+  description     = "Terraform provisioned Transit Gateway Attachment"
+  connection_path = nsxt_gateway_connection.test.path
 }
 ```
 
@@ -47,7 +48,7 @@ An existing object can be [imported][docs-import] into this resource, via the fo
 [docs-import]: https://www.terraform.io/cli/import
 
 ```
-terraform import nsxt_policy_transit_gateway_attachment.test PATH
+terraform import nsxt_transit_gateway_attachment.test PATH
 ```
 
 The above command imports TransitGatewayAttachment named `test` with the policy path `PATH`.

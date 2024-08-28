@@ -507,11 +507,11 @@ func Provider() *schema.Provider {
 			"nsxt_transit_gateway":                                     resourceNsxtTransitGateway(),
 			"nsxt_policy_share":                                        resourceNsxtPolicyShare(),
 			"nsxt_policy_shared_resource":                              resourceNsxtPolicySharedResource(),
-			"nsxt_policy_gateway_connection":                           resourceNsxtPolicyGatewayConnection(),
+			"nsxt_gateway_connection":                                  resourceNsxtGatewayConnection(),
 			"nsxt_vpc":                                                 resourceNsxtVpc(),
 			"nsxt_vpc_nat_rule":                                        resourceNsxtPolicyVpcNatRule(),
 			"nsxt_vpc_ip_address_allocation":                           resourceNsxtVpcIpAddressAllocation(),
-			"nsxt_policy_transit_gateway_attachment":                   resourceNsxtPolicyTransitGatewayAttachment(),
+			"nsxt_transit_gateway_attachment":                          resourceNsxtTransitGatewayAttachment(),
 		},
 
 		ConfigureFunc: providerConfigure,

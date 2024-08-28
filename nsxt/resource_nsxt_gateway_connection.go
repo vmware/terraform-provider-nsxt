@@ -73,12 +73,12 @@ var gatewayConnectionSchema = map[string]*metadata.ExtendedSchema{
 	},
 }
 
-func resourceNsxtPolicyGatewayConnection() *schema.Resource {
+func resourceNsxtGatewayConnection() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNsxtPolicyGatewayConnectionCreate,
-		Read:   resourceNsxtPolicyGatewayConnectionRead,
-		Update: resourceNsxtPolicyGatewayConnectionUpdate,
-		Delete: resourceNsxtPolicyGatewayConnectionDelete,
+		Create: resourceNsxtGatewayConnectionCreate,
+		Read:   resourceNsxtGatewayConnectionRead,
+		Update: resourceNsxtGatewayConnectionUpdate,
+		Delete: resourceNsxtGatewayConnectionDelete,
 		Importer: &schema.ResourceImporter{
 			State: nsxtPolicyPathResourceImporter,
 		},
@@ -86,7 +86,7 @@ func resourceNsxtPolicyGatewayConnection() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyGatewayConnectionExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
+func resourceNsxtGatewayConnectionExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
 	var err error
 
 	client := clientLayer.NewGatewayConnectionsClient(connector)
@@ -102,10 +102,10 @@ func resourceNsxtPolicyGatewayConnectionExists(id string, connector client.Conne
 	return false, logAPIError("Error retrieving resource", err)
 }
 
-func resourceNsxtPolicyGatewayConnectionCreate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtGatewayConnectionCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
-	id, err := getOrGenerateID(d, m, resourceNsxtPolicyGatewayConnectionExists)
+	id, err := getOrGenerateID(d, m, resourceNsxtGatewayConnectionExists)
 	if err != nil {
 		return err
 	}
@@ -135,10 +135,10 @@ func resourceNsxtPolicyGatewayConnectionCreate(d *schema.ResourceData, m interfa
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
-	return resourceNsxtPolicyGatewayConnectionRead(d, m)
+	return resourceNsxtGatewayConnectionRead(d, m)
 }
 
-func resourceNsxtPolicyGatewayConnectionRead(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtGatewayConnectionRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
 	id := d.Id()
@@ -164,7 +164,7 @@ func resourceNsxtPolicyGatewayConnectionRead(d *schema.ResourceData, m interface
 	return metadata.StructToSchema(elem, d, gatewayConnectionSchema, "", nil)
 }
 
-func resourceNsxtPolicyGatewayConnectionUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtGatewayConnectionUpdate(d *schema.ResourceData, m interface{}) error {
 
 	connector := getPolicyConnector(m)
 
@@ -196,10 +196,10 @@ func resourceNsxtPolicyGatewayConnectionUpdate(d *schema.ResourceData, m interfa
 		return handleUpdateError("GatewayConnection", id, err)
 	}
 
-	return resourceNsxtPolicyGatewayConnectionRead(d, m)
+	return resourceNsxtGatewayConnectionRead(d, m)
 }
 
-func resourceNsxtPolicyGatewayConnectionDelete(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtGatewayConnectionDelete(d *schema.ResourceData, m interface{}) error {
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining GatewayConnection ID")
