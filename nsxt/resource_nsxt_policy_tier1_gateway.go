@@ -407,11 +407,14 @@ func policyTier1GatewayResourceToInfraStruct(context utl.SessionContext, d *sche
 		DisableFirewall:         &disableFirewall,
 		EnableStandbyRelocation: &enableStandbyRelocation,
 		ForceWhitelisting:       &forceWhitelisting,
-		Tier0Path:               &tier0Path,
 		RouteAdvertisementTypes: routeAdvertisementTypes,
 		RouteAdvertisementRules: routeAdvertisementRules,
 		Ipv6ProfilePaths:        ipv6ProfilePaths,
 		ResourceType:            &t1Type,
+	}
+
+	if tier0Path != "" {
+		obj.Tier0Path = &tier0Path
 	}
 
 	if util.NsxVersionHigherOrEqual("3.2.0") {

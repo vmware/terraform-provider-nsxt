@@ -29,7 +29,10 @@ func TestAccResourceNsxtVpcConnectivityProfile_basic(t *testing.T) {
 	testResourceName := "nsxt_vpc_connectivity_profile.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyVPC(t)
+		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtVpcConnectivityProfileCheckDestroy(state, accTestVpcConnectivityProfileUpdateAttributes["display_name"])
@@ -91,7 +94,10 @@ func TestAccResourceNsxtVpcConnectivityProfile_importBasic(t *testing.T) {
 	testResourceName := "nsxt_vpc_connectivity_profile.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyVPC(t)
+		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtVpcConnectivityProfileCheckDestroy(state, name)
