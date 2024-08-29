@@ -383,8 +383,7 @@ func upgradeRunCreateOrUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func prepareUpgrade(upgradeClientSet *upgradeClientSet, d *schema.ResourceData, m interface{}) error {
-	for i := range upgradeComponentList {
-		component := upgradeComponentList[i]
+	for _, component := range upgradeComponentList {
 		// Customize MP upgrade is not allowed
 		if component == mpUpgradeGroup {
 			continue
@@ -615,13 +614,17 @@ func updateUpgradeUnitGroups(upgradeClientSet *upgradeClientSet, d *schema.Resou
 			rebootlessUpgrade := group["rebootless_upgrade"].(bool)
 
 			var extendConfig []model.KeyValuePair
+			if groupGet.ExtendedConfiguration != nil {
+				extendConfig = groupGet.ExtendedConfiguration
+			}
+
 			if upgradeMode != "" {
 				upgradeModeKey := "upgrade_mode"
-				extendConfig = append(extendConfig, model.KeyValuePair{Key: &upgradeModeKey, Value: &upgradeMode})
+				extendConfig = util.KeyValuePairsReplaceOrAppend(extendConfig, upgradeModeKey, upgradeMode)
 			}
 			if mmcVsanMode != "" {
 				mmcVsanModeKey := "maintenance_mode_config_vsan_mode"
-				extendConfig = append(extendConfig, model.KeyValuePair{Key: &mmcVsanModeKey, Value: &mmcVsanMode})
+				extendConfig = util.KeyValuePairsReplaceOrAppend(extendConfig, mmcVsanModeKey, mmcVsanMode)
 			}
 
 			mmcEvacuateOffVmsStr := "false"
@@ -629,14 +632,14 @@ func updateUpgradeUnitGroups(upgradeClientSet *upgradeClientSet, d *schema.Resou
 			if mmcEvacuateOffVms {
 				mmcEvacuateOffVmsStr = "true"
 			}
-			extendConfig = append(extendConfig, model.KeyValuePair{Key: &mmcEvacuateOffVmsKey, Value: &mmcEvacuateOffVmsStr})
+			extendConfig = util.KeyValuePairsReplaceOrAppend(extendConfig, mmcEvacuateOffVmsKey, mmcEvacuateOffVmsStr)
 
 			rebootlessUpgradeStr := "false"
 			rebootlessUpgradeKey := "rebootless_upgrade"
 			if rebootlessUpgrade {
 				rebootlessUpgradeStr = "true"
 			}
-			extendConfig = append(extendConfig, model.KeyValuePair{Key: &rebootlessUpgradeKey, Value: &rebootlessUpgradeStr})
+			extendConfig = util.KeyValuePairsReplaceOrAppend(extendConfig, rebootlessUpgradeKey, rebootlessUpgradeStr)
 			groupGet.ExtendedConfiguration = extendConfig
 		}
 

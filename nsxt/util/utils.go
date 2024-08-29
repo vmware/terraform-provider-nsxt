@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/go-version"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 )
 
 var NsxVersion = ""
@@ -51,4 +52,14 @@ func VerifyVerifiableID(id, extra string) bool {
 	}
 	h := hash(s[0] + extra)
 	return s[1] == fmt.Sprintf("%x", h)
+}
+
+func KeyValuePairsReplaceOrAppend(kvpSlice []model.KeyValuePair, k, v string) []model.KeyValuePair {
+	for i := range kvpSlice {
+		if *kvpSlice[i].Key == k {
+			kvpSlice[i].Value = &v
+			return kvpSlice
+		}
+	}
+	return append(kvpSlice, model.KeyValuePair{Key: &k, Value: &v})
 }
