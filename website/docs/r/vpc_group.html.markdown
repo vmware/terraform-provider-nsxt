@@ -12,6 +12,8 @@ used as sources and destinations, as well as in the Applied To field, in firewal
 
 This resource is applicable to NSX Policy Manager.
 
+## Example Usage
+
 ```hcl
 data "nsxt_policy_project" "demoproj" {
   display_name = "demoproj"
