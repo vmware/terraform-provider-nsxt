@@ -38,6 +38,7 @@ var transitGatewaySchema = map[string]*metadata.ExtendedSchema{
 				},
 			},
 			Optional: true,
+			Computed: true,
 		},
 		Metadata: metadata.Metadata{
 			SchemaType:   "list",
