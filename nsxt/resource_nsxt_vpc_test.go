@@ -190,7 +190,7 @@ resource "nsxt_vpc_service_profile" "test" {
   %s
   display_name = "%s"
   dhcp_config {
-    mode = "DHCP_IP_ALLOCATION_BY_PORT"
+    mode = "DHCP_SERVER"
   }
 }
 

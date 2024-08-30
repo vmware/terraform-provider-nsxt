@@ -19,8 +19,7 @@ import (
 )
 
 var vpcServiceProfileModeValues = []string{
-	model.VpcProfileDhcpConfig_MODE_IP_ALLOCATION_BY_PORT,
-	model.VpcProfileDhcpConfig_MODE_IP_ALLOCATION_BY_MAC,
+	model.VpcProfileDhcpConfig_MODE_SERVER,
 	model.VpcProfileDhcpConfig_MODE_RELAY,
 	model.VpcProfileDhcpConfig_MODE_DEACTIVATED,
 }
@@ -139,11 +138,39 @@ var vpcServiceProfileSchema = map[string]*metadata.ExtendedSchema{
 							Type:         schema.TypeString,
 							ValidateFunc: validation.StringInSlice(vpcServiceProfileModeValues, false),
 							Optional:     true,
-							Default:      model.VpcProfileDhcpConfig_MODE_IP_ALLOCATION_BY_PORT,
+							Default:      model.VpcProfileDhcpConfig_MODE_SERVER,
 						},
 						Metadata: metadata.Metadata{
 							SchemaType:   "string",
 							SdkFieldName: "Mode",
+						},
+					},
+					"advanced_config": {
+						Schema: schema.Schema{
+							Type:     schema.TypeList,
+							MaxItems: 1,
+							Elem: &metadata.ExtendedResource{
+								Schema: map[string]*metadata.ExtendedSchema{
+									"is_distributed_dhcp": {
+										Schema: schema.Schema{
+											Type:     schema.TypeBool,
+											Optional: true,
+											Default:  true,
+										},
+										Metadata: metadata.Metadata{
+											SchemaType:   "bool",
+											SdkFieldName: "IsDistributedDhcp",
+										},
+									},
+								},
+							},
+							Optional: true,
+							Computed: true,
+						},
+						Metadata: metadata.Metadata{
+							SchemaType:   "struct",
+							SdkFieldName: "AdvancedConfig",
+							ReflectType:  reflect.TypeOf(model.VpcDhcpAdvancedConfig{}),
 						},
 					},
 					"dhcp_relay_config": {
