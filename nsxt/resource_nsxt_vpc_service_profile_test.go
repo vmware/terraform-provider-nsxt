@@ -37,6 +37,7 @@ var accTestPolicyVpcServiceProfileUpdateAttributes = map[string]string{
 
 func TestAccResourceNsxtVpcServiceProfile_basic(t *testing.T) {
 	testResourceName := "nsxt_vpc_service_profile.test"
+	testDataSourceName := "data.nsxt_vpc_service_profile.test"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t); testAccOnlyVPC(t) },
@@ -49,6 +50,8 @@ func TestAccResourceNsxtVpcServiceProfile_basic(t *testing.T) {
 				Config: testAccNsxtVpcServiceProfileTemplate(true, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtVpcServiceProfileExists(accTestPolicyVpcServiceProfileCreateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttrSet(testDataSourceName, "path"),
+					resource.TestCheckResourceAttrSet(testDataSourceName, "description"),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyVpcServiceProfileCreateAttributes["display_name"]),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyVpcServiceProfileCreateAttributes["description"]),
 					resource.TestCheckResourceAttr(testResourceName, "dns_forwarder_config.#", "1"),
@@ -72,6 +75,8 @@ func TestAccResourceNsxtVpcServiceProfile_basic(t *testing.T) {
 				Config: testAccNsxtVpcServiceProfileTemplate(true, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtVpcServiceProfileExists(accTestPolicyVpcServiceProfileCreateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttrSet(testDataSourceName, "path"),
+					resource.TestCheckResourceAttrSet(testDataSourceName, "description"),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyVpcServiceProfileCreateAttributes["display_name"]),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyVpcServiceProfileCreateAttributes["description"]),
 					resource.TestCheckResourceAttr(testResourceName, "dns_forwarder_config.#", "1"),
@@ -283,7 +288,14 @@ resource "nsxt_vpc_service_profile" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, testAccNsxtProjectContext(), profileAssignment, attrMap["display_name"], attrMap["description"], attrMap["ntp_servers"], attrMap["lease_time"], attrMap["mode"], attrMap["dns_server_ips"], attrMap["cache_size"], attrMap["log_level"])
+}
+
+data "nsxt_vpc_service_profile" "test" {
+  %s
+  display_name = "%s"
+
+  depends_on = [nsxt_vpc_service_profile.test]
+}`, testAccNsxtProjectContext(), profileAssignment, attrMap["display_name"], attrMap["description"], attrMap["ntp_servers"], attrMap["lease_time"], attrMap["mode"], attrMap["dns_server_ips"], attrMap["cache_size"], attrMap["log_level"], testAccNsxtProjectContext(), attrMap["display_name"])
 }
 
 func testAccNsxtVpcServiceProfileMinimalistic() string {
