@@ -198,7 +198,7 @@ resource "nsxt_vpc_connectivity_profile" "test" {
   %s
   display_name = "%s"
 
-  transit_gateway_path = nsxt_transit_gateway.test.path
+  transit_gateway_path = nsxt_policy_transit_gateway.test.path
   service_gateway {
     enable = false
   }

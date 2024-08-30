@@ -23,20 +23,20 @@ var accTestTransitGatewayUpdateAttributes = map[string]string{
 	"transit_subnets": "192.168.7.0/24",
 }
 
-func TestAccResourceNsxtTransitGateway_basic(t *testing.T) {
-	testResourceName := "nsxt_transit_gateway.test"
+func TestAccResourceNsxtPolicyTransitGateway_basic(t *testing.T) {
+	testResourceName := "nsxt_policy_transit_gateway.test"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t); testAccOnlyVPC(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtTransitGatewayCheckDestroy(state, accTestTransitGatewayUpdateAttributes["display_name"])
+			return testAccNsxtPolicyTransitGatewayCheckDestroy(state, accTestTransitGatewayUpdateAttributes["display_name"])
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtTransitGatewayTemplate(true),
+				Config: testAccNsxtPolicyTransitGatewayTemplate(true),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtTransitGatewayExists(accTestTransitGatewayCreateAttributes["display_name"], testResourceName),
+					testAccNsxtPolicyTransitGatewayExists(accTestTransitGatewayCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestTransitGatewayCreateAttributes["display_name"]),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestTransitGatewayCreateAttributes["description"]),
 					resource.TestCheckResourceAttr(testResourceName, "transit_subnets.0", accTestTransitGatewayCreateAttributes["transit_subnets"]),
@@ -48,9 +48,9 @@ func TestAccResourceNsxtTransitGateway_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtTransitGatewayTemplate(false),
+				Config: testAccNsxtPolicyTransitGatewayTemplate(false),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtTransitGatewayExists(accTestTransitGatewayUpdateAttributes["display_name"], testResourceName),
+					testAccNsxtPolicyTransitGatewayExists(accTestTransitGatewayUpdateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestTransitGatewayUpdateAttributes["display_name"]),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestTransitGatewayUpdateAttributes["description"]),
 					resource.TestCheckResourceAttr(testResourceName, "transit_subnets.0", accTestTransitGatewayUpdateAttributes["transit_subnets"]),
@@ -62,9 +62,9 @@ func TestAccResourceNsxtTransitGateway_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtTransitGatewayMinimalistic(),
+				Config: testAccNsxtPolicyTransitGatewayMinimalistic(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtTransitGatewayExists(accTestTransitGatewayCreateAttributes["display_name"], testResourceName),
+					testAccNsxtPolicyTransitGatewayExists(accTestTransitGatewayCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -76,19 +76,19 @@ func TestAccResourceNsxtTransitGateway_basic(t *testing.T) {
 	})
 }
 
-func TestAccResourceNsxtTransitGateway_importBasic(t *testing.T) {
+func TestAccResourceNsxtPolicyTransitGateway_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
-	testResourceName := "nsxt_transit_gateway.test"
+	testResourceName := "nsxt_policy_transit_gateway.test"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t); testAccOnlyVPC(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtTransitGatewayCheckDestroy(state, name)
+			return testAccNsxtPolicyTransitGatewayCheckDestroy(state, name)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtTransitGatewayMinimalistic(),
+				Config: testAccNsxtPolicyTransitGatewayMinimalistic(),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -100,7 +100,7 @@ func TestAccResourceNsxtTransitGateway_importBasic(t *testing.T) {
 	})
 }
 
-func testAccNsxtTransitGatewayExists(displayName string, resourceName string) resource.TestCheckFunc {
+func testAccNsxtPolicyTransitGatewayExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
@@ -115,7 +115,7 @@ func testAccNsxtTransitGatewayExists(displayName string, resourceName string) re
 			return fmt.Errorf("Policy TransitGateway resource ID not set in resources")
 		}
 
-		exists, err := resourceNsxtTransitGatewayExists(testAccGetSessionContext(), resourceID, connector)
+		exists, err := resourceNsxtPolicyTransitGatewayExists(testAccGetSessionContext(), resourceID, connector)
 		if err != nil {
 			return err
 		}
@@ -127,16 +127,16 @@ func testAccNsxtTransitGatewayExists(displayName string, resourceName string) re
 	}
 }
 
-func testAccNsxtTransitGatewayCheckDestroy(state *terraform.State, displayName string) error {
+func testAccNsxtPolicyTransitGatewayCheckDestroy(state *terraform.State, displayName string) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
 	for _, rs := range state.RootModule().Resources {
 
-		if rs.Type != "nsxt_transit_gateway" {
+		if rs.Type != "nsxt_policy_transit_gateway" {
 			continue
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		exists, err := resourceNsxtTransitGatewayExists(testAccGetSessionContext(), resourceID, connector)
+		exists, err := resourceNsxtPolicyTransitGatewayExists(testAccGetSessionContext(), resourceID, connector)
 		if err == nil {
 			return err
 		}
@@ -148,7 +148,7 @@ func testAccNsxtTransitGatewayCheckDestroy(state *terraform.State, displayName s
 	return nil
 }
 
-func testAccNsxtTransitGatewayTemplate(createFlow bool) string {
+func testAccNsxtPolicyTransitGatewayTemplate(createFlow bool) string {
 	var attrMap map[string]string
 	if createFlow {
 		attrMap = accTestTransitGatewayCreateAttributes
@@ -156,7 +156,7 @@ func testAccNsxtTransitGatewayTemplate(createFlow bool) string {
 		attrMap = accTestTransitGatewayUpdateAttributes
 	}
 	return fmt.Sprintf(`
-resource "nsxt_transit_gateway" "test" {
+resource "nsxt_policy_transit_gateway" "test" {
 %s
   display_name    = "%s"
   description     = "%s"
@@ -169,9 +169,9 @@ resource "nsxt_transit_gateway" "test" {
 }`, testAccNsxtProjectContext(), attrMap["display_name"], attrMap["description"], attrMap["transit_subnets"])
 }
 
-func testAccNsxtTransitGatewayMinimalistic() string {
+func testAccNsxtPolicyTransitGatewayMinimalistic() string {
 	return fmt.Sprintf(`
-resource "nsxt_transit_gateway" "test" {
+resource "nsxt_policy_transit_gateway" "test" {
 %s
   display_name    = "%s"
   transit_subnets = ["%s"]

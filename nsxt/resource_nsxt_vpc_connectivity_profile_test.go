@@ -168,7 +168,7 @@ var testAccNsxtVpcConnectivityProfileHelper = getAccTestResourceName()
 
 func testAccNsxtVpcConnectivityProfilePrerequisite() string {
 	return fmt.Sprintf(`
-resource "nsxt_transit_gateway" "test" {
+resource "nsxt_policy_transit_gateway" "test" {
 %s
   display_name    = "%s"
   transit_subnets = ["192.168.7.0/24"]
@@ -187,7 +187,7 @@ resource "nsxt_vpc_connectivity_profile" "test" {
 %s
   display_name = "%s"
   description  = "%s"
-  transit_gateway_path = nsxt_transit_gateway.test.path
+  transit_gateway_path = nsxt_policy_transit_gateway.test.path
 
   service_gateway {
     nat_config {
@@ -210,7 +210,7 @@ func testAccNsxtVpcConnectivityProfileMinimalistic() string {
 resource "nsxt_vpc_connectivity_profile" "test" {
 %s
   display_name         = "%s"
-  transit_gateway_path = nsxt_transit_gateway.test.path
+  transit_gateway_path = nsxt_policy_transit_gateway.test.path
 
 }`, testAccNsxtProjectContext(), accTestVpcConnectivityProfileUpdateAttributes["display_name"])
 }

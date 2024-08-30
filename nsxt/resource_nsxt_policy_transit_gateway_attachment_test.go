@@ -166,7 +166,7 @@ resource "nsxt_policy_project" "test" {
   tgw_external_connections = [nsxt_policy_gateway_connection.test.path]
 }
 
-resource "nsxt_transit_gateway" "test" {
+resource "nsxt_policy_transit_gateway" "test" {
   context {
     project_id = nsxt_policy_project.test.id
   }
@@ -175,7 +175,7 @@ resource "nsxt_transit_gateway" "test" {
 }
 
 resource "nsxt_policy_transit_gateway_attachment" "test" {
-  parent_path  = nsxt_transit_gateway.test.path
+  parent_path  = nsxt_policy_transit_gateway.test.path
   connection_path = nsxt_policy_gateway_connection.test.path
   display_name = "%s"
   description  = "%s"

@@ -1,11 +1,11 @@
 ---
 subcategory: "VPC"
 layout: "nsxt"
-page_title: "NSXT: nsxt_transit_gateway"
+page_title: "NSXT: nsxt_policy_transit_gateway"
 description: A resource to configure a Transit Gateway.
 ---
 
-# nsxt_transit_gateway
+# nsxt_policy_transit_gateway
 
 This resource provides a method for the management of a Transit Gateway.
 
@@ -52,7 +52,7 @@ An existing object can be [imported][docs-import] into this resource, via the fo
 [docs-import]: https://www.terraform.io/cli/import
 
 ```
-terraform import nsxt_transit_gateway.test PATH
+terraform import nsxt_policy_transit_gateway.test PATH
 ```
 
 The above command imports Transit Gateway named `test` with the NSX path `PATH`.
