@@ -46,12 +46,12 @@ var transitGatewaySchema = map[string]*metadata.ExtendedSchema{
 	},
 }
 
-func resourceNsxtTransitGateway() *schema.Resource {
+func resourceNsxtPolicyTransitGateway() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNsxtTransitGatewayCreate,
-		Read:   resourceNsxtTransitGatewayRead,
-		Update: resourceNsxtTransitGatewayUpdate,
-		Delete: resourceNsxtTransitGatewayDelete,
+		Create: resourceNsxtPolicyTransitGatewayCreate,
+		Read:   resourceNsxtPolicyTransitGatewayRead,
+		Update: resourceNsxtPolicyTransitGatewayUpdate,
+		Delete: resourceNsxtPolicyTransitGatewayDelete,
 		Importer: &schema.ResourceImporter{
 			State: nsxtPolicyPathResourceImporter,
 		},
@@ -59,7 +59,7 @@ func resourceNsxtTransitGateway() *schema.Resource {
 	}
 }
 
-func resourceNsxtTransitGatewayExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
+func resourceNsxtPolicyTransitGatewayExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
 	var err error
 	parents := getVpcParentsFromContext(sessionContext)
 	client := clientLayer.NewTransitGatewaysClient(connector)
@@ -75,10 +75,10 @@ func resourceNsxtTransitGatewayExists(sessionContext utl.SessionContext, id stri
 	return false, logAPIError("Error retrieving resource", err)
 }
 
-func resourceNsxtTransitGatewayCreate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtPolicyTransitGatewayCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
-	id, err := getOrGenerateID2(d, m, resourceNsxtTransitGatewayExists)
+	id, err := getOrGenerateID2(d, m, resourceNsxtPolicyTransitGatewayExists)
 	if err != nil {
 		return err
 	}
@@ -112,10 +112,10 @@ func resourceNsxtTransitGatewayCreate(d *schema.ResourceData, m interface{}) err
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
-	return resourceNsxtTransitGatewayRead(d, m)
+	return resourceNsxtPolicyTransitGatewayRead(d, m)
 }
 
-func resourceNsxtTransitGatewayRead(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtPolicyTransitGatewayRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
 	id := d.Id()
@@ -141,7 +141,7 @@ func resourceNsxtTransitGatewayRead(d *schema.ResourceData, m interface{}) error
 	return metadata.StructToSchema(elem, d, transitGatewaySchema, "", nil)
 }
 
-func resourceNsxtTransitGatewayUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtPolicyTransitGatewayUpdate(d *schema.ResourceData, m interface{}) error {
 
 	connector := getPolicyConnector(m)
 
@@ -177,10 +177,10 @@ func resourceNsxtTransitGatewayUpdate(d *schema.ResourceData, m interface{}) err
 		return handleUpdateError("TransitGateway", id, err)
 	}
 
-	return resourceNsxtTransitGatewayRead(d, m)
+	return resourceNsxtPolicyTransitGatewayRead(d, m)
 }
 
-func resourceNsxtTransitGatewayDelete(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtPolicyTransitGatewayDelete(d *schema.ResourceData, m interface{}) error {
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining TransitGateway ID")

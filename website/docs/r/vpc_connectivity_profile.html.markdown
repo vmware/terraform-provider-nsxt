@@ -22,7 +22,7 @@ resource "nsxt_vpc_connectivity_profile" "test" {
   display_name = "test"
   description  = "Terraform provisioned profile"
 
-  transit_gateway_path = nsxt_transit_gateway.gw1.path
+  transit_gateway_path = nsxt_policy_transit_gateway.gw1.path
   service_gateway {
     nat_config {
       enable_default_snat = true
