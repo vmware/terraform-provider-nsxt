@@ -22,6 +22,7 @@ var vpcSubnetAccessModeValues = []string{
 	model.VpcSubnet_ACCESS_MODE_PRIVATE,
 	model.VpcSubnet_ACCESS_MODE_PUBLIC,
 	model.VpcSubnet_ACCESS_MODE_ISOLATED,
+	model.VpcSubnet_ACCESS_MODE_PRIVATE_TGW,
 }
 
 var vpcSubnetSchema = map[string]*metadata.ExtendedSchema{
