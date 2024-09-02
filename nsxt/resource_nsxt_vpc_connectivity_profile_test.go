@@ -27,6 +27,7 @@ var accTestVpcConnectivityProfileUpdateAttributes = map[string]string{
 
 func TestAccResourceNsxtVpcConnectivityProfile_basic(t *testing.T) {
 	testResourceName := "nsxt_vpc_connectivity_profile.test"
+	testDataSourceName := "nsxt_vpc_connectivity_profile.test"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -42,6 +43,8 @@ func TestAccResourceNsxtVpcConnectivityProfile_basic(t *testing.T) {
 				Config: testAccNsxtVpcConnectivityProfileTemplate(true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtVpcConnectivityProfileExists(accTestVpcConnectivityProfileCreateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttrSet(testDataSourceName, "path"),
+					resource.TestCheckResourceAttrSet(testDataSourceName, "description"),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestVpcConnectivityProfileCreateAttributes["display_name"]),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestVpcConnectivityProfileCreateAttributes["description"]),
 					resource.TestCheckResourceAttrSet(testResourceName, "transit_gateway_path"),
@@ -60,6 +63,8 @@ func TestAccResourceNsxtVpcConnectivityProfile_basic(t *testing.T) {
 				Config: testAccNsxtVpcConnectivityProfileTemplate(false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtVpcConnectivityProfileExists(accTestVpcConnectivityProfileUpdateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttrSet(testDataSourceName, "path"),
+					resource.TestCheckResourceAttrSet(testDataSourceName, "description"),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestVpcConnectivityProfileUpdateAttributes["display_name"]),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestVpcConnectivityProfileUpdateAttributes["description"]),
 					resource.TestCheckResourceAttrSet(testResourceName, "transit_gateway_path"),
@@ -197,12 +202,17 @@ resource "nsxt_vpc_connectivity_profile" "test" {
     enable = %s
   }
 
-
   tag {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, testAccNsxtProjectContext(), attrMap["display_name"], attrMap["description"], attrMap["enable_default_snat"], attrMap["enable"])
+}
+data "nsxt_vpc_connectivity_profile" "test" {
+%s
+  display_name = "%s"
+
+  depends_on = [nsxt_vpc_connectivity_profile.test]
+}`, testAccNsxtProjectContext(), attrMap["display_name"], attrMap["description"], attrMap["enable_default_snat"], attrMap["enable"], testAccNsxtProjectContext(), attrMap["display_name"])
 }
 
 func testAccNsxtVpcConnectivityProfileMinimalistic() string {
