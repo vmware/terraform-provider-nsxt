@@ -25,6 +25,7 @@ var accTestTransitGatewayUpdateAttributes = map[string]string{
 
 func TestAccResourceNsxtPolicyTransitGateway_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_transit_gateway.test"
+	testDataSourceName := "nsxt_policy_transit_gateway.test"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t); testAccOnlyVPC(t) },
@@ -45,6 +46,9 @@ func TestAccResourceNsxtPolicyTransitGateway_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+
+					resource.TestCheckResourceAttrSet(testDataSourceName, "path"),
+					resource.TestCheckResourceAttrSet(testDataSourceName, "description"),
 				),
 			},
 			{
@@ -59,6 +63,9 @@ func TestAccResourceNsxtPolicyTransitGateway_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+
+					resource.TestCheckResourceAttrSet(testDataSourceName, "path"),
+					resource.TestCheckResourceAttrSet(testDataSourceName, "description"),
 				),
 			},
 			{
@@ -115,7 +122,7 @@ func testAccNsxtPolicyTransitGatewayExists(displayName string, resourceName stri
 			return fmt.Errorf("Policy TransitGateway resource ID not set in resources")
 		}
 
-		exists, err := resourceNsxtPolicyTransitGatewayExists(testAccGetSessionContext(), resourceID, connector)
+		exists, err := resourceNsxtPolicyTransitGatewayExists(testAccGetSessionProjectContext(), resourceID, connector)
 		if err != nil {
 			return err
 		}
@@ -136,7 +143,7 @@ func testAccNsxtPolicyTransitGatewayCheckDestroy(state *terraform.State, display
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		exists, err := resourceNsxtPolicyTransitGatewayExists(testAccGetSessionContext(), resourceID, connector)
+		exists, err := resourceNsxtPolicyTransitGatewayExists(testAccGetSessionProjectContext(), resourceID, connector)
 		if err == nil {
 			return err
 		}
@@ -166,7 +173,14 @@ resource "nsxt_policy_transit_gateway" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, testAccNsxtProjectContext(), attrMap["display_name"], attrMap["description"], attrMap["transit_subnets"])
+}
+
+data "nsxt_policy_transit_gateway" "test" {
+%s
+  display_name = "%s"
+  depends_on = [nsxt_policy_transit_gateway.test]
+}`, testAccNsxtProjectContext(), attrMap["display_name"], attrMap["description"], attrMap["transit_subnets"],
+		testAccNsxtProjectContext(), attrMap["display_name"])
 }
 
 func testAccNsxtPolicyTransitGatewayMinimalistic() string {
