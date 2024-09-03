@@ -335,6 +335,7 @@ func Provider() *schema.Provider {
 			"nsxt_vpc_subnet_port":                                   dataSourceNsxtVpcSubnetPort(),
 			"nsxt_vpc_service_profile":                               dataSourceNsxtVpcServiceProfile(),
 			"nsxt_vpc_connectivity_profile":                          dataSourceNsxtVpcConnectivityProfile(),
+			"nsxt_policy_transit_gateway":                            dataSourceNsxtPolicyTransitGateway(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
