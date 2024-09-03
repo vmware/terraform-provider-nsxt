@@ -41,7 +41,7 @@ The following arguments are supported:
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `access_level_for_oidc` - (Optional) Specifies access level to NSX from the compute manager. Accepted values - 'FULL' or 'LIMITED'. The default value is 'FULL'.
-* `create_service_account` - (Optional) Specifies whether service account is created or not on compute manager.
+* `create_service_account` - (Optional) Specifies whether service account is created or not on compute manager. The default is `true`. Note that only `true` value will be supported from version 9.0.0 onwards.
 * `credential` - (Required) Login credentials for the compute manager. Should contain exactly one credential enlisted below: 
   * `saml_login` - (Optional) A login credential specifying saml token.
     * `thumbprint` - (Required) Thumbprint of the server.
