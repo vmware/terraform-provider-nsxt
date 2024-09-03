@@ -282,7 +282,7 @@ func testAccOnlyGlobalManager(t *testing.T) {
 }
 
 func testAccOnlyLocalManager(t *testing.T) {
-	if testAccIsGlobalManager() || testAccIsMultitenancy() {
+	if testAccIsGlobalManager() {
 		t.Skipf("This test requires a local manager environment")
 	}
 }
