@@ -25,7 +25,7 @@ func resourceNsxtPolicySecurityPolicyRule() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: nsxtSecurityPolicyRuleImporter,
 		},
-		Schema: getSecurityPolicyAndGatewayRuleSchema(false, false, true, true),
+		Schema: getSecurityPolicyAndGatewayRuleSchema(false, false, false, true),
 	}
 }
 
@@ -38,7 +38,7 @@ func resourceNsxtPolicySecurityPolicyRuleCreate(d *schema.ResourceData, m interf
 	policyID := getPolicyIDFromPath(policyPath)
 
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID2(d, m, resourceNsxtPolicySecurityPolicyRuleExistsPartial(policyPath))
+	id, err := getOrGenerateID2(d, m, resourceNsxtPolicySecurityPolicyRuleExistsPartial(d, m, policyPath))
 	if err != nil {
 		return err
 	}
@@ -124,9 +124,12 @@ func securityPolicyRuleSchemaToModel(d *schema.ResourceData, id string) model.Ru
 	}
 }
 
-func resourceNsxtPolicySecurityPolicyRuleExistsPartial(policyPath string) func(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
+func resourceNsxtPolicySecurityPolicyRuleExistsPartial(d *schema.ResourceData, m interface{}, policyPath string) func(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
+	// we need to take context from the parent rather than from resource context clause,
+	// which does not exist for policy rule resource
+	parentContext := getParentContext(d, m, policyPath)
 	return func(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
-		return resourceNsxtPolicySecurityPolicyRuleExists(sessionContext, id, policyPath, connector)
+		return resourceNsxtPolicySecurityPolicyRuleExists(parentContext, id, policyPath, connector)
 	}
 }
 
