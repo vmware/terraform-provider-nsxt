@@ -58,7 +58,7 @@ func testAccResourceNsxtPolicySecurityPolicyRuleBasic(t *testing.T, withContext 
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNsxtPolicySecurityPolicyRuleDeps(withContext, policyName, locked) +
-					testAccNsxtPolicySecurityPolicyRuleTemplate("test", name, action, direction, proto, seqNum),
+					testAccNsxtPolicySecurityPolicyRuleTemplate("test", name, action, direction, proto, seqNum, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySecurityPolicyExists(policyResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(policyResourceName, "display_name", policyName),
@@ -75,7 +75,7 @@ func testAccResourceNsxtPolicySecurityPolicyRuleBasic(t *testing.T, withContext 
 			{
 				// Update Policy and Rule at the same time
 				Config: testAccNsxtPolicySecurityPolicyRuleDeps(withContext, updatedPolicyName, updatedLocked) +
-					testAccNsxtPolicySecurityPolicyRuleTemplate("test", updatedName, updatedAction, updatedDirection, updatedProto, updatedSeqNum),
+					testAccNsxtPolicySecurityPolicyRuleTemplate("test", updatedName, updatedAction, updatedDirection, updatedProto, updatedSeqNum, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySecurityPolicyExists(policyResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(policyResourceName, "display_name", updatedPolicyName),
@@ -92,8 +92,8 @@ func testAccResourceNsxtPolicySecurityPolicyRuleBasic(t *testing.T, withContext 
 			{
 				// Update Policy and append another Rule at the same time
 				Config: testAccNsxtPolicySecurityPolicyRuleDeps(withContext, policyName, locked) +
-					testAccNsxtPolicySecurityPolicyRuleTemplate("test", updatedName, updatedAction, updatedDirection, updatedProto, updatedSeqNum) +
-					testAccNsxtPolicySecurityPolicyRuleTemplate("test2", appendRuleName, action, direction, proto, seqNum),
+					testAccNsxtPolicySecurityPolicyRuleTemplate("test", updatedName, updatedAction, updatedDirection, updatedProto, updatedSeqNum, false) +
+					testAccNsxtPolicySecurityPolicyRuleTemplate("test2", appendRuleName, action, direction, proto, seqNum, true),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySecurityPolicyExists(policyResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(policyResourceName, "display_name", policyName),
@@ -117,7 +117,7 @@ func testAccResourceNsxtPolicySecurityPolicyRuleBasic(t *testing.T, withContext 
 			{
 				// Update Policy and delete one of its Rule at the same time
 				Config: testAccNsxtPolicySecurityPolicyRuleDeps(withContext, updatedPolicyName, updatedLocked) +
-					testAccNsxtPolicySecurityPolicyRuleTemplate("test", updatedName, updatedAction, updatedDirection, updatedProto, updatedSeqNum),
+					testAccNsxtPolicySecurityPolicyRuleTemplate("test", updatedName, updatedAction, updatedDirection, updatedProto, updatedSeqNum, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySecurityPolicyExists(policyResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(policyResourceName, "display_name", updatedPolicyName),
@@ -152,7 +152,7 @@ func TestAccResourceNsxtPolicySecurityPolicyRule_importBasic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNsxtPolicySecurityPolicyRuleDeps(false, "policyName", "true") +
-					testAccNsxtPolicySecurityPolicyRuleTemplate("test", name, "ALLOW", "IN", "IPV4", "1"),
+					testAccNsxtPolicySecurityPolicyRuleTemplate("test", name, "ALLOW", "IN", "IPV4", "1", false),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -180,7 +180,7 @@ func TestAccResourceNsxtPolicySecurityPolicyRule_importBasic_multitenancy(t *tes
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNsxtPolicySecurityPolicyRuleDeps(true, "policyName", "true") +
-					testAccNsxtPolicySecurityPolicyRuleTemplate("test", name, "ALLOW", "IN", "IPV4", "1"),
+					testAccNsxtPolicySecurityPolicyRuleTemplate("test", name, "ALLOW", "IN", "IPV4", "1", false),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -267,9 +267,14 @@ resource "nsxt_policy_parent_security_policy" "policy1" {
 }`, context, displayName, locked)
 }
 
-func testAccNsxtPolicySecurityPolicyRuleTemplate(resourceName, displayName, action, direction, ipVersion, seqNum string) string {
+func testAccNsxtPolicySecurityPolicyRuleTemplate(resourceName, displayName, action, direction, ipVersion, seqNum string, withID bool) string {
+	idString := ""
+	if withID {
+		idString = fmt.Sprintf(`nsx_id = "%s"`, displayName)
+	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_security_policy_rule" "%s" {
+%s
   display_name    = "%s"
   policy_path     = nsxt_policy_parent_security_policy.policy1.path
   action          = "%s"
@@ -281,5 +286,5 @@ resource "nsxt_policy_security_policy_rule" "%s" {
     scope = "color"
     tag   = "orange"
   }
-}`, resourceName, displayName, action, direction, ipVersion, seqNum)
+}`, resourceName, idString, displayName, action, direction, ipVersion, seqNum)
 }
