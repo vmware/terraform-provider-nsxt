@@ -35,10 +35,14 @@ resource "nsxt_vpc_service_profile" "vpc1_service_profile" {
     ntp_servers = ["20.2.60.5"]
 
     lease_time = 50840
-    mode       = "DHCP_IP_ALLOCATION_BY_PORT"
+    mode       = "DHCP_SERVER"
 
     dns_client_config {
       dns_server_ips = ["10.204.2.20"]
+    }
+
+    advanced_config {
+      is_distributed_dhcp = false
     }
   }
 
@@ -69,10 +73,14 @@ The following arguments are supported:
   * `dns_client_config` - (Optional) DNS Client configuration
     * `dns_server_ips` - (Optional) List of IP addresses of the DNS servers which need to be configured on the workload VMs
   * `lease_time` - (Optional) DHCP lease time in seconds.
-
-  * `mode` - (Optional) DHCP mode of the VPC Profile DHCP Config. Possible values are `DHCP_IP_ALLOCATION_BY_PORT`, `DHCP_IP_ALLOCATION_BY_MAC`, `DHCP_RELAY`, `DHCP_DEACTIVATED`. Default is `DHCP_IP_ALLOCATION_BY_PORT`.
+  * `mode` - (Optional) DHCP mode of the VPC Profile DHCP Config. Possible values are `DHCP_SERVER`, `DHCP_RELAY`, `DHCP_DEACTIVATED`. Default is `DHCP_SERVER`.
   * `dhcp_relay_config` - (Optional) DHCP Relay configuration
     * `server_addresses` - (Optional) List of DHCP server IP addresses for DHCP relay configuration. Both IPv4 and IPv6 addresses are supported.
+  * `advanced_config` - (Optional) VPC DHCP advanced configuration
+    * `is_distributed_dhcp` - DHCP server's IP allocation model based on workloads subnet port id. It is applicable when DHCP mode is DHCP_SERVER.
+      Value of this field can be False only when Edge cluster is available. If value is False, edge cluster in VPC connectivity profile must be
+      configured for this mode. This is the traditional DHCP server that dynamically allocates IP per VM's MAC.
+      If value is True, edge cluster will not be required for this mode. This is a DHCP server that dynamically assigns IP per VM port."
 * `dns_forwarder_config` - (Optional) DNS Forwarder configuration
   * `cache_size` - (Optional) Cache size in KB
   * `log_level` - (Optional) Log level of the DNS forwarder. Possible values: `DEBUG`, `INFO`, `WARNING`, `ERROR`, `FATAL`
