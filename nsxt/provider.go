@@ -1231,9 +1231,35 @@ func getContextDataFromSchema(d *schema.ResourceData) (string, string) {
 	return "", ""
 }
 
+func getContextDataFromParentPath(parentPath string) (string, string) {
+	segments := strings.Split(parentPath, "/")
+	var projectID, vpcID string
+	if len(segments) > 4 && segments[1] == "orgs" && segments[3] == "projects" {
+		projectID = segments[4]
+
+		if len(segments) > 6 && segments[5] == "vpcs" {
+			vpcID = segments[6]
+		}
+	}
+	return projectID, vpcID
+}
+
 func getSessionContext(d *schema.ResourceData, m interface{}) tf_api.SessionContext {
+	return getSessionContextHelper(d, m, "")
+}
+
+func getParentContext(d *schema.ResourceData, m interface{}, parentPath string) tf_api.SessionContext {
+	return getSessionContextHelper(d, m, parentPath)
+}
+
+func getSessionContextHelper(d *schema.ResourceData, m interface{}, parentPath string) tf_api.SessionContext {
 	var clientType tf_api.ClientType
-	projectID, vpcID := getContextDataFromSchema(d)
+	var projectID, vpcID string
+	if parentPath == "" {
+		projectID, vpcID = getContextDataFromSchema(d)
+	} else {
+		projectID, vpcID = getContextDataFromParentPath(parentPath)
+	}
 	if projectID != "" {
 		clientType = tf_api.Multitenancy
 		if vpcID != "" {
