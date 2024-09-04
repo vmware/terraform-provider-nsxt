@@ -17,7 +17,7 @@ This resource is applicable to NSX Policy Manager.
 resource "nsxt_policy_distributed_vlan_connection" "test" {
   display_name      = "test"
   description       = "Terraform provisioned Distributed Vlan Connection"
-  gateway_addresses = ["192.1168.2.1/24", "192.1168.3.1/24"]
+  gateway_addresses = ["192.168.2.1/24", "192.168.3.1/24"]
   vlan_id           = 12
 }
 ```
