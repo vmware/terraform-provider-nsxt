@@ -167,6 +167,7 @@ var vpcSchema = map[string]*metadata.ExtendedSchema{
 		Metadata: metadata.Metadata{
 			SchemaType:   "string",
 			SdkFieldName: "ShortId",
+			OmitIfEmpty:  true,
 		},
 	},
 	"vpc_connectivity_profile": {

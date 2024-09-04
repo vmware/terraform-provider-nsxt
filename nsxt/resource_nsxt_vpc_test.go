@@ -98,9 +98,25 @@ func TestAccResourceNsxtVpc_basic(t *testing.T) {
 					testAccNsxtVpcExists(accTestVpcCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttrSet(testResourceName, "vpc_service_profile"),
 					resource.TestCheckResourceAttrSet(testResourceName, "vpc_connectivity_profile"),
+					resource.TestCheckResourceAttr(testResourceName, "short_id", accTestVpcUpdateAttributes["short_id"]),
 					resource.TestCheckResourceAttr(testResourceName, "load_balancer_vpc_endpoint.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+				),
+			},
+			{
+				Config: testAccNsxtVpcMinimalisticNoShortId(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtVpcExists(accTestVpcCreateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttrSet(testResourceName, "vpc_service_profile"),
+					resource.TestCheckResourceAttrSet(testResourceName, "vpc_connectivity_profile"),
+					resource.TestCheckResourceAttr(testResourceName, "load_balancer_vpc_endpoint.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "description", ""),
+					resource.TestCheckResourceAttr(testResourceName, "short_id", accTestVpcUpdateAttributes["short_id"]),
+					resource.TestCheckResourceAttr(testResourceName, "nsx_id", accTestVpcUpdateAttributes["short_id"]),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
@@ -251,4 +267,17 @@ resource "nsxt_vpc" "test" {
   vpc_service_profile      = nsxt_vpc_service_profile.test.path
   vpc_connectivity_profile = nsxt_vpc_connectivity_profile.test.path
 }`, testAccNsxtProjectContext(), accTestVpcUpdateAttributes["display_name"], accTestVpcUpdateAttributes["short_id"])
+}
+
+// We use short_id as nsx_id to make sure NSX populates the short_id correctly
+func testAccNsxtVpcMinimalisticNoShortId() string {
+	return testAccNsxtVpcPrerequisites() + fmt.Sprintf(`
+resource "nsxt_vpc" "test" {
+  %s
+  nsx_id = "%s"
+  display_name = "%s"
+  # TODO - remove when default profiles are supported
+  vpc_service_profile      = nsxt_vpc_service_profile.test.path
+  vpc_connectivity_profile = nsxt_vpc_connectivity_profile.test.path
+}`, testAccNsxtProjectContext(), accTestVpcUpdateAttributes["short_id"], accTestVpcUpdateAttributes["display_name"])
 }
