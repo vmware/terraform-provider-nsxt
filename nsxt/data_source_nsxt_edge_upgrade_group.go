@@ -13,9 +13,10 @@ import (
 )
 
 var (
-	edgeUpgradeGroup = "EDGE"
-	hostUpgradeGroup = "HOST"
-	mpUpgradeGroup   = "MP"
+	edgeUpgradeGroup     = "EDGE"
+	hostUpgradeGroup     = "HOST"
+	mpUpgradeGroup       = "MP"
+	finalizeUpgradeGroup = "FINALIZE_UPGRADE"
 )
 
 func dataSourceNsxtEdgeUpgradeGroup() *schema.Resource {

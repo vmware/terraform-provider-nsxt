@@ -166,9 +166,20 @@ resource "nsxt_upgrade_run" "run" {
 }
 ```
 
+### Upgrade run stage with NSX v9.0 and above
+
+NSX v9.0 introduces a few changes to the flow of execution of the run resource: the upgrade begins with updating the NSX 
+management plane, then Edge appliances are upgraded, followed by ESXi hosts. Finally, the upgrade process is finalized, 
+when the entire process is complete, including the upgrade of the ESXi software.
+
+When the ESXi software is not upgraded, the finalization stage will fail. There is an additional component in the 
+`nsxt_upgrade_run` resource which allows execution without the finalization stage. This allows successful execution of 
+the NSX management plane, the Edge appliances and the NSX bits on the ESXi hosts, and postpone the ESXi OS upgrade to 
+a later time.
+
 ### Post upgrade checks
 
-Upgrade post check data sources can be used to examine the results of the edge and host upgrades, to cunclude if the 
+Upgrade post check data sources can be used to examine the results of the edge and host upgrades, to conclude if the 
 upgrade has completed successfully.
 
 The example below uses Terraform `check` to test the upgrade results.
