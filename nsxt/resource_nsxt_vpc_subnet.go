@@ -7,12 +7,15 @@ import (
 	"fmt"
 	"log"
 	"reflect"
+	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	clientLayer "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/vpcs"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/vpcs/subnets"
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
@@ -359,8 +362,38 @@ func resourceNsxtVpcSubnetDelete(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	parents := getVpcParentsFromContext(getSessionContext(d, m))
 
+	// Wait until potential VM ports are deleted
+	pendingStates := []string{"pending"}
+	targetStates := []string{"ok", "error"}
+	stateConf := &resource.StateChangeConf{
+		Pending: pendingStates,
+		Target:  targetStates,
+		Refresh: func() (interface{}, string, error) {
+			portsClient := subnets.NewPortsClient(connector)
+			ports, err := portsClient.List(parents[0], parents[1], parents[2], id, nil, nil, nil, nil, nil, nil)
+			if err != nil {
+				return ports, "error", logAPIError("Error listing VPC subnet ports", err)
+			}
+			numOfPorts := len(ports.Results)
+			log.Printf("[DEBUG] Current number of ports on subnet %s is %d", id, numOfPorts)
+
+			if numOfPorts > 0 {
+				return ports, "pending", nil
+			}
+			return ports, "ok", nil
+
+		},
+		Timeout:    d.Timeout(schema.TimeoutDelete),
+		MinTimeout: 1 * time.Second,
+		Delay:      1 * time.Second,
+	}
+	_, err := stateConf.WaitForState()
+	if err != nil {
+		return fmt.Errorf("Failed to get port information for subnet %s: %v", id, err)
+	}
+
 	client := clientLayer.NewSubnetsClient(connector)
-	err := client.Delete(parents[0], parents[1], parents[2], id)
+	err = client.Delete(parents[0], parents[1], parents[2], id)
 
 	if err != nil {
 		return handleDeleteError("VpcSubnet", id, err)
