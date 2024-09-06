@@ -740,6 +740,40 @@ func testAccNsxtProjectContext() string {
 `, projectID)
 }
 
+func testAccNsxtMultitenancyContext(includeVpc bool) string {
+	if testAccIsVPC() {
+		// Some tests run in VPC context, however dependency resources are
+		// not under VPC. In this case, we rely on VPC env configuration
+		// but need to only list project in the context
+		projectID := os.Getenv("NSXT_VPC_PROJECT_ID")
+		if !includeVpc {
+			return fmt.Sprintf(`
+  context {
+    project_id = "%s"
+  }
+`, projectID)
+		}
+		// VPC resource
+		vpcID := os.Getenv("NSXT_VPC_ID")
+		return fmt.Sprintf(`
+  context {
+    project_id = "%s"
+    vpc_id     = "%s"
+  }
+`, projectID, vpcID)
+	}
+	// CLassic Multi Tenancy resource
+	projectID := os.Getenv("NSXT_PROJECT_ID")
+	if projectID != "" {
+		return fmt.Sprintf(`
+  context {
+    project_id = "%s"
+  }
+`, projectID)
+	}
+	return ""
+}
+
 func testAccResourceNsxtPolicyImportIDRetriever(resourceID string) func(*terraform.State) (string, error) {
 	return func(s *terraform.State) (string, error) {
 
@@ -795,4 +829,29 @@ func testAccGenerateTLSKeyPair() (string, string, error) {
 	}
 	privatePem = buf.String()
 	return publicPem, privatePem, nil
+}
+
+func testAccNsxtProjectShareAll(sharedResourcePath string) string {
+	name := getAccTestResourceName()
+	projectPath := fmt.Sprintf("/orgs/default/projects/%s", os.Getenv("NSXT_VPC_PROJECT_ID"))
+	context := testAccNsxtMultitenancyContext(false)
+	return fmt.Sprintf(`
+resource "nsxt_policy_share" "test" {
+%s
+  display_name = "%s"
+
+  sharing_strategy = "ALL_DESCENDANTS"
+  shared_with      = ["%s"]
+}
+
+resource "nsxt_policy_shared_resource" "test" {
+%s
+  display_name = "%s"
+
+  share_path   = nsxt_policy_share.test.path
+  resource_object {
+    resource_path    = %s
+    include_children = true
+  }
+}`, context, name, projectPath, context, name, sharedResourcePath)
 }
