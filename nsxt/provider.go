@@ -336,6 +336,7 @@ func Provider() *schema.Provider {
 			"nsxt_vpc_service_profile":                               dataSourceNsxtVpcServiceProfile(),
 			"nsxt_vpc_connectivity_profile":                          dataSourceNsxtVpcConnectivityProfile(),
 			"nsxt_policy_transit_gateway":                            dataSourceNsxtPolicyTransitGateway(),
+			"nsxt_policy_transit_gateway_nat":                        dataSourceNsxtPolicyTransitGatewayNat(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -520,6 +521,7 @@ func Provider() *schema.Provider {
 			"nsxt_vpc_external_address":              resourceNsxtVpcExternalAddress(),
 			"nsxt_vpc_ip_address_allocation":         resourceNsxtVpcIpAddressAllocation(),
 			"nsxt_vpc_subnet":                        resourceNsxtVpcSubnet(),
+			"nsxt_policy_transit_gateway_nat_rule":   resourceNsxtPolicyTransitGatewayNatRule(),
 		},
 
 		ConfigureFunc: providerConfigure,
