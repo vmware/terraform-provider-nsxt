@@ -110,33 +110,28 @@ func TestAccResourceNsxtVPCSecurityPolicy_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "rule.0.tag.#", "1"),
 				),
 			},
-			// TODO: For now, creation od the context profile with VPC context crashes the provider. This should be addressed in the
-			//       generated wrappers (check that there is an implementation in VPC (or whatever) context.
-			//       Then, the context profile should be created in the project context, shared to the VPC (no sharing capability yet in TF)
-			//       to enable testing functionality below.
-			//
-			//{
-			//	Config: testAccNsxtPolicySecurityPolicyWithProfiles(resourceName, updatedName, direction2, proto2, tag2, defaultDomain, true),
-			//	Check: resource.ComposeTestCheckFunc(
-			//		testAccNsxtPolicySecurityPolicyExists(testResourceName, defaultDomain),
-			//		resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
-			//		resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
-			//		resource.TestCheckResourceAttr(testResourceName, "comments", ""),
-			//		resource.TestCheckResourceAttr(testResourceName, "locked", "false"),
-			//		resource.TestCheckResourceAttr(testResourceName, "scope.#", "0"),
-			//		resource.TestCheckResourceAttr(testResourceName, "sequence_number", "3"),
-			//		resource.TestCheckResourceAttr(testResourceName, "stateful", "true"),
-			//		resource.TestCheckResourceAttr(testResourceName, "tcp_strict", "false"),
-			//		resource.TestCheckResourceAttr(testResourceName, "rule.#", "1"),
-			//		resource.TestCheckResourceAttr(testResourceName, "rule.0.display_name", updatedName),
-			//		resource.TestCheckResourceAttr(testResourceName, "rule.0.direction", direction2),
-			//		resource.TestCheckResourceAttr(testResourceName, "rule.0.ip_version", proto2),
-			//		resource.TestCheckResourceAttr(testResourceName, "rule.0.action", defaultAction),
-			//		resource.TestCheckResourceAttr(testResourceName, "rule.0.log_label", tag2),
-			//		resource.TestCheckResourceAttr(testResourceName, "rule.0.tag.#", "1"),
-			//		resource.TestCheckResourceAttr(testResourceName, "rule.0.profiles.#", "1"),
-			//	),
-			//},
+			{
+				Config: testAccNsxtPolicySecurityPolicyWithProfiles(resourceName, updatedName, direction2, proto2, tag2, defaultDomain, true, true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicySecurityPolicyExists(testResourceName, defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "comments", ""),
+					resource.TestCheckResourceAttr(testResourceName, "locked", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "scope.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "sequence_number", "3"),
+					resource.TestCheckResourceAttr(testResourceName, "stateful", "true"),
+					resource.TestCheckResourceAttr(testResourceName, "tcp_strict", "false"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.display_name", updatedName),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.direction", direction2),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.ip_version", proto2),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.action", defaultAction),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.log_label", tag2),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.tag.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.0.profiles.#", "1"),
+				),
+			},
 		},
 	})
 }
