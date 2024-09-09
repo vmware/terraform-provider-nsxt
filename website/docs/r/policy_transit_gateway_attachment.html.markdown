@@ -14,10 +14,30 @@ This resource is applicable to NSX Global Manager, NSX Policy Manager and VMC.
 ## Example Usage
 
 ```hcl
-resource "nsxt_policy_transit_gateway_attachment" "test" {
+data "nsxt_policy_project" "test_proj" {
+  display_name = "test_project"
+}
+
+data "nsxt_policy_transit_gateway" "test_tgw" {
+  context {
+    project_id = nsxt_policy_project.test_proj.id
+  }
+  id = "default"
+}
+
+resource "nsxt_policy_gateway_connection" "test_gw_conn" {
+  display_name = "test_gw_conn"
+  tier0_path   = "/infra/tier-0s/test-t0"
+}
+
+resource "nsxt_policy_transit_gateway_attachment" "test_tgw_att" {
+  context {
+    project_id = nsxt_policy_project.test_proj.id
+  }
+
   display_name    = "test"
-  description     = "Terraform provisioned TransitGatewayAttachment"
-  connection_path = nsxt_policy_vpc_connectivity_profile.test.path
+  parent_path     = nsxt_policy_transit_gateway.test_tgw.path
+  connection_path = nsxt_policy_gateway_connection.test_gw_conn.path
 }
 ```
 
