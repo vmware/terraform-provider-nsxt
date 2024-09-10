@@ -287,6 +287,12 @@ func testAccIsGlobalManager2() tf_api.ClientType {
 	return tf_api.Local
 }
 
+func testAccNotGlobalManager(t *testing.T) {
+	if testAccIsGlobalManager() {
+		t.Skipf("This test requires a global manager environment")
+	}
+}
+
 func testAccOnlyGlobalManager(t *testing.T) {
 	if !testAccIsGlobalManager() {
 		t.Skipf("This test requires a global manager environment")
@@ -795,4 +801,28 @@ func testAccGenerateTLSKeyPair() (string, string, error) {
 	}
 	privatePem = buf.String()
 	return publicPem, privatePem, nil
+}
+
+func testAccNsxtProjectShareAll(sharedResourcePath string) string {
+	name := getAccTestResourceName()
+	projectPath := fmt.Sprintf("/orgs/default/projects/%s", os.Getenv("NSXT_VPC_PROJECT_ID"))
+	context := testAccNsxtMultitenancyContext(false)
+	return fmt.Sprintf(`
+resource "nsxt_policy_share" "test" {
+%s
+  display_name = "%s"
+
+  sharing_strategy = "ALL_DESCENDANTS"
+  shared_with      = ["%s"]
+}
+
+resource "nsxt_policy_shared_resource" "test" {
+  display_name = "%s"
+
+  share_path   = nsxt_policy_share.test.path
+  resource_object {
+    resource_path    = %s
+    include_children = true
+  }
+}`, context, name, projectPath, name, sharedResourcePath)
 }

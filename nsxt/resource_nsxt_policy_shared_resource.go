@@ -28,7 +28,6 @@ func resourceNsxtPolicySharedResource() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"revision":     getRevisionSchema(),
 			"tag":          getTagsSchema(),
-			"context":      getContextSchema(false, false, false),
 			"share_path": {
 				Type:        schema.TypeString,
 				Required:    true,
@@ -64,7 +63,9 @@ func resourceNsxtPolicySharedResourceCreate(d *schema.ResourceData, m interface{
 	id := newUUID()
 
 	connector := getPolicyConnector(m)
-	shareID := getPolicyIDFromPath(d.Get("share_path").(string))
+	sharePath := d.Get("share_path").(string)
+	shareID := getPolicyIDFromPath(sharePath)
+	context := getParentContext(d, m, sharePath)
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
 	tags := getPolicyTagsFromSchema(d)
@@ -85,7 +86,6 @@ func resourceNsxtPolicySharedResourceCreate(d *schema.ResourceData, m interface{
 		Tags:            tags,
 		ResourceObjects: resourceObjects,
 	}
-	context := getSessionContext(d, m)
 	client := shares.NewResourcesClient(context, connector)
 	err := client.Patch(shareID, id, obj)
 	if err != nil {
@@ -106,8 +106,9 @@ func resourceNsxtPolicySharedResourceRead(d *schema.ResourceData, m interface{})
 		return fmt.Errorf("error obtaining Shared Resource ID")
 	}
 
-	shareID := getPolicyIDFromPath(d.Get("share_path").(string))
-	context := getSessionContext(d, m)
+	sharePath := d.Get("share_path").(string)
+	shareID := getPolicyIDFromPath(sharePath)
+	context := getParentContext(d, m, sharePath)
 	client := shares.NewResourcesClient(context, connector)
 	obj, err := client.Get(shareID, id)
 	if err != nil {
@@ -137,7 +138,9 @@ func resourceNsxtPolicySharedResourceUpdate(d *schema.ResourceData, m interface{
 	id := d.Id()
 
 	connector := getPolicyConnector(m)
-	shareID := getPolicyIDFromPath(d.Get("share_path").(string))
+	sharePath := d.Get("share_path").(string)
+	shareID := getPolicyIDFromPath(sharePath)
+	context := getParentContext(d, m, sharePath)
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
 	tags := getPolicyTagsFromSchema(d)
@@ -158,7 +161,6 @@ func resourceNsxtPolicySharedResourceUpdate(d *schema.ResourceData, m interface{
 		Tags:            tags,
 		ResourceObjects: resourceObjects,
 	}
-	context := getSessionContext(d, m)
 	client := shares.NewResourcesClient(context, connector)
 	err := client.Patch(shareID, id, obj)
 	if err != nil {
@@ -176,10 +178,11 @@ func resourceNsxtPolicySharedResourceDelete(d *schema.ResourceData, m interface{
 	if id == "" {
 		return fmt.Errorf("error obtaining Shared Resource ID")
 	}
-	shareID := getPolicyIDFromPath(d.Get("share_path").(string))
+	sharePath := d.Get("share_path").(string)
+	shareID := getPolicyIDFromPath(sharePath)
 
 	connector := getPolicyConnector(m)
-	context := getSessionContext(d, m)
+	context := getParentContext(d, m, sharePath)
 	client := shares.NewResourcesClient(context, connector)
 	err := client.Delete(shareID, id)
 
