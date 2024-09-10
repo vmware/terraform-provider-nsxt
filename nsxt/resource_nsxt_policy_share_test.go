@@ -5,6 +5,7 @@ package nsxt
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -91,6 +92,48 @@ func TestAccResourceNsxtPolicyShare_importBasic(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyShare_multitenancy(t *testing.T) {
+	testResourceName := "nsxt_policy_share.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyMultitenancy(t)
+			testAccNSXVersion(t, "4.1.1")
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyShareCheckDestroy(state, accTestPolicyShareUpdateAttributes["display_name"])
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyShareWithMyselfTemplate(true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyShareExists(accTestPolicyShareCreateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyShareCreateAttributes["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyShareCreateAttributes["description"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyShareWithMyselfTemplate(false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyShareExists(accTestPolicyShareUpdateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyShareUpdateAttributes["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyShareUpdateAttributes["description"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+				),
+			},
+		},
+	})
+}
+
 func testAccNsxtPolicyShareExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
@@ -156,4 +199,29 @@ resource "nsxt_policy_share" "test" {
     tag   = "tag1"
   }
 }`, attrMap["display_name"], attrMap["description"])
+}
+
+func testAccNsxtPolicyShareWithMyselfTemplate(createFlow bool) string {
+	var attrMap map[string]string
+	if createFlow {
+		attrMap = accTestPolicyShareCreateAttributes
+	} else {
+		attrMap = accTestPolicyShareUpdateAttributes
+	}
+	projectID := os.Getenv("NSXT_PROJECT_ID")
+	return fmt.Sprintf(`
+data "nsxt_policy_project" "test" {
+  id = "%s"
+}
+
+resource "nsxt_policy_share" "test" {
+  context {
+    project_id = data.nsxt_policy_project.test.id
+  }
+  display_name = "%s"
+  description  = "%s"
+
+  sharing_strategy = "ALL_DESCENDANTS"
+  shared_with      = [data.nsxt_policy_project.test.path]
+}`, projectID, attrMap["display_name"], attrMap["description"])
 }

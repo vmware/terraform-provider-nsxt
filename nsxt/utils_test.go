@@ -275,6 +275,12 @@ func testAccIsGlobalManager2() tf_api.ClientType {
 	return tf_api.Local
 }
 
+func testAccNotGlobalManager(t *testing.T) {
+	if testAccIsGlobalManager() {
+		t.Skipf("This test requires a global manager environment")
+	}
+}
+
 func testAccOnlyGlobalManager(t *testing.T) {
 	if !testAccIsGlobalManager() {
 		t.Skipf("This test requires a global manager environment")
@@ -828,7 +834,6 @@ resource "nsxt_policy_share" "test" {
 }
 
 resource "nsxt_policy_shared_resource" "test" {
-%s
   display_name = "%s"
 
   share_path   = nsxt_policy_share.test.path
@@ -836,5 +841,5 @@ resource "nsxt_policy_shared_resource" "test" {
     resource_path    = %s
     include_children = true
   }
-}`, context, name, projectPath, context, name, sharedResourcePath)
+}`, context, name, projectPath, name, sharedResourcePath)
 }
