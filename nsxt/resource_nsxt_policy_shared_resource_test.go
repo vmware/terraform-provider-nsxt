@@ -28,7 +28,7 @@ func TestAccResourceNsxtPolicySharedResource_basic(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccOnlyLocalManager(t)
+			testAccNotGlobalManager(t)
 			testAccNSXVersion(t, "4.1.1")
 		},
 		Providers: testAccProviders,
@@ -64,6 +64,48 @@ func TestAccResourceNsxtPolicySharedResource_basic(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicySharedResource_multitenancy(t *testing.T) {
+	testResourceName := "nsxt_policy_shared_resource.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyMultitenancy(t)
+			testAccNSXVersion(t, "4.1.1")
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicySharedResourceCheckDestroy(state, accTestPolicySharedResourceUpdateAttributes["display_name"])
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicySharedResourceMultitenancyTemplate(true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicySharedResourceExists(accTestPolicySharedResourceCreateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicySharedResourceCreateAttributes["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicySharedResourceCreateAttributes["description"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicySharedResourceMultitenancyTemplate(false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicySharedResourceExists(accTestPolicySharedResourceUpdateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicySharedResourceUpdateAttributes["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicySharedResourceUpdateAttributes["description"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtPolicySharedResource_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_shared_resource.test"
@@ -71,7 +113,7 @@ func TestAccResourceNsxtPolicySharedResource_importBasic(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccOnlyLocalManager(t)
+			testAccNotGlobalManager(t)
 			testAccNSXVersion(t, "4.1.1")
 		},
 		Providers: testAccProviders,
@@ -166,6 +208,25 @@ resource "nsxt_policy_shared_resource" "test" {
   tag {
     scope = "scope1"
     tag   = "tag1"
+  }
+}`, attrMap["display_name"], attrMap["description"])
+}
+
+func testAccNsxtPolicySharedResourceMultitenancyTemplate(createFlow bool) string {
+	var attrMap map[string]string
+	if createFlow {
+		attrMap = accTestPolicySharedResourceCreateAttributes
+	} else {
+		attrMap = accTestPolicySharedResourceUpdateAttributes
+	}
+	return testAccNsxtPolicyShareWithMyselfTemplate(true) + testAccNsxtPolicyContextProfileReadTemplate("AMQP") + fmt.Sprintf(`
+resource "nsxt_policy_shared_resource" "test" {
+  display_name = "%s"
+  description  = "%s"
+
+  share_path   = nsxt_policy_share.test.path
+  resource_object {
+    resource_path = data.nsxt_policy_context_profile.test.path
   }
 }`, attrMap["display_name"], attrMap["description"])
 }

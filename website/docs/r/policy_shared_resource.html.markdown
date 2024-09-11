@@ -33,8 +33,6 @@ The following arguments are supported:
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
-* `context` - (Optional) The context which the object belongs to
-    * `project_id` - (Required) The ID of the project which the object belongs to
 * `share_path` - (Required) Share policy path to associate the resource to.
 * `resource_object` _ (Required) List of resources to be shared.
   * `include_children` - (Optional) Denotes if the children of the shared path are also shared.
