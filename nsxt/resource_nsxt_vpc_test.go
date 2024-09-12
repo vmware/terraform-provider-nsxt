@@ -17,24 +17,19 @@ var testAccNsxtVpcHelperName = getAccTestResourceName()
 // shortId is limited to 8 chars
 var testAccNsxtVpcShortID = testAccNsxtVpcHelperName[len(testAccNsxtVpcHelperName)-8:]
 var accTestVpcCreateAttributes = map[string]string{
-	"display_name":             getAccTestResourceName(),
-	"description":              "terraform created",
-	"private_ips":              "192.168.44.0/24",
-	"short_id":                 testAccNsxtVpcShortID,
-	"vpc_connectivity_profile": "test-create",
-	"enabled":                  "false",
-	"listener_ip":              "182.168.2.3",
+	"display_name": getAccTestResourceName(),
+	"description":  "terraform created",
+	"private_ips":  "192.168.44.0/24",
+	"short_id":     testAccNsxtVpcShortID,
+	"enabled":      "false",
 }
 
 var accTestVpcUpdateAttributes = map[string]string{
-	"display_name":   getAccTestResourceName(),
-	"description":    "terraform updated",
-	"private_ips":    "192.168.44.0/24",
-	"short_id":       testAccNsxtVpcShortID,
-	"enabled":        "false",
-	"listener_ip":    "230.64.2.1",
-	"enable_dhcp":    "false",
-	"dns_server_ips": "20.4.12.8",
+	"display_name": getAccTestResourceName(),
+	"description":  "terraform updated",
+	"private_ips":  "192.168.44.0/24",
+	"short_id":     testAccNsxtVpcShortID,
+	"enabled":      "false",
 }
 
 func TestAccResourceNsxtVpc_basic(t *testing.T) {
@@ -56,12 +51,9 @@ func TestAccResourceNsxtVpc_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "private_ips.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "private_ips.0", accTestVpcCreateAttributes["private_ips"]),
 					resource.TestCheckResourceAttr(testResourceName, "ip_address_type", model.Vpc_IP_ADDRESS_TYPE_IPV4),
-					resource.TestCheckResourceAttr(testResourceName, "vpc_dns_forwarder.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "short_id", accTestVpcCreateAttributes["short_id"]),
 					resource.TestCheckResourceAttr(testResourceName, "load_balancer_vpc_endpoint.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "load_balancer_vpc_endpoint.0.enabled", accTestVpcCreateAttributes["enabled"]),
-					resource.TestCheckResourceAttr(testResourceName, "vpc_dns_forwarder.0.enabled", accTestVpcCreateAttributes["enabled"]),
-					resource.TestCheckResourceAttr(testResourceName, "vpc_dns_forwarder.0.listener_ip", accTestVpcCreateAttributes["listener_ip"]),
 					resource.TestCheckResourceAttrSet(testResourceName, "vpc_service_profile"),
 					resource.TestCheckResourceAttrSet(testResourceName, "vpc_connectivity_profile"),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
@@ -78,12 +70,9 @@ func TestAccResourceNsxtVpc_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestVpcUpdateAttributes["description"]),
 					resource.TestCheckResourceAttr(testResourceName, "private_ips.0", accTestVpcUpdateAttributes["private_ips"]),
 					resource.TestCheckResourceAttr(testResourceName, "ip_address_type", model.Vpc_IP_ADDRESS_TYPE_IPV4),
-					resource.TestCheckResourceAttr(testResourceName, "vpc_dns_forwarder.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "short_id", accTestVpcUpdateAttributes["short_id"]),
 					resource.TestCheckResourceAttr(testResourceName, "load_balancer_vpc_endpoint.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "load_balancer_vpc_endpoint.0.enabled", accTestVpcUpdateAttributes["enabled"]),
-					resource.TestCheckResourceAttr(testResourceName, "vpc_dns_forwarder.0.enabled", accTestVpcUpdateAttributes["enabled"]),
-					resource.TestCheckResourceAttr(testResourceName, "vpc_dns_forwarder.0.listener_ip", accTestVpcUpdateAttributes["listener_ip"]),
 					resource.TestCheckResourceAttrSet(testResourceName, "vpc_service_profile"),
 					resource.TestCheckResourceAttrSet(testResourceName, "vpc_connectivity_profile"),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
@@ -240,11 +229,6 @@ resource "nsxt_vpc" "test" {
   vpc_service_profile      = nsxt_vpc_service_profile.test.path
   vpc_connectivity_profile = nsxt_vpc_connectivity_profile.test.path
 
-  vpc_dns_forwarder {
-    enabled = %s
-    listener_ip = "%s"
-  }
-
   load_balancer_vpc_endpoint {
     enabled = %s
   }
@@ -253,7 +237,7 @@ resource "nsxt_vpc" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, testAccNsxtProjectContext(), attrMap["display_name"], attrMap["description"], attrMap["private_ips"], attrMap["short_id"], attrMap["enabled"], attrMap["listener_ip"], attrMap["enabled"])
+}`, testAccNsxtProjectContext(), attrMap["display_name"], attrMap["description"], attrMap["private_ips"], attrMap["short_id"], attrMap["enabled"])
 }
 
 func testAccNsxtVpcMinimalistic() string {
