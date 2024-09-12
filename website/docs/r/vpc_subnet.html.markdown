@@ -7,7 +7,7 @@ description: A resource to configure a VpcSubnet.
 
 # nsxt_vpc_subnet
 
-This resource provides a method for the management of a VpcSubnet.
+This resource provides a method for the management of a Vpc Subnet.
 
 This resource is applicable to NSX Policy Manager.
 
@@ -49,11 +49,18 @@ The following arguments are supported:
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
-* `advanced_config` - (Optional) None
-    * `static_ip_allocation` - (Optional) None
+* `advanced_config` - (Optional) Advanced Configuration for the Subnet
+    * `gateway_addresses` - (Optional) List of Gateway IP Addresses per address family, in CIDR format
+    * `connectivity_state` - (Optional) Connectivity state for the subnet, one of `CONNECTED`, `DISCONNECTED`
+    * `dhcp_server_addresses` - (Optional) List of DHCP server addresses per address family, in CIDR format
+    * `static_ip_allocation` - (Optional) Static IP allocation configuration
         * `enabled` - (Optional) Enable ip and mac addresse allocation for VPC Subnet ports from static ip pool. To
           enable this,
           dhcp pool shall be empty and static ip pool shall own all available ip addresses.
+    * `extra_configs` - (Optional) List of vendor specific configuration key/value pairs
+      * `config_pair` - (Required)
+        * `key` - (Required) key for vendor-specific configuration
+        * `value` - (Required) value for vendor-specific configuration
 
 * `ipv4_subnet_size` - (Optional) If IP Addresses are not provided, this field will be used to carve out the ips
   from respective ip block defined in the parent VPC. The default is 64.
