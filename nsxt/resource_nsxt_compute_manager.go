@@ -46,7 +46,7 @@ func resourceNsxtComputeManager() *schema.Resource {
 				Type:        schema.TypeBool,
 				Description: "Specifies whether service account is created or not on compute manager",
 				Optional:    true,
-				Default:     true,
+				Default:     false,
 			},
 			"credential": {
 				Type:        schema.TypeList,
