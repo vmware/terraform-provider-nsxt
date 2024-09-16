@@ -524,6 +524,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_transit_gateway_nat_rule":      resourceNsxtPolicyTransitGatewayNatRule(),
 			"nsxt_vpc_static_route":                     resourceNsxtVpcStaticRoutes(),
 			"nsxt_policy_project_ip_address_allocation": resourceNsxtProjectIpAddressAllocation(),
+			"nsxt_vpc_dhcp_v4_static_binding":           resourceNsxtVpcSubnetDhcpV4StaticBindingConfig(),
 		},
 
 		ConfigureFunc: providerConfigure,

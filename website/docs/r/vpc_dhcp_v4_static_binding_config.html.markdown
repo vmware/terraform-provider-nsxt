@@ -1,29 +1,46 @@
 ---
-subcategory: "FIXME"
+subcategory: "VPC"
 layout: "nsxt"
-page_title: "NSXT: nsxt_policy_dhcp_v4_static_binding_config"
-description: A resource to configure a DhcpV4StaticBindingConfig.
+page_title: "NSXT: nsxt_vpc_dhcp_v4_static_binding"
+description: A resource to configure a DHCP IPv4 Static Binding.
 ---
 
-# nsxt_policy_dhcp_v4_static_binding_config
+# nsxt_vpc_dhcp_v4_static_binding
 
 This resource provides a method for the management of a DhcpV4StaticBindingConfig.
-
-This resource is applicable to NSX Global Manager, NSX Policy Manager and VMC.
+This resource is applicable to NSX Policy Manager.
 
 ## Example Usage
 
 ```hcl
-resource "nsxt_policy_dhcp_v4_static_binding_config" "test" {
-    display_name      = "test"
-    description       = "Terraform provisioned DhcpV4StaticBindingConfig"
-    resource_type = "DhcpV4StaticBindingConfig"
-gateway_address = FILL VALUE FOR schema.TypeString
-host_name = FILL VALUE FOR schema.TypeString
-mac_address = FILL VALUE FOR schema.TypeString
-lease_time = FILL VALUE FOR schema.TypeInt
-ip_address = FILL VALUE FOR schema.TypeString
+data "nsxt_policy_project" "demoproj" {
+  display_name = "demoproj"
+}
 
+data "nsxt_vpc" "demovpc" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+  }
+  display_name = "vpc1"
+}
+
+data "nsxt_vpc_subnet" "test" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+    vpc_id     = data.nsxt_vpc.demovpc.id
+  }
+  display_name = "subnet1"
+}
+
+resource "nsxt_vpc_dhcp_v4_static_binding" "test" {
+  parent_path     = data.nsxt_vpc_subnet.test.path
+  display_name    = "test"
+  description     = "Terraform provisioned DhcpV4StaticBindingConfig"
+  gateway_address = "192.168.240.1"
+  host_name       = "host.example.org"
+  mac_address     = "10:0e:00:11:22:02"
+  lease_time      = 162
+  ip_address      = "192.168.240.41"
 }
 ```
 
@@ -31,35 +48,30 @@ ip_address = FILL VALUE FOR schema.TypeString
 
 The following arguments are supported:
 
+* `parent_path` - (Required) Policy path of parent VpcSubnet object, typically reference to `path` in `nsxt_vpc_subnet` data source or resource.
 * `display_name` - (Required) Display name of the resource.
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
-* `resource_type` - (Required) Resource type of the DhcpStaticBindingConfig
-
-* `gateway_address` - (Optional) When not specified, gateway address is auto-assigned from segment
-configuration.
-
+* `gateway_address` - (Optional) When not specified, gateway address is auto-assigned from segment configuration.
 * `host_name` - (Optional) Hostname to assign to the host.
-
 * `mac_address` - (Optional) MAC address of the host.
-
 * `lease_time` - (Optional) DHCP lease time in seconds.
-
-* `ip_address` - (Optional) IP assigned to host. The IP address must belong to the subnet, if any,
-configured on Segment.
-
-* `options` - (Optional) None
-  * `option121` - (Optional) None
-    * `static_route` - (Optional) Classless static route of DHCP option 121.
-      * `next_hop` - (Optional) IP address of next hop of the route.
-      * `network` - (Optional) Destination network in CIDR format.
+* `ip_address` - (Optional) IP assigned to host. The IP address must belong to the subnet, if any, configured on Segment.
+* `options` - (Optional) DHCPv4 options block
+  * `option121` - (Optional) Specification for DHCP option 121
+    * `static_route` - (Required) Classless static route of DHCP option 121.
+      * `next_hop` - (Required) IP address of next hop of the route.
+      * `network` - (Required) Destination network in CIDR format.
   * `other` - (Optional) To define DHCP options other than option 121 in generic format.
+    * `code` - (Required) Code of the dhcp option.
+    * `values` - (Optional) Value of the option.
+  
 Please note, only the following options can be defined in generic
 format. Those other options will be accepted without validation
 but will not take effect.
 --------------------------
-  Code    Name
+Code    Name
 --------------------------
     2   Time Offset
     6   Domain Name Server
@@ -88,10 +100,6 @@ but will not take effect.
     210 PXE Path Prefix
     211 PXE Reboot Time
 
-    * `code` - (Optional) Code of the dhcp option.
-    * `values` - (Optional) Value of the option.
-
-
 ## Attributes Reference
 
 In addition to arguments listed above, the following attributes are exported:
@@ -107,7 +115,7 @@ An existing object can be [imported][docs-import] into this resource, via the fo
 [docs-import]: https://www.terraform.io/cli/import
 
 ```
-terraform import nsxt_policy_dhcp_v4_static_binding_config.test UUID
+terraform import nsxt_vpc_dhcp_v4_static_binding.test PATH
 ```
 
-The above command imports DhcpV4StaticBindingConfig named `test` with the NSX ID `UUID`.
+The above command imports DhcpV4StaticBindingConfig named `test` with the policy path `PATH`.

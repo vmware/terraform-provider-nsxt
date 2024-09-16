@@ -10,6 +10,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
+	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	clientLayer "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/vpcs/subnets"
@@ -17,11 +19,6 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
 )
-
-var dhcpV4StaticBindingConfigResourceTypeValues = []string{
-	model.DhcpV4StaticBindingConfig_RESOURCE_TYPE_DHCP_V4_STATIC_BINDING_CONFIG,
-	model.DhcpV4StaticBindingConfig_RESOURCE_TYPE_DHCP_V6_STATIC_BINDING_CONFIG,
-}
 
 var dhcpV4StaticBindingConfigSchema = map[string]*metadata.ExtendedSchema{
 	"nsx_id":       metadata.GetExtendedSchema(getNsxIDSchema()),
@@ -31,17 +28,6 @@ var dhcpV4StaticBindingConfigSchema = map[string]*metadata.ExtendedSchema{
 	"revision":     metadata.GetExtendedSchema(getRevisionSchema()),
 	"tag":          metadata.GetExtendedSchema(getTagsSchema()),
 	"parent_path":  metadata.GetExtendedSchema(getPolicyPathSchema(true, true, "Policy path of the parent")),
-	"resource_type": {
-		Schema: schema.Schema{
-			Type:         schema.TypeString,
-			ValidateFunc: validation.StringInSlice(dhcpV4StaticBindingConfigResourceTypeValues, false),
-			Required:     true,
-		},
-		Metadata: metadata.Metadata{
-			SchemaType:   "string",
-			SdkFieldName: "ResourceType",
-		},
-	},
 	"gateway_address": {
 		Schema: schema.Schema{
 			Type:         schema.TypeString,
@@ -51,6 +37,7 @@ var dhcpV4StaticBindingConfigSchema = map[string]*metadata.ExtendedSchema{
 		Metadata: metadata.Metadata{
 			SchemaType:   "string",
 			SdkFieldName: "GatewayAddress",
+			OmitIfEmpty:  true,
 		},
 	},
 	"host_name": {
@@ -117,7 +104,7 @@ var dhcpV4StaticBindingConfigSchema = map[string]*metadata.ExtendedSchema{
 														Schema: schema.Schema{
 															Type:         schema.TypeString,
 															ValidateFunc: validateSingleIP(),
-															Optional:     true,
+															Required:     true,
 														},
 														Metadata: metadata.Metadata{
 															SchemaType:   "string",
@@ -128,7 +115,7 @@ var dhcpV4StaticBindingConfigSchema = map[string]*metadata.ExtendedSchema{
 														Schema: schema.Schema{
 															Type:         schema.TypeString,
 															ValidateFunc: validateCidrOrIPOrRange(),
-															Optional:     true,
+															Required:     true,
 														},
 														Metadata: metadata.Metadata{
 															SchemaType:   "string",
@@ -137,11 +124,12 @@ var dhcpV4StaticBindingConfigSchema = map[string]*metadata.ExtendedSchema{
 													},
 												},
 											},
-											Optional: true,
+											Required: true,
 										},
 										Metadata: metadata.Metadata{
 											SchemaType:   "list",
 											SdkFieldName: "StaticRoutes",
+											ReflectType:  reflect.TypeOf(model.ClasslessStaticRoute{}),
 										},
 									},
 								},
@@ -162,7 +150,7 @@ var dhcpV4StaticBindingConfigSchema = map[string]*metadata.ExtendedSchema{
 									"code": {
 										Schema: schema.Schema{
 											Type:     schema.TypeInt,
-											Optional: true,
+											Required: true,
 										},
 										Metadata: metadata.Metadata{
 											SchemaType:   "int",
@@ -194,6 +182,7 @@ var dhcpV4StaticBindingConfigSchema = map[string]*metadata.ExtendedSchema{
 						Metadata: metadata.Metadata{
 							SchemaType:   "list",
 							SdkFieldName: "Others",
+							ReflectType:  reflect.TypeOf(model.GenericDhcpOption{}),
 						},
 					},
 				},
@@ -208,12 +197,12 @@ var dhcpV4StaticBindingConfigSchema = map[string]*metadata.ExtendedSchema{
 	},
 }
 
-func resourceNsxtDhcpV4StaticBindingConfig() *schema.Resource {
+func resourceNsxtVpcSubnetDhcpV4StaticBindingConfig() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNsxtDhcpV4StaticBindingConfigCreate,
-		Read:   resourceNsxtDhcpV4StaticBindingConfigRead,
-		Update: resourceNsxtDhcpV4StaticBindingConfigUpdate,
-		Delete: resourceNsxtDhcpV4StaticBindingConfigDelete,
+		Create: resourceNsxtVpcSubnetDhcpV4StaticBindingConfigCreate,
+		Read:   resourceNsxtVpcSubnetDhcpV4StaticBindingConfigRead,
+		Update: resourceNsxtVpcSubnetDhcpV4StaticBindingConfigUpdate,
+		Delete: resourceNsxtVpcSubnetDhcpV4StaticBindingConfigDelete,
 		Importer: &schema.ResourceImporter{
 			State: nsxtParentPathResourceImporter,
 		},
@@ -221,13 +210,13 @@ func resourceNsxtDhcpV4StaticBindingConfig() *schema.Resource {
 	}
 }
 
-func resourceNsxtDhcpV4StaticBindingConfigExists(sessionContext utl.SessionContext, parentPath string, id string, connector client.Connector) (bool, error) {
+func resourceNsxtVpcSubnetDhcpV4StaticBindingConfigExists(sessionContext utl.SessionContext, parentPath string, id string, connector client.Connector) (bool, error) {
 	var err error
 	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4)
 	if pathErr != nil {
 		return false, pathErr
 	}
-	client := clientLayer.NewDhcpV4StaticBindingConfigsClient(connector)
+	client := clientLayer.NewDhcpStaticBindingConfigsClient(connector)
 	_, err = client.Get(parents[0], parents[1], parents[2], parents[3], id)
 	if err == nil {
 		return true, nil
@@ -240,10 +229,10 @@ func resourceNsxtDhcpV4StaticBindingConfigExists(sessionContext utl.SessionConte
 	return false, logAPIError("Error retrieving resource", err)
 }
 
-func resourceNsxtDhcpV4StaticBindingConfigCreate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtVpcSubnetDhcpV4StaticBindingConfigCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
-	id, err := getOrGenerateIDWithParent(d, m, resourceNsxtDhcpV4StaticBindingConfigExists)
+	id, err := getOrGenerateIDWithParent(d, m, resourceNsxtVpcSubnetDhcpV4StaticBindingConfigExists)
 	if err != nil {
 		return err
 	}
@@ -258,9 +247,10 @@ func resourceNsxtDhcpV4StaticBindingConfigCreate(d *schema.ResourceData, m inter
 	tags := getPolicyTagsFromSchema(d)
 
 	obj := model.DhcpV4StaticBindingConfig{
-		DisplayName: &displayName,
-		Description: &description,
-		Tags:        tags,
+		DisplayName:  &displayName,
+		Description:  &description,
+		Tags:         tags,
+		ResourceType: model.DhcpStaticBindingConfig_RESOURCE_TYPE_DHCPV4STATICBINDINGCONFIG,
 	}
 
 	elem := reflect.ValueOf(&obj).Elem()
@@ -270,18 +260,24 @@ func resourceNsxtDhcpV4StaticBindingConfigCreate(d *schema.ResourceData, m inter
 
 	log.Printf("[INFO] Creating DhcpV4StaticBindingConfig with ID %s", id)
 
-	client := clientLayer.NewDhcpV4StaticBindingConfigsClient(connector)
-	err = client.Patch(parents[0], parents[1], parents[2], parents[3], id, obj)
+	converter := bindings.NewTypeConverter()
+	convObj, convErrs := converter.ConvertToVapi(obj, model.DhcpV4StaticBindingConfigBindingType())
+	if convErrs != nil {
+		return convErrs[0]
+	}
+
+	client := clientLayer.NewDhcpStaticBindingConfigsClient(connector)
+	err = client.Patch(parents[0], parents[1], parents[2], parents[3], id, convObj.(*data.StructValue))
 	if err != nil {
 		return handleCreateError("DhcpV4StaticBindingConfig", id, err)
 	}
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
-	return resourceNsxtDhcpV4StaticBindingConfigRead(d, m)
+	return resourceNsxtVpcSubnetDhcpV4StaticBindingConfigRead(d, m)
 }
 
-func resourceNsxtDhcpV4StaticBindingConfigRead(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtVpcSubnetDhcpV4StaticBindingConfigRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
 	id := d.Id()
@@ -289,15 +285,25 @@ func resourceNsxtDhcpV4StaticBindingConfigRead(d *schema.ResourceData, m interfa
 		return fmt.Errorf("Error obtaining DhcpV4StaticBindingConfig ID")
 	}
 
-	client := clientLayer.NewDhcpV4StaticBindingConfigsClient(connector)
+	client := clientLayer.NewDhcpStaticBindingConfigsClient(connector)
 	parentPath := d.Get("parent_path").(string)
 	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4)
 	if pathErr != nil {
 		return pathErr
 	}
-	obj, err := client.Get(parents[0], parents[1], parents[2], parents[3], id)
+	dhcpObj, err := client.Get(parents[0], parents[1], parents[2], parents[3], id)
 	if err != nil {
 		return handleReadError(d, "DhcpV4StaticBindingConfig", id, err)
+	}
+
+	converter := bindings.NewTypeConverter()
+	convObj, errs := converter.ConvertToGolang(dhcpObj, model.DhcpV4StaticBindingConfigBindingType())
+	if errs != nil {
+		return errs[0]
+	}
+	obj := convObj.(model.DhcpV4StaticBindingConfig)
+	if obj.ResourceType != "DhcpV4StaticBindingConfig" {
+		return handleReadError(d, "DhcpV4 Static Binding Config", id, fmt.Errorf("Unexpected ResourceType"))
 	}
 
 	setPolicyTagsInSchema(d, obj.Tags)
@@ -311,7 +317,7 @@ func resourceNsxtDhcpV4StaticBindingConfigRead(d *schema.ResourceData, m interfa
 	return metadata.StructToSchema(elem, d, dhcpV4StaticBindingConfigSchema, "", nil)
 }
 
-func resourceNsxtDhcpV4StaticBindingConfigUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtVpcSubnetDhcpV4StaticBindingConfigUpdate(d *schema.ResourceData, m interface{}) error {
 
 	connector := getPolicyConnector(m)
 
@@ -332,26 +338,34 @@ func resourceNsxtDhcpV4StaticBindingConfigUpdate(d *schema.ResourceData, m inter
 	revision := int64(d.Get("revision").(int))
 
 	obj := model.DhcpV4StaticBindingConfig{
-		DisplayName: &displayName,
-		Description: &description,
-		Tags:        tags,
-		Revision:    &revision,
+		DisplayName:  &displayName,
+		Description:  &description,
+		Tags:         tags,
+		Revision:     &revision,
+		ResourceType: model.DhcpStaticBindingConfig_RESOURCE_TYPE_DHCPV4STATICBINDINGCONFIG,
 	}
 
 	elem := reflect.ValueOf(&obj).Elem()
 	if err := metadata.SchemaToStruct(elem, d, dhcpV4StaticBindingConfigSchema, "", nil); err != nil {
 		return err
 	}
-	client := clientLayer.NewDhcpV4StaticBindingConfigsClient(connector)
-	_, err := client.Update(parents[0], parents[1], parents[2], parents[3], id, obj)
+
+	converter := bindings.NewTypeConverter()
+	convObj, convErrs := converter.ConvertToVapi(obj, model.DhcpV4StaticBindingConfigBindingType())
+	if convErrs != nil {
+		return convErrs[0]
+	}
+
+	client := clientLayer.NewDhcpStaticBindingConfigsClient(connector)
+	_, err := client.Update(parents[0], parents[1], parents[2], parents[3], id, convObj.(*data.StructValue))
 	if err != nil {
 		return handleUpdateError("DhcpV4StaticBindingConfig", id, err)
 	}
 
-	return resourceNsxtDhcpV4StaticBindingConfigRead(d, m)
+	return resourceNsxtVpcSubnetDhcpV4StaticBindingConfigRead(d, m)
 }
 
-func resourceNsxtDhcpV4StaticBindingConfigDelete(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtVpcSubnetDhcpV4StaticBindingConfigDelete(d *schema.ResourceData, m interface{}) error {
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining DhcpV4StaticBindingConfig ID")
@@ -364,7 +378,7 @@ func resourceNsxtDhcpV4StaticBindingConfigDelete(d *schema.ResourceData, m inter
 		return pathErr
 	}
 
-	client := clientLayer.NewDhcpV4StaticBindingConfigsClient(connector)
+	client := clientLayer.NewDhcpStaticBindingConfigsClient(connector)
 	err := client.Delete(parents[0], parents[1], parents[2], parents[3], id)
 
 	if err != nil {
