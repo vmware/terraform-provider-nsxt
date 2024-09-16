@@ -159,6 +159,37 @@ func prepareForUpgrade(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
+func isVCF9HostUpgrade(m interface{}, targetVersion string) (bool, error) {
+	// In VCF9.0 and newer, overall upgrade status can be PAUSED when hosts are pre-upgraded. Pre-checks should still
+	// execute in this case
+	if util.VersionLower(targetVersion, "9.0.0") {
+		return false, nil
+	}
+	connector := getPolicyConnector(m)
+	client := upgrade.NewStatusSummaryClient(connector)
+	statusSummary, err := client.Get(nil, nil, nil)
+	if err != nil {
+		return false, err
+	}
+	if *statusSummary.OverallUpgradeStatus != nsxModel.UpgradeStatus_OVERALL_UPGRADE_STATUS_PAUSED {
+		return false, nil
+	}
+	// In this case, all components other than host will be NOT_STARTED, but hosts will be with status SUCCESS
+	for _, c := range statusSummary.ComponentStatus {
+		if *c.ComponentType == hostUpgradeGroup {
+			if *c.Status != nsxModel.ComponentUpgradeStatus_STATUS_SUCCESS {
+				return false, nil
+			}
+		} else {
+			// It's not a host - should be NOT_STARTED
+			if *c.Status != nsxModel.ComponentUpgradeStatus_STATUS_NOT_STARTED {
+				return false, nil
+			}
+		}
+	}
+	return true, nil
+}
+
 func getSummaryInfo(m interface{}) (string, bool, error) {
 	connector := getPolicyConnector(m)
 	summaryClient := upgrade.NewSummaryClient(connector)
@@ -175,8 +206,16 @@ func getSummaryInfo(m interface{}) (string, bool, error) {
 		return targetVersion, false, nil
 	}
 	if summary.UpgradeStatus == nil || (*summary.UpgradeStatus) != nsxModel.UpgradeSummary_UPGRADE_STATUS_NOT_STARTED {
-		log.Printf("Upgrade process has started, skip running precheck")
-		return targetVersion, false, nil
+		is9, err := isVCF9HostUpgrade(m, targetVersion)
+		if err != nil {
+			return "", false, err
+		}
+		if is9 {
+			log.Printf("Hosts have been pre-upgraded, prechecks should be running")
+		} else {
+			log.Printf("Upgrade process has started, skip running precheck")
+			return targetVersion, false, nil
+		}
 	}
 	return targetVersion, true, nil
 }

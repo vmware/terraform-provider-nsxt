@@ -27,6 +27,18 @@ var upgradeComponentList = []string{
 	mpUpgradeGroup,
 }
 
+var upgradeComponentListPost9 = []string{
+	mpUpgradeGroup,
+	edgeUpgradeGroup,
+	hostUpgradeGroup,
+	finalizeUpgradeGroup,
+}
+
+var postCheckComponentList = []string{
+	edgeUpgradeGroup,
+	hostUpgradeGroup,
+}
+
 var componentToGroupKey = map[string]string{
 	edgeUpgradeGroup: "edge_group",
 	hostUpgradeGroup: "host_group",
@@ -71,6 +83,23 @@ type upgradeClientSet struct {
 	Interval int
 }
 
+func getTargetVersion(m interface{}) (string, error) {
+	connector := getPolicyConnector(m)
+	client := upgrade.NewSummaryClient(connector)
+	obj, err := client.Get()
+	if err != nil {
+		return "", err
+	}
+	return *obj.TargetVersion, nil
+}
+
+func getUpgradeComponentList(targetVersion string) []string {
+	if util.VersionHigherOrEqual(targetVersion, "9.0.0") {
+		return upgradeComponentListPost9
+	}
+	return upgradeComponentList
+}
+
 func newUpgradeClientSet(connector client.Connector, d *schema.ResourceData) *upgradeClientSet {
 	return &upgradeClientSet{
 		GroupClient:       upgrade.NewUpgradeUnitGroupsClient(connector),
@@ -104,6 +133,21 @@ func resourceNsxtUpgradeRun() *schema.Resource {
 			"host_group":           getUpgradeGroupSchema(true),
 			"edge_upgrade_setting": getUpgradeSettingSchema(true),
 			"host_upgrade_setting": getUpgradeSettingSchema(false),
+			"finalize_upgrade_setting": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enabled": {
+							Type:        schema.TypeBool,
+							Description: "Finalize upgrade when complete",
+							Optional:    true,
+							Default:     true,
+						},
+					},
+				},
+			},
 			"timeout": {
 				Type:         schema.TypeInt,
 				Description:  "Upgrade status check timeout in seconds",
@@ -362,16 +406,28 @@ func upgradeRunCreateOrUpdate(d *schema.ResourceData, m interface{}) error {
 
 	connector := getPolicyConnectorWithHeaders(m, nil, false, false)
 	upgradeClientSet := newUpgradeClientSet(connector, d)
+	targetVersion, err := getTargetVersion(m)
+	if err != nil {
+		return err
+	}
 
 	log.Printf("[INFO] Updating UpgradeUnitGroup and UpgradePlanSetting.")
-	err := prepareUpgrade(upgradeClientSet, d, m)
+	err = prepareUpgrade(upgradeClientSet, d, targetVersion)
 	if err != nil {
 		return handleCreateError("NsxtUpgradeRun", id, err)
 	}
 
 	log.Printf("[INFO] Successfully update UpgradeUnitGroup and UpgradePlanSetting. Start Upgrade.")
+	finalizeUpgrade := true
+	if d.HasChange("finalize_upgrade_setting") {
+		finalizeSettings := d.Get("finalize_upgrade_setting").([]interface{})
+		if len(finalizeSettings) != 0 {
+			finalizeSettingsMap := finalizeSettings[0].(map[string]interface{})
+			finalizeUpgrade = finalizeSettingsMap["enabled"].(bool)
+		}
+	}
 
-	err = runUpgrade(upgradeClientSet, getPartialUpgradeMap(d))
+	err = runUpgrade(upgradeClientSet, getPartialUpgradeMap(d, targetVersion), targetVersion, finalizeUpgrade)
 	if err != nil {
 		return handleCreateError("NsxtUpgradeRun", id, err)
 	}
@@ -382,10 +438,10 @@ func upgradeRunCreateOrUpdate(d *schema.ResourceData, m interface{}) error {
 	return resourceNsxtUpgradeRunRead(d, m)
 }
 
-func prepareUpgrade(upgradeClientSet *upgradeClientSet, d *schema.ResourceData, m interface{}) error {
-	for _, component := range upgradeComponentList {
+func prepareUpgrade(upgradeClientSet *upgradeClientSet, d *schema.ResourceData, targetVersion string) error {
+	for _, component := range getUpgradeComponentList(targetVersion) {
 		// Customize MP upgrade is not allowed
-		if component == mpUpgradeGroup {
+		if component == mpUpgradeGroup || component == finalizeUpgradeGroup {
 			continue
 		}
 
@@ -438,13 +494,13 @@ func prepareUpgrade(upgradeClientSet *upgradeClientSet, d *schema.ResourceData, 
 	return nil
 }
 
-func getPartialUpgradeMap(d *schema.ResourceData) map[string]bool {
+func getPartialUpgradeMap(d *schema.ResourceData, targetVersion string) map[string]bool {
 	isPartialUpgradeMap := map[string]bool{
 		edgeUpgradeGroup: false,
 		hostUpgradeGroup: false,
 	}
-	for _, component := range upgradeComponentList {
-		if component == mpUpgradeGroup {
+	for _, component := range getUpgradeComponentList(targetVersion) {
+		if component == mpUpgradeGroup || component == finalizeUpgradeGroup {
 			continue
 		}
 		for _, groupI := range d.Get(componentToGroupKey[component]).([]interface{}) {
@@ -711,10 +767,14 @@ func updateComponentUpgradePlanSetting(settingClient plan.SettingsClient, d *sch
 	return err
 }
 
-func runUpgrade(upgradeClientSet *upgradeClientSet, partialUpgradeMap map[string]bool) error {
+func runUpgrade(upgradeClientSet *upgradeClientSet, partialUpgradeMap map[string]bool, targetVersion string, finalizeUpgrade bool) error {
 	partialUpgradeExist := false
 	prevComponent := ""
-	for _, component := range upgradeComponentList {
+	for _, c := range getUpgradeComponentList(targetVersion) {
+		component := c
+		if !finalizeUpgrade && component == finalizeUpgradeGroup {
+			continue
+		}
 		// After one component upgrade is completed, although the status of our next component is NOT_STARTED,
 		// there is a period that overall status is still IN_PROGRESS, which will prevent us to start the upgrade of next component.
 		// Wait here for the overall status become stable. Because there is potential upgrade triggered before, we wait here also
@@ -735,6 +795,16 @@ func runUpgrade(upgradeClientSet *upgradeClientSet, partialUpgradeMap map[string
 				continue
 			}
 		}
+
+		// If component is already upgraded, resume
+		status, err := getUpgradeStatus(upgradeClientSet.StatusClient, &component)
+		if err != nil {
+			return err
+		}
+		if status.Status == model.ComponentUpgradeStatus_STATUS_SUCCESS {
+			log.Printf("Component %s already upgraded successfully, skipping", component)
+			continue
+		}
 		pendingStatus := []string{model.ComponentUpgradeStatus_STATUS_IN_PROGRESS}
 		targetStatus := []string{model.ComponentUpgradeStatus_STATUS_SUCCESS}
 		completeLog := fmt.Sprintf("[INFO] %s upgrade is completed.", component)
@@ -746,7 +816,10 @@ func runUpgrade(upgradeClientSet *upgradeClientSet, partialUpgradeMap map[string
 			prevComponent = component
 			completeLog = fmt.Sprintf("[INFO] %s upgrade is partially completed.", component)
 		}
-		upgradeClientSet.PlanClient.Upgrade(&component)
+		err = upgradeClientSet.PlanClient.Upgrade(&component)
+		if err != nil {
+			return err
+		}
 		err = waitUpgradeForStatus(upgradeClientSet, &component, pendingStatus, targetStatus)
 		if err != nil {
 			return err
@@ -757,21 +830,18 @@ func runUpgrade(upgradeClientSet *upgradeClientSet, partialUpgradeMap map[string
 }
 
 func runPostcheck(upgradeClient nsx.UpgradeClient, d *schema.ResourceData) {
-	for i := range upgradeComponentList {
-		component := upgradeComponentList[i]
-		if component != mpUpgradeGroup {
-			settingI := d.Get(componentToSettingKey[component]).([]interface{})
-			if len(settingI) == 0 {
-				continue
-			}
+	for _, component := range postCheckComponentList {
+		settingI := d.Get(componentToSettingKey[component]).([]interface{})
+		if len(settingI) == 0 {
+			continue
+		}
 
-			setting := settingI[0].(map[string]interface{})
-			postCheck := setting["post_upgrade_check"].(bool)
+		setting := settingI[0].(map[string]interface{})
+		postCheck := setting["post_upgrade_check"].(bool)
 
-			if postCheck {
-				log.Printf("[INFO] Start %s upgrade postcheck. Please use data source nsxt_upgrade_postcheck for results.", component)
-				upgradeClient.Executepostupgradechecks(component)
-			}
+		if postCheck {
+			log.Printf("[INFO] Start %s upgrade postcheck. Please use data source nsxt_upgrade_postcheck for results.", component)
+			upgradeClient.Executepostupgradechecks(component)
 		}
 	}
 }
@@ -838,6 +908,11 @@ func resourceNsxtUpgradeRunRead(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return handleReadError(d, "NsxtUpgradeRun", id, err)
 	}
+	targetVersion, err := getTargetVersion(m)
+	if err != nil {
+		return handleReadError(d, "NsxtUpgradeRun", id, err)
+	}
+	d.Set("target_version", targetVersion)
 	return nil
 }
 

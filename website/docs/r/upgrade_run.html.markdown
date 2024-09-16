@@ -88,6 +88,8 @@ The following arguments are supported:
     * `parallel` - (Optional) Upgrade Method to specify whether upgrades of UpgradeUnitGroups in this component are performed serially or in parallel. Default: True.
     * `post_upgrade_check` - (Optional) Flag to indicate whether run post upgrade check after upgrade. Default: True.
     * `stop_on_error` - (Optional) Flag to indicate whether to pause the upgrade plan execution when an error occurs. Default: False.
+* `finalize_upgrade_setting` - (Optional) FINALIZE_UPGRADE component upgrade plan setting.
+    * `enabled` - (Optional) Finalize upgrade after completion of all the components' upgrade is complete. Default: True.   
 
 ## Argument Reference
 

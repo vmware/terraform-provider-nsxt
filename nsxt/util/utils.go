@@ -13,9 +13,12 @@ import (
 var NsxVersion = ""
 
 func NsxVersionLower(ver string) bool {
+	return VersionLower(NsxVersion, ver)
+}
 
+func VersionLower(base, ver string) bool {
 	requestedVersion, err1 := version.NewVersion(ver)
-	currentVersion, err2 := version.NewVersion(NsxVersion)
+	currentVersion, err2 := version.NewVersion(base)
 	if err1 != nil || err2 != nil {
 		log.Printf("[ERROR] Failed perform version check for version %s", ver)
 		return true
@@ -24,9 +27,13 @@ func NsxVersionLower(ver string) bool {
 }
 
 func NsxVersionHigherOrEqual(ver string) bool {
+	return VersionHigherOrEqual(NsxVersion, ver)
+}
+
+func VersionHigherOrEqual(base, ver string) bool {
 
 	requestedVersion, err1 := version.NewVersion(ver)
-	currentVersion, err2 := version.NewVersion(NsxVersion)
+	currentVersion, err2 := version.NewVersion(base)
 	if err1 != nil || err2 != nil {
 		log.Printf("[ERROR] Failed perform version check for version %s", ver)
 		return false
