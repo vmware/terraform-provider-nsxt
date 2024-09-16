@@ -22,9 +22,7 @@ resource "nsxt_vpc" "test" {
   display_name = "test"
   description  = "Terraform provisioned VPC"
 
-  external_ipv4_blocks = [data.nsxt_policy_project.test.external_ipv4_blocks.0]
-
-  private_ips = ["192.168.55.2"]
+  private_ips = ["192.168.55.0/24"]
   short_id    = "vpc-tf"
 
   load_balancer_vpc_endpoint {
@@ -41,7 +39,6 @@ The following arguments are supported:
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
-* `external_ipv4_blocks` - (Optional) IP block used for allocating CIDR blocks for public subnets. IP block must be subset of Project IPv4 blocks. This field is mutually exclusive with `vpc_connectivity_profile`, `vpc_service_profile`.
 * `private_ips` - (Optional) IP CIDRs to manage private IPv4 subnets.
 * `vpc_service_profile` - (Optional) The path of the configuration profile of the VPC services.
 * `vpc_connectivity_profile` - (Optional) The path of the configuration profile for the VPC transit gateway attachment.
