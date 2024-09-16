@@ -28,6 +28,11 @@ var vpcSubnetAccessModeValues = []string{
 	model.VpcSubnet_ACCESS_MODE_PRIVATE_TGW,
 }
 
+var vpcSubnetConnectivityStateValues = []string{
+	model.SubnetAdvancedConfig_CONNECTIVITY_STATE_CONNECTED,
+	model.SubnetAdvancedConfig_CONNECTIVITY_STATE_DISCONNECTED,
+}
+
 var vpcSubnetSchema = map[string]*metadata.ExtendedSchema{
 	"nsx_id":       metadata.GetExtendedSchema(getNsxIDSchema()),
 	"path":         metadata.GetExtendedSchema(getPathSchema()),
@@ -42,6 +47,106 @@ var vpcSubnetSchema = map[string]*metadata.ExtendedSchema{
 			MaxItems: 1,
 			Elem: &metadata.ExtendedResource{
 				Schema: map[string]*metadata.ExtendedSchema{
+					"gateway_addresses": {
+						Schema: schema.Schema{
+							Type: schema.TypeList,
+							Elem: &metadata.ExtendedSchema{
+								Schema: schema.Schema{
+									Type: schema.TypeString,
+								},
+								Metadata: metadata.Metadata{
+									SchemaType: "string",
+								},
+							},
+							Optional: true,
+						},
+						Metadata: metadata.Metadata{
+							SchemaType:   "list",
+							SdkFieldName: "GatewayAddresses",
+						},
+					},
+					"extra_config": {
+						Schema: schema.Schema{
+							Type: schema.TypeList,
+							Elem: &metadata.ExtendedResource{
+								Schema: map[string]*metadata.ExtendedSchema{
+									"config_pair": {
+										Schema: schema.Schema{
+											Type:     schema.TypeList,
+											MaxItems: 1,
+											Elem: &metadata.ExtendedResource{
+												Schema: map[string]*metadata.ExtendedSchema{
+													"value": {
+														Schema: schema.Schema{
+															Type:     schema.TypeString,
+															Required: true,
+														},
+														Metadata: metadata.Metadata{
+															SchemaType:   "string",
+															SdkFieldName: "Value",
+														},
+													},
+													"key": {
+														Schema: schema.Schema{
+															Type:     schema.TypeString,
+															Required: true,
+														},
+														Metadata: metadata.Metadata{
+															SchemaType:   "string",
+															SdkFieldName: "Key",
+														},
+													},
+												},
+											},
+											Required: true,
+										},
+										Metadata: metadata.Metadata{
+											SchemaType:   "struct",
+											SdkFieldName: "ConfigPair",
+											ReflectType:  reflect.TypeOf(model.UnboundedKeyValuePair{}),
+										},
+									},
+								},
+							},
+							Optional: true,
+						},
+						Metadata: metadata.Metadata{
+							SchemaType:   "list",
+							SdkFieldName: "ExtraConfigs",
+							ReflectType:  reflect.TypeOf(model.SubnetExtraConfig{}),
+							OmitIfEmpty:  true,
+						},
+					},
+					"dhcp_server_addresses": {
+						Schema: schema.Schema{
+							Type: schema.TypeList,
+							Elem: &metadata.ExtendedSchema{
+								Schema: schema.Schema{
+									Type: schema.TypeString,
+								},
+								Metadata: metadata.Metadata{
+									SchemaType: "string",
+								},
+							},
+							Optional: true,
+						},
+						Metadata: metadata.Metadata{
+							SchemaType:   "list",
+							SdkFieldName: "DhcpServerAddresses",
+						},
+					},
+					"connectivity_state": {
+						Schema: schema.Schema{
+							Type:         schema.TypeString,
+							ValidateFunc: validation.StringInSlice(vpcSubnetConnectivityStateValues, false),
+							Optional:     true,
+							Default:      model.SubnetAdvancedConfig_CONNECTIVITY_STATE_CONNECTED,
+						},
+						Metadata: metadata.Metadata{
+							SchemaType:   "string",
+							SdkFieldName: "ConnectivityState",
+						},
+					},
 					"static_ip_allocation": {
 						Schema: schema.Schema{
 							Type:     schema.TypeList,
@@ -71,6 +176,7 @@ var vpcSubnetSchema = map[string]*metadata.ExtendedSchema{
 				},
 			},
 			Optional: true,
+			Computed: true,
 		},
 		Metadata: metadata.Metadata{
 			SchemaType:   "struct",

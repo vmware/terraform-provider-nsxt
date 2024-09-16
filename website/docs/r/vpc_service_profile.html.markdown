@@ -45,11 +45,6 @@ resource "nsxt_vpc_service_profile" "vpc1_service_profile" {
       is_distributed_dhcp = false
     }
   }
-
-  dns_forwarder_config {
-    cache_size = 1024
-    log_level  = "WARNING"
-  }
 }
 ```
 
@@ -81,11 +76,6 @@ The following arguments are supported:
       Value of this field can be False only when Edge cluster is available. If value is False, edge cluster in VPC connectivity profile must be
       configured for this mode. This is the traditional DHCP server that dynamically allocates IP per VM's MAC.
       If value is True, edge cluster will not be required for this mode. This is a DHCP server that dynamically assigns IP per VM port."
-* `dns_forwarder_config` - (Optional) DNS Forwarder configuration
-  * `cache_size` - (Optional) Cache size in KB
-  * `log_level` - (Optional) Log level of the DNS forwarder. Possible values: `DEBUG`, `INFO`, `WARNING`, `ERROR`, `FATAL`
-  * `conditional_forwarder_zone_paths` - (Optional) Path of conditional DNS zones
-  * `default_forwarder_zone_path` - (Optional) Path of the default DNS zone
 
 
 ## Attributes Reference

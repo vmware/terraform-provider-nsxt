@@ -102,62 +102,6 @@ var vpcSchema = map[string]*metadata.ExtendedSchema{
 			SdkFieldName: "IpAddressType",
 		},
 	},
-	"vpc_dns_forwarder": {
-		Schema: schema.Schema{
-			Type:     schema.TypeList,
-			MaxItems: 1,
-			Elem: &metadata.ExtendedResource{
-				Schema: map[string]*metadata.ExtendedSchema{
-					"enabled": {
-						Schema: schema.Schema{
-							Type:     schema.TypeBool,
-							Optional: true,
-						},
-						Metadata: metadata.Metadata{
-							SchemaType:   "bool",
-							SdkFieldName: "Enabled",
-						},
-					},
-					"listener_ip": {
-						Schema: schema.Schema{
-							Type:         schema.TypeString,
-							ValidateFunc: validation.IsIPv4Address,
-							Optional:     true,
-						},
-						Metadata: metadata.Metadata{
-							SchemaType:   "string",
-							SdkFieldName: "ListenerIp",
-						},
-					},
-				},
-			},
-			Optional: true,
-		},
-		Metadata: metadata.Metadata{
-			SchemaType:   "struct",
-			SdkFieldName: "VpcDnsForwarder",
-			ReflectType:  reflect.TypeOf(model.VpcDnsForwarder{}),
-		},
-	},
-	"private_ipv4_blocks": {
-		Schema: schema.Schema{
-			Type: schema.TypeList,
-			Elem: &metadata.ExtendedSchema{
-				Schema: schema.Schema{
-					Type: schema.TypeString,
-				},
-				Metadata: metadata.Metadata{
-					SchemaType: "string",
-				},
-			},
-			Optional: true,
-		},
-		Metadata: metadata.Metadata{
-			SchemaType:   "list",
-			SdkFieldName: "PrivateIpv4Blocks",
-			OmitIfEmpty:  true,
-		},
-	},
 	"short_id": {
 		Schema: schema.Schema{
 			Type:     schema.TypeString,

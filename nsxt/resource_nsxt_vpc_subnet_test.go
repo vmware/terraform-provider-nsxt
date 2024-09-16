@@ -168,7 +168,6 @@ func testAccNsxtVpcSubnetCheckDestroy(state *terraform.State, displayName string
 	return nil
 }
 
-// TODO - remove empty advanced_config when NSX issue is fixed
 // TODO - add subnet size option when NSX issue is fixed
 func testAccNsxtVpcSubnetTemplate(createFlow bool) string {
 	var attrMap map[string]string
@@ -190,8 +189,6 @@ resource "nsxt_vpc_subnet" "test" {
     enable_dhcp = %s
   }
 
-  advanced_config {}
-
   tag {
     scope = "scope1"
     tag   = "tag1"
@@ -204,6 +201,5 @@ func testAccNsxtVpcSubnetMinimalistic() string {
 resource "nsxt_vpc_subnet" "test" {
 %s
   display_name = "%s"
-  advanced_config {}
 }`, testAccNsxtPolicyMultitenancyContext(), accTestVpcSubnetUpdateAttributes["display_name"])
 }
