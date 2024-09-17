@@ -129,7 +129,7 @@ func testAccResourceNsxtPolicySecurityPolicyBasic(t *testing.T, withContext bool
 				),
 			},
 			{
-				Config: testAccNsxtPolicySecurityPolicyWithProfiles(resourceName, updatedName, direction2, proto2, tag2, defaultDomain, withContext),
+				Config: testAccNsxtPolicySecurityPolicyWithProfiles(resourceName, updatedName, direction2, proto2, tag2, defaultDomain, withContext, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySecurityPolicyExists(testResourceName, defaultDomain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -583,7 +583,7 @@ func TestAccResourceNsxtGlobalPolicySecurityPolicy_withSite(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtPolicySecurityPolicyWithProfiles(resourceName, updatedName, direction2, proto2, tag2, domain, false),
+				Config: testAccNsxtPolicySecurityPolicyWithProfiles(resourceName, updatedName, direction2, proto2, tag2, domain, false, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicySecurityPolicyExists(testResourceName, domain),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", updatedName),
@@ -1005,9 +1005,17 @@ func testAccNsxtPolicySecurityPolicyWithIPCidrRange(name string, destIP string, 
 }`, name, destIP, destCidr, destIPRange, sourceIP, sourceCidr, sourceIPRange)
 }
 
-func testAccNsxtPolicySecurityPolicyWithProfiles(resourceName, name, direction, protocol, ruleTag, domainName string, withContext bool) string {
+func testAccNsxtPolicySecurityPolicyWithProfiles(resourceName, name, direction, protocol, ruleTag, domainName string, withContext bool, isVpc bool) string {
+	vpcShare := ""
+	withCategory := true
+	if isVpc {
+		// this is VPC rule, we need to share context profile with the VPC
+		// we do this by sharing with project and all its descendants
+		withCategory = false
+		vpcShare = testAccNsxtProjectShareAll("nsxt_policy_context_profile.test.path")
+	}
 	profiles := `
 profiles = [nsxt_policy_context_profile.test.path]
 `
-	return testAccNsxtPolicyContextProfileTemplate("security-policy-test-profile", testAccNsxtPolicyContextProfileAttributeDomainNameTemplate(testSystemDomainName), withContext) + testAccNsxtPolicySecurityPolicyWithRule(resourceName, name, direction, protocol, ruleTag, domainName, profiles, withContext, true)
+	return testAccNsxtPolicyContextProfileTemplate("security-policy-test-profile", testAccNsxtPolicyContextProfileAttributeDomainNameTemplate(testSystemDomainName), withContext) + vpcShare + testAccNsxtPolicySecurityPolicyWithRule(resourceName, name, direction, protocol, ruleTag, domainName, profiles, withContext, withCategory)
 }

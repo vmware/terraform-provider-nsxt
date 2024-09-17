@@ -415,7 +415,7 @@ func testAccNsxtPolicyContextProfileCheckDestroy(state *terraform.State, display
 func testAccNsxtPolicyContextProfileTemplate(name string, attributes string, withContext bool) string {
 	context := ""
 	if withContext {
-		context = testAccNsxtPolicyMultitenancyContext()
+		context = testAccNsxtMultitenancyContext(false)
 	}
 	return fmt.Sprintf(`
 resource "nsxt_policy_context_profile" "test" {
