@@ -34,10 +34,9 @@ resource "nsxt_vpc_subnet" "test" {
 
   display_name     = "test-subnet"
   description      = "Test VPC subnet"
-  ipv4_subnet_size = 64
+  ipv4_subnet_size = 32
   ip_addresses     = ["192.168.240.0/24"]
   access_mode      = "Isolated"
-
 }
 ```
 
@@ -49,6 +48,10 @@ The following arguments are supported:
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
+* `ipv4_subnet_size` - (Optional) If IP Addresses are not provided, this field will be used to carve out the ips
+  from respective ip block defined in the parent VPC. The default is 64.
+* `ip_addresses` - (Optional) If not provided, Ip assignment will be done based on VPC CIDRs
+* `access_mode` - (Optional) Subnet access mode, one of `Private`, `Public`, `Isolated` or `Private_TGW`. Default is `Private`
 * `advanced_config` - (Optional) Advanced Configuration for the Subnet
     * `gateway_addresses` - (Optional) List of Gateway IP Addresses per address family, in CIDR format
     * `connectivity_state` - (Optional) Connectivity state for the subnet, one of `CONNECTED`, `DISCONNECTED`
@@ -61,42 +64,26 @@ The following arguments are supported:
       * `config_pair` - (Required)
         * `key` - (Required) key for vendor-specific configuration
         * `value` - (Required) value for vendor-specific configuration
-
-* `ipv4_subnet_size` - (Optional) If IP Addresses are not provided, this field will be used to carve out the ips
-  from respective ip block defined in the parent VPC. The default is 64.
-  If ip_addresses field is provided then ipv4_subnet_size field is ignored.
-  This field cannot be modified after creating a VPC Subnet.
-
-* `ip_addresses` - (Optional) If not provided, Ip assignment will be done based on VPC CIDRs
-  This represents the VPC Subnet that is associated with tier.
-  If IPv4 CIDR is given, ipv4_subnet_size property is ignored.
-  For IPv6 CIDR, supported prefix length is /64.
-
-* `access_mode` - (Optional) There are three kinds of Access Types supported for an Application.
-  Private - VPC Subnet is accessible only within the application and its IPs are allocated from
-  private IP address pool from VPC configuration unless specified explicitly by user.
-  Public - VPC Subnet is accessible from external networks and its IPs are allocated from public IP
-  address pool from VPC configuration unless specified explicitly by user.
-  Isolated - VPC Subnet is not accessible from other VPC Subnets within the same VPC.
-
-* `dhcp_config` - (Optional) None
+* `dhcp_config` - (Optional) DHCP configuration block
+    * `ntp_servers` - (Optional) List of NTP server IP addresses
     * `dhcp_relay_config_path` - (Optional) Policy path of DHCP-relay-config. If configured then all the subnets will be
       configured with the DHCP relay server.
       If not specified, then the local DHCP server will be configured for all connected subnets.
-
-    * `dns_client_config` - (Optional) None
+    * `dns_client_config` - (Optional) DHCP Client configuration block
         * `dns_server_ips` - (Optional) IPs of the DNS servers which need to be configured on the workload VMs
-
     * `enable_dhcp` - (Optional) If activated, the DHCP server will be configured based on IP address type.
-      If deactivated then neither DHCP server nor relay shall be configured.
-
-    * `static_pool_config` - (Optional) None
-        * `ipv4_pool_size` - (Optional) Number of IPs to be reserved in static ip pool. Maximum allowed value is 'subnet
-          size - 4'.
-          If dhcp is enabled then by default static ipv4 pool size will be zero and all available IPs will be reserved
-          in
-          local dhcp pool.
-          If dhcp is deactivated then by default all IPs will be reserved in static ip pool.
+    * `static_pool_config` - (Optional) Static pool configuration block
+        * `ipv4_pool_size` - (Optional) Number of IPs to be reserved in static ip pool.
+    * `excluded_ips` - (Optional) List of excluded IP addresses
+    * `options` - (Optional) DHCPv4 options block
+      * `option121` - (Optional) Specification for DHCP option 121
+        * `static_route` - (Optional) Static route
+          * `network` - (Optional) Destination network in CIDR format
+          * `next_hop` - (Optional) IP Address for next hop of the route
+        * `other` - (Optional) DHCP option in generic format
+          * `code` - (Optional) Code of DHCP option
+          * `values` - (Optional) List of values in string format
+* `ip_blocks` - (Optional) List of IP block path for subnet IP allocation
 
 ## Attributes Reference
 
