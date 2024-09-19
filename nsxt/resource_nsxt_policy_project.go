@@ -12,6 +12,7 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects"
 )
 
 func resourceNsxtPolicyProject() *schema.Resource {
@@ -70,6 +71,31 @@ func resourceNsxtPolicyProject() *schema.Resource {
 				Type:     schema.TypeList,
 				Elem:     getElemPolicyPathSchema(),
 				Optional: true,
+			},
+			"default_security_profile": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MinItems: 1,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"north_south_firewall": {
+							Type:     schema.TypeList,
+							MinItems: 1,
+							MaxItems: 1,
+							Required: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:        schema.TypeBool,
+										Required:    true,
+										Description: "Flag that indicates whether north-south firewall (Gateway Firewall) is enabled",
+									},
+								},
+							},
+						},
+					},
+				},
 			},
 		},
 	}
@@ -143,7 +169,41 @@ func resourceNsxtPolicyProjectPatch(connector client.Connector, d *schema.Resour
 	log.Printf("[INFO] Patching Project with ID %s", id)
 
 	client := infra.NewProjectsClient(connector)
-	return client.Patch(defaultOrgID, id, obj)
+	err := client.Patch(defaultOrgID, id, obj)
+	if err != nil {
+		return err
+	}
+
+	if d.HasChanges("default_security_profile") {
+		err = patchVpcSecurityProfile(d, connector, id)
+	}
+	return err
+}
+
+func patchVpcSecurityProfile(d *schema.ResourceData, connector client.Connector, projectID string) error {
+	enabled := false
+	defaultSecurityProfile := d.Get("default_security_profile")
+	if defaultSecurityProfile != nil {
+		dsp := defaultSecurityProfile.([]interface{})
+		if len(dsp) > 0 {
+			northSouthFirewall := dsp[0].(map[string]interface{})["north_south_firewall"]
+			if northSouthFirewall != nil {
+				nsfw := northSouthFirewall.([]interface{})
+				if len(nsfw) > 0 {
+					elem := nsfw[0].(map[string]interface{})
+					enabled = elem["enabled"].(bool)
+				}
+			}
+		}
+	}
+	// Default security profile is created by NSX, we can assume that it's there already
+	client := projects.NewVpcSecurityProfilesClient(connector)
+	obj := model.VpcSecurityProfile{
+		NorthSouthFirewall: &model.NorthSouthFirewall{
+			Enabled: &enabled,
+		},
+	}
+	return client.Patch(defaultOrgID, projectID, "default", obj)
 }
 
 func resourceNsxtPolicyProjectCreate(d *schema.ResourceData, m interface{}) error {
