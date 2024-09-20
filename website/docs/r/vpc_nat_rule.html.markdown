@@ -5,7 +5,7 @@ page_title: "NSXT: nsxt_vpc_nat_rule"
 description: A resource to configure a NAT rule under VPC.
 ---
 
-# nsxt_policy_vpc_nat_rule
+# nsxt_vpc_nat_rule
 
 This resource provides a method for the management of a VPC NAT Rule.
 

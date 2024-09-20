@@ -1,11 +1,11 @@
 ---
 subcategory: "VPC"
 layout: "nsxt"
-page_title: "NSXT: nsxt_policy_static_routes"
-description: A resource to configure a StaticRoutes.
+page_title: "NSXT: nsxt_vpc_static_route"
+description: A resource to configure a Static Routes under VPC.
 ---
 
-# nsxt_policy_static_route
+# nsxt_vpc_static_route
 
 This resource provides a method for the management of VPC Static Routes.
 
@@ -15,6 +15,11 @@ This resource is applicable to NSX Policy Manager.
 
 ```hcl
 resource "nsxt_vpc_static_route" "test" {
+  context {
+    project_id = data.nsxt_policy_project.demoproj.id
+    vpc_id     = data.nsxt_vpc.demovpc.id
+  }
+
   display_name = "test"
   description  = "Terraform provisioned StaticRoutes"
 
