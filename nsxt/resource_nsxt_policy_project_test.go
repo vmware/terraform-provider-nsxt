@@ -10,10 +10,11 @@ import (
 	"testing"
 	"text/template"
 
-	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects"
+
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
 var shortID = getAccTestRandomString(6)
@@ -163,7 +164,7 @@ func TestAccResourceNsxtPolicyProject_411basic(t *testing.T) {
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyProjectCheckDestroy(state, accTestPolicyProjectUpdateAttributes["display_name"])
+			return testAccNsxtPolicyProjectCheckDestroy(state, accTestPolicyProjectUpdateAttributes["DisplayName"])
 		},
 		Steps: []resource.TestStep{
 			{
@@ -217,7 +218,7 @@ func TestAccResourceNsxtPolicyProject_420basic(t *testing.T) {
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyProjectCheckDestroy(state, accTestPolicyProjectUpdateAttributes["display_name"])
+			return testAccNsxtPolicyProjectCheckDestroy(state, accTestPolicyProjectUpdateAttributes["DisplayName"])
 		},
 		Steps: []resource.TestStep{
 			{
@@ -274,7 +275,7 @@ func TestAccResourceNsxtPolicyProject_900basic(t *testing.T) {
 		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtPolicyProjectCheckDestroy(state, accTestPolicyProjectUpdateAttributes["display_name"])
+			return testAccNsxtPolicyProjectCheckDestroy(state, accTestPolicyProjectUpdateAttributes["DisplayName"])
 		},
 		Steps: []resource.TestStep{
 			{
@@ -295,6 +296,51 @@ func TestAccResourceNsxtPolicyProject_900basic(t *testing.T) {
 					runChecksNsx411(testResourceName, expectedValuesStep2),
 					runChecksNsx420(testResourceName, expectedValuesStep2),
 					runChecksNsx900(testResourceName, expectedValuesStep2),
+				),
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicyProject_900defaultSecurityProfile(t *testing.T) {
+	testResourceName := "nsxt_policy_project.test"
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyLocalManager(t)
+			testAccNSXVersion(t, "9.0.0")
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyProjectCheckDestroy(state, accTestPolicyProjectCreateAttributes["DisplayName"])
+		},
+		Steps: []resource.TestStep{
+			{
+				// Create: Set T0, Ext GW connection, Ext IPv4 Block, activate default DFW
+				Config: testAccNsxtPolicyProjectMinimalistic(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyProjectGetSecurityProfileNSEnabled(testResourceName, false),
+				),
+			},
+			{
+				// Update: Set T0, Ext GW connection, No Ext IPv4 Block, disable default DFW
+				Config: testAccNsxtPolicyProjectDefaultSecurityPolicy(false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyProjectGetSecurityProfileNSEnabled(testResourceName, false),
+				),
+			},
+			{
+				// Update: Set T0, Ext GW connection, No Ext IPv4 Block, disable default DFW
+				Config: testAccNsxtPolicyProjectDefaultSecurityPolicy(true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyProjectGetSecurityProfileNSEnabled(testResourceName, true),
+				),
+			},
+			{
+				// Update: Set T0, Ext GW connection, No Ext IPv4 Block, disable default DFW
+				Config: testAccNsxtPolicyProjectDefaultSecurityPolicy(false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyProjectGetSecurityProfileNSEnabled(testResourceName, false),
 				),
 			},
 		},
@@ -326,6 +372,32 @@ func TestAccResourceNsxtPolicyProject_importBasic(t *testing.T) {
 			},
 		},
 	})
+}
+
+func testAccNsxtPolicyProjectGetSecurityProfileNSEnabled(resourceName string, expectedVal bool) resource.TestCheckFunc {
+	return func(state *terraform.State) error {
+
+		rs, ok := state.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("Policy Project resource %s not found in resources", resourceName)
+		}
+
+		resourceID := rs.Primary.ID
+		if resourceID == "" {
+			return fmt.Errorf("Policy Project resource ID not set in resources")
+		}
+
+		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
+		client := projects.NewVpcSecurityProfilesClient(connector)
+		obj, err := client.Get(defaultOrgID, resourceID, "default")
+		if err != nil {
+			return err
+		}
+		if *obj.NorthSouthFirewall.Enabled != expectedVal {
+			return fmt.Errorf("expected NorthSouthFirewall to be %v, isntead status is %v", *obj.NorthSouthFirewall.Enabled, expectedVal)
+		}
+		return nil
+	}
 }
 
 func testAccNsxtPolicyProjectExists(displayName string, resourceName string) resource.TestCheckFunc {
@@ -503,4 +575,17 @@ resource "nsxt_policy_project" "test" {
   display_name = "%s"
 
 }`, accTestPolicyProjectUpdateAttributes["DisplayName"])
+}
+
+func testAccNsxtPolicyProjectDefaultSecurityPolicy(enabled bool) string {
+	return fmt.Sprintf(`
+resource "nsxt_policy_project" "test" {
+  display_name = "%s"
+  default_security_profile {
+    north_south_firewall {
+      enabled = %s
+    }
+  }
+
+}`, accTestPolicyProjectCreateAttributes["DisplayName"], strconv.FormatBool(enabled))
 }
