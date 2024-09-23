@@ -63,12 +63,12 @@ func resourceNsxtPolicyProject() *schema.Resource {
 				Computed: true,
 			},
 			"external_ipv4_blocks": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Elem:     getElemPolicyPathSchema(),
 				Optional: true,
 			},
 			"tgw_external_connections": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Elem:     getElemPolicyPathSchema(),
 				Optional: true,
 			},
@@ -139,8 +139,8 @@ func resourceNsxtPolicyProjectPatch(connector client.Connector, d *schema.Resour
 	}
 	tier0s := getStringListFromSchemaList(d, "tier0_gateway_paths")
 	activateDefaultDFWRules := d.Get("activate_default_dfw_rules").(bool)
-	extIpv4BlocksList := getStringListFromSchemaList(d, "external_ipv4_blocks")
-	tgwConnectionsList := getStringListFromSchemaList(d, "tgw_external_connections")
+	extIpv4BlocksList := getStringListFromSchemaSet(d, "external_ipv4_blocks")
+	tgwConnectionsList := getStringListFromSchemaSet(d, "tgw_external_connections")
 
 	obj := model.Project{
 		DisplayName: &displayName,
