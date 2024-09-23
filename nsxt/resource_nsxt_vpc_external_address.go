@@ -16,7 +16,7 @@ func resourceNsxtVpcExternalAddress() *schema.Resource {
 		Update: resourceNsxtVpcExternalAddressUpdate,
 		Delete: resourceNsxtVpcExternalAddressDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtParentPathResourceImporter,
+			State: nsxtVpcExternalAddressImporter,
 		},
 		Schema: map[string]*schema.Schema{
 			"parent_path":                getPolicyPathSchema(true, true, "port path for address binding"),
@@ -106,4 +106,18 @@ func resourceNsxtVpcExternalAddressUpdate(d *schema.ResourceData, m interface{})
 
 func resourceNsxtVpcExternalAddressDelete(d *schema.ResourceData, m interface{}) error {
 	return updatePort(d, m, true)
+}
+
+func nsxtVpcExternalAddressImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	importID := d.Id()
+	if isSpaceString(importID) {
+		return []*schema.ResourceData{d}, ErrEmptyImportID
+	}
+	if isPolicyPath(importID) {
+		// Since external address is part of Port API, parent path is the port URL
+		d.SetId(newUUID())
+		d.Set("parent_path", importID)
+		return []*schema.ResourceData{d}, nil
+	}
+	return []*schema.ResourceData{d}, ErrNotAPolicyPath
 }

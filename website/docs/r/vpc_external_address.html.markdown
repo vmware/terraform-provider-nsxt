@@ -56,4 +56,4 @@ An existing VPC External Address Binding can be [imported][docs-import] into thi
 terraform import nsxt_vpc_external_address.external_address1 PATH
 ```
 
-The above command imports the VPC External Address Binding named `external_address` with the NSX Policy path `PATH`.
+The above command imports the VPC External Address Binding named `external_address` with the NSX Policy path of the parent port `PATH`.
