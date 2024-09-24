@@ -1,11 +1,11 @@
 ---
 subcategory: "VPC"
 layout: "nsxt"
-page_title: "NSXT: nsxt_project_ip_address_allocation"
+page_title: "NSXT: nsxt_policy_project_ip_address_allocation"
 description: A resource to configure IP Address Allocation under Project.
 ---
 
-# nsxt_project_ip_address_allocation
+# nsxt_policy_project_ip_address_allocation
 
 This resource provides a method for allocating IP Address from IP block associated with VPC.
 
@@ -14,7 +14,7 @@ This resource is applicable to NSX Policy Manager.
 ## Example Usage
 
 ```hcl
-resource "nsxt_project_ip_address_allocation" "nat" {
+resource "nsxt_policy_project_ip_address_allocation" "nat" {
   context {
     project_id = data.nsxt_policy_project.dev.id
   }
