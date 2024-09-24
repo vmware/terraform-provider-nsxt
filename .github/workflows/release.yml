@@ -26,8 +26,10 @@ jobs:
         name: golangci-lint
         uses: golangci/golangci-lint-action@v3
         with:
-          version: v1.50
+          version: v1.56.1
           args: --issues-exit-code=1
+          skip-pkg-cache: true
+          skip-build-cache: true
       -
         name: Import GPG key
         id: import_gpg
