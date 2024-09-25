@@ -6,6 +6,7 @@ package nsxt
 import (
 	"fmt"
 	"net/http"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -18,7 +19,12 @@ func TestAccResourceNsxtIpSet_basic(t *testing.T) {
 	testResourceName := "nsxt_ip_set.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestDeprecated(t); testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccOnlyLocalManager(t)
+			testAccTestDeprecated(t)
+			testAccPreCheck(t)
+			testAccNSXVersionLessThan(t, "9.0.0")
+		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXIpSetCheckDestroy(state, updateName)
@@ -48,12 +54,41 @@ func TestAccResourceNsxtIpSet_basic(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtIpSet_basic_900(t *testing.T) {
+	name := getAccTestResourceName()
+	resourceName := getAccTestResourceName()
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccOnlyLocalManager(t)
+			testAccTestDeprecated(t)
+			testAccPreCheck(t)
+			testAccNSXVersion(t, "9.0.0")
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXIpSetCheckDestroy(state, resourceName)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccNSXIpSetCreateTemplate(name),
+				ExpectError: regexp.MustCompile("MP resource.*has been removed in NSX"),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtIpSet_noName(t *testing.T) {
 	name := ""
 	testResourceName := "nsxt_ip_set.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestDeprecated(t); testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccOnlyLocalManager(t)
+			testAccTestDeprecated(t)
+			testAccPreCheck(t)
+			testAccNSXVersionLessThan(t, "9.0.0")
+		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXIpSetCheckDestroy(state, name)
@@ -88,7 +123,12 @@ func TestAccResourceNsxtIpSet_importBasic(t *testing.T) {
 	testResourceName := "nsxt_ip_set.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccTestDeprecated(t); testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccOnlyLocalManager(t)
+			testAccTestDeprecated(t)
+			testAccPreCheck(t)
+			testAccNSXVersionLessThan(t, "9.0.0")
+		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNSXIpSetCheckDestroy(state, name)
@@ -101,6 +141,29 @@ func TestAccResourceNsxtIpSet_importBasic(t *testing.T) {
 				ResourceName:      testResourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtIpSet_importBasic_900(t *testing.T) {
+	name := getAccTestResourceName()
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccOnlyLocalManager(t)
+			testAccTestDeprecated(t)
+			testAccPreCheck(t)
+			testAccNSXVersion(t, "9.0.0")
+		},
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNSXIpSetCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccNSXIpSetCreateTemplate(name),
+				ExpectError: regexp.MustCompile("MP resource.*has been removed in NSX"),
 			},
 		},
 	})
