@@ -307,7 +307,11 @@ func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[str
 			exists := false
 			if len(parent) > 0 && parentMap[key] != nil {
 				value = parentMap[key].(string)
-				exists = true
+				// For nested maps, value is initialized to zero string even if not
+				// specified by user explicitly
+				if len(value) > 0 {
+					exists = true
+				}
 			} else {
 				var v interface{}
 				v, exists = d.GetOk(key)

@@ -298,6 +298,7 @@ var vpcSubnetSchema = map[string]*metadata.ExtendedSchema{
 						Metadata: metadata.Metadata{
 							SchemaType:   "string",
 							SdkFieldName: "DhcpRelayConfigPath",
+							OmitIfEmpty:  true,
 						},
 					},
 					"excluded_ips": {
