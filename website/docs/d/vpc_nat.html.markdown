@@ -30,13 +30,13 @@ data "nsxt_vpc_nat" "test" {
     project_id = data.nsxt_policy_project.proj.id
     vpc_id     = data.nsxt_vpc.vpc1.id
   }
-  type = "USER"
+  nat_type = "USER"
 }
 ```
 
 ## Argument Reference
 
-* `type` - (Required) Type of NAT, one of `USER`, `INTERNAL`, `DEFAULT` or `NAT64`.
+* `nat_type` - (Required) Type of NAT, one of `USER`, `INTERNAL`, `DEFAULT` or `NAT64`.
 * `context` - (Required) The context which the object belongs to
     * `project_id` - (Required) The ID of the project which the object belongs to
     * `vpc_id` - (Required) The ID of the VPC which the object belongs to
