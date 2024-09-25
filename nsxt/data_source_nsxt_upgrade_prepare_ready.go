@@ -5,6 +5,7 @@ package nsxt
 
 import (
 	"fmt"
+
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
