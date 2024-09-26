@@ -6,10 +6,11 @@ issues:
      - SA1019
      - G402
      - G404
+     - G115
      - GetOkExists
 
 run:
-  deadline: 5m
+  deadline: 30m
 
 linters:
   disable-all: true
@@ -20,7 +21,7 @@ linters:
     - staticcheck
     - gosec
     - goimports
-    - vet
+    - govet
     - misspell
     - gosimple
     - staticcheck

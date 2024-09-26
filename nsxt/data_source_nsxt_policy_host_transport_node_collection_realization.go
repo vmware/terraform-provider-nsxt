@@ -4,6 +4,7 @@
 package nsxt
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"time"
@@ -122,5 +123,5 @@ func getErrorFromState(state *model.TransportNodeCollectionState) error {
 		result += fmt.Sprintf("VCLM transition error: %v\n", *state.VlcmTransitionError)
 	}
 
-	return fmt.Errorf(result)
+	return errors.New(result)
 }

@@ -251,7 +251,7 @@ func setSnatTranslationInSchema(d *schema.ResourceData, snatTranslation *loadbal
 	if snatTranslation != nil {
 		if snatTranslation.Type_ == "LbSnatIpPool" {
 			elem["type"] = "SNAT_IP_POOL"
-			if snatTranslation.IpAddresses != nil && len(snatTranslation.IpAddresses) > 0 {
+			if len(snatTranslation.IpAddresses) > 0 {
 				elem["ip"] = snatTranslation.IpAddresses[0].IpAddress
 			}
 		} else {
@@ -421,7 +421,7 @@ func resourceNsxtLbPoolRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("description", lbPool.Description)
 	d.Set("display_name", lbPool.DisplayName)
 	setTagsInSchema(d, lbPool.Tags)
-	if lbPool.ActiveMonitorIds != nil && len(lbPool.ActiveMonitorIds) > 0 {
+	if len(lbPool.ActiveMonitorIds) > 0 {
 		d.Set("active_monitor_id", lbPool.ActiveMonitorIds[0])
 	} else {
 		d.Set("active_monitor_id", "")

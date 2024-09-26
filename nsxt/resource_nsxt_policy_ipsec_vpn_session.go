@@ -638,7 +638,7 @@ func resourceNsxtPolicyIPSecVpnSessionRead(d *schema.ResourceData, m interface{}
 		}
 		var subnets []string
 		var prefixLength int64
-		if blockVPN.TunnelInterfaces != nil && len(blockVPN.TunnelInterfaces) > 0 {
+		if len(blockVPN.TunnelInterfaces) > 0 {
 			for _, tunnelInterface := range blockVPN.TunnelInterfaces {
 				ipSubnets := tunnelInterface.IpSubnets
 				for _, ipSubnet := range ipSubnets {
