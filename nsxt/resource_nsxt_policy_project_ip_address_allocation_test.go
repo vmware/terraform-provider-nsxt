@@ -24,20 +24,20 @@ var accTestProjectIpAddressAllocationUpdateAttributes = map[string]string{
 	"allocation_size": "1",
 }
 
-func TestAccResourceNsxtProjectIpAddressAllocation_basic(t *testing.T) {
+func TestAccResourceNsxtPolicyProjectIpAddressAllocation_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_project_ip_address_allocation.test"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t); testAccOnlyVPC(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtProjectIpAddressAllocationCheckDestroy(state, accTestProjectIpAddressAllocationUpdateAttributes["display_name"])
+			return testAccNsxtPolicyProjectIpAddressAllocationCheckDestroy(state, accTestProjectIpAddressAllocationUpdateAttributes["display_name"])
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtProjectIpAddressAllocationTemplate(true),
+				Config: testAccNsxtPolicyProjectIpAddressAllocationTemplate(true),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtProjectIpAddressAllocationExists(accTestProjectIpAddressAllocationCreateAttributes["display_name"], testResourceName),
+					testAccNsxtPolicyProjectIpAddressAllocationExists(accTestProjectIpAddressAllocationCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestProjectIpAddressAllocationCreateAttributes["display_name"]),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestProjectIpAddressAllocationCreateAttributes["description"]),
 					resource.TestCheckResourceAttrSet(testResourceName, "allocation_ips"),
@@ -50,9 +50,9 @@ func TestAccResourceNsxtProjectIpAddressAllocation_basic(t *testing.T) {
 			},
 			/* TODO - enable when/if IP allocation update is supported on NSX
 			{
-				Config: testAccNsxtProjectIpAddressAllocationTemplate(false),
+				Config: testAccNsxtPolicyProjectIpAddressAllocationTemplate(false),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtProjectIpAddressAllocationExists(accTestProjectIpAddressAllocationUpdateAttributes["display_name"], testResourceName),
+					testAccNsxtPolicyProjectIpAddressAllocationExists(accTestProjectIpAddressAllocationUpdateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestProjectIpAddressAllocationUpdateAttributes["display_name"]),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestProjectIpAddressAllocationUpdateAttributes["description"]),
 					resource.TestCheckResourceAttrSet(testResourceName, "allocation_ips"),
@@ -64,9 +64,9 @@ func TestAccResourceNsxtProjectIpAddressAllocation_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNsxtProjectIpAddressAllocationMinimalistic(),
+				Config: testAccNsxtPolicyProjectIpAddressAllocationMinimalistic(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtProjectIpAddressAllocationExists(accTestProjectIpAddressAllocationCreateAttributes["display_name"], testResourceName),
+					testAccNsxtPolicyProjectIpAddressAllocationExists(accTestProjectIpAddressAllocationCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -78,7 +78,7 @@ func TestAccResourceNsxtProjectIpAddressAllocation_basic(t *testing.T) {
 	})
 }
 
-func TestAccResourceNsxtProjectIpAddressAllocation_importBasic(t *testing.T) {
+func TestAccResourceNsxtPolicyProjectIpAddressAllocation_importBasic(t *testing.T) {
 	name := getAccTestResourceName()
 	testResourceName := "nsxt_policy_project_ip_address_allocation.test"
 
@@ -86,11 +86,11 @@ func TestAccResourceNsxtProjectIpAddressAllocation_importBasic(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t); testAccOnlyVPC(t) },
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccNsxtProjectIpAddressAllocationCheckDestroy(state, name)
+			return testAccNsxtPolicyProjectIpAddressAllocationCheckDestroy(state, name)
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNsxtProjectIpAddressAllocationMinimalistic(),
+				Config: testAccNsxtPolicyProjectIpAddressAllocationMinimalistic(),
 			},
 			{
 				ResourceName:      testResourceName,
@@ -102,7 +102,7 @@ func TestAccResourceNsxtProjectIpAddressAllocation_importBasic(t *testing.T) {
 	})
 }
 
-func testAccNsxtProjectIpAddressAllocationExists(displayName string, resourceName string) resource.TestCheckFunc {
+func testAccNsxtPolicyProjectIpAddressAllocationExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
@@ -117,7 +117,7 @@ func testAccNsxtProjectIpAddressAllocationExists(displayName string, resourceNam
 			return fmt.Errorf("Policy ProjectIpAddressAllocation resource ID not set in resources")
 		}
 
-		exists, err := resourceNsxtProjectIpAddressAllocationExists(testAccGetSessionContext(), resourceID, connector)
+		exists, err := resourceNsxtPolicyProjectIpAddressAllocationExists(testAccGetSessionContext(), resourceID, connector)
 		if err != nil {
 			return err
 		}
@@ -129,7 +129,7 @@ func testAccNsxtProjectIpAddressAllocationExists(displayName string, resourceNam
 	}
 }
 
-func testAccNsxtProjectIpAddressAllocationCheckDestroy(state *terraform.State, displayName string) error {
+func testAccNsxtPolicyProjectIpAddressAllocationCheckDestroy(state *terraform.State, displayName string) error {
 	connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
 	for _, rs := range state.RootModule().Resources {
 
@@ -138,7 +138,7 @@ func testAccNsxtProjectIpAddressAllocationCheckDestroy(state *terraform.State, d
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		exists, err := resourceNsxtProjectIpAddressAllocationExists(testAccGetSessionContext(), resourceID, connector)
+		exists, err := resourceNsxtPolicyProjectIpAddressAllocationExists(testAccGetSessionContext(), resourceID, connector)
 		if err == nil {
 			return err
 		}
@@ -150,7 +150,7 @@ func testAccNsxtProjectIpAddressAllocationCheckDestroy(state *terraform.State, d
 	return nil
 }
 
-func testAccNsxtProjectIpAddressAllocationTemplate(createFlow bool) string {
+func testAccNsxtPolicyProjectIpAddressAllocationTemplate(createFlow bool) string {
 	var attrMap map[string]string
 	if createFlow {
 		attrMap = accTestProjectIpAddressAllocationCreateAttributes
@@ -175,7 +175,7 @@ resource "nsxt_policy_project_ip_address_allocation" "test" {
 }`, os.Getenv("NSXT_VPC_PROJECT_ID"), testAccNsxtProjectContext(), attrMap["display_name"], attrMap["description"], attrMap["allocation_size"])
 }
 
-func testAccNsxtProjectIpAddressAllocationMinimalistic() string {
+func testAccNsxtPolicyProjectIpAddressAllocationMinimalistic() string {
 	return fmt.Sprintf(`
 data "nsxt_policy_project" "test" {
   id = "%s"
