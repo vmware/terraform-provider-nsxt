@@ -66,12 +66,12 @@ var projectIpAddressAllocationSchema = map[string]*metadata.ExtendedSchema{
 	},
 }
 
-func resourceNsxtProjectIpAddressAllocation() *schema.Resource {
+func resourceNsxtPolicyProjectIpAddressAllocation() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNsxtProjectIpAddressAllocationCreate,
-		Read:   resourceNsxtProjectIpAddressAllocationRead,
-		Update: resourceNsxtProjectIpAddressAllocationUpdate,
-		Delete: resourceNsxtProjectIpAddressAllocationDelete,
+		Create: resourceNsxtPolicyProjectIpAddressAllocationCreate,
+		Read:   resourceNsxtPolicyProjectIpAddressAllocationRead,
+		Update: resourceNsxtPolicyProjectIpAddressAllocationUpdate,
+		Delete: resourceNsxtPolicyProjectIpAddressAllocationDelete,
 		Importer: &schema.ResourceImporter{
 			State: nsxtPolicyPathResourceImporter,
 		},
@@ -79,7 +79,7 @@ func resourceNsxtProjectIpAddressAllocation() *schema.Resource {
 	}
 }
 
-func resourceNsxtProjectIpAddressAllocationExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
+func resourceNsxtPolicyProjectIpAddressAllocationExists(sessionContext utl.SessionContext, id string, connector client.Connector) (bool, error) {
 	var err error
 	parents := getVpcParentsFromContext(sessionContext)
 	client := clientLayer.NewIpAddressAllocationsClient(connector)
@@ -95,10 +95,10 @@ func resourceNsxtProjectIpAddressAllocationExists(sessionContext utl.SessionCont
 	return false, logAPIError("Error retrieving resource", err)
 }
 
-func resourceNsxtProjectIpAddressAllocationCreate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtPolicyProjectIpAddressAllocationCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
-	id, err := getOrGenerateID2(d, m, resourceNsxtProjectIpAddressAllocationExists)
+	id, err := getOrGenerateID2(d, m, resourceNsxtPolicyProjectIpAddressAllocationExists)
 	if err != nil {
 		return err
 	}
@@ -129,10 +129,10 @@ func resourceNsxtProjectIpAddressAllocationCreate(d *schema.ResourceData, m inte
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
-	return resourceNsxtProjectIpAddressAllocationRead(d, m)
+	return resourceNsxtPolicyProjectIpAddressAllocationRead(d, m)
 }
 
-func resourceNsxtProjectIpAddressAllocationRead(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtPolicyProjectIpAddressAllocationRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
 	id := d.Id()
@@ -158,7 +158,7 @@ func resourceNsxtProjectIpAddressAllocationRead(d *schema.ResourceData, m interf
 	return metadata.StructToSchema(elem, d, projectIpAddressAllocationSchema, "", nil)
 }
 
-func resourceNsxtProjectIpAddressAllocationUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtPolicyProjectIpAddressAllocationUpdate(d *schema.ResourceData, m interface{}) error {
 
 	connector := getPolicyConnector(m)
 
@@ -188,10 +188,10 @@ func resourceNsxtProjectIpAddressAllocationUpdate(d *schema.ResourceData, m inte
 		return handleUpdateError("ProjectIpAddressAllocation", id, err)
 	}
 
-	return resourceNsxtProjectIpAddressAllocationRead(d, m)
+	return resourceNsxtPolicyProjectIpAddressAllocationRead(d, m)
 }
 
-func resourceNsxtProjectIpAddressAllocationDelete(d *schema.ResourceData, m interface{}) error {
+func resourceNsxtPolicyProjectIpAddressAllocationDelete(d *schema.ResourceData, m interface{}) error {
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining ProjectIpAddressAllocation ID")
