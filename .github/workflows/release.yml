@@ -28,6 +28,8 @@ jobs:
         with:
           version: v1.52
           args: --issues-exit-code=1 --timeout=30m
+          skip-pkg-cache: true
+          skip-build-cache: true
       -
         name: Import GPG key
         id: import_gpg
