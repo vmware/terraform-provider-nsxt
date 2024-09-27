@@ -339,6 +339,8 @@ func Provider() *schema.Provider {
 			"nsxt_policy_transit_gateway_nat":                        dataSourceNsxtPolicyTransitGatewayNat(),
 			"nsxt_policy_project_ip_address_allocation":              dataSourceNsxtProjectIpAddressAllocation(),
 			"nsxt_vpc_ip_address_allocation":                         dataSourceNsxtVpcIpAddressAllocation(),
+			"nsxt_policy_gateway_connection":                         dataSourceNsxtPolicyGatewayConnection(),
+			"nsxt_policy_distributed_vlan_connection":                dataSourceNsxtPolicyDistributedVlanConnection(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{

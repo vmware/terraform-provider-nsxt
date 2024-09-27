@@ -25,6 +25,7 @@ var accTestPolicyGatewayConnectionUpdateAttributes = map[string]string{
 
 func TestAccResourceNsxtPolicyGatewayConnection_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_gateway_connection.test"
+	testDataSourceName := "data.nsxt_policy_gateway_connection.test"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -49,6 +50,7 @@ func TestAccResourceNsxtPolicyGatewayConnection_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+					resource.TestCheckResourceAttrSet(testDataSourceName, "path"),
 				),
 			},
 			{
@@ -64,6 +66,7 @@ func TestAccResourceNsxtPolicyGatewayConnection_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+					resource.TestCheckResourceAttrSet(testDataSourceName, "path"),
 				),
 			},
 			{
@@ -75,6 +78,7 @@ func TestAccResourceNsxtPolicyGatewayConnection_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+					resource.TestCheckResourceAttrSet(testDataSourceName, "path"),
 				),
 			},
 		},
@@ -155,13 +159,7 @@ func testAccNsxtPolicyGatewayConnectionCheckDestroy(state *terraform.State, disp
 	return nil
 }
 
-func testAccNsxtPolicyGatewayConnectionTemplate(createFlow bool) string {
-	var attrMap map[string]string
-	if createFlow {
-		attrMap = accTestPolicyGatewayConnectionCreateAttributes
-	} else {
-		attrMap = accTestPolicyGatewayConnectionUpdateAttributes
-	}
+func testAccNsxtPolicyGatewayConnectionPrerequisites() string {
 	return fmt.Sprintf(`
 data "nsxt_policy_edge_cluster" "EC" {
   display_name = "%s"
@@ -170,8 +168,17 @@ data "nsxt_policy_edge_cluster" "EC" {
 resource "nsxt_policy_tier0_gateway" "test" {
   display_name      = "terraformt0gw"
   edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
+}`, getEdgeClusterName())
 }
 
+func testAccNsxtPolicyGatewayConnectionTemplate(createFlow bool) string {
+	var attrMap map[string]string
+	if createFlow {
+		attrMap = accTestPolicyGatewayConnectionCreateAttributes
+	} else {
+		attrMap = accTestPolicyGatewayConnectionUpdateAttributes
+	}
+	return testAccNsxtPolicyGatewayConnectionPrerequisites() + fmt.Sprintf(`
 resource "nsxt_policy_gateway_connection" "test" {
   display_name = "%s"
   description  = "%s"
@@ -182,13 +189,24 @@ resource "nsxt_policy_gateway_connection" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, getEdgeClusterName(), attrMap["display_name"], attrMap["description"], attrMap["aggregate_routes"])
+}
+
+data "nsxt_policy_gateway_connection" "test" {
+  tier0_path = nsxt_policy_tier0_gateway.test.path
+  display_name = "%s"
+  depends_on = [nsxt_policy_gateway_connection.test]
+}`, attrMap["display_name"], attrMap["description"], attrMap["aggregate_routes"], attrMap["display_name"])
 }
 
 func testAccNsxtPolicyGatewayConnectionMinimalistic() string {
-	return fmt.Sprintf(`
+	return testAccNsxtPolicyGatewayConnectionPrerequisites() + fmt.Sprintf(`
 resource "nsxt_policy_gateway_connection" "test" {
+  tier0_path   = nsxt_policy_tier0_gateway.test.path
   display_name = "%s"
+}
 
-}`, accTestPolicyGatewayConnectionUpdateAttributes["display_name"])
+data "nsxt_policy_gateway_connection" "test" {
+  display_name = "%s"
+  depends_on = [nsxt_policy_gateway_connection.test]
+}`, accTestPolicyGatewayConnectionUpdateAttributes["display_name"], accTestPolicyGatewayConnectionUpdateAttributes["display_name"])
 }
