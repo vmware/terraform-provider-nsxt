@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net/url"
 	"regexp"
 	"strings"
 	"time"
@@ -389,6 +390,23 @@ func getParameterFromPolicyPath(startDelimiter, endDelimiter, policyPath string)
 	return policyPath[startIndex+len(startDelimiter) : endIndex], nil
 }
 
+func validateImportPolicyPath(policyPath string) error {
+	if isSpaceString(policyPath) {
+		return ErrEmptyImportID
+	}
+	_, err := url.ParseRequestURI(policyPath)
+	if err != nil {
+		return ErrNotAPolicyPath
+	}
+	if strings.Contains(policyPath, "//") {
+		return ErrNotAPolicyPath
+	}
+	if !isPolicyPath(policyPath) {
+		return ErrNotAPolicyPath
+	}
+	return nil
+}
+
 func nsxtPolicyPathResourceImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	rd, err := nsxtPolicyPathResourceImporterHelper(d, m)
 	if errors.Is(err, ErrNotAPolicyPath) {
@@ -413,47 +431,45 @@ func nsxtVPCPathResourceImporter(d *schema.ResourceData, m interface{}) ([]*sche
 
 func nsxtPolicyPathResourceImporterHelper(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	importID := d.Id()
-	if isSpaceString(importID) {
-		return []*schema.ResourceData{d}, ErrEmptyImportID
+	err := validateImportPolicyPath(importID)
+	if err != nil {
+		return []*schema.ResourceData{}, err
 	}
-	if isPolicyPath(importID) {
-		pathSegs := strings.Split(importID, "/")
-		if strings.Contains(pathSegs[1], "infra") {
-			d.SetId(pathSegs[len(pathSegs)-1])
-		} else if pathSegs[1] == "orgs" && pathSegs[3] == "projects" {
-			if len(pathSegs) < 5 {
-				return nil, fmt.Errorf("invalid policy multitenancy path %s", importID)
-			}
-			// pathSegs[2] should contain the organization. Once we support multiple organization, it should be
-			// assigned into the context as well
-			ctxMap := make(map[string]interface{})
-			ctxMap["project_id"] = pathSegs[4]
-			if pathSegs[5] == "vpcs" {
-				ctxMap["vpc_id"] = pathSegs[6]
-			}
-			d.Set("context", []interface{}{ctxMap})
-			d.SetId(pathSegs[len(pathSegs)-1])
+
+	pathSegs := strings.Split(importID, "/")
+	if strings.Contains(pathSegs[1], "infra") {
+		d.SetId(pathSegs[len(pathSegs)-1])
+	} else if pathSegs[1] == "orgs" && pathSegs[3] == "projects" {
+		if len(pathSegs) < 5 {
+			return nil, fmt.Errorf("invalid policy multitenancy path %s", importID)
 		}
-		return []*schema.ResourceData{d}, nil
+		// pathSegs[2] should contain the organization. Once we support multiple organization, it should be
+		// assigned into the context as well
+		ctxMap := make(map[string]interface{})
+		ctxMap["project_id"] = pathSegs[4]
+		if pathSegs[5] == "vpcs" {
+			ctxMap["vpc_id"] = pathSegs[6]
+		}
+		d.Set("context", []interface{}{ctxMap})
+		d.SetId(pathSegs[len(pathSegs)-1])
 	}
-	return []*schema.ResourceData{d}, ErrNotAPolicyPath
+	return []*schema.ResourceData{d}, nil
 }
 
 func nsxtParentPathResourceImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	importID := d.Id()
-	if isSpaceString(importID) {
-		return []*schema.ResourceData{d}, ErrEmptyImportID
+	err := validateImportPolicyPath(importID)
+	if err != nil {
+		return []*schema.ResourceData{}, err
 	}
-	if isPolicyPath(importID) {
-		pathSegs := strings.Split(importID, "/")
-		segCount := len(pathSegs)
-		d.SetId(pathSegs[segCount-1])
-		// to get parent path size, remove last two tokens (id and separator) plus two slashes
-		truncateSize := len(pathSegs[segCount-1]) + len(pathSegs[segCount-2]) + 2
-		d.Set("parent_path", importID[:len(importID)-truncateSize])
-		return []*schema.ResourceData{d}, nil
-	}
-	return []*schema.ResourceData{d}, ErrNotAPolicyPath
+
+	pathSegs := strings.Split(importID, "/")
+	segCount := len(pathSegs)
+	d.SetId(pathSegs[segCount-1])
+	// to get parent path size, remove last two tokens (id and separator) plus two slashes
+	truncateSize := len(pathSegs[segCount-1]) + len(pathSegs[segCount-2]) + 2
+	d.Set("parent_path", importID[:len(importID)-truncateSize])
+	return []*schema.ResourceData{d}, nil
 }
 
 func isPolicyPath(policyPath string) bool {
