@@ -50,7 +50,7 @@ The following arguments are supported:
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
-* `connection_path` - (Optional) Policy path of the desidered transit gateway external connection.
+* `connection_path` - (Required) Policy path of the desired transit gateway external connection.
 
 ## Attributes Reference
 
