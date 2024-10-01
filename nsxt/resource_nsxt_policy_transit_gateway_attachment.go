@@ -30,7 +30,7 @@ var transitGatewayAttachmentSchema = map[string]*metadata.ExtendedSchema{
 		Schema: schema.Schema{
 			Type:         schema.TypeString,
 			ValidateFunc: validatePolicyPath(),
-			Optional:     true,
+			Required:     true,
 		},
 		Metadata: metadata.Metadata{
 			SchemaType:   "string",
