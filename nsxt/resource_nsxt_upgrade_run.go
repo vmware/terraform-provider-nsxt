@@ -90,6 +90,9 @@ func getTargetVersion(m interface{}) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	if obj.TargetVersion == nil {
+		return "", fmt.Errorf("failed to fetch upgrade target version. Upgrade process should be restarted with a clean state")
+	}
 	return *obj.TargetVersion, nil
 }
 
