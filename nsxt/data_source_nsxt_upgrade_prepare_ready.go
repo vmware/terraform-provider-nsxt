@@ -4,7 +4,9 @@
 package nsxt
 
 import (
+	"errors"
 	"fmt"
+
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -84,7 +86,7 @@ func dataSourceNsxtUpgradePrepareReadyRead(d *schema.ResourceData, m interface{}
 		errMessage += fmt.Sprintf("\nThere are unacknowledged warnings in prechecks:\n%s\nPlease address these errors from NSX or using nsxt_upgrade_precheck_acknowledge resource", preCheckText)
 	}
 	if len(errMessage) > 0 {
-		return fmt.Errorf(errMessage)
+		return errors.New(errMessage)
 	}
 	objID := util.GetVerifiableID(newUUID(), "nsxt_upgrade_prepare_ready")
 	d.SetId(objID)
