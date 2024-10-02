@@ -5,6 +5,7 @@ package nsxt
 
 import (
 	"fmt"
+
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
