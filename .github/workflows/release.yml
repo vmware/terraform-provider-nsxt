@@ -35,8 +35,8 @@ jobs:
         id: import_gpg
         uses: crazy-max/ghaction-import-gpg@v6
         with:
-          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
-          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY2 }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE2 }}
       -
         name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v5
