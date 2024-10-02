@@ -466,8 +466,7 @@ func getStandardHostSwitchSchema(nodeType string) *schema.Schema {
 			"host_switch_mode": {
 				Type:         schema.TypeString,
 				Description:  "Operational mode of a HostSwitch",
-				Default:      model.StandardHostSwitch_HOST_SWITCH_MODE_STANDARD,
-				Optional:     true,
+				Computed:     true,
 				ValidateFunc: validation.StringInSlice(hostSwitchModeValues, false),
 			},
 			"is_migrate_pnics": {

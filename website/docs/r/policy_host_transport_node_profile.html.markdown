@@ -43,7 +43,7 @@ The following arguments are supported:
 * `standard_host_switch` - (Required) Standard host switch specification.
     * `host_switch_id` - (Optional) The host switch id. This ID will be used to reference a host switch.
     * `host_switch_name` - (Optional) Host switch name. This name will be used to reference a host switch.
-    * `host_switch_mode` - (Optional) Operational mode of a HostSwitch. Accepted values - 'STANDARD', 'ENS', 'ENS_INTERRUPT' or 'LEGACY'. The default value is 'STANDARD'.
+    * `host_switch_mode` - (Optional) Operational mode of a HostSwitch. Accepted values - 'STANDARD', 'ENS', 'ENS_INTERRUPT' or 'LEGACY'.
     * `host_switch_profile` - (Optional) Policy paths of host switch profiles to be associated with this host switch.
     * `ip_assignment` - (Required) - Specification for IPs to be used with host switch virtual tunnel endpoints. Should contain exactly one of the below:
         * `assigned_by_dhcp` - (Optional) Enables DHCP assignment.
