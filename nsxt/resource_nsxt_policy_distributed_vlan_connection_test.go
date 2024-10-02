@@ -27,6 +27,7 @@ var accTestPolicyDistributedVlanConnectionUpdateAttributes = map[string]string{
 
 func TestAccResourceNsxtPolicyDistributedVlanConnection_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_distributed_vlan_connection.test"
+	testDataSourceName := "data.nsxt_policy_distributed_vlan_connection.test"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -51,6 +52,7 @@ func TestAccResourceNsxtPolicyDistributedVlanConnection_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+					resource.TestCheckResourceAttrSet(testDataSourceName, "path"),
 				),
 			},
 			{
@@ -66,6 +68,7 @@ func TestAccResourceNsxtPolicyDistributedVlanConnection_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+					resource.TestCheckResourceAttrSet(testDataSourceName, "path"),
 				),
 			},
 			{
@@ -77,6 +80,7 @@ func TestAccResourceNsxtPolicyDistributedVlanConnection_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+					resource.TestCheckResourceAttrSet(testDataSourceName, "path"),
 				),
 			},
 		},
@@ -176,12 +180,24 @@ resource "nsxt_policy_distributed_vlan_connection" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, attrMap["display_name"], attrMap["description"], attrMap["vlan_id"], attrMap["gateway_addresses"])
+}
+
+data "nsxt_policy_distributed_vlan_connection" "test" {
+  display_name = "%s"
+
+  depends_on = [nsxt_policy_distributed_vlan_connection.test]
+}`, attrMap["display_name"], attrMap["description"], attrMap["vlan_id"], attrMap["gateway_addresses"], attrMap["display_name"])
 }
 
 func testAccNsxtPolicyDistributedVlanConnectionMinimalistic() string {
 	return fmt.Sprintf(`
 resource "nsxt_policy_distributed_vlan_connection" "test" {
   display_name = "%s"
-}`, accTestPolicyDistributedVlanConnectionUpdateAttributes["display_name"])
+}
+
+data "nsxt_policy_distributed_vlan_connection" "test" {
+  display_name = "%s"
+
+  depends_on = [nsxt_policy_distributed_vlan_connection.test]
+}`, accTestPolicyDistributedVlanConnectionUpdateAttributes["display_name"], accTestPolicyDistributedVlanConnectionUpdateAttributes["display_name"])
 }

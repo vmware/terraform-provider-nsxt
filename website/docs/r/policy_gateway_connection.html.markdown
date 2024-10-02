@@ -23,7 +23,6 @@ resource "nsxt_policy_gateway_connection" "test" {
   description      = "Terraform provisioned GatewayConnection"
   tier0_path       = data.nsxt_policy_tier0_gateway.test.path
   aggregate_routes = ["192.168.240.0/24"]
-
 }
 ```
 
@@ -33,12 +32,12 @@ The following arguments are supported:
 
 * `display_name` - (Required) Display name of the resource.
 * `description` - (Optional) Description of the resource.
+* `tier0_path` - (Required) Tier-0 gateway object path
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `advertise_outbound_route_filters` - (Optional) List of prefixlist object paths that will have Transit gateway to tier-0 gateway advertise route filter.
 * `aggregate_routes` - (Optional) Configure aggregate TGW_PREFIXES routes on Tier-0 gateway for prefixes owned by TGW gateway.
 If not specified then in-use prefixes are configured as TGW_PREFIXES routes on Tier-0 gateway.
-* `tier0_path` - (Optional) Tier-0 gateway object path
 
 
 
