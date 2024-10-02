@@ -30,8 +30,8 @@ The following arguments are supported:
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
-* `vlan_id` - (Optional) Vlan id for external gateway traffic.
-* `gateway_addresses` - (Optional) List of gateway addresses in CIDR format.
+* `vlan_id` - (Required) Vlan id for external gateway traffic.
+* `gateway_addresses` - (Required) List of gateway addresses in CIDR format.
 
 
 ## Attributes Reference
