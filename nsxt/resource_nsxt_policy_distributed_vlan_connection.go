@@ -26,7 +26,7 @@ var distributedVlanConnectionSchema = map[string]*metadata.ExtendedSchema{
 	"vlan_id": {
 		Schema: schema.Schema{
 			Type:     schema.TypeInt,
-			Optional: true,
+			Required: true,
 		},
 		Metadata: metadata.Metadata{
 			SchemaType:   "int",
@@ -45,7 +45,7 @@ var distributedVlanConnectionSchema = map[string]*metadata.ExtendedSchema{
 					SchemaType: "string",
 				},
 			},
-			Optional: true,
+			Required: true,
 		},
 		Metadata: metadata.Metadata{
 			SchemaType:   "list",
