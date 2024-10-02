@@ -5,7 +5,7 @@ page_title: "NSXT: nsxt_policy_transit_gateway_nat_rule"
 description: A resource to configure a NAT rule under Transit Gateway.
 ---
 
-# nsxt_policy_policy_transit_gateway_nat_rule
+# nsxt_policy_transit_gateway_nat_rule
 
 This resource provides a method for the management of NAT Rule under Transit Gateway.
 
