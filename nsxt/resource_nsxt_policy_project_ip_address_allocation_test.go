@@ -172,7 +172,12 @@ resource "nsxt_policy_project_ip_address_allocation" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, os.Getenv("NSXT_VPC_PROJECT_ID"), testAccNsxtProjectContext(), attrMap["display_name"], attrMap["description"], attrMap["allocation_size"])
+}
+
+data "nsxt_policy_project_ip_address_allocation" "test" {
+  %s
+  ip_allocations = nsxt_policy_project_ip_address_allocation.ip_allocations
+}`, os.Getenv("NSXT_VPC_PROJECT_ID"), testAccNsxtProjectContext(), attrMap["display_name"], attrMap["description"], attrMap["allocation_size"], testAccNsxtProjectContext())
 }
 
 func testAccNsxtPolicyProjectIpAddressAllocationMinimalistic() string {
@@ -186,5 +191,10 @@ resource "nsxt_policy_project_ip_address_allocation" "test" {
   display_name    = "%s"
   allocation_size = %s
   ip_block        = data.nsxt_policy_project.test.external_ipv4_blocks[0]
-}`, os.Getenv("NSXT_VPC_PROJECT_ID"), testAccNsxtProjectContext(), accTestProjectIpAddressAllocationUpdateAttributes["display_name"], accTestProjectIpAddressAllocationUpdateAttributes["allocation_size"])
+}
+
+data "nsxt_policy_project_ip_address_allocation" "test" {
+  %s
+  ip_allocations = nsxt_policy_project_ip_address_allocation.ip_allocations
+}`, os.Getenv("NSXT_VPC_PROJECT_ID"), testAccNsxtProjectContext(), accTestProjectIpAddressAllocationUpdateAttributes["display_name"], accTestProjectIpAddressAllocationUpdateAttributes["allocation_size"], testAccNsxtProjectContext())
 }
