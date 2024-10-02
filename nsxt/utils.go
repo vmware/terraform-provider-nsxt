@@ -623,6 +623,14 @@ func dataSourceNotSupportedError() error {
 	return fmt.Errorf("This data source is not supported with given provider settings")
 }
 
+func mpResourceRemovedError(resourceName string) error {
+	return fmt.Errorf("MP resource %s was deprecated and has been removed in NSX 9.0.0", resourceName)
+}
+
+func mpDataSourceRemovedError(dataSourceName string) error {
+	return fmt.Errorf("MP data source %s was deprecated and has been removed in NSX 9.0.0", dataSourceName)
+}
+
 func stringInList(target string, list []string) bool {
 	// util to check if target string is in list
 	for _, value := range list {
