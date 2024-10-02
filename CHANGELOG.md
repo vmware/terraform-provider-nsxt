@@ -1,8 +1,41 @@
+## 3.7.0 (October 9, 2024)
+
+UPGRADE SUPPORT:
+
+The following objects are promoted from Beta with this release:
+* `data/nsxt_upgrade_postcheck`
+* `data/nsxt_upgrade_prepare_ready`
+* `data/nsxt_edge_upgrade_group`
+* `data/nsxt_host_upgrade_group`
+
+* `resource/nsxt_upgrade_prepare`
+* `resource/nsxt_upgrade_run`
+* `resource/nsxt_upgrade_precheck_acknowledge`
+
+EXPERIMENTAL FEATURES:
+* `resource/nsxt_policy_share`
+* `resource/nsxt_policy_shared_resource`
+
+BUG FIXES:
+* `resource/nsxt_policy_security_policy_rule`: Allow configuration of `nsx_id` ([#1356](https://github.com/vmware/terraform-provider-nsxt/pull/1356))
+* `resource/nsxt_policy_security_policy_rule`: Fix non-empty diff around empty lists ([#1225](https://github.com/vmware/terraform-provider-nsxt/pull/1225))
+* `resource/nsxt_policy_tier1_gateway`: Fix assignment of `tier1_path`, which caused subsequent failures with NAT configuration ([#1287](https://github.com/vmware/terraform-provider-nsxt/pull/1287))
+* Fix crash caused by invalid `context` configuration ([#1224](https://github.com/vmware/terraform-provider-nsxt/pull/1224))
+* `resource/nsxt_policy_ip_block`: Fix non-empty diff caused by `visibilty` attribute in early NSX versions ([#1228](https://github.com/vmware/terraform-provider-nsxt/pull/1228))
+* Fix authentication in session token retrieval. This fixes an issue that was causing denial of service in certain cases ([#1216](https://github.com/vmware/terraform-provider-nsxt/pull/1216))
+* `resource/nsxt_policy_gateway_route_map`: Fix bug around assignment of `out_filter` ([#1211](https://github.com/vmware/terraform-provider-nsxt/pull/1211))
+
+IMPROVEMENTS:
+* `data/nsxt_policy_uplink_host_switch_profile` : Add `realized_id` attribute ([#1294](https://github.com/vmware/terraform-provider-nsxt/pull/1294))
+* Improve validation of `context` attributes across resources that support multitenancy([#1281](https://github.com/vmware/terraform-provider-nsxt/pull/1281))
+* Improve validation of `display_name` and `description` attributes across all resources ([#1270](https://github.com/vmware/terraform-provider-nsxt/pull/1270))
+* Introduce `ignore_tags` feature for segments. With this option, terraform can ignore certain tags auto-assigned by the platform, and not overwrite those ([#1212](https://github.com/vmware/terraform-provider-nsxt/pull/1212))
+
 ## 3.6.2 (July 23, 2024)
 
 FABRIC SUPPORT:
-The following objects are promoted from Beta with this release:
 
+The following objects are promoted from Beta with this release:
 * `data/nsxt_compute_collection`
 * `data/nsxt_compute_manager`
 * `data/nsxt_discovered_node`
@@ -31,7 +64,6 @@ The following objects are promoted from Beta with this release:
 
 USER MANAGEMENT SUPPORT:
 The following objects are promoted from Beta with this release:
-
 * `resource/nsxt_node_user`
 * `resource/nsxt_policy_ldap_identity_source`
 * `resource/nsxt_policy_user_management_role`
@@ -66,7 +98,6 @@ IMPROVEMENTS:
 
 BUG FIXES ON EXPERIMENTAL FEATURES:
 * `resource/nsxt_edge_transport_node`: fix crash when syslog port is specified ([#1190](https://github.com/vmware/terraform-provider-nsxt/pull/1190))
-=======
 
 ## 3.6.0 (April 16, 2024)
 
