@@ -467,6 +467,7 @@ func getStandardHostSwitchSchema(nodeType string) *schema.Schema {
 				Type:         schema.TypeString,
 				Description:  "Operational mode of a HostSwitch",
 				Computed:     true,
+				Optional:     true,
 				ValidateFunc: validation.StringInSlice(hostSwitchModeValues, false),
 			},
 			"is_migrate_pnics": {
