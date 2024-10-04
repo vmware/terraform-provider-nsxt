@@ -4,6 +4,7 @@
 package nsxt
 
 import (
+	liberrors "errors"
 	"fmt"
 	"log"
 
@@ -104,7 +105,7 @@ func logVapiErrorData(message string, vapiMessages []std.LocalizableMessage, vap
 		}
 	}
 	log.Printf("[ERROR]: %s", details)
-	return fmt.Errorf(details)
+	return liberrors.New(details)
 }
 
 func logAPIError(message string, err error) error {

@@ -452,6 +452,7 @@ func prepareUpgrade(upgradeClientSet *upgradeClientSet, d *schema.ResourceData, 
 			continue
 		}
 
+		//#nosec G601 Ignore implicit memory aliasing in for loop temporarily
 		status, err := getUpgradeStatus(upgradeClientSet.StatusClient, &component)
 		if err != nil {
 			return err
@@ -466,6 +467,7 @@ func prepareUpgrade(upgradeClientSet *upgradeClientSet, d *schema.ResourceData, 
 		if status.Status == model.ComponentUpgradeStatus_STATUS_IN_PROGRESS {
 			upgradeClientSet.PlanClient.Pause()
 		}
+		//#nosec G601 Ignore implicit memory aliasing in for loop temporarily
 		err = waitUpgradeForStatus(upgradeClientSet, &component, inFlightComponentUpgradeStatus, staticComponentUpgradeStatus)
 		if err != nil {
 			return err
@@ -473,6 +475,7 @@ func prepareUpgrade(upgradeClientSet *upgradeClientSet, d *schema.ResourceData, 
 
 		// Cache the group list before reset as group IDs change by reset operation. References for some types of groups
 		// could be affected here
+		//#nosec G601 Ignore implicit memory aliasing in for loop temporarily
 		preResetGroupList, err := upgradeClientSet.GroupClient.List(&component, nil, nil, nil, nil, nil, nil, nil)
 		if err != nil {
 			return err
@@ -820,6 +823,7 @@ func runUpgrade(upgradeClientSet *upgradeClientSet, partialUpgradeMap map[string
 			prevComponent = component
 			completeLog = fmt.Sprintf("[INFO] %s upgrade is partially completed.", component)
 		}
+		//#nosec G601 Ignore implicit memory aliasing in for loop temporarily
 		err = upgradeClientSet.PlanClient.Upgrade(&component)
 		if err != nil {
 			return err
