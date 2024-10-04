@@ -407,6 +407,7 @@ func validateImportPolicyPath(policyPath string) error {
 	return nil
 }
 
+// This importer function accepts policy path and resource ID
 func nsxtPolicyPathResourceImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	rd, err := nsxtPolicyPathResourceImporterHelper(d, m)
 	if errors.Is(err, ErrNotAPolicyPath) {
@@ -415,6 +416,11 @@ func nsxtPolicyPathResourceImporter(d *schema.ResourceData, m interface{}) ([]*s
 		return rd, err
 	}
 	return rd, nil
+}
+
+// This importer function accepts policy path only as import ID
+func nsxtPolicyPathOnlyResourceImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	return nsxtPolicyPathResourceImporterHelper(d, m)
 }
 
 func nsxtVPCPathResourceImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {

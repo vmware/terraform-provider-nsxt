@@ -258,7 +258,7 @@ func resourceNsxtVpcServiceProfile() *schema.Resource {
 		Update: resourceNsxtVpcServiceProfileUpdate,
 		Delete: resourceNsxtVpcServiceProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathResourceImporter,
+			State: nsxtPolicyPathOnlyResourceImporter,
 		},
 		Schema: metadata.GetSchemaFromExtendedSchema(vpcServiceProfileSchema),
 	}
