@@ -166,16 +166,15 @@ resource "nsxt_policy_project" "test" {
   tgw_external_connections = [nsxt_policy_gateway_connection.test.path]
 }
 
-resource "nsxt_policy_transit_gateway" "test" {
+data "nsxt_policy_transit_gateway" "test" {
   context {
     project_id = nsxt_policy_project.test.id
   }
-  display_name      = "%s"
-  transit_subnets = ["192.168.7.0/24"]
+  id = "default"
 }
 
 resource "nsxt_policy_transit_gateway_attachment" "test" {
-  parent_path  = nsxt_policy_transit_gateway.test.path
+  parent_path  = data.nsxt_policy_transit_gateway.test.path
   connection_path = nsxt_policy_gateway_connection.test.path
   display_name = "%s"
   description  = "%s"
@@ -184,5 +183,5 @@ resource "nsxt_policy_transit_gateway_attachment" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, getEdgeClusterName(), dependantEntityName, dependantEntityName, dependantEntityName, dependantEntityName, attrMap["display_name"], attrMap["description"])
+}`, getEdgeClusterName(), dependantEntityName, dependantEntityName, dependantEntityName, attrMap["display_name"], attrMap["description"])
 }
