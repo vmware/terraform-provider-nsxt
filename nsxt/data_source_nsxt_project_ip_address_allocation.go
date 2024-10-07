@@ -21,7 +21,7 @@ func dataSourceNsxtProjectIpAddressAllocation() *schema.Resource {
 			"display_name": getDataSourceExtendedDisplayNameSchema(),
 			"description":  getDataSourceDescriptionSchema(),
 			"path":         getPathSchema(),
-			"context":      getContextSchema(true, false, true),
+			"context":      getContextSchema(true, false, false),
 		},
 	}
 }
