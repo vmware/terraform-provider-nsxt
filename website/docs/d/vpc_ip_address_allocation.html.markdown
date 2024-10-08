@@ -30,7 +30,7 @@ data "nsxt_vpc_ip_address_allocation" "test" {
     project_id = data.nsxt_policy_project.demoproj.id
     vpc_id     = data.nsxt_vpc.demovpc.id
   }
-  ip_allocations = "10.203.5.19"
+  allocation_ips = "10.203.5.19"
 }
 ```
 
@@ -41,7 +41,7 @@ data "nsxt_vpc_ip_address_allocation" "test" {
 * `context` - (Required) The context which the object belongs to
     * `project_id` - (Required) The ID of the project which the object belongs to
     * `vpc_id` - (Required) The ID of the VPC which the object belongs to
-* `ip_allocations` - (Optional) IP or CIDR that was allocated
+* `allocation_ips` - (Optional) IP or CIDR that was allocated
 
 ## Attributes Reference
 
