@@ -512,7 +512,11 @@ func getPartialUpgradeMap(d *schema.ResourceData, targetVersion string) map[stri
 		for _, groupI := range d.Get(componentToGroupKey[component]).([]interface{}) {
 			group := groupI.(map[string]interface{})
 			enabled := group["enabled"].(bool)
-			upgradeMode := group["upgrade_mode"].(string)
+			upgradeMode := ""
+			um, ok := group["upgrade_mode"]
+			if ok {
+				upgradeMode = um.(string)
+			}
 			pauseAfterEach := group["pause_after_each_upgrade_unit"].(bool)
 			if !enabled || pauseAfterEach || upgradeMode == "stage_in_vlcm" {
 				isPartialUpgradeMap[component] = true
