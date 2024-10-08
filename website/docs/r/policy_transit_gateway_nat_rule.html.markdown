@@ -52,7 +52,7 @@ The following arguments are supported:
 * `translated_network` - (Optional) Translated network address.
 * `logging` - (Optional) Boolean flag to indicate whether logging is enabled. The default is `false`.
 * `destination_network` - (Optional) For `DNAT` rules, this is a required field, and represents the destination network for the incoming packets. For other type of rules, it may contain destination network of outgoing packets.
-* `action` - (Optional) NAT action, one of `SNAT` (translates a source IP address into an outbound packet so that
+* `action` - (Required) NAT action, one of `SNAT` (translates a source IP address into an outbound packet so that
 the packet appears to originate from a different network), `DNAT` (translates the destination IP address of inbound packets so that packets are delivered to a target address into another network), and `REFLEXIVE` (one-to-one mapping of source and destination IP addresses).
 * `firewall_match` - (Optional) Indicates how the firewall matches the address after NATing if firewall
 stage is not skipped, one of `MATCH_EXTERNAL_ADDRESS`, `MATCH_INTERNAL_ADDRESS` or `BYPASS`. Default is `MATCH_INTERNAL_ADDRESS`.
