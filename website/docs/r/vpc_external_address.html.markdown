@@ -22,9 +22,17 @@ resource "nsxt_vpc_ip_address_allocation" "test" {
   allocation_size = 1
 }
 
+data "nsxt_policy_vm" "vm1" {
+  context {
+    project_id = "Dev_project"
+    vpc_id     = "dev_vpc"
+  }
+  display_name = "myvm-1"
+}
+
 data "nsxt_vpc_subnet_port" "test" {
   subnet_path = nsxt_vpc_subnet.test.path
-  vm_id       = data.vsphere_virtual_machine.vm1.id
+  vm_id       = data.nsxt_policy_vm.vm1.instance_id
 }
 
 resource "nsxt_vpc_external_address" "test" {
