@@ -32,7 +32,7 @@ The following arguments are supported:
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `allocation_size` - (Optional) The system will allocate IP addresses from unused IP addresses based on allocation size. Currently only size `1` is supported.
-* `allocation_ips` - (Optional) If specified, IPs have to be within range of respectiveIP blocks.
+* `allocation_ips` - (Optional) If specified, IPs have to be within range of respective IP blocks.
 * `ip_block` - (Optional) Policy path for IP Block for the allocation.
 
 
