@@ -674,6 +674,9 @@ func resourceNsxtVpcSubnetUpdate(d *schema.ResourceData, m interface{}) error {
 	client := clientLayer.NewSubnetsClient(connector)
 	_, err := client.Update(parents[0], parents[1], parents[2], id, obj)
 	if err != nil {
+		// Trigger partial update to avoid terraform updating state based on failed intent
+		// TODO - move this into handleUpdateError
+		d.Partial(true)
 		return handleUpdateError("VpcSubnet", id, err)
 	}
 
