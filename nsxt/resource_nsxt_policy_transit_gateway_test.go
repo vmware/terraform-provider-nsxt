@@ -28,7 +28,11 @@ func TestAccResourceNsxtPolicyTransitGateway_basic(t *testing.T) {
 	testDataSourceName := "nsxt_policy_transit_gateway.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyVPC(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyVPC(t)
+			testAccNSXVersion(t, "9.1.0")
+		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTransitGatewayCheckDestroy(state, accTestTransitGatewayUpdateAttributes["display_name"])
@@ -88,7 +92,11 @@ func TestAccResourceNsxtPolicyTransitGateway_importBasic(t *testing.T) {
 	testResourceName := "nsxt_policy_transit_gateway.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t); testAccOnlyVPC(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testAccOnlyVPC(t)
+			testAccNSXVersion(t, "9.1.0")
+		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTransitGatewayCheckDestroy(state, name)
