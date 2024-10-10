@@ -75,7 +75,7 @@ var policyVpcNatRuleSchema = map[string]*metadata.ExtendedSchema{
 		Schema: schema.Schema{
 			Type:         schema.TypeString,
 			ValidateFunc: validation.StringInSlice(policyVpcNatRuleActionValues, false),
-			Optional:     true,
+			Required:     true,
 		},
 		Metadata: metadata.Metadata{
 			SchemaType:   "string",
