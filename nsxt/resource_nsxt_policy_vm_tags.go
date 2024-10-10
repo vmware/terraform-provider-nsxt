@@ -78,7 +78,13 @@ func listAllPolicyVirtualMachines(context utl.SessionContext, connector client.C
 		// parameters, respects cursor input. Therefore we determine end of VM list by
 		// looking for empty result.
 		sortBy := "external_id"
-		vms, err := client.List(cursor, nil, &boolFalse, nil, nil, &boolFalse, &sortBy)
+		var efPtr *string
+		if getPolicyEnforcementPoint(m) != "default" {
+			// To minimize changes, avoid passing enforcement point unless its specified in provider
+			enforcementPointPath := getPolicyEnforcementPointPath(m)
+			efPtr = &enforcementPointPath
+		}
+		vms, err := client.List(cursor, efPtr, &boolFalse, nil, nil, &boolFalse, &sortBy)
 		if err != nil {
 			return results, err
 		}
