@@ -415,7 +415,8 @@ func upgradeRunCreateOrUpdate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	log.Printf("[INFO] Updating UpgradeUnitGroup and UpgradePlanSetting.")
-	err = prepareUpgrade(upgradeClientSet, d, targetVersion)
+	var hasVLCM bool
+	err = prepareUpgrade(upgradeClientSet, d, targetVersion, &hasVLCM)
 	if err != nil {
 		return handleCreateError("NsxtUpgradeRun", id, err)
 	}
@@ -430,7 +431,7 @@ func upgradeRunCreateOrUpdate(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 
-	err = runUpgrade(upgradeClientSet, getPartialUpgradeMap(d, targetVersion), targetVersion, finalizeUpgrade)
+	err = runUpgrade(upgradeClientSet, getPartialUpgradeMap(d, targetVersion), targetVersion, hasVLCM, finalizeUpgrade)
 	if err != nil {
 		return handleCreateError("NsxtUpgradeRun", id, err)
 	}
@@ -441,7 +442,7 @@ func upgradeRunCreateOrUpdate(d *schema.ResourceData, m interface{}) error {
 	return resourceNsxtUpgradeRunRead(d, m)
 }
 
-func prepareUpgrade(upgradeClientSet *upgradeClientSet, d *schema.ResourceData, targetVersion string) error {
+func prepareUpgrade(upgradeClientSet *upgradeClientSet, d *schema.ResourceData, targetVersion string, hasVLCM *bool) error {
 	for _, component := range getUpgradeComponentList(targetVersion) {
 		// Customize MP upgrade is not allowed
 		if component == mpUpgradeGroup || component == finalizeUpgradeGroup {
@@ -487,7 +488,7 @@ func prepareUpgrade(upgradeClientSet *upgradeClientSet, d *schema.ResourceData, 
 			return err
 		}
 
-		err = updateUpgradeUnitGroups(upgradeClientSet, d, component, preResetGroupList)
+		err = updateUpgradeUnitGroups(upgradeClientSet, d, component, preResetGroupList, hasVLCM)
 		if err != nil {
 			return err
 		}
@@ -591,8 +592,9 @@ func waitUpgradeForStatus(upgradeClientSet *upgradeClientSet, component *string,
 	return nil
 }
 
-func updateUpgradeUnitGroups(upgradeClientSet *upgradeClientSet, d *schema.ResourceData, component string, preResetGroupList model.UpgradeUnitGroupListResult) error {
+func updateUpgradeUnitGroups(upgradeClientSet *upgradeClientSet, d *schema.ResourceData, component string, preResetGroupList model.UpgradeUnitGroupListResult, hasVLCM *bool) error {
 	isBefore := false
+	*hasVLCM = false
 	getReorderAfterReq := func(id string) model.ReorderRequest {
 		return model.ReorderRequest{
 			Id:       &id,
@@ -686,6 +688,9 @@ func updateUpgradeUnitGroups(upgradeClientSet *upgradeClientSet, d *schema.Resou
 			}
 
 			if upgradeMode != "" {
+				if upgradeMode == "stage_in_vlcm" {
+					*hasVLCM = true
+				}
 				upgradeModeKey := "upgrade_mode"
 				extendConfig = util.KeyValuePairsReplaceOrAppend(extendConfig, upgradeModeKey, upgradeMode)
 			}
@@ -778,7 +783,7 @@ func updateComponentUpgradePlanSetting(settingClient plan.SettingsClient, d *sch
 	return err
 }
 
-func runUpgrade(upgradeClientSet *upgradeClientSet, partialUpgradeMap map[string]bool, targetVersion string, finalizeUpgrade bool) error {
+func runUpgrade(upgradeClientSet *upgradeClientSet, partialUpgradeMap map[string]bool, targetVersion string, hasVLCM, finalizeUpgrade bool) error {
 	partialUpgradeExist := false
 	prevComponent := ""
 	for _, c := range getUpgradeComponentList(targetVersion) {
@@ -828,6 +833,12 @@ func runUpgrade(upgradeClientSet *upgradeClientSet, partialUpgradeMap map[string
 			completeLog = fmt.Sprintf("[INFO] %s upgrade is partially completed.", component)
 		}
 		//#nosec G601 Ignore implicit memory aliasing in for loop temporarily
+		if hasVLCM && component == hostUpgradeGroup {
+			err = upgradeClientSet.PlanClient.Stageupgrade(&component)
+			if err != nil {
+				return err
+			}
+		}
 		err = upgradeClientSet.PlanClient.Upgrade(&component)
 		if err != nil {
 			return err
