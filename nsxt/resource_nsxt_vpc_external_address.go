@@ -99,6 +99,9 @@ func resourceNsxtVpcExternalAddressRead(d *schema.ResourceData, m interface{}) e
 func resourceNsxtVpcExternalAddressUpdate(d *schema.ResourceData, m interface{}) error {
 	err := updatePort(d, m, false)
 	if err != nil {
+		// Trigger partial update to avoid terraform updating state based on failed intent
+		// TODO - move this into handleUpdateError
+		d.Partial(true)
 		return handleUpdateError("External Address", "", err)
 	}
 	return resourceNsxtVpcExternalAddressRead(d, m)
