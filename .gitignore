@@ -1,3 +1,16 @@
+# Ignore any built binaries.
+terraform-provider-nsxt
+terraform-provider-nsxt.exe
+
+# Ignore distribution directories.
 dist/
+
+# Ignore editor directories.
 .idea/
-vendor
+.vscode/
+
+# Ignore temporaroy editor files.
+*~
+
+# Ignore macOS desktop services store files.
+**/.DS_Store
