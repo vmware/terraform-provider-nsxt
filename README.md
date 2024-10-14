@@ -1,187 +1,104 @@
-# Terraform NSX-T Provider
+<!--
+© Broadcom. All Rights Reserved.
+The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+SPDX-License-Identifier: MPL-2.0
+-->
 
-This is the repository for the Terraform NSX Provider, which one can use with
-Terraform to work with [VMware NSX-T][vmware-nsxt].
+<!-- markdownlint-disable first-line-h1 no-inline-html -->
 
-[vmware-nsxt]: https://www.vmware.com/products/nsx.html
+<img src="docs/images/icon-color.svg" alt="VMware NSX" width="150">
 
-For general information about Terraform, visit the [official
-website][tf-website] and the [GitHub project page][tf-github].
+# Terraform Provider for VMware NSX
 
-[tf-website]: https://terraform.io/
-[tf-github]: https://github.com/hashicorp/terraform
+[![Latest Release](https://img.shields.io/github/v/tag/vmware/terraform-provider-nsxt?label=latest%20release&style=for-the-badge)](https://github.com/vmware/terraform-provider-nsxt/releases/latest) [![License](https://img.shields.io/github/license/vmware/terraform-provider-nsxt.svg?style=for-the-badge)](LICENSE)
 
-Documentation on the NSX platform can be found at the [NSX-T Documentation page](https://docs.vmware.com/en/VMware-NSX-T/index.html)
+The Terraform Provider for [VMware NSX][product-documentation] is a plugin for Terraform that allows you to interact with VMware NSX.
 
-# Using the Provider
+Learn more:
 
-The latest version of this provider requires Terraform v0.12 or higher to run.
+- Read the provider [documentation][provider-documentation].
 
-The VMware supported version of the provider requires NSX version 3.0.0 onwards and Terraform 0.12 onwards.
-Version 2.0.0 of the provider offers NSX consumption via policy APIs, which is the recommended way.
-Most policy resources are supported with NSX version 3.0.0 onwards, however some resources or attributes require later releases. Please refer to documentation for more details.
-The recommended vSphere provider to be used in conjunction with the NSX-T Terraform Provider is 1.3.3 or above.
+- Join the community [discussions][provider-discussions].
 
-Note that you need to run `terraform init` to fetch the provider before
-deploying.
+## Requirements
 
-## Full Provider Documentation
+- [VMware NSX][product-documentation]
 
-The provider is documented in full on the Terraform website and can be found
-[here](https://registry.terraform.io/providers/vmware/nsxt/latest). Check the provider documentation for details on entering your connection information and how to get started with writing configuration for vSphere resources.
+  The following table lists the supported product versions for this provider.
 
-### Controlling the provider version
+  - VMware NSX 4.2.x
+  - VMware NSX 4.1.x
+  - VMware NSX 4.0.x
+  - VMware NSX-T Data Center 3.2.x
+  - VMware NSX-T Data Center 3.1.x
+  - VMware NSX-T Data Center 3.1.x
+  - VMware NSX-T Data Center 2.5.x [^1]
 
-Note that you can also control the provider version. This requires the use of a `provider` block in your Terraform configuration if you have not added one already.
+  [^1]: Support for VMware NSX-T Data Center 2.5.x is limited with v3.2.x and later.
 
-The syntax is as follows:
+  The plugin supports versions in accordance with the [Broadcom Product Lifecycle][product-lifecycle].
 
-```hcl
-provider "nsxt" {
-  version = "~> 3.2"
-  ...
-}
+- [Terraform 0.12+][terraform-install]
+
+  For general information about Terraform, visit [HashiCorp Developer][terraform-install] and [the project][terraform-github] on GitHub.
+
+- [Go 1.22][golang-install]
+
+  Required, if [building][provider-build] and [testing][provider-test].
+
+## Using the Provider
+
+The Terraform Provider for VMware NSX is a Partner tier provider.
+
+Partner tier providers are owned and maintained by a partner in the HashiCorp Technology Partner Program. HashiCorp verifies the authenticity of the publisher and the provider is listed on the [Terraform Registry][terraform-registry] with a Partner tier label.
+
+To use a released version of the Terraform provider in your environment, run `terraform init` and Terraform will automatically install the provider from the Terraform Registry.
+
+Unless you are contributing to the provider or require a pre-release bugfix or feature, use a
+released version of the provider.
+
+See [Installing the Terraform Provider for VMware NSX][provider-install] for additional instructions on automated and manual installation methods and how to control the provider version.
+
+For either installation method, documentation about the provider configuration, resources, and data sources can be found on the Terraform Registry.
+
+## Upgrading the Provider
+
+The provider does not upgrade automatically. After each new release, you can run the following command to upgrade the provider:
+
+```shell
+terraform init -upgrade
 ```
 
-Version locking uses a pessimistic operator, so this version lock would mean
-anything within the 3.x namespace, including or after 3.0.0. [Read more][provider-vc] on provider version control.
+## Contributing
 
-[provider-vc]: https://www.terraform.io/docs/configuration/providers.html#provider-versions
+The Terraform Provider for VMware NSX is the work of many contributors and the project team appreciates your help!
 
-# Automated Installation (Recommended)
+If you discover a bug or would like to suggest an enhancement, submit [an issue][provider-issues].
 
-Download and initialization of Terraform providers is with the “terraform init” command. This applies to the NSX-T provider as well. Once the provider block for the NSX-T provider is specified in your .tf file, “terraform init” will detect a need for the provider and download it to your environment.
-You can list versions of providers installed in your environment by running “terraform version” command:
+If you would like to submit a pull request, please read the [contribution guidelines][provider-contributing] to get started. In case of enhancement or feature contribution, we kindly ask you to open an issue to discuss it beforehand.
 
-```hcl
-$ ./terraform version
-Terraform v1.2.1
-on linux_amd64
-+ provider registry.terraform.io/vmware/nsxt v3.3
-```
+## Support
 
-# Manual Installation
+The Terraform Provider for VMware NSX is supported by Broadcom and the provider community. For bugs and feature requests please open a Github Issue and label it appropriately or contact Broadcom support.
 
-**NOTE:** Unless you are [developing](#developing-the-provider) or require a
-pre-release bugfix or feature, you will want to use the officially released
-version of the provider (see [the section above](#using-the-provider)).
+## License
 
-**NOTE:** Recommended way to compile the provider is using [Go Modules](https://blog.golang.org/using-go-modules).
+© Broadcom. All Rights Reserved.
+The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
 
-**NOTE:** For terraform 0.13, please refer to [provider installation configuration][install-013] in order to use custom provider.
+The Terraform Provider for VMware NSX is available under the [Mozilla Public License, version 2.0][provider-license] license.
 
-[install-013]: https://www.terraform.io/docs/commands/cli-config.html#provider-installation
-
-## Cloning the Project
-
-First, you will want to clone the repository to
-`$GOPATH/src/github.com/vmware/terraform-provider-nsxt`:
-
-```sh
-mkdir -p $GOPATH/src/github.com/vmware
-cd $GOPATH/src/github.com/vmware
-git clone https://github.com/vmware/terraform-provider-nsxt.git
-```
-
-## Building and Installing the Provider
-
-Recommended golang version is go1.18 onwards.
-After the clone has been completed, you can enter the provider directory and build the provider.
-
-```sh
-cd $GOPATH/src/github.com/vmware/terraform-provider-nsxt
-make
-```
-
-After the build is complete, copy the provider executable `terraform-provider-nsxt` into location specified in your provider installation configuration. Make sure to delete provider lock files that might exist in your working directory due to prior provider usage. Run `terraform init`.
-For developing, consider using [dev overrides configuration][dev-overrides]. Please note that `terraform init` should not be used with dev overrides.
-
-[dev-overrides]: https://www.terraform.io/docs/cli/config/config-file.html#development-overrides-for-provider-developers
-
-# Developing the Provider
-
-**NOTE:** Before you start work on a feature, please make sure to check the
-[issue tracker][gh-issues] and existing [pull requests][gh-prs] to ensure that
-work is not being duplicated. For further clarification, you can also ask in a
-new issue.
-
-[gh-issues]: https://github.com/vmware/terraform-provider-nsxt/issues
-[gh-prs]: https://github.com/vmware/terraform-provider-nsxt/pulls
-
-If you wish to work on the provider, you'll first need [Go][go-website]
-installed on your machine (version 1.19+ is recommended). You'll also need to
-correctly setup a [GOPATH][gopath], as well as adding `$GOPATH/bin` to your
-`$PATH`.
-
-[go-website]: https://golang.org/
-[gopath]: http://golang.org/doc/code.html#GOPATH
-
-See [Manual Installation](#manual-installation) for details on building the
-provider.
-
-# Testing the Provider
-
-**NOTE:** Testing the NSX-T provider is currently a complex operation as it
-requires having a NSX-T manager endpoint to test against, which should be
-hosting a standard configuration for a NSX-T cluster. To cover Global Manager
-test cases, NSX-T Global Manager suite needs to be preconfigured.
-
-## Configuring Environment Variables
-
-Most of the tests in this provider require a comprehensive list of environment
-variables to run. See the individual `*_test.go` files in the [`nsxt/`](nsxt/)
-directory for more details, in addition to
-[`tests_utils.go`](nsxt/tests_utils.go) for details on some tunables that can be
-used to specify the locations of certain pre-created resources that some tests
-require.
-
-Minimum environment variable :
-```sh
-$ export NSXT_MANAGER_HOST="192.168.110.41"
-$ export NSXT_USERNAME="admin"
-$ export NSXT_PASSWORD="MyPassword123!"
-$ export NSXT_ALLOW_UNVERIFIED_SSL=true
-```
-
-## Running the Acceptance Tests
-
-After this is done, you can run the acceptance tests by running:
-
-```sh
-$ make testacc
-```
-
-If you want to run against a specific set of tests, run `make testacc` with the
-`TESTARGS` parameter containing the run mask as per below:
-
-```sh
-make testacc TESTARGS="-run=TestAccResourceNsxtPolicyTier0Gateway"
-```
-
-This following example would run all of the acceptance tests matching
-`TestAccResourceNsxtPolicyTier0Gateway`. Change this for the specific tests you want
-to run.
-
-# Interoperability
-
-The following versions of NSX are supported:
-
- * NSX-T 4.2.*
- * NSX-T 4.1.*
- * NSX-T 4.0.*
- * NSX-T 3.2.*
- * NSX-T 3.1.*
- * NSX-T 3.0.*
- * NSX-T 2.5.* support is limited with provider version 3.2.x and above
- 
-Some specific resources and attributes may require recent versions of NSX-T. Please refer to documentation for more details.
-
-# Support
-
-The NSX Terraform provider is Broadcom supported as well as community supported. For bugs and feature requests please open a Github Issue and label it appropriately or contact Broadcom support.
-
-# License
-
-Copyright © 2015-2024 Broadcom, Inc. All Rights Reserved.
-
-The NSX Terraform provider is available under [MPL2.0 license](https://github.com/vmware/terraform-provider-nsxt/blob/master/LICENSE.txt).
+[golang-install]: https://golang.org/doc/install
+[product-documentation]: https://docs.vmware.com/en/VMware-NSX/index.html
+[product-lifecycle]: https://support.broadcom.com/group/ecx/productlifecycle
+[provider-contributing]: CONTRIBUTING.md
+[provider-discussions]: https://github.com/vmware/terraform-provider-nsxt/discussions
+[provider-documentation]: https://registry.terraform.io/providers/vmware/nsxt/latest/docs
+[provider-build]: docs/build.md
+[provider-install]: docs/install.md
+[provider-test]: docs/test.md
+[provider-issues]: https://github.com/vmware/terraform-provider-nsxt/issues/new/choose
+[provider-license]: LICENSE
+[terraform-github]: https://github.com/hashicorp/terraform
+[terraform-install]: https://developer.hashicorp.com/terraform/install
+[terraform-registry]: https://registry.terraform.io
