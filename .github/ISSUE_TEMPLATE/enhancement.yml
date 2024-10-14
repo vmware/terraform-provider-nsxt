@@ -1,0 +1,48 @@
+---
+name: Enhancement Request
+description: Is something critical missing? Suggest an enhancement.
+labels:
+  - [enhancement, needs-review]
+body:
+  - type: markdown
+    attributes:
+      value: >
+        Before filing an enhancement, please search the existing issues and use the
+        [reaction](https://blog.github.com/2016-03-10-add-reactions-to-pull-requests-issues-and-comments/)
+        feature to add up-votes to existing requests.
+
+        Vote on this issue by adding a 👍 [reaction](https://blog.github.com/2016-03-10-add-reactions-to-pull-requests-issues-and-comments/) to the original issue initial description to help the maintainers prioritize.
+
+        Do not leave "+1" or other comments that do not add relevant information or questions.
+
+        If you are interested in working on this enhancement or have submitted a pull request, please leave a comment.
+
+        When filing an enhancement, please include the following information.
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: A written overview of the enhancement.
+    validations:
+      required: true
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use Case(s)
+      description: Any relevant use-cases that you see.
+    validations:
+      required: true
+  - type: textarea
+    id: potential-configuration
+    attributes:
+      label: Potential Configuration
+      description: Provide a potential configuration.
+    validations:
+      required: true
+  - type: textarea
+    id: references
+    attributes:
+      label: References
+      description: Provide any references.
+    validations:
+      required: false
