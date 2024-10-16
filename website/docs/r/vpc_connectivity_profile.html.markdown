@@ -46,7 +46,6 @@ The following arguments are supported:
 * `service_gateway` - (Optional) Service Gateway configuration
   * `nat_config` - (Optional) NAT configuration
     * `enable_default_snat` - (Optional) Auto configured SNAT for private subnet.
-    * `ip_blocks` - (Optional) IP blocks for NAT external IPs. If not configured external IP block will be used. These blocks must be subset of external IP blocks.
   * `qos_config` - (Optional) None
     * `ingress_qos_profile_path` - (Optional) Policy path to gateway QoS profile in ingress direction.
     * `egress_qos_profile_path` - (Optional) Policy path to gateway QoS profile in egress direction.
