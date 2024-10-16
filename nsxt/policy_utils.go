@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	sdkerrors "github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
@@ -523,11 +523,11 @@ func commaSeparatedStringToStringList(commaString string) []string {
 	return strList
 }
 
-func nsxtPolicyWaitForRealizationStateConf(connector client.Connector, d *schema.ResourceData, realizedEntityPath string, timeout int) *resource.StateChangeConf {
+func nsxtPolicyWaitForRealizationStateConf(connector client.Connector, d *schema.ResourceData, realizedEntityPath string, timeout int) *retry.StateChangeConf {
 	client := realized_state.NewRealizedEntitiesClient(connector)
 	pendingStates := []string{"UNKNOWN", "UNREALIZED"}
 	targetStates := []string{"REALIZED", "ERROR"}
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending: pendingStates,
 		Target:  targetStates,
 		Refresh: func() (interface{}, string, error) {

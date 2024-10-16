@@ -8,7 +8,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/fabric/compute_collections"
@@ -274,8 +274,8 @@ func resourceNsxtPolicyHostTransportNodeCollectionUpdate(d *schema.ResourceData,
 	return resourceNsxtPolicyHostTransportNodeCollectionRead(d, m)
 }
 
-func getComputeCollectionMemberStateConf(connector client.Connector, id string) *resource.StateChangeConf {
-	return &resource.StateChangeConf{
+func getComputeCollectionMemberStateConf(connector client.Connector, id string) *retry.StateChangeConf {
+	return &retry.StateChangeConf{
 		Pending: []string{"notyet"},
 		Target:  []string{"success", "failed"},
 		Refresh: func() (interface{}, string, error) {

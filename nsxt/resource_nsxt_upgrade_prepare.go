@@ -12,7 +12,7 @@ import (
 
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
@@ -443,7 +443,7 @@ func waitForBundleUpload(m interface{}, bundleID string, timeout int) error {
 		nsxModel.UpgradeBundleUploadStatus_STATUS_SUCCESS,
 		nsxModel.UpgradeBundleUploadStatus_STATUS_FAILED,
 	}
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending: pendingStates,
 		Target:  targetStates,
 		Refresh: func() (interface{}, string, error) {
@@ -482,7 +482,7 @@ func waitForUcUpgrade(m interface{}, timeout int) error {
 		nsxModel.UcUpgradeStatus_STATE_SUCCESS,
 		nsxModel.UcUpgradeStatus_STATE_FAILED,
 	}
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending: pendingStates,
 		Target:  targetStates,
 		Refresh: func() (interface{}, string, error) {
@@ -523,7 +523,7 @@ func waitForPrecheckComplete(m interface{}, componentType string, timeout int) e
 		nsxModel.UpgradeChecksExecutionStatus_STATUS_ABORTED,
 		nsxModel.UpgradeChecksExecutionStatus_STATUS_COMPLETED,
 	}
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending: pendingStates,
 		Target:  targetStates,
 		Refresh: func() (interface{}, string, error) {
