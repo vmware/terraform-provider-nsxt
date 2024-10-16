@@ -8,7 +8,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
@@ -95,7 +95,7 @@ func dataSourceNsxtComputeManagerRealizationWait(d *schema.ResourceData, connect
 		model.ConfigurationState_STATE_ERROR,
 	}
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending: pendingStates,
 		Target:  targetStates,
 		Refresh: func() (interface{}, string, error) {
@@ -140,7 +140,7 @@ func dataSourceNsxtComputeManagerRegistrationWait(d *schema.ResourceData, connec
 		model.ComputeManagerStatus_REGISTRATION_STATUS_REGISTERED_WITH_ERRORS,
 	}
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending: pendingStates,
 		Target:  targetStates,
 		Refresh: func() (interface{}, string, error) {

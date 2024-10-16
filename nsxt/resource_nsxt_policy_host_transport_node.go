@@ -8,9 +8,9 @@ import (
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/sites/enforcement_points/host_transport_nodes"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
@@ -207,8 +207,8 @@ func resourceNsxtPolicyHostTransportNodeUpdate(d *schema.ResourceData, m interfa
 	return resourceNsxtPolicyHostTransportNodeRead(d, m)
 }
 
-func getHostTransportNodeStateConf(connector client.Connector, id, siteID, epID string) *resource.StateChangeConf {
-	return &resource.StateChangeConf{
+func getHostTransportNodeStateConf(connector client.Connector, id, siteID, epID string) *retry.StateChangeConf {
+	return &retry.StateChangeConf{
 		Pending: []string{"notyet"},
 		Target:  []string{"success", "failed"},
 		Refresh: func() (interface{}, string, error) {

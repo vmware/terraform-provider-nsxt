@@ -13,7 +13,7 @@ import (
 
 	"golang.org/x/exp/slices"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
@@ -123,9 +123,9 @@ type NsxClusterNode struct {
 	Status    string
 }
 
-func getNodeConnectivityStateConf(connector client.Connector, delay int, interval int, timeout int) *resource.StateChangeConf {
+func getNodeConnectivityStateConf(connector client.Connector, delay int, interval int, timeout int) *retry.StateChangeConf {
 
-	return &resource.StateChangeConf{
+	return &retry.StateChangeConf{
 		Pending: []string{"notyet"},
 		Target:  []string{"success"},
 		Refresh: func() (interface{}, string, error) {

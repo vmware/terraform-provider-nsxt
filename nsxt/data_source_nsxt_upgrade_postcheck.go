@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
@@ -99,7 +99,7 @@ func dataSourceNsxtUpgradePostCheckRead(d *schema.ResourceData, m interface{}) e
 	interval := d.Get("interval").(int)
 	delay := d.Get("delay").(int)
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending: []string{model.UpgradeChecksExecutionStatus_STATUS_IN_PROGRESS},
 		Target:  []string{model.UpgradeChecksExecutionStatus_STATUS_COMPLETED},
 		Refresh: func() (interface{}, string, error) {

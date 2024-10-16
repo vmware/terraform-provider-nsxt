@@ -9,7 +9,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/sites/enforcement_points/transport_node_collections"
@@ -81,7 +81,7 @@ func dataSourceNsxtPolicyHostTransportNodeCollectionRealizationRead(d *schema.Re
 
 	objID := getPolicyIDFromPath(path)
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending: pendingStates,
 		Target:  targetStates,
 		Refresh: func() (interface{}, string, error) {

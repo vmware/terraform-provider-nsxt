@@ -11,7 +11,7 @@ import (
 
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
@@ -1532,8 +1532,8 @@ func resourceNsxtEdgeTransportNodeUpdate(d *schema.ResourceData, m interface{}) 
 	return resourceNsxtEdgeTransportNodeRead(d, m)
 }
 
-func getTransportNodeStateConf(connector client.Connector, id string) *resource.StateChangeConf {
-	return &resource.StateChangeConf{
+func getTransportNodeStateConf(connector client.Connector, id string) *retry.StateChangeConf {
+	return &retry.StateChangeConf{
 		Pending: []string{"notyet"},
 		Target:  []string{"success", "failed"},
 		Refresh: func() (interface{}, string, error) {
