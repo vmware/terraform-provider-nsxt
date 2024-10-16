@@ -1,5 +1,5 @@
 ---
-subcategory: "Beta"
+subcategory: "Fabric"
 layout: "nsxt"
 page_title: "NSXT: transport_node"
 description: An Transport Node data source.

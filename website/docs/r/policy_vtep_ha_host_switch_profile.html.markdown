@@ -1,5 +1,5 @@
 ---
-subcategory: "Beta"
+subcategory: "Fabric"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_vtep_ha_host_switch_profile"
 description: A resource to configure a VTEP HA host switch profile in NSX Policy.

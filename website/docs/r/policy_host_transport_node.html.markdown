@@ -1,13 +1,13 @@
 ---
-subcategory: "Beta"
+subcategory: "Fabric"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_host_transport_node"
-description: A resource to configure a HostTransportNode.
+description: A resource to configure a Host Transport Node.
 ---
 
 # nsxt_policy_host_transport_node
 
-This resource provides a method for the management of a HostTransportNode.
+This resource provides a method for the management of a Host Transport Node.
 This resource is supported with NSX 4.1.0 onwards.
 
 ## Example Usage

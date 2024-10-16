@@ -1,8 +1,8 @@
 ---
-subcategory: "Beta"
+subcategory: "Fabric"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_compute_sub_cluster"
-description: A resource to configure a  Sub Cluster.
+description: A resource to configure a Compute Sub Cluster.
 ---
 
 # nsxt_policy_compute_sub_cluster

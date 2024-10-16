@@ -1,5 +1,5 @@
 ---
-subcategory: "Beta"
+subcategory: "Fabric"
 layout: "nsxt"
 page_title: "NSXT: discovered_node"
 description: An Discovered Node data source.
@@ -54,3 +54,8 @@ data "nsxt_discovered_node" "test" {
 * `id` - (Optional) External id of the discovered node, ex. a mo-ref from VC.
 * `ip_address` - (Optional) IP Address of the discovered node.
 * `compute_manager_state` - (Optional) Realized state of compute manager. This argument is only needed to ensure dependency upon `nsxt_compute_manager_realization` data source, so that `nsxt_discovered_node` is not evaluated before compute manager is fully functional.
+
+## Attributes Reference
+
+* `id` - External id of the discovered node, ex. a mo-ref from VC.
+* `ip_address` - IP Address of the discovered node.

@@ -1,5 +1,5 @@
 ---
-subcategory: "Beta"
+subcategory: "Realization"
 layout: "nsxt"
 page_title: "NSXT: policy_gateway_interface_realization"
 description: A gateway interface realization information.
