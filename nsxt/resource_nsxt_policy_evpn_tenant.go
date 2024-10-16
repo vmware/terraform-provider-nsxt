@@ -20,7 +20,7 @@ func resourceNsxtPolicyEvpnTenant() *schema.Resource {
 		Update: resourceNsxtPolicyEvpnTenantUpdate,
 		Delete: resourceNsxtPolicyEvpnTenantDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{

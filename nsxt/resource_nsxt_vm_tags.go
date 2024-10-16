@@ -22,7 +22,7 @@ func resourceNsxtVMTags() *schema.Resource {
 		Update: resourceNsxtVMTagsUpdate,
 		Delete: resourceNsxtVMTagsDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		DeprecationMessage: mpObjectResourceDeprecationMessage,
 		Schema: map[string]*schema.Schema{

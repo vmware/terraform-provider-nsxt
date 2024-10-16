@@ -19,7 +19,7 @@ func resourceNsxtLogicalRouterLinkPortOnTier1() *schema.Resource {
 		Update: resourceNsxtLogicalRouterLinkPortOnTier1Update,
 		Delete: resourceNsxtLogicalRouterLinkPortOnTier1Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		DeprecationMessage: mpObjectResourceDeprecationMessage,
 		Schema: map[string]*schema.Schema{

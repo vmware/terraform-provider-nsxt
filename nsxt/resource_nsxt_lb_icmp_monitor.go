@@ -20,7 +20,7 @@ func resourceNsxtLbIcmpMonitor() *schema.Resource {
 		Update: resourceNsxtLbIcmpMonitorUpdate,
 		Delete: resourceNsxtLbMonitorDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		DeprecationMessage: mpObjectResourceDeprecationMessage,
 		Schema: map[string]*schema.Schema{

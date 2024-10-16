@@ -31,7 +31,7 @@ func resourceNsxtPolicyLdapIdentitySource() *schema.Resource {
 		Update: resourceNsxtPolicyLdapIdentitySourceUpdate,
 		Delete: resourceNsxtPolicyLdapIdentitySourceDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{

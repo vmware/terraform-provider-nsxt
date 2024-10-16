@@ -21,7 +21,7 @@ func resourceNsxtEdgeHighAvailabilityProfile() *schema.Resource {
 		Update: resourceNsxtEdgeHighAvailabilityProfileUpdate,
 		Delete: resourceNsxtEdgeHighAvailabilityProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Schema: map[string]*schema.Schema{
 			"revision":     getRevisionSchema(),
