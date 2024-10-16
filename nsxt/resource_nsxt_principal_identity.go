@@ -20,7 +20,7 @@ func resourceNsxtPrincipalIdentity() *schema.Resource {
 		Read:   resourceNsxtPrincipalIdentityRead,
 		Delete: resourceNsxtPrincipalIdentityDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{

@@ -19,7 +19,7 @@ func resourceNsxtLbTCPMonitor() *schema.Resource {
 		Update: resourceNsxtLbTCPMonitorUpdate,
 		Delete: resourceNsxtLbMonitorDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		DeprecationMessage: mpObjectResourceDeprecationMessage,
 		Schema:             getLbL4MonitorSchema("tcp"),

@@ -20,7 +20,7 @@ func resourceNsxtLogicalDhcpServer() *schema.Resource {
 		Update: resourceNsxtLogicalDhcpServerUpdate,
 		Delete: resourceNsxtLogicalDhcpServerDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		DeprecationMessage: mpObjectResourceDeprecationMessage,
 		Schema: map[string]*schema.Schema{

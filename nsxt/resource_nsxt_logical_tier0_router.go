@@ -23,7 +23,7 @@ func resourceNsxtLogicalTier0Router() *schema.Resource {
 		Update: resourceNsxtLogicalTier0RouterUpdate,
 		Delete: resourceNsxtLogicalTier0RouterDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		DeprecationMessage: mpObjectResourceDeprecationMessage,
 		Schema: map[string]*schema.Schema{

@@ -20,7 +20,7 @@ func resourceNsxtLbHTTPForwardingRule() *schema.Resource {
 		Update: resourceNsxtLbHTTPForwardingRuleUpdate,
 		Delete: resourceNsxtLbHTTPRuleDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		DeprecationMessage: mpObjectResourceDeprecationMessage,
 		Schema: map[string]*schema.Schema{

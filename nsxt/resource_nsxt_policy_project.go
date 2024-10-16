@@ -20,7 +20,7 @@ func resourceNsxtPolicyProject() *schema.Resource {
 		Update: resourceNsxtPolicyProjectUpdate,
 		Delete: resourceNsxtPolicyProjectDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{

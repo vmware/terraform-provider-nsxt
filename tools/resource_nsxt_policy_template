@@ -25,7 +25,7 @@ func resourceNsxtPolicy<!RESOURCE!>() *schema.Resource {
 		Update: resourceNsxtPolicy<!RESOURCE!>Update,
 		Delete: resourceNsxtPolicy<!RESOURCE!>Delete,
 		Importer: &schema.ResourceImporter{
-                        State: schema.ImportStatePassthrough,
+                        StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{

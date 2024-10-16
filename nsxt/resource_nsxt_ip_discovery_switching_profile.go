@@ -20,7 +20,7 @@ func resourceNsxtIPDiscoverySwitchingProfile() *schema.Resource {
 		Update: resourceNsxtIPDiscoverySwitchingProfileUpdate,
 		Delete: resourceNsxtIPDiscoverySwitchingProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		DeprecationMessage: mpObjectResourceDeprecationMessage,
 		Schema: map[string]*schema.Schema{

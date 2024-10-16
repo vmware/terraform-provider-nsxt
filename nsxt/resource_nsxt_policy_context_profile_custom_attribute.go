@@ -38,7 +38,7 @@ func resourceNsxtPolicyContextProfileCustomAttribute() *schema.Resource {
 		Read:   resourceNsxtPolicyContextProfileCustomAttributeRead,
 		Delete: resourceNsxtPolicyContextProfileCustomAttributeDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{

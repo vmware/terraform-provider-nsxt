@@ -22,7 +22,7 @@ func resourceNsxtAlgorithmTypeNsService() *schema.Resource {
 		Update: resourceNsxtAlgorithmTypeNsServiceUpdate,
 		Delete: resourceNsxtAlgorithmTypeNsServiceDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		DeprecationMessage: mpObjectResourceDeprecationMessage,
 		Schema: map[string]*schema.Schema{

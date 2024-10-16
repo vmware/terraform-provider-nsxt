@@ -19,7 +19,7 @@ func resourceNsxtIPBlockSubnet() *schema.Resource {
 		// Update IP block subnet is not supported by the NSX
 		Delete: resourceNsxtIPBlockSubnetDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		DeprecationMessage: mpObjectResourceDeprecationMessage,
 		Schema: map[string]*schema.Schema{

@@ -19,7 +19,7 @@ func resourceNsxtEtherTypeNsService() *schema.Resource {
 		Update: resourceNsxtEtherTypeNsServiceUpdate,
 		Delete: resourceNsxtEtherTypeNsServiceDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		DeprecationMessage: mpObjectResourceDeprecationMessage,
 		Schema: map[string]*schema.Schema{

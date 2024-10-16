@@ -26,7 +26,7 @@ func resourceNsxtFailureDomain() *schema.Resource {
 		Update: resourceNsxtFailureDomainUpdate,
 		Delete: resourceNsxtFailureDomainDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{

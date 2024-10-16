@@ -20,7 +20,7 @@ func resourceNsxtLbHTTPSMonitor() *schema.Resource {
 		Update: resourceNsxtLbHTTPSMonitorUpdate,
 		Delete: resourceNsxtLbMonitorDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		DeprecationMessage: mpObjectResourceDeprecationMessage,
 		Schema: map[string]*schema.Schema{

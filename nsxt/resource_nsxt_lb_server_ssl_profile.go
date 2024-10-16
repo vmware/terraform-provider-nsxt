@@ -19,7 +19,7 @@ func resourceNsxtLbServerSslProfile() *schema.Resource {
 		Update: resourceNsxtLbServerSslProfileUpdate,
 		Delete: resourceNsxtLbServerSslProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		DeprecationMessage: mpObjectResourceDeprecationMessage,
 		Schema: map[string]*schema.Schema{

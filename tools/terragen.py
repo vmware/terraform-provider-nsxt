@@ -494,7 +494,7 @@ def main():
         # Add the importer line
         pretty_writeln(f, "Importer: &schema.ResourceImporter{")
         shift()
-        pretty_writeln(f, "State: schema.ImportStatePassthrough,")
+        pretty_writeln(f, "StateContext: schema.ImportStatePassthroughContext,")
         unshift()
         pretty_writeln(f, "},")
 
