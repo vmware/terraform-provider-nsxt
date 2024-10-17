@@ -329,7 +329,6 @@ func Provider() *schema.Provider {
 			"nsxt_manager_info":                                      dataSourceNsxtManagerInfo(),
 			"nsxt_vpc":                                               dataSourceNsxtVPC(),
 			"nsxt_vpc_group":                                         dataSourceNsxtVpcGroup(),
-			"nsxt_policy_vpc":                                        dataSourceNsxtVPC(),
 			"nsxt_vpc_nat":                                           dataSourceNsxtVpcNat(),
 			"nsxt_vpc_subnet":                                        dataSourceNsxtVpcSubnet(),
 			"nsxt_vpc_subnet_port":                                   dataSourceNsxtVpcSubnetPort(),
