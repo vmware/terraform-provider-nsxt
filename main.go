@@ -4,9 +4,7 @@
 package main
 
 import (
-	"context"
 	"flag"
-	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
@@ -14,8 +12,7 @@ import (
 )
 
 func main() {
-	var debugMode bool
-	flag.BoolVar(&debugMode, "debug", false, "set to true to run the provider with support for debuggers like delve")
+	debugMode := flag.Bool("debug", false, "Enable debug mode for debuggers like Delve (dlv).")
 	flag.Parse()
 
 	opts := &plugin.ServeOpts{
@@ -24,12 +21,9 @@ func main() {
 		},
 	}
 
-	if debugMode {
-		err := plugin.Debug(context.Background(), "registry.terraform.io/vmware/nsxt", opts)
-		if err != nil {
-			log.Fatal(err.Error())
-		}
-		return
+	if *debugMode {
+		opts.Debug = true
+		opts.ProviderAddr = "registry.terraform.io/vmware/nsxt"
 	}
 
 	plugin.Serve(opts)
