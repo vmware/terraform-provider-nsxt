@@ -1,93 +1,86 @@
 package nsxt
 
 import (
+	"context"
 	"log"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
+const nsxRemovedVersion = "9.0.0"
+
 type resourceFunc func() *schema.Resource
 
 func commonVersionCheck(m interface{}) bool {
 	initNSXVersion(getPolicyConnector(m))
-	return !util.NsxVersionHigherOrEqual("9.0.0")
+	return !util.NsxVersionHigherOrEqual(nsxRemovedVersion)
 }
 
-func readWrapper(originalFunc schema.ReadFunc, name string, fail bool) schema.ReadFunc {
-	wrappedFunc := func(d *schema.ResourceData, m interface{}) error {
+func genericWrapper(originalFunc interface{}, name string, fail bool, action string) interface{} {
+	return func(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 		if commonVersionCheck(m) {
-			return originalFunc(d, m)
-
+			switch f := originalFunc.(type) {
+			case schema.ReadContextFunc:
+				return f(ctx, d, m)
+			case schema.CreateContextFunc:
+				return f(ctx, d, m)
+			case schema.UpdateContextFunc:
+				return f(ctx, d, m)
+			case schema.DeleteContextFunc:
+				return f(ctx, d, m)
+			}
 		}
 		if fail {
-			// We fail for data source only
-			log.Printf("[INFO] Failing read for data source %s: removed from NSX 9.0.0", name)
-			return mpDataSourceRemovedError(name)
+			log.Printf("[INFO] Failing %s for resource %s: removed from NSX %s", action, name, nsxRemovedVersion)
+			return diag.FromErr(mpResourceRemovedError(name))
 		}
-		log.Printf("[INFO] Skipping read for resource %s: removed from NSX 9.0.0", name)
+		log.Printf("[INFO] Skipping %s for resource %s: removed from NSX %s", action, name, nsxRemovedVersion)
 		return nil
 	}
-	return wrappedFunc
 }
 
-func createWrapper(originalFunc schema.CreateFunc, name string) schema.CreateFunc {
-	wrappedFunc := func(d *schema.ResourceData, m interface{}) error {
-		if commonVersionCheck(m) {
-			return originalFunc(d, m)
-		}
-		log.Printf("[INFO] Failing write for resource %s: removed from NSX 9.0.0", name)
-		return mpResourceRemovedError(name)
-	}
-	return wrappedFunc
+func readWrapper(originalFunc schema.ReadContextFunc, name string, fail bool) schema.ReadContextFunc {
+	return genericWrapper(originalFunc, name, fail, "read").(schema.ReadContextFunc)
 }
 
-func updateWrapper(originalFunc schema.UpdateFunc, name string) schema.UpdateFunc {
-	wrappedFunc := func(d *schema.ResourceData, m interface{}) error {
-		if commonVersionCheck(m) {
-			return originalFunc(d, m)
-		}
-		log.Printf("[INFO] Failing update for resource %s: removed from NSX 9.0.0", name)
-		return mpResourceRemovedError(name)
-	}
-	return wrappedFunc
+func deleteWrapper(originalFunc schema.DeleteContextFunc, name string) schema.DeleteContextFunc {
+	return genericWrapper(originalFunc, name, false, "delete").(schema.DeleteContextFunc)
 }
 
-func deleteWrapper(originalFunc schema.DeleteFunc, name string) schema.DeleteFunc {
-	wrappedFunc := func(d *schema.ResourceData, m interface{}) error {
-		if commonVersionCheck(m) {
-			return originalFunc(d, m)
-		}
-		log.Printf("[INFO] Skipping delete for resource %s: removed from NSX 9.0.0", name)
-		return nil
-	}
-	return wrappedFunc
+func createWrapper(originalFunc schema.CreateContextFunc, name string) schema.CreateContextFunc {
+	return genericWrapper(originalFunc, name, false, "create").(schema.CreateContextFunc)
+}
+
+func updateWrapper(originalFunc schema.UpdateContextFunc, name string) schema.UpdateContextFunc {
+	return genericWrapper(originalFunc, name, false, "update").(schema.UpdateContextFunc)
 }
 
 func importerWrapper(originalImporter *schema.ResourceImporter, name string) *schema.ResourceImporter {
-	wrappedFunc := func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	wrappedFunc := func(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 		if commonVersionCheck(m) {
-			return originalImporter.State(d, m)
+			return originalImporter.StateContext(ctx, d, m)
 		}
-		log.Printf("[INFO] Failing import for resource %s: removed from NSX 9.0.0", name)
+		log.Printf("[INFO] Failing import for resource %s: removed from NSX %s", name, nsxRemovedVersion)
 		return nil, mpResourceRemovedError(name)
 	}
-	originalImporter.State = wrappedFunc
+	originalImporter.StateContext = wrappedFunc
 	return originalImporter
 }
 
 func removedResourceWrapper(realResourceFunc resourceFunc, name string) *schema.Resource {
 	resource := realResourceFunc()
-	resource.Read = readWrapper(resource.Read, name, false)
-	if resource.Delete != nil {
-		resource.Delete = deleteWrapper(resource.Delete, name)
+	resource.ReadContext = readWrapper(resource.ReadContext, name, false)
+	if resource.DeleteContext != nil {
+		resource.DeleteContext = deleteWrapper(resource.DeleteContext, name)
 	}
-	if resource.Create != nil {
-		resource.Create = createWrapper(resource.Create, name)
+	if resource.CreateContext != nil {
+		resource.CreateContext = createWrapper(resource.CreateContext, name)
 	}
-	if resource.Update != nil {
-		resource.Update = updateWrapper(resource.Update, name)
+	if resource.UpdateContext != nil {
+		resource.UpdateContext = updateWrapper(resource.UpdateContext, name)
 	}
 	if resource.Importer != nil {
 		resource.Importer = importerWrapper(resource.Importer, name)
@@ -97,6 +90,6 @@ func removedResourceWrapper(realResourceFunc resourceFunc, name string) *schema.
 
 func removedDataSourceWrapper(realDataSourceFunc resourceFunc, name string) *schema.Resource {
 	resource := realDataSourceFunc()
-	resource.Read = readWrapper(resource.Read, name, true)
+	resource.ReadContext = readWrapper(resource.ReadContext, name, true)
 	return resource
 }
