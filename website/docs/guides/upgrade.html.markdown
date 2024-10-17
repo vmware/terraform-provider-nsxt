@@ -109,6 +109,33 @@ consumed using the data sources `nsxt_edge_upgrade_group` and `nsxt_host_upgrade
 **NOTE:** Only one `nsxt_upgrade_run` resource should be used in the upgrade plan.
 
 ```hcl
+data "nsxt_policy_host_transport_node" "host_transport_node1" {
+  display_name = "hosttransportnode1"
+}
+
+data "nsxt_policy_host_transport_node" "host_transport_node2" {
+  display_name = "hosttransportnode2"
+}
+
+data "nsxt_policy_host_transport_node" "host_transport_node3" {
+  display_name = "hosttransportnode3"
+}
+
+data "nsxt_host_upgrade_group" "hg1" {
+  upgrade_prepare_id = nsxt_upgrade_prepare.test.id
+  display_name       = "Group for Compute-Cluster1"
+}
+
+data "nsxt_edge_upgrade_group" "eg1" {
+  upgrade_prepare_id = nsxt_upgrade_prepare.test.id
+  display_name       = "edgeupgradegroup1"
+}
+
+data "nsxt_edge_upgrade_group" "eg2" {
+  upgrade_prepare_id = nsxt_upgrade_prepare.test.id
+  display_name       = "edgeupgradegroup2"
+}
+
 resource "nsxt_upgrade_run" "run" {
   upgrade_prepare_ready_id = data.nsxt_upgrade_prepare_ready.ready.id
 
@@ -127,22 +154,10 @@ resource "nsxt_upgrade_run" "run" {
     parallel = true
   }
 
-  data "nsxt_policy_host_transport_node" "host_transport_node1" {
-    display_name = "host_transport_node1"
-  }
-
   host_group {
     display_name = "HostWithDifferentSettings"
     parallel     = false
     hosts        = [data.nsxt_policy_host_transport_node.host_transport_node1.id]
-  }
-
-  data "nsxt_policy_host_transport_node" "host_transport_node2" {
-    display_name = "host_transport_node2"
-  }
-
-  data "nsxt_policy_host_transport_node" "host_transport_node3" {
-    display_name = "host_transport_node3"
   }
 
   host_group {
