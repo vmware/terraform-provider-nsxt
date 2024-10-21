@@ -1,5 +1,5 @@
 ---
-subcategory: "Beta"
+subcategory: "Fabric"
 layout: "nsxt"
 page_title: "NSXT: failure_domain"
 description: Failure Domain data source.
@@ -8,8 +8,6 @@ description: Failure Domain data source.
 # nsxt_failure_domain
 
 This data source provides information about Failure Domain configured in NSX.
-
-This resource is supported with NSX 3.0.0 onwards.
 
 ## Example Usage
 

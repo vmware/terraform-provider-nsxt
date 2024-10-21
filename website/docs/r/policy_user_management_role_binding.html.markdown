@@ -1,5 +1,5 @@
 ---
-subcategory: "Beta"
+subcategory: "User Management"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_user_management_role_binding"
 description: A resource to configure user management Role Bindings.

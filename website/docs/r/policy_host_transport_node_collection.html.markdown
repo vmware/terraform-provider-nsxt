@@ -1,5 +1,5 @@
 ---
-subcategory: "Beta"
+subcategory: "Fabric"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_host_transport_node_collection"
 description: A resource to configure Policy Host Transport Node Collection.
@@ -41,7 +41,7 @@ The following arguments are supported:
 * `sub_cluster_config` - (Optional) List of sub-cluster configuration.
   * `host_switch_config_source` - (Required) List of overridden HostSwitch configuration.
     * `host_switch_id` - (Required) HostSwitch ID.
-    * `transport_node_profile_sub_config_name` - (Required) Name of the TransportNodeProfile sub configuration to be used.
+    * `transport_node_profile_sub_config_name` - (Required) Name of the Transport Node Profile sub configuration to be used.
   * `sub_cluster_id` - (Required) sub-cluster ID.
 * `transport_node_profile_path` - (Optional) Transport Node Profile Path.
 * `remove_nsx_on_destroy` - (Optional) Upon deletion, uninstall NSX from Transport Node Collection member hosts. Default is true. 

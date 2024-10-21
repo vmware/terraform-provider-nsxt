@@ -178,7 +178,7 @@ Some specific resources and attributes may require recent versions of NSX-T. Ple
 
 # Support
 
-The NSX Terraform provider is now VMware supported as well as community supported. For bugs and feature requests please open a Github Issue and label it appropriately or contact VMware support.
+The NSX Terraform provider is Broadcom supported as well as community supported. For bugs and feature requests please open a Github Issue and label it appropriately or contact Broadcom support.
 
 # License
 

@@ -1,5 +1,5 @@
 ---
-subcategory: "Beta"
+subcategory: "Realization"
 layout: "nsxt"
 page_title: "NSXT: compute_manager_realization"
 description: Compute manager resource realization information.

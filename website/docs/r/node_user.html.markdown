@@ -1,5 +1,5 @@
 ---
-subcategory: "Beta"
+subcategory: "User Management"
 layout: "nsxt"
 page_title: "NSXT: nsxt_node_user"
 description: A resource to configure Node Users.
