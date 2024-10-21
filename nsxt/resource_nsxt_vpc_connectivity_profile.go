@@ -96,25 +96,6 @@ var vpcConnectivityProfileSchema = map[string]*metadata.ExtendedSchema{
 											SdkFieldName: "EnableDefaultSnat",
 										},
 									},
-									"ip_blocks": {
-										Schema: schema.Schema{
-											Type: schema.TypeList,
-											Elem: &metadata.ExtendedSchema{
-												Schema: schema.Schema{
-													Type:         schema.TypeString,
-													ValidateFunc: validatePolicyPath(),
-												},
-												Metadata: metadata.Metadata{
-													SchemaType: "string",
-												},
-											},
-											Optional: true,
-										},
-										Metadata: metadata.Metadata{
-											SchemaType:   "list",
-											SdkFieldName: "IpBlocks",
-										},
-									},
 								},
 							},
 							Optional: true,
