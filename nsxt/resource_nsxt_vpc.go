@@ -14,6 +14,7 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	clientLayer "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/vpcs"
 
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
@@ -114,17 +115,32 @@ var vpcSchema = map[string]*metadata.ExtendedSchema{
 			OmitIfEmpty:  true,
 		},
 	},
-	"vpc_connectivity_profile": {
+	"default_attachment": {
 		Schema: schema.Schema{
-			Type:         schema.TypeString,
-			ValidateFunc: validatePolicyPath(),
-			Optional:     true,
-			Computed:     true,
+			Type:     schema.TypeList,
+			MaxItems: 1,
+			Elem: &metadata.ExtendedResource{
+				Schema: map[string]*metadata.ExtendedSchema{
+					"vpc_connectivity_profile": {
+						Schema: schema.Schema{
+							Type:         schema.TypeString,
+							ValidateFunc: validatePolicyPath(),
+							Required:     true,
+						},
+						Metadata: metadata.Metadata{
+							SchemaType:   "string",
+							SdkFieldName: "VpcConnectivityProfile",
+							Skip:         true,
+						},
+					},
+				},
+			},
+			Optional: true,
+			Computed: true,
 		},
 		Metadata: metadata.Metadata{
-			SchemaType:   "string",
-			SdkFieldName: "VpcConnectivityProfile",
-			OmitIfEmpty:  true,
+			SchemaType: "struct",
+			Skip:       true,
 		},
 	},
 }
@@ -207,6 +223,14 @@ func resourceNsxtVpcCreate(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return handleCreateError("Vpc", id, err)
 	}
+
+	if d.HasChanges("default_attachment") {
+		err = patchVpcAttachment(d, connector, id, parents)
+		if err != nil {
+			return handleCreateError("Vpc Attachment", id, err)
+		}
+	}
+
 	d.SetId(id)
 	d.Set("nsx_id", id)
 
@@ -236,7 +260,24 @@ func resourceNsxtVpcRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("path", obj.Path)
 
 	elem := reflect.ValueOf(&obj).Elem()
-	return metadata.StructToSchema(elem, d, vpcSchema, "", nil)
+	err = metadata.StructToSchema(elem, d, vpcSchema, "", nil)
+	if err != nil {
+		return handleReadError(d, "Vpc", id, err)
+	}
+
+	attachmentClient := vpcs.NewAttachmentsClient(connector)
+	attachment, attErr := attachmentClient.Get(parents[0], parents[1], id, "default")
+	if attErr != nil {
+		return handleReadError(d, "Vpc Attachment", id, err)
+	}
+
+	var attachmentList []map[string]interface{}
+	attachmentMap := make(map[string]interface{})
+	attachmentMap["vpc_connectivity_profile"] = attachment.VpcConnectivityProfile
+	attachmentList = append(attachmentList, attachmentMap)
+	d.Set("default_attachment", attachmentList)
+	return nil
+
 }
 
 func resourceNsxtVpcUpdate(d *schema.ResourceData, m interface{}) error {
@@ -274,6 +315,13 @@ func resourceNsxtVpcUpdate(d *schema.ResourceData, m interface{}) error {
 		d.Partial(true)
 		return handleUpdateError("Vpc", id, err)
 	}
+	if d.HasChanges("default_attachment") {
+		err = patchVpcAttachment(d, connector, id, parents)
+		if err != nil {
+			d.Partial(true)
+			return handleUpdateError("Vpc Attachment", id, err)
+		}
+	}
 
 	return resourceNsxtVpcRead(d, m)
 }
@@ -295,4 +343,22 @@ func resourceNsxtVpcDelete(d *schema.ResourceData, m interface{}) error {
 	}
 
 	return nil
+}
+
+func patchVpcAttachment(d *schema.ResourceData, connector client.Connector, vpcID string, parents []string) error {
+	// Initialize to default profile in case default_attachment was removed
+	profilePath := fmt.Sprintf("/orgs/%s/projects/%s/connectivity-profiles/default", parents[0], parents[1])
+	defaultAttachment := d.Get("default_attachment")
+
+	if defaultAttachment != nil {
+		attachmentMap := defaultAttachment.([]interface{})
+		if len(attachmentMap) > 0 {
+			profilePath = attachmentMap[0].(map[string]interface{})["vpc_connectivity_profile"].(string)
+		}
+	}
+	client := vpcs.NewAttachmentsClient(connector)
+	obj := model.VpcAttachment{
+		VpcConnectivityProfile: &profilePath,
+	}
+	return client.Patch(parents[0], parents[1], vpcID, "default", obj)
 }

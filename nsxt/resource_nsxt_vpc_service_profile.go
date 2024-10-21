@@ -24,14 +24,6 @@ var vpcServiceProfileModeValues = []string{
 	model.VpcProfileDhcpConfig_MODE_DEACTIVATED,
 }
 
-var vpcServiceProfileLogLevelValues = []string{
-	model.PolicyVpcDnsForwarder_LOG_LEVEL_DEBUG,
-	model.PolicyVpcDnsForwarder_LOG_LEVEL_INFO,
-	model.PolicyVpcDnsForwarder_LOG_LEVEL_ERROR,
-	model.PolicyVpcDnsForwarder_LOG_LEVEL_WARNING,
-	model.PolicyVpcDnsForwarder_LOG_LEVEL_FATAL,
-}
-
 var vpcServiceProfileSchema = map[string]*metadata.ExtendedSchema{
 	"nsx_id":       metadata.GetExtendedSchema(getNsxIDSchema()),
 	"path":         metadata.GetExtendedSchema(getPathSchema()),
