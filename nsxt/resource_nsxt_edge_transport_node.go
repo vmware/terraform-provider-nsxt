@@ -9,8 +9,6 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -18,9 +16,13 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
+	mpmodel "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/model"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/transport_nodes"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	"golang.org/x/exp/maps"
+
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
 var ipAssignmentTypes = []string{
@@ -29,47 +31,56 @@ var ipAssignmentTypes = []string{
 	"static_ip_pool",
 }
 
+var mpHostSwitchProfileTypeFromPolicyType = map[string]string{
+	model.PolicyBaseHostSwitchProfile_RESOURCE_TYPE_POLICYUPLINKHOSTSWITCHPROFILE:          mpmodel.BaseHostSwitchProfile_RESOURCE_TYPE_UPLINKHOSTSWITCHPROFILE,
+	model.PolicyBaseHostSwitchProfile_RESOURCE_TYPE_POLICYLLDPHOSTSWITCHPROFILE:            mpmodel.BaseHostSwitchProfile_RESOURCE_TYPE_LLDPHOSTSWITCHPROFILE,
+	model.PolicyBaseHostSwitchProfile_RESOURCE_TYPE_POLICYNIOCPROFILE:                      mpmodel.BaseHostSwitchProfile_RESOURCE_TYPE_NIOCPROFILE,
+	model.PolicyBaseHostSwitchProfile_RESOURCE_TYPE_POLICYEXTRACONFIGHOSTSWITCHPROFILE:     mpmodel.BaseHostSwitchProfile_RESOURCE_TYPE_EXTRACONFIGHOSTSWITCHPROFILE,
+	model.PolicyBaseHostSwitchProfile_RESOURCE_TYPE_POLICYVTEPHAHOSTSWITCHPROFILE:          mpmodel.BaseHostSwitchProfile_RESOURCE_TYPE_VTEPHAHOSTSWITCHPROFILE,
+	model.PolicyBaseHostSwitchProfile_RESOURCE_TYPE_POLICYHIGHPERFORMANCEHOSTSWITCHPROFILE: mpmodel.BaseHostSwitchProfile_RESOURCE_TYPE_HIGHPERFORMANCEHOSTSWITCHPROFILE,
+}
+
 const nodeTypeEdge = "EdgeNode"
 const nodeTypeHost = "HostNode"
 
 var hostSwitchModeValues = []string{
-	model.StandardHostSwitch_HOST_SWITCH_MODE_STANDARD,
-	model.StandardHostSwitch_HOST_SWITCH_MODE_ENS,
-	model.StandardHostSwitch_HOST_SWITCH_MODE_ENS_INTERRUPT,
-	model.StandardHostSwitch_HOST_SWITCH_MODE_LEGACY,
+	mpmodel.StandardHostSwitch_HOST_SWITCH_MODE_STANDARD,
+	mpmodel.StandardHostSwitch_HOST_SWITCH_MODE_ENS,
+	mpmodel.StandardHostSwitch_HOST_SWITCH_MODE_ENS_INTERRUPT,
+	mpmodel.StandardHostSwitch_HOST_SWITCH_MODE_LEGACY,
 }
 
 var edgeNodeFormFactorValues = []string{
-	model.EdgeNodeDeploymentConfig_FORM_FACTOR_SMALL,
-	model.EdgeNodeDeploymentConfig_FORM_FACTOR_MEDIUM,
-	model.EdgeNodeDeploymentConfig_FORM_FACTOR_LARGE,
-	model.EdgeNodeDeploymentConfig_FORM_FACTOR_XLARGE,
+	mpmodel.EdgeNodeDeploymentConfig_FORM_FACTOR_SMALL,
+	mpmodel.EdgeNodeDeploymentConfig_FORM_FACTOR_MEDIUM,
+	mpmodel.EdgeNodeDeploymentConfig_FORM_FACTOR_LARGE,
+	mpmodel.EdgeNodeDeploymentConfig_FORM_FACTOR_XLARGE,
 }
 
 var cpuReservationValues = []string{
-	model.CPUReservation_RESERVATION_IN_SHARES_EXTRA_HIGH_PRIORITY,
-	model.CPUReservation_RESERVATION_IN_SHARES_HIGH_PRIORITY,
-	model.CPUReservation_RESERVATION_IN_SHARES_NORMAL_PRIORITY,
-	model.CPUReservation_RESERVATION_IN_SHARES_LOW_PRIORITY,
+	mpmodel.CPUReservation_RESERVATION_IN_SHARES_EXTRA_HIGH_PRIORITY,
+	mpmodel.CPUReservation_RESERVATION_IN_SHARES_HIGH_PRIORITY,
+	mpmodel.CPUReservation_RESERVATION_IN_SHARES_NORMAL_PRIORITY,
+	mpmodel.CPUReservation_RESERVATION_IN_SHARES_LOW_PRIORITY,
 }
 
 var syslogLogLevelValues = []string{
-	model.SyslogConfiguration_LOG_LEVEL_EMERGENCY,
-	model.SyslogConfiguration_LOG_LEVEL_ALERT,
-	model.SyslogConfiguration_LOG_LEVEL_CRITICAL,
-	model.SyslogConfiguration_LOG_LEVEL_ERROR,
-	model.SyslogConfiguration_LOG_LEVEL_WARNING,
-	model.SyslogConfiguration_LOG_LEVEL_NOTICE,
-	model.SyslogConfiguration_LOG_LEVEL_INFO,
-	model.SyslogConfiguration_LOG_LEVEL_DEBUG,
+	mpmodel.SyslogConfiguration_LOG_LEVEL_EMERGENCY,
+	mpmodel.SyslogConfiguration_LOG_LEVEL_ALERT,
+	mpmodel.SyslogConfiguration_LOG_LEVEL_CRITICAL,
+	mpmodel.SyslogConfiguration_LOG_LEVEL_ERROR,
+	mpmodel.SyslogConfiguration_LOG_LEVEL_WARNING,
+	mpmodel.SyslogConfiguration_LOG_LEVEL_NOTICE,
+	mpmodel.SyslogConfiguration_LOG_LEVEL_INFO,
+	mpmodel.SyslogConfiguration_LOG_LEVEL_DEBUG,
 }
 
 var syslogProtocolValues = []string{
-	model.SyslogConfiguration_PROTOCOL_TCP,
-	model.SyslogConfiguration_PROTOCOL_UDP,
-	model.SyslogConfiguration_PROTOCOL_TLS,
-	model.SyslogConfiguration_PROTOCOL_LI,
-	model.SyslogConfiguration_PROTOCOL_LI_TLS,
+	mpmodel.SyslogConfiguration_PROTOCOL_TCP,
+	mpmodel.SyslogConfiguration_PROTOCOL_UDP,
+	mpmodel.SyslogConfiguration_PROTOCOL_TLS,
+	mpmodel.SyslogConfiguration_PROTOCOL_LI,
+	mpmodel.SyslogConfiguration_PROTOCOL_LI_TLS,
 }
 
 func resourceNsxtEdgeTransportNode() *schema.Resource {
@@ -132,7 +143,7 @@ func getEdgeNodeDeploymentConfigSchema() *schema.Schema {
 			Schema: map[string]*schema.Schema{
 				"form_factor": {
 					Type:         schema.TypeString,
-					Default:      model.EdgeNodeDeploymentConfig_FORM_FACTOR_MEDIUM,
+					Default:      mpmodel.EdgeNodeDeploymentConfig_FORM_FACTOR_MEDIUM,
 					Optional:     true,
 					ValidateFunc: validation.StringInSlice(edgeNodeFormFactorValues, false),
 				},
@@ -266,7 +277,7 @@ func getEdgeNodeDeploymentConfigSchema() *schema.Schema {
 											Type:         schema.TypeString,
 											Description:  "CPU reservation in shares",
 											Optional:     true,
-											Default:      model.CPUReservation_RESERVATION_IN_SHARES_HIGH_PRIORITY,
+											Default:      mpmodel.CPUReservation_RESERVATION_IN_SHARES_HIGH_PRIORITY,
 											ValidateFunc: validation.StringInSlice(cpuReservationValues, false),
 										},
 										"memory_reservation_percentage": {
@@ -365,7 +376,7 @@ func getEdgeNodeSettingsSchema() *schema.Schema {
 								Type:         schema.TypeString,
 								Optional:     true,
 								Description:  "Log level to be redirected",
-								Default:      model.SyslogConfiguration_LOG_LEVEL_INFO,
+								Default:      mpmodel.SyslogConfiguration_LOG_LEVEL_INFO,
 								ValidateFunc: validation.StringInSlice(syslogLogLevelValues, false),
 							},
 							"port": {
@@ -381,7 +392,7 @@ func getEdgeNodeSettingsSchema() *schema.Schema {
 								Type:         schema.TypeString,
 								Optional:     true,
 								Description:  "Syslog protocol",
-								Default:      model.SyslogConfiguration_PROTOCOL_UDP,
+								Default:      mpmodel.SyslogConfiguration_PROTOCOL_UDP,
 								ValidateFunc: validation.StringInSlice(syslogProtocolValues, false),
 							},
 							"server": {
@@ -656,12 +667,12 @@ func getIPAssignmentSchema(required bool) *schema.Schema {
 	}
 }
 
-func getTransportNodeFromSchema(d *schema.ResourceData) (*model.TransportNode, error) {
+func getTransportNodeFromSchema(d *schema.ResourceData, m interface{}) (*mpmodel.TransportNode, error) {
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	tags := getMPTagsFromSchema(d)
 	failureDomain := d.Get("failure_domain").(string)
-	hostSwitchSpec, err := getHostSwitchSpecFromSchema(d, nodeTypeEdge)
+	hostSwitchSpec, err := getHostSwitchSpecFromSchema(d, m, nodeTypeEdge)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create Transport Node: %v", err)
 	}
@@ -682,15 +693,15 @@ func getTransportNodeFromSchema(d *schema.ResourceData) (*model.TransportNode, e
 	if err != nil {
 		return nil, err
 	}
-	node := model.EdgeNode{
+	node := mpmodel.EdgeNode{
 		ExternalId:       &externalID,
 		Fqdn:             &fqdn,
 		IpAddresses:      ipAddresses,
 		DeploymentConfig: deploymentConfig,
 		NodeSettings:     nodeSettings,
-		ResourceType:     model.EdgeNode__TYPE_IDENTIFIER,
+		ResourceType:     mpmodel.EdgeNode__TYPE_IDENTIFIER,
 	}
-	dataValue, errs = converter.ConvertToVapi(node, model.EdgeNodeBindingType())
+	dataValue, errs = converter.ConvertToVapi(node, mpmodel.EdgeNodeBindingType())
 
 	if errs != nil {
 		log.Printf("Failed to convert node object, errors are %v", errs)
@@ -698,7 +709,7 @@ func getTransportNodeFromSchema(d *schema.ResourceData) (*model.TransportNode, e
 	}
 	nodeDeploymentInfo := dataValue.(*data.StructValue)
 
-	obj := model.TransportNode{
+	obj := mpmodel.TransportNode{
 		Description:        &description,
 		DisplayName:        &displayName,
 		Tags:               tags,
@@ -714,7 +725,7 @@ func resourceNsxtEdgeTransportNodeCreate(d *schema.ResourceData, m interface{}) 
 	connector := getPolicyConnector(m)
 	client := nsx.NewTransportNodesClient(connector)
 
-	obj, err := getTransportNodeFromSchema(d)
+	obj, err := getTransportNodeFromSchema(d, m)
 	if err != nil {
 		return err
 	}
@@ -730,7 +741,7 @@ func resourceNsxtEdgeTransportNodeCreate(d *schema.ResourceData, m interface{}) 
 	return resourceNsxtEdgeTransportNodeRead(d, m)
 }
 
-func getEdgeNodeDeploymentConfigFromSchema(cfg interface{}) (*model.EdgeNodeDeploymentConfig, error) {
+func getEdgeNodeDeploymentConfigFromSchema(cfg interface{}) (*mpmodel.EdgeNodeDeploymentConfig, error) {
 	converter := bindings.NewTypeConverter()
 
 	if cfg == nil {
@@ -739,7 +750,7 @@ func getEdgeNodeDeploymentConfigFromSchema(cfg interface{}) (*model.EdgeNodeDepl
 	for _, ci := range cfg.([]interface{}) {
 		c := ci.(map[string]interface{})
 		formFactor := c["form_factor"].(string)
-		var nodeUserSettings *model.NodeUserSettings
+		var nodeUserSettings *mpmodel.NodeUserSettings
 		if c["node_user_settings"] != nil {
 			for _, nusi := range c["node_user_settings"].([]interface{}) {
 				nus := nusi.(map[string]interface{})
@@ -749,7 +760,7 @@ func getEdgeNodeDeploymentConfigFromSchema(cfg interface{}) (*model.EdgeNodeDepl
 				cliUsername := nus["cli_username"].(string)
 				rootPassword := nus["root_password"].(string)
 
-				nodeUserSettings = &model.NodeUserSettings{
+				nodeUserSettings = &mpmodel.NodeUserSettings{
 					CliPassword:  &cliPassword,
 					CliUsername:  &cliUsername,
 					RootPassword: &rootPassword,
@@ -771,37 +782,37 @@ func getEdgeNodeDeploymentConfigFromSchema(cfg interface{}) (*model.EdgeNodeDepl
 			defaultGatewayAddresses := interface2StringList(vdc["default_gateway_address"].([]interface{}))
 			hostID := vdc["host_id"].(string)
 			managementNetworkID := vdc["management_network_id"].(string)
-			var managemenPortSubnets []model.IPSubnet
+			var managemenPortSubnets []mpmodel.IPSubnet
 			for _, ipsi := range vdc["management_port_subnet"].([]interface{}) {
 				ips := ipsi.(map[string]interface{})
 				ipAddresses := interface2StringList(ips["ip_addresses"].([]interface{}))
 				prefixLength := int64(ips["prefix_length"].(int))
-				subnet := model.IPSubnet{
+				subnet := mpmodel.IPSubnet{
 					IpAddresses:  ipAddresses,
 					PrefixLength: &prefixLength,
 				}
 				managemenPortSubnets = append(managemenPortSubnets, subnet)
 			}
-			var reservationInfo *model.ReservationInfo
+			var reservationInfo *mpmodel.ReservationInfo
 			for _, ri := range vdc["reservation_info"].([]interface{}) {
 				rInfo := ri.(map[string]interface{})
 				cpuReservationInMhz := int64(rInfo["cpu_reservation_in_mhz"].(int))
 				cpuReservationInShares := rInfo["cpu_reservation_in_shares"].(string)
 				memoryReservationPercentage := int64(rInfo["memory_reservation_percentage"].(int))
 
-				reservationInfo = &model.ReservationInfo{
-					CpuReservation: &model.CPUReservation{
+				reservationInfo = &mpmodel.ReservationInfo{
+					CpuReservation: &mpmodel.CPUReservation{
 						ReservationInMhz:    &cpuReservationInMhz,
 						ReservationInShares: &cpuReservationInShares,
 					},
-					MemoryReservation: &model.MemoryReservation{
+					MemoryReservation: &mpmodel.MemoryReservation{
 						ReservationPercentage: &memoryReservationPercentage,
 					},
 				}
 			}
 			storageID := vdc["storage_id"].(string)
 			vcID := vdc["vc_id"].(string)
-			cfg := model.VsphereDeploymentConfig{
+			cfg := mpmodel.VsphereDeploymentConfig{
 				ComputeId:             &computeID,
 				DataNetworkIds:        dataNetworkIds,
 				ManagementNetworkId:   &managementNetworkID,
@@ -809,7 +820,7 @@ func getEdgeNodeDeploymentConfigFromSchema(cfg interface{}) (*model.EdgeNodeDepl
 				ReservationInfo:       reservationInfo,
 				StorageId:             &storageID,
 				VcId:                  &vcID,
-				PlacementType:         model.DeploymentConfig_PLACEMENT_TYPE_VSPHEREDEPLOYMENTCONFIG,
+				PlacementType:         mpmodel.DeploymentConfig_PLACEMENT_TYPE_VSPHEREDEPLOYMENTCONFIG,
 			}
 			if len(defaultGatewayAddresses) > 0 {
 				cfg.DefaultGatewayAddresses = defaultGatewayAddresses
@@ -821,14 +832,14 @@ func getEdgeNodeDeploymentConfigFromSchema(cfg interface{}) (*model.EdgeNodeDepl
 			if computeFolderID != "" {
 				cfg.ComputeFolderId = &computeFolderID
 			}
-			dataValue, errs := converter.ConvertToVapi(cfg, model.VsphereDeploymentConfigBindingType())
+			dataValue, errs := converter.ConvertToVapi(cfg, mpmodel.VsphereDeploymentConfigBindingType())
 			if errs != nil {
 				return nil, errs[0]
 			} else if dataValue != nil {
 				vmDeploymentConfig = dataValue.(*data.StructValue)
 			}
 		}
-		return &model.EdgeNodeDeploymentConfig{
+		return &mpmodel.EdgeNodeDeploymentConfig{
 			FormFactor:         &formFactor,
 			NodeUserSettings:   nodeUserSettings,
 			VmDeploymentConfig: vmDeploymentConfig,
@@ -837,7 +848,7 @@ func getEdgeNodeDeploymentConfigFromSchema(cfg interface{}) (*model.EdgeNodeDepl
 	return nil, nil
 }
 
-func getEdgeNodeSettingsFromSchema(s interface{}) (*model.EdgeNodeSettings, error) {
+func getEdgeNodeSettingsFromSchema(s interface{}) (*mpmodel.EdgeNodeSettings, error) {
 	if s == nil {
 		return nil, nil
 	}
@@ -852,21 +863,21 @@ func getEdgeNodeSettingsFromSchema(s interface{}) (*model.EdgeNodeSettings, erro
 		hostName := setting["hostname"].(string)
 		ntpServers := interface2StringList(setting["ntp_servers"].([]interface{}))
 		searchDomains := interface2StringList(setting["search_domains"].([]interface{}))
-		var syslogServers []model.SyslogConfiguration
+		var syslogServers []mpmodel.SyslogConfiguration
 		for _, sli := range setting["syslog_server"].([]interface{}) {
 			syslogServer := sli.(map[string]interface{})
 			logLevel := syslogServer["log_level"].(string)
 			port := syslogServer["port"].(string)
 			protocol := syslogServer["protocol"].(string)
 			server := syslogServer["server"].(string)
-			syslogServers = append(syslogServers, model.SyslogConfiguration{
+			syslogServers = append(syslogServers, mpmodel.SyslogConfiguration{
 				LogLevel: &logLevel,
 				Port:     &port,
 				Protocol: &protocol,
 				Server:   &server,
 			})
 		}
-		obj := &model.EdgeNodeSettings{
+		obj := &mpmodel.EdgeNodeSettings{
 			AdvancedConfiguration: advCfg,
 			AllowSshRootLogin:     &allowSSHRootLogin,
 			DnsServers:            dnsServers,
@@ -885,13 +896,13 @@ func getEdgeNodeSettingsFromSchema(s interface{}) (*model.EdgeNodeSettings, erro
 	return nil, nil
 }
 
-func getCPUConfigFromSchema(cpuConfigList []interface{}) []model.CpuCoreConfigForEnhancedNetworkingStackSwitch {
-	var cpuConfig []model.CpuCoreConfigForEnhancedNetworkingStackSwitch
+func getCPUConfigFromSchema(cpuConfigList []interface{}) []mpmodel.CpuCoreConfigForEnhancedNetworkingStackSwitch {
+	var cpuConfig []mpmodel.CpuCoreConfigForEnhancedNetworkingStackSwitch
 	for _, cc := range cpuConfigList {
 		data := cc.(map[string]interface{})
 		numLCores := int64(data["num_lcores"].(int))
 		numaNodeIndex := int64(data["numa_node_index"].(int))
-		elem := model.CpuCoreConfigForEnhancedNetworkingStackSwitch{
+		elem := mpmodel.CpuCoreConfigForEnhancedNetworkingStackSwitch{
 			NumLcores:     &numLCores,
 			NumaNodeIndex: &numaNodeIndex,
 		}
@@ -900,18 +911,43 @@ func getCPUConfigFromSchema(cpuConfigList []interface{}) []model.CpuCoreConfigFo
 	return cpuConfig
 }
 
-func getHostSwitchProfileIDsFromSchema(hswProfileList []interface{}) []model.HostSwitchProfileTypeIdEntry {
-	var hswProfiles []model.HostSwitchProfileTypeIdEntry
+func getHostSwitchProfileResourceType(m interface{}, id string) (string, error) {
+	connector := getPolicyConnector(m)
+	client := infra.NewHostSwitchProfilesClient(connector)
+	structValue, err := client.Get(id)
+
+	if err != nil {
+		return "", err
+	}
+
+	converter := bindings.NewTypeConverter()
+	baseInterface, errs := converter.ConvertToGolang(structValue, model.PolicyBaseHostSwitchProfileBindingType())
+	if errs != nil {
+		return "", errs[0]
+	}
+	base := baseInterface.(model.PolicyBaseHostSwitchProfile)
+	resourceType, ok := mpHostSwitchProfileTypeFromPolicyType[base.ResourceType]
+	if !ok {
+		return "", fmt.Errorf("MP resource type not found for %s", base.ResourceType)
+	}
+	return resourceType, nil
+}
+
+func getHostSwitchProfileIDsFromSchema(m interface{}, hswProfileList []interface{}) ([]mpmodel.HostSwitchProfileTypeIdEntry, error) {
+	var hswProfiles []mpmodel.HostSwitchProfileTypeIdEntry
 	for _, hswp := range hswProfileList {
-		key := model.BaseHostSwitchProfile_RESOURCE_TYPE_UPLINKHOSTSWITCHPROFILE
 		val := hswp.(string)
-		elem := model.HostSwitchProfileTypeIdEntry{
+		key, err := getHostSwitchProfileResourceType(m, getPolicyIDFromPath(val))
+		if err != nil {
+			return nil, err
+		}
+		elem := mpmodel.HostSwitchProfileTypeIdEntry{
 			Key:   &key,
 			Value: &val,
 		}
 		hswProfiles = append(hswProfiles, elem)
 	}
-	return hswProfiles
+	return hswProfiles, nil
 }
 
 func getIPAssignmentFromSchema(ipAssignmentList interface{}) (*data.StructValue, error) {
@@ -932,10 +968,10 @@ func getIPAssignmentFromSchema(ipAssignmentList interface{}) (*data.StructValue,
 		case "assigned_by_dhcp":
 			dhcpEnabled := iaData.(bool)
 			if dhcpEnabled {
-				elem := model.AssignedByDhcp{
-					ResourceType: model.IpAssignmentSpec_RESOURCE_TYPE_ASSIGNEDBYDHCP,
+				elem := mpmodel.AssignedByDhcp{
+					ResourceType: mpmodel.IpAssignmentSpec_RESOURCE_TYPE_ASSIGNEDBYDHCP,
 				}
-				dataValue, errs = converter.ConvertToVapi(elem, model.AssignedByDhcpBindingType())
+				dataValue, errs = converter.ConvertToVapi(elem, mpmodel.AssignedByDhcpBindingType())
 			} else {
 				return nil, fmt.Errorf("no valid IP assignment found")
 			}
@@ -945,23 +981,23 @@ func getIPAssignmentFromSchema(ipAssignmentList interface{}) (*data.StructValue,
 				defaultGateway := data["default_gateway"].(string)
 				ipList := interfaceListToStringList(data["ip_addresses"].([]interface{}))
 				subnetMask := data["subnet_mask"].(string)
-				elem := model.StaticIpListSpec{
+				elem := mpmodel.StaticIpListSpec{
 					DefaultGateway: &defaultGateway,
 					IpList:         ipList,
 					SubnetMask:     &subnetMask,
-					ResourceType:   model.IpAssignmentSpec_RESOURCE_TYPE_STATICIPLISTSPEC,
+					ResourceType:   mpmodel.IpAssignmentSpec_RESOURCE_TYPE_STATICIPLISTSPEC,
 				}
-				dataValue, errs = converter.ConvertToVapi(elem, model.StaticIpListSpecBindingType())
+				dataValue, errs = converter.ConvertToVapi(elem, mpmodel.StaticIpListSpecBindingType())
 				break
 			}
 
 		case "static_ip_pool":
 			staticIPPoolID := iaData.(string)
-			elem := model.StaticIpPoolSpec{
+			elem := mpmodel.StaticIpPoolSpec{
 				IpPoolId:     &staticIPPoolID,
-				ResourceType: model.IpAssignmentSpec_RESOURCE_TYPE_STATICIPPOOLSPEC,
+				ResourceType: mpmodel.IpAssignmentSpec_RESOURCE_TYPE_STATICIPPOOLSPEC,
 			}
-			dataValue, errs = converter.ConvertToVapi(elem, model.StaticIpPoolSpecBindingType())
+			dataValue, errs = converter.ConvertToVapi(elem, mpmodel.StaticIpPoolSpecBindingType())
 
 		default:
 			return nil, fmt.Errorf("no valid IP assignment found")
@@ -1014,10 +1050,10 @@ func getIPAssignmentData(data map[string]interface{}) (string, interface{}, erro
 	return t, d, nil
 }
 
-func getHostSwitchSpecFromSchema(d *schema.ResourceData, nodeType string) (*data.StructValue, error) {
+func getHostSwitchSpecFromSchema(d *schema.ResourceData, m interface{}, nodeType string) (*data.StructValue, error) {
 	var dataValue data.DataValue
 	var errs []error
-	var hsList []model.StandardHostSwitch
+	var hsList []mpmodel.StandardHostSwitch
 
 	converter := bindings.NewTypeConverter()
 	standardSwitchList := d.Get("standard_host_switch").([]interface{})
@@ -1028,41 +1064,47 @@ func getHostSwitchSpecFromSchema(d *schema.ResourceData, nodeType string) (*data
 		hostSwitchName := swData["host_switch_name"].(string)
 		var hostSwitchMode, hostSwitchType string
 		var isMigratePNics bool
-		var uplinks []model.VdsUplink
-		var cpuConfig []model.CpuCoreConfigForEnhancedNetworkingStackSwitch
+		var uplinks []mpmodel.VdsUplink
+		var cpuConfig []mpmodel.CpuCoreConfigForEnhancedNetworkingStackSwitch
 		if nodeType == nodeTypeHost {
 			cpuConfig = getCPUConfigFromSchema(swData["cpu_config"].([]interface{}))
 			hostSwitchMode = swData["host_switch_mode"].(string)
-			hostSwitchType = model.StandardHostSwitch_HOST_SWITCH_TYPE_VDS
+			hostSwitchType = mpmodel.StandardHostSwitch_HOST_SWITCH_TYPE_VDS
 			isMigratePNics = swData["is_migrate_pnics"].(bool)
 			uplinks = getUplinksFromSchema(swData["uplink"].([]interface{}))
 		} else if nodeType == nodeTypeEdge {
-			hostSwitchMode = model.StandardHostSwitch_HOST_SWITCH_MODE_STANDARD
-			hostSwitchType = model.StandardHostSwitch_HOST_SWITCH_TYPE_NVDS
+			hostSwitchMode = mpmodel.StandardHostSwitch_HOST_SWITCH_MODE_STANDARD
+			hostSwitchType = mpmodel.StandardHostSwitch_HOST_SWITCH_TYPE_NVDS
 		}
-		hostSwitchProfileIDs := getHostSwitchProfileIDsFromSchema(swData["host_switch_profile"].([]interface{}))
+		hostSwitchProfileIDs, err := getHostSwitchProfileIDsFromSchema(m, swData["host_switch_profile"].([]interface{}))
+		if err != nil {
+			return nil, err
+		}
 		iPAssignmentSpec, err := getIPAssignmentFromSchema(swData["ip_assignment"])
-		var pNics []model.Pnic
+		if err != nil {
+			return nil, fmt.Errorf("error parsing HostSwitchSpec schema %v", err)
+		}
+		var pNics []mpmodel.Pnic
 		for _, p := range swData["pnic"].([]interface{}) {
 			data := p.(map[string]interface{})
 			deviceName := data["device_name"].(string)
 			uplinkName := data["uplink_name"].(string)
-			elem := model.Pnic{
+			elem := mpmodel.Pnic{
 				DeviceName: &deviceName,
 				UplinkName: &uplinkName,
 			}
 			pNics = append(pNics, elem)
 		}
-		if err != nil {
-			return nil, fmt.Errorf("error parsing HostSwitchSpec schema %v", err)
-		}
-		var transportNodeSubProfileCfg []model.TransportNodeProfileSubConfig
+		var transportNodeSubProfileCfg []mpmodel.TransportNodeProfileSubConfig
 		if nodeType == nodeTypeHost {
-			transportNodeSubProfileCfg = getTransportNodeSubProfileCfg(swData["transport_node_profile_sub_config"])
+			transportNodeSubProfileCfg, err = getTransportNodeSubProfileCfg(m, swData["transport_node_profile_sub_config"])
+			if err != nil {
+				return nil, err
+			}
 		}
 		transportZoneEndpoints := getTransportZoneEndpointsFromSchema(swData["transport_zone_endpoint"].([]interface{}))
 
-		hsw := model.StandardHostSwitch{
+		hsw := mpmodel.StandardHostSwitch{
 			HostSwitchId:           &hostSwitchID,
 			HostSwitchMode:         &hostSwitchMode,
 			HostSwitchProfileIds:   hostSwitchProfileIDs,
@@ -1083,11 +1125,11 @@ func getHostSwitchSpecFromSchema(d *schema.ResourceData, nodeType string) (*data
 
 		hsList = append(hsList, hsw)
 	}
-	hostSwitchSpec := model.StandardHostSwitchSpec{
+	hostSwitchSpec := mpmodel.StandardHostSwitchSpec{
 		HostSwitches: hsList,
-		ResourceType: model.HostSwitchSpec_RESOURCE_TYPE_STANDARDHOSTSWITCHSPEC,
+		ResourceType: mpmodel.HostSwitchSpec_RESOURCE_TYPE_STANDARDHOSTSWITCHSPEC,
 	}
-	dataValue, errs = converter.ConvertToVapi(hostSwitchSpec, model.StandardHostSwitchSpecBindingType())
+	dataValue, errs = converter.ConvertToVapi(hostSwitchSpec, mpmodel.StandardHostSwitchSpecBindingType())
 
 	if errs != nil {
 		return nil, errs[0]
@@ -1097,17 +1139,17 @@ func getHostSwitchSpecFromSchema(d *schema.ResourceData, nodeType string) (*data
 	return nil, nil
 }
 
-func getTransportZoneEndpointsFromSchema(endpointList []interface{}) []model.TransportZoneEndPoint {
-	var tzEPList []model.TransportZoneEndPoint
+func getTransportZoneEndpointsFromSchema(endpointList []interface{}) []mpmodel.TransportZoneEndPoint {
+	var tzEPList []mpmodel.TransportZoneEndPoint
 	for _, endpoint := range endpointList {
 		data := endpoint.(map[string]interface{})
 		transportZoneID := data["transport_zone"].(string)
-		var transportZoneProfileIDs []model.TransportZoneProfileTypeIdEntry
+		var transportZoneProfileIDs []mpmodel.TransportZoneProfileTypeIdEntry
 		if data["transport_zone_profiles"] != nil {
 			for _, tzpID := range data["transport_zone_profiles"].([]interface{}) {
 				profileID := tzpID.(string)
-				resourceType := model.TransportZoneProfileTypeIdEntry_RESOURCE_TYPE_BFDHEALTHMONITORINGPROFILE
-				elem := model.TransportZoneProfileTypeIdEntry{
+				resourceType := mpmodel.TransportZoneProfileTypeIdEntry_RESOURCE_TYPE_BFDHEALTHMONITORINGPROFILE
+				elem := mpmodel.TransportZoneProfileTypeIdEntry{
 					ProfileId:    &profileID,
 					ResourceType: &resourceType,
 				}
@@ -1115,7 +1157,7 @@ func getTransportZoneEndpointsFromSchema(endpointList []interface{}) []model.Tra
 			}
 		}
 
-		elem := model.TransportZoneEndPoint{
+		elem := mpmodel.TransportZoneEndPoint{
 			TransportZoneId:         &transportZoneID,
 			TransportZoneProfileIds: transportZoneProfileIDs,
 		}
@@ -1124,14 +1166,14 @@ func getTransportZoneEndpointsFromSchema(endpointList []interface{}) []model.Tra
 	return tzEPList
 }
 
-func getUplinksFromSchema(uplinksList []interface{}) []model.VdsUplink {
-	var uplinks []model.VdsUplink
+func getUplinksFromSchema(uplinksList []interface{}) []mpmodel.VdsUplink {
+	var uplinks []mpmodel.VdsUplink
 	for _, ul := range uplinksList {
 		data := ul.(map[string]interface{})
 		uplinkName := data["uplink_name"].(string)
 		vdsLagName := data["vds_lag_name"].(string)
 		vdsUplinkName := data["vds_uplink_name"].(string)
-		elem := model.VdsUplink{
+		elem := mpmodel.VdsUplink{
 			UplinkName:    &uplinkName,
 			VdsLagName:    &vdsLagName,
 			VdsUplinkName: &vdsUplinkName,
@@ -1141,23 +1183,26 @@ func getUplinksFromSchema(uplinksList []interface{}) []model.VdsUplink {
 	return uplinks
 }
 
-func getTransportNodeSubProfileCfg(iface interface{}) []model.TransportNodeProfileSubConfig {
-	var cfgList []model.TransportNodeProfileSubConfig
+func getTransportNodeSubProfileCfg(m interface{}, iface interface{}) ([]mpmodel.TransportNodeProfileSubConfig, error) {
+	var cfgList []mpmodel.TransportNodeProfileSubConfig
 	if iface == nil {
-		return cfgList
+		return cfgList, nil
 	}
 	profileCfgList := iface.([]interface{})
 	for _, pCfg := range profileCfgList {
 		data := pCfg.(map[string]interface{})
 		name := data["name"].(string)
-		var swCfgOpt *model.HostSwitchConfigOption
+		var swCfgOpt *mpmodel.HostSwitchConfigOption
 		for _, cfgOpt := range data["host_switch_config_option"].([]interface{}) {
 			opt := cfgOpt.(map[string]interface{})
 			swID := opt["host_switch_id"].(string)
-			profileIDs := getHostSwitchProfileIDsFromSchema(opt["host_switch_profile"].([]interface{}))
+			profileIDs, err := getHostSwitchProfileIDsFromSchema(m, opt["host_switch_profile"].([]interface{}))
+			if err != nil {
+				return nil, err
+			}
 			iPAssignmentSpec, _ := getIPAssignmentFromSchema(opt["ip_assignment"].([]interface{}))
 			uplinks := getUplinksFromSchema(opt["uplink"].([]interface{}))
-			swCfgOpt = &model.HostSwitchConfigOption{
+			swCfgOpt = &mpmodel.HostSwitchConfigOption{
 				HostSwitchId:         &swID,
 				HostSwitchProfileIds: profileIDs,
 				IpAssignmentSpec:     iPAssignmentSpec,
@@ -1165,13 +1210,13 @@ func getTransportNodeSubProfileCfg(iface interface{}) []model.TransportNodeProfi
 			}
 		}
 
-		elem := model.TransportNodeProfileSubConfig{
+		elem := mpmodel.TransportNodeProfileSubConfig{
 			Name:                   &name,
 			HostSwitchConfigOption: swCfgOpt,
 		}
 		cfgList = append(cfgList, elem)
 	}
-	return cfgList
+	return cfgList, nil
 }
 
 func resourceNsxtEdgeTransportNodeRead(d *schema.ResourceData, m interface{}) error {
@@ -1201,11 +1246,11 @@ func resourceNsxtEdgeTransportNodeRead(d *schema.ResourceData, m interface{}) er
 	}
 
 	converter := bindings.NewTypeConverter()
-	base, errs := converter.ConvertToGolang(obj.NodeDeploymentInfo, model.EdgeNodeBindingType())
+	base, errs := converter.ConvertToGolang(obj.NodeDeploymentInfo, mpmodel.EdgeNodeBindingType())
 	if errs != nil {
 		return handleReadError(d, "TransportNode", id, errs[0])
 	}
-	node := base.(model.EdgeNode)
+	node := base.(mpmodel.EdgeNode)
 
 	if node.DeploymentConfig != nil {
 		err = setEdgeDeploymentConfigInSchema(d, node.DeploymentConfig)
@@ -1233,7 +1278,7 @@ func resourceNsxtEdgeTransportNodeRead(d *schema.ResourceData, m interface{}) er
 	return nil
 }
 
-func setEdgeNodeSettingsInSchema(d *schema.ResourceData, nodeSettings *model.EdgeNodeSettings) error {
+func setEdgeNodeSettingsInSchema(d *schema.ResourceData, nodeSettings *mpmodel.EdgeNodeSettings) error {
 	elem := getElemOrEmptyMapFromSchema(d, "node_settings")
 	elem["advanced_configuration"] = setKeyValueListForSchema(nodeSettings.AdvancedConfiguration)
 	elem["allow_ssh_root_login"] = nodeSettings.AllowSshRootLogin
@@ -1257,7 +1302,7 @@ func setEdgeNodeSettingsInSchema(d *schema.ResourceData, nodeSettings *model.Edg
 	return nil
 }
 
-func setEdgeDeploymentConfigInSchema(d *schema.ResourceData, deploymentConfig *model.EdgeNodeDeploymentConfig) error {
+func setEdgeDeploymentConfigInSchema(d *schema.ResourceData, deploymentConfig *mpmodel.EdgeNodeDeploymentConfig) error {
 	var err error
 	elem := getElemOrEmptyMapFromSchema(d, "deployment_config")
 
@@ -1286,22 +1331,22 @@ func setEdgeDeploymentConfigInSchema(d *schema.ResourceData, deploymentConfig *m
 
 func setVMDeploymentConfigInSchema(config *data.StructValue) (interface{}, error) {
 	converter := bindings.NewTypeConverter()
-	base, errs := converter.ConvertToGolang(config, model.DeploymentConfigBindingType())
+	base, errs := converter.ConvertToGolang(config, mpmodel.DeploymentConfigBindingType())
 	if errs != nil {
 		return nil, errs[0]
 	}
-	cfgType := base.(model.DeploymentConfig).PlacementType
+	cfgType := base.(mpmodel.DeploymentConfig).PlacementType
 
 	// Only VsphereDeploymentConfig is supported
-	if cfgType != model.DeploymentConfig_PLACEMENT_TYPE_VSPHEREDEPLOYMENTCONFIG {
+	if cfgType != mpmodel.DeploymentConfig_PLACEMENT_TYPE_VSPHEREDEPLOYMENTCONFIG {
 		return nil, fmt.Errorf("unsupported PlacementType %s", cfgType)
 	}
 
-	vCfg, errs := converter.ConvertToGolang(config, model.VsphereDeploymentConfigBindingType())
+	vCfg, errs := converter.ConvertToGolang(config, mpmodel.VsphereDeploymentConfigBindingType())
 	if errs != nil {
 		return nil, errs[0]
 	}
-	vSphereCfg := vCfg.(model.VsphereDeploymentConfig)
+	vSphereCfg := vCfg.(mpmodel.VsphereDeploymentConfig)
 	elem := make(map[string]interface{})
 	elem["compute_folder_id"] = vSphereCfg.ComputeFolderId
 	elem["compute_id"] = vSphereCfg.ComputeId
@@ -1340,20 +1385,20 @@ func setVMDeploymentConfigInSchema(config *data.StructValue) (interface{}, error
 func setHostSwitchSpecInSchema(d *schema.ResourceData, spec *data.StructValue, nodeType string) error {
 	converter := bindings.NewTypeConverter()
 
-	base, errs := converter.ConvertToGolang(spec, model.HostSwitchSpecBindingType())
+	base, errs := converter.ConvertToGolang(spec, mpmodel.HostSwitchSpecBindingType())
 	if errs != nil {
 		return errs[0]
 	}
-	swType := base.(model.HostSwitchSpec).ResourceType
+	swType := base.(mpmodel.HostSwitchSpec).ResourceType
 
 	switch swType {
-	case model.HostSwitchSpec_RESOURCE_TYPE_STANDARDHOSTSWITCHSPEC:
+	case mpmodel.HostSwitchSpec_RESOURCE_TYPE_STANDARDHOSTSWITCHSPEC:
 		var swList []map[string]interface{}
-		entry, errs := converter.ConvertToGolang(spec, model.StandardHostSwitchSpecBindingType())
+		entry, errs := converter.ConvertToGolang(spec, mpmodel.StandardHostSwitchSpecBindingType())
 		if errs != nil {
 			return errs[0]
 		}
-		swEntry := entry.(model.StandardHostSwitchSpec)
+		swEntry := entry.(mpmodel.StandardHostSwitchSpec)
 		for _, sw := range swEntry.HostSwitches {
 
 			// TODO - remove this when SDK is updated with NSX 4.1.2
@@ -1430,13 +1475,13 @@ func setHostSwitchSpecInSchema(d *schema.ResourceData, spec *data.StructValue, n
 		}
 		d.Set("standard_host_switch", swList)
 
-	case model.HostSwitchSpec_RESOURCE_TYPE_PRECONFIGUREDHOSTSWITCHSPEC:
+	case mpmodel.HostSwitchSpec_RESOURCE_TYPE_PRECONFIGUREDHOSTSWITCHSPEC:
 		return fmt.Errorf("preconfigured host switch is not supported")
 	}
 	return nil
 }
 
-func setTransportZoneEndpointInSchema(endpoints []model.TransportZoneEndPoint) interface{} {
+func setTransportZoneEndpointInSchema(endpoints []mpmodel.TransportZoneEndPoint) interface{} {
 	var endpointList []map[string]interface{}
 	for _, endpoint := range endpoints {
 		e := make(map[string]interface{})
@@ -1451,7 +1496,7 @@ func setTransportZoneEndpointInSchema(endpoints []model.TransportZoneEndPoint) i
 	return endpointList
 }
 
-func setUplinksFromSchema(uplinks []model.VdsUplink) interface{} {
+func setUplinksFromSchema(uplinks []mpmodel.VdsUplink) interface{} {
 	var uplinkList []map[string]interface{}
 	for _, uplink := range uplinks {
 		e := make(map[string]interface{})
@@ -1467,40 +1512,40 @@ func setIPAssignmentInSchema(spec *data.StructValue) (interface{}, error) {
 	elem := make(map[string]interface{})
 
 	converter := bindings.NewTypeConverter()
-	base, errs := converter.ConvertToGolang(spec, model.IpAssignmentSpecBindingType())
+	base, errs := converter.ConvertToGolang(spec, mpmodel.IpAssignmentSpecBindingType())
 	if errs != nil {
 		return nil, errs[0]
 	}
-	assignmentType := base.(model.IpAssignmentSpec).ResourceType
+	assignmentType := base.(mpmodel.IpAssignmentSpec).ResourceType
 
 	switch assignmentType {
-	case model.IpAssignmentSpec_RESOURCE_TYPE_ASSIGNEDBYDHCP:
+	case mpmodel.IpAssignmentSpec_RESOURCE_TYPE_ASSIGNEDBYDHCP:
 		elem["assigned_by_dhcp"] = true
 
-	case model.IpAssignmentSpec_RESOURCE_TYPE_STATICIPLISTSPEC:
+	case mpmodel.IpAssignmentSpec_RESOURCE_TYPE_STATICIPLISTSPEC:
 		e := make(map[string]interface{})
-		entry, errs := converter.ConvertToGolang(spec, model.StaticIpListSpecBindingType())
+		entry, errs := converter.ConvertToGolang(spec, mpmodel.StaticIpListSpecBindingType())
 		if errs != nil {
 			return nil, errs[0]
 		}
-		ipAsEntry := entry.(model.StaticIpListSpec)
+		ipAsEntry := entry.(mpmodel.StaticIpListSpec)
 		e["default_gateway"] = ipAsEntry.DefaultGateway
 		e["ip_addresses"] = ipAsEntry.IpList
 		e["subnet_mask"] = ipAsEntry.SubnetMask
 		elem["static_ip"] = []map[string]interface{}{e}
 
-	case model.IpAssignmentSpec_RESOURCE_TYPE_STATICIPPOOLSPEC:
-		entry, errs := converter.ConvertToGolang(spec, model.StaticIpPoolSpecBindingType())
+	case mpmodel.IpAssignmentSpec_RESOURCE_TYPE_STATICIPPOOLSPEC:
+		entry, errs := converter.ConvertToGolang(spec, mpmodel.StaticIpPoolSpecBindingType())
 		if errs != nil {
 			return nil, errs[0]
 		}
-		ipAsEntry := entry.(model.StaticIpPoolSpec)
+		ipAsEntry := entry.(mpmodel.StaticIpPoolSpec)
 		elem["static_ip_pool"] = ipAsEntry.IpPoolId
 	}
 	return []interface{}{elem}, nil
 }
 
-func setHostSwitchProfileIDsInSchema(hspIDs []model.HostSwitchProfileTypeIdEntry) []interface{} {
+func setHostSwitchProfileIDsInSchema(hspIDs []mpmodel.HostSwitchProfileTypeIdEntry) []interface{} {
 	var hostSwitchProfileIDs []interface{}
 	for _, hspID := range hspIDs {
 		hostSwitchProfileIDs = append(hostSwitchProfileIDs, hspID.Value)
@@ -1517,7 +1562,7 @@ func resourceNsxtEdgeTransportNodeUpdate(d *schema.ResourceData, m interface{}) 
 
 	client := nsx.NewTransportNodesClient(connector)
 
-	obj, err := getTransportNodeFromSchema(d)
+	obj, err := getTransportNodeFromSchema(d, m)
 	if err != nil {
 		return handleUpdateError("TransportNode", id, err)
 	}
