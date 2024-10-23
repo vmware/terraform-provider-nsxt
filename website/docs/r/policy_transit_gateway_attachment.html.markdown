@@ -2,14 +2,14 @@
 subcategory: "Beta"
 layout: "nsxt"
 page_title: "NSXT: nsxt_policy_transit_gateway_attachment"
-description: A resource to configure a TransitGatewayAttachment.
+description: A resource to configure a Transit Gateway Attachment.
 ---
 
 # nsxt_policy_transit_gateway_attachment
 
-This resource provides a method for the management of a TransitGatewayAttachment.
+This resource provides a method for the management of a Transit Gateway Attachment.
 
-This resource is applicable to NSX Global Manager, NSX Policy Manager and VMC.
+This resource is applicable to NSX Policy Manager.
 
 ## Example Usage
 
@@ -31,10 +31,6 @@ resource "nsxt_policy_gateway_connection" "test_gw_conn" {
 }
 
 resource "nsxt_policy_transit_gateway_attachment" "test_tgw_att" {
-  context {
-    project_id = nsxt_policy_project.test_proj.id
-  }
-
   display_name    = "test"
   parent_path     = nsxt_policy_transit_gateway.test_tgw.path
   connection_path = nsxt_policy_gateway_connection.test_gw_conn.path
@@ -70,4 +66,4 @@ An existing object can be [imported][docs-import] into this resource, via the fo
 terraform import nsxt_policy_transit_gateway_attachment.test PATH
 ```
 
-The above command imports TransitGatewayAttachment named `test` with the policy path `PATH`.
+The above command imports Transit Gateway Attachment named `test` with the policy path `PATH`.
