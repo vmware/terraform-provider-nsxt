@@ -114,19 +114,6 @@ var vpcSchema = map[string]*metadata.ExtendedSchema{
 			OmitIfEmpty:  true,
 		},
 	},
-	"vpc_connectivity_profile": {
-		Schema: schema.Schema{
-			Type:         schema.TypeString,
-			ValidateFunc: validatePolicyPath(),
-			Optional:     true,
-			Computed:     true,
-		},
-		Metadata: metadata.Metadata{
-			SchemaType:   "string",
-			SdkFieldName: "VpcConnectivityProfile",
-			OmitIfEmpty:  true,
-		},
-	},
 }
 
 // VPC resource needs dedicated importer since its path is VPC path,
