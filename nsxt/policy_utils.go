@@ -320,7 +320,7 @@ func parseStandardPolicyPath(path string) ([]string, error) {
 			infraPath = false
 		}
 	}
-	if len(segments) <= idx {
+	if len(segments) < idx {
 		return nil, fmt.Errorf("unexpected policy path %s", path)
 	}
 	if infraPath {

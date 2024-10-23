@@ -34,6 +34,7 @@ var accTestVpcUpdateAttributes = map[string]string{
 
 func TestAccResourceNsxtVpc_basic(t *testing.T) {
 	testResourceName := "nsxt_vpc.test"
+	attachmentResourceName := "nsxt_vpc_attachment.test"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t); testAccOnlyVPC(t) },
@@ -55,11 +56,12 @@ func TestAccResourceNsxtVpc_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "load_balancer_vpc_endpoint.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "load_balancer_vpc_endpoint.0.enabled", accTestVpcCreateAttributes["enabled"]),
 					resource.TestCheckResourceAttrSet(testResourceName, "vpc_service_profile"),
-					resource.TestCheckResourceAttrSet(testResourceName, "vpc_connectivity_profile"),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+					resource.TestCheckResourceAttrSet(attachmentResourceName, "parent_path"),
+					resource.TestCheckResourceAttrSet(attachmentResourceName, "vpc_connectivity_profile"),
 				),
 			},
 			{
@@ -74,11 +76,12 @@ func TestAccResourceNsxtVpc_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "load_balancer_vpc_endpoint.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "load_balancer_vpc_endpoint.0.enabled", accTestVpcUpdateAttributes["enabled"]),
 					resource.TestCheckResourceAttrSet(testResourceName, "vpc_service_profile"),
-					resource.TestCheckResourceAttrSet(testResourceName, "vpc_connectivity_profile"),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
+					resource.TestCheckResourceAttrSet(attachmentResourceName, "parent_path"),
+					resource.TestCheckResourceAttrSet(attachmentResourceName, "vpc_connectivity_profile"),
 				),
 			},
 			{
@@ -86,7 +89,6 @@ func TestAccResourceNsxtVpc_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtVpcExists(accTestVpcCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttrSet(testResourceName, "vpc_service_profile"),
-					resource.TestCheckResourceAttrSet(testResourceName, "vpc_connectivity_profile"),
 					resource.TestCheckResourceAttr(testResourceName, "short_id", accTestVpcUpdateAttributes["short_id"]),
 					resource.TestCheckResourceAttr(testResourceName, "load_balancer_vpc_endpoint.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
@@ -101,7 +103,6 @@ func TestAccResourceNsxtVpc_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtVpcExists(accTestVpcCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttrSet(testResourceName, "vpc_service_profile"),
-					resource.TestCheckResourceAttrSet(testResourceName, "vpc_connectivity_profile"),
 					resource.TestCheckResourceAttr(testResourceName, "load_balancer_vpc_endpoint.#", "0"),
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
 					resource.TestCheckResourceAttr(testResourceName, "short_id", accTestVpcUpdateAttributes["short_id"]),
@@ -226,8 +227,7 @@ resource "nsxt_vpc" "test" {
   private_ips  = ["%s"]
   short_id     = "%s"
 
-  vpc_service_profile      = nsxt_vpc_service_profile.test.path
-  vpc_connectivity_profile = nsxt_vpc_connectivity_profile.test.path
+  vpc_service_profile = nsxt_vpc_service_profile.test.path
 
   load_balancer_vpc_endpoint {
     enabled = %s
@@ -237,7 +237,14 @@ resource "nsxt_vpc" "test" {
     scope = "scope1"
     tag   = "tag1"
   }
-}`, testAccNsxtProjectContext(), attrMap["display_name"], attrMap["description"], attrMap["private_ips"], attrMap["short_id"], attrMap["enabled"])
+}
+
+resource "nsxt_vpc_attachment" "test" {
+  display_name             = "%s"
+  parent_path              = nsxt_vpc.test.path
+  vpc_connectivity_profile = nsxt_vpc_connectivity_profile.test.path
+}
+`, testAccNsxtProjectContext(), attrMap["display_name"], attrMap["description"], attrMap["private_ips"], attrMap["short_id"], attrMap["enabled"], attrMap["display_name"])
 }
 
 func testAccNsxtVpcMinimalistic() string {
@@ -249,7 +256,6 @@ resource "nsxt_vpc" "test" {
   short_id     = "%s"
   # TODO - remove when default profiles are supported
   vpc_service_profile      = nsxt_vpc_service_profile.test.path
-  vpc_connectivity_profile = nsxt_vpc_connectivity_profile.test.path
 }`, testAccNsxtProjectContext(), accTestVpcUpdateAttributes["display_name"], accTestVpcUpdateAttributes["short_id"])
 }
 
@@ -262,6 +268,5 @@ resource "nsxt_vpc" "test" {
   display_name = "%s"
   # TODO - remove when default profiles are supported
   vpc_service_profile      = nsxt_vpc_service_profile.test.path
-  vpc_connectivity_profile = nsxt_vpc_connectivity_profile.test.path
 }`, testAccNsxtProjectContext(), accTestVpcUpdateAttributes["short_id"], accTestVpcUpdateAttributes["display_name"])
 }
