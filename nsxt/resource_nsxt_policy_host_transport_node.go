@@ -138,7 +138,7 @@ func policyHostTransportNodePatch(siteID, epID, htnID string, d *schema.Resource
 	displayName := d.Get("display_name").(string)
 	tags := getPolicyTagsFromSchema(d)
 	discoveredNodeID := d.Get("discovered_node_id").(string)
-	hostSwitchSpec, err := getHostSwitchSpecFromSchema(d, nodeTypeHost)
+	hostSwitchSpec, err := getHostSwitchSpecFromSchema(d, m, nodeTypeHost)
 	revision := int64(d.Get("revision").(int))
 	if err != nil {
 		return fmt.Errorf("failed to create hostSwitchSpec of HostTransportNode: %v", err)
