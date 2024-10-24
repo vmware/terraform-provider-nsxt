@@ -19,7 +19,7 @@ func resourceNsxtDhcpRelayService() *schema.Resource {
 		Update: resourceNsxtDhcpRelayServiceUpdate,
 		Delete: resourceNsxtDhcpRelayServiceDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		DeprecationMessage: mpObjectResourceDeprecationMessage,
 		Schema: map[string]*schema.Schema{

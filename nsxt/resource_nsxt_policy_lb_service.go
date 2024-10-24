@@ -41,7 +41,7 @@ func resourceNsxtPolicyLBService() *schema.Resource {
 		Update: resourceNsxtPolicyLBServiceUpdate,
 		Delete: resourceNsxtPolicyLBServiceDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{

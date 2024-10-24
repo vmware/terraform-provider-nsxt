@@ -79,7 +79,7 @@ func resourceNsxtEdgeTransportNode() *schema.Resource {
 		Update: resourceNsxtEdgeTransportNodeUpdate,
 		Delete: resourceNsxtEdgeTransportNodeDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Schema: map[string]*schema.Schema{
 			"revision":     getRevisionSchema(),

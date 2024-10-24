@@ -20,7 +20,7 @@ func resourceNsxtLbHTTPResponseRewriteRule() *schema.Resource {
 		Update: resourceNsxtLbHTTPResponseRewriteRuleUpdate,
 		Delete: resourceNsxtLbHTTPRuleDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		DeprecationMessage: mpObjectResourceDeprecationMessage,
 		Schema: map[string]*schema.Schema{
