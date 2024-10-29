@@ -273,7 +273,7 @@ func uploadPrecheckAndUpgradeBundle(d *schema.ResourceData, m interface{}) error
 	precheckBundleType := nsxModel.UpgradeBundleFetchRequest_BUNDLE_TYPE_PRE_UPGRADE
 	precheckBundleURL := d.Get("precheck_bundle_url").(string)
 	if !precheckBundleCompatibilityCheck(precheckBundleURL) {
-		return fmt.Errorf("Precheck bundle is only supported and is required for NSXT version >= 4.1.1")
+		return fmt.Errorf("Precheck bundle is only supported for NSXT version >= 4.1.1")
 	}
 	if len(precheckBundleURL) > 0 {
 		err := uploadUpgradeBundle(d, m, precheckBundleType)
@@ -290,9 +290,6 @@ func uploadPrecheckAndUpgradeBundle(d *schema.ResourceData, m interface{}) error
 
 func precheckBundleCompatibilityCheck(precheckBundleURL string) bool {
 	if util.NsxVersionLower("4.1.1") && len(precheckBundleURL) > 0 {
-		return false
-	}
-	if util.NsxVersionHigherOrEqual("4.1.1") && len(precheckBundleURL) == 0 {
 		return false
 	}
 	return true
