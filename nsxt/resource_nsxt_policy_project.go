@@ -206,6 +206,27 @@ func patchVpcSecurityProfile(d *schema.ResourceData, connector client.Connector,
 	return client.Patch(defaultOrgID, projectID, "default", obj)
 }
 
+func setVpcSecurityProfileInSchema(d *schema.ResourceData, connector client.Connector, projectID string) error {
+	client := projects.NewVpcSecurityProfilesClient(connector)
+	obj, err := client.Get(defaultOrgID, projectID, "default")
+	if err != nil {
+		return err
+	}
+
+	enabled := false
+	if obj.NorthSouthFirewall != nil && obj.NorthSouthFirewall.Enabled != nil {
+		enabled = *obj.NorthSouthFirewall.Enabled
+	}
+
+	nsfw := map[string]interface{}{"enabled": &enabled}
+	nsfws := []interface{}{nsfw}
+	dsp := map[string]interface{}{"north_south_firewall": nsfws}
+	dsps := []interface{}{dsp}
+
+	d.Set("default_security_profile", dsps)
+	return nil
+}
+
 func resourceNsxtPolicyProjectCreate(d *schema.ResourceData, m interface{}) error {
 
 	// Initialize resource Id and verify this ID is not yet used
@@ -259,6 +280,10 @@ func resourceNsxtPolicyProjectRead(d *schema.ResourceData, m interface{}) error 
 	}
 	d.Set("site_info", siteInfosList)
 	d.Set("tier0_gateway_paths", obj.Tier0s)
+	err = setVpcSecurityProfileInSchema(d, connector, id)
+	if err != nil {
+		return err
+	}
 	if util.NsxVersionHigherOrEqual("4.2.0") {
 		d.Set("activate_default_dfw_rules", obj.ActivateDefaultDfwRules)
 	}
