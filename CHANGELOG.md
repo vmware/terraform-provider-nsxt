@@ -1,3 +1,18 @@
+## 3.7.1 (November 8, 2024)
+
+BUG FIXES:
+* Fix documentation issue of reverting fabric and user management resources back to `Beta` ([#1433](https://github.com/vmware/terraform-provider-nsxt/pull/1433))
+* `resource/nsxt_policy_vm_tags`: Fix inventory VM search on VMC platform ([#1412](https://github.com/vmware/terraform-provider-nsxt/pull/1412))
+* `resource/nsxt_edge_transport_node`, `resource/nsxt_policy_host_transport_node`: Allow configuring different host switch profile types, rather than only uplink profile type ([#1442](https://github.com/vmware/terraform-provider-nsxt/pull/1442))
+* `resource/nsxt_edge_transport_node`, `resource/nsxt_policy_host_transport_node`, `resource/nsxt_policy_host_transport_node_profile`: Remove default for `host_switch_mode` and define it as Computed, following platform behavior ([#1386](https://github.com/vmware/terraform-provider-nsxt/pull/1386))
+* `resource/nsxt_upgrade_run`: Fix potential crash when `upgrade_mode` is not specified ([#1404](https://github.com/vmware/terraform-provider-nsxt/pull/1404))
+* `resource/nsxt_upgrade_run`: Stage host upgrade in vLCM when flagged to do so ([#1411](https://github.com/vmware/terraform-provider-nsxt/pull/1411))
+* `resource/nsxt_upgrade_run`: Handle VLCM upgrade as potentially partial ([#1390](https://github.com/vmware/terraform-provider-nsxt/pull/1390))
+
+IMPROVEMENTS:
+
+* Disable MP resources for NSX 9.0.0 and onwards, due to those objects not being supported anymore on the backend ([#1384](https://github.com/vmware/terraform-provider-nsxt/pull/1384))
+
 ## 3.7.0 (October 9, 2024)
 
 UPGRADE SUPPORT:
