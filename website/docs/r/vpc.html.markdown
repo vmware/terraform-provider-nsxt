@@ -41,7 +41,6 @@ The following arguments are supported:
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `private_ips` - (Optional) IP CIDRs to manage private IPv4 subnets.
 * `vpc_service_profile` - (Optional) The path of the configuration profile of the VPC services.
-* `vpc_connectivity_profile` - (Optional) The path of the configuration profile for the VPC transit gateway attachment.
 * `load_balancer_vpc_endpoint` - (Optional) Configuration for Load Balancer Endpoint
   * `enabled` - (Optional) Flag to indicate whether support for load balancing is needed. Setting this flag to `true` causes allocation of private IPs from the private block associated with this VPC for the use of the load balancer.
 * `ip_address_type` - (Optional) This defines the IP address type that will be allocated for subnets.
