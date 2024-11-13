@@ -20,7 +20,7 @@ var accTestVpcIpAddressAllocationCreateAttributes = map[string]string{
 var accTestVpcIpAddressAllocationUpdateAttributes = map[string]string{
 	"display_name":    getAccTestResourceName(),
 	"description":     "terraform updated",
-	"allocation_size": "1",
+	"allocation_size": "2",
 }
 
 func TestAccResourceNsxtVpcIpAddressAllocation_basic(t *testing.T) {
@@ -48,7 +48,6 @@ func TestAccResourceNsxtVpcIpAddressAllocation_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 				),
 			},
-			/* For now, UPDATE is not supported for this resource
 			{
 				Config: testAccNsxtVpcIpAddressAllocationTemplate(false),
 				Check: resource.ComposeTestCheckFunc(
@@ -75,7 +74,6 @@ func TestAccResourceNsxtVpcIpAddressAllocation_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
 				),
 			},
-			*/
 		},
 	})
 }

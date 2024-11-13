@@ -48,7 +48,6 @@ func TestAccResourceNsxtPolicyProjectIpAddressAllocation_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "1"),
 				),
 			},
-			/* TODO - enable when/if IP allocation update is supported on NSX
 			{
 				Config: testAccNsxtPolicyProjectIpAddressAllocationTemplate(false),
 				Check: resource.ComposeTestCheckFunc(
@@ -73,7 +72,7 @@ func TestAccResourceNsxtPolicyProjectIpAddressAllocation_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
 				),
-			},*/
+			},
 		},
 	})
 }
@@ -176,7 +175,7 @@ resource "nsxt_policy_project_ip_address_allocation" "test" {
 
 data "nsxt_policy_project_ip_address_allocation" "test" {
   %s
-  ip_allocations = nsxt_policy_project_ip_address_allocation.ip_allocations
+  allocation_ips = nsxt_policy_project_ip_address_allocation.test.allocation_ips
 }`, os.Getenv("NSXT_VPC_PROJECT_ID"), testAccNsxtProjectContext(), attrMap["display_name"], attrMap["description"], attrMap["allocation_size"], testAccNsxtProjectContext())
 }
 
@@ -195,6 +194,6 @@ resource "nsxt_policy_project_ip_address_allocation" "test" {
 
 data "nsxt_policy_project_ip_address_allocation" "test" {
   %s
-  ip_allocations = nsxt_policy_project_ip_address_allocation.ip_allocations
+  allocation_ips = nsxt_policy_project_ip_address_allocation.test.allocation_ips
 }`, os.Getenv("NSXT_VPC_PROJECT_ID"), testAccNsxtProjectContext(), accTestProjectIpAddressAllocationUpdateAttributes["display_name"], accTestProjectIpAddressAllocationUpdateAttributes["allocation_size"], testAccNsxtProjectContext())
 }

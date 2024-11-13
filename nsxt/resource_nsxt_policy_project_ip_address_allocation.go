@@ -181,6 +181,11 @@ func resourceNsxtPolicyProjectIpAddressAllocationUpdate(d *schema.ResourceData, 
 		Revision:    &revision,
 	}
 
+	elem := reflect.ValueOf(&obj).Elem()
+	if err := metadata.SchemaToStruct(elem, d, projectIpAddressAllocationSchema, "", nil); err != nil {
+		return err
+	}
+
 	// Only the above attributes can be updated, others force recreation
 	client := clientLayer.NewIpAddressAllocationsClient(connector)
 	_, err := client.Update(parents[0], parents[1], id, obj)
