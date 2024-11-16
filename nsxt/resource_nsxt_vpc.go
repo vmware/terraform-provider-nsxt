@@ -275,7 +275,7 @@ func resourceNsxtVpcDelete(d *schema.ResourceData, m interface{}) error {
 	parents := getVpcParentsFromContext(getSessionContext(d, m))
 
 	client := clientLayer.NewVpcsClient(connector)
-	err := client.Delete(parents[0], parents[1], id)
+	err := client.Delete(parents[0], parents[1], id, nil)
 
 	if err != nil {
 		return handleDeleteError("Vpc", id, err)

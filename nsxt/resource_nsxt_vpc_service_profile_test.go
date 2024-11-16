@@ -16,7 +16,6 @@ var accTestPolicyVpcServiceProfileCreateAttributes = map[string]string{
 	"description":      "terraform created",
 	"ntp_servers":      "5.5.5.5",
 	"lease_time":       "50840",
-	"mode":             "DHCP_SERVER",
 	"dns_server_ips":   "7.7.7.7",
 	"server_addresses": "11.11.11.11",
 }
@@ -26,7 +25,6 @@ var accTestPolicyVpcServiceProfileUpdateAttributes = map[string]string{
 	"description":      "terraform updated",
 	"ntp_servers":      "5.5.5.7",
 	"lease_time":       "148000",
-	"mode":             "DHCP_SERVER",
 	"dns_server_ips":   "7.7.7.2",
 	"server_addresses": "11.11.11.111",
 }
@@ -50,12 +48,13 @@ func TestAccResourceNsxtVpcServiceProfile_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testDataSourceName, "description"),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyVpcServiceProfileCreateAttributes["display_name"]),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyVpcServiceProfileCreateAttributes["description"]),
-					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.ntp_servers.0", accTestPolicyVpcServiceProfileCreateAttributes["ntp_servers"]),
-					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dns_client_config.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.lease_time", accTestPolicyVpcServiceProfileCreateAttributes["lease_time"]),
-					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.mode", accTestPolicyVpcServiceProfileCreateAttributes["mode"]),
+					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dhcp_relay_config.#", "0"),
-					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dns_client_config.0.dns_server_ips.0", accTestPolicyVpcServiceProfileCreateAttributes["dns_server_ips"]),
+					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dhcp_server_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dhcp_server_config.0.ntp_servers.0", accTestPolicyVpcServiceProfileCreateAttributes["ntp_servers"]),
+					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dhcp_server_config.0.lease_time", accTestPolicyVpcServiceProfileCreateAttributes["lease_time"]),
+					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dhcp_server_config.0.dns_client_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dhcp_server_config.0.dns_client_config.0.dns_server_ips.0", accTestPolicyVpcServiceProfileCreateAttributes["dns_server_ips"]),
 
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -72,13 +71,13 @@ func TestAccResourceNsxtVpcServiceProfile_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testDataSourceName, "description"),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyVpcServiceProfileCreateAttributes["display_name"]),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyVpcServiceProfileCreateAttributes["description"]),
-					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.ntp_servers.0", accTestPolicyVpcServiceProfileCreateAttributes["ntp_servers"]),
-					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dns_client_config.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.lease_time", accTestPolicyVpcServiceProfileCreateAttributes["lease_time"]),
-					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.mode", accTestPolicyVpcServiceProfileCreateAttributes["mode"]),
+					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dhcp_relay_config.#", "0"),
-					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dns_client_config.0.dns_server_ips.0", accTestPolicyVpcServiceProfileCreateAttributes["dns_server_ips"]),
-
+					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dhcp_server_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dhcp_server_config.0.ntp_servers.0", accTestPolicyVpcServiceProfileCreateAttributes["ntp_servers"]),
+					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dhcp_server_config.0.lease_time", accTestPolicyVpcServiceProfileCreateAttributes["lease_time"]),
+					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dhcp_server_config.0.dns_client_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dhcp_server_config.0.dns_client_config.0.dns_server_ips.0", accTestPolicyVpcServiceProfileCreateAttributes["dns_server_ips"]),
 					resource.TestCheckResourceAttrSet(testResourceName, "qos_profile"),
 					resource.TestCheckResourceAttrSet(testResourceName, "spoof_guard_profile"),
 					resource.TestCheckResourceAttrSet(testResourceName, "ip_discovery_profile"),
@@ -91,18 +90,19 @@ func TestAccResourceNsxtVpcServiceProfile_basic(t *testing.T) {
 				),
 			},
 			{
+				// update values, no profiles
 				Config: testAccNsxtVpcServiceProfileTemplate(false, false),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtVpcServiceProfileExists(accTestPolicyVpcServiceProfileUpdateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyVpcServiceProfileUpdateAttributes["display_name"]),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyVpcServiceProfileUpdateAttributes["description"]),
 					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.ntp_servers.0", accTestPolicyVpcServiceProfileUpdateAttributes["ntp_servers"]),
-					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dns_client_config.#", "1"),
-					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.lease_time", accTestPolicyVpcServiceProfileUpdateAttributes["lease_time"]),
-					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.mode", accTestPolicyVpcServiceProfileUpdateAttributes["mode"]),
 					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dhcp_relay_config.#", "0"),
-					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dns_client_config.0.dns_server_ips.0", accTestPolicyVpcServiceProfileUpdateAttributes["dns_server_ips"]),
+					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dhcp_server_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dhcp_server_config.0.ntp_servers.0", accTestPolicyVpcServiceProfileUpdateAttributes["ntp_servers"]),
+					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dhcp_server_config.0.lease_time", accTestPolicyVpcServiceProfileUpdateAttributes["lease_time"]),
+					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dhcp_server_config.0.dns_client_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dhcp_server_config.0.dns_client_config.0.dns_server_ips.0", accTestPolicyVpcServiceProfileUpdateAttributes["dns_server_ips"]),
 
 					resource.TestCheckResourceAttr(testResourceName, "qos_profile", ""),
 					resource.TestCheckResourceAttr(testResourceName, "spoof_guard_profile", ""),
@@ -116,6 +116,20 @@ func TestAccResourceNsxtVpcServiceProfile_basic(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccNsxtVpcServiceProfileDhcpRelay(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtVpcServiceProfileExists(accTestPolicyVpcServiceProfileCreateAttributes["display_name"], testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "description", ""),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dhcp_relay_config.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.0.dhcp_relay_config.0.server_addresses.#", "1"),
+				),
+			},
+			{
 				Config: testAccNsxtVpcServiceProfileMinimalistic(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtVpcServiceProfileExists(accTestPolicyVpcServiceProfileCreateAttributes["display_name"], testResourceName),
@@ -124,6 +138,7 @@ func TestAccResourceNsxtVpcServiceProfile_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+					resource.TestCheckResourceAttr(testResourceName, "dhcp_config.#", "1"),
 				),
 			},
 		},
@@ -256,13 +271,13 @@ resource "nsxt_vpc_service_profile" "test" {
   description  = "%s"
 
   dhcp_config {
-    ntp_servers = ["%s"]
+    dhcp_server_config {
+      ntp_servers = ["%s"]
+      lease_time = %s
 
-    lease_time = %s
-    mode = "%s"
-
-    dns_client_config {
-      dns_server_ips = ["%s"]
+      dns_client_config {
+        dns_server_ips = ["%s"]
+      }
     }
   }
 
@@ -277,7 +292,21 @@ data "nsxt_vpc_service_profile" "test" {
   display_name = "%s"
 
   depends_on = [nsxt_vpc_service_profile.test]
-}`, testAccNsxtProjectContext(), profileAssignment, attrMap["display_name"], attrMap["description"], attrMap["ntp_servers"], attrMap["lease_time"], attrMap["mode"], attrMap["dns_server_ips"], testAccNsxtProjectContext(), attrMap["display_name"])
+}`, testAccNsxtProjectContext(), profileAssignment, attrMap["display_name"], attrMap["description"], attrMap["ntp_servers"], attrMap["lease_time"], attrMap["dns_server_ips"], testAccNsxtProjectContext(), attrMap["display_name"])
+}
+
+func testAccNsxtVpcServiceProfileDhcpRelay() string {
+	return fmt.Sprintf(`
+resource "nsxt_vpc_service_profile" "test" {
+  %s
+  display_name = "%s"
+  dhcp_config {
+    dhcp_relay_config {
+      server_addresses = ["%s"]
+    }
+  }
+  
+}`, testAccNsxtProjectContext(), accTestPolicyVpcServiceProfileUpdateAttributes["display_name"], accTestPolicyVpcServiceProfileUpdateAttributes["server_addresses"])
 }
 
 func testAccNsxtVpcServiceProfileMinimalistic() string {
@@ -285,9 +314,8 @@ func testAccNsxtVpcServiceProfileMinimalistic() string {
 resource "nsxt_vpc_service_profile" "test" {
   %s
   display_name = "%s"
-  
   dhcp_config {
-    mode = "%s"
   }
-}`, testAccNsxtProjectContext(), accTestPolicyVpcServiceProfileUpdateAttributes["display_name"], accTestPolicyVpcServiceProfileUpdateAttributes["mode"])
+  
+}`, testAccNsxtProjectContext(), accTestPolicyVpcServiceProfileUpdateAttributes["display_name"])
 }

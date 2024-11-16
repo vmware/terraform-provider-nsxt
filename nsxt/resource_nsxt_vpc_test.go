@@ -196,7 +196,9 @@ resource "nsxt_vpc_service_profile" "test" {
   %s
   display_name = "%s"
   dhcp_config {
-    mode = "DHCP_SERVER"
+    dhcp_server_config {
+      lease_time = 15600
+    }
   }
 }
 

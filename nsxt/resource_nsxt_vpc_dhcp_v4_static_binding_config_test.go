@@ -207,9 +207,9 @@ resource "nsxt_vpc_subnet" "test" {
   ip_addresses = ["192.168.240.0/26"]
   access_mode = "Isolated"
   dhcp_config {
-    enable_dhcp = true
-    static_pool_config {
-      ipv4_pool_size = 32
+    mode = "DHCP_SERVER"
+    dhcp_server_additional_config {
+      reserved_ip_ranges = ["192.168.240.40-192.168.240.60"]
     }
   }
 }
