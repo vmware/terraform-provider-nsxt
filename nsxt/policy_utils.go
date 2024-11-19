@@ -311,6 +311,9 @@ func parseStandardPolicyPath(path string) ([]string, error) {
 		// append org and project
 		parents = append(parents, segments[2])
 		parents = append(parents, segments[4])
+		if len(segments) == 5 { // This is a project path, no further parsing is required
+			return parents, nil
+		}
 		idx = 5
 
 		if len(segments) > 6 && segments[5] == "vpcs" {
