@@ -28,6 +28,7 @@ func TestAccDataSourceNsxtPolicyTransportZone_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(testResourceName, "id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "is_default"),
+					resource.TestCheckResourceAttrSet(testResourceName, "realized_id"),
 					resource.TestCheckResourceAttr(testResourceName, "transport_type", "VLAN_BACKED"),
 				),
 			},
