@@ -9,7 +9,6 @@ import (
 	"reflect"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	clientLayer "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects"
@@ -61,110 +60,6 @@ var vpcServiceProfileSchema = map[string]*metadata.ExtendedSchema{
 			Required: true,
 			Elem: &metadata.ExtendedResource{
 				Schema: map[string]*metadata.ExtendedSchema{
-					"ntp_servers": {
-						Schema: schema.Schema{
-							Type: schema.TypeList,
-							Elem: &metadata.ExtendedSchema{
-								Schema: schema.Schema{
-									Type:         schema.TypeString,
-									ValidateFunc: validateSingleIPOrHostName(),
-								},
-								Metadata: metadata.Metadata{
-									SchemaType: "string",
-								},
-							},
-							Optional: true,
-						},
-						Metadata: metadata.Metadata{
-							SchemaType:   "list",
-							SdkFieldName: "NtpServers",
-						},
-					},
-					"dns_client_config": {
-						Schema: schema.Schema{
-							Type:     schema.TypeList,
-							MaxItems: 1,
-							Elem: &metadata.ExtendedResource{
-								Schema: map[string]*metadata.ExtendedSchema{
-									"dns_server_ips": {
-										Schema: schema.Schema{
-											Type: schema.TypeList,
-											Elem: &metadata.ExtendedSchema{
-												Schema: schema.Schema{
-													Type: schema.TypeString,
-												},
-												Metadata: metadata.Metadata{
-													SchemaType: "string",
-												},
-											},
-											Optional: true,
-										},
-										Metadata: metadata.Metadata{
-											SchemaType:   "list",
-											SdkFieldName: "DnsServerIps",
-										},
-									},
-								},
-							},
-							Optional: true,
-						},
-						Metadata: metadata.Metadata{
-							SchemaType:   "struct",
-							SdkFieldName: "DnsClientConfig",
-							ReflectType:  reflect.TypeOf(model.DnsClientConfig{}),
-						},
-					},
-					"lease_time": {
-						Schema: schema.Schema{
-							Type:     schema.TypeInt,
-							Optional: true,
-							Default:  86400,
-						},
-						Metadata: metadata.Metadata{
-							SchemaType:   "int",
-							SdkFieldName: "LeaseTime",
-						},
-					},
-					"mode": {
-						Schema: schema.Schema{
-							Type:         schema.TypeString,
-							ValidateFunc: validation.StringInSlice(vpcServiceProfileModeValues, false),
-							Optional:     true,
-							Default:      model.VpcProfileDhcpConfig_MODE_SERVER,
-						},
-						Metadata: metadata.Metadata{
-							SchemaType:   "string",
-							SdkFieldName: "Mode",
-						},
-					},
-					"advanced_config": {
-						Schema: schema.Schema{
-							Type:     schema.TypeList,
-							MaxItems: 1,
-							Elem: &metadata.ExtendedResource{
-								Schema: map[string]*metadata.ExtendedSchema{
-									"is_distributed_dhcp": {
-										Schema: schema.Schema{
-											Type:     schema.TypeBool,
-											Optional: true,
-											Default:  true,
-										},
-										Metadata: metadata.Metadata{
-											SchemaType:   "bool",
-											SdkFieldName: "IsDistributedDhcp",
-										},
-									},
-								},
-							},
-							Optional: true,
-							Computed: true,
-						},
-						Metadata: metadata.Metadata{
-							SchemaType:   "struct",
-							SdkFieldName: "AdvancedConfig",
-							ReflectType:  reflect.TypeOf(model.VpcDhcpAdvancedConfig{}),
-						},
-					},
 					"dhcp_relay_config": {
 						Schema: schema.Schema{
 							Type:     schema.TypeList,
@@ -197,6 +92,114 @@ var vpcServiceProfileSchema = map[string]*metadata.ExtendedSchema{
 							SchemaType:   "struct",
 							SdkFieldName: "DhcpRelayConfig",
 							ReflectType:  reflect.TypeOf(model.VpcDhcpRelayConfig{}),
+						},
+					},
+					"dhcp_server_config": {
+						Schema: schema.Schema{
+							Type:     schema.TypeList,
+							MaxItems: 1,
+							Elem: &metadata.ExtendedResource{
+								Schema: map[string]*metadata.ExtendedSchema{
+									"dns_client_config": {
+										Schema: schema.Schema{
+											Type:     schema.TypeList,
+											MaxItems: 1,
+											Elem: &metadata.ExtendedResource{
+												Schema: map[string]*metadata.ExtendedSchema{
+													"dns_server_ips": {
+														Schema: schema.Schema{
+															Type: schema.TypeList,
+															Elem: &metadata.ExtendedSchema{
+																Schema: schema.Schema{
+																	Type: schema.TypeString,
+																},
+																Metadata: metadata.Metadata{
+																	SchemaType: "string",
+																},
+															},
+															Optional: true,
+														},
+														Metadata: metadata.Metadata{
+															SchemaType:   "list",
+															SdkFieldName: "DnsServerIps",
+														},
+													},
+												},
+											},
+											Optional: true,
+										},
+										Metadata: metadata.Metadata{
+											SchemaType:   "struct",
+											SdkFieldName: "DnsClientConfig",
+											ReflectType:  reflect.TypeOf(model.DnsClientConfig{}),
+										},
+									},
+									"lease_time": {
+										Schema: schema.Schema{
+											Type:     schema.TypeInt,
+											Optional: true,
+											Default:  86400,
+										},
+										Metadata: metadata.Metadata{
+											SchemaType:   "int",
+											SdkFieldName: "LeaseTime",
+										},
+									},
+									"ntp_servers": {
+										Schema: schema.Schema{
+											Type: schema.TypeList,
+											Elem: &metadata.ExtendedSchema{
+												Schema: schema.Schema{
+													Type:         schema.TypeString,
+													ValidateFunc: validateSingleIPOrHostName(),
+												},
+												Metadata: metadata.Metadata{
+													SchemaType: "string",
+												},
+											},
+											Optional: true,
+										},
+										Metadata: metadata.Metadata{
+											SchemaType:   "list",
+											SdkFieldName: "NtpServers",
+										},
+									},
+									"advanced_config": {
+										Schema: schema.Schema{
+											Type:     schema.TypeList,
+											MaxItems: 1,
+											Elem: &metadata.ExtendedResource{
+												Schema: map[string]*metadata.ExtendedSchema{
+													"is_distributed_dhcp": {
+														Schema: schema.Schema{
+															Type:     schema.TypeBool,
+															Optional: true,
+															Computed: true,
+														},
+														Metadata: metadata.Metadata{
+															SchemaType:   "bool",
+															SdkFieldName: "IsDistributedDhcp",
+														},
+													},
+												},
+											},
+											Optional: true,
+											Computed: true,
+										},
+										Metadata: metadata.Metadata{
+											SchemaType:   "struct",
+											SdkFieldName: "AdvancedConfig",
+											ReflectType:  reflect.TypeOf(model.VpcDhcpAdvancedConfig{}),
+										},
+									},
+								},
+							},
+							Optional: true,
+						},
+						Metadata: metadata.Metadata{
+							SchemaType:   "struct",
+							SdkFieldName: "DhcpServerConfig",
+							ReflectType:  reflect.TypeOf(model.VpcDhcpServerConfig{}),
 						},
 					},
 				},
@@ -299,6 +302,11 @@ func resourceNsxtVpcServiceProfileCreate(d *schema.ResourceData, m interface{}) 
 		return err
 	}
 
+	if obj.DhcpConfig == nil {
+		// NSX requires to send this struct even if empty
+		obj.DhcpConfig = &model.VpcProfileDhcpConfig{}
+	}
+
 	log.Printf("[INFO] Creating VpcServiceProfile with ID %s", id)
 
 	client := clientLayer.NewVpcServiceProfilesClient(connector)
@@ -368,6 +376,12 @@ func resourceNsxtVpcServiceProfileUpdate(d *schema.ResourceData, m interface{}) 
 	if err := metadata.SchemaToStruct(elem, d, vpcServiceProfileSchema, "", nil); err != nil {
 		return err
 	}
+
+	if obj.DhcpConfig == nil {
+		// NSX requires to send this struct even if empty
+		obj.DhcpConfig = &model.VpcProfileDhcpConfig{}
+	}
+
 	client := clientLayer.NewVpcServiceProfilesClient(connector)
 	_, err := client.Update(parents[0], parents[1], id, obj)
 	if err != nil {

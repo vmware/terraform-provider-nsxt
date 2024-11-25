@@ -33,6 +33,12 @@ var vpcSubnetConnectivityStateValues = []string{
 	model.SubnetAdvancedConfig_CONNECTIVITY_STATE_DISCONNECTED,
 }
 
+var vpcSubnetModeValues = []string{
+	model.SubnetDhcpConfig_MODE_SERVER,
+	model.SubnetDhcpConfig_MODE_RELAY,
+	model.SubnetDhcpConfig_MODE_DEACTIVATED,
+}
+
 var vpcSubnetSchema = map[string]*metadata.ExtendedSchema{
 	"nsx_id":       metadata.GetExtendedSchema(getNsxIDSchema()),
 	"path":         metadata.GetExtendedSchema(getPathSchema()),
@@ -233,6 +239,7 @@ var vpcSubnetSchema = map[string]*metadata.ExtendedSchema{
 			},
 			Optional: true,
 			Computed: true,
+			ForceNew: true,
 		},
 		Metadata: metadata.Metadata{
 			SchemaType:   "list",
@@ -259,209 +266,114 @@ var vpcSubnetSchema = map[string]*metadata.ExtendedSchema{
 			Computed: true,
 			Elem: &metadata.ExtendedResource{
 				Schema: map[string]*metadata.ExtendedSchema{
-					"ntp_servers": {
-						Schema: schema.Schema{
-							Type: schema.TypeList,
-							Elem: &metadata.ExtendedSchema{
-								Schema: schema.Schema{
-									Type:         schema.TypeString,
-									ValidateFunc: validateSingleIPOrHostName(),
-								},
-								Metadata: metadata.Metadata{
-									SchemaType: "string",
-								},
-							},
-							Optional: true,
-						},
-						Metadata: metadata.Metadata{
-							SchemaType:   "list",
-							SdkFieldName: "NtpServers",
-						},
-					},
-					"lease_time": {
-						Schema: schema.Schema{
-							Type:     schema.TypeInt,
-							Optional: true,
-							Default:  86400,
-						},
-						Metadata: metadata.Metadata{
-							SchemaType:   "int",
-							SdkFieldName: "LeaseTime",
-						},
-					},
-					"dhcp_relay_config_path": {
+					"mode": {
 						Schema: schema.Schema{
 							Type:         schema.TypeString,
-							ValidateFunc: validatePolicyPath(),
+							ValidateFunc: validation.StringInSlice(vpcSubnetModeValues, false),
 							Optional:     true,
+							Default:      model.SubnetDhcpConfig_MODE_DEACTIVATED,
 						},
 						Metadata: metadata.Metadata{
 							SchemaType:   "string",
-							SdkFieldName: "DhcpRelayConfigPath",
-							OmitIfEmpty:  true,
+							SdkFieldName: "Mode",
 						},
 					},
-					"excluded_ips": {
-						Schema: schema.Schema{
-							Type: schema.TypeList,
-							Elem: &metadata.ExtendedSchema{
-								Schema: schema.Schema{
-									Type:         schema.TypeString,
-									ValidateFunc: validateSingleIP(),
-								},
-								Metadata: metadata.Metadata{
-									SchemaType: "string",
-								},
-							},
-							Optional: true,
-						},
-						Metadata: metadata.Metadata{
-							SchemaType:   "list",
-							SdkFieldName: "ExcludedIps",
-						},
-					},
-					"dns_client_config": {
+					"dhcp_server_additional_config": {
 						Schema: schema.Schema{
 							Type:     schema.TypeList,
 							MaxItems: 1,
 							Elem: &metadata.ExtendedResource{
 								Schema: map[string]*metadata.ExtendedSchema{
-									"dns_server_ips": {
-										Schema: schema.Schema{
-											Type: schema.TypeList,
-											Elem: &metadata.ExtendedSchema{
-												Schema: schema.Schema{
-													Type: schema.TypeString,
-												},
-												Metadata: metadata.Metadata{
-													SchemaType: "string",
-												},
-											},
-											Optional: true,
-										},
-										Metadata: metadata.Metadata{
-											SchemaType:   "list",
-											SdkFieldName: "DnsServerIps",
-										},
-									},
-								},
-							},
-							Optional: true,
-						},
-						Metadata: metadata.Metadata{
-							SchemaType:   "struct",
-							SdkFieldName: "DnsClientConfig",
-							ReflectType:  reflect.TypeOf(model.DnsClientConfig{}),
-						},
-					},
-					"enable_dhcp": {
-						Schema: schema.Schema{
-							Type:     schema.TypeBool,
-							Optional: true,
-							Computed: true,
-						},
-						Metadata: metadata.Metadata{
-							SchemaType:   "bool",
-							SdkFieldName: "EnableDhcp",
-						},
-					},
-					"static_pool_config": {
-						Schema: schema.Schema{
-							Type:     schema.TypeList,
-							MaxItems: 1,
-							Elem: &metadata.ExtendedResource{
-								Schema: map[string]*metadata.ExtendedSchema{
-									"ipv4_pool_size": {
-										Schema: schema.Schema{
-											Type:     schema.TypeInt,
-											Optional: true,
-										},
-										Metadata: metadata.Metadata{
-											SchemaType:   "int",
-											SdkFieldName: "Ipv4PoolSize",
-										},
-									},
-								},
-							},
-							Optional: true,
-						},
-						Metadata: metadata.Metadata{
-							SchemaType:   "struct",
-							SdkFieldName: "StaticPoolConfig",
-							ReflectType:  reflect.TypeOf(model.StaticPoolConfig{}),
-						},
-					},
-					"dhcp_relay_config": {
-						Schema: schema.Schema{
-							Type:     schema.TypeList,
-							MaxItems: 1,
-							Elem: &metadata.ExtendedResource{
-								Schema: map[string]*metadata.ExtendedSchema{
-									"server_addresses": {
-										Schema: schema.Schema{
-											Type: schema.TypeList,
-											Elem: &metadata.ExtendedSchema{
-												Schema: schema.Schema{
-													Type: schema.TypeString,
-												},
-												Metadata: metadata.Metadata{
-													SchemaType: "string",
-												},
-											},
-											Optional: true,
-										},
-										Metadata: metadata.Metadata{
-											SchemaType:   "list",
-											SdkFieldName: "ServerAddresses",
-										},
-									},
-								},
-							},
-							Optional: true,
-						},
-						Metadata: metadata.Metadata{
-							SchemaType:   "struct",
-							SdkFieldName: "DhcpRelayConfig",
-							ReflectType:  reflect.TypeOf(model.VpcDhcpRelayConfig{}),
-						},
-					},
-					"options": {
-						Schema: schema.Schema{
-							Type:     schema.TypeList,
-							MaxItems: 1,
-							Elem: &metadata.ExtendedResource{
-								Schema: map[string]*metadata.ExtendedSchema{
-									"option121": {
+									"options": {
 										Schema: schema.Schema{
 											Type:     schema.TypeList,
 											MaxItems: 1,
 											Elem: &metadata.ExtendedResource{
 												Schema: map[string]*metadata.ExtendedSchema{
-													"static_route": {
+													"option121": {
+														Schema: schema.Schema{
+															Type:     schema.TypeList,
+															MaxItems: 1,
+															Elem: &metadata.ExtendedResource{
+																Schema: map[string]*metadata.ExtendedSchema{
+																	"static_route": {
+																		Schema: schema.Schema{
+																			Type: schema.TypeList,
+																			Elem: &metadata.ExtendedResource{
+																				Schema: map[string]*metadata.ExtendedSchema{
+																					"next_hop": {
+																						Schema: schema.Schema{
+																							Type:         schema.TypeString,
+																							ValidateFunc: validateSingleIP(),
+																							Optional:     true,
+																						},
+																						Metadata: metadata.Metadata{
+																							SchemaType:   "string",
+																							SdkFieldName: "NextHop",
+																						},
+																					},
+																					"network": {
+																						Schema: schema.Schema{
+																							Type:         schema.TypeString,
+																							ValidateFunc: validateCidrOrIPOrRange(),
+																							Optional:     true,
+																						},
+																						Metadata: metadata.Metadata{
+																							SchemaType:   "string",
+																							SdkFieldName: "Network",
+																						},
+																					},
+																				},
+																			},
+																			Optional: true,
+																		},
+																		Metadata: metadata.Metadata{
+																			SchemaType:   "list",
+																			SdkFieldName: "StaticRoutes",
+																			ReflectType:  reflect.TypeOf(model.ClasslessStaticRoute{}),
+																		},
+																	},
+																},
+															},
+															Optional: true,
+														},
+														Metadata: metadata.Metadata{
+															SchemaType:   "struct",
+															SdkFieldName: "Option121",
+															ReflectType:  reflect.TypeOf(model.DhcpOption121{}),
+														},
+													},
+													"other": {
 														Schema: schema.Schema{
 															Type: schema.TypeList,
 															Elem: &metadata.ExtendedResource{
 																Schema: map[string]*metadata.ExtendedSchema{
-																	"next_hop": {
+																	"code": {
 																		Schema: schema.Schema{
-																			Type:         schema.TypeString,
-																			ValidateFunc: validateSingleIP(),
-																			Optional:     true,
+																			Type:     schema.TypeInt,
+																			Optional: true,
 																		},
 																		Metadata: metadata.Metadata{
-																			SchemaType:   "string",
-																			SdkFieldName: "NextHop",
+																			SchemaType:   "int",
+																			SdkFieldName: "Code",
 																		},
 																	},
-																	"network": {
+																	"values": {
 																		Schema: schema.Schema{
-																			Type:         schema.TypeString,
-																			ValidateFunc: validateCidrOrIPOrRange(),
-																			Optional:     true,
+																			Type: schema.TypeList,
+																			Elem: &metadata.ExtendedSchema{
+																				Schema: schema.Schema{
+																					Type: schema.TypeString,
+																				},
+																				Metadata: metadata.Metadata{
+																					SchemaType: "string",
+																				},
+																			},
+																			Optional: true,
 																		},
 																		Metadata: metadata.Metadata{
-																			SchemaType:   "string",
-																			SdkFieldName: "Network",
+																			SchemaType:   "list",
+																			SdkFieldName: "Values",
 																		},
 																	},
 																},
@@ -470,8 +382,8 @@ var vpcSubnetSchema = map[string]*metadata.ExtendedSchema{
 														},
 														Metadata: metadata.Metadata{
 															SchemaType:   "list",
-															SdkFieldName: "StaticRoutes",
-															ReflectType:  reflect.TypeOf(model.ClasslessStaticRoute{}),
+															SdkFieldName: "Others",
+															ReflectType:  reflect.TypeOf(model.GenericDhcpOption{}),
 														},
 													},
 												},
@@ -480,61 +392,37 @@ var vpcSubnetSchema = map[string]*metadata.ExtendedSchema{
 										},
 										Metadata: metadata.Metadata{
 											SchemaType:   "struct",
-											SdkFieldName: "Option121",
-											ReflectType:  reflect.TypeOf(model.DhcpOption121{}),
+											SdkFieldName: "Options",
+											ReflectType:  reflect.TypeOf(model.DhcpV4Options{}),
 										},
 									},
-									"other": {
+									"reserved_ip_ranges": {
 										Schema: schema.Schema{
 											Type: schema.TypeList,
-											Elem: &metadata.ExtendedResource{
-												Schema: map[string]*metadata.ExtendedSchema{
-													"code": {
-														Schema: schema.Schema{
-															Type:     schema.TypeInt,
-															Optional: true,
-														},
-														Metadata: metadata.Metadata{
-															SchemaType:   "int",
-															SdkFieldName: "Code",
-														},
-													},
-													"values": {
-														Schema: schema.Schema{
-															Type: schema.TypeList,
-															Elem: &metadata.ExtendedSchema{
-																Schema: schema.Schema{
-																	Type: schema.TypeString,
-																},
-																Metadata: metadata.Metadata{
-																	SchemaType: "string",
-																},
-															},
-															Optional: true,
-														},
-														Metadata: metadata.Metadata{
-															SchemaType:   "list",
-															SdkFieldName: "Values",
-														},
-													},
+											Elem: &metadata.ExtendedSchema{
+												Schema: schema.Schema{
+													Type: schema.TypeString,
+												},
+												Metadata: metadata.Metadata{
+													SchemaType: "string",
 												},
 											},
 											Optional: true,
 										},
 										Metadata: metadata.Metadata{
 											SchemaType:   "list",
-											SdkFieldName: "Others",
-											ReflectType:  reflect.TypeOf(model.GenericDhcpOption{}),
+											SdkFieldName: "ReservedIpRanges",
 										},
 									},
 								},
 							},
 							Optional: true,
+							Computed: true,
 						},
 						Metadata: metadata.Metadata{
 							SchemaType:   "struct",
-							SdkFieldName: "Options",
-							ReflectType:  reflect.TypeOf(model.DhcpV4Options{}),
+							SdkFieldName: "DhcpServerAdditionalConfig",
+							ReflectType:  reflect.TypeOf(model.DhcpServerAdditionalConfig{}),
 						},
 					},
 				},
@@ -543,8 +431,10 @@ var vpcSubnetSchema = map[string]*metadata.ExtendedSchema{
 		},
 		Metadata: metadata.Metadata{
 			SchemaType:   "struct",
-			SdkFieldName: "DhcpConfig",
-			ReflectType:  reflect.TypeOf(model.VpcSubnetDhcpConfig{}),
+			// Note that SubnetDhcpConfig is populated here (rather than the alernative VpcSubnetDhcpConfig)
+			// This is the recommended way to configure DHCP
+			SdkFieldName: "SubnetDhcpConfig",
+			ReflectType:  reflect.TypeOf(model.SubnetDhcpConfig{}),
 		},
 	},
 }
@@ -586,6 +476,10 @@ func resourceNsxtVpcSubnetCreate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
+	if err = validateDhcpConfig(d); err != nil {
+		return err
+	}
+
 	parents := getVpcParentsFromContext(getSessionContext(d, m))
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
@@ -613,6 +507,31 @@ func resourceNsxtVpcSubnetCreate(d *schema.ResourceData, m interface{}) error {
 	d.Set("nsx_id", id)
 
 	return resourceNsxtVpcSubnetRead(d, m)
+}
+
+func validateDhcpConfig(d *schema.ResourceData) error {
+	dhcpConfig, ok := d.GetOk("dhcp_config")
+	if !ok {
+		return nil
+	}
+
+	configList := dhcpConfig.([]interface{})
+	if len(configList) == 0 {
+		return nil
+	}
+
+	config := configList[0].(map[string]interface{})
+
+	if config["mode"].(string) == model.SubnetDhcpConfig_MODE_RELAY {
+		if ac, ok := config["dhcp_server_additional_config"]; ok {
+			advancedConfig := ac.([]interface{})
+			if len(advancedConfig) > 0 {
+				return fmt.Errorf("dhcp_server_additional_config can not be specified with DHCP_RELAY mode")
+			}
+		}
+	}
+
+	return nil
 }
 
 func resourceNsxtVpcSubnetRead(d *schema.ResourceData, m interface{}) error {
@@ -653,6 +572,10 @@ func resourceNsxtVpcSubnetUpdate(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("Error obtaining VpcSubnet ID")
 	}
 
+	if err := validateDhcpConfig(d); err != nil {
+		return err
+	}
+
 	parents := getVpcParentsFromContext(getSessionContext(d, m))
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
@@ -671,6 +594,14 @@ func resourceNsxtVpcSubnetUpdate(d *schema.ResourceData, m interface{}) error {
 	if err := metadata.SchemaToStruct(elem, d, vpcSubnetSchema, "", nil); err != nil {
 		return err
 	}
+
+	// Since dhcp block is Computed (sent back by NSX even if not specified), we need to
+	// explicitly clear out additional DHCP config in case of DHCP RELAY mode, otherwise
+	// NSX throws an error
+	if (obj.SubnetDhcpConfig != nil) && (obj.SubnetDhcpConfig.Mode != nil && *obj.SubnetDhcpConfig.Mode == model.SubnetDhcpConfig_MODE_RELAY) {
+		obj.SubnetDhcpConfig.DhcpServerAdditionalConfig = nil
+	}
+
 	client := clientLayer.NewSubnetsClient(connector)
 	_, err := client.Update(parents[0], parents[1], parents[2], id, obj)
 	if err != nil {

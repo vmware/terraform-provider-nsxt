@@ -103,7 +103,7 @@ func testAccDataSourceNsxtVPCDeleteByName(name string) error {
 	}
 	for _, objInList := range objList.Results {
 		if *objInList.DisplayName == name {
-			err := client.Delete(defaultOrgID, projID, *objInList.Id)
+			err := client.Delete(defaultOrgID, projID, *objInList.Id, nil)
 			if err != nil {
 				return handleDeleteError("VPC", *objInList.Id, err)
 			}

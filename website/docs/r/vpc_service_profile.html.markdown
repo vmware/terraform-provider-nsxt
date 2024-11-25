@@ -32,17 +32,17 @@ resource "nsxt_vpc_service_profile" "vpc1_service_profile" {
   qos_profile           = nsxt_policy_qos_profile.for_vpc1.path
 
   dhcp_config {
-    ntp_servers = ["20.2.60.5"]
+    dhcp_server_config {
+      ntp_servers = ["20.2.60.5"]
+      lease_time  = 50840
 
-    lease_time = 50840
-    mode       = "DHCP_SERVER"
+      dns_client_config {
+        dns_server_ips = ["10.204.2.20"]
+      }
 
-    dns_client_config {
-      dns_server_ips = ["10.204.2.20"]
-    }
-
-    advanced_config {
-      is_distributed_dhcp = false
+      advanced_config {
+        is_distributed_dhcp = false
+      }
     }
   }
 }
@@ -64,18 +64,17 @@ The following arguments are supported:
 * `security_profile` - (Optional) Policy path for Security Profile
 * `qos_profile` - (Optional) Policy path for QoS profile
 * `dhcp_config` - (Required) DHCP configuration for this profile
-  * `ntp_servers` - (Optional) List of NTP servers
-  * `dns_client_config` - (Optional) DNS Client configuration
-    * `dns_server_ips` - (Optional) List of IP addresses of the DNS servers which need to be configured on the workload VMs
-  * `lease_time` - (Optional) DHCP lease time in seconds.
-  * `mode` - (Optional) DHCP mode of the VPC Profile DHCP Config. Possible values are `DHCP_SERVER`, `DHCP_RELAY`, `DHCP_DEACTIVATED`. Default is `DHCP_SERVER`.
+  * `dhcp_server_config` - (Optionl) DHCP server configuration for this profile
+    * `ntp_servers` - (Optional) List of NTP servers
+    * `dns_client_config` - (Optional) DNS Client configuration
+      * `dns_server_ips` - (Optional) List of IP addresses of the DNS servers which need to be configured on the workload VMs
+    * `lease_time` - (Optional) DHCP lease time in seconds.
+    * `advanced_config` - (Optional) VPC DHCP advanced configuration
+      * `is_distributed_dhcp` - DHCP server's IP allocation model based on workloads subnet port id. Can be `false` only when Edge cluster is available, in
+        which case edge cluster in VPC connectivity profile must be configured. This is the traditional DHCP server that dynamically allocates IP per VM's MAC.
+        If value is `true`, edge cluster will not be required. This is a DHCP server that dynamically assigns IP per VM port.
   * `dhcp_relay_config` - (Optional) DHCP Relay configuration
     * `server_addresses` - (Optional) List of DHCP server IP addresses for DHCP relay configuration. Both IPv4 and IPv6 addresses are supported.
-  * `advanced_config` - (Optional) VPC DHCP advanced configuration
-    * `is_distributed_dhcp` - DHCP server's IP allocation model based on workloads subnet port id. It is applicable when DHCP mode is DHCP_SERVER.
-      Value of this field can be False only when Edge cluster is available. If value is False, edge cluster in VPC connectivity profile must be
-      configured for this mode. This is the traditional DHCP server that dynamically allocates IP per VM's MAC.
-      If value is True, edge cluster will not be required for this mode. This is a DHCP server that dynamically assigns IP per VM port."
 
 
 ## Attributes Reference

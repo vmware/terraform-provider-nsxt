@@ -40,6 +40,9 @@ resource "nsxt_vpc_subnet" "test" {
 }
 ```
 
+~> **NOTE:** In some cases, subnet creation will depend on VPC attachment. If both resources are being created within same apply, 
+  explicit `depends_on` meta argument needs to be added to enforce this dependency.
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -65,24 +68,19 @@ The following arguments are supported:
         * `key` - (Required) key for vendor-specific configuration
         * `value` - (Required) value for vendor-specific configuration
 * `dhcp_config` - (Optional) DHCP configuration block
-    * `ntp_servers` - (Optional) List of NTP server IP addresses
-    * `dhcp_relay_config_path` - (Optional) Policy path of DHCP-relay-config. If configured then all the subnets will be
-      configured with the DHCP relay server.
-      If not specified, then the local DHCP server will be configured for all connected subnets.
-    * `dns_client_config` - (Optional) DHCP Client configuration block
-        * `dns_server_ips` - (Optional) IPs of the DNS servers which need to be configured on the workload VMs
-    * `enable_dhcp` - (Optional) If activated, the DHCP server will be configured based on IP address type.
-    * `static_pool_config` - (Optional) Static pool configuration block
-        * `ipv4_pool_size` - (Optional) Number of IPs to be reserved in static ip pool.
-    * `excluded_ips` - (Optional) List of excluded IP addresses
-    * `options` - (Optional) DHCPv4 options block
-      * `option121` - (Optional) Specification for DHCP option 121
-        * `static_route` - (Optional) Static route
-          * `network` - (Optional) Destination network in CIDR format
-          * `next_hop` - (Optional) IP Address for next hop of the route
-        * `other` - (Optional) DHCP option in generic format
-          * `code` - (Optional) Code of DHCP option
-          * `values` - (Optional) List of values in string format
+    * `mode` - (Optional) The operational mode of DHCP within the subnet, can be one of `DHCP_SERVER`, `DHCP_RELAY`, `DHCP_DEACTIVATED`. 
+       Default is `DHCP_DEACTIVATED`
+    * `dhcp_server_additional_config` - (Optional) Additional DHCP server config
+      * `options` - (Optional) DHCPv4 options block
+        * `option121` - (Optional) Specification for DHCP option 121
+          * `static_route` - (Optional) Static route
+            * `network` - (Optional) Destination network in CIDR format
+            * `next_hop` - (Optional) IP Address for next hop of the route
+          * `other` - (Optional) DHCP option in generic format
+            * `code` - (Optional) Code of DHCP option
+            * `values` - (Optional) List of values in string format
+      * `reserved_ip_ranges` - (Optional) Specifies IP ranges that are reserved and excluded from being assigned by the DHCP server to clients.
+         This is a list of IP ranges or IP addresses.
 * `ip_blocks` - (Optional) List of IP block path for subnet IP allocation
 
 ## Attributes Reference
