@@ -97,6 +97,13 @@ func resourceNsxtEdgeTransportNode() *schema.Resource {
 			"description":  getDescriptionSchema(),
 			"display_name": getDisplayNameSchema(),
 			"tag":          getTagsSchema(),
+			"node_id": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				Description:   "Unique Id of the fabric node",
+				ConflictsWith: []string{"ip_addresses", "fqdn", "deployment_config", "external_id"},
+			},
 			"failure_domain": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -671,43 +678,56 @@ func getTransportNodeFromSchema(d *schema.ResourceData, m interface{}) (*mpmodel
 	description := d.Get("description").(string)
 	displayName := d.Get("display_name").(string)
 	tags := getMPTagsFromSchema(d)
+	nodeID := d.Get("node_id").(string)
 	failureDomain := d.Get("failure_domain").(string)
 	hostSwitchSpec, err := getHostSwitchSpecFromSchema(d, m, nodeTypeEdge)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create Transport Node: %v", err)
 	}
 
-	converter := bindings.NewTypeConverter()
-	var dataValue data.DataValue
-	var errs []error
+	var nodeDeploymentInfo *data.StructValue
+	if nodeID == "" {
+		/*
+			node_id attribute conflicts with node_deployment_info. As node_deployment_info is a complex object which has
+			attributes with default values, this schema property will always have values - therefore there is no simple way
+			to enforce this conflict within the provider (e.g check if node_id and node_deployment_info have values, then
+			fail.
+			So the provider will ignore node_deployment_info properties when node_id has a value - which would mean that
+			this edge appliance was created externally.
+		*/
+		log.Printf("node_id not specified, will deploy edge using values in deploymentConfig")
+		converter := bindings.NewTypeConverter()
+		var dataValue data.DataValue
+		var errs []error
 
-	externalID := d.Get("external_id").(string)
-	fqdn := d.Get("fqdn").(string)
-	ipAddresses := interfaceListToStringList(d.Get("ip_addresses").([]interface{}))
+		externalID := d.Get("external_id").(string)
+		fqdn := d.Get("fqdn").(string)
+		ipAddresses := interfaceListToStringList(d.Get("ip_addresses").([]interface{}))
 
-	deploymentConfig, err := getEdgeNodeDeploymentConfigFromSchema(d.Get("deployment_config"))
-	if err != nil {
-		return nil, err
-	}
-	nodeSettings, err := getEdgeNodeSettingsFromSchema(d.Get("node_settings"))
-	if err != nil {
-		return nil, err
-	}
-	node := mpmodel.EdgeNode{
-		ExternalId:       &externalID,
-		Fqdn:             &fqdn,
-		IpAddresses:      ipAddresses,
-		DeploymentConfig: deploymentConfig,
-		NodeSettings:     nodeSettings,
-		ResourceType:     mpmodel.EdgeNode__TYPE_IDENTIFIER,
-	}
-	dataValue, errs = converter.ConvertToVapi(node, mpmodel.EdgeNodeBindingType())
+		deploymentConfig, err := getEdgeNodeDeploymentConfigFromSchema(d.Get("deployment_config"))
+		if err != nil {
+			return nil, err
+		}
+		nodeSettings, err := getEdgeNodeSettingsFromSchema(d.Get("node_settings"))
+		if err != nil {
+			return nil, err
+		}
+		node := mpmodel.EdgeNode{
+			ExternalId:       &externalID,
+			Fqdn:             &fqdn,
+			IpAddresses:      ipAddresses,
+			DeploymentConfig: deploymentConfig,
+			NodeSettings:     nodeSettings,
+			ResourceType:     mpmodel.EdgeNode__TYPE_IDENTIFIER,
+		}
+		dataValue, errs = converter.ConvertToVapi(node, mpmodel.EdgeNodeBindingType())
 
-	if errs != nil {
-		log.Printf("Failed to convert node object, errors are %v", errs)
-		return nil, errs[0]
+		if errs != nil {
+			log.Printf("Failed to convert node object, errors are %v", errs)
+			return nil, errs[0]
+		}
+		nodeDeploymentInfo = dataValue.(*data.StructValue)
 	}
-	nodeDeploymentInfo := dataValue.(*data.StructValue)
 
 	obj := mpmodel.TransportNode{
 		Description:        &description,
@@ -724,6 +744,37 @@ func getTransportNodeFromSchema(d *schema.ResourceData, m interface{}) (*mpmodel
 func resourceNsxtEdgeTransportNodeCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	client := nsx.NewTransportNodesClient(connector)
+
+	nodeID := d.Get("node_id").(string)
+	if nodeID != "" {
+		obj, err := client.Get(nodeID)
+		if err != nil {
+			return handleCreateError("TransportNode", nodeID, err)
+		}
+		// Set node_id, revision and computed values in schema
+		d.Set("failure_domain", obj.FailureDomainId)
+
+		converter := bindings.NewTypeConverter()
+		base, errs := converter.ConvertToGolang(obj.NodeDeploymentInfo, mpmodel.EdgeNodeBindingType())
+		if errs != nil {
+			return handleCreateError("TransportNode", nodeID, errs[0])
+		}
+		node := base.(mpmodel.EdgeNode)
+		d.Set("external_id", node.ExternalId)
+		d.Set("fqdn", node.Fqdn)
+		d.Set("ip_addresses", node.IpAddresses)
+		if obj.Revision != nil {
+			d.Set("revision", obj.Revision)
+		}
+
+		d.SetId(nodeID)
+		err = resourceNsxtEdgeTransportNodeUpdate(d, m)
+		if err != nil {
+			// There is a failure in update, let's discard this so state will remain clean
+			d.SetId("")
+		}
+		return err
+	}
 
 	obj, err := getTransportNodeFromSchema(d, m)
 	if err != nil {
@@ -914,23 +965,31 @@ func getCPUConfigFromSchema(cpuConfigList []interface{}) []mpmodel.CpuCoreConfig
 func getHostSwitchProfileResourceType(m interface{}, id string) (string, error) {
 	connector := getPolicyConnector(m)
 	client := infra.NewHostSwitchProfilesClient(connector)
-	structValue, err := client.Get(id)
 
+	// we retrieve a list of profiles instead of using Get(), as the id could be either MP id or Policy id
+	list, err := client.List(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 	if err != nil {
 		return "", err
 	}
-
 	converter := bindings.NewTypeConverter()
-	baseInterface, errs := converter.ConvertToGolang(structValue, model.PolicyBaseHostSwitchProfileBindingType())
-	if errs != nil {
-		return "", errs[0]
+
+	for _, structValue := range list.Results {
+		baseInterface, errs := converter.ConvertToGolang(structValue, model.PolicyBaseHostSwitchProfileBindingType())
+		if errs != nil {
+			return "", errs[0]
+		}
+		base := baseInterface.(model.PolicyBaseHostSwitchProfile)
+
+		if *base.Id == id || *base.RealizationId == id {
+			resourceType, ok := mpHostSwitchProfileTypeFromPolicyType[base.ResourceType]
+			if !ok {
+				return "", fmt.Errorf("MP resource type not found for %s", base.ResourceType)
+			}
+			return resourceType, nil
+		}
 	}
-	base := baseInterface.(model.PolicyBaseHostSwitchProfile)
-	resourceType, ok := mpHostSwitchProfileTypeFromPolicyType[base.ResourceType]
-	if !ok {
-		return "", fmt.Errorf("MP resource type not found for %s", base.ResourceType)
-	}
-	return resourceType, nil
+
+	return "", fmt.Errorf("Host Switch Profile type not found for %s", id)
 }
 
 func getHostSwitchProfileIDsFromSchema(m interface{}, hswProfileList []interface{}) ([]mpmodel.HostSwitchProfileTypeIdEntry, error) {
@@ -1236,6 +1295,7 @@ func resourceNsxtEdgeTransportNodeRead(d *schema.ResourceData, m interface{}) er
 	d.Set("description", obj.Description)
 	d.Set("display_name", obj.DisplayName)
 	setMPTagsInSchema(d, obj.Tags)
+	d.Set("node_id", obj.NodeId)
 	d.Set("failure_domain", obj.FailureDomainId)
 
 	if obj.HostSwitchSpec != nil {
