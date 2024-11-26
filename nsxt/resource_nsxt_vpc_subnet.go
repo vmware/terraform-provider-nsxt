@@ -430,7 +430,7 @@ var vpcSubnetSchema = map[string]*metadata.ExtendedSchema{
 			Optional: true,
 		},
 		Metadata: metadata.Metadata{
-			SchemaType:   "struct",
+			SchemaType: "struct",
 			// Note that SubnetDhcpConfig is populated here (rather than the alernative VpcSubnetDhcpConfig)
 			// This is the recommended way to configure DHCP
 			SdkFieldName: "SubnetDhcpConfig",
