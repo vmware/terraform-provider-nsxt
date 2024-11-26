@@ -10,6 +10,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/fabric"
@@ -248,7 +249,6 @@ func resourceNsxtComputeManagerCreate(d *schema.ResourceData, m interface{}) err
 		DisplayName:           &displayName,
 		Tags:                  tags,
 		AccessLevelForOidc:    accessLevelForOidc,
-		CreateServiceAccount:  &createServiceAccount,
 		Credential:            credential,
 		ExtensionCertificate:  getExtensionCertificate(d),
 		MultiNsx:              &multiNSX,
@@ -256,6 +256,12 @@ func resourceNsxtComputeManagerCreate(d *schema.ResourceData, m interface{}) err
 		ReverseProxyHttpsPort: reverseProxyHTTPSsPort,
 		Server:                &server,
 		SetAsOidcProvider:     &setAsOidcProvider,
+	}
+
+	// From 9.0.0 onwards CreateServiceAccount can not be false
+	// so we can effetively ignore this field
+	if util.NsxVersionLower("9.0.0") {
+		obj.CreateServiceAccount = &createServiceAccount
 	}
 
 	log.Printf("[INFO] Creating Compute Manager %s", displayName)
@@ -505,7 +511,6 @@ func resourceNsxtComputeManagerUpdate(d *schema.ResourceData, m interface{}) err
 		DisplayName:           &displayName,
 		Tags:                  tags,
 		AccessLevelForOidc:    accessLevelForOidc,
-		CreateServiceAccount:  &createServiceAccount,
 		Credential:            credential,
 		ExtensionCertificate:  getExtensionCertificate(d),
 		MultiNsx:              &multiNSX,
@@ -514,6 +519,12 @@ func resourceNsxtComputeManagerUpdate(d *schema.ResourceData, m interface{}) err
 		Server:                &server,
 		SetAsOidcProvider:     &setAsOidcProvider,
 		Revision:              &revision,
+	}
+
+	// From 9.0.0 onwards CreateServiceAccount can not be false
+	// so we can effetively ignore this field
+	if util.NsxVersionLower("9.0.0") {
+		obj.CreateServiceAccount = &createServiceAccount
 	}
 
 	_, err = client.Update(id, obj)
