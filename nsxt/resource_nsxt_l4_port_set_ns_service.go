@@ -22,7 +22,7 @@ func resourceNsxtL4PortSetNsService() *schema.Resource {
 		Update: resourceNsxtL4PortSetNsServiceUpdate,
 		Delete: resourceNsxtL4PortSetNsServiceDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		DeprecationMessage: mpObjectResourceDeprecationMessage,
 		Schema: map[string]*schema.Schema{

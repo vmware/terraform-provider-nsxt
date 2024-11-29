@@ -33,7 +33,7 @@ func resourceNsxtSwitchSecuritySwitchingProfile() *schema.Resource {
 		Update: resourceNsxtSwitchSecuritySwitchingProfileUpdate,
 		Delete: resourceNsxtSwitchSecuritySwitchingProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		DeprecationMessage: mpObjectResourceDeprecationMessage,
 		Schema: map[string]*schema.Schema{

@@ -22,7 +22,7 @@ func resourceNsxtUsers() *schema.Resource {
 		Update: resourceNsxtNodeUserUpdate,
 		Delete: resourceNsxtNodeUserDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{

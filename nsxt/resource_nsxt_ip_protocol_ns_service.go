@@ -20,7 +20,7 @@ func resourceNsxtIPProtocolNsService() *schema.Resource {
 		Update: resourceNsxtIPProtocolNsServiceUpdate,
 		Delete: resourceNsxtIPProtocolNsServiceDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		DeprecationMessage: mpObjectResourceDeprecationMessage,
 		Schema: map[string]*schema.Schema{
