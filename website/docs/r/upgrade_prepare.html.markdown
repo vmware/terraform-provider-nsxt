@@ -36,7 +36,7 @@ The following arguments are supported:
 
 * `upgrade_bundle_url` - (Required) The url to download the Manager Upgrade bundle.
 * `version` - (Optional) Target upgrade version for NSX, format is x.x.x..., should include at least 3 digits, example: 4.1.2
-* `precheck_bundle_url` - (Optional) The url to download the Precheck bundle. This field is required if NSX >= 4.1.1
+* `precheck_bundle_url` - (Optional) The url to download the Precheck bundle.
 * `accept_user_agreement` - (Required) This field must be set to true otherwise upgrade will not proceed.
 * `bundle_upload_timeout` - (Optional) Timeout for uploading upgrade bundle in seconds. Default is `3600`.
 * `uc_upgrade_timeout` - (Optional) Timeout for upgrading upgrade coordinator in seconds. Default is `1800`.
