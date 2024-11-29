@@ -51,6 +51,11 @@ func dataSourceNsxtPolicyTransportZone() *schema.Resource {
 				Optional:     true,
 				ValidateFunc: validatePolicyPath(),
 			},
+			"realized_id": {
+				Type:        schema.TypeString,
+				Description: "The ID of the realized resource",
+				Computed:    true,
+			},
 		},
 	}
 }
@@ -90,6 +95,7 @@ func dataSourceNsxtPolicyTransportZoneRead(d *schema.ResourceData, m interface{}
 		d.Set("is_default", transportZoneResource.IsDefault)
 		d.Set("transport_type", transportZoneResource.TzType)
 		d.Set("site_path", transportZoneResource.ParentPath)
+		d.Set("realized_id", transportZoneResource.RealizationId)
 		return nil
 	}
 	connector := getPolicyConnector(m)
@@ -159,5 +165,6 @@ func dataSourceNsxtPolicyTransportZoneRead(d *schema.ResourceData, m interface{}
 	d.Set("path", obj.Path)
 	d.Set("is_default", obj.IsDefault)
 	d.Set("transport_type", obj.TzType)
+	d.Set("realized_id", obj.RealizationId)
 	return nil
 }

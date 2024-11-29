@@ -54,3 +54,4 @@ In addition to arguments listed above, the following attributes are exported:
 * `is_default` - A boolean flag indicating if this Transport Zone is the default.
 * `transport_type` - The transport type of this transport zone.
 * `path` - The NSX path of the policy resource.
+* `realized_id` - The id of realized transport zone object. This id should be used in `nsxt_edge_transport_node` resource.
