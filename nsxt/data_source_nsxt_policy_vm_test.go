@@ -42,6 +42,7 @@ func testAccDataSourceNsxtPolicyVMBasic(t *testing.T, withContext bool, preCheck
 					resource.TestCheckResourceAttrSet(testResourceName, "bios_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "external_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "instance_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "tag.#"),
 				),
 			},
 			{
@@ -52,6 +53,7 @@ func testAccDataSourceNsxtPolicyVMBasic(t *testing.T, withContext bool, preCheck
 					resource.TestCheckResourceAttrSet(testResourceName, "bios_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "external_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "instance_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "tag.#"),
 				),
 			},
 		},
