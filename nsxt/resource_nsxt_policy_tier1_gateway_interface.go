@@ -57,6 +57,7 @@ func resourceNsxtPolicyTier1GatewayInterface() *schema.Resource {
 				ForceNew:     true,
 				ValidateFunc: validatePolicyPath(),
 			},
+			"dhcp_relay_path": getPolicyPathSchema(false, false, "Policy path for DHCP relay config"),
 		},
 	}
 }
@@ -136,6 +137,7 @@ func resourceNsxtPolicyTier1GatewayInterfaceCreate(d *schema.ResourceData, m int
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
 	segmentPath := d.Get("segment_path").(string)
+	dhcpRelayPath := d.Get("dhcp_relay_path").(string)
 	tags := getPolicyTagsFromSchema(d)
 	interfaceSubnetList := getGatewayInterfaceSubnetList(d)
 	var ipv6ProfilePaths []string
@@ -151,6 +153,10 @@ func resourceNsxtPolicyTier1GatewayInterfaceCreate(d *schema.ResourceData, m int
 		Subnets:          interfaceSubnetList,
 		SegmentPath:      &segmentPath,
 		Ipv6ProfilePaths: ipv6ProfilePaths,
+	}
+
+	if len(dhcpRelayPath) > 0 {
+		obj.DhcpRelayPath = &dhcpRelayPath
 	}
 
 	if mtu > 0 {
@@ -229,6 +235,7 @@ func resourceNsxtPolicyTier1GatewayInterfaceRead(d *schema.ResourceData, m inter
 	d.Set("path", obj.Path)
 	d.Set("revision", obj.Revision)
 	d.Set("segment_path", obj.SegmentPath)
+	d.Set("dhcp_relay_path", obj.DhcpRelayPath)
 	if obj.Ipv6ProfilePaths != nil {
 		d.Set("ipv6_ndra_profile_path", obj.Ipv6ProfilePaths[0]) // only one supported for now
 	}
@@ -269,6 +276,7 @@ func resourceNsxtPolicyTier1GatewayInterfaceUpdate(d *schema.ResourceData, m int
 	tags := getPolicyTagsFromSchema(d)
 	interfaceSubnetList := getGatewayInterfaceSubnetList(d)
 	segmentPath := d.Get("segment_path").(string)
+	dhcpRelayPath := d.Get("dhcp_relay_path").(string)
 	var ipv6ProfilePaths []string
 	if d.Get("ipv6_ndra_profile_path").(string) != "" {
 		ipv6ProfilePaths = append(ipv6ProfilePaths, d.Get("ipv6_ndra_profile_path").(string))
@@ -283,6 +291,10 @@ func resourceNsxtPolicyTier1GatewayInterfaceUpdate(d *schema.ResourceData, m int
 		SegmentPath:      &segmentPath,
 		Ipv6ProfilePaths: ipv6ProfilePaths,
 		Revision:         &revision,
+	}
+
+	if len(dhcpRelayPath) > 0 || d.HasChange("dhcp_relay_path") {
+		obj.DhcpRelayPath = &dhcpRelayPath
 	}
 
 	if mtu > 0 {

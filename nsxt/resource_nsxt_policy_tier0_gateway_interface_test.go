@@ -370,6 +370,7 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_withID(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.0", ipAddress),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
+					resource.TestCheckResourceAttrSet(testResourceName, "dhcp_relay_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "segment_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "gateway_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -390,6 +391,7 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_withID(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.0", ipAddress),
 					resource.TestCheckResourceAttr(testResourceName, "ip_addresses.1", ipv6Address),
+					resource.TestCheckResourceAttrSet(testResourceName, "dhcp_relay_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "segment_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "gateway_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -726,6 +728,11 @@ resource "nsxt_policy_tier0_gateway_interface" "test" {
 
 func testAccNsxtPolicyTier0InterfaceTemplateWithID(name string, subnet string) string {
 	return testAccNsxtPolicyGatewayInterfaceDeps("11", false) + fmt.Sprintf(`
+resource "nsxt_policy_dhcp_relay" "test" {
+  display_name     = "test"
+  server_addresses = ["10.203.34.15"]
+}
+
 resource "nsxt_policy_tier0_gateway" "test" {
   display_name      = "%s"
   ha_mode           = "ACTIVE_STANDBY"
@@ -733,13 +740,14 @@ resource "nsxt_policy_tier0_gateway" "test" {
 }
 
 resource "nsxt_policy_tier0_gateway_interface" "test" {
-  nsx_id                 = "test"
-  display_name           = "%s"
-  type                   = "SERVICE"
-  description            = "Acceptance Test"
-  gateway_path           = nsxt_policy_tier0_gateway.test.path
-  segment_path           = nsxt_policy_vlan_segment.test.path
-  subnets                = ["%s"]
+  nsx_id          = "test"
+  display_name    = "%s"
+  type            = "SERVICE"
+  description     = "Acceptance Test"
+  gateway_path    = nsxt_policy_tier0_gateway.test.path
+  segment_path    = nsxt_policy_vlan_segment.test.path
+  subnets         = ["%s"]
+  dhcp_relay_path = nsxt_policy_dhcp_relay.test.path
   %s
 }`, nsxtPolicyTier0GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, subnet, testAccNsxtPolicyTier0InterfaceSiteTemplate()) +
 		testAccNsxtPolicyTier0InterfaceRealizationTemplate()

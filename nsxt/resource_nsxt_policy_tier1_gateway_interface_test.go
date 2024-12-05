@@ -127,6 +127,7 @@ func TestAccResourceNsxtPolicyTier1GatewayInterface_withID(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttr(testResourceName, "subnets.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "subnets.0", subnet),
+					resource.TestCheckResourceAttrSet(testResourceName, "dhcp_relay_path"),
 					resource.TestCheckResourceAttr(testResourceName, "urpf_mode", "NONE"),
 					resource.TestCheckResourceAttr(testResourceName, "tag.#", "0"),
 					resource.TestCheckResourceAttrSet(testResourceName, "segment_path"),
@@ -147,6 +148,7 @@ func TestAccResourceNsxtPolicyTier1GatewayInterface_withID(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "subnets.#", "2"),
 					resource.TestCheckResourceAttr(testResourceName, "subnets.0", subnet),
 					resource.TestCheckResourceAttr(testResourceName, "subnets.1", ipv6Subnet),
+					resource.TestCheckResourceAttrSet(testResourceName, "dhcp_relay_path"),
 					resource.TestCheckResourceAttr(testResourceName, "urpf_mode", "NONE"),
 					resource.TestCheckResourceAttrSet(testResourceName, "segment_path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "gateway_path"),
@@ -478,19 +480,25 @@ resource "nsxt_policy_tier1_gateway_interface" "test" {
 
 func testAccNsxtPolicyTier1InterfaceTemplateWithID(name string, subnet string) string {
 	return testAccNsxtPolicyGatewayInterfaceDeps("11", false) + fmt.Sprintf(`
+resource "nsxt_policy_dhcp_relay" "test" {
+  display_name     = "test"
+  server_addresses = ["10.203.34.15"]
+}
+
 resource "nsxt_policy_tier1_gateway" "test" {
-  display_name      = "%s"
+  display_name = "%s"
   %s
 }
 
 resource "nsxt_policy_tier1_gateway_interface" "test" {
-  nsx_id                 = "test"
-  display_name           = "%s"
-  description            = "Acceptance Test"
-  gateway_path           = nsxt_policy_tier1_gateway.test.path
-  segment_path           = nsxt_policy_vlan_segment.test.path
-  subnets                = ["%s"]
-  urpf_mode              = "NONE"
+  nsx_id          = "test"
+  display_name    = "%s"
+  description     = "Acceptance Test"
+  gateway_path    = nsxt_policy_tier1_gateway.test.path
+  segment_path    = nsxt_policy_vlan_segment.test.path
+  subnets         = ["%s"]
+  urpf_mode       = "NONE"
+  dhcp_relay_path = nsxt_policy_dhcp_relay.test.path
   %s
 }`, nsxtPolicyTier1GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, subnet, testAccNsxtPolicyTier0InterfaceSiteTemplate()) +
 		testAccNextPolicyTier1InterfaceRealizationTemplate()

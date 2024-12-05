@@ -96,7 +96,8 @@ func resourceNsxtPolicyTier0GatewayInterface() *schema.Resource {
 				ForceNew:     true,
 				ValidateFunc: validatePolicyPath(),
 			},
-			"ospf": getGatewayInterfaceOspfSchema(),
+			"ospf":            getGatewayInterfaceOspfSchema(),
+			"dhcp_relay_path": getPolicyPathSchema(false, false, "Policy path for DHCP relay config"),
 		},
 	}
 }
@@ -241,6 +242,7 @@ func resourceNsxtPolicyTier0GatewayInterfaceCreate(d *schema.ResourceData, m int
 
 	segmentPath := d.Get("segment_path").(string)
 	objSitePath := d.Get("site_path").(string)
+	dhcpRelayPath := d.Get("dhcp_relay_path").(string)
 	ifType := d.Get("type").(string)
 	if len(segmentPath) == 0 && ifType != model.Tier0Interface_TYPE_LOOPBACK {
 		// segment_path in required for all interfaces other than loopback
@@ -320,6 +322,10 @@ func resourceNsxtPolicyTier0GatewayInterfaceCreate(d *schema.ResourceData, m int
 
 	if len(segmentPath) > 0 {
 		obj.SegmentPath = &segmentPath
+	}
+
+	if len(dhcpRelayPath) > 0 {
+		obj.DhcpRelayPath = &dhcpRelayPath
 	}
 
 	if mtu > 0 {
@@ -408,6 +414,7 @@ func resourceNsxtPolicyTier0GatewayInterfaceRead(d *schema.ResourceData, m inter
 	d.Set("segment_path", obj.SegmentPath)
 	d.Set("edge_node_path", obj.EdgePath)
 	d.Set("type", obj.Type_)
+	d.Set("dhcp_relay_path", obj.DhcpRelayPath)
 
 	if obj.Ipv6ProfilePaths != nil {
 		d.Set("ipv6_ndra_profile_path", obj.Ipv6ProfilePaths[0]) // only one supported for now
@@ -468,6 +475,7 @@ func resourceNsxtPolicyTier0GatewayInterfaceUpdate(d *schema.ResourceData, m int
 
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
+	dhcpRelayPath := d.Get("dhcp_relay_path").(string)
 	tags := getPolicyTagsFromSchema(d)
 	interfaceSubnetList := getGatewayInterfaceSubnetList(d)
 	segmentPath := d.Get("segment_path").(string)
@@ -491,6 +499,10 @@ func resourceNsxtPolicyTier0GatewayInterfaceUpdate(d *schema.ResourceData, m int
 
 	if mtu > 0 {
 		obj.Mtu = &mtu
+	}
+
+	if len(dhcpRelayPath) > 0 || d.HasChange("dhcp_relay_path") {
+		obj.DhcpRelayPath = &dhcpRelayPath
 	}
 
 	if edgePath != "" {
