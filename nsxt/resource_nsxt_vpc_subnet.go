@@ -401,7 +401,8 @@ var vpcSubnetSchema = map[string]*metadata.ExtendedSchema{
 											Type: schema.TypeList,
 											Elem: &metadata.ExtendedSchema{
 												Schema: schema.Schema{
-													Type: schema.TypeString,
+													Type:         schema.TypeString,
+													ValidateFunc: validateCidrOrIPOrRange(),
 												},
 												Metadata: metadata.Metadata{
 													SchemaType: "string",
