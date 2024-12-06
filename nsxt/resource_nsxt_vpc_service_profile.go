@@ -17,12 +17,6 @@ import (
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
 )
 
-var vpcServiceProfileModeValues = []string{
-	model.VpcProfileDhcpConfig_MODE_SERVER,
-	model.VpcProfileDhcpConfig_MODE_RELAY,
-	model.VpcProfileDhcpConfig_MODE_DEACTIVATED,
-}
-
 var vpcServiceProfileSchema = map[string]*metadata.ExtendedSchema{
 	"nsx_id":       metadata.GetExtendedSchema(getNsxIDSchema()),
 	"path":         metadata.GetExtendedSchema(getPathSchema()),
