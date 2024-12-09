@@ -903,6 +903,10 @@ func getPolicyLbRuleVariablePersistenceLearnActionSchema() *schema.Schema {
 func getPolicyClientSSLBindingFromSchema(d *schema.ResourceData) *model.LBClientSslProfileBinding {
 	bindings := d.Get("client_ssl").([]interface{})
 	for _, binding := range bindings {
+		if binding == nil {
+			// empty clause
+			continue
+		}
 		// maximum count is one
 		data := binding.(map[string]interface{})
 		chainDepth := int64(data["certificate_chain_depth"].(int))
@@ -958,6 +962,10 @@ func setPolicyClientSSLBindingInSchema(d *schema.ResourceData, binding *model.LB
 func getPolicyServerSSLBindingFromSchema(d *schema.ResourceData) *model.LBServerSslProfileBinding {
 	bindings := d.Get("server_ssl").([]interface{})
 	for _, binding := range bindings {
+		if binding == nil {
+			// empty clause
+			continue
+		}
 		// maximum count is one
 		data := binding.(map[string]interface{})
 		chainDepth := int64(data["certificate_chain_depth"].(int))
@@ -1402,6 +1410,10 @@ func getPolicyLbRulesFromSchema(d *schema.ResourceData) []model.LBRule {
 	rules := d.Get("rule").([]interface{})
 
 	for _, rule := range rules {
+		if rule == nil {
+			// empty clause
+			continue
+		}
 		ruleData := rule.(map[string]interface{})
 
 		displayName := ruleData["display_name"].(string)
@@ -1412,6 +1424,10 @@ func getPolicyLbRulesFromSchema(d *schema.ResourceData) []model.LBRule {
 
 		ruleActions := ruleData["action"]
 		for _, ruleAction := range ruleActions.([]interface{}) {
+			if ruleAction == nil {
+				// empty clause
+				continue
+			}
 
 			ruleAction := ruleAction.(map[string]interface{})
 
@@ -1474,6 +1490,10 @@ func getPolicyLbRulesFromSchema(d *schema.ResourceData) []model.LBRule {
 
 		ruleConditions := ruleData["condition"]
 		for _, ruleCondition := range ruleConditions.([]interface{}) {
+			if ruleCondition == nil {
+				// empty clause
+				continue
+			}
 
 			ruleCondition := ruleCondition.(map[string]interface{})
 
