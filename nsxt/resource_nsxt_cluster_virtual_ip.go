@@ -31,7 +31,7 @@ func resourceNsxtClusterVirualIP() *schema.Resource {
 		Update: resourceNsxtClusterVirualIPUpdate,
 		Delete: resourceNsxtClusterVirualIPDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{

@@ -20,7 +20,7 @@ func resourceNsxtNsServiceGroup() *schema.Resource {
 		Update: resourceNsxtNsServiceGroupUpdate,
 		Delete: resourceNsxtNsServiceGroupDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		DeprecationMessage: mpObjectResourceDeprecationMessage,
 		Schema: map[string]*schema.Schema{
