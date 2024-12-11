@@ -26,6 +26,7 @@ func dataSourceNsxtPolicyVM() *schema.Resource {
 			"external_id":  getDataSourceStringSchema("External ID of the Virtual Machine"),
 			"bios_id":      getDataSourceStringSchema("BIOS UUID of the Virtual Machine"),
 			"instance_id":  getDataSourceStringSchema("Instance UUID of the Virtual Machine"),
+			"tag":          getTagsSchema(),
 			"context":      getContextSchema(false, false, false),
 		},
 	}
@@ -47,6 +48,7 @@ func dataSourceNsxtPolicyVMIDRead(d *schema.ResourceData, m interface{}) error {
 
 	objID := getNsxtPolicyVMIDFromSchema(d)
 	context := getSessionContext(d, m)
+
 	if objID != "" {
 		vmObj, err := findNsxtPolicyVMByID(context, connector, objID, m)
 		if err != nil {
@@ -85,5 +87,7 @@ func dataSourceNsxtPolicyVMIDRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("external_id", *vmModel.ExternalId)
 	d.Set("bios_id", computeIDMap[nsxtPolicyBiosUUIDKey])
 	d.Set("instance_id", computeIDMap[nsxtPolicyInstanceUUIDKey])
+	setPolicyTagsInSchema(d, vmModel.Tags)
+
 	return nil
 }
