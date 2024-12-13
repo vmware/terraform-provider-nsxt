@@ -12,12 +12,14 @@ used as sources and destinations, as well as in the Applied To field, in firewal
 
 This resource is applicable to NSX Policy Manager.
 
+## Example Usage
+
 ```hcl
 data "nsxt_policy_project" "demoproj" {
   display_name = "demoproj"
 }
 
-data "nsxt_policy_vpc" "demovpc" {
+data "nsxt_vpc" "demovpc" {
   context {
     project_id = data.nsxt_policy_project.demoproj.id
   }
@@ -27,7 +29,7 @@ data "nsxt_policy_vpc" "demovpc" {
 resource "nsxt_vpc_group" "group1" {
   context {
     project_id = data.nsxt_policy_project.demoproj.id
-    vpc_id     = data.nsxt_policy_vpc.demovpc.id
+    vpc_id     = data.nsxt_vpc.demovpc.id
   }
 
   display_name = "tf-group1"
@@ -67,13 +69,13 @@ The following arguments are supported:
   * `macaddress_expression` - (Optional) An expression block to specify individual MAC Addresses for this Group.
     * `mac_addresses` - (Required) List of MAC addresses.
   * `path_expression` - (Optional) An expression block to specify direct group members by policy path.
-    * `member_paths` - (Required) List of policy paths for direct members for this Group (such as Segments, Segment ports, Groups etc).
+    * `member_paths` - (Required) List of policy paths for direct members for this Group (such as Subnets, Subnet ports, Groups etc).
   * `external_id_expression` - (Optional) An expression block to specify external IDs for the specified member type for this Group.
     * `member_type` - (Optional) External ID member type. Must be one of: `VirtualMachine`, `VirtualNetworkInterface`, `CloudNativeServiceInstance`, or `PhysicalServer`. Defaults to `VirtualMachine`.
     * `external_ids` - (Required) List of external IDs for the specified member type.
   * `condition` (Optional) A repeatable condition block to select this Group's members. When multiple `condition` blocks are used in a single `criteria` they form a nested expression that's implicitly ANDed together and each nested condition must used the same `member_type`.
-    * `key` (Required) Specifies the attribute to query. Must be one of: `Tag`, `ComputerName`, `OSName`, `Name`, `NodeType`, `GroupType`, `ALL`, `IPAddress`, `PodCidr`. Please note that certain keys are only applicable to certain member types.
-    * `member_type` (Required) Specifies the type of resource to query. Must be one of: `IPSet`, `LogicalPort`, `LogicalSwitch`, `Segment`, `SegmentPort`, `VirtualMachine`, `Group`, `DVPG`, `DVPort`, `IPAddress`, `TransportNode`, `Pod`. `Service`, `Namespace`, `KubernetesCluster`, `KubernetesNamespace`, `KubernetesIngress`, `KubernetesService`, `KubernetesNode`, `AntreaEgress`, `AntreaIPPool`. Not that certain member types are only applicable to certain environments.
+    * `key` (Required) Specifies the attribute to query. Must be one of: `Tag`, `ComputerName`, `OSName`, `Name`. Please note that certain keys are only applicable to certain member types.
+    * `member_type` (Required) Specifies the type of resource to query. Must be one of: `Subnet`, `SubnetPort`, `VirtualMachine`
     * `operator` (Required) Specifies the query operator to use. Must be one of: `CONTAINS`, `ENDSWITH`, `EQUALS`, `NOTEQUALS`, `STARTSWITH`, `IN`, `NOTIN`, `MATCHES`. Not that certain operators are only applicable to certain keys/member types.:w
     * `value` (Required) User specified string value to use in the query. For `Tag` criteria, use 'scope|value' notation if you wish to specify scope in criteria.
 * `conjunction` (Required for multiple `criteria`) When specifying multiple `criteria`, a conjunction is used to specify if the criteria should selected using `AND` or `OR`.

@@ -262,6 +262,18 @@ func testAccGetSessionContext() tf_api.SessionContext {
 	return tf_api.SessionContext{ProjectID: projectID, ClientType: clientType, VPCID: vpcID}
 }
 
+func testAccGetSessionProjectContext() tf_api.SessionContext {
+	clientType := testAccIsGlobalManager2()
+	projectID := os.Getenv("NSXT_PROJECT_ID")
+	vpcID := ""
+	return tf_api.SessionContext{ProjectID: projectID, ClientType: clientType, VPCID: vpcID}
+}
+
+func testAccGetProjectContext() tf_api.SessionContext {
+	projectID := os.Getenv("NSXT_PROJECT_ID")
+	return tf_api.SessionContext{ProjectID: projectID, ClientType: tf_api.Multitenancy}
+}
+
 func testAccIsGlobalManager2() tf_api.ClientType {
 	if testAccIsVPC() {
 		return tf_api.VPC
@@ -725,6 +737,15 @@ func testAccNsxtPolicyMultitenancyContext() string {
 	return ""
 }
 
+func testAccNsxtProjectContext() string {
+	projectID := os.Getenv("NSXT_PROJECT_ID")
+	return fmt.Sprintf(`
+  context {
+    project_id = "%s"
+  }
+`, projectID)
+}
+
 func testAccNsxtMultitenancyContext(includeVpc bool) string {
 	if testAccIsVPC() {
 		// Some tests run in VPC context, however dependency resources are
@@ -765,10 +786,6 @@ func testAccResourceNsxtPolicyImportIDRetriever(resourceID string) func(*terrafo
 		rs, ok := s.RootModule().Resources[resourceID]
 		if !ok {
 			return "", fmt.Errorf("NSX Policy %s resource not found in resources", resourceID)
-		}
-		resourceID := rs.Primary.ID
-		if resourceID == "" {
-			return "", fmt.Errorf("NSX Policy %s resource ID not set in resources", resourceID)
 		}
 		path := rs.Primary.Attributes["path"]
 		if path == "" {

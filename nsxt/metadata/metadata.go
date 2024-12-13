@@ -286,6 +286,7 @@ func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[str
 			logger.Printf("[TRACE] %s parent %s key %s", ctx, parent, key)
 		}
 		if len(item.Metadata.PolymorphicType) > 0 {
+			logger.Printf("[TRACE] %s inspecting polymorphic key %s", ctx, key)
 			itemList := getItemListForSchemaToStruct(d, item.Metadata.SchemaType, key, parent, parentMap)
 			switch item.Metadata.PolymorphicType {
 			case PolymorphicTypeNested:
@@ -306,7 +307,11 @@ func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[str
 			exists := false
 			if len(parent) > 0 && parentMap[key] != nil {
 				value = parentMap[key].(string)
-				exists = true
+				// For nested maps, value is initialized to zero string even if not
+				// specified by user explicitly
+				if len(value) > 0 {
+					exists = true
+				}
 			} else {
 				var v interface{}
 				v, exists = d.GetOk(key)

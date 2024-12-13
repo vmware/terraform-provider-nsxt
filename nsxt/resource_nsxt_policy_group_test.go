@@ -2,6 +2,7 @@ package nsxt
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -53,6 +54,39 @@ func TestAccResourceNsxtPolicyGroup_basicImport_multitenancy(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 				ImportStateIdFunc: testAccResourceNsxtPolicyImportIDRetriever(testResourceName),
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicyGroup_empty(t *testing.T) {
+	testAccResourceNsxtPolicyGroupEmpty(t, false, func() {
+		testAccPreCheck(t)
+	})
+}
+
+func TestAccResourceNsxtPolicyGroup_empty_multitenancy(t *testing.T) {
+	testAccResourceNsxtPolicyGroupEmpty(t, true, func() {
+		testAccPreCheck(t)
+		testAccOnlyMultitenancy(t)
+	})
+}
+
+func testAccResourceNsxtPolicyGroupEmpty(t *testing.T, withContext bool, preCheck func()) {
+	// A simple tests that verify successful creation of a group with no criteria
+	name := getAccTestResourceName()
+	resourceName := "nsxt_policy_group"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  preCheck,
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyGroupCheckDestroy(state, name, defaultDomain)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccNsxtPolicyEmptyCreateTemplate(name, resourceName, withContext),
+				ExpectError: regexp.MustCompile("found empty criteria block in configuration"),
 			},
 		},
 	})
@@ -731,6 +765,33 @@ resource "%s" "test" {
 %s
   display_name = "%s"
   description  = "Acceptance Test"
+}
+`, resourceName, context, name)
+}
+
+func testAccNsxtPolicyEmptyCreateTemplate(name, resourceName string, withContext bool) string {
+	context := ""
+	if withContext {
+		context = testAccNsxtPolicyMultitenancyContext()
+	}
+	return fmt.Sprintf(`
+resource "%s" "test_empty" {
+%s
+  display_name = "%s"
+  description  = "Acceptance Test"
+
+  criteria {
+  }
+
+  tag {
+    scope = "scope1"
+    tag   = "tag1"
+  }
+
+  tag {
+    scope = "scope2"
+    tag   = "tag2"
+  }
 }
 `, resourceName, context, name)
 }

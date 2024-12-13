@@ -65,6 +65,7 @@ func TestIsPolicyPath(t *testing.T) {
 		"/global-infra/tier-1s/mygw1",
 		"/orgs/infra/tier-1s/mygw1",
 		"/orgs/myorg/projects/myproj/domains/d",
+		"/orgs/myorg/projects/myproj/vpcs/nicevpc",
 	}
 
 	for _, test := range testData {
