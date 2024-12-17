@@ -66,15 +66,18 @@ func deleteWrapper(originalFunc schema.DeleteFunc, name string) schema.DeleteFun
 }
 
 func importerWrapper(originalImporter *schema.ResourceImporter, name string) *schema.ResourceImporter {
+	newImporter := new(schema.ResourceImporter)
 	wrappedFunc := func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 		if commonVersionCheck(m) {
-			return originalImporter.State(d, m)
+			stateFunc := originalImporter.State
+			return stateFunc(d, m)
 		}
 		log.Printf("[INFO] Failing import for resource %s: removed from NSX 9.0.0", name)
 		return nil, mpResourceRemovedError(name)
 	}
-	originalImporter.State = wrappedFunc
-	return originalImporter
+	newImporter.State = wrappedFunc
+	newImporter.StateContext = originalImporter.StateContext
+	return newImporter
 }
 
 func removedResourceWrapper(realResourceFunc resourceFunc, name string) *schema.Resource {
