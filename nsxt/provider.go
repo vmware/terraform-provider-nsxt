@@ -340,6 +340,7 @@ func Provider() *schema.Provider {
 			"nsxt_vpc_ip_address_allocation":                         dataSourceNsxtVpcIpAddressAllocation(),
 			"nsxt_policy_gateway_connection":                         dataSourceNsxtPolicyGatewayConnection(),
 			"nsxt_policy_distributed_vlan_connection":                dataSourceNsxtPolicyDistributedVlanConnection(),
+			"nsxt_vpc_subnet_realization":                            dataSourceNsxtPolicySegmentRealization(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
