@@ -62,6 +62,12 @@ func resourceNsxtPolicyProject() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"vc_folder": {
+				Type:        schema.TypeBool,
+				Description: "Flag to specify whether the DVPGs created for project segments are grouped under a folder on the VC",
+				Optional:    true,
+				Default:     true,
+			},
 			"external_ipv4_blocks": {
 				Type:     schema.TypeList,
 				Elem:     getElemPolicyPathSchema(),
@@ -77,6 +83,7 @@ func resourceNsxtPolicyProject() *schema.Resource {
 				Optional: true,
 				MinItems: 1,
 				MaxItems: 1,
+				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"north_south_firewall": {
@@ -139,6 +146,7 @@ func resourceNsxtPolicyProjectPatch(connector client.Connector, d *schema.Resour
 	}
 	tier0s := getStringListFromSchemaList(d, "tier0_gateway_paths")
 	activateDefaultDFWRules := d.Get("activate_default_dfw_rules").(bool)
+	vcFolder := d.Get("vc_folder").(bool)
 	extIpv4BlocksList := getStringListFromSchemaList(d, "external_ipv4_blocks")
 	tgwConnectionsList := getStringListFromSchemaList(d, "tgw_external_connections")
 
@@ -161,6 +169,7 @@ func resourceNsxtPolicyProjectPatch(connector client.Connector, d *schema.Resour
 
 	if util.NsxVersionHigherOrEqual("9.0.0") {
 		obj.TgwExternalConnections = tgwConnectionsList
+		obj.VcFolder = &vcFolder
 	}
 
 	if shortID != "" {
@@ -294,6 +303,7 @@ func resourceNsxtPolicyProjectRead(d *schema.ResourceData, m interface{}) error 
 	}
 	if util.NsxVersionHigherOrEqual("9.0.0") {
 		d.Set("tgw_external_connections", obj.TgwExternalConnections)
+		d.Set("vc_folder", obj.VcFolder)
 	}
 	return nil
 }
