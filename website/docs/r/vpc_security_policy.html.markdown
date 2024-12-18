@@ -18,7 +18,7 @@ data "nsxt_policy_project" "demoproj" {
   display_name = "demoproj"
 }
 
-data "nsxt_policy_vpc" "demovpc" {
+data "nsxt_vpc" "demovpc" {
   context {
     project_id = data.nsxt_policy_project.demoproj.id
   }
@@ -28,7 +28,7 @@ data "nsxt_policy_vpc" "demovpc" {
 resource "nsxt_vpc_security_policy" "policy1" {
   context {
     project_id = data.nsxt_policy_project.demoproj.id
-    vpc_id     = data.nsxt_policy_vpc.demovpc.id
+    vpc_id     = data.nsxt_vpc.demovpc.id
   }
   display_name = "policy1"
   description  = "Terraform provisioned Security Policy"

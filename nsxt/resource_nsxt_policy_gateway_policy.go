@@ -132,7 +132,11 @@ func policyGatewayPolicyBuildAndPatch(d *schema.ResourceData, m interface{}, con
 	}
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	tags := getPolicyTagsFromSchema(d)
+	tags, tagErr := getValidatedTagsFromSchema(d)
+	if tagErr != nil {
+		return tagErr
+	}
+
 	comments := d.Get("comments").(string)
 	locked := d.Get("locked").(bool)
 	sequenceNumber := int64(d.Get("sequence_number").(int))

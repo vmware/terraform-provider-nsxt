@@ -33,7 +33,14 @@ func dataSourceNsxtPolicyProject() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
-				Optional: true,
+				Computed: true,
+			},
+			"external_ipv4_blocks": {
+				Type: schema.TypeList,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Computed: true,
 			},
 		},
 	}
@@ -126,6 +133,7 @@ func dataSourceNsxtPolicyProjectRead(d *schema.ResourceData, m interface{}) erro
 	}
 	d.Set("site_info", siteInfosList)
 	d.Set("tier0_gateway_paths", obj.Tier0s)
+	d.Set("external_ipv4_blocks", obj.ExternalIpv4Blocks)
 
 	return nil
 }
