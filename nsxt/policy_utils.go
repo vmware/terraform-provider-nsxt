@@ -442,7 +442,7 @@ func nsxtPolicyPathResourceImporterHelper(d *schema.ResourceData, m interface{})
 	importID := d.Id()
 	err := validateImportPolicyPath(importID)
 	if err != nil {
-		return []*schema.ResourceData{}, err
+		return []*schema.ResourceData{d}, err
 	}
 
 	pathSegs := strings.Split(importID, "/")
