@@ -46,7 +46,7 @@ resource "nsxt_edge_transport_node" "test" {
     }
   }
   node_settings {
-    hostname             = "tf_edge_node"
+    hostname             = "tf-edge-node"
     allow_ssh_root_login = true
     enable_ssh           = true
   }
@@ -56,6 +56,38 @@ resource "nsxt_edge_transport_node" "test" {
 **NOTE:** `data.vsphere_network`, `data.vsphere_compute_cluster`, `data.vsphere_datastore`, `data.vsphere_host` are 
 obtained using [hashicorp/vsphere](https://registry.terraform.io/providers/hashicorp/vsphere/) provider.
 
+## Example Usage, with Edge Transport Node created externally and converted into a transport node using Terraform
+```hcl
+data "nsxt_transport_node" "test_node" {
+  display_name = "tf_edge_node"
+}
+
+resource "nsxt_edge_transport_node" "test_node" {
+  node_id      = data.nsxt_transport_node.test_node.id
+  description  = "Terraform-deployed edge node"
+  display_name = "tf_edge_node"
+  standard_host_switch {
+    ip_assignment {
+      static_ip_pool = data.nsxt_policy_ip_pool.vtep_ip_pool.realized_id
+    }
+    transport_zone_endpoint {
+      transport_zone = data.nsxt_transport_zone.overlay_tz.id
+    }
+    transport_zone_endpoint {
+      transport_zone = data.nsxt_transport_zone.vlan_tz.id
+    }
+    host_switch_profile = [data.nsxt_policy_uplink_host_switch_profile.edge_uplink_profile.path]
+    pnic {
+      device_name = "fp-eth0"
+      uplink_name = "uplink1"
+    }
+  }
+  node_settings {
+    hostname = "tf-edge-node"
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -63,6 +95,7 @@ The following arguments are supported:
 * `display_name` - (Required) Display name of the resource.
 * `description` - (Optional) Description of the resource.
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
+* `node_id` - (Optional) The id of a pre-deployed Edge appliance to be converted into a transport node. Note that `node_id` attribute conflicts with `external_id`, `fqdn`, `ip_addresses` `deployment_config` and `node_settings` and those will be ignored while specifying `node_id`.   
 * `failure_domain` - (Optional)  Id of the failure domain.
 * `standard_host_switch` - (Required) Standard host switch specification.
   * `host_switch_id` - (Optional) The host switch id. This ID will be used to reference a host switch.
