@@ -45,7 +45,7 @@ resource "nsxt_transport_node" "test" {
     }
   }
   node_settings {
-    hostname             = "tf_edge_node"
+    hostname             = "tf-edge-node"
     allow_ssh_root_login = true
     enable_ssh           = true
   }
