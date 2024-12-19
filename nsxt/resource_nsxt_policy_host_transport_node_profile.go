@@ -20,7 +20,7 @@ func resourceNsxtPolicyHostTransportNodeProfile() *schema.Resource {
 		Update: resourceNsxtPolicyHostTransportNodeProfileUpdate,
 		Delete: resourceNsxtPolicyHostTransportNodeProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathResourceImporter,
+			State: getFriendlyPolicyPathOrIDResourceImporter("/infra/host-transport-node-profiles/[profile]"),
 		},
 		Schema: map[string]*schema.Schema{
 			"nsx_id":       getNsxIDSchema(),
