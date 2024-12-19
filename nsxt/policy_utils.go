@@ -27,6 +27,7 @@ import (
 // ErrNotAPolicyPath - Define an ignorable error for  policy path importer - to indicate that the given path is not a
 // policy path and may be processed as an id - which is handy for legacy import method
 var ErrNotAPolicyPath = errors.New("specified import identifier is not a policy path")
+var ErrUnexpectedPolicyPath = errors.New("unexpected policy path")
 var ErrEmptyImportID = errors.New("import identifier cannot be empty")
 
 func isSpaceString(s string) bool {
@@ -410,6 +411,18 @@ func validateImportPolicyPath(policyPath string) error {
 	return nil
 }
 
+func getFriendlyPolicyPathResourceImporter(pathExample string) func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	return func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+		rd, err := nsxtPolicyPathResourceImporterHelper(d, m)
+		if errors.Is(err, ErrNotAPolicyPath) || errors.Is(err, ErrUnexpectedPolicyPath) {
+			return rd, fmt.Errorf("Invalid policy path %s; expected format: %s", d.Id(), pathExample)
+		} else if err != nil {
+			return rd, err
+		}
+		return rd, nil
+	}
+}
+
 // This importer function accepts policy path and resource ID
 func nsxtPolicyPathResourceImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	rd, err := nsxtPolicyPathResourceImporterHelper(d, m)
@@ -426,16 +439,23 @@ func nsxtPolicyPathOnlyResourceImporter(d *schema.ResourceData, m interface{}) (
 	return nsxtPolicyPathResourceImporterHelper(d, m)
 }
 
-func nsxtVPCPathResourceImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	rd, err := nsxtPolicyPathResourceImporterHelper(d, m)
-	if err != nil {
-		return rd, err
+func getFriendlyVpcPathResourceImporter(pathExample string) func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	return func(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+		rd, err := nsxtPolicyPathResourceImporterHelper(d, m)
+		if errors.Is(err, ErrNotAPolicyPath) || errors.Is(err, ErrUnexpectedPolicyPath) {
+			return rd, fmt.Errorf("Invalid policy path %s; expected format: %s", d.Id(), pathExample)
+		}
+
+		if err != nil {
+			return rd, err
+		}
+
+		projectID, vpcID := getContextDataFromSchema(d)
+		if projectID == "" || vpcID == "" {
+			return rd, fmt.Errorf("imported resource policy path should have both project_id and vpc_id fields")
+		}
+		return rd, nil
 	}
-	projectID, vpcID := getContextDataFromSchema(d)
-	if projectID == "" || vpcID == "" {
-		return rd, fmt.Errorf("imported resource policy path should have both project_id and vpc_id fields")
-	}
-	return rd, nil
 }
 
 func nsxtPolicyPathResourceImporterHelper(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
