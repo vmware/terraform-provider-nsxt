@@ -28,21 +28,26 @@ var mpObjectDataSourceDeprecationMessage = "Please use corresponding policy data
 
 func getNsxIDSchema() *schema.Schema {
 	return &schema.Schema{
-		Type:        schema.TypeString,
-		Description: "NSX ID for this resource",
-		Optional:    true,
-		Computed:    true,
-		ForceNew:    true,
+		Type:         schema.TypeString,
+		Description:  "NSX ID for this resource",
+		Optional:     true,
+		Computed:     true,
+		ForceNew:     true,
+		ValidateFunc: validation.StringLenBetween(1, 1024),
 	}
 }
 
 func getFlexNsxIDSchema(readOnly bool) *schema.Schema {
-	return &schema.Schema{
+	s := schema.Schema{
 		Type:        schema.TypeString,
 		Description: "NSX ID for this resource",
 		Optional:    !readOnly,
 		Computed:    true,
 	}
+	if !readOnly {
+		s.ValidateFunc = validation.StringLenBetween(1, 1024)
+	}
+	return &s
 }
 
 func getComputedNsxIDSchema() *schema.Schema {

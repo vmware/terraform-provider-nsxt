@@ -12,6 +12,7 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 
 	"github.com/vmware/terraform-provider-nsxt/api/infra"
+	tf_api "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
 func TestAccDataSourceNsxtPolicyIpBlock_basic(t *testing.T) {
@@ -37,12 +38,12 @@ func testAccDataSourceNsxtPolicyIPBlockBasic(t *testing.T, withContext bool, pre
 		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
-			return testAccDataSourceNsxtPolicyIPBlockDeleteByName(name)
+			return testAccDataSourceNsxtPolicyIPBlockDeleteByName(testAccGetSessionContext(), name)
 		},
 		Steps: []resource.TestStep{
 			{
 				PreConfig: func() {
-					if err := testAccDataSourceNsxtPolicyIPBlockCreate(name, newUUID(), "4001::/64", false); err != nil {
+					if err := testAccDataSourceNsxtPolicyIPBlockCreate(testAccGetSessionContext(), name, newUUID(), "4001::/64", false); err != nil {
 						t.Error(err)
 					}
 				},
@@ -57,12 +58,12 @@ func testAccDataSourceNsxtPolicyIPBlockBasic(t *testing.T, withContext bool, pre
 	})
 }
 
-func testAccDataSourceNsxtPolicyIPBlockCreate(name, id, cidr string, isPrivate bool) error {
+func testAccDataSourceNsxtPolicyIPBlockCreate(context tf_api.SessionContext, name, id, cidr string, isPrivate bool) error {
 	connector, err := testAccGetPolicyConnector()
 	if err != nil {
 		return fmt.Errorf("Error during test client initialization: %v", err)
 	}
-	client := infra.NewIpBlocksClient(testAccGetSessionContext(), connector)
+	client := infra.NewIpBlocksClient(context, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}
@@ -86,12 +87,12 @@ func testAccDataSourceNsxtPolicyIPBlockCreate(name, id, cidr string, isPrivate b
 	return nil
 }
 
-func testAccDataSourceNsxtPolicyIPBlockDeleteByName(name string) error {
+func testAccDataSourceNsxtPolicyIPBlockDeleteByName(context tf_api.SessionContext, name string) error {
 	connector, err := testAccGetPolicyConnector()
 	if err != nil {
 		return fmt.Errorf("Error during test client initialization: %v", err)
 	}
-	client := infra.NewIpBlocksClient(testAccGetSessionContext(), connector)
+	client := infra.NewIpBlocksClient(context, connector)
 	if client == nil {
 		return policyResourceNotSupportedError()
 	}

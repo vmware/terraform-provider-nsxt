@@ -55,6 +55,8 @@ var conditionMemberTypeValues = []string{
 	model.Condition_MEMBER_TYPE_KUBERNETESGATEWAY,
 	model.Condition_MEMBER_TYPE_KUBERNETESSERVICE,
 	model.Condition_MEMBER_TYPE_KUBERNETESNODE,
+	model.Condition_MEMBER_TYPE_VPCSUBNETPORT,
+	model.Condition_MEMBER_TYPE_VPCSUBNET,
 }
 
 var conditionOperatorValues = []string{
@@ -106,7 +108,7 @@ func getPolicyGroupSchema(withDomain bool) map[string]*schema.Schema {
 		"description":  getDescriptionSchema(),
 		"revision":     getRevisionSchema(),
 		"tag":          getTagsSchema(),
-		"context":      getContextSchema(false, false, !withDomain),
+		"context":      getContextSchema(!withDomain, false, !withDomain),
 		"group_type": {
 			Type:         schema.TypeString,
 			Description:  "Indicates the group type",
@@ -320,7 +322,7 @@ func getExtendedCriteriaSetSchema() *schema.Resource {
 				Type:        schema.TypeSet,
 				Description: "Identity Group expression",
 				Elem:        getIdentityGroupSchema(),
-				Optional:    true,
+				Required:    true,
 			},
 		},
 	}
@@ -373,6 +375,9 @@ type criteriaMeta struct {
 func validateGroupCriteriaSets(criteriaSets []interface{}) ([]criteriaMeta, error) {
 	var criteria []criteriaMeta
 	for _, criteriaBlock := range criteriaSets {
+		if criteriaBlock == nil {
+			return nil, fmt.Errorf("found empty criteria block in configuration")
+		}
 		seenExp := ""
 		criteriaMap := criteriaBlock.(map[string]interface{})
 		for expName, expVal := range criteriaMap {
@@ -856,10 +861,8 @@ func resourceNsxtPolicyGroupGeneralCreate(d *schema.ResourceData, m interface{},
 	if err != nil {
 		return err
 	}
-
 	criteriaSets := d.Get("criteria").([]interface{})
 	conjunctions := d.Get("conjunction").([]interface{})
-
 	criteriaMeta, err := validateGroupCriteriaAndConjunctions(criteriaSets, conjunctions)
 	if err != nil {
 		return err
@@ -881,7 +884,10 @@ func resourceNsxtPolicyGroupGeneralCreate(d *schema.ResourceData, m interface{},
 	}
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	tags := getPolicyTagsFromSchema(d)
+	tags, tagErr := getValidatedTagsFromSchema(d)
+	if tagErr != nil {
+		return tagErr
+	}
 
 	var groupTypes []string
 	groupType := d.Get("group_type").(string)
