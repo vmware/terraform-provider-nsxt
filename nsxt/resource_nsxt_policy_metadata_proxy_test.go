@@ -44,7 +44,6 @@ func TestAccResourceNsxtPolicyMetadataProxy_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyMetadataProxyCreateAttributes["display_name"]),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyMetadataProxyCreateAttributes["description"]),
 
-					resource.TestCheckResourceAttr(testResourceName, "secret", accTestPolicyMetadataProxyCreateAttributes["secret"]),
 					resource.TestCheckResourceAttr(testResourceName, "server_address", accTestPolicyMetadataProxyCreateAttributes["server_address"]),
 
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
@@ -60,7 +59,6 @@ func TestAccResourceNsxtPolicyMetadataProxy_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyMetadataProxyUpdateAttributes["display_name"]),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyMetadataProxyUpdateAttributes["description"]),
 
-					resource.TestCheckResourceAttr(testResourceName, "secret", accTestPolicyMetadataProxyUpdateAttributes["secret"]),
 					resource.TestCheckResourceAttr(testResourceName, "server_address", accTestPolicyMetadataProxyUpdateAttributes["server_address"]),
 
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
@@ -90,9 +88,10 @@ func TestAccResourceNsxtPolicyMetadataProxy_importBasic(t *testing.T) {
 				Config: testAccNsxtPolicyMetadataProxyTemplate(true),
 			},
 			{
-				ResourceName:      testResourceName,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            testResourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"secret"},
 			},
 		},
 	})

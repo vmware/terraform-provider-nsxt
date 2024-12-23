@@ -27,7 +27,7 @@ var accTestPolicyLBServiceUpdateAttributes = map[string]string{
 	"connectivity_path": "nsxt_policy_tier1_gateway.test2.path",
 	"enabled":           "false",
 	"error_log_level":   "EMERGENCY",
-	"size":              "MEDIUM",
+	"size":              "SMALL",
 }
 
 var accTestPolicyLBServiceGateway1Name = getAccTestResourceName()
