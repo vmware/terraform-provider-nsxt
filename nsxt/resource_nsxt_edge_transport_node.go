@@ -965,9 +965,9 @@ func getCPUConfigFromSchema(cpuConfigList []interface{}) []mpmodel.CpuCoreConfig
 func getHostSwitchProfileResourceType(m interface{}, id string) (string, error) {
 	connector := getPolicyConnector(m)
 	client := infra.NewHostSwitchProfilesClient(connector)
-
+	t := true
 	// we retrieve a list of profiles instead of using Get(), as the id could be either MP id or Policy id
-	list, err := client.List(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	list, err := client.List(nil, nil, nil, nil, &t, nil, nil, nil, nil, nil, nil, nil)
 	if err != nil {
 		return "", err
 	}
