@@ -21,10 +21,10 @@ resource "nsxt_edge_transport_node" "test" {
       assigned_by_dhcp = true
     }
     transport_zone_endpoint {
-      transport_zone          = data.nsxt_transport_zone.tz1.id
+      transport_zone          = data.nsxt_policy_transport_zone.tz1.id
       transport_zone_profiles = ["52035bb3-ab02-4a08-9884-18631312e50a"]
     }
-    host_switch_profile = [nsxt_policy_uplink_host_switch_profile.hsw_profile1.path]
+    host_switch_profile = [nsxt_policy_uplink_host_switch_profile.hsw_profile1.id]
     pnic {
       device_name = "fp-eth0"
       uplink_name = "uplink1"
@@ -56,6 +56,8 @@ resource "nsxt_edge_transport_node" "test" {
 **NOTE:** `data.vsphere_network`, `data.vsphere_compute_cluster`, `data.vsphere_datastore`, `data.vsphere_host` are 
 obtained using [hashicorp/vsphere](https://registry.terraform.io/providers/hashicorp/vsphere/) provider.
 
+**NOTE** while policy path values are acceptable for `transport_zone`,  `host_switch_profile` attributes, it is better to use id values to avoid state issues.
+
 ## Example Usage, with Edge Transport Node created externally and converted into a transport node using Terraform
 ```hcl
 data "nsxt_transport_node" "test_node" {
@@ -71,12 +73,12 @@ resource "nsxt_edge_transport_node" "test_node" {
       static_ip_pool = data.nsxt_policy_ip_pool.vtep_ip_pool.realized_id
     }
     transport_zone_endpoint {
-      transport_zone = data.nsxt_transport_zone.overlay_tz.id
+      transport_zone = data.nsxt_policy_transport_zone.overlay_tz.id
     }
     transport_zone_endpoint {
-      transport_zone = data.nsxt_transport_zone.vlan_tz.id
+      transport_zone = data.nsxt_policy_transport_zone.vlan_tz.id
     }
-    host_switch_profile = [data.nsxt_policy_uplink_host_switch_profile.edge_uplink_profile.path]
+    host_switch_profile = [data.nsxt_policy_uplink_host_switch_profile.edge_uplink_profile.id]
     pnic {
       device_name = "fp-eth0"
       uplink_name = "uplink1"
