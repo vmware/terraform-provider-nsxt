@@ -176,9 +176,14 @@ func isVCF9HostUpgrade(m interface{}, targetVersion string) (bool, error) {
 		return false, nil
 	}
 	// In this case, all components other than host will be NOT_STARTED, but hosts will be with status SUCCESS
+	// Finalize component can be NOT_STARTED or PAUSED
 	for _, c := range statusSummary.ComponentStatus {
 		if *c.ComponentType == hostUpgradeGroup {
 			if *c.Status != nsxModel.ComponentUpgradeStatus_STATUS_SUCCESS {
+				return false, nil
+			}
+		} else if *c.ComponentType == finalizeUpgradeGroup {
+			if *c.Status != nsxModel.ComponentUpgradeStatus_STATUS_PAUSED && *c.Status != nsxModel.ComponentUpgradeStatus_STATUS_NOT_STARTED {
 				return false, nil
 			}
 		} else {
