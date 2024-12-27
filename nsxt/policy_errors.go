@@ -18,19 +18,21 @@ import (
 )
 
 func printAPIError(apiError model.ApiError) string {
-	if apiError.ErrorMessage != nil && apiError.ErrorCode != nil {
-		return fmt.Sprintf("%s (code %v)", *apiError.ErrorMessage, *apiError.ErrorCode)
-	}
+	msg := ""
 
 	if apiError.ErrorMessage != nil {
-		return *apiError.ErrorMessage
+		msg = *apiError.ErrorMessage
+	}
+
+	if apiError.Details != nil {
+		msg += fmt.Sprintf(": %s", *apiError.Details)
 	}
 
 	if apiError.ErrorCode != nil {
-		return fmt.Sprintf("(code %v)", *apiError.ErrorCode)
+		msg += fmt.Sprintf(" (code %v)", *apiError.ErrorCode)
 	}
 
-	return ""
+	return msg
 }
 
 // TODO: Remove duplicate code when sdk implements composition of API inheritance model

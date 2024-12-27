@@ -1021,7 +1021,7 @@ resource "nsxt_policy_segment" "test" {
           next_hop = "2.3.1.3"
         }
         dhcp_option_121 {
-          network  = "3.1.1.21/24"
+          network  = "3.1.1.0/24"
           next_hop = "3.3.1.3"
         }
         dhcp_generic_option {

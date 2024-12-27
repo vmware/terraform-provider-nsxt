@@ -10,6 +10,8 @@ description: A resource to configure a Policy Host Transport Node Profile.
 This resource provides a method for the management of a Policy Host Transport Node Profile.
 This resource is supported with NSX 4.1.0 onwards.
 
+**NOTE:** In case that the `nsxt_policy_host_transport_node_profile` is created in the same plan with `nsxt_compute_manager`, it is required to add a dependency between the two.
+
 ## Example Usage
 ```hcl
 resource "nsxt_policy_host_transport_node_profile" "test" {

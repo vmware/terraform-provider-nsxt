@@ -25,10 +25,13 @@ func resourceNsxtPolicyParentSecurityPolicy() *schema.Resource {
 	}
 }
 
-func parentSecurityPolicySchemaToModel(d *schema.ResourceData, id string) model.SecurityPolicy {
+func parentSecurityPolicySchemaToModel(d *schema.ResourceData, id string) (model.SecurityPolicy, error) {
 	displayName := d.Get("display_name").(string)
 	description := d.Get("description").(string)
-	tags := getPolicyTagsFromSchema(d)
+	tags, tagErr := getValidatedTagsFromSchema(d)
+	if tagErr != nil {
+		return model.SecurityPolicy{}, tagErr
+	}
 	cat, ok := d.GetOk("category")
 	category := ""
 	if ok {
@@ -59,7 +62,7 @@ func parentSecurityPolicySchemaToModel(d *schema.ResourceData, id string) model.
 	if category != "" {
 		obj.Category = &category
 	}
-	return obj
+	return obj, nil
 }
 
 func parentSecurityPolicyModelToSchema(d *schema.ResourceData, m interface{}, isVPC bool) (*model.SecurityPolicy, error) {

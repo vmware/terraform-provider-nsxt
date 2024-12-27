@@ -8,9 +8,11 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 	infra "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects"
 )
 
 func resourceNsxtPolicyProject() *schema.Resource {
@@ -55,10 +57,52 @@ func resourceNsxtPolicyProject() *schema.Resource {
 				Elem:     getElemPolicyPathSchema(),
 				Optional: true,
 			},
+			"activate_default_dfw_rules": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+			},
+			"vc_folder": {
+				Type:        schema.TypeBool,
+				Description: "Flag to specify whether the DVPGs created for project segments are grouped under a folder on the VC",
+				Optional:    true,
+				Default:     true,
+			},
 			"external_ipv4_blocks": {
 				Type:     schema.TypeList,
 				Elem:     getElemPolicyPathSchema(),
 				Optional: true,
+			},
+			"tgw_external_connections": {
+				Type:     schema.TypeList,
+				Elem:     getElemPolicyPathSchema(),
+				Optional: true,
+			},
+			"default_security_profile": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MinItems: 1,
+				MaxItems: 1,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"north_south_firewall": {
+							Type:     schema.TypeList,
+							MinItems: 1,
+							MaxItems: 1,
+							Required: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:        schema.TypeBool,
+										Required:    true,
+										Description: "Flag that indicates whether north-south firewall (Gateway Firewall) is enabled",
+									},
+								},
+							},
+						},
+					},
+				},
 			},
 		},
 	}
@@ -101,7 +145,10 @@ func resourceNsxtPolicyProjectPatch(connector client.Connector, d *schema.Resour
 		siteInfos = append(siteInfos, obj)
 	}
 	tier0s := getStringListFromSchemaList(d, "tier0_gateway_paths")
-	externalIPV4Blocks := getStringListFromSchemaList(d, "external_ipv4_blocks")
+	activateDefaultDFWRules := d.Get("activate_default_dfw_rules").(bool)
+	vcFolder := d.Get("vc_folder").(bool)
+	extIpv4BlocksList := getStringListFromSchemaList(d, "external_ipv4_blocks")
+	tgwConnectionsList := getStringListFromSchemaList(d, "tgw_external_connections")
 
 	obj := model.Project{
 		DisplayName:        &displayName,
@@ -109,7 +156,20 @@ func resourceNsxtPolicyProjectPatch(connector client.Connector, d *schema.Resour
 		Tags:               tags,
 		SiteInfos:          siteInfos,
 		Tier0s:             tier0s,
-		ExternalIpv4Blocks: externalIPV4Blocks,
+		ExternalIpv4Blocks: extIpv4BlocksList,
+	}
+
+	if util.NsxVersionHigherOrEqual("4.2.0") {
+		obj.ActivateDefaultDfwRules = &activateDefaultDFWRules
+	}
+
+	if util.NsxVersionHigherOrEqual("4.1.1") {
+		obj.ExternalIpv4Blocks = extIpv4BlocksList
+	}
+
+	if util.NsxVersionHigherOrEqual("9.0.0") {
+		obj.TgwExternalConnections = tgwConnectionsList
+		obj.VcFolder = &vcFolder
 	}
 
 	if shortID != "" {
@@ -119,7 +179,62 @@ func resourceNsxtPolicyProjectPatch(connector client.Connector, d *schema.Resour
 	log.Printf("[INFO] Patching Project with ID %s", id)
 
 	client := infra.NewProjectsClient(connector)
-	return client.Patch(defaultOrgID, id, obj)
+	err := client.Patch(defaultOrgID, id, obj)
+	if err != nil {
+		return err
+	}
+
+	if d.HasChanges("default_security_profile") {
+		err = patchVpcSecurityProfile(d, connector, id)
+	}
+	return err
+}
+
+func patchVpcSecurityProfile(d *schema.ResourceData, connector client.Connector, projectID string) error {
+	enabled := false
+	defaultSecurityProfile := d.Get("default_security_profile")
+	if defaultSecurityProfile != nil {
+		dsp := defaultSecurityProfile.([]interface{})
+		if len(dsp) > 0 {
+			northSouthFirewall := dsp[0].(map[string]interface{})["north_south_firewall"]
+			if northSouthFirewall != nil {
+				nsfw := northSouthFirewall.([]interface{})
+				if len(nsfw) > 0 {
+					elem := nsfw[0].(map[string]interface{})
+					enabled = elem["enabled"].(bool)
+				}
+			}
+		}
+	}
+	// Default security profile is created by NSX, we can assume that it's there already
+	client := projects.NewVpcSecurityProfilesClient(connector)
+	obj := model.VpcSecurityProfile{
+		NorthSouthFirewall: &model.NorthSouthFirewall{
+			Enabled: &enabled,
+		},
+	}
+	return client.Patch(defaultOrgID, projectID, "default", obj)
+}
+
+func setVpcSecurityProfileInSchema(d *schema.ResourceData, connector client.Connector, projectID string) error {
+	client := projects.NewVpcSecurityProfilesClient(connector)
+	obj, err := client.Get(defaultOrgID, projectID, "default")
+	if err != nil {
+		return err
+	}
+
+	enabled := false
+	if obj.NorthSouthFirewall != nil && obj.NorthSouthFirewall.Enabled != nil {
+		enabled = *obj.NorthSouthFirewall.Enabled
+	}
+
+	nsfw := map[string]interface{}{"enabled": &enabled}
+	nsfws := []interface{}{nsfw}
+	dsp := map[string]interface{}{"north_south_firewall": nsfws}
+	dsps := []interface{}{dsp}
+
+	d.Set("default_security_profile", dsps)
+	return nil
 }
 
 func resourceNsxtPolicyProjectCreate(d *schema.ResourceData, m interface{}) error {
@@ -147,7 +262,7 @@ func resourceNsxtPolicyProjectRead(d *schema.ResourceData, m interface{}) error 
 
 	id := d.Id()
 	if id == "" {
-		return fmt.Errorf("Error obtaining Project ID")
+		return fmt.Errorf("error obtaining Project ID")
 	}
 
 	var obj model.Project
@@ -175,8 +290,21 @@ func resourceNsxtPolicyProjectRead(d *schema.ResourceData, m interface{}) error 
 	}
 	d.Set("site_info", siteInfosList)
 	d.Set("tier0_gateway_paths", obj.Tier0s)
-	d.Set("external_ipv4_blocks", obj.ExternalIpv4Blocks)
 
+	err = setVpcSecurityProfileInSchema(d, connector, id)
+	if err != nil {
+		return err
+	}
+	if util.NsxVersionHigherOrEqual("4.2.0") {
+		d.Set("activate_default_dfw_rules", obj.ActivateDefaultDfwRules)
+	}
+	if util.NsxVersionHigherOrEqual("4.1.1") {
+		d.Set("external_ipv4_blocks", obj.ExternalIpv4Blocks)
+	}
+	if util.NsxVersionHigherOrEqual("9.0.0") {
+		d.Set("tgw_external_connections", obj.TgwExternalConnections)
+		d.Set("vc_folder", obj.VcFolder)
+	}
 	return nil
 }
 
@@ -184,7 +312,7 @@ func resourceNsxtPolicyProjectUpdate(d *schema.ResourceData, m interface{}) erro
 
 	id := d.Id()
 	if id == "" {
-		return fmt.Errorf("Error obtaining Project ID")
+		return fmt.Errorf("error obtaining Project ID")
 	}
 
 	connector := getPolicyConnector(m)
@@ -199,7 +327,7 @@ func resourceNsxtPolicyProjectUpdate(d *schema.ResourceData, m interface{}) erro
 func resourceNsxtPolicyProjectDelete(d *schema.ResourceData, m interface{}) error {
 	id := d.Id()
 	if id == "" {
-		return fmt.Errorf("Error obtaining Project ID")
+		return fmt.Errorf("error obtaining Project ID")
 	}
 
 	connector := getPolicyConnector(m)
