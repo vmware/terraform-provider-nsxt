@@ -1,3 +1,19 @@
+## 3.8.0 (December 31, 2020)
+
+BUG FIXES:
+
+* `resource/nsxt_edge_transport_node`: Support system-defined host switch profiles ([#1489](https://github.com/vmware/terraform-provider-nsxt/pull/1489))
+* Fix import issue for deprecated MP resources ([#1486](https://github.com/vmware/terraform-provider-nsxt/pull/1486))
+* `resource/nsxt_policy_lb_virtual_server`: Fix potential crash when empty block is configured ([#1463](https://github.com/vmware/terraform-provider-nsxt/pull/1463))
+
+IMPROVEMENTS:
+
+* `resource/nsxt_edge_transport_node`: Add support for Edge transport nodes which were created externally ([#1473](https://github.com/vmware/terraform-provider-nsxt/pull/1473))
+* `resource/nsxt_policy_nat_rule`: Support new `nat_type` attribute to indicate type of NAT for the rule ([#1480](https://github.com/vmware/terraform-provider-nsxt/pull/1480))
+* `resource/nsxt_policy_tier0_gateway_interface`, `resource/nsxt_policy_tier1_gateway_interface`: Add `dhcp_relay_path` attribute ([#1475](https://github.com/vmware/terraform-provider-nsxt/pull/1475))
+* `data/nsxt_policy_vm`: ([#1470](https://github.com/vmware/terraform-provider-nsxt/pull/1470))
+* `data/nsxt_policy_transport_zone`: ([#1468](https://github.com/vmware/terraform-provider-nsxt/pull/1468))
+
 ## 3.7.1 (November 8, 2024)
 
 BUG FIXES:
