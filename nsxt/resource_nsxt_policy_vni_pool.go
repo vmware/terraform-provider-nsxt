@@ -15,6 +15,8 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
+var vniPoolPathExample = "/infra/vni-pools/[pool]"
+
 func resourceNsxtPolicyVniPool() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyVniPoolCreate,
@@ -22,7 +24,7 @@ func resourceNsxtPolicyVniPool() *schema.Resource {
 		Update: resourceNsxtPolicyVniPoolUpdate,
 		Delete: resourceNsxtPolicyVniPoolDelete,
 		Importer: &schema.ResourceImporter{
-			State: getFriendlyPolicyPathOrIDResourceImporter("/infra/vni-pools/[pool]"),
+			State: getPolicyPathOrIDResourceImporter(vniPoolPathExample),
 		},
 
 		Schema: map[string]*schema.Schema{

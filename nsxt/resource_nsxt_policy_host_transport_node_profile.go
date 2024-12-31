@@ -13,6 +13,8 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
+var hostTransportNodeProfilePathExample = "/infra/host-transport-node-profiles/[profile]"
+
 func resourceNsxtPolicyHostTransportNodeProfile() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyHostTransportNodeProfileCreate,
@@ -20,7 +22,7 @@ func resourceNsxtPolicyHostTransportNodeProfile() *schema.Resource {
 		Update: resourceNsxtPolicyHostTransportNodeProfileUpdate,
 		Delete: resourceNsxtPolicyHostTransportNodeProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: getFriendlyPolicyPathOrIDResourceImporter("/infra/host-transport-node-profiles/[profile]"),
+			State: getPolicyPathOrIDResourceImporter(hostTransportNodeProfilePathExample),
 		},
 		Schema: map[string]*schema.Schema{
 			"nsx_id":       getNsxIDSchema(),

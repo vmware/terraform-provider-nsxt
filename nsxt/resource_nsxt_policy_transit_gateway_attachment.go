@@ -55,7 +55,7 @@ func resourceNsxtPolicyTransitGatewayAttachment() *schema.Resource {
 
 func resourceNsxtPolicyTransitGatewayAttachmentExists(sessionContext utl.SessionContext, parentPath string, id string, connector client.Connector) (bool, error) {
 	var err error
-	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 3)
+	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 3, transitGatewayPathExample)
 	if pathErr != nil {
 		return false, pathErr
 	}
@@ -81,7 +81,7 @@ func resourceNsxtPolicyTransitGatewayAttachmentCreate(d *schema.ResourceData, m 
 	}
 
 	parentPath := d.Get("parent_path").(string)
-	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 3)
+	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 3, transitGatewayPathExample)
 	if pathErr != nil {
 		return pathErr
 	}
@@ -123,7 +123,7 @@ func resourceNsxtPolicyTransitGatewayAttachmentRead(d *schema.ResourceData, m in
 
 	client := clientLayer.NewAttachmentsClient(connector)
 	parentPath := d.Get("parent_path").(string)
-	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 3)
+	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 3, transitGatewayPathExample)
 	if pathErr != nil {
 		return pathErr
 	}
@@ -153,7 +153,7 @@ func resourceNsxtPolicyTransitGatewayAttachmentUpdate(d *schema.ResourceData, m 
 	}
 
 	parentPath := d.Get("parent_path").(string)
-	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 3)
+	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 3, transitGatewayPathExample)
 	if pathErr != nil {
 		return pathErr
 	}
@@ -191,7 +191,7 @@ func resourceNsxtPolicyTransitGatewayAttachmentDelete(d *schema.ResourceData, m 
 
 	connector := getPolicyConnector(m)
 	parentPath := d.Get("parent_path").(string)
-	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 3)
+	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 3, transitGatewayPathExample)
 	if pathErr != nil {
 		return pathErr
 	}

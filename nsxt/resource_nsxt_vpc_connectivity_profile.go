@@ -186,6 +186,8 @@ var vpcConnectivityProfileSchema = map[string]*metadata.ExtendedSchema{
 	},
 }
 
+var vpcConnectivityProfilePathExample = "/orgs/[org]/projects/[project]/vpc-connectivity-profiles/[profile]"
+
 func resourceNsxtVpcConnectivityProfile() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtVpcConnectivityProfileCreate,
@@ -193,7 +195,7 @@ func resourceNsxtVpcConnectivityProfile() *schema.Resource {
 		Update: resourceNsxtVpcConnectivityProfileUpdate,
 		Delete: resourceNsxtVpcConnectivityProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: getFriendlyPolicyPathResourceImporter("/orgs/[org]/projects/[project]/vpc-connectivity-profiles/[profile]"),
+			State: getPolicyPathResourceImporter(vpcConnectivityProfilePathExample),
 		},
 		Schema: metadata.GetSchemaFromExtendedSchema(vpcConnectivityProfileSchema),
 	}

@@ -17,6 +17,8 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
+var dnsForwarderZonePath string = getMultitenancyPathExample("/infra/dns-forwarder-zones/[profile]")
+
 func resourceNsxtPolicyDNSForwarderZone() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyDNSForwarderZoneCreate,
@@ -24,7 +26,7 @@ func resourceNsxtPolicyDNSForwarderZone() *schema.Resource {
 		Update: resourceNsxtPolicyDNSForwarderZoneUpdate,
 		Delete: resourceNsxtPolicyDNSForwarderZoneDelete,
 		Importer: &schema.ResourceImporter{
-			State: getFriendlyPolicyPathOrIDResourceImporter(getMultitenancyPathExample("/infra/dns-forwarder-zones/[profile]")),
+			State: getPolicyPathOrIDResourceImporter(dnsForwarderZonePath),
 		},
 
 		Schema: map[string]*schema.Schema{

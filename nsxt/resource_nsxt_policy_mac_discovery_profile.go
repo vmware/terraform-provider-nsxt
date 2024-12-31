@@ -125,6 +125,8 @@ var macDiscoveryProfileSchema = map[string]*metadata.ExtendedSchema{
 	},
 }
 
+var macDiscoveryProfileExamplePath string = getMultitenancyPathExample("/infra/mac-discovery-profiles/[profile]")
+
 func resourceNsxtPolicyMacDiscoveryProfile() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyMacDiscoveryProfileCreate,
@@ -132,7 +134,7 @@ func resourceNsxtPolicyMacDiscoveryProfile() *schema.Resource {
 		Update: resourceNsxtPolicyMacDiscoveryProfileUpdate,
 		Delete: resourceNsxtPolicyMacDiscoveryProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: getFriendlyPolicyPathOrIDResourceImporter(getMultitenancyPathExample("/infra/mac-discovery-profiles/[profile]")),
+			State: getPolicyPathOrIDResourceImporter(macDiscoveryProfileExamplePath),
 		},
 
 		Schema: metadata.GetSchemaFromExtendedSchema(macDiscoveryProfileSchema),

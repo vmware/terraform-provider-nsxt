@@ -17,6 +17,8 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
+var dhcpServerPathExample = getMultitenancyPathExample("/infra/dhcp-servers/[dhcp-server]")
+
 func resourceNsxtPolicyDhcpServer() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyDhcpServerCreate,
@@ -24,7 +26,7 @@ func resourceNsxtPolicyDhcpServer() *schema.Resource {
 		Update: resourceNsxtPolicyDhcpServerUpdate,
 		Delete: resourceNsxtPolicyDhcpServerDelete,
 		Importer: &schema.ResourceImporter{
-			State: getFriendlyPolicyPathOrIDResourceImporter(getMultitenancyPathExample("/infra/dhcp-servers/[dhcp-server]")),
+			State: getPolicyPathOrIDResourceImporter(dhcpServerPathExample),
 		},
 
 		Schema: map[string]*schema.Schema{
