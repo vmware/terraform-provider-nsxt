@@ -22,7 +22,7 @@ func resourceNsxtPolicyDhcpRelayConfig() *schema.Resource {
 		Update: resourceNsxtPolicyDhcpRelayConfigUpdate,
 		Delete: resourceNsxtPolicyDhcpRelayConfigDelete,
 		Importer: &schema.ResourceImporter{
-			State: getFriendlyPolicyPathOrIDResourceImporter(getMultitenancyPathExample("/infra/dhcp-relays/[dhcp-relay]")),
+			State: getPolicyPathOrIDResourceImporter(getMultitenancyPathExample("/infra/dhcp-relays/[dhcp-relay]")),
 		},
 
 		Schema: map[string]*schema.Schema{

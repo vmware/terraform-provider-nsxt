@@ -51,7 +51,7 @@ func resourceNsxtPolicyContextProfile() *schema.Resource {
 		Update: resourceNsxtPolicyContextProfileUpdate,
 		Delete: resourceNsxtPolicyContextProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: getFriendlyPolicyPathOrIDResourceImporter(getMultitenancyPathExample("/infra/context-profiles/[profile]")),
+			State: getPolicyPathOrIDResourceImporter(getMultitenancyPathExample("/infra/context-profiles/[profile]")),
 		},
 
 		Schema: map[string]*schema.Schema{

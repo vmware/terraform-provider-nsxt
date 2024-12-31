@@ -18,7 +18,7 @@ func resourceNsxtVPCSecurityPolicy() *schema.Resource {
 		Update: resourceNsxtVPCSecurityPolicyUpdate,
 		Delete: resourceNsxtVPCSecurityPolicyDelete,
 		Importer: &schema.ResourceImporter{
-			State: getFriendlyVpcPathResourceImporter("/orgs/[org]/projects/[project]/vpcs/[vpc]/security-policies/[security-policy]"),
+			State: getVpcPathResourceImporter("/orgs/[org]/projects/[project]/vpcs/[vpc]/security-policies/[security-policy]"),
 		},
 		Schema: getPolicySecurityPolicySchema(false, true, true, true),
 	}

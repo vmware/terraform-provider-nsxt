@@ -244,7 +244,7 @@ func resourceNsxtPolicySegmentSecurityProfile() *schema.Resource {
 		Update: resourceNsxtPolicySegmentSecurityProfileUpdate,
 		Delete: resourceNsxtPolicySegmentSecurityProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: getFriendlyPolicyPathOrIDResourceImporter(getMultitenancyPathExample("/infra/segment-security-profiles/[profile]")),
+			State: getPolicyPathOrIDResourceImporter(getMultitenancyPathExample("/infra/segment-security-profiles/[profile]")),
 		},
 
 		Schema: metadata.GetSchemaFromExtendedSchema(segmentSecurityProfileSchema),

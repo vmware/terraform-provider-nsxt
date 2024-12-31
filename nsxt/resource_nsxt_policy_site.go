@@ -25,7 +25,7 @@ func resourceNsxtPolicySite() *schema.Resource {
 		Update: resourceNsxtPolicySiteUpdate,
 		Delete: resourceNsxtPolicySiteDelete,
 		Importer: &schema.ResourceImporter{
-			State: getFriendlyPolicyPathOrIDResourceImporter("/infra/sites/[site]"),
+			State: getPolicyPathOrIDResourceImporter("/infra/sites/[site]"),
 		},
 
 		Schema: map[string]*schema.Schema{

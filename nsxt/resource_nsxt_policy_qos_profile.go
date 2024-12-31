@@ -27,7 +27,7 @@ func resourceNsxtPolicyQosProfile() *schema.Resource {
 		Update: resourceNsxtPolicyQosProfileUpdate,
 		Delete: resourceNsxtPolicyQosProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: getFriendlyPolicyPathOrIDResourceImporter(getMultitenancyPathExample("/infra/qos-profiles/[profile]")),
+			State: getPolicyPathOrIDResourceImporter(getMultitenancyPathExample("/infra/qos-profiles/[profile]")),
 		},
 
 		Schema: map[string]*schema.Schema{

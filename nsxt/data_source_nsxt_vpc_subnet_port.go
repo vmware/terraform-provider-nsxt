@@ -41,7 +41,7 @@ func dataSourceNsxtVpcSubnetPort() *schema.Resource {
 func listVpcSubnetPorts(connector client.Connector, subnetPath string) ([]model.VpcSubnetPort, error) {
 
 	var results []model.VpcSubnetPort
-	parents, pathErr := parseStandardPolicyPathVerifySize(subnetPath, 4)
+	parents, pathErr := parseStandardPolicyPathVerifySize(subnetPath, 4, "/orgs/[org]/projects/[project]/vpcs/[vpc]/subnets/[subnet]")
 	if pathErr != nil {
 		return results, pathErr
 	}

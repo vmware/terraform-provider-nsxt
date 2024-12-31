@@ -106,7 +106,7 @@ func resourceNsxtVpcIpAddressAllocation() *schema.Resource {
 		Update: resourceNsxtVpcIpAddressAllocationUpdate,
 		Delete: resourceNsxtVpcIpAddressAllocationDelete,
 		Importer: &schema.ResourceImporter{
-			State: getFriendlyVpcPathResourceImporter("/orgs/[org]/projects/[project]/vpcs/[vpc]/ip-address-allocations/[allocation]"),
+			State: getVpcPathResourceImporter("/orgs/[org]/projects/[project]/vpcs/[vpc]/ip-address-allocations/[allocation]"),
 		},
 		Schema: metadata.GetSchemaFromExtendedSchema(vpcIpAddressAllocationSchema),
 	}

@@ -14,7 +14,7 @@ func resourceNsxtPolicySegment() *schema.Resource {
 		Update: resourceNsxtPolicySegmentUpdate,
 		Delete: resourceNsxtPolicySegmentDelete,
 		Importer: &schema.ResourceImporter{
-			State: getFriendlyPolicyPathOrIDResourceImporter(getMultitenancyPathExample("/infra/segments/[segment]")),
+			State: getPolicyPathOrIDResourceImporter(getMultitenancyPathExample("/infra/segments/[segment]")),
 		},
 
 		Schema: getPolicyCommonSegmentSchema(false, false),

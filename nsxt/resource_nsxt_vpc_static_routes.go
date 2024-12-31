@@ -82,7 +82,7 @@ func resourceNsxtVpcStaticRoutes() *schema.Resource {
 		Update: resourceNsxtVpcStaticRoutesUpdate,
 		Delete: resourceNsxtVpcStaticRoutesDelete,
 		Importer: &schema.ResourceImporter{
-			State: getFriendlyVpcPathResourceImporter("/orgs/[org]/projects/[project]/vpcs/[vpc]/static-routes/[route]"),
+			State: getVpcPathResourceImporter("/orgs/[org]/projects/[project]/vpcs/[vpc]/static-routes/[route]"),
 		},
 		Schema: metadata.GetSchemaFromExtendedSchema(staticRoutesSchema),
 	}

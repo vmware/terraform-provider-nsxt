@@ -43,7 +43,7 @@ func dataSourceNsxtPolicyTransitGatewayNatRead(d *schema.ResourceData, m interfa
 	connector := getPolicyConnector(m)
 
 	parentPath := d.Get("transit_gateway_path").(string)
-	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 3)
+	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 3, "/orgs/[org]/projects/[project]/transit-gateways/[gateway]")
 	if pathErr != nil {
 		return fmt.Errorf("invalid transit_gateway_path: %v", pathErr)
 	}
