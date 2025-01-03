@@ -6,7 +6,6 @@ package nsxt
 import (
 	"fmt"
 	"log"
-	"strings"
 
 	"github.com/vmware/terraform-provider-nsxt/api/infra/domains"
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
@@ -352,22 +351,8 @@ func resourceNsxtPolicyGroupExistsInDomainPartial(domain string) func(sessionCon
 	}
 }
 
-func validateNestedGroupConditions(conditions []interface{}) (string, error) {
-	memberType := ""
-	for _, cond := range conditions {
-		condMap := cond.(map[string]interface{})
-		condMemberType := condMap["member_type"].(string)
-		if memberType != "" && condMemberType != memberType {
-			return "", fmt.Errorf("Nested conditions must all use the same member_type, but found '%v' with '%v'", condMemberType, memberType)
-		}
-		memberType = condMemberType
-	}
-	return memberType, nil
-}
-
 type criteriaMeta struct {
 	ExpressionType string
-	MemberType     string
 	IsNested       bool
 	criteriaBlocks []interface{}
 }
@@ -381,25 +366,12 @@ func validateGroupCriteriaSets(criteriaSets []interface{}) ([]criteriaMeta, erro
 		seenExp := ""
 		criteriaMap := criteriaBlock.(map[string]interface{})
 		for expName, expVal := range criteriaMap {
-			memberType := ""
 			expValList := expVal.([]interface{})
 			if len(expValList) > 0 {
 				if seenExp != "" {
-					return nil, fmt.Errorf("Criteria blocks are homogeneous, but found '%v' with '%v'", expName, seenExp)
-				}
-				if expName == "condition" {
-					mType, err := validateNestedGroupConditions(expValList)
-					if err != nil {
-						return nil, err
-					}
-					memberType = mType
-				} else if strings.HasSuffix(expName, "_expression") {
-					memberType = ""
-				} else {
-					return nil, fmt.Errorf("Unknown criteria: %v", expName)
+					return nil, fmt.Errorf("Criteria blocks should be homogeneous, but found '%v' with '%v'", expName, seenExp)
 				}
 				criteriaType := criteriaMeta{
-					MemberType:     memberType,
 					ExpressionType: expName,
 					IsNested:       len(expValList) > 1,
 					criteriaBlocks: expValList}
@@ -421,10 +393,6 @@ func validateGroupConjunctions(conjunctions []interface{}, criteriaMeta []criter
 			if metaA.ExpressionType != metaB.ExpressionType {
 				return fmt.Errorf("AND conjunctions must use the same types of criteria expressions, but got %v and %v",
 					metaA.ExpressionType, metaB.ExpressionType)
-			}
-			if metaA.MemberType != metaB.MemberType {
-				return fmt.Errorf("AND conjunctions with conditions must have the same member types, but got %v and %v",
-					metaA.MemberType, metaB.MemberType)
 			}
 		}
 	}

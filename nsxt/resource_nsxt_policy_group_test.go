@@ -59,6 +59,33 @@ func TestAccResourceNsxtPolicyGroup_basicImport_multitenancy(t *testing.T) {
 	})
 }
 
+func TestAccResourceNsxtPolicyGroup_mixedCriteria(t *testing.T) {
+	name := getAccTestResourceName()
+	resourceName := "nsxt_policy_group"
+	testResourceName := fmt.Sprintf("%s.test", resourceName)
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyGroupCheckDestroy(state, name, defaultDomain)
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyGroupMixedCriteriaTemplate(name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyGroupExists(testResourceName, defaultDomain),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "criteria.0.condition.#", "2"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccResourceNsxtPolicyGroup_empty(t *testing.T) {
 	testAccResourceNsxtPolicyGroupEmpty(t, false, func() {
 		testAccPreCheck(t)
@@ -1574,4 +1601,26 @@ resource "nsxt_policy_group" "test" {
   }
 }
 `, name)
+}
+
+func testAccNsxtPolicyGroupMixedCriteriaTemplate(name string) string {
+	return fmt.Sprintf(`
+resource "nsxt_policy_group" "test" {
+  display_name = "%s"
+
+  criteria {
+    condition {
+      key         = "Tag"
+      member_type = "Segment"
+      operator    = "EQUALS"
+      value       = "blue"
+    }
+    condition {
+      key         = "Tag"
+      member_type = "SegmentPort"
+      operator    = "EQUALS"
+      value       = "orange"
+    }
+  }
+}`, name)
 }
