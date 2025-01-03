@@ -21,7 +21,7 @@ func resourceNsxtPolicyVniPool() *schema.Resource {
 		Update: resourceNsxtPolicyVniPoolUpdate,
 		Delete: resourceNsxtPolicyVniPoolDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathResourceImporter,
+			State: getPolicyPathOrIDResourceImporter("/infra/vni-pools/[pool]"),
 		},
 
 		Schema: map[string]*schema.Schema{

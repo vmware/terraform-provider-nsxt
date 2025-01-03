@@ -46,7 +46,7 @@ func resourceNsxtPolicyIntrusionServiceProfile() *schema.Resource {
 		Update: resourceNsxtPolicyIntrusionServiceProfileUpdate,
 		Delete: resourceNsxtPolicyIntrusionServiceProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathResourceImporter,
+			State: getPolicyPathOrIDResourceImporter(getMultitenancyPathExample("/infra/settings/firewall/security/intrusion-services/profiles/[profile]")),
 		},
 
 		Schema: map[string]*schema.Schema{

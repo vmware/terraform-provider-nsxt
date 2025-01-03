@@ -29,7 +29,7 @@ func resourceNsxtPolicyIPBlock() *schema.Resource {
 		Update: resourceNsxtPolicyIPBlockUpdate,
 		Delete: resourceNsxtPolicyIPBlockDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathResourceImporter,
+			State: getPolicyPathOrIDResourceImporter(getMultitenancyPathExample("/infra/ip-blocks/[ip-block]")),
 		},
 
 		Schema: map[string]*schema.Schema{

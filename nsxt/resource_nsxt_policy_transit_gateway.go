@@ -54,7 +54,7 @@ func resourceNsxtPolicyTransitGateway() *schema.Resource {
 		Update: resourceNsxtPolicyTransitGatewayUpdate,
 		Delete: resourceNsxtPolicyTransitGatewayDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathOnlyResourceImporter,
+			State: getPolicyPathResourceImporter("/orgs/[org]/projects/[project]/transit-gateways/[gateway]"),
 		},
 		Schema: metadata.GetSchemaFromExtendedSchema(transitGatewaySchema),
 	}

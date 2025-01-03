@@ -12,7 +12,7 @@ func resourceNsxtVPCGroup() *schema.Resource {
 		Update: resourceNsxtVPCGroupUpdate,
 		Delete: resourceNsxtVPCGroupDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtVPCPathResourceImporter,
+			State: getVpcPathResourceImporter("/orgs/[org]/projects/[project]/vpcs/[vpc]/groups/[group]"),
 		},
 
 		Schema: getPolicyGroupSchema(false),

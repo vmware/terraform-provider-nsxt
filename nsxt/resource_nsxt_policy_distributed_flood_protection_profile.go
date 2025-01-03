@@ -25,7 +25,7 @@ func resourceNsxtPolicyDistributedFloodProtectionProfile() *schema.Resource {
 		Update: resourceNsxtPolicyDistributedFloodProtectionProfileUpdate,
 		Delete: resourceNsxtPolicyFloodProtectionProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathResourceImporter,
+			State: getPolicyPathOrIDResourceImporter(getMultitenancyPathExample("/infra/flood-protection-profiles/[profile]")),
 		},
 		Schema: getDistributedFloodProtectionProfile(),
 	}

@@ -73,7 +73,7 @@ func resourceNsxtPolicyProjectIpAddressAllocation() *schema.Resource {
 		Update: resourceNsxtPolicyProjectIpAddressAllocationUpdate,
 		Delete: resourceNsxtPolicyProjectIpAddressAllocationDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathOnlyResourceImporter,
+			State: getPolicyPathResourceImporter("/orgs/[org]/projects/[project]/ip-address-allocations/[allocation]"),
 		},
 		Schema: metadata.GetSchemaFromExtendedSchema(projectIpAddressAllocationSchema),
 	}

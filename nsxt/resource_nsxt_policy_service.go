@@ -26,7 +26,7 @@ func resourceNsxtPolicyService() *schema.Resource {
 		Update: resourceNsxtPolicyServiceUpdate,
 		Delete: resourceNsxtPolicyServiceDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathResourceImporter,
+			State: getPolicyPathOrIDResourceImporter(getMultitenancyPathExample("/infra/services/[service]")),
 		},
 
 		Schema: map[string]*schema.Schema{
