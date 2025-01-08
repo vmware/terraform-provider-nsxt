@@ -27,8 +27,19 @@ import (
 
 var ipAssignmentTypes = []string{
 	"assigned_by_dhcp",
+	"no_ipv4",
 	"static_ip",
 	"static_ip_pool",
+	"static_ip_mac",
+}
+
+var ipv6AssignmentTypes = []string{
+	"assigned_by_dhcpv6",
+	"assigned_by_autoconf",
+	"no_ipv6",
+	"static_ip",
+	"static_ip_pool",
+	"static_ip_mac",
 }
 
 var mpHostSwitchProfileTypeFromPolicyType = map[string]string{
@@ -435,7 +446,8 @@ func getStandardHostSwitchSchema(nodeType string) *schema.Schema {
 					Computed:    true,
 				},
 				"host_switch_profile": getHostSwitchProfileIDsSchema(),
-				"ip_assignment":       getIPAssignmentSchema(true),
+				"ip_assignment":       getIPAssignmentSchema(false),
+				"ipv6_assignment":     getIPv6AssignmentSchema(),
 				"pnic": {
 					Type:        schema.TypeList,
 					Optional:    true,
@@ -514,6 +526,7 @@ func getStandardHostSwitchSchema(nodeType string) *schema.Schema {
 									},
 									"host_switch_profile": getHostSwitchProfileIDsSchema(),
 									"ip_assignment":       getIPAssignmentSchema(false),
+									"ipv6_assignment":     getIPv6AssignmentSchema(),
 									"uplink":              getUplinksSchema(),
 								},
 							},
@@ -617,6 +630,30 @@ func getHostSwitchProfileIDsSchema() *schema.Schema {
 	}
 }
 
+func getIpMacPairSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeList,
+		Description: "List of IP MAC pairs",
+		MinItems:    1,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"ip_address": {
+					Type:         schema.TypeString,
+					Description:  "A single IPv6 address",
+					Required:     true,
+					ValidateFunc: validation.IsIPv6Address,
+				},
+				"mac_address": {
+					Type:        schema.TypeString,
+					Description: "A single MAC address",
+					Required:    true,
+				},
+			},
+		},
+		Required: true,
+	}
+}
+
 func getIPAssignmentSchema(required bool) *schema.Schema {
 	return &schema.Schema{
 		Type:        schema.TypeList,
@@ -660,6 +697,123 @@ func getIPAssignmentSchema(required bool) *schema.Schema {
 								Required:     true,
 								Description:  "Subnet mask",
 								ValidateFunc: validateSingleIP(),
+							},
+						},
+					},
+				},
+				"static_ip_pool": {
+					Type:        schema.TypeString,
+					Optional:    true,
+					Description: "IP assignment specification for Static IP Pool",
+				},
+				"static_ip_mac": {
+					Type:        schema.TypeList,
+					MaxItems:    1,
+					Optional:    true,
+					Description: "IP assignment specification for Static MAC List.",
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"default_gateway": {
+								Type:         schema.TypeString,
+								Required:     true,
+								Description:  "Gateway IP",
+								ValidateFunc: validateSingleIP(),
+							},
+							"ip_mac_pair": getIpMacPairSchema(),
+							"subnet_mask": {
+								Type:        schema.TypeString,
+								Required:    true,
+								Description: "Subnet mask",
+							},
+						},
+					},
+				},
+				"no_ipv4": {
+					Type:        schema.TypeBool,
+					Optional:    true,
+					Default:     false,
+					Description: "No IPv4 assignment",
+				},
+			},
+		},
+	}
+}
+
+func getIPv6AssignmentSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeList,
+		Description: "Specification for IPv6 to be used with host switch virtual tunnel endpoints",
+		MaxItems:    1,
+		Optional:    true,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"assigned_by_dhcpv6": {
+					Type:        schema.TypeBool,
+					Optional:    true,
+					Default:     false,
+					Description: "Enables DHCPv6 assignment",
+				},
+				"assigned_by_autoconf": {
+					Type:        schema.TypeBool,
+					Optional:    true,
+					Default:     false,
+					Description: "Enables autoconf assignment",
+				},
+				"no_ipv6": {
+					Type:        schema.TypeBool,
+					Optional:    true,
+					Default:     false,
+					Description: "No IPv6 assignment",
+				},
+				"static_ip": {
+					Type:        schema.TypeList,
+					MaxItems:    1,
+					Optional:    true,
+					Description: "IP assignment specification for Static IP List.",
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"default_gateway": {
+								Type:         schema.TypeString,
+								Required:     true,
+								Description:  "Gateway IP",
+								ValidateFunc: validateSingleIP(),
+							},
+							"ip_addresses": {
+								Type:        schema.TypeList,
+								Description: "List of IPs for transport node host switch virtual tunnel endpoints",
+								MinItems:    1,
+								Required:    true,
+								Elem: &schema.Schema{
+									Type:         schema.TypeString,
+									ValidateFunc: validateSingleIP(),
+								},
+							},
+							"prefix_length": {
+								Type:        schema.TypeString,
+								Required:    true,
+								Description: "Prefix length",
+							},
+						},
+					},
+				},
+				"static_ip_mac": {
+					Type:        schema.TypeList,
+					MaxItems:    1,
+					Optional:    true,
+					Description: "IP assignment specification for Static MAC List.",
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"default_gateway": {
+								Type:         schema.TypeString,
+								Required:     true,
+								Description:  "Gateway IP",
+								ValidateFunc: validateSingleIP(),
+							},
+							"ip_mac_pair": getIpMacPairSchema(),
+							"prefix_length": {
+								Type:        schema.TypeString,
+								Required:    true,
+								Description: "Prefix length",
 							},
 						},
 					},
@@ -1016,7 +1170,7 @@ func getIPAssignmentFromSchema(ipAssignmentList interface{}) (*data.StructValue,
 	converter := bindings.NewTypeConverter()
 
 	for _, ia := range ipAssignmentList.([]interface{}) {
-		iaType, iaData, err := getIPAssignmentData(ia.(map[string]interface{}))
+		iaType, iaData, err := getIPAssignmentData(ia.(map[string]interface{}), ipAssignmentTypes)
 		if err != nil {
 			return nil, err
 		}
@@ -1031,6 +1185,16 @@ func getIPAssignmentFromSchema(ipAssignmentList interface{}) (*data.StructValue,
 					ResourceType: mpmodel.IpAssignmentSpec_RESOURCE_TYPE_ASSIGNEDBYDHCP,
 				}
 				dataValue, errs = converter.ConvertToVapi(elem, mpmodel.AssignedByDhcpBindingType())
+			} else {
+				return nil, fmt.Errorf("no valid IP assignment found")
+			}
+		case "no_ipv4":
+			nope := iaData.(bool)
+			if nope {
+				elem := mpmodel.NoIpv4{
+					ResourceType: mpmodel.IpAssignmentSpec_RESOURCE_TYPE_NOIPV4,
+				}
+				dataValue, errs = converter.ConvertToVapi(elem, mpmodel.NoIpv4BindingType())
 			} else {
 				return nil, fmt.Errorf("no valid IP assignment found")
 			}
@@ -1050,6 +1214,33 @@ func getIPAssignmentFromSchema(ipAssignmentList interface{}) (*data.StructValue,
 				break
 			}
 
+		case "static_ip_mac":
+			for _, iad := range iaData.([]interface{}) {
+				data := iad.(map[string]interface{})
+				defaultGateway := data["default_gateway"].(string)
+				var ipMacList []mpmodel.IpMacPair
+				schemaList := data["ip_mac_pair"].([]interface{})
+				for _, schemaEntry := range schemaList {
+					ipmac := schemaEntry.(map[string]interface{})
+					ip := ipmac["ip_address"].(string)
+					mac := ipmac["mac_address"].(string)
+					entry := mpmodel.IpMacPair{
+						Ip:  &ip,
+						Mac: &mac,
+					}
+					ipMacList = append(ipMacList, entry)
+				}
+				subnetMask := data["subnet_mask"].(string)
+				elem := mpmodel.StaticIpMacListSpec{
+					DefaultGateway: &defaultGateway,
+					IpMacList:      ipMacList,
+					SubnetMask:     &subnetMask,
+					ResourceType:   mpmodel.IpAssignmentSpec_RESOURCE_TYPE_STATICIPMACLISTSPEC,
+				}
+				dataValue, errs = converter.ConvertToVapi(elem, mpmodel.StaticIpMacListSpecBindingType())
+				break
+			}
+
 		case "static_ip_pool":
 			staticIPPoolID := iaData.(string)
 			elem := mpmodel.StaticIpPoolSpec{
@@ -1057,6 +1248,114 @@ func getIPAssignmentFromSchema(ipAssignmentList interface{}) (*data.StructValue,
 				ResourceType: mpmodel.IpAssignmentSpec_RESOURCE_TYPE_STATICIPPOOLSPEC,
 			}
 			dataValue, errs = converter.ConvertToVapi(elem, mpmodel.StaticIpPoolSpecBindingType())
+
+		default:
+			return nil, fmt.Errorf("no valid IP assignment found")
+		}
+		if errs != nil {
+			return nil, errs[0]
+		}
+		entryStruct := dataValue.(*data.StructValue)
+		return entryStruct, nil
+	}
+	return nil, nil
+}
+
+func getIPv6AssignmentFromSchema(ipAssignmentList interface{}) (*data.StructValue, error) {
+	if ipAssignmentList == nil {
+		return nil, nil
+	}
+	converter := bindings.NewTypeConverter()
+
+	for _, ia := range ipAssignmentList.([]interface{}) {
+		iaType, iaData, err := getIPAssignmentData(ia.(map[string]interface{}), ipv6AssignmentTypes)
+		if err != nil {
+			return nil, err
+		}
+
+		var dataValue data.DataValue
+		var errs []error
+		switch iaType {
+		case "assigned_by_dhcpv6":
+			dhcpEnabled := iaData.(bool)
+			if dhcpEnabled {
+				elem := mpmodel.AssignedByDhcpv6{
+					ResourceType: mpmodel.Ipv6AssignmentSpec_RESOURCE_TYPE_ASSIGNEDBYDHCPV6,
+				}
+				dataValue, errs = converter.ConvertToVapi(elem, mpmodel.AssignedByDhcpv6BindingType())
+			} else {
+				return nil, fmt.Errorf("no valid IP assignment found")
+			}
+		case "assigned_by_autoconf":
+			autoConf := iaData.(bool)
+			if autoConf {
+				elem := mpmodel.AssignedByAutoConf{
+					ResourceType: mpmodel.Ipv6AssignmentSpec_RESOURCE_TYPE_ASSIGNEDBYAUTOCONF,
+				}
+				dataValue, errs = converter.ConvertToVapi(elem, mpmodel.AssignedByAutoConfBindingType())
+			} else {
+				return nil, fmt.Errorf("no valid IP assignment found")
+			}
+		case "no_ipv6":
+			nope := iaData.(bool)
+			if nope {
+				elem := mpmodel.NoIpv6{
+					ResourceType: mpmodel.Ipv6AssignmentSpec_RESOURCE_TYPE_NOIPV6,
+				}
+				dataValue, errs = converter.ConvertToVapi(elem, mpmodel.NoIpv6BindingType())
+			} else {
+				return nil, fmt.Errorf("no valid IP assignment found")
+			}
+		case "static_ip":
+			for _, iad := range iaData.([]interface{}) {
+				data := iad.(map[string]interface{})
+				defaultGateway := data["default_gateway"].(string)
+				ipList := interfaceListToStringList(data["ip_addresses"].([]interface{}))
+				prefixLength := data["prefix_length"].(string)
+				elem := mpmodel.StaticIpv6ListSpec{
+					DefaultGateway: &defaultGateway,
+					Ipv6List:       ipList,
+					PrefixLength:   &prefixLength,
+					ResourceType:   mpmodel.Ipv6AssignmentSpec_RESOURCE_TYPE_STATICIPV6LISTSPEC,
+				}
+				dataValue, errs = converter.ConvertToVapi(elem, mpmodel.StaticIpv6ListSpecBindingType())
+				break
+			}
+
+		case "static_ip_mac":
+			for _, iad := range iaData.([]interface{}) {
+				data := iad.(map[string]interface{})
+				defaultGateway := data["default_gateway"].(string)
+				var ipMacList []mpmodel.Ipv6MacPair
+				schemaList := data["ip_mac_pair"].([]interface{})
+				for _, schemaEntry := range schemaList {
+					ipmac := schemaEntry.(map[string]interface{})
+					ipv6 := ipmac["ip_address"].(string)
+					mac := ipmac["mac_address"].(string)
+					entry := mpmodel.Ipv6MacPair{
+						Ipv6: &ipv6,
+						Mac:  &mac,
+					}
+					ipMacList = append(ipMacList, entry)
+				}
+				prefixLength := data["prefix_length"].(string)
+				elem := mpmodel.StaticIpv6MacListSpec{
+					DefaultGateway: &defaultGateway,
+					Ipv6MacList:    ipMacList,
+					PrefixLength:   &prefixLength,
+					ResourceType:   mpmodel.Ipv6AssignmentSpec_RESOURCE_TYPE_STATICIPV6MACLISTSPEC,
+				}
+				dataValue, errs = converter.ConvertToVapi(elem, mpmodel.StaticIpv6MacListSpecBindingType())
+				break
+			}
+
+		case "static_ip_pool":
+			staticIPPoolID := iaData.(string)
+			elem := mpmodel.StaticIpv6PoolSpec{
+				Ipv6PoolId:   &staticIPPoolID,
+				ResourceType: mpmodel.Ipv6AssignmentSpec_RESOURCE_TYPE_STATICIPV6POOLSPEC,
+			}
+			dataValue, errs = converter.ConvertToVapi(elem, mpmodel.StaticIpv6PoolSpecBindingType())
 
 		default:
 			return nil, fmt.Errorf("no valid IP assignment found")
@@ -1091,12 +1390,12 @@ func isString(v interface{}) bool {
 	return reflect.TypeOf(v).Kind() == reflect.String
 }
 
-func getIPAssignmentData(data map[string]interface{}) (string, interface{}, error) {
+func getIPAssignmentData(data map[string]interface{}, valueList []string) (string, interface{}, error) {
 	var t string
 	var d interface{}
 
 	n := 0
-	for _, iaType := range ipAssignmentTypes {
+	for _, iaType := range valueList {
 		d1 := data[iaType]
 		if (isString(d1) && d1 != "") || (isSlice(d1) && len(d1.([]interface{})) > 0) || (isBool(d1) && d1.(bool)) {
 			t, d = iaType, data[iaType]
@@ -1143,6 +1442,10 @@ func getHostSwitchSpecFromSchema(d *schema.ResourceData, m interface{}, nodeType
 		if err != nil {
 			return nil, fmt.Errorf("error parsing HostSwitchSpec schema %v", err)
 		}
+		iPv6AssignmentSpec, err := getIPv6AssignmentFromSchema(swData["ipv6_assignment"])
+		if err != nil {
+			return nil, fmt.Errorf("error parsing HostSwitchSpec schema %v", err)
+		}
 		var pNics []mpmodel.Pnic
 		for _, p := range swData["pnic"].([]interface{}) {
 			data := p.(map[string]interface{})
@@ -1169,6 +1472,7 @@ func getHostSwitchSpecFromSchema(d *schema.ResourceData, m interface{}, nodeType
 			HostSwitchProfileIds:   hostSwitchProfileIDs,
 			HostSwitchType:         &hostSwitchType,
 			IpAssignmentSpec:       iPAssignmentSpec,
+			Ipv6AssignmentSpec:     iPv6AssignmentSpec,
 			Pnics:                  pNics,
 			TransportZoneEndpoints: transportZoneEndpoints,
 		}
@@ -1461,11 +1765,6 @@ func setHostSwitchSpecInSchema(d *schema.ResourceData, spec *data.StructValue, n
 		swEntry := entry.(mpmodel.StandardHostSwitchSpec)
 		for _, sw := range swEntry.HostSwitches {
 
-			// TODO - remove this when SDK is updated with NSX 4.1.2
-			if sw.IpAssignmentSpec == nil {
-				return fmt.Errorf("Ipv6 assignments are not supported yet")
-			}
-
 			elem := make(map[string]interface{})
 			elem["host_switch_id"] = sw.HostSwitchId
 			elem["host_switch_name"] = sw.HostSwitchName
@@ -1474,7 +1773,15 @@ func setHostSwitchSpecInSchema(d *schema.ResourceData, spec *data.StructValue, n
 				elem["host_switch_profile"] = profiles
 			}
 			var err error
-			elem["ip_assignment"], err = setIPAssignmentInSchema(sw.IpAssignmentSpec)
+			if sw.IpAssignmentSpec != nil {
+				elem["ip_assignment"], err = setIPAssignmentInSchema(sw.IpAssignmentSpec)
+			}
+			if err != nil {
+				return err
+			}
+			if sw.Ipv6AssignmentSpec != nil {
+				elem["ipv6_assignment"], err = setIPv6AssignmentInSchema(sw.Ipv6AssignmentSpec)
+			}
 			if err != nil {
 				return err
 			}
@@ -1509,6 +1816,12 @@ func setHostSwitchSpecInSchema(d *schema.ResourceData, spec *data.StructValue, n
 					}
 					if tnpsc.HostSwitchConfigOption.IpAssignmentSpec != nil {
 						hsCfgOpt["ip_assignment"], err = setIPAssignmentInSchema(tnpsc.HostSwitchConfigOption.IpAssignmentSpec)
+						if err != nil {
+							return err
+						}
+					}
+					if tnpsc.HostSwitchConfigOption.IpAssignmentSpec != nil {
+						hsCfgOpt["ipv6_assignment"], err = setIPv6AssignmentInSchema(tnpsc.HostSwitchConfigOption.Ipv6AssignmentSpec)
 						if err != nil {
 							return err
 						}
@@ -1582,6 +1895,9 @@ func setIPAssignmentInSchema(spec *data.StructValue) (interface{}, error) {
 	case mpmodel.IpAssignmentSpec_RESOURCE_TYPE_ASSIGNEDBYDHCP:
 		elem["assigned_by_dhcp"] = true
 
+	case mpmodel.IpAssignmentSpec_RESOURCE_TYPE_NOIPV4:
+		elem["no_ipv4"] = true
+
 	case mpmodel.IpAssignmentSpec_RESOURCE_TYPE_STATICIPLISTSPEC:
 		e := make(map[string]interface{})
 		entry, errs := converter.ConvertToGolang(spec, mpmodel.StaticIpListSpecBindingType())
@@ -1601,7 +1917,92 @@ func setIPAssignmentInSchema(spec *data.StructValue) (interface{}, error) {
 		}
 		ipAsEntry := entry.(mpmodel.StaticIpPoolSpec)
 		elem["static_ip_pool"] = ipAsEntry.IpPoolId
+
+	case mpmodel.IpAssignmentSpec_RESOURCE_TYPE_STATICIPMACLISTSPEC:
+		e := make(map[string]interface{})
+		entry, errs := converter.ConvertToGolang(spec, mpmodel.StaticIpMacListSpecBindingType())
+		if errs != nil {
+			return nil, errs[0]
+		}
+		ipAsEntry := entry.(mpmodel.StaticIpMacListSpec)
+		e["default_gateway"] = ipAsEntry.DefaultGateway
+		e["subnet_mask"] = ipAsEntry.SubnetMask
+
+		var ipMacPairList []map[string]interface{}
+		for _, elem := range ipAsEntry.IpMacList {
+			pair := make(map[string]interface{})
+			pair["ip_address"] = elem.Ip
+			pair["mac_address"] = elem.Mac
+			ipMacPairList = append(ipMacPairList, pair)
+		}
+		e["ip_mac_pair"] = ipMacPairList
+		elem["static_ip_mac"] = []map[string]interface{}{e}
 	}
+
+	return []interface{}{elem}, nil
+}
+
+func setIPv6AssignmentInSchema(spec *data.StructValue) (interface{}, error) {
+	elem := make(map[string]interface{})
+
+	converter := bindings.NewTypeConverter()
+	base, errs := converter.ConvertToGolang(spec, mpmodel.Ipv6AssignmentSpecBindingType())
+	if errs != nil {
+		return nil, errs[0]
+	}
+	assignmentType := base.(mpmodel.Ipv6AssignmentSpec).ResourceType
+
+	switch assignmentType {
+	case mpmodel.Ipv6AssignmentSpec_RESOURCE_TYPE_ASSIGNEDBYDHCPV6:
+		elem["assigned_by_dhcpv6"] = true
+
+	case mpmodel.Ipv6AssignmentSpec_RESOURCE_TYPE_ASSIGNEDBYAUTOCONF:
+		elem["assigned_by_autoconf"] = true
+
+	case mpmodel.Ipv6AssignmentSpec_RESOURCE_TYPE_NOIPV6:
+		elem["no_ipv6"] = true
+
+	case mpmodel.Ipv6AssignmentSpec_RESOURCE_TYPE_STATICIPV6LISTSPEC:
+		e := make(map[string]interface{})
+		entry, errs := converter.ConvertToGolang(spec, mpmodel.StaticIpv6ListSpecBindingType())
+		if errs != nil {
+			return nil, errs[0]
+		}
+		ipAsEntry := entry.(mpmodel.StaticIpv6ListSpec)
+		e["default_gateway"] = ipAsEntry.DefaultGateway
+		e["ip_addresses"] = ipAsEntry.Ipv6List
+		e["prefix_length"] = ipAsEntry.PrefixLength
+		elem["static_ip"] = []map[string]interface{}{e}
+
+	case mpmodel.Ipv6AssignmentSpec_RESOURCE_TYPE_STATICIPV6POOLSPEC:
+		entry, errs := converter.ConvertToGolang(spec, mpmodel.StaticIpv6PoolSpecBindingType())
+		if errs != nil {
+			return nil, errs[0]
+		}
+		ipAsEntry := entry.(mpmodel.StaticIpv6PoolSpec)
+		elem["static_ip_pool"] = ipAsEntry.Ipv6PoolId
+
+	case mpmodel.Ipv6AssignmentSpec_RESOURCE_TYPE_STATICIPV6MACLISTSPEC:
+		e := make(map[string]interface{})
+		entry, errs := converter.ConvertToGolang(spec, mpmodel.StaticIpv6MacListSpecBindingType())
+		if errs != nil {
+			return nil, errs[0]
+		}
+		ipAsEntry := entry.(mpmodel.StaticIpv6MacListSpec)
+		e["default_gateway"] = ipAsEntry.DefaultGateway
+		e["prefix_length"] = ipAsEntry.PrefixLength
+
+		var ipMacPairList []map[string]interface{}
+		for _, elem := range ipAsEntry.Ipv6MacList {
+			pair := make(map[string]interface{})
+			pair["ip_address"] = elem.Ipv6
+			pair["mac_address"] = elem.Mac
+			ipMacPairList = append(ipMacPairList, pair)
+		}
+		e["ip_mac_pair"] = ipMacPairList
+		elem["static_ip_mac"] = []map[string]interface{}{e}
+	}
+
 	return []interface{}{elem}, nil
 }
 
