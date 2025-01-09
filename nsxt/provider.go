@@ -8,7 +8,7 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"math/rand"
 	"net/http"
@@ -722,7 +722,7 @@ func (v *vmcAuthInfo) getAPIToken() (string, error) {
 		return "", err
 	}
 	if res.StatusCode != 200 {
-		b, _ := ioutil.ReadAll(res.Body)
+		b, _ := io.ReadAll(res.Body)
 		return "", fmt.Errorf("unexpected status code %d trying to get auth token. %s", res.StatusCode, string(b))
 	}
 
@@ -784,7 +784,7 @@ func getConnectorTLSConfig(d *schema.ResourceData) (*tls.Config, error) {
 	}
 
 	if len(caFile) > 0 {
-		caCert, err := ioutil.ReadFile(caFile)
+		caCert, err := os.ReadFile(caFile)
 		if err != nil {
 			return nil, err
 		}
