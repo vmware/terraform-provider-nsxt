@@ -569,27 +569,6 @@ func testAccNsxtPolicyProjectTemplate900(createFlow, includeT0GW, includeExterna
 	return buffer.String()
 }
 
-func testAccNsxtPolicyProjectTemplateWithIPBlock(displayName string) string {
-	return fmt.Sprintf(`
-data "nsxt_policy_tier0_gateway" "test" {
-  display_name = "%s"
-}
-resource "nsxt_policy_ip_block" "block1" {
-  display_name = "ip-block1"
-  cidr         = "10.100.100.0/23"
-  visibility   = "EXTERNAL"
-}
-resource "nsxt_policy_project" "test" {
-  display_name = "%s"
-  tier0_gateway_paths = [data.nsxt_policy_tier0_gateway.test.path]
-  external_ipv4_blocks = [nsxt_policy_ip_block.block1.path]
-  tag {
-    scope = "scope1"
-    tag   = "tag1"
-  }
-}`, getTier0RouterName(), displayName)
-}
-
 func testAccNsxtPolicyProjectMinimalistic() string {
 	return fmt.Sprintf(`
 resource "nsxt_policy_project" "test" {
