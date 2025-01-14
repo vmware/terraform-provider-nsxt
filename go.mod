@@ -1,7 +1,8 @@
 module github.com/vmware/terraform-provider-nsxt
 
-go 1.22
-toolchain go1.22.5
+go 1.22.0
+
+toolchain go1.23.3
 
 replace (
 	github.com/vmware/vsphere-automation-sdk-go/lib => github.com/vmware/vsphere-automation-sdk-go/lib v0.7.1-0.20241113023437-5938c535c194
