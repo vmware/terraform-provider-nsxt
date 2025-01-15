@@ -420,8 +420,14 @@ func setCredentialValuesInSchema(d *schema.ResourceData, credential *data.Struct
 			return errs[0]
 		}
 		credEntry := entry.(model.SamlTokenLoginCredential)
-		elem["thumbprint"] = credEntry.Thumbprint
-		elem["token"] = credEntry.Token
+		// Normally NSX won't return sensitive info, in which case
+		// we need to keep values from intent to avoid permadiff
+		if credEntry.Thumbprint != nil {
+			elem["thumbprint"] = credEntry.Thumbprint
+		}
+		if credEntry.Token != nil {
+			elem["token"] = credEntry.Token
+		}
 		parentElem["saml_login"] = []interface{}{elem}
 
 	case model.SessionLoginCredential__TYPE_IDENTIFIER:
@@ -431,8 +437,14 @@ func setCredentialValuesInSchema(d *schema.ResourceData, credential *data.Struct
 			return errs[0]
 		}
 		credEntry := entry.(model.SessionLoginCredential)
-		elem["session_id"] = credEntry.SessionId
-		elem["thumbprint"] = credEntry.Thumbprint
+		// Normally NSX won't return sensitive info, in which case
+		// we need to keep values from intent to avoid permadiff
+		if credEntry.SessionId != nil {
+			elem["session_id"] = credEntry.SessionId
+		}
+		if credEntry.Thumbprint != nil {
+			elem["thumbprint"] = credEntry.Thumbprint
+		}
 		parentElem["session_login"] = []interface{}{elem}
 
 	case model.UsernamePasswordLoginCredential__TYPE_IDENTIFIER:
@@ -442,15 +454,17 @@ func setCredentialValuesInSchema(d *schema.ResourceData, credential *data.Struct
 			return errs[0]
 		}
 		credEntry := entry.(model.UsernamePasswordLoginCredential)
-		// Normally NSX won't return credEntry.Username
+		// Normally NSX won't return sensitive info, in which case
+		// we need to keep values from intent to avoid permadiff
 		if credEntry.Username != nil {
 			elem["username"] = credEntry.Username
 		}
-		// Normally NSX won't return credEntry.Password
 		if credEntry.Password != nil {
 			elem["password"] = credEntry.Password
 		}
-		elem["thumbprint"] = credEntry.Thumbprint
+		if credEntry.Thumbprint != nil {
+			elem["thumbprint"] = credEntry.Thumbprint
+		}
 		parentElem["username_password_login"] = []interface{}{elem}
 
 	case model.VerifiableAsymmetricLoginCredential__TYPE_IDENTIFIER:
@@ -460,9 +474,17 @@ func setCredentialValuesInSchema(d *schema.ResourceData, credential *data.Struct
 			return errs[0]
 		}
 		credEntry := entry.(model.VerifiableAsymmetricLoginCredential)
-		elem["asymmetric_credential"] = credEntry.AsymmetricCredential
-		elem["credential_key"] = credEntry.CredentialKey
-		elem["credential_verifier"] = credEntry.CredentialVerifier
+		// Normally NSX won't return sensitive info, in which case
+		// we need to keep values from intent to avoid permadiff
+		if credEntry.AsymmetricCredential != nil {
+			elem["asymmetric_credential"] = credEntry.AsymmetricCredential
+		}
+		if credEntry.CredentialKey != nil {
+			elem["credential_key"] = credEntry.CredentialKey
+		}
+		if credEntry.CredentialVerifier != nil {
+			elem["credential_verifier"] = credEntry.CredentialVerifier
+		}
 		parentElem["verifiable_asymmetric_login"] = []interface{}{elem}
 
 	default:
