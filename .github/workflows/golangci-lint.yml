@@ -23,7 +23,7 @@ jobs:
         uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9f722fe0da7ef32 # v5.0.2
         with:
           go-version-file: 'go.mod'
-          cache: true
+          cache: false
       - run: go mod download
       - run: go build -v .
       - name: Run Linters
@@ -32,5 +32,3 @@ jobs:
           version: v1.62.0
           args: --issues-exit-code=1 --timeout 10m
           only-new-issues: true
-          skip-pkg-cache: true
-          skip-build-cache: true
