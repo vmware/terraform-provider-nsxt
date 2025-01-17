@@ -636,7 +636,9 @@ func getElemOrEmptyMapFromSchema(d *schema.ResourceData, key string) map[string]
 	if e != nil {
 		elems := e.([]interface{})
 		if len(elems) > 0 {
-			return elems[0].(map[string]interface{})
+			if elemMap, ok := elems[0].(map[string]interface{}); ok {
+				return elemMap
+			}
 		}
 	}
 	return make(map[string]interface{})
@@ -647,7 +649,9 @@ func getElemOrEmptyMapFromMap(d map[string]interface{}, key string) map[string]i
 	if e != nil {
 		elems := e.([]interface{})
 		if len(elems) > 0 {
-			return elems[0].(map[string]interface{})
+			if elemMap, ok := elems[0].(map[string]interface{}); ok {
+				return elemMap
+			}
 		}
 	}
 	return make(map[string]interface{})
