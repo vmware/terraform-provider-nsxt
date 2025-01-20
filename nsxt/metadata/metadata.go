@@ -69,6 +69,13 @@ type TypeIdentifier struct {
 	APIFieldName string
 }
 
+func metadataTraceLogger(format string, v ...any) {
+	if os.Getenv("TF_LOG_METADATA_DEBUGGING") != "" {
+		f := fmt.Sprintf("[TRACE] %s", format)
+		log.Printf(f, v)
+	}
+}
+
 // GetSdkName returns the SDK field type identifier
 // Defaults to ResourceType
 func (t TypeIdentifier) GetSdkName() string {
@@ -103,7 +110,7 @@ func GetSchemaFromExtendedSchema(ext map[string]*ExtendedSchema) map[string]*sch
 	result := make(map[string]*schema.Schema)
 
 	for key, value := range ext {
-		logger.Printf("[TRACE] inspecting schema key %s, value %v", key, value)
+		metadataTraceLogger("inspecting schema key %s, value %v", key, value)
 		shallowCopy := value.Schema
 		if (value.Schema.Type == schema.TypeList) || (value.Schema.Type == schema.TypeSet) {
 			elem, ok := shallowCopy.Elem.(*ExtendedSchema)
@@ -149,9 +156,9 @@ func StructToSchema(elem reflect.Value, d *schema.ResourceData, metadata map[str
 			continue
 		}
 
-		logger.Printf("[TRACE] %s inspecting key %s", ctx, key)
+		metadataTraceLogger("%s inspecting key %s", ctx, key)
 		if len(parent) > 0 {
-			logger.Printf("[TRACE] %s parent %s key %s", ctx, parent, key)
+			metadataTraceLogger("%s parent %s key %s", ctx, parent, key)
 		}
 		if !elem.FieldByName(item.Metadata.SdkFieldName).IsValid() {
 			// FieldByName can't find the field by name
@@ -162,7 +169,7 @@ func StructToSchema(elem reflect.Value, d *schema.ResourceData, metadata map[str
 			return
 		}
 		if elem.FieldByName(item.Metadata.SdkFieldName).IsNil() {
-			logger.Printf("[TRACE] %s skip key %s with nil value", ctx, key)
+			metadataTraceLogger("%s skip key %s with nil value", ctx, key)
 			continue
 		}
 		if len(item.Metadata.PolymorphicType) > 0 {
@@ -186,7 +193,7 @@ func StructToSchema(elem reflect.Value, d *schema.ResourceData, metadata map[str
 			} else {
 				d.Set(key, nestedVal)
 			}
-			logger.Printf("[TRACE] %s adding polymorphic slice %+v to key %s", ctx, nestedVal, key)
+			metadataTraceLogger("%s adding polymorphic slice %+v to key %s", ctx, nestedVal, key)
 			continue
 		}
 		if item.Metadata.SchemaType == "struct" {
@@ -196,7 +203,7 @@ func StructToSchema(elem reflect.Value, d *schema.ResourceData, metadata map[str
 			if err = StructToSchema(nestedObj.Elem(), d, childElem.Schema, key, nestedSchema); err != nil {
 				return
 			}
-			logger.Printf("[TRACE] %s assigning struct %+v to %s", ctx, nestedObj, key)
+			metadataTraceLogger("%s assigning struct %+v to %s", ctx, nestedObj, key)
 			var nestedSlice []map[string]interface{}
 			nestedSlice = append(nestedSlice, nestedSchema)
 			if len(parent) > 0 {
@@ -208,7 +215,7 @@ func StructToSchema(elem reflect.Value, d *schema.ResourceData, metadata map[str
 			if _, ok := item.Schema.Elem.(*ExtendedSchema); ok {
 				// List of string, bool, int
 				nestedSlice := elem.FieldByName(item.Metadata.SdkFieldName)
-				logger.Printf("[TRACE] %s assigning slice %v to %s", ctx, nestedSlice.Interface(), key)
+				metadataTraceLogger("%s assigning slice %v to %s", ctx, nestedSlice.Interface(), key)
 				if len(parent) > 0 {
 					parentMap[key] = nestedSlice.Interface()
 				} else {
@@ -224,7 +231,7 @@ func StructToSchema(elem reflect.Value, d *schema.ResourceData, metadata map[str
 						return
 					}
 					nestedSlice = append(nestedSlice, nestedSchema)
-					logger.Printf("[TRACE] %s appending slice item %+v to %s", ctx, nestedSchema, key)
+					metadataTraceLogger("%s appending slice item %+v to %s", ctx, nestedSchema, key)
 				}
 				if len(parent) > 0 {
 					parentMap[key] = nestedSlice
@@ -234,11 +241,11 @@ func StructToSchema(elem reflect.Value, d *schema.ResourceData, metadata map[str
 			}
 		} else {
 			if len(parent) > 0 {
-				logger.Printf("[TRACE] %s assigning nested value %+v to %s",
+				metadataTraceLogger("%s assigning nested value %+v to %s",
 					ctx, elem.FieldByName(item.Metadata.SdkFieldName).Interface(), key)
 				parentMap[key] = elem.FieldByName(item.Metadata.SdkFieldName).Interface()
 			} else {
-				logger.Printf("[TRACE] %s assigning value %+v to %s",
+				metadataTraceLogger("%s assigning value %+v to %s",
 					ctx, elem.FieldByName(item.Metadata.SdkFieldName).Interface(), key)
 				d.Set(key, elem.FieldByName(item.Metadata.SdkFieldName).Interface())
 			}
@@ -261,15 +268,15 @@ func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[str
 
 	for key, item := range metadata {
 		if item.Metadata.ReadOnly {
-			logger.Printf("[TRACE] %s skip key %s as read only", ctx, key)
+			metadataTraceLogger("%s skip key %s as read only", ctx, key)
 			continue
 		}
 		if item.Metadata.Skip {
-			logger.Printf("[TRACE] %s skip key %s", ctx, key)
+			metadataTraceLogger("%s skip key %s", ctx, key)
 			continue
 		}
 		if item.Metadata.IntroducedInVersion != "" && util.NsxVersionLower(item.Metadata.IntroducedInVersion) {
-			logger.Printf("[TRACE] %s skip key %s as NSX version is lower than %v", ctx, key, item.Metadata.IntroducedInVersion)
+			metadataTraceLogger("%s skip key %s as NSX version is lower than %v", ctx, key, item.Metadata.IntroducedInVersion)
 			continue
 		}
 		if !elem.FieldByName(item.Metadata.SdkFieldName).IsValid() {
@@ -281,12 +288,12 @@ func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[str
 			return
 		}
 
-		logger.Printf("[TRACE] %s inspecting key %s with type %s", ctx, key, item.Metadata.SchemaType)
+		metadataTraceLogger("%s inspecting key %s with type %s", ctx, key, item.Metadata.SchemaType)
 		if len(parent) > 0 {
-			logger.Printf("[TRACE] %s parent %s key %s", ctx, parent, key)
+			metadataTraceLogger("%s parent %s key %s", ctx, parent, key)
 		}
 		if len(item.Metadata.PolymorphicType) > 0 {
-			logger.Printf("[TRACE] %s inspecting polymorphic key %s", ctx, key)
+			metadataTraceLogger("%s inspecting polymorphic key %s", ctx, key)
 			itemList := getItemListForSchemaToStruct(d, item.Metadata.SchemaType, key, parent, parentMap)
 			switch item.Metadata.PolymorphicType {
 			case PolymorphicTypeNested:
@@ -320,10 +327,10 @@ func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[str
 				}
 			}
 			if item.Metadata.OmitIfEmpty && !exists {
-				logger.Printf("[TRACE] %s skip key %s since its empty and OmitIfEmpty is true", ctx, key)
+				metadataTraceLogger("%s skip key %s since its empty and OmitIfEmpty is true", ctx, key)
 				continue
 			}
-			logger.Printf("[TRACE] %s assigning string %v to %s", ctx, value, key)
+			metadataTraceLogger("%s assigning string %v to %s", ctx, value, key)
 			elem.FieldByName(item.Metadata.SdkFieldName).Set(reflect.ValueOf(&value))
 		}
 		if item.Metadata.SchemaType == "bool" {
@@ -340,10 +347,10 @@ func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[str
 				}
 			}
 			if item.Metadata.OmitIfEmpty && !exists {
-				logger.Printf("[TRACE] %s skip key %s since its empty and OmitIfEmpty is true", ctx, key)
+				metadataTraceLogger("%s skip key %s since its empty and OmitIfEmpty is true", ctx, key)
 				continue
 			}
-			logger.Printf("[TRACE] %s assigning bool %v to %s", ctx, value, key)
+			metadataTraceLogger("%s assigning bool %v to %s", ctx, value, key)
 			elem.FieldByName(item.Metadata.SdkFieldName).Set(reflect.ValueOf(&value))
 		}
 		if item.Metadata.SchemaType == "int" {
@@ -360,22 +367,22 @@ func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[str
 				}
 			}
 			if item.Metadata.OmitIfEmpty && value == 0 && !exists {
-				logger.Printf("[TRACE] %s skip key %s since its empty and OmitIfEmpty is true", ctx, key)
+				metadataTraceLogger("%s skip key %s since its empty and OmitIfEmpty is true", ctx, key)
 				continue
 			}
-			logger.Printf("[TRACE] %s assigning int %v to %s", ctx, value, key)
+			metadataTraceLogger("%s assigning int %v to %s", ctx, value, key)
 			elem.FieldByName(item.Metadata.SdkFieldName).Set(reflect.ValueOf(&value))
 		}
 		if item.Metadata.SchemaType == "struct" {
 			nestedObj := reflect.New(item.Metadata.ReflectType)
 			itemList := getItemListForSchemaToStruct(d, item.Metadata.SchemaType, key, parent, parentMap)
 			if len(itemList) == 0 {
-				logger.Printf("[TRACE] Item list empty")
+				metadataTraceLogger("Item list empty")
 				continue
 			}
 			if itemList[0] == nil {
 				// empty clause is specified
-				logger.Printf("[TRACE] Item list contains empty value")
+				metadataTraceLogger("Item list contains empty value")
 				continue
 			}
 			nestedSchema := itemList[0].(map[string]interface{})
@@ -384,7 +391,7 @@ func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[str
 			if err = SchemaToStruct(nestedObj.Elem(), d, childElem.Schema, key, nestedSchema); err != nil {
 				return
 			}
-			logger.Printf("[TRACE] %s assigning struct %v to %s", ctx, nestedObj, key)
+			metadataTraceLogger("%s assigning struct %v to %s", ctx, nestedObj, key)
 			elem.FieldByName(item.Metadata.SdkFieldName).Set(nestedObj)
 		}
 		if item.Metadata.SchemaType == "list" || item.Metadata.SchemaType == "set" {
@@ -413,7 +420,7 @@ func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[str
 					} else {
 						sliceElem.Index(i).Set(reflect.ValueOf(v))
 					}
-					logger.Printf("[TRACE] %s appending %v to %s", ctx, v, key)
+					metadataTraceLogger("%s appending %v to %s", ctx, v, key)
 				}
 			}
 
@@ -432,7 +439,7 @@ func SchemaToStruct(elem reflect.Value, d *schema.ResourceData, metadata map[str
 						return
 					}
 					sliceElem.Index(i).Set(nestedObj.Elem())
-					logger.Printf("[TRACE] %s appending %+v to %s", ctx, nestedObj.Elem(), key)
+					metadataTraceLogger("%s appending %+v to %s", ctx, nestedObj.Elem(), key)
 				}
 			}
 		}
@@ -564,7 +571,7 @@ func polyStructToNestedSchema(ctx string, elem reflect.Value, item *ExtendedSche
 		}
 		sliceValue[i] = make(map[string]interface{})
 		sliceValue[i][key] = []interface{}{nestedSchema}
-		logger.Printf("[TRACE] %s adding %+v of key %s", ctx, dv, key)
+		metadataTraceLogger("%s adding %+v of key %s", ctx, dv, key)
 	}
 
 	ret = sliceValue
@@ -613,7 +620,7 @@ func polyNestedSchemaToStruct(ctx string, elem reflect.Value, dataList []interfa
 				return
 			}
 			dv[i] = dataValue.(*data.StructValue)
-			logger.Printf("[TRACE] %s adding polymorphic value %+v to %s",
+			metadataTraceLogger("%s adding polymorphic value %+v to %s",
 				ctx, nestedObj.Interface(), item.Metadata.SdkFieldName)
 
 			// there should be only one non-empty entry in the map
@@ -718,7 +725,7 @@ func polyFlattenSchemaToStruct(ctx string, elem reflect.Value, key string, dataL
 			return
 		}
 		rSlice.Index(i).Set(reflect.ValueOf(dataValue.(*data.StructValue)))
-		logger.Printf("[TRACE] %s adding polymorphic value %+v to %s",
+		metadataTraceLogger("%s adding polymorphic value %+v to %s",
 			ctx, nestedObj.Interface(), item.Metadata.SdkFieldName)
 	}
 
