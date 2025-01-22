@@ -6,13 +6,13 @@ package nsxt
 
 import (
 	"fmt"
-	"github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
-	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx"
 	"testing"
 
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/vmware/vsphere-automation-sdk-go/lib/vapi/std/errors"
+	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx"
 	ep "github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/sites/enforcement_points"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra/sites/enforcement_points/edge_clusters"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
