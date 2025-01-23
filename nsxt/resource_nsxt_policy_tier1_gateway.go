@@ -56,6 +56,8 @@ var t1TypeValues = []string{
 	model.Tier1_TYPE_NATTED,
 }
 
+var tier1GatewayPathExample = getMultitenancyPathExample("/infra/tier-1s/[gateway]")
+
 func resourceNsxtPolicyTier1Gateway() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyTier1GatewayCreate,
@@ -63,7 +65,7 @@ func resourceNsxtPolicyTier1Gateway() *schema.Resource {
 		Update: resourceNsxtPolicyTier1GatewayUpdate,
 		Delete: resourceNsxtPolicyTier1GatewayDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathResourceImporter,
+			State: getPolicyPathOrIDResourceImporter(tier1GatewayPathExample),
 		},
 
 		Schema: map[string]*schema.Schema{

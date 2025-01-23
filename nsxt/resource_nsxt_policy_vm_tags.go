@@ -30,6 +30,8 @@ var (
 	nsxtPolicyInstanceUUIDKey = "instanceUuid"
 )
 
+var vmTagsPathExample = getMultitenancyPathExample("/infra/realized-state/virtual-machines/[vm]")
+
 func resourceNsxtPolicyVMTags() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyVMTagsCreate,
@@ -37,7 +39,7 @@ func resourceNsxtPolicyVMTags() *schema.Resource {
 		Update: resourceNsxtPolicyVMTagsUpdate,
 		Delete: resourceNsxtPolicyVMTagsDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathResourceImporter,
+			State: getPolicyPathOrIDResourceImporter(vmTagsPathExample),
 		},
 
 		Schema: map[string]*schema.Schema{

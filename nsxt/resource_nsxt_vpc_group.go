@@ -6,6 +6,8 @@ package nsxt
 
 import "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+var vpcGroupPathExample = "/orgs/[org]/projects/[project]/vpcs/[vpc]/groups/[group]"
+
 func resourceNsxtVPCGroup() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtVPCGroupCreate,
@@ -13,7 +15,7 @@ func resourceNsxtVPCGroup() *schema.Resource {
 		Update: resourceNsxtVPCGroupUpdate,
 		Delete: resourceNsxtVPCGroupDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtVPCPathResourceImporter,
+			State: getVpcPathResourceImporter(vpcGroupPathExample),
 		},
 
 		Schema: getPolicyGroupSchema(false),

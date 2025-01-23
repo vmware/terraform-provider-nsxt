@@ -76,6 +76,8 @@ var staticRoutesSchema = map[string]*metadata.ExtendedSchema{
 	},
 }
 
+var vpcStaticRoutesPathExample = "/orgs/[org]/projects/[project]/vpcs/[vpc]/static-routes/[route]"
+
 func resourceNsxtVpcStaticRoutes() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtVpcStaticRoutesCreate,
@@ -83,7 +85,7 @@ func resourceNsxtVpcStaticRoutes() *schema.Resource {
 		Update: resourceNsxtVpcStaticRoutesUpdate,
 		Delete: resourceNsxtVpcStaticRoutesDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtVPCPathResourceImporter,
+			State: getVpcPathResourceImporter(vpcStaticRoutesPathExample),
 		},
 		Schema: metadata.GetSchemaFromExtendedSchema(staticRoutesSchema),
 	}

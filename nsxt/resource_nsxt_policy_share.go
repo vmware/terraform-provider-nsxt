@@ -20,6 +20,8 @@ var sharingStrategyVals = []string{
 	model.Share_SHARING_STRATEGY_NONE_DESCENDANTS,
 }
 
+var sharePathExample = getMultitenancyPathExample("/infra/shares/[share]")
+
 func resourceNsxtPolicyShare() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyShareCreate,
@@ -27,7 +29,7 @@ func resourceNsxtPolicyShare() *schema.Resource {
 		Update: resourceNsxtPolicyShareUpdate,
 		Delete: resourceNsxtPolicyShareDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathOnlyResourceImporter,
+			State: getPolicyPathResourceImporter(sharePathExample),
 		},
 
 		Schema: map[string]*schema.Schema{

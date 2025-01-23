@@ -45,6 +45,8 @@ var subAttributeReverseKeyMap = map[string]string{
 	model.PolicySubAttributes_KEY_CIFS_SMB_VERSION: "cifs_smb_version",
 }
 
+var contextProfilePathExample = getMultitenancyPathExample("/infra/context-profiles/[profile]")
+
 func resourceNsxtPolicyContextProfile() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyContextProfileCreate,
@@ -52,7 +54,7 @@ func resourceNsxtPolicyContextProfile() *schema.Resource {
 		Update: resourceNsxtPolicyContextProfileUpdate,
 		Delete: resourceNsxtPolicyContextProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathResourceImporter,
+			State: getPolicyPathOrIDResourceImporter(contextProfilePathExample),
 		},
 
 		Schema: map[string]*schema.Schema{

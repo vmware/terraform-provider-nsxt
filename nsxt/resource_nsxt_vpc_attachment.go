@@ -18,6 +18,8 @@ import (
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
 )
 
+var vpcPathExample = "/orgs/[org]/projects/[project]/vpcs/[vpc]"
+
 var vpcAttachmentSchema = map[string]*metadata.ExtendedSchema{
 	"nsx_id":       metadata.GetExtendedSchema(getNsxIDSchema()),
 	"path":         metadata.GetExtendedSchema(getPathSchema()),
@@ -54,7 +56,7 @@ func resourceNsxtVpcAttachment() *schema.Resource {
 
 func resourceNsxtVpcAttachmentExists(sessionContext utl.SessionContext, parentPath string, id string, connector client.Connector) (bool, error) {
 	var err error
-	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 3)
+	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 3, vpcPathExample)
 	if pathErr != nil {
 		return false, pathErr
 	}
@@ -80,7 +82,7 @@ func resourceNsxtVpcAttachmentCreate(d *schema.ResourceData, m interface{}) erro
 	}
 
 	parentPath := d.Get("parent_path").(string)
-	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 3)
+	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 3, vpcPathExample)
 	if pathErr != nil {
 		return pathErr
 	}
@@ -122,7 +124,7 @@ func resourceNsxtVpcAttachmentRead(d *schema.ResourceData, m interface{}) error 
 
 	client := clientLayer.NewAttachmentsClient(connector)
 	parentPath := d.Get("parent_path").(string)
-	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 3)
+	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 3, vpcPathExample)
 	if pathErr != nil {
 		return pathErr
 	}
@@ -152,7 +154,7 @@ func resourceNsxtVpcAttachmentUpdate(d *schema.ResourceData, m interface{}) erro
 	}
 
 	parentPath := d.Get("parent_path").(string)
-	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 3)
+	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 3, vpcPathExample)
 	if pathErr != nil {
 		return pathErr
 	}
@@ -191,7 +193,7 @@ func resourceNsxtVpcAttachmentDelete(d *schema.ResourceData, m interface{}) erro
 	connector := getPolicyConnector(m)
 	parentPath := d.Get("parent_path").(string)
 
-	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 3)
+	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 3, vpcPathExample)
 	if pathErr != nil {
 		return pathErr
 	}
