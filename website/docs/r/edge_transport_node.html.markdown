@@ -105,11 +105,32 @@ The following arguments are supported:
   * `host_switch_profile` - (Optional) Identifiers of host switch profiles to be associated with this host switch.
   * `ip_assignment` - (Required) - Specification for IPs to be used with host switch virtual tunnel endpoints. Should contain exatly one of the below:
     * `assigned_by_dhcp` - (Optional) Enables DHCP assignment.
+    * `no_ipv4` - (Optional) No IPv4 for this host switch.
     * `static_ip` - (Optional) IP assignment specification for Static IP List.
       * `ip_addresses` - (Required) List of IPs for transport node host switch virtual tunnel endpoints.
-      * `subnet_mask` - (Required) Subnet mask.
-      * `default_gateway` - (Required) Gateway IP.
+      * `subnet_mask` - (Required) Subnet mask
+      * `default_gateway` - (Required) Gateway IP
+    * `static_ip_mac` - (Optional) IP assignment specification for Static IP + MAC Pair List.
+      * `ip_mac_pair` - (Required) List of IP MAC Pairs
+        * `ip_address` - (Required) IP address
+        * `mac_address` - (Required) MAC address
+      * `subnet_mask` - (Required) Subnet mask
+      * `default_gateway` - (Required) Gateway IP
     * `static_ip_pool` - (Optional) IP assignment specification for Static IP Pool. Pool ID is expected here (if `nsxt_policy_ip_pool` object is referenced here, please use `realized_id` attribute)
+  * `ipv6_assignment` - (Optional) - Specification for IPv6 to be used with host switch virtual tunnel endpoints. Should contain exatly one of the below:
+    * `assigned_by_dhcpv6` - (Optional) Enables DHCP assignment.
+    * `assigned_by_autoconf` - (Optional) Enables autoconf assignment.
+    * `no_ipv6` - (Optional) No IPv6 for this host switch.
+    * `static_ip` - (Optional) IP assignment specification for Static IP List.
+      * `ip_addresses` - (Required) List of IPs for transport node host switch virtual tunnel endpoints.
+      * `prefix_length` - (Required) Prefix Length.
+      * `default_gateway` - (Required) Gateway IP.
+    * `static_ip_mac` - (Optional) IP assignment specification for Static IPv6 + MAC Pair List.
+      * `ip_mac_pair` - (Required) List of IP MAC Pairs
+        * `ip_address` - (Required) IPv6 address
+        * `mac_address` - (Required) MAC address
+      * `prefix_length` - (Required) Prefix Length.
+      * `default_gateway` - (Required) Gateway IP.
   * `pnic` - (Optional) Physical NICs connected to the host switch.
     * `device_name` - (Required) Device name or key.
     * `uplink_name` - (Required) Uplink name for this Pnic.

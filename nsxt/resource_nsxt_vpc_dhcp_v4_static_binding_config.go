@@ -1,5 +1,6 @@
-/* Copyright © 2024 Broadcom, Inc. All Rights Reserved.
-   SPDX-License-Identifier: MPL-2.0 */
+// © Broadcom. All Rights Reserved.
+// The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: MPL-2.0
 
 package nsxt
 
@@ -212,7 +213,7 @@ func resourceNsxtVpcSubnetDhcpV4StaticBindingConfig() *schema.Resource {
 
 func resourceNsxtVpcSubnetDhcpV4StaticBindingConfigExists(sessionContext utl.SessionContext, parentPath string, id string, connector client.Connector) (bool, error) {
 	var err error
-	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4)
+	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4, vpcSubnetPathExample)
 	if pathErr != nil {
 		return false, pathErr
 	}
@@ -238,7 +239,7 @@ func resourceNsxtVpcSubnetDhcpV4StaticBindingConfigCreate(d *schema.ResourceData
 	}
 
 	parentPath := d.Get("parent_path").(string)
-	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4)
+	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4, vpcSubnetPathExample)
 	if pathErr != nil {
 		return pathErr
 	}
@@ -287,7 +288,7 @@ func resourceNsxtVpcSubnetDhcpV4StaticBindingConfigRead(d *schema.ResourceData, 
 
 	client := clientLayer.NewDhcpStaticBindingConfigsClient(connector)
 	parentPath := d.Get("parent_path").(string)
-	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4)
+	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4, vpcSubnetPathExample)
 	if pathErr != nil {
 		return pathErr
 	}
@@ -327,7 +328,7 @@ func resourceNsxtVpcSubnetDhcpV4StaticBindingConfigUpdate(d *schema.ResourceData
 	}
 
 	parentPath := d.Get("parent_path").(string)
-	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4)
+	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4, vpcSubnetPathExample)
 	if pathErr != nil {
 		return pathErr
 	}
@@ -376,7 +377,7 @@ func resourceNsxtVpcSubnetDhcpV4StaticBindingConfigDelete(d *schema.ResourceData
 
 	connector := getPolicyConnector(m)
 	parentPath := d.Get("parent_path").(string)
-	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4)
+	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4, vpcSubnetPathExample)
 	if pathErr != nil {
 		return pathErr
 	}

@@ -1,5 +1,6 @@
-/* Copyright © 2019 VMware, Inc. All Rights Reserved.
-   SPDX-License-Identifier: MPL-2.0 */
+// © Broadcom. All Rights Reserved.
+// The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: MPL-2.0
 
 package nsxt
 
@@ -29,6 +30,8 @@ var (
 	nsxtPolicyInstanceUUIDKey = "instanceUuid"
 )
 
+var vmTagsPathExample = getMultitenancyPathExample("/infra/realized-state/virtual-machines/[vm]")
+
 func resourceNsxtPolicyVMTags() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyVMTagsCreate,
@@ -36,7 +39,7 @@ func resourceNsxtPolicyVMTags() *schema.Resource {
 		Update: resourceNsxtPolicyVMTagsUpdate,
 		Delete: resourceNsxtPolicyVMTagsDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathResourceImporter,
+			State: getPolicyPathOrIDResourceImporter(vmTagsPathExample),
 		},
 
 		Schema: map[string]*schema.Schema{

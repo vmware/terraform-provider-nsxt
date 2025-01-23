@@ -1,5 +1,6 @@
-/* Copyright © 2019 VMware, Inc. All Rights Reserved.
-   SPDX-License-Identifier: MPL-2.0 */
+// © Broadcom. All Rights Reserved.
+// The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: MPL-2.0
 
 package nsxt
 
@@ -16,6 +17,8 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
+var dnsForwarderZonePath string = getMultitenancyPathExample("/infra/dns-forwarder-zones/[profile]")
+
 func resourceNsxtPolicyDNSForwarderZone() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyDNSForwarderZoneCreate,
@@ -23,7 +26,7 @@ func resourceNsxtPolicyDNSForwarderZone() *schema.Resource {
 		Update: resourceNsxtPolicyDNSForwarderZoneUpdate,
 		Delete: resourceNsxtPolicyDNSForwarderZoneDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathResourceImporter,
+			State: getPolicyPathOrIDResourceImporter(dnsForwarderZonePath),
 		},
 
 		Schema: map[string]*schema.Schema{

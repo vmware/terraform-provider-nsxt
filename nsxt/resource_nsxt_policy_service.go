@@ -1,5 +1,6 @@
-/* Copyright © 2019 VMware, Inc. All Rights Reserved.
-   SPDX-License-Identifier: MPL-2.0 */
+// © Broadcom. All Rights Reserved.
+// The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: MPL-2.0
 
 package nsxt
 
@@ -198,6 +199,8 @@ func getNestedServiceEntrySchema() *schema.Schema {
 	}
 }
 
+var servicePathExample = getMultitenancyPathExample("/infra/services/[service]")
+
 func resourceNsxtPolicyService() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyServiceCreate,
@@ -205,7 +208,7 @@ func resourceNsxtPolicyService() *schema.Resource {
 		Update: resourceNsxtPolicyServiceUpdate,
 		Delete: resourceNsxtPolicyServiceDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathResourceImporter,
+			State: getPolicyPathOrIDResourceImporter(servicePathExample),
 		},
 
 		Schema: map[string]*schema.Schema{

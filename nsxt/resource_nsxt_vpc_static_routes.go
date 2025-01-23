@@ -1,5 +1,6 @@
-/* Copyright © 2024 Broadcom, Inc. All Rights Reserved.
-   SPDX-License-Identifier: MPL-2.0 */
+// © Broadcom. All Rights Reserved.
+// The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: MPL-2.0
 
 package nsxt
 
@@ -75,6 +76,8 @@ var staticRoutesSchema = map[string]*metadata.ExtendedSchema{
 	},
 }
 
+var vpcStaticRoutesPathExample = "/orgs/[org]/projects/[project]/vpcs/[vpc]/static-routes/[route]"
+
 func resourceNsxtVpcStaticRoutes() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtVpcStaticRoutesCreate,
@@ -82,7 +85,7 @@ func resourceNsxtVpcStaticRoutes() *schema.Resource {
 		Update: resourceNsxtVpcStaticRoutesUpdate,
 		Delete: resourceNsxtVpcStaticRoutesDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtVPCPathResourceImporter,
+			State: getVpcPathResourceImporter(vpcStaticRoutesPathExample),
 		},
 		Schema: metadata.GetSchemaFromExtendedSchema(staticRoutesSchema),
 	}

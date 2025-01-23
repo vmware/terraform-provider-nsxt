@@ -1,5 +1,6 @@
-/* Copyright © 2022 VMware, Inc. All Rights Reserved.
-   SPDX-License-Identifier: MPL-2.0 */
+// © Broadcom. All Rights Reserved.
+// The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: MPL-2.0
 
 package nsxt
 
@@ -16,6 +17,8 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
+var ipDiscoveryProfilePathExample = getMultitenancyPathExample("/infra/ip-discovery-profiles/[profile]")
+
 func resourceNsxtPolicyIPDiscoveryProfile() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyIPDiscoveryProfileCreate,
@@ -23,7 +26,7 @@ func resourceNsxtPolicyIPDiscoveryProfile() *schema.Resource {
 		Update: resourceNsxtPolicyIPDiscoveryProfileUpdate,
 		Delete: resourceNsxtPolicyIPDiscoveryProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathResourceImporter,
+			State: getPolicyPathOrIDResourceImporter(ipDiscoveryProfilePathExample),
 		},
 
 		Schema: map[string]*schema.Schema{

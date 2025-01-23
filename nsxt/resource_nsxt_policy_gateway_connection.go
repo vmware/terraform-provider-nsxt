@@ -1,5 +1,6 @@
-/* Copyright © 2024 Broadcom, Inc. All Rights Reserved.
-   SPDX-License-Identifier: MPL-2.0 */
+// © Broadcom. All Rights Reserved.
+// The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: MPL-2.0
 
 package nsxt
 
@@ -73,6 +74,8 @@ var gatewayConnectionSchema = map[string]*metadata.ExtendedSchema{
 	},
 }
 
+var gatewayConnectionPathExample = "/infra/gateway-connections/[connection]"
+
 func resourceNsxtPolicyGatewayConnection() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyGatewayConnectionCreate,
@@ -80,7 +83,7 @@ func resourceNsxtPolicyGatewayConnection() *schema.Resource {
 		Update: resourceNsxtPolicyGatewayConnectionUpdate,
 		Delete: resourceNsxtPolicyGatewayConnectionDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathOnlyResourceImporter,
+			State: getPolicyPathResourceImporter(gatewayConnectionPathExample),
 		},
 		Schema: metadata.GetSchemaFromExtendedSchema(gatewayConnectionSchema),
 	}

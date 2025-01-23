@@ -1,5 +1,6 @@
-/* Copyright © 2024 Broadcom, Inc. All Rights Reserved.
-   SPDX-License-Identifier: MPL-2.0 */
+// © Broadcom. All Rights Reserved.
+// The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: MPL-2.0
 
 package nsxt
 
@@ -54,6 +55,8 @@ var distributedVlanConnectionSchema = map[string]*metadata.ExtendedSchema{
 	},
 }
 
+const distributedVlanConnectionPathExample = "/infra/distributed-vlan-connections/[connection]"
+
 func resourceNsxtPolicyDistributedVlanConnection() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyDistributedVlanConnectionCreate,
@@ -61,7 +64,7 @@ func resourceNsxtPolicyDistributedVlanConnection() *schema.Resource {
 		Update: resourceNsxtPolicyDistributedVlanConnectionUpdate,
 		Delete: resourceNsxtPolicyDistributedVlanConnectionDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathOnlyResourceImporter,
+			State: getPolicyPathResourceImporter(distributedVlanConnectionPathExample),
 		},
 		Schema: metadata.GetSchemaFromExtendedSchema(distributedVlanConnectionSchema),
 	}

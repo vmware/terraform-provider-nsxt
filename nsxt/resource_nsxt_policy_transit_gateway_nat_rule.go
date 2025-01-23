@@ -1,5 +1,6 @@
-/* Copyright © 2024 Broadcom, Inc. All Rights Reserved.
-   SPDX-License-Identifier: MPL-2.0 */
+// © Broadcom. All Rights Reserved.
+// The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: MPL-2.0
 
 package nsxt
 
@@ -16,6 +17,8 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 	"github.com/vmware/terraform-provider-nsxt/nsxt/metadata"
 )
+
+var transitGatewayNatPathExample = "/orgs/[org]/projects/[project]/transit-gateways/[gateway]/nat/[type]"
 
 func resourceNsxtPolicyTransitGatewayNatRule() *schema.Resource {
 	return &schema.Resource{
@@ -34,7 +37,7 @@ func resourceNsxtPolicyTransitGatewayNatRule() *schema.Resource {
 
 func resourceNsxtPolicyTransitGatewayNatRuleExists(sessionContext utl.SessionContext, parentPath string, id string, connector client.Connector) (bool, error) {
 	var err error
-	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4)
+	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4, transitGatewayNatPathExample)
 	if pathErr != nil {
 		return false, pathErr
 	}
@@ -60,7 +63,7 @@ func resourceNsxtPolicyTransitGatewayNatRuleCreate(d *schema.ResourceData, m int
 	}
 
 	parentPath := d.Get("parent_path").(string)
-	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4)
+	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4, transitGatewayNatPathExample)
 	if pathErr != nil {
 		return pathErr
 	}
@@ -102,7 +105,7 @@ func resourceNsxtPolicyTransitGatewayNatRuleRead(d *schema.ResourceData, m inter
 
 	client := clientLayer.NewNatRulesClient(connector)
 	parentPath := d.Get("parent_path").(string)
-	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4)
+	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4, transitGatewayNatPathExample)
 	if pathErr != nil {
 		return pathErr
 	}
@@ -132,7 +135,7 @@ func resourceNsxtPolicyTransitGatewayNatRuleUpdate(d *schema.ResourceData, m int
 	}
 
 	parentPath := d.Get("parent_path").(string)
-	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4)
+	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4, transitGatewayNatPathExample)
 	if pathErr != nil {
 		return pathErr
 	}
@@ -170,7 +173,7 @@ func resourceNsxtPolicyTransitGatewayNatRuleDelete(d *schema.ResourceData, m int
 
 	connector := getPolicyConnector(m)
 	parentPath := d.Get("parent_path").(string)
-	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4)
+	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4, transitGatewayNatPathExample)
 	if pathErr != nil {
 		return pathErr
 	}

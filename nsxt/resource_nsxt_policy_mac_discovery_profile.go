@@ -1,5 +1,6 @@
-/* Copyright © 2020 VMware, Inc. All Rights Reserved.
-   SPDX-License-Identifier: MPL-2.0 */
+// © Broadcom. All Rights Reserved.
+// The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: MPL-2.0
 
 package nsxt
 
@@ -124,6 +125,8 @@ var macDiscoveryProfileSchema = map[string]*metadata.ExtendedSchema{
 	},
 }
 
+var macDiscoveryProfileExamplePath string = getMultitenancyPathExample("/infra/mac-discovery-profiles/[profile]")
+
 func resourceNsxtPolicyMacDiscoveryProfile() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyMacDiscoveryProfileCreate,
@@ -131,7 +134,7 @@ func resourceNsxtPolicyMacDiscoveryProfile() *schema.Resource {
 		Update: resourceNsxtPolicyMacDiscoveryProfileUpdate,
 		Delete: resourceNsxtPolicyMacDiscoveryProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathResourceImporter,
+			State: getPolicyPathOrIDResourceImporter(macDiscoveryProfileExamplePath),
 		},
 
 		Schema: metadata.GetSchemaFromExtendedSchema(macDiscoveryProfileSchema),

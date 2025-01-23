@@ -1,5 +1,6 @@
-/* Copyright © 2023 VMware, Inc. All Rights Reserved.
-   SPDX-License-Identifier: MPL-2.0 */
+// © Broadcom. All Rights Reserved.
+// The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: MPL-2.0
 
 package nsxt
 
@@ -49,6 +50,8 @@ var overlayEncapModes = []string{
 	model.PolicyUplinkHostSwitchProfile_OVERLAY_ENCAP_GENEVE,
 }
 
+var uplinkHostSwitchProfilePathSample = "/infra/host-switch-profiles/[profile]"
+
 func resourceNsxtUplinkHostSwitchProfile() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtUplinkHostSwitchProfileCreate,
@@ -56,7 +59,7 @@ func resourceNsxtUplinkHostSwitchProfile() *schema.Resource {
 		Update: resourceNsxtUplinkHostSwitchProfileUpdate,
 		Delete: resourceNsxtUplinkHostSwitchProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathResourceImporter,
+			State: getPolicyPathOrIDResourceImporter(uplinkHostSwitchProfilePathSample),
 		},
 
 		Schema: map[string]*schema.Schema{

@@ -1,5 +1,6 @@
-/* Copyright © 2020 VMware, Inc. All Rights Reserved.
-   SPDX-License-Identifier: MPL-2.0 */
+// © Broadcom. All Rights Reserved.
+// The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: MPL-2.0
 
 package nsxt
 
@@ -319,7 +320,7 @@ func TestAccResourceNsxtPolicyProject_900defaultSecurityProfile(t *testing.T) {
 				// Create: Set T0, Ext GW connection, Ext IPv4 Block, activate default DFW
 				Config: testAccNsxtPolicyProjectMinimalistic(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyProjectGetSecurityProfileNSEnabled(testResourceName, false),
+					testAccNsxtPolicyProjectGetSecurityProfileNSEnabled(testResourceName, true),
 				),
 			},
 			{

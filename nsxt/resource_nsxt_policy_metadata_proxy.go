@@ -1,5 +1,6 @@
-/* Copyright © 2024 Broadcom, Inc. All Rights Reserved.
-   SPDX-License-Identifier: MPL-2.0 */
+// © Broadcom. All Rights Reserved.
+// The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: MPL-2.0
 
 package nsxt
 
@@ -15,6 +16,8 @@ import (
 
 var cryptoProtocolsValues = []string{"TLS_V1", "TLS_V1_1", "TLS_V1_2"}
 
+var metadataProxyPathExample = getMultitenancyPathExample("/infra/metadata-proxies/[profile]")
+
 func resourceNsxtPolicyMetadataProxy() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyMetadataProxyCreate,
@@ -22,7 +25,7 @@ func resourceNsxtPolicyMetadataProxy() *schema.Resource {
 		Update: resourceNsxtPolicyMetadataProxyUpdate,
 		Delete: resourceNsxtPolicyMetadataProxyDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathResourceImporter,
+			State: getPolicyPathOrIDResourceImporter(metadataProxyPathExample),
 		},
 
 		Schema: map[string]*schema.Schema{

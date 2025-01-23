@@ -1,5 +1,6 @@
-/* Copyright © 2024 Broadcom, Inc. All Rights Reserved.
-   SPDX-License-Identifier: MPL-2.0 */
+// © Broadcom. All Rights Reserved.
+// The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: MPL-2.0
 
 package nsxt
 
@@ -29,6 +30,8 @@ var policyVpcNatRuleFirewallMatchValues = []string{
 	model.PolicyVpcNatRule_FIREWALL_MATCH_MATCH_INTERNAL_ADDRESS,
 	model.PolicyVpcNatRule_FIREWALL_MATCH_BYPASS,
 }
+
+var vpcNatPathExample = "/orgs/[org]/projects/[project]/vpcs/[vpc]/nat/[type]"
 
 var policyVpcNatRuleSchema = map[string]*metadata.ExtendedSchema{
 	"nsx_id":       metadata.GetExtendedSchema(getNsxIDSchema()),
@@ -144,7 +147,7 @@ func resourceNsxtPolicyVpcNatRule() *schema.Resource {
 
 func resourceNsxtPolicyVpcNatRuleExists(sessionContext utl.SessionContext, parentPath string, id string, connector client.Connector) (bool, error) {
 	var err error
-	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4)
+	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4, vpcNatPathExample)
 	if pathErr != nil {
 		return false, pathErr
 	}
@@ -170,7 +173,7 @@ func resourceNsxtPolicyVpcNatRuleCreate(d *schema.ResourceData, m interface{}) e
 	}
 
 	parentPath := d.Get("parent_path").(string)
-	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4)
+	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4, vpcNatPathExample)
 	if pathErr != nil {
 		return pathErr
 	}
@@ -212,7 +215,7 @@ func resourceNsxtPolicyVpcNatRuleRead(d *schema.ResourceData, m interface{}) err
 
 	client := clientLayer.NewNatRulesClient(connector)
 	parentPath := d.Get("parent_path").(string)
-	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4)
+	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4, vpcNatPathExample)
 	if pathErr != nil {
 		return pathErr
 	}
@@ -242,7 +245,7 @@ func resourceNsxtPolicyVpcNatRuleUpdate(d *schema.ResourceData, m interface{}) e
 	}
 
 	parentPath := d.Get("parent_path").(string)
-	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4)
+	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4, vpcNatPathExample)
 	if pathErr != nil {
 		return pathErr
 	}
@@ -283,7 +286,7 @@ func resourceNsxtPolicyVpcNatRuleDelete(d *schema.ResourceData, m interface{}) e
 
 	connector := getPolicyConnector(m)
 	parentPath := d.Get("parent_path").(string)
-	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4)
+	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 4, vpcNatPathExample)
 	if pathErr != nil {
 		return pathErr
 	}

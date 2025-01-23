@@ -1,5 +1,6 @@
-/* Copyright © 2024 Broadcom, Inc. All Rights Reserved.
-   SPDX-License-Identifier: MPL-2.0 */
+// © Broadcom. All Rights Reserved.
+// The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: MPL-2.0
 
 package nsxt
 
@@ -185,6 +186,8 @@ var vpcConnectivityProfileSchema = map[string]*metadata.ExtendedSchema{
 	},
 }
 
+var vpcConnectivityProfilePathExample = "/orgs/[org]/projects/[project]/vpc-connectivity-profiles/[profile]"
+
 func resourceNsxtVpcConnectivityProfile() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtVpcConnectivityProfileCreate,
@@ -192,7 +195,7 @@ func resourceNsxtVpcConnectivityProfile() *schema.Resource {
 		Update: resourceNsxtVpcConnectivityProfileUpdate,
 		Delete: resourceNsxtVpcConnectivityProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathOnlyResourceImporter,
+			State: getPolicyPathResourceImporter(vpcConnectivityProfilePathExample),
 		},
 		Schema: metadata.GetSchemaFromExtendedSchema(vpcConnectivityProfileSchema),
 	}

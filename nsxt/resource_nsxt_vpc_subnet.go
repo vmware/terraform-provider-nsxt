@@ -1,5 +1,6 @@
-/* Copyright © 2024 Broadcom, Inc. All Rights Reserved.
-   SPDX-License-Identifier: MPL-2.0 */
+// © Broadcom. All Rights Reserved.
+// The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: MPL-2.0
 
 package nsxt
 
@@ -447,7 +448,7 @@ func resourceNsxtVpcSubnet() *schema.Resource {
 		Update: resourceNsxtVpcSubnetUpdate,
 		Delete: resourceNsxtVpcSubnetDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtVPCPathResourceImporter,
+			State: getVpcPathResourceImporter(vpcSubnetPathExample),
 		},
 		Schema: metadata.GetSchemaFromExtendedSchema(vpcSubnetSchema),
 	}

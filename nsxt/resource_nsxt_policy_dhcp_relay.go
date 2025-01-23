@@ -1,5 +1,6 @@
-/* Copyright © 2019 VMware, Inc. All Rights Reserved.
-   SPDX-License-Identifier: MPL-2.0 */
+// © Broadcom. All Rights Reserved.
+// The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: MPL-2.0
 
 package nsxt
 
@@ -15,6 +16,8 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
+var dhcpRelayPathExample = getMultitenancyPathExample("/infra/dhcp-relays/[dhcp-relay]")
+
 func resourceNsxtPolicyDhcpRelayConfig() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyDhcpRelayConfigCreate,
@@ -22,7 +25,7 @@ func resourceNsxtPolicyDhcpRelayConfig() *schema.Resource {
 		Update: resourceNsxtPolicyDhcpRelayConfigUpdate,
 		Delete: resourceNsxtPolicyDhcpRelayConfigDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathResourceImporter,
+			State: getPolicyPathOrIDResourceImporter(dhcpRelayPathExample),
 		},
 
 		Schema: map[string]*schema.Schema{

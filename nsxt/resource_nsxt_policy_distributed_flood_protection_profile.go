@@ -1,5 +1,6 @@
-/* Copyright © 2023 VMware, Inc. All Rights Reserved.
-   SPDX-License-Identifier: MPL-2.0 */
+// © Broadcom. All Rights Reserved.
+// The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: MPL-2.0
 
 package nsxt
 
@@ -18,6 +19,8 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
+var distributedFloodProtectionProfilePathExample = getMultitenancyPathExample("/infra/flood-protection-profiles/[profile]")
+
 func resourceNsxtPolicyDistributedFloodProtectionProfile() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyDistributedFloodProtectionProfileCreate,
@@ -25,7 +28,7 @@ func resourceNsxtPolicyDistributedFloodProtectionProfile() *schema.Resource {
 		Update: resourceNsxtPolicyDistributedFloodProtectionProfileUpdate,
 		Delete: resourceNsxtPolicyFloodProtectionProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathResourceImporter,
+			State: getPolicyPathOrIDResourceImporter(distributedFloodProtectionProfilePathExample),
 		},
 		Schema: getDistributedFloodProtectionProfile(),
 	}

@@ -1,5 +1,6 @@
-/* Copyright © 2019 VMware, Inc. All Rights Reserved.
-   SPDX-License-Identifier: MPL-2.0 */
+// © Broadcom. All Rights Reserved.
+// The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: MPL-2.0
 
 package nsxt
 
@@ -22,6 +23,8 @@ var visibilityTypes = []string{
 	model.IpAddressBlock_VISIBILITY_PRIVATE,
 }
 
+var ipBlockPathExample = getMultitenancyPathExample("/infra/ip-blocks/[ip-block]")
+
 func resourceNsxtPolicyIPBlock() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyIPBlockCreate,
@@ -29,7 +32,7 @@ func resourceNsxtPolicyIPBlock() *schema.Resource {
 		Update: resourceNsxtPolicyIPBlockUpdate,
 		Delete: resourceNsxtPolicyIPBlockDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathResourceImporter,
+			State: getPolicyPathOrIDResourceImporter(ipBlockPathExample),
 		},
 
 		Schema: map[string]*schema.Schema{

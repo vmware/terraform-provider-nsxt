@@ -1,11 +1,14 @@
-/* Copyright © 2019 VMware, Inc. All Rights Reserved.
-   SPDX-License-Identifier: MPL-2.0 */
+// © Broadcom. All Rights Reserved.
+// The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: MPL-2.0
 
 package nsxt
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
+
+var segmentPathExample = getMultitenancyPathExample("/infra/segments/[segment]")
 
 func resourceNsxtPolicySegment() *schema.Resource {
 	return &schema.Resource{
@@ -14,7 +17,7 @@ func resourceNsxtPolicySegment() *schema.Resource {
 		Update: resourceNsxtPolicySegmentUpdate,
 		Delete: resourceNsxtPolicySegmentDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathResourceImporter,
+			State: getPolicyPathOrIDResourceImporter(segmentPathExample),
 		},
 
 		Schema: getPolicyCommonSegmentSchema(false, false),

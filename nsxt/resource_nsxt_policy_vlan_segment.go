@@ -1,5 +1,6 @@
-/* Copyright © 2019 VMware, Inc. All Rights Reserved.
-   SPDX-License-Identifier: MPL-2.0 */
+// © Broadcom. All Rights Reserved.
+// The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: MPL-2.0
 
 package nsxt
 
@@ -18,7 +19,7 @@ func resourceNsxtPolicyVlanSegment() *schema.Resource {
 		Update: resourceNsxtPolicyVlanSegmentUpdate,
 		Delete: resourceNsxtPolicyVlanSegmentDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathResourceImporter,
+			State: getPolicyPathOrIDResourceImporter(segmentPathExample),
 		},
 
 		Schema: segSchema,

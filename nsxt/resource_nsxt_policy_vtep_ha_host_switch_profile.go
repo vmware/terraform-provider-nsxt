@@ -1,5 +1,6 @@
-/* Copyright © 2024 Broadcom, Inc. All Rights Reserved.
-   SPDX-License-Identifier: MPL-2.0 */
+// © Broadcom. All Rights Reserved.
+// The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: MPL-2.0
 
 package nsxt
 
@@ -15,6 +16,8 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
 
+var vtepHAHostSwitchProfilePathExample = "/infra/host-switch-profiles/[profile]"
+
 func resourceNsxtVtepHAHostSwitchProfile() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtVtepHAHostSwitchProfileCreate,
@@ -22,7 +25,7 @@ func resourceNsxtVtepHAHostSwitchProfile() *schema.Resource {
 		Update: resourceNsxtVtepHAHostSwitchProfileUpdate,
 		Delete: resourceNsxtVtepHAHostSwitchProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathResourceImporter,
+			State: getPolicyPathOrIDResourceImporter(vtepHAHostSwitchProfilePathExample),
 		},
 
 		Schema: map[string]*schema.Schema{

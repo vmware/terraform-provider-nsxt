@@ -1,5 +1,6 @@
-/* Copyright © 2023 VMware, Inc. All Rights Reserved.
-   SPDX-License-Identifier: MPL-2.0 */
+// © Broadcom. All Rights Reserved.
+// The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: MPL-2.0
 
 package nsxt
 
@@ -21,6 +22,8 @@ var lBClientSslProfileCipherGroupLabelValues = []string{
 	model.LBClientSslProfile_CIPHER_GROUP_LABEL_BALANCED,
 }
 
+var lbClientSslProfilePathExample = "/infra/lb-client-ssl-profiles/[profile]"
+
 func resourceNsxtPolicyLBClientSslProfile() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyLBClientSslProfileCreate,
@@ -28,7 +31,7 @@ func resourceNsxtPolicyLBClientSslProfile() *schema.Resource {
 		Update: resourceNsxtPolicyLBClientSslProfileUpdate,
 		Delete: resourceNsxtPolicyLBClientSslProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathResourceImporter,
+			State: getPolicyPathOrIDResourceImporter(lbClientSslProfilePathExample),
 		},
 
 		Schema: map[string]*schema.Schema{

@@ -1,5 +1,6 @@
-/* Copyright © 2024 Broadcom, Inc. All Rights Reserved.
-   SPDX-License-Identifier: MPL-2.0 */
+// © Broadcom. All Rights Reserved.
+// The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: MPL-2.0
 
 package nsxt
 
@@ -11,6 +12,8 @@ import (
 	"github.com/vmware/terraform-provider-nsxt/api/infra/domains"
 )
 
+var vpcSecurityPolicyPathExample = "/orgs/[org]/projects/[project]/vpcs/[vpc]/security-policies/[security-policy]"
+
 func resourceNsxtVPCSecurityPolicy() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtVPCSecurityPolicyCreate,
@@ -18,7 +21,7 @@ func resourceNsxtVPCSecurityPolicy() *schema.Resource {
 		Update: resourceNsxtVPCSecurityPolicyUpdate,
 		Delete: resourceNsxtVPCSecurityPolicyDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtVPCPathResourceImporter,
+			State: getVpcPathResourceImporter(vpcSecurityPolicyPathExample),
 		},
 		Schema: getPolicySecurityPolicySchema(false, true, true, true),
 	}

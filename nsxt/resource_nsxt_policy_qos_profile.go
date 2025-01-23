@@ -1,5 +1,6 @@
-/* Copyright © 2020 VMware, Inc. All Rights Reserved.
-   SPDX-License-Identifier: MPL-2.0 */
+// © Broadcom. All Rights Reserved.
+// The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: MPL-2.0
 
 package nsxt
 
@@ -18,7 +19,13 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
-var rateLimiterResourceTypes = []string{model.QosBaseRateLimiter_RESOURCE_TYPE_INGRESSRATELIMITER, model.QosBaseRateLimiter_RESOURCE_TYPE_INGRESSBROADCASTRATELIMITER, model.QosBaseRateLimiter_RESOURCE_TYPE_EGRESSRATELIMITER}
+var rateLimiterResourceTypes = []string{
+	model.QosBaseRateLimiter_RESOURCE_TYPE_INGRESSRATELIMITER,
+	model.QosBaseRateLimiter_RESOURCE_TYPE_INGRESSBROADCASTRATELIMITER,
+	model.QosBaseRateLimiter_RESOURCE_TYPE_EGRESSRATELIMITER,
+}
+
+var qosProfilePathExample = getMultitenancyPathExample("/infra/qos-profiles/[profile]")
 
 func resourceNsxtPolicyQosProfile() *schema.Resource {
 	return &schema.Resource{
@@ -27,7 +34,7 @@ func resourceNsxtPolicyQosProfile() *schema.Resource {
 		Update: resourceNsxtPolicyQosProfileUpdate,
 		Delete: resourceNsxtPolicyQosProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathResourceImporter,
+			State: getPolicyPathOrIDResourceImporter(qosProfilePathExample),
 		},
 
 		Schema: map[string]*schema.Schema{

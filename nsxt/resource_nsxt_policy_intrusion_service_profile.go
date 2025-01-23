@@ -1,5 +1,6 @@
-/* Copyright © 2021 VMware, Inc. All Rights Reserved.
-   SPDX-License-Identifier: MPL-2.0 */
+// © Broadcom. All Rights Reserved.
+// The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: MPL-2.0
 
 package nsxt
 
@@ -39,6 +40,8 @@ var idsProfileSignatureActionValues = []string{
 	model.IdsProfileLocalSignature_ACTION_REJECT,
 }
 
+var intrusionServiceProfilePathExample = getMultitenancyPathExample("/infra/settings/firewall/security/intrusion-services/profiles/[profile]")
+
 func resourceNsxtPolicyIntrusionServiceProfile() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyIntrusionServiceProfileCreate,
@@ -46,7 +49,7 @@ func resourceNsxtPolicyIntrusionServiceProfile() *schema.Resource {
 		Update: resourceNsxtPolicyIntrusionServiceProfileUpdate,
 		Delete: resourceNsxtPolicyIntrusionServiceProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathResourceImporter,
+			State: getPolicyPathOrIDResourceImporter(intrusionServiceProfilePathExample),
 		},
 
 		Schema: map[string]*schema.Schema{

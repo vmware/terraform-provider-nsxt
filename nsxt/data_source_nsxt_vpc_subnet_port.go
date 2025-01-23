@@ -1,5 +1,6 @@
-/* Copyright © 2024 Broadcom, Inc. All Rights Reserved.
-   SPDX-License-Identifier: MPL-2.0 */
+// © Broadcom. All Rights Reserved.
+// The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: MPL-2.0
 
 package nsxt
 
@@ -38,10 +39,12 @@ func dataSourceNsxtVpcSubnetPort() *schema.Resource {
 	}
 }
 
+var vpcSubnetPathExample = "/orgs/[org]/projects/[project]/vpcs/[vpc]/subnets/[subnet]"
+
 func listVpcSubnetPorts(connector client.Connector, subnetPath string) ([]model.VpcSubnetPort, error) {
 
 	var results []model.VpcSubnetPort
-	parents, pathErr := parseStandardPolicyPathVerifySize(subnetPath, 4)
+	parents, pathErr := parseStandardPolicyPathVerifySize(subnetPath, 4, vpcSubnetPathExample)
 	if pathErr != nil {
 		return results, pathErr
 	}

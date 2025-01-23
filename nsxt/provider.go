@@ -1,5 +1,6 @@
-/* Copyright © 2017 VMware, Inc. All Rights Reserved.
-   SPDX-License-Identifier: MPL-2.0 */
+// © Broadcom. All Rights Reserved.
+// The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: MPL-2.0
 
 package nsxt
 
@@ -340,6 +341,8 @@ func Provider() *schema.Provider {
 			"nsxt_vpc_ip_address_allocation":                         dataSourceNsxtVpcIpAddressAllocation(),
 			"nsxt_policy_gateway_connection":                         dataSourceNsxtPolicyGatewayConnection(),
 			"nsxt_policy_distributed_vlan_connection":                dataSourceNsxtPolicyDistributedVlanConnection(),
+			"nsxt_policy_services":                                   dataSourceNsxtPolicyServices(),
+			"nsxt_policy_groups":                                     dataSourceNsxtPolicyGroups(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{

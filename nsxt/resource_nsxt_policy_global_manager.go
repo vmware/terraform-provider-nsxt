@@ -1,5 +1,6 @@
-/* Copyright © 2024 Broadcom, Inc. All Rights Reserved.
-   SPDX-License-Identifier: MPL-2.0 */
+// © Broadcom. All Rights Reserved.
+// The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: MPL-2.0
 
 package nsxt
 
@@ -18,6 +19,8 @@ var globalManagerModeValues = []string{
 	gm_model.GlobalManager_MODE_STANDBY,
 }
 
+var globalManagerPathExample = "/global-infra/global-managers/[manager]"
+
 func resourceNsxtPolicyGlobalManager() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyGlobalManagerCreate,
@@ -25,7 +28,7 @@ func resourceNsxtPolicyGlobalManager() *schema.Resource {
 		Update: resourceNsxtPolicyGlobalManagerUpdate,
 		Delete: resourceNsxtPolicyGlobalManagerDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathResourceImporter,
+			State: getPolicyPathOrIDResourceImporter(globalManagerPathExample),
 		},
 
 		Schema: map[string]*schema.Schema{

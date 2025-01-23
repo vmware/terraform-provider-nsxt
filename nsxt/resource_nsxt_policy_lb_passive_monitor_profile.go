@@ -1,5 +1,6 @@
-/* Copyright © 2020 VMware, Inc. All Rights Reserved.
-   SPDX-License-Identifier: MPL-2.0 */
+// © Broadcom. All Rights Reserved.
+// The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: MPL-2.0
 
 package nsxt
 
@@ -22,7 +23,7 @@ func resourceNsxtPolicyLBPassiveMonitorProfile() *schema.Resource {
 		Update: resourceNsxtPolicyLBPassiveMonitorProfileUpdate,
 		Delete: resourceNsxtPolicyLBPassiveMonitorProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathResourceImporter,
+			State: getPolicyPathOrIDResourceImporter(lbMonitorProfilePathExample),
 		},
 
 		Schema: map[string]*schema.Schema{

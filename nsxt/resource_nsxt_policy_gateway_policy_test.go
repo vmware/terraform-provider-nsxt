@@ -1,5 +1,6 @@
-/* Copyright © 2019 VMware, Inc. All Rights Reserved.
-   SPDX-License-Identifier: MPL-2.0 */
+// © Broadcom. All Rights Reserved.
+// The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: MPL-2.0
 
 package nsxt
 
@@ -938,12 +939,12 @@ func testAccNsxtPolicyGatewayPolicyWithIPCidrRange(name string, destIP string, d
 		locked          = false
 		stateful        = true
 		tcp_strict      = false
-	  
+
 		tag {
 		  scope = "color"
 		  tag   = "orange"
 		}
-	  
+
 		rule {
 		  display_name          = "rule1"
 		  source_groups         = [nsxt_policy_group.group1.path]
@@ -960,7 +961,7 @@ func testAccNsxtPolicyGatewayPolicyWithIPCidrRange(name string, destIP string, d
 		  services              = [nsxt_policy_service.icmp.path]
 		  scope                 = [nsxt_policy_tier1_gateway.gwt1test.path]			
 		  action                = "ALLOW"
-	        }
+	  }
 
 		rule {
 		  display_name          = "rule3"

@@ -1,5 +1,6 @@
-/* Copyright © 2024 Broadcom, Inc. All Rights Reserved.
-   SPDX-License-Identifier: MPL-2.0 */
+// © Broadcom. All Rights Reserved.
+// The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: MPL-2.0
 
 package nsxt
 
@@ -90,13 +91,13 @@ func TestNegativeParseStandardPolicyPath(t *testing.T) {
 
 func TestParseStandardPolicyPathVerifySize(t *testing.T) {
 
-	_, err := parseStandardPolicyPathVerifySize("/infra/things/thing1/sub-things/sub-thing1", 3)
+	_, err := parseStandardPolicyPathVerifySize("/infra/things/thing1/sub-things/sub-thing1", 3, "sample")
 	assert.NotNil(t, err)
 
-	parents, err := parseStandardPolicyPathVerifySize("/infra/things/thing1/sub-things/sub-thing1", 2)
+	parents, err := parseStandardPolicyPathVerifySize("/infra/things/thing1/sub-things/sub-thing1", 2, "sample")
 	assert.Nil(t, err)
 	assert.Equal(t, 2, len(parents))
 
-	_, err = parseStandardPolicyPathVerifySize("/global-infra/things/1/sub-things/2/fine-tuned-thing/3", 1)
+	_, err = parseStandardPolicyPathVerifySize("/global-infra/things/1/sub-things/2/fine-tuned-thing/3", 1, "sample")
 	assert.NotNil(t, err)
 }

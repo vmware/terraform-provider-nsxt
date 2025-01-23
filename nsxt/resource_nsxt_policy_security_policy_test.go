@@ -1,5 +1,6 @@
-/* Copyright © 2019 VMware, Inc. All Rights Reserved.
-   SPDX-License-Identifier: MPL-2.0 */
+// © Broadcom. All Rights Reserved.
+// The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: MPL-2.0
 
 package nsxt
 
@@ -949,12 +950,12 @@ func testAccNsxtPolicySecurityPolicyWithIPCidrRange(name string, destIP string, 
 		locked          = false
 		stateful        = true
 		tcp_strict      = false
-	  
+
 		tag {
 		  scope = "color"
 		  tag   = "orange"
 		}
-	  
+
 		rule {
 		  display_name          = "rule1"
 		  source_groups         = [nsxt_policy_group.group1.path]
@@ -964,11 +965,11 @@ func testAccNsxtPolicySecurityPolicyWithIPCidrRange(name string, destIP string, 
 		}
 
 		rule {
-		  display_name          = "rule2"
-		  source_groups         = [nsxt_policy_group.group1.path]			
-		  destination_groups    = ["%s"]
-	          services              = [nsxt_policy_service.icmp.path]
-		  action                = "ALLOW"
+			display_name          = "rule2"
+			source_groups         = [nsxt_policy_group.group1.path]
+			destination_groups    = ["%s"]
+			services              = [nsxt_policy_service.icmp.path]
+			action                = "ALLOW"
 		}
 
 		rule {
@@ -986,7 +987,7 @@ func testAccNsxtPolicySecurityPolicyWithIPCidrRange(name string, destIP string, 
 		  services              = [nsxt_policy_service.icmp.path]
 		  action                = "ALLOW"
 		}
-  
+
 		rule {
 		  display_name          = "rule5"
 		  source_groups         = ["%s"]			
@@ -994,21 +995,21 @@ func testAccNsxtPolicySecurityPolicyWithIPCidrRange(name string, destIP string, 
 		  services              = [nsxt_policy_service.icmp.path]
 		  action                = "ALLOW"
 		  sequence_number       = 105
-                }
-  
+    }
+
 		rule {
 		  display_name          = "rule6"
 		  source_groups         = ["%s"]
 		  destination_groups    = [nsxt_policy_group.group2.path]
 		  service_entries {
 		    icmp_entry {
-			display_name = "test"
-			icmp_type    = "3"
-			protocol     = "ICMPv4"
+			    display_name = "test"
+			    icmp_type    = "3"
+			    protocol     = "ICMPv4"
 		    }
 		    l4_port_set_entry {
-			protocol          = "TCP"
-			destination_ports = ["8000-8080"]
+			    protocol          = "TCP"
+			    destination_ports = ["8000-8080"]
 		    }
 		  }
 		  action                = "ALLOW"

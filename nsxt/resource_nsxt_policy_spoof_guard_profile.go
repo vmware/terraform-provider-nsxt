@@ -1,5 +1,6 @@
-/* Copyright © 2020 VMware, Inc. All Rights Reserved.
-   SPDX-License-Identifier: MPL-2.0 */
+// © Broadcom. All Rights Reserved.
+// The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: MPL-2.0
 
 package nsxt
 
@@ -15,6 +16,8 @@ import (
 	utl "github.com/vmware/terraform-provider-nsxt/api/utl"
 )
 
+var spoofGuardProfilePathExample = getMultitenancyPathExample("/infra/spoofguard-profiles/[profile]")
+
 func resourceNsxtPolicySpoofGuardProfile() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicySpoofGuardProfileCreate,
@@ -22,7 +25,7 @@ func resourceNsxtPolicySpoofGuardProfile() *schema.Resource {
 		Update: resourceNsxtPolicySpoofGuardProfileUpdate,
 		Delete: resourceNsxtPolicySpoofGuardProfileDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathResourceImporter,
+			State: getPolicyPathOrIDResourceImporter(spoofGuardProfilePathExample),
 		},
 
 		Schema: map[string]*schema.Schema{

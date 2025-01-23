@@ -1,9 +1,12 @@
-/* Copyright © 2024 Broadcom, Inc. All Rights Reserved.
-   SPDX-License-Identifier: MPL-2.0 */
+// © Broadcom. All Rights Reserved.
+// The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: MPL-2.0
 
 package nsxt
 
 import "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+var vpcGroupPathExample = "/orgs/[org]/projects/[project]/vpcs/[vpc]/groups/[group]"
 
 func resourceNsxtVPCGroup() *schema.Resource {
 	return &schema.Resource{
@@ -12,7 +15,7 @@ func resourceNsxtVPCGroup() *schema.Resource {
 		Update: resourceNsxtVPCGroupUpdate,
 		Delete: resourceNsxtVPCGroupDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtVPCPathResourceImporter,
+			State: getVpcPathResourceImporter(vpcGroupPathExample),
 		},
 
 		Schema: getPolicyGroupSchema(false),

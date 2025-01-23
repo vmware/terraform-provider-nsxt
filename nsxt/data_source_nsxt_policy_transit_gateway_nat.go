@@ -1,5 +1,6 @@
-/* Copyright © 2024 Broadcom, Inc. All Rights Reserved.
-   SPDX-License-Identifier: MPL-2.0 */
+// © Broadcom. All Rights Reserved.
+// The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: MPL-2.0
 
 package nsxt
 
@@ -39,11 +40,13 @@ func dataSourceNsxtPolicyTransitGatewayNat() *schema.Resource {
 	}
 }
 
+var transitGatewayPathExample = "/orgs/[org]/projects/[project]/transit-gateways/[gateway]"
+
 func dataSourceNsxtPolicyTransitGatewayNatRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 
 	parentPath := d.Get("transit_gateway_path").(string)
-	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 3)
+	parents, pathErr := parseStandardPolicyPathVerifySize(parentPath, 3, transitGatewayPathExample)
 	if pathErr != nil {
 		return fmt.Errorf("invalid transit_gateway_path: %v", pathErr)
 	}

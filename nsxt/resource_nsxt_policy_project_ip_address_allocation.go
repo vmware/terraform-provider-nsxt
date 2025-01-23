@@ -1,5 +1,6 @@
-/* Copyright © 2024 Broadcom, Inc. All Rights Reserved.
-   SPDX-License-Identifier: MPL-2.0 */
+// © Broadcom. All Rights Reserved.
+// The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: MPL-2.0
 
 package nsxt
 
@@ -66,6 +67,8 @@ var projectIpAddressAllocationSchema = map[string]*metadata.ExtendedSchema{
 	},
 }
 
+var projectIpAddressAllocationPathExample = "/orgs/[org]/projects/[project]/ip-address-allocations/[allocation]"
+
 func resourceNsxtPolicyProjectIpAddressAllocation() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceNsxtPolicyProjectIpAddressAllocationCreate,
@@ -73,7 +76,7 @@ func resourceNsxtPolicyProjectIpAddressAllocation() *schema.Resource {
 		Update: resourceNsxtPolicyProjectIpAddressAllocationUpdate,
 		Delete: resourceNsxtPolicyProjectIpAddressAllocationDelete,
 		Importer: &schema.ResourceImporter{
-			State: nsxtPolicyPathOnlyResourceImporter,
+			State: getPolicyPathResourceImporter(projectIpAddressAllocationPathExample),
 		},
 		Schema: metadata.GetSchemaFromExtendedSchema(projectIpAddressAllocationSchema),
 	}
