@@ -95,7 +95,7 @@ func getPolicyLocaleServiceSchema(isTier1 bool) *schema.Schema {
 	}
 
 	elemSchema := map[string]*schema.Schema{
-		"nsx_id": getNsxIDSchema(),
+		"nsx_id": getFlexNsxIDSchema(false),
 		"edge_cluster_path": {
 			Type:         schema.TypeString,
 			Description:  "The path of the edge cluster connected to this gateway",
@@ -205,7 +205,7 @@ func getGatewayIntersiteConfigSchema() *schema.Schema {
 		Type:        schema.TypeList,
 		Optional:    true,
 		Computed:    true,
-		Description: "Locale Service for the gateway",
+		Description: "Intersite config for the gateway",
 		MaxItems:    1,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
