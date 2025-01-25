@@ -785,7 +785,8 @@ func policyTier0GatewayResourceToInfraStruct(context utl.SessionContext, d *sche
 	}
 
 	bgpConfig := d.Get("bgp_config").([]interface{})
-	if len(bgpConfig) > 0 && !isGlobalManager {
+	// no need to include BGP child block if it didn't change
+	if d.HasChange("bgp_config") && len(bgpConfig) > 0 && !isGlobalManager {
 		// For Global Manager BGP is defined as separate resource
 		routingConfigStruct := resourceNsxtPolicyTier0GatewayBGPConfigSchemaToStruct(bgpConfig[0], vrfConfig != nil, id)
 		structValue, err := initPolicyTier0ChildBgpConfig(&routingConfigStruct)
@@ -798,7 +799,7 @@ func policyTier0GatewayResourceToInfraStruct(context utl.SessionContext, d *sche
 	edgeClusterPath := d.Get("edge_cluster_path").(string)
 	_, redistributionSet := d.GetOk("redistribution_config")
 	// The user can either define locale_service (GL or LM) or edge_cluster_path (LM only)
-	if d.HasChange("locale_service") {
+	if d.HasChange("locale_service") && edgeClusterPath == "" {
 		// Update locale services only if configuration changed
 		localeServices, err := initGatewayLocaleServices(context, d, connector, listPolicyTier0GatewayLocaleServices)
 		if err != nil {

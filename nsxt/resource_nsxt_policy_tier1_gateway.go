@@ -373,6 +373,19 @@ func initSingleTier1GatewayLocaleService(context utl.SessionContext, d *schema.R
 	return initChildLocaleService(serviceStruct, false)
 }
 
+// determine whether we should create locale service implicitly:
+// 1. in case user specifies edge_cluster_path rather than locale_service block
+// 2. in case user clears edge_cluster_path, and locale_service block is absent
+func useImplicitLocaleService(d *schema.ResourceData) bool {
+	// edge cluster path specified without locale services
+	edgeClusterPathSpecified := len(d.Get("edge_cluster_path").(string)) > 0
+	// edge cluster path should be cleared from gateway
+	_, localeServicesSpecified := d.GetOk("locale_service")
+	edgeClusterPathCleared := d.HasChange("edge_cluster_path") && len(d.Get("edge_cluster_path").(string)) == 0 && !localeServicesSpecified
+
+	return edgeClusterPathSpecified || edgeClusterPathCleared
+}
+
 func policyTier1GatewayResourceToInfraStruct(context utl.SessionContext, d *schema.ResourceData, connector client.Connector, id string) (model.Infra, error) {
 	var infraChildren, gwChildren []*data.StructValue
 	var infraStruct model.Infra
@@ -447,25 +460,26 @@ func policyTier1GatewayResourceToInfraStruct(context utl.SessionContext, d *sche
 		obj.IntersiteConfig = intersiteConfig
 	}
 
-	// set edge cluster for local manager if needed
-	if d.HasChange("edge_cluster_path") && context.ClientType != utl.Global {
+	// edge cluster is specified using edge_cluster_path on local manager
+	if useImplicitLocaleService(d) && context.ClientType != utl.Global {
 		dataValue, err := initSingleTier1GatewayLocaleService(context, d, connector)
 		if err != nil {
 			return infraStruct, err
 		}
 
 		gwChildren = append(gwChildren, dataValue)
-	}
+	} else {
+		// edge cluster path is mutually excusive with locale_services
+		if d.HasChange("locale_service") {
+			// Update locale services only if configuration changed
+			localeServices, err := initGatewayLocaleServices(context, d, connector, listPolicyTier1GatewayLocaleServices)
+			if err != nil {
+				return infraStruct, err
+			}
 
-	if d.HasChange("locale_service") {
-		// Update locale services only if configuration changed
-		localeServices, err := initGatewayLocaleServices(context, d, connector, listPolicyTier1GatewayLocaleServices)
-		if err != nil {
-			return infraStruct, err
-		}
-
-		if len(localeServices) > 0 {
-			gwChildren = append(gwChildren, localeServices...)
+			if len(localeServices) > 0 {
+				gwChildren = append(gwChildren, localeServices...)
+			}
 		}
 	}
 

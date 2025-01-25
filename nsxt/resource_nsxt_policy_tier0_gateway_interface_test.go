@@ -467,6 +467,66 @@ func TestAccResourceNsxtPolicyTier0GatewayInterface_withV6(t *testing.T) {
 	})
 }
 
+// Make sure locale-service dependant interface is not deleted when edge cluster
+// config is updated on the gateway
+func TestAccResourceNsxtPolicyTier0GatewayInterface_updateGateway(t *testing.T) {
+	name := getAccTestResourceName()
+	testResourceName := "nsxt_policy_tier0_gateway_interface.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyTier0InterfaceCheckDestroy(state, name)
+		},
+		Steps: []resource.TestStep{
+			{
+				// Create gateway without using locale service
+				Config: testAccNsxtPolicyTier0InterfaceUpdateGatewayTemplate(name, false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyTier0InterfaceExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "subnets.#", "2"),
+					resource.TestCheckResourceAttrSet(testResourceName, "segment_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "gateway_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+				),
+			},
+			{
+				// Update gateway to use locale services
+				Config: testAccNsxtPolicyTier0InterfaceUpdateGatewayTemplate(name, true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyTier0InterfaceExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "subnets.#", "2"),
+					resource.TestCheckResourceAttrSet(testResourceName, "segment_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "gateway_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "locale_service_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+				),
+			},
+			{
+				// Update gateway back to original config using edge cluster path
+				Config: testAccNsxtPolicyTier0InterfaceUpdateGatewayTemplate(name, false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyTier0InterfaceExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttr(testResourceName, "subnets.#", "2"),
+					resource.TestCheckResourceAttrSet(testResourceName, "segment_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "gateway_path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+				),
+			},
+		},
+	})
+}
+
 func testAccNSXPolicyTier0InterfaceImporterGetID(s *terraform.State) (string, error) {
 	testResourceName := "nsxt_policy_tier0_gateway_interface.test"
 	rs, ok := s.RootModule().Resources[testResourceName]
@@ -837,4 +897,24 @@ resource "nsxt_policy_tier0_gateway_interface" "test" {
   }
 }`, nsxtPolicyTier0GatewayName, testAccNsxtPolicyTier0EdgeClusterTemplate(), name, mtu, subnet, enablePim, extraConfig) +
 		testAccNsxtPolicyTier0InterfaceRealizationTemplate()
+}
+
+func testAccNsxtPolicyTier0InterfaceUpdateGatewayTemplate(name string, useLocaleService bool) string {
+	edgeCluster := "edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path"
+	if useLocaleService {
+		edgeCluster = testAccNsxtPolicyLocaleServiceECTemplate()
+	}
+	return testAccNsxtPolicyGatewayInterfaceDeps("11", false) + fmt.Sprintf(`
+resource "nsxt_policy_tier0_gateway" "test" {
+  display_name = "%s"
+  %s
+}
+
+resource "nsxt_policy_tier0_gateway_interface" "test" {
+  display_name   = "%s"
+  gateway_path   = nsxt_policy_tier0_gateway.test.path
+  segment_path   = nsxt_policy_vlan_segment.test.path
+  subnets        = ["10.192.12.2/24", "1002::3:3/64"]
+  type           = "EXTERNAL"
+}`, nsxtPolicyTier1GatewayName, edgeCluster, name)
 }
