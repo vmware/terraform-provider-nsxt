@@ -95,7 +95,7 @@ func getPolicyLocaleServiceSchema(isTier1 bool) *schema.Schema {
 	}
 
 	elemSchema := map[string]*schema.Schema{
-		"nsx_id": getNsxIDSchema(),
+		"nsx_id": getFlexNsxIDSchema(false),
 		"edge_cluster_path": {
 			Type:         schema.TypeString,
 			Description:  "The path of the edge cluster connected to this gateway",
@@ -205,7 +205,7 @@ func getGatewayIntersiteConfigSchema() *schema.Schema {
 		Type:        schema.TypeList,
 		Optional:    true,
 		Computed:    true,
-		Description: "Locale Service for the gateway",
+		Description: "Intersite config for the gateway",
 		MaxItems:    1,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
@@ -296,6 +296,7 @@ func initGatewayLocaleServices(context utl.SessionContext, d *schema.ResourceDat
 	services := d.Get("locale_service").(*schema.Set).List()
 
 	existingServices := make(map[string]model.LocaleServices)
+	singleLocaleServiceID := ""
 	if len(d.Id()) > 0 {
 		// This is an update - we might need to delete locale services
 		existingServiceObjects, errList := listLocaleServicesFunc(context, connector, d.Id())
@@ -304,6 +305,10 @@ func initGatewayLocaleServices(context utl.SessionContext, d *schema.ResourceDat
 		}
 
 		for _, obj := range existingServiceObjects {
+			if len(existingServiceObjects) == 1 {
+				// Most common use case for local manager, where only one instance is supported
+				singleLocaleServiceID = *obj.Id
+			}
 			existingServices[*obj.Id] = obj
 		}
 	}
@@ -313,7 +318,6 @@ func initGatewayLocaleServices(context utl.SessionContext, d *schema.ResourceDat
 		cfg := service.(map[string]interface{})
 		edgeClusterPath := cfg["edge_cluster_path"].(string)
 		edgeNodes := interfaceListToStringList(cfg["preferred_edge_paths"].([]interface{}))
-		path := cfg["path"].(string)
 		nsxID := cfg["nsx_id"].(string)
 		// validate unique ids are provided for services
 		if len(nsxID) > 0 {
@@ -325,11 +329,19 @@ func initGatewayLocaleServices(context utl.SessionContext, d *schema.ResourceDat
 
 		var serviceID string
 		if nsxID != "" {
-			log.Printf("[DEBUG] Updating locale service %s", path)
+			log.Printf("[DEBUG] Updating locale service %s for gateway %s", nsxID, d.Id())
 			serviceID = nsxID
 		} else {
-			serviceID = newUUID()
-			log.Printf("[DEBUG] Preparing to create locale service %s for gateway %s", serviceID, d.Id())
+			// to avoid disruption for objects configured under the locale service
+			// we want to avoid recreating the service
+			// for local manager, only one locale service is supported
+			if len(services) == 1 && singleLocaleServiceID != "" {
+				log.Printf("[DEBUG] Updating locale service %s for gateway %s", singleLocaleServiceID, d.Id())
+				serviceID = singleLocaleServiceID
+			} else {
+				serviceID = newUUID()
+				log.Printf("[DEBUG] Preparing to create locale service %s for gateway %s", serviceID, d.Id())
+			}
 		}
 		serviceStruct := model.LocaleServices{
 			Id:                 &serviceID,
