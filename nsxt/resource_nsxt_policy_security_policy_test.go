@@ -360,6 +360,7 @@ func TestAccResourceNsxtPolicySecurityPolicy_withIPCidrRange(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "rule.5.source_groups.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.5.source_groups.0", policyRange),
 					resource.TestCheckResourceAttr(testResourceName, "rule.5.destination_groups.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.5.service_entries.#", "1"),
 				),
 			},
 			{
@@ -419,6 +420,7 @@ func TestAccResourceNsxtPolicySecurityPolicy_withIPCidrRange(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "rule.5.source_groups.#", "1"),
 					resource.TestCheckResourceAttr(testResourceName, "rule.5.source_groups.0", updatedPolicyRange),
 					resource.TestCheckResourceAttr(testResourceName, "rule.5.destination_groups.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "rule.5.service_entries.#", "1"),
 				),
 			},
 		},
@@ -871,7 +873,6 @@ resource "nsxt_policy_service" "tcp778" {
 }`
 }
 
-// TODO: add profiles when available
 func testAccNsxtPolicySecurityPolicyWithDepsCreate(name string) string {
 	return testAccNsxtPolicySecurityPolicyDeps() + fmt.Sprintf(`
 resource "nsxt_policy_security_policy" "test" {
@@ -972,36 +973,46 @@ func testAccNsxtPolicySecurityPolicyWithIPCidrRange(name string, destIP string, 
 		}
 
 		rule {
-			display_name          = "rule3"
-			source_groups         = [nsxt_policy_group.group1.path]
-			destination_groups    = ["%s"]
-			services              = [nsxt_policy_service.icmp.path]
-			action                = "ALLOW"
-			sequence_number       = 50
+		  display_name          = "rule3"
+		  source_groups         = [nsxt_policy_group.group1.path]
+		  destination_groups    = ["%s"]
+		  services              = [nsxt_policy_service.icmp.path]
+		  action                = "ALLOW"
+		  sequence_number       = 50
 		}
 		rule {
-			display_name          = "rule4"
-			source_groups         = ["%s"]
-			destination_groups    = [nsxt_policy_group.group2.path]
-			services              = [nsxt_policy_service.icmp.path]
-			action                = "ALLOW"
+		  display_name          = "rule4"
+		  source_groups         = ["%s"]
+		  destination_groups    = [nsxt_policy_group.group2.path]
+		  services              = [nsxt_policy_service.icmp.path]
+		  action                = "ALLOW"
 		}
 
 		rule {
-			  display_name          = "rule5"
-			  source_groups         = ["%s"]
-			  destination_groups    = [nsxt_policy_group.group2.path]
-			  services              = [nsxt_policy_service.icmp.path]
-			  action                = "ALLOW"
-			  sequence_number       = 105
-                }
+		  display_name          = "rule5"
+		  source_groups         = ["%s"]			
+		  destination_groups    = [nsxt_policy_group.group2.path]
+		  services              = [nsxt_policy_service.icmp.path]
+		  action                = "ALLOW"
+		  sequence_number       = 105
+    }
 
 		rule {
-			  display_name          = "rule6"
-			  source_groups         = ["%s"]
-			  destination_groups    = [nsxt_policy_group.group2.path]
-			  services              = [nsxt_policy_service.icmp.path]
-			  action                = "ALLOW"
+		  display_name          = "rule6"
+		  source_groups         = ["%s"]
+		  destination_groups    = [nsxt_policy_group.group2.path]
+		  service_entries {
+		    icmp_entry {
+			    display_name = "test"
+			    icmp_type    = "3"
+			    protocol     = "ICMPv4"
+		    }
+		    l4_port_set_entry {
+			    protocol          = "TCP"
+			    destination_ports = ["8000-8080"]
+		    }
+		  }
+		  action                = "ALLOW"
 		}
 }`, name, destIP, destCidr, destIPRange, sourceIP, sourceCidr, sourceIPRange)
 }
