@@ -238,7 +238,13 @@ func TestAccResourceNsxtPolicyTier1Gateway_withEdgeCluster(t *testing.T) {
 	edgeClusterName := getEdgeClusterName()
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccOnlyLocalManager(t)
+			testAccPreCheck(t)
+			// NSX pre-4.0.0 sends wrong revision, therefore we can't validate
+			// the gateway is not recreated
+			testAccNSXVersion(t, "4.0.0")
+		},
 		Providers: testAccProviders,
 		CheckDestroy: func(state *terraform.State) error {
 			return testAccNsxtPolicyTier1CheckDestroy(state, updateName)
@@ -252,6 +258,7 @@ func TestAccResourceNsxtPolicyTier1Gateway_withEdgeCluster(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttrSet(testResourceName, "edge_cluster_path"),
 					resource.TestCheckResourceAttr(testResourceName, "tier0_path", ""),
+					resource.TestCheckResourceAttr(testResourceName, "revision", "0"),
 					resource.TestCheckResourceAttr(realizationResourceName, "state", "REALIZED"),
 				),
 			},
@@ -263,6 +270,22 @@ func TestAccResourceNsxtPolicyTier1Gateway_withEdgeCluster(t *testing.T) {
 					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
 					resource.TestCheckResourceAttrSet(testResourceName, "edge_cluster_path"),
 					resource.TestCheckResourceAttr(testResourceName, "tier0_path", ""),
+					// verify gateway was not recreated
+					resource.TestCheckResourceAttr(testResourceName, "revision", "1"),
+					resource.TestCheckResourceAttr(realizationResourceName, "state", "REALIZED"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyTier1CreateWithLocaleServiceTemplate(updateName, edgeClusterName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyTier1Exists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", updateName),
+					resource.TestCheckResourceAttr(testResourceName, "description", "Acceptance Test"),
+					resource.TestCheckResourceAttr(testResourceName, "locale_service.#", "1"),
+					resource.TestCheckResourceAttrSet(testResourceName, "locale_service.0.edge_cluster_path"),
+					resource.TestCheckResourceAttr(testResourceName, "tier0_path", ""),
+					// verify gateway was not recreated
+					resource.TestCheckResourceAttr(testResourceName, "revision", "2"),
 					resource.TestCheckResourceAttr(realizationResourceName, "state", "REALIZED"),
 				),
 			},
@@ -702,6 +725,25 @@ resource "nsxt_policy_tier1_gateway" "test" {
   tag {
     scope = "scope2"
     tag   = "tag2"
+  }
+}
+
+data "nsxt_policy_realization_info" "realization_info" {
+  path = nsxt_policy_tier1_gateway.test.path
+}`, edgeClusterName, name)
+}
+
+func testAccNsxtPolicyTier1CreateWithLocaleServiceTemplate(name string, edgeClusterName string) string {
+	return fmt.Sprintf(`
+data "nsxt_policy_edge_cluster" "EC" {
+  display_name = "%s"
+}
+
+resource "nsxt_policy_tier1_gateway" "test" {
+  display_name      = "%s"
+  description       = "Acceptance Test"
+  locale_service {
+    edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
   }
 }
 
