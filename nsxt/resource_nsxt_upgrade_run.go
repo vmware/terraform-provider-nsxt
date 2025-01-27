@@ -792,11 +792,20 @@ func runUpgrade(upgradeClientSet *upgradeClientSet, partialUpgradeMap map[string
 		if !finalizeUpgrade && component == finalizeUpgradeGroup {
 			continue
 		}
+		status, err := getUpgradeStatus(upgradeClientSet.StatusClient, &component)
+		if err != nil {
+			return err
+		}
+
+		if status.Status == model.ComponentUpgradeStatus_STATUS_SUCCESS {
+			log.Printf("[WARN] %s upgrade is already succeed. Any changes on it will be ignored.", component)
+			continue
+		}
 		// After one component upgrade is completed, although the status of our next component is NOT_STARTED,
 		// there is a period that overall status is still IN_PROGRESS, which will prevent us to start the upgrade of next component.
 		// Wait here for the overall status become stable. Because there is potential upgrade triggered before, we wait here also
 		// for the first component for safety.
-		err := waitUpgradeForStatus(upgradeClientSet, nil, inFlightComponentUpgradeStatus, staticComponentUpgradeStatus)
+		err = waitUpgradeForStatus(upgradeClientSet, nil, inFlightComponentUpgradeStatus, staticComponentUpgradeStatus)
 		if err != nil {
 			return err
 		}
@@ -814,7 +823,7 @@ func runUpgrade(upgradeClientSet *upgradeClientSet, partialUpgradeMap map[string
 		}
 
 		// If component is already upgraded, resume
-		status, err := getUpgradeStatus(upgradeClientSet.StatusClient, &component)
+		status, err = getUpgradeStatus(upgradeClientSet.StatusClient, &component)
 		if err != nil {
 			return err
 		}
