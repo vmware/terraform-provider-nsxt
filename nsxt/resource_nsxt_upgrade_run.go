@@ -562,7 +562,7 @@ func waitUpgradeForStatus(upgradeClientSet *upgradeClientSet, component *string,
 		Target:  target,
 		Refresh: func() (interface{}, string, error) {
 			status, err := getUpgradeStatus(upgradeClientSet.StatusClient, component)
-			if component != nil && *component == mpUpgradeGroup && (isServiceUnavailableError(err) || isTimeoutError(err)) {
+			if component != nil && *component == mpUpgradeGroup && (isServiceUnavailableError(err) || isTimeoutError(err) || isInternalServerError(err)) {
 				// After MP upgrade is completed, NSXT will restart and service_unavailable error or timeout error will be received depending on the request timing.
 				// Keep polling for this case.
 				return model.ComponentUpgradeStatus_STATUS_IN_PROGRESS, model.ComponentUpgradeStatus_STATUS_IN_PROGRESS, nil
