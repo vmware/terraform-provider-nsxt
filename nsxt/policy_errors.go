@@ -160,6 +160,13 @@ func isTimeoutError(err error) bool {
 	return false
 }
 
+func isInternalServerError(err error) bool {
+	if _, ok := err.(errors.InternalServerError); ok {
+		return true
+	}
+	return false
+}
+
 func handleCreateError(resourceType string, resource string, err error) error {
 	msg := fmt.Sprintf("Failed to create %s %s", resourceType, resource)
 	return logAPIError(msg, err)
