@@ -19,8 +19,8 @@ resource "nsxt_policy_host_transport_node" "test" {
   discovered_node_id = data.nsxt_discovered_node.dn.id
 
   standard_host_switch {
-    host_switch_id      = "50 0b 31 a4 b8 af 35 df-40 56 b6 f9 aa d3 ee 12"
-    host_switch_profile = [data.nsxt_policy_uplink_host_switch_profile.uplink_host_switch_profile.path]
+    host_switch_id = "50 0b 31 a4 b8 af 35 df-40 56 b6 f9 aa d3 ee 12"
+    uplink_profile = data.nsxt_policy_uplink_host_switch_profile.uplink_host_switch_profile.path
 
     ip_assignment {
       assigned_by_dhcp = true
@@ -65,7 +65,9 @@ The following arguments are supported:
   * `host_switch_id` - (Optional) The host switch id. This ID will be used to reference a host switch.
   * `host_switch_name` - (Optional) Host switch name. This name will be used to reference a host switch.
   * `host_switch_mode` - (Optional) Operational mode of a HostSwitch. Accepted values - 'STANDARD', 'ENS', 'ENS_INTERRUPT' or 'LEGACY'.
-  * `host_switch_profile` - (Optional) Policy path of host switch profiles to be associated with this host switch.
+  * `host_switch_profile` - (Deprecated) Policy paths of host switch profiles to be associated with this host switch. This attribute is deprecated, please use type-specific attribute instead (such as `uplink_profile`)
+  * `uplink_profile` - (Optional) Uplink host switch profile path.
+  * `vtep_ha_profile` - (Optional) VTEP high availablility host switch profile path. Only applicable with VDS switch.
   * `ip_assignment` - (Optional) - Specification for IPs to be used with host switch virtual tunnel endpoints. Should contain exatly one of the below:
     * `assigned_by_dhcp` - (Optional) Enables DHCP assignment.
     * `no_ipv4` - (Optional) No IPv4 for this host switch.

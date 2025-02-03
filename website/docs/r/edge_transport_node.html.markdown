@@ -78,7 +78,7 @@ resource "nsxt_edge_transport_node" "test_node" {
     transport_zone_endpoint {
       transport_zone = data.nsxt_policy_transport_zone.vlan_tz.id
     }
-    host_switch_profile = [data.nsxt_policy_uplink_host_switch_profile.edge_uplink_profile.id]
+    uplink_profile = data.nsxt_policy_uplink_host_switch_profile.edge_uplink_profile.id
     pnic {
       device_name = "fp-eth0"
       uplink_name = "uplink1"
@@ -102,7 +102,9 @@ The following arguments are supported:
 * `standard_host_switch` - (Required) Standard host switch specification.
   * `host_switch_id` - (Optional) The host switch id. This ID will be used to reference a host switch.
   * `host_switch_name` - (Optional) Host switch name. This name will be used to reference a host switch.
-  * `host_switch_profile` - (Optional) Identifiers of host switch profiles to be associated with this host switch.
+  * `host_switch_profile` - (Deprecated) Identifiers of host switch profiles to be associated with this host switch. This attribute is deprecated, please use type-specific attribute instead (such as `uplink_profile`)
+  * `uplink_profile` - (Optional) Uplink host switch profile id.
+  * `vtep_ha_profile` - (Optional) VTEP high availablility host switch profile id. Only applicable with VDS switch.
   * `ip_assignment` - (Required) - Specification for IPs to be used with host switch virtual tunnel endpoints. Should contain exatly one of the below:
     * `assigned_by_dhcp` - (Optional) Enables DHCP assignment.
     * `no_ipv4` - (Optional) No IPv4 for this host switch.
