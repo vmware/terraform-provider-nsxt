@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"reflect"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -988,16 +989,22 @@ func getEdgeNodeDeploymentConfigFromSchema(cfg interface{}) (*mpmodel.EdgeNodeDe
 			defaultGatewayAddresses := interface2StringList(vdc["default_gateway_address"].([]interface{}))
 			hostID := vdc["host_id"].(string)
 			managementNetworkID := vdc["management_network_id"].(string)
-			var managemenPortSubnets []mpmodel.IPSubnet
+			var managementPortSubnets []mpmodel.IPSubnet
+			hasIpv6 := false
 			for _, ipsi := range vdc["management_port_subnet"].([]interface{}) {
 				ips := ipsi.(map[string]interface{})
 				ipAddresses := interface2StringList(ips["ip_addresses"].([]interface{}))
+				for _, ip := range ipAddresses {
+					if strings.Contains(ip, ":") {
+						hasIpv6 = true
+					}
+				}
 				prefixLength := int64(ips["prefix_length"].(int))
 				subnet := mpmodel.IPSubnet{
 					IpAddresses:  ipAddresses,
 					PrefixLength: &prefixLength,
 				}
-				managemenPortSubnets = append(managemenPortSubnets, subnet)
+				managementPortSubnets = append(managementPortSubnets, subnet)
 			}
 			var reservationInfo *mpmodel.ReservationInfo
 			for _, ri := range vdc["reservation_info"].([]interface{}) {
@@ -1022,11 +1029,17 @@ func getEdgeNodeDeploymentConfigFromSchema(cfg interface{}) (*mpmodel.EdgeNodeDe
 				ComputeId:             &computeID,
 				DataNetworkIds:        dataNetworkIds,
 				ManagementNetworkId:   &managementNetworkID,
-				ManagementPortSubnets: managemenPortSubnets,
+				ManagementPortSubnets: managementPortSubnets,
 				ReservationInfo:       reservationInfo,
 				StorageId:             &storageID,
 				VcId:                  &vcID,
 				PlacementType:         mpmodel.DeploymentConfig_PLACEMENT_TYPE_VSPHEREDEPLOYMENTCONFIG,
+			}
+			if hasIpv6 {
+				// only static IPv6 assignment is supported for now
+				ipv6Assignment := mpmodel.VsphereDeploymentConfig_IPV6ASSIGNMENT_TYPE_STATIC
+				// NSX complains if we assign the type without actual address
+				cfg.Ipv6AssignmentType = &ipv6Assignment
 			}
 			if len(defaultGatewayAddresses) > 0 {
 				cfg.DefaultGatewayAddresses = defaultGatewayAddresses
