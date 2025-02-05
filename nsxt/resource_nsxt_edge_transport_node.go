@@ -447,20 +447,8 @@ func getStandardHostSwitchSchema(nodeType string) *schema.Schema {
 					Computed:    true,
 				},
 				"host_switch_profile": getHostSwitchProfileIDsSchema(),
-				"uplink_profile": {
-					Type:        schema.TypeString,
-					Description: "Host switch uplink profile",
-					Optional:    true,
-					Computed:    true,
-				},
-				"vtep_ha_profile": {
-					Type:        schema.TypeString,
-					Description: "Host switch high availability profile",
-					Optional:    true,
-					Computed:    true,
-				},
-				"ip_assignment":   getIPAssignmentSchema(false),
-				"ipv6_assignment": getIPv6AssignmentSchema(),
+				"ip_assignment":       getIPAssignmentSchema(false),
+				"ipv6_assignment":     getIPv6AssignmentSchema(),
 				"pnic": {
 					Type:        schema.TypeList,
 					Optional:    true,
@@ -640,8 +628,6 @@ func getHostSwitchProfileIDsSchema() *schema.Schema {
 		Elem: &schema.Schema{
 			Type: schema.TypeString,
 		},
-		Computed:   true,
-		Deprecated: "use specific profiles instead",
 	}
 }
 
@@ -1161,36 +1147,8 @@ func getHostSwitchProfileResourceType(m interface{}, id string) (string, error) 
 	return "", fmt.Errorf("Host Switch Profile type not found for %s", id)
 }
 
-func getHostSwitchProfileIDsFromSchema(m interface{}, parentMap map[string]interface{}) ([]mpmodel.HostSwitchProfileTypeIdEntry, error) {
+func getHostSwitchProfileIDsFromSchema(m interface{}, hswProfileList []interface{}) ([]mpmodel.HostSwitchProfileTypeIdEntry, error) {
 	var hswProfiles []mpmodel.HostSwitchProfileTypeIdEntry
-
-	uplinkProfile := parentMap["uplink_profile"].(string)
-	haProfile := parentMap["vtep_ha_profile"].(string)
-
-	if len(uplinkProfile) > 0 {
-		profileType := mpmodel.BaseHostSwitchProfile_RESOURCE_TYPE_UPLINKHOSTSWITCHPROFILE
-		elem := mpmodel.HostSwitchProfileTypeIdEntry{
-			Key:   &profileType,
-			Value: &uplinkProfile,
-		}
-		hswProfiles = append(hswProfiles, elem)
-	}
-
-	if len(haProfile) > 0 {
-		profileType := mpmodel.BaseHostSwitchProfile_RESOURCE_TYPE_VTEPHAHOSTSWITCHPROFILE
-		elem := mpmodel.HostSwitchProfileTypeIdEntry{
-			Key:   &profileType,
-			Value: &haProfile,
-		}
-		hswProfiles = append(hswProfiles, elem)
-	}
-
-	if len(hswProfiles) > 0 {
-		return hswProfiles, nil
-	}
-
-	// Deprecated way of specifying profiles as single list
-	hswProfileList := parentMap["host_switch_profile"].([]interface{})
 	for _, hswp := range hswProfileList {
 		val := hswp.(string)
 		key, err := getHostSwitchProfileResourceType(m, getPolicyIDFromPath(val))
@@ -1477,7 +1435,7 @@ func getHostSwitchSpecFromSchema(d *schema.ResourceData, m interface{}, nodeType
 			hostSwitchMode = mpmodel.StandardHostSwitch_HOST_SWITCH_MODE_STANDARD
 			hostSwitchType = mpmodel.StandardHostSwitch_HOST_SWITCH_TYPE_NVDS
 		}
-		hostSwitchProfileIDs, err := getHostSwitchProfileIDsFromSchema(m, swData)
+		hostSwitchProfileIDs, err := getHostSwitchProfileIDsFromSchema(m, swData["host_switch_profile"].([]interface{}))
 		if err != nil {
 			return nil, err
 		}
@@ -1602,7 +1560,7 @@ func getTransportNodeSubProfileCfg(m interface{}, iface interface{}) ([]mpmodel.
 		for _, cfgOpt := range data["host_switch_config_option"].([]interface{}) {
 			opt := cfgOpt.(map[string]interface{})
 			swID := opt["host_switch_id"].(string)
-			profileIDs, err := getHostSwitchProfileIDsFromSchema(m, opt)
+			profileIDs, err := getHostSwitchProfileIDsFromSchema(m, opt["host_switch_profile"].([]interface{}))
 			if err != nil {
 				return nil, err
 			}
@@ -1811,7 +1769,10 @@ func setHostSwitchSpecInSchema(d *schema.ResourceData, spec *data.StructValue, n
 			elem := make(map[string]interface{})
 			elem["host_switch_id"] = sw.HostSwitchId
 			elem["host_switch_name"] = sw.HostSwitchName
-			setHostSwitchProfileIDsInSchema(sw.HostSwitchProfileIds, elem)
+			profiles := setHostSwitchProfileIDsInSchema(sw.HostSwitchProfileIds)
+			if len(profiles) > 0 {
+				elem["host_switch_profile"] = profiles
+			}
 			var err error
 			if sw.IpAssignmentSpec != nil {
 				elem["ip_assignment"], err = setIPAssignmentInSchema(sw.IpAssignmentSpec)
@@ -1850,7 +1811,10 @@ func setHostSwitchSpecInSchema(d *schema.ResourceData, spec *data.StructValue, n
 					e := make(map[string]interface{})
 					hsCfgOpt := make(map[string]interface{})
 					hsCfgOpt["host_switch_id"] = tnpsc.HostSwitchConfigOption.HostSwitchId
-					setHostSwitchProfileIDsInSchema(tnpsc.HostSwitchConfigOption.HostSwitchProfileIds, hsCfgOpt)
+					profiles := setHostSwitchProfileIDsInSchema(tnpsc.HostSwitchConfigOption.HostSwitchProfileIds)
+					if len(profiles) > 0 {
+						hsCfgOpt["host_switch_profile"] = profiles
+					}
 					if tnpsc.HostSwitchConfigOption.IpAssignmentSpec != nil {
 						hsCfgOpt["ip_assignment"], err = setIPAssignmentInSchema(tnpsc.HostSwitchConfigOption.IpAssignmentSpec)
 						if err != nil {
@@ -2043,23 +2007,12 @@ func setIPv6AssignmentInSchema(spec *data.StructValue) (interface{}, error) {
 	return []interface{}{elem}, nil
 }
 
-func setHostSwitchProfileIDsInSchema(hspIDs []mpmodel.HostSwitchProfileTypeIdEntry, parentMap map[string]interface{}) {
+func setHostSwitchProfileIDsInSchema(hspIDs []mpmodel.HostSwitchProfileTypeIdEntry) []interface{} {
 	var hostSwitchProfileIDs []interface{}
 	for _, hspID := range hspIDs {
-		if hspID.Key == nil {
-			continue
-		}
-		if *hspID.Key == mpmodel.BaseHostSwitchProfile_RESOURCE_TYPE_UPLINKHOSTSWITCHPROFILE {
-			parentMap["uplink_profile"] = hspID.Value
-		}
-		if *hspID.Key == mpmodel.BaseHostSwitchProfile_RESOURCE_TYPE_VTEPHAHOSTSWITCHPROFILE {
-			parentMap["vtep_ha_profile"] = hspID.Value
-		}
 		hostSwitchProfileIDs = append(hostSwitchProfileIDs, hspID.Value)
 	}
-
-	// deprecated way of specifying profiles in single list
-	parentMap["host_switch_profile"] = hostSwitchProfileIDs
+	return hostSwitchProfileIDs
 }
 
 func resourceNsxtEdgeTransportNodeUpdate(d *schema.ResourceData, m interface{}) error {
