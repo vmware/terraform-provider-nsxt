@@ -798,7 +798,7 @@ func policyTier0GatewayResourceToInfraStruct(context utl.SessionContext, d *sche
 	edgeClusterPath := d.Get("edge_cluster_path").(string)
 	_, redistributionSet := d.GetOk("redistribution_config")
 	// The user can either define locale_service (GL or LM) or edge_cluster_path (LM only)
-	if d.HasChange("locale_service") {
+	if d.HasChange("locale_service") && edgeClusterPath == "" {
 		// Update locale services only if configuration changed
 		localeServices, err := initGatewayLocaleServices(context, d, connector, listPolicyTier0GatewayLocaleServices)
 		if err != nil {
