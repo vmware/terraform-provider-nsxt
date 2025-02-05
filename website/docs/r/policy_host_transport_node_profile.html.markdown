@@ -24,8 +24,8 @@ resource "nsxt_policy_host_transport_node_profile" "test" {
     transport_zone_endpoint {
       transport_zone = data.nsxt_policy_transport_zone.tz1.path
     }
-    uplink_profile   = nsxt_policy_uplink_host_switch_profile.hsw_profile1.path
-    is_migrate_pnics = false
+    host_switch_profile = [nsxt_policy_uplink_host_switch_profile.hsw_profile1.path]
+    is_migrate_pnics    = false
     pnic {
       device_name = "fp-eth0"
       uplink_name = "uplink1"
@@ -46,9 +46,7 @@ The following arguments are supported:
     * `host_switch_id` - (Optional) The host switch id. This ID will be used to reference a host switch.
     * `host_switch_name` - (Optional) Host switch name. This name will be used to reference a host switch.
     * `host_switch_mode` - (Optional) Operational mode of a HostSwitch. Accepted values - 'STANDARD', 'ENS', 'ENS_INTERRUPT' or 'LEGACY'.
-    * `host_switch_profile` - (Deprecated) Policy paths of host switch profiles to be associated with this host switch. This attribute is deprecated, please use type-specific attribute instead (such as `uplink_profile`)
-    * `uplink_profile` - (Optional) Uplink host switch profile path.
-    * `vtep_ha_profile` - (Optional) VTEP high availablility host switch profile path. Only applicable with VDS switch.
+    * `host_switch_profile` - (Optional) Policy paths of host switch profiles to be associated with this host switch.
     * `ip_assignment` - (Required) - Specification for IPs to be used with host switch virtual tunnel endpoints. Should contain exactly one of the below:
         * `assigned_by_dhcp` - (Optional) Enables DHCP assignment.
         * `static_ip` - (Optional) IP assignment specification for Static IP List.
