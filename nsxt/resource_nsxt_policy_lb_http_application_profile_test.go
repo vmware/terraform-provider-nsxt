@@ -55,7 +55,7 @@ func TestAccResourceNsxtPolicyLBHttpApplicationProfile_basic(t *testing.T) {
 			{
 				Config: testAccNsxtPolicyLBHttpApplicationProfileTemplate(true),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyLBHttpApplicationProfileExists(accTestPolicyLBHttpApplicationProfileCreateAttributes["display_name"], testResourceName),
+					testAccNsxtPolicyLBApplicationProfileExists(accTestPolicyLBHttpApplicationProfileCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyLBHttpApplicationProfileCreateAttributes["display_name"]),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyLBHttpApplicationProfileCreateAttributes["description"]),
 					resource.TestCheckResourceAttr(testResourceName, "http_redirect_to", accTestPolicyLBHttpApplicationProfileCreateAttributes["http_redirect_to"]),
@@ -78,7 +78,7 @@ func TestAccResourceNsxtPolicyLBHttpApplicationProfile_basic(t *testing.T) {
 			{
 				Config: testAccNsxtPolicyLBHttpApplicationProfileTemplate(false),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyLBHttpApplicationProfileExists(accTestPolicyLBHttpApplicationProfileUpdateAttributes["display_name"], testResourceName),
+					testAccNsxtPolicyLBApplicationProfileExists(accTestPolicyLBHttpApplicationProfileUpdateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyLBHttpApplicationProfileUpdateAttributes["display_name"]),
 					resource.TestCheckResourceAttr(testResourceName, "description", accTestPolicyLBHttpApplicationProfileUpdateAttributes["description"]),
 					resource.TestCheckResourceAttr(testResourceName, "http_redirect_to", accTestPolicyLBHttpApplicationProfileUpdateAttributes["http_redirect_to"]),
@@ -101,7 +101,7 @@ func TestAccResourceNsxtPolicyLBHttpApplicationProfile_basic(t *testing.T) {
 			{
 				Config: testAccNsxtPolicyLBHttpApplicationProfileMinimalistic(),
 				Check: resource.ComposeTestCheckFunc(
-					testAccNsxtPolicyLBHttpApplicationProfileExists(accTestPolicyLBHttpApplicationProfileCreateAttributes["display_name"], testResourceName),
+					testAccNsxtPolicyLBApplicationProfileExists(accTestPolicyLBHttpApplicationProfileCreateAttributes["display_name"], testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "description", ""),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
@@ -136,27 +136,27 @@ func TestAccResourceNsxtPolicyLBHttpApplicationProfile_importBasic(t *testing.T)
 	})
 }
 
-func testAccNsxtPolicyLBHttpApplicationProfileExists(displayName string, resourceName string) resource.TestCheckFunc {
+func testAccNsxtPolicyLBApplicationProfileExists(displayName string, resourceName string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 
 		connector := getPolicyConnector(testAccProvider.Meta().(nsxtClients))
 
 		rs, ok := state.RootModule().Resources[resourceName]
 		if !ok {
-			return fmt.Errorf("Policy LBHttpProfile resource %s not found in resources", resourceName)
+			return fmt.Errorf("Policy LB Application Profile resource %s not found in resources", resourceName)
 		}
 
 		resourceID := rs.Primary.ID
 		if resourceID == "" {
-			return fmt.Errorf("Policy LBHttpProfile resource ID not set in resources")
+			return fmt.Errorf("Policy LB Application Profile resource ID not set in resources")
 		}
 
-		exists, err := resourceNsxtPolicyLBHttpApplicationProfileExists(resourceID, connector, testAccIsGlobalManager())
+		exists, err := resourceNsxtPolicyLBAppProfileExists(resourceID, connector, testAccIsGlobalManager())
 		if err != nil {
 			return err
 		}
 		if !exists {
-			return fmt.Errorf("Policy LBHttpProfile %s does not exist", resourceID)
+			return fmt.Errorf("Policy LB Application Profile %s does not exist", resourceID)
 		}
 
 		return nil
@@ -172,7 +172,7 @@ func testAccNsxtPolicyLBHttpApplicationProfileCheckDestroy(state *terraform.Stat
 		}
 
 		resourceID := rs.Primary.Attributes["id"]
-		exists, err := resourceNsxtPolicyLBHttpApplicationProfileExists(resourceID, connector, testAccIsGlobalManager())
+		exists, err := resourceNsxtPolicyLBAppProfileExists(resourceID, connector, testAccIsGlobalManager())
 		if err == nil {
 			return err
 		}

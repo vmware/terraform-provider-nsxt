@@ -12,7 +12,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/data"
-	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model"
 )
@@ -107,10 +106,6 @@ func resourceNsxtPolicyLBHttpApplicationProfile() *schema.Resource {
 	}
 }
 
-func resourceNsxtPolicyLBHttpApplicationProfileExists(id string, connector client.Connector, isGlobalManager bool) (bool, error) {
-	return resourceNsxtPolicyLBAppProfileExists(id, connector, isGlobalManager)
-}
-
 func resourceNsxtPolicyLBHttpApplicationProfilePatch(d *schema.ResourceData, m interface{}, id string) error {
 	connector := getPolicyConnector(m)
 	converter := bindings.NewTypeConverter()
@@ -165,7 +160,7 @@ func resourceNsxtPolicyLBHttpApplicationProfilePatch(d *schema.ResourceData, m i
 func resourceNsxtPolicyLBHttpApplicationProfileCreate(d *schema.ResourceData, m interface{}) error {
 
 	// Initialize resource Id and verify this ID is not yet used
-	id, err := getOrGenerateID(d, m, resourceNsxtPolicyLBHttpApplicationProfileExists)
+	id, err := getOrGenerateID(d, m, resourceNsxtPolicyLBAppProfileExists)
 	if err != nil {
 		return err
 	}
