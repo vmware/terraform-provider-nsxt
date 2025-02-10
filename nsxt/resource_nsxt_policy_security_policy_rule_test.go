@@ -71,6 +71,9 @@ func testAccResourceNsxtPolicySecurityPolicyRuleBasic(t *testing.T, withContext 
 					resource.TestCheckResourceAttr(ruleResourceName, "direction", direction),
 					resource.TestCheckResourceAttr(ruleResourceName, "ip_version", proto),
 					resource.TestCheckResourceAttr(ruleResourceName, "sequence_number", seqNum),
+					resource.TestCheckResourceAttr(ruleResourceName, "service_entries.#", "1"),
+					resource.TestCheckResourceAttr(ruleResourceName, "service_entries.0.igmp_entry.#", "1"),
+					resource.TestCheckResourceAttr(ruleResourceName, "service_entries.0.l4_port_set_entry.#", "2"),
 				),
 			},
 			{
@@ -282,6 +285,21 @@ resource "nsxt_policy_security_policy_rule" "%s" {
   direction       = "%s"
   ip_version      = "%s"
   sequence_number = %s
+
+  service_entries {
+    igmp_entry {
+    }
+    
+    l4_port_set_entry {
+      protocol          = "TCP"
+      destination_ports = [ "443" ]
+    }
+
+    l4_port_set_entry {
+      protocol          = "TCP"
+      destination_ports = [ "80" ]
+    }
+  }
 
   tag {
     scope = "color"
