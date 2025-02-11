@@ -64,6 +64,7 @@ var staticComponentUpgradeStatus = []string{
 	model.ComponentUpgradeStatus_STATUS_FAILED,
 	model.ComponentUpgradeStatus_STATUS_NOT_STARTED,
 	model.ComponentUpgradeStatus_STATUS_PAUSED,
+	model.ComponentUpgradeStatus_STATUS_SUCCESS,
 }
 
 var inFlightComponentUpgradeStatus = []string{
@@ -461,7 +462,7 @@ func prepareUpgrade(upgradeClientSet *upgradeClientSet, d *schema.ResourceData, 
 		}
 
 		if status.Status == model.ComponentUpgradeStatus_STATUS_SUCCESS {
-			log.Printf("[WARN] %s upgrade is already succeed. Any changes on it will be ignored.", component)
+			log.Printf("[WARN] %s upgrade is already succeeded. Any changes on it will be ignored.", component)
 			continue
 		}
 		// If a component upgrade is in progress, to update either UpgradeUnitGroup or UpgradePlanSetting,
@@ -473,6 +474,13 @@ func prepareUpgrade(upgradeClientSet *upgradeClientSet, d *schema.ResourceData, 
 		err = waitUpgradeForStatus(upgradeClientSet, &component, inFlightComponentUpgradeStatus, staticComponentUpgradeStatus)
 		if err != nil {
 			return err
+		}
+		status, err = getUpgradeStatus(upgradeClientSet.StatusClient, &component)
+		if err != nil {
+			return err
+		}
+		if status.Status == model.ComponentUpgradeStatus_STATUS_SUCCESS {
+			return fmt.Errorf("unexpected status 'SUCCESS' for component '%s. Possibly there is a concurrent upgrade run'", component)
 		}
 
 		// Cache the group list before reset as group IDs change by reset operation. References for some types of groups
@@ -798,7 +806,7 @@ func runUpgrade(upgradeClientSet *upgradeClientSet, partialUpgradeMap map[string
 		}
 
 		if status.Status == model.ComponentUpgradeStatus_STATUS_SUCCESS {
-			log.Printf("[WARN] %s upgrade is already succeed. Any changes on it will be ignored.", component)
+			log.Printf("[WARN] %s upgrade is already succeeded. Any changes on it will be ignored.", component)
 			continue
 		}
 		// After one component upgrade is completed, although the status of our next component is NOT_STARTED,
@@ -808,6 +816,13 @@ func runUpgrade(upgradeClientSet *upgradeClientSet, partialUpgradeMap map[string
 		err = waitUpgradeForStatus(upgradeClientSet, nil, inFlightComponentUpgradeStatus, staticComponentUpgradeStatus)
 		if err != nil {
 			return err
+		}
+		status, err = getUpgradeStatus(upgradeClientSet.StatusClient, &component)
+		if err != nil {
+			return err
+		}
+		if status.Status == model.ComponentUpgradeStatus_STATUS_SUCCESS {
+			return fmt.Errorf("unexpected status 'SUCCESS' for component '%s. Possibly there is a concurrent upgrade run'", component)
 		}
 
 		if partialUpgradeExist {
