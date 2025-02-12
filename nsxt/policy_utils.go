@@ -739,3 +739,27 @@ func getPolicyLbMonitorPortSchema() *schema.Schema {
 func getVpcParentsFromContext(context utl.SessionContext) []string {
 	return []string{utl.DefaultOrgID, context.ProjectID, context.VPCID}
 }
+
+func getPolicyKeyValuePairListFromSchema(kvIList interface{}) []model.KeyValuePair {
+	var kvList []model.KeyValuePair
+	if kvIList != nil {
+		for _, kv := range kvIList.([]interface{}) {
+			kvMap := kv.(map[string]interface{})
+			key := kvMap["key"].(string)
+			val := kvMap["value"].(string)
+			kvList = append(kvList, model.KeyValuePair{Key: &key, Value: &val})
+		}
+	}
+	return kvList
+}
+
+func setPolicyKeyValueListForSchema(kvList []model.KeyValuePair) interface{} {
+	var kvIList []interface{}
+	for _, ec := range kvList {
+		kvMap := make(map[string]interface{})
+		kvMap["key"] = ec.Key
+		kvMap["value"] = ec.Value
+		kvIList = append(kvIList, kvMap)
+	}
+	return kvIList
+}

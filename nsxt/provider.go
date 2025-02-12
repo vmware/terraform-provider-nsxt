@@ -539,6 +539,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_project_ip_address_allocation": resourceNsxtPolicyProjectIpAddressAllocation(),
 			"nsxt_vpc_dhcp_v4_static_binding":           resourceNsxtVpcSubnetDhcpV4StaticBindingConfig(),
 			"nsxt_policy_l7_access_profile":             resourceNsxtPolicyL7AccessProfile(),
+			"nsxt_policy_edge_transport_node":           resourceNsxtPolicyEdgeTransportNode(),
 		},
 
 		ConfigureFunc: providerConfigure,
