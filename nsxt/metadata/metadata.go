@@ -20,6 +20,12 @@ import (
 // package level logger to include log.Lshortfile context
 var logger = log.New(os.Stderr, "", log.LstdFlags|log.Lshortfile)
 
+// common way NSX API defines polymorphic type
+var StandardTypeIdentifier = TypeIdentifier{
+	SdkName:      "Type_",
+	APIFieldName: "type",
+}
+
 const (
 	PolymorphicTypeFlatten = "flatten"
 	PolymorphicTypeNested  = "nested"
@@ -615,7 +621,7 @@ func polyNestedSchemaToStruct(ctx string, elem reflect.Value, dataList []interfa
 				return
 			}
 			// set resource type based on mapping
-			nestedObj.Elem().FieldByName(item.Metadata.TypeIdentifier.GetSdkName()).Set(reflect.ValueOf(&rType))
+			nestedObj.Elem().FieldByName(item.Metadata.TypeIdentifier.GetSdkName()).Set(reflect.ValueOf(rType))
 
 			dataValue, errors := converter.ConvertToVapi(nestedObj.Interface(), childMeta.Metadata.BindingType)
 			if errors != nil {
@@ -720,7 +726,7 @@ func polyFlattenSchemaToStruct(ctx string, elem reflect.Value, key string, dataL
 
 		// set resource type
 		nestedObj.Elem().FieldByName(item.Metadata.TypeIdentifier.GetSdkName()).Set(reflect.ValueOf(
-			&item.Metadata.ResourceType))
+			item.Metadata.ResourceType))
 
 		dataValue, errors := converter.ConvertToVapi(nestedObj.Interface(), item.Metadata.BindingType)
 		if errors != nil {
