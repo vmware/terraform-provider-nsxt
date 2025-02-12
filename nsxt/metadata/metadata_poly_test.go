@@ -17,7 +17,7 @@ import (
 type testCatStruct struct {
 	Age  *int64
 	Name *string
-	Type *string
+	Type string
 }
 
 func testCatStructBindingType() vapiBindings_.BindingType {
@@ -27,7 +27,7 @@ func testCatStructBindingType() vapiBindings_.BindingType {
 	fieldNameMap["age"] = "Age"
 	fields["name"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
 	fieldNameMap["name"] = "Name"
-	fields["type"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["type"] = vapiBindings_.NewStringType()
 	fieldNameMap["type"] = "Type"
 	var validators = []vapiBindings_.Validator{}
 	return vapiBindings_.NewStructType("com.vmware.nsx.fake.cat", fields,
@@ -41,7 +41,7 @@ func TestCatStructBinding(t *testing.T) {
 	obj := testCatStruct{
 		Age:  &age,
 		Name: &name,
-		Type: &rType,
+		Type: rType,
 	}
 	converter := vapiBindings_.NewTypeConverter()
 	dv, err := converter.ConvertToVapi(obj, testCatStructBindingType())
@@ -54,7 +54,7 @@ func TestCatStructBinding(t *testing.T) {
 type testCoffeeStruct struct {
 	IsDecaf *bool
 	Name    *string
-	Type    *string
+	Type    string
 }
 
 func testCoffeeStructBindingType() vapiBindings_.BindingType {
@@ -64,7 +64,7 @@ func testCoffeeStructBindingType() vapiBindings_.BindingType {
 	fieldNameMap["is_decaf"] = "IsDecaf"
 	fields["name"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
 	fieldNameMap["name"] = "Name"
-	fields["type"] = vapiBindings_.NewOptionalType(vapiBindings_.NewStringType())
+	fields["type"] = vapiBindings_.NewStringType()
 	fieldNameMap["type"] = "Type"
 	var validators = []vapiBindings_.Validator{}
 	return vapiBindings_.NewStructType("com.vmware.nsx.fake.coffee", fields,
@@ -78,7 +78,7 @@ func TestCoffeeStructBinding(t *testing.T) {
 	obj := testCoffeeStruct{
 		IsDecaf: &decaf,
 		Name:    &name,
-		Type:    &rType,
+		Type:    rType,
 	}
 	converter := vapiBindings_.NewTypeConverter()
 	dv, err := converter.ConvertToVapi(obj, testCoffeeStructBindingType())
@@ -230,7 +230,7 @@ func TestPolyStructToNestedSchema(t *testing.T) {
 		catObj := testCatStruct{
 			Age:  &age,
 			Name: &name,
-			Type: &rType,
+			Type: rType,
 		}
 		obj := testPolyStruct{}
 		converter := vapiBindings_.NewTypeConverter()
@@ -260,7 +260,7 @@ func TestPolyStructToNestedSchema(t *testing.T) {
 		coffeeObj := testCoffeeStruct{
 			IsDecaf: &isDecaf,
 			Name:    &name,
-			Type:    &rType,
+			Type:    rType,
 		}
 		obj := testPolyStruct{}
 		converter := vapiBindings_.NewTypeConverter()
@@ -293,12 +293,12 @@ func TestPolyStructToNestedSchema(t *testing.T) {
 		catObj := testCatStruct{
 			Age:  &age,
 			Name: &catName,
-			Type: &catResType,
+			Type: catResType,
 		}
 		coffeeObj := testCoffeeStruct{
 			IsDecaf: &isDecaf,
 			Name:    &coffeeName,
-			Type:    &coffeeResType,
+			Type:    coffeeResType,
 		}
 		obj := testPolyListStruct{
 			PolyList: make([]*data.StructValue, 2),
@@ -345,12 +345,12 @@ func TestPolyStructToNestedSchema(t *testing.T) {
 		catObj := testCatStruct{
 			Age:  &age,
 			Name: &catName,
-			Type: &catResType,
+			Type: catResType,
 		}
 		coffeeObj := testCoffeeStruct{
 			IsDecaf: &isDecaf,
 			Name:    &coffeeName,
-			Type:    &coffeeResType,
+			Type:    coffeeResType,
 		}
 		obj := testPolyListStruct{
 			PolyList: make([]*data.StructValue, 2),
@@ -416,7 +416,7 @@ func TestNestedSchemaToPolyStruct(t *testing.T) {
 		assert.Nil(t, errors, "unexpected error calling ConvertToGolang")
 		assert.Equal(t, "matcha", *obs.(testCatStruct).Name)
 		assert.Equal(t, int64(1), *obs.(testCatStruct).Age)
-		assert.Equal(t, "FakeCat", *obs.(testCatStruct).Type)
+		assert.Equal(t, "FakeCat", obs.(testCatStruct).Type)
 	})
 
 	t.Run("coffee struct", func(t *testing.T) {
@@ -444,7 +444,7 @@ func TestNestedSchemaToPolyStruct(t *testing.T) {
 		assert.Nil(t, errors, "unexpected error calling ConvertToGolang")
 		assert.Equal(t, "latte", *obs.(testCoffeeStruct).Name)
 		assert.Equal(t, true, *obs.(testCoffeeStruct).IsDecaf)
-		assert.Equal(t, "FakeCoffee", *obs.(testCoffeeStruct).Type)
+		assert.Equal(t, "FakeCoffee", obs.(testCoffeeStruct).Type)
 	})
 
 	t.Run("mixed list", func(t *testing.T) {
@@ -481,12 +481,12 @@ func TestNestedSchemaToPolyStruct(t *testing.T) {
 		assert.Nil(t, errors, "unexpected error calling ConvertToGolang")
 		assert.Equal(t, "latte", *coffee.(testCoffeeStruct).Name)
 		assert.Equal(t, true, *coffee.(testCoffeeStruct).IsDecaf)
-		assert.Equal(t, "FakeCoffee", *coffee.(testCoffeeStruct).Type)
+		assert.Equal(t, "FakeCoffee", coffee.(testCoffeeStruct).Type)
 		cat, errors := converter.ConvertToGolang(obj.PolyList[1], testCatStructBindingType())
 		assert.Nil(t, errors, "unexpected error calling ConvertToGolang")
 		assert.Equal(t, "matcha", *cat.(testCatStruct).Name)
 		assert.Equal(t, int64(1), *cat.(testCatStruct).Age)
-		assert.Equal(t, "FakeCat", *cat.(testCatStruct).Type)
+		assert.Equal(t, "FakeCat", cat.(testCatStruct).Type)
 	})
 
 	t.Run("mixed set", func(t *testing.T) {
@@ -525,13 +525,13 @@ func TestNestedSchemaToPolyStruct(t *testing.T) {
 				assert.Nil(t, errors, "unexpected error calling ConvertToGolang")
 				assert.Equal(t, "oolong", *cat.(testCatStruct).Name)
 				assert.Equal(t, int64(2), *cat.(testCatStruct).Age)
-				assert.Equal(t, "FakeCat", *cat.(testCatStruct).Type)
+				assert.Equal(t, "FakeCat", cat.(testCatStruct).Type)
 			} else {
 				coffee, errors := converter.ConvertToGolang(item, testCoffeeStructBindingType())
 				assert.Nil(t, errors, "unexpected error calling ConvertToGolang")
 				assert.Equal(t, "mocha", *coffee.(testCoffeeStruct).Name)
 				assert.Equal(t, false, *coffee.(testCoffeeStruct).IsDecaf)
-				assert.Equal(t, "FakeCoffee", *coffee.(testCoffeeStruct).Type)
+				assert.Equal(t, "FakeCoffee", coffee.(testCoffeeStruct).Type)
 			}
 		}
 	})
@@ -643,7 +643,7 @@ func TestPolyStructToFlattenSchema(t *testing.T) {
 		catObj := testCatStruct{
 			Age:  &age,
 			Name: &name,
-			Type: &rType,
+			Type: rType,
 		}
 		obj := testPolyStruct{}
 		converter := vapiBindings_.NewTypeConverter()
@@ -671,7 +671,7 @@ func TestPolyStructToFlattenSchema(t *testing.T) {
 		coffeeObj := testCoffeeStruct{
 			IsDecaf: &isDecaf,
 			Name:    &name,
-			Type:    &rType,
+			Type:    rType,
 		}
 		obj := testPolyStruct{}
 		converter := vapiBindings_.NewTypeConverter()
@@ -702,12 +702,12 @@ func TestPolyStructToFlattenSchema(t *testing.T) {
 		catObj := testCatStruct{
 			Age:  &age,
 			Name: &catName,
-			Type: &catResType,
+			Type: catResType,
 		}
 		coffeeObj := testCoffeeStruct{
 			IsDecaf: &isDecaf,
 			Name:    &coffeeName,
-			Type:    &coffeeResType,
+			Type:    coffeeResType,
 		}
 		obj := testPolyListStruct{
 			PolyList: make([]*data.StructValue, 2),
@@ -762,7 +762,7 @@ func TestFlattenSchemaToPolyStruct(t *testing.T) {
 		assert.Nil(t, errors, "unexpected error calling ConvertToGolang")
 		assert.Equal(t, "matcha", *obs.(testCatStruct).Name)
 		assert.Equal(t, int64(1), *obs.(testCatStruct).Age)
-		assert.Equal(t, "FakeCat", *obs.(testCatStruct).Type)
+		assert.Equal(t, "FakeCat", obs.(testCatStruct).Type)
 	})
 
 	t.Run("error on assigning struct multiple times", func(t *testing.T) {
@@ -818,13 +818,13 @@ func TestFlattenSchemaToPolyStruct(t *testing.T) {
 				assert.Nil(t, errors, "unexpected error calling ConvertToGolang")
 				assert.Equal(t, "oolong", *cat.(testCatStruct).Name)
 				assert.Equal(t, int64(2), *cat.(testCatStruct).Age)
-				assert.Equal(t, "FakeCat", *cat.(testCatStruct).Type)
+				assert.Equal(t, "FakeCat", cat.(testCatStruct).Type)
 			} else {
 				coffee, errors := converter.ConvertToGolang(item, testCoffeeStructBindingType())
 				assert.Nil(t, errors, "unexpected error calling ConvertToGolang")
 				assert.Equal(t, "mocha", *coffee.(testCoffeeStruct).Name)
 				assert.Equal(t, true, *coffee.(testCoffeeStruct).IsDecaf)
-				assert.Equal(t, "FakeCoffee", *coffee.(testCoffeeStruct).Type)
+				assert.Equal(t, "FakeCoffee", coffee.(testCoffeeStruct).Type)
 			}
 		}
 	})
