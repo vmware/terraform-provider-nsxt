@@ -1127,3 +1127,18 @@
     - Delete
     - Patch
     - Update
+- api_packages:
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/infra
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Local
+    - client: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/orgs/projects/infra
+      model: github.com/vmware/vsphere-automation-sdk-go/services/nsxt/model
+      type: Multitenancy
+  model_name: L7AccessProfile
+  obj_name: L7AccessProfile
+  supported_method:
+    - New
+    - Get
+    - Delete
+    - Patch
+    - Update
