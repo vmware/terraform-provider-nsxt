@@ -546,6 +546,7 @@ type upgradeStatusAndDetail struct {
 func getUpgradeStatus(statusClient upgrade.StatusSummaryClient, component *string) (*upgradeStatusAndDetail, error) {
 	status, err := statusClient.Get(component, nil, nil)
 	if err != nil {
+		log.Printf("[DEBUG] Failed to get status: error is %v", err)
 		return nil, err
 	}
 	if component == nil {
@@ -576,7 +577,7 @@ func waitUpgradeForStatus(upgradeClientSet *upgradeClientSet, component *string,
 				return nil, model.ComponentUpgradeStatus_STATUS_IN_PROGRESS, nil
 			}
 			if err != nil {
-				return status, model.ComponentUpgradeStatus_STATUS_FAILED, err
+				return nil, model.ComponentUpgradeStatus_STATUS_FAILED, err
 			}
 			log.Printf("[DEBUG] Current upgrade status: %s", status.Status)
 			// Status retrieval was successful but upgrade has failed - report an error
@@ -593,6 +594,7 @@ func waitUpgradeForStatus(upgradeClientSet *upgradeClientSet, component *string,
 	if err != nil {
 		statusDetail := ""
 		if statusI != nil {
+			log.Printf("[DEBUG] returned status from WaitForState is not nil, value is %v", statusI)
 			status := statusI.(*upgradeStatusAndDetail)
 			statusDetail = fmt.Sprintf(" Current status: %s. Details: %s", status.Status, status.Detail)
 		}
