@@ -28,7 +28,7 @@ linters:
     - unused            # Detects unused variables, constants, etc.
 
 run:
-  deadline: 30m # Sets the maximum time limit for the linter run.
+  timeout: 30m # Sets the maximum time limit for the linter run.
 
 output:
   formats:
