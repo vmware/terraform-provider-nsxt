@@ -89,7 +89,10 @@ The following arguments are supported:
     * `post_upgrade_check` - (Optional) Flag to indicate whether run post upgrade check after upgrade. Default: True.
     * `stop_on_error` - (Optional) Flag to indicate whether to pause the upgrade plan execution when an error occurs. Default: False.
 * `finalize_upgrade_setting` - (Optional) FINALIZE_UPGRADE component upgrade plan setting.
-    * `enabled` - (Optional) Finalize upgrade after completion of all the components' upgrade is complete. Default: True.   
+    * `enabled` - (Optional) Finalize upgrade after completion of all the components' upgrade is complete. Default: True.
+* `timeout` - (Optional) Upgrade status check timeout in seconds. Default: 3600 seconds.
+* `interval` - (Optional) Interval to check upgrade status in seconds. Default: 30 seconds.
+* `delay` - (Optional) Initial delay to start upgrade status checks in seconds. Default: 300 seconds. 
 
 ## Argument Reference
 
