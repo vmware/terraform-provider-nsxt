@@ -45,7 +45,6 @@ var accTestPolicyLBVirtualServerUpdateAttributes = map[string]string{
 	"access_list_control_action":  "DROP",
 }
 
-// TODO: add service_path to the test when backend bug is fixed
 func TestAccResourceNsxtPolicyLBVirtualServer_basic(t *testing.T) {
 	testResourceName := "nsxt_policy_lb_virtual_server.test"
 
@@ -250,6 +249,59 @@ func TestAccResourceNsxtPolicyLBVirtualServer_withAccessList(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccNsxtPolicyLBVirtualServerExists(testResourceName),
 					resource.TestCheckResourceAttr(testResourceName, "access_list_control.#", "0"),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+					resource.TestCheckResourceAttr(testResourceName, "pool_path", ""),
+				),
+			},
+		},
+	})
+}
+
+func TestAccResourceNsxtPolicyLBVirtualServer_udp(t *testing.T) {
+	testResourceName := "nsxt_policy_lb_virtual_server.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccOnlyLocalManager(t); testAccPreCheck(t) },
+		Providers: testAccProviders,
+		CheckDestroy: func(state *terraform.State) error {
+			return testAccNsxtPolicyLBVirtualServerCheckDestroy(state, accTestPolicyLBVirtualServerCreateAttributes["display_name"])
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyLBVirtualServerUdp(true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyLBVirtualServerExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyLBVirtualServerCreateAttributes["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "ip_address", accTestPolicyLBVirtualServerCreateAttributes["ip_address"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "pool_path"),
+					resource.TestCheckResourceAttr(testResourceName, "ports.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "ports.0", accTestPolicyLBVirtualServerCreateAttributes["ports"]),
+					resource.TestCheckResourceAttr(testResourceName, "log_significant_event_only", accTestPolicyLBVirtualServerCreateAttributes["log_significant_event_only"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyLBVirtualServerUdp(false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyLBVirtualServerExists(testResourceName),
+					resource.TestCheckResourceAttr(testResourceName, "display_name", accTestPolicyLBVirtualServerUpdateAttributes["display_name"]),
+					resource.TestCheckResourceAttr(testResourceName, "ip_address", accTestPolicyLBVirtualServerUpdateAttributes["ip_address"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "pool_path"),
+					resource.TestCheckResourceAttr(testResourceName, "ports.#", "1"),
+					resource.TestCheckResourceAttr(testResourceName, "ports.0", accTestPolicyLBVirtualServerUpdateAttributes["ports"]),
+					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
+				),
+			},
+			{
+				Config: testAccNsxtPolicyLBVirtualServerMinimalistic(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccNsxtPolicyLBVirtualServerExists(testResourceName),
 					resource.TestCheckResourceAttrSet(testResourceName, "nsx_id"),
 					resource.TestCheckResourceAttrSet(testResourceName, "path"),
 					resource.TestCheckResourceAttrSet(testResourceName, "revision"),
@@ -875,6 +927,44 @@ resource "nsxt_policy_lb_virtual_server" "test" {
 data "nsxt_policy_realization_info" "realization_info" {
   path = nsxt_policy_lb_virtual_server.test.path
 }`, attrMap["display_name"], attrMap["ip_address"], attrMap["ports"], attrMap["log_significant_event_only"], attrMap["access_list_control_action"], attrMap["access_list_control_enabled"])
+}
+
+func testAccNsxtPolicyLBVirtualServerUdp(createFlow bool) string {
+	var attrMap map[string]string
+	if createFlow {
+		attrMap = accTestPolicyLBVirtualServerCreateAttributes
+	} else {
+		attrMap = accTestPolicyLBVirtualServerUpdateAttributes
+	}
+	return fmt.Sprintf(`
+data "nsxt_policy_lb_app_profile" "default_udp"{
+  type = "UDP"
+  display_name = "default-udp-lb-app-profile"
+}
+
+data "nsxt_policy_lb_persistence_profile" "default" {
+  type = "SOURCE_IP"
+}
+
+resource "nsxt_policy_lb_pool" "pool" {
+  display_name = "terraform-vs-test-pool"
+}
+
+resource "nsxt_policy_lb_virtual_server" "test" {
+  display_name               = "%s"
+  access_log_enabled         = true
+  application_profile_path   = data.nsxt_policy_lb_app_profile.default_udp.path
+  enabled                    = true
+  ip_address                 = "%s"
+  ports                      = ["%s"]
+  pool_path                  = nsxt_policy_lb_pool.pool.path
+  persistence_profile_path   = data.nsxt_policy_lb_persistence_profile.default.path
+  log_significant_event_only = %s
+}
+
+data "nsxt_policy_realization_info" "realization_info" {
+  path = nsxt_policy_lb_virtual_server.test.path
+}`, attrMap["display_name"], attrMap["ip_address"], attrMap["ports"], attrMap["log_significant_event_only"])
 }
 
 func testAccNsxtPolicyLBVirtualServerWithRules(createFlow bool) string {
