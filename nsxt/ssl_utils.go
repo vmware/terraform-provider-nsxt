@@ -26,8 +26,7 @@ func getSSLCiphersSchema() *schema.Schema {
 		Type:        schema.TypeSet,
 		Description: "Supported SSL cipher list",
 		Elem: &schema.Schema{
-			Type:         schema.TypeString,
-			ValidateFunc: validateSSLCiphers(),
+			Type: schema.TypeString,
 		},
 		Optional: true,
 		Computed: true,
