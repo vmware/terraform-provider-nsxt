@@ -486,6 +486,7 @@ func Provider() *schema.Provider {
 			"nsxt_edge_high_availability_profile":                      resourceNsxtEdgeHighAvailabilityProfile(),
 			"nsxt_policy_host_transport_node_collection":               resourceNsxtPolicyHostTransportNodeCollection(),
 			"nsxt_policy_lb_client_ssl_profile":                        resourceNsxtPolicyLBClientSslProfile(),
+			"nsxt_policy_lb_server_ssl_profile":                        resourceNsxtPolicyLBServerSslProfile(),
 			"nsxt_policy_lb_http_application_profile":                  resourceNsxtPolicyLBHttpApplicationProfile(),
 			"nsxt_policy_lb_fast_tcp_application_profile":              resourceNsxtPolicyLBFastTcpApplicationProfile(),
 			"nsxt_policy_lb_fast_udp_application_profile":              resourceNsxtPolicyLBFastUdpApplicationProfile(),
