@@ -55,9 +55,10 @@ var supportedMaintenanceModeConfigVsanMode = []string{"evacuate_all_data", "ensu
 
 var (
 	// Default waiting setup in seconds
-	defaultUpgradeStatusCheckInterval = 30
-	defaultUpgradeStatusCheckTimeout  = 3600
-	defaultUpgradeStatusCheckDelay    = 300
+	defaultUpgradeStatusCheckInterval   = 30
+	defaultUpgradeStatusCheckTimeout    = 3600
+	defaultUpgradeStatusCheckDelay      = 300
+	defaultUpgradeStatusCheckMaxRetries = 100
 )
 
 var staticComponentUpgradeStatus = []string{
@@ -80,9 +81,10 @@ type upgradeClientSet struct {
 	UpgradeClient     nsx.UpgradeClient
 	GroupStatusClient upgrade.UpgradeUnitGroupsStatusClient
 
-	Timeout  int
-	Delay    int
-	Interval int
+	Timeout    int
+	Delay      int
+	Interval   int
+	MaxRetries int
 }
 
 func getTargetVersion(m interface{}) (string, error) {
@@ -114,9 +116,10 @@ func newUpgradeClientSet(connector client.Connector, d *schema.ResourceData) *up
 		UpgradeClient:     nsx.NewUpgradeClient(connector),
 		GroupStatusClient: upgrade.NewUpgradeUnitGroupsStatusClient(connector),
 
-		Timeout:  d.Get("timeout").(int),
-		Delay:    d.Get("delay").(int),
-		Interval: d.Get("interval").(int),
+		Timeout:    d.Get("timeout").(int),
+		Delay:      d.Get("delay").(int),
+		Interval:   d.Get("interval").(int),
+		MaxRetries: d.Get("max_retries").(int),
 	}
 }
 
@@ -173,6 +176,12 @@ func resourceNsxtUpgradeRun() *schema.Resource {
 				Optional:     true,
 				Default:      defaultUpgradeStatusCheckDelay,
 				ValidateFunc: validation.IntAtLeast(0),
+			},
+			"max_retries": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Default:      defaultUpgradeStatusCheckMaxRetries,
+				ValidateFunc: validation.IntAtLeast(1),
 			},
 			"upgrade_group_plan": getUpgradeGroupPlanSchema(),
 			"state": {
@@ -586,9 +595,10 @@ func waitUpgradeForStatus(upgradeClientSet *upgradeClientSet, component *string,
 			}
 			return status, status.Status, nil
 		},
-		Timeout:      time.Duration(upgradeClientSet.Timeout) * time.Second,
-		PollInterval: time.Duration(upgradeClientSet.Interval) * time.Second,
-		Delay:        time.Duration(upgradeClientSet.Delay) * time.Second,
+		Timeout:        time.Duration(upgradeClientSet.Timeout) * time.Second,
+		PollInterval:   time.Duration(upgradeClientSet.Interval) * time.Second,
+		Delay:          time.Duration(upgradeClientSet.Delay) * time.Second,
+		NotFoundChecks: upgradeClientSet.MaxRetries,
 	}
 	statusI, err := stateConf.WaitForState()
 	if err != nil {
