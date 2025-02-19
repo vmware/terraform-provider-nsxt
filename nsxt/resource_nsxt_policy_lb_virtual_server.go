@@ -525,7 +525,7 @@ func getPolicyLbRuleHTTPSslConditionSchema() *schema.Schema {
 					Description: "Supported SSL ciphers",
 					Optional:    true,
 					Elem: &schema.Schema{
-						Type:         schema.TypeString,
+						Type: schema.TypeString,
 					},
 				},
 				"session_reused": {
@@ -540,8 +540,8 @@ func getPolicyLbRuleHTTPSslConditionSchema() *schema.Schema {
 					ValidateFunc: validation.StringInSlice(lbHTTPSslConditionUsedProtocolValues, false),
 				},
 				"used_ssl_cipher": {
-					Type:         schema.TypeString,
-					Optional:     true,
+					Type:     schema.TypeString,
+					Optional: true,
 				},
 			},
 		},
