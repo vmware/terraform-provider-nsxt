@@ -1084,6 +1084,9 @@ func initCommonConfig(d *schema.ResourceData) commonProviderConfig {
 	maxRetries := d.Get("max_retries").(int)
 	retryMinDelay := d.Get("retry_min_delay").(int)
 	retryMaxDelay := d.Get("retry_max_delay").(int)
+	if retryMaxDelay < retryMinDelay {
+		retryMaxDelay = retryMinDelay + 1
+	}
 	username := d.Get("username").(string)
 	password := d.Get("password").(string)
 
