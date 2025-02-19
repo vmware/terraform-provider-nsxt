@@ -649,7 +649,7 @@ func resourceNsxtPolicyTier0GatewayBGPConfigSchemaToStruct(cfg interface{}, isVr
 	return routeStruct
 }
 
-func initSingleTier0GatewayLocaleService(context utl.SessionContext, d *schema.ResourceData, children []*data.StructValue, connector client.Connector) (*data.StructValue, error) {
+func initImplicitTier0GatewayLocaleService(context utl.SessionContext, d *schema.ResourceData, children []*data.StructValue, connector client.Connector) (*data.StructValue, error) {
 
 	edgeClusterPath := d.Get("edge_cluster_path").(string)
 	var serviceStruct *model.LocaleServices
@@ -679,7 +679,7 @@ func initSingleTier0GatewayLocaleService(context utl.SessionContext, d *schema.R
 		serviceStruct.Children = children
 	}
 
-	log.Printf("[DEBUG] Using Locale Service with ID %s and Edge Cluster %v", *serviceStruct.Id, serviceStruct.EdgeClusterPath)
+	log.Printf("[DEBUG] Using Locale Service with ID %s and Edge Cluster %v", *serviceStruct.Id, edgeClusterPath)
 
 	return initChildLocaleService(serviceStruct, false)
 }
@@ -822,7 +822,7 @@ func policyTier0GatewayResourceToInfraStruct(context utl.SessionContext, d *sche
 			}
 
 			var err error
-			dataValue, err := initSingleTier0GatewayLocaleService(context, d, lsChildren, connector)
+			dataValue, err := initImplicitTier0GatewayLocaleService(context, d, lsChildren, connector)
 			if err != nil {
 				return infraStruct, err
 			}

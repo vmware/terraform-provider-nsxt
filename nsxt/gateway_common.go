@@ -82,7 +82,6 @@ func getPolicyEdgeClusterPathSchema() *schema.Schema {
 		Description:  "The path of the edge cluster connected to this gateway",
 		Optional:     true,
 		ValidateFunc: validatePolicyPath(),
-		Computed:     true,
 	}
 }
 

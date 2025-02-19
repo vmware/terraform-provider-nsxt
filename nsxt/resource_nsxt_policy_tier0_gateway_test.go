@@ -943,10 +943,10 @@ data "nsxt_policy_edge_cluster" "EC" {
 }
 
 resource "nsxt_policy_tier0_gateway" "test" {
-  display_name = "%s"
+  display_name      = "%s"
   edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
   redistribution_config {
-    enabled  = false
+    enabled      = false
     ospf_enabled = false
     rule {
         name = "test-rule-1"
@@ -967,10 +967,10 @@ data "nsxt_policy_edge_cluster" "EC" {
 }
 
 resource "nsxt_policy_tier0_gateway" "test" {
-  display_name = "%s"
+  display_name      = "%s"
   edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
   redistribution_config {
-    enabled  = false
+    enabled      = false
     ospf_enabled = false
     rule {
         name = "test-rule-1"
@@ -989,8 +989,13 @@ data "nsxt_policy_realization_info" "realization_info" {
 
 func testAccNsxtPolicyTier0Update2WithRedistribution(name string) string {
 	return fmt.Sprintf(`
-resource "nsxt_policy_tier0_gateway" "test" {
+data "nsxt_policy_edge_cluster" "EC" {
   display_name = "%s"
+}
+resource "nsxt_policy_tier0_gateway" "test" {
+  display_name      = "%s"
+  edge_cluster_path = data.nsxt_policy_edge_cluster.EC.path
+
   redistribution_config {
     enabled  = false
     ospf_enabled = true
@@ -999,5 +1004,5 @@ resource "nsxt_policy_tier0_gateway" "test" {
 
 data "nsxt_policy_realization_info" "realization_info" {
   path = nsxt_policy_tier0_gateway.test.path
-}`, name)
+}`, getEdgeClusterName(), name)
 }

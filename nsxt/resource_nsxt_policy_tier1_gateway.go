@@ -343,7 +343,7 @@ func resourceNsxtPolicyTier1GatewaySetVersionDependentAttrs(d *schema.ResourceDa
 
 }
 
-func initSingleTier1GatewayLocaleService(context utl.SessionContext, d *schema.ResourceData, connector client.Connector) (*data.StructValue, error) {
+func initImplicitTier1GatewayLocaleService(context utl.SessionContext, d *schema.ResourceData, connector client.Connector) (*data.StructValue, error) {
 
 	edgeClusterPath := d.Get("edge_cluster_path").(string)
 	var serviceStruct *model.LocaleServices
@@ -363,13 +363,16 @@ func initSingleTier1GatewayLocaleService(context utl.SessionContext, d *schema.R
 			ResourceType: &lsType,
 		}
 	}
+	// clear preferred edge nodes if exist
+	serviceStruct.PreferredEdgePaths = nil
 	if len(edgeClusterPath) > 0 {
 		serviceStruct.EdgeClusterPath = &edgeClusterPath
+		log.Printf("[DEBUG] Using Locale Service with ID %s and Edge Cluster %v", *serviceStruct.Id, edgeClusterPath)
 	} else {
 		serviceStruct.EdgeClusterPath = nil
+		log.Printf("[DEBUG] Using Locale Service with ID %s no Edge Cluster", *serviceStruct.Id)
 	}
 
-	log.Printf("[DEBUG] Using Locale Service with ID %s and Edge Cluster %v", *serviceStruct.Id, serviceStruct.EdgeClusterPath)
 	return initChildLocaleService(serviceStruct, false)
 }
 
@@ -462,7 +465,7 @@ func policyTier1GatewayResourceToInfraStruct(context utl.SessionContext, d *sche
 
 	// edge cluster is specified using edge_cluster_path on local manager
 	if useImplicitLocaleService(d) && context.ClientType != utl.Global {
-		dataValue, err := initSingleTier1GatewayLocaleService(context, d, connector)
+		dataValue, err := initImplicitTier1GatewayLocaleService(context, d, connector)
 		if err != nil {
 			return infraStruct, err
 		}
