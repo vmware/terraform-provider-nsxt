@@ -509,7 +509,7 @@ func getSegmentSubnetDhcpConfigFromSchema(schemaConfig map[string]interface{}) (
 
 	converter := bindings.NewTypeConverter()
 
-	if len(dhcpV4Config) > 0 {
+	if len(dhcpV4Config) > 0 && dhcpV4Config[0] != nil {
 		dhcpConfig := dhcpV4Config[0].(map[string]interface{})
 		serverAddress := dhcpConfig["server_address"].(string)
 		dnsServers := dhcpConfig["dns_servers"].([]interface{})
@@ -538,7 +538,7 @@ func getSegmentSubnetDhcpConfigFromSchema(schemaConfig map[string]interface{}) (
 		return dataValue.(*data.StructValue), nil
 	}
 
-	if len(dhcpV6Config) > 0 {
+	if len(dhcpV6Config) > 0 && dhcpV6Config[0] != nil {
 		dhcpConfig := dhcpV6Config[0].(map[string]interface{})
 		serverAddress := dhcpConfig["server_address"].(string)
 		dnsServers := dhcpConfig["dns_servers"].([]interface{})
@@ -793,7 +793,7 @@ func policySegmentResourceToInfraStruct(context utl.SessionContext, id string, d
 	obj.Subnets = subnetStructs
 
 	advConfig := d.Get("advanced_config").([]interface{})
-	if len(advConfig) > 0 {
+	if len(advConfig) > 0 && advConfig[0] != nil {
 		advConfigMap := advConfig[0].(map[string]interface{})
 		connectivity := advConfigMap["connectivity"].(string)
 		hybrid := advConfigMap["hybrid"].(bool)
@@ -987,8 +987,10 @@ func nsxtPolicySegmentDiscoveryProfileSetInStruct(d *schema.ResourceData) (*data
 	revision := int64(0)
 	shouldDelete := false
 	oldProfiles, newProfiles := d.GetChange("discovery_profile")
-	if len(newProfiles.([]interface{})) > 0 {
-		profileMap := newProfiles.([]interface{})[0].(map[string]interface{})
+	newProfilesList := newProfiles.([]interface{})
+
+	if len(newProfilesList) > 0 && newProfilesList[0] != nil {
+		profileMap := newProfilesList[0].(map[string]interface{})
 
 		ipDiscoveryProfilePath = profileMap["ip_discovery_profile_path"].(string)
 		macDiscoveryProfilePath = profileMap["mac_discovery_profile_path"].(string)
@@ -1046,9 +1048,10 @@ func nsxtPolicySegmentQosProfileSetInStruct(d *schema.ResourceData) (*data.Struc
 	qosProfilePath := ""
 	revision := int64(0)
 	oldProfiles, newProfiles := d.GetChange("qos_profile")
+	newProfilesList := newProfiles.([]interface{})
 	shouldDelete := false
-	if len(newProfiles.([]interface{})) > 0 {
-		profileMap := newProfiles.([]interface{})[0].(map[string]interface{})
+	if len(newProfilesList) > 0 && newProfilesList[0] != nil {
+		profileMap := newProfilesList[0].(map[string]interface{})
 
 		qosProfilePath = profileMap["qos_profile_path"].(string)
 		if len(profileMap["binding_map_path"].(string)) > 0 {
@@ -1103,9 +1106,10 @@ func nsxtPolicySegmentSecurityProfileSetInStruct(d *schema.ResourceData) (*data.
 	securityProfilePath := ""
 	revision := int64(0)
 	oldProfiles, newProfiles := d.GetChange("security_profile")
+	newProfilesList := newProfiles.([]interface{})
 	shouldDelete := false
-	if len(newProfiles.([]interface{})) > 0 {
-		profileMap := newProfiles.([]interface{})[0].(map[string]interface{})
+	if len(newProfilesList) > 0 && newProfilesList[0] != nil {
+		profileMap := newProfilesList[0].(map[string]interface{})
 
 		spoofguardProfilePath = profileMap["spoofguard_profile_path"].(string)
 		securityProfilePath = profileMap["security_profile_path"].(string)

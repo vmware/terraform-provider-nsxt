@@ -185,7 +185,7 @@ func getIdsProfileCriteriaFromSchema(d *schema.ResourceData) ([]*data.StructValu
 	var result []*data.StructValue
 
 	criteria := d.Get("criteria").([]interface{})
-	if len(criteria) == 0 {
+	if len(criteria) == 0 || criteria[0] == nil {
 		return result, nil
 	}
 

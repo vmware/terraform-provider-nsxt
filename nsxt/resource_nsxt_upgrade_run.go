@@ -781,7 +781,7 @@ func getPostResetGroupIDFromPreResetList(groupID string, preResetGroupList model
 
 func updateComponentUpgradePlanSetting(settingClient plan.SettingsClient, d *schema.ResourceData, component string) error {
 	settingI := d.Get(componentToSettingKey[component]).([]interface{})
-	if len(settingI) == 0 {
+	if len(settingI) == 0 || settingI[0] == nil {
 		return nil
 	}
 
