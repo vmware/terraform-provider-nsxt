@@ -185,7 +185,7 @@ func getIdsProfileCriteriaFromSchema(d *schema.ResourceData) ([]*data.StructValu
 	var result []*data.StructValue
 
 	criteria := d.Get("criteria").([]interface{})
-	if len(criteria) == 0 {
+	if len(criteria) == 0 || criteria[0] == nil {
 		return result, nil
 	}
 
@@ -286,7 +286,10 @@ func setIdsProfileCriteriaInSchema(criteriaList []*data.StructValue, d *schema.R
 			criteriaMap["products_affected"] = criteria.FilterValue
 		}
 	}
-	schemaList = append(schemaList, criteriaMap)
+
+	if len(criteriaMap) > 0 {
+		schemaList = append(schemaList, criteriaMap)
+	}
 
 	return d.Set("criteria", schemaList)
 }

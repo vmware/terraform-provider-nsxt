@@ -174,7 +174,7 @@ func gatewayInterfaceVersionDepenantSet(d *schema.ResourceData, m interface{}, o
 
 func policyTier0GatewayInterfaceOspfSet(d *schema.ResourceData, m interface{}, obj *model.Tier0Interface) error {
 	ospfConfigs := d.Get("ospf").([]interface{})
-	if len(ospfConfigs) == 0 {
+	if len(ospfConfigs) == 0 || ospfConfigs[0] == nil {
 		return nil
 	}
 
