@@ -337,6 +337,13 @@ func resourceNsxtPolicyEdgeTransportNode() *schema.Resource {
 				ForceNew:    true,
 				Default:     "default",
 			},
+			"node_id": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				Description:   "Unique Id of the fabric node",
+				ConflictsWith: []string{"advanced_configuration", "appliance_config", "credentials", "form_factor", "management_interface", "vm_deployment_config"},
+			},
 			"advanced_configuration": getKeyValuePairListSchema(),
 			"appliance_config": {
 				Type:        schema.TypeList,
@@ -1180,6 +1187,42 @@ func getVMDeploymentConfigFromSchema(iVmDeploymentCfg interface{}) (*data.Struct
 	return nil, nil
 }
 
+func policyEdgeTransportNodePredeployedPatch(siteID, epID, etnID string, d *schema.ResourceData, m interface{}) error {
+
+	connector := getPolicyConnector(m)
+	etnClient := enforcement_points.NewEdgeTransportNodesClient(connector)
+
+	obj, err := etnClient.Get(siteID, epID, etnID)
+	if err != nil {
+		return err
+	}
+
+	description := d.Get("description").(string)
+	obj.Description = &description
+
+	displayName := d.Get("display_name").(string)
+	obj.DisplayName = &displayName
+
+	obj.Tags = getPolicyTagsFromSchema(d)
+
+	revision := int64(d.Get("revision").(int))
+	obj.Revision = &revision
+
+	failureDomainPath := d.Get("failure_domain_path").(string)
+	obj.FailureDomainPath = &failureDomainPath
+
+	hostname := d.Get("hostname").(string)
+	obj.Hostname = &hostname
+
+	switchSpec, err := getSwitchFromSchema(d.Get("switch"))
+	if err != nil {
+		return err
+	}
+	obj.SwitchSpec = switchSpec
+
+	return etnClient.Patch(siteID, epID, etnID, obj)
+}
+
 func policyEdgeTransportNodePatch(siteID, epID, etnID string, d *schema.ResourceData, m interface{}) error {
 
 	description := d.Get("description").(string)
@@ -1230,9 +1273,15 @@ func policyEdgeTransportNodePatch(siteID, epID, etnID string, d *schema.Resource
 
 func resourceNsxtPolicyEdgeTransportNodeCreate(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
+
 	id := d.Get("nsx_id").(string)
+	nodeID := d.Get("node_id").(string)
 	if id == "" {
-		id = newUUID()
+		if nodeID != "" {
+			id = nodeID
+		} else {
+			id = newUUID()
+		}
 	}
 	sitePath := d.Get("site_path").(string)
 	siteID := getResourceIDFromResourcePath(sitePath, "sites")
@@ -1243,19 +1292,31 @@ func resourceNsxtPolicyEdgeTransportNodeCreate(d *schema.ResourceData, m interfa
 	if epID == "" {
 		epID = getPolicyEnforcementPoint(m)
 	}
-	exists, err := resourceNsxtPolicyEdgeTransportNodeExists(siteID, epID, id, connector)
-	if err != nil {
-		return err
-	}
-	if exists {
-		return fmt.Errorf("resource with ID %s already exists", id)
-	}
 
-	// Create the resource using PATCH
-	log.Printf("[INFO] Creating PolicyEdgeTransportNode with ID %s under site %s enforcement point %s", id, siteID, epID)
-	err = policyEdgeTransportNodePatch(siteID, epID, id, d, m)
-	if err != nil {
-		return handleCreateError("EdgeTransportNode", id, err)
+	if nodeID == "" {
+		exists, err := resourceNsxtPolicyEdgeTransportNodeExists(siteID, epID, id, connector)
+		if err != nil {
+			return err
+		}
+		if exists {
+			return fmt.Errorf("resource with ID %s already exists", id)
+		}
+
+		// Create the resource using PATCH
+		log.Printf("[INFO] Creating PolicyEdgeTransportNode with ID %s under site %s enforcement point %s", id, siteID, epID)
+		err = policyEdgeTransportNodePatch(siteID, epID, id, d, m)
+		if err != nil {
+			return handleCreateError("EdgeTransportNode", id, err)
+		}
+	} else {
+		log.Printf("Adding a pre-existing Edge appliance")
+		if id != nodeID {
+			return fmt.Errorf("cannot have both nsx_id and node_id attribute set, with different values")
+		}
+		err := policyEdgeTransportNodePredeployedPatch(siteID, epID, nodeID, d, m)
+		if err != nil {
+			return err
+		}
 	}
 
 	d.SetId(id)
