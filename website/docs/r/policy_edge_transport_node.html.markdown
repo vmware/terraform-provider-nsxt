@@ -75,6 +75,33 @@ data "nsxt_policy_realization_info" "info" {
 **NOTE:** `data.vsphere_network`, `data.vsphere_compute_cluster`, `data.vsphere_datastore`, `data.vsphere_host` are
 obtained using [hashicorp/vsphere](https://registry.terraform.io/providers/hashicorp/vsphere/) provider.
 
+## Example Usage, with Edge Transport Node created externally and converted into a transport node using Terraform
+```hcl
+data "nsxt_policy_edge_node" "node1" {
+  display_name = "tf_edge_node"
+}
+
+resource "nsxt_policy_edge_transport_node" "test" {
+  node_id = data.nsxt_policy_edge_node.node1.id
+
+  hostname = "test-edge-12"
+  switch {
+    overlay_transport_zone_path = data.nsxt_policy_transport_zone.overlay_tz.path
+    pnic {
+      device_name = "fp-eth0"
+      uplink_name = "uplink1"
+    }
+    uplink_host_switch_profile_path = data.nsxt_policy_uplink_host_switch_profile.uplink_host_switch_profile.path
+    tunnel_endpoint {
+      ip_assignment {
+        static_ipv4_pool = data.nsxt_policy_ip_pool.ip_pool1.path
+      }
+    }
+    vlan_transport_zone_paths = [data.nsxt_policy_transport_zone.vlan_tz.path]
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -84,6 +111,7 @@ The following arguments are supported:
 * `tag` - (Optional) A list of scope + tag pairs to associate with this resource.
 * `site_path` - (Optional) The path of the site which the Edge Transport Node belongs to. `path` field of the existing `nsxt_policy_site` can be used here. Defaults to default site path.
 * `enforcement_point` - (Optional) The ID of enforcement point under given `site_path` to manage the Edge Transport Node. Defaults to default enforcement point.
+* `node_id` - (Optional) The id of a pre-deployed Edge appliance to be converted into a Policy Edge transport node.
 * `advanced_configuration` - (Optional) Array of additional specific properties for advanced or cloud-specific deployments in key-value format.
   * `key` - (Required) Key.
   * `value` - (Required) Value.
