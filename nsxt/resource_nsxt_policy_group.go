@@ -114,6 +114,7 @@ func getPolicyGroupSchema(withDomain bool) map[string]*schema.Schema {
 			Description:  "Indicates the group type",
 			ValidateFunc: validation.StringInSlice(groupTypeValues, false),
 			Optional:     true,
+			ForceNew:     true,
 		},
 		"criteria": {
 			Type:        schema.TypeList,
