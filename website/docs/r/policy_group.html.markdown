@@ -218,7 +218,7 @@ The following arguments are supported:
       * `distinguished_name` (Required) LDAP distinguished name (DN). A valid fully qualified distinguished name should be provided here. This value is valid only if it matches to exactly 1 LDAP object on the LDAP server.
       * `domain_base_distinguished_name` (Required) Identity (Directory) domain base distinguished name. This is the base distinguished name for the domain where this identity group resides. (e.g. dc=example,dc=com)
       * `sid` (Optional) Identity (Directory) Group SID (security identifier). A security identifier (SID) is a unique value of variable length used to identify a trustee. This field is only populated for Microsoft Active Directory identity store.
-* `group_type` - (Optional) One of `IPAddress`, `ANTREA`. Empty group type indicates a generic group. Attribute is supported with NSX version 3.2.0 and above.
+* `group_type` - (Optional) One of `IPAddress`, `ANTREA`. Empty group type indicates a generic group. Attribute is supported with NSX version 3.2.0 and above. Note that updating this attribute will trigger recreation of the group.
 
 
 ## Attributes Reference
