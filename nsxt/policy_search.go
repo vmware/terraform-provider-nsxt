@@ -8,6 +8,8 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"log"
+	"os"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/bindings"
@@ -114,18 +116,57 @@ func policyDataSourceResourceReadWithValidation(d *schema.ResourceData, connecto
 	return policyDataSourceResourceFilterAndSet(d, resultValues, resourceType)
 }
 
-func listPolicyResourcesByNameAndType(connector client.Connector, context utl.SessionContext, displayName string, resourceType string, additionalQuery *string) ([]*data.StructValue, error) {
-	query := fmt.Sprintf("resource_type:%s AND display_name:%s* AND marked_for_delete:false", resourceType, escapeSpecialCharacters(displayName))
-	switch context.ClientType {
-	case utl.Local:
-		return searchLMPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
-	case utl.Global:
-		return searchGMPolicyResources(connector, *buildPolicyResourcesQuery(&query, additionalQuery))
-	case utl.Multitenancy, utl.VPC:
-		return searchMultitenancyResources(connector, context, *buildPolicyResourcesQuery(&query, additionalQuery))
+var globalHash = map[string][]*data.StructValue{}
+
+func filterName(list []*data.StructValue, name string) ([]*data.StructValue, error) {
+	converter := bindings.NewTypeConverter()
+	var ret []*data.StructValue
+	for _, obj := range list {
+		dataValue, errors := converter.ConvertToGolang(obj, model.PolicyConfigResourceBindingType())
+		if len(errors) > 0 {
+			return nil, errors[0]
+		}
+		resource := dataValue.(model.PolicyConfigResource)
+
+		if strings.HasPrefix(*resource.DisplayName, name) {
+			ret = append(ret, obj)
+		}
 	}
 
-	return nil, errors.New("invalid ClientType")
+	return ret, nil
+}
+
+var cacheHitCount = 0
+var cacheMissCount = 0
+
+func listPolicyResourcesByNameAndType(connector client.Connector, context utl.SessionContext, displayName string, resourceType string, additionalQuery *string) ([]*data.StructValue, error) {
+	// query := fmt.Sprintf("resource_type:%s AND display_name:%s* AND marked_for_delete:false", resourceType, escapeSpecialCharacters(displayName))
+	query := fmt.Sprintf("resource_type:%s AND marked_for_delete:false", resourceType)
+	query2 := buildPolicyResourcesQuery(&query, additionalQuery)
+	if ret2, ok := globalHash[*query2]; ok {
+		cacheHitCount += 1
+		log.Printf("--------------XXXXXXXXXXXXXXXX hit %d miss %d pid %d\n", cacheHitCount, cacheMissCount, os.Getpid())
+		return filterName(ret2, displayName)
+	}
+	var ret []*data.StructValue
+	var err error
+	switch context.ClientType {
+	case utl.Local:
+		ret, err = searchLMPolicyResources(connector, *query2)
+	case utl.Global:
+		ret, err = searchGMPolicyResources(connector, *query2)
+	case utl.Multitenancy, utl.VPC:
+		ret, err = searchMultitenancyResources(connector, context, *query2)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	globalHash[*query2] = ret
+	cacheMissCount += 1
+	log.Printf("--------------XXXXXXXXXXXXXXXX hit %d miss %d pid %d\n", cacheHitCount, cacheMissCount, os.Getpid())
+	return filterName(ret, displayName)
 }
 
 func listInventoryResourcesByNameAndType(connector client.Connector, context utl.SessionContext, displayName string, resourceType string, additionalQuery *string) ([]*data.StructValue, error) {
