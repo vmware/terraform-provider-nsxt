@@ -116,7 +116,25 @@ func policyDataSourceResourceReadWithValidation(d *schema.ResourceData, connecto
 	return policyDataSourceResourceFilterAndSet(d, resultValues, resourceType)
 }
 
-var globalHash = map[string][]*data.StructValue{}
+var globalHash = map[string]map[string]*data.StructValue{}
+
+func makeMapFromList(list []*data.StructValue) map[string]*data.StructValue {
+	converter := bindings.NewTypeConverter()
+	ret := make(map[string]*data.StructValue)
+	for _, obj := range list {
+		dataValue, errors := converter.ConvertToGolang(obj, model.PolicyConfigResourceBindingType())
+		if len(errors) > 0 {
+			return nil
+		}
+		resource := dataValue.(model.PolicyConfigResource)
+
+		if resource.DisplayName != nil {
+			ret[*resource.DisplayName] = obj
+		}
+	}
+
+	return ret
+}
 
 func filterName(list []*data.StructValue, name string) ([]*data.StructValue, error) {
 	converter := bindings.NewTypeConverter()
@@ -146,7 +164,7 @@ func listPolicyResourcesByNameAndType(connector client.Connector, context utl.Se
 	if ret2, ok := globalHash[*query2]; ok {
 		cacheHitCount += 1
 		log.Printf("--------------XXXXXXXXXXXXXXXX hit %d miss %d pid %d\n", cacheHitCount, cacheMissCount, os.Getpid())
-		return filterName(ret2, displayName)
+		return []*data.StructValue{ret2[displayName]}, nil
 	}
 	var ret []*data.StructValue
 	var err error
@@ -163,10 +181,10 @@ func listPolicyResourcesByNameAndType(connector client.Connector, context utl.Se
 		return nil, err
 	}
 
-	globalHash[*query2] = ret
+	globalHash[*query2] = makeMapFromList(ret)
 	cacheMissCount += 1
 	log.Printf("--------------XXXXXXXXXXXXXXXX hit %d miss %d pid %d\n", cacheHitCount, cacheMissCount, os.Getpid())
-	return filterName(ret, displayName)
+	return []*data.StructValue{globalHash[*query2][displayName]}, nil
 }
 
 func listInventoryResourcesByNameAndType(connector client.Connector, context utl.SessionContext, displayName string, resourceType string, additionalQuery *string) ([]*data.StructValue, error) {
