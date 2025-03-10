@@ -24,6 +24,7 @@ var idsProfileSeverityValues = []string{
 	model.IdsProfile_PROFILE_SEVERITY_HIGH,
 	model.IdsProfile_PROFILE_SEVERITY_LOW,
 	model.IdsProfile_PROFILE_SEVERITY_CRITICAL,
+	model.IdsProfile_PROFILE_SEVERITY_SUSPICIOUS,
 }
 
 var idsProfileCvssValues = []string{
