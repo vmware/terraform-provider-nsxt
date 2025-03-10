@@ -80,7 +80,7 @@ The following arguments are supported:
 * `nsx_id` - (Optional) The NSX ID of this resource. If set, this ID will be used to create the resource.
 * `context` - (Optional) The context which the object belongs to
   * `project_id` - (Required) The ID of the project which the object belongs to
-* `severities` - (Required) List of profile severities, supported values are `LOW`, `MEDIUM`, `HIGH`, 'CRITICAL`.
+* `severities` - (Required) List of profile severities, supported values are `LOW`, `MEDIUM`, `HIGH`, `CRITICAL`, `SUSPICIOUS`.
 * `criteria` - (Optional) Filtering criteria for the IDS Profile.
   * `attack_types` - (Optional) List of supported attack types.
   * `attack_targets` - (Optional) List of supported attack targets. Please refer to example above to ensure correct formatting - in some versions, UI shows a different format than NSX expects.
