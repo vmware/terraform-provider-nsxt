@@ -434,6 +434,7 @@ func Provider() *schema.Provider {
 			"nsxt_policy_edge_cluster":                                 resourceNsxtPolicyEdgeCluster(),
 			"nsxt_policy_edge_high_availability_profile":               resourceNsxtPolicyEdgeHighAvailabilityProfile(),
 			"nsxt_policy_edge_transport_node":                          resourceNsxtPolicyEdgeTransportNode(),
+			"nsxt_policy_edge_transport_node_rtep":                     resourceNsxtPolicyEdgeTransportNodeRTEP(),
 			"nsxt_policy_evpn_config":                                  resourceNsxtPolicyEvpnConfig(),
 			"nsxt_policy_evpn_tenant":                                  resourceNsxtPolicyEvpnTenant(),
 			"nsxt_policy_evpn_tunnel_endpoint":                         resourceNsxtPolicyEvpnTunnelEndpoint(),
