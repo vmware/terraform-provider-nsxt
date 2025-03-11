@@ -66,7 +66,7 @@ The following arguments are supported:
 * `passive_monitor_path` - (Optional) Passive monitor to be associated with this pool.
 * `snat` - (Optional) Source NAT may be required to ensure traffic from the server destined to the client is received by the load balancer.
   * `type` - (Optional) SNAT type, one of `AUTOMAP`, `DISABLED`, `IPPOOL`. Default is `AUTOMAP`.
-  * `ip_pool_addresses` - (Optional) List of IP ranges or IP CIDRs to use for IPPOOL SNAT type.
+  * `ip_pool_addresses` - (Optional) List of IP ranges or IP CIDRs to use for `IPPOOL` SNAT type.
 * `tcp_multiplexing_enabled` - (Optional) Enable TCP multiplexing within the pool.
 * `tcp_multiplexing_number` - (Optional) The maximum number of TCP connections per pool that are idly kept alive for sending future client requests.
 

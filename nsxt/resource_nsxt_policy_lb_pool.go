@@ -315,6 +315,9 @@ func getPolicyPoolSnatFromSchema(d *schema.ResourceData) (*data.StructValue, err
 		}
 
 		addresses := snatMap["ip_pool_addresses"].([]interface{})
+		if snatType != "IPPOOL" && len(addresses) > 0 {
+			return nil, fmt.Errorf("ip_pool_addresses should only be specified to snat type IPPOOL")
+		}
 		var addressList []model.LBSnatIpElement
 		for _, address := range addresses {
 			addressStr := address.(string)
