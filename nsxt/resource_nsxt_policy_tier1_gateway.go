@@ -507,7 +507,7 @@ func policyTier1GatewayResourceToInfraStruct(context utl.SessionContext, d *sche
 	return infraStruct, nil
 }
 
-func validateTier1Type(d *schema.ResourceData) error {
+func validateTier1(d *schema.ResourceData) error {
 	connectivityType := d.Get("type").(string)
 	tier0Path := d.Get("tier0_path").(string)
 
@@ -515,6 +515,33 @@ func validateTier1Type(d *schema.ResourceData) error {
 		if len(tier0Path) == 0 {
 			return fmt.Errorf("tier0_path needs to be specified for gateway type %v", connectivityType)
 		}
+	}
+
+	haMode := d.Get("ha_mode").(string)
+	if haMode != "NONE" {
+		return nil
+	}
+
+	// validate edge cluster is not set for distributed only gateway
+	edgeClusterSet := false
+	edgeClusterPath := d.Get("edge_cluster_path").(string)
+	if len(edgeClusterPath) > 0 {
+		edgeClusterSet = true
+	} else {
+		localeServices := d.Get("locale_service").(*schema.Set).List()
+		for _, service := range localeServices {
+			serviceMap := service.(map[string]interface{})
+			if path, ok := serviceMap["edgeClusterPath"]; ok {
+				if len(path.(string)) > 0 {
+					edgeClusterSet = true
+					break
+				}
+			}
+
+		}
+	}
+	if edgeClusterSet {
+		return fmt.Errorf("when edge_cluster_path is specified, ha_mode can not be set to `NONE`")
 	}
 
 	return nil
@@ -529,7 +556,7 @@ func resourceNsxtPolicyTier1GatewayCreate(d *schema.ResourceData, m interface{})
 		return err
 	}
 
-	err = validateTier1Type(d)
+	err = validateTier1(d)
 	if err != nil {
 		return err
 	}
@@ -685,6 +712,10 @@ func resourceNsxtPolicyTier1GatewayUpdate(d *schema.ResourceData, m interface{})
 	id := d.Id()
 	if id == "" {
 		return fmt.Errorf("Error obtaining Tier1 id")
+	}
+
+	if err := validateTier1(d); err != nil {
+		return err
 	}
 
 	obj, err := policyTier1GatewayResourceToInfraStruct(getSessionContext(d, m), d, connector, id)
