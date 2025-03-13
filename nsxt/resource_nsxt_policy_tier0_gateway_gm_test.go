@@ -208,6 +208,10 @@ resource "nsxt_policy_tier0_gateway" "test" {
     primary_site_path = data.nsxt_policy_site.site2.path
     transit_subnet    = "%s"
   }
+
+  advanced_config {
+    forwarding_up_timer = 10
+  }
 }`, defaultTestResourceName, testAccGmGatewayIntersiteSubnet)
 }
 
