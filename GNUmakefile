@@ -18,6 +18,9 @@ build: fmtcheck
 build-coverage:
 	go build -cover -ldflags "-X github.com/vmware/terraform-provider-nsxt/nsxt.GitCommit=$(GIT_COMMIT)" -o $(BUILD_PATH)/bin
 
+build-debug:
+	go build -gcflags="all=-N -l"  -ldflags "-X github.com/vmware/terraform-provider-nsxt/nsxt.GitCommit=$(GIT_COMMIT)" -o $(BUILD_PATH)/bin
+
 test: fmtcheck
 	go test -i $(TEST) || exit 1
 	echo $(TEST) | \
