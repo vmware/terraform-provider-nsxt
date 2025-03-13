@@ -38,7 +38,7 @@ func dataSourceNsxtTagsRead(d *schema.ResourceData, m interface{}) error {
 
 	var tags []string
 	for _, tag := range tagsList.Results {
-		if isSet == false || *tag.Scope == scopeFilter {
+		if !isSet || *tag.Scope == scopeFilter {
 			tags = append(tags, *tag.Tag)
 		}
 	}
