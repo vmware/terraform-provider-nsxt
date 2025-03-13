@@ -173,6 +173,8 @@ The following arguments are supported:
       * `name` - (Optional) Rule name.
       * `route_map_path` - (Optional) Route map to be associated with the redistribution rule.
       * `types` - (Optional) List of redistribution types, possible values are: `TIER0_STATIC`, `TIER0_CONNECTED`, `TIER0_EXTERNAL_INTERFACE`, `TIER0_SEGMENT`, `TIER0_ROUTER_LINK`, `TIER0_SERVICE_INTERFACE`, `TIER0_LOOPBACK_INTERFACE`, `TIER0_DNS_FORWARDER_IP`, `TIER0_IPSEC_LOCAL_IP`, `TIER0_NAT`, `TIER0_EVPN_TEP_IP`, `TIER1_NAT`, `TIER1_STATIC`, `TIER1_LB_VIP`, `TIER1_LB_SNAT`, `TIER1_DNS_FORWARDER_IP`, `TIER1_CONNECTED`, `TIER1_SERVICE_INTERFACE`, `TIER1_SEGMENT`, `TIER1_IPSEC_LOCAL_ENDPOINT`.
+* `advanced_config` - (Optional) Advanced gateway configuration
+  * `forwarding_up_timer` - (Optional) Extra time in seconds the router must wait before sending the UP notification after the peer routing session is established. VRF setting for this attribute must be the same as parent gateway.
 
 ## Attributes Reference
 
