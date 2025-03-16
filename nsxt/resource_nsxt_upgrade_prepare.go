@@ -25,7 +25,8 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-mp/nsx/upgrade/pre_upgrade_checks"
 )
 
-var precheckComponentTypes = []string{"EDGE", "HOST", "MP"}
+var lmPrecheckComponentTypes = []string{"EDGE", "HOST", "MP"}
+var gmPrecheckComponentTypes = []string{"MP"}
 
 const bundleUploadTimeout int = 3600
 const ucUpgradeTimeout int = 3600
@@ -400,7 +401,7 @@ func executePreupgradeChecks(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 	timeout := d.Get("precheck_timeout").(int)
-	for _, componentType := range precheckComponentTypes {
+	for _, componentType := range getPrecheckComponentTypes(m) {
 		log.Printf("Execute pre-upgrade check on %s", componentType)
 		err = waitForPrecheckComplete(m, componentType, timeout)
 		if err != nil {
@@ -408,6 +409,13 @@ func executePreupgradeChecks(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 	return nil
+}
+
+func getPrecheckComponentTypes(m interface{}) []string {
+	if isPolicyGlobalManager(m) {
+		return gmPrecheckComponentTypes
+	}
+	return lmPrecheckComponentTypes
 }
 
 func getPrecheckErrors(m interface{}, typeParam *string) ([]nsxModel.UpgradeCheckFailure, error) {

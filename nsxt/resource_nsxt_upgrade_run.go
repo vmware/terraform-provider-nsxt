@@ -36,6 +36,10 @@ var upgradeComponentListPost9 = []string{
 	finalizeUpgradeGroup,
 }
 
+var upgradeComponentListGlobalManager = []string{
+	mpUpgradeGroup,
+}
+
 var postCheckComponentList = []string{
 	edgeUpgradeGroup,
 	hostUpgradeGroup,
@@ -53,6 +57,7 @@ var componentToSettingKey = map[string]string{
 
 var supportedUpgradeMode = []string{"maintenance_mode", "in_place", "stage_in_vlcm"}
 var supportedMaintenanceModeConfigVsanMode = []string{"evacuate_all_data", "ensure_object_accessibility", "no_action"}
+var lmOnlyAttributes = []string{"edge_group", "host_group", "finalize_upgrade_setting", "edge_upgrade_setting", "host_upgrade_setting"}
 
 var (
 	// Default waiting setup in seconds
@@ -101,7 +106,10 @@ func getTargetVersion(m interface{}) (string, error) {
 	return *obj.TargetVersion, nil
 }
 
-func getUpgradeComponentList(targetVersion string) []string {
+func getUpgradeComponentList(targetVersion string, m interface{}) []string {
+	if isPolicyGlobalManager(m) {
+		return upgradeComponentListGlobalManager
+	}
 	if util.VersionHigherOrEqual(targetVersion, "9.0.0") {
 		return upgradeComponentListPost9
 	}
@@ -413,6 +421,15 @@ func upgradeRunCreateOrUpdate(d *schema.ResourceData, m interface{}) error {
 		id = newUUID()
 	}
 
+	// Fail if upgrade groups are configured for global manager
+	if isPolicyGlobalManager(m) {
+		for _, attr := range lmOnlyAttributes {
+			if d.HasChange(attr) {
+				return fmt.Errorf("attribute %s is not supported for Global Manager", attr)
+			}
+		}
+	}
+
 	// Validate that upgrade_prepare_id is actually from the nsxt_upgrade_prepare_ready data source
 	upgradePrepareReadyID := d.Get("upgrade_prepare_ready_id").(string)
 	if !util.VerifyVerifiableID(upgradePrepareReadyID, "nsxt_upgrade_prepare_ready") {
@@ -428,7 +445,7 @@ func upgradeRunCreateOrUpdate(d *schema.ResourceData, m interface{}) error {
 
 	log.Printf("[INFO] Updating UpgradeUnitGroup and UpgradePlanSetting.")
 	var hasVLCM bool
-	err = prepareUpgrade(upgradeClientSet, d, targetVersion, &hasVLCM)
+	err = prepareUpgrade(upgradeClientSet, d, m, targetVersion, &hasVLCM)
 	if err != nil {
 		return handleCreateError("NsxtUpgradeRun", id, err)
 	}
@@ -443,7 +460,7 @@ func upgradeRunCreateOrUpdate(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 
-	err = runUpgrade(upgradeClientSet, getPartialUpgradeMap(d, targetVersion), targetVersion, hasVLCM, finalizeUpgrade)
+	err = runUpgrade(upgradeClientSet, m, getPartialUpgradeMap(d, m, targetVersion), targetVersion, hasVLCM, finalizeUpgrade)
 	if err != nil {
 		return handleCreateError("NsxtUpgradeRun", id, err)
 	}
@@ -454,8 +471,8 @@ func upgradeRunCreateOrUpdate(d *schema.ResourceData, m interface{}) error {
 	return resourceNsxtUpgradeRunRead(d, m)
 }
 
-func prepareUpgrade(upgradeClientSet *upgradeClientSet, d *schema.ResourceData, targetVersion string, hasVLCM *bool) error {
-	for _, component := range getUpgradeComponentList(targetVersion) {
+func prepareUpgrade(upgradeClientSet *upgradeClientSet, d *schema.ResourceData, m interface{}, targetVersion string, hasVLCM *bool) error {
+	for _, component := range getUpgradeComponentList(targetVersion, m) {
 		// Customize MP upgrade is not allowed
 		if component == mpUpgradeGroup || component == finalizeUpgradeGroup {
 			continue
@@ -516,12 +533,12 @@ func prepareUpgrade(upgradeClientSet *upgradeClientSet, d *schema.ResourceData, 
 	return nil
 }
 
-func getPartialUpgradeMap(d *schema.ResourceData, targetVersion string) map[string]bool {
+func getPartialUpgradeMap(d *schema.ResourceData, m interface{}, targetVersion string) map[string]bool {
 	isPartialUpgradeMap := map[string]bool{
 		edgeUpgradeGroup: false,
 		hostUpgradeGroup: false,
 	}
-	for _, component := range getUpgradeComponentList(targetVersion) {
+	for _, component := range getUpgradeComponentList(targetVersion, m) {
 		if component == mpUpgradeGroup || component == finalizeUpgradeGroup {
 			continue
 		}
@@ -816,10 +833,10 @@ func updateComponentUpgradePlanSetting(settingClient plan.SettingsClient, d *sch
 	return err
 }
 
-func runUpgrade(upgradeClientSet *upgradeClientSet, partialUpgradeMap map[string]bool, targetVersion string, hasVLCM, finalizeUpgrade bool) error {
+func runUpgrade(upgradeClientSet *upgradeClientSet, m interface{}, partialUpgradeMap map[string]bool, targetVersion string, hasVLCM, finalizeUpgrade bool) error {
 	partialUpgradeExist := false
 	prevComponent := ""
-	for _, c := range getUpgradeComponentList(targetVersion) {
+	for _, c := range getUpgradeComponentList(targetVersion, m) {
 		component := c
 		if !finalizeUpgrade && component == finalizeUpgradeGroup {
 			continue
