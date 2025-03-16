@@ -94,18 +94,21 @@ The following arguments are supported:
 * `timeout` - (Optional) Upgrade status check timeout in seconds. Default: 3600 seconds.
 * `interval` - (Optional) Interval to check upgrade status in seconds. Default: 30 seconds.
 * `delay` - (Optional) Initial delay to start upgrade status checks in seconds. Default: 300 seconds.
+* `max_retries` - (Optional) Maximum number of retries before failing the upgrade operation. Default: 100. 
+
+**NOTE:** With Global Manager, `edge_group`, `host_group`, `finalize_upgrade_setting`, `edge_upgrade_setting`, `host_upgrade_setting` attributes are not supported.
 
 ## Attributes Reference
 
 In addition to arguments listed above, the following attributes are exported:
 
 * `upgrade_plan` - (Computed) Upgrade plan for current upgrade. Upgrade unit groups that are not defined in `edge_group` or `host_group` will also be included here.
-    * `type` - Component type.
-    * `id` - ID of the upgrade unit group.
-    * `enabled` - Flag to indicate whether upgrade of this group is enabled or not.
-    * `parallel` - Upgrade method to specify whether the upgrade is to be performed in parallel or serially.
-    * `pause_after_each_upgrade_unit` - Flag to indicate whether upgrade should be paused after upgrade of each upgrade-unit.
-    * `extended_config` - Extended configuration for the group.
+  * `type` - Component type.
+  * `id` - ID of the upgrade unit group.
+  * `enabled` - Flag to indicate whether upgrade of this group is enabled or not.
+  * `parallel` - Upgrade method to specify whether the upgrade is to be performed in parallel or serially.
+  * `pause_after_each_upgrade_unit` - Flag to indicate whether upgrade should be paused after upgrade of each upgrade-unit.
+  * `extended_config` - Extended configuration for the group.
 * `state` - (Computed) Upgrade states of each component
     * `type` - Component type.
     * `status` - Upgrade status of component.
