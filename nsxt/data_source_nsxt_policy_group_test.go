@@ -92,6 +92,27 @@ func TestAccDataSourceNsxtPolicyGroup_withSite(t *testing.T) {
 	})
 }
 
+func TestAccDataSourceNsxtPolicyGroup_specialChars(t *testing.T) {
+	name := getAccTestDataSourceName() + "_&$!"
+	testResourceName := "data.nsxt_policy_group.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNsxtPolicyGroupTemplateWithResource(name),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(testResourceName, "display_name", name),
+					resource.TestCheckResourceAttrSet(testResourceName, "path"),
+				),
+			},
+		},
+	})
+}
+
 func testAccDataSourceNsxtPolicyGroupCreate(domain string, name string) error {
 	connector, err := testAccGetPolicyConnector()
 	if err != nil {
@@ -158,4 +179,15 @@ data "nsxt_policy_group" "test" {
   display_name = "%s"
   domain       = "%s"
 }`, context, name, domain)
+}
+
+func testAccNsxtPolicyGroupTemplateWithResource(name string) string {
+	return fmt.Sprintf(`
+resource "nsxt_policy_group" "test" {
+  display_name = "%s"
+}
+data "nsxt_policy_group" "test" {
+  display_name = "%s"
+  depends_on   = [nsxt_policy_group.test]
+}`, name, name)
 }
