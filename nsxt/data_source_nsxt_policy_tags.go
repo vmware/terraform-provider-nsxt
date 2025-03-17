@@ -13,7 +13,7 @@ func dataSourceNsxtTags() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceNsxtTagsRead,
 		Schema: map[string]*schema.Schema{
-			"scope": getDataSourceStringSchema("The scope of the tags to retrieve. If this is not set it will retrieve all the tags."),
+			"scope": getDataSourceStringSchema("The scope of the tags to retrieve."),
 			"items": {
 				Type:        schema.TypeList,
 				Description: "List of tags based on the scope.",
@@ -29,18 +29,15 @@ func dataSourceNsxtTags() *schema.Resource {
 func dataSourceNsxtTagsRead(d *schema.ResourceData, m interface{}) error {
 	connector := getPolicyConnector(m)
 	client := infra.NewTagsClient(connector)
-	tagsList, err := client.List(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	scope := d.Get("scope").(string)
+	tagsList, err := client.List(nil, nil, nil, nil, nil, &scope, nil, nil, nil, nil)
 	if err != nil {
 		return err
 	}
 
-	scopeFilter, isSet := d.GetOk("scope")
-
 	var tags []string
 	for _, tag := range tagsList.Results {
-		if !isSet || *tag.Scope == scopeFilter {
-			tags = append(tags, *tag.Tag)
-		}
+		tags = append(tags, *tag.Tag)
 	}
 	d.Set("items", tags)
 
