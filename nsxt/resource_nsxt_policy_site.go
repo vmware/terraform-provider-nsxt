@@ -12,6 +12,8 @@ import (
 	"github.com/vmware/vsphere-automation-sdk-go/runtime/protocol/client"
 	"github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/global_infra"
 	gm_model "github.com/vmware/vsphere-automation-sdk-go/services/nsxt-gm/model"
+
+	"github.com/vmware/terraform-provider-nsxt/nsxt/util"
 )
 
 var siteTypeValues = []string{
@@ -121,9 +123,11 @@ func getConnectionInfosFromSchema(d *schema.ResourceData, key string) []gm_model
 		connectionInfo := gm_model.SiteNodeConnectionInfo{
 			Fqdn:       &fqdn,
 			Password:   &password,
-			SiteUuid:   &siteUUID,
 			Thumbprint: &thumbprint,
 			Username:   &username,
+		}
+		if util.NsxVersionHigherOrEqual("4.1.0") {
+			connectionInfo.SiteUuid = &siteUUID
 		}
 		connectionInfos = append(connectionInfos, connectionInfo)
 	}
@@ -155,7 +159,7 @@ func getSiteFromSchema(d *schema.ResourceData) gm_model.Site {
 	siteConnectionInfos := getConnectionInfosFromSchema(d, "site_connection_info")
 	siteType := d.Get("site_type").(string)
 
-	return gm_model.Site{
+	site := gm_model.Site{
 		DisplayName:             &displayName,
 		Description:             &description,
 		Tags:                    tags,
@@ -163,8 +167,11 @@ func getSiteFromSchema(d *schema.ResourceData) gm_model.Site {
 		FailIfRttExceeded:       &failIfRttExceeded,
 		MaximumRtt:              &maximumRtt,
 		SiteConnectionInfo:      siteConnectionInfos,
-		SiteType:                &siteType,
 	}
+	if util.NsxVersionHigherOrEqual("4.1.0") {
+		site.SiteType = &siteType
+	}
+	return site
 }
 
 func resourceNsxtPolicySiteExists(id string, connector client.Connector, isGlobal bool) (bool, error) {
