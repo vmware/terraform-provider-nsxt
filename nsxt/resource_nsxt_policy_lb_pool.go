@@ -300,7 +300,12 @@ func getPolicyPoolSnatFromSchema(d *schema.ResourceData) (*data.StructValue, err
 			return dataValue.(*data.StructValue), nil
 		}
 
+		addresses := snatMap["ip_pool_addresses"].([]interface{})
+
 		if snatType == "AUTOMAP" {
+			if snatType != "IPPOOL" && len(addresses) > 0 {
+				return nil, fmt.Errorf("ip_pool_addresses should only be specified to snat type IPPOOL")
+			}
 
 			entry := model.LBSnatAutoMap{
 				Type_: model.LBSnatAutoMap__TYPE_IDENTIFIER,
@@ -310,14 +315,9 @@ func getPolicyPoolSnatFromSchema(d *schema.ResourceData) (*data.StructValue, err
 			if errs != nil {
 				return nil, errs[0]
 			}
-
 			return dataValue.(*data.StructValue), nil
 		}
 
-		addresses := snatMap["ip_pool_addresses"].([]interface{})
-		if snatType != "IPPOOL" && len(addresses) > 0 {
-			return nil, fmt.Errorf("ip_pool_addresses should only be specified to snat type IPPOOL")
-		}
 		var addressList []model.LBSnatIpElement
 		for _, address := range addresses {
 			addressStr := address.(string)
