@@ -12,29 +12,27 @@ import (
 )
 
 func TestAccDataSourceNsxtPolicyTags_basic(t *testing.T) {
-	testAccDataSourceNsxtPolicyTagsBasic(t, func() {
-		testAccPreCheck(t)
-	})
-}
-
-func testAccDataSourceNsxtPolicyTagsBasic(t *testing.T, preCheck func()) {
 	tagName := "testTag"
+	emptyScopeTag := "testEmptyScopeTag"
 	transportZone := getOverlayTransportZoneName()
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  preCheck,
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNSXPolicyTagsReadTemplate(tagName, transportZone),
+				Config: testAccNSXPolicyTagsReadTemplate(tagName, emptyScopeTag, transportZone),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckOutput("nsxt_tags", tagName),
+					resource.TestCheckOutput("empty_nsxt_tags", emptyScopeTag),
 				),
 			},
 		},
 	})
 }
 
-func testAccNSXPolicyTagsReadTemplate(tagName string, transportZone string) string {
+func testAccNSXPolicyTagsReadTemplate(tagName string, emptyScopeTag string, transportZone string) string {
 	return fmt.Sprintf(`
 resource "nsxt_policy_segment" "segment1" {
   display_name        = "segment1"
@@ -42,6 +40,9 @@ resource "nsxt_policy_segment" "segment1" {
   transport_zone_path = data.nsxt_policy_transport_zone.overlay_transport_zone.path
   tag {
     scope = "scope-test"
+    tag   = "%s"
+  }
+  tag {
     tag   = "%s"
   }
 
@@ -60,5 +61,13 @@ output "nsxt_tags" {
   value = data.nsxt_policy_tags.tags.items[0]
 }
 
-`, tagName, transportZone)
+data "nsxt_policy_tags" "emptytags" {
+  depends_on = [nsxt_policy_segment.segment1]
+}
+
+output "empty_nsxt_tags" {
+  value = data.nsxt_policy_tags.emptytags.items[0]
+}
+
+`, tagName, emptyScopeTag, transportZone)
 }
